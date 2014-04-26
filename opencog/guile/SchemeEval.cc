@@ -35,10 +35,6 @@ void SchemeEval::init(void)
 	SchemeSmob::init(atomspace);
 	PrimitiveEnviron::init();
 
-	// The environment will hold the atomsapce.
-	the_environment = scm_interaction_environment();
-	the_environment = scm_gc_protect_object(the_environment);
-
 	// Output ports for side-effects.
 	saved_outport = scm_current_output_port();
 	saved_outport = scm_gc_protect_object(saved_outport);
@@ -58,13 +54,11 @@ void SchemeEval::init(void)
 	captured_stack = scm_gc_protect_object(captured_stack);
 
 	// Place the atomspace into the environment!
-	atomspace_variable = scm_c_module_define(the_environment,
-	                    "*-atomspace-*",
-	                    SchemeSmob::make_as(atomspace));
+	atomspace_variable = scm_c_define("*-atomspace-*",
+	                                  SchemeSmob::make_as(atomspace));
 	atomspace_variable = scm_gc_protect_object(atomspace_variable);
 
 	pexpr = NULL;
-	_sexpr = SCM_EOL;
 }
 
 void * SchemeEval::c_wrap_init(void *p)
@@ -88,7 +82,6 @@ void SchemeEval::finish(void)
 
 	scm_gc_unprotect_object(error_string);
 	scm_gc_unprotect_object(captured_stack);
-	scm_gc_unprotect_object(the_environment);
 }
 
 void * SchemeEval::c_wrap_finish(void *p)
@@ -260,18 +253,6 @@ std::string SchemeEval::prt(SCM node)
 
 /* ============================================================== */
 
-SCM SchemeEval::eval_body_wrapper (void *data)
-{
-	SchemeEval *ss = (SchemeEval *) data;
-	return ss->eval_body();
-}
-
-SCM SchemeEval::eval_string_body_wrapper (void *data)
-{
-	SchemeEval *ss = (SchemeEval *) data;
-	return ss->eval_string_body();
-}
-
 SCM SchemeEval::preunwind_handler_wrapper (void *data, SCM tag, SCM throw_args)
 {
 	SchemeEval *ss = (SchemeEval *) data;
@@ -439,13 +420,26 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	scm_variable_set_x(atomspace_variable,
 	                   SchemeSmob::make_as(atomspace));
 
-	_input_line += expr;
+	/* Avoid a string buffer copy if there is no pending input */
+	const char *expr_str;
+	bool newin = false;
+	if (_pending_input)
+	{
+		_input_line += expr;
+		expr_str = _input_line.c_str();
+	}
+	else
+	{
+		expr_str = expr.c_str();
+		newin = true;
+	}
 
 	_caught_error = false;
 	_pending_input = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
-	                      SchemeEval::eval_string_body_wrapper, this,
+	                      (scm_t_catch_body) scm_c_eval_string,
+	                      (void *) expr_str,
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
 
@@ -454,6 +448,8 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	 * to true. */
 	if (_pending_input)
 	{
+		/* Save input for later */
+		if (newin) _input_line += expr;
 		return "";
 	}
 	_pending_input = false;
@@ -491,18 +487,13 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	return "#<Error: Unreachable statement reached>";
 }
 
-SCM SchemeEval::eval_string_body()
-{
-	return scm_c_eval_string_in_module(_input_line.c_str(),
-	                                   the_environment);
-}
-
 
 /* ============================================================== */
 
-SCM SchemeEval::eval_body()
+SCM SchemeEval::thunk_scm_eval(void* expr)
 {
-	return scm_eval(_sexpr, the_environment);
+	SCM sexpr = (SCM) expr;
+	return scm_eval(sexpr, scm_interaction_environment());
 }
 
 /**
@@ -524,11 +515,10 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	scm_variable_set_x(atomspace_variable,
 	                   SchemeSmob::make_as(atomspace));
 
-	_sexpr = sexpr;
 	_caught_error = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
-	                 SchemeEval::eval_body_wrapper, this,
+	                 SchemeEval::thunk_scm_eval, (void *) sexpr,
 	                 SchemeEval::catch_handler_wrapper, this,
 	                 SchemeEval::preunwind_handler_wrapper, this);
 

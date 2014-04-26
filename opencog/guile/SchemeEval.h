@@ -46,9 +46,9 @@ class SchemeEval : public GenericEval
 		std::string answer;
 
 		// Straight-up evaluation
+		static SCM thunk_scm_eval(void *);
 		SCM do_scm_eval(SCM);
 		SCM do_scm_eval_str(const std::string &);
-		SCM _sexpr;
 
 		// Handle apply
 		Handle do_apply(const std::string& func, Handle varargs);
@@ -60,12 +60,8 @@ class SchemeEval : public GenericEval
 		// Error handling stuff
 		SCM error_string;
 		SCM captured_stack;
-		static SCM eval_body_wrapper(void *);
-		static SCM eval_string_body_wrapper(void *);
 		static SCM preunwind_handler_wrapper(void *, SCM, SCM);
 		static SCM catch_handler_wrapper(void *, SCM, SCM);
-		SCM eval_body();
-		SCM eval_string_body();
 		SCM preunwind_handler(SCM, SCM);
 		SCM catch_handler(SCM, SCM);
 
@@ -77,7 +73,6 @@ class SchemeEval : public GenericEval
 		SCM saved_outport;
 		bool in_shell;
 		AtomSpace* atomspace;
-		SCM the_environment;
 		SCM atomspace_variable;
 
 	public:
