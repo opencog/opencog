@@ -1,5 +1,5 @@
 /*
- * tests/scm/SCMPrimitiveUTest.cxxtest
+ * tests/scm/SCMExecutionUTest.cxxtest
  *
  * Copyright (C) 2014 Cosmo Harrigan
  * All Rights Reserved
@@ -68,38 +68,6 @@ class SCMExecutionUTest :  public CxxTest::TestSuite
 	void testExecute(void);
 };
 
-//// Some example class
-//class MyExampleClass
-//{
-//	private:
-//		int id;  // some value in the instance
-//		AtomSpace *as;
-//	public:
-
-//		MyExampleClass(AtomSpace *_as, int _id) {as = _as; id = _id; }
-
-//		// An example method -- accepts a handle, and wraps it
-//		// with a ListLink.
-//		Handle my_func(Handle h)
-//		{
-//			TSM_ASSERT("Failed to get a valid handle", as->isValidHandle(h))
-
-//			logger().debug("Info: my_func instance %d received the node: %s\n", id, as->getName(h).c_str());
-//			Handle hlist = as->addLink(LIST_LINK, h);
-//			return hlist;
-//		}
-
-//		// Throw exception on purpose
-//		Handle my_other_func(Handle h)
-//		{
-//			throw (RuntimeException(TRACE_INFO, "Don't panic!! Threw exception %d on purpose.", id));
-//			return Handle::UNDEFINED;
-//		}
-//};
-
-/*
- * This is called once before each test, for each test (!!)
- */
 void SCMExecutionUTest::setUp(void)
 {
 	server(CogServer::createInstance);
@@ -113,20 +81,13 @@ void SCMExecutionUTest::tearDown(void)
 	eval = NULL;
 }
 
-// ============================================================
-
 void SCMExecutionUTest::testExecute(void)
 {
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
         Handle julian = as->addNode(CONCEPT_NODE, "julian");
         Handle prince = as->addNode(CONCEPT_NODE, "prince");
         Handle king = as->addNode(CONCEPT_NODE, "king");
         as->addLink(INHERITANCE_LINK, julian, prince);
 
-        as->print();
-//        eval->eval("(InheritanceLink (ConceptNode \"Julian\") "
-//                   "(ConceptNode \"prince\"))");
         eval->eval("(define (make-king x) (InheritanceLink x "
                    "(ConceptNode \"king\")))");
         
@@ -139,43 +100,4 @@ void SCMExecutionUTest::testExecute(void)
         as->print();
 
         TS_ASSERT_EQUALS(as->getIncoming(king).size(), 2);
-
-//	// Create the example class, and define a scheme function,
-//	// named "bingo", that will call one of its methods
-//	MyExampleClass *mtc = new MyExampleClass(as,42);
-//	define_scheme_primitive("bingo", &MyExampleClass::my_func, mtc);
-
-//	// Now, call bingo, with a reasonable argument. Since
-//	// MyExampleClass::my_func is expecting a handle, we better pass
-//	// bingo a handle.
-//	eval->eval("(define nnn (cog-new-node 'ConceptNode \"Hello World!\"))");
-//	eval->eval("(define yyy (bingo nnn))");
-
-//	bool eval_err = eval->eval_error();
-//	TSM_ASSERT ("Evaluation error defining node", !eval_err);
-
-//	// Now verify that the returned yyy is a ListLink which wraps the input node.
-//	Handle nnn = eval->eval_h("nnn");
-//	Handle yyy = eval->eval_h("yyy");
-//	TSM_ASSERT ("undefined node handle ", as->isValidHandle(nnn));
-//	TSM_ASSERT ("undefined list handle ", as->isValidHandle(yyy));
-
-//	TSM_ASSERT ("Null handle for link ", as->isValidHandle(yyy));
-//	TSM_ASSERT ("handle isn't a link ", as->isLink(yyy));
-
-//	const std::vector<Handle>& oset = as->getOutgoing(yyy);
-
-//	TSM_ASSERT ("wrong outgoing set ", nnn == oset[0]);
-
-//	// Test the throw of an assertion. This should cause an evaluation
-//	// error. (In the shell, stuff would get printed to terminal)
-//	define_scheme_primitive("whoops", &MyExampleClass::my_other_func, mtc);
-//	eval->eval("(whoops nnn)");
-//	eval_err = eval->eval_error();
-//	TSM_ASSERT ("Failed to catch exception", eval_err);
-
-	logger().debug("END TEST: %s", __FUNCTION__);
 }
-
-/* ============================= END OF FILE ================= */
-
