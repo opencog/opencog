@@ -58,8 +58,10 @@ void SchemeEval::init(void)
 	captured_stack = scm_gc_protect_object(captured_stack);
 
 	// Place the atomspace into the environment!
-	// scm_c_module_define(the_environment, "*-atomspace-*",
-	//                    SchemeSmob::make_as(atomspace));
+	atomspace_variable = scm_c_module_define(the_environment,
+	                    "*-atomspace-*",
+	                    SchemeSmob::make_as(atomspace));
+	atomspace_variable = scm_gc_protect_object(atomspace_variable);
 
 	pexpr = NULL;
 	_sexpr = SCM_EOL;
@@ -80,6 +82,8 @@ void SchemeEval::finish(void)
 
 	scm_close_port(outport);
 	scm_gc_unprotect_object(outport);
+
+	scm_gc_unprotect_object(atomspace_variable);
 
 	scm_gc_unprotect_object(error_string);
 	scm_gc_unprotect_object(captured_stack);
@@ -430,6 +434,10 @@ std::string SchemeEval::do_eval(const std::string &expr)
 {
 	per_thread_init();
 
+	// Set global atomspace variable in the execution environment.
+	scm_variable_set_x(atomspace_variable,
+	                   SchemeSmob::make_as(atomspace));
+
 	_input_line += expr;
 
 	_caught_error = false;
@@ -509,6 +517,12 @@ SCM SchemeEval::eval_body()
  */
 SCM SchemeEval::do_scm_eval(SCM sexpr)
 {
+	per_thread_init();
+
+	// Set global atomspace variable in the execution environment.
+	scm_variable_set_x(atomspace_variable,
+	                   SchemeSmob::make_as(atomspace));
+
 	_sexpr = sexpr;
 	_caught_error = false;
 	captured_stack = SCM_BOOL_F;
@@ -612,6 +626,12 @@ void * SchemeEval::c_wrap_eval_h(void * p)
  */
 SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 {
+	per_thread_init();
+
+	// Set global atomspace variable in the execution environment.
+	scm_variable_set_x(atomspace_variable,
+	                   SchemeSmob::make_as(atomspace));
+
 	_caught_error = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,

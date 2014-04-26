@@ -67,6 +67,7 @@ class MultiAtomSpace :  public CxxTest::TestSuite
 		void tearDown(void);
 
 		void test_two(void);
+		void test_three(void);
 };
 
 /*
@@ -144,3 +145,39 @@ void MultiAtomSpace::test_two(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+#define CHKEV(ev) \
+	TSM_ASSERT("Caught scm error during eval", \
+		(false == ev->eval_error()));
+void MultiAtomSpace::test_three(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	AtomSpace* as1 = new AtomSpace();
+	AtomSpace* as2 = new AtomSpace();
+	AtomSpace* as3 = new AtomSpace();
+	SchemeEval* ev1 = new SchemeEval(as1);
+	SchemeEval* ev2 = new SchemeEval(as2);
+	SchemeEval* ev3 = new SchemeEval(as3);
+
+	Handle h1 = ev1->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
+	CHKEV(ev1);
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h1);
+	Handle h2 = ev2->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
+	CHKEV(ev2);
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h2);
+	Handle h3 = ev3->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
+	CHKEV(ev3);
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h3);
+	TSM_ASSERT("Bad handles", h1 != h2);
+	TSM_ASSERT("Bad handles", h1 != h3);
+	TSM_ASSERT("Bad handles", h2 != h3);
+
+
+	delete ev3;
+	delete ev2;
+	delete ev1;
+	delete as3;
+	delete as2;
+	delete as1;
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

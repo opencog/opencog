@@ -78,6 +78,7 @@ class SchemeEval : public GenericEval
 		bool in_shell;
 		AtomSpace* atomspace;
 		SCM the_environment;
+		SCM atomspace_variable;
 
 	public:
 		SchemeEval(AtomSpace*);
