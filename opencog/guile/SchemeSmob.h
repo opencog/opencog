@@ -140,6 +140,9 @@ class SchemeSmob
 		static SCM ss_af_boundary(void);
 		static SCM ss_set_af_boundary(SCM);
 		static SCM ss_af(void);
+        
+		// ExecutionLinks
+		static SCM ss_execute(SCM);
 
 		// Callback into misc C++ code.
 		static SCM ss_ad_hoc(SCM, SCM);
@@ -171,7 +174,7 @@ class SchemeSmob
 		static void init();
 		SchemeSmob();
 	public:
-		// This alows other users to get the atomspace that scheme is
+		// This allows other users to get the atomspace that scheme is
 		// using.
 		static AtomSpace* ss_get_env_as(const char *);
 

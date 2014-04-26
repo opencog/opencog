@@ -234,6 +234,9 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-af-boundary",       0, 0, 0, C(ss_af_boundary));
 	scm_c_define_gsubr("cog-set-af-boundary!",  1, 0, 0, C(ss_set_af_boundary));
 	scm_c_define_gsubr("cog-af",                0, 0, 0, C(ss_af));
+    
+	// ExecutionLinks
+	scm_c_define_gsubr("cog-execute!",          1, 0, 0, C(ss_execute));
 
 	// Atom types
 	scm_c_define_gsubr("cog-get-types",         0, 0, 0, C(ss_get_types));

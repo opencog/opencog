@@ -16,10 +16,6 @@ TARGET_LINK_LIBRARIES(execution
 	atomspace
 )
 
-IF (HAVE_GUILE)
-   TARGET_LINK_LIBRARIES(execution smob)
-ENDIF (HAVE_GUILE)
-
 IF (HAVE_CYTHON)
    TARGET_LINK_LIBRARIES(execution PythonEval)
    TARGET_LINK_LIBRARIES(execution ${PYTHON_LIBRARIES})
@@ -29,4 +25,3 @@ INSTALL (FILES
     ExecutionLink.h
     DESTINATION "include/${PROJECT_NAME}/atomspace"
 )
-
