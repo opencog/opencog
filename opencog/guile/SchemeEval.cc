@@ -32,7 +32,7 @@ using namespace opencog;
  */
 void SchemeEval::init(void)
 {
-	SchemeSmob::init(atomspace);
+	SchemeSmob::init();
 	PrimitiveEnviron::init();
 
 	// Output ports for side-effects.
@@ -53,11 +53,6 @@ void SchemeEval::init(void)
 	captured_stack = SCM_BOOL_F;
 	captured_stack = scm_gc_protect_object(captured_stack);
 
-	// Place the atomspace into the environment!
-	atomspace_variable = scm_c_define("*-atomspace-*",
-	                                  SchemeSmob::make_as(atomspace));
-	atomspace_variable = scm_gc_protect_object(atomspace_variable);
-
 	pexpr = NULL;
 }
 
@@ -77,8 +72,6 @@ void SchemeEval::finish(void)
 
 	scm_close_port(outport);
 	scm_gc_unprotect_object(outport);
-
-	scm_gc_unprotect_object(atomspace_variable);
 
 	scm_gc_unprotect_object(error_string);
 	scm_gc_unprotect_object(captured_stack);
@@ -417,8 +410,7 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	per_thread_init();
 
 	// Set global atomspace variable in the execution environment.
-	scm_variable_set_x(atomspace_variable,
-	                   SchemeSmob::make_as(atomspace));
+	SchemeSmob::ss_set_env_as(atomspace);
 
 	/* Avoid a string buffer copy if there is no pending input */
 	const char *expr_str;
@@ -512,8 +504,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	per_thread_init();
 
 	// Set global atomspace variable in the execution environment.
-	scm_variable_set_x(atomspace_variable,
-	                   SchemeSmob::make_as(atomspace));
+	SchemeSmob::ss_set_env_as(atomspace);
 
 	_caught_error = false;
 	captured_stack = SCM_BOOL_F;
@@ -620,8 +611,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 	per_thread_init();
 
 	// Set global atomspace variable in the execution environment.
-	scm_variable_set_x(atomspace_variable,
-	                   SchemeSmob::make_as(atomspace));
+	SchemeSmob::ss_set_env_as(atomspace);
 
 	_caught_error = false;
 	captured_stack = SCM_BOOL_F;
