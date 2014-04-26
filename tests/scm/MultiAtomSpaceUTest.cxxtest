@@ -168,10 +168,41 @@ void MultiAtomSpace::test_three(void)
 	Handle h3 = ev3->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
 	CHKEV(ev3);
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h3);
+
+	// We expect the handles to be all different, because they are
+	// each in a different atomspace.
 	TSM_ASSERT("Bad handles", h1 != h2);
 	TSM_ASSERT("Bad handles", h1 != h3);
 	TSM_ASSERT("Bad handles", h2 != h3);
 
+	// The cogserver atomspace is a fourth place ...
+	Handle h4 = evaluator->eval_h("(ConceptNode \"stuff\")");
+	CHKERR;
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h4);
+	TSM_ASSERT("Bad handles", h1 != h4);
+	TSM_ASSERT("Bad handles", h2 != h4);
+	TSM_ASSERT("Bad handles", h3 != h4);
+
+	Handle h5 = ev2->eval_h("(cog-new-node 'ConceptNode \"solitary\")");
+	CHKEV(ev2);
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h5);
+
+	// We expect to not be able to find solitary anywhere but in as2
+	Handle h6 = ev1->eval_h("(cog-node 'ConceptNode \"solitary\")");
+	CHKEV(ev1);
+	TSM_ASSERT("Did not expect to find atom", Handle::UNDEFINED == h6);
+
+	Handle h7 = ev3->eval_h("(cog-node 'ConceptNode \"solitary\")");
+	CHKEV(ev3);
+	TSM_ASSERT("Did not expect to find atom", Handle::UNDEFINED == h7);
+
+	Handle h8 = evaluator->eval_h("(cog-node 'ConceptNode \"solitary\")");
+	CHKERR;
+	TSM_ASSERT("Did not expect to find atom", Handle::UNDEFINED == h8);
+
+	Handle h9 = ev2->eval_h("(cog-node 'ConceptNode \"solitary\")");
+	CHKEV(ev2);
+	TSM_ASSERT("Expect to find atom", h5 == h9);
 
 	delete ev3;
 	delete ev2;
