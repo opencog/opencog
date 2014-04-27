@@ -23,6 +23,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/guile/SchemeSmob.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/server/CogServer.h>
@@ -53,6 +54,21 @@ class SCMExecutionUTest :  public CxxTest::TestSuite
 		logger().setFilename(config()["LOG_FILE"]);
 		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
 		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+                
+                config().set("SCM_PRELOAD",
+                        "opencog/atomspace/core_types.scm");
+        
+                // Blindly search a bunch of paths hoping to find the files
+                // in one of them ...
+                const char * paths[] =
+                {
+                        "./",
+                        "../",
+                        "../../",
+                        "../../../",
+                        NULL
+                };
+                cogserver().loadSCMModules(paths);
 	}
 
 	~SCMExecutionUTest()
@@ -88,16 +104,21 @@ void SCMExecutionUTest::testExecute(void)
         Handle king = as->addNode(CONCEPT_NODE, "king");
         as->addLink(INHERITANCE_LINK, julian, prince);
 
+        // Define a Scheme procedure that will be used in the
+        // GroundedSchemaNode
         eval->eval("(define (make-king x) (InheritanceLink x "
                    "(ConceptNode \"king\")))");
         
+        // There is no king yet
         TS_ASSERT_EQUALS(as->getIncoming(king).size(), 0);
 
-        std::cout << eval->eval("(cog-execute! (ExecutionLink "
+        // Use the "cog-execute!" command to fire an ExecutionLink directly
+        // from the Scheme shell, containing a GroundedSchemaNode referring to 
+        // the previously defined procedure
+        eval->eval("(cog-execute! (ExecutionLink "
                    "(GroundedSchemaNode \"scm: make-king\") (ListLink "
                    "(ConceptNode \"julian\"))))");
 
-        as->print();
-
-        TS_ASSERT_EQUALS(as->getIncoming(king).size(), 2);
+        // Now there should be a king
+        TS_ASSERT_EQUALS(as->getIncoming(king).size(), 1);
 }
