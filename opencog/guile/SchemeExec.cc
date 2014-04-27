@@ -61,17 +61,17 @@ SCM SchemeEval::do_apply_scm( const std::string& func, Handle varargs )
  */
 SCM SchemeSmob::ss_execute (SCM satom)
 {
-    AtomSpace* atomspace = ss_get_env_as("cog-execute");
+	AtomSpace* atomspace = ss_get_env_as("cog-execute");
     
 	Handle h = verify_handle(satom, "cog-execute");
 	
-    if (h->getType() != EXECUTION_LINK)
-    {
+	if (h->getType() != EXECUTION_LINK)
+	{
 		scm_wrong_type_arg_msg("cog-execute", 1, satom,
 			"ExecutionLink opencog cog-execute");
-    }
-    
-    return handle_to_scm(ExecutionLink::do_execute(atomspace, h));
+	}
+
+	return handle_to_scm(ExecutionLink::do_execute(atomspace, h));
 }
 
 #endif
