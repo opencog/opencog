@@ -98,10 +98,6 @@ fuzzy_greater_than(3) := contin_if( less_than($1 $2)
 fuzzy_high(3) := fuzzy_greater_than($1 $2 $3)                         
 
 # ----------------------- Constants -----------------------
-pee_threshold(0) := 0.5
-
-poo_threshold(0) := 0.5
-
 hunger_threshold(0) := 0.5
 
 thirst_threshold(0) := 0.5
@@ -129,12 +125,6 @@ has_energy(1) :=
 
 is_fit(1) :=
 	greater_than(get_fitness($1) fitness_threshold)
-
-needs_pee(1) :=
-	greater_than(get_pee_urgency($1) pee_threshold)
-
-needs_poo(1) :=
-	greater_than(get_poo_urgency($1) poo_threshold)
 
 is_moderately_next(2) :=
         is_proportional_next($1 $2 4 go_away_from_threshold)
