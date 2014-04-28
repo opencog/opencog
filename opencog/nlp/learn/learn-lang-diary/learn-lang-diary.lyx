@@ -2475,6 +2475,53 @@ which is (1) in ENF, not DNF or CNF, and (2) shared by several dozen words.
 \end_layout
 
 \begin_layout Section*
+28 April 2014
+\end_layout
+
+\begin_layout Subsection*
+Isotopy
+\end_layout
+
+\begin_layout Standard
+The concept of 
+\begin_inset Quotes eld
+\end_inset
+
+isotopy
+\begin_inset Quotes erd
+\end_inset
+
+ (https://en.wikipedia.org/wiki/Isotopy_(semiotics)) was introduced by Algirdas
+ Greimas in 1966.
+ Example: 
+\begin_inset Quotes eld
+\end_inset
+
+I drink some water
+\begin_inset Quotes erd
+\end_inset
+
+, with the meanings of 
+\begin_inset Quotes eld
+\end_inset
+
+drink
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+water
+\begin_inset Quotes erd
+\end_inset
+
+ re-inforcing one-another.
+ But this is eactly what the Mihalcea WSD algo does, eh? 
+\end_layout
+
+\begin_layout Section*
 The End 
 \end_layout
 
