@@ -60,13 +60,18 @@ size_t SchemeSmob::free_misc(SCM node)
 	switch (misctype)
 	{
 		case COG_AS:
-			AtomSpace *as;
-			as = (AtomSpace *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (as,
+		{
+			AtomSpace *as = (AtomSpace *) SCM_SMOB_DATA(node);
+			auto has = deleteable_as.find(as);
+			if (deleteable_as.end() != has)
+			{
+				deleteable_as.erase(has);
+				scm_gc_unregister_collectable_memory (as,
 			                  sizeof(*as), "opencog atomspace");
-			delete as;
+				delete as;
+			}
 			return 0;
-
+		}
 		case COG_AV:
 			AttentionValue *av;
 			av = (AttentionValue *) SCM_SMOB_DATA(node);

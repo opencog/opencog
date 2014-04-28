@@ -44,6 +44,7 @@ public:
     // Seems that a score of -6 is the best one can do in a short time.
     void test_predicate_score()
     {
+        // Score must be -6 or better
         string data_file_path("-i" + weightedUTest_dir + "weighted.csv");
         moses_test_good_enough_score({"-Hit", 
                           "-ur",
@@ -52,6 +53,34 @@ public:
                           data_file_path,
                           },
                           -6.1);
+    }
+
+    void test_weighted_score()
+    {
+        // Score must be -8.016 or better
+        string data_file_path("-i" + weightedUTest_dir + "weighted.csv");
+        moses_test_good_enough_score({"-Hit", 
+                          "-ur",
+                          "--score-weight=wgt",
+                          "-m20000",
+                          data_file_path,
+                          },
+                          -8.017);    // one of the 5-folds wrong, and 6 of the 10-folds. 
+                          // -11.028); // two of the 5-folds, and 7 of the 10-folds.
+    }
+
+    void test_neg_weighted_score()
+    {
+        // Test weighting, where some of the weights are negative or zero.
+        // score must be exactly 2
+        string data_file_path("-i" + weightedUTest_dir + "weight-neg.csv");
+        moses_test_score({"-Hit", 
+                          "-uout",
+                          "--score-weight=wgt",
+                          "-m200",
+                          data_file_path,
+                          },
+                          2);
     }
 
 };

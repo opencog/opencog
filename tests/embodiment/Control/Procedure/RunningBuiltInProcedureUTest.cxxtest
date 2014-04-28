@@ -75,7 +75,7 @@ public:
         PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
         std::vector<combo::vertex> arguments;
-        AvatarActionSchema p(pai, ActionType::BARK());
+        AvatarActionSchema p(pai, ActionType::STEP_FORWARD());
         RunningBuiltInProcedure rbp(pai, p, arguments);
         TS_ASSERT(!rbp.isFinished());
         TS_ASSERT(!rbp.isFailed());
@@ -88,7 +88,7 @@ public:
         TS_ASSERT(get<ActionPlanID>(&result));
         TS_ASSERT(get<ActionPlanID>(result) == "0");
         TS_ASSERT(!plans.empty());
-        TS_ASSERT(plans.front().getAction(1).getType() == ActionType::BARK());
+        TS_ASSERT(plans.front().getAction(1).getType() == ActionType::STEP_FORWARD());
 #endif
     }
 
@@ -97,7 +97,7 @@ public:
         AvatarInterfaceMock pi;
         PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
-        AvatarActionSchema p(pai, ActionType::BARK());
+        AvatarActionSchema p(pai, ActionType::STEP_FORWARD());
         std::vector<combo::vertex> arguments;
         RunningBuiltInProcedure rbp(pai, p, arguments);
         TS_ASSERT(!rbp.isFinished());

@@ -13,6 +13,7 @@
 #ifndef _OPENCOG_SCHEME_SMOB_H
 #define _OPENCOG_SCHEME_SMOB_H
 
+#include <set>
 #include <string>
 #include <vector>
 #include <libguile.h>
@@ -127,6 +128,7 @@ class SchemeSmob
 		static SCM take_as(AtomSpace *);
 		static SCM make_as(AtomSpace *);
 		static AtomSpace* ss_to_atomspace(SCM);
+		static std::set<AtomSpace*> deleteable_as;
 
 		// Attention values
 		static SCM ss_new_av(SCM, SCM, SCM);
@@ -164,10 +166,10 @@ class SchemeSmob
 		static int verify_int (SCM, const char *, int pos = 1,
 		                       const char *msg = "expecting integer");
 
-		static SCM atomspace_symbol;
+		static SCM atomspace_variable;
 		static void ss_set_env_as(AtomSpace *);
-		static void init(AtomSpace *as);
-		SchemeSmob(AtomSpace *as);
+		static void init();
+		SchemeSmob();
 	public:
 		// This alows other users to get the atomspace that scheme is
 		// using.

@@ -262,7 +262,7 @@ void OCPlanningAgent::run()
 
 #ifdef HAVE_GUILE
         // Select the most important demand for now, by scm
-        SchemeEval* evaluator = new SchemeEval();
+        SchemeEval* evaluator = new SchemeEval(&oac->getAtomSpace());
         std::string scheme_expression;
 
         scheme_expression = "( update_selected_demand_goal )";

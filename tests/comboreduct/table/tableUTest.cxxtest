@@ -149,7 +149,7 @@ public:
         OTable ot(o, "troc");
         stringstream ss;
         ostreamTable(ss, fit_it, ot);
-        cout << "result:" << endl;
+        cout << "result: filterITable" << endl;
         cout << ss.str();
         cout << "fit_it:" << endl;
         cout << fit_it;
@@ -179,12 +179,32 @@ public:
         CTable filtered_ctable = ctable.filtered(args);
         stringstream ss;
         ostreamCTable(ss, filtered_ctable);
-        cout << "result:" << endl;
+        cout << "test_filterCTable result:" << endl;
         cout << ss.str();
         TS_ASSERT_EQUALS(ss.str(),
                          "troc,truc\n"
                          "{1:1},1\n"
                          "{0:1},0\n");
+    }
+    void test_weightCTable()
+    {
+        std::cout << "\n----------------------------" << std::endl;
+        string target_feature("r");
+        vector<string> ignore_features;
+        Table tt = loadTable(tableUTest_dir + "weighted.csv",
+                             target_feature, ignore_features);
+        CTable ctt = tt.compressed("wgt");
+
+        cout << "weighted result:\n" << ctt << endl;
+        stringstream ss;
+        ss << ctt;
+
+        TS_ASSERT_EQUALS(ss.str(),
+                   "r,a,b,c,d,e\n"
+                   "{1:3.5},1,1,1,1,1\n"
+                   "{1:2.66},1,1,1,0,0\n"
+                   "{0:2.5},0,1,1,1,1\n"
+                   "{1:0.4,0:0.8},0,0,0,0,0\n");
     }
 
     // Set target Price, and ignore column Temperature
@@ -248,11 +268,11 @@ public:
         Table tt = loadTable(tableUTest_dir + "sparse.data",
                              target_feature, ignore_features);
 
-        testIStreamTable("target1,d,e,f,g,x,y,z\n"
-                         "thing,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
-                         "some,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
-                         "other,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
-                         "last,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
+        testIStreamTable("target1,date,d,e,f,g,x,y,z\n"
+                         "thing,12-04-2012,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
+                         "some,12-05-2012,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
+                         "other,12-06-2012T14:35:02-0500,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
+                         "last,12-07-2012T16:00:00-0500,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
                          tt.itable, tt.otable, true);
     }
 
@@ -264,11 +284,11 @@ public:
         Table tt = loadTable(tableUTest_dir + "sparse.data",
                              target_feature, ignore_features);
 
-        testIStreamTable("target2,d,e,f,g,x,y,z\n"
-                         "3.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
-                         "4.4,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
-                         "5.5,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
-                         "6.6,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
+        testIStreamTable("target2,date,d,e,f,g,x,y,z\n"
+                         "3.0,12-04-2012,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
+                         "4.4,12-05-2012,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
+                         "5.5,12-06-2012T14:35:02-0500,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
+                         "6.6,12-07-2012T16:00:00-0500,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
                          tt.itable, tt.otable, true);
     }
 

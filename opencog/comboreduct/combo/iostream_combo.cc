@@ -23,7 +23,6 @@
 
 #include "iostream_combo.h"
 #include "procedure_call.h"
-#include <boost/range/algorithm/find.hpp>
 
 namespace opencog { namespace combo {
 
@@ -414,9 +413,9 @@ string ph2l(const string& ce, const vector<string>& labels)
     string match;
     bool matching = false;
     for (char c : ce) {
-        if(!matching) {
+        if (!matching) {
             res += c;
-            if(c == '$') // matching starts
+            if (c == '$') // matching starts
                 matching = true;
         } else {
             if(c == ' ' || c == ')' || c == '\n') { //matching ends
@@ -428,12 +427,13 @@ string ph2l(const string& ce, const vector<string>& labels)
         }
     }
     // if a matching is going on flush to the result
-    if(matching)
+    if (matching)
         res += labels[lexical_cast<arity_t>(match) - 1];
     return res;
 }
 
-string l2ph(const string& ce, const vector<string>& labels)
+std::string l2ph(const std::string& ce,
+                 const std::vector<std::string>& labels)
 {
     /// @todo the implementation could be done in 2 lines with
     /// boost.regex with boost version 1.42 or above because then we
@@ -443,13 +443,13 @@ string l2ph(const string& ce, const vector<string>& labels)
     string match;
     bool matching = false;
     for (char c : ce) {
-        if(!matching) {
+        if (!matching) {
             res += c;
-            if(c == '$') // matching starts
+            if (c == '$') // matching starts
                 matching = true;
         } else {
-            if(c == ' ' || c == ')' || c == '\n') { //matching ends
-                auto found_it = find(labels, match);
+            if (c == ' ' || c == ')' || c == '\n') { //matching ends
+                auto found_it = std::find(labels.begin(), labels.end(), match);
                 OC_ASSERT(found_it != labels.end(), "No label %s matching",
                           match.c_str());
                 arity_t idx = distance(labels.begin(), found_it) + 1;
@@ -460,9 +460,9 @@ string l2ph(const string& ce, const vector<string>& labels)
                 match += c;
         }
     }
-    // if a matching is going on flush to the result
-    if(matching) {
-        auto found_it = boost::find(labels, match);
+    // If there's a match, flush the result
+    if (matching) {
+        auto found_it = std::find(labels.begin(), labels.end(), match);
         OC_ASSERT(found_it != labels.end(), "No label %s matching",
                   match.c_str());
         arity_t idx = distance(labels.begin(), found_it) + 1;

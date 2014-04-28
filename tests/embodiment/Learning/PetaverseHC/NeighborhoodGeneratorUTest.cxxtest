@@ -134,11 +134,11 @@ public:
         ng.precomputeCompositePerceptions();
         ng.precomputeCompositeActions();
 
-        //generate the neighborhood of and_set(beg)
+        //generate the neighborhood of and_seq(jump_up)
         combo_tree_ns_set nh; //neighborhood
         combo_tree center;
         stringstream ss;
-        ss << "and_seq(beg)";
+        ss << "and_seq(jump_up)";
         // ss >> center;
         AvatarCombo::operator>>(ss, center);
         OC_ASSERT(!center.empty(), "in this test center cannot be empty");
@@ -176,7 +176,7 @@ private:
         {
             stringstream ss;
             combo_tree tmp1;
-            ss << "beg";
+            ss << "jump_up";
             AvatarCombo::operator>>(ss, tmp1);
             actions.insert(tmp1);
         }
@@ -246,7 +246,7 @@ private:
         {
             stringstream ss;
             combo_tree tmp1;
-            ss << "beg";
+            ss << "jump_up";
             AvatarCombo::operator>>(ss, tmp1);
             compositeActions.insert(tmp1);
         }
@@ -262,14 +262,14 @@ private:
         {
             stringstream ss;
             combo_tree tmp3;
-            ss << "action_boolean_if(exist_object and_seq and_seq(beg))";
+            ss << "action_boolean_if(exist_object and_seq and_seq(jump_up))";
             AvatarCombo::operator>>(ss, tmp3);
             compositeActions.insert(tmp3);
         }
         {
             stringstream ss;
             combo_tree tmp4;
-            ss << "action_boolean_if(exist_object and_seq(beg) and_seq)";
+            ss << "action_boolean_if(exist_object and_seq(jump_up) and_seq)";
             AvatarCombo::operator>>(ss, tmp4);
             compositeActions.insert(tmp4);
         }
@@ -290,28 +290,28 @@ private:
         {
             stringstream ss;
             combo_tree tmp5;
-            ss << "action_boolean_if(exist_object and_seq(beg) and_seq(goto_obj(stick)))";
+            ss << "action_boolean_if(exist_object and_seq(jump_up) and_seq(goto_obj(stick)))";
             AvatarCombo::operator>>(ss, tmp5);
             compositeActions.insert(tmp5);
         }
         {
             stringstream ss;
             combo_tree tmp6;
-            ss << "action_boolean_if(exist_object and_seq(goto_obj(stick)) and_seq(beg))";
+            ss << "action_boolean_if(exist_object and_seq(goto_obj(stick)) and_seq(jump_up))";
             AvatarCombo::operator>>(ss, tmp6);
             compositeActions.insert(tmp6);
         }
         {
             stringstream ss;
             combo_tree tmp7;
-            ss << "action_boolean_if(near(stick nearest_object) and_seq and_seq(beg))";
+            ss << "action_boolean_if(near(stick nearest_object) and_seq and_seq(jump_up))";
             AvatarCombo::operator>>(ss, tmp7);
             compositeActions.insert(tmp7);
         }
         {
             stringstream ss;
             combo_tree tmp8;
-            ss << "action_boolean_if(near(stick nearest_object) and_seq(beg) and_seq)";
+            ss << "action_boolean_if(near(stick nearest_object) and_seq(jump_up) and_seq)";
             AvatarCombo::operator>>(ss, tmp8);
             compositeActions.insert(tmp8);
         }
@@ -332,43 +332,43 @@ private:
         {
             stringstream ss;
             combo_tree tmp9;
-            ss << "action_boolean_if(near(stick nearest_object) and_seq(beg) and_seq(goto_obj(stick)))";
+            ss << "action_boolean_if(near(stick nearest_object) and_seq(jump_up) and_seq(goto_obj(stick)))";
             AvatarCombo::operator>>(ss, tmp9);
             compositeActions.insert(tmp9);
         }
         {
             stringstream ss;
             combo_tree tmp10;
-            ss << "action_boolean_if(near(stick nearest_object) and_seq(goto_obj(stick)) and_seq(beg))";
+            ss << "action_boolean_if(near(stick nearest_object) and_seq(goto_obj(stick)) and_seq(jump_up))";
             AvatarCombo::operator>>(ss, tmp10);
             compositeActions.insert(tmp10);
         }
         //action_action_if
-        { //action_action_if(and_seq(beg) and_seq(beg) and_seq) -> and_seq(beg beg)
+        { //action_action_if(and_seq(jump_up) and_seq(jump_up) and_seq) -> and_seq(jump_up jump_up)
             stringstream ss;
             combo_tree tmp12;
-            ss << "and_seq(beg beg)";
+            ss << "and_seq(jump_up jump_up)";
             AvatarCombo::operator>>(ss, tmp12);
             compositeActions.insert(tmp12);
         }
-        { //action_action_if(and_seq(beg) and_seq(goto_obj(stick)) and_seq) -> and_seq(beg goto_obj(stick))
+        { //action_action_if(and_seq(jump_up) and_seq(goto_obj(stick)) and_seq) -> and_seq(jump_up goto_obj(stick))
             stringstream ss;
             combo_tree tmp14;
-            ss << "and_seq(beg goto_obj(stick))";
+            ss << "and_seq(jump_up goto_obj(stick))";
             AvatarCombo::operator>>(ss, tmp14);
             compositeActions.insert(tmp14);
         }
         {
             stringstream ss;
             combo_tree tmp15;
-            ss << "action_action_if(and_seq(goto_obj(stick)) and_seq and_seq(beg))";
+            ss << "action_action_if(and_seq(goto_obj(stick)) and_seq and_seq(jump_up))";
             AvatarCombo::operator>>(ss, tmp15);
             compositeActions.insert(tmp15);
         }
         {
             stringstream ss;
             combo_tree tmp15;
-            ss << "action_action_if(and_seq(goto_obj(stick)) and_seq(beg) and_seq)";
+            ss << "action_action_if(and_seq(goto_obj(stick)) and_seq(jump_up) and_seq)";
             AvatarCombo::operator>>(ss, tmp15);
             compositeActions.insert(tmp15);
         }
@@ -390,7 +390,7 @@ private:
         {
             stringstream ss;
             combo_tree tmp18;
-            ss << "action_while(and_seq(beg))";
+            ss << "action_while(and_seq(jump_up))";
             AvatarCombo::operator>>(ss, tmp18);
             compositeActions.insert(tmp18);
         }
@@ -412,7 +412,7 @@ private:
         {
             stringstream ss;
             combo_tree tmp21;
-            ss << "boolean_while(exist_object and_seq(beg))";
+            ss << "boolean_while(exist_object and_seq(jump_up))";
             AvatarCombo::operator>>(ss, tmp21);
             compositeActions.insert(tmp21);
         }
@@ -426,7 +426,7 @@ private:
         {
             stringstream ss;
             combo_tree tmp23;
-            ss << "boolean_while(near(stick nearest_object) and_seq(beg))";
+            ss << "boolean_while(near(stick nearest_object) and_seq(jump_up))";
             AvatarCombo::operator>>(ss, tmp23);
             compositeActions.insert(tmp23);
         }
@@ -440,7 +440,7 @@ private:
         {
             stringstream ss;
             combo_tree tmp25;
-            ss << "boolean_while(not(exist_object) and_seq(beg))";
+            ss << "boolean_while(not(exist_object) and_seq(jump_up))";
             AvatarCombo::operator>>(ss, tmp25);
             compositeActions.insert(tmp25);
         }
@@ -454,7 +454,7 @@ private:
         {
             stringstream ss;
             combo_tree tmp27;
-            ss << "boolean_while(not(near(stick nearest_object)) and_seq(beg))";
+            ss << "boolean_while(not(near(stick nearest_object)) and_seq(jump_up))";
             AvatarCombo::operator>>(ss, tmp27);
             compositeActions.insert(tmp27);
         }
@@ -480,7 +480,7 @@ private:
         {
             stringstream ss;
             combo_tree tmp2;
-            ss << "and_seq(beg)";
+            ss << "and_seq(jump_up)";
             AvatarCombo::operator>>(ss, tmp2);
             nh.insert(tmp2);
         }
@@ -494,21 +494,21 @@ private:
         {
             stringstream ss;
             combo_tree tmp4;
-            ss << "and_seq(beg beg)";
+            ss << "and_seq(jump_up jump_up)";
             AvatarCombo::operator>>(ss, tmp4);
             nh.insert(tmp4);
         }
         {
             stringstream ss;
             combo_tree tmp5;
-            ss << "and_seq(beg goto_obj(stick))";
+            ss << "and_seq(jump_up goto_obj(stick))";
             AvatarCombo::operator>>(ss, tmp5);
             nh.insert(tmp5);
         }
         {
             stringstream ss;
             combo_tree tmp6;
-            ss << "and_seq(goto_obj(stick) beg)";
+            ss << "and_seq(goto_obj(stick) jump_up)";
             AvatarCombo::operator>>(ss, tmp6);
             nh.insert(tmp6);
         }
@@ -516,14 +516,14 @@ private:
         {
             stringstream ss;
             combo_tree tmp7;
-            ss << "and_seq(action_boolean_if(exist_object and_seq and_seq(beg)))";
+            ss << "and_seq(action_boolean_if(exist_object and_seq and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp7);
             nh.insert(tmp7);
         }
         {
             stringstream ss;
             combo_tree tmp8;
-            ss << "and_seq(action_boolean_if(exist_object and_seq(beg) and_seq))";
+            ss << "and_seq(action_boolean_if(exist_object and_seq(jump_up) and_seq))";
             AvatarCombo::operator>>(ss, tmp8);
             nh.insert(tmp8);
         }
@@ -544,28 +544,28 @@ private:
         {
             stringstream ss;
             combo_tree tmp9;
-            ss << "and_seq(action_boolean_if(exist_object and_seq(beg) and_seq(goto_obj(stick))))";
+            ss << "and_seq(action_boolean_if(exist_object and_seq(jump_up) and_seq(goto_obj(stick))))";
             AvatarCombo::operator>>(ss, tmp9);
             nh.insert(tmp9);
         }
         {
             stringstream ss;
             combo_tree tmp10;
-            ss << "and_seq(action_boolean_if(exist_object and_seq(goto_obj(stick)) and_seq(beg)))";
+            ss << "and_seq(action_boolean_if(exist_object and_seq(goto_obj(stick)) and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp10);
             nh.insert(tmp10);
         }
         {
             stringstream ss;
             combo_tree tmp11;
-            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq and_seq(beg)))";
+            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp11);
             nh.insert(tmp11);
         }
         {
             stringstream ss;
             combo_tree tmp12;
-            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq(beg) and_seq))";
+            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq(jump_up) and_seq))";
             AvatarCombo::operator>>(ss, tmp12);
             nh.insert(tmp12);
         }
@@ -586,211 +586,211 @@ private:
         {
             stringstream ss;
             combo_tree tmp13;
-            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq(beg) and_seq(goto_obj(stick))))";
+            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq(jump_up) and_seq(goto_obj(stick))))";
             AvatarCombo::operator>>(ss, tmp13);
             nh.insert(tmp13);
         }
         {
             stringstream ss;
             combo_tree tmp14;
-            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq(goto_obj(stick)) and_seq(beg)))";
+            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq(goto_obj(stick)) and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp14);
             nh.insert(tmp14);
         }
         {
             stringstream ss;
             combo_tree tmp15;
-            ss << "and_seq(beg action_boolean_if(exist_object and_seq and_seq(beg)))";
+            ss << "and_seq(jump_up action_boolean_if(exist_object and_seq and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp15);
             nh.insert(tmp15);
         }
         {
             stringstream ss;
             combo_tree tmp16;
-            ss << "and_seq(beg action_boolean_if(exist_object and_seq(beg) and_seq))";
+            ss << "and_seq(jump_up action_boolean_if(exist_object and_seq(jump_up) and_seq))";
             AvatarCombo::operator>>(ss, tmp16);
             nh.insert(tmp16);
         }
         {
             stringstream ss;
             combo_tree tmp17;
-            ss << "and_seq(beg action_boolean_if(exist_object and_seq and_seq(goto_obj(stick))))";
+            ss << "and_seq(jump_up action_boolean_if(exist_object and_seq and_seq(goto_obj(stick))))";
             AvatarCombo::operator>>(ss, tmp17);
             nh.insert(tmp17);
         }
         {
             stringstream ss;
             combo_tree tmp18;
-            ss << "and_seq(beg action_boolean_if(exist_object and_seq(goto_obj(stick)) and_seq))";
+            ss << "and_seq(jump_up action_boolean_if(exist_object and_seq(goto_obj(stick)) and_seq))";
             AvatarCombo::operator>>(ss, tmp18);
             nh.insert(tmp18);
         }
         {
             stringstream ss;
             combo_tree tmp17;
-            ss << "and_seq(beg action_boolean_if(exist_object and_seq(beg) and_seq(goto_obj(stick))))";
+            ss << "and_seq(jump_up action_boolean_if(exist_object and_seq(jump_up) and_seq(goto_obj(stick))))";
             AvatarCombo::operator>>(ss, tmp17);
             nh.insert(tmp17);
         }
         {
             stringstream ss;
             combo_tree tmp18;
-            ss << "and_seq(beg action_boolean_if(exist_object and_seq(goto_obj(stick)) and_seq(beg)))";
+            ss << "and_seq(jump_up action_boolean_if(exist_object and_seq(goto_obj(stick)) and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp18);
             nh.insert(tmp18);
         }
         {
             stringstream ss;
             combo_tree tmp19;
-            ss << "and_seq(beg action_boolean_if(near(stick nearest_object) and_seq and_seq(beg)))";
+            ss << "and_seq(jump_up action_boolean_if(near(stick nearest_object) and_seq and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp19);
             nh.insert(tmp19);
         }
         {
             stringstream ss;
             combo_tree tmp20;
-            ss << "and_seq(beg action_boolean_if(near(stick nearest_object) and_seq(beg) and_seq))";
+            ss << "and_seq(jump_up action_boolean_if(near(stick nearest_object) and_seq(jump_up) and_seq))";
             AvatarCombo::operator>>(ss, tmp20);
             nh.insert(tmp20);
         }
         {
             stringstream ss;
             combo_tree tmp21;
-            ss << "and_seq(beg action_boolean_if(near(stick nearest_object) and_seq and_seq(goto_obj(stick))))";
+            ss << "and_seq(jump_up action_boolean_if(near(stick nearest_object) and_seq and_seq(goto_obj(stick))))";
             AvatarCombo::operator>>(ss, tmp21);
             nh.insert(tmp21);
         }
         {
             stringstream ss;
             combo_tree tmp22;
-            ss << "and_seq(beg action_boolean_if(near(stick nearest_object) and_seq(goto_obj(stick)) and_seq))";
+            ss << "and_seq(jump_up action_boolean_if(near(stick nearest_object) and_seq(goto_obj(stick)) and_seq))";
             AvatarCombo::operator>>(ss, tmp22);
             nh.insert(tmp22);
         }
         {
             stringstream ss;
             combo_tree tmp21;
-            ss << "and_seq(beg action_boolean_if(near(stick nearest_object) and_seq(beg) and_seq(goto_obj(stick))))";
+            ss << "and_seq(jump_up action_boolean_if(near(stick nearest_object) and_seq(jump_up) and_seq(goto_obj(stick))))";
             AvatarCombo::operator>>(ss, tmp21);
             nh.insert(tmp21);
         }
         {
             stringstream ss;
             combo_tree tmp22;
-            ss << "and_seq(beg action_boolean_if(near(stick nearest_object) and_seq(goto_obj(stick)) and_seq(beg)))";
+            ss << "and_seq(jump_up action_boolean_if(near(stick nearest_object) and_seq(goto_obj(stick)) and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp22);
             nh.insert(tmp22);
         }
         {
             stringstream ss;
             combo_tree tmp23;
-            ss << "and_seq(action_boolean_if(exist_object and_seq and_seq(beg)) beg)";
+            ss << "and_seq(action_boolean_if(exist_object and_seq and_seq(jump_up)) jump_up)";
             AvatarCombo::operator>>(ss, tmp23);
             nh.insert(tmp23);
         }
         {
             stringstream ss;
             combo_tree tmp24;
-            ss << "and_seq(action_boolean_if(exist_object and_seq(beg) and_seq) beg)";
+            ss << "and_seq(action_boolean_if(exist_object and_seq(jump_up) and_seq) jump_up)";
             AvatarCombo::operator>>(ss, tmp24);
             nh.insert(tmp24);
         }
         {
             stringstream ss;
             combo_tree tmp25;
-            ss << "and_seq(action_boolean_if(exist_object and_seq and_seq(goto_obj(stick))) beg)";
+            ss << "and_seq(action_boolean_if(exist_object and_seq and_seq(goto_obj(stick))) jump_up)";
             AvatarCombo::operator>>(ss, tmp25);
             nh.insert(tmp25);
         }
         {
             stringstream ss;
             combo_tree tmp26;
-            ss << "and_seq(action_boolean_if(exist_object and_seq(goto_obj(stick)) and_seq) beg)";
+            ss << "and_seq(action_boolean_if(exist_object and_seq(goto_obj(stick)) and_seq) jump_up)";
             AvatarCombo::operator>>(ss, tmp26);
             nh.insert(tmp26);
         }
         {
             stringstream ss;
             combo_tree tmp25;
-            ss << "and_seq(action_boolean_if(exist_object and_seq(beg) and_seq(goto_obj(stick))) beg)";
+            ss << "and_seq(action_boolean_if(exist_object and_seq(jump_up) and_seq(goto_obj(stick))) jump_up)";
             AvatarCombo::operator>>(ss, tmp25);
             nh.insert(tmp25);
         }
         {
             stringstream ss;
             combo_tree tmp26;
-            ss << "and_seq(action_boolean_if(exist_object and_seq(goto_obj(stick)) and_seq(beg)) beg)";
+            ss << "and_seq(action_boolean_if(exist_object and_seq(goto_obj(stick)) and_seq(jump_up)) jump_up)";
             AvatarCombo::operator>>(ss, tmp26);
             nh.insert(tmp26);
         }
         {
             stringstream ss;
             combo_tree tmp27;
-            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq and_seq(beg)) beg)";
+            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq and_seq(jump_up)) jump_up)";
             AvatarCombo::operator>>(ss, tmp27);
             nh.insert(tmp27);
         }
         {
             stringstream ss;
             combo_tree tmp28;
-            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq(beg) and_seq) beg)";
+            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq(jump_up) and_seq) jump_up)";
             AvatarCombo::operator>>(ss, tmp28);
             nh.insert(tmp28);
         }
         {
             stringstream ss;
             combo_tree tmp29;
-            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq and_seq(goto_obj(stick))) beg)";
+            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq and_seq(goto_obj(stick))) jump_up)";
             AvatarCombo::operator>>(ss, tmp29);
             nh.insert(tmp29);
         }
         {
             stringstream ss;
             combo_tree tmp40;
-            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq(goto_obj(stick)) and_seq) beg)";
+            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq(goto_obj(stick)) and_seq) jump_up)";
             AvatarCombo::operator>>(ss, tmp40);
             nh.insert(tmp40);
         }
         {
             stringstream ss;
             combo_tree tmp29;
-            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq(beg) and_seq(goto_obj(stick))) beg)";
+            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq(jump_up) and_seq(goto_obj(stick))) jump_up)";
             AvatarCombo::operator>>(ss, tmp29);
             nh.insert(tmp29);
         }
         {
             stringstream ss;
             combo_tree tmp40;
-            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq(goto_obj(stick)) and_seq(beg)) beg)";
+            ss << "and_seq(action_boolean_if(near(stick nearest_object) and_seq(goto_obj(stick)) and_seq(jump_up)) jump_up)";
             AvatarCombo::operator>>(ss, tmp40);
             nh.insert(tmp40);
         }
         //action_action_if
-        { //action_action_if(and_seq(beg) and_seq(beg) and_seq) -> and_seq(beg beg)
+        { //action_action_if(and_seq(jump_up) and_seq(jump_up) and_seq) -> and_seq(jump_up jump_up)
             stringstream ss;
             combo_tree tmp41;
-            ss << "and_seq(beg beg)";
+            ss << "and_seq(jump_up jump_up)";
             AvatarCombo::operator>>(ss, tmp41);
             nh.insert(tmp41);
         }
-        { //action_action_if(and_seq(beg) and_seq(goto_obj(stick)) and_seq) -> and_seq(beg goto_obj(stick))
+        { //action_action_if(and_seq(jump_up) and_seq(goto_obj(stick)) and_seq) -> and_seq(jump_up goto_obj(stick))
             stringstream ss;
             combo_tree tmp42;
-            ss << "and_seq(beg goto_obj(stick))";
+            ss << "and_seq(jump_up goto_obj(stick))";
             AvatarCombo::operator>>(ss, tmp42);
             nh.insert(tmp42);
         }
         {
             stringstream ss;
             combo_tree tmp43;
-            ss << "and_seq(action_action_if(and_seq(goto_obj(stick)) and_seq and_seq(beg)))";
+            ss << "and_seq(action_action_if(and_seq(goto_obj(stick)) and_seq and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp43);
             nh.insert(tmp43);
         }
         {
             stringstream ss;
             combo_tree tmp44;
-            ss << "and_seq(action_action_if(and_seq(goto_obj(stick)) and_seq(beg) and_seq))";
+            ss << "and_seq(action_action_if(and_seq(goto_obj(stick)) and_seq(jump_up) and_seq))";
             AvatarCombo::operator>>(ss, tmp44);
             nh.insert(tmp44);
         }
@@ -808,80 +808,80 @@ private:
             AvatarCombo::operator>>(ss, tmp46);
             nh.insert(tmp46);
         }
-        { //and_seq(beg action_action_if(and_seq(beg) and_seq(beg) and_seq)) -> and_seq(beg beg beg)
+        { //and_seq(jump_up action_action_if(and_seq(jump_up) and_seq(jump_up) and_seq)) -> and_seq(jump_up jump_up jump_up)
             stringstream ss;
             combo_tree tmp47;
-            ss << "and_seq(beg beg beg)";
+            ss << "and_seq(jump_up jump_up jump_up)";
             AvatarCombo::operator>>(ss, tmp47);
             nh.insert(tmp47);
         }
-        { //and_seq(beg action_action_if(and_seq(beg) and_seq and_seq(goto_obj(stick)))) -> and_seq(beg beg goto_obj(stick))
+        { //and_seq(jump_up action_action_if(and_seq(jump_up) and_seq and_seq(goto_obj(stick)))) -> and_seq(jump_up jump_up goto_obj(stick))
             stringstream ss;
             combo_tree tmp48;
-            ss << "and_seq(beg beg goto_obj(stick))";
+            ss << "and_seq(jump_up jump_up goto_obj(stick))";
             AvatarCombo::operator>>(ss, tmp48);
             nh.insert(tmp48);
         }
         {
             stringstream ss;
             combo_tree tmp49;
-            ss << "and_seq(beg action_action_if(and_seq(goto_obj(stick)) and_seq and_seq(beg)))";
+            ss << "and_seq(jump_up action_action_if(and_seq(goto_obj(stick)) and_seq and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp49);
             nh.insert(tmp49);
         }
         {
             stringstream ss;
             combo_tree tmp50;
-            ss << "and_seq(beg action_action_if(and_seq(goto_obj(stick)) and_seq(beg) and_seq))";
+            ss << "and_seq(jump_up action_action_if(and_seq(goto_obj(stick)) and_seq(jump_up) and_seq))";
             AvatarCombo::operator>>(ss, tmp50);
             nh.insert(tmp50);
         }
         {
             stringstream ss;
             combo_tree tmp51;
-            ss << "and_seq(beg action_action_if(and_seq(goto_obj(stick)) and_seq and_seq(goto_obj(stick))))";
+            ss << "and_seq(jump_up action_action_if(and_seq(goto_obj(stick)) and_seq and_seq(goto_obj(stick))))";
             AvatarCombo::operator>>(ss, tmp51);
             nh.insert(tmp51);
         }
         {
             stringstream ss;
             combo_tree tmp52;
-            ss << "and_seq(beg action_action_if(and_seq(goto_obj(stick)) and_seq(goto_obj(stick)) and_seq))";
+            ss << "and_seq(jump_up action_action_if(and_seq(goto_obj(stick)) and_seq(goto_obj(stick)) and_seq))";
             AvatarCombo::operator>>(ss, tmp52);
             nh.insert(tmp52);
         }
-        { //and_seq(action_action_if(and_seq(beg) and_seq(goto_obj(stick)) and_seq) beg) -> and_seq(beg goto_obj(stick) beg)
+        { //and_seq(action_action_if(and_seq(jump_up) and_seq(goto_obj(stick)) and_seq) jump_up) -> and_seq(jump_up goto_obj(stick) jump_up)
             stringstream ss;
             combo_tree tmp53;
-            ss << "and_seq(beg goto_obj(stick) beg)";
+            ss << "and_seq(jump_up goto_obj(stick) jump_up)";
             AvatarCombo::operator>>(ss, tmp53);
             nh.insert(tmp53);
         }
         {
             stringstream ss;
             combo_tree tmp54;
-            ss << "and_seq(action_action_if(and_seq(goto_obj(stick)) and_seq and_seq(beg)) beg)";
+            ss << "and_seq(action_action_if(and_seq(goto_obj(stick)) and_seq and_seq(jump_up)) jump_up)";
             AvatarCombo::operator>>(ss, tmp54);
             nh.insert(tmp54);
         }
         {
             stringstream ss;
             combo_tree tmp55;
-            ss << "and_seq(action_action_if(and_seq(goto_obj(stick)) and_seq(beg) and_seq) beg)";
+            ss << "and_seq(action_action_if(and_seq(goto_obj(stick)) and_seq(jump_up) and_seq) jump_up)";
             AvatarCombo::operator>>(ss, tmp55);
             nh.insert(tmp55);
         }
         {
             stringstream ss;
             combo_tree tmp56;
-            ss << "and_seq(action_action_if(and_seq(goto_obj(stick)) and_seq and_seq(goto_obj(stick))) beg)";
+            ss << "and_seq(action_action_if(and_seq(goto_obj(stick)) and_seq and_seq(goto_obj(stick))) jump_up)";
             AvatarCombo::operator>>(ss, tmp56);
             nh.insert(tmp56);
         }
         {
             stringstream ss;
             combo_tree tmp57;
-            ss << "and_seq(action_action_if(and_seq(goto_obj(stick)) and_seq(goto_obj(stick)) and_seq) beg)";
+            ss << "and_seq(action_action_if(and_seq(goto_obj(stick)) and_seq(goto_obj(stick)) and_seq) jump_up)";
             AvatarCombo::operator>>(ss, tmp57);
             nh.insert(tmp57);
         }
@@ -889,7 +889,7 @@ private:
         {
             stringstream ss;
             combo_tree tmp58;
-            ss << "and_seq(action_while(and_seq(beg)))";
+            ss << "and_seq(action_while(and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp58);
             nh.insert(tmp58);
         }
@@ -903,7 +903,7 @@ private:
         {
             stringstream ss;
             combo_tree tmp60;
-            ss << "and_seq(beg action_while(and_seq(goto_obj(stick))))";
+            ss << "and_seq(jump_up action_while(and_seq(goto_obj(stick))))";
             AvatarCombo::operator>>(ss, tmp60);
             nh.insert(tmp60);
         }
@@ -917,7 +917,7 @@ private:
         {
             stringstream ss;
             combo_tree tmp62;
-            ss << "and_seq(beg action_while(action_not(and_seq(goto_obj(stick)))))";
+            ss << "and_seq(jump_up action_while(action_not(and_seq(goto_obj(stick)))))";
             AvatarCombo::operator>>(ss, tmp62);
             nh.insert(tmp62);
         }
@@ -925,14 +925,14 @@ private:
         {
             stringstream ss;
             combo_tree tmp63;
-            ss << "and_seq(boolean_while(exist_object and_seq(beg)))";
+            ss << "and_seq(boolean_while(exist_object and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp63);
             nh.insert(tmp63);
         }
         {
             stringstream ss;
             combo_tree tmp64;
-            ss << "and_seq(boolean_while(near(stick nearest_object) and_seq(beg)))";
+            ss << "and_seq(boolean_while(near(stick nearest_object) and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp64);
             nh.insert(tmp64);
         }
@@ -953,70 +953,70 @@ private:
         {
             stringstream ss;
             combo_tree tmp67;
-            ss << "and_seq(beg boolean_while(exist_object and_seq(beg)))";
+            ss << "and_seq(jump_up boolean_while(exist_object and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp67);
             nh.insert(tmp67);
         }
         {
             stringstream ss;
             combo_tree tmp68;
-            ss << "and_seq(beg boolean_while(near(stick nearest_object) and_seq(beg)))";
+            ss << "and_seq(jump_up boolean_while(near(stick nearest_object) and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp68);
             nh.insert(tmp68);
         }
         {
             stringstream ss;
             combo_tree tmp69;
-            ss << "and_seq(beg boolean_while(exist_object and_seq(goto_obj(stick))))";
+            ss << "and_seq(jump_up boolean_while(exist_object and_seq(goto_obj(stick))))";
             AvatarCombo::operator>>(ss, tmp69);
             nh.insert(tmp69);
         }
         {
             stringstream ss;
             combo_tree tmp70;
-            ss << "and_seq(beg boolean_while(near(stick nearest_object) and_seq(goto_obj(stick))))";
+            ss << "and_seq(jump_up boolean_while(near(stick nearest_object) and_seq(goto_obj(stick))))";
             AvatarCombo::operator>>(ss, tmp70);
             nh.insert(tmp70);
         }
         {
             stringstream ss;
             combo_tree tmp71;
-            ss << "and_seq(boolean_while(exist_object and_seq(beg)) beg)";
+            ss << "and_seq(boolean_while(exist_object and_seq(jump_up)) jump_up)";
             AvatarCombo::operator>>(ss, tmp71);
             nh.insert(tmp71);
         }
         {
             stringstream ss;
             combo_tree tmp72;
-            ss << "and_seq(boolean_while(near(stick nearest_object) and_seq(beg)) beg)";
+            ss << "and_seq(boolean_while(near(stick nearest_object) and_seq(jump_up)) jump_up)";
             AvatarCombo::operator>>(ss, tmp72);
             nh.insert(tmp72);
         }
         {
             stringstream ss;
             combo_tree tmp73;
-            ss << "and_seq(boolean_while(exist_object and_seq(goto_obj(stick))) beg)";
+            ss << "and_seq(boolean_while(exist_object and_seq(goto_obj(stick))) jump_up)";
             AvatarCombo::operator>>(ss, tmp73);
             nh.insert(tmp73);
         }
         {
             stringstream ss;
             combo_tree tmp74;
-            ss << "and_seq(boolean_while(near(stick nearest_object) and_seq(goto_obj(stick))) beg)";
+            ss << "and_seq(boolean_while(near(stick nearest_object) and_seq(goto_obj(stick))) jump_up)";
             AvatarCombo::operator>>(ss, tmp74);
             nh.insert(tmp74);
         }
         {
             stringstream ss;
             combo_tree tmp75;
-            ss << "and_seq(boolean_while(not(exist_object) and_seq(beg)))";
+            ss << "and_seq(boolean_while(not(exist_object) and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp75);
             nh.insert(tmp75);
         }
         {
             stringstream ss;
             combo_tree tmp76;
-            ss << "and_seq(boolean_while(not(near(stick nearest_object)) and_seq(beg)))";
+            ss << "and_seq(boolean_while(not(near(stick nearest_object)) and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp76);
             nh.insert(tmp76);
         }
@@ -1037,56 +1037,56 @@ private:
         {
             stringstream ss;
             combo_tree tmp79;
-            ss << "and_seq(beg boolean_while(not(exist_object) and_seq(beg)))";
+            ss << "and_seq(jump_up boolean_while(not(exist_object) and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp79);
             nh.insert(tmp79);
         }
         {
             stringstream ss;
             combo_tree tmp80;
-            ss << "and_seq(beg boolean_while(not(near(stick nearest_object)) and_seq(beg)))";
+            ss << "and_seq(jump_up boolean_while(not(near(stick nearest_object)) and_seq(jump_up)))";
             AvatarCombo::operator>>(ss, tmp80);
             nh.insert(tmp80);
         }
         {
             stringstream ss;
             combo_tree tmp81;
-            ss << "and_seq(beg boolean_while(not(exist_object) and_seq(goto_obj(stick))))";
+            ss << "and_seq(jump_up boolean_while(not(exist_object) and_seq(goto_obj(stick))))";
             AvatarCombo::operator>>(ss, tmp81);
             nh.insert(tmp81);
         }
         {
             stringstream ss;
             combo_tree tmp82;
-            ss << "and_seq(beg boolean_while(not(near(stick nearest_object)) and_seq(goto_obj(stick))))";
+            ss << "and_seq(jump_up boolean_while(not(near(stick nearest_object)) and_seq(goto_obj(stick))))";
             AvatarCombo::operator>>(ss, tmp82);
             nh.insert(tmp82);
         }
         {
             stringstream ss;
             combo_tree tmp83;
-            ss << "and_seq(boolean_while(not(exist_object) and_seq(beg)) beg)";
+            ss << "and_seq(boolean_while(not(exist_object) and_seq(jump_up)) jump_up)";
             AvatarCombo::operator>>(ss, tmp83);
             nh.insert(tmp83);
         }
         {
             stringstream ss;
             combo_tree tmp84;
-            ss << "and_seq(boolean_while(not(near(stick nearest_object)) and_seq(beg)) beg)";
+            ss << "and_seq(boolean_while(not(near(stick nearest_object)) and_seq(jump_up)) jump_up)";
             AvatarCombo::operator>>(ss, tmp84);
             nh.insert(tmp84);
         }
         {
             stringstream ss;
             combo_tree tmp85;
-            ss << "and_seq(boolean_while(not(exist_object) and_seq(goto_obj(stick))) beg)";
+            ss << "and_seq(boolean_while(not(exist_object) and_seq(goto_obj(stick))) jump_up)";
             AvatarCombo::operator>>(ss, tmp85);
             nh.insert(tmp85);
         }
         {
             stringstream ss;
             combo_tree tmp86;
-            ss << "and_seq(boolean_while(not(near(stick nearest_object)) and_seq(goto_obj(stick))) beg)";
+            ss << "and_seq(boolean_while(not(near(stick nearest_object)) and_seq(goto_obj(stick))) jump_up)";
             AvatarCombo::operator>>(ss, tmp86);
             nh.insert(tmp86);
         }

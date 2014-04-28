@@ -119,23 +119,19 @@ void MockOpcHCTest::init(const std::string & myId,
 
     //add necessary nodes to represent BDs
     behaved_h = atomSpace->addNode(PREDICATE_NODE, BEHAVED_STR);
-    //fill atomSpace with actions goto_obj grab and wag
+    //fill atomSpace with actions goto_obj grab
     //goto_obj
     goto_obj_h = atomSpace->addNode(GROUNDED_SCHEMA_NODE,
                                     get_instance(id::goto_obj)->get_name().c_str());
     //grab
     grab_h = atomSpace->addNode(GROUNDED_SCHEMA_NODE,
                                 get_instance(id::grab)->get_name().c_str());
-    //wag
-    wag_h = atomSpace->addNode(GROUNDED_SCHEMA_NODE,
-                               get_instance(id::wag)->get_name().c_str());
     //add the concept of the trick
     trick_h = atomSpace->addNode(CONCEPT_NODE, TRICK_NAME);
     //add AtTimeLink to it
     tt1_h = timeServer().addTimeInfo(trick_h, Temporal(0,
                                    3 * TIME_INTERVAL));
-    //add first behavior, goto to stick and wag the taile (subject : owner)
-    //(yes the owner wag its taile)
+    //add first behavior, goto to stick
     //for goto_obj
     HandleSeq goto_obj_seq;
     goto_obj_seq.push_back(owner_h);
@@ -160,15 +156,6 @@ void MockOpcHCTest::init(const std::string & myId,
     ev_grab_seq.push_back(behaved_h);
     ev_grab_seq.push_back(arglg_h);
     eval_grab_obj_h = atomSpace->addLink(EVALUATION_LINK, ev_grab_seq);
-    //for wag
-    HandleSeq wag_seq;
-    wag_seq.push_back(owner_h);
-    wag_seq.push_back(wag_h);
-    Handle arglw_h = atomSpace->addLink(LIST_LINK, wag_seq);
-    HandleSeq ev_wag_seq;
-    ev_wag_seq.push_back(behaved_h);
-    ev_wag_seq.push_back(arglw_h);
-    eval_wag_h = atomSpace->addLink(EVALUATION_LINK, ev_wag_seq);
     //add atTimeLink to it
     ebdg_h = timeServer().addTimeInfo(eval_grab_obj_h,
                                     Temporal(2 * TIME_INTERVAL,
@@ -263,20 +250,11 @@ bool MockOpcHCTest::processNextMessage(opencog::messaging::Message *msg)
                 Handle ebd2_h = timeServer().addTimeInfo(eval_goto_obj_h,
                                                        Temporal(10 * TIME_INTERVAL,
                                                                 11 * TIME_INTERVAL));
-                //for grab
-                //add atTimeLink to it
-                Handle ebdw_h = timeServer().addTimeInfo(eval_wag_h,
-                                                       Temporal(12 * TIME_INTERVAL,
-                                                                13 * TIME_INTERVAL));
                 //add member link to trick concept
                 HandleSeq m1_seq;
                 m1_seq.push_back(ebd2_h);
                 m1_seq.push_back(tt2_h);
                 atomSpace->addLink(MEMBER_LINK, m1_seq);
-                HandleSeq m2_seq;
-                m2_seq.push_back(ebdw_h);
-                m2_seq.push_back(tt2_h);
-                atomSpace->addLink(MEMBER_LINK, m2_seq);
 
                 lsMessageSender->sendReward(TRICK_NAME, TRICK_ARGS,
                                             SCHEMA_NAME, REWARD_1);

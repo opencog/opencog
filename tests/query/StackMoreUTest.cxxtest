@@ -117,7 +117,7 @@ void StackMoreUTest::setUp(void)
 	load_scm_files_from_config(*as, paths);
 
 	// Create an implication link that will be tested.
-	SchemeEval* eval = new SchemeEval();
+	SchemeEval* eval = new SchemeEval(as);
 	bind_oo = eval->apply("bind_oo", Handle::UNDEFINED);
 	bind_ou = eval->apply("bind_ou", Handle::UNDEFINED);
 	bind_uo = eval->apply("bind_uo", Handle::UNDEFINED);

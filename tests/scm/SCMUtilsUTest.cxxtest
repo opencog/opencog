@@ -77,7 +77,7 @@ class SCMUtilsUTest :  public CxxTest::TestSuite
 void SCMUtilsUTest::setUp(void)
 {
 	server(CogServer::createInstance);
-	evaluator = new SchemeEval();
+	evaluator = new SchemeEval(&cogserver().getAtomSpace());
 
 	// Load the required data
 	config().set("MODULES",

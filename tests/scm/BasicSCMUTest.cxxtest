@@ -111,7 +111,7 @@ void BasicSCMUTest::setUp(void)
 {
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
-	eval = new SchemeEval();
+	eval = new SchemeEval(as);
 
 	// Proper UTF-8 behaviour requires the right locale.
 	// Do not use LC_ALL, as otherwise the printing of the numeric

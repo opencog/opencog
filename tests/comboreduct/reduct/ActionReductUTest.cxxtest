@@ -38,7 +38,7 @@ public:
     }
     {
       stringstream ss;
-      ss << "and_seq(beg stretch)";
+      ss << "and_seq(step_forward turn_left)";
       combo_tree tmp;
       ss >> tmp;
       boost::tribool res = get_action_result(tmp, combo_tree::iterator(tmp.begin()));
@@ -56,7 +56,7 @@ public:
     }
     {
       stringstream ss;
-      ss << "action_action_if(goto_obj(stick) beg stretch)";
+      ss << "action_action_if(goto_obj(stick) step_forward turn_left)";
       combo_tree tmp;
       ss >> tmp;
       boost::tribool res = get_action_result(tmp, combo_tree::iterator(tmp.begin()));
@@ -65,7 +65,7 @@ public:
     }
     {
       stringstream ss;
-      ss << "and_seq(exec_seq(action_action_if(goto_obj(stick) beg stretch)) stretch)";
+      ss << "and_seq(exec_seq(action_action_if(goto_obj(stick) step_forward turn_left)) turn_left)";
       combo_tree tmp;
       ss >> tmp;
       boost::tribool res = get_action_result(tmp, combo_tree::iterator(tmp.begin()));
@@ -74,7 +74,7 @@ public:
     }
     {
       stringstream ss;
-      ss << "or_seq(and_exec(action_action_if(goto_obj(stick) beg stretch)) goto_obj(stick))";
+      ss << "or_seq(and_exec(action_action_if(goto_obj(stick) step_forward turn_left)) goto_obj(stick))";
       combo_tree tmp;
       ss >> tmp;
       boost::tribool res = get_action_result(tmp, combo_tree::iterator(tmp.begin()));
@@ -83,7 +83,7 @@ public:
     }
     {
       stringstream ss;
-      ss << "or_seq(goto_obj(stick) beg)";
+      ss << "or_seq(goto_obj(stick) step_forward)";
       combo_tree tmp;
       ss >> tmp;
       boost::tribool res = get_action_result(tmp, combo_tree::iterator(tmp.begin()));
@@ -92,7 +92,7 @@ public:
     }
     {
       stringstream ss;
-      ss << "or_seq(goto_obj(stick) action_while(beg))";
+      ss << "or_seq(goto_obj(stick) action_while(step_forward))";
       combo_tree tmp;
       ss >> tmp;
       boost::tribool res = get_action_result(tmp, combo_tree::iterator(tmp.begin()));
@@ -265,7 +265,7 @@ public:
   //test_simplify6 :
   //reduce_action_action_if_always_succeeds
   void test_simplify6() {
-    string tree_str="action_action_if(beg goto_obj(stick) stretch)";
+    string tree_str="action_action_if(step_forward goto_obj(stick) turn_left)";
     stringstream ss(tree_str);
     combo_tree tr;
     ss >> tr;
@@ -279,13 +279,13 @@ public:
     stringstream ss1;
     ss1 << tr;
     std::cout << "TEST_SIMPLIFY6 : " << tr << std::endl;
-    TS_ASSERT_EQUALS(ss1.str(), string("and_seq(beg goto_obj(stick)) "));
+    TS_ASSERT_EQUALS(ss1.str(), string("and_seq(step_forward goto_obj(stick)) "));
   }
 
   //test_simplify7 :
   //reduce_action_action_if_always_fails
   void test_simplify7() {
-    string tree_str="action_action_if(action_failure goto_obj(stick) stretch)";
+    string tree_str="action_action_if(action_failure goto_obj(stick) turn_left)";
     stringstream ss(tree_str);
     combo_tree tr;
     ss >> tr;
@@ -299,7 +299,7 @@ public:
     stringstream ss1;
     ss1 << tr;
     std::cout << "TEST_SIMPLIFY7 : " << tr << std::endl;
-    TS_ASSERT_EQUALS(ss1.str(), string("exec_seq(action_failure stretch) "));
+    TS_ASSERT_EQUALS(ss1.str(), string("exec_seq(action_failure turn_left) "));
   }
 
   //test_simplify8 :
@@ -326,7 +326,7 @@ public:
   //reduce_boolean_while_depend_condition
   void test_simplify9() {
     {
-      string tree_str="boolean_while(false beg)";
+      string tree_str="boolean_while(false step_forward)";
       stringstream ss(tree_str);
       combo_tree tr;
       ss >> tr;
@@ -364,7 +364,7 @@ public:
   //test_simplify10
   //reduce_sequential_and_always_fails
   void test_simplify10() {
-    string tree_str="and_seq(beg action_failure stretch)";
+    string tree_str="and_seq(step_forward action_failure turn_left)";
     stringstream ss(tree_str);
     combo_tree tr;
     ss >> tr;
@@ -378,13 +378,13 @@ public:
     stringstream ss1;
     ss1 << tr;
     std::cout << "TEST_SIMPLIFY10 : " << tr << std::endl;
-    TS_ASSERT_EQUALS(ss1.str(), string("and_seq(beg action_failure) "));
+    TS_ASSERT_EQUALS(ss1.str(), string("and_seq(step_forward action_failure) "));
   }
 
   //test_simplify11
   //reduce_sequential_or_always_succeeds
   void test_simplify11() {
-    string tree_str="or_seq(goto_obj(stick) beg stretch)";
+    string tree_str="or_seq(goto_obj(stick) step_forward turn_left)";
     stringstream ss(tree_str);
     combo_tree tr;
     ss >> tr;
@@ -398,13 +398,13 @@ public:
     stringstream ss1;
     ss1 << tr;
     std::cout << "TEST_SIMPLIFY11 : " << tr << std::endl;
-    TS_ASSERT_EQUALS(ss1.str(), string("or_seq(goto_obj(stick) beg) "));
+    TS_ASSERT_EQUALS(ss1.str(), string("or_seq(goto_obj(stick) step_forward) "));
   }
 
   //test_simplify12_a
   //reduce_repeat_out_action_while
   void test_simplify12_a() {
-    string tree_str="and_seq(beg goto_obj(stick) action_while(and_seq(beg goto_obj(stick))))";
+    string tree_str="and_seq(step_forward goto_obj(stick) action_while(and_seq(step_forward goto_obj(stick))))";
     stringstream ss(tree_str);
     combo_tree tr;
     ss >> tr;
@@ -418,7 +418,7 @@ public:
     stringstream ss1;
     ss1 << tr;
     std::cout << "TEST_SIMPLIFY12 A : " << tr << std::endl;
-    TS_ASSERT_EQUALS(ss1.str(), string("and_seq(action_while(and_seq(beg goto_obj(stick)))) "));
+    TS_ASSERT_EQUALS(ss1.str(), string("and_seq(action_while(and_seq(step_forward goto_obj(stick)))) "));
   }
 
   //test_simplify12_b
@@ -444,7 +444,7 @@ public:
   //test_simplify13
   //reduce_repeat_in_action_while
   void test_simplify13() {
-    string tree_str="action_while(and_seq(beg goto_obj(stick) beg goto_obj(stick)))";
+    string tree_str="action_while(and_seq(step_forward goto_obj(stick) step_forward goto_obj(stick)))";
     stringstream ss(tree_str);
     combo_tree tr;
     ss >> tr;
@@ -458,13 +458,13 @@ public:
     stringstream ss1;
     ss1 << tr;
     std::cout << "TEST_SIMPLIFY13 : " << tr << std::endl;
-    TS_ASSERT_EQUALS(ss1.str(), string("action_while(and_seq(beg goto_obj(stick))) "));
+    TS_ASSERT_EQUALS(ss1.str(), string("action_while(and_seq(step_forward goto_obj(stick))) "));
   }
 
   //test_simplify14
   //reduce_action_boolean_if_sub_cond
   void test_simplify14() {
-    string tree_str="action_boolean_if(near(stick tree) and_seq(action_boolean_if(near(stick tree) beg stretch)) and_seq(action_boolean_if(near(stick tree) sit goto_obj(stick))))";
+    string tree_str="action_boolean_if(near(stick tree) and_seq(action_boolean_if(near(stick tree) step_forward turn_left)) and_seq(action_boolean_if(near(stick tree) sit goto_obj(stick))))";
     stringstream ss(tree_str);
     combo_tree tr;
     ss >> tr;
@@ -478,13 +478,13 @@ public:
     stringstream ss1;
     ss1 << tr;
     std::cout << "TEST_SIMPLIFY14 : " << tr << std::endl;
-    TS_ASSERT_EQUALS(ss1.str(), string("action_boolean_if(near(stick tree) and_seq(action_boolean_if(true beg stretch)) and_seq(action_boolean_if(false sit goto_obj(stick)))) "));
+    TS_ASSERT_EQUALS(ss1.str(), string("action_boolean_if(near(stick tree) and_seq(action_boolean_if(true step_forward turn_left)) and_seq(action_boolean_if(false sit goto_obj(stick)))) "));
   }
 
   //test_simplify15
   //reduce_action_boolean_if_sub_cond
   void test_simplify15() {
-    string tree_str="boolean_while(near(stick tree) and_seq(action_boolean_if(near(stick tree) beg stretch)))";
+    string tree_str="boolean_while(near(stick tree) and_seq(action_boolean_if(near(stick tree) step_forward turn_left)))";
     stringstream ss(tree_str);
     combo_tree tr;
     ss >> tr;
@@ -498,13 +498,13 @@ public:
     stringstream ss1;
     ss1 << tr;
     std::cout << "TEST_SIMPLIFY15 : " << tr << std::endl;
-    TS_ASSERT_EQUALS(ss1.str(), string("boolean_while(near(stick tree) and_seq(action_boolean_if(true beg stretch))) "));
+    TS_ASSERT_EQUALS(ss1.str(), string("boolean_while(near(stick tree) and_seq(action_boolean_if(true step_forward turn_left))) "));
   }
 
   //test_simplify16
   //reduce_not_cond_action_boolean_if
   void test_simplify16() {
-    string tree_str="action_boolean_if(not(near(stick tree)) bark wag)";
+    string tree_str="action_boolean_if(not(near(stick tree)) turn_right step_forward)";
     stringstream ss(tree_str);
     combo_tree tr;
     ss >> tr;
@@ -518,13 +518,13 @@ public:
     stringstream ss1;
     ss1 << tr;
     std::cout << "TEST_SIMPLIFY16 : " << tr << std::endl;
-    TS_ASSERT_EQUALS(ss1.str(), string("action_boolean_if(near(stick tree) wag bark) "));
+    TS_ASSERT_EQUALS(ss1.str(), string("action_boolean_if(near(stick tree) step_forward turn_right) "));
   }
 
   //test_simplify17
   //reduce_double_action_not
   void test_simplify17() {
-    string tree_str="action_not(action_not(wag))";
+    string tree_str="action_not(action_not(step_forward))";
     stringstream ss(tree_str);
     combo_tree tr;
     ss >> tr;
@@ -538,7 +538,7 @@ public:
     stringstream ss1;
     ss1 << tr;
     std::cout << "TEST_SIMPLIFY17 : " << tr << std::endl;
-    TS_ASSERT_EQUALS(ss1.str(), string("wag"));
+    TS_ASSERT_EQUALS(ss1.str(), string("step_forward"));
   }
 
   //test_modular_arguments :
@@ -566,8 +566,8 @@ public:
   //test_preconditions_checks :
   //precondition pair (grab, drop)
   void test_preconditions_checks1() {
-    string tree_str="and_seq(or_seq(bark grab) or_seq(drop bark))";
-    string tree_str_reduced="and_seq(or_seq(bark grab) or_seq(drop bark)) ";
+    string tree_str="and_seq(or_seq(turn_right grab) or_seq(drop turn_right))";
+    string tree_str_reduced="and_seq(or_seq(turn_right grab) or_seq(drop turn_right)) ";
 
     stringstream ss(tree_str);
     combo_tree tr;
@@ -588,8 +588,8 @@ public:
   //test_preconditions_checks :
   //precondition pair (grab, drop)
   void test_preconditions_checks2() {
-    string tree_str="and_seq(or_seq(bark bark) and_seq(drop bark))";
-    string tree_str_reduced="and_seq(or_seq(bark bark) bark) ";
+    string tree_str="and_seq(or_seq(turn_right turn_right) and_seq(drop turn_right))";
+    string tree_str_reduced="and_seq(or_seq(turn_right turn_right) turn_right) ";
 
     stringstream ss(tree_str);
     combo_tree tr;

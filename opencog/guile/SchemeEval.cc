@@ -32,9 +32,10 @@ using namespace opencog;
  */
 void SchemeEval::init(void)
 {
-	SchemeSmob::init(atomspace);
+	SchemeSmob::init();
 	PrimitiveEnviron::init();
 
+	// Output ports for side-effects.
 	saved_outport = scm_current_output_port();
 	saved_outport = scm_gc_protect_object(saved_outport);
 
@@ -45,6 +46,7 @@ void SchemeEval::init(void)
 
 	in_shell = false;
 
+	// User error and crash management
 	error_string = SCM_EOL;
 	error_string = scm_gc_protect_object(error_string);
 
@@ -63,8 +65,9 @@ void * SchemeEval::c_wrap_init(void *p)
 
 void SchemeEval::finish(void)
 {
-	// Restore the previous outport.
-	scm_set_current_output_port(saved_outport);
+	// Restore the previous outport (if its still alive)
+	if (scm_is_false(scm_port_closed_p(saved_outport)))
+		scm_set_current_output_port(saved_outport);
 	scm_gc_unprotect_object(saved_outport);
 
 	scm_close_port(outport);
@@ -245,14 +248,13 @@ std::string SchemeEval::prt(SCM node)
 
 SCM SchemeEval::preunwind_handler_wrapper (void *data, SCM tag, SCM throw_args)
 {
-	SchemeEval *ss = (SchemeEval *)data;
+	SchemeEval *ss = (SchemeEval *) data;
 	return ss->preunwind_handler(tag, throw_args);
-	return SCM_EOL;
 }
 
 SCM SchemeEval::catch_handler_wrapper (void *data, SCM tag, SCM throw_args)
 {
-	SchemeEval *ss = (SchemeEval *)data;
+	SchemeEval *ss = (SchemeEval *) data;
 	return ss->catch_handler(tag, throw_args);
 }
 
@@ -261,7 +263,7 @@ SCM SchemeEval::preunwind_handler (SCM tag, SCM throw_args)
 	// We can only record the stack before it is unwound.
 	// The normal catch handler body runs only *after* the stack
 	// has been unwound.
-	captured_stack = scm_make_stack (SCM_BOOL_T, SCM_EOL);
+	captured_stack = scm_make_stack(SCM_BOOL_T, SCM_EOL);
 	return SCM_EOL;
 }
 
@@ -344,7 +346,6 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 }
 
 /* ============================================================== */
-
 /**
  * Evaluate a scheme expression.
  *
@@ -406,11 +407,14 @@ void * SchemeEval::c_wrap_eval(void * p)
  */
 std::string SchemeEval::do_eval(const std::string &expr)
 {
-	bool newin = false;
 	per_thread_init();
+
+	// Set global atomspace variable in the execution environment.
+	SchemeSmob::ss_set_env_as(atomspace);
 
 	/* Avoid a string buffer copy if there is no pending input */
 	const char *expr_str;
+	bool newin = false;
 	if (_pending_input)
 	{
 		_input_line += expr;
@@ -475,14 +479,13 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	return "#<Error: Unreachable statement reached>";
 }
 
+
 /* ============================================================== */
 
-SCM SchemeEval::wrap_scm_eval(void *expr)
+SCM SchemeEval::thunk_scm_eval(void* expr)
 {
-	SCM sexpr = (SCM)expr;
-	// return scm_local_eval (sexpr, SCM_EOL);
-	// return scm_local_eval (sexpr, scm_procedure_environment(scm_car(sexpr)));
-	return scm_eval (sexpr, scm_interaction_environment());
+	SCM sexpr = (SCM) expr;
+	return scm_eval(sexpr, scm_interaction_environment());
 }
 
 /**
@@ -498,10 +501,15 @@ SCM SchemeEval::wrap_scm_eval(void *expr)
  */
 SCM SchemeEval::do_scm_eval(SCM sexpr)
 {
+	per_thread_init();
+
+	// Set global atomspace variable in the execution environment.
+	SchemeSmob::ss_set_env_as(atomspace);
+
 	_caught_error = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
-	                 (scm_t_catch_body) wrap_scm_eval, (void *) sexpr,
+	                 SchemeEval::thunk_scm_eval, (void *) sexpr,
 	                 SchemeEval::catch_handler_wrapper, this,
 	                 SchemeEval::preunwind_handler_wrapper, this);
 
@@ -600,6 +608,11 @@ void * SchemeEval::c_wrap_eval_h(void * p)
  */
 SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 {
+	per_thread_init();
+
+	// Set global atomspace variable in the execution environment.
+	SchemeSmob::ss_set_env_as(atomspace);
+
 	_caught_error = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,

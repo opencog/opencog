@@ -60,7 +60,7 @@ public:
         PAI pai(as, ap, pi);
         pi.setPAI(&pai);
         BuiltInProcedureRepository rep(pai);
-        TS_ASSERT(rep.contains(string("BARK")));
+        TS_ASSERT(rep.contains(string("STEP_FORWARD")));
         TS_ASSERT(!rep.contains("non-existing-builtin-schema"));
     }
 
@@ -72,8 +72,8 @@ public:
         PAI pai(as, ap, pi);
         pi.setPAI(&pai);
         BuiltInProcedureRepository rep(pai);
-        const BuiltInProcedure& proc = rep.get(string("BARK"));
-        TS_ASSERT(proc.getName() == "BARK");
+        const BuiltInProcedure& proc = rep.get(string("STEP_FORWARD"));
+        TS_ASSERT(proc.getName() == "STEP_FORWARD");
     }
 
 };

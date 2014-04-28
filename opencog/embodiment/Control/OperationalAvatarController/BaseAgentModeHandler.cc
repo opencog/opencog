@@ -34,7 +34,6 @@
 #include <boost/algorithm/string.hpp>
 
 #include <opencog/util/Logger.h>
-#include <opencog/guile/SchemeEval.h>
 #include <opencog/spacetime/SpaceServer.h>
 
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>

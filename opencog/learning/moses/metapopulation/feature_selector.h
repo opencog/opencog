@@ -102,7 +102,7 @@ struct feature_selector_parameters
     /**
      * Probability of discarding a row
      */
-    float subsampling_pbty;
+    double subsampling_pbty;
 
     /**
      * Number of feature sets to select out of feature selection and
@@ -121,7 +121,7 @@ struct feature_selector_parameters
      * scores. aggregate can be either generalized mean or sum, or
      * max.
      */
-    float diversity_pressure;
+    double diversity_pressure;
 
     /**
      * Set a cap regarding the population of feature sets. Right have

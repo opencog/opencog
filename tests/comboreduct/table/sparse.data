@@ -3,8 +3,8 @@
 #
 # First row is a header row.
 #
-target1, target2
-thing, 3.0, a : 1, b : 2, c : 3
-some,  4.4, f : 6, b : 2, d : 4, a : 1
-other, 5.5, g : 7, e : 5
-last,  6.6, x : 24, y : 25, z : 26, a : 1, b : 2, c : 3, d : 4, e : 5 
+target1, target2, date
+thing, 3.0, 12-04-2012, a : 1, b : 2, c : 3
+some,  4.4, 12-05-2012, f : 6, b : 2, d : 4, a : 1
+other, 5.5, 12-06-2012T14:35:02-0500, g : 7, e : 5
+last,  6.6, 12-07-2012T16:00:00-0500, x : 24, y : 25, z : 26, a : 1, b : 2, c : 3, d : 4, e : 5 

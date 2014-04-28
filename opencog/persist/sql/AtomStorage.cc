@@ -1721,7 +1721,7 @@ void AtomStorage::kill_data(void)
 	Response rp;
 
 	// See the file "atom.sql" for detailed documentation as to the 
-	// structure of teh SQL tables.
+	// structure of the SQL tables.
 	rp.rs = db_conn->exec("DELETE from Atoms;");
 	rp.rs->release();
 
