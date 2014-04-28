@@ -26,6 +26,9 @@
 #include <opencog/spacetime/TimeServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include "OAC.h"
 #include "PatternMiningAgent.h"
 
@@ -45,6 +48,7 @@ PatternMiningAgent::PatternMiningAgent(CogServer& cs) : Agent(cs)
 
 void PatternMiningAgent::init()
 {
+    sleep(15);
     logger().debug( "PatternMiningAgent::%s - Initialize the Agent [cycle = %d]",
                     __FUNCTION__, this->cycleCount);
 
@@ -52,11 +56,33 @@ void PatternMiningAgent::init()
     OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
-    // Get AtomSpace
+
+    // create corpus AtomSpace
     corpusAtomSpace = new AtomSpace();
 
+    // pre-load scm files:
+//    SCM_PRELOAD           = scm/core_types.scm,
+//                            scm/spacetime_types.scm,
+//                            scm/nlp_types.scm,
+//                            scm/attention_types.scm,
+//                            scm/embodiment_types.scm,
+//                            scm/persistence.scm,
+//                            scm/utilities.scm,
+//                            scm/file-utils.scm,
+//                            scm/debug.scm,
+
+    load_scm_file( *(this->corpusAtomSpace), "./scm/core_types.scm" );
+    load_scm_file( *(this->corpusAtomSpace), "./scm/spacetime_types.scm" );
+    load_scm_file( *(this->corpusAtomSpace), "./scm/nlp_types.scm" );
+    load_scm_file( *(this->corpusAtomSpace), "./scm/attention_types.scm" );
+    load_scm_file( *(this->corpusAtomSpace), "./scm/embodiment_types.scm" );
+    load_scm_file( *(this->corpusAtomSpace), "./scm/persistence.scm" );
+    load_scm_file( *(this->corpusAtomSpace), "./scm/utilities.scm" );
+    load_scm_file( *(this->corpusAtomSpace), "./scm/file-utils.scm" );
+    load_scm_file( *(this->corpusAtomSpace), "./scm/debug.scm" );
+
     // load test corpus
-    if ( load_scm_file( *(this->corpusAtomSpace), "pm_test_corpus.scm" ) == 0  )
+    if ( load_scm_file( *(this->corpusAtomSpace), "./pm_test_corpus.scm" ) == 0  )
         logger().info( "PatternMiningAgent::%s - Loaded pattern miner test corpus file: '%s'",
                         __FUNCTION__,
                        "pm_test_corpus.scm"
@@ -66,6 +92,7 @@ void PatternMiningAgent::init()
                          __FUNCTION__,
                         "pm_test_corpus.scm"
                       );
+
 
     cout << "PatternMiningAgent: init: loaded test corpus into corpusAtomSpace \n ";
 
