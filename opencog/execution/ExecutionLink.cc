@@ -68,7 +68,7 @@ ExecutionLink::ExecutionLink(Handle schema, Handle args,
 Handle ExecutionLink::do_execute(AtomSpace* as, Handle execlnk)
 {
     if (EXECUTION_LINK != execlnk->getType()) {
-        throw RuntimeException(TRACE_INFO, "Expecting to get an ExectionLink!");
+        throw RuntimeException(TRACE_INFO, "Expecting to get an ExecutionLink!");
     }
     LinkPtr l(LinkCast(execlnk));
     return do_execute(as, l->getOutgoingSet());
