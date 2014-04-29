@@ -195,7 +195,7 @@ Handle Instantiator::execution_link()
 {
 	// This throws if it can't figure out the schema ...
 	// should we try and catch here ?
-	return ExecutionLink::do_execute(oset);
+	return ExecutionLink::do_execute(as, oset);
 
 	// Unkown proceedure type.  Return it, maybe some other
 	// execution-link handler will be able to process it.

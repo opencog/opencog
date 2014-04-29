@@ -52,7 +52,7 @@ scm_t_bits SchemeSmob::cog_uuid_tag;
 scm_t_bits SchemeSmob::cog_misc_tag;
 bool SchemeSmob::is_inited = false;
 
-void SchemeSmob::init(AtomSpace *as)
+void SchemeSmob::init()
 {
 	// XXX It would be ever so slightly more correct to use
 	// pthread_once() here, but that currently seems like overkill.
@@ -61,14 +61,15 @@ void SchemeSmob::init(AtomSpace *as)
 		is_inited = true;
 		init_smob_type();
 		register_procs();
-		ss_set_env_as(as);
+
+		atomspace_variable = scm_c_define("*-atomspace-*", make_as(NULL));
+		atomspace_variable = scm_permanent_object(atomspace_variable);
 	}
 }
 
-SchemeSmob::SchemeSmob(AtomSpace *as)
+SchemeSmob::SchemeSmob()
 {
-	// printf("atomspace at schemesmob creation is %p", as);
-	init(as);
+	init();
 }
 
 /* ============================================================== */
@@ -233,6 +234,9 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-af-boundary",       0, 0, 0, C(ss_af_boundary));
 	scm_c_define_gsubr("cog-set-af-boundary!",  1, 0, 0, C(ss_set_af_boundary));
 	scm_c_define_gsubr("cog-af",                0, 0, 0, C(ss_af));
+    
+	// ExecutionLinks
+	scm_c_define_gsubr("cog-execute!",          1, 0, 0, C(ss_execute));
 
 	// Atom types
 	scm_c_define_gsubr("cog-get-types",         0, 0, 0, C(ss_get_types));

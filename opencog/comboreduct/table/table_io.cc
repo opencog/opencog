@@ -299,6 +299,15 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
         return token;
         break;
 
+    // Ugly hack ... the problem adressed here is that feature
+    // selection has to read and propagate columns of unknown type
+    // (typically, dates, times).  So we hack around this here.
+    case id::ill_formed_type:
+        return enum_t(token);
+        // return id::ill_formed_type;
+        // return id::null_vertex;
+        break;
+
     default:
         stringstream ss;
         ss << "Unable to convert token \"" << token << "\" to type=" << tipe << endl;

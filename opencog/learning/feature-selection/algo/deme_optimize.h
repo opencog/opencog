@@ -26,7 +26,6 @@
 #define _OPENCOG_FEATURE_SELECTION_DEME_OPTIMIZE_H
 
 #include <boost/range/algorithm/sort.hpp>
-#include <boost/range/algorithm/find.hpp>
 
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/learning/moses/representation/field_set.h>
@@ -64,7 +63,7 @@ feature_set_pop optimize_deme_select_feature_sets(const field_set& fields,
     for (const auto& inst : deme) {
         feature_set_pop::value_type p(select_tag()(inst).get_score(),
                                       get_feature_set(fields, inst));
-        if (boost::find(fs_pop, p) == fs_pop.end())
+        if (std::find(fs_pop.begin(), fs_pop.end(), p) == fs_pop.end())
             fs_pop.insert(p);
     }
 

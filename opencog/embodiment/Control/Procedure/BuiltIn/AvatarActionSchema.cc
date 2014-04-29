@@ -70,16 +70,7 @@ bool AvatarActionSchema::isAvatarAction() const
  *  jump                => void jump(float theta, Vector velocity)
  *  drop                => void drop()
  *  grab                => Status grab(EntityID id, float RangeRadius)
- *  sniff               => void sniff([EntityID id, short bodyPart])
- *  bark                => void bark([EntityID id])
- *  look_up_turn_head   => void look_up_turn_head()
- *  bare_teeth          => void bareTeeth([EntityID id])
- *  back_flip
- *  wag                 => void wag([float duration])
- *  stretch             => void stretch()
  *  sit                 => void sit([short duration])
- *  beg                 => void beg()
- *  heel                => void heel()
  *  random_step
  */
 combo::vertex AvatarActionSchema::execute(const std::vector<combo::vertex>& arguments) const throw (RuntimeException, InvalidParamException, std::bad_exception)

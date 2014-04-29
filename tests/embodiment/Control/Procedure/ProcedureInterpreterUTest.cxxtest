@@ -77,7 +77,7 @@ public:
         PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
         std::vector<combo::vertex> arguments;
-        AvatarActionSchema p(pai, ActionType::BARK());
+        AvatarActionSchema p(pai, ActionType::STEP_FORWARD());
         ProcedureInterpreter interpreter(pai);
         RunningProcedureID id = interpreter.runProcedure(p, arguments);
         //TS_ASSERT(interpreter.isFinished(id)); // it's finished because interpreter runs builtin procedures imediatelly
@@ -91,7 +91,7 @@ public:
         TS_ASSERT(get<ActionPlanID>(&result));
         TS_ASSERT(get<ActionPlanID>(result) == "0");
         TS_ASSERT(!plans.empty());
-        TS_ASSERT(plans.front().getAction(1).getType() == ActionType::BARK());
+        TS_ASSERT(plans.front().getAction(1).getType() == ActionType::STEP_FORWARD());
         interpreter.stopProcedure(id);
         TS_ASSERT(interpreter.isFinished(id));
         TS_ASSERT(!interpreter.isFailed(id));
@@ -104,7 +104,7 @@ public:
         PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
         std::vector<combo::vertex> arguments;
-        AvatarActionSchema p(pai, ActionType::BARK());
+        AvatarActionSchema p(pai, ActionType::STEP_FORWARD());
         ProcedureInterpreter interpreter(pai);
         RunningProcedureID id = interpreter.runProcedure(p, arguments);
         //TS_ASSERT(interpreter.isFinished(id)); // it's finished because interpreter runs builtin procedures imediatelly

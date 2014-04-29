@@ -103,10 +103,10 @@ public:
 
         TS_ASSERT(pr != NULL);
 
-//   cout << "\nContains :" << pr->contains(string("BARK")) << ".\n";
+//   cout << "\nContains :" << pr->contains(string("STEP_FORWARD")) << ".\n";
 //   cout << "\nContains :" << pr->contains(string("EAT")) << ".\n";
 
-        TS_ASSERT(pr->contains(string("BARK")));
+        TS_ASSERT(pr->contains(string("STEP_FORWARD")));
         TS_ASSERT(pr->contains(string("EAT")));
 
     }
@@ -117,9 +117,9 @@ public:
 
         combo::combo_tree tr;
 
-//   cout << pr->get(string("BARK")).getName() << endl;
+//   cout << pr->get(string("STEP_FORWARD")).getName() << endl;
 
-        TS_ASSERT( pr->get(string("BARK")).getName() != "");
+        TS_ASSERT( pr->get(string("STEP_FORWARD")).getName() != "");
 
     }
 
@@ -128,20 +128,20 @@ public:
 
         TS_ASSERT(pr != NULL);
 
-        stringstream sst("and_seq(bark bark sit)");
+        stringstream sst("and_seq(step_forward step_forward sit)");
         combo::combo_tree tr;
         // sst >> tr;
         AvatarCombo::operator>>(sst, tr);
 
-        ComboProcedure newCp(string("bbarkk"), 0, tr);
+        ComboProcedure newCp(string("sss"), 0, tr);
 
         pr->add(newCp);
 
-        TS_ASSERT(pr->contains(string("bbarkk")));
+        TS_ASSERT(pr->contains(string("sss")));
 
-        TS_ASSERT(!pr->contains(string("bbarkkk")));
+        TS_ASSERT(!pr->contains(string("sss")));
 
-        TS_ASSERT( pr->get(string("bbarkk")).getName() == "bbarkk");
+        TS_ASSERT( pr->get(string("sss")).getName() == "sss");
 
     }
 

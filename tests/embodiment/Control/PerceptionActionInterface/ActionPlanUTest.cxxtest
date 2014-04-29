@@ -92,7 +92,7 @@ public:
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
             "<oc:action-plan xmlns:oc=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"1\" id=\"10\">\n"
             "\n"
-            "  <action name=\"trick_for_food\" sequence=\"1\"/>\n"
+            "  <action name=\"step_forward\" sequence=\"1\"/>\n"
             "\n"
             "</oc:action-plan>\n"
             ,
@@ -100,7 +100,7 @@ public:
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
             "<oc:action-plan xmlns:oc=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"2\" id=\"10\">\n"
             "\n"
-            "  <action name=\"trick_for_food\" sequence=\"1\"/>\n"
+            "  <action name=\"step_forward\" sequence=\"1\"/>\n"
             "\n"
             "  <action name=\"walk\" sequence=\"2\">\n"
             "    <param name=\"target\" type=\"vector\">\n"
@@ -118,7 +118,7 @@ public:
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
             "<oc:action-plan xmlns:oc=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"3\" id=\"10\">\n"
             "\n"
-            "  <action name=\"trick_for_food\" sequence=\"1\"/>\n"
+            "  <action name=\"step_forward\" sequence=\"1\"/>\n"
             "\n"
             "  <action name=\"walk\" sequence=\"2\">\n"
             "    <param name=\"target\" type=\"vector\">\n"
@@ -130,7 +130,7 @@ public:
             "    </param>\n"
             "  </action>\n"
             "\n"
-            "  <action name=\"bark\" sequence=\"3\"/>\n"
+            "  <action name=\"rotate_left\" sequence=\"3\"/>\n"
             "\n"
             "</oc:action-plan>\n"
             ,
@@ -138,7 +138,7 @@ public:
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
             "<oc:action-plan xmlns:oc=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"4\" id=\"10\">\n"
             "\n"
-            "  <action name=\"trick_for_food\" sequence=\"1\"/>\n"
+            "  <action name=\"step_forward\" sequence=\"1\"/>\n"
             "\n"
             "  <action name=\"walk\" sequence=\"2\">\n"
             "    <param name=\"target\" type=\"vector\">\n"
@@ -150,7 +150,7 @@ public:
             "    </param>\n"
             "  </action>\n"
             "\n"
-            "  <action name=\"bark\" sequence=\"3\"/>\n"
+            "  <action name=\"rotate_left\" sequence=\"3\"/>\n"
             "\n"
             "  <action name=\"eat\" sequence=\"4\">\n"
             "    <param name=\"object\" type=\"entity\">\n"
@@ -164,7 +164,7 @@ public:
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
             "<oc:action-plan xmlns:oc=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"5\" id=\"10\">\n"
             "\n"
-            "  <action name=\"trick_for_food\" sequence=\"1\"/>\n"
+            "  <action name=\"step_forward\" sequence=\"1\"/>\n"
             "\n"
             "  <action name=\"walk\" sequence=\"2\">\n"
             "    <param name=\"target\" type=\"vector\">\n"
@@ -176,7 +176,7 @@ public:
             "    </param>\n"
             "  </action>\n"
             "\n"
-            "  <action name=\"bark\" sequence=\"3\"/>\n"
+            "  <action name=\"rotate_left\" sequence=\"3\"/>\n"
             "\n"
             "  <action name=\"eat\" sequence=\"4\">\n"
             "    <param name=\"object\" type=\"entity\">\n"
@@ -197,9 +197,9 @@ public:
         //printf("%s\n", expectedPVPMessages[2]);
 
         AvatarAction actions[NUM_ACTIONS] =  {
-            AvatarAction(ActionType::TRICK_FOR_FOOD()),
+            AvatarAction(ActionType::STEP_FORWARD()),
             AvatarAction(ActionType::WALK()),
-            AvatarAction(ActionType::BARK()),
+            AvatarAction(ActionType::ROTATE_LEFT()),
             AvatarAction(ActionType::EAT()),
             AvatarAction(ActionType::FLY())
         };
@@ -232,17 +232,17 @@ public:
     void testSize() {
         ActionPlan plan;
         TS_ASSERT(plan.size() == 0);
-        plan.addAction(AvatarAction(ActionType::BARK()));
+        plan.addAction(AvatarAction(ActionType::STEP_FORWARD()));
         TS_ASSERT(plan.size() == 1);
-        plan.addAction(AvatarAction(ActionType::SIT()));
+        plan.addAction(AvatarAction(ActionType::ROTATE_LEFT()));
         TS_ASSERT(plan.size() == 2);
     }
 
     void testMarkAndCheckMarkMethods() {
         ActionPlan plan;
-        plan.addAction(AvatarAction(ActionType::BARK()));
-        plan.addAction(AvatarAction(ActionType::LOOK_UP_TURN_HEAD()));
-        plan.addAction(AvatarAction(ActionType::SLEEP()));
+        plan.addAction(AvatarAction(ActionType::STEP_FORWARD()));
+        plan.addAction(AvatarAction(ActionType::ROTATE_LEFT()));
+        plan.addAction(AvatarAction(ActionType::ROTATE_RIGHT()));
 
         TS_ASSERT(!plan.isTried(1));
         TS_ASSERT(!plan.isTried(2));
@@ -323,9 +323,9 @@ public:
         TS_ASSERT(plan.hasFailed());
 
         ActionPlan plan2;
-        plan2.addAction(AvatarAction(ActionType::BARK()));
-        plan2.addAction(AvatarAction(ActionType::LOOK_UP_TURN_HEAD()));
-        plan2.addAction(AvatarAction(ActionType::SLEEP()));
+        plan2.addAction(AvatarAction(ActionType::STEP_FORWARD()));
+        plan2.addAction(AvatarAction(ActionType::ROTATE_LEFT()));
+        plan2.addAction(AvatarAction(ActionType::ROTATE_RIGHT()));
         plan2.markAsDone(1);
         plan2.markAsDone(2);
         plan2.markAsDone(3);

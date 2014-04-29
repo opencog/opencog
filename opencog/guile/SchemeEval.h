@@ -46,7 +46,7 @@ class SchemeEval : public GenericEval
 		std::string answer;
 
 		// Straight-up evaluation
-		static SCM wrap_scm_eval(void *);
+		static SCM thunk_scm_eval(void *);
 		SCM do_scm_eval(SCM);
 		SCM do_scm_eval_str(const std::string &);
 
@@ -75,7 +75,7 @@ class SchemeEval : public GenericEval
 		AtomSpace* atomspace;
 
 	public:
-		SchemeEval(AtomSpace* = NULL);
+		SchemeEval(AtomSpace*);
 		~SchemeEval();
 
 		std::string eval(const std::string&);

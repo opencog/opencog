@@ -493,7 +493,7 @@ int OAC::addRulesToAtomSpace()
 */
 #ifdef HAVE_GUILE
     // Set PET_HANDLE and OWNER_HANDLE for the Scheme shell before loading rules file
-    SchemeEval* evaluator = new SchemeEval();
+    SchemeEval* evaluator = new SchemeEval(atomSpace);
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression =  "(set! PET_HANDLE (get_agent_handle \"" + 

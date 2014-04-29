@@ -78,35 +78,10 @@ public :
     //    runProcedureInCombo(str, id::action_success);
     //}
 
-    //void testFoodBowl() {
-    //    std::string str("food_bowl");
-    //    runProcedureInCombo(str, PAIUtils::getInternalId("Food"));
-
-    //    str.assign("goto_obj(food_bowl 2)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testWaterBowl() {
-    //    std::string str("water_bowl");
-    //    runProcedureInCombo(str, PAIUtils::getInternalId("Water"));
-
-    //    str.assign("goto_obj(water_bowl 2)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
     //void testGoNearObj() {
     //    std::string str("water_bowl");
     //    runProcedureInCombo(str, PAIUtils::getInternalId("Water"));
-
     //    str.assign("gonear_obj(water_bowl 4)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testPetHome() {
-    //    std::string str("pet_home");
-    //    runProcedureInCombo(str, PAIUtils::getInternalId("House"));
-
-    //    str.assign("goto_obj(pet_home 2)");
     //    runProcedureInCombo(str, id::action_success);
     //}
 
@@ -145,10 +120,6 @@ public :
     //    std::string str("rotate_right");
     //    runProcedureInCombo(str, id::action_success);
     //}
-    //void testHeel() {
-    //    std::string str("heel");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
 
     //void testJumpUp() {
     //    std::string str("jump_up");
@@ -178,8 +149,6 @@ public :
     //    runProcedureInCombo(str, id::action_success);
     //}
 
-
-
     //void testGrab() {
     //    std::string str("grab(nearest_pickupable)");
     //    runProcedureInCombo(str, id::action_success);
@@ -200,26 +169,6 @@ public :
     //    runProcedureInCombo(str, id::action_success);
     //}
 
-    //void testSniff() {
-    //    std::string str("sniff");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testSniffAt() {
-    //    std::string str("sniff_at(nearest_edible)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testSniffPetPart() {
-    //    std::string str("sniff_pet_part(nearest_pet NOSE)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testSniffAvatarPart() {
-    //    std::string str("sniff_avatar_part(nearest_avatar BUTT)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
     //void testEat() {
     //    std::string str("eat(nearest_edible)");
     //    runProcedureInCombo(str, id::action_success);
@@ -230,178 +179,8 @@ public :
     //    runProcedureInCombo(str, id::action_success);
     //}
 
-    //void testChew() {
-    //    std::string str("chew(nearest_small)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testScratchOther() {
-    //    std::string str("scratch_other(nearest_object)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testBeg() {
-    //    std::string str("beg");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testHideFace() {
-    //    std::string str("hide_face");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testLookUpTurnHead() {
-    //    std::string str("look_up_turn_head");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
     //void testSit() {
     //    std::string str("sit");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testStretch() {
-    //    std::string str("stretch");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testRunInCircle() {
-    //    std::string str("run_in_circle");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testScratchSelf() {
-    //    std::string str("scratch_self(NOSE)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testLieDown() {
-    //    std::string str("lie_down");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testrTickForFood() {
-    //    std::string str("trick_for_food");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testPee() {
-    //    std::string str("pee");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testPoo() {
-    //    std::string str("poo");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testBark() {
-    //    std::string str("bark");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testBarkAt() {
-    //    std::string str("bark_at(nearest_pet)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testLick() {
-    //    std::string str("lick");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testLickAt() {
-    //    std::string str("lick_at(nearest_edible)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testBelch() {
-    //    std::string str("belch");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testMoveHead() {
-    //    std::string str("move_head(2 2 2)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testGrowl() {
-    //    std::string str("growl");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testGrowlAt() {
-    //    std::string str("growl_at(nearest_pet)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testWhine() {
-    //    std::string str("whine");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testWhineAt() {
-    //    std::string str("whine_at(nearest_avatar)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testFearfulPosture() {
-    //    std::string str("fearful_posture");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testClean() {
-    //    std::string str("clean");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testTapDance() {
-    //    std::string str("tap_dance");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testBareTeeth() {
-    //    std::string str("bare_teeth");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testBareTeethAt() {
-    //    std::string str("bare_teeth_at(nearest_pet)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testPlayDead() {
-    //    std::string str("play_dead");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testVomit() {
-    //    std::string str("vomit");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testLeanRockDance() {
-    //    std::string str("lean_rock_dance");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testAnticipatePlay() {
-    //    std::string str("anticipate_play");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testBackFlip() {
-    //    std::string str("back_flip");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testMoveLeftEar() {
-    //    std::string str("move_left_ear(PERK)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testMoveRightEar() {
-    //    std::string str("move_right_ear(TWITCH)");
     //    runProcedureInCombo(str, id::action_success);
     //}
 
@@ -410,28 +189,8 @@ public :
     //    runProcedureInCombo(str, id::action_success);
     //}
 
-    //void testShakeHead() {
-    //    std::string str("shake_head");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
     //void testSleep() {
     //    std::string str("sleep");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testDream() {
-    //    std::string str("dream(nearest_edible)");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testWag() {
-    //    std::string str("wag");
-    //    runProcedureInCombo(str, id::action_success);
-    //}
-
-    //void testTailFlex() {
-    //    std::string str("tail_flex(2)");
     //    runProcedureInCombo(str, id::action_success);
     //}
 

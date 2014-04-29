@@ -15,6 +15,8 @@
 
 using namespace opencog;
 
+std::set<AtomSpace*> SchemeSmob::deleteable_as;
+
 /* ============================================================== */
 
 std::string SchemeSmob::as_to_string(const AtomSpace *as)
@@ -45,6 +47,7 @@ SCM SchemeSmob::make_as (AtomSpace *as)
  */
 SCM SchemeSmob::take_as (AtomSpace *as)
 {
+	deleteable_as.insert(as);
 	scm_gc_register_collectable_memory (as,
 	                 sizeof(*as), "opencog atomspace");
 	return make_as(as);
@@ -97,30 +100,23 @@ AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
  * Set the atomspace into the top-level interaction environment
  */
 
-SCM SchemeSmob::atomspace_symbol;
+SCM SchemeSmob::atomspace_variable;
 
 void SchemeSmob::ss_set_env_as(AtomSpace *as)
 {
-	// Place the atomspace in the ... well, the top-level environment
-	// I think this is the interaction-environment, at this point.
-	// Not sure...
-
-	// XXX TODO FIXME: if someone deletes the atomspace, without
-	// telling us, then we are left holding a pointer to freed memory.
-	// Although this is a "user error", we could minimize this by
-	// creating a signal in the atomspace destructor, and listening
-	// for that signal.
-	scm_c_define("*-atomspace-*", make_as(as));
-	atomspace_symbol = scm_c_lookup("*-atomspace-*");
-	atomspace_symbol = scm_permanent_object(atomspace_symbol);
+	// XXX this should be replaced by a fluid, so that reference
+	// is thead-safe.
+	scm_variable_set_x(atomspace_variable, make_as(as));
 }
 
 AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
 {
-	SCM ref = scm_variable_ref(atomspace_symbol);
+	// XXX this should be replaced by a fluid, so that reference
+	// is thead-safe.
+	SCM ref = scm_variable_ref(atomspace_variable);
 	AtomSpace* as = ss_to_atomspace(ref);
 	if (NULL == as)
-		scm_out_of_range(subr, atomspace_symbol);
+		scm_out_of_range(subr, atomspace_variable);
 	return as;
 }
 

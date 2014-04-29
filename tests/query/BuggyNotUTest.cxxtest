@@ -131,7 +131,7 @@ void BuggyNot::test_bugnot(void)
 	load_scm_files_from_config(*as, paths);
 
 	// Create an implication link that will be tested.
-	SchemeEval* eval = new SchemeEval();
+	SchemeEval* eval = new SchemeEval(as);
 	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
 	Handle trans_rule = eval->apply("transitive-rule", Handle::UNDEFINED);
 	delete eval;

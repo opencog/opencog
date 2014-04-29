@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 
-#include <boost/range/algorithm/find.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/range/algorithm/count.hpp>
 #include <boost/range/algorithm/binary_search.hpp>
 #include <boost/range/algorithm_ext/for_each.hpp>
@@ -94,9 +94,19 @@ static std::vector<T> tokenizeRow(const std::string& line,
     table_tokenizer tok = get_row_tokenizer(line);
     std::vector<T> res;
     unsigned i = 0;
-    for (const std::string& t : tok)
+    for (const std::string& t : tok) {
+
+        // trim away whitespace padding; failing to do this
+        // confuses stuff downstream.
+        std::string clean(t);
+        boost::trim(clean);
+
+        // Sometimes the tokenizer returns pure whitespace :-(
+        if (0 == clean.size()) continue;
+
         if (!boost::binary_search(ignored_indices, i++))
-            res.push_back(boost::lexical_cast<T>(t));
+            res.push_back(boost::lexical_cast<T>(clean));
+    }
     return res;
 }
 

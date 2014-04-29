@@ -258,7 +258,7 @@ std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_
     }
 
     // Initialize scheme evaluator
-    SchemeEval* evaluator = new SchemeEval();
+    SchemeEval* evaluator = new SchemeEval(&atomSpace);
     std::string scheme_expression, scheme_return_value;
 
     // If it is a SPEECH_ACT_SCHEMA_NODE, run the corresponding scheme function,
@@ -688,7 +688,7 @@ std::cout<<"Current action is still running [SchemaId = "
     // If we've used up the current plan, do a new planning
     if ( this->temp_action_list.empty() && this->current_actions.empty() ) {
         // Initialize scheme evaluator
-        SchemeEval* evaluator = new SchemeEval();
+        SchemeEval* evaluator = new SchemeEval(&atomSpace);
         std::string scheme_expression, scheme_return_value;
 
         // test: skip for some circles before beginning next planning

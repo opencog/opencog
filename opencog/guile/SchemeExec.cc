@@ -8,6 +8,7 @@
 #ifdef HAVE_GUILE
 
 #include <libguile.h>
+#include <opencog/execution/ExecutionLink.h>
 
 #include "SchemeEval.h"
 #include "SchemeSmob.h"
@@ -53,6 +54,24 @@ SCM SchemeEval::do_apply_scm( const std::string& func, Handle varargs )
 	}
 	expr = scm_cons(sfunc, expr);
 	return do_scm_eval(expr);
+}
+
+/**
+ * Executes an ExecutionLink
+ */
+SCM SchemeSmob::ss_execute (SCM satom)
+{
+	AtomSpace* atomspace = ss_get_env_as("cog-execute");
+    
+	Handle h = verify_handle(satom, "cog-execute");
+	
+	if (h->getType() != EXECUTION_LINK)
+	{
+		scm_wrong_type_arg_msg("cog-execute", 1, satom,
+			"ExecutionLink opencog cog-execute");
+	}
+
+	return handle_to_scm(ExecutionLink::do_execute(atomspace, h));
 }
 
 #endif

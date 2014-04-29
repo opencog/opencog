@@ -34,7 +34,8 @@ ExecutionLink::ExecutionLink(const HandleSeq& oset,
     : Link(EXECUTION_LINK, oset, tv, av)
 {
     if ((2 != oset.size()) or
-       (LIST_LINK != oset[1]->getType())) {
+       (LIST_LINK != oset[1]->getType()))
+    {
         throw RuntimeException(TRACE_INFO, "ExectionLink must have schema and args!");
     }
 }
@@ -64,13 +65,13 @@ ExecutionLink::ExecutionLink(Handle schema, Handle args,
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-Handle ExecutionLink::do_execute(Handle execlnk)
+Handle ExecutionLink::do_execute(AtomSpace* as, Handle execlnk)
 {
     if (EXECUTION_LINK != execlnk->getType()) {
-        throw RuntimeException(TRACE_INFO, "Expecting to get an ExectionLink!");
+        throw RuntimeException(TRACE_INFO, "Expecting to get an ExecutionLink!");
     }
     LinkPtr l(LinkCast(execlnk));
-    return do_execute(l->getOutgoingSet());
+    return do_execute(as, l->getOutgoingSet());
 }
 
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionLink
@@ -80,13 +81,13 @@ Handle ExecutionLink::do_execute(Handle execlnk)
 /// Expects the second handle of the sequence to be a ListLink
 /// Executes the GroundedSchemaNode, supplying the second handle as argument
 ///
-Handle ExecutionLink::do_execute(const HandleSeq& sna)
+Handle ExecutionLink::do_execute(AtomSpace* as, const HandleSeq& sna)
 {
     if (2 != sna.size())
     {
         throw RuntimeException(TRACE_INFO, "Incorrect arity for an ExectionLink!");
     }
-    return do_execute(sna[0], sna[1]);
+    return do_execute(as, sna[0], sna[1]);
 }
 
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionLink
@@ -95,7 +96,7 @@ Handle ExecutionLink::do_execute(const HandleSeq& sna)
 /// Expects "args" to be a ListLink
 /// Executes the GroundedSchemaNode, supplying the args as argument
 ///
-Handle ExecutionLink::do_execute(Handle gsn, Handle args)
+Handle ExecutionLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
 {
     if (GROUNDED_SCHEMA_NODE != gsn->getType()) {
         throw RuntimeException(TRACE_INFO, "Expecting GroundedSchemaNode!");
@@ -117,7 +118,7 @@ Handle ExecutionLink::do_execute(Handle gsn, Handle args)
         size_t pos = 4;
         while (' ' == schema[pos]) pos++;
 
-        SchemeEval* applier = new SchemeEval();
+        SchemeEval* applier = new SchemeEval(as);
         Handle h = applier->apply(schema.substr(pos), args);
         delete applier;
         return h;
