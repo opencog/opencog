@@ -210,7 +210,7 @@ def learn_all(size=10000):
 
 # learn_all()
 
-learn(100000 - 1)
+# learn(100000 - 1)
 # classes = classify(generate_random_relations(1000), 1000)
 # classes = classify()
 #

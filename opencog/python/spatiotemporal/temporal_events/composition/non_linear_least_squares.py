@@ -35,8 +35,8 @@ class DecompositionFitter(object):
 
         minimize(self.fitness, self.params)
 
-        # for param_key in self.params:
-        #     self.params[param_key].value = round(self.params[param_key].value, 6)
+        for param_key in self.params:
+            self.params[param_key].value = round(self.params[param_key].value, 6)
 
     def fitness(self, params):
         model = numpy.zeros(13)
@@ -139,7 +139,7 @@ if __name__ == '__main__':
     for i in xrange(50):
         A, B = generate_random_events(2)
         relations = A * B
-        formula = FormulaCreator(Fitter(relations))
+        formula = FormulaCreator(DecompositionFitter(relations))
         print relations.to_list()
         relations_estimate = formula.calculate_relations()
         print relations_estimate.to_list()
