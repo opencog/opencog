@@ -1,5 +1,5 @@
 INCLUDE_DIRECTORIES(
-    ${GUILE_INCLUDE_DIR}
+	${GUILE_INCLUDE_DIR}
 )
 
 ADD_LIBRARY (smob SHARED
@@ -8,15 +8,17 @@ ADD_LIBRARY (smob SHARED
 	SchemePrimitive.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
+	SchemeSmobAS.cc
 	SchemeSmobAV.cc
 	SchemeSmobGC.cc
 	SchemeSmobNew.cc
 	SchemeSmobTV.cc
-	SchemeSmobVH.cc
+	SchemeSmobAF.cc
 	load-file
 )
 
 TARGET_LINK_LIBRARIES(smob
+	atomspace
 	${GUILE_LIBRARIES}
 )
 
@@ -30,7 +32,7 @@ TARGET_LINK_LIBRARIES(PrimitiveExample
 )
 
 IF (WIN32)
-    INSTALL (TARGETS smob DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	INSTALL (TARGETS smob DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 ENDIF (WIN32)
 
 INSTALL (FILES

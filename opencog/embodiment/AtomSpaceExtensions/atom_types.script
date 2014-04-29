@@ -1,28 +1,9 @@
-// =====================================================================
-// PLN atoms that are also used in embodiment:
-// (we should be including the PLN atom_types.h file, except that the
-// build of PLN was disabled sometime in 2011 and so we specify these
-// explicitly below.  If/when PLN is resurrected, these wuold be removed.)
-
-// Actually a PLN types, needed by embodiment:
-SIMULTANEOUS_EQUIVALENCE_LINK <- UNORDERED_LINK
-
-PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
-TAIL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
-
-// used in unity_rules.scm
-SEQUENTIAL_AND_LINK <- ORDERED_LINK //AND_LINK
-
-
 // ====================================================================
 // Embodiment atoms
 
-// XXX what are these ?
+// XXX what are these ? Should be removed, I guess ... 
 // CW_PIXEL_PERCEPT_NODE <- NODE "CWPixelPerceptNode"
 // CW_COLOR_NODE <- NODE "CWColorNode"
-
-BEFORE_LINK <- ORDERED_LINK
-LATEST_LINK <- ORDERED_LINK
 
 PET_NODE <- OBJECT_NODE
 AVATAR_NODE <- OBJECT_NODE
@@ -33,7 +14,7 @@ UNKNOWN_OBJECT_NODE <- OBJECT_NODE
 // Perception specific terms
 IS_ACCEPTABLE_SECOND_ARG_LINK <- ORDERED_LINK
 
-
+ONTOLOGICAL_INHERITANCE_LINK <- ORDERED_LINK
 
 WR_LINK <- ASSOCIATIVE_LINK "WRLink"
 FREQUENCY_LINK <- INHERITANCE_LINK
@@ -47,3 +28,16 @@ SPEECH_ACT_SCHEMA_NODE <- GROUNDED_SCHEMA_NODE
 DIALOG_NODE <- CONCEPT_NODE
 UTTERANCE_NODE <- CONCEPT_NODE
 
+// Frame nodes and links used by embodiment.
+// These are different than the old, obsolete frame types
+// that RelEx used to generate, and are instead defined in
+// opencog/embodiment/frames.list and framesInheritance.list
+// and are manipulated in 
+// embodiment/AtomSpaceExtensions/AtomSpaceUtil.cc and also
+// Control/Language/LanguageComprehension.cc
+DEFINED_FRAME_NODE <- CONCEPT_NODE
+DEFINED_FRAME_ELEMENT_NODE <- PREDICATE_NODE
+FRAME_ELEMENT_LINK <- ORDERED_LINK
+
+SIMULTANEOUS_EQUIVALENCE_LINK <- UNORDERED_LINK
+SEQUENTIAL_AND_LINK <- ORDERED_LINK

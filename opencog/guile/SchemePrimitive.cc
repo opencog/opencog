@@ -39,9 +39,6 @@ PrimitiveEnviron::~PrimitiveEnviron() {}
 
 void PrimitiveEnviron::do_register(const char *name, int nargs)
 {
-	// Force initialization of the guile subsystem.
-	SchemeEval::instance();
-
 	// Now enter guile mode, and do the actual work there.
 	tmp_name = name;
 	tmp_nargs = nargs;
@@ -119,7 +116,7 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 	{
 		rc = fe->invoke(arglist);
 	}
-	catch (std::exception &ex)
+	catch (const std::exception& ex)
 	{
 		const char *msg = ex.what();
 		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
@@ -129,6 +126,7 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 			scm_from_locale_string(msg),
 			SCM_EOL,
 			SCM_EOL);
+		logger().error("Guile caught C++ exception: %s", msg);
 	}
 	catch (...)
 	{
@@ -139,6 +137,7 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 			scm_from_locale_string("unknown C++ exception"),
 			SCM_EOL,
 			SCM_EOL);
+		logger().error("Guile caught unknown C++ exception");
 	}
 	return rc;
 }

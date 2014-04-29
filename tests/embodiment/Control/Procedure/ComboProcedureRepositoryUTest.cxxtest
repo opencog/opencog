@@ -31,7 +31,7 @@
 
 using namespace opencog;
 using namespace Procedure;
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace std;
 using namespace control;
 
@@ -55,7 +55,7 @@ public:
         for (int i = 0; i < NUMBER_OF_COMBO_TREES; i++) {
             stringstream ss(bodies[i]);
             // ss >> trees[i];
-            PetCombo::operator>>(ss, trees[i]);
+            AvatarCombo::operator>>(ss, trees[i]);
             //cout << "trees[" << i << "] = " << trees[i] << endl;
         }
     }

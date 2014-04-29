@@ -24,6 +24,7 @@
 
 #include <vector>
 
+#include <opencog/util/foreach.h>
 #include <opencog/util/StringTokenizer.h>
 
 #include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>

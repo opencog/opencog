@@ -38,7 +38,7 @@ class ProcedureRepository : public SavableRepository
 
 private:
     ComboProcedureRepository comboRepository;
-    BuiltInProcedureRepository& builtInRepository;
+    BuiltInProcedureRepository builtInRepository;
 
 public:
     ProcedureRepository(pai::PAI&);

@@ -65,13 +65,13 @@ Link::~Link()
     DPRINTF("Deleting link:\n%s\n", this->toString().c_str());
 }
 
-std::string Link::toShortString(std::string indent) const
+std::string Link::toShortString(std::string indent)
 {
     std::stringstream answer;
     std::string more_indent = indent + "  ";
 
     answer << indent << "(" << classserver().getTypeName(_type);
-    answer << " " << getTruthValue()->toString() << ")\n";
+    answer << " " << getTruthValue()->toString() << "\n";
 
     // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
@@ -80,21 +80,22 @@ std::string Link::toShortString(std::string indent) const
         AtomPtr a(_outgoing[i]);
         answer << a->toShortString(more_indent);
     }
-    answer << indent << ")\n";
+    answer << indent << ") ; [" << getHandle().value() << "]\n";
     return answer.str();
 }
 
-std::string Link::toString(std::string indent) const
+std::string Link::toString(std::string indent)
 {
     std::string answer;
     std::string more_indent = indent + "  ";
 #define BUFSZ 1024
     static char buf[BUFSZ];
 
-    snprintf(buf, BUFSZ, "(%s (av %d %d) %s\n",
+    snprintf(buf, BUFSZ, "(%s (av %d %d %d) %s\n",
              classserver().getTypeName(_type).c_str(),
              (int)getAttentionValue()->getSTI(),
              (int)getAttentionValue()->getLTI(),
+             (int)getAttentionValue()->getVLTI(),
              getTruthValue()->toString().c_str());
     answer = indent + buf;
     // Here the targets string is made. If a target is a node, its name is
@@ -103,7 +104,8 @@ std::string Link::toString(std::string indent) const
         AtomPtr a(_outgoing[i]);
         answer += a->toString(more_indent);
     }
-    answer += indent + ")\n";
+    answer += indent + ") ; [" + 
+            std::to_string(getHandle().value()).c_str() + "]\n";
     return answer;
 }
 

@@ -65,8 +65,8 @@ namespace opencog
             ClusterSeq; //the vector of doubles is the centroid of the cluster
         
         AtomSpace* as;
-        boost::signals::connection removedAtomConnection;
-        boost::signals::connection addedAtomConnection;
+        boost::signals2::connection removedAtomConnection;
+        boost::signals2::connection addedAtomConnection;
 
         AtomEmbedMap atomMaps;
         AsymAtomEmbedMap asymAtomMaps;

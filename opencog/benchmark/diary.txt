@@ -561,3 +561,139 @@ Summary:
   removeAtom        161         156
 
 
+22 January 2014
+---------------
+Remeasure, because locks had to be added to the truth-value getters.
+Upshot: adding locks to the getTV path did not affect performance.
+The setTV path got faster, probably due to cleaner impl.
+
+Significant improvements in getIncoming/OutgoingSet ... not sure why.
+
+Big drop in getNodesHandles, don't know why.
+
+ 
+                   -A -X         -A          -A -g
+   test           AtomTable    AtomSpace    Scheme
+   name           K-ops/sec    K-ops/sec   K-ops/sec
+   ----           ---------    ---------   ---------
+  noop            10000        3333      
+  addNode           217          93.5         
+  addLink            88          54.3       
+  getType          1000         833        
+  getTV             769         833    
+  setTV             769         476      
+  getHandleSet        0.423       0.401        
+  getNodeHandles     41.8        30.5
+  getOutgoingSet    833         666          
+  getIncomingSet    714         555         
+  removeAtom        145         130
+
+
+7 March 2014
+------------
+Due to bug #524, scheme was always being interpreted, never compiled.
+The previous commit fixes this, the setting #:compile? #t on
+eval-string.  This should improve scheme performance.  Does it?
+No, it des NOT. Gack. But of course. Compiling every time is just
+going to slow everything down. Really, we should compile just once.
+and measure the compiled code. Gack.  This needs a new benchmark...
+
+
+                      -A -g
+   test              compile
+   name             K-ops/sec
+   ----             ---------
+  noop                 inf
+  addNode              14.3
+  addLink               6.67
+  getType               0.826
+  getTV                 2.04
+  setTV                 1.92
+  getOutgoingSet        1.92
+  getIncomingSet        1.49
+  removeAtom            0.392
+
+                     27 Oct      -g       -G -r100   -G -r100
+   test               2013      memo       interp     compile
+   name            K-ops/sec   K-ops/sec  K-ops/sec  K-ops/sec
+   ----            ---------   ---------  ---------  ---------
+  noop                  inf      inf         inf
+  addNode              8.93      9.61       10.7
+  addLink              7.52      7.82        5.76
+  getType              7.58      7.81       12.2
+  getTV                6.37      8.62       13.4
+  setTV                7.63      7.81        7.34
+  getOutgoingSet      11.90     13.9        13.2
+  getIncomingSet       5.32      8.62       12.6
+  removeAtom            -       10.4        10.6
+
+Comparing today's interpreted measurements to those from Oct 2013, looks
+like everything improves.  The improvements are all due to the faster
+underlying atomspace.
+
+8 March 2014
+------------
+Again.  New flags:
+ -g -M is now same as old -g : it runs scheme, and memoizes (memoization
+       is run outside the timing loop).
+ -g -C run scheme, and compile (compilation is done outside of timing loop)
+ -g run scheme, raw, straight up interpretation: no memo, not compile.
+ 
+                  previous     -g -M       -g         -g -C   
+   test           memoize     memoize     interp     compile  
+   name          K-ops/sec   K-ops/sec   K-ops/sec  K-ops/sec
+   ----          ---------   ---------   ---------  ---------
+  noop               inf         inf       inf         inf
+  addNode           9.61         10.1       6.04        8.62
+  addLink           7.82         6.80      2.36        7.24
+  getType           7.81         6.85      4.69        7.41
+  getTV             8.62         8.13      5.61        6.94
+  setTV             7.81         7.25      3.73        7.46
+  getOutgoingSet   13.9          6.41      4.75        7.12
+  getIncomingSet    8.62         5.65      4.70        6.25
+  removeAtom       10.4          7.87      4.19        5.15
+
+In the above, "previous" is the column copied from above, yesterday.
+It should be identical to -g -M but its not.  Today's runs seem a
+lot slower.  There's a huge variability in reported times, run-to-run.
+I don't like this failure to reproduce. I don't understand it.
+By contrast, most of the other runs don't have this huge variability,
+they are very consistent run to run.  Makes me think that there is
+some cache/tlb invalidation that is dominating this.
+
+
+                -g -M -r100    -g -r100   -g -C -r100    -A
+   test           memoize       interp      compile    AtomSpace
+   name          K-ops/sec     K-ops/sec   K-ops/sec   K-ops/sec
+   ----          ---------     ---------   ---------   ---------
+  noop               inf         inf          inf
+  addNode           37.0        10.7         37.1         89.8
+  addLink           57.3         3.32        67.0         58.1
+  getType          102          11.8        128          833
+  getTV            152          13.0        227          833
+  setTV            128           7.25       203          625
+  getOutgoingSet   217          12.6        288          697
+  getIncomingSet   172          12.7        242          666
+  removeAtom        69.4        10.7         74.6        130
+
+
+Now, the above are a lot more interesting.   First, look at the -g -r100
+column, and compare it to the -g column from the previous table.  The
+difference between these two is the cost of entering and exiting guile.
+The plain -g column enters guile, does one op, and exists.  The -r100
+column enters guile, does 100 ops, and then exits.
+
+The memoized and compiled columns should be compared to the interpreted
+column: this shows exacly how painfully slow the interpreter is.  The
+fact that the compiled and memoized columns are quite close to one
+another illustrates that there's really not much going on in the
+bindings.  For contrast, the last column shows the atomspace
+performance. (repeated the measurement here, but it seems same as
+before).
+
+To summarize:
+ 1) the scheme bindings are pretty "thin"
+ 2) There's a huge overhead from using the scheme interpreter, as opposed
+    to running compiled (or even memoized) code.
+ 3) There's a huge overhead to enter and exit the scheme subsystem.
+

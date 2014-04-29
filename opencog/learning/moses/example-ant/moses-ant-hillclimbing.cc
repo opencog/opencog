@@ -29,6 +29,7 @@
 
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/numeric.h>
+#include <opencog/util/oc_omp.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
@@ -36,6 +37,7 @@
 
 #include "../moses/moses_main.h"
 #include "../optimization/optimization.h"
+#include "../scoring/scoring_base.h"
 #include "ant_scoring.h"
 
 
@@ -48,46 +50,66 @@ using namespace std;
 
 int main(int argc,char** argv) 
 {
-  int max_evals,rand_seed;
-  try {
-    if (argc!=3)
-      throw "foo";
-    rand_seed=lexical_cast<int>(argv[1]);
-    randGen().seed(rand_seed);
-    max_evals=atoi(argv[2]);
-  } catch (...) {
-    cerr << "usage: " << argv[0] << " seed maxevals" << endl;
-    exit(1);
-  }
+    int max_evals,rand_seed;
+    if (argc == 3) {
+        rand_seed=lexical_cast<int>(argv[1]);
+        randGen().seed(rand_seed);
+        max_evals=atoi(argv[2]);
+    } else {
+        cerr << "usage: " << argv[0] << " seed maxevals" << endl;
+        exit(1);
+    }
 
-  type_tree tt(id::lambda_type);
-  tt.append_children(tt.begin(),id::action_result_type,1);
+    // Simplificity pressure
+    float simplicity_pressure = 0.5;
 
-  ant_score scorer;
-  ant_bscore bscorer;
+    // Multi-thread
+    static const string localhost = "localhost";
+    unsigned n_jobs = 4;
+    jobs_t jobs{{localhost, n_jobs}};
+    setting_omp(jobs[localhost]);
 
-  combo_tree_ns_set perceptions;
-  combo_tree_ns_set actions;
+    // Logger setting
+    static const string log_file = "moses-ant-hillclimbing.log";
+    remove(log_file.c_str());
+    logger().setLevel(Logger::DEBUG);
+    logger().setFilename(log_file);
 
-  actions.insert(combo_tree(get_instance(id::turn_left)));
-  actions.insert(combo_tree(get_instance(id::turn_right)));
-  actions.insert(combo_tree(get_instance(id::move_forward)));
+    type_tree tt(id::lambda_type);
+    tt.append_children(tt.begin(),id::action_result_type,1);
 
-  perceptions.insert(combo_tree(get_instance(id::is_food_ahead)));
+    ant_bscore bscorer(simplicity_pressure);
+    bscore_based_cscore<ant_bscore> cscorer(bscorer);
 
-  metapop_parameters metaparms;
-  metaparms.perceptions = &perceptions;
-  metaparms.actions = &actions;
+    combo_tree_ns_set perceptions;
+    combo_tree_ns_set actions;
 
-  hill_climbing hc;
-  metapopulation metapop(combo_tree(id::sequential_and), tt, action_reduction(),
-              scorer, bscorer, hc, metaparms);
+    actions.insert(combo_tree(get_instance(id::turn_left)));
+    actions.insert(combo_tree(get_instance(id::turn_right)));
+    actions.insert(combo_tree(get_instance(id::move_forward)));
+
+    perceptions.insert(combo_tree(get_instance(id::is_food_ahead)));
+
+    metapop_parameters metaparms;
+    metaparms.perceptions = &perceptions;
+    metaparms.actions = &actions;
+    metaparms.complexity_temperature = 100;
+
+    // Define optimization algo
+    optim_parameters opt_params;
+    opt_params.max_dist = 3;
+    hc_parameters hc_params;
+    hc_params.widen_search = true;
+    hc_params.crossover = true;
+    hill_climbing hc(opt_params, hc_params);
+
+    metapopulation metapop(combo_tree(id::sequential_and), tt, action_reduction(),
+                           cscorer, bscorer, hc, metaparms);
   
-  boost::program_options::variables_map vm;
-  jobs_t jobs;
+    boost::program_options::variables_map vm;
 
-  moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0);
-  moses_statistics st;
-  run_moses(metapop, moses_param, st);
+    moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0, 100);
+    moses_statistics st;
+    run_moses(metapop, moses_param, st);
 }
 

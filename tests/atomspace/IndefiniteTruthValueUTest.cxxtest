@@ -28,7 +28,6 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_integration.h>
 
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
@@ -48,7 +47,7 @@ using namespace std;
 #define ERROR_THRESHOLD 0.01f
 
 // floats only have about 7.5 digits of precision
-#define FLOAT_ACCEPTABLE_ERROR 0.000001f
+#define FLOAT_ACCEPTABLE_ERROR 0.000001
 
 #define DIFF_ACCEPTABLE_ERROR 0.01f
 
@@ -65,25 +64,26 @@ static double TestIntegralFormula(double x, void * params) {
   return f;
 }
 
-static float TestDensityIntegral(float lower, float upper, 
-				 float L_, float U_, float k_, float s_) {
+static strength_t TestDensityIntegral(strength_t lower, strength_t upper,
+                                 strength_t L_, strength_t U_, count_t k_, strength_t s_)
+{
   double params[4];
   size_t neval = 0;
   double result = 0, abserr = 0 ;
   gsl_function F;
-  
-  params[0] = static_cast<double>(L_); 
-  params[1] = static_cast<double>(U_); 
-  params[2] = static_cast<double>(k_); 
+
+  params[0] = static_cast<double>(L_);
+  params[1] = static_cast<double>(U_);
+  params[2] = static_cast<double>(k_);
   params[3] = static_cast<double>(s_);
-  
+
   F.function = &TestIntegralFormula;
   F.params = &params;
-  
-  gsl_integration_qng (&F, lower, upper, 
-				1e-1, 0.0, &result, &abserr, &neval);
 
-  return (float) result;
+  gsl_integration_qng (&F, lower, upper,
+                                1e-1, 0.0, &result, &abserr, &neval);
+
+  return (strength_t) result;
 }
 
 
@@ -92,50 +92,53 @@ class IndefiniteTruthValueUTest :  public CxxTest::TestSuite
 
 private:
     IndefiniteTruthValue* tvs[NUM_TVS];
-    float ls[NUM_TVS];
-    float us[NUM_TVS];
-    float means[NUM_TVS];
+    strength_t ls[NUM_TVS];
+    strength_t us[NUM_TVS];
+    strength_t means[NUM_TVS];
 
-    float default_k;
+    count_t default_k;
 
-    float count(float l, float u) {
-        float W = u - l;
+    count_t count(strength_t l, strength_t u)
+    {
+        strength_t W = u - l;
         W = max(W, 0.0000001f);
         return (default_k*(1 - W) / W);
     }
 
-    float confidence(float l, float u) {
-        float c = count(l, u);
+    confidence_t confidence(strength_t l, strength_t u)
+    {
+        count_t c = count(l, u);
         return (c / (c + default_k));
     }
 
-    float computeDiff(float L, float U, float K, float b) {
+    strength_t computeDiff(strength_t L, strength_t U, count_t K, strength_t b)
+    {
       if(U==L) {
-	return 0.0f;
+        return 0.0f;
       }
       else {
-	float idiff = 0.01;
-	float L1, U1;
-	float numerator, denominator, result;
-	float expected = (1-b)/2;
-	bool lt_expected = true, gt_expected = true;
-	while (lt_expected || gt_expected) {
-	  U1 = U + idiff;
-	  L1 = L - idiff;
+        strength_t idiff = 0.01;
+        strength_t L1, U1;
+        strength_t numerator, denominator, result;
+        strength_t expected = (1-b)/2;
+        bool lt_expected = true, gt_expected = true;
+        while (lt_expected || gt_expected) {
+          U1 = U + idiff;
+          L1 = L - idiff;
 
-	  numerator = TestDensityIntegral(U,U1,L1,U1,default_k,IndefiniteTruthValue::s);
-	  denominator = TestDensityIntegral(L1,U1,L1,U1,default_k,IndefiniteTruthValue::s);
+          numerator = TestDensityIntegral(U,U1,L1,U1,default_k,IndefiniteTruthValue::s);
+          denominator = TestDensityIntegral(L1,U1,L1,U1,default_k,IndefiniteTruthValue::s);
 
-	  if (denominator > 0) result = numerator / denominator;
-	  else result = 0.0;
-	
-	  lt_expected = result < expected - IndefiniteTruthValue::diffError;
-	  gt_expected = result > expected + IndefiniteTruthValue::diffError;
+          if (denominator > 0) result = numerator / denominator;
+          else result = 0.0;
 
-	  if(lt_expected) idiff += idiff/2;
-	  if(gt_expected) idiff -= idiff/2;
-	}
-	return idiff;
+          lt_expected = result < expected - IndefiniteTruthValue::diffError;
+          gt_expected = result > expected + IndefiniteTruthValue::diffError;
+
+          if(lt_expected) idiff += idiff/2;
+          if(gt_expected) idiff -= idiff/2;
+        }
+        return idiff;
       }
     }
 
@@ -177,8 +180,8 @@ public:
         TS_ASSERT(fabs(tv->getDiff()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(tv->isSymmetric());
         TS_ASSERT(fabs(tv->getMean()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
-        float expectedCount = count(0, 0);
-        float expectedConfidence = confidence(0, 0);
+        count_t expectedCount = count(0, 0);
+        confidence_t expectedConfidence = confidence(0, 0);
         TS_ASSERT(isApproxEq(tv->getCount(), expectedCount, FLOAT_ACCEPTABLE_ERROR));
         //logger().debug("tv->getCount() = %f, expectedCount = %f", tv->getCount() , expectedCount);
         TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
@@ -189,15 +192,15 @@ public:
             TS_ASSERT(fabs(tv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->getConfidenceLevel()  - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) <= FLOAT_ACCEPTABLE_ERROR);
-	    //compute diff using a method provided with the UTest
-	    float computedDiff = computeDiff(tv->getL(), tv->getU(), default_k, tv->getConfidenceLevel());
-	    std::cout << "COMPUTE DIFF : " << computedDiff
-		      << " DIFF : " << tv->getDiff() << std::endl;
-	    TS_ASSERT(isApproxEq(tv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
+            //compute diff using a method provided with the UTest
+            strength_t computedDiff = computeDiff(tv->getL(), tv->getU(), default_k, tv->getConfidenceLevel());
+            std::cout << "COMPUTE DIFF : " << computedDiff
+                      << " DIFF : " << tv->getDiff() << std::endl;
+            TS_ASSERT(isApproxEq(tv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
             TS_ASSERT(tv->isSymmetric());
             TS_ASSERT(fabs(tv->getMean() - means[i]) <= ERROR_THRESHOLD);
-            float expectedCount = count(ls[i], us[i]);
-            float expectedConfidence = confidence(ls[i], us[i]);
+            count_t expectedCount = count(ls[i], us[i]);
+            confidence_t expectedConfidence = confidence(ls[i], us[i]);
             TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
             TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
         }
@@ -212,8 +215,8 @@ public:
         TS_ASSERT(fabs(tv->getDiff()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(tv->isSymmetric());
         TS_ASSERT(fabs(tv->getMean()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
-        float expectedCount = count(0, 0);
-        float expectedConfidence = confidence(0, 0);
+        count_t expectedCount = count(0, 0);
+        confidence_t expectedConfidence = confidence(0, 0);
         TS_ASSERT(isApproxEq(tv->getCount(), expectedCount, FLOAT_ACCEPTABLE_ERROR));
         //logger().debug("tv->getCount() = %f, expectedCount = %f", tv->getCount() , expectedCount);
         TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
@@ -224,55 +227,15 @@ public:
             TS_ASSERT(fabs(tv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->getConfidenceLevel()  - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) <= FLOAT_ACCEPTABLE_ERROR);
-	    //compute diff using a method provided with the UTest
-	    float computedDiff = computeDiff(tv->getL(), tv->getU(), default_k, tv->getConfidenceLevel());
-	    TS_ASSERT(isApproxEq(tv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
+            //compute diff using a method provided with the UTest
+            strength_t computedDiff = computeDiff(tv->getL(), tv->getU(), default_k, tv->getConfidenceLevel());
+            TS_ASSERT(isApproxEq(tv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
             TS_ASSERT(tv->isSymmetric());
             TS_ASSERT(fabs(tv->getMean() - means[i]) <= ERROR_THRESHOLD);
-            float expectedCount = count(ls[i], us[i]);
-            float expectedConfidence = confidence(ls[i], us[i]);
+            count_t expectedCount = count(ls[i], us[i]);
+            confidence_t expectedConfidence = confidence(ls[i], us[i]);
             TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
             TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
-        }
-    }
-
-#define SAVING_AND_LOADING_TV_FLOAT_PRECISION 0.001
-    void testToAndFromString() {
-        char tvStr[1024];
-        for (int i = 0; i <= NUM_TVS; i++) {
-            bool testChangedMean = (i == NUM_TVS);
-            if (testChangedMean) {
-                i--;
-                tvs[i]->setMean(means[0]);
-            }
-            std::string tvToStringValue = tvs[i]->toString();
-            sprintf(tvStr, "%s %s\n", TruthValue::typeToStr(tvs[i]->getType()), tvToStringValue.c_str());
-            TruthValuePtr tv = TruthValue::factory(tvStr);
-            TS_ASSERT(tv != NULL);
-            TS_ASSERT(tv->getType() == tvs[i]->getType());
-            IndefiniteTruthValuePtr itv = IndefiniteTruthValue::fromString(tvToStringValue.c_str());
-
-            TS_ASSERT(fabs(itv->getL() - ls[i]) < SAVING_AND_LOADING_TV_FLOAT_PRECISION);
-            TS_ASSERT(fabs(itv->getU() - us[i]) < SAVING_AND_LOADING_TV_FLOAT_PRECISION);
-            TS_ASSERT(fabs(itv->getConfidenceLevel() - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) < SAVING_AND_LOADING_TV_FLOAT_PRECISION);
-	    //compute diff using a method provided with the UTest
-	    float computedDiff = computeDiff(itv->getL(), itv->getU(),
-					     default_k, itv->getConfidenceLevel());
-	    TS_ASSERT(isApproxEq(itv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
-            TS_ASSERT(itv->isSymmetric());
-            if (testChangedMean) {
-                //logger().debug("itv->getMean() = %f, means[0] = %f", itv->getMean(), means[0]);
-                TS_ASSERT(fabs(itv->getMean() - means[0]) <= ERROR_THRESHOLD);
-            } else {
-                TS_ASSERT(fabs(itv->getMean() - means[i]) <= ERROR_THRESHOLD);
-            }
-            float expectedCount = count(ls[i], us[i]);
-            float expectedConfidence = confidence(ls[i], us[i]);
-            TS_ASSERT(fabs(itv->getCount() - expectedCount) <= ERROR_THRESHOLD);
-            TS_ASSERT(fabs(itv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
-            if (testChangedMean) {
-                i++;
-            }
         }
     }
 
@@ -280,13 +243,13 @@ public:
         for (int i = 0; i < NUM_TVS; i++) {
             IndefiniteTruthValue* tv = tvs[i];
             for (int j = 0; j < 10; j++) {
-                float mean = j * 0.1f;
+                strength_t mean = j * 0.1f;
                 tvs[i]->setMean(mean);
                 TS_ASSERT(fabs(tv->getMean() - mean) <= ERROR_THRESHOLD);
                 TS_ASSERT(fabs(tv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
-                float expectedCount = count(ls[i], us[i]);
-                float expectedConfidence = confidence(ls[i], us[i]);
+                count_t expectedCount = count(ls[i], us[i]);
+                confidence_t expectedConfidence = confidence(ls[i], us[i]);
                 TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
                 TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
             }
@@ -297,17 +260,17 @@ public:
         for (int i = 0; i < NUM_TVS; i++) {
             IndefiniteTruthValue* tv = tvs[i];
             for (int j = 0; j < 10; j++) {
-                float l = j * 0.1f;
+                strength_t l = j * 0.1f;
                 tvs[i]->setL(l);
                 TS_ASSERT(fabs(tv->getL()  - l) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(isApproxEq(tv->getMean(), (l+us[i])/2, ERROR_THRESHOLD));
-                float expectedCount = count(l, us[i]);
-                float expectedConfidence = confidence(l, us[i]);
+                count_t expectedCount = count(l, us[i]);
+                confidence_t expectedConfidence = confidence(l, us[i]);
 
                 // Some of the expectedCount are small (e.g. 0.222...)
                 // and some are large (e.g. 19999998) so take care with diff.
-                // ... and sometimes expected count is zero ... 
+                // ... and sometimes expected count is zero ...
                 if (1.0 < expectedCount) {
                     TS_ASSERT(fabs(tv->getCount() / expectedCount - 1.0f) <= FLOAT_ACCEPTABLE_ERROR);
                 } else {
@@ -322,13 +285,13 @@ public:
         for (int i = 0; i < NUM_TVS; i++) {
             IndefiniteTruthValue* tv = tvs[i];
             for (int j = 0; j < 10; j++) {
-                float u = j * 0.1f;
+                strength_t u = j * 0.1f;
                 tvs[i]->setU(u);
                 TS_ASSERT(fabs(tv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getU()  - u) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(isApproxEq(tv->getMean(), (ls[i]+u)/2, ERROR_THRESHOLD));
-                float expectedCount = count(ls[i], u);
-                float expectedConfidence = confidence(ls[i], u);
+                count_t expectedCount = count(ls[i], u);
+                confidence_t expectedConfidence = confidence(ls[i], u);
 
                 // Some of the expectedCount are small (e.g. 0.222...)
                 // and some are large (e.g. 19999998) so take care with diff.
@@ -346,14 +309,14 @@ public:
         for (int i = 0; i < NUM_TVS; i++) {
             IndefiniteTruthValue* tv = tvs[i];
             for (int j = 0; j < 10; j++) {
-                float confLevel = j * 0.1f;
+                confidence_t confLevel = j * 0.1f;
                 tvs[i]->setConfidenceLevel(confLevel);
                 TS_ASSERT(fabs(tv->getConfidenceLevel()  - confLevel) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getMean() - means[i]) <= ERROR_THRESHOLD);
-                float expectedCount = count(ls[i], us[i]);
-                float expectedConfidence = confidence(ls[i], us[i]);
+                count_t expectedCount = count(ls[i], us[i]);
+                confidence_t expectedConfidence = confidence(ls[i], us[i]);
                 TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
                 TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
             }
@@ -364,7 +327,7 @@ public:
         for (int i = 0; i < NUM_TVS; i++) {
             IndefiniteTruthValue* tv = tvs[i];
             for (int j = 0; j < 10; j++) {
-                float diff = j * 0.1f;
+                strength_t diff = j * 0.1f;
                 tv->setDiff(diff);
                 TS_ASSERT(fabs(tv->getDiff()  - diff) <= FLOAT_ACCEPTABLE_ERROR);
                 //logger().debug("diff = %f, tv->getL_() = %f, (ls[i] - diff) = %f", diff, tv->getL_(), (ls[i] - diff));
@@ -373,8 +336,8 @@ public:
                 TS_ASSERT(fabs(tv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getMean() - means[i]) <= ERROR_THRESHOLD);
-                float expectedCount = count(ls[i], us[i]);
-                float expectedConfidence = confidence(ls[i], us[i]);
+                count_t expectedCount = count(ls[i], us[i]);
+                confidence_t expectedConfidence = confidence(ls[i], us[i]);
                 TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
                 TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
             }
@@ -398,7 +361,7 @@ public:
             TS_ASSERT(fabs(tvs[i]->getL() - ls[i]) <= ERROR_THRESHOLD);
             TS_ASSERT(fabs(tvs[i]->getU() - us[i]) <= ERROR_THRESHOLD);
             for (int j = 10; j <= 0; j--) {
-                float diff = j * 0.1f;
+                strength_t diff = j * 0.1f;
                 tvs[i]->setDiff(diff);
                 TS_ASSERT(fabs(tvs[i]->getL_() - (ls[i] - diff)) <= ERROR_THRESHOLD);
                 TS_ASSERT(fabs(tvs[i]->getU_() - (us[i] + diff)) <= ERROR_THRESHOLD);
@@ -426,14 +389,14 @@ public:
             TS_ASSERT(fabs(clonedTv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(clonedTv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(clonedTv->getConfidenceLevel()  - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) <= FLOAT_ACCEPTABLE_ERROR);
-	    //compute diff using a method provided with the UTest
-	    float computedDiff = computeDiff(clonedTv->getL(), clonedTv->getU(),
-					     default_k, clonedTv->getConfidenceLevel());
-	    TS_ASSERT(isApproxEq(clonedTv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
+            //compute diff using a method provided with the UTest
+            strength_t computedDiff = computeDiff(clonedTv->getL(), clonedTv->getU(),
+                                             default_k, clonedTv->getConfidenceLevel());
+            TS_ASSERT(isApproxEq(clonedTv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
             TS_ASSERT(clonedTv->isSymmetric());
             TS_ASSERT(fabs(clonedTv->getMean() - means[i]) <= ERROR_THRESHOLD);
-            float expectedCount = count(ls[i], us[i]);
-            float expectedConfidence = confidence(ls[i], us[i]);
+            count_t expectedCount = count(ls[i], us[i]);
+            confidence_t expectedConfidence = confidence(ls[i], us[i]);
             TS_ASSERT(fabs(clonedTv->getCount() - expectedCount) <= ERROR_THRESHOLD);
             TS_ASSERT(fabs(clonedTv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
         }
@@ -453,8 +416,8 @@ public:
         //TS_ASSERT(!clonedTv->isSymmetric());
         TS_ASSERT(clonedTv->isSymmetric());
         TS_ASSERT(fabs(clonedTv->getMean() - means[1]) <= ERROR_THRESHOLD);
-        float expectedCount = count(ls[1], us[1]);
-        float expectedConfidence = confidence(ls[1], us[1]);
+        count_t expectedCount = count(ls[1], us[1]);
+        confidence_t expectedConfidence = confidence(ls[1], us[1]);
         TS_ASSERT(fabs(clonedTv->getCount() - expectedCount) <= ERROR_THRESHOLD);
         TS_ASSERT(fabs(clonedTv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
     }
@@ -463,9 +426,9 @@ public:
         for (unsigned int i = 0; i < NUM_TVS; i++) {
             IndefiniteTruthValue* tv = tvs[i];
             TS_ASSERT(tv->getFirstOrderDistribution().size() == 0);
-            vector<float*> v;
+            vector<strength_t*> v;
             for (unsigned int j = 0; j < i; j++) {
-                float* fv = (float*) malloc(j * sizeof(float));
+                strength_t* fv = (strength_t*) malloc(j * sizeof(strength_t));
                 for (unsigned int k = 0; k < j; k++) {
                     fv[k] = k * 0.1f;
                 }
@@ -475,7 +438,7 @@ public:
             v = tv->getFirstOrderDistribution();
             TS_ASSERT(v.size() == i);
             for (unsigned int j = 0; j < i; j++) {
-                float* fv = v[j];
+                strength_t* fv = v[j];
                 for (unsigned int k = 0; k < j; k++) {
                     TS_ASSERT(fabs(fv[k]  - k*0.1) <= FLOAT_ACCEPTABLE_ERROR);
                 }

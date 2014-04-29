@@ -97,7 +97,7 @@ void PsiFeelingUpdaterAgent::init()
     OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
-    const AtomSpace& atomSpace = oac->getAtomSpace();
+    AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Get petId
     const std::string & petId = oac->getPet().getPetId();
@@ -222,18 +222,13 @@ void PsiFeelingUpdaterAgent::runUpdaters()
     logger().debug( "PsiFeelingUpdaterAgent::%s - Running feeling updaters (scheme scripts) [ cycle = %d ]",
                     __FUNCTION__ , this->cycleCount);
 
+#if HAVE_GUILE
     // Get OAC
     OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
-    // Get AtomSpace
-    AtomSpace& atomSpace = oac->getAtomSpace();
-
-
-#if HAVE_GUILE
-
     // Initialize scheme evaluator
-    SchemeEval & evaluator = SchemeEval::instance(&atomSpace);
+    SchemeEval* evaluator = new SchemeEval();
     std::string scheme_expression, scheme_return_value;
 
     // Process feelings one by one
@@ -251,9 +246,9 @@ void PsiFeelingUpdaterAgent::runUpdaters()
         scheme_expression = "( " + feelingUpdater + " )";
 
         // Run the Procedure that update feeling and get the updated value
-        scheme_return_value = evaluator.eval(scheme_expression);
+        scheme_return_value = evaluator->eval(scheme_expression);
 
-        if ( evaluator.eval_error() ) {
+        if ( evaluator->eval_error() ) {
             logger().error( "PsiFeelingUpdaterAgent::%s - Failed to execute '%s'",
                              __FUNCTION__, scheme_expression.c_str());
 
@@ -280,6 +275,7 @@ void PsiFeelingUpdaterAgent::runUpdaters()
                          __FUNCTION__, feeling.c_str(), iFeeling->second.updatedValue);
     }// for
 
+    delete evaluator;
 #endif // HAVE_GUILE
 
 }

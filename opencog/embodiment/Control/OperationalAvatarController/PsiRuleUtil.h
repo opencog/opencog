@@ -262,9 +262,9 @@ public:
      *         ListLink (empty)
      *
      */
-    static Handle getPreviousDemandGoal(const AtomSpace & atomSpace, Handle & referenceLink); 
+    static Handle getPreviousDemandGoal(AtomSpace & atomSpace, Handle & referenceLink); 
 
-    static Handle getCurrentDemandGoal(const AtomSpace & atomSpace, Handle & referenceLink); 
+    static Handle getCurrentDemandGoal(AtomSpace & atomSpace, Handle & referenceLink); 
 
     static void setCurrentDemandGoal(AtomSpace & atomSpace, Handle hCurrentlySelectedDemandGoal); 
 }; // class

@@ -133,9 +133,9 @@ protected:
     /** Hash table of atoms given stimulus since reset */
     AtomStimHashMap* stimulatedAtoms;
 
-    boost::signals::connection conn;
+    boost::signals2::connection conn;
 
-    /** called by AtomTable via a boost:signal when an atom is removed. */
+    /** called by AtomTable via a boost::signals2::signal when an atom is removed. */
     void atomRemoved(AtomPtr);
 
 public:
@@ -221,6 +221,9 @@ public:
      */
     stim_t getAtomStimulus(Handle h) const;
 
+    /** The following two are NOT thread-safe! Neither can be called
+     * safely from multiple threads!
+     */
     AttentionValuePtr getAV() { return _attentionValue; }
     void setAV(AttentionValuePtr new_av) { _attentionValue = new_av; }
 }; // class

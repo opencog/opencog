@@ -1,7 +1,8 @@
 /*
  * opencog/atomspace/AtomSpaceImpl.h
  *
- * Copyright (C) 2010-2011 OpenCog Foundation
+ * Copyright (c) 2010-2011 OpenCog Foundation
+ * Copyright (c) 2009, 2013 Linas Vepstas
  * All Rights Reserved
  *
  * Written by Joel Pitt <joel@opencog.org>
@@ -28,8 +29,6 @@
 #include <algorithm>
 #include <list>
 #include <vector>
-
-#include <boost/signal.hpp>
 
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AttentionValue.h>
@@ -70,23 +69,53 @@ public:
     void unregisterBackingStore(BackingStore *);
 
     /**
+     * Read-write synchronization barrier.
+     * If there is a backing store, then make sure all writes have
+     * been completed.
+     * NB: at this time,we don't distinguish barrier and flush.
+     * Although this is named 'barrier', its actually implemented
+     * as a flush.  This may change in the future.
+     */
+    void barrier(void) { if (backing_store) backing_store->barrier(); }
+
+    /**
      * Recursively store the atom to the backing store.
      * I.e. if the atom is a link, then store all of the atoms
      * in its outgoing set as well, recursively.
      */
-    void storeAtom(Handle h) {
-        if (backing_store) backing_store->storeAtom(h);
+    void storeAtom(Handle h);
+
+    /**
+     * Load *all* atoms of the given type, but only if they are not
+     * already in the AtomTable. 
+     */
+    void loadType(Type t) {
+        if (backing_store) backing_store->loadType(atomTable, t);
     }
 
     /**
-     * Return the atom with the indicated handle. This method will
-     * explicitly use the backing store to obtain an instance of the
-     * atom. If an atom corresponding to the handle cannot be found,
-     * then an undefined handle is returned. If the atom is found, 
-     * then the corresponding atom is guaranteed to have been
-     * instantiated in the atomspace.
+     * Unconditionally fetch an atom from the backingstore.
+     * If there is no backingstore, then Handle::UNDEINFED is returned.
+     * If the atom is found in the backingstore, then it is placed in
+     * the atomtable before returning.  If the atom is already in the
+     * atomtable, and is also found in the backingstore, then the TV's
+     * are merged.
+     *
+     * The fetch is 'unconditional', in that it is fetched, even if it
+     * already is in the atomspace.  Also, the ignored-types of the
+     * backing store are not used.
+     * 
+     * To avoid a fetch if the atom already is in the atomtable, use the
+     * getAtom() method instead.
      */
     Handle fetchAtom(Handle);
+
+    /**
+     * Get an atom from the AtomTable. If not found there, get it from
+     * the backingstore (and add it to the AtomTable).  If the atom is
+     * not found in either place, return Handle::UNDEFINED.
+     */
+    Handle getAtom(Handle);
 
     /**
      * Use the backing store to load the entire incoming set of the atom.
@@ -107,9 +136,20 @@ public:
     Handle addNode(Type t, const std::string& name = "", TruthValuePtr tvn = TruthValue::DEFAULT_TV());
 
     /**
-     * Add a new link to the Atom Table
-     * If the atom already exists then the old and the new truth value
-     * is merged
+     * Get a node from the AtomTable, if it's in there. If its not found
+     * in the AtomTable, and there's a backing store, then the atom will
+     * be fetched from the backingstore (and added to the AtomTable). If
+     * the atom can't be found in either place, Handle::UNDEFINED will be
+     * returned.
+     *
+     * See also the getAtom() method.
+     */
+    Handle getNode(Type t, const std::string& name = "");
+
+    /**
+     * Add a new link to the AtomTable.
+     * If the atom already exists in the AtomTable, then the old and
+     * the new truth values are merged.
      * @param t         Type of the link
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
@@ -120,20 +160,15 @@ public:
                    TruthValuePtr tvn = TruthValue::DEFAULT_TV());
 
     /**
-     * Removes an atom from the atomspace
+     * Get a link from the AtomTable, if it's in there. If its not found
+     * in the AtomTable, and there's a backing store, then the atom will
+     * be fetched from the backingstore (and added to the AtomTable). If
+     * the atom can't be found in either place, Handle::UNDEFINED will be
+     * returned.
      *
-     * @param h The Handle of the atom to be removed.
-     * @param recursive Recursive-removal flag; the removal will
-     *       fail if this flag is not set, and the atom has incoming
-     *       links (that are in the atomspace).  Set to false only if
-     *       you can guarantee that this atom does not appear in the
-     *       outgoing set of any link in the atomspace.
-     * @return True if the Atom for the given Handle was successfully
-     *         removed. False, otherwise.
+     * See also the getAtom() method.
      */
-    bool removeAtom(Handle h, bool recursive = true) {
-        return 0 < atomTable.extract(h, recursive).size();
-    }
+    Handle getLink(Type t, const HandleSeq& outgoing);
 
     /** Retrieve the incoming set of a given atom */
     HandleSeq getIncoming(Handle);
@@ -152,6 +187,38 @@ public:
     HandleSeq getNeighbors(Handle h, bool fanin=true, bool fanout=true,
             Type linkType=LINK, bool subClasses=true) const;
 
+    /**
+     * Purges an atom from the atomtable. Attached storage is not
+     * affected.
+     *
+     * @param h The Handle of the atom to be removed.
+     * @param recursive Recursive-removal flag; the removal will
+     *       fail if this flag is not set, and the atom has incoming
+     *       links (that are in the atomspace).  Set to false only if
+     *       you can guarantee that this atom does not appear in the
+     *       outgoing set of any link in the atomspace.
+     * @return True if the Atom for the given Handle was successfully
+     *         removed. False, otherwise.
+     */
+    bool removeAtom(Handle h, bool recursive = true) {
+        return 0 < atomTable.extract(h, recursive).size();
+    }
+
+    /**
+     * Delete an atom from the atomtable and from attached storage
+     * This deleting is permanent; a deleted atom cannot be recovered.
+     *
+     * @param h The Handle of the atom to be removed.
+     * @param recursive Recursive-removal flag; the removal will
+     *       fail if this flag is not set, and the atom has incoming
+     *       links (that are in the atomspace).  Set to false only if
+     *       you can guarantee that this atom does not appear in the
+     *       outgoing set of any link in the atomspace.
+     * @return True if the Atom for the given Handle was successfully
+     *         removed. False, otherwise.
+     */
+    bool deleteAtom(Handle h, bool recursive = true);
+
     //! Clear the atomspace, remove all atoms
     void clear();
 
@@ -163,18 +230,6 @@ private:
      * Used to fetch atoms from disk.
      */
     BackingStore *backing_store;
-
-    /**
-     * signal connections used to keep track of atom removal in the AtomTable
-     */
-    boost::signals::connection removedAtomConnection; 
-    boost::signals::connection addedAtomConnection; 
-
-    /** Handler for the 'atom removed' signal */
-    void atomRemoved(AtomPtr);
-
-    /** Handler for the 'atom added' signal */
-    void atomAdded(Handle);
 
 public:
     /**

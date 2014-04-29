@@ -42,6 +42,8 @@ OCPlanningAgent::OCPlanningAgent(CogServer& cs) : Agent(cs)
 {
     this->cycleCount = 0;
 
+    startPlanning = false;
+
     // Force the Agent initialize itself during its first cycle.
     this->forceInitNextCycle();
 }
@@ -130,6 +132,7 @@ bool OCPlanningAgent::isMoveAction(string s)
         return false;
 }
 
+
 void OCPlanningAgent::run()
 {
     this->cycleCount = _cogserver.getCycleCount();
@@ -138,8 +141,28 @@ void OCPlanningAgent::run()
     OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
+    static int waitToStart =  0;
+
     if (!this->bInitialized)
         this->init();
+
+    if (! startPlanning)
+    {
+        if ( ( oac->getPAI().hasFinishFistTimeWorldPercetption()) &&
+             ( oac->getPsiDemandUpdaterAgent().get()->getHasPsiDemandUpdaterForTheFirstTime()))
+        {
+            // to wait for the PAI to finish more perception processing
+            waitToStart ++;
+
+            if (waitToStart > 10)
+            {
+                startPlanning = true;
+                std::cout<<"OCPlanningAgent start!" <<std::endl;
+            }
+        }
+
+        return;
+    }
 
     logger().debug( "OCPlanningAgent::%s - Executing run %d times",
                      __FUNCTION__, this->cycleCount);
@@ -237,8 +260,9 @@ void OCPlanningAgent::run()
         // currently, there is not any plan being executed.
         // run the planner to generate a new plan
 
+#ifdef HAVE_GUILE
         // Select the most important demand for now, by scm
-        SchemeEval & evaluator = SchemeEval::instance();
+        SchemeEval* evaluator = new SchemeEval();
         std::string scheme_expression;
 
         scheme_expression = "( update_selected_demand_goal )";
@@ -246,17 +270,18 @@ void OCPlanningAgent::run()
         //scheme_expression = "( get_most_critical_demand_goal )";
 
         // Run the Procedure that do planning
-         evaluator.eval(scheme_expression);
+        evaluator->eval(scheme_expression);
 
-        if ( evaluator.eval_error() )
+        if ( evaluator->eval_error() )
         {
             logger().error( "OCPlanningAgent::%s -getCurrentDemand() failed '%s'",
                              __FUNCTION__,
                              scheme_expression.c_str()
                           );
 
-            hSelectedDemandGoal = Handle::UNDEFINED;
         }
+        delete evaluator;
+#endif // HAVE_GUILE
 
         hSelectedDemandGoal =  AtomSpaceUtil::getReference(oac->getAtomSpace(),
                                         oac->getAtomSpace().getHandle(CONCEPT_NODE,
@@ -281,9 +306,11 @@ void OCPlanningAgent::run()
         // if planning failed
         if (currentOCPlanID == "")
         {
+            std::cout<<std::endl;
             std::cout<<"OCPlanner can not find any suitable plan for the selected demand goal:"
                      <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
                      <<std::endl;
+            std::cout<<std::endl;
         }
         else
         {

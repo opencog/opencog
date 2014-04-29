@@ -1,0 +1,364 @@
+/*
+ * tests/persist/sql/PersistUTest.cxxtest
+ *
+ * Test AtomSpace persistance.  Assumes BasicSaveUTest is passing.
+ *
+ * If this test is failing for you, then be sure to read the README in
+ * this directory, and also ../../opencong/persist/README, and then
+ * create and configure the SQL database as described there. Next,
+ * edit ../../lib/test-opencog.conf to add the database credentials
+ * (the username and passwd).
+ *
+ * Copyright (C) 2008, 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/TLB.h>
+#include <opencog/nlp/types/atom_types.h>
+#include <opencog/persist/sql/AtomStorage.h>
+#include <opencog/persist/sql/PersistModule.h>
+
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+
+#include <cstdio>
+
+using namespace opencog;
+
+class PersistUTest :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpace *_as;
+		PersistModule *_pm;
+		const char * dbname;
+		const char * username;
+		const char * passwd;
+
+		NodePtr n1[10];
+		NodePtr n2[10];
+		NodePtr n3[10];
+		LinkPtr l[10];
+		Handle h1[10];
+		Handle h2[10];
+		Handle h3[10];
+		Handle hl[10];
+
+	public:
+
+		PersistUTest(void);
+		~PersistUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+		void kill_data(void);
+
+		void freindlyFailMessage()
+		{
+			TS_FAIL("The PersistUTest failed.\n"
+				"This is probably because you do not have SQL installed\n"
+				"or configured the way that OpenCog expects.\n\n"
+				"SQL persistance is optional for OpenCog, so if you don't\n"
+				"want it or need it, just ignore this test failure.\n"
+				"Otherwise, please be sure to read opencong/persist/sql/README,\n"
+				"and create/configure the SQL database as described there.\n"
+				"Next, edit lib/opencog-test.conf appropriately, so as\n"
+				"to indicate the location of your database. If this is\n"
+				"done correctly, then this test will pass.\n");
+			exit(1);
+		}
+
+		void add_to_space(int, AtomSpace *, std::string id);
+		void check_space(int, AtomSpace *);
+		void check_empty(int, AtomSpace *);
+
+		void test_atomspace(void);
+};
+
+PersistUTest:: PersistUTest(void)
+{
+	try
+	{
+		config().load("opencog-test.conf");
+	}
+	catch (RuntimeException &e)
+	{
+		std::cerr << e.getMessage() << std::endl;
+	}
+	logger().setFilename(config()["LOG_FILE"]);
+	logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+	logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+	try {
+		// Get the database logins & etc from the config file.
+		dbname = config()["TEST_DB_NAME"].c_str();
+		username = config()["TEST_DB_USERNAME"].c_str();
+		passwd = config()["TEST_DB_PASSWD"].c_str();
+	}
+	catch (InvalidParamException &e)
+	{
+		freindlyFailMessage();
+	}
+
+	// Copy credential over to where cogserver can find them.
+	config().set("STORAGE", dbname);
+	config().set("STORAGE_USERNAME", username);
+	config().set("STORAGE_PASSWD", passwd);
+	cogserver().openDatabase();
+
+	Module* m = cogserver().getModule("opencog::PersistModule");
+	_pm = dynamic_cast<PersistModule*>(m);
+	_as = &cogserver().getAtomSpace();
+}
+
+/*
+ * This is called once before each test, for each test (!!)
+ */
+void PersistUTest::setUp(void)
+{
+	kill_data();
+}
+
+// ============================================================
+
+void PersistUTest::kill_data(void)
+{
+	AtomStorage* astore = new AtomStorage(dbname, username, passwd);
+	if (!astore->connected())
+	{
+		logger().info("setUp: cannot connect to database");
+		freindlyFailMessage();
+		exit(1);
+	}
+	logger().info("Connect to \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
+
+	// Trash the contents of the database.
+	astore->kill_data();
+
+	// Destructor also logs out of database (avoid warning in DB log file)
+	delete astore;
+}
+
+// ============================================================
+
+static void atomCompare(AtomPtr a, AtomPtr b)
+{
+	LinkPtr la(LinkCast(a));
+	LinkPtr lb(LinkCast(b));
+
+	TSM_ASSERT("No atom found", b != NULL);
+	if (NULL == b) return;
+
+	TSM_ASSERT_EQUALS("Type mistmatch", a->getType(), b->getType());
+
+	// Only links can have arity
+	if (la && lb)
+	{
+		TSM_ASSERT_EQUALS("Arity mistmatch", la->getArity(), lb->getArity());
+
+		if (0 < la->getArity())
+		{
+			std::vector<Handle> outa = la->getOutgoingSet();
+			std::vector<Handle> outb = lb->getOutgoingSet();
+			for (int i=0; i< la->getArity(); i++)
+			{
+				if (outa[i] != outb[i])
+				{
+					TSM_ASSERT_EQUALS("outgoing set mis-match", 
+						outa[i].value(), outb[i].value());
+				}
+			}
+		}
+	}
+
+	TruthValuePtr ta = a->getTruthValue();
+	TruthValuePtr tb = b->getTruthValue();
+	if (ta or tb)
+	{
+		TSM_ASSERT("Missing truth value", ta);
+		TSM_ASSERT("Missing truth value", tb);
+		if (ta and tb)
+		{
+			TSM_ASSERT("Truth value miscompare", (*ta)==(*tb));
+
+			if (not ((*ta) == (*tb)))
+			{
+				fprintf(stderr, "Error, truth value miscompare, "
+					"ma=%f mb=%f ca=%f cb=%f\n",
+					ta->getMean(), tb->getMean(), ta->getCount(), tb->getCount());
+			}
+		}
+	}
+}
+
+// ============================================================
+
+void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
+{
+	// Create an atom ... 
+	TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
+	h1[idx] = as->addNode(WORD_NODE, id + "fromNode", stv);
+	n1[idx] = NodeCast(h1[idx]);
+
+	TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 200+idx));
+	h2[idx] = as->addNode(WORD_NODE, id + "toNode", stv2);
+	n2[idx] = NodeCast(h2[idx]);
+
+	TruthValuePtr stv3(SimpleTruthValue::createTV(0.33, 300+idx));
+	h3[idx] = as->addNode(WORD_NODE, id + "third wheel", stv3);
+	n3[idx] = NodeCast(h3[idx]);
+
+	std::vector<Handle> hvec;
+	hvec.push_back(h1[idx]);
+	hvec.push_back(h2[idx]);
+	hvec.push_back(h3[idx]);
+
+	hl[idx] = as->addLink(WORD_SENSE_LINK, hvec);
+	l[idx] = LinkCast(hl[idx]);
+}
+
+void PersistUTest::check_space(int idx, AtomSpace *space)
+{
+	Handle hb1 = space->getHandle(n1[idx]->getType(), n1[idx]->getName());
+	atomCompare(h1[idx], hb1);
+
+	Handle hb2 = space->getHandle(n2[idx]->getType(), n2[idx]->getName());
+	atomCompare(h2[idx], hb2);
+
+	Handle hb3 = space->getHandle(n3[idx]->getType(), n3[idx]->getName());
+	atomCompare(h3[idx], hb3);
+
+	std::vector<Handle> hvec;
+	hvec.push_back(hb1);
+	hvec.push_back(hb2);
+	hvec.push_back(hb3);
+
+	Handle hlb = space->getHandle(hl[idx]->getType(), hvec);
+	atomCompare(hl[idx], hlb);
+}
+
+void PersistUTest::check_empty(int idx, AtomSpace *space)
+{
+	Handle hb1 = space->getHandle(n1[idx]->getType(), n1[idx]->getName());
+	TSM_ASSERT("Should not find this atom", hb1 == Handle::UNDEFINED);
+
+	Handle hb2 = space->getHandle(n2[idx]->getType(), n2[idx]->getName());
+	TSM_ASSERT("Should not find this atom", hb2 == Handle::UNDEFINED);
+
+	Handle hb3 = space->getHandle(n3[idx]->getType(), n3[idx]->getName());
+	TSM_ASSERT("Should not find this atom", hb3 == Handle::UNDEFINED);
+
+	std::vector<Handle> hvec;
+	hvec.push_back(h1[idx]);
+	hvec.push_back(h2[idx]);
+	hvec.push_back(h3[idx]);
+
+	Handle hlb = space->getHandle(hl[idx]->getType(), hvec);
+	TSM_ASSERT("Should not find this atom", hlb == Handle::UNDEFINED);
+}
+
+// ============================================================
+
+void PersistUTest::test_atomspace(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	TSM_ASSERT("Persist Module not loaded", _pm);
+
+	int idx = 0;
+	add_to_space(idx++, _as, "AA-aa-wow ");
+	add_to_space(idx++, _as, "BB-bb-wow ");
+	add_to_space(idx++, _as, "CC-cc-wow ");
+	add_to_space(idx++, _as, "DD-dd-wow ");
+	add_to_space(idx++, _as, "EE-ee-wow ");
+
+	/* Make sure UTF-8 works fine */
+	add_to_space(idx++, _as, "Попытка выбраться вызвала слабый стон ");
+	add_to_space(idx++, _as, "はにがうりだそうであってるのかはち ");
+
+	/* Verify that the atoms were added */
+	idx = 0;
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+
+	/* Push all atoms out to the SQL DB */
+	Request* req = cogserver().createRequest("sql-store");
+	cogserver().pushRequest(req);
+	cogserver().processRequests();
+
+	/* Remove atoms from the AtomSpace. This does not delete them from
+	 * the SQL storage, though; to do that, they must be deleted, not
+    * removed.
+	 */
+	_as->barrier();
+	_as->clear();
+	TSM_ASSERT("Non-empty atomspace", 0 == _as->getSize());
+
+	/* Verify that the atoms can still be fetched from storage. */
+	idx = 0;
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+
+	/* Do it again, for good luck.  */
+	_as->clear();
+	TSM_ASSERT("Non-empty atomspace", 0 == _as->getSize());
+
+	/* Verify that the atoms can still be fetched from storage. */
+	idx = 0;
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+
+	/* Kill data for good */
+	_as->clear();
+	TSM_ASSERT("Non-empty atomspace", 0 == _as->getSize());
+	kill_data();
+
+	/* Verify that the atoms no longer being found. */
+	idx = 0;
+	check_empty(idx++, _as);
+	check_empty(idx++, _as);
+	check_empty(idx++, _as);
+	check_empty(idx++, _as);
+	check_empty(idx++, _as);
+
+	/* Orderly shutdown avoids warning in Potgres log file */
+	req = cogserver().createRequest("sql-close");
+	cogserver().pushRequest(req);
+	cogserver().processRequests();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/* ============================= END OF FILE ================= */

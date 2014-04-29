@@ -35,9 +35,7 @@
 #include <opencog/server/CogServer.h>
 
 #include "PythonEval.h"
-#include "agent_finder_types.h"
-#include "agent_finder_api.h"
-
+#include "opencog/atomspace_api.h"
 
 using std::string;
 using std::vector;
@@ -47,32 +45,45 @@ using namespace opencog;
 //#define DPRINTF printf
 #define DPRINTF(...)
 
-PythonEval * PythonEval::singletonInstance = 0;
+PythonEval* PythonEval::singletonInstance = NULL;
 
-static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
+static void global_python_init()
 {
-    PROJECT_BINARY_DIR"/opencog/cython", // bindings
-    PROJECT_SOURCE_DIR"/opencog/python", // opencog modules written in python
-    PROJECT_SOURCE_DIR"/tests/cython",   // for testing
-    DATADIR"/python",                    // install directory
-    #ifndef WIN32
-    "/usr/local/share/opencog/python",
-    "/usr/share/opencog/python",
-    #endif // !WIN32
-    NULL
-};
+    static bool already_inited = false;
+
+    // Avoid hard crash if already inited.
+    if (already_inited) return;
+    already_inited = true;
+
+    // Start up Python (this init method skips registering signal
+    // handlers)
+    if (not Py_IsInitialized())
+        Py_InitializeEx(0);
+    if (not PyEval_ThreadsInitialized()) {
+        PyEval_InitThreads();
+        // Without this, pyshell hangs and does nothing.
+        PyEval_ReleaseLock();
+    }
+}
 
 void PythonEval::init(void)
 {
-    logger().info("PythonEval::%s Initialising python evaluator.", __FUNCTION__);
-    this->pending = false;
+    static bool eval_already_inited = false;
+
+    // Avoid hard crash if already inited.
+    if (eval_already_inited) return;
+    eval_already_inited = true;
+
+    global_python_init();
+
+    logger().info("PythonEval::%s Initialising python evaluator.",
+        __FUNCTION__);
 
     // Save a pointer to the main PyThreadState object
     this->mainThreadState = PyThreadState_Get();
 
     // Get a reference to the PyInterpreterState
     this->mainInterpreterState = this->mainThreadState->interp;
-
 
     // Getting the __main__ module
     this->pyRootModule = PyImport_AddModule("__main__");
@@ -84,47 +95,46 @@ void PythonEval::init(void)
                 );
 
     // Define the user function executer
-    PyRun_SimpleString("from opencog.atomspace import Handle, Atom\n"
-                       "import inspect\n"
-                       "def execute_user_defined_function(func, handle_uuid):\n"
-                       "    handle = Handle(handle_uuid)\n"
-                       "    args_list_link = ATOMSPACE[handle]\n"
-                       "    no_of_arguments_in_pattern = len(args_list_link.out)\n"
-                       "    no_of_arguments_in_user_fn = len(inspect.getargspec(func).args)\n"
-                       "    if no_of_arguments_in_pattern != no_of_arguments_in_user_fn:\n"
-                       "        raise Exception('Number of arguments in the function (' + "
-                       "str(no_of_arguments_in_user_fn) + ') does not match that of the "
-                       "corresponding pattern (' + str(no_of_arguments_in_pattern) + ').')\n"
-                       "    atom = func(*args_list_link.out)\n"
-                       "    if atom is None:\n"
-                       "        return\n"
-                       "    assert(type(atom) == Atom)\n"
-                       "    return atom.h.value()\n\n");
-
-    // No idea what this one does but it's needed
-    if (import_agent_finder() == -1) {
-        PyErr_Print();
-        throw RuntimeException(TRACE_INFO,"[PythonModule] Failed to load helper python module");
-    }
+    // XXX FIXME ... this should probably be defined in some py file
+    // that is loaded up by opencog.conf
+    PyRun_SimpleString(
+        "from opencog.atomspace import Handle, Atom\n"
+        "import inspect\n"
+        "def execute_user_defined_function(func, handle_uuid):\n"
+        "    handle = Handle(handle_uuid)\n"
+        "    args_list_link = ATOMSPACE[handle]\n"
+        "    no_of_arguments_in_pattern = len(args_list_link.out)\n"
+        "    no_of_arguments_in_user_fn = len(inspect.getargspec(func).args)\n"
+        "    if no_of_arguments_in_pattern != no_of_arguments_in_user_fn:\n"
+        "        raise Exception('Number of arguments in the function (' + "
+        "str(no_of_arguments_in_user_fn) + ') does not match that of the "
+        "corresponding pattern (' + str(no_of_arguments_in_pattern) + ').')\n"
+        "    atom = func(*args_list_link.out)\n"
+        "    if atom is None:\n"
+        "        return\n"
+        "    assert(type(atom) == Atom)\n"
+        "    return atom.h.value()\n\n");
 
     // Add ATOMSPACE to __main__ module
-    PyDict_SetItem(PyModule_GetDict(this->pyRootModule), PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
+    PyDict_SetItem(PyModule_GetDict(this->pyRootModule),
+                   PyBytes_FromString("ATOMSPACE"),
+                   this->getPyAtomspace());
 
-    // These are needed for calling Python/C API functions, definnes them once and for all
+    // These are needed for calling Python/C API functions, define 
+    // them once and for all
     pyGlobal = PyDict_New();
     pyLocal = PyDict_New();
 
     // Getting sys.path and keeping the refrence, used in this->addSysPath()
     sys_path = PySys_GetObject((char*)"path");
 
-    // Import pattern_match_functions which contains user defined functions
-    this->addModuleFromPath(PROJECT_SOURCE_DIR"/opencog/python/pattern_match_functions");
-
-    logger().info("PythonEval::%s Finished initialising python evaluator.", __FUNCTION__);
+    logger().info("PythonEval::%s Finished initialising python evaluator.",
+        __FUNCTION__);
 }
 
-PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace)
+PyObject* PythonEval::getPyAtomspace(AtomSpace* atomspace)
 {
+    init();
     PyObject * pAtomSpace;
 
     if (atomspace)
@@ -134,15 +144,13 @@ PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace)
 
     if (pAtomSpace != NULL)
         logger().debug("PythonEval::%s Get atomspace wrapped with python object",
-                       __FUNCTION__
-                       );
+                       __FUNCTION__);
     else {
         if (PyErr_Occurred())
             PyErr_Print();
 
-        logger().error("PythonEval::%s Failed to get atomspace wrapped with python object",
-                       __FUNCTION__
-                       );
+        logger().error("PythonEval::%s Failed to get atomspace "
+                       "wrapped with python object", __FUNCTION__);
     }
 
     return pAtomSpace;
@@ -178,46 +186,33 @@ PythonEval::~PythonEval()
 * Use a singleton instance to avoid initializing python interpreter
 * twice.
 */
-PythonEval& PythonEval::instance(AtomSpace * atomspace)
+PythonEval& PythonEval::instance(AtomSpace* atomspace)
 {
-    if (not Py_IsInitialized()){
-        logger().error() << "Python Interpreter isn't initialized";
-        throw RuntimeException(TRACE_INFO, "Python Interpreter isn't initialized");
-    }
-    if (not PyEval_ThreadsInitialized()){
-        logger().error() << "Python Threads isn't initialized";
-        throw RuntimeException(TRACE_INFO, "Python Threads isn't initialized");
-    }
-
     if (!singletonInstance)
     {
-        if (!atomspace) {
-            // Create our own local AtomSpace to send calls to
-            // the
-            // event loop (otherwise the getType cache breaks)
-            atomspace = new AtomSpace(cogserver().getAtomSpace());
-        }
+        if (!atomspace)
+            throw (RuntimeException(TRACE_INFO, "Null Atomspace!"));
         singletonInstance = new PythonEval(atomspace);
     }
-    else if (atomspace and &singletonInstance->_atomspace->getImpl() !=
-             &atomspace->getImpl())
+    else if (atomspace and singletonInstance->_atomspace != atomspace)
     {
-        // Someone is trying to initialize the Python
-        // interpreter
-        // on a different AtomSpace. because of the singleton
-        // design
-        // there is no easy way to support this...
+        // Someone is trying to initialize the Python interpreter on a
+        // different AtomSpace.  Because of the singleton design of the
+        // the CosgServer+AtomSpace, there is no easy way to support this...
         throw RuntimeException(TRACE_INFO, "Trying to re-initialize"
-                               " python interpreter with different AtomSpaceImpl ptr!");
+                " python interpreter with different AtomSpace ptr!");
     }
     return *singletonInstance;
 }
 
 Handle PythonEval::apply(const std::string& func, Handle varargs)
 {
-    PyObject *pError, *pyModule, *pFunc, *pExecFunc, *pArgs, *pUUID, *pValue = NULL;
+    PyObject *pError, *pyModule, *pFunc, *pExecFunc;
+    PyObject *pArgs, *pUUID, *pValue = NULL;
     string moduleName;
     string funcName;
+
+    init();
 
     // Get the correct module and extract the function name
     int index = func.find_first_of('.');
@@ -235,7 +230,8 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
 
     //    PyGILState_STATE _state = PyGILState_Ensure();
     // Get a refrence to the function
-    pFunc = PyDict_GetItem(PyModule_GetDict(pyModule), PyBytes_FromString(funcName.c_str()));
+    pFunc = PyDict_GetItem(PyModule_GetDict(pyModule),
+                           PyBytes_FromString(funcName.c_str()));
 
     OC_ASSERT(pFunc != NULL);
     if(!PyCallable_Check(pFunc))
@@ -245,7 +241,8 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     }
 
     // Get a refrence to our executer function
-    pExecFunc = PyDict_GetItem(PyModule_GetDict(this->pyRootModule), PyBytes_FromString("execute_user_defined_function"));
+    pExecFunc = PyDict_GetItem(PyModule_GetDict(this->pyRootModule),
+                    PyBytes_FromString("execute_user_defined_function"));
     OC_ASSERT(pExecFunc != NULL);
 
     // Create the argument list
@@ -260,9 +257,9 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     pValue = PyObject_CallObject(pExecFunc, pArgs);
     pError = PyErr_Occurred();
 
-    if(pError){
+    if (pError) {
         PyErr_Print();
-        logger().error() << PyBytes_AsString(PyObject_GetAttrString(pError, "message")) << std::endl;
+        logger().error() << PyBytes_AsString(PyObject_GetAttrString(pError, "message"));
         return Handle::UNDEFINED;
     }
 
@@ -281,6 +278,8 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
 
 std::string PythonEval::apply_script(const std::string& script)
 {
+    init();
+
     std::string result;
 //    PyObject* pError;
     //    PyGILState_STATE _state = PyGILState_Ensure();
@@ -320,6 +319,8 @@ std::string PythonEval::apply_script(const std::string& script)
 
 void PythonEval::addSysPath(std::string path)
 {
+    init();
+
     PyList_Append(this->sys_path, PyBytes_FromString(path.c_str()));
     //    PyRun_SimpleString(("sys.path += ['" + path + "']").c_str());
 }
@@ -330,6 +331,8 @@ void PythonEval::addSysPath(std::string path)
 */
 void PythonEval::add_module_directory(const boost::filesystem::path &p)
 {
+    init();
+
     vector<boost::filesystem::path> files;
     vector<boost::filesystem::path> pyFiles;
 
@@ -370,6 +373,8 @@ void PythonEval::add_module_directory(const boost::filesystem::path &p)
 */
 void PythonEval::add_module_file(const boost::filesystem::path &p)
 {
+    init();
+
     this->addSysPath(p.parent_path().c_str());
 
     string name;
@@ -413,28 +418,35 @@ void PythonEval::addModuleFromPath(std::string path)
 
 }
 
-std::string PythonEval::eval(std::string expr)
+std::string PythonEval::eval(const std::string& partial_expr)
 {
+    init();
+
     std::string result = "";
-    if (expr == "\n")
+    if (partial_expr == "\n")
     {
-        this->pending = false;
-        result = this->apply_script(this->expr);
-        this->expr = "";
+        _pending_input = false;
+        result = this->apply_script(_input_line);
+        _input_line = "";
     }
     else
     {
-        size_t size = expr.size();
-        size_t colun = expr.find_last_of(':');
+        // If the line ends with a colon, its not a complete expression,
+        // and we must wait for more input.
+        // XXX FIXME TODO: the same might be true if there was an open
+        // parenthesis, and no close parentheis.  This neds to be
+        // scanned for and fixed.
+        size_t size = partial_expr.size();
+        size_t colun = partial_expr.find_last_of(':');
         if (size-2 == colun)
-            pending = true;
+            _pending_input = true;
 
-        this->expr += expr;
+        _input_line += partial_expr;
 
-        if (not pending)
+        if (not _pending_input)
         {
-            result = this->apply_script(this->expr);
-            this->expr = "";
+            result = this->apply_script(_input_line);
+            _input_line = "";
         }
     }
     return result;

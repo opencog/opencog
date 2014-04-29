@@ -1,4 +1,3 @@
-
                              OpenCog NLP Tutorial
                              --------------------
                                  May 2009
@@ -28,49 +27,91 @@ http://www.abisource.com/projects/link-grammar/
    linkparser> John threw the ball
    Found 1 linkage (1 had no P.P. violations)
 	   Unique linkage, cost vector = (CORP=6.0467 UNUSED=0 DIS=0 AND=0 LEN=5)
-   
-             +-----Os----+
-      +--Ss--+     +--Ds-+
-      |      |     |     |
-   John.m threw.v the ball.n 
+	   
+- The Link Grammar Parser produces a Penn Tree Bank-style markup: 
+  (S (NP John) (VP threw (NP the ball)))
 
--- Links are Ss,Os,Ds
+   
+    +-------WV-------+-----Os-----+
+    +---Wd---+---Ss--+      +--Ds-+
+    |        |       |      |     |
+LEFT-WALL John.m threw.v-d the ball.s
+
+
+-- Links are WV, Wd, Ss, Os, Ds; in total there are about 100 link types, and many more subtypes.
 -- Ss == Subject, singular
 -- Os == Object, singular
 -- Ds == Determiner, singular
+-- The wall: Invisible word to anchor root of the sentence, i.e. head-noun & head-verb, and
+   to guarantee question inversion only at sentence beginning
+-- Wd == Wall-head-noun-link
+-- WV == Wall-head-verb-link
 
--- There are about 100 link types, and many more subtypes.
 -- Links are bidirectional; no head-word.
+-- Underlying assumption: Planarity, i.e. links do not cross.
 -- Words have "disjuncts" which fit like puzzle pieces:
    e.g. threw: S- & O+  means that verb "threw" must have
    subject on left, object on right.
 -- Parser arranges puzzle pieces until all fit together.
 -- Disjuncts form context-free grammar.
+-- For more information, review http://www.cs.cmu.edu/afs/cs.cmu.edu/project/link/pub/www/papers/ps/tr91-196.pdf
 
 
 RelEx is a dependency relation extractor
 ======================================== 
 http://opencog.org/wiki/RelEx
 
+-- Can be easiest installed following the instructions here:
+   https://github.com/opencog/relex/blob/master/install-scripts/README.md
+   
+-- In lieu of running a full VM on a non-Linux PC a Vagrant can be set up:
+   https://github.com/opencog/relex/blob/master/Vagrantfile
+
 -- Uses link-grammar input to obtain relations:
-   _subj (<<throw>>, <<John>>) 
-   _obj (<<throw>>, <<ball>>)
+    _obj(throw, ball)
+    _subj(throw, John)
 
 -- First word of the relation is the "head word",
    the second word is the "dependent" word:
    e.g. "John threw the red ball"
 
-    _amod (<<ball>>, <<red>>)
+    _amod(ball, red)
 
 -- Also performs feature tagging:
    Features are part-of-speech, tense, noun-number, etc.
 
-   pos (ball, noun)
-   noun_number (ball, singular)
-   DEFINITE-FLAG (ball, T)
-   pos (throw, verb)
-   tense (throw, past)
-   person-FLAG (John, T)
+    tense(throw, past)
+    subscript-TAG(throw, .v-d)
+    pos(throw, verb)
+    definite-FLAG(ball, T)
+    subscript-TAG(ball, .s)
+    pos(ball, noun)
+    noun_number(ball, singular)
+    gender(John, masculine)
+    definite-FLAG(John, T)
+    person-FLAG(John, T)
+    subscript-TAG(John, .m)
+    pos(John, noun)
+    noun_number(John, singular)
+    pos(the, det)
+    
+-- Parse can also be represented as a dependency graph:
+   [head [name <<throw>>
+       tense <<past>>
+       links [_subj [name <<John>>
+                     definite-FLAG <<T>>
+                     gender <<masculine>>
+                     noun_number <<singular>>
+                     person-FLAG <<T>>
+                     pos <<noun>>
+                     subscript-TAG <<.m>>]
+              _obj [name <<ball>>
+                    definite-FLAG <<T>>
+                    noun_number <<uncountable>>
+                    pos <<noun>>
+                    subscript-TAG <<.n-u>>]]
+       pos <<verb>>
+       subscript-TAG <<.v-d>>]]
 
 -- RelEx "extracts" information from the parse-graph by means of 
    "pattern matching" on subgraphs:
@@ -93,8 +134,12 @@ http://opencog.org/wiki/RelEx
 -- Pattern matching fairly closely tied to linguistics
 -- Pattern matching is on graphs, not hypergraphs.
 
--- RelEx has other assorted other functions too ... 
-   (framenet, pronoun resolution, entity identification, ...)
+-- RelEx uses the Hobbs algorithm for anaphora resolution (accuracy: 60%)
+   (can be improved with statistical measures, e.g. Hobbs score, etc.).
+-- RelEx has other assorted other functions (entity identification, etc.)
+-- Functions can be specified with flags, e.g. -a to resolve anaphoras, etc.
+-- RelEx parses 4x faster than Stanford Parser, generates Stanford-compatible output.
+-- RelEx2Logic output format for logical reasoning is under development.
 
 
 Parsed sentences as OpenCog hypergraphs
@@ -294,13 +339,18 @@ Common-sense Reasoning
 
 -- Starting point: Read in many sentences, e.g. from MIT ConceptNet,
    which has 800K ++ "common-sense" assertions: "Ice cream is made from milk"
-   Parse them.  Extract semantic triples. Remember them. Answer questions.
+   Parse them.  Extract semantic triples. Store them in a knowledge-base.
+   Answer questions (possibly with PLN).
 
 -- Use reasoning to answer: "Aristotle is a man. All men are mortal. 
    Is Aristotle mortal?"
 
 -- Use reasoning for sense-disambiguation: "I heard a bark in the night": 
    Can one hear "tree bark"? No. So "bark" is probably not "tree bark".
+   
+-- Use reasoning for anaphora resolution: "John saw a big apple under a tree. He ate it."
+   Can one "eat" a "tree"? Can a "tree" or an "apple" "eat"? No. So "John ate the apple."
+   Maybe look to DRT for implementation ideas (such as accessability).
 
 -- Concept formation, refinement:  Today: "What is an instrument?"
    Answer: "cymbal ukulele scale drum chronometer saxophone"
@@ -313,8 +363,6 @@ Common-sense Reasoning
 Important things this tutorial did not cover:
 =============================================
 -- Many link-grammar details, including post-grocessing, SAT solver
--- Framenet-like markup in RelEx
--- Pronoun/anaphora resolution in RelEx
 -- Word-sense disambiguation in OpenCog.
 
 
@@ -322,7 +370,6 @@ Fun queries:
 ============
 what is a tunnel?
 what is an instrument?
-
 
 
 Open Research Questions

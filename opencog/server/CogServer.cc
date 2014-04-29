@@ -36,16 +36,19 @@
 #include <boost/filesystem/operations.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/cython/PythonEval.h>
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/server/Agent.h>
 #include <opencog/server/ConsoleSocket.h>
 #include <opencog/server/NetworkServer.h>
 #include <opencog/server/SystemActivityTable.h>
 #include <opencog/server/Request.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
+#include <opencog/util/platform.h>
 
 #ifdef HAVE_SQL_STORAGE
 #include <opencog/persist/sql/PersistModule.h>
@@ -109,11 +112,17 @@ CogServer::CogServer() : cycleCount(1)
 {
     if (atomSpace) delete atomSpace;  // global static, declared in BaseServer.
     atomSpace = new AtomSpace();
-    _systemActivityTable.init(this);
+#ifdef HAVE_GUILE
+    // Tell scheme which atomspace to use.
+    SchemeEval* se = new SchemeEval(atomSpace);
+    delete se;
+#endif // HAVE_GUILE
+#ifdef HAVE_CYTHON
+    // Tell python which atomspace to use.
+    PythonEval::instance(atomSpace);
+#endif // HAVE_CYTHON
 
-    pthread_mutex_init(&messageQueueLock, NULL);
-    pthread_mutex_init(&processRequestsLock, NULL);
-    pthread_mutex_init(&agentsLock, NULL);
+    _systemActivityTable.init(this);
 
     agentsRunning = true;
 }
@@ -251,13 +260,12 @@ bool CogServer::customLoopRun(void)
 
 void CogServer::processRequests(void)
 {
-    pthread_mutex_lock(&processRequestsLock);
-    Request* request;
-    while ((request = popRequest()) != NULL) {
+    std::unique_lock<std::mutex> lock(processRequestsMutex);
+    while (0 < getRequestQueueSize()) {
+        Request* request = popRequest();
         request->execute();
         delete request;
     }
-    pthread_mutex_unlock(&processRequestsLock);
 }
 
 void CogServer::runAgent(AgentPtr agent)
@@ -308,14 +316,13 @@ void CogServer::runAgent(AgentPtr agent)
 
 void CogServer::processAgents(void)
 {
-    pthread_mutex_lock(&agentsLock);
+    std::unique_lock<std::mutex> lock(agentsMutex);
     AgentSeq::const_iterator it;
     for (it = agents.begin(); it != agents.end(); ++it) {
         AgentPtr agent = *it;
         if ((cycleCount % agent->frequency()) == 0)
             runAgent(agent);
     }
-    pthread_mutex_unlock(&agentsLock);
 }
 
 bool CogServer::registerAgent(const std::string& id, AbstractFactory<Agent> const* factory)
@@ -344,18 +351,17 @@ AgentPtr CogServer::createAgent(const std::string& id, const bool start)
 
 void CogServer::startAgent(AgentPtr agent)
 {
-    pthread_mutex_lock(&agentsLock);
+    std::unique_lock<std::mutex> lock(agentsMutex);
     agents.push_back(agent);
-    pthread_mutex_unlock(&agentsLock);
 }
 
 void CogServer::stopAgent(AgentPtr agent)
 {
-    pthread_mutex_lock(&agentsLock);
+    std::unique_lock<std::mutex> lock(agentsMutex);
     AgentSeq::iterator ai = std::find(agents.begin(), agents.end(), agent);
     if (ai != agents.end())
         agents.erase(ai);
-    pthread_mutex_unlock(&agentsLock);
+    lock.unlock();
     logger().debug("[CogServer] stopped agent \"%s\"", agent->to_string().c_str());
 }
 
@@ -371,7 +377,7 @@ void CogServer::destroyAllAgents(const std::string& id)
     // constrained to only running every N cognitive cycles. I.e. when
     // they have their own thread they'll have to be stopped and their threads
     // "joined"
-    pthread_mutex_lock(&agentsLock);
+    std::unique_lock<std::mutex> lock(agentsMutex);
     // place agents with classinfo().id == id at the end of the container
     AgentSeq::iterator last =
         std::partition(agents.begin(), agents.end(),
@@ -391,7 +397,6 @@ void CogServer::destroyAllAgents(const std::string& id)
     // after the 'agents.erase' call above, because the agent's destructor might
     // include a recursive call to destroyAllAgents
     // std::for_each(to_delete.begin(), to_delete.end(), safe_deleter<Agent>());
-    pthread_mutex_unlock(&agentsLock);
 }
 
 void CogServer::startAgentLoop(void)
@@ -439,38 +444,6 @@ void CogServer::stop()
     running = false;
 }
 
-Request* CogServer::popRequest()
-{
-
-    Request* request;
-
-    pthread_mutex_lock(&messageQueueLock);
-    if (requestQueue.empty()) {
-        request = NULL;
-    } else {
-        request = requestQueue.front();
-        requestQueue.pop();
-    }
-    pthread_mutex_unlock(&messageQueueLock);
-
-    return request;
-}
-
-void CogServer::pushRequest(Request* request)
-{
-    pthread_mutex_lock(&messageQueueLock);
-    requestQueue.push(request);
-    pthread_mutex_unlock(&messageQueueLock);
-}
-
-int CogServer::getRequestQueueSize()
-{
-    pthread_mutex_lock(&messageQueueLock);
-    int size = requestQueue.size();
-    pthread_mutex_unlock(&messageQueueLock);
-    return size;
-}
-
 bool CogServer::loadModule(const std::string& filename)
 {
 // TODO FIXME I guess this needs to be different for windows.
@@ -503,7 +476,9 @@ bool CogServer::loadModule(const std::string& filename)
 #endif
     const char* dlsymError = dlerror();
     if ((dynLibrary == NULL) || (dlsymError)) {
-        logger().error("Unable to load module \"%s\": %s", filename.c_str(), dlsymError);
+        // This is almost surely due to a user configuration error.
+        // User errors are always logged as warnings.
+        logger().warn("Unable to load module \"%s\": %s", filename.c_str(), dlsymError);
         return false;
     }
 
@@ -698,36 +673,8 @@ void CogServer::loadModules(const char* module_paths[])
 
 void CogServer::loadSCMModules(const char* config_paths[])
 {
-    // Load scheme modules specified in the config file
-    std::vector<std::string> scm_modules;
-    tokenize(config()["SCM_PRELOAD"], std::back_inserter(scm_modules), ", ");
 #ifdef HAVE_GUILE
-    std::vector<std::string>::const_iterator it;
-    for (it = scm_modules.begin(); it != scm_modules.end(); ++it)
-    {
-        int rc = 2;
-        const char * mod = (*it).c_str();
-        if ( config_paths != NULL ) {
-            for (int i = 0; config_paths[i] != NULL; ++i) {
-                boost::filesystem::path modulePath(config_paths[i]);
-                modulePath /= *it;
-                if (boost::filesystem::exists(modulePath)) {
-                    mod = modulePath.string().c_str();
-                    rc = load_scm_file(*atomSpace,mod);
-                    if (0 == rc) break;
-                }
-            }
-        } // if
-        if (rc)
-        {
-           logger().warn("Failed to load %s: %d %s",
-                 mod, rc, strerror(rc));
-        }
-        else
-        {
-            logger().info("Loaded %s", mod);
-        }
-    }
+    load_scm_files_from_config(*atomSpace, config_paths);
 #else /* HAVE_GUILE */
     logger().warn(
         "Server compiled without SCM support");
@@ -737,7 +684,11 @@ void CogServer::loadSCMModules(const char* config_paths[])
 void CogServer::openDatabase(void)
 {
     // No-op if the user has not configured a storage backend
-    if (!config().has("STORAGE")) return;
+    if (!config().has("STORAGE")) {
+        logger().warn("No database persistant storage configured! "
+                      "Use the STORAGE config keyword to define.");
+        return;
+    }
 
 #ifdef HAVE_SQL_STORAGE
     const std::string &dbname = config()["STORAGE"];
@@ -759,11 +710,11 @@ void CogServer::openDatabase(void)
         logger().warn("Failed to pre-load database, because persist module not found!\n");
         return;
     }
-    PersistModule *pm = static_cast<PersistModule *>(mod);
+    PersistModule *pm = dynamic_cast<PersistModule *>(mod);
     const std::string &resp = pm->do_open(NULL, args);
 
-    logger().info("Preload >>%s: %s as user %s\n",
-        resp.c_str(), dbname.c_str(), username.c_str());
+    logger().info("Preload %s as user %s msg: %s",
+        dbname.c_str(), username.c_str(), resp.c_str());
 
 #else /* HAVE_SQL_STORAGE */
     logger().warn(

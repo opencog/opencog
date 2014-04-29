@@ -3,7 +3,7 @@
  *
  * Author: Linas Vepstas February 2008
  *
- * Copyright (C) 2008,2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2008,2009,2014 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -27,6 +27,7 @@
 #include <map>
 #include <set>
 #include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/Link.h>
 
 namespace opencog {
 class PatternMatchEngine;
@@ -50,7 +51,7 @@ class PatternMatchCallback
 		 * Return false if the nodes match, else return
 		 * true. (i.e. return true if mis-match).
 		 */
-		virtual bool node_match(Handle node1, Handle node2) = 0;
+		virtual bool node_match(Handle& node1, Handle& node2) = 0;
 
 		/**
 		 * Called when a variable in the template pattern
@@ -61,7 +62,7 @@ class PatternMatchCallback
 		 * Return false if the grouding is acceptable, else
 		 * return true. (i.e. return true if mis-match).
 		 */
-		virtual bool variable_match(Handle node1, Handle node2) = 0;
+		virtual bool variable_match(Handle& node1, Handle& node2) = 0;
 
 		/**
 		 * Called when a link in the template pattern
@@ -72,7 +73,7 @@ class PatternMatchCallback
 		 * Return false if the links match, else return
 		 * true. (i.e. return true if mis-match).
 		 */
-		virtual bool link_match(Handle link1, Handle link2) = 0;
+		virtual bool link_match(LinkPtr& link1, LinkPtr& link2) = 0;
 
 		/**
 		 * Called when a solution is found. Should 
@@ -94,7 +95,7 @@ class PatternMatchCallback
 		 * Return true to discard the use of this clause as a possible 
 		 * grounding, return false to use this grounding.
 		 */
-		virtual bool clause_match(Handle pattrn_link_h, Handle grnd_link_h)
+		virtual bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h)
 		{
 			return false;
 		}
@@ -113,7 +114,7 @@ class PatternMatchCallback
 		 * Note that all required clauses will have been grounded before
 		 * any optional clauses are examined.
 		 */
-		virtual bool optional_clause_match(Handle pattrn, Handle grnd)
+		virtual bool optional_clause_match(Handle& pattrn, Handle& grnd)
 		{
 			return false;
 		}
@@ -143,16 +144,17 @@ class PatternMatchCallback
 		virtual void set_type_restrictions(VariableTypeMap &tm) {}
 
 		/**
-		 * Called to start search. Must iterate over the portion of the
-		 * atomspace in which the solution will be looked for.  This
-		 * callback can be used to limit how much of the atomspace is
-		 * searched, as well as controlling the initial starting points
-		 * for the search.
+		 * Called to initiaite the search. This callback is responsbile
+		 * for performing the top-most, outer loop of the search. That is,
+		 * it gets to pick the starting points for the search, thereby
+		 * possibly limiting the breadth of the search.  It may also cull
+		 * the variables, clauses, or negated clauses to remove those that
+		 * will not alter the final semantics of the search.
 		 */
 		virtual void perform_search(PatternMatchEngine *,
-		                            const std::vector<Handle> &vars,
-		                            const std::vector<Handle> &clauses,
-		                            const std::vector<Handle> &negations) = 0;
+		                            std::vector<Handle> &vars,
+		                            std::vector<Handle> &clauses,
+		                            std::vector<Handle> &negations) = 0;
 };
 
 } // namespace opencog

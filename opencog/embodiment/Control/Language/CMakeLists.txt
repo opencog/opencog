@@ -12,5 +12,6 @@ ADD_DEPENDENCIES(Language embodiment_atom_types)
 
 TARGET_LINK_LIBRARIES (Language
 	atomspace
+	embodiment-types
 )
 

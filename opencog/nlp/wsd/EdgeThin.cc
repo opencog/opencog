@@ -157,9 +157,8 @@ void EdgeThin::thin_parse(Handle h, int _keep)
  */
 static bool sense_compare(Handle ha, Handle hb)
 {
-    AtomSpace& as = atomspace();
-	double sa = as.getTV(ha)->getCount();
-	double sb = as.getTV(hb)->getCount();
+	double sa = ha->getTruthValue()->getCount();
+	double sb = hb->getTruthValue()->getCount();
 	if (sa > sb) return true;
 	return false;
 }

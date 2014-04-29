@@ -164,6 +164,7 @@ private:
 
 #ifdef HAVE_GUILE
     /** The static elements below will be replaced by a SchemePrimitive soon **/
+    static SchemeEval* evaluator;
     static SCM execute(SCM objectObserver, SCM figureSemeNode, SCM groundSemeNode, SCM ground2SemeNode);
 #endif
 

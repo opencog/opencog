@@ -39,7 +39,7 @@ class OutgoingTree
 		 * Return true if the indicated node occurs somewhere in the 
 		 * tree spanned by the outgoing set.
 		 */
-		inline bool is_node_in_tree(Handle tree, Handle node)
+		inline bool is_node_in_tree(Handle& tree, Handle& node)
 		{
 			tgt = node;
 			return in_tree(tree);
@@ -51,7 +51,9 @@ class OutgoingTree
 		{
 			if (tree == Handle::UNDEFINED) return false;
 			if (tree == tgt) return true;
-			return opencog::foreach_outgoing_handle(tree, &OutgoingTree::in_tree, this);
+			LinkPtr ltree(LinkCast(tree));
+			if (NULL == ltree) return false;
+			return opencog::foreach_outgoing_handle(ltree, &OutgoingTree::in_tree, this);
 		}
 };
 

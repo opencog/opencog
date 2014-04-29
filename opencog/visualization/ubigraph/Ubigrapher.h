@@ -72,8 +72,8 @@ private:
     bool atomRemoveSignal(AtomPtr); //! Signal handler for atom removals.
 
     bool listening; //! Whether the Ubigrapher is listening for AtomSpace signals.
-    boost::signals::connection c_add; //! Connection to add atom signals
-    boost::signals::connection c_remove; //! Connection to remove atom signals
+    boost::signals2::connection c_add; //! Connection to add atom signals
+    boost::signals2::connection c_remove; //! Connection to remove atom signals
 
     /** Whether the Ubigrapher has successfully connected to an Ubigraph
      * server.

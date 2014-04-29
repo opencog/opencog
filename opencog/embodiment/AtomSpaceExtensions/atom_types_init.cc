@@ -1,9 +1,7 @@
 /*
  * opencog/embodiment/AtomSpaceExtensions/atom_types_init.cc
  *
- * Copyright (C) 2002-2009 Novamente LLC
- * All Rights Reserved
- * Author(s): Welter Luigi
+ * Copyright (C) 2014 Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -26,46 +24,13 @@
 #include "opencog/spacetime/atom_types.definitions"
 #include "opencog/embodiment/AtomSpaceExtensions/atom_types.definitions"
 
-// library initialization
-#if defined(WIN32) && defined(_DLL)
-namespace win {
-#include <windows.h>
-}
+#define INHERITANCE_FILE "opencog/spacetime/atom_types.inheritance"
+#define INHERITANCE_FILE2 "opencog/embodiment/AtomSpaceExtensions/atom_types.inheritance"
+#define INITNAME embodiment_types_init
 
-win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
-                           win::DWORD fdwReason,     // reason for calling function
-                           win::LPVOID lpvReserved)  // reserved
-{
-    System::setModuleHandle(hinstDLL);
-    switch (fdwReason) {
-        case DLL_PROCESS_ATTACH:
-            #include "opencog/spacetime/atom_types.inheritance"
-            #include "opencog/embodiment/AtomSpaceExtensions/atom_types.inheritance"
-            break;
-        case DLL_THREAD_ATTACH:
-            break;
-        case DLL_THREAD_DETACH:
-            break;
-        case DLL_PROCESS_DETACH:
-            break;
-    }
-    return TRUE;
-}
-#else //if __GNUC__
-__attribute__((constructor))
-static void init(void)
-{
-    #include "opencog/spacetime/atom_types.inheritance"
-    #include "opencog/embodiment/AtomSpaceExtensions/atom_types.inheritance"
-}
-
-__attribute__((constructor))
-void fini(void)
-{
-}
-
-#endif
+#include <opencog/atomspace/atom_types.cc>
 
 using namespace opencog;
 TRIVIAL_MODULE(EmbodimentTypesModule)
 DECLARE_MODULE(EmbodimentTypesModule)
+

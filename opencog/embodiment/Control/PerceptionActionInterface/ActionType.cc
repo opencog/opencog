@@ -752,6 +752,31 @@ const ActionType& ActionType::DESTROY_BLOCK()
     static ActionType* result = new ActionType(DESTROY_BLOCK_CODE, "destroy_block", VECTOR, EMPTY, paramNames, "void destroy_block(Vector position)");
     return *result;
 }
+
+const ActionType& ActionType::STEP_FORWARD()
+{
+    initParamTypes();
+    static const char* paramNames[] = {};
+    static ActionType* result = new ActionType(STEP_FORWARD_CODE, "step_forward", EMPTY, EMPTY, paramNames, "void step_forward() (C++ to help humans, WTF)");
+    return *result;
+}
+
+const ActionType& ActionType::ROTATE_LEFT()
+{
+    initParamTypes();
+    static const char* paramNames[] = {};
+    static ActionType* result = new ActionType(ROTATE_LEFT_CODE, "rotate_left", EMPTY, EMPTY, paramNames, "rotate_left :: IO ()");
+    return *result;
+}
+
+const ActionType& ActionType::ROTATE_RIGHT()
+{
+    initParamTypes();
+    static const char* paramNames[] = {};
+    static ActionType* result = new ActionType(ROTATE_RIGHT_CODE, "rotate_right", EMPTY, EMPTY, paramNames, "rotate_right :: IO ()");
+    return *result;
+}
+
 const ActionType& ActionType::DO_NOTHING()
 {
     initParamTypes();
@@ -947,6 +972,11 @@ void ActionType::init()
 
         BUILD_BLOCK();
         DESTROY_BLOCK();
+
+        // For Santa Fe Trail problem
+        STEP_FORWARD();
+        ROTATE_LEFT();
+        ROTATE_RIGHT();
 
         DO_NOTHING();
 

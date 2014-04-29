@@ -319,15 +319,15 @@ int main(int argc, char** argv)
         
         // ================= pre scoring ====================
         ("pre-penalty",
-         value<float>(&fs_params.pre_penalty)->default_value(1.0f),
+         value<double>(&fs_params.pre_penalty)->default_value(1.0),
          "Activation penalty (see moses --help or man moses for more info)")
 
         ("pre-min-activation",
-         value<float>(&fs_params.pre_min_activation)->default_value(0.5f),
+         value<double>(&fs_params.pre_min_activation)->default_value(0.5),
          "Minimum activation (see moses --help or man moses for more info).\n")
 
         ("pre-max-activation",
-         value<float>(&fs_params.pre_max_activation)->default_value(1.0f),
+         value<double>(&fs_params.pre_max_activation)->default_value(1.0),
          "Maximum activation (see moses --help or man moses for more info).\n")
 
         ("pre-positive",

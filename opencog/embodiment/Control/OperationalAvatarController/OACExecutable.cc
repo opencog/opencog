@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 		}
 
         // setting unexpected handler in case a different exception from the
-        // especified ones is throw in the code
+        // specified ones is thrown in the code
         std::set_unexpected(oac_unexpected_handler);
         
         //char petName[256];

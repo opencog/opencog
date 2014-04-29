@@ -74,15 +74,15 @@ public:
     /**
      * Create a navigation planning action sequence(including walk, jump
      * etc.) that will be sent to OAC.
-     * @param actions Calculated path plan
-     * @param useExistingID If this method get called two or more times and this
-     * var is true, the new walks will be added to the same navigation plan
-     * @param tuNudge nudge actions will be added to walk plan if it is not null
+     * @param includingLastStep = true means the last step will step on the endPoint. When it just moves to an empty position or a tiny object, it's ok to be true.
+     *                                 If the endPoint is the loction of a big object, it's better to set includingLastStep to false so as to avoid stepping into it.
+     *
      */
     static bool createNavigationPlanAction( opencog::pai::PAI& pai,SpaceServer::SpaceMap& sm,
                                             const SpaceServer::SpaceMapPoint& startPoint,
                                             const SpaceServer::SpaceMapPoint& endPoint,
                                             opencog::pai::ActionPlanID _planID = "",
+                                            bool includingLastStep = true,
                                             float customSpeed = 0);
 
 private:
@@ -154,8 +154,8 @@ private:
                          Handle goBehind = Handle::UNDEFINED,
                          float walkSpeed = 0);
 
-    //! synthesize a PetAction obj from a subtree
-    opencog::pai::PetAction buildPetAction(sib_it from);
+    //! synthesize a AvatarAction obj from a subtree
+    opencog::pai::AvatarAction buildAvatarAction(sib_it from);
 
     //! convert string to camelCase
     std::string toCamelCase(const std::string& str);

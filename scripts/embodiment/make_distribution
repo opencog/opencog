@@ -45,7 +45,7 @@ $binDirH/opencog/embodiment/Control/OperationalAvatarController/opcHcTester \
 $binDirH/opencog/embodiment/Control/Procedure/combo_shell \
 $binDirH/opencog/embodiment/Control/Procedure/combo_shell_stdio \
 $binDirH/opencog/embodiment/Learning/LearningServer/learningServer \
-$binDirH/opencog/query/libquery.so \
+$binDirH/opencog/query/libQueryModule.so \
 $binDirH/opencog/server/libbuiltinreqs.so \
 $binDirH/opencog/shell/libscheme-shell.so \
 $binDirH/opencog/persist/sql/libpersist.so \
@@ -59,6 +59,7 @@ $binDirH/opencog/persist/sql/libpersist.so \
 ./unity_action_schema.combo \
 $pdh/opencog/embodiment/psi_util.scm \
 $pdh/opencog/embodiment/rules_core.scm \
+$pdh/opencog/embodiment/pm_test_corpus.scm \
 $pdh/opencog/embodiment/multiverse_rules.scm \
 $pdh/opencog/embodiment/unity_rules.scm \
 $pdh/opencog/embodiment/dialog_system.scm \
@@ -86,20 +87,12 @@ set schemeOpencogFiles [list \
 $pdh/opencog/scm/utilities.scm \
 $pdh/opencog/scm/file-utils.scm \
 $pdh/opencog/scm/persistence.scm \
-$pdh/opencog/scm/debug.scm \
+$pdh/opencog/scm/config.scm \
 $binDirH/opencog/atomspace/core_types.scm \
 $binDirH/opencog/nlp/types/nlp_types.scm \
 $binDirH/opencog/spacetime/spacetime_types.scm \
 $binDirH/opencog/dynamics/attention/attention_types.scm \
 $binDirH/opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm \
-]
-
-set schemeEmbodimentFiles [list \
-$pdh/opencog/embodiment/scm/predicates-frames.scm \
-$pdh/opencog/embodiment/scm/language-comprehension.scm \
-$pdh/opencog/embodiment/scm/reference-resolution-rules.scm \
-$pdh/opencog/embodiment/scm/command-resolution-rules.scm \
-$pdh/opencog/embodiment/scm/question-answering.scm \
 ]
 
 if {$type_dist == "dev"} {
@@ -150,14 +143,9 @@ exec cp -r $embodimentConf $distDir/embodiment.conf
 
 # copy scheme sripts
 exec mkdir -p $distDir/scm
-exec mkdir -p $distDir/scm/embodiment
 
 foreach file $schemeOpencogFiles {
     exec cp $file $distDir/scm/
-}
-
-foreach file $schemeEmbodimentFiles {
-    exec cp $file $distDir/scm/embodiment/
 }
 
 # copy python scripts of the monitor

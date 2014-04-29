@@ -79,7 +79,7 @@ void EventResponder::response(std::string actionName, Handle instanceNode, Handl
 #if HAVE_GUILE
 
     // Initialize scheme evaluator
-    SchemeEval & evaluator = SchemeEval::instance(&atomSpace);
+    SchemeEval* evaluator = new SchemeEval();
     std::string scheme_expression, scheme_return_value;
 
     unsigned long handleInt = instanceNode.value();
@@ -90,9 +90,9 @@ void EventResponder::response(std::string actionName, Handle instanceNode, Handl
 
     logger().debug("EventResponder::response scheme_expression = %s",scheme_expression.c_str());
     // Run the Procedure that update Demands and get the updated value
-    scheme_return_value = evaluator.eval(scheme_expression);
+    scheme_return_value = evaluator->eval(scheme_expression);
 
-    if ( evaluator.eval_error() ) {
+    if ( evaluator->eval_error() ) {
         logger().error( "EventResponder::response - Failed to execute scheme function '%s'",
                          scheme_expression.c_str()
                       );
@@ -105,13 +105,14 @@ void EventResponder::response(std::string actionName, Handle instanceNode, Handl
     scheme_expression = expression.str();
 
     logger().debug("EventResponder::response process attitudes. scheme_expression = %s",scheme_expression.c_str());
-    scheme_return_value = evaluator.eval(scheme_expression);
+    scheme_return_value = evaluator->eval(scheme_expression);
 
-    if ( evaluator.eval_error() ) {
+    if ( evaluator->eval_error() ) {
         logger().error( "EventResponder::response - Failed to execute scheme function '%s'",
                          scheme_expression.c_str()
                       );
     }
+    delete evaluator;
 
 #endif // HAVE_GUILE
 }

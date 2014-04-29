@@ -4,6 +4,8 @@
 #ifndef _OPENCOG_PYTHON_MODULE_H
 #define _OPENCOG_PYTHON_MODULE_H
 
+#if HAVE_CYTHON
+
 #include <string>
 
 #include <opencog/server/Agent.h>
@@ -107,5 +109,6 @@ public:
 
 } // namespace opencog
 
-#endif // _OPENCOG_SINGLE_AGENT_MODULE_H
+#endif // HAVE_CYTHON
+#endif // _OPENCOG_PYTHON_MODULE_H
 

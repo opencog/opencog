@@ -1,27 +1,23 @@
-# Build the query module
-INCLUDE_DIRECTORIES(
-	${PYTHON_INCLUDE_PATH}
-)
 
+# Build the query shlib
 ADD_LIBRARY(query SHARED
 	DefaultPatternMatchCB.cc
 	PatternMatch.cc
 	PatternMatchEngine.cc
-	QueryModule.cc
+	PatternSCM.cc
 )
 
 ADD_DEPENDENCIES(query
 	opencog_atom_types
 )
 
-IF (HAVE_GUILE)
-	# TARGET_LINK_LIBRARIES(query smob)
-ENDIF (HAVE_GUILE)
+TARGET_LINK_LIBRARIES(query atomspace execution)
 
-IF (HAVE_CYTHON)
-	TARGET_LINK_LIBRARIES(query PythonEval)
-	TARGET_LINK_LIBRARIES(query ${PYTHON_LIBRARIES})
-ENDIF (HAVE_CYTHON)
+# Build the query cogserver module
+ADD_LIBRARY(QueryModule SHARED
+	QueryModule.cc
+)
+TARGET_LINK_LIBRARIES(QueryModule query server)
 
 IF (WIN32)
    INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
@@ -34,7 +30,6 @@ ENDIF (WIN32)
 INSTALL (FILES
 	CrispLogicPMCB.h
 	DefaultPatternMatchCB.h
-	OutgoingTree.h
 	PatternMatch.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h

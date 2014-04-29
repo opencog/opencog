@@ -36,7 +36,6 @@
 
 using namespace opencog;
 
-// If you change this, make sure to update atomspace_details.pyx!
 #define KKK 800.0f
 
 SimpleTruthValue::SimpleTruthValue(strength_t m, count_t c)
@@ -71,6 +70,15 @@ confidence_t SimpleTruthValue::getConfidence() const
     return countToConfidence(count);
 }
 
+// This is the merge formula appropriate for PLN.
+TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other) const
+{
+    if (other->getConfidence() > getConfidence()) {
+        return other->clone();
+    }
+    return clone();
+}
+
 std::string SimpleTruthValue::toString() const
 {
     char buf[1024];
@@ -84,8 +92,18 @@ bool SimpleTruthValue::operator==(const TruthValue& rhs) const
 {
     const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&rhs);
     if (NULL == stv) return false;
-    if (mean != stv->mean) return false;
-    if (count != stv->count) return false;
+
+#define FLOAT_ACCEPTABLE_MEAN_ERROR 0.000001
+    if (FLOAT_ACCEPTABLE_MEAN_ERROR < fabs(mean - stv->mean)) return false;
+
+// Converting from confidence to count and back again using single-precision
+// float is a real accuracy killer.  In particular, 2/802 = 0.002494 but
+// converting back gives 800*0.002494/(1.0-0.002494) = 2.000188 and so
+// comparison tests can only be accurate to about 0.000188 or
+// thereabouts.
+#define FLOAT_ACCEPTABLE_COUNT_ERROR 0.0002
+
+    if (FLOAT_ACCEPTABLE_COUNT_ERROR < fabs(1.0 - (stv->count/count))) return false;
     return true;
 }
 
@@ -106,15 +124,3 @@ confidence_t SimpleTruthValue::countToConfidence(count_t cn)
 {
     return static_cast<confidence_t>(cn / (cn + KKK));
 }
-
-TruthValuePtr SimpleTruthValue::fromString(const char* tvStr)
-{
-    float mean, conf;
-    sscanf(tvStr, "(stv %f %f)", &mean, &conf);
-    DPRINTF("SimpleTruthValue::fromString(%s) => mean = %f, conf = %f\n", tvStr, mean, conf);
-    return std::make_shared<SimpleTruthValue>(static_cast<strength_t>(mean),
-                                static_cast<count_t>(confidenceToCount(conf)));
-}
-
-
-

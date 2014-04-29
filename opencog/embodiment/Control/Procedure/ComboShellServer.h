@@ -36,13 +36,14 @@ class ComboShellServer : public MessageCogServer
 public:
     static BaseServer* createInstance();
     ComboShellServer();
-    void init();
+    void init(const string& OAC_ID);
 
     // overrides
     bool customLoopRun();
     bool processNextMessage(Message *message);
 private:
     bool _waiting;
+    string _OAC_ID;
 }; // class
 } } // namespace opencog::messaging
 

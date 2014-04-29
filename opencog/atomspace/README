@@ -4,10 +4,46 @@
 
 The README contains miscellaneous notes about the atomspace. 
 
+======================================================================
 
-----------------------------------------------------------------------
-Adding atom types
-----------------------------------------------------------------------
+                   Merging Truth Values
+                   ---------------------
+
+This is a feature-bug, that needs fixing.  Currently, there is a very
+complicated semantics for merging truth values, depending on whether
+a pre-existing atom is being inserted into the atomspace, what its value
+is, and dealing with truth values fom atoms coming from backing store.
+There are three problems here:
+
+1) Its hard to enumerate all the different places that truth values
+   might be coming from; it scattered throughout the code.
+2) Its hard to determine what *should* happen, in any given situation,
+   (i.e. the actual merge to be performed depends on the two truth-value
+   types, their values, and where they came from. There are 4 truth value
+   types, and two places they come from, making 32 possibiliities, not
+   counting the value-dependency of merging...)
+3) Its very hard to determine if the actual code is doing the correct
+   thing, even if you think you know what 'correct' is. 
+
+Thus, the proposal here is to get rid of *all* automatic truth-value
+merging in this code, and make that the responsibility of the particular
+application. (PLN, or whomever).
+
+Anyway, for the most part, what the code usually does is this:
+-- For simple truth values, larger confidence wins.  This might not be
+   the correct behaviour, if the intent was to lower the confidence ...
+-- For count truth values, the counts are summed.  This may not be
+   correct, since the confidence slot might store entropy, which needs
+   adjusting after such a merge.
+-- Merger of any of the other types is undefined.
+
+
+======================================================================
+======================================================================
+======================================================================
+
+                      Adding atom types
+                      -----------------
 
 The ClassServer provides a primitive extension mechanism so that
 modules/agents/libraries may add new atom types to the default type
@@ -174,12 +210,18 @@ desire for a benchmark).
 
 The AtomTable uses a single global lock, and it potentially causes
 significant contention in a highly-threaded environment. This could be
-fixe by converting it to a reader-writer lock, using readers for the
+fixed by converting it to a reader-writer lock, using readers for the
 getHandles calls, and writer for the add/remove Atom calls.
 
 The atoms are all using a per-atom lock, and thus should have no
 contention (although this is a bit RAM-greedy, but what the heck --
 the alternative of one global lock would be a huge bottleneck.)
+
+The ClassServer() uses a reader-writer lock when fetching info.
+If would be great to make this lockless somehow, since, realistically,
+absolutely no one ever adds new atom types, once the cogserver has been
+initialized. i.e. we're using a lock to protect a case that never
+happens in real life.
 
 
 ======================================================================
@@ -330,6 +372,7 @@ a number of users of the raw access methods).
 ======================================================================
 ======================================================================
 ======================================================================
+
  Design Review Notes/Issues
  --------------------------
 Linas made the following observations/posted the following questions

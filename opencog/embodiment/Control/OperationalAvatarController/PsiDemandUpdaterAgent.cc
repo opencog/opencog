@@ -42,15 +42,15 @@ bool PsiDemandUpdaterAgent::Demand::runUpdater(AtomSpace & atomSpace)
 #if HAVE_GUILE
 
     // Initialize scheme evaluator
-    SchemeEval & evaluator = SchemeEval::instance(&atomSpace);
+    SchemeEval* evaluator = new SchemeEval();
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression = "( " + demandUpdater + " )";
 
     // Run the Procedure that update Demands and get the updated value
-    scheme_return_value = evaluator.eval(scheme_expression);
+    scheme_return_value = evaluator->eval(scheme_expression);
 
-    if ( evaluator.eval_error() ) {
+    if ( evaluator->eval_error() ) {
         logger().error( "PsiDemandUpdaterAgent::Demand::%s - Failed to execute '%s'",
                          __FUNCTION__, scheme_expression.c_str());
 
@@ -108,7 +108,7 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
 #if HAVE_GUILE
 
     // Initialize scheme evaluator
-    SchemeEval & evaluator = SchemeEval::instance(&atomSpace);
+    SchemeEval* evaluator = new SchemeEval();
     std::string scheme_expression, scheme_return_value;
 
     // Store the updated Demand levels to AtomSpace
@@ -123,12 +123,13 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
                         ")";
 
     // Run the scheme procedure
-    scheme_return_value = evaluator.eval(scheme_expression);
+    scheme_return_value = evaluator->eval(scheme_expression);
 
-    if ( evaluator.eval_error() ) {
+    if ( evaluator->eval_error() ) {
         logger().error( "PsiDemandUpdaterAgent::Demand::%s - Failed to execute '%s'",
                          __FUNCTION__, scheme_expression.c_str());
 
+        delete evaluator;
         return false;
     }
 
@@ -150,14 +151,16 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
                          ")";
 
     // Run the scheme procedure
-    scheme_return_value = evaluator.eval(scheme_expression);
+    scheme_return_value = evaluator->eval(scheme_expression);
 
-    if ( evaluator.eval_error() ) {
+    if ( evaluator->eval_error() ) {
         logger().error( "PsiDemandUpdaterAgent::Demand::%s - Failed to execute '%s' for demand '%s'",
                          __FUNCTION__, scheme_expression.c_str(), this->demandName.c_str());
 
+        delete evaluator;
         return false;
     }
+    delete evaluator;
 
     // Store the result and update TruthValue of EvaluationLinkDemandGoal and EvaluationLinkFuzzyWithin
     // TODO: Use PLN forward chainer to handle this?
@@ -195,6 +198,10 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
 
     return true;
 
+#else // HAVE_GUILE
+    logger().error("PsiDemandUpdaterAgent::Demand::%s - guile is required",
+                   __FUNCTION__);
+    return false;
 #endif // HAVE_GUILE
 
 }
@@ -332,6 +339,8 @@ void PsiDemandUpdaterAgent::init()
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
+
+    hasPsiDemandUpdaterForTheFirstTime = false;
 }
 
 void PsiDemandUpdaterAgent::run()
@@ -373,6 +382,8 @@ void PsiDemandUpdaterAgent::run()
 
     // Send the truth values of demand goals to the virtual world
     this->sendUpdatedValues();
+
+    hasPsiDemandUpdaterForTheFirstTime = true;
 
 #ifdef HAVE_ZMQ
     // Publish updated Demand values via ZeroMQ

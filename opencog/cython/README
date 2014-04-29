@@ -3,7 +3,7 @@ Welcome to the overview for the Python bindings for OpenCog.
 Written by Joel Pitt <joel@opencog.org> - feedback encouraged.
 
 Requirements:
-* Python 2.6 or later - these bindings may work with earlier version, but they have not been tested at all.
+* Python 2.7 - these bindings may work with earlier versions, but they have not been tested at all.
 * Cython 0.14 or later. http://www.cython.org/
 * Nosetests - for running unit tests.
 
@@ -22,11 +22,11 @@ Currently the package structure looks like this:
  opencog.atomspace
  opencog.atomspace.types
  opencog.cogserver
- opencog.pymoses (in progress)
+ opencog.pymoses
+ opencog.scheme_wrapper
 
 Eventually, when other components of OpenCog are accessible, they'll follow a similar pattern:
 
- opencog.pln
  opencog.rules
 
 == Tutorial == 
@@ -122,7 +122,7 @@ Lets create our first link:
 </source>
 
 Up until now we've ignored [[Truthvalues]]. The TruthValue implementation is not
-entirely complete.Currently the bindings only support "[[SimpleTruthValues]]",
+entirely complete. Currently the bindings only support "[[SimpleTruthValues]]",
 since these are the most frequently used.
 
 <source lang="python">
@@ -136,7 +136,7 @@ since these are the most frequently used.
 
 Next up is queries to the AtomSpace. What if we want to iterate over all the
 ConceptNodes we've added so far? Most of the AtomSpace getHandleSet methods
-have be wrapped and also have more descriptive names for each variant (instead
+have been wrapped and also have more descriptive names for each variant (instead
 of the numerous overloads in the C++ API, that IMO makes things confusing).
 
 <source lang="python">
@@ -268,7 +268,6 @@ code.
 
 === TODO ===
 
-* Support VersionHandles and contextual truth values
 * Support add/remove signals (but depends on changing from boost::signals to ZeroMQ messaging first)
+  (Why? ZMQ messgng is about 50x-200x slower than boost::signals ... )
 * It'd also be nice to somehow import types using "<tt>from opencog.atomspace.types import ConceptNode</tt>" (or use a * import)
-

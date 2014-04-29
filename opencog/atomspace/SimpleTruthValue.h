@@ -28,9 +28,6 @@
 #define _OPENCOG_SIMPLE_TRUTH_VALUE_H_
 
 #include <opencog/atomspace/TruthValue.h>
-#ifdef ZMQ_EXPERIMENT
-#include "ProtocolBufferSerializer.h"
-#endif
 
 namespace opencog
 {
@@ -41,16 +38,9 @@ namespace opencog
 class SimpleTruthValue;
 typedef std::shared_ptr<SimpleTruthValue> SimpleTruthValuePtr;
 
-//! a TruthValue that stores a mean and the number of observations (strength and confidance)
+//! a TruthValue that stores a mean and the number of observations (strength and confidence)
 class SimpleTruthValue : public TruthValue
 {
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-
-private:
-    SimpleTruthValue() {};
-#endif
-
 protected:
 
     /// Mean of the strength of the TV over all observations
@@ -68,8 +58,6 @@ public:
     SimpleTruthValue(SimpleTruthValue const&);
 
     virtual bool operator==(const TruthValue& rhs) const;
-
-    static TruthValuePtr fromString(const char*);
 
     /// Heuristic to compute the count given the confidence (according
     /// to the PLN book)
@@ -89,6 +77,15 @@ public:
     strength_t getMean() const;
     count_t getCount() const;
     confidence_t getConfidence() const;
+
+    /**
+     * Truth value merge formula, as specified by PLN.
+     *
+     * Currently tv1.merge(tv2) works as follows:
+     * the resulting TV is either tv1 or tv2, the result being the one
+     * with the highest confidence.
+     */
+    TruthValuePtr merge(TruthValuePtr) const;
 
     static SimpleTruthValuePtr createSTV(strength_t mean, count_t count)
     {

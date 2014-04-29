@@ -26,7 +26,6 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/CountTruthValue.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
@@ -165,24 +164,6 @@ std::string SchemeSmob::tv_to_string(const TruthValue *tv)
 			ret += buff;
 			return ret;
 		}
-		case COMPOSITE_TRUTH_VALUE:
-		{
-			const CompositeTruthValue *mtv = static_cast<const CompositeTruthValue *>(tv);
-			ret += "(mtv ";
-			ret += tv_to_string(mtv->getPrimaryTV().get());
-
-			foreach(VersionHandle vh, mtv->vh_range())
-			{
-				ret += "(";
-				ret += vh_to_string(&vh);
-				const TruthValuePtr vtv = mtv->getVersionedTV(vh);
-				ret += " ";
-				ret += tv_to_string(vtv.get());
-				ret += ")";
-			}
-			ret += ")";
-			return ret;
-		}
 		default:
 			return ret;
 	}
@@ -237,29 +218,6 @@ SCM SchemeSmob::ss_new_itv (SCM slower, SCM supper, SCM sconfidence)
 	return take_tv(tv);
 }
 
-SCM SchemeSmob::ss_new_mtv (SCM svh, SCM stv)
-{
-	VersionHandle *vh = verify_vh(svh, "cog-new-mtv");
-	TruthValue *tv = verify_tv(stv, "cog-new-mtv", 2);
-
-	CompositeTruthValue *mtv = new CompositeTruthValue(tv->clone(), *vh);
-	return take_tv(mtv);
-}
-
-SCM SchemeSmob::ss_set_vtv (SCM smtv, SCM svh, SCM stv)
-{
-	CompositeTruthValue *mtv = 
-		dynamic_cast<CompositeTruthValue*>(verify_tv(smtv, "cog-set-vtv!"));
-	if (!mtv)
-		scm_wrong_type_arg_msg("cog-set-vtv!", 1, smtv, "opencog composite truth value");
-
-	VersionHandle *vh = verify_vh(svh, "cog-set-vtv!", 2);
-	TruthValue *tv = verify_tv(stv, "cog-set-vtv!", 3);
-
-	mtv->setVersionedTV(tv->clone(), *vh);
-	return smtv;
-}
-
 /* ============================================================== */
 /**
  * Return true if the scm is a truth value
@@ -309,11 +267,6 @@ SCM SchemeSmob::ss_itv_p (SCM s)
 	return tv_p(s, INDEFINITE_TRUTH_VALUE);
 }
 
-SCM SchemeSmob::ss_mtv_p (SCM s)
-{
-	return tv_p(s, COMPOSITE_TRUTH_VALUE);
-}
-
 /* ============================================================== */
 
 TruthValue * SchemeSmob::verify_tv(SCM stv, const char *subrname, int pos)
@@ -343,12 +296,15 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			SimpleTruthValue *stv = static_cast<SimpleTruthValue *>(tv);
 			SCM mean = scm_from_double(stv->getMean());
 			SCM conf = scm_from_double(stv->getConfidence());
+			SCM count = scm_from_double(stv->getCount());
 			SCM smean = scm_from_locale_symbol("mean");
 			SCM sconf = scm_from_locale_symbol("confidence");
+			SCM scount = scm_from_locale_symbol("count");
 	
 			SCM rc = SCM_EOL;
 			rc = scm_acons(sconf, conf, rc);
 			rc = scm_acons(smean, mean, rc);
+			rc = scm_acons(scount, count, rc);
 			return rc;
 		}
 		case COUNT_TRUTH_VALUE:
@@ -381,41 +337,6 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			rc = scm_acons(sconf, conf, rc);
 			rc = scm_acons(supper, upper, rc), 
 			rc = scm_acons(slower, lower, rc);
-			return rc;
-		}
-		case COMPOSITE_TRUTH_VALUE:
-		{
-			CompositeTruthValue *mtv = static_cast<CompositeTruthValue *>(tv);
-			TruthValuePtr ptv = mtv->getPrimaryTV();
-			TruthValue *nptv = ptv->rawclone();
-			SCM sptv = take_tv(nptv);
-
-			SCM sprimary = scm_from_locale_symbol("primary");
-			SCM sversion = scm_from_locale_symbol("versions");
-			SCM svhandle = scm_from_locale_symbol("vhandle");
-			SCM stvalue = scm_from_locale_symbol("tvalue");
-
-			// Loop over all the version handles.
-			SCM vers = SCM_EOL;
-			foreach(VersionHandle vh, mtv->vh_range())
-			{
-				SCM one = SCM_EOL;
-
-				VersionHandle *nvh = new VersionHandle(vh);
-				SCM svh = take_vh(nvh);
-				one = scm_acons(svhandle, svh, one);
-
-				TruthValuePtr vtv = mtv->getVersionedTV(vh);
-				TruthValue *nvtv = vtv->rawclone();
-				SCM svtv = take_tv(nvtv);
-				one = scm_acons(stvalue, svtv, one);
-
-				vers = scm_cons(one, vers);
-			}
-
-			SCM rc = SCM_EOL;
-			rc = scm_acons(sversion, vers, rc);
-			rc = scm_acons(sprimary, sptv, rc);
 			return rc;
 		}
 		default:

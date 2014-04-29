@@ -32,12 +32,12 @@
 #include <set>
 #include <string>
 
-#include <boost/signal.hpp>
+#include <boost/signals2.hpp>
 
 #include <opencog/util/exceptions.h>
 
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
+#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/types.h>
 
@@ -52,10 +52,16 @@ namespace opencog
 
 class Link;
 typedef std::shared_ptr<Link> LinkPtr;
-typedef std::set<LinkPtr> IncomingSet;
+typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
 typedef std::weak_ptr<Link> WinkPtr;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
-typedef boost::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
+typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
+
+// We use a std:vector instead of std::set for IncomingSet, because
+// virtually all access will be either insert, or iterate, so we get
+// O(1) performance. We use std::set for WincomingSet, because we want
+// both good insert and good remove performance.  Note that sometimes
+// incoming sets can be huge (millions of atoms).
 
 /**
  * Atoms are the basic implementational unit in the system that
@@ -162,6 +168,9 @@ private:
     //! Unsets removal flag.
     void unsetRemovalFlag();
 
+    /** Change the Very-Long-Term Importance */
+    void chgVLTI(int unit);
+
 public:
 
     virtual ~Atom();
@@ -171,6 +180,14 @@ public:
      * @return The type of the atom.
      */
     inline Type getType() const { return _type; }
+
+    /** Basic predicate */
+    bool isType(Type t, bool subclass) const
+    {
+        Type at(getType());
+        if (not subclass) return t == at;
+        return classserver().isA(at, t);
+    }
 
     /** Returns the handle of the atom.
      *
@@ -185,26 +202,48 @@ public:
      * @return The const reference to the AttentionValue object
      * of the atom.
      */
-    AttentionValuePtr getAttentionValue() const { return _attentionValue; }
+    AttentionValuePtr getAttentionValue();
 
     //! Sets the AttentionValue object of the atom.
     void setAttentionValue(AttentionValuePtr) throw (RuntimeException);
+
+    /** Change the Short-Term Importance */
+    void setSTI(AttentionValue::sti_t stiValue)
+    {
+        /* Make a copy */
+        AttentionValuePtr old_av = getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            stiValue,
+            old_av->getLTI(),
+            old_av->getVLTI());
+        setAttentionValue(new_av);
+    }
+
+    /** Change the Long-term Importance */
+    void setLTI(AttentionValue::lti_t ltiValue)
+    {
+        AttentionValuePtr old_av = getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            ltiValue,
+            old_av->getVLTI());
+        setAttentionValue(new_av);
+    }
+
+    /** Increase the Very-Long-Term Importance by 1 */
+    void incVLTI() { chgVLTI(+1); }
+
+    /** Decrease the Very-Long-Term Importance by 1 */
+    void decVLTI() { chgVLTI(-1); }
 
     /** Returns the TruthValue object of the atom.
      *
      * @return The const referent to the TruthValue object of the atom.
      */
-    TruthValuePtr getTruthValue() const { return _truthValue; }
+    TruthValuePtr getTruthValue();
 
     //! Sets the TruthValue object of the atom.
     void setTruthValue(TruthValuePtr);
-
-    //! The get,setTV methods deal with versioning. Yuck.
-    void setTV(TruthValuePtr, VersionHandle = NULL_VERSION_HANDLE);
-    TruthValuePtr getTV(VersionHandle = NULL_VERSION_HANDLE) const;
-
-    /** Change the primary TV's mean */
-    void setMean(float) throw (InvalidParamException);
 
     /** merge truth value into this */
     void merge(TruthValuePtr);
@@ -231,13 +270,46 @@ public:
         return result;
     }
 
+    /**
+     * Returns the set of atoms with a given target handle in their
+     * outgoing set (atom type and its subclasses optionally).
+     * That is, returns the incoming set of Handle h, with some optional
+     * filtering.
+     *
+     * @param The handle that must be in the outgoing set of the atom.
+     * @param The optional type of the atom.
+     * @param Whether atom type subclasses should be considered.
+     * @return The set of atoms of the given type with the given handle
+     *         in their outgoing set.
+     */
+    template <typename OutputIterator> OutputIterator
+    getIncomingSetByType(OutputIterator result,
+                         Type type, bool subclass = false)
+    {
+        if (NULL == _incoming_set) return result;
+        std::lock_guard<std::mutex> lck(_mtx);
+        // Sigh. I need to compose copy_if with transform. I could
+        // do this wih boost range adaptors, but I don't feel like it.
+        auto end = _incoming_set->_iset.end();
+        for (auto w = _incoming_set->_iset.begin(); w != end; w++)
+        {
+            Handle h(w->lock());
+            if (h and h->isType(type, subclass)) {
+                *result = h;
+                result ++;
+            }
+        }
+        return result;
+    }
+
 
     /** Returns a string representation of the node.
      *
      * @return A string representation of the node.
+     * cannot be const, because observing the TV and AV requires a lock.
      */
-    virtual std::string toString(std::string indent = "") const = 0;
-    virtual std::string toShortString(std::string indent = "") const = 0;
+    virtual std::string toString(std::string indent = "") = 0;
+    virtual std::string toShortString(std::string indent = "") = 0;
 
     /** Returns whether two atoms are equal.
      *
@@ -250,6 +322,8 @@ public:
      * @return true if the atoms are different, false otherwise.
      */
     virtual bool operator!=(const Atom&) const = 0;
+
+
 };
 
 /** @}*/

@@ -30,7 +30,6 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
@@ -76,7 +75,9 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 
 	void setUp(void);
 
-	void tearDown(void) { }
+	void tearDown(void);
+
+	void test_utf8(void);
 
 	// TVs
 	void check_truth_value(const TruthValue& tv);
@@ -98,11 +99,9 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 
 	// Relex links
 	void check_parse_link(const char *, Type, const char *, const char *, const char *, const char *, float, float);
-	void check_frame_link(const char *, Type, const char *, const char *, const char *, const char *, float, float);
 	void test_parse_link(void);
 	void test_lemma_link(void);
 	void test_part_of_speech_link(void);
-	void test_frame_element_link(void);
 };
 
 /*
@@ -112,7 +111,7 @@ void BasicSCMUTest::setUp(void)
 {
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
-	eval = &SchemeEval::instance(as);
+	eval = new SchemeEval();
 
 	// Proper UTF-8 behaviour requires the right locale.
 	// Do not use LC_ALL, as otherwise the printing of the numeric
@@ -123,10 +122,33 @@ void BasicSCMUTest::setUp(void)
 	eval->eval("(setlocale LC_CTYPE \"\")");
 	eval->clear_pending();
 }
+void BasicSCMUTest::tearDown(void)
+{
+	delete eval;
+	eval = NULL;
+}
 
 // ============================================================
 
-void BasicSCMUTest::check_truth_value(const TruthValue& tv) {
+void BasicSCMUTest::test_utf8(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(display \"Ćićolina\")");
+	bool eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to eval a UTF-8 string", !eval_err);
+
+	eval->eval("(display \"Lietuvos žydų kilmės žurnalistas\")");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to eval a UTF-8 string", !eval_err);
+}
+
+// ============================================================
+
+void BasicSCMUTest::check_truth_value(const TruthValue& tv)
+{
 	std::cout << "check_truth_value(" << tv << ")" << std::endl;
 
 	// added check_truth_value_node in the atomspace
@@ -156,8 +178,6 @@ void BasicSCMUTest::check_truth_value(const TruthValue& tv) {
 		   << " " << itv.getConfidence();
 		break;
 	}
-	case COMPOSITE_TRUTH_VALUE:
-		// @todo
 	default:
 		ss << "Wrong Truth Value Type (" << tvt << ")";
 		TSM_ASSERT(ss.str().c_str(), false);
@@ -379,8 +399,8 @@ void BasicSCMUTest::test_link_tv_setting(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// Create initially with one set of trtuh values
-	Handle inh = eval->eval_h("(ListLink (stv 0.75 0.5) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
+	// Create initially with one set of truth values
+	Handle inh = eval->eval_h("(ListLink (stv 0.75 0.25) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
 	bool eval_err = eval->eval_error();
 	eval->clear_pending();
 	TSM_ASSERT("Failed to create a link", !eval_err);
@@ -389,14 +409,29 @@ void BasicSCMUTest::test_link_tv_setting(void)
 	float m = tv->getMean();
 	float c = tv->getConfidence();
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.75), 1.0e-6);
-	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.5), 1.0e-6);
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.25), 1.0e-6);
 
-	// Create it again, but with differeent truth values
-	// Make sure the new values grab hold.
+	// Add it again, but with stronger confidence.
+	// Make sure the new values grab hold (because tv merge should use
+	// the stronger confidence value).
 	inh = eval->eval_h("(ListLink (stv 0.6 0.42) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
 	eval_err = eval->eval_error();
 	eval->clear_pending();
-	TSM_ASSERT("Failed to create a link", !eval_err);
+	TSM_ASSERT("Failed to update a link", !eval_err);
+
+	tv = as->getTV(inh);
+	m = tv->getMean();
+	c = tv->getConfidence();
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.6), 1.0e-6);
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.42), 1.0e-6);
+
+	// Add it again, but with weaker confidence.
+	// Make sure the new values DO NOT grab hold (because tv merge
+	// should use the stronger confidence value).
+	inh = eval->eval_h("(ListLink (stv 0.9 0.16) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to update a link", !eval_err);
 
 	tv = as->getTV(inh);
 	m = tv->getMean();
@@ -434,8 +469,8 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 		float m = tv->getMean();
 		float c = tv->getConfidence();
 		//the link has TV 0.0
-		TS_ASSERT_EQUALS(m,0.0);
-		TS_ASSERT_EQUALS(c,0.0);
+		TS_ASSERT_EQUALS(m, 1.0); // DEFAULT_TV is true with no confidence
+		TS_ASSERT_EQUALS(c, 0.0);
 	}
 
 	Type t1 = classserver().getType(nodename1);
@@ -469,68 +504,6 @@ void BasicSCMUTest::test_lemma_link()
 	check_parse_link("LemmaLink", LEMMA_LINK, "WordInstanceNode", "WordNode",
 	                 "blue@6fdd848e-a69c-4b6c-a9a2-376e09789096",
 	                 "blue", 1.0, 1.0);
-
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-// ============================================================
-
-void BasicSCMUTest::check_frame_link(const char * tipo, Type type,
-                               const char * nodename1, const char * nodename2,
-                               const char * value1, const char * value2,
-                               float truth, float conf)
-{
-	printf("check_frame_link(%s,%s,%s,%f,%f)\n",
-	        tipo, nodename1, nodename2, truth, conf);
-
-	char buff[500];
-	snprintf(buff, 500, "(%s (%s \"%s\") (%s \"%s\") )",
-	         tipo, nodename1, value1, nodename2, value2);
-
-	eval->eval(buff);
-	bool eval_err = eval->eval_error();
-	eval->clear_pending();
-	TSM_ASSERT("Failed to create a frame link", !eval_err);
-
-	HandleSeq links;
-	as->getHandlesByType(back_inserter(links), type, true);
-	//printf("Number of links found: %d\n",links.size());
-
-	HandleSeq::const_iterator i;
-	for (i = links.begin(); i != links.end(); ++i)
-	{
-		TruthValuePtr tv = as->getTV(*i);
-		float m = tv->getMean();
-		float c = tv->getConfidence();
-		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
-		TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
-		//printf("Link TruthValue: %f -- %f\n", m, c);
-	}
-
-	Type t1 = classserver().getType(nodename1);
-	Handle h1 = as->getHandle(t1, value1);
-	TSM_ASSERT("Failed to find handle", h1 != NULL);
-
-	NodePtr n1 = NodeCast(h1);
-	TSM_ASSERT("Failed to find node", n1 != NULL);
-
-	Type t2 = classserver().getType(nodename2);
-	Handle h2 = as->getHandle(t2, value2 );
-	TSM_ASSERT("Failed to find handle", h2 != NULL);
-
-	NodePtr n2 = NodeCast(h2);
-	TSM_ASSERT("Failed to find node", n2 != NULL);
-
-}
-
-void BasicSCMUTest::test_frame_element_link()
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	check_frame_link("FrameElementLink", PARSE_LINK,
-	                 "DefinedFrameNode", "DefinedFrameElementNode",
-	                 "#Temporal_colocation", "#Temporal_colocation:Time",
-	                 0.0, 0.0);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

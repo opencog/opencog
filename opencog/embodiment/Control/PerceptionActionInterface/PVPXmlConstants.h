@@ -105,6 +105,7 @@
 #define FOOD_BOWL_ATTRIBUTE                  "foodBowl"
 #define WATER_BOWL_ATTRIBUTE                 "waterBowl"
 #define PICK_UP_ABLE_ATTRIBUTE               "pickupable"
+#define HOLDER_ATTRIBUTE                      "holder"
 #define SENSOR_ATTRIBUTE           "sensor"
 #define SUBJECT_ATTRIBUTE          "subject"
 #define SIGNAL_ATTRIBUTE           "signal"

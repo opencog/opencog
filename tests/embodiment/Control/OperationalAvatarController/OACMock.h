@@ -41,7 +41,7 @@
 
 using namespace opencog::oac;
 using namespace Procedure;
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace opencog;
 
 /**

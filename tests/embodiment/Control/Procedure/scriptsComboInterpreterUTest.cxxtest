@@ -33,7 +33,7 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 
 using namespace opencog::pai;
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace std;
 using namespace Procedure;
 
@@ -400,7 +400,7 @@ public :
 
         stringstream ss(cmd);
         // ss >> tree;
-        PetCombo::operator>>(ss, tree);
+        AvatarCombo::operator>>(ss, tree);
 
         //charge scripts
         cpr.instantiateProcedureCalls(tree, true);
@@ -442,7 +442,7 @@ public :
 
         stringstream ss(cmd);
         // ss >> tree;
-        PetCombo::operator>>(ss, tree);
+        AvatarCombo::operator>>(ss, tree);
 
         //charge scripts
         cpr.instantiateProcedureCalls(tree, true);
@@ -493,7 +493,7 @@ public :
         combo::combo_tree tree;
         stringstream ss(cmd);
         // ss >> tree;
-        PetCombo::operator>>(ss, tree);
+        AvatarCombo::operator>>(ss, tree);
 
         //charge scripts
         cpr.instantiateProcedureCalls(tree, true);

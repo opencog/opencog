@@ -24,7 +24,6 @@
 
 #include <math.h>
 
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
@@ -100,40 +99,6 @@ public:
             TS_ASSERT(fabs(tv->getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(tv->getConfidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
-        }
-    }
-
-    void testToAndFromString() {
-        char tvStr[1024];
-        for (int i = 0; i < NUM_TVS; i++) {
-            std::string tvToStringValue = tvs[i]->toString();
-            sprintf(tvStr, "%s %s", TruthValue::typeToStr(tvs[i]->getType()), tvToStringValue.c_str());
-            TruthValuePtr tv = TruthValue::factory(tvStr);
-            TS_ASSERT(tv != NULL);
-            TS_ASSERT(tv->getType() == tvs[i]->getType());
-            TruthValuePtr stv = SimpleTruthValue::fromString(tvToStringValue.c_str());
-            TS_ASSERT(stv != NULL);
-            TS_ASSERT(fabs(stv->getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(stv->getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(stv->getConfidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
-        }
-    }
-
-#define SAVING_AND_LOADING_TV_FLOAT_PRECISION 0.001
-    void testToString() {
-        char tvStr[1024];
-        for (int i = 0; i < NUM_TVS; i++) {
-            std::string tvToStringValue = tvs[i]->toString();
-            //logger().debug("%s", tvToStringValue.c_str());
-            sprintf(tvStr, "%s %s", TruthValue::typeToStr(tvs[i]->getType()), tvToStringValue.c_str());
-            //logger().debug("tvStr = %s", tvStr);
-            TruthValuePtr tv = TruthValue::factory(tvStr);
-            TS_ASSERT(tv != NULL);
-            TS_ASSERT(tv->getType() == tvs[i]->getType());
-            //logger().debug("rebuiltTvStr = %s", tv->toString().c_str());
-            TS_ASSERT(tv->getMean() - means[i] < SAVING_AND_LOADING_TV_FLOAT_PRECISION);
-            TS_ASSERT(tv->getCount() - counts[i] < SAVING_AND_LOADING_TV_FLOAT_PRECISION);
-            TS_ASSERT(tv->getConfidence() - confidences[i] < SAVING_AND_LOADING_TV_FLOAT_PRECISION);
         }
     }
 

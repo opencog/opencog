@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
@@ -88,9 +89,8 @@ void UnorderedUTest::setUp(void)
 	// Load the required data
 	config().set("MODULES",
 		"opencog/nlp/types/libnlp-types.so, "
-		"opencog/spacetime/libspacetime.so, "
-		"opencog/dynamics/attention/libattention.so, "
-		"opencog/embodiment/AtomSpaceExtensions/libAtomSpaceExtensions.so");
+		"opencog/dynamics/attention/libattention-types.so, "
+		"opencog/embodiment/AtomSpaceExtensions/libembodiment-types.so");
 
 	config().set("SCM_PRELOAD",
       "opencog/atomspace/core_types.scm, "
@@ -112,13 +112,15 @@ void UnorderedUTest::setUp(void)
 		NULL
 	};
 	cogserver().loadModules(paths);
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 
 
 	// Create an implication link that will be tested.
-	disorder = SchemeEval::instance().apply("blink", Handle::UNDEFINED);
-	disordered = SchemeEval::instance().apply("blinker", Handle::UNDEFINED);
-	disor_more = SchemeEval::instance().apply("blank", Handle::UNDEFINED);
+	SchemeEval* eval = new SchemeEval();
+	disorder = eval->apply("blink", Handle::UNDEFINED);
+	disordered = eval->apply("blinker", Handle::UNDEFINED);
+	disor_more = eval->apply("blank", Handle::UNDEFINED);
+	delete eval;
 }
 
 /*

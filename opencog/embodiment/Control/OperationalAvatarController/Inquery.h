@@ -64,10 +64,19 @@ public:
     // After planning, please reset the spaceMap back to the real one via calling this function
     static void reSetSpaceMap();
 
+    // only apply when getStateOwner is Entity or string
+    static Handle getStateOwnerHandle(ParamValue &stateOwnerParamValue);
 
     // If this is an simple state, which requires no real time calculation.
     // There is EvaluationLink in the atomspace for this state, we can just get its latest value from the atomspace
-    static ParamValue getParamValueFromAtomspace(State &state);
+    // sometimes there is only resutls that has a truth value lower than 0.5, in such case, is_true will be assign false.
+    static ParamValue getParamValueFromAtomspace(State &state, bool &is_true);
+
+    // for that kind of States that do not exist in Atomspace, nor in real time system, just simply return UNDEFINED_VALUE
+    static ParamValue inqueryUnknowableState(const vector<ParamValue>& stateOwnerList);
+
+    // check if these two are the same, currently only support entity and string
+    static ParamValue inqueryIsSame(const vector<ParamValue>& stateOwnerList);
 
     static ParamValue inqueryDistance(const vector<ParamValue>& stateOwnerList);
     static ParamValue inqueryExist(const vector<ParamValue>& stateOwnerList);
@@ -84,6 +93,7 @@ public:
     static vector<ParamValue> inqueryAdjacentAccessPosition(const vector<ParamValue>& stateOwnerList);
     /*static vector<ParamValue> inqueryStandableNearbyAccessablePosition(const vector<ParamValue>& stateOwnerList);*/
     static vector<ParamValue> inqueryUnderPosition(const vector<ParamValue>& stateOwnerList);// get the position just under the input pos
+
 
 
     // inquery the spatial relationships
@@ -135,6 +145,9 @@ public:
     // this function is used by generatePMLinkFromAState()
     static HandleSeq generatePMNodeFromeAParamValue(ParamValue& ParamValue, RuleNode* ruleNode);
 
+    // only for grounded paramvalue
+    static HandleSeq generateNodeForGroundedParamValue(ParamValue* realValue);
+
     // generate a link for one matching condition for using Pattern Matching, from a state in the precondition list of a RuleNode
     static Handle generatePMLinkFromAState(State* state, RuleNode* ruleNode);
 
@@ -142,6 +155,9 @@ public:
     static HandleSeq findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string> &varNames);
 
     static ParamValue getParamValueFromHandle(string var, Handle& valueH);
+
+ private:
+    static  HandleSeq _findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string>& varNames);
 
 
 };

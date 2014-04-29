@@ -34,6 +34,5 @@ TARGET_LINK_LIBRARIES (hopfield
 	server
 	attention
 	${PROJECT_UBI_LIB}
-	${Boost_SIGNALS_LIBRARY}
 	${EXPAT_LIBRARIES}
 )

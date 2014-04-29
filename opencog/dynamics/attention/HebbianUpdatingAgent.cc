@@ -24,12 +24,34 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 
 using namespace opencog;
+
+static void setMean(Handle h, float tc)
+{
+	TruthValuePtr oldtv(h->getTruthValue());
+	switch (oldtv->getType())
+	{
+		case SIMPLE_TRUTH_VALUE: {
+			TruthValuePtr newtv(SimpleTruthValue::createTV(tc, oldtv->getCount()));
+			h->setTruthValue(newtv);
+			break;
+		}
+		case INDEFINITE_TRUTH_VALUE: {
+			IndefiniteTruthValuePtr newtv(IndefiniteTruthValue::createITV(oldtv));
+			newtv->setMean(tc);
+			h->setTruthValue(newtv);
+			break;
+		}
+		default:
+			throw InvalidParamException(TRACE_INFO, "Unsupported TV type in Hebbian");
+	}
+}
 
 HebbianUpdatingAgent::HebbianUpdatingAgent(CogServer& cs) :
     Agent(cs)
@@ -46,7 +68,7 @@ HebbianUpdatingAgent::HebbianUpdatingAgent(CogServer& cs) :
 
     // Provide a logger, but disable it initially
     log = NULL;
-    setLogger(new opencog::Logger("HebbianUpdatingAgent.log", Logger::WARN, true));
+    setLogger(new opencog::Logger("HebbianUpdatingAgent.log", Logger::FINE, true));
 }
 
 HebbianUpdatingAgent::~HebbianUpdatingAgent()
@@ -144,7 +166,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                         a->setAV(h,backupAV);
                     } else {
                         // link type is fine, just update TV
-                        a->setMean(h, tc);
+                        setMean(h, tc);
                     }
                 }
             } else {
@@ -162,7 +184,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                     a->setAV(h,backupAV);
                 } else {
                     // link type is fine, just update TV
-                    a->setMean(h, tc);
+                    setMean(h, tc);
                 }
             }
 
@@ -176,7 +198,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
             }
             tc = (tcDecayRate * new_tc) + ( (1.0f - tcDecayRate) * old_tc);
             if (tc < 0.0f) tc = 0.0f;
-            a->setMean(h, tc);
+            setMean(h, tc);
         }
 		if (isDifferent)
 			log->fine("HebbianUpdatingAgent: %s old tv %f", a->atomAsString(h).c_str(), old_tc);
@@ -234,9 +256,11 @@ float HebbianUpdatingAgent::targetConjunction(std::vector<Handle> handles)
 
         // if none in attention return 0 at end
         if (sti > a->getAttentionalFocusBoundary()) {
-			log->fine("HebbianUpdatingAgent: %d in attention, focus boundary = %d", sti,
-					a->getAttentionalFocusBoundary() );
-			inAttention = true;
+            log->fine("HebbianUpdatingAgent: handle %d STI value %d in attention, focus boundary = %d", 
+                      h.value(),
+                      sti,
+                      a->getAttentionalFocusBoundary());
+            inAttention = true;
 		}
 
         // normalise each sti and multiply each

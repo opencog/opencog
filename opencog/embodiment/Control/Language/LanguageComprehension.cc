@@ -31,11 +31,13 @@
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
+#include <opencog/util/foreach.h>
 
 #include <opencog/embodiment/Control/Language/LanguageComprehension.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 
 using namespace opencog::oac;
 using namespace opencog::spatial;
@@ -81,6 +83,8 @@ void LanguageComprehension::handleCommand(const std::string& name, const std::ve
     } 
 }
 
+SchemeEval* LanguageComprehension::evaluator = NULL;
+
 void LanguageComprehension::init( void )
 {
     if ( !initialized ) {
@@ -89,17 +93,17 @@ void LanguageComprehension::init( void )
 #ifdef HAVE_GUILE
         // Ensure SchemeEval is initialised with AtomSpace.
         opencog::AtomSpace& as = this->agent.getAtomSpace();
-        SchemeEval::instance(&as);
+        evaluator = new SchemeEval(&as);
         
         std::stringstream script;
         script << "(define agentSemeNode (SemeNode \"";
         script << agent.getPetId( ) << "\") )" << std::endl;
-        std::string answer = SchemeEval::instance().eval( script.str( ) );
-        if ( SchemeEval::instance().eval_error() ) {
+        std::string answer = evaluator->eval( script.str( ) );
+        if ( evaluator->eval_error() ) {
             logger().error( "LanguageComprehension::%s - An error occurred while trying to setup the agent seme node: %s",
                             __FUNCTION__, answer.c_str( ) );
         } // if
-        SchemeEval::instance().clear_pending( );
+        evaluator->clear_pending();
 
         loadFrames( );
 
@@ -127,16 +131,16 @@ void LanguageComprehension::resolveLatestSentenceReference( void )
     init();
 
 #ifdef HAVE_GUILE
-    std::string answer = SchemeEval::instance().eval( "(resolve-reference)");
+    std::string answer = evaluator->eval( "(resolve-reference)");
     logger().debug( "LanguageComprehension::%s - (resolve-reference) resolved references: \n%s",
                     __FUNCTION__,
                     answer.c_str() 
                   );
-    if ( SchemeEval::instance().eval_error() ) {
+    if ( evaluator->eval_error() ) {
         logger().error( "LanguageComprehension::%s - An error occurred while trying to resolve reference: %s",
                         __FUNCTION__, answer.c_str( ) );
     } // if
-    SchemeEval::instance().clear_pending();
+    evaluator->clear_pending();
 #endif
 }
 
@@ -189,13 +193,13 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
     init();
 
 #ifdef HAVE_GUILE
-    std::string answer = SchemeEval::instance().eval( "(resolve-command)");
+    std::string answer = evaluator->eval( "(resolve-command)");
     logger().debug( "LanguageComprehension::%s - (resolve-command) answer: %s", __FUNCTION__, answer.c_str() );
-    if ( SchemeEval::instance().eval_error() ) {
+    if ( evaluator->eval_error() ) {
         logger().error( "LanguageComprehension::%s - An error occurred while trying to resolve command: %s",
                         __FUNCTION__, answer.c_str( ) );
     } // if
-    SchemeEval::instance().clear_pending();
+    evaluator->clear_pending();
 #endif
     
     opencog::AtomSpace& as = agent.getAtomSpace();
@@ -427,21 +431,21 @@ void LanguageComprehension::updateFact(void)
     init();
 
 #ifdef HAVE_GUILE
-    std::string answer = SchemeEval::instance().eval( "(update-fact)");    
+    std::string answer = evaluator->eval( "(update-fact)");    
 
     logger().debug( "LanguageComprehension::%s - (update-fact) newly created or deleted frame instances (fact): \n%s", 
                     __FUNCTION__, 
                     answer.c_str()
                   );
 
-    if ( SchemeEval::instance().eval_error() ) {
+    if ( evaluator->eval_error() ) {
         logger().error( "LanguageComprehension::%s - (update-fact) An error occurred while trying to update fact: \n%s",
                         __FUNCTION__, 
                         answer.c_str() 
                       );
     } // if
 
-    SchemeEval::instance().clear_pending( );    
+    evaluator->clear_pending( );    
 #endif
 }
 
@@ -585,18 +589,18 @@ void LanguageComprehension::answerQuestion()
     //           Frame 2
     //           ...
     //
-    std::string question_type = SchemeEval::instance().eval( "(answer-question)");    
+    std::string question_type = evaluator->eval( "(answer-question)");    
     logger().debug( "LanguageComprehension::%s - (answer-question) question type: %s",
                     __FUNCTION__,
                     question_type.c_str()
                   );
-    if ( SchemeEval::instance().eval_error() ) {
+    if ( evaluator->eval_error() ) {
         logger().error( "LanguageComprehension::%s - An error occurred while trying to answer the question: %s",
                         __FUNCTION__, 
                         question_type.c_str()
                       );
     } 
-    SchemeEval::instance().clear_pending( );
+    evaluator->clear_pending( );
 
     // ------------------------------------------------------------------------
     // Step 2: create sentences based on answer frames via frame2relex and relex2sentence. 
@@ -669,12 +673,12 @@ void LanguageComprehension::answerQuestion()
     sentences.push_back( atomSpace.addNode( SENTENCE_NODE, answer_sentence) ); 
     atomSpace.addLink( LIST_LINK, sentences, SimpleTruthValue::createTV( 1, 1 ) );
 
-    answer = SchemeEval::instance().eval( "(choose-sentence)");
+    answer = evaluator->eval( "(choose-sentence)");
     logger().debug( "LanguageComprehension::%s - (choose-sentence) answer: %s",
                     __FUNCTION__, 
                     answer.c_str()
                   );
-    if ( SchemeEval::instance().eval_error() ) {
+    if ( evaluator->eval_error() ) {
         logger().error( "LanguageComprehension::%s - "
                         "An error occurred while trying to choose a sentence: %s",
                         __FUNCTION__,
@@ -682,7 +686,7 @@ void LanguageComprehension::answerQuestion()
                       );
     } 
 
-    SchemeEval::instance().clear_pending( );
+    evaluator->clear_pending( );
 
     // now set to false all heard sentences and set as answered all heard questions
     for( unsigned int i = 0; i < heardSentences.size(); ++i ) {

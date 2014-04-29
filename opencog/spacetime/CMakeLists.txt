@@ -3,7 +3,7 @@ OPENCOG_ADD_ATOM_TYPES(atom_types.script
    atom_types.definitions
    atom_types.inheritance
    spacetime_types.scm)
-ADD_CUSTOM_TARGET(spacetime_types DEPENDS atom_types.h)
+ADD_CUSTOM_TARGET(spacetime_atom_types DEPENDS atom_types.h)
 
 ADD_LIBRARY (spacetime SHARED
 	atom_types_init.cc
@@ -21,7 +21,7 @@ ADD_LIBRARY (spacetime SHARED
 )
 
 ADD_DEPENDENCIES(spacetime opencog_atom_types)
-ADD_DEPENDENCIES(spacetime spacetime_types)
+ADD_DEPENDENCIES(spacetime spacetime_atom_types)
 
 TARGET_LINK_LIBRARIES(spacetime SpaceMap server atomspace)
 

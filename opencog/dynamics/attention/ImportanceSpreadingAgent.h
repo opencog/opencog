@@ -94,6 +94,16 @@ private:
     float calcDifference(AttentionValue::sti_t s, AttentionValue::sti_t t, \
             float weight);
 
+    /** Set the agent's logger object
+     *
+     * Note, this will be deleted when this agent is.
+     *
+     * @param l The logger to associate with the agent.
+     */
+    void setLogger(Logger* l);
+
+    Logger *log; //!< Logger object for Agent
+
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
@@ -105,6 +115,12 @@ public:
     ImportanceSpreadingAgent(CogServer&);
     virtual ~ImportanceSpreadingAgent();
     virtual void run();
+
+    /** Return the agent's logger object
+     *
+     * @return A logger object.
+     */
+    Logger* getLogger();
 
     /** Set minimal amount of STI necessary for an atom to have before it
      * spreads STI.

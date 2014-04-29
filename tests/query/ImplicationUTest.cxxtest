@@ -22,6 +22,7 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
+#include <opencog/guile/load-file.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/server/CogServer.h>
@@ -35,6 +36,7 @@ class ImplicationUTest :  public CxxTest::TestSuite
 	private:
 		PatternMatch pm;
 		AtomSpace *as;
+		SchemeEval *eval;
 		Handle varscope, restrict, restrict2;
 		Handle implication, implication2;
 
@@ -66,8 +68,7 @@ class ImplicationUTest :  public CxxTest::TestSuite
 		}
 
 		void setUp(void);
-
-		void tearDown(void) { }
+		void tearDown(void);
 
 		void test_exec(void);
 };
@@ -99,7 +100,7 @@ void ImplicationUTest::setUp(void)
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
-	SchemeEval::instance(as);
+	eval = new SchemeEval();
 
 	// Load the atom types
 	config().set("MODULES",
@@ -120,8 +121,7 @@ void ImplicationUTest::setUp(void)
 		NULL
 	};
 	cogserver().loadModules(paths);
-	cogserver().loadSCMModules(paths);
-
+	load_scm_files_from_config(*as, paths);
 
 	// Create initialzation
 	const char * setup = 
@@ -134,8 +134,8 @@ void ImplicationUTest::setUp(void)
 	"   (apply cog-new-link (append (list 'InheritanceLink) x)))\n"
 	"(define (ImplicationLink . x)\n"
 	"   (apply cog-new-link (append (list 'ImplicationLink) x)))\n"
-	"(define (DefinedFrameNode . x)\n"
-	"   (apply cog-new-node (append (list 'DefinedFrameNode) x)))\n"
+	"(define (WordSenseNode . x)\n"
+	"   (apply cog-new-node (append (list 'WordSenseNode) x)))\n"
 	"(define (ConceptNode . x)\n"
 	"   (apply cog-new-node (append (list 'ConceptNode) x)))\n"
 	"(define (PredicateNode . x)\n"
@@ -148,7 +148,7 @@ void ImplicationUTest::setUp(void)
 	"   (apply cog-new-link (append (list 'TypedVariableLink) x)))\n"
 	"(define (BindLink . x)\n"
 	"   (apply cog-new-link (append (list 'BindLink) x)))\n";
-	SchemeEval::instance().eval(setup);
+	eval->eval(setup);
 
 	// Create an implication link that will be tested.
 	const char * imp = 
@@ -157,18 +157,18 @@ void ImplicationUTest::setUp(void)
 	"   (AndLink\n"
 	"      (InheritanceLink\n"
 	"         (PredicateNode \"grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation\")\n"
-	"         (DefinedFrameNode \"#Manipulation\")\n"
+	"         (WordSenseNode \"#Manipulation\")\n"
 	"      )\n"
 	"      (InheritanceLink (stv 1 1)\n"
 	"         (VariableNode \"$predNode\")\n"
-	"         (DefinedFrameNode \"#Manipulation\")\n"
+	"         (WordSenseNode \"#Manipulation\")\n"
 	"      )\n"
 	"   )\n"
 	"   (VariableNode \"$predNode\")\n"
 	")\n"
 	")\n";
-	SchemeEval::instance( ).eval(imp);
-	implication = SchemeEval::instance( ).apply("imp", Handle::UNDEFINED);
+	eval->eval(imp);
+	implication = eval->apply("imp", Handle::UNDEFINED);
 
 	// Create an implication link without the conjunction (AndLink)
 	const char * imp2 =
@@ -176,13 +176,13 @@ void ImplicationUTest::setUp(void)
 	"(ImplicationLink\n"
 	"   (InheritanceLink (stv 1 1)\n"
 	"      (VariableNode \"$predNode\")\n"
-	"      (DefinedFrameNode \"#Manipulation\")\n"
+	"      (WordSenseNode \"#Manipulation\")\n"
 	"   )\n"
 	"   (VariableNode \"$predNode\")\n"
 	")\n"
 	")\n";
-	SchemeEval::instance( ).eval(imp2);
-	implication2 = SchemeEval::instance( ).apply("imp2", Handle::UNDEFINED);
+	eval->eval(imp2);
+	implication2 = eval->apply("imp2", Handle::UNDEFINED);
 
 	// Create a varscope link with just one variable
 	const char * scope =
@@ -192,14 +192,14 @@ void ImplicationUTest::setUp(void)
 	"   (ImplicationLink\n"
 	"      (InheritanceLink (stv 1 1)\n"
 	"         (VariableNode \"$predNode\")\n"
-	"         (DefinedFrameNode \"#Manipulation\")\n"
+	"         (WordSenseNode \"#Manipulation\")\n"
 	"      )\n"
 	"      (VariableNode \"$predNode\")\n"
 	"   )\n"
 	")\n"
 	")\n";
-	SchemeEval::instance( ).eval(scope);
-	varscope = SchemeEval::instance( ).apply("varscope", Handle::UNDEFINED);
+	eval->eval(scope);
+	varscope = eval->apply("varscope", Handle::UNDEFINED);
 
 	// Create a varscope link with a type restriction
 	const char * strict =
@@ -212,14 +212,14 @@ void ImplicationUTest::setUp(void)
 	"   (ImplicationLink\n"
 	"      (InheritanceLink (stv 1 1)\n"
 	"         (VariableNode \"$predNode\")\n"
-	"         (DefinedFrameNode \"#Manipulation\")\n"
+	"         (WordSenseNode \"#Manipulation\")\n"
 	"      )\n"
 	"      (VariableNode \"$predNode\")\n"
 	"   )\n"
 	")\n"
 	")\n";
-	SchemeEval::instance( ).eval(strict);
-	restrict = SchemeEval::instance( ).apply("restricto", Handle::UNDEFINED);
+	eval->eval(strict);
+	restrict = eval->apply("restricto", Handle::UNDEFINED);
 
 	// Create a varscope link with a type restriction
 	const char * strict2 =
@@ -232,18 +232,18 @@ void ImplicationUTest::setUp(void)
 	"      )\n"
 	"      (TypedVariableLink\n"
 	"         (VariableNode \"$framNode\")\n"
-	"         (VariableTypeNode \"DefinedFrameNode\")\n"
+	"         (VariableTypeNode \"WordSenseNode\")\n"
 	"      )\n"
 	"   )\n"
 	"   (ImplicationLink\n"
 	"      (AndLink\n"
 	"         (InheritanceLink (stv 1 1)\n"
 	"            (VariableNode \"$predNode\")\n"
-	"            (DefinedFrameNode \"#Manipulation\")\n"
+	"            (WordSenseNode \"#Manipulation\")\n"
 	"         )\n"
 	"         (InheritanceLink (stv 1 1)\n"
 	"            (VariableNode \"$framNode\")\n"
-	"            (DefinedFrameNode \"#Manipulation\")\n"
+	"            (WordSenseNode \"#Manipulation\")\n"
 	"         )\n"
 	"      )\n"
 	"      (ListLink\n"
@@ -253,20 +253,26 @@ void ImplicationUTest::setUp(void)
 	"   )\n"
 	")\n"
 	")\n";
-	SchemeEval::instance( ).eval(strict2);
-	restrict2 = SchemeEval::instance( ).apply("restrict2", Handle::UNDEFINED);
+	eval->eval(strict2);
+	restrict2 = eval->apply("restrict2", Handle::UNDEFINED);
 
 	// Create data on which the above pattern should match
 	const char * str = 
 	"(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 0)\n"
-	"   (DefinedFrameNode \"#Ingestion\")\n"
-	"   (DefinedFrameNode \"#Manipulation\")\n"
+	"   (WordSenseNode \"#Ingestion\")\n"
+	"   (WordSenseNode \"#Manipulation\")\n"
 	")\n"
 	"(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 0)\n"
 	"   (PredicateNode \"grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation\")\n"
-	"   (DefinedFrameNode \"#Manipulation\")\n"
+	"   (WordSenseNode \"#Manipulation\")\n"
 	")\n";
-	SchemeEval::instance( ).eval(str);
+	eval->eval(str);
+}
+
+void ImplicationUTest::tearDown(void)
+{
+	delete eval;
+	eval = NULL;
 }
 
 /*
@@ -275,7 +281,7 @@ void ImplicationUTest::setUp(void)
  * Expect to get the following result, given the above data:
  *
  *    ListLink
- *       DefinedFrameNode #Ingestion
+ *       WordSenseNode #Ingestion
  *       PredicateNode grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation
  */
 #define getlink(hand,pos) as->getOutgoing(hand,pos)

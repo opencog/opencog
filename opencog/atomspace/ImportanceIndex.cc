@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include <opencog/util/Config.h>
+#include <opencog/util/functional.h>
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atomspace/ImportanceIndex.h>
@@ -174,9 +175,12 @@ UnorderedHandleSet ImportanceIndex::extractOld(const AtomTable* atomtable,
 	// If recursive-flag is set, also extract all the links in the
 	// atom's incoming set.
 	if (recursive) {
-		const UnorderedHandleSet& iset = atomtable->getIncomingSet(handle);
-		for (UnorderedHandleSet::const_iterator it = iset.begin();
-			it != iset.end(); it++)
+		HandleSeq iset;
+		handle->getIncomingSet(back_inserter(iset));
+
+		HandleSeq::iterator it = iset.begin();
+		HandleSeq::iterator is_end = iset.end();
+		for (; it != is_end; it++)
 		{
 			AtomPtr a(*it);
 			OC_ASSERT(a != NULL, "Corrupt incoming set!");
@@ -189,9 +193,11 @@ UnorderedHandleSet ImportanceIndex::extractOld(const AtomTable* atomtable,
 
 	// This handle can be extracted only if all links in its incoming
 	// set are also marked for removal by decay.
-	const UnorderedHandleSet& iset = atomtable->getIncomingSet(handle);
-	for (UnorderedHandleSet::const_iterator it = iset.begin();
-			it != iset.end(); it++)
+	HandleSeq iset;
+	handle->getIncomingSet(back_inserter(iset));
+	HandleSeq::iterator it = iset.begin();
+	HandleSeq::iterator is_end = iset.end();
+	for (; it != is_end; it++)
 	{
 		AtomPtr a(*it);
 		OC_ASSERT(a != NULL, "Corrupt incoming set!");

@@ -77,10 +77,14 @@ class AtomSpaceBenchmark
     long getMemUsage();
     int counter;
 
+    std::string memoize_or_compile(std::string);
+
     std::vector<std::string>  methodNames;
 public:
-    int Nreps;
-    int Nloops;
+    unsigned int Nreps;
+    unsigned int Nloops;
+    bool memoize;
+    bool compile;
     int sizeIncrease;
     bool saveToFile;
     int saveInterval;

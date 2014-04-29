@@ -53,7 +53,7 @@ namespace opencog {
 namespace oac {
 
 using namespace Procedure;
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace pai;
 using learningserver::messages::SchemaMessage;
 
@@ -208,11 +208,16 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 
         psiActionSelectionAgent = 0;
     }
-    else
+    else if (config().get_bool("PSI_ACTION_SELECTION_ENABLED"))
     {
         registerAgent(PsiActionSelectionAgent::info().id,
                              &psiActionSelectionAgentFactory);
         psiActionSelectionAgent = createAgent<PsiActionSelectionAgent>();
+        ocPlanningAgent = 0;
+    }
+    else
+    {
+        psiActionSelectionAgent = 0;
         ocPlanningAgent = 0;
     }
 
@@ -373,7 +378,27 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     }
     else
         this->monitorChangesAgent = NULL; 
-#endif        
+#endif
+
+    if ( config().get_bool("ENABLE_PATTERN_MINER"))
+    {
+        if ( load_scm_file( *(this->atomSpace), "pm_test_corpus.scm" ) == 0  )
+            logger().info( "OAC::%s - Loaded pattern miner test corpus file: '%s'",
+                            __FUNCTION__,
+                           "pm_test_corpus.scm"
+                         );
+        else
+            logger().error( "OAC::%s - Failed to load pattern miner test corpus file: '%s'",
+                             __FUNCTION__,
+                            "pm_test_corpus.scm"
+                          );
+
+
+        this->patternMiningAgent = PatternMiningAgentPtr(new PatternMiningAgent(*this));
+        this->startAgent(this->patternMiningAgent);
+    }
+    else
+        this->patternMiningAgent = NULL;
 
     // TODO: This should be done only after NetworkElement is initialized
     // (i.e., handshake with router is done)
@@ -403,6 +428,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
             boost::lexical_cast<std::string>( visualDebuggerPort ) );
 
     } // if
+
 
     Inquery::init(atomSpace);
 
@@ -467,7 +493,7 @@ int OAC::addRulesToAtomSpace()
 */
 #ifdef HAVE_GUILE
     // Set PET_HANDLE and OWNER_HANDLE for the Scheme shell before loading rules file
-    SchemeEval & evaluator = SchemeEval::instance(this->atomSpace);
+    SchemeEval* evaluator = new SchemeEval();
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression =  "(set! PET_HANDLE (get_agent_handle \"" + 
@@ -482,9 +508,9 @@ int OAC::addRulesToAtomSpace()
                                               this->getPet().getOwnerId() + 
                                              "\") )";
 
-    scheme_return_value = evaluator.eval(scheme_expression);
+    scheme_return_value = evaluator->eval(scheme_expression);
 
-    if ( evaluator.eval_error() ) 
+    if ( evaluator->eval_error() ) 
         logger().error("OAC::%s - Failed to set PET_HANDLE and OWNER_HANDLE",
                        __FUNCTION__
                       );
@@ -492,6 +518,8 @@ int OAC::addRulesToAtomSpace()
         logger().info("OAC::%s - Set PET_HANDLE and OWNER_HANDLE for Scheme shell",
                       __FUNCTION__
                      );
+    delete evaluator;
+    evaluator = NULL;
             
     // Load the psi rules file, including Modulators, DemandGoals and Rules 
     std::string psi_rules_file_name; 
@@ -831,7 +859,7 @@ bool OAC::processNextMessage(messaging::Message *msg)
         return false;
     }
 
-    // message from spawner - probabily a SAVE_AND_EXIT
+    // message from spawner - probably a SAVE_AND_EXIT
     if (msg->getFrom() == config().get("SPAWNER_ID")) {
         result = processSpawnerMessage((std::string)msg->getPlainTextRepresentation());
 
@@ -846,18 +874,18 @@ bool OAC::processNextMessage(messaging::Message *msg)
     // message from the combo shell to execute a schema
     if (msg->getFrom() == config().get("COMBO_SHELL_ID")) {
         std::string str(msg->getPlainTextRepresentation());
-        logger().error("OAC::%s - Got combo shell msg: '%s'", __FUNCTION__, str.c_str());
+        logger().info("OAC::%s - Got combo shell msg: '%s'", __FUNCTION__, str.c_str());
 
         if (str.empty())
             return false; //a timing error, maybe?
 
         std::stringstream ss(str);
         combo_tree tr;
-        ss >> tr;
+        AvatarCombo::operator>>(ss, tr);
         ComboProcedure cp("", 0, tr);
         std::vector<vertex> args; //an expression, not a function - no args
         procedureInterpreter->runProcedure(cp, args);
-        logger().error("OAC - Called runProcedure(" + ss.str() + ")");
+        logger().info("OAC - Called runProcedure(" + ss.str() + ")");
     }
 
     // message from learning server

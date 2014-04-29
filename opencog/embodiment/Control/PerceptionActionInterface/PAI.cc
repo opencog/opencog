@@ -46,6 +46,7 @@
 #include <xercesc/sax2/XMLReaderFactory.hpp>
 
 #include <opencog/util/exceptions.h>
+#include <opencog/util/foreach.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/macros.h>
 #include <opencog/util/Logger.h>
@@ -56,6 +57,7 @@
 
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
@@ -178,17 +180,18 @@ ActionPlanID PAI::createActionPlan()
     // Get the planning result
     std::string demandName; 
 
-    Handle hDemandEvaluationLink =
-        AtomSpaceUtil::getReference(atomSpace, 
-                                    atomSpace.getHandle(CONCEPT_NODE,
-                                                        "plan_selected_demand_goal"
-                                                       )
-                                   );
+    Handle hPlanSelDemGoal = atomSpace.getHandle(CONCEPT_NODE,
+                                                 "plan_selected_demand_goal");
+    if (hPlanSelDemGoal != Handle::UNDEFINED) {
+        Handle hDemandEvaluationLink =
+            AtomSpaceUtil::getReference(atomSpace, hPlanSelDemGoal);
 
-    if ( hDemandEvaluationLink != Handle::UNDEFINED ) {
-        Handle hDemandPredicateNode = atomSpace.getOutgoing(hDemandEvaluationLink, 0);
-        demandName = atomSpace.getName(hDemandPredicateNode); 
-        demandName = demandName.substr(0, demandName.rfind("DemandGoal")); 
+        if ( hDemandEvaluationLink != Handle::UNDEFINED ) {
+            Handle hDemandPredicateNode =
+                atomSpace.getOutgoing(hDemandEvaluationLink, 0);
+            demandName = atomSpace.getName(hDemandPredicateNode);
+            demandName = demandName.substr(0, demandName.rfind("DemandGoal"));
+        }
     }
 
     ActionPlan plan(planId, demandName);
@@ -234,7 +237,7 @@ void PAI::sendExtractedActionFromPlan(ActionPlanID planId, unsigned int actionSe
             
             // must be added first. Otherwise the reference to the plan becomes invalid
             pendingActionPlans[planId] = plan;
-            inProgressActionPlans.erase(it->first);
+            inProgressActionPlans.erase(it);
 
         } else {
             throw opencog::RuntimeException(TRACE_INFO,
@@ -490,7 +493,7 @@ void PAI::sendSingleActionCommand(std::string& actionName, std::vector<ActionPar
     doc->release();
 }
 
-ActionID PAI::addAction(ActionPlanID planId, const PetAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
+ActionID PAI::addAction(ActionPlanID planId, const AvatarAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
     ActionID result = Handle::UNDEFINED;
     ActionPlanMap::iterator it = inProgressActionPlans.find(planId);
@@ -1820,15 +1823,15 @@ void PAI::processInstruction(DOMElement * element)
     } // if
 
 #ifdef HAVE_GUILE
-    if(parsedSentenceText != NULL){
-        SchemeEval & evaluator = SchemeEval::instance(); 
+    if (parsedSentenceText != NULL){
+        SchemeEval* evaluator = new SchemeEval(); 
         std::string scheme_expression, scheme_return_value; 
 
         // Clean up all the information of previous sentence, such as detach 
         // the AnchorNode of previous sentence if it has not been processed. 
         scheme_expression = "( reset_dialog_system )";
-        scheme_return_value = evaluator.eval(scheme_expression); 
-        if ( evaluator.eval_error() ) {
+        scheme_return_value = evaluator->eval(scheme_expression); 
+        if ( evaluator->eval_error() ) {
             logger().error("PAI::%s - Failed to execute '%s'", 
                             __FUNCTION__, 
                            scheme_expression.c_str()
@@ -1837,13 +1840,14 @@ void PAI::processInstruction(DOMElement * element)
 
         // Put the newly parsed sentence into AtomSpace, then PsiActionSelectionAgent 
         // and dialog_system.scm will continue processing it. 
-        scheme_return_value = evaluator.eval(parsedSentenceText); 
-        if ( evaluator.eval_error() ) {
+        scheme_return_value = evaluator->eval(parsedSentenceText); 
+        if ( evaluator->eval_error() ) {
             logger().error("PAI::%s - Failed to put the parsed result from RelexServer to AtomSpace", 
                            __FUNCTION__
                           ); 
         }
-    }    
+        delete evaluator;
+    }
 #endif
 
     // Add the perceptions into AtomSpace
@@ -2706,7 +2710,7 @@ Vector PAI::getVelocityData(DOMElement* velocityElement)
     return result;
 }
 
-Handle PAI::addActionToAtomSpace(ActionPlanID planId, const PetAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
+Handle PAI::addActionToAtomSpace(ActionPlanID planId, const AvatarAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
 
     Handle schemaNode = AtomSpaceUtil::addNode(atomSpace, GROUNDED_SCHEMA_NODE, action.getName().c_str());
@@ -2782,7 +2786,7 @@ Handle PAI::addActionToAtomSpace(ActionPlanID planId, const PetAction& action) t
     return execLink;
 }
 
-Handle PAI::addActionPredicate(const char* predicateName, const PetAction& action, unsigned long timestamp, ActionID actionId)
+Handle PAI::addActionPredicate(const char* predicateName, const AvatarAction& action, unsigned long timestamp, ActionID actionId)
 {
     Handle execLink = actionId;
     logger().debug("PAI - execLink = %s \n", atomSpace.atomAsString(execLink).c_str());
@@ -2799,7 +2803,7 @@ Handle PAI::addActionPredicate(const char* predicateName, const PetAction& actio
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
     Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp, TruthValue::TRUE_TV());
-    AtomSpaceUtil::updateLatestPetActionPredicate(atomSpace, atTimeLink, predicateNode);
+    AtomSpaceUtil::updateLatestAvatarActionPredicate(atomSpace, atTimeLink, predicateNode);
 
     return atTimeLink;
 }
@@ -3135,7 +3139,7 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
         bool isPickupable = AtomSpaceUtil::isPredicateTrue(atomSpace, "is_pickupable", objectNode);
         isObstacle = !isSelfObject && (isAgent || ((hasPetHeight ? (height > 0.3f * pet_height) : true) && !isPickupable));
 
-        logger().debug("PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_pickupable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent ? "t" : "f"), (hasPetHeight ? "t" : "f"), (isObstacle ? "t" : "f"), height, pet_height, (isPickupable ? "t" : "f"), (isSelfObject ? "t" : "f") );
+        logger().debug("PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_upable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent ? "t" : "f"), (hasPetHeight ? "t" : "f"), (isObstacle ? "t" : "f"), height, pet_height, (isPickupable ? "t" : "f"), (isSelfObject ? "t" : "f") );
     } else {
         isObstacle = true;
         entityClass = "block";
@@ -3371,7 +3375,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
             switch (statusCode) {
             case opencog::pai::DONE:
                 {
-                    const PetAction& action = plan.getAction(seqNumber);
+                    const AvatarAction& action = plan.getAction(seqNumber);
 
                     // if a GRAB action, set grabbed object
                     if (action.getType() == ActionType::GRAB()) {
@@ -3797,6 +3801,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     bool isFoodbowl = getBooleanProperty(properties, FOOD_BOWL_ATTRIBUTE);
     bool isWaterbowl = getBooleanProperty(properties, WATER_BOWL_ATTRIBUTE);
     bool isPickupable = getBooleanProperty(properties, PICK_UP_ABLE_ATTRIBUTE);
+    const std::string& holder = getStringProperty(properties, HOLDER_ATTRIBUTE);
 
     const std::string& color_name = queryMapInfoProperty(properties, COLOR_NAME_ATTRIBUTE);
 
@@ -3810,6 +3815,13 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     const std::string& material = getStringProperty(properties, MATERIAL_ATTRIBUTE);
     const std::string& texture = getStringProperty(properties, TEXTURE_ATTRIBUTE);
     const std::string& ownerId = getStringProperty(properties, OWNER_ID_ATTRIBUTE);
+
+    // the specific class this entity is, e.g. battery
+    std::string entityClass = getStringProperty(getPropertyMap(mapinfo), ENTITY_CLASS_ATTRIBUTE);
+    TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
+
+    Handle classHandle = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, entityClass);
+    AtomSpaceUtil::addPropertyPredicate(atomSpace, ENTITY_CLASS_ATTRIBUTE, objectNode,classHandle, tv, true);
 
     // Add the property predicates in atomspace
     addPropertyPredicate(std::string("exist"), objectNode, true, false); //! Update existance predicate 
@@ -3840,6 +3852,24 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
                                         SimpleTruthValue::createTV((isVisible ? 1.0f : 0.0f), 1.0f), 
                                         agentNode, objectNode);
     } // if
+
+    // Add holder property predicate
+    if (holder != NULL_ATTRIBUTE)
+    {
+        Handle holderWordNode = atomSpace.addNode(WORD_NODE, holder);
+        Handle holderConceptNode = atomSpace.addNode(AVATAR_NODE, holder);
+
+        HandleSeq referenceLinkOutgoing;
+        referenceLinkOutgoing.push_back(holderConceptNode);
+        referenceLinkOutgoing.push_back(holderWordNode);
+
+        // Add a reference link
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
+        atomSpace.setLTI(referenceLink, 1);
+
+        AtomSpaceUtil::setPredicateValue(atomSpace, "holder",
+                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, holderConceptNode);
+    }
 
     // Add material property predicate
     if (material != NULL_ATTRIBUTE){

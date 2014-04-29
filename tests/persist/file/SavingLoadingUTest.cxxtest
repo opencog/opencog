@@ -29,7 +29,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/persist/file/SavingLoading.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -79,9 +78,9 @@ public:
         #include "tests/persist/file/atom_types.inheritance"
         tvs[0] = SimpleTruthValue::createTV(TV1_MEAN, TV1_COUNT);
         tvs[1] = IndefiniteTruthValue::createTV(TV2_L, TV2_U);
-        tvs[2] = CompositeTruthValue::createTV(SimpleTruthValue::createTV(TV3_MEAN, TV3_COUNT), NULL_VERSION_HANDLE);
-        tvs[3] = NULL;
-        tvs[4] = NULL;
+        tvs[2] = SimpleTruthValue::createTV(TV3_MEAN, TV3_COUNT);
+        tvs[3] = TruthValue::DEFAULT_TV();
+        tvs[4] = TruthValue::DEFAULT_TV();
     }
 
     ~SavingLoadingUTest() {
@@ -103,16 +102,6 @@ public:
         Handle h3 = atomSpace.addNode(CONCEPT_NODE, (string)NODE3_NAME, tvs[2]);
         //logger().debug("runSaving() 1");
 
-        // Insert other nodes with 2 more Composite TVs with valid handles
-        //if (tvs[3] == NULL) {
-        tvs[3] = tvs[2]->clone();
-        CompositeTVCast(tvs[3])->setVersionedTV(tvs[0], VersionHandle(HYPOTHETICAL, h1));
-        //}
-        //if (tvs[4] == NULL) {
-        tvs[4] = tvs[2]->clone();
-        CompositeTVCast(tvs[4])->setVersionedTV(tvs[1], VersionHandle(CONTEXTUAL, h2));
-        CompositeTVCast(tvs[4])->setVersionedTV(tvs[1], VersionHandle(HYPOTHETICAL, h2));
-        //}
         //logger().debug("runSaving() 2");
         Handle h4 = atomSpace.addNode(CONCEPT_NODE, (string)NODE4_NAME, tvs[3]);
         Handle h5 = atomSpace.addNode(CONCEPT_NODE, (string)NODE5_NAME, tvs[4]);
@@ -201,7 +190,6 @@ public:
         TS_ASSERT(fabs(tv3->getMean() - tvs[2]->getMean()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv3->getCount() - tvs[2]->getCount()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv3->getConfidence() - tvs[2]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(CompositeTVCast(tv3)->getNumberOfVersionedTVs() == CompositeTVCast(tvs[2])->getNumberOfVersionedTVs());
 
         Handle h4 = atomSpace.getHandle(CONCEPT_NODE, NODE4_NAME);
         TS_ASSERT(h4 != Handle::UNDEFINED);
@@ -215,14 +203,6 @@ public:
         TS_ASSERT(fabs(tv4->getMean() - tvs[3]->getMean()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv4->getCount() - tvs[3]->getCount()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv4->getConfidence() - tvs[3]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(CompositeTVCast(tv4)->getNumberOfVersionedTVs() == CompositeTVCast(tvs[3])->getNumberOfVersionedTVs());
-
-        TruthValuePtr versionedTv = CompositeTVCast(tv4)->getVersionedTV(VersionHandle(HYPOTHETICAL, h1));
-        TS_ASSERT(not versionedTv->isNullTv());
-        TS_ASSERT(versionedTv->getType() == tvs[0]->getType());
-        TS_ASSERT(versionedTv->getMean() == tvs[0]->getMean());
-        TS_ASSERT(versionedTv->getCount() == tvs[0]->getCount());
-        TS_ASSERT(fabs(versionedTv->getConfidence() - tvs[0]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
 
         Handle h5 = atomSpace.getHandle(CONCEPT_NODE, NODE5_NAME);
         TS_ASSERT(h5 != Handle::UNDEFINED);
@@ -236,20 +216,6 @@ public:
         TS_ASSERT(fabs(tv5->getMean() - tvs[4]->getMean()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv5->getCount() - tvs[4]->getCount()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv5->getConfidence() - tvs[4]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(CompositeTVCast(tv5)->getNumberOfVersionedTVs() == CompositeTVCast(tvs[4])->getNumberOfVersionedTVs());
-
-        TruthValuePtr versionedTv1 = CompositeTVCast(tv5)->getVersionedTV(VersionHandle(CONTEXTUAL, h2));
-        TS_ASSERT(not versionedTv1->isNullTv());
-        TS_ASSERT(versionedTv1->getType() == tvs[1]->getType());
-        TS_ASSERT(versionedTv1->getMean() == tvs[1]->getMean());
-        TS_ASSERT(versionedTv1->getCount() == tvs[1]->getCount());
-        TS_ASSERT(fabs(versionedTv1->getConfidence() - tvs[1]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-        TruthValuePtr versionedTv2 = CompositeTVCast(tv5)->getVersionedTV(VersionHandle(HYPOTHETICAL, h2));
-        TS_ASSERT(not versionedTv2->isNullTv());
-        TS_ASSERT(versionedTv2->getType() == tvs[1]->getType());
-        TS_ASSERT(versionedTv2->getMean() == tvs[1]->getMean());
-        TS_ASSERT(versionedTv2->getCount() == tvs[1]->getCount());
-        TS_ASSERT(fabs(versionedTv2->getConfidence() - tvs[1]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
 
         // Check links
 

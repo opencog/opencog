@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
@@ -65,8 +66,7 @@ class VarTypeNot :  public CxxTest::TestSuite
 		}
 
 		void setUp(void);
-
-		void tearDown(void) { }
+		void tearDown(void);
 
 		void test_exec(void);
 };
@@ -85,21 +85,20 @@ void VarTypeNot::setUp(void)
 	// Load the required data
 	config().set("MODULES",
 		"opencog/nlp/types/libnlp-types.so, "
-		"opencog/spacetime/libspacetime.so, "
-		"opencog/dynamics/attention/libattention.so, "
-		"opencog/embodiment/AtomSpaceExtensions/libAtomSpaceExtensions.so");
+		"opencog/dynamics/attention/libattention-types.so, "
+		"opencog/embodiment/AtomSpaceExtensions/libembodiment-types.so");
 
 	config().set("SCM_PRELOAD",
-      "opencog/atomspace/core_types.scm, "
-      "opencog/nlp/types/nlp_types.scm, "
-      "opencog/spacetime/spacetime_types.scm, "
-      "opencog/dynamics/attention/attention_types.scm, "
-      "opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
+		"opencog/atomspace/core_types.scm, "
+		"opencog/nlp/types/nlp_types.scm, "
+		"opencog/spacetime/spacetime_types.scm, "
+		"opencog/dynamics/attention/attention_types.scm, "
+		"opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
 		"tests/query/var-type-not.scm");
 
 	// Blindly search a bunch of paths hoping to find the files
 	// in one of them ...
-	const char * paths[] = 
+	const char * paths[] =
 	{
 		"./",
 		"../",
@@ -108,11 +107,17 @@ void VarTypeNot::setUp(void)
 		NULL
 	};
 	cogserver().loadModules(paths);
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 
 	// Create an implication link that will be tested.
-	vscope_good = SchemeEval::instance().apply("rule-good", Handle::UNDEFINED);
-	vscope_bad = SchemeEval::instance().apply("rule-bad", Handle::UNDEFINED);
+	SchemeEval* evaluator = new SchemeEval();
+	vscope_good = evaluator->apply("rule-good", Handle::UNDEFINED);
+	vscope_bad = evaluator->apply("rule-bad", Handle::UNDEFINED);
+	delete evaluator;
+}
+
+void VarTypeNot::tearDown(void)
+{
 }
 
 /*

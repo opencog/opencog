@@ -14,7 +14,6 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -59,11 +58,13 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     showTypeSizes = false;
     Nreps = 100000;
     Nloops = 1;
-    sizeIncrease=0;
-    saveToFile=false;
-    saveInterval=1;
-    buildTestData=false;
-    chanceUseDefaultTV=0.8f;
+    memoize = false;
+    compile = false;
+    sizeIncrease = 0;
+    saveToFile = false;
+    saveInterval = 1;
+    buildTestData = false;
+    chanceUseDefaultTV = 0.8f;
     doStats = false;
     testKind = BENCH_AS;
 
@@ -102,9 +103,6 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
             case INDEFINITE_TRUTH_VALUE:
                 total += sizeof(IndefiniteTruthValue);
                 break;
-            case COMPOSITE_TRUTH_VALUE:
-                total += sizeof(CompositeTruthValue);
-                break;
             default:
                 break;
             }
@@ -122,9 +120,6 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
                 break;
             case INDEFINITE_TRUTH_VALUE:
                 total += sizeof(IndefiniteTruthValue);
-                break;
-            case COMPOSITE_TRUTH_VALUE:
-                total += sizeof(CompositeTruthValue);
                 break;
             default:
                 break;
@@ -165,7 +160,6 @@ void AtomSpaceBenchmark::printTypeSizes()
     cout << "SimpleTruthValue = " << sizeof(SimpleTruthValue) << endl;
     cout << "CountTruthValue = " << sizeof(CountTruthValue) << endl;
     cout << "IndefiniteTruthValue = " << sizeof(IndefiniteTruthValue) << endl;
-    cout << "CompositeTruthValue = " << sizeof(CompositeTruthValue) << endl;
     cout << "AttentionValue = " << sizeof(AttentionValue) << endl;
     cout << "IncomingSet = " << sizeof(IncomingSet) << endl;
     cout << "AtomSignal = " << sizeof(AtomSignal) << endl;
@@ -234,13 +228,17 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
         case BENCH_AS:  cout << "AtomSpace's "; break;
         case BENCH_TABLE:  cout << "AtomTable's "; break;
 #if HAVE_GUILE
-        case BENCH_SCM:  cout << "Scheme's "; break;
+        case BENCH_SCM:  cout << "Scheme's "; 
+        if (memoize) cout << "memoized ";
+        else if (compile) cout << "compiled ";
+        else cout << "interpreted ";
+        break;
 #endif /* HAVE_GUILE */
 #if HAVE_CYTHON
         case BENCH_PYTHON: cout << "Python's "; break;
 #endif /* HAVE_CYTHON */
     }
-    cout << methodName << " method " << Nreps << " times ";
+    cout << methodName << " method " << (Nreps*Nloops) << " times ";
     std::ofstream myfile;
     if (saveToFile)
     {
@@ -254,7 +252,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     timeval tim;
     gettimeofday(&tim, NULL);
     double t1 = tim.tv_sec + (tim.tv_usec/1000000.0);
-    for (int i=0; i < Nreps; i++)
+    for (unsigned int i=0; i < Nreps; i++)
     {
         if (sizeIncrease)
         {
@@ -293,7 +291,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     // rssEnd = getMemUsage();
     cout << "Sum clock() time for all requests: " << sumAsyncTime << " (" <<
         (float) sumAsyncTime / CLOCKS_PER_SEC << " seconds, "<<
-        1.0f/(((float)sumAsyncTime/CLOCKS_PER_SEC) / Nreps) << " requests per second)" << endl;
+        1.0f/(((float)sumAsyncTime/CLOCKS_PER_SEC) / (Nreps*Nloops)) << " requests per second)" << endl;
     //cout << "Memory (max RSS) change after benchmark: " <<
     //    (rssEnd - rssStart - rssFromIncrease) / 1024 << "kb" << endl;
 
@@ -347,7 +345,7 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 #endif
             Handle::set_resolver(&asp->getAtomTable());
 #if HAVE_GUILE
-            scm = &SchemeEval::instance(asp);
+            scm = new SchemeEval(asp);
 #endif
         }
         numberOfTypes = classserver().getNumberOfClasses();
@@ -360,6 +358,9 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
         if (testKind == BENCH_TABLE)
             delete atab;
         else {
+#if HAVE_GUILE
+            delete scm;
+#endif
 #if HAVE_CYTHON
             delete cogs;
 #else
@@ -370,6 +371,30 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 
     //cout << estimateOfAtomSize(Handle(2)) << endl;
     //cout << estimateOfAtomSize(Handle(1020)) << endl;
+}
+
+std::string
+AtomSpaceBenchmark::memoize_or_compile(std::string exp)
+{
+#ifdef HAVE_GUILE
+    if (memoize)
+    {
+        std::ostringstream dss;
+        dss << "(define (mk) " << exp << ")\n";
+        scm->eval(dss.str());
+        return "(mk)\n";
+    }
+    if (compile)
+    {
+        std::ostringstream dss;
+        dss << "(compile '(define (mk) " << exp
+            << ") #:env (current-module))\n";
+        scm->eval(dss.str());
+        return "(mk)\n";
+    }
+#endif /* HAVE_GUILE */
+
+    return exp;
 }
 
 Type AtomSpaceBenchmark::randomType(Type t)
@@ -422,20 +447,27 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
     }
 #if HAVE_GUILE
     case BENCH_SCM: {
-#if ALL_AT_ONCE
         std::ostringstream ss;
-        ss << "(cog-new-node '"
-           << classserver().getTypeName(t) 
-           << " \"" << scp << "\")\n";
-        std::string gs = ss.str();
-#else
-        std::ostringstream dss;
-        dss << "(define (mk) (cog-new-node '"
-           << classserver().getTypeName(t) 
-           << " \"" << scp << "\"))\n";
-        scm->eval(dss.str());
-        std::string gs = "(mk)\n";
-#endif
+        for (unsigned int i=0; i<Nloops; i++) {
+            ss << "(cog-new-node '"
+               << classserver().getTypeName(t) 
+               << " \"" << scp << "\")\n";
+
+            p = rng->randdouble();
+            t = defaultNodeType;
+            if (p < chanceOfNonDefaultNode)
+                t = randomType(NODE);
+
+            scp = csi;
+            if (csi.size() ==  0) {
+                std::ostringstream oss;
+                counter++;
+                oss << "node " << counter;
+                scp = oss.str();
+            }
+        }
+        std::string gs = memoize_or_compile(ss.str());
+     
         clock_t t_begin = clock();
         scm->eval_h(gs);
         return clock() - t_begin;
@@ -493,32 +525,43 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
 
 #if HAVE_GUILE
     case BENCH_SCM: {
-#if ALL_AT_ONCE
         // This is somewhat more cumbersome and slower than what
         // anyone would actually do in scheme, because handles are
         // never handled in this way, but wtf, not much choice here.
         // I guess its quasi-realistic as a stand-in for other work
         // that might be done anyway...
         std::ostringstream ss;
-        ss << "(cog-new-link '"
-           << classserver().getTypeName(t) << " ";
-        for (size_t j=0; j < arity; j++) {
-            ss << "(cog-atom " << outgoing[j].value() << ") ";
+        for (unsigned int i=0; i<Nloops; i++) {
+            if (25 < arity) arity = 25;
+            for (size_t j = 0; j < arity; j++) {
+                char c = 'a' + j;
+                ss << "(define h" << c 
+                   << " (cog-atom " << outgoing[j].value() << "))\n";
+            }
+            ss << "(cog-new-link '"
+               << classserver().getTypeName(t);
+            for (size_t j = 0; j < arity; j++) {
+                char c = 'a' + j;
+                ss << " h" << c;
+            }
+            ss << ")\n";
+
+            t = defaultLinkType;
+            p = rng->randdouble();
+            if (p < chanceOfNonDefaultLink) t = randomType(LINK);
+
+            arity = (*prg)(randgen);
+            if (arity == 0) { ++arity; };
+
+            // AtomSpace will throw if the context link has bad arity
+            if (CONTEXT_LINK == t) arity = 2;
+
+            outgoing.clear();
+            for (size_t j=0; j < arity; j++) {
+                outgoing.push_back(getRandomHandle());
+            }
         }
-        ss << ")\n";
-        std::string gs = ss.str();
-#else
-        // OK, here we memoize, the way it would normally be done ... 
-        std::ostringstream dss;
-        dss << "(define (mk) (cog-new-link '"
-           << classserver().getTypeName(t) << " ";
-        for (size_t j=0; j < arity; j++) {
-            dss << "(cog-atom " << outgoing[j].value() << ") ";
-        }
-        dss << "))\n";
-        scm->eval(dss.str());
-        std::string gs = "(mk)\n";
-#endif
+        std::string gs = memoize_or_compile(ss.str());
 
         clock_t t_begin = clock();
         scm->eval_h(gs);
@@ -613,7 +656,9 @@ timepair_t AtomSpaceBenchmark::bm_addLink()
 timepair_t AtomSpaceBenchmark::bm_rmAtom()
 {
     Handle h = getRandomHandle();
-    while (0 < h->getIncomingSetSize()) {
+    // operator->() can return NULL when there's no atom for the uuid,
+    // because the atom was deleted in a previous pass! Dohh!
+    while (NULL == h.operator->() or 0 < h->getIncomingSetSize()) {
         h = getRandomHandle();
     }
     clock_t t_begin;
@@ -622,12 +667,12 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        for (int i=0; i<Nloops; i++) {
+        for (unsigned int i=0; i<Nloops; i++) {
             dss << "aspace.remove(Handle(" << h.value() << "))\n";
             h = getRandomHandle();
             // XXX FIXME --- this may have trouble finding anything if
             // Nloops is bigger than the number of links in the atomspace !
-            while (0 < h->getIncomingSetSize()) {
+            while (NULL == h.operator->() or 0 < h->getIncomingSetSize()) {
                 h = getRandomHandle();
             }
         }
@@ -639,24 +684,17 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
-#if 1 // ALL_AT_ONCE
         std::ostringstream ss;
-        for (int i=0; i<Nloops; i++) {
+        for (unsigned int i=0; i<Nloops; i++) {
             ss << "(cog-delete-recursive (cog-atom " << h.value() << "))\n";
             h = getRandomHandle();
             // XXX FIXME --- this may have trouble finding anything if
             // Nloops is bigger than the number of links in the atomspace !
-            while (0 < h->getIncomingSetSize()) {
+            while (NULL == h.operator->() or 0 < h->getIncomingSetSize()) {
                 h = getRandomHandle();
             }
         }
-        std::string gs = ss.str();
-#else
-        std::ostringstream dss;
-        dss << "(define (getty) (cog-type (cog-atom " << h.value() << ")))\n";
-        scm->eval(dss.str());
-        std::string gs = "(getty)";
-#endif
+        std::string gs = memoize_or_compile(ss.str());
 
         clock_t t_begin = clock();
         scm->eval(gs);
@@ -681,12 +719,6 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
 
 Handle AtomSpaceBenchmark::getRandomHandle()
 {
-    //tRandomStart = clock();
-    // We need this TLB access as the only alternative to
-    // getting a random handle this way scales badly:
-    // (... plus we are not allowed access to the AtomTable either)
-    //Handle h = asp->getAtomTable().getRandom(rng);
-    //tRandomEnd = clock();
     return Handle(UUID_begin + rng->randint(UUID_end-1-UUID_begin));
 }
 
@@ -699,7 +731,7 @@ timepair_t AtomSpaceBenchmark::bm_getType()
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        for (int i=0; i<Nloops; i++) {
+        for (unsigned int i=0; i<Nloops; i++) {
             dss << "aspace.get_type(Handle(" << h.value() << "))\n";
             h = getRandomHandle();
         }
@@ -711,19 +743,12 @@ timepair_t AtomSpaceBenchmark::bm_getType()
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
-#if 1 // ALL_AT_ONCE
         std::ostringstream ss;
-        for (int i=0; i<Nloops; i++) {
+        for (unsigned int i=0; i<Nloops; i++) {
             ss << "(cog-type (cog-atom " << h.value() << "))\n";
             h = getRandomHandle();
         }
-        std::string gs = ss.str();
-#else
-        std::ostringstream dss;
-        dss << "(define (getty) (cog-type (cog-atom " << h.value() << ")))\n";
-        scm->eval(dss.str());
-        std::string gs = "(getty)";
-#endif
+        std::string gs = memoize_or_compile(ss.str());
 
         clock_t t_begin = clock();
         scm->eval(gs);
@@ -764,16 +789,12 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
-#if ALL_AT_ONCE
         std::ostringstream ss;
-        ss << "(cog-tv (cog-atom " << h.value() << "))\n";
-        std::string gs = ss.str();
-#else
-        std::ostringstream dss;
-        dss << "(define (getty) (cog-tv (cog-atom " << h.value() << ")))\n";
-        scm->eval(dss.str());
-        std::string gs = "(getty)";
-#endif
+        for (unsigned int i=0; i<Nloops; i++) {
+            ss << "(cog-tv (cog-atom " << h.value() << "))\n";
+            h = getRandomHandle();
+        }
+        std::string gs = memoize_or_compile(ss.str());
 
         clock_t t_begin = clock();
         scm->eval(gs);
@@ -829,20 +850,17 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
-#if ALL_AT_ONCE
         std::ostringstream ss;
-        ss << "(cog-set-tv! (cog-atom " << h.value() << ")"
-           << "   (cog-new-stv " << strength << " " << conf << ")"
-           << ")\n";
-        std::string gs = ss.str();
-#else
-        std::ostringstream dss;
-        dss << "(define (setty) (cog-set-tv! (cog-atom " << h.value() << ")"
-            << "   (cog-new-stv " << strength << " " << conf << ")"
-            << "))\n";
-        scm->eval(dss.str());
-        std::string gs = "(setty)";
-#endif
+        for (unsigned int i=0; i<Nloops; i++) {
+            ss << "(cog-set-tv! (cog-atom " << h.value() << ")"
+               << "   (cog-new-stv " << strength << " " << conf << ")"
+               << ")\n";
+
+            h = getRandomHandle();
+            strength = rng->randfloat();
+            conf = rng->randfloat();
+        }
+        std::string gs = memoize_or_compile(ss.str());
 
         clock_t t_begin = clock();
         scm->eval(gs);
@@ -965,16 +983,12 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
-#if ALL_AT_ONCE
         std::ostringstream ss;
-        ss << "(cog-outgoing-set (cog-atom " << h.value() << "))\n";
-        std::string gs = ss.str();
-#else
-        std::ostringstream dss;
-        dss << "(define (go) (cog-outgoing-set (cog-atom " << h.value() << ")))\n";
-        scm->eval(dss.str());
-        std::string gs = "(go)";
-#endif
+        for (unsigned int i=0; i<Nloops; i++) {
+            ss << "(cog-outgoing-set (cog-atom " << h.value() << "))\n";
+            h = getRandomHandle();
+        }
+        std::string gs = memoize_or_compile(ss.str());
 
         clock_t t_begin = clock();
         scm->eval(gs);
@@ -1016,16 +1030,12 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
-#if ALL_AT_ONCE
         std::ostringstream ss;
-        ss << "(cog-incoming-set (cog-atom " << h.value() << "))\n";
-        std::string gs = ss.str();
-#else
-        std::ostringstream dss;
-        dss << "(define (gi) (cog-incoming-set (cog-atom " << h.value() << ")))\n";
-        scm->eval(dss.str());
-        std::string gs = "(gi)";
-#endif
+        for (unsigned int i=0; i<Nloops; i++) {
+            ss << "(cog-incoming-set (cog-atom " << h.value() << "))\n";
+            h = getRandomHandle();
+        }
+        std::string gs = memoize_or_compile(ss.str());
 
         clock_t t_begin = clock();
         scm->eval(gs);
@@ -1035,7 +1045,7 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
 #endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         t_begin = clock();
-        atab->getIncomingSet(h);
+        h->getIncomingSet();
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }

@@ -92,6 +92,7 @@ GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 
 PREDICATE_NODE <- SCHEMA_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
+DEFINED_RELATIONSHIP_NODE <- PREDICATE_NODE // Generic relations
 
 SATISFYING_SET_LINK <- ORDERED_LINK
 
@@ -102,55 +103,14 @@ EXECUTION_LINK <- ORDERED_LINK
 EXECUTION_OUTPUT_LINK <- ORDERED_LINK
 
 // ====================================================================
-// Assorted fine-grained logic links, used by PLN.
-
-PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
-PREDICTIVE_ATTRACTION_LINK <- ORDERED_LINK
-TAIL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
-SEQUENTIAL_AND_LINK <- ORDERED_LINK //AND_LINK
-SIMULTANEOUS_AND_LINK <- ORDERED_LINK //AND_LINK
-
-EVENTUAL_SEQUENTIAL_AND_LINK <- ORDERED_LINK "EventualSequentialAND"
-EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplication"
-
-// ExtInh is redundant with SUBSET_LINK and officially disabled
-// EXTENSIONAL_INHERITANCE_LINK <- ORDERED_LINK
-EXTENSIONAL_SIMILARITY_LINK <- UNORDERED_LINK
-INTENSIONAL_SIMILARITY_LINK <- UNORDERED_LINK
-INTENSIONAL_INHERITANCE_LINK <- ORDERED_LINK
-
-// ====================================================================
-// Temporal Links used by Python PLN
-AT_TIME_LINK <- ORDERED_LINK
-TIME_NODE <- NODE
-
-// Time Interval Calculus links.
-// XXX TODO Perhaps "overlaps", "equals" and "contains" should be renamed
-// to make it clear that these apply to time intervals, only.
-BEFORE_LINK <- ORDERED_LINK
-OVERLAPS_LINK <- ORDERED_LINK
-DURING_LINK <- ORDERED_LINK
-MEETS_LINK <- ORDERED_LINK
-STARTS_LINK <- ORDERED_LINK
-FINISHES_LINK <- ORDERED_LINK
-EQUALS_LINK <- ORDERED_LINK
-AFTER_LINK <- ORDERED_LINK
-OVERLAPPED_BY_LINK <- ORDERED_LINK
-CONTAINS_LINK <- ORDERED_LINK
-MET_BY_LINK <- ORDERED_LINK
-STARTED_BY_LINK <- ORDERED_LINK
-FINISHED_BY_LINK <- ORDERED_LINK
-
-// ====================================================================
 // Synchronization primitive, used to mark stages of a processing
 // pipeline; used as a fence or guard barrier, make sure that earlier
 // stages have completed processing before later ones start.
-// Basically, hypergraphs may be attached to the anchor, with a 
+// Basically, hypergraphs may be attached to the anchor, with a
 // ListLink, to indicate that they are either done, or awaiting
 // processing.
 ANCHOR_NODE <- NODE
 
-// Holder of statistical truth values. 
-// XXX not clear if this is used anywhere ... maybe should remove this.
-COUNT_LINK <- ORDERED_LINK
-
+// Link for mathematices. Not in use at the time of recatgorizing, from
+// NLP related atom types.
+QUANTITY_LINK <- ORDERED_LINK

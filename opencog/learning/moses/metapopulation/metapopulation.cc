@@ -104,6 +104,8 @@ void metapopulation::set_diversity()
     // mean is replaced by the max
     bool dp_max = params.diversity.exponent <= 0.0;
 
+    // Update the diversity penalty of the candidate according to its
+    // diversity distance to the pool
     auto update_diversity_penalty = [&](bsct_dp_pair& v) {
 
         if (!pool.empty()) { // only do something if the pool is
@@ -164,9 +166,9 @@ void metapopulation::set_diversity()
 
         // // debug
         // logger().fine("Pool =");
-        // for (pbscored_combo_tree* ptr : pool) {
+        // for (pbscored_combo_tree& pbs_tr : pool) {
         //     stringstream ss;
-        //     ostream_pbscored_combo_tree(ss, *ptr, true, true, true);
+        //     ostream_pbscored_combo_tree(ss, pbs_tr, true, true, true);
         //     logger().fine(ss.str());
         // }
         // // ~debug
@@ -175,9 +177,10 @@ void metapopulation::set_diversity()
         OMP_ALGO::for_each(tmp.begin(), tmp.end(), update_diversity_penalty);
 
         // take the max score, insert in the pool and remove from tmp
+
+        // Define less function to compare bsct_dp_pair
         pbscored_combo_tree_greater bsct_gt;
-        auto gt = [&](const bsct_dp_pair& l,
-                      const bsct_dp_pair& r) {
+        auto gt = [&](const bsct_dp_pair& l, const bsct_dp_pair& r) {
             return bsct_gt(*l.first, *r.first);
         };
         // note although we do use min_element it returns the
@@ -574,6 +577,8 @@ void metapopulation::resize_metapop()
     // faster than above. I think this is because the erase() above
     // causes the std::set to try to sort the contents, and this
     // ends up costing a lot.  I think... not sure.
+
+    // Get the first score below worst_score (from begin() + min_pool_size)
     iterator it = std::next(begin(), min_pool_size);
     while (it != end()) {
         score_t sc = get_penalized_score(*it);
@@ -649,6 +654,23 @@ pbscored_combo_tree_set metapopulation::get_new_candidates(const metapop_candida
         if (fcnd == end())
             res.insert(cnd);
     }
+
+    // That version runs the insertion in parallel, I don't know what is faster
+    //
+    // mutex insert_cnd_mutex;
+    // typedef boost::unique_lock<mutex> unique_lock;
+
+    // auto insert_new_candidate = [&](metapop_candidates::value_type& cnd) {
+    //     const combo_tree& tr = get_tree(cnd);
+    //     const_iterator fcnd = std::find_if(begin(), end(),
+    //                                        [&](const pbscored_combo_tree& v) {
+    //                                            return tr == get_tree(v); });
+    //     if (fcnd == end()) {
+    //         unique_lock lock(insert_cnd_mutex);
+    //         res.insert(cnd);
+    //     }
+    // };
+
     return res;
 }
 

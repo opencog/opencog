@@ -158,24 +158,24 @@ RunningProcedureId ComboInterpreter::runProcedure(const combo::combo_tree& tr, c
     return id;
 }
 
-bool ComboInterpreter::isFinished(RunningProcedureId id)
+bool ComboInterpreter::isFinished(RunningProcedureId id) const
 {
-    Map::iterator it = _map.find(id);
-    return (it == _map.end() || it->second.isFinished());
+    Map::const_iterator it = _map.find(id);
+    return (it == _map.cend() || it->second.isFinished());
 }
 
 // Note: this will return false if the stopProcedure() method was previously called for this same procedure id,
 // even if the procedure execution has failed before
-bool ComboInterpreter::isFailed(RunningProcedureId id)
+bool ComboInterpreter::isFailed(RunningProcedureId id) const
 {
     if (_failed.find(id) != _failed.end()) {
         return true;
     }
-    Map::iterator it = _map.find(id);
+    Map::const_iterator it = _map.find(id);
 
 //    logger().warn("_map!end '%s', finished '%s', failed '%s'.",
 //                    (it!=_map.end())?"true":"false", it->second.isFinished()?"true":"false", it->second.isFailed()?"true":"false");
-    return (it != _map.end() && it->second.isFinished() && it->second.isFailed());
+    return (it != _map.cend() && it->second.isFinished() && it->second.isFailed());
 }
 
 // Get the result of the procedure with the given id

@@ -30,9 +30,6 @@
 #include <vector>
 
 #include <opencog/atomspace/TruthValue.h>
-#ifdef ZMQ_EXPERIMENT
-#include "ProtocolBufferSerializer.h"
-#endif
 
 namespace opencog
 {
@@ -52,10 +49,6 @@ static inline IndefiniteTruthValuePtr IndefiniteTVCast(TruthValuePtr tv)
  */
 class IndefiniteTruthValue : public TruthValue
 {
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-#endif
-
 private:
 
     strength_t U;
@@ -100,8 +93,6 @@ public:
     //! it is a strict equality comparison, without error interval tolerance
     virtual bool operator==(const TruthValue& rhs) const;
 
-    static IndefiniteTruthValuePtr fromString(const char*);
-
     strength_t getMean() const;
     strength_t getU() const;
     strength_t getL() const;
@@ -115,12 +106,15 @@ public:
     void setConfidenceLevel(confidence_t);
     void setDiff(strength_t);
     void setFirstOrderDistribution(const std::vector<strength_t*>&);
+    void setSymmetric(bool s) { symmetric = s; }
 
     count_t getCount() const;
     confidence_t getConfidence() const;
     strength_t getU_() const;
     strength_t getL_() const;
     bool isSymmetric() const;
+
+    TruthValuePtr merge(TruthValuePtr) const;
 
     std::string toString() const;
     TruthValueType getType() const;
@@ -139,11 +133,16 @@ public:
         return std::static_pointer_cast<TruthValue>(createITV(tv));
     }
 
+    static IndefiniteTruthValuePtr createITV(strength_t l, strength_t u,
+                         confidence_t c = DEFAULT_CONFIDENCE_LEVEL)
+    {
+        return std::make_shared<IndefiniteTruthValue>(l, u, c);
+    }
+
     static TruthValuePtr createTV(strength_t l, strength_t u,
                          confidence_t c = DEFAULT_CONFIDENCE_LEVEL)
     {
-        return std::static_pointer_cast<TruthValue>(
-            std::make_shared<IndefiniteTruthValue>(l, u, c));
+        return std::static_pointer_cast<TruthValue>(createITV(l, u, c));
     }
 
     TruthValuePtr clone() const

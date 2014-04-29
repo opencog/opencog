@@ -65,7 +65,8 @@ private:
 
     Atom* resolve();
     Atom* cresolve() const;
-    static const AtomTable* _resolver;
+    static AtomPtr do_res(const Handle*);
+    static std::vector<const AtomTable*> _resolver;
 public:
 
     static const Handle UNDEFINED;
@@ -81,11 +82,24 @@ public:
     }
 
     inline Handle& operator=(const Handle& h) {
-        if (this == &h) return *this;
+        if (this->_uuid == h._uuid) {
+            Atom* a = h._ptr.get();
+            // The 'typical' case here is where a isn't null,
+            // but this is.  The weirdo case is where both
+            // aren't null, and yet differ.
+            // Mostly, we want to avoid the CPU overhead of calling
+            // resolve(), it we can; so the goal of this if-stmt is
+            // to upgrade the ptr from null to non-null.
+            if (a != NULL and a != this->_ptr.get())
+                this->_ptr = h._ptr;
+            return *this;
+        }
         this->_uuid = h._uuid;
         this->_ptr = h._ptr;
         return *this;
     }
+
+    Handle& operator=(const AtomPtr& a);
 
     inline Atom* operator->() {
         Atom* ptr = _ptr.get();
@@ -103,17 +117,17 @@ public:
 
     // Allows expressions like "if(h)..." to work when h has a non-null pointer.
     explicit inline operator bool() const noexcept {
-        if (_ptr) return true;
+        if (_ptr.get()) return true;
         return NULL != cresolve(); // might be null because we haven't resolved it yet!
     }
 
     inline bool operator==(std::nullptr_t) const noexcept {
-        if (_ptr) return false;
+        if (_ptr.get()) return false;
         return NULL == cresolve(); // might be null because we haven't resolved it yet!
     }
 
     inline bool operator!=(std::nullptr_t) const noexcept {
-        if (_ptr) return true;
+        if (_ptr.get()) return true;
         return NULL != cresolve(); // might be null because we haven't resolved it yet!
     }
 
@@ -148,8 +162,8 @@ public:
     }
 
     AtomPtr resolve_ptr();
-    static void set_resolver(const AtomTable* tab) { _resolver = tab; }
-    static void clear_resolver(const AtomTable* tab) { _resolver = NULL; }
+    static void set_resolver(const AtomTable*);
+    static void clear_resolver(const AtomTable*);
 
     operator AtomPtr() const {
         if (_ptr.get()) return _ptr;

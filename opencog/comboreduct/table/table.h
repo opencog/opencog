@@ -37,6 +37,7 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/util/Counter.h>
 #include <opencog/util/dorepeat.h>
+#include <opencog/util/exceptions.h>
 #include <opencog/util/KLD.h>
 
 #include "../interpreter/eval.h"   /* Needed for binding map, and then obsolete */
@@ -51,10 +52,12 @@
 namespace opencog { namespace combo {
 
 /**
- * Get indices (aka positions or offsets) of a list of labels given a header
+ * Get indices (aka positions or offsets) of a list of labels given a
+ * header. The labels can be sequenced in any order, it will always
+ * return the order consistent with the header.
  */
 std::vector<unsigned> get_indices(const std::vector<std::string>& labels,
-                                  const std::vector<std::string>& sub_labels);
+                                  const std::vector<std::string>& header);
         
 ///////////////////
 // Generic table //
@@ -206,7 +209,8 @@ struct equal_visitor : public boost::static_visitor<bool> {
 // function specifically for output table
 std::string table_fmt_vertex_to_str(const vertex& v);
 std::string table_fmt_builtin_to_str(const builtin& b);
-struct to_strings_visitor : public boost::static_visitor<string_seq> {
+struct to_strings_visitor : public boost::static_visitor<string_seq>
+{
     string_seq operator()(const string_seq& seq) {
         return seq;
     }
@@ -231,6 +235,7 @@ struct to_strings_visitor : public boost::static_visitor<string_seq> {
         return res;
     }
 };
+
 struct get_type_tree_at_visitor : public boost::static_visitor<type_tree> {
     get_type_tree_at_visitor(size_t pos) : _pos(pos) {}
     template<typename Seq> type_tree operator()(const Seq& seq) {
@@ -251,13 +256,13 @@ struct interpreter_visitor : public boost::static_visitor<vertex>
     interpreter_visitor(const combo_tree::iterator& it) : _it(it) {}
     vertex operator()(const std::vector<builtin>& inputs) {
         return boolean_interpreter(inputs)(_it);
-    }    
+    }
     vertex operator()(const std::vector<contin_t>& inputs) {
         // Can't use contin, since the output might be non-contin,
         // e.g. a boolean, or an enum.  
         // return contin_interpreter(inputs)(_it);
         return mixed_interpreter(inputs)(_it);
-    }    
+    }
     vertex operator()(const std::vector<vertex>& inputs) {
         return mixed_interpreter(inputs)(_it);
     }
@@ -271,7 +276,7 @@ struct interpreter_visitor : public boost::static_visitor<vertex>
     }
     combo_tree::iterator _it;
 };
-        
+
 /**
  * multi_type_seq is a variant of sequences of primitive combo types,
  * vertex and tree. That way the Table, ITable or CTable can store
@@ -350,13 +355,14 @@ struct multi_type_seq : public boost::less_than_comparable<multi_type_seq>,
     // I set it as mutable because the FUCKING boost::variant
     // apply_visitor doesn't allow to deal with const variants. For
     // the same reason I cannot define multi_type_seq as an inherited
-    // class from multi_type_variant (boost::variant kinda suck!).
+    // class from multi_type_variant (boost::variant kinda sucks!).
     mutable multi_type_variant _variant;
 };
 
 // Filter a multi_type_seq
 template<typename F>
-struct seq_filtered_visitor : public boost::static_visitor<multi_type_seq> {
+struct seq_filtered_visitor : public boost::static_visitor<multi_type_seq>
+{
     seq_filtered_visitor(const F& filter) : _filter(filter) {}
     template<typename Seq> multi_type_seq operator()(const Seq& seq) {
         return seq_filtered(seq, _filter);
@@ -369,6 +375,9 @@ struct seq_filtered_visitor : public boost::static_visitor<multi_type_seq> {
 /// of the duplicated outputs.  That is, the output column is of the
 /// form {v1:c1, v2:c2, ...} where c1 is the number of times value v1
 /// was seen in the output, c2 the number of times v2 was observed, etc.
+///
+/// For weighted rows, the counts c1, c2,... need not be integers; they
+/// will hold the sum of the (floating point) weights for the rows.
 ///
 /// For example, if one has the following table:
 ///
@@ -387,13 +396,14 @@ struct seq_filtered_visitor : public boost::static_visitor<multi_type_seq> {
 /// Most scoring functions work on CTable, as it avoids re-evaluating a
 /// combo program on duplicated inputs.
 //
-class CTable : public std::map<multi_type_seq, Counter<vertex, unsigned>>
-                  // ,
-               // public boost::equality_comparable<CTable>
+typedef double count_t;
+
+class CTable : public std::map<multi_type_seq, Counter<vertex, count_t>>
+               // , public boost::equality_comparable<CTable>
 {
 public:
     typedef multi_type_seq key_type;
-    typedef Counter<vertex, unsigned> counter_t;
+    typedef Counter<vertex, count_t> counter_t;
     typedef std::map<key_type, counter_t> super;
     typedef typename super::value_type value_type;
     typedef std::vector<std::string> string_seq;
@@ -417,9 +427,11 @@ public:
 
     arity_t get_arity() const { return ilabels.size(); }
 
-    /// Return the total number of observations (should be equal to the
-    /// size of the corresponding uncompressed table)
-    unsigned uncompressed_size() const;
+    /// Return the total number of observations.
+    /// This will equal to the size of the corresponding uncompressed
+    /// when all row weights are equal to 1.0; otherwise, this is the
+    /// sum of all the row weights.
+    count_t uncompressed_size() const;
 
     template<typename F>
     CTable filtered(const F& filter) const
@@ -587,8 +599,8 @@ public:
      * If the feature is the empty string, then column zero is deleted.
      * The returned value is the name of the column.
      */
-    std::string delete_column(const std::string& feature);
-    void delete_columns(const string_seq& ignore_features);
+    std::string delete_column(const std::string& feature) throw(IndexErrorException);
+    void delete_columns(const string_seq& ignore_features) throw(IndexErrorException);
 
     /**
      * Get the column, given its offset or label
@@ -773,8 +785,10 @@ struct Table
         return res;
     }
 
-    /// return the corresponding compressed table
-    CTable compressed() const;
+    /// Return the corresponding compressed table.
+    /// The named column, if not empty, will be used to provide weights
+    /// for each row, during compresion.
+    CTable compressed(const std::string = "") const;
 
     /// add raw features given an input file and a list of
     /// features. It is assumed that the table has a subset of
@@ -851,7 +865,7 @@ double mutualInformation(const ITable& it, const OTable& ot, const FeatureSet& f
     // (X1, ..., Xn) occurs. This count is kept in "ic". Likewise, the
     // "ioc" counter counts how often the vertex_seq (Y, X1, ..., Xn)
     // occurs.
-    typedef Counter<multi_type_seq, unsigned> VSCounter;
+    typedef Counter<multi_type_seq, count_t> VSCounter;
     VSCounter ic, // for H(X1, ..., Xn)
         ioc; // for H(Y, X1, ..., Xn)
     ITable::const_iterator i_it = it.begin();
@@ -859,16 +873,16 @@ double mutualInformation(const ITable& it, const OTable& ot, const FeatureSet& f
     
     for (; i_it != it.end(); ++i_it, ++o_it) {
         multi_type_seq ic_vec = asf(i_it->get_variant());
-        ++ic[ic_vec];
+        ic[ic_vec] += 1.0;
         multi_type_seq ioc_vec(ic_vec);
         ioc_vec.push_back(get_builtin(*o_it));
-        ++ioc[ioc_vec];
+        ioc[ioc_vec] += 1.0;
     }
 
     // Compute the probability distributions
     std::vector<double> ip(ic.size()), iop(ioc.size());
     double total = it.size();
-    auto div_total = [&](unsigned c) { return c/total; };
+    auto div_total = [&](count_t c) { return c/total; };
     transform(ic | map_values, ip.begin(), div_total);
     transform(ioc | map_values, iop.begin(), div_total);
 
@@ -910,13 +924,13 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         // (X1, ..., Xn) occurs. This count is kept in "ic". Likewise, the
         // "ioc" counter counts how often the vertex_seq (Y, X1, ..., Xn)
         // occurs.
-        typedef Counter<CTable::key_type, unsigned> VSCounter;
+        typedef Counter<CTable::key_type, count_t> VSCounter;
         VSCounter ic;  // for H(X1, ..., Xn)
         VSCounter ioc; // for H(Y, X1, ..., Xn)
         double total = 0.0;
 
         // Count the total number of times an enum appears in the table
-        Counter<vertex, unsigned> ycount;
+        Counter<vertex, count_t> ycount;
 
         for (const auto& row : ctable)
         {
@@ -924,14 +938,14 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
             CTable::key_type vec = asf(row.first.get_variant());
 
             // update ic (input counter)
-            unsigned row_total = row.second.total_count();
+            count_t row_total = row.second.total_count();
             ic[vec] += row_total;
 
             // for each enum type counted in the row,
             for (const auto& val_pair : row.second) {
                 const vertex& v = val_pair.first; // key of map
 
-                unsigned count = row.second.get(v);
+                count_t count = row.second.get(v);
                 ycount[v] += count;
 
                 // update ioc == "input output counter"
@@ -954,7 +968,7 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         // Compute the probability distributions; viz divide count by total.
         // "c" == count, "p" == probability
         std::vector<double> yprob(ycount.size()), ip(ic.size()), iop(ioc.size());
-        auto div_total = [&](unsigned c) { return c/total; };
+        auto div_total = [&](count_t c) { return c/total; };
         transform(ycount | map_values, yprob.begin(), div_total);
         transform(ic | map_values, ip.begin(), div_total);
         transform(ioc | map_values, iop.begin(), div_total);
@@ -982,7 +996,7 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
                 const vertex& v = val_pair.first; // key of map
                 contin_t y = get_contin(v); // typecast
 
-                unsigned flt_count = row.second.get(y);
+                count_t flt_count = row.second.get(y);
                 dorepeat(flt_count) {
                     auto pr = std::make_pair(x,y);
                     sorted_list.insert(pr);
@@ -1004,7 +1018,7 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         // Also a problem, this is returning values greater than 1.0;
         // I thought that IC was supposed to max out at 1.0 !?
         contin_t ic = - KLD(p,q);
-        // XXX TODO remove this print, for better prformance.
+        // XXX TODO remove this print, for better performance.
         unsigned idx = *(fs.begin());
         logger().debug() <<"Contin MI for feat=" << idx << " ic=" << ic;
         return ic;
@@ -1068,7 +1082,7 @@ double mutualInformationBtwSets(const CTable& ctable,
         // MI(fs_l, fs_r) = H(L1, ..., Lm) + H(R1, ..., Rl) - H(U1, ..., Un)
         //
         // To do this, we need to count how often those events occurs.
-        typedef Counter<CTable::key_type, unsigned> VSCounter;
+        typedef Counter<CTable::key_type, count_t> VSCounter;
         VSCounter
             uc, // for H(U1, ..., Un)
             lc, // for H(L1, ..., Lm)
@@ -1081,7 +1095,7 @@ double mutualInformationBtwSets(const CTable& ctable,
             CTable::key_type vec_u = asf_u(row.first.get_variant()),
                 vec_l = asf_l(row.first.get_variant()),
                 vec_r = asf_r(row.first.get_variant());
-            unsigned row_total = row.second.total_count();
+            double row_total = row.second.total_count();
 
             // update uc, lc and rc
             uc[vec_u] += row_total;
@@ -1095,7 +1109,7 @@ double mutualInformationBtwSets(const CTable& ctable,
         // Compute the probability distributions; viz divide count by total.
         // "c" == count, "p" == probability
         std::vector<double> up(uc.size()), lp(lc.size()), rp(rc.size());
-        auto div_total = [&](unsigned c) { return c/total; };
+        auto div_total = [&](count_t c) { return c/total; };
         transform(uc | map_values, up.begin(), div_total);
         transform(lc | map_values, lp.begin(), div_total);
         transform(rc | map_values, rp.begin(), div_total);
@@ -1184,7 +1198,7 @@ public:
         iterator it = begin();
         for (int i = 0; it != end(); ++i, ++it) {
             bool_vector v(_arity);
-            for (arity_t j = 0;j < _arity;++j)
+            for (arity_t j = 0;j < _arity; ++j)
                 v[j] = (i >> j) % 2;  // j'th bit of i
             (*it) = f(v.begin(), v.end());
         }
@@ -1199,7 +1213,7 @@ public:
     template<typename It>
     bool operator()(It from,It to) {
         const_iterator it = begin();
-        for (int i = 1;from != to;++from, i = i << 1)
+        for (int i = 1; from != to; ++from, i = i << 1)
             if (*from)
                 it += i;
         return *it;

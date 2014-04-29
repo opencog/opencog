@@ -30,7 +30,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParameter.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParamType.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
-#include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/AvatarAction.h>
 #include "PlanningHeaderFiles.h"
 #include "Inquery.h"
 
@@ -120,7 +120,6 @@ namespace opencog { namespace oac {
         // see the enum StateType
         StateType stateType;
 
-
         // some kinds of state is not apparent, need real-time inquery from the system
         // e.g.: Distance(a,b) - the distance between a and b, it's usually not apparent, need to call corresponding funciton to calcuate
         // e.g.: the height of Ben, this is a essential attribute, which is usuall apparent and not changed, so this is not need a real-time inquery
@@ -128,6 +127,8 @@ namespace opencog { namespace oac {
 
         // if the need_inquery is true, then it needs a inquery funciton to get the value of the state in real-time
         InqueryStateFun inqueryStateFun;
+
+        bool permanent; // if it's true, then the value of this state cannot be changed. Only can be changed from or ot UN_DEFINED value
 
         void changeStateType(StateType newType){this->stateType = newType;}
 
@@ -139,11 +140,12 @@ namespace opencog { namespace oac {
 
         //map<string , vector<ParamValue*> > paraIndexMap; // this is only used when this state is inside a rule, the rule class will assign the values to this map
 
+        // for some unknowable states, not existing in Atomspace, nor able to calculate in real time, _need_inquery = true, but _inqueryStateFun = 0
         State(string _stateName, ActionParamType _valuetype,StateType _stateType, ParamValue  _ParamValue,
-              vector<ParamValue> _stateOwnerList, bool _need_inquery = false, InqueryStateFun _inqueryStateFun = 0);
+              vector<ParamValue> _stateOwnerList, bool _need_inquery = false, InqueryStateFun _inqueryStateFun = false, bool _permanent = 0);
 
         State(string _stateName, ActionParamType _valuetype ,StateType _stateType, ParamValue _ParamValue,
-               bool _need_inquery = false, InqueryStateFun _inqueryStateFun = 0);
+               bool _need_inquery = false, InqueryStateFun _inqueryStateFun = 0, bool _permanent = false);
 
         State(){}
 
@@ -178,8 +180,7 @@ namespace opencog { namespace oac {
         // @ original_state is the corresponding begin state of this goal state, so that we can compare the current state to both fo the goal and origninal states
         //                  to calculate its satisfiedDegree value.
         // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
-        bool isSatisfiedMe( ParamValue& value, float& satisfiedDegree,  State *original_state = 0);
-        bool isSatisfied( State& goal, float &satisfiedDegree,  State *original_state = 0) ;
+        bool isSatisfied( State& goal, float &satisfiedDegree, bool& unknown, State *original_state = 0) ;
 
         // To get int,float value or fuzzy int or float value from a state
         // For convenience, we will also consider int value as float value
@@ -346,7 +347,7 @@ namespace opencog { namespace oac {
     class Rule
     {
     public:
-        PetAction* action;
+        AvatarAction* action;
 
         // the actor who carry out this action, usually an Entity
         ParamValue actor;
@@ -380,19 +381,29 @@ namespace opencog { namespace oac {
 
         string ruleName; // this is just for debug use , it can be empty
 
-        // constructors
-        Rule(PetAction* _action, ParamValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost):
-            action(_action) , actor(_actor), preconditionList(_preconditionList), effectList(_effectList), basic_cost(_basic_cost),
-            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""){}
+        bool precondOrderDependent; // does the order of preconditions matter?
 
-        Rule(PetAction* _action, ParamValue _actor, float _basic_cost):
+        // the other rules that , once use one of the rules in noCoexisenceOtherRules, should not use this rule
+        vector<Rule*> noCoexisenceOtherRules;
+
+        bool isReversibleRule;
+
+        // constructors
+        Rule(AvatarAction* _action, ParamValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost, bool _precondOrderDependent = false, bool _isReversibleRule = false):
+            action(_action) , actor(_actor), preconditionList(_preconditionList), effectList(_effectList), basic_cost(_basic_cost),
+            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""),precondOrderDependent(_precondOrderDependent), isReversibleRule(_isReversibleRule)
+        {noCoexisenceOtherRules.clear();}
+
+        Rule(AvatarAction* _action, ParamValue _actor, float _basic_cost, bool _precondOrderDependent = false, bool _isReversibleRule = false):
             action(_action) , actor(_actor), preconditionList(), effectList(), basic_cost(_basic_cost),
-            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""){}
+            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""),precondOrderDependent(_precondOrderDependent),isReversibleRule(_isReversibleRule)
+        {noCoexisenceOtherRules.clear();}
 
         float getBasicCost();
 
         // the cost calculation is : basic_cost + cost_coefficient1 * value(cost_cal_state1) + cost_coefficient2 * value(cost_cal_state2) + ...
-        static float getCost(float basic_cost,vector<CostHeuristic>& CostHeuristics, ParamGroundedMapInARule& groudings);
+        // isRecursivePrecon0Sat and isRecursivePrecon1Sat are only for recursive rules, only calculate the unsatisfied preconditons cost for recursive rules.
+        static float getCost(Rule* r,float basic_cost,vector<CostHeuristic>& CostHeuristics, ParamGroundedMapInARule& groudings, bool isRecursivePrecon0Sat, bool isRecursivePrecon1Sat);
 
         void addEffect(EffectPair effect)
         {
@@ -429,6 +440,11 @@ namespace opencog { namespace oac {
         bool static isUnGroundedString( string &s);
         bool static isUnGroundedVector(Vector& v);
         bool static isUnGroundedEntity( Entity &e);
+
+        // even when one of if the rule effect describe the same state with the given goal, if is still possible that this rule doesn't help achieving this goal.
+        // e.g. if the goal is to some one keep cats as pet, but the rule effect is some one not to keep something as pet, then this rule won't help to achieve this goal.
+        // output direcHelp means if the effect value is grounded already and the same with the goal value
+        bool isRulePossibleToHelpToAchieveGoal(State* goal, bool &directHelp);
 
     protected:
 

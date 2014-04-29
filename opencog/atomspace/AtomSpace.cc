@@ -21,12 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AtomSpace.h"
-
 #include <stdlib.h>
 #include <string>
 
+#include <boost/bind.hpp>
+
 #include <opencog/util/Logger.h>
+#include "AtomSpace.h"
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -40,42 +41,25 @@ AtomSpace::AtomSpace(void)
 {
     _atomSpaceImpl = new AtomSpaceImpl();
     _ownsAtomSpaceImpl = true;
-
-    c_add = addAtomSignal(
-        boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
 
 AtomSpace::AtomSpace(const AtomSpace& other)
 {
     _atomSpaceImpl = other._atomSpaceImpl;
     _ownsAtomSpaceImpl = false;
-
-    c_add = addAtomSignal(
-        boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
 
 AtomSpace::AtomSpace(AtomSpaceImpl* a)
 {
     _atomSpaceImpl = a;
     _ownsAtomSpaceImpl = false;
-
-    c_add = addAtomSignal(
-        boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
 
 AtomSpace::~AtomSpace()
 {
-    c_add.disconnect();
     // Will be unnecessary once GC is implemented
     if (_ownsAtomSpaceImpl)
         delete _atomSpaceImpl;
-}
-
-bool AtomSpace::handleAddSignal(Handle h)
-{
-    // XXX TODO FIXME  this must be locked to avoid corruption!!!
-    addAtomSignalQueue.push_back(h);
-    return false;
 }
 
 AtomSpace& AtomSpace::operator=(const AtomSpace& other)

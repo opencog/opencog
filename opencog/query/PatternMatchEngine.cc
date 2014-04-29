@@ -1,7 +1,7 @@
 /*
  * PatternMatchEngine.cc
  *
- * Copyright (C) 2008,2009,2011 Linas Vepstas
+ * Copyright (C) 2008,2009,2011,2014 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  February 2008
  *
@@ -23,6 +23,7 @@
 
 #include "PatternMatchEngine.h"
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atomspace/Foreach.h>
 #include <opencog/atomspace/ForeachTwo.h>
 
@@ -57,21 +58,21 @@ void PatternMatchEngine::set_atomspace(AtomSpace *as)
 	invalid_grounding = as->addLink(LINK, oset);
 }
 
-bool PatternMatchEngine::prt(Handle h)
+bool PatternMatchEngine::prt(Handle& h)
 {
-	std::string str = atom_space->atomAsString(h);
+	std::string str = h->toShortString();
 	printf ("%s\n", str.c_str());
 	return false;
 }
 
-inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
+inline void PatternMatchEngine::prtmsg(const char * msg, Handle& h)
 {
 #ifdef DEBUG
 	if (h == Handle::UNDEFINED) {
 		printf ("%s (invalid handle)\n", msg);
 		return;
 	}
-	std::string str = atom_space->atomAsString(h);
+	std::string str = h->toShortString();
 	printf ("%s %s\n", msg, str.c_str());
 #endif
 }
@@ -110,8 +111,6 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
  */
 bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 {
-	AtomSpace *as = atom_space;
-
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
 	if (bound_vars.end() != bound_vars.find(hp))
@@ -123,19 +122,17 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		// If we already have a grounding for this variable, the new
 		// proposed grounding must match the existing one. Such multiple
 		// groundings can occur when traversing graphs with loops in them.
-		Handle gnd = var_grounding[hp];
-		if (atom_space->isValidHandle(gnd)) {
+		Handle gnd(var_grounding[hp]);
+		if (Handle::UNDEFINED != gnd) {
 			return (gnd != hg);
 		}
 
 		// VariableNode had better be an actual node!
 		// If it's not then we are very very confused ...
-		if (!as->isNode(hp))
-		{
-			printf("ERROR: expected variable to be a node, got this: %s\n",
-				as->atomAsString(hp).c_str());
-			return true;
-		}
+		NodePtr np(NodeCast(hp));
+		OC_ASSERT (NULL != np,
+		      "ERROR: expected variable to be a node, got this: %s\n",
+				hp->toShortString().c_str());
 
 		// Else, we have a candidate grounding for this variable.
 		// The node_match may implement some tighter variable check,
@@ -159,10 +156,12 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	}
 
 	// If both are links, compare them as such.
-	if (as->isLink(hp) && as->isLink(hg))
+	LinkPtr lp(LinkCast(hp));
+	LinkPtr lg(LinkCast(hg));
+	if (lp and lg)
 	{
 		// Let the callback perform basic checking.
-		bool mismatch = pmc->link_match(hp, hg);
+		bool mismatch = pmc->link_match(lp, lg);
 		if (mismatch) return true;
 
 		dbgprt("depth=%d\n", depth);
@@ -174,11 +173,13 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		// this. If they are un-ordered, then we have to compare (at
 		// most) every possible permutation.
 		//
-		Type tp = as->getType(hp);
+		Type tp = hp->getType();
 		if (classserver().isA(tp, ORDERED_LINK))
 		{
-			const std::vector<Handle> &osp = atom_space->getOutgoing(hp);
-			const std::vector<Handle> &osg = atom_space->getOutgoing(hg);
+			LinkPtr lp(LinkCast(hp));
+			LinkPtr lg(LinkCast(hg));
+			const std::vector<Handle> &osp = lp->getOutgoingSet();
+			const std::vector<Handle> &osg = lg->getOutgoingSet();
 
 			// The recursion step: traverse down the tree.
 			// In principle, we could/should push the current groundings
@@ -224,8 +225,10 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			// to do this; this is done elsewhere. Here, its enough to find
 			// any grounding that works (i.e. is consistent with all
 			// groundings up till now).
-			std::vector<Handle> osp = atom_space->getOutgoing(hp);
-			const std::vector<Handle> &osg = atom_space->getOutgoing(hg);
+			LinkPtr lp(LinkCast(hp));
+			LinkPtr lg(LinkCast(hg));
+			std::vector<Handle> osp = lp->getOutgoingSet();
+			const std::vector<Handle> &osg = lg->getOutgoingSet();
 			sort(osp.begin(), osp.end());
 
 			do {
@@ -257,7 +260,9 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	}
 
 	// If both are nodes, compare them as such.
-	if (as->isNode(hp) && as->isNode(hg))
+	NodePtr np(NodeCast(hp));
+	NodePtr ng(NodeCast(hg));
+	if (np and ng)
 	{
 		// Call the callback to make the final determination.
 		bool mismatch = pmc->node_match(hp, hg);
@@ -294,7 +299,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 	return found;
 }
 
-bool PatternMatchEngine::do_soln_up(Handle hsoln)
+bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 {
 	// Let's not look at our own navel
 	if (hsoln == curr_root) return false;
@@ -387,8 +392,8 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 			       (false == clause_accepted) &&
 			       (optionals.count(curr_root)))
 			{
-				no_match = pmc->optional_clause_match(curr_pred_handle,
-				                        Handle::UNDEFINED);
+				Handle undef(Handle::UNDEFINED);
+				no_match = pmc->optional_clause_match(curr_pred_handle, undef);
 				dbgprt ("Exhausted search for optional clause, cb=%d\n", no_match);
 				if (no_match) return false;
 
@@ -467,7 +472,7 @@ bool PatternMatchEngine::pred_up(Handle h)
 	if (!valid) return false;
 
 	// Move up the solution outgoing set, looking for a match.
-	Handle curr_pred_save = curr_pred_handle;
+	Handle curr_pred_save(curr_pred_handle);
 	curr_pred_handle = h;
 
 	bool found = foreach_incoming_handle(curr_soln_handle,
@@ -494,8 +499,8 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	// to the optional clauses.  We can find ungrounded clauses by
 	// looking at the grounded vars, looking up the root, to see if
 	// the root is grounded.  If its not, start working on that.
-	Handle pursue = Handle::UNDEFINED;
-	Handle unsolved_clause = Handle::UNDEFINED;
+	Handle pursue(Handle::UNDEFINED);
+	Handle unsolved_clause(Handle::UNDEFINED);
 	bool unsolved = false;
 	bool solved = false;
 
@@ -509,11 +514,12 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		unsolved = false;
 		solved = false;
 
-		std::vector<Handle>::iterator i;
-		for (i = rl->begin(); i != rl->end(); i++)
+		std::vector<Handle>::iterator i = rl->begin();
+		std::vector<Handle>::iterator iend = rl->end();
+		for (; i != iend; i++)
 		{
-			Handle root = *i;
-			if(atom_space->isValidHandle(clause_grounding[root]))
+			Handle root(*i);
+			if (Handle::UNDEFINED != clause_grounding[root])
 			{
 				solved = true;
 			}
@@ -524,6 +530,12 @@ void PatternMatchEngine::get_next_untried_clause(void)
 				unsolved = true;
 			}
 		}
+
+		// XXX TODO ... Rather than settling for the first one that we find,
+		// we should instead look for the "thinnest" one, the one with the
+		// smallest incoming set.  That is because the very next thing that
+		// we do will be to iterate over the incoming set of "pursue" ... so
+		// it could be a huge pay-off to minimize this.
 		if (solved && unsolved) break;
 	}
 
@@ -557,12 +569,13 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		unsolved = false;
 		solved = false;
 
-		std::vector<Handle>::iterator i;
-		for (i=rl->begin(); i != rl->end(); i++)
+		std::vector<Handle>::iterator i = rl->begin();
+		std::vector<Handle>::iterator iend = rl->end();
+		for (; i != iend; i++)
 		{
-			Handle root = *i;
-			Handle root_gnd = clause_grounding[root];
-			if(atom_space->isValidHandle(root_gnd) && root_gnd != invalid_grounding)
+			Handle root(*i);
+			Handle root_gnd(clause_grounding[root]);
+			if (Handle::UNDEFINED != root_gnd and root_gnd != invalid_grounding)
 			{
 				solved = true;
 			}
@@ -615,7 +628,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
  * from the atom space. That atom is assumed to anchor some part of
  * a graph that hopefully will match the predicate.
  */
-bool PatternMatchEngine::do_candidate(Handle do_clause, Handle starter, Handle ah)
+bool PatternMatchEngine::do_candidate(Handle& do_clause, Handle& starter, Handle& ah)
 {
 	// Cleanup
 	var_grounding.clear();
@@ -653,81 +666,118 @@ bool PatternMatchEngine::note_root(Handle h)
 	}
 	rl->push_back(curr_root);
 
-	foreach_outgoing_handle(h, &PatternMatchEngine::note_root, this);
+	LinkPtr l(LinkCast(h));
+	if (l) foreach_outgoing_handle(l, &PatternMatchEngine::note_root, this);
 	return false;
 }
 
 /**
- * Find a grounding for a sequence of clauses in conjunctive normal form.
+ * Clear all internal state.
+ * This allows a given instance of this class to be used again.
+ */
+void PatternMatchEngine::clear(void)
+{
+	// Clear all state.
+	bound_vars.clear();
+	cnf_clauses.clear();
+	optionals.clear();
+	var_grounding.clear();
+	clause_grounding.clear();
+	root_map.clear();
+	issued.clear();
+
+	curr_root = Handle::UNDEFINED;
+	curr_soln_handle = Handle::UNDEFINED;
+	curr_pred_handle = Handle::UNDEFINED;
+	depth = 0;
+
+	while (!pred_handle_stack.empty()) pred_handle_stack.pop();
+	while (!soln_handle_stack.empty()) soln_handle_stack.pop();
+	while (!root_handle_stack.empty()) root_handle_stack.pop();
+	while (!pred_solutn_stack.empty()) pred_solutn_stack.pop();
+	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
+	while (!issued_stack.empty()) issued_stack.pop();
+}
+
+
+/**
+ * Find groundings for a sequence of clauses in conjunctive normal form.
+ * That is, perform a variable unification across multiple clauses.
  *
  * The list of clauses, and the list of negations, are both OpenCog
- * hypergraphs.  Both should also be envisioned as a kind of predicate:
- * i.e. something which may or may not exist (may or may not be "true")
- * in that the subgraph defined by the predicate might not actually
- * be found in the universe of all atoms in the atomspace.
+ * hypergraphs.  Both can be (should be) envisioned as model-theoretic
+ * predicates: i.e. statements with are "true" only if they exist in
+ * the atomspace (which is the "universe" of all statements).  That is,
+ * the clauses define a subgraph which may or may not exist in the
+ * atomspace.
  *
  * The list of "bound vars" are to be solved for ("grounded", or
  * "evaluated") during pattern matching. That is, if the subgraph
  * defined by the clauses is located, then the vars are given the
- * corresponding values associated to that match.
+ * corresponding values associated to that match. Becuase these
+ * variables can be shared across multiple clauses, this can be
+ * understood to be a unification problem; the pattern matcher is thus
+ * a unifier.
  *
  * The negations are a set of clauses whose truth values are to be
  * inverted.  That is, while the clauses define a subgraph that
- * *must* be found, the negations define a subgraph that probably
- * should not be found, or, if found, should have a truth value of
- * 'false'.  The precise handing of the negated clauses is determined
- * by the callback, although the search engine itself will proclaim
- * a match whether or not it finds negated clauses. Thus, the neg
- * clauses can be understood as "optional" matches: they will be
- * matched, if possible, but are not required to be matched. The idea
- * that these are actually "negated" is governed by the callback.
+ * *must* be found, the negations define a subgraph that should
+ * not be found, or, if found, should have a truth value of 'false'.
+ * The precise meaning of 'false' in the sentence above is determined
+ * by the callback, which can use arbitrary criteria for this.
+ * In particular, the search engine itself will happily proclaim
+ * a match whether or not it finds any of the negated clauses. So,
+ * in this sense, the negated clauses can be understood to be
+ * "optional" matches: they will be matched, if possible, but are not
+ * required to be matched. It is up to the callback to explictly
+ * reject these clauses, if it so wishes to, thus implementing the
+ * concept of negation.
  *
  * The PatternMatchCallback is consulted to determine whether a
  * veritable match has been found, or not. The callback is given
  * individual nodes and links to compare for a match.
+ *
+ * The callback may alter the sequence of the clauses, in order to
+ * otpimze the search. It may also remove some clauses or variables,
+ * if it determines that these are irrelevant to the search.
  */
 void PatternMatchEngine::match(PatternMatchCallback *cb,
-                         const std::vector<Handle> &vars,
-                         const std::vector<Handle> &clauses,
-                         const std::vector<Handle> &negations)
+                         std::vector<Handle> &vars,
+                         std::vector<Handle> &clauses,
+                         std::vector<Handle> &negations)
 {
-	if (!atom_space) return;
+	// Clear all state.
+	clear();
 
 	// Copy the variables from vector to set; this makes it easier to
 	// determine set membership.
-	std::vector<Handle>::const_iterator i;
-	for (i = vars.begin();
-	     i != vars.end(); i++)
+	std::vector<Handle>::const_iterator i = vars.begin();
+	std::vector<Handle>::const_iterator iend = vars.end();
+	for (; i != iend; i++)
 	{
-		Handle h = *i;
-		bound_vars.insert(h);
+		bound_vars.insert(*i);
 	}
 
 	cnf_clauses = clauses;
 
 	// Copy the negates into the clause list
 	// Copy the negates into a set.
-	for (i = negations.begin();
-	     i != negations.end(); i++)
+	iend = negations.end();
+	for (i = negations.begin(); i != iend; i++)
 	{
-		Handle h = *i;
-		cnf_clauses.push_back(h);
-		optionals.insert(h);
+		cnf_clauses.push_back(*i);
+		optionals.insert(*i);
 	}
-
-	var_grounding.clear();
-	clause_grounding.clear();
 
 	if (cnf_clauses.size() == 0) return;
 
 	// Preparation prior to search.
 	// Create a table of the nodes that appear in the clauses, and
 	// a list of the clauses that each node participates in.
-	root_map.clear();
-	for (i = cnf_clauses.begin();
-	     i != cnf_clauses.end(); i++)
+	iend = cnf_clauses.end();
+	for (i = cnf_clauses.begin(); i != iend; i++)
 	{
-		Handle h = *i;
+		Handle h(*i);
 		curr_root = h;
 		note_root(h);
 	}
@@ -737,11 +787,11 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	// Print out the predicate ...
 	printf("\nPredicate consists of the following clauses:\n");
 	int cl = 0;
-	for (i = cnf_clauses.begin();
-	     i != cnf_clauses.end(); i++)
+	iend = cnf_clauses.end();
+	for (i = cnf_clauses.begin(); i != iend; i++)
 	{
+		Handle h(*i);
 		printf("Clause %d: ", cl);
-		Handle h = *i;
 		prt(h);
 		cl++;
 	}
@@ -750,8 +800,8 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	std::set<Handle>::const_iterator j;
 	for (j=bound_vars.begin(); j != bound_vars.end(); j++)
 	{
-		Handle h = *j;
-		if (atom_space->isNode(h))
+		Handle h(*j);
+		if (NodeCast(h))
 		{
 			printf(" Bound var: "); prt(h);
 		}
@@ -765,7 +815,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 #endif
 
 	// Perform the actual search!
-	cb->perform_search(this, vars, clauses,negations);
+	cb->perform_search(this, vars, clauses, negations);
 
 	dbgprt ("==================== Done Matching ==================\n");
 #ifdef DEBUG
@@ -799,7 +849,7 @@ bool PatternMatchEngine::validate(
 	for (i = clauses.begin();
 	     i != clauses.end();)
 	{
-		Handle clause = *i;
+		Handle clause(*i);
 		if (validate (vars, clause))
 		{
 			i++;
@@ -822,29 +872,31 @@ bool PatternMatchEngine::validate(
  */
 bool PatternMatchEngine::validate(
                          const std::vector<Handle> &vars,
-                         Handle clause)
+                         Handle& clause)
 {
 	// If its a node, then it must be one of the vars.
-	Type clause_type = atom_space->getType(clause);
+	Type clause_type = clause->getType();
 	if (classserver().isNode(clause_type))
 	{
-		std::vector<Handle>::const_iterator i;
-		for (i = vars.begin(); i != vars.end(); i++)
+		std::vector<Handle>::const_iterator i = vars.begin();
+		std::vector<Handle>::const_iterator iend = vars.end();
+		for (; i != iend; i++)
 		{
-			Handle h = *i;
-			if (h == clause) return true;
+			if (*i == clause) return true;
 		}
 		return false;
 	}
 
 	// If its a link, then recurse to subclauses.
-	if (classserver().isLink(clause_type))
+	LinkPtr lc(LinkCast(clause));
+	if (lc)
 	{
-		const std::vector<Handle> &oset = atom_space->getOutgoing(clause);
-		std::vector<Handle>::const_iterator i;
-		for (i = oset.begin(); i != oset.end(); i++)
+		const std::vector<Handle> &oset = lc->getOutgoingSet();
+		std::vector<Handle>::const_iterator i = oset.begin();
+		std::vector<Handle>::const_iterator iend = oset.end();
+		for (; i != iend; i++)
 		{
-			Handle subclause = *i;
+			Handle subclause(*i);
 			if (validate(vars, subclause)) return true;
 		}
 		return false;
@@ -860,15 +912,15 @@ void PatternMatchEngine::print_solution(
 	printf("\nNode groundings:\n");
 
 	// Print out the bindings of solutions to variables.
-	std::map<Handle, Handle>::const_iterator j;
-	for (j=vars.begin(); j != vars.end(); j++)
+	std::map<Handle, Handle>::const_iterator j = vars.begin();
+	std::map<Handle, Handle>::const_iterator jend = vars.end();
+	for (; j != jend; j++)
 	{
-		std::pair<Handle, Handle> pv = *j;
-		Handle var = pv.first;
-		Handle soln = pv.second;
+		Handle var(j->first);
+		Handle soln(j->second);
 
-		Type tyv = atom_space->getType(var);
-		Type tys = atom_space->getType(soln);
+		Type tyv = var->getType();
+		Type tys = soln->getType();
 
 		// Only print grounding for variables.
 		if (VARIABLE_NODE != tyv) continue;
@@ -878,22 +930,25 @@ void PatternMatchEngine::print_solution(
 		std::string solstr;
 		if (classserver().isNode(tyv))
 		{
-			solstr = atom_space->getName(soln).c_str();
+			NodePtr n(NodeCast(soln));
+			solstr = n->getName().c_str();
 		}
 		else
 		{
-			solstr = atom_space->atomAsString(soln).c_str();
+			solstr = soln->toShortString().c_str();
 		}
 
 		if (soln == Handle::UNDEFINED)
 		{
+			NodePtr nv(NodeCast(var));
 			printf("ERROR: ungrounded variable %s %s\n",
-				vart.c_str(), atom_space->getName(var).c_str());
+				vart.c_str(), nv->getName().c_str());
 			continue;
 		}
 
+		NodePtr nv(NodeCast(var));
 		printf("\t%s %s maps to %s %s\n", vart.c_str(),
-			atom_space->getName(var).c_str(),
+			nv->getName().c_str(),
 			slnt.c_str(), solstr.c_str());
 	}
 
@@ -905,10 +960,11 @@ void PatternMatchEngine::print_solution(
 	{
 		if (m->second == Handle::UNDEFINED)
 		{
-			prtmsg("ERROR: ungrounded clause: ", m->first);
+			Handle mf(m->first);
+			prtmsg("ERROR: ungrounded clause: ", mf);
 			continue;
 		}
-		std::string str = atom_space->atomAsString(m->second);
+		std::string str = m->second->toShortString();
 		printf ("%d.   %s\n", i, str.c_str());
 	}
 	printf ("\n");
@@ -925,13 +981,13 @@ void PatternMatchEngine::print_predicate(
 	std::vector<Handle>::const_iterator i;
 	for (i = clauses.begin(); i != clauses.end(); i++)
 	{
-		Handle h = *i;
+		Handle h(*i);
 		prt(h);
 	}
 	printf("\nVars:\n");
 	for (i = vars.begin(); i != vars.end(); i++)
 	{
-		Handle h = *i;
+		Handle h(*i);
 		prt(h);
 	}
 }

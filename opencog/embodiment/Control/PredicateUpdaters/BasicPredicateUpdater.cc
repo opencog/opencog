@@ -22,6 +22,7 @@
  */
 
 
+#include <opencog/util/foreach.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/spacetime/atom_types.h>
 

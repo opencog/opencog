@@ -20,10 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatch.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -65,8 +65,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
 		}
 
 		void setUp(void);
-
-		void tearDown(void) { }
+		void tearDown(void);
 
 		void test_exec(void);
 };
@@ -79,13 +78,14 @@ class ExecutionUTest :  public CxxTest::TestSuite
  */
 #define an as->addNode
 #define al as->addLink
+void ExecutionUTest::tearDown(void)
+{
+	delete as;
+}
 void ExecutionUTest::setUp(void)
 {
-	server(CogServer::createInstance);
-	as = &cogserver().getAtomSpace();
+	as = new AtomSpace();
 	pm.set_atomspace(as);
-	// Initialise scheme
-	SchemeEval::instance(as);
 
 	// Create an implication link that will be tested.
 	implication = 
@@ -147,7 +147,9 @@ void ExecutionUTest::setUp(void)
 	"		) \n"
 	"	) \n"
 	")";
-	SchemeEval::instance().eval(str);
+	SchemeEval* ev = new SchemeEval(as);
+	ev->eval(str);
+	delete ev;
 #endif /* HAVE_GUILE */
 }
 

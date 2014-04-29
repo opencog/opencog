@@ -36,7 +36,6 @@
 #include "../metapopulation/metapopulation.h"
 
 using namespace std;
-using namespace boost::program_options;
 using namespace opencog;
 using namespace moses;
 
@@ -58,7 +57,9 @@ void not_recognized_dst(const string& diversity_dst)
 }
 
 // given the sequence of distances write the results
-void write_results(const eval_diversity_params& edp, const vector<float>& dsts) {
+void write_results(const eval_diversity_params& edp,
+                   const vector<score_t>& dsts)
+{
     if (edp.output_file.empty())
         ostream_results(cout, edp, dsts);
     else {
@@ -67,46 +68,48 @@ void write_results(const eval_diversity_params& edp, const vector<float>& dsts) 
     }
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
+    namespace po = boost::program_options;
     eval_diversity_params edp;
     
     // Declare the supported options.
-    options_description desc("Allowed options");
+    po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "Produce help message.\n")
 
-        ("input-file,i", value<vector<string>>(&edp.input_files),
+        ("input-file,i", po::value<vector<string>>(&edp.input_files),
          "DSV file containing a target feature (indicated by option -f) "
          "used to compute the distance between the other files. Can be used "
          "several times to enter several input files. "
          "The distance will be computed between each target across all files.\n")
 
-        ("target-feature,u", value<string>(&edp.target_feature),
+        ("target-feature,u", po::value<string>(&edp.target_feature),
          "Name of the target feature to load.\n")
 
-        ("moses-file,m", value<vector<string>>(&edp.moses_files),
+        ("moses-file,m", po::value<vector<string>>(&edp.moses_files),
          "File containing the candidates as output by moses. The output "
          "must contain the bscores (see option -t or moses). "
          "Can be used several times for several files.\n")
         
-        ("output-file,o", value<string>(&edp.output_file),
+        ("output-file,o", po::value<string>(&edp.output_file),
          "File to write the results. If none is given it write on the stdout.\n")
 
-        ("display-stats", value<bool>(&edp.display_stats)->default_value(true),
+        ("display-stats", po::value<bool>(&edp.display_stats)->default_value(true),
          "Display statistics.\n")
 
-        ("display-values", value<bool>(&edp.display_values)->default_value(false),
+        ("display-values", po::value<bool>(&edp.display_values)->default_value(false),
          "Display the actually values (distances).\n")
 
         ("diversity-dst",
-         value<string>(&edp.diversity_dst)->default_value(p_norm),
+         po::value<string>(&edp.diversity_dst)->default_value(p_norm),
          str(boost::format("Set the distance between behavioral scores, "
                            "then used to determin the diversity penalty."
                            "3 distances are available: %s, %s and %s.\n")
              % p_norm % tanimoto % angular).c_str())
 
         ("diversity-p-norm",
-         value<score_t>(&edp.diversity_p_norm)->default_value(2.0),
+         po::value<double>(&edp.diversity_p_norm)->default_value(2.0),
          "Set the parameter of the p_norm distance. A value of 1.0"
          "correspond to the Manhatan distance. A value of 2.0 corresponds to "
          "the Euclidean distance. A value of 0.0 or less correspond to the "
@@ -114,15 +117,15 @@ int main(int argc, char** argv) {
 
         ;
 
-    variables_map vm;
+    po::variables_map vm;
     try {
-        store(parse_command_line(argc, argv, desc), vm);
+        po::store(po::parse_command_line(argc, argv, desc), vm);
     }
-    catch (error& e) {
+    catch (po::error& e) {
         OC_ASSERT(false, "Fatal error: invalid or duplicated argument:\n\t%s\n",
                   e.what());
     }
-    notify(vm);
+    po::notify(vm);
 
     if (vm.count("help") || argc == 1) {
         cout << desc << endl;
@@ -160,7 +163,7 @@ int main(int argc, char** argv) {
         }
 
         // compute the distances between the bscores
-        vector<float> dsts;
+        vector<score_t> dsts;
         for (unsigned i = 0; i < bcts.size(); ++i)
             for (unsigned j = 0; j < i; ++j)
                 dsts.push_back(diversity_params.dst(get_bscore(bcts[i]),
@@ -173,16 +176,16 @@ int main(int argc, char** argv) {
     if (!edp.input_files.empty()) {        
         // load the target features (assumed to be of float type) and
         // dump them in vectors of floats
-        vector<vector<float>> targets;
+        vector<vector<score_t>> targets;
         for (const string& file : edp.input_files) {
-            vector<float> target;
+            vector<score_t> target;
             boost::transform(combo::loadOTable(file, edp.target_feature),
                              back_inserter(target), combo::cast_contin);
             targets.push_back(target);
         }
 
         // compute the distances between the targets
-        vector<float> dsts;
+        vector<score_t> dsts;
         for (unsigned i = 0; i < targets.size(); ++i)
             for (unsigned j = 0; j < i; ++j)
                 dsts.push_back(diversity_params.dst(targets[i], targets[j]));

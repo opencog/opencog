@@ -148,6 +148,15 @@ struct representation : public knob_mapper, boost::noncopyable
         } else { // disc
             disc_map_cit d_cit = find_disc_knob(it);
             out << (d_cit == disc.end() ? *it : d_cit->second->toStr());
+            if (d_cit != disc.end()) {
+                // In the case of action_subtree_knob just return. (it
+                // would be wrong to do a recursive call because it
+                // might be on the subtree that has alreaby been
+                // ostreamed). This is kinda hack.
+                if (d_cit->second.type() == typeid(action_subtree_knob)) {
+                    return out;
+                }
+            }
         }
 
         // if null_vertex then print its child instead

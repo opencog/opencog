@@ -27,14 +27,16 @@
 #include <getopt.h>
 #include <langinfo.h>
 #include <locale.h>
+#include <signal.h>
+#include <string.h>
 
-#include <boost/filesystem/operations.hpp>
+#include <string>
+#include <thread>
+#include <utility>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/foreach.hpp>
-
-#include <utility>
-#include <string>
 
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
@@ -48,11 +50,13 @@ using namespace std;
 static const char* DEFAULT_CONFIG_FILENAME = "opencog.conf";
 static const char* DEFAULT_CONFIG_PATHS[] = 
 {
-    CONFDIR,
+    // Search order for the config file:
+    "lib",       // First, we look in the build directory (cmake puts it here)
+    "../lib",    // Next, we look at the source directory
+    CONFDIR,     // Next, the install directory
 #ifndef WIN32
-    "/etc",
+    "/etc",      // Finally, in the standard ssytem directory.
 #endif // !WIN32
-    "../lib",
     NULL
 };
 
@@ -64,8 +68,8 @@ static const char* DEFAULT_MODULE_PATHS[] =
     "../build/opencog",    // autogened scm files go into the build dir!
     "../bin/opencog",      // an alternate name for a build dir.
 #ifndef WIN32
+    "/usr/local/share/opencog",  // search local first, then system.
     "/usr/share/opencog",
-    "/usr/local/share/opencog",
 #endif // !WIN32
     NULL
 };
@@ -76,6 +80,17 @@ static void usage(const char* progname)
     std::cerr << "Each config file is loaded sequentially, with the values in \n"
         << " later files overwriting earlier. Then each singular option overrides \n" 
         << " options in config files. " << std::endl;
+}
+
+// Catch and report sigsegv
+void sighand(int sig)
+{
+    logger().setPrintToStdoutFlag(true);
+    logger().error() << "Caught signal " << sig << " (" << strsignal(sig)
+        << ") on thread " << std::this_thread::get_id();
+    logger().flush();
+    sleep(3);
+    exit(1);
 }
 
 int main(int argc, char *argv[])
@@ -177,6 +192,15 @@ int main(int argc, char *argv[])
     logger().setBackTraceLevel(Logger::getLevelFromString(config()["BACK_TRACE_LOG_LEVEL"]));
     logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
     //logger().setLevel(Logger::DEBUG);
+
+    // Start catching signals
+    signal(SIGSEGV, sighand);
+    signal(SIGBUS, sighand);
+    signal(SIGFPE, sighand);
+    signal(SIGILL, sighand);
+    signal(SIGABRT, sighand);
+    signal(SIGTRAP, sighand);
+    signal(SIGQUIT, sighand);
     
     CogServer& cogserve = cogserver();
 

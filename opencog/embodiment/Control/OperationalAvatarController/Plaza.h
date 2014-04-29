@@ -28,7 +28,7 @@
 #include <string>
 #include <stdlib.h>
 
-#include <zmq.hpp>
+#include <lib/zmq/zmq.hpp>
 
 namespace opencog { namespace oac {
 

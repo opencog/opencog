@@ -22,8 +22,10 @@
 
 #ifdef HAVE_GUILE
 
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/server/ConsoleSocket.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/platform.h>
+#include <opencog/util/foreach.h>
 
 #include "SchemeShellModule.h"
 
@@ -33,6 +35,7 @@ DECLARE_MODULE(SchemeShellModule);
 
 SchemeShellModule::SchemeShellModule(CogServer& cs) : Module(cs)
 {
+	evaluator = new SchemeEval();
 }
 
 void SchemeShellModule::init(void)
@@ -45,6 +48,7 @@ SchemeShellModule::~SchemeShellModule()
 {
 	shellout_unregister();
 	do_eval_unregister();
+	delete evaluator;
 }
 
 /**
@@ -89,16 +93,15 @@ std::string SchemeShellModule::do_eval(Request *req, std::list<std::string> args
 		expr += arg + " ";
 	}
 
-	SchemeEval& eval = SchemeEval::instance();
-	out = eval.eval(expr);
+	out = evaluator->eval(expr);
 	// May not be necessary since an error message and backtrace are provided.
-	if (eval.eval_error()) {
+	if (evaluator->eval_error()) {
 		out += "An error occurred\n";
 	}
-	if (eval.input_pending()) {
+	if (evaluator->input_pending()) {
 		out += "Invalid Scheme expression: missing something";
 	}
-	eval.clear_pending();
+	evaluator->clear_pending();
 
 	return out;
 }

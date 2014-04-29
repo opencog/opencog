@@ -4,7 +4,7 @@ from scipy.stats.distributions import rv_frozen
 from spatiotemporal.time_intervals import TimeInterval
 from spatiotemporal.unix_time import random_time, UnixTime
 from utility.generic import convert_dict_to_sorted_lists
-from utility.geometric import Function, FunctionPiecewiseLinear,\
+from utility.functions import Function, FunctionPiecewiseLinear,\
     FunctionHorizontalLinear, FunctionComposite, FUNCTION_ZERO, FUNCTION_ONE, FunctionLinear
 from numpy import PINF as POSITIVE_INFINITY, NINF as NEGATIVE_INFINITY
 from utility.numeric.globals import EPSILON
@@ -82,6 +82,15 @@ class ProbabilityDistributionPiecewiseLinear(list, TimeInterval, rv_frozen):
     #        else:
     #            upper_bound = target
 
+    def std(self):
+        # Not properly implemented
+        return 0
+
+    def stats(self, moments='mv'):
+        # Not properly implemented
+        # m, s, k
+        return self.mean(), 0, 0
+
     def mean(self):
         return self._mean
 
@@ -110,12 +119,23 @@ class ProbabilityDistributionPiecewiseLinear(list, TimeInterval, rv_frozen):
             return result[0]
         return result
 
+    # def plot(self):
+    #     import matplotlib.pyplot as plt
+    #     x_axis, y_axis = [], []
+    #     for time_step in self:
+    #         x_axis.append(UnixTime(time_step - EPSILON).to_datetime())
+    #         x_axis.append(UnixTime(time_step + EPSILON).to_datetime())
+    #         y_axis.append(self.pdf(time_step - EPSILON))
+    #         y_axis.append(self.pdf(time_step + EPSILON))
+    #     plt.plot(x_axis, y_axis)
+    #     return plt
+
     def plot(self):
         import matplotlib.pyplot as plt
         x_axis, y_axis = [], []
         for time_step in self:
-            x_axis.append(UnixTime(time_step - EPSILON).to_datetime())
-            x_axis.append(UnixTime(time_step + EPSILON).to_datetime())
+            x_axis.append(time_step - EPSILON)
+            x_axis.append(time_step + EPSILON)
             y_axis.append(self.pdf(time_step - EPSILON))
             y_axis.append(self.pdf(time_step + EPSILON))
         plt.plot(x_axis, y_axis)

@@ -139,7 +139,7 @@ private:
 struct optim_stats
 {
     optim_stats()
-        : nsteps(0), deme_count(0), total_steps(0), total_evals(0),
+        : nsteps(0), demeID(0), total_steps(0), total_evals(0),
         field_set_size(0), over_budget(false)
 #ifdef GATHER_STATS
           , hiscore(0.0), hicount(0.0),
@@ -147,7 +147,7 @@ struct optim_stats
 #endif
     {}
     unsigned nsteps;
-    unsigned deme_count;
+    demeID_t demeID;
     unsigned total_steps;
     unsigned total_evals;
     unsigned field_set_size;

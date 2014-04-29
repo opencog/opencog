@@ -30,8 +30,6 @@
 #include <map>
 #include <vector>
 
-#include <pthread.h>
-
 #include <opencog/server/Agent.h>
 #include <opencog/server/SystemActivityTable.h>
 #include <opencog/util/Logger.h>
@@ -82,9 +80,9 @@ protected:
     AgentActivityTable _agentActivityTable;
     size_t _maxAgentActivityTableSeqSize;
     CogServer* _cogServer;
-    boost::signals::connection _conn;
+    boost::signals2::connection _conn;
 
-    /** called by AtomSpaceImpl via a boost:signal when an atom is removed. */
+    /** called by AtomSpaceImpl via a boost::signals2::signal when an atom is removed. */
     void atomRemoved(AtomPtr);
 
     /** trim Activity sequence to a maximum size */

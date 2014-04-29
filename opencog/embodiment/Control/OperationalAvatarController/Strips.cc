@@ -52,16 +52,16 @@ const char* opencog::oac::STATE_TYPE_NAME[5] =
 };
 
 State::State(string _stateName, ActionParamType _valuetype,StateType _stateType, ParamValue  _ParamValue,
-             vector<ParamValue> _stateOwnerList, bool _need_inquery, InqueryStateFun _inqueryStateFun)
-    : stateOwnerList(_stateOwnerList),stateType(_stateType),need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun)
+             vector<ParamValue> _stateOwnerList, bool _need_inquery, InqueryStateFun _inqueryStateFun, bool _permanent)
+    : stateOwnerList(_stateOwnerList),stateType(_stateType), need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun), permanent(_permanent)
 {
     this->stateName = _stateName;
     stateVariable = new ActionParameter(_stateName,_valuetype,_ParamValue);
 }
 
 State::State(string _stateName, ActionParamType _valuetype ,StateType _stateType, ParamValue _ParamValue,
-             bool _need_inquery, InqueryStateFun _inqueryStateFun)
-    : stateType(_stateType),need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun)
+             bool _need_inquery, InqueryStateFun _inqueryStateFun, bool _permanent)
+    : stateType(_stateType), need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun),permanent(_permanent)
 {
     stateVariable = new ActionParameter(_stateName,_valuetype,_ParamValue);
     stateOwnerList.clear();
@@ -70,13 +70,16 @@ State::State(string _stateName, ActionParamType _valuetype ,StateType _stateType
 
 State::~State()
 {
-    delete stateVariable;
+    if (stateVariable)
+        delete stateVariable;
+
+    stateVariable = 0;
 }
 
 State* State::clone()
 {
     State* cloneState = new State(this->stateName,this->getActionParamType(),this->stateType, this->stateVariable->getValue(),
-                                  this->stateOwnerList,this->need_inquery, this->inqueryStateFun );
+                                  this->stateOwnerList,this->need_inquery, this->inqueryStateFun, this->permanent );
     return cloneState;
 }
 
@@ -92,22 +95,31 @@ ParamValue State::getParamValue()
         return this->stateVariable->getValue();
 
     if (need_inquery)
-        return inqueryStateFun(stateOwnerList);
+    {
+        if (inqueryStateFun != 0)
+            return inqueryStateFun(stateOwnerList);
+        else
+            return UNDEFINED_VALUE;
+    }
     else
-        return (Inquery::getParamValueFromAtomspace(*this));
+    {
+        bool is_true;
+        ParamValue value = Inquery::getParamValueFromAtomspace(*this,  is_true);
+        if ( (! is_true) &&  (stateType !=  STATE_NOT_EQUAL_TO))
+            return UNDEFINED_VALUE;
+        else if ((stateType ==  STATE_NOT_EQUAL_TO) && ( is_true))
+            return UNDEFINED_VALUE;
 
-}
+        return value;
+    }
 
-// I am the goal, I want to check if this @param value is satisfied me
-bool State::isSatisfiedMe( ParamValue& value, float &satisfiedDegree,  State *original_state)
-{
-    State other(this->name(),this->getActionParamType(),STATE_EQUAL_TO,value,this->stateOwnerList);
-    return other.isSatisfied(*this,satisfiedDegree,original_state);
 }
 
 // pls make sure the goal describes the same state content with this state first
-bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_state)
+bool State::isSatisfied( State &goal, float& satisfiedDegree, bool &unknown, State *original_state)
 {
+    unknown = false;
+
     if ((goal.stateType == stateType)&&(stateVariable->getValue() == goal.stateVariable->getValue()))
     {
        satisfiedDegree = 1.0f;
@@ -139,17 +151,43 @@ bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_s
                }
            }
        }
-       else if ((stateType == STATE_NOT_EQUAL_TO) && (goal.getActionParamType().getCode() == BOOLEAN_CODE))
+       else if (stateType == STATE_NOT_EQUAL_TO)
        {
-           if (!(stateVariable->getValue() == goal.stateVariable->getValue()))
+           if (goal.getActionParamType().getCode() == BOOLEAN_CODE)
            {
-               satisfiedDegree = 1.0f;
-               return true;
+               if (!(stateVariable->getValue() == goal.stateVariable->getValue()))
+               {
+                   satisfiedDegree = 1.0f;
+                   return true;
+               }
+               else
+               {
+                   satisfiedDegree = 0.0f;
+                   return false;
+               }
            }
            else
            {
-               satisfiedDegree = 0.0f;
-               return false;
+               if (goal.stateType == STATE_NOT_EQUAL_TO)
+               {
+                   satisfiedDegree = 1.0f;
+                   unknown = true;
+                   return false;
+               }
+               else if ( (goal.stateType == STATE_EQUAL_TO))
+               {
+                   if (!(stateVariable->getValue() == goal.stateVariable->getValue()))
+                   {
+                       satisfiedDegree = 0.0f;
+                       unknown = true;
+                       return false;
+                   }
+                   else
+                   {
+                       satisfiedDegree = 0.0f;
+                       return false;
+                   }
+               }
            }
        }
        else
@@ -781,7 +819,7 @@ float Rule::getBasicCost()
 }
 
 
-float Rule::getCost(float basic_cost,vector<CostHeuristic>& CostHeuristics, ParamGroundedMapInARule& groudings)
+float Rule::getCost(Rule* r, float basic_cost,vector<CostHeuristic>& CostHeuristics, ParamGroundedMapInARule& groudings,bool isRecursivePrecon0Sat, bool isRecursivePrecon1Sat)
 {
     // the cost calculation is : basic_cost + cost_cal_state.value1 * cost_coefficient1 + cost_cal_state.value2 * cost_coefficient2 + ...
     // the cost_cal_state is the state related to the cost, e.g.: if an action is move from A to B, then the cost will depend on the state distanceOf(A,B)
@@ -794,6 +832,21 @@ float Rule::getCost(float basic_cost,vector<CostHeuristic>& CostHeuristics, Para
         vector<CostHeuristic>::iterator costIt;
         for (costIt = CostHeuristics.begin(); costIt != CostHeuristics.end(); ++ costIt)
         {
+            if (r->IsRecursiveRule)
+            {
+                if (costIt == CostHeuristics.begin())
+                {
+                    if (isRecursivePrecon0Sat)
+                        continue;
+                }
+                else
+                {
+                    if (isRecursivePrecon1Sat)
+                        continue;
+                }
+
+            }
+
             State* cost_cal_state = ((CostHeuristic)(*costIt)).cost_cal_state;
             // get numberic value from this cost_cal_state
             if (! cost_cal_state->isNumbericState())
@@ -1017,8 +1070,8 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
         }
     }
 
-    // check the state value
-    if (toGroundStateValue && isParameterUnGrounded(*(s->stateVariable)))
+    // try to ground the state value if it is ungrounded
+    if (isParameterUnGrounded(*(s->stateVariable)))
     {
         // if the state value is assigned
         if ( !(knownStateVal == UNDEFINED_VALUE))
@@ -1032,8 +1085,17 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
             if (paramMapIt != groundings.end())
                 groundedState->stateVariable->assignValue(paramMapIt->second);
             else if (ifRealTimeQueryStateValue)
-                groundedState->stateVariable->assignValue(groundedState->getParamValue());
-            else
+            {
+                ParamValue value = groundedState->getParamValue();
+                if ((value == UNDEFINED_VALUE) && toGroundStateValue)
+                {
+                    delete groundedState;
+                    return 0;
+                }
+
+                groundedState->stateVariable->assignValue(value);
+            }
+            else if (toGroundStateValue)
             {
                 delete groundedState;
                 return 0;
@@ -1193,13 +1255,16 @@ void Rule::_preProcessRuleParameterIndexes()
                 _addParameterIndex(s,*ownerIt);
         }
 
-        // check the state value
-        if (isParameterUnGrounded( *(s->stateVariable)))
-                _addParameterIndex(s,s->stateVariable->getValue());
 
         // check the effect value
         if (isParamValueUnGrounded(e->opParamValue))
             _addParameterIndex(s,e->opParamValue);
+
+        //  not need to add the old state value in index
+//        // check the old state value
+//        if (isParameterUnGrounded( *(s->stateVariable)))
+//                _addParameterIndex(s,s->stateVariable->getValue());
+
     }
 
     // Check if all the cost calcuation states parameters grounded
@@ -1220,4 +1285,74 @@ void Rule::_preProcessRuleParameterIndexes()
 
     }
 
+}
+
+// todo: this is not complete. if other users have more requiment, need to implment his own cases.
+bool  Rule::isRulePossibleToHelpToAchieveGoal(State* goal, bool &directHelp)
+{
+    vector<EffectPair>::iterator effectIt;
+    for(effectIt = effectList.begin(); effectIt != effectList.end(); ++effectIt)
+    {
+        bool help = false;
+        Effect* e = effectIt->second;
+        State* s = e->state;
+        if (s->name() == goal->name())
+        {
+            help = true;
+            directHelp = false;
+            switch (e->effectOp)
+            {
+            case OP_ASSIGN:
+                if (goal->stateType == STATE_NOT_EQUAL_TO)
+                {
+                    help = false;
+
+                    if (! isParamValueUnGrounded(e->opParamValue))
+                    {
+                        help = !(e->opParamValue == goal->getParamValue());
+                    }
+
+                }
+                else if (goal->stateType == STATE_EQUAL_TO)
+                {
+                    if (! isParamValueUnGrounded(e->opParamValue))
+                    {
+                        directHelp = e->opParamValue == goal->getParamValue();
+                        help = directHelp;
+                    }
+                }
+                break;
+
+            case OP_ASSIGN_NOT_EQUAL_TO:
+                if (goal->stateType == STATE_EQUAL_TO)
+                    help = false;
+                break;
+
+            case OP_ASSIGN_GREATER_THAN:
+                if (goal->stateType != STATE_GREATER_THAN)
+                    help = false;
+                break;
+            case OP_ASSIGN_LESS_THAN:
+                if (goal->stateType != STATE_LESS_THAN)
+                    help = false;
+                break;
+            case OP_REVERSE:
+            case OP_ADD:
+            case OP_SUB:
+            case OP_MUL:
+            case OP_DIV:
+            case OP_NUM_OPS:
+            default:
+                help = true;
+                break;
+
+            }
+
+        }
+
+        if (help == true)
+            return true;
+    }
+
+    return false;
 }

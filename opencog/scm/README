@@ -18,7 +18,7 @@ OpenCog atoms and systems, in various general ways. These utilities include:
 
 -- utilities.scm
    + increment a CountTruthValue
-   + delete an OpenCog hypergraph, from the top-node downards
+   + delete an OpenCog hypergraph, from the top-node downwards
    + get all atoms of a certain given type
    + get all incoming/outgoing atoms of a given type
    + apply filter to a list of atoms
