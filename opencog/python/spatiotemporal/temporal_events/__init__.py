@@ -5,7 +5,7 @@ from spatiotemporal.time_intervals import check_is_time_interval, TimeInterval
 from spatiotemporal.temporal_events.membership_function import MembershipFunction, ProbabilityDistributionPiecewiseLinear
 from spatiotemporal.unix_time import UnixTime
 from utility.generic import convert_dict_to_sorted_lists
-from utility.geometric import FunctionPiecewiseLinear, FUNCTION_ZERO
+from utility.functions import FunctionPiecewiseLinear, FUNCTION_ZERO
 
 __author__ = 'keyvan'
 
@@ -38,11 +38,10 @@ class TemporalEvent(list, TimeInterval):
         self.interval_ending = TimeInterval(ending, b, bins_ending)
         list.__init__(self, self.interval_beginning + self.interval_ending)
         TimeInterval.__init__(self, a, b, bins)
-        # if relation_formula is None:
-        #     relation_formula = RelationFormulaGeometricMean()
-        # elif not isinstance(relation_formula, BaseRelationFormula):
-        #     raise TypeError("'relation_formula' should be of type 'BaseRelationFormula'")
-        relation_formula = RelationFormulaGeometricMean()
+        if relation_formula is None:
+            relation_formula = RelationFormulaConvolution()
+        elif not isinstance(relation_formula, BaseRelationFormula):
+            raise TypeError("'relation_formula' should be of type 'BaseRelationFormula'")
         relation_formula.bounds[distribution_beginning] = self.a, self.beginning
         relation_formula.bounds[distribution_ending] = self.ending, self.b
         self._formula_creator = FormulaCreator(relation_formula)
@@ -186,7 +185,7 @@ class TemporalInstance(TimeInterval):
 
 
 if __name__ == '__main__':
-    from utility.geometric import integral
+    from utility.functions import integral
     from scipy.stats import norm
     import matplotlib.pyplot as plt
 

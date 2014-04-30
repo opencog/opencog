@@ -58,7 +58,6 @@ class TimeInterval(object):
             self._float_list = [float(time) for time in self]
         return self._float_list
 
-
     @property
     def duration(self):
         return float(self.b - self.a)
