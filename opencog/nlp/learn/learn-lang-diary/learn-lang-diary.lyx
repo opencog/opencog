@@ -2403,29 +2403,28 @@ status open
 \end_layout
 
 \begin_layout Standard
-Note this is effective linkage equivalence holds in general for any link-grammar
- dict, and not just for FST.
- How should it be understood?
+How should it be understood? These are, in fact, two distinct, inequivalent
+ LG grammars, as can be seen by considering the parse of the strings 
+\begin_inset Quotes eld
+\end_inset
+
+ac
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+abc
+\begin_inset Quotes erd
+\end_inset
+
+ for the two cases.
 \end_layout
 
 \begin_layout Standard
-An example of the former is c a noun, and b an adjective: the presence of
- te adjective is optional, and when it is present, it is linked with a special
- 'adjective' link (here, t+).
-\end_layout
-
-\begin_layout Standard
-The later construction does not seem to have any easy example equivalent
- for the English language ...
- it seems to be awkward.
- 
-\end_layout
-
-\begin_layout Standard
-This suggests that there should be a pattern recognizer that converts the
- latter into the former.
- When would this be inappropriate? When would weighting schemes interfere?
- when would output interfere?
+When would weighting schemes interfere? when would output interfere?
 \end_layout
 
 \begin_layout Section*
