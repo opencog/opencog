@@ -5,7 +5,6 @@ __author__ = 'keyvan'
 
 
 class Link(list):
-
     repr_separator_symbol = '--'
 
     def __init__(self, first_node=None, second_node=None):
@@ -16,22 +15,21 @@ class Link(list):
         return hash(self.first_node) ^ hash(self.second_node)
 
     def __eq__(self, other):
-        if self.first_node == other.first_node and\
-           self.second_node == other.second_node:
+        if self.first_node == other.first_node and \
+                        self.second_node == other.second_node:
             return True
         if (type(self), type(other)) != (DirectedLink, DirectedLink):
-            if self.first_node == other.second_node and\
-               self.second_node == other.first_node:
+            if self.first_node == other.second_node and \
+                            self.second_node == other.first_node:
                 return True
         return False
 
     def __repr__(self):
-        return str(self.first_node) + self.repr_separator_symbol +\
+        return str(self.first_node) + self.repr_separator_symbol + \
                str(self.second_node)
 
 
 class DirectedLink(Link):
-
     repr_separator_symbol = '->'
 
     @property
@@ -58,8 +56,8 @@ class DirectedLink(Link):
         first_node.outgoing_links.add(self)
         second_node.incoming_links.add(self)
 
-class Node(object):
 
+class Node(object):
     def __init__(self, name=None, host_network=None, backup=True):
         self.name = name
         self.incoming_links = set()
@@ -91,8 +89,8 @@ class Node(object):
         network's being DAG requirement
         """
         link = DirectedLink(self, child)
-        if type(self.network) is BayesianNetwork and\
-           self.network.check_dag(link):
+        if type(self.network) is BayesianNetwork and \
+                self.network.check_dag(link):
             link.place_between()
             return link
         return None
@@ -127,7 +125,7 @@ class Node(object):
 
     @property
     def edges(self):
-        return self.incoming_links |\
+        return self.incoming_links | \
                self.outgoing_links | self.links_to_neighbours
 
     @property
@@ -140,7 +138,7 @@ class Node(object):
         self._neighbours |= self._backup._neighbours
 
     def __len__(self):
-        return len(self.incoming_links) +\
+        return len(self.incoming_links) + \
                len(self.outgoing_links) + len(self._neighbours)
 
     def __eq__(self, other):
@@ -153,6 +151,7 @@ class Node(object):
         if self.name is None:
             return object.__repr__(self)
         return self.name
+
 
 class Row(set):
     def __getitem__(self, variable_name):
@@ -167,9 +166,7 @@ class Row(set):
         return _hash
 
 
-
 class ConditionalProbabilityTable(dict):
-
     def __init__(self, node=None):
         self.node = node
         self.parents = set([parent.name for parent in node.parents])
@@ -184,29 +181,22 @@ class ConditionalProbabilityTable(dict):
             yield config, self[config]
 
 
-class Graph(object):
-
-    def add(self, obj):
-        pass
-
-    def remove(self,obj):
-        pass
-
-
-    def vertices(self):
-        pass
-    def edges(self):
-        pass
-
-
-class Network(Graph):
-
+class Network(object):
     def __init__(self):
         self._edges = set()
+        self._vertices = set()
         self._needs_update = True
 
     def invalidate(self):
         self._needs_update = True
+
+    def add(self, vertice):
+        self._vertices.add(vertice)
+        self.invalidate()
+
+    def remove(self, vertice):
+        self._vertices.remove(vertice)
+        self.invalidate()
 
     @property
     def edges(self):
@@ -218,9 +208,11 @@ class Network(Graph):
         return self._edges
 
     def __repr__(self):
-        return 'Vertices = ' + repr(list(self)) + '\n' +\
+        return 'Vertices = ' + repr(list(self)) + '\n' + \
                'Edges = ' + str(self.edges)
 
+    def __iter__(self):
+        return iter(self._vertices)
 
 
 #class DAGOrganiser(object):
@@ -276,7 +268,6 @@ class Network(Graph):
 
 
 class BayesianNetwork(Network):
-
     def __init__(self):
         Network.__init__(self)
 
@@ -326,7 +317,7 @@ class BayesianNetwork(Network):
                     continue
                 link = neighbour1.add_neighbour(neighbour2)
                 clique = Clique(neighbour1, node, neighbour2, junction_tree)
-#                clique = Clique(neighbour1)
+                #                clique = Clique(neighbour1)
                 clique.connect_link(link)
             eliminated.add(self.pop(node))
         for node in eliminated:
@@ -363,12 +354,11 @@ class BayesianNetwork(Network):
             if link is DirectedLink:
                 new_link = DirectedLink()
                 new_link.place_between(nodes_by_name[link.first_node],
-                    nodes_by_name[link.second_node])
+                                       nodes_by_name[link.second_node])
         return clone
 
 
 class Clique(object):
-
     def __init__(self, node1, node2, node3, junction_tree=None):
         self.frozenSet = frozenset((node1, node2, node3))
         self.edges = set()
@@ -378,8 +368,9 @@ class Clique(object):
 
     def connect_link(self, link):
         self.edges.add(link)
-#        if link.first_node not in link.second_node.neighbours:
-#            link.first_node.add_neighbour(link.second_node)
+
+    #        if link.first_node not in link.second_node.neighbours:
+    #            link.first_node.add_neighbour(link.second_node)
 
     def __repr__(self):
         return repr(tuple(self))
@@ -390,7 +381,6 @@ class Clique(object):
 
 class JunctionTree(Network):
     pass
-
 
 
 #################test
@@ -420,16 +410,3 @@ if __name__ == '__main__':
     print network, '\n---------------\n'
     jt = network.triangulate()
     print jt, '\n---------------\n'
-
-    l1 = DirectedLink(A,B)
-    l2 = Link(B,A)
-
-    print l1 == l2
-
-    a = set(); a.add(l1); a.add(l2)
-    print a
-    print hash(l1)
-    print hash(l2)
-
-
-    #comajhsb

@@ -1,7 +1,7 @@
 from math import sqrt
 from scipy.stats import uniform
 from spatiotemporal.temporal_events import RelationFormulaGeometricMean
-from utility.geometric import almost_equals
+from utility.functions import almost_equals
 
 __author__ = 'keyvan'
 

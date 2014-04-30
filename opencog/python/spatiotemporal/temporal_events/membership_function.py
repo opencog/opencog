@@ -4,7 +4,7 @@ from scipy.stats.distributions import rv_frozen
 from spatiotemporal.time_intervals import TimeInterval
 from spatiotemporal.unix_time import random_time, UnixTime
 from utility.generic import convert_dict_to_sorted_lists
-from utility.geometric import Function, FunctionPiecewiseLinear,\
+from utility.functions import Function, FunctionPiecewiseLinear,\
     FunctionHorizontalLinear, FunctionComposite, FUNCTION_ZERO, FUNCTION_ONE, FunctionLinear
 from numpy import PINF as POSITIVE_INFINITY, NINF as NEGATIVE_INFINITY
 from utility.numeric.globals import EPSILON
