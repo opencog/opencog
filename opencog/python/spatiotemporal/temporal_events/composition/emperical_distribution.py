@@ -10,7 +10,7 @@ __author__ = 'keyvan'
 def overlaps(bounds_1, bounds_2):
     a_1, b_1 = bounds_1
     a_2, b_2 = bounds_2
-    return a_1 < a_2 < b_1 or a_1 < b_2 < b_1 or a_2 < a_1 < b_2 or a_2 < b_1 < b_2
+    return a_1 < a_2 < b_1 or a_1 < b_2 < b_1 or a_2 < a_1 < b_2 or a_2 < b_1 < b_2 or a_1 == a_2 or b_1 == b_2
 
 
 def generate_random_relations(size=1000):
