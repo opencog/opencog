@@ -163,6 +163,8 @@ private:
 
     bool isIgnoredType(Type type);
 
+    std::string Link2keyString(Handle& link, string indent = "");
+
 public:
     PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram);
     ~PatternMiner();
