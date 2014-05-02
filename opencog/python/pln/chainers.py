@@ -936,15 +936,16 @@ class Chainer(AbstractChainer):
         # some of the validations might not make sense for backward chaining
 
         # Sanity checks
-        if not self._allow_output_with_variables \
-            and self._contains_variables(outputs[0]):
-            self.log_failed_inference('output contains variable(s)')
-            return False
+        for i in outputs:
+            if not self._allow_output_with_variables \
+                and self._contains_variables(i):
+                self.log_failed_inference('output contains variable(s)')
+                return False
 
-        if not self.valid_structure(outputs[0]):
-            self.log_failed_inference('invalid structure %s %s %s' %
-                                      (rule, inputs, outputs))
-            return False
+            if not self.valid_structure(i):
+                self.log_failed_inference('invalid structure %s %s %s' %
+                                          (rule, inputs, outputs))
+                return False
 
         if self._check_cycles:
             if self.history.check_cycles(inputs, outputs):
