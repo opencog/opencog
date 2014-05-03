@@ -378,7 +378,7 @@ std::string AtomSpacePublisherModule::atomMessage(Object jsonAtom)
 {
     Object json;
     json.push_back(Pair("atom", jsonAtom));
-    json.push_back(Pair("timestamp", time(0)));
+    json.push_back(Pair("timestamp", (boost::uint64_t)time(0)));
     return write_formatted(json);
 }
 
@@ -390,7 +390,7 @@ std::string AtomSpacePublisherModule::avMessage(
     json.push_back(Pair("avOld", jsonAVOld));
     json.push_back(Pair("avNew", jsonAVNew));
     json.push_back(Pair("atom", jsonAtom));
-    json.push_back(Pair("timestamp", time(0)));
+    json.push_back(Pair("timestamp", (boost::uint64_t)time(0)));
     return write_formatted(json);
 }
 
@@ -402,7 +402,7 @@ std::string AtomSpacePublisherModule::tvMessage(
     json.push_back(Pair("tvOld", jsonTVOld));
     json.push_back(Pair("tvNew", jsonTVNew));
     json.push_back(Pair("atom", jsonAtom));
-    json.push_back(Pair("timestamp", time(0)));
+    json.push_back(Pair("timestamp", (boost::uint64_t)time(0)));
     return write_formatted(json);
 }
 
