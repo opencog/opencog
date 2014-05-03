@@ -37,10 +37,11 @@ http://zeromq.org/intro:get-the-software
 
 Requires ZeroMQ version 3.2.4 (libzmq3-dev) or higher.
 
-This will be installed automatically if you are using [ocpkg](https://github.com/opencog/ocpkg).
-
 #### Threaded Building Blocks (Intel TBB)
+
 https://www.threadingbuildingblocks.org/download
+
+These will be installed automatically if you are using [ocpkg](https://github.com/opencog/ocpkg).
 
 Module
 ------
