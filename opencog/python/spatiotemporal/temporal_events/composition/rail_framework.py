@@ -13,6 +13,7 @@ class Wagon(object):
         self._parent = None
         self.heads = []
         self.tails = []
+        self.is_moving = False
 
     @property
     def parent(self):
@@ -51,9 +52,12 @@ class Wagon(object):
         return self.a, self.b
     
     def bind(self, other):
-        root = other.root
-        self.bound_wagons.append(root)
-        root._parent = self
+        root = self.root
+        root.bound_wagons.append(other)
+        for wagon in other.bound_wagons:
+            root.bound_wagons.append(wagon)
+        other.bound_wagons = []
+        other._parent = root
 
     def move_to(self, a, b=None):
         if b is None:
@@ -61,13 +65,14 @@ class Wagon(object):
         root = self.root
         scale = (b - a) / self.length
         bias = a - scale * self.a
-        if scale == 1.0 and bias == 0.0:
-            return
+        if not (scale == 1.0 and bias == 0.0):
+            root.transform(scale, bias)
 
-        root.transform(scale, bias)
+    def find_move_cover_areas(self, a, b):
+        return (min(self.b, b), max(self.b, b)), (min(self.a, a), max(self.a, a))
 
-    def _move_to(self, a, b):
-        head_bounds, tail_bounds = (min(self.b, b), max(self.b, b)), (min(self.a, a), max(self.a, a))
+    def _move_heads_and_tails(self, a, b):
+        head_bounds, tail_bounds = self.find_move_cover_areas(a, b)
 
         for head in self.heads:
             if overlaps(head.bounds, head_bounds):
@@ -76,26 +81,38 @@ class Wagon(object):
             if overlaps(tail.bounds, tail_bounds):
                 tail.move_to(a - tail.length, a)
 
+
+    def _move_to(self, a, b):
+        self._move_heads_and_tails(a, b)
         self._a, self.length = a, b - a
 
     def transform(self, scale, bias):
+        if self.is_moving:
+            return
+        self.is_moving = True
         transform_start = self.a * scale + bias
         transform_end = self.b * scale + bias
 
-        tail_bounds = min(self.a, transform_start), max(self.a, transform_start)
-        head_bounds = min(self.b, transform_end), max(self.b, transform_end)
-
-        for head in self.heads:
-            if overlaps(head.bounds, head_bounds):
-                head.move_to(transform_end, transform_end + head.length)
-        for tail in self.tails:
-            if overlaps(tail.bounds, tail_bounds):
-                tail.move_to(transform_start - tail.length, transform_start)
+        # tail_bounds = min(self.a, transform_start), max(self.a, transform_start)
+        # head_bounds = min(self.b, transform_end), max(self.b, transform_end)
+        #
+        # for head in self.heads:
+        #     if overlaps(head.bounds, head_bounds):
+        #         head.move_to(transform_end, transform_end + head.length)
+        # for tail in self.tails:
+        #     if overlaps(tail.bounds, tail_bounds):
+        #         tail.move_to(transform_start - tail.length, transform_start)
 
         for wagon in self.bound_wagons:
-            wagon.transform(scale, bias)
+            wagon_a = wagon.a * scale + bias
+            wagon_b = wagon.b * scale + bias
+            wagon._move_to(wagon_a, wagon_b)
+
+        self._move_heads_and_tails(transform_start, transform_end)
 
         self._a, self.length = transform_start, transform_end - transform_start
+
+        self.is_moving = False
 
     def __str__(self, indent=0):
         children = indent * ' ' + repr(self) + '\n'
@@ -151,7 +168,11 @@ class RailwaySystem(object):
 
     def add_rail(self, rail_key):
         self.memo.append(('add_rail', (rail_key)))
-        self.rails[rail_key] = Rail([Wagon(0, 1), Wagon(1, 2)])
+        wagon_1 = Wagon(0, 10)
+        wagon_2 = Wagon(10, 20)
+        wagon_1.name = rail_key + '0'
+        wagon_2.name = rail_key + '1'
+        self.rails[rail_key] = Rail([wagon_1, wagon_2])
 
     def move_wagon(self, rail_key, wagon_index, a, b):
         self.memo.append(('move_wagon', (rail_key, wagon_index, a, b)))
@@ -173,8 +194,8 @@ class RailwaySystem(object):
 
     def bind_wagons_vertical(self, rail_1_key, wagon_1_index, rail_2_key, wagon_2_index):
         self.memo.append(('bind_wagons_vertical', (rail_1_key, wagon_1_index, rail_2_key, wagon_2_index)))
-        self.rails[rail_1_key][wagon_1_index].bind(self.rails[rail_2_key][wagon_2_index])
-
+        # self.rails[rail_1_key][wagon_1_index].bind(self.rails[rail_2_key][wagon_2_index])
+        self.rails[rail_2_key][wagon_2_index].bind(self.rails[rail_1_key][wagon_1_index])
     def move_and_bind_vertical(self, rail_1_key, wagon_1_index, rail_2_key, wagon_2_index, a, b):
         self.move_wagon(rail_1_key, wagon_1_index, a, b)
         self.bind_wagons_vertical(rail_1_key, wagon_1_index, rail_2_key, wagon_2_index)
@@ -205,37 +226,31 @@ if __name__ == '__main__':
     rails.add_rail(b)
     rails.add_rail(c)
 
-    rails.bind_wagons_before_horizontal(a, 1, b, 1)
-    rails.bind_wagons_after_horizontal(b, 1, c, 0)
-    rails.bind_wagons_before_horizontal(a, 0, b, 0)
-    rails.bind_wagons_before_horizontal(b, 0, c, 1)
-    rails.bind_wagons_before_horizontal(a, 1, b, 0)
+    # rails.bind_wagons_before_horizontal(a, 1, b, 1)
+    # rails.bind_wagons_after_horizontal(b, 1, c, 0)
+    # rails.bind_wagons_before_horizontal(a, 0, b, 0)
+    # rails.bind_wagons_before_horizontal(b, 0, c, 1)
+    # rails.bind_wagons_before_horizontal(a, 1, b, 0)
 
 
 
-    # rails.move_and_bind_vertical(a, 0, b, 0, -1, 0.3)
-    # # rails[0][0].move_to(-1, 0.3)
-    # # rails[0][0].bind(rails[1][0])
+    rails.move_and_bind_vertical(a, 1, b, 0, 6, 9)
+    # rails[0][0].move_to(-1, 0.3)
+    # rails[0][0].bind(rails[1][0])
 
-    # rails.move_and_bind_vertical(a, 1, b, 0, 0.7, 3)
-    # # rails[0][1].move_to(0.7, 3)
-    # # rails[0][1].bind(rails[1][0])
-    #
-    # rails.move_and_bind_vertical(c, 0, b, 0, -0.5, 0.5)
-    # # rails[2][0].move_to(-0.5, 0.5)
-    # # rails[2][0].bind(rails[1][0])
-    #
-    # rails.move_and_bind_vertical(b, 1, a, 1, 2, 5)
-    # # rails[1][1].move_to(2, 5)
-    # # rails[1][1].bind(rails[0][1])
-    #
-    # rails.move_and_bind_vertical(c, 1, b, 1, 4, 6)
-    # # rails[2][1].move_to(4, 6)
-    # # rails[2][1].bind(rails[1][1])
+    rails.move_and_bind_vertical(c, 1, a, 1, 7, 10)
+    # rails[0][1].move_to(0.7, 3)
+    # rails[0][1].bind(rails[1][0])
 
-    # rails_2 = deepcopy(rails)
-    # # rails.move_wagon(b, 1, 7, 13)
-    # rails_2.move_wagon(b, 1, 7, 13)
+    rails.move_and_bind_vertical(a, 0, b, 1, 0, 5)
+    # rails[2][0].move_to(-0.5, 0.5)
+    # rails[2][0].bind(rails[1][0])
 
+    rails.move_and_bind_vertical(c, 0, b, 1, 1, 5)
+    # rails[1][1].move_to(2, 5)
+    # rails[1][1].bind(rails[0][1])
+    print rails
+
+    rails.move_wagon(c, 1, 8, 11)
     print rails
     # print rails_2

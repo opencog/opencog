@@ -7,9 +7,14 @@ from spatiotemporal.time_intervals import TimeInterval
 __author__ = 'keyvan'
 
 
+def trim_float(float_object, no_digits=12):
+    return int(float_object * 10 ** no_digits) / float(10 ** no_digits)
+
+
 def overlaps(bounds_1, bounds_2):
     a_1, b_1 = bounds_1
     a_2, b_2 = bounds_2
+    a_1, b_1, a_2, b_2 = trim_float(a_1), trim_float(b_1), trim_float(a_2), trim_float(b_2)
     return a_1 < a_2 < b_1 or a_1 < b_2 < b_1 or a_2 < a_1 < b_2 or a_2 < b_1 < b_2 or a_1 == a_2 or b_1 == b_2
 
 

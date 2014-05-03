@@ -1,7 +1,9 @@
 from copy import deepcopy
+import numpy
 import random
 from spatiotemporal.temporal_events import RelationFormulaConvolution
 from spatiotemporal.temporal_events.composition import unpack
+from spatiotemporal.temporal_events.composition.emperical_distribution import overlaps
 from spatiotemporal.temporal_events.composition.rail_framework import RailwaySystem
 from spatiotemporal.temporal_events.trapezium import generate_random_events, TemporalEventTrapezium
 
@@ -52,9 +54,15 @@ def expand(node, relations):
 
     candidates = unpack(relation, start_reference, length_reference)
     for a, b in candidates:
+        reference = rails[temporal_event_2_key][portion_index_2]
+
         new_rails = deepcopy(rails)
         new_rails.move_and_bind_vertical(temporal_event_1_key, portion_index_1, temporal_event_2_key, portion_index_2,
                                          a, b)
+        new_reference = new_rails[temporal_event_2_key][portion_index_2]
+        if new_reference.a != reference.a or new_reference.b != reference.b:
+            continue
+
         successors.append(Node(new_rails, deepcopy(new_unpack_states)))
 
     return successors
@@ -89,30 +97,71 @@ class DepthFirstSearchComposition(object):
         return solutions
 
 
+def convert_rail_to_trapezium_event(railway_system, rail_key):
+    a = railway_system[rail_key][0].a
+    beginning = railway_system[rail_key][0].b
+    ending = railway_system[rail_key][1].a
+    b = railway_system[rail_key][1].b
+
+    return TemporalEventTrapezium(a, b, beginning, ending)
+
+
 if __name__ == '__main__':
     search_tree = DepthFirstSearchComposition()
     formula = RelationFormulaConvolution()
-    # A, B, C = generate_random_events(3)
-    # for event in [A, B, C]:
-    #     p = ''
-    #     for point in [event.a, event.beginning, event.ending, event.b]:
-    #         p += str((point - A.a) / (A.beginning - A.a)) + ', '
-    #     print p
+    A, B, C = generate_random_events(3)
+    for event in [A, B, C]:
+        p = ''
+        for point in [event.a, event.beginning, event.ending, event.b]:
+            p += str((point - A.a) / (A.beginning - A.a)) + ', '
+        print p
 
-    A = TemporalEventTrapezium(0.0, 3.76285794052, 1.0, 2.36411109829)
-    B = TemporalEventTrapezium(0.429332220194, 0.618402145058, 0.459203813555, 0.565328983453)
-    C = TemporalEventTrapezium(0.124194304788, 4.60495737242, 1.16915491876, 3.62004160264)
-
+    # A = TemporalEventTrapezium(0, 30, 10, 20)
+    # B = TemporalEventTrapezium(8, 22, 15, 16)
+    # C = TemporalEventTrapezium(0, 30, 10, 20)
+    goal = []
     events = {'A': A, 'B': B, 'C': C}
     for a_key, b_key in [('A', 'B'), ('B', 'C')]:
         a, b = events[a_key], events[b_key]
         for portion_index_a in [0, 1]:
             for portion_index_b in [0, 1]:
-                search_tree.add_relation(a_key, portion_index_a, b_key, portion_index_b,
-                                         formula.compare(a[portion_index_a], b[portion_index_b]))
+                relation = formula.compare(a[portion_index_a], b[portion_index_b])
+                goal.append(relation)
+                search_tree.add_relation(a_key, portion_index_a, b_key, portion_index_b, relation)
+
+    goal = numpy.array(goal)
 
     rails = RailwaySystem()
     for event_key in events:
         rails.add_rail(event_key)
 
-    print search_tree.find_solutions(rails)
+    solutions = search_tree.find_solutions(rails)
+
+    for railway_system in solutions:
+        estimate = []
+        A = convert_rail_to_trapezium_event(railway_system, 'A')
+        B = convert_rail_to_trapezium_event(railway_system, 'B')
+        C = convert_rail_to_trapezium_event(railway_system, 'C')
+        events = {'A': A, 'B': B, 'C': C}
+        for a_key, b_key in [('A', 'B'), ('B', 'C')]:
+            a, b = events[a_key], events[b_key]
+            for portion_index_a in [0, 1]:
+                for portion_index_b in [0, 1]:
+                    relation = formula.compare(a[portion_index_a], b[portion_index_b])
+                    estimate.append(relation)
+        print goal - numpy.array(estimate)
+
+
+"""
+0.0, 1.0, 3.95895473838, 4.49707162177,
+-0.612107375715, 4.16960183244, 4.45574646245, 16.9067080822,
+4.65660415787, 6.70232672098, 17.3980110842, 17.8023626962,
+
+0.0, 1.0, 43.9490138429, 58.2172787905,
+216.760424476, 276.752908482, 296.416558036, 387.454518564,
+93.3980514706, 309.730217663, 387.304504184, 477.604687366,
+
+0.0, 1.0, 1.18958954041, 2.54221796041,
+1.86934798288, 1.90946709733, 2.09485603768, 2.13348835072,
+-0.531899401165, -0.262333114979, 2.77404081223, 3.17684405284,
+"""
