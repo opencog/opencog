@@ -206,6 +206,59 @@ An internal method randomly selects which rule to apply in a given
 inference step from the available rules in the **\_select\_rule** method
 of the [AbstractChainer class][].
 
+#### Inference History
+
+Inference steps are recorded as ExecutionLinks, as implemented in the **AtomSpaceBasedInferenceHistory** class in **chainers.py**.
+
+The format is:
+
+```
+ExecutionLink
+    rule
+    ListLink
+    ListLink inputs
+    ListLink outputs
+```
+
+They are not currently encapsulated in any sort of context in the atomspace, so you have to search for them by link type. For example:
+
+```
+(cog-find-atoms 'ExecutionLink)
+```
+
+The inference history is also recorded in the **history** attribute of the chainer. Given an instance of a **chainer** object, you can obtain the inference history as follows:
+
+```
+chainer.history._all_applications
+```
+
+Example instance of an application from the inference history:
+
+```
+(ExecutionLink (stv 1.000000 0.000000)
+  (GroundedSchemaNode "ModusPonensRule")
+  (ListLink (stv 1.000000 0.000000)
+    (ListLink (stv 1.000000 0.000000)
+      (ImplicationLink (stv 0.500000 1.000000)
+        (EvaluationLink (stv 1.000000 0.000000)
+          (PredicateNode "smokes")
+          (ListLink (stv 1.000000 0.000000)
+            (VariableNode "$X")))
+        (EvaluationLink (stv 1.000000 0.000000)
+          (PredicateNode "cancer")
+          (ListLink (stv 1.000000 0.000000)
+            (VariableNode "$X"))))
+      (EvaluationLink (stv 0.632456 1.000000)
+        (PredicateNode "smokes")
+        (ListLink (stv 1.000000 0.000000)
+          (ConceptNode "Bob"))))
+    (ListLink (stv 1.000000 0.000000)
+      (EvaluationLink (stv 0.389737 1.000000)
+        (PredicateNode "cancer")
+        (ListLink (stv 1.000000 0.000000)
+          (ConceptNode "Bob"))))))
+```
+
 #### Formulas
 
 Each rule is associated with a formula, as described [here][rules]. The
