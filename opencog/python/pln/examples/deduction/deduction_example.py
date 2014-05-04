@@ -68,16 +68,9 @@ for i in range(1, 500):
         print("-- Rule:\n{0}".format(rule))
         print("\n-- Input:\n{0}".format(input))
 
-print('\n--- Trails:')
-trails = deduction_agent.get_trails()
-i = 0
-for item in trails:
-    i += 1
-    print("[%s]\n%s" % (i, item))
-
 print('--- History:')
 history = deduction_agent.get_history()
-pprint(vars(history))
+pprint(history)
 
 with open('pln_log.txt', 'w') as logfile:
     all_atoms = atomspace.get_atoms_by_type(t=types.Atom)

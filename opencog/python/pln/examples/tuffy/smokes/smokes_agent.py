@@ -37,7 +37,9 @@ class InferenceAgent(MindAgent):
         self.chainer = None
 
     def create_chainer(self, atomspace):
-        self.chainer = Chainer(atomspace, stimulateAtoms=False, allow_output_with_variables=True)
+        self.chainer = Chainer(atomspace,
+                               stimulateAtoms=False,
+                               allow_output_with_variables=True)
 
         # EvaluationToMember, MemberToInheritance
         self.chainer.add_rule(
