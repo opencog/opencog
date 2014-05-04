@@ -4,27 +4,28 @@
 # docker build -t $USER/opencog .
 # docker run --name cogserver -d -p 17001:17001 -p 5000:5000 $USER/opencog
 # docker logs cogserver
-# sudo lxc-attach -n `docker inspect cogserver | grep '"ID"' | sed 's/[^0-9a-z]//g'` /bin/bash
 
-FROM ubuntu:12.04
+FROM ubuntu:14.04
 MAINTAINER David Hart "dhart@opencog.org"
-RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
+RUN echo "deb http://archive.ubuntu.com/ubuntu trusty main universe" > /etc/apt/sources.list
 RUN apt-get update 
-RUN apt-get -y install python-software-properties wget sudo 
+RUN apt-get -y install software-properties-common wget sudo 
 
-# Get ocpkg script, replace wget with ADD when caching feature is added
+# ocpkg tool to install repositories and dependencies
+ADD scripts/ocpkg /octool
+RUN chmod +x /octool 
+RUN /octool -v -a -d
+
+# hack for libiberty package found in trusty main
+RUN sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h
+
+# build opencog
 ADD . /opencog
-ADD https://raw.github.com/opencog/ocpkg/master/ocpkg /opencog/
-RUN chmod -v u+x /opencog/ocpkg && \
-    ln -s -v /opencog/ocpkg /opencog/octool && \
-    ln -s -v /opencog /opencog/src && \
-    mkdir -v -p /opencog/bin 
-
-# Add repositories, install dependencies, build; still depends on opencog/bin
-RUN /opencog/octool -v -a -d
-RUN /opencog/octool -v -b -l /opencog/bin
+RUN ln -s -v /opencog /opencog/src
+RUN mkdir -v /opencog/build
+RUN /octool -v -b -l /opencog/build
 
 # Start cogserver when container runs
-WORKDIR /opencog/bin
+WORKDIR /opencog/build
 CMD ["-c",  "/opencog/lib/opencog.conf"]
-ENTRYPOINT ["/opencog/bin/opencog/server/cogserver"] 
+ENTRYPOINT ["/opencog/build/opencog/server/cogserver"] 
