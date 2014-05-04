@@ -14,20 +14,18 @@ Please see doc/ for platform and OS specific READMEs.
 
 Prerequisites
 -------------
-To build and run OpenCog, the following packages are required. With a
-few exceptions, most Linux distributions will have these packages.
-
-Older versions of CMake may not have scripts to find all of these packages,
-some needed CMake scripts are included in lib, but others in lib/compat are
-provided if you are trying to build with an old version of CMake (although the
-best option is to get the latest CMake if possible).
+To build and run OpenCog, the packages listed below are required. With a
+few exceptions, most Linux distributions will provide these packages. Users of
+Ubuntu 14.04 "Trusty Tahr" may use the dependency installer at scripts/octool.
+Users of any version of Linux may use the Dockerfile to quickly build a 
+container in which OpenCog will be built and run.
 
 ###### boost
 > C++ utilities package
 > http://www.boost.org/ | libboost-dev
 
 ###### cmake
-> Build management tool
+> Build management tool; v2.8 or higher recommended.
 > http://www.cmake.org/ | cmake
 
 ###### cxxtest
