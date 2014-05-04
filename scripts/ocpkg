@@ -1,12 +1,12 @@
 #!/bin/bash
 #
 ## @file		ocpkg
-## @copyright		OpenCog Foundation (2012)
+## @copyright		OpenCog Foundation (2012,2013,2014)
 ## @author		David Hart <dhart@opencog.org>
 ## @section DESCRIPTION	A script to download, build, test, install and package OpenCog
 ## @section LICENSE	Permission to copy and modify is granted under the GPL
-## @section REQUIREMENT	Ubuntu Linux 12.04 (precise pangolin)
-## @section SEEALSO	ocbootstrap - install an Ubuntu chroot on any Linux distro
+## @section REQUIREMENT	Ubuntu Linux 14.04 (precise pangolin)
+## @section SEEALSO	Dockerfile - compile and run OpenCog in a Linux container
  
 # This bash script is organized in sections:
 # SECTION 1. Global variable setting
