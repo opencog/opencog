@@ -312,6 +312,7 @@ class AbstractChainer(Logic):
         for node in self.atomspace.get_atoms_by_type(types.ConceptNode):
             node.tv = self.node_tv(node)
 
+
 class AtomSpaceBasedInferenceHistory:
     """
     Use the AtomSpace to record inference history. It has two main uses. The
@@ -489,6 +490,13 @@ class AtomSpaceBasedInferenceHistory:
         self.log.debug("Inference trail:")
         for application in history:
             self.print_application(application)
+
+    def get_history(self):
+        """
+        Returns all of the applications in the inference history
+        """
+        return self._all_applications
+
 
 class Chainer(AbstractChainer):
     """

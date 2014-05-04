@@ -48,4 +48,4 @@ class DeductionAgent(MindAgent):
         return self.chainer.trails
 
     def get_history(self):
-        return self.chainer.history_index
+        return self.chainer.history.get_history()
