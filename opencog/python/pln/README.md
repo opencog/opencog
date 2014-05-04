@@ -152,22 +152,6 @@ chainer.add_rule(rule)
 Check the contents of the [AtomSpace][], and if the forward inference
 step was successful, you should see a new [InheritanceLink][].
 
-You can inspect the inference trail:
-```
-for item in chainer.trails:
-    print item
-```
-```
-node[ConceptNode:animal]
-node[ConceptNode:bird]
-node[ConceptNode:swan]
-[InheritanceLink `<swan,bird>` 0.5 0.50000000]
-[InheritanceLink `<bird,animal>` 0.5 0.50000000]
-[InheritanceLink `<swan,animal>` 0.14899 0.50000000]
-```
-You can also inspect the detailed history:
-    print vars(chainer.history_index)
-
 ### Example using the predefined ForwardInferenceAgent
 
 Now that you understand how the previous steps work, you can also
@@ -198,9 +182,6 @@ implemented by classes that derive from the [Rule class][].
 The add\_rule method takes a chainer and a link type as parameters.
 
 You can view the list of implemented rules in the **rules** folder.
-
-After performing [inference][], it stores the results in the **trails**
-and **history\_index** members.
 
 An internal method randomly selects which rule to apply in a given
 inference step from the available rules in the **\_select\_rule** method
