@@ -223,7 +223,7 @@ ExecutionLink
 They are not currently encapsulated in any sort of context in the atomspace, so you have to search for them by link type. For example:
 
 ```
-(cog-find-atoms 'ExecutionLink)
+(cog-get-atoms 'ExecutionLink)
 ```
 
 The inference history is also recorded in the **history** attribute of the chainer. Given an instance of a **chainer** object, you can obtain the inference history as follows:
