@@ -229,7 +229,7 @@ They are not currently encapsulated in any sort of context in the atomspace, so 
 The inference history is also recorded in the **history** attribute of the chainer. Given an instance of a **chainer** object, you can obtain the inference history as follows:
 
 ```
-chainer.history._all_applications
+chainer.history.get_history()
 ```
 
 Example instance of an application from the inference history:
