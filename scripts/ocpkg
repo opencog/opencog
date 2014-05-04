@@ -5,34 +5,26 @@
 ## @author		David Hart <dhart@opencog.org>
 ## @section DESCRIPTION	A script to download, build, test, install and package OpenCog
 ## @section LICENSE	Permission to copy and modify is granted under the GPL
-## @section REQUIREMENT	Ubuntu Linux 14.04 (precise pangolin)
+## @section REQUIREMENT	Ubuntu Linux 14.04 "Trusty Tahr". See opencog/ocpkg repo for 12.04 version
 ## @section SEEALSO	Dockerfile - compile and run OpenCog in a Linux container
  
-# This bash script is organized in sections:
+# This bash script is organized in sections
 # SECTION 1. Global variable setting
 # SECTION 2. Command line option handling
 # SECTION 3. Error handling & cleanup
 # SECTION 4. Function definitions
 # SECTION 5. Main program
 
-# Notes:
-# - terminal & editor are best set to a column width of 144+ characters 
-#        (bash lines, dpkg lines and gcc lines can be long!)
-# - this script executes fastest with a minimum of 4GB RAM, 4GB SWAP, /tmp on 4GB tmpfs
-#        (real time overhead for CD repackaging without building OpenCog is about 5m)
-# - test CD/DVD images using:
-#        testdrive -u OpenCogLive.iso
-#        kvm -cdrom OpenCogLive.iso -boot d -m 2048
+# Notes
+# 5 minute LiveCD creation is possible with a minimum of 4GB RAM, 4GB SWAP, and /tmp on 4GB tmpfs
+# test CD/DVD images using:
+#   testdrive -u OpenCogLive.iso
+#   kvm -cdrom OpenCogLive.iso -boot d -m 2048
 
-# To do: 
-# - add Launchpad & bzr-buildeb build options (for deb packaging)
-#       http://developer.ubuntu.com/packaging/html/
-# - add vmbuilder option for OpenStack & Amazon EC2 distribution 
-#       https://help.ubuntu.com/11.04/serverguide/C/jeos-and-vmbuilder.html
-#	https://launchpad.net/awsome (front-end for OpenStack providing the AWS API)
-# - add PACKAGE_BUILD variables for incremental builds
-# - add manifest rebuild to LiveCD/DVD
-# - add privilege separation when run as root (run make, etc., as real user)
+# To do
+# Debian/Ubuntu packaging abilities http://developer.ubuntu.com/packaging/html/
+# incremental builds
+# manifest rebuild to LiveCD/DVD
 
 # trap errors
 set -e
@@ -72,6 +64,7 @@ DEFAULT_UPDATE_OPENCOG=true
 #DEFAULT_BUILD_OPENCOG=true		
 #DEFAULT_TEST_OPENCOG=true		
 
+# TBD: update for Ubuntu 14.04
 UBUNTU_ISO=ubuntu-12.04.2-desktop-amd64.iso
 UBUNTU_URL=http://releases.ubuntu.com/12.04/
 UBUNTU_MD5SUM=b436b6d4c7de064652f30d783bda5b4e
