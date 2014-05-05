@@ -534,12 +534,18 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     {
         implicationLinkOutgoings.push_back(patternToMatch[0]); // the pattern to match
         implicationLinkOutgoings.push_back(patternToMatch[0]); // the results to return
+
+        std::cout<<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
+                << originalAtomSpace->atomAsString(patternToMatch[0]).c_str() << std::endl;
     }
     else
     {
         Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch, TruthValue::TRUE_TV());
         implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
         implicationLinkOutgoings.push_back(hAndLink); // the results to return
+
+        std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
+                << originalAtomSpace->atomAsString(hAndLink).c_str() << std::endl;
     }
 
     Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
@@ -557,12 +563,12 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 
     Handle hResultListLink = pm.bindlink(hBindLink);
 
-    std::cout<<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
-            << originalAtomSpace->atomAsString(hBindLink).c_str() <<std::endl;
-
     // Get result
     // Note: Don't forget remove the hResultListLink and BindLink
     HandleSeq resultSet = originalAtomSpace->getOutgoing(hResultListLink);
+
+    std::cout << toString(resultSet.size())  << " instances found." << std::endl  << std::endl;
+
     originalAtomSpace->removeAtom(hResultListLink);
     originalAtomSpace->removeAtom(hBindLink);
 
@@ -727,7 +733,7 @@ void PatternMiner::growPatternsTask()
 
 bool compareHTreeNodeByFrequency(HTreeNode* node1, HTreeNode* node2)
 {
-    return (node1->instances.size() >= node2->instances.size());
+    return (node1->instances.size() > node2->instances.size());
 }
 
 void PatternMiner::OutPutPatternsToFile(unsigned int n_gram)
