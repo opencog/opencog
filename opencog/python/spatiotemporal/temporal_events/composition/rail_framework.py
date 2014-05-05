@@ -1,6 +1,7 @@
 from copy import deepcopy
 from numpy import PINF, NINF
 from spatiotemporal.temporal_events.composition.emperical_distribution import overlaps
+from spatiotemporal.temporal_events.util import Dijkstra
 
 __author__ = 'keyvan'
 
@@ -9,7 +10,7 @@ class Wagon(object):
     def __init__(self, a, b):
         self._a = float(a)
         self.length = float(b - a)
-        self.bound_wagons = []
+        self.bound_wagons = set()
         self._parent = None
         self.heads = []
         self.tails = []
@@ -26,18 +27,10 @@ class Wagon(object):
     @property
     def a(self):
         return self._a
-
-    @a.setter
-    def a(self, value):
-        self.move(self.a - value)
     
     @property
     def b(self):
         return self._a + self.length
-
-    @b.setter
-    def b(self, value):
-        self.move(self.b - value)
 
     @property
     def root(self):
@@ -53,11 +46,13 @@ class Wagon(object):
     
     def bind(self, other):
         root = self.root
-        root.bound_wagons.append(other)
-        for wagon in other.bound_wagons:
-            root.bound_wagons.append(wagon)
-        other.bound_wagons = []
-        other._parent = root
+        root_other = other.root
+        root.bound_wagons.add(root_other)
+        for wagon in root_other.bound_wagons:
+            root.bound_wagons.add(wagon)
+            wagon._parent = root
+        root_other.bound_wagons = set()
+        root_other._parent = root
 
     def move_to(self, a, b=None):
         if b is None:
@@ -121,7 +116,8 @@ class Wagon(object):
         return children
 
     def __repr__(self):
-        return 'Wagon(a: {0}, b: {1})'.format(self.a, self.b)
+        # TODO remove self.name
+        return '{2}(a: {0}, b: {1})'.format(self.a, self.b, self.name)
 
 
 class Rail(list):
@@ -165,14 +161,17 @@ class RailwaySystem(object):
     def __init__(self):
         self.rails = {}
         self.memo = []
+        self.dag = {}
 
     def add_rail(self, rail_key):
-        self.memo.append(('add_rail', (rail_key)))
+        self.memo.append(('add_rail', [rail_key]))
         wagon_1 = Wagon(0, 10)
         wagon_2 = Wagon(10, 20)
         wagon_1.name = rail_key + '0'
         wagon_2.name = rail_key + '1'
         self.rails[rail_key] = Rail([wagon_1, wagon_2])
+        self.dag[wagon_2] = {wagon_1: 1}
+        self.dag[wagon_1] = {}
 
     def move_wagon(self, rail_key, wagon_index, a, b):
         self.memo.append(('move_wagon', (rail_key, wagon_index, a, b)))
@@ -189,16 +188,26 @@ class RailwaySystem(object):
         wagon_2.tails.append(wagon_1)
         wagon_1.heads.append(wagon_2)
 
+        self.dag[wagon_2][wagon_1] = 1
+
     def bind_wagons_after_horizontal(self, rail_1_key, wagon_1_index, rail_2_key, wagon_2_index):
         self.bind_wagons_before_horizontal(rail_2_key, wagon_2_index, rail_1_key, wagon_1_index)
 
     def bind_wagons_vertical(self, rail_1_key, wagon_1_index, rail_2_key, wagon_2_index):
         self.memo.append(('bind_wagons_vertical', (rail_1_key, wagon_1_index, rail_2_key, wagon_2_index)))
-        # self.rails[rail_1_key][wagon_1_index].bind(self.rails[rail_2_key][wagon_2_index])
         self.rails[rail_2_key][wagon_2_index].bind(self.rails[rail_1_key][wagon_1_index])
+
     def move_and_bind_vertical(self, rail_1_key, wagon_1_index, rail_2_key, wagon_2_index, a, b):
         self.move_wagon(rail_1_key, wagon_1_index, a, b)
         self.bind_wagons_vertical(rail_1_key, wagon_1_index, rail_2_key, wagon_2_index)
+
+    def are_in_same_vertical_tree(self, rail_1_key, wagon_1_index, rail_2_key, wagon_2_index):
+        return self.rails[rail_1_key][wagon_1_index].root is self.rails[rail_2_key][wagon_2_index].root
+
+    def are_in_same_horizontal_tree(self, rail_1_key, wagon_1_index, rail_2_key, wagon_2_index):
+        start = self.rails[rail_1_key][wagon_1_index]
+        end = self.rails[rail_2_key][wagon_2_index]
+        return 0 < Dijkstra(self.dag, start, end)[0][end]
 
     def __getitem__(self, rail_key):
         return self.rails[rail_key]

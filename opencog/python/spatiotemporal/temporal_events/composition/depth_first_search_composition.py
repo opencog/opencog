@@ -112,13 +112,17 @@ if __name__ == '__main__':
     A, B, C = generate_random_events(3)
     for event in [A, B, C]:
         p = ''
-        for point in [event.a, event.beginning, event.ending, event.b]:
+        for point in [event.a, event.b, event.beginning, event.ending]:
             p += str((point - A.a) / (A.beginning - A.a)) + ', '
         print p
 
     # A = TemporalEventTrapezium(0, 30, 10, 20)
-    # B = TemporalEventTrapezium(8, 22, 15, 16)
-    # C = TemporalEventTrapezium(0, 30, 10, 20)
+    # B = TemporalEventTrapezium(20.1, 50, 30.09, 40)
+    # C = TemporalEventTrapezium(20.2, 70, 30.2, 60)
+
+    actual_solution = (A * C).to_vector()
+    print 'Actual\n', actual_solution
+
     goal = []
     events = {'A': A, 'B': B, 'C': C}
     for a_key, b_key in [('A', 'B'), ('B', 'C')]:
@@ -136,12 +140,19 @@ if __name__ == '__main__':
         rails.add_rail(event_key)
 
     solutions = search_tree.find_solutions(rails)
+    average_solution = numpy.zeros(13)
 
+    print 'Solutions'
     for railway_system in solutions:
         estimate = []
         A = convert_rail_to_trapezium_event(railway_system, 'A')
         B = convert_rail_to_trapezium_event(railway_system, 'B')
         C = convert_rail_to_trapezium_event(railway_system, 'C')
+
+        solution = (A * C).to_vector()
+        print solution
+        average_solution += solution / len(solutions)
+
         events = {'A': A, 'B': B, 'C': C}
         for a_key, b_key in [('A', 'B'), ('B', 'C')]:
             a, b = events[a_key], events[b_key]
@@ -149,19 +160,7 @@ if __name__ == '__main__':
                 for portion_index_b in [0, 1]:
                     relation = formula.compare(a[portion_index_a], b[portion_index_b])
                     estimate.append(relation)
-        print goal - numpy.array(estimate)
+        # print goal - numpy.array(estimate)
 
-
-"""
-0.0, 1.0, 3.95895473838, 4.49707162177,
--0.612107375715, 4.16960183244, 4.45574646245, 16.9067080822,
-4.65660415787, 6.70232672098, 17.3980110842, 17.8023626962,
-
-0.0, 1.0, 43.9490138429, 58.2172787905,
-216.760424476, 276.752908482, 296.416558036, 387.454518564,
-93.3980514706, 309.730217663, 387.304504184, 477.604687366,
-
-0.0, 1.0, 1.18958954041, 2.54221796041,
-1.86934798288, 1.90946709733, 2.09485603768, 2.13348835072,
--0.531899401165, -0.262333114979, 2.77404081223, 3.17684405284,
-"""
+    print 'Average\n', average_solution
+    print 'Error\n', actual_solution - average_solution
