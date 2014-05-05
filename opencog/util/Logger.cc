@@ -196,7 +196,7 @@ void Logger::flush()
     // try to work around it by sleeping.
     usleep(10);
 
-    // Perhaps we could do this with semaphors, but this is not
+    // Perhaps we could do this with semaphores, but this is not
     // really critical code, so a busy-wait is good enough.
     while (pending_write or not msg_queue.is_empty())
     {
