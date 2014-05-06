@@ -211,30 +211,3 @@ def learn_all(size=10000):
         print 'F:', test_x[i]
         print 'learning', clf.predict(test_x[i])
         print 'actual', test_y[i], '\n-------------\n'
-
-
-# learn_all()
-
-# learn(100000 - 1)
-# classes = classify(generate_random_relations(1000), 1000)
-# classes = classify()
-#
-# for _class in classes:
-#     average = numpy.zeros(13)
-#     length = 1.0 / len(classes[_class])
-#     for relation in classes[_class]:
-#         if max(relation.to_vector()) > 1:
-#             print relation.to_vector()
-#         average += relation.to_vector()
-#     average *= length
-#
-#     variance = numpy.zeros(13)
-#     for relation in classes[_class]:
-#         variance += (relation.to_vector() - average) ** 2 * length
-#     print _class
-#     print average
-#     print variance ** 0.5
-#     print
-#
-# read_data()
-

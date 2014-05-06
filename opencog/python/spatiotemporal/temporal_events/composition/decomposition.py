@@ -1,7 +1,6 @@
 from spatiotemporal.temporal_events import FormulaCreator
 from spatiotemporal.temporal_events.relation_formulas import TemporalRelation
 import numpy as np
-from spatiotemporal.temporal_events.trapezium import TemporalEventTrapezium
 
 __author__ = 'keyvan'
 
@@ -60,8 +59,3 @@ class Individual(dict):
 
         goal, solution = np.array(goal), np.array(solution)
         return np.linalg.norm(goal - solution)
-
-
-class SimulatedAnnealing(object):
-    def neighbour(self, individual):
-        pass

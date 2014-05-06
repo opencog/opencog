@@ -55,13 +55,3 @@ def random_time(start, stop, probability_distribution=None):
         return stop
     return UnixTime(random_value)
 
-if __name__ == '__main__':
-    a = datetime(2010, 1, 1)
-    print a
-    a = UnixTime(a)
-    print a
-    print a.to_datetime()
-    a = UnixTime(1.25)
-    print a
-    print a.to_datetime().microsecond / float(10 ** 6)
-    print UnixTime(a.to_datetime()).to_datetime()

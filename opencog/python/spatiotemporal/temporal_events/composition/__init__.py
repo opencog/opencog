@@ -29,5 +29,3 @@ def unpack(relation, start_reference=0, length_reference=1):
             solutions.append((solution_a, solution_b))
 
     return solutions
-
-# print unpack((0.68354519254445345, 0.10696157642928092, 0.31645480745554644), 66.2096292233, 9.629403233)

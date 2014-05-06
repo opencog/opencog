@@ -1,9 +1,11 @@
-from copy import deepcopy
-from numpy import PINF, NINF
+from itertools import chain
 from spatiotemporal.temporal_events.composition.emperical_distribution import overlaps
 from spatiotemporal.temporal_events.util import Dijkstra
+from utility.functions import almost_equals
 
 __author__ = 'keyvan'
+
+EPSILON = 1e-12
 
 
 class Wagon(object):
@@ -47,6 +49,8 @@ class Wagon(object):
     def bind(self, other):
         root = self.root
         root_other = other.root
+        if root_other is root:
+            return
         root.bound_wagons.add(root_other)
         for wagon in root_other.bound_wagons:
             root.bound_wagons.add(wagon)
@@ -76,7 +80,6 @@ class Wagon(object):
             if overlaps(tail.bounds, tail_bounds):
                 tail.move_to(a - tail.length, a)
 
-
     def _move_to(self, a, b):
         self._move_heads_and_tails(a, b)
         self._a, self.length = a, b - a
@@ -87,16 +90,6 @@ class Wagon(object):
         self.is_moving = True
         transform_start = self.a * scale + bias
         transform_end = self.b * scale + bias
-
-        # tail_bounds = min(self.a, transform_start), max(self.a, transform_start)
-        # head_bounds = min(self.b, transform_end), max(self.b, transform_end)
-        #
-        # for head in self.heads:
-        #     if overlaps(head.bounds, head_bounds):
-        #         head.move_to(transform_end, transform_end + head.length)
-        # for tail in self.tails:
-        #     if overlaps(tail.bounds, tail_bounds):
-        #         tail.move_to(transform_start - tail.length, transform_start)
 
         for wagon in self.bound_wagons:
             wagon_a = wagon.a * scale + bias
@@ -116,8 +109,7 @@ class Wagon(object):
         return children
 
     def __repr__(self):
-        # TODO remove self.name
-        return '{2}(a: {0}, b: {1})'.format(self.a, self.b, self.name)
+        return 'Wagon(a: {0}, b: {1})'.format(self.a, self.b)
 
 
 class Rail(list):
@@ -170,8 +162,8 @@ class RailwaySystem(object):
         wagon_1.name = rail_key + '0'
         wagon_2.name = rail_key + '1'
         self.rails[rail_key] = Rail([wagon_1, wagon_2])
-        self.dag[wagon_2] = {wagon_1: 1}
-        self.dag[wagon_1] = {}
+        self.dag[wagon_1] = {wagon_2: 1}
+        self.dag[wagon_2] = {}
 
     def move_wagon(self, rail_key, wagon_index, a, b):
         self.memo.append(('move_wagon', (rail_key, wagon_index, a, b)))
@@ -188,26 +180,44 @@ class RailwaySystem(object):
         wagon_2.tails.append(wagon_1)
         wagon_1.heads.append(wagon_2)
 
-        self.dag[wagon_2][wagon_1] = 1
+        self.dag[wagon_1][wagon_2] = 1
 
     def bind_wagons_after_horizontal(self, rail_1_key, wagon_1_index, rail_2_key, wagon_2_index):
         self.bind_wagons_before_horizontal(rail_2_key, wagon_2_index, rail_1_key, wagon_1_index)
 
     def bind_wagons_vertical(self, rail_1_key, wagon_1_index, rail_2_key, wagon_2_index):
+        wagon_1 = self.rails[rail_1_key][wagon_1_index]
+        wagon_2 = self.rails[rail_2_key][wagon_2_index]
         self.memo.append(('bind_wagons_vertical', (rail_1_key, wagon_1_index, rail_2_key, wagon_2_index)))
-        self.rails[rail_2_key][wagon_2_index].bind(self.rails[rail_1_key][wagon_1_index])
+        wagon_2.bind(wagon_1)
+
+        equals_a = almost_equals(wagon_1.a, wagon_2.a, EPSILON)
+        equals_b = almost_equals(wagon_1.b, wagon_2.b, EPSILON)
+        if (wagon_1.a < wagon_2.a or equals_a) and (wagon_1.b < wagon_2.b or equals_b):
+            self.dag[wagon_1][wagon_2] = 1
+
+        if (wagon_1.a > wagon_2.a or equals_a) and (wagon_1.b > wagon_2.b or equals_b):
+            self.dag[wagon_2][wagon_1] = 1
 
     def move_and_bind_vertical(self, rail_1_key, wagon_1_index, rail_2_key, wagon_2_index, a, b):
         self.move_wagon(rail_1_key, wagon_1_index, a, b)
         self.bind_wagons_vertical(rail_1_key, wagon_1_index, rail_2_key, wagon_2_index)
 
-    def are_in_same_vertical_tree(self, rail_1_key, wagon_1_index, rail_2_key, wagon_2_index):
-        return self.rails[rail_1_key][wagon_1_index].root is self.rails[rail_2_key][wagon_2_index].root
+    def are_in_same_vertical_tree(self, wagon_1, wagon_2):
+        return wagon_1.root is wagon_2.root
 
-    def are_in_same_horizontal_tree(self, rail_1_key, wagon_1_index, rail_2_key, wagon_2_index):
-        start = self.rails[rail_1_key][wagon_1_index]
-        end = self.rails[rail_2_key][wagon_2_index]
-        return 0 < Dijkstra(self.dag, start, end)[0][end]
+    def are_in_same_horizontal_tree(self, wagon_1, wagon_2):
+        start = wagon_1
+        end = wagon_2
+        dijkstra_1 = Dijkstra(self.dag, start, end)
+        dijkstra_2 = Dijkstra(self.dag, end, start)
+        return end in dijkstra_1[0] or start in dijkstra_2[0]
+
+    def compress(self):
+        for rail_key, rail in self.rails.items():
+            wagon_tail = rail[0]
+            wagon_head = rail[-1]
+            self.move_wagon(rail_key, 0, wagon_head.a - wagon_tail.length, wagon_head.a)
 
     def __getitem__(self, rail_key):
         return self.rails[rail_key]
@@ -227,39 +237,5 @@ class RailwaySystem(object):
     def __repr__(self):
         return str(self)
 
-
-if __name__ == '__main__':
-    rails = RailwaySystem()
-    a, b, c = 'A', 'B', 'C'
-    rails.add_rail(a)
-    rails.add_rail(b)
-    rails.add_rail(c)
-
-    # rails.bind_wagons_before_horizontal(a, 1, b, 1)
-    # rails.bind_wagons_after_horizontal(b, 1, c, 0)
-    # rails.bind_wagons_before_horizontal(a, 0, b, 0)
-    # rails.bind_wagons_before_horizontal(b, 0, c, 1)
-    # rails.bind_wagons_before_horizontal(a, 1, b, 0)
-
-
-
-    rails.move_and_bind_vertical(a, 1, b, 0, 6, 9)
-    # rails[0][0].move_to(-1, 0.3)
-    # rails[0][0].bind(rails[1][0])
-
-    rails.move_and_bind_vertical(c, 1, a, 1, 7, 10)
-    # rails[0][1].move_to(0.7, 3)
-    # rails[0][1].bind(rails[1][0])
-
-    rails.move_and_bind_vertical(a, 0, b, 1, 0, 5)
-    # rails[2][0].move_to(-0.5, 0.5)
-    # rails[2][0].bind(rails[1][0])
-
-    rails.move_and_bind_vertical(c, 0, b, 1, 1, 5)
-    # rails[1][1].move_to(2, 5)
-    # rails[1][1].bind(rails[0][1])
-    print rails
-
-    rails.move_wagon(c, 1, 8, 11)
-    print rails
-    # print rails_2
+    def __iter__(self):
+        return chain(*self.rails.values())

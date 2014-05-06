@@ -1,13 +1,26 @@
 from __future__ import generators
-from math import fabs, sqrt
+from itertools import combinations
+from math import sqrt
 from numpy import isinf
-from scipy.stats import expon
 from scipy.stats.distributions import uniform_gen
 from utility.numeric.globals import EPSILON
 
 __author__ = 'keyvan'
 
 DISTRIBUTION_INTEGRAL_LIMIT = 1 - EPSILON
+
+
+def compute_railway_strength(solutions):
+    railway_system = solutions[0]
+    points = 0.0
+    count = 0
+    for wagon_1, wagon_2 in combinations(railway_system, 2):
+        count += 1
+        if railway_system.are_in_same_vertical_tree(wagon_1, wagon_2) or\
+                railway_system.are_in_same_horizontal_tree(wagon_1, wagon_2):
+            points += 1
+
+    return points / count / len(solutions)
 
 
 def calculate_bounds_of_probability_distribution(probability_distribution,
@@ -183,7 +196,3 @@ def shortestPath(G, start, end):
         end = P[end]
     Path.reverse()
     return Path
-
-
-if __name__ == '__main__':
-    print calculate_bounds_of_probability_distribution(expon(loc=10, scale=2))
