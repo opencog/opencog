@@ -62,7 +62,7 @@
 			; inet-aton is deprecated, so don't use it (as of 2013)
 			; (connect s AF_INET (inet-aton relex-server-host) relex-server-port)
 			(connect s AF_INET (inet-pton AF_INET relex-server-host) relex-server-port)
-	
+
 			(display sent-txt s)
 			(display "\n" s) ; must send newline to flush socket
 			(system (string-join (list "echo \"Info: send to parser: " sent-txt "\"")))
@@ -73,7 +73,10 @@
 	)
 
 	; Perform the actual processing
-	(do-sock-io plain-txt)
+	(if (string=? plain-txt "")
+		(display "Please enter a valid sentence.")
+		(do-sock-io plain-txt)
+	)
 )
 
 ; -----------------------------------------------------------------------

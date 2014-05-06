@@ -117,13 +117,14 @@
 	(NotLink (PredicateNode instance))
 )
 
-(define (possessive-rule-1 noun noun_instance word)
+(define (possessive-rule noun noun_instance word word_instance)
 	(InheritanceLink (ConceptNode noun_instance) (ConceptNode noun))
+        (InheritanceLink (ConceptNode word_instance) (ConceptNode word))
 	(EvaluationLink
 		(PredicateNode "Possession")
 		(ListLink
 			(ConceptNode noun_instance)
-			(ConceptNode word)
+			(ConceptNode word_instance)
 		)
 	)
 )

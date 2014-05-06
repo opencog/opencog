@@ -152,22 +152,6 @@ chainer.add_rule(rule)
 Check the contents of the [AtomSpace][], and if the forward inference
 step was successful, you should see a new [InheritanceLink][].
 
-You can inspect the inference trail:
-```
-for item in chainer.trails:
-    print item
-```
-```
-node[ConceptNode:animal]
-node[ConceptNode:bird]
-node[ConceptNode:swan]
-[InheritanceLink `<swan,bird>` 0.5 0.50000000]
-[InheritanceLink `<bird,animal>` 0.5 0.50000000]
-[InheritanceLink `<swan,animal>` 0.14899 0.50000000]
-```
-You can also inspect the detailed history:
-    print vars(chainer.history_index)
-
 ### Example using the predefined ForwardInferenceAgent
 
 Now that you understand how the previous steps work, you can also
@@ -199,12 +183,62 @@ The add\_rule method takes a chainer and a link type as parameters.
 
 You can view the list of implemented rules in the **rules** folder.
 
-After performing [inference][], it stores the results in the **trails**
-and **history\_index** members.
-
 An internal method randomly selects which rule to apply in a given
 inference step from the available rules in the **\_select\_rule** method
 of the [AbstractChainer class][].
+
+#### Inference History
+
+Inference steps are recorded as ExecutionLinks, as implemented in the **AtomSpaceBasedInferenceHistory** class in **chainers.py**.
+
+The format is:
+
+```
+ExecutionLink
+    rule
+    ListLink
+    ListLink inputs
+    ListLink outputs
+```
+
+They are not currently encapsulated in any sort of context in the atomspace, so you have to search for them by link type. For example:
+
+```
+(cog-get-atoms 'ExecutionLink)
+```
+
+The inference history is also recorded in the **history** attribute of the chainer. Given an instance of a **chainer** object, you can obtain the inference history as follows:
+
+```
+chainer.history.get_history()
+```
+
+Example instance of an application from the inference history:
+
+```
+(ExecutionLink (stv 1.000000 0.000000)
+  (GroundedSchemaNode "ModusPonensRule")
+  (ListLink (stv 1.000000 0.000000)
+    (ListLink (stv 1.000000 0.000000)
+      (ImplicationLink (stv 0.500000 1.000000)
+        (EvaluationLink (stv 1.000000 0.000000)
+          (PredicateNode "smokes")
+          (ListLink (stv 1.000000 0.000000)
+            (VariableNode "$X")))
+        (EvaluationLink (stv 1.000000 0.000000)
+          (PredicateNode "cancer")
+          (ListLink (stv 1.000000 0.000000)
+            (VariableNode "$X"))))
+      (EvaluationLink (stv 0.632456 1.000000)
+        (PredicateNode "smokes")
+        (ListLink (stv 1.000000 0.000000)
+          (ConceptNode "Bob"))))
+    (ListLink (stv 1.000000 0.000000)
+      (EvaluationLink (stv 0.389737 1.000000)
+        (PredicateNode "cancer")
+        (ListLink (stv 1.000000 0.000000)
+          (ConceptNode "Bob"))))))
+```
 
 #### Formulas
 

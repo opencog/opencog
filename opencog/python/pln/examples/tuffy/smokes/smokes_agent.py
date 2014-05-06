@@ -37,8 +37,26 @@ class InferenceAgent(MindAgent):
         self.chainer = None
 
     def create_chainer(self, atomspace):
-        self.chainer = Chainer(atomspace, stimulateAtoms=False)
+        self.chainer = Chainer(atomspace,
+                               stimulateAtoms=False,
+                               allow_output_with_variables=True)
 
+        # EvaluationToMember, MemberToInheritance
+        self.chainer.add_rule(
+            GeneralEvaluationToMemberRule(self.chainer, 0, 1))
+        self.chainer.add_rule(MemberToEvaluationRule(self.chainer))
+        self.chainer.add_rule(MemberToInheritanceRule(self.chainer))
+        self.chainer.add_rule(InheritanceToMemberRule(self.chainer))
+
+        # For predicates with 2 arguments,
+        # with the 0th argument made into a variable
+        self.chainer.add_rule(
+            GeneralEvaluationToMemberRule(self.chainer, 0, 2))
+
+        # ModusPonens:
+        # Implication smokes(x) cancer(X)
+        # smokes(Anna)
+        # |= cancer(Anna)
         self.chainer.add_rule(
             ModusPonensRule(self.chainer, types.ImplicationLink))
 

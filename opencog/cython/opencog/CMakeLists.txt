@@ -1,7 +1,7 @@
 
 # Need to use -fno-strict-aliasing when compiling cython code, in order
 # to avoid nasty compiler warnings about aliasing.  Cython explicitly
-# performs aliasing, in order to emulate python object  inheritance.
+# performs aliasing, in order to emulate python object inheritance.
 # See, for example, 
 # https://groups.google.com/forum/#!topic/cython-users/JV1-KvIUeIg
 #
@@ -67,6 +67,8 @@ IF (HAVE_ATOMSPACE)
 		atomspace.cpp
 	)
 
+	# XXX FIXME Cython should not static link the atom-types, but
+	# but should instead dynamic-load them, as needed.
 	ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 	ADD_DEPENDENCIES(atomspace_cython nlp_atom_types)
 	ADD_DEPENDENCIES(atomspace_cython attention_atom_types)
