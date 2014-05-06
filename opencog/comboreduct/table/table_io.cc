@@ -883,8 +883,8 @@ istream& istreamTable_ignore_indices(istream& in, Table& tab,
 
 static istream&
 inferTableAttributes(istream& in, const string& target_feature,
-                              const vector<string>& ignore_features,
-                              type_tree& tt, bool& has_header, bool& is_sparse)
+                     const vector<string>& ignore_features,
+                     type_tree& tt, bool& has_header, bool& is_sparse)
 {
     // maxline is the maximum number of lines to read to infer the
     // attributes. A negative number means reading all lines.
