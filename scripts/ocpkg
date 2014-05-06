@@ -733,8 +733,7 @@ cleanup_iso
 
 # SECTION 5: Main Program (MAIN main)
 
-if [ "$SELF_NAME" == "install-dependencies-trusty" ] || [ "$SELF_NAME" == "vagra
-nt-shell" ] ; then
+if [ "$SELF_NAME" == "install-dependencies-trusty" ] ; then
   add_repositories
   install_dependencies
   sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
