@@ -735,6 +735,13 @@ cleanup_iso
 
 # options that run when invoked as $TOOL_NAME 
 
+if [ "$SELF_NAME" == "install-dependencies-trusty" ] ; then
+  sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
+  add_repositories
+  install_dependencies
+  exit 0
+fi
+
 if [ "$SELF_NAME" == "$TOOL_NAME" ] ; then
  if [ $ADD_REPOSITORIES ] ; then add_repositories ; fi 
  if [ $INSTALL_DEPENDENCIES ] ; then install_dependencies ; fi 
