@@ -114,7 +114,8 @@ struct feature_selector_parameters
      * When selecting several feature sets (n_demes > 1) a diversity
      * pressure can be applied before selecting the best feature sets.
      *
-     * The penalized score of a feature set fs_i is
+     * The penalized score of a feature set fs_i is:
+     *
      * q(fs_i) - diversity_pressure * aggregate_{j=0}^{i-1}(mi(fs_i, fs_j))
      *
      * Where the feature sets fs_i are ordered by their penalized
