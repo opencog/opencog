@@ -511,7 +511,7 @@ fi
 # test for and fix Ubuntu 14.04 libiberty-dev includefile bug
 source /etc/lsb-release
 if [ "$DISTRIB_CODENAME" == "trusty" ] ; then 
-  sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
+  sudo sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
 fi
 }
 
