@@ -507,6 +507,7 @@ MESSAGE="Installing OpenCog build dependencies...." ; message
 if ! sudo apt-get $QUIET --no-upgrade --assume-yes install $PACKAGES_BUILD $PACKAGES_RUNTIME $PACKAGES_FETCH; then
   MESSAGE="Please enable 'universe' repositories and re-run this script."  ; message
   exit 1
+  sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
 fi
 }
 
@@ -736,7 +737,6 @@ cleanup_iso
 if [ "$SELF_NAME" == "install-dependencies-trusty" ] ; then
   add_repositories
   install_dependencies
-  sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
   exit 0
 fi
 

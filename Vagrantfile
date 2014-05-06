@@ -39,7 +39,7 @@ Vagrant.configure("2") do |config|
                    "modifyvm", :id,
                    "--memory", "1536",
                    "--name", "opencog-dev-vm",
-                   "--cpus", "2"
+                   "--cpus", "1"
                    ]
   end
 end
