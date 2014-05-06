@@ -507,6 +507,10 @@ MESSAGE="Installing OpenCog build dependencies...." ; message
 if ! sudo apt-get $QUIET --no-upgrade --assume-yes install $PACKAGES_BUILD $PACKAGES_RUNTIME $PACKAGES_FETCH; then
   MESSAGE="Please enable 'universe' repositories and re-run this script."  ; message
   exit 1
+fi
+# test for and fix Ubuntu 14.04 libiberty-dev includefile bug
+source /etc/lsb-release
+if [ "$DISTRIB_CODENAME" == "trusty" ] ; then 
   sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
 fi
 }
