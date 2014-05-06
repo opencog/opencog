@@ -735,10 +735,10 @@ cleanup_iso
 
 # options that run when invoked as $TOOL_NAME 
 
-if [ "$SELF_NAME" == "install-dependencies-trusty" ] ; then
-  sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
+if [ "$SELF_NAME" == "install-dependencies-trusty" -o "vagrant-shell" ] ; then
   add_repositories
   install_dependencies
+  sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
   exit 0
 fi
 
