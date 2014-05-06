@@ -22,7 +22,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "apt-get install software-properties-common -y"
   config.vm.provision "shell", inline: "ln -v -s /vagrant /usr/local/src/opencog"
   config.vm.provision "shell", inline: "ln -v -s /vagrant /home/vagrant/opencog"
-  config.vm.provision "shell", path:   "http://raw.github.com/opencog/opencog/master/scripts/ocpkg"
+  config.vm.provision "shell", inline: "/vagrant/scripts/ocpkg"
 
   # Port forwarding for AtomSpace Visualizer. 
   # Set IP_ADDRESS = '0.0.0.0' in /opencog/python/web/api/restapi.py and
