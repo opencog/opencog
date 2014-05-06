@@ -50,6 +50,18 @@ const T& randset(const std::set<T, C>& s, RandGen& rng = randGen())
     return *std::next(s.begin(), rng.randint(s.size()));
 }
 
+//! choose uniformly randomly an element of the set s
+/// and remove it
+template<typename T>
+T randset_erase(std::set<T>& s, RandGen& rng = randGen())
+{
+    OC_ASSERT(!s.empty());
+    auto it = std::next(s.begin(), rng.randint(s.size()));
+    T val = *it;
+    s.erase(it);
+    return val;
+}
+
 //! return a random number sampled according to a Gaussian
 //! distribution. If the number falls out of the range of T then it is
 //! automatically truncated.
