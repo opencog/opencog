@@ -499,12 +499,13 @@ struct metapopulation : pbscored_combo_tree_ptr_set
     deme_expander _dex;
 
     // Structure holding stats about diversity
-    struct diversity_stats {
-        float count,            // number of pairs of candidates considered
-            mean,               // average bscore distance between all candidates
-            std,                // std dev bscore distance between all candidates
-            min,                // min bscore distance between all candidates
-            max;                // max bscore distance between all candidates
+    struct diversity_stats
+    {
+        double count;    // number of pairs of candidates considered
+        double mean;     // average bscore distance between all candidates
+        double std;      // std dev bscore distance between all candidates
+        double min;      // min bscore distance between all candidates
+        double max;      // max bscore distance between all candidates
     };
 
     /**
