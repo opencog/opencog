@@ -20,7 +20,7 @@ class PLNUnitTester(TestCase):
         self.atomSpaceExpected = AtomSpace()
         self.testFiles = []
 
-        # Below is to get us to the OC (git) root.
+        # Code below is to get us to the OC (git) root based on predictable test launch locations.
 
         if str(os.getcwd()).endswith("/test_pln"):
             self.relativeFolderPrefix = "../../../"
@@ -29,7 +29,7 @@ class PLNUnitTester(TestCase):
         elif str(os.getcwd()).endswith("/build/tests/python"):
             self.relativeFolderPrefix = "../../../"
         else:
-            print "Error determining path, please run from 'build' or 'tests/python/test_pln folder'"
+            print "Error determining path, please run from 'build', 'tests/python/test_pln' or 'build/tests/python' folder."
             print "Current working directory is: " + str(os.getcwd())
 
         self.chainer = Chainer(self.atomSpaceInputs,
@@ -38,12 +38,7 @@ class PLNUnitTester(TestCase):
                                allow_output_with_variables=True,
                                allow_backchaining_with_variables=True)
 
-        print "Adding test file " + self.relativeFolderPrefix + "tests/python/test_pln/scm/specific_rules/DeductionRule_InheritanceLink.scm"
-
-        self.testFiles.append(self.relativeFolderPrefix + "tests/python/test_pln/scm/specific_rules/DeductionRule_InheritanceLink.scm")
-
-        print "Current folder: " + str(os.getcwd()) + "/" +  self.relativeFolderPrefix
-
+        self.addTestFile("tests/python/test_pln/scm/specific_rules/DeductionRule_InheritanceLink.scm")
 
     def tearDown(self):
         del self.atomSpaceFileData
@@ -52,10 +47,17 @@ class PLNUnitTester(TestCase):
         del self.chainer
 
     def test_all(self):
-        print "LOL!"
         for testFile in self.testFiles:
             print "Testing file: " + testFile
             self.run_file(testFile)
+
+    def addTestFile(self, testFile):
+        fullTestFile = self.relativeFolderPrefix + testFile
+
+        if __VERBOSE__:
+            print "Adding test file " + fullTestFile
+
+        self.testFiles.append(fullTestFile)
 
     def reset_atom_spaces(self):
         self.reset_atom_space(self.atomSpaceFileData)
@@ -86,8 +88,6 @@ class PLNUnitTester(TestCase):
             self.transfer_atom(atomspace, atom)
 
     def load_inputs(self):
-        print "atomSpaceInputs: "
-        self.print_atomspace(self.atomSpaceInputs)
         self.fill_atomspace(self.atomSpaceInputs, self.get_predicate_arguments(self.atomSpaceFileData, "inputs"))
 
         if __VERBOSE__:
@@ -137,28 +137,25 @@ class PLNUnitTester(TestCase):
             if __VERBOSE__:
                 print result
 
+    def atomspace_links_to_list(self, atomSpace):
+        result = []
+
+        expectedLinks = atomSpace.get_atoms_by_type(types.Link)
+
+        for link in expectedLinks:
+            atomStringToCheckFor = atomSpace.get_atom_string(link.h)
+            if not "standardize_apart" in atomStringToCheckFor:
+                atomStringToCheckFor = re.sub(r"\[[0-9]+\]", "", atomStringToCheckFor)
+                result.append(atomStringToCheckFor)
+
+        return result
+
     def check_atomspace_contains_atomspace(self, atomSpaceChecklist, atomSpaceToCheck):
         result = True
         error = ""
 
-        expectedList = []
-        actualList = []
-
-        expectedLinks = atomSpaceChecklist.get_atoms_by_type(types.Link)
-
-        for link in expectedLinks:
-            atomStringToCheckFor = atomSpaceChecklist.get_atom_string(link.h)
-            if not "standardize_apart" in atomStringToCheckFor:
-                atomStringToCheckFor = re.sub(r"\[[0-9]+\]", "", atomStringToCheckFor)
-                expectedList.append(atomStringToCheckFor)
-
-        actualLinks = atomSpaceToCheck.get_atoms_by_type(types.Link)
-
-        for link in actualLinks:
-            atomStringToFind = atomSpaceToCheck.get_atom_string(link.h)
-            if not "standardize_apart" in atomStringToFind:
-                atomStringToFind = re.sub(r"\[[0-9]+\]", "", atomStringToFind)
-                actualList.append(atomStringToFind)
+        expectedList = self.atomspace_links_to_list(atomSpaceChecklist)
+        actualList = self.atomspace_links_to_list(atomSpaceToCheck)
 
         for listItem in expectedList:
             if not (listItem in actualList):
@@ -422,7 +419,6 @@ class AllRules(object):
 
 def main():
     pln_unit_tester = PLNUnitTester()
-    print "HAHA"
     pln_unit_tester.test_all()
 
 
