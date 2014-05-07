@@ -534,7 +534,7 @@ void problem_params::options_init()
          "performance.\n")
 
         ("revisit",
-         po::value<unsigned>(&revisit)->default_value(0),
+         po::value<int>(&revisit)->default_value(0),
          "Number of times the same exemplar can be revisited. "
          "This option is only worthwhile when there "
          "is a great deal of stochasticity in the search so that exploring "
