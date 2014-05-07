@@ -61,7 +61,7 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars,
         composite_score csc(cscorer(si_base));
         composite_penalized_bscore cpb(pbs, csc);
         cpbscore_demeID cbs_demeID(cpb, demeID_t());
-        
+
         candidates[si_base] = cbs_demeID;
     }
 
@@ -75,10 +75,11 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars,
     update_best_candidates(mps);
     merge_candidates(mps);
 }
+
 void metapopulation::set_diversity()
 {
     logger().debug("Compute diversity penalties of the metapopulation");
-    
+
     pbscored_combo_tree_ptr_set pool; // new metapopulation
 
     // structure to remember a partially aggredated distorted
@@ -89,7 +90,7 @@ void metapopulation::set_diversity()
     std::vector<bsct_dp_pair> tmp;
     for (psi bsct_it = begin(); bsct_it != end(); ++bsct_it)
         tmp.push_back(bsct_dp_pair(bsct_it, 0.0));
-    
+
     // pointer to the last candidate moved from tmp to pool
     const pbscored_combo_tree* last_ptr(nullptr);
 
@@ -335,10 +336,10 @@ void metapopulation::merge_candidates(pbscored_combo_tree_set& candidates)
             logger().fine(ss.str());
         }
     }
-    
+
     // Serialize access
     std::lock_guard<std::mutex> lock(_merge_mutex);
-    
+
     // Note that merge_nondominated() is very cpu-expensive and
     // complex...
     if (params.diversity.include_dominated) {
@@ -375,7 +376,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         boost::sort(deme, std::greater<scored_instance<composite_score> >());
 
     trim_down_demes(demes);
-    
+
     ///////////////////////////////////////////////////////////////
     // select the set of candidates to add in the metapopulation //
     ///////////////////////////////////////////////////////////////
@@ -392,7 +393,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         // https://bugs.launchpad.net/bugs/933906
         auto select_candidates =
             [&, this](const scored_instance<composite_score>& inst) {
-            
+
             const composite_score& inst_csc = inst.second;
             score_t inst_sc = get_score(inst_csc);
             // if it's really bad stops
@@ -417,7 +418,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
             // locked too.  (to avoid collision with threads updating
             // _visited, e.g. the MPI case.
             bool not_already_visited = !this->has_been_visited(tr);
-            
+
             // update the set of potential exemplars
             if (not_already_visited && thread_safe_tr_not_found()) {
                 penalized_bscore pbs; // empty bscore till
@@ -433,7 +434,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         // It can happen that the true number of evals is less than the
         // deme size (certain cases involving the univariate optimizer)
         // But also, the deme size can be smaller than the number of evals,
-        // if the deme was shrunk to save space. 
+        // if the deme was shrunk to save space.
         unsigned max_pot_cnd = std::min(evals_seq[i], (unsigned)demes[i].size());
         if (params.max_candidates >= 0)
             max_pot_cnd = std::min(max_pot_cnd, (unsigned)params.max_candidates);
@@ -447,7 +448,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         // select_candidates() can be very time consuming; it currently
         // takes anywhere from 25 to 500(!!) millisecs per instance (!!)
         // for me; my (reduced, simplified) instances have complexity
-        // of about 100. This seems too long/slow (circa summer 2012).        
+        // of about 100. This seems too long/slow (circa summer 2012).
         //
         // We first select the top max_pot_cnd from the deme. But some
         // candidates will be redundant so in order to reach the
@@ -469,7 +470,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
             //                "pot_candidates.size() = %u",
             //                i, demes.size(), pot_candidates.size());
 
-            
+
             // select candidates in range = [deme_being, deme_end)
             OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
 
@@ -482,7 +483,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
                 demes[i].end() : deme_begin + delta;
         }
     }
-    
+
     logger().debug("Selected %u candidates to be merged",
                    pot_candidates.size());
 
@@ -555,7 +556,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
 }
 
 void metapopulation::resize_metapop()
-{    
+{
     if (size() <= min_pool_size)
         return;
 
@@ -630,7 +631,7 @@ void metapopulation::resize_metapop()
     if (logger().isDebugEnabled()) {
         logger().debug("Removed %u candidates from the metapopulation",
                        old_size - size());
-        
+
         logger().debug("Metapopulation size is %u", size());
         if (logger().isFineEnabled()) {
             stringstream ss;
@@ -866,7 +867,7 @@ void metapopulation::merge_nondominated(const pbscored_combo_tree_set& bcs, unsi
         bcv_mp.push_back(&cnd);
     pbscored_combo_tree_ptr_vec_pair bcv_p =
         get_nondominated_disjoint_rec(bcv, bcv_mp, jobs);
-    
+
     // remove the dominated ones from the metapopulation
     boost::sort(bcv_mp);
     boost::sort(bcv_p.second);
@@ -880,18 +881,18 @@ void metapopulation::merge_nondominated(const pbscored_combo_tree_set& bcs, unsi
         insert(new pbscored_combo_tree(*cnd));
 }
 
-void metapopulation::trim_down_demes(boost::ptr_vector<deme_t>& demes) const {
-    // Trim the demes down to size.  The point here is that the next
-    // stage, select_candidates below, is very cpu-intensive; we
-    // should keep only those candidates that will survive in the
-    // metapop.  But what are these? Well, select_exemplar() uses
-    // an exponential choice function; instances below a cut-off
-    // score have no chance at all of getting selected. So just
-    // eliminate them now, instead of later.
-    //
-    // However, trimming too much is bad: it can happen that none
-    // of the best-scoring instances lead to a solution. So keep
-    // around a reasonable pool. Wild choice ot 250 seems reasonable.
+/// Trim the demes down to size.  The point here is that the next
+/// stage, select_candidates, is very cpu-intensive; we should keep
+/// only those candidates that will survive in the metapop.  But what
+/// are these?  Well, select_exemplar() uses an exponential choice
+/// function; instances below a cut-off score have no chance at all
+/// of getting selected. So just eliminate them now, instead of later.
+///
+/// However, trimming too much is bad: it can happen that none
+/// of the best-scoring instances lead to a solution. So keep
+/// around a reasonable pool. Wild choice ot 250 seems reasonable.
+void metapopulation::trim_down_demes(boost::ptr_vector<deme_t>& demes) const
+{
     for (deme_t& deme : demes) {
 
         if (logger().isDebugEnabled())
@@ -921,7 +922,6 @@ void metapopulation::trim_down_demes(boost::ptr_vector<deme_t>& demes) const {
             ss << "Deme trimmed down, new size: " << deme.size();
             logger().debug(ss.str());
         }
-        
     }
 }
 
