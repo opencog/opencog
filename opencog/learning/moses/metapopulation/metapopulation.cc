@@ -685,6 +685,142 @@ metapopulation::to_set(const pbscored_combo_tree_ptr_vec& bcv)
     return res;
 }
 
+/// Trim the demes down to size.  The point here is that the next
+/// stage, select_candidates, is very cpu-intensive; we should keep
+/// only those candidates that will survive in the metapop.  But what
+/// are these?  Well, select_exemplar() uses an exponential choice
+/// function; instances below a cut-off score have no chance at all
+/// of getting selected. So just eliminate them now, instead of later.
+///
+/// However, trimming too much is bad: it can happen that none
+/// of the best-scoring instances lead to a solution. So keep
+/// around a reasonable pool. Wild choice ot 250 seems reasonable.
+void metapopulation::trim_down_demes(boost::ptr_vector<deme_t>& demes) const
+{
+    for (deme_t& deme : demes) {
+
+        if (logger().isDebugEnabled())
+        {
+            stringstream ss;
+            ss << "Trim down deme " << deme.getID()
+               << " of size: " << deme.size();
+            logger().debug(ss.str());
+        }
+
+        if (min_pool_size < deme.size()) {
+            score_t top_sc = get_penalized_score(deme.begin()->second);
+            score_t bot_sc = top_sc - useful_score_range();
+
+            for (size_t i = deme.size()-1; 0 < i; --i) {
+                const composite_score &cscore = deme[i].second;
+                score_t score = get_penalized_score(cscore);
+                if (score < bot_sc) {
+                    deme.pop_back();
+                }
+            }
+        }
+
+        if (logger().isDebugEnabled())
+        {
+            stringstream ss;
+            ss << "Deme trimmed down, new size: " << deme.size();
+            logger().debug(ss.str());
+        }
+    }
+}
+
+/// Update the record of the best score seen, and the associated tree.
+/// Safe to call in a multi-threaded context.
+void metapopulation::update_best_candidates(const pbscored_combo_tree_set& candidates)
+{
+    if (candidates.empty())
+        return;
+
+    // Make this routine thread-safe.
+    // XXX this lock probably doesn't have to be the same one
+    // that merge uses.  I think.
+    std::lock_guard<std::mutex> lock(_merge_mutex);
+
+    // Candidates are kept in penalized score order, not in
+    // absolute score order.  Thus, we need to search through
+    // the first few to find the true best score.  Also, there
+    // may be several candidates with the best score.
+    score_t best_sc = get_score(_best_cscore);
+    complexity_t best_cpx = get_complexity(_best_cscore);
+
+    for (const pbscored_combo_tree& cnd : candidates)
+    {
+        const composite_score& csc = get_composite_score(cnd);
+        score_t sc = get_score(csc);
+        complexity_t cpx = get_complexity(csc);
+        if ((sc > best_sc) || ((sc == best_sc) && (cpx <= best_cpx)))
+        {
+            if ((sc > best_sc) || ((sc == best_sc) && (cpx < best_cpx)))
+            {
+                _best_cscore = csc;
+                best_sc = get_score(_best_cscore);
+                best_cpx = get_complexity(_best_cscore);
+                _best_candidates.clear();
+                logger().debug() << "New best score: " << _best_cscore;
+            }
+            _best_candidates.insert(cnd);
+        }
+    }
+}
+
+// log the best candidates
+void metapopulation::log_best_candidates() const
+{
+    if (!logger().isInfoEnabled())
+        return;
+
+    if (best_candidates().empty())
+        logger().info("No new best candidates");
+    else {
+        logger().info()
+           << "The following candidate(s) have the best score "
+           << best_composite_score();
+        for (const auto& cand : best_candidates()) {
+            logger().info() << "" << get_tree(cand);
+        }
+    }
+}
+
+// Like above, but using std::cout.
+void metapopulation::print(long n,
+           bool output_score,
+           bool output_penalty,
+           bool output_bscore,
+           bool output_visited,
+           bool output_only_best)
+{
+    ostream(std::cout, n, output_score, output_penalty,
+            output_bscore, output_visited, output_only_best);
+}
+
+bool metapopulation::has_been_visited(const combo_tree& tr) const
+{
+    return _visited_exemplars.find(tr) != _visited_exemplars.cend();
+}
+
+// ==============================================================
+// Gene domination code
+// I beleive that the dominated-merge, dominated remove code
+// is no longer used anywhere (as of 2012). This is for several
+// reasons: 
+// -- Computing the bscores needed for domination is slowww.
+// -- Removing dominated demes destroys a lot of diversity in the
+//    metapopulation, causing learning to stagnate.  There's an 
+//    entire diary entry exploring and explaining this phenomenon.
+//    In short: from standard evolutionary theory, specialization
+//    can only arise out of damage. Eliminating the weak, damaged
+//    genes prevents them from being able to discover optimal 
+//    solutions.  if only the strong survive, they get trapped in a
+//    local maximum, and can never jump out.
+//
+// We're going to keep this code around for a while, there are some
+// useful-seeming subalgorithms in it ...
+//
 void metapopulation::remove_dominated(pbscored_combo_tree_set& bcs, unsigned jobs)
 {
     // get the nondominated candidates
@@ -879,124 +1015,6 @@ void metapopulation::merge_nondominated(const pbscored_combo_tree_set& bcs, unsi
     // add the nondominated ones from bsc
     for (const pbscored_combo_tree* cnd : bcv_p.first)
         insert(new pbscored_combo_tree(*cnd));
-}
-
-/// Trim the demes down to size.  The point here is that the next
-/// stage, select_candidates, is very cpu-intensive; we should keep
-/// only those candidates that will survive in the metapop.  But what
-/// are these?  Well, select_exemplar() uses an exponential choice
-/// function; instances below a cut-off score have no chance at all
-/// of getting selected. So just eliminate them now, instead of later.
-///
-/// However, trimming too much is bad: it can happen that none
-/// of the best-scoring instances lead to a solution. So keep
-/// around a reasonable pool. Wild choice ot 250 seems reasonable.
-void metapopulation::trim_down_demes(boost::ptr_vector<deme_t>& demes) const
-{
-    for (deme_t& deme : demes) {
-
-        if (logger().isDebugEnabled())
-        {
-            stringstream ss;
-            ss << "Trim down deme " << deme.getID()
-               << " of size: " << deme.size();
-            logger().debug(ss.str());
-        }
-
-        if (min_pool_size < deme.size()) {
-            score_t top_sc = get_penalized_score(deme.begin()->second);
-            score_t bot_sc = top_sc - useful_score_range();
-
-            for (size_t i = deme.size()-1; 0 < i; --i) {
-                const composite_score &cscore = deme[i].second;
-                score_t score = get_penalized_score(cscore);
-                if (score < bot_sc) {
-                    deme.pop_back();
-                }
-            }
-        }
-
-        if (logger().isDebugEnabled())
-        {
-            stringstream ss;
-            ss << "Deme trimmed down, new size: " << deme.size();
-            logger().debug(ss.str());
-        }
-    }
-}
-
-/// Update the record of the best score seen, and the associated tree.
-/// Safe to call in a multi-threaded context.
-void metapopulation::update_best_candidates(const pbscored_combo_tree_set& candidates)
-{
-    if (candidates.empty())
-        return;
-
-    // Make this routine thread-safe.
-    // XXX this lock probably doesn't have to be the same one
-    // that merge uses.  I think.
-    std::lock_guard<std::mutex> lock(_merge_mutex);
-
-    // Candidates are kept in penalized score order, not in
-    // absolute score order.  Thus, we need to search through
-    // the first few to find the true best score.  Also, there
-    // may be several candidates with the best score.
-    score_t best_sc = get_score(_best_cscore);
-    complexity_t best_cpx = get_complexity(_best_cscore);
-
-    for (const pbscored_combo_tree& cnd : candidates)
-    {
-        const composite_score& csc = get_composite_score(cnd);
-        score_t sc = get_score(csc);
-        complexity_t cpx = get_complexity(csc);
-        if ((sc > best_sc) || ((sc == best_sc) && (cpx <= best_cpx)))
-        {
-            if ((sc > best_sc) || ((sc == best_sc) && (cpx < best_cpx)))
-            {
-                _best_cscore = csc;
-                best_sc = get_score(_best_cscore);
-                best_cpx = get_complexity(_best_cscore);
-                _best_candidates.clear();
-                logger().debug() << "New best score: " << _best_cscore;
-            }
-            _best_candidates.insert(cnd);
-        }
-    }
-}
-
-// log the best candidates
-void metapopulation::log_best_candidates() const
-{
-    if (!logger().isInfoEnabled())
-        return;
-
-    if (best_candidates().empty())
-        logger().info("No new best candidates");
-    else {
-        logger().info()
-           << "The following candidate(s) have the best score "
-           << best_composite_score();
-        for (const auto& cand : best_candidates()) {
-            logger().info() << "" << get_tree(cand);
-        }
-    }
-}
-
-// Like above, but using std::cout.
-void metapopulation::print(long n,
-           bool output_score,
-           bool output_penalty,
-           bool output_bscore,
-           bool output_visited,
-           bool output_only_best)
-{
-    ostream(std::cout, n, output_score, output_penalty,
-            output_bscore, output_visited, output_only_best);
-}
-
-bool metapopulation::has_been_visited(const combo_tree& tr) const
-{
-    return _visited_exemplars.find(tr) != _visited_exemplars.cend();
 }
 
 } // ~namespace moses
