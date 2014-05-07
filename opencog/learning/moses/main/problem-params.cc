@@ -430,7 +430,7 @@ void problem_params::options_init()
         ("hc-crossover-min-neighbors",
          po::value<unsigned>(&hc_crossover_min_neighbors)->default_value(400),
          "It also allows to control when crossover occurs instead of "         
-         " exhaustive search. If the neighborhood to explore has more than "
+         "exhaustive search. If the neighborhood to explore has more than "
          "the given number (and at least 2 iterations has passed) then "
          "crossover kicks in.\n")
 
