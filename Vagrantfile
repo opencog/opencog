@@ -2,25 +2,27 @@
 # # vi: set ft=ruby :
 
 # QuickStart
-# 1. vagrant box add precise64 http://files.vagrantup.com/precise64.box
-# 2. vagrant up
-# 3. vagrant ssh
+# 1. vagrant up
+# 2. vagrant ssh
 # Optional
-# 1. Change Ubuntu archive mirror
-# 2. Change memory and cpus values
-# 3. Use provider vagrant-lxc on Linux
-# More: http://wiki.opencog.org/w/Setup_OpenCog_development_environment_VM_using_Vagrant
-# More: http://wiki.opencog.org/w/Building_OpenCog
+# 1. Change Ubuntu archive mirror to a local mirror
+# 2. Change vb.customize memory and cpus values
+# 3. On Linux hosts, use provider vagrant-lxc
+# More
+# http://wiki.opencog.org/w/Setup_OpenCog_development_environment_VM_using_Vagrant
+# http://wiki.opencog.org/w/Building_OpenCog
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "precise64"
+  config.vm.box = "trusty64"
+  config.vm.box_url = "http://files.vagrantup.com/trusty64.box"
+  config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
   config.vm.hostname = "cogbox"
-  config.vm.provision "shell", inline: "sed -i 's/us.archive.ubuntu.com/hk.archive.ubuntu.com/g' /etc/apt/sources.list"
+  config.vm.provision "shell", inline: "sed -i 's:/archive.ubuntu.com:/hk.archive.ubuntu.com:g' /etc/apt/sources.list"
   config.vm.provision "shell", inline: "apt-get update -y"
-  config.vm.provision "shell", inline: "apt-get install python-software-properties -y"
+  config.vm.provision "shell", inline: "apt-get install software-properties-common -y"
   config.vm.provision "shell", inline: "ln -v -s /vagrant /usr/local/src/opencog"
   config.vm.provision "shell", inline: "ln -v -s /vagrant /home/vagrant/opencog"
-  config.vm.provision "shell", path:   "http://raw.github.com/opencog/ocpkg/master/ocpkg"
+  config.vm.provision "shell", inline: "/vagrant/scripts/install-dependencies-trusty"
 
   # Port forwarding for AtomSpace Visualizer. 
   # Set IP_ADDRESS = '0.0.0.0' in /opencog/python/web/api/restapi.py and
@@ -37,7 +39,7 @@ Vagrant.configure("2") do |config|
                    "modifyvm", :id,
                    "--memory", "1536",
                    "--name", "opencog-dev-vm",
-                   "--cpus", "2"
+                   "--cpus", "1"
                    ]
   end
 end

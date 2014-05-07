@@ -508,6 +508,11 @@ if ! sudo apt-get $QUIET --no-upgrade --assume-yes install $PACKAGES_BUILD $PACK
   MESSAGE="Please enable 'universe' repositories and re-run this script."  ; message
   exit 1
 fi
+# test for and fix Ubuntu 14.04 libiberty-dev includefile bug
+source /etc/lsb-release
+if [ "$DISTRIB_CODENAME" == "trusty" ] ; then 
+  sudo sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
+fi
 }
 
 update_opencog_source() { 
@@ -733,7 +738,11 @@ cleanup_iso
 
 # SECTION 5: Main Program (MAIN main)
 
-# options that run when invoked as $TOOL_NAME 
+if [ "$SELF_NAME" == "install-dependencies-trusty" ] ; then
+  add_repositories
+  install_dependencies
+  exit 0
+fi
 
 if [ "$SELF_NAME" == "$TOOL_NAME" ] ; then
  if [ $ADD_REPOSITORIES ] ; then add_repositories ; fi 
