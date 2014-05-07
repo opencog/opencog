@@ -81,7 +81,6 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         };
     } else {
         OC_ASSERT(false, "Precision scorer, unsupported output type");
-        return;
     }
 
     logger().fine("Precision scorer, penalty = %f, "
