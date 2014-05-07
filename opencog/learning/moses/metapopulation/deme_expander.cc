@@ -105,7 +105,7 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
     } else
         demeIDs.emplace_back(n_expansions + 1);
 
-    // [HIGHLY EXPERIMENTAL]. Limit the number of features used to
+    // Limit the number of features used to
     // build the exemplar to a more manageable number.  Basically,
     // this is 'on-the-fly' feature selection.  This differs from an
     // ordinary, one-time only, up-front round of feature selection by
