@@ -192,9 +192,10 @@ void problem_params::options_init()
                     " the remote machines.\n")
              % jobs_opt.second % job_seperator).c_str())
 
-        ("min-pool", po::value<unsigned>(&min_pool)->default_value(50),
+        ("min-pool",
+         po::value<unsigned>(&min_pool)->default_value(50),
          "Minimum number of elements to process in the pool to enable "
-         " multi-threading.\n")
+         "multi-threading.\n")
 
         (opt_desc_str(exemplars_str_opt).c_str(),
          po::value<vector<string>>(&exemplars_str),
@@ -359,7 +360,8 @@ void problem_params::options_init()
          "the ratio of change in complexity to score improvement (as "
          "determined by earlier runs).\n")
 
-        ("cap-coef", po::value<double>(&cap_coef)->default_value(50.0),
+        ("cap-coef",
+         po::value<double>(&cap_coef)->default_value(50.0),
          "Set the leading coefficient of the formula defining the "
          "metapop size cap = cap_coef*(x+250)*(1+2*exp(-x/500)), "
          "where x is the number of generations so far. The default usually works "
@@ -531,7 +533,8 @@ void problem_params::options_init()
          "convergence.  In practice, not so much; it can hurt "
          "performance.\n")
 
-        ("revisit", po::value<unsigned>(&revisit)->default_value(0),
+        ("revisit",
+         po::value<unsigned>(&revisit)->default_value(0),
          "Number of times the same exemplar can be revisited. "
          "This option is only worthwhile when there "
          "is a great deal of stochasticity in the search so that exploring "
@@ -870,7 +873,7 @@ void problem_params::options_init()
          "will be selected. \n"
          "For the -ainc algo only, the -C flag over-rides this setting.\n")
 
-        // ======= Feature-selection diveristy pressure =======
+        // ======= Feature-selection diversity pressure =======
         ("fs-diversity-pressure",
          po::value<double>(&festor_params.diversity_pressure)->default_value(0),
          "Multiplicative coefficient of the diversity penalty "

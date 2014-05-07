@@ -74,7 +74,7 @@ void table_problem_base::common_setup(problem_params& pms)
             subsampleTable(table, pms.nsamples);
         // Compressed table
         ctables.push_back(table.compressed(pms.weighting_feature));
-        // The compressed table removess the weighting feature, too.
+        // The compressed table removes the weighting feature, too.
         if (not pms.weighting_feature.empty())
             table.itable.delete_column(pms.weighting_feature);
         tables.push_back(table);
@@ -289,7 +289,7 @@ void pre_table_problem::run(problem_params& pms)
     if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
         // XXX FIXME should use the concatenation of all ctables, not just first
         pms.meta_params.fstor = new feature_selector(ctables.front(),
-                                                 pms.festor_params);
+                                                     pms.festor_params);
     }
 
     multibscore_based_bscore bscore(bscores);
