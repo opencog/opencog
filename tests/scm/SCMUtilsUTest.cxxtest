@@ -89,18 +89,8 @@ void SCMUtilsUTest::setUp(void)
 		"opencog/scm/utilities.scm, "
 		"tests/scm/utils-test.scm");
 
-	// Blindly search a bunch of paths hoping to find the files
-	// in one of them ...
-	const char * paths[] =
-	{
-		"./",
-		"../",
-		"../../",
-		"../../../",
-		NULL
-	};
-	cogserver().loadModules(paths);
-	cogserver().loadSCMModules(paths);
+	cogserver().loadModules();
+	cogserver().loadSCMModules();
 
 }
 
