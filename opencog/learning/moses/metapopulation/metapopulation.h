@@ -30,13 +30,6 @@
 
 #include <boost/unordered_set.hpp>
 #include <boost/logic/tribool.hpp>
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/count.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-#include <boost/accumulators/statistics/min.hpp>
-#include <boost/accumulators/statistics/max.hpp>
 
 #include <opencog/comboreduct/combo/combo.h>
 #include <opencog/comboreduct/reduct/reduct.h>
@@ -512,46 +505,7 @@ struct metapopulation : pbscored_combo_tree_ptr_set
      * Gather statistics about the diversity of the n best candidates
      * (if n is negative then all candidates are included)
      */
-    diversity_stats gather_diversity_stats(int n) {
-        if (n < 0)
-            return _cached_dst.gather_stats();
-        else {
-            using namespace boost::accumulators;
-            typedef accumulator_set<float, stats<tag::count,
-                                     tag::mean,
-                                     tag::variance,
-                                     tag::min,
-                                     tag::max>> accumulator_t;
-
-            // compute the statistics
-            accumulator_t acc;
-            auto from_i = cbegin(),
-                to = std::next(cbegin(), std::min(n, (int)size()));
-            for (; from_i != to; ++from_i) {
-                for (auto from_j = cbegin(); from_j != from_i; ++from_j) {
-#ifdef ENABLE_DST_CACHE
-                    cached_dst::ptr_pair cts = {&*from_j, &*from_i};
-                    auto it = _cached_dst.cache.find(cts);
-                    OC_ASSERT(it != _cached_dst.cache.cend(),
-                              "Candidate isn't in the cache that must be a bug");
-                    acc(it->second);
-#else
-                    acc(_cached_dst(&*from_j, &*from_i));
-#endif
-                }
-            }
-
-            // gather stats
-            diversity_stats ds;
-            ds.count = boost::accumulators::count(acc);
-            ds.mean = boost::accumulators::mean(acc);
-            ds.std = sqrt(boost::accumulators::variance(acc));
-            ds.min = boost::accumulators::min(acc);
-            ds.max = boost::accumulators::max(acc);
-
-            return ds;
-        }
-    }
+    diversity_stats gather_diversity_stats(int n);
 
 protected:
     static const unsigned min_pool_size = 250;
