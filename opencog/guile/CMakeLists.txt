@@ -2,6 +2,11 @@ INCLUDE_DIRECTORIES(
 	${GUILE_INCLUDE_DIR}
 )
 
+# The below are used to automatically find module load paths
+ADD_DEFINITIONS(
+	-DCMAKE_INSTALL_PREFIX="\\"${CMAKE_INSTALL_PREFIX}\\""
+)
+
 ADD_LIBRARY (smob SHARED
 	SchemeEval.cc
 	SchemeExec.cc
