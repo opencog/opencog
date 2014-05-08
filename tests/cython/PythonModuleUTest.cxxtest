@@ -82,17 +82,7 @@ public:
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
 
         config().set("MODULES", "opencog/cython/libPythonModule.so");
-        // Blindly search a bunch of paths hoping to find the python
-        // module in one of them ...
-        const char * paths[] =
-        {
-           "./",
-           "../",
-           "../../",
-           "../../../",
-           NULL
-        };
-        cogserver.loadModules(paths);
+        cogserver.loadModules();
     }
 
     ~PythonModuleUTest() {
