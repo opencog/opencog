@@ -27,20 +27,14 @@
 
 #include <atomic>
 #include <mutex>
+#include <unordered_map>
+#include <unordered_set>
 
-#include <boost/unordered_set.hpp>
 #include <boost/logic/tribool.hpp>
 
-#include <opencog/comboreduct/combo/combo.h>
-#include <opencog/comboreduct/reduct/reduct.h>
-
-#include "../representation/instance_set.h"
-#include "../representation/representation.h"
 #include "../optimization/optimization.h"
-#include "../scoring/scoring.h"
-#include "../moses/types.h"
+#include "metapop_params.h"
 #include "deme_expander.h"
-#include "feature_selector.h"
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 
@@ -50,12 +44,6 @@
 
 namespace opencog {
 namespace moses {
-
-using std::pair;
-using std::make_pair;
-using boost::logic::tribool;
-using boost::logic::indeterminate;
-using namespace combo;
 
 void print_stats_header (optim_stats *os, bool diversity_enabled);
 
@@ -80,10 +68,10 @@ struct metapopulation : pbscored_combo_tree_ptr_set
 
     // The goal of using unordered_set here is to have O(1) access time
     // to see if a combo tree is in the set, or not.
-    typedef boost::unordered_set<combo_tree,
-                                 boost::hash<combo_tree> > combo_tree_hash_set;
-    typedef boost::unordered_map<combo_tree, unsigned,
-                                 boost::hash<combo_tree> > combo_tree_hash_counter;
+    typedef std::unordered_set<combo_tree,
+                               boost::hash<combo_tree> > combo_tree_hash_set;
+    typedef std::unordered_map<combo_tree, unsigned,
+                               boost::hash<combo_tree> > combo_tree_hash_counter;
 
     // Init the metapopulation with the following set of exemplars.
     void init(const std::vector<combo_tree>& exemplars,
@@ -369,30 +357,30 @@ struct metapopulation : pbscored_combo_tree_ptr_set
      *                       false if y dominates x
      *                       indeterminate otherwise
      */
-    static inline tribool dominates(const behavioral_score& x,
+    static inline boost::logic::tribool dominates(const behavioral_score& x,
                                     const behavioral_score& y)
     {
         // everything dominates an empty vector
         if (x.empty()) {
             if (y.empty())
-                return indeterminate;
+                return boost::logic::indeterminate;
             return false;
         } else if (y.empty()) {
             return true;
         }
 
-        tribool res = indeterminate;
+        boost::logic::tribool res = boost::logic::indeterminate;
         for (behavioral_score::const_iterator xit = x.begin(), yit = y.begin();
              xit != x.end(); ++xit, ++yit)
         {
             if (*xit > *yit) {
                 if (!res)
-                    return indeterminate;
+                    return boost::logic::indeterminate;
                 else
                     res = true;
             } else if (*yit > *xit) {
                 if (res)
-                    return indeterminate;
+                    return boost::logic::indeterminate;
                 else
                     res = false;
             }
@@ -568,15 +556,11 @@ protected:
         diversity_stats gather_stats() const;
 
         // cache
-        typedef boost::shared_mutex cache_mutex;
-        typedef boost::shared_lock<cache_mutex> shared_lock;
-        typedef boost::unique_lock<cache_mutex> unique_lock;
-        typedef boost::unordered_map<ptr_pair, dp_t, boost::hash<ptr_pair>> Cache;
-        cache_mutex mutex;
+        boost::shared_mutex mutex;
 
         const diversity_parameters& dparams;
         std::atomic<unsigned> misses, hits;
-        Cache cache;
+        std::unordered_map<ptr_pair, dp_t, std::hash<ptr_pair>> cache;
     };
 
     cached_dst _cached_dst;

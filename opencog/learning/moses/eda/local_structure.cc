@@ -21,12 +21,16 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "local_structure.h"
+
+#include <boost/iterator/indirect_iterator.hpp>
+
 #include <opencog/util/numeric.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/selection.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
+
+#include "local_structure.h"
 
 namespace opencog {
 namespace moses {
@@ -35,11 +39,11 @@ namespace moses {
 // instances [l, u)
 bool local_structure_model::is_uniform_on(iptr_iter l, iptr_iter u, int idx) const
 {
-    return (adjacent_find(make_indirect_iterator(l), make_indirect_iterator(u),
+    return (adjacent_find(boost::make_indirect_iterator(l), boost::make_indirect_iterator(u),
                           bind(std::not_equal_to<disc_t>(),
                                bind(&field_set::get_raw, &_fields, _1, idx),
                                bind(&field_set::get_raw, &_fields, _2, idx))) ==
-            make_indirect_iterator(u));
+            boost::make_indirect_iterator(u));
 }
 
 void local_structure_model::rec_split_term(iptr_iter l, iptr_iter u,

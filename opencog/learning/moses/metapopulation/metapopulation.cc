@@ -816,7 +816,8 @@ bool metapopulation::has_been_visited(const combo_tree& tr) const
  * Gather statistics about the diversity of the n best candidates
  * (if n is negative then all candidates are included)
  */
-diversity_stats metapopulation::gather_diversity_stats(int n)
+metapopulation::diversity_stats
+metapopulation::gather_diversity_stats(int n)
 {
     if (n < 0)
         return _cached_dst.gather_stats();
@@ -859,8 +860,9 @@ diversity_stats metapopulation::gather_diversity_stats(int n)
     }
 }
 
-dp_t metapopulation::cached_dst::operator()(const pbscored_combo_tree* cl,
-                                            const pbscored_combo_tree* cr)
+diversity_parameters::dp_t
+metapopulation::cached_dst::operator()(const pbscored_combo_tree* cl,
+                                       const pbscored_combo_tree* cr)
 {
 #ifdef ENABLE_DST_CACHE
     ptr_pair cts = {cl, cr};
@@ -909,7 +911,8 @@ void metapopulation::cached_dst::erase_ptr_seq(std::vector<pbscored_combo_tree*>
  * Gather some statistics about the diversity of the
  * population, such as mean, std, min, max of the distances.
  */
-diversity_stats metapopulation::cached_dst::gather_stats() const
+metapopulation::diversity_stats
+metapopulation::cached_dst::gather_stats() const
 {
     namespace ba = boost::accumulators;
     typedef ba::accumulator_set<double,

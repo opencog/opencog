@@ -26,7 +26,6 @@
 #define _COMBO_EVAL_H
 
 #include <exception>
-#include <boost/unordered_map.hpp>
 
 #include <opencog/util/tree.h>
 #include <opencog/util/numeric.h>
