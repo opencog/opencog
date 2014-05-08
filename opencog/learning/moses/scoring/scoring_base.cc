@@ -95,7 +95,7 @@ score_t multibscore_based_bscore::min_improv() const
     // boost::min_element(_bscorers | boost::transformed(/*)
     score_t res = very_best_score;
     for (const bscore_base& bs : _bscorers)
-        res = min(res, bs.min_improv());
+        res = std::min(res, bs.min_improv());
     return res;
 }
 

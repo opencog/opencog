@@ -32,17 +32,11 @@
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/lazy_random_selector.h>
 
-#include "using.h"
 #include "../eda/initialization.h"
 #include "../representation/instance_set.h"
 #include "../moses/types.h"
 
 namespace opencog { namespace moses {
-
-using boost::math::binomial_coefficient;
-using boost::numeric_cast;
-using boost::numeric::positive_overflow;
-using std::numeric_limits;
 
 /**
  * This procedure generates the initial deme randomly
@@ -586,11 +580,11 @@ inline size_t
 safe_binomial_coefficient(unsigned k, unsigned n)
 {
     size_t res;
-    double noi_db = binomial_coefficient<double>(k, n);
+    double noi_db = boost::math::binomial_coefficient<double>(k, n);
     try {
-        res = numeric_cast<size_t>(noi_db);
-    } catch (positive_overflow&) {
-        res = numeric_limits<size_t>::max();
+        res = boost::numeric_cast<size_t>(noi_db);
+    } catch (boost::numeric::positive_overflow&) {
+        res = std::numeric_limits<size_t>::max();
     }
     return res;
 }
@@ -657,7 +651,7 @@ count_neighborhood_size_from_index(const field_set& fs,
 
         // Calculate number_of_instances for each possible distance i
         // of the current contin.
-        for (int i = 0; i <= min((int)dist, depth); ++i) {
+        for (int i = 0; i <= std::min((int)dist, depth); ++i) {
 
             // Number of instances for this contin, at distance i.
             unsigned cni = 0;
@@ -665,16 +659,16 @@ count_neighborhood_size_from_index(const field_set& fs,
             // Count combinations when Left or Right are switched and
             // added after Stop, where j represents the number of
             // Left or Right added after Stop.
-            for (int j = max(0, i-length); j <= min(i, depth-length); ++j)
-                cni += (unsigned) binomial_coefficient<double>(length, i-j)
+            for (int j = std::max(0, i-length); j <= std::min(i, depth-length); ++j)
+                cni += (unsigned) boost::math::binomial_coefficient<double>(length, i-j)
                     * pow2(j);
 
             // Count combinations when Left or Right are switched and
             // removed before Stop, where j represents the number of
             // removed Left or Right before Stop.
             if (i <= length)
-                for (int j = 1; j <= min(i, length); ++j)
-                    cni += (unsigned) binomial_coefficient<double>(length-j, i-j);
+                for (int j = 1; j <= std::min(i, length); ++j)
+                    cni += (unsigned) boost::math::binomial_coefficient<double>(length-j, i-j);
 
             // Recursive call.
             number_of_instances +=

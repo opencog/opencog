@@ -156,7 +156,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
 
         if (xover) {
             // log why crossover is enabled
-            stringstream why_xover;
+            std::stringstream why_xover;
             if (large_nbh)
                 why_xover << "too large neighborhood "
                           << total_number_of_neighbors << ">="
@@ -175,7 +175,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
             already_xover = true;
         } else {
             // log why crossover is disabled
-            stringstream whynot_xover;
+            std::stringstream whynot_xover;
             if (!hc_params.crossover)
                 whynot_xover << "user option";
             else if (iteration <= 2)
@@ -211,7 +211,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
 
         // log neighborhood distance
         if (logger().isDebugEnabled()) {
-            stringstream nbh_dst;
+            std::stringstream nbh_dst;
             nbh_dst << "Evaluate " << number_of_new_instances << " neighbors";
             if (number_of_new_instances > 0) {
                 if (xover) {
@@ -567,7 +567,7 @@ size_t hill_climbing::n_new_instances(size_t distance, unsigned max_evals,
             // Cap ram usage at the lesser of the desired usage,
             // or the actual available space.
             uint64_t free_ram = getFreeRAM();
-            uint64_t cap = min(ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes, 
+            uint64_t cap = std::min(ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes, 
                                MAX_RAM_LIMIT * free_ram);
             number_of_new_instances = cap / _instance_bytes;
             logger().debug("Cap new instances. "

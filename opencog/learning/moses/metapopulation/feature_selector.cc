@@ -66,7 +66,7 @@ void feature_selector::preprocess_params(const combo::combo_tree& xmplr)
     const auto& ilabels = _ctable.get_input_labels();
 
     // names of the exemplar features
-    vector<string> xmplr_feature_names;
+    std::vector<std::string> xmplr_feature_names;
     for (arity_t i : xmplr_features)
         xmplr_feature_names.push_back(ilabels[i]);
 
@@ -97,7 +97,7 @@ void feature_selector::preprocess_params(const combo::combo_tree& xmplr)
     // Alternatively to params.increase_target_size, one can ignore
     // the features in the exemplar during feature selection.
     params.ignored_features = params.ignore_xmplr_features ?
-        xmplr_features : set<arity_t>();
+        xmplr_features : std::set<arity_t>();
 
     // Or one can use the output of the exemplar as an initial feature
     if (params.xmplr_as_feature) {
@@ -198,7 +198,7 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const
 
     if (logger().isFineEnabled()) {
         logger().fine("fs_ctable:");
-        stringstream ss;
+        std::stringstream ss;
         ostreamCTable(ss, fs_ctable);
         logger().fine() << ss.str();
     }

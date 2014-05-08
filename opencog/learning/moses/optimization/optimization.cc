@@ -56,7 +56,7 @@ information_theoretic_bits(const field_set& fs)
     return res;
 }
 
-optim_parameters::optim_parameters(const string& _opt_algo,
+optim_parameters::optim_parameters(const std::string& _opt_algo,
                  double _pop_size_ratio,
                  score_t _terminate_if_gte,
                  size_t _max_dist,
@@ -94,7 +94,7 @@ unsigned optim_parameters::max_gens_improv(const field_set& fs) const
 // min(windowsize_pop*N,windowsize_len*n)
 unsigned optim_parameters::rtr_window_size(const field_set& fs) const
 {
-    return ceil(min(window_size_pop*pop_size(fs),
+    return std::ceil(std::min(window_size_pop*pop_size(fs),
                     window_size_len*information_theoretic_bits(fs)));
 }
 

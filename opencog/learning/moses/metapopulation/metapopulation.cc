@@ -45,6 +45,7 @@
 namespace opencog {
 namespace moses {
 
+using namespace std;
 using std::pair;
 using std::make_pair;
 using boost::logic::tribool;

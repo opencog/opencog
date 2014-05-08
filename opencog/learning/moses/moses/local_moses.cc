@@ -140,7 +140,7 @@ void local_moses(metapopulation& mp,
         // (columns of tab-seprated numbers)
         if (logger().isInfoEnabled()) {
 
-            stringstream ss;
+            std::stringstream ss;
             ss << "Stats: " << stats.n_expansions
                << "\t" << stats.n_evals    // number of evaluations so far
                << "\t" << ((int) stats.elapsed_secs)  // wall-clock time.
@@ -176,7 +176,7 @@ void local_moses(metapopulation& mp,
         // I find this particularly useful for studying diversity but
         // it could be relaxed and printed whatever
         if (logger().isDebugEnabled() and mp.params.diversity.pressure > 0.0) {
-            stringstream ss;
+            std::stringstream ss;
             ss << pa.max_cnd_output << " best candidates of the metapopulation (with scores and visited status):" << std::endl;
             mp.ostream(ss, pa.max_cnd_output, true, true, true, true);
             logger().debug(ss.str());

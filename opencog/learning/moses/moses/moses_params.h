@@ -32,7 +32,7 @@ namespace opencog {
 namespace moses {
 
 /// A map between hostname and number of jobs allocated.
-typedef std::map<string, unsigned> jobs_t;
+typedef std::map<std::string, unsigned> jobs_t;
 
 /**
  * parameters to decide how to run moses

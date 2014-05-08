@@ -72,7 +72,7 @@ void diversity_parameters::set_dst2dp(diversity_parameters::dst2dp_enum_t d2de)
         dst2dp = [&](dp_t dst) { return pow(dst, pressure); };
         break;
     default: {
-        stringstream ss;
+        std::stringstream ss;
         ss << "diversity_parameters::set_dst2dp error: no case for " << d2de;
         OC_ASSERT(false, ss.str());
     }

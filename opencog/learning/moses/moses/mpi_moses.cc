@@ -105,9 +105,9 @@ void moses_mpi_comm::send_finished(int target)
 /// Send a combo tree to the target node 
 void moses_mpi_comm::send_tree(const combo_tree &tr, int target)
 {
-    stringstream ss;
+    std::stringstream ss;
     ss << tr;
-    const string& xtree = ss.str();
+    const std::string& xtree = ss.str();
     const char * stree = xtree.c_str();
     int stree_sz = xtree.size();
     MPI::COMM_WORLD.Send(&stree_sz, 1, MPI::INT, target, MSG_COMBO_TREE_LEN);
@@ -125,7 +125,7 @@ void moses_mpi_comm::recv_tree(combo_tree &tr, int source)
     char stree[stree_sz+1];
     MPI::COMM_WORLD.Recv(stree, stree_sz, MPI::CHAR, source, MSG_COMBO_TREE);
     stree[stree_sz] = 0;
-    stringstream ss;
+    std::stringstream ss;
     ss << stree;
     ss >> tr;
 
@@ -329,7 +329,7 @@ void mpi_moses_worker(metapopulation& mp,
             gettimeofday(&stop, NULL);
             timersub(&stop, &start, &elapsed);
 
-            stringstream ss;
+            std::stringstream ss;
             ss << "Unit: " << cnt <<"\t" 
                << elapsed.tv_sec << "\t"
                << wait_time << "\t"
@@ -490,7 +490,7 @@ cout<<"duuude master "<<getpid() <<" from="<<worker.rank << " got evals="<<n_eva
             timersub(&stop, &start, &elapsed);
             start = stop;
 
-            stringstream ss;
+            std::stringstream ss;
             ss << "Stats: " << stats.n_expansions;
             ss << "\t" << stats.n_evals;    // number of evaluations so far
             ss << "\t" << elapsed.tv_sec;   // wall-clock time.
@@ -643,7 +643,7 @@ void mpi_moses(metapopulation& mp,
         // updated and collected atomically... other threads may be
         // merging and updating as this print happens. Yuck. Oh well.
         if (logger().isInfoEnabled()) {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Stats: " << stats.n_expansions;
             ss << "\t" << stats.n_evals;    // number of evaluations so far
             ss << "\t" << mp.size();       // size of the metapopulation
@@ -672,7 +672,7 @@ void mpi_moses(metapopulation& mp,
         sleep(1);
     }
 
-    stringstream ss;
+    std::stringstream ss;
     ss << "Final stats:\n";
     ss << "Stats: " << stats.n_expansions;
     ss << "\t" << stats.n_evals;    // number of evaluations so far

@@ -33,7 +33,6 @@
 
 #include "field_set.h"
 #include "representation.h"
-#include "../moses/using.h"
 
 namespace opencog { namespace moses {
 

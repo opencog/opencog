@@ -27,19 +27,20 @@
 #include <bitset>
 #include <string>
 
-#include <opencog/util/tree.h>
+#include <opencog/util/based_variant.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/numeric.h>
-#include <opencog/util/based_variant.h>
+#include <opencog/util/tree.h>
 
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/combo/iostream_combo.h>
 
-#include "../moses/using.h"
 #include "../moses/complexity.h"
 #include "field_set.h"
 
 namespace opencog { namespace moses {
+
+using namespace combo;
 
 // A knob represents a single dimension of variation relative to an exemplar
 // program tree. This may be discrete or continuous. In the discrete case, the

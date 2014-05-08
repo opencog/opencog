@@ -36,7 +36,7 @@
 namespace opencog { namespace moses {
 
 // both sender and receiver must use exactly this string for n_evals.
-static const string number_of_evals_str = "n_evals";
+static const std::string number_of_evals_str = "n_evals";
 
 // get the pid of the main instance of moses (the one launching the
 // others). This is useful to have more uniqueness in the log names of
@@ -48,19 +48,19 @@ pid_t get_parent_pid();
 // 2) the process output temporary file name (string)
 // 3) its corresponding FILE (FILE*)
 // 4) and the number of jobs it is running (unsigned)
-typedef boost::tuple<string, string, FILE*, unsigned> proc_info;
+typedef boost::tuple<std::string, std::string, FILE*, unsigned> proc_info;
 typedef std::map<int, proc_info> proc_map;
 // proc_map's access functions
 int get_pid(const proc_map::value_type& pmv);
-string get_cmd(const proc_map::value_type& pmv);
-string get_tmp(const proc_map::value_type& pmv);
+std::string get_cmd(const proc_map::value_type& pmv);
+std::string get_tmp(const proc_map::value_type& pmv);
 FILE* get_file(const proc_map::value_type& pmv);
 unsigned get_num_jobs(const proc_map::value_type& pmv);
 
 // map the name of host and its proc_map
-typedef std::map<string, proc_map> host_proc_map;
+typedef std::map<std::string, proc_map> host_proc_map;
 // host_proc_map's access functions
-const string& get_hostname(const host_proc_map::value_type& hp);
+const std::string& get_hostname(const host_proc_map::value_type& hp);
 const proc_map& get_proc_map(const host_proc_map::value_type& hp);
 const unsigned get_total_jobs(const host_proc_map::value_type& hp);
 
@@ -73,17 +73,17 @@ unsigned running_proc_count(const host_proc_map& hpm);
  * returning the adequate information to merge the result with the
  * metapopulation
  */
-string build_cmdline(const boost::program_options::variables_map& vm, 
+std::string build_cmdline(const boost::program_options::variables_map& vm, 
                      const combo_tree& tr,
-                     const string& host_name,
+                     const std::string& host_name,
                      unsigned n_jobs,
                      unsigned max_evals,
                      unsigned gen_idx);
 
 // run the given command and return its corresponding proc_map
-proc_map::value_type launch_cmd(string cmd, unsigned n_jobs);
+proc_map::value_type launch_cmd(std::string cmd, unsigned n_jobs);
 // check if a file is being used by process of PID pid 
-bool is_being_written(const string& file_name, int pid);
+bool is_being_written(const std::string& file_name, int pid);
 
 // check if a process is running
 bool is_running(const proc_map::value_type& pmv);
@@ -91,7 +91,7 @@ bool is_running(const proc_map::value_type& pmv);
  * read the istream, add the candidates, fill max_evals
  * @todo replace metapop_candidates by pbscored_combo_tree_set
  */
-void parse_result(istream& in, metapop_candidates& candidates, int& evals);
+void parse_result(std::istream& in, metapop_candidates& candidates, int& evals);
 // like above but uses a proc_map::value_type instead of istream
 void parse_result(const proc_map::value_type& pmv, 
                   metapop_candidates& candidates, int& evals);

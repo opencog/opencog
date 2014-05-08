@@ -71,7 +71,7 @@ static const std::string hc("hc"); // local search
 // other algo
 struct optim_parameters
 {
-    optim_parameters(const string& _opt_algo = hc,
+    optim_parameters(const std::string& _opt_algo = hc,
                      double _pop_size_ratio = 20,
                      score_t _terminate_if_gte = 0,
                      size_t _max_dist = 4,
@@ -101,7 +101,7 @@ struct optim_parameters
     bool score_improved(score_t best_score, score_t prev_hi) const;
 
     // String name of the optimization algo to employ
-    string opt_algo;
+    std::string opt_algo;
 
     // optimization is terminated after n generations, or
     // term_improv*sqrt(n/w) consecutive generations with no

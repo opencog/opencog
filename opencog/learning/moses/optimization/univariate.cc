@@ -61,8 +61,8 @@ unsigned univariate_optimization::operator()(deme_t& deme,
         pop_size = max_evals;
         max_gens_total = 0;
     } else {
-        max_gens_total = min(max_gens_total,
-                             (max_evals - pop_size) / n_generate);
+        max_gens_total = std::min(max_gens_total,
+                                  (max_evals - pop_size) / n_generate);
     }
 
     // Create the initial sample

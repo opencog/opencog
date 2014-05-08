@@ -134,7 +134,7 @@ struct hc_parameters
 
     // Deme stat name. String to indicate that TAB seperated deme
     // statistics are logged. By default 'Demes'.
-    string prefix_stat_deme;
+    std::string prefix_stat_deme;
 };
 
 ///////////////////

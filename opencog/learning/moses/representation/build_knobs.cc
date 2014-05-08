@@ -68,9 +68,9 @@ build_knobs::build_knobs(combo_tree& exemplar,
     if ((perceptions != NULL || actions != NULL) &&
         (output_type != id::action_result_type))
     {
-        stringstream ss;
+        std::stringstream ss;
         ss << output_type;
-        stringstream art_ss;
+        std::stringstream art_ss;
         art_ss << id::action_result_type;
         OC_ASSERT(0, "ERROR: During representation building, "
                      "expected action type '%s', got '%s'",
@@ -120,7 +120,7 @@ build_knobs::build_knobs(combo_tree& exemplar,
     }
     else
     {
-        stringstream ss;
+        std::stringstream ss;
         ss << output_type;
         OC_ASSERT(0, "Unsupported output type, got '%s'",
                   ss.str().c_str());
@@ -927,7 +927,7 @@ void build_knobs::rec_canonize(pre_it it)
         logical_canonize(it.begin());
     }
     else {
-        stringstream ss;
+        std::stringstream ss;
         ss << *it << " not a buitin, neither an argument";
         OC_ASSERT(is_argument(*it), ss.str());
     }
@@ -1278,6 +1278,7 @@ static void enumerate_nodes(sib_it it, vector<ann_type>& nodes)
 // and can't possibly work ... 
 void build_knobs::ann_canonize(pre_it it)
 {
+    using namespace std;
     combo::tree_transform trans;
     cout << _exemplar << endl << endl;
     ann net = trans.decodify_tree(_exemplar);

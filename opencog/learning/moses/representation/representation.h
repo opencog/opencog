@@ -31,7 +31,6 @@
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/type_checker/type_tree.h>
 
-#include "../moses/using.h"
 #include "knob_mapper.h"
 
 namespace opencog { namespace moses {

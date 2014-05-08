@@ -36,7 +36,6 @@
 #include <opencog/comboreduct/reduct/logical_rules.h>
 #include <opencog/comboreduct/reduct/general_rules.h>
 
-#include "../moses/using.h"
 #include "representation.h"
 #include "build_knobs.h"
 
@@ -96,7 +95,7 @@ combo_tree type_to_exemplar(type_node type)
                   "perhaps it has not been possible to infer it from the "
                   "input table.");
     default: {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Error: type " << type << " not supported";
         OC_ASSERT(false, ss.str());
     }

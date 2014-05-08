@@ -37,17 +37,17 @@ namespace opencog {
 // using namespace moses;
 
 // Feature selection algorithms
-// XXX do we really need to have these in a heaer file ?? Can't we hide them?
-static const string inc="inc"; // incremental_selection (see
-                               // algo/incrementalh)
-static const string smd="smd"; // stochastic_max_dependency (see
-                               // algo/stochastic_max_dependency.h)
-static const string simple="simple"; // See algo/simple.h
+// XXX do we really need to have these in a header file ?? Can't we hide them?
+static const std::string inc="inc"; // incremental_selection (see
+                                    // algo/incrementalh)
+static const std::string smd="smd"; // stochastic_max_dependency (see
+                                    // algo/stochastic_max_dependency.h)
+static const std::string simple="simple"; // See algo/simple.h
 
 // Feature selection scorers
-static const string mi="mi";    // Mutual Information (see feature_scorer.h)
-static const string pre="pre";  // Precision (see
-                                // opencog/learning/moses/scoring/scoring.h)
+static const std::string mi="mi";    // Mutual Information (see feature_scorer.h)
+static const std::string pre="pre";  // Precision (see
+                                     // opencog/learning/moses/scoring/scoring.h)
 
 // parameters of feature-selection, see desc.add_options() in
 // feature-selection.cc for their meaning
@@ -131,7 +131,7 @@ void write_results(const Table& table,
 /**
  * Convert the initial features into feature_set (set of indices)
  */
-feature_set initial_features(const vector<string>& labels,
+feature_set initial_features(const std::vector<std::string>& labels,
                              const feature_selection_parameters& fs_params);
 
 // A wrapper, simply so that optimizer gets the iscorer_base base class.
