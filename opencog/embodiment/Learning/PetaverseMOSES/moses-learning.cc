@@ -75,7 +75,7 @@ moses_learning::moses_learning(int nepc,
               << std::endl;
 
     for (combo_tree_ns_set_it i = actions.begin(); i != actions.end(); ++i)
-        std::cout << "action: " << *i << endl;
+        std::cout << "action: " << *i << std::endl;
 
     cscore = new petaverse_cscore(_fitness_estimator);
     bscore = new petaverse_bscore(_fitness_estimator);

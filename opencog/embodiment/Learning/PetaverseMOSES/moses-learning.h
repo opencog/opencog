@@ -128,7 +128,7 @@ struct petaverse_cscore : public cscore_base
     composite_score operator()(const combo_tree& tr) const
     {
         score_t score = _fitnessEstimator(tr);
-        std::cout << "scoring " << tr << " score: " << score << endl;
+        std::cout << "scoring " << tr << " score: " << score << std::endl;
 
 // This complexity ratio matches the original code, but it is not
 // obviously correct to me.

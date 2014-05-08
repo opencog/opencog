@@ -29,6 +29,7 @@
 using namespace opencog;
 using namespace combo;
 using namespace moses;
+using namespace std;
 
 const string mosesUTest_dir=string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
 const string target_feature = "target";
