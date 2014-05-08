@@ -7,10 +7,15 @@ from spatiotemporal.time_intervals import TimeInterval
 __author__ = 'keyvan'
 
 
+def trim_float(float_object, no_digits=12):
+    return int(float_object * 10 ** no_digits) / float(10 ** no_digits)
+
+
 def overlaps(bounds_1, bounds_2):
     a_1, b_1 = bounds_1
     a_2, b_2 = bounds_2
-    return a_1 < a_2 < b_1 or a_1 < b_2 < b_1 or a_2 < a_1 < b_2 or a_2 < b_1 < b_2
+    a_1, b_1, a_2, b_2 = trim_float(a_1), trim_float(b_1), trim_float(a_2), trim_float(b_2)
+    return a_1 < a_2 < b_1 or a_1 < b_2 < b_1 or a_2 < a_1 < b_2 or a_2 < b_1 < b_2 or a_1 == a_2 or b_1 == b_2
 
 
 def generate_random_relations(size=1000):
@@ -206,30 +211,3 @@ def learn_all(size=10000):
         print 'F:', test_x[i]
         print 'learning', clf.predict(test_x[i])
         print 'actual', test_y[i], '\n-------------\n'
-
-
-# learn_all()
-
-# learn(100000 - 1)
-# classes = classify(generate_random_relations(1000), 1000)
-# classes = classify()
-#
-# for _class in classes:
-#     average = numpy.zeros(13)
-#     length = 1.0 / len(classes[_class])
-#     for relation in classes[_class]:
-#         if max(relation.to_vector()) > 1:
-#             print relation.to_vector()
-#         average += relation.to_vector()
-#     average *= length
-#
-#     variance = numpy.zeros(13)
-#     for relation in classes[_class]:
-#         variance += (relation.to_vector() - average) ** 2 * length
-#     print _class
-#     print average
-#     print variance ** 0.5
-#     print
-#
-# read_data()
-

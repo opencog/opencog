@@ -24,9 +24,8 @@ def unpack(relation, start_reference=0, length_reference=1):
         elif before > 1 - comparison_operand:
             start_solution = start_reference - length_solution + sqrt(2*after*length_solution*length_reference)
 
-        if i == 0 or i == 1 and solutions[0].args != (start_solution, length_solution):
+        if i == 0 or i == 1 and solutions[0] != (start_solution, start_solution + length_solution):
             solution_a, solution_b = round(start_solution, 15), round(start_solution + length_solution, 15)
             solutions.append((solution_a, solution_b))
 
     return solutions
-
