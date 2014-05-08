@@ -544,7 +544,8 @@ protected:
      *
      * 2) we need to remove the pairs containing deleted pointers
      */
-    struct cached_dst {
+    struct cached_dst
+    {
         // ctor
         cached_dst(const diversity_parameters& _dparams)
             : dparams(_dparams), misses(0), hits(0) {}
@@ -552,76 +553,19 @@ protected:
         // We use a std::set instead of a std::pair, little
         // optimization to deal with the symmetry of the distance
         typedef std::set<const pbscored_combo_tree*> ptr_pair;
-        dp_t operator()(const pbscored_combo_tree* cl, const pbscored_combo_tree* cr)
-        {
-#ifdef ENABLE_DST_CACHE
-            ptr_pair cts = {cl, cr};
-            // hit
-            {
-                shared_lock lock(mutex);
-                auto it = cache.find(cts);
-                if (it != cache.end()) {
-                    ++hits;
-                    return it->second;
-                }
-            }
-            // miss
-            dp_t dst = dparams.dst(get_bscore(*cl), get_bscore(*cr));
-
-            // // debug
-            // logger().fine("&cl = %p, &cr = %p, dst = %f", cl, cr, dst);
-            // // ~debug
-
-            ++misses;
-            {
-                unique_lock lock(mutex);
-                return cache[cts] = dst;
-            }
-#else
-            return dparams.dst(get_bscore(*cl), get_bscore(*cr));
-#endif
-        }
+        dp_t operator()(const pbscored_combo_tree* cl,
+                        const pbscored_combo_tree* cr);
 
         /**
          * Remove all keys containing any element of ptr_seq
          */
-        void erase_ptr_seq(std::vector<pbscored_combo_tree*> ptr_seq) {
-#ifdef ENABLE_DST_CACHE
-            for (Cache::iterator it = cache.begin(); it != cache.end();) {
-                if (!is_disjoint(ptr_seq, it->first))
-                    it = cache.erase(it);
-                else
-                    ++it;
-            }
-#endif
-        }
+        void erase_ptr_seq(std::vector<pbscored_combo_tree*> ptr_seq);
 
         /**
          * Gather some statistics about the diversity of the
          * population, such as mean, std, min, max of the distances.
          */
-        diversity_stats gather_stats() const {
-            using namespace boost::accumulators;
-            typedef accumulator_set<float, stats<tag::count,
-                                     tag::mean,
-                                     tag::variance,
-                                     tag::min,
-                                     tag::max>> accumulator_t;
-
-            // compute the statistics
-            accumulator_t acc;
-            for (const auto& v : cache) acc(v.second);
-
-            // gather stats
-            diversity_stats ds;
-            ds.count = boost::accumulators::count(acc);
-            ds.mean = boost::accumulators::mean(acc);
-            ds.std = sqrt(boost::accumulators::variance(acc));
-            ds.min = boost::accumulators::min(acc);
-            ds.max = boost::accumulators::max(acc);
-
-            return ds;
-        }
+        diversity_stats gather_stats() const;
 
         // cache
         typedef boost::shared_mutex cache_mutex;

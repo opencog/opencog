@@ -849,15 +849,91 @@ diversity_stats metapopulation::gather_diversity_stats(int n)
 
         // gather stats
         diversity_stats ds;
-        ds.count = boost::accumulators::count(acc);
-        ds.mean = boost::accumulators::mean(acc);
-        ds.std = sqrt(boost::accumulators::variance(acc));
-        ds.min = boost::accumulators::min(acc);
-        ds.max = boost::accumulators::max(acc);
+        ds.count = ba::count(acc);
+        ds.mean = ba::mean(acc);
+        ds.std = sqrt(ba::variance(acc));
+        ds.min = ba::min(acc);
+        ds.max = ba::max(acc);
 
         return ds;
     }
 }
+
+dp_t metapopulation::cached_dst::operator()(const pbscored_combo_tree* cl,
+                                            const pbscored_combo_tree* cr)
+{
+#ifdef ENABLE_DST_CACHE
+    ptr_pair cts = {cl, cr};
+    // hit
+    {
+        shared_lock lock(mutex);
+        auto it = cache.find(cts);
+        if (it != cache.end()) {
+            ++hits;
+            return it->second;
+        }
+    }
+    // miss
+    dp_t dst = dparams.dst(get_bscore(*cl), get_bscore(*cr));
+
+    // // debug
+    // logger().fine("&cl = %p, &cr = %p, dst = %f", cl, cr, dst);
+    // // ~debug
+
+    ++misses;
+    {
+        unique_lock lock(mutex);
+        return cache[cts] = dst;
+    }
+#else
+    return dparams.dst(get_bscore(*cl), get_bscore(*cr));
+#endif
+}
+
+/**
+ * Remove all keys containing any element of ptr_seq
+ */
+void metapopulation::cached_dst::erase_ptr_seq(std::vector<pbscored_combo_tree*> ptr_seq)
+{
+#ifdef ENABLE_DST_CACHE
+    for (Cache::iterator it = cache.begin(); it != cache.end();) {
+        if (!is_disjoint(ptr_seq, it->first))
+            it = cache.erase(it);
+        else
+            ++it;
+    }
+#endif
+}
+
+/**
+ * Gather some statistics about the diversity of the
+ * population, such as mean, std, min, max of the distances.
+ */
+diversity_stats metapopulation::cached_dst::gather_stats() const
+{
+    namespace ba = boost::accumulators;
+    typedef ba::accumulator_set<double,
+                                ba::stats<ba::tag::count,
+                                          ba::tag::mean,
+                                          ba::tag::variance,
+                                          ba::tag::min,
+                                          ba::tag::max>> accumulator_t;
+
+    // compute the statistics
+    accumulator_t acc;
+    for (const auto& v : cache) acc(v.second);
+
+    // gather stats
+    diversity_stats ds;
+    ds.count = ba::count(acc);
+    ds.mean = ba::mean(acc);
+    ds.std = sqrt(ba::variance(acc));
+    ds.min = ba::min(acc);
+    ds.max = ba::max(acc);
+
+    return ds;
+}
+
 
 // ==============================================================
 // Gene domination code
