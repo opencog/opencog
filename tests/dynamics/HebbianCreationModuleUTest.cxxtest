@@ -67,23 +67,7 @@ public:
         logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
-        // The following operation is ugly. It was copied from existing tests.
-
-        // Blindly search a bunch of paths hoping to find the files
-        // in one of them ...
-        const char * paths[] =
-        {
-            "./",
-            "../",
-            "../../",
-            "../../../",
-            "../../../../",
-            "../../../../../",
-            "../../../../../../",
-            NULL
-        };
-        cogserver().loadModules(paths);
-
+        cogserver().loadModules();
         this->as = &cogserver().getAtomSpace();
     }
 

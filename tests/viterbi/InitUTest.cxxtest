@@ -85,18 +85,8 @@ void InitUTest::setUp(void)
 		"opencog/viterbi/viterbi_types.scm, "
 		"opencog/viterbi/parse.scm");
 
-	// Blindly search a bunch of paths hoping to find the files
-	// in one of them ...
-	const char * paths[] =
-	{
-		"./",
-		"../",
-		"../../",
-		"../../../",
-		NULL
-	};
-	cogserver().loadModules(paths);
-	cogserver().loadSCMModules(paths);
+	cogserver().loadModules();
+	cogserver().loadSCMModules();
 }
 
 void InitUTest::test_init(void)

@@ -58,17 +58,7 @@ class SCMExecutionUTest :  public CxxTest::TestSuite
                 config().set("SCM_PRELOAD",
                         "opencog/atomspace/core_types.scm");
         
-                // Blindly search a bunch of paths hoping to find the files
-                // in one of them ...
-                const char * paths[] =
-                {
-                        "./",
-                        "../",
-                        "../../",
-                        "../../../",
-                        NULL
-                };
-                cogserver().loadSCMModules(paths);
+                cogserver().loadSCMModules();
 	}
 
 	~SCMExecutionUTest()

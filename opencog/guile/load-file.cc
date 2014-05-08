@@ -98,6 +98,16 @@ int load_scm_file (AtomSpace& as, const char * filename)
  */
 void load_scm_files_from_config(AtomSpace& atomSpace, const char* search_paths[])
 {
+    if (NULL == search_paths) {
+        const char * mp[] = {
+            CMAKE_INSTALL_PREFIX,
+            PROJECT_BINARY_DIR,
+            PROJECT_SOURCE_DIR,
+            NULL
+        };
+        search_paths = mp;
+    }
+
     // Load scheme modules specified in the config file
     std::vector<std::string> scm_modules;
     tokenize(config()["SCM_PRELOAD"], std::back_inserter(scm_modules), ", ");

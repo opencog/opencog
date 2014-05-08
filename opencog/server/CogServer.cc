@@ -644,6 +644,16 @@ Module* CogServer::getModule(const std::string& moduleId)
 
 void CogServer::loadModules(const char* module_paths[])
 {
+    if (NULL == module_paths) {
+        const char * mp[] = {
+            CMAKE_INSTALL_PREFIX,
+            PROJECT_BINARY_DIR,
+            PROJECT_SOURCE_DIR,
+            NULL
+        };
+        module_paths = mp;
+    }
+
     // Load modules specified in the config file
     std::vector<std::string> modules;
     tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
@@ -674,6 +684,16 @@ void CogServer::loadModules(const char* module_paths[])
 void CogServer::loadSCMModules(const char* config_paths[])
 {
 #ifdef HAVE_GUILE
+    if (NULL == config_paths) {
+        const char * mp[] = {
+            CMAKE_INSTALL_PREFIX,
+            PROJECT_BINARY_DIR,
+            PROJECT_SOURCE_DIR,
+            NULL
+        };
+        config_paths = mp;
+    }
+
     load_scm_files_from_config(*atomSpace, config_paths);
 #else /* HAVE_GUILE */
     logger().warn(
