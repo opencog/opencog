@@ -37,7 +37,6 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 		PatternMatch pm;
 		AtomSpace* as;
 		SchemeEval* eval;
-		static const char* paths[];
 
 	public:
 
@@ -69,7 +68,7 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 				"opencog/dynamics/attention/libattention-types.so, "
 				"opencog/embodiment/AtomSpaceExtensions/libembodiment-types.so");
 
-			cogserver().loadModules(paths);
+			cogserver().loadModules();
 
 
 		}
@@ -92,16 +91,6 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 		void test_full(void);
 };
 
-const char* EinsteinPuzzle::paths[] =
-	{
-		"./",
-		"../",
-		"../../",
-		"../../../",
-		NULL
-	};
-
-
 /*
  * Clear the atomspace, load various atom types.
  */
@@ -118,9 +107,7 @@ void EinsteinPuzzle::setUp(void)
 		"opencog/dynamics/attention/attention_types.scm, "
 		"opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm");
 
-	// Blindly search a bunch of paths hoping to find the files
-	// in one of them ...
-	load_scm_files_from_config(*as, paths);
+	load_scm_files_from_config(*as);
 }
 
 #define getlink(hand,pos) as->getOutgoing(hand,pos)
@@ -136,7 +123,7 @@ void EinsteinPuzzle::test_trivial_deduct(void)
 	config().set("SCM_PRELOAD",
 		"tests/query/deduct-trivial.scm, "
 		"tests/query/deduct-rules.scm");
-	load_scm_files_from_config(*as, paths);
+	load_scm_files_from_config(*as);
 
 	// Create an implication link that will be tested.
 	Handle puzzle_rules = eval->apply("is-same-rule", Handle::UNDEFINED);
@@ -167,7 +154,7 @@ void EinsteinPuzzle::test_trivial_keep(void)
 		"tests/query/deduct-trivial.scm, "
 		"tests/query/deduct-rules.scm, "
 		"tests/query/deduct-keep.scm");
-	load_scm_files_from_config(*as, paths);
+	load_scm_files_from_config(*as);
 
 	// Create an implication link that will be tested.
 	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
@@ -214,7 +201,7 @@ void EinsteinPuzzle::test_full(void)
 	config().set("SCM_PRELOAD",
 		"tests/query/deduct-einstein.scm, "
 		"tests/query/deduct-rules.scm");
-	load_scm_files_from_config(*as, paths);
+	load_scm_files_from_config(*as);
 
 	// Create an implication link that will be tested.
 	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
