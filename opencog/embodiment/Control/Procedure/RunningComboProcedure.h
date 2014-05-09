@@ -73,19 +73,22 @@ struct RunningComboProcedure {
                           const std::vector<combo::vertex>& arguments,
                           bool doesSendDefinitePlan = true);
 
-    //copy ctor - fatal runtime error if the rhs has already begun running
+    // Copy ctor - fatal runtime error if the rhs has already begun running
     RunningComboProcedure(const RunningComboProcedure&);
 
-    //each call to cycle executes a single action, and will exit after sending it to the virtual world.
-    //it won't continue executing until the virtual world says the action has finished (or failed).
-    //throws if execution of the action plan (PAI::sendActionPlan(ActionPlanID)) fails
+    // Each call to cycle executes a single action, and will exit after
+    // sending it to the virtual world.  it won't continue executing
+    // until the virtual world says the action has finished (or
+    // failed).  throws if execution of the action plan
+    // (PAI::sendActionPlan(ActionPlanID)) fails
     void cycle() throw(ActionPlanSendingFailure, AssertionException, std::bad_exception);
 
-    //terminate - prevent future plans from being evaluated,
-    //sets result to null_vertex - note that this is not the same as failure
+    // Terminate - prevent future plans from being evaluated, sets
+    // result to null_vertex - note that this is not the same as
+    // failure
     void stop();
 
-    //is the rp ready to run an action plan?
+    // Is the rp ready to run an action plan?
     bool isReady() const;
 
     //is the rp done running?
@@ -144,18 +147,13 @@ protected:
     combo::vertex eval_anything(sib_it it);
 private:
     /**
-     * true if the combo interpreter
-     * evaluates the indefinite aguments
-     * of a plan during interpretation
-     * (that is the plan once sent contains only
-     * definite objects)
-     * false if the combo interpreter
-     * sends directly unevaluated indefinite objects
-     * in the plan
-     * this is escentially used by NoSpaceLife
-     * in order to deal with the random operators
-     * optimization, to avoid Monte Carlos
-     * simulations
+     * true if the combo interpreter evaluates the indefinite aguments
+     * of a plan during interpretation (that is the plan once sent
+     * contains only definite objects) false if the combo interpreter
+     * sends directly unevaluated indefinite objects in the plan this
+     * is essentially used by NoSpaceLife in order to deal with the
+     * random operators optimization, to avoid Monte Carlos
+     * simulations.
      */
     bool _doesSendDefinitePlan;
 
