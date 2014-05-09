@@ -499,7 +499,7 @@ vector<unsigned> get_indices(const vector<string>& labels,
 
 unsigned get_index(const string& label, const vector<string>& header)
 {
-    return distance(header.begin(), std::find(header.begin(), header.end(), label));
+    return std::distance(header.begin(), std::find(header.begin(), header.end(), label));
 }
 
 void Table::add_features_from_file(const string& input_file,
@@ -581,6 +581,23 @@ void Table::add_features_from_file(const string& input_file,
 }
         
 // -------------------------------------------------------
+////////////
+// CTable //
+////////////
+
+CTable::CTable(const std::string& _olabel)
+    : olabel(_olabel) {}
+
+CTable::CTable(const string_seq& labs, const type_tree& tt)
+    : tsig(tt), olabel(labs[0]), ilabels(labs)
+{
+    ilabels.erase(ilabels.begin());
+}
+
+CTable::CTable(const std::string& _olabel, const string_seq& _ilabels,
+               const type_tree& tt)
+    : tsig(tt), olabel(_olabel), ilabels(_ilabels)
+{}
 
 void CTable::set_labels(const vector<string>& labels)
 {

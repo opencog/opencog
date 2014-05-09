@@ -912,7 +912,7 @@ inferTableAttributes(istream& in, const string& target_feature,
     }
 
     // parse what could be a header
-    vector<string> maybe_header = tokenizeRow<string>(lines.front());
+    const vector<string> maybe_header = tokenizeRow<string>(lines.front());
 
     // determine arity
     arity_t arity = maybe_header.size();
@@ -949,7 +949,11 @@ inferTableAttributes(istream& in, const string& target_feature,
 
     // Determine type signature
     if (has_header) {
+
+        // if unspecified, the target is the first column
         unsigned target_idx = 0;
+
+        // target feature will be ignored
         if (!target_feature.empty()) {
             auto target_it = std::find(maybe_header.begin(), maybe_header.end(),
                                        target_feature);
@@ -1115,6 +1119,8 @@ istream& istreamDenseTable(istream& in, Table& tab,
         string line;
         get_data_line(in, line);
         vector<string> header = tokenizeRow<string>(line);
+
+        // Set target idx
         if (!target_feature.empty()) {
             auto target_it = std::find(header.begin(), header.end(),
                                        target_feature);
@@ -1122,6 +1128,8 @@ istream& istreamDenseTable(istream& in, Table& tab,
                       target_feature.c_str());
             target_idx = std::distance(header.begin(), target_it);
         }
+
+        // Set ignore idxs
         ignore_idxs = get_indices(ignore_features, header);
 
         // get input and output labels from the header
@@ -1152,7 +1160,7 @@ CTable::value_type parseCTableRow(const type_tree& tt, const std::string& row_st
     multi_type_seq input_values = ftv(input_seq);
 
     // convert the outputs string into CTable::counter_t
-    vector<string> output_pair_seq  = tokenizeRow<string>(outputs);
+    vector<string> output_pair_seq = tokenizeRow<string>(outputs);
     CTable::counter_t counter;
     for (const string& pair_str : output_pair_seq) {
         unsigned sep_pos = pair_str.find(":");
@@ -1247,7 +1255,7 @@ ostream& ostreamCTableRow(ostream& out, const CTable::value_type& ctv)
     auto ats = boost::apply_visitor(tsv);
     // print map of outputs
     out << "{";
-    for(auto it = ctv.second.begin(); it != ctv.second.end();) {
+    for (auto it = ctv.second.begin(); it != ctv.second.end();) {
         out << table_fmt_vertex_to_str(it->first) << ":" << it->second;
         if(++it != ctv.second.end())
             out << ",";
