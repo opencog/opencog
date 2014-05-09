@@ -26,16 +26,14 @@ represented in AtomSpace notation (rather than natural language).
 Important notes:
 
 - We need to modify PLN to handle satisfying sets properly, see:
-
-https://github.com/opencog/opencog/issues/601
-https://github.com/opencog/opencog/issues/602
-https://github.com/opencog/opencog/issues/603
-https://github.com/opencog/opencog/issues/613
-https://github.com/opencog/opencog/pull/637
+  - https://github.com/opencog/opencog/issues/601
+  - https://github.com/opencog/opencog/issues/602
+  - https://github.com/opencog/opencog/issues/603
+  - https://github.com/opencog/opencog/issues/613
+  - https://github.com/opencog/opencog/pull/637
 
 - The Relex2Logic rules require modification for "is"/"be" predicates, see:
-
-https://github.com/opencog/opencog/issues/726
+  - https://github.com/opencog/opencog/issues/726
 
 PLN rules needed:
 
