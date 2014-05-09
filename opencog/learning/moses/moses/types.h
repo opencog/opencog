@@ -66,12 +66,7 @@ typedef float score_t;
 static const int io_score_precision = 32;
 
 static const score_t very_best_score = std::numeric_limits<score_t>::max();
-
-// below we use 1 - best score and not
-// std::numeric_limits<score_t>::min, please recall that in the STL
-// standard min when applied to a floating type returns the smallest
-// possible representable value
-static const score_t very_worst_score = score_t(1) - very_best_score;
+static const score_t very_worst_score = std::numeric_limits<score_t>::lowest();
 
 // But modify the default sort ordering for these objects.
 struct composite_score:
