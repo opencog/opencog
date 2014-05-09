@@ -161,14 +161,9 @@ public:
     {
     public:
         Base(const Base& b) : logger(b.logger), lvl(b.lvl) {}
-        std::stringstream& operator<<(const std::string& s)
+        template<typename T> std::stringstream& operator<<(const T& v)
         {
-            ss << s;
-            return ss;
-        }
-        std::stringstream& operator<<(const char *s)
-        {
-            ss << s;
+            ss << v;
             return ss;
         }
         ~Base()
