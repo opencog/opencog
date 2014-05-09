@@ -59,7 +59,7 @@ void eval_constants::operator()(combo_tree& tr, combo_tree::iterator it) const
     if (is_associative(*it)) {
         if (is_commutative(*it)) {
             to = tr.partition(it.begin(), it.end(), is_constant<vertex>);
-            int n_consts = distance(it.begin(), to);
+            int n_consts = std::distance(it.begin(), to);
             if (n_consts < 2 && (!(n_consts == 1 && it.has_one_child())))
                 return;
             if (to != it.end()) {
