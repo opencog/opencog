@@ -425,6 +425,9 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
 
             foreach (Handle link, inputLinks)
             {
+                // debug:
+                string inputLinkStr = originalAtomSpace->atomAsString(link);
+
                 HandleSeq outgoingLinks;
                 generateALinkByChosenVariables(link, patternVarMap, outgoingLinks);
                 Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),outgoingLinks,TruthValue::TRUE_TV());
@@ -446,6 +449,11 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
             {
                 newHTreeNode = new HTreeNode();
                 keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
+            }
+            else
+            {
+                // debug
+                cout << "Unique Key already exists: \n" << keyString << "Skip this pattern!\n";
             }
 
             uniqueKeyLock.unlock();
@@ -670,9 +678,9 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
     for(;varIt != curHTreeNode->patternVarMap.end(); ++ varIt)
     {
         // find what are the other links in the original Atomspace contain this variable
-        HandleSeq incomings = originalAtomSpace->getIncoming( ((Handle)(varIt->second)));
+        HandleSeq incomings = originalAtomSpace->getIncoming( ((Handle)(varIt->first)));
         // debug
-        string curvarstr = originalAtomSpace->atomAsString((Handle)(varIt->second));
+        string curvarstr = originalAtomSpace->atomAsString((Handle)(varIt->first));
 
         foreach(Handle incomingHandle, incomings)
         {

@@ -45,7 +45,7 @@ namespace opencog
         vector<HandleSeq> instances; // the corresponding instances of this pattern in the original AtomSpace
         vector<HTreeNode*> parentLinks;
         vector<HTreeNode*> childLinks;
-        map<Handle,Handle> patternVarMap;// variable handle in pattenmining Atomspace to the ground value node in the orginal Atomspace
+        map<Handle,Handle> patternVarMap;//  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
 
         HTreeNode()
         {
