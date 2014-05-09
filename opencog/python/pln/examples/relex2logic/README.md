@@ -26,6 +26,7 @@ represented in AtomSpace notation (rather than natural language).
 Important notes:
 
 1. We need to modify PLN to handle satisfying sets properly, see:
+
 https://github.com/opencog/opencog/issues/601
 https://github.com/opencog/opencog/issues/602
 https://github.com/opencog/opencog/issues/603
@@ -45,13 +46,14 @@ PLN rules needed:
 
 ### Predicates
 
+Important note: The representation of "be" will change to an InheritanceLink rather than an EvaluationLink of a PredicateNode if issue #2 (above) is implemented.
+
 ```
 (PredicateNode "breathe")
 
 (PredicateNode "be")
 ```
 
-Note: The following will change if issue #2 (above) is addressed.
 #### be(Socrates, man)
 
 ```
