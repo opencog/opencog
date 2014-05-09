@@ -34,6 +34,7 @@ https://github.com/opencog/opencog/issues/613
 https://github.com/opencog/opencog/pull/637
 
 2. The Relex2Logic rules require modification for "is"/"be" predicates, see:
+
 https://github.com/opencog/opencog/issues/726
 
 PLN rules needed:
@@ -46,7 +47,21 @@ PLN rules needed:
 
 ### Predicates
 
-Important note: The representation of "be" will change to an InheritanceLink rather than an EvaluationLink of a PredicateNode if issue #2 (above) is implemented.
+#### Important note
+
+The representation of "be" will change to an InheritanceLink rather than an EvaluationLink of a PredicateNode if issue #2 (above) is implemented.
+
+That representation would appear as:
+
+```
+(InheritanceLink
+    (ConceptNode "Socrates@7b03b9d8-cdee-4b35-bf29-c6fd35cb4229")
+    (ConceptNode "man@35b6f89b-5753-4da1-8dc4-55224cf56789"))
+```
+
+However, the current representation produced is as follows.
+
+#### Current representation
 
 ```
 (PredicateNode "breathe")
@@ -54,7 +69,7 @@ Important note: The representation of "be" will change to an InheritanceLink rat
 (PredicateNode "be")
 ```
 
-#### be(Socrates, man)
+##### be(Socrates, man)
 
 ```
 (EvaluationLink (stv 1.000000 0.000000)
@@ -66,7 +81,7 @@ Important note: The representation of "be" will change to an InheritanceLink rat
 )
 ```
 
-#### breathe(men, air)
+##### breathe(men, air)
 
 ```
 (EvaluationLink (stv 1.000000 0.000000)
