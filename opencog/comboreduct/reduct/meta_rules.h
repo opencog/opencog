@@ -29,6 +29,7 @@
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/repetition/enum_trailing_params.hpp>
 #include <boost/preprocessor/repetition/repeat.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 #include <opencog/util/functional.h>
 
@@ -50,7 +51,7 @@ struct when : public crule<when> {
     void operator()(combo_tree&, combo_tree::iterator) const;
 
 protected:
-    shared_ptr<const rule> r;
+    std::shared_ptr<const rule> r;
     bool cond;
 };
 
@@ -66,7 +67,7 @@ struct ignore_size_increase : public crule<ignore_size_increase> {
     void operator()(combo_tree&, combo_tree::iterator) const;
 
 protected:
-    shared_ptr<const rule> r;
+   std::shared_ptr<const rule> r;
 };
 
 //apply rule in pre-order (left-to-right, parents before children, leftward
@@ -95,7 +96,7 @@ struct downwards : public crule<downwards>
     void operator()(combo_tree&, combo_tree::iterator) const;
 
 protected:
-    shared_ptr<const rule> r;
+    std::shared_ptr<const rule> r;
     combo::type_tree input;
     combo::type_node output;
 };
@@ -112,7 +113,7 @@ struct upwards : public crule<upwards> {
     void operator()(combo_tree&, combo_tree::iterator) const;
 
 protected:
-    shared_ptr<const rule> r;
+    std::shared_ptr<const rule> r;
 };
 
 //apply a rule repeatedly to a point-of-application until the tree no
@@ -126,7 +127,7 @@ struct iterative : public crule<iterative> {
         : crule<iterative>::crule(i.get_name()), r(i.r->clone()) { }
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 protected:
-    shared_ptr<const rule> r;
+    std::shared_ptr<const rule> r;
 };
 
 //like iterative but take into account the assumption set and is a bit slower
@@ -140,7 +141,7 @@ struct assum_iterative : public crule<assum_iterative> {
         : crule<assum_iterative>::crule(i.get_name()), r(i.r->clone()) { }
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 protected:
-    shared_ptr<const rule> r;
+    std::shared_ptr<const rule> r;
 };
 
 //apply rules sequentially to a particular point-of-application
@@ -167,7 +168,7 @@ struct sequential : public crule<sequential> {
 #undef OC_RULES_PUSH_BACK
 
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
-    ptr_vector<rule> rules;
+    boost::ptr_vector<rule> rules;
 };
 
 } // ~namespace reduct

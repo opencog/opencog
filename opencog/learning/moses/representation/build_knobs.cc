@@ -219,7 +219,7 @@ void build_knobs::logical_canonize(pre_it it)
  * @return a ptr_vector of the knobs
  */
 template<typename It>
-ptr_vector<logical_subtree_knob>
+boost::ptr_vector<logical_subtree_knob>
 build_knobs::logical_probe_rec(pre_it subtree,
                                combo_tree& exemplr, pre_it it,
                                It from, It to,
@@ -236,11 +236,11 @@ build_knobs::logical_probe_rec(pre_it subtree,
         // has to be put before the asyncronous call to avoid
         // read/write conflicts)
         combo_tree exemplr_cp(exemplr);
-        pre_it it_cp = next(exemplr_cp.begin(), distance(exemplr.begin(), it));
-        pre_it subtree_cp = next(exemplr_cp.begin(), distance(exemplr.begin(), subtree));
+        pre_it it_cp = next(exemplr_cp.begin(), std::distance(exemplr.begin(), it));
+        pre_it subtree_cp = next(exemplr_cp.begin(), std::distance(exemplr.begin(), subtree));
 
         // asynchronous recursive call for [from, mid)
-        std::future<ptr_vector<logical_subtree_knob>> f_async =
+        std::future<boost::ptr_vector<logical_subtree_knob>> f_async =
             async(std::launch::async,
                   [&]() {return this->logical_probe_rec(subtree, exemplr, it,
                                                         from, mid,
@@ -248,7 +248,7 @@ build_knobs::logical_probe_rec(pre_it subtree,
                                                         s_jobs.first);});
 
         // synchronous recursive call for [mid, to) on the copy
-        ptr_vector<logical_subtree_knob> kb_copy_v =
+        boost::ptr_vector<logical_subtree_knob> kb_copy_v =
             logical_probe_rec(subtree_cp, exemplr_cp, it_cp, mid, to,
                               add_if_in_exemplar, s_jobs.second);
 
@@ -259,7 +259,7 @@ build_knobs::logical_probe_rec(pre_it subtree,
         }
         return kb_v;
     } else {
-        ptr_vector<logical_subtree_knob> kb_v;
+        boost::ptr_vector<logical_subtree_knob> kb_v;
         while (from != to) {
             auto kb = new logical_subtree_knob(exemplr, it, from->begin());
             if ((add_if_in_exemplar || !kb->in_exemplar())
@@ -594,7 +594,7 @@ void build_knobs::add_logical_knobs(pre_it subtree,
     // The actual running time for logical_probe_rec seems to take
     // 1.5 to 5 millisecs per subtree node, when disc_probe_rec is
     // enabled.
-    ptr_vector<logical_subtree_knob> kb_v =
+    boost::ptr_vector<logical_subtree_knob> kb_v =
         logical_probe_rec(subtree, _exemplar, it, perms.begin(), perms.end(),
                           add_if_in_exemplar, nthr);
 

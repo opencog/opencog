@@ -23,6 +23,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <boost/iterator/counting_iterator.hpp>
+#include <boost/iterator/indirect_iterator.hpp>
+
 #include <opencog/util/exceptions.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/mt19937ar.h>
@@ -33,6 +36,8 @@
 namespace opencog { namespace reduct {
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::iterator pre_it;
+
+using boost::make_counting_iterator;
 
 // Ensure that all arguments and 'or' nodes have an 'and' node as their
 // parent.  This is needed, so that other normalizations can catch all
@@ -466,9 +471,9 @@ void subtree_to_enf::reduce_to_enf::operator()(sib_it it)
 
 bool subtree_to_enf::reduce_to_enf::consistent(const subtree_set& s)
 {
-    return std::adjacent_find(make_indirect_iterator(s.begin()),
-                              make_indirect_iterator(s.end()),
-                              is_complement)==make_indirect_iterator(s.end());
+    return std::adjacent_find(boost::make_indirect_iterator(s.begin()),
+                              boost::make_indirect_iterator(s.end()),
+                              is_complement) == boost::make_indirect_iterator(s.end());
 }
 
 bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child)
