@@ -13,6 +13,10 @@ import os
 
 __VERBOSE__ = False
 
+# Set to True to search for needed .scm files in default IN-SOURCE build location, e.g. to write unit tests in the IDE
+# Set to False to search for needed .scm files based on environment variables PROJECT_SOURCE_DIR and PROJECT_BINARY_DIR
+__DEV_MODE__ = False
+
 class PLNUnitTester(TestCase):
     def setUp(self):
         self.atomSpaceFileData = AtomSpace()
@@ -22,23 +26,13 @@ class PLNUnitTester(TestCase):
 
         # Code below is to get us to the OC (git) root based on predictable test launch locations.
 
-        if str(os.getcwd()).endswith("/test_pln"):
-            self.relativeFolderPrefix = "../../../"
-        elif str(os.getcwd()).endswith("/build"):
-            self.relativeFolderPrefix = "../"
-        elif str(os.getcwd()).endswith("/build/tests/python"):
-            self.relativeFolderPrefix = "../../../"
-        else:
-            print "Error determining path, please run from 'build', 'tests/python/test_pln' or 'build/tests/python' folder."
-            print "Current working directory is: " + str(os.getcwd())
-
         self.chainer = Chainer(self.atomSpaceInputs,
                                stimulateAtoms=False, agent=self,
                                learnRuleFrequencies=False,
                                allow_output_with_variables=True,
                                allow_backchaining_with_variables=True)
 
-        self.addTestFile("tests/python/test_pln/scm/specific_rules/DeductionRule_InheritanceLink.scm")
+        self.addTestFile("DeductionRule_InheritanceLink.scm")
 
     def tearDown(self):
         del self.atomSpaceFileData
@@ -52,10 +46,15 @@ class PLNUnitTester(TestCase):
             self.run_file(testFile)
 
     def addTestFile(self, testFile):
-        fullTestFile = self.relativeFolderPrefix + testFile
+        # Again, default to dev mode
+        ruleFolder = "scm/specific_rules/"
 
-        if __VERBOSE__:
-            print "Adding test file " + fullTestFile
+        if not __DEV_MODE__:
+            ruleFolder = os.getenv("PROJECT_SOURCE_DIR") + "/tests/python/test_pln/scm/specific_rules/"
+
+        fullTestFile = ruleFolder + testFile
+
+        print "Adding test file " + fullTestFile
 
         self.testFiles.append(fullTestFile)
 
@@ -64,24 +63,33 @@ class PLNUnitTester(TestCase):
         self.reset_atom_space(self.atomSpaceInputs)
         self.reset_atom_space(self.atomSpaceExpected)
 
+    def load_file_into_atomspace(self, fullPath, atomSpace):
+        if os.path.exists(fullPath):
+            load_scm(atomSpace, fullPath)
+        else:
+            print "Path '" + fullPath + "' does not exist."
+
     def reset_atom_space(self, atomspaceToReset):
         atomspaceToReset.clear()
-        coreTypes = self.relativeFolderPrefix + "build/opencog/atomspace/core_types.scm"
 
-        if os.path.exists(coreTypes):
-            load_scm(atomspaceToReset, coreTypes)
-        else:
-            print "Path '" + coreTypes + "' does not exist."
+        # Default to dev mode
+        # Build folder is up, up, up, /build
+        coreTypes = "../../../build/opencog/atomspace/core_types.scm"
+        # Source root is up, up, up
+        utilities = "../../../opencog/scm/utilities.scm"
 
-        utilities = self.relativeFolderPrefix + "opencog/scm/utilities.scm"
+        if not __DEV_MODE__:
+            sourceFolder = os.getenv("PROJECT_SOURCE_DIR")
+            binFolder = os.getenv("PROJECT_BINARY_DIR")
 
-        if os.path.exists(utilities):
-            load_scm(atomspaceToReset, utilities)
-        else:
-            print "Path '" + utilities + "' does not exist."
+            print "PROJECT_SOURCE_DIR = " + sourceFolder
+            print "PROJECT_BINARY_DIR = " + binFolder
 
-    def load_file_data(self, filename):
-        load_scm(self.atomSpaceFileData, filename)
+            coreTypes = binFolder + "/opencog/atomspace/core_types.scm"
+            utilities = sourceFolder + "/opencog/scm/utilities.scm"
+
+        self.load_file_into_atomspace(coreTypes, atomspaceToReset)
+        self.load_file_into_atomspace(utilities, atomspaceToReset)
 
     def fill_atomspace(self, atomspace, atomList):
         for atom in atomList:
@@ -195,7 +203,7 @@ class PLNUnitTester(TestCase):
 
         self.reset_atom_spaces()
 
-        self.load_file_data(filename)
+        self.load_file_into_atomspace(filename, self.atomSpaceFileData)
 
         self.load_inputs()
         self.load_outputs()
