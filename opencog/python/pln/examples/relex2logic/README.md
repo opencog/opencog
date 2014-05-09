@@ -25,10 +25,15 @@ represented in AtomSpace notation (rather than natural language).
 
 Important notes:
 
-1. We need to modify PLN to handle satisfying sets properly.
+1. We need to modify PLN to handle satisfying sets properly, see:
+https://github.com/opencog/opencog/issues/601
+https://github.com/opencog/opencog/issues/602
+https://github.com/opencog/opencog/issues/603
+https://github.com/opencog/opencog/issues/613
+https://github.com/opencog/opencog/pull/637
 
 2. The Relex2Logic rules require modification for "is"/"be" predicates, see:
-https://github.com/opencog/opencog/issues/530
+https://github.com/opencog/opencog/issues/726
 
 PLN rules needed:
 
@@ -46,6 +51,7 @@ PLN rules needed:
 (PredicateNode "be")
 ```
 
+Note: The following will change if issue #2 (above) is addressed.
 #### be(Socrates, man)
 
 ```
