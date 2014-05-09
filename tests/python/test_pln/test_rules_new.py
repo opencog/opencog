@@ -82,9 +82,6 @@ class PLNUnitTester(TestCase):
             sourceFolder = os.getenv("PROJECT_SOURCE_DIR")
             binFolder = os.getenv("PROJECT_BINARY_DIR")
 
-            print "PROJECT_SOURCE_DIR = " + sourceFolder
-            print "PROJECT_BINARY_DIR = " + binFolder
-
             coreTypes = binFolder + "/opencog/atomspace/core_types.scm"
             utilities = sourceFolder + "/opencog/scm/utilities.scm"
 
