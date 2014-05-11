@@ -269,6 +269,7 @@ class MemberToEvaluationRule(Rule):
     # Todo: The 'outputs' parameter is not used
     def custom_compute(self, inputs, outputs):
         [member_link] = inputs
+        evaluation_link = []
         tv = member_link.tv
 
         if member_link.out[1].type == types.SatisfyingSetLink:
@@ -279,10 +280,10 @@ class MemberToEvaluationRule(Rule):
             output_args =  [concept if i == variable else i for i in input_args]
 
             list_link = self.chainer.link(types.ListLink, output_args)
-            evaluation_link = self.chainer.link(types.EvaluationLink,
-                                 [predicate, list_link])
+            evaluation_link = [self.chainer.link(types.EvaluationLink,
+                                 [predicate, list_link])]
 
-        return [evaluation_link], [tv]
+        return evaluation_link, [tv]
 
 
 # Todo: Should this function be in this file with the rules?
