@@ -350,7 +350,7 @@ class EvaluationToMemberRule(Rule):
                 # The arg.out is a list that must not be changed. If arg.out is
                 # used instead of the returned value of atomspace's get_outgoing
                 # method then the changes made to arg.out are permanent.
-                list_arg = self.chainer._atomspace.get_outgoing(arg.h)
+                list_arg = self.chainer.atomspace.get_outgoing(arg.h)
                 first_iter = True
 
                 for j in variables:
