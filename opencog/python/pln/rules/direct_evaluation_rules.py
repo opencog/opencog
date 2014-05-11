@@ -360,8 +360,8 @@ class EvaluationToMemberRule(Rule):
                     else:
                         try:
                             next_index = next(k for k, l in enumerate(list_arg)
-                                                         if l not in variables)
-                        except:
+                                              if l not in variables)
+                        except StopIteration:
                             break
                         list_arg[next_index] = j
                     list_link = self.chainer.link(
