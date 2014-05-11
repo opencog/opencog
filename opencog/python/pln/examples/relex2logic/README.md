@@ -37,7 +37,7 @@ Important notes:
 
 PLN rules needed:
 
-- GeneralEvaluationToMemberRule
+- EvaluationToMemberRule
 - MemberToInheritanceRule
 - DeductionRule
 

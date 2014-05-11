@@ -18,15 +18,12 @@ class EvaluationToMemberAgent(MindAgent):
     def create_chainer(self, atomspace):
         self.chainer = Chainer(atomspace, stimulateAtoms=False, allow_output_with_variables=True)
 
-        # EvaluationToMemberRule only accepts predicates with 1 argument
-        # For predicates with more arguments, GeneralEvaluationToMemberRule
-        # is used.
         self.chainer.add_rule(
-            GeneralEvaluationToMemberRule(self.chainer, 0, 1))
+            EvaluationToMemberRule(self.chainer, 0, 1))
         self.chainer.add_rule(
-            GeneralEvaluationToMemberRule(self.chainer, 0, 2))
+            EvaluationToMemberRule(self.chainer, 0, 2))
         self.chainer.add_rule(
-            GeneralEvaluationToMemberRule(self.chainer, 0, 3))
+            EvaluationToMemberRule(self.chainer, 0, 3))
         self.chainer.add_rule(MemberToInheritanceRule(self.chainer))
         self.chainer.add_rule(
             DeductionRule(self.chainer, types.InheritanceLink))
