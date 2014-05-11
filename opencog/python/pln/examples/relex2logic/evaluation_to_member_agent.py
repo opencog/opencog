@@ -16,14 +16,13 @@ class EvaluationToMemberAgent(MindAgent):
         self.chainer = None
 
     def create_chainer(self, atomspace):
-        self.chainer = Chainer(atomspace, stimulateAtoms=False, allow_output_with_variables=True)
+        self.chainer = Chainer(atomspace,
+                               stimulateAtoms=False,
+                               allow_output_with_variables=True,
+                               delete_temporary_variables=True)
 
         self.chainer.add_rule(
-            EvaluationToMemberRule(self.chainer, 0, 1))
-        self.chainer.add_rule(
             EvaluationToMemberRule(self.chainer, 0, 2))
-        self.chainer.add_rule(
-            EvaluationToMemberRule(self.chainer, 0, 3))
         self.chainer.add_rule(MemberToInheritanceRule(self.chainer))
         self.chainer.add_rule(
             DeductionRule(self.chainer, types.InheritanceLink))
