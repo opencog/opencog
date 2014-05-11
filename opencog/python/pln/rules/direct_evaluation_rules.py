@@ -335,13 +335,19 @@ class EvaluationToMemberRule(Rule):
         [eval_link] = inputs
         [predicate, arg] = eval_link.out
         variables = [self.chainer.node(types.VariableNode, "$X{}".format(i))
-                                        for i in xrange(0, self.arg_count)]
+                     for i in xrange(0, self.arg_count)]
         returned_outputs = []
         tv = []
 
-        # arg_indexes hold the occurence count of a paricular atom in a ListLink
+        # arg_indexes holds the occurrence count of a particular atom in a
+        # ListLink
         # Key = the atom under consideration
         # Values = the index of the atom in the ListLink
+
+        # To do: @AmeBel, why does the following line raise the following
+        # warning?
+        #   "Expected type 'Iterable' (matched generic type 'Iterable[T, V]'),
+        #   got '__generator[list]' instead"
         arg_indexs = dict(([j, [p for p,q in enumerate(arg.out)  if q == j]]
                                             for i, j in enumerate(arg.out)))
 
@@ -350,7 +356,7 @@ class EvaluationToMemberRule(Rule):
                 # The arg.out is a list that must not be changed. If arg.out is
                 # used instead of the returned value of atomspace's get_outgoing
                 # method then the changes made to arg.out are permanent.
-                list_arg = self.chainer._atomspace.get_outgoing(arg.h)
+                list_arg = self.chainer.atomspace.get_outgoing(arg.h)
                 first_iter = True
 
                 for j in variables:
@@ -360,21 +366,22 @@ class EvaluationToMemberRule(Rule):
                     else:
                         try:
                             next_index = next(k for k, l in enumerate(list_arg)
-                                                         if l not in variables)
-                        except:
+                                              if l not in variables)
+                        except StopIteration:
                             break
                         list_arg[next_index] = j
                     list_link = self.chainer.link(
-                                    types.ListLink, list_arg)
+                        types.ListLink, list_arg)
                     evaluation_link = self.chainer.link(
-                                        types.EvaluationLink,
-                                        [predicate , list_link])
-                    satisying_set_link = self.chainer.link(
-                                        types.SatisfyingSetLink,
-                                        [variables[0], evaluation_link])
+                        types.EvaluationLink,
+                        [predicate, list_link])
+                    satisfying_set_link = self.chainer.atomspace.add_link(
+                        types.SatisfyingSetLink,
+                        [variables[0], evaluation_link],
+                        TruthValue(1, TruthValue().confidence_to_count(1)))
                     member_link = self.chainer.link(
-                                        types.MemberLink,
-                                        [i, satisying_set_link])
+                        types.MemberLink,
+                        [i, satisfying_set_link])
 
                     returned_outputs.append(member_link)
                     tv.append(eval_link.tv)
