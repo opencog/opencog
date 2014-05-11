@@ -372,7 +372,7 @@ class EvaluationToMemberRule(Rule):
                     satisfying_set_link = self.chainer.atomspace.add_link(
                         types.SatisfyingSetLink,
                         [variables[0], evaluation_link],
-                        TruthValue(1, TruthValue.confidence_to_count(1)))
+                        TruthValue(1, TruthValue().confidence_to_count(1)))
                     member_link = self.chainer.link(
                         types.MemberLink,
                         [i, satisfying_set_link])
