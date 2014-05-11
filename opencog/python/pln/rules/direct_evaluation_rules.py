@@ -369,12 +369,13 @@ class EvaluationToMemberRule(Rule):
                     evaluation_link = self.chainer.link(
                                         types.EvaluationLink,
                                         [predicate , list_link])
-                    satisying_set_link = self.chainer.link(
-                                        types.SatisfyingSetLink,
-                                        [variables[0], evaluation_link])
+                    satisfying_set_link = self.chainer.atomspace.add_link(
+                        types.SatisfyingSetLink,
+                        [variables[0], evaluation_link],
+                        TruthValue(1, TruthValue.confidence_to_count(1)))
                     member_link = self.chainer.link(
-                                        types.MemberLink,
-                                        [i, satisying_set_link])
+                        types.MemberLink,
+                        [i, satisfying_set_link])
 
                     returned_outputs.append(member_link)
                     tv.append(eval_link.tv)
