@@ -684,9 +684,6 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
 
         foreach(Handle incomingHandle, incomings)
         {
-            if (isInHandleSeq(incomingHandle, instance))
-                continue;
-
             Handle extendedHandle;
             // if this atom is a igonred type, get its first parent that is not in the igonred types
             if (isIgnoredType (originalAtomSpace->getType(incomingHandle)) )
@@ -700,6 +697,9 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
 
             // debug
             string extendedHandleStr = originalAtomSpace->atomAsString(extendedHandle);
+
+            if (isInHandleSeq(extendedHandle, instance))
+                continue;
 
             // Add this extendedHandle to the old pattern so as to make a new pattern
             HandleSeq originalLinks = instance;
