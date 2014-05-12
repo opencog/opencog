@@ -244,12 +244,15 @@ vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern)
 
 }
 
-string PatternMiner::unifiedPatternToKeyString(vector<Handle>& inputPattern)
+string PatternMiner::unifiedPatternToKeyString(vector<Handle>& inputPattern, const AtomSpace *atomspace)
 {
+    if (atomspace == 0)
+        atomspace = this->atomSpace;
+
     string keyStr = "";
     foreach(Handle h, inputPattern)
     {
-        keyStr += Link2keyString(h);
+        keyStr += Link2keyString(h,"", atomspace);
         keyStr += "\n";
     }
 
@@ -302,6 +305,7 @@ bool isLastNElementsAllTrue(bool* array, int size, int n)
     return true;
 }
 
+ // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
 void PatternMiner::generateALinkByChosenVariables(Handle& originalLink, map<Handle,Handle>& valueToVarMap,  HandleSeq& outputOutgoings)
 {
     HandleSeq outgoingLinks = originalAtomSpace->getOutgoing(originalLink);
@@ -332,6 +336,7 @@ void PatternMiner::generateALinkByChosenVariables(Handle& originalLink, map<Hand
     }
 }
 
+ // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
 void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap)
 {
     HandleSeq outgoingLinks = originalAtomSpace->getOutgoing(link);
@@ -353,6 +358,26 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
         else
         {
             extractAllNodesInLink(h,valueToVarMap);
+        }
+    }
+}
+
+void PatternMiner::extractAllNodesInLink(Handle link, set<Handle>& allNodes)
+{
+    HandleSeq outgoingLinks = originalAtomSpace->getOutgoing(link);
+
+    foreach (Handle h, outgoingLinks)
+    {
+        if (originalAtomSpace->isNode(h))
+        {
+            if (allNodes.find(h) == allNodes.end())
+            {
+                allNodes.insert(h);
+            }
+        }
+        else
+        {
+            extractAllNodesInLink(h,allNodes);
         }
     }
 }
@@ -380,7 +405,7 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
 //    )
 vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, unsigned int gram)
 {
-    map<Handle,Handle> valueToVarMap;
+    map<Handle,Handle> valueToVarMap;  // the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
     vector<HTreeNode*> allNewPatternKeys;
 
     // First, extract all the nodes in the input links
@@ -462,7 +487,6 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
             {
                 newHTreeNode->pattern = unifiedPattern;
                 allNewPatternKeys.push_back(newHTreeNode);
-                newHTreeNode->patternVarMap = patternVarMap;
                 (patternsForGram[gram-1]).push_back(newHTreeNode);
             }
 
@@ -673,14 +697,27 @@ Handle PatternMiner::getFirstNonIgnoredIncomingLink(AtomSpace *atomspace, Handle
 
 void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram)
 {
-    map<Handle, Handle>::iterator varIt = curHTreeNode->patternVarMap.begin();
+    // debug:
+    string instanceInst = unifiedPatternToKeyString(instance, originalAtomSpace);
+    if (instanceInst.find("$var") != std::string::npos)
+    {
+        cout << "Debug: error! The instance contines variables!" << instanceInst << std::endl;
+    }
 
-    for(;varIt != curHTreeNode->patternVarMap.end(); ++ varIt)
+    // First, extract all the nodes in the instance links
+    set<Handle> allNodes;
+
+    foreach (Handle link, instance)
+        extractAllNodesInLink(link, allNodes);
+
+    set<Handle>::iterator varIt;
+
+    for(varIt = allNodes.begin(); varIt != allNodes.end(); ++ varIt)
     {
         // find what are the other links in the original Atomspace contain this variable
-        HandleSeq incomings = originalAtomSpace->getIncoming( ((Handle)(varIt->first)));
+        HandleSeq incomings = originalAtomSpace->getIncoming( ((Handle)(*varIt)));
         // debug
-        string curvarstr = originalAtomSpace->atomAsString((Handle)(varIt->first));
+        string curvarstr = originalAtomSpace->atomAsString((Handle)(*varIt));
 
         foreach(Handle incomingHandle, incomings)
         {
@@ -700,6 +737,12 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
 
             if (isInHandleSeq(extendedHandle, instance))
                 continue;
+
+            if (extendedHandleStr.find("$var") != std::string::npos)
+            {
+                cout << "Debug: error! The extended link contines variables!" << extendedHandleStr << std::endl;
+                continue;
+            }
 
             // Add this extendedHandle to the old pattern so as to make a new pattern
             HandleSeq originalLinks = instance;
@@ -876,25 +919,28 @@ void PatternMiner::runPatternMiner()
 
 }
 
-std::string PatternMiner::Link2keyString(Handle& h, std::string indent)
+std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const AtomSpace *atomspace)
 {
+    if (atomspace == 0)
+        atomspace = this->atomSpace;
+
     std::stringstream answer;
     std::string more_indent = indent + "  ";
 
-    answer << indent  << "(" << classserver().getTypeName(atomSpace->getType(h)) << " ";
+    answer << indent  << "(" << classserver().getTypeName(atomspace->getType(h)) << " ";
 
-    if (atomSpace->isNode(h))
+    if (atomspace->isNode(h))
     {
-        answer << atomSpace->getName(h);
+        answer << atomspace->getName(h);
     }
 
     answer << ")" << "\n";
 
-    if (atomSpace->isLink(h))
+    if (atomspace->isLink(h))
     {
-        HandleSeq outgoings = atomSpace->getOutgoing(h);
+        HandleSeq outgoings = atomspace->getOutgoing(h);
         foreach(Handle outgoing, outgoings)
-            answer << Link2keyString(outgoing, more_indent);
+            answer << Link2keyString(outgoing, more_indent, atomspace);
     }
 
     return answer.str();

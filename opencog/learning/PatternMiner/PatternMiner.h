@@ -122,7 +122,7 @@ private:
     // Return unified ordered Handle vector
     vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern);
 
-    string unifiedPatternToKeyString(vector<Handle>& inputPattern);
+    string unifiedPatternToKeyString(vector<Handle>& inputPattern , const AtomSpace *atomspace = 0);
 
     // this function is called by RebindVariableNames
     void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks);
@@ -135,7 +135,9 @@ private:
     // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
     void generateALinkByChosenVariables(Handle &originalLink, map<Handle,Handle>& valueToVarMap, HandleSeq &outputOutgoings);
 
+     // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
     void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap);
+    void extractAllNodesInLink(Handle link, set<Handle>& allNodes); // just find all the nodes in the original atomspace for this link
 
     vector<HTreeNode *> extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, unsigned int gram = 1);
 
@@ -163,7 +165,8 @@ private:
 
     bool isIgnoredType(Type type);
 
-    std::string Link2keyString(Handle& link, string indent = "");
+    // if atomspace = 0, it will use the pattern mining Atomspace
+    std::string Link2keyString(Handle& link, string indent = "", const AtomSpace *atomspace = 0);
 
 public:
     PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram);
