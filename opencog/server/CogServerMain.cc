@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
     cogserve.openDatabase(); 
 
     // Load modules specified in config
-    cogserve.loadModules(); 
+    cogserve.loadModules(DEFAULT_MODULE_PATHS); 
     cogserve.loadSCMModules(DEFAULT_MODULE_PATHS);
 
     // enable the network server and run the server's main loop
