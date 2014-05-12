@@ -62,11 +62,14 @@ static const char* DEFAULT_CONFIG_PATHS[] =
 
 static const char* DEFAULT_MODULE_PATHS[] = 
 {
-    DATADIR,
+    PROJECT_BINARY_DIR,
+    PROJECT_SOURCE_DIR,
     "opencog",
     "../opencog",
     "../build/opencog",    // autogened scm files go into the build dir!
     "../bin/opencog",      // an alternate name for a build dir.
+    DATADIR,
+    CMAKE_INSTALL_PREFIX,
 #ifndef WIN32
     "/usr/local/share/opencog",  // search local first, then system.
     "/usr/share/opencog",
@@ -210,7 +213,7 @@ int main(int argc, char *argv[])
     cogserve.openDatabase(); 
 
     // Load modules specified in config
-    cogserve.loadModules(); 
+    cogserve.loadModules(DEFAULT_MODULE_PATHS); 
     cogserve.loadSCMModules(DEFAULT_MODULE_PATHS);
 
     // enable the network server and run the server's main loop
