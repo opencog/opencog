@@ -25,49 +25,208 @@ represented in AtomSpace notation (rather than natural language).
 
 Important notes:
 
-- We need to modify PLN to handle satisfying sets properly, see:
+- The demo is functional in that the required output is produced.
+  At the moment, this is only done using Python.
+  It should be done with RelEx2Logic in the Cogserver.
+  To do this, the Relex2Logic rules require modification for "is"/"be"
+  predicates, see:
+  - https://github.com/opencog/opencog/issues/726
+
+- There are some outstanding issues concerning satisfying sets:
   - https://github.com/opencog/opencog/issues/601
   - https://github.com/opencog/opencog/issues/602
   - https://github.com/opencog/opencog/issues/603
   - https://github.com/opencog/opencog/issues/613
-  - https://github.com/opencog/opencog/pull/637
 
-- The Relex2Logic rules require modification for "is"/"be" predicates, see:
-  - https://github.com/opencog/opencog/issues/726
+- And some concerning duplicates or bugs in the output:
+  - https://github.com/opencog/opencog/issues/733
+  - https://github.com/opencog/opencog/issues/734
+  - https://github.com/opencog/opencog/issues/735
 
 PLN rules needed:
 
 - EvaluationToMemberRule
 - MemberToInheritanceRule
 - DeductionRule
-
-## Logical output from Relex2Logic:
-
-### Predicates
+- InheritanceToMemberRule
+- MemberToEvaluationRule
 
 #### Important note
 
-The representation of "be" will change to an InheritanceLink rather than an EvaluationLink of a PredicateNode if issue #2 (above) is implemented.
+The representation of "be" should be an InheritanceLink rather than an
+EvaluationLink of a PredicateNode if issue #726 (above) is implemented.
 
-That representation would appear as:
+The InheritanceLink implementation is assumed for this example.
 
+For the Python example, concepts are used in lieu of concept instances.
+Running this with RelEx2Logic will use concept instances.
+
+
+### The inference process
+
+#### AtomSpace starting contents:
+
+##### Concepts
 ```
-(InheritanceLink
-    (ConceptNode "Socrates@7b03b9d8-cdee-4b35-bf29-c6fd35cb4229")
-    (ConceptNode "man@35b6f89b-5753-4da1-8dc4-55224cf56789"))
+(ConceptNode "Socrates" (av 0 0 0) (stv 0.001000 1.000000)) ; [1]
+ 
+(ConceptNode "man" (av 0 0 0) (stv 0.010000 1.000000)) ; [2]
+ 
+(ConceptNode "air" (av 0 0 0) (stv 0.010000 1.000000)) ; [3]
 ```
 
-However, the current representation produced is as follows.
-
-#### Current representation
-
+##### Set that satifies breathe(x,y)
 ```
-(PredicateNode "breathe")
-
-(PredicateNode "be")
+(ListLink (av 0 0 0) (stv 1.000000 0.000000)
+  (ConceptNode "man" (av 0 0 0) (stv 0.010000 1.000000)) ; [2]
+  (ConceptNode "air" (av 0 0 0) (stv 0.010000 1.000000)) ; [3]
+) ; [6]
 ```
 
-##### be(Socrates, man)
+##### breathe(x,y)
+```
+(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (PredicateNode "breathe" (av 0 0 0) (stv 1.000000 0.000000)) ; [5]
+  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+    (ConceptNode "man" (av 0 0 0) (stv 0.010000 1.000000)) ; [2]
+    (ConceptNode "air" (av 0 0 0) (stv 0.010000 1.000000)) ; [3]
+  ) ; [6]
+) ; [7]
+```
+
+##### Socrates IS-A man
+```
+(InheritanceLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "Socrates" (av 0 0 0) (stv 0.001000 1.000000)) ; [1]
+  (ConceptNode "man" (av 0 0 0) (stv 0.010000 1.000000)) ; [2]
+) ; [4]
+```
+
+#### Inference steps
+
+##### 1) EvaluationToMemberRule 
+
+###### Input
+```
+(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (PredicateNode "breathe" (av 0 0 0) (stv 1.000000 0.000000)) ; [5]
+  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+    (ConceptNode "man" (av 0 0 0) (stv 0.010000 1.000000)) ; [2]
+    (ConceptNode "air" (av 0 0 0) (stv 0.010000 1.000000)) ; [3]
+  ) ; [6]
+) ; [7]
+```
+
+##### Output (and 3 other variations of this link where elements of
+##### the ListLink are substituted with variables)
+```
+(MemberLink (stv 1.000000 1.000000)
+  (ConceptNode "man") ; [2]
+  (SatisfyingSetLink (stv 1.000000 1.000000)
+    (VariableNode "$X0") ; [144]
+    (EvaluationLink (stv 1.000000 0.000000)
+      (PredicateNode "breathe") ; [5]
+      (ListLink (stv 1.000000 0.000000)
+        (VariableNode "$X0") ; [144]
+        (ConceptNode "air") ; [3]
+      ) ; [146]
+    ) ; [147]
+  ) ; [148]
+) ; [149]
+```
+
+##### 2) MemberToInheritance Rule
+
+###### Input is previous output
+ 
+###### Output
+```
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "man") ; [2]
+  (SatisfyingSetLink (stv 1.000000 1.000000)
+    (VariableNode "$X0") ; [144]
+    (EvaluationLink (stv 1.000000 0.000000)
+      (PredicateNode "breathe") ; [5]
+      (ListLink (stv 1.000000 0.000000)
+        (VariableNode "$X0") ; [144]
+        (ConceptNode "air") ; [3]
+      ) ; [146]
+    ) ; [147]
+  ) ; [148]
+) ; [242]
+```
+
+##### 3) DeductionRule<InheritanceRule>
+
+###### Input is previous ouput and
+```
+[(InheritanceLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "Socrates" (av 0 0 0) (stv 0.001000 1.000000)) ; [1]
+  (ConceptNode "man" (av 0 0 0) (stv 0.010000 1.000000)) ; [2]
+) ; [4]
+```
+
+###### Output
+```
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "Socrates") ; [1]
+  (SatisfyingSetLink (stv 1.000000 0.000000)
+    (VariableNode "$X1") ; [145]
+    (EvaluationLink (stv 1.000000 0.000000)
+      (PredicateNode "breathe") ; [5]
+      (ListLink (stv 1.000000 0.000000)
+        (VariableNode "$X1") ; [145]
+        (ConceptNode "air") ; [3]
+      ) ; [281]
+    ) ; [282]
+  ) ; [283]
+) ; [284]
+```
+
+##### 4) InheritanceToMemberRule
+
+###### Input is previous output
+
+###### Output
+```
+(MemberLink (stv 1.000000 1.000000)
+  (ConceptNode "Socrates") ; [1]
+  (SatisfyingSetLink (stv 1.000000 0.000000)
+    (VariableNode "$X1") ; [145]
+    (EvaluationLink (stv 1.000000 0.000000)
+      (PredicateNode "breathe") ; [5]
+      (ListLink (stv 1.000000 0.000000)
+        (VariableNode "$X1") ; [145]
+        (ConceptNode "air") ; [3]
+      ) ; [281]
+    ) ; [282]
+  ) ; [283]
+) ; [477]
+```
+
+##### 5) MemberToEvaluationRule
+
+###### Input is previous output
+
+###### Final output
+```
+EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "breathe") ; [5]
+  (ListLink (stv 1.000000 0.000000)
+    (ConceptNode "Socrates") ; [1]
+    (ConceptNode "air") ; [3]
+  ) ; [542]
+) ; [543]
+```
+
+#### Note: Along the way, some other inferences which don't
+####       lead to the desired output are produced as well.
+
+
+
+### Current output by RelEx & RelEx2Logic (for reference)
+
+### be(Socrates, man)
 
 ```
 (EvaluationLink (stv 1.000000 0.000000)
@@ -79,7 +238,7 @@ However, the current representation produced is as follows.
 )
 ```
 
-##### breathe(men, air)
+### breathe(men, air)
 
 ```
 (EvaluationLink (stv 1.000000 0.000000)
@@ -166,3 +325,5 @@ However, the current representation produced is as follows.
   (PredicateNode "be")
 )
 ```
+
+
