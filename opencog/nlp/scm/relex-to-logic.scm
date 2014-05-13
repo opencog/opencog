@@ -290,3 +290,6 @@
     	)
 )
 
+(define (be-inheritance-rule subj_concept subj_instance obj_concept obj_instance)
+    (InheritanceLink (ConceptNode subj_instance) (ConceptNode obj_instance))
+)
