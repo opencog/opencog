@@ -47,6 +47,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/files.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
@@ -645,13 +646,7 @@ Module* CogServer::getModule(const std::string& moduleId)
 void CogServer::loadModules(const char* module_paths[])
 {
     if (NULL == module_paths) {
-        const char * mp[] = {
-            CMAKE_INSTALL_PREFIX,
-            PROJECT_BINARY_DIR,
-            PROJECT_SOURCE_DIR,
-            NULL
-        };
-        module_paths = mp;
+        module_paths = DEFAULT_MODULE_PATHS;
     }
 
     // Load modules specified in the config file
@@ -685,13 +680,7 @@ void CogServer::loadSCMModules(const char* config_paths[])
 {
 #ifdef HAVE_GUILE
     if (NULL == config_paths) {
-        const char * mp[] = {
-            CMAKE_INSTALL_PREFIX,
-            PROJECT_BINARY_DIR,
-            PROJECT_SOURCE_DIR,
-            NULL
-        };
-        config_paths = mp;
+        config_paths = DEFAULT_MODULE_PATHS;
     }
 
     load_scm_files_from_config(*atomSpace, config_paths);

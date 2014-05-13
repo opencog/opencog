@@ -19,11 +19,6 @@ TARGET_LINK_LIBRARIES(builtinreqs
 	cogutil
 )
 
-# The below are used to automatically find module load paths
-ADD_DEFINITIONS(
-	-DCMAKE_INSTALL_PREFIX="\\"${CMAKE_INSTALL_PREFIX}\\""
-)
-
 ADD_LIBRARY (server SHARED
 	Agent
 	BaseServer

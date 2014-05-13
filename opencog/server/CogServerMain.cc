@@ -42,6 +42,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/files.h>
 #include <opencog/util/misc.h>
 
 using namespace opencog;
@@ -56,23 +57,6 @@ static const char* DEFAULT_CONFIG_PATHS[] =
     CONFDIR,     // Next, the install directory
 #ifndef WIN32
     "/etc",      // Finally, in the standard ssytem directory.
-#endif // !WIN32
-    NULL
-};
-
-static const char* DEFAULT_MODULE_PATHS[] = 
-{
-    PROJECT_BINARY_DIR,
-    PROJECT_SOURCE_DIR,
-    "opencog",
-    "../opencog",
-    "../build/opencog",    // autogened scm files go into the build dir!
-    "../bin/opencog",      // an alternate name for a build dir.
-    DATADIR,
-    CMAKE_INSTALL_PREFIX,
-#ifndef WIN32
-    "/usr/local/share/opencog",  // search local first, then system.
-    "/usr/share/opencog",
 #endif // !WIN32
     NULL
 };

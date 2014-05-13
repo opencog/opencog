@@ -59,9 +59,9 @@ def scheme_eval_h(AtomSpace a, char* s):
     return Handle(ret.value())
 
 cdef extern from "opencog/guile/load-file.h" namespace "opencog":
-    int load_scm_file (cAtomSpace& as, char* filename)
+    int load_scm_file_relative (cAtomSpace& as, char* filename)
 
 def load_scm(AtomSpace a, char* fname):
-    status = load_scm_file(deref(a.atomspace), fname)
+    status = load_scm_file_relative(deref(a.atomspace), fname)
     return status == 0
 
