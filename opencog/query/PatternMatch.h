@@ -58,6 +58,7 @@ class PatternMatch
 		           Handle negations = Handle::UNDEFINED);
 
 		Handle bindlink(Handle);
+		Handle single_bindlink (Handle);
 		Handle crisp_logic_bindlink(Handle);
 
 		// deprecated; used only in the unit-test cases.
