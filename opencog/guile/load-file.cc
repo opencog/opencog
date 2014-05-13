@@ -30,27 +30,11 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/files.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/misc.h>
 
 namespace opencog {
-
-static const char * DEFAULT_MODULE_PATHS[] = {
-    PROJECT_BINARY_DIR,
-    PROJECT_BINARY_DIR "/opencog",
-    PROJECT_SOURCE_DIR,
-    PROJECT_SOURCE_DIR "/opencog",
-    CMAKE_INSTALL_PREFIX,
-    CMAKE_INSTALL_PREFIX "/opencog",
-    DATADIR,         // this too is an install dir
-    DATADIR "/opencog",
-#ifndef WIN32
-    "/usr/local/share/opencog",  // search local first, then system.
-    "/usr/share/opencog",
-    "/",
-#endif // !WIN32
-    NULL
-};
 
 /**
  * Load scheme code from a file.

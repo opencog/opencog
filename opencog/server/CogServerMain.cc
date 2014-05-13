@@ -42,6 +42,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/files.h>
 #include <opencog/util/misc.h>
 
 using namespace opencog;
