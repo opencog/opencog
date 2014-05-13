@@ -35,6 +35,23 @@
 
 namespace opencog {
 
+static const char * DEFAULT_MODULE_PATHS[] = {
+    PROJECT_BINARY_DIR,
+    PROJECT_BINARY_DIR "/opencog",
+    PROJECT_SOURCE_DIR,
+    PROJECT_SOURCE_DIR "/opencog",
+    CMAKE_INSTALL_PREFIX,
+    CMAKE_INSTALL_PREFIX "/opencog",
+    DATADIR,         // this too is an install dir
+    DATADIR "/opencog",
+#ifndef WIN32
+    "/usr/local/share/opencog",  // search local first, then system.
+    "/usr/share/opencog",
+    "/",
+#endif // !WIN32
+    NULL
+};
+
 /**
  * Load scheme code from a file.
  * The code will be loaded into a running instance of the evaluator.
@@ -100,14 +117,7 @@ int load_scm_file (AtomSpace& as, const char * filename)
 int load_scm_file_relative (AtomSpace& as, const char * filename, const char* search_paths[])
 {
     if (NULL == search_paths) {
-        const char * mp[] = {
-            CMAKE_INSTALL_PREFIX,
-            PROJECT_BINARY_DIR,
-            PROJECT_SOURCE_DIR,
-            "/",
-            NULL
-        };
-        search_paths = mp;
+        search_paths = DEFAULT_MODULE_PATHS;
     }
 
     int rc = 2;

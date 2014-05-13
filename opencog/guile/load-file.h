@@ -30,6 +30,8 @@ namespace opencog {
  *  @{
  */
 
+static const char** DEFAULT_MODULE_PATHS;
+
 #ifdef HAVE_GUILE
 int load_scm_file (AtomSpace& as, const char * filename);
 int load_scm_file_relative (AtomSpace& as, const char * filename, const char * paths[] = NULL);

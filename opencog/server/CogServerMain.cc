@@ -60,23 +60,6 @@ static const char* DEFAULT_CONFIG_PATHS[] =
     NULL
 };
 
-static const char* DEFAULT_MODULE_PATHS[] = 
-{
-    PROJECT_BINARY_DIR,
-    PROJECT_SOURCE_DIR,
-    "opencog",
-    "../opencog",
-    "../build/opencog",    // autogened scm files go into the build dir!
-    "../bin/opencog",      // an alternate name for a build dir.
-    DATADIR,
-    CMAKE_INSTALL_PREFIX,
-#ifndef WIN32
-    "/usr/local/share/opencog",  // search local first, then system.
-    "/usr/share/opencog",
-#endif // !WIN32
-    NULL
-};
-
 static void usage(const char* progname)
 {
     std::cerr << "Usage: " << progname << " [[-c <config-file>]..] [[-DOPTION=\"VALUE\"]..]\n\n";
