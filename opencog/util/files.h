@@ -42,7 +42,7 @@ namespace opencog
  * Set of paths to search when attempting to load a module.
  * This is used both for loading shared libs and scheme files.
  */
-static const char** DEFAULT_MODULE_PATHS;
+extern const char** DEFAULT_MODULE_PATHS;
 
 /**
  * Check if a file exists in the current directory

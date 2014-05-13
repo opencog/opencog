@@ -56,7 +56,7 @@
  * searched, as they will not exist on the user's machine.  I don't
  * know how to disable this, though...
  */
-static const char * DEFAULT_MODULE_PATHS[] =
+static const char *paths[] =
 {
     PROJECT_BINARY_DIR,
     PROJECT_BINARY_DIR "/opencog",
@@ -73,6 +73,7 @@ static const char * DEFAULT_MODULE_PATHS[] =
 #endif // !WIN32
     NULL
 };
+const char ** opencog::DEFAULT_MODULE_PATHS = paths;
 
 bool opencog::fileExists(const char* filename)
 {
