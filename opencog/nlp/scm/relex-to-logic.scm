@@ -192,6 +192,21 @@
 	)
 )
 
+(define (to-do-rule-3 v1 v1_instance v2 v2_instance v3 v3_instance)
+        (InheritanceLink (ConceptNode v1_instance) (ConceptNode v1))
+        (InheritanceLink (PredicateNode v2_instance) (PredicateNode v2))
+        (InheritanceLink (ConceptNode v3_instance) (ConceptNode v3))
+        (EvaluationLink
+                (PredicateNode v2_instance)
+                (ListLink
+                        (InheritanceLink
+                                (ConceptNode v3_instance)
+                                (ConceptNode v1_instance)
+                        )
+                )
+        )
+)
+
 (define (to-be-rule verb verb_ins adj adj_ins subj subj_ins)
 	(InheritanceLink (PredicateNode verb_ins) (PredicateNode verb))
 	(InheritanceLink (ConceptNode subj_ins) (ConceptNode subj))
