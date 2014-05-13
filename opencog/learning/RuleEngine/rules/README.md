@@ -56,8 +56,10 @@ The following rules are defined for the corresponding rule bases:
 
     (cog-bind find-humans)
 
-7. Observe that there are 3 additional instances of human defined:
+- Observe that there are 3 additional instances of human defined:
 
     (ConceptNode "Socrates")
+
     (ConceptNode "Einstein")
+
     (ConceptNode "Peirce")
