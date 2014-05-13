@@ -224,8 +224,12 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 		_root = clauses[bestclause];
 		dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
 		dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
-		foreach_incoming_handle(best_start,
-		                  &DefaultPatternMatchCB::loop_candidate, this);
+		IncomingSet iset = get_incoming_set(best_start);
+		size_t sz = iset.size();
+		for (size_t i = 0; i < sz; i++) {
+			bool rc = loop_candidate(Handle(iset[i]));
+			if (rc) break;
+		}
 	}
 	else
 	{
