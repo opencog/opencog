@@ -134,19 +134,19 @@ namespace opencog
                  * The computed distance will be the referenceEntity and a given different entity
                  * @param referenceObject
                  */
-                inline EntityDistanceComparator( const EntityPtr& referenceObject ) : 
-                    referenceEntity( referenceEntity ) 
+                EntityDistanceComparator( const EntityPtr& referenceObject ) : 
+                    referenceEntity(referenceObject) 
                 {
                 }
 
-                inline virtual ~EntityDistanceComparator( void ) 
+                virtual ~EntityDistanceComparator( void ) 
                 { 
                 }
 
                 /*
                  *
                  */
-                inline bool operator()( const EntityPtr& o1, const EntityPtr& o2) const 
+                bool operator()( const EntityPtr& o1, const EntityPtr& o2) const 
                 {
                     double distanceToObject1 = referenceEntity->distanceTo(*o1);
                     double distanceToObject2 = referenceEntity->distanceTo(*o2);
