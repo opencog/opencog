@@ -34,7 +34,6 @@ Important notes:
 
 - There are some outstanding issues concerning satisfying sets:
   - https://github.com/opencog/opencog/issues/601
-  - https://github.com/opencog/opencog/issues/602
   - https://github.com/opencog/opencog/issues/603
   - https://github.com/opencog/opencog/issues/613
 
@@ -58,9 +57,11 @@ EvaluationLink of a PredicateNode if issue #726 (above) is implemented.
 
 The InheritanceLink implementation is assumed for this example.
 
-For the Python example, concepts are used in lieu of concept instances.
-Running this with RelEx2Logic will use concept instances.
+The example can be loaded into the Cogserver as a MindAgent or run
+with Python.
 
+For this example at the moment, concepts are used. These can be
+changed for concept instances later.
 
 ### The inference process
 
@@ -75,7 +76,7 @@ Running this with RelEx2Logic will use concept instances.
 (ConceptNode "air" (av 0 0 0) (stv 0.010000 1.000000)) ; [3]
 ```
 
-##### Set that satifies breathe(x,y)
+##### Tuple that satifies breathe(x,y)
 ```
 (ListLink (av 0 0 0) (stv 1.000000 0.000000)
   (ConceptNode "man" (av 0 0 0) (stv 0.010000 1.000000)) ; [2]
@@ -117,8 +118,7 @@ Running this with RelEx2Logic will use concept instances.
 ) ; [7]
 ```
 
-##### Output (and 3 other variations of this link where elements of
-##### the ListLink are substituted with variables)
+##### Output (and 3 other variations of this link where elements of the ListLink are substituted with variables)
 ```
 (MemberLink (stv 1.000000 1.000000)
   (ConceptNode "man") ; [2]
@@ -219,8 +219,7 @@ EvaluationLink (stv 1.000000 1.000000)
 ) ; [543]
 ```
 
-#### Note: Along the way, some other inferences which don't
-####       lead to the desired output are produced as well.
+#### Note: Along the way, some other inferences which don't lead to the desired output are produced as well.
 
 
 
@@ -325,5 +324,3 @@ EvaluationLink (stv 1.000000 1.000000)
   (PredicateNode "be")
 )
 ```
-
-
