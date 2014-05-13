@@ -39,7 +39,8 @@ ENDMACRO(CYTHON_ADD_MODULE_PYX)
 IF (HAVE_ATOMSPACE)
 	###################### logger ##########################################
 	CYTHON_ADD_MODULE_PYX(logger)
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logger.cpp")
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logger.cpp" 
+		"../../util/Logger.h")
 
 	ADD_LIBRARY(logger_cython SHARED
 		logger.cpp
@@ -57,7 +58,12 @@ IF (HAVE_ATOMSPACE)
 	###################### atomspace ####################################
 	CYTHON_ADD_MODULE_PYX(atomspace
 		"atom.pyx" "classserver.pyx" "atomspace_details.pyx"
-		"spacetime.pyx" opencog_atom_types)
+		"spacetime.pyx" opencog_atom_types
+		"../../atomspace/TruthValue.h" "../../atomspace/SimpleTruthValue.h"
+		"../../atomspace/ClassServer.h" "../../atomspace/Handle.h"
+		"../../atomspace/AtomSpace.h"
+		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
+	)
 
 	# list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace.cpp")
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
@@ -97,7 +103,8 @@ ENDIF (HAVE_ATOMSPACE)
 IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	############################## scheme wrapper #####################
 	CYTHON_ADD_MODULE_PYX(scheme_wrapper
-		"PyScheme.cc" "atomspace.pxd" opencog_atom_types)
+		"PyScheme.h" "atomspace.pxd" opencog_atom_types
+		"../../guile/load-file.h" "../../query/PatternSCM.h")
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
@@ -122,7 +129,13 @@ ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 IF (HAVE_SERVER)
 	############################ cogserver #########################
 	CYTHON_ADD_MODULE_PYX(cogserver
-		"request.pyx" "agent.pyx" "atomspace.pxd" opencog_atom_types)
+		"request.pyx" "agent.pyx" "atomspace.pxd" opencog_atom_types
+		"agent_finder_types.h"
+		"../../atomspace/TruthValue.h" "../../atomspace/SimpleTruthValue.h"
+		"../../atomspace/ClassServer.h" "../../atomspace/Handle.h"
+		"../../atomspace/AtomSpace.h"
+		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
+	)
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "cogserver.cpp")
 
@@ -142,7 +155,13 @@ IF (HAVE_SERVER)
 
 	####################### agent finder ########################
 	CYTHON_ADD_MODULE_PYX(agent_finder
-		"atomspace.pxd" "cogserver.pxd")
+		"atomspace.pxd" "cogserver.pxd"
+		"../../server/Agent.h" "../../server/Request.h"
+		"../../atomspace/TruthValue.h" "../../atomspace/SimpleTruthValue.h"
+		"../../atomspace/ClassServer.h" "../../atomspace/Handle.h"
+		"../../atomspace/AtomSpace.h"
+		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
+	)
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES
 		"agent_finder.cpp" "agent_finder_api.h")
@@ -167,7 +186,9 @@ IF (HAVE_SERVER)
 ENDIF(HAVE_SERVER)
 
 IF (HAVE_MOSES)
-	CYTHON_ADD_MODULE_PYX(pymoses)
+	CYTHON_ADD_MODULE_PYX(pymoses
+		"../../learning/moses/main/moses_exec.h"
+	)
 
 	# opencog.pymoses Python bindings
 	ADD_LIBRARY(moses_cython SHARED
