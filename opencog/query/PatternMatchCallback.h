@@ -76,7 +76,7 @@ class PatternMatchCallback
 		virtual bool link_match(LinkPtr& link1, LinkPtr& link2) = 0;
 
 		/**
-		 * Called when a solution is found. Should 
+		 * Called when a solution is found. Should
 		 * return false to search for more solutions;
 		 * or return true to terminate search.
 		 */
@@ -91,8 +91,8 @@ class PatternMatchCallback
 		 *
 		 * A clause match has occured if all calls to node_match()
 		 * and link_match() in that clause have returned false.
-		 * 
-		 * Return true to discard the use of this clause as a possible 
+		 *
+		 * Return true to discard the use of this clause as a possible
 		 * grounding, return false to use this grounding.
 		 */
 		virtual bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h)
@@ -108,7 +108,7 @@ class PatternMatchCallback
 		 *
 		 * Return true to terminate further searches from this point
 		 * on; the result of termination will be backtracking to search
-		 * for other possible groundings of the required clauses. 
+		 * for other possible groundings of the required clauses.
 		 * Return false to examine the next optional clause (if any).
 		 *
 		 * Note that all required clauses will have been grounded before
@@ -117,6 +117,19 @@ class PatternMatchCallback
 		virtual bool optional_clause_match(Handle& pattrn, Handle& grnd)
 		{
 			return false;
+		}
+
+		/**
+		 * Called whenever the incoming set of an atom is to be explored.
+		 * The search space can be prioritized by returning a list in
+		 * some sorted order: the first ones will be searched first.
+		 * The search space can also be limited, by returning a set that
+		 * is smaller than the full incoming set (for example, by
+		 * returning only those atoms with a high av sti).
+		 */
+		virtual IncomingSet get_incoming_set(Handle h)
+		{
+			return h->getIncomingSet();
 		}
 
 		/**
