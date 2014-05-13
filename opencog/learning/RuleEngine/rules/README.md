@@ -32,19 +32,32 @@ The following rules are defined for the corresponding rule bases:
 
 ## Example
 
-1. Load the deduction rule definitions:
+- Load the deduction rule definitions:
+
     learning/RuleEngine/rules/pln/deduction.scm
-2. Load this file containing the data:
+
+- Load this file containing the data:
+
     tests/learning/RuleEngine/simple-assertions.scm
-3. Run this command:
+
+- Run this command:
+
     (cog-bind find-humans)
-4. Observe that there is only one instance of human defined:
+
+- Observe that there is only one instance of human defined:
+
     (ConceptNode "man")
-5. Run this command:
+
+- Run this command:
+
     (cog-bind pln-rule-deduction)
-6. Run this command again:
+
+- Run this command again:
+
     (cog-bind find-humans)
-7. Observe that there are 3 additional instances of human defined.
+
+7. Observe that there are 3 additional instances of human defined:
+
     (ConceptNode "Socrates")
     (ConceptNode "Einstein")
     (ConceptNode "Peirce")
