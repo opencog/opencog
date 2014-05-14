@@ -23,7 +23,8 @@ RUN su buildbot sh -c "git remote add origin git://github.com/opencog/opencog"
 
 # set buildslave admin and host info
 RUN echo "David Hart <dhart@opencog.org>" > /buildbot/info/admin && \
-    echo "Intel Core i7-3770 CPU @ 3.40GHz 16GB RAM\nUbuntu 14.04 (Trusty Tahr)" > /buildbot/info/host
+    grep "model name" /proc/cpuinfo | head -1 | cut -d ":" -f 2 | tr -d " " > /buildbot/info/host && \
+    grep DISTRIB_DESCRIPTION /etc/lsb-release | cut -d "=" -f 2 | tr -d "\"" >> /buildbot/info/host
 
 CMD su buildbot sh -c "\
 sed -i s:BUILDSLAVE_NAME:$BUILDSLAVE_NAME:g /buildbot/buildbot.tac && \
