@@ -560,7 +560,7 @@ protected:
 
         const diversity_parameters& dparams;
         std::atomic<unsigned> misses, hits;
-        std::unordered_map<ptr_pair, dp_t, std::hash<ptr_pair>> cache;
+        std::unordered_map<ptr_pair, dp_t, boost::hash<ptr_pair>> cache;
     };
 
     cached_dst _cached_dst;

@@ -40,16 +40,11 @@ class ProbabilityDistributionPiecewiseLinear(list, TimeInterval, rv_frozen):
             pdf_y_intercept = fabs(self.cdf.derivative((a + b) / 2.0))
             pdf_output_list.append(pdf_y_intercept)
             dictionary_bounds_function[bounds] = FunctionHorizontalLinear(pdf_y_intercept)
-            #dictionary_bounds_function[bounds] = FunctionLinear(
-            #    x_0=a, y_0=pdf_y_intercept - pdf_y_intercept / 2.0,
-            #    x_1=b, y_1=pdf_y_intercept + pdf_y_intercept / 2.0)
 
         self.pdf = FunctionComposite(dictionary_bounds_function, function_undefined=FUNCTION_ZERO, domain=self,
                                      is_normalised=True)
 
         self.roulette_wheel = []
-        #center_of_mass_lower_bound = 0
-        #center_of_mass_set = False
 
         self._mean = 0
         for bounds in sorted(self.pdf.dictionary_bounds_function):
@@ -61,26 +56,7 @@ class ProbabilityDistributionPiecewiseLinear(list, TimeInterval, rv_frozen):
             share = cdf(b)
             self.roulette_wheel.append((a, b, share))
 
-            #if not center_of_mass_set and share > 0.5:
-            #    self._center_of_mass = UnixTime(self._calculate_center_of_mass(center_of_mass_lower_bound, b))
-            #    center_of_mass_set = True
-            #center_of_mass_lower_bound = b
-
             self._mean += (a + b) / 2.0 * pdf(a) * (b - a)
-
-    #def _calculate_center_of_mass(self, lower_bound, upper_bound):
-    #    while True:
-    #        distance = fabs(upper_bound - lower_bound)
-    #        target = lower_bound - distance / 2
-    #        if distance < EPSILON:
-    #            return lower_bound
-    #        difference = self.cdf(target) - 0.5
-    #        if fabs(difference) < EPSILON:
-    #            return target
-    #        if difference > 0:
-    #            lower_bound = target
-    #        else:
-    #            upper_bound = target
 
     def std(self):
         # Not properly implemented

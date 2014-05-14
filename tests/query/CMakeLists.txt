@@ -40,6 +40,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(UnorderedUTest)
 	ADD_CXXTEST(StackMoreUTest)
 	ADD_CXXTEST(EinsteinUTest)
+        ADD_CXXTEST(SingleUTest)
 
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		cogutil
@@ -64,3 +65,5 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-u-o.scm
     ${PROJECT_BINARY_DIR}/tests/query/stackmore-u-o.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-u-u.scm
     ${PROJECT_BINARY_DIR}/tests/query/stackmore-u-u.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/single.scm
+    ${PROJECT_BINARY_DIR}/tests/query/single.scm)

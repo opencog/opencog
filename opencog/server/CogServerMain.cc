@@ -42,6 +42,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/files.h>
 #include <opencog/util/misc.h>
 
 using namespace opencog;
@@ -56,20 +57,6 @@ static const char* DEFAULT_CONFIG_PATHS[] =
     CONFDIR,     // Next, the install directory
 #ifndef WIN32
     "/etc",      // Finally, in the standard ssytem directory.
-#endif // !WIN32
-    NULL
-};
-
-static const char* DEFAULT_MODULE_PATHS[] = 
-{
-    DATADIR,
-    "opencog",
-    "../opencog",
-    "../build/opencog",    // autogened scm files go into the build dir!
-    "../bin/opencog",      // an alternate name for a build dir.
-#ifndef WIN32
-    "/usr/local/share/opencog",  // search local first, then system.
-    "/usr/share/opencog",
 #endif // !WIN32
     NULL
 };
@@ -210,7 +197,7 @@ int main(int argc, char *argv[])
     cogserve.openDatabase(); 
 
     // Load modules specified in config
-    cogserve.loadModules(); 
+    cogserve.loadModules(DEFAULT_MODULE_PATHS); 
     cogserve.loadSCMModules(DEFAULT_MODULE_PATHS);
 
     // enable the network server and run the server's main loop

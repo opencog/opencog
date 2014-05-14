@@ -45,6 +45,36 @@
 
 #define USER_FLAG "$USER"
 
+/**
+ * The file paths here have to be able to find both shared libraries
+ * (dynamicaly loadable libraries) as well as scheme modules and files.
+ *
+ * The basic search algo is that anything in the user's directory is
+ * explored first, before anything in the system directories.
+ *
+ * XXX FIXME -- for binary installs, the project dirs should not be
+ * searched, as they will not exist on the user's machine.  I don't
+ * know how to disable this, though...
+ */
+static const char *paths[] =
+{
+    PROJECT_BINARY_DIR,
+    PROJECT_BINARY_DIR "/opencog",
+    PROJECT_SOURCE_DIR,
+    PROJECT_SOURCE_DIR "/opencog",
+    CMAKE_INSTALL_PREFIX,
+    CMAKE_INSTALL_PREFIX "/opencog",
+    DATADIR,         // this too is an install dir
+    DATADIR "/opencog",
+#ifndef WIN32
+    "/usr/local/share/opencog",  // search local first, then system.
+    "/usr/share/opencog",
+    "/",
+#endif // !WIN32
+    NULL
+};
+const char ** opencog::DEFAULT_MODULE_PATHS = paths;
+
 bool opencog::fileExists(const char* filename)
 {
     std::fstream dumpFile(filename, std::ios::in);

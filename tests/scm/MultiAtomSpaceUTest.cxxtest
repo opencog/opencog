@@ -86,18 +86,8 @@ void MultiAtomSpace::setUp(void)
 		"opencog/atomspace/core_types.scm, "
 		"tests/scm/multispace.scm");
 
-	// Blindly search a bunch of paths hoping to find the files
-	// in one of them ...
-	const char * paths[] =
-	{
-		"./",
-		"../",
-		"../../",
-		"../../../",
-		NULL
-	};
-	cogserver().loadModules(paths);
-	cogserver().loadSCMModules(paths);
+	cogserver().loadModules();
+	cogserver().loadSCMModules();
 
 }
 
@@ -221,25 +211,14 @@ void MultiAtomSpace::test_load(void)
 	AtomSpace* as1 = new AtomSpace();
 	AtomSpace* as2 = new AtomSpace();
 
-   // Blindly search a bunch of paths hoping to find the files
-   // in one of them ...
-   const char * paths[] =
-   {
-      "./",
-      "../",
-      "../../",
-      "../../../",
-      NULL
-   };
-
    config().set("SCM_PRELOAD",
       "opencog/atomspace/core_types.scm, "
       "opencog/nlp/types/nlp_types.scm, "
       "opencog/scm/utilities.scm, "
 	   "tests/scm/utils-test.scm");
 
-	load_scm_files_from_config(*as1, paths);
-	load_scm_files_from_config(*as2, paths);
+	load_scm_files_from_config(*as1);
+	load_scm_files_from_config(*as2);
 	// load_scm_file(*as1, "tests/scm/utils-test.scm");
 	// load_scm_file(*as2, "tests/scm/utils-test.scm");
 

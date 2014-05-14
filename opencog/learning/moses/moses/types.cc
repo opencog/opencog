@@ -68,7 +68,7 @@ bool pbscored_combo_tree_greater::operator()(const pbscored_combo_tree& bs_tr1,
 const composite_score worst_composite_score = composite_score();
 
 composite_score::composite_score()
-    : score(very_worst_score), complexity(worst_complexity),
+    : score(very_worst_score), complexity(least_complexity),
       complexity_penalty(0.0), diversity_penalty(0.0),
       penalized_score(very_worst_score)
 {}

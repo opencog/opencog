@@ -27,7 +27,6 @@ ADD_LIBRARY(comboreduct SHARED
 	combo/procedure_repository
 	combo/simple_nn
 	combo/tree_generation
-	combo/using
 	combo/variable_unifier
 	combo/vertex
 
@@ -36,7 +35,7 @@ ADD_LIBRARY(comboreduct SHARED
 
 	interpreter/eval
 	interpreter/perception_eval
-    interpreter/interpreter
+	interpreter/interpreter
 
 	type_checker/type_tree_def
 	type_checker/type_tree
@@ -61,7 +60,6 @@ ADD_LIBRARY(comboreduct SHARED
 	reduct/perception_reduction
 	reduct/perception_rules
 	reduct/reduct
-	reduct/using
 
 	ant_combo_vocabulary/ant_builtin_action
 	ant_combo_vocabulary/ant_perception

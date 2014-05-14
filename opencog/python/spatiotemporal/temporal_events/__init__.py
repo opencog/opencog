@@ -125,6 +125,13 @@ class TemporalEvent(list, TimeInterval):
     def ending(self):
         return self._ending
 
+    def __getitem__(self, portion_index):
+        if portion_index not in [0, 1]:
+            raise IndexError("TemporalEvent object only accepts '0' or '1' as index")
+        if portion_index == 0:
+            return self.distribution_beginning
+        return self.distribution_ending
+
     def __mul__(self, other):
         return self.temporal_relations_with(other)
 

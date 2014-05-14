@@ -26,20 +26,20 @@ class SchemeTest(TestCase):
 
         # These relative paths are horridly ugly.
         # There must be a better way ...
-        status = load_scm(self.space, "../../opencog/atomspace/core_types.scm")
+        status = load_scm(self.space, "opencog/atomspace/core_types.scm")
         self.assertTrue(status)
 
-        status = load_scm(self.space, "../../opencog/nlp/types/nlp_types.scm")
+        status = load_scm(self.space, "opencog/nlp/types/nlp_types.scm")
         self.assertTrue(status)
 
-        status = load_scm(self.space, "../../../opencog/scm/utilities.scm")
+        status = load_scm(self.space, "opencog/scm/utilities.scm")
         self.assertTrue(status)
 
     # Load a file that results in atoms placed in the atomspace.
     # Make sure the loaded atom is what we think it is.
     def test_b_load_file(self):
 
-        status = load_scm(self.space, "../../../tests/cython/guile/basic_unify.scm")
+        status = load_scm(self.space, "tests/cython/guile/basic_unify.scm")
         self.assertTrue(status)
 
         a1 = self.space.add_node(types.ConceptNode, "hello")

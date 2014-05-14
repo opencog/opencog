@@ -69,11 +69,6 @@ IF (APPLE)
 	#SET_TARGET_PROPERTIES(cogserver PROPERTIES INSTALL_RPATH
 	#	${PROJECT_BINARY_DIR}/opencog/guile)
 	#SET_TARGET_PROPERTIES(cogserver PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
-ELSE(APPLE)
-# This is just plain wrong, it won't link the test cases correctly.
-#
-#	SET_TARGET_PROPERTIES(server PROPERTIES LINK_FLAGS
-#		-Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/visualization/dotty:${PROJECT_BINARY_DIR}/opencog/visualization/ubigraph:${PROJECT_BINARY_DIR}/opencog/dynamics/attention:${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/learning/dimensionalembedding:${PROJECT_BINARY_DIR}/opencog/nlp/wsd:${PROJECT_BINARY_DIR}/opencog/persist:${PROJECT_BINARY_DIR}/opencog/query:${PROJECT_BINARY_DIR}/opencog/server:${PROJECT_BINARY_DIR}/opencog/shell:${PROJECT_BINARY_DIR}/opencog/util:${PROJECT_BINARY_DIR}/opencog/web:${PROJECT_BINARY_DIR}/opencog/cython/)
 ENDIF (APPLE)
 #ENDIF (CMAKE_BUILD_TYPE STREQUAL "Debug")
 

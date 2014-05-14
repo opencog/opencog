@@ -96,18 +96,8 @@ void VarTypeNot::setUp(void)
 		"opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
 		"tests/query/var-type-not.scm");
 
-	// Blindly search a bunch of paths hoping to find the files
-	// in one of them ...
-	const char * paths[] =
-	{
-		"./",
-		"../",
-		"../../",
-		"../../../",
-		NULL
-	};
-	cogserver().loadModules(paths);
-	load_scm_files_from_config(*as, paths);
+	cogserver().loadModules();
+	load_scm_files_from_config(*as);
 
 	// Create an implication link that will be tested.
 	SchemeEval* evaluator = new SchemeEval(as);

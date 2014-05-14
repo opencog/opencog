@@ -27,12 +27,12 @@
 
 #include <functional>
 #include <iomanip>
+#include <unordered_map>
 
-#include <boost/unordered_map.hpp>
-#include <boost/iterator/indirect_iterator.hpp>
-#include <boost/operators.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/iterator/indirect_iterator.hpp>
+#include <boost/operators.hpp>
 #include <boost/ptr_container/ptr_set.hpp>
 
 #include <opencog/util/functional.h>
@@ -66,12 +66,7 @@ typedef float score_t;
 static const int io_score_precision = 32;
 
 static const score_t very_best_score = std::numeric_limits<score_t>::max();
-
-// below we use 1 - best score and not
-// std::numeric_limits<score_t>::min, please recall that in the STL
-// standard min when applied to a floating type returns the smallest
-// possible representable value
-static const score_t very_worst_score = score_t(1) - very_best_score;
+static const score_t very_worst_score = std::numeric_limits<score_t>::lowest();
 
 // But modify the default sort ordering for these objects.
 struct composite_score:
@@ -278,9 +273,9 @@ typedef pbscored_combo_tree_seq::const_iterator pbscored_combo_tree_seq_cit;
 
 /// metapop_candidates provides an O(1) way of determining if a combo
 /// tree is in the map, or not (and getting its score, if it is).
-typedef boost::unordered_map<combo::combo_tree,
-                             pbscored_combo_tree::second_type,
-                             boost::hash<combo::combo_tree> > metapop_candidates;
+typedef std::unordered_map<combo::combo_tree,
+                           pbscored_combo_tree::second_type,
+                           boost::hash<combo::combo_tree> > metapop_candidates;
 typedef metapop_candidates::value_type metapop_candidate;
 typedef metapop_candidates::iterator metapop_candidates_it;
 typedef metapop_candidates::const_iterator metapop_candidates_cit;

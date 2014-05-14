@@ -10,6 +10,7 @@
 
 using namespace opencog;
 using namespace moses;
+using namespace std;
 
 class NeighborSamplingUTest : public CxxTest::TestSuite {
 public:

@@ -120,22 +120,3 @@ class TimeInterval(object):
     def __str__(self):
         return 'from {0} to {1}'.format(self.a, self.b)
 
-
-if __name__ == '__main__':
-    import time
-    a = TimeInterval(1, 100000, 1000000)
-    b = []
-
-    start = time.time()
-    ls = a.to_list()
-
-    for t in xrange(len(a)):
-        b.append(ls[t])
-
-    list_performance = time.time() - start
-
-    start = time.time()
-    for t in xrange(len(a)):
-        b.append(a[t])
-
-    print 'time:', list_performance, 'for list vs.', time.time() - start, 'direct'

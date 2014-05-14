@@ -454,8 +454,14 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 
 	// Move up the predicate, and hunt for a match, again.
 	prtmsg("node has grnd, move up:", hsoln);
-	bool found = foreach_incoming_handle(curr_pred_handle,
-	                &PatternMatchEngine::pred_up, this);
+	// IncomingSet iset = get_incoming_set(curr_pred_handle);
+	IncomingSet iset = curr_pred_handle->getIncomingSet();
+	size_t sz = iset.size();
+	bool found = false;
+	for (size_t i = 0; i < sz; i++) {
+		found = pred_up(Handle(iset[i]));
+		if (found) break;
+	}
 	dbgprt("after moving up the clause, found = %d\n", found);
 
 	curr_soln_handle = soln_handle_stack.top();
@@ -475,8 +481,13 @@ bool PatternMatchEngine::pred_up(Handle h)
 	Handle curr_pred_save(curr_pred_handle);
 	curr_pred_handle = h;
 
-	bool found = foreach_incoming_handle(curr_soln_handle,
-	                     &PatternMatchEngine::soln_up, this);
+	IncomingSet iset = pmc->get_incoming_set(curr_soln_handle);
+	size_t sz = iset.size();
+	bool found = false;
+	for (size_t i = 0; i < sz; i++) {
+		found = soln_up(Handle(iset[i]));
+		if (found) break;
+	}
 
 	curr_pred_handle = curr_pred_save;
 	dbgprt("found upward soln = %d\n", found);

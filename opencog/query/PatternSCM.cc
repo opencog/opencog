@@ -36,6 +36,7 @@ void PatternSCM::init(void)
 	// that SchemeSmob is initialized first ... and, for that, we
 	// would need to get our hands on an atomspace ... Ugh. Yuck.
 	define_scheme_primitive("cog-bind", &PatternSCM::do_bindlink, _inst);
+	define_scheme_primitive("cog-bind-single", &PatternSCM::do_single_bindlink, _inst);
 	define_scheme_primitive("cog-bind-crisp", &PatternSCM::do_crisp_bindlink, _inst);
 #endif
 }
@@ -52,6 +53,23 @@ Handle PatternSCM::do_bindlink(Handle h)
 	PatternMatch pm;
 	pm.set_atomspace(as);
 	Handle grounded_expressions = pm.bindlink(h);
+	return grounded_expressions;
+#else
+	return Handle::UNDEFINED;
+#endif
+}
+
+/**
+ * Identical to do_bindlink above, except that it only returns the first match
+ */
+Handle PatternSCM::do_single_bindlink(Handle h)
+{
+#ifdef HAVE_GUILE
+	// XXX we should also allow opt-args to be a list of handles
+	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bind-single");
+	PatternMatch pm;
+	pm.set_atomspace(as);
+	Handle grounded_expressions = pm.single_bindlink(h);
 	return grounded_expressions;
 #else
 	return Handle::UNDEFINED;

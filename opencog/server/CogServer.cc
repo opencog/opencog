@@ -47,6 +47,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/files.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
@@ -644,6 +645,10 @@ Module* CogServer::getModule(const std::string& moduleId)
 
 void CogServer::loadModules(const char* module_paths[])
 {
+    if (NULL == module_paths) {
+        module_paths = DEFAULT_MODULE_PATHS;
+    }
+
     // Load modules specified in the config file
     std::vector<std::string> modules;
     tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
@@ -674,6 +679,10 @@ void CogServer::loadModules(const char* module_paths[])
 void CogServer::loadSCMModules(const char* config_paths[])
 {
 #ifdef HAVE_GUILE
+    if (NULL == config_paths) {
+        config_paths = DEFAULT_MODULE_PATHS;
+    }
+
     load_scm_files_from_config(*atomSpace, config_paths);
 #else /* HAVE_GUILE */
     logger().warn(

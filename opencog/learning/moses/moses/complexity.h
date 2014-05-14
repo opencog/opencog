@@ -24,21 +24,19 @@
 #ifndef _COMBO_COMPLEXITY_H
 #define _COMBO_COMPLEXITY_H
 
-// Various routines dealing with computin the (algorithmic) complexity
+// Various routines dealing with computing the (algorithmic) complexity
 // of particular combo programs.
 
 #include <opencog/comboreduct/combo/vertex.h>
-#include <limits>
 
 namespace opencog { namespace moses {
 
     // Right now, the algorithmic complexity of any combo program
     // is always an (unsigned) int.  I guess it could be made a float,
     // if need be... there's no fundamental reason for an int here.
-    typedef int complexity_t;
+    typedef unsigned complexity_t;
 
-    static const complexity_t worst_complexity =
-        std::numeric_limits<complexity_t>::min();
+    static const complexity_t least_complexity = 0;
 
     complexity_t tree_complexity(combo::combo_tree::iterator, 
                         bool (*)(const combo::combo_tree::iterator&) = NULL);

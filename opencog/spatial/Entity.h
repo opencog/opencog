@@ -56,44 +56,44 @@ namespace opencog
         class Entity
         {
         public:
-            enum AXIS_LIMITS 
+            enum AXIS_LIMITS
             {
                 XMIN = 0, XMAX,
                 YMIN, YMAX,
                 ZMIN, ZMAX
             };
 
-            class LimitRelation 
+            class LimitRelation
             {
             public:
-                enum RELATION_AXIS 
+                enum RELATION_AXIS
                 {
                     X = 0,
                     Y,
                     Z
                 };
-        
+
                 LimitRelation( const Entity* entityA = NULL, const Entity* entityB = NULL ) :
-                    entityA( entityA ), entityB( entityB ), limitsA(6), limitsB(6), relations(3) 
-                { 
+                    entityA( entityA ), entityB( entityB ), limitsA(6), limitsB(6), relations(3)
+                {
                 }
-        
+
                 virtual ~LimitRelation( void ) { }
-                    
+
                 const Entity* entityA;
                 const Entity* entityB;
-                
+
                 std::vector<std::set<math::Vector3> > limitsA;
                 std::vector<std::set<math::Vector3> > limitsB;
                 std::vector<unsigned int> relations;
-            }; 
+            };
 
             typedef boost::variant<std::string, int, double, bool> PropertyValueType;
 
             /**
              * All the types of entities
              */
-            enum ENTITY_TYPE 
+            enum ENTITY_TYPE
             {
                 STATIC,
                 MOVABLE,
@@ -105,7 +105,7 @@ namespace opencog
             /**
              * Types of properties
              */
-            enum PROPERTY 
+            enum PROPERTY
             {
                 TYPE = 0,
                 EDIBLE,
@@ -134,28 +134,28 @@ namespace opencog
                  * The computed distance will be the referenceEntity and a given different entity
                  * @param referenceObject
                  */
-                inline EntityDistanceComparator( const EntityPtr& referenceObject ) : 
-                    referenceEntity( referenceEntity ) 
+                EntityDistanceComparator( const EntityPtr& referenceObject ) :
+                    referenceEntity(referenceObject)
                 {
                 }
 
-                inline virtual ~EntityDistanceComparator( void ) 
-                { 
+                virtual ~EntityDistanceComparator( void )
+                {
                 }
 
                 /*
                  *
                  */
-                inline bool operator()( const EntityPtr& o1, const EntityPtr& o2) const 
+                bool operator()( const EntityPtr& o1, const EntityPtr& o2) const
                 {
                     double distanceToObject1 = referenceEntity->distanceTo(*o1);
                     double distanceToObject2 = referenceEntity->distanceTo(*o2);
                     if ( distanceToObject1 < distanceToObject2 ) {
                         return true;
-                    } 
+                    }
                     else {
                         return false;
-                    } 
+                    }
                 }
             };
 
@@ -175,12 +175,12 @@ namespace opencog
              * @param length
              * @param orientation
              */
-            Entity( long id, const std::string& name, const math::Vector3& position, 
-                const math::Dimension3& dimension, const math::Quaternion& orientation, 
+            Entity( long id, const std::string& name, const math::Vector3& position,
+                const math::Dimension3& dimension, const math::Quaternion& orientation,
                     double radius = 0.0 );
 
-            inline virtual ~Entity( void ) 
-            { 
+            inline virtual ~Entity( void )
+            {
             }
 
             /**
@@ -193,7 +193,7 @@ namespace opencog
              * Getter for entity bounding box
              * @return
              */
-            inline const math::BoundingBox& getBoundingBox( void ) const 
+            inline const math::BoundingBox& getBoundingBox( void ) const
             {
                 return this->boundingBox;
             }
@@ -202,7 +202,7 @@ namespace opencog
              * Getter for the current entity position
              * @return
              */
-            inline const math::Vector3& getPosition( void ) const 
+            inline const math::Vector3& getPosition( void ) const
             {
                 return this->position;
             }
@@ -211,7 +211,7 @@ namespace opencog
              * Getter for the current entity orientation
              * @return
              */
-            inline const math::Quaternion& getOrientation( void ) const 
+            inline const math::Quaternion& getOrientation( void ) const
             {
                 return this->orientation;
             }
@@ -220,7 +220,7 @@ namespace opencog
              * Getter for dimension
              * @return
              */
-            inline const math::Dimension3& getDimension( void ) const 
+            inline const math::Dimension3& getDimension( void ) const
             {
                 return this->dimension;
             }
@@ -229,7 +229,7 @@ namespace opencog
              * Return the entity id
              * @return
              */
-            inline const long& getId() const 
+            inline const long& getId() const
             {
                 return this->id;
             }
@@ -238,7 +238,7 @@ namespace opencog
              * Return the entity name
              * @return
              */
-            inline const std::string& getName( void ) const 
+            inline const std::string& getName( void ) const
             {
                 return this->name;
             }
@@ -247,7 +247,7 @@ namespace opencog
              * Helper method to get the entity width
              * @return
              */
-            inline double getWidth( void ) const 
+            inline double getWidth( void ) const
             {
                 return this->dimension.width;
             }
@@ -256,7 +256,7 @@ namespace opencog
              * Helper method to get the entity height
              * @return
              */
-            inline double getHeight(void ) const 
+            inline double getHeight(void ) const
             {
                 return this->dimension.height;
             }
@@ -265,12 +265,12 @@ namespace opencog
              * Helper method to get the entity length
              * @return
              */
-            inline double getLength( void ) const 
+            inline double getLength( void ) const
             {
                 return this->dimension.length;
             }
 
-            inline double getExpansionRadius( void ) const 
+            inline double getExpansionRadius( void ) const
             {
                 return this->expansionRadius;
             }
@@ -329,9 +329,9 @@ namespace opencog
              */
             std::string toString( ) const;
 
-            double distanceTo( const Entity& entity, 
-                               math::Vector3* pointInA = NULL, 
-                               math::Vector3* pointInB = NULL, 
+            double distanceTo( const Entity& entity,
+                               math::Vector3* pointInA = NULL,
+                               math::Vector3* pointInB = NULL,
                                LimitRelation* = NULL ) const;
 
             /**
@@ -343,34 +343,34 @@ namespace opencog
              *
              ********************* ********************* **********************
              *                     *                     *
-             * 1) |--A--|          * 2)         |--A--|  * 4) |--A--|     
+             * 1) |--A--|          * 2)         |--A--|  * 4) |--A--|
              *            |--B--|  *    |--B--|          *        |--B--|
-             *                     *                     * 
+             *                     *                     *
              ********************* ********************* **********************
              *                     *                     *
-             * 8)     |--A--|      * 16) |--A--|         * 32)       |--A--|     
-             *    |--B--|          *           |--B--|   *     |--B--|      
+             * 8)     |--A--|      * 16) |--A--|         * 32)       |--A--|
+             *    |--B--|          *           |--B--|   *     |--B--|
              *                     *                     *
              ********************* ********************* **********************
              *                     *                     *
              * 64) |--A--|         * 128)  |--A--|       * 256) |----A----|
              *     |--B--|         *     |----B----|     *        |--B--|
                                    *                     *
-             ********************* ********************* ********************** 
+             ********************* ********************* **********************
              *                     *
              * 512) |--A--|        * 1024) |----A----|
              *      |----B----|    *       |--B--|
-             *                     *  
+             *                     *
              *          |--A--|    *       |----A----|
              *      |----B----|    *           |--B--|
              *                     *
              ******************************************************************
-             * 
+             *
              * Note that the number of the limit is
              * the code used to classify the limits relation between
-             * the objects. 
+             * the objects.
              *
-             * i.e. a returning vector with the following configuration: 
+             * i.e. a returning vector with the following configuration:
              *      relations[0] = 1024 relations[1] = 16 relations[2] = 16
              * means that in the X axis the relation 1024 was found and in the Y and Z axis
              * the relation is 16
@@ -382,15 +382,15 @@ namespace opencog
 
             /*
              * Extract the spatial relations between two objects
-             * 
+             *
              * @param observer The observer entity
-             * @param besideDistance A distance used as threshold for considering 
+             * @param besideDistance A distance used as threshold for considering
              *                       an object beside or not another
              * @param entityB The entity used as reference entity
-             * @return std::vector<SPATIAL_RELATION> a vector of all spatial relations 
+             * @return std::vector<SPATIAL_RELATION> a vector of all spatial relations
              *         between entityA (this entity) and entityB (reference entity)
              *
-             * @note entityA is 'this' entity, that is the entity launches this function. 
+             * @note entityA is 'this' entity, that is the entity launches this function.
              */
             /* std::vector<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer,
                                                                    double besideDistance,
@@ -401,7 +401,7 @@ namespace opencog
              * Currently this can only be BETWEEN, which states that A is between B and C
              *
              * @param observer The observer entity
-             * @param besideDistance A distance used as threshold for considering 
+             * @param besideDistance A distance used as threshold for considering
              *                       an object beside or not another
              * @param entityB First reference entity
              * @param entityC Second reference entity
@@ -410,7 +410,7 @@ namespace opencog
              *         among entityA (this entity), entityB (first reference) and entityC
              *         (second reference)
              *
-             * @note entityA is 'this' entity, that is the entity launches this function. 
+             * @note entityA is 'this' entity, that is the entity launches this function.
              */
             /*std::vector<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer,
                                                                    double besideDistance,

@@ -10,6 +10,11 @@ ELSE (APPLE)
 	SET(APPLE_STRNDUP_FILES)
 ENDIF (APPLE)
 
+# The below are used to automatically find module load paths
+ADD_DEFINITIONS(
+   -DCMAKE_INSTALL_PREFIX="\\"${CMAKE_INSTALL_PREFIX}\\""
+)
+
 ADD_LIBRARY(cogutil SHARED
 	ansi
 	algorithm

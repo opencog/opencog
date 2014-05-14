@@ -302,7 +302,7 @@ Handle Instantiator::instantiate(Handle& expr, std::map<Handle, Handle> &vars)
  * pattern matcher calls the callback, it will do so with a particular
  * grounding of the search pattern. If this class is holding an ungrounded
  * implicand, and will create a grounded version of the implicand. If
- * the implcand is alrready grounded, then it's a no-op -- this class
+ * the implicand is already grounded, then it's a no-op -- this class
  * alone will *NOT* change its truth value.  Use a derived class for
  * this.
  *
@@ -763,7 +763,7 @@ class CrispImplicator:
 /**
  * The crisp implicator needs to tweak the truth value of the
  * resulting implicand. In most cases, this is not (strictly) needed,
- * for example, if the implcand has ungrounded variables, then
+ * for example, if the implicand has ungrounded variables, then
  * a truth value can be assigned to it, and the implicand will obtain
  * that truth value upon grounding.
  *
@@ -791,6 +791,32 @@ bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
 	return false;
 }
 
+class SingleImplicator:
+    public virtual Implicator,
+    public virtual DefaultPatternMatchCB
+{
+    public:
+        virtual bool solution(std::map<Handle, Handle> &pred_soln,
+                              std::map<Handle, Handle> &var_soln);
+};
+
+/**
+ * The single implicator behaves like the default implicator, except that
+ * it terminates after the first solution is found.
+ */
+bool SingleImplicator::solution(std::map<Handle, Handle> &pred_soln,
+                          std::map<Handle, Handle> &var_soln)
+{
+	inst.as = as;
+	Handle h = inst.instantiate(implicand, var_soln);
+
+	if (h != Handle::UNDEFINED)
+	{
+		result_list.push_back(h);
+	}
+	return true;
+}
+
 } // namespace opencog
 
 /**
@@ -807,6 +833,22 @@ Handle PatternMatch::bindlink (Handle himplication)
 {
 	// Now perform the search.
 	DefaultImplicator impl;
+	impl.as = atom_space;
+	return do_bindlink(himplication, &impl);
+}
+
+/**
+ * Evaluate an ImplicationLink embedded in a BindLink
+ *
+ * Returns the first match only. Otherwise, the behavior is identical to
+ * PatternMatch::bindlink above.
+ *
+ * See the do_bindlink function documentation for details.
+ */
+Handle PatternMatch::single_bindlink (Handle himplication)
+{
+	// Now perform the search.
+	SingleImplicator impl;
 	impl.as = atom_space;
 	return do_bindlink(himplication, &impl);
 }

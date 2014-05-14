@@ -50,6 +50,8 @@ class TemporalEventTrapezium(TemporalEvent):
             assert (beginning_factor, ending_factor) == (None, None), "PiecewiseTemporalEvent() only accepts " \
                                                                       "either 'beginning_factor' and 'ending_factor' " \
                                                                       "or 'beginning' and 'ending'"
+            if not a < beginning < ending < b:
+                raise AttributeError("The inputs should satisfy 'a < beginning < ending < b' relation")
 
         if beginning_factor is not None:
             assert beginning_factor > 0
@@ -101,28 +103,3 @@ def generate_random_events(size=20):
 
     return events
 
-
-if __name__ == '__main__':
-    import time
-
-    #event = TemporalEventTrapezium(1, 20)
-    #
-    #event.plot()
-    #event.distribution_beginning.plot()
-    #plt = event.distribution_ending.plot()
-    #plt.ylim(ymin=0, ymax=1.1)
-    #plt.show()
-
-    #events = generate_random_events(5)
-    events = generate_random_events(500)
-
-    start = time.time()
-
-    for event in events:
-        plt = event.plot()
-        #plt = event.instance().plot()
-
-    print 'Performance:', time.time() - start, 'seconds'
-
-    plt.ylim(ymin=0, ymax=1.1)
-    plt.show()

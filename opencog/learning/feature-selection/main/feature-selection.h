@@ -45,9 +45,9 @@ static const std::string smd="smd"; // stochastic_max_dependency (see
 static const std::string simple="simple"; // See algo/simple.h
 
 // Feature selection scorers
-static const std::string mi="mi";    // Mutual Information (see feature_scorer.h)
-static const std::string pre="pre";  // Precision (see
-                                     // opencog/learning/moses/scoring/scoring.h)
+static const std::string mi="mi";   // Mutual Information (see feature_scorer.h)
+static const std::string pre="pre"; // Precision (see
+                                    // opencog/learning/moses/scoring/scoring.h)
 
 // parameters of feature-selection, see desc.add_options() in
 // feature-selection.cc for their meaning

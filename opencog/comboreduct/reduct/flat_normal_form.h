@@ -123,7 +123,7 @@ protected:
 template<typename T>
 nf nf_mapper<T>::add_cnf(sib_it from,sib_it to)
 {
-    nf res(distance(from, to));
+    nf res(std::distance(from, to));
     for (nf::iterator out = res.begin(); out != res.end(); ++from, ++out)
         if (*from == id::logical_or)
             for (sib_it item = from.begin(); item != from.end(); ++item)
@@ -136,7 +136,7 @@ nf nf_mapper<T>::add_cnf(sib_it from,sib_it to)
 template<typename T>
 nf nf_mapper<T>::add_dnf(sib_it from, sib_it to)
 {
-    nf res(distance(from, to));
+    nf res(std::distance(from, to));
     for (nf::iterator out = res.begin(); out != res.end(); ++from, ++out)
         if (*from == id::logical_and)
             for (sib_it item = from.begin(); item != from.end(); ++item)
@@ -248,11 +248,11 @@ int nf_mapper<T>::add_item(sib_it item)
     // Add it directly
     int next_id = _int2item.size() + 1;
 
-    std::pair<int, tree> pr = make_pair(next_id, tree(item));
+    std::pair<int, tree> pr = std::make_pair(next_id, tree(item));
 
     int actual_id = _int2item.insert(pr).first->first;
 
-    return _item2int.insert(make_pair(item, actual_id)).first->second;
+    return _item2int.insert(std::make_pair(item, actual_id)).first->second;
 }
 
 template<typename T>

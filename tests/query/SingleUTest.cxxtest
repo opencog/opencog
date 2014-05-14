@@ -1,0 +1,120 @@
+/*
+ * tests/query/BindUTest.cxxtest
+ *
+ * Copyright (C) 2014 Cosmo Harrigan
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/query/PatternMatch.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class BindUTest: public CxxTest::TestSuite
+{
+private:
+        PatternMatch pm;
+        AtomSpace *as;
+        SchemeEval* eval;
+
+public:
+    BindUTest(void)
+    {
+        try
+        {
+             config().load("opencog-test.conf");
+        }
+        catch (RuntimeException &e)
+        {
+            std::cerr << e.getMessage() << std::endl;
+        }
+        logger().setFilename(config()["LOG_FILE"]);
+        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+        server(CogServer::createInstance);
+        as = &cogserver().getAtomSpace();
+        pm.set_atomspace(as);
+        eval = new SchemeEval(as);
+    }
+
+    ~BindUTest()
+    {
+        delete as;
+        // Erase the log file if no assertions failed.
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+                std::remove(logger().getFilename().c_str());
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_single_bindlink(void);
+};
+
+void BindUTest::tearDown(void)
+{
+}
+
+void BindUTest::setUp(void)
+{
+    pm.set_atomspace(as);
+    
+    config().set("SCM_PRELOAD",
+        "opencog/atomspace/core_types.scm, "
+        "opencog/scm/utilities.scm");
+
+    load_scm_files_from_config(*as);
+    
+    config().set("MODULES",
+        "opencog/query/libQueryModule.so");
+    
+    cogserver().loadModules();
+}
+
+/*
+ * Basic BindLink unit test. Defines 3 inheritance relationships,
+ * and then tests that PatternMatch::bindlink finds all of them, and that
+ * PatternMatch::single_bindlink only finds the first result and then stops
+ * searching.
+ */
+void BindUTest::test_single_bindlink(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    
+    config().set("SCM_PRELOAD", "tests/query/single.scm");
+    load_scm_files_from_config(*as);    
+    
+    Handle findMan = eval->eval_h("find-man");
+    
+    // First, get all the solutions. There should be 3 of them:
+    // Socrates, Einstein and Peirce all inherit from man
+    Handle answersAll = pm.bindlink(findMan);
+    TS_ASSERT_EQUALS(3, as->getArity(answersAll));
+    
+    // Test PatternMatch::single_bindlink, which should only return the
+    // first match
+    Handle answersSingle = pm.single_bindlink(findMan);
+    TS_ASSERT_EQUALS(1, as->getArity(answersSingle));
+}
