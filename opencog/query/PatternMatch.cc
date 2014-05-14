@@ -813,10 +813,6 @@ bool SingleImplicator::solution(std::map<Handle, Handle> &pred_soln,
 	if (h != Handle::UNDEFINED)
 	{
 		result_list.push_back(h);
-
-		// Set truth value to true+confident
-		TruthValuePtr stv(SimpleTruthValue::createTV(1, SimpleTruthValue::confidenceToCount(1)));
-		h->setTruthValue(stv);
 	}
 	return true;
 }
