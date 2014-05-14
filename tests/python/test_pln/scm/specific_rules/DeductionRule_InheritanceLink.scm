@@ -1,11 +1,11 @@
-; The formula for deduction uses at least part of every Node's TV.
+(define human (ConceptNode "Human" (stv 0.01 1)))
+(define socrates (ConceptNode "Socrates" (stv 0.01 1)))
+(define mortal (ConceptNode "Mortal" (stv 0.01 1)))
+
 (EvaluationLink (PredicateNode "inputs") 
 	(ListLink 
-		(ConceptNode "Human" (stv 0.01 1))
-		(ConceptNode "Socrates" (stv 0.01 1))
-		(ConceptNode "Mortal" (stv 0.01 1))
-		(InheritanceLink (ConceptNode "Human") (ConceptNode "Mortal") (stv 0.5 1))
-		(InheritanceLink (ConceptNode "Socrates") (ConceptNode "Human") (stv 0.5 1))
+		(InheritanceLink human mortal (stv 0.5 1))
+		(InheritanceLink socrates human (stv 0.5 1))
 	)
 )
 (EvaluationLink (PredicateNode "rules") 
@@ -15,18 +15,18 @@
 )
 (EvaluationLink (PredicateNode "forwardSteps")
 	(ListLink
-		(NumberNode "10")
+		(NumberNode "1")
 	)
 )
 
 (EvaluationLink (PredicateNode "outputs") 
 	(ListLink 
-		(ConceptNode "Human" (stv 0.01 1))
-		(ConceptNode "Socrates" (stv 0.01 1))
-		(ConceptNode "Mortal" (stv 0.01 1))
-		(InheritanceLink (ConceptNode "Human") (ConceptNode "Mortal") (stv 0.5 1))
-		(InheritanceLink (ConceptNode "Socrates") (ConceptNode "Human") (stv 0.5 1))
-		(InheritanceLink (ConceptNode "Socrates") (ConceptNode "Mortal") (stv 0.252525 1))
+		human
+		socrates
+		mortal
+		(InheritanceLink human mortal (stv 0.5 1))
+		(InheritanceLink socrates human (stv 0.5 1))
+		(InheritanceLink socrates mortal (stv 0.252525 1))
 	)
 )
 

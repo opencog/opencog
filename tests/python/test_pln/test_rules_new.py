@@ -33,6 +33,7 @@ class PLNUnitTester(TestCase):
                                allow_backchaining_with_variables=True)
 
         self.addTestFile("DeductionRule_InheritanceLink.scm")
+        self.addTestFile("OrRule_new.scm")
 
     def tearDown(self):
         del self.atomSpaceFileData
@@ -47,14 +48,12 @@ class PLNUnitTester(TestCase):
 
     def addTestFile(self, testFile):
         # Again, default to dev mode
-        ruleFolder = "scm/specific_rules/"
+        ruleFolder = str(os.getcwd()) + "/scm/specific_rules/"
 
         if not __DEV_MODE__:
             ruleFolder = os.getenv("PROJECT_SOURCE_DIR") + "/tests/python/test_pln/scm/specific_rules/"
 
         fullTestFile = ruleFolder + testFile
-
-        print "Adding test file " + fullTestFile
 
         self.testFiles.append(fullTestFile)
 
@@ -64,19 +63,23 @@ class PLNUnitTester(TestCase):
         self.reset_atom_space(self.atomSpaceExpected)
 
     def load_file_into_atomspace(self, fullPath, atomSpace):
-        if os.path.exists(fullPath):
-            load_scm(atomSpace, fullPath)
-        else:
-            print "Path '" + fullPath + "' does not exist."
+        load_scm(atomSpace, fullPath)
 
     def reset_atom_space(self, atomspaceToReset):
         atomspaceToReset.clear()
 
         # Default to dev mode
         # Build folder is up, up, up, /build
-        coreTypes = "../../../build/opencog/atomspace/core_types.scm"
+        coreTypes = "atomspace/core_types.scm"
         # Source root is up, up, up
-        utilities = "../../../opencog/scm/utilities.scm"
+        utilities = "scm/utilities.scm"
+
+        if __VERBOSE__:
+            if (os.path.exists(coreTypes)):
+                print "Path '" + coreTypes + "' exists."
+
+            if (os.path.exists(utilities)):
+                print "Path '" + utilities + "' exists."
 
         if not __DEV_MODE__:
             sourceFolder = os.getenv("PROJECT_SOURCE_DIR")
@@ -136,11 +139,14 @@ class PLNUnitTester(TestCase):
         except:
             numberOfSteps = 1
 
-        for x in range(0, numberOfSteps):
+
+        while numberOfSteps > 0:
             result = self.chainer.forward_step()
 
-            if __VERBOSE__:
-                print result
+            if not result is None:
+                numberOfSteps -= 1
+                if __VERBOSE__:
+                    print result
 
     def atomspace_links_to_list(self, atomSpace):
         result = []
