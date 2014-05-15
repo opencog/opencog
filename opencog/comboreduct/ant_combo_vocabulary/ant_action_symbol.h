@@ -54,9 +54,9 @@ namespace ant_action_symbol_properties {
         //action_symbol          name                 type
     };
 
-}//~namespace pet_perception_properties
+}//~namespace ant_perception_properties
 
-//pet_action_symbol both derive from action_symbol_base and pet_operator
+//ant_action_symbol both derive from action_symbol_base and ant_operator
 class ant_action_symbol : public ant_operator<ant_action_symbol_enum, id::ant_action_symbol_count>, public action_symbol_base {
 
 private:

@@ -54,7 +54,7 @@ void ant_indefinite_object::set_indefinite_object(ant_indefinite_object_enum pio
 }
 
 indefinite_object ant_indefinite_object::get_instance(const std::string& name) {
-  //look up for pet_indefinite_object_enum corresponding to that name
+  //look up for ant_indefinite_object_enum corresponding to that name
   bool found = false;
   indefinite_object as = NULL;
   for(unsigned int i = 0; i<id::ant_indefinite_object_count && !found; ++i) {
