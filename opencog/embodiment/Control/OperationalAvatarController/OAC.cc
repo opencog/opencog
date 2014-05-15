@@ -257,9 +257,6 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                          &importanceUpdatingAgentFactory);
     importanceUpdatingAgent = createAgent<ImportanceUpdatingAgent>();
 
-    registerAgent( STIDecayingAgent::info().id, &stiDecayingAgentFactory);
-    stiDecayingAgent = createAgent<STIDecayingAgent>();
-
 //    if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         // adds the same procedure interpreter agent to schedule again
 //        this->startAgent(procedureInterpreterAgent);
@@ -354,12 +351,6 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         this->importanceUpdatingAgent->setFrequency(
            config().get_int( "IMPORTANCE_UPDATING_CYCLE_PERIOD" ) );
         this->startAgent(importanceUpdatingAgent);
-    }
-
-    if (config().get_bool("STI_DECAYING_ENABLED")) {
-        this->stiDecayingAgent->setFrequency(
-           config().get_int( "STI_DECAYING_CYCLE_PERIOD" ) );
-        this->startAgent(stiDecayingAgent);
     }
 
 #ifdef HAVE_CYTHON
@@ -459,8 +450,6 @@ void OAC::attention_allocation(OAC * oac)
         std::cout<<"importanceSpreadingAgent "<<i<<std::endl; 
         oac->runAgent(oac->importanceUpdatingAgent); 
         std::cout<<"importanceUpdatingAgent "<<i<<std::endl; 
-        oac->runAgent(oac->stiDecayingAgent); 
-        std::cout<<"stiDecayingAgent "<<i<<std::endl; 
         std::cout<<"attention_allocation Done: "<<i<<std::endl; 
     }
 }
@@ -646,7 +635,6 @@ OAC::~OAC()
 //    delete (importanceDiffusionAgent); 
     delete (importanceSpreadingAgent); 
     delete (importanceUpdatingAgent); 
-    delete (stiDecayingAgent); 
 
 #ifdef HAVE_CYTHON
     delete (fishgramAgent); 
@@ -960,11 +948,6 @@ void OAC::schemaSelection()
 //  if ( pet->getMode( ) != PLAYING && pet->getMode( ) != LEARNING ) {
 //    pet->setMode( PLAYING );
 //  } // if
-}
-
-void OAC::decayShortTermImportance()
-{
-    atomSpace->decayShortTermImportance();
 }
 
 const std::string OAC::getPath(const std::string& petId, const std::string& filename)

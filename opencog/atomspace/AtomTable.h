@@ -468,14 +468,6 @@ public:
     }
 
     /**
-     * Decays importance of all atoms in the table, reindexing
-     * importanceIndex accordingly and extracting the atoms that fall
-     * below the "LOWER_STI_VALUE" threshold.
-     * @return the list of the handles that should be removed.
-     */
-    AtomPtrSet decayShortTermImportance();
-
-    /**
      * Updates the importance index for the given atom. According to the
      * new importance of the atom, it may change importance bins.
      *

@@ -961,15 +961,6 @@ public:
 
     /* ----------------------------------------------------------- */
 
-    /**
-     * Decays STI of all atoms (one cycle of importance decay).  Deprecated,
-     * importance updating should be done by ImportanceUpdating Agent.
-     * @deprecated ECAN should be used, but this method is still used by
-     * embodiment.
-     */
-    void decayShortTermImportance() {
-        getImpl().atomTable.decayShortTermImportance(); }
-
     /** Get attentional focus boundary
      * Generally atoms below this threshold shouldn't be accessed unless search
      * methods are unsuccessful on those that are above this value.

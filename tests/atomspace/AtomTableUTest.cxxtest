@@ -392,36 +392,6 @@ public:
             std::remove(filename);
     }
 
-    void testImportanceUpdate()
-    {
-        atomSpace->clear();
-
-        /* add a simple set of links & nodes */
-        NodePtr wordNode(createNode(NUMBER_NODE, "1"));
-        wordNode->setAttentionValue(createAV((AttentionValue::sti_t) - 10));
-        Handle wnHandle = table->add(wordNode);
-
-        NodePtr senseNode(createNode(CONCEPT_NODE, "28675194"));
-        senseNode->setAttentionValue(createAV((AttentionValue::sti_t) 30));
-        Handle snHandle = table->add(senseNode);
-
-        HandleSeq os;
-        os.push_back(wnHandle);
-        os.push_back(snHandle);
-        LinkPtr inheritanceLink = createLink(INHERITANCE_LINK, os);
-        inheritanceLink->setAttentionValue(createAV((AttentionValue::sti_t) 500));
-        Handle linkHandle = table->add(inheritanceLink);
-
-        // force sti decaying
-        for (int i = 0; i < 10; i++)
-            table->decayShortTermImportance();
-
-        // test the updated STIs
-        TS_ASSERT(wnHandle->getAttentionValue()->getSTI()   == -20);
-        TS_ASSERT(snHandle->getAttentionValue()->getSTI()   ==  20);
-        TS_ASSERT(linkHandle->getAttentionValue()->getSTI() == 490);
-    }
-
     /* test the fix for the bug triggered whenever we had a link pointing to the
      * same atom twice (or more) */
     void testDoubleLink() {

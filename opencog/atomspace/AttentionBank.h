@@ -90,13 +90,6 @@ public:
     AFCHSigl& RemoveAFSignal() { return _RemoveAFSignal; }
 
     /**
-     * Decays STI of all atoms in the AtomSpace (one cycle of importance decay).
-     * @deprecated Importance updating should be done by ImportanceUpdating
-     * Agent, but this is still used by Embodiment.
-     */
-    void decayShortTermImportance();
-
-    /**
      * Get the total amount of STI in the AtomSpace, sum of
      * STI across all atoms.
      *

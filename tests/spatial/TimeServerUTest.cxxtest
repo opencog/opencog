@@ -1610,33 +1610,6 @@ public:
         delete t2;
     }
 
-    void testTimeAtomsRemovalByDecay() {
-        AtomSpace& atomSpace = atomspace();
-        atomSpace.clear();
-
-        Handle node = atomSpace.addNode(CONCEPT_NODE, "test");
-        Handle atTimeLink = timeServer().addTimeInfo(node, 1000);
-        TS_ASSERT((NULL != atTimeLink));
-
-        vector<HandleTemporalPair> res;
-        timeServer().getTimeInfo(back_inserter(res), node);
-        TS_ASSERT(!res.empty());
-
-        // Change STI so that all atoms are removed quickly by decay method. 
-        unsigned int ncycles = 5;
-        AttentionValue::sti_t sti = config().get_int("MIN_STI") + ncycles;
-        atomSpace.setSTI(atTimeLink, sti);
-        atomSpace.setSTI(atomSpace.getOutgoing(atTimeLink, 0), sti);
-        atomSpace.setSTI(atomSpace.getOutgoing(atTimeLink, 1), sti);
-
-        for (unsigned int i = 0; i < (ncycles + 1); ++i) atomSpace.decayShortTermImportance();
-
-        // Check if related time info was removed from TimeServer properly
-        res.clear();
-        timeServer().getTimeInfo(back_inserter(res), Handle::UNDEFINED);
-        TS_ASSERT(res.empty());
-    }
-
     void testRemoveTimeInfo() {
         AtomSpace& atomSpace = atomspace();
         atomSpace.clear();

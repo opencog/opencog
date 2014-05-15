@@ -30,7 +30,6 @@
 #include <opencog/dynamics/attention/ImportanceSpreadingAgent.h>
 #include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
-#include <opencog/dynamics/attention/STIDecayingAgent.h>
 #include <opencog/server/Factory.h>
 #include <opencog/server/Module.h>
 
@@ -51,7 +50,6 @@ private:
     Factory<ImportanceDiffusionAgent, Agent> diffusionFactory;
 #endif
     Factory<ImportanceUpdatingAgent, Agent>  updatingFactory;
-    Factory<STIDecayingAgent, Agent>         stidecayingFactory;
 
 public:
 
