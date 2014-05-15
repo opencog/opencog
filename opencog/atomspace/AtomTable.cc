@@ -683,22 +683,6 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     return result;
 }
 
-AtomPtrSet AtomTable::decayShortTermImportance()
-{
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-    UnorderedHandleSet exh = importanceIndex.decayShortTermImportance(this);
-
-    AtomPtrSet aps;
-    // update the AtomTable's size
-    UnorderedHandleSet::iterator it;
-    for (it = exh.begin(); it != exh.end(); it++) {
-        Handle h(*it);
-        AtomPtrSet exa = extract(h);
-        aps.insert(exa.begin(), exa.end());
-    }
-    return aps;
-}
-
 // This is the resize callback, when a new type is dynamically added.
 void AtomTable::typeAdded(Type t)
 {

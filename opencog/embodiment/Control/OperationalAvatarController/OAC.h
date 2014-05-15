@@ -41,8 +41,6 @@
 //#include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
 #include <opencog/dynamics/attention/ImportanceSpreadingAgent.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
-#include <opencog/dynamics/attention/STIDecayingAgent.h>
-
 
 #include <opencog/embodiment/Control/MessagingSystem/MessageCogServer.h>
 #include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
@@ -173,7 +171,6 @@ private:
 //    ImportanceDiffusionAgentPtr importanceDiffusionAgent; 
     ImportanceSpreadingAgentPtr importanceSpreadingAgent; 
     ImportanceUpdatingAgentPtr importanceUpdatingAgent; 
-    STIDecayingAgentPtr stiDecayingAgent; 
 
 #ifdef HAVE_CYTHON
     PyMindAgentPtr fishgramAgent; 
@@ -324,11 +321,6 @@ public:
     void schemaSelection();
 
     /**
-      * Decays short term importance of all atoms in local AtomSpace
-      */
-    void decayShortTermImportance();
-
-    /**
      * Return the path to a file or a directory
      *
      * @param petId The id of the pet used to produce the file path
@@ -357,8 +349,6 @@ public:
 //    SingletonFactory <ImportanceDiffusionAgent, Agent> importanceDiffusionAgentFactory; 
     SingletonFactory <ImportanceSpreadingAgent, Agent> importanceSpreadingAgentFactory;  
     SingletonFactory <ImportanceUpdatingAgent, Agent> importanceUpdatingAgentFactory; 
-    SingletonFactory <STIDecayingAgent, Agent> stiDecayingAgentFactory;  
-
 }; // class
 
 }} // namespace opencog::oac

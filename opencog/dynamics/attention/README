@@ -27,7 +27,6 @@ allocation among atoms within OpenCog.
   - ForgettingAgent - "forgets" atoms with low LTI.
   - HebbianUpdatingAgent - updates the weights of HebbianLinks based on what
     is in the Attentional Focus of the OpenCog instance at the time it's run.
-  - STIDecayingAgent - simplified forgetting mechanism (Used by Embodiment).
 
 - Modules
   - HebbianCreationModule - creates AsymmetricHebbianLinks between

@@ -5,7 +5,6 @@ ADD_LIBRARY (oac SHARED
 	PetMessageSender
 	PVPActionPlanSender
 	ProcedureInterpreterAgent
-	ImportanceDecayAgent
 	ActionSelectionAgent
 	EntityExperienceAgent
 	PsiModulatorUpdaterAgent
