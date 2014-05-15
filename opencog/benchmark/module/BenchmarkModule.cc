@@ -98,6 +98,23 @@ int BenchmarkModule::fullyConnectedTestConcurrent(int numAtoms)
     return atoms.size();
 }
 
+int BenchmarkModule::updateSTITestConcurrent()
+{
+    srand(time(NULL));
+
+    HandleSeq atoms;
+    as->getHandlesByType(back_inserter(atoms), ATOM, true);
+
+    OMP_ALGO::for_each(atoms.begin(), atoms.end(),
+        [this](Handle handle)
+    {
+        int newSTI = rand() % 1000;
+        as->setSTI(handle, newSTI);
+    });
+
+    return atoms.size();
+}
+
 std::string
 BenchmarkModule::do_fullyConnectedTest(Request *dummy,
                                        std::list<std::string> args)
@@ -133,6 +150,7 @@ BenchmarkModule::do_fullyConnectedTest(Request *dummy,
     const time_t begin_time_wall = time(NULL);
 
     int numNodes;
+    std::string result;
 
     if (option == "reset")
     {
@@ -151,6 +169,17 @@ BenchmarkModule::do_fullyConnectedTest(Request *dummy,
     else if (option == "concurrent")
     {
         numNodes = fullyConnectedTestConcurrent(numNewNodes);
+        result = "Fully connected graph of " +
+                std::to_string(numNodes) +
+                " total nodes including " +
+                std::to_string(numNewNodes) +
+                " new nodes.\n";
+    }
+    else if (option == "sti")
+    {
+        int numAtoms = updateSTITestConcurrent();
+        result = std::to_string(numAtoms) +
+                " atoms updated with random STI values.\n";
     }
     else
     {
@@ -166,16 +195,12 @@ BenchmarkModule::do_fullyConnectedTest(Request *dummy,
     const time_t end_time_wall = time(NULL);
 
     std::string message;
-    message =
-        "Test complete. Fully connected graph of " +
-        std::to_string(numNodes) +
-        " total nodes including " +
-        std::to_string(numNewNodes) +
-        " new nodes.\nWall clock time: " +
-        std::to_string(end_time_wall - begin_time_wall) +
-        " seconds\nCPU clock time: " +
-        std::to_string((end_time_cpu - begin_time_cpu) / CLOCKS_PER_SEC) +
-        " seconds\nNumber of threads used: " +
-        std::to_string(numThreads) + "\n";
+    message = result +
+            "Wall clock time: " +
+            std::to_string(end_time_wall - begin_time_wall) +
+            " seconds\nCPU clock time: " +
+            std::to_string((end_time_cpu - begin_time_cpu) / CLOCKS_PER_SEC) +
+            " seconds\nNumber of threads used: " +
+            std::to_string(numThreads) + "\n";
     return message;
 }
