@@ -47,7 +47,6 @@ INSTALL(FILES
 	perception_rules.h
         fold_rules.h
 	reduct.h
-	using.h
 
 	DESTINATION
 

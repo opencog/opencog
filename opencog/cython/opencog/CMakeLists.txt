@@ -230,6 +230,6 @@ ELSE (WIN32)
 ENDIF (WIN32)
 
 INSTALL (FILES 
-	opencog/__init__.py
+	__init__.py
 	DESTINATION "${DATADIR}/python/opencog")
 
