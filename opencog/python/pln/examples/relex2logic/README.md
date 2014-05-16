@@ -76,7 +76,7 @@ changed for concept instances later.
 (ConceptNode "air" (av 0 0 0) (stv 0.010000 1.000000)) ; [3]
 ```
 
-##### Tuple that satifies breathe(x,y)
+##### Tuple that satisfies breathe(x,y)
 ```
 (ListLink (av 0 0 0) (stv 1.000000 0.000000)
   (ConceptNode "man" (av 0 0 0) (stv 0.010000 1.000000)) ; [2]

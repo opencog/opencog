@@ -43,7 +43,7 @@ class InferenceAgent(MindAgent):
 
         # EvaluationToMember, MemberToInheritance
         self.chainer.add_rule(
-            GeneralEvaluationToMemberRule(self.chainer, 0, 1))
+            EvaluationToMemberRule(self.chainer, 0, 1))
         self.chainer.add_rule(MemberToEvaluationRule(self.chainer))
         self.chainer.add_rule(MemberToInheritanceRule(self.chainer))
         self.chainer.add_rule(InheritanceToMemberRule(self.chainer))
@@ -51,7 +51,7 @@ class InferenceAgent(MindAgent):
         # For predicates with 2 arguments,
         # with the 0th argument made into a variable
         self.chainer.add_rule(
-            GeneralEvaluationToMemberRule(self.chainer, 0, 2))
+            EvaluationToMemberRule(self.chainer, 0, 2))
 
         # ModusPonens:
         # Implication smokes(x) cancer(X)
