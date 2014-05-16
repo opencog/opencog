@@ -3367,9 +3367,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
             }
         }
 
-        set<unsigned int>::const_iterator itr;
-        for (itr = seqNumbers.begin(); itr != seqNumbers.end(); itr++) {
-            unsigned int seqNumber = *itr;
+        for (unsigned seqNumber : seqNumbers) {
             const char* predicateName = NULL;
 
             switch (statusCode) {
