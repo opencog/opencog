@@ -410,11 +410,11 @@ SERVER_PORT           = 17001
 
 
 # modules that will be loaded at the cogserver start
-MODULES               = ./libQueryModule.so,
-                        ./libbuiltinreqs.so,
-                        ./libscheme-shell.so,
-                        ./libpersist.so,
-                        ./libPythonModule.so
+MODULES               = query/libQueryModule.so,
+                        server/libbuiltinreqs.so,
+                        shell/libscheme-shell.so,
+                        persist/sql/libpersist.so,
+                        cython/libPythonModule.so
 
 # scheme script files that will be loaded during the system startup
 SCM_PRELOAD           = scm/core_types.scm,
