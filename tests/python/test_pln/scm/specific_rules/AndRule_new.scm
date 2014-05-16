@@ -14,7 +14,7 @@
 )
 (EvaluationLink (PredicateNode "forwardSteps")
 	(ListLink
-		(NumberNode "10")
+		(NumberNode "1")
 	)
 )
 
@@ -22,7 +22,7 @@
 	(ListLink 
 		a
 		b
-		(AndLink a b (stv 0.252525 1))
+		(AndLink a b (stv 0.160000 0.650000))
 	)
 )
 
