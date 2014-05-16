@@ -24,16 +24,30 @@ class PLNUnitTester(TestCase):
         self.atomSpaceExpected = AtomSpace()
         self.testFiles = []
 
-        # Code below is to get us to the OC (git) root based on predictable test launch locations.
+        self.chainer = None
 
-        self.chainer = Chainer(self.atomSpaceInputs,
-                               stimulateAtoms=False, agent=self,
-                               learnRuleFrequencies=False,
-                               allow_output_with_variables=True,
-                               allow_backchaining_with_variables=True)
-
+        # Works:
         self.addTestFile("DeductionRule_InheritanceLink.scm")
         self.addTestFile("OrRule_new.scm")
+        self.addTestFile("BooleanTransformationRule_new.scm")
+        self.addTestFile("AndRule_new.scm") # STV issue
+
+        # Testing (just a placeholder for where to put tests while...testing them)
+
+
+        # Following tests give results that don't match or exceed expectations:
+        #self.addTestFile("LionTigerAS_new.scm") # Lots of stuff
+        #self.addTestFile("IntensionalLinkEvaluationRule_new.scm") # Creates an IntensionalSimilarityLink though no such rule was supplied.
+
+        # Following tests don't give chaining results:
+        #self.addTestFile("AndBulkEvaluationRule_new.scm")
+        #self.addTestFile("AndBulkEvaluationRule3EvaluationLinks_new.scm")
+        #self.addTestFile("AndBulkEvaluationRule3_new.scm")
+        #self.addTestFile("AndBulkEvaluationRuleEvaluationLinks_new.scm")
+        #self.addTestFile("AndBulkEvaluationRulePredicates_new.scm")
+        #self.addTestFile("NegatedAndBulkEvaluationRule3EvaluationLinks_new.scm")
+        #self.addTestFile("SubsetAS_new.scm")
+
 
     def tearDown(self):
         del self.atomSpaceFileData
@@ -42,9 +56,12 @@ class PLNUnitTester(TestCase):
         del self.chainer
 
     def test_all(self):
-        for testFile in self.testFiles:
-            print "Testing file: " + testFile
-            self.run_file(testFile)
+        if len(self.testFiles) == 0:
+            print "No test files have been selected."
+        else:
+            for testFile in self.testFiles:
+                print "Testing file: " + testFile
+                self.run_file(testFile)
 
     def addTestFile(self, testFile):
         # Again, default to dev mode
@@ -56,6 +73,27 @@ class PLNUnitTester(TestCase):
         fullTestFile = ruleFolder + testFile
 
         self.testFiles.append(fullTestFile)
+
+    def run_chaining_steps(self):
+        if __VERBOSE__:
+            print "Rules that can be applied:"
+            print [" *" + r.name for r in self.chainer.rules]
+
+        numberOfSteps = 1
+        try:
+            numberOfStepsNode = self.get_predicate_arguments(self.atomSpaceFileData, "forwardSteps")
+            numberOfSteps = int(numberOfStepsNode[0].name)
+        except:
+            numberOfSteps = 1
+
+
+        while numberOfSteps > 0:
+            result = self.chainer.forward_step()
+
+            if not result is None:
+                numberOfSteps -= 1
+                if __VERBOSE__:
+                    print result
 
     def reset_atom_spaces(self):
         self.reset_atom_space(self.atomSpaceFileData)
@@ -73,6 +111,7 @@ class PLNUnitTester(TestCase):
         coreTypes = "atomspace/core_types.scm"
         # Source root is up, up, up
         utilities = "scm/utilities.scm"
+        plnTypes = "learning/pln/pln_types.scm"
 
         if __VERBOSE__:
             if (os.path.exists(coreTypes)):
@@ -87,9 +126,11 @@ class PLNUnitTester(TestCase):
 
             coreTypes = binFolder + "/opencog/atomspace/core_types.scm"
             utilities = sourceFolder + "/opencog/scm/utilities.scm"
+            plnTypes = binFolder + "/opencog/learning/pln/pln_types.scm"
 
         self.load_file_into_atomspace(coreTypes, atomspaceToReset)
         self.load_file_into_atomspace(utilities, atomspaceToReset)
+        self.load_file_into_atomspace(plnTypes, atomspaceToReset)
 
     def fill_atomspace(self, atomspace, atomList):
         for atom in atomList:
@@ -127,26 +168,7 @@ class PLNUnitTester(TestCase):
             self.chainer.add_rule(allRules.lookup_rule(rule))
 
 
-    def run_chaining_steps(self):
-        if __VERBOSE__:
-            print "Rules that can be applied:"
-            print [" *" + r.name for r in self.chainer.rules]
 
-        numberOfSteps = 1
-        try:
-            numberOfStepsNode = self.get_predicate_arguments(self.atomSpaceFileData, "forwardSteps")
-            numberOfSteps = int(numberOfStepsNode[0].name)
-        except:
-            numberOfSteps = 1
-
-
-        while numberOfSteps > 0:
-            result = self.chainer.forward_step()
-
-            if not result is None:
-                numberOfSteps -= 1
-                if __VERBOSE__:
-                    print result
 
     def atomspace_links_to_list(self, atomSpace):
         result = []
@@ -182,14 +204,14 @@ class PLNUnitTester(TestCase):
         allPredictedItemsExist = False
         allItemsWerePredicted = False
 
-        print "Checking if all predicted items exist:"
+        print "Checking if all predicted items were created:"
 
         if self.check_atomspace_contains_atomspace(self.atomSpaceExpected, self.atomSpaceInputs):
             print "  Yes, all predicted items exist"
             allPredictedItemsExist = True
         else:
             print "  No, not all predicted items were created (see above for details)"
-        print "Checking if all items were predicted:"
+        print "Checking if all created items were predicted:"
 
         if self.check_atomspace_contains_atomspace(self.atomSpaceInputs, self.atomSpaceExpected):
             print "  Yes, all created items were predicted"
@@ -205,6 +227,13 @@ class PLNUnitTester(TestCase):
         print os.path.realpath(filename)
 
         self.reset_atom_spaces()
+
+        self.chainer = Chainer(self.atomSpaceInputs,
+                               stimulateAtoms=False, agent=self,
+                               learnRuleFrequencies=False,
+                               allow_output_with_variables=True,
+                               allow_backchaining_with_variables=True)
+
 
         self.load_file_into_atomspace(filename, self.atomSpaceFileData)
 

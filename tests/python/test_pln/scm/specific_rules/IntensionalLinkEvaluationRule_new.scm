@@ -20,7 +20,7 @@
 )
 (EvaluationLink (PredicateNode "forwardSteps")
 	(ListLink
-		(NumberNode "10")
+		(NumberNode "1")
 	)
 )
 
@@ -28,6 +28,6 @@
 	(ListLink 
 		(AttractionLink (stv 1 dc) mammal lion)
 		(AttractionLink (stv 1 dc) mammal tiger)
-		(IntensionalInheritanceLink lion tiger)
+		(IntensionalInheritanceLink (stv 1.000000 0.001248) lion tiger)
 	)
 )

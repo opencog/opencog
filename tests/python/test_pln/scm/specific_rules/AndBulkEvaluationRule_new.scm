@@ -1,8 +1,8 @@
 (define true (stv 1.0 0.1))
 (define false (stv 0.0 0.1))
 
-(define A (ConceptNode "A"))
-(define B (ConceptNode "B"))
+(define a (ConceptNode "A"))
+(define b (ConceptNode "B"))
 
 (EvaluationLink (PredicateNode "inputs") 
 	(ListLink 
@@ -25,7 +25,7 @@
 )
 (EvaluationLink (PredicateNode "forwardSteps")
 	(ListLink
-		(NumberNode "10")
+		(NumberNode "1")
 	)
 )
 

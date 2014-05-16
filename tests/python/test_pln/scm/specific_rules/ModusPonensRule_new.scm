@@ -10,8 +10,12 @@
 
 (EvaluationLink (PredicateNode "inputs") 
 	(ListLink 
-		(InheritanceLink human mortal (stv 0.5 1))
-		(InheritanceLink socrates human (stv 0.5 1))
+		eval_a
+		eval_b
+		imp_eva_evb
+		eval_c
+		imp_evb_evc
+		eval_d
 	)
 )
 (EvaluationLink (PredicateNode "rules") 

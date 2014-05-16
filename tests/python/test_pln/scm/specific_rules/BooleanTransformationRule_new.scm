@@ -15,14 +15,14 @@
 )
 (EvaluationLink (PredicateNode "forwardSteps")
 	(ListLink
-		(NumberNode "10")
+		(NumberNode "1")
 	)
 )
 
 (EvaluationLink (PredicateNode "outputs") 
 	(ListLink 
 		(OrLink P Q (stv 0.1 0.1))
-		(SubsetLink
+		(SubsetLink (stv 0.100000 0.100000)
 			(NotLink P)
 			Q
 		)
