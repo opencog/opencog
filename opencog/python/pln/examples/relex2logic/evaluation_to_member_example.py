@@ -13,9 +13,9 @@ __author__ = 'Cosmo Harrigan'
 atomspace = AtomSpace()
 __init__(atomspace)
 
-coreTypes = "../../../../../build/opencog/atomspace/core_types.scm"
-utilities = "../../../../scm/utilities.scm"
-data = "evaluation-to-member.scm"
+coreTypes = "opencog/atomspace/core_types.scm"
+utilities = "opencog/scm/utilities.scm"
+data = "opencog/python/pln/examples/relex2logic/evaluation-to-member.scm"
 
 for item in [coreTypes, utilities, data]:
     load_scm(atomspace, item)
