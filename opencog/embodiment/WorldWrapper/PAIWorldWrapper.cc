@@ -864,7 +864,7 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
     stringstream ss;
     ss << *from;
 
-    logger().debug("PAIWorldWrapper::%s - Trying to build pet action '%s' for builtin_action_enum %d'",
+    logger().debug("PAIWorldWrapper::%s - Trying to build avatar action '%s' for builtin_action_enum %d'",
                    __FUNCTION__, ss.str().c_str( ), bae);
 
     /****
