@@ -440,7 +440,7 @@ SCM_PRELOAD           = scm/core_types.scm,
                         demand_updaters.scm,
                         modulator_updaters.scm,
                         stimulus_updaters.scm,
-			pm_test_corpus.scm
+#			pm_test_corpus.scm
 
 # Use a comma separated list for multiple dirs
 PYTHON_EXTENSION_DIRS  = ../../../opencog/python/web/api

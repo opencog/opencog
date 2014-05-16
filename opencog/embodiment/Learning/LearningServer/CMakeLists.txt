@@ -7,6 +7,15 @@ ADD_LIBRARY(lslib
 	ImitationLearningAgent
 )
 
+ADD_LIBRARY(TestPatternMinerAgent SHARED
+        TestPatternMinerAgent
+)
+
+TARGET_LINK_LIBRARIES (TestPatternMinerAgent
+	PatternMiner
+)
+
+
 TARGET_LINK_LIBRARIES (lslib
 	PetaverseMOSES
 	comboreduct

@@ -373,18 +373,6 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 
     if ( config().get_bool("ENABLE_PATTERN_MINER"))
     {
-        if ( load_scm_file( *(this->atomSpace), "pm_test_corpus.scm" ) == 0  )
-            logger().info( "OAC::%s - Loaded pattern miner test corpus file: '%s'",
-                            __FUNCTION__,
-                           "pm_test_corpus.scm"
-                         );
-        else
-            logger().error( "OAC::%s - Failed to load pattern miner test corpus file: '%s'",
-                             __FUNCTION__,
-                            "pm_test_corpus.scm"
-                          );
-
-
         this->patternMiningAgent = PatternMiningAgentPtr(new PatternMiningAgent(*this));
         this->startAgent(this->patternMiningAgent);
     }
