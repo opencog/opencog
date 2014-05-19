@@ -314,7 +314,7 @@
 (define (be-inheritance-det-rule subj_concept subj_instance obj_concept obj_instance determiner)
     (InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
     (InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
-    (cond ((or (string=? determiner "those") (string=? determiner "these") (string=? determiner "this") (string=? determiner "that"))
+    (cond ((or (string=? determiner "those") (string=? determiner "these") (string=? determiner "this") (string=? determiner "that") (string=? determiner "the"))
            (InheritanceLink (ConceptNode subj_instance) (ConceptNode obj_instance)))
     )
 )
