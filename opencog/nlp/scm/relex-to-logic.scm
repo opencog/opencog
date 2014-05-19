@@ -305,12 +305,14 @@
     	)
 )
 
+; Examples: "Cats are animals", "Socrates is a man", "Trees are plants"
 (define (be-inheritance-rule subj_concept subj_instance obj_concept obj_instance)
     (InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 	(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
     (InheritanceLink (ConceptNode subj_instance) (ConceptNode obj_instance))
 )
 
+; Examples: "This man is a plumber", "The girls are vegetarians", "That scientist is a genius"
 (define (be-inheritance-det-rule subj_concept subj_instance obj_concept obj_instance determiner)
     (InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
     (InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
