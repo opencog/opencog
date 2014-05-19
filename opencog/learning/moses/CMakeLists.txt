@@ -67,6 +67,7 @@ ADD_LIBRARY (moses SHARED STATIC
 
 TARGET_LINK_LIBRARIES (moses
 	comboreduct
+	comboant
 	feature_selection
 	cogutil
 	${Boost_PROGRAM_OPTIONS_LIBRARY}

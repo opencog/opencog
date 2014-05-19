@@ -13,12 +13,14 @@ TARGET_LINK_LIBRARIES(vertexUTest
 ADD_CXXTEST(messageUTest)
 TARGET_LINK_LIBRARIES(messageUTest
 	comboreduct
+	comboant
 	cogutil
 )
 
 ADD_CXXTEST(type_treeUTest)
 TARGET_LINK_LIBRARIES(type_treeUTest
 	comboreduct
+	comboant
 	cogutil
 )
 
@@ -31,12 +33,14 @@ TARGET_LINK_LIBRARIES(variable_unifierUTest
 ADD_CXXTEST(procedure_callUTest)
 TARGET_LINK_LIBRARIES(procedure_callUTest
 	comboreduct
+	comboant
 	cogutil
 )
 
 ADD_CXXTEST(procedure_repositoryUTest)
 TARGET_LINK_LIBRARIES(procedure_repositoryUTest
 	comboreduct
+	comboant
 	cogutil
 )
 
@@ -49,11 +53,13 @@ TARGET_LINK_LIBRARIES(procedure_repositoryUTest
 ADD_CXXTEST(interpreterUTest)
 TARGET_LINK_LIBRARIES(interpreterUTest
 	comboreduct
-    cogutil
+	comboant
+	cogutil
 )
 
 ADD_CXXTEST(listUTest)
 TARGET_LINK_LIBRARIES(listUTest
 	comboreduct
+	comboant
 	cogutil
 )

@@ -8,5 +8,6 @@ ADD_LIBRARY(AvatarComboVocabulary
 
 TARGET_LINK_LIBRARIES(AvatarComboVocabulary
 	comboreduct
+	comboant
 	util
 )

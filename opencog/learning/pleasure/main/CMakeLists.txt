@@ -3,6 +3,7 @@ ADD_EXECUTABLE (pleasure-main main.cpp)
 TARGET_LINK_LIBRARIES (pleasure-main
 	pleasure
 	comboreduct
+	comboant
 	cogutil
 )
 
