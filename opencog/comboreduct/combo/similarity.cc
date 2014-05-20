@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/similarity/similarity.cc
+ * opencog/comboreduct/combo/similarity.cc
  *
  * Copyright (C) 2014 Aidyia Limited
  * All Rights Reserved

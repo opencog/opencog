@@ -23,8 +23,8 @@
  */
 #include <iostream>
 
-#include <opencog/comboreduct/similarity/similarity.h>
 #include <opencog/comboreduct/combo/iostream_combo.h>
+#include <opencog/comboreduct/combo/similarity.h>
 
 int main(int argc, char** argv)
 {

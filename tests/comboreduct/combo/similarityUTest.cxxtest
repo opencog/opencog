@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/comboreduct/similarity/similarity.h>
+#include <opencog/comboreduct/combo/similarity.h>
 
 using namespace opencog::combo;
 using namespace std;

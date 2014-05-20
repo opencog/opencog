@@ -25,11 +25,10 @@ ADD_LIBRARY(comboreduct SHARED
 	combo/perception
 	combo/procedure_call
 	combo/procedure_repository
+	combo/similarity
 	combo/simple_nn
 	combo/variable_unifier
 	combo/vertex
-
-	similarity/similarity
 
 	table/table
 	table/table_io
