@@ -3177,21 +3177,23 @@ unsigned int pre_order_index(const tree<T>& tr,
 }                                
 
 template<typename iter>
-std::string subtree_to_string(iter it) {
+std::string subtree_to_string(iter it)
+{
     std::stringstream ss;
-    int nChildren=it.number_of_children();
-    if (nChildren==1) {
+    int nChildren = it.number_of_children();
+    if (1 == nChildren) {
         ss << (*it) << "(";
         ss << subtree_to_string(it.begin());
         ss << ")";
-    } else if (nChildren==0) {
+    } else if (0 == nChildren) {
         ss << (*it);
     } else {
         ss << (*it) << "(";
         ss << subtree_to_string(it.begin());
 
-        for (typename iter::sibling_iterator sib=++it.begin();
-             sib!=it.end();++sib) {
+        for (typename iter::sibling_iterator sib = ++it.begin();
+             sib != it.end(); ++sib)
+        {
             ss << " ";
             ss << subtree_to_string(sib);
         }
@@ -3223,11 +3225,8 @@ namespace opencog {
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const opencog::tree<T>& tr)
 {
-    for (typename opencog::tree<T>::iterator it=tr.begin();it!=tr.end();++it) {
-        out << subtree_to_string(it);
-        it.skip_children();
-        out << " ";
-    }
+    typename opencog::tree<T>::sibling_iterator it = tr.begin();
+    out << subtree_to_string(it);
     return out;
 }
 
