@@ -47,13 +47,23 @@ static void tree_flatten_rec(tree_branch_vector& ctr, combo_tree::iterator root)
 	int numch = root.number_of_children();
 	if (0 == numch)
 	{
+		stringstream ss;
+		ss << combo_tree(root);
+		ctr[ss.str()] += 1;
 		return;
 	}
-	if (1 == numch)
+	else if (1 == numch)
 	{
-		return;
+		combo_tree::sibling_iterator first = root.begin();
+		if (0 == first.number_of_children())
+		{
+			stringstream ss;
+			ss << combo_tree(root);
+			ctr[ss.str()] += 1;
+			return;
+		}
 	}
-	if (2 == numch)
+	else if (2 == numch)
 	{
 		combo_tree::sibling_iterator first = root.begin();
 		if (0 == first.number_of_children() and
@@ -94,6 +104,11 @@ tree_branch_vector tree_flatten(const std::string& str)
 
 std::ostream& operator<<(std::ostream& os, const tree_branch_vector& btv)
 {
+	bool nf = false;
+	foreach(auto pr, btv) {
+		if (nf) os << ", "; else nf = true;
+		os << pr.first << ": " << pr.second;
+	}
 	return os;
 }
 

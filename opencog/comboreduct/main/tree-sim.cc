@@ -1,7 +1,7 @@
 /*
  * opencog/comboreduct/main/tree-sim.cc
  *
- * Copyright (C) 2014 Aidyia
+ * Copyright (C) 2014 Aidyia Limited
  * All Rights Reserved
  *
  * Written by Linas Vepstas
