@@ -1,7 +1,7 @@
 /*
  * opencog/comboreduct/similarity/similarity.cc
  *
- * Copyright (C) 2014 Aidyia
+ * Copyright (C) 2014 Aidyia Limited
  * All Rights Reserved
  *
  * Written by Linas Vepstas
@@ -42,16 +42,28 @@ using namespace std;
  */
 static void tree_flatten_rec(tree_branch_vector& ctr, combo_tree::iterator root)
 {
-	// if (*it == id::logical_and
-
 	cout << "duuude root " << *root << endl;
 
-	if (2 == root.number_of_children())
+	int numch = root.number_of_children();
+	if (0 == numch)
 	{
-		cout << "duude its two" << endl;
-		stringstream ss;
-		ss << combo_tree(root);
-		ctr[ss.str()] += 1;
+		return;
+	}
+	if (1 == numch)
+	{
+		return;
+	}
+	if (2 == numch)
+	{
+		combo_tree::sibling_iterator first = root.begin();
+		if (0 == first.number_of_children() and
+		    0 == (++first).number_of_children())
+		{
+			stringstream ss;
+			ss << combo_tree(root);
+			ctr[ss.str()] += 1;
+			return;
+		}
 	}
 
 	combo_tree::sibling_iterator it = root.begin();
@@ -68,6 +80,21 @@ tree_branch_vector tree_flatten(const combo_tree& tree)
 	combo_tree::iterator root = tree.begin();
 	tree_flatten_rec(counter, root);
 	return counter;
+}
+
+tree_branch_vector tree_flatten(const std::string& str)
+{
+	stringstream ss;
+	combo_tree tr;
+	ss << str;
+	ss >> tr;
+	return tree_flatten(tr);
+}
+
+
+std::ostream& operator<<(std::ostream& os, const tree_branch_vector& btv)
+{
+	return os;
 }
 
 

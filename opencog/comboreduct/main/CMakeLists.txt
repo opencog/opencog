@@ -86,9 +86,10 @@ TARGET_LINK_LIBRARIES(gen-table
 
 ADD_EXECUTABLE (gen-disj-conj gen-disj-conj.cc)
 TARGET_LINK_LIBRARIES(gen-disj-conj
-    comboreduct
-    cogutil
-    ${Boost_PROGRAM_OPTIONS_LIBRARY} 
+	comboreduct
+	comboant
+	cogutil
+	${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
 
 # install eval-table
