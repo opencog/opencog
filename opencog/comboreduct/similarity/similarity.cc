@@ -46,32 +46,38 @@ static void tree_flatten_rec(tree_branch_vector& ctr, combo_tree::iterator root)
 	if (0 == numch)
 	{
 		stringstream ss;
-		ss << combo_tree(root);
+		ss << *root;
 		ctr[ss.str()] += 1;
 		return;
 	}
-	else if (1 == numch)
+	if (1 == numch)
 	{
 		combo_tree::sibling_iterator first = root.begin();
-		if (0 == first.number_of_children())
-		{
-			stringstream ss;
-			ss << combo_tree(root);
-			ctr[ss.str()] += 1;
-			return;
-		}
+		stringstream ss;
+		ss << *root << "(" << *first << ")";
+		ctr[ss.str()] += 1;
+
+		if (0 != first.number_of_children())
+			tree_flatten_rec(ctr, first);
+
+		return;
 	}
-	else if (2 == numch)
+	if (2 == numch)
 	{
 		combo_tree::sibling_iterator first = root.begin();
-		if (0 == first.number_of_children() and
-		    0 == (++first).number_of_children())
-		{
-			stringstream ss;
-			ss << combo_tree(root);
-			ctr[ss.str()] += 1;
-			return;
-		}
+		combo_tree::sibling_iterator second = first;
+		second ++;
+
+		stringstream ss;
+		ss << *root << "(" << *first << " " << *second << ")";
+		ctr[ss.str()] += 1;
+
+		if (0 != first.number_of_children())
+			tree_flatten_rec(ctr, first);
+
+		if (0 != second.number_of_children())
+			tree_flatten_rec(ctr, second);
+		return;
 	}
 
 	combo_tree::sibling_iterator it = root.begin();

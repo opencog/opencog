@@ -30,7 +30,7 @@ class similarityUTest : public CxxTest::TestSuite
 {
 public:
 
-    void test_two()
+    void test_simple()
     {
         tree_branch_vector tbv = tree_flatten("+($1 $2)");
         TS_ASSERT_EQUALS(toString(tbv), "+($1 $2) : 1");
@@ -48,6 +48,22 @@ public:
         tbv = tree_flatten("+ (  )");
         TS_ASSERT_EQUALS(toString(tbv), "+ : 1");
     }
+
+    void test_nest()
+    {
+        tree_branch_vector tbv = tree_flatten("+( +( $2))");
+        TS_ASSERT_EQUALS(toString(tbv), "+($2) : 1, +(+) : 1");
+
+        tbv = tree_flatten("+( +(1 $2))");
+        TS_ASSERT_EQUALS(toString(tbv), "+(+) : 1, +(1 $2) : 1");
+
+        tbv = tree_flatten("+(3 +(1 $2))");
+        TS_ASSERT_EQUALS(toString(tbv), "+(1 $2) : 1, +(3 +) : 1");
+
+        tbv = tree_flatten("+(+(1 $2) 3)");
+        TS_ASSERT_EQUALS(toString(tbv), "+(+ 3) : 1, +(1 $2) : 1");
+    }
+
 };
 
 
