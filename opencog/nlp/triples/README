@@ -76,6 +76,10 @@ Unfortunately, the code here generates these triples, and the problem
 is not easily fixable without a fairly major tearup.  To reiterate:
 synatactic relations are ignored at one's peril.
 
+As to the practical usability of this code: there are other issues,
+described below, and especially the to-do section, that require
+attention.
+
 
 Structures
 ----------
