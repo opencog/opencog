@@ -42,8 +42,6 @@ using namespace std;
  */
 static void tree_flatten_rec(tree_branch_vector& ctr, combo_tree::iterator root)
 {
-	cout << "duuude root " << *root << endl;
-
 	int numch = root.number_of_children();
 	if (0 == numch)
 	{
@@ -107,7 +105,7 @@ std::ostream& operator<<(std::ostream& os, const tree_branch_vector& btv)
 	bool nf = false;
 	foreach(auto pr, btv) {
 		if (nf) os << ", "; else nf = true;
-		os << pr.first << ": " << pr.second;
+		os << pr.first << " : " << pr.second;
 	}
 	return os;
 }

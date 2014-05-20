@@ -35,18 +35,18 @@ public:
         tree_branch_vector tbv = tree_flatten("+($1 $2)");
         TS_ASSERT_EQUALS(toString(tbv), "+($1 $2) : 1");
 
-        tbv = tree_flatten("+($1 2)");
+        tbv = tree_flatten("+ ($1 2)");
         TS_ASSERT_EQUALS(toString(tbv), "+($1 2) : 1");
-        tbv = tree_flatten("+(1 $2)");
+        tbv = tree_flatten("+		(1  $2)");
         TS_ASSERT_EQUALS(toString(tbv), "+(1 $2) : 1");
 
-        tbv = tree_flatten("+($1)");
+        tbv = tree_flatten("+  ($1)");
         TS_ASSERT_EQUALS(toString(tbv), "+($1) : 1");
-        tbv = tree_flatten("+(1)");
+        tbv = tree_flatten("+( 1)");
         TS_ASSERT_EQUALS(toString(tbv), "+(1) : 1");
 
-        tbv = tree_flatten("+()");
-        TS_ASSERT_EQUALS(toString(tbv), "+() : 1");
+        tbv = tree_flatten("+ (  )");
+        TS_ASSERT_EQUALS(toString(tbv), "+ : 1");
     }
 };
 
