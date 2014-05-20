@@ -1,6 +1,7 @@
 ADD_CXXTEST(vertexUTest)
 TARGET_LINK_LIBRARIES(vertexUTest
 	comboreduct
+	comboant
 	cogutil
 )
 
@@ -41,6 +42,7 @@ TARGET_LINK_LIBRARIES(annUTest
 ADD_CXXTEST(variable_unifierUTest)
 TARGET_LINK_LIBRARIES(variable_unifierUTest
 	comboreduct
+	comboant
 	cogutil
 )
 
