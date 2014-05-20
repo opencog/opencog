@@ -33,7 +33,6 @@ ADD_LIBRARY(comboreduct SHARED
 	table/table_io
 
 	interpreter/eval
-	interpreter/perception_eval
 	interpreter/interpreter
 
 	type_checker/type_tree_def
