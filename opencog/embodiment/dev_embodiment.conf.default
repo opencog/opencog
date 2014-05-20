@@ -439,7 +439,7 @@ SCM_PRELOAD           = scm/core_types.scm,
                         feeling_updaters.scm,
                         demand_updaters.scm,
                         modulator_updaters.scm,
-                        stimulus_updaters.scm,
+                        stimulus_updaters.scm
 #			pm_test_corpus.scm
 
 # Use a comma separated list for multiple dirs
