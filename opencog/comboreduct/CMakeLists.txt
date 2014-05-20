@@ -29,6 +29,8 @@ ADD_LIBRARY(comboreduct SHARED
 	combo/variable_unifier
 	combo/vertex
 
+	similarity/similarity
+
 	table/table
 	table/table_io
 

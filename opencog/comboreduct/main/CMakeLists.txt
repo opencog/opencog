@@ -47,6 +47,13 @@ TARGET_LINK_LIBRARIES(interactive-reductor
 	cogutil
 )
 
+ADD_EXECUTABLE (repl repl.cc)
+TARGET_LINK_LIBRARIES(repl
+	comboreduct
+	comboant
+	cogutil
+)
+
 ADD_EXECUTABLE (tree_gen tree_gen.cc)
 TARGET_LINK_LIBRARIES(tree_gen
 	comboreduct
@@ -54,8 +61,8 @@ TARGET_LINK_LIBRARIES(tree_gen
 	cogutil
 )
 
-ADD_EXECUTABLE (repl repl.cc)
-TARGET_LINK_LIBRARIES(repl
+ADD_EXECUTABLE (tree-sim tree-sim.cc)
+TARGET_LINK_LIBRARIES(tree-sim
 	comboreduct
 	comboant
 	cogutil
