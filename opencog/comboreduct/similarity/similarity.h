@@ -25,11 +25,14 @@
 #ifndef COMBO_SIMILARITY_H_
 #define COMBO_SIMILARITY_H_
 
+#include <map>
+#include <string>
 #include <opencog/comboreduct/combo/vertex.h>
 
 namespace opencog { namespace combo {
 
-combo_tree to_binary_tree(const combo_tree&);
+typedef std::map<std::string, unsigned> tree_branch_vector;
+tree_branch_vector tree_flatten(const combo_tree&);
 
 class tree_similarity
 {

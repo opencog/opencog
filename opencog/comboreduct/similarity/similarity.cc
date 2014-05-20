@@ -21,22 +21,53 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <opencog/comboreduct/combo/iostream_combo.h>
+
 #include "similarity.h"
 
 namespace opencog { namespace combo {
 
-/**
- * to_binary_tree -- convert combo tree to binary tree
- *
- * Create a a tree that is functionally the same as the given tree,
- * but such that it is a binary tree: every vertex has at most two
- * children.
- */
-combo_tree to_binary_tree(const combo_tree& tree)
-{
-	combo_tree btree(tree);
+using namespace std;
 
-	return btree;
+/**
+ * tree_flatten -- approximate combo tree by a flattened vector
+ *
+ * Implicitly convert the tree to binary form, and then count the 
+ * number of vertexes of each type in that binary tree.
+ *
+ * (The binary tree equivalent of a combo tree is a tree where every
+ * vertex has at most two children, but is otherwise semantically
+ * equivalent).
+ */
+static void tree_flatten_rec(tree_branch_vector& ctr, combo_tree::iterator root)
+{
+	// if (*it == id::logical_and
+
+	cout << "duuude root " << *root << endl;
+
+	if (2 == root.number_of_children())
+	{
+		cout << "duude its two" << endl;
+		stringstream ss;
+		ss << combo_tree(root);
+		ctr[ss.str()] += 1;
+	}
+
+	combo_tree::sibling_iterator it = root.begin();
+	combo_tree::sibling_iterator last = root.end();
+	for (; it !=last; it++)
+	{
+		cout << "duuude child " << *it << endl;
+	}
+}
+
+tree_branch_vector tree_flatten(const combo_tree& tree)
+{
+	tree_branch_vector counter;
+	combo_tree::iterator root = tree.begin();
+	tree_flatten_rec(counter, root);
+	return counter;
 }
 
 

@@ -45,7 +45,9 @@ int main(int argc, char** argv)
 
     cout << "Input tree: " << tr << endl;
 
-    combo_tree btr = to_binary_tree(tr);
+    tree_branch_vector btv = tree_flatten(tr);
 
-    cout << "Binary version: " << btr << endl;
+    foreach(auto pr, btv) {
+       cout << "Vect: " << pr.first << " count: " << pr.second << endl;
+    }
 }
