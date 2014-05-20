@@ -91,7 +91,7 @@
 
 (define (advmod-rule verb instance adv adv_instance)
 	(InheritanceLink  (ConceptNode adv_instance) (ConceptNode adv))
-	(InheritanceLink  (PredicateNode instance) (ConceptNode adv_instance))
+	(InheritanceLink  (SatisfyingSetLink (PredicateNode instance)) (ConceptNode adv_instance))
 	(InheritanceLink  (PredicateNode instance) (PredicateNode verb))
 )
 
