@@ -29,6 +29,28 @@
 namespace opencog { namespace combo {
 
 using namespace std;
+/**
+ * This file implements the tree similarity measure described by:
+ * Rui Yang, Panos Kalnis, Anthony K. H. Tung
+ * "Similarity Evaluation on Tree-structured Data"
+ * appearning in SIGMOD 2005.
+ * http://www.comp.nus.edu.sg/~atung/renmin/treematch.pdf
+ *
+ * There are various changes and departures form the algo described
+ * above:
+ * 1) We never need the binary tree version of a tree, and so never
+ *    generate that.  Instead, we generate the branch-tree vector
+ *    directly.
+ * 2) Empty nodes are never generated; they're not needed.
+ * 3) The code here assumes that any N-ary operator for N>2 can
+ *    be decomposed into a binary tree in a fully associative way.
+ *    For the combo arithmetic and boolean operators, this is
+ *    appropriate, since, of course, +(a b c) == +(a +(b c))
+ *    At time of writing, all combo N-ary operators are associative
+ *    in this way.
+ * 4) We don't actually need a C++ vector to hold the vector. An
+ *    std::map is easier.
+ */
 
 /**
  * tree_flatten -- approximate combo tree by a flattened vector
@@ -42,7 +64,7 @@ using namespace std;
  */
 static void tree_flatten_rec(tree_branch_vector& ctr, combo_tree::iterator root)
 {
-	int numch = root.number_of_children();
+	size_t numch = root.number_of_children();
 	if (0 == numch)
 	{
 		stringstream ss;
@@ -62,30 +84,31 @@ static void tree_flatten_rec(tree_branch_vector& ctr, combo_tree::iterator root)
 
 		return;
 	}
-	if (2 == numch)
-	{
-		combo_tree::sibling_iterator first = root.begin();
-		combo_tree::sibling_iterator second = first;
-		second ++;
 
+	combo_tree::sibling_iterator first = root.begin();
+	size_t i = 0;
+	for (; i < numch-2; first++, i++)
+	{
 		stringstream ss;
-		ss << *root << "(" << *first << " " << *second << ")";
+		ss << *root << "(" << *first << " " << *root << ")";
 		ctr[ss.str()] += 1;
 
 		if (0 != first.number_of_children())
 			tree_flatten_rec(ctr, first);
-
-		if (0 != second.number_of_children())
-			tree_flatten_rec(ctr, second);
-		return;
 	}
 
-	combo_tree::sibling_iterator it = root.begin();
-	combo_tree::sibling_iterator last = root.end();
-	for (; it !=last; it++)
-	{
-		cout << "duuude child " << *it << endl;
-	}
+	combo_tree::sibling_iterator second = first;
+	second ++;
+
+	stringstream ss;
+	ss << *root << "(" << *first << " " << *second << ")";
+	ctr[ss.str()] += 1;
+
+	if (0 != first.number_of_children())
+		tree_flatten_rec(ctr, first);
+
+	if (0 != second.number_of_children())
+		tree_flatten_rec(ctr, second);
 }
 
 tree_branch_vector tree_flatten(const combo_tree& tree)
