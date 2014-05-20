@@ -30,7 +30,7 @@ relation. Roughly speaking, prepositional relations hold over extended
 periods of time (the tree and house are not likely to move anytime soon)
 while verb/action relations hold only during instants in time (once the
 throwing is done, it becomes something that happened in the past). This
-distinction is important when performing commn-sense reasoning.
+distinction is important when performing common-sense reasoning.
 
 The primary challenge here is of dealing with the diversity of
 expression in the English language, where most sentences are NOT short,
@@ -53,6 +53,29 @@ process RelEx input and generate triples output.  The IF..THEN.. syntax
 very closely resembles that used by the RelEx framing code, with the 
 intention that someday, it will be possible to use this code to port the
 RelEx frame processing to OpenCog.
+
+
+Status
+------
+The experiment was concluded in 2009 and the code here is mothballed.
+Here's what I learned: it appears that the syntactic structure of the
+English language is important for reasoning and understanding, and that
+simplifications, such as those done here, can erase important semantic
+content.  
+
+The code here uses a design decision that makes it unappealing to
+further extend this work, at least, not without re-writing a core part
+of it.  Specifically, the issue is the reduction of a sentence such as
+"John threw a rock" to the triple "throw(John,rock)".  The begs a
+question: if the input sentence is "John threw a rock at the window",
+how should that be represented?  The answer is clear when the subject
+and object at maintained distinctly:  "_subj(throw, John) _obj(throw,
+rock) at(rock, window)".  But when the triple is "throw(John,rock)"
+its no longer clear how to attach "at the window" to this structure.
+Unfortunately, the code here generates these triples, and the problem
+is not easily fixable without a fairly major tearup.  To reiterate:
+synatactic relations are ignored at one's peril.
+
 
 Structures
 ----------
