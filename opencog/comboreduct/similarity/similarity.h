@@ -37,12 +37,9 @@ typedef std::map<std::string, unsigned> tree_branch_vector;
 tree_branch_vector tree_flatten(const combo_tree&);
 tree_branch_vector tree_flatten(const std::string& str);
 
-class tree_similarity
-{
-	public:
-		tree_similarity(void);
-
-};
+size_t tree_similarity(const combo_tree&, const combo_tree&);
+size_t tree_similarity(const tree_branch_vector&, const tree_branch_vector&);
+size_t tree_similarity(const std::string&, const std::string&);
 
 std::ostream& operator<<(std::ostream&, const tree_branch_vector&);
 std::string toString(const tree_branch_vector& tbv)

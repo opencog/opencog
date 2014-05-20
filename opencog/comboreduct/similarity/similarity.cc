@@ -28,7 +28,6 @@
 
 namespace opencog { namespace combo {
 
-using namespace std;
 /**
  * This file implements the tree similarity measure described by:
  * Rui Yang, Panos Kalnis, Anthony K. H. Tung
@@ -42,13 +41,19 @@ using namespace std;
  *    generate that.  Instead, we generate the branch-tree vector
  *    directly.
  * 2) Empty nodes are never generated; they're not needed.
- * 3) The code here assumes that any N-ary operator for N>2 can
+ * 3) Leaf nodes are not generated. This is a fairly significant
+ *    departure from the original algorithm.  It does alter the
+ *    distance measure for tree similarity; our trees are measured
+ *    'closer' than the original algo, by about a factor of 2.
+ *    I beleive that this difference won't affect results by much;
+ *    it will save cpu time, though.
+ * 4) The code here assumes that any N-ary operator for N>2 can
  *    be decomposed into a binary tree in a fully associative way.
  *    For the combo arithmetic and boolean operators, this is
  *    appropriate, since, of course, +(a b c) == +(a +(b c))
  *    At time of writing, all combo N-ary operators are associative
  *    in this way.
- * 4) We don't actually need a C++ vector to hold the vector. An
+ * 5) We don't actually need a C++ vector to hold the vector. An
  *    std::map is easier.
  */
 
@@ -67,7 +72,7 @@ static void tree_flatten_rec(tree_branch_vector& ctr, combo_tree::iterator root)
 	size_t numch = root.number_of_children();
 	if (0 == numch)
 	{
-		stringstream ss;
+		std::stringstream ss;
 		ss << *root;
 		ctr[ss.str()] += 1;
 		return;
@@ -75,7 +80,7 @@ static void tree_flatten_rec(tree_branch_vector& ctr, combo_tree::iterator root)
 	if (1 == numch)
 	{
 		combo_tree::sibling_iterator first = root.begin();
-		stringstream ss;
+		std::stringstream ss;
 		ss << *root << "(" << *first << ")";
 		ctr[ss.str()] += 1;
 
@@ -85,11 +90,14 @@ static void tree_flatten_rec(tree_branch_vector& ctr, combo_tree::iterator root)
 		return;
 	}
 
+	// Assume, for numch>2, that the root will dsitribute associarively
+	// over its arguments.  That is, if the root +, we assume that
+	// +(a b c) == +(a +(b c)) and so the first tree-branch is +(a +)
 	combo_tree::sibling_iterator first = root.begin();
 	size_t i = 0;
 	for (; i < numch-2; first++, i++)
 	{
-		stringstream ss;
+		std::stringstream ss;
 		ss << *root << "(" << *first << " " << *root << ")";
 		ctr[ss.str()] += 1;
 
@@ -100,7 +108,7 @@ static void tree_flatten_rec(tree_branch_vector& ctr, combo_tree::iterator root)
 	combo_tree::sibling_iterator second = first;
 	second ++;
 
-	stringstream ss;
+	std::stringstream ss;
 	ss << *root << "(" << *first << " " << *second << ")";
 	ctr[ss.str()] += 1;
 
@@ -111,6 +119,7 @@ static void tree_flatten_rec(tree_branch_vector& ctr, combo_tree::iterator root)
 		tree_flatten_rec(ctr, second);
 }
 
+/** Same as above, wrapper */
 tree_branch_vector tree_flatten(const combo_tree& tree)
 {
 	tree_branch_vector counter;
@@ -119,15 +128,62 @@ tree_branch_vector tree_flatten(const combo_tree& tree)
 	return counter;
 }
 
+/** Same as above, utility version for combo trees as strings */
 tree_branch_vector tree_flatten(const std::string& str)
 {
-	stringstream ss;
+	std::stringstream ss;
 	combo_tree tr;
 	ss << str;
 	ss >> tr;
 	return tree_flatten(tr);
 }
 
+/**
+ * tree_similarity -- compute the manhattan distance between trees.
+ *
+ * The manhattan distance is the same as the lp_1 distance.
+ */
+size_t tree_similarity(const tree_branch_vector& av,
+                       const tree_branch_vector& bv)
+{
+	size_t dist = 0;
+	// At the end, diff will hold anything in bv that is not in av
+	tree_branch_vector diff = bv;
+	foreach (auto pr, av)
+	{
+		size_t acnt = pr.second;
+		size_t bcnt = 0;
+		diff.erase(pr.first);
+		try {
+			bcnt = bv.at(pr.first);
+		}
+		catch (const std::out_of_range& oor)
+		{}
+
+		dist += abs(acnt - bcnt);
+	}
+
+	// Add anything in bv that was not in av.
+	foreach (auto p, diff)
+	{
+		dist += p.second;
+	}
+	return dist;
+}
+
+size_t tree_similarity(const combo_tree& a, const combo_tree& b)
+{
+	tree_branch_vector av = tree_flatten(a);
+	tree_branch_vector bv = tree_flatten(b);
+	return tree_similarity(av, bv);
+}
+
+size_t tree_similarity(const std::string& a, const std::string& b)
+{
+	tree_branch_vector av = tree_flatten(a);
+	tree_branch_vector bv = tree_flatten(b);
+	return tree_similarity(av, bv);
+}
 
 std::ostream& operator<<(std::ostream& os, const tree_branch_vector& btv)
 {
@@ -139,11 +195,6 @@ std::ostream& operator<<(std::ostream& os, const tree_branch_vector& btv)
 	return os;
 }
 
-
-tree_similarity::tree_similarity(void)
-{
-
-}
 
 } // ~namespace combo
 } // ~namespace opencog

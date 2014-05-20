@@ -85,6 +85,20 @@ public:
         TS_ASSERT_EQUALS(toString(tbv), "and($1 and) : 2, and(or $3) : 1, or($2 $2) : 1");
     }
 
+    void test_distance()
+    {
+        TS_ASSERT_EQUALS(0, tree_similarity("+(a b c)", " +  ( a  b  c )  "));
+        TS_ASSERT_EQUALS(2, tree_similarity("+(a b c)", "+(a b d)"));
+        TS_ASSERT_EQUALS(2, tree_similarity("+(a b c a a a a)", "+(a b d a a a a)"));
+        TS_ASSERT_EQUALS(8, tree_similarity("+(a b c a a a a)", "+(a b d d d d d)"));
+        TS_ASSERT_EQUALS(3, tree_similarity("+(a b c)", "+(a b)"));
+        TS_ASSERT_EQUALS(1, tree_similarity("+(a b c)", "+(b c)"));
+        TS_ASSERT_EQUALS(1, tree_similarity("+(a b c d e)", "+(b c d e)"));
+        TS_ASSERT_EQUALS(2, tree_similarity("+(a b c d e)", "+(c d e)"));
+        TS_ASSERT_EQUALS(3, tree_similarity("+(a b c d e)", "+(d e)"));
+        TS_ASSERT_EQUALS(5, tree_similarity("+(a b c d e)", "+(e)"));
+        TS_ASSERT_EQUALS(2, tree_similarity("+(a b a a a a)", "+(a c a a a a)"));
+    }
 };
 
 
