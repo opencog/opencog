@@ -30,9 +30,9 @@ public:
     void test_fold_unrolling()
     {
     string tree_str1 = "foldr(+ 1 list(2 3 4))";
-    TS_ASSERT_EQUALS(perform_fold_reduce(tree_str1), string("+(2 +(3 +(4 1))) "));
+    TS_ASSERT_EQUALS(perform_fold_reduce(tree_str1), string("+(2 +(3 +(4 1)))"));
     string tree_str2 = "foldl(+ 1 list(2 3 4))";
-    TS_ASSERT_EQUALS(perform_fold_reduce(tree_str2), string("+(+(+(1 2) 3) 4) "));
+    TS_ASSERT_EQUALS(perform_fold_reduce(tree_str2), string("+(+(+(1 2) 3) 4)"));
     }
 
 };

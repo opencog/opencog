@@ -20,37 +20,35 @@ class listUTest :  public CxxTest::TestSuite {
 public:
     void test_list()
     {
-        TS_ASSERT_EQUALS(teval("list(a b)"), string("list(a b) "));
-        TS_ASSERT_EQUALS(teval("list(a b c)"), string("list(a b c) "));
-        TS_ASSERT_EQUALS(teval("car(list(a b c))"), string("a "));
-        TS_ASSERT_EQUALS(teval("cdr(list(a b c))"), string("list(b c) "));
-        TS_ASSERT_EQUALS(teval("cons(a list)"), string("list(a) "));
-        TS_ASSERT_EQUALS(teval("cons(a cons(b list))"), string("list(a b) "));
-        TS_ASSERT_EQUALS(teval("cons(a cons(b cons (c list)))"), string("list(a b c) "));
-        TS_ASSERT_EQUALS(teval("car(cons(a cons(b cons (c list))))"), string("a "));
-        TS_ASSERT_EQUALS(teval("cdr(cons(a cons(b cons (c list))))"), string("list(b c) "));
+        TS_ASSERT_EQUALS(teval("list(a b)"), string("list(a b)"));
+        TS_ASSERT_EQUALS(teval("list(a b c)"), string("list(a b c)"));
+        TS_ASSERT_EQUALS(teval("car(list(a b c))"), string("a"));
+        TS_ASSERT_EQUALS(teval("cdr(list(a b c))"), string("list(b c)"));
+        TS_ASSERT_EQUALS(teval("cons(a list)"), string("list(a)"));
+        TS_ASSERT_EQUALS(teval("cons(a cons(b list))"), string("list(a b)"));
+        TS_ASSERT_EQUALS(teval("cons(a cons(b cons (c list)))"), string("list(a b c)"));
+        TS_ASSERT_EQUALS(teval("car(cons(a cons(b cons (c list))))"), string("a"));
+        TS_ASSERT_EQUALS(teval("cdr(cons(a cons(b cons (c list))))"), string("list(b c)"));
 
         // Should be able to eval list contents
-        TS_ASSERT_EQUALS(teval("list ( +(1 1)  *(2 2))"), string("list(2 4) "));
-        TS_ASSERT_EQUALS(teval("car( list ( +(1 1)  *(2 2)))"), string("2 "));
-        TS_ASSERT_EQUALS(teval("cdr( list ( +(1 1)  *(2 2)))"), string("list(4) "));
+        TS_ASSERT_EQUALS(teval("list ( +(1 1)  *(2 2))"), string("list(2 4)"));
+        TS_ASSERT_EQUALS(teval("car( list ( +(1 1)  *(2 2)))"), string("2"));
+        TS_ASSERT_EQUALS(teval("cdr( list ( +(1 1)  *(2 2)))"), string("list(4)"));
 
         // Result of car should be usable in non-list structures
-        TS_ASSERT_EQUALS(teval("+(40 car( list ( +(1 1)  *(2 2))))"), string("42 "));
-        TS_ASSERT_EQUALS(teval("+(5 car( list ( +(1 1)  *(2 2))) 15 20)"), string("42 "));
-        TS_ASSERT_EQUALS(teval("+(5 car( list ( +(1 1)  *(2 2))) 15 car(cdr(list(50 20))))"), string("42 "));
+        TS_ASSERT_EQUALS(teval("+(40 car( list ( +(1 1)  *(2 2))))"), string("42"));
+        TS_ASSERT_EQUALS(teval("+(5 car( list ( +(1 1)  *(2 2))) 15 20)"), string("42"));
+        TS_ASSERT_EQUALS(teval("+(5 car( list ( +(1 1)  *(2 2))) 15 car(cdr(list(50 20))))"), string("42"));
 
-        //tests for foldr and foldl
-        TS_ASSERT_EQUALS(teval("foldr(+ 1 list(2 3))"), string("6 "));
-        TS_ASSERT_EQUALS(teval("foldr(cons list list(a b c))"), string("list(a b c) "));
-        TS_ASSERT_EQUALS(teval("foldr(+ car(list(1 2)) list(2 3))"), string("6 "));
-        TS_ASSERT_EQUALS(teval("foldr(+ 1 cdr(list(1 2 3)))"), string("6 "));
-        TS_ASSERT_EQUALS(teval("foldr(+ 1 cons(2 list(3)))"), string("6 "));
-        TS_ASSERT_EQUALS(teval("foldl(+ 1 list(2 3))"), string("6 "));
-        TS_ASSERT_EQUALS(teval("foldl(+ car(list(1 2)) list(2 3))"), string("6 "));
-        TS_ASSERT_EQUALS(teval("foldl(+ 1 cdr(list(1 2 3)))"), string("6 "));
-        TS_ASSERT_EQUALS(teval("foldl(+ 1 cons(2 list(3)))"), string("6 "));
+        // tests for foldr and foldl
+        TS_ASSERT_EQUALS(teval("foldr(+ 1 list(2 3))"), string("6"));
+        TS_ASSERT_EQUALS(teval("foldr(cons list list(a b c))"), string("list(a b c)"));
+        TS_ASSERT_EQUALS(teval("foldr(+ car(list(1 2)) list(2 3))"), string("6"));
+        TS_ASSERT_EQUALS(teval("foldr(+ 1 cdr(list(1 2 3)))"), string("6"));
+        TS_ASSERT_EQUALS(teval("foldr(+ 1 cons(2 list(3)))"), string("6"));
+        TS_ASSERT_EQUALS(teval("foldl(+ 1 list(2 3))"), string("6"));
+        TS_ASSERT_EQUALS(teval("foldl(+ car(list(1 2)) list(2 3))"), string("6"));
+        TS_ASSERT_EQUALS(teval("foldl(+ 1 cdr(list(1 2 3)))"), string("6"));
+        TS_ASSERT_EQUALS(teval("foldl(+ 1 cons(2 list(3)))"), string("6"));
     }
-
-
 };
