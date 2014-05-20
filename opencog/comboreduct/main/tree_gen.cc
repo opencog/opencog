@@ -22,12 +22,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <iostream>
+#include <boost/lexical_cast.hpp>
 
 #include <opencog/util/selection.h>
 #include <opencog/util/mt19937ar.h>
 
-#include <opencog/comboreduct/combo/tree_generation.h>
-#include <boost/lexical_cast.hpp>
+#include "tree_generation.h"
 
 int main(int argc, char** argv)
 {

@@ -26,7 +26,6 @@ ADD_LIBRARY(comboreduct SHARED
 	combo/procedure_call
 	combo/procedure_repository
 	combo/simple_nn
-	combo/tree_generation
 	combo/variable_unifier
 	combo/vertex
 
