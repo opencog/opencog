@@ -7,21 +7,26 @@ using std::string;
 using namespace opencog;
 
 tree<string> tr;
-tree<string>::iterator at=tr.begin();
+tree<string>::iterator at = tr.begin();
 
-void begin_internal(const char* from, const char* to) {
-    at= tr.empty() 
-        ? tr.insert(at,string(from,to-1))
-        : tr.append_child(at,string(from,to-1));
+void begin_internal(const char* from, const char* to)
+{
+    at = tr.empty() 
+        ? tr.insert(at,string(from, to-1))
+        : tr.append_child(at,string(from, to-1));
 }
-void end_internal(const char) {
-    at=tr.parent(at);
+
+void end_internal(const char)
+{
+    at = tr.parent(at);
 }
-void add_leaf(const char* from, const char* to) {
+
+void add_leaf(const char* from, const char* to)
+{
     if (tr.empty())
-        at=tr.insert(at,string(from,to));
+        at = tr.insert(at, string(from, to));
     else
-        tr.append_child(at,string(from,to));
+        tr.append_child(at, string(from, to));
 }
 
 struct TreeGrammar : public grammar<TreeGrammar>
@@ -33,16 +38,17 @@ struct TreeGrammar : public grammar<TreeGrammar>
     {
         definition(const TreeGrammar&)
         {
-            term= 
-                lexeme_d[//or a message M with the syntax message:"M"
-                         //added this to parse correctly has_said perceptions
+            term = 
+                lexeme_d[// or a message M with the syntax message:"M"
+                         // added this to parse correctly has_said perceptions
+                         // XXX THIS IS A HACK -- FIXME
                          ( str_p("message:") >> ch_p('"') 
                            >> *(anychar_p - ch_p('"')) >> ch_p('"'))
                          | (+( anychar_p - ch_p('(') - ch_p(')') - space_p))]
                 [&add_leaf];
-            beg=
+            beg =
                 lexeme_d[(+( anychar_p - ch_p('(') - ch_p(')') - space_p)) >> '('];
-            expr=
+            expr =
                 (beg[&begin_internal] >> +expr >> ch_p(')')[&end_internal]) |
                 term;
             //expr=term | (term >> '(' >> +expr >> ')');
@@ -78,7 +84,7 @@ std::istream& operator>>(std::istream& in,opencog::tree<std::string>& t)
     do {
         // Replaced by getline so that a message i.e. "yo  man" isn't
         // replaced by "yo man" (where a space is missing)
-        // Other assumption : no '(' and ')' between " "
+        // This assumes that there are no '(' and ')' in the quoted string.
         std::getline(in, tmp);
         nparen += count(tmp.begin(), tmp.end(), '(') 
                  - count(tmp.begin(), tmp.end(), ')');
@@ -97,14 +103,27 @@ std::istream& operator>>(std::istream& in,opencog::tree<std::string>& t)
     // a parenthesis. XXX If you know how to fix the parser, please do.
     // Example: "and  ($1 $2)" should parse as "and($1 $2)", but the
     // former fails to parse correctly for some reason unclear to me.
-    while (str[0] == ' ' || str[0] == '\t') str.erase(str.begin());
     int sz = str.length();
     int i=0, j = 0;
+    while (i<sz and (str[i] == ' ' or str[i] == '\t')) i++;
     while (i<sz) {
        int ix = i;
-       // skipp all whitespace followed by a open paren.
-       while (str[ix] == ' ' || str[ix] == '\t') ix++;
-       if (str[ix] == '(') i = ix;
+       // Skip all whitespace that preceeds an open paren.
+       while (str[ix] == ' ' or str[ix] == '\t') ix++;
+       if (str[ix] == '(') {
+          i = ix;
+
+          // If there is nothing but whitespace until the close paren,
+          // then drop both the open and the close parens.  The operator
+          // is effectively child-less in this situation.  If we don't
+          // do this, then the parser goes bonkers and decides that the
+          // operator is a child of itself.  For example, "+()" parses
+          // to become "+(+)" which is incorrect. (Yes, some operators
+          // can be zero-ary).
+          ix++;
+          while (str[ix] == ' ' or str[ix] == '\t') ix++;
+          if (str[ix] == ')') i = ++ix;
+       }
        str[j] = str[i];
        i++; j++;
     }

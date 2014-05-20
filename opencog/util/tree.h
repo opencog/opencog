@@ -3060,13 +3060,13 @@ void tree_convert(const treeT1& src, treeT2& dst)
 {
     typedef typename treeT2::value_type T2;
 
-    dst=treeT2(T2());
-    typename treeT1::iterator src_it=src.begin();
-    typename treeT2::iterator dst_it=dst.begin();
+    dst = treeT2(T2());
+    typename treeT1::iterator src_it = src.begin();
+    typename treeT2::iterator dst_it = dst.begin();
     while (src_it != src.end())
     {
-        dst_it = dst.insert_after(dst_it,T2());
-        subtree_convert(src,src_it,dst,dst_it);
+        dst_it = dst.insert_after(dst_it, T2());
+        subtree_convert(src,src_it, dst, dst_it);
         src_it.skip_children();
         ++src_it;
     }
@@ -3237,7 +3237,7 @@ std::istream& operator>>(std::istream& in, opencog::tree<T>& tr)
     opencog::tree<std::string> tmp;
     in >> tmp;
     try {
-        opencog::tree_convert(tmp,tr);
+        opencog::tree_convert(tmp, tr);
     } catch (boost::bad_lexical_cast&) {
         std::stringstream stream (std::stringstream::out);
         stream << "Bad node data in tree '" << tr << "'" << std::endl;
