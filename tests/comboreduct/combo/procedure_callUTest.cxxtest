@@ -1,6 +1,6 @@
 /** procedure_callUTest.cxxtest --- 
  *
- * Copyright (C) 2012 OpenCof Foundation
+ * Copyright (C) 2012 OpenCog Foundation
  *
  * Author: Nil Geisweiller
  *
@@ -29,7 +29,7 @@ class procedure_callUTest : public CxxTest::TestSuite {
 public:
 
     void test_parse_procedure_call() {
-        string add_proc("add(2) := +($1 $2) ");
+        string add_proc("add(2) := +($1 $2)");
         std::stringstream ss;
         ss << add_proc << std::endl;
         

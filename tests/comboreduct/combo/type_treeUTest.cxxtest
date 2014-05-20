@@ -23,7 +23,7 @@ public:
 
         std::cout << tt << std::endl;
 
-        string st = "application(->(arg_list(boolean) boolean) $1 application(->(contin boolean) application(->(arg_list(contin) contin) $2 $2)) $3) ";
+        string st = "application(->(arg_list(boolean) boolean) $1 application(->(contin boolean) application(->(arg_list(contin) contin) $2 $2)) $3)";
         TS_ASSERT_EQUALS(sst.str(), st);
     }
 
@@ -40,7 +40,7 @@ public:
 
         std::cout << "'" << tt << "'" << std::endl;
 
-        string st = "action_definite_object ";
+        string st = "action_definite_object";
 
         TS_ASSERT_EQUALS(sst.str(), st);
     }
@@ -170,7 +170,7 @@ public:
         stringstream sst_red;
         sst_red << tt;
 
-        string st = "boolean ";
+        string st = "boolean";
         TS_ASSERT_EQUALS(sst_red.str(), st);
     }
 
@@ -196,7 +196,7 @@ public:
         stringstream sst_red;
         sst_red << tt;
 
-        string st = "->(contin boolean) ";
+        string st = "->(contin boolean)";
         TS_ASSERT_EQUALS(sst_red.str(), st);
     }
 
@@ -226,7 +226,7 @@ public:
         reduce_type_tree(tt);
         stringstream sst;
         sst << tt;
-        string st = "->(definite_object action_result) ";
+        string st = "->(definite_object action_result)";
 
         std::cout << "REDUCED TT : " << tt << std::endl;
 
@@ -242,7 +242,7 @@ public:
         reduce_type_tree(tt);
         stringstream sst;
         sst << tt;
-        string st = "action_result ";
+        string st = "action_result";
 
         std::cout << "REDUCED TT : " << tt << std::endl;
 
@@ -258,7 +258,7 @@ public:
         reduce_type_tree(tt);
         stringstream sst;
         sst << tt;
-        string st = "unknown ";
+        string st = "unknown";
 
         std::cout << "REDUCED TT : " << tt << std::endl;
 
@@ -284,7 +284,7 @@ public:
         stringstream sst_red;
         sst_red << tt;
 
-        string st = "->(boolean contin boolean boolean) ";
+        string st = "->(boolean contin boolean boolean)";
         TS_ASSERT_EQUALS(sst_red.str(), st);
     }
 
@@ -307,7 +307,7 @@ public:
         stringstream sst_red;
         sst_red << tt;
 
-        string st = "->(arg_list(action_result) action_result) ";
+        string st = "->(arg_list(action_result) action_result)";
         TS_ASSERT_EQUALS(sst_red.str(), st);
     }
 
@@ -330,7 +330,7 @@ public:
         stringstream sst_red;
         sst_red << tt;
 
-        string st = "wild_card ";
+        string st = "wild_card";
         TS_ASSERT_EQUALS(sst_red.str(), st);
     }
 

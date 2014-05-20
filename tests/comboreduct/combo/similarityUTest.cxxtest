@@ -1,0 +1,104 @@
+/** 
+ * similarityUTest.cxxtest --- 
+ *
+ * Copyright (C) 2014 Aidyia Limited
+ *
+ * Author: Linas Vepstas
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/comboreduct/combo/similarity.h>
+
+using namespace opencog::combo;
+using namespace std;
+
+class similarityUTest : public CxxTest::TestSuite
+{
+public:
+
+    void test_simple()
+    {
+        tree_branch_vector tbv = tree_flatten("+($1 $2)");
+        TS_ASSERT_EQUALS(toString(tbv), "+($1 $2) : 1");
+
+        tbv = tree_flatten("+ ($1 2)");
+        TS_ASSERT_EQUALS(toString(tbv), "+($1 2) : 1");
+        tbv = tree_flatten("+		(1  $2)");
+        TS_ASSERT_EQUALS(toString(tbv), "+(1 $2) : 1");
+
+        tbv = tree_flatten("+  ($1)");
+        TS_ASSERT_EQUALS(toString(tbv), "+($1) : 1");
+        tbv = tree_flatten("+( 1)");
+        TS_ASSERT_EQUALS(toString(tbv), "+(1) : 1");
+
+        tbv = tree_flatten("+ (  )");
+        TS_ASSERT_EQUALS(toString(tbv), "+ : 1");
+    }
+
+    void test_nest()
+    {
+        tree_branch_vector tbv = tree_flatten("+( +( $2))");
+        TS_ASSERT_EQUALS(toString(tbv), "+($2) : 1, +(+) : 1");
+
+        tbv = tree_flatten("+( +(1 $2))");
+        TS_ASSERT_EQUALS(toString(tbv), "+(+) : 1, +(1 $2) : 1");
+
+        tbv = tree_flatten("+(3 +(1 $2))");
+        TS_ASSERT_EQUALS(toString(tbv), "+(1 $2) : 1, +(3 +) : 1");
+
+        tbv = tree_flatten("+(+(1 $2) 3)");
+        TS_ASSERT_EQUALS(toString(tbv), "+(+ 3) : 1, +(1 $2) : 1");
+    }
+
+    void test_long()
+    {
+        tree_branch_vector tbv = tree_flatten("+(1 2 3)");
+        TS_ASSERT_EQUALS(toString(tbv), "+(1 +) : 1, +(2 3) : 1");
+
+        tbv = tree_flatten("+(1 2 3 4)");
+        TS_ASSERT_EQUALS(toString(tbv), "+(1 +) : 1, +(2 +) : 1, +(3 4) : 1");
+
+        tbv = tree_flatten("+(1 1 1 1 1)");
+        TS_ASSERT_EQUALS(toString(tbv), "+(1 +) : 3, +(1 1) : 1");
+
+        tbv = tree_flatten("+(1 1 *(1 1) 1)");
+        TS_ASSERT_EQUALS(toString(tbv), "*(1 1) : 1, +(* 1) : 1, +(1 +) : 2");
+
+        tbv = tree_flatten("+(1 1 *(2 2) 3)");
+        TS_ASSERT_EQUALS(toString(tbv), "*(2 2) : 1, +(* 3) : 1, +(1 +) : 2");
+
+        tbv = tree_flatten("and($1 $1 or($2 $2) $3)");
+        TS_ASSERT_EQUALS(toString(tbv), "and($1 and) : 2, and(or $3) : 1, or($2 $2) : 1");
+    }
+
+    void test_distance()
+    {
+        TS_ASSERT_EQUALS(0, tree_similarity("+(a b c)", " +  ( a  b  c )  "));
+        TS_ASSERT_EQUALS(2, tree_similarity("+(a b c)", "+(a b d)"));
+        TS_ASSERT_EQUALS(2, tree_similarity("+(a b c a a a a)", "+(a b d a a a a)"));
+        TS_ASSERT_EQUALS(8, tree_similarity("+(a b c a a a a)", "+(a b d d d d d)"));
+        TS_ASSERT_EQUALS(3, tree_similarity("+(a b c)", "+(a b)"));
+        TS_ASSERT_EQUALS(1, tree_similarity("+(a b c)", "+(b c)"));
+        TS_ASSERT_EQUALS(1, tree_similarity("+(a b c d e)", "+(b c d e)"));
+        TS_ASSERT_EQUALS(2, tree_similarity("+(a b c d e)", "+(c d e)"));
+        TS_ASSERT_EQUALS(3, tree_similarity("+(a b c d e)", "+(d e)"));
+        TS_ASSERT_EQUALS(5, tree_similarity("+(a b c d e)", "+(e)"));
+        TS_ASSERT_EQUALS(2, tree_similarity("+(a b a a a a)", "+(a c a a a a)"));
+    }
+};
+
+

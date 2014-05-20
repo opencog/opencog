@@ -3060,13 +3060,13 @@ void tree_convert(const treeT1& src, treeT2& dst)
 {
     typedef typename treeT2::value_type T2;
 
-    dst=treeT2(T2());
-    typename treeT1::iterator src_it=src.begin();
-    typename treeT2::iterator dst_it=dst.begin();
+    dst = treeT2(T2());
+    typename treeT1::iterator src_it = src.begin();
+    typename treeT2::iterator dst_it = dst.begin();
     while (src_it != src.end())
     {
-        dst_it = dst.insert_after(dst_it,T2());
-        subtree_convert(src,src_it,dst,dst_it);
+        dst_it = dst.insert_after(dst_it, T2());
+        subtree_convert(src,src_it, dst, dst_it);
         src_it.skip_children();
         ++src_it;
     }
@@ -3177,21 +3177,23 @@ unsigned int pre_order_index(const tree<T>& tr,
 }                                
 
 template<typename iter>
-std::string subtree_to_string(iter it) {
+std::string subtree_to_string(iter it)
+{
     std::stringstream ss;
-    int nChildren=it.number_of_children();
-    if (nChildren==1) {
+    int nChildren = it.number_of_children();
+    if (1 == nChildren) {
         ss << (*it) << "(";
         ss << subtree_to_string(it.begin());
         ss << ")";
-    } else if (nChildren==0) {
+    } else if (0 == nChildren) {
         ss << (*it);
     } else {
         ss << (*it) << "(";
         ss << subtree_to_string(it.begin());
 
-        for (typename iter::sibling_iterator sib=++it.begin();
-             sib!=it.end();++sib) {
+        for (typename iter::sibling_iterator sib = ++it.begin();
+             sib != it.end(); ++sib)
+        {
             ss << " ";
             ss << subtree_to_string(sib);
         }
@@ -3223,11 +3225,8 @@ namespace opencog {
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const opencog::tree<T>& tr)
 {
-    for (typename opencog::tree<T>::iterator it=tr.begin();it!=tr.end();++it) {
-        out << subtree_to_string(it);
-        it.skip_children();
-        out << " ";
-    }
+    typename opencog::tree<T>::sibling_iterator it = tr.begin();
+    out << subtree_to_string(it);
     return out;
 }
 
@@ -3238,7 +3237,7 @@ std::istream& operator>>(std::istream& in, opencog::tree<T>& tr)
     opencog::tree<std::string> tmp;
     in >> tmp;
     try {
-        opencog::tree_convert(tmp,tr);
+        opencog::tree_convert(tmp, tr);
     } catch (boost::bad_lexical_cast&) {
         std::stringstream stream (std::stringstream::out);
         stream << "Bad node data in tree '" << tr << "'" << std::endl;

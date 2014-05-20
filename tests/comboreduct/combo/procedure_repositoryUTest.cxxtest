@@ -15,9 +15,9 @@ public:
         procedure_repository pr;
         load_procedure_repository<ant_builtin_action, ant_perception, ant_action_symbol, ant_indefinite_object>(ss, pr, true);
         std::stringstream ss_exp;
-        ss_exp << "A_rec(1) := contin_if(0<($1) B_rec(+($1 -1)) 0)  [->(contin contin) ]" << std::endl;
-        ss_exp << "B_rec(1) := contin_if(0<($1) A_rec(*($1 0.5)) 0)  [->(contin contin) ]" << std::endl;
-        ss_exp << "fact(1) := contin_if(0<($1) *($1 fact(+($1 -1))) 1)  [->(contin contin) ]" << std::endl;
+        ss_exp << "A_rec(1) := contin_if(0<($1) B_rec(+($1 -1)) 0) [->(contin contin)]" << std::endl;
+        ss_exp << "B_rec(1) := contin_if(0<($1) A_rec(*($1 0.5)) 0) [->(contin contin)]" << std::endl;
+        ss_exp << "fact(1) := contin_if(0<($1) *($1 fact(+($1 -1))) 1) [->(contin contin)]" << std::endl;
         std::stringstream ss_res;
         pr.toStream(ss_res, true);
         TS_ASSERT_EQUALS(ss_res.str(), ss_exp.str());

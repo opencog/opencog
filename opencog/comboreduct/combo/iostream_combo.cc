@@ -251,7 +251,7 @@ bool enum_str_to_vertex(const std::string& str, vertex& v)
 
 ostream& ostream_builtin(ostream& out, const builtin& h, format f)
 {
-    switch(f) {
+    switch (f) {
     case fmt::python:
         switch (h) {
         case id::null_vertex:
