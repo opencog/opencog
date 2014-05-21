@@ -4,10 +4,21 @@ For testing smokes_agent.py without the cogserver
 
 from __future__ import print_function
 from opencog.atomspace import AtomSpace, TruthValue, types
-from data import *
+from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
 from pln.examples.tuffy.smokes.smokes_agent import InferenceAgent
 
 __author__ = 'Cosmo Harrigan'
+
+atomspace = AtomSpace()
+__init__(atomspace)
+
+coreTypes = "opencog/atomspace/core_types.scm"
+utilities = "opencog/scm/utilities.scm"
+data = "opencog/python/pln/examples/tuffy/smokes/smokes.scm"
+
+for item in [coreTypes, utilities, data]:
+    load_scm(atomspace, item)
+
 atoms = atomspace.get_atoms_by_type(types.Atom)
 for atom in atoms:
     print(atom)
@@ -59,7 +70,7 @@ for i in range(0, MAX_STEPS):
         break
 
 if answer:
-    print("\n---- Answer found after {0} inference steps that produced a new" +
+    print("\n---- Answer found after {0} inference steps that produced a new "
           "output, out of {1} total inference steps attempted.".
           format(outputs_produced, i+1))
 else:

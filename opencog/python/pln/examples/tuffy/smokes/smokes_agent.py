@@ -41,18 +41,6 @@ class InferenceAgent(MindAgent):
                                stimulateAtoms=False,
                                allow_output_with_variables=True)
 
-        # EvaluationToMember, MemberToInheritance
-        self.chainer.add_rule(
-            EvaluationToMemberRule(self.chainer, 0, 1))
-        self.chainer.add_rule(MemberToEvaluationRule(self.chainer))
-        self.chainer.add_rule(MemberToInheritanceRule(self.chainer))
-        self.chainer.add_rule(InheritanceToMemberRule(self.chainer))
-
-        # For predicates with 2 arguments,
-        # with the 0th argument made into a variable
-        self.chainer.add_rule(
-            EvaluationToMemberRule(self.chainer, 0, 2))
-
         # ModusPonens:
         # Implication smokes(x) cancer(X)
         # smokes(Anna)
