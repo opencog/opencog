@@ -142,7 +142,7 @@ cdef class moses:
 
         # Combo output
         else:
-            output_list = [element[:-1] for element in output.splitlines()]
+            output_list = [element for element in output.splitlines()]
 
             for candidate in output_list:
                 score = int(candidate.partition(' ')[0])
