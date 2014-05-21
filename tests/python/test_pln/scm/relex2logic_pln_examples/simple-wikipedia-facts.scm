@@ -3,6 +3,12 @@
 
 ; A scientist is a person who works in science.
 
+; It would be good if there would be a way to only display the atoms
+; produced by RelEx2Logic in the AtomSpace and be able to hide all
+; the WordInstanceNodes, DefinedLinguisticRelationshipNodes, etc.
+; This would not only be valuable for inspecting the output, but also for
+; checking without distractions if PLN performs the right deductions.
+
 (InheritanceLink (stv 1.0 1.0)
     (ConceptNode "scientist")
     (AndLink
@@ -22,6 +28,15 @@
     (ListLink
         (ConceptNode "scientist")
         (ConceptNode "how our world works"))) ; how are embedded sentences handled?
+
+; There are three to-do-rules. No-one, however, deals with this constellation:
+; _to-do(try, understand)
+; _subj(try, scientist)
+; _subj(work, world)
+; 
+; (S (NP A scientist.n) (VP tries.v (S (VP to.r (VP understand.v (SBAR (WHADVP how) (S (NP our world.n) (VP works.v))))))) .)
+
+
 
 ; Scientist make observations, ask questions and do extensive research work in finding the answers to these questions.
 
