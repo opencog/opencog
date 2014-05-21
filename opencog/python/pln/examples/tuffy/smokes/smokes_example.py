@@ -9,14 +9,21 @@ from pln.examples.tuffy.smokes.smokes_agent import InferenceAgent
 
 __author__ = 'Cosmo Harrigan'
 
+# Set to True to include extra, un-needed data, to evaluate inference control
+# efficiency
+EXTRA_DATA = True
+
 atomspace = AtomSpace()
 __init__(atomspace)
 
-coreTypes = "opencog/atomspace/core_types.scm"
-utilities = "opencog/scm/utilities.scm"
-data = "opencog/python/pln/examples/tuffy/smokes/smokes.scm"
+data = ["opencog/atomspace/core_types.scm",
+        "opencog/scm/utilities.scm",
+        "opencog/python/pln/examples/tuffy/smokes/smokes.scm"]
 
-for item in [coreTypes, utilities, data]:
+if EXTRA_DATA:
+    data.append("opencog/python/pln/examples/tuffy/smokes/extra-data.scm")
+
+for item in data:
     load_scm(atomspace, item)
 
 atoms = atomspace.get_atoms_by_type(types.Atom)
