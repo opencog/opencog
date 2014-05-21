@@ -311,6 +311,7 @@
 	(InheritanceLink (ConceptNode subj_instance) (ConceptNode obj_instance))
 )
 
+;Example: "The books were written by Charles Dickens."
 (define (passive-rule1 verb verb_instance obj obj_instance passive_obj passive_obj_instance)
         (InheritanceLink (PredicateNode verb_instance) (PredicateNode verb))
         (InheritanceLink (ConceptNode obj_instance) (ConceptNode obj))
@@ -324,6 +325,7 @@
       )
 )
 
+;Example: "The books are published."
 (define (passive-rule2 verb verb_instance obj obj_instance)
         (InheritanceLink (PredicateNode verb_instance) (PredicateNode verb))
         (InheritanceLink (ConceptNode obj_instance) (ConceptNode obj))
