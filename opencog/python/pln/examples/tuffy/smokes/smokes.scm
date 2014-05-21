@@ -51,15 +51,15 @@
         (ListLink
             (VariableNode "$X")
             (VariableNode "$Y")))
-        (ImplicationLink
-            (EvaluationLink
-                smokes
-                (ListLink
-                    (VariableNode "$X")))
-            (EvaluationLink
-                smokes
-                (ListLink
-                    (VariableNode "$Y")))))
+    (ImplicationLink
+        (EvaluationLink
+            smokes
+            (ListLink
+                (VariableNode "$X")))
+        (EvaluationLink
+            smokes
+            (ListLink
+                (VariableNode "$Y")))))
 
 ; If X and Y are friends, then Y and X are friends.
 ; Note: this is not currently used.
