@@ -263,7 +263,7 @@
 	(InheritanceLink (PredicateNode verb_instance) (PredicateNode verb))
 	(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 	(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
-	(EvaluationLink
+	(EvaluationLink (stv 1.0 1.0)
 		(PredicateNode verb_instance)
 		(ListLink
 			(ConceptNode subj_instance)
