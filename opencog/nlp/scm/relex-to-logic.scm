@@ -310,3 +310,16 @@
 	(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
 	(InheritanceLink (ConceptNode subj_instance) (ConceptNode obj_instance))
 )
+
+(define (passive-rule1 verb verb_instance obj obj_instance passive_obj passive_obj_instance)
+        (InheritanceLink (PredicateNode verb_instance) (PredicateNode verb))
+        (InheritanceLink (ConceptNode obj_instance) (ConceptNode obj))
+        (InheritanceLink (ConceptNode passive_obj_instance) (ConceptNode passive_obj))
+        (EvaluationLink 
+                (PredicateNode verb_instance)
+                (ListLink
+                        (ConceptNode passive_obj_instance)
+                        (ConceptNode obj_instance)
+                )
+      )
+)
