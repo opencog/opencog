@@ -40,7 +40,7 @@
 )
 (EvaluationLink (PredicateNode "forwardSteps")
 	(ListLink
-		(NumberNode "10")
+		(NumberNode "1")
 	)
 )
 
