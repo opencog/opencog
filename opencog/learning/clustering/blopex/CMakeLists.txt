@@ -8,6 +8,6 @@ ADD_LIBRARY(blopex SHARED
 )
 
 TARGET_LINK_LIBRARIES (blopex
-	lapack
+	${LAPACK_LIBRARIES}
 	m
 )

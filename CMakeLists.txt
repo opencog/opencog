@@ -265,6 +265,17 @@ ELSE (IBERTY_FOUND)
 ENDIF (IBERTY_FOUND)
 
 
+# Lapack is needed for BLOPEX
+FIND_PACKAGE(LAPACK)
+IF (LAPACK_FOUND)
+	# MESSAGE(STATUS "LAPACK found.")
+	ADD_DEFINITIONS(-DHAVE_LAPACK)
+	SET(HAVE_LAPACK 1)
+ELSE (LAPACK_FOUND)
+	MESSAGE(STATUS "LAPACK missing: needed for blopex-based clustering.")
+ENDIF (LAPACK_FOUND)
+
+
 # Link-Gramar is needed for the Viterbi parser
 # Only 4.7.12 or newer has the required read-dict API in it.
 FIND_PACKAGE(LinkGrammar 4.7.12)
@@ -722,6 +733,7 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 # Show a summary of what we got
 SUMMARY_ADD("AtomSpace" "A weighted and typed hypergraph database" HAVE_ATOMSPACE)
 SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
+SUMMARY_ADD("Blopex" "BLOPEX block eigenvalue solver" HAVE_LAPACK)
 SUMMARY_ADD("ComboReduct" "Library for reduction of combo program trees" HAVE_COMBOREDUCT)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HAVE_DIMEMBED)
