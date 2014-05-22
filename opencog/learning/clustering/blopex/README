@@ -29,3 +29,11 @@ generalized eigenproblems; a user-defined symmetric positive
 preconditioner; robustness with respect to random initial
 approximations, variable preconditioners, and ill-conditioning of the
 stiffness matrix; and apparently optimal convergence speed.
+
+See also:
+http://en.wikipedia.org/wiki/BLOPEX
+http://en.wikipedia.org/wiki/LOBPCG
+
+Knyazev, Andrew V. (2001), "Toward the Optimal Preconditioned
+Eigensolver: Locally Optimal Block Preconditioned Conjugate Gradient
+Method", SIAM Journal on Scientific Computing 23 (2): 517–541,

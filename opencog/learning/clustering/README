@@ -3,19 +3,38 @@
                       ----------
                        May 2014
 
+
 This directory is going to contain some relatively simple, quick-n-dirty
 clustering algorithms for extracting the number of clusters, and their
-sizes, given only a collection of objects, and the pair-wise distances
+sizes, given only a collection of objects, and the pair-wise similarity
 between them.  Currently, the primary consumer of this code is planned
 to be MOSES; the clustering is neede to get a sensation of the diversity
 of the demes being trained in MOSES.  That is, given a collection of
-combo trees, and some distance measure between them, the goal is to see
+combo trees, and some similarity value between them, the goal is to see
 how many of these are similar, and how many are different, and what the
 variation within a cluster might be.
 
-Note: the above mis-uses the word "distance". The actual pair-wise
-numbers might not actually be distances in the strict sense; that is,
-they might not obey the triangle inequality.
+Note: in what follows, the similarity mesure is NOT assumed to be a 
+"metric" or "distance".  That is, the actual pair-wise similarity
+between two objects might not obey the triangle inequality, which is
+required for a true distance metric.  This is important, because many
+textbook clustering algorithms assume that the similarity measure is in
+fact a metric; thus, this requirement rules out most of these.  Another
+requirement seems to be that linear clusterers should be avoided, mostly
+because its not at all clear that it will be possible to cluster the
+data with linear hyperplanes.  (On the other hand, the data is fairly
+high-dimensional, so linear sepratation might not actually be
+inaccurate.  But we don't know that yet, so lets not assume it.)
+
+Due to the above requirements, the number of suitable clustering
+algorithms shrinks to a very sall set; basically, only "spectral
+clustering" appears to be appropriate.  Unfortunately, there does not
+seem to be any C/C++ open-source available for spectral clustering.
+Thus, we take a stab at it here.  Again, this is not, at this time,
+meant to be all things to all people; rather, its to be a quick hack.
+We'll see how it comes out ...
+
+
 
 References:
 -----------
@@ -24,6 +43,7 @@ http://en.wikipedia.org/wiki/K-means_clustering
 http://en.wikipedia.org/wiki/Expectation-maximization_algorithm
 http://en.wikipedia.org/wiki/DBSCAN
 http://en.wikipedia.org/wiki/OPTICS_algorithm
+
 
 Algorithm selection:
 --------------------
@@ -48,14 +68,15 @@ only choice.
 
 Spectral Clustering
 -------------------
-Choices:
+Background reading:
+
 http://en.wikipedia.org/wiki/Spectral_clustering
 http://en.wikipedia.org/wiki/Lanczos_algorithm
 http://en.wikipedia.org/wiki/LOBPCG
 
-Source code: C/C++:
+Open-source code: C/C++:
 https://github.com/fedelebron/Spectral-Clustering
-  Sounds crazy/broken/amateur
+  Appears to be excessively simplistic... not trustworthy.
 
 https://code.google.com/p/pspectralclustering/
   Parallel, for supercomp[uters. Overkill.
@@ -64,19 +85,30 @@ http://matthias.jimdo.com/downloads/spectral-clustering/
   WTF? doesn't seem to actually implement spectral clustering???
   I can't find the code its all OpenGL and misc junk ...
 
-OK, so have to hand-build.
+OK, so have to hand-build the algo. Oh well.
 
-Seems that the LOBPCG algo would be the best. To avoid developing from
-scratch ... can we get it somewhere?
 
--- gsl does not have it
--- scipy does but we're not using python
--- octave has it, but octave is fat.
--- https://code.google.com/p/blopex/
-   blopex looks reasonably stand-alone.  Seems to need lapack
+The Eigenvalue problem
+----------------------
+What's the best way to solve the eigenvalue problem?  Brute-forcing
+this by calling directly into BLAS, ATLAS or LAPACK seems like overhill.
+So don't. Seems that the LOBPCG algo is the best.  The LOBPCG inventors
+have a standard implementation: BLOPEX.
 
-blopex seems like the only way to go ... 
+   https://code.google.com/p/blopex/
+   http://en.wikipedia.org/wiki/BLOPEX
 
+Because it is not a part of Ubuntu or RedHat, and because its build
+system is icky, a copy of BLOPEX is checked in here (in a subdirectory).
+
+
+The spectral algorithm
+----------------------
+By default, spectral clustering can only split a dataset into two.
+Heirarchical clustering then can split it into more. But whwere to stop?
+Answer:
+   Self-Tuning Spectral Clustering, L. Zelnik-Manor and P. Perona, NIPS 2004
+   http://www.vision.caltech.edu/lihi/Demos/SelfTuningClustering.html
 
 
 
