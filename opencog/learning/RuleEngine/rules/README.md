@@ -17,6 +17,16 @@ The following rules are defined for the corresponding rule bases:
     - pln-rule-deduction
     - pln-rule-modus-ponens
 
+## Additional instructions
+
+After loading the rules, you should also load this Scheme file:
+
+```
+compile-rules.scm
+```
+
+in order to compile the rules and formulas for better performance.
+
 ## Next steps
 - See if these can be implemented to directly use the "side-effect free" versions so that the truth value application occurs inside the ImplicationLink rather than inside the Scheme rule. This was discussed [here](https://groups.google.com/d/msg/opencog/KUptHRvBXu0/YR6oySxLKeMJ).
 
@@ -34,32 +44,58 @@ The following rules are defined for the corresponding rule bases:
 
 - Load the deduction rule definitions:
 
+    ```
     learning/RuleEngine/rules/pln/deduction.scm
+    ```
+
+    Example:
+
+    ```
+    (load-scm-from-file "learning/RuleEngine/rules/pln/deduction.scm")
+    ```
 
 - Load this file containing the data:
 
+    ```
     tests/learning/RuleEngine/simple-assertions.scm
+    ```
+
+    Example:
+
+    ```
+    (load-scm-from-file "tests/learning/RuleEngine/simple-assertions.scm")
+    ```
 
 - Run this command:
 
+    ```
     (cog-bind find-humans)
+    ```
 
 - Observe that there is only one instance of human defined:
 
+    ```
     (ConceptNode "man")
+    ```
 
 - Run this command:
 
+    ```
     (cog-bind pln-rule-deduction)
+    ```
 
 - Run this command again:
 
+    ```
     (cog-bind find-humans)
+    ```
 
 - Observe that there are 3 additional instances of human defined:
 
+    ```
     (ConceptNode "Socrates")
 
     (ConceptNode "Einstein")
 
     (ConceptNode "Peirce")
+    ```
