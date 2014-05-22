@@ -513,7 +513,10 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, Atom
            Handle new_node = toAtomSpace->addNode(fromAtomSpace->getType(h), fromAtomSpace->getName(h), fromAtomSpace->getTV(h));
            outgoings.push_back(new_node);
            if (fromAtomSpace->getType(h) == VARIABLE_NODE)
-               outVariableNodes.push_back(new_node);
+           {
+               if ( ! isInHandleSeq(new_node, outVariableNodes) ) // should not have duplicated variable nodes
+                outVariableNodes.push_back(new_node);
+           }
         }
         else
         {
@@ -575,8 +578,8 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
     implicationLinkOutgoings.push_back(hAndLink); // the results to return
 
-    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
-            << originalAtomSpace->atomAsString(hAndLink).c_str() << std::endl;
+//    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
+//            << originalAtomSpace->atomAsString(hAndLink).c_str() << std::endl;
 
 
     Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
@@ -587,6 +590,10 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     bindLinkOutgoings.push_back(hVariablesListLink);
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
+
+    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
+              << originalAtomSpace->atomAsString(hBindLink).c_str() << std::endl;
+
 
     // Run pattern matcher
     PatternMatch pm;
@@ -879,11 +886,14 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     htree = new HTree();
     atomSpace = new AtomSpace();
 
-    unsigned int system_thread_num  = std::thread::hardware_concurrency();
-    if (system_thread_num > 2)
-        THREAD_NUM = system_thread_num - 2;
-    else
-        THREAD_NUM = 1;
+//    unsigned int system_thread_num  = std::thread::hardware_concurrency();
+//    if (system_thread_num > 2)
+//        THREAD_NUM = system_thread_num - 2;
+//    else
+//        THREAD_NUM = 1;
+
+    // test only one tread for now
+    THREAD_NUM = 1;
 
     threads = new thread[THREAD_NUM];
 
