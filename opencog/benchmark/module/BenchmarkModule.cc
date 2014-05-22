@@ -91,8 +91,26 @@ int BenchmarkModule::fullyConnectedTestConcurrent(int numAtoms)
         for_each(atoms.begin(), atoms.end(),
             [&handleSource, this](Handle handleTarget)
         {
-            as->addLink(ASYMMETRIC_HEBBIAN_LINK, handleSource, handleTarget);
+            as->addLink(ASYMMETRIC_HEBBIAN_LINK, handleSource, handleTarget, 
+                        SimpleTruthValue::createTV(0, 1));
         });
+    });
+
+    return atoms.size();
+}
+
+int BenchmarkModule::updateSTITestConcurrent()
+{
+    srand(time(NULL));
+
+    HandleSeq atoms;
+    as->getHandlesByType(back_inserter(atoms), ATOM, true);
+
+    OMP_ALGO::for_each(atoms.begin(), atoms.end(),
+        [this](Handle handle)
+    {
+        int newSTI = rand() % 1000;
+        as->setSTI(handle, newSTI);
     });
 
     return atoms.size();
@@ -133,6 +151,7 @@ BenchmarkModule::do_fullyConnectedTest(Request *dummy,
     const time_t begin_time_wall = time(NULL);
 
     int numNodes;
+    std::string result;
 
     if (option == "reset")
     {
@@ -151,14 +170,25 @@ BenchmarkModule::do_fullyConnectedTest(Request *dummy,
     else if (option == "concurrent")
     {
         numNodes = fullyConnectedTestConcurrent(numNewNodes);
+        result = "Fully connected graph of " +
+                std::to_string(numNodes) +
+                " total nodes including " +
+                std::to_string(numNewNodes) +
+                " new nodes.\n";
+    }
+    else if (option == "sti")
+    {
+        int numAtoms = updateSTITestConcurrent();
+        result = std::to_string(numAtoms) +
+                " atoms updated with random STI values.\n";
     }
     else
     {
         return "Error, unrecognized argument. Usage:\n"
                "  benchmark-fully-connected OPTION COUNT THREADS\n"
-               "where OPTION is 'concurrent' or 'reset', COUNT is an integer "
-               "number of nodes,\nand THREADS is an integer number of threads. "
-               "If no arguments are specified,\ndefaults to:\n"
+               "where OPTION is 'concurrent', 'reset' or 'sti', COUNT is an "
+               "integer number of nodes,\nand THREADS is an integer number of "
+               "threads. If no arguments are specified,\ndefaults to:\n"
                "  concurrent 500 2\n";
     }
 
@@ -166,16 +196,12 @@ BenchmarkModule::do_fullyConnectedTest(Request *dummy,
     const time_t end_time_wall = time(NULL);
 
     std::string message;
-    message =
-        "Test complete. Fully connected graph of " +
-        std::to_string(numNodes) +
-        " total nodes including " +
-        std::to_string(numNewNodes) +
-        " new nodes.\nWall clock time: " +
-        std::to_string(end_time_wall - begin_time_wall) +
-        " seconds\nCPU clock time: " +
-        std::to_string((end_time_cpu - begin_time_cpu) / CLOCKS_PER_SEC) +
-        " seconds\nNumber of threads used: " +
-        std::to_string(numThreads) + "\n";
+    message = result +
+            "Wall clock time: " +
+            std::to_string(end_time_wall - begin_time_wall) +
+            " seconds\nCPU clock time: " +
+            std::to_string((end_time_cpu - begin_time_cpu) / CLOCKS_PER_SEC) +
+            " seconds\nNumber of threads used: " +
+            std::to_string(numThreads) + "\n";
     return message;
 }
