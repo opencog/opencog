@@ -91,7 +91,8 @@ int BenchmarkModule::fullyConnectedTestConcurrent(int numAtoms)
         for_each(atoms.begin(), atoms.end(),
             [&handleSource, this](Handle handleTarget)
         {
-            as->addLink(ASYMMETRIC_HEBBIAN_LINK, handleSource, handleTarget);
+            as->addLink(ASYMMETRIC_HEBBIAN_LINK, handleSource, handleTarget, 
+                        SimpleTruthValue::createTV(0, 1));
         });
     });
 
@@ -185,9 +186,9 @@ BenchmarkModule::do_fullyConnectedTest(Request *dummy,
     {
         return "Error, unrecognized argument. Usage:\n"
                "  benchmark-fully-connected OPTION COUNT THREADS\n"
-               "where OPTION is 'concurrent' or 'reset', COUNT is an integer "
-               "number of nodes,\nand THREADS is an integer number of threads. "
-               "If no arguments are specified,\ndefaults to:\n"
+               "where OPTION is 'concurrent', 'reset' or 'sti', COUNT is an "
+               "integer number of nodes,\nand THREADS is an integer number of "
+               "threads. If no arguments are specified,\ndefaults to:\n"
                "  concurrent 500 2\n";
     }
 
