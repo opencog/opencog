@@ -1,3 +1,0 @@
-Standalone use: 
-Edit Makefile.inc if necessary.
-Type "make". This should create a static library lib/libBLOPEX.a
