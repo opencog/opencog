@@ -1,2 +1,3 @@
 ADD_SUBDIRECTORY (blopex)
+ADD_SUBDIRECTORY (blopex-demo)
 
