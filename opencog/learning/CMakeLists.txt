@@ -1,4 +1,5 @@
 IF (HAVE_MOSES)
+	ADD_SUBDIRECTORY (clustering)
 	ADD_SUBDIRECTORY (moses)
 	ADD_SUBDIRECTORY (feature-selection)
 ENDIF (HAVE_MOSES)
