@@ -246,6 +246,10 @@ usage has been exceeded. This can be fixed by:
 save file contents, then:
 
    sysctl -p /etc/sysctl.conf
+   
+If you continue to get errors after that, read this for help fixing them:
+
+   http://stackoverflow.com/questions/12616935/postgresql-shared-memory-settings
 
 
 User and Database Setup
