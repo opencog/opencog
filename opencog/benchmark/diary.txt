@@ -697,3 +697,15 @@ To summarize:
     to running compiled (or even memoized) code.
  3) There's a huge overhead to enter and exit the scheme subsystem.
 
+
+So: there are two distinct costs: 
+ A) Cost of calling a C++ smob function, from scheme.  The above numbers
+    suggest that the ballpark cost of this is about 2uS or 3uS 
+    (getOutgoingSet, getTV) but sometimes much worse: 7uS for getType,
+    and 15 uS for addNode. This suggests severe cache-contention issues.
+
+ B) Cost of calling scheme from C++. This seems to take about 175uS and
+    sometimes much worse: 300uS to 400uS.  Perhaps this could be worked
+    around by having another thread on standby:  linux thread-context
+    switching should run abt about 5uS per switch ...
+
