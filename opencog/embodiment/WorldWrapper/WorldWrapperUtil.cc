@@ -654,7 +654,7 @@ vu))));
                              self_id, owner_id));
         break;
     case id::exemplar_avatar: {
-        Handle evalLink = AtomSpaceUtil::getMostRecentEvaluationLink(atomSpace, std::string("is_exemplar_avatar"));
+        Handle evalLink = AtomSpaceUtil::getMostRecentEvaluationLink(atomSpace, "is_exemplar_avatar");
 
         if (evalLink != Handle::UNDEFINED) {
             if (atomSpace.getMean(evalLink) > meanTruthThreshold) {
@@ -1278,7 +1278,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             definite_object_to_atom_name(get_definite_object(vo),
                                          self_id, owner_id);
         return WorldWrapperUtil::getPhysiologicalFeeling
-               (atomSpace, std::string(HUNGER_PREDICATE_NAME), target, time);
+               (atomSpace, HUNGER_PREDICATE_NAME, target, time);
 
         /*
         // cache predicate data variables
@@ -1318,7 +1318,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                 definite_object_to_atom_name(get_definite_object(vo),
                                              self_id, owner_id);
             return WorldWrapperUtil::getPhysiologicalFeeling
-                   (atomSpace,  std::string(THIRST_PREDICATE_NAME), target, time);
+                   (atomSpace,  THIRST_PREDICATE_NAME, target, time);
 
             /*
                         // cache predicate data variables
@@ -1357,7 +1357,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                 definite_object_to_atom_name(get_definite_object(vo),
                                              self_id, owner_id);
             return WorldWrapperUtil::getPhysiologicalFeeling
-                   (atomSpace,  std::string(ENERGY_PREDICATE_NAME), target, time);
+                   (atomSpace,  ENERGY_PREDICATE_NAME, target, time);
 
             /*
                         // cache predicate data variables
@@ -1396,7 +1396,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                 definite_object_to_atom_name(get_definite_object(vo),
                                              self_id, owner_id);
             return WorldWrapperUtil::getPhysiologicalFeeling
-                   (atomSpace, std::string(FITNESS_PREDICATE_NAME), target, time);
+                   (atomSpace, FITNESS_PREDICATE_NAME, target, time);
 
             /*
                         // cache predicate data variables
@@ -1538,7 +1538,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         OC_ASSERT(it.number_of_children() == 4,
                          "WWUtil - is_proportional_next perception needs four arguments. Got '%d'.", it.number_of_children());
         {
-            WorldWrapperUtil::changePredicateName(tmp, std::string("next"));
+            WorldWrapperUtil::changePredicateName(tmp, "next");
 
             pre_it tree_it = tmp.begin();
             sib_it sibling_it = tree_it.begin();
@@ -2189,16 +2189,13 @@ combo::vertex WorldWrapperUtil::evalPerception(
     // Modulators        
     case id::get_activation_modulator:
         logger().debug("WorldWrapperUtil::%s - id::get_activation_modulator", __FUNCTION__);
-        return WorldWrapperUtil::getModulator( atomSpace, 
-                                               std::string(ACTIVATION_MODULATOR_NAME),
-                                               time
-                                             );
+        return WorldWrapperUtil::getModulator(atomSpace, ACTIVATION_MODULATOR_NAME, time);
         break;
 
     case id::get_resolution_modulator:
        logger().debug("WorldWrapperUtil::%s - id::get_resolution_modulator", __FUNCTION__);
        return WorldWrapperUtil::getModulator( atomSpace, 
-                                              std::string(RESOLUTION_MODULATOR_NAME),
+                                              RESOLUTION_MODULATOR_NAME,
                                               time
                                              );
         break;
@@ -2206,7 +2203,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
     case id::get_securing_threshold_modulator:
       logger().debug("WorldWrapperUtil::%s - id::get_securing_threshold_modulator", __FUNCTION__);
       return WorldWrapperUtil::getModulator( atomSpace, 
-                                             std::string(SECURING_THRESHOLD_MODULATOR_NAME), 
+                                             SECURING_THRESHOLD_MODULATOR_NAME,
                                              time
                                            );
         break;
@@ -2216,7 +2213,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                      __FUNCTION__
                    );
      return WorldWrapperUtil::getModulator( atomSpace, 
-                                            std::string(SELECTION_THRESHOLD_MODULATOR_NAME),
+                                            SELECTION_THRESHOLD_MODULATOR_NAME,
                                             time
                                           );
 
@@ -2226,7 +2223,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
     case id::get_energy_demand:
         logger().debug("WorldWrapperUtil::%s - id::get_energy_demand", __FUNCTION__);
         return WorldWrapperUtil::getDemand( atomSpace, 
-                                            std::string(ENERGY_DEMAND_NAME),
+                                            ENERGY_DEMAND_NAME,
                                             time
                                           );
         break;
@@ -2234,7 +2231,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
     case id::get_water_demand:
         logger().debug("WorldWrapperUtil::%s - id::get_water_demand", __FUNCTION__);
         return WorldWrapperUtil::getDemand( atomSpace, 
-                                            std::string(WATER_DEMAND_NAME),
+                                            WATER_DEMAND_NAME,
                                             time
                                           );
         break;
@@ -2242,7 +2239,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
     case id::get_integrity_demand:
         logger().debug("WorldWrapperUtil::%s - id::get_integrity_demand", __FUNCTION__);
         return WorldWrapperUtil::getDemand( atomSpace, 
-                                            std::string(INTEGRITY_DEMAND_NAME),
+                                            INTEGRITY_DEMAND_NAME,
                                             time
                                           );
         break;
@@ -2250,7 +2247,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
     case id::get_affiliation_demand:
         logger().debug("WorldWrapperUtil::%s - id::get_affiliation_demand", __FUNCTION__);
         return WorldWrapperUtil::getDemand( atomSpace, 
-                                            std::string(AFFILIATION_DEMAND_NAME),
+                                            AFFILIATION_DEMAND_NAME,
                                             time
                                           );
         break;
@@ -2258,7 +2255,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
     case id::get_certainty_demand:
         logger().debug("WorldWrapperUtil::%s - id::get_certainty_demand", __FUNCTION__);
         return WorldWrapperUtil::getDemand( atomSpace, 
-                                            std::string(CERTAINTY_DEMAND_NAME),
+                                            CERTAINTY_DEMAND_NAME,
                                             time
                                           );
         break;
@@ -2266,7 +2263,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
      case id::get_competence_demand:
         logger().debug("WorldWrapperUtil::%s - id::get_competence_demand", __FUNCTION__);
         return WorldWrapperUtil::getDemand( atomSpace, 
-                                            std::string(COMPETENCE_DEMAND_NAME),
+                                            COMPETENCE_DEMAND_NAME,
                                             time
                                           );
         break;
@@ -2292,7 +2289,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
     case id::get_integrity_demand_goal_truth_value:
         logger().debug("WorldWrapperUtil::%s - id::get_integrity_demand_goal_truth_value", __FUNCTION__); 
         return WorldWrapperUtil::getDemandGoalTruthValue( atomSpace, 
-                                                          std::string(INTEGRITY_DEMAND_NAME),
+                                                          INTEGRITY_DEMAND_NAME,
                                                           self_id, 
                                                           time 
                                                         );
@@ -2301,7 +2298,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
     case id::get_affiliation_demand_goal_truth_value:
         logger().debug("WorldWrapperUtil::%s - id::get_affiliation_demand_goal_truth_value", __FUNCTION__); 
         return WorldWrapperUtil::getDemandGoalTruthValue( atomSpace, 
-                                                          std::string(AFFILIATION_DEMAND_NAME), 
+                                                          AFFILIATION_DEMAND_NAME, 
                                                           self_id, 
                                                           time
                                                         );
@@ -2310,7 +2307,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
     case id::get_certainty_demand_goal_truth_value:
         logger().debug("WorldWrapperUtil::%s - id::get_certainty_demand_goal_truth_value", __FUNCTION__);
         return WorldWrapperUtil::getDemandGoalTruthValue( atomSpace, 
-                                                          std::string(CERTAINTY_DEMAND_NAME), 
+                                                          CERTAINTY_DEMAND_NAME,
                                                           self_id, 
                                                           time
                                                         );
@@ -2319,7 +2316,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
     case id::get_competence_demand_goal_truth_value:
         logger().debug("WorldWrapperUtil::%s - id::get_competence_demand_goal_truth_value", __FUNCTION__); 
         return WorldWrapperUtil::getDemandGoalTruthValue( atomSpace, 
-                                                          std::string(COMPETENCE_DEMAND_NAME), 
+                                                          COMPETENCE_DEMAND_NAME,
                                                           self_id, 
                                                           time
                                                         );
@@ -2328,49 +2325,49 @@ combo::vertex WorldWrapperUtil::evalPerception(
         // -------------- pet traits perceptions
         //case id::is_aggressive:
     case id::get_aggressiveness:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(AGGRESSIVENESS_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, AGGRESSIVENESS_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_curious:
     case id::get_curiosity:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(CURIOSITY_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, CURIOSITY_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_playful:
     case id::get_playfulness:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(PLAYFULNESS_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, PLAYFULNESS_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_friendly:
     case id::get_friendliness:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(FRIENDLINESS_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, FRIENDLINESS_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_fearful:
     case id::get_fearfulness:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(FEARFULNESS_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, FEARFULNESS_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_appreciative:
     case id::get_appreciativeness:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(APPRECIATIVENESS_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, APPRECIATIVENESS_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_excitable:
     case id::get_excitability:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(EXCITABILITY_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, EXCITABILITY_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
@@ -2378,62 +2375,62 @@ combo::vertex WorldWrapperUtil::evalPerception(
         // -------------- pet emotional feeling perceptions
         //case id::is_happy:
     case id::get_happiness:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(HAPPINESS_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, HAPPINESS_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_fear:
     case id::get_fear:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(FEAR_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, FEAR_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_proud:
     case id::get_pride:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(PRIDE_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, PRIDE_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_lovely:
     case id::get_love:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(LOVE_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, LOVE_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_hateful:
     case id::get_hate:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(HATE_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, HATE_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_angry:
     case id::get_anger:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(ANGER_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, ANGER_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_grateful:
     case id::get_gratitude:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(GRATITUDE_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, GRATITUDE_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_excited:
     case id::get_excitement:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(EXCITEMENT_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, EXCITEMENT_PREDICATE_NAME);
         return WorldWrapperUtil::getEmotionalFeelingOrTrait(smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
     case id::is_owner:
-        WorldWrapperUtil::changePredicateName(tmp, std::string(OWNERSHIP_PREDICATE_NAME));
+        WorldWrapperUtil::changePredicateName(tmp, OWNERSHIP_PREDICATE_NAME);
         break;
 
     default:
