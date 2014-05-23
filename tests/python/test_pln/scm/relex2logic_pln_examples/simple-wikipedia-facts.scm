@@ -196,7 +196,9 @@
 ; Rule to make sense of spatial relation needed.
 
 
-; Scientists often make experiments to find out more about reality.
+; Scientists often make experiments (to find out more about reality).
+
+; (Approximate) desired output:
 
 (EvaluationLink (stv .7 .8)
     (PredicadeNode "make")
@@ -204,14 +206,82 @@
         (ConceptNode "scientist")
         (ConceptNode "experiments")))
 
+; Current output:
+; 
+; _obj(make, experiment)
+; _advmod(make, often)
+; _subj(make, scientist)
+; 
+; SVO-rule, tense-rule and adv-mod-rule are used.
+
+(InheritanceLink (stv 1.000000 0.000000)
+  (PredicateNode "make@d6d5ff22-4fd7-4616-a443-31147a8bdb67") ; [220]
+  (PredicateNode "make") ; [221]
+) ; [222]
+
+(InheritanceLink (stv 1.000000 0.000000)
+  (ConceptNode "scientists@1dac5b75-dadd-4c04-aa63-dc56e63f802c") ; [223]
+  (ConceptNode "scientist") ; [224]
+) ; [225]
+
+(InheritanceLink (stv 1.000000 0.000000)
+  (ConceptNode "experiments@80482db7-def5-4f26-9f6a-1505bb94b7d6") ; [226]
+  (ConceptNode "experiment") ; [227]
+) ; [228]
+
+(InheritanceLink (stv 1.000000 0.000000)
+  (PredicateNode "make@d6d5ff22-4fd7-4616-a443-31147a8bdb67") ; [220]
+  (ConceptNode "present") ; [231]
+) ; [232]
+
+(InheritanceLink (stv 1.000000 0.000000)
+  (ConceptNode "often@bf26a7e3-a467-40bd-922c-fb2d87221fe8") ; [233]
+  (ConceptNode "often") ; [234]
+) ; [235]
+
+(InheritanceLink (stv 1.000000 0.000000)
+  (SatisfyingSetLink (stv 1.000000 0.000000)
+    (PredicateNode "make@d6d5ff22-4fd7-4616-a443-31147a8bdb67") ; [220]
+  ) ; [236]
+  (ConceptNode "often@bf26a7e3-a467-40bd-922c-fb2d87221fe8") ; [233]
+) ; [237]
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "make@d6d5ff22-4fd7-4616-a443-31147a8bdb67") ; [220]
+  (ListLink (stv 1.000000 0.000000)
+    (ConceptNode "scientists@1dac5b75-dadd-4c04-aa63-dc56e63f802c") ; [223]
+    (ConceptNode "experiments@80482db7-def5-4f26-9f6a-1505bb94b7d6") ; [226]
+  ) ; [229]
+) ; [230]
+
+; Often needs to modify stv.
+
 
 ; Scientists sometimes may repeat experiments or use control groups.
+
+; (Approximate) desired output:
 
 (EvaluationLink (stv .3 .5)
     (PredicadeNode "repeat")
     (ListLink
         (ConceptNode "scientist")
         (ConceptNode "experiments")))
+
+; Current output:
+
+; conj_or(repeat, use)
+; _obj(repeat, repeat)
+; _obj(repeat, use)
+; _nn(group, control)
+; _obj(or, group)
+; _advmod(or, sometimes)
+; _subj(or, scientist)
+; 
+; SVO-rule is falsely applied: SVO-rule "scientist" "or" "group"
+; Other applied rules: tense-rule "repeat" "present", advmod-rule "or" "sometimes",
+; nn-rule "group" "control"
+; 
+; Needed: rule using conj_or($v1, $v2)
 
 
 ; Scientific work is also carred out in laboratories.
@@ -228,8 +298,12 @@
     (ConceptNode "scientist")
     (ConceptNode "atheist"))
 
+; This is quite difficult. The stv has to be estimated using knowledge of the rest of
+; the universe.
 
 ; Scientists that study physics are physicists. 
+
+; Desired output:
 
 (InheritanceLink (stv 1.0 1.0)
     (AndLink
@@ -243,8 +317,24 @@
                 (ConceptNode "physics"))))
     (ConceptNode "physicist"))
 
+; Current RelEx relations:
+
+bj(be, physicist)
+_subj(be, scientist)
+_obj(study, physics)
+_subj(study, scientist)
+that_adj(scientist, study)
+
+; Currently applied R2L rules: be-inheritance-rule "scientist" "physicist",
+; tense-rule "be" "present"
+
+; RelEx relations are all in place. Required rules for that-subordinate clause;
+; disjoint rules need to be possible for different clauses.
+
 
 ; Scientists write papers.
+
+; Desired output:
 
 (EvaluationLink (stv 1.0 1.0)
     (PredicadeNode "write")
@@ -252,14 +342,39 @@
         (ConceptNode "scientist")
         (ConceptNode "papers")))
 
+; Current output:
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "write@7255c1d6-2cce-47d5-9cc1-80bd3cbf5d2e") ; [586]
+  (ListLink (stv 1.000000 0.000000)
+    (ConceptNode "scientists@1f0e427c-4772-4a1e-8883-40f229a65d46") ; [589]
+    (ConceptNode "papers@53f7eaef-ed9a-4736-9a93-c75d360a2c84") ; [592]
+  ) ; [595]
+) ; [596] check!
+
 
 ; A few scientists win a nobel prize.
+
+; (Approximate) desired output:
 
 (EvaluationLink (stv .1 .1)
     (PredicadeNode "win")
     (ListLink
         (ConceptNode "scientist")
         (ConceptNode "nobel_prize")))
+
+; Current RelEx relations:
+
+_obj(win, prize)
+_subj(win, scientist)
+_nn(prize, nobel)
+_quantity(scientist, a_few)
+
+; Currently applied R2L rules: SVO-rule "scientist" "win" "prize",
+; tense-rule "win" "present", nn-rule "nobel" "prize"
+
+; One rule needed that modifies stvs based on _quantity relation;
+; probably best using scoped variables.
 
 
 ; Example sentences for inference:
