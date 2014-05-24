@@ -201,7 +201,7 @@ void metapopulation::set_diversity()
         // distance with the other in tmp
         last_ptr = &*mit->first;
         // move the last candidate to the pool and remove it from tmp
-        pool.transfer(mit->first, *this);
+        pool.transfer(mit->first, _scored_trees);
         tmp.erase(mit);
     }
 
@@ -217,7 +217,7 @@ void metapopulation::set_diversity()
     // // ~debug
 
     // Replace the existing metapopulation with the new one.
-    swap(pool);
+    _scored_trees.swap(pool);
 
     if (logger().isFineEnabled()) {
         stringstream ss;
@@ -226,13 +226,15 @@ void metapopulation::set_diversity()
     }
 }
 
-void metapopulation::log_selected_exemplar(const_iterator exemplar_it)
+void metapopulation::log_selected_exemplar(pbscored_combo_tree_ptr_set::const_iterator exemplar_it)
 {
-    if (exemplar_it == cend()) {
+    if (not logger().isDebugEnabled()) return;
+
+    if (exemplar_it == _scored_trees.cend()) {
         logger().debug() << "No exemplar found";
     } else {
         const auto& xmplr = *exemplar_it;
-        unsigned pos = std::distance(cbegin(), exemplar_it) + 1,
+        unsigned pos = std::distance(_scored_trees.cbegin(), exemplar_it) + 1,
             nth_vst = _visited_exemplars[get_tree(xmplr)];
 
         logger().debug() << "Selected the " << pos
@@ -253,11 +255,11 @@ pbscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     // Shortcut for special case, as sometimes, the very first time
     // though, the score is invalid.
     if (size() == 1) {
-        const_iterator selex = cbegin();
+        pbscored_combo_tree_ptr_set::const_iterator selex = _scored_trees.cbegin();
         const combo_tree& tr = get_tree(*selex);
         if(params.revisit + 1 > _visited_exemplars[tr]) // not enough visited
             _visited_exemplars[tr]++;
-        else selex = cend();    // enough visited
+        else selex = _scored_trees.cend();    // enough visited
 
         log_selected_exemplar(selex);
         return selex;
@@ -289,8 +291,8 @@ pbscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
 
     // Nothing found, we've already tried them all.
     if (!found_exemplar) {
-        log_selected_exemplar(cend());
-        return cend();
+        log_selected_exemplar(_scored_trees.cend());
+        return _scored_trees.cend();
     }
 
     // Compute the probability normalization, needed for the
@@ -323,7 +325,7 @@ pbscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
                                                          sum, randGen()));
     // cout << "select_exemplar(): sum=" << sum << " fwd =" << fwd
     // << " size=" << probs.size() << " frac=" << fwd/((float)probs.size()) << endl;
-    const_iterator selex = std::next(begin(), fwd);
+    pbscored_combo_tree_ptr_set::const_iterator selex = std::next(_scored_trees.begin(), fwd);
 
     // We increment _visited_exemplar
     _visited_exemplars[get_tree(*selex)]++;
@@ -354,7 +356,7 @@ void metapopulation::merge_candidates(pbscored_combo_tree_set& candidates)
     if (params.diversity.include_dominated) {
         logger().debug("Insert all candidates in the metapopulation");
         for (const auto& cnd : candidates)
-            insert(new pbscored_combo_tree(cnd));
+            _scored_trees.insert(new pbscored_combo_tree(cnd));
     } else {
         logger().debug("Insert non-dominated candidates in the metapopulation");
         unsigned old_size = size();
@@ -501,7 +503,8 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
     // Save CPU time by not computing them.
     if (params.keep_bscore
         || !params.diversity.include_dominated
-        || params.diversity.pressure > 0.0) {
+        || params.diversity.pressure > 0.0)
+    {
         logger().debug("Compute behavioral score of %d selected candidates",
                        pot_candidates.size());
 
@@ -589,16 +592,16 @@ void metapopulation::resize_metapop()
     // ends up costing a lot.  I think... not sure.
 
     // Get the first score below worst_score (from begin() + min_pool_size)
-    iterator it = std::next(begin(), min_pool_size);
-    while (it != end()) {
+    pbscored_combo_tree_ptr_set::iterator it = std::next(_scored_trees.begin(), min_pool_size);
+    while (it != _scored_trees.end()) {
         score_t sc = get_penalized_score(*it);
         if (sc < worst_score) break;
         it++;
     }
 
-    while (it != end()) {
+    while (it != _scored_trees.end()) {
         ptr_seq.push_back(&*it);
-        it = erase(it);
+        it = _scored_trees.erase(it);
     }
 
     // Is the population still too large?  Yes, it is, if it is more
@@ -627,9 +630,9 @@ void metapopulation::resize_metapop()
         // using std is necessary to break the ambiguity between
         // boost::next and std::next. Weirdly enough this appears
         // only 32bit arch
-        iterator it = std::next(begin(), which);
+        pbscored_combo_tree_ptr_set::iterator it = std::next(_scored_trees.begin(), which);
         ptr_seq.push_back(&*it);
-        erase(it);
+        _scored_trees.erase(it);
         popsz --;
     }
 
@@ -658,10 +661,11 @@ pbscored_combo_tree_set metapopulation::get_new_candidates(const metapop_candida
     pbscored_combo_tree_set res;
     for (const auto& cnd : mcs) {
         const combo_tree& tr = get_tree(cnd);
-        const_iterator fcnd =
-            OMP_ALGO::find_if(begin(), end(), [&](const pbscored_combo_tree& v) {
+        pbscored_combo_tree_ptr_set::const_iterator fcnd =
+            OMP_ALGO::find_if(_scored_trees.begin(), _scored_trees.end(),
+                              [&](const pbscored_combo_tree& v) {
                     return tr == get_tree(v); });
-        if (fcnd == end())
+        if (fcnd == _scored_trees.end())
             res.insert(cnd);
     }
 
@@ -833,10 +837,10 @@ metapopulation::gather_diversity_stats(int n)
 
         // compute the statistics
         accumulator_t acc;
-        auto from_i = cbegin(),
-            to = std::next(cbegin(), std::min(n, (int)size()));
+        auto from_i = _scored_trees.cbegin(),
+            to = std::next(_scored_trees.cbegin(), std::min(n, (int)size()));
         for (; from_i != to; ++from_i) {
-            for (auto from_j = cbegin(); from_j != from_i; ++from_j) {
+            for (auto from_j = _scored_trees.cbegin(); from_j != from_i; ++from_j) {
 #ifdef ENABLE_DST_CACHE
                 cached_dst::ptr_pair cts = {&*from_j, &*from_i};
                 auto it = _cached_dst.cache.find(cts);
@@ -1146,11 +1150,11 @@ void metapopulation::merge_nondominated(const pbscored_combo_tree_set& bcs, unsi
     pbscored_combo_tree_ptr_vec diff_bcv_mp =
         set_difference(bcv_mp, bcv_p.second);
     for (const pbscored_combo_tree* cnd : diff_bcv_mp)
-        erase(*cnd);
+        _scored_trees.erase(*cnd);
 
     // add the nondominated ones from bsc
     for (const pbscored_combo_tree* cnd : bcv_p.first)
-        insert(new pbscored_combo_tree(*cnd));
+        _scored_trees.insert(new pbscored_combo_tree(*cnd));
 }
 
 } // ~namespace moses

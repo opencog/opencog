@@ -153,26 +153,19 @@ protected:
 
 extern const composite_score worst_composite_score;
 
-// In order to keep track from which deme each candidate comes we
-// assign a unique ID for each deme.
-//
-// The demeID is formatted as followed, either
-//
-// EXPANSION
-//
-// If only one deme is spawned per expansion
-//
-// or
-//
-// EXPANSION.BREADTH_FIRST
-//
-// If more than one deme is spawned per expansion
-//
-// Where EXPANSION is the number of times the deme expander has been
-// called thus far. And BREADTH_FIRST is the index of the deme created
-// by one call of the deme expander. The initial metapopulation comes
-// from demeID "0" by convention.
-struct demeID_t : public std::string {
+/// Assign a unique ID for each deme.  This is used to keep track of
+/// which deme each candidate comes from. The demeID is stored as a string,
+/// formatted as either a single a single integer EXPANSION or as a pair
+/// EXPANSION.BREADTH_FIRST.   The first is used if there is only one deme
+/// spawned per expansion.  The second form is used if more than one deme
+/// is spawned per expansion
+///
+/// Here, EXPANSION is the number of times that the deme expander has
+/// been called thus far. BREADTH_FIRST is the index of the deme created
+/// by a single call of the deme expander. The initial metapopulation
+/// comes from demeID "0".
+struct demeID_t : public std::string
+{
     demeID_t(unsigned expansion = 0 /* default initial deme */);
     demeID_t(unsigned expansion, unsigned breadth_first);
 };

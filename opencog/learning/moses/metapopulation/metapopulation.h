@@ -54,14 +54,16 @@ void print_stats_header (optim_stats *os, bool diversity_enabled);
  *
  * The metapopulation is updated in iterations. In each iteration, one
  * of its elements is selected as an exemplar. The exemplar is then
- * decorated with knobs and optimized, to create a new deme.  Members
- * of the deme are then folded back into the metapopulation.
+ * decorated with knobs and optimized, to create a new deme.  Suitably
+ * high-scoring members of the deme are then folded back into the
+ * metapopulation.  At this point, the metapopulation may be pruned,
+ * to keep it's size manageable.
  *
  * NOTE:
- *   cscore_base = scoring function (output composite scores)
+ *   cscore_base = scoring function (output composite (combined) scores)
  *   bscore_base = behavioral scoring function (output behaviors)
  */
-struct metapopulation : pbscored_combo_tree_ptr_set
+struct metapopulation
 {
     typedef deme_t::iterator deme_it;
     typedef deme_t::const_iterator deme_cit;
@@ -102,8 +104,9 @@ struct metapopulation : pbscored_combo_tree_ptr_set
                    const bscore_base& bsc,
                    optimizer_base& opt,
                    const metapop_parameters& pa = metapop_parameters()) :
+        params(pa),
         _dex(type_signature, si_ca, si_kb, sc, opt, pa),
-        _bscorer(bsc), params(pa),
+        _bscorer(bsc),
         _merge_count(0),
         _best_cscore(worst_composite_score),
         _cached_dst(pa.diversity)
@@ -119,8 +122,9 @@ struct metapopulation : pbscored_combo_tree_ptr_set
                    const cscore_base& sc, const bscore_base& bsc,
                    optimizer_base& opt,
                    const metapop_parameters& pa = metapop_parameters()) :
+        params(pa),
         _dex(type_signature, si, si, sc, opt, pa),
-        _bscorer(bsc), params(pa),
+        _bscorer(bsc),
         _merge_count(0),
         _best_cscore(worst_composite_score),
         _cached_dst(pa.diversity)
@@ -204,7 +208,7 @@ struct metapopulation : pbscored_combo_tree_ptr_set
      */
     void set_diversity();
 
-    void log_selected_exemplar(const_iterator exemplar_it);
+    void log_selected_exemplar(pbscored_combo_tree_ptr_set::const_iterator);
 
     /**
      * Select the exemplar from the population. An exemplar is choosen
@@ -223,6 +227,11 @@ struct metapopulation : pbscored_combo_tree_ptr_set
      *         exemplar exists then return end()
      */
     pbscored_combo_tree_ptr_set::const_iterator select_exemplar();
+    pbscored_combo_tree_ptr_set::const_iterator end() const { return _scored_trees.end(); }
+    pbscored_combo_tree_ptr_set::const_iterator begin() const { return _scored_trees.begin(); }
+    bool empty() const { return _scored_trees.empty(); } 
+    size_t size() const { return _scored_trees.size(); }
+    void clear() { _scored_trees.clear(); }
 
     /// Given the current complexity temp, return the range of scores that
     /// are likely to be selected by the select_exemplar routine. Due to
@@ -464,7 +473,7 @@ struct metapopulation : pbscored_combo_tree_ptr_set
                  bool output_only_best = false,
                  bool output_python = false)
     {
-        return ostream(out, begin(), end(),
+        return ostream(out, _scored_trees.begin(), _scored_trees.end(),
                        n, output_score, output_penalty, output_bscore,
                        output_visited, output_only_best, output_python);
     }
@@ -476,8 +485,6 @@ struct metapopulation : pbscored_combo_tree_ptr_set
                bool output_bscore = false,
                bool output_visited = false,
                bool output_only_best = false);
-
-    deme_expander _dex;
 
     // Structure holding stats about diversity
     struct diversity_stats
@@ -495,15 +502,19 @@ struct metapopulation : pbscored_combo_tree_ptr_set
      */
     diversity_stats gather_diversity_stats(int n);
 
+public:
+    const metapop_parameters& params;
+
+// protected:
+    deme_expander _dex;
+ 
 protected:
+    pbscored_combo_tree_ptr_set _scored_trees;
+
     static const unsigned min_pool_size = 250;
 
     const bscore_base& _bscorer; // behavioral score
 
-public:
-    const metapop_parameters& params;
-
-protected:
     size_t _merge_count;
 
     // The best score ever found during search.

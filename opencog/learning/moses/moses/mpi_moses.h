@@ -68,7 +68,7 @@ public:
     // worker methods, to be used only by workers.
     int recv_more_work();
     void recv_exemplar(combo_tree&);
-    void send_deme(const pbscored_combo_tree_ptr_set&, int);
+    void send_deme(const metapopulation&, int);
 
     std::atomic<size_t> sent_bytes;
     std::atomic<size_t> recv_bytes;
