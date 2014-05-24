@@ -65,9 +65,6 @@ void print_stats_header (optim_stats *os, bool diversity_enabled);
  */
 struct metapopulation
 {
-    typedef deme_t::iterator deme_it;
-    typedef deme_t::const_iterator deme_cit;
-
     // The goal of using unordered_set here is to have O(1) access time
     // to see if a combo tree is in the set, or not.
     typedef std::unordered_set<combo_tree,

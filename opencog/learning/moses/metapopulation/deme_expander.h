@@ -31,9 +31,6 @@ namespace moses {
 
 struct deme_expander
 {
-    typedef deme_t::iterator deme_it;
-    typedef deme_t::const_iterator deme_cit;
-
     deme_expander(const type_tree& type_signature,
                   const reduct::rule& si_ca,
                   const reduct::rule& si_kb,

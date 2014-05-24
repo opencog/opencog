@@ -472,6 +472,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         // otherwise, if we just iterate in parallel till we get
         // enough candidates, it can create race conditions
         // (indeterminism)
+        typedef deme_t::const_iterator deme_cit;
         for (deme_cit deme_begin = demes[i].cbegin(),
                  deme_end = deme_begin + max_pot_cnd;
              deme_begin != demes[i].cend()
