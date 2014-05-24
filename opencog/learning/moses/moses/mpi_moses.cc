@@ -199,7 +199,7 @@ void moses_mpi_comm::recv_exemplar(combo_tree& exemplar)
 ///
 /// This sends a pretty big glob.
 // XXX TODO -- trim the deme down, before sending, by using the worst acceptable score.
-void moses_mpi_comm::send_deme(const pbscored_combo_tree_ptr_set& mp, int n_evals)
+void moses_mpi_comm::send_deme(const metapopulation& mp, int n_evals)
 {
     MPI::COMM_WORLD.Send(&n_evals, 1, MPI::INT, ROOT_NODE, MSG_NUM_EVALS);
 
