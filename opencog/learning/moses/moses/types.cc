@@ -35,8 +35,8 @@ demeID_t::demeID_t(unsigned expansion)
 demeID_t::demeID_t(unsigned expansion, unsigned breadth_first)
     : string(to_string(expansion) + "." + to_string(breadth_first)) {}
 
-bool pbscored_combo_tree_greater::operator()(const pbscored_combo_tree& bs_tr1,
-                                            const pbscored_combo_tree& bs_tr2) const
+bool scored_combo_tree_greater::operator()(const scored_combo_tree& bs_tr1,
+                                            const scored_combo_tree& bs_tr2) const
 {
     composite_score csc1 = get_composite_score(bs_tr1);
     composite_score csc2 = get_composite_score(bs_tr2);
@@ -48,7 +48,7 @@ bool pbscored_combo_tree_greater::operator()(const pbscored_combo_tree& bs_tr1,
     if (lt) return false;
 
     // If we are here, then they are equal.  We are desperate to break
-    // a tie, because otherwise, the pbscored_combo_tree_set will discard
+    // a tie, because otherwise, the scored_combo_tree_set will discard
     // anything that compares equal, and we really don't want that.
     score_t sc1 = get_score(csc1);
     score_t sc2 = get_score(csc2);
@@ -130,37 +130,29 @@ bool composite_score::operator==(const composite_score &r) const
 // convenience accessors //
 ///////////////////////////
 
-const combo::combo_tree& get_tree(const pbscored_combo_tree& pbst)
+const composite_penalized_bscore& get_composite_penalized_bscore(const scored_combo_tree& pbst)
 {
-    return pbst.first;
+    return pbst.cpbscored.first;
 }
 
-combo::combo_tree& get_tree(pbscored_combo_tree& pbst)
+composite_penalized_bscore& get_composite_penalized_bscore(scored_combo_tree& pbst)
 {
-    return pbst.first;
+    return pbst.cpbscored.first;
 }
 
-const composite_penalized_bscore& get_composite_penalized_bscore(const pbscored_combo_tree& pbst)
+const cpbscore_demeID& get_cpbscore_demeID(const scored_combo_tree& pbst)
 {
-    return pbst.second.first;
+    return pbst.cpbscored;
 }
 
-composite_penalized_bscore& get_composite_penalized_bscore(pbscored_combo_tree& pbst)
+cpbscore_demeID& get_cpbscore_demeID(scored_combo_tree& pbst)
 {
-    return pbst.second.first;
+    return pbst.cpbscored;
 }
 
-const cpbscore_demeID& get_cpbscore_demeID(const pbscored_combo_tree& pbst) {
-    return pbst.second;
-}
-
-cpbscore_demeID& get_cpbscore_demeID(pbscored_combo_tree& pbst) {
-    return pbst.second;
-}
-
-demeID_t get_demeID(const pbscored_combo_tree& pbst)
+demeID_t get_demeID(const scored_combo_tree& pbst)
 {
-    return pbst.second.second;
+    return pbst.cpbscored.second;
 }
 
 score_t get_penalized_score(const composite_score& sc)
@@ -173,7 +165,7 @@ const composite_score& get_composite_score(const composite_penalized_bscore& ctb
     return ctbs.second;
 }
 
-const composite_score& get_composite_score(const pbscored_combo_tree& bsct)
+const composite_score& xget_composite_score(const scored_combo_tree& bsct)
 {
     return get_composite_score(get_composite_penalized_bscore(bsct));
 }
@@ -183,7 +175,7 @@ score_t get_penalized_score(const composite_penalized_bscore& cpb)
     return get_penalized_score(get_composite_score(cpb));
 }
 
-score_t get_penalized_score(const pbscored_combo_tree& st)
+score_t get_penalized_score(const scored_combo_tree& st)
 {
     return get_penalized_score(get_composite_score(st));
 }
@@ -193,7 +185,7 @@ composite_score& get_composite_score(composite_penalized_bscore& ctbs)
     return ctbs.second;
 }
 
-composite_score& get_composite_score(pbscored_combo_tree& bsct)
+composite_score& get_composite_score(scored_combo_tree& bsct)
 {
     return get_composite_score(bsct.second.first);
 }
@@ -208,7 +200,7 @@ score_t get_score(const composite_penalized_bscore& ts)
     return get_score(ts.second);
 }
 
-score_t get_score(const pbscored_combo_tree& bst)
+score_t get_score(const scored_combo_tree& bst)
 {
     return get_score(get_composite_penalized_bscore(bst));
 }
@@ -223,7 +215,7 @@ complexity_t get_complexity(const composite_penalized_bscore& ts)
     return get_complexity(ts.second);
 }
 
-complexity_t get_complexity(const pbscored_combo_tree& bst)
+complexity_t get_complexity(const scored_combo_tree& bst)
 {
     return get_complexity(get_composite_penalized_bscore(bst));
 }
@@ -238,7 +230,7 @@ score_t get_complexity_penalty(const composite_penalized_bscore& ts)
     return get_complexity_penalty(ts.second);
 }
 
-score_t get_complexity_penalty(const pbscored_combo_tree& bst)
+score_t get_complexity_penalty(const scored_combo_tree& bst)
 {
     return get_complexity_penalty(get_composite_penalized_bscore(bst));
 }
@@ -253,7 +245,7 @@ score_t get_diversity_penalty(const composite_penalized_bscore& ts)
     return get_diversity_penalty(ts.second);
 }
 
-score_t get_diversity_penalty(const pbscored_combo_tree& bst)
+score_t get_diversity_penalty(const scored_combo_tree& bst)
 {
     return get_diversity_penalty(get_composite_penalized_bscore(bst));
 }
@@ -268,7 +260,7 @@ score_t get_penalty(const composite_penalized_bscore& ts)
     return get_penalty(ts.second);
 }
 
-score_t get_penalty(const pbscored_combo_tree& bst)
+score_t get_penalty(const scored_combo_tree& bst)
 {
     return get_penalty(get_composite_penalized_bscore(bst));
 }
@@ -283,12 +275,12 @@ penalized_bscore& get_pbscore(composite_penalized_bscore& ts)
     return ts.first;
 }
 
-const penalized_bscore& get_pbscore(const pbscored_combo_tree& bst)
+const penalized_bscore& get_pbscore(const scored_combo_tree& bst)
 {
     return get_pbscore(get_composite_penalized_bscore(bst));
 }
 
-penalized_bscore& get_pbscore(pbscored_combo_tree& bst)
+penalized_bscore& get_pbscore(scored_combo_tree& bst)
 {
     return get_pbscore(get_composite_penalized_bscore(bst));
 }
@@ -303,7 +295,7 @@ const behavioral_score& get_bscore(const composite_penalized_bscore& cbs)
     return get_bscore(cbs.first);
 }
 
-const behavioral_score& get_bscore(const pbscored_combo_tree& bst)
+const behavioral_score& get_bscore(const scored_combo_tree& bst)
 {
     return get_bscore(get_composite_penalized_bscore(bst));
 }

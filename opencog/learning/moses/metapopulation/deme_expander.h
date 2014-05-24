@@ -52,7 +52,7 @@ struct deme_expander
      *
      * @return return true if it creates demes successfully, otherwise false.
      */
-    // bool create_deme(pbscored_combo_tree_set::const_iterator exemplar)
+    // bool create_deme(scored_combo_tree_set::const_iterator exemplar)
     bool create_demes(const combo_tree& exemplar, int n_expansions = 0);
 
     /**

@@ -198,14 +198,14 @@ struct metapopulation
      * XXX The implementation here results in a lot of copying of
      * behavioral scores and combo trees, and thus could hurt
      * performance by quite a bit.  To avoid this, we'd need to change
-     * the use of pbscored_combo_tree_set in this class. This would be
+     * the use of scored_combo_tree_set in this class. This would be
      * a fairly big task, and it's currently not clear that its worth
      * the effort, as diversity_penalty is not yet showing promising
      * results...
      */
     void set_diversity();
 
-    void log_selected_exemplar(pbscored_combo_tree_ptr_set::const_iterator);
+    void log_selected_exemplar(scored_combo_tree_ptr_set::const_iterator);
 
     /**
      * Select the exemplar from the population. An exemplar is choosen
@@ -223,9 +223,9 @@ struct metapopulation
      * @return the iterator of the selected exemplar, if no such
      *         exemplar exists then return end()
      */
-    pbscored_combo_tree_ptr_set::const_iterator select_exemplar();
-    pbscored_combo_tree_ptr_set::const_iterator end() const { return _scored_trees.end(); }
-    pbscored_combo_tree_ptr_set::const_iterator begin() const { return _scored_trees.begin(); }
+    scored_combo_tree_ptr_set::const_iterator select_exemplar();
+    scored_combo_tree_ptr_set::const_iterator end() const { return _scored_trees.end(); }
+    scored_combo_tree_ptr_set::const_iterator begin() const { return _scored_trees.begin(); }
     bool empty() const { return _scored_trees.empty(); } 
     size_t size() const { return _scored_trees.size(); }
     void clear() { _scored_trees.clear(); }
@@ -251,10 +251,10 @@ struct metapopulation
     /// Safe to call in a multi-threaded context.
     ///
     /// @todo it would probably be more efficient to use
-    /// pbscored_combo_tree_ptr_set and not having to copy and
+    /// scored_combo_tree_ptr_set and not having to copy and
     /// reallocate candidates onces they are selected. It might be
     /// minor though in terms of performance gain.
-    void merge_candidates(pbscored_combo_tree_set& candidates);
+    void merge_candidates(scored_combo_tree_set& candidates);
 
     /**
      * merge deme -- convert instances to trees, and save them.
@@ -300,37 +300,37 @@ struct metapopulation
     // Return the set of candidates not present in the metapopulation.
     // This makes merging faster because it decreases the number of
     // calls of dominates.
-    pbscored_combo_tree_set get_new_candidates(const metapop_candidates& mcs);
+    scored_combo_tree_set get_new_candidates(const metapop_candidates& mcs);
 
-    typedef pair<pbscored_combo_tree_set,
-                 pbscored_combo_tree_set> pbscored_combo_tree_set_pair;
+    typedef pair<scored_combo_tree_set,
+                 scored_combo_tree_set> scored_combo_tree_set_pair;
 
-    typedef std::vector<const pbscored_combo_tree*> pbscored_combo_tree_ptr_vec;
-    typedef pbscored_combo_tree_ptr_vec::iterator pbscored_combo_tree_ptr_vec_it;
-    typedef pbscored_combo_tree_ptr_vec::const_iterator pbscored_combo_tree_ptr_vec_cit;
-    typedef pair<pbscored_combo_tree_ptr_vec,
-                 pbscored_combo_tree_ptr_vec> pbscored_combo_tree_ptr_vec_pair;
+    typedef std::vector<const scored_combo_tree*> scored_combo_tree_ptr_vec;
+    typedef scored_combo_tree_ptr_vec::iterator scored_combo_tree_ptr_vec_it;
+    typedef scored_combo_tree_ptr_vec::const_iterator scored_combo_tree_ptr_vec_cit;
+    typedef pair<scored_combo_tree_ptr_vec,
+                 scored_combo_tree_ptr_vec> scored_combo_tree_ptr_vec_pair;
 
     // reciprocal of random_access_view
-    static pbscored_combo_tree_set
-    to_set(const pbscored_combo_tree_ptr_vec& bcv);
+    static scored_combo_tree_set
+    to_set(const scored_combo_tree_ptr_vec& bcv);
 
-    void remove_dominated(pbscored_combo_tree_set& bcs, unsigned jobs = 1);
+    void remove_dominated(scored_combo_tree_set& bcs, unsigned jobs = 1);
 
-    static pbscored_combo_tree_set
-    get_nondominated_iter(const pbscored_combo_tree_set& bcs);
+    static scored_combo_tree_set
+    get_nondominated_iter(const scored_combo_tree_set& bcs);
 
     // split in 2 of equal size
-    static pbscored_combo_tree_ptr_vec_pair
-    inline split(const pbscored_combo_tree_ptr_vec& bcv)
+    static scored_combo_tree_ptr_vec_pair
+    inline split(const scored_combo_tree_ptr_vec& bcv)
     {
-        pbscored_combo_tree_ptr_vec_cit middle = bcv.begin() + bcv.size() / 2;
-        return make_pair(pbscored_combo_tree_ptr_vec(bcv.begin(), middle),
-                         pbscored_combo_tree_ptr_vec(middle, bcv.end()));
+        scored_combo_tree_ptr_vec_cit middle = bcv.begin() + bcv.size() / 2;
+        return make_pair(scored_combo_tree_ptr_vec(bcv.begin(), middle),
+                         scored_combo_tree_ptr_vec(middle, bcv.end()));
     }
 
-    pbscored_combo_tree_ptr_vec
-    get_nondominated_rec(const pbscored_combo_tree_ptr_vec& bcv,
+    scored_combo_tree_ptr_vec
+    get_nondominated_rec(const scored_combo_tree_ptr_vec& bcv,
                          unsigned jobs = 1);
 
     // return a pair of sets of nondominated candidates between bcs1
@@ -340,19 +340,19 @@ struct metapopulation
     // they are used in the code. The first (resp. second) element of
     // the pair corresponds to the nondominated candidates of bcs1
     // (resp. bcs2)
-    pbscored_combo_tree_set_pair
-    get_nondominated_disjoint(const pbscored_combo_tree_set& bcs1,
-                              const pbscored_combo_tree_set& bcs2,
+    scored_combo_tree_set_pair
+    get_nondominated_disjoint(const scored_combo_tree_set& bcs1,
+                              const scored_combo_tree_set& bcs2,
                               unsigned jobs = 1);
 
-    pbscored_combo_tree_ptr_vec_pair
-    get_nondominated_disjoint_rec(const pbscored_combo_tree_ptr_vec& bcv1,
-                                  const pbscored_combo_tree_ptr_vec& bcv2,
+    scored_combo_tree_ptr_vec_pair
+    get_nondominated_disjoint_rec(const scored_combo_tree_ptr_vec& bcv1,
+                                  const scored_combo_tree_ptr_vec& bcv2,
                                   unsigned jobs = 1);
 
     // merge nondominated candidate to the metapopulation assuming
     // that bcs contains no dominated candidates within itself
-    void merge_nondominated(const pbscored_combo_tree_set& bcs, unsigned jobs = 1);
+    void merge_nondominated(const scored_combo_tree_set& bcs, unsigned jobs = 1);
 
     /**
      * x dominates y if
@@ -399,7 +399,7 @@ struct metapopulation
     
     /// Update the record of the best score seen, and the associated tree.
     /// Safe to call in a multi-threaded context.
-    void update_best_candidates(const pbscored_combo_tree_set& candidates);
+    void update_best_candidates(const scored_combo_tree_set& candidates);
 
     // log the best candidates
     void log_best_candidates() const;
@@ -423,7 +423,7 @@ struct metapopulation
     {
         if (!output_only_best) {
             for (; from != to && n != 0; ++from, n--) {
-                ostream_pbscored_combo_tree(out, *from, output_score,
+                ostream_scored_combo_tree(out, *from, output_score,
                                            output_penalty, output_bscore,
                                            output_python);
                 if (output_visited)
@@ -437,7 +437,7 @@ struct metapopulation
         score_t best_score = very_worst_score;
 
         for (In f = from; f != to; ++f) {
-            const pbscored_combo_tree& bt = *f;
+            const scored_combo_tree& bt = *f;
             score_t sc = get_score(bt);
             if (best_score < sc) best_score = sc;
         }
@@ -447,9 +447,9 @@ struct metapopulation
         // necessarily ranked highest, as the ranking is a linear combo
         // of both score and complexity.
         for (In f = from; f != to && n != 0; ++f, n--) {
-            const pbscored_combo_tree& bt = *f;
+            const scored_combo_tree& bt = *f;
             if (best_score <= get_score(bt)) {
-                ostream_pbscored_combo_tree(out, bt, output_score,
+                ostream_scored_combo_tree(out, bt, output_score,
                                            output_penalty, output_bscore,
                                            output_python);
                 if (output_visited)
@@ -506,7 +506,7 @@ public:
     deme_expander _dex;
  
 protected:
-    pbscored_combo_tree_ptr_set _scored_trees;
+    scored_combo_tree_ptr_set _scored_trees;
 
     static const unsigned min_pool_size = 250;
 
@@ -532,7 +532,7 @@ protected:
 
     /**
      * Cache for bscore distance between (for diversity penalty). Maps
-     * a std::set<pbscored_combo_tree*> (only 2 elements to represent
+     * a std::set<scored_combo_tree*> (only 2 elements to represent
      * an unordered pair) to a a bscore distance. We don't use
      * {lru,prr}_cache because
      *
@@ -548,14 +548,14 @@ protected:
 
         // We use a std::set instead of a std::pair, little
         // optimization to deal with the symmetry of the distance
-        typedef std::set<const pbscored_combo_tree*> ptr_pair;
-        dp_t operator()(const pbscored_combo_tree* cl,
-                        const pbscored_combo_tree* cr);
+        typedef std::set<const scored_combo_tree*> ptr_pair;
+        dp_t operator()(const scored_combo_tree* cl,
+                        const scored_combo_tree* cr);
 
         /**
          * Remove all keys containing any element of ptr_seq
          */
-        void erase_ptr_seq(std::vector<pbscored_combo_tree*> ptr_seq);
+        void erase_ptr_seq(std::vector<scored_combo_tree*> ptr_seq);
 
         /**
          * Gather some statistics about the diversity of the

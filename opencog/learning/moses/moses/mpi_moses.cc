@@ -207,9 +207,9 @@ void moses_mpi_comm::send_deme(const metapopulation& mp, int n_evals)
     MPI::COMM_WORLD.Send(&num_trees, 1, MPI::INT, ROOT_NODE, MSG_NUM_COMBO_TREES);
     sent_bytes += 2*sizeof(int);
 
-    pbscored_combo_tree_ptr_set_cit it;
+    scored_combo_tree_ptr_set_cit it;
     for (it = mp.begin(); it != mp.end(); it++) {
-        const pbscored_combo_tree& btr = *it;
+        const scored_combo_tree& btr = *it;
 
         // We are going to send only the composite score, and not the
         // full behavioural score.  Basically, the full bscore is just
@@ -241,7 +241,7 @@ int moses_mpi_comm::probe_for_deme()
 /// in an atomic, unfragmented way, from the first source that sent
 /// one to us.
 void moses_mpi_comm::recv_deme(int source,
-                               pbscored_combo_tree_set& cands,
+                               scored_combo_tree_set& cands,
                                int& n_evals,
                                const demeID_t& demeID)
 {
@@ -267,7 +267,7 @@ void moses_mpi_comm::recv_deme(int source,
         penalized_bscore pbs(bs, sc.get_complexity_penalty());
         composite_penalized_bscore cbs(pbs, sc);
         cpbscore_demeID cbs_demeID(cbs, demeID);
-        pbscored_combo_tree bsc_tr(tr, cbs_demeID);
+        scored_combo_tree bsc_tr(tr, cbs_demeID);
         cands.insert(bsc_tr);
     }
 }
@@ -433,7 +433,7 @@ void mpi_moses(metapopulation& mp,
            && (pa.max_gens != stats.n_expansions)
            && (mp.best_score() < pa.max_score))
     {
-        pbscored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
+        scored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
         if (exemplar == mp.end()) {
             if (wrkpool.available() == tot_workers) {
                 logger().warn(
@@ -466,7 +466,7 @@ void mpi_moses(metapopulation& mp,
                 mompi.dispatch_deme(worker.rank, extree, max_evals);
 
                 int n_evals = 0;
-                pbscored_combo_tree_set candidates;
+                scored_combo_tree_set candidates;
                 mompi.recv_deme(worker.rank, candidates, n_evals);
 cout<<"duuude master "<<getpid() <<" from="<<worker.rank << " got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
                 wrkpool.give_back(worker);
@@ -569,7 +569,7 @@ void mpi_moses(metapopulation& mp,
     {
         // Feeder: push work out to each worker.
         while ((0 < wrkpool.size()) && !done) {
-            pbscored_combo_tree_ptr_set_cit exemplar = mp.select_exemplar();
+            scored_combo_tree_ptr_set_cit exemplar = mp.select_exemplar();
             if (exemplar == mp.end()) {
 
                 if ((tot_workers == wrkpool.size()) && (0 == source)) {
@@ -605,7 +605,7 @@ void mpi_moses(metapopulation& mp,
         }
 
         int n_evals = 0;
-        pbscored_combo_tree_set candidates;
+        scored_combo_tree_set candidates;
         stats.n_expansions ++;
 
         // XXX TODO instead of overwritting the demeID it should be

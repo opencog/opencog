@@ -89,7 +89,7 @@ bool is_being_written(const std::string& file_name, int pid);
 bool is_running(const proc_map::value_type& pmv);
 /**
  * read the istream, add the candidates, fill max_evals
- * @todo replace metapop_candidates by pbscored_combo_tree_set
+ * @todo replace metapop_candidates by scored_combo_tree_set
  */
 void parse_result(std::istream& in, metapop_candidates& candidates, int& evals);
 // like above but uses a proc_map::value_type instead of istream

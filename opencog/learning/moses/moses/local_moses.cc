@@ -54,7 +54,7 @@ bool expand_deme(metapopulation& mp,
     // over exemplars until we find one that expands.
     // XXX When would one never expand?  Wouldn't that be a bug?
     while (1) {
-        pbscored_combo_tree_ptr_set_cit exemplar = mp.select_exemplar();
+        scored_combo_tree_ptr_set_cit exemplar = mp.select_exemplar();
 
         // Should have found something by now.
         if (exemplar == mp.end()) {

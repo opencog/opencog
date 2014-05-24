@@ -80,14 +80,14 @@ class partial_solver
                 refresh(metapop);
         }
 
-        static bool check_candidates(pbscored_combo_tree_set& cands, void *ud)
+        static bool check_candidates(scored_combo_tree_set& cands, void *ud)
         {
             partial_solver *ps = (partial_solver *) ud;
             return ps->eval_candidates(cands);
         }
 
     protected:
-        bool eval_candidates(const pbscored_combo_tree_set&);
+        bool eval_candidates(const scored_combo_tree_set&);
         void eval_candidate(const combo_tree&);
         void record_prefix();
         void effective(combo_tree::iterator,
