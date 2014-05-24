@@ -54,11 +54,13 @@ void print_stats_header (optim_stats *os, bool diversity_enabled);
  *
  * The metapopulation is updated in iterations. In each iteration, one
  * of its elements is selected as an exemplar. The exemplar is then
- * decorated with knobs and optimized, to create a new deme.  Members
- * of the deme are then folded back into the metapopulation.
+ * decorated with knobs and optimized, to create a new deme.  Suitably
+ * high-scoring members of the deme are then folded back into the
+ * metapopulation.  At this point, the metapopulation may be pruned,
+ * to keep it's size manageable.
  *
  * NOTE:
- *   cscore_base = scoring function (output composite scores)
+ *   cscore_base = scoring function (output composite (combined) scores)
  *   bscore_base = behavioral scoring function (output behaviors)
  */
 struct metapopulation : pbscored_combo_tree_ptr_set
