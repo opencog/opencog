@@ -131,12 +131,12 @@ cout<<"duuude end with prefix_count=" << _prefix_count <<" table_size=" << tcoun
 /// predicates are "good enough".  If we find one that is, then trim
 /// the scoring tables, and return (so as to run moses on the smaller
 /// problem).
-bool partial_solver::eval_candidates(const pbscored_combo_tree_set& cands)
+bool partial_solver::eval_candidates(const scored_combo_tree_set& cands)
 {
     logger().info() << "well-enough received " << cands.size() << " candidates";
     _most_good = 0;
     for (auto &item : cands) {
-        const combo_tree& cand = get_tree(item);
+        const combo_tree& cand = item.get_tree();
         eval_candidate(cand);
     }
 
@@ -164,7 +164,7 @@ void partial_solver::final_cleanup(const metapopulation& cands)
     // and feed them back in as exemplars, for scoring.
     _exemplars.clear();
     for (auto &item : cands) {
-        combo_tree cand = get_tree(item);
+        combo_tree cand = item.get_tree();
         sib_it ldr = _leader.begin();
         sib_it cit = cand.begin();
         cit = cit.begin();
@@ -252,7 +252,7 @@ void partial_solver::trim_table(std::vector<CTable>& tabs,
 void partial_solver::refresh(const metapopulation& cands)
 {
     for (const auto &item : cands)
-        _exemplars.push_back(get_tree(item));
+        _exemplars.push_back(item.get_tree());
 }
 
 /// Evaluate a single candidate

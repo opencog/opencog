@@ -95,7 +95,7 @@ public:
     {
         // a set of pbscored_combo_tree, the combo_tree themselves are
         // dummy (1, 2, ...) as only their bscore matter
-        pbscored_combo_tree_set bcs;
+        scored_combo_tree_set bcs;
         // 1
         penalized_bscore pbs1;
         pbs1.first = {-1, 0, -1, 0};
@@ -104,7 +104,7 @@ public:
         composite_penalized_bscore cbs1(pbs1, csc1);
         combo_tree tr1(1.0);
         cpbscore_demeID cbs1_demeID(cbs1, demeID_t());
-        pbscored_combo_tree bct1(tr1, cbs1_demeID);
+        scored_combo_tree bct1(tr1, cbs1_demeID);
         bcs.insert(bct1);
         // 2
         penalized_bscore pbs2;
@@ -114,7 +114,7 @@ public:
         composite_penalized_bscore cbs2(pbs2, csc2);
         combo_tree tr2(2.0);
         cpbscore_demeID cbs2_demeID(cbs2, demeID_t());
-        pbscored_combo_tree bct2(tr2, cbs2_demeID);
+        scored_combo_tree bct2(tr2, cbs2_demeID);
         bcs.insert(bct2);
         // 3
         penalized_bscore pbs3;
@@ -124,7 +124,7 @@ public:
         composite_penalized_bscore cbs3(pbs3, csc3);
         combo_tree tr3(3.0);
         cpbscore_demeID cbs3_demeID(cbs3, demeID_t());
-        pbscored_combo_tree bct3(tr3, cbs3_demeID);
+        scored_combo_tree bct3(tr3, cbs3_demeID);
         bcs.insert(bct3);
         // 4
         penalized_bscore pbs4;
@@ -134,7 +134,7 @@ public:
         composite_penalized_bscore cbs4(pbs4, csc4);
         combo_tree tr4(4.0);
         cpbscore_demeID cbs4_demeID(cbs4, demeID_t());
-        pbscored_combo_tree bct4(tr4, cbs4_demeID);
+        scored_combo_tree bct4(tr4, cbs4_demeID);
         bcs.insert(bct4);
         // 5
         penalized_bscore pbs5;
@@ -144,7 +144,7 @@ public:
         composite_penalized_bscore cbs5(pbs5, csc5);
         combo_tree tr5(5.0);
         cpbscore_demeID cbs5_demeID(cbs5, demeID_t());
-        pbscored_combo_tree bct5(tr5, cbs5_demeID);
+        scored_combo_tree bct5(tr5, cbs5_demeID);
         bcs.insert(bct5);
 
         _metapopulation.remove_dominated(bcs);
@@ -158,9 +158,9 @@ public:
     // test metapopulation::merge_nondominated_rec
     void test_merge_nondominated_rec()
     {
-        // a set of pbscored_combo_tree, the combo_tree themselves are
+        // a set of scored_combo_tree, the combo_tree themselves are
         // dummy (1, 2, ...) as only their bscore matter
-        pbscored_combo_tree_set bcs1, bcs2;
+        scored_combo_tree_set bcs1, bcs2;
         // 4
         penalized_bscore pbs4;
         pbs4.first = {0, -1, 0, -1};
@@ -169,7 +169,7 @@ public:
         composite_penalized_bscore cbs4(pbs4, csc4);
         cpbscore_demeID cbs4_demeID(cbs4, demeID_t());
         combo_tree tr4(4.0);
-        pbscored_combo_tree bct4(tr4, cbs4_demeID);
+        scored_combo_tree bct4(tr4, cbs4_demeID);
         bcs1.insert(bct4);
         // 5
         penalized_bscore pbs5;
@@ -179,7 +179,7 @@ public:
         composite_penalized_bscore cbs5(pbs5, csc5);
         cpbscore_demeID cbs5_demeID(cbs5, demeID_t());
         combo_tree tr5(5.0);
-        pbscored_combo_tree bct5(tr5, cbs5_demeID);
+        scored_combo_tree bct5(tr5, cbs5_demeID);
         bcs2.insert(bct5);
         // 2
         penalized_bscore pbs2;
@@ -189,12 +189,12 @@ public:
         composite_penalized_bscore cbs2(pbs2, csc2);
         cpbscore_demeID cbs2_demeID(cbs2, demeID_t());
         combo_tree tr2(2.0);
-        pbscored_combo_tree bct2(tr2, cbs2_demeID);
+        scored_combo_tree bct2(tr2, cbs2_demeID);
         bcs2.insert(bct2);
 
-        metapopulation::pbscored_combo_tree_set_pair res_p =
+        metapopulation::scored_combo_tree_set_pair res_p =
             _metapopulation.get_nondominated_disjoint(bcs1, bcs2);
-        pbscored_combo_tree_set res = set_union(res_p.first, res_p.second);
+        scored_combo_tree_set res = set_union(res_p.first, res_p.second);
         // 2 is dominated
         TS_ASSERT_EQUALS(res.size(), 2);             // 1 is removed
         TS_ASSERT_EQUALS(res.find(bct5), res.end()); // bct5

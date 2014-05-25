@@ -31,9 +31,6 @@ namespace moses {
 
 struct deme_expander
 {
-    typedef deme_t::iterator deme_it;
-    typedef deme_t::const_iterator deme_cit;
-
     deme_expander(const type_tree& type_signature,
                   const reduct::rule& si_ca,
                   const reduct::rule& si_kb,
@@ -55,7 +52,7 @@ struct deme_expander
      *
      * @return return true if it creates demes successfully, otherwise false.
      */
-    // bool create_deme(pbscored_combo_tree_set::const_iterator exemplar)
+    // bool create_deme(scored_combo_tree_set::const_iterator exemplar)
     bool create_demes(const combo_tree& exemplar, int n_expansions = 0);
 
     /**

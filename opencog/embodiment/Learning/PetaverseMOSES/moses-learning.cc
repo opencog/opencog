@@ -164,8 +164,8 @@ void moses_learning::operator()()
     case HC_BUILD_CANDIDATES:  {
 
         std::cout << "BUILD" << std::endl;
-        pbscored_combo_tree_ptr_set_cit exemplar = metapop->select_exemplar();
-        if (metapop->_dex.create_demes(get_tree(*exemplar)))
+        scored_combo_tree_ptr_set_cit exemplar = metapop->select_exemplar();
+        if (metapop->_dex.create_demes(exemplar->get_tree()))
             _hcState = HC_ESTIMATE_CANDIDATES;
         else
             _hcState = HC_IDLE;
@@ -228,11 +228,11 @@ void moses_learning::operator()()
         std::cout << "best program total: " << _best_program_estimated << std::endl;
         std::cout << "best score total: " << _best_fitness_estimated << std::endl;
 
-        pbscored_combo_tree_ptr_set_cit exemplar = metapop->select_exemplar();
+        scored_combo_tree_ptr_set_cit exemplar = metapop->select_exemplar();
         if(exemplar == metapop->end())
             _hcState = HC_IDLE;
         else {
-            _center = get_tree(*exemplar);
+            _center = exemplar->get_tree();
             _hcState = HC_INIT;
         }
 
@@ -269,9 +269,9 @@ const combo_tree& moses_learning::best_program_estimated()
 const combo_tree& moses_learning::current_program()
 {
     //returns the best program which has never been sent to the owner
-    for(pbscored_combo_tree_ptr_set_cit mci = metapop->begin();
+    for (scored_combo_tree_ptr_set_cit mci = metapop->begin();
         mci != metapop->end(); ++mci)  {
-        _current_program = get_tree(*mci);
+        _current_program = mci->get_tree();
 
         // if this one has already been sent, check the next one
         if(_used_for_owner.find(_current_program) != _used_for_owner.end())

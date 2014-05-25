@@ -1,4 +1,4 @@
-/** eval-diversity.cc --- 
+/* eval-diversity.cc --- 
  *
  * Copyright (C) 2012 OpenCog Foundation
  *
@@ -151,13 +151,13 @@ int main(int argc, char** argv)
     if (!edp.moses_files.empty()) {
         // load the bscores
         vector<behavioral_score> bscores;
-        vector<pbscored_combo_tree> bcts;
+        vector<scored_combo_tree> bcts;
         for (const string& file : edp.moses_files) {
             ifstream in(file);
             in.exceptions(ifstream::failbit | ifstream::badbit | ifstream::eofbit);
             while (in.good()) {
                 try {
-                    bcts.push_back(istream_pbscored_combo_tree(in));
+                    bcts.push_back(istream_scored_combo_tree(in));
                 } catch(...) {}
             }
         }

@@ -181,7 +181,7 @@ struct metapop_parameters
     // the set of actions of an optional interactive agent
     const combo_tree_ns_set* actions;
 
-    bool (*merge_callback)(pbscored_combo_tree_set&, void*);
+    bool (*merge_callback)(scored_combo_tree_set&, void*);
     void *callback_user_data;
 
     const feature_selector* fstor;
