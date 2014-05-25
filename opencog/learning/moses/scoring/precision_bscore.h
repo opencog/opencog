@@ -57,8 +57,8 @@ namespace opencog { namespace moses {
  *
  * The scorer counts the total number of rows for which the combo program
  * returned 'true'. This is defined as the 'activation'.  For boolean tables,
- * the activation is just the number of true positives plus the number of 
- * false positives.  
+ * the activation is just the number of true positives plus the number of
+ * false positives.
  *
  * Note that an activation of zero corresponds to perfect precision:
  * there were no false positives.  Thus, to get reasonable results,
@@ -114,7 +114,7 @@ struct precision_bscore : public bscore_base
                      bool positive = true,
                      bool worst_norm = false);
 
-    penalized_bscore operator()(const combo_tree& tr) const;
+    behavioral_score operator()(const combo_tree& tr) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
@@ -130,7 +130,7 @@ struct precision_bscore : public bscore_base
 
     virtual void set_complexity_coef(score_t complexity_ratio);
     virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
-    
+
     /**
      * This is a experimental feature, we generate a massive combo
      * tree that is supposed to maximize the precision (keeping
@@ -164,7 +164,7 @@ protected:
 
     // for debugging, keep that around till we fix best_possible_bscore
     // mutable CTable fully_filtered_ctable;
-    
+
     size_t ctable_usize;   // uncompressed size of ctable
     score_t min_activation, max_activation;
     score_t max_output; // max output one gets (1 in case it is
@@ -198,7 +198,7 @@ struct precision_conj_bscore : public bscore_base
     precision_conj_bscore(const CTable& _ctable, float hardness,
                           bool positive = true);
 
-    penalized_bscore operator()(const combo_tree& tr) const;
+    behavioral_score operator()(const combo_tree& tr) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
@@ -208,10 +208,10 @@ struct precision_conj_bscore : public bscore_base
 
     virtual void set_complexity_coef(score_t complexity_ratio);
     virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
-    
+
 protected:
     const CTable& ctable;
-    
+
     size_t ctable_usize;   // uncompressed size of ctable
     float hardness;
     bool positive;

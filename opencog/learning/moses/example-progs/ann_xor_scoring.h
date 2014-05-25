@@ -96,14 +96,14 @@ struct ann_xor_cscore  : public cscore_base
 
 struct ann_xor_bscore : public bscore_base
 {
-    penalized_bscore operator()(const combo_tree& tr) const
+    behavioral_score operator()(const combo_tree& tr) const
     {
         composite_score cs(ann_xor_cscore()(tr));
 
-        penalized_bscore pbs;
-        pbs.first[0] = get_score(cs);
-        pbs.second = get_penalty(cs);
-        return pbs;
+        behavioral_score bs;
+        bs.push_back(cs.get_score());
+        bs.push_back(cs.get_penalty());
+        return bs;
     }
     behavioral_score best_possible_bscore() const
     {

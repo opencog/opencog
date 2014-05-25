@@ -259,9 +259,9 @@ void partial_solver::refresh(const metapopulation& cands)
 void partial_solver::eval_candidate (const combo_tree& cand)
 {
     // Are we done yet?
-    penalized_bscore pbs = _bscore->operator()(cand);
+    behavioral_score bs = _bscore->operator()(cand);
     score_t total_score = 0.0;
-    for (const score_t& sc : pbs.first)
+    for (const score_t& sc : bs)
         total_score += sc;
 
     logger().debug() << "well-enough candidate=" << total_score

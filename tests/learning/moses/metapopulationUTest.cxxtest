@@ -46,11 +46,9 @@ struct dummy_cscore : public cscore_base
 // For testing only
 struct dummy_bscore : public bscore_base
 {
-    penalized_bscore operator()(const combo_tree& tr) const
+    behavioral_score operator()(const combo_tree& tr) const
     {
-        penalized_bscore pbs;
-        pbs.second = 0;
-        return pbs;
+        return behavioral_score();
     }
     behavioral_score best_possible_bscore() const
     {
@@ -97,42 +95,32 @@ public:
         // dummy (1, 2, ...) as only their bscore matter
         scored_combo_tree_set bcs;
         // 1
-        penalized_bscore pbs1;
-        pbs1.first = {-1, 0, -1, 0};
-        pbs1.second = 0;
-        composite_score csc1(-2, -1, pbs1.second);
+        behavioral_score pbs1 = {-1, 0, -1, 0};
+        composite_score csc1(-2, -1, 0);
         combo_tree tr1(1.0);
         scored_combo_tree bct1(tr1, demeID_t(), csc1, pbs1);
         bcs.insert(bct1);
         // 2
-        penalized_bscore pbs2;
-        pbs2.first = {-1, -1, -1, 0};
-        pbs1.second = 0;
-        composite_score csc2(-3, -1, pbs2.second);
+        behavioral_score pbs2 = {-1, -1, -1, 0};
+        composite_score csc2(-3, -1, 0);
         combo_tree tr2(2.0);
         scored_combo_tree bct2(tr2, demeID_t(), csc2, pbs2);
         bcs.insert(bct2);
         // 3
-        penalized_bscore pbs3;
-        pbs3.first = {-1, 0, -1, 0};
-        pbs3.second = 0;
-        composite_score csc3(-2, -1, pbs3.second);
+        behavioral_score pbs3 = {-1, 0, -1, 0};
+        composite_score csc3(-2, -1, 0);
         combo_tree tr3(3.0);
         scored_combo_tree bct3(tr3, demeID_t(), csc3, pbs3);
         bcs.insert(bct3);
         // 4
-        penalized_bscore pbs4;
-        pbs4.first = {0, -1, 0, -1};
-        pbs4.second = 0;
-        composite_score csc4(-2, -1, pbs4.second);
+        behavioral_score pbs4 = {0, -1, 0, -1};
+        composite_score csc4(-2, -1, 0);
         combo_tree tr4(4.0);
         scored_combo_tree bct4(tr4, demeID_t(), csc4, pbs4);
         bcs.insert(bct4);
         // 5
-        penalized_bscore pbs5;
-        pbs5.first = {0, -1, -1, -1};
-        pbs5.second = 0;
-        composite_score csc5(-3, -1, pbs5.second);
+        behavioral_score pbs5 = {0, -1, -1, -1};
+        composite_score csc5(-3, -1, 0);
         combo_tree tr5(5.0);
         scored_combo_tree bct5(tr5, demeID_t(), csc5, pbs5);
         bcs.insert(bct5);
@@ -152,26 +140,20 @@ public:
         // dummy (1, 2, ...) as only their bscore matter
         scored_combo_tree_set bcs1, bcs2;
         // 4
-        penalized_bscore pbs4;
-        pbs4.first = {0, -1, 0, -1};
-        pbs4.second = 0;
-        composite_score csc4(-2, -1, pbs4.second);
+        behavioral_score pbs4 = {0, -1, 0, -1};
+        composite_score csc4(-2, -1, 0);
         combo_tree tr4(4.0);
         scored_combo_tree bct4(tr4, demeID_t(), csc4, pbs4);
         bcs1.insert(bct4);
         // 5
-        penalized_bscore pbs5;
-        pbs5.first = {0, -1, -1, -1};
-        pbs5.second = 0;
-        composite_score csc5(-3, -1, pbs5.second);
+        behavioral_score pbs5 = {0, -1, -1, -1};
+        composite_score csc5(-3, -1, 0);
         combo_tree tr5(5.0);
         scored_combo_tree bct5(tr5, demeID_t(), csc5, pbs5);
         bcs2.insert(bct5);
         // 2
-        penalized_bscore pbs2;
-        pbs2.first = {-1, -1, -1, 0};
-        pbs2.second = 0;
-        composite_score csc2(-3, -1, pbs2.second);
+        behavioral_score pbs2 = {-1, -1, -1, 0};
+        composite_score csc2(-3, -1, 0);
         combo_tree tr2(2.0);
         scored_combo_tree bct2(tr2, demeID_t(), csc2, pbs2);
         bcs2.insert(bct2);

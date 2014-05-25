@@ -101,7 +101,8 @@ private:
     const int _steps;
 };
 
-struct AntFitnessEstimator : public AntFitnessFunction {
+struct AntFitnessEstimator : public AntFitnessFunction
+{
     AntFitnessEstimator(int steps = 600, int noise = 0);
 
     score_t operator()(const combo_tree& tr) const;
@@ -114,7 +115,7 @@ struct ant_bscore : public bscore_base
 {
     ant_bscore(float simplicity_pressure = 1.0);
 
-    penalized_bscore operator()(const combo_tree& tr) const;
+    behavioral_score operator()(const combo_tree& tr) const;
 
     behavioral_score best_possible_bscore() const;
 

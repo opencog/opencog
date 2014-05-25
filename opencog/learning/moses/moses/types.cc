@@ -210,15 +210,5 @@ score_t get_penalty(const scored_combo_tree& bst)
     return get_penalty(bst.get_composite_score());
 }
 
-const behavioral_score& get_bscore(const penalized_bscore& pbs)
-{
-    return pbs.first;
-}
-
-const behavioral_score& get_bscore(const scored_combo_tree& bst)
-{
-    return get_bscore(bst.get_pbscore());
-}
-
 } // ~namespace moses
 } // ~namespace opencog

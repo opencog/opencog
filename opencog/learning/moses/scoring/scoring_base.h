@@ -94,21 +94,21 @@ struct cscore_base : public unary_function<combo_tree, composite_score>
 };
 
 // Abstract bscoring function class to implement
-struct bscore_base : public unary_function<combo_tree, penalized_bscore>
+struct bscore_base : public unary_function<combo_tree, behavioral_score>
 {
-    bscore_base() : _occam(false), _complexity_coef(0.0) {};
+    bscore_base() {};
     virtual ~bscore_base() {};
 
     // Evaluate the candidate tr
-    virtual penalized_bscore operator()(const combo_tree& tr) const = 0;
+    virtual behavioral_score operator()(const combo_tree& tr) const = 0;
 
     // Return the best possible bscore achievable with that fitness
     // function. This is useful in order to stop running MOSES when
     // the best possible score is reached
     virtual behavioral_score best_possible_bscore() const = 0;
 
-    // Return the minimum value considered for improvement (by defaut
-    // return 0)
+    // Return the minimum value considered for improvement.
+    // Return 0 by default.
     virtual score_t min_improv() const { return 0.0; }
 
     // In case the fitness function can be sped-up when certain
@@ -117,11 +117,18 @@ struct bscore_base : public unary_function<combo_tree, penalized_bscore>
     // (no speed-up).
     virtual void ignore_idxs(const std::set<arity_t>&) const {}
 
+    // Store a complexity coeeficient with the scorerer.  This is
+    // done to work around the fact that different kinds of scorers
+    // normalize their scores in different ways, and so the perhaps
+    // the way the penalties are scaled should be appropirately scaled
+    // as well. Now, of course, the user could just specify a different
+    // scale on the moses command line, but perhaps this inflicts too
+    // much effort on the user.  Thus, we maintain a "suggested" scaling
+    // here.  XXX TODO: this should be reviewed and maybe reworked??
     virtual void set_complexity_coef(score_t complexity_ratio);
     virtual void set_complexity_coef(unsigned alphabet_size, float p);
 
 protected:
-    bool _occam; // If true, then Occam's razor is taken into account.
     score_t _complexity_coef;
 };
 
@@ -138,16 +145,16 @@ protected:
  * TODO: could be detemplatized, it's only instantiated with
  * bscore_base.
  */
-template<typename PBScorer>
+template<typename BScorer>
 struct bscore_based_cscore : public cscore_base
 {
-    bscore_based_cscore(const PBScorer& sr) : _pbscorer(sr) {}
+    bscore_based_cscore(const BScorer& sr) : _bscorer(sr) {}
 
     composite_score operator()(const combo_tree& tr) const
     {
         try {
-            penalized_bscore pbs = _pbscorer(tr);
-            return operator()(pbs, tree_complexity(tr));
+            behavioral_score bs = _bscorer(tr);
+            return operator()(bs, tree_complexity(tr));
         }
         catch (EvalException& ee)
         {
@@ -169,19 +176,17 @@ struct bscore_based_cscore : public cscore_base
     }
 
     // Hmmm, this could be static, actually ... 
-    composite_score operator()(const penalized_bscore& pbs,
+    composite_score operator()(const behavioral_score& bs,
                                complexity_t cpxy) const
     {
-        const behavioral_score &bs = pbs.first;
         score_t res = boost::accumulate(bs, 0.0);
 
         if (logger().isFineEnabled()) {
             logger().fine() << "bscore_based_cscore: " << res
-                            << " complexity: " << cpxy
-                            << " complexity penalty: " << pbs.second;
+                            << " complexity: " << cpxy;
         }
 
-        return composite_score(res, cpxy, pbs.second, 0.0);
+        return composite_score(res, cpxy, 0.0, 0.0);
     }
 
 
@@ -189,13 +194,13 @@ struct bscore_based_cscore : public cscore_base
     // termination condition.
     score_t best_possible_score() const
     {
-        return boost::accumulate(_pbscorer.best_possible_bscore(), 0.0);
+        return boost::accumulate(_bscorer.best_possible_bscore(), 0.0);
     }
 
     // Return the minimum value considered for improvement
     score_t min_improv() const
     {
-        return _pbscorer.min_improv();
+        return _bscorer.min_improv();
     }
 
     // In case the fitness function can be sped-up when certain
@@ -203,10 +208,10 @@ struct bscore_based_cscore : public cscore_base
     // indices (from 0).
     void ignore_idxs(const std::set<arity_t>& idxs) const
     {
-        _pbscorer.ignore_idxs(idxs);
+        _bscorer.ignore_idxs(idxs);
     }
 
-    const PBScorer& _pbscorer;
+    const BScorer& _bscorer;
 };
 
 /**
@@ -223,7 +228,7 @@ struct multibscore_based_bscore : public bscore_base
     multibscore_based_bscore(const BScorerSeq& bscorers) : _bscorers(bscorers) {}
 
     // main operator
-    penalized_bscore operator()(const combo_tree& tr) const;
+    behavioral_score operator()(const combo_tree& tr) const;
 
     behavioral_score best_possible_bscore() const;
 
@@ -240,12 +245,12 @@ protected:
 };
 
 // helper to log a combo_tree and its behavioral score
-static inline void log_candidate_pbscore(const combo_tree& tr,
-                                         const penalized_bscore& pbs)
+static inline void log_candidate_bscore(const combo_tree& tr,
+                                        const behavioral_score& bs)
 {
     if (logger().isFineEnabled())
         logger().fine() << "Evaluate candidate: " << tr << "\n"
-                        << "\tBScored: " << pbs;
+                        << "\tBScored: " << bs;
 }
 
 } //~namespace moses

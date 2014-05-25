@@ -44,9 +44,8 @@ public:
         behavioral_score bs = {0.25, 0, 0.25};
 
         // build the scored_combo_tree
-        penalized_bscore pbs(bs, cpx_penalty);
         composite_score cs(sc, cpx, cpx_penalty, diversity_penalty);
-        scored_combo_tree bct(tr, demeID_t(), cs, pbs);
+        scored_combo_tree bct(tr, demeID_t(), cs, bs);
 
         // build expected string
         std::stringstream oss;
@@ -62,6 +61,6 @@ public:
         // check the composite scores
         TS_ASSERT_EQUALS(bct.get_composite_score(), parsed_bct.get_composite_score());
         // check the behavioral score
-        TS_ASSERT_EQUALS(get_bscore(bct), get_bscore(parsed_bct));        
+        TS_ASSERT_EQUALS(bct.get_bscore(), parsed_bct.get_bscore());        
     }
 };

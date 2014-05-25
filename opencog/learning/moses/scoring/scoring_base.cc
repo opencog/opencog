@@ -44,8 +44,7 @@ void bscore_base::set_complexity_coef(unsigned alphabet_size, float p)
     // Both p==0.0 and p==0.5 are singularities in the forumla.
     // See the explanation in the comment above ctruth_table_bscore.
     _complexity_coef = 0.0;
-    _occam = (p > 0.0f && p < 0.5f);
-    if (_occam)
+    if (p > 0.0f && p < 0.5f)
         _complexity_coef = discrete_complexity_coef(alphabet_size, p);
 
     logger().info() << "BScore noise = " << p
@@ -56,8 +55,7 @@ void bscore_base::set_complexity_coef(unsigned alphabet_size, float p)
 void bscore_base::set_complexity_coef(score_t complexity_ratio)
 {
     _complexity_coef = 0.0;
-    _occam = (complexity_ratio > 0.0);
-    if (_occam)
+    if (complexity_ratio > 0.0)
         _complexity_coef = 1.0 / complexity_ratio;
 
     logger().info() << "BScore complexity ratio = " << 1.0/_complexity_coef;
@@ -68,15 +66,14 @@ void bscore_base::set_complexity_coef(score_t complexity_ratio)
 //////////////////////////////
 
 // main operator
-penalized_bscore multibscore_based_bscore::operator()(const combo_tree& tr) const
+behavioral_score multibscore_based_bscore::operator()(const combo_tree& tr) const
 {
-    penalized_bscore pbs;
+    behavioral_score bs;
     for (const bscore_base& bsc : _bscorers) {
-        penalized_bscore apbs = bsc(tr);
-        boost::push_back(pbs.first, apbs.first);
-        pbs.second += apbs.second;
+        behavioral_score abs = bsc(tr);
+        boost::push_back(bs, abs);
     }
-    return pbs;
+    return bs;
 }
 
 behavioral_score multibscore_based_bscore::best_possible_bscore() const

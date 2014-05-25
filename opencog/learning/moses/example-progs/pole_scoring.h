@@ -226,10 +226,10 @@ struct ann_pole2nv_bscore : public bscore_base
     {
         composite_score cs(ann_pole2nv_cscore()(tr));
 
-        penalized_bscore pbs;
-        pbs.first.push_back(get_score(cs));
-        pbs.second = get_penalty(cs);
-        return pbs;
+        behavioral_score bs;
+        bs.push_back(cs.get_score());
+        bs.push_back(cs.get_penalty());
+        return bs;
     }
     behavioral_score best_possible_bscore() const
     {
@@ -253,10 +253,10 @@ struct ann_pole2_bscore : public bscore_base
     {
         composite_score cs(ann_pole2_cscore()(tr));
 
-        penalized_bscore pbs;
-        pbs.first.push_back(get_score(cs));
-        pbs.second = get_penalty(cs);
-        return pbs;
+        behavioral_score bs;
+        bs.push_back(cs.get_score());
+        bs.push_back(cs.get_penalty());
+        return bs;
     }
     behavioral_score best_possible_bscore() const
     {
@@ -276,14 +276,14 @@ struct ann_pole_cscore  : public cscore_base
 
 struct ann_pole_bscore : public bscore_base
 {
-    penalized_bscore operator()(const combo_tree& tr) const
+    behavioral_score operator()(const combo_tree& tr) const
     {
         composite_score cs(ann_pole_cscore()(tr));
 
-        penalized_bscore pbs;
-        pbs.first[0] = get_score(cs);
-        pbs.second = get_penalty(cs);
-        return pbs;
+        behavioral_score bs;
+        bs.push_back(cs.get_score());
+        bs.push_back(cs.get_penalty());
+        return bs;
     }
     behavioral_score best_possible_bscore() const
     {

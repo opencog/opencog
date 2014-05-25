@@ -261,11 +261,7 @@ void moses_mpi_comm::recv_deme(int source,
         combo_tree tr;
         recv_tree(tr, source);
 
-        // The vector behavioural score will be empty; only the
-        // composite score gets a non-trivial value.
-        behavioral_score bs;
-        penalized_bscore pbs(bs, sc.get_complexity_penalty());
-        scored_combo_tree bsc_tr(tr, demeID, sc, pbs);
+        scored_combo_tree bsc_tr(tr, demeID, sc);
         cands.insert(bsc_tr);
     }
 }
