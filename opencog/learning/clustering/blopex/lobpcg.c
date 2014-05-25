@@ -704,6 +704,7 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
   tempYBR = (util->FortranMatrixCreate)();
 
   blockVectorW = mv_MultiVectorCreateCopy( blockVectorX, 0 );
+  blockVectorBY = blockVectorY;
 
   if ( !noYFlag ) {
     (util->FortranMatrixAllocateData)( sizeY, sizeY, gramYBY );
