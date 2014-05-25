@@ -70,19 +70,13 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars,
         composite_score csc(cscorer(si_base));
         composite_penalized_bscore cpb(pbs, csc);
         cpbscore_demeID cbs_demeID(cpb, demeID_t());
+        scored_combo_tree sct(si_base, cbs_demeID);
 
-        candidates[si_base] = cbs_demeID;
+        candidates.insert(sct);
     }
 
-    scored_combo_tree_set mps(candidates.begin(), candidates.end());
-    for (const auto& cnd : candidates) {
-        cpbscore_demeID cbs_demeID(get_composite_penalized_bscore(cnd),
-                                   demeID_t());
-        scored_combo_tree pct(get_tree(cnd), cbs_demeID);
-        mps.insert(pct);
-    }
-    update_best_candidates(mps);
-    merge_candidates(mps);
+    update_best_candidates(candidates);
+    merge_candidates(candidates);
 }
 
 void metapopulation::set_diversity()
@@ -157,12 +151,12 @@ void metapopulation::set_diversity()
 
             // update v.first
             if (params.diversity.dst2dp_type == params.diversity.pthpower)
-                get_composite_score(bsct).multiply_diversity = true;
-            get_composite_score(bsct).set_diversity_penalty(adp);
+                bsct.get_composite_score().multiply_diversity = true;
+            bsct.get_composite_score().set_diversity_penalty(adp);
 
             if (logger().isFineEnabled()) {
                 stringstream ss;
-                ss << "Diversity for candidate: " << get_tree(bsct)
+                ss << "Diversity for candidate: " << bsct.get_tree()
                    << ", last_dst = " << last_dst
                    << ", last_dp = " << last_dp
                    << ", last_ddp = " << last_ddp
@@ -235,14 +229,14 @@ void metapopulation::log_selected_exemplar(scored_combo_tree_ptr_set::const_iter
     } else {
         const auto& xmplr = *exemplar_it;
         unsigned pos = std::distance(_scored_trees.cbegin(), exemplar_it) + 1,
-            nth_vst = _visited_exemplars[get_tree(xmplr)];
+            nth_vst = _visited_exemplars[xmplr.get_tree()];
 
         logger().debug() << "Selected the " << pos
                          << "th exemplar, from deme " << get_demeID(xmplr)
                          << ", for the " << nth_vst << "th time(s)";
-        logger().debug() << "Exemplar tree : " << get_tree(xmplr);
+        logger().debug() << "Exemplar tree : " << xmplr.get_tree();
         logger().debug() << "With composite score : "
-                         << get_composite_score(xmplr);
+                         << xmplr.get_composite_score();
     }
 }
 
@@ -256,7 +250,7 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     // though, the score is invalid.
     if (size() == 1) {
         scored_combo_tree_ptr_set::const_iterator selex = _scored_trees.cbegin();
-        const combo_tree& tr = get_tree(*selex);
+        const combo_tree& tr = selex->get_tree();
         if(params.revisit + 1 > _visited_exemplars[tr]) // not enough visited
             _visited_exemplars[tr]++;
         else selex = _scored_trees.cend();    // enough visited
@@ -278,7 +272,7 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
         score_t sc = get_penalized_score(bsct);
 
         // Skip exemplars that have been visited enough
-        const combo_tree& tr = get_tree(bsct);
+        const combo_tree& tr = bsct.get_tree();
         if (params.revisit + 1 > _visited_exemplars[tr]) {
             probs.push_back(sc);
             found_exemplar = true;
@@ -328,7 +322,7 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     scored_combo_tree_ptr_set::const_iterator selex = std::next(_scored_trees.begin(), fwd);
 
     // We increment _visited_exemplar
-    _visited_exemplars[get_tree(*selex)]++;
+    _visited_exemplars[selex->get_tree()]++;
 
     log_selected_exemplar(selex);
     return selex;
@@ -421,7 +415,8 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
             // Return true if not found.
             auto thread_safe_tr_not_found = [&]() {
                 shared_lock lock(pot_cnd_mutex);
-                return pot_candidates.find(tr) == pot_candidates.end();
+                scored_combo_tree sct(tr);
+                return pot_candidates.find(sct) == pot_candidates.end();
             };
 
             // XXX To make merge_deme thread safe, this needs to be
@@ -437,7 +432,8 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
                 cpbscore_demeID cbs_demeID(cbsc, demes[i].getID());
 
                 unique_lock lock(pot_cnd_mutex);
-                pot_candidates[tr] = cbs_demeID;
+                scored_combo_tree sct(tr, cbs_demeID);
+                pot_candidates.insert(sct);
             }
         };
 
@@ -508,15 +504,47 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         logger().debug("Compute behavioral score of %d selected candidates",
                        pot_candidates.size());
 
-        auto compute_bscore = [this](scored_ccombo_tree& cand) {
+#ifdef FIXME_LATER
+        // XXX TODO FIXME: the scores should be computed in-place, above,
+        // instead of involving copies.  This needs a lock.
+        scored_combo_tree_set new_pot;
+        auto compute_bscore = [this, new_pot](const scored_combo_tree& cand) {
             penalized_bscore pbs = this->_bscorer(cand.get_tree());
             composite_penalized_bscore cpb(pbs, cand.get_composite_score());
-            cand.second = cpbscore_demeID(cpb, get_demeID(cand));
+            cpbscore_demeID cpbd(cpb, get_demeID(cand));
+            scored_combo_tree sct(cand.get_tree(), cpbd);
+            new_pot.insert(sct);
         };
         OMP_ALGO::for_each(pot_candidates.begin(), pot_candidates.end(),
                            compute_bscore);
+        pot_candidates = new_pot;
+#endif
+#if WTF
+// XXX WTF compiler dislikes the below, it keeps complaining about constness.
+// I can't figure it out!
+        for (scored_combo_tree& cand : pot_candidates)
+        {
+            penalized_bscore pbs = this->_bscorer(cand.get_tree());
+            composite_penalized_bscore cpb(pbs, cand.get_composite_score());
+            cpbscore_demeID cpbd(cpb, get_demeID(cand));
+            cand.cpbscored = cpbd;
+        }
+#endif
+        scored_combo_tree_set new_pot;
+        for (const scored_combo_tree& cand : pot_candidates)
+        {
+            penalized_bscore pbs = this->_bscorer(cand.get_tree());
+            composite_penalized_bscore cpb(pbs, cand.get_composite_score());
+            cpbscore_demeID cpbd(cpb, get_demeID(cand));
+            scored_combo_tree sct(cand.get_tree(), cpbd);
+            new_pot.insert(sct);
+        }
+        pot_candidates = new_pot;
     }
 
+    // XXX FIXME TODO: we should reverse the step below and the step above,
+    // so that we only compute the bscores on the cands that are not yet
+    // in the metapop.
     logger().debug("Select only candidates not already in the metapopulation");
     scored_combo_tree_set candidates = get_new_candidates(pot_candidates);
     logger().debug("Selected %u candidates (%u were in the metapopulation)",
@@ -656,15 +684,15 @@ void metapopulation::resize_metapop()
 // Return the set of candidates not present in the metapopulation.
 // This makes merging faster because at best it decreases the number
 // of calls of dominates.
-scored_combo_tree_set metapopulation::get_new_candidates(const metapop_candidates& mcs)
+scored_combo_tree_set metapopulation::get_new_candidates(const scored_combo_tree_set& mcs)
 {
     scored_combo_tree_set res;
     for (const auto& cnd : mcs) {
-        const combo_tree& tr = get_tree(cnd);
+        const combo_tree& tr = cnd.get_tree();
         scored_combo_tree_ptr_set::const_iterator fcnd =
             OMP_ALGO::find_if(_scored_trees.begin(), _scored_trees.end(),
                               [&](const scored_combo_tree& v) {
-                    return tr == get_tree(v); });
+                    return tr == v.get_tree(); });
         if (fcnd == _scored_trees.end())
             res.insert(cnd);
     }
@@ -763,7 +791,7 @@ void metapopulation::update_best_candidates(const scored_combo_tree_set& candida
 
     for (const scored_combo_tree& cnd : candidates)
     {
-        const composite_score& csc = get_composite_score(cnd);
+        const composite_score& csc = cnd.get_composite_score();
         score_t sc = get_score(csc);
         complexity_t cpx = get_complexity(csc);
         if ((sc > best_sc) || ((sc == best_sc) && (cpx <= best_cpx)))
@@ -794,7 +822,7 @@ void metapopulation::log_best_candidates() const
            << "The following candidate(s) have the best score "
            << best_composite_score();
         for (const auto& cand : best_candidates()) {
-            logger().info() << "" << get_tree(cand);
+            logger().info() << "" << cand.get_tree();
         }
     }
 }

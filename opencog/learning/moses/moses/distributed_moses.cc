@@ -395,7 +395,7 @@ void distributed_moses(metapopulation& mp,
 
             const string& hostname = get_hostname(*hpm_it);
             unsigned n_jobs = jobs.find(hostname)->second;
-            const combo_tree& tr = get_tree(*exemplar);
+            const combo_tree& tr = exemplar->get_tree();
 
             string cmdline =
                 build_cmdline(vm, tr, hostname, n_jobs,

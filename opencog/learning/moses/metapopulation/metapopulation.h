@@ -424,7 +424,7 @@ struct metapopulation
                                            output_penalty, output_bscore,
                                            output_python);
                 if (output_visited)
-                    out << "visited: " << has_been_visited(get_tree(*from))
+                    out << "visited: " << has_been_visited(from->get_tree())
                         << std::endl;
             }
             return out;
@@ -450,7 +450,7 @@ struct metapopulation
                                            output_penalty, output_bscore,
                                            output_python);
                 if (output_visited)
-                    out << "visited:" << has_been_visited(get_tree(*from))
+                    out << "visited:" << has_been_visited(from->get_tree())
                         << std::endl;
             }
         }

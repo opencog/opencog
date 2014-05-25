@@ -184,7 +184,7 @@ const composite_score& xget_composite_score(const composite_penalized_bscore&);
 class scored_combo_tree
 {
 public:
-    scored_combo_tree(combo::combo_tree& tr, cpbscore_demeID cbsd)
+    scored_combo_tree(combo::combo_tree tr, cpbscore_demeID cbsd= cpbscore_demeID())
         : tree(tr), cpbscored(cbsd)
     {}
 
@@ -210,21 +210,6 @@ public:
        return xget_composite_score(cpb);
     }
 };
-
-composite_score& get_composite_score(scored_combo_tree& sct)
-{
-    return sct.get_composite_score();
-}
-
-const combo::combo_tree& get_tree(const scored_combo_tree& sct)
-{
-    return sct.get_tree();
-}
-
-combo::combo_tree& get_tree(scored_combo_tree& sct)
-{
-    return sct.get_tree();
-}
 
 ///////////////////////////
 // convenience accessors //
@@ -352,7 +337,7 @@ Out& ostream_scored_combo_tree(Out& out, const scored_combo_tree& cnd,
                                  bool output_bscore = false,
                                  bool output_python = false)
 {
-    return ostream_combo_tree_composite_pbscore(out, get_tree(cnd),
+    return ostream_combo_tree_composite_pbscore(out, cnd.get_tree(),
                                                 cget_composite_penalized_bscore(cnd),
                                                 output_score,
                                                 output_penalty,

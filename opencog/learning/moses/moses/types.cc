@@ -42,8 +42,10 @@ size_t scored_combo_tree_hash::operator()(const scored_combo_tree& sct) const
 {
     const combo::combo_tree& tr = sct.get_tree();
     // return boost::hash<combo::combo_tree>(tr);
-/// XXX this is very wrong
-return 0;
+// XXX FIXME this is wrong ... using just the adress as the hash
+// sort-of works but fails to find identical trees at different
+// addresses.
+return (size_t) (void*) (&sct);
 }
 
 bool scored_combo_tree_equal::operator()(const scored_combo_tree& tr1,
@@ -78,7 +80,7 @@ bool scored_combo_tree_greater::operator()(const scored_combo_tree& bs_tr1,
 
     // Arghh, still tied!  The above already used complexity to break
     // the tie.  We're grasping at straws, here.
-    return size_tree_order<vertex>()(get_tree(bs_tr1), get_tree(bs_tr2));
+    return size_tree_order<vertex>()(bs_tr1.get_tree(), bs_tr2.get_tree());
 }
 
 // the empty composite_score ctor returns the worst composite score
@@ -147,6 +149,7 @@ bool composite_score::operator==(const composite_score &r) const
 // convenience accessors //
 ///////////////////////////
 
+
 const composite_penalized_bscore& cget_composite_penalized_bscore(const scored_combo_tree& pbst)
 {
     return pbst.cpbscored.first;
@@ -177,14 +180,19 @@ score_t get_penalized_score(const composite_score& sc)
    return sc.get_penalized_score();
 }
 
-const composite_score& get_composite_score(const composite_penalized_bscore& ctbs)
+composite_score& xget_composite_score(composite_penalized_bscore& ctbs)
+{
+    return ctbs.second;
+}
+
+const composite_score& xget_composite_score(const composite_penalized_bscore& ctbs)
 {
     return ctbs.second;
 }
 
 score_t get_penalized_score(const composite_penalized_bscore& cpb)
 {
-    return get_penalized_score(get_composite_score(cpb));
+    return get_penalized_score(xget_composite_score(cpb));
 }
 
 score_t get_penalized_score(const scored_combo_tree& sct)
