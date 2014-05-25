@@ -40,12 +40,12 @@ demeID_t::demeID_t(unsigned expansion, unsigned breadth_first)
 
 size_t scored_combo_tree_hash::operator()(const scored_combo_tree& sct) const
 {
+    size_t hash = 0;
     const combo::combo_tree& tr = sct.get_tree();
-    // return boost::hash<combo::combo_tree>(tr);
-// XXX FIXME this is wrong ... using just the adress as the hash
-// sort-of works but fails to find identical trees at different
-// addresses.
-return (size_t) (void*) (&sct);
+    for (combo::vertex vtx : tr) {
+        boost::hash_combine(hash, combo::hash_value(vtx));
+    }
+    return hash;
 }
 
 bool scored_combo_tree_equal::operator()(const scored_combo_tree& tr1,
