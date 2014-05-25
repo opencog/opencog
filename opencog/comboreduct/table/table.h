@@ -1245,16 +1245,4 @@ protected:
 
 }} // ~namespaces combo opencog
 
-
-// TODO see if we can put that under opencog combo
-/*
-namespace boost
-{
-inline size_t hash_value(const opencog::combo::complete_truth_table& tt)
-{
-    return hash_range(tt.begin(), tt.end());
-}
-} //~namespace boost
-*/
-
 #endif // _OPENCOG_TABLE_H
