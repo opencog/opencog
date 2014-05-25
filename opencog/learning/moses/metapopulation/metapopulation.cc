@@ -69,8 +69,7 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars,
         // composite_score csc(_cscorer (pbs, tree_complexity(si_base)));
         composite_score csc(cscorer(si_base));
         composite_penalized_bscore cpb(pbs, csc);
-        cpbscore_demeID cbs_demeID(cpb, demeID_t());
-        scored_combo_tree sct(si_base, cbs_demeID);
+        scored_combo_tree sct(si_base, demeID_t(), cpb);
 
         candidates.insert(sct);
     }
@@ -232,7 +231,7 @@ void metapopulation::log_selected_exemplar(scored_combo_tree_ptr_set::const_iter
             nth_vst = _visited_exemplars[xmplr.get_tree()];
 
         logger().debug() << "Selected the " << pos
-                         << "th exemplar, from deme " << get_demeID(xmplr)
+                         << "th exemplar, from deme " << xmplr.get_demeID()
                          << ", for the " << nth_vst << "th time(s)";
         logger().debug() << "Exemplar tree : " << xmplr.get_tree();
         logger().debug() << "With composite score : "
@@ -429,10 +428,9 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
                 penalized_bscore pbs; // empty bscore till
                                       // it gets computed
                 composite_penalized_bscore cbsc(pbs, inst_csc);
-                cpbscore_demeID cbs_demeID(cbsc, demes[i].getID());
 
                 unique_lock lock(pot_cnd_mutex);
-                scored_combo_tree sct(tr, cbs_demeID);
+                scored_combo_tree sct(tr, demes[i].getID(), cbsc);
                 pot_candidates.insert(sct);
             }
         };
@@ -535,8 +533,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         {
             penalized_bscore pbs = this->_bscorer(cand.get_tree());
             composite_penalized_bscore cpb(pbs, cand.get_composite_score());
-            cpbscore_demeID cpbd(cpb, get_demeID(cand));
-            scored_combo_tree sct(cand.get_tree(), cpbd);
+            scored_combo_tree sct(cand.get_tree(), cand.get_demeID(), cpb);
             new_pot.insert(sct);
         }
         pot_candidates = new_pot;
@@ -1117,7 +1114,7 @@ metapopulation::get_nondominated_disjoint_rec(const scored_combo_tree_ptr_vec& b
         bool it1_insert = true; // whether *it1 is to be inserted
                                 // in bcv_res1
         for (; it2 != bcv2.end(); ++it2) {
-            tribool dom = dominates(get_pbscore(**it1).first, get_pbscore(**it2).first);
+            tribool dom = dominates((*it1)->get_pbscore().first, (*it2)->get_pbscore().first);
             if (!dom) {
                 it1_insert = false;
                 bcv_res2.insert(bcv_res2.end(), it2, bcv2.end());

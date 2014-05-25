@@ -103,8 +103,7 @@ public:
         composite_score csc1(-2, -1, pbs1.second);
         composite_penalized_bscore cbs1(pbs1, csc1);
         combo_tree tr1(1.0);
-        cpbscore_demeID cbs1_demeID(cbs1, demeID_t());
-        scored_combo_tree bct1(tr1, cbs1_demeID);
+        scored_combo_tree bct1(tr1, demeID_t(), cbs1);
         bcs.insert(bct1);
         // 2
         penalized_bscore pbs2;
@@ -113,8 +112,7 @@ public:
         composite_score csc2(-3, -1, pbs2.second);
         composite_penalized_bscore cbs2(pbs2, csc2);
         combo_tree tr2(2.0);
-        cpbscore_demeID cbs2_demeID(cbs2, demeID_t());
-        scored_combo_tree bct2(tr2, cbs2_demeID);
+        scored_combo_tree bct2(tr2, demeID_t(), cbs2);
         bcs.insert(bct2);
         // 3
         penalized_bscore pbs3;
@@ -123,8 +121,7 @@ public:
         composite_score csc3(-2, -1, pbs3.second);
         composite_penalized_bscore cbs3(pbs3, csc3);
         combo_tree tr3(3.0);
-        cpbscore_demeID cbs3_demeID(cbs3, demeID_t());
-        scored_combo_tree bct3(tr3, cbs3_demeID);
+        scored_combo_tree bct3(tr3, demeID_t(), cbs3);
         bcs.insert(bct3);
         // 4
         penalized_bscore pbs4;
@@ -133,8 +130,7 @@ public:
         composite_score csc4(-2, -1, pbs4.second);
         composite_penalized_bscore cbs4(pbs4, csc4);
         combo_tree tr4(4.0);
-        cpbscore_demeID cbs4_demeID(cbs4, demeID_t());
-        scored_combo_tree bct4(tr4, cbs4_demeID);
+        scored_combo_tree bct4(tr4, demeID_t(), cbs4);
         bcs.insert(bct4);
         // 5
         penalized_bscore pbs5;
@@ -143,8 +139,7 @@ public:
         composite_score csc5(-3, -1, pbs5.second);
         composite_penalized_bscore cbs5(pbs5, csc5);
         combo_tree tr5(5.0);
-        cpbscore_demeID cbs5_demeID(cbs5, demeID_t());
-        scored_combo_tree bct5(tr5, cbs5_demeID);
+        scored_combo_tree bct5(tr5, demeID_t(), cbs5);
         bcs.insert(bct5);
 
         _metapopulation.remove_dominated(bcs);
@@ -167,9 +162,8 @@ public:
         pbs4.second = 0;
         composite_score csc4(-2, -1, pbs4.second);
         composite_penalized_bscore cbs4(pbs4, csc4);
-        cpbscore_demeID cbs4_demeID(cbs4, demeID_t());
         combo_tree tr4(4.0);
-        scored_combo_tree bct4(tr4, cbs4_demeID);
+        scored_combo_tree bct4(tr4, demeID_t(), cbs4);
         bcs1.insert(bct4);
         // 5
         penalized_bscore pbs5;
@@ -177,9 +171,8 @@ public:
         pbs5.second = 0;
         composite_score csc5(-3, -1, pbs5.second);
         composite_penalized_bscore cbs5(pbs5, csc5);
-        cpbscore_demeID cbs5_demeID(cbs5, demeID_t());
         combo_tree tr5(5.0);
-        scored_combo_tree bct5(tr5, cbs5_demeID);
+        scored_combo_tree bct5(tr5, demeID_t(), cbs5);
         bcs2.insert(bct5);
         // 2
         penalized_bscore pbs2;
@@ -187,9 +180,8 @@ public:
         pbs2.second = 0;
         composite_score csc2(-3, -1, pbs2.second);
         composite_penalized_bscore cbs2(pbs2, csc2);
-        cpbscore_demeID cbs2_demeID(cbs2, demeID_t());
         combo_tree tr2(2.0);
-        scored_combo_tree bct2(tr2, cbs2_demeID);
+        scored_combo_tree bct2(tr2, demeID_t(), cbs2);
         bcs2.insert(bct2);
 
         metapopulation::scored_combo_tree_set_pair res_p =

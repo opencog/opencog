@@ -172,58 +172,64 @@ struct demeID_t : public std::string
     demeID_t(unsigned expansion = 0 /* default initial deme */);
     demeID_t(unsigned expansion, unsigned breadth_first);
 };
-        
+
 typedef std::vector<score_t> behavioral_score;
 typedef std::pair<behavioral_score, score_t> penalized_bscore;
 typedef std::pair<penalized_bscore, composite_score> composite_penalized_bscore;
-typedef std::pair<composite_penalized_bscore, demeID_t> cpbscore_demeID;
-
-composite_score& xget_composite_score(composite_penalized_bscore&);
-const composite_score& xget_composite_score(const composite_penalized_bscore&);
 
 class scored_combo_tree
 {
 public:
-    scored_combo_tree(combo::combo_tree tr, cpbscore_demeID cbsd= cpbscore_demeID())
-        : tree(tr), cpbscored(cbsd)
+    scored_combo_tree(combo::combo_tree tr,
+                      demeID_t id = demeID_t(),
+                      composite_penalized_bscore cpbs = composite_penalized_bscore())
+        : _tree(tr), _deme_id(id), _cpbscore(cpbs)
     {}
 
 // private:
-    combo::combo_tree tree;
-    cpbscore_demeID cpbscored;
-    // demeID_t deme_id;
+    combo::combo_tree _tree;
+    demeID_t _deme_id;
+    composite_penalized_bscore _cpbscore;
     // composite_score cscore;
     // behavioral_score bscore;
 
 public:
-    const combo::combo_tree& get_tree(void) const { return tree; }
-    combo::combo_tree& get_tree(void) { return tree; }
+    const combo::combo_tree& get_tree(void) const { return _tree; }
+    combo::combo_tree& get_tree(void) { return _tree; }
 
+    const demeID_t get_demeID() const { return _deme_id; }
+    demeID_t get_demeID() { return _deme_id; }
+
+// XXX the next method is a temporary hack
+    const composite_penalized_bscore& get_composite_penalized_bscore(void) const
+    {
+       return _cpbscore;
+    }
+    composite_penalized_bscore& get_composite_penalized_bscore(void)
+    {
+       return _cpbscore;
+    }
+    const penalized_bscore& get_pbscore(void) const
+    {
+       return _cpbscore.first;
+    }
+    penalized_bscore& get_pbscore(void)
+    {
+       return _cpbscore.first;
+    }
     const composite_score& get_composite_score(void) const
     {
-       const composite_penalized_bscore& cpb = cpbscored.first;
-       return xget_composite_score(cpb);
+       return _cpbscore.second;
     }
     composite_score& get_composite_score(void)
     {
-       composite_penalized_bscore& cpb = cpbscored.first;
-       return xget_composite_score(cpb);
+       return _cpbscore.second;
     }
 };
 
 ///////////////////////////
 // convenience accessors //
 ///////////////////////////
-
-score_t get_penalized_score(const composite_score& sc);
-
-composite_penalized_bscore& get_composite_penalized_bscore(scored_combo_tree& pbst);
-const composite_penalized_bscore& cget_composite_penalized_bscore(const scored_combo_tree& pbst);
-
-const cpbscore_demeID& get_cpbscore_demeID(const scored_combo_tree& pbst);
-cpbscore_demeID& get_cpbscore_demeID(scored_combo_tree& pbst);
-
-demeID_t get_demeID(const scored_combo_tree& pbst);
 
 score_t get_penalized_score(const composite_score& sc);
 score_t get_penalized_score(const composite_penalized_bscore& cpb);
@@ -250,9 +256,7 @@ score_t get_penalty(const composite_penalized_bscore& ts);
 score_t get_penalty(const scored_combo_tree& bst);
 
 const penalized_bscore& get_pbscore(const composite_penalized_bscore& ts);
-const penalized_bscore& get_pbscore(const scored_combo_tree& bst);
 penalized_bscore& get_pbscore(composite_penalized_bscore& ts);
-penalized_bscore& get_pbscore(scored_combo_tree& bst);
 
 const behavioral_score& get_bscore(const penalized_bscore& pbs);
 const behavioral_score& get_bscore(const composite_penalized_bscore& cbs);
@@ -268,7 +272,7 @@ const behavioral_score& get_bscore(const scored_combo_tree& bst);
  * metapopulation or the deme with candidates with undefined scores
  * (as these are usually very bad candidates).
  */
-struct scored_combo_tree_greater 
+struct scored_combo_tree_greater
     : public std::binary_function<scored_combo_tree, scored_combo_tree, bool>
 {
     bool operator()(const scored_combo_tree&,
@@ -338,7 +342,7 @@ Out& ostream_scored_combo_tree(Out& out, const scored_combo_tree& cnd,
                                  bool output_python = false)
 {
     return ostream_combo_tree_composite_pbscore(out, cnd.get_tree(),
-                                                cget_composite_penalized_bscore(cnd),
+                                                cnd.get_composite_penalized_bscore(),
                                                 output_score,
                                                 output_penalty,
                                                 output_bscore,
@@ -362,7 +366,7 @@ Out& ostream_combo_tree_composite_pbscore(Out& out,
     if (output_score)
         out << std::setprecision(io_score_precision)
             << get_score(cpb) << " ";
-    
+
     out << tr << std::endl;
 
     if (output_penalty)
@@ -402,11 +406,11 @@ scored_combo_tree istream_scored_combo_tree(In& in) {
     // parse score
     score_t sc;
     in >> sc;
-    
+
     // parse combo tree
     combo::combo_tree tr;
     in >> tr;
-    
+
     // parse the rest
     complexity_t cpx = 0;
     score_t cpx_penalty = 0, diversity_penalty = 0, penalized_score = 0;
@@ -450,13 +454,12 @@ scored_combo_tree istream_scored_combo_tree(In& in) {
     }
     // assign to candidate
     combo::combo_tree tr_test = tr;
-    
+
     penalized_bscore pbs(bs, cpx_penalty);
     composite_score cs(sc, cpx, cpx_penalty, diversity_penalty);
     composite_penalized_bscore cbs(pbs, cs);
-    cpbscore_demeID cbs_demeID(cbs, /* default demeID */ 0);
-    return scored_combo_tree(tr, cbs_demeID);
-}                                      
+    return scored_combo_tree(tr, /* default demeID */ 0, cbs);
+}
 
 /**
  * stream out a candidate along with their scores (optionally
