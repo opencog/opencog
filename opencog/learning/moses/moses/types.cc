@@ -155,29 +155,14 @@ score_t get_penalized_score(const composite_score& sc)
    return sc.get_penalized_score();
 }
 
-score_t get_penalized_score(const composite_penalized_bscore& cpb)
-{
-    return get_penalized_score(cpb.second);
-}
-
 score_t get_penalized_score(const scored_combo_tree& sct)
 {
     return get_penalized_score(sct.get_composite_score());
 }
 
-composite_score& get_composite_score(composite_penalized_bscore& ctbs)
-{
-    return ctbs.second;
-}
-
 score_t get_score(const composite_score& ts)
 {
     return ts.get_score();
-}
-
-score_t get_score(const composite_penalized_bscore& ts)
-{
-    return get_score(ts.second);
 }
 
 score_t get_score(const scored_combo_tree& bst)
@@ -190,11 +175,6 @@ complexity_t get_complexity(const composite_score& ts)
     return ts.get_complexity();
 }
 
-complexity_t get_complexity(const composite_penalized_bscore& ts)
-{
-    return get_complexity(ts.second);
-}
-
 complexity_t get_complexity(const scored_combo_tree& bst)
 {
     return get_complexity(bst.get_composite_score());
@@ -203,11 +183,6 @@ complexity_t get_complexity(const scored_combo_tree& bst)
 score_t get_complexity_penalty(const composite_score& ts)
 {
     return ts.get_complexity_penalty();
-}
-
-score_t get_complexity_penalty(const composite_penalized_bscore& ts)
-{
-    return get_complexity_penalty(ts.second);
 }
 
 score_t get_complexity_penalty(const scored_combo_tree& bst)
@@ -220,11 +195,6 @@ score_t get_diversity_penalty(const composite_score& ts)
     return ts.get_diversity_penalty();
 }
 
-score_t get_diversity_penalty(const composite_penalized_bscore& ts)
-{
-    return get_diversity_penalty(ts.second);
-}
-
 score_t get_diversity_penalty(const scored_combo_tree& bst)
 {
     return get_diversity_penalty(bst.get_composite_score());
@@ -235,34 +205,14 @@ score_t get_penalty(const composite_score& ts)
     return ts.get_penalty();
 }
 
-score_t get_penalty(const composite_penalized_bscore& ts)
-{
-    return get_penalty(ts.second);
-}
-
 score_t get_penalty(const scored_combo_tree& bst)
 {
     return get_penalty(bst.get_composite_score());
 }
 
-const penalized_bscore& get_pbscore(const composite_penalized_bscore& ts)
-{
-    return ts.first;
-}
-
-penalized_bscore& get_pbscore(composite_penalized_bscore& ts)
-{
-    return ts.first;
-}
-
 const behavioral_score& get_bscore(const penalized_bscore& pbs)
 {
     return pbs.first;
-}
-
-const behavioral_score& get_bscore(const composite_penalized_bscore& cbs)
-{
-    return get_bscore(cbs.first);
 }
 
 const behavioral_score& get_bscore(const scored_combo_tree& bst)
