@@ -28,6 +28,8 @@
 #include <map>
 #include <iterator>
 #include <opencog/atomspace/atom_types.h>
+#include <opencog/spacetime/atom_types.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/util/StringManipulator.h>
 #include <opencog/util/foreach.h>
 #include <opencog/query/PatternMatch.h>
@@ -513,7 +515,10 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, Atom
            Handle new_node = toAtomSpace->addNode(fromAtomSpace->getType(h), fromAtomSpace->getName(h), fromAtomSpace->getTV(h));
            outgoings.push_back(new_node);
            if (fromAtomSpace->getType(h) == VARIABLE_NODE)
-               outVariableNodes.push_back(new_node);
+           {
+               if ( ! isInHandleSeq(new_node, outVariableNodes) ) // should not have duplicated variable nodes
+                outVariableNodes.push_back(new_node);
+           }
         }
         else
         {
@@ -558,6 +563,12 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //        )
 //     )
 
+    // Debug
+    static int count = 0;
+    count ++;
+
+    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern: count = " << count << std::endl;
+
     HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings;
 
     HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpace(atomSpace, originalAtomSpace, HNode->pattern, variableNodes);
@@ -575,8 +586,8 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
     implicationLinkOutgoings.push_back(hAndLink); // the results to return
 
-    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
-            << originalAtomSpace->atomAsString(hAndLink).c_str() << std::endl;
+//    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
+//            << originalAtomSpace->atomAsString(hAndLink).c_str() << std::endl;
 
 
     Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
@@ -587,6 +598,55 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     bindLinkOutgoings.push_back(hVariablesListLink);
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
+
+    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
+              << originalAtomSpace->atomAsString(hBindLink).c_str() << std::endl;
+
+//    // debug
+//    if ((variableNodes.size() == 4) && (patternToMatch.size() == 3))
+//    {
+//        Handle firstEval = patternToMatch[0];
+//        if (originalAtomSpace->getType(firstEval) == EVALUATION_LINK)
+//        {
+//            Handle listH = originalAtomSpace->getOutgoing(firstEval,1);
+
+//            Handle bobNode = originalAtomSpace->getOutgoing(listH, 0);
+
+//            if (originalAtomSpace->getName(bobNode) == "Bob")
+//            {
+//                std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern: stop!" << std::endl;
+
+//                // dump the atomspace to scm file
+//                HandleSeq allDumpNodes, allDumpLinks;
+//                originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
+
+//                // out put the n_gram patterns to a file
+//                ofstream dumpFile;
+//                string fileName = "DumpAtomspace.scm";
+//                std::cout<<"Debug: PatternMiner: dumping the curpos Atomspace to file " + fileName << std::endl;
+
+//                dumpFile.open(fileName.c_str());
+
+//                foreach(Handle h, allDumpNodes)
+//                {
+//                    dumpFile << originalAtomSpace->atomAsString(h);
+//                }
+
+//                originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
+
+//                foreach(Handle h, allDumpLinks)
+//                {
+//                    dumpFile << originalAtomSpace->atomAsString(h);
+//                }
+
+//                dumpFile.close();
+
+//                std::terminate();
+//            }
+//        }
+
+//    }
+
 
     // Run pattern matcher
     PatternMatch pm;
@@ -879,11 +939,14 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     htree = new HTree();
     atomSpace = new AtomSpace();
 
-    unsigned int system_thread_num  = std::thread::hardware_concurrency();
-    if (system_thread_num > 2)
-        THREAD_NUM = system_thread_num - 2;
-    else
-        THREAD_NUM = 1;
+//    unsigned int system_thread_num  = std::thread::hardware_concurrency();
+//    if (system_thread_num > 2)
+//        THREAD_NUM = system_thread_num - 2;
+//    else
+//        THREAD_NUM = 1;
+
+    // test only one tread for now
+    THREAD_NUM = 1;
 
     threads = new thread[THREAD_NUM];
 
@@ -910,6 +973,7 @@ PatternMiner::~PatternMiner()
 
 void PatternMiner::runPatternMiner()
 {
+
     std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << std::endl;
     // first, generate the first layer patterns: patterns of 1 gram (contains only one link)
     ConstructTheFirstGramPatterns();
@@ -944,4 +1008,119 @@ std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const At
     }
 
     return answer.str();
+}
+
+void PatternMiner::testPatternMatcher()
+{
+    originalAtomSpace->getHandlesByType(back_inserter(allLinks), (Type) LINK, true );
+    std::cout<<"Debug: PatternMiner total link numer = "  << allLinks.size() << std::endl;
+
+//(BindLink (stv 1.000000 1.000000)
+//  (ListLink (stv 1.000000 1.000000)
+//    (VariableNode "$var_1") ; [66]
+//    (VariableNode "$var_2") ; [265]
+//    (VariableNode "$var_3") ; [673]
+//    (VariableNode "$var_4") ; [729]
+//  ) ; [734]
+//  (ImplicationLink (stv 1.000000 1.000000)
+//    (AndLink (stv 1.000000 1.000000)
+//      (EvaluationLink (stv 1.000000 1.000000)
+//        (VariableNode "$var_1") ; [66]
+//        (ListLink (stv 1.000000 1.000000)
+//          (ObjectNode "Bob") ; [13]
+//          (VariableNode "$var_2") ; [265]
+//        ) ; [331]
+//      ) ; [332]
+//      (EvaluationLink (stv 1.000000 1.000000)
+//        (VariableNode "$var_1") ; [66]
+//        (ListLink (stv 1.000000 1.000000)
+//          (VariableNode "$var_3") ; [673]
+//          (VariableNode "$var_2") ; [265]
+//        ) ; [930]
+//      ) ; [931]
+//      (InheritanceLink (stv 1.000000 1.000000)
+//        (VariableNode "$var_3") ; [673]
+//        (VariableNode "$var_4") ; [729]
+//      ) ; [3482]
+//    ) ; [5611]
+//    ...
+    HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, patternToMatch;
+
+    Handle varHandle1 = originalAtomSpace->addNode(opencog::VARIABLE_NODE,"$var_1" );
+    Handle varHandle2 = originalAtomSpace->addNode(opencog::VARIABLE_NODE,"$var_2" );
+    Handle varHandle3 = originalAtomSpace->addNode(opencog::VARIABLE_NODE,"$var_3" );
+    Handle varHandle4 = originalAtomSpace->addNode(opencog::VARIABLE_NODE,"$var_4" );
+
+
+    variableNodes.push_back(varHandle1);
+    variableNodes.push_back(varHandle2);
+    variableNodes.push_back(varHandle3);
+    variableNodes.push_back(varHandle4);
+
+    // The first EvaluationLink
+    HandleSeq listlinkOutgoings1, evalLinkOutgoings1;
+    Handle bobNode = originalAtomSpace->addNode(opencog::OBJECT_NODE, "Bob" );
+    listlinkOutgoings1.push_back(bobNode);
+    listlinkOutgoings1.push_back(varHandle2);
+    Handle listlink1 = originalAtomSpace->addLink(LIST_LINK, listlinkOutgoings1, TruthValue::TRUE_TV());
+    evalLinkOutgoings1.push_back(varHandle1);
+    evalLinkOutgoings1.push_back(listlink1);
+    Handle evalLink1 = originalAtomSpace->addLink(EVALUATION_LINK, evalLinkOutgoings1, TruthValue::TRUE_TV());
+
+    // The second EvaluationLink
+    HandleSeq listlinkOutgoings2, evalLinkOutgoings2;
+    listlinkOutgoings2.push_back(varHandle3);
+    listlinkOutgoings2.push_back(varHandle2);
+    Handle listlink2 = originalAtomSpace->addLink(LIST_LINK, listlinkOutgoings2, TruthValue::TRUE_TV());
+    evalLinkOutgoings2.push_back(varHandle1);
+    evalLinkOutgoings2.push_back(listlink2);
+    Handle evalLink2 = originalAtomSpace->addLink(EVALUATION_LINK, evalLinkOutgoings2, TruthValue::TRUE_TV());
+
+    // The InheritanceLink
+    HandleSeq inherOutgoings;
+    inherOutgoings.push_back(varHandle3);
+    inherOutgoings.push_back(varHandle4);
+    Handle inherLink = originalAtomSpace->addLink(INHERITANCE_LINK, inherOutgoings, TruthValue::TRUE_TV());
+
+    patternToMatch.push_back(evalLink1);
+    patternToMatch.push_back(evalLink2);
+    patternToMatch.push_back(inherLink);
+
+    Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch, TruthValue::TRUE_TV());
+
+    implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
+    implicationLinkOutgoings.push_back(hAndLink); // the results to return
+
+    Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
+
+    // add variable atoms
+    Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
+
+    bindLinkOutgoings.push_back(hVariablesListLink);
+    bindLinkOutgoings.push_back(hImplicationLink);
+    Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
+
+    std::cout <<"Debug: PatternMiner::testPatternMatcher for pattern:" << std::endl
+              << originalAtomSpace->atomAsString(hBindLink).c_str() << std::endl;
+
+
+    // Run pattern matcher
+    PatternMatch pm;
+    pm.set_atomspace(originalAtomSpace);
+
+    Handle hResultListLink = pm.bindlink(hBindLink);
+
+    // Get result
+    // Note: Don't forget to remove the hResultListLink and BindLink
+    HandleSeq resultSet = originalAtomSpace->getOutgoing(hResultListLink);
+
+    std::cout << toString(resultSet.size())  << " instances found:" << std::endl ;
+
+    //debug
+    std::cout << originalAtomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
+
+    originalAtomSpace->removeAtom(hResultListLink);
+    originalAtomSpace->removeAtom(hBindLink);
+
+    
 }

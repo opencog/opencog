@@ -178,6 +178,8 @@ public:
 
     void runPatternMiner();
 
+    void testPatternMatcher();
+
 
  };
 
