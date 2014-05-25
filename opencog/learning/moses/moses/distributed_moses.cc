@@ -269,15 +269,16 @@ void parse_result(istream& in, scored_combo_tree_set& candidates, int& evals)
             // insert read element in candidates
             composite_score cs(score, complexity, complexity_penalty);
             scored_combo_tree candidate =
-                  scored_combo_tree(tr, cpbscore_demeID({pbs, cs}, demeID_t()));
+                  scored_combo_tree(tr, demeID_t(), cs, pbs);
             candidates.insert(candidate);
 
             if (logger().isFineEnabled()) {
                 logger().fine("Parsed candidate:");
                 stringstream ss;
-                ostream_combo_tree_composite_pbscore(ss,
+                ostream_combo_tree_cpbscore(ss,
                               candidate.get_tree(),
-                              get_composite_penalized_bscore(candidate),
+                              candidate.get_composite_score(),
+                              candidate.get_pbscore(),
                               true, true);
                 logger().fine(ss.str());
             }

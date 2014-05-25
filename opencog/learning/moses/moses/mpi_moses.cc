@@ -265,9 +265,7 @@ void moses_mpi_comm::recv_deme(int source,
         // composite score gets a non-trivial value.
         behavioral_score bs;
         penalized_bscore pbs(bs, sc.get_complexity_penalty());
-        composite_penalized_bscore cbs(pbs, sc);
-        cpbscore_demeID cbs_demeID(cbs, demeID);
-        scored_combo_tree bsc_tr(tr, cbs_demeID);
+        scored_combo_tree bsc_tr(tr, demeID, sc, pbs);
         cands.insert(bsc_tr);
     }
 }

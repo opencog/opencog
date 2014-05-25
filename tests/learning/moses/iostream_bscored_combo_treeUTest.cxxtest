@@ -46,9 +46,7 @@ public:
         // build the scored_combo_tree
         penalized_bscore pbs(bs, cpx_penalty);
         composite_score cs(sc, cpx, cpx_penalty, diversity_penalty);
-        composite_penalized_bscore cbs(pbs, cs);
-        cpbscore_demeID cbs_demeID(cbs, demeID_t());
-        scored_combo_tree bct(tr, cbs_demeID);
+        scored_combo_tree bct(tr, demeID_t(), cs, pbs);
 
         // build expected string
         std::stringstream oss;
