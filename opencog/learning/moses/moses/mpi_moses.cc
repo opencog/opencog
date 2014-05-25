@@ -214,8 +214,8 @@ void moses_mpi_comm::send_deme(const metapopulation& mp, int n_evals)
         // We are going to send only the composite score, and not the
         // full behavioural score.  Basically, the full bscore is just
         // not needed for the current most popular merge technique.
-        send_cscore(get_composite_score(btr), ROOT_NODE);
-        send_tree(get_tree(btr), ROOT_NODE);
+        send_cscore(btr.get_composite_score(), ROOT_NODE);
+        send_tree(btr.get_tree(), ROOT_NODE);
     }
 }
 

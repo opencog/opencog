@@ -57,7 +57,7 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars,
                           const reduct::rule& simplify_candidate,
                           const cscore_base& cscorer)
 {
-    metapop_candidates candidates;
+    scored_combo_tree_set candidates;
     for (const combo_tree& base : exemplars) {
         combo_tree si_base(base);
         simplify_candidate(si_base);
@@ -377,8 +377,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
 
     // Add, as potential exemplars for future demes, all unique
     // trees in the final deme.
-    metapop_candidates pot_candidates;
-
+    scored_combo_tree_set pot_candidates;
 
     logger().debug("Sort the deme(s)");
 
@@ -509,9 +508,9 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         logger().debug("Compute behavioral score of %d selected candidates",
                        pot_candidates.size());
 
-        auto compute_bscore = [this](metapop_candidates::value_type& cand) {
-            penalized_bscore pbs = this->_bscorer(get_tree(cand));
-            composite_penalized_bscore cpb(pbs, get_composite_score(cand));
+        auto compute_bscore = [this](scored_ccombo_tree& cand) {
+            penalized_bscore pbs = this->_bscorer(cand.get_tree());
+            composite_penalized_bscore cpb(pbs, cand.get_composite_score());
             cand.second = cpbscore_demeID(cpb, get_demeID(cand));
         };
         OMP_ALGO::for_each(pot_candidates.begin(), pot_candidates.end(),

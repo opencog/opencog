@@ -65,10 +65,7 @@ void print_stats_header (optim_stats *os, bool diversity_enabled);
  */
 struct metapopulation
 {
-    // The goal of using unordered_set here is to have O(1) access time
-    // to see if a combo tree is in the set, or not.
-    typedef std::unordered_set<combo_tree,
-                               boost::hash<combo_tree> > combo_tree_hash_set;
+    // XXX shouldn't this bbe scored_combo_tree ??
     typedef std::unordered_map<combo_tree, unsigned,
                                boost::hash<combo_tree> > combo_tree_hash_counter;
 
@@ -152,7 +149,7 @@ struct metapopulation
      * Return the set of candidates with the highest composite
      * scores.  These will all have the the same "best_composite_score".
      */
-    const metapop_candidates& best_candidates() const
+    const scored_combo_tree_set& best_candidates() const
     {
         return _best_candidates;
     }
@@ -162,7 +159,7 @@ struct metapopulation
      */
     const combo_tree& best_tree() const
     {
-        return _best_candidates.begin()->first;
+        return _best_candidates.begin()->get_tree();
     }
 
     typedef diversity_parameters::dp_t dp_t;  // diversity_penalty type
@@ -300,7 +297,7 @@ struct metapopulation
     // Return the set of candidates not present in the metapopulation.
     // This makes merging faster because it decreases the number of
     // calls of dominates.
-    scored_combo_tree_set get_new_candidates(const metapop_candidates& mcs);
+    scored_combo_tree_set get_new_candidates(const scored_combo_tree_set&);
 
     typedef pair<scored_combo_tree_set,
                  scored_combo_tree_set> scored_combo_tree_set_pair;
@@ -518,7 +515,7 @@ protected:
     composite_score _best_cscore;
 
     // Trees with composite score equal to _best_cscore.
-    metapop_candidates _best_candidates;
+    scored_combo_tree_set _best_candidates;
 
     // contains the exemplars of demes that have been searched so far
     // (and the number of times they have been searched)

@@ -21,10 +21,13 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <sstream>
+
+#include <boost/functional/hash.hpp>
+
 #include "types.h"
 #include "complexity.h"
 
-#include <sstream>
 
 namespace opencog { namespace moses {
 
@@ -35,11 +38,25 @@ demeID_t::demeID_t(unsigned expansion)
 demeID_t::demeID_t(unsigned expansion, unsigned breadth_first)
     : string(to_string(expansion) + "." + to_string(breadth_first)) {}
 
-bool scored_combo_tree_greater::operator()(const scored_combo_tree& bs_tr1,
-                                            const scored_combo_tree& bs_tr2) const
+size_t scored_combo_tree_hash::operator()(const scored_combo_tree& sct) const
 {
-    composite_score csc1 = get_composite_score(bs_tr1);
-    composite_score csc2 = get_composite_score(bs_tr2);
+    const combo::combo_tree& tr = sct.get_tree();
+    // return boost::hash<combo::combo_tree>(tr);
+/// XXX this is very wrong
+return 0;
+}
+
+bool scored_combo_tree_equal::operator()(const scored_combo_tree& tr1,
+                                         const scored_combo_tree& tr2) const
+{
+    return tr1.get_tree() == tr2.get_tree();
+}
+
+bool scored_combo_tree_greater::operator()(const scored_combo_tree& bs_tr1,
+                                           const scored_combo_tree& bs_tr2) const
+{
+    const composite_score csc1 = bs_tr1.get_composite_score();
+    const composite_score csc2 = bs_tr2.get_composite_score();
 
     bool gt = (csc1 > csc2);
     if (gt) return true;
@@ -130,7 +147,7 @@ bool composite_score::operator==(const composite_score &r) const
 // convenience accessors //
 ///////////////////////////
 
-const composite_penalized_bscore& get_composite_penalized_bscore(const scored_combo_tree& pbst)
+const composite_penalized_bscore& cget_composite_penalized_bscore(const scored_combo_tree& pbst)
 {
     return pbst.cpbscored.first;
 }
@@ -165,29 +182,19 @@ const composite_score& get_composite_score(const composite_penalized_bscore& ctb
     return ctbs.second;
 }
 
-const composite_score& xget_composite_score(const scored_combo_tree& bsct)
-{
-    return get_composite_score(get_composite_penalized_bscore(bsct));
-}
-
 score_t get_penalized_score(const composite_penalized_bscore& cpb)
 {
     return get_penalized_score(get_composite_score(cpb));
 }
 
-score_t get_penalized_score(const scored_combo_tree& st)
+score_t get_penalized_score(const scored_combo_tree& sct)
 {
-    return get_penalized_score(get_composite_score(st));
+    return get_penalized_score(sct.get_composite_score());
 }
 
 composite_score& get_composite_score(composite_penalized_bscore& ctbs)
 {
     return ctbs.second;
-}
-
-composite_score& get_composite_score(scored_combo_tree& bsct)
-{
-    return get_composite_score(bsct.second.first);
 }
 
 score_t get_score(const composite_score& ts)
@@ -202,7 +209,7 @@ score_t get_score(const composite_penalized_bscore& ts)
 
 score_t get_score(const scored_combo_tree& bst)
 {
-    return get_score(get_composite_penalized_bscore(bst));
+    return get_score(cget_composite_penalized_bscore(bst));
 }
 
 complexity_t get_complexity(const composite_score& ts)
@@ -217,7 +224,7 @@ complexity_t get_complexity(const composite_penalized_bscore& ts)
 
 complexity_t get_complexity(const scored_combo_tree& bst)
 {
-    return get_complexity(get_composite_penalized_bscore(bst));
+    return get_complexity(cget_composite_penalized_bscore(bst));
 }
 
 score_t get_complexity_penalty(const composite_score& ts)
@@ -232,7 +239,7 @@ score_t get_complexity_penalty(const composite_penalized_bscore& ts)
 
 score_t get_complexity_penalty(const scored_combo_tree& bst)
 {
-    return get_complexity_penalty(get_composite_penalized_bscore(bst));
+    return get_complexity_penalty(cget_composite_penalized_bscore(bst));
 }
 
 score_t get_diversity_penalty(const composite_score& ts)
@@ -247,7 +254,7 @@ score_t get_diversity_penalty(const composite_penalized_bscore& ts)
 
 score_t get_diversity_penalty(const scored_combo_tree& bst)
 {
-    return get_diversity_penalty(get_composite_penalized_bscore(bst));
+    return get_diversity_penalty(cget_composite_penalized_bscore(bst));
 }
 
 score_t get_penalty(const composite_score& ts)
@@ -262,7 +269,7 @@ score_t get_penalty(const composite_penalized_bscore& ts)
 
 score_t get_penalty(const scored_combo_tree& bst)
 {
-    return get_penalty(get_composite_penalized_bscore(bst));
+    return get_penalty(cget_composite_penalized_bscore(bst));
 }
 
 const penalized_bscore& get_pbscore(const composite_penalized_bscore& ts)
@@ -277,7 +284,7 @@ penalized_bscore& get_pbscore(composite_penalized_bscore& ts)
 
 const penalized_bscore& get_pbscore(const scored_combo_tree& bst)
 {
-    return get_pbscore(get_composite_penalized_bscore(bst));
+    return get_pbscore(cget_composite_penalized_bscore(bst));
 }
 
 penalized_bscore& get_pbscore(scored_combo_tree& bst)
@@ -297,7 +304,7 @@ const behavioral_score& get_bscore(const composite_penalized_bscore& cbs)
 
 const behavioral_score& get_bscore(const scored_combo_tree& bst)
 {
-    return get_bscore(get_composite_penalized_bscore(bst));
+    return get_bscore(cget_composite_penalized_bscore(bst));
 }
 
 } // ~namespace moses

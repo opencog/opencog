@@ -28,7 +28,7 @@
 
 #include <functional>
 #include <iomanip>
-#include <unordered_map>
+#include <unordered_set>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -44,7 +44,6 @@
 
 namespace opencog { namespace moses {
 
-using std::binary_function;
 using combo::vertex;
 using boost::indirect_iterator;
 using boost::transform_iterator;
@@ -180,14 +179,12 @@ typedef std::pair<penalized_bscore, composite_score> composite_penalized_bscore;
 typedef std::pair<composite_penalized_bscore, demeID_t> cpbscore_demeID;
 
 composite_score& xget_composite_score(composite_penalized_bscore&);
+const composite_score& xget_composite_score(const composite_penalized_bscore&);
 
 class scored_combo_tree
 {
 public:
     scored_combo_tree(combo::combo_tree& tr, cpbscore_demeID cbsd)
-        : tree(tr), cpbscored(cbsd)
-    {}
-    scored_combo_tree(combo::combo_tree& tr, cpbscore_demeID& cbsd)
         : tree(tr), cpbscored(cbsd)
     {}
 
@@ -202,6 +199,11 @@ public:
     const combo::combo_tree& get_tree(void) const { return tree; }
     combo::combo_tree& get_tree(void) { return tree; }
 
+    const composite_score& get_composite_score(void) const
+    {
+       const composite_penalized_bscore& cpb = cpbscored.first;
+       return xget_composite_score(cpb);
+    }
     composite_score& get_composite_score(void)
     {
        composite_penalized_bscore& cpb = cpbscored.first;
@@ -230,8 +232,8 @@ combo::combo_tree& get_tree(scored_combo_tree& sct)
 
 score_t get_penalized_score(const composite_score& sc);
 
-const composite_penalized_bscore& get_composite_penalized_bscore(const scored_combo_tree& pbst);
 composite_penalized_bscore& get_composite_penalized_bscore(scored_combo_tree& pbst);
+const composite_penalized_bscore& cget_composite_penalized_bscore(const scored_combo_tree& pbst);
 
 const cpbscore_demeID& get_cpbscore_demeID(const scored_combo_tree& pbst);
 cpbscore_demeID& get_cpbscore_demeID(scored_combo_tree& pbst);
@@ -281,15 +283,31 @@ const behavioral_score& get_bscore(const scored_combo_tree& bst);
  * metapopulation or the deme with candidates with undefined scores
  * (as these are usually very bad candidates).
  */
-struct scored_combo_tree_greater : public binary_function<scored_combo_tree,
-                                                            scored_combo_tree,
-                                                            bool>
+struct scored_combo_tree_greater 
+    : public std::binary_function<scored_combo_tree, scored_combo_tree, bool>
 {
-    bool operator()(const scored_combo_tree& bs_tr1,
-                    const scored_combo_tree& bs_tr2) const;
+    bool operator()(const scored_combo_tree&,
+                    const scored_combo_tree&) const;
 };
-typedef std::set<scored_combo_tree,
-                 scored_combo_tree_greater> scored_combo_tree_set;
+
+struct scored_combo_tree_hash
+     : public std::unary_function<scored_combo_tree, size_t>
+{
+    size_t operator()(const scored_combo_tree&) const;
+};
+
+struct scored_combo_tree_equal
+     : public std::binary_function<scored_combo_tree, scored_combo_tree, bool>
+{
+    bool operator()(const scored_combo_tree&,
+                    const scored_combo_tree&) const;
+};
+
+/// scored_combo_tree_set provides an O(1) way of determining if a combo
+/// tree is in the set, or not (and getting its score, if it is).
+typedef std::unordered_set<scored_combo_tree,
+                 scored_combo_tree_hash,
+                 scored_combo_tree_equal> scored_combo_tree_set;
 typedef scored_combo_tree_set::iterator scored_combo_tree_set_it;
 typedef scored_combo_tree_set::const_iterator scored_combo_tree_set_cit;
 
@@ -301,15 +319,6 @@ typedef scored_combo_tree_ptr_set::const_iterator scored_combo_tree_ptr_set_cit;
 typedef std::vector<scored_combo_tree> scored_combo_tree_seq;
 typedef scored_combo_tree_seq::iterator scored_combo_tree_seq_it;
 typedef scored_combo_tree_seq::const_iterator scored_combo_tree_seq_cit;
-
-/// metapop_candidates provides an O(1) way of determining if a combo
-/// tree is in the map, or not (and getting its score, if it is).
-typedef std::unordered_map<combo::combo_tree,
-                           scored_combo_tree,
-                           boost::hash<combo::combo_tree> > metapop_candidates;
-typedef metapop_candidates::value_type metapop_candidate;
-typedef metapop_candidates::iterator metapop_candidates_it;
-typedef metapop_candidates::const_iterator metapop_candidates_cit;
 
 // ostream functions
 template<typename Out>
@@ -344,7 +353,7 @@ Out& ostream_scored_combo_tree(Out& out, const scored_combo_tree& cnd,
                                  bool output_python = false)
 {
     return ostream_combo_tree_composite_pbscore(out, get_tree(cnd),
-                                                get_composite_penalized_bscore(cnd),
+                                                cget_composite_penalized_bscore(cnd),
                                                 output_score,
                                                 output_penalty,
                                                 output_bscore,
