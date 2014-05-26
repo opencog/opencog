@@ -439,11 +439,13 @@ behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) const
         bs.push_back(sc);
     }
 
-        // pbs.second = tree_complexity(tr) * complexity_coef;
-        // pbs.second = graded_complexity(it) * _complexity_coef;
-
     log_candidate_bscore(tr, bs);
     return bs;
+}
+
+complexity_t enum_graded_bscore::get_complexity(const combo:combo_tree& tr) const
+{
+    return graded_complexity(tr.begin());
 }
 
 score_t enum_graded_bscore::min_improv() const
@@ -548,9 +550,6 @@ behavioral_score enum_effective_bscore::operator()(const combo_tree& tr) const
         predicate = next(predicate, 2);
         if (effective) weight *= grading;
     }
-
-        // pbs.second = tree_complexity(tr) * complexity_coef;
-        // pbs.second = graded_complexity(it) * _complexity_coef;
 
     log_candidate_bscore(tr, bs);
     return bs;

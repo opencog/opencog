@@ -125,6 +125,14 @@ struct bscore_base : public unary_function<combo_tree, behavioral_score>
     /// be called only after the ignore idex have been set.
     virtual void ignore_idxs(const std::set<arity_t>&) const {}
 
+    /// Get the appropriate complexity measure for the indicated combo
+    /// tree. By default, this is the tree complexity, although it may
+    /// depend on the scorer.
+    virtual complexity_t get_complexity(const combo_tree& tr) const
+    {
+        return tree_complexity(tr);
+    }
+
     // Store a complexity coeeficient with the scorerer.  This is
     // done to work around the fact that different kinds of scorers
     // normalize their scores in different ways, and so the perhaps
@@ -158,7 +166,7 @@ struct behave_cscore : public cscore_base
     {
         try {
             behavioral_score bs = _bscorer(tr);
-            return operator()(bs, tree_complexity(tr));
+            return operator()(bs, _bscorer.get_complexity(tr));
         }
         catch (EvalException& ee)
         {

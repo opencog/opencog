@@ -480,9 +480,10 @@ struct enum_graded_bscore : public enum_table_bscore
         : enum_table_bscore(_ctt), grading(0.9)
     {}
 
-    behavioral_score operator()(const combo_tree& tr) const;
+    behavioral_score operator()(const combo_tree&) const;
 
     virtual score_t min_improv() const;
+    virtual complexity_t get_complexity(const combo_tree&) const;
 
     score_t grading;
 protected:
