@@ -43,7 +43,6 @@ namespace opencog { namespace moses {
 using namespace std;
 
 extern const char * version_string;
-typedef bscore_based_cscore<bscore_base> cscorer_t;
 
 /**
  * Run moses
@@ -221,7 +220,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
                            moses_parameters moses_params,
                            Printer& printer)
 {
-    cscorer_t c_scorer(bscorer);
+    behave_cscore c_scorer(bscorer);
 
     // Update terminate_if_gte and max_score criteria. An explicit
     // user-specified max score always over-rides the inferred score.
@@ -260,8 +259,8 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
         // not on the behavioral score. So we can throw away the 
         // behavioral score after computng it (we don't need to cche it).
         // typedef adaptive_cache<prr_cache_threaded<CScorer> > ScoreACache;
-        cscorer_t cscorer(bscorer);
-        prr_cache_threaded<cscorer_t> score_cache(initial_cache_size, cscorer,
+        behave_cscore cscorer(bscorer);
+        prr_cache_threaded<behave_cscore> score_cache(initial_cache_size, cscorer,
                                                  "composite scores");
         // ScoreACache score_acache(score_cache);
         metapop_moses_results_b(bases, type_sig, si_ca, si_kb,

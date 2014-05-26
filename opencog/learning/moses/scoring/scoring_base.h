@@ -141,14 +141,10 @@ protected:
  * This is a "minor" helper class, and exists for two reasons:
  * 1) avoids some redundancy of having the summation in many places
  * 2) Helps with keeping the score-caching code cleaner.
- *
- * TODO: could be detemplatized, it's only instantiated with
- * bscore_base.
  */
-template<typename BScorer>
-struct bscore_based_cscore : public cscore_base
+struct behave_cscore : public cscore_base
 {
-    bscore_based_cscore(const BScorer& sr) : _bscorer(sr) {}
+    behave_cscore(const bscore_base& sr) : _bscorer(sr) {}
 
     composite_score operator()(const combo_tree& tr) const
     {
@@ -182,7 +178,7 @@ struct bscore_based_cscore : public cscore_base
         score_t res = boost::accumulate(bs, 0.0);
 
         if (logger().isFineEnabled()) {
-            logger().fine() << "bscore_based_cscore: " << res
+            logger().fine() << "behave_cscore: " << res
                             << " complexity: " << cpxy;
         }
 
@@ -211,7 +207,7 @@ struct bscore_based_cscore : public cscore_base
         _bscorer.ignore_idxs(idxs);
     }
 
-    const BScorer& _bscorer;
+    const bscore_base& _bscorer;
 };
 
 /**
