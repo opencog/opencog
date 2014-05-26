@@ -133,14 +133,24 @@ struct bscore_base : public unary_function<combo_tree, behavioral_score>
         return tree_complexity(tr);
     }
 
-    // Store a complexity coeeficient with the scorerer.  This is
-    // done to work around the fact that different kinds of scorers
-    // normalize their scores in different ways, and so the perhaps
-    // the way the penalties are scaled should be appropirately scaled
-    // as well. Now, of course, the user could just specify a different
-    // scale on the moses command line, but perhaps this inflicts too
-    // much effort on the user.  Thus, we maintain a "suggested" scaling
-    // here.  XXX TODO: this should be reviewed and maybe reworked??
+    /// Return the complexity coefficient.  This is used to obtain the
+    /// complexity penalty for the score, which is meant to be computed
+    /// as penalty = get_complexity_coef() * get_complexity(tree);
+    /// This is done in two steps like this, because different scorers
+    /// use a different scale, and so the complexity needs to be rescaled.
+    /// Furthermore, different scorers also have a different notion of
+    /// complexity. This is the opportunity to make adjustments for each
+    /// case.
+    virtual score_t get_complexity_coef() const { return _complexity_coef; }
+
+    /// Store a complexity coefficient with the scorerer.  This is
+    /// done to work around the fact that different kinds of scorers
+    /// normalize their scores in different ways, and so the way that
+    /// the penalties are scaled should differ as well.
+    /// Strictly speaking, the user could just specify a different
+    /// scale on the moses command line, but perhaps this inflicts too
+    /// much effort on the user.  Thus, we maintain a "suggested" scaling
+    /// here.
     virtual void set_complexity_coef(score_t complexity_ratio);
     virtual void set_complexity_coef(unsigned alphabet_size, float p);
 
@@ -158,15 +168,18 @@ protected:
  * 1) avoids some redundancy of having the summation in many places
  * 2) Helps with keeping the score-caching code cleaner.
  */
-struct behave_cscore : public cscore_base
+class behave_cscore : public cscore_base
 {
+public:
     behave_cscore(const bscore_base& sr) : _bscorer(sr) {}
 
     composite_score operator()(const combo_tree& tr) const
     {
+        behavioral_score bs;
+        complexity_t cpxy = 0.0;
         try {
-            behavioral_score bs = _bscorer(tr);
-            return operator()(bs, _bscorer.get_complexity(tr));
+            bs = _bscorer(tr);
+            cpxy = _bscorer.get_complexity(tr);
         }
         catch (EvalException& ee)
         {
@@ -174,9 +187,9 @@ struct behave_cscore : public cscore_base
             // valid domain (negative input log or division by zero),
             // or outputs a value which is not representable (too
             // large exp or log). The error is logged as level fine
-            // because its happens very often when learning continuous
-            // functions, and it gets too much in the way if logged at
-            // a lower level.
+            // because this happens very often when learning continuous
+            // functions, and it clogs up the log when logged at a
+            // higher level.
             logger().fine()
                << "The following candidate: " << tr << "\n"
                << "has failed to be evaluated, "
@@ -185,20 +198,17 @@ struct behave_cscore : public cscore_base
 
             return worst_composite_score;
         }
-    }
 
-    // Hmmm, this could be static, actually ... 
-    composite_score operator()(const behavioral_score& bs,
-                               complexity_t cpxy) const
-    {
         score_t res = boost::accumulate(bs, 0.0);
 
+        score_t cpxy_coef = _bscorer.get_complexity_coef();
         if (logger().isFineEnabled()) {
             logger().fine() << "behave_cscore: " << res
-                            << " complexity: " << cpxy;
+                            << " complexity: " << cpxy 
+                            << " cpxy_coeff: " << cpxy_coef;
         }
 
-        return composite_score(res, cpxy, 0.0, 0.0);
+        return composite_score(res, cpxy, cpxy * cpxy_coef, 0.0);
     }
 
 
@@ -223,6 +233,7 @@ struct behave_cscore : public cscore_base
         _bscorer.ignore_idxs(idxs);
     }
 
+private:
     const bscore_base& _bscorer;
 };
 

@@ -443,7 +443,7 @@ behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
-complexity_t enum_graded_bscore::get_complexity(const combo:combo_tree& tr) const
+complexity_t enum_graded_bscore::get_complexity(const combo::combo_tree& tr) const
 {
     return graded_complexity(tr.begin());
 }
