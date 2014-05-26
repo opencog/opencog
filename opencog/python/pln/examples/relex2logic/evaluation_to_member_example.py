@@ -15,7 +15,8 @@ __init__(atomspace)
 
 coreTypes = "opencog/atomspace/core_types.scm"
 utilities = "opencog/scm/utilities.scm"
-data = "opencog/python/pln/examples/relex2logic/evaluation-to-member.scm"
+#data = "opencog/python/pln/examples/relex2logic/evaluation-to-member.scm"
+data = "opencog/python/pln/examples/relex2logic/r2l-outpust-test.scm"
 
 for item in [coreTypes, utilities, data]:
     load_scm(atomspace, item)
