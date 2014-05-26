@@ -61,60 +61,68 @@ score_t discrete_complexity_coef(unsigned alphabet_size, double p);
 /// Note: this returns NEGATIVE values.
 score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
 
-// Abstract scoring function class to implement
+/// Abstract base class for obtaining the composite score.
 struct cscore_base : public unary_function<combo_tree, composite_score>
 {
-    // Evaluate the candidate tr
+    /// Evaluate the candidate combo_tree tr
     virtual composite_score operator()(const combo_tree& tr) const = 0;
 
-    // Return the best possible score achievable with that fitness
-    // function. This is useful in order to stop running MOSES when
-    // the best possible score is reached. If not overloaded it will
-    // return best_score (constant defined under
-    // opencog/learning/moses/moses/types.h)
+    /// Return the best possible score achievable with this fitness
+    /// function. This is useful for stopping MOSES when  the best
+    /// possible score has been reached. If not overloaded, it will
+    /// return very_best_score (which is a constant defined in
+    /// opencog/learning/moses/moses/types.h)
     virtual score_t best_possible_score() const { return very_best_score; }
 
-    // Return the minimum value considered for improvement (by
-    // default return 0)
+    /// Return the minimum value considered for improvementa.
+    /// Return 0 by default.
     virtual score_t min_improv() const { return 0.0; }
 
-    // In case the fitness function can be sped-up when certain
-    // features are ignored. The features are indicated as set of
-    // indices (from 0). The method provided by default does nothing
-    // (no speed-up).
-    //
-    // There is also another case. When a new deme is spawn if some
-    // features are ignored then the best_possible_score might be
-    // lower, it's good to compute it in order to stop deme search. If
-    // ignore_idxs is set then best_possible_score() can be recalled
-    // to get thta new ma score value.
+    /// Indicate a set of features that should be ignored during scoring,
+    /// The features are indicated as indexes, starting from 0.
+    ///
+    /// The primary use-case is for speeding up fitness evaluation. (???)
+    ///
+    /// Note that the best_possible_score may depend on the set of
+    /// ignored features. Thus, the best_possible_score() method should
+    /// be called only after the ignore idex have been set.
     virtual void ignore_idxs(const std::set<arity_t>&) const {}
 
     virtual ~cscore_base(){}
 };
 
-// Abstract bscoring function class to implement
+/// Abstract base class for behavioral scoring
 struct bscore_base : public unary_function<combo_tree, behavioral_score>
 {
     bscore_base() {};
     virtual ~bscore_base() {};
 
-    // Evaluate the candidate tr
-    virtual behavioral_score operator()(const combo_tree& tr) const = 0;
+    /// Return the behavioral score for the candidate combo_tree
+    virtual behavioral_score operator()(const combo_tree&) const = 0;
 
-    // Return the best possible bscore achievable with that fitness
-    // function. This is useful in order to stop running MOSES when
-    // the best possible score is reached
+    /// Return the best possible bscore achievable with this fitness
+    /// function. This is useful for stopping MOSES when the best
+    /// possible score has been reached.
     virtual behavioral_score best_possible_bscore() const = 0;
 
-    // Return the minimum value considered for improvement.
-    // Return 0 by default.
+    /// Return the smallest change in the score which can be considered
+    /// to be an improvement over the previous score. This is useful for
+    /// avoiding local maxima which have a very flat top. That is, where
+    /// all combo trees in the same local maximum have almost exactly
+    /// the same score, and so scores improve by very small amounts
+    /// during the search.  In such cases, one can save a lot of CPU
+    /// time by terminating the search when the imrpovements are smaller
+    /// than the min_improv(). Returns 0.0 by default.
     virtual score_t min_improv() const { return 0.0; }
 
-    // In case the fitness function can be sped-up when certain
-    // features are ignored. The features are indicated as set of
-    // indices (from 0). The method provided by default does nothing
-    // (no speed-up).
+    /// Indicate a set of features that should be ignored during scoring,
+    /// The features are indicated as indexes, starting from 0.
+    ///
+    /// The primary use-case is for speeding up fitness evaluation. (???)
+    ///
+    /// Note that the best_possible_score may depend on the set of
+    /// ignored features. Thus, the best_possible_score() method should
+    /// be called only after the ignore idex have been set.
     virtual void ignore_idxs(const std::set<arity_t>&) const {}
 
     // Store a complexity coeeficient with the scorerer.  This is
