@@ -193,6 +193,7 @@
 	)
 )
 
+;Example: "She is nice to help with the project."
 (define (to-do-rule-3 v1 v1_instance v2 v2_instance v3 v3_instance)
         (InheritanceLink (ConceptNode v1_instance) (ConceptNode v1))
         (InheritanceLink (PredicateNode v2_instance) (PredicateNode v2))
@@ -206,6 +207,19 @@
                         )
                 )
         )
+)
+
+;Example: "She must be able to sing."
+(define (to-do-rule-4 v1 v1_instance v2 v2_instance) 
+        (InheritanceLink (ConceptNode v2_instance) (ConceptNode v2))
+        (InheritanceLink (PredicateNode v1_instance) (PredicateNode v1))
+	(EvaluationLink
+		(PredicateNode "able_to")
+		(ListLink
+			(ConceptNode v2_instance)
+			(ConceptNode v1_instance)
+		)
+	)
 )
 
 (define (to-be-rule verb verb_ins adj adj_ins subj subj_ins)
