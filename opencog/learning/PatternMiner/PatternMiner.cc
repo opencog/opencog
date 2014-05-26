@@ -605,44 +605,39 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //    // debug
 //    if ((variableNodes.size() == 4) && (patternToMatch.size() == 3))
 //    {
-//        Handle firstEval = patternToMatch[0];
-//        if (originalAtomSpace->getType(firstEval) == EVALUATION_LINK)
+
+//        if ( (originalAtomSpace->getType(patternToMatch[0]) == EVALUATION_LINK) &&
+//             (originalAtomSpace->getType(patternToMatch[1]) == EVALUATION_LINK) &&
+//             (originalAtomSpace->getType(patternToMatch[2]) == INHERITANCE_LINK) )
 //        {
-//            Handle listH = originalAtomSpace->getOutgoing(firstEval,1);
 
-//            Handle bobNode = originalAtomSpace->getOutgoing(listH, 0);
+//            std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern: stop!" << std::endl;
 
-//            if (originalAtomSpace->getName(bobNode) == "Bob")
+//            // dump the atomspace to scm file
+//            HandleSeq allDumpNodes, allDumpLinks;
+//            originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
+
+//            // out put the n_gram patterns to a file
+//            ofstream dumpFile;
+//            string fileName = "DumpAtomspace.scm";
+//            std::cout<<"Debug: PatternMiner: dumping the curpos Atomspace to file " + fileName << std::endl;
+
+//            dumpFile.open(fileName.c_str());
+
+//            foreach(Handle h, allDumpNodes)
 //            {
-//                std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern: stop!" << std::endl;
-
-//                // dump the atomspace to scm file
-//                HandleSeq allDumpNodes, allDumpLinks;
-//                originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
-
-//                // out put the n_gram patterns to a file
-//                ofstream dumpFile;
-//                string fileName = "DumpAtomspace.scm";
-//                std::cout<<"Debug: PatternMiner: dumping the curpos Atomspace to file " + fileName << std::endl;
-
-//                dumpFile.open(fileName.c_str());
-
-//                foreach(Handle h, allDumpNodes)
-//                {
-//                    dumpFile << originalAtomSpace->atomAsString(h);
-//                }
-
-//                originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
-
-//                foreach(Handle h, allDumpLinks)
-//                {
-//                    dumpFile << originalAtomSpace->atomAsString(h);
-//                }
-
-//                dumpFile.close();
-
-//                std::terminate();
+//                dumpFile << originalAtomSpace->atomAsString(h);
 //            }
+
+//            originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
+
+//            foreach(Handle h, allDumpLinks)
+//            {
+//                dumpFile << originalAtomSpace->atomAsString(h);
+//            }
+
+//            dumpFile.close();
+
 //        }
 
 //    }
@@ -663,12 +658,15 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     //debug
     std::cout << originalAtomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
 
+
     originalAtomSpace->removeAtom(hResultListLink);
     originalAtomSpace->removeAtom(hBindLink);
+    originalAtomSpace->removeAtom(hAndLink);
 
     foreach (Handle listH , resultSet)
     {
         HNode->instances.push_back(originalAtomSpace->getOutgoing(listH));
+
     }
 
 }
