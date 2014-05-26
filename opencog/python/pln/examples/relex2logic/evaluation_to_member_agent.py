@@ -30,6 +30,8 @@ class EvaluationToMemberAgent(MindAgent):
             InheritanceToMemberRule(self.chainer))
         self.chainer.add_rule(
             MemberToEvaluationRule(self.chainer))
+        self.chainer.add_rule(
+            AbductionRule(self.chainer, types.InheritanceLink))
 
     def run(self, atomspace):
         if self.chainer is None:
