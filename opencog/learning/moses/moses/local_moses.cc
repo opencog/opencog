@@ -146,7 +146,7 @@ void local_moses(metapopulation& mp,
                << "\t" << ((int) stats.elapsed_secs)  // wall-clock time.
                << "\t" << mp.size()       // size of the metapopulation
                << "\t" << mp.best_score() // score of the highest-ranked exemplar.
-               << "\t" << get_complexity(mp.best_composite_score()); // as above.
+               << "\t" << mp.best_composite_score().get_complexity(); // as above.
             if (os) {
                 ss << "\t" << os->field_set_size  // number of bits in the knobs
                    << "\t" << os->nsteps  // number of iterations of optimizer

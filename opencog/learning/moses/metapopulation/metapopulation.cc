@@ -267,7 +267,7 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     // the iterator follows this order.
     for (const scored_combo_tree& bsct : *this) {
 
-        score_t sc = bsct.get_composite_score().get_penalized_score();
+        score_t sc = bsct.get_penalized_score();
 
         // Skip exemplars that have been visited enough
         const combo_tree& tr = bsct.get_tree();
@@ -397,7 +397,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
             [&, this](const scored_instance<composite_score>& inst) {
 
             const composite_score& inst_csc = inst.second;
-            score_t inst_sc = get_score(inst_csc);
+            score_t inst_sc = inst_csc.get_score();
             // if it's really bad stops
             if (inst_sc <= very_worst_score || !isfinite(inst_sc))
                 return;
@@ -600,7 +600,7 @@ void metapopulation::resize_metapop()
     // pointers to deallocate
     std::vector<scored_combo_tree*> ptr_seq;
 
-    score_t top_score = begin()->get_composite_score().get_penalized_score();
+    score_t top_score = begin()->get_penalized_score();
     score_t range = useful_score_range();
     score_t worst_score = top_score - range;
 
@@ -614,7 +614,7 @@ void metapopulation::resize_metapop()
     // Get the first score below worst_score (from begin() + min_pool_size)
     scored_combo_tree_ptr_set::iterator it = std::next(_scored_trees.begin(), min_pool_size);
     while (it != _scored_trees.end()) {
-        score_t sc = it->get_composite_score().get_penalized_score();
+        score_t sc = it->get_penalized_score();
         if (sc < worst_score) break;
         it++;
     }
@@ -741,12 +741,12 @@ void metapopulation::trim_down_demes(boost::ptr_vector<deme_t>& demes) const
         }
 
         if (min_pool_size < deme.size()) {
-            score_t top_sc = get_penalized_score(deme.begin()->second);
+            score_t top_sc = deme.begin()->second.get_penalized_score();
             score_t bot_sc = top_sc - useful_score_range();
 
             for (size_t i = deme.size()-1; 0 < i; --i) {
                 const composite_score &cscore = deme[i].second;
-                score_t score = get_penalized_score(cscore);
+                score_t score = cscore.get_penalized_score();
                 if (score < bot_sc) {
                     deme.pop_back();
                 }
@@ -778,21 +778,21 @@ void metapopulation::update_best_candidates(const scored_combo_tree_set& candida
     // absolute score order.  Thus, we need to search through
     // the first few to find the true best score.  Also, there
     // may be several candidates with the best score.
-    score_t best_sc = get_score(_best_cscore);
-    complexity_t best_cpx = get_complexity(_best_cscore);
+    score_t best_sc = _best_cscore.get_score();
+    complexity_t best_cpx = _best_cscore.get_complexity();
 
     for (const scored_combo_tree& cnd : candidates)
     {
         const composite_score& csc = cnd.get_composite_score();
-        score_t sc = get_score(csc);
-        complexity_t cpx = get_complexity(csc);
+        score_t sc = csc.get_score();
+        complexity_t cpx = csc.get_complexity();
         if ((sc > best_sc) || ((sc == best_sc) && (cpx <= best_cpx)))
         {
             if ((sc > best_sc) || ((sc == best_sc) && (cpx < best_cpx)))
             {
                 _best_cscore = csc;
-                best_sc = get_score(_best_cscore);
-                best_cpx = get_complexity(_best_cscore);
+                best_sc = _best_cscore.get_score();
+                best_cpx = _best_cscore.get_complexity();
                 _best_candidates.clear();
                 logger().debug() << "New best score: " << _best_cscore;
             }

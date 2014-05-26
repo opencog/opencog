@@ -52,13 +52,13 @@ using boost::transform_iterator;
 // basic types //
 /////////////////
 
-// a score_t is defined as float rather than double to save memory and
+// A score_t is defined as float rather than double to save memory and
 // limit the number of decimals needed in IO (such as logging) so that
 // tools that need its textual representation can stay in sync with
 // what's in RAM with less digits. If that precision is not enough,
 // please try first to change the internal scoring function types then
 // convert the result to score_t before changing its typedef to
-// double, float as final score type is likely enough
+// double, since float as the final score type is likely enough.
 typedef float score_t;
 
 // score precision used for logging and outputting results, it is set
@@ -167,6 +167,8 @@ extern const composite_score worst_composite_score;
 /// been called thus far. BREADTH_FIRST is the index of the deme created
 /// by a single call of the deme expander. The initial metapopulation
 /// comes from demeID "0".
+//
+// XXX wouldn't it be better to store ints here ??
 struct demeID_t : public std::string
 {
     demeID_t(unsigned expansion = 0 /* default initial deme */);
@@ -214,28 +216,18 @@ public:
     {
        return _cscore;
     }
+
+    /* Utility wrappers */
+    score_t get_score() const { return _cscore.get_score(); }
+    complexity_t get_complexity() const { return _cscore.get_complexity(); }
+    score_t get_penalized_score() const { return _cscore.get_penalized_score(); }
+    score_t get_complexity_penalty() const { return _cscore.get_complexity_penalty(); }
+    score_t get_diversity_penalty() const { return _cscore.get_diversity_penalty(); }
+    score_t get_penalty() const { return _cscore.get_penalty(); }
 };
 
-///////////////////////////
-// convenience accessors //
-///////////////////////////
-
-score_t get_penalized_score(const composite_score& sc);
-
-score_t get_score(const composite_score& ts);
-score_t get_score(const scored_combo_tree& bst);
-
-complexity_t get_complexity(const composite_score& ts);
-complexity_t get_complexity(const scored_combo_tree& bst);
-
-score_t get_complexity_penalty(const composite_score& ts);
-score_t get_complexity_penalty(const scored_combo_tree& bst);
-
-score_t get_diversity_penalty(const composite_score& ts);
-score_t get_diversity_penalty(const scored_combo_tree& bst);
-
-score_t get_penalty(const composite_score& ts);
-score_t get_penalty(const scored_combo_tree& bst);
+// =======================================================================
+// collections of trees
 
 /**
  * greater_than operator for scored_combo_tree.  The order is
@@ -280,10 +272,7 @@ typedef boost::ptr_set<scored_combo_tree,
 typedef scored_combo_tree_ptr_set::iterator scored_combo_tree_ptr_set_it;
 typedef scored_combo_tree_ptr_set::const_iterator scored_combo_tree_ptr_set_cit;
 
-typedef std::vector<scored_combo_tree> scored_combo_tree_seq;
-typedef scored_combo_tree_seq::iterator scored_combo_tree_seq_it;
-typedef scored_combo_tree_seq::const_iterator scored_combo_tree_seq_cit;
-
+// =======================================================================
 // ostream functions
 template<typename Out>
 Out& ostream_behavioral_score(Out& out, const behavioral_score& bs)

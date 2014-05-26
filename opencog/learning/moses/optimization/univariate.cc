@@ -76,7 +76,7 @@ unsigned univariate_optimization::operator()(deme_t& deme,
                (deme, n_select, n_generate, max_gens_total, iscorer,
                 terminate_if_gte_or_no_improv<composite_score>
                 (composite_score(opt_params.terminate_if_gte,
-                                  get_complexity(worst_composite_score),
+                                  worst_composite_score.get_complexity(),
                                   0),
                  max_gens_improv),
                 tournament_selection((unsigned)eda_params.selection),

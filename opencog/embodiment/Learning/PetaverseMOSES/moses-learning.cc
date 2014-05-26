@@ -279,7 +279,7 @@ const combo_tree& moses_learning::current_program()
 
         _used_for_owner.insert(_current_program);
 
-        fitness_t cur_est_fit = get_score(*mci);
+        fitness_t cur_est_fit = mci->get_score();
 
         //DEBUG INFO
         std::cout << "CURRENT FITNESS : " << cur_est_fit << std::endl;

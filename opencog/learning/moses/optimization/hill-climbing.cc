@@ -247,7 +247,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
         for (unsigned i = current_number_of_instances;
              deme.begin() + i != deme.end(); ++i) {
             const composite_score &inst_cscore = deme[i].second;
-            score_t iscore = get_penalized_score(inst_cscore);
+            score_t iscore = inst_cscore.get_penalized_score();
             if (iscore >  best_score) {
                 best_cscore = inst_cscore;
                 best_score = iscore;
@@ -259,7 +259,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
             // weighted score.  We need the raw score for the
             // termination condition, as, in the final answer, we
             // want the best raw score, not the best weighted score.
-            score_t rscore = get_score(inst_cscore);
+            score_t rscore = inst_cscore.get_score();
             if (rscore >  best_raw_score) {
                 best_raw_score = rscore;
             }
@@ -387,7 +387,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
                 << best_score - prev_hi << "\t"  /* previous weighted */
                 << best_raw_score << "\t"     /* non-weighted, raw score */
                 << best_raw_score - prev_best_raw << "\t"
-                << get_complexity(best_cscore);
+                << best_cscore.get_complexity();
         }
 
         /* If this is the first time through the loop, then
@@ -733,7 +733,7 @@ size_t hill_climbing::resize_by_score(deme_t& deme, score_t cutoff)
          auto last = deme.end();
          size_t contig = 0;
          for (auto it = deme.begin(); it != deme.end(); it++) {
-             score_t iscore = get_penalized_score(it->second);
+             score_t iscore = it->second.get_penalized_score();
              if (iscore <= cutoff) {
                  if (0 == contig) first = it;
                  last = it;
@@ -775,7 +775,7 @@ bool hill_climbing::resize_deme(deme_t& deme, score_t best_score)
     // To find the number of bad scores, we have to look
     // at the *whole* deme.
     for (const deme_inst_t& si : deme) {
-        score_t iscore = get_penalized_score(si.second);
+        score_t iscore = si.second.get_penalized_score();
         if (iscore <=  cutoff)
             bad_score_cnt++;
     }
