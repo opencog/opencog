@@ -209,6 +209,7 @@ private:
  */
 class multibehave_cscore : public cscore_base
 {
+public:
     typedef boost::ptr_vector<bscore_base> BScorerSeq;
     
     /// ctor

@@ -171,10 +171,11 @@ void ip_problem::run(problem_params& pms)
         set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio);
         bscores.push_back(r);
     }
-    multibscore_based_bscore bscore(bscores);
-    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
+    multibehave_cscore mbcscore(bscores);
+    multibscore_based_bscore bscore(bscores); // XXX TODO REMOVE ME
     metapop_moses_results(pms.exemplars, tt,
-                          *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
+                          *pms.bool_reduct, *pms.bool_reduct_rep, 
+                          bscore, mbcscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 
@@ -213,8 +214,10 @@ void ann_table_problem::run(problem_params& pms)
 
     contin_bscore bscore(tables.front());
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
+    behave_cscore cscore(bscore);
     metapop_moses_results(pms.exemplars, tt,
-                          reduct::ann_reduction(), reduct::ann_reduction(), bscore,
+                          reduct::ann_reduction(), reduct::ann_reduction(),
+                          bscore, cscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }
@@ -246,10 +249,10 @@ void ann_table_problem::run(problem_params& pms)
         set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio); \
         bscores.push_back(r);                                        \
     }                                                                \
+    multibehave_cscore mbcscore(bscores);                            \
     multibscore_based_bscore bscore(bscores);                        \
-    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio); \
     metapop_moses_results(pms.exemplars, cand_sig,                   \
-                      REDUCT, REDUCT_REP, bscore,                    \
+                      REDUCT, REDUCT_REP, bscore, mbcscore,          \
                       pms.opt_params, pms.hc_params, pms.meta_params, \
                       pms.moses_params, pms.mmr_pa);                 \
 }
@@ -294,10 +297,11 @@ void pre_table_problem::run(problem_params& pms)
                                                      pms.festor_params);
     }
 
+    multibehave_cscore mbcscore(bscores);
     multibscore_based_bscore bscore(bscores);
-    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
     metapop_moses_results(pms.exemplars, cand_sig,
-                          *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
+                          *pms.bool_reduct, *pms.bool_reduct_rep,
+                          bscore, mbcscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 
@@ -332,10 +336,11 @@ void pre_conj_table_problem::run(problem_params& pms)
         pms.meta_params.fstor = new feature_selector(ctables.front(),
                                                  pms.festor_params);
     }
-    multibscore_based_bscore bscore(bscores);
-    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
+    multibehave_cscore mbcscore(bscores);
+    multibscore_based_bscore bscore(bscores); // XXX TODO REMOVE ME
     metapop_moses_results(pms.exemplars, cand_sig,
-                          *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
+                          *pms.bool_reduct, *pms.bool_reduct_rep,
+                          bscore, mbcscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }
