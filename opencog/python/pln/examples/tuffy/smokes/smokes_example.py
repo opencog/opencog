@@ -32,7 +32,7 @@ for atom in atoms:
 MAX_STEPS = 500
 
 chainer = InferenceAgent()
-chainer.create_chainer(atomspace=atomspace)
+chainer.create_chainer(atomspace=atomspace, stimulate_atoms=False)
 
 answer = False
 outputs_produced = 0
