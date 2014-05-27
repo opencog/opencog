@@ -94,7 +94,8 @@ protected:
 template<typename F,
          typename Hash=boost::hash<typename F::argument_type>,
          typename Equals=std::equal_to<typename F::argument_type> >
-struct lru_cache : public F, public cache_base {
+struct lru_cache : public F, public cache_base
+{
     typedef typename F::argument_type argument_type;
     typedef typename F::result_type result_type;
     typedef typename std::list<argument_type> list;
@@ -105,7 +106,7 @@ struct lru_cache : public F, public cache_base {
     typedef typename map::iterator map_iter;
 
     lru_cache(size_type n, const F& f=F(), const std::string name = "lru_cache")
-        : F(f), cache_base(n, name), _map(n+1) {}
+        : F(f), cache_base(n, name), _fu(f), _map(n+1) {}
 
     inline bool full() const { return _map.size()==_n; }
     inline bool empty() const { return _map.empty(); }
@@ -182,13 +183,14 @@ struct lru_cache : public F, public cache_base {
     }
 
 protected:
+    const F& _fu;
     mutable map _map;
     mutable list _lru; // this list is only here so that we know what
                        // is the last used element to remove it from
                        // the cache when it gets full
 
     inline result_type _f(const argument_type& x) const {
-        return F::operator()(x);
+        return _fu(x);
     }
 
     // increment failure and call
@@ -219,7 +221,8 @@ protected:
 template<typename F,
          typename Hash=boost::hash<typename F::argument_type>,
          typename Equals=std::equal_to<typename F::argument_type> >
-struct lru_cache_threaded : public lru_cache<F, Hash, Equals> {
+struct lru_cache_threaded : public lru_cache<F, Hash, Equals>
+{
 private:
     typedef lru_cache<F, Hash, Equals> super;
     typedef boost::shared_mutex cache_mutex;
@@ -366,7 +369,7 @@ struct prr_cache : public F, public cache_base
     typedef typename map::iterator map_iter;
 
     prr_cache(size_type n, const F& f=F(), const std::string name = "prr_cache")
-        : F(f), cache_base(n, name), _map(n+1) {}
+        : F(f), cache_base(n, name), _fu(f), _map(n+1) {}
 
     bool full() const { return _map.size() == _n; }
     bool empty() const { return _map.empty(); }
@@ -403,18 +406,19 @@ struct prr_cache : public F, public cache_base
     }
 
 protected:
+    const F& _fu;
     mutable map _map;
 
     inline result_type _f(const argument_type& x) const
     {
-        return F::operator()(x);
+        return _fu(x);
     }
 
     // increment misses and call
     inline result_type if_f(const argument_type& x) const
     {
         ++_misses;
-        return _f(x);
+        return _fu(x);
     }
 
 };
