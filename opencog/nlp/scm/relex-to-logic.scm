@@ -218,7 +218,8 @@
 		(PredicateNode "able_to")
 		(ListLink
 			(ConceptNode v2_instance)
-			(ConceptNode v1_instance)
+			(PredicateNode v1_instance)
+			
 		)
 	)
 )
