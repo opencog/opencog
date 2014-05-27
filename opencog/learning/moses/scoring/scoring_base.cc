@@ -61,32 +61,111 @@ void bscore_base::set_complexity_coef(score_t complexity_ratio)
     logger().info() << "BScore complexity ratio = " << 1.0/_complexity_coef;
 }
 
-//////////////////////////////
-// multibscore_based_bscore //
-//////////////////////////////
+////////////////////
+// behave_cscore //
+///////////////////
 
-// main operator
-behavioral_score multibscore_based_bscore::operator()(const combo_tree& tr) const
+composite_score behave_cscore::operator()(const combo_tree& tr) const
 {
-    behavioral_score bs;
-    for (const bscore_base& bsc : _bscorers) {
-        behavioral_score abs = bsc(tr);
-        boost::push_back(bs, abs);
+    score_t res = 0.0;
+    try {
+        res = boost::accumulate(_bscorer(tr), 0.0);
     }
-    return bs;
+    catch (EvalException& ee)
+    {
+        // Exceptions are raised when operands are out of their
+        // valid domain (negative input log or division by zero),
+        // or outputs a value which is not representable (too
+        // large exp or log). The error is logged as level fine
+        // because this happens very often when learning continuous
+        // functions, and it clogs up the log when logged at a
+        // higher level.
+        logger().fine()
+           << "The following candidate: " << tr << "\n"
+           << "has failed to be evaluated, "
+           << "raising the following exception: "
+           << ee.get_message() << " " << ee.get_vertex();
+
+        return worst_composite_score;
+    }
+
+    complexity_t cpxy = _bscorer.get_complexity(tr);
+    score_t cpxy_coef = _bscorer.get_complexity_coef();
+    if (logger().isFineEnabled()) {
+        logger().fine() << "behave_cscore: " << res
+                        << " complexity: " << cpxy
+                        << " cpxy_coeff: " << cpxy_coef;
+    }
+
+    return composite_score(res, cpxy, cpxy * cpxy_coef, 0.0);
 }
 
-behavioral_score multibscore_based_bscore::best_possible_bscore() const
+
+////////////////////////
+// multibehave_cscore //
+////////////////////////
+
+// main operator
+composite_score multibehave_cscore::operator()(const combo_tree& tr) const
 {
-    behavioral_score bs;
+    score_t sum_score = 0.0;
+    score_t sum_coef = 0.0;
+    score_t sum_penalty = 0.0;
+
     for (const bscore_base& bsc : _bscorers) {
-        boost::push_back(bs, bsc.best_possible_bscore());
+        score_t res = 0.0;
+        try {
+            res = boost::accumulate(bsc(tr), 0.0);
+        }
+        catch (EvalException& ee)
+        {
+            // Exceptions are raised when operands are out of their
+            // valid domain (negative input log or division by zero),
+            // or outputs a value which is not representable (too
+            // large exp or log). The error is logged as level fine
+            // because this happens very often when learning continuous
+            // functions, and it clogs up the log when logged at a
+            // higher level.
+            logger().fine()
+               << "The following candidate: " << tr << "\n"
+               << "has failed to be evaluated, "
+               << "raising the following exception: "
+               << ee.get_message() << " " << ee.get_vertex();
+
+            return worst_composite_score;
+        }
+
+        complexity_t cpxy = bsc.get_complexity(tr);
+        score_t cpxy_coef = bsc.get_complexity_coef();
+
+        sum_score += res;
+        sum_coef += cpxy_coef;
+        sum_penalty += cpxy_coef * cpxy;  // weighted sum !!
     }
-    return bs;
+
+    // Weighted average complexity over all results.
+    score_t cpxy = sum_penalty / sum_coef;
+
+    if (logger().isFineEnabled()) {
+        logger().fine() << "behave_cscore: " << sum_score
+                        << " complexity: " << cpxy
+                        << " penalty: " << sum_penalty;
+    }
+
+    return composite_score(sum_score, cpxy, sum_penalty, 0.0);
+}
+
+score_t multibehave_cscore::best_possible_bscore() const
+{
+    score_t best = 0.0;
+    for (const bscore_base& bsc : _bscorers) {
+        best += boost::accumulate(bsc.best_possible_bscore(), 0.0);
+    }
+    return best;
 }
 
 // return the min of all min_improv
-score_t multibscore_based_bscore::min_improv() const
+score_t multibehave_cscore::min_improv() const
 {
     // @todo can be turned in to 1-line with boost::min_element
     // boost::min_element(_bscorers | boost::transformed(/*)
@@ -96,7 +175,7 @@ score_t multibscore_based_bscore::min_improv() const
     return res;
 }
 
-void multibscore_based_bscore::ignore_idxs(const std::set<arity_t>& idxs) const
+void multibehave_cscore::ignore_idxs(const std::set<arity_t>& idxs) const
 {
     for (const bscore_base& bs : _bscorers)
         bs.ignore_idxs(idxs);

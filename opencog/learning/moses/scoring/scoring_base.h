@@ -173,53 +173,16 @@ class behave_cscore : public cscore_base
 public:
     behave_cscore(const bscore_base& sr) : _bscorer(sr) {}
 
-    composite_score operator()(const combo_tree& tr) const
-    {
-        behavioral_score bs;
-        complexity_t cpxy = 0.0;
-        try {
-            bs = _bscorer(tr);
-            cpxy = _bscorer.get_complexity(tr);
-        }
-        catch (EvalException& ee)
-        {
-            // Exceptions are raised when operands are out of their
-            // valid domain (negative input log or division by zero),
-            // or outputs a value which is not representable (too
-            // large exp or log). The error is logged as level fine
-            // because this happens very often when learning continuous
-            // functions, and it clogs up the log when logged at a
-            // higher level.
-            logger().fine()
-               << "The following candidate: " << tr << "\n"
-               << "has failed to be evaluated, "
-               << "raising the following exception: "
-               << ee.get_message() << " " << ee.get_vertex();
+    composite_score operator()(const combo_tree& tr) const;
 
-            return worst_composite_score;
-        }
-
-        score_t res = boost::accumulate(bs, 0.0);
-
-        score_t cpxy_coef = _bscorer.get_complexity_coef();
-        if (logger().isFineEnabled()) {
-            logger().fine() << "behave_cscore: " << res
-                            << " complexity: " << cpxy 
-                            << " cpxy_coeff: " << cpxy_coef;
-        }
-
-        return composite_score(res, cpxy, cpxy * cpxy_coef, 0.0);
-    }
-
-
-    // Returns the best score reachable for that problem. Used as
-    // termination condition.
+    /// Returns the best score reachable for this problem. Used as
+    /// termination condition.
     score_t best_possible_score() const
     {
         return boost::accumulate(_bscorer.best_possible_bscore(), 0.0);
     }
 
-    // Return the minimum value considered for improvement
+    /// Return the minimum value considered for improvement.
     score_t min_improv() const
     {
         return _bscorer.min_improv();
@@ -238,30 +201,34 @@ private:
 };
 
 /**
- * Behavioral scorer defined by multiple behavioral scoring functions.
+ * Composite scorer defined by multiple behavioral scoring functions.
  * This is done when the problem to solve is defined in terms of multiple
- * problems. For now the multiple scores have the same type as defined
- * by the template argument BScorer.
+ * problems.  Much like the above, but accumulated multiple behavioral
+ * scores.
  */
-struct multibscore_based_bscore : public bscore_base
+class multibehave_cscore : public cscore_base
 {
     typedef boost::ptr_vector<bscore_base> BScorerSeq;
     
-    // ctors
-    multibscore_based_bscore(const BScorerSeq& bscorers) : _bscorers(bscorers) {}
+    /// ctor
+    multibehave_cscore(const BScorerSeq& bscorers) : _bscorers(bscorers) {}
 
-    // main operator
-    behavioral_score operator()(const combo_tree& tr) const;
+    /// Main entry point
+    composite_score operator()(const combo_tree& tr) const;
 
+    /// Returns the best score reachable for the problems. Used as
+    /// termination condition.
     behavioral_score best_possible_bscore() const;
 
-    // return the min of all min_improv
+    /// Return the minimum value considered for improvement.
+    /// This will be the the min of all min_improv.
     score_t min_improv() const;
 
-    // In case the fitness function can be sped-up when certain
-    // features are ignored. The features are indicated as set of
-    // indices (from 0).
+    /// In case the fitness function can be sped-up when certain
+    /// features are ignored. The features are indicated as set of
+    /// indices (from 0).
     void ignore_idxs(const std::set<arity_t>&) const;
+
 
 protected:
     const BScorerSeq& _bscorers;
