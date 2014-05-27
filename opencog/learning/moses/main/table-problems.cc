@@ -172,6 +172,7 @@ void ip_problem::run(problem_params& pms)
         bscores.push_back(r);
     }
     multibscore_based_bscore bscore(bscores);
+    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
     metapop_moses_results(pms.exemplars, tt,
                           *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
@@ -246,6 +247,7 @@ void ann_table_problem::run(problem_params& pms)
         bscores.push_back(r);                                        \
     }                                                                \
     multibscore_based_bscore bscore(bscores);                        \
+    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio); \
     metapop_moses_results(pms.exemplars, cand_sig,                   \
                       REDUCT, REDUCT_REP, bscore,                    \
                       pms.opt_params, pms.hc_params, pms.meta_params, \
@@ -293,6 +295,7 @@ void pre_table_problem::run(problem_params& pms)
     }
 
     multibscore_based_bscore bscore(bscores);
+    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
     metapop_moses_results(pms.exemplars, cand_sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
@@ -330,6 +333,7 @@ void pre_conj_table_problem::run(problem_params& pms)
                                                  pms.festor_params);
     }
     multibscore_based_bscore bscore(bscores);
+    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
     metapop_moses_results(pms.exemplars, cand_sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,

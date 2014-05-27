@@ -88,7 +88,7 @@ behavioral_score multibscore_based_bscore::best_possible_bscore() const
 // return the min of all min_improv
 score_t multibscore_based_bscore::min_improv() const
 {
-    /// @todo can be turned in to 1-line with boost::min_element
+    // @todo can be turned in to 1-line with boost::min_element
     // boost::min_element(_bscorers | boost::transformed(/*)
     score_t res = very_best_score;
     for (const bscore_base& bs : _bscorers)

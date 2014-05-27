@@ -94,7 +94,7 @@ struct cscore_base : public unary_function<combo_tree, composite_score>
 /// Abstract base class for behavioral scoring
 struct bscore_base : public unary_function<combo_tree, behavioral_score>
 {
-    bscore_base() {};
+    bscore_base() : _complexity_coef(0.0) {};
     virtual ~bscore_base() {};
 
     /// Return the behavioral score for the candidate combo_tree
