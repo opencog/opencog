@@ -11,7 +11,7 @@
 )
 (EvaluationLink (PredicateNode "rules") 
 	(ListLink 
-		(ConceptNode "EvaluationToMemberRule")
+		(ConceptNode "GeneralEvaluationToMemberRule")
 	)
 )
 (EvaluationLink (PredicateNode "forwardSteps")

@@ -44,7 +44,7 @@ Important notes:
 
 PLN rules needed:
 
-- EvaluationToMemberRule
+- GeneralEvaluationToMemberRule
 - MemberToInheritanceRule
 - DeductionRule
 - InheritanceToMemberRule
@@ -105,7 +105,7 @@ changed for concept instances later.
 
 #### Inference steps
 
-##### 1) EvaluationToMemberRule 
+##### 1) GeneralEvaluationToMemberRule
 
 ###### Input
 ```

@@ -43,7 +43,7 @@ class PLNUnitTester(TestCase):
         #self.addTestFile("SimilarityRule_And.scm")
 
         # Amen is looking at this one:
-        #self.addTestFile("EvaluationToMemberRule.scm")
+        #self.addTestFile("GeneralEvaluationToMemberRule.scm")
 
         # Following tests give results that don't match or exceed expectations:
         #self.addTestFile("LionTigerAS_new.scm") # Lots of stuff
@@ -435,7 +435,7 @@ class AllRules(object):
         self.chainer.add_rule(
             IntensionalSimilarityEvaluationRule(self.chainer))
 
-        # self.member_rules = [EvaluationToMemberRule(self.chainer),
+        # self.member_rules = [GeneralEvaluationToMemberRule(self.chainer),
         #     MemberToEvaluationRule(self.chainer)]
         # self.member_rules += \
         #     create_general_evaluation_to_member_rules(self.chainer)

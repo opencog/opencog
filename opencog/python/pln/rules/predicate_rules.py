@@ -10,7 +10,7 @@ from pln.rule import Rule
 # can be handled trivially using the existing first-order PLN rules.
 # This is where we handle some other special cases.
 
-# Cases with variables can be handled by EvaluationToMemberRule
+# Cases with variables can be handled by GeneralEvaluationToMemberRule
 # (in other file). But it would be better to do it implicitly, so
 # you don't have the separate steps of converting from FOL to HOL
 # and back again.

@@ -76,7 +76,7 @@ and extensional parts separately
   can find nearby things using the space/time servers
 * You can probably get past toddler-level AI without having to use
   predicate logic much. And it may be easier to convert 2+ place
-  predicates into 1-place predicates (see EvaluationToMemberRule)
+  predicates into 1-place predicates (see GeneralEvaluationToMemberRule)
 '''
 
 
