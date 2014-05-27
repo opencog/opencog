@@ -218,7 +218,7 @@ class multibehave_cscore : public cscore_base
 
     /// Returns the best score reachable for the problems. Used as
     /// termination condition.
-    behavioral_score best_possible_bscore() const;
+    score_t best_possible_score() const;
 
     /// Return the minimum value considered for improvement.
     /// This will be the the min of all min_improv.

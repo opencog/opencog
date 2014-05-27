@@ -155,7 +155,7 @@ composite_score multibehave_cscore::operator()(const combo_tree& tr) const
     return composite_score(sum_score, cpxy, sum_penalty, 0.0);
 }
 
-score_t multibehave_cscore::best_possible_bscore() const
+score_t multibehave_cscore::best_possible_score() const
 {
     score_t best = 0.0;
     for (const bscore_base& bsc : _bscorers) {
