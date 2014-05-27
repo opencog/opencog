@@ -1,6 +1,6 @@
 (define neighbors (PredicateNode "neighbors"))
 (define knows (PredicateNode "knows"))
-(define hasMet (PredicateNode "HaveMet"))
+(define hasMet (PredicateNode "HasMet"))
 (define sick (PredicateNode "sick"))
 (define tired (PredicateNode "tired"))
 (define intelligent (ConceptNode "intelligent"))

@@ -403,8 +403,10 @@ class AtomSpaceBasedInferenceHistory:
         apps = [app for app in apps if not self._get_rule(app).name.startswith('$')]
         # It will find the template as one of the matches
         #apps.remove(template)
-        #self._history_atomspace.remove(template)
-        #self._history_atomspace.remove(inputs, recursive=True)
+
+        self._history_atomspace.remove(template)
+        self._history_atomspace.remove(inputs, recursive=True)
+        self._history_atomspace.remove(rule, recursive=True)
 
         assert all(app in self._history_atomspace for app in apps)
         return apps
