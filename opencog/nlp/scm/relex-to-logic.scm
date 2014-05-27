@@ -152,7 +152,7 @@
 	(EvaluationLink (PredicateNode "On") (ConceptNode w1_instance) (ConceptNode w2_instance))
 )
 
-; Example: "She is going to help John."
+; Example: "She wants to help John."
 (define (to-do-rule-1 v1 v1_instance v2 v2_instance s s_instance o o_instance)
 	(InheritanceLink (ConceptNode s_instance) (ConceptNode s))
 	(InheritanceLink (ConceptNode o_instance) (ConceptNode o))
@@ -230,9 +230,9 @@
 	(InheritanceLink (PredicateNode verb2_instance) (PredicateNode verb2))
 	(EvaluationLink
 		(PredicateNode verb1_instance)
-		(ListLink
+		(EvaluationLink
+			(PredicateNode verb2_instance)		 
 			(ConceptNode subj_instance)
-			(PredicateNode verb2_instance)
 		)
 	)
 )
