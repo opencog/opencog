@@ -70,8 +70,10 @@ void bool_problem_base::run(problem_params& pms)
     unsigned as = alphabet_size(sig, pms.ignore_ops);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
+    behave_cscore cscore(bscore);
     metapop_moses_results(pms.exemplars, sig,
-                          *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
+                          *pms.bool_reduct, *pms.bool_reduct_rep,
+                          bscore, cscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }
@@ -219,8 +221,10 @@ void polynomial_problem::run(problem_params& pms)
                          it, eft);
 
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
+    behave_cscore cscore(bscore);
     metapop_moses_results(pms.exemplars, tt,
-                          *pms.contin_reduct, *pms.contin_reduct, bscore,
+                          *pms.contin_reduct, *pms.contin_reduct,
+                          bscore, cscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }
@@ -324,8 +328,10 @@ void combo_problem::run(problem_params& pms)
     if (output_type == id::boolean_type) {
         // @todo: Occam's razor and nsamples is not taken into account
         logical_bscore bscore(tr, arity);
+        behave_cscore cscore(bscore);
         metapop_moses_results(pms.exemplars, tt,
-                              *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
+                              *pms.bool_reduct, *pms.bool_reduct_rep,
+                              bscore, cscore,
                               pms.opt_params, pms.hc_params, pms.meta_params,
                               pms.moses_params, pms.mmr_pa);
     }
@@ -364,8 +370,10 @@ void combo_problem::run(problem_params& pms)
 
         contin_bscore bscore(ot, it);
         set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
+        behave_cscore cscore(bscore);
         metapop_moses_results(pms.exemplars, tt,
-                              *pms.contin_reduct, *pms.contin_reduct, bscore,
+                              *pms.contin_reduct, *pms.contin_reduct,
+                              bscore, cscore,
                               pms.opt_params, pms.hc_params, pms.meta_params,
                               pms.moses_params, pms.mmr_pa);
     } else {
@@ -411,8 +419,10 @@ void ann_combo_problem::run(problem_params& pms)
     int as = alphabet_size(tt, pms.ignore_ops);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
+    behave_cscore cscore(bscore);
     metapop_moses_results(pms.exemplars, tt,
-                          *pms.contin_reduct, *pms.contin_reduct, bscore,
+                          *pms.contin_reduct, *pms.contin_reduct,
+                          bscore, cscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }

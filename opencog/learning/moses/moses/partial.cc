@@ -51,7 +51,9 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
      _meta_params(meta_params),
      _moses_params(moses_params), _printer(mmr_pa),
      _bscore(NULL), 
+     _cscore(NULL), 
      _straight_bscore(NULL), 
+     _straight_cscore(NULL), 
      _num_evals(0), _num_gens(0),
      _done(false),
      _most_good(0)
@@ -62,6 +64,8 @@ partial_solver::~partial_solver()
 {
     delete _bscore;
     delete _straight_bscore;
+    delete _cscore;
+    delete _straight_cscore;
 }
 
 /// Implements the "leave well-enough alone" algorithm.
@@ -78,6 +82,7 @@ void partial_solver::solve()
         tab_sz += ctable.uncompressed_size();
     }
     _bscore = new multibscore_based_bscore(score_seq);
+    _cscore = new multibehave_cscore(score_seq);
 
     _meta_params.merge_callback = check_candidates;
     _meta_params.callback_user_data = (void *) this;
@@ -100,7 +105,7 @@ void partial_solver::solve()
                         << " num exemplars=" << _exemplars.size();
 
         metapop_moses_results(_exemplars, _table_type_signature,
-                              _reduct, _reduct, *_bscore,
+                              _reduct, _reduct, *_bscore, *_cscore,
                               _opt_params, _hc_params, _meta_params, _moses_params,
                               *this);
 
@@ -114,7 +119,7 @@ void partial_solver::solve()
 
             logger().info() << "well-enough DONE!";
             metapop_moses_results(_exemplars, _table_type_signature,
-                                  _reduct, _reduct, *_straight_bscore,
+                                  _reduct, _reduct, *_straight_bscore, *_straight_cscore,
                                   _opt_params, _hc_params, _meta_params, _moses_params,
                                   _printer);
 
@@ -184,6 +189,7 @@ void partial_solver::final_cleanup(const metapopulation& cands)
         straight_score_seq.push_back(new StraightBScore(ctable));
 
     _straight_bscore = new multibscore_based_bscore(straight_score_seq);
+    _straight_cscore = new multibehave_cscore(straight_score_seq);
 }
 
 /// Compute the effectiveness of the predicate.
@@ -259,9 +265,11 @@ void partial_solver::refresh(const metapopulation& cands)
 void partial_solver::eval_candidate (const combo_tree& cand)
 {
     // Are we done yet?
-    penalized_bscore pbs = _bscore->operator()(cand);
+    behavioral_score bs = _bscore->operator()(cand);
+
+    // XXX is this correct? I think we need to ask the cscorer for the total ...
     score_t total_score = 0.0;
-    for (const score_t& sc : pbs.first)
+    for (const score_t& sc : bs)
         total_score += sc;
 
     logger().debug() << "well-enough candidate=" << total_score
@@ -346,6 +354,8 @@ void partial_solver::record_prefix()
 
     delete _bscore;
     _bscore = new multibscore_based_bscore(score_seq);
+    delete _cscore;
+    _cscore = new multibehave_cscore(score_seq);
 }
 
 

@@ -79,7 +79,7 @@ int main(int argc,char** argv)
     tt.append_children(tt.begin(),id::action_result_type,1);
 
     ant_bscore bscorer(simplicity_pressure);
-    bscore_based_cscore<ant_bscore> cscorer(bscorer);
+    behave_cscore cscorer(bscorer);
 
     combo_tree_ns_set perceptions;
     combo_tree_ns_set actions;

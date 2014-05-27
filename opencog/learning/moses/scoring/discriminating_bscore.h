@@ -166,7 +166,7 @@ struct recall_bscore : public discriminating_bscore
                   float max_precision = 1.0f,
                   float hardness = 1.0f);
 
-    penalized_bscore operator()(const combo_tree& tr) const;
+    behavioral_score operator()(const combo_tree& tr) const;
 
 protected:
     virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) const;
@@ -184,7 +184,7 @@ struct prerec_bscore : public discriminating_bscore
                   float max_recall = 1.0f,
                   float hardness = 1.0f);
 
-    penalized_bscore operator()(const combo_tree& tr) const;
+    behavioral_score operator()(const combo_tree& tr) const;
 
 protected:
     virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) const;
@@ -206,7 +206,7 @@ struct bep_bscore : public discriminating_bscore
                float max_diff = 0.5f,
                float hardness = 1.0f);
 
-    penalized_bscore operator()(const combo_tree& tr) const;
+    behavioral_score operator()(const combo_tree& tr) const;
 
 protected:
     virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) const;
@@ -220,7 +220,7 @@ protected:
 struct f_one_bscore : public discriminating_bscore
 {
     f_one_bscore(const CTable& _ctable);
-    penalized_bscore operator()(const combo_tree& tr) const;
+    behavioral_score operator()(const combo_tree& tr) const;
 
 protected:
     virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) const;

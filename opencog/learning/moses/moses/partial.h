@@ -121,9 +121,11 @@ class partial_solver
         // typedef enum_graded_bscore BScore;
         typedef enum_effective_bscore BScore;
         multibscore_based_bscore *_bscore;
+        multibehave_cscore *_cscore;
 
         typedef enum_table_bscore StraightBScore;
         multibscore_based_bscore *_straight_bscore;
+        multibehave_cscore *_straight_cscore;
 
         int _num_evals;     // number of evaluations
         int _num_gens;      // number of generations

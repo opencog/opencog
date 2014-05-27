@@ -66,11 +66,11 @@ public:
                           "-uclass",
                           "-ndiv", "-nsin", "-nexp", "-nlog",
                           "-m10000",
-                          "-r0",   // Seems to work best ...
+                          "-r14",  // Seems to work best ...
                           "-Z1",   // much much faster w/this flag...
                           data_file_path,
                           },
-                          -4.5);
+                          -4.24);
     }
 
     // Exactly same as above, but with two threads.  This tests
@@ -85,11 +85,11 @@ public:
                           "-uclass",
                           "-ndiv", "-nsin", "-nexp", "-nlog",
                           "-m10000",
-                          "-r0",   // Seems to work best ...
+                          "-r14",  // Seems to work best ...
                           "-j2",   // two threads
                           "-Z1",   // much much faster w/this flag...
                           data_file_path,
                           },
-                          -4.5);
+                          -4.24);
     }
 };

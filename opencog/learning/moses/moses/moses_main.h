@@ -43,7 +43,6 @@ namespace opencog { namespace moses {
 using namespace std;
 
 extern const char * version_string;
-typedef bscore_based_cscore<bscore_base> cscorer_t;
 
 /**
  * Run moses
@@ -170,8 +169,8 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const opencog::combo::type_tree& tt,
                              const reduct::rule& si_ca,
                              const reduct::rule& si_kb,
-                             const cscore_base& sc,
                              const bscore_base& bsc,
+                             const cscore_base& sc,
                              const optim_parameters& opt_params,
                              const hc_parameters& hc_params,
                              const metapop_parameters& meta_params,
@@ -215,14 +214,13 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
                            const reduct::rule& si_ca,
                            const reduct::rule& si_kb,
                            bscore_base& bscorer,
+                           cscore_base& c_scorer,
                            optim_parameters opt_params,
                            hc_parameters hc_params,
                            const metapop_parameters& meta_params,
                            moses_parameters moses_params,
                            Printer& printer)
 {
-    cscorer_t c_scorer(bscorer);
-
     // Update terminate_if_gte and max_score criteria. An explicit
     // user-specified max score always over-rides the inferred score.
     score_t target_score = c_scorer.best_possible_score();
@@ -258,19 +256,19 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
         // When the include_dominated flag is set, then trees are merged
         // into the metapop based only on the score (and complexity),
         // not on the behavioral score. So we can throw away the 
-        // behavioral score after computng it (we don't need to cche it).
-        // typedef adaptive_cache<prr_cache_threaded<CScorer> > ScoreACache;
-        cscorer_t cscorer(bscorer);
-        prr_cache_threaded<cscorer_t> score_cache(initial_cache_size, cscorer,
+        // behavioral score after computng it (we don't need to cache it).
+        prr_cache_threaded<cscore_base> score_cache(initial_cache_size, c_scorer,
                                                  "composite scores");
         // ScoreACache score_acache(score_cache);
         metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
-                                score_cache /*score_acache*/, bscorer,
-                                opt_params, hc_params, meta_params, moses_params,
-                                printer);
+                                bscorer, score_cache /*score_acache*/,
+                                opt_params, hc_params, meta_params,
+                                moses_params, printer);
     } else
-        metapop_moses_results_b(bases, type_sig, si_ca, si_kb, c_scorer, bscorer,
-                                opt_params, hc_params, meta_params, moses_params, printer);
+        metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
+                                bscorer, c_scorer,
+                                opt_params, hc_params, meta_params,
+                                moses_params, printer);
 }
 
 } // ~namespace moses

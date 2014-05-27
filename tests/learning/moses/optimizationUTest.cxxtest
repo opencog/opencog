@@ -78,6 +78,6 @@ public:
         std::sort(deme.begin(), deme.end(),
                   std::greater<scored_instance<composite_score> >());
         // check if it has found the solution
-        TS_ASSERT_EQUALS(get_score(*deme.begin_scores()), 0);
+        TS_ASSERT_EQUALS(deme.begin_scores()->get_score(), 0);
     }    
 };

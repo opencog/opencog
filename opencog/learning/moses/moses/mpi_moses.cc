@@ -261,11 +261,7 @@ void moses_mpi_comm::recv_deme(int source,
         combo_tree tr;
         recv_tree(tr, source);
 
-        // The vector behavioural score will be empty; only the
-        // composite score gets a non-trivial value.
-        behavioral_score bs;
-        penalized_bscore pbs(bs, sc.get_complexity_penalty());
-        scored_combo_tree bsc_tr(tr, demeID, sc, pbs);
+        scored_combo_tree bsc_tr(tr, demeID, sc);
         cands.insert(bsc_tr);
     }
 }
@@ -335,7 +331,7 @@ void mpi_moses_worker(metapopulation& mp,
                << max_evals << "\t"
                << mp.size() << "\t"  // size of the metapopulation
                << mp.best_score() <<"\t"
-               << get_complexity(mp.best_composite_score());
+               << mp.best_composite_score().get_complexity();
             if (os) {
                 ss << "\t" << os->field_set_size;  // number of bits in the knobs
             }
@@ -646,7 +642,7 @@ void mpi_moses(metapopulation& mp,
             ss << "\t" << stats.n_evals;    // number of evaluations so far
             ss << "\t" << mp.size();       // size of the metapopulation
             ss << "\t" << mp.best_score(); // score of the highest-ranked exemplar.
-            ss << "\t" << get_complexity(mp.best_composite_score()); // as above.
+            ss << "\t" << mp.best_composite_score().get_complexity(); // as above.
             logger().info(ss.str());
         }
 
@@ -676,7 +672,7 @@ void mpi_moses(metapopulation& mp,
     ss << "\t" << stats.n_evals;    // number of evaluations so far
     ss << "\t" << mp.size();       // size of the metapopulation
     ss << "\t" << mp.best_score(); // score of the highest-ranked exemplar.
-    ss << "\t" << get_complexity(mp.best_composite_score()); // as above.
+    ss << "\t" << mp.best_composite_score().get_complexity(); // as above.
     logger().info(ss.str());
 
     logger().info() << "MPI: bytes sent=" << mompi.sent_bytes

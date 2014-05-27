@@ -32,12 +32,12 @@
 namespace opencog { namespace moses {
 
 using namespace std;
-        
+
 //////////////////////
 // precision_bscore //
 //////////////////////
 
-/// NOTE: The "precision" bscore, below, does NOT correspond to the 
+/// NOTE: The "precision" bscore, below, does NOT correspond to the
 /// standard definition of "precision", as usually given in textbooks
 /// or wikipedia, but is something similar but different in various
 /// details. To get the standard, text-book definition of a "precision"
@@ -122,8 +122,7 @@ void precision_bscore::set_complexity_coef(unsigned alphabet_size, float p)
     // Both p==0.0 and p==0.5 are singularity points in the Occam's
     // razor formula for discrete outputs (see the explanation in the
     // comment above ctruth_table_bscore)
-    _occam = p > 0.0f && p < 0.5f;
-    if (_occam)
+    if (p > 0.0f and p < 0.5f)
         _complexity_coef = discrete_complexity_coef(alphabet_size, p)
             / ctable_usize;     // normalized by the size of the table
                                 // because the precision is normalized
@@ -137,24 +136,22 @@ void precision_bscore::set_complexity_coef(unsigned alphabet_size, float p)
 void precision_bscore::set_complexity_coef(score_t ratio)
 {
     _complexity_coef = 0.0;
-    _occam = (ratio > 0);
-
-    if (_occam)
+    if (ratio > 0)
         _complexity_coef = 1.0 / ratio;
 
     logger().info() << "Precision scorer, complexity ratio = " << 1.0f/_complexity_coef;
 }
 
-penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
+behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 {
-    penalized_bscore pbs;
+    behavioral_score bs;
 
     // Initial precision. No hits means perfect precision :)
     // Yes, zero hits is common, early on.
     score_t precision = 1.0;
     unsigned active = 0;   // total number of active outputs by tr
     score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
-    
+
     interpreter_visitor iv(tr);
     auto interpret_tr = boost::apply_visitor(iv);
     if (precision_full_bscore) {
@@ -177,14 +174,14 @@ penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
             // logger().fine("sumo = %g, sao = %g, active = %u, is_true = %d",
             //               sumo, sao, active,
             //               interpret_tr(vct.first.get_variant()) == id::logical_true);
-            pbs.first.push_back(sumo);
+            bs.push_back(sumo);
         }
 
         if (active > 0) {
             // normalize all components by active
             score_t iac = 1.0 / active; // inverse of activity to be faster
-            for (auto& v : pbs.first) v *= iac;
-            
+            for (auto& v : bs) v *= iac;
+
             // tp = true positive
             // fp = false positive
             //
@@ -199,7 +196,7 @@ penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
             //
             // So before adding the recall penalty we add +1/2 to
             // compensate for that
-            pbs.first.push_back(0.5);
+            bs.push_back(0.5);
         }
 
     } else {
@@ -249,30 +246,25 @@ penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
                 logger().fine("Weird: worst_norm (%f) is positive, maybe the activation is really low", avg_worst_deciles);
         }
 
-        pbs.first.push_back(precision);
+        bs.push_back(precision);
     }
 
     if (0 < active)
         precision = (sao / active + 0.5) / max_output;
-    
+
     // For boolean tables, activation sum of true and false positives
     // i.e. the sum of all positives.   For contin tables, the activation
     // is likewise: the number of rows for which the combo tree returned
     // true (positive).
     score_t activation = (score_t)active / ctable_usize;
     score_t activation_penalty = get_activation_penalty(activation);
-    pbs.first.push_back(activation_penalty);
+    bs.push_back(activation_penalty);
     if (logger().isFineEnabled())
         logger().fine("precision = %f  activation=%f  activation penalty=%e",
                       precision, activation, activation_penalty);
 
-    // Add the Complexity penalty
-    if (_occam)
-        pbs.second = tree_complexity(tr) * _complexity_coef;
-
-    log_candidate_pbscore(tr, pbs);
-
-    return pbs;
+    log_candidate_bscore(tr, bs);
+    return bs;
 }
 
 behavioral_score precision_bscore::best_possible_bscore() const
@@ -317,7 +309,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
         best_precision = 0.0,
         best_activation = 0.0,
         best_activation_penalty = 0.0;
-    
+
     reverse_foreach (const auto& mpv, max_precisions) {
         sao += mpv.second.first;
         active += mpv.second.second;
@@ -498,8 +490,7 @@ void precision_conj_bscore::set_complexity_coef(unsigned alphabet_size, float p)
     // Both p==0.0 and p==0.5 are singularity points in the Occam's
     // razor formula for discrete outputs (see the explanation in the
     // comment above ctruth_table_bscore)
-    _occam = p > 0.0f && p < 0.5f;
-    if (_occam)
+    if (p > 0.0f and p < 0.5f)
         _complexity_coef = discrete_complexity_coef(alphabet_size, p)
             / ctable_usize;     // normalized by the size of the table
                                 // because the precision is normalized
@@ -513,17 +504,15 @@ void precision_conj_bscore::set_complexity_coef(unsigned alphabet_size, float p)
 void precision_conj_bscore::set_complexity_coef(score_t ratio)
 {
     _complexity_coef = 0.0;
-    _occam = (ratio > 0);
-
-    if (_occam)
+    if (ratio > 0)
         _complexity_coef = 1.0 / ratio;
 
     logger().info() << "Precision scorer, complexity ratio = " << 1.0f/_complexity_coef;
 }
 
-penalized_bscore precision_conj_bscore::operator()(const combo_tree& tr) const
+behavioral_score precision_conj_bscore::operator()(const combo_tree& tr) const
 {
-    penalized_bscore pbs;
+    behavioral_score bs;
 
     // compute active and sum of all active outputs
     unsigned active = 0;   // total number of active outputs by tr
@@ -548,7 +537,7 @@ penalized_bscore precision_conj_bscore::operator()(const combo_tree& tr) const
     score_t precision = 1.0;
     if (0 < active)
         precision = sao / active;
-    pbs.first.push_back(precision);
+    bs.push_back(precision);
 
     // Count the number of conjunctions (up to depth 2)
     unsigned conj_n = 0;
@@ -561,19 +550,14 @@ penalized_bscore precision_conj_bscore::operator()(const combo_tree& tr) const
         if (*sib == id::logical_and)
             ++conj_n;
     score_t conj_n_penalty = hardness * (-1.0 / (1.0 + conj_n));
-    pbs.first.push_back(conj_n_penalty);
+    bs.push_back(conj_n_penalty);
 
     if (logger().isFineEnabled())
         logger().fine("precision = %f  conj_n=%u  conj_n penalty=%e",
                      precision, conj_n, conj_n_penalty);
 
-    // Add the Complexity penalty
-    if (_occam)
-        pbs.second = tree_complexity(tr) * _complexity_coef;
-
-    log_candidate_pbscore(tr, pbs);
-
-    return pbs;
+    log_candidate_bscore(tr, bs);
+    return bs;
 }
 
 behavioral_score precision_conj_bscore::best_possible_bscore() const

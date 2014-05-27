@@ -166,8 +166,8 @@ int main(int argc, char** argv)
         vector<score_t> dsts;
         for (unsigned i = 0; i < bcts.size(); ++i)
             for (unsigned j = 0; j < i; ++j)
-                dsts.push_back(diversity_params.dst(get_bscore(bcts[i]),
-                                                    get_bscore(bcts[j])));
+                dsts.push_back(diversity_params.dst(bcts[i].get_bscore(),
+                                                    bcts[j].get_bscore()));
 
         // write the results
         write_results(edp, dsts);
