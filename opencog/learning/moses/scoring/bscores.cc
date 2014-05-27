@@ -371,6 +371,8 @@ score_t enum_graded_bscore::graded_complexity(combo_tree::iterator it) const
 {
     typedef combo_tree::sibling_iterator sib_it;
     typedef combo_tree::iterator pre_it;
+
+    if (it.is_childless()) return 0.0;
     sib_it predicate = it.begin();
     score_t cpxy = 0.0;
     score_t weight = 1.0;
