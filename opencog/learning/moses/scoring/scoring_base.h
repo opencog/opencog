@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
+ * Copyright (C) 2014 Aidyia Limited
  * All Rights Reserved
  *
  * Written by Moshe Looks, Nil Geisweiller, Linas Vepstas
@@ -233,6 +234,50 @@ class multibehave_cscore : public cscore_base
 protected:
     const BScorerSeq& _bscorers;
 };
+
+
+/**
+ * Behavioral scorer defined by multiple behavioral scoring functions.
+ * This is done when the problem to solve is defined in terms of multiple
+ * problems.
+XXX FIXME TODO  This class is ... wrong, and is a temporary placeholder.
+It needs to be eventually be removed.  The primary problem is that bscores
+should not be linearly combined in this way, since that results in diversity
+measurements that are inappropriately weighted.  That is, different bscorers
+may have a different conception of what "diversity" means. This is especially
+the case for the enum_ scorers, which have a grading as each possible enum is
+matched.  That is, notions of diversity are analogous to notions of complexity;
+they make sense only within the context of the actual scorer.
+
+The correct answer is to move the diversity calculations out of the metapop
+and into bscore_base.  The combination of multiple bscorers into one place
+would then happen in multibehave, above.  However, this is a big tearup of
+the code, so I'm putting this off for a litttle while.
+ */
+struct multibscore_based_bscore : public bscore_base
+{
+    typedef boost::ptr_vector<bscore_base> BScorerSeq;
+    
+    // ctors
+    multibscore_based_bscore(const BScorerSeq& bscorers) : _bscorers(bscorers) {}
+
+    // main operator
+    behavioral_score operator()(const combo_tree& tr) const;
+
+    behavioral_score best_possible_bscore() const;
+
+    // return the min of all min_improv
+    score_t min_improv() const;
+
+    // In case the fitness function can be sped-up when certain
+    // features are ignored. The features are indicated as set of
+    // indices (from 0).
+    void ignore_idxs(const std::set<arity_t>&) const;
+
+protected:
+    const BScorerSeq& _bscorers;
+};
+
 
 // helper to log a combo_tree and its behavioral score
 static inline void log_candidate_bscore(const combo_tree& tr,
