@@ -261,7 +261,7 @@
 
 (define (SVO-rule subj_concept  subj_instance  verb  verb_instance  obj_concept  obj_instance)
 	(InheritanceLink (PredicateNode verb_instance) (PredicateNode verb))
-	(InheritanceLink (ConceptNode subj_instance (stv 1.0 1.0)) (ConceptNode subj_concept (stv 1.0 1.0)) (stv 1.0 .99))
+	(InheritanceLink (ConceptNode subj_instance (stv .1 1.0)) (ConceptNode subj_concept (stv .1 1.0)) (stv 1.0 .99))
 	(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
 	(EvaluationLink (stv 1.0 1.0)
 		(PredicateNode verb_instance)
@@ -308,33 +308,6 @@
 ; Examples: "Socrates is a man", "Cats are animals", "Trees are plants"
 (define (be-inheritance-rule subj_concept subj_instance obj_concept obj_instance)
 	(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept) (stv 1.0 1.0))
-	(InheritanceLink (ConceptNode obj_instance (stv 1.0 1.0)) (ConceptNode obj_concept (stv 1.0 1.0)) (stv 1.0 .99))
+	(InheritanceLink (ConceptNode obj_instance (stv .1 1.0)) (ConceptNode obj_concept (stv .1 1.0)) (stv 1.0 .99))
 	(InheritanceLink (ConceptNode subj_instance) (ConceptNode obj_instance) (stv 1.0 1.0))
-)
-
-;Example: "The books were written by Charles Dickens."
-(define (passive-rule1 verb verb_instance obj obj_instance passive_obj passive_obj_instance)
-        (InheritanceLink (PredicateNode verb_instance) (PredicateNode verb))
-        (InheritanceLink (ConceptNode obj_instance) (ConceptNode obj))
-        (InheritanceLink (ConceptNode passive_obj_instance) (ConceptNode passive_obj))
-        (EvaluationLink 
-                (PredicateNode verb_instance)
-                (ListLink
-                        (ConceptNode passive_obj_instance)
-                        (ConceptNode obj_instance)
-                )
-      )
-)
-
-;Example: "The books are published."
-(define (passive-rule2 verb verb_instance obj obj_instance)
-        (InheritanceLink (PredicateNode verb_instance) (PredicateNode verb))
-        (InheritanceLink (ConceptNode obj_instance) (ConceptNode obj))
-        (EvaluationLink 
-                (PredicateNode verb_instance)
-                (ListLink
-                        (VariableNode "$x")
-                        (ConceptNode obj_instance)
-                )
-        )
 )
