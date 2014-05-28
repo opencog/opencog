@@ -299,26 +299,10 @@ Out& ostream_scored_combo_tree(Out& out, const scored_combo_tree& cnd,
                                  bool output_bscore = false,
                                  bool output_python = false)
 {
-    return ostream_combo_tree_cpbscore(out,
-                                       cnd.get_tree(),
-                                       cnd.get_composite_score(),
-                                       cnd.get_bscore(),
-                                       output_score,
-                                       output_penalty,
-                                       output_bscore,
-                                       output_python);
-}
+    const combo::combo_tree& tr = cnd.get_tree();
+    const composite_score& cs = cnd.get_composite_score();
+    const behavioral_score& bs = cnd.get_bscore();
 
-template<typename Out>
-Out& ostream_combo_tree_cpbscore(Out& out,
-                                 const combo::combo_tree& tr,
-                                 const composite_score& cs,
-                                 const behavioral_score& bs,
-                                 bool output_score = true,
-                                 bool output_penalty = false,
-                                 bool output_bscore = false,
-                                 bool output_python = false)
-{
     if (output_python)
         return ostream_combo_tree_cpbscore_python(out, tr, cs, bs,
                                                   output_score,
