@@ -273,10 +273,7 @@ void parse_result(istream& in, scored_combo_tree_set& candidates, int& evals)
             if (logger().isFineEnabled()) {
                 logger().fine("Parsed candidate:");
                 stringstream ss;
-                ostream_combo_tree_cpbscore(ss,
-                              candidate.get_tree(),
-                              candidate.get_composite_score(),
-                              candidate.get_bscore(),
+                ostream_scored_combo_tree(ss, candidate,
                               true, true);
                 logger().fine(ss.str());
             }
