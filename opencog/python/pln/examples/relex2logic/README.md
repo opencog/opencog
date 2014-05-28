@@ -42,6 +42,9 @@ Important notes:
   - https://github.com/opencog/opencog/issues/734
   - https://github.com/opencog/opencog/issues/735
 
+- The introduction of the Abduction rule was discussed here:
+  - https://github.com/opencog/opencog/pull/777
+
 PLN rules needed:
 
 - EvaluationToMemberRule
@@ -49,6 +52,7 @@ PLN rules needed:
 - DeductionRule
 - InheritanceToMemberRule
 - MemberToEvaluationRule
+- AbductionRule
 
 #### Important note
 
@@ -69,39 +73,69 @@ changed for concept instances later.
 
 ##### Concepts
 ```
-(ConceptNode "Socrates" (av 0 0 0) (stv 0.001000 1.000000)) ; [1]
- 
-(ConceptNode "man" (av 0 0 0) (stv 0.010000 1.000000)) ; [2]
- 
-(ConceptNode "air" (av 0 0 0) (stv 0.010000 1.000000)) ; [3]
+(ConceptNode "Socrates@f250f429-5078-4453-8662-c63cc8f58a22") ; [217]
+
+(ConceptNode "Socrates" (stv .1 1.0)) ; [218]
+
+(ConceptNode "man@80d4e852-1b93-4c49-84e1-5a7352b0dcb1" (stv .1 1.0)) ; [220]
+
+(ConceptNode "men@83d83a2e-940c-46aa-91f1-a7d2c106ef13" (stv .1 1.0)) ; [290]
+
+(ConceptNode "man" (stv .1 1.0)) ; [221]
+
+(ConceptNode "air@e3f175ea-c3d1-45cf-883d-a6d2f6a879ac") ; [292]
+
+(ConceptNode "air") ; [293]
+
+(ConceptNode "present") ; [227]
+
 ```
 
 ##### Tuple that satisfies breathe(x,y)
 ```
-(ListLink (av 0 0 0) (stv 1.000000 0.000000)
-  (ConceptNode "man" (av 0 0 0) (stv 0.010000 1.000000)) ; [2]
-  (ConceptNode "air" (av 0 0 0) (stv 0.010000 1.000000)) ; [3]
-) ; [6]
+(ListLink (stv 1.000000 0.000000)
+  (ConceptNode "men@83d83a2e-940c-46aa-91f1-a7d2c106ef13") ; [290]
+  (ConceptNode "air@e3f175ea-c3d1-45cf-883d-a6d2f6a879ac") ; [292]
+) ; [295]
 ```
 
 ##### breathe(x,y)
 ```
-(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "breathe" (av 0 0 0) (stv 1.000000 0.000000)) ; [5]
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "man" (av 0 0 0) (stv 0.010000 1.000000)) ; [2]
-    (ConceptNode "air" (av 0 0 0) (stv 0.010000 1.000000)) ; [3]
-  ) ; [6]
-) ; [7]
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "breathe@218b15b2-52a8-430c-93f6-b4bba225418c") ; [287]
+  (ListLink (stv 1.000000 0.000000)
+    (ConceptNode "men@83d83a2e-940c-46aa-91f1-a7d2c106ef13") ; [290]
+    (ConceptNode "air@e3f175ea-c3d1-45cf-883d-a6d2f6a879ac") ; [292]
+  ) ; [295]
+) ; [296]
 ```
 
 ##### Socrates IS-A man
 ```
-(InheritanceLink (av 0 0 0) (stv 1.000000 1.000000)
-  (ConceptNode "Socrates" (av 0 0 0) (stv 0.001000 1.000000)) ; [1]
-  (ConceptNode "man" (av 0 0 0) (stv 0.010000 1.000000)) ; [2]
-) ; [4]
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "Socrates@f250f429-5078-4453-8662-c63cc8f58a22") ; [217]
+  (ConceptNode "man@80d4e852-1b93-4c49-84e1-5a7352b0dcb1") ; [220]
+) ; [223]
 ```
+
+##### Instance inherits from generic concept
+```
+(InheritanceLink (stv 1.000000 0.990000)
+  (ConceptNode "men@83d83a2e-940c-46aa-91f1-a7d2c106ef13") ; [290]
+  (ConceptNode "man") ; [221]
+) ; [291]
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "Socrates@f250f429-5078-4453-8662-c63cc8f58a22") ; [217]
+  (ConceptNode "Socrates") ; [218]
+) ; [219]
+
+(InheritanceLink (stv 1.000000 0.990000)
+  (ConceptNode "man@80d4e852-1b93-4c49-84e1-5a7352b0dcb1") ; [220]
+  (ConceptNode "man") ; [221]
+) ; [222]
+```
+
 
 #### Inference steps
 
@@ -109,30 +143,30 @@ changed for concept instances later.
 
 ###### Input
 ```
-(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "breathe" (av 0 0 0) (stv 1.000000 0.000000)) ; [5]
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "man" (av 0 0 0) (stv 0.010000 1.000000)) ; [2]
-    (ConceptNode "air" (av 0 0 0) (stv 0.010000 1.000000)) ; [3]
-  ) ; [6]
-) ; [7]
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "breathe@7f5b37e8-e4b3-4335-a06b-68af470cf354") ; [350]
+  (ListLink (stv 1.000000 0.000000)
+    (ConceptNode "men@a2905bdd-9214-4717-82c6-dfe21c1263bc") ; [353]
+    (ConceptNode "air@9bfe790d-5446-4219-be74-845c0d145fe1") ; [355]
+  ) ; [358]
+) ; [359]
 ```
 
 ##### Output (and 3 other variations of this link where elements of the ListLink are substituted with variables)
 ```
 (MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "man") ; [2]
+  (ConceptNode "men@a2905bdd-9214-4717-82c6-dfe21c1263bc") ; [353]
   (SatisfyingSetLink (stv 1.000000 1.000000)
-    (VariableNode "$X0") ; [144]
+    (VariableNode "$X0") ; [441]
     (EvaluationLink (stv 1.000000 0.000000)
-      (PredicateNode "breathe") ; [5]
+      (PredicateNode "breathe@7f5b37e8-e4b3-4335-a06b-68af470cf354") ; [350]
       (ListLink (stv 1.000000 0.000000)
-        (VariableNode "$X0") ; [144]
-        (ConceptNode "air") ; [3]
-      ) ; [146]
-    ) ; [147]
-  ) ; [148]
-) ; [149]
+        (VariableNode "$X0") ; [441]
+        (ConceptNode "air@9bfe790d-5446-4219-be74-845c0d145fe1") ; [355]
+      ) ; [443]
+    ) ; [444]
+  ) ; [445]
+) ; [446]
 ```
 
 ##### 2) MemberToInheritance Rule
@@ -142,66 +176,101 @@ changed for concept instances later.
 ###### Output
 ```
 (InheritanceLink (stv 1.000000 1.000000)
-  (ConceptNode "man") ; [2]
+  (ConceptNode "men@a2905bdd-9214-4717-82c6-dfe21c1263bc") ; [353]
   (SatisfyingSetLink (stv 1.000000 1.000000)
-    (VariableNode "$X0") ; [144]
+    (VariableNode "$X0") ; [441]
     (EvaluationLink (stv 1.000000 0.000000)
-      (PredicateNode "breathe") ; [5]
+      (PredicateNode "breathe@7f5b37e8-e4b3-4335-a06b-68af470cf354") ; [350]
       (ListLink (stv 1.000000 0.000000)
-        (VariableNode "$X0") ; [144]
-        (ConceptNode "air") ; [3]
-      ) ; [146]
-    ) ; [147]
-  ) ; [148]
-) ; [242]
+        (VariableNode "$X0") ; [441]
+        (ConceptNode "air@9bfe790d-5446-4219-be74-845c0d145fe1") ; [355]
+      ) ; [443]
+    ) ; [444]
+  ) ; [445]
+) ; [6107]
 ```
 
-##### 3) DeductionRule<InheritanceRule>
+##### 3) AbductionRule<InheritanceRule>
 
-###### Input is previous ouput and
+###### Input
 ```
-[(InheritanceLink (av 0 0 0) (stv 1.000000 1.000000)
-  (ConceptNode "Socrates" (av 0 0 0) (stv 0.001000 1.000000)) ; [1]
-  (ConceptNode "man" (av 0 0 0) (stv 0.010000 1.000000)) ; [2]
-) ; [4]
+(InheritanceLink (stv 1.000000 0.990000)
+  (ConceptNode "men@a2905bdd-9214-4717-82c6-dfe21c1263bc") ; [353]
+  (ConceptNode "man") ; [284]
+) ; [354]
+ 
+(InheritanceLink (stv 1.000000 0.990000)
+  (ConceptNode "man@fbc51aff-8074-46d8-b3ba-1ccaeb1adb34") ; [283]
+  (ConceptNode "man") ; [284]
+) ; [285]
 ```
 
 ###### Output
 ```
-(InheritanceLink (stv 1.000000 1.000000)
-  (ConceptNode "Socrates") ; [1]
-  (SatisfyingSetLink (stv 1.000000 0.000000)
-    (VariableNode "$X1") ; [145]
-    (EvaluationLink (stv 1.000000 0.000000)
-      (PredicateNode "breathe") ; [5]
-      (ListLink (stv 1.000000 0.000000)
-        (VariableNode "$X1") ; [145]
-        (ConceptNode "air") ; [3]
-      ) ; [281]
-    ) ; [282]
-  ) ; [283]
-) ; [284]
+(InheritanceLink (stv 1.000000 0.988901)
+  (ConceptNode "man@fbc51aff-8074-46d8-b3ba-1ccaeb1adb34") ; [283]
+  (ConceptNode "men@a2905bdd-9214-4717-82c6-dfe21c1263bc") ; [353]
+) ; [609]
 ```
 
-##### 4) InheritanceToMemberRule
+##### 4) DeductionRule<InheritanceRule>
+
+###### Input is previous ouput and
+```
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "Socrates@46ec3d0f-4535-4d01-87b7-84ef65c25a23") ; [280]
+  (ConceptNode "man@fbc51aff-8074-46d8-b3ba-1ccaeb1adb34") ; [283]
+) ; [286]
+```
+
+###### Output
+```
+(InheritanceLink (stv 1.000000 0.991755)
+  (ConceptNode "Socrates@46ec3d0f-4535-4d01-87b7-84ef65c25a23") ; [280]
+  (ConceptNode "men@a2905bdd-9214-4717-82c6-dfe21c1263bc") ; [353]
+) ; [777]
+```
+
+##### 5) DeductionRule<InheritanceRule>
+
+##### Input is previous output and output from 2)
+
+##### Output
+```
+(InheritanceLink (stv 1.000000 0.986333)
+  (ConceptNode "Socrates@46ec3d0f-4535-4d01-87b7-84ef65c25a23") ; [280]
+  (SatisfyingSetLink (stv 1.000000 0.000000)
+    (VariableNode "$X1") ; [442]
+    (EvaluationLink (stv 1.000000 1.000000)
+      (PredicateNode "breathe@7f5b37e8-e4b3-4335-a06b-68af470cf354") ; [350]
+      (ListLink (stv 1.000000 0.000000)
+        (VariableNode "$X1") ; [442]
+        (ConceptNode "air@9bfe790d-5446-4219-be74-845c0d145fe1") ; [355]
+      ) ; [922]
+    ) ; [923]
+  ) ; [8605]
+) ; [12317]
+```
+
+##### 6) InheritanceToMemberRule
 
 ###### Input is previous output
 
 ###### Output
 ```
-(MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Socrates") ; [1]
-  (SatisfyingSetLink (stv 1.000000 0.000000)
-    (VariableNode "$X1") ; [145]
+(MemberLink (stv 1.000000 0.989841)
+  (ConceptNode "Socrates@46ec3d0f-4535-4d01-87b7-84ef65c25a23") ; [217]
+  (SatisfyingSetLink (stv 1.000000 1.000000)
+    (VariableNode "$X0") ; [385]
     (EvaluationLink (stv 1.000000 0.000000)
-      (PredicateNode "breathe") ; [5]
+      (PredicateNode "breathe@7f5b37e8-e4b3-4335-a06b-68af470cf354") ; [350]
       (ListLink (stv 1.000000 0.000000)
-        (VariableNode "$X1") ; [145]
-        (ConceptNode "air") ; [3]
-      ) ; [281]
-    ) ; [282]
-  ) ; [283]
-) ; [477]
+        (VariableNode "$X1") ; [442]
+        (ConceptNode "air@9bfe790d-5446-4219-be74-845c0d145fe1") ; [355]
+      ) ; [922]
+    ) ; [388]
+  ) ; [389]
+) ; [6375]
 ```
 
 ##### 5) MemberToEvaluationRule
@@ -210,117 +279,13 @@ changed for concept instances later.
 
 ###### Final output
 ```
-EvaluationLink (stv 1.000000 1.000000)
-  (PredicateNode "breathe") ; [5]
+(EvaluationLink (stv 1.000000 0.989841)
+  (PredicateNode "breathe@7f5b37e8-e4b3-4335-a06b-68af470cf354") ; [350]
   (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Socrates") ; [1]
-    (ConceptNode "air") ; [3]
-  ) ; [542]
-) ; [543]
+    (ConceptNode "Socrates@46ec3d0f-4535-4d01-87b7-84ef65c25a23") ; [217]
+    (ConceptNode "air@9bfe790d-5446-4219-be74-845c0d145fe1") ; [355]
+  ) ; [922]
+) ; [388]
 ```
 
 #### Note: Along the way, some other inferences which don't lead to the desired output are produced as well.
-
-
-
-### Current output by RelEx & RelEx2Logic (for reference)
-
-### be(Socrates, man)
-
-```
-(EvaluationLink (stv 1.000000 0.000000)
-  (PredicateNode "is@a64c0b7f-117e-447c-8879-7601423601b4")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Socrates@7b03b9d8-cdee-4b35-bf29-c6fd35cb4229")
-    (ConceptNode "man@35b6f89b-5753-4da1-8dc4-55224cf56789")
-  )
-)
-```
-
-### breathe(men, air)
-
-```
-(EvaluationLink (stv 1.000000 0.000000)
-  (PredicateNode "breathe@cd1c5b26-0a62-493f-81eb-e7606d3439fa")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "men@cc05125c-5468-4b86-b2f3-b4cedd2eb29e")
-    (ConceptNode "air@4f8ea182-b6a7-4c04-8e1e-c195f5000c8b")
-  )
-)
-```
-
-### Concepts
-
-```
-(ConceptNode "man")
-
-(ConceptNode "men@cc05125c-5468-4b86-b2f3-b4cedd2eb29e")
-
-(ConceptNode "air@4f8ea182-b6a7-4c04-8e1e-c195f5000c8b")
-
-(ConceptNode "air")
-
-(ConceptNode "Socrates@7b03b9d8-cdee-4b35-bf29-c6fd35cb4229")
-
-(ConceptNode "Socrates")
-```
-
-
-### Sentences
-
-```
-(ReferenceLink (stv 1.000000 1.000000)
-  (ParseNode "sentence@6c596aad-8396-43a7-8380-0ab51eb91613_parse_0")
-  (ListLink (stv 1.000000 0.000000)
-    (WordInstanceNode "Socrates@7b03b9d8-cdee-4b35-bf29-c6fd35cb4229")
-    (WordInstanceNode "is@a64c0b7f-117e-447c-8879-7601423601b4")
-    (WordInstanceNode "a@13ebe81e-26db-4f40-9bdb-a10c88767830")
-    (WordInstanceNode "man@35b6f89b-5753-4da1-8dc4-55224cf56789")
-    (WordInstanceNode ".@7b5926db-6913-40a1-bb2c-f265a7435c51")
-  )
-)
-
-(ReferenceLink (stv 1.000000 1.000000)
-  (ParseNode "sentence@061ce111-14e2-4d25-b5e8-f187e02cb093_parse_0")
-  (ListLink (stv 1.000000 0.000000)
-    (WordInstanceNode "men@cc05125c-5468-4b86-b2f3-b4cedd2eb29e")
-    (WordInstanceNode "breathe@cd1c5b26-0a62-493f-81eb-e7606d3439fa")
-    (WordInstanceNode "air@4f8ea182-b6a7-4c04-8e1e-c195f5000c8b")
-    (WordInstanceNode ".@29183d71-9982-40c4-b474-7e0c2444bfd4")
-  )
-)
-```
-
-### Generalizing from specific instances
-
-```
-(InheritanceLink (stv 1.000000 0.000000)
-  (PredicateNode "breathe@cd1c5b26-0a62-493f-81eb-e7606d3439fa")
-  (PredicateNode "breathe")
-)
-
-(InheritanceLink (stv 1.000000 0.000000)
-  (ConceptNode "man@35b6f89b-5753-4da1-8dc4-55224cf56789")
-  (ConceptNode "man")
-)
-
-(InheritanceLink (stv 1.000000 0.000000)
-  (ConceptNode "men@cc05125c-5468-4b86-b2f3-b4cedd2eb29e")
-  (ConceptNode "man")
-)
-
-(InheritanceLink (stv 1.000000 0.000000)
-  (ConceptNode "air@4f8ea182-b6a7-4c04-8e1e-c195f5000c8b")
-  (ConceptNode "air")
-)
-
-(InheritanceLink (stv 1.000000 0.000000)
-  (ConceptNode "Socrates@7b03b9d8-cdee-4b35-bf29-c6fd35cb4229")
-  (ConceptNode "Socrates")
-)
-
-(InheritanceLink (stv 1.000000 0.000000)
-  (PredicateNode "is@a64c0b7f-117e-447c-8879-7601423601b4")
-  (PredicateNode "be")
-)
-```
