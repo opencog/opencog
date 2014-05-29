@@ -369,3 +369,63 @@
                 )
         )
 )
+
+(define adjective-clause-rule-1 
+        (BindLink 
+                (ListLink 
+                        (TypedVariableLink 
+                                (VariableNode "$A") 
+                                (VariableTypeNode "ConceptNode")) 
+                        (TypedVariableLink 
+                                (VariableNode "$B") 
+                                (VariableTypeNode "ConceptNode")) 
+                        (TypedVariableLink 
+                                (VariableNode "$C") 
+                                (VariableTypeNode "PredicateNode")) 
+                        (TypedVariableLink 
+                                (VariableNode "$D") 
+                                (VariableTypeNode "ConceptNode"))) 
+                (ImplicationLink 
+                        (AndLink 
+                                (InheritanceLink (VariableNode "$A")(VariableNode "$B")) 
+                                (EvaluationLink (VariableNode "$C")(ListLink(VariableNode "$A")(VariableNode "$D"))) 
+                                (EvaluationLink (PredicateNode "whichmarker") (ListLink (VariableNode "$A")(VariableNode "$C")))) 
+                        (InheritanceLink 
+                                (SatisfyingSetLink (VariableNode "$X") 
+                                        (InheritanceLink (VariableNode "$X") (VariableNode "$A")) 
+                                        (EvaluationLink (VariableNode "$C") (ListLink (VariableNode "$X") (VariableNode "$D")))) 
+                                (VariableNode "$B")))
+        )
+) 
+
+(define adjective-clause-rule-2
+        (BindLink
+                (ListLink
+                        (TypedVariableLink
+                                (VariableNode "$A")
+                                (VariableTypeNode "PredicateNode"))
+                        (TypedVariableLink
+                                (VariableNode "$B")
+                                (VariableTypeNode "ConceptNode"))
+                        (TypedVariableLink
+                                (VariableNode "$C")
+                                (VariableTypeNode "ConceptNode"))
+                        (TypedVariableLink
+                                (VariableNode "$D")
+                                (VariableTypeNode "PredicateNode"))
+                        (TypedVariableLink
+                                (VariableNode "$E")
+                                (VariableTypeNode "ConceptNode")))
+                (ImplicationLink
+                        (AndLink
+                                (EvaluationLink (VariableNode "$A")(ListLink(VariableNode "$B")(VariableNode "$C")))
+                                (EvaluationLink (VariableNode "$D")(ListLink(VariableNode "$C")(VariableNode "$E")))
+                                (EvaluationLink (PredicateNode "whichmarker") (ListLink (VariableNode "$C")(VariableNode "$D"))))
+                        (EvaluationLink
+                                 (VariableNode "$A")
+                                        (ListLink (VariableNode "$B")
+                                                (SatisfyingSetLink (VariableNode "$X")
+                                                        (InheritanceLink (VariableNode "$X") (VariableNode "$C"))
+                                                        (EvaluationLink (VariableNode "$D") (ListLink (VariableNode "$X") (VariableNode "$E"))))))
+)))
+
