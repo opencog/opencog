@@ -83,7 +83,6 @@ vertex RunningComboProcedure::eval_indefinite_object(indefinite_object io)
 
 vertex RunningComboProcedure::eval_anything(sib_it it)
 {
-    typedef combo_tree::iterator pre_it;
     const vertex& v = *it;
 
     if (const argument* a = boost::get<argument>(&v)) {

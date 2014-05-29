@@ -586,22 +586,6 @@ static const char* typeToStr(TruthValueType t) throw (InvalidParamException)
     }
 }
 
-static TruthValueType TVstrToType(const char* str) throw (InvalidParamException)
-{
-    TruthValueType t = SIMPLE_TRUTH_VALUE;
-
-    while (t != NUMBER_OF_TRUTH_VALUE_TYPES) {
-        if (!strcmp(str, typeToStr(t))) {
-            return t;
-        }
-        t = (TruthValueType)((int)t + 1);
-    }
-
-    throw InvalidParamException(TRACE_INFO,
-          "TruthValue - Invalid Truth Value type string: '%s'.", str);
-}
-
-
 static TruthValuePtr tv_factory(TruthValueType type, const char* tvStr);
 
 static TruthValuePtr tv_factory(TruthValueType type, const char* tvStr)
