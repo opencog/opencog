@@ -76,16 +76,25 @@
 ; Desired output (needs some refinement):
 
 (EvaluationLink (stv 1.0 1.0)
-    (PredicateNode "try to understand") ; how would infinitive constructions be handled?
+    (PredicateNode "try")
     (ListLink
         (ConceptNode "scientist")
-        (ConceptNode "how our world works"))) ; how are embedded sentences handled?
+        (EvaluationLink
+            (PredicateNode "understand")
+            (ListLink
+                (ConceptNode "scientist")
+                (SatisfyingSetLink
+                    (VariableNode "$x")
+                    (EvaluationLink
+                        (PredicateNode "how")
+                        (ListLink
+                            (VariableNode "$x")
+                            (EvaluationLink
+                                (PredicateNode "work")
+                                (ConceptNode "world")))))))))
 
-; There are three to-do-rules. None, however, deal with this constellation:
-; _to-do(try, understand)
-; _subj(try, scientist)
-; _subj(work, world)
-; 
+; Link-grammar sentence parse:
+
 ; (S (NP A scientist.n) (VP tries.v (S (VP to.r (VP understand.v (SBAR (WHADVP how) (S (NP our world.n) (VP works.v))))))) .)
 
 ; Current RelEx2Logic output:
@@ -144,16 +153,12 @@
 
 ; Current RelEx2Logic output:
 
-; The tree is parsed correctly by link-grammar: (S (NP Scientists.n) (VP make.v (NP observations.n) and.j-v ask.v (NP questions.n)) .)
-
-; RelEx, however, isn't able to assign the objects correctly:
-; _obj(make, make)
-; _obj(make, ask)
+; _obj(make, observation)
 ; conj_and(make, ask)
-; _subj(make, scientist)
-; _subj(ask, scientist)
-
-; Is this a general issue that RelEx isn't able to handle conjunction yet?
+; _obj(ask, question)
+; _advmod(and, Scientist)
+; _subj relations are still missing, though (https://github.com/opencog/relex/issues/46).
+; Thus, no SVO-rule is performed and no EvaluationLinks are generated.
 
 
 ; Scientists work for governments, companies, schools and research institutes.
@@ -172,15 +177,16 @@
             (ConceptNode "research institutes"))))
 
 ; Current RelEx2Logic output:
- 
-; Seemingly, RelEx isn't able to handle compound verbs. I imagine this is a known issue? 
+
+; Same as above: Verb + particle need to be handled. 
  
 ; for(work, and)
 ; _subj(work, scientist)
 ; conj_and(,, institute)
 ; _nn(institute, research)
 
-; The same applies to the enumeration, even though link-grammar does a good job parsing the sentence:
+; The same applies to the enumeration (conjunction) isn't handled properly in this case yet,
+; even though link-grammar does a good job parsing the sentence:
 ; (S (NP Scientists.n) (VP work.v (PP for.p governments.n , companies.n , schools.n and.j-n research.n-u institutes.n)) .)
 
 
@@ -270,7 +276,9 @@
   ) ; [229]
 ) ; [230]
 
-; Often needs to modify stv.
+; Fuzzy adverbs/adjectives (e.g. often) need to modify stv. R2L will deal
+; with them separately. So far, only 'maybe' has been implemented (albeit
+; without a helper function.)
 
 
 ; Scientists sometimes may repeat experiments or use control groups.
@@ -292,12 +300,9 @@
 ; _obj(or, group)
 ; _advmod(or, sometimes)
 ; _subj(or, scientist)
-; 
-; SVO-rule is falsely applied: SVO-rule "scientist" "or" "group"
-; Other applied rules: tense-rule "repeat" "present", advmod-rule "or" "sometimes",
-; nn-rule "group" "control"
-; 
-; Needed: rule using conj_or($v1, $v2)
+
+; _subj relations are missing so SVO-rules can be applied
+; (https://github.com/opencog/relex/issues/52).
 
 
 ; Scientific work is also carred out in laboratories.
