@@ -174,6 +174,10 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		// most) every possible permutation.
 		//
 		Type tp = hp->getType();
+		if (classserver().isA(tp, GREATER_THAN_LINK))
+		{
+			return false;
+		}
 		if (classserver().isA(tp, ORDERED_LINK))
 		{
 			LinkPtr lp(LinkCast(hp));

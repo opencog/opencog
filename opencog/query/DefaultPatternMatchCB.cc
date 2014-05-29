@@ -244,8 +244,8 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 		// candidates in the AtomSpace.
 
 		// XXX TODO -- as a performance optimization, we should try all
-		// the ifferent clauses, and find the one with the smallest number
-		// of atoms of tht type, or otheise try to find a small ("thin")
+		// the different clauses, and find the one with the smallest number
+		// of atoms of that type, or otherwise try to find a small ("thin")
 		// incoming set to search over.
 		AtomSpace *as = _pme->get_atomspace();
 		as->foreach_handle_of_type(ptype,
@@ -257,8 +257,6 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 
 bool DefaultPatternMatchCB::post_link_match(LinkPtr& lpat, LinkPtr& lsoln)
 {
-
-std::cout << " Hello world " << lsoln << std::endl;
 	return false;
 }
 
