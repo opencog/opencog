@@ -12,9 +12,9 @@ ADD_DEPENDENCIES(query
 )
 
 TARGET_LINK_LIBRARIES(query 
-        atomspace 
-        execution 
-        smob
+	atomspace 
+	execution 
+	smob
 )
 
 # Build the query cogserver module
