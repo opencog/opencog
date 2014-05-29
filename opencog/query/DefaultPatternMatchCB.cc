@@ -253,4 +253,13 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 	}
 }
 
+/* ======================================================== */
+
+bool DefaultPatternMatchCB::post_link_match(LinkPtr& lpat, LinkPtr& lsoln)
+{
+
+std::cout << " Hello world " << lsoln << std::endl;
+	return false;
+}
+
 /* ===================== END OF FILE ===================== */
