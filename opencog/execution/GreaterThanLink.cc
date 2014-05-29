@@ -123,8 +123,8 @@ bool GreaterThanLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
                 "Expecting c++:greater arguments to be NumberNode's!");
         const std::string& s1 = NodeCast(h1)->getName();
         const std::string& s2 = NodeCast(h2)->getName();
-        double v1 = atof(s1.str());
-        double v2 = atof(s2.str());
+        double v1 = atof(s1.c_str());
+        double v2 = atof(s2.c_str());
         return v1 > v2;
     }
 
@@ -141,7 +141,7 @@ bool GreaterThanLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
         delete applier;
 
         // If its false or nil, then false; everything else is true.
-        if (rc.equals("#f") or rc.equals("()")) return false;
+        if (rc.compare("#f") or rc.compare("()")) return false;
         return true;
 #else
         throw RuntimeException(TRACE_INFO, "Cannot evaluate scheme GroundedSchemaNode!");
@@ -152,11 +152,10 @@ bool GreaterThanLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
     {
 #ifdef HAVE_CYTHON
         // Be friendly, and strip leading white-space, if any.
-        size_t pos = 3;
-        while (' ' == schema[pos]) pos++;
+        // size_t pos = 3;
+        // while (' ' == schema[pos]) pos++;
 
-        PythonEval &applier = PythonEval::instance();
-
+        // PythonEval &applier = PythonEval::instance();
         // ???? applier.apply(schema.substr(pos), args);
         throw RuntimeException(TRACE_INFO, "Python support not implemented!");
 
