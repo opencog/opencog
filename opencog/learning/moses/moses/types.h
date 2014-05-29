@@ -187,7 +187,7 @@ public:
         : _tree(tr), _deme_id(id), _cscore(cs), _bscore(bs)
     {}
 
-// private:
+private:
     combo::combo_tree _tree;
     demeID_t _deme_id;
     composite_score _cscore;
