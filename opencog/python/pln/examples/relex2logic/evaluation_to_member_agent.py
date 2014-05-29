@@ -22,7 +22,7 @@ class EvaluationToMemberAgent(MindAgent):
                                delete_temporary_variables=True)
 
         self.chainer.add_rule(
-            EvaluationToMemberRule(self.chainer, 0, 2))
+            GeneralEvaluationToMemberRule(self.chainer, 0, 2))
         self.chainer.add_rule(MemberToInheritanceRule(self.chainer))
         self.chainer.add_rule(
             DeductionRule(self.chainer, types.InheritanceLink))
@@ -30,6 +30,8 @@ class EvaluationToMemberAgent(MindAgent):
             InheritanceToMemberRule(self.chainer))
         self.chainer.add_rule(
             MemberToEvaluationRule(self.chainer))
+        self.chainer.add_rule(
+            AbductionRule(self.chainer, types.InheritanceLink))
 
     def run(self, atomspace):
         if self.chainer is None:

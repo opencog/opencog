@@ -142,7 +142,7 @@ struct metapopulation
      */
     score_t best_score() const
     {
-        return get_score(_best_cscore);
+        return _best_cscore.get_score();
     }
 
     /**
@@ -435,7 +435,7 @@ struct metapopulation
 
         for (In f = from; f != to; ++f) {
             const scored_combo_tree& bt = *f;
-            score_t sc = get_score(bt);
+            score_t sc = bt.get_score();
             if (best_score < sc) best_score = sc;
         }
 
@@ -445,7 +445,7 @@ struct metapopulation
         // of both score and complexity.
         for (In f = from; f != to && n != 0; ++f, n--) {
             const scored_combo_tree& bt = *f;
-            if (best_score <= get_score(bt)) {
+            if (best_score <= bt.get_score()) {
                 ostream_scored_combo_tree(out, bt, output_score,
                                            output_penalty, output_bscore,
                                            output_python);

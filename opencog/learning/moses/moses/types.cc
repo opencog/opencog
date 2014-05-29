@@ -69,8 +69,8 @@ bool scored_combo_tree_greater::operator()(const scored_combo_tree& bs_tr1,
     // If we are here, then they are equal.  We are desperate to break
     // a tie, because otherwise, the scored_combo_tree_set will discard
     // anything that compares equal, and we really don't want that.
-    score_t sc1 = get_score(csc1);
-    score_t sc2 = get_score(csc2);
+    score_t sc1 = csc1.get_score();
+    score_t sc2 = csc2.get_score();
 
     gt = (sc1 > sc2);
     if (gt) return true;
@@ -143,81 +143,6 @@ bool composite_score::operator==(const composite_score &r) const
         && CHK_EQ(diversity_penalty)
         && CHK_EQ(penalized_score)
         ;
-}
-
-///////////////////////////
-// convenience accessors //
-///////////////////////////
-
-
-score_t get_penalized_score(const composite_score& sc)
-{
-   return sc.get_penalized_score();
-}
-
-score_t get_penalized_score(const scored_combo_tree& sct)
-{
-    return get_penalized_score(sct.get_composite_score());
-}
-
-score_t get_score(const composite_score& ts)
-{
-    return ts.get_score();
-}
-
-score_t get_score(const scored_combo_tree& bst)
-{
-    return get_score(bst.get_composite_score());
-}
-
-complexity_t get_complexity(const composite_score& ts)
-{
-    return ts.get_complexity();
-}
-
-complexity_t get_complexity(const scored_combo_tree& bst)
-{
-    return get_complexity(bst.get_composite_score());
-}
-
-score_t get_complexity_penalty(const composite_score& ts)
-{
-    return ts.get_complexity_penalty();
-}
-
-score_t get_complexity_penalty(const scored_combo_tree& bst)
-{
-    return get_complexity_penalty(bst.get_composite_score());
-}
-
-score_t get_diversity_penalty(const composite_score& ts)
-{
-    return ts.get_diversity_penalty();
-}
-
-score_t get_diversity_penalty(const scored_combo_tree& bst)
-{
-    return get_diversity_penalty(bst.get_composite_score());
-}
-
-score_t get_penalty(const composite_score& ts)
-{
-    return ts.get_penalty();
-}
-
-score_t get_penalty(const scored_combo_tree& bst)
-{
-    return get_penalty(bst.get_composite_score());
-}
-
-const behavioral_score& get_bscore(const penalized_bscore& pbs)
-{
-    return pbs.first;
-}
-
-const behavioral_score& get_bscore(const scored_combo_tree& bst)
-{
-    return get_bscore(bst.get_pbscore());
 }
 
 } // ~namespace moses

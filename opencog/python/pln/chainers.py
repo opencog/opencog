@@ -76,7 +76,7 @@ and extensional parts separately
   can find nearby things using the space/time servers
 * You can probably get past toddler-level AI without having to use
   predicate logic much. And it may be easier to convert 2+ place
-  predicates into 1-place predicates (see EvaluationToMemberRule)
+  predicates into 1-place predicates (see GeneralEvaluationToMemberRule)
 '''
 
 
@@ -403,8 +403,10 @@ class AtomSpaceBasedInferenceHistory:
         apps = [app for app in apps if not self._get_rule(app).name.startswith('$')]
         # It will find the template as one of the matches
         #apps.remove(template)
-        #self._history_atomspace.remove(template)
-        #self._history_atomspace.remove(inputs, recursive=True)
+
+        self._history_atomspace.remove(template)
+        self._history_atomspace.remove(inputs, recursive=True)
+        self._history_atomspace.remove(rule, recursive=True)
 
         assert all(app in self._history_atomspace for app in apps)
         return apps

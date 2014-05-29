@@ -128,7 +128,7 @@ class AbductionRule(Rule):
                       outputs=[chainer.link(link_type, [S, L])],
                       inputs=[chainer.link(link_type, [S, M]),
                               chainer.link(link_type, [L, M]), S, M, L],
-                      formula=formulas.inductionFormula)
+                      formula=formulas.abductionFormula)
 
 
 class TransitiveSimilarityRule(Rule):

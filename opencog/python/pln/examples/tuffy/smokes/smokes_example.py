@@ -5,7 +5,7 @@ For testing smokes_agent.py without the cogserver
 from __future__ import print_function
 from opencog.atomspace import AtomSpace, TruthValue, types
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
-from pln.examples.tuffy.smokes.smokes_agent import InferenceAgent
+from pln.examples.tuffy.smokes.smokes_agent import InferenceAgent, check_result
 
 __author__ = 'Cosmo Harrigan'
 
@@ -32,26 +32,7 @@ for atom in atoms:
 MAX_STEPS = 500
 
 chainer = InferenceAgent()
-chainer.create_chainer(atomspace=atomspace)
-
-
-def check_result():
-    # Searches for EvaluationLinks where the first argument is: PredicateNode
-    # "cancer" and the target of the predicate is a ConceptNode (representing a
-    # person)
-    eval_links = atomspace.get_atoms_by_type(types.EvaluationLink)
-
-    num_results = 0
-    for eval_link in eval_links:
-        out = [atom for atom in atomspace.get_outgoing(eval_link.h)
-               if atom.is_a(types.PredicateNode) and atom.name == "cancer"]
-        if out:
-            list_link = atomspace.get_outgoing(eval_link.h)[1]
-            argument = atomspace.get_outgoing(list_link.h)[0]
-            if argument.is_a(types.ConceptNode):
-                num_results += 1
-
-    return num_results == 4
+chainer.create_chainer(atomspace=atomspace, stimulate_atoms=False)
 
 answer = False
 outputs_produced = 0
@@ -72,7 +53,7 @@ for i in range(0, MAX_STEPS):
         print("-- using production rule: {0}".format(rule.name))
         print("\n-- based on this input:\n{0}".format(input))
 
-    if check_result():
+    if check_result(atomspace):
         answer = True
         break
 

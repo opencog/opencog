@@ -302,7 +302,7 @@ def create_general_evaluation_to_member_rules(chainer):
     return rules
 
 
-class EvaluationToMemberRule(Rule):
+class GeneralEvaluationToMemberRule(Rule):
     """
     An EvaluationLink with 2+ arguments has a satisfying set where
     every member is a ListLink. But there's another option which may be

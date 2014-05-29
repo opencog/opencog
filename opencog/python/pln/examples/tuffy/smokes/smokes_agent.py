@@ -14,10 +14,9 @@ Method 2 -- Running the example within the cogserver:
 - Add the module path to your PYTHON_EXTENSION_DIRS in opencog.conf:
   ../opencog/python/pln/examples/tuffy/smokes
 - Run the cogserver
-- Clone the test-datasets repository:
-  https://github.com/opencog/test-datasets
-- From that repository, load this file into the cogserver:
-  pln/tuffy/smokes/smokes.scm
+- Load these files into the cogserver:
+  python/pln/examples/tuffy/smokes/smokes.scm,
+  python/pln/examples/tuffy/smokes/extra-data.scm
 - Run these commands in the cogserver:
   loadpy smokes_agent
   agents-start smokes_agent.InferenceAgent
@@ -36,10 +35,13 @@ class InferenceAgent(MindAgent):
     def __init__(self):
         self.chainer = None
 
-    def create_chainer(self, atomspace):
+    def create_chainer(self, atomspace, stimulate_atoms=True):
         self.chainer = Chainer(atomspace,
-                               stimulateAtoms=False,
-                               allow_output_with_variables=True)
+                               agent=self,
+                               stimulateAtoms=stimulate_atoms,
+                               allow_output_with_variables=False,
+                               preferAttentionalFocus=True,
+                               delete_temporary_variables=True)
 
         # ModusPonens:
         # Implication smokes(x) cancer(X)
@@ -53,5 +55,27 @@ class InferenceAgent(MindAgent):
             self.create_chainer(atomspace)
             return
 
-        result = self.chainer.forward_step()
-        return result
+        if not check_result(atomspace):
+            result = self.chainer.forward_step()
+            return result
+
+
+def check_result(atomspace):
+    """
+    Searches for EvaluationLinks where the first argument is: PredicateNode
+    "cancer" and the target of the predicate is a ConceptNode (representing a
+    person)
+    """
+    eval_links = atomspace.get_atoms_by_type(types.EvaluationLink)
+
+    num_results = 0
+    for eval_link in eval_links:
+        out = [atom for atom in atomspace.get_outgoing(eval_link.h)
+               if atom.is_a(types.PredicateNode) and atom.name == "cancer"]
+        if out:
+            list_link = atomspace.get_outgoing(eval_link.h)[1]
+            argument = atomspace.get_outgoing(list_link.h)[0]
+            if argument.is_a(types.ConceptNode):
+                num_results += 1
+
+    return num_results == 4

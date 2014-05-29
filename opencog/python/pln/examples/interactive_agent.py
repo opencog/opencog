@@ -24,7 +24,7 @@ class InteractiveAgent:
           (ConceptNode "smokes")
         )
 
-        -- using production rule: EvaluationToMemberRule
+        -- using production rule: GeneralEvaluationToMemberRule
 
         -- based on this input:
         [(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)

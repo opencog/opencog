@@ -170,18 +170,15 @@ score_t AntFitnessEstimator::operator()(const combo_tree& tr) const {
 ant_bscore::ant_bscore(float simplicity_pressure)
     : _simplicity_pressure(simplicity_pressure) {}
 
-penalized_bscore ant_bscore::operator()(const combo_tree& tr) const
+behavioral_score ant_bscore::operator()(const combo_tree& tr) const
 {
-    penalized_bscore pbs;
+    behavioral_score bs;
     // @todo: It is not a good behavioral_score. Instead it should be
     // -1 for all pellet non-eaten
-    pbs.first.push_back(-89);
-    pbs.first.push_back(_aff(tr));
+    bs.push_back(-89);
+    bs.push_back(_aff(tr));
 
-    // @todo: the complexity penalty should be tunable
-    pbs.second = _simplicity_pressure * tr.size();
-    
-    return pbs;
+    return bs;
 }
 
 behavioral_score ant_bscore::best_possible_bscore() const

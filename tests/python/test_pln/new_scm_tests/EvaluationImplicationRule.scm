@@ -4,13 +4,13 @@
 
 (EvaluationLink (PredicateNode "inputs") 
 	(ListLink 
-		(InheritanceLink socrates mortal (stv 0.5 1))
 		(InheritanceLink human mortal (stv 0.5 1))
+		(InheritanceLink socrates human (stv 0.5 1))
 	)
 )
 (EvaluationLink (PredicateNode "rules") 
 	(ListLink 
-		(ConceptNode "AbductionRule<InheritanceLink>")
+		(ConceptNode "EvaluationImplicationRule")
 	)
 )
 (EvaluationLink (PredicateNode "forwardSteps")
@@ -24,11 +24,10 @@
 		human
 		socrates
 		mortal
-		(InheritanceLink socrates mortal (stv 0.5 1))
 		(InheritanceLink human mortal (stv 0.5 1))
-		(InheritanceLink socrates human (stv 0.252525 1))
+		(InheritanceLink socrates human (stv 0.5 1))
+		(InheritanceLink socrates mortal (stv 0.252525 1))
 	)
 )
-
 
 
