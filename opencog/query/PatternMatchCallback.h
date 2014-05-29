@@ -72,6 +72,10 @@ class PatternMatchCallback
 		 * is a possible solution link from the atomspace.
 		 * Return false if the links match, else return
 		 * true. (i.e. return true if mis-match).
+		 *
+		 * This callback should not compar the link contents;
+		 * the pattern matcher will do that next, if this
+		 * callback accepts the match.
 		 */
 		virtual bool link_match(LinkPtr& link1, LinkPtr& link2) = 0;
 
