@@ -13,46 +13,62 @@
 
 (InheritanceLink (stv 1.0 1.0)
     (ConceptNode "scientist")
-    (AndLink
-        (InheritanceLink
-            (VariableNode "$x")
-            (ConceptNode "person"))
-        (EvaluationLink
-            (PredicadeNode "work_in") ; how would 'in' be handled?
-            (ListLink
+    (SatisfyingSetLink
+        (VariableNode "$x")
+        (AndLink
+            (InheritanceLink
                 (VariableNode "$x")
-                (ConceptNode "science")))))
+                (ConceptNode "person"))
+            (EvaluationLink
+                (PredicadeNode "work_in") ; how would 'in' be handled?
+                (ListLink
+                    (VariableNode "$x")
+                    (ConceptNode "science")))))
 
 ; Current RelEx2Logic output:
 
-; be-inheritance-rule
-(InheritanceLink (stv 1.000000 1.000000)
-  (ConceptNode "scientist@5d709cad-32b0-4d4c-93fc-0fee959d6a94") ; [365]
-  (ConceptNode "scientist") ; [366]
-) ; [367]
-
-(InheritanceLink (stv 1.000000 1.000000)
-  (ConceptNode "person@faa54fae-15dc-4bbc-a714-8449221e1768") ; [368]
-  (ConceptNode "person") ; [369]
-) ; [370]
-
-(InheritanceLink (stv 1.000000 1.000000)
-  (ConceptNode "scientist@5d709cad-32b0-4d4c-93fc-0fee959d6a94") ; [365]
-  (ConceptNode "person@faa54fae-15dc-4bbc-a714-8449221e1768") ; [368]
-) ; [371]
+; SV-rule
+(EvaluationLink (stv 1.000000 0.000000)
+  (PredicateNode "works@b54f5154-d1e5-4ccc-9b24-b6607a7059f5") ; [209]
+  (ConceptNode "person@14eeec29-2e60-4a17-93bc-9e330ca11a0a") ; [200]
+) ; [213]
 
 ; tense-rule
 (InheritanceLink (stv 1.000000 0.000000)
-  (PredicateNode "is@fb91bdf4-a47a-4d67-8732-af8f2a73f294") ; [372]
-  (PredicateNode "be") ; [373]
-) ; [374]
+  (PredicateNode "is@efbcc00b-4b6f-4d5d-804e-6a8951dc5cb4") ; [204]
+  (ConceptNode "present") ; [207]
+) ; [208]
 
-; The SVO-rule isn't applied for the subordinate clause because,
-; currently, a RelEx2Logic rule can only be applied once per sentence.
-; As be-inheritance is already applied, this currently prevents SVO from being
-; applied to the subordinate clause because they are disjoint.
-; This is discussed here: https://github.com/opencog/relex/issues/39 and
-; should be fixed to deal with this sentence.
+(InheritanceLink (stv 1.000000 0.000000)
+  (PredicateNode "works@b54f5154-d1e5-4ccc-9b24-b6607a7059f5") ; [209]
+  (PredicateNode "work") ; [210]
+) ; [211]
+
+; tense-rule
+(InheritanceLink (stv 1.000000 0.000000)
+  (PredicateNode "works@b54f5154-d1e5-4ccc-9b24-b6607a7059f5") ; [209]
+  (ConceptNode "present") ; [207]
+) ; [212]
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "scientist@337d31cb-04e0-41d8-8885-1a4021ea94ab") ; [197]
+  (ConceptNode "scientist") ; [198]
+) ; [199]
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "person@14eeec29-2e60-4a17-93bc-9e330ca11a0a") ; [200]
+  (ConceptNode "person") ; [201]
+) ; [202]
+
+; be-inheritance-rule
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "scientist@337d31cb-04e0-41d8-8885-1a4021ea94ab") ; [197]
+  (ConceptNode "person@14eeec29-2e60-4a17-93bc-9e330ca11a0a") ; [200]
+) ; [203]
+
+; As pointed out by Ruiting, link grammar can handle verbs with particles.
+; A R2L rule is required to produce a compound PredicateNode for verbs and
+; particles.
 
 
 ; A scientist tries to understand how our world works.
@@ -60,7 +76,7 @@
 ; Desired output (needs some refinement):
 
 (EvaluationLink (stv 1.0 1.0)
-    (PredicadeNode "try to understand") ; how would infinitive constructions be handled?
+    (PredicateNode "try to understand") ; how would infinitive constructions be handled?
     (ListLink
         (ConceptNode "scientist")
         (ConceptNode "how our world works"))) ; how are embedded sentences handled?
