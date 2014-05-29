@@ -4,14 +4,14 @@ INCLUDE_DIRECTORIES (
 	${PROJECT_SOURCE_DIR}/opencog/util
 )
 
-LINK_DIRECTORIES(
+LINK_DIRECTORIES (
 	${PROJECT_BINARY_DIR}/opencog/nlp/types
 	${PROJECT_BINARY_DIR}/opencog/atomspace
 	${PROJECT_BINARY_DIR}/opencog/query
 	${PROJECT_BINARY_DIR}/opencog/util
 )
 
-LINK_LIBRARIES(
+LINK_LIBRARIES (
 	atomspace
 	nlp-types
 	query
@@ -39,14 +39,18 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(MatchLinkUTest)
 	ADD_CXXTEST(UnorderedUTest)
 	ADD_CXXTEST(StackMoreUTest)
+	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(EinsteinUTest)
-        ADD_CXXTEST(SingleUTest)
+	ADD_CXXTEST(SingleUTest)
 
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		cogutil
 	)
 ENDIF (HAVE_GUILE)
 
+# Copy files to the build directory.  We do this so that the
+# scheme files can be found no matter where the source directory
+# might be.
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-stack.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-stack.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/var-type-not.scm
@@ -67,3 +71,5 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-u-u.scm
     ${PROJECT_BINARY_DIR}/tests/query/stackmore-u-u.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/single.scm
     ${PROJECT_BINARY_DIR}/tests/query/single.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater_than.scm
+    ${PROJECT_BINARY_DIR}/tests/query/greater_than.scm)
