@@ -72,8 +72,27 @@ class PatternMatchCallback
 		 * is a possible solution link from the atomspace.
 		 * Return false if the links match, else return
 		 * true. (i.e. return true if mis-match).
+		 *
+		 * The link_match() callback should not compare the
+		 * link contents; the pattern matcher will do that
+		 * next, if this callback accepts the match.
+		 * After the pattern matcher has found a grounding
+		 * for a link, the post_link_match() callback is
+		 * called, offering a second chance to reject a link.
 		 */
 		virtual bool link_match(LinkPtr& link1, LinkPtr& link2) = 0;
+
+		/** 
+		 * Called after a candidate grounding has been found
+		 * for a link.  This callback offers a final chance
+		 * to reject the link match based on the actual
+		 * grounding, or to perform post-match processing.
+		 * For example, the post_link_match() callback is 
+		 * used by the GreaterThanLink to perform a comparison
+		 * of the grounded values; if the comparison fails,
+		 * the match is rejected.
+		 */
+		virtual bool post_link_match(LinkPtr& link1, LinkPtr& link2) = 0;
 
 		/**
 		 * Called when a solution is found. Should

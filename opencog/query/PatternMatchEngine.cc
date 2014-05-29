@@ -174,6 +174,10 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		// most) every possible permutation.
 		//
 		Type tp = hp->getType();
+		if (classserver().isA(tp, GREATER_THAN_LINK))
+		{
+			return false;
+		}
 		if (classserver().isA(tp, ORDERED_LINK))
 		{
 			LinkPtr lp(LinkCast(hp));
@@ -201,16 +205,17 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			depth --;
 			dbgprt("tree_comp down link mismatch=%d\n", mismatch);
 
+			if (mismatch) return true;
+
+			// If we've found a grounding, lets see if the
+			// post-match callback likes this grounding.
+			mismatch = pmc->post_link_match(lp, lg);
+			if (mismatch) return true;
+
 			// If we've found a grounding, record it.
-			if (false == mismatch)
-				var_grounding[hp] = hg;
+			var_grounding[hp] = hg;
 
-			// if (false == mismatch)
-			//	   var_solutn_stack.pop();
-			// else
-			//	   POPGND(var_grounding, var_solutn_stack);
-
-			return mismatch;
+			return false;
 		}
 		else
 		{
@@ -242,6 +247,14 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 				depth --;
 				dbgprt("tree_comp down unordered link mismatch=%d\n", mismatch);
 
+				// If we've found a grounding, lets see if the
+				// post-match callback likes this grounding.
+				if (false == mismatch)
+				{
+					mismatch = pmc->post_link_match(lp, lg);
+				}
+
+				// If we've found a grounding, record it.
 				if (false == mismatch)
 				{
 					var_solutn_stack.pop();

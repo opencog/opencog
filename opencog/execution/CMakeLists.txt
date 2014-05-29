@@ -7,6 +7,7 @@ INCLUDE_DIRECTORIES(
 
 ADD_LIBRARY (execution SHARED
     ExecutionLink.cc
+    GreaterThanLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -23,5 +24,6 @@ ENDIF (HAVE_CYTHON)
 
 INSTALL (FILES
     ExecutionLink.h
+    GreaterThanLink.h
     DESTINATION "include/${PROJECT_NAME}/atomspace"
 )

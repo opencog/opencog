@@ -102,6 +102,8 @@ SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
 EXECUTION_LINK <- ORDERED_LINK
 EXECUTION_OUTPUT_LINK <- ORDERED_LINK
 
+GREATER_THAN_LINK <- EXECUTION_LINK
+
 // ====================================================================
 // Synchronization primitive, used to mark stages of a processing
 // pipeline; used as a fence or guard barrier, make sure that earlier
@@ -111,6 +113,5 @@ EXECUTION_OUTPUT_LINK <- ORDERED_LINK
 // processing.
 ANCHOR_NODE <- NODE
 
-// Link for mathematices. Not in use at the time of recatgorizing, from
-// NLP related atom types.
+// Link for mathematics. (???)
 QUANTITY_LINK <- ORDERED_LINK
