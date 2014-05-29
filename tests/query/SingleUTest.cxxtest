@@ -1,5 +1,5 @@
 /*
- * tests/query/BindUTest.cxxtest
+ * tests/query/SingleUTest.cxxtest
  *
  * Copyright (C) 2014 Cosmo Harrigan
  * All Rights Reserved
@@ -31,7 +31,7 @@
 
 using namespace opencog;
 
-class BindUTest: public CxxTest::TestSuite
+class SingleUTest: public CxxTest::TestSuite
 {
 private:
         PatternMatch pm;
@@ -39,7 +39,7 @@ private:
         SchemeEval* eval;
 
 public:
-    BindUTest(void)
+    SingleUTest(void)
     {
         try
         {
@@ -59,7 +59,7 @@ public:
         eval = new SchemeEval(as);
     }
 
-    ~BindUTest()
+    ~SingleUTest()
     {
         delete as;
         // Erase the log file if no assertions failed.
@@ -73,11 +73,11 @@ public:
     void test_single_bindlink(void);
 };
 
-void BindUTest::tearDown(void)
+void SingleUTest::tearDown(void)
 {
 }
 
-void BindUTest::setUp(void)
+void SingleUTest::setUp(void)
 {
     pm.set_atomspace(as);
     
@@ -94,12 +94,12 @@ void BindUTest::setUp(void)
 }
 
 /*
- * Basic BindLink unit test. Defines 3 inheritance relationships,
+ * Basic SingleLink unit test. Defines 3 inheritance relationships,
  * and then tests that PatternMatch::bindlink finds all of them, and that
  * PatternMatch::single_bindlink only finds the first result and then stops
  * searching.
  */
-void BindUTest::test_single_bindlink(void)
+void SingleUTest::test_single_bindlink(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
