@@ -110,6 +110,24 @@ bool GreaterThanLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
     const std::string& schema = NodeCast(gsn)->getName();
     // printf ("Grounded schema name: %s\n", schema.c_str());
 
+    // A very special-case C++ comparison
+    // This can compare two NumberNodes 
+    // Hard-coded in C++ for speed. (well, and convenience ...)
+    if (0 == schema.compare(0,4,"c++:greater", 11))
+    {
+        LinkPtr ll(LinkCast(args));
+        Handle h1(ll->getOutgoingAtom(0));
+        Handle h2(ll->getOutgoingAtom(1));
+        if (NUMBER_NODE != h1->getType() or NUMBER_NODE != h2->getType())
+            throw RuntimeException(TRACE_INFO,
+                "Expecting c++:greater arguments to be NumberNode's!");
+        const std::string& s1 = NodeCast(h1)->getName();
+        const std::string& s2 = NodeCast(h2)->getName();
+        double v1 = atof(s1.str());
+        double v2 = atof(s2.str());
+        return v1 > v2;
+    }
+
     // At this point, we only run scheme and python schemas.
     if (0 == schema.compare(0,4,"scm:", 4))
     {
