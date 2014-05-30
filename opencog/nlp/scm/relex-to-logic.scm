@@ -546,6 +546,15 @@
                                                 (EvaluationLink (VariableNode "$D") (ListLink (VariableNode "$E") (VariableNode "$X")))
                                           )))
 )))
+;For sentences sv and be-inheritance-rule applied in the first part of RelEx2logic 
+;Example:  "The woman who lives next door is a registered nurse."
+;RelEx2Logic representaion:
+;  (InheritanceLink 
+;      (SatisfyingSetLink 
+;               (VariableNode "$X") 
+;               (InheritanceLink (VariableNode "$X") (VariableNode "woman")) 
+;               (EvaluationLink (VariableNode "live") (ListLink (VariableNode "$X")))) 
+;      (VariableNode "nurse"))
 
 (define adjective-clause-rule-5
         (BindLink 
