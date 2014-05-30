@@ -1,13 +1,9 @@
 ; Facts taken from SimpleWikipedia:
 
+; See here for useful discussions concerning the sentences:
+; - https://github.com/opencog/opencog/pull/778/files#r12911998
 
 ; A scientist is a person who works in science.
-
-; It would be good if there would be a way to only display the atoms
-; produced by RelEx2Logic in the AtomSpace and be able to hide all
-; the WordInstanceNodes, DefinedLinguisticRelationshipNodes, etc.
-; This would not only be valuable for inspecting the output, but also for
-; checking without distractions if PLN performs the right deductions.
 
 ; Desired output (with some refinements):
 
@@ -20,7 +16,7 @@
                 (VariableNode "$x")
                 (ConceptNode "person"))
             (EvaluationLink
-                (PredicadeNode "work_in") ; how would 'in' be handled?
+                (PredicadeNode "work_in") 
                 (ListLink
                     (VariableNode "$x")
                     (ConceptNode "science")))))
@@ -67,8 +63,10 @@
 ) ; [203]
 
 ; As pointed out by Ruiting, link grammar can handle verbs with particles.
-; A R2L rule is required to produce a compound PredicateNode for verbs and
-; particles.
+; RelEx should be able to produce PredicateNodes for common verb+particle
+; pairs.
+; Not feasible because there are so many combinations? (see below: teach_at, etc) 
+; Also, verbs + particles and prepositions have to be differentiated.
 
 
 ; A scientist tries to understand how our world works.
@@ -99,43 +97,86 @@
 
 ; Current RelEx2Logic output:
 
-(InheritanceLink (stv 1.000000 0.000000)
-  (ConceptNode "world@15badd06-cb2c-4d39-adac-0253d6c74b01") ; [538]
-  (ConceptNode "world") ; [539]
-) ; [540]
-
-(InheritanceLink (stv 1.000000 0.000000)
-  (ConceptNode "our@d06ca837-7ee6-4f4a-a181-3a70916d4b95") ; [542]
-  (ConceptNode "us") ; [543]
-) ; [544]
-
-(InheritanceLink (stv 1.000000 0.000000)
-  (PredicateNode "works@463aae53-ef79-4cd9-8b4e-ee67c7481e40") ; [533]
-  (PredicateNode "work") ; [534]
-) ; [535]
-
-(InheritanceLink (stv 1.000000 0.000000)
-  (PredicateNode "works@463aae53-ef79-4cd9-8b4e-ee67c7481e40") ; [533]
-  (ConceptNode "present") ; [536]
-) ; [537]
+(ListLink (stv 0.990000 0.990000)
+  (ConceptNode "world@cf823ba7-fdca-4674-851f-51988a8de699") ; [375]
+  (ConceptNode "our@16e09edd-8f0c-4b93-8b7e-c2a3a4d14c7d") ; [379]
+) ; [383]
 
 (EvaluationLink (stv 1.000000 0.000000)
-  (PredicateNode "Possession") ; [545]
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "world@15badd06-cb2c-4d39-adac-0253d6c74b01") ; [538]
-    (ConceptNode "our@d06ca837-7ee6-4f4a-a181-3a70916d4b95") ; [542]
-  ) ; [546]
-) ; [547]
+  (PredicateNode "understand@26f7796c-b25d-49d9-92be-5b6642a8640b") ; [392]
+  (ConceptNode "scientist@3fc15db2-5bd5-41e2-a9fe-55ca0d38d9a6") ; [389]
+) ; [395]
 
 (EvaluationLink (stv 1.000000 0.000000)
-  (PredicateNode "works@463aae53-ef79-4cd9-8b4e-ee67c7481e40") ; [533]
-  (ConceptNode "world@15badd06-cb2c-4d39-adac-0253d6c74b01") ; [538]
-) ; [541]
+  (PredicateNode "tries@8e4f8728-d2b3-4f1d-aa87-45cd9c24e6aa") ; [385]
+  (EvaluationLink (stv 1.000000 0.000000)
+    (PredicateNode "understand@26f7796c-b25d-49d9-92be-5b6642a8640b") ; [392]
+    (ConceptNode "scientist@3fc15db2-5bd5-41e2-a9fe-55ca0d38d9a6") ; [389]
+  ) ; [395]
+) ; [396]
 
-; Same problem as above. 'A scientist tries to understand' is not captured.
+(EvaluationLink (stv 0.990000 0.990000)
+  (PredicateNode "tries@8e4f8728-d2b3-4f1d-aa87-45cd9c24e6aa") ; [385]
+  (ConceptNode "scientist@3fc15db2-5bd5-41e2-a9fe-55ca0d38d9a6") ; [389]
+) ; [397]
+
+(EvaluationLink (stv 0.990000 0.990000)
+  (PredicateNode "works@562a14be-6028-4012-be39-5724003ecafc") ; [370]
+  (ConceptNode "world@cf823ba7-fdca-4674-851f-51988a8de699") ; [375]
+) ; [378]
+
+(EvaluationLink (stv 0.990000 0.990000)
+  (PredicateNode "Possession") ; [382]
+  (ListLink (stv 0.990000 0.990000)
+    (ConceptNode "world@cf823ba7-fdca-4674-851f-51988a8de699") ; [375]
+    (ConceptNode "our@16e09edd-8f0c-4b93-8b7e-c2a3a4d14c7d") ; [379]
+  ) ; [383]
+) ; [384]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (ConceptNode "world@cf823ba7-fdca-4674-851f-51988a8de699") ; [375]
+  (ConceptNode "world") ; [376]
+) ; [377]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (ConceptNode "our@16e09edd-8f0c-4b93-8b7e-c2a3a4d14c7d") ; [379]
+  (ConceptNode "us") ; [380]
+) ; [381]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (PredicateNode "tries@8e4f8728-d2b3-4f1d-aa87-45cd9c24e6aa") ; [385]
+  (PredicateNode "try") ; [386]
+) ; [387]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (PredicateNode "tries@8e4f8728-d2b3-4f1d-aa87-45cd9c24e6aa") ; [385]
+  (ConceptNode "present") ; [373]
+) ; [388]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (ConceptNode "scientist@3fc15db2-5bd5-41e2-a9fe-55ca0d38d9a6") ; [389]
+  (ConceptNode "scientist") ; [390]
+) ; [391]
+
+(InheritanceLink (stv 1.000000 0.000000)
+  (PredicateNode "understand@26f7796c-b25d-49d9-92be-5b6642a8640b") ; [392]
+  (PredicateNode "understand") ; [393]
+) ; [394]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (PredicateNode "works@562a14be-6028-4012-be39-5724003ecafc") ; [370]
+  (PredicateNode "work") ; [371]
+) ; [372]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (PredicateNode "works@562a14be-6028-4012-be39-5724003ecafc") ; [370]
+  (ConceptNode "present") ; [373]
+) ; [374]
+
+; Nodes need to be embedded.
 
 
-; Scientist make observations and ask questions (and do extensive research work in finding the answers to these questions).
+; Scientists make observations and ask questions (and do extensive research work in finding the answers to these questions).
 
 ; Desired output:
 
@@ -153,12 +194,15 @@
 
 ; Current RelEx2Logic output:
 
-; _obj(make, observation)
+; RelEx relations:
+; bj(make, observation)
 ; conj_and(make, ask)
+; _subj(make, scientist)
 ; _obj(ask, question)
-; _advmod(and, Scientist)
-; _subj relations are still missing, though (https://github.com/opencog/relex/issues/46).
-; Thus, no SVO-rule is performed and no EvaluationLinks are generated.
+; _subj(ask, scientist)
+
+; No R2L output is produced for me right now: https://github.com/opencog/relex/issues/46.
+; Probably just a bug.
 
 
 ; Scientists work for governments, companies, schools and research institutes.
@@ -185,7 +229,8 @@
 ; conj_and(,, institute)
 ; _nn(institute, research)
 
-; The same applies to the enumeration (conjunction) isn't handled properly in this case yet,
+
+; Enumeration (conjunction) isn't handled properly in this case yet,
 ; even though link-grammar does a good job parsing the sentence:
 ; (S (NP Scientists.n) (VP work.v (PP for.p governments.n , companies.n , schools.n and.j-n research.n-u institutes.n)) .)
 
@@ -209,14 +254,31 @@
 ; _subj(teach, scientist)
 ; _quantity(scientist, some)
 
-(EvaluationLink (stv 1.000000 0.000000)
-  (PredicateNode "teach@e1ae1613-14b5-4316-9ccc-1f3b40f8d86b") ; [1013]
-  (ConceptNode "scientists@dfd9c430-1675-46f5-8c8c-6cfa7de97e61") ; [1018]
-) ; [1021]
+(EvaluationLink (stv 0.990000 0.990000)
+  (PredicateNode "teach@5ea61496-0b3a-4ddc-b520-5aae837b642b") ; [1005]
+  (ConceptNode "scientists@79a3955d-0bf1-4a9e-9f6c-2f6dfe7e0bbc") ; [1010]
+) ; [1013]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (PredicateNode "teach@5ea61496-0b3a-4ddc-b520-5aae837b642b") ; [1005]
+  (PredicateNode "teach") ; [1006]
+) ; [1007]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (PredicateNode "teach@5ea61496-0b3a-4ddc-b520-5aae837b642b") ; [1005]
+  (ConceptNode "present") ; [1008]
+) ; [1009]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (ConceptNode "scientists@79a3955d-0bf1-4a9e-9f6c-2f6dfe7e0bbc") ; [1010]
+  (ConceptNode "scientist") ; [1011]
+) ; [1012]
 
 ; Quantifier 'some' should modify stv.
-; Rule to make sense of spatial relation needed.
-
+; How? Concrete probability values for 'some', 'few', 'a lot', etc?
+; E.g. 'few' := .2, 'some' := .3, 'a lot' := .7...
+; Has this already been discussed?
+; Again: Verb+particle/preposition.
 
 ; Scientists often make experiments (to find out more about reality).
 
@@ -278,38 +340,51 @@
 
 ; Fuzzy adverbs/adjectives (e.g. often) need to modify stv. R2L will deal
 ; with them separately. So far, only 'maybe' has been implemented (albeit
-; without a helper function.)
+; without a helper function which, however, is specified here:
+; http://wiki.opencog.org/w/RelEx2Logic#Maybe_Rule)
+; Could I go forward and start implementing rules for fuzzy adverbs or would
+; this be counter-productive or made redundant when temporary markers are
+; going to be reduced in the post-processing step?
 
 
 ; Scientists sometimes may repeat experiments or use control groups.
 
 ; (Approximate) desired output:
 
-(EvaluationLink (stv .3 .5)
-    (PredicadeNode "repeat")
-    (ListLink
-        (ConceptNode "scientist")
-        (ConceptNode "experiments")))
+(OrLink
+    (EvaluationLink (stv .3 .5)
+        (PredicateNode "repeat")
+        (ListLink
+            (ConceptNode "scientist")
+            (ConceptNode "experiments")))
+    (EvaluationLink (stv .3 .5)
+        (Predicate "use")
+        (ListLink
+            (ConceptNode "scientist")
+            (ConceptNode "control_groups"))))
 
 ; Current output:
 
-; conj_or(repeat, use)
-; _obj(repeat, repeat)
-; _obj(repeat, use)
+; nj_or(repeat, use)
+; _obj(repeat, experiment)
 ; _nn(group, control)
+; _obj(use, group)
 ; _obj(or, group)
 ; _advmod(or, sometimes)
 ; _subj(or, scientist)
 
-; _subj relations are missing so SVO-rules can be applied
-; (https://github.com/opencog/relex/issues/52).
+; _subj relations are missing for 'repeat' and 'use': https://github.com/opencog/relex/issues/52 
 
 
 ; Scientific work is also carred out in laboratories.
 
-(InheritanceLink
-    (ConceptNode "scientific_work")
-    (ConceptNode "science"))
+(ContextLink (stv .8 .8)
+    (ConceptNode "Science"
+    (EvaluationLink (stv .7 .7)
+        (PredicateNode "be_carried_out_in")
+        (ListLink
+            (ConceptNode "work")
+            (ConceptNode "laboratories")))))
 
 
 ; Scientists are more likely to be atheists than the rest of the general population.
@@ -327,30 +402,81 @@
 ; Desired output:
 
 (InheritanceLink (stv 1.0 1.0)
-    (AndLink
-        (InheritanceLink
-            (VariableNode "$x")
-            (ConceptNode "scientist"))
-        (EvaluationLink
-            (PredicadeNode "study")
-            (ListLink
+    (SatisfyingSetLink
+        (VariableNode "$x")
+        (AndLink
+            (InheritanceLink
                 (VariableNode "$x")
-                (ConceptNode "physics"))))
+                (ConceptNode "scientist")
+            (EvaluationLink
+                (PredicateNode "study")
+                (ListLink
+                    (VariableNode "$x")
+                    (ConceptNode "physics"))))))
     (ConceptNode "physicist"))
-
+        
 ; Current RelEx relations:
 
-bj(be, physicist)
-_subj(be, scientist)
-_obj(study, physics)
-_subj(study, scientist)
-that_adj(scientist, study)
+; bj(be, physicist)
+; _subj(be, scientist)
+; _obj(study, physics)
+; _subj(study, scientist)
+; that_adj(scientist, study)
 
-; Currently applied R2L rules: be-inheritance-rule "scientist" "physicist",
-; tense-rule "be" "present"
+(ListLink (stv 0.990000 0.990000)
+  (ConceptNode "scientists@18c624d0-c717-4e9b-acd6-d63f99f74ef4") ; [1311]
+  (ConceptNode "physics@a2225099-e913-4429-9c7c-9d2fb9be3e03") ; [1326]
+) ; [1329]
+
+(EvaluationLink (stv 0.990000 0.990000)
+  (PredicateNode "study@68cafe06-3ff2-4b39-8486-763d7a243e40") ; [1323]
+  (ListLink (stv 0.990000 0.990000)
+    (ConceptNode "scientists@18c624d0-c717-4e9b-acd6-d63f99f74ef4") ; [1311]
+    (ConceptNode "physics@a2225099-e913-4429-9c7c-9d2fb9be3e03") ; [1326]
+  ) ; [1329]
+) ; [1330]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (ConceptNode "physicists@5f8900a3-d388-48ba-8d44-00c09e1d5453") ; [1314]
+  (ConceptNode "physicist") ; [1315]
+) ; [1316]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (ConceptNode "scientists@18c624d0-c717-4e9b-acd6-d63f99f74ef4") ; [1311]
+  (ConceptNode "physicists@5f8900a3-d388-48ba-8d44-00c09e1d5453") ; [1314]
+) ; [1317]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (PredicateNode "are@eb91546b-c50f-4574-b2f8-e41a4f776111") ; [1318]
+  (PredicateNode "be") ; [1319]
+) ; [1320]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (PredicateNode "are@eb91546b-c50f-4574-b2f8-e41a4f776111") ; [1318]
+  (ConceptNode "present") ; [1321]
+) ; [1322]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (PredicateNode "study@68cafe06-3ff2-4b39-8486-763d7a243e40") ; [1323]
+  (PredicateNode "study") ; [1324]
+) ; [1325]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (ConceptNode "physics@a2225099-e913-4429-9c7c-9d2fb9be3e03") ; [1326]
+  (ConceptNode "physics") ; [1327]
+) ; [1328]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (PredicateNode "study@68cafe06-3ff2-4b39-8486-763d7a243e40") ; [1323]
+  (ConceptNode "present") ; [1321]
+) ; [1331]
+
+(InheritanceLink (stv 0.990000 0.990000)
+  (ConceptNode "scientists@18c624d0-c717-4e9b-acd6-d63f99f74ef4") ; [1311]
+  (ConceptNode "scientist") ; [1312]
+) ; [1313]
 
 ; RelEx relations are all in place. Required rules for that-subordinate clause;
-; disjoint rules need to be possible for different clauses.
 
 
 ; Scientists write papers.
@@ -386,16 +512,16 @@ that_adj(scientist, study)
 
 ; Current RelEx relations:
 
-_obj(win, prize)
-_subj(win, scientist)
-_nn(prize, nobel)
-_quantity(scientist, a_few)
+; _obj(win, prize)
+; _subj(win, scientist)
+; _nn(prize, nobel)
+; _quantity(scientist, a_few)
 
 ; Currently applied R2L rules: SVO-rule "scientist" "win" "prize",
 ; tense-rule "win" "present", nn-rule "nobel" "prize"
 
 ; One rule needed that modifies stvs based on _quantity relation;
-; probably best using scoped variables.
+; probably best using scoped variables. Also see 'some' above.
 
 
 ; Example sentences for inference:
