@@ -369,7 +369,20 @@
                 )
         )
 )
+;For sentences SVO and SVP rules applied in the first part of RelEx2logic 
+;Example: "The restaurant which serves national food is very famous
+;RelEx2Logic representaion:
+; (InheritanceLink
+;      (SatisfyingSetLink (VariableNode "$X")
+;         (InheritanceLink(VariableNode "$X")(ConceptNode "restaurant"))
+;         (EvaluationLink
+;            (PredicateNode "serves")
+;            (ListLink
+;               (VariableNode "$X")
+;               (ConceptNode "food"))))
+;     (ConceptNode "famous"))
 
+;
 (define adjective-clause-rule-1 
         (BindLink 
                 (ListLink 
