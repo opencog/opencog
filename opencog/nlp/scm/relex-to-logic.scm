@@ -491,5 +491,31 @@
                                           )))
 )))
 
+(define adjective-clause-rule-5
+        (BindLink 
+                (ListLink 
+                        (TypedVariableLink 
+                                (VariableNode "$A") 
+                                (VariableTypeNode "ConceptNode")) 
+                        (TypedVariableLink 
+                                (VariableNode "$B") 
+                                (VariableTypeNode "ConceptNode")) 
+                        (TypedVariableLink 
+                                (VariableNode "$C") 
+                                (VariableTypeNode "PredicateNode")) 
+                        (TypedVariableLink 
+                                (VariableNode "$D") 
+                                (VariableTypeNode "ConceptNode"))) 
+                (ImplicationLink 
+                        (AndLink 
+                                (InheritanceLink (VariableNode "$A")(VariableNode "$B")) 
+                                (EvaluationLink (VariableNode "$C")(ListLink(VariableNode "$A"))) 
+                                (EvaluationLink (PredicateNode "whomarker") (ListLink (VariableNode "$A")(VariableNode "$C")))) 
+                        (InheritanceLink 
+                                (SatisfyingSetLink (VariableNode "$X") 
+                                        (InheritanceLink (VariableNode "$X") (VariableNode "$A")) 
+                                        (EvaluationLink (VariableNode "$C") (ListLink (VariableNode "$X")))) 
+                        (VariableNode "$B")))
+)) 
 
 
