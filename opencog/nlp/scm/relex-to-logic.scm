@@ -458,3 +458,38 @@
                                          (EvaluationLink (VariableNode "$C") (ListLink (VariableNode "$D") (VariableNode "$E")(VariableNode "$x"))))
                                 (VariableNode "$B")))
 ))
+
+(define adjective-clause-rule-4
+        (BindLink
+                (ListLink
+                        (TypedVariableLink
+                                (VariableNode "$A")
+                                (VariableTypeNode "PredicateNode"))
+                        (TypedVariableLink
+                                (VariableNode "$B")
+                                (VariableTypeNode "ConceptNode"))
+                        (TypedVariableLink
+                                (VariableNode "$C")
+                                (VariableTypeNode "ConceptNode"))
+                        (TypedVariableLink
+                                (VariableNode "$D")
+                                (VariableTypeNode "PredicateNode"))
+                        (TypedVariableLink
+                                (VariableNode "$E")
+                                (VariableTypeNode "ConceptNode")))
+                (ImplicationLink
+                        (AndLink
+                                (EvaluationLink (VariableNode "$A")(ListLink(VariableNode "$B")(VariableNode "$C")))
+                                (EvaluationLink (VariableNode "$D")(ListLink(VariableNode "$E")(VariableNode "$C")))
+                                (EvaluationLink (PredicateNode "whichmarker") (ListLink (VariableNode "$C")(VariableNode "$D"))))
+                        (EvaluationLink 
+                                (VariableNode "$A")
+                                (ListLink (VariableNode "$B")
+                                          (SatisfyingSetLink (VariableNode "$X")
+                                                (InheritanceLink (VariableNode "$X") (VariableNode "$C"))
+                                                (EvaluationLink (VariableNode "$D") (ListLink (VariableNode "$E") (VariableNode "$X")))
+                                          )))
+)))
+
+
+
