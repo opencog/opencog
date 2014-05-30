@@ -456,7 +456,20 @@
                                                         (InheritanceLink (VariableNode "$X") (VariableNode "$C"))
                                                         (EvaluationLink (VariableNode "$D") (ListLink (VariableNode "$X") (VariableNode "$E"))))))
 )))
-
+;For sentences SVO and SVIO rule applied in the first part of RelEx2logic 
+;Example:  "The book which you give me last week is interesting."
+;RelEx2Logic representaion:
+;(InheritanceLink
+;      (SatisfyingSetLink
+;         (VariableNode "$X")
+;         (InheritanceLink (VariableNode "$X")(ConceptNode "book"))
+;         (EvaluationLink
+;            (PredicateNode "give")
+;            (ListLink
+;               (ConceptNode "you")
+;               (ConceptNode "me")
+;               (VariableNode "$x")))
+;      (ConceptNode "interesting"))
 (define adjective-clause-rule-3
         (BindLink
                 (ListLink
