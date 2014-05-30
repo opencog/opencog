@@ -1006,7 +1006,7 @@ istream& istreamTable_NEW(istream& in, Table& tab,
 
     if (is_sparse) {
         // fallback on the old loader
-        // TODO:  this could be definitely be optimized
+        // TODO: this could definitely be optimized
         return istreamTable(in, tab, target_feature, ignore_features);
     } else {
         return istreamDenseTable(in, tab, target_feature, ignore_features,
@@ -1046,9 +1046,9 @@ tokenizeRowIO(const std::string& line,
 
 static istream&
 istreamDenseTable_noHeader(istream& in, Table& tab,
-                                    unsigned target_idx,
-                                    const vector<unsigned>& ignore_idxs,
-                                    const type_tree& tt, bool has_header)
+                           unsigned target_idx,
+                           const vector<unsigned>& ignore_idxs,
+                           const type_tree& tt, bool has_header)
 {
     // Get the entire dataset into memory (cleaning weird stuff)
     string line;
@@ -1168,7 +1168,7 @@ CTable::value_type parseCTableRow(const type_tree& tt, const std::string& row_st
             value_str = pair_str.substr(sep_pos + 1);
         vertex v = token_to_vertex(get_type_node(get_signature_output(tt)),
                                    key_str);
-        unsigned count = stoi(value_str);
+        count_t count = atof(value_str.c_str());
         counter[v] = count;
     }
     return CTable::value_type(input_values, counter);
@@ -1255,9 +1255,9 @@ ostream& ostreamCTableRow(ostream& out, const CTable::value_type& ctv)
     auto ats = boost::apply_visitor(tsv);
     // print map of outputs
     out << "{";
-    for (auto it = ctv.second.begin(); it != ctv.second.end();) {
+    for (auto it = ctv.second.cbegin(); it != ctv.second.cend();) {
         out << table_fmt_vertex_to_str(it->first) << ":" << it->second;
-        if(++it != ctv.second.end())
+        if (++it != ctv.second.cend())
             out << ",";
     }
     out << "},";
