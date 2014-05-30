@@ -298,7 +298,7 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
         // If p is invalid (or already visited, because it has nan)
         // then it is skipped, i.e. assigned probability of 0.0f
         if (isfinite(p))
-            expf((p - highest_score) * inv_temp);
+            p = expf((p - highest_score) * inv_temp);
         else
             p = 0.0;
 
