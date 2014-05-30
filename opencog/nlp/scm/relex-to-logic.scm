@@ -411,6 +411,21 @@
         )
 ) 
 
+;For sentences SVO rule applied twice in the first part of RelEx2logic 
+;Example: "I like the trees which have coffee beans." 
+;RelEx2Logic representaion:
+;(EvaluationLink
+;   (PredicateNode "like")
+;   (ListLink
+;       (ConceptNode "I")
+;       (SatisfyingSetLink (VariableNode "$X")
+;         (InheritanceLink (VariableNode "$X")(ConceptNode "trees"))
+;         (EvaluationLink
+;            (PredicateNode "have")
+;            (ListLink
+;               (VariableNode "$X")
+;               (ConceptNode "beans")
+;            )))))
 (define adjective-clause-rule-2
         (BindLink
                 (ListLink
