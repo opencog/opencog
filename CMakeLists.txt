@@ -52,6 +52,12 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 # Detect different compilers and OS'es, tweak flags as necessary.
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
+	# aiiee cmake version 2.8.8 or newer is needed for below to
+	# work...
+	# IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6.4)
+	#	MESSAGE(FATAL_ERROR "GCC version must be at least 4.6.4!")
+	# ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6.4)
+
 	IF (APPLE)
 		SET(CMAKE_C_FLAGS "-Wall -Wno-long-long -Wno-conversion")
 		SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
