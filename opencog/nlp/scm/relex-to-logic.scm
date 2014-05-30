@@ -499,6 +499,21 @@
                                          (EvaluationLink (VariableNode "$C") (ListLink (VariableNode "$D") (VariableNode "$E")(VariableNode "$x"))))
                                 (VariableNode "$B")))
 ))
+;For sentences SVO and passive rule applied in the first part of RelEx2logic 
+;Example:  "They ate a special curry which was recommended by the restaurant’s owner."
+;RelEx2Logic representaion:
+;(EvaluationLink
+;      (PredicateNode "ate")
+;      (ListLink
+;         (ConceptNode "they")
+;         (SatisfyingSetLink (VariableNode "$X")
+;            (InheritanceLink (VariableNode "$X")(ConceptNode "curry"))
+;            (EvaluationLink
+;               (PredicateNode "recommended")
+;               (ListLink
+;                  (ConceptNode "owner")
+;                  (VariableNode "$X")
+; )))))
 
 (define adjective-clause-rule-4
         (BindLink
