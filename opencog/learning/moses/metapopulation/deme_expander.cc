@@ -111,8 +111,8 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
     // ordinary, one-time only, up-front round of feature selection by
     // using only those features which score well with the current
     // exemplar.
-    vector<operator_set> ignore_ops_seq, considered_args_seq;
-    vector<combo_tree> xmplr_seq;
+    std::vector<operator_set> ignore_ops_seq, considered_args_seq;
+    std::vector<combo_tree> xmplr_seq;
     if (_params.fstor) {
         // copy, any change in the parameters will not be remembered
         feature_selector festor = *_params.fstor;
@@ -128,7 +128,9 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
         const auto& ilabels = festor._ctable.get_input_labels();
 
         if (festor.params.n_demes > 1)
-            logger().info() << "Breadth-first deme expansion (same exemplar, multiple feature sets): " << festor.params.n_demes << " demes";
+            logger().info() << "Breadth-first deme expansion "
+                               "(same exemplar, multiple feature sets): "
+                            << festor.params.n_demes << " demes";
 
         log_selected_feature_sets(sf_pop, xmplr_features, ilabels, demeIDs);
 
@@ -281,8 +283,7 @@ vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_time)
     if (_params.fstor) {
         // reset scorer to use all variables (important so that
         // behavioral score is consistent across generations
-        std::set<arity_t> empty_idxs;
-        _cscorer.ignore_idxs(empty_idxs);
+        _cscorer.ignore_idxs(std::set<arity_t>());
     }
 
     return actl_evals;
