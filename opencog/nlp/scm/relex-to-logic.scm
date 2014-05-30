@@ -518,4 +518,40 @@
                         (VariableNode "$B")))
 )) 
 
-
+(define adjective-clause-rule-5
+        (BindLink 
+                (ListLink 
+                        (TypedVariableLink 
+                                (VariableNode "$A") 
+                                (VariableTypeNode "ConceptNode")) 
+                        (TypedVariableLink 
+                                (VariableNode "$B") 
+                                (VariableTypeNode "ConceptNode")) 
+                        (TypedVariableLink 
+                                (VariableNode "$C") 
+                                (VariableTypeNode "PredicateNode")) 
+                        (TypedVariableLink 
+                                (VariableNode "$D") 
+                                (VariableTypeNode "PredicateNode")) 
+                        (TypedVariableLink 
+                                (VariableNode "$E") 
+                                (VariableTypeNode "ConceptNode"))) 
+                (ImplicationLink 
+                        (AndLink 
+                                (InheritanceLink (VariableNode "$A")(VariableNode "$B")) 
+                                (EvaluationLink (VariableNode "$C")(ListLink(VariableNode "$A")())) 
+                                (EvaluationLink (PredicateNode "whomarker") (ListLink (VariableNode "$A")(VariableNode "$C")))) 
+                (EvaluationLink
+                        (VariableNode "$C")
+                                (ListLink
+                                        (SatisfyingSetLink (VariableNode "$X") 
+                                                 (InheritanceLink (VariableNode "$X") (VariableNode "$A"))
+                                                 (InheritanceLink (VariableNode "$X") (VariableNode "$B"))) 
+                                (EvaluationLink
+                                                (VariableNode "$D")
+                                                (ListLink
+                                                        (SatisfyingSetLink (VariableNode "$X") 
+                                                                (InheritanceLink (VariableNode "$X") (VariableNode "$A"))
+                                                                (InheritanceLink (VariableNode "$X") (VariableNode "$B"))) 
+                                                        (VariableNode "$E")))
+))))) 
