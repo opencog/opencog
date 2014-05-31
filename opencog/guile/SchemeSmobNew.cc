@@ -564,7 +564,7 @@ SCM SchemeSmob::ss_delete (SCM satom)
 
 /* ============================================================== */
 /**
- * delete the atom, and everything pointing to it.
+ * Delete the atom, and everything pointing to it.
  */
 SCM SchemeSmob::ss_delete_recursive (SCM satom)
 {
@@ -572,6 +572,48 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom)
     AtomSpace* atomspace = ss_get_env_as("cog-delete-recursive");
 
     bool rc = atomspace->removeAtom(h, true);
+
+    if (rc) return SCM_BOOL_T;
+    return SCM_BOOL_F;
+}
+
+/* ============================================================== */
+/**
+ * Delete the atom, but only if it has no incoming links.
+ * Return SCM_BOOL_T if the atom was deleted, else return SCM_BOOL_F
+ */
+SCM SchemeSmob::ss_purge (SCM satom)
+{
+    Handle h = verify_handle(satom, "cog-purge");
+    AtomSpace* atomspace = ss_get_env_as("cog-purge");
+
+    // It can happen that the atom has already been purged, but we're
+    // still holding on to its UUID.  This is rare... but possible. So
+    // don't crash when it happens.
+    if (NULL == h.operator->()) return SCM_BOOL_F;
+
+    // The purge will fail/log warning if the incoming set isn't null.
+    if (h->getIncomingSetSize() > 0) return SCM_BOOL_F;
+
+    // AtomSpace::purgeAtom() returns true if atom was purged,
+    // else returns false
+    bool rc = atomspace->purgeAtom(h, false);
+
+    // rc should always be true at this point ...
+    if (rc) return SCM_BOOL_T;
+    return SCM_BOOL_F;
+}
+
+/* ============================================================== */
+/**
+ * Purge the atom, and everything pointing to it.
+ */
+SCM SchemeSmob::ss_purge_recursive (SCM satom)
+{
+    Handle h = verify_handle(satom, "cog-purge-recursive");
+    AtomSpace* atomspace = ss_get_env_as("cog-purge-recursive");
+
+    bool rc = atomspace->purgeAtom(h, true);
 
     if (rc) return SCM_BOOL_T;
     return SCM_BOOL_F;

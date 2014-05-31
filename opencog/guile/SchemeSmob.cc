@@ -192,6 +192,8 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-link",              1, 0, 1, C(ss_link));
 	scm_c_define_gsubr("cog-delete",            1, 0, 0, C(ss_delete));
 	scm_c_define_gsubr("cog-delete-recursive",  1, 0, 0, C(ss_delete_recursive));
+	scm_c_define_gsubr("cog-purge",             1, 0, 0, C(ss_purge));
+	scm_c_define_gsubr("cog-purge-recursive",   1, 0, 0, C(ss_purge_recursive));
 	scm_c_define_gsubr("cog-atom?",             1, 0, 1, C(ss_atom_p));
 	scm_c_define_gsubr("cog-node?",             1, 0, 1, C(ss_node_p));
 	scm_c_define_gsubr("cog-link?",             1, 0, 1, C(ss_link_p));
