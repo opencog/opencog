@@ -381,7 +381,7 @@
 ;               (VariableNode "$X")
 ;               (ConceptNode "food"))))
 ;     (ConceptNode "famous"))
-
+;$A → restaurant,$B → famous,$C →  serve and $D →  food
 ;
 (define adjective-clause-rule-1 
         (BindLink 
@@ -426,6 +426,7 @@
 ;               (VariableNode "$X")
 ;               (ConceptNode "beans")
 ;            )))))
+;$A → like,$B → i,$C → tree,$D → have and $E → been
 (define adjective-clause-rule-2
         (BindLink
                 (ListLink
@@ -470,6 +471,7 @@
 ;               (ConceptNode "me")
 ;               (VariableNode "$x")))
 ;      (ConceptNode "interesting"))
+;$A → book ,$B → interesting,$C → give, $D → you and $E → me
 (define adjective-clause-rule-3
         (BindLink
                 (ListLink
@@ -514,7 +516,7 @@
 ;                  (ConceptNode "owner")
 ;                  (VariableNode "$X")
 ; )))))
-
+;$A → ate,$B → they,$C → curry,$D → recommend and $E → owner
 (define adjective-clause-rule-4
         (BindLink
                 (ListLink
@@ -555,7 +557,7 @@
 ;               (InheritanceLink (VariableNode "$X") (VariableNode "woman")) 
 ;               (EvaluationLink (VariableNode "live") (ListLink (VariableNode "$X")))) 
 ;      (VariableNode "nurse"))
-
+;$A -> woman , $B -> nurse and $C -> live
 (define adjective-clause-rule-5
         (BindLink 
                 (ListLink 
@@ -582,8 +584,26 @@
                                         (EvaluationLink (VariableNode "$C") (ListLink (VariableNode "$X")))) 
                         (VariableNode "$B")))
 )) 
-
-(define adjective-clause-rule-5
+;For sentences to-do-rule1 and svp applied in the first part of RelEx2logic 
+;Example:  "A player who is injured has to leave the field." 
+;RelEx2Logic representaion:
+;(EvaluationLink
+;   (VariableNode "has")
+;   (ListLink
+;      (SatisfyingSetLink 
+;        (VariableNode "$X") 
+;        (InheritanceLink (VariableNode "$X") (VariableNode "player"))
+;        (InheritanceLink (VariableNode "$X") (VariableNode "injured"))) 
+;      (EvaluationLink
+;         (VariableNode "leave")
+;         (ListLink
+;            (SatisfyingSetLink 
+;                (VariableNode "$X") 
+;                (InheritanceLink (VariableNode "$X") (VariableNode "player"))
+;                (InheritanceLink (VariableNode "$X") (VariableNode "injured"))) 
+;            (VariableNode "field")))))
+;$A -> player,$B -> injured,$C -> has,$D -> leave and $E -> field
+(define adjective-clause-rule-6
         (BindLink 
                 (ListLink 
                         (TypedVariableLink 
@@ -604,8 +624,8 @@
                 (ImplicationLink 
                         (AndLink 
                                 (InheritanceLink (VariableNode "$A")(VariableNode "$B")) 
-                                (EvaluationLink (VariableNode "$C")(ListLink(VariableNode "$A")())) 
-                                (EvaluationLink (PredicateNode "whomarker") (ListLink (VariableNode "$A")(VariableNode "$C")))) 
+                                (EvaluationLink (VariableNode "$C")(ListLink(VariableNode "$A")(EvaluationLink(VariableNode "$D")(ListLink(VariableNode "$A")(VariableNode "$E"))))) 
+                                (EvaluationLink (PredicateNode "whomarker") (ListLink (VariableNode "$A")(VariableNode "$B")))) 
                 (EvaluationLink
                         (VariableNode "$C")
                                 (ListLink
