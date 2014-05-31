@@ -375,7 +375,7 @@ void AtomSpaceImpl::clear()
     // atomspace! This will take minutes on any decent-sized atomspace!
     std::vector<Handle>::iterator i;
     for (i = allAtoms.begin(); i != allAtoms.end(); ++i) {
-        removeAtom(*i, true);
+        purgeAtom(*i, true);
     }
 
     allAtoms.clear();
