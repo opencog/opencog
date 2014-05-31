@@ -189,7 +189,8 @@ public:
 
     /**
      * Purges an atom from the atomtable. Attached storage is not
-     * affected.
+     * affected.  The removed atom stays valid (is not deleted) until
+     * all handles and pointers referencing it are deleted.
      *
      * @param h The Handle of the atom to be removed.
      * @param recursive Recursive-removal flag; the removal will
@@ -200,13 +201,14 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool removeAtom(Handle h, bool recursive = true) {
+    bool purgeAtom(Handle h, bool recursive = true) {
         return 0 < atomTable.extract(h, recursive).size();
     }
 
     /**
-     * Delete an atom from the atomtable and from attached storage
-     * This deleting is permanent; a deleted atom cannot be recovered.
+     * Remove an atom from the atomtable and from attached storage.
+     * The removed atom stays valid (is not deleted) until all
+     * handles and pointers referencing it are deleted.
      *
      * @param h The Handle of the atom to be removed.
      * @param recursive Recursive-removal flag; the removal will
@@ -217,7 +219,7 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool deleteAtom(Handle h, bool recursive = true);
+    bool removeAtom(Handle h, bool recursive = true);
 
     //! Clear the atomspace, remove all atoms
     void clear();

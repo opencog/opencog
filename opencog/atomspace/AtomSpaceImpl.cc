@@ -351,7 +351,7 @@ HandleSeq AtomSpaceImpl::getIncoming(Handle h)
     return hs;
 }
 
-bool AtomSpaceImpl::deleteAtom(Handle h, bool recursive)
+bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
 {
     if (backing_store) {
 // Under construction .... 
