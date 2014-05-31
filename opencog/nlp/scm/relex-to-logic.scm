@@ -381,7 +381,7 @@
 ;               (VariableNode "$X")
 ;               (ConceptNode "food"))))
 ;     (ConceptNode "famous"))
-;$A → restaurant,$B → famous,$C →  serve and $D →  food
+; $A = restaurant,$B = famous,$C =  serve and $D =  food
 ;
 (define adjective-clause-rule-1 
         (BindLink 
@@ -426,7 +426,7 @@
 ;               (VariableNode "$X")
 ;               (ConceptNode "beans")
 ;            )))))
-;$A → like,$B → i,$C → tree,$D → have and $E → been
+;$A = like,$B = i,$C = tree,$D = have and $E = been
 (define adjective-clause-rule-2
         (BindLink
                 (ListLink
@@ -471,7 +471,7 @@
 ;               (ConceptNode "me")
 ;               (VariableNode "$x")))
 ;      (ConceptNode "interesting"))
-;$A → book ,$B → interesting,$C → give, $D → you and $E → me
+;$A = book ,$B = interesting,$C = give, $D = you and $E = me
 (define adjective-clause-rule-3
         (BindLink
                 (ListLink
@@ -502,7 +502,7 @@
                                 (VariableNode "$B")))
 ))
 ;For sentences SVO and passive rule applied in the first part of RelEx2logic 
-;Example:  "They ate a special curry which was recommended by the restaurant’s owner."
+; Example:  "They ate a special curry which was recommended by the restaurant owner."
 ;RelEx2Logic representaion:
 ;(EvaluationLink
 ;      (PredicateNode "ate")
@@ -516,7 +516,7 @@
 ;                  (ConceptNode "owner")
 ;                  (VariableNode "$X")
 ; )))))
-;$A → ate,$B → they,$C → curry,$D → recommend and $E → owner
+;$A = ate,$B = they,$C = curry,$D = recommend and $E = owner
 (define adjective-clause-rule-4
         (BindLink
                 (ListLink
