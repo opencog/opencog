@@ -431,7 +431,7 @@ void problem_params::options_init()
 
         ("hc-crossover-min-neighbors",
          po::value<unsigned>(&hc_crossover_min_neighbors)->default_value(400),
-         "It also allows to control when crossover occurs instead of "         
+         "It also allows to control when crossover occurs instead of "
          "exhaustive search. If the neighborhood to explore has more than "
          "the given number (and at least 2 iterations has passed) then "
          "crossover kicks in.\n")
@@ -875,7 +875,7 @@ void problem_params::options_init()
 
         // ======= Feature-selection diversity pressure =======
         ("fs-diversity-pressure",
-         po::value<double>(&festor_params.diversity_pressure)->default_value(0),
+         po::value<double>(&festor_params.diversity_pressure)->default_value(0.0),
          "Multiplicative coefficient of the diversity penalty "
          "(itself being in [0,1]).\n")
 
@@ -1272,16 +1272,16 @@ void problem_params::parse_options(int argc, char* argv[])
 
     // Set metapop printer parameters.
     mmr_pa = metapop_printer(result_count,
-                           output_score,
-                           output_penalty,
-                           output_bscore,
-                           output_only_best,
-                           output_eval_number,
-                           output_with_labels,
-                           col_labels,
-                           output_file,
-                           output_python,
-                           enable_mpi);
+                             output_score,
+                             output_penalty,
+                             output_bscore,
+                             output_only_best,
+                             output_eval_number,
+                             output_with_labels,
+                             col_labels,
+                             output_file,
+                             output_python,
+                             enable_mpi);
 
 }
 

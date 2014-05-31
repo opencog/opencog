@@ -89,7 +89,8 @@ void metapopulation::set_diversity()
     typedef scored_combo_tree_ptr_set_it psi;
     typedef std::pair<psi, dp_t> bsct_dp_pair;
     std::vector<bsct_dp_pair> tmp;
-    for (psi bsct_it = begin(); bsct_it != end(); ++bsct_it)
+    psi last = _scored_trees.end();
+    for (psi bsct_it = _scored_trees.begin(); bsct_it != last; ++bsct_it)
         tmp.push_back(bsct_dp_pair(bsct_it, 0.0));
 
     // pointer to the last candidate moved from tmp to pool
@@ -275,10 +276,9 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
             probs.push_back(sc);
             found_exemplar = true;
             if (highest_score < sc) highest_score = sc;
-        } else // hack: if the tree is visited enough then put a
-               // positive score so we know it must be ignored
-#define SKIP_OVER_ME (1.0e38)
-            probs.push_back(SKIP_OVER_ME);
+        } else // If the tree is visited enough then put a
+               // nan score so we know it must be ignored
+            probs.push_back(NAN);
     }
 
     // Nothing found, we've already tried them all.
@@ -295,9 +295,13 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     score_t sum = 0.0f;
     // Convert scores into (non-normalized) probabilities
     for (score_t& p : probs) {
-        // In case p has the max complexity (already visited) then
-        // the probability is set to null
-        p = (p > (0.1*SKIP_OVER_ME) ? 0.0f : expf((p - highest_score) * inv_temp));
+        // If p is invalid (or already visited, because it has nan)
+        // then it is skipped, i.e. assigned probability of 0.0f
+        if (isfinite(p))
+            p = expf((p - highest_score) * inv_temp);
+        else
+            p = 0.0;
+
         sum += p;
     }
 
@@ -600,7 +604,7 @@ void metapopulation::resize_metapop()
     // pointers to deallocate
     std::vector<scored_combo_tree*> ptr_seq;
 
-    score_t top_score = begin()->get_penalized_score();
+    score_t top_score = _scored_trees.begin()->get_penalized_score();
     score_t range = useful_score_range();
     score_t worst_score = top_score - range;
 
@@ -694,7 +698,7 @@ scored_combo_tree_set metapopulation::get_new_candidates(const scored_combo_tree
     // mutex insert_cnd_mutex;
     // typedef boost::unique_lock<mutex> unique_lock;
 
-    // auto insert_new_candidate = [&](metapop_candidates::value_type& cnd) {
+    // auto insert_new_candidate = [&](scored_combo_tree_set::value_type& cnd) {
     //     const combo_tree& tr = get_tree(cnd);
     //     const_iterator fcnd = std::find_if(begin(), end(),
     //                                        [&](const scored_combo_tree& v) {

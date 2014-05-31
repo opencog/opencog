@@ -421,8 +421,8 @@ struct metapopulation
         if (!output_only_best) {
             for (; from != to && n != 0; ++from, n--) {
                 ostream_scored_combo_tree(out, *from, output_score,
-                                           output_penalty, output_bscore,
-                                           output_python);
+                                          output_penalty, output_bscore,
+                                          output_python);
                 if (output_visited)
                     out << "visited: " << has_been_visited(from->get_tree())
                         << std::endl;
@@ -447,8 +447,8 @@ struct metapopulation
             const scored_combo_tree& bt = *f;
             if (best_score <= bt.get_score()) {
                 ostream_scored_combo_tree(out, bt, output_score,
-                                           output_penalty, output_bscore,
-                                           output_python);
+                                          output_penalty, output_bscore,
+                                          output_python);
                 if (output_visited)
                     out << "visited:" << has_been_visited(from->get_tree())
                         << std::endl;

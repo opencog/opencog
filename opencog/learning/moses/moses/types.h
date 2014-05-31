@@ -293,15 +293,16 @@ static const std::string penalized_score_prefix_str = "penalized score:";
 static const std::string behavioral_score_prefix_str = "behavioral score:";
 
 template<typename Out>
-Out& ostream_scored_combo_tree(Out& out, const scored_combo_tree& cnd,
+Out& ostream_scored_combo_tree(Out& out,
+                                 const scored_combo_tree& sct,
                                  bool output_score = true,
                                  bool output_penalty = false,
                                  bool output_bscore = false,
                                  bool output_python = false)
 {
-    const combo::combo_tree& tr = cnd.get_tree();
-    const composite_score& cs = cnd.get_composite_score();
-    const behavioral_score& bs = cnd.get_bscore();
+    const combo::combo_tree& tr = sct.get_tree();
+    const composite_score& cs = sct.get_composite_score();
+    const behavioral_score& bs = sct.get_bscore();
 
     if (output_python)
         return ostream_combo_tree_cpbscore_python(out, tr, cs, bs,

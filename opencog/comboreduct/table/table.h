@@ -949,7 +949,7 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
                 ycount[v] += count;
 
                 // update ioc == "input output counter"
-                switch(otype) {
+                switch (otype) {
                 case id::enum_type: vec.push_back(get_enum_type(v));
                     break;
                 case id::boolean_type: vec.push_back(get_builtin(v));
