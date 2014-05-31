@@ -9,7 +9,7 @@
 (ContextLink (stv .5 .9)
     (ConceptNode "Music")
     (EvaluationLink
-        (PredicadeNode "mention")
+        (PredicateNode "mention")
         (ListLink
             (ConceptNode "Alice")
             (ConceptNode "CanadianPlaceNames"))))
@@ -21,7 +21,7 @@
 (ContextLink (stv .5 .9)
     (ConceptNode "Music")
     (EvaluationLink
-        (PredicadeNode "mention")
+        (PredicateNode "mention")
         (ListLink
             (ConceptNode "Bob")
             (ConceptNode "CanadianPlaceNames"))))
@@ -31,7 +31,7 @@
 (ContextLink (stv .1 .9)
     (ConceptNode "Music")
     (EvaluationLink
-        (PredicadeNode "mention")
+        (PredicateNode "mention")
         (ListLink
             (ConceptNode "Clark")
             (ConceptNode "CanadianPlaceNames"))))
@@ -41,7 +41,7 @@
 (ContextLink (stv .1 .9)
     (ConceptNode "Accounting")
     (EvaluationLink
-        (PredicadeNode "mention")
+        (PredicateNode "mention")
         (ListLink
             (ConceptNode "Alice")
             (ConceptNode "CanadianPlaceNames"))))
@@ -51,7 +51,7 @@
 (ContextLink (stv .5 .9)
     (ConceptNode "Accounting")
     (EvaluationLink
-        (PredicadeNode "mention")
+        (PredicateNode "mention")
         (ListLink
             (ConceptNode "Bob")
             (ConceptNode "CanadianPlaceNames"))))
@@ -62,7 +62,7 @@
 (ContextLink (stv .6 .9)
     (ConceptNode "Accounting")
     (EvaluationLink
-        (PredicadeNode "mention")
+        (PredicateNode "mention")
         (ListLink
             (ConceptNode "Clark")
             (ConceptNode "CanadianPlaceNames"))))
@@ -71,12 +71,13 @@
 ; Non-context specific axioms
 
 ; 7) "Accounting is associated with money."
-(InheritanceLink (stv .7 .9)
+; Changed InheritanceLink to HebbianLink
+(HebbianLink (stv .7 .9)
     (ConceptNode "Accounting")
     (ConceptNode "Money"))
 
 ; 8) "CanadianPlaces is associated with Canada."
-(InheritanceLink (stv .8 .9)
+(HebbianLink (stv .8 .9)
     (ConceptNode "CanadianPeople")
     (ConceptNode "CanadianPlacesNames"))
 
@@ -137,6 +138,7 @@
 
 ; Question to answer:
 ; What is the chance of Clark being involved with log trafficking?
-(InheritanceLink (stv ? ?)
-    (ConceptNode "Clark")
-    (ConceptNode "LogTrafficking")
+(define query
+    (InheritanceLink (stv "$x" 0.0)
+        (ConceptNode "Clark")
+        (ConceptNode "LogTrafficking")))
