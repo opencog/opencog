@@ -163,7 +163,7 @@ BenchmarkModule::do_fullyConnectedTest(Request *dummy,
         OMP_ALGO::for_each(atoms.begin(), atoms.end(),
             [this](Handle handle)
         {
-            as->deleteAtom(handle, true);
+            as->removeAtom(handle, true);
         });
 
         return "All ConceptNodes and their incoming sets deleted.\n";

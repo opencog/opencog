@@ -312,9 +312,9 @@ void PersistUTest::test_atomspace(void)
 	cogserver().pushRequest(req);
 	cogserver().processRequests();
 
-	/* Remove atoms from the AtomSpace. This does not delete them from
+	/* Purge atoms from the AtomSpace. This does not delete them from
 	 * the SQL storage, though; to do that, they must be deleted, not
-    * removed.
+    * purged.
 	 */
 	_as->barrier();
 	_as->clear();

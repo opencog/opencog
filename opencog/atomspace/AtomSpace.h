@@ -282,10 +282,31 @@ public:
     void barrier(void) { getImpl().barrier(); }
 
     /**
-     * Remove an atom from the atomspace.  Note that this only purges
-     * the atom from the AtomSpace; it may still remain in persistent
-     * storage.  To also delete from persistant storage, use the
-     * deleteAtom() method. 
+     * Purge an atom from the atomspace.  This only removes the atom
+     * from the AtomSpace; it may still remain in persistent storage.
+     * To also delete from persistant storage, use the removeAtom()
+     * method.  The atom remains valid as long as there are Handles
+     * or AtomPptr's that reference it; it is deleted only when the
+     * last reference goes away.
+     *
+     * @param h The Handle of the atom to be removed.
+     * @param recursive Recursive-removal flag; the removal will
+     *       fail if this flag is not set, and the atom has incoming
+     *       links (that are in the atomspace).  Set to false only if
+     *       you can guarantee that this atom does not appear in the
+     *       outgoing set of any link in the atomspace.
+     * @return True if the Atom for the given Handle was successfully
+     *         removed. False, otherwise.
+     */
+    bool purgeAtom(Handle h, bool recursive = true) {
+        return getImpl().purgeAtom(h, recursive);
+    }
+
+    /**
+     * Removes an atom from the atomspace, and any attached storage.
+     * The atom remains valid as long as there are Handles or AtomPtr's
+     * that reference it; it is deleted only when the last reference
+     * goes away.
      *
      * @param h The Handle of the atom to be removed.
      * @param recursive Recursive-removal flag; the removal will
@@ -298,24 +319,6 @@ public:
      */
     bool removeAtom(Handle h, bool recursive = true) {
         return getImpl().removeAtom(h, recursive);
-    }
-
-    /**
-     * Deletes an atom from the atomspace, and any attached storage.
-     * The permanently deletes the atom; to merely purge it from the
-     * atomspace, without altering storage, use removeAtom().
-     *
-     * @param h The Handle of the atom to be removed.
-     * @param recursive Recursive-removal flag; the removal will
-     *       fail if this flag is not set, and the atom has incoming
-     *       links (that are in the atomspace).  Set to false only if
-     *       you can guarantee that this atom does not appear in the
-     *       outgoing set of any link in the atomspace.
-     * @return True if the Atom for the given Handle was successfully
-     *         removed. False, otherwise.
-     */
-    bool deleteAtom(Handle h, bool recursive = true) {
-        return getImpl().deleteAtom(h, recursive);
     }
 
     /**
