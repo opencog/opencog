@@ -175,8 +175,32 @@ struct demeID_t : public std::string
     demeID_t(unsigned expansion, unsigned breadth_first);
 };
 
+/// Behavioral scores record one score per row of input data.
+///
+/// For a boolean problem, that score will typically be zero or one,
+/// signifying that the combo tree got that row correct, or not.
+/// The score may differ from zero or one if the table is compressed
+/// (has multiple input rows that are identical) or if the table is
+/// weighted (different rows have different weights, set by user) or
+/// boosted (different weights that are dynamically assigned).
+///
+/// That is, a behavioral score is always for a particular combot tree,
+/// in reference to a particular table of data.  Exactly which tree it
+/// is, and which table, is implicit.
 typedef std::vector<score_t> behavioral_score;
 
+/// A single combo tree, together with various score metrics for it.
+///
+/// Large parts of the system need to track a combo tree, along with
+/// various performance metrics associated with that tree.  This
+/// provides the place where tree-related information is kept.
+///
+/// Included is:
+/// -- a composite score (total score, plus complexity and diversity
+///    penalties)
+/// -- a behavioral score (how well the tree did on each row of a table;
+///    exactly which table it is is implicit)
+/// -- a boosing vector (used to implement the boosting algorithm)
 class scored_combo_tree
 {
 public:
@@ -192,6 +216,7 @@ private:
     demeID_t _deme_id;
     composite_score _cscore;
     behavioral_score _bscore;
+    behavioral_score _boost;
 
 public:
     const combo::combo_tree& get_tree(void) const { return _tree; }
@@ -203,6 +228,10 @@ public:
     const behavioral_score& get_bscore(void) const
     {
        return _bscore;
+    }
+    const behavioral_score& get_boost(void) const
+    {
+       return _boost;
     }
     behavioral_score& get_bscore(void)
     {
@@ -264,8 +293,6 @@ struct scored_combo_tree_equal
 typedef std::unordered_set<scored_combo_tree,
                  scored_combo_tree_hash,
                  scored_combo_tree_equal> scored_combo_tree_set;
-typedef scored_combo_tree_set::iterator scored_combo_tree_set_it;
-typedef scored_combo_tree_set::const_iterator scored_combo_tree_set_cit;
 
 typedef boost::ptr_set<scored_combo_tree,
                        scored_combo_tree_greater> scored_combo_tree_ptr_set;
@@ -284,7 +311,8 @@ Out& ostream_behavioral_score(Out& out, const behavioral_score& bs)
  * stream out a candidate along with their scores (optionally
  * complexity and bscore).
  *
- * @param bool output_python if true, output is a python module instead of a combo program
+ * @param bool output_python if true, output is a python module
+ *             instead of a combo program XXX currently broken XXX
  */
 static const std::string complexity_prefix_str = "complexity:";
 static const std::string complexity_penalty_prefix_str = "complexity penalty:";
@@ -348,8 +376,8 @@ Out& ostream_scored_combo_tree(Out& out,
 // TODO: if the istream doesn't end by a bscore then it will
 // completely exhaust it.
 template<typename In>
-scored_combo_tree istream_scored_combo_tree(In& in) {
-
+scored_combo_tree istream_scored_combo_tree(In& in)
+{
     // parse score
     score_t sc;
     in >> sc;
