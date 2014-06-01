@@ -368,7 +368,7 @@ P(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n})=\frac{P(R(x_{1},x_{
 
 \end_inset
 
-The entropy is then build recursively by normalizing by the probability
+The entropy is then built recursively by normalizing by the probability
  of wild-card relations:
 \begin_inset Formula 
 \[
@@ -854,7 +854,7 @@ No-crossing Minimum Spanning Trees
 It turns out that writing an algorithm for a no-crossing minimum spanning
  tree is surprisingly painful; enforcing the no-crossing constraint requies
  treatment of a number of special cases.
- But perhaps this is not actually rquired! R.
+ But perhaps this is not actually required! R.
  Ferrer i Cancho in 
 \begin_inset Quotes eld
 \end_inset
