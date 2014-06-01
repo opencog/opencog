@@ -976,7 +976,7 @@ Sentences with long dependencies are rarely spoken: Hawkins, J.
 \end_layout
 
 \begin_layout Standard
-So, ratherr than imposing no-crossing as a constraint on the parser, instead,
+So, rather than imposing no-crossing as a constraint on the parser, instead,
  let it find its own way into the grammar.
  Just implement a plain-old MST parser, punt on crossing.
 \end_layout
@@ -1062,7 +1062,7 @@ colorless green ideas
 \end_layout
 
 \begin_layout Enumerate
-How to automatically extract an ontolofy from free text?
+How to automatically extract an ontology from free text?
 \end_layout
 
 \begin_layout Standard
@@ -1088,7 +1088,7 @@ The Boltzmann distribution is the so-called canonical distribution, meaning
 \end_inset
 
  (viz, this is the MaxEnt principle.
- except for MaxEnt, the constraint is not on energy but a set of features.)
+ except for MaxEnt, the constraint is not on energy, but a set of features.)
 \end_layout
 
 \begin_layout Itemize
@@ -1120,8 +1120,8 @@ Boltzmann Entropy
 \begin_inset Formula $S_{B}$
 \end_inset
 
- is the shanon entrpy of the microcanonical esemble: it maximizes the entropy
- (MaxEnt) for a fixed value of the energy.
+ is the shanon entropy of the microcanonical ensemble: it maximizes the
+ entropy (MaxEnt) for a fixed value of the energy.
  (MaxEnt: not the energy, but for a fixed set of features).
  (viz, 
 \begin_inset Formula $S_{B}=k_{B}\log\left(\epsilon\frac{d\Omega}{dE}\right)$
@@ -1147,8 +1147,8 @@ Gibbs Entropy
 \begin_inset Quotes erd
 \end_inset
 
- is the shanon entropy, maximized for a system held to constraint that energy
- is less-than-or-equal to E.
+ is the Shanon entropy, maximized for a system held to the constraint that
+ energy is less-than-or-equal to E.
  (!) This gives 
 \begin_inset Formula $S_{G}=k_{B}\log\Omega$
 \end_inset
@@ -1202,7 +1202,7 @@ There is an interesting simplification that happens with minimum-spanning
 
 \end_inset
 
-Wy? Why this, instead of the maybe 
+Why? Why this, instead of the maybe 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2518,6 +2518,64 @@ water
 
  re-inforcing one-another.
  But this is eactly what the Mihalcea WSD algo does, eh? 
+\end_layout
+
+\begin_layout Section*
+14 May 2014
+\end_layout
+
+\begin_layout Subsection*
+Tree similarity
+\end_layout
+
+\begin_layout Standard
+\begin_inset Quotes eld
+\end_inset
+
+Similarity Evaluation on Tree-structured Data
+\begin_inset Quotes erd
+\end_inset
+
+ Rui Yang Panos Kalnis Anthony K.
+ H.
+ Tung SIGMOD 2005 June 14-16, 2005.
+ Quote from abstract: 
+\begin_inset Quotes eld
+\end_inset
+
+propose to trans- form tree-structured data into an approximate numerical
+ multidimensional vector
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Funny -- that's what Bob Coecke proposes for any kind of monoidal category:
+ vector spaces being a special monoidal cat.
+ Hmmm.
+ 
+\end_layout
+
+\begin_layout Standard
+Approaches:
+\end_layout
+
+\begin_layout Itemize
+Tree-edit distance: many variants proposed, all high cpu/memory intensive.
+\end_layout
+
+\begin_layout Itemize
+convert tre to pre or post-oerder, and use string edit distance.
+\end_layout
+
+\begin_layout Itemize
+Convert to binary tree.
+ For combo trees, this makes sense, due to the associative property of most
+ of the operators.
+ In particular, in combo any oper that can have multi-sibilings is also
+ associative and thus convertible to binary tree.
+ What's more, trees with binary branch distance of zero really are equivalent
+ for us: See Figure 4 in above reference.
+ Yay! this fits very very well with combo!.
 \end_layout
 
 \begin_layout Section*
