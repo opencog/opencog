@@ -321,9 +321,10 @@ class BayesianNetwork(Network):
         for node in self:
             for parent1, parent2 in subsets_of_len_two(node.parents):
                 result.append(str(parent1.add_neighbour(parent2)))
-        return 'Added: ' + ', '.join(result)
+        return result
 
     def triangulate(self):
+        added_links = []
         junction_tree = JunctionTree()
         vertices = list(self._vertices.values())
         eliminated = set()
@@ -333,14 +334,14 @@ class BayesianNetwork(Network):
             for neighbour1, neighbour2 in subsets_of_len_two(node.neighbours):
                 if neighbour1 in eliminated or neighbour2 in eliminated:
                     continue
-                # link = neighbour1.add_neighbour(neighbour2)
+                added_links.append(Link(neighbour1, neighbour2))
                 clique = Clique(neighbour1, node, neighbour2, junction_tree)
             eliminated.add(self.pop(node))
         for node in eliminated:
             node.revert()
             self.add(node)
         junction_tree.connect_links()
-        return junction_tree
+        return junction_tree, added_links
 
     def check_dag(self, link):
         parents = link.first_node.parents.copy()
@@ -439,5 +440,6 @@ if __name__ == '__main__':
     print 'Original Bayes Net:'
     print network, '\n---------------\n'
     print network.moralise(), '\n---------------\n'
-    jt = network.triangulate()
+    jt, links = network.triangulate()
+    print links, '\n---------------\n'
     print jt, '\n---------------\n'
