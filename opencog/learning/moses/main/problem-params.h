@@ -153,12 +153,6 @@ struct problem_params : public option_base
     // it params
     bool it_abs_err;
 
-    // XXX Demo options, these should be removed!
-    // viz the demo problems should get access to argc, argv...
-    // and do their own parsing.
-    std::string combo_str;
-    unsigned int problem_size;
-
     // interesting predicates options.
     // XXX just like above, the ip argv parser should grab these...
     double ip_kld_weight;

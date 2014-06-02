@@ -583,22 +583,6 @@ problem_params::add_options(boost::program_options::options_description& desc)
          po::value<string>(&output_file)->default_value(""),
          "File where to place the output. If empty, then output to stdout.\n")
 
-        // Demo options
-        
-        (opt_desc_str(combo_str_opt).c_str(),
-         po::value<string>(&combo_str),
-         str(format("Combo program to learn, used when the problem"
-                    " cp is selected (option -%s).\n")
-             % problem_opt.second).c_str())
-
-        (opt_desc_str(problem_size_opt).c_str(),
-         po::value<unsigned int>(&problem_size)->default_value(5),
-         "For even parity (pa), disjunction (dj) and majority (maj) "
-         "the problem size corresponds directly to the arity. "
-         "For multiplex (mux) the arity is arg+2^arg. "
-         "For regression of f(x)_o = sum_{i={1,o}} x^i (sr) "
-         "the problem size corresponds to the order o.\n")
-
         // The remaining options (TODO organize that)
         
         (opt_desc_str(min_rand_input_opt).c_str(),

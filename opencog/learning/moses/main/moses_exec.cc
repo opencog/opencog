@@ -37,7 +37,7 @@ int moses_exec(int argc, char** argv)
     register_demo_problems();
     register_table_problems();
 
-    problem_params pms;
+    demo_params pms;
     static bool is_init = false;
     if (not is_init) {
         register_options(&pms);

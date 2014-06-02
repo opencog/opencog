@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2010 OpenCog Foundation
  * Copyright (C) 2012 Poulin Holdings LLC
- * Copyright (C) 2013 Linas Vepstas
+ * Copyright (C) 2013, 2014 Linas Vepstas
  *
  * Author: Nil Geisweiller <ngeiswei@gmail.com>
  *         Linas Vepstas <linasvepstas@gmail.com>
@@ -35,6 +35,32 @@
 
 namespace opencog { namespace moses {
 
+void demo_params::add_options(boost::program_options::options_description& desc)
+{
+    namespace po = boost::program_options;
+
+    problem_params::add_options(desc);
+
+    desc.add_options()
+
+        ("combo-program,y",
+         po::value<std::string>(&combo_str),
+         "Combo program to learn, used when the problem cp is "
+         "selected (option -y).\n")
+
+        ("problem-size,k",
+         po::value<unsigned int>(&problem_size)->default_value(5),
+         "For even parity (pa), disjunction (dj) and majority (maj) "
+         "the problem size corresponds directly to the arity. "
+         "For multiplex (mux) the arity is arg+2^arg. "
+         "For regression of f(x)_o = sum_{i={1,o}} x^i (sr) "
+         "the problem size corresponds to the order o.\n")
+
+    ; // end of options
+}
+
+// ==================================================================
+
 // set the complexity ratio.
 template <typename BScorer>
 void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio)
@@ -58,7 +84,7 @@ class bool_problem_base : public problem_base
 
 void bool_problem_base::run(option_base* ob)
 {
-    problem_params& pms = *dynamic_cast<problem_params*>(ob);
+    demo_params& pms = *dynamic_cast<demo_params*>(ob);
 
     if (pms.enable_feature_selection)
         logger().warn("Feature selection is not supported for the demo problems");
@@ -200,7 +226,7 @@ class polynomial_problem : public problem_base
 
 void polynomial_problem::run(option_base* ob)
 {
-    problem_params& pms = *dynamic_cast<problem_params*>(ob);
+    demo_params& pms = *dynamic_cast<demo_params*>(ob);
 
     if (pms.enable_feature_selection)
         logger().warn("Feature selection is not supported for the polynomial problem");
@@ -253,10 +279,10 @@ static combo_tree str_to_combo_tree(const string& combo_str)
 class combo_problem_base : public problem_base
 {
     public:
-        void check_args(problem_params&);
+        void check_args(demo_params&);
 };
 
-void combo_problem_base::check_args(problem_params& pms)
+void combo_problem_base::check_args(demo_params& pms)
 {
     if (pms.enable_feature_selection)
         logger().warn("Feature selection is not supported for the combo demo.");
@@ -318,7 +344,7 @@ class combo_problem : public combo_problem_base
 
 void combo_problem::run(option_base* ob)
 {
-    problem_params& pms = *dynamic_cast<problem_params*>(ob);
+    demo_params& pms = *dynamic_cast<demo_params*>(ob);
     check_args(pms);
 
     // get the combo_tree and infer its type
@@ -403,7 +429,7 @@ class ann_combo_problem : public combo_problem_base
 
 void ann_combo_problem::run(option_base* ob)
 {
-    problem_params& pms = *dynamic_cast<problem_params*>(ob);
+    demo_params& pms = *dynamic_cast<demo_params*>(ob);
     check_args(pms);
 
     // get the combo_tree and infer its type

@@ -24,7 +24,17 @@
 #ifndef _OPENCOG_MOSES_DEMO_PROBLEMS_H
 #define _OPENCOG_MOSES_DEMO_PROBLEMS_H
 
+#include "problem-params.h"
+
 namespace opencog { namespace moses {
+
+struct demo_params : public problem_params
+{
+    void add_options(boost::program_options::options_description&);
+
+    std::string combo_str;
+    unsigned int problem_size;
+};
 
 void register_demo_problems();
 
