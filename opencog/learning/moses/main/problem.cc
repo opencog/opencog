@@ -71,7 +71,7 @@ void parse_options(int argc, char* argv[])
     }
     po::notify(vm);
 
-    if (vm.count("help") || argc == 1) {
+    if (vm.count("help") or argc == 1) {
         std::cout << _desc << std::endl;
         exit(1);
     }

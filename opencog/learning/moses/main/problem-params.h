@@ -75,7 +75,6 @@ struct problem_params : public option_base
     int max_gens;
     std::string log_level;
     std::string log_file;
-    bool log_file_dep_opt;
 
     // output printing options (metapop_printer)
     long result_count;

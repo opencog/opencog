@@ -123,7 +123,7 @@ static combo_tree str_to_combo_tree(const string& combo_str)
  */
 static void not_recognized_dst(const string& diversity_dst)
 {
-    stringstream ss;
+    std::stringstream ss;
     ss << diversity_dst << " is not recognized. Valid distances are "
        << p_norm << ", " << tanimoto << " and " << angular;
     log_output_error_exit(ss.str());
@@ -146,10 +146,6 @@ static void not_recognized_dst2dp(const string& diversity_dst2dp)
 problem_params::problem_params() :
     enable_mpi(false),
     default_nsamples(20),
-    output_python(false),
-    complexity_temperature(5.0),
-    complexity_ratio(3.5),
-    use_well_enough(false),
     fs_params(festor_params.fs_params),
     max_filename_size(255)
 {
@@ -975,9 +971,6 @@ problem_params::add_options(boost::program_options::options_description& desc)
 
 void problem_params::parse_options(boost::program_options::variables_map& vm)
 {
-    // set flags
-    log_file_dep_opt = vm.count(log_file_dep_opt_opt.first) > 0;
-
     if (vm.count("version")) {
         cout << "moses " << version_string << std::endl;
 #ifdef HAVE_MPI
@@ -987,6 +980,9 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
 #endif
         exit(0);
     }
+
+    // set flags
+    bool have_log_file_opt = vm.count(log_file_dep_opt_opt.first) > 0;
 
 #ifdef HAVE_MPI
     // Avoid MPI log file clobber mania
@@ -1000,8 +996,8 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
 #endif
 
     // Set log file.
-    if (log_file_dep_opt) {
-        set<string> ignore_opt{log_file_dep_opt_opt.first};
+    if (have_log_file_opt) {
+        std::set<std::string> ignore_opt{log_file_dep_opt_opt.first};
         log_file = determine_log_name(default_log_file_prefix,
                                       vm, ignore_opt,
                                       string(".").append(default_log_file_suffix));
