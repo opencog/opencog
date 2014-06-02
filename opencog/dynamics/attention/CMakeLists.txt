@@ -37,6 +37,7 @@ ADD_LIBRARY(attention SHARED
 	HebbianUpdatingAgent
 	ImportanceSpreadingAgent
 	ImportanceDiffusionAgent
+	SimpleImportanceDiffusionAgent        
 	ImportanceUpdatingAgent
 )
 
@@ -82,6 +83,8 @@ INSTALL (FILES
 	HebbianUpdatingAgent.h
 	ImportanceSpreadingAgent.h
 	ImportanceDiffusionAgent.h
+	SpreadDecider.h
+	SimpleImportanceDiffusionAgent.h
 	ImportanceUpdatingAgent.h
 	DESTINATION "include/${PROJECT_NAME}/dynamics/attention"
 )
