@@ -41,6 +41,15 @@
 
 namespace opencog { namespace moses {
 
+// XXX FIXME TODO The structure below should be split into multiple
+// parts, with each sub-part resposnisble for picking out the argv's
+// that it cares about. Unfortunately, this requires getting rid of 
+// boost::program_options (because boost::program_options does not
+// allow modulariztion in this way; it forces all program options to
+// be treated in a global fashion.  I tried. It was a hell. See this
+// commit, and thee ones leading up to it:
+// dc77c2a8812b0be18d95fc8b916d16bb78a95b29
+// Argh ...
 struct problem_params
 {
     problem_params();
@@ -108,7 +117,7 @@ struct problem_params
     score_t diversity_p_norm;
     std::string diversity_dst2dp;
 
-    // optim_param
+    // optim_param (applicable for all optimzation algos)
     std::string opt_algo; //optimization algorithm
     double pop_size_ratio;
     score_t max_score;
@@ -122,7 +131,7 @@ struct problem_params
     // constraint for problems pre, recall, prerec
     score_t hardness;
 
-    // hc_param
+    // hc_param  (hill-climbing)
     bool hc_widen_search;
     bool hc_single_step;
     bool hc_crossover;
