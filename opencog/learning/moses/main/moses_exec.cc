@@ -38,8 +38,12 @@ int moses_exec(int argc, char** argv)
     register_table_problems();
 
     problem_params pms;
-    register_options(&pms);
-    init_options();
+    static bool is_init = false;
+    if (not is_init) {
+        register_options(&pms);
+        init_options();
+        is_init = true;
+    }
     parse_options(argc, argv);
 
     problem_base* probm = find_problem(pms.problem);
