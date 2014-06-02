@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/SimpleSimpleImportanceDiffusionAgent.cc
+ * opencog/dynamics/attention/SimpleImportanceDiffusionAgent.cc
  *
  * Copyright (C) 2014 Cosmo Harrigan
  * All Rights Reserved
@@ -133,7 +133,29 @@ void SimpleImportanceDiffusionAgent::run()
 
 void SimpleImportanceDiffusionAgent::spreadImportance()
 {
+    // For each atomSource in AttentionalFocus that is not a hebbian link
     
+    // Check the decision function to determine if spreading will occur
+    // If no, continue (to the next iteration)
+    
+    // Construct a vector of incident atoms
+    // (consisting of the set union of the incoming and outgoing sets)
+    
+    // Add the hebbian adjacent atoms to the incident atoms vector
+    // (atoms that are adjacent, connected by a hebbian link)
+    
+    // Construct a probability vector containing the incident atoms, which 
+    // determines how to allocate the STI that will be diffused 
+    // (stored as a map, associating each atom with a probability)
+    
+    // Find the total amount of STI that atomSource will diffuse
+    
+    // For each atomTarget in incident atoms
+    
+    // Set the diffusion amount to the associated entry in the probability 
+    // vector multiplied by the total amount to diffuse
+    
+    // Update the STI of the target atom and the source atom
 }
 
 } // namespace
