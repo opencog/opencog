@@ -71,13 +71,12 @@
 ; Non-context specific axioms
 
 ; 7) "Accounting is associated with money."
-; Changed InheritanceLink to HebbianLink
-(HebbianLink (stv .7 .9)
+(AssociativeLink (stv .7 .9)
     (ConceptNode "Accounting")
     (ConceptNode "Money"))
 
 ; 8) "CanadianPlaces is associated with Canada."
-(HebbianLink (stv .8 .9)
+(AssociativeLink (stv .8 .9)
     (ConceptNode "CanadianPeople")
     (ConceptNode "CanadianPlacesNames"))
 
@@ -139,6 +138,6 @@
 ; Question to answer:
 ; What is the chance of Clark being involved with log trafficking?
 (define query
-    (InheritanceLink (stv "$x" 0.0)
+    (InheritanceLink
         (ConceptNode "Clark")
         (ConceptNode "LogTrafficking")))
