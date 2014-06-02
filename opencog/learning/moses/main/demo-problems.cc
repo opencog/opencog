@@ -25,6 +25,9 @@
  */
 
 #include <opencog/util/Logger.h>
+#include <opencog/learning/moses/main/problem-params.h>
+#include <opencog/learning/moses/moses/types.h>
+#include <opencog/learning/moses/scoring/bscores.h>
 #include <opencog/learning/moses/example-progs/scoring_iterators.h>
 
 #include "problem.h"
@@ -50,11 +53,13 @@ class bool_problem_base : public problem_base
     public:
         virtual combo::arity_t get_arity(int) = 0;
         virtual logical_bscore get_bscore(int) = 0;
-        virtual void run(problem_params&);
+        virtual void run(option_base*);
 };
 
-void bool_problem_base::run(problem_params& pms)
+void bool_problem_base::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
+
     if (pms.enable_feature_selection)
         logger().warn("Feature selection is not supported for the demo problems");
 
@@ -190,11 +195,13 @@ class polynomial_problem : public problem_base
         virtual const std::string description() const {
              return "Simple regression of f_n(x) = sum_{k={1,n}} x^k"; }
         virtual combo::arity_t get_arity(int sz) { return 1; }
-        virtual void run(problem_params&);
+        virtual void run(option_base*);
 };
 
-void polynomial_problem::run(problem_params& pms)
+void polynomial_problem::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
+
     if (pms.enable_feature_selection)
         logger().warn("Feature selection is not supported for the polynomial problem");
 
@@ -306,11 +313,12 @@ class combo_problem : public combo_problem_base
         virtual const std::string name() const { return "cp"; }
         virtual const std::string description() const {
              return "Demo: Learn a given combo program"; }
-        virtual void run(problem_params&);
+        virtual void run(option_base*);
 };
 
-void combo_problem::run(problem_params& pms)
+void combo_problem::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
     check_args(pms);
 
     // get the combo_tree and infer its type
@@ -390,11 +398,12 @@ class ann_combo_problem : public combo_problem_base
         virtual const std::string name() const { return "ann-cp"; }
         virtual const std::string description() const {
              return "Demo: Learn a given combo program using ANN"; }
-        virtual void run(problem_params&);
+        virtual void run(option_base*);
 };
 
-void ann_combo_problem::run(problem_params& pms)
+void ann_combo_problem::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
     check_args(pms);
 
     // get the combo_tree and infer its type

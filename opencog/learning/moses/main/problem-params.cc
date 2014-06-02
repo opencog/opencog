@@ -151,26 +151,22 @@ problem_params::problem_params() :
     complexity_ratio(3.5),
     use_well_enough(false),
     fs_params(festor_params.fs_params),
-    max_filename_size(255),
-    desc("Allowed options")
+    max_filename_size(255)
 {
-    options_init();
 }
 
-
-void problem_params::options_init()
+void
+problem_params::add_options(boost::program_options::options_description& desc)
 {
     namespace po = boost::program_options;
     using boost::format;
+    using namespace std;
 
     // Declare the supported options.
     // XXX TODO: make this print correctly, instead of using brackets.
     desc.add_options()
 
         // General options
-        
-        ("help,h", "Produce help message.\n")
-
         ("version", "Display the version of moses.\n")
 
         (opt_desc_str(jobs_opt).c_str(),
@@ -993,25 +989,10 @@ void problem_params::options_init()
 
 }
 
-void problem_params::parse_options(int argc, char* argv[])
+void problem_params::parse_options(boost::program_options::variables_map& vm)
 {
-    namespace po = boost::program_options;
-    po::variables_map vm;
-    try {
-        po::store(po::parse_command_line(argc, argv, desc), vm);
-    }
-    catch (po::error& e) {
-        OC_ASSERT(0, "Fatal error: invalid or duplicated argument:\n\t%s\n", e.what());
-    }
-    po::notify(vm);
-
     // set flags
     log_file_dep_opt = vm.count(log_file_dep_opt_opt.first) > 0;
-
-    if (vm.count("help") || argc == 1) {
-        cout << desc << endl;
-        exit(1);
-    }
 
     if (vm.count("version")) {
         cout << "moses " << version_string << std::endl;
@@ -1060,15 +1041,8 @@ void problem_params::parse_options(int argc, char* argv[])
     auto prt_stack = [](int sig) { logger().error("Caught SIGHUP"); };
     signal(SIGHUP, prt_stack);
 
-    // Log command-line args
+    // Log some generic, important information.
     logger().info() << "moses version " << version_string;
-    string cmdline = "Command line:";
-    for (int i = 0; i < argc; ++i) {
-         cmdline += " ";
-         cmdline += argv[i];
-    }
-    logger().info(cmdline);
-
     char hname[256];
     gethostname(hname, 256);
     logger().info("hostname: %s", hname);

@@ -137,8 +137,9 @@ void table_problem_base::common_type_setup(problem_params& pms)
 
 // ==================================================================
 
-void ip_problem::run(problem_params& pms)
+void ip_problem::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
     // ip assumes that the inputs are boolean and the output is contin
     type_tree ettt = gen_signature(id::boolean_type,
@@ -200,8 +201,9 @@ static combo_tree ann_exemplar(combo::arity_t arity)
     return ann_tr;
 }
 
-void ann_table_problem::run(problem_params& pms)
+void ann_table_problem::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
     // If no exemplar has been provided in the options,
     // insert the default.
@@ -257,10 +259,11 @@ void ann_table_problem::run(problem_params& pms)
                       pms.moses_params, pms.mmr_pa);                 \
 }
 
-void pre_table_problem::run(problem_params& pms)
+void pre_table_problem::run(option_base* ob)
 {
     // Very nearly identical to the REGRESSION macro above,
     // except that some new experimental features are being tried.
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
     common_type_setup(pms);
 
@@ -307,10 +310,11 @@ void pre_table_problem::run(problem_params& pms)
 
 }
 
-void pre_conj_table_problem::run(problem_params& pms)
+void pre_conj_table_problem::run(option_base* ob)
 {
     // Very nearly identical to the REGRESSION macro above,
     // except that some new experimental features are being tried.
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
     common_type_setup(pms);
 
@@ -345,8 +349,9 @@ void pre_conj_table_problem::run(problem_params& pms)
                           pms.moses_params, pms.mmr_pa);
 }
 
-void prerec_table_problem::run(problem_params& pms)
+void prerec_table_problem::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
     common_type_setup(pms);
 
@@ -358,8 +363,9 @@ void prerec_table_problem::run(problem_params& pms)
                (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
 
-void recall_table_problem::run(problem_params& pms)
+void recall_table_problem::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
     common_type_setup(pms);
 
@@ -371,8 +377,9 @@ void recall_table_problem::run(problem_params& pms)
                (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
 
-void bep_table_problem::run(problem_params& pms)
+void bep_table_problem::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
     common_type_setup(pms);
 
@@ -384,8 +391,9 @@ void bep_table_problem::run(problem_params& pms)
                (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
 
-void f_one_table_problem::run(problem_params& pms)
+void f_one_table_problem::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
     common_type_setup(pms);
 
@@ -395,8 +403,9 @@ void f_one_table_problem::run(problem_params& pms)
                (table));
 }
 
-void it_table_problem::run(problem_params& pms)
+void it_table_problem::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
     common_type_setup(pms);
 
@@ -474,8 +483,9 @@ void it_table_problem::run(problem_params& pms)
     }
 }
 
-void cluster_table_problem::run(problem_params& pms)
+void cluster_table_problem::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
     common_type_setup(pms);
 

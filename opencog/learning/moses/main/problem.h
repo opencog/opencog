@@ -1,7 +1,7 @@
 /**
  * problem.h ---
  *
- * Copyright (C) 2013 Linas Vepstas
+ * Copyright (C) 2013,2014 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>
  *
@@ -25,9 +25,22 @@
 #define _OPENCOG_MOSES_PROBLEM_H
 
 #include <string>
-#include <opencog/learning/moses/main/problem-params.h>
+#include <boost/program_options.hpp>
+#include <opencog/comboreduct/combo/vertex.h>
 
 namespace opencog { namespace moses {
+
+class option_base
+{
+    public:
+        virtual ~option_base() {}
+        virtual void add_options(boost::program_options::options_description&) = 0;
+        virtual void parse_options(boost::program_options::variables_map&) = 0;
+};
+
+void register_options(option_base*);
+void init_options();
+void parse_options(int argc, char* argv[]);
 
 class problem_base
 {
@@ -35,13 +48,16 @@ class problem_base
         virtual ~problem_base() {}
         virtual const std::string name() const = 0;
         virtual const std::string description() const = 0;
-        virtual void run(problem_params&) = 0;
+        virtual void run(option_base*) = 0;
 };
 
 void register_problem(problem_base*);
 problem_base* find_problem(const std::string&);
 
-unsigned alphabet_size(const type_tree& tt, const vertex_set ignore_ops);
+
+// misc utility .. doesn't really below here,,, ?
+unsigned alphabet_size(const combo::type_tree& tt,
+                       const combo::vertex_set ignore_ops);
 
 
 } // ~namespace moses

@@ -32,6 +32,7 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/table/table.h>
+#include <opencog/learning/moses/main/problem.h>
 #include <opencog/learning/moses/metapopulation/metapop_params.h>
 #include <opencog/learning/moses/moses/moses_main.h>
 #include <opencog/learning/moses/moses/moses_params.h>
@@ -50,10 +51,11 @@ namespace opencog { namespace moses {
 // commit, and thee ones leading up to it:
 // dc77c2a8812b0be18d95fc8b916d16bb78a95b29
 // Argh ...
-struct problem_params
+struct problem_params : public option_base
 {
     problem_params();
-    void parse_options(int argc, char* argv[]);
+    void add_options(boost::program_options::options_description&);
+    void parse_options(boost::program_options::variables_map&);
 
     // program options, see options_description below for their meaning
     std::vector<std::string> jobs_str;
@@ -191,8 +193,6 @@ protected:
     const unsigned int max_filename_size;
 
     reduct::logical_reduction lr;
-    boost::program_options::options_description desc;
-    void options_init();
 
 private:
     std::vector<std::string> col_labels;
