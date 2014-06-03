@@ -563,6 +563,7 @@ void cluster_table_problem::run(option_base* ob)
 void register_table_problems(problem_manager& pmr, option_manager& mgr)
 {
 	table_problem_params *tpp = new table_problem_params();
+	mgr.register_options(tpp);
 
 	ip_problem_params *ippp = new ip_problem_params();
 	mgr.register_options(ippp);
