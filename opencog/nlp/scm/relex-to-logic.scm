@@ -369,3 +369,15 @@
                 )
         )
 )
+;Example:
+(define (and-rule2 var1 var1_instance var2 var2_instance)
+	(InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
+	(InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
+        (EvaluationLink
+        (PredicateNode "AndMarker")
+		(ListLink
+			(ConceptNode var1_instance)
+			(ConceptNode var2_instance)
+		)
+	)
+)
