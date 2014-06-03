@@ -219,28 +219,6 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "maj, demo, majority problem\n\n"
          "sr, demo, regression of f_n(x) = sum_{k=1,n} x^k\n")
 
-        // Input specification options
-
-        (opt_desc_str(input_data_file_opt).c_str(),
-         po::value<vector<string>>(&input_data_files),
-         "Input table file in DSV format (with comma, whitespace "
-         "and tabulation as seperator). Colums correspond to features "
-         "and rows to observations. Can be used several times, in such "
-         "a case the behavioral score of the whole problem is the "
-         "concatenation of the behavioral scores of the sub-problems "
-         "associated with the files. Each file must have the same number "
-         "of features in the same order.\n")
-
-        (opt_desc_str(target_feature_opt).c_str(),
-         po::value<string>(&target_feature),
-         "Label of the target feature to fit. If none is given the "
-         "first one is used.\n")
-
-        (opt_desc_str(ignore_feature_str_opt).c_str(),
-         po::value<vector<string>>(&ignore_features_str),
-         "Ignore feature from the datasets. Can be used several times "
-         "to ignore several features.\n")
-
         (opt_desc_str(nsamples_opt).c_str(),
          po::value<int>(&nsamples)->default_value(-1),
          "Number of samples to describe the problem. "
@@ -268,14 +246,6 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "it will overwrite it. "
          "Otherwise, for any other value, the user's defined max-score will "
          "be used.\n")
-
-        ("score-weight",
-         po::value<string>(&weighting_feature),
-         "Feature (table column) to use as a weight during scoring. "
-         "The score of the combo model on each row of the table is "
-         "weighted by this value, to determine the final score. This "
-         "option is useful when not all of the rows in a table are "
-         "equally important to model correctly.\n")
 
         (opt_desc_str(max_evals_opt).c_str(),
          po::value<unsigned long>(&max_evals)->default_value(10000),

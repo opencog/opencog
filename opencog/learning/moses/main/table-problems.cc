@@ -52,12 +52,50 @@ static void log_output_error_exit(string err_msg) {
 
 // ==================================================================
 
+void table_problem_params::add_options(boost::program_options::options_description& desc)
+{
+    namespace po = boost::program_options;
+
+    desc.add_options()
+
+        ("input-file,i",
+         po::value<vector<string>>(&input_data_files),
+         "Input table file in DSV format (with comma, whitespace "
+         "and tabulation as seperator). Colums correspond to features "
+         "and rows to observations. Can be used several times, in such "
+         "a case the behavioral score of the whole problem is the "
+         "concatenation of the behavioral scores of the sub-problems "
+         "associated with the files. Each file must have the same number "
+         "of features in the same order.\n")
+
+        ("target-feature,u",
+         po::value<string>(&target_feature),
+         "Label of the target feature to fit. If none is given the "
+         "first one is used.\n")
+
+        ("score-weight",
+         po::value<string>(&weighting_feature),
+         "Feature (table column) to use as a weight during scoring. "
+         "The score of the combo model on each row of the table is "
+         "weighted by this value, to determine the final score. This "
+         "option is useful when not all of the rows in a table are "
+         "equally important to model correctly.\n")
+
+        ("ignore-feature,Y",
+         po::value<vector<string>>(&ignore_features_str),
+         "Ignore feature from the datasets. Can be used several times "
+         "to ignore several features.\n")
+
+    ;  // end of desc add options
+}
+
+// ==================================================================
+
 void table_problem_base::common_setup(problem_params& pms)
 {
-    if (pms.input_data_files.empty()) {
+    if (_tpp.input_data_files.empty()) {
         stringstream ss;
-        ss << "no input data file has been specified (option -"
-           << input_data_file_opt.second << ")";
+        ss << "no input data file has been specified (option -i)";
         log_output_error_exit(ss.str());
     }
 
@@ -65,18 +103,18 @@ void table_problem_base::common_setup(problem_params& pms)
     tables.clear();
     ctables.clear();
     size_t num_rows = 0;
-    for (const string& idf : pms.input_data_files) {
+    for (const string& idf : _tpp.input_data_files) {
         logger().info("Read data file %s", idf.c_str());
-        Table table = loadTable(idf, pms.target_feature, pms.ignore_features_str);
+        Table table = loadTable(idf, _tpp.target_feature, _tpp.ignore_features_str);
         num_rows += table.size();
         // Possibly subsample the table
         if (pms.nsamples > 0)
             subsampleTable(table, pms.nsamples);
         // Compressed table
-        ctables.push_back(table.compressed(pms.weighting_feature));
+        ctables.push_back(table.compressed(_tpp.weighting_feature));
         // The compressed table removes the weighting feature, too.
-        if (not pms.weighting_feature.empty())
-            table.itable.delete_column(pms.weighting_feature);
+        if (not _tpp.weighting_feature.empty())
+            table.itable.delete_column(_tpp.weighting_feature);
         tables.push_back(table);
     }
     logger().info("Number of rows in tables = %d", num_rows);
@@ -94,8 +132,8 @@ void table_problem_base::common_setup(problem_params& pms)
             combo::arity_t test_arity = tables[i].get_arity();
             if (test_arity != arity) {
                 stringstream ss;
-                ss << "File " << pms.input_data_files[0] << " has arity " << arity
-                   << " while file " << pms.input_data_files[i] << " has arity " << test_arity;
+                ss << "File " << _tpp.input_data_files[0] << " has arity " << arity
+                   << " while file " << _tpp.input_data_files[i] << " has arity " << test_arity;
                 log_output_error_exit(ss.str());
             }
         }
@@ -119,7 +157,7 @@ void table_problem_base::common_type_setup(problem_params& pms)
     // problem == pre  precision-based scoring
     // precision combo trees always return booleans.
     if (pms.exemplars.empty()) {
-        type_node pbr_type = pms.problem == pre_table_problem().name() ?
+        type_node pbr_type = pms.problem == pre_table_problem(_tpp).name() ?
             id::boolean_type : table_output_tn;
         pms.exemplars.push_back(type_to_exemplar(pbr_type));
     }
@@ -524,19 +562,21 @@ void cluster_table_problem::run(option_base* ob)
 
 void register_table_problems(option_manager& mgr)
 {
+	table_problem_params *tpp = new table_problem_params();
+
 	ip_problem_params *ippp = new ip_problem_params();
 	mgr.register_options(ippp);
 
-	register_problem(new ip_problem(*ippp));
-	register_problem(new ann_table_problem());
-	register_problem(new pre_table_problem());
-	register_problem(new pre_conj_table_problem());
-	register_problem(new prerec_table_problem());
-	register_problem(new recall_table_problem());
-	register_problem(new bep_table_problem());
-	register_problem(new f_one_table_problem());
-	register_problem(new it_table_problem());
-	register_problem(new cluster_table_problem());
+	register_problem(new ip_problem(*tpp, *ippp));
+	register_problem(new ann_table_problem(*tpp));
+	register_problem(new pre_table_problem(*tpp));
+	register_problem(new pre_conj_table_problem(*tpp));
+	register_problem(new prerec_table_problem(*tpp));
+	register_problem(new recall_table_problem(*tpp));
+	register_problem(new bep_table_problem(*tpp));
+	register_problem(new f_one_table_problem(*tpp));
+	register_problem(new it_table_problem(*tpp));
+	register_problem(new cluster_table_problem(*tpp));
 }
 
 } // ~namespace moses

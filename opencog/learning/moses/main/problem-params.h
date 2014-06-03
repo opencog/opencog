@@ -94,7 +94,6 @@ struct problem_params : public option_base
     std::vector<std::string> include_only_ops_str;
     std::vector<std::string> ignore_ops_str;
     vertex_set ignore_ops;
-    std::vector<std::string> ignore_features_str;
     std::vector<std::string> exemplars_str;
     std::vector<combo_tree> exemplars;
 
@@ -129,10 +128,6 @@ struct problem_params : public option_base
     bool weighted_accuracy;
     std::vector<contin_t> discretize_thresholds;
 
-    // hardness of the activation range
-    // constraint for problems pre, recall, prerec
-    score_t hardness;
-
     // hc_param  (hill-climbing)
     bool hc_widen_search;
     bool hc_single_step;
@@ -146,18 +141,16 @@ struct problem_params : public option_base
     // classifier parameters
     bool use_well_enough;
 
+    // hardness of the activation range -- scoring-related
+    // constraint for problems pre, recall, prerec
+    score_t hardness;
+
     // pre params
     bool pre_worst_norm;
     bool gen_best_tree;
 
     // it params
     bool it_abs_err;
-
-    // Table-related options
-    // XXX just like above, the table_base argv parser should grab these...
-    std::vector<std::string> input_data_files;
-    std::string target_feature;
-    std::string weighting_feature;
 
     /// Enable feature selection while selecting exemplar
     /// feature selection happens before each representation building
