@@ -37,7 +37,8 @@ int moses_exec(int argc, char** argv)
     register_demo_problems();
     register_table_problems();
 
-    static demo_params pms;
+    // single, static, as otherwise boost:program_options crashes.
+    static problem_params pms;
     static bool is_init = false;
     if (not is_init) {
         register_options(&pms);

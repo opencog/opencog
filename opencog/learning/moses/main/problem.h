@@ -35,7 +35,7 @@ class option_base
     public:
         virtual ~option_base() {}
         virtual void add_options(boost::program_options::options_description&) = 0;
-        virtual void parse_options(boost::program_options::variables_map&) = 0;
+        virtual void parse_options(boost::program_options::variables_map&) {};
 };
 
 void register_options(option_base*);
