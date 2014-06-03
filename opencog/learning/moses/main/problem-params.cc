@@ -407,6 +407,9 @@ problem_params::add_options(boost::program_options::options_description& desc)
                     "different RAM.\n") % hc).c_str())
 
         // Algorithm tuning options
+        ("boost",
+         po::value<bool>(&boosting)->default_value(false),
+         "Enable boosting for supervised learning problems.\n")
         
         (opt_desc_str(reduct_knob_building_effort_opt).c_str(),
          po::value<int>(&reduct_knob_building_effort)->default_value(2),
@@ -549,7 +552,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          po::value<string>(&output_file)->default_value(""),
          "File where to place the output. If empty, then output to stdout.\n")
 
-        // The remaining options (TODO organize that)
+        // The remaining options (TODO organize this)
         
         (opt_desc_str(min_rand_input_opt).c_str(),
          po::value<double>(&min_rand_input)->default_value(0.0),
