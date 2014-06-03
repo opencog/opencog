@@ -27,6 +27,9 @@
 #ifndef _OPENCOG_PATTERN_UTILS_H
 #define _OPENCOG_PATTERN_UTILS_H
 
+#include <set>
+#include <vector>
+
 #include <opencog/util/foreach.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/Foreach.h>
@@ -37,10 +40,10 @@ namespace opencog {
 class FindVariables
 {
    public:
-      std::vector<Handle> varlist;
+      std::set<Handle> varset;
 
       /**
-       * Create a list of all of the VariableNodes that lie in the
+       * Create a set of all of the VariableNodes that lie in the
        * outgoing set of the handle (recursively).
        */
       inline bool find_vars(Handle h)
@@ -50,7 +53,7 @@ class FindVariables
          {
             if (t == VARIABLE_NODE)
             {
-               varlist.push_back(h);
+               varset.insert(h);
             }
             return false;
          }

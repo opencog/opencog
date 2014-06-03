@@ -24,10 +24,8 @@
 #ifndef _OPENCOG_PATTERN_MATCH_H
 #define _OPENCOG_PATTERN_MATCH_H
 
-#include <map>
-#include <vector>
+#include <set>
 
-#include <opencog/atomspace/types.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 
@@ -39,9 +37,9 @@ class PatternMatch
 		AtomSpace *atom_space;
 		PatternMatchEngine pme;
 		int get_vartype(Handle,
-		                std::vector<Handle> &,
-		                VariableTypeMap &);
-		Handle do_imply(Handle, PatternMatchCallback *, std::vector<Handle> *);
+		                std::set<Handle>&,
+		                VariableTypeMap&);
+		Handle do_imply(Handle, PatternMatchCallback *, std::set<Handle>&);
 		Handle do_bindlink(Handle, PatternMatchCallback *);
 
 	public:

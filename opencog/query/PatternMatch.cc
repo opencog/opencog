@@ -103,7 +103,8 @@ void PatternMatch::match(PatternMatchCallback *cb,
 		return;
 	}
 
-	std::vector<Handle> vars(lvarbles->getOutgoingSet());
+	std::set<Handle> vars;
+	foreach(Handle v, lvarbles->getOutgoingSet()) vars.insert(v);
 
 	// negation clauses are optionally present
 	std::vector<Handle> negs;
@@ -399,7 +400,7 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 
 Handle PatternMatch::do_imply (Handle himplication,
                                PatternMatchCallback *pmc,
-                               std::vector<Handle> *varlist)
+                               std::set<Handle>& varset)
 {
 	// Must be non-empty.
 	LinkPtr limplication(LinkCast(himplication));
@@ -464,27 +465,27 @@ Handle PatternMatch::do_imply (Handle himplication,
 	}
 
 
-	// Extract a list of variables, if needed.
+	// Extract the set of variables, if needed.
 	// This is used only by the deprecated imply() function, as the
 	// BindLink will include a list of variables up-front.
 	FindVariables fv;
-	if (NULL == varlist)
+	if (0 == varset.size())
 	{
 		fv.find_vars(hclauses);
-		varlist = &fv.varlist;
+		varset = fv.varset;
 	}
 
 	// Make sure that every clause contains at least one variable.
 	// The presence of constant clauses will mess up the current
 	// pattern matcher.  Constant clauses are "trivial" to match,
 	// and so its pointless to even send them through the system.
-	bool bogus = pme.validate(*varlist, affirm);
+	bool bogus = pme.validate(varset, affirm);
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern matching",
 			__FUNCTION__);
 	}
-	bogus = pme.validate(*varlist, negate);
+	bogus = pme.validate(varset, negate);
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern negation",
@@ -494,7 +495,7 @@ Handle PatternMatch::do_imply (Handle himplication,
 	// Now perform the search.
 	Implicator *impl = dynamic_cast<Implicator *>(pmc);
 	impl->implicand = implicand;
-	pme.match(pmc, *varlist, affirm, negate);
+	pme.match(pmc, varset, affirm, negate);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -530,7 +531,7 @@ typedef std::pair<Handle, const std::set<Type> > ATPair;
  * via the map "typemap".
  */
 int PatternMatch::get_vartype(Handle htypelink,
-                              std::vector<Handle> &vset,
+                              std::set<Handle> &vset,
                               VariableTypeMap &typemap)
 {
 	const std::vector<Handle>& oset = LinkCast(htypelink)->getOutgoingSet();
@@ -561,7 +562,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 		std::set<Type> ts;
 		ts.insert(vt);
 		typemap.insert(ATPair(varname,ts));
-		vset.push_back(varname);
+		vset.insert(varname);
 	}
 	else if (LIST_LINK == t)
 	{
@@ -592,7 +593,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 		}
 
 		typemap.insert(ATPair(varname,ts));
-		vset.push_back(varname);
+		vset.insert(varname);
 	}
 	else
 	{
@@ -658,7 +659,7 @@ Handle PatternMatch::do_bindlink (Handle hbindlink,
 
 	// vset is the vector of variables.
 	// typemap is the (possibly empty) list of restrictions on atom types.
-	std::vector<Handle> vset;
+	std::set<Handle> vset;
 	VariableTypeMap typemap;
 
 	// Expecting the declaration list to be either a single
@@ -667,7 +668,7 @@ Handle PatternMatch::do_bindlink (Handle hbindlink,
 	if ((VARIABLE_NODE == tdecls) or
 	    NodeCast(hdecls)) // allow *any* node as a variable
 	{
-		vset.push_back(hdecls);
+		vset.insert(hdecls);
 	}
 	else if (TYPED_VARIABLE_LINK == tdecls)
 	{
@@ -685,7 +686,7 @@ Handle PatternMatch::do_bindlink (Handle hbindlink,
 			Type t = h->getType();
 			if (VARIABLE_NODE == t)
 			{
-				vset.push_back(h);
+				vset.insert(h);
 			}
 			else if (TYPED_VARIABLE_LINK == t)
 			{
@@ -708,7 +709,7 @@ Handle PatternMatch::do_bindlink (Handle hbindlink,
 
 	pmc->set_type_restrictions(typemap);
 
-	Handle gl = do_imply(himpl, pmc, &vset);
+	Handle gl = do_imply(himpl, pmc, vset);
 
 	return gl;
 }
@@ -870,7 +871,8 @@ Handle PatternMatch::imply (Handle himplication)
 	// Now perform the search.
 	DefaultImplicator impl;
 	impl.as = atom_space;
-	return do_imply(himplication, &impl, NULL);
+	std::set<Handle> varset;
+	return do_imply(himplication, &impl, varset);
 }
 
 /**
@@ -897,7 +899,8 @@ Handle PatternMatch::crisp_logic_imply (Handle himplication)
 	// Now perform the search.
 	CrispImplicator impl;
 	impl.as = atom_space;
-	return do_imply(himplication, &impl, NULL);
+	std::set<Handle> varset;
+	return do_imply(himplication, &impl, varset);
 }
 
 /* ===================== END OF FILE ===================== */

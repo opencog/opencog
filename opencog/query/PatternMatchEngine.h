@@ -27,6 +27,7 @@
 #include <map>
 #include <set>
 #include <stack>
+#include <vector>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/PatternMatchCallback.h>
@@ -50,9 +51,9 @@ class PatternMatchEngine
 
 		// -------------------------------------------
 		// predicate to be solved.
-		std::set<Handle> bound_vars;
-		std::vector<Handle> cnf_clauses;
-		std::set<Handle> optionals;
+		std::set<Handle> _bound_vars;
+		std::vector<Handle> _cnf_clauses;
+		std::set<Handle> _optionals;
 
 		// -------------------------------------------
 		// Traversal utilities
@@ -113,10 +114,10 @@ class PatternMatchEngine
 		bool do_candidate(Handle&, Handle&, Handle&);
 
 		// Make sure that variables can be found in the clauses.
-		bool validate(const std::vector<Handle> &vars,
+		bool validate(const std::set<Handle> &vars,
 		              std::vector<Handle> &clauses);
 
-		bool validate(const std::vector<Handle> &vars,
+		bool validate(const std::set<Handle> &vars,
 		              Handle& clause);
 
 		void get_connected_components(const std::vector<Handle> &vars,
@@ -125,7 +126,7 @@ class PatternMatchEngine
 
 		// Do the actual pattern search.
 		void match(PatternMatchCallback *,
-		           std::vector<Handle> &vars,
+		           std::set<Handle> &vars,
 		           std::vector<Handle> &clauses,
 		           std::vector<Handle> &negations);
 
@@ -133,7 +134,7 @@ class PatternMatchEngine
 		void print_solution(const std::map<Handle, Handle> &vars,
 		                           const std::map<Handle, Handle> &clauses);
 
-		void print_predicate(const std::vector<Handle> &vars,
+		void print_predicate(const std::set<Handle> &vars,
 		                            const std::vector<Handle> &clauses);
 };
 
