@@ -164,8 +164,8 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle atomSource)
                                               probabilityVector[atomTarget]);
         
         // Trade STI between the source and target atoms
-        as->setSTI(atomSource, as->getSTI(atomSource) - totalDiffusionAmount);
-        as->setSTI(atomTarget, as->getSTI(atomTarget) + totalDiffusionAmount);
+        as->setSTI(atomSource, as->getSTI(atomSource) - diffusionAmount);
+        as->setSTI(atomTarget, as->getSTI(atomTarget) + diffusionAmount);
         
         // TODO: How to make this a transaction? This could go wrong if there
         // were simultaneous updates in other threads.
@@ -209,6 +209,10 @@ HandleSeq SimpleImportanceDiffusionAgent::diffusionSourceVector()
                                type == SYMMETRIC_INVERSE_HEBBIAN_LINK)
                            {
                                return true;
+                           }
+                           else
+                           {
+                               return false;
                            }
                        }));
     
@@ -262,7 +266,11 @@ HandleSeq SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(Handle h)
 std::map<Handle, double> SimpleImportanceDiffusionAgent::probabilityVector(
         HandleSeq handles)
 {
-
+    std::map<Handle, double> result;
+    
+    // TODO
+    
+    return result;
 }
 
 /*
