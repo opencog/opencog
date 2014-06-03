@@ -148,10 +148,10 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle atomSource)
             SimpleImportanceDiffusionAgent::probabilityVector(targetAtoms);
     
     // Calculate the total amount that will be diffused
-    AttentionValue::sti_t diffusionAmount = 
+    AttentionValue::sti_t totalDiffusionAmount = 
             SimpleImportanceDiffusionAgent::calculateDiffusionAmount(atomSource);
     
-    if (diffusionAmount == 0)
+    if (totalDiffusionAmount == 0)
     {
         return;
     }
@@ -159,14 +159,26 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle atomSource)
     // For each atomTarget in incident atoms, perform diffusion
     foreach (Handle atomTarget, targetAtoms)
     {       
-        diffusionAmount = diffusionAmount * probabilityVector[atomTarget];   
+        AttentionValue::sti_t diffusionAmount = 
+                (AttentionValue::sti_t) floor(totalDiffusionAmount * 
+                                              probabilityVector[atomTarget]);
         
         // Trade STI between the source and target atoms
-        as->setSTI(atomSource, as->getSTI(atomSource) - diffusionAmount);
-        as->setSTI(atomTarget, as->getSTI(atomTarget) + diffusionAmount);
+        as->setSTI(atomSource, as->getSTI(atomSource) - totalDiffusionAmount);
+        as->setSTI(atomTarget, as->getSTI(atomTarget) + totalDiffusionAmount);
         
         // TODO: How to make this a transaction? This could go wrong if there
         // were simultaneous updates in other threads.
+        
+        // TODO: Using integers for STI values can cause strange consequences.
+        // Rounding to an integer is required so that only whole STI amounts
+        // are exchanged; due to flooring after multiplying the probability 
+        // vector by the total diffusion amount, the amount diffused by this 
+        // routine may not exactly match the totalDiffusionAmount, which could 
+        // be a problem. Floor is used instead of round, so that an atom cannot
+        // diffuse more STI than it has. This also can cause an atom to not
+        // diffuse any STI when the amount to be diffused is less than 1.
+        //   * See: https://github.com/opencog/opencog/issues/676
     }
 }
 
@@ -250,7 +262,7 @@ HandleSeq SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(Handle h)
 std::map<Handle, double> SimpleImportanceDiffusionAgent::probabilityVector(
         HandleSeq handles)
 {
-    
+
 }
 
 /*
@@ -261,7 +273,12 @@ std::map<Handle, double> SimpleImportanceDiffusionAgent::probabilityVector(
 AttentionValue::sti_t SimpleImportanceDiffusionAgent::calculateDiffusionAmount(
         Handle h)
 {
+    return (AttentionValue::sti_t) round(as->getSTI(h) * maxSpreadPercentage);
     
+    // TODO: Using integers for STI values can cause strange consequences.
+    // For example, if the amount to diffuse is 0.4, it will become 0, causing
+    // no diffusion to occur.
+    //   * See: https://github.com/opencog/opencog/issues/676
 }
 
 } // namespace
