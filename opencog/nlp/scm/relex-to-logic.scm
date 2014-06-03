@@ -381,3 +381,15 @@
 		)
 	)
 )
+
+(define (and-rule1 var1 var1_instance var2 var2_instance)
+	(InheritanceLink (PredicateNode var1_instance) (PredicateNode var1))
+	(InheritanceLink (PredicateNode var2_instance) (PredicateNode var2))
+        (EvaluationLink
+        (PredicateNode "AndMarker")
+		(ListLink
+			(PredicateNode var1_instance)
+			(PredicateNode var2_instance)
+		)
+	)
+)
