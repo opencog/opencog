@@ -936,18 +936,59 @@ bool PatternMatchEngine::validate(
 void PatternMatchEngine::get_connected_components(
                     const std::set<Handle> &vars,
                     const std::vector<Handle> &clauses,
-                    std::set<std::vector<Handle>> &components)
+                    std::set<std::vector<Handle>> &compset)
 {
-	std::set<Handle> cur_vars;
-	std::vector<Handle> cur_component;
-	foreach(Handle cl, clauses)
+	std::vector<std::vector<Handle>> components;
+	std::vector<std::set<Handle>> component_vars; // cache of vars in component
+
+	foreach (Handle cl, clauses)
 	{
-		// if (any_node_in_tree
+		bool extended = false;
+
+		// Which component might this possibly belong to??? Try them all.
+		size_t nc = components.size();
+		for (size_t i = 0; i<nc; i++)
+		{
+			std::set<Handle> cur_vars(component_vars[i]);
+			// If clause cl is connected to this component, then add it
+			// to this component.
+			if (any_node_in_tree(cl, cur_vars))
+			{
+				// Extend the component
+				std::vector<Handle> curr_component(components[i]);
+				curr_component.push_back(cl);
+				components[i] = curr_component;
+
+				// Add to the varset cache for that component.
+				FindVariables fv;
+				fv.find_vars(cl);
+				foreach (Handle v, fv.varset) cur_vars.insert(v);
+				component_vars[i] = cur_vars;
+
+				extended = true;
+				break;
+			}
+		}
+
+		if (extended) continue;
+
+		// If we are here, we found a disconnected clause.
+		// Start a new component
+		std::vector<Handle> new_component;
+		new_component.push_back(cl);
+		components.push_back(new_component);
+
 		FindVariables fv;
 		fv.find_vars(cl);
-// xxxxxxxxx
+		std::set<Handle> new_varcache(fv.varset);
+		component_vars.push_back(new_varcache);
 	}
 
+	// We are done. Copy the components over.
+	foreach (auto comp, components)
+	{
+		compset.insert(comp);
+	}
 }
 
 

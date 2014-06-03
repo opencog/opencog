@@ -91,7 +91,7 @@ inline bool is_node_in_tree(const Handle& tree, const Handle& node)
  * Return true if any of the indicated nodes occurs somewhere in
  * the tree spanned by the outgoing set.
  */
-inline bool any_node_in_tree(const Handle& tree, std::vector<Handle>& nodes)
+inline bool any_node_in_tree(const Handle& tree, const std::set<Handle>& nodes)
 {
 	foreach(Handle n, nodes)
 	{
