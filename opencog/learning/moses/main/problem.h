@@ -58,8 +58,15 @@ class problem_base
         virtual void run(option_base*) = 0;
 };
 
-void register_problem(problem_base*);
-problem_base* find_problem(const std::string&);
+class problem_manager
+{
+    public:
+        ~problem_manager();
+        void register_problem(problem_base*);
+        problem_base* find_problem(const std::string&);
+    private:
+        std::map<std::string, problem_base*> _problem_set;
+};
 
 
 // misc utility .. doesn't really below here,,, ?

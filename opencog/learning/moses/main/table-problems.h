@@ -31,11 +31,27 @@
 
 namespace opencog { namespace moses {
 
-void register_table_problems();
+void register_table_problems(problem_manager&, option_manager&);
+
+struct table_problem_params : public option_base
+{
+    void add_options(boost::program_options::options_description&);
+
+    std::vector<std::string> input_data_files;
+    std::string target_feature;
+    std::string weighting_feature;
+    std::vector<std::string> ignore_features_str;
+};
+
 
 class table_problem_base : public problem_base
 {
+public:
+    table_problem_base(table_problem_params& tp) : _tpp(tp) {}
+
 protected:
+    table_problem_params& _tpp;
+
     typedef boost::ptr_vector<bscore_base> BScorerSeq;
 
     void common_setup(problem_params&);
@@ -53,20 +69,36 @@ protected:
     type_node output_type;
 };
 
+/// interesting predicates options.
+struct ip_problem_params : public option_base
+{
+    void add_options(boost::program_options::options_description&);
+    double ip_kld_weight;
+    double ip_skewness_weight;
+    double ip_stdU_weight;
+    double ip_skew_U_weight;
+};
+
 /// Find interesting predicates
 class ip_problem : public table_problem_base
 {
     public:
+        ip_problem(table_problem_params& tp, ip_problem_params& ip)
+           : table_problem_base(tp), _ippp(ip) {}
         virtual const std::string name() const { return "ip"; }
         virtual const std::string description() const {
              return "Find interesting patterns"; }
         virtual void run(option_base*);
+    protected:
+        ip_problem_params& _ippp;
 };
 
 /// Regression based on combo program using ann
 class ann_table_problem : public table_problem_base
 {
     public:
+        ann_table_problem(table_problem_params& tp)
+            : table_problem_base(tp) {}
         virtual const std::string name() const { return "ann-it"; }
         virtual const std::string description() const {
              return "ANN-based regression on input table"; }
@@ -80,6 +112,8 @@ class ann_table_problem : public table_problem_base
 class pre_table_problem : public table_problem_base
 {
     public:
+        pre_table_problem(table_problem_params& tp)
+            : table_problem_base(tp) {}
         virtual const std::string name() const { return "pre"; }
         virtual const std::string description() const {
              return "Precision-Activation scoring"; }
@@ -91,6 +125,8 @@ class pre_table_problem : public table_problem_base
 class pre_conj_table_problem : public table_problem_base
 {
     public:
+        pre_conj_table_problem(table_problem_params& tp)
+            : table_problem_base(tp) {}
         virtual const std::string name() const { return "pre-conj"; }
         virtual const std::string description() const {
              return "Precision-Conjunction-Maximization"; }
@@ -102,6 +138,8 @@ class pre_conj_table_problem : public table_problem_base
 class prerec_table_problem : public table_problem_base
 {
     public:
+        prerec_table_problem(table_problem_params& tp)
+            : table_problem_base(tp) {}
         virtual const std::string name() const { return "prerec"; }
         virtual const std::string description() const {
              return "Precision Maximization (holding recall constant)"; }
@@ -113,6 +151,8 @@ class prerec_table_problem : public table_problem_base
 class recall_table_problem : public table_problem_base
 {
     public:
+        recall_table_problem(table_problem_params& tp)
+            : table_problem_base(tp) {}
         virtual const std::string name() const { return "recall"; }
         virtual const std::string description() const {
              return "Recall Maximization (holding precision constant)"; }
@@ -124,6 +164,8 @@ class recall_table_problem : public table_problem_base
 class bep_table_problem : public table_problem_base
 {
     public:
+        bep_table_problem(table_problem_params& tp)
+            : table_problem_base(tp) {}
         virtual const std::string name() const { return "bep"; }
         virtual const std::string description() const {
              return "Maximize Break-even Point"; }
@@ -135,6 +177,8 @@ class bep_table_problem : public table_problem_base
 class f_one_table_problem : public table_problem_base
 {
     public:
+        f_one_table_problem(table_problem_params& tp)
+            : table_problem_base(tp) {}
         virtual const std::string name() const { return "f_one"; }
         virtual const std::string description() const {
              return "Maximize F_1 score"; }
@@ -146,6 +190,8 @@ class f_one_table_problem : public table_problem_base
 class it_table_problem : public table_problem_base
 {
     public:
+        it_table_problem(table_problem_params& tp)
+            : table_problem_base(tp) {}
         virtual const std::string name() const { return "it"; }
         virtual const std::string description() const {
              return "Maximize Accuracy"; }
@@ -157,6 +203,8 @@ class it_table_problem : public table_problem_base
 class cluster_table_problem : public table_problem_base
 {
     public:
+        cluster_table_problem(table_problem_params& tp)
+            : table_problem_base(tp) {}
         virtual const std::string name() const { return "cluster"; }
         virtual const std::string description() const {
              return "Discover clustering function"; }

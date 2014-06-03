@@ -35,8 +35,6 @@ using namespace std;
 //
 // Available abbreviations are: O
 static const pair<string, string> rand_seed_opt("random-seed", "r");
-static const pair<string, string> input_data_file_opt("input-file", "i");
-static const pair<string, string> target_feature_opt("target-feature", "u");
 static const pair<string, string> problem_opt("problem", "H");
 static const pair<string, string> nsamples_opt("nsamples", "b");
 static const pair<string, string> min_rand_input_opt("min-rand-input", "q");
@@ -60,7 +58,6 @@ static const pair<string, string> log_file_dep_opt_opt("log-file-dep-opt", "F");
 static const pair<string, string> noise_opt("noise", "p");
 static const pair<string, string> include_only_ops_str_opt("include-only-operator", "N");
 static const pair<string, string> ignore_ops_str_opt("ignore-operator", "n");
-static const pair<string, string> ignore_feature_str_opt("ignore-feature", "Y");
 static const pair<string, string> opt_algo_opt("opt-algo", "a");
 static const pair<string, string> exemplars_str_opt("exemplar", "e");
 static const pair<string, string> reduct_candidate_effort_opt("reduct-candidate-effort", "E");
@@ -81,11 +78,6 @@ static const pair<string, string> complexity_ratio_opt("complexity-ratio", "z");
 static const pair<string, string> discretize_threshold_opt("discretize-threshold", "R");
 
 // options specific to a particular fitness function
-static const pair<string, string> ip_kld_weight_opt("ip_kld_weight", "K");
-static const pair<string, string> ip_skewness_weight_opt("ip_skewness_weight", "J");
-static const pair<string, string> ip_stdU_weight_opt("ip_stdU_weight", "U");
-static const pair<string, string> ip_skew_U_weight_opt("ip_skew_U_weight", "X");
-
 static const pair<string, string> alpha_opt("alpha", "Q");
 
 // options specific to a particular optimization algorithm

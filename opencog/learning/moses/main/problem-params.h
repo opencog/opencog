@@ -43,13 +43,14 @@
 namespace opencog { namespace moses {
 
 // XXX FIXME TODO The structure below should be split into multiple
-// parts, with each sub-part resposnisble for picking out the argv's
+// parts, with each sub-part responsible for picking out the argv's
 // that it cares about. Unfortunately, this requires getting rid of 
 // boost::program_options (because boost::program_options does not
 // allow modulariztion in this way; it forces all program options to
-// be treated in a global fashion.  I tried. It was a hell. See this
-// commit, and thee ones leading up to it:
-// dc77c2a8812b0be18d95fc8b916d16bb78a95b29
+// be specified in a single instance of options_description; if this
+// isn't done, then parse_command_line() blows up, and notify() blows
+// up. And then theres variables_map to hack around. So its badly
+// designed.  I tried to hack past the damage but its overwhelming.
 // Argh ...
 struct problem_params : public option_base
 {
@@ -93,7 +94,6 @@ struct problem_params : public option_base
     std::vector<std::string> include_only_ops_str;
     std::vector<std::string> ignore_ops_str;
     vertex_set ignore_ops;
-    std::vector<std::string> ignore_features_str;
     std::vector<std::string> exemplars_str;
     std::vector<combo_tree> exemplars;
 
@@ -128,10 +128,6 @@ struct problem_params : public option_base
     bool weighted_accuracy;
     std::vector<contin_t> discretize_thresholds;
 
-    // hardness of the activation range
-    // constraint for problems pre, recall, prerec
-    score_t hardness;
-
     // hc_param  (hill-climbing)
     bool hc_widen_search;
     bool hc_single_step;
@@ -145,25 +141,16 @@ struct problem_params : public option_base
     // classifier parameters
     bool use_well_enough;
 
+    // hardness of the activation range -- scoring-related
+    // constraint for problems pre, recall, prerec
+    score_t hardness;
+
     // pre params
     bool pre_worst_norm;
     bool gen_best_tree;
 
     // it params
     bool it_abs_err;
-
-    // interesting predicates options.
-    // XXX just like above, the ip argv parser should grab these...
-    double ip_kld_weight;
-    double ip_skewness_weight;
-    double ip_stdU_weight;
-    double ip_skew_U_weight;
-
-    // Table-related options
-    // XXX just like above, the table_base argv parser should grab these...
-    std::vector<std::string> input_data_files;
-    std::string target_feature;
-    std::string weighting_feature;
 
     /// Enable feature selection while selecting exemplar
     /// feature selection happens before each representation building

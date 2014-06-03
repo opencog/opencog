@@ -90,20 +90,25 @@ void option_manager::parse_options(int argc, char* argv[])
 // =================================================================
 // Register and find problems, by name, so that they can be run.
 
-std::map<std::string, problem_base*> problem_set;
-
-void register_problem(problem_base* prob)
+void problem_manager::register_problem(problem_base* prob)
 {
     std::pair<std::string, problem_base*> pr(prob->name(), prob);
-    problem_set.insert(pr);
+    _problem_set.insert(pr);
 }
 
-problem_base* find_problem(const std::string& name)
+problem_base* problem_manager::find_problem(const std::string& name)
 {
-    auto it = problem_set.find(name);
-    if (it != problem_set.end())
+    auto it = _problem_set.find(name);
+    if (it != _problem_set.end())
         return it->second;
     return NULL;
+}
+
+problem_manager::~problem_manager()
+{
+    foreach(auto pr, _problem_set) {
+        delete pr.second;
+    }
 }
 
 // =================================================================
