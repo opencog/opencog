@@ -530,5 +530,18 @@ TODO
    variables. (Basically this is a bug...)
 
  * GreaterThanLink is not yet done/working.  Its harder than I thought.
+
+ * Enhhancement: Add support for OrLink's in the pattern: viz: having
+   partly matched some fraction of the pattern, allow the OrLink to
+   specify several different sub-parts that are acceptable matches.
+   That is, the pattern has 'fixed' regions, and 'variable' regions,
+   or, 'required' regions and 'alternatively-required' regions.  It
+   seems like these should be nestable.
+
+ * Enhancement: allow user to bind a handle name to a subset of the
+   match. This would be handy to reduce the verbosity of writing down
+   the consequenct part (e.g. if we matched clauses a,b,c, then the
+   output could be just clause b only, and it would be nice to just say
+   'clause b' instead of spelling it out.)
    
  -------------------------- END OF FILE ------------------------
