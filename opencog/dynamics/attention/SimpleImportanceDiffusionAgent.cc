@@ -171,7 +171,29 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle atomSource)
  */
 HandleSeq SimpleImportanceDiffusionAgent::diffusionSourceVector()
 {
+    // Retrieve the atoms in the AttentionalFocus
+    HandleSeq resultSet;
+    as->getHandleSetInAttentionalFocus(back_inserter(resultSet));
     
+    // Remove the hebbian links
+    resultSet.erase(
+        std::remove_if(resultSet.begin(), resultSet.end(),
+                       [=](const Handle& h)
+                       { 
+                           Type type = as->getType(h);
+                           
+                           if (type == ASYMMETRIC_HEBBIAN_LINK ||
+                               type == HEBBIAN_LINK ||
+                               type == SYMMETRIC_HEBBIAN_LINK ||
+                               type == SYMMETRIC_HEBBIAN_LINK ||
+                               type == INVERSE_HEBBIAN_LINK ||
+                               type == SYMMETRIC_INVERSE_HEBBIAN_LINK)
+                           {
+                               return true;
+                           }
+                       }));
+    
+    return resultSet;
 }
 
 /*
