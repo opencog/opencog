@@ -110,7 +110,6 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	// Make sure that the pattern is connected
 	std::set<std::vector<Handle>> components;
 	pme.get_connected_components(vars, clauses, components);
-printf("duuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuude its %d\n", components.size());
 	if (1 != components.size())
 		throw InvalidParamException(TRACE_INFO,
 			"Pattern is not connected! Found %d components.", components.size());
@@ -179,7 +178,8 @@ class Instantiator
 
 	public:
 		AtomSpace *as;
-		Handle instantiate(Handle& expr, std::map<Handle, Handle> &vars);
+		Handle instantiate(Handle& expr, std::map<Handle, Handle> &vars)
+			throw (InvalidParamException);
 };
 
 Handle Instantiator::execution_link()
@@ -262,23 +262,24 @@ bool Instantiator::walk_tree(Handle expr)
  * added to the atomspace, and its handle is returned.
  */
 Handle Instantiator::instantiate(Handle& expr, std::map<Handle, Handle> &vars)
+	throw (InvalidParamException)
 {
+	// throw, not assert, because this is a user error ...
 	if (Handle::UNDEFINED == expr)
-	{
-		logger().warn("%s: Asked to ground a null expression", __FUNCTION__);
-		return Handle::UNDEFINED;
-	}
+		throw InvalidParamException(TRACE_INFO,
+			"Asked to ground a null expression");
+
 	vmap = &vars;
 	oset.clear();
 	did_exec = false;
 
 	walk_tree(expr);
 	if ((false == did_exec) && (oset.size() != 1))
-	{
-		logger().warn("%s: failure to ground expression (found %d groundings)\n"
+		throw InvalidParamException(TRACE_INFO,
+			"Failure to ground expression (found %d groundings)\n"
 			"Ungrounded expr is %s\n",
-			__FUNCTION__, oset.size(), expr->toShortString().c_str());
-	}
+			oset.size(), expr->toShortString().c_str());
+
 	if (oset.size() >= 1)
 		return oset[0];
 	return Handle::UNDEFINED;
@@ -694,7 +695,9 @@ Handle PatternMatch::do_bindlink (Handle hbindlink,
 			}
 			else if (TYPED_VARIABLE_LINK == t)
 			{
-				if (get_vartype(h, vset, typemap)) return Handle::UNDEFINED;
+				if (get_vartype(h, vset, typemap))
+					throw InvalidParamException(TRACE_INFO,
+						"Don't understand the TypedVariableLink");
 			}
 			else
 				throw InvalidParamException(TRACE_INFO,

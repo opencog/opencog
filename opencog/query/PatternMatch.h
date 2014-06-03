@@ -40,7 +40,7 @@ class PatternMatch
 		                std::set<Handle>&,
 		                VariableTypeMap&);
 
-		Handle do_match(PatternMatchCallback *,
+		void do_match(PatternMatchCallback *,
 		                std::set<Handle>& vars,
 		                std::vector<Handle>& clauses,
 		                std::vector<Handle>& negations)

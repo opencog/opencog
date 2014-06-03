@@ -117,10 +117,19 @@ void Disconnected::test_exec(void)
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindlink);
 
-	// Result should be a ListLink w/ one solution
-	Handle result = pm.bindlink(bindlink);
-	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
+	// We expect to catch an error here.
+	try
+	{
+		pm.bindlink(bindlink);
+	}
+	catch (const InvalidParamException& ex)
+	{
+		logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+	}
+	catch (...)
+	{
+		TSM_ASSERT("Unexpeted exception caught", false);
+	}
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
