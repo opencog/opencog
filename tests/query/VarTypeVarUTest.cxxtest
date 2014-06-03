@@ -1,0 +1,137 @@
+/*
+ * tests/query/VarTypeVarUTest.cxxtest
+ *
+ * Copyright (C) 2009,2014 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/PatternMatch.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class VarTypeVar :  public CxxTest::TestSuite
+{
+	private:
+		PatternMatch pm;
+		AtomSpace *as;
+		Handle vscope_good, vscope_bad;
+
+	public:
+
+		VarTypeVar(void)
+		{
+			try
+			{
+				config().load("opencog-test.conf");
+			}
+			catch (RuntimeException &e)
+			{
+				std::cerr << e.getMessage() << std::endl;
+			}
+			logger().setFilename(config()["LOG_FILE"]);
+			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+			// logger().setLevel(Logger::DEBUG);
+			// logger().setPrintToStdoutFlag(true);
+		}
+
+		~VarTypeVar()
+		{
+			// Erase the log file if no assertions failed.
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+		void tearDown(void);
+
+		void test_exec(void);
+};
+
+/*
+ * This function sets up an implication link, and some data.
+ */
+#define an as->addNode
+#define al as->addLink
+void VarTypeVar::setUp(void)
+{
+	server(CogServer::createInstance);
+	as = &cogserver().getAtomSpace();
+	pm.set_atomspace(as);
+
+	// Load the required data
+	config().set("MODULES",
+		"opencog/nlp/types/libnlp-types.so, "
+		"opencog/dynamics/attention/libattention-types.so, "
+		"opencog/embodiment/AtomSpaceExtensions/libembodiment-types.so");
+
+	config().set("SCM_PRELOAD",
+		"opencog/atomspace/core_types.scm, "
+		"opencog/nlp/types/nlp_types.scm, "
+		"opencog/spacetime/spacetime_types.scm, "
+		"opencog/dynamics/attention/attention_types.scm, "
+		"opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
+		"tests/query/var-type-not.scm");
+
+	cogserver().loadModules();
+	load_scm_files_from_config(*as);
+
+	// Create an implication link that will be tested.
+	SchemeEval* evaluator = new SchemeEval(as);
+	vscope_good = evaluator->apply("rule-good", Handle::UNDEFINED);
+	vscope_bad = evaluator->apply("rule-bad", Handle::UNDEFINED);
+	delete evaluator;
+}
+
+void VarTypeVar::tearDown(void)
+{
+}
+
+/*
+ * Basic implication link test.
+ */
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
+
+void VarTypeVar::test_exec(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_good);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_bad);
+
+	// Result should be a ListLink w/ zero solutions
+	Handle result_good = pm.crisp_logic_bindlink(vscope_good);
+	logger().debug("result-good is %s\n", SchemeSmob::to_string(result_good).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 0, getarity(result_good));
+
+	Handle result_bad = pm.crisp_logic_bindlink(vscope_bad);
+	logger().debug("result-bad is %s\n", SchemeSmob::to_string(result_bad).c_str());
+	TSM_ASSERT_EQUALS("expecting undefined value", Handle::UNDEFINED, result_bad);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
