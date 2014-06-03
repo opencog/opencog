@@ -129,6 +129,9 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle atomSource)
     // TODO: What if the STI values of the atoms change during these updates?
     // This could go wrong if there were simultaneous updates in other threads.
     
+    // TODO: Support inverse hebbian links
+    
+    // Find the target atoms that will be diffused to
     HandleSeq targetAtoms = 
             SimpleImportanceDiffusionAgent::incidentAtoms(atomSource);        
     
@@ -139,9 +142,12 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle atomSource)
                        hebbianAdjacentAtoms.begin(), 
                        hebbianAdjacentAtoms.end());
     
+    // Calculate the probability vector that determines how much to diffuse to
+    // each atom
     std::map<Handle, double> probabilityVector = 
             SimpleImportanceDiffusionAgent::probabilityVector(targetAtoms);
     
+    // Calculate the total amount that will be diffused
     AttentionValue::sti_t diffusionAmount = 
             SimpleImportanceDiffusionAgent::calculateDiffusionAmount(atomSource);
     
@@ -150,7 +156,7 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle atomSource)
         return;
     }
 
-    // For each atomTarget in incident atoms
+    // For each atomTarget in incident atoms, perform diffusion
     foreach (Handle atomTarget, targetAtoms)
     {       
         diffusionAmount = diffusionAmount * probabilityVector[atomTarget];   
@@ -230,8 +236,6 @@ HandleSeq SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(Handle h)
     HandleSeq resultSet = 
             as->getNeighbors(h, false, true, ASYMMETRIC_HEBBIAN_LINK, false);
     
-    // TODO: Support inverse hebbian links
-    
     return resultSet;
 }
 
@@ -240,6 +244,8 @@ HandleSeq SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(Handle h)
  * 
  * Calculated as the portion of the total STI that will be allocated to each
  * of the atoms
+ * 
+ * The specifics of the algorithm are a subject of current research
  */
 std::map<Handle, double> SimpleImportanceDiffusionAgent::probabilityVector(
         HandleSeq handles)
