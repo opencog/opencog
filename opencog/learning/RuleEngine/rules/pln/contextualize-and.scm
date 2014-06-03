@@ -11,7 +11,7 @@
 ;    R A B
 ;----------------------------------
 
-(define pln-rule-contextualize
+(define pln-rule-contextualize-and
     (BindLink
         (ListLink
             (VariableNode "$R")
@@ -44,7 +44,7 @@
 
 
 ; In an EvaluationLink, the PredicateNode is not 'andified'
-(define pln-rule-contextualize-evaluation
+(define pln-rule-contextualize-and-evaluation
     (BindLink
         (ListLink
             (TypedVariableLink
