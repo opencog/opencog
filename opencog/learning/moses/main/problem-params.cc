@@ -692,22 +692,6 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "and x >= threshold. The option can be used several times (n-1) "
          "to produce n classes and the thresholds are automatically sorted.\n")
 
-        (opt_desc_str(ip_kld_weight_opt).c_str(),
-         po::value<double>(&ip_kld_weight)->default_value(1.0),
-         "Interesting patterns (ip). Weight of the KLD.\n")
-
-        (opt_desc_str(ip_skewness_weight_opt).c_str(),
-         po::value<double>(&ip_skewness_weight)->default_value(1.0),
-         "Interesting patterns (ip). Weight of skewness.\n")
-
-        (opt_desc_str(ip_stdU_weight_opt).c_str(),
-         po::value<double>(&ip_stdU_weight)->default_value(1.0),
-         "Interesting patterns (ip). Weight of stdU.\n")
-
-        (opt_desc_str(ip_skew_U_weight_opt).c_str(),
-         po::value<double>(&ip_skew_U_weight)->default_value(1.0),
-         "Interesting patterns (ip). Weight of skew_U.\n")
-
         (opt_desc_str(alpha_opt).c_str(),
          po::value<score_t>(&hardness)->default_value(0.0),
          "If problems pre, prerec, recall, f_one or bep are specified, "

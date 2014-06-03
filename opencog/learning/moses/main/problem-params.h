@@ -153,13 +153,6 @@ struct problem_params : public option_base
     // it params
     bool it_abs_err;
 
-    // interesting predicates options.
-    // XXX FIXME, the just like above, the ip argv parser should grab these...
-    double ip_kld_weight;
-    double ip_skewness_weight;
-    double ip_stdU_weight;
-    double ip_skew_U_weight;
-
     // Table-related options
     // XXX just like above, the table_base argv parser should grab these...
     std::vector<std::string> input_data_files;

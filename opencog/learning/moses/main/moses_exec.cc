@@ -37,7 +37,7 @@ int moses_exec(int argc, char** argv)
     option_manager mgr;
 
     register_demo_problems(mgr);
-    register_table_problems();
+    register_table_problems(mgr);
 
     problem_params pms;
     mgr.register_options(&pms);

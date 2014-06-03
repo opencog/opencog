@@ -137,6 +137,31 @@ void table_problem_base::common_type_setup(problem_params& pms)
 
 // ==================================================================
 
+void ip_problem_params::add_options(boost::program_options::options_description& desc)
+{
+    namespace po = boost::program_options;
+
+    desc.add_options()
+
+        ("ip_kld_weight,K",
+         po::value<double>(&ip_kld_weight)->default_value(1.0),
+         "Interesting patterns (ip). Weight of the KLD.\n")
+
+        ("ip_skewness_weight,J",
+         po::value<double>(&ip_skewness_weight)->default_value(1.0),
+         "Interesting patterns (ip). Weight of skewness.\n")
+
+        ("ip_stdU_weight,U",
+         po::value<double>(&ip_stdU_weight)->default_value(1.0),
+         "Interesting patterns (ip). Weight of stdU.\n")
+
+        ("ip_skew_U_weight,X",
+         po::value<double>(&ip_skew_U_weight)->default_value(1.0),
+         "Interesting patterns (ip). Weight of skew_U.\n")
+
+    ;  // end of desc add options
+}
+
 void ip_problem::run(option_base* ob)
 {
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
@@ -162,10 +187,10 @@ void ip_problem::run(option_base* ob)
     BScorerSeq bscores;
     for (const CTable& ctable : ctables) {
         BScore *r = new BScore(ctable,
-                               pms.ip_kld_weight,
-                               pms.ip_skewness_weight,
-                               pms.ip_stdU_weight,
-                               pms.ip_skew_U_weight,
+                               _ippp.ip_kld_weight,
+                               _ippp.ip_skewness_weight,
+                               _ippp.ip_stdU_weight,
+                               _ippp.ip_skew_U_weight,
                                pms.min_rand_input,
                                pms.max_rand_input,
                                pms.hardness, pms.hardness >= 0);
@@ -497,9 +522,12 @@ void cluster_table_problem::run(option_base* ob)
 
 // ==================================================================
 
-void register_table_problems()
+void register_table_problems(option_manager& mgr)
 {
-	register_problem(new ip_problem());
+	ip_problem_params *ippp = new ip_problem_params();
+	mgr.register_options(ippp);
+
+	register_problem(new ip_problem(*ippp));
 	register_problem(new ann_table_problem());
 	register_problem(new pre_table_problem());
 	register_problem(new pre_conj_table_problem());

@@ -81,11 +81,6 @@ static const pair<string, string> complexity_ratio_opt("complexity-ratio", "z");
 static const pair<string, string> discretize_threshold_opt("discretize-threshold", "R");
 
 // options specific to a particular fitness function
-static const pair<string, string> ip_kld_weight_opt("ip_kld_weight", "K");
-static const pair<string, string> ip_skewness_weight_opt("ip_skewness_weight", "J");
-static const pair<string, string> ip_stdU_weight_opt("ip_stdU_weight", "U");
-static const pair<string, string> ip_skew_U_weight_opt("ip_skew_U_weight", "X");
-
 static const pair<string, string> alpha_opt("alpha", "Q");
 
 // options specific to a particular optimization algorithm

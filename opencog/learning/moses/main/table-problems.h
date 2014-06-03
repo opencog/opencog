@@ -31,7 +31,7 @@
 
 namespace opencog { namespace moses {
 
-void register_table_problems();
+void register_table_problems(option_manager&);
 
 class table_problem_base : public problem_base
 {
@@ -53,14 +53,27 @@ protected:
     type_node output_type;
 };
 
+/// interesting predicates options.
+struct ip_problem_params : public option_base
+{
+    void add_options(boost::program_options::options_description&);
+    double ip_kld_weight;
+    double ip_skewness_weight;
+    double ip_stdU_weight;
+    double ip_skew_U_weight;
+};
+
 /// Find interesting predicates
 class ip_problem : public table_problem_base
 {
     public:
+        ip_problem(ip_problem_params& ip) : _ippp(ip) {}
         virtual const std::string name() const { return "ip"; }
         virtual const std::string description() const {
              return "Find interesting patterns"; }
         virtual void run(option_base*);
+    protected:
+        ip_problem_params& _ippp;
 };
 
 /// Regression based on combo program using ann
