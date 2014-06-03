@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2010 OpenCog Foundation
  * Copyright (C) 2012, 2013 Poulin Holdings LLC
- * Copyright (C) 2013 Linas Vepstas
+ * Copyright (C) 2013, 2014 Linas Vepstas
  *
  * Author: Nil Geisweiller <ngeiswei@gmail.com>
  *         Linas Vepstas <linasvepstas@gmail.com>
@@ -24,14 +24,73 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <stdlib.h>
+
+#include <iostream>
+#include <map>
+#include <set>
+
+#include <opencog/util/Logger.h>
+#include <opencog/comboreduct/type_checker/type_tree.h>
+
 #include "problem.h"
 
 namespace opencog { namespace moses {
 
 // =================================================================
+// Register options
+
+void option_manager::register_options(option_base* ob)
+{
+    _option_set.insert(ob);
+}
+
+void option_manager::init_options()
+{
+    _desc.add_options()
+        ("help,h", "Produce help message.\n");
+
+    foreach(auto ob, _option_set) {
+        ob->add_options(_desc);
+    }
+}
+
+void option_manager::parse_options(int argc, char* argv[])
+{
+    namespace po = boost::program_options;
+    po::variables_map vm;
+    try {
+        po::store(po::parse_command_line(argc, argv, _desc), vm);
+    }
+    catch (po::error& e) {
+        OC_ASSERT(0, "Fatal error: invalid or duplicated argument:\n\t%s\n", e.what());
+    }
+    po::notify(vm);
+
+    if (vm.count("help") or argc == 1) {
+        std::cout << _desc << std::endl;
+        exit(1);
+    }
+
+    foreach(auto ob, _option_set) {
+        ob->parse_options(vm);
+    }
+
+    // Log command-line args. Do this after above, since one of the
+    // options might change the log file location. Perhaps we should
+    // move that (log-file location) code here?
+    std::string cmdline = "Command line:";
+    for (int i = 0; i < argc; ++i) {
+         cmdline += " ";
+         cmdline += argv[i];
+    }
+    logger().info(cmdline);
+}
+
+// =================================================================
 // Register and find problems, by name, so that they can be run.
 
-map<std::string, problem_base*> problem_set;
+std::map<std::string, problem_base*> problem_set;
 
 void register_problem(problem_base* prob)
 {
@@ -39,7 +98,7 @@ void register_problem(problem_base* prob)
     problem_set.insert(pr);
 }
 
-problem_base* find_problem(const string& name)
+problem_base* find_problem(const std::string& name)
 {
     auto it = problem_set.find(name);
     if (it != problem_set.end())
@@ -50,12 +109,14 @@ problem_base* find_problem(const string& name)
 // =================================================================
 // Common utility
 
-static void log_output_error_exit(string err_msg)
+static void log_output_error_exit(std::string err_msg)
 {
     logger().error() << "Error: " << err_msg;
-    cerr << "Error: " << err_msg << endl;
+    std::cerr << "Error: " << err_msg << std::endl;
     exit(1);    
 }
+
+using namespace combo;
 
 static bool contains_type(const type_tree_pre_it it, id::type_node ty)
 {
@@ -125,7 +186,7 @@ unsigned alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
         case id::unknown_type:
         case id::ill_formed_type:
         default:
-            stringstream ss;
+            std::stringstream ss;
             ss << "alphabet_size: type " << tt << " currently not supported.";
             log_output_error_exit(ss.str());
     }

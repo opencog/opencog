@@ -38,8 +38,6 @@ static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> input_data_file_opt("input-file", "i");
 static const pair<string, string> target_feature_opt("target-feature", "u");
 static const pair<string, string> problem_opt("problem", "H");
-static const pair<string, string> combo_str_opt("combo-program", "y");
-static const pair<string, string> problem_size_opt("problem-size", "k");
 static const pair<string, string> nsamples_opt("nsamples", "b");
 static const pair<string, string> min_rand_input_opt("min-rand-input", "q");
 static const pair<string, string> max_rand_input_opt("max-rand-input", "w");

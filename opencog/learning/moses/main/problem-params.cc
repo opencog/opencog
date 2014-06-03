@@ -123,7 +123,7 @@ static combo_tree str_to_combo_tree(const string& combo_str)
  */
 static void not_recognized_dst(const string& diversity_dst)
 {
-    stringstream ss;
+    std::stringstream ss;
     ss << diversity_dst << " is not recognized. Valid distances are "
        << p_norm << ", " << tanimoto << " and " << angular;
     log_output_error_exit(ss.str());
@@ -146,31 +146,23 @@ static void not_recognized_dst2dp(const string& diversity_dst2dp)
 problem_params::problem_params() :
     enable_mpi(false),
     default_nsamples(20),
-    output_python(false),
-    complexity_temperature(5.0),
-    complexity_ratio(3.5),
-    use_well_enough(false),
     fs_params(festor_params.fs_params),
-    max_filename_size(255),
-    desc("Allowed options")
+    max_filename_size(255)
 {
-    options_init();
 }
 
-
-void problem_params::options_init()
+void
+problem_params::add_options(boost::program_options::options_description& desc)
 {
     namespace po = boost::program_options;
     using boost::format;
+    using namespace std;
 
     // Declare the supported options.
     // XXX TODO: make this print correctly, instead of using brackets.
     desc.add_options()
 
         // General options
-        
-        ("help,h", "Produce help message.\n")
-
         ("version", "Display the version of moses.\n")
 
         (opt_desc_str(jobs_opt).c_str(),
@@ -587,22 +579,6 @@ void problem_params::options_init()
          po::value<string>(&output_file)->default_value(""),
          "File where to place the output. If empty, then output to stdout.\n")
 
-        // Demo options
-        
-        (opt_desc_str(combo_str_opt).c_str(),
-         po::value<string>(&combo_str),
-         str(format("Combo program to learn, used when the problem"
-                    " cp is selected (option -%s).\n")
-             % problem_opt.second).c_str())
-
-        (opt_desc_str(problem_size_opt).c_str(),
-         po::value<unsigned int>(&problem_size)->default_value(5),
-         "For even parity (pa), disjunction (dj) and majority (maj) "
-         "the problem size corresponds directly to the arity. "
-         "For multiplex (mux) the arity is arg+2^arg. "
-         "For regression of f(x)_o = sum_{i={1,o}} x^i (sr) "
-         "the problem size corresponds to the order o.\n")
-
         // The remaining options (TODO organize that)
         
         (opt_desc_str(min_rand_input_opt).c_str(),
@@ -993,26 +969,8 @@ void problem_params::options_init()
 
 }
 
-void problem_params::parse_options(int argc, char* argv[])
+void problem_params::parse_options(boost::program_options::variables_map& vm)
 {
-    namespace po = boost::program_options;
-    po::variables_map vm;
-    try {
-        po::store(po::parse_command_line(argc, argv, desc), vm);
-    }
-    catch (po::error& e) {
-        OC_ASSERT(0, "Fatal error: invalid or duplicated argument:\n\t%s\n", e.what());
-    }
-    po::notify(vm);
-
-    // set flags
-    log_file_dep_opt = vm.count(log_file_dep_opt_opt.first) > 0;
-
-    if (vm.count("help") || argc == 1) {
-        cout << desc << endl;
-        exit(1);
-    }
-
     if (vm.count("version")) {
         cout << "moses " << version_string << std::endl;
 #ifdef HAVE_MPI
@@ -1022,6 +980,9 @@ void problem_params::parse_options(int argc, char* argv[])
 #endif
         exit(0);
     }
+
+    // set flags
+    bool have_log_file_opt = vm.count(log_file_dep_opt_opt.first) > 0;
 
 #ifdef HAVE_MPI
     // Avoid MPI log file clobber mania
@@ -1035,8 +996,8 @@ void problem_params::parse_options(int argc, char* argv[])
 #endif
 
     // Set log file.
-    if (log_file_dep_opt) {
-        set<string> ignore_opt{log_file_dep_opt_opt.first};
+    if (have_log_file_opt) {
+        std::set<std::string> ignore_opt{log_file_dep_opt_opt.first};
         log_file = determine_log_name(default_log_file_prefix,
                                       vm, ignore_opt,
                                       string(".").append(default_log_file_suffix));
@@ -1060,15 +1021,8 @@ void problem_params::parse_options(int argc, char* argv[])
     auto prt_stack = [](int sig) { logger().error("Caught SIGHUP"); };
     signal(SIGHUP, prt_stack);
 
-    // Log command-line args
+    // Log some generic, important information.
     logger().info() << "moses version " << version_string;
-    string cmdline = "Command line:";
-    for (int i = 0; i < argc; ++i) {
-         cmdline += " ";
-         cmdline += argv[i];
-    }
-    logger().info(cmdline);
-
     char hname[256];
     gethostname(hname, 256);
     logger().info("hostname: %s", hname);

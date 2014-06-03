@@ -58,7 +58,7 @@ namespace opencog { namespace combo {
  */
 std::vector<unsigned> get_indices(const std::vector<std::string>& labels,
                                   const std::vector<std::string>& header);
-        
+
 ///////////////////
 // Generic table //
 ///////////////////
@@ -73,7 +73,8 @@ typedef std::vector<std::string> string_seq;
 
 // Push back to a multi_type_seq
 template<typename T /* type being pushed */>
-struct push_back_visitor : public boost::static_visitor<> {
+struct push_back_visitor : public boost::static_visitor<>
+{
     push_back_visitor(const T& value) : _value(value) {}
     void operator()(std::vector<T>& seq) const {
         seq.push_back(_value);
@@ -89,7 +90,9 @@ struct push_back_visitor : public boost::static_visitor<> {
     }
     const T& _value;
 };
-struct pop_back_visitor : public boost::static_visitor<> {
+
+struct pop_back_visitor : public boost::static_visitor<>
+{
     template<typename Seq> void operator()(Seq& seq) const {
         seq.pop_back();
     }
@@ -98,7 +101,8 @@ struct pop_back_visitor : public boost::static_visitor<> {
 /**
  * Replace the value of multi_type_seq at pos by its initial value
  */
-struct init_at_visitor : public boost::static_visitor<> {
+struct init_at_visitor : public boost::static_visitor<>
+{
     init_at_visitor(size_t pos) : _pos(pos) {}
     template<typename Seq>
     void operator()(Seq& seq) const {
@@ -107,8 +111,10 @@ struct init_at_visitor : public boost::static_visitor<> {
     }
     size_t _pos;
 };
-template<typename T> 
-struct get_at_visitor : public boost::static_visitor<T> {
+
+template<typename T>
+struct get_at_visitor : public boost::static_visitor<T>
+{
     get_at_visitor(size_t pos) : _pos(pos) {}
     T operator()(const std::vector<T>& seq) const {
         return seq[_pos];
@@ -125,8 +131,10 @@ struct get_at_visitor : public boost::static_visitor<T> {
     }
     size_t _pos;
 };
-template<> 
-struct get_at_visitor<vertex> : public boost::static_visitor<vertex> {
+
+template<>
+struct get_at_visitor<vertex> : public boost::static_visitor<vertex>
+{
     get_at_visitor(size_t pos) : _pos(pos) {}
     vertex operator()(const combo_tree_seq& seq) const {
         return *seq[_pos].begin();
@@ -136,23 +144,29 @@ struct get_at_visitor<vertex> : public boost::static_visitor<vertex> {
     }
     size_t _pos;
 };
-template<> 
-struct get_at_visitor<combo_tree> : public boost::static_visitor<combo_tree> {
+
+template<>
+struct get_at_visitor<combo_tree> : public boost::static_visitor<combo_tree>
+{
     get_at_visitor(size_t pos) : _pos(pos) {}
     template<typename Seq> combo_tree operator()(const Seq& seq) const {
         return seq[_pos];
     }
     size_t _pos;
 };
-struct erase_at_visitor : public boost::static_visitor<> {
+
+struct erase_at_visitor : public boost::static_visitor<>
+{
     erase_at_visitor(size_t pos) : _pos(pos) {}
     template<typename Seq> void operator()(Seq& seq) const {
         seq.erase(seq.begin() + _pos);
     }
     size_t _pos;
 };
+
 template<typename T>
-struct insert_at_visitor : public boost::static_visitor<> {
+struct insert_at_visitor : public boost::static_visitor<>
+{
     // if pos is negative then it inserts at the end
     insert_at_visitor(int pos, const T v) : _pos(pos), _v(v) {}
     void operator()(std::vector<T>& seq) const {
@@ -167,20 +181,26 @@ struct insert_at_visitor : public boost::static_visitor<> {
     int _pos;
     const T& _v;
 };
-struct size_visitor : public boost::static_visitor<size_t> {
+
+struct size_visitor : public boost::static_visitor<size_t>
+{
     template<typename Seq> size_t operator()(const Seq& seq) {
         return seq.size();
     }
 };
-struct empty_visitor : public boost::static_visitor<bool> {
+
+struct empty_visitor : public boost::static_visitor<bool>
+{
     template<typename Seq> bool operator()(const Seq& seq) {
         return seq.empty();
     }
 };
+
 /**
  * Allows to compare vertex_vec with vectors of different types.
  */
-struct equal_visitor : public boost::static_visitor<bool> {
+struct equal_visitor : public boost::static_visitor<bool>
+{
 #define __FALSE_EQ__(seql_t, seqr_t)                          \
     bool operator()(const seql_t& l, const seqr_t& r) const { \
         return false;                                         \
@@ -205,7 +225,7 @@ struct equal_visitor : public boost::static_visitor<bool> {
         return boost::equal(l, r);
     }
 };
-     
+
 // function specifically for output table
 std::string table_fmt_vertex_to_str(const vertex& v);
 std::string table_fmt_builtin_to_str(const builtin& b);
@@ -222,7 +242,7 @@ struct to_strings_visitor : public boost::static_visitor<string_seq>
     string_seq operator()(const builtin_seq& seq) {
         string_seq res;
         boost::transform(seq, back_inserter(res), table_fmt_builtin_to_str);
-        return res;        
+        return res;
     }
     template<typename Seq> string_seq operator()(const Seq& seq) {
         string_seq res;
@@ -236,11 +256,12 @@ struct to_strings_visitor : public boost::static_visitor<string_seq>
     }
 };
 
-struct get_type_tree_at_visitor : public boost::static_visitor<type_tree> {
+struct get_type_tree_at_visitor : public boost::static_visitor<type_tree>
+{
     get_type_tree_at_visitor(size_t pos) : _pos(pos) {}
     template<typename Seq> type_tree operator()(const Seq& seq) {
         return get_type_tree(seq[_pos]);
-    }    
+    }
     size_t _pos;
 };
 
@@ -259,7 +280,7 @@ struct interpreter_visitor : public boost::static_visitor<vertex>
     }
     vertex operator()(const std::vector<contin_t>& inputs) {
         // Can't use contin, since the output might be non-contin,
-        // e.g. a boolean, or an enum.  
+        // e.g. a boolean, or an enum.
         // return contin_interpreter(inputs)(_it);
         return mixed_interpreter(inputs)(_it);
     }
@@ -352,6 +373,8 @@ struct multi_type_seq : public boost::less_than_comparable<multi_type_seq>,
     const std::vector<T>& get_seq() const {
         return boost::get<std::vector<T>>(_variant);
     }
+
+protected:
     // I set it as mutable because the FUCKING boost::variant
     // apply_visitor doesn't allow to deal with const variants. For
     // the same reason I cannot define multi_type_seq as an inherited
@@ -533,6 +556,8 @@ protected:
  * Rows represent data samples.
  * Columns represent input variables.
  * Optionally holds a list of column labels (input variable names)
+ *
+ * Each entry in the vector is a row.
  */
 class ITable : public std::vector<multi_type_seq>
 {
@@ -574,8 +599,8 @@ public:
     type_node get_type(const std::string&) const;
 
     /**
-     * Insert a column 'col', named 'clab', after position 'off' If
-     * off is negative, then the insert is after the last column.
+     * Insert a column 'col', named 'clab', after position 'off'.
+     * If off is negative, then insert after the last column.
      *
      * TODO: we really should use iterators here, not column numbers.
      *
@@ -589,7 +614,7 @@ public:
     void insert_col(const std::string& clab,
                     const vertex_seq& col,
                     int off = -1);
-    
+
     /**
      * Delete the named feature from the input table.
      * If the feature is the empty string, then column zero is deleted.
@@ -738,7 +763,7 @@ struct Table
     // Return the types of the columns in the table.
     // The type is returned as a lambda(input col types) -> output col type.
     // This is computed on the fly each time, instead ov being
-    // stored with the object, so that RAM isn't wasted holding this 
+    // stored with the object, so that RAM isn't wasted holding this
     // infrequently-needed info.
     type_tree get_signature() const
     {
@@ -783,7 +808,7 @@ struct Table
 
     /// Return the corresponding compressed table.
     /// The named column, if not empty, will be used to provide weights
-    /// for each row, during compresion.
+    /// for each row, during compression.
     CTable compressed(const std::string = "") const;
 
     /// add raw features given an input file and a list of
@@ -825,7 +850,7 @@ double OTEntropy(const OTable& ot);
  *
  * The target (output) feature Y is provided in the output table OTable,
  * whereas the input features are specified as a set of indexes giving
- * columns in the input table ITable. That is, the columns X1..Xn are 
+ * columns in the input table ITable. That is, the columns X1..Xn are
  * specified by the feature set fs.
  *
  * The mutual information
@@ -857,7 +882,7 @@ double mutualInformation(const ITable& it, const OTable& ot, const FeatureSet& f
     // declare useful visitors
     seq_filtered_visitor<FeatureSet> sfv(fs);
     auto asf = boost::apply_visitor(sfv);
-    
+
     // Let X1, ..., Xn be the input columns on the table, and
     // Y be the output column.  We need to compute the joint entropies
     // H(Y, X1, ..., Xn) and H(X1, ..., Xn)
@@ -870,7 +895,7 @@ double mutualInformation(const ITable& it, const OTable& ot, const FeatureSet& f
         ioc; // for H(Y, X1, ..., Xn)
     ITable::const_iterator i_it = it.begin();
     OTable::const_iterator o_it = ot.begin();
-    
+
     for (; i_it != it.end(); ++i_it, ++o_it) {
         multi_type_seq ic_vec = asf(i_it->get_variant());
         ic[ic_vec] += 1.0;

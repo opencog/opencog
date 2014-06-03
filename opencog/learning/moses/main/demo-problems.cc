@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2010 OpenCog Foundation
  * Copyright (C) 2012 Poulin Holdings LLC
- * Copyright (C) 2013 Linas Vepstas
+ * Copyright (C) 2013, 2014 Linas Vepstas
  *
  * Author: Nil Geisweiller <ngeiswei@gmail.com>
  *         Linas Vepstas <linasvepstas@gmail.com>
@@ -25,12 +25,50 @@
  */
 
 #include <opencog/util/Logger.h>
+#include <opencog/learning/moses/main/problem-params.h>
+#include <opencog/learning/moses/moses/types.h>
+#include <opencog/learning/moses/scoring/bscores.h>
 #include <opencog/learning/moses/example-progs/scoring_iterators.h>
 
 #include "problem.h"
 #include "demo-problems.h"
 
 namespace opencog { namespace moses {
+
+struct demo_params : public option_base
+{
+    void add_options(boost::program_options::options_description&);
+
+    std::string combo_str;
+    unsigned int problem_size;
+};
+
+void demo_params::add_options(boost::program_options::options_description& desc)
+{
+    namespace po = boost::program_options;
+
+    desc.add_options()
+
+        ("combo-program,y",
+         po::value<std::string>(&combo_str),
+         "Combo program to learn, used when the problem cp is "
+         "selected (option -y).\n")
+
+        ("problem-size,k",
+         po::value<unsigned int>(&problem_size)->default_value(5),
+         "For even parity (pa), disjunction (dj) and majority (maj) "
+         "the problem size corresponds directly to the arity. "
+         "For multiplex (mux) the arity is arg+2^arg. "
+         "For regression of f(x)_o = sum_{i={1,o}} x^i (sr) "
+         "the problem size corresponds to the order o.\n")
+
+    ; // end of options
+}
+
+// Single, static, global, as otherwise boost:program_options crashes.
+static demo_params _dparms;
+
+// ==================================================================
 
 // set the complexity ratio.
 template <typename BScorer>
@@ -50,11 +88,13 @@ class bool_problem_base : public problem_base
     public:
         virtual combo::arity_t get_arity(int) = 0;
         virtual logical_bscore get_bscore(int) = 0;
-        virtual void run(problem_params&);
+        virtual void run(option_base*);
 };
 
-void bool_problem_base::run(problem_params& pms)
+void bool_problem_base::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
+
     if (pms.enable_feature_selection)
         logger().warn("Feature selection is not supported for the demo problems");
 
@@ -64,9 +104,9 @@ void bool_problem_base::run(problem_params& pms)
         pms.exemplars.push_back(type_to_exemplar(id::boolean_type));
     }
 
-    logical_bscore bscore = get_bscore(pms.problem_size);
+    logical_bscore bscore = get_bscore(_dparms.problem_size);
 
-    type_tree sig = gen_signature(id::boolean_type, get_arity(pms.problem_size));
+    type_tree sig = gen_signature(id::boolean_type, get_arity(_dparms.problem_size));
     unsigned as = alphabet_size(sig, pms.ignore_ops);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
@@ -190,11 +230,13 @@ class polynomial_problem : public problem_base
         virtual const std::string description() const {
              return "Simple regression of f_n(x) = sum_{k={1,n}} x^k"; }
         virtual combo::arity_t get_arity(int sz) { return 1; }
-        virtual void run(problem_params&);
+        virtual void run(option_base*);
 };
 
-void polynomial_problem::run(problem_params& pms)
+void polynomial_problem::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
+
     if (pms.enable_feature_selection)
         logger().warn("Feature selection is not supported for the polynomial problem");
 
@@ -217,7 +259,7 @@ void polynomial_problem::run(problem_params& pms)
     contin_bscore::err_function_type eft =
         pms.it_abs_err ? contin_bscore::abs_error :
         contin_bscore::squared_error;
-    contin_bscore bscore(simple_symbolic_regression(pms.problem_size),
+    contin_bscore bscore(simple_symbolic_regression(_dparms.problem_size),
                          it, eft);
 
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
@@ -254,14 +296,14 @@ void combo_problem_base::check_args(problem_params& pms)
     if (pms.enable_feature_selection)
         logger().warn("Feature selection is not supported for the combo demo.");
 
-    if (pms.combo_str.empty()) {
+    if (_dparms.combo_str.empty()) {
         logger().warn() << "You must specify a combo tree to learn (option -y).";
         std::cerr << "You must specify a combo tree to learn (option -y)." << std::endl;
         exit(-1);
     }
 
     // get the combo_tree and infer its type
-    combo_tree tr = str_to_combo_tree(pms.combo_str);
+    combo_tree tr = str_to_combo_tree(_dparms.combo_str);
     type_tree tt = infer_type_tree(tr);
     if (not is_well_formed(tt)) {
         logger().warn() << "The combo tree " << tr << " is not well formed.";
@@ -276,7 +318,7 @@ void combo_problem_base::check_args(problem_params& pms)
     // then the resulting combo program will be garbage.  Try to
     // sanity-check this, so as to avoid user frustration.
     // A symptom of this error is that the arity will be -1.
-    if (-1 == arity || NULL == strchr(pms.combo_str.c_str(), '$')) {
+    if (-1 == arity || NULL == strchr(_dparms.combo_str.c_str(), '$')) {
         cerr << "Error: the combo program " << tr << "\n"
              << "appears not to contain any arguments. Did you\n"
              << "forget to escape the $'s in the shell command line?"
@@ -306,15 +348,16 @@ class combo_problem : public combo_problem_base
         virtual const std::string name() const { return "cp"; }
         virtual const std::string description() const {
              return "Demo: Learn a given combo program"; }
-        virtual void run(problem_params&);
+        virtual void run(option_base*);
 };
 
-void combo_problem::run(problem_params& pms)
+void combo_problem::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
     check_args(pms);
 
     // get the combo_tree and infer its type
-    combo_tree tr = str_to_combo_tree(pms.combo_str);
+    combo_tree tr = str_to_combo_tree(_dparms.combo_str);
     type_tree tt = infer_type_tree(tr);
     type_node output_type = get_type_node(get_signature_output(tt));
     combo::arity_t arity = type_tree_arity(tt);
@@ -390,15 +433,16 @@ class ann_combo_problem : public combo_problem_base
         virtual const std::string name() const { return "ann-cp"; }
         virtual const std::string description() const {
              return "Demo: Learn a given combo program using ANN"; }
-        virtual void run(problem_params&);
+        virtual void run(option_base*);
 };
 
-void ann_combo_problem::run(problem_params& pms)
+void ann_combo_problem::run(option_base* ob)
 {
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
     check_args(pms);
 
     // get the combo_tree and infer its type
-    combo_tree tr = str_to_combo_tree(pms.combo_str);
+    combo_tree tr = str_to_combo_tree(_dparms.combo_str);
     type_tree tt = infer_type_tree(tr);
     // type_tree tt = gen_signature(id::ann_type, 0);
 
@@ -429,8 +473,10 @@ void ann_combo_problem::run(problem_params& pms)
 
 // ==================================================================
 
-void register_demo_problems()
+void register_demo_problems(option_manager& mgr)
 {
+	mgr.register_options(&_dparms);
+
 	register_problem(new pa_problem());
 	register_problem(new dj_problem());
 	register_problem(new majority_problem());
