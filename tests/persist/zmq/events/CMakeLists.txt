@@ -18,3 +18,7 @@ LINK_LIBRARIES(
 )
 
 ADD_CXXTEST(AtomSpacePublisherModuleUTest)
+
+TARGET_LINK_LIBRARIES(AtomSpacePublisherModuleUTest
+    atomspacepublishermodule
+)
