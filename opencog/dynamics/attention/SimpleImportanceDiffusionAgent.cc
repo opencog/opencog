@@ -47,21 +47,18 @@ SimpleImportanceDiffusionAgent::SimpleImportanceDiffusionAgent(CogServer& cs) :
         "ECAN_SPREAD_HEBBIAN_ONLY","false",
         "",""
     };
+    
     setParameters(defaultConfig);
     spreadDecider = NULL;
-
-    //! @todo won't respond to the parameters being changed later
-    //! (not a problem at present, but could get awkward with, for example,
-    //! automatic parameter adaptation)
-    maxSpreadPercentage = (float) (config().get_double("ECAN_MAX_SPREAD_PERCENTAGE"));
-
+    maxSpreadPercentage = 
+            (float) (config().get_double("ECAN_MAX_SPREAD_PERCENTAGE"));
     setSpreadDecider(STEP);
-
     spreadHebbianOnly = config().get_bool("ECAN_SPREAD_HEBBIAN_ONLY");
 
     // Provide a logger
     log = NULL;
-    setLogger(new opencog::Logger("SimpleImportanceDiffusionAgent.log", Logger::FINE, true));
+    setLogger(new opencog::Logger("SimpleImportanceDiffusionAgent.log", 
+                                  Logger::FINE, true));
 }
 
 void SimpleImportanceDiffusionAgent::setLogger(Logger* _log)
@@ -83,7 +80,8 @@ void SimpleImportanceDiffusionAgent::setSpreadDecider(int type, float shape)
     }
     switch (type) {
     case HYPERBOLIC:
-        spreadDecider = (SpreadDecider*) new HyperbolicDecider(_cogserver, shape);
+        spreadDecider = 
+                (SpreadDecider*) new HyperbolicDecider(_cogserver, shape);
         break;
     case STEP:
         spreadDecider = (SpreadDecider*) new StepDecider(_cogserver);
@@ -215,7 +213,8 @@ std::map<Handle, double> SimpleImportanceDiffusionAgent::probabilityVector(
  * 
  * Calculated as the maximum spread percentage multiplied by the atom's STI
  */
-AttentionValue::sti_t SimpleImportanceDiffusionAgent::calculateDiffusionAmount(Handle h)
+AttentionValue::sti_t SimpleImportanceDiffusionAgent::calculateDiffusionAmount(
+        Handle h)
 {
     
 }
