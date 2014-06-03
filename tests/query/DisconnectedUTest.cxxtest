@@ -118,6 +118,7 @@ void Disconnected::test_exec(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindlink);
 
 	// We expect to catch an error here.
+	bool caught = false;
 	try
 	{
 		pm.bindlink(bindlink);
@@ -125,11 +126,9 @@ void Disconnected::test_exec(void)
 	catch (const InvalidParamException& ex)
 	{
 		logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+		caught = true;
 	}
-	catch (...)
-	{
-		TSM_ASSERT("Unexpeted exception caught", false);
-	}
+	TSM_ASSERT("Failed to catch expected exception", caught);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

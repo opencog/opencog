@@ -129,9 +129,17 @@ void VarTypeNot::test_exec(void)
 	logger().debug("result-good is %s\n", SchemeSmob::to_string(result_good).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 0, getarity(result_good));
 
-	Handle result_bad = pm.crisp_logic_bindlink(vscope_bad);
-	logger().debug("result-bad is %s\n", SchemeSmob::to_string(result_bad).c_str());
-	TSM_ASSERT_EQUALS("expecting undefined value", Handle::UNDEFINED, result_bad);
+	bool caught = false;
+	try
+	{
+		pm.crisp_logic_bindlink(vscope_bad);
+   }
+   catch (const InvalidParamException& ex)
+   {
+      logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+		caught = true;
+   }
+   TSM_ASSERT("Failed to catch expected exception", caught);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
