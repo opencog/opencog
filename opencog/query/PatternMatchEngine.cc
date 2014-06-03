@@ -21,11 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PatternMatchEngine.h"
-
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/foreach.h>
 #include <opencog/atomspace/Foreach.h>
 #include <opencog/atomspace/ForeachTwo.h>
+
+#include "PatternMatchEngine.h"
+#include "PatternUtils.h"
 
 using namespace opencog;
 
@@ -487,7 +489,7 @@ bool PatternMatchEngine::pred_up(Handle h)
 {
 	// Is this link even a part of the predicate we are considering?
 	// If not, try the next atom.
-	bool valid = ot.is_node_in_tree(curr_root, h);
+	bool valid = is_node_in_tree(curr_root, h);
 	if (!valid) return false;
 
 	// Move up the solution outgoing set, looking for a match.
@@ -932,13 +934,18 @@ bool PatternMatchEngine::validate(
  * before the grounding of the virtual links is attempted.
  */
 void PatternMatchEngine::get_connected_components(
-                    const std::vector<Handle> &vars,
+                    const std::set<Handle> &vars,
                     const std::vector<Handle> &clauses,
                     std::set<std::vector<Handle>> &components)
 {
-
+	std::set<Handle> cur_vars;
+	std::vector<Handle> cur_component;
 	foreach(Handle cl, clauses)
 	{
+		// if (any_node_in_tree
+		FindVariables fv;
+		fv.find_vars(cl);
+// xxxxxxxxx
 	}
 
 }

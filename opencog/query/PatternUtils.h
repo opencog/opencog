@@ -32,7 +32,6 @@
 
 #include <opencog/util/foreach.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/Foreach.h>
 
 namespace opencog {
 
@@ -68,45 +67,38 @@ class FindVariables
 		}
 };
 
-
-class OutgoingTree
+/**
+ * Return true if any of the indicated node occurs somewhere in the
+ * tree spanned by the outgoing set.
+ */
+inline bool is_node_in_tree(const Handle& tree, const Handle& node)
 {
-	public:
-		/**
-		 * Return true if any of the indicated nodes occurs somewhere in 
-		 * the tree spanned by the outgoing set.
-		 */
-		inline bool any_node_in_tree(Handle& tree, std::vector<Handle>& nodes)
-		{
-			foreach(Handle n, nodes)
-			{
-				if (is_node_in_tree(tree, n)) return true;
-			}
-			return false;
-		}
+	if (tree == Handle::UNDEFINED) return false;
+	if (tree == node) return true;
+	LinkPtr ltree(LinkCast(tree));
+	if (NULL == ltree) return false;
 
-		/**
-		 * Return true if any of the indicated node occurs somewhere in the 
-		 * tree spanned by the outgoing set.
-		 */
-		inline bool is_node_in_tree(Handle& tree, Handle& node)
-		{
-			tgt = node;
-			return in_tree(tree);
-		}
+	// Recurse downwards...
+	const std::vector<Handle> &vh = ltree->getOutgoingSet();
+	size_t sz = vh.size();
+	for (size_t i = 0; i < sz; i++) {
+		if (is_node_in_tree(vh[i], node)) return true;
+	}
+	return false;
+}
 
-	private:
-		Handle tgt;
-		inline bool in_tree(Handle tree)
-		{
-			if (tree == Handle::UNDEFINED) return false;
-			if (tree == tgt) return true;
-			LinkPtr ltree(LinkCast(tree));
-			if (NULL == ltree) return false;
-			return opencog::foreach_outgoing_handle(ltree, &OutgoingTree::in_tree, this);
-		}
-};
-
+/**
+ * Return true if any of the indicated nodes occurs somewhere in
+ * the tree spanned by the outgoing set.
+ */
+inline bool any_node_in_tree(const Handle& tree, std::vector<Handle>& nodes)
+{
+	foreach(Handle n, nodes)
+	{
+		if (is_node_in_tree(tree, n)) return true;
+	}
+	return false;
+}
 
 } // namespace opencog
 

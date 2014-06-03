@@ -22,11 +22,14 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Foreach.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/execution/ExecutionLink.h>
+#include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 
 #include "PatternMatch.h"
+#include "PatternUtils.h"
 #include "DefaultPatternMatchCB.h"
 #include "CrispLogicPMCB.h"
 
@@ -104,7 +107,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	}
 
 	std::set<Handle> vars;
-	foreach(Handle v, lvarbles->getOutgoingSet()) vars.insert(v);
+	foreach (Handle v, lvarbles->getOutgoingSet()) vars.insert(v);
 
 	// negation clauses are optionally present
 	std::vector<Handle> negs;

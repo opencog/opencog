@@ -31,7 +31,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/PatternMatchCallback.h>
-#include <opencog/query/PatternUtils.h>
 
 namespace opencog {
 
@@ -70,7 +69,6 @@ class PatternMatchEngine
 		bool soln_up(Handle);
 		bool do_soln_up(Handle&);
 		bool clause_accepted;
-		OutgoingTree ot;
 		Handle curr_soln_handle;
 		Handle curr_pred_handle;
 		void get_next_untried_clause(void);
@@ -120,7 +118,7 @@ class PatternMatchEngine
 		bool validate(const std::set<Handle> &vars,
 		              Handle& clause);
 
-		void get_connected_components(const std::vector<Handle> &vars,
+		void get_connected_components(const std::set<Handle> &vars,
 		              const std::vector<Handle> &clauses,
 		              std::set<std::vector<Handle>> &components);
 
