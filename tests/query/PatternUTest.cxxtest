@@ -230,8 +230,8 @@ void PatternUTest::test_simple_link(void)
 	Handle hvar = as->addNode(VARIABLE_NODE, "variable node");
 	Handle he = as->addLink(INHERITANCE_LINK, hconst, hvar);
 
-	std::vector<Handle> vars;
-	vars.push_back(hvar);
+	std::set<Handle> vars;
+	vars.insert(hvar);
 
 	std::vector<Handle> preds;
 	preds.push_back(he);
@@ -286,9 +286,9 @@ void PatternUTest::test_two_links(void)
 
 	Handle hv = as->addLink(LIST_LINK, hx, hy);
 
-	std::vector<Handle> vars;
-	vars.push_back(hx);
-	vars.push_back(hy);
+	std::set<Handle> vars;
+	vars.insert(hx);
+	vars.insert(hy);
 
 	std::vector<Handle> preds;
 	preds.push_back(hlx);
@@ -349,9 +349,9 @@ void PatternUTest::test_eval(void)
 
 	heval = as->addLink(EVALUATION_LINK, hprn, hl);
 
-	std::vector<Handle> vars;
-	vars.push_back(hprn);
-	vars.push_back(h2);
+	std::set<Handle> vars;
+	vars.insert(hprn);
+	vars.insert(h2);
 
 	std::vector<Handle> preds;
 	preds.push_back(heval);
@@ -374,9 +374,9 @@ void PatternUTest::test_eval(void)
 
 	hshort_eval = as->addLink(EVALUATION_LINK, hprns, hls);
 
-	std::vector<Handle> svars;
-	svars.push_back(hprns);
-	svars.push_back(h2);
+	std::set<Handle> svars;
+	svars.insert(hprns);
+	svars.insert(h2);
 
 	std::vector<Handle> spreds;
 	spreds.push_back(hshort_eval);
@@ -394,7 +394,7 @@ void PatternUTest::test_eval(void)
 
 	// And do it again, now matching two clauses
 	preds.push_back(hshort_eval);
-	vars.push_back(hprns);
+	vars.insert(hprns);
 	pmcb.found = 0; // reset the counter !!
 	pme.match(&pmcb, vars, preds, snegs);
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
