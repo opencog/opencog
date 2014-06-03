@@ -10,6 +10,9 @@
         ; _subj(like, I)
         ; _amod(bass, eating)
         ; The output produced by RelEx2Logic should be:
+        ; (The below contains a nested use of "I" which might seem
+        ; convoluted, but all alternatives would require even more
+        ; complicated structure.)
         (EvaluationLink
             (PredicateNode "like")
             (ListLink
