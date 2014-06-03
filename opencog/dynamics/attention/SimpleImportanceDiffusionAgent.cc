@@ -204,7 +204,16 @@ HandleSeq SimpleImportanceDiffusionAgent::diffusionSourceVector()
  */
 HandleSeq SimpleImportanceDiffusionAgent::incidentAtoms(Handle h)
 {
+    HandleSeq resultSet;
     
+    // Add the incoming set
+    resultSet = as->getIncoming(h);
+    
+    // Calculate and append the outgoing set
+    HandleSeq outgoing = as->getOutgoing(h);
+    resultSet.insert(resultSet.end(), outgoing.begin(), outgoing.end());
+    
+    return resultSet;
 }
 
 /*
@@ -215,7 +224,7 @@ HandleSeq SimpleImportanceDiffusionAgent::incidentAtoms(Handle h)
  */
 HandleSeq SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(Handle h)
 {
-    
+    // Use FollowLink::follow_link?   
 }
 
 /*
