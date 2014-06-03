@@ -43,13 +43,14 @@
 namespace opencog { namespace moses {
 
 // XXX FIXME TODO The structure below should be split into multiple
-// parts, with each sub-part resposnisble for picking out the argv's
+// parts, with each sub-part responsible for picking out the argv's
 // that it cares about. Unfortunately, this requires getting rid of 
 // boost::program_options (because boost::program_options does not
 // allow modulariztion in this way; it forces all program options to
-// be treated in a global fashion.  I tried. It was a hell. See this
-// commit, and thee ones leading up to it:
-// dc77c2a8812b0be18d95fc8b916d16bb78a95b29
+// be specified in a single instance of options_description; if this
+// isn't done, then parse_command_line() blows up, and notify() blows
+// up. And then theres variables_map to hack around. So its badly
+// designed.  I tried to hack past the damage but its overwhelming.
 // Argh ...
 struct problem_params : public option_base
 {
@@ -153,7 +154,7 @@ struct problem_params : public option_base
     bool it_abs_err;
 
     // interesting predicates options.
-    // XXX just like above, the ip argv parser should grab these...
+    // XXX FIXME, the just like above, the ip argv parser should grab these...
     double ip_kld_weight;
     double ip_skewness_weight;
     double ip_stdU_weight;

@@ -65,9 +65,6 @@ void demo_params::add_options(boost::program_options::options_description& desc)
     ; // end of options
 }
 
-// Single, static, global, as otherwise boost:program_options crashes.
-static demo_params _dparms;
-
 // ==================================================================
 
 // set the complexity ratio.
@@ -86,9 +83,12 @@ void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio
 class bool_problem_base : public problem_base
 {
     public:
+        bool_problem_base(demo_params& dp) : _dparms(dp) {}
         virtual combo::arity_t get_arity(int) = 0;
         virtual logical_bscore get_bscore(int) = 0;
         virtual void run(option_base*);
+    protected:
+        demo_params& _dparms;
 };
 
 void bool_problem_base::run(option_base* ob)
@@ -125,6 +125,7 @@ void bool_problem_base::run(option_base* ob)
 class pa_problem : public bool_problem_base
 {
     public:
+        pa_problem(demo_params& dp) : bool_problem_base(dp) {}
         virtual const std::string name() const { return "pa"; }
         virtual const std::string description() const {
              return "Learn parity function demo"; }
@@ -145,6 +146,7 @@ class pa_problem : public bool_problem_base
 class dj_problem : public bool_problem_base
 {
     public:
+        dj_problem(demo_params& dp) : bool_problem_base(dp) {}
         virtual const std::string name() const { return "dj"; }
         virtual const std::string description() const {
              return "Learn logicical disjunction demo"; }
@@ -166,6 +168,7 @@ class dj_problem : public bool_problem_base
 class majority_problem : public bool_problem_base
 {
     public:
+        majority_problem(demo_params& dp) : bool_problem_base(dp) {}
         virtual const std::string name() const { return "maj"; }
         virtual const std::string description() const {
              return "Majority problem demo"; }
@@ -188,6 +191,7 @@ class majority_problem : public bool_problem_base
 class mux_problem : public bool_problem_base
 {
     public:
+        mux_problem(demo_params& dp) : bool_problem_base(dp) {}
         virtual const std::string name() const { return "mux"; }
         virtual const std::string description() const {
             return "Multiplex problem demo"; }
@@ -226,11 +230,14 @@ class mux_problem : public bool_problem_base
 class polynomial_problem : public problem_base
 {
     public:
+        polynomial_problem(demo_params& dp) : _dparms(dp) {}
         virtual const std::string name() const { return "sr"; }
         virtual const std::string description() const {
              return "Simple regression of f_n(x) = sum_{k={1,n}} x^k"; }
         virtual combo::arity_t get_arity(int sz) { return 1; }
         virtual void run(option_base*);
+    protected:
+        demo_params& _dparms;
 };
 
 void polynomial_problem::run(option_base* ob)
@@ -288,7 +295,10 @@ static combo_tree str_to_combo_tree(const string& combo_str)
 class combo_problem_base : public problem_base
 {
     public:
+        combo_problem_base(demo_params& dp) : _dparms(dp) {}
         void check_args(problem_params&);
+    protected:
+        demo_params& _dparms;
 };
 
 void combo_problem_base::check_args(problem_params& pms)
@@ -345,6 +355,7 @@ static contin_t largest_const_in_tree(const combo_tree &tr)
 class combo_problem : public combo_problem_base
 {
     public:
+        combo_problem(demo_params& dp) : combo_problem_base(dp) {}
         virtual const std::string name() const { return "cp"; }
         virtual const std::string description() const {
              return "Demo: Learn a given combo program"; }
@@ -430,6 +441,7 @@ void combo_problem::run(option_base* ob)
 class ann_combo_problem : public combo_problem_base
 {
     public:
+        ann_combo_problem(demo_params& dp) : combo_problem_base(dp) {}
         virtual const std::string name() const { return "ann-cp"; }
         virtual const std::string description() const {
              return "Demo: Learn a given combo program using ANN"; }
@@ -475,15 +487,16 @@ void ann_combo_problem::run(option_base* ob)
 
 void register_demo_problems(option_manager& mgr)
 {
-	mgr.register_options(&_dparms);
+	demo_params* dp = new demo_params();
+	mgr.register_options(dp);
 
-	register_problem(new pa_problem());
-	register_problem(new dj_problem());
-	register_problem(new majority_problem());
-	register_problem(new mux_problem());
-	register_problem(new polynomial_problem());
-	register_problem(new combo_problem());
-	register_problem(new ann_combo_problem());
+	register_problem(new pa_problem(*dp));
+	register_problem(new dj_problem(*dp));
+	register_problem(new majority_problem(*dp));
+	register_problem(new mux_problem(*dp));
+	register_problem(new polynomial_problem(*dp));
+	register_problem(new combo_problem(*dp));
+	register_problem(new ann_combo_problem(*dp));
 }
 
 } // ~namespace moses
