@@ -81,10 +81,48 @@ PatternMatch::PatternMatch(void)
  * It is not clear at this time how to benefit from Boolean SAT solver
  * technlogy (or at what point this would be needed).
  */
+void PatternMatch::do_match(PatternMatchCallback *cb,
+                            std::set<Handle>& vars,
+                            std::vector<Handle>& clauses,
+                            std::vector<Handle>& negations)
+
+	throw (InvalidParamException)
+{
+	// Make sure that the user did not pass in bogus clauses
+	// Make sure that every clause contains at least one variable.
+	// The presence of constant clauses will mess up the current
+	// pattern matcher.  Constant clauses are "trivial" to match,
+	// and so its pointless to even send them through the system.
+	bool bogus = pme.validate(vars, clauses);
+	if (bogus)
+	{
+		logger().warn("%s: Constant clauses removed from pattern matching",
+			__FUNCTION__);
+	}
+
+	bogus = pme.validate(vars, negations);
+	if (bogus)
+	{
+		logger().warn("%s: Constant clauses removed from pattern negation",
+			__FUNCTION__);
+	}
+
+	// Make sure that the pattern is connected
+	std::set<std::vector<Handle>> components;
+	pme.get_connected_components(vars, clauses, components);
+printf("duuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuude its %d\n", components.size());
+	if (1 != components.size())
+		throw InvalidParamException(TRACE_INFO,
+			"Pattern is not connected! Found %d components.", components.size());
+
+	pme.match(cb, vars, clauses, negations);
+}
+
 void PatternMatch::match(PatternMatchCallback *cb,
                          Handle hvarbles,
                          Handle hclauses,
                          Handle hnegates)
+	throw (InvalidParamException)
 {
 	// Both must be non-empty.
 	LinkPtr lclauses(LinkCast(hclauses));
@@ -95,52 +133,30 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	Type tvarbles = hvarbles->getType();
 	Type tclauses = hclauses->getType();
 	if (LIST_LINK != tvarbles)
-	{
-		logger().warn("%s: expected ListLink for bound variable list",
-			__FUNCTION__);
-		return;
-	}
-	if (AND_LINK != tclauses)
-	{
-		logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
-		return;
-	}
+		throw InvalidParamException(TRACE_INFO,
+			"Expected ListLink for bound variable list.");
 
-	std::set<Handle> vars;
-	foreach (Handle v, lvarbles->getOutgoingSet()) vars.insert(v);
+	if (AND_LINK != tclauses)
+		throw InvalidParamException(TRACE_INFO,
+			"Expected AndLink for clause list.");
 
 	// negation clauses are optionally present
 	std::vector<Handle> negs;
 	LinkPtr lnegates(LinkCast(hnegates));
 	if (lnegates)
 	{
-		Type tnegates = hnegates->getType();
-		if (AND_LINK != tnegates)
-		{
-			logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
-			return;
-		}
+		if (AND_LINK != lnegates->getType())
+			throw InvalidParamException(TRACE_INFO,
+				"Expected AndLink holding negated/otional clauses.");
 		negs = lnegates->getOutgoingSet();
-		bool bogus = pme.validate(vars, negs);
-		if (bogus)
-		{
-			logger().warn("%s: Constant clauses removed from pattern rejection",
-				__FUNCTION__);
-		}
 	}
 
-	// Make sure that the user did not pass in bogus clauses
+	std::set<Handle> vars;
+	foreach (Handle v, lvarbles->getOutgoingSet()) vars.insert(v);
+
 	std::vector<Handle> clauses(lclauses->getOutgoingSet());
 
-	bool bogus = pme.validate(vars, clauses);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern matching",
-			__FUNCTION__);
-	}
-
-	pme.match(cb, vars, clauses, negs);
-
+	do_match(cb, vars, clauses, negs);
 }
 
 /* ================================================================= */
@@ -404,32 +420,33 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 Handle PatternMatch::do_imply (Handle himplication,
                                PatternMatchCallback *pmc,
                                std::set<Handle>& varset)
+	throw (InvalidParamException)
 {
 	// Must be non-empty.
 	LinkPtr limplication(LinkCast(himplication));
-	if (NULL == limplication) return Handle::UNDEFINED;
+	if (NULL == limplication)
+		throw InvalidParamException(TRACE_INFO,
+			"Expected ImplicationLink");
 
 	// Type must be as expected
 	Type timpl = himplication->getType();
 	if (IMPLICATION_LINK != timpl)
-	{
-		logger().warn("%s: expected ImplicationLink", __FUNCTION__);
-		return Handle::UNDEFINED;
-	}
+		throw InvalidParamException(TRACE_INFO,
+			"Expected ImplicationLink");
 
 	const std::vector<Handle>& oset = limplication->getOutgoingSet();
 	if (2 != oset.size())
-	{
-		logger().warn("%s: ImplicationLink has wrong size", __FUNCTION__);
-		return Handle::UNDEFINED;
-	}
+		throw InvalidParamException(TRACE_INFO,
+			"ImplicationLink has wrong size: %d", oset.size());
 
 	Handle hclauses(oset[0]);
 	Handle implicand(oset[1]);
 
 	// Must be non-empty.
 	LinkPtr lclauses(LinkCast(hclauses));
-	if (NULL == lclauses) return Handle::UNDEFINED;
+	if (NULL == lclauses)
+		throw InvalidParamException(TRACE_INFO,
+			"Expected non-empty set of clauses in the ImplicationLink");
 
 	// The predicate is either an AndList, or a single clause
 	// If its an AndList, then its a list of clauses.
@@ -467,38 +484,20 @@ Handle PatternMatch::do_imply (Handle himplication,
 		affirm.push_back(hclauses);
 	}
 
-
 	// Extract the set of variables, if needed.
 	// This is used only by the deprecated imply() function, as the
 	// BindLink will include a list of variables up-front.
-	FindVariables fv;
 	if (0 == varset.size())
 	{
+		FindVariables fv;
 		fv.find_vars(hclauses);
 		varset = fv.varset;
-	}
-
-	// Make sure that every clause contains at least one variable.
-	// The presence of constant clauses will mess up the current
-	// pattern matcher.  Constant clauses are "trivial" to match,
-	// and so its pointless to even send them through the system.
-	bool bogus = pme.validate(varset, affirm);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern matching",
-			__FUNCTION__);
-	}
-	bogus = pme.validate(varset, negate);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern negation",
-			__FUNCTION__);
 	}
 
 	// Now perform the search.
 	Implicator *impl = dynamic_cast<Implicator *>(pmc);
 	impl->implicand = implicand;
-	pme.match(pmc, varset, affirm, negate);
+	do_match(pmc, varset, affirm, negate);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -635,27 +634,27 @@ int PatternMatch::get_vartype(Handle htypelink,
 
 Handle PatternMatch::do_bindlink (Handle hbindlink,
                                   PatternMatchCallback *pmc)
+	throw (InvalidParamException)
 {
 	// Must be non-empty.
 	LinkPtr lbl(LinkCast(hbindlink));
-	if (NULL == lbl) return Handle::UNDEFINED;
+	if (NULL == lbl)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a BindLink");
 
 	// Type must be as expected
 	Type tscope = hbindlink->getType();
 	if (BIND_LINK != tscope)
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
-		logger().warn("%s: expected BindLink, got %s",
-			 __FUNCTION__, tname.c_str());
-		return Handle::UNDEFINED;
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a BindLink, got %s", tname.c_str());
 	}
 
 	const std::vector<Handle>& oset = lbl->getOutgoingSet();
 	if (2 != oset.size())
-	{
-		logger().warn("%s: BindLink has wrong size", __FUNCTION__);
-		return Handle::UNDEFINED;
-	}
+		throw InvalidParamException(TRACE_INFO,
+			"BindLink has wrong size %d", oset.size());
 
 	Handle hdecls(oset[0]);  // VariableNode declarations
 	Handle himpl(oset[1]);   // ImplicationLink
@@ -675,7 +674,9 @@ Handle PatternMatch::do_bindlink (Handle hbindlink,
 	}
 	else if (TYPED_VARIABLE_LINK == tdecls)
 	{
-		if (get_vartype(hdecls, vset, typemap)) return Handle::UNDEFINED;
+		if (get_vartype(hdecls, vset, typemap))
+			throw InvalidParamException(TRACE_INFO,
+				"Cannot understand the typed variable definition");
 	}
 	else if (LIST_LINK == tdecls)
 	{
@@ -696,18 +697,14 @@ Handle PatternMatch::do_bindlink (Handle hbindlink,
 				if (get_vartype(h, vset, typemap)) return Handle::UNDEFINED;
 			}
 			else
-			{
-				logger().warn("%s: expected a VariableNode or a TypedVariableLink",
-				           __FUNCTION__);
-				return Handle::UNDEFINED;
-			}
+				throw InvalidParamException(TRACE_INFO,
+					"Expected a VariableNode or a TypedVariableLink");
 		}
 	}
   	else
 	{
-		logger().warn("%s: expected a ListLink holding variable declarations",
-		     __FUNCTION__);
-		return Handle::UNDEFINED;
+		throw InvalidParamException(TRACE_INFO,
+			"Expected a ListLink holding variable declarations");
 	}
 
 	pmc->set_type_restrictions(typemap);
