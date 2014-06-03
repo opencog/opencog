@@ -33,6 +33,7 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/algorithm.h>
+#include <opencog/atomspace/FollowLink.h>
 
 #define DEBUG
 namespace opencog
@@ -224,7 +225,14 @@ HandleSeq SimpleImportanceDiffusionAgent::incidentAtoms(Handle h)
  */
 HandleSeq SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(Handle h)
 {
-    // Use FollowLink::follow_link?   
+    // Chase the hebbian links originating at this atom and obtain the 
+    // adjacent atoms that are found by traversing those links
+    HandleSeq resultSet = 
+            as->getNeighbors(h, false, true, ASYMMETRIC_HEBBIAN_LINK, false);
+    
+    // TODO: Support inverse hebbian links
+    
+    return resultSet;
 }
 
 /*
