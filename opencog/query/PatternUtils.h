@@ -27,6 +27,7 @@
 #ifndef _OPENCOG_PATTERN_UTILS_H
 #define _OPENCOG_PATTERN_UTILS_H
 
+#include <opencog/util/foreach.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/Foreach.h>
 
@@ -57,6 +58,11 @@ class FindVariables
          LinkPtr l(LinkCast(h));
          return foreach_outgoing_handle(l, &FindVariables::find_vars, this);
       }
+
+      inline void find_vars(std::vector<Handle> hlist)
+      {
+			foreach(Handle h, hlist) find_vars(h);
+		}
 };
 
 
@@ -64,7 +70,20 @@ class OutgoingTree
 {
 	public:
 		/**
-		 * Return true if the indicated node occurs somewhere in the 
+		 * Return true if any of the indicated nodes occurs somewhere in 
+		 * the tree spanned by the outgoing set.
+		 */
+		inline bool any_node_in_tree(Handle& tree, std::vector<Handle>& nodes)
+		{
+			foreach(Handle n, nodes)
+			{
+				if (is_node_in_tree(tree, n)) return true;
+			}
+			return false;
+		}
+
+		/**
+		 * Return true if any of the indicated node occurs somewhere in the 
 		 * tree spanned by the outgoing set.
 		 */
 		inline bool is_node_in_tree(Handle& tree, Handle& node)
