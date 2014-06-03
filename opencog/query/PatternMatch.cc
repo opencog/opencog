@@ -140,42 +140,13 @@ void PatternMatch::match(PatternMatchCallback *cb,
 }
 
 /* ================================================================= */
-// Handy dandy utility class.
-//
-namespace opencog {
-class FindVariables
-{
-	public:
-		std::vector<Handle> varlist;
-
-		/**
-		 * Create a list of all of the VariableNodes that lie in the
-		 * outgoing set of the handle (recursively).
-		 */
-		inline bool find_vars(Handle h)
-		{
-			Type t = h->getType();
-			if (classserver().isNode(t))
-			{
-				if (t == VARIABLE_NODE)
-				{
-					varlist.push_back(h);
-				}
-				return false;
-			}
-
-			LinkPtr l(LinkCast(h));
-			return foreach_outgoing_handle(l, &FindVariables::find_vars, this);
-		}
-};
-
-/* ================================================================= */
 /**
  * class Instantiator -- create grounded expressions from ungrounded ones.
  * Given an ungrounded expression (i.e. an expression containing variables)
  * and a map between variables and ground terms, it will create a new
  * expression, with the ground terms substituted for the variables.
  */
+namespace opencog {
 class Instantiator
 {
 	private:

@@ -953,6 +953,9 @@ void PatternMatchEngine::get_connected_components(
                     const std::vector<Handle> &clauses,
                     std::set<std::vector<Handle>> &components)
 {
+	foreach(Handle cl, clauses)
+	{
+	}
 
 }
 

@@ -29,8 +29,8 @@
 #include <stack>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/OutgoingTree.h>
 #include <opencog/query/PatternMatchCallback.h>
+#include <opencog/query/PatternUtils.h>
 
 namespace opencog {
 

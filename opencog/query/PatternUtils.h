@@ -1,5 +1,5 @@
 /**
- * OutgoingTree.h
+ * PatternUtils.h
  *
  * Utilities for navigating a tree of outgoing edges.
  *
@@ -24,13 +24,41 @@
  * Created by Linas Vepstas February 2008
  */
 
-#ifndef _OPENCOG_OUTGOING_TREE_H
-#define _OPENCOG_OUTGOING_TREE_H
+#ifndef _OPENCOG_PATTERN_UTILS_H
+#define _OPENCOG_PATTERN_UTILS_H
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/Foreach.h>
 
 namespace opencog {
+
+///  Find all of the variable nodes occuring in a clause.
+class FindVariables
+{
+   public:
+      std::vector<Handle> varlist;
+
+      /**
+       * Create a list of all of the VariableNodes that lie in the
+       * outgoing set of the handle (recursively).
+       */
+      inline bool find_vars(Handle h)
+      {
+         Type t = h->getType();
+         if (classserver().isNode(t))
+         {
+            if (t == VARIABLE_NODE)
+            {
+               varlist.push_back(h);
+            }
+            return false;
+         }
+
+         LinkPtr l(LinkCast(h));
+         return foreach_outgoing_handle(l, &FindVariables::find_vars, this);
+      }
+};
+
 
 class OutgoingTree
 {
@@ -57,6 +85,7 @@ class OutgoingTree
 		}
 };
 
+
 } // namespace opencog
 
-#endif // _OPENCOG_OUTGOING_TREE_H
+#endif // _OPENCOG_PATTERN_UTILS_H
