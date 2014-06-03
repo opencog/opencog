@@ -1,6 +1,8 @@
 
 
-; Typed variables ... make sure the typing is respected.
+; The bindlink below has two disconnected parts. The pattern matcher
+; should throw an error for this situation, as it is an undesirable
+; kind of thing to have. 
 (define anaphora-resolution
    (BindLink
       (ListLink
@@ -36,7 +38,7 @@
 (define (get-bindlink) anaphora-resolution)
 
 
-; An unsed binlink, it provvides some confounding junk to confuse
+; An unused binlink, it provides some confounding junk to confuse
 ; the pattern matcher.
 (define pronoun-finder
    (BindLink
@@ -69,8 +71,13 @@
 )
 
 
+; Some pointless junk in the atomspace.  Not needed for this test case,
+; its just here wasting space.
+;
 ; Relex parse of sentence Tom ate it
 ; (S (NP Tom.m) (VP ate.v-d (NP it)))
+
+(define (stv mean conf) (cog-new-stv mean conf))
 
 (ReferenceLink (stv 1.0 1.0)
    (WordInstanceNode "LEFT-WALL@sentence@f73f6f0d-8822-4220-b6fa-7afa24ec3af8_parse_0")

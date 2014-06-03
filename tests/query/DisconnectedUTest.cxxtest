@@ -1,5 +1,5 @@
 /*
- * tests/query/VarTypeVarUTest.cxxtest
+ * tests/query/DisconnectedUTest.cxxtest
  *
  * Copyright (C) 2009,2014 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -31,7 +31,7 @@
 
 using namespace opencog;
 
-class VarTypeVar :  public CxxTest::TestSuite
+class Disconnected :  public CxxTest::TestSuite
 {
 	private:
 		PatternMatch pm;
@@ -40,7 +40,7 @@ class VarTypeVar :  public CxxTest::TestSuite
 
 	public:
 
-		VarTypeVar(void)
+		Disconnected(void)
 		{
 			try
 			{
@@ -58,7 +58,7 @@ class VarTypeVar :  public CxxTest::TestSuite
 			// logger().setPrintToStdoutFlag(true);
 		}
 
-		~VarTypeVar()
+		~Disconnected()
 		{
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -76,7 +76,7 @@ class VarTypeVar :  public CxxTest::TestSuite
  */
 #define an as->addNode
 #define al as->addLink
-void VarTypeVar::setUp(void)
+void Disconnected::setUp(void)
 {
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
@@ -89,7 +89,7 @@ void VarTypeVar::setUp(void)
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
 		"opencog/nlp/types/nlp_types.scm, "
-		"tests/query/var-type-var.scm");
+		"tests/query/disconnected.scm");
 
 	cogserver().loadModules();
 	load_scm_files_from_config(*as);
@@ -100,17 +100,17 @@ void VarTypeVar::setUp(void)
 	delete evaluator;
 }
 
-void VarTypeVar::tearDown(void)
+void Disconnected::tearDown(void)
 {
 }
 
 /*
- * Basic implication link test.
+ * Test bindlink consisting of two disconnected componentns
  */
 #define getlink(hand,pos) as->getOutgoing(hand,pos)
 #define getarity(hand) as->getArity(hand)
 
-void VarTypeVar::test_exec(void)
+void Disconnected::test_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -120,7 +120,7 @@ void VarTypeVar::test_exec(void)
 	// Result should be a ListLink w/ one solution
 	Handle result = pm.bindlink(bindlink);
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
