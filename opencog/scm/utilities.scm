@@ -307,7 +307,7 @@
 ;
 ; Starting at the atom 'anchor', chase its incoming links of
 ; 'link-type', and return a list of all of the atoms of type
-; 'node-type' in those links. For example, if 'anchor' is the
+; 'endpoint-type' in those links. For example, if 'anchor' is the
 ; node 'GivenNode "a"', and the atomspace contains
 ;
 ;    SomeLink
