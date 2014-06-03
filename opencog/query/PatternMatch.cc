@@ -114,6 +114,10 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 		throw InvalidParamException(TRACE_INFO,
 			"Pattern is not connected! Found %d components.", components.size());
 
+	// pme.get_connected_components places the clauses in
+	// connection-sorted order. Use that, it makes matching slightly
+	// faster.
+	clauses = *components.begin();
 	pme.match(cb, vars, clauses, negations);
 }
 

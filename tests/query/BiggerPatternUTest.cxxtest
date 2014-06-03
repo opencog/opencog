@@ -84,8 +84,9 @@ class BiggerPatternUTest :  public CxxTest::TestSuite
  *
  * The actual rule encoded below is
  *
- * # IF _subj(be,$var0)                   ; subject is now $var0
- *       ^ _obj(be,$var1)                 ; object is $var1
+ * # IF _subj($cop,$var0)                 ; subject is now $var0
+ *       ^ _obj($cop,$var1)               ; object is $var1
+ *       ^ %LemmaLink($cop,be)            ; copula verb must be 'be'
  *       ^ $prep($var0,$var2)             ; preposition
  *       ^ %LemmaLink($var0,$word0)       ; word of word instance.
  *       ^ $phrase($word0, $prep)         ; convert to phrase

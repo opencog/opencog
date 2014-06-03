@@ -932,6 +932,13 @@ bool PatternMatchEngine::validate(
  * the combinatorics).  If the pattern does contain "virtual" links,
  * then the largest connected component should be grounded first,
  * before the grounding of the virtual links is attempted.
+ *
+ * A side effect of the algorithm is that it sorts the clauses into
+ * connected order. That is, given the vector of connected clauses,
+ * each element in the vector is connected to some clause that came
+ * before.  This is handy, because users do not always specify clauses
+ * in such an order, and matching can be slightly speeded when they
+ * are pursued in order.
  */
 void PatternMatchEngine::get_connected_components(
                     const std::set<Handle> &vars,
@@ -941,45 +948,69 @@ void PatternMatchEngine::get_connected_components(
 	std::vector<std::vector<Handle>> components;
 	std::vector<std::set<Handle>> component_vars; // cache of vars in component
 
-	foreach (Handle cl, clauses)
+	std::vector<Handle> todo(clauses);
+
+	while (0 < todo.size())
 	{
-		bool extended = false;
+		// no_con_yet == clauses that failed to connect to any existing
+		// component.
+		std::vector<Handle> no_con_yet;
+		bool did_at_least_one = false;
 
-		// Which component might this possibly belong to??? Try them all.
-		size_t nc = components.size();
-		for (size_t i = 0; i<nc; i++)
+		foreach (Handle cl, todo)
 		{
-			std::set<Handle> cur_vars(component_vars[i]);
-			// If clause cl is connected to this component, then add it
-			// to this component.
-			if (any_node_in_tree(cl, cur_vars))
+			bool extended = false;
+
+			// Which component might this possibly belong to??? Try them all.
+			size_t nc = components.size();
+			for (size_t i = 0; i<nc; i++)
 			{
-				// Extend the component
-				std::vector<Handle> curr_component(components[i]);
-				curr_component.push_back(cl);
-				components[i] = curr_component;
+				std::set<Handle> cur_vars(component_vars[i]);
+				// If clause cl is connected to this component, then add it
+				// to this component.
+				if (any_node_in_tree(cl, cur_vars))
+				{
+					// Extend the component
+					std::vector<Handle> curr_component(components[i]);
+					curr_component.push_back(cl);
+					components[i] = curr_component;
 
-				// Add to the varset cache for that component.
-				FindVariables fv;
-				fv.find_vars(cl);
-				foreach (Handle v, fv.varset) cur_vars.insert(v);
-				component_vars[i] = cur_vars;
+					// Add to the varset cache for that component.
+					FindVariables fv;
+					fv.find_vars(cl);
+					foreach (Handle v, fv.varset) cur_vars.insert(v);
+					component_vars[i] = cur_vars;
 
-				extended = true;
-				break;
+					extended = true;
+					did_at_least_one = true;
+					break;
+				}
 			}
+
+			if (not extended)
+				no_con_yet.push_back(cl);
 		}
 
-		if (extended) continue;
+		if (did_at_least_one)
+		{
+			todo = no_con_yet;
+			continue; 
+		}
+
+		// Grab the first clause that failed to attach to something,
+		// and use it to start a new component.
+		Handle ncl = no_con_yet.back();
+		no_con_yet.pop_back();
+		todo = no_con_yet;
 
 		// If we are here, we found a disconnected clause.
 		// Start a new component
 		std::vector<Handle> new_component;
-		new_component.push_back(cl);
+		new_component.push_back(ncl);
 		components.push_back(new_component);
 
 		FindVariables fv;
-		fv.find_vars(cl);
+		fv.find_vars(ncl);
 		std::set<Handle> new_varcache(fv.varset);
 		component_vars.push_back(new_varcache);
 	}
@@ -991,8 +1022,8 @@ void PatternMatchEngine::get_connected_components(
 	}
 }
 
-
 /* ======================================================== */
+
 void PatternMatchEngine::print_solution(
 	const std::map<Handle, Handle> &vars,
 	const std::map<Handle, Handle> &clauses)
