@@ -31,11 +31,11 @@ ADD_CXXTEST(Boolean2NotUTest)
 
 # Its a *lot* easier to write scheme, than to write C++ code!
 IF (HAVE_GUILE)
+	ADD_CXXTEST(DisconnectedUTest)
 	ADD_CXXTEST(ImplicationUTest)
 	ADD_CXXTEST(ExecutionUTest)
 	ADD_CXXTEST(BuggyStackUTest)
 	ADD_CXXTEST(VarTypeNotUTest)
-	ADD_CXXTEST(VarTypeVarUTest)
 	ADD_CXXTEST(BuggyNotUTest)
 	ADD_CXXTEST(MatchLinkUTest)
 	ADD_CXXTEST(UnorderedUTest)
