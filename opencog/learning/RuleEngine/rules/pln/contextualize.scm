@@ -1,5 +1,6 @@
 ; =====================================================================
 ; ContextualizeRule
+; (http://wiki.opencog.org/w/ContextualizerRule)
 ; 
 ; a)
 ; R <TV>
@@ -19,13 +20,13 @@
             (VariableNode "$B")
             (VariableNode "$C"))
             (ImplicationLink
-                (VariableNode "$R")
+                (VariableNode "$R"
                     (AndLink
                         (VariableNode "$C")
                         (VariableNode "$A"))
                     (AndLink
                         (VariableNode "$C")
-                        (VariableNode "$B"))
+                        (VariableNode "$B")))
                 (ListLink
                     (ContextLink 
                         (VariableNode "$C")

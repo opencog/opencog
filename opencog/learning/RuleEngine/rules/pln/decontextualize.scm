@@ -1,5 +1,6 @@
 ; =====================================================================
 ; DecontextualizeRule
+; http://wiki.opencog.org/w/DecontextualizerRule
 ; 
 ; a)
 ; ContextLink <TV>
