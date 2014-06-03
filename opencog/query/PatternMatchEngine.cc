@@ -847,6 +847,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 #endif
 }
 
+/* ======================================================== */
 /**
  * Validate -- every clause must contain at least one variable.
  *
@@ -929,6 +930,34 @@ bool PatternMatchEngine::validate(
 	return false;
 }
 
+/* ======================================================== */
+/**
+ * Given an input set of clauses, partition this set into its
+ * connected components, returning that set. The connected
+ * components are added to the set "components".
+ *
+ * Two clauses are "connected" if they both contain a common
+ * variable. A connected componet is a set of clauses that are
+ * all connected.
+ *
+ * This method serves two different purposes.  First, if the
+ * pattern does not contain any "virtual" links, then the pattern
+ * matcher works correctly only if there is one single, connected
+ * component (this is by design, since we don't want to deal with
+ * the combinatorics).  If the pattern does contain "virtual" links,
+ * then the largest connected component should be grounded first,
+ * before the grounding of the virtual links is attempted.
+ */
+void PatternMatchEngine::get_connected_components(
+                    const std::vector<Handle> &vars,
+                    const std::vector<Handle> &clauses,
+                    std::set<std::vector<Handle>> &components)
+{
+
+}
+
+
+/* ======================================================== */
 void PatternMatchEngine::print_solution(
 	const std::map<Handle, Handle> &vars,
 	const std::map<Handle, Handle> &clauses)

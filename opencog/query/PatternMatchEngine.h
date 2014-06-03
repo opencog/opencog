@@ -25,9 +25,9 @@
 #define _OPENCOG_PATTERN_MATCH_ENGINE_H
 
 #include <map>
+#include <set>
 #include <stack>
 
-#include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/OutgoingTree.h>
 #include <opencog/query/PatternMatchCallback.h>
@@ -112,17 +112,24 @@ class PatternMatchEngine
 		// Examine each candidate for a match, in turn.
 		bool do_candidate(Handle&, Handle&, Handle&);
 
+		// Make sure that variables can be found in the clauses.
 		bool validate(const std::vector<Handle> &vars,
 		              std::vector<Handle> &clauses);
 
 		bool validate(const std::vector<Handle> &vars,
 		              Handle& clause);
 
+		void get_connected_components(const std::vector<Handle> &vars,
+		              const std::vector<Handle> &clauses,
+		              std::set<std::vector<Handle>> &components);
+
+		// Do the actual pattern search.
 		void match(PatternMatchCallback *,
 		           std::vector<Handle> &vars,
 		           std::vector<Handle> &clauses,
 		           std::vector<Handle> &negations);
 
+		// Handy-dandy utilities
 		void print_solution(const std::map<Handle, Handle> &vars,
 		                           const std::map<Handle, Handle> &clauses);
 

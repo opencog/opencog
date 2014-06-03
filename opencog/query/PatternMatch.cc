@@ -458,7 +458,10 @@ Handle PatternMatch::do_imply (Handle himplication,
 
 	// The predicate is either an AndList, or a single clause
 	// If its an AndList, then its a list of clauses.
-	// XXX Should an OrList be supported ??
+	// XXX FIXME Perhaps, someday, some sort of embedded OrList should
+	// be supported, allowing several different patterns to be matched
+	// in one go. But not today, this is complex and low priority. See
+	// the README for slighly more detail
 	std::vector<Handle> affirm, negate;
 	Type tclauses = hclauses->getType();
 	if (AND_LINK == tclauses)
@@ -501,8 +504,9 @@ Handle PatternMatch::do_imply (Handle himplication,
 	}
 
 	// Make sure that every clause contains at least one variable.
-	// (The presence of constant clauses will mess up the current
-	// pattern matcher.)
+	// The presence of constant clauses will mess up the current
+	// pattern matcher.  Constant clauses are "trivial" to match,
+	// and so its pointless to even send them through the system.
 	bool bogus = pme.validate(*varlist, affirm);
 	if (bogus)
 	{
