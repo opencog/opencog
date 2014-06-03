@@ -34,18 +34,15 @@ using namespace reduct;
 
 int moses_exec(int argc, char** argv)
 {
-    register_demo_problems();
+    option_manager mgr;
+
+    register_demo_problems(mgr);
     register_table_problems();
 
-    // single, static, as otherwise boost:program_options crashes.
-    static problem_params pms;
-    static bool is_init = false;
-    if (not is_init) {
-        register_options(&pms);
-        init_options();
-        is_init = true;
-    }
-    parse_options(argc, argv);
+    problem_params pms;
+    mgr.register_options(&pms);
+    mgr.init_options();
+    mgr.parse_options(argc, argv);
 
     problem_base* probm = find_problem(pms.problem);
     if (probm)

@@ -40,16 +40,12 @@ namespace opencog { namespace moses {
 // =================================================================
 // Register options
 
-std::set<option_base*> _option_set;
-
-void register_options(option_base* ob)
+void option_manager::register_options(option_base* ob)
 {
     _option_set.insert(ob);
 }
 
-boost::program_options::options_description _desc;
-
-void init_options()
+void option_manager::init_options()
 {
     _desc.add_options()
         ("help,h", "Produce help message.\n");
@@ -59,7 +55,7 @@ void init_options()
     }
 }
 
-void parse_options(int argc, char* argv[])
+void option_manager::parse_options(int argc, char* argv[])
 {
     namespace po = boost::program_options;
     po::variables_map vm;
@@ -89,7 +85,6 @@ void parse_options(int argc, char* argv[])
          cmdline += argv[i];
     }
     logger().info(cmdline);
-
 }
 
 // =================================================================

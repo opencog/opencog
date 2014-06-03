@@ -38,9 +38,16 @@ class option_base
         virtual void parse_options(boost::program_options::variables_map&) {};
 };
 
-void register_options(option_base*);
-void init_options();
-void parse_options(int argc, char* argv[]);
+class option_manager
+{
+	public:
+		void register_options(option_base*);
+		void init_options();
+		void parse_options(int argc, char* argv[]);
+	private:
+		std::set<option_base*> _option_set;
+		boost::program_options::options_description _desc;
+};
 
 class problem_base
 {

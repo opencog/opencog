@@ -473,9 +473,10 @@ void ann_combo_problem::run(option_base* ob)
 
 // ==================================================================
 
-void register_demo_problems()
+void register_demo_problems(option_manager& mgr)
 {
-	register_options(&_dparms);
+	mgr.register_options(&_dparms);
+
 	register_problem(new pa_problem());
 	register_problem(new dj_problem());
 	register_problem(new majority_problem());
