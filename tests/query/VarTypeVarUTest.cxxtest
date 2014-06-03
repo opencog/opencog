@@ -36,7 +36,7 @@ class VarTypeVar :  public CxxTest::TestSuite
 	private:
 		PatternMatch pm;
 		AtomSpace *as;
-		Handle vscope_good, vscope_bad;
+		Handle bindlink;
 
 	public:
 
@@ -84,25 +84,19 @@ void VarTypeVar::setUp(void)
 
 	// Load the required data
 	config().set("MODULES",
-		"opencog/nlp/types/libnlp-types.so, "
-		"opencog/dynamics/attention/libattention-types.so, "
-		"opencog/embodiment/AtomSpaceExtensions/libembodiment-types.so");
+		"opencog/nlp/types/libnlp-types.so");
 
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
 		"opencog/nlp/types/nlp_types.scm, "
-		"opencog/spacetime/spacetime_types.scm, "
-		"opencog/dynamics/attention/attention_types.scm, "
-		"opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
-		"tests/query/var-type-not.scm");
+		"tests/query/var-type-var.scm");
 
 	cogserver().loadModules();
 	load_scm_files_from_config(*as);
 
 	// Create an implication link that will be tested.
 	SchemeEval* evaluator = new SchemeEval(as);
-	vscope_good = evaluator->apply("rule-good", Handle::UNDEFINED);
-	vscope_bad = evaluator->apply("rule-bad", Handle::UNDEFINED);
+	bindlink = evaluator->apply("get-bindlink", Handle::UNDEFINED);
 	delete evaluator;
 }
 
@@ -121,17 +115,12 @@ void VarTypeVar::test_exec(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Make sure the scheme file actually loaded!
-	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_good);
-	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_bad);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindlink);
 
-	// Result should be a ListLink w/ zero solutions
-	Handle result_good = pm.crisp_logic_bindlink(vscope_good);
-	logger().debug("result-good is %s\n", SchemeSmob::to_string(result_good).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 0, getarity(result_good));
-
-	Handle result_bad = pm.crisp_logic_bindlink(vscope_bad);
-	logger().debug("result-bad is %s\n", SchemeSmob::to_string(result_bad).c_str());
-	TSM_ASSERT_EQUALS("expecting undefined value", Handle::UNDEFINED, result_bad);
+	// Result should be a ListLink w/ one solution
+	Handle result = pm.bindlink(bindlink);
+	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
