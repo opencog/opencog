@@ -1,4 +1,4 @@
-; ================================
+; =====================================================================
 ; ContextualizeRule
 ; 
 ; a)
@@ -9,7 +9,7 @@
 ; ContextLink <TV>
 ;    C
 ;    R A B
-;----------------------------------
+;----------------------------------------------------------------------
 
 (define pln-rule-contextualize-and
     (BindLink
@@ -77,7 +77,39 @@
                                     (VariableNode "$B")))
                             (VariableNode "$R")))))))
 
+;----------------------------------------------------------------------
+; b)
+; SubsetLink <TV>
+;    C
+;    A
+; |-
+; ContextLink <TV>
+;    C
+;    A
+;----------------------------------------------------------------------
+(define pln-rule-contextualize-subset
+    (BindLink
+        (ListLink
+            (VariableNode "$C")
+            (VariableNode "$A"))
+        (ImplicationLink
+            (SubsetLink
+                (VariableNode "$C")
+                (VariableNode "$A"))
+            (ListLink
+                (ContextLink
+                    (VariableNode "$C")
+                    (VariableNode "$A"))
+                (ExecutionLink
+                    (GroundedSchemaNode "scm:pln-formula-context")
+                    (ListLink
+                        (ContextLink
+                            (VariableNode "$C")
+                            (VariableNode "$A"))
+                        (SubsetLink
+                            (VariableNode "$C")
+                            (VariableNode "$A"))))))))
+
+
 (define (pln-formula-context Context Relation)
     (cog-set-tv! Context (cog-tv Relation)))
-
-
