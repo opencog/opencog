@@ -39,13 +39,14 @@ int moses_exec(int argc, char** argv)
     problem_params pms;
     mgr.register_options(&pms);
 
-    register_demo_problems(mgr);
-    register_table_problems(mgr);
+    problem_manager pmr;
+    register_demo_problems(pmr, mgr);
+    register_table_problems(pmr, mgr);
 
     mgr.init_options();
     mgr.parse_options(argc, argv);
 
-    problem_base* probm = find_problem(pms.problem);
+    problem_base* probm = pmr.find_problem(pms.problem);
     if (probm)
     {
         probm->run(&pms);

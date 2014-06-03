@@ -31,7 +31,7 @@
 
 namespace opencog { namespace moses {
 
-void register_table_problems(option_manager&);
+void register_table_problems(problem_manager&, option_manager&);
 
 struct table_problem_params : public option_base
 {

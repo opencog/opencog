@@ -560,23 +560,23 @@ void cluster_table_problem::run(option_base* ob)
 
 // ==================================================================
 
-void register_table_problems(option_manager& mgr)
+void register_table_problems(problem_manager& pmr, option_manager& mgr)
 {
 	table_problem_params *tpp = new table_problem_params();
 
 	ip_problem_params *ippp = new ip_problem_params();
 	mgr.register_options(ippp);
 
-	register_problem(new ip_problem(*tpp, *ippp));
-	register_problem(new ann_table_problem(*tpp));
-	register_problem(new pre_table_problem(*tpp));
-	register_problem(new pre_conj_table_problem(*tpp));
-	register_problem(new prerec_table_problem(*tpp));
-	register_problem(new recall_table_problem(*tpp));
-	register_problem(new bep_table_problem(*tpp));
-	register_problem(new f_one_table_problem(*tpp));
-	register_problem(new it_table_problem(*tpp));
-	register_problem(new cluster_table_problem(*tpp));
+	pmr.register_problem(new ip_problem(*tpp, *ippp));
+	pmr.register_problem(new ann_table_problem(*tpp));
+	pmr.register_problem(new pre_table_problem(*tpp));
+	pmr.register_problem(new pre_conj_table_problem(*tpp));
+	pmr.register_problem(new prerec_table_problem(*tpp));
+	pmr.register_problem(new recall_table_problem(*tpp));
+	pmr.register_problem(new bep_table_problem(*tpp));
+	pmr.register_problem(new f_one_table_problem(*tpp));
+	pmr.register_problem(new it_table_problem(*tpp));
+	pmr.register_problem(new cluster_table_problem(*tpp));
 }
 
 } // ~namespace moses

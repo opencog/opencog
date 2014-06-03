@@ -28,7 +28,7 @@
 
 namespace opencog { namespace moses {
 
-void register_demo_problems(option_manager&);
+void register_demo_problems(problem_manager&, option_manager&);
 
 } // ~namespace moses
 } // ~namespace opencog

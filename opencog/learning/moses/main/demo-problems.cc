@@ -485,18 +485,18 @@ void ann_combo_problem::run(option_base* ob)
 
 // ==================================================================
 
-void register_demo_problems(option_manager& mgr)
+void register_demo_problems(problem_manager& pmr, option_manager& mgr)
 {
 	demo_params* dp = new demo_params();
 	mgr.register_options(dp);
 
-	register_problem(new pa_problem(*dp));
-	register_problem(new dj_problem(*dp));
-	register_problem(new majority_problem(*dp));
-	register_problem(new mux_problem(*dp));
-	register_problem(new polynomial_problem(*dp));
-	register_problem(new combo_problem(*dp));
-	register_problem(new ann_combo_problem(*dp));
+	pmr.register_problem(new pa_problem(*dp));
+	pmr.register_problem(new dj_problem(*dp));
+	pmr.register_problem(new majority_problem(*dp));
+	pmr.register_problem(new mux_problem(*dp));
+	pmr.register_problem(new polynomial_problem(*dp));
+	pmr.register_problem(new combo_problem(*dp));
+	pmr.register_problem(new ann_combo_problem(*dp));
 }
 
 } // ~namespace moses
