@@ -175,7 +175,7 @@ bool DefaultPatternMatchCB::loop_candidate(Handle h)
  * "normal" case.
  */
 void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
-                         std::vector<Handle> &vars,
+                         std::set<Handle> &vars,
                          std::vector<Handle> &clauses,
                          std::vector<Handle> &negations)
 {

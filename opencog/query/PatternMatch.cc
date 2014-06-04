@@ -22,11 +22,14 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Foreach.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/execution/ExecutionLink.h>
+#include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 
 #include "PatternMatch.h"
+#include "PatternUtils.h"
 #include "DefaultPatternMatchCB.h"
 #include "CrispLogicPMCB.h"
 
@@ -78,10 +81,66 @@ PatternMatch::PatternMatch(void)
  * It is not clear at this time how to benefit from Boolean SAT solver
  * technlogy (or at what point this would be needed).
  */
+void PatternMatch::do_match(PatternMatchCallback *cb,
+                            std::set<Handle>& vars,
+                            std::vector<Handle>& clauses,
+                            std::vector<Handle>& negations)
+
+	throw (InvalidParamException)
+{
+	// Make sure that the user did not pass in bogus clauses
+	// Make sure that every clause contains at least one variable.
+	// The presence of constant clauses will mess up the current
+	// pattern matcher.  Constant clauses are "trivial" to match,
+	// and so its pointless to even send them through the system.
+	bool bogus = pme.validate(vars, clauses);
+	if (bogus)
+	{
+		logger().warn("%s: Constant clauses removed from pattern matching",
+			__FUNCTION__);
+	}
+
+	bogus = pme.validate(vars, negations);
+	if (bogus)
+	{
+		logger().warn("%s: Constant clauses removed from pattern negation",
+			__FUNCTION__);
+	}
+
+	// Make sure that the pattern is connected
+	std::set<std::vector<Handle>> components;
+	pme.get_connected_components(vars, clauses, components);
+	if (1 != components.size())
+	{
+		// Users are going to be stumped by this one, so print
+		// out a verbose, user-freindly debug message to help
+		// them out.
+		std::stringstream ss;
+		ss << "Pattern is not connected! Found "
+			<< components.size() << " components:\n";
+		int cnt = 0;
+		foreach (auto comp, components)
+		{
+			ss << "Connected component " << cnt
+				<< " consists of ----------------: \n";
+			foreach (Handle h, comp) ss << h->toString();
+			cnt++;
+		}
+		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
+	}
+
+	// pme.get_connected_components places the clauses in
+	// connection-sorted order. Use that, it makes matching slightly
+	// faster.
+	clauses = *components.begin();
+	pme.match(cb, vars, clauses, negations);
+}
+
 void PatternMatch::match(PatternMatchCallback *cb,
                          Handle hvarbles,
                          Handle hclauses,
                          Handle hnegates)
+	throw (InvalidParamException)
 {
 	// Both must be non-empty.
 	LinkPtr lclauses(LinkCast(hclauses));
@@ -92,82 +151,31 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	Type tvarbles = hvarbles->getType();
 	Type tclauses = hclauses->getType();
 	if (LIST_LINK != tvarbles)
-	{
-		logger().warn("%s: expected ListLink for bound variable list",
-			__FUNCTION__);
-		return;
-	}
-	if (AND_LINK != tclauses)
-	{
-		logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
-		return;
-	}
+		throw InvalidParamException(TRACE_INFO,
+			"Expected ListLink for bound variable list.");
 
-	std::vector<Handle> vars(lvarbles->getOutgoingSet());
+	if (AND_LINK != tclauses)
+		throw InvalidParamException(TRACE_INFO,
+			"Expected AndLink for clause list.");
 
 	// negation clauses are optionally present
 	std::vector<Handle> negs;
 	LinkPtr lnegates(LinkCast(hnegates));
 	if (lnegates)
 	{
-		Type tnegates = hnegates->getType();
-		if (AND_LINK != tnegates)
-		{
-			logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
-			return;
-		}
+		if (AND_LINK != lnegates->getType())
+			throw InvalidParamException(TRACE_INFO,
+				"Expected AndLink holding negated/otional clauses.");
 		negs = lnegates->getOutgoingSet();
-		bool bogus = pme.validate(vars, negs);
-		if (bogus)
-		{
-			logger().warn("%s: Constant clauses removed from pattern rejection",
-				__FUNCTION__);
-		}
 	}
 
-	// Make sure that the user did not pass in bogus clauses
+	std::set<Handle> vars;
+	foreach (Handle v, lvarbles->getOutgoingSet()) vars.insert(v);
+
 	std::vector<Handle> clauses(lclauses->getOutgoingSet());
 
-	bool bogus = pme.validate(vars, clauses);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern matching",
-			__FUNCTION__);
-	}
-
-	pme.match(cb, vars, clauses, negs);
-
+	do_match(cb, vars, clauses, negs);
 }
-
-/* ================================================================= */
-// Handy dandy utility class.
-//
-namespace opencog {
-class FindVariables
-{
-	public:
-		std::vector<Handle> varlist;
-
-		/**
-		 * Create a list of all of the VariableNodes that lie in the
-		 * outgoing set of the handle (recursively).
-		 */
-		inline bool find_vars(Handle h)
-		{
-			Type t = h->getType();
-			if (classserver().isNode(t))
-			{
-				if (t == VARIABLE_NODE)
-				{
-					varlist.push_back(h);
-				}
-				return false;
-			}
-
-			LinkPtr l(LinkCast(h));
-			return foreach_outgoing_handle(l, &FindVariables::find_vars, this);
-		}
-};
 
 /* ================================================================= */
 /**
@@ -176,6 +184,7 @@ class FindVariables
  * and a map between variables and ground terms, it will create a new
  * expression, with the ground terms substituted for the variables.
  */
+namespace opencog {
 class Instantiator
 {
 	private:
@@ -188,7 +197,8 @@ class Instantiator
 
 	public:
 		AtomSpace *as;
-		Handle instantiate(Handle& expr, std::map<Handle, Handle> &vars);
+		Handle instantiate(Handle& expr, std::map<Handle, Handle> &vars)
+			throw (InvalidParamException);
 };
 
 Handle Instantiator::execution_link()
@@ -271,23 +281,24 @@ bool Instantiator::walk_tree(Handle expr)
  * added to the atomspace, and its handle is returned.
  */
 Handle Instantiator::instantiate(Handle& expr, std::map<Handle, Handle> &vars)
+	throw (InvalidParamException)
 {
+	// throw, not assert, because this is a user error ...
 	if (Handle::UNDEFINED == expr)
-	{
-		logger().warn("%s: Asked to ground a null expression", __FUNCTION__);
-		return Handle::UNDEFINED;
-	}
+		throw InvalidParamException(TRACE_INFO,
+			"Asked to ground a null expression");
+
 	vmap = &vars;
 	oset.clear();
 	did_exec = false;
 
 	walk_tree(expr);
 	if ((false == did_exec) && (oset.size() != 1))
-	{
-		logger().warn("%s: failure to ground expression (found %d groundings)\n"
+		throw InvalidParamException(TRACE_INFO,
+			"Failure to ground expression (found %d groundings)\n"
 			"Ungrounded expr is %s\n",
-			__FUNCTION__, oset.size(), expr->toShortString().c_str());
-	}
+			oset.size(), expr->toShortString().c_str());
+
 	if (oset.size() >= 1)
 		return oset[0];
 	return Handle::UNDEFINED;
@@ -428,37 +439,41 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 
 Handle PatternMatch::do_imply (Handle himplication,
                                PatternMatchCallback *pmc,
-                               std::vector<Handle> *varlist)
+                               std::set<Handle>& varset)
+	throw (InvalidParamException)
 {
 	// Must be non-empty.
 	LinkPtr limplication(LinkCast(himplication));
-	if (NULL == limplication) return Handle::UNDEFINED;
+	if (NULL == limplication)
+		throw InvalidParamException(TRACE_INFO,
+			"Expected ImplicationLink");
 
 	// Type must be as expected
 	Type timpl = himplication->getType();
 	if (IMPLICATION_LINK != timpl)
-	{
-		logger().warn("%s: expected ImplicationLink", __FUNCTION__);
-		return Handle::UNDEFINED;
-	}
+		throw InvalidParamException(TRACE_INFO,
+			"Expected ImplicationLink");
 
 	const std::vector<Handle>& oset = limplication->getOutgoingSet();
 	if (2 != oset.size())
-	{
-		logger().warn("%s: ImplicationLink has wrong size", __FUNCTION__);
-		return Handle::UNDEFINED;
-	}
+		throw InvalidParamException(TRACE_INFO,
+			"ImplicationLink has wrong size: %d", oset.size());
 
 	Handle hclauses(oset[0]);
 	Handle implicand(oset[1]);
 
 	// Must be non-empty.
 	LinkPtr lclauses(LinkCast(hclauses));
-	if (NULL == lclauses) return Handle::UNDEFINED;
+	if (NULL == lclauses)
+		throw InvalidParamException(TRACE_INFO,
+			"Expected non-empty set of clauses in the ImplicationLink");
 
 	// The predicate is either an AndList, or a single clause
 	// If its an AndList, then its a list of clauses.
-	// XXX Should an OrList be supported ??
+	// XXX FIXME Perhaps, someday, some sort of embedded OrList should
+	// be supported, allowing several different patterns to be matched
+	// in one go. But not today, this is complex and low priority. See
+	// the README for slighly more detail
 	std::vector<Handle> affirm, negate;
 	Type tclauses = hclauses->getType();
 	if (AND_LINK == tclauses)
@@ -489,37 +504,20 @@ Handle PatternMatch::do_imply (Handle himplication,
 		affirm.push_back(hclauses);
 	}
 
-
-	// Extract a list of variables, if needed.
+	// Extract the set of variables, if needed.
 	// This is used only by the deprecated imply() function, as the
 	// BindLink will include a list of variables up-front.
-	FindVariables fv;
-	if (NULL == varlist)
+	if (0 == varset.size())
 	{
+		FindVariables fv;
 		fv.find_vars(hclauses);
-		varlist = &fv.varlist;
-	}
-
-	// Make sure that every clause contains at least one variable.
-	// (The presence of constant clauses will mess up the current
-	// pattern matcher.)
-	bool bogus = pme.validate(*varlist, affirm);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern matching",
-			__FUNCTION__);
-	}
-	bogus = pme.validate(*varlist, negate);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern negation",
-			__FUNCTION__);
+		varset = fv.varset;
 	}
 
 	// Now perform the search.
 	Implicator *impl = dynamic_cast<Implicator *>(pmc);
 	impl->implicand = implicand;
-	pme.match(pmc, *varlist, affirm, negate);
+	do_match(pmc, varset, affirm, negate);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -555,7 +553,7 @@ typedef std::pair<Handle, const std::set<Type> > ATPair;
  * via the map "typemap".
  */
 int PatternMatch::get_vartype(Handle htypelink,
-                              std::vector<Handle> &vset,
+                              std::set<Handle> &vset,
                               VariableTypeMap &typemap)
 {
 	const std::vector<Handle>& oset = LinkCast(htypelink)->getOutgoingSet();
@@ -586,7 +584,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 		std::set<Type> ts;
 		ts.insert(vt);
 		typemap.insert(ATPair(varname,ts));
-		vset.push_back(varname);
+		vset.insert(varname);
 	}
 	else if (LIST_LINK == t)
 	{
@@ -617,7 +615,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 		}
 
 		typemap.insert(ATPair(varname,ts));
-		vset.push_back(varname);
+		vset.insert(varname);
 	}
 	else
 	{
@@ -656,34 +654,34 @@ int PatternMatch::get_vartype(Handle htypelink,
 
 Handle PatternMatch::do_bindlink (Handle hbindlink,
                                   PatternMatchCallback *pmc)
+	throw (InvalidParamException)
 {
 	// Must be non-empty.
 	LinkPtr lbl(LinkCast(hbindlink));
-	if (NULL == lbl) return Handle::UNDEFINED;
+	if (NULL == lbl)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a BindLink");
 
 	// Type must be as expected
 	Type tscope = hbindlink->getType();
 	if (BIND_LINK != tscope)
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
-		logger().warn("%s: expected BindLink, got %s",
-			 __FUNCTION__, tname.c_str());
-		return Handle::UNDEFINED;
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a BindLink, got %s", tname.c_str());
 	}
 
 	const std::vector<Handle>& oset = lbl->getOutgoingSet();
 	if (2 != oset.size())
-	{
-		logger().warn("%s: BindLink has wrong size", __FUNCTION__);
-		return Handle::UNDEFINED;
-	}
+		throw InvalidParamException(TRACE_INFO,
+			"BindLink has wrong size %d", oset.size());
 
 	Handle hdecls(oset[0]);  // VariableNode declarations
 	Handle himpl(oset[1]);   // ImplicationLink
 
 	// vset is the vector of variables.
 	// typemap is the (possibly empty) list of restrictions on atom types.
-	std::vector<Handle> vset;
+	std::set<Handle> vset;
 	VariableTypeMap typemap;
 
 	// Expecting the declaration list to be either a single
@@ -692,11 +690,13 @@ Handle PatternMatch::do_bindlink (Handle hbindlink,
 	if ((VARIABLE_NODE == tdecls) or
 	    NodeCast(hdecls)) // allow *any* node as a variable
 	{
-		vset.push_back(hdecls);
+		vset.insert(hdecls);
 	}
 	else if (TYPED_VARIABLE_LINK == tdecls)
 	{
-		if (get_vartype(hdecls, vset, typemap)) return Handle::UNDEFINED;
+		if (get_vartype(hdecls, vset, typemap))
+			throw InvalidParamException(TRACE_INFO,
+				"Cannot understand the typed variable definition");
 	}
 	else if (LIST_LINK == tdecls)
 	{
@@ -710,30 +710,28 @@ Handle PatternMatch::do_bindlink (Handle hbindlink,
 			Type t = h->getType();
 			if (VARIABLE_NODE == t)
 			{
-				vset.push_back(h);
+				vset.insert(h);
 			}
 			else if (TYPED_VARIABLE_LINK == t)
 			{
-				if (get_vartype(h, vset, typemap)) return Handle::UNDEFINED;
+				if (get_vartype(h, vset, typemap))
+					throw InvalidParamException(TRACE_INFO,
+						"Don't understand the TypedVariableLink");
 			}
 			else
-			{
-				logger().warn("%s: expected a VariableNode or a TypedVariableLink",
-				           __FUNCTION__);
-				return Handle::UNDEFINED;
-			}
+				throw InvalidParamException(TRACE_INFO,
+					"Expected a VariableNode or a TypedVariableLink");
 		}
 	}
   	else
 	{
-		logger().warn("%s: expected a ListLink holding variable declarations",
-		     __FUNCTION__);
-		return Handle::UNDEFINED;
+		throw InvalidParamException(TRACE_INFO,
+			"Expected a ListLink holding variable declarations");
 	}
 
 	pmc->set_type_restrictions(typemap);
 
-	Handle gl = do_imply(himpl, pmc, &vset);
+	Handle gl = do_imply(himpl, pmc, vset);
 
 	return gl;
 }
@@ -895,7 +893,8 @@ Handle PatternMatch::imply (Handle himplication)
 	// Now perform the search.
 	DefaultImplicator impl;
 	impl.as = atom_space;
-	return do_imply(himplication, &impl, NULL);
+	std::set<Handle> varset;
+	return do_imply(himplication, &impl, varset);
 }
 
 /**
@@ -922,7 +921,8 @@ Handle PatternMatch::crisp_logic_imply (Handle himplication)
 	// Now perform the search.
 	CrispImplicator impl;
 	impl.as = atom_space;
-	return do_imply(himplication, &impl, NULL);
+	std::set<Handle> varset;
+	return do_imply(himplication, &impl, varset);
 }
 
 /* ===================== END OF FILE ===================== */

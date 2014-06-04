@@ -25,11 +25,11 @@
 #define _OPENCOG_PATTERN_MATCH_ENGINE_H
 
 #include <map>
+#include <set>
 #include <stack>
+#include <vector>
 
-#include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/OutgoingTree.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog {
@@ -50,9 +50,9 @@ class PatternMatchEngine
 
 		// -------------------------------------------
 		// predicate to be solved.
-		std::set<Handle> bound_vars;
-		std::vector<Handle> cnf_clauses;
-		std::set<Handle> optionals;
+		std::set<Handle> _bound_vars;
+		std::vector<Handle> _cnf_clauses;
+		std::set<Handle> _optionals;
 
 		// -------------------------------------------
 		// Traversal utilities
@@ -69,7 +69,6 @@ class PatternMatchEngine
 		bool soln_up(Handle);
 		bool do_soln_up(Handle&);
 		bool clause_accepted;
-		OutgoingTree ot;
 		Handle curr_soln_handle;
 		Handle curr_pred_handle;
 		void get_next_untried_clause(void);
@@ -112,21 +111,28 @@ class PatternMatchEngine
 		// Examine each candidate for a match, in turn.
 		bool do_candidate(Handle&, Handle&, Handle&);
 
-		bool validate(const std::vector<Handle> &vars,
+		// Make sure that variables can be found in the clauses.
+		bool validate(const std::set<Handle> &vars,
 		              std::vector<Handle> &clauses);
 
-		bool validate(const std::vector<Handle> &vars,
+		bool validate(const std::set<Handle> &vars,
 		              Handle& clause);
 
+		void get_connected_components(const std::set<Handle> &vars,
+		              const std::vector<Handle> &clauses,
+		              std::set<std::vector<Handle>> &components);
+
+		// Do the actual pattern search.
 		void match(PatternMatchCallback *,
-		           std::vector<Handle> &vars,
+		           std::set<Handle> &vars,
 		           std::vector<Handle> &clauses,
 		           std::vector<Handle> &negations);
 
+		// Handy-dandy utilities
 		void print_solution(const std::map<Handle, Handle> &vars,
 		                           const std::map<Handle, Handle> &clauses);
 
-		void print_predicate(const std::vector<Handle> &vars,
+		void print_predicate(const std::set<Handle> &vars,
 		                            const std::vector<Handle> &clauses);
 };
 

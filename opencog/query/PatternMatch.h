@@ -24,10 +24,8 @@
 #ifndef _OPENCOG_PATTERN_MATCH_H
 #define _OPENCOG_PATTERN_MATCH_H
 
-#include <map>
-#include <vector>
+#include <set>
 
-#include <opencog/atomspace/types.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 
@@ -39,10 +37,18 @@ class PatternMatch
 		AtomSpace *atom_space;
 		PatternMatchEngine pme;
 		int get_vartype(Handle,
-		                std::vector<Handle> &,
-		                VariableTypeMap &);
-		Handle do_imply(Handle, PatternMatchCallback *, std::vector<Handle> *);
-		Handle do_bindlink(Handle, PatternMatchCallback *);
+		                std::set<Handle>&,
+		                VariableTypeMap&);
+
+		void do_match(PatternMatchCallback *,
+		                std::set<Handle>& vars,
+		                std::vector<Handle>& clauses,
+		                std::vector<Handle>& negations)
+			throw (InvalidParamException);
+		Handle do_imply(Handle, PatternMatchCallback *, std::set<Handle>&)
+			throw (InvalidParamException);
+		Handle do_bindlink(Handle, PatternMatchCallback *)
+			throw (InvalidParamException);
 
 	public:
 		PatternMatch(void);
@@ -55,7 +61,8 @@ class PatternMatch
 		void match(PatternMatchCallback *,
 		           Handle vars,
 		           Handle clauses,
-		           Handle negations = Handle::UNDEFINED);
+		           Handle negations = Handle::UNDEFINED)
+			throw (InvalidParamException);
 
 		Handle bindlink(Handle);
 		Handle single_bindlink (Handle);

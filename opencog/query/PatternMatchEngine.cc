@@ -21,11 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PatternMatchEngine.h"
-
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/foreach.h>
 #include <opencog/atomspace/Foreach.h>
 #include <opencog/atomspace/ForeachTwo.h>
+
+#include "PatternMatchEngine.h"
+#include "PatternUtils.h"
 
 using namespace opencog;
 
@@ -113,11 +115,11 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 {
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (bound_vars.end() != bound_vars.find(hp))
+	if (_bound_vars.end() != _bound_vars.find(hp))
 	{
 		// But... if handle hg happens to also be a bound var,
 		// then its a mismatch.
-		if (bound_vars.end() != bound_vars.find(hg)) return true;
+		if (_bound_vars.end() != _bound_vars.find(hg)) return true;
 
 		// If we already have a grounding for this variable, the new
 		// proposed grounding must match the existing one. Such multiple
@@ -332,7 +334,7 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 		// Is this required to match? If so, then let the callback
 		// make the final decision; if callback rejects, then it's
 		// the same as a mismatch; try the next one.
-		if (optionals.count(curr_root))
+		if (_optionals.count(curr_root))
 		{
 			clause_accepted = true;
 			no_match = pmc->optional_clause_match(curr_pred_handle, hsoln);
@@ -374,7 +376,7 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 		else
 		{
 			prtmsg("next clause is", curr_root);
-			dbgprt("This clause is %s\n", optionals.count(curr_root)? "optional" : "required");
+			dbgprt("This clause is %s\n", _optionals.count(curr_root)? "optional" : "required");
 			prtmsg("joining handle is", curr_pred_handle);
 
 			// Else, start solving the next unsolved clause. Note: this is
@@ -403,7 +405,7 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 			// clauses that don't have matches.
 			while ((false == found) &&
 			       (false == clause_accepted) &&
-			       (optionals.count(curr_root)))
+			       (_optionals.count(curr_root)))
 			{
 				Handle undef(Handle::UNDEFINED);
 				no_match = pmc->optional_clause_match(curr_pred_handle, undef);
@@ -487,7 +489,7 @@ bool PatternMatchEngine::pred_up(Handle h)
 {
 	// Is this link even a part of the predicate we are considering?
 	// If not, try the next atom.
-	bool valid = ot.is_node_in_tree(curr_root, h);
+	bool valid = is_node_in_tree(curr_root, h);
 	if (!valid) return false;
 
 	// Move up the solution outgoing set, looking for a match.
@@ -548,7 +550,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 				solved = true;
 			}
 			else if ((issued.end() == issued.find(root)) &&
-			         (optionals.end() == optionals.find(root)))
+			         (_optionals.end() == _optionals.find(root)))
 			{
 				unsolved_clause = root;
 				unsolved = true;
@@ -702,9 +704,9 @@ bool PatternMatchEngine::note_root(Handle h)
 void PatternMatchEngine::clear(void)
 {
 	// Clear all state.
-	bound_vars.clear();
-	cnf_clauses.clear();
-	optionals.clear();
+	_bound_vars.clear();
+	_cnf_clauses.clear();
+	_optionals.clear();
 	var_grounding.clear();
 	clause_grounding.clear();
 	root_map.clear();
@@ -766,42 +768,31 @@ void PatternMatchEngine::clear(void)
  * if it determines that these are irrelevant to the search.
  */
 void PatternMatchEngine::match(PatternMatchCallback *cb,
-                         std::vector<Handle> &vars,
+                         std::set<Handle> &vars,
                          std::vector<Handle> &clauses,
                          std::vector<Handle> &negations)
 {
 	// Clear all state.
 	clear();
 
-	// Copy the variables from vector to set; this makes it easier to
-	// determine set membership.
-	std::vector<Handle>::const_iterator i = vars.begin();
-	std::vector<Handle>::const_iterator iend = vars.end();
-	for (; i != iend; i++)
-	{
-		bound_vars.insert(*i);
-	}
-
-	cnf_clauses = clauses;
+	_bound_vars = vars;
+	_cnf_clauses = clauses;
 
 	// Copy the negates into the clause list
 	// Copy the negates into a set.
-	iend = negations.end();
-	for (i = negations.begin(); i != iend; i++)
+	foreach (Handle h, negations)
 	{
-		cnf_clauses.push_back(*i);
-		optionals.insert(*i);
+		_cnf_clauses.push_back(h);
+		_optionals.insert(h);
 	}
 
-	if (cnf_clauses.size() == 0) return;
+	if (_cnf_clauses.size() == 0) return;
 
 	// Preparation prior to search.
 	// Create a table of the nodes that appear in the clauses, and
 	// a list of the clauses that each node participates in.
-	iend = cnf_clauses.end();
-	for (i = cnf_clauses.begin(); i != iend; i++)
+	foreach (Handle h, _cnf_clauses)
 	{
-		Handle h(*i);
 		curr_root = h;
 		note_root(h);
 	}
@@ -811,27 +802,23 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	// Print out the predicate ...
 	printf("\nPredicate consists of the following clauses:\n");
 	int cl = 0;
-	iend = cnf_clauses.end();
-	for (i = cnf_clauses.begin(); i != iend; i++)
+	foreach (Handle h, _cnf_clauses)
 	{
-		Handle h(*i);
 		printf("Clause %d: ", cl);
 		prt(h);
 		cl++;
 	}
 
 	// Print out the bound variables in the predicate.
-	std::set<Handle>::const_iterator j;
-	for (j=bound_vars.begin(); j != bound_vars.end(); j++)
+	foreach (Handle h, _bound_vars)
 	{
-		Handle h(*j);
 		if (NodeCast(h))
 		{
 			printf(" Bound var: "); prt(h);
 		}
 	}
 
-	if (0 == bound_vars.size())
+	if (0 == _bound_vars.size())
 	{
 		printf("There are no bound vars in this pattern\n");
 	}
@@ -847,6 +834,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 #endif
 }
 
+/* ======================================================== */
 /**
  * Validate -- every clause must contain at least one variable.
  *
@@ -864,14 +852,14 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
  * Returns true if the list of clauses was modified, else returns false.
  */
 bool PatternMatchEngine::validate(
-                         const std::vector<Handle> &vars,
+                         const std::set<Handle> &vars,
                          std::vector<Handle> &clauses)
 {
 	bool modified = false;
 
+	// Caustion: this loop modifies the clauses list!
 	std::vector<Handle>::iterator i;
-	for (i = clauses.begin();
-	     i != clauses.end();)
+	for (i = clauses.begin(); i != clauses.end(); )
 	{
 		Handle clause(*i);
 		if (validate (vars, clause))
@@ -895,18 +883,16 @@ bool PatternMatchEngine::validate(
  * the list of variables, then return true; else return false.
  */
 bool PatternMatchEngine::validate(
-                         const std::vector<Handle> &vars,
+                         const std::set<Handle> &vars,
                          Handle& clause)
 {
 	// If its a node, then it must be one of the vars.
 	Type clause_type = clause->getType();
 	if (classserver().isNode(clause_type))
 	{
-		std::vector<Handle>::const_iterator i = vars.begin();
-		std::vector<Handle>::const_iterator iend = vars.end();
-		for (; i != iend; i++)
+		foreach (Handle v, vars)
 		{
-			if (*i == clause) return true;
+			if (v == clause) return true;
 		}
 		return false;
 	}
@@ -928,6 +914,115 @@ bool PatternMatchEngine::validate(
 
 	return false;
 }
+
+/* ======================================================== */
+/**
+ * Given an input set of clauses, partition this set into its
+ * connected components, returning that set. The connected
+ * components are added to the set "components".
+ *
+ * Two clauses are "connected" if they both contain a common
+ * variable. A connected componet is a set of clauses that are
+ * all connected.
+ *
+ * This method serves two different purposes.  First, if the
+ * pattern does not contain any "virtual" links, then the pattern
+ * matcher works correctly only if there is one single, connected
+ * component (this is by design, since we don't want to deal with
+ * the combinatorics).  If the pattern does contain "virtual" links,
+ * then the largest connected component should be grounded first,
+ * before the grounding of the virtual links is attempted.
+ *
+ * A side effect of the algorithm is that it sorts the clauses into
+ * connected order. That is, given the vector of connected clauses,
+ * each element in the vector is connected to some clause that came
+ * before.  This is handy, because users do not always specify clauses
+ * in such an order, and matching can be slightly speeded when they
+ * are pursued in order.
+ */
+void PatternMatchEngine::get_connected_components(
+                    const std::set<Handle> &vars,
+                    const std::vector<Handle> &clauses,
+                    std::set<std::vector<Handle>> &compset)
+{
+	std::vector<std::vector<Handle>> components;
+	std::vector<std::set<Handle>> component_vars; // cache of vars in component
+
+	std::vector<Handle> todo(clauses);
+
+	while (0 < todo.size())
+	{
+		// no_con_yet == clauses that failed to connect to any existing
+		// component.
+		std::vector<Handle> no_con_yet;
+		bool did_at_least_one = false;
+
+		foreach (Handle cl, todo)
+		{
+			bool extended = false;
+
+			// Which component might this possibly belong to??? Try them all.
+			size_t nc = components.size();
+			for (size_t i = 0; i<nc; i++)
+			{
+				std::set<Handle> cur_vars(component_vars[i]);
+				// If clause cl is connected to this component, then add it
+				// to this component.
+				if (any_node_in_tree(cl, cur_vars))
+				{
+					// Extend the component
+					std::vector<Handle> curr_component(components[i]);
+					curr_component.push_back(cl);
+					components[i] = curr_component;
+
+					// Add to the varset cache for that component.
+					FindVariables fv;
+					fv.find_vars(cl);
+					foreach (Handle v, fv.varset) cur_vars.insert(v);
+					component_vars[i] = cur_vars;
+
+					extended = true;
+					did_at_least_one = true;
+					break;
+				}
+			}
+
+			if (not extended)
+				no_con_yet.push_back(cl);
+		}
+
+		if (did_at_least_one)
+		{
+			todo = no_con_yet;
+			continue; 
+		}
+
+		// Grab the first clause that failed to attach to something,
+		// and use it to start a new component.
+		Handle ncl = no_con_yet.back();
+		no_con_yet.pop_back();
+		todo = no_con_yet;
+
+		// If we are here, we found a disconnected clause.
+		// Start a new component
+		std::vector<Handle> new_component;
+		new_component.push_back(ncl);
+		components.push_back(new_component);
+
+		FindVariables fv;
+		fv.find_vars(ncl);
+		std::set<Handle> new_varcache(fv.varset);
+		component_vars.push_back(new_varcache);
+	}
+
+	// We are done. Copy the components over.
+	foreach (auto comp, components)
+	{
+		compset.insert(comp);
+	}
+}
+
+/* ======================================================== */
 
 void PatternMatchEngine::print_solution(
 	const std::map<Handle, Handle> &vars,
@@ -998,22 +1093,14 @@ void PatternMatchEngine::print_solution(
  * For debug printing only
  */
 void PatternMatchEngine::print_predicate(
-                  const std::vector<Handle> &vars,
+                  const std::set<Handle> &vars,
                   const std::vector<Handle> &clauses)
 {
 	printf("\nClauses:\n");
-	std::vector<Handle>::const_iterator i;
-	for (i = clauses.begin(); i != clauses.end(); i++)
-	{
-		Handle h(*i);
-		prt(h);
-	}
+	foreach (Handle h, clauses) prt(h);
+
 	printf("\nVars:\n");
-	for (i = vars.begin(); i != vars.end(); i++)
-	{
-		Handle h(*i);
-		prt(h);
-	}
+	foreach (Handle h, vars) prt(h);
 }
 
 /* ===================== END OF FILE ===================== */

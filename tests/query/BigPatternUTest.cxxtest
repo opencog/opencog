@@ -61,8 +61,8 @@ class BigPatternUTest :  public CxxTest::TestSuite
  *
  * ; Sentence: "Pottery is made from clay."
  * ; var0=make  var1=pottery var2=clay  prep=from
- * # IF _obj(make, $var1)
- *     ^ $prep(make,$var2)              ; preposition
+ * # IF _obj($verb, $var1)
+ *     ^ $prep($verb, $var2)              ; preposition
  *     THEN ^3_make_from($var2, $var1)
  * 
  * This pattern should accept this input: 
@@ -91,14 +91,14 @@ void BigPatternUTest::setUp(void)
 			al(EVALUATION_LINK,
 				an(PREDICATE_NODE, "_obj"),
 				al(LIST_LINK,
-					an(CONCEPT_NODE, "make"),
+					an(VARIABLE_NODE, "$verb"),
 					an(VARIABLE_NODE, "$var1")
 				)
 			),
 			al(EVALUATION_LINK,
 				an(PREDICATE_NODE, "from"),
 				al(LIST_LINK,
-					an(CONCEPT_NODE, "make"),
+					an(VARIABLE_NODE, "$verb"),
 					an(VARIABLE_NODE, "$var2")
 				)
 			)

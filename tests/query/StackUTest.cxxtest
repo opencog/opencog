@@ -159,9 +159,9 @@ void StackUTest::test_stack(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	std::vector<Handle> vars;
-	vars.push_back(svar);
-	vars.push_back(wvar);
+	std::set<Handle> vars;
+	vars.insert(svar);
+	vars.insert(wvar);
 
 	std::vector<Handle> preds;
 	preds.push_back(p1);

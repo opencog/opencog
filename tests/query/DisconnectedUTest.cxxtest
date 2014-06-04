@@ -1,7 +1,7 @@
 /*
- * tests/query/VarTypeNotUTest.cxxtest
+ * tests/query/DisconnectedUTest.cxxtest
  *
- * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009,2014 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,16 +31,16 @@
 
 using namespace opencog;
 
-class VarTypeNot :  public CxxTest::TestSuite
+class Disconnected :  public CxxTest::TestSuite
 {
 	private:
 		PatternMatch pm;
 		AtomSpace *as;
-		Handle vscope_good, vscope_bad;
+		Handle bindlink;
 
 	public:
 
-		VarTypeNot(void)
+		Disconnected(void)
 		{
 			try
 			{
@@ -58,7 +58,7 @@ class VarTypeNot :  public CxxTest::TestSuite
 			// logger().setPrintToStdoutFlag(true);
 		}
 
-		~VarTypeNot()
+		~Disconnected()
 		{
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -76,7 +76,7 @@ class VarTypeNot :  public CxxTest::TestSuite
  */
 #define an as->addNode
 #define al as->addLink
-void VarTypeNot::setUp(void)
+void Disconnected::setUp(void)
 {
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
@@ -84,62 +84,51 @@ void VarTypeNot::setUp(void)
 
 	// Load the required data
 	config().set("MODULES",
-		"opencog/nlp/types/libnlp-types.so, "
-		"opencog/dynamics/attention/libattention-types.so, "
-		"opencog/embodiment/AtomSpaceExtensions/libembodiment-types.so");
+		"opencog/nlp/types/libnlp-types.so");
 
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
 		"opencog/nlp/types/nlp_types.scm, "
-		"opencog/spacetime/spacetime_types.scm, "
-		"opencog/dynamics/attention/attention_types.scm, "
-		"opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
-		"tests/query/var-type-not.scm");
+		"tests/query/disconnected.scm");
 
 	cogserver().loadModules();
 	load_scm_files_from_config(*as);
 
 	// Create an implication link that will be tested.
 	SchemeEval* evaluator = new SchemeEval(as);
-	vscope_good = evaluator->apply("rule-good", Handle::UNDEFINED);
-	vscope_bad = evaluator->apply("rule-bad", Handle::UNDEFINED);
+	bindlink = evaluator->apply("get-bindlink", Handle::UNDEFINED);
 	delete evaluator;
 }
 
-void VarTypeNot::tearDown(void)
+void Disconnected::tearDown(void)
 {
 }
 
 /*
- * Basic implication link test.
+ * Test bindlink consisting of two disconnected componentns
  */
 #define getlink(hand,pos) as->getOutgoing(hand,pos)
 #define getarity(hand) as->getArity(hand)
 
-void VarTypeNot::test_exec(void)
+void Disconnected::test_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Make sure the scheme file actually loaded!
-	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_good);
-	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_bad);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindlink);
 
-	// Result should be a ListLink w/ zero solutions
-	Handle result_good = pm.crisp_logic_bindlink(vscope_good);
-	logger().debug("result-good is %s\n", SchemeSmob::to_string(result_good).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 0, getarity(result_good));
-
+	// We expect to catch an error here.
 	bool caught = false;
 	try
 	{
-		pm.crisp_logic_bindlink(vscope_bad);
-   }
-   catch (const InvalidParamException& ex)
-   {
-      logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+		pm.bindlink(bindlink);
+	}
+	catch (const InvalidParamException& ex)
+	{
+		logger().debug("Caught exception, just as expected: %s", ex.getMessage());
 		caught = true;
-   }
-   TSM_ASSERT("Failed to catch expected exception", caught);
+	}
+	TSM_ASSERT("Failed to catch expected exception", caught);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
