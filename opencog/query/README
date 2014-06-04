@@ -527,16 +527,26 @@ TODO
    starting point in the next clause.  This can cause an explosion
    of the search effort.  Basically, that's broken. Grep for 
    "joining handle is" ... joining handles should only be grounded
-   variables. (Basically this is a bug...)
+   variables. (Basically this is a bug...)  This is now partly
+   fixed by the connected_component check, prior to the match starting.
 
  * GreaterThanLink is not yet done/working.  Its harder than I thought.
 
- * Enhhancement: Add support for OrLink's in the pattern: viz: having
+ * Enhancement: Add support for OrLink's in the pattern: viz: having
    partly matched some fraction of the pattern, allow the OrLink to
    specify several different sub-parts that are acceptable matches.
    That is, the pattern has 'fixed' regions, and 'variable' regions,
    or, 'required' regions and 'alternatively-required' regions.  It
-   seems like these should be nestable.
+   seems like these should be nestable.  This would have to behave
+   like an exclusive-or: one MUST match one-and-only-one of the
+   sub-parts.  Berhaps this could be done by extending the 'optional'
+   part of the matcher?
+
+ * Enhancement: Add support for IfLink, which would have the semantics
+   'if (some-condition-during-search) then match-this else match-that'
+   This would need to be an extension of GreaterThanLink, which has
+   the semantics of 'if (some-condition-during-search) then
+   trivial-always-match else trivial-impossible-match.'
 
  * Enhancement: allow user to bind a handle name to a subset of the
    match. This would be handy to reduce the verbosity of writing down
