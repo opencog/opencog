@@ -112,6 +112,7 @@
 		(ListLink
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
+			(decl-var "ConceptNode" "$addr_a")
 			(decl-var "ConceptNode" "$addr_b")
 		)
 		(ImplicationLink
@@ -119,10 +120,11 @@
 			(AndLink
 				;; if adress of personA is 1st house
 				(clause PN "Address" VN "$person_a" CN "101 Main Street")
+				(clause PN "Address" VN "$person_a" VN "$addr_a")
 				;; and A is neighbor of B
 				(clause PN "Neighbor" VN "$person_a" VN "$person_b")
 				;; and the next house is one over
-				(clause PN "Successor" CN "101 Main Street" VN "$addr_b")
+				(clause PN "Successor" VN "$addr_a" VN "$addr_b")
 				;; and we don't already know the conclusion
 				(NotLink
 					(clause PN "Address" VN "$person_b" VN "$addr_b")
