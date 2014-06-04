@@ -62,6 +62,9 @@
     )
 )
 
+(InheritanceLink (1, .99 ) (ConceptNode "BE-Rule") (ConceptNode "Rule"))
+
+(ReferenceLink (1, .99 ) (ConceptNode "BE-Rule") be-inheritance)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
