@@ -46,7 +46,7 @@ These will be installed automatically if you are using [ocpkg](https://github.co
 Module
 ------
 
-This is implemented as a module named *libatomspacepublisher.so* which must be enabled in the *opencog.conf* file.
+This is implemented as *opencog/persist/zmq/events/libatomspacepublishermodule.so* which must be enabled in the *opencog.conf* file.
 
 When loaded, it will be enabled by default. The module supports the following CogServer commands:
 
