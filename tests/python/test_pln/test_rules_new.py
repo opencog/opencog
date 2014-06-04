@@ -27,11 +27,11 @@ class PLNUnitTester(TestCase):
         self.chainer = None
 
         # Works:
-        # self.addTestFile("AbductionRule_InheritanceLink.scm") # Under investigation
+        self.addTestFile("AbductionRule_InheritanceLink.scm") # Under investigation
         self.addTestFile("AndRule_new.scm")
         self.addTestFile("BooleanTransformationRule_new.scm")
         self.addTestFile("DeductionRule_InheritanceLink.scm")
-        #self.addTestFile("InductionRule_InheritanceLink.scm") # disabled due to result swapping CNodes on buildbot
+        self.addTestFile("InductionRule_InheritanceLink.scm") # disabled due to result swapping CNodes on buildbot
         self.addTestFile("InheritanceRule.scm")
         self.addTestFile("InversionRule_InheritanceLink.scm")
         self.addTestFile("OrCreationRule.scm")
