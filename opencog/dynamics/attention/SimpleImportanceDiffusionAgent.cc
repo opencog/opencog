@@ -36,20 +36,33 @@
 #include <opencog/atomspace/FollowLink.h>
 
 #define DEBUG
+#define _unused(x) ((void)x)
+
 namespace opencog
 {
 
 SimpleImportanceDiffusionAgent::SimpleImportanceDiffusionAgent(CogServer& cs) :
     Agent(cs)
 {
+    /* ======================================================== */
+    // Default configuration settings
+    
+    // ECAN_MAX_SPREAD_PERCENTAGE
+    // Maximum percentage of STI that is spread from an atom
+    
+    // ECAN_SPREAD_HEBBIAN_ONLY
+    // If false, will diffuse along hebbian links only. If true,
+    // will also diffuse to all non-hebbian incident atoms in the
+    // incoming and outgoing sets
     static const std::string defaultConfig[] = {
-        //! Maximum percentage of STI that is spread from an atom
-        "ECAN_MAX_SPREAD_PERCENTAGE","0.5",
-        "ECAN_SPREAD_HEBBIAN_ONLY","false",
+        "ECAN_MAX_SPREAD_PERCENTAGE", "0.5",
+        "ECAN_SPREAD_HEBBIAN_ONLY", "false",
         "",""
     };
     
     setParameters(defaultConfig);
+    /* ======================================================== */
+    
     spreadDecider = NULL;
     maxSpreadPercentage = 
             (float) (config().get_double("ECAN_MAX_SPREAD_PERCENTAGE"));
@@ -106,10 +119,13 @@ void SimpleImportanceDiffusionAgent::run()
     spreadImportance();
 }
 
+/*
+ * Carries out the importance diffusion process, spreading STI along the
+ * graph according to the configuration settings
+ */
 void SimpleImportanceDiffusionAgent::spreadImportance()
 {
-    HandleSeq diffusionSourceVector = 
-            SimpleImportanceDiffusionAgent::diffusionSourceVector();
+    HandleSeq diffusionSourceVector = SimpleImportanceDiffusionAgent::diffusionSourceVector();
     
     foreach (Handle atomSource, diffusionSourceVector) 
     {
@@ -124,62 +140,89 @@ void SimpleImportanceDiffusionAgent::spreadImportance()
  * Diffuses importance from one atom to its non-hebbian incident atoms
  * and hebbian adjacent atoms
  */
-void SimpleImportanceDiffusionAgent::diffuseAtom(Handle atomSource)
+void SimpleImportanceDiffusionAgent::diffuseAtom(Handle source)
 {
     // TODO: What if the STI values of the atoms change during these updates?
     // This could go wrong if there were simultaneous updates in other threads.
     
     // TODO: Support inverse hebbian links
+
+    // Find the incident atoms that will be diffused to
+    HandleSeq incidentAtoms = 
+            SimpleImportanceDiffusionAgent::incidentAtoms(source);        
     
-    // Find the target atoms that will be diffused to
-    HandleSeq targetAtoms = 
-            SimpleImportanceDiffusionAgent::incidentAtoms(atomSource);        
-    
+    // Find the hebbian adjacent atoms that will be diffused to
     HandleSeq hebbianAdjacentAtoms = 
-            SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(atomSource);
+            SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(source);
+        
+    // Calculate the probability vector that determines what proportion to 
+    // diffuse to each incident atom
+    std::map<Handle, double> probabilityVectorIncident = 
+            SimpleImportanceDiffusionAgent::probabilityVectorIncident(
+                incidentAtoms);
     
-    targetAtoms.insert(targetAtoms.end(), 
-                       hebbianAdjacentAtoms.begin(), 
-                       hebbianAdjacentAtoms.end());
+    // Calculate the probability vector that determines what proportion to 
+    // diffuse to each hebbian adjacent atom
+    std::map<Handle, double> probabilityVectorHebbianAdjacent = 
+            SimpleImportanceDiffusionAgent::probabilityVectorHebbianAdjacent(
+                source, hebbianAdjacentAtoms);
     
-    // Calculate the probability vector that determines how much to diffuse to
-    // each atom
-    std::map<Handle, double> probabilityVector = 
-            SimpleImportanceDiffusionAgent::probabilityVector(targetAtoms);
+    // Combine the two probability vectors into one according to the
+    // configuration parameters
+    std::map<Handle, double> probabilityVector = combineIncidentAdjacentVectors(
+                probabilityVectorIncident, probabilityVectorHebbianAdjacent);
     
     // Calculate the total amount that will be diffused
     AttentionValue::sti_t totalDiffusionAmount = 
-            SimpleImportanceDiffusionAgent::calculateDiffusionAmount(atomSource);
+            calculateDiffusionAmount(source);
     
+    // If there is nothing to diffuse, finish
     if (totalDiffusionAmount == 0)
     {
         return;
     }
 
-    // For each atomTarget in incident atoms, perform diffusion
-    foreach (Handle atomTarget, targetAtoms)
-    {       
+    // Perform diffusion from the source to each atom target
+    typedef std::map<Handle, double>::iterator it_type;
+    for(it_type iterator = probabilityVector.begin(); 
+        iterator != probabilityVector.end(); iterator++)
+    {
+        // Calculate the diffusion amount using the entry in the probability 
+        // vector for this particular target
         AttentionValue::sti_t diffusionAmount = 
                 (AttentionValue::sti_t) floor(totalDiffusionAmount * 
-                                              probabilityVector[atomTarget]);
+                                              iterator->second);
         
-        // Trade STI between the source and target atoms
-        as->setSTI(atomSource, as->getSTI(atomSource) - diffusionAmount);
-        as->setSTI(atomTarget, as->getSTI(atomTarget) + diffusionAmount);
-        
-        // TODO: How to make this a transaction? This could go wrong if there
-        // were simultaneous updates in other threads.
-        
-        // TODO: Using integers for STI values can cause strange consequences.
-        // Rounding to an integer is required so that only whole STI amounts
-        // are exchanged; due to flooring after multiplying the probability 
-        // vector by the total diffusion amount, the amount diffused by this 
-        // routine may not exactly match the totalDiffusionAmount, which could 
-        // be a problem. Floor is used instead of round, so that an atom cannot
-        // diffuse more STI than it has. This also can cause an atom to not
-        // diffuse any STI when the amount to be diffused is less than 1.
-        //   * See: https://github.com/opencog/opencog/issues/676
+        // Do the STI trade between the source and the target
+        tradeSTI(source, iterator->first, diffusionAmount);
     }
+}
+
+/*
+ * Trades STI between a source atom and a target atom
+ */
+void SimpleImportanceDiffusionAgent::tradeSTI(Handle source, 
+                                              Handle target, 
+                                              AttentionValue::sti_t amount)
+{
+    
+    
+    // Trade STI between the source and target atoms
+    as->setSTI(source, as->getSTI(source) - amount);
+    as->setSTI(target, as->getSTI(target) + amount);
+    
+    // TODO: How to make this a transaction? This could go wrong if there
+    // were simultaneous updates in other threads.
+    
+    // TODO: Using integers for STI values can cause strange consequences.
+    // Rounding to an integer is required so that only whole STI amounts
+    // are exchanged; due to flooring after multiplying the probability 
+    // vector by the total diffusion amount, the amount diffused by this 
+    // routine may not exactly match the totalDiffusionAmount, which could 
+    // be a problem. Floor is used instead of round, so that an atom cannot
+    // diffuse more STI than it has. This also can cause an atom to not
+    // diffuse any STI when the amount to be diffused is less than 1.
+    //   * See: https://github.com/opencog/opencog/issues/676    
 }
 
 /*
@@ -259,16 +302,165 @@ HandleSeq SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(Handle h)
  * Returns a map of atom handles and probability values
  * 
  * Calculated as the portion of the total STI that will be allocated to each
- * of the atoms
+ * of the incident atoms
  * 
  * The specifics of the algorithm are a subject of current research
  */
-std::map<Handle, double> SimpleImportanceDiffusionAgent::probabilityVector(
-        HandleSeq handles)
+std::map<Handle, double> 
+SimpleImportanceDiffusionAgent::probabilityVectorIncident(HandleSeq handles)
 {
     std::map<Handle, double> result;
     
-    // TODO
+    // Allocate an equal probability to each incident atom
+    double diffusionAmount = 1.0f / handles.size();
+    
+    foreach (Handle target, handles)
+    {
+        result.insert({target, diffusionAmount});
+    }
+    
+    return result;
+    
+    // TODO: The ideal formula to use here is a subject of current research
+}
+
+/*
+ * Returns a map of atom handles and probability values
+ * 
+ * Calculated as the portion of the total STI that will be allocated to each
+ * of the hebbian adjacent atoms
+ * 
+ * The specifics of the algorithm are a subject of current research
+ */
+std::map<Handle, double> 
+SimpleImportanceDiffusionAgent::probabilityVectorHebbianAdjacent(
+        Handle source, HandleSeq targets)
+{
+    std::map<Handle, double> result;
+    
+    // Start with 100% of possible diffusion, and then allocate it
+    double diffusionAvailable = 1.0;
+    
+    // Calculate out how many hebbian adjacent atoms there are in total
+    int atomCount = targets.size();
+    
+    // Calculate the maximum amount that could be allocated to each adjacent 
+    // atom, if each hebbian link divided up the total available amount equally
+    double maxAllocation = diffusionAvailable / atomCount;
+    
+    // For each hebbian link that will be spread across, discount the 
+    // amount that is actually allocated to it, based on certain attributes 
+    // of the link
+    foreach (Handle target, targets)
+    {
+        // Find the hebbian link that connects the source atom to this target
+        HandleSeq searchAtoms(2);
+        searchAtoms[0] = source;
+        searchAtoms[1] = target;
+        HandleSeq resultList;
+        as->getHandlesByOutgoing(back_inserter(resultList), searchAtoms, NULL, 
+                                 NULL, 2, ASYMMETRIC_HEBBIAN_LINK, false);
+        Handle link = resultList.front();
+        
+        // Calculate the discounted diffusion amount based on the link
+        // attributes
+        double diffusionAmount = 
+                maxAllocation * calculateHebbianDiffusionPercentage(link);    
+    
+        // Insert the diffusionAmount into the map
+        result.insert({target, diffusionAmount});
+    }// TODO: The ideal formula to use here is a subject of current research
+    
+    return result;
+}
+
+/*
+ * Returns a map of atom handles and probability values
+ * 
+ * Calculated as the portion of the total STI that will be allocated to each
+ * of the atoms.
+ * 
+ * Two probability vectors are combined in this function in order to return
+ * a single, unified probability vector. This allocates a portion of the 
+ * available STI to the vector containing incident atoms (excluding hebbian
+ * links), and a portion of the STI to the vector containing hebbian adjacent
+ * atoms.
+ * 
+ * The specifics of the algorithm are a subject of current research
+ */
+std::map<Handle, double> 
+SimpleImportanceDiffusionAgent::combineIncidentAdjacentVectors(
+        std::map<Handle, double> incidentVector, 
+        std::map<Handle, double> adjacentVector)
+{
+    std::map<Handle, double> result;
+    
+    // Start with 100% of possible diffusion, and then allocate it
+    double diffusionAvailable = 1.0;
+    
+    // TODO: Make this a configuration parameter
+    double HEBBIAN_MAX_ALLOCATION_PERCENTAGE = 0.50;
+    
+    // Calculate the maximum proportion that could be used for diffusion to
+    // all hebbian adjacent atoms
+    double hebbianDiffusionAvailable = 
+            HEBBIAN_MAX_ALLOCATION_PERCENTAGE * diffusionAvailable;
+    
+    // Calculate the maximum proportion that could be allocated to any
+    // particular hebbian adjacent atom, as the total amount available for
+    // allocation to all hebbian adjacent atoms, divided by the count of
+    // hebbian adjacent atoms
+    double hebbianMaximumLinkAllocation = 
+            hebbianDiffusionAvailable / adjacentVector.size();
+    
+    // Keep track of how much diffusion has been allocated to hebbian adjacent
+    // atoms
+    double hebbianDiffusionUsed = 0.0;
+    
+    // For each hebbian adjacent target, allocate a proportion of STI according
+    // to the probability vector for the target, and the proportion that is
+    // available for allocation to any particular individual atom
+    typedef std::map<Handle, double>::iterator it_type;
+    for(it_type iterator = adjacentVector.begin(); 
+        iterator != adjacentVector.end(); iterator++)
+    {
+        double diffusionAmount = 
+                hebbianMaximumLinkAllocation * iterator->second;
+        result.insert({iterator->first, diffusionAmount});
+        
+        // Decrement the amount of remaining diffusion that is available
+        hebbianDiffusionUsed += diffusionAmount;
+    }
+    
+    // There is likely unused diffusion remaining from the hebbian diffusion 
+    // process, if some of the links did not diffuse fully due to their 
+    // attributes. Subtract what diffusion was used to determine how much is
+    // still available.
+    diffusionAvailable -= hebbianDiffusionUsed;
+    
+    // Keep track of how much diffusion has been allocated to incident atoms
+    double incidentDiffusionUsed = 0.0;
+    
+    // Allocate the remaining diffusion amount to the incident atoms according
+    // to the probability vector for the targets
+    for(it_type iterator = adjacentVector.begin(); 
+        iterator != adjacentVector.end(); iterator++)
+    {
+        double diffusionAmount = 
+                diffusionAvailable * iterator->second;
+        result.insert({iterator->first, diffusionAmount});
+        
+        incidentDiffusionUsed += diffusionAmount;
+    }
+    
+#ifdef DEBUG
+    // Confirm that the probability vector sums to 1.0
+    double totalDiffused = incidentDiffusionUsed + hebbianDiffusionUsed;
+    double tolerance = 0.001;
+    assert (totalDiffused > 1 - tolerance && totalDiffused < 1 + tolerance);
+    _unused(totalDiffused);
+    _unused(tolerance);
+#endif
     
     return result;
 }
@@ -287,6 +479,28 @@ AttentionValue::sti_t SimpleImportanceDiffusionAgent::calculateDiffusionAmount(
     // For example, if the amount to diffuse is 0.4, it will become 0, causing
     // no diffusion to occur.
     //   * See: https://github.com/opencog/opencog/issues/676
+}
+
+/*
+ * Returns a percentage, which should be multiplied by the amount of STI
+ * that is available to spread across a given hebbian link, to determine the 
+ * amount of STI that should actually be spread across the given hebbian link
+ * 
+ * For example, this allows a calculation that uses the strength or confidence
+ * of a TruthValue to make a hebbian link less "conductive".
+ */
+float SimpleImportanceDiffusionAgent::calculateHebbianDiffusionPercentage(
+        Handle h)
+{
+    strength_t strength = as->getMean(h);
+    confidence_t confidence = as->getConfidence(h);
+    
+    return strength * confidence;
+    
+    // TODO: The ideal formula to use here is a subject of current research
+    
+    // By returning the strength times the confidence, if either value is
+    // far from 1.0, then the link will allow less diffusion to occur
 }
 
 } // namespace

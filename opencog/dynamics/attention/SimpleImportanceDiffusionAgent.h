@@ -59,14 +59,8 @@ class SimpleImportanceDiffusionAgent : public Agent
 
 private:
     AtomSpace* as;
-
-    // Maximum percentage of importance to spread
     float maxSpreadPercentage;
-
-    // Whether to spread STI along hebbian links only, or to also spread to
-    // atoms that are incident to the source
     bool spreadHebbianOnly;
-
     SpreadDecider* spreadDecider;
     void setLogger(Logger* l);
     Logger *log;
@@ -78,6 +72,13 @@ private:
     HandleSeq hebbianAdjacentAtoms(Handle);
     std::map<Handle, double> probabilityVector(HandleSeq);    
     AttentionValue::sti_t calculateDiffusionAmount(Handle);
+    float calculateHebbianDiffusionPercentage(Handle);
+    float calculateIncidentDiffusionPercentage(Handle);
+    std::map<Handle, double> probabilityVectorIncident(HandleSeq);
+    std::map<Handle, double> probabilityVectorHebbianAdjacent(Handle, HandleSeq);
+    std::map<Handle, double> combineIncidentAdjacentVectors(
+            std::map<Handle, double>, std::map<Handle, double>);
+    void tradeSTI(Handle, Handle, AttentionValue::sti_t);
 
 public:
     enum { HYPERBOLIC, STEP };
