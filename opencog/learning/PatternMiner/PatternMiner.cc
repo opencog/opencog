@@ -930,6 +930,8 @@ void PatternMiner::OutPutPatternsToFile(unsigned int n_gram)
 
 void PatternMiner::ConstructTheFirstGramPatterns()
 {
+    int start_time = time(NULL);
+
     std::cout<<"Debug: PatternMiner:  start (gram = 1) pattern mining..." << std::endl;
 
     cur_gram = 1;
@@ -944,9 +946,12 @@ void PatternMiner::ConstructTheFirstGramPatterns()
 
     // sort the patterns by frequency
     std::sort((patternsForGram[0]).begin(), (patternsForGram[0]).end(),compareHTreeNodeByFrequency );
+
+    int end_time = time(NULL);
     OutPutPatternsToFile(1);
 
     std::cout<<"Debug: PatternMiner: done (gram = 1) pattern mining! " + toString((patternsForGram[0]).size()) + " patterns found! " << std::endl;
+    printf(" Total time: %d seconds. \n", end_time - start_time);
 
 }
 
@@ -1034,12 +1039,17 @@ PatternMiner::~PatternMiner()
 void PatternMiner::runPatternMiner()
 {
 
+    int start_time = time(NULL);
+
     std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << std::endl;
     // first, generate the first layer patterns: patterns of 1 gram (contains only one link)
     ConstructTheFirstGramPatterns();
 
     // and then generate all patterns
     GrowAllPatterns();
+
+    int end_time = time(NULL);
+    printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
 
 }
 
