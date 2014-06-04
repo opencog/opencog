@@ -1,6 +1,7 @@
 
 Diary of performance measurements and tuning for MOSES
 ------------------------------------------------------
+    Linas Vepstas -- January 2012 - August 2013
 
 Maintained by Linas Vepstas.  Started January 2012.  A summary
 of lessons learned is immediately below.   The rest is a diary,

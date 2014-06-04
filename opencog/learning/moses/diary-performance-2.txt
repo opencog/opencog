@@ -1,0 +1,87 @@
+
+    Diary of MOSES performance and Enhancement Work
+    -----------------------------------------------
+       Linas Vepstas -- started June 2014
+
+
+Diary of notes, thoughts, measurements, pertaining to work on MOSES.
+
+Boosting in MOSES
+-----------------
+There are several very different ways of envisioning boosting in MOSES,
+each being more or less compatible with the formal definition of
+boosting. See http://en.wikipedia.org/wiki/Boosting_(meta-algorithm)
+
+The formal definition of boosting invokes the idea of a weighted
+ensemble of 'weak learners'.  Each member of the ensemble is given a
+weight, with the weights being issued so as to minimize the total error
+of the prediction being made by the ensemble. The accuracy of the
+ensemble is then measured, and used to identify those samples in the
+training set that are being classified incorrectly.  New weak learners
+are then trained, with an emphasis on correctly classifying those
+samples that were gotten incorrect by the ensemble.
+
+For MOSES, it appropriate definition of 'ensemble' is ambiguous.
+The ensemble can be: 
+
+  A) The set of instances in the current deme
+  B) The evolutionary history of a given exemplar
+  C) The collection of combo trees (exemplars) in the metapopulation.
+  D) Some combination of the above.
+
+Let's recall the definition of an exemplar, a deme, and a
+metapopulation.
+
+ *) An 'exemplar' is a single, fixed combo tree.  It has some
+    evolutionary heritage, having evolved from earlier trees.
+
+ *) The metapopulation is the current collection of the fittest
+    (most accurate) exemplars.
+
+ *) A deme is an exemplar that has been decorated with knobs, together
+    with a large set of possible knob settings (instances).  Each
+    instance is conceptually a single combio tree, that differs
+    structurally from its parent exemplar in some 'minor' way.
+
+Lets look at how the boosting algo would work for each scenario. 
+
+Scenario A) The set of instances is an ensemble.  In this scenario, the
+boosting algorithm becomes a variant the current 'hill-climbing' algo.
+
+ A.1) Select an exemplar from the metapopulation.
+ A.2) Generate N instances by turning N knobs.
+ A.3) Score all N instances, using a uniform weight on all samples.
+ A.4) Pick the highest-scoring instance, add it to the ensemble.
+ A.5) Score the ensemble, see which samples are mis-predicted.
+ A.6) Adjust per-sample weight based on ensemble mis-prediction
+ A.7) Re-score remaining N-1 instances with new weighted scorer.
+ A.8) Go to step A.4
+
+ A.9) Terminate above loop using some criteria,
+ A.10) Select the highest-scoring instance, based on the weighted
+       scorer available at termination time.
+ A.11) Go to step A.2
+
+
+
+
+---------
+Each deme gets a single weight, the weights make it an ensemble.
+Each deme maintains a behavioral score.
+
+
+weight of deme is obtained by minimizing total error on training set.
+
+
+row weights: 'here's what you get wrong' vs. 'here's what ensemble
+gets wrong'
+
+
+
+
+
+What is a deme_t?
+
+typedef instance_set<composite_score> deme_t;
+struct instance_set : public vector<scored_instance<ScoreT> >
+All instances in instance set have same field description.
