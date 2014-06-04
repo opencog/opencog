@@ -304,7 +304,7 @@ HandleSeq SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(Handle h)
  * Calculated as the portion of the total STI that will be allocated to each
  * of the incident atoms
  * 
- * The specifics of the algorithm are a subject of current research
+ * TODO: The ideal formula to use here is a subject of current research
  */
 std::map<Handle, double> 
 SimpleImportanceDiffusionAgent::probabilityVectorIncident(HandleSeq handles)
@@ -320,8 +320,6 @@ SimpleImportanceDiffusionAgent::probabilityVectorIncident(HandleSeq handles)
     }
     
     return result;
-    
-    // TODO: The ideal formula to use here is a subject of current research
 }
 
 /*
@@ -369,7 +367,7 @@ SimpleImportanceDiffusionAgent::probabilityVectorHebbianAdjacent(
     
         // Insert the diffusionAmount into the map
         result.insert({target, diffusionAmount});
-    }// TODO: The ideal formula to use here is a subject of current research
+    }
     
     return result;
 }
@@ -488,6 +486,12 @@ AttentionValue::sti_t SimpleImportanceDiffusionAgent::calculateDiffusionAmount(
  * 
  * For example, this allows a calculation that uses the strength or confidence
  * of a TruthValue to make a hebbian link less "conductive".
+ * 
+ * TODO: The ideal formula to use here is a subject of current research
+ * 
+ * In the current implementation, by returning the strength times the 
+ * confidence, if either value is far from 1.0, then the link will allow less 
+ * diffusion to occur across the hebbian link
  */
 float SimpleImportanceDiffusionAgent::calculateHebbianDiffusionPercentage(
         Handle h)
@@ -496,11 +500,6 @@ float SimpleImportanceDiffusionAgent::calculateHebbianDiffusionPercentage(
     confidence_t confidence = as->getConfidence(h);
     
     return strength * confidence;
-    
-    // TODO: The ideal formula to use here is a subject of current research
-    
-    // By returning the strength times the confidence, if either value is
-    // far from 1.0, then the link will allow less diffusion to occur
 }
 
 } // namespace
