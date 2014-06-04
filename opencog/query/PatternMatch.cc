@@ -111,8 +111,23 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	std::set<std::vector<Handle>> components;
 	pme.get_connected_components(vars, clauses, components);
 	if (1 != components.size())
-		throw InvalidParamException(TRACE_INFO,
-			"Pattern is not connected! Found %d components.", components.size());
+	{
+		// Users are going to be stumped by this one, so print
+		// out a verbose, user-freindly debug message to help
+		// them out.
+		std::stringstream ss;
+		ss << "Pattern is not connected! Found "
+			<< components.size() << " components:\n";
+		int cnt = 0;
+		foreach (auto comp, components)
+		{
+			ss << "Connected component " << cnt
+				<< " consists of ----------------: \n";
+			foreach (Handle h, comp) ss << h->toString();
+			cnt++;
+		}
+		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
+	}
 
 	// pme.get_connected_components places the clauses in
 	// connection-sorted order. Use that, it makes matching slightly
