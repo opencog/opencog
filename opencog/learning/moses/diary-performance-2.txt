@@ -69,12 +69,13 @@ Hill-climbing) The current canonical algo.
 Scenario A) The set of instances is an ensemble.  In this scenario, the
 boosting algorithm becomes a variant the current 'hill-climbing' algo.
 The steps are numbered below so that they correspond to the
-hill-climbing steps.
+hill-climbing steps. To summarize: step H.3 is replaced by the Boost
+algo, so that H.3 is a bunch of steps.
 
  A.1) Select an exemplar from the metapopulation. (same as H.1)
  A.2) Generate N instances by turning N knobs. (same as H.2)
  A.3.1) Score all N instances, using a uniform weight on all samples.
- A.3.2) Pick the highest-scoring instance, add it to the ensemble.
+ A.3.2) Pick the best instance, per boost, add it to the ensemble.
  A.3.3) Score the ensemble, see which samples are mis-predicted.
  A.3.4) Adjust per-sample weight based on ensemble mis-prediction
  A.3.5) Re-score remaining N-1 instances with new weighted scorer.
@@ -133,8 +134,9 @@ This begs the question:
         are all different ...
 
 ----
-Scenario Bh) Just like plain-old hill-climbing H, except that steps 3
-and 7 are modified:
+Scenario Bh) Just like plain-old hill-climbing H, except that steps H.3
+and H.7 are modified. Step H.7 is replaced by the boost algo, with step
+H.3 using the appropriate boosting scoring function.
 
  Bh.1) Select an exemplar from the metapopulation. (Same as H.1)
  Bh.2) Generate N instances by turning N knobs. (Same as H.2)
@@ -164,13 +166,34 @@ and
 --------------
 Secnario C) The entire metapopulation is the ensemble.
 
+Again, this is a variant of the canonical hill-climbing algo, with
+modifications show below.  To summarize, step H.7 is replaced by the
+boost algo.  Unlike Bh.7, though, the ensemble is the entire metapop.
+
+ C.1) Select an exemplar from the metapopulation. (Same as H.1)
+ C.2) Generate N instances by turning N knobs. (Same as H.2)
+ C.3x) Score all N instances, weights from the metapop.
+ C.4) Select the highest-scoring instance. (Same as H.4)
+ C.5) Go to step C.2 (Same as H.5)
+
+ C.6) Terminate above loop in some way. (Same as H.6)
+ C.7.1) From 1 till M, do:
+ C.7.2) Pick the best instance, per boost, add it to the metapop.
+ C.7.3) Score the whole metapop, see which samples are mis-predicted.
+ C.7.4) Adjust per-sample weight based on ensemble mis-prediction
+ C.7.5) Re-score remaining M-1 instances with new weighted scorer.
+ C.7.6) Go to step C.7.2
+
+ C.8) Go to step C.1 (Same as H.8)
+
+ C.9) Terminate above loop in some way.
+ C.10) Use the top K exemplars in the metapopulation to create a
+       traditional ensemble, for off-line prediction/classification.
+
 
 ---------
 Each deme gets a single weight, the weights make it an ensemble.
 Each deme maintains a behavioral score.
-
-
-weight of deme is obtained by minimizing total error on training set.
 
 
 row weights: 'here's what you get wrong' vs. 'here's what ensemble
