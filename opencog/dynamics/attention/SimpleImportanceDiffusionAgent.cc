@@ -55,7 +55,7 @@ SimpleImportanceDiffusionAgent::SimpleImportanceDiffusionAgent(CogServer& cs) :
     // will also diffuse to all non-hebbian incident atoms in the
     // incoming and outgoing sets
     static const std::string defaultConfig[] = {
-        "ECAN_MAX_SPREAD_PERCENTAGE", "0.5",
+        "ECAN_MAX_SPREAD_PERCENTAGE", "0.6",
         "ECAN_SPREAD_HEBBIAN_ONLY", "false",
         "",""
     };
@@ -146,7 +146,7 @@ void SimpleImportanceDiffusionAgent::spreadImportance()
         }
 #endif
     }
-    
+   
     // Now, process all of the outstanding diffusion events in the diffusion 
     // stack
     SimpleImportanceDiffusionAgent::processDiffusionStack();
@@ -158,32 +158,29 @@ void SimpleImportanceDiffusionAgent::spreadImportance()
  */
 void SimpleImportanceDiffusionAgent::diffuseAtom(Handle source)
 {
-    // TODO: What if the STI values of the atoms change during these updates?
-    // This could go wrong if there were simultaneous updates in other threads.
-    
-    // TODO: Support inverse hebbian links
-
-    // Find the incident atoms that will be diffused to
+    // (1) Find the incident atoms that will be diffused to
     HandleSeq incidentAtoms = 
             SimpleImportanceDiffusionAgent::incidentAtoms(source);        
     
-    // Find the hebbian adjacent atoms that will be diffused to
+    // (2) Find the hebbian adjacent atoms that will be diffused to
     HandleSeq hebbianAdjacentAtoms = 
             SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(source);
         
-    // Calculate the probability vector that determines what proportion to 
-    // diffuse to each incident atom
+    // (3) Calculate the probability vector that determines what proportion to 
+    //     diffuse to each incident atom
     std::map<Handle, double> probabilityVectorIncident = 
             SimpleImportanceDiffusionAgent::probabilityVectorIncident(
                 incidentAtoms);
 
 #ifdef DEBUG
+    std::cout << "Calculating diffusion for handle # " << source.value() <<
+                 std::endl;
     std::cout << "Incident probability vector contains " << 
                  probabilityVectorIncident.size() << " atoms." << std::endl;
 #endif
     
-    // Calculate the probability vector that determines what proportion to 
-    // diffuse to each hebbian adjacent atom
+    // (4) Calculate the probability vector that determines what proportion to 
+    //     diffuse to each hebbian adjacent atom
     std::map<Handle, double> probabilityVectorHebbianAdjacent = 
             SimpleImportanceDiffusionAgent::probabilityVectorHebbianAdjacent(
                 source, hebbianAdjacentAtoms);
@@ -194,8 +191,8 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle source)
                  std::endl;
 #endif
     
-    // Combine the two probability vectors into one according to the
-    // configuration parameters
+    // (5) Combine the two probability vectors into one according to the
+    //     configuration parameters
     std::map<Handle, double> probabilityVector = combineIncidentAdjacentVectors(
                 probabilityVectorIncident, probabilityVectorHebbianAdjacent);
     
@@ -204,13 +201,15 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle source)
                  " atoms." << std::endl;
 #endif
     
-    // Calculate the total amount that will be diffused
+    // (6) Calculate the total amount that will be diffused
     AttentionValue::sti_t totalDiffusionAmount = 
             calculateDiffusionAmount(source);
     
 #ifdef DEBUG
     std::cout << "Total diffusion amount: " << totalDiffusionAmount << std::endl;
 #endif
+    
+    /* ===================================================================== */
     
     // If there is nothing to diffuse, finish
     if (totalDiffusionAmount == 0)
@@ -226,7 +225,7 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle source)
         DiffusionEventType diffusionEvent;
         
         // Calculate the diffusion amount using the entry in the probability 
-        // vector for this particular target
+        // vector for this particular target (stored in iterator->second)
         diffusionEvent.amount = (AttentionValue::sti_t) 
                 floor(totalDiffusionAmount * iterator->second);
         
@@ -239,6 +238,13 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle source)
         // amounts will be calculated in a different way than expected.
         diffusionStack.push(diffusionEvent);
     }
+
+    /* ===================================================================== */
+    
+    // TODO: What if the STI values of the atoms change during these updates?
+    // This could go wrong if there were simultaneous updates in other threads.
+    
+    // TODO: Support inverse hebbian links
 }
 
 /*
@@ -295,7 +301,7 @@ HandleSeq SimpleImportanceDiffusionAgent::diffusionSourceVector()
                            Type type = as->getType(h);
 
 #ifdef DEBUG                           
-                           std::cout << "checking atom of type: " << 
+                           std::cout << "Checking atom of type: " << 
                                         classserver().getTypeName(type) << "\n";
 #endif
                            
@@ -489,8 +495,12 @@ SimpleImportanceDiffusionAgent::combineIncidentAdjacentVectors(
     for(it_type iterator = adjacentVector.begin(); 
         iterator != adjacentVector.end(); iterator++)
     {
+        // iterator->second is the entry in the probability vector for this
+        // handle
         double diffusionAmount = 
                 hebbianMaximumLinkAllocation * iterator->second;
+        
+        // iterator->first is the handle
         result.insert({iterator->first, diffusionAmount});
         
         // Decrement the amount of remaining diffusion that is available
@@ -576,12 +586,27 @@ float SimpleImportanceDiffusionAgent::calculateHebbianDiffusionPercentage(
  */
 void SimpleImportanceDiffusionAgent::processDiffusionStack()
 {
+#ifdef DEBUG
+    // Keep track of the total amount of STI traded for debugging
+    AttentionValue::sti_t totalAmountTraded = 0;
+#endif
+    
     while (!diffusionStack.empty())
     {
         DiffusionEventType event = diffusionStack.top();
         SimpleImportanceDiffusionAgent::tradeSTI(event);
         diffusionStack.pop();
+        
+#ifdef DEBUG
+        totalAmountTraded += event.amount;
+#endif
     }
+    
+#ifdef DEBUG    
+    // Each trade occurs bidirectionally. Therefore, if you add up all the
+    // trades, it should be equal to twice the amount that was diffused
+    std::cout << "Total STI traded: " << totalAmountTraded << std::endl;
+#endif
 }
 
 } // namespace

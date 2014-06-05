@@ -90,7 +90,7 @@ private:
     std::map<Handle, double> combineIncidentAdjacentVectors(
             std::map<Handle, double>, std::map<Handle, double>);
     void tradeSTI(DiffusionEventType);
-
+    
 public:
     enum { HYPERBOLIC, STEP };
     void setSpreadDecider(int type, float shape = 30);
