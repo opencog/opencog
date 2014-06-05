@@ -227,10 +227,8 @@
     (EvaluationLink
         (PredicateNode "able_to")
         (ListLink
-            (EvaluationLink
-                (PredicateNode v1_instance)
-                (ListLink
-                    (ConceptNode v2_instance)))
+            (ConceptNode v2_instance)
+            (PredicateNode v1_instance)
         )
     )
 )
