@@ -125,8 +125,11 @@ void SimpleImportanceDiffusionAgent::run()
  */
 void SimpleImportanceDiffusionAgent::spreadImportance()
 {
-    HandleSeq diffusionSourceVector = SimpleImportanceDiffusionAgent::diffusionSourceVector();
+    HandleSeq diffusionSourceVector = 
+            SimpleImportanceDiffusionAgent::diffusionSourceVector();
     
+    // Calculate the diffusion for each source atom, and store the diffusion
+    // event in a stack
     foreach (Handle atomSource, diffusionSourceVector) 
     {
         // Check the decision function to determine if spreading will occur
@@ -134,6 +137,10 @@ void SimpleImportanceDiffusionAgent::spreadImportance()
             diffuseAtom(atomSource);
         }
     }
+    
+    // Now, process all of the outstanding diffusion events in the diffusion 
+    // stack
+    SimpleImportanceDiffusionAgent::processDiffusionStack();
 }
 
 /*
@@ -187,29 +194,32 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle source)
     for(it_type iterator = probabilityVector.begin(); 
         iterator != probabilityVector.end(); iterator++)
     {
+        DiffusionEventType diffusionEvent;
+        
         // Calculate the diffusion amount using the entry in the probability 
         // vector for this particular target
-        AttentionValue::sti_t diffusionAmount = 
-                (AttentionValue::sti_t) floor(totalDiffusionAmount * 
-                                              iterator->second);
+        diffusionEvent.amount = (AttentionValue::sti_t) 
+                floor(totalDiffusionAmount * iterator->second);
         
-        // Do the STI trade between the source and the target
-        tradeSTI(source, iterator->first, diffusionAmount);
+        diffusionEvent.source = source;
+        diffusionEvent.target = iterator->first;
+        
+        // Add the diffusion event to a stack. The diffusion is stored in a 
+        // stack, so that all the diffusion events can be processed after the 
+        // diffusion calculations are complete. Otherwise, the diffusion 
+        // amounts will be calculated in a different way than expected.
+        diffusionStack.push(diffusionEvent);
     }
 }
 
 /*
  * Trades STI between a source atom and a target atom
  */
-void SimpleImportanceDiffusionAgent::tradeSTI(Handle source, 
-                                              Handle target, 
-                                              AttentionValue::sti_t amount)
+void SimpleImportanceDiffusionAgent::tradeSTI(DiffusionEventType event)
 {
-    
-    
     // Trade STI between the source and target atoms
-    as->setSTI(source, as->getSTI(source) - amount);
-    as->setSTI(target, as->getSTI(target) + amount);
+    as->setSTI(event.source, as->getSTI(event.source) - event.amount);
+    as->setSTI(event.target, as->getSTI(event.target) + event.amount);
     
     // TODO: How to make this a transaction? This could go wrong if there
     // were simultaneous updates in other threads.
@@ -500,6 +510,21 @@ float SimpleImportanceDiffusionAgent::calculateHebbianDiffusionPercentage(
     confidence_t confidence = as->getConfidence(h);
     
     return strength * confidence;
+}
+
+/*
+ * Processes all of the diffusion events that have accumulated in the stack
+ * 
+ * This is where the atom STI updates actually take place.
+ */
+void SimpleImportanceDiffusionAgent::processDiffusionStack()
+{
+    while (!diffusionStack.empty())
+    {
+        DiffusionEventType event = diffusionStack.top();
+        SimpleImportanceDiffusionAgent::tradeSTI(event);
+        diffusionStack.pop();
+    }
 }
 
 } // namespace

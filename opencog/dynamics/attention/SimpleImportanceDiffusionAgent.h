@@ -26,6 +26,7 @@
 #define _OPENCOG_SIMPLE_IMPORTANCE_DIFFUSION_AGENT_H
 
 #include <string>
+#include <stack>
 #include <math.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
@@ -65,6 +66,16 @@ private:
     void setLogger(Logger* l);
     Logger *log;
     
+    typedef struct DiffusionEventType
+    {
+        Handle source;
+        Handle target;
+        AttentionValue::sti_t amount;
+    } DiffusionEventType;
+
+    std::stack<DiffusionEventType> diffusionStack;
+    void processDiffusionStack();
+    
     void spreadImportance();
     void diffuseAtom(Handle);
     HandleSeq diffusionSourceVector();
@@ -78,7 +89,7 @@ private:
     std::map<Handle, double> probabilityVectorHebbianAdjacent(Handle, HandleSeq);
     std::map<Handle, double> combineIncidentAdjacentVectors(
             std::map<Handle, double>, std::map<Handle, double>);
-    void tradeSTI(Handle, Handle, AttentionValue::sti_t);
+    void tradeSTI(DiffusionEventType);
 
 public:
     enum { HYPERBOLIC, STEP };
