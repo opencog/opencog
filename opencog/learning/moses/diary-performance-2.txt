@@ -186,18 +186,20 @@ boost algo.  Unlike Bh.7, though, the ensemble is the entire metapop.
 
  C.8) Go to step C.1 (Same as H.8)
 
- C.9) Terminate above loop in some way.
+ C.9) Terminate above loop in some way. (Same as H.9)
  C.10) Use the top K exemplars in the metapopulation to create a
        traditional ensemble, for off-line prediction/classification.
 
+Since, in all scenarios, it is step C.10 that is providing the final
+ensemble that will be deployed (or evaluated on the test set), it seems
+to me to me that pursuing scenario C first is the course of action that
+makes the most sense.
 
 ---------
-Each deme gets a single weight, the weights make it an ensemble.
-Each deme maintains a behavioral score.
+How to implement Scenario C:
+- Add single weight to scored combo tree. 
+- Maintain a weight column .. where? In CTable? No...
 
-
-row weights: 'here's what you get wrong' vs. 'here's what ensemble
-gets wrong'
 
 
 
