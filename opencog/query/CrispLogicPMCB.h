@@ -45,6 +45,7 @@ class CrispLogicPMCB :
 	public virtual DefaultPatternMatchCB
 {
 	public:
+		CrispLogicPMCB(AtomSpace* as) : DefaultPatternMatchCB(as) {}
 
 		/**
  		 * This callback is called whenever a match has beeen identified

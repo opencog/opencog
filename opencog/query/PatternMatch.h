@@ -26,6 +26,7 @@
 
 #include <set>
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 
@@ -34,7 +35,7 @@ namespace opencog {
 class PatternMatch
 {
 	private:
-		AtomSpace *atom_space;
+		AtomSpace *_atom_space;
 		PatternMatchEngine pme;
 		int get_vartype(Handle,
 		                std::set<Handle>&,
@@ -54,8 +55,7 @@ class PatternMatch
 		PatternMatch(void);
 		void set_atomspace(AtomSpace *as)
 		{
-			atom_space = as;
-			pme.set_atomspace(as);
+			_atom_space = as;
 		}
 
 		void match(PatternMatchCallback *,

@@ -44,13 +44,10 @@ class DefaultPatternMatchCB :
 	public virtual PatternMatchCallback
 {
 	public:
-		DefaultPatternMatchCB(void)
-		{
-			_type_restrictions = NULL;
-			_atom_space = NULL;
-		}
-
-		void set_atomspace(AtomSpace*as) { _atom_space = as; }
+		DefaultPatternMatchCB(AtomSpace* as) :
+			_type_restrictions(NULL),
+			_atom_space(as)
+		{}
 
 		/**
 		 * Called when a node in the template pattern needs to
