@@ -134,8 +134,17 @@ void SimpleImportanceDiffusionAgent::spreadImportance()
     {
         // Check the decision function to determine if spreading will occur
         if (spreadDecider->spreadDecision(as->getSTI(atomSource))) {
+#ifdef DEBUG
+            std::cout << "Calling diffuseAtom." << std::endl;
+#endif
             diffuseAtom(atomSource);
         }
+#ifdef DEBUG
+        else
+        {
+            std::cout << "Did not call diffuseAtom." << std::endl;
+        }
+#endif
     }
     
     // Now, process all of the outstanding diffusion events in the diffusion 
@@ -167,21 +176,41 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle source)
     std::map<Handle, double> probabilityVectorIncident = 
             SimpleImportanceDiffusionAgent::probabilityVectorIncident(
                 incidentAtoms);
+
+#ifdef DEBUG
+    std::cout << "Incident probability vector contains " << 
+                 probabilityVectorIncident.size() << " atoms." << std::endl;
+#endif
     
     // Calculate the probability vector that determines what proportion to 
     // diffuse to each hebbian adjacent atom
     std::map<Handle, double> probabilityVectorHebbianAdjacent = 
             SimpleImportanceDiffusionAgent::probabilityVectorHebbianAdjacent(
                 source, hebbianAdjacentAtoms);
+
+#ifdef DEBUG
+    std::cout << "Hebbian adjacent probability vector contains " << 
+                 probabilityVectorHebbianAdjacent.size() << " atoms." << 
+                 std::endl;
+#endif
     
     // Combine the two probability vectors into one according to the
     // configuration parameters
     std::map<Handle, double> probabilityVector = combineIncidentAdjacentVectors(
                 probabilityVectorIncident, probabilityVectorHebbianAdjacent);
     
+#ifdef DEBUG
+    std::cout << "Probability vector contains " << probabilityVector.size() << 
+                 " atoms." << std::endl;
+#endif
+    
     // Calculate the total amount that will be diffused
     AttentionValue::sti_t totalDiffusionAmount = 
             calculateDiffusionAmount(source);
+    
+#ifdef DEBUG
+    std::cout << "Total diffusion amount: " << totalDiffusionAmount << std::endl;
+#endif
     
     // If there is nothing to diffuse, finish
     if (totalDiffusionAmount == 0)
@@ -221,6 +250,11 @@ void SimpleImportanceDiffusionAgent::tradeSTI(DiffusionEventType event)
     as->setSTI(event.source, as->getSTI(event.source) - event.amount);
     as->setSTI(event.target, as->getSTI(event.target) + event.amount);
     
+#ifdef DEBUG
+    std::cout << "tradeSTI: " << event.amount << " from " << event.source 
+              << " to " << event.target << "." << std::endl;
+#endif
+    
     // TODO: How to make this a transaction? This could go wrong if there
     // were simultaneous updates in other threads.
     
@@ -246,13 +280,24 @@ HandleSeq SimpleImportanceDiffusionAgent::diffusionSourceVector()
     // Retrieve the atoms in the AttentionalFocus
     HandleSeq resultSet;
     as->getHandleSetInAttentionalFocus(back_inserter(resultSet));
+
+#ifdef DEBUG      
+    std::cout << "Calculating diffusionSourceVector." << std::endl;
+    std::cout << "AF Size before removing hebbian links: " << 
+                 resultSet.size() << "\n";
+#endif
     
     // Remove the hebbian links
-    resultSet.erase(
+    auto it_end =
         std::remove_if(resultSet.begin(), resultSet.end(),
                        [=](const Handle& h)
                        { 
                            Type type = as->getType(h);
+
+#ifdef DEBUG                           
+                           std::cout << "checking atom of type: " << 
+                                        classserver().getTypeName(type) << "\n";
+#endif
                            
                            if (type == ASYMMETRIC_HEBBIAN_LINK ||
                                type == HEBBIAN_LINK ||
@@ -261,14 +306,26 @@ HandleSeq SimpleImportanceDiffusionAgent::diffusionSourceVector()
                                type == INVERSE_HEBBIAN_LINK ||
                                type == SYMMETRIC_INVERSE_HEBBIAN_LINK)
                            {
+#ifdef DEBUG
+                               std::cout << "Atom is hebbian" << "\n";
+#endif
                                return true;
                            }
                            else
                            {
+#ifdef DEBUG
+                               std::cout << "Atom is not hebbian" << "\n";
+#endif
                                return false;
                            }
-                       }));
+                       });
+    resultSet.erase(it_end, resultSet.end());
     
+#ifdef DEBUG      
+    std::cout << "AF Size after removing hebbian links: " << 
+    resultSet.size() << "\n";
+#endif
+
     return resultSet;
 }
 
@@ -451,8 +508,8 @@ SimpleImportanceDiffusionAgent::combineIncidentAdjacentVectors(
     
     // Allocate the remaining diffusion amount to the incident atoms according
     // to the probability vector for the targets
-    for(it_type iterator = adjacentVector.begin(); 
-        iterator != adjacentVector.end(); iterator++)
+    for(it_type iterator = incidentVector.begin(); 
+        iterator != incidentVector.end(); iterator++)
     {
         double diffusionAmount = 
                 diffusionAvailable * iterator->second;
