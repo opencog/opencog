@@ -25,6 +25,7 @@
 #define _MOSES_LOCAL_MOSES_H
 
 #include "../metapopulation/metapopulation.h"
+#include "../metapopulation/deme_expander.h"
 #include "moses_params.h"
 
 namespace opencog {
@@ -34,9 +35,10 @@ using namespace combo;
 
 // A version of moses that runs only on the local host
 // i.e. its not network-distributed.
-void local_moses(metapopulation& mp,
-                 const moses_parameters& pa,
-                 moses_statistics& stats);
+void local_moses(metapopulation&,
+                 deme_expander&,
+                 const moses_parameters&,
+                 moses_statistics&);
 
 } // ~namespace moses
 } // ~namespace opencog

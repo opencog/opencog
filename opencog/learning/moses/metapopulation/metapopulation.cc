@@ -250,7 +250,7 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     if (size() == 1) {
         scored_combo_tree_ptr_set::const_iterator selex = _scored_trees.cbegin();
         const combo_tree& tr = selex->get_tree();
-        if(params.revisit + 1 > _visited_exemplars[tr]) // not enough visited
+        if (params.revisit + 1 > _visited_exemplars[tr]) // not enough visited
             _visited_exemplars[tr]++;
         else selex = _scored_trees.cend();    // enough visited
 

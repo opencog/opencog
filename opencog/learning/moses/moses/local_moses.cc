@@ -43,7 +43,8 @@ using namespace combo;
  * @return return true if expansion has succeeded, false otherwise
  *
  */
-bool expand_deme(metapopulation& mp,
+static bool expand_deme(metapopulation& mp,
+                 deme_expander& dex,
                  int max_evals, time_t max_time,
                  moses_statistics& stats)
 {
@@ -67,25 +68,25 @@ bool expand_deme(metapopulation& mp,
         }
 
         // if create_deme returned true, we are good to go.
-        if (mp._dex.create_demes(exemplar->get_tree(), stats.n_expansions))
+        if (dex.create_demes(exemplar->get_tree(), stats.n_expansions))
             break;
 
         logger().error() << "Exemplar: " << exemplar->get_tree();
         OC_ASSERT(false, "Exemplar failed to expand!\n");
     }
 
-    vector<unsigned> actl_evals = mp._dex.optimize_demes(max_evals, max_time);
+    vector<unsigned> actl_evals = dex.optimize_demes(max_evals, max_time);
     stats.n_evals += boost::accumulate(actl_evals, 0U);
     stats.n_expansions++;
 
-    bool done = mp.merge_demes(mp._dex._demes, mp._dex._reps, actl_evals);
+    bool done = mp.merge_demes(dex._demes, dex._reps, actl_evals);
 
     if (logger().isInfoEnabled()) {
         logger().info() << "Expansion " << stats.n_expansions << " done";
         logger().info() << "Total number of evaluations so far: " << stats.n_evals;
         mp.log_best_candidates();
     }
-    mp._dex.free_demes();
+    dex.free_demes();
 
     // Might be empty, if the eval fails and throws an exception
     return done || mp.empty();
@@ -104,13 +105,14 @@ bool expand_deme(metapopulation& mp,
  * @param pa the parameters to run moses
  */
 void local_moses(metapopulation& mp,
+                 deme_expander& dex,
                  const moses_parameters& pa,
                  moses_statistics& stats)
 {
     logger().info("MOSES starts, max_evals=%d max_gens=%d max_time=%d",
                   pa.max_evals, pa.max_gens, pa.max_time);
 
-    optim_stats *os = dynamic_cast<optim_stats *> (&mp._dex._optimize);
+    optim_stats *os = dynamic_cast<optim_stats *> (&dex._optimize);
 
     // Print legend for the columns of the stats.
     print_stats_header(os, mp.params.diversity.pressure > 0.0);
@@ -125,7 +127,7 @@ void local_moses(metapopulation& mp,
            && (stats.elapsed_secs < pa.max_time))
     {
         // Run a generation
-        bool done = expand_deme(mp,
+        bool done = expand_deme(mp, dex,
                                 pa.max_evals - stats.n_evals, 
                                 pa.max_time - stats.elapsed_secs, 
                                 stats);

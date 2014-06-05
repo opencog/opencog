@@ -58,6 +58,7 @@ class partial_solver
         /// exemplars that moses found, so that we can see if they are
         /// "good enough".
         void operator()(metapopulation &metapop,
+                        deme_expander& dex,
                         moses_statistics& stats)
         {
             _num_evals = stats.n_evals;

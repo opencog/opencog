@@ -34,7 +34,6 @@
 
 #include "../optimization/optimization.h"
 #include "metapop_params.h"
-#include "deme_expander.h"
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 
@@ -65,7 +64,7 @@ void print_stats_header (optim_stats *os, bool diversity_enabled);
  */
 struct metapopulation
 {
-    // XXX shouldn't this bbe scored_combo_tree ??
+    // XXX shouldn't this be scored_combo_tree ??
     typedef std::unordered_map<combo_tree, unsigned,
                                boost::hash<combo_tree> > combo_tree_hash_counter;
 
@@ -91,15 +90,11 @@ struct metapopulation
      * @param pa      Control parameters for this class.
      */
     metapopulation(const std::vector<combo_tree>& bases,
-                   const type_tree& type_signature,
                    const reduct::rule& si_ca,
-                   const reduct::rule& si_kb,
                    const cscore_base& sc,
                    const bscore_base& bsc,
-                   optimizer_base& opt,
                    const metapop_parameters& pa = metapop_parameters()) :
         params(pa),
-        _dex(type_signature, si_ca, si_kb, sc, opt, pa),
         _bscorer(bsc),
         _merge_count(0),
         _best_cscore(worst_composite_score),
@@ -111,13 +106,10 @@ struct metapopulation
     // Like above but using a single base, and a single reduction rule.
     /// @todo use C++11 redirection
     metapopulation(const combo_tree& base,
-                   const type_tree& type_signature,
                    const reduct::rule& si,
                    const cscore_base& sc, const bscore_base& bsc,
-                   optimizer_base& opt,
                    const metapop_parameters& pa = metapop_parameters()) :
         params(pa),
-        _dex(type_signature, si, si, sc, opt, pa),
         _bscorer(bsc),
         _merge_count(0),
         _best_cscore(worst_composite_score),
@@ -499,9 +491,6 @@ struct metapopulation
 public:
     const metapop_parameters& params;
 
-// protected:
-    deme_expander _dex;
- 
 protected:
     scored_combo_tree_ptr_set _scored_trees;
 

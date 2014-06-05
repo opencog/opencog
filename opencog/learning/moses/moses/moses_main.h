@@ -31,6 +31,9 @@
 
 #include <opencog/comboreduct/combo/combo.h>
 
+#include "../metapopulation/deme_expander.h"
+#include "../metapopulation/metapopulation.h"
+
 #include "../optimization/hill-climbing.h"
 #include "../optimization/star-anneal.h"
 #include "../optimization/univariate.h"
@@ -47,9 +50,10 @@ extern const char * version_string;
 /**
  * Run moses
  */
-void run_moses(metapopulation& metapop,
-               const moses_parameters& moses_params,
-               moses_statistics& stats);
+void run_moses(metapopulation&,
+               deme_expander&,
+               const moses_parameters&,
+               moses_statistics&);
 
 /// Print metapopulation results to stdout, logfile, etc.
 struct metapop_printer
@@ -81,6 +85,7 @@ struct metapop_printer
      * Print metapopulation summary.
      */
     void operator()(metapopulation &metapop,
+                    deme_expander& dex,
                     moses_statistics& stats) const
     {
         // We expect the mpi worker processes to have an empty
@@ -126,21 +131,21 @@ struct metapop_printer
             logger().info("Best candidates:\n%s", res.c_str());
     
     #ifdef GATHER_STATS
-        metapop._dex._optimize.hiscore /= metapop._dex._optimize.hicount;
-        metapop._dex._optimize.num_improved /= metapop._dex._optimize.count_improved;
+        dex._optimize.hiscore /= dex._optimize.hicount;
+        dex._optimize.num_improved /= dex._optimize.count_improved;
         logger().info() << "Avg number of improved scores = "
-                        << metapop._dex._optimize.num_improved;
+                        << dex._optimize.num_improved;
         logger().info() << "Avg improved as percentage= "
-                        << 100.0 * metapop._dex._optimize.num_improved /
-                               metapop._dex._optimize.scores.size();
+                        << 100.0 * dex._optimize.num_improved /
+                               dex._optimize.scores.size();
 
-        for (unsigned i=0; i< metapop._dex._optimize.scores.size(); i++) {
-            metapop._dex._optimize.scores[i] /= metapop._dex._optimize.counts[i];
+        for (unsigned i=0; i< dex._optimize.scores.size(); i++) {
+            dex._optimize.scores[i] /= dex._optimize.counts[i];
             logger().info() << "Avg Scores: "
                 << i << "\t"
-                << metapop._dex._optimize.hiscore << "\t"
-                << metapop._dex._optimize.counts[i] << "\t"
-                << metapop._dex._optimize.scores[i];
+                << dex._optimize.hiscore << "\t"
+                << dex._optimize.counts[i] << "\t"
+                << dex._optimize.scores[i];
         }
     #endif
     }
@@ -197,11 +202,11 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
         exit(1);
     }
 
-    metapopulation metapop(bases, tt, si_ca, si_kb, sc, bsc,
-                           *optimizer, meta_params);
+    deme_expander dex(tt, si_ca, si_kb, sc, *optimizer, meta_params);
+    metapopulation metapop(bases, si_ca, sc, bsc, meta_params);
 
-    run_moses(metapop, moses_params, stats);
-    printer(metapop, stats);
+    run_moses(metapop, dex, moses_params, stats);
+    printer(metapop, dex, stats);
     delete optimizer;
 }
 

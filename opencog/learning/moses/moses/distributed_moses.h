@@ -31,6 +31,7 @@
 #include <opencog/util/log_prog_name.h>
 
 #include "../metapopulation/metapopulation.h"
+#include "../metapopulation/deme_expander.h"
 #include "moses_params.h"
 
 namespace opencog { namespace moses {
@@ -144,9 +145,10 @@ bool all_resources_free(const host_proc_map& hpm);
  *
  * @param mp          the metapopulation 
  */
-void distributed_moses(metapopulation& mp,
-                       const moses_parameters& pa,
-                       moses_statistics& stats);
+void distributed_moses(metapopulation&,
+                       deme_expander&,
+                       const moses_parameters&,
+                       moses_statistics&);
 
 } // ~namespace moses
 } // ~namespace opencog

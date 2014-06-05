@@ -29,6 +29,7 @@
 #include <future>
 #include <opencog/util/pool.h>
 
+#include "../metapopulation/deme_expander.h"
 #include "../metapopulation/metapopulation.h"
 #include "moses_params.h"
 
@@ -87,17 +88,19 @@ protected:
 /// This is mono-threaded: i.e. both the send and receive happen
 /// within the main thread.
 //
-void mpi_moses_worker(metapopulation& mp,
-                      moses_mpi_comm& mompi);
+void mpi_moses_worker(metapopulation&,
+                      moses_mpi_comm&);
 
-void mpi_moses(metapopulation& mp,
-               const moses_parameters& pa,
-               moses_statistics& stats);
+void mpi_moses(metapopulation&,
+               deme_expander&,
+               const moses_parameters&,
+               moses_statistics&);
 
 
 #else // HAVE_MPI
 
 static inline void mpi_moses(metapopulation& mp,
+               deme_expander& dex,
                const moses_parameters& pa,
                moses_statistics& stats)
 {

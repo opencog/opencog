@@ -98,16 +98,17 @@ void print_stats_header (optim_stats *os, bool diversity)
 }
 
 void run_moses(metapopulation& metapop,
+               deme_expander& dex,
                const moses_parameters& moses_params,
                moses_statistics& stats)
 {
     // Run moses, either on localhost, or distributed.
     if (moses_params.local)
-        local_moses(metapop, moses_params, stats);
+        local_moses(metapop, dex, moses_params, stats);
     else if (moses_params.mpi)
-        mpi_moses(metapop, moses_params, stats);
+        mpi_moses(metapop, dex, moses_params, stats);
     else
-        distributed_moses(metapop, moses_params, stats);
+        distributed_moses(metapop, dex, moses_params, stats);
 }
 
 
