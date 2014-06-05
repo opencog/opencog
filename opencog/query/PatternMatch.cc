@@ -38,7 +38,7 @@ using namespace opencog;
 
 PatternMatch::PatternMatch(void)
 {
-    atom_space = NULL;
+    _atom_space = NULL;
 }
 
 /* ================================================================= */
@@ -188,6 +188,7 @@ namespace opencog {
 class Instantiator
 {
 	private:
+		AtomSpace *_as;
 		std::map<Handle, Handle> *vmap;
 
 		std::vector<Handle> oset;
@@ -196,7 +197,8 @@ class Instantiator
 		bool did_exec;
 
 	public:
-		AtomSpace *as;
+		Instantiator(AtomSpace* as) : _as(as) {}
+
 		Handle instantiate(Handle& expr, std::map<Handle, Handle> &vars)
 			throw (InvalidParamException);
 };
@@ -205,7 +207,7 @@ Handle Instantiator::execution_link()
 {
 	// This throws if it can't figure out the schema ...
 	// should we try and catch here ?
-	return ExecutionLink::do_execute(as, oset);
+	return ExecutionLink::do_execute(_as, oset);
 
 	// Unkown proceedure type.  Return it, maybe some other
 	// execution-link handler will be able to process it.
@@ -259,7 +261,7 @@ bool Instantiator::walk_tree(Handle expr)
 	// Now create a duplicate link, but with an outgoing set where
 	// the variables have been substituted by their values.
 	TruthValuePtr tv(expr->getTruthValue());
-	Handle sh(as->addLink(t, oset, tv));
+	Handle sh(_as->addLink(t, oset, tv));
 
 	oset = save_oset;
 	oset.push_back(sh);
@@ -325,9 +327,10 @@ class Implicator :
 	public virtual PatternMatchCallback
 {
 	protected:
+		AtomSpace *_as;
 		Instantiator inst;
 	public:
-		AtomSpace *as;
+		Implicator(AtomSpace* as) : _as(as), inst(as) {}
 		Handle implicand;
 		std::vector<Handle> result_list;
 		virtual bool solution(std::map<Handle, Handle> &pred_soln,
@@ -338,7 +341,6 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
                           std::map<Handle, Handle> &var_soln)
 {
 	// PatternMatchEngine::print_solution(pred_soln,var_soln);
-	inst.as = as;
 	Handle h = inst.instantiate(implicand, var_soln);
 	if (Handle::UNDEFINED != h)
 	{
@@ -521,7 +523,7 @@ Handle PatternMatch::do_imply (Handle himplication,
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
-	Handle gl = atom_space->addLink(LIST_LINK, impl->result_list);
+	Handle gl = _atom_space->addLink(LIST_LINK, impl->result_list);
 
 	return gl;
 }
@@ -743,7 +745,10 @@ namespace opencog {
 class DefaultImplicator:
 	public virtual Implicator,
 	public virtual DefaultPatternMatchCB
-{};
+{
+	public:
+		DefaultImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp) {}
+};
 
 } // namespace opencog
 
@@ -754,6 +759,9 @@ class CrispImplicator:
 	public virtual CrispLogicPMCB
 {
 	public:
+		CrispImplicator(AtomSpace* asp) :
+			Implicator(asp), DefaultPatternMatchCB(asp), CrispLogicPMCB(asp)
+		{}
 		virtual bool solution(std::map<Handle, Handle> &pred_soln,
 		                      std::map<Handle, Handle> &var_soln);
 };
@@ -775,7 +783,6 @@ bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
                           std::map<Handle, Handle> &var_soln)
 {
 	// PatternMatchEngine::print_solution(pred_soln,var_soln);
-	inst.as = as;
 	Handle h = inst.instantiate(implicand, var_soln);
 
 	if (h != Handle::UNDEFINED)
@@ -790,12 +797,13 @@ bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
 }
 
 class SingleImplicator:
-    public virtual Implicator,
-    public virtual DefaultPatternMatchCB
+	public virtual Implicator,
+	public virtual DefaultPatternMatchCB
 {
-    public:
-        virtual bool solution(std::map<Handle, Handle> &pred_soln,
-                              std::map<Handle, Handle> &var_soln);
+	public:
+		SingleImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp) {}
+		virtual bool solution(std::map<Handle, Handle> &pred_soln,
+		                      std::map<Handle, Handle> &var_soln);
 };
 
 /**
@@ -805,7 +813,6 @@ class SingleImplicator:
 bool SingleImplicator::solution(std::map<Handle, Handle> &pred_soln,
                           std::map<Handle, Handle> &var_soln)
 {
-	inst.as = as;
 	Handle h = inst.instantiate(implicand, var_soln);
 
 	if (h != Handle::UNDEFINED)
@@ -830,8 +837,7 @@ bool SingleImplicator::solution(std::map<Handle, Handle> &pred_soln,
 Handle PatternMatch::bindlink (Handle himplication)
 {
 	// Now perform the search.
-	DefaultImplicator impl;
-	impl.as = atom_space;
+	DefaultImplicator impl(_atom_space);
 	return do_bindlink(himplication, &impl);
 }
 
@@ -846,8 +852,7 @@ Handle PatternMatch::bindlink (Handle himplication)
 Handle PatternMatch::single_bindlink (Handle himplication)
 {
 	// Now perform the search.
-	SingleImplicator impl;
-	impl.as = atom_space;
+	SingleImplicator impl(_atom_space);
 	return do_bindlink(himplication, &impl);
 }
 
@@ -871,8 +876,7 @@ Handle PatternMatch::single_bindlink (Handle himplication)
 Handle PatternMatch::crisp_logic_bindlink (Handle himplication)
 {
 	// Now perform the search.
-	CrispImplicator impl;
-	impl.as = atom_space;
+	CrispImplicator impl(_atom_space);
 	return do_bindlink(himplication, &impl);
 }
 
@@ -891,8 +895,7 @@ Handle PatternMatch::crisp_logic_bindlink (Handle himplication)
 Handle PatternMatch::imply (Handle himplication)
 {
 	// Now perform the search.
-	DefaultImplicator impl;
-	impl.as = atom_space;
+	DefaultImplicator impl(_atom_space);
 	std::set<Handle> varset;
 	return do_imply(himplication, &impl, varset);
 }
@@ -919,8 +922,7 @@ Handle PatternMatch::imply (Handle himplication)
 Handle PatternMatch::crisp_logic_imply (Handle himplication)
 {
 	// Now perform the search.
-	CrispImplicator impl;
-	impl.as = atom_space;
+	CrispImplicator impl(_atom_space);
 	std::set<Handle> varset;
 	return do_imply(himplication, &impl, varset);
 }

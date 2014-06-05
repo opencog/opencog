@@ -521,14 +521,11 @@ D) The foreach abstraction allows complex iterators to be implemented.
 
 TODO
 ----
- * Performance improvement: The current implementeation can fall
-   into an MxN search if the clauses are not listed in an order
-   where a grounded variable in the previous clause is used as the
-   starting point in the next clause.  This can cause an explosion
-   of the search effort.  Basically, that's broken. Grep for 
-   "joining handle is" ... joining handles should only be grounded
-   variables. (Basically this is a bug...)  This is now partly
-   fixed by the connected_component check, prior to the match starting.
+ * Performance improvement: Steal an idea from DPLL, viz unit_propagate.
+   That is, start with those clauses that have only a single variable
+   in them, ground that, and propagate.  Not sure, I think this could
+   should improve run-time.  Perhaps there are other ideas to steal,
+   e.g. from zChaff? 
 
  * GreaterThanLink is not yet done/working.  Its harder than I thought.
 

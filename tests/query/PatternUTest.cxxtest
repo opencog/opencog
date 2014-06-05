@@ -104,8 +104,7 @@ class PatternUTest: public CxxTest::TestSuite
 class PMCB : public DefaultPatternMatchCB
 {
 	public:
-		AtomSpace *as;
-		PMCB(AtomSpace *_as);
+		PMCB(AtomSpace* as) : DefaultPatternMatchCB(as), found(0) {}
 		virtual bool node_match(Node *, Node *);
 		virtual bool solution(std::map<Handle, Handle> &pred_soln,
 		                      std::map<Handle, Handle> &var_soln);
@@ -114,12 +113,6 @@ class PMCB : public DefaultPatternMatchCB
 		std::map<Handle, Handle> preds;
 		std::map<Handle, Handle> vars;
 };
-
-PMCB::PMCB(AtomSpace* _as)
-{
-	as = _as;
-	found = 0;
-}
 
 bool PMCB::node_match(Node *npat, Node *nsoln)
 {
@@ -194,7 +187,6 @@ void PatternUTest::tearDown(void)
 void PatternUTest::setUp(void)
 {
 	pm.set_atomspace(as);
-	pme.set_atomspace(as);
 
 	// create a gnarly graph
 	hconst_1 = as->addNode(CONCEPT_NODE, "some const concept node 1");

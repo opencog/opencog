@@ -29,7 +29,6 @@
 #include <stack>
 #include <vector>
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog {
@@ -40,9 +39,6 @@ class PatternMatchEngine
 	typedef std::vector<Handle> RootList;
 	typedef std::map<Handle, RootList *> RootMap;
 	typedef std::pair<Handle, RootList *> RootPair;
-
-	protected:
-		AtomSpace *atom_space;
 
 	private:
 		bool prt(Handle& h);
@@ -94,16 +90,11 @@ class PatternMatchEngine
 		std::map<Handle, Handle> var_grounding;
 		std::map<Handle, Handle> clause_grounding;
 
-		// Handle used to denote non-existant grounding.
-		Handle invalid_grounding;
-
-		// callback to report results.
+		// callback to whom the results are reported.
 		PatternMatchCallback *pmc;
 
 	public:
-		PatternMatchEngine(void);
-		void set_atomspace(AtomSpace *);
-		AtomSpace * get_atomspace(void) { return atom_space; } 
+		PatternMatchEngine(void) {}
 
 		// Clear all internal state
 		void clear(void);
