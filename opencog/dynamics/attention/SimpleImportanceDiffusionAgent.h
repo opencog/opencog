@@ -98,6 +98,11 @@ public:
     virtual ~SimpleImportanceDiffusionAgent();
     virtual void run();
     Logger* getLogger();
+    virtual const ClassInfo& classinfo() const { return info(); }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("opencog::SimpleImportanceDiffusionAgent");
+        return _ci;
+    }
 }; // class
 
 typedef std::shared_ptr<SimpleImportanceDiffusionAgent> SimpleImportanceDiffusionAgentPtr;
