@@ -51,7 +51,7 @@ private:
     Factory<ImportanceDiffusionAgent, Agent> diffusionFactory;
 #endif
     Factory<ImportanceUpdatingAgent, Agent>  updatingFactory;
-    Factory<SimpleImportanceDiffusionAgent, Agent>  simpleDiffusionFactory;
+    Factory<SimpleImportanceDiffusionAgent, Agent> simpleDiffusionFactory;
 
 public:
 
