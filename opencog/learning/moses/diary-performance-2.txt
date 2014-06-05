@@ -1,0 +1,212 @@
+
+    Diary of MOSES performance and Enhancement Work
+    -----------------------------------------------
+       Linas Vepstas -- started June 2014
+
+
+Diary of notes, thoughts, measurements, pertaining to work on MOSES.
+
+Boosting in MOSES
+-----------------
+There are several very different ways of envisioning boosting in MOSES,
+each being more or less compatible with the formal definition of
+boosting. See http://en.wikipedia.org/wiki/Boosting_(meta-algorithm)
+
+The formal definition of boosting invokes the idea of a weighted
+ensemble of 'weak learners'.  Each member of the ensemble is given a
+weight, with the weights being issued so as to minimize the total error
+of the prediction being made by the ensemble. The accuracy of the
+ensemble is then measured, and used to identify those samples in the
+training set that are being classified incorrectly.  New weak learners
+are then trained, with an emphasis on correctly classifying those
+samples that were gotten incorrect by the ensemble.
+
+For MOSES, it appropriate definition of 'ensemble' is ambiguous.
+The ensemble can be: 
+
+  A) The set of instances in the current deme
+  B) The evolutionary history of a given exemplar
+  C) The collection of combo trees (exemplars) in the metapopulation.
+  D) Some combination of the above.
+
+Let's recall the definition of an exemplar, a deme, and a
+metapopulation.
+
+ *) An 'exemplar' is a single, fixed combo tree.  It has some
+    evolutionary heritage, having evolved from earlier trees.
+
+ *) The metapopulation is the current collection of the fittest
+    (most accurate) exemplars.
+
+ *) A deme is an exemplar that has been decorated with knobs, together
+    with a large set of possible knob settings (instances).  Each
+    instance is conceptually a single combio tree, that differs
+    structurally from its parent exemplar in some 'minor' way.
+
+Lets look at how the boosting algo would work for each scenario. But
+first, lets sketch the current 'hill-climbing' algo, as currently
+performed by MOSES.
+
+--------------
+Hill-climbing) The current canonical algo.
+
+ H.1) Select an exemplar from the metapopulation.
+ H.2) Generate N instances by turning N knobs.
+ H.3) Score all N instances, using a uniform weight on all samples.
+ H.4) Select the highest-scoring instance. (this is the hill-climb).
+ H.5) Go to step H.2
+
+ H.6) Terminate above loop in some way. (e.g. top of hill reached)
+ H.7) Put M of the top-scoring instances into the metapopulation.
+ H.8) Go to step H.1
+
+ H.9) Terminate above loop in some way.
+ H.10) Use the top K exemplars in the metapopulation to create a
+       traditional ensemble, for off-line prediction/classification.
+
+
+--------------
+Scenario A) The set of instances is an ensemble.  In this scenario, the
+boosting algorithm becomes a variant the current 'hill-climbing' algo.
+The steps are numbered below so that they correspond to the
+hill-climbing steps. To summarize: step H.3 is replaced by the Boost
+algo, so that H.3 is a bunch of steps.
+
+ A.1) Select an exemplar from the metapopulation. (same as H.1)
+ A.2) Generate N instances by turning N knobs. (same as H.2)
+ A.3.1) Score all N instances, using a uniform weight on all samples.
+ A.3.2) Pick the best instance, per boost, add it to the ensemble.
+ A.3.3) Score the ensemble, see which samples are mis-predicted.
+ A.3.4) Adjust per-sample weight based on ensemble mis-prediction
+ A.3.5) Re-score remaining N-1 instances with new weighted scorer.
+ A.3.6) Go to step A.3.2
+
+ A.3.7) Terminate above loop using some criteria,
+ A.4) Select the highest-scoring instance, based on the weighted
+      scorer available at termination time.
+ A.5) Go to step A.2 (Same as H.5)
+
+ A.6.1) Terminate above loop in some way. (e.g. top of hill reached)
+ A.6.2) Discard all row-weights.
+ A.7) Put M of the top-scoring instances into metapop.  (Same as H.7)
+ A.8) Go to step A.1 (Same as H.8)
+
+ A.9) Same as H.9
+ A.10) Same as H.10
+
+The above seems to make sense, and is fully compatible with the formal
+definition of boosting. However, step A.4 seems somewhat strange. Lets
+ponder it.
+
+In step A.4, we pick the instance with the highest weighted score,
+rather than the instance with the highest overall accuracy. What does
+this mean?  What effect does this have?  Well, it selects for an
+instance that gets right what previous instances got wrong.  By the time
+that we get past step A.7, what we've done is to create M exemplars that
+got things right that the initial exemplar did not.  Do any of these M
+exemplars have a better absolute value accuracy score than the initial
+exemplar? Unclear.  So we have research question 1:
+
+ RQ.1) Compare the 'raw' score of the M exemplars from step A.7 to the
+       score from ordinary hill-climbing H.7.  Is it possible that the
+       weighted hill-climb of step A.4 somehow avoided a plateau that
+       H.4 may have gotten stuck in?  viz. Can scenario A) boosting
+       actually outperform ordinary hill-climbing? (At each step?)
+
+ RQ.2) Is the final metapopulation of A.10 stronger/fitter/better than
+       that of H.10, given same amount of CPU time?  (Hill-climbing is
+       less CPU intensive, so can perform more iterations).
+
+--------------
+Secnario B) The ensemble is the evolutionary history of an exemplar.
+
+There's actually two Scenario B's. So:
+
+----
+Scenario Ba) Just like Scenario A, except that at step A.6.2, we save
+the final weights, associate them with this particular exemplar.  These
+weights are then used in step A.3.1, instead of a uniform distribution.
+
+This begs the question:
+  RQ.3) Is scenario Ba better than plain-A?  It seems to offer some kind
+        of continuinty with what came before, but does that matter?  The
+        only reason the top-of-hill A.6.1 is evaded is because the knobs
+        are all different ...
+
+----
+Scenario Bh) Just like plain-old hill-climbing H, except that steps H.3
+and H.7 are modified. Step H.7 is replaced by the boost algo, with step
+H.3 using the appropriate boosting scoring function.
+
+ Bh.1) Select an exemplar from the metapopulation. (Same as H.1)
+ Bh.2) Generate N instances by turning N knobs. (Same as H.2)
+ Bh.3x) Score all N instances, using a weight distribution that was
+        previously saved with the exemplar.
+ Bh.4) Select the highest-scoring instance. (Same as H.4)
+ Bh.5) Go to step Bh.2 (Same as H.5)
+
+ Bh.6) Terminate above loop in some way. (e.g. top of hill reached)
+ Bh.7.1) Select M top-scoring instances. 
+ Bh.7.2) Add that instance to an ensemble that contains its parent.
+ Bh.7.3) Update row weights for this ensemble.
+ Bh.7.4) Place the ensemble into the metapopulation.
+ Bh.8) Go to step Bh.1 (Same as step H.8)
+
+Here, the ensemble consists only of an exemplar, and all of its parents
+from which it is descended.  These seems to be rather thin.  The problem
+is that step 6-8 don't happen that often -- and so the ensembles never
+get very big.  Naively, boosting would seem to work best when the
+ensembles have many members. This begs the question:
+
+ RQ.4) How big to the ensembles get, for the Bh approach?
+
+and 
+ RQ.5) Same as RQ.2 -- net-net, is this better?
+
+--------------
+Secnario C) The entire metapopulation is the ensemble.
+
+Again, this is a variant of the canonical hill-climbing algo, with
+modifications show below.  To summarize, step H.7 is replaced by the
+boost algo.  Unlike Bh.7, though, the ensemble is the entire metapop.
+
+ C.1) Select an exemplar from the metapopulation. (Same as H.1)
+ C.2) Generate N instances by turning N knobs. (Same as H.2)
+ C.3x) Score all N instances, weights from the metapop.
+ C.4) Select the highest-scoring instance. (Same as H.4)
+ C.5) Go to step C.2 (Same as H.5)
+
+ C.6) Terminate above loop in some way. (Same as H.6)
+ C.7.1) From 1 till M, do:
+ C.7.2) Pick the best instance, per boost, add it to the metapop.
+ C.7.3) Score the whole metapop, see which samples are mis-predicted.
+ C.7.4) Adjust per-sample weight based on ensemble mis-prediction
+ C.7.5) Re-score remaining M-1 instances with new weighted scorer.
+ C.7.6) Go to step C.7.2
+
+ C.8) Go to step C.1 (Same as H.8)
+
+ C.9) Terminate above loop in some way. (Same as H.9)
+ C.10) Use the top K exemplars in the metapopulation to create a
+       traditional ensemble, for off-line prediction/classification.
+
+Since, in all scenarios, it is step C.10 that is providing the final
+ensemble that will be deployed (or evaluated on the test set), it seems
+to me to me that pursuing scenario C first is the course of action that
+makes the most sense.
+
+---------
+How to implement Scenario C:
+- Add single weight to scored combo tree. 
+- Maintain a weight column .. where? In CTable? No...
+
+
+
+
+
+
+What is a deme_t?
+
+typedef instance_set<composite_score> deme_t;
+struct instance_set : public vector<scored_instance<ScoreT> >
+All instances in instance set have same field description.

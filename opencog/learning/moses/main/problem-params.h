@@ -99,17 +99,18 @@ struct problem_params : public option_base
 
     // metapop_param
     int max_candidates;
-    bool reduce_all;
     int revisit;
+    bool reduce_all;
+    bool linear_regression;
+    bool boosting;
     double noise;
     score_t complexity_temperature;
     score_t complexity_ratio;
     double cap_coef;
     unsigned cache_size;
-    bool linear_regression;
     double perm_ratio;
     
-    // diversity parameters
+    // metapopulation diversity parameters
     bool include_dominated;
     score_t diversity_pressure;
     score_t diversity_exponent;
