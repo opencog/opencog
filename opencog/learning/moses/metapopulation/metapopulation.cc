@@ -54,13 +54,11 @@ using namespace combo;
 
 // Init the metapopulation with the following set of exemplars.
 void metapopulation::init(const std::vector<combo_tree>& exemplars,
-                          const reduct::rule& simplify_candidate,
                           const cscore_base& cscorer)
 {
     scored_combo_tree_set candidates;
     for (const combo_tree& base : exemplars) {
         combo_tree si_base(base);
-        simplify_candidate(si_base);
 
         behavioral_score bs(_bscorer(si_base));
         // XXX Compute the bscore a second time.   The first time

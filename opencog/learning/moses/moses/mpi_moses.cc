@@ -394,6 +394,7 @@ worker_pool::worker_pool(int num_workers)
 /// version (below) needs.
 ///
 void mpi_moses(metapopulation& mp,
+               deme_expander& dex,
                const moses_parameters& pa,
                moses_statistics& stats)
 {
@@ -404,7 +405,7 @@ void mpi_moses(metapopulation& mp,
 
     // main worker dispatch loop
     if (!mompi.is_mpi_root()) {
-        mpi_moses_worker(mp, mompi);
+        mpi_moses_worker(mp, dex, mompi);
         return;
     }
 
@@ -524,6 +525,7 @@ theend:
 /// Not clear if such a consolidation is worth-while...
 //
 void mpi_moses(metapopulation& mp,
+               deme_expander& dex,
                const moses_parameters& pa,
                moses_statistics& stats)
 
@@ -535,7 +537,7 @@ void mpi_moses(metapopulation& mp,
 
     // Worker or dispatcher?
     if (!mompi.is_mpi_root()) {
-        mpi_moses_worker(mp, mompi);
+        mpi_moses_worker(mp, dex, mompi);
         return;
     }
 

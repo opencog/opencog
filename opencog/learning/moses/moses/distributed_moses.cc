@@ -354,6 +354,7 @@ bool all_resources_free(const host_proc_map& hpm)
 }
 
 void distributed_moses(metapopulation& mp,
+                       deme_expander& dex,
                        const moses_parameters& pa,
                        moses_statistics& stats)
 {

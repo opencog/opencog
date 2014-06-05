@@ -89,6 +89,7 @@ protected:
 /// within the main thread.
 //
 void mpi_moses_worker(metapopulation&,
+                      deme_expander&,
                       moses_mpi_comm&);
 
 void mpi_moses(metapopulation&,

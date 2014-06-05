@@ -202,8 +202,12 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
         exit(1);
     }
 
+    // This seems kind of cheesy ... shouldn't the exemplars 
+    // already be simplified, by now?
+    for (const combo_tree& xmplr: bases) si_ca(xmplr);
+
     deme_expander dex(tt, si_ca, si_kb, sc, *optimizer, meta_params);
-    metapopulation metapop(bases, si_ca, sc, bsc, meta_params);
+    metapopulation metapop(bases, sc, bsc, meta_params);
 
     run_moses(metapop, dex, moses_params, stats);
     printer(metapop, dex, stats);

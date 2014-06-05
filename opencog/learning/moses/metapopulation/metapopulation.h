@@ -70,7 +70,6 @@ struct metapopulation
 
     // Init the metapopulation with the following set of exemplars.
     void init(const std::vector<combo_tree>& exemplars,
-              const reduct::rule& simplify_candidate,
               const cscore_base& cscorer);
 
     /**
@@ -90,7 +89,6 @@ struct metapopulation
      * @param pa      Control parameters for this class.
      */
     metapopulation(const std::vector<combo_tree>& bases,
-                   const reduct::rule& si_ca,
                    const cscore_base& sc,
                    const bscore_base& bsc,
                    const metapop_parameters& pa = metapop_parameters()) :
@@ -100,13 +98,12 @@ struct metapopulation
         _best_cscore(worst_composite_score),
         _cached_dst(pa.diversity)
     {
-        init(bases, si_ca, sc);
+        init(bases, sc);
     }
 
     // Like above but using a single base, and a single reduction rule.
     /// @todo use C++11 redirection
     metapopulation(const combo_tree& base,
-                   const reduct::rule& si,
                    const cscore_base& sc, const bscore_base& bsc,
                    const metapop_parameters& pa = metapop_parameters()) :
         params(pa),
@@ -116,7 +113,7 @@ struct metapopulation
         _cached_dst(pa.diversity)
     {
         std::vector<combo_tree> bases(1, base);
-        init(bases, si, sc);
+        init(bases, sc);
     }
 
     ~metapopulation() {}
