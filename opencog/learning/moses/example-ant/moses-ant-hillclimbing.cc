@@ -35,6 +35,8 @@
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 
+#include "../metapopulation/deme_expander.h"
+#include "../metapopulation/metapopulation.h"
 #include "../moses/moses_main.h"
 #include "../optimization/optimization.h"
 #include "../scoring/scoring_base.h"
@@ -103,13 +105,14 @@ int main(int argc,char** argv)
     hc_params.crossover = true;
     hill_climbing hc(opt_params, hc_params);
 
-    metapopulation metapop(combo_tree(id::sequential_and), tt, action_reduction(),
-                           cscorer, bscorer, hc, metaparms);
+    deme_expander dex(tt, action_reduction(), action_reduction(), cscorer, hc, metaparms);
+    metapopulation metapop(combo_tree(id::sequential_and), 
+                           cscorer, bscorer, metaparms);
   
     boost::program_options::variables_map vm;
 
     moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0, 100);
     moses_statistics st;
-    run_moses(metapop, moses_param, st);
+    run_moses(metapop, dex, moses_param, st);
 }
 

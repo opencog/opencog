@@ -6,6 +6,9 @@
 
 #include <opencog/comboreduct/interpreter/eval.h>
 
+#include "../metapopulation/deme_expander.h"
+#include "../metapopulation/metapopulation.h"
+
 #include "../moses/moses_main.h"
 #include "../scoring/scoring.h"
 #include "../optimization/optimization.h"
@@ -67,13 +70,14 @@ int main(int argc, char** argv)
         si = &(clean_reduction());
 
     univariate_optimization univ;
-    metapopulation metapop(tr, tt, *si, cscore, bscore, univ);
+    deme_expander dex(tt, *si, *si, cscore, univ);
+    metapopulation metapop(tr, cscore, bscore);
 
     boost::program_options::variables_map vm;
     jobs_t jobs;
     moses_parameters moses_param(vm, jobs, true, max_evals);
     moses_statistics st;
-    run_moses(metapop, moses_param, st);
+    run_moses(metapop, dex, moses_param, st);
 
     //transform the best combo tree into an ANN
     tree_transform trans; 

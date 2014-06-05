@@ -58,15 +58,14 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars,
 {
     scored_combo_tree_set candidates;
     for (const combo_tree& base : exemplars) {
-        combo_tree si_base(base);
 
-        behavioral_score bs(_bscorer(si_base));
+        behavioral_score bs(_bscorer(base));
         // XXX Compute the bscore a second time.   The first time
         // was immediately above.  We do it again, because the
         // caching scorer lacks the correct signature.
         // composite_score csc(_cscorer (pbs, tree_complexity(si_base)));
-        composite_score csc(cscorer(si_base));
-        scored_combo_tree sct(si_base, demeID_t(), csc, bs);
+        composite_score csc(cscorer(base));
+        scored_combo_tree sct(base, demeID_t(), csc, bs);
 
         candidates.insert(sct);
     }
