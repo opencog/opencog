@@ -11,7 +11,7 @@
 ; Check if a word instance can be removed
 (define (cleanable? word-inst)
 	(or
-		(definite? word-inst)
+		(and (not (definite? word-inst)) (word-inst-match-pos? word-inst "noun"))
 		(word-inst-match-pos? word-inst "adj")
 		(word-inst-match-pos? word-inst "adv")
 	)
@@ -50,12 +50,12 @@
 ; Clean up word instances from rules output if applicable
 (define (clean-up-inst word-inst)
 	; find the WordNode of this instance
-	(define word-node (car (word-inst-get-word word-inst)))
+	(define word-node (word-inst-get-lemma word-inst))
 	; find the ConceptNode of this word instance
 	(define word-inst-concept (cog-node 'ConceptNode (cog-name word-inst)))
 	; find the ConceptNode of this word node
 	(define word-node-concept (cog-node 'ConceptNode (cog-name word-node)))
-
+	
 	(cond
 		((cleanable? word-inst)
 			; delete the InheritanceLink linking the instance with the word
