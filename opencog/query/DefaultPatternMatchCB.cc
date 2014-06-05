@@ -124,13 +124,6 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
 	return hdeepest;
 }
 
-bool DefaultPatternMatchCB::loop_candidate(Handle h)
-{
-	dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-	dbgprt("Loop candidate: %s\n", h->toShortString().c_str());
-	return _pme->do_candidate(_root, _starter_pred, h);
-}
-
 /**
  * Search for solutions/groundings over all of the AtomSpace, using
  * some "reasonable" assumptions for what might be searched for. Or,
@@ -179,8 +172,6 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
                          std::vector<Handle> &clauses,
                          std::vector<Handle> &negations)
 {
-	_pme = pme;
-
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
 	// iterating over the incoming set of the node, and so, if it is
@@ -227,7 +218,10 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 		IncomingSet iset = get_incoming_set(best_start);
 		size_t sz = iset.size();
 		for (size_t i = 0; i < sz; i++) {
-			bool rc = loop_candidate(Handle(iset[i]));
+			Handle h(iset[i]);
+			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+			dbgprt("Loop candidate: %s\n", h->toShortString().c_str());
+			bool rc = pme->do_candidate(_root, _starter_pred, h);
 			if (rc) break;
 		}
 	}
@@ -247,9 +241,18 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 		// the different clauses, and find the one with the smallest number
 		// of atoms of that type, or otherwise try to find a small ("thin")
 		// incoming set to search over.
-		AtomSpace *as = _pme->get_atomspace();
-		as->foreach_handle_of_type(ptype,
-		      &DefaultPatternMatchCB::loop_candidate, this);
+		std::list<Handle> handle_set;
+		_atom_space->getHandlesByType(back_inserter(handle_set), ptype);
+		std::list<Handle>::iterator i = handle_set.begin();
+		std::list<Handle>::iterator iend = handle_set.end();
+		for (; i != iend; i++)
+		{
+			Handle h(*i);
+			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+			dbgprt("Loop candidate: %s\n", h->toShortString().c_str());
+			bool rc = pme->do_candidate(_root, _starter_pred, h);
+			if (rc) break;
+		}
 	}
 }
 

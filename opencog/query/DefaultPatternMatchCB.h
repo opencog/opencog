@@ -26,7 +26,7 @@
 #define _OPENCOG_DEFAULT_PATTERN_MATCH_H
 
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 
@@ -47,7 +47,10 @@ class DefaultPatternMatchCB :
 		DefaultPatternMatchCB(void)
 		{
 			_type_restrictions = NULL;
+			_atom_space = NULL;
 		}
+
+		void set_atomspace(AtomSpace*as) { _atom_space = as; }
 
 		/**
 		 * Called when a node in the template pattern needs to
@@ -164,10 +167,9 @@ class DefaultPatternMatchCB :
 		Handle _root;
 		Handle _starter_pred;
 		Handle find_starter(Handle, size_t&, Handle&, size_t&);
-		bool loop_candidate(Handle);
 		VariableTypeMap *_type_restrictions;
 	protected:
-		PatternMatchEngine *_pme;
+		AtomSpace *_atom_space;
 };
 
 } // namespace opencog

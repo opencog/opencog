@@ -47,19 +47,6 @@ using namespace opencog;
 #endif
 #endif
 
-PatternMatchEngine::PatternMatchEngine(void)
-{
-	atom_space = NULL;
-}
-
-void PatternMatchEngine::set_atomspace(AtomSpace *as)
-{
-	atom_space = as;
-
-	HandleSeq oset;
-	invalid_grounding = as->addLink(LINK, oset);
-}
-
 bool PatternMatchEngine::prt(Handle& h)
 {
 	std::string str = h->toShortString();
@@ -413,7 +400,7 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 				if (no_match) return false;
 
 				// XXX Maybe should push n pop here? No, maybe not ...
-				clause_grounding[curr_root] = invalid_grounding;
+				clause_grounding[curr_root] = Handle::UNDEFINED;
 				get_next_untried_clause();
 				prtmsg("Next optional clause is", curr_root);
 				if (Handle::UNDEFINED == curr_root)
@@ -601,7 +588,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		{
 			Handle root(*i);
 			Handle root_gnd(clause_grounding[root]);
-			if (Handle::UNDEFINED != root_gnd and root_gnd != invalid_grounding)
+			if (Handle::UNDEFINED != root_gnd)
 			{
 				solved = true;
 			}
