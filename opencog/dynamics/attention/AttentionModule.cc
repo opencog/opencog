@@ -42,7 +42,7 @@ AttentionModule::AttentionModule(CogServer& cs) :
 #endif
     _cogserver.registerAgent(ImportanceSpreadingAgent::info().id, &spreadingFactory);
     _cogserver.registerAgent(ImportanceUpdatingAgent::info().id,  &updatingFactory);
-    _cogserver.registerAgent(SimpleImportanceDiffusionAgent::info().id,  &updatingFactory);
+    _cogserver.registerAgent(SimpleImportanceDiffusionAgent::info().id,  &simpleDiffusionFactory);
 }
 
 AttentionModule::~AttentionModule()
