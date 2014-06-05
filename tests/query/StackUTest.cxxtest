@@ -64,7 +64,7 @@ class TestPMCB :
 	int lcnt;
 	int scnt;
 	Handle anch;
-	TestPMCB(void) {  lcnt = 0; scnt = 0; }
+	TestPMCB(AtomSpace* as) : DefaultPatternMatchCB(as), lcnt(0), scnt(0) {}
 
 	virtual bool clause_match(Handle& pattrn, Handle& grnd)
 	{
@@ -106,7 +106,6 @@ void StackUTest::tearDown(void)
 void StackUTest::setUp(void)
 {
 	as = new AtomSpace();
-	pme.set_atomspace(as);
 
 	// Create an implication link that will be tested.
 	p1 = al(ORDERED_LINK,
@@ -169,7 +168,7 @@ void StackUTest::test_stack(void)
 
 	std::vector<Handle> negs;
 
-	TestPMCB pmcb;
+	TestPMCB pmcb(as);
 	pmcb.anch = anch;
 	pme.match(&pmcb, vars, preds, negs);
 
