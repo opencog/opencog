@@ -14,6 +14,7 @@ IF (GSL_FOUND)
 	ADD_CXXTEST(ImportanceDiffusionAgentUTest)
 ENDIF (GSL_FOUND)
 ADD_CXXTEST(HebbianCreationModuleUTest)
+ADD_CXXTEST(SimpleImportanceDiffusionAgentUTest)
 
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/dynamics/scm/example-1-evaluation-link.scm
-    ${PROJECT_BINARY_DIR}/tests/dynamics/scm/example-1-evaluation-link.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/dynamics/scm/example-1.scm
+    ${PROJECT_BINARY_DIR}/tests/dynamics/scm/example-1.scm)
