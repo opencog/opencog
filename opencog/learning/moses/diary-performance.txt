@@ -119,11 +119,11 @@ these.
 
 ++ Lessons from the AntUTest: For some problems (such as the ant Santa
    Fe trail), the distance from a false local maximum to the nearest
-   pass the leads to the true maximum can be very large. This requires
-   setting a correspondly large temperature, so that the stochastic
-   Boltzmann distribution can hop out of the local minimum at least
-   once every three times (but not much more often than that.) The notes
-   at the bottom show how to do this.
+   pass that leads to the true maximum (the saddle) can be very large.
+   This requires setting a correspondly large temperature, so that the
+   stochastic Boltzmann distribution can hop out of the local minimum at
+   least once every three times (but not much more often than that.) The
+   notes at the bottom show how to do this.
 
    The complexity penalty also plays a large role in limiting the total
    size of the search space.  Basically, the size of the search space

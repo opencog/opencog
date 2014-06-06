@@ -305,7 +305,8 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "used to select the next exemplar out of the metapopulaton. "
          "A temperature that is too high or too low will make it likely "
          "that poor exemplars will be chosen for exploration, thus "
-         "resulting in excessively long search times.\n")
+         "resulting in excessively long search times. See the man "
+         "page for more info.\n")
 
         (opt_desc_str(complexity_ratio_opt).c_str(),
          po::value<score_t>(&complexity_ratio)->default_value(3.5),
@@ -320,7 +321,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "solutions, adversely lengthening solution times.  "
          "Suggest setting this to a value that is 1x to 2x larger than "
          "the ratio of change in complexity to score improvement (as "
-         "determined by earlier runs).\n")
+         "determined by earlier runs). See the man page for more info.\n")
 
         ("cap-coef",
          po::value<double>(&cap_coef)->default_value(50.0),
