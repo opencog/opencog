@@ -12,14 +12,14 @@
 ;    R A B
 ;----------------------------------------------------------------------
 
-(define pln-rule-contextualize-implication
+(define pln-rule-contextualize-inheritance
     (BindLink
         (ListLink
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C"))
             (ImplicationLink
-                (ImplicationLink
+                (InheritanceLink
                     (AndLink
                         (VariableNode "$C")
                         (VariableNode "$A"))
@@ -40,7 +40,7 @@
                                 (InheritanceLink
                                     (VariableNode "$A")
                                     (VariableNode "$B")))
-                            (ImplicationLink
+                            (InheritanceLink
                                 (AndLink
                                     (VariableNode "$C")
                                     (VariableNode "$A"))
