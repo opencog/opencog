@@ -48,7 +48,8 @@ public:
     AntUTest() {
         // Logger setting
         logger().setPrintToStdoutFlag(true); 
-        logger().setLevel(Logger::DEBUG);        
+        // logger().setLevel(Logger::DEBUG);        
+        logger().setLevel(Logger::INFO);        
     }
 
     void test_ant() {
@@ -59,16 +60,11 @@ public:
         // The performance of AntUTest is very highly dependent on the
         // initial random number seed. At the time of this writing, some
         // seeds result in a solution being found in a few seconds or
-        // less, while others take at least minutes, maybe hours. The
+        // less, while others take at least minutes, or longer. The
         // bottom of the file opencog/learning/moses/diary-performance.txt
         // provides more information.
         //
-        // I think that this behaviour is due to a poor design in the
-        // demo/test; either the learner gets lucky, early and fast, or
-        // it gets lost, and wanders aimlessly forevermore.  This is not
-        // representative of "typical" learning tasks. (Linas June 2014)
-        //
-        int rand_seed = 6;
+        int rand_seed = 10;
         randGen().seed(rand_seed);
 
         // Multi-thread
@@ -82,8 +78,8 @@ public:
 
         ant_bscore bscorer;
 
-        // Hmmm...
-        double complexity_ratio = 3.5;
+        // See the diary for the complexity ratio.
+        double complexity_ratio = 0.16;
         bscorer.set_complexity_coef(complexity_ratio);
         behave_cscore cscorer(bscorer);
 
@@ -101,13 +97,13 @@ public:
         demeparms.actions = &actions;
 
         metapop_parameters metaparms;
-        metaparms.complexity_temperature = 50.0;  // See diary entry
+        metaparms.complexity_temperature = 2000;  // See diary entry
 
         // Define optimization algo
         optim_parameters opt_params;
         hc_parameters hc_params;
-        hc_params.widen_search = true;
-        hc_params.crossover = true;      // same as default
+        hc_params.widen_search = false;  // Same as default
+        hc_params.crossover = true;      // Same as default
         hill_climbing hc(opt_params, hc_params);
 
         deme_expander dex(tt, action_reduction(),

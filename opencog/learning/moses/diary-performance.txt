@@ -1,7 +1,7 @@
 
 Diary of performance measurements and tuning for MOSES
 ------------------------------------------------------
-    Linas Vepstas -- January 2012 - August 2013
+    Linas Vepstas -- January 2012 - June 2014
 
 Maintained by Linas Vepstas.  Started January 2012.  A summary
 of lessons learned is immediately below.   The rest is a diary,
@@ -115,6 +115,27 @@ these.
 
    (Note: As of June 2014, the AntUTest is hitting this bug. See very
    bottom of this file for details.)
+
+
+++ Lessons from the AntUTest: For some problems (such as the ant Santa
+   Fe trail), the distance from a false local maximum to the nearest
+   pass the leads to the true maximum can be very large. This requires
+   setting a correspondly large temperature, so that the stochastic
+   Boltzmann distribution can hop out of the local minimum at least
+   once every three times (but not much more often than that.) The notes
+   at the bottom show how to do this.
+
+   The complexity penalty also plays a large role in limiting the total
+   size of the search space.  Basically, the size of the search space
+   increases exponentially as the complexity.  For the ant problem, it
+   seems that even a small change in complexity results in a large change
+   of the search space (Its very probable that the complexity of the ant
+   problem is not being measured correctly).  Thus, for the ant problem,
+   it is also very important to sharply limit the complexity, by using
+   a large complexity penalty. If this is not done, then MOSES will again
+   get trapped in some local maximum, exploring very complex solutions
+   that are far away from the true maximum.  Such premature
+   over-specialization is to be avoided.
    
 
 ++ Better population control; skip behavioral score computation.
@@ -4087,9 +4108,45 @@ maximum is surrounded by steep sides, so steep that even fairly large
 complexity penalties are insufficient to get back to a place where
 the lucky good path can be found.
 
-Hmmm
+Hmmm. The best solution has a height of 89, and complexity 11.  The
+local trap(s) have a hieght of about 60-70, and complexity 20-30. This
+suggests that Boltzman needs to backtrack by a score of about 60,
+suggesting that a temperature of about T=2000 (= 0.3 * 60 * 100) is
+needed. The complexity penalty has to be very stiff, too: so a 
+complexity difference of 10 needs to be like a score of 60, so the
+compexity coeff needs to be 6.0, which means the complexity-ratio of
+about 0.16 = 1/6.  Lets try that, see what happens ...
 
-Thus, its maybe not a very good topic for optimization (i.e. since 
-"realistic" food distributions would not be set out in an easy-to-follow
-trail.)  Basically: leave this one alone, its not worth the effort.
+The super-hot penalty below. The params are:
+        double complexity_ratio = 0.16;
+        metaparms.complexity_temperature = 2000;
+        hc_params.widen_search = false;
+        hc_params.crossover = true;
 
+
+
+  rand      super hot
+  seed      penalty
+  ----      --------   
+   1         20 secs
+   2         58 secs
+   3         16 secs
+   4       >500 secs
+   5         30 secs
+   6          2 secs
+   7       >400 secs
+   8       >400 secs
+   9        170 secs
+  10          1 secs
+
+Woo hoo!  I call that success!  Basically, by estimating the distance 
+from peak to mountain-pass, we get a sense of the correct temperature
+needed to hop out of the local maximum on smoe regular basis.  Next,
+by comparing the known solution complexity to the typical complexity
+at the local maximum, we find out how to penalize the complexity so that
+we don't get stuck exploring inappropriately complex solutions. (Right?
+This point might not be completely obvious:  the more complex the
+solution, the larger the size of the total space that needs to be
+searched -- its exponentially larger.   So, a high complexity penalty
+has the effect of reducing the size of the space that needs to be
+searched.)

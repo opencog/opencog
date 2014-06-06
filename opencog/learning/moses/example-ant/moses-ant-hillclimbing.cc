@@ -50,6 +50,15 @@ using namespace boost;
 using namespace ant_combo;
 using namespace std;
 
+// This demo is nearly identical to the AntUTest unit test.
+//
+// The performance of this demo is very highly dependent on the
+// initial random number seed. At the time of this writing, some
+// seeds result in a solution being found in a few seconds or
+// less, while others take at least minutes, or longer. The
+// bottom of the file opencog/learning/moses/diary-performance.txt
+// provides more information.
+
 int main(int argc,char** argv)
 {
     int max_evals,rand_seed;
@@ -78,9 +87,12 @@ int main(int argc,char** argv)
     logger().setFilename(log_file);
 
     type_tree tt(id::lambda_type);
-    tt.append_children(tt.begin(),id::action_result_type,1);
+    tt.append_children(tt.begin(), id::action_result_type, 1);
 
-    ant_bscore bscorer(simplicity_pressure);
+    ant_bscore bscorer;
+    // See the diary for the complexity ratio.
+    double complexity_ratio = 0.16;
+    bscorer.set_complexity_coef(complexity_ratio);
     behave_cscore cscorer(bscorer);
 
     combo_tree_ns_set perceptions;
@@ -97,17 +109,17 @@ int main(int argc,char** argv)
     demeparms.actions = &actions;
 
     metapop_parameters metaparms;
-    metaparms.complexity_temperature = 100;
+    metaparms.complexity_temperature = 2000;  // See diary entry
 
     // Define optimization algo
     optim_parameters opt_params;
-    opt_params.max_dist = 3;
     hc_parameters hc_params;
-    hc_params.widen_search = true;
-    hc_params.crossover = true;
+    hc_params.widen_search = false;  // Same as default
+    hc_params.crossover = true;      // Same as default
     hill_climbing hc(opt_params, hc_params);
 
-    deme_expander dex(tt, action_reduction(), action_reduction(), cscorer, hc, demeparms);
+    deme_expander dex(tt, action_reduction(),
+                          action_reduction(), cscorer, hc, demeparms);
     metapopulation metapop(combo_tree(id::sequential_and),
                            cscorer, bscorer, metaparms);
 
