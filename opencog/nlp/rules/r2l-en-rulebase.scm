@@ -11,31 +11,33 @@
 )
 
 ; This is to avoid repeatitive definition of mutually exclusive rules.
-(ContextLink
-    (ConceptNode "R2l-en-RuleBase")
-    (ForAllLink
-        (ListLink
-            (VariableNode "$X")
-            (VariableNode "$Y")
-        )
-        (EquivalenceLink
-            (EvaluationLink
-                (PredicateNode "MutuallyExclusive")
-                (ListLink
-                    (VariableNode "$X")
-                    (VariableNode "$Y")
-                )
-            )
-            (EvaluationLink
-                (PredicateNode "MutuallyExclusive")
-                (ListLink
-                    (VariableNode "$Y")
-                    (VariableNode "$X")
-                )
-            )
-        )
-    )
-)
+; It is commented out b/c it might not be necessary for now. It can come in
+; handy while using PLN for rule mining (not sure how).
+;(ContextLink
+;    (ConceptNode "R2l-en-RuleBase")
+;    (ForAllLink
+;        (ListLink
+;            (VariableNode "$X")
+;            (VariableNode "$Y")
+;        )
+;        (EquivalenceLink
+;            (EvaluationLink
+;                (PredicateNode "MutuallyExclusive")
+;                (ListLink
+;                    (VariableNode "$X")
+;                    (VariableNode "$Y")
+;                )
+;            )
+;            (EvaluationLink
+;                (PredicateNode "MutuallyExclusive")
+;                (ListLink
+;                    (VariableNode "$Y")
+;                    (VariableNode "$X")
+;                )
+;            )
+;        )
+;    )
+;)
 
 ; --------------------------------------------------------------------
 ; Specifiyication of the SVO-Rule in the context of R2L-en-
