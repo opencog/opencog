@@ -71,9 +71,6 @@ int main(int argc,char** argv)
         exit(1);
     }
 
-    // Simplificity pressure
-    float simplicity_pressure = 0.5;
-
     // Multi-thread
     static const string localhost = "localhost";
     unsigned n_jobs = 4;
