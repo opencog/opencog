@@ -137,7 +137,7 @@ bool optim_parameters::score_improved(score_t best_score, score_t prev_hi) const
 }
 
 
-void print_stats_header (optim_stats *os, bool diversity)
+void print_stats_header(optim_stats *os, bool diversity)
 {
     using std::stringstream;
 

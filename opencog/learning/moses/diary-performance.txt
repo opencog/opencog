@@ -4007,6 +4007,7 @@ Revised run:
         hc_params.widen_search = false;
         hc_params.crossover = true;
 
+        Scores below shows that this is even worse. WTF. Why?
 
 
                baseline      revised
@@ -4015,12 +4016,12 @@ Revised run:
       1       > 3600 secs   > 500 secs
       2       2 secs         fail in 15 secs
       3       > 120 secs    > 150 secs
-      4       > 120 secs
-      5       15 secs
-      6       0.5 secs
-      7       > 120 secs
-      8       > 120 secs
-      9       > 120 secs
-     10       5 secs
+      4       > 120 secs    > 120 secs
+      5       15 secs       > 120 secs
+      6       0.5 secs      0.5 secs
+      7       > 120 secs    > 120 secs
+      8       > 120 secs    > 120 secs
+      9       > 120 secs    > 120 secs
+     10       5 secs         fail in 24 secs
 
 

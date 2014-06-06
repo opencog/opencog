@@ -372,7 +372,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
             double ram_usage = current_number_of_instances;
             ram_usage *= _instance_bytes;
             ram_usage /= 1024 * 1024;
-            logger().info() << hc_params.prefix_stat_deme << ": "
+            logger().info() << hc_params.prefix_stat_deme << "Hill: "
                 << demeID << "\t"
                 << iteration << "\t"
                 << total_steps << "\t"
@@ -816,8 +816,9 @@ bool hill_climbing::resize_deme(deme_t& deme, score_t best_score)
     return did_resize;
 }
 
-void hill_climbing::log_stats_legend() {
-    logger().info() << hc_params.prefix_stat_deme << ": # "   /* Legend for graph stats */
+void hill_climbing::log_stats_legend()
+{
+    logger().info() << hc_params.prefix_stat_deme << "Hill: # "   /* Legend for graph stats */
         "demeID\t"
         "iteration\t"
         "total_steps\t"

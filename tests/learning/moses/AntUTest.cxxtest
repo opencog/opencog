@@ -66,7 +66,7 @@ public:
         // 6 of 10 are terrible.
         //
         // BTW, the bug here is not with AntUTest, but with MOSES itself...
-        int rand_seed = 4;
+        int rand_seed = 10;
         randGen().seed(rand_seed);
 
         // Multi-thread
