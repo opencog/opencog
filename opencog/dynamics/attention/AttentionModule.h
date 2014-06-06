@@ -29,6 +29,7 @@
 #include <opencog/dynamics/attention/HebbianUpdatingAgent.h>
 #include <opencog/dynamics/attention/ImportanceSpreadingAgent.h>
 #include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
+#include <opencog/dynamics/attention/SimpleImportanceDiffusionAgent.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
 #include <opencog/server/Factory.h>
 #include <opencog/server/Module.h>
@@ -50,6 +51,7 @@ private:
     Factory<ImportanceDiffusionAgent, Agent> diffusionFactory;
 #endif
     Factory<ImportanceUpdatingAgent, Agent>  updatingFactory;
+    Factory<SimpleImportanceDiffusionAgent, Agent> simpleDiffusionFactory;
 
 public:
 

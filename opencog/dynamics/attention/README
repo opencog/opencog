@@ -22,11 +22,18 @@ allocation among atoms within OpenCog.
 - MindAgents
   - ImportanceUpdatingAgent - pays "wages" and collects "rent" from atoms in the
     form of Short Term Importance (STI) and Long Term Importance (LTI).
-  - ImportanceDiffusionAgent - spreads STI along HebbianLinks.
-  - ImportanceSpreadingAgent - alternative way to spread STI along HebbianLinks.
   - ForgettingAgent - "forgets" atoms with low LTI.
   - HebbianUpdatingAgent - updates the weights of HebbianLinks based on what
     is in the Attentional Focus of the OpenCog instance at the time it's run.
+  - For importance spreading, there are several implementations. You should only
+    use one at a time. The following two agent options are from the original
+    implementation in 2008:
+      - ImportanceDiffusionAgent - spreads STI along HebbianLinks.
+      - ImportanceSpreadingAgent - alternative way to spread STI along HebbianLinks.
+    In 2014, experiments with a different method of importance diffusion began
+    using the following agent:
+      - SimpleImportanceDiffusionAgent
+    More details on each are available below.
 
 - Modules
   - HebbianCreationModule - creates AsymmetricHebbianLinks between
@@ -204,13 +211,71 @@ This initial implementation uses the gsl::matrix class from
 [http://gslwrap.sourceforge.net GSLWrap]. This can only work for a small
 AtomSpace, since gsl::matrix isn't sparse.
 
-==== In future ====
+=== SimpleImportanceDiffusionAgent ===
 
-[http://www.boost.org/libs/numeric/ Boost] provides a series of sparse matrices
-and simple operation on these.
+The SimpleImportanceDiffusionAgent causes importance diffusion to occur between
+atoms in the attentional focus.
 
-Or work out how to carry out the same procedure without using a sparse matrix
-(doable... but might be slower).
+It iterates over all atoms in the attentional focus. For each atom, it checks
+if the spread decider function will cause importance to diffuse. If diffusion
+will occur, then it determines how much of the STI from the atom is available
+for diffusion by a configurable parameter.
+
+Depending on another configurable parameter, diffusion may occur only to 
+hebbian links or also to non-hebbian incident atoms. Non-hebbian incident atoms
+are defined as all atoms that are in the incoming or outgoing sets of a 
+source atom.
+
+The amount of diffusion that is available for diffusion to hebbian links is 
+controlled by a configurable parameter. The total amount of diffusion that is
+available for the hebbian links is divided by the count, which determines the
+maximum diffusion that can occur to any individual hebbian link. The amount that
+is actually diffused to the hebbian link is reduced by a customizable function
+based on the strength and confidence values of the link.
+
+Since the amount that is actually diffused to hebbian links can be reduced
+based on attributes of the links, there is often leftover importance. This
+importance is reallocated for diffusion to the non-hebbian incident atoms,
+if that option is enabled.
+
+Diffusion to non-hebbian incident atoms occurs by allocating all remaining
+available importance equally among the target atoms.
+
+The algorithm iterates over each source atom, and then iterates over each
+target atom. STI trading events are accumulated in a stack. After all source
+atoms have been processed, all of the accumulated STI trading events are
+submitted to the atomspace.
+
+This implementation differs from the prior ImportanceDiffusionAgent in several
+ways. The motivations are to make the implementation simpler to understand, and
+to introduce some new functionality that will be described below. 
+
+It does not build the full connection matrix. Instead, it constructs a map of 
+target atom probability vectors each time it processes a source atom. It does 
+not scale STI values to the 0 to 1 interval and back again. Instead, it always
+works with actual STI values.
+
+The main new functionality is the ability to spread importance directly
+between non-hebbian incident atoms, that is, atoms in the incoming and outgoing 
+sets of a source atom. This property is important for diffusion in a 
+generalized hypergraph when importance is allowed to diffuse without relying on
+hebbian links as the only diffusion mechanism. Without this property, 
+importance will not spread properly along non-hebbian atoms ocurring in 
+clauses, and will sometimes get "stuck" at certain atoms.
+
+This implementation is currently highly experimental. There are notes in the 
+implementation indicating additional functionality that is needed, including
+the ability to handle other types of hebbian links than AsymmetricHebbianLink. 
+
+There are also notes describing the functions that are a matter of ongoing 
+research. Particularly, the determination of what functions to use to determine
+the allocation of importance between source and target atoms, when the target
+atoms are a mix of hebbian and non-hebbian atoms, and the truth values of the
+target atoms have varying degrees of strength and confidence.
+
+The implementation requires benchmarking in order to determine its performance 
+profile. Additionally, further testing is currently underway with more complex
+graph structures.
 
 === ForgettingAgent ===
 
