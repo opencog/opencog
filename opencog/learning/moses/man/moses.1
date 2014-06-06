@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "April 18, 2014" "3.6.10" "OpenCog Learning"
+.TH MOSES 1 "June 6, 2014" "3.6.10" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -540,16 +540,37 @@ Set the "temperature" of the Boltzmann-like distribution used to
 select the next exemplar out of the metapopulation. A temperature that
 is too high or too low will make it likely that poor exemplars will be
 chosen for exploration, thus resulting in excessively long search times.
-Recommended values lie in the range of 2 to 10, with a default of 6.
+The recommended temperature depends strongly on the type of problem
+being solved.  If it is known that the problem has false maxima, and
+that the distance from the top of the false maximum to the saddle
+separating the false and true maximum is H, then the recommended 
+temerature is 30*H.  Here, H is the 'height' or difference in score
+from false peak to saddle, the saddle being the highest mountain pass
+between the false and true minumum. Varying the temperature by a factor
+of 2 or 3 from this value won't affect results much.  Too small a
+temperature will typically lead to the system getting trapped at a
+local maximum.
+
+The demo parity problem works well with a temperature of 5 whereas
+the demo Ant trail problem requies a temperature of 2000.
+
 .TP
 .BI \-z\  ratio \fR,\ \fB\-\-complexity\-ratio= ratio
 Fix the ratio of score to complexity, to be used as a penalty, 
-when ranking the metapopulation for fitness.  Typically, improving
-the score by one point requires that the complexity of the model to
-increase by (approximately) \fIN\fR bits; the value of \fIN\fR being
-data-dependent.   The algorithm will usually learn most easily
-if the complexity ratio is set between 1 and 2 times the value of
-\fIN\fR.
+when ranking the metapopulation for fitness. This ratio is meant to
+be used to limit the size of the search space, and, when used with
+an appropriate temperature, to avoid gettting trapped in local
+maxima.
+
+Roughly speaking, the size of the search space increases exponentially
+with the complexity of the combo trees being explored: more complex
+trees means more of them need to be examined.  However, more complex
+trees typically result in higher scores.  If an increase of N bits
+in the complexity typically leads to an increase of s points of the
+score, then the complexity ratio should be set to about N/s.  In
+this way, the exploration of more complex tree is penalized by an
+amount roughly comparable to the chance that such complicated trees
+actually provide a better solution.
 
 The complexity ratio is used to calculate a scoring penalty; the
 penalty lowers the score in proportion to the solution complexity;
@@ -561,10 +582,10 @@ complex solutions, ranking them in a way so that they are not much
 explored. Thus, the algorithm may get trapped examining only the
 simplest solutions, which are probably inappropriate.
 
-Setting this ratio too high will add too much noise to the 
-metapopulation, preventing a solution from being found.  That is, the
-algorithm may spend too much time evaluating overly-complex solutions,
-being unaware of good, simple solutions. 
+Setting this ratio too high will prevent a good solution from being
+found.  In such cases, the algorithm will spend too much time
+evaluating overly-complex solutions, blithly leaving simpler, better 
+solutions unexplored.
 
 The relationship between the score change and the complexity change
 is very strongly data-dependent, and must (currently) be manually
@@ -572,7 +593,8 @@ determined (although it might be possible to measure it automatically).
 Input data tables with lots of almost-duplicate data may have very low
 ratios; complex problems with sparse data may have very high ratios.
 Initial recommended values would be in the range from 1 to 5;
-with 3.5 as the default.
+with 3.5 as the default.  The parity demo problem works well with
+the 3.5 default, the Ant trail demo problem works well with 0.16.
 
 .TP
 .BI \-Z1\fR,\ \fB\-\-hc\-crossover=1

@@ -48,7 +48,8 @@ public:
     AntUTest() {
         // Logger setting
         logger().setPrintToStdoutFlag(true); 
-        logger().setLevel(Logger::DEBUG);        
+        // logger().setLevel(Logger::DEBUG);        
+        logger().setLevel(Logger::INFO);        
     }
 
     void test_ant() {
@@ -56,21 +57,15 @@ public:
         int max_evals = 1000000;
 
         // Random seed
-        // XXX FIXME. The performance of AntUTest is very highly dependent
-        // on the initial random number seed. At the time of this writing,
-        // a seed of 6 completes in half-a-second.  A seed of 6 completes
-        // in two seconds. But 1,3,4,7,8 or 9 take more than two minutes
-        // (before I killed the job). A seed of 1 took more than an hour
-        // before I killed it.  A seed of 5 takes 15 secs; a seed of 10
-        // takes 5 secs.  Conclude: 2 out of 10 are fast, 2 more are OK,
-        // 6 of 10 are terrible.
+        // The performance of AntUTest is very highly dependent on the
+        // initial random number seed. At the time of this writing, some
+        // seeds result in a solution being found in a few seconds or
+        // less, while others take at least minutes, or longer. The
+        // bottom of the file opencog/learning/moses/diary-performance.txt
+        // provides more information.
         //
-        // BTW, the bug here is not with AntUTest, but with MOSES itself...
-        int rand_seed = 6;
+        int rand_seed = 10;
         randGen().seed(rand_seed);
-
-        // Simplificity pressure
-        float simplicity_pressure = 0.5;
 
         // Multi-thread
         static const string localhost = "localhost";
@@ -81,7 +76,11 @@ public:
         type_tree tt(id::lambda_type);
         tt.append_children(tt.begin(), id::action_result_type, 1);
 
-        ant_bscore bscorer(simplicity_pressure);
+        ant_bscore bscorer;
+
+        // See the diary for the complexity ratio.
+        double complexity_ratio = 0.16;
+        bscorer.set_complexity_coef(complexity_ratio);
         behave_cscore cscorer(bscorer);
 
         combo_tree_ns_set perceptions;
@@ -98,14 +97,13 @@ public:
         demeparms.actions = &actions;
 
         metapop_parameters metaparms;
-        metaparms.complexity_temperature = 100;
+        metaparms.complexity_temperature = 2000;  // See diary entry
 
         // Define optimization algo
         optim_parameters opt_params;
-        opt_params.max_dist = 3;
         hc_parameters hc_params;
-        hc_params.widen_search = true;
-        hc_params.crossover = true;
+        hc_params.widen_search = false;  // Same as default
+        hc_params.crossover = true;      // Same as default
         hill_climbing hc(opt_params, hc_params);
 
         deme_expander dex(tt, action_reduction(),

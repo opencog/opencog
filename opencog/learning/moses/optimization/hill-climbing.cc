@@ -372,7 +372,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
             double ram_usage = current_number_of_instances;
             ram_usage *= _instance_bytes;
             ram_usage /= 1024 * 1024;
-            logger().info() << hc_params.prefix_stat_deme << ": "
+            logger().info() << hc_params.prefix_stat_deme << "Hill: "
                 << demeID << "\t"
                 << iteration << "\t"
                 << total_steps << "\t"
@@ -428,16 +428,17 @@ unsigned hill_climbing::operator()(deme_t& deme,
              * lucky.
              */
             bool big_step = opt_params.score_improved(best_score, prev_hi);
-            if (!big_step && !last_chance) {
+            if ((not big_step) and (not last_chance)) {
                 /* If we just did the nearest neighbors, and found no
                  * improvement, then try again with the simplexes.  That's
                  * cheap & quick and one last chance to get lucky ...
                  */
-                if (!already_xover
+                if (not already_xover
                     // in the case we can widen the search check that
                     // the max distance has been reached, otherwise,
-                    // it's not really a last_change
-                    && (!hc_params.widen_search || max_distance < distance)) {
+                    // it's not really a last_chance
+                    and (not hc_params.widen_search or max_distance < distance))
+                {
                     last_chance = true;
                     continue;
                 }
@@ -815,8 +816,9 @@ bool hill_climbing::resize_deme(deme_t& deme, score_t best_score)
     return did_resize;
 }
 
-void hill_climbing::log_stats_legend() {
-    logger().info() << hc_params.prefix_stat_deme << ": # "   /* Legend for graph stats */
+void hill_climbing::log_stats_legend()
+{
+    logger().info() << hc_params.prefix_stat_deme << "Hill: # "   /* Legend for graph stats */
         "demeID\t"
         "iteration\t"
         "total_steps\t"

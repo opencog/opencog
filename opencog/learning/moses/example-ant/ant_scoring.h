@@ -41,7 +41,8 @@ using namespace opencog::moses;
 
 static const int ANT_X = 32;
 static const int ANT_Y = 32;
-static const char init_trail[ANT_Y][ANT_X+1] = {
+static const char init_trail[ANT_Y][ANT_X+1] =
+{
     " 888                            ",
     "   8                            ",
     "   8                     888    ",
@@ -76,8 +77,8 @@ static const char init_trail[ANT_Y][ANT_X+1] = {
     "                                "
 };
 
-struct AntFitnessFunction : unary_function<combo_tree, score_t> {
-
+struct AntFitnessFunction : unary_function<combo_tree, score_t>
+{
     typedef combo_tree::iterator pre_it;
     typedef combo_tree::sibling_iterator sib_it;
 
@@ -113,14 +114,13 @@ private:
 
 struct ant_bscore : public bscore_base
 {
-    ant_bscore(float simplicity_pressure = 1.0);
+    ant_bscore() {}
 
     behavioral_score operator()(const combo_tree& tr) const;
 
     behavioral_score best_possible_bscore() const;
 
 private:
-    float _simplicity_pressure;
     AntFitnessFunction _aff;
 };
 

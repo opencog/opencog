@@ -105,7 +105,7 @@ struct metapop_parameters
 {
     metapop_parameters(int _max_candidates = -1,
                        unsigned _revisit = 0,
-                       score_t _complexity_temperature = 3.0f,
+                       score_t _complexity_temperature = 6.0f,
                        unsigned _jobs = 1,
                        diversity_parameters _diversity = diversity_parameters()) :
         max_candidates(_max_candidates),

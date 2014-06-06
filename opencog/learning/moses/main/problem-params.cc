@@ -305,7 +305,8 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "used to select the next exemplar out of the metapopulaton. "
          "A temperature that is too high or too low will make it likely "
          "that poor exemplars will be chosen for exploration, thus "
-         "resulting in excessively long search times.\n")
+         "resulting in excessively long search times. See the man "
+         "page for more info.\n")
 
         (opt_desc_str(complexity_ratio_opt).c_str(),
          po::value<score_t>(&complexity_ratio)->default_value(3.5),
@@ -320,7 +321,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "solutions, adversely lengthening solution times.  "
          "Suggest setting this to a value that is 1x to 2x larger than "
          "the ratio of change in complexity to score improvement (as "
-         "determined by earlier runs).\n")
+         "determined by earlier runs). See the man page for more info.\n")
 
         ("cap-coef",
          po::value<double>(&cap_coef)->default_value(50.0),
@@ -420,7 +421,9 @@ problem_params::add_options(boost::program_options::options_description& desc)
         (opt_desc_str(max_dist_opt).c_str(),
          po::value<size_t>(&max_dist)->default_value(4),
          "The maximum radius of the neighborhood around the "
-         "exemplar to explore.\n")
+         "exemplar to explore. This value only has an effect if "
+         "the widen-search option has been set; this controls how "
+         "far the search is widened.\n")
 
         (opt_desc_str(reduce_all_opt).c_str(),
          po::value<bool>(&reduce_all)->default_value(true),
@@ -487,7 +490,10 @@ problem_params::add_options(boost::program_options::options_description& desc)
          str(format("Hillclimbing parameter (%s). If false, then deme search "
                     "terminates when a local hilltop is found. If true, "
                     "then the search radius is progressively widened, "
-                    "until another termination condition is met.\n") % hc).c_str())
+                    "until another termination condition is met. "
+                    "The max-dist value controls just how wide the "
+                    "search will go. The recommended setting is to "
+                    "not perform widening.\n") % hc).c_str())
 
         ("well-enough",
          po::value<bool>(&use_well_enough)->default_value(false),

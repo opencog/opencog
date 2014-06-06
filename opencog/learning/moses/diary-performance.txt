@@ -1,7 +1,7 @@
 
 Diary of performance measurements and tuning for MOSES
 ------------------------------------------------------
-    Linas Vepstas -- January 2012 - August 2013
+    Linas Vepstas -- January 2012 - June 2014
 
 Maintained by Linas Vepstas.  Started January 2012.  A summary
 of lessons learned is immediately below.   The rest is a diary,
@@ -96,7 +96,7 @@ these.
 
    The original Occam temperature was not recognized as a temperature,
    but instead appealled to a concept of Solomonoff prior distribution
-   probbility.  The distribution was 2^-complexity, with complexity
+   probability.  The distribution was 2^-complexity, with complexity
    meaured in bits.  By contrast, the current code uses a distribution
    of exp(-beta * complexity).  Solomonoff would be regained if
    beta==log2==0.69 but instead, current experimental evidence suggests
@@ -112,6 +112,30 @@ these.
    the true complexity; if so, the Solomonoff prior would be closer
    to the experimentally optimal temperature.  But it is hard to say,
    at this point.
+
+   (Note: As of June 2014, the AntUTest is hitting this bug. See very
+   bottom of this file for details.)
+
+
+++ Lessons from the AntUTest: For some problems (such as the ant Santa
+   Fe trail), the distance from a false local maximum to the nearest
+   pass that leads to the true maximum (the saddle) can be very large.
+   This requires setting a correspondly large temperature, so that the
+   stochastic Boltzmann distribution can hop out of the local minimum at
+   least once every three times (but not much more often than that.) The
+   notes at the bottom show how to do this.
+
+   The complexity penalty also plays a large role in limiting the total
+   size of the search space.  Basically, the size of the search space
+   increases exponentially as the complexity.  For the ant problem, it
+   seems that even a small change in complexity results in a large change
+   of the search space (Its very probable that the complexity of the ant
+   problem is not being measured correctly).  Thus, for the ant problem,
+   it is also very important to sharply limit the complexity, by using
+   a large complexity penalty. If this is not done, then MOSES will again
+   get trapped in some local maximum, exploring very complex solutions
+   that are far away from the true maximum.  Such premature
+   over-specialization is to be avoided.
    
 
 ++ Better population control; skip behavioral score computation.
@@ -137,7 +161,7 @@ these.
    exemplars are choosen with a Boltzmann distribution, with exemplar x
    being choosen with probability p(x) ~ exp(-E(x)/kT) where E(x) is the
    score of exemplar x. Because of the rapid fall-off of the
-   exponential,  exemplars with scores that are worse than 20 ro 30
+   exponential,  exemplars with scores that are worse than 20 or 30
    times kT are very very unlikely to be chosen (since exp(-20) or
    exp(-30) is so very tiny).   Thus, it is quite reasonable to cull
    exemplars with scores worse than this from the metapopulation.  This
@@ -3977,3 +4001,152 @@ Appearently, its hard for moses...
     160K    570      -3
     640K   5682      -3
 
+==================================================================
+
+June 2014 -- AntUTest
+---------------------
+Currently, the AntUTest is exhibiting the same-old bad behaviour of
+excess runtimes, as documented up top.  So, I want to run a quick
+experiment to make sure the same techniques work to fix AntUTest as
+well.
+
+Baseline run:
+        simplicity_pressure = 0.5;
+        metaparms.complexity_temperature = 100;
+        opt_params.max_dist = 3;
+        hc_params.widen_search = true;
+        hc_params.crossover = true;
+
+Revised run:
+        The above paramaters are changed to the default settings, which
+        were obtained a few years ago, as documented above. The default
+        complexity ratio of 3.5 was from the boolean problems, not clear
+        that its ideal for the ant problem,
+
+        complexity_ratio = 3.5
+        metaparms.complexity_temperature = 6.0;
+        hc_params.widen_search = false;
+        hc_params.crossover = true;
+
+        Scores below shows that this is even worse. WTF. Why?
+
+OK, so typical ant complexities seem to be 10-20.  With a complexity
+ratio of 3.5, this gets scaled to a coef = 1/3.5 = 0.3 so the penalty
+is in the 0.3*(10-20) = 3-6 range.  Seems plausbile ... 
+
+The complexity temp of 6.0 works out toe a beta of ... 
+inv_temp= 100/6 = 16 ... 
+This seems to be entirely too low a temperature for Ants, since the
+probability factor is exp (-beta*score_delta) and score delta is of
+order 1.0.   So a temp of 100 seems like a more reasonable deal.
+
+Warmer run:
+        As above but with 
+        metaparms.complexity_temperature = 50.0;
+
+Hot run:
+        As above but with 
+        metaparms.complexity_temperature = 350.0;
+
+Warm-widen:
+        As above, but with (btw, width is the default width of 4)
+        hc_params.widen_search = true;
+        metaparms.complexity_temperature = 50.0;  // See diary entry
+
+
+
+  rand      baseline      revised        warmer       hot    warm-
+  seed      run-time      run-time      run-time      run    widen
+  ----      --------      --------      --------     -----   -----
+   1       > 3600 secs   > 500 secs    > 120 secs    > 120      7
+   2       2 secs         fail in 15   > 120 secs    > 120      2
+   3       > 120 secs    > 150 secs    > 120 secs    > 300   >150
+   4       > 120 secs    > 120 secs    > 120 secs    > 120   >200
+   5       15 secs       > 120 secs    > 120 secs    > 200    108
+   6       0.5 secs      0.5 secs      > 120 secs               2
+   7       > 120 secs    > 120 secs    > 120 secs            >120
+   8       > 120 secs    > 120 secs                          >120
+   9       > 120 secs    > 120 secs                          >150
+  10       5 secs         fail in 24 secs                   fail in 300 secs
+
+
+Is there a regression? Verify that the traditional 4-parity still works:
+Below is moses -Hpa -k4 -z3.5 -v5 -m350000 for different randome seeds -r
+The baseline numbers for parity are near line 1514 in this file (grep for
+Regression test parity performance)
+
+ rand   time
+ seed  (secs)
+ ----   ----
+  -r0    78
+  -r1   108
+  -r2    47
+  -r3   150
+  -r4    22
+
+Based on this sniff test, looks like its all working well.
+
+AntUTest Conclusion:
+MOSES seems to be working correctly, based on the quick parity-4 sniff
+test.  Something about the ant problem results in a solution being
+quickly found, or not at all.  Looking at the actual ant-trail, used
+for scoring, suggests that the issue may be that the trail peters out
+as it goes on. This suggests that there could be algos that quickly
+follow the 'obvious' trail, but then take a wrong turn, and wander
+aimlessly forever-more, resulting in a trap, where the few remaining
+nuggest of food are far away and difficult to find, without some sort
+of exhasutive search (which is presumably not allowed -- its exhasuting.)
+So, AntUTest seems to rely on getting lucky very early, or getting lost.
+
+Now: as to getting lucky: the "complexity temperature" is supposed to
+work to avoid this trap: viz, rather than exploring ever-more complex
+solutions, the Boltzmann-temperature is supposed to guarantee that,
+some of the time, simpler solutions will be explored (and thus, improving
+the odds of "getting lucky", if trapped in a high-complexity local
+maximum.) However, given the above results, it seems that the local
+maximum is surrounded by steep sides, so steep that even fairly large
+complexity penalties are insufficient to get back to a place where
+the lucky good path can be found.
+
+Hmmm. The best solution has a height of 89, and complexity 11.  The
+local trap(s) have a hieght of about 60-70, and complexity 20-30. This
+suggests that Boltzman needs to backtrack by a score of about 60,
+suggesting that a temperature of about T=2000 (= 0.3 * 60 * 100) is
+needed. The complexity penalty has to be very stiff, too: so a 
+complexity difference of 10 needs to be like a score of 60, so the
+compexity coeff needs to be 6.0, which means the complexity-ratio of
+about 0.16 = 1/6.  Lets try that, see what happens ...
+
+The super-hot penalty below. The params are:
+        double complexity_ratio = 0.16;
+        metaparms.complexity_temperature = 2000;
+        hc_params.widen_search = false;
+        hc_params.crossover = true;
+
+
+
+  rand      super hot
+  seed      penalty
+  ----      --------   
+   1         20 secs
+   2         58 secs
+   3         16 secs
+   4       >500 secs
+   5         30 secs
+   6          2 secs
+   7       >400 secs
+   8       >400 secs
+   9        170 secs
+  10          1 secs
+
+Woo hoo!  I call that success!  Basically, by estimating the distance 
+from peak to mountain-pass, we get a sense of the correct temperature
+needed to hop out of the local maximum on smoe regular basis.  Next,
+by comparing the known solution complexity to the typical complexity
+at the local maximum, we find out how to penalize the complexity so that
+we don't get stuck exploring inappropriately complex solutions. (Right?
+This point might not be completely obvious:  the more complex the
+solution, the larger the size of the total space that needs to be
+searched -- its exponentially larger.   So, a high complexity penalty
+has the effect of reducing the size of the space that needs to be
+searched.)

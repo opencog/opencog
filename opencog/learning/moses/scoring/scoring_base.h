@@ -87,6 +87,11 @@ struct cscore_base : public unary_function<combo_tree, composite_score>
     /// Note that the best_possible_score may depend on the set of
     /// ignored features. Thus, the best_possible_score() method should
     /// be called only after the ignore idex have been set.
+    ///
+    /// XXX I don't get it ... if we are going to ignore indexes,
+    /// shouldn't we ignore them when building the combo trees?  And
+    /// if a combo tree does make use of an index, how can one possibly
+    /// "ignore" it ??  This just does not seem correct to me...
     virtual void ignore_idxs(const std::set<arity_t>&) const {}
 
     virtual ~cscore_base(){}
@@ -124,6 +129,11 @@ struct bscore_base : public unary_function<combo_tree, behavioral_score>
     /// Note that the best_possible_score may depend on the set of
     /// ignored features. Thus, the best_possible_score() method should
     /// be called only after the ignore idex have been set.
+    ///
+    /// XXX I don't get it ... if we are going to ignore indexes,
+    /// shouldn't we ignore them when building the combo trees?  And
+    /// if a combo tree does make use of an index, how can one possibly
+    /// "ignore" it ??  This just does not seem correct to me...
     virtual void ignore_idxs(const std::set<arity_t>&) const {}
 
     /// Get the appropriate complexity measure for the indicated combo
