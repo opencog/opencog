@@ -239,8 +239,9 @@ void ip_problem::run(option_base* ob)
     multibscore_based_bscore bscore(bscores); // XXX TODO REMOVE ME
     metapop_moses_results(pms.exemplars, tt,
                           *pms.bool_reduct, *pms.bool_reduct_rep, 
-                          bscore, mbcscore,
-                          pms.opt_params, pms.hc_params, pms.meta_params,
+                          bscore, pms.cache_size, mbcscore,
+                          pms.opt_params, pms.hc_params,
+                          pms.deme_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 
 }
@@ -282,8 +283,9 @@ void ann_table_problem::run(option_base* ob)
     behave_cscore cscore(bscore);
     metapop_moses_results(pms.exemplars, tt,
                           reduct::ann_reduction(), reduct::ann_reduction(),
-                          bscore, cscore,
-                          pms.opt_params, pms.hc_params, pms.meta_params,
+                          bscore, pms.cache_size, cscore,
+                          pms.opt_params, pms.hc_params,
+                          pms.deme_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }
 
@@ -299,7 +301,7 @@ void ann_table_problem::run(option_base* ob)
     if (pms.enable_feature_selection && pms.fs_params.target_size > 0) { \
         /* XXX FIXME: should use the concatenation of all */         \
         /* tables, and not just the first. */                        \
-        pms.meta_params.fstor = new feature_selector(TABLES.front(), pms.festor_params); \
+        pms.deme_params.fstor = new feature_selector(TABLES.front(), pms.festor_params); \
     }                                                                \
     /* Keep the table input signature, just make sure */             \
     /* the output is the desired type. */                            \
@@ -317,8 +319,10 @@ void ann_table_problem::run(option_base* ob)
     multibehave_cscore mbcscore(bscores);                            \
     multibscore_based_bscore bscore(bscores);                        \
     metapop_moses_results(pms.exemplars, cand_sig,                   \
-                      REDUCT, REDUCT_REP, bscore, mbcscore,          \
-                      pms.opt_params, pms.hc_params, pms.meta_params, \
+                      REDUCT, REDUCT_REP, bscore,                    \
+                      pms.cache_size, mbcscore,                      \
+                      pms.opt_params, pms.hc_params,                 \
+                      pms.deme_params, pms.meta_params,              \
                       pms.moses_params, pms.mmr_pa);                 \
 }
 
@@ -359,7 +363,7 @@ void pre_table_problem::run(option_base* ob)
     // Enable feature selection while selecting exemplar
     if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
         // XXX FIXME should use the concatenation of all ctables, not just first
-        pms.meta_params.fstor = new feature_selector(ctables.front(),
+        pms.deme_params.fstor = new feature_selector(ctables.front(),
                                                      pms.festor_params);
     }
 
@@ -367,8 +371,9 @@ void pre_table_problem::run(option_base* ob)
     multibscore_based_bscore bscore(bscores);
     metapop_moses_results(pms.exemplars, cand_sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
-                          bscore, mbcscore,
-                          pms.opt_params, pms.hc_params, pms.meta_params,
+                          bscore, pms.cache_size, mbcscore,
+                          pms.opt_params, pms.hc_params,
+                          pms.deme_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 
 }
@@ -400,14 +405,14 @@ void pre_conj_table_problem::run(option_base* ob)
     // Enable feature selection while selecting exemplar
     if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
         // XXX FIXME should use the concatenation of all ctables, not just first
-        pms.meta_params.fstor = new feature_selector(ctables.front(),
+        pms.deme_params.fstor = new feature_selector(ctables.front(),
                                                  pms.festor_params);
     }
     multibehave_cscore mbcscore(bscores);
     multibscore_based_bscore bscore(bscores); // XXX TODO REMOVE ME
     metapop_moses_results(pms.exemplars, cand_sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
-                          bscore, mbcscore,
+                          bscore, pms.cache_size, mbcscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }
@@ -501,7 +506,9 @@ void it_table_problem::run(option_base* ob)
             partial_solver well(ctables,
                             table_type_signature,
                             pms.exemplars, *pms.contin_reduct,
-                            pms.opt_params, pms.hc_params, pms.meta_params,
+                            pms.opt_params, pms.hc_params,
+                            pms.deme_params,
+                            pms.cache_size, pms.meta_params,
                             pms.moses_params, pms.mmr_pa);
             well.solve();
         } else {

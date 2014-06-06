@@ -168,6 +168,7 @@ struct problem_params : public option_base
     optim_parameters opt_params;
     hc_parameters hc_params;
     moses_parameters moses_params;
+    deme_parameters deme_params;
     metapop_parameters meta_params;
     metapop_printer mmr_pa;
 protected:

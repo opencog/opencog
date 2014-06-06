@@ -45,6 +45,8 @@ class partial_solver
                        const rule& reduct,
                        const optim_parameters& opt_params,
                        const hc_parameters& hc_params,
+                       const deme_parameters& deme_params,
+                       unsigned cache_size,
                        const metapop_parameters& meta_params,
                        const moses_parameters& moses_params,
                        const metapop_printer& mmr_pa);
@@ -114,6 +116,7 @@ class partial_solver
         const rule& _reduct;
         optim_parameters _opt_params;
         hc_parameters _hc_params;
+        deme_parameters _deme_params;
         metapop_parameters _meta_params;
         moses_parameters _moses_params;
         const metapop_printer& _printer;
@@ -123,6 +126,7 @@ class partial_solver
         typedef enum_effective_bscore BScore;
         multibscore_based_bscore *_bscore;
         multibehave_cscore *_cscore;
+        unsigned _cache_size;
 
         typedef enum_table_bscore StraightBScore;
         multibscore_based_bscore *_straight_bscore;

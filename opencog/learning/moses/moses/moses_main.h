@@ -178,6 +178,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const cscore_base& sc,
                              const optim_parameters& opt_params,
                              const hc_parameters& hc_params,
+                             const deme_parameters& deme_params,
                              const metapop_parameters& meta_params,
                              const moses_parameters& moses_params,
                              Printer& printer)
@@ -211,7 +212,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
         simple_bases.push_back(siba);
     }
 
-    deme_expander dex(tt, si_ca, si_kb, sc, *optimizer, meta_params);
+    deme_expander dex(tt, si_ca, si_kb, sc, *optimizer, deme_params);
     metapopulation metapop(simple_bases, sc, bsc, meta_params);
 
     run_moses(metapop, dex, moses_params, stats);
@@ -228,9 +229,11 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
                            const reduct::rule& si_ca,
                            const reduct::rule& si_kb,
                            bscore_base& bscorer,
+                           unsigned cache_size,
                            cscore_base& c_scorer,
                            optim_parameters opt_params,
                            hc_parameters hc_params,
+                           const deme_parameters& deme_params,
                            const metapop_parameters& meta_params,
                            moses_parameters moses_params,
                            Printer& printer)
@@ -260,12 +263,12 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     // update minimum score improvement
     opt_params.set_min_score_improv(c_scorer.min_improv());
 
-    if (meta_params.cache_size > 0) {
+    if (cache_size > 0) {
         // WARNING: adaptive_cache is not thread safe (and therefore
         // deactivated for now)
         
         // static const unsigned initial_cache_size = 1000000;
-        unsigned initial_cache_size = meta_params.cache_size;
+        unsigned initial_cache_size = cache_size;
         
         // When the include_dominated flag is set, then trees are merged
         // into the metapop based only on the score (and complexity),
@@ -276,12 +279,14 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
         // ScoreACache score_acache(score_cache);
         metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
                                 bscorer, score_cache /*score_acache*/,
-                                opt_params, hc_params, meta_params,
+                                opt_params, hc_params, 
+                                deme_params, meta_params,
                                 moses_params, printer);
     } else
         metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
                                 bscorer, c_scorer,
-                                opt_params, hc_params, meta_params,
+                                opt_params, hc_params,
+                                deme_params, meta_params,
                                 moses_params, printer);
 }
 

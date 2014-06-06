@@ -113,8 +113,9 @@ void bool_problem_base::run(option_base* ob)
     behave_cscore cscore(bscore);
     metapop_moses_results(pms.exemplars, sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
-                          bscore, cscore,
-                          pms.opt_params, pms.hc_params, pms.meta_params,
+                          bscore, pms.cache_size, cscore,
+                          pms.opt_params, pms.hc_params,
+                          pms.deme_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }
 
@@ -255,7 +256,7 @@ void polynomial_problem::run(option_base* ob)
 
     // sr is fundamentally a kind of non-linear regression!
     // over-ride any flag settings regarding this.
-    pms.meta_params.linear_contin = false;
+    pms.deme_params.linear_contin = false;
 
     type_tree tt = gen_signature(id::contin_type, 1);
 
@@ -273,8 +274,9 @@ void polynomial_problem::run(option_base* ob)
     behave_cscore cscore(bscore);
     metapop_moses_results(pms.exemplars, tt,
                           *pms.contin_reduct, *pms.contin_reduct,
-                          bscore, cscore,
-                          pms.opt_params, pms.hc_params, pms.meta_params,
+                          bscore, pms.cache_size, cscore,
+                          pms.opt_params, pms.hc_params,
+                          pms.deme_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }
 
@@ -385,8 +387,9 @@ void combo_problem::run(option_base* ob)
         behave_cscore cscore(bscore);
         metapop_moses_results(pms.exemplars, tt,
                               *pms.bool_reduct, *pms.bool_reduct_rep,
-                              bscore, cscore,
-                              pms.opt_params, pms.hc_params, pms.meta_params,
+                              bscore, pms.cache_size, cscore,
+                              pms.opt_params, pms.hc_params,
+                              pms.deme_params, pms.meta_params,
                               pms.moses_params, pms.mmr_pa);
     }
     else if (output_type == id::contin_type) {
@@ -427,8 +430,9 @@ void combo_problem::run(option_base* ob)
         behave_cscore cscore(bscore);
         metapop_moses_results(pms.exemplars, tt,
                               *pms.contin_reduct, *pms.contin_reduct,
-                              bscore, cscore,
-                              pms.opt_params, pms.hc_params, pms.meta_params,
+                              bscore, pms.cache_size, cscore,
+                              pms.opt_params, pms.hc_params,
+                              pms.deme_params, pms.meta_params,
                               pms.moses_params, pms.mmr_pa);
     } else {
         logger().error() << "Error: combo_problem: type " << tt << " not supported.";
@@ -478,8 +482,9 @@ void ann_combo_problem::run(option_base* ob)
     behave_cscore cscore(bscore);
     metapop_moses_results(pms.exemplars, tt,
                           *pms.contin_reduct, *pms.contin_reduct,
-                          bscore, cscore,
-                          pms.opt_params, pms.hc_params, pms.meta_params,
+                          bscore, pms.cache_size, cscore,
+                          pms.opt_params, pms.hc_params,
+                          pms.deme_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }
 

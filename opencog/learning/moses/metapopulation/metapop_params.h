@@ -101,47 +101,29 @@ struct diversity_parameters
 };
 
 /**
- * parameters about deme management
+ * parameters for metapopulation management
  */
 struct metapop_parameters
 {
     metapop_parameters(int _max_candidates = -1,
-                       bool _reduce_all = true,
                        unsigned _revisit = 0,
                        score_t _complexity_temperature = 3.0f,
-                       const operator_set& _ignore_ops = empty_ignore_ops,
-                       // bool _enable_cache = false,    // adaptive_cache
-                       unsigned _cache_size = 100000,     // is disabled
                        unsigned _jobs = 1,
-                       diversity_parameters _diversity = diversity_parameters(),
-                       const combo_tree_ns_set* _perceptions = NULL,
-                       const combo_tree_ns_set* _actions = NULL,
-                       const feature_selector* _fstor = NULL) :
+                       diversity_parameters _diversity = diversity_parameters()) :
         max_candidates(_max_candidates),
-        reduce_all(_reduce_all),
         revisit(_revisit),
         keep_bscore(false),
         complexity_temperature(_complexity_temperature),
         cap_coef(50),
-        ignore_ops(_ignore_ops),
-        // enable_cache(_enable_cache),   // adaptive_cache
-        cache_size(_cache_size),          // is disabled
         jobs(_jobs),
         diversity(_diversity),
-        perceptions(_perceptions),
-        actions(_actions),
         merge_callback(NULL),
-        callback_user_data(NULL),
-        fstor(_fstor),
-        linear_contin(true)
+        callback_user_data(NULL)
         {}
 
     // The max number of candidates considered to be added to the
     // metapopulation, if negative then all candidates are considered.
     int max_candidates;
-
-    // If true then all candidates are reduced before evaluation.
-    bool reduce_all;
 
     // The number of times the same exemplar can be revisited. If 0
     // then an exemplar can only be visited once.
@@ -162,13 +144,6 @@ struct metapop_parameters
     // where x is the number of generations so far
     double cap_coef;
 
-    // the set of operators to ignore
-    operator_set ignore_ops;
-
-    // Enable caching of scores.
-    // bool enable_cache;   // adaptive_cache
-    unsigned cache_size;    // is disabled
-
     // Number of jobs for metapopulation maintenance such as merging
     // candidates to the metapopulation.
     unsigned jobs;
@@ -176,13 +151,42 @@ struct metapop_parameters
     // parameters to control diversity
     diversity_parameters diversity;
 
+    bool (*merge_callback)(scored_combo_tree_set&, void*);
+    void *callback_user_data;
+};
+
+/**
+ * parameters for deme management
+ */
+struct deme_parameters
+{
+    deme_parameters(bool _reduce_all = true,
+                    const operator_set& _ignore_ops = empty_ignore_ops,
+                    const combo_tree_ns_set* _perceptions = NULL,
+                    const combo_tree_ns_set* _actions = NULL,
+                    const feature_selector* _fstor = NULL) :
+        reduce_all(_reduce_all),
+        ignore_ops(_ignore_ops),
+        perceptions(_perceptions),
+        actions(_actions),
+        fstor(_fstor),
+        linear_contin(true)
+        {}
+
+    // The max number of candidates considered to be added to the
+    // metapopulation, if negative then all candidates are considered.
+    int max_candidates;
+
+    // If true then all candidates are reduced before evaluation.
+    bool reduce_all;
+
+    // the set of operators to ignore
+    operator_set ignore_ops;
+
     // the set of perceptions of an optional interactive agent
     const combo_tree_ns_set* perceptions;
     // the set of actions of an optional interactive agent
     const combo_tree_ns_set* actions;
-
-    bool (*merge_callback)(scored_combo_tree_set&, void*);
-    void *callback_user_data;
 
     const feature_selector* fstor;
 

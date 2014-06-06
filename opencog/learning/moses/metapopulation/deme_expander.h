@@ -36,7 +36,7 @@ struct deme_expander
                   const reduct::rule& si_kb,
                   const cscore_base& sc,
                   optimizer_base& opt,
-                  const metapop_parameters& pa = metapop_parameters()) :
+                  const deme_parameters& pa = deme_parameters()) :
         _optimize(opt),
         _type_sig(type_signature),
         simplify_candidate(si_ca),
@@ -110,7 +110,7 @@ protected:
     // calculate max score per deme
     std::vector<std::set<arity_t>> _ignore_idxs_seq;
 
-    metapop_parameters _params;
+    deme_parameters _params;
 };
 
 } // ~namespace moses
