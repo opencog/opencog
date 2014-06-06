@@ -135,7 +135,7 @@ struct representation : public knob_mapper, boost::noncopyable
 
     /**
      * Output the prototype of the exemplar (works correctly only when
-     * the exemplar is yet unchanged).
+     * the exemplar is not yet changed).
      */
     template<typename Out>
     Out& ostream_prototype(Out& out, combo_tree::iterator it) const
@@ -151,7 +151,7 @@ struct representation : public knob_mapper, boost::noncopyable
                 // In the case of action_subtree_knob just return. (it
                 // would be wrong to do a recursive call because it
                 // might be on the subtree that has alreaby been
-                // ostreamed). This is kinda hack.
+                // ostreamed). This is kinda hacky.
                 if (d_cit->second.type() == typeid(action_subtree_knob)) {
                     return out;
                 }
@@ -165,11 +165,11 @@ struct representation : public knob_mapper, boost::noncopyable
         }
 
         // recursive call on children
-        if (!it.is_childless()) {
+        if (not it.is_childless()) {
             out << "(";
-            for(sib_it sib = it.begin(); sib != it.end();) {
+            for (sib_it sib = it.begin(); sib != it.end();) {
                 ostream_prototype(out, sib);
-                if(++sib != it.end()) out << " ";
+                if (++sib != it.end()) out << " ";
             }
             out << ")";
         }
