@@ -55,14 +55,14 @@
 	(define word-inst-concept (cog-node 'ConceptNode (cog-name word-inst)))
 	; find the ConceptNode of this word node
 	(define word-node-concept (cog-node 'ConceptNode (cog-name word-node)))
-	
+
 	(cond
 		((cleanable? word-inst)
-			; delete the InheritanceLink linking the instance with the word
-			(delete-hypergraph (cog-link 'InheritanceLink word-inst-concept word-node-concept))
 			; for each graph with word-inst-concept, rebuild upward
 			; replace all link with word-inst-concept with word-node-concept
 			(rebuild-all word-inst-concept word-node-concept)
+			; delete the newly created InheritanceLink linking the word with itself
+			(delete-hypergraph (cog-link 'InheritanceLink word-node-concept word-node-concept))
 		)
 	)
 )
