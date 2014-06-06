@@ -25,14 +25,11 @@
 #include <opencog/util/mt19937ar.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/learning/moses/metapopulation/metapopulation.h>
 #include <opencog/learning/moses/scoring/scoring.h>
-#include <opencog/learning/moses/optimization/optimization.h>
 
 using namespace opencog;
 using namespace combo;
-using namespace reduct;
 using namespace moses;
 
 // For testing only
@@ -69,19 +66,13 @@ class metapopulationUTest : public CxxTest::TestSuite
 {
     dummy_cscore _dcsc;
     dummy_bscore _dbsc;
-    vertex_set ignore_ops;
-    logical_reduction lred;
-    dummy_optimization _do;
     metapopulation _metapopulation;
 
 public:
     metapopulationUTest()
-        : _dcsc(), _dbsc(), ignore_ops(),
-          lred(ignore_ops),
-          _do(),
-          _metapopulation(combo_tree(), type_tree(),
-                          lred.operator()(2), _dcsc, _dbsc,
-                          _do)
+        : _dcsc(), _dbsc(),
+          _metapopulation(combo_tree(),
+                          _dcsc, _dbsc)
     {
         logger().setPrintToStdoutFlag(true);
         logger().setLevel(Logger::FINE);

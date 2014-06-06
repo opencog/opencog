@@ -268,9 +268,10 @@ void moses_mpi_comm::recv_deme(int source,
 
 
 void mpi_moses_worker(metapopulation& mp,
+                      deme_expander& dex,
                       moses_mpi_comm& mompi)
 {
-    optim_stats *os = dynamic_cast<optim_stats *> (&mp._dex._optimize);
+    optim_stats *os = dynamic_cast<optim_stats *> (&dex._optimize);
 
     // Print header for the loop stats.
     logger().info() << "Unit: # cnt\trun_secs\twait_secs\tevals\tmax_evals\tmetapop_size\tbest_score\tcomplexity\tfield_set_sz";
@@ -300,7 +301,7 @@ void mpi_moses_worker(metapopulation& mp,
         mompi.recv_exemplar(exemplar);
         logger().info() << "Allowed " << max_evals 
                         << " evals for recvd exemplar " << exemplar;
-        if (!mp._dex.create_demes(exemplar, 0 /* TODO replace with the
+        if (!dex.create_demes(exemplar, 0 /* TODO replace with the
                                                  right expansion
                                                  count */)) {
             // XXX replace this with appropriate message back to root!
@@ -309,10 +310,10 @@ void mpi_moses_worker(metapopulation& mp,
 
         // XXX TODO should probably fetch max_time from somewhere...
         time_t max_time = INT_MAX;
-        vector<unsigned> actl_evals = mp._dex.optimize_demes(max_evals, max_time);
+        vector<unsigned> actl_evals = dex.optimize_demes(max_evals, max_time);
 
-        mp.merge_demes(mp._dex._demes, mp._dex._reps, actl_evals);
-        mp._dex.free_demes();
+        mp.merge_demes(dex._demes, dex._reps, actl_evals);
+        dex.free_demes();
 
         // logger().info() << "Sending " << mp.size() << " results";
         unsigned total_evals = boost::accumulate(actl_evals, 0U);
@@ -393,6 +394,7 @@ worker_pool::worker_pool(int num_workers)
 /// version (below) needs.
 ///
 void mpi_moses(metapopulation& mp,
+               deme_expander& dex,
                const moses_parameters& pa,
                moses_statistics& stats)
 {
@@ -403,7 +405,7 @@ void mpi_moses(metapopulation& mp,
 
     // main worker dispatch loop
     if (!mompi.is_mpi_root()) {
-        mpi_moses_worker(mp, mompi);
+        mpi_moses_worker(mp, dex, mompi);
         return;
     }
 
@@ -523,6 +525,7 @@ theend:
 /// Not clear if such a consolidation is worth-while...
 //
 void mpi_moses(metapopulation& mp,
+               deme_expander& dex,
                const moses_parameters& pa,
                moses_statistics& stats)
 
@@ -534,7 +537,7 @@ void mpi_moses(metapopulation& mp,
 
     // Worker or dispatcher?
     if (!mompi.is_mpi_root()) {
-        mpi_moses_worker(mp, mompi);
+        mpi_moses_worker(mp, dex, mompi);
         return;
     }
 

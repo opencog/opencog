@@ -21,6 +21,7 @@ ENDIF (MOSES_GIT_DESCRIBE)
 ADD_SUBDIRECTORY (moses)
 ADD_SUBDIRECTORY (scoring)
 ADD_SUBDIRECTORY (metapopulation)
+ADD_SUBDIRECTORY (deme)
 ADD_SUBDIRECTORY (representation)
 ADD_SUBDIRECTORY (optimization)
 ADD_SUBDIRECTORY (eda)
@@ -42,27 +43,29 @@ ADD_LIBRARY (moses SHARED STATIC
 	moses/partial
 	moses/types
 
-	scoring/scoring_base
-	scoring/discriminating_bscore
-	scoring/precision_bscore
-	scoring/instance_scorer
-	scoring/bscores
-
 	metapopulation/metapopulation
 	metapopulation/metapop_params
-	metapopulation/deme_expander
-	metapopulation/feature_selector
 
-	optimization/hill-climbing
-	optimization/optimization
-	optimization/star-anneal
-	optimization/univariate
+	deme/deme_expander
+	deme/feature_selector
 
 	representation/build_knobs
 	representation/field_set
 	representation/knob_mapper
 	representation/knobs
 	representation/representation
+
+	optimization/hill-climbing
+	optimization/optimization
+	optimization/star-anneal
+	optimization/univariate
+
+	scoring/scoring_base
+	scoring/discriminating_bscore
+	scoring/precision_bscore
+	scoring/instance_scorer
+	scoring/bscores
+
 )
 
 TARGET_LINK_LIBRARIES (moses

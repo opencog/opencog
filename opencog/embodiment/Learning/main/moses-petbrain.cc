@@ -97,13 +97,13 @@ int main(int argc, char** argv)
 
     perceptions.insert(combo_tree(ant_combo::get_instance(id::is_food_ahead)));
 
-    metapop_parameters metaparms;
-    metaparms.perceptions = &perceptions;
-    metaparms.actions = &actions;
+    deme_parameters demeparms;
+    demeparms.perceptions = &perceptions;
+    demeparms.actions = &actions;
 
-    metapopulation metapop(combo_tree(id::sequential_and),
-                tt, action_reduction(),
-                cscorer, bscorer, climber, metaparms);
+    deme_expander dex(tt, action_reduction(), action_reduction(),
+                      cscorer, climber, demeparms);
+    metapopulation metapop(combo_tree(id::sequential_and), cscorer, bscorer);
 
     cout << "build metapop" << endl;
 
@@ -113,5 +113,5 @@ int main(int argc, char** argv)
     moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0);
     moses_statistics stats;
 
-    run_moses(metapop, moses_param, stats);
+    run_moses(metapop, dex, moses_param, stats);
 }

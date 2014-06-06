@@ -26,6 +26,8 @@
 
 #include <opencog/comboreduct/reduct/reduct.h>
 
+#include <opencog/learning/moses/deme/deme_expander.h>
+#include <opencog/learning/moses/metapopulation/metapopulation.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/learning/moses/optimization/hill-climbing.h>
 #include <opencog/learning/moses/scoring/scoring.h>
@@ -80,13 +82,15 @@ moses_learning::moses_learning(int nepc,
     cscore = new petaverse_cscore(_fitness_estimator);
     bscore = new petaverse_bscore(_fitness_estimator);
     climber = new hill_climbing;
+    _demeparms = new deme_parameters;
     _metaparms = new metapop_parameters;
 
-    _metaparms->perceptions = &perceptions;
-    _metaparms->actions = &_actions;
-    _metaparms->ignore_ops = _ignore_ops;
+    _demeparms->perceptions = &perceptions;
+    _demeparms->actions = &_actions;
+    _demeparms->ignore_ops = _ignore_ops;
 
-    metapop = NULL;
+    _dex = NULL;
+    _metapop = NULL;
 
     _hcState = HC_INIT;
 
@@ -100,8 +104,10 @@ moses_learning::~moses_learning()
     delete cscore;
     delete bscore;
     delete climber;
-    if (metapop)
-        delete metapop;
+    if (_dex)
+        delete _dex;
+    if (_metapop)
+        delete _metapop;
 }
 
 
@@ -150,11 +156,15 @@ void moses_learning::operator()()
         type_tree tt(id::lambda_type);
         tt.append_children(tt.begin(), id::action_result_type, 1);
 
-        if (metapop)
-            delete metapop;
+        if (_dex)
+            delete _dex;
+        if (_metapop)
+            delete _metapop;
 
-        metapop = new metapopulation (_center, tt, action_reduction(),
-             *cscore, *bscore, *climber, *_metaparms);
+        _dex = new deme_expander(tt, action_reduction(),
+             action_reduction(), *cscore, *climber, *_demeparms);
+        _metapop = new metapopulation (_center, 
+             *cscore, *bscore, *_metaparms);
 
         _hcState = HC_BUILD_CANDIDATES;
         break;
@@ -164,8 +174,8 @@ void moses_learning::operator()()
     case HC_BUILD_CANDIDATES:  {
 
         std::cout << "BUILD" << std::endl;
-        scored_combo_tree_ptr_set_cit exemplar = metapop->select_exemplar();
-        if (metapop->_dex.create_demes(exemplar->get_tree()))
+        scored_combo_tree_ptr_set_cit exemplar = _metapop->select_exemplar();
+        if (_dex->create_demes(exemplar->get_tree()))
             _hcState = HC_ESTIMATE_CANDIDATES;
         else
             _hcState = HC_IDLE;
@@ -183,8 +193,8 @@ void moses_learning::operator()()
 
         // learning time is uncapped.
         time_t max_time = INT_MAX;
-        auto evals = metapop->_dex.optimize_demes(max_for_generation
-                                                  - stats.n_evals,
+        auto evals = _dex->optimize_demes(max_for_generation
+                                                  - _stats.n_evals,
                                                   max_time);
         int o = boost::accumulate(evals, 0);
         std::cout << "number of evaluations: " << o << std::endl;
@@ -192,7 +202,7 @@ void moses_learning::operator()()
         if (o < 0)
             _hcState = HC_FINISH_CANDIDATES;
 
-        stats.n_evals += o;
+        _stats.n_evals += o;
 
         //print the generation number and a best solution
 //          std::cout << "EST sampled " << metapop->n_evals()
@@ -206,30 +216,30 @@ void moses_learning::operator()()
     case HC_FINISH_CANDIDATES:  {
 
         OC_ASSERT(false, "TODO");
-        // metapop->merge_demes(metapop->_dex._demes,
-        //                      metapop->_dex._reps,
-        //                      /* stats.n_evals */ {}, {} /* deme IDs */);
+        // _metapop->merge_demes(_dex->_demes,
+        //                      _dex->_reps,
+        //                      /* _stats.n_evals */ {}, {} /* deme IDs */);
 
         //print the generation number and a best solution
-        std::cout << "sampled " << stats.n_evals
-                  << " best " << metapop->best_score() << " "
-                  << metapop->best_tree() << std::endl;
+        std::cout << "sampled " << _stats.n_evals
+                  << " best " << _metapop->best_score() << " "
+                  << _metapop->best_tree() << std::endl;
 
-        std::cout << "sampled " << stats.n_evals << std::endl;;
+        std::cout << "sampled " << _stats.n_evals << std::endl;;
 
-        if (metapop->best_score() >= _best_fitness_estimated) {
-            _best_fitness_estimated = metapop->best_score();
-            _best_program_estimated = metapop->best_tree();
+        if (_metapop->best_score() >= _best_fitness_estimated) {
+            _best_fitness_estimated = _metapop->best_score();
+            _best_program_estimated = _metapop->best_tree();
         }
 
-        std::cout << "best program in this iter: " << metapop->best_tree() << std::endl;
-        std::cout << "best score for this prog: " << metapop->best_score() << std::endl;
+        std::cout << "best program in this iter: " << _metapop->best_tree() << std::endl;
+        std::cout << "best score for this prog: " << _metapop->best_score() << std::endl;
 
         std::cout << "best program total: " << _best_program_estimated << std::endl;
         std::cout << "best score total: " << _best_fitness_estimated << std::endl;
 
-        scored_combo_tree_ptr_set_cit exemplar = metapop->select_exemplar();
-        if(exemplar == metapop->end())
+        scored_combo_tree_ptr_set_cit exemplar = _metapop->select_exemplar();
+        if (exemplar == _metapop->end())
             _hcState = HC_IDLE;
         else {
             _center = exemplar->get_tree();
@@ -269,8 +279,8 @@ const combo_tree& moses_learning::best_program_estimated()
 const combo_tree& moses_learning::current_program()
 {
     //returns the best program which has never been sent to the owner
-    for (scored_combo_tree_ptr_set_cit mci = metapop->begin();
-        mci != metapop->end(); ++mci)  {
+    for (scored_combo_tree_ptr_set_cit mci = _metapop->begin();
+        mci != _metapop->end(); ++mci)  {
         _current_program = mci->get_tree();
 
         // if this one has already been sent, check the next one

@@ -36,6 +36,8 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
                                const rule& reduct,
                                const optim_parameters& opt_params,
                                const hc_parameters& hc_params,
+                               const deme_parameters& deme_params,
+                               unsigned cache_size,
                                const metapop_parameters& meta_params,
                                const moses_parameters& moses_params,
                                const metapop_printer& mmr_pa)
@@ -48,10 +50,12 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
      _reduct(reduct),
      _opt_params(opt_params),
      _hc_params(hc_params),
+     _deme_params(deme_params),
      _meta_params(meta_params),
      _moses_params(moses_params), _printer(mmr_pa),
      _bscore(NULL), 
      _cscore(NULL), 
+     _cache_size(cache_size),
      _straight_bscore(NULL), 
      _straight_cscore(NULL), 
      _num_evals(0), _num_gens(0),
@@ -105,8 +109,11 @@ void partial_solver::solve()
                         << " num exemplars=" << _exemplars.size();
 
         metapop_moses_results(_exemplars, _table_type_signature,
-                              _reduct, _reduct, *_bscore, *_cscore,
-                              _opt_params, _hc_params, _meta_params, _moses_params,
+                              _reduct, _reduct, *_bscore, 
+                              _cache_size, *_cscore,
+                              _opt_params, _hc_params, 
+                              _deme_params,
+                              _meta_params, _moses_params,
                               *this);
 
         // If done, then we run one last time, but only to invoke the
@@ -119,8 +126,11 @@ void partial_solver::solve()
 
             logger().info() << "well-enough DONE!";
             metapop_moses_results(_exemplars, _table_type_signature,
-                                  _reduct, _reduct, *_straight_bscore, *_straight_cscore,
-                                  _opt_params, _hc_params, _meta_params, _moses_params,
+                                  _reduct, _reduct, *_straight_bscore,
+                                  _cache_size, *_straight_cscore,
+                                  _opt_params, _hc_params, 
+                                  _deme_params,
+                                  _meta_params, _moses_params,
                                   _printer);
 
             break;

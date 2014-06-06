@@ -4,6 +4,9 @@
 #include <opencog/util/Logger.h>
 #include <opencog/comboreduct/interpreter/eval.h>
 
+#include "../deme/deme_expander.h"
+#include "../metapopulation/metapopulation.h"
+
 #include "../representation/representation.h"
 #include "../moses/moses_main.h"
 #include "../optimization/optimization.h"
@@ -59,13 +62,14 @@ int main(int argc, char** argv)
     ann_pole2nv_cscore p2_cscore;
     ann_pole2nv_bscore p2_bscore; 
     univariate_optimization univ;
-    metapopulation metapop_pole2(tr, tt, *si, p2_cscore, p2_bscore, univ);
+    deme_expander dex(tt, *si, *si, p2_cscore, univ);
+    metapopulation metapop_pole2(tr, p2_cscore, p2_bscore);
 
     boost::program_options::variables_map vm;
     jobs_t jobs;
     moses_parameters moses_param(vm, jobs, true, max_evals);
     moses_statistics st;
-    run_moses(metapop_pole2, moses_param, st);
+    run_moses(metapop_pole2, dex, moses_param, st);
 
     //change best combo tree back into ANN
     tree_transform trans; 

@@ -24,6 +24,8 @@
 #include <opencog/util/Logger.h>
 #include <opencog/comboreduct/interpreter/eval.h>
 
+#include "../deme/deme_expander.h"
+#include "../metapopulation/metapopulation.h"
 #include "../moses/moses_main.h"
 #include "../scoring/scoring.h"
 #include "../representation/representation.h"
@@ -83,11 +85,12 @@ int main(int argc, char** argv)
     ann_pole_bscore p_bscore; 
 
     univariate_optimization optim_algo;
-    metapopulation metapop_pole(tr, tt, *si, p_cscore, p_bscore, optim_algo);
+    deme_expander dex(tt, *si,  *si, p_cscore, optim_algo);
+    metapopulation metapop_pole(tr, p_cscore, p_bscore);
 
     moses_parameters pa;
     moses_statistics st;
-    run_moses(metapop_pole, pa, st);
+    run_moses(metapop_pole, dex, pa, st);
 
     //change best tree into ANN
     tree_transform trans; 

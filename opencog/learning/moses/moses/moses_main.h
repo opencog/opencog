@@ -31,6 +31,9 @@
 
 #include <opencog/comboreduct/combo/combo.h>
 
+#include "../deme/deme_expander.h"
+#include "../metapopulation/metapopulation.h"
+
 #include "../optimization/hill-climbing.h"
 #include "../optimization/star-anneal.h"
 #include "../optimization/univariate.h"
@@ -47,9 +50,10 @@ extern const char * version_string;
 /**
  * Run moses
  */
-void run_moses(metapopulation& metapop,
-               const moses_parameters& moses_params,
-               moses_statistics& stats);
+void run_moses(metapopulation&,
+               deme_expander&,
+               const moses_parameters&,
+               moses_statistics&);
 
 /// Print metapopulation results to stdout, logfile, etc.
 struct metapop_printer
@@ -81,6 +85,7 @@ struct metapop_printer
      * Print metapopulation summary.
      */
     void operator()(metapopulation &metapop,
+                    deme_expander& dex,
                     moses_statistics& stats) const
     {
         // We expect the mpi worker processes to have an empty
@@ -126,21 +131,21 @@ struct metapop_printer
             logger().info("Best candidates:\n%s", res.c_str());
     
     #ifdef GATHER_STATS
-        metapop._dex._optimize.hiscore /= metapop._dex._optimize.hicount;
-        metapop._dex._optimize.num_improved /= metapop._dex._optimize.count_improved;
+        dex._optimize.hiscore /= dex._optimize.hicount;
+        dex._optimize.num_improved /= dex._optimize.count_improved;
         logger().info() << "Avg number of improved scores = "
-                        << metapop._dex._optimize.num_improved;
+                        << dex._optimize.num_improved;
         logger().info() << "Avg improved as percentage= "
-                        << 100.0 * metapop._dex._optimize.num_improved /
-                               metapop._dex._optimize.scores.size();
+                        << 100.0 * dex._optimize.num_improved /
+                               dex._optimize.scores.size();
 
-        for (unsigned i=0; i< metapop._dex._optimize.scores.size(); i++) {
-            metapop._dex._optimize.scores[i] /= metapop._dex._optimize.counts[i];
+        for (unsigned i=0; i< dex._optimize.scores.size(); i++) {
+            dex._optimize.scores[i] /= dex._optimize.counts[i];
             logger().info() << "Avg Scores: "
                 << i << "\t"
-                << metapop._dex._optimize.hiscore << "\t"
-                << metapop._dex._optimize.counts[i] << "\t"
-                << metapop._dex._optimize.scores[i];
+                << dex._optimize.hiscore << "\t"
+                << dex._optimize.counts[i] << "\t"
+                << dex._optimize.scores[i];
         }
     #endif
     }
@@ -173,6 +178,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const cscore_base& sc,
                              const optim_parameters& opt_params,
                              const hc_parameters& hc_params,
+                             const deme_parameters& deme_params,
                              const metapop_parameters& meta_params,
                              const moses_parameters& moses_params,
                              Printer& printer)
@@ -197,11 +203,20 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
         exit(1);
     }
 
-    metapopulation metapop(bases, tt, si_ca, si_kb, sc, bsc,
-                           *optimizer, meta_params);
+    // This seems kind of cheesy ... shouldn't the exemplars 
+    // already be simplified, by now?
+    std::vector<combo_tree> simple_bases;
+    for (const combo_tree& xmplr: bases) {
+        combo_tree siba(xmplr);
+        si_ca(siba);
+        simple_bases.push_back(siba);
+    }
 
-    run_moses(metapop, moses_params, stats);
-    printer(metapop, stats);
+    deme_expander dex(tt, si_ca, si_kb, sc, *optimizer, deme_params);
+    metapopulation metapop(simple_bases, sc, bsc, meta_params);
+
+    run_moses(metapop, dex, moses_params, stats);
+    printer(metapop, dex, stats);
     delete optimizer;
 }
 
@@ -214,9 +229,11 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
                            const reduct::rule& si_ca,
                            const reduct::rule& si_kb,
                            bscore_base& bscorer,
+                           unsigned cache_size,
                            cscore_base& c_scorer,
                            optim_parameters opt_params,
                            hc_parameters hc_params,
+                           const deme_parameters& deme_params,
                            const metapop_parameters& meta_params,
                            moses_parameters moses_params,
                            Printer& printer)
@@ -246,12 +263,12 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     // update minimum score improvement
     opt_params.set_min_score_improv(c_scorer.min_improv());
 
-    if (meta_params.cache_size > 0) {
+    if (cache_size > 0) {
         // WARNING: adaptive_cache is not thread safe (and therefore
         // deactivated for now)
         
         // static const unsigned initial_cache_size = 1000000;
-        unsigned initial_cache_size = meta_params.cache_size;
+        unsigned initial_cache_size = cache_size;
         
         // When the include_dominated flag is set, then trees are merged
         // into the metapop based only on the score (and complexity),
@@ -262,12 +279,14 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
         // ScoreACache score_acache(score_cache);
         metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
                                 bscorer, score_cache /*score_acache*/,
-                                opt_params, hc_params, meta_params,
+                                opt_params, hc_params, 
+                                deme_params, meta_params,
                                 moses_params, printer);
     } else
         metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
                                 bscorer, c_scorer,
-                                opt_params, hc_params, meta_params,
+                                opt_params, hc_params,
+                                deme_params, meta_params,
                                 moses_params, printer);
 }
 

@@ -26,6 +26,7 @@
 
 #include <opencog/util/tree.h>
 
+#include <opencog/learning/moses/deme/deme_expander.h>
 #include <opencog/learning/moses/metapopulation/metapopulation.h>
 #include <opencog/learning/moses/moses/moses_params.h>
 #include <opencog/learning/moses/scoring/scoring.h>
@@ -93,6 +94,7 @@ private:
     const operator_set& _ignore_ops;
     const combo_tree_ns_set& _perceptions;
     const combo_tree_ns_set& _actions;
+    deme_parameters *_demeparms;
     metapop_parameters *_metaparms;
 
     fitness_t _current_fitness; //real fitness of current program
@@ -113,8 +115,9 @@ private:
 
     const score_t max_score;
 
-    metapopulation *metapop;
-    moses_statistics stats;
+    deme_expander *_dex;
+    metapopulation *_metapop;
+    moses_statistics _stats;
 };
 
 struct petaverse_cscore : public cscore_base

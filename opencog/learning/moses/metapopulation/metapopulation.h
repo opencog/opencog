@@ -32,9 +32,10 @@
 
 #include <boost/logic/tribool.hpp>
 
+#include <opencog/comboreduct/combo/combo.h>
 #include "../optimization/optimization.h"
+#include "../scoring/scoring_base.h"
 #include "metapop_params.h"
-#include "deme_expander.h"
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 
@@ -44,8 +45,6 @@
 
 namespace opencog {
 namespace moses {
-
-void print_stats_header (optim_stats *os, bool diversity_enabled);
 
 /**
  * The metapopulation will store the expressions (as scored trees)
@@ -63,15 +62,16 @@ void print_stats_header (optim_stats *os, bool diversity_enabled);
  *   cscore_base = scoring function (output composite (combined) scores)
  *   bscore_base = behavioral scoring function (output behaviors)
  */
+using combo::combo_tree;
+
 struct metapopulation
 {
-    // XXX shouldn't this bbe scored_combo_tree ??
+    // XXX shouldn't this be scored_combo_tree ??
     typedef std::unordered_map<combo_tree, unsigned,
                                boost::hash<combo_tree> > combo_tree_hash_counter;
 
     // Init the metapopulation with the following set of exemplars.
     void init(const std::vector<combo_tree>& exemplars,
-              const reduct::rule& simplify_candidate,
               const cscore_base& cscorer);
 
     /**
@@ -91,40 +91,31 @@ struct metapopulation
      * @param pa      Control parameters for this class.
      */
     metapopulation(const std::vector<combo_tree>& bases,
-                   const type_tree& type_signature,
-                   const reduct::rule& si_ca,
-                   const reduct::rule& si_kb,
                    const cscore_base& sc,
                    const bscore_base& bsc,
-                   optimizer_base& opt,
                    const metapop_parameters& pa = metapop_parameters()) :
         params(pa),
-        _dex(type_signature, si_ca, si_kb, sc, opt, pa),
         _bscorer(bsc),
         _merge_count(0),
         _best_cscore(worst_composite_score),
         _cached_dst(pa.diversity)
     {
-        init(bases, si_ca, sc);
+        init(bases, sc);
     }
 
     // Like above but using a single base, and a single reduction rule.
     /// @todo use C++11 redirection
     metapopulation(const combo_tree& base,
-                   const type_tree& type_signature,
-                   const reduct::rule& si,
                    const cscore_base& sc, const bscore_base& bsc,
-                   optimizer_base& opt,
                    const metapop_parameters& pa = metapop_parameters()) :
         params(pa),
-        _dex(type_signature, si, si, sc, opt, pa),
         _bscorer(bsc),
         _merge_count(0),
         _best_cscore(worst_composite_score),
         _cached_dst(pa.diversity)
     {
         std::vector<combo_tree> bases(1, base);
-        init(bases, si, sc);
+        init(bases, sc);
     }
 
     ~metapopulation() {}
@@ -499,9 +490,6 @@ struct metapopulation
 public:
     const metapop_parameters& params;
 
-// protected:
-    deme_expander _dex;
- 
 protected:
     scored_combo_tree_ptr_set _scored_trees;
 

@@ -4,6 +4,10 @@
 #include <opencog/util/Logger.h>
 #include <opencog/comboreduct/interpreter/eval.h>
 
+
+#include "../deme/deme_expander.h"
+#include "../metapopulation/metapopulation.h"
+
 #include "../moses/moses_main.h"
 #include "../optimization/optimization.h"
 #include "../scoring/scoring.h"
@@ -44,12 +48,12 @@ int main(int argc, char** argv)
     ann_pole2_bscore p2_bscore;
 
     hill_climbing hc;
-    metapopulation metapop_pole2(tr, tt, clean_reduction(),
-                      p2_cscore, p2_bscore, hc);
+    deme_expander dex(tt, clean_reduction(), clean_reduction(), p2_cscore, hc);
+    metapopulation metapop_pole2(tr, p2_cscore, p2_bscore);
 
     moses_parameters pa;
     moses_statistics st;
-    run_moses(metapop_pole2, pa, st);
+    run_moses(metapop_pole2, dex, pa, st);
 
     combo_tree best = metapop_pole2.best_tree();
     ann bestnet = trans.decodify_tree(best);

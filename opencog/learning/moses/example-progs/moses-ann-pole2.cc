@@ -26,6 +26,9 @@
 
 #include <opencog/comboreduct/interpreter/eval.h>
 
+#include "../deme/deme_expander.h"
+#include "../metapopulation/metapopulation.h"
+
 #include "../representation/representation.h"
 #include "../optimization/optimization.h"
 #include "../moses/moses_main.h"
@@ -75,18 +78,19 @@ int main(int argc, char** argv)
 
     //DOUBLE MARKOVIAN POLE TASK`
     const reduct::rule* si = &(ann_reduction());
-    if(!reduce)
+    if (!reduce)
         si = &(clean_reduction());
     
     ann_pole2_cscore p2_cscore;
     ann_pole2_bscore p2_bscore; 
 
     univariate_optimization univ;
-    metapopulation metapop_pole2(tr, tt, *si, p2_cscore, p2_bscore, univ);
+    deme_expander dex(tt, *si, *si, p2_cscore, univ);
+    metapopulation metapop_pole2(tr, p2_cscore, p2_bscore);
 
     moses_parameters pa;
     moses_statistics st;
-    run_moses(metapop_pole2, pa, st);
+    run_moses(metapop_pole2, dex, pa, st);
 
     //change best combo tree back into ANN
     tree_transform trans; 

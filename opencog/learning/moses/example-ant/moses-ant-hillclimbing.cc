@@ -35,6 +35,8 @@
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 
+#include "../deme/deme_expander.h"
+#include "../metapopulation/metapopulation.h"
 #include "../moses/moses_main.h"
 #include "../optimization/optimization.h"
 #include "../scoring/scoring_base.h"
@@ -48,7 +50,7 @@ using namespace boost;
 using namespace ant_combo;
 using namespace std;
 
-int main(int argc,char** argv) 
+int main(int argc,char** argv)
 {
     int max_evals,rand_seed;
     if (argc == 3) {
@@ -90,9 +92,11 @@ int main(int argc,char** argv)
 
     perceptions.insert(combo_tree(get_instance(id::is_food_ahead)));
 
+    deme_parameters demeparms;
+    demeparms.perceptions = &perceptions;
+    demeparms.actions = &actions;
+
     metapop_parameters metaparms;
-    metaparms.perceptions = &perceptions;
-    metaparms.actions = &actions;
     metaparms.complexity_temperature = 100;
 
     // Define optimization algo
@@ -103,13 +107,14 @@ int main(int argc,char** argv)
     hc_params.crossover = true;
     hill_climbing hc(opt_params, hc_params);
 
-    metapopulation metapop(combo_tree(id::sequential_and), tt, action_reduction(),
-                           cscorer, bscorer, hc, metaparms);
-  
+    deme_expander dex(tt, action_reduction(), action_reduction(), cscorer, hc, demeparms);
+    metapopulation metapop(combo_tree(id::sequential_and),
+                           cscorer, bscorer, metaparms);
+
     boost::program_options::variables_map vm;
 
     moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0, 100);
     moses_statistics st;
-    run_moses(metapop, moses_param, st);
+    run_moses(metapop, dex, moses_param, st);
 }
 
