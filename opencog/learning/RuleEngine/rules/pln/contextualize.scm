@@ -12,15 +12,14 @@
 ;    R A B
 ;----------------------------------------------------------------------
 
-(define pln-rule-contextualize-and
+(define pln-rule-contextualize-implication
     (BindLink
         (ListLink
-            (VariableNode "$R")
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C"))
             (ImplicationLink
-                (VariableNode "$R"
+                (ImplicationLink
                     (AndLink
                         (VariableNode "$C")
                         (VariableNode "$A"))
@@ -30,7 +29,7 @@
                 (ListLink
                     (ContextLink 
                         (VariableNode "$C")
-                        (VariableNode "$R"
+                        (InheritanceLink
                             (VariableNode "$A")
                             (VariableNode "$B")))
                     (ExecutionLink
@@ -38,14 +37,20 @@
                         (ListLink
                             (ContextLink
                                 (VariableNode "$C")
-                                (VariableNode "$R"
+                                (InheritanceLink
                                     (VariableNode "$A")
                                     (VariableNode "$B")))
-                            (VariableNode "$R")))))))
+                            (ImplicationLink
+                                (AndLink
+                                    (VariableNode "$C")
+                                    (VariableNode "$A"))
+                                (AndLink
+                                    (VariableNode "$C")
+                                    (VariableNode "$B")))))))))
 
 
 ; In an EvaluationLink, the PredicateNode is not 'andified'
-(define pln-rule-contextualize-and-evaluation
+(define pln-rule-contextualize-evaluation
     (BindLink
         (ListLink
             (TypedVariableLink
