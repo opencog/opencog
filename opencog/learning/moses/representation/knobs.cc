@@ -319,7 +319,8 @@ field_set::disc_spec action_subtree_knob::spec() const {
     return field_set::disc_spec(multiplicity());
 }
 
-std::string action_subtree_knob::toStr() const {
+std::string action_subtree_knob::toStr() const
+{
     std::stringstream ss;
     ss << "[";
     for(int i = 0; i < multiplicity(); ++i) {
@@ -328,9 +329,7 @@ std::string action_subtree_knob::toStr() const {
         if (idx == 0)
             ss << "nil";
         else {
-            std::stringstream tr_ss;
-            tr_ss << _perms[idx-1];
-            ss << tr_ss.str().substr(0, tr_ss.str().size()-1);
+            ss << _perms[idx-1];
         }
         if (i+1 < multiplicity())
             ss << "|";
