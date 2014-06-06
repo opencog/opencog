@@ -420,7 +420,9 @@ problem_params::add_options(boost::program_options::options_description& desc)
         (opt_desc_str(max_dist_opt).c_str(),
          po::value<size_t>(&max_dist)->default_value(4),
          "The maximum radius of the neighborhood around the "
-         "exemplar to explore.\n")
+         "exemplar to explore. This value only has an effect if "
+         "the widen-search option has been set; this controls how "
+         "far the search is widened.\n")
 
         (opt_desc_str(reduce_all_opt).c_str(),
          po::value<bool>(&reduce_all)->default_value(true),
@@ -487,7 +489,10 @@ problem_params::add_options(boost::program_options::options_description& desc)
          str(format("Hillclimbing parameter (%s). If false, then deme search "
                     "terminates when a local hilltop is found. If true, "
                     "then the search radius is progressively widened, "
-                    "until another termination condition is met.\n") % hc).c_str())
+                    "until another termination condition is met. "
+                    "The max-dist value controls just how wide the "
+                    "search will go. The recommended setting is to "
+                    "not perform widening.\n") % hc).c_str())
 
         ("well-enough",
          po::value<bool>(&use_well_enough)->default_value(false),

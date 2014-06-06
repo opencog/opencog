@@ -43,7 +43,7 @@ struct hc_parameters
 {
     hc_parameters(bool widen = false,
                   bool step = false,
-                  bool cross = false,
+                  bool cross = true,
                   unsigned max_evals = 20000,
                   double _fraction_of_nn = 2.0) // > 1.0 since works on estimate only.
         : widen_search(widen),

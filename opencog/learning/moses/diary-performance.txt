@@ -96,7 +96,7 @@ these.
 
    The original Occam temperature was not recognized as a temperature,
    but instead appealled to a concept of Solomonoff prior distribution
-   probbility.  The distribution was 2^-complexity, with complexity
+   probability.  The distribution was 2^-complexity, with complexity
    meaured in bits.  By contrast, the current code uses a distribution
    of exp(-beta * complexity).  Solomonoff would be regained if
    beta==log2==0.69 but instead, current experimental evidence suggests
@@ -112,6 +112,9 @@ these.
    the true complexity; if so, the Solomonoff prior would be closer
    to the experimentally optimal temperature.  But it is hard to say,
    at this point.
+
+   (Note: As of June 2014, the AntUTest is hitting this bug. See very
+   bottom of this file for details.)
    
 
 ++ Better population control; skip behavioral score computation.
@@ -137,7 +140,7 @@ these.
    exemplars are choosen with a Boltzmann distribution, with exemplar x
    being choosen with probability p(x) ~ exp(-E(x)/kT) where E(x) is the
    score of exemplar x. Because of the rapid fall-off of the
-   exponential,  exemplars with scores that are worse than 20 ro 30
+   exponential,  exemplars with scores that are worse than 20 or 30
    times kT are very very unlikely to be chosen (since exp(-20) or
    exp(-30) is so very tiny).   Thus, it is quite reasonable to cull
    exemplars with scores worse than this from the metapopulation.  This
@@ -3976,4 +3979,48 @@ Appearently, its hard for moses...
      40K     90      -3
     160K    570      -3
     640K   5682      -3
+
+==================================================================
+
+June 2014 -- AntUTest
+---------------------
+Currently, the AntUTest is exhibiting the same-old bad behaviour of
+excess runtimes, as documented up top.  So, I want to run a quick
+experiment to make sure the same techniques work to fix AntUTest as
+well.
+
+Baseline run:
+        simplicity_pressure = 0.5;
+        metaparms.complexity_temperature = 100;
+        opt_params.max_dist = 3;
+        hc_params.widen_search = true;
+        hc_params.crossover = true;
+
+Revised run:
+        The above paramaters are changed to the default settings, which
+        were obtained a few years ago, as documented above. The default
+        complexity ratio of 3.5 was from the boolean problems, not clear
+        that its ideal for the ant problem,
+
+        complexity_ratio = 3.5
+        metaparms.complexity_temperature = 6.0;
+        hc_params.widen_search = false;
+        hc_params.crossover = true;
+
+
+
+               baseline      revised
+  rand seed    run-time      run-time
+  ---------    -------       --------
+      1       > 3600 secs   > 500 secs
+      2       2 secs         fail in 15 secs
+      3       > 120 secs    > 150 secs
+      4       > 120 secs
+      5       15 secs
+      6       0.5 secs
+      7       > 120 secs
+      8       > 120 secs
+      9       > 120 secs
+     10       5 secs
+
 
