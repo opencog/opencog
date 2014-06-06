@@ -54,6 +54,10 @@ class CogServer;
  * 
  * (2) Diffusion to atoms that are adjacent to each atom, where the type of
  *     the connecting edge is a hebbian link
+ * 
+ * Please refer to the detailed description of this agent in the README file,
+ * where an extensive explanation of the algorithm, features and pending
+ * work is explained.
  */
 class SimpleImportanceDiffusionAgent : public Agent
 {
@@ -61,6 +65,7 @@ class SimpleImportanceDiffusionAgent : public Agent
 private:
     AtomSpace* as;
     float maxSpreadPercentage;
+    float hebbianMaxAllocationPercentage;
     bool spreadHebbianOnly;
     SpreadDecider* spreadDecider;
     void setLogger(Logger* l);
@@ -94,6 +99,9 @@ private:
 public:
     enum { HYPERBOLIC, STEP };
     void setSpreadDecider(int type, float shape = 30);
+    void setMaxSpreadPercentage(float);
+    void setHebbianMaxAllocationPercentage(float);
+    void setSpreadHebbianOnly(bool);
     SimpleImportanceDiffusionAgent(CogServer&);
     virtual ~SimpleImportanceDiffusionAgent();
     virtual void run();

@@ -54,9 +54,14 @@ SimpleImportanceDiffusionAgent::SimpleImportanceDiffusionAgent(CogServer& cs) :
     // If false, will diffuse along hebbian links only. If true,
     // will also diffuse to all non-hebbian incident atoms in the
     // incoming and outgoing sets
+    
+    // HEBBIAN_MAX_ALLOCATION_PERCENTAGE
+    // Maximum percentage that will be available for diffusion to hebbian links
+    
     static const std::string defaultConfig[] = {
         "ECAN_MAX_SPREAD_PERCENTAGE", "0.6",
         "ECAN_SPREAD_HEBBIAN_ONLY", "false",
+        "HEBBIAN_MAX_ALLOCATION_PERCENTAGE", "0.5",
         "",""
     };
     
@@ -64,10 +69,12 @@ SimpleImportanceDiffusionAgent::SimpleImportanceDiffusionAgent(CogServer& cs) :
     /* ======================================================== */
     
     spreadDecider = NULL;
-    maxSpreadPercentage = 
-            (float) (config().get_double("ECAN_MAX_SPREAD_PERCENTAGE"));
     setSpreadDecider(STEP);
-    spreadHebbianOnly = config().get_bool("ECAN_SPREAD_HEBBIAN_ONLY");
+    setMaxSpreadPercentage(
+                (float) (config().get_double("ECAN_MAX_SPREAD_PERCENTAGE")));
+    setSpreadHebbianOnly(config().get_bool("ECAN_SPREAD_HEBBIAN_ONLY"));
+    setHebbianMaxAllocationPercentage(
+                config().get_double("HEBBIAN_MAX_ALLOCATION_PERCENTAGE"));
 
     // Provide a logger
     log = NULL;
@@ -84,6 +91,41 @@ void SimpleImportanceDiffusionAgent::setLogger(Logger* _log)
 Logger* SimpleImportanceDiffusionAgent::getLogger()
 {
     return log;
+}
+
+/*
+ * Set the value of the parameter that determines how much of an atom's STI
+ * is available for diffusion at each time step. An atom will not diffuse more
+ * than this percentage.
+ */
+void SimpleImportanceDiffusionAgent::setMaxSpreadPercentage(float percent)
+{
+    maxSpreadPercentage = percent;
+}
+
+/*
+ * Set the value of the parameter that determines how much of an atom's STI 
+ * will be allocated for potential diffusion to hebbian links. Note that any 
+ * unused STI that was available but unused for diffusion to hebbian links
+ * will then be reallocated for diffusion to incident non-hebbian atoms, if
+ * that option is enabled.
+ */
+void SimpleImportanceDiffusionAgent::setHebbianMaxAllocationPercentage(
+        float percent)
+{
+    hebbianMaxAllocationPercentage = percent;
+}
+
+/*
+ * Set the value of the parameter that determines whether diffusion will occur
+ * only along hebbian links (when the parameter is True) or if diffusion will
+ * occur both along hebbian links and to non-hebbian incident atoms (when the
+ * parameter is False), meaning that all atoms that are in the incoming or
+ * outgoing sets will be diffusion targets.
+ */
+void SimpleImportanceDiffusionAgent::setSpreadHebbianOnly(bool option)
+{
+    spreadHebbianOnly = option;
 }
 
 void SimpleImportanceDiffusionAgent::setSpreadDecider(int type, float shape)
@@ -469,13 +511,10 @@ SimpleImportanceDiffusionAgent::combineIncidentAdjacentVectors(
     // Start with 100% of possible diffusion, and then allocate it
     double diffusionAvailable = 1.0;
     
-    // TODO: Make this a configuration parameter
-    double HEBBIAN_MAX_ALLOCATION_PERCENTAGE = 0.50;
-    
     // Calculate the maximum proportion that could be used for diffusion to
     // all hebbian adjacent atoms
     double hebbianDiffusionAvailable = 
-            HEBBIAN_MAX_ALLOCATION_PERCENTAGE * diffusionAvailable;
+            hebbianMaxAllocationPercentage * diffusionAvailable;
     
     // Calculate the maximum proportion that could be allocated to any
     // particular hebbian adjacent atom, as the total amount available for
