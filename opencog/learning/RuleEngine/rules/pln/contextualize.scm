@@ -54,15 +54,12 @@
     (BindLink
         (ListLink
             (TypedVariableLink
-                (VariableNode "$R")
-                (VariableTypeNode "EvaluationLink"))
-            (TypedVariableLink
                 (VariableNode "$A")
                 (VariableTypeNode "PredicateNode"))
             (VariableNode "$B")
             (VariableNode "$C"))
             (ImplicationLink
-                (VariableNode "$R")
+                (EvaluationLink
                     (VariableNode "$A")
                     (AndLink
                         (VariableNode "$C")
@@ -70,7 +67,7 @@
                 (ListLink
                     (ContextLink
                         (VariableNode "$C")
-                        (VariableNode "$R"
+                        (EvaluationLink
                             (VariableNode "$A")
                             (VariableNode "$B")))
                     (ExecutionLink
@@ -81,7 +78,11 @@
                                 (VariableNode "$R"
                                     (VariableNode "$A")
                                     (VariableNode "$B")))
-                            (VariableNode "$R")))))))
+                            (EvaluationLink
+                                (VariableNode "$A")
+                                (AndLink
+                                    (VariableNode "$C")
+                                    (VariableNode "$B"))))))))))
 
 ;----------------------------------------------------------------------
 ; b)
