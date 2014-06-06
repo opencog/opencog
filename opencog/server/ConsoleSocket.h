@@ -86,7 +86,7 @@ public:
     void OnConnection(void);
 
     /** OnLine callback: called when a new command/request is revieved
-     *  from the client. It parses the command line by spliting it into
+     *  from the client. It parses the command line by splitting it into
      *  space-separated tokens.
      *
      *  The first token is used as the requests id/name and the
