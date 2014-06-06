@@ -521,6 +521,10 @@ D) The foreach abstraction allows complex iterators to be implemented.
 
 TODO
 ----
+ * Enhancement: Add support for VariableLink, so that, for example,
+   (VariableLink $R (VariableNode $A) (VariableNode $B)) matches
+   any arity-2 link (as long as the type constraints are obeyed).
+
  * Performance improvement: Steal an idea from DPLL, viz unit_propagate.
    That is, start with those clauses that have only a single variable
    in them, ground that, and propagate.  Not sure, I think this could
