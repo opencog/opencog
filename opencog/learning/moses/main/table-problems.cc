@@ -413,7 +413,8 @@ void pre_conj_table_problem::run(option_base* ob)
     metapop_moses_results(pms.exemplars, cand_sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
                           bscore, pms.cache_size, mbcscore,
-                          pms.opt_params, pms.hc_params, pms.meta_params,
+                          pms.opt_params, pms.hc_params,
+                          pms.deme_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }
 

@@ -30,8 +30,8 @@
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/log_prog_name.h>
 
+#include "../deme/deme_expander.h"
 #include "../metapopulation/metapopulation.h"
-#include "../metapopulation/deme_expander.h"
 #include "moses_params.h"
 
 namespace opencog { namespace moses {

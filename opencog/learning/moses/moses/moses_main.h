@@ -31,7 +31,7 @@
 
 #include <opencog/comboreduct/combo/combo.h>
 
-#include "../metapopulation/deme_expander.h"
+#include "../deme/deme_expander.h"
 #include "../metapopulation/metapopulation.h"
 
 #include "../optimization/hill-climbing.h"

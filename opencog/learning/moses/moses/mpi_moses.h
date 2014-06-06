@@ -29,7 +29,7 @@
 #include <future>
 #include <opencog/util/pool.h>
 
-#include "../metapopulation/deme_expander.h"
+#include "../deme/deme_expander.h"
 #include "../metapopulation/metapopulation.h"
 #include "moses_params.h"
 

@@ -104,7 +104,7 @@ TARGET_LINK_LIBRARIES(scoringUTest
 
 ADD_CXXTEST(AntUTest)
 TARGET_LINK_LIBRARIES(AntUTest
-    ant_scoring
+	ant_scoring
 	moses_exec
 	moses
 	comboreduct

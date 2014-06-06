@@ -32,7 +32,9 @@
 
 #include <boost/logic/tribool.hpp>
 
+#include <opencog/comboreduct/combo/combo.h>
 #include "../optimization/optimization.h"
+#include "../scoring/scoring_base.h"
 #include "metapop_params.h"
 
 #define EVALUATED_ALL_AVAILABLE 1234567
@@ -43,8 +45,6 @@
 
 namespace opencog {
 namespace moses {
-
-void print_stats_header (optim_stats *os, bool diversity_enabled);
 
 /**
  * The metapopulation will store the expressions (as scored trees)
@@ -62,6 +62,8 @@ void print_stats_header (optim_stats *os, bool diversity_enabled);
  *   cscore_base = scoring function (output composite (combined) scores)
  *   bscore_base = behavioral scoring function (output behaviors)
  */
+using combo::combo_tree;
+
 struct metapopulation
 {
     // XXX shouldn't this be scored_combo_tree ??

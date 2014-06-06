@@ -24,7 +24,7 @@
 #define _OPENCOG_DEME_EXPANDER_H
 
 #include "../optimization/optimization.h"
-#include "metapop_params.h"
+#include "deme_params.h"
 
 namespace opencog {
 namespace moses {

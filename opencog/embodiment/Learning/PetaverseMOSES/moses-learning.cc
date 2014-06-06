@@ -26,7 +26,7 @@
 
 #include <opencog/comboreduct/reduct/reduct.h>
 
-#include <opencog/learning/moses/metapopulation/deme_expander.h>
+#include <opencog/learning/moses/deme/deme_expander.h>
 #include <opencog/learning/moses/metapopulation/metapopulation.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/learning/moses/optimization/hill-climbing.h>
@@ -85,9 +85,9 @@ moses_learning::moses_learning(int nepc,
     _demeparms = new deme_parameters;
     _metaparms = new metapop_parameters;
 
-    _metaparms->perceptions = &perceptions;
-    _metaparms->actions = &_actions;
-    _metaparms->ignore_ops = _ignore_ops;
+    _demeparms->perceptions = &perceptions;
+    _demeparms->actions = &_actions;
+    _demeparms->ignore_ops = _ignore_ops;
 
     _dex = NULL;
     _metapop = NULL;
@@ -175,7 +175,7 @@ void moses_learning::operator()()
 
         std::cout << "BUILD" << std::endl;
         scored_combo_tree_ptr_set_cit exemplar = _metapop->select_exemplar();
-        if (_dex.create_demes(exemplar->get_tree()))
+        if (_dex->create_demes(exemplar->get_tree()))
             _hcState = HC_ESTIMATE_CANDIDATES;
         else
             _hcState = HC_IDLE;
@@ -193,8 +193,8 @@ void moses_learning::operator()()
 
         // learning time is uncapped.
         time_t max_time = INT_MAX;
-        auto evals = _dex.optimize_demes(max_for_generation
-                                                  - stats.n_evals,
+        auto evals = _dex->optimize_demes(max_for_generation
+                                                  - _stats.n_evals,
                                                   max_time);
         int o = boost::accumulate(evals, 0);
         std::cout << "number of evaluations: " << o << std::endl;
@@ -202,7 +202,7 @@ void moses_learning::operator()()
         if (o < 0)
             _hcState = HC_FINISH_CANDIDATES;
 
-        stats.n_evals += o;
+        _stats.n_evals += o;
 
         //print the generation number and a best solution
 //          std::cout << "EST sampled " << metapop->n_evals()
@@ -216,18 +216,18 @@ void moses_learning::operator()()
     case HC_FINISH_CANDIDATES:  {
 
         OC_ASSERT(false, "TODO");
-        // metapop->merge_demes(_dex._demes,
-        //                      _dex._reps,
-        //                      /* stats.n_evals */ {}, {} /* deme IDs */);
+        // _metapop->merge_demes(_dex->_demes,
+        //                      _dex->_reps,
+        //                      /* _stats.n_evals */ {}, {} /* deme IDs */);
 
         //print the generation number and a best solution
-        std::cout << "sampled " << stats.n_evals
+        std::cout << "sampled " << _stats.n_evals
                   << " best " << _metapop->best_score() << " "
                   << _metapop->best_tree() << std::endl;
 
-        std::cout << "sampled " << stats.n_evals << std::endl;;
+        std::cout << "sampled " << _stats.n_evals << std::endl;;
 
-        if (metapop->best_score() >= _best_fitness_estimated) {
+        if (_metapop->best_score() >= _best_fitness_estimated) {
             _best_fitness_estimated = _metapop->best_score();
             _best_program_estimated = _metapop->best_tree();
         }

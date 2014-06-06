@@ -164,6 +164,8 @@ struct optim_stats
 #endif
 };
 
+void print_stats_header (optim_stats *, bool diversity_enabled);
+
 typedef instance_set<composite_score> deme_t;
 typedef scored_instance<composite_score> deme_inst_t;
 

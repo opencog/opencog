@@ -26,7 +26,7 @@
 
 #include <opencog/util/tree.h>
 
-#include <opencog/learning/moses/metapopulation/deme_expander.h>
+#include <opencog/learning/moses/deme/deme_expander.h>
 #include <opencog/learning/moses/metapopulation/metapopulation.h>
 #include <opencog/learning/moses/moses/moses_params.h>
 #include <opencog/learning/moses/scoring/scoring.h>

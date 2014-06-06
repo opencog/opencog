@@ -24,7 +24,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/comboreduct/interpreter/eval.h>
 
-#include "../metapopulation/deme_expander.h"
+#include "../deme/deme_expander.h"
 #include "../metapopulation/metapopulation.h"
 #include "../moses/moses_main.h"
 #include "../scoring/scoring.h"

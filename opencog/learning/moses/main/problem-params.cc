@@ -1099,19 +1099,19 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
         festor_params.xmplr_as_feature = true;
     }
 
+    // Set deme expansion paramters
+    deme_params.reduce_all = reduce_all;
+    deme_params.ignore_ops = ignore_ops;
+    deme_params.linear_contin = linear_regression;
+    deme_params.perm_ratio = perm_ratio;
+
     // Set metapopulation parameters
     meta_params.max_candidates = max_candidates;
-    meta_params.reduce_all = reduce_all;
     meta_params.revisit = revisit;
     meta_params.keep_bscore = output_bscore;
     meta_params.complexity_temperature = complexity_temperature;
     meta_params.cap_coef = cap_coef;
-    meta_params.ignore_ops = ignore_ops;
-    // meta_params.enable_cache = enable_cache;   // adaptive_cache
-    meta_params.cache_size = cache_size;          // is disabled
     meta_params.jobs = jobs[localhost];
-    meta_params.linear_contin = linear_regression;
-    meta_params.perm_ratio = perm_ratio;
 
     // diversity parameters
     meta_params.diversity.include_dominated = include_dominated;
