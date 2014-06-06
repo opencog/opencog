@@ -44,7 +44,7 @@ class ShellAPI(Resource):
 
         # Validate, parse and send the command
         data = reqparse.request.get_json()
-        if 'type' in data:
+        if 'command' in data:
             self.oc.send(data['command'])
         else:
             abort(400,
