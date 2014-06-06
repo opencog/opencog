@@ -4009,19 +4009,87 @@ Revised run:
 
         Scores below shows that this is even worse. WTF. Why?
 
+OK, so typical ant complexities seem to be 10-20.  With a complexity
+ratio of 3.5, this gets scaled to a coef = 1/3.5 = 0.3 so the penalty
+is in the 0.3*(10-20) = 3-6 range.  Seems plausbile ... 
 
-               baseline      revised
-  rand seed    run-time      run-time
-  ---------    -------       --------
-      1       > 3600 secs   > 500 secs
-      2       2 secs         fail in 15 secs
-      3       > 120 secs    > 150 secs
-      4       > 120 secs    > 120 secs
-      5       15 secs       > 120 secs
-      6       0.5 secs      0.5 secs
-      7       > 120 secs    > 120 secs
-      8       > 120 secs    > 120 secs
-      9       > 120 secs    > 120 secs
-     10       5 secs         fail in 24 secs
+The complexity temp of 6.0 works out toe a beta of ... 
+inv_temp= 100/6 = 16 ... 
+This seems to be entirely too low a temperature for Ants, since the
+probability factor is exp (-beta*score_delta) and score delta is of
+order 1.0.   So a temp of 100 seems like a more reasonable deal.
 
+Warmer run:
+        As above but with 
+        metaparms.complexity_temperature = 50.0;
+
+Hot run:
+        As above but with 
+        metaparms.complexity_temperature = 350.0;
+
+Warm-widen:
+        As above, but with (btw, width is the default width of 4)
+        hc_params.widen_search = true;
+        metaparms.complexity_temperature = 50.0;  // See diary entry
+
+
+
+  rand      baseline      revised        warmer       hot    warm-
+  seed      run-time      run-time      run-time      run    widen
+  ----      --------      --------      --------     -----   -----
+   1       > 3600 secs   > 500 secs    > 120 secs    > 120      7
+   2       2 secs         fail in 15   > 120 secs    > 120      2
+   3       > 120 secs    > 150 secs    > 120 secs    > 300   >150
+   4       > 120 secs    > 120 secs    > 120 secs    > 120   >200
+   5       15 secs       > 120 secs    > 120 secs    > 200    108
+   6       0.5 secs      0.5 secs      > 120 secs               2
+   7       > 120 secs    > 120 secs    > 120 secs            >120
+   8       > 120 secs    > 120 secs                          >120
+   9       > 120 secs    > 120 secs                          >150
+  10       5 secs         fail in 24 secs                   fail in 300 secs
+
+
+Is there a regression? Verify that the traditional 4-parity still works:
+Below is moses -Hpa -k4 -z3.5 -v5 -m350000 for different randome seeds -r
+The baseline numbers for parity are near line 1514 in this file (grep for
+Regression test parity performance)
+
+ rand   time
+ seed  (secs)
+ ----   ----
+  -r0    78
+  -r1   108
+  -r2    47
+  -r3   150
+  -r4    22
+
+Based on this sniff test, looks like its all working well.
+
+AntUTest Conclusion:
+MOSES seems to be working correctly, based on the quick parity-4 sniff
+test.  Something about the ant problem results in a solution being
+quickly found, or not at all.  Looking at the actual ant-trail, used
+for scoring, suggests that the issue may be that the trail peters out
+as it goes on. This suggests that there could be algos that quickly
+follow the 'obvious' trail, but then take a wrong turn, and wander
+aimlessly forever-more, resulting in a trap, where the few remaining
+nuggest of food are far away and difficult to find, without some sort
+of exhasutive search (which is presumably not allowed -- its exhasuting.)
+So, AntUTest seems to rely on getting lucky very early, or getting lost.
+
+Now: as to getting lucky: the "complexity temperature" is supposed to
+work to avoid this trap: viz, rather than exploring ever-more complex
+solutions, the Boltzmann-temperature is supposed to guarantee that,
+some of the time, simpler solutions will be explored (and thus, improving
+the odds of "getting lucky", if trapped in a high-complexity local
+maximum.) However, given the above results, it seems that the local
+maximum is surrounded by steep sides, so steep that even fairly large
+complexity penalties are insufficient to get back to a place where
+the lucky good path can be found.
+
+Hmmm
+
+Thus, its maybe not a very good topic for optimization (i.e. since 
+"realistic" food distributions would not be set out in an easy-to-follow
+trail.)  Basically: leave this one alone, its not worth the effort.
 
