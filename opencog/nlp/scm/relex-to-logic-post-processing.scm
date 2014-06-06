@@ -67,4 +67,10 @@
 	)
 )
 
+; -----------------------------------------------------------------------
+; Clean up the whole sentence as needed
+(define (clean-up-parse parse-node)
+	(define word-inst-list (parse-get-words parse-node))
+	(map clean-up-inst word-inst-list)
+)
 
