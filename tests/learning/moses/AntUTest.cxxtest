@@ -26,6 +26,7 @@
 #include <opencog/learning/moses/example-ant/ant_scoring.h>
 #include <opencog/learning/moses/metapopulation/metapopulation.h>
 #include <opencog/learning/moses/optimization/hill-climbing.h>
+#include <opencog/learning/moses/scoring/behave_cscore.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>

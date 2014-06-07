@@ -33,12 +33,16 @@ namespace opencog { namespace moses {
 /**
  * Composite score calculated from the behavioral score.
  *
- * The score is calculated as the sum of the bscore over all features:
- *      score = sum_f BScore(f) + penalty
+ * The score is calculated as the sum of the bscore over all rows:
+ *      score = sum_i BScore(i) + penalty
  *
- * This is a "minor" helper class, and exists for two reasons:
+ * We're calling each element in the bscore a "row" because it typically
+ * corresponds to a row of an input table, during supervised training.
+ *
+ * This is a "minor" helper class, and exists for three reasons:
  * 1) avoids some redundancy of having the summation in many places
  * 2) Helps with keeping the score-caching code cleaner.
+ * 3) When boosting, the summation above is no longer just a simple sum.
  */
 class behave_cscore : public cscore_base
 {

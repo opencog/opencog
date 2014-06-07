@@ -27,6 +27,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/learning/moses/main/problem-params.h>
 #include <opencog/learning/moses/moses/types.h>
+#include <opencog/learning/moses/scoring/behave_cscore.h>
 #include <opencog/learning/moses/scoring/bscores.h>
 #include <opencog/learning/moses/example-progs/scoring_iterators.h>
 

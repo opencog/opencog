@@ -21,11 +21,10 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <algorithm>
+#include <stdlib.h>
+
 #include <iostream>
-#include <set>
 #include <string>
-#include <boost/lexical_cast.hpp>
 
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/numeric.h>
@@ -40,6 +39,7 @@
 #include "../moses/moses_main.h"
 #include "../optimization/optimization.h"
 #include "../scoring/scoring_base.h"
+#include "../scoring/behave_cscore.h"
 #include "ant_scoring.h"
 
 
@@ -63,9 +63,9 @@ int main(int argc,char** argv)
 {
     int max_evals,rand_seed;
     if (argc == 3) {
-        rand_seed=lexical_cast<int>(argv[1]);
+        rand_seed = atoi(argv[1]);
         randGen().seed(rand_seed);
-        max_evals=atoi(argv[2]);
+        max_evals = atoi(argv[2]);
     } else {
         cerr << "usage: " << argv[0] << " seed maxevals" << endl;
         exit(1);

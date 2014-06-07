@@ -28,6 +28,7 @@
 
 #include "../optimization/hill-climbing.h"
 #include "../metapopulation/metapopulation.h"
+#include "../scoring/behave_cscore.h"
 #include "moses_main.h"
 
 namespace opencog { namespace moses {

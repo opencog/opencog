@@ -24,6 +24,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/range/algorithm_ext/push_back.hpp>
+
 #include "scoring_base.h"
 
 namespace opencog { namespace moses {
