@@ -31,8 +31,8 @@ namespace opencog {
 using namespace combo;
 
 template<typename FeatureSet>
-struct fs_scorer_base : public std::unary_function<FeatureSet, double> {
-
+struct fs_scorer_base : public std::unary_function<FeatureSet, double>
+{
     // ctor
     fs_scorer_base(const CTable& ctable, double confi)
         : _ctable(ctable), _confi(confi), _usize(_ctable.uncompressed_size()) {}
@@ -44,7 +44,7 @@ struct fs_scorer_base : public std::unary_function<FeatureSet, double> {
 
 protected:
 
-    // Very rought approximation of the confidence in the feature
+    // Very rough approximation of the confidence in the feature
     // quality measure
     double confidence(unsigned fs_size) const {
         return _usize / (_usize + exp(-_confi*fs_size));

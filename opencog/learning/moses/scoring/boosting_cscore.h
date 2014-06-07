@@ -35,18 +35,19 @@ namespace opencog { namespace moses {
 /**
  * Composite score calculated from the behavioral score, using boosting.
  *
- * The score is calculated as a weighted sum of the bscore over all rows:
- *      score = sum_i weight(i) * BScore(i) + penalty
+ * The score is calculated as a weighted sum of the bscore over all samples:
+ *      score = sum_x weight(x) * BScore(x) + penalty
  *
- * We're calling each element in the bscore a "row" because it typically
- * corresponds to a row of an input table, during supervised training.
- * The weight is an adjustment, computed by applying a standard AdaBoost-
- * style algorithm.
+ * Each element in the bscore typically corresponds to a sample in a
+ * supervised training set, that is, a row of a table contianing the
+ * training data. The weight is an adjustment, computed by applying a
+ * standard AdaBoost-style algorithm.  See, for example
+ * http://en.wikipedia.org/wiki/AdaBoost
  */
 class boosting_cscore : public cscore_base
 {
 public:
-    boosting_cscore(const bscore_base& sr) : _bscorer(sr) {}
+    boosting_cscore();
 
     composite_score operator()(const combo_tree& tr) const;
 

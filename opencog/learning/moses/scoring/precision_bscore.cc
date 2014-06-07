@@ -351,8 +351,15 @@ behavioral_score precision_bscore::best_possible_bscore() const
     logger().fine("activation at best score = %f", best_activation);
     logger().fine("activation penalty at best score = %f", best_activation_penalty);
 
-    /// @todo it's not really the best bscore but rather the best score
+    // @todo it's not really the best bscore but rather the best score
     return {best_sc};
+}
+
+behavioral_score precision_bscore::worst_possible_bscore() const
+{
+    // Make an attempt too at least return the correct length
+    double bad = very_worst_score / ((double) ctable.size() + 1);
+    return behavioral_score(ctable.size(), bad);
 }
 
 // Note that the logarithm is always negative, so this method always

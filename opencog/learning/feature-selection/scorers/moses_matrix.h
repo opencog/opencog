@@ -60,7 +60,8 @@ struct pre_scorer : public fs_scorer_base<FeatureSet>
           _min_activation(min_activation), _max_activation(max_activation),
           _positive(positive) {}
 
-    double operator()(const FeatureSet& fs) const {
+    double operator()(const FeatureSet& fs) const
+    {
         // filter the ctable
         CTable filtered_ctable = super::_ctable.filtered(fs);
         // create the scorer
