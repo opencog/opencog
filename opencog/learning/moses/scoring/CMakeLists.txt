@@ -1,11 +1,12 @@
 #install header files
 INSTALL(FILES
+	behave_cscore.h
+	bscores.h
+	discriminating_bscore.h
+	instance_scorer.h
+	precision_bscore.h
+	scoring_base.h
 	scoring.h
-    scoring_base.h
-    discriminating_bscore.h
-    precision_bscore.h
-    instance_scorer.h
-    bscores.h
 
 	DESTINATION
 

@@ -50,7 +50,7 @@ performed by MOSES.
 --------------
 Hill-climbing) The current canonical algo.
 
- H.1) Select an exemplar from the metapopulation.
+ H.1) Select an exemplar from the metapopulation, create deme.
  H.2) Generate N instances by turning N knobs.
  H.3) Score all N instances, using a uniform weight on all samples.
  H.4) Select the highest-scoring instance. (this is the hill-climb).
@@ -198,8 +198,10 @@ makes the most sense.
 ---------
 How to implement Scenario C:
 - Add single weight to scored combo tree. 
+
 - Maintain a weight column .. where? In CTable? No...
 
+  Needs to be like the behave_cscore, but different.
 
 
 

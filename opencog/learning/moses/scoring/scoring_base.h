@@ -26,22 +26,8 @@
 #ifndef _MOSES_SCORING_BASE_H
 #define _MOSES_SCORING_BASE_H
 
-#include <iostream>
-#include <fstream>
-#include <functional>
-
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/range/numeric.hpp>
-#include <boost/range/algorithm_ext/push_back.hpp>
-#include <boost/range/algorithm/min_element.hpp>
-
-#include <opencog/util/lru_cache.h>
-#include <opencog/util/algorithm.h>
-#include <opencog/util/functional.h>
-#include <opencog/util/KLD.h>
-
-#include <opencog/comboreduct/table/table.h>
 
 #include "../moses/types.h"
 #include "../representation/representation.h"
@@ -169,83 +155,6 @@ protected:
     score_t _complexity_coef;
 };
 
-/**
- * Composite score calculated from the behavioral score.
- *
- * The score is calculated as the sum of the bscore over all features:
- *      score = sum_f BScore(f) + penalty
- *
- * This is a "minor" helper class, and exists for two reasons:
- * 1) avoids some redundancy of having the summation in many places
- * 2) Helps with keeping the score-caching code cleaner.
- */
-class behave_cscore : public cscore_base
-{
-public:
-    behave_cscore(const bscore_base& sr) : _bscorer(sr) {}
-
-    composite_score operator()(const combo_tree& tr) const;
-
-    /// Returns the best score reachable for this problem. Used as
-    /// termination condition.
-    score_t best_possible_score() const
-    {
-        return boost::accumulate(_bscorer.best_possible_bscore(), 0.0);
-    }
-
-    /// Return the minimum value considered for improvement.
-    score_t min_improv() const
-    {
-        return _bscorer.min_improv();
-    }
-
-    // In case the fitness function can be sped-up when certain
-    // features are ignored. The features are indicated as set of
-    // indices (from 0).
-    void ignore_idxs(const std::set<arity_t>& idxs) const
-    {
-        _bscorer.ignore_idxs(idxs);
-    }
-
-private:
-    const bscore_base& _bscorer;
-};
-
-/**
- * Composite scorer defined by multiple behavioral scoring functions.
- * This is done when the problem to solve is defined in terms of multiple
- * problems.  Much like the above, but accumulated multiple behavioral
- * scores.
- */
-class multibehave_cscore : public cscore_base
-{
-public:
-    typedef boost::ptr_vector<bscore_base> BScorerSeq;
-    
-    /// ctor
-    multibehave_cscore(const BScorerSeq& bscorers) : _bscorers(bscorers) {}
-
-    /// Main entry point
-    composite_score operator()(const combo_tree& tr) const;
-
-    /// Returns the best score reachable for the problems. Used as
-    /// termination condition.
-    score_t best_possible_score() const;
-
-    /// Return the minimum value considered for improvement.
-    /// This will be the the min of all min_improv.
-    score_t min_improv() const;
-
-    /// In case the fitness function can be sped-up when certain
-    /// features are ignored. The features are indicated as set of
-    /// indices (from 0).
-    void ignore_idxs(const std::set<arity_t>&) const;
-
-
-protected:
-    const BScorerSeq& _bscorers;
-};
-
 
 /**
  * Behavioral scorer defined by multiple behavioral scoring functions.
@@ -263,7 +172,7 @@ they make sense only within the context of the actual scorer.
 The correct answer is to move the diversity calculations out of the metapop
 and into bscore_base.  The combination of multiple bscorers into one place
 would then happen in multibehave, above.  However, this is a big tearup of
-the code, so I'm putting this off for a litttle while.
+the code, so I'm putting this off for a little while.
  */
 struct multibscore_based_bscore : public bscore_base
 {
