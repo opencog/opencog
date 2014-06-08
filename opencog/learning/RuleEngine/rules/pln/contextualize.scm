@@ -12,6 +12,15 @@
 ;    R A B
 ;----------------------------------------------------------------------
 
+; Example: "David is competent doing in mathematics. He isn't competent in
+; cooking."
+; (InheritanceLink
+;   (AndLink
+;       (ConceptNode "doing_mathematics")
+;       (ConceptNode "Ben"))
+;   (AndLink
+;       (ConceptNode "doing_mathematics")
+;       (ConceptNode "competent")))
 (define pln-rule-contextualize-inheritance
     (BindLink
         (ListLink
@@ -50,6 +59,8 @@
 
 
 ; In an EvaluationLink, the PredicateNode is not 'andified'
+; Example: "In the context of the earth, the sky is blue.
+; In the context of the earth, the sky is black."
 (define pln-rule-contextualize-evaluation
     (BindLink
         (ListLink
@@ -94,6 +105,14 @@
 ;    C
 ;    A
 ;----------------------------------------------------------------------
+; Example: "A bulldog is a dog. Bulldogs appear in the context of dogs."
+; (SubsetLink
+;   (ConceptNode "dog")
+;   (ConceptNode "bulldog"))
+; |-
+; (ContextLink
+;   (ConceptNode "dog")
+;   (ConceptNode "bulldog"))
 (define pln-rule-contextualize-subset
     (BindLink
         (ListLink
