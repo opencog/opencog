@@ -100,8 +100,8 @@ void table_problem_base::common_setup(problem_params& pms)
     }
 
     // Read input data files
-    tables.clear();
-    ctables.clear();
+    _tables.clear();
+    _ctables.clear();
     size_t num_rows = 0;
     for (const string& idf : _tpp.input_data_files) {
         logger().info("Read data file %s", idf.c_str());
@@ -111,25 +111,30 @@ void table_problem_base::common_setup(problem_params& pms)
         if (pms.nsamples > 0)
             subsampleTable(table, pms.nsamples);
         // Compressed table
-        ctables.push_back(table.compressed(_tpp.weighting_feature));
+        _ctables.push_back(table.compressed(_tpp.weighting_feature));
         // The compressed table removes the weighting feature, too.
         if (not _tpp.weighting_feature.empty())
             table.itable.delete_column(_tpp.weighting_feature);
-        tables.push_back(table);
+        _tables.push_back(table);
     }
     logger().info("Number of rows in tables = %d", num_rows);
+
+    // XXX FIXME -- the multiple tables should be merged into one.
+    ctable = _ctables.front();
+    table = _tables.front();
 
     // Get the labels contained in the data file.
     ilabels.clear();
     if (pms.output_with_labels)
-        ilabels = tables.front().itable.get_labels();
+        ilabels = table.itable.get_labels();
 
-    arity = tables.front().get_arity();
+    arity = table.get_arity();
 
     // Check that all input data files have the same arity
-    if (tables.size() > 1) {
-        for (size_t i = 1; i < tables.size(); ++i) {
-            combo::arity_t test_arity = tables[i].get_arity();
+    // XXX FIXME .. check that they all have the same signature.
+    if (_tables.size() > 1) {
+        for (size_t i = 1; i < _tables.size(); ++i) {
+            combo::arity_t test_arity = _tables[i].get_arity();
             if (test_arity != arity) {
                 stringstream ss;
                 ss << "File " << _tpp.input_data_files[0] << " has arity " << arity
@@ -146,7 +151,7 @@ void table_problem_base::common_setup(problem_params& pms)
 void table_problem_base::common_type_setup(problem_params& pms)
 {
     // Infer the signature based on the input table.
-    table_type_signature = tables.front().get_signature();
+    table_type_signature = table.get_signature();
     logger().info() << "Inferred data signature " << table_type_signature;
 
     // Infer the type of the input table
@@ -207,7 +212,7 @@ void ip_problem::run(option_base* ob)
     // ip assumes that the inputs are boolean and the output is contin
     type_tree ettt = gen_signature(id::boolean_type,
                                    id::contin_type, arity);
-    OC_ASSERT(ettt == tables.front().get_signature(),
+    OC_ASSERT(ettt == table.get_signature(),
               "The input table doesn't have the right data types."
               " The output should be contin and the inputs should"
               " be boolean");
@@ -221,22 +226,17 @@ void ip_problem::run(option_base* ob)
     int as = alphabet_size(tt, pms.ignore_ops);
 
     typedef interesting_predicate_bscore BScore;
-    typedef boost::ptr_vector<bscore_base> BScorerSeq;
-    BScorerSeq bscores;
-    for (const CTable& ctable : ctables) {
-        BScore *r = new BScore(ctable,
-                               _ippp.ip_kld_weight,
-                               _ippp.ip_skewness_weight,
-                               _ippp.ip_stdU_weight,
-                               _ippp.ip_skew_U_weight,
-                               pms.min_rand_input,
-                               pms.max_rand_input,
-                               pms.hardness, pms.hardness >= 0);
-        set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio);
-        bscores.push_back(r);
-    }
-    multibehave_cscore mbcscore(bscores);
-    multibscore_based_bscore bscore(bscores); // XXX TODO REMOVE ME
+    BScore bscore(ctable,
+                  _ippp.ip_kld_weight,
+                  _ippp.ip_skewness_weight,
+                  _ippp.ip_stdU_weight,
+                  _ippp.ip_skew_U_weight,
+                  pms.min_rand_input,
+                  pms.max_rand_input,
+                  pms.hardness, pms.hardness >= 0);
+    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
+
+    behave_cscore mbcscore(bscore);
     metapop_moses_results(pms.exemplars, tt,
                           *pms.bool_reduct, *pms.bool_reduct_rep, 
                           bscore, pms.cache_size, mbcscore,
@@ -278,7 +278,7 @@ void ann_table_problem::run(option_base* ob)
     type_tree tt = gen_signature(id::ann_type, 0);
     int as = alphabet_size(tt, pms.ignore_ops);
 
-    contin_bscore bscore(tables.front());
+    contin_bscore bscore(table);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
     behave_cscore cscore(bscore);
     metapop_moses_results(pms.exemplars, tt,
@@ -295,13 +295,12 @@ void ann_table_problem::run(option_base* ob)
 // the args are variable length, tables is a variable, and scorer is a type,
 // and I don't feel like fighting templates to make all three happen just
 // exactly right.
-#define REGRESSION(OUT_TYPE, REDUCT, REDUCT_REP, TABLES, SCORER, ARGS) \
+#define REGRESSION(OUT_TYPE, REDUCT, REDUCT_REP, TABLE, SCORER, ARGS) \
 {                                                                    \
     /* Enable feature selection while selecting exemplar */          \
-    if (pms.enable_feature_selection && pms.fs_params.target_size > 0) { \
-        /* XXX FIXME: should use the concatenation of all */         \
-        /* tables, and not just the first. */                        \
-        pms.deme_params.fstor = new feature_selector(TABLES.front(), pms.festor_params); \
+    if (pms.enable_feature_selection and pms.fs_params.target_size > 0) { \
+        pms.deme_params.fstor =                                      \
+                     new feature_selector(TABLE, pms.festor_params); \
     }                                                                \
     /* Keep the table input signature, just make sure */             \
     /* the output is the desired type. */                            \
@@ -309,15 +308,9 @@ void ann_table_problem::run(option_base* ob)
         get_signature_inputs(table_type_signature),                  \
         type_tree(OUT_TYPE));                                        \
     int as = alphabet_size(cand_sig, pms.ignore_ops);                \
-    typedef SCORER BScore;                                           \
-    BScorerSeq bscores;                                              \
-    for (const auto& table : TABLES) {                               \
-        BScore* r = new BScore ARGS ;                                \
-        set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio); \
-        bscores.push_back(r);                                        \
-    }                                                                \
-    multibehave_cscore mbcscore(bscores);                            \
-    multibscore_based_bscore bscore(bscores);                        \
+    SCORER bscore ARGS ;                                             \
+    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio); \
+    behave_cscore mbcscore(bscore);                                  \
     metapop_moses_results(pms.exemplars, cand_sig,                   \
                       REDUCT, REDUCT_REP, bscore,                    \
                       pms.cache_size, mbcscore,                      \
@@ -341,34 +334,28 @@ void pre_table_problem::run(option_base* ob)
         type_tree(id::boolean_type));
     int as = alphabet_size(cand_sig, pms.ignore_ops);
     typedef precision_bscore BScore;
-    BScorerSeq bscores;
-    for (const CTable& ctable : ctables) {
-        BScore* r = new BScore(ctable,
-                               fabs(pms.hardness),
-                               pms.min_rand_input,
-                               pms.max_rand_input,
-                               pms.hardness >= 0,
-                               pms.pre_worst_norm);
-        set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio);
-        bscores.push_back(r);
-        if (pms.gen_best_tree) {
-            // experimental: use some canonically generated
-            // candidate as exemplar seed
-            combo_tree tr = r->gen_canonical_best_candidate();
-            logger().info() << "Canonical program tree (non reduced) maximizing precision = " << tr;
-            pms.exemplars.push_back(tr);
-        }
+    BScore bscore(ctable,
+                       fabs(pms.hardness),
+                       pms.min_rand_input,
+                       pms.max_rand_input,
+                       pms.hardness >= 0,
+                       pms.pre_worst_norm);
+    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
+    if (pms.gen_best_tree) {
+        // experimental: use some canonically generated
+        // candidate as exemplar seed
+        combo_tree tr = bscore.gen_canonical_best_candidate();
+        logger().info() << "Canonical program tree (non reduced) maximizing precision = " << tr;
+        pms.exemplars.push_back(tr);
     }
 
     // Enable feature selection while selecting exemplar
     if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
-        // XXX FIXME should use the concatenation of all ctables, not just first
-        pms.deme_params.fstor = new feature_selector(ctables.front(),
+        pms.deme_params.fstor = new feature_selector(ctable,
                                                      pms.festor_params);
     }
 
-    multibehave_cscore mbcscore(bscores);
-    multibscore_based_bscore bscore(bscores);
+    behave_cscore mbcscore(bscore);
     metapop_moses_results(pms.exemplars, cand_sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
                           bscore, pms.cache_size, mbcscore,
@@ -393,23 +380,17 @@ void pre_conj_table_problem::run(option_base* ob)
         type_tree(id::boolean_type));
     int as = alphabet_size(cand_sig, pms.ignore_ops);
     typedef precision_conj_bscore BScore;
-    BScorerSeq bscores;
-    for (const CTable& ctable : ctables) {
-        BScore* r = new BScore(ctable,
-                               fabs(pms.hardness),
-                               pms.hardness >= 0);
-        set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio);
-        bscores.push_back(r);
-    }
+    BScore bscore(ctable,
+                   fabs(pms.hardness),
+                   pms.hardness >= 0);
+    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
     // Enable feature selection while selecting exemplar
     if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
-        // XXX FIXME should use the concatenation of all ctables, not just first
-        pms.deme_params.fstor = new feature_selector(ctables.front(),
+        pms.deme_params.fstor = new feature_selector(ctable,
                                                  pms.festor_params);
     }
-    multibehave_cscore mbcscore(bscores);
-    multibscore_based_bscore bscore(bscores); // XXX TODO REMOVE ME
+    behave_cscore mbcscore(bscore);
     metapop_moses_results(pms.exemplars, cand_sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
                           bscore, pms.cache_size, mbcscore,
@@ -428,8 +409,8 @@ void prerec_table_problem::run(option_base* ob)
         pms.max_rand_input = 1.0; }
     REGRESSION(id::boolean_type,
                *pms.bool_reduct, *pms.bool_reduct_rep,
-               ctables, prerec_bscore,
-               (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
+               ctable, prerec_bscore,
+               (ctable, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
 
 void recall_table_problem::run(option_base* ob)
@@ -442,8 +423,8 @@ void recall_table_problem::run(option_base* ob)
         pms.max_rand_input = 1.0; }
     REGRESSION(id::boolean_type,
                *pms.bool_reduct, *pms.bool_reduct_rep,
-               ctables, recall_bscore,
-               (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
+               ctable, recall_bscore,
+               (ctable, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
 
 void bep_table_problem::run(option_base* ob)
@@ -456,8 +437,8 @@ void bep_table_problem::run(option_base* ob)
         pms.max_rand_input = 0.5; }
     REGRESSION(id::boolean_type,
                *pms.bool_reduct, *pms.bool_reduct_rep,
-               ctables, bep_bscore,
-               (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
+               ctable, bep_bscore,
+               (ctable, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
 
 void f_one_table_problem::run(option_base* ob)
@@ -468,8 +449,8 @@ void f_one_table_problem::run(option_base* ob)
 
     REGRESSION(id::boolean_type,
                *pms.bool_reduct, *pms.bool_reduct_rep,
-               ctables, f_one_bscore,
-               (table));
+               ctable, f_one_bscore,
+               (ctable));
 }
 
 void it_table_problem::run(option_base* ob)
@@ -485,8 +466,8 @@ void it_table_problem::run(option_base* ob)
     if (output_type == id::boolean_type) {
         REGRESSION(output_type,
                    *pms.bool_reduct, *pms.bool_reduct_rep,
-                   ctables, ctruth_table_bscore,
-                   (table));
+                   ctable, ctruth_table_bscore,
+                   (ctable));
     }
 
     // --------- Enumerated output type
@@ -504,8 +485,7 @@ void it_table_problem::run(option_base* ob)
             // The "leave well-enough alone" algorithm.
             // Works. Kind of. Not as well as hoped.
             // Might be good for some problem. See diary.
-            partial_solver well(ctables,
-                            table_type_signature,
+            partial_solver well(ctable,
                             pms.exemplars, *pms.contin_reduct,
                             pms.opt_params, pms.hc_params,
                             pms.deme_params,
@@ -517,8 +497,8 @@ void it_table_problem::run(option_base* ob)
             // just uses a slightly different scorer.
             REGRESSION(output_type,
                        *pms.contin_reduct, *pms.contin_reduct,
-                       ctables, enum_effective_bscore,
-                       (table));
+                       ctable, enum_effective_bscore,
+                       (ctable));
         }
     }
 
@@ -532,13 +512,13 @@ void it_table_problem::run(option_base* ob)
 
             REGRESSION(output_type,
                        *pms.contin_reduct, *pms.contin_reduct,
-                       tables, contin_bscore,
+                       table, contin_bscore,
                        (table, eft));
 
         } else {
             REGRESSION(output_type,
                        *pms.contin_reduct, *pms.contin_reduct,
-                       tables, discretize_contin_bscore,
+                       table, discretize_contin_bscore,
                        (table.otable, table.itable,
                             pms.discretize_thresholds, pms.weighted_accuracy));
         }
@@ -562,7 +542,7 @@ void cluster_table_problem::run(option_base* ob)
 
     REGRESSION(output_type,
                *pms.contin_reduct, *pms.contin_reduct,
-               tables, cluster_bscore,
+               table, cluster_bscore,
                (table.itable));
 }
 

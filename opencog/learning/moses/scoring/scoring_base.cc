@@ -64,47 +64,5 @@ void bscore_base::set_complexity_coef(score_t complexity_ratio)
     logger().info() << "BScore complexity ratio = " << 1.0/_complexity_coef;
 }
 
-//////////////////////////////
-// multibscore_based_bscore //
-//////////////////////////////
-// XXX TODO FIXME  the code below is 'obsolete', see the header file for an
-// explanation.
-
-// main operator
-behavioral_score multibscore_based_bscore::operator()(const combo_tree& tr) const
-{
-    behavioral_score bs;
-    for (const bscore_base& bsc : _bscorers) {
-        behavioral_score abs = bsc(tr);
-        boost::push_back(bs, abs);
-    }
-    return bs;
-}
-
-behavioral_score multibscore_based_bscore::best_possible_bscore() const
-{
-    behavioral_score bs;
-    for (const bscore_base& bsc : _bscorers) {
-        boost::push_back(bs, bsc.best_possible_bscore());
-    }
-    return bs;
-}
-
-// return the min of all min_improv
-score_t multibscore_based_bscore::min_improv() const
-{
-    // @todo can be turned in to 1-line with boost::min_element
-    // boost::min_element(_bscorers | boost::transformed(/*)
-    score_t res = very_best_score;
-    for (const bscore_base& bs : _bscorers)
-        res = std::min(res, bs.min_improv());
-    return res;
-}
-
-void multibscore_based_bscore::ignore_idxs(const std::set<arity_t>& idxs) const
-{
-    for (const bscore_base& bs : _bscorers)
-        bs.ignore_idxs(idxs);
-}
 } // ~namespace moses
 } // ~namespace opencog

@@ -74,41 +74,6 @@ private:
     const bscore_base& _bscorer;
 };
 
-/**
- * Composite scorer defined by multiple behavioral scoring functions.
- * This is done when the problem to solve is defined in terms of multiple
- * problems.  Much like the above, but accumulated multiple behavioral
- * scores.
- */
-class multibehave_cscore : public cscore_base
-{
-public:
-    typedef boost::ptr_vector<bscore_base> BScorerSeq;
-    
-    /// ctor
-    multibehave_cscore(const BScorerSeq& bscorers) : _bscorers(bscorers) {}
-
-    /// Main entry point
-    composite_score operator()(const combo_tree& tr) const;
-
-    /// Returns the best score reachable for the problems. Used as
-    /// termination condition.
-    score_t best_possible_score() const;
-
-    /// Return the minimum value considered for improvement.
-    /// This will be the the min of all min_improv.
-    score_t min_improv() const;
-
-    /// In case the fitness function can be sped-up when certain
-    /// features are ignored. The features are indicated as set of
-    /// indices (from 0).
-    void ignore_idxs(const std::set<arity_t>&) const;
-
-
-protected:
-    const BScorerSeq& _bscorers;
-};
-
 
 } //~namespace moses
 } //~namespace opencog

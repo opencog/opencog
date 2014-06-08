@@ -40,8 +40,7 @@ using namespace reduct;
 class partial_solver
 {
     public:
-        partial_solver(const vector<CTable> &ctables,
-                       const type_tree& table_tt,
+        partial_solver(const CTable &ctable,
                        const vector<combo_tree>& exemplars,
                        const rule& reduct,
                        const optim_parameters& opt_params,
@@ -97,7 +96,7 @@ class partial_solver
         void effective(combo_tree::iterator,
                        unsigned& good_count,  // return value
                        unsigned& fail_count); //return value
-        void trim_table(std::vector<CTable>&,
+        void trim_table(CTable&,
                         const combo_tree::iterator,
                         unsigned& deleted,   // return value
                         unsigned& total);    // return value
@@ -108,8 +107,8 @@ class partial_solver
 
         // Copy, more or less, our arguments, so that moses
         // can be called with these values.
-        std::vector<CTable> _ctables;
-        std::vector<CTable> _orig_ctables;
+        CTable _ctable;
+        const CTable& _orig_ctable;
         const type_tree& _table_type_signature;
         std::vector<combo_tree> _exemplars;
         combo_tree _leader;
@@ -125,13 +124,13 @@ class partial_solver
         // typedef enum_filter_bscore BScore;
         // typedef enum_graded_bscore BScore;
         typedef enum_effective_bscore BScore;
-        multibscore_based_bscore *_bscore;
-        multibehave_cscore *_cscore;
+        enum_effective_bscore *_bscore;
+        behave_cscore *_cscore;
         unsigned _cache_size;
 
         typedef enum_table_bscore StraightBScore;
-        multibscore_based_bscore *_straight_bscore;
-        multibehave_cscore *_straight_cscore;
+        enum_table_bscore *_straight_bscore;
+        behave_cscore *_straight_cscore;
 
         int _num_evals;     // number of evaluations
         int _num_gens;      // number of generations
@@ -139,12 +138,6 @@ class partial_solver
 
         unsigned _most_good;
         combo_tree::iterator _best_predicate;
-
-        // XXX keep these here due object lifetime weirdness ... 
-        // There is something bizarre/wrong with how ptr_vector works!?!?
-        typedef boost::ptr_vector<bscore_base> BScorerSeq;
-        BScorerSeq score_seq;
-        BScorerSeq straight_score_seq;
 };
 
 };};

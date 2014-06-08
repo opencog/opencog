@@ -358,8 +358,8 @@ behavioral_score precision_bscore::best_possible_bscore() const
 behavioral_score precision_bscore::worst_possible_bscore() const
 {
     // Make an attempt too at least return the correct length
-    double bad = very_worst_score / ((double) ctable.size() + 1);
-    return behavioral_score(ctable.size(), bad);
+    double bad = very_worst_score / ((double) orig_ctable.size() + 1);
+    return behavioral_score(orig_ctable.size(), bad);
 }
 
 // Note that the logarithm is always negative, so this method always
