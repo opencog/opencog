@@ -21,7 +21,8 @@
  */
 
 #include "partial.h"
-#include "../scoring/scoring.h"
+#include "../scoring/scoring_base.h"
+#include "../scoring/behave_cscore.h"
 
 namespace opencog { namespace moses {
 

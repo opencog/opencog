@@ -7,7 +7,6 @@ INSTALL(FILES
 	instance_scorer.h
 	precision_bscore.h
 	scoring_base.h
-	scoring.h
 
 	DESTINATION
 

@@ -106,7 +106,7 @@ class partial_solver
         void final_cleanup(const metapopulation&);
     private:
 
-        // Copy, more or less, or arguments, so that moses
+        // Copy, more or less, our arguments, so that moses
         // can be called with these values.
         std::vector<CTable> _ctables;
         std::vector<CTable> _orig_ctables;

@@ -195,13 +195,40 @@ ensemble that will be deployed (or evaluated on the test set), it seems
 to me to me that pursuing scenario C first is the course of action that
 makes the most sense.
 
----------
+
+Design issues
+-------------
 How to implement Scenario C:
 - Add single weight to scored combo tree. 
 
-- Maintain a weight column .. where? In CTable? No...
-
+- Maintain a weight column .. where? In a new boosing scorer.
   Needs to be like the behave_cscore, but different.
+
+Scoring Requirements:
+1) hill-climber needs a *single* scalar score, to determine which way is "up".
+2) This scalar score needs to be a sum of:
+   a) a complexity penalty, obtained from the combo tree,
+   b) a diversity penalty, based on
+      i) the metapopulation
+      ii) possibly the behavioral score
+      iii) possibly the combo tree
+   c) a function of the behavioral score, such as a direct sum,
+      or possibly a weighted bscore (e.g. via boosting).
+
+3) Multiple tables will be explicitly NOT supported. Why? Because its
+   not clear how to combine these.  One way would be to combine them
+   into one big table.  Another possibility is to use a different
+   bscorer on each; but I don't know of a use-case for that.  I don't
+   know how to weight these relative to one-another.  So, for now, 
+   bonly one table.
+
+Solution:
+-- remove multibscore
+-- provide a utility for #2 that assembles a composite score from the 
+   parts, and can be queried for the scalar score.
+
+
+
 
 
 

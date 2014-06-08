@@ -403,6 +403,7 @@ struct enum_table_bscore : public bscore_base
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
     behavioral_score best_possible_bscore() const;
+    behavioral_score worst_possible_bscore() const;
 
     virtual score_t min_improv() const;
 
