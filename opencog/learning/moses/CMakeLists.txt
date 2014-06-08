@@ -61,6 +61,8 @@ ADD_LIBRARY (moses SHARED STATIC
 	optimization/univariate
 
 	scoring/scoring_base
+	scoring/behave_cscore
+	scoring/boosting_cscore
 	scoring/discriminating_bscore
 	scoring/precision_bscore
 	scoring/instance_scorer

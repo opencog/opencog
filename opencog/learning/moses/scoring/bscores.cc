@@ -44,7 +44,7 @@
 #include <opencog/util/MannWhitneyU.h>
 #include <opencog/comboreduct/table/table_io.h>
 
-#include "scoring.h"
+#include "bscores.h"
 
 namespace opencog { namespace moses {
 
@@ -305,6 +305,13 @@ behavioral_score enum_table_bscore::best_possible_bscore() const
               });
 
     return bs;
+}
+
+behavioral_score enum_table_bscore::worst_possible_bscore() const
+{
+    // Make an attempt too at least return the correct length
+    double bad = very_worst_score / ((double) ctable.size() + 1);
+    return behavioral_score(ctable.size(), bad);
 }
 
 score_t enum_table_bscore::min_improv() const

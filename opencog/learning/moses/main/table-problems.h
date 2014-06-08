@@ -58,8 +58,10 @@ protected:
     void common_type_setup(problem_params&);
 
     // Input data for table-based problems.
-    std::vector<Table> tables;
-    std::vector<CTable> ctables;
+    std::vector<Table> _tables;
+    std::vector<CTable> _ctables;
+    Table table;
+    CTable ctable;
     std::vector<std::string> ilabels;     // labels of the input table (table.itable)
     combo::arity_t arity;
 

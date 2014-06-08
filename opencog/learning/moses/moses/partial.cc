@@ -21,7 +21,8 @@
  */
 
 #include "partial.h"
-#include "../scoring/scoring.h"
+#include "../scoring/scoring_base.h"
+#include "../scoring/behave_cscore.h"
 
 namespace opencog { namespace moses {
 
@@ -30,8 +31,7 @@ using namespace std;
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::iterator pre_it;
 
-partial_solver::partial_solver(const vector<CTable> &ctables,
-                               const type_tree& table_tt,
+partial_solver::partial_solver(const CTable &ctable,
                                const vector<combo_tree>& exemplars,
                                const rule& reduct,
                                const optim_parameters& opt_params,
@@ -42,9 +42,9 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
                                const moses_parameters& moses_params,
                                const metapop_printer& mmr_pa)
 
-    :_ctables(ctables),
-     _orig_ctables(ctables),
-     _table_type_signature(table_tt),
+    :_ctable(ctable),
+     _orig_ctable(ctable),
+     _table_type_signature(ctable.get_signature()),
      _exemplars(exemplars), _leader(id::cond),
      _prefix_count(0),
      _reduct(reduct),
@@ -78,15 +78,8 @@ void partial_solver::solve()
     _num_gens = 0;
     _done = false;
 
-    unsigned tab_sz = 0;
-    score_seq.clear();
-    for (const CTable& ctable : _ctables) {
-        score_seq.push_back(new BScore(ctable));
-
-        tab_sz += ctable.uncompressed_size();
-    }
-    _bscore = new multibscore_based_bscore(score_seq);
-    _cscore = new multibehave_cscore(score_seq);
+    _bscore =  new BScore(_ctable);
+    _cscore = new behave_cscore(*_bscore);
 
     _meta_params.merge_callback = check_candidates;
     _meta_params.callback_user_data = (void *) this;
@@ -137,9 +130,6 @@ void partial_solver::solve()
         }
     }
     logger().info() << "well-enough good-bye!";
-unsigned tcount = 0;
- for (CTable& ctable : _ctables) tcount += ctable.uncompressed_size();
-cout<<"duuude end with prefix_count=" << _prefix_count <<" table_size=" << tcount << endl;
 }
 
 /// Evaluate each of the candidate solutions, see if any of the leading
@@ -191,15 +181,12 @@ void partial_solver::final_cleanup(const metapopulation& cands)
         _exemplars.push_back(cand);
     }
 
-    // Recreate the original scoring tables, too.
+    // Recreate the original scoring table, too.
     // This time, use the non-graded (flat) scorer, that simply counts
     // the number of right & wrong, without weighting.
-    straight_score_seq.clear();
-    for (const CTable& ctable : _orig_ctables)
-        straight_score_seq.push_back(new StraightBScore(ctable));
 
-    _straight_bscore = new multibscore_based_bscore(straight_score_seq);
-    _straight_cscore = new multibehave_cscore(straight_score_seq);
+    _straight_bscore = new BScore(_ctable);
+    _straight_cscore = new behave_cscore(*_straight_bscore);
 }
 
 /// Compute the effectiveness of the predicate.
@@ -217,19 +204,18 @@ void partial_solver::effective(combo_tree::iterator pred,
     // Count how many items the first predicate mis-identifies.
     interpreter_visitor iv(predicate);
     auto interpret_predicate = boost::apply_visitor(iv);
-    for (CTable& ctable : _ctables) {
-        for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); cit++) {
-            vertex pr = interpret_predicate(cit->first.get_variant());
-            const CTable::counter_t& c = cit->second;
-            total_count += c.total_count();
-            if (pr == id::logical_true) {
-                unsigned num_right = c.get(consequent);
-                unsigned num_total = c.total_count();
-                if (num_right != num_total)
-                    fail_count += num_total - num_right;
-                else
-                    good_count += num_right;
-            }
+    CTable::iterator cend = _ctable.end();
+    for (CTable::iterator cit = _ctable.begin(); cit != cend; cit++) {
+        vertex pr = interpret_predicate(cit->first.get_variant());
+        const CTable::counter_t& c = cit->second;
+        total_count += c.total_count();
+        if (pr == id::logical_true) {
+            unsigned num_right = c.get(consequent);
+            unsigned num_total = c.total_count();
+            if (num_right != num_total)
+                fail_count += num_total - num_right;
+            else
+                good_count += num_right;
         }
     }
     logger().debug() << "well-enough leading predicate fail=" << fail_count
@@ -239,7 +225,7 @@ void partial_solver::effective(combo_tree::iterator pred,
 
 
 /// Remove all rows from the table that satisfy the predicate.
-void partial_solver::trim_table(std::vector<CTable>& tabs,
+void partial_solver::trim_table(CTable& taby,
                                 const combo_tree::iterator predicate,
                                 unsigned& deleted,   // return value
                                 unsigned& total)    // return value
@@ -247,19 +233,17 @@ void partial_solver::trim_table(std::vector<CTable>& tabs,
 {
     interpreter_visitor iv(predicate);
     auto interpret_predicate = boost::apply_visitor(iv);
-    for (CTable& ctable : tabs) {
-        for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); ) {
-            vertex pr = interpret_predicate(cit->first.get_variant());
-            const CTable::counter_t& c = cit->second;
-            unsigned tc = c.total_count();
-            total += tc;
+    for (CTable::iterator cit = taby.begin(); cit != taby.end(); ) {
+        vertex pr = interpret_predicate(cit->first.get_variant());
+        const CTable::counter_t& c = cit->second;
+        unsigned tc = c.total_count();
+        total += tc;
 
-            if (pr == id::logical_true) {
-                deleted += tc;
-                ctable.erase(cit++);
-            }
-            else cit++;
+        if (pr == id::logical_true) {
+            deleted += tc;
+            taby.erase(cit++);
         }
+        else cit++;
     }
 }
 
@@ -344,7 +328,7 @@ void partial_solver::record_prefix()
 {
     unsigned total_rows = 0;
     unsigned deleted = 0;
-    trim_table(_ctables, _best_predicate, deleted, total_rows);
+    trim_table(_ctable, _best_predicate, deleted, total_rows);
     logger().info() << "well-enough deleted " << deleted
                     << " rows out of total " << total_rows;
 
@@ -357,15 +341,11 @@ void partial_solver::record_prefix()
     logger().info() << "well-enough " << _prefix_count
                     << " prefix=" << _leader;
 
-    // Redo the scoring tables, as they cache the score tables (why?)
-    score_seq.clear();
-    for (const CTable& ctable : _ctables)
-        score_seq.push_back(new BScore(ctable));
-
+    // Redo the scoring table, as it caches the score table (why?)
     delete _bscore;
-    _bscore = new multibscore_based_bscore(score_seq);
+    _bscore = new BScore(_ctable);
     delete _cscore;
-    _cscore = new multibehave_cscore(score_seq);
+    _cscore = new behave_cscore(*_bscore);
 }
 
 
