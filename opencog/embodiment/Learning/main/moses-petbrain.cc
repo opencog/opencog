@@ -30,7 +30,7 @@
 #include <opencog/comboreduct/reduct/reduct.h>
 
 #include <opencog/learning/moses/moses/moses_main.h>
-#include <opencog/learning/moses/scoring/scoring.h>
+#include <opencog/learning/moses/scoring/behave_cscore.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
@@ -41,22 +41,15 @@ using namespace reduct;
 using namespace boost;
 using namespace std;
 
-struct interactive_cscore : public cscore_base
-{
-    composite_score operator()(const combo_tree& tr) const
-    {
-        cout << "Fitness Function of : " << tr << " enter the score :" << endl;
-        score_t score = 0.0;
-        cin >> score;
-        return composite_score(score, 0, 0);
-    }
-};
-
 struct interactive_bscore : public bscore_base
 {
     result_type operator()(const combo_tree& tr) const
     {
+        cout << "Fitness Function of : " << tr << " enter the score :" << endl;
+        score_t score = 0.0;
+        cin >> score;
         result_type pbs;
+        pbs.push_back(score);
         return pbs;
     }
     behavioral_score best_possible_bscore() const
@@ -84,8 +77,9 @@ int main(int argc, char** argv)
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(), id::action_result_type, 1);
 
-    interactive_cscore cscorer;
+    simple_ascore ascorer;
     interactive_bscore bscorer;
+    behave_cscore cscorer(bscorer, ascorer);
     hill_climbing climber;
 
     combo_tree_ns_set perceptions;
@@ -103,7 +97,7 @@ int main(int argc, char** argv)
 
     deme_expander dex(tt, action_reduction(), action_reduction(),
                       cscorer, climber, demeparms);
-    metapopulation metapop(combo_tree(id::sequential_and), cscorer, bscorer);
+    metapopulation metapop(combo_tree(id::sequential_and), cscorer);
 
     cout << "build metapop" << endl;
 
