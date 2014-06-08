@@ -31,8 +31,8 @@
 
 #include <opencog/util/oc_assert.h>
 
+#include "../representation/instance_scorer.h"
 #include "../representation/instance_set.h"
-#include "../scoring/scoring.h"
 
 namespace opencog { namespace moses {
 

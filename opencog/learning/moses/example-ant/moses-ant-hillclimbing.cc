@@ -90,7 +90,8 @@ int main(int argc,char** argv)
     // See the diary for the complexity ratio.
     double complexity_ratio = 0.16;
     bscorer.set_complexity_coef(complexity_ratio);
-    behave_cscore cscorer(bscorer);
+    simple_ascore ascorer;
+    behave_cscore cscorer(bscorer, ascorer);
 
     combo_tree_ns_set perceptions;
     combo_tree_ns_set actions;
@@ -118,7 +119,7 @@ int main(int argc,char** argv)
     deme_expander dex(tt, action_reduction(),
                           action_reduction(), cscorer, hc, demeparms);
     metapopulation metapop(combo_tree(id::sequential_and),
-                           cscorer, bscorer, metaparms);
+                           cscorer, metaparms);
 
     boost::program_options::variables_map vm;
 

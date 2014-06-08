@@ -37,7 +37,7 @@ string_seq deme_expander::fs_to_names(const std::set<arity_t>& fs,
 void deme_expander::log_selected_feature_sets(const feature_set_pop& sf_pop,
                                               const feature_set& xmplr_features,
                                               const string_seq& ilabels,
-                                              const vector<demeID_t>& demeIDs) const
+                                              const std::vector<demeID_t>& demeIDs) const
 {
     unsigned sfps = sf_pop.size(), sfi = 0;
 
@@ -98,7 +98,7 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
     combo_tree xmplr = exemplar;
 
     // Define the demeIDs of the demes to be spawned
-    vector<demeID_t> demeIDs;
+    std::vector<demeID_t> demeIDs;
     if (_params.fstor && _params.fstor->params.n_demes > 1) {
         for (unsigned i = 0; i < _params.fstor->params.n_demes; i++)
             demeIDs.emplace_back(n_expansions + 1, i);
@@ -226,9 +226,9 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
     return true;
 }
 
-vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_time)
+std::vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_time)
 {
-    vector<unsigned> actl_evals;
+    std::vector<unsigned> actl_evals;
     int max_evals_per_deme = max_evals / _demes.size();
     for (unsigned i = 0; i < _demes.size(); i++)
     {

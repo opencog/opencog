@@ -32,6 +32,7 @@
 namespace opencog { namespace moses {
 
 using namespace std;
+using namespace combo;
 
 //////////////////////
 // precision_bscore //

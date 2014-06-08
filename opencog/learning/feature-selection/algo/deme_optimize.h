@@ -30,7 +30,6 @@
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/learning/moses/representation/field_set.h>
 #include <opencog/learning/moses/representation/instance_set.h>
-#include <opencog/learning/moses/scoring/scoring.h>
 #include <opencog/comboreduct/table/table.h>
 
 #include "../main/feature-selection.h" // needed for feature_selection_params

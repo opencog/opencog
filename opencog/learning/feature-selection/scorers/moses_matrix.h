@@ -26,14 +26,14 @@
 
 #include <opencog/util/numeric.h>
 
-#include <opencog/learning/moses/scoring/scoring.h>
-#include <opencog/comboreduct/combo/common_def.h>
+#include <opencog/comboreduct/table/table.h>
+#include <opencog/learning/moses/scoring/precision_bscore.h>
 #include "fs_scorer_base.h"
 
 namespace opencog {
 
 using namespace moses;
-using namespace combo;
+using combo::CTable;
 
 /**
  * Wrapper to use moses scoring precision (see
@@ -74,7 +74,7 @@ struct pre_scorer : public fs_scorer_base<FeatureSet>
         return precision * cfdence;
     }
 protected:
-    float _penalty, _min_activation, _max_activation;
+    double _penalty, _min_activation, _max_activation;
     bool _positive;
 };
 

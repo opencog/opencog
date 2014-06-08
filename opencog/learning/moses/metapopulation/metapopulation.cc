@@ -46,25 +46,18 @@ namespace opencog {
 namespace moses {
 
 using namespace std;
-using std::pair;
-using std::make_pair;
 using boost::logic::tribool;
 using boost::logic::indeterminate;
 using namespace combo;
 
 // Init the metapopulation with the following set of exemplars.
-void metapopulation::init(const std::vector<combo_tree>& exemplars,
-                          const cscore_base& cscorer)
+void metapopulation::init(const std::vector<combo_tree>& exemplars)
 {
     scored_combo_tree_set candidates;
     for (const combo_tree& base : exemplars) {
 
-        behavioral_score bs(_bscorer(base));
-        // XXX Compute the bscore a second time.   The first time
-        // was immediately above.  We do it again, because the
-        // caching scorer lacks the correct signature.
-        // composite_score csc(_cscorer (pbs, tree_complexity(si_base)));
-        composite_score csc(cscorer(base));
+        behavioral_score bs(_cscorer.get_bscore(base));
+        composite_score csc(_cscorer.get_cscore(bs));
         scored_combo_tree sct(base, demeID_t(), csc, bs);
 
         candidates.insert(sct);
@@ -519,14 +512,14 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
 // I can't figure it out!
         for (scored_combo_tree& cand : pot_candidates)
         {
-            behavioral_score bs = this->_bscorer(cand.get_tree());
+            behavioral_score bs(_cscorer.get_bscore(cand.get_tree()));
             cand._bscore = bs;
         }
 #endif
         scored_combo_tree_set new_pot;
         for (const scored_combo_tree& cand : pot_candidates)
         {
-            behavioral_score bs = this->_bscorer(cand.get_tree());
+            behavioral_score bs(_cscorer.get_bscore(cand.get_tree()));
             scored_combo_tree sct(cand.get_tree(),
                                   cand.get_demeID(), 
                                   cand.get_composite_score(), bs);
@@ -1024,14 +1017,14 @@ metapopulation::get_nondominated_iter(const scored_combo_tree_set& bcs)
     return scored_combo_tree_set(mcl.begin(), mcl.end());
 }
 
-typedef pair<scored_combo_tree_set,
-             scored_combo_tree_set> scored_combo_tree_set_pair;
+typedef std::pair<scored_combo_tree_set,
+                  scored_combo_tree_set> scored_combo_tree_set_pair;
 
 typedef std::vector<const scored_combo_tree*> scored_combo_tree_ptr_vec;
 typedef scored_combo_tree_ptr_vec::iterator scored_combo_tree_ptr_vec_it;
 typedef scored_combo_tree_ptr_vec::const_iterator scored_combo_tree_ptr_vec_cit;
-typedef pair<scored_combo_tree_ptr_vec,
-             scored_combo_tree_ptr_vec> scored_combo_tree_ptr_vec_pair;
+typedef std::pair<scored_combo_tree_ptr_vec,
+                  scored_combo_tree_ptr_vec> scored_combo_tree_ptr_vec_pair;
 
 
 scored_combo_tree_ptr_vec
@@ -1090,7 +1083,7 @@ metapopulation::get_nondominated_disjoint(const scored_combo_tree_set& bcs1,
         get_nondominated_disjoint_rec(random_access_view(bcs1),
                                       random_access_view(bcs2),
                                       jobs);
-    return make_pair(to_set(res_p.first), to_set(res_p.second));
+    return std::make_pair(to_set(res_p.first), to_set(res_p.second));
 }
 
 scored_combo_tree_ptr_vec_pair
@@ -1102,7 +1095,7 @@ metapopulation::get_nondominated_disjoint_rec(const scored_combo_tree_ptr_vec& b
     // base case //
     ///////////////
     if (bcv1.empty() || bcv2.empty())
-        return make_pair(bcv1, bcv2);
+        return std::make_pair(bcv1, bcv2);
     else if (bcv1.size() == 1) {
         scored_combo_tree_ptr_vec bcv_res1, bcv_res2;
         scored_combo_tree_ptr_vec_cit it1 = bcv1.begin(),
@@ -1120,7 +1113,7 @@ metapopulation::get_nondominated_disjoint_rec(const scored_combo_tree_ptr_vec& b
         }
         if (it1_insert)
             bcv_res1.push_back(*it1);
-        return make_pair(bcv_res1, bcv_res2);
+        return std::make_pair(bcv_res1, bcv_res2);
     }
     //////////////
     // rec case //
@@ -1142,7 +1135,7 @@ metapopulation::get_nondominated_disjoint_rec(const scored_combo_tree_ptr_vec& b
         boost::sort(bcv_m1.second); boost::sort(bcv_m2.second);
         scored_combo_tree_ptr_vec bcv_m2_inter =
             set_intersection(bcv_m1.second, bcv_m2.second);
-        return make_pair(bcv_m1.first, bcv_m2_inter);
+        return std::make_pair(bcv_m1.first, bcv_m2_inter);
     } else { // single-threaded
         scored_combo_tree_ptr_vec_pair
             bcv_m1 = get_nondominated_disjoint_rec(bcv1_p.first, bcv2),
@@ -1150,7 +1143,7 @@ metapopulation::get_nondominated_disjoint_rec(const scored_combo_tree_ptr_vec& b
                                                    bcv_m1.second);
         // merge results
         append(bcv_m1.first, bcv_m2.first);
-        return make_pair(bcv_m1.first, bcv_m2.second);
+        return std::make_pair(bcv_m1.first, bcv_m2.second);
     }
 }
 

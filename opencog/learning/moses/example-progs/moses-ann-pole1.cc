@@ -27,9 +27,9 @@
 #include "../deme/deme_expander.h"
 #include "../metapopulation/metapopulation.h"
 #include "../moses/moses_main.h"
-#include "../scoring/scoring.h"
 #include "../representation/representation.h"
 #include "../optimization/optimization.h"
+#include "../scoring/scoring_base.h"
 
 #include "pole_scoring.h"
 
@@ -81,12 +81,13 @@ int main(int argc, char** argv)
         si = &(clean_reduction());
 
     //SINGLE MARKOVIAN POLE TASK
-    ann_pole_cscore p_cscore;
     ann_pole_bscore p_bscore; 
+    simple_ascore ascorer;
+    behave_cscore cscorer(p_bscore, ascorer);
 
     univariate_optimization optim_algo;
-    deme_expander dex(tt, *si,  *si, p_cscore, optim_algo);
-    metapopulation metapop_pole(tr, p_cscore, p_bscore);
+    deme_expander dex(tt, *si,  *si, cscorer, optim_algo);
+    metapopulation metapop_pole(tr, cscorer);
 
     moses_parameters pa;
     moses_statistics st;

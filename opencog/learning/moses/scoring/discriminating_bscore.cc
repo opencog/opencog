@@ -25,6 +25,7 @@
 
 #include "discriminating_bscore.h"
 
+#include <boost/accumulators/accumulators.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/adaptor/filtered.hpp>
 #include <boost/range/adaptor/reversed.hpp>
@@ -36,6 +37,7 @@
 namespace opencog { namespace moses {
 
 using namespace std;
+using namespace combo;
 using boost::adaptors::map_values;
 using boost::adaptors::map_keys;
 using boost::adaptors::filtered;

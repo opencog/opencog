@@ -31,7 +31,6 @@
 #include <opencog/comboreduct/combo/simple_nn.h>
 #include <opencog/comboreduct/reduct/ann_rules.h>
 
-#include "../scoring/scoring.h"
 #include "pole_balancing.h"
 
 using namespace opencog;
@@ -206,90 +205,70 @@ struct AnnPoleFitnessFunction : public unary_function<combo_tree, double>
 };
 
 
-// This is what the original zource had this as, but its not
+// This is what the original source had this as, but its not
 // obviously correct, to me.
 #define CPXY_RATIO 1.0
 
-struct ann_pole2nv_cscore : public cscore_base
-{
-    composite_score operator()(const combo_tree& tr) const
-    {
-        complexity_t cpxy = tr.size();
-        return composite_score(p2ff(tr), cpxy, cpxy/CPXY_RATIO);
-    }
-    AnnPole2NVFitnessFunction p2ff;
-};
-
-struct ann_pole2nv_bscore : public bscore_base
+struct ann_pole_bscore : public bscore_base
 {
     result_type operator()(const combo_tree& tr) const
     {
-        composite_score cs(ann_pole2nv_cscore()(tr));
-
         behavioral_score bs;
-        bs.push_back(cs.get_score());
-        bs.push_back(cs.get_penalty());
+        bs.push_back(pff(tr));
         return bs;
     }
     behavioral_score best_possible_bscore() const
     {
         return {0.0};
     }
-};
-
-struct ann_pole2_cscore : public cscore_base
-{
-    result_type operator()(const combo_tree& tr) const
+    complexity_t get_complexity(const combo_tree& tr) const
     {
-        complexity_t sz = tr.size();
-        return composite_score(p2ff(tr), sz, sz/CPXY_RATIO);
+        return tr.size();
     }
-    AnnPole2FitnessFunction p2ff;
+    score_t get_complexity_coef() const { return 1.0/CPXY_RATIO; }
+    AnnPoleFitnessFunction pff;
 };
 
 struct ann_pole2_bscore : public bscore_base
 {
     result_type operator()(const combo_tree& tr) const
     {
-        composite_score cs(ann_pole2_cscore()(tr));
-
         behavioral_score bs;
-        bs.push_back(cs.get_score());
-        bs.push_back(cs.get_penalty());
+        bs.push_back(p2ff(tr));
         return bs;
     }
     behavioral_score best_possible_bscore() const
     {
         return {0.0};
     }
-};
-
-struct ann_pole_cscore  : public cscore_base
-{
-    composite_score operator()(const combo_tree& tr) const
+    complexity_t get_complexity(const combo_tree& tr) const
     {
-        complexity_t cpxy = tr.size();
-        return composite_score(pff.operator()(tr), cpxy, cpxy/CPXY_RATIO);
+        return tr.size();
     }
-    AnnPoleFitnessFunction pff;
+    score_t get_complexity_coef() const { return 1.0/CPXY_RATIO; }
+    AnnPole2FitnessFunction p2ff;
 };
 
-struct ann_pole_bscore : public bscore_base
+struct ann_pole2nv_bscore : public bscore_base
 {
-    behavioral_score operator()(const combo_tree& tr) const
+    result_type operator()(const combo_tree& tr) const
     {
-        composite_score cs(ann_pole_cscore()(tr));
-
         behavioral_score bs;
-        bs.push_back(cs.get_score());
-        bs.push_back(cs.get_penalty());
+        bs.push_back(p2nvff(tr));
         return bs;
     }
     behavioral_score best_possible_bscore() const
     {
         return {0.0};
     }
+    complexity_t get_complexity(const combo_tree& tr) const
+    {
+        return tr.size();
+    }
+    score_t get_complexity_coef() const { return 1.0/CPXY_RATIO; }
+    AnnPole2NVFitnessFunction p2nvff;
 };
+
 
 
 #endif

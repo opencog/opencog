@@ -156,7 +156,7 @@ struct iscorer_cache : public iscorer_base
 
 
 template<typename FeatureSet>
-struct fs_scorer : public unary_function<FeatureSet, double>
+struct fs_scorer : public std::unary_function<FeatureSet, double>
 {
     fs_scorer(const CTable& ctable,
               const feature_selection_parameters& fs_params)

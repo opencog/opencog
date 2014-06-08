@@ -31,7 +31,6 @@
 #include <opencog/comboreduct/combo/simple_nn.h>
 #include <opencog/comboreduct/reduct/ann_rules.h>
 
-#include "../scoring/scoring.h"
 
 using namespace opencog;
 using namespace combo;
@@ -82,33 +81,26 @@ struct AnnXORFitnessFunction : public unary_function<combo_tree, double>
 // obviously correct, to me.
 #define CPXY_RATIO 1.0
 
-struct ann_xor_cscore  : public cscore_base
-{
-    composite_score operator()(const combo_tree& tr) const
-    {
-        complexity_t cpxy = tr.size();
-        // Note minus sign!
-        return composite_score(-aff.operator()(tr), cpxy, cpxy/CPXY_RATIO);
-    }
-
-    AnnXORFitnessFunction aff;
-};
 
 struct ann_xor_bscore : public bscore_base
 {
-    behavioral_score operator()(const combo_tree& tr) const
+    result_type operator()(const combo_tree& tr) const
     {
-        composite_score cs(ann_xor_cscore()(tr));
-
         behavioral_score bs;
-        bs.push_back(cs.get_score());
-        bs.push_back(cs.get_penalty());
+        bs.push_back(-aff(tr));
         return bs;
     }
     behavioral_score best_possible_bscore() const
     {
         return {0.0};
     }
+    complexity_t get_complexity(const combo_tree& tr) const
+    {
+        return tr.size();
+    }
+    score_t get_complexity_coef() const { return 1.0/CPXY_RATIO; }
+
+    AnnXORFitnessFunction aff;
 };
 
 #endif

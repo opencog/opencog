@@ -37,6 +37,8 @@
 
 #include "build_knobs.h"
 
+using namespace std;
+
 namespace opencog { namespace moses {
 
 typedef combo_tree::sibling_iterator sib_it;

@@ -29,6 +29,9 @@
 
 namespace opencog { namespace moses {
 
+using combo::CTable;
+using combo::type_node;
+
 /**
  * Fitness function for maximizing binary precision, that is, for
  * minimizing false positives.   This scorer works for both boolean

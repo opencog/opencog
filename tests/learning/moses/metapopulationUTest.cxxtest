@@ -26,19 +26,11 @@
 
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/learning/moses/metapopulation/metapopulation.h>
-#include <opencog/learning/moses/scoring/scoring.h>
+#include <opencog/learning/moses/scoring/behave_cscore.h>
 
 using namespace opencog;
 using namespace combo;
 using namespace moses;
-
-// For testing only
-struct dummy_cscore : public cscore_base
-{
-    composite_score operator()(const combo_tree& tr) const {
-        return composite_score(0,0,0);
-    }
-};
 
 // For testing only
 struct dummy_bscore : public bscore_base
@@ -64,15 +56,15 @@ struct dummy_optimization : public optimizer_base
 
 class metapopulationUTest : public CxxTest::TestSuite
 {
-    dummy_cscore _dcsc;
+    simple_ascore _asc;
     dummy_bscore _dbsc;
+    behave_cscore _csc;
     metapopulation _metapopulation;
 
 public:
     metapopulationUTest()
-        : _dcsc(), _dbsc(),
-          _metapopulation(combo_tree(),
-                          _dcsc, _dbsc)
+        : _asc(), _dbsc(), _csc(_dbsc, _asc),
+          _metapopulation(combo_tree(), _csc)
     {
         logger().setPrintToStdoutFlag(true);
         logger().setLevel(Logger::FINE);

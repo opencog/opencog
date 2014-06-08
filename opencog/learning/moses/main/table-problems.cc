@@ -28,6 +28,8 @@
 #include <opencog/comboreduct/table/table_io.h>
 
 #include "../moses/partial.h"
+#include "../scoring/bscores.h"
+#include "../scoring/discriminating_bscore.h"
 
 #include "moses_exec_def.h"
 #include "table-problems.h"
@@ -236,10 +238,11 @@ void ip_problem::run(option_base* ob)
                   pms.hardness, pms.hardness >= 0);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
-    behave_cscore mbcscore(bscore);
+    simple_ascore ascore;
+    behave_cscore mbcscore(bscore, ascore);
     metapop_moses_results(pms.exemplars, tt,
                           *pms.bool_reduct, *pms.bool_reduct_rep, 
-                          bscore, pms.cache_size, mbcscore,
+                          mbcscore,
                           pms.opt_params, pms.hc_params,
                           pms.deme_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
@@ -280,10 +283,11 @@ void ann_table_problem::run(option_base* ob)
 
     contin_bscore bscore(table);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
-    behave_cscore cscore(bscore);
+    simple_ascore ascore;
+    behave_cscore cscore(bscore, ascore);
     metapop_moses_results(pms.exemplars, tt,
                           reduct::ann_reduction(), reduct::ann_reduction(),
-                          bscore, pms.cache_size, cscore,
+                          cscore,
                           pms.opt_params, pms.hc_params,
                           pms.deme_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
@@ -310,10 +314,10 @@ void ann_table_problem::run(option_base* ob)
     int as = alphabet_size(cand_sig, pms.ignore_ops);                \
     SCORER bscore ARGS ;                                             \
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio); \
-    behave_cscore mbcscore(bscore);                                  \
+    simple_ascore ascore;                                            \
+    behave_cscore mbcscore(bscore, ascore);                          \
     metapop_moses_results(pms.exemplars, cand_sig,                   \
-                      REDUCT, REDUCT_REP, bscore,                    \
-                      pms.cache_size, mbcscore,                      \
+                      REDUCT, REDUCT_REP, mbcscore,                  \
                       pms.opt_params, pms.hc_params,                 \
                       pms.deme_params, pms.meta_params,              \
                       pms.moses_params, pms.mmr_pa);                 \
@@ -354,11 +358,12 @@ void pre_table_problem::run(option_base* ob)
         pms.deme_params.fstor = new feature_selector(ctable,
                                                      pms.festor_params);
     }
-
-    behave_cscore mbcscore(bscore);
+ 
+    simple_ascore ascore;
+    behave_cscore mbcscore(bscore, ascore);
     metapop_moses_results(pms.exemplars, cand_sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
-                          bscore, pms.cache_size, mbcscore,
+                          mbcscore,
                           pms.opt_params, pms.hc_params,
                           pms.deme_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
@@ -390,10 +395,12 @@ void pre_conj_table_problem::run(option_base* ob)
         pms.deme_params.fstor = new feature_selector(ctable,
                                                  pms.festor_params);
     }
-    behave_cscore mbcscore(bscore);
+
+    simple_ascore ascore;
+    behave_cscore mbcscore(bscore, ascore);
     metapop_moses_results(pms.exemplars, cand_sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
-                          bscore, pms.cache_size, mbcscore,
+                          mbcscore,
                           pms.opt_params, pms.hc_params,
                           pms.deme_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
@@ -489,7 +496,7 @@ void it_table_problem::run(option_base* ob)
                             pms.exemplars, *pms.contin_reduct,
                             pms.opt_params, pms.hc_params,
                             pms.deme_params,
-                            pms.cache_size, pms.meta_params,
+                            pms.meta_params,
                             pms.moses_params, pms.mmr_pa);
             well.solve();
         } else {

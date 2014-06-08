@@ -26,13 +26,13 @@
 #ifndef _MOSES_SCORING_BASE_H
 #define _MOSES_SCORING_BASE_H
 
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
-
 #include "../moses/types.h"
-#include "../representation/representation.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
 namespace opencog { namespace moses {
+
+using combo::combo_tree;
+using combo::arity_t;
 
 /// Used to define the complexity scoring component given that p is the
 /// probability of having an observation being wrong (see the comment
@@ -48,43 +48,9 @@ score_t discrete_complexity_coef(unsigned alphabet_size, double p);
 /// Note: this returns NEGATIVE values.
 score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
 
-/// Abstract base class for obtaining the composite score.
-struct cscore_base : public unary_function<combo_tree, composite_score>
-{
-    /// Evaluate the candidate combo_tree tr
-    virtual composite_score operator()(const combo_tree& tr) const = 0;
-
-    /// Return the best possible score achievable with this fitness
-    /// function. This is useful for stopping MOSES when  the best
-    /// possible score has been reached. If not overloaded, it will
-    /// return very_best_score (which is a constant defined in
-    /// opencog/learning/moses/moses/types.h)
-    virtual score_t best_possible_score() const { return very_best_score; }
-
-    /// Return the minimum value considered for improvementa.
-    /// Return 0 by default.
-    virtual score_t min_improv() const { return 0.0; }
-
-    /// Indicate a set of features that should be ignored during scoring,
-    /// The features are indicated as indexes, starting from 0.
-    ///
-    /// The primary use-case is for speeding up fitness evaluation. (???)
-    ///
-    /// Note that the best_possible_score may depend on the set of
-    /// ignored features. Thus, the best_possible_score() method should
-    /// be called only after the ignore idex have been set.
-    ///
-    /// XXX I don't get it ... if we are going to ignore indexes,
-    /// shouldn't we ignore them when building the combo trees?  And
-    /// if a combo tree does make use of an index, how can one possibly
-    /// "ignore" it ??  This just does not seem correct to me...
-    virtual void ignore_idxs(const std::set<arity_t>&) const {}
-
-    virtual ~cscore_base(){}
-};
-
-/// Abstract base class for behavioral scoring
-struct bscore_base : public unary_function<combo_tree, behavioral_score>
+/// Abstract base class for behavioral scoring.
+/// A behavioral score is a vector of scores, one per sample of a dataset.
+struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
 {
     bscore_base() : _complexity_coef(0.0) {};
     virtual ~bscore_base() {};
@@ -155,6 +121,21 @@ protected:
     score_t _complexity_coef;
 };
 
+/// Abstract base class for summing behavioral scores.
+struct ascore_base : public std::unary_function<combo_tree, composite_score>
+{
+    /// Sum up the behavioral score
+    virtual score_t operator()(const behavioral_score&) const = 0;
+
+    virtual ~ascore_base(){}
+};
+
+/// Simplest ascore, it just total up the bscore.
+struct simple_ascore : ascore_base
+{
+    /// Sum up the behavioral score
+    virtual score_t operator()(const behavioral_score&) const;
+};
 
 // helper to log a combo_tree and its behavioral score
 static inline void log_candidate_bscore(const combo_tree& tr,

@@ -21,20 +21,24 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _EDA_INSTANCE_SET_H
-#define _EDA_INSTANCE_SET_H
+#ifndef _REP_INSTANCE_SET_H
+#define _REP_INSTANCE_SET_H
+
+#include <vector>
+
+#include <boost/iterator/transform_iterator.hpp>
 
 #include "field_set.h"
-#include "../eda/scoring.h"
+#include "scored_instance.h"
 #include "../moses/types.h"
 
 namespace opencog {
 namespace moses {
 
 template<typename ScoreT>
-struct instance_set : public vector<scored_instance<ScoreT> >
+struct instance_set : public std::vector<scored_instance<ScoreT> >
 {
-    typedef vector<scored_instance<ScoreT> > super;
+    typedef std::vector<scored_instance<ScoreT> > super;
     typedef typename super::value_type value_type;
     typedef boost::transform_iterator < select_tag,
                                         typename super::iterator,

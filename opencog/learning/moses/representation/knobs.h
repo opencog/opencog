@@ -26,13 +26,13 @@
 
 #include <bitset>
 #include <string>
+#include <vector>
 
 #include <opencog/util/based_variant.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/tree.h>
 
-#include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/combo/iostream_combo.h>
 
 #include "../moses/complexity.h"
@@ -279,7 +279,7 @@ struct action_subtree_knob : public discrete_knob<MAX_PERM_ACTIONS>
     typedef combo_tree::pre_order_iterator pre_it;
 
     action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
-                        const vector<combo_tree>& perms);
+                        const std::vector<combo_tree>& perms);
 
     complexity_t complexity_bound() const;
 
@@ -295,7 +295,7 @@ struct action_subtree_knob : public discrete_knob<MAX_PERM_ACTIONS>
 
     std::string toStr() const;
 protected:
-    const vector<combo_tree> _perms;
+    const std::vector<combo_tree> _perms;
 };
 
 // Binary knob for action subtree, present or absent

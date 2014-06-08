@@ -29,6 +29,7 @@
 #include "../optimization/hill-climbing.h"
 #include "../metapopulation/metapopulation.h"
 #include "../scoring/behave_cscore.h"
+#include "../scoring/bscores.h"
 #include "moses_main.h"
 
 namespace opencog { namespace moses {
@@ -46,7 +47,6 @@ class partial_solver
                        const optim_parameters& opt_params,
                        const hc_parameters& hc_params,
                        const deme_parameters& deme_params,
-                       unsigned cache_size,
                        const metapop_parameters& meta_params,
                        const moses_parameters& moses_params,
                        const metapop_printer& mmr_pa);
@@ -121,12 +121,12 @@ class partial_solver
         moses_parameters _moses_params;
         const metapop_printer& _printer;
 
+        ascore_base *_ascore;
         // typedef enum_filter_bscore BScore;
         // typedef enum_graded_bscore BScore;
         typedef enum_effective_bscore BScore;
         enum_effective_bscore *_bscore;
         behave_cscore *_cscore;
-        unsigned _cache_size;
 
         typedef enum_table_bscore StraightBScore;
         enum_table_bscore *_straight_bscore;

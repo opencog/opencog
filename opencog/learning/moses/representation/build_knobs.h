@@ -24,6 +24,8 @@
 #ifndef _MOSES_BUILD_KNOBS_H
 #define _MOSES_BUILD_KNOBS_H
 
+#include <vector>
+
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
@@ -125,7 +127,7 @@ protected:
                            bool add_if_in_exemplar = true);
 
     void sample_logical_perms(combo_tree::iterator it,
-                              vector<combo_tree>& perms);
+                              std::vector<combo_tree>& perms);
 
     void insert_typed_arg(combo_tree &tr,
                           type_tree_sib_it arg_type,
@@ -178,9 +180,9 @@ protected:
     void add_simple_action_knobs(combo_tree::iterator it,
                                  bool add_if_in_exemplar = true);
     void sample_action_perms(combo_tree::iterator it,
-                             vector<combo_tree>& perms);
+                             std::vector<combo_tree>& perms);
     void simple_action_probe(combo_tree::iterator it, bool add_if_in_exemplar);
-    void action_probe(/*const combo_tree& tr*/vector<combo_tree>& perms,
+    void action_probe(std::vector<combo_tree>& perms,
                       combo_tree::iterator it, bool add_if_in_exemplar);
     void action_cleanup();
 

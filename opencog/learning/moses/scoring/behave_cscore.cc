@@ -24,17 +24,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/comboreduct/crutil/exception.h>
+
 #include "behave_cscore.h"
 
 namespace opencog { namespace moses {
 
-composite_score behave_cscore::operator()(const combo_tree& tr) const
+behavioral_score behave_cscore::get_bscore(const combo_tree& tr) const
 {
-    score_t res = 0.0;
+    return _bscorer(tr);
+}
+
+composite_score behave_cscore::get_cscore(const combo_tree& tr)
+{
+    behavioral_score bs;
     try {
-        res = boost::accumulate(_bscorer(tr), 0.0);
+        bs = get_bscore(tr);
     }
-    catch (EvalException& ee)
+    catch (combo::EvalException& ee)
     {
         // Exceptions are raised when operands are out of their
         // valid domain (negative input log or division by zero),
@@ -43,14 +50,16 @@ composite_score behave_cscore::operator()(const combo_tree& tr) const
         // because this happens very often when learning continuous
         // functions, and it clogs up the log when logged at a
         // higher level.
-        logger().fine()
-           << "The following candidate: " << tr << "\n"
-           << "has failed to be evaluated, "
-           << "raising the following exception: "
-           << ee.get_message() << " " << ee.get_vertex();
-
+        if (logger().isFineEnabled()) {
+            logger().fine()
+               << "The following candidate: " << tr << "\n"
+               << "has failed to be evaluated, "
+               << "raising the following exception: "
+               << ee.get_message() << " " << ee.get_vertex();
+        }
         return worst_composite_score;
     }
+    score_t res = _ascorer(bs);
 
     complexity_t cpxy = _bscorer.get_complexity(tr);
     score_t cpxy_coef = _bscorer.get_complexity_coef();
@@ -61,6 +70,25 @@ composite_score behave_cscore::operator()(const combo_tree& tr) const
     }
 
     return composite_score(res, cpxy, cpxy * cpxy_coef, 0.0);
+}
+
+composite_score behave_cscore::get_cscore(const behavioral_score& bs)
+{
+    score_t res = _ascorer(bs);
+
+#if 0
+XXX FIXME
+    complexity_t cpxy = _bscorer.get_complexity(tr);
+    score_t cpxy_coef = _bscorer.get_complexity_coef();
+    if (logger().isFineEnabled()) {
+        logger().fine() << "behave_cscore: " << res
+                        << " complexity: " << cpxy
+                        << " cpxy_coeff: " << cpxy_coef;
+    }
+    return composite_score(res, cpxy, cpxy * cpxy_coef, 0.0);
+#endif
+
+    return composite_score(res, 0, 0, 0.0);
 }
 
 score_t behave_cscore::best_possible_score() const

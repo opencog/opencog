@@ -28,9 +28,8 @@
 #include <opencog/util/lazy_random_selector.h>
 #include <opencog/util/oc_omp.h>
 
-#include "using.h"
 #include "../representation/field_set.h"
-#include "scoring.h"
+#include "../representation/scored_instance.h"
 
 namespace opencog { 
 namespace moses {

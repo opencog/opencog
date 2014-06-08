@@ -26,13 +26,13 @@
 #include <sstream>
 #include <string>
 #include <opencog/util/mt19937ar.h>
+#include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/learning/moses/representation/knobs.h>
 
 using namespace opencog;
 using namespace moses;
 using namespace reduct;
 using namespace combo;
-//using namespace util;
 using namespace std;
 
 class KnobTurningUTest : public CxxTest::TestSuite
