@@ -30,10 +30,8 @@
 #define _MOSES_HILL_CLIMBING_H
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/util/platform.h>
 
 #include "../representation/instance_set.h"
-#include "../scoring/scoring.h"
 #include "optimization.h"
 
 namespace opencog { namespace moses {

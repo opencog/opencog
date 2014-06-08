@@ -10,7 +10,7 @@
 
 #include "../moses/moses_main.h"
 #include "../optimization/optimization.h"
-#include "../scoring/scoring.h"
+#include "../scoring/scoring_base.h"
 
 #include "pole_scoring.h"
 
@@ -43,13 +43,14 @@ int main(int argc, char** argv)
     tt.append_children(tt.begin(), id::ann_type, 1);
 
 
-    //DOUBLE MARKOVIAN POLE TASK`
-    ann_pole2_cscore p2_cscore;
+    // DOUBLE MARKOVIAN POLE TASK`
     ann_pole2_bscore p2_bscore;
+    simple_ascore ascorer;
+    behave_cscore cscorer(p2_bscore, ascorer);
 
     hill_climbing hc;
-    deme_expander dex(tt, clean_reduction(), clean_reduction(), p2_cscore, hc);
-    metapopulation metapop_pole2(tr, p2_cscore, p2_bscore);
+    deme_expander dex(tt, clean_reduction(), clean_reduction(), cscorer, hc);
+    metapopulation metapop_pole2(tr, cscorer);
 
     moses_parameters pa;
     moses_statistics st;
@@ -65,7 +66,3 @@ int main(int argc, char** argv)
     //for parameter sweet
     cout << metapop_pole2.best_score() << endl;
 }
-
-
-
-

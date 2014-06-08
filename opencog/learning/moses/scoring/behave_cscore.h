@@ -26,6 +26,8 @@
 #ifndef _MOSES_BEHAVE_CSCORE_H
 #define _MOSES_BEHAVE_CSCORE_H
 
+#include <opencog/util/lru_cache.h>
+
 #include "scoring_base.h"
 
 namespace opencog { namespace moses {
@@ -45,12 +47,15 @@ namespace opencog { namespace moses {
  * 2) Helps with keeping the score-caching code cleaner.
  * 3) When boosting, the summation above is no longer just a simple sum.
  */
-class behave_cscore : public cscore_base
+class behave_cscore 
 {
 public:
-    behave_cscore(const bscore_base& sr) : _bscorer(sr) {}
+    behave_cscore(const bscore_base& b, ascore_base& a)
+        : _bscorer(b), _ascorer(a) {}
 
-    composite_score operator()(const combo_tree& tr) const;
+    behavioral_score get_bscore(const combo_tree&) const;
+    composite_score get_cscore(const behavioral_score&);
+    composite_score get_cscore(const combo_tree&);
 
     /// Returns the best score reachable for this problem. Used as
     /// termination condition.
@@ -72,6 +77,13 @@ public:
 
 private:
     const bscore_base& _bscorer;
+    ascore_base& _ascorer;
+
+#ifdef LATER
+    prr_cache_threaded<cscore_base> score_cache(initial_cache_size, c_scorer,
+                                                 "composite scores");
+#endif
+
 };
 
 

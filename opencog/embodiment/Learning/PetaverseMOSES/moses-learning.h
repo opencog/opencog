@@ -29,7 +29,7 @@
 #include <opencog/learning/moses/deme/deme_expander.h>
 #include <opencog/learning/moses/metapopulation/metapopulation.h>
 #include <opencog/learning/moses/moses/moses_params.h>
-#include <opencog/learning/moses/scoring/scoring.h>
+#include <opencog/learning/moses/scoring/scoring_base.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 
 #include <opencog/embodiment/Learning/FitnessEstimator/NoSpaceLifeFitnessEstimator.h>
@@ -85,8 +85,9 @@ public:
     void reset_estimator();
 
 private:
-    struct petaverse_cscore *cscore;
+    struct ascore_base *ascore;
     struct petaverse_bscore *bscore;
+    struct behave_cscore *cscore;
     struct hill_climbing *climber;
     const FE& _fitness_estimator;
     Comp _comp;
@@ -120,60 +121,42 @@ private:
     moses_statistics _stats;
 };
 
-struct petaverse_cscore : public cscore_base
-{
-    petaverse_cscore(const FE& fitnessEstimator)
-            : _fitnessEstimator(fitnessEstimator) {}
-
-    petaverse_cscore(const petaverse_cscore& ps)
-            : _fitnessEstimator(ps._fitnessEstimator) {}
-
-    composite_score operator()(const combo_tree& tr) const
-    {
-        score_t score = _fitnessEstimator(tr);
-        std::cout << "scoring " << tr << " score: " << score << std::endl;
 
 // This complexity ratio matches the original code, but it is not
 // obviously correct to me.
 #define CPXY_RATIO 1.0
 
-        complexity_t cpxy = tr.size();
-        composite_score cs(score, cpxy, cpxy / CPXY_RATIO);
-        return cs;
-    }
-    ~petaverse_cscore() {}
-
-private:
-    const FE& _fitnessEstimator;
-};
-
 // @todo: this is not a good behavioral score, it should rather be
 // such that each feature correspond to the dissimilarity of an action
 // in the action sequence to imitate
 struct petaverse_bscore : public bscore_base
-{
+{   
     petaverse_bscore(const FE& fitnessEstimator)
             : _fitnessEstimator(fitnessEstimator) {}
 
     petaverse_bscore(const petaverse_bscore& ps)
             : _fitnessEstimator(ps._fitnessEstimator) {}
 
-    behavioral_score operator()(const combo_tree& tr) const
+    result_type operator()(const combo_tree& tr) const
     {
+        score_t score = _fitnessEstimator(tr);
         behavioral_score bs;
-        bs.push_back(_fitnessEstimator(tr));
+        bs.push_back(score);
         return bs;
     }
-
     behavioral_score best_possible_bscore() const
     {
-        return {0.0};           // @todo that might be wrong
+        return {0.0};
     }
-
-    ~petaverse_bscore() {}
+    complexity_t get_complexity(const combo_tree& tr) const
+    {
+        return tr.size();
+    }
+    score_t get_complexity_coef() const { return 1.0/CPXY_RATIO; }
 private:
     const FE& _fitnessEstimator;
-};
+};  
+
 
 } // ~namespace moses
 } // ~namespace opencog

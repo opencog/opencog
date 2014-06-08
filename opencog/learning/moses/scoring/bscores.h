@@ -28,6 +28,7 @@
 #include <iostream>
 #include <fstream>
 #include <functional>
+#include <vector>
 
 #include <boost/range/numeric.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
@@ -45,9 +46,10 @@
 
 #include "scoring_base.h"
 #include "../moses/types.h"
-#include "../representation/representation.h"
 
 namespace opencog { namespace moses {
+
+using namespace combo;
 
 /**
  * Each feature corresponds to an input tuple, 0 if the output of the
@@ -85,13 +87,13 @@ protected:
 struct discretize_contin_bscore : public bscore_base
 {
     discretize_contin_bscore(const OTable& ot, const ITable& it,
-                             const vector<contin_t>& thres,
+                             const std::vector<contin_t>& thres,
                              bool weighted_average);
 
     // @todo when switching to gcc 4.6 use constructor delagation to
     // simplify that
     // discretize_contin_bscore(const Table& table,
-    //                          const vector<contin_t>& thres,
+    //                          const std::vector<contin_t>& thres,
     //                          bool weighted_average,
     //                          float alphabet_size, float p);
 
@@ -107,7 +109,7 @@ struct discretize_contin_bscore : public bscore_base
 protected:
     OTable target;
     ITable cit;
-    vector<contin_t> thresholds;
+    std::vector<contin_t> thresholds;
     bool weighted_accuracy;     // Whether the bscore is weighted to
                                 // deal with unbalanced data.
 
@@ -117,13 +119,13 @@ protected:
     // [l_idx, u_idx)
     size_t class_idx_within(contin_t v, size_t l_idx, size_t u_idx) const;
 
-    vector<size_t> classes;       // classes of the output, alligned with target
+    std::vector<size_t> classes;       // classes of the output, alligned with target
 
     // Weight of each class, so that each one weighs as much as the
     // others, even in case of unbalance sampling. Specifically:
     // weights[i] = s / (n * c_i) where s is the sample size, n the
     // number of classes and c_i the number of samples for class i.
-    vector<score_t> weights;
+    std::vector<score_t> weights;
 };
 
 /**

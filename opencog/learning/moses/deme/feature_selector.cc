@@ -324,8 +324,8 @@ csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& f
     // penalties are aggregated (max) we only need to compute the
     // diversity between the elements and the lastly added feature set
     // in res.
-    typedef pair<composite_score, feature_set> csc_feature_set;
-    vector<csc_feature_set> csc_fs_seq;
+    typedef std::pair<composite_score, feature_set> csc_feature_set;
+    std::vector<csc_feature_set> csc_fs_seq;
     for (const auto& fs : fs_pop)
         csc_fs_seq.emplace_back(composite_score(fs.first, fs.second.size()),
                                 fs.second);

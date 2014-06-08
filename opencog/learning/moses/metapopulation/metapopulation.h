@@ -31,10 +31,11 @@
 #include <unordered_set>
 
 #include <boost/logic/tribool.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 #include <opencog/comboreduct/combo/combo.h>
 #include "../optimization/optimization.h"
-#include "../scoring/scoring_base.h"
+#include "../scoring/behave_cscore.h"
 #include "metapop_params.h"
 
 #define EVALUATED_ALL_AVAILABLE 1234567
@@ -57,10 +58,6 @@ namespace moses {
  * high-scoring members of the deme are then folded back into the
  * metapopulation.  At this point, the metapopulation may be pruned,
  * to keep it's size manageable.
- *
- * NOTE:
- *   cscore_base = scoring function (output composite (combined) scores)
- *   bscore_base = behavioral scoring function (output behaviors)
  */
 using combo::combo_tree;
 
@@ -71,8 +68,7 @@ struct metapopulation
                                boost::hash<combo_tree> > combo_tree_hash_counter;
 
     // Init the metapopulation with the following set of exemplars.
-    void init(const std::vector<combo_tree>& exemplars,
-              const cscore_base& cscorer);
+    void init(const std::vector<combo_tree>& exemplars);
 
     /**
      *  Constuctor for the class metapopulation
@@ -91,31 +87,30 @@ struct metapopulation
      * @param pa      Control parameters for this class.
      */
     metapopulation(const std::vector<combo_tree>& bases,
-                   const cscore_base& sc,
-                   const bscore_base& bsc,
+                   behave_cscore& sc,
                    const metapop_parameters& pa = metapop_parameters()) :
         params(pa),
-        _bscorer(bsc),
+        _cscorer(sc),
         _merge_count(0),
         _best_cscore(worst_composite_score),
         _cached_dst(pa.diversity)
     {
-        init(bases, sc);
+        init(bases);
     }
 
     // Like above but using a single base, and a single reduction rule.
     /// @todo use C++11 redirection
     metapopulation(const combo_tree& base,
-                   const cscore_base& sc, const bscore_base& bsc,
+                   behave_cscore& sc,
                    const metapop_parameters& pa = metapop_parameters()) :
         params(pa),
-        _bscorer(bsc),
+        _cscorer(sc),
         _merge_count(0),
         _best_cscore(worst_composite_score),
         _cached_dst(pa.diversity)
     {
         std::vector<combo_tree> bases(1, base);
-        init(bases, sc);
+        init(bases);
     }
 
     ~metapopulation() {}
@@ -290,14 +285,14 @@ struct metapopulation
     // calls of dominates.
     scored_combo_tree_set get_new_candidates(const scored_combo_tree_set&);
 
-    typedef pair<scored_combo_tree_set,
-                 scored_combo_tree_set> scored_combo_tree_set_pair;
+    typedef std::pair<scored_combo_tree_set,
+                      scored_combo_tree_set> scored_combo_tree_set_pair;
 
     typedef std::vector<const scored_combo_tree*> scored_combo_tree_ptr_vec;
     typedef scored_combo_tree_ptr_vec::iterator scored_combo_tree_ptr_vec_it;
     typedef scored_combo_tree_ptr_vec::const_iterator scored_combo_tree_ptr_vec_cit;
-    typedef pair<scored_combo_tree_ptr_vec,
-                 scored_combo_tree_ptr_vec> scored_combo_tree_ptr_vec_pair;
+    typedef std::pair<scored_combo_tree_ptr_vec,
+                      scored_combo_tree_ptr_vec> scored_combo_tree_ptr_vec_pair;
 
     // reciprocal of random_access_view
     static scored_combo_tree_set
@@ -491,11 +486,11 @@ public:
     const metapop_parameters& params;
 
 protected:
+    behave_cscore& _cscorer;
+
     scored_combo_tree_ptr_set _scored_trees;
 
     static const unsigned min_pool_size = 250;
-
-    const bscore_base& _bscorer; // behavioral score
 
     size_t _merge_count;
 

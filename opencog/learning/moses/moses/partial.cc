@@ -37,7 +37,6 @@ partial_solver::partial_solver(const CTable &ctable,
                                const optim_parameters& opt_params,
                                const hc_parameters& hc_params,
                                const deme_parameters& deme_params,
-                               unsigned cache_size,
                                const metapop_parameters& meta_params,
                                const moses_parameters& moses_params,
                                const metapop_printer& mmr_pa)
@@ -53,19 +52,22 @@ partial_solver::partial_solver(const CTable &ctable,
      _deme_params(deme_params),
      _meta_params(meta_params),
      _moses_params(moses_params), _printer(mmr_pa),
+     _ascore(NULL), 
      _bscore(NULL), 
      _cscore(NULL), 
-     _cache_size(cache_size),
      _straight_bscore(NULL), 
      _straight_cscore(NULL), 
      _num_evals(0), _num_gens(0),
      _done(false),
      _most_good(0)
 {
+	// XXX FIXME, should be configurable, to use boosting!?
+	_ascore = new simple_ascore();
 }
 
 partial_solver::~partial_solver()
 {
+    delete _ascore;
     delete _bscore;
     delete _straight_bscore;
     delete _cscore;
@@ -79,7 +81,7 @@ void partial_solver::solve()
     _done = false;
 
     _bscore =  new BScore(_ctable);
-    _cscore = new behave_cscore(*_bscore);
+    _cscore = new behave_cscore(*_bscore, *_ascore);
 
     _meta_params.merge_callback = check_candidates;
     _meta_params.callback_user_data = (void *) this;
@@ -102,8 +104,7 @@ void partial_solver::solve()
                         << " num exemplars=" << _exemplars.size();
 
         metapop_moses_results(_exemplars, _table_type_signature,
-                              _reduct, _reduct, *_bscore, 
-                              _cache_size, *_cscore,
+                              _reduct, _reduct, *_cscore,
                               _opt_params, _hc_params, 
                               _deme_params,
                               _meta_params, _moses_params,
@@ -119,8 +120,7 @@ void partial_solver::solve()
 
             logger().info() << "well-enough DONE!";
             metapop_moses_results(_exemplars, _table_type_signature,
-                                  _reduct, _reduct, *_straight_bscore,
-                                  _cache_size, *_straight_cscore,
+                                  _reduct, _reduct, *_straight_cscore,
                                   _opt_params, _hc_params, 
                                   _deme_params,
                                   _meta_params, _moses_params,
@@ -186,7 +186,7 @@ void partial_solver::final_cleanup(const metapopulation& cands)
     // the number of right & wrong, without weighting.
 
     _straight_bscore = new BScore(_ctable);
-    _straight_cscore = new behave_cscore(*_straight_bscore);
+    _straight_cscore = new behave_cscore(*_straight_bscore, *_ascore);
 }
 
 /// Compute the effectiveness of the predicate.
@@ -345,7 +345,7 @@ void partial_solver::record_prefix()
     delete _bscore;
     _bscore = new BScore(_ctable);
     delete _cscore;
-    _cscore = new behave_cscore(*_bscore);
+    _cscore = new behave_cscore(*_bscore, *_ascore);
 }
 
 

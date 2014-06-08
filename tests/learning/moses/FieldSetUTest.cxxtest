@@ -1,8 +1,8 @@
+#include <vector>
 #include <cxxtest/TestSuite.h>
 #include <opencog/learning/moses/representation/field_set.h>
 #include <opencog/learning/moses/eda/initialization.h>
 #include <opencog/util/mt19937ar.h>
-#include <vector>
 
 using namespace opencog;
 using namespace moses;
@@ -74,7 +74,7 @@ public:
         const int bs = 1000000;
         const int s = ds+bs;
         const int check_count = 10000;
-        vector<field_set::spec> spec(ds, field_set::disc_spec(3));
+        std::vector<field_set::spec> spec(ds, field_set::disc_spec(3));
         spec.resize(s, field_set::disc_spec(2));
         field_set fs(spec.begin(), spec.end());
         

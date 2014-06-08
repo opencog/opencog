@@ -220,9 +220,9 @@ unsigned hill_climbing::operator()(deme_t& deme,
                     auto dst_from_center = [&](const instance& inst) {
                         return deme.fields().hamming_distance(inst, center_inst);
                     };
-                    vector<int> dsts;
-                    transform(deme_inst_from, deme.end_instances(),
-                              back_inserter(dsts), dst_from_center);
+                    std::vector<int> dsts;
+                    std::transform(deme_inst_from, deme.end_instances(),
+                                   back_inserter(dsts), dst_from_center);
                     auto pmm = boost::minmax_element(dsts.begin(), dsts.end());
                     nbh_dst << " from distance " << *pmm.first
                             << " to " << *pmm.second;

@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/scoring/boosting_cscore.h
+ * opencog/learning/moses/scoring/boosting_ascore.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
@@ -33,10 +33,10 @@
 namespace opencog { namespace moses {
 
 /**
- * Composite score calculated from the behavioral score, using boosting.
+ * Score calculated from the behavioral score, using boosting.
  *
  * The score is calculated as a weighted sum of the bscore over all samples:
- *      score = sum_x weight(x) * BScore(x) + penalty
+ *      score = sum_x weight(x) * BScore(x)
  *
  * Each element in the bscore typically corresponds to a sample in a
  * supervised training set, that is, a row of a table contianing the
@@ -44,30 +44,14 @@ namespace opencog { namespace moses {
  * standard AdaBoost-style algorithm.  See, for example
  * http://en.wikipedia.org/wiki/AdaBoost
  */
-class boosting_cscore : public cscore_base
+class boosting_ascore : public ascore_base
 {
 public:
-    boosting_cscore();
+    boosting_ascore();
 
-    composite_score operator()(const combo_tree& tr) const;
-
-    /// Returns the best score reachable for this problem. Used as
-    /// termination condition.
-    score_t best_possible_score() const;
-
-    /// Return the minimum value considered for improvement.
-    score_t min_improv() const;
-
-    // In case the fitness function can be sped-up when certain
-    // features are ignored. The features are indicated as set of
-    // indices (from 0).
-    void ignore_idxs(const std::set<arity_t>& idxs) const
-    {
-        _bscorer.ignore_idxs(idxs);
-    }
+    score_t operator()(const behavioral_score&) const;
 
 private:
-    const bscore_base& _bscorer;
     std::vector<double> _weights;
 };
 

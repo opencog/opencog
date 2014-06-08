@@ -220,8 +220,8 @@ std::ostream& field_set::ostream_field_set(std::ostream& out) const
     unsigned idx = 0;
     out << "fields = {" << endl;
 
-    vector<term_spec>::const_iterator tit = term().begin();
-    vector<term_spec>::const_iterator tend = term().end();
+    std::vector<term_spec>::const_iterator tit = term().begin();
+    std::vector<term_spec>::const_iterator tend = term().end();
     for (; tit != tend; tit++, idx++)
     {
         out << "\t{ idx=" << idx
@@ -231,8 +231,8 @@ std::ostream& field_set::ostream_field_set(std::ostream& out) const
             << "; }," << endl;
     }
 
-    vector<contin_spec>::const_iterator cit = contin().begin();
-    vector<contin_spec>::const_iterator cend = contin().end();
+    std::vector<contin_spec>::const_iterator cit = contin().begin();
+    std::vector<contin_spec>::const_iterator cend = contin().end();
     for (; cit != cend; cit++, idx++)
     {
         out << "\t{ idx=" << idx
@@ -244,8 +244,8 @@ std::ostream& field_set::ostream_field_set(std::ostream& out) const
             << "; }," << endl;
     }
 
-    vector<disc_spec>::const_iterator dit = disc_and_bit().begin();
-    vector<disc_spec>::const_iterator dend = disc_and_bit().end();
+    std::vector<disc_spec>::const_iterator dit = disc_and_bit().begin();
+    std::vector<disc_spec>::const_iterator dend = disc_and_bit().end();
     for (; dit != dend; dit++, idx++)
     {
         if (2 < dit->multy)

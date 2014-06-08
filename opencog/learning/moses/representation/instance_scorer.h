@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/scoring/precision_bscore.h
+ * opencog/learning/moses/representation/instance_scorer.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
@@ -25,11 +25,14 @@
 #ifndef _INSTANCE_SCORER_H
 #define _INSTANCE_SCORER_H
 
-#include "scoring_base.h"
+#include "instance.h"
+#include "field_set.h"
+#include "representation.h"
+#include "../scoring/behave_cscore.h"
 
 namespace opencog { namespace moses {
 
-struct iscorer_base : public unary_function<instance, composite_score>
+struct iscorer_base : public std::unary_function<instance, composite_score>
 {
     virtual composite_score operator()(const instance&) const = 0;
     virtual ~iscorer_base() {}
@@ -66,8 +69,9 @@ protected:
 
 struct complexity_based_scorer : public iscorer_base
 {
-    complexity_based_scorer(const cscore_base& s, representation& rep, bool reduce)
-        : _cscorer(s), _rep(rep), _reduce(reduce) {}
+    complexity_based_scorer(behave_cscore& cs,
+                            representation& rep, bool reduce)
+        : _cscorer(cs), _rep(rep), _reduce(reduce) {}
 
     composite_score operator()(const instance& inst) const
     {
@@ -78,8 +82,10 @@ struct complexity_based_scorer : public iscorer_base
 
         try {
             combo_tree tr = _rep.get_candidate(inst, _reduce);
-            return _cscorer(tr);
+            return _cscorer.get_cscore(tr);
         } catch (...) {
+// XXX FIXME, calling score_tree above does not throw the exception; this should be done
+// differntly, maybe call bcorer directly, then a.
             combo_tree raw_tr = _rep.get_candidate(inst, false);
             combo_tree red_tr = _rep.get_candidate(inst, true);
             logger().warn() << "The following instance could not be evaluated: "
@@ -91,7 +97,7 @@ struct complexity_based_scorer : public iscorer_base
     }
 
 protected:
-    const cscore_base& _cscorer;
+    behave_cscore& _cscorer;
     representation& _rep;
     bool _reduce; // whether the exemplar is reduced before being
                   // evaluated, this may be advantagous if Scoring is

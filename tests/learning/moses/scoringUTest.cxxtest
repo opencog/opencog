@@ -22,7 +22,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <opencog/learning/moses/scoring/scoring.h>
+#include <opencog/learning/moses/scoring/precision_bscore.h>
 #include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/table/table_io.h>
 

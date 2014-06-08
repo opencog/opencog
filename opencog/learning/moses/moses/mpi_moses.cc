@@ -310,7 +310,7 @@ void mpi_moses_worker(metapopulation& mp,
 
         // XXX TODO should probably fetch max_time from somewhere...
         time_t max_time = INT_MAX;
-        vector<unsigned> actl_evals = dex.optimize_demes(max_evals, max_time);
+        std::vector<unsigned> actl_evals = dex.optimize_demes(max_evals, max_time);
 
         mp.merge_demes(dex._demes, dex._reps, actl_evals);
         dex.free_demes();

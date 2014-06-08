@@ -10,7 +10,7 @@
 #include "../metapopulation/metapopulation.h"
 
 #include "../moses/moses_main.h"
-#include "../scoring/scoring.h"
+#include "../scoring/scoring_base.h"
 #include "../optimization/optimization.h"
 #include "../representation/representation.h"
 
@@ -62,16 +62,17 @@ int main(int argc, char** argv)
 
 
     // binary XOR task
-    ann_xor_cscore cscore;
     ann_xor_bscore bscore;
+    simple_ascore ascorer;
+    behave_cscore cscorer(bscore, ascorer);
 
     const reduct::rule* si = &(ann_reduction());
     if(!reduce)
         si = &(clean_reduction());
 
     univariate_optimization univ;
-    deme_expander dex(tt, *si, *si, cscore, univ);
-    metapopulation metapop(tr, cscore, bscore);
+    deme_expander dex(tt, *si, *si, cscorer, univ);
+    metapopulation metapop(tr, cscorer);
 
     boost::program_options::variables_map vm;
     jobs_t jobs;

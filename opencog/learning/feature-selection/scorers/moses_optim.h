@@ -26,11 +26,10 @@
 
 #include <opencog/util/numeric.h>
 
-#include <opencog/learning/moses/representation/field_set.h>
-#include <opencog/learning/moses/eda/eda.h>
-#include <opencog/learning/moses/moses/types.h>
-#include <opencog/learning/moses/scoring/scoring.h>
 #include <opencog/comboreduct/combo/common_def.h>
+#include <opencog/learning/moses/representation/field_set.h>
+#include <opencog/learning/moses/representation/instance_scorer.h>
+#include <opencog/learning/moses/moses/types.h>
 
 namespace opencog {
 

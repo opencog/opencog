@@ -1,11 +1,12 @@
 /*
- * opencog/modes/eda/eda.h
+ * opencog/learning/moses/scoring/boosting_ascore.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2012,2013 Poulin Holdings LLC
+ * Copyright (C) 2014 Aidyia Limited
  * All Rights Reserved
  *
- * Written by Moshe Looks
- *            Predrag Janicic
+ * Written by Moshe Looks, Nil Geisweiller, Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,28 +23,17 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _EDA_EDA_H
-#define _EDA_EDA_H
 
-#include "using.h"
-#include <opencog/util/tree.h>
+#include "boosting_ascore.h"
 
-namespace opencog {
-namespace moses {
+namespace opencog { namespace moses {
 
-// Storage types for packed populations.
-typedef unsigned long int packed_t;
-#define bits_per_packed_t (8*sizeof(packed_t))
+score_t boosting_ascore::operator()(const behavioral_score& bs) const
+{
+    score_t res = boost::accumulate(bs, 0.0);
+    return res;
+}
 
-// Value types accessing unpacked instances.
-typedef double       contin_t;  // continuous
-typedef unsigned     disc_t;    // discrete
-typedef std::string  term_t;
-typedef tree<term_t> term_tree;
-
-typedef std::vector<packed_t> instance;
 
 } // ~namespace moses
 } // ~namespace opencog
-
-#endif

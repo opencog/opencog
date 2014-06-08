@@ -32,7 +32,7 @@
 #include "../representation/representation.h"
 #include "../optimization/optimization.h"
 #include "../moses/moses_main.h"
-#include "../scoring/scoring.h"
+#include "../scoring/scoring_base.h"
 
 #include "pole_scoring.h"
 
@@ -81,12 +81,13 @@ int main(int argc, char** argv)
     if (!reduce)
         si = &(clean_reduction());
     
-    ann_pole2_cscore p2_cscore;
     ann_pole2_bscore p2_bscore; 
+    simple_ascore ascorer;
+    behave_cscore cscorer(p2_bscore, ascorer);
 
     univariate_optimization univ;
-    deme_expander dex(tt, *si, *si, p2_cscore, univ);
-    metapopulation metapop_pole2(tr, p2_cscore, p2_bscore);
+    deme_expander dex(tt, *si, *si, cscorer, univ);
+    metapopulation metapop_pole2(tr, cscorer);
 
     moses_parameters pa;
     moses_statistics st;

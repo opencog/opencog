@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/eda/using.h
+ * opencog/learning/moses/representation/scored_instance.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -21,49 +21,35 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _EDA_USING_H
-#define _EDA_USING_H
+#ifndef _SCORED_INSTANCE_H
+#define _SCORED_INSTANCE_H
 
-#include <boost/bind.hpp>
-#include <boost/iterator/counting_iterator.hpp>
-#include <boost/iterator/transform_iterator.hpp>
-#include <boost/utility/result_of.hpp>
-#include <boost/next_prior.hpp>
-#include <boost/type_traits.hpp>
-
-#include <vector>
-#include <algorithm>
-#include <utility>
-
+#include "instance.h"
 #include <opencog/util/functional.h>
-#include <opencog/util/numeric.h>
 
-/// anything that gets imported into the eda namespace with a using
-/// directive should go here
 namespace opencog { 
 namespace moses {
-using boost::bind;
-using boost::ref;
-using boost::make_counting_iterator;
-using boost::make_transform_iterator;
-using boost::result_of;
-using boost::next;
-using boost::prior;
 
-using std::unary_function;
-using std::binary_function;
+template<typename ScoreT>
+struct scored_instance : public tagged_item<instance, ScoreT>
+{
+    typedef tagged_item<instance, ScoreT> super;
 
-using std::vector;
+    scored_instance(const instance& i, const ScoreT& s) : super(i, s) { }
+    scored_instance(const instance& i) : super(i) { }
+    scored_instance() { }
+    template<class T1, class T2>
+    scored_instance(const std::pair<T1, T2>& p) : super(p) { }
 
-using std::distance;
-using std::copy;
-using std::transform;
-using std::nth_element;
-using std::accumulate;
-using std::adjacent_find;
-
-using std::pair;
-using std::make_pair;
+    bool operator<(const scored_instance& other) const
+    {
+        return this->second < other.second;
+    }
+    bool operator>(const scored_instance& other) const
+    {
+        return this->second > other.second;
+    }
+};
 
 } // ~namespace moses
 } // ~namespace opencog

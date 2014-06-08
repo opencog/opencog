@@ -23,7 +23,12 @@
 #ifndef _OPENCOG_DEME_EXPANDER_H
 #define _OPENCOG_DEME_EXPANDER_H
 
+#include <vector>
+
+#include <boost/ptr_container/ptr_vector.hpp>
+
 #include "../optimization/optimization.h"
+#include "../scoring/behave_cscore.h"
 #include "deme_params.h"
 
 namespace opencog {
@@ -34,7 +39,7 @@ struct deme_expander
     deme_expander(const type_tree& type_signature,
                   const reduct::rule& si_ca,
                   const reduct::rule& si_kb,
-                  const cscore_base& sc,
+                  behave_cscore& sc,
                   optimizer_base& opt,
                   const deme_parameters& pa = deme_parameters()) :
         _optimize(opt),
@@ -65,7 +70,7 @@ struct deme_expander
      * @return return the number of evaluations actually performed per
      *         deme (in case of breadth-first search).
      */
-    vector<unsigned> optimize_demes(int max_evals, time_t max_time);
+    std::vector<unsigned> optimize_demes(int max_evals, time_t max_time);
 
     void free_demes();
 
@@ -75,10 +80,6 @@ struct deme_expander
     optimizer_base &_optimize;
 
 protected:
-    /**
-     * 
-     */
-    
     /**
      * Takes a feature set, a header of the input features and return
      * a vector of the names of the featire set.
@@ -103,7 +104,7 @@ protected:
     const combo::type_tree& _type_sig;    // type signature of the exemplar
     const reduct::rule& simplify_candidate; // to simplify candidates
     const reduct::rule& simplify_knob_building; // during knob building
-    const cscore_base& _cscorer; // composite score
+    behave_cscore& _cscorer; // composite score
 
     // This is used to keep track of the ignored indices for
     // optimizing evaluation (in case of feature selection) and

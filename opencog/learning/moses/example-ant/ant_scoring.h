@@ -30,8 +30,7 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
-#include "../moses/types.h"
-#include "../scoring/scoring.h"
+#include "../scoring/scoring_base.h"
 
 using namespace ant_combo;
 using namespace opencog::moses;
@@ -77,7 +76,7 @@ static const char init_trail[ANT_Y][ANT_X+1] =
     "                                "
 };
 
-struct AntFitnessFunction : unary_function<combo_tree, score_t>
+struct AntFitnessFunction : std::unary_function<combo_tree, score_t>
 {
     typedef combo_tree::iterator pre_it;
     typedef combo_tree::sibling_iterator sib_it;

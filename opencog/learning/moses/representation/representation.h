@@ -25,9 +25,6 @@
 #ifndef _MOSES_REPRESENTATION_H
 #define _MOSES_REPRESENTATION_H
 
-#include <boost/thread.hpp>
-#include <boost/utility.hpp>
-
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/type_checker/type_tree.h>
 

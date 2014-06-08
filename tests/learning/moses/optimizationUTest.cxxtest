@@ -28,7 +28,7 @@
 #include <opencog/util/mt19937ar.h>
 
 #include <opencog/learning/moses/eda/initialization.h>
-#include <opencog/learning/moses/scoring/scoring.h>
+#include <opencog/learning/moses/scoring/scoring_base.h>
 #include <opencog/learning/moses/moses/types.h>
 #include <opencog/learning/moses/optimization/hill-climbing.h>
 #include <opencog/learning/moses/optimization/optimization.h>

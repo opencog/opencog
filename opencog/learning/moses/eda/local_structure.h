@@ -24,6 +24,8 @@
 #ifndef _EDA_LOCAL_STRUCTURE_H
 #define _EDA_LOCAL_STRUCTURE_H
 
+#include <vector>
+
 #include <opencog/util/digraph.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/tree.h>
@@ -281,8 +283,8 @@ void local_structure_probs_learning::operator()(const field_set& fs,
 {
     // This is a binary for_each, defined in util/algorithms.h
     for_each(dst.begin(), dst.end(), make_counting_iterator(0),
-             bind(&local_structure_probs_learning::rec_learn<It>,
-                  this, ref(fs),
+             boost::bind(&local_structure_probs_learning::rec_learn<It>,
+                  this, boost::ref(fs),
                   from, to, _2, bind(&dtree::begin, _1)));
 }
 
@@ -315,8 +317,8 @@ void local_structure_probs_learning::rec_learn(const field_set& fs,
                         raw_arity, ++pivots.begin());
         for_each(pivots.begin(), --pivots.end(), ++pivots.begin(),
                  make_counting_iterator(dtr.begin()),
-                 bind(&local_structure_probs_learning::rec_learn<It>, this,
-                      ref(fs), _1, _2, idx, _3));
+                 boost::bind(&local_structure_probs_learning::rec_learn<It>, this,
+                      boost::ref(fs), _1, _2, idx, _3));
     }
 }
 

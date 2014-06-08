@@ -30,7 +30,7 @@
 #include <opencog/learning/moses/metapopulation/metapopulation.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/learning/moses/optimization/hill-climbing.h>
-#include <opencog/learning/moses/scoring/scoring.h>
+#include <opencog/learning/moses/scoring/scoring_base.h>
 
 #include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>
 
@@ -79,8 +79,9 @@ moses_learning::moses_learning(int nepc,
     for (combo_tree_ns_set_it i = actions.begin(); i != actions.end(); ++i)
         std::cout << "action: " << *i << std::endl;
 
-    cscore = new petaverse_cscore(_fitness_estimator);
+    ascore = new simple_ascore();
     bscore = new petaverse_bscore(_fitness_estimator);
+    cscore = new behave_cscore(*bscore, *ascore);
     climber = new hill_climbing;
     _demeparms = new deme_parameters;
     _metaparms = new metapop_parameters;
@@ -103,6 +104,7 @@ moses_learning::~moses_learning()
 {
     delete cscore;
     delete bscore;
+    delete ascore;
     delete climber;
     if (_dex)
         delete _dex;
@@ -164,7 +166,7 @@ void moses_learning::operator()()
         _dex = new deme_expander(tt, action_reduction(),
              action_reduction(), *cscore, *climber, *_demeparms);
         _metapop = new metapopulation (_center, 
-             *cscore, *bscore, *_metaparms);
+             *cscore, *_metaparms);
 
         _hcState = HC_BUILD_CANDIDATES;
         break;
@@ -331,9 +333,11 @@ void moses_learning::reset_estimator()
 
     delete cscore;
     delete bscore;
+    delete ascore;
 
-    cscore = new petaverse_cscore(_fitness_estimator);
+    ascore = new simple_ascore();
     bscore = new petaverse_bscore(_fitness_estimator);
+    cscore = new behave_cscore(*bscore, *ascore); 
 
     //we get restarted from the best program so far
     _center = (_best_program.empty() ? _best_program_estimated : _best_program);

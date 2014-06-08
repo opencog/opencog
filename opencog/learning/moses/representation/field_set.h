@@ -25,15 +25,18 @@
 #define _REP_FIELD_SET_H
 
 #include <map>
+
+#include <boost/operators.hpp>  // for random_access_iterator_helper
 #include <boost/variant.hpp>
 
-#include <opencog/util/RandGen.h>
-#include <opencog/util/mt19937ar.h>
 #include <opencog/util/dorepeat.h>
-#include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/mt19937ar.h>
+#include <opencog/util/numeric.h>
+#include <opencog/util/oc_assert.h>
+#include <opencog/util/RandGen.h>
 
-#include "../eda/eda.h"
+#include "instance.h"
 
 namespace opencog {
 namespace moses {
@@ -393,15 +396,15 @@ struct field_set
     // Return vector of discrete specs. This vector includes the single
     // bit (boolean) specs, which are at the end of the array, thus the
     // name "disc and bit".
-    const vector<disc_spec>& disc_and_bit() const
+    const std::vector<disc_spec>& disc_and_bit() const
     {
         return _disc;
     }
-    const vector<contin_spec>& contin() const
+    const std::vector<contin_spec>& contin() const
     {
         return _contin;
     }
-    const vector<term_spec>& term() const
+    const std::vector<term_spec>& term() const
     {
         return _term;
     }
@@ -593,7 +596,7 @@ struct field_set
         // the cache avoids.
 #ifdef USE_UNCACHED_VERSION
         size_t raw_idx = begin_contin_raw_idx();
-        for (vector<contin_spec>::const_iterator it = _contin.begin();
+        for (std::vector<contin_spec>::const_iterator it = _contin.begin();
                 it != _contin.begin() + spec_idx; ++it)
             raw_idx += it->depth;
         return raw_idx;
@@ -626,7 +629,7 @@ struct field_set
     {
         // @todo: compute at the start in _fields - could be faster..
         size_t raw_idx = 0;
-        for (vector<term_spec>::const_iterator it = _term.begin();
+        for (std::vector<term_spec>::const_iterator it = _term.begin();
                 it != _term.begin() + idx; ++it)
             raw_idx += it->depth;
         return raw_idx;
@@ -697,15 +700,15 @@ protected:
     // begin_contin_fields() - end_contin_fields()
     // begin_disc_fields() - end_disc_fields()
     // begin_bit_fields() - end_bit_fields()
-    vector<field> _fields;
-    vector<term_spec> _term;
-    vector<contin_spec> _contin;
-    vector<disc_spec> _disc; // Includes bits.
+    std::vector<field> _fields;
+    std::vector<term_spec> _term;
+    std::vector<contin_spec> _contin;
+    std::vector<disc_spec> _disc; // Includes bits.
     size_t _nbool; // the number of disc_spec that requires only 1 bit to pack
 
     // Cache of offsets, meant to improve performance of the
     // contin_to_raw_idx() lookup in get_contin().
-    vector<size_t> _contin_raw_offsets;
+    std::vector<size_t> _contin_raw_offsets;
 
     // Cached values for start location of the continuous and discrete
     // fields in the _fields array.  We don't need to cache the term

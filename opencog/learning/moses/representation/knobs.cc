@@ -21,6 +21,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <opencog/comboreduct/reduct/reduct.h>
+
 #include "knobs.h"
 
 namespace opencog { namespace moses {
@@ -253,7 +256,7 @@ std::string logical_subtree_knob::posStr(int pos, bool tag_current) const
 /////////////////////////
 
 action_subtree_knob::action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
-                                         const vector<combo_tree>& perms)
+                                         const std::vector<combo_tree>& perms)
     : discrete_knob<MAX_PERM_ACTIONS>(tr), _perms(perms) {
 
     OC_ASSERT((int)_perms.size() < MAX_PERM_ACTIONS, "Too many perms.");

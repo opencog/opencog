@@ -25,9 +25,14 @@
 #ifndef _DISCRIMINATING_BSCORE_H
 #define _DISCRIMINATING_BSCORE_H
 
+#include <opencog/comboreduct/table/table.h>
+
 #include "scoring_base.h"
 
 namespace opencog { namespace moses {
+
+using combo::CTable;
+using combo::type_node;
 
 /// Perform summations commonly used in binary discriminators.
 /// These may be used to obtain precision, recall, specificty,
