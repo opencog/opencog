@@ -379,3 +379,274 @@
                 )
         )
 )
+;For sentences SVO and SVP rules applied in the first part of RelEx2logic 
+;Example: "The restaurant which serves national food is very famous
+;RelEx2Logic representaion:
+;(InheritanceLink
+;   (SatisfyingSetLink (VariableNode "$X")
+;       (InheritanceLink(VariableNode "$X")(ConceptNode "restaurant"))
+;       (EvaluationLink
+;           (PredicateNode "serves")
+;           (ListLink
+;               (VariableNode "$X")
+;               (ConceptNode "food"))))
+;   (ConceptNode "famous"))
+;$A=restaurant,$B=famous,$C=serve and $D=food
+;
+(define adjective-clause-rule-1 
+    (BindLink
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$A")
+                (VariableTypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$B")
+                (VariableTypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$C")
+                (VariableTypeNode "PredicateNode"))
+            (TypedVariableLink
+                (VariableNode "$D")
+                (VariableTypeNode "ConceptNode")))
+        (ImplicationLink
+            (AndLink
+                (InheritanceLink (VariableNode "$A")(VariableNode "$B"))
+                (EvaluationLink (VariableNode "$C")(ListLink(VariableNode "$A")(VariableNode "$D")))
+                (EvaluationLink (PredicateNode "whichmarker") (ListLink (VariableNode "$A")(VariableNode "$C"))))
+            (InheritanceLink
+                (SatisfyingSetLink (VariableNode "$X")
+                (InheritanceLink (VariableNode "$X") (VariableNode "$A"))
+                (EvaluationLink (VariableNode "$C") (ListLink (VariableNode "$X") (VariableNode "$D"))))
+            (VariableNode "$B")))
+    )
+)
+
+;For sentences SVO rule applied twice in the first part of RelEx2logic 
+;Example: "I like the trees which have coffee beans." 
+;RelEx2Logic representaion:
+;(EvaluationLink
+;   (PredicateNode "like")
+;       (ListLink
+;           (ConceptNode "I")
+;           (SatisfyingSetLink (VariableNode "$X")
+;               (InheritanceLink (VariableNode "$X")(ConceptNode "trees"))
+;               (EvaluationLink
+;                   (PredicateNode "have")
+;                       (ListLink
+;                           (VariableNode "$X")
+;                           (ConceptNode "beans")
+;)))))
+;$A=like,$B=i,$C=tree,$D=have and $E=been
+(define adjective-clause-rule-2
+    (BindLink
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$A")
+                (VariableTypeNode "PredicateNode"))
+            (TypedVariableLink
+                (VariableNode "$B")
+                (VariableTypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$C")
+                (VariableTypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$D")
+                (VariableTypeNode "PredicateNode"))
+            (TypedVariableLink
+                (VariableNode "$E")
+                (VariableTypeNode "ConceptNode")))
+        (ImplicationLink
+            (AndLink
+                (EvaluationLink (VariableNode "$A")(ListLink(VariableNode "$B")(VariableNode "$C")))
+                (EvaluationLink (VariableNode "$D")(ListLink(VariableNode "$C")(VariableNode "$E")))
+                (EvaluationLink (PredicateNode "whichmarker") (ListLink (VariableNode "$C")(VariableNode "$D"))))
+            (EvaluationLink
+                (VariableNode "$A")
+                (ListLink (VariableNode "$B")
+                    (SatisfyingSetLink (VariableNode "$X")
+                        (InheritanceLink (VariableNode "$X") (VariableNode "$C"))
+                        (EvaluationLink (VariableNode "$D") (ListLink (VariableNode "$X") (VariableNode "$E"))))))
+)))
+;For sentences SVO and SVIO rule applied in the first part of RelEx2logic 
+;Example:  "The book which you give me last week is interesting."
+;RelEx2Logic representaion:
+;(InheritanceLink
+;      (SatisfyingSetLink
+;         (VariableNode "$X")
+;         (InheritanceLink (VariableNode "$X")(ConceptNode "book"))
+;         (EvaluationLink
+;            (PredicateNode "give")
+;            (ListLink
+;               (ConceptNode "you")
+;               (ConceptNode "me")
+;               (VariableNode "$x")))
+;      (ConceptNode "interesting"))
+;$A = book ,$B = interesting,$C = give, $D = you and $E = me
+(define adjective-clause-rule-3
+    (BindLink
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$A")
+                (VariableTypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$B")
+                (VariableTypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$C")
+                (VariableTypeNode "PredicateNode"))
+            (TypedVariableLink
+                (VariableNode "$D")
+                (VariableTypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$E")
+                (VariableTypeNode "ConceptNode")))
+        (ImplicationLink
+            (AndLink
+                (InheritanceLink (VariableNode "$A")(VariableNode "$B"))
+                (EvaluationLink (VariableNode "$C")(ListLink(VariableNode "$D")(VariableNode "$E")(VariableNode "$A")))
+                (EvaluationLink (PredicateNode "whichmarker") (ListLink (VariableNode "$A")(VariableNode "$C"))))
+            (InheritanceLink
+            (SatisfyingSetLink (VariableNode "$X")
+                (InheritanceLink (VariableNode "$X") (VariableNode "$A"))
+                (EvaluationLink (VariableNode "$C") (ListLink (VariableNode "$D") (VariableNode "$E")(VariableNode "$x"))))
+            (VariableNode "$B")))
+))
+;For sentences SVO and passive rule applied in the first part of RelEx2logic 
+; Example:  "They ate a special curry which was recommended by the restaurant owner."
+;RelEx2Logic representaion:
+;(EvaluationLink
+;      (PredicateNode "ate")
+;      (ListLink
+;         (ConceptNode "they")
+;         (SatisfyingSetLink (VariableNode "$X")
+;            (InheritanceLink (VariableNode "$X")(ConceptNode "curry"))
+;            (EvaluationLink
+;               (PredicateNode "recommended")
+;               (ListLink
+;                  (ConceptNode "owner")
+;                  (VariableNode "$X")
+; )))))
+;$A = ate,$B = they,$C = curry,$D = recommend and $E = owner
+(define adjective-clause-rule-4
+    (BindLink
+         (ListLink
+            (TypedVariableLink
+                (VariableNode "$A")
+                (VariableTypeNode "PredicateNode"))
+            (TypedVariableLink
+                (VariableNode "$B")
+                (VariableTypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$C")
+                (VariableTypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$D")
+                (VariableTypeNode "PredicateNode"))
+            (TypedVariableLink
+                (VariableNode "$E")
+                (VariableTypeNode "ConceptNode")))
+        (ImplicationLink
+            (AndLink
+                (EvaluationLink (VariableNode "$A")(ListLink(VariableNode "$B")(VariableNode "$C")))
+                (EvaluationLink (VariableNode "$D")(ListLink(VariableNode "$E")(VariableNode "$C")))
+                (EvaluationLink (PredicateNode "whichmarker") (ListLink (VariableNode "$C")(VariableNode "$D"))))
+            (EvaluationLink 
+                (VariableNode "$A")
+                (ListLink (VariableNode "$B")
+                    (SatisfyingSetLink (VariableNode "$X")
+                        (InheritanceLink (VariableNode "$X") (VariableNode "$C"))
+                        (EvaluationLink (VariableNode "$D") (ListLink (VariableNode "$E") (VariableNode "$X")))
+                    )))
+)))
+;For sentences sv and be-inheritance-rule applied in the first part of RelEx2logic 
+;Example:  "The woman who lives next door is a registered nurse."
+;RelEx2Logic representaion:
+;  (InheritanceLink 
+;      (SatisfyingSetLink 
+;               (VariableNode "$X") 
+;               (InheritanceLink (VariableNode "$X") (VariableNode "woman")) 
+;               (EvaluationLink (VariableNode "live") (ListLink (VariableNode "$X")))) 
+;      (VariableNode "nurse"))
+;$A -> woman , $B -> nurse and $C -> live
+(define adjective-clause-rule-5
+    (BindLink
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$A")
+                (VariableTypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$B")
+                (VariableTypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$C")
+                (VariableTypeNode "PredicateNode"))
+            (TypedVariableLink
+                (VariableNode "$D")
+                (VariableTypeNode "ConceptNode")))
+        (ImplicationLink
+            (AndLink
+                (InheritanceLink (VariableNode "$A")(VariableNode "$B"))
+                (EvaluationLink (VariableNode "$C")(ListLink(VariableNode "$A")))
+                (EvaluationLink (PredicateNode "whomarker") (ListLink (VariableNode "$A")(VariableNode "$C"))))
+            (InheritanceLink
+                (SatisfyingSetLink (VariableNode "$X")
+                    (InheritanceLink (VariableNode "$X") (VariableNode "$A"))
+                    (EvaluationLink (VariableNode "$C") (ListLink (VariableNode "$X"))))
+            (VariableNode "$B")))
+))
+;For sentences to-do-rule1 and svp applied in the first part of RelEx2logic 
+;Example:  "A player who is injured has to leave the field." 
+;RelEx2Logic representaion:
+;(EvaluationLink
+;   (VariableNode "has")
+;   (ListLink
+;      (SatisfyingSetLink 
+;        (VariableNode "$X") 
+;        (InheritanceLink (VariableNode "$X") (VariableNode "player"))
+;        (InheritanceLink (VariableNode "$X") (VariableNode "injured"))) 
+;      (EvaluationLink
+;         (VariableNode "leave")
+;         (ListLink
+;            (SatisfyingSetLink 
+;                (VariableNode "$X") 
+;                (InheritanceLink (VariableNode "$X") (VariableNode "player"))
+;                (InheritanceLink (VariableNode "$X") (VariableNode "injured"))) 
+;            (VariableNode "field")))))
+;$A -> player,$B -> injured,$C -> has,$D -> leave and $E -> field
+(define adjective-clause-rule-6
+     (BindLink
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$A")
+                (VariableTypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$B")
+                (VariableTypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$C")
+                (VariableTypeNode "PredicateNode"))
+            (TypedVariableLink
+                (VariableNode "$D")
+                (VariableTypeNode "PredicateNode"))
+            (TypedVariableLink
+                (VariableNode "$E")
+                (VariableTypeNode "ConceptNode")))
+        (ImplicationLink
+            (AndLink
+                (InheritanceLink (VariableNode "$A")(VariableNode "$B"))
+                (EvaluationLink (VariableNode "$C")(ListLink(VariableNode "$A")(EvaluationLink(VariableNode "$D")(ListLink(VariableNode "$A")(VariableNode "$E")))))
+                (EvaluationLink (PredicateNode "whomarker") (ListLink (VariableNode "$A")(VariableNode "$B"))))
+            (EvaluationLink
+                (VariableNode "$C")
+                (ListLink
+                    (SatisfyingSetLink (VariableNode "$X")
+                        (InheritanceLink (VariableNode "$X") (VariableNode "$A"))
+                        (InheritanceLink (VariableNode "$X") (VariableNode "$B")))
+                    (EvaluationLink
+                        (VariableNode "$D")
+                        (ListLink
+                            (SatisfyingSetLink (VariableNode "$X") 
+                                (InheritanceLink (VariableNode "$X") (VariableNode "$A"))
+                                (InheritanceLink (VariableNode "$X") (VariableNode "$B")))
+                            (VariableNode "$E")))
+)))))
