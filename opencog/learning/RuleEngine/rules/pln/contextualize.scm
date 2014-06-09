@@ -12,15 +12,26 @@
 ;    R A B
 ;----------------------------------------------------------------------
 
-; Example: "David is competent doing in mathematics. He isn't competent in
-; cooking."
+; This rule can be used to deal with inheritance relationships that apply
+; only in certain circumstances and to differentiate between those cases.
+; Example: "Ben is competent in the domain of mathematics.
+;           Ben is not competent in the domain of juggling."
 ; (InheritanceLink
 ;   (AndLink
-;       (ConceptNode "doing_mathematics")
-;       (ConceptNode "Ben"))
+;       (ConceptNode "Ben")
+;       (ConceptNode "doing_mathematics"))
+;   (ConceptNode "competent"))
+;
+; (InheritanceLink
 ;   (AndLink
-;       (ConceptNode "doing_mathematics")
+;       (ConceptNode "Ben")
+;       (ConceptNode "juggling"))
+;   (NotLink
 ;       (ConceptNode "competent")))
+;
+; Instances of Ben that are doing mathematics are competent, while
+; instances of Ben that are juggling are incompetent. An AndLink 
+; between two concepts designates the intersection of these concepts.
 (define pln-rule-contextualize-inheritance
     (BindLink
         (ListLink
@@ -59,6 +70,8 @@
 
 
 ; In an EvaluationLink, the PredicateNode is not 'andified'
+; This rule is used specifically to deal with evaluations
+; that differ between different contexts.
 ; Example: "In the context of the earth, the sky is blue.
 ; In the context of the earth, the sky is black."
 (define pln-rule-contextualize-evaluation
@@ -105,6 +118,12 @@
 ;    C
 ;    A
 ;----------------------------------------------------------------------
+
+; This rule is used to transform a SubsetLink directly into a ContextLink.
+; This is possible due to ConceptNode "X" (stv) being equivalent to
+; (SubsetLink (stv)
+;   (ConceptNode "Universe")
+;   (ConceptNode "X"))
 ; Example: "A bulldog is a dog. Bulldogs appear in the context of dogs."
 ; (SubsetLink
 ;   (ConceptNode "dog")
