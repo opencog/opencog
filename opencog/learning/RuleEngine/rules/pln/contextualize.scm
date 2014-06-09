@@ -141,19 +141,15 @@
             (SubsetLink
                 (VariableNode "$C")
                 (VariableNode "$A"))
-            (ListLink
-                (ContextLink
-                    (VariableNode "$C")
-                    (VariableNode "$A"))
-                (ExecutionLink
-                    (GroundedSchemaNode "scm:pln-formula-context")
-                    (ListLink
-                        (ContextLink
-                            (VariableNode "$C")
-                            (VariableNode "$A"))
-                        (SubsetLink
-                            (VariableNode "$C")
-                            (VariableNode "$A"))))))))
+           (ExecutionLink
+               (GroundedSchemaNode "scm:pln-formula-context")
+               (ListLink
+                   (ContextLink
+                       (VariableNode "$C")
+                       (VariableNode "$A"))
+                   (SubsetLink
+                       (VariableNode "$C")
+                       (VariableNode "$A")))))))
 
 
 (define (pln-formula-context Context Relation)
