@@ -9,11 +9,11 @@ the same directory as this README.
 Docker image structure:
 
     ├─opencog-deps
-      ├─opencog-build (in directory manualbuild; for a dev environment)
+      ├─opencog-dev (for a dev environment)
       ├─opencog-buildslave
       ├─opencog-distcc
       ├─opencog-embodiment
 
-Using bind mounts is a hacky solution to passing the opencog source tree
-to each docker build. Run bindmounts.sh before running 'docker build' and
-bindumount.sh to clean up afterward.
+Using bind mounts (some containers currently use them) is a hacky solution
+to passing the opencog source tree to each docker build. Run bindmounts.sh
+before running 'docker build' and bindumount.sh to clean up afterward.
