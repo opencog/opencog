@@ -414,15 +414,21 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
     foreach (Handle link, inputLinks)
         extractAllNodesInLink(link, valueToVarMap);
 
-    int n_max = valueToVarMap.size();
-    bool* indexes = new bool[n_max];
+    // Generate all the possible combinations of all the nodes: all patterns including the 1 ~ n_max variables
+    // If there are too many variables in a pattern, it doesn't make much sense, so we litmit the max number of variables to half of the node number
 
-    OC_ASSERT( (n_max > 1),
+    OC_ASSERT( (valueToVarMap.size() > 1),
               "PatternMiner::extractAllPossiblePatternsFromInputLinks: this group of links only has one node: %s!\n",
                atomSpace->atomAsString(inputLinks[0]).c_str() );
 
-    // Generate all the possible combinations of all the nodes: all patterns including 1 ~ (valueToVarMap.size() - 1) variables
-    for (int var_num = 1; var_num < n_max; ++ var_num)
+    int n_max = valueToVarMap.size();
+    int n_limit= valueToVarMap.size()/2.0f;
+    n_limit ++;
+
+    bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const
+
+    // var_num is the number of variables
+    for (int var_num = 1;var_num < n_limit; ++ var_num)
     {
         // Use the binary method to generate all combinations:
 
@@ -438,11 +444,12 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
             // construct the pattern for this combination in the PatternMining Atomspace
             // generate the valueToVarMap for this pattern of this combination
             map<Handle,Handle>::iterator iter;
+
             map<Handle,Handle> patternVarMap;
             unsigned int index = 0;
             for (iter = valueToVarMap.begin(); iter != valueToVarMap.end(); ++ iter)
             {
-                if (indexes[index])
+                if (indexes[index]) // this is considered as a const, add it into the variable to value map
                     patternVarMap.insert(std::pair<Handle,Handle>(iter->first, iter->second));
 
                 index ++;
