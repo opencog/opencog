@@ -549,6 +549,16 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		// smallest incoming set.  That is because the very next thing that
 		// we do will be to iterate over the incoming set of "pursue" ... so
 		// it could be a huge pay-off to minimize this.
+		//
+		// In particular, the "thinnest" one is probably the one with the
+		// fewest ungrounded variables in it. Thus, if there is just one
+		// variable that needs to be grounded, then this can be done in 
+		// direct fashion; it resembles the concept of "unit propagation"
+		// in the DPLL algorithm.
+		//
+		// If there are two ungrounded variables in a clause, then the
+		// "thickness" is the *product* of the sizes of the two incoming
+		// sets. Thus, the fewer ungrounded variables, the better.
 		if (solved && unsolved) break;
 	}
 

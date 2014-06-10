@@ -530,6 +530,9 @@ TODO
    in them, ground that, and propagate.  Not sure, I think this could
    should improve run-time.  Perhaps there are other ideas to steal,
    e.g. from zChaff? 
+   
+   Anyway, the next clause to be selected is chosen by 
+   get_next_untried_clause(); there is a XXX note in there about this.
 
  * GreaterThanLink is not yet done/working.  Its harder than I thought.
 
