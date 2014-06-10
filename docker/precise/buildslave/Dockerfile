@@ -8,9 +8,24 @@ MAINTAINER David Hart "dhart@opencog.org"
 
 RUN echo "deb http://hk.archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list && \
     echo "deb http://hk.archive.ubuntu.com/ubuntu precise-updates main universe" >> /etc/apt/sources.list && \
-    DEBIAN_FRONTEND=noninteractive apt-get -y update && \
-    DEBIAN_FRONTEND=noninteractive apt-get -y install python-software-properties \  
-                                              wget unzip git ssh pwgen sudo less vim
+    DEBIAN_FRONTEND=noninteractive apt-get update --assume-yes && \
+    DEBIAN_FRONTEND=noninteractive apt-get install \
+                                                   python-software-properties \
+                                                   locales \
+                                                   sudo \
+                                                   wget \
+                                                   git \
+                                                   unzip \
+                                                   less \
+                                                   vim \
+                                                   byobu \
+                                                   mosh \
+                                           --assume-yes
+
+RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
 # ocpkg tool to install repositories and dependencies
 ADD https://raw.githubusercontent.com/opencog/ocpkg/master/ocpkg /octool
