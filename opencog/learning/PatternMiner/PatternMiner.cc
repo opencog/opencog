@@ -681,18 +681,18 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     foreach (Handle listH , resultSet)
     {
         HNode->instances.push_back(originalAtomSpace->getOutgoing(listH));
-        originalAtomSpace->deleteAtom(listH);
+        originalAtomSpace->removeAtom(listH);
     }
 
     foreach (Handle toDelh, linksWillBeDel)
     {
-        originalAtomSpace->deleteAtom(toDelh);
+        originalAtomSpace->removeAtom(toDelh);
     }
 
-    originalAtomSpace->deleteAtom(hBindLink);
-    originalAtomSpace->deleteAtom(hAndLink);
-    originalAtomSpace->deleteAtom(hResultListLink);
-    originalAtomSpace->deleteAtom(hVariablesListLink);
+    originalAtomSpace->removeAtom(hBindLink);
+    originalAtomSpace->removeAtom(hAndLink);
+    originalAtomSpace->removeAtom(hResultListLink);
+    originalAtomSpace->removeAtom(hVariablesListLink);
 
 
 
@@ -713,7 +713,7 @@ void PatternMiner::removeLinkAndItsAllSubLinks(AtomSpace* _atomspace, Handle lin
 
         }
     }
-    _atomspace->deleteAtom(link);
+    _atomspace->removeAtom(link);
 
 }
 
