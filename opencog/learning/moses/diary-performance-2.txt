@@ -223,9 +223,9 @@ Scoring Requirements:
    bonly one table.
 
 Solution:
--- remove multibscore
+-- remove multibscore (done)
 -- provide a utility for #2 that assembles a composite score from the 
-   parts, and can be queried for the scalar score.
+   parts, and can be queried for the scalar score. Done: its behave_cscore.
 
 
 

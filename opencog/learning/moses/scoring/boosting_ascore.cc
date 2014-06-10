@@ -1,12 +1,10 @@
 /*
  * opencog/learning/moses/scoring/boosting_ascore.cc
  *
- * Copyright (C) 2002-2008 Novamente LLC
- * Copyright (C) 2012,2013 Poulin Holdings LLC
  * Copyright (C) 2014 Aidyia Limited
  * All Rights Reserved
  *
- * Written by Moshe Looks, Nil Geisweiller, Linas Vepstas
+ * Written by Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -28,9 +26,21 @@
 
 namespace opencog { namespace moses {
 
+boosting_ascore::boosting_ascore(size_t sz)
+{
+    double norm = 1.0 / (double) sz;
+    _weights = std::vector<double>(sz, norm);
+    _size = sz;
+}
+
 score_t boosting_ascore::operator()(const behavioral_score& bs) const
 {
-    score_t res = boost::accumulate(bs, 0.0);
+    OC_ASSERT(bs.size() == _size, "Unexpected behavioral score size");
+
+    score_t res = 0.0;
+    for (size_t i=0; i<_size; i++) {
+        res += _weights[i] * bs[i];
+    }
     return res;
 }
 
