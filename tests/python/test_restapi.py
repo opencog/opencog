@@ -322,3 +322,26 @@ class TestRESTApi():
                                        'atoms?filterby=stirange&stimin=1&includeIncoming=true&includeOutgoing=true')
         get_result = json.loads(get_response.data)['result']['atoms']
         assert len(get_result) == 5
+
+    def test_scheme_command(self):
+        # Test an arbitrary Scheme command to ensure the binding is working
+        # properly
+
+        # Set the AttentionalFocus Boundary
+        command = {'command': '(cog-set-af-boundary! 5)'}
+
+        post_response = self.client.post(self.uri + 'scheme', data=json.dumps(command), headers=self.headers)
+        post_result = json.loads(post_response.data)['response']
+
+        # Verify that the value returned by the POST request is the new
+        # value of the AttentionalFocus Boundary
+        assert post_result == "5\n"
+
+        # Get the AttentionalFocus Boundary
+        command = {'command': '(cog-af-boundary)'}
+
+        post_response = self.client.post(self.uri + 'scheme', data=json.dumps(command), headers=self.headers)
+        post_result = json.loads(post_response.data)['response']
+
+        # Verify that it matches the previous response
+        assert post_result == "5\n"
