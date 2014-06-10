@@ -8,6 +8,7 @@ Exposes a REST API for the atomspace and cogserver.
 - **atoms** Methods to create, read, update and delete sets of atoms
 - **types** Provides the available atom types
 - **shell** Exposes a basic interface to send shell commands to control the CogServer
+- **scheme** Send commands to the Scheme interpreter and receive a response
 
 #### Documentation
 

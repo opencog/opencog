@@ -12,14 +12,17 @@ PORT = 5000
 
 class Start(opencog.cogserver.Request):
     """
-    Implements a CogServer Module to load upon startup that will load the REST API defined in apimain.py
+    Implements a CogServer Module to load upon startup that will load the REST
+    API defined in apimain.py
 
     Prerequisites:
         1) Requires installation of the Python dependencies by running:
             sudo ./install_dependencies.sh
 
-        2) Requires the configuration file (opencog.conf) to contain the following parameters:
-            - PYTHON_EXTENSION_DIRS must specify the relative location of the API scripts
+        2) Requires the configuration file (opencog.conf) to contain the
+           following parameters:
+            - PYTHON_EXTENSION_DIRS must specify the relative location of the
+              API scripts
                 Example: PYTHON_EXTENSION_DIRS = ../opencog/python/web/api
             - PYTHON_PRELOAD must specify the restapi module
                 Example: PYTHON_PRELOAD = restapi
@@ -28,17 +31,19 @@ class Start(opencog.cogserver.Request):
     """
 
     summary = "Start the OpenCog REST API"
-    description = "Usage: restapi.Start\n\n" \
-    "Starts the OpenCog REST API. This will provide a REST interface to the Atomspace,\n" \
-    "allowing you to create, read, update and delete atoms across the network using\n" \
-    "HTTP requests/responses with JSON-formatted data.\n\n" \
-    "Default endpoint: http://127.0.0.1:5000/api/v1.1/\n" \
-    "Example request: http://127.0.0.1:5000/api/v1.1/atoms?type=ConceptNode"
+    description = "Usage: restapi.Start\n\nStarts the OpenCog REST API. " \
+                  "This will provide a REST interface to the Atomspace,\n" \
+                  "allowing you to create, read, update and delete atoms " \
+                  "across the network using\nHTTP requests/responses with " \
+                  "JSON-formatted data.\n\nDefault endpoint: " \
+                  "http://127.0.0.1:5000/api/v1.1/\nExample request: " \
+                  "http://127.0.0.1:5000/api/v1.1/atoms?type=ConceptNode"
 
     def run(self, args, atomspace):
         """
-        Loads the REST API into a separate thread and invokes it, so that it will continue serving requests in the
-        background after the Request that loads it has returned control to the CogServer
+        Loads the REST API into a separate thread and invokes it, so that it
+        will continue serving requests in the background after the Request
+        that loads it has returned control to the CogServer
         """
         self.atomspace = atomspace
         thread = Thread(target=self.invoke)
