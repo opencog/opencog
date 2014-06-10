@@ -6,6 +6,7 @@ from opencog.atomspace import Handle
 from mappers import *
 from flask.ext.restful.utils import cors
 
+
 class AtomCollectionAPI(Resource):
     # This is because of https://github.com/twilio/flask-restful/issues/134
     @classmethod
@@ -15,7 +16,8 @@ class AtomCollectionAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('type', type=str, location='args', choices=types.__dict__.keys())
+        self.reqparse.add_argument(
+            'type', type=str, location='args', choices=types.__dict__.keys())
         self.reqparse.add_argument('name', type=str, location='args')
         self.reqparse.add_argument('callback', type=str, location='args')
         self.reqparse.add_argument('filterby', type=str, location='args',
@@ -23,16 +25,20 @@ class AtomCollectionAPI(Resource):
         self.reqparse.add_argument('stimin', type=int, location='args')
         self.reqparse.add_argument('stimax', type=int, location='args')
         self.reqparse.add_argument('tvStrengthMin', type=float, location='args')
-        self.reqparse.add_argument('tvConfidenceMin', type=float, location='args')
+        self.reqparse.add_argument(
+            'tvConfidenceMin', type=float, location='args')
         self.reqparse.add_argument('tvCountMin', type=float, location='args')
-        self.reqparse.add_argument('includeIncoming', type=str, location='args',
-                                   choices=['true', 'false', 'True', 'False', '0', '1'])
-        self.reqparse.add_argument('includeOutgoing', type=str, location='args',
-                                   choices=['true', 'false', 'True', 'False', '0', '1'])
+        self.reqparse.add_argument(
+            'includeIncoming', type=str, location='args',
+            choices=['true', 'false', 'True', 'False', '0', '1'])
+        self.reqparse.add_argument(
+            'includeOutgoing', type=str, location='args',
+            choices=['true', 'false', 'True', 'False', '0', '1'])
 
         super(AtomCollectionAPI, self).__init__()
 
-    # Set CORS headers to allow cross-origin access (https://github.com/twilio/flask-restful/pull/131):
+    # Set CORS headers to allow cross-origin access
+    # (https://github.com/twilio/flask-restful/pull/131):
     @cors.crossdomain(origin='*')
     def get(self, id=""):
         """
@@ -41,28 +47,40 @@ class AtomCollectionAPI(Resource):
 
         atoms/[id]
         (or)
-        atoms?type=[type]&name=[name]&filterby=[filterby]&tvStrengthMin=[tvStrengthMin]
-            &tvConfidenceMin=[tvConfidenceMin]&tvCountMin=[tvCountMin]&includeIncoming=[includeIncoming]
+        atoms?type=[type]&name=[name]&filterby=[filterby]
+            &tvStrengthMin=[tvStrengthMin]&tvConfidenceMin=[tvConfidenceMin]
+            &tvCountMin=[tvCountMin]&includeIncoming=[includeIncoming]
             &includeOutgoing=[includeOutgoing]&callback=[callback]
 
-        :param id: (optional, int, to specifically request an atom by handle, can be combined with includeIncoming or
-            includeOutgoing only; if specified, other query parameters will have no effect) Atom handle
+        :param id: (optional, int, to specifically request an atom by handle,
+            can be combined with includeIncoming or includeOutgoing only; if
+            specified, other query parameters will have no effect) Atom handle
 
-        :param type: (optional) Atom type, see http://wiki.opencog.org/w/OpenCog_Atom_types
+        :param type: (optional) Atom type, see
+            http://wiki.opencog.org/w/OpenCog_Atom_types
         :param name: (optional, string, not allowed for Link types) Atom name
         If neither type or name are provided, all atoms will be retrieved
-        :param filterby: (optional, can't be combined with type or name) Allows certain predefined filters
-          - The filter 'stirange' allows the additional parameters 'stimin' (required, int) and 'stimax' (optional, int)
-            and returns the atoms in a given STI range
-          - The filter 'attentionalfocus' (boolean) returns the atoms in the AttentionalFocus
-        :param tvStrengthMin: (optional, float) Only return atoms with TruthValue strength greater than this amount
-        :param tvConfidenceMin: (optional, float) Only return atoms with TruthValue confidence greater than this amount
-        :param tvCountMin: (optional, float) Only return atoms with TruthValue count greater than this amount
-        :param includeIncoming: (optional, boolean) Returns the conjunction of the set of atoms and their incoming sets
-        :param includeOutgoing: (optional, boolean) Returns the conjunction of the set of atoms and their outgoing sets
-            Useful in combination with includeIncoming.
+        :param filterby: (optional, can't be combined with type or name)
+            Allows certain predefined filters
+          - The filter 'stirange' allows the additional parameters 'stimin'
+            (required, int) and 'stimax' (optional, int) and returns the atoms
+            in a given STI range
+          - The filter 'attentionalfocus' (boolean) returns the atoms in the
+            AttentionalFocus
+        :param tvStrengthMin: (optional, float) Only return atoms with
+            TruthValue strength greater than this amount
+        :param tvConfidenceMin: (optional, float) Only return atoms with
+            TruthValue confidence greater than this amount
+        :param tvCountMin: (optional, float) Only return atoms with TruthValue
+            count greater than this amount
+        :param includeIncoming: (optional, boolean) Returns the conjunction of
+            the set of atoms and their incoming sets
+        :param includeOutgoing: (optional, boolean) Returns the conjunction of
+            the set of atoms and their outgoing sets. Useful in combination
+            with includeIncoming.
 
-        :param callback: (optional) JavaScript callback function for JSONP support
+        :param callback: (optional) JavaScript callback function for JSONP
+            support
 
         :return result: Returns a JSON representation of an atom list.
         Example:
@@ -127,7 +145,8 @@ class AtomCollectionAPI(Resource):
                 atoms = []
                 # abort(404, 'Handle not found')
         else:
-            # First, check if there is a valid filter type, and give it precedence if it exists
+            # First, check if there is a valid filter type, and give it
+            # precedence if it exists
             valid_filter = False
             if filter_by is not None:
                 if filter_by == 'stirange':
@@ -135,31 +154,38 @@ class AtomCollectionAPI(Resource):
                         valid_filter = True
                         atoms = self.atomspace.get_atoms_by_av(sti_min, sti_max)
                     else:
-                        abort(400, 'Invalid request: stirange filter requires stimin parameter')
+                        abort(400, 'Invalid request: stirange filter requires '
+                                   'stimin parameter')
                 elif filter_by == 'attentionalfocus':
                     valid_filter = True
                     atoms = self.atomspace.get_atoms_in_attentional_focus()
 
-            # If there is not a valid filter type, proceed to select by type or name
+            # If there is not a valid filter type, proceed to select by type
+            # or name
             if not valid_filter:
                 if type is None and name is None:
                     atoms = self.atomspace.get_atoms_by_type(types.Atom)
                 elif name is None:
-                    atoms = self.atomspace.get_atoms_by_type(types.__dict__.get(type))
+                    atoms = self.atomspace.get_atoms_by_type(
+                        types.__dict__.get(type))
                 else:
                     if type is None:
                         type = 'Node'
-                    atoms = self.atomspace.get_atoms_by_name(t=types.__dict__.get(type), name=name)
+                    atoms = self.atomspace.get_atoms_by_name(
+                        t=types.__dict__.get(type), name=name)
 
             # Optionally, filter by TruthValue
             if tv_strength_min is not None:
-                atoms = [atom for atom in atoms if atom.tv.mean >= tv_strength_min]
+                atoms = [atom for atom in atoms if atom.tv.mean >=
+                                                   tv_strength_min]
 
             if tv_confidence_min is not None:
-                atoms = [atom for atom in atoms if atom.tv.confidence >= tv_confidence_min]
+                atoms = [atom for atom in atoms if atom.tv.confidence >=
+                                                   tv_confidence_min]
 
             if tv_count_min is not None:
-                atoms = [atom for atom in atoms if atom.tv.count >= tv_count_min]
+                atoms = [atom for atom in atoms if atom.tv.count >=
+                                                   tv_count_min]
 
         # Optionally, include the incoming set
         if include_incoming in ['True', 'true', '1']:
@@ -175,27 +201,33 @@ class AtomCollectionAPI(Resource):
         # if callback function supplied, pad the JSON data (i.e. JSONP):
         if callback is not None:
             response = str(callback) + '(' + json.dumps(json_data) + ');'
-            return current_app.response_class(response, mimetype='application/javascript')
+            return current_app.response_class(
+                response, mimetype='application/javascript')
         else:
-            return current_app.response_class(json.dumps(json_data), mimetype='application/json')
+            return current_app.response_class(
+                json.dumps(json_data), mimetype='application/json')
 
     def post(self):
         """
         Creates a new atom. If the atom already exists, it updates the atom.
         Uri: atoms
 
-        Include data with the POST request providing a JSON representation of the atom.
+        Include data with the POST request providing a JSON representation of
+        the atom.
         Valid data elements:
 
-        type (required) Atom type, see http://wiki.opencog.org/w/OpenCog_Atom_types
+        type (required) Atom type, see
+            http://wiki.opencog.org/w/OpenCog_Atom_types
         name (required for Node types, not allowed for Link types) Atom name
         truthvalue (required) TruthValue, formatted as follows:
-            type (required) TruthValue type (only 'simple' is currently available), see http://wiki.opencog.org/w/TruthValue
+            type (required) TruthValue type (only 'simple' is currently
+                available), see http://wiki.opencog.org/w/TruthValue
             details (required) TruthValue parameters, formatted as follows:
                 strength (required)
                 count (required)
-        outgoing (optional) The set of arguments of the relation, formatted as a list of Atom handles
-            (only valid for Links, not nodes), see http://wiki.opencog.org/w/Link#Incoming_and_Outgoing_Sets
+        outgoing (optional) The set of arguments of the relation, formatted as
+            a list of Atom handles (only valid for Links, not nodes), see
+            http://wiki.opencog.org/w/Link#Incoming_and_Outgoing_Sets
 
         Examples:
 
@@ -227,7 +259,8 @@ class AtomCollectionAPI(Resource):
                   }
               }
 
-        :return atoms: Returns a JSON representation of an atom list containing the atom. Example:
+        :return atoms: Returns a JSON representation of an atom list containing
+        the atom. Example:
         {
           'atoms':
           {
@@ -263,7 +296,8 @@ class AtomCollectionAPI(Resource):
             if data['type'] in types.__dict__:
                 type = types.__dict__.get(data['type'])
             else:
-                abort(400, 'Invalid request: type \'' + type + '\' is not a valid type')
+                abort(400, 'Invalid request: type \'' + type + '\' is not a '
+                                                               'valid type')
         else:
             abort(400, 'Invalid request: required parameter type is missing')
 
@@ -283,16 +317,19 @@ class AtomCollectionAPI(Resource):
         # Nodes must have names
         if is_a(type, types.Node):
             if name is None:
-                abort(400, 'Invalid request: node type specified and required parameter name is missing')
+                abort(400, 'Invalid request: node type specified and required '
+                           'parameter name is missing')
         # Links can't have names
         else:
             if name is not None:
-                abort(400, 'Invalid request: parameter name is not allowed for link types')
+                abort(400, 'Invalid request: parameter name is not allowed for '
+                           'link types')
 
         try:
             atom = self.atomspace.add(t=type, name=name, tv=tv, out=outgoing)
         except TypeError:
-            abort(500, 'Error while processing your request. Check your parameters.')
+            abort(500, 'Error while processing your request. Check your '
+                       'parameters.')
 
         return {'atoms': marshal(atom, atom_fields)}
 
@@ -302,12 +339,12 @@ class AtomCollectionAPI(Resource):
         Uri: atoms/[id]
 
         :param id: Atom handle
-        Include data with the PUT request providing a JSON representation of the updated attributes.
-        Valid data elements:
+        Include data with the PUT request providing a JSON representation of
+        the updated attributes. Valid data elements:
 
         truthvalue (optional) TruthValue, formatted as follows:
-            type (required) TruthValue type (only 'simple' is currently available)
-                            see http://wiki.opencog.org/w/TruthValue
+            type (required) TruthValue type (only 'simple' is currently
+                available). See: http://wiki.opencog.org/w/TruthValue
             details (required) TruthValue parameters, formatted as follows:
                 strength (required)
                 count (required)
@@ -336,7 +373,8 @@ class AtomCollectionAPI(Resource):
           }
         }
 
-        :return atoms: Returns a JSON representation of an atom list containing the atom.
+        :return atoms: Returns a JSON representation of an atom list
+        containing the atom.
         Example:
 
         { 'atoms':
@@ -374,7 +412,8 @@ class AtomCollectionAPI(Resource):
         data = reqparse.request.get_json()
 
         if 'truthvalue' not in data and 'attentionvalue' not in data:
-            abort(400, 'Invalid request: you must include a truthvalue or attentionvalue parameter')
+            abort(400, 'Invalid request: you must include a truthvalue or '
+                       'attentionvalue parameter')
 
         if 'truthvalue' in data:
             tv = ParseTruthValue.parse(data)
@@ -394,7 +433,8 @@ class AtomCollectionAPI(Resource):
 
         :param id: Atom handle
 
-        :return result:  Returns a JSON representation of the result, indicating success or failure.
+        :return result:  Returns a JSON representation of the result,
+            indicating success or failure.
         Example:
 
         {
