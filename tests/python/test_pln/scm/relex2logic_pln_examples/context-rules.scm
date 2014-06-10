@@ -8,7 +8,7 @@
     (ListLink
         ; 1) input for (pln-rule-contextualize-inheritance)
         ; "Ben is competent in doing mathematics."
-        (Inheritance
+        (InheritanceLink
             (AndLink
                 (ConceptNode "Ben")
                 (ConceptNode "doing_mathematics"))
