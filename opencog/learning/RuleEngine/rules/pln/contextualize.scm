@@ -46,27 +46,21 @@
                     (AndLink
                         (VariableNode "$C")
                         (VariableNode "$B")))
-                (ListLink
-                    (ContextLink 
-                        (VariableNode "$C")
-                        (InheritanceLink
-                            (VariableNode "$A")
-                            (VariableNode "$B")))
-                    (ExecutionLink
-                        (GroundedSchemaNode "scm: pln-formula-context")
-                        (ListLink
-                            (ContextLink
-                                (VariableNode "$C")
-                                (InheritanceLink
-                                    (VariableNode "$A")
-                                    (VariableNode "$B")))
+                (ExecutionLink
+                    (GroundedSchemaNode "scm: pln-formula-context")
+                    (ListLink
+                        (ContextLink
+                            (VariableNode "$C")
                             (InheritanceLink
-                                (AndLink
-                                    (VariableNode "$C")
-                                    (VariableNode "$A"))
-                                (AndLink
-                                    (VariableNode "$C")
-                                    (VariableNode "$B")))))))))
+                                (VariableNode "$A")
+                                (VariableNode "$B")))
+                        (InheritanceLink
+                            (AndLink
+                                (VariableNode "$C")
+                                (VariableNode "$A"))
+                            (AndLink
+                                (VariableNode "$C")
+                                (VariableNode "$B"))))))))
 
 
 ; In an EvaluationLink, the PredicateNode is not 'andified'
@@ -82,31 +76,25 @@
                 (VariableTypeNode "PredicateNode"))
             (VariableNode "$B")
             (VariableNode "$C"))
-            (ImplicationLink
-                (EvaluationLink
-                    (VariableNode "$A")
-                    (AndLink
-                        (VariableNode "$C")
-                        (VariableNode "$B"))
-                (ListLink
-                    (ContextLink
-                        (VariableNode "$C")
-                        (EvaluationLink
-                            (VariableNode "$A")
-                            (VariableNode "$B")))
-                    (ExecutionLink
-                        (GroundedSchemaNode "scm: pln-formula-context")
-                        (ListLink
-                            (ContextLink
-                                (VariableNode "$C")
-                                (VariableNode "$R"
-                                    (VariableNode "$A")
-                                    (VariableNode "$B")))
-                            (EvaluationLink
-                                (VariableNode "$A")
-                                (AndLink
-                                    (VariableNode "$C")
-                                    (VariableNode "$B"))))))))))
+       (ImplicationLink
+           (EvaluationLink
+               (VariableNode "$A")
+               (AndLink
+                   (VariableNode "$C")
+                   (VariableNode "$B")))
+           (ExecutionLink
+               (GroundedSchemaNode "scm: pln-formula-context")
+               (ListLink
+                   (ContextLink
+                       (VariableNode "$C")
+                       (EvaluationLink
+                           (VariableNode "$A")
+                           (VariableNode "$B")))
+                   (EvaluationLink
+                       (VariableNode "$A")
+                       (AndLink
+                           (VariableNode "$C")
+                           (VariableNode "$B"))))))))
 
 ;----------------------------------------------------------------------
 ; b)
