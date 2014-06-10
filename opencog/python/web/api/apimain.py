@@ -5,6 +5,7 @@ from flask.ext.restful import Api
 from apiatomcollection import *
 from apitypes import *
 from apishell import *
+from apischeme import *
 
 
 class RESTAPI(object):
@@ -24,8 +25,9 @@ class RESTAPI(object):
 
     Example request: http://127.0.0.1:5000/api/v1.1/atoms?type=ConceptNode
 
-    See: opencog/python/web/api/exampleclient.py for detailed examples of usage, and review
-    the method definitions in each resource for request/response specifications.
+    See: opencog/python/web/api/exampleclient.py for detailed examples of
+    usage, and review the method definitions in each resource for request/
+    response specifications.
     """
 
     def __init__(self, atomspace):
@@ -34,12 +36,25 @@ class RESTAPI(object):
         # Initialize the web server and set the routing
         self.app = Flask(__name__, static_url_path="")
         self.api = Api(self.app)
+
+        # Create and add each resource
         atom_collection_api = AtomCollectionAPI.new(self.atomspace)
         atom_types_api = TypesAPI()
         shell_api = ShellAPI()
-        self.api.add_resource(atom_collection_api, '/api/v1.1/atoms', '/api/v1.1/atoms/<int:id>', endpoint='atoms')
-        self.api.add_resource(atom_types_api, '/api/v1.1/types', endpoint='types')
-        self.api.add_resource(shell_api, '/api/v1.1/shell', endpoint='shell')
+        scheme_api = SchemeAPI.new(self.atomspace)
+
+        self.api.add_resource(atom_collection_api,
+                              '/api/v1.1/atoms',
+                              '/api/v1.1/atoms/<int:id>', endpoint='atoms')
+        self.api.add_resource(atom_types_api,
+                              '/api/v1.1/types',
+                              endpoint='types')
+        self.api.add_resource(shell_api,
+                              '/api/v1.1/shell',
+                              endpoint='shell')
+        self.api.add_resource(scheme_api,
+                              '/api/v1.1/scheme',
+                              endpoint='scheme')
 
     def run(self, host='127.0.0.1', port=5000):
         """
@@ -57,4 +72,3 @@ class RESTAPI(object):
         Returns a test client for the REST API
         """
         return self.app.test_client()
-

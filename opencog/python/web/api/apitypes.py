@@ -11,28 +11,35 @@ class TypesAPI(Resource):
         self.reqparse.add_argument('callback', type=str, location='args')
         super(TypesAPI, self).__init__()
 
-    # Set CORS headers to allow cross-origin access (https://github.com/twilio/flask-restful/pull/131):
+    # Set CORS headers to allow cross-origin access
+    # (https://github.com/twilio/flask-restful/pull/131):
     @cors.crossdomain(origin='*')
     def get(self):
         """
         Returns a list of valid atom types
         Uri: types
 
-        :return types: Returns a JSON representation of a list of valid atom types
+        :return types: Returns a JSON representation of a list of valid atom
+            types
 
         Example:
 
-        {"types": ["TrueLink", "NumberNode", "OrLink", "PrepositionalRelationshipNode"]}
+        {"types": ["TrueLink", "NumberNode", "OrLink",
+          "PrepositionalRelationshipNode"]}
         """
 
-        json_data = {'types': filter(lambda x: not x.startswith('__') and not x.endswith('__') and not x == 'NO_TYPE',
-                                     types.__dict__.keys())}
+        json_data = \
+            {'types': filter(lambda x:
+                             not x.startswith('__') and not x.endswith('__')
+                             and not x == 'NO_TYPE', types.__dict__.keys())}
 
         # if callback function supplied, pad the JSON data (i.e. JSONP):
         args = self.reqparse.parse_args()
         callback = args.get('callback')
         if callback is not None:
             response = str(callback) + '(' + json.dumps(json_data) + ');'
-            return current_app.response_class(response, mimetype='application/javascript')
+            return current_app.response_class(
+                response, mimetype='application/javascript')
         else:
-            return current_app.response_class(json.dumps(json_data), mimetype='application/json')
+            return current_app.response_class(
+                json.dumps(json_data), mimetype='application/json')

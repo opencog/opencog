@@ -21,27 +21,37 @@ class ParseTruthValue(object):
             if 'type' in data['truthvalue']:
                 tv_type = data['truthvalue']['type']
             else:
-                abort(400, 'Invalid request: truthvalue object requires a type parameter')
+                abort(400, 'Invalid request: truthvalue object requires a '
+                           'type parameter')
         else:
-            abort(400, 'Invalid request: required parameter truthvalue is missing')
+            abort(400, 'Invalid request: required parameter truthvalue '
+                       'is missing')
 
-        # @todo: Cython bindings implementation does not provide support for other TruthValue types yet
-        #        (see: opencog\cython\opencog\atomspace_details.pyx, opencog\cython\opencog\atomspace.pxd)
+        # @todo: Cython bindings implementation does not provide support for
+        # other TruthValue types yet
+        # (see: opencog\cython\opencog\atomspace_details.pyx,
+        #       opencog\cython\opencog\atomspace.pxd)
         if tv_type != 'simple':
             if tv_type in ['composite', 'count', 'indefinite']:
                 # @todo: check error type
-                abort(400, 'Invalid request: truthvalue type \'' + tv_type + '\' is not supported')
+                abort(400, 'Invalid request: truthvalue type \'' +
+                           tv_type + '\' is not supported')
             else:
                 # @todo: check error type
-                abort(400, 'Invalid request: type \'' + tv_type + '\' is not a valid truthvalue type')
+                abort(400, 'Invalid request: type \'' + tv_type +
+                           '\' is not a valid truthvalue type')
 
         if 'details' in data['truthvalue']:
-            if 'strength' in data['truthvalue']['details'] and 'count' in data['truthvalue']['details']:
-                tv = TruthValue(data['truthvalue']['details']['strength'], data['truthvalue']['details']['count'])
+            if 'strength' in data['truthvalue']['details'] \
+                and 'count' in data['truthvalue']['details']:
+                tv = TruthValue(data['truthvalue']['details']['strength'],
+                                data['truthvalue']['details']['count'])
             else:
-                abort(400, 'Invalid request: truthvalue details object requires both a strength and count parameter')
+                abort(400, 'Invalid request: truthvalue details object '
+                           'requires both a strength and count parameter')
         else:
-            abort(400, 'Invalid request: truthvalue object requires a details parameter')
+            abort(400, 'Invalid request: truthvalue object requires a '
+                       'details parameter')
 
         return tv
 

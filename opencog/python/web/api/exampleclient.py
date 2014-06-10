@@ -1,5 +1,6 @@
 """
-Examples of how to consume the REST API from Python, using the 'requests' module:
+Examples of how to consume the REST API from Python, using the 'requests'
+module:
 http://www.python-requests.org/
 
 From the wiki documentation located here:
@@ -11,7 +12,8 @@ __author__ = 'Cosmo Harrigan'
 from requests import *
 import json
 
-# Define the API Endpoint - replace 127.0.0.1 with the server IP address if necessary
+# Define the API Endpoint - replace 127.0.0.1 with the server IP address if
+# necessary
 IP_ADDRESS = '127.0.0.1'
 PORT = '5000'
 uri = 'http://' + IP_ADDRESS + ':' + PORT + '/api/v1.1/'
@@ -176,7 +178,9 @@ POST /api/v1.1/atoms:
 
 # POST a new link between the two newly created nodes
 truthvalue = {'type': 'simple', 'details': {'strength': 0.5, 'count': 0.4}}
-atom = {'type': 'InheritanceLink', 'truthvalue': truthvalue, 'outgoing': [handle_node_1, handle_node_2]}
+atom = {'type': 'InheritanceLink',
+        'truthvalue': truthvalue,
+        'outgoing': [handle_node_1, handle_node_2]}
 post_response = post(uri + 'atoms', data=json.dumps(atom), headers=headers)
 post_result = post_response.json()['atoms']
 pprint(post_response, post_result)
@@ -214,7 +218,9 @@ POST /api/v1.1/atoms:
 truthvalue = {'type': 'simple', 'details': {'strength': 0.006, 'count': 0.8}}
 attentionvalue = {'sti': 5, 'lti': 3, 'vlti': True}
 atom_update = {'truthvalue': truthvalue, 'attentionvalue': attentionvalue}
-put_response = put(uri + 'atoms/' + str(handle_node_1), data=json.dumps(atom_update), headers=headers)
+put_response = put(uri + 'atoms/' + str(handle_node_1),
+                   data=json.dumps(atom_update),
+                   headers=headers)
 put_result = put_response.json()['atoms']
 pprint(put_response, put_result)
 '''
@@ -257,4 +263,3 @@ DELETE /api/v1.1/atoms/76:
   "success": true
 }
 '''
-
