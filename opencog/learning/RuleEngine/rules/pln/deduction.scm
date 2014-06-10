@@ -18,22 +18,18 @@
                 (InheritanceLink
                     (VariableNode "$B")
                     (VariableNode "$C")))
-            (ListLink
-                (InheritanceLink
-                    (VariableNode "$A")
-                    (VariableNode "$C"))
-                (ExecutionLink
-                    (GroundedSchemaNode "scm: pln-formula-simple-deduction")
-                    (ListLink
-                        (InheritanceLink
-                            (VariableNode "$A")
-                            (VariableNode "$B"))
-                        (InheritanceLink
-                            (VariableNode "$B")
-                            (VariableNode "$C"))
-                        (InheritanceLink
-                            (VariableNode "$A")
-                            (VariableNode "$C"))))))))
+            (ExecutionLink
+                (GroundedSchemaNode "scm: pln-formula-simple-deduction")
+                (ListLink
+                    (InheritanceLink
+                        (VariableNode "$A")
+                        (VariableNode "$B"))
+                    (InheritanceLink
+                        (VariableNode "$B")
+                        (VariableNode "$C"))
+                    (InheritanceLink
+                        (VariableNode "$A")
+                        (VariableNode "$C")))))))
 
 ; -----------------------------------------------------------------------------
 ; Deduction Formula
