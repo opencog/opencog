@@ -3,15 +3,18 @@
 # docker build -t $USER/opencog-precise-buildslave .
 # docker run -d -e BUILDSLAVE_NAME=$HOSTNAME -e BUILDSLAVE_PASSWD=foobar $USER/opencog-precise-buildslave
 
-MAINTAINER David Hart "dhart@opencog.org"
 FROM ubuntu:12.04
+MAINTAINER David Hart "dhart@opencog.org"
 
-RUN apt-get update 
-RUN apt-get -y install python-software-properties sudo 
+RUN echo "deb http://hk.archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list && \
+    echo "deb http://hk.archive.ubuntu.com/ubuntu precise-updates main universe" >> /etc/apt/sources.list && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y install python-software-properties \  
+                                              wget unzip git ssh pwgen sudo less vim
 
 # ocpkg tool to install repositories and dependencies
 ADD https://raw.githubusercontent.com/opencog/ocpkg/master/ocpkg /octool
-RUN /octool -a -d
+RUN chmod ugo+x /octool && /octool -a -d
 
 RUN apt-get -y install python-pip python-dev
 
