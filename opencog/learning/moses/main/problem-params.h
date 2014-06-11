@@ -103,6 +103,7 @@ struct problem_params : public option_base
     bool reduce_all;
     bool linear_regression;
     bool boosting;
+    bool discard_dominated;
     double noise;
     score_t complexity_temperature;
     score_t complexity_ratio;
@@ -111,7 +112,6 @@ struct problem_params : public option_base
     double perm_ratio;
     
     // metapopulation diversity parameters
-    bool include_dominated;
     score_t diversity_pressure;
     score_t diversity_exponent;
     bool diversity_normalize;

@@ -442,8 +442,8 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "Maximum number of demes to generate and optimize, "
          "negative means no generation limit.\n")
 
-        (opt_desc_str(include_dominated_opt).c_str(),
-         po::value<bool>(&include_dominated)->default_value(true),
+        ("discard-dominated",
+         po::value<bool>(&discard_dominated)->default_value(true),
          "Include dominated candidates (according behavioral score) "
          "when merging candidates in the metapopulation. Disabling "
          "this may lead to poorer performance.\n")
@@ -1115,13 +1115,13 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
     meta_params.max_candidates = max_candidates;
     meta_params.revisit = revisit;
     meta_params.do_boosting = boosting;
+    meta_params.discard_dominated = discard_dominated;
     meta_params.keep_bscore = output_bscore;
     meta_params.complexity_temperature = complexity_temperature;
     meta_params.cap_coef = cap_coef;
     meta_params.jobs = jobs[localhost];
 
     // diversity parameters
-    meta_params.diversity.include_dominated = include_dominated;
     meta_params.diversity.pressure = diversity_pressure;
     meta_params.diversity.exponent = diversity_exponent;
     meta_params.diversity.normalize = diversity_normalize;

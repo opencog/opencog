@@ -32,13 +32,7 @@ struct diversity_parameters
 {
     typedef score_t dp_t;
 
-    diversity_parameters(bool _include_dominated = true);
-
-    // Ignore behavioral score domination when merging candidates in
-    // the metapopulation. Keeping dominated candidates may improves
-    // performance by avoiding local maxima. Discarding dominated
-    // candidates may increase the diversity of the metapopulation.
-    bool include_dominated;
+    diversity_parameters();
 
     // Diversity pressure of to enforce diversification of the
     // metapop. 0 means no diversity pressure, the higher the value
@@ -111,6 +105,7 @@ struct metapop_parameters
         max_candidates(_max_candidates),
         revisit(_revisit),
         do_boosting(false),
+        discard_dominated(false),
         keep_bscore(false),
         complexity_temperature(_complexity_temperature),
         cap_coef(50.0),
@@ -132,6 +127,24 @@ struct metapop_parameters
     // the metapopulation merge. In this case, the scorer must be
     // capable of maintaining sample weights.
     bool do_boosting;
+
+    // Discard dominated candidates when merging candidates into
+    // the metapopulation.  A candidate is "dominated" when some
+    // existing member of the metapopulation scores better on
+    // *every* sample in the scoring dataset. Naively, one might
+    // think that a candidate that does worse, in every possible way,
+    // is useless, and can be safely thrown away.  It turns out that
+    // this is a bad assumption; dominated candidates, when selected
+    // for deme expansion, often have far fitter off-spring than the
+    // off-spring of the top-scoring (dominating) members of the
+    // metapopulation. Thus, the "weak", dominated members of the
+    // metapopulation are important for ensuring the vitality of
+    // the metapopulation, and are discarded only at considerable risk.
+    //
+    // Note that the algorithms to compute domination are quite slow,
+    // and so one has a double benefit: not only is the metapopulation
+    // healthier, but candidate merging runs faster.
+    bool discard_dominated;
 
     // Keep track of the bscores even if not needed (in case the user
     // wants to keep them around, e.g. for debug printing.)

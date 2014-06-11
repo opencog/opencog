@@ -736,14 +736,27 @@ Create and optimize no more than \fInum\fR demes.  Negative numbers
 are interpreted as "unlimited". By default, the number of demes is
 unlimited.
 .TP
-.BI \-I0\fR,\ \fB\-\-include\-dominated=0
-Disable the merging of dominated candidates into the metapopulation.
-When this flag is specified, the metapopulation will consist entirely
-of the highest scoring candidates.  Specifying this flag can (severely)
-degrade performance, as this will make it more likely that the
-algorithm will get trapped in a local maximum. In addition, culling
-the dominated candidates takes a significant amount of CPU time and
-complexity.
+.BI \fB\-\-discard\-dominated=1
+If specified, the "dominated" members of the metapopulation will be
+discarded.  A member of the metapopulation is "dominated" when some
+existing member of the metapopulation scores better on *every* sample
+in the scoring dataset. Naively, one might think that an individual that
+does worse, in every possible way, is useless, and can be safely
+thrown away.  It turns out that this is a bad assumption; dominated
+individuals, when selected for deme expansion, often have far fitter
+off-spring than the off-spring of the top-scoring (dominating) members
+of the metapopulation. Thus, the "weak", dominated members of the
+metapopulation are important for ensuring the vitality of the
+metapopulation as a whole, and are discarded only at considerable
+risk to the future adaptability of the overall population.  Put another
+way: specifying this flag makes it more likely that the metapopulation
+will get trapped in a non-optimal local maximum.
+    
+Note that the algorithms to compute domination are quite slow,
+and so keeping doinated individuals has a double benefit: not only
+is the metapopulation healthier, but metapopulation management
+runs faster.
+
 .TP
 .BI \-L1\fR,\ \fB\-\-hc\-single\-step=1
 Single-step, instead of hill-climbing to the top of a hill. That is,

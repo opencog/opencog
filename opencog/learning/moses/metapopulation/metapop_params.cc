@@ -24,9 +24,8 @@
 
 namespace opencog { namespace moses {
 
-diversity_parameters::diversity_parameters(bool _include_dominated)
-    : include_dominated(_include_dominated),
-      pressure(0.0),
+diversity_parameters::diversity_parameters()
+    : pressure(0.0),
       exponent(-1.0),       // max
       normalize(true)       // sum or mean (default mean)
 {

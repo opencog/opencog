@@ -56,7 +56,7 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
 
     // Note that merge_nondominated() is very cpu-expensive and
     // complex...
-    if (_params.diversity.include_dominated) {
+    if (not _params.discard_dominated) {
         logger().debug("Insert all candidates in the metapopulation");
         for (const auto& cnd : candidates)
             _scored_trees.insert(new scored_combo_tree(cnd));
@@ -207,7 +207,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
     // merging is asked for, or if the diversity penalty is in use.
     // Save CPU time by not computing them.
     if (_params.keep_bscore
-        or not _params.diversity.include_dominated
+        or _params.discard_dominated
         or diversity_enabled())
     {
         logger().debug("Compute behavioral score of %d selected candidates",
@@ -258,7 +258,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
     logger().debug("Selected %u candidates (%u were in the metapopulation)",
                    candidates.size(), pot_candidates.size()-candidates.size());
 
-    if (!_params.diversity.include_dominated) {
+    if (_params.discard_dominated) {
 
         logger().debug("Remove dominated candidates");
         if (logger().isFineEnabled()) {
