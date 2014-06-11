@@ -61,7 +61,7 @@ namespace moses {
  */
 using combo::combo_tree;
 
-struct metapopulation
+class metapopulation
 {
     // XXX shouldn't this be scored_combo_tree ??
     typedef std::unordered_map<combo_tree, unsigned,
@@ -70,6 +70,7 @@ struct metapopulation
     // Init the metapopulation with the following set of exemplars.
     void init(const std::vector<combo_tree>& exemplars);
 
+public:
     /**
      *  Constuctor for the class metapopulation
      *
@@ -148,6 +149,8 @@ struct metapopulation
         return _best_candidates.begin()->get_tree();
     }
 
+    // ------------------- Diversity-realted parts --------------------
+private:
     typedef diversity_parameters::dp_t dp_t;  // diversity_penalty type
 
     /**
@@ -188,8 +191,25 @@ struct metapopulation
      */
     void set_diversity();
 
-    void log_selected_exemplar(scored_combo_tree_ptr_set::const_iterator);
+public:
+    // Structure holding stats about diversity
+    struct diversity_stats
+    {
+        double count;    // number of pairs of candidates considered
+        double mean;     // average bscore distance between all candidates
+        double std;      // std dev bscore distance between all candidates
+        double min;      // min bscore distance between all candidates
+        double max;      // max bscore distance between all candidates
+    };
 
+    /**
+     * Gather statistics about the diversity of the n best candidates
+     * (if n is negative then all candidates are included)
+     */
+    diversity_stats gather_diversity_stats(int n);
+
+    // ---------------- Deme-expansion-related -----------------------
+public:
     /**
      * Select the exemplar from the population. An exemplar is choosen
      * from the pool of candidates using a Boltzmann distribution
@@ -207,12 +227,14 @@ struct metapopulation
      *         exemplar exists then return end()
      */
     scored_combo_tree_ptr_set::const_iterator select_exemplar();
+
     scored_combo_tree_ptr_set::const_iterator end() const { return _scored_trees.end(); }
     scored_combo_tree_ptr_set::const_iterator begin() const { return _scored_trees.begin(); }
     bool empty() const { return _scored_trees.empty(); } 
     size_t size() const { return _scored_trees.size(); }
     void clear() { _scored_trees.clear(); }
 
+private:
     /// Given the current complexity temp, return the range of scores that
     /// are likely to be selected by the select_exemplar routine. Due to
     /// exponential decay of scores in select_exemplar(), this is fairly
@@ -224,6 +246,8 @@ struct metapopulation
         return params.complexity_temperature * 30.0 / 100.0;
     }
 
+    // -------------------------- Merge related ----------------------
+public:
     /// Merge candidates in to the metapopulation.
     ///
     /// If the include-dominated flag is not set, the set of candidates
@@ -257,6 +281,11 @@ struct metapopulation
                      const boost::ptr_vector<representation>& reps,
                      const std::vector<unsigned>& evals_seq);
 
+    /// Update the record of the best score seen, and the associated tree.
+    /// Safe to call in a multi-threaded context.
+    void update_best_candidates(const scored_combo_tree_set& candidates);
+
+private:
     /**
      * Weed out excessively bad scores. The select_exemplar() routine
      * picks an exemplar out of the metapopulation, using an
@@ -285,9 +314,15 @@ struct metapopulation
     // calls of dominates.
     scored_combo_tree_set get_new_candidates(const scored_combo_tree_set&);
 
+    // Trim down demes before merging based the scores
+    void trim_down_demes(boost::ptr_vector<deme_t>& demes) const;
+    
+    // --------------------- Domination-related stuff --------------------
+private:
+    friend class metapopulationUTest;  // the tester tests the domination code...
+
     typedef std::pair<scored_combo_tree_set,
                       scored_combo_tree_set> scored_combo_tree_set_pair;
-
     typedef std::vector<const scored_combo_tree*> scored_combo_tree_ptr_vec;
     typedef scored_combo_tree_ptr_vec::iterator scored_combo_tree_ptr_vec_it;
     typedef scored_combo_tree_ptr_vec::const_iterator scored_combo_tree_ptr_vec_cit;
@@ -295,13 +330,9 @@ struct metapopulation
                       scored_combo_tree_ptr_vec> scored_combo_tree_ptr_vec_pair;
 
     // reciprocal of random_access_view
-    static scored_combo_tree_set
-    to_set(const scored_combo_tree_ptr_vec& bcv);
+    static scored_combo_tree_set to_set(const scored_combo_tree_ptr_vec& bcv);
 
     void remove_dominated(scored_combo_tree_set& bcs, unsigned jobs = 1);
-
-    static scored_combo_tree_set
-    get_nondominated_iter(const scored_combo_tree_set& bcs);
 
     // split in 2 of equal size
     static scored_combo_tree_ptr_vec_pair
@@ -311,6 +342,9 @@ struct metapopulation
         return make_pair(scored_combo_tree_ptr_vec(bcv.begin(), middle),
                          scored_combo_tree_ptr_vec(middle, bcv.end()));
     }
+
+    static scored_combo_tree_set
+    get_nondominated_iter(const scored_combo_tree_set& bcs);
 
     scored_combo_tree_ptr_vec
     get_nondominated_rec(const scored_combo_tree_ptr_vec& bcv,
@@ -377,15 +411,13 @@ struct metapopulation
         return res;
     }
 
-    // Trim down demes before merging based the scores
-    void trim_down_demes(boost::ptr_vector<deme_t>& demes) const;
-    
-    /// Update the record of the best score seen, and the associated tree.
-    /// Safe to call in a multi-threaded context.
-    void update_best_candidates(const scored_combo_tree_set& candidates);
-
+    // --------------------- Miscellaneous functions --------------------
+public:
     // log the best candidates
     void log_best_candidates() const;
+
+private:
+    void log_selected_exemplar(scored_combo_tree_ptr_set::const_iterator);
 
     /**
      * stream out the metapopulation in decreasing order of their
@@ -443,6 +475,7 @@ struct metapopulation
         return out;
     }
 
+public:
     // Like above, but assumes that from = begin() and to = end().
     template<typename Out>
     Out& ostream(Out& out, long n = -1,
@@ -465,22 +498,6 @@ struct metapopulation
                bool output_bscore = false,
                bool output_visited = false,
                bool output_only_best = false);
-
-    // Structure holding stats about diversity
-    struct diversity_stats
-    {
-        double count;    // number of pairs of candidates considered
-        double mean;     // average bscore distance between all candidates
-        double std;      // std dev bscore distance between all candidates
-        double min;      // min bscore distance between all candidates
-        double max;      // max bscore distance between all candidates
-    };
-
-    /**
-     * Gather statistics about the diversity of the n best candidates
-     * (if n is negative then all candidates are included)
-     */
-    diversity_stats gather_diversity_stats(int n);
 
 public:
     const metapop_parameters& params;

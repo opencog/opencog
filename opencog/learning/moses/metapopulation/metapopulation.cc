@@ -702,16 +702,6 @@ scored_combo_tree_set metapopulation::get_new_candidates(const scored_combo_tree
     return res;
 }
 
-// reciprocal of random_access_view
-scored_combo_tree_set
-metapopulation::to_set(const scored_combo_tree_ptr_vec& bcv)
-{
-    scored_combo_tree_set res;
-    for (const scored_combo_tree* cnd : bcv)
-        res.insert(*cnd);
-    return res;
-}
-
 /// Trim the demes down to size.  The point here is that the next
 /// stage, select_candidates, is very cpu-intensive; we should keep
 /// only those candidates that will survive in the metapop.  But what
@@ -1072,6 +1062,16 @@ metapopulation::get_nondominated_rec(const scored_combo_tree_ptr_vec& bcv,
         append(res_p.first, res_p.second);
         return res_p.first;
     }
+}
+
+// reciprocal of random_access_view
+scored_combo_tree_set
+metapopulation::to_set(const scored_combo_tree_ptr_vec& bcv)
+{
+    scored_combo_tree_set res;
+    for (const scored_combo_tree* cnd : bcv)
+        res.insert(*cnd);
+    return res;
 }
 
 scored_combo_tree_set_pair
