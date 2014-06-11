@@ -28,8 +28,7 @@ namespace opencog { namespace moses {
 
 boosting_ascore::boosting_ascore(size_t sz)
 {
-    double norm = 1.0 / (double) sz;
-    _weights = std::vector<double>(sz, norm);
+    _weights = std::vector<double>(sz, 1.0);
     _size = sz;
 }
 

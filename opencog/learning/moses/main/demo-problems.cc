@@ -114,9 +114,9 @@ void bool_problem_base::run(option_base* ob)
 
     ascore_base* ascorer = NULL;
     if (pms.meta_params.do_boosting) {
-        ascorer = new simple_ascore();
-    } else {
         ascorer = new boosting_ascore(bscore.size());
+    } else {
+        ascorer = new simple_ascore();
     }
     behave_cscore cscore(bscore, *ascorer);
     metapop_moses_results(pms.exemplars, sig,

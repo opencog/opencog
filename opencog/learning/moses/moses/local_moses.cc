@@ -122,9 +122,9 @@ void local_moses(metapopulation& mp,
     stats.elapsed_secs = 0.0;
 
     while ((stats.n_evals < pa.max_evals)
-           && (pa.max_gens != stats.n_expansions)
-           && (mp.best_score() < pa.max_score)
-           && (stats.elapsed_secs < pa.max_time))
+           and (pa.max_gens != stats.n_expansions)
+           and (mp.best_score() < pa.max_score)
+           and (stats.elapsed_secs < pa.max_time))
     {
         // Run a generation
         bool done = expand_deme(mp, dex,
