@@ -29,8 +29,27 @@
                 (ConceptNode "sky")
                 (ConceptNode "moon")))
         ; 3) input for (pln-rule-contextualize-subset)
-        ; "Dogs are animals"
+        ; "Dogs are animals."
         (SubsetLink
+            (ConceptNode "dogs")
+            (ConceptNode "animals"))
+        ; 4) input for (pln-rule-decontextualize-inheritance)
+        ; "Ben is competent in the domain of mathematics.
+        (ContextLink
+            (ConceptNode "doing_mathematics")
+            (InheritanceLink
+                (ConceptNode "Ben")
+                (ConceptNode "competent")))
+        ; 5) input for (pln-rule-decontextualize-evaluation)
+        ; "In the context of the earth, the sky is blue."
+        (ContextLink
+            (ConceptNode "earth")
+            (EvaluationLink
+                (PredicateNode "isBlue")
+                (ConceptNode "sky")))
+        ; 6) input for (pln-rule-decontextualize-subset)
+        ; "Dogs are animals."
+        (ContextLink
             (ConceptNode "dogs")
             (ConceptNode "animals"))))
 
@@ -49,16 +68,34 @@
                     (ConceptNode "earth")
                     (EvaluationLink (stv .8 .7)
                         (PredicateNode "isBlue")
-                        (ListLink
-                            (ConceptNode "sky"))))
+                        (ConceptNode "sky")))
                 (ContextLink 
                     (ConceptNode "moon")
                     (EvaluationLink (stv .0 .2)
                         (PredicateNode "isBlue")
-                        (ListLink
-                            (ConceptNode "sky"))))
+                        (ConceptNode "sky")))
                 ; 3) output
                 (ContextLink
+                    (ConceptNode "dogs")
+                    (ConceptNode "animals"))
+                ; output of decontextualize-rules is
+                ; input 1-3
+                ; 4) output                
+                (InheritanceLink
+                    (AndLink
+                        (ConceptNode "Ben")
+                        (ConceptNode "doing_mathematics"))
+                    (AndLink
+                        (ConceptNode "competent")
+                        (ConceptNode "doing_mathematics")))
+                ; 5) output
+                (EvaluationLink
+                    (PredicateNode "isBlue")
+                    (AndLink
+                        (ConceptNode "sky")
+                        (ConceptNode "earth")))
+                ; 6) output
+                (SubsetLink
                     (ConceptNode "dogs")
                     (ConceptNode "animals")))
             (ConceptNode "true"))))
