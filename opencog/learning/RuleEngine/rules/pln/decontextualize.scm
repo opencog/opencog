@@ -12,70 +12,67 @@
 ;     C ANDLink B
 ;----------------------------------------------------------------------
 
-(define pln-rule-decontextualize-to-and
+; Inverse of (pln-rule-contextualize-inheritance):
+; a ContextLink consisting of an InheritanceLink is decontextualized,
+; i.e. reduced to an inheritance relationship
+(define pln-rule-decontextualize-inheritance
     (BindLink
         (ListLink
-            (VariableNode "$R")
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C"))
         (ImplicationLink
             (ContextLink
-                    (VariableNode "$C")
-                    (VariableNode "$R"
-                        (VariableNode "$A")
-                        (VariableNode "$B")))
-            (ListLink
-                (VariableNode "$R"
-                    (AndLink
-                        (VariableNode "$C")
-                        (VariableNode "$A"))
-                    (AndLink
-                        (VariableNode "$C")
-                        (VariableNode "$B")))
+                (VariableNode "$C")
+                (InheritanceLink
+                    (VariableNode "$A")
+                    (VariableNode "$B")))
                 (ExecutionLink
                     (GroundedSchemaNode "scm: pln-formula-context")
                     (ListLink
-                        (VariableNode "$R")
+                        (InheritanceLink
+                            (AndLink
+                                (VariableNode "$C")
+                                (VariableNode "$A"))
+                            (AndLink
+                                (VariableNode "$C")
+                                (VariableNode "$B")))
                         (ContextLink
                             (VariableNode "$C")
-                            (VariableNode "$R"
+                            (InheritanceLink
                                 (VariableNode "$A")
-                                (VariableNode "$B")))))))))
+                                (VariableNode "$B"))))))))
 
-; In an EvaluationLink, the PredicateNode is not 'andified'
-(define pln-rule-decontextualize-to-and-evaluation
+; Inverse of (pln-rule-contextualize-evaluation):
+; in an EvaluationLink, the PredicateNode is not 'andified';
+; gets rid of the ContextLink enclosing an EvaluationLink
+(define pln-rule-decontextualize-evaluation
     (BindLink
         (ListLink
             (TypedVariableLink
-                (VariableNode "$R")
-                (VariableTypeNode "EvaluationLink"))
-            (TypedVariableLink
                 (VariableNode "$A")
-                (VariableTypeNode "PredicateLink"))
+                (VariableTypeNode "PredicateNode"))
             (VariableNode "$B")
             (VariableNode "$C"))
         (ImplicationLink
             (ContextLink
-                    (VariableNode "$C")
-                    (VariableNode "$R"
+                (VariableNode "$C")
+                (EvaluationLink
+                    (VariableNode "$A")
+                    (VariableNode "$B")))
+            (ExecutionLink
+                (GroundedSchemaNode "scm: pln-formula-context")
+                (ListLink
+                    (EvaluationLink
                         (VariableNode "$A")
-                        (VariableNode "$B")))
-            (ListLink
-                (VariableNode "$R"
-                    (VariableNode "$A"))
-                    (AndLink
-                        (VariableNode "$C")
-                        (VariableNode "$B")))
-                (ExecutionLink
-                    (GroundedSchemaNode "scm: pln-formula-context")
-                    (ListLink
-                        (VariableNode "$R")
-                        (ContextLink
+                        (AndLink
                             (VariableNode "$C")
-                            (VariableNode "$R"
-                                (VariableNode "$A")
-                                (VariableNode "$B"))))))))
+                            (VariableNode "$B")))
+                    (ContextLink
+                        (VariableNode "$C")
+                        (EvaluationLink
+                            (VariableNode "$A")
+                            (VariableNode "$B"))))))))
 
 ;----------------------------------------------------------------------
 ; b)
@@ -87,7 +84,9 @@
 ;     C
 ;     A
 ;----------------------------------------------------------------------
-(define pln-rule-decontextualize-to-subset
+; Inverse of (pln-rule-contextualize-subset):
+; ContextLink is transformed into a SubsetLink
+(define pln-rule-decontextualize-subset
     (BindLink
         (ListLink
             (VariableNode "$A")
@@ -96,19 +95,15 @@
             (ContextLink
                 (VariableNode "$C")
                 (VariableNode "$A"))
-            (ListLink
-                (SubsetLink
-                    (VariableNode "$C")
-                    (VariableNode "$A"))
-                (ExecutionLink
-                    (GroundedSchemaNode "scm: pln-formula-context")
-                    (ListLink
-                        (SubsetLink
-                            (VariableNode "$C")
-                            (VariableNode "$A"))
-                        (ContextLink
-                            (VariableNode "$C")
-                            (VariableNode "$A"))))))))
+            (ExecutionLink
+                (GroundedSchemaNode "scm: pln-formula-context")
+                (ListLink
+                    (SubsetLink
+                        (VariableNode "$C")
+                        (VariableNode "$A"))
+                    (ContextLink
+                        (VariableNode "$C")
+                        (VariableNode "$A")))))))
 
 (define (pln-formula-context Relation Context)
     (cog-set-tv! Relation (cog-tv Context)))
