@@ -62,9 +62,9 @@
     )
 )
 
-(InheritanceLink (1, .99 ) (ConceptNode "SVO-Rule") (ConceptNode "Rule"))
+(InheritanceLink (stv 1 .99) (ConceptNode "SVO-Rule") (ConceptNode "Rule"))
 
-(ReferenceLink (1, .99 ) (ConceptNode "SVO-Rule") svo)
+(ReferenceLink (stv 1 .99) (ConceptNode "SVO-Rule") svo)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.

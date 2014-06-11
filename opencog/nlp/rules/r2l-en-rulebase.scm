@@ -5,7 +5,7 @@
 ; is specifying the rules that are to be used by the R2L pipeline and how they
 ; have to be applied for the english language.
 
-(InheritanceLink (1, .99) 
+(InheritanceLink (stv 1 .99) 
     (ConceptNode "R2L-en-RuleBase") 
     (ConceptNode "RuleBase")
 )
@@ -43,7 +43,7 @@
 ; Specifiyication of the SVO-Rule in the context of R2L-en-
 ; Examples: "Alice ate the mushroom."
 
-(MemberLink (1, .99) 
+(MemberLink (stv 1 .99) 
     (ConceptNode "SVO-Rule") 
     (ConceptNode "R2L-en-RuleBase") 
 )
@@ -74,7 +74,7 @@
 ; --------------------------------------------------------------------
 ; Examples: "Socrates is a man", "Cats are animals", "Trees are plants"
 
-(MemberLink (1, .99) 
+(MemberLink (stv 1 .99) 
     (ConceptNode "BE-Rule") 
     (ConceptNode "R2L-en-RuleBase") 
 )
