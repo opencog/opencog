@@ -39,8 +39,6 @@ namespace opencog {
 namespace moses {
 
 using namespace std;
-using boost::logic::tribool;
-using boost::logic::indeterminate;
 using namespace combo;
 
 void metapopulation::set_diversity()
