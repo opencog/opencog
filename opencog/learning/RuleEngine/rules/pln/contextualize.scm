@@ -49,11 +49,13 @@
                 (ExecutionLink
                     (GroundedSchemaNode "scm: pln-formula-context")
                     (ListLink
+                        ; this ContextLink is the desired output
                         (ContextLink
                             (VariableNode "$C")
                             (InheritanceLink
                                 (VariableNode "$A")
                                 (VariableNode "$B")))
+                        ; the 2nd argument of pln-formula-context
                         (InheritanceLink
                             (AndLink
                                 (VariableNode "$C")
@@ -76,25 +78,25 @@
                 (VariableTypeNode "PredicateNode"))
             (VariableNode "$B")
             (VariableNode "$C"))
-       (ImplicationLink
-           (EvaluationLink
-               (VariableNode "$A")
-               (AndLink
-                   (VariableNode "$C")
-                   (VariableNode "$B")))
-           (ExecutionLink
-               (GroundedSchemaNode "scm: pln-formula-context")
-               (ListLink
-                   (ContextLink
-                       (VariableNode "$C")
-                       (EvaluationLink
-                           (VariableNode "$A")
-                           (VariableNode "$B")))
-                   (EvaluationLink
-                       (VariableNode "$A")
-                       (AndLink
-                           (VariableNode "$C")
-                           (VariableNode "$B"))))))))
+        (ImplicationLink
+            (EvaluationLink
+                (VariableNode "$A")
+                (AndLink
+                    (VariableNode "$C")
+                    (VariableNode "$B")))
+            (ExecutionLink
+                (GroundedSchemaNode "scm: pln-formula-context")
+                (ListLink
+                    (ContextLink
+                        (VariableNode "$C")
+                        (EvaluationLink
+                            (VariableNode "$A")
+                            (VariableNode "$B")))
+                    (EvaluationLink
+                        (VariableNode "$A")
+                        (AndLink
+                            (VariableNode "$C")
+                            (VariableNode "$B"))))))))
 
 ;----------------------------------------------------------------------
 ; b)
