@@ -44,6 +44,8 @@
 // indeterminism
 // #define ENABLE_DST_CACHE
 
+class metapopulationUTest;
+
 namespace opencog {
 namespace moses {
 
@@ -90,7 +92,7 @@ public:
     metapopulation(const std::vector<combo_tree>& bases,
                    behave_cscore& sc,
                    const metapop_parameters& pa = metapop_parameters()) :
-        params(pa),
+        _params(pa),
         _cscorer(sc),
         _merge_count(0),
         _best_cscore(worst_composite_score),
@@ -104,7 +106,7 @@ public:
     metapopulation(const combo_tree& base,
                    behave_cscore& sc,
                    const metapop_parameters& pa = metapop_parameters()) :
-        params(pa),
+        _params(pa),
         _cscorer(sc),
         _merge_count(0),
         _best_cscore(worst_composite_score),
@@ -149,65 +151,6 @@ public:
         return _best_candidates.begin()->get_tree();
     }
 
-    // ------------------- Diversity-realted parts --------------------
-private:
-    typedef diversity_parameters::dp_t dp_t;  // diversity_penalty type
-
-    /**
-     * Distort a diversity penalty component between 2
-     * candidates. (actually not used apart from a comment of
-     * aggregated_dps)
-     */
-    dp_t distort_dp(dp_t dp) const {
-        return pow(dp, params.diversity.exponent);
-    }
-    /**
-     * The inverse function of distort_dp normalized by the vector
-     * size. Basically
-     *
-     * aggregated_dps(sum_i distort_dp(x_i), N) == generalized_mean(x)
-     * where N is the size of x.
-     */
-    dp_t aggregated_dps(dp_t ddp_sum, unsigned N) const {
-        return pow(ddp_sum / N, 1.0 / params.diversity.exponent);
-    }
-
-    /**
-     * Compute the diversity penalty for all models of the metapopulation.
-     *
-     * If the diversity penalty is enabled, then punish the scores of
-     * those exemplars that are too similar to the previous ones.
-     * This may not make any difference for the first dozen exemplars
-     * choosen, but starts getting important once the metapopulation
-     * gets large, and the search bogs down.
-     *
-     * XXX The implementation here results in a lot of copying of
-     * behavioral scores and combo trees, and thus could hurt
-     * performance by quite a bit.  To avoid this, we'd need to change
-     * the use of scored_combo_tree_set in this class. This would be
-     * a fairly big task, and it's currently not clear that its worth
-     * the effort, as diversity_penalty is not yet showing promising
-     * results...
-     */
-    void set_diversity();
-
-public:
-    // Structure holding stats about diversity
-    struct diversity_stats
-    {
-        double count;    // number of pairs of candidates considered
-        double mean;     // average bscore distance between all candidates
-        double std;      // std dev bscore distance between all candidates
-        double min;      // min bscore distance between all candidates
-        double max;      // max bscore distance between all candidates
-    };
-
-    /**
-     * Gather statistics about the diversity of the n best candidates
-     * (if n is negative then all candidates are included)
-     */
-    diversity_stats gather_diversity_stats(int n);
-
     // ---------------- Deme-expansion-related -----------------------
 public:
     /**
@@ -243,7 +186,7 @@ private:
     //
     score_t useful_score_range() const
     {
-        return params.complexity_temperature * 30.0 / 100.0;
+        return _params.complexity_temperature * 30.0 / 100.0;
     }
 
     // -------------------------- Merge related ----------------------
@@ -317,9 +260,77 @@ private:
     // Trim down demes before merging based the scores
     void trim_down_demes(boost::ptr_vector<deme_t>& demes) const;
     
+    // ------------------- Diversity-realted parts --------------------
+private:
+    typedef diversity_parameters::dp_t dp_t;  // diversity_penalty type
+
+    /**
+     * Distort a diversity penalty component between 2
+     * candidates. (actually not used apart from a comment of
+     * aggregated_dps)
+     */
+    dp_t distort_dp(dp_t dp) const {
+        return pow(dp, _params.diversity.exponent);
+    }
+    /**
+     * The inverse function of distort_dp normalized by the vector
+     * size. Basically
+     *
+     * aggregated_dps(sum_i distort_dp(x_i), N) == generalized_mean(x)
+     * where N is the size of x.
+     */
+    dp_t aggregated_dps(dp_t ddp_sum, unsigned N) const {
+        return pow(ddp_sum / N, 1.0 / _params.diversity.exponent);
+    }
+
+    /**
+     * Compute the diversity penalty for all models of the metapopulation.
+     *
+     * If the diversity penalty is enabled, then punish the scores of
+     * those exemplars that are too similar to the previous ones.
+     * This may not make any difference for the first dozen exemplars
+     * choosen, but starts getting important once the metapopulation
+     * gets large, and the search bogs down.
+     *
+     * XXX The implementation here results in a lot of copying of
+     * behavioral scores and combo trees, and thus could hurt
+     * performance by quite a bit.  To avoid this, we'd need to change
+     * the use of scored_combo_tree_set in this class. This would be
+     * a fairly big task, and it's currently not clear that its worth
+     * the effort, as diversity_penalty is not yet showing promising
+     * results...
+     */
+    void set_diversity();
+
+public:
+    // Structure holding stats about diversity
+    struct diversity_stats
+    {
+        double count;    // number of pairs of candidates considered
+        double mean;     // average bscore distance between all candidates
+        double std;      // std dev bscore distance between all candidates
+        double min;      // min bscore distance between all candidates
+        double max;      // max bscore distance between all candidates
+    };
+
+    /**
+     * Gather statistics about the diversity of the n best candidates
+     * (if n is negative then all candidates are included)
+     */
+    diversity_stats gather_diversity_stats(int n);
+
+    /**
+     * Return true if the diversity mechanism is enabled. This mechanism
+     * tries to make sure that the metapopulation is as diverse as posible,
+     * thus, in principle, speeding learning.
+     */
+    bool diversity_enabled() const {
+        return _params.diversity.pressure > 0.0;
+    }
+
     // --------------------- Domination-related stuff --------------------
 private:
-    friend class metapopulationUTest;  // the tester tests the domination code...
+    friend class ::metapopulationUTest;  // the tester tests the domination code...
 
     typedef std::pair<scored_combo_tree_set,
                       scored_combo_tree_set> scored_combo_tree_set_pair;
@@ -499,10 +510,9 @@ public:
                bool output_visited = false,
                bool output_only_best = false);
 
-public:
-    const metapop_parameters& params;
-
 protected:
+    const metapop_parameters& _params;
+
     behave_cscore& _cscorer;
 
     scored_combo_tree_ptr_set _scored_trees;
@@ -540,8 +550,8 @@ protected:
     struct cached_dst
     {
         // ctor
-        cached_dst(const diversity_parameters& _dparams)
-            : dparams(_dparams), misses(0), hits(0) {}
+        cached_dst(const diversity_parameters& dparams)
+            : _dparams(dparams), misses(0), hits(0) {}
 
         // We use a std::set instead of a std::pair, little
         // optimization to deal with the symmetry of the distance
@@ -563,7 +573,7 @@ protected:
         // cache
         boost::shared_mutex mutex;
 
-        const diversity_parameters& dparams;
+        const diversity_parameters& _dparams;
         std::atomic<unsigned> misses, hits;
         std::unordered_map<ptr_pair, dp_t, boost::hash<ptr_pair>> cache;
     };

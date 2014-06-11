@@ -95,7 +95,7 @@ void metapopulation::set_diversity()
 
     // if diversity_exponent is negative or null then the generalized
     // mean is replaced by the max
-    bool dp_max = params.diversity.exponent <= 0.0;
+    bool dp_max = _params.diversity.exponent <= 0.0;
 
     // Update the diversity penalty of the candidate according to its
     // diversity distance to the pool
@@ -119,8 +119,8 @@ void metapopulation::set_diversity()
                       "when some of its components are negative. "
                       "If that is the case you might want to switch to the angular "
                       "distance.");
-            dp_t last_dp = params.diversity.dst2dp(last_dst),
-            last_ddp = dp_max ? last_dp : pow(last_dp, params.diversity.exponent);
+            dp_t last_dp = _params.diversity.dst2dp(last_dst),
+            last_ddp = dp_max ? last_dp : pow(last_dp, _params.diversity.exponent);
 
             // // debug
             // ++dp_count;
@@ -134,12 +134,12 @@ void metapopulation::set_diversity()
                 adp = v.second;
             } else {
                 v.second += last_ddp;
-                unsigned N = params.diversity.normalize ? pool.size() : 1;
+                unsigned N = _params.diversity.normalize ? pool.size() : 1;
                 adp = this->aggregated_dps(v.second, N);
             }
 
             // update v.first
-            if (params.diversity.dst2dp_type == params.diversity.pthpower)
+            if (_params.diversity.dst2dp_type == _params.diversity.pthpower)
                 bsct.get_composite_score().multiply_diversity = true;
             bsct.get_composite_score().set_diversity_penalty(adp);
 
@@ -240,7 +240,7 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     if (size() == 1) {
         scored_combo_tree_ptr_set::const_iterator selex = _scored_trees.cbegin();
         const combo_tree& tr = selex->get_tree();
-        if (params.revisit + 1 > _visited_exemplars[tr]) // not enough visited
+        if (_params.revisit + 1 > _visited_exemplars[tr]) // not enough visited
             _visited_exemplars[tr]++;
         else selex = _scored_trees.cend();    // enough visited
 
@@ -262,7 +262,7 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
 
         // Skip exemplars that have been visited enough
         const combo_tree& tr = bsct.get_tree();
-        if (params.revisit + 1 > _visited_exemplars[tr]) {
+        if (_params.revisit + 1 > _visited_exemplars[tr]) {
             probs.push_back(sc);
             found_exemplar = true;
             if (highest_score < sc) highest_score = sc;
@@ -281,7 +281,7 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     // roullete choice of exemplars with equal scores, but
     // differing complexities. Empirical work on 4-parity suggests
     // that a temperature of 3 or 4 works best.
-    score_t inv_temp = 100.0f / params.complexity_temperature;
+    score_t inv_temp = 100.0f / _params.complexity_temperature;
     score_t sum = 0.0f;
     // Convert scores into (non-normalized) probabilities
     for (score_t& p : probs) {
@@ -339,14 +339,14 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
 
     // Note that merge_nondominated() is very cpu-expensive and
     // complex...
-    if (params.diversity.include_dominated) {
+    if (_params.diversity.include_dominated) {
         logger().debug("Insert all candidates in the metapopulation");
         for (const auto& cnd : candidates)
             _scored_trees.insert(new scored_combo_tree(cnd));
     } else {
         logger().debug("Insert non-dominated candidates in the metapopulation");
         unsigned old_size = size();
-        merge_nondominated(candidates, params.jobs);
+        merge_nondominated(candidates, _params.jobs);
         logger().debug("Inserted %u non-dominated candidates "
                        "in the metapopulation", size() - old_size);
     }
@@ -429,8 +429,8 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         // But also, the deme size can be smaller than the number of evals,
         // if the deme was shrunk to save space.
         unsigned max_pot_cnd = std::min(evals_seq[i], (unsigned)demes[i].size());
-        if (params.max_candidates >= 0)
-            max_pot_cnd = std::min(max_pot_cnd, (unsigned)params.max_candidates);
+        if (_params.max_candidates >= 0)
+            max_pot_cnd = std::min(max_pot_cnd, (unsigned)_params.max_candidates);
         unsigned total_max_pot_cnd = pot_candidates.size() + max_pot_cnd;
 
         stringstream ss;
@@ -484,9 +484,9 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
     // Behavioural scores are needed only if domination-based
     // merging is asked for, or if the diversity penalty is in use.
     // Save CPU time by not computing them.
-    if (params.keep_bscore
-        || !params.diversity.include_dominated
-        || params.diversity.pressure > 0.0)
+    if (_params.keep_bscore
+        || !_params.diversity.include_dominated
+        || _params.diversity.pressure > 0.0)
     {
         logger().debug("Compute behavioral score of %d selected candidates",
                        pot_candidates.size());
@@ -536,7 +536,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
     logger().debug("Selected %u candidates (%u were in the metapopulation)",
                    candidates.size(), pot_candidates.size()-candidates.size());
 
-    if (!params.diversity.include_dominated) {
+    if (!_params.diversity.include_dominated) {
 
         logger().debug("Remove dominated candidates");
         if (logger().isFineEnabled()) {
@@ -549,7 +549,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         }
 
         size_t old_size = candidates.size();
-        remove_dominated(candidates, params.jobs);
+        remove_dominated(candidates, _params.jobs);
 
         logger().debug("Removed %u dominated candidates out of %u",
                        old_size - candidates.size(), old_size);
@@ -567,12 +567,12 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
     update_best_candidates(candidates);
 
     bool done = false;
-    if (params.merge_callback)
-        done = (*params.merge_callback)(candidates, params.callback_user_data);
+    if (_params.merge_callback)
+        done = (*_params.merge_callback)(candidates, _params.callback_user_data);
     merge_candidates(candidates);
 
     // update diversity penalties
-    if (params.diversity.pressure > 0.0)
+    if (_params.diversity.pressure > 0.0)
         set_diversity();
 
     // resize the metapopulation
@@ -622,7 +622,7 @@ void metapopulation::resize_metapop()
     // than cap as defined by the function of the number of
     // generations defined below
     //
-    // popsize cap =  params.cap_coef*(x+250)*(1+2*exp(-x/500))
+    // popsize cap =  _params.cap_coef*(x+250)*(1+2*exp(-x/500))
     //
     // when x is the number of generations so far.
     //
@@ -631,7 +631,7 @@ void metapopulation::resize_metapop()
     // size_t nbelts = get_bscore(*begin()).size();
     // double cap = 1.0e6 / double(nbelts);
     _merge_count++;
-    double cap = params.cap_coef;
+    double cap = _params.cap_coef;
     cap *= _merge_count + 250.0;
     cap *= 1 + 2.0*exp(- double(_merge_count) / 500.0);
     size_t popsz_cap = cap;
@@ -885,7 +885,7 @@ metapopulation::cached_dst::operator()(const scored_combo_tree* cl,
         }
     }
     // miss
-    dp_t dst = dparams.dst(cl->get_bscore(), cr->get_bscore());
+    dp_t dst = _dparams.dst(cl->get_bscore(), cr->get_bscore());
 
     // // debug
     // logger().fine("&cl = %p, &cr = %p, dst = %f", cl, cr, dst);
@@ -897,7 +897,7 @@ metapopulation::cached_dst::operator()(const scored_combo_tree* cl,
         return cache[cts] = dst;
     }
 #else
-    return dparams.dst(cl->get_bscore(), cr->get_bscore());
+    return _dparams.dst(cl->get_bscore(), cr->get_bscore());
 #endif
 }
 
