@@ -481,7 +481,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
     logger().debug("Selected %u candidates to be merged",
                    pot_candidates.size());
 
-    // Behavioural scores are needed only if domination-based
+    // Behavioral scores are needed only if domination-based
     // merging is asked for, or if the diversity penalty is in use.
     // Save CPU time by not computing them.
     if (_params.keep_bscore
@@ -624,10 +624,19 @@ void metapopulation::resize_metapop()
     //
     // popsize cap =  _params.cap_coef*(x+250)*(1+2*exp(-x/500))
     //
-    // when x is the number of generations so far.
+    // when x is the number of generations so far. The goal of capping
+    // is to keep the metapop small enough that it does not blow out the
+    // available RAM on the machine, but large enough that deme expansion
+    // can always find some suitable exemplar to explore.  The above
+    // formula was arrived at via some ad-hoc experimentation.  A default
+    // value of _params.cap_coef=50 seems to work well.
     //
     // XXX TODO fix the cap so its more sensitive to the size of
-    // each exemplar, right!?
+    // each exemplar, right!? So if the exemplars are huges, then the
+    // population size has to be smaller.  ... On the other hand, if
+    // the exemplars are huge, then MOSES has probably wandered into
+    // a bad corner, and is failing to explore a big enough space.
+    //
     // size_t nbelts = get_bscore(*begin()).size();
     // double cap = 1.0e6 / double(nbelts);
     _merge_count++;

@@ -1114,6 +1114,7 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
     // Set metapopulation parameters
     meta_params.max_candidates = max_candidates;
     meta_params.revisit = revisit;
+    meta_params.do_boosting = boosting;
     meta_params.keep_bscore = output_bscore;
     meta_params.complexity_temperature = complexity_temperature;
     meta_params.cap_coef = cap_coef;

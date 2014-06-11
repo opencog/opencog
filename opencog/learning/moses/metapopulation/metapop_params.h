@@ -110,9 +110,10 @@ struct metapop_parameters
                        diversity_parameters _diversity = diversity_parameters()) :
         max_candidates(_max_candidates),
         revisit(_revisit),
+        do_boosting(false),
         keep_bscore(false),
         complexity_temperature(_complexity_temperature),
-        cap_coef(50),
+        cap_coef(50.0),
         jobs(_jobs),
         diversity(_diversity),
         merge_callback(NULL),
@@ -127,8 +128,13 @@ struct metapop_parameters
     // then an exemplar can only be visited once.
     unsigned revisit;
 
-    // keep track of the bscores even if not needed (in case the user
-    // wants to keep them around)
+    // If true, then an Ada-Boost-style algorithm is applied during
+    // the metapopulation merge. In this case, the scorer must be
+    // capable of maintaining sample weights.
+    bool do_boosting;
+
+    // Keep track of the bscores even if not needed (in case the user
+    // wants to keep them around, e.g. for debug printing.)
     bool keep_bscore;
 
     // Boltzmann temperature ...
@@ -139,7 +145,12 @@ struct metapop_parameters
     //
     // cap = cap_coef*(x+250)*(1+2*exp(-x/500))
     //
-    // where x is the number of generations so far
+    // where x is the number of generations so far.  The goal of capping
+    // is to keep the metapop small enough that it does not blow out the
+    // available RAM on the machine, but large enough that deme expansion
+    // can always find some suitable exemplar to explore.  The above
+    // formula was arrived at via some ad-hoc experimentation.  A default
+    // value of cap_coef=50 seems to work well.
     double cap_coef;
 
     // Number of jobs for metapopulation maintenance such as merging
