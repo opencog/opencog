@@ -6,8 +6,16 @@
 FROM opencog/opencog-deps
 MAINTAINER David Hart "dhart@opencog.org"
 
-RUN apt-get -y update && \
-    apt-get -y install python-pip python-dev
+RUN apt-get update --assume-yes && \
+    apt-get install python-pip \
+                    python-dev \
+		    locales \
+            --assume-yes
+
+RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
 RUN pip install buildbot-slave==0.8.8
 
