@@ -67,6 +67,123 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars)
     merge_candidates(candidates);
 }
 
+// -------------------------------------------------------------------
+// Exemplar selection-related code
+
+void metapopulation::log_selected_exemplar(scored_combo_tree_ptr_set::const_iterator exemplar_it)
+{
+    if (not logger().isDebugEnabled()) return;
+
+    if (exemplar_it == _scored_trees.cend()) {
+        logger().debug() << "No exemplar found";
+    } else {
+        const auto& xmplr = *exemplar_it;
+        unsigned pos = std::distance(_scored_trees.cbegin(), exemplar_it) + 1,
+            nth_vst = _visited_exemplars[xmplr.get_tree()];
+
+        logger().debug() << "Selected the " << pos
+                         << "th exemplar, from deme " << xmplr.get_demeID()
+                         << ", for the " << nth_vst << "th time(s)";
+        logger().debug() << "Exemplar tree : " << xmplr.get_tree();
+        logger().debug() << "With composite score : "
+                         << xmplr.get_composite_score();
+    }
+}
+
+scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
+{
+    OC_ASSERT(!empty(), "Empty metapopulation in select_exemplar().");
+
+    logger().debug("Select exemplar");
+
+    // Shortcut for special case, as sometimes, the very first time
+    // though, the score is invalid.
+    if (size() == 1) {
+        scored_combo_tree_ptr_set::const_iterator selex = _scored_trees.cbegin();
+        const combo_tree& tr = selex->get_tree();
+        if (_params.revisit + 1 > _visited_exemplars[tr]) // not enough visited
+            _visited_exemplars[tr]++;
+        else selex = _scored_trees.cend();    // enough visited
+
+        log_selected_exemplar(selex);
+        return selex;
+    }
+
+    vector<score_t> probs;
+    // Set flag to true, when a suitable exemplar is found.
+    bool found_exemplar = false;
+#define UNEVALUATED_SCORE -1.0e37
+    score_t highest_score = UNEVALUATED_SCORE;
+
+    // The exemplars are stored in order from best score to worst;
+    // the iterator follows this order.
+    for (const scored_combo_tree& bsct : *this) {
+
+        score_t sc = bsct.get_penalized_score();
+
+        // Skip exemplars that have been visited enough
+        const combo_tree& tr = bsct.get_tree();
+        if (_params.revisit + 1 > _visited_exemplars[tr]) {
+            probs.push_back(sc);
+            found_exemplar = true;
+            if (highest_score < sc) highest_score = sc;
+        } else // If the tree is visited enough then put a
+               // nan score so we know it must be ignored
+            probs.push_back(NAN);
+    }
+
+    // Nothing found, we've already tried them all.
+    if (!found_exemplar) {
+        log_selected_exemplar(_scored_trees.cend());
+        return _scored_trees.cend();
+    }
+
+    // Compute the probability normalization, needed for the
+    // roullete choice of exemplars with equal scores, but
+    // differing complexities. Empirical work on 4-parity suggests
+    // that a temperature of 3 or 4 works best.
+    score_t inv_temp = 100.0f / _params.complexity_temperature;
+    score_t sum = 0.0f;
+    // Convert scores into (non-normalized) probabilities
+    for (score_t& p : probs) {
+        // If p is invalid (or already visited, because it has nan)
+        // then it is skipped, i.e. assigned probability of 0.0f
+        if (isfinite(p))
+            p = expf((p - highest_score) * inv_temp);
+        else
+            p = 0.0;
+
+        sum += p;
+    }
+
+    // log the distribution probs
+    if (logger().isFineEnabled())
+    {
+        stringstream ss;
+        ss << "Non-normalized probability distribution of candidate selection: ";
+        ostreamContainer(ss, probs);
+        logger().fine() << ss.str();
+    }
+
+    OC_ASSERT(sum > 0.0f, "There is an internal bug, please fix it");
+
+    size_t fwd = distance(probs.begin(), roulette_select(probs.begin(),
+                                                         probs.end(),
+                                                         sum, randGen()));
+    // cout << "select_exemplar(): sum=" << sum << " fwd =" << fwd
+    // << " size=" << probs.size() << " frac=" << fwd/((float)probs.size()) << endl;
+    scored_combo_tree_ptr_set::const_iterator selex = std::next(_scored_trees.begin(), fwd);
+
+    // We increment _visited_exemplar
+    _visited_exemplars[selex->get_tree()]++;
+
+    log_selected_exemplar(selex);
+    return selex;
+}
+
+// -------------------------------------------------------------------
+// deme merging related code
+
 void metapopulation::set_diversity()
 {
     logger().debug("Compute diversity penalties of the metapopulation");
@@ -209,117 +326,6 @@ void metapopulation::set_diversity()
     }
 }
 
-void metapopulation::log_selected_exemplar(scored_combo_tree_ptr_set::const_iterator exemplar_it)
-{
-    if (not logger().isDebugEnabled()) return;
-
-    if (exemplar_it == _scored_trees.cend()) {
-        logger().debug() << "No exemplar found";
-    } else {
-        const auto& xmplr = *exemplar_it;
-        unsigned pos = std::distance(_scored_trees.cbegin(), exemplar_it) + 1,
-            nth_vst = _visited_exemplars[xmplr.get_tree()];
-
-        logger().debug() << "Selected the " << pos
-                         << "th exemplar, from deme " << xmplr.get_demeID()
-                         << ", for the " << nth_vst << "th time(s)";
-        logger().debug() << "Exemplar tree : " << xmplr.get_tree();
-        logger().debug() << "With composite score : "
-                         << xmplr.get_composite_score();
-    }
-}
-
-scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
-{
-    OC_ASSERT(!empty(), "Empty metapopulation in select_exemplar().");
-
-    logger().debug("Select exemplar");
-
-    // Shortcut for special case, as sometimes, the very first time
-    // though, the score is invalid.
-    if (size() == 1) {
-        scored_combo_tree_ptr_set::const_iterator selex = _scored_trees.cbegin();
-        const combo_tree& tr = selex->get_tree();
-        if (_params.revisit + 1 > _visited_exemplars[tr]) // not enough visited
-            _visited_exemplars[tr]++;
-        else selex = _scored_trees.cend();    // enough visited
-
-        log_selected_exemplar(selex);
-        return selex;
-    }
-
-    vector<score_t> probs;
-    // Set flag to true, when a suitable exemplar is found.
-    bool found_exemplar = false;
-#define UNEVALUATED_SCORE -1.0e37
-    score_t highest_score = UNEVALUATED_SCORE;
-
-    // The exemplars are stored in order from best score to worst;
-    // the iterator follows this order.
-    for (const scored_combo_tree& bsct : *this) {
-
-        score_t sc = bsct.get_penalized_score();
-
-        // Skip exemplars that have been visited enough
-        const combo_tree& tr = bsct.get_tree();
-        if (_params.revisit + 1 > _visited_exemplars[tr]) {
-            probs.push_back(sc);
-            found_exemplar = true;
-            if (highest_score < sc) highest_score = sc;
-        } else // If the tree is visited enough then put a
-               // nan score so we know it must be ignored
-            probs.push_back(NAN);
-    }
-
-    // Nothing found, we've already tried them all.
-    if (!found_exemplar) {
-        log_selected_exemplar(_scored_trees.cend());
-        return _scored_trees.cend();
-    }
-
-    // Compute the probability normalization, needed for the
-    // roullete choice of exemplars with equal scores, but
-    // differing complexities. Empirical work on 4-parity suggests
-    // that a temperature of 3 or 4 works best.
-    score_t inv_temp = 100.0f / _params.complexity_temperature;
-    score_t sum = 0.0f;
-    // Convert scores into (non-normalized) probabilities
-    for (score_t& p : probs) {
-        // If p is invalid (or already visited, because it has nan)
-        // then it is skipped, i.e. assigned probability of 0.0f
-        if (isfinite(p))
-            p = expf((p - highest_score) * inv_temp);
-        else
-            p = 0.0;
-
-        sum += p;
-    }
-
-    // log the distribution probs
-    if (logger().isFineEnabled())
-    {
-        stringstream ss;
-        ss << "Non-normalized probability distribution of candidate selection: ";
-        ostreamContainer(ss, probs);
-        logger().fine() << ss.str();
-    }
-
-    OC_ASSERT(sum > 0.0f, "There is an internal bug, please fix it");
-
-    size_t fwd = distance(probs.begin(), roulette_select(probs.begin(),
-                                                         probs.end(),
-                                                         sum, randGen()));
-    // cout << "select_exemplar(): sum=" << sum << " fwd =" << fwd
-    // << " size=" << probs.size() << " frac=" << fwd/((float)probs.size()) << endl;
-    scored_combo_tree_ptr_set::const_iterator selex = std::next(_scored_trees.begin(), fwd);
-
-    // We increment _visited_exemplar
-    _visited_exemplars[selex->get_tree()]++;
-
-    log_selected_exemplar(selex);
-    return selex;
-}
-
 void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
 {
     if (logger().isDebugEnabled()) {
@@ -350,6 +356,11 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
         logger().debug("Inserted %u non-dominated candidates "
                        "in the metapopulation", size() - old_size);
     }
+}
+
+bool metapopulation::has_been_visited(const combo_tree& tr) const
+{
+    return _visited_exemplars.find(tr) != _visited_exemplars.cend();
 }
 
 bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
@@ -485,8 +496,8 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
     // merging is asked for, or if the diversity penalty is in use.
     // Save CPU time by not computing them.
     if (_params.keep_bscore
-        || !_params.diversity.include_dominated
-        || _params.diversity.pressure > 0.0)
+        or not _params.diversity.include_dominated
+        or diversity_enabled())
     {
         logger().debug("Compute behavioral score of %d selected candidates",
                        pot_candidates.size());
@@ -572,7 +583,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
     merge_candidates(candidates);
 
     // update diversity penalties
-    if (_params.diversity.pressure > 0.0)
+    if (diversity_enabled())
         set_diversity();
 
     // resize the metapopulation
@@ -812,6 +823,9 @@ void metapopulation::log_best_candidates() const
     }
 }
 
+// -------------------------------------------------------------------
+// Misc routines
+
 // Like above, but using std::cout.
 void metapopulation::print(long n,
            bool output_score,
@@ -822,11 +836,6 @@ void metapopulation::print(long n,
 {
     ostream(std::cout, n, output_score, output_penalty,
             output_bscore, output_visited, output_only_best);
-}
-
-bool metapopulation::has_been_visited(const combo_tree& tr) const
-{
-    return _visited_exemplars.find(tr) != _visited_exemplars.cend();
 }
 
 
