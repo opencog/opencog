@@ -27,21 +27,21 @@
                 (InheritanceLink
                     (VariableNode "$A")
                     (VariableNode "$B")))
-                (ExecutionLink
-                    (GroundedSchemaNode "scm: pln-formula-context")
-                    (ListLink
-                        (InheritanceLink
-                            (AndLink
-                                (VariableNode "$C")
-                                (VariableNode "$A"))
-                            (AndLink
-                                (VariableNode "$C")
-                                (VariableNode "$B")))
-                        (ContextLink
+            (ExecutionLink
+                (GroundedSchemaNode "scm: pln-formula-context")
+                (ListLink
+                    (InheritanceLink
+                        (AndLink
                             (VariableNode "$C")
-                            (InheritanceLink
-                                (VariableNode "$A")
-                                (VariableNode "$B"))))))))
+                            (VariableNode "$A"))
+                        (AndLink
+                            (VariableNode "$C")
+                            (VariableNode "$B")))
+                    (ContextLink
+                        (VariableNode "$C")
+                        (InheritanceLink
+                            (VariableNode "$A")
+                            (VariableNode "$B"))))))))
 
 ; Inverse of (pln-rule-contextualize-evaluation):
 ; in an EvaluationLink, the PredicateNode is not 'andified';
