@@ -16,6 +16,15 @@ The following rules are defined for the corresponding rule bases:
 - PLN:
     - pln-rule-deduction
     - pln-rule-modus-ponens
+    - Context rules:
+        - pln-rule-contextualize-inheritance
+        - pln-rule-contextualize-evaluation
+        - pln-rule-contextualize-subset
+        - pln-rule-decontextualize-inheritance
+        - pln-rule-decontextualize-evaluation
+        - pln-rule-decontextualize-subset
+        - pln-rule-context-free-to-sensitive
+        (here, the exact formula is still unclear)
 
 ## Additional instructions
 
