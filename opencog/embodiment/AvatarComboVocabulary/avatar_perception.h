@@ -269,7 +269,7 @@ static const perception_basic_description pbd[] = {
 
     { id::is_last_agent_action, "is_last_agent_action", "->(union(definite_object indefinite_object wild_card) action_definite_object arg_list(union(definite_object indefinite_object)) boolean)" },
     { id::is_last_avatar_schema,   "is_last_avatar_schema",   "->(action_definite_object action_result arg_list(union(definite_object indefinite_object wild_card)) boolean)" },
-    { id::is_last_group_command, "is_last_group_command", "->(definite_object definite_object arg_list(union(definite_object contin)) boolean)" }
+    { id::is_last_group_command, "is_last_group_command", "->(definite_object definite_object arg_list(union(definite_object contin)) boolean)" },
 
     { id::is_battery_ahead, "is_battery_ahead", "->(boolean)" }
 };
@@ -371,7 +371,7 @@ static const perception_property_description ppd[] = {
     { id::is_proportional_next, false,   false,     false,      true,     true,     false },
     { id::is_last_agent_action, false,   false,     false,      false,    false,    false },
     { id::is_last_avatar_schema,   false,   false,     false,      false,    false,    false },
-    { id::is_last_group_command,   false,   false,     false,      false,    false,    false }
+    { id::is_last_group_command,   false,   false,     false,      false,    false,    false },
 
     { id::is_battery_ahead,        false,   false,     false,      false,    false,    false }
 };
