@@ -2,7 +2,10 @@ __author__ = 'sebastian'
 
 from opencog.atomspace import types, TruthValue, get_type_name
 from pln.rules import Rule
-import formulas
+
+"""
+Rules to convert certain types of links into ContextLinks.
+"""
 
 
 class InheritanceToContextRule(Rule):
@@ -33,9 +36,9 @@ class InheritanceToContextRule(Rule):
                       inputs=[chainer.link(types.InheritanceLink,  # InheritanceLink
                                            [chainer.link(types.AndLink, [c, a]),  # C ANDLink A
                                             chainer.link(types.AndLink, [c, b])])],  # C ANDLink B
-                      outputs=[chainer.link(types.ContextLink,
+                      outputs=[chainer.link(types.ContextLink,  # ContextLink
                                             [c,
-                                             chainer.link(types.InheritanceLink,
+                                             chainer.link(types.InheritanceLink,  # InheritanceLink
                                                           [a, b])])])
 
 
@@ -72,3 +75,16 @@ class EvaluationToContextRule(Rule):
                                               [concept_c, evaluation_link])]
 
         return context_link, [tv]
+
+
+class SubsetToContext(Rule):
+
+    def __init__(self, chainer):
+        a = chainer.new_variable()
+        c = chainer.new_variable()
+
+        self.chainer = chainer
+        Rule.__init__(self,
+                      formula=None,
+                      inputs=[chainer.link(types.SubsetLink, [c, a])],
+                      outputs=[chainer.link(types.ContextLink, [c, a])])
