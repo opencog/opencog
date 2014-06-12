@@ -73,7 +73,6 @@ class EvaluationToContextRule(Rule):
                                                 [predicate_a, list_link])
             context_link = [self.chainer.link(types.ContextLink,
                                               [concept_c, evaluation_link])]
-
         return context_link, [tv]
 
 
@@ -88,3 +87,29 @@ class SubsetToContext(Rule):
                       formula=None,
                       inputs=[chainer.link(types.SubsetLink, [c, a])],
                       outputs=[chainer.link(types.ContextLink, [c, a])])
+
+
+class ContextToInheritance(Rule):
+
+    def __init__(self, chainer):
+        a = chainer.new_variable()
+        b = chainer.new_variable()
+        c = chainer.new_variable()
+
+        self.chainer = chainer
+        Rule.__init__(self,
+                      formula=None,
+                      inputs=[chainer.link(types.ContextLink,  # ContextLink
+                                            [c,
+                                             chainer.link(types.InheritanceLink,  # InheritanceLink
+                                                          [a, b])])],
+                      outputs=[chainer.link(types.InheritanceLink,  # InheritanceLink
+                                           [chainer.link(types.AndLink, [c, a]),  # C ANDLink A
+                                            chainer.link(types.AndLink, [c, b])])])  # C ANDLink B
+
+
+class ContextToEvaluation(Rule):
+
+
+
+
