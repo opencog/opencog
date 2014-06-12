@@ -72,7 +72,6 @@ static const pair<string, string> pop_size_ratio_opt("pop-size-ratio", "P");
 static const pair<string, string> max_score_opt("max-score", "A");
 static const pair<string, string> max_dist_opt("max-dist", "D");
 static const pair<string, string> max_candidates_opt("max-candidates", "M");
-static const pair<string, string> include_dominated_opt("include-dominated", "I");
 static const pair<string, string> complexity_temperature_opt("complexity-temperature", "v");
 static const pair<string, string> complexity_ratio_opt("complexity-ratio", "z");
 static const pair<string, string> discretize_threshold_opt("discretize-threshold", "R");

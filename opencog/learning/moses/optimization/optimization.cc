@@ -147,7 +147,7 @@ void print_stats_header(optim_stats *os, bool diversity)
         ss << "Stats: # \n"
            << "Stats: # Stats are tab-separated, ready for graphing.\n"
            << "Stats: # You can also use the script parse_log.py to extract a CSV file given a moses log file.\n"
-           << "Column explanation:\n"
+           << "Stats: # Column explanation:\n"
            << "Stats: # \n"
            << "Stats: # gen is the generation number.\n"
            << "Stats: # num_evals is the number of scoring function evaluations so far.\n"

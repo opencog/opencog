@@ -52,11 +52,15 @@ score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
 /// A behavioral score is a vector of scores, one per sample of a dataset.
 struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
 {
-    bscore_base() : _complexity_coef(0.0) {};
+    bscore_base() : _complexity_coef(0.0), _size(0) {};
     virtual ~bscore_base() {};
 
     /// Return the behavioral score for the candidate combo_tree
     virtual behavioral_score operator()(const combo_tree&) const = 0;
+
+    /// Return the size (length) of the behavioral_score that operator()
+    /// above would return.
+    virtual size_t size() const { return _size; }
 
     /// Return the best possible bscore achievable with this fitness
     /// function. This is useful for stopping MOSES when the best
@@ -119,6 +123,7 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
 
 protected:
     score_t _complexity_coef;
+    size_t _size;
 };
 
 /// Abstract base class for summing behavioral scores.

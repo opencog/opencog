@@ -43,6 +43,9 @@ ADD_LIBRARY (moses SHARED STATIC
 	moses/partial
 	moses/types
 
+	metapopulation/diversity
+	metapopulation/domination
+	metapopulation/merging
 	metapopulation/metapopulation
 	metapopulation/metapop_params
 

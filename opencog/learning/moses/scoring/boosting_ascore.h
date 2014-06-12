@@ -1,12 +1,10 @@
 /*
  * opencog/learning/moses/scoring/boosting_ascore.h
  *
- * Copyright (C) 2002-2008 Novamente LLC
- * Copyright (C) 2012,2013 Poulin Holdings LLC
  * Copyright (C) 2014 Aidyia Limited
  * All Rights Reserved
  *
- * Written by Moshe Looks, Nil Geisweiller, Linas Vepstas
+ * Written by Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,8 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _MOSES_BOOST_CSCORE_H
-#define _MOSES_BOOST_CSCORE_H
+#ifndef _MOSES_BOOST_ASCORE_H
+#define _MOSES_BOOST_ASCORE_H
 
 #include <vector>
 
@@ -47,16 +45,17 @@ namespace opencog { namespace moses {
 class boosting_ascore : public ascore_base
 {
 public:
-    boosting_ascore();
+    boosting_ascore(size_t);
 
     score_t operator()(const behavioral_score&) const;
 
 private:
     std::vector<double> _weights;
+    size_t _size;
 };
 
 
 } //~namespace moses
 } //~namespace opencog
 
-#endif // _MOSES_BOOST_CSCORE_H
+#endif // _MOSES_BOOST_ASCORE_H

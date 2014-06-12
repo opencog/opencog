@@ -66,6 +66,24 @@ std::vector<unsigned> get_indices(const std::vector<std::string>& labels,
 ///////////////////////////////////
 // Collection of useful visitors //
 ///////////////////////////////////
+//
+// The below is sort of weird, and may seeem wrong, and thus requires
+// some explanation. The visitors here are implemented in such a way
+// that if all features are the same (i.e. all elements in a row are
+// the same), then the visitor gets used.  This seems awfully backwards,
+// as normally, it is all of the samples in a column of the table that
+// all have exactly the same type, and not the rows!
+//
+// Notation: rows correspond to samples, columns are features.
+//
+// Anyway: this somewhat oddball visitor implementation was done to
+// save system RAM, because vector<variant<T1, ..., Tn>> takes a lot
+// more RAM than variant<vector<T1>, ..., vector<Tn>>.  In that sense,
+// this implementation "works". Unfortunately, its flawed, if any one
+// of the columns has a different type than the others.  Someday, the
+// design here should be changed, so that the space-savings is still
+// realized, while also allowing different types for different columns.
+// XXX FIXME TODO: change the implementation, per the above note.
 
 typedef std::vector<builtin> builtin_seq;
 typedef std::vector<contin_t> contin_seq;

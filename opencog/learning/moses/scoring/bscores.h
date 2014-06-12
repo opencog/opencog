@@ -60,9 +60,9 @@ struct logical_bscore : public bscore_base
 {
     template<typename Func>
     logical_bscore(const Func& func, int a)
-            : _target(func, a), _arity(a) {}
+            : _target(func, a), _arity(a) { _size = _target.size(); }
     logical_bscore(const combo_tree& tr, int a)
-            : _target(tr, a), _arity(a) {}
+            : _target(tr, a), _arity(a) { _size = _target.size(); }
 
     behavioral_score operator()(const combo_tree& tr) const;
 
