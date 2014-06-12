@@ -4,7 +4,8 @@ from opencog.atomspace import types, TruthValue, get_type_name
 from pln.rules import Rule
 
 """
-Rules to convert certain types of links into ContextLinks.
+Rules to convert certain types of links into ContextLinks
+and to convert these types of links back into ContextLinks.
 """
 
 
@@ -63,7 +64,7 @@ class EvaluationToContextRule(Rule):
         tv = inputs.tv
 
         if inputs.out[0].type == types.PredicateNode:
-            predicate_a = inputs.out[0].type
+            predicate_a = inputs.out[0]
             concept_c = inputs.out[1].out[0].out[0]
             concept_b = inputs.out[1].out[0].out[1]
 
@@ -109,6 +110,36 @@ class ContextToInheritance(Rule):
 
 
 class ContextToEvaluation(Rule):
+
+    def __init__(self, chainer):
+        a = chainer.new_variable()
+        b = chainer.new_variable()
+        c = chainer.new_variable()
+
+        self.chainer = chainer
+        Rule.__init__(self,
+                      formula=None,
+                      inputs=[chainer.link(types.ContextLink,  # ContextLink
+                                           [c,  # ConceptNode C
+                                            chainer.link(types.EvaluationLink, # EvaluationLink
+                                                         [a,  # PredicateNode A
+                                                          chainer.link(types.ListLink, [b])])])],
+                      outputs=[])
+
+    def custom_compute(self, inputs):
+        [inputs] = inputs
+        tv = inputs.tv
+
+        if inputs.out[1].out[0].type == types.PredicateNode:
+            predicate_a = inputs.out[1].out[0]
+            concept_c = inputs.out[0]
+            concept_b = inputs.out[1].out[1].out[0]
+
+            and_link = self.chainer.link(types.AndLink, [concept_c, concept_b])
+            list_link = self.chainer.link(types.ListLink, [and_link])
+            evaluation_link = self.chainer.link(types.EvaluationLink,
+                                                [predicate_a, list_link])
+        return evaluation_link, [tv]
 
 
 
