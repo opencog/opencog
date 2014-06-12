@@ -1,92 +1,74 @@
-from opencog.atomspace import types, TruthValue
+__author__ = 'sebastian'
+
+from opencog.atomspace import types, TruthValue, get_type_name
+from pln.rules import Rule
 import formulas
-from pln.rule import Rule
-
-# Todo:
-# It may be better to use SubsetLinks instead of ContextLinks, or at
-# least implicitly convert them.
-
-# (Context C x).tv = (Subset C x).tv
-# (Context C: Subset x y).tv = (Subset (x AND C) (y AND C))
-
-# DeductionRule produces
-# Context C: Subset x z
-# using
-# Context C: Subset x y
-# Context C: Subset y z
-# Context C: y
-# Context C: z
-
-# Special case for direct evaluation Rules.
-# Subset A B requires
-# Member x A, Member x B
-#
-# Context C: Subset A B requires
-# Member x A
-# Member x B
-# Member x C
-# or something. and then change the math.
-
-# Or
-
-class ContextualRule(Rule):
-    def __init__(self, chainer, rule):
-        self._chainer = chainer
-        self.name = 'Contextual' + rule.name
-        self.full_name = 'Contextual' + rule.full_name
-        self._outputs = rule._outputs
-        self._inputs = rule._inputs
-
-        self.formula = rule.formula
-
-        context = chainer.new_variable()
-        self._outputs = [self.contextlink(context, out)
-                         for out in self._outputs]
-
-        is_evaluation_rule = 'EvaluationRule' in rule.name
-        if is_evaluation_rule:
-            raise "Direct evaluation in a context is not handled yet"
-        else:
-            self._inputs = [self.contextlink(context, input)
-                            for input in self._inputs]
-
-        print self.name
-        print self._outputs
-        print self._inputs
-
-    def andlink(self, context, expression):
-        return self._chainer.link(types.AndLink, [context, expression])
-
-    def contextlink(self, context, expression):
-        return self._chainer.link(types.ContextLink, [context, expression])
-
-    def extract_context(self, contextlink):
-        # Todo: The variable 'context' is never used. Is it supposed to
-        # be returned instead of 'contextlink'?
-        context = contextlink.out[0]
-        expression = contextlink.out[1]
-
-        return contextlink, expression
 
 
-class AndToContextRule(Rule):
+class InheritanceToContextRule(Rule):
     """
-    (Context C: Subset x y).tv = (Subset (x AND C) (y AND C))
+    InheritanceLink <TV>    EvaluationLink <TV>         SubsetLink <TV>
+        ANDLink             PredicateNode A                C
+            C               ListLink                       A
+            A                   ANDLink
+        ANDLink                     C
+            C                       B
+            B
+    |-                      |-                          |-
+    ContextLink <TV>        ContextLink <TV>            ContextLink <TV>
+        C                       C                           C
+        InheritanceLink         EvaluationLink              A
+            A                       PredicateNode A
+            B                       ListLink
+                                        B
     """
-    def __init__(self, chainer, link_type):
-        A = chainer.new_variable()
-        B = chainer.new_variable()
-        C = chainer.new_variable()
+    def __init__(self, chainer):
+        a = chainer.new_variable()
+        b = chainer.new_variable()
+        c = chainer.new_variable()
 
-        link = chainer.link(link_type, [A, B])
-        contextlink = chainer.link(types.ContextLink, [C, link])
-
-        andAC = chainer.link(types.AndLink, [A, C])
-        andBC = chainer.link(types.AndLink, [B, C])
-        input = chainer.link(link_type, [andAC, andBC])
-
+        self.chainer = chainer
         Rule.__init__(self,
-                      formula=formulas.identityFormula,
-                      outputs=[contextlink],
-                      inputs=[input])
+                      formula=None,
+                      inputs=[chainer.link(types.InheritanceLink,  # InheritanceLink
+                                           [chainer.link(types.AndLink, [c, a]),  # C ANDLink A
+                                            chainer.link(types.AndLink, [c, b])])],  # C ANDLink B
+                      outputs=[chainer.link(types.ContextLink,
+                                            [c,
+                                             chainer.link(types.InheritanceLink,
+                                                          [a, b])])])
 
+
+class EvaluationToContextRule(Rule):
+
+    def __init__(self, chainer):
+        a = chainer.new_variable()
+        b = chainer.new_variable()
+        c = chainer.new_variable()
+
+        self.chainer = chainer
+        Rule.__init__(self,
+                      formula=None,
+                      inputs=[chainer.link(types.EvaluationLink,  # InheritanceLink
+                                           [a,  # PredicateNode A
+                                            chainer.link(types.ListLink, [  # ListLink
+                                                chainer.link(types.AndLink(c, b))])])],  # C ANDLink B
+                      outputs=[])
+
+    def custom_compute(self, inputs):
+        [inputs] = inputs
+        tv = inputs.tv
+
+        if inputs.out[0].type == types.PredicateNode:
+            predicate_a = inputs.out[0].type
+            concept_c = inputs.out[1].out[0].out[0]
+            concept_b = inputs.out[1].out[0].out[1]
+
+            list_link = self.chainer.link(types.ListLink,
+                                          [concept_b])
+            evaluation_link = self.chainer.link(types.EvaluationLink,
+                                                [predicate_a, list_link])
+            context_link = [self.chainer.link(types.ContextLink,
+                                              [concept_c, evaluation_link])]
+
+        return context_link, [tv]
