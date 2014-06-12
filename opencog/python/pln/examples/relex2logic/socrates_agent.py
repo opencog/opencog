@@ -1,6 +1,5 @@
 """
-Testing EvaluationToMember for correct output and examining the
-SatisfyingSet behavior
+Testing PLN inference on socrates-r2l.scm input
 """
 
 from opencog.cogserver import MindAgent
@@ -11,7 +10,7 @@ from pln.rules import *
 __author__ = 'Cosmo Harrigan'
 
 
-class EvaluationToMemberAgent(MindAgent):
+class SocratesAgent(MindAgent):
     def __init__(self):
         self.chainer = None
 
