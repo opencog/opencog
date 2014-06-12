@@ -111,7 +111,7 @@ private:
      * @param target The object whose feeling is to be retrieved.
      * @param time The current timestamp (used for cache searches).`
      */
-    static float getPhysiologicalFeeling(      AtomSpace& as,
+    static float getPhysiologicalFeeling(AtomSpace& as,
                                          const std::string& name,
                                          const std::string& target,
                                          unsigned long time);

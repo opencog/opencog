@@ -711,9 +711,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         combo::variable_unifier& vu)
 {
 
-    OC_ASSERT(
-                     is_perception(*it),
-                     "It is assumed that '*it' is a perception");
+    OC_ASSERT(is_perception(*it), "It is assumed that '*it' is a perception");
 
     perception p = get_perception(*it);
     if (p == get_instance(id::is_null)) { //just check directly
@@ -734,11 +732,8 @@ combo::vertex WorldWrapperUtil::evalPerception(
         return combo::bool_to_vertex(get_definite_object(v) == id::null_obj);
 
     } else if (p == get_instance(id::exists)) {
-        OC_ASSERT(
-                         it.number_of_children() == 1);
-        OC_ASSERT(
-                         smh != Handle::UNDEFINED,
-                         "A SpaceMap must exist");
+        OC_ASSERT(it.number_of_children() == 1);
+        OC_ASSERT(smh != Handle::UNDEFINED, "A SpaceMap must exist");
         const SpaceServer::SpaceMap& sm = spaceServer().getMap(smh);
         return combo::bool_to_vertex(inSpaceMap(sm, atomSpace, self_id, owner_id,
                                                 *it.begin()));
@@ -878,10 +873,10 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
                 } else {
                     result = classserver().isA(atomSpace.getType(toHandle(atomSpace,
-                                                         def_obj,
-                                                         self_id,
-                                                         owner_id)),
-                                                        AVATAR_NODE);
+                                                                          def_obj,
+                                                                          self_id,
+                                                                          owner_id)),
+                                               AVATAR_NODE);
 
                     // cache miss, compute value and cache it
                     if (result) {

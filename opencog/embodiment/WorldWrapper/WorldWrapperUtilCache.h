@@ -115,7 +115,7 @@ struct predicate {
 /**
  * Implements a timestamped cache for WWUtil perceptions reducing
  * AtomSpace queries needed. By timestamped cache it is meant that
- * every query or insertion need a timestamp, and if the given
+ * every query or insertion needs a timestamp, and if the given
  * timestamp differs from the current one, all cache is erased.
  */
 class WorldWrapperUtilCache
@@ -125,7 +125,7 @@ public:
 
     // typedefs
     typedef boost::unordered_map < predicate, float,
-    boost::hash<predicate> > cacheMap;
+                                   boost::hash<predicate> > cacheMap;
     typedef cacheMap::iterator cacheMapIt;
 
     /**
@@ -181,12 +181,12 @@ private:
     int timestampChangeMiss;
 
 
-    // clear the cache. During cache clea, the new valid timestamp is
-    // set. Cace clear will be called every time one of the two happen:
+    // Clear the cache. During cache clear, the new valid timestamp is
+    // set. Cache clear will be called every time one of the two happens:
     //
-    // 1. search for data with newer timestamp then WWUtil current one.
-    // 2. insert data with newer timestamp than then WWCacheUtil current
-    // one
+    // 1. search for data with newer timestamp than WWUtil current one.
+    // 2. insert data with newer timestamp than WWCacheUtil current one.
+    //
     // @param timestamp The new timestamp valid
     void clearCache(unsigned long timestamp);
 
