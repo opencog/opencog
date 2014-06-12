@@ -44,11 +44,11 @@ private:
 
     WorldWrapperUtilCache cache;
 
-    predicate p1;
-    predicate p2;
-    predicate p3;
-    predicate p4;
-    predicate p5;
+    Predicate p1;
+    Predicate p2;
+    Predicate p3;
+    Predicate p4;
+    Predicate p5;
 
 public:
     WorldWrapperUtilCacheUTest() {
@@ -126,7 +126,7 @@ public:
 
     void testFindWithMiss() {
 
-        predicate p6;
+        Predicate p6;
         std::vector<std::string> argList;
 
         argList.push_back(arg1);

@@ -25,6 +25,20 @@
 
 using namespace opencog::world;
 
+Predicate::Predicate() {
+    this->name = std::string("");
+}
+
+Predicate::Predicate(const std::string& name,
+                     const std::vector<std::string>& arguments) {
+    this->name = name;
+    this->arguments = arguments;
+}
+
+bool Predicate::operator==(const Predicate& p) const {
+    return this->name == p.name && this->arguments == p.arguments;
+}
+
 WorldWrapperUtilCache::WorldWrapperUtilCache()
 {
     this->notFoundMiss = 0;
@@ -35,7 +49,7 @@ WorldWrapperUtilCache::WorldWrapperUtilCache()
     this->timestamp = 0;
 }
 
-bool WorldWrapperUtilCache::add(unsigned long timestamp, predicate& pred, float value)
+bool WorldWrapperUtilCache::add(unsigned long timestamp, const Predicate& pred, float value)
 {
     if (this->timestamp != timestamp) {
         clearCache(timestamp);
@@ -47,7 +61,7 @@ bool WorldWrapperUtilCache::add(unsigned long timestamp, predicate& pred, float 
     return result.second;
 }
 
-float WorldWrapperUtilCache::find(unsigned long timestamp, predicate& pred)
+float WorldWrapperUtilCache::find(unsigned long timestamp, const Predicate& pred)
 {
     this->finds++;
 

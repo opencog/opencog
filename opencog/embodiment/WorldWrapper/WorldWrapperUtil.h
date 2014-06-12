@@ -54,9 +54,6 @@ class WorldWrapperUtil
 
 private:
 
-    // inform if cache data should be used when evaluating predicates
-    static bool useCache;
-
     // cache predicates information between timestamps.
     static WorldWrapperUtilCache cache;
 
@@ -339,16 +336,6 @@ public:
                                         const combo::combo_tree::iterator it,
                                         bool isInThePast = false,
                                         combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
-
-    /**
-     * Inform if the cache usage is enabled or not.
-     */
-    static bool cacheEnabled();
-
-    /**
-     * Set the use or not of cache when evaluating predicates
-     */
-    static void setCacheUse(bool state);
 
     /**
      * lookup location in the current localspacemap

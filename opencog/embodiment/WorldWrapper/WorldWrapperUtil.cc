@@ -50,7 +50,7 @@ using namespace opencog;
 using namespace opencog::pai;
 // This is already available in opencog::world, but this is placed here to
 // make it obvious where predicate comes from
-using opencog::world::predicate;
+using opencog::world::Predicate;
 
 namespace opencog { namespace world {
 
@@ -814,7 +814,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
         combo::definite_object& def_obj = definite_objects[0];
         argument.push_back(std::string(def_obj));
-        predicate pred(name, argument);
+        Predicate pred(name, argument);
         float data = WorldWrapperUtil::cache.find(time, pred);
 
         Handle handle = atomSpace.getHandle(OBJECT_NODE,
@@ -864,7 +864,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
                 argument.clear();
                 argument.push_back(std::string(def_obj));
-                predicate pred(name, argument);
+                Predicate pred(name, argument);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 bool result;
@@ -920,7 +920,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
                 argument.clear();
                 argument.push_back(std::string(def_obj));
-                predicate pred(name, argument);
+                Predicate pred(name, argument);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 bool result;
@@ -998,7 +998,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
                 argument.clear();
                 argument.push_back(std::string(def_obj));
-                predicate pred(name, argument);
+                Predicate pred(name, argument);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 bool result;
@@ -1061,7 +1061,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
                 argument.clear();
                 argument.push_back(std::string(def_obj));
-                predicate pred(name, argument);
+                Predicate pred(name, argument);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 bool result;
@@ -1216,7 +1216,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             argument.clear();
             argument.push_back(std::string(def_obj));
             argument.push_back(message);
-            predicate pred(name, argument);
+            Predicate pred(name, argument);
             float data = WorldWrapperUtil::cache.find(time, pred);
 
             bool result;
@@ -1281,7 +1281,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         std::vector<std::string> argument;
         argument.push_back(target);
 
-        predicate pred(name, argument);
+        Predicate pred(name, argument);
         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
         if(feeling == CACHE_MISS){
@@ -1321,7 +1321,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                         std::vector<std::string> argument;
                         argument.push_back(target);
 
-                        predicate pred(name, argument);
+                        Predicate pred(name, argument);
                         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
                         if(feeling == CACHE_MISS){
@@ -1360,7 +1360,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                         std::vector<std::string> argument;
                         argument.push_back(target);
 
-                        predicate pred(name, argument);
+                        Predicate pred(name, argument);
                         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
                         if(feeling == CACHE_MISS){
@@ -1399,7 +1399,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                         std::vector<std::string> argument;
                         argument.push_back(target);
 
-                        predicate pred(name, argument);
+                        Predicate pred(name, argument);
                         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
                         if(feeling == CACHE_MISS){
@@ -1418,7 +1418,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         std::string name = p->get_name();
         std::vector<std::string> argument;
 
-        predicate pred(name, argument);
+        Predicate pred(name, argument);
         float repetition = WorldWrapperUtil::cache.find(time, pred);
 
         if (repetition == CACHE_MISS) {
@@ -1478,7 +1478,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         std::vector<std::string> argument;
         argument.push_back( stateNumber );
 
-        predicate pred(name, argument);
+        Predicate pred(name, argument);
         float state = WorldWrapperUtil::cache.find(time, pred);
 
         if (state == CACHE_MISS) {
@@ -1599,7 +1599,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                     arguments.push_back(get_definite_object(*arg));
                 }
 
-                predicate pred(name, arguments);
+                Predicate pred(name, arguments);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 if (data != CACHE_MISS) {
@@ -1659,7 +1659,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                         for (sib_it arg = tree_it.begin(); arg != tree_it.end(); arg++) {
                             arguments.push_back(get_definite_object(*arg));
                         }
-                        predicate pred(name, arguments);
+                        Predicate pred(name, arguments);
                         float data = WorldWrapperUtil::cache.find(time, pred);
 
                         bool result = false;
@@ -1774,7 +1774,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                 argument.push_back( command );
                 argument.push_back( stringParameters.str( ) );
 
-                predicate pred(name, argument);
+                Predicate pred(name, argument);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 if (data != CACHE_MISS) {
@@ -1934,7 +1934,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                     arguments.push_back(parameters[i]);
                 }
 
-                predicate pred(name, arguments);
+                Predicate pred(name, arguments);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 if (data != CACHE_MISS) {
@@ -2497,7 +2497,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                      "WWUtil - default - %s - pred created",
                      ss.str().c_str());
 
-        predicate pred(name, arguments);
+        Predicate pred(name, arguments);
         float data = WorldWrapperUtil::cache.find(time, pred);
 
         logger().debug(
@@ -2568,7 +2568,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                     arguments.push_back(get_definite_object(*arg));
                 }
 
-                predicate pred(name, arguments);
+                Predicate pred(name, arguments);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 bool result = false;
@@ -2825,23 +2825,13 @@ float WorldWrapperUtil::getPhysiologicalFeeling(AtomSpace& atomSpace,
         const std::string& target,
         unsigned long time)
 {
+    float value = WorldWrapperUtil::cache.call([&]() {
+            return AtomSpaceUtil::getCurrentPetFeelingLevel(atomSpace, target,
+                                                            feeling); },
+        time, Predicate(feeling, std::vector<std::string>({target})));
 
-    // cache predicate data variables
-    std::string name(feeling);
-    std::vector<std::string> argument;
-    argument.push_back(target);
-
-    predicate pred(name, argument);
-    float value = WorldWrapperUtil::cache.find(time, pred);
-
-    if (value == CACHE_MISS) {
-        value = AtomSpaceUtil::getCurrentPetFeelingLevel(atomSpace, target, feeling);
-        WorldWrapperUtil::cache.add(time, pred, value);
-    }
-
-    logger().debug(
-                 "WWUtil - '%s' with '%s' '%f'.",
-                 target.c_str(), feeling.c_str(), value);
+    logger().debug("WorldWrapperUtil::%s - '%s' with '%s' '%f'.",
+                   __FUNCTION__, target.c_str(), feeling.c_str(), value);
     return value;
 }
 
@@ -2849,27 +2839,13 @@ float WorldWrapperUtil::getModulator(AtomSpace & atomSpace,
                                      const std::string & modulatorName,
                                      unsigned long time)
 {
-    // Cache predicate data variables
-    //
-    // Actually, Modulator is not a Predicate in AtomSpace 
-    // (see "rules_core.scm" for the detail),
-    // while we only want to use WorldWrapperUtil's cache mechanism.
-    std::string name(modulatorName);
-    std::vector<std::string> argument;
+    float value = WorldWrapperUtil::cache.call([&]() {
+            return AtomSpaceUtil::getCurrentModulatorLevel(atomSpace,
+                                                           modulatorName); },
+        time, Predicate(modulatorName, std::vector<std::string>()));
 
-    predicate pred(name, argument);
-    float value = WorldWrapperUtil::cache.find(time, pred);
-
-    if (value == CACHE_MISS) {
-        value = AtomSpaceUtil::getCurrentModulatorLevel(atomSpace, modulatorName);
-        WorldWrapperUtil::cache.add(time, pred, value);
-    }
-
-    logger().debug( "WorldWrapperUtil::%s - '%s' for the avatar is '%f'", 
-                    __FUNCTION__, 
-                    modulatorName.c_str(), 
-                    value
-                  );
+    logger().debug("WorldWrapperUtil::%s - '%s' for the avatar is '%f'", 
+                   __FUNCTION__, modulatorName.c_str(), value);
 
     return value;
 }
@@ -2878,27 +2854,13 @@ float WorldWrapperUtil::getDemand(AtomSpace & atomSpace,
                                   const std::string & demandName,
                                   unsigned long time)
 {
-    // Cache predicate data variables
-    //
-    // Actually, Demand is not a Predicate in AtomSpace 
-    // (see "rules_core.scm" for the detail),
-    // while we only want to use WorldWrapperUtil's cache mechanism.
-    std::string name(demandName);
-    std::vector<std::string> argument;
+    float value = WorldWrapperUtil::cache.call([&]() {
+            return AtomSpaceUtil::getCurrentDemandLevel(atomSpace,
+                                                        demandName); },
+        time, Predicate(demandName, std::vector<std::string>()));
 
-    predicate pred(name, argument);
-    float value = WorldWrapperUtil::cache.find(time, pred);
-
-    if (value == CACHE_MISS) {
-        value = AtomSpaceUtil::getCurrentDemandLevel(atomSpace, demandName);
-        WorldWrapperUtil::cache.add(time, pred, value);
-    }
-
-    logger().debug( "WorldWrapperUtil::%s - current '%s' level is '%f'.", 
-                    __FUNCTION__, 
-                    demandName.c_str(), 
-                    value
-                  );
+    logger().debug("WorldWrapperUtil::%s - current '%s' level is '%f'.", 
+                   __FUNCTION__, demandName.c_str(), value);
 
     return value;
 }
@@ -2908,32 +2870,18 @@ float WorldWrapperUtil::getDemandGoalTruthValue(AtomSpace & atomSpace,
                                                 const std::string & self_id,
                                                 unsigned long time)
 {
-    // Cache predicate data variables
-    //
-    // Actually, Demand is not a Predicate in AtomSpace 
-    // (see "rules_core.scm" for the detail),
-    // while we only want to use WorldWrapperUtil's cache mechanism.
-    std::string name(demand);
-    std::vector<std::string> argument;
+    float value = WorldWrapperUtil::cache.call([&]() {
+            Handle hDemandGoal =
+                AtomSpaceUtil::getDemandGoalEvaluationLink(atomSpace, demand);
+            if ( hDemandGoal == opencog::Handle::UNDEFINED ) 
+                value = randGen().randfloat();
+            else
+                value = atomSpace.getMean(hDemandGoal); 
+            return value; },
+        time, Predicate(demand, std::vector<std::string>()));
 
-    predicate pred(name, argument);
-    float value = WorldWrapperUtil::cache.find(time, pred);
-
-    if (value == CACHE_MISS) {
-        Handle hDemandGoal = AtomSpaceUtil::getDemandGoalEvaluationLink(atomSpace, demand);
-
-        if ( hDemandGoal == opencog::Handle::UNDEFINED ) 
-            value = randGen().randfloat();
-        else
-            value = atomSpace.getMean(hDemandGoal); 
-    }
-
-    logger().debug( "WorldWrapperUtil::%s - '%s' for the avatar with id '%s' is '%f'.", 
-                    __FUNCTION__, 
-                    demand.c_str(), 
-                    self_id.c_str(),
-                    value
-                  );
+    logger().debug("WorldWrapperUtil::%s - '%s' for the avatar with id '%s' is '%f'.", 
+                   __FUNCTION__, demand.c_str(), self_id.c_str(), value);
 
     return value;
 }
@@ -2948,9 +2896,7 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(
         bool isInThePast,
         combo::variable_unifier& vu)
 {
-
-
-    //eval indefinite arg
+    // Eval indefinite arg
     for (sib_it arg = it.begin(); arg != it.end(); ++arg) {
         if (is_indefinite_object(*arg)) {
             *arg = WorldWrapperUtil::evalIndefiniteObject(smh, time,
@@ -2959,58 +2905,47 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(
                     get_indefinite_object(*arg),
                     isInThePast);
         }
-        logger().debug(
-                     "WWUtil - getEmotionalFeelingOrTrait - eval all"
-                     " indefinite objects.");
+        logger().debug("WWUtil - getEmotionalFeelingOrTrait - eval all"
+                       " indefinite objects.");
     }
 
-    combo_tree tmp(it);
-    stringstream ss;
-    ss << tmp;
-
-    // constructing predicate struct to search cache
+    // Constructing predicate struct to search cache
     std::string name;
     if (is_definite_object(*it)) {
         name = get_definite_object(*it);
     } else {
-        OC_ASSERT(false,
-                         "WWUtil - getEmotionalFeelingOrTrait - argument"
-                         " it should be definite_object.");
+        OC_ASSERT(false, "WWUtil - getEmotionalFeelingOrTrait - argument"
+                  " it should be definite_object.");
     }
     std::vector<std::string> arguments;
-
     for (sib_it arg = it.begin(); arg != it.end(); ++arg) {
         OC_ASSERT(is_definite_object(*arg),
-                         "WWUtil -  getEmotionalFeelingOrTrait - argument"
-                         " should be definite_object");
+                  "WWUtil -  getEmotionalFeelingOrTrait - argument"
+                  " should be definite_object");
         arguments.push_back(get_definite_object(*arg));
     }
+    Predicate pred(name, arguments);
 
-    predicate pred(name, arguments);
-    float data = WorldWrapperUtil::cache.find(time, pred);
-
-    if (data != CACHE_MISS) {
-        logger().debug(
-                     "WWUtil -  getEmotionalFeelingOrTrait - %s - cache hit"
-                     " - value '%.2f'.",
-                     ss.str().c_str(), data);
-        return data;
-
-    } else {
-
-        float data = -1.0f;
+    // Function to call in case of cache miss
+    auto cache_miss_fun = [&]() {
+        float value = -1.0f;
         Handle h = rec_lookup(atomSpace, it, self_id, owner_id);
-
         if (h != Handle::UNDEFINED) {
-            data = atomSpace.getMean(h);
+            value = atomSpace.getMean(h);
         }
-        WorldWrapperUtil::cache.add(time, pred, data);
+        return value;
+    };
 
-        logger().debug("WWUtil -  getEmotionalFeelingOrTrait - %s - cache miss - value '%.2f'.",
-                     ss.str().c_str(), data);
-        return data;
+    // Call cache
+    float value = WorldWrapperUtil::cache.call(cache_miss_fun, time, pred);
+
+    // Log
+    if (logger().isDebugEnabled()) {
+        logger().debug() << "WWUtil - getEmotionalFeelingOrTrait - "
+                         << combo_tree(it) << " - value '" << value << "'";
     }
+
+    return value;
 }
 
-} } // namespace opencog::world
-
+}} // namespace opencog::world

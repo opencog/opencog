@@ -39,7 +39,7 @@ namespace opencog { namespace world {
  * Predicate data that should be cached. These predicates are the key in
  * cache hash map.
  */
-struct predicate {
+struct Predicate {
 
     std::string name;
     std::vector<std::string> arguments;
@@ -47,43 +47,20 @@ struct predicate {
     /**
      * Constructors
      */
-    predicate() {
-        this->name = std::string("");
-    }
-
-    predicate(const std::string& name, std::vector<std::string> arguments) {
-        this->name = name;
-
-        for (unsigned int i = 0; i < arguments.size(); i++) {
-            this->arguments.push_back(arguments[i]);
-        }
-    }
+    Predicate();
+    Predicate(const std::string& name, const std::vector<std::string>& arguments);
 
     /**
      * Equality operator. Predicate's name and arguments should match. The order
      * that the arguments are inserted matter so be carefull.
      */
-    bool operator==(predicate const& p) const {
-        if (arguments.size() != p.arguments.size()) {
-            return false;
-        }
-
-        if (name != p.name) {
-            return false;
-        }
-
-        for (unsigned int i = 0; i < arguments.size(); i++) {
-            if (arguments[i] != p.arguments[i]) return false;
-        }
-        return true;
-    }
-
+    bool operator==(const Predicate& p) const;
 
     /**
      * Hash function for predicates which consider not only the predicate name
      * but also its arguments.
      */
-    friend std::size_t hash_value(predicate const& p) {
+    friend std::size_t hash_value(const Predicate& p) {
 
         std::size_t seed = 0;
 
@@ -95,9 +72,7 @@ struct predicate {
             boost::hash_range(seed, p.name.end() - STR_SIZE_FOR_HASH, p.name.end());
         }
 
-        for (unsigned int i = 0; i < p.arguments.size(); i++) {
-            std::string arg = p.arguments[i];
-
+        for (const std::string& arg : p.arguments) {
             // ... and arguments. This is necessary because most of then
             // have a common prefix (is_, id_, etc).
             if (arg.size() <= STR_SIZE_FOR_HASH) {
@@ -110,7 +85,7 @@ struct predicate {
         return seed;
     }
 
-}; // struct predicate
+}; // struct Predicate
 
 /**
  * Implements a timestamped cache for WWUtil perceptions reducing
@@ -124,14 +99,28 @@ class WorldWrapperUtilCache
 public:
 
     // typedefs
-    typedef boost::unordered_map < predicate, float,
-                                   boost::hash<predicate> > cacheMap;
+    typedef boost::unordered_map < Predicate, float,
+                                   boost::hash<Predicate> > cacheMap;
     typedef cacheMap::iterator cacheMapIt;
 
     /**
      * Constructors
      */
     WorldWrapperUtilCache();
+
+    /**
+     * Call f (which is assumed to be called on predicate pred) and
+     * cache pred if not already cached.
+     */
+    template<typename Fun>
+    float call(const Fun& f, unsigned long timestamp, const Predicate& pred) {
+        float value = find(timestamp, pred);
+        if (value == CACHE_MISS) {
+            value = f();
+            add(timestamp, pred, value);
+        }
+        return value;
+    }
 
     /**
      * Add information to cache.
@@ -141,7 +130,7 @@ public:
      * @param value The predicate cached value
      * @return true if the information was cached and false otherwise.
      */
-    bool add(unsigned long timestamp, predicate& pred, float value);
+    bool add(unsigned long timestamp, const Predicate& pred, float value);
 
     /**
      * Lookup for a cached value for the given predicate.
@@ -150,8 +139,11 @@ public:
      * @param predicate The predicate whose cached value is to be
      * searched.
      * @return The cached value or -1.0 if cache miss.
+     *
+     * Note that this method is not const as it can clear the cache if
+     * the timestamp is different.
      */
-    float find(unsigned long timestamp, predicate& pred);
+    float find(unsigned long timestamp, const Predicate& pred);
 
     /**
      * Get cache's current timestamp. It holds information only for the
@@ -175,10 +167,10 @@ private:
     cacheMap cache;
 
     // profiling variables. total find and cache miss
-    int finds;
-    int notFoundMiss;
-    int emptyCacheMiss;
-    int timestampChangeMiss;
+    unsigned finds;
+    unsigned notFoundMiss;
+    unsigned emptyCacheMiss;
+    unsigned timestampChangeMiss;
 
 
     // Clear the cache. During cache clear, the new valid timestamp is
@@ -193,4 +185,5 @@ private:
 }; // class WorldWrapperUtilCache
 
 } } // namespace opencog::world
+
 #endif
