@@ -20,14 +20,16 @@
         ; The sky is not blue in the context of the moon."
         (EvaluationLink (stv .8 .7)
             (PredicateNode "isBlue")
-            (AndLink
-                (ConceptNode "sky")
-                (ConceptNode "earth")))
+            (ListLink
+                (AndLink
+                    (ConceptNode "sky")
+                    (ConceptNode "earth"))))
         (EvaluationLink (stv .0 .2)
             (PredicateNode "isBlue")
-            (AndLink
-                (ConceptNode "sky")
-                (ConceptNode "moon")))
+            (ListLink
+                (AndLink
+                    (ConceptNode "sky")
+                    (ConceptNode "moon"))))
         ; 3) input for (pln-rule-contextualize-subset)
         ; "Dogs are animals."
         (SubsetLink
@@ -46,7 +48,8 @@
             (ConceptNode "earth")
             (EvaluationLink
                 (PredicateNode "isBlue")
-                (ConceptNode "sky")))
+                (ListLink
+                    (ConceptNode "sky"))))
         ; 6) input for (pln-rule-decontextualize-subset)
         ; "Dogs are animals."
         (ContextLink
@@ -68,12 +71,14 @@
                     (ConceptNode "earth")
                     (EvaluationLink (stv .8 .7)
                         (PredicateNode "isBlue")
-                        (ConceptNode "sky")))
+                        (ListLink
+                            (ConceptNode "sky"))))
                 (ContextLink 
                     (ConceptNode "moon")
                     (EvaluationLink (stv .0 .2)
                         (PredicateNode "isBlue")
-                        (ConceptNode "sky")))
+                        (ListLink
+                            (ConceptNode "sky"))))
                 ; 3) output
                 (ContextLink
                     (ConceptNode "dogs")
@@ -91,9 +96,10 @@
                 ; 5) output
                 (EvaluationLink
                     (PredicateNode "isBlue")
-                    (AndLink
-                        (ConceptNode "sky")
-                        (ConceptNode "earth")))
+                    (ListLink
+                        (AndLink
+                            (ConceptNode "sky")
+                            (ConceptNode "earth"))))
                 ; 6) output
                 (SubsetLink
                     (ConceptNode "dogs")

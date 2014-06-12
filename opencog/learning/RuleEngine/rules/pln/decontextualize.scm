@@ -59,20 +59,23 @@
                 (VariableNode "$C")
                 (EvaluationLink
                     (VariableNode "$A")
-                    (VariableNode "$B")))
+                    (ListLink
+                        (VariableNode "$B"))))
             (ExecutionLink
                 (GroundedSchemaNode "scm: pln-formula-context")
                 (ListLink
                     (EvaluationLink
                         (VariableNode "$A")
-                        (AndLink
-                            (VariableNode "$C")
-                            (VariableNode "$B")))
+                        (ListLink
+                            (AndLink
+                                (VariableNode "$C")
+                                (VariableNode "$B"))))
                     (ContextLink
                         (VariableNode "$C")
                         (EvaluationLink
                             (VariableNode "$A")
-                            (VariableNode "$B"))))))))
+                            (ListLink
+                                (VariableNode "$B")))))))))
 
 ;----------------------------------------------------------------------
 ; b)
