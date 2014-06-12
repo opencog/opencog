@@ -443,7 +443,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "negative means no generation limit.\n")
 
         ("discard-dominated",
-         po::value<bool>(&discard_dominated)->default_value(true),
+         po::value<bool>(&discard_dominated)->default_value(false),
          "Include dominated candidates (according behavioral score) "
          "when merging candidates in the metapopulation. Disabling "
          "this may lead to poorer performance.\n")
