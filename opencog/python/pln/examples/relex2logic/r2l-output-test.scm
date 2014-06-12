@@ -47,7 +47,7 @@
   (ConceptNode "present") ; [227]
 ) ; [297]
 
-(InheritanceLink (stv 1.000000 1.000000)
+(InheritanceLink (stv 1.000000 1.000000) (av 1000 0 0)
   (ConceptNode "Socrates@f250f429-5078-4453-8662-c63cc8f58a22") ; [217]
   (ConceptNode "Socrates") ; [218]
 ) ; [219]
