@@ -167,7 +167,7 @@
 	(define (less-than word-inst-1 word-inst-2)
 		(define index-1 (list-index (lambda (a-node) (equal? word-inst-1 a-node)) word-inst-list))
 		(define index-2 (list-index (lambda (a-node) (equal? word-inst-2 a-node)) word-inst-list))
-		(string<? (cog-name (list-ref number-list index-1)) (cog-name (list-ref number-list index-2))))
+		(< (string->number (cog-name (list-ref number-list index-1))) (string->number (cog-name (list-ref number-list index-2)))))
 	(cdr (sort word-inst-list less-than))
 )
 
