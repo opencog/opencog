@@ -394,11 +394,39 @@ void metapopulation::resize_metapop()
     }
 }
 
-// Return the set of candidates not present in the metapopulation.
-// This makes merging faster because at best it decreases the number
-// of calls of dominates.
+/// Given a set of candidates, return the set of candidates not already
+/// present in the metapopulation.  This usually makes merging faster;
+/// for example, if domination is enabled, this will result in fewer
+/// calls to dominates().
 scored_combo_tree_set metapopulation::get_new_candidates(const scored_combo_tree_set& mcs)
 {
+
+#define PARALLEL_INSERT 1
+#ifdef PARALLEL_INSERT
+    // Parallel insert, uses locking to avoid corruption.
+    // This is probably faster than the lock-free version below,
+    // but who knows ... (the version below is also parallel, just
+    // that it's finer-grained than this one, which means its probably
+    // slower!?)
+    scored_combo_tree_set res;
+    std::mutex insert_cnd_mutex;
+
+    scored_combo_tree_ptr_set::const_iterator cbeg = _scored_trees.begin();
+    scored_combo_tree_ptr_set::const_iterator cend = _scored_trees.end();
+    auto insert_new_candidate = [&](const scored_combo_tree& cnd) {
+        const combo_tree& tr = cnd.get_tree();
+        scored_combo_tree_ptr_set::const_iterator fcnd =
+            std::find_if(cbeg, cend,
+                [&](const scored_combo_tree& v) { return tr == v.get_tree(); });
+        if (fcnd == cend) {
+            std::unique_lock<mutex> lock(insert_cnd_mutex);
+            res.insert(cnd);
+        }
+    };
+    OMP_ALGO::for_each(mcs.begin(), mcs.end(), insert_new_candidate);
+    return res;
+
+#else
     scored_combo_tree_set res;
     for (const auto& cnd : mcs) {
         const combo_tree& tr = cnd.get_tree();
@@ -409,24 +437,8 @@ scored_combo_tree_set metapopulation::get_new_candidates(const scored_combo_tree
         if (fcnd == _scored_trees.end())
             res.insert(cnd);
     }
-
-    // That version runs the insertion in parallel, I don't know what is faster
-    //
-    // mutex insert_cnd_mutex;
-    // typedef boost::unique_lock<mutex> unique_lock;
-
-    // auto insert_new_candidate = [&](scored_combo_tree_set::value_type& cnd) {
-    //     const combo_tree& tr = get_tree(cnd);
-    //     const_iterator fcnd = std::find_if(begin(), end(),
-    //                                        [&](const scored_combo_tree& v) {
-    //                                            return tr == get_tree(v); });
-    //     if (fcnd == end()) {
-    //         unique_lock lock(insert_cnd_mutex);
-    //         res.insert(cnd);
-    //     }
-    // };
-
     return res;
+#endif
 }
 
 /// Trim the demes down to size.  The point here is that the next
