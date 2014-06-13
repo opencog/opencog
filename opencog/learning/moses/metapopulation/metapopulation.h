@@ -388,45 +388,8 @@ private:
     // that bcs contains no dominated candidates within itself
     void merge_nondominated(const scored_combo_tree_set& bcs, unsigned jobs = 1);
 
-    /**
-     * x dominates y if
-     *
-     * for all i x_i >= y_i and there exists i such that x_i > y_i
-     *
-     * this function returns true if x dominates y
-     *                       false if y dominates x
-     *                       indeterminate otherwise
-     */
-    static inline boost::logic::tribool dominates(const behavioral_score& x,
-                                    const behavioral_score& y)
-    {
-        // everything dominates an empty vector
-        if (x.empty()) {
-            if (y.empty())
-                return boost::logic::indeterminate;
-            return false;
-        } else if (y.empty()) {
-            return true;
-        }
-
-        boost::logic::tribool res = boost::logic::indeterminate;
-        for (behavioral_score::const_iterator xit = x.begin(), yit = y.begin();
-             xit != x.end(); ++xit, ++yit)
-        {
-            if (*xit > *yit) {
-                if (!res)
-                    return boost::logic::indeterminate;
-                else
-                    res = true;
-            } else if (*yit > *xit) {
-                if (res)
-                    return boost::logic::indeterminate;
-                else
-                    res = false;
-            }
-        }
-        return res;
-    }
+    static boost::logic::tribool dominates(const behavioral_score& x,
+                                           const behavioral_score& y);
 
     // --------------------- Miscellaneous functions --------------------
 public:

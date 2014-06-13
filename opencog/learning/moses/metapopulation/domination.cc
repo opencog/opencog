@@ -43,20 +43,61 @@ using namespace combo;
 // Gene domination code
 // I beleive that the dominated-merge, dominated remove code
 // is no longer used anywhere (as of 2012). This is for several
-// reasons: 
+// reasons:
 // -- Computing the bscores needed for domination is slowww.
 // -- Removing dominated demes destroys a lot of diversity in the
-//    metapopulation, causing learning to stagnate.  There's an 
+//    metapopulation, causing learning to stagnate.  There's an
 //    entire diary entry exploring and explaining this phenomenon.
 //    In short: from standard evolutionary theory, specialization
 //    can only arise out of damage. Eliminating the weak, damaged
-//    genes prevents them from being able to discover optimal 
+//    genes prevents them from being able to discover optimal
 //    solutions.  If only the strong survive, they get trapped in a
 //    local maximum, and can never jump out.
 //
 // We're going to keep this code around for a while, there are some
 // useful-seeming sub-algorithms in it ...
 //
+
+/**
+ * x dominates y if
+ *
+ * for all i x_i >= y_i and there exists i such that x_i > y_i
+ *
+ * this function returns true if x dominates y
+ *                       false if y dominates x
+ *                       indeterminate otherwise
+ */
+boost::logic::tribool metapopulation::dominates(const behavioral_score& x,
+                                                const behavioral_score& y)
+{
+    // everything dominates an empty vector
+    if (x.empty()) {
+        if (y.empty())
+            return boost::logic::indeterminate;
+        return false;
+    } else if (y.empty()) {
+        return true;
+    }
+    boost::logic::tribool res = boost::logic::indeterminate;
+    for (behavioral_score::const_iterator xit = x.begin(), yit = y.begin();
+         xit != x.end(); ++xit, ++yit)
+    {
+        if (*xit > *yit) {
+            if (!res)
+                return boost::logic::indeterminate;
+            else
+                res = true;
+        } else if (*yit > *xit) {
+            if (res)
+                return boost::logic::indeterminate;
+            else
+                res = false;
+        }
+    }
+    return res;
+}
+
+
 void metapopulation::remove_dominated(scored_combo_tree_set& bcs, unsigned jobs)
 {
     // get the nondominated candidates
