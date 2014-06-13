@@ -90,10 +90,10 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
     logger().debug("Sort the deme(s)");
 
     // Sort the deme according to composite_score (descending order)
-    for (deme_t& deme : demes)
+    for (deme_t& deme : demes) {
         boost::sort(deme, std::greater<scored_instance<composite_score> >());
-
-    trim_down_demes(demes);
+        trim_down_deme(deme);
+    }
 
     ///////////////////////////////////////////////////////////////
     // select the set of candidates to add in the metapopulation //
@@ -305,7 +305,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
 
 void metapopulation::resize_metapop()
 {
-    if (size() <= min_pool_size)
+    if (size() <= _min_pool_size)
         return;
 
     unsigned old_size = size();
@@ -328,7 +328,7 @@ void metapopulation::resize_metapop()
     // ends up costing a lot.  I think... not sure.
 
     // Get the first score below worst_score (from begin() + min_pool_size)
-    scored_combo_tree_ptr_set::iterator it = std::next(_scored_trees.begin(), min_pool_size);
+    scored_combo_tree_ptr_set::iterator it = std::next(_scored_trees.begin(), _min_pool_size);
     while (it != _scored_trees.end()) {
         score_t sc = it->get_penalized_score();
         if (sc < worst_score) break;
@@ -443,37 +443,34 @@ scored_combo_tree_set metapopulation::get_new_candidates(const scored_combo_tree
 /// However, trimming too much is bad: it can happen that none
 /// of the best-scoring instances lead to a solution. So keep
 /// around a reasonable pool. Wild choice ot 250 seems reasonable.
-void metapopulation::trim_down_demes(boost::ptr_vector<deme_t>& demes) const
+void metapopulation::trim_down_deme(deme_t& deme) const
 {
-    for (deme_t& deme : demes) {
+    if (logger().isDebugEnabled())
+    {
+        stringstream ss;
+        ss << "Trim down deme " << deme.getID()
+           << " of size: " << deme.size();
+        logger().debug(ss.str());
+    }
 
-        if (logger().isDebugEnabled())
-        {
-            stringstream ss;
-            ss << "Trim down deme " << deme.getID()
-               << " of size: " << deme.size();
-            logger().debug(ss.str());
-        }
+    if (_min_pool_size < deme.size()) {
+        score_t top_sc = deme.begin()->second.get_penalized_score();
+        score_t bot_sc = top_sc - useful_score_range();
 
-        if (min_pool_size < deme.size()) {
-            score_t top_sc = deme.begin()->second.get_penalized_score();
-            score_t bot_sc = top_sc - useful_score_range();
-
-            for (size_t i = deme.size()-1; 0 < i; --i) {
-                const composite_score &cscore = deme[i].second;
-                score_t score = cscore.get_penalized_score();
-                if (score < bot_sc) {
-                    deme.pop_back();
-                }
+        for (size_t i = deme.size()-1; 0 < i; --i) {
+            const composite_score &cscore = deme[i].second;
+            score_t score = cscore.get_penalized_score();
+            if (score < bot_sc) {
+                deme.pop_back();
             }
         }
+    }
 
-        if (logger().isDebugEnabled())
-        {
-            stringstream ss;
-            ss << "Deme trimmed down, new size: " << deme.size();
-            logger().debug(ss.str());
-        }
+    if (logger().isDebugEnabled())
+    {
+        stringstream ss;
+        ss << "Deme trimmed down, new size: " << deme.size();
+        logger().debug(ss.str());
     }
 }
 

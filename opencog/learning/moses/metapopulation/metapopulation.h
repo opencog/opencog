@@ -207,10 +207,11 @@ public:
     void merge_candidates(scored_combo_tree_set& candidates);
 
     /**
-     * merge deme -- convert instances to trees, and save them.
+     * merge demes -- convert instances to trees, and merge them
+     * back into the metapopulation.
      *
      * 1) cull the poorest scoring instances.
-     * 2) convert set of instances to trees
+     * 2) convert instances to trees
      * 3) merge trees into the metapopulation, possibly using domination
      *    as the merge criterion.
      *
@@ -262,8 +263,8 @@ private:
     // calls of dominates.
     scored_combo_tree_set get_new_candidates(const scored_combo_tree_set&);
 
-    // Trim down demes before merging based the scores
-    void trim_down_demes(boost::ptr_vector<deme_t>& demes) const;
+    // Trim down deme before merging based the scores
+    void trim_down_deme(deme_t& deme) const;
     
     // ------------------- Diversity-realted parts --------------------
 private:
@@ -522,7 +523,7 @@ protected:
 
     scored_combo_tree_ptr_set _scored_trees;
 
-    static const unsigned min_pool_size = 250;
+    static const unsigned _min_pool_size = 250;
 
     size_t _merge_count;
 
