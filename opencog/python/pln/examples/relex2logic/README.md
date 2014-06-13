@@ -25,13 +25,6 @@ represented in AtomSpace notation (rather than natural language).
 
 Important notes:
 
-- The demo is functional in that the required output is produced.
-  At the moment, this is only done using Python.
-  It should be done with RelEx2Logic in the Cogserver.
-  To do this, the Relex2Logic rules require modification for "is"/"be"
-  predicates, see:
-  - https://github.com/opencog/opencog/issues/726
-
 - There are some outstanding issues concerning satisfying sets:
   - https://github.com/opencog/opencog/issues/601
   - https://github.com/opencog/opencog/issues/603
@@ -54,18 +47,10 @@ PLN rules needed:
 - MemberToEvaluationRule
 - AbductionRule
 
-#### Important note
-
-The representation of "be" should be an InheritanceLink rather than an
-EvaluationLink of a PredicateNode if issue #726 (above) is implemented.
-
-The InheritanceLink implementation is assumed for this example.
+#### Note
 
 The example can be loaded into the Cogserver as a MindAgent or run
 with Python.
-
-For this example at the moment, concepts are used. These can be
-changed for concept instances later.
 
 ### The inference process
 
