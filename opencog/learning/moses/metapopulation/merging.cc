@@ -23,8 +23,6 @@
 
 #include <math.h>
 
-#include <boost/range/algorithm/sort.hpp>
-
 #include <opencog/util/oc_omp.h>
 #include <opencog/util/selection.h>
 
@@ -89,9 +87,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
 
     logger().debug("Sort the deme(s)");
 
-    // Sort the deme according to composite_score (descending order)
     for (deme_t& deme : demes) {
-        boost::sort(deme, std::greater<scored_instance<composite_score> >());
         trim_down_deme(deme);
     }
 
@@ -382,7 +378,7 @@ void metapopulation::resize_metapop()
     }
 
     // remove them from _cached_dst
-    boost::sort(ptr_seq);
+    std::sort(ptr_seq.begin(), ptr_seq.end());
     _cached_dst.erase_ptr_seq(ptr_seq);
 
     if (logger().isDebugEnabled()) {
@@ -443,8 +439,13 @@ scored_combo_tree_set metapopulation::get_new_candidates(const scored_combo_tree
 /// However, trimming too much is bad: it can happen that none
 /// of the best-scoring instances lead to a solution. So keep
 /// around a reasonable pool. Wild choice ot 250 seems reasonable.
+/// (_min_pool_size defaults to 250)
 void metapopulation::trim_down_deme(deme_t& deme) const
 {
+    // Don't bother, if the deme is tiny.
+    if (_min_pool_size >= deme.size())
+        return;
+
     if (logger().isDebugEnabled())
     {
         stringstream ss;
@@ -453,16 +454,19 @@ void metapopulation::trim_down_deme(deme_t& deme) const
         logger().debug(ss.str());
     }
 
-    if (_min_pool_size < deme.size()) {
-        score_t top_sc = deme.begin()->second.get_penalized_score();
-        score_t bot_sc = top_sc - useful_score_range();
+    // Sort the deme according to composite_score (descending order)
+    // We pop the poorest scorers off the back, below.
+    std::sort(deme.begin(), deme.end(),
+              std::greater<scored_instance<composite_score> >());
 
-        for (size_t i = deme.size()-1; 0 < i; --i) {
-            const composite_score &cscore = deme[i].second;
-            score_t score = cscore.get_penalized_score();
-            if (score < bot_sc) {
-                deme.pop_back();
-            }
+    score_t top_sc = deme.begin()->second.get_penalized_score();
+    score_t bot_sc = top_sc - useful_score_range();
+
+    for (size_t i = deme.size()-1; 0 < i; --i) {
+        const composite_score &cscore = deme[i].second;
+        score_t score = cscore.get_penalized_score();
+        if (score < bot_sc) {
+            deme.pop_back();
         }
     }
 
