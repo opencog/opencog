@@ -158,8 +158,10 @@
 ; ---------------------------------------------------------------------
 ; parse-get-words - Given a parse, return a list of all words in the parse
 ;
+; Given a parse, return all word instances, skipping LEFT-WALL
+;
 (define (parse-get-words parse-node)
-	(cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node)
+	(cdr (cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node))
 )
 
 ; --------------------------------------------------------------------
