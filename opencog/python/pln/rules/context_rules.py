@@ -142,5 +142,27 @@ class ContextToEvaluation(Rule):
         return evaluation_link, [tv]
 
 
+class ContextToSubsetRule(Rule):
+
+    def __init__(self, chainer):
+        a = chainer.new_variable()
+        c = chainer.new_variable()
+
+        self.chainer = chainer
+        Rule.__init__(self,
+                      formula=None,
+                      inputs=[chainer.link(types.ContextLink, [c, a])],
+                      outputs=[chainer.link(types.SubsetLink, [c, a])])
 
 
+class ContextFreeToSensitive(Rule):
+
+    def __init__(self, chainer):
+        a = chainer.new_variable()
+        c = chainer.new_variable()
+
+        self.chainer = chainer
+        Rule.__init__(self,
+                      formula=contextFreeToSensitiveFormula,  # needs to be implemented
+                      inputs=[chainer.link(types.AndLink, [c, a])],
+                      outputs=[chainer.link(types.ContextLink, [c, a])])
