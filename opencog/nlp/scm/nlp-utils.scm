@@ -156,12 +156,18 @@
 )
 
 ; ---------------------------------------------------------------------
-; parse-get-words - Given a parse, return a list of all words in the parse
+; parse-get-words - Given a parse, return a list of all words in the parse in order
 ;
-; Given a parse, return all word instances, skipping LEFT-WALL
+; Given a parse, return all word instances in order, skipping LEFT-WALL
 ;
 (define (parse-get-words parse-node)
-	(cdr (cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node))
+	(define word-inst-list (cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node))
+	(define number-list (map word-inst-get-number word-inst-list))
+	(define (less-than word-inst-1 word-inst-2)
+		(define index-1 (list-index (lambda (a-node) (equal? word-inst-1 a-node)) word-inst-list))
+		(define index-2 (list-index (lambda (a-node) (equal? word-inst-2 a-node)) word-inst-list))
+		(string<? (cog-name (list-ref number-list index-1)) (cog-name (list-ref number-list index-2))))
+	(cdr (sort word-inst-list less-than))
 )
 
 ; --------------------------------------------------------------------
@@ -181,6 +187,15 @@
 			)
 		)
 	)
+)
+
+; ---------------------------------------------------------------------
+; word-inst-get-number   Return the NumberNode associated with word-inst
+;
+; Return the NumberNode associated with 'word-inst'
+;
+(define (word-inst-get-number word-inst)
+	(car (cog-chase-link 'WordSequenceLink 'NumberNode word-inst))
 )
 
 ; ---------------------------------------------------------------------
