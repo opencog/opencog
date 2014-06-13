@@ -19,8 +19,9 @@
 ; -- document-get-sentences Get senteces in document.
 ; -- sentence-get-parses    Get parses of a sentence.
 ; -- sent-list-get-parses   Get parses of a list of sentences.
-; -- parse-get-words        Get all words occuring in a parse.
+; -- parse-get-words        Get all words occuring in a parse in order.
 ; -- parse-get-relations    Get all RelEx relations in a parse.
+; -- word-inst-get-number   Return the NumberNode associated with word-inst. 
 ; -- word-inst-get-word   Return the WordNode associated with word-inst.
 ; -- word-inst-get-word-str  Return the word string assoc with word-inst.
 ; -- word-inst-get-lemma  Return the lemma of word instance.
