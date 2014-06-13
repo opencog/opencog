@@ -63,17 +63,17 @@
 
 ; If X and Y are friends, then Y and X are friends.
 ; Note: this is not currently used.
-(EquivalenceLink (stv 1.0 1.0)
-    (EvaluationLink
-        friends
-        (ListLink
-            (VariableNode "$X")
-            (VariableNode "$Y")))
-    (EvaluationLink
-        friends
-        (ListLink
-            (VariableNode "$Y")
-            (VariableNode "$X"))))
+;(EquivalenceLink (stv 1.0 1.0)
+;    (EvaluationLink
+;        friends
+;        (ListLink
+;            (VariableNode "$X")
+;            (VariableNode "$Y")))
+;    (EvaluationLink
+;        friends
+;        (ListLink
+;            (VariableNode "$Y")
+;            (VariableNode "$X"))))
 
 ;;; --------------------------------------------------------------------------
 ;;; evidence.db
