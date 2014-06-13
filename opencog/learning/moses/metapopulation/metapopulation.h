@@ -216,6 +216,11 @@ public:
      *
      * Return true if further deme exploration should be halted.
      *
+     * 'demes' is a list of demes
+     * 'reps' is a list of reps, each rep corresponding to a deme.
+     * 'evals' is a list of counts, indicating how many scoring
+     *         function evaluations were made for each deme/rep.
+     *
      * This is almost but not quite thread-safe.  The use of
      * _visited_exemplars is not yet protected. There may be other
      * things.

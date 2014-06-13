@@ -149,8 +149,6 @@ typedef std::multimap<composite_score,
  */
 struct feature_selector
 {
-    typedef std::set<combo::arity_t> feature_set;
-
     feature_selector(const combo::CTable& ctable,
                      const feature_selector_parameters& festor_params);
 
