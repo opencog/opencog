@@ -247,7 +247,7 @@ private:
      * However, lets not get over-zelous; if the metapop is too small,
      * then we have the nasty situation where none of the best-scoring
      * individuals lead to a solution.  Fix the minimum metapop size
-     * to, oh, say, 250.
+     * to, oh, say, 250 (aka _min_pool_size).
      *
      * But if the population starts exploding, this is also bad, as it
      * chews up RAM with unlikely exemplars. Keep it in check by
