@@ -7,25 +7,30 @@ from pln.rules.formulas import contextFormula
 """
 Rules to convert certain types of links into ContextLinks
 and to convert these types of links back into ContextLinks.
+Rule explanations can be found in
+    ../../../learning/RuleEngine/rules/pln/contextualize.scm
+    ../../../learning/RuleEngine/rules/pln/decontextualize.scm
+    ../../../learning/RuleEngine/rules/pln/context-free-to-contextualize.scm
+For further information see also here:
+http://wiki.opencog.org/w/ContextLink
 """
 
 
 class InheritanceToContextRule(Rule):
     """
-    InheritanceLink <TV>    EvaluationLink <TV>         SubsetLink <TV>
-        ANDLink             PredicateNode A                C
-            C               ListLink                       A
-            A                   ANDLink
-        ANDLink                     C
-            C                       B
-            B
-    |-                      |-                          |-
-    ContextLink <TV>        ContextLink <TV>            ContextLink <TV>
-        C                       C                           C
-        InheritanceLink         EvaluationLink              A
-            A                       PredicateNode Ac
-            B                       ListLink
-                                        B
+    InheritanceLink <TV>
+        ANDLink
+            ConceptNode C
+            ConceptNode A
+        ANDLink
+            ConceptNode C
+            ConceptNode B
+    |-
+    ContextLink <TV>
+        ConceptNode C
+        InheritanceLink
+            ConceptNode A
+            ConceptNode B
     """
     def __init__(self, chainer):
         a = chainer.new_variable()
@@ -49,7 +54,21 @@ class InheritanceToContextRule(Rule):
 
 
 class EvaluationToContextRule(Rule):
-
+    """
+    EvaluationLink <TV>
+        PredicateNode A
+        ListLink
+            ANDLink
+                ConceptNode C
+                ConceptNode B
+    |-
+    ContextLink <TV>
+        ConceptNode C
+        EvaluationLink
+            PredicateNode A
+                ListLink
+                    ConceptNode B
+    """
     def __init__(self, chainer):
         a = chainer.new_variable()
         b = chainer.new_variable()
@@ -87,7 +106,15 @@ class EvaluationToContextRule(Rule):
 
 
 class SubsetToContextRule(Rule):
-
+    """
+    SubsetLink <TV>
+        ConceptNode C
+        ConceptNode A
+    |-
+    ContextLink <TV>
+        ConceptNode C
+        ConceptNode A
+    """
     def __init__(self, chainer):
         a = chainer.new_variable()
         c = chainer.new_variable()
@@ -100,7 +127,21 @@ class SubsetToContextRule(Rule):
 
 
 class ContextToInheritanceRule(Rule):
-
+    """
+    ContextLink <TV>
+        ConceptNode C
+        InheritanceLink
+            ConceptNode A
+            ConceptNode B
+    |-
+    InheritanceLink <TV>
+        ANDLink
+            ConceptNode C
+            ConceptNode A
+        ANDLink
+            ConceptNode C
+            ConceptNode B
+    """
     def __init__(self, chainer):
         a = chainer.new_variable()
         b = chainer.new_variable()
@@ -124,7 +165,21 @@ class ContextToInheritanceRule(Rule):
 
 
 class ContextToEvaluationRule(Rule):
-
+    """
+    ContextLink <TV>
+        ConceptNode C
+        EvaluationLink
+            PredicateNode A
+            ListLink
+                ConceptNode B
+    |-
+    EvaluationLink <TV>
+        PredicateNode A
+        ListLink
+            ANDLink
+                ConceptNode C
+                ConceptNode B
+    """
     def __init__(self, chainer):
         a = chainer.new_variable()
         b = chainer.new_variable()
@@ -160,7 +215,15 @@ class ContextToEvaluationRule(Rule):
 
 
 class ContextToSubsetRule(Rule):
-
+    """
+    ContextLink <TV>
+        ConceptNode C
+        ConceptNode A
+    |-
+    SubsetLink <TV>
+        ConceptNode C
+        ConceptNode A
+    """
     def __init__(self, chainer):
         a = chainer.new_variable()
         c = chainer.new_variable()
@@ -184,7 +247,15 @@ class ContextToSubsetRule(Rule):
 
 
 class ContextFreeToSensitiveRule(Rule):
-
+    """
+    ANDLink
+        ConceptNode C<TV1>
+        ConceptNode A <TV2>
+    |-
+    ContextLink <TV3>
+        ConceptNode C
+        ConceptNode A
+    """
     def __init__(self, chainer):
         a = chainer.new_variable()
         c = chainer.new_variable()
