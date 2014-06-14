@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2010 Novemente LLC
  * Copyright (C) 2012 Poulin Holdings
+ * Copyright (C) 2014 Aidyia Limited
  *
  * Authors: Nil Geisweiller, Moshe Looks, Linas Vepstas
  *
@@ -37,6 +38,7 @@
 #include "../optimization/optimization.h"
 #include "../scoring/behave_cscore.h"
 #include "metapop_params.h"
+#include "ensemble.h"
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 
@@ -78,6 +80,10 @@ namespace moses {
  * the ensemble and the metapopulation differ; the ensemble will be used
  * for inference, the metapopulation for breeding.
  *
+ * XXX FIXME: right now, the ensemble is attached to the metapop, its
+ * kind-of coming along for the ride, because that's easier for now.
+ * Someday, it should have an independent existance.
+ *
  * A number of different approaches are taken to maintain a well-balanced,
  * evenly-distributed collection of exemplars.  One of these is the 
  * "diversity" mechanism, which seeks to ensure that the distribution
@@ -113,35 +119,18 @@ public:
      */
     metapopulation(const std::vector<combo_tree>& bases,
                    behave_cscore& sc,
-                   const metapop_parameters& pa = metapop_parameters()) :
-        _params(pa),
-        _cscorer(sc),
-        _merge_count(0),
-        _best_cscore(worst_composite_score),
-        _cached_dst(pa.diversity)
-    {
-        init(bases);
-    }
+                   const metapop_parameters& pa = metapop_parameters());
 
     // Like above but using a single base, and a single reduction rule.
     /// @todo use C++11 redirection
     metapopulation(const combo_tree& base,
                    behave_cscore& sc,
-                   const metapop_parameters& pa = metapop_parameters()) :
-        _params(pa),
-        _cscorer(sc),
-        _merge_count(0),
-        _best_cscore(worst_composite_score),
-        _cached_dst(pa.diversity)
-    {
-        std::vector<combo_tree> bases(1, base);
-        init(bases);
-    }
+                   const metapop_parameters& pa = metapop_parameters());
 
     ~metapopulation() {}
 
     /**
-     * Return the best composite score.
+     * Return the composite score of the highest-scoring tree in the metapop.
      */
     const composite_score& best_composite_score() const
     {
@@ -149,7 +138,7 @@ public:
     }
 
     /**
-     * Return the best score.
+     * Return the score of the highest-scoring tree in the metapop.
      */
     score_t best_score() const
     {
@@ -199,33 +188,19 @@ public:
     size_t size() const { return _scored_trees.size(); }
     void clear() { _scored_trees.clear(); }
 
-private:
-    /// Given the current complexity temp, return the range of scores that
-    /// are likely to be selected by the select_exemplar routine. Due to
-    /// exponential decay of scores in select_exemplar(), this is fairly
-    /// narrow: viz: e^30 = 1e13 ... We could probably get by with
-    /// e^14 = 1.2e6
-    //
-    score_t useful_score_range() const
-    {
-        return _params.complexity_temperature * 30.0 / 100.0;
-    }
-
     // -------------------------- Merge related ----------------------
 public:
-    /// Merge candidates in to the metapopulation.
-    ///
-    /// If the include-dominated flag is not set, the set of candidates
-    /// might be changed during merge, with the dominated candidates
-    /// removed during the merge. XXX Really?  It looks like the code
-    /// does this culling *before* this method is called ...
+    /// Merge candidates in to the metapopulation. If the param 
+    /// discard_dominated flag is not set, then no culling or scoring
+    /// is performed; it is assumed that previous stages have already
+    /// determined that the candidates are suitable for merging.
     ///
     /// Safe to call in a multi-threaded context.
     ///
     /// @todo it would probably be more efficient to use
     /// scored_combo_tree_ptr_set and not having to copy and
-    /// reallocate candidates onces they are selected. It might be
-    /// minor though in terms of performance gain.
+    /// reallocate candidates once they are selected. It might be
+    /// minor though in terms of performance gain. FIXME.
     void merge_candidates(scored_combo_tree_set& candidates);
 
     /**
@@ -292,6 +267,17 @@ private:
     void deme_to_trees(deme_t&, const representation&,
                        unsigned n_evals, scored_combo_tree_set&);
     
+    /// Given the current complexity temp, return the range of scores that
+    /// are likely to be selected by the select_exemplar routine. Due to
+    /// exponential decay of scores in select_exemplar(), this is fairly
+    /// narrow: viz: e^30 = 1e13 ... We could probably get by with
+    /// e^14 = 1.2e6
+    //
+    score_t useful_score_range() const
+    {
+        return _params.complexity_temperature * 30.0 / 100.0;
+    }
+
     // ------------------- Diversity-realted parts --------------------
 private:
     typedef diversity_parameters::dp_t dp_t;  // diversity_penalty type
@@ -359,6 +345,55 @@ public:
     bool diversity_enabled() const {
         return _params.diversity.pressure > 0.0;
     }
+private:
+
+    /**
+     * Cache for bscore distance between (for diversity penalty). Maps
+     * a std::set<scored_combo_tree*> (only 2 elements to represent
+     * an unordered pair) to a a bscore distance. We don't use
+     * {lru,prr}_cache because
+     *
+     * 1) we don't need a limit on the cache.
+     *
+     * 2) we need to remove the pairs containing deleted pointers
+     */
+    struct cached_dst
+    {
+        // ctor
+        cached_dst(const diversity_parameters& dparams)
+            : _dparams(dparams), misses(0), hits(0) {}
+
+        // We use a std::set instead of a std::pair, little
+        // optimization to deal with the symmetry of the distance
+        typedef std::set<const scored_combo_tree*> ptr_pair;
+        dp_t operator()(const scored_combo_tree* cl,
+                        const scored_combo_tree* cr);
+
+        /**
+         * Remove all keys containing any element of ptr_seq
+         */
+        void erase_ptr_seq(std::vector<scored_combo_tree*> ptr_seq);
+
+        /**
+         * Gather some statistics about the diversity of the
+         * population, such as mean, std, min, max of the distances.
+         */
+        diversity_stats gather_stats() const;
+
+        // cache
+        boost::shared_mutex mutex;
+
+        const diversity_parameters& _dparams;
+        std::atomic<unsigned> misses, hits;
+        std::unordered_map<ptr_pair, dp_t, boost::hash<ptr_pair>> cache;
+    };
+
+    cached_dst _cached_dst;
+
+public:
+    const cached_dst& get_cached_dst() const {
+        return _cached_dst;
+    }
 
     // --------------------- Domination-related stuff --------------------
 private:
@@ -417,10 +452,33 @@ private:
     static boost::logic::tribool dominates(const behavioral_score& x,
                                            const behavioral_score& y);
 
-    // --------------------- Miscellaneous functions --------------------
+    // --------------------- Printing/Logging functions --------------------
 public:
     // log the best candidates
     void log_best_candidates() const;
+
+    // Like above, but assumes that from = begin() and to = end().
+    template<typename Out>
+    Out& ostream(Out& out, long n = -1,
+                 bool output_score = true,
+                 bool output_penalty = false,
+                 bool output_bscore = false,
+                 bool output_visited = false,
+                 bool output_only_best = false,
+                 bool output_python = false)
+    {
+        return ostream(out, _scored_trees.begin(), _scored_trees.end(),
+                       n, output_score, output_penalty, output_bscore,
+                       output_visited, output_only_best, output_python);
+    }
+
+    // Like above, but using std::cout.
+    void print(long n = -1,
+               bool output_score = true,
+               bool output_penalty = false,
+               bool output_bscore = false,
+               bool output_visited = false,
+               bool output_only_best = false);
 
 private:
     void log_selected_exemplar(scored_combo_tree_ptr_set::const_iterator);
@@ -481,30 +539,8 @@ private:
         return out;
     }
 
-public:
-    // Like above, but assumes that from = begin() and to = end().
-    template<typename Out>
-    Out& ostream(Out& out, long n = -1,
-                 bool output_score = true,
-                 bool output_penalty = false,
-                 bool output_bscore = false,
-                 bool output_visited = false,
-                 bool output_only_best = false,
-                 bool output_python = false)
-    {
-        return ostream(out, _scored_trees.begin(), _scored_trees.end(),
-                       n, output_score, output_penalty, output_bscore,
-                       output_visited, output_only_best, output_python);
-    }
 
-    // Like above, but using std::cout.
-    void print(long n = -1,
-               bool output_score = true,
-               bool output_penalty = false,
-               bool output_bscore = false,
-               bool output_visited = false,
-               bool output_only_best = false);
-
+    // --------------------- Internal state -----------------------
 protected:
     const metapop_parameters& _params;
 
@@ -538,54 +574,9 @@ protected:
     // lock to enable thread-safe deme merging.
     std::mutex _merge_mutex;
 
-    /**
-     * Cache for bscore distance between (for diversity penalty). Maps
-     * a std::set<scored_combo_tree*> (only 2 elements to represent
-     * an unordered pair) to a a bscore distance. We don't use
-     * {lru,prr}_cache because
-     *
-     * 1) we don't need a limit on the cache.
-     *
-     * 2) we need to remove the pairs containing deleted pointers
-     */
-    struct cached_dst
-    {
-        // ctor
-        cached_dst(const diversity_parameters& dparams)
-            : _dparams(dparams), misses(0), hits(0) {}
-
-        // We use a std::set instead of a std::pair, little
-        // optimization to deal with the symmetry of the distance
-        typedef std::set<const scored_combo_tree*> ptr_pair;
-        dp_t operator()(const scored_combo_tree* cl,
-                        const scored_combo_tree* cr);
-
-        /**
-         * Remove all keys containing any element of ptr_seq
-         */
-        void erase_ptr_seq(std::vector<scored_combo_tree*> ptr_seq);
-
-        /**
-         * Gather some statistics about the diversity of the
-         * population, such as mean, std, min, max of the distances.
-         */
-        diversity_stats gather_stats() const;
-
-        // cache
-        boost::shared_mutex mutex;
-
-        const diversity_parameters& _dparams;
-        std::atomic<unsigned> misses, hits;
-        std::unordered_map<ptr_pair, dp_t, boost::hash<ptr_pair>> cache;
-    };
-
-    cached_dst _cached_dst;
-
-public:
-    const cached_dst& get_cached_dst() const {
-        return _cached_dst;
-    }
-
+    // For now, the ensemble is along for the ride.  Someday, perhaps
+    // it should enjoy life ndependently of the metapop.
+    ensemble _ensemble;
 };
 
 } // ~namespace moses

@@ -49,6 +49,10 @@ namespace moses {
  * only makes sense when the set was generated using a consisten
  * algorithm, admitting only certain specific members. This differs
  * from the metapopulation, which has no particular admission criteria.
+ *
+ * XXX FIXME: right now, the ensemble is attached to the metapop, its
+ * kind-of coming along for the ride, because that's easier for now.
+ * Someday, it should have an independent existance.
  */
 class ensemble
 {

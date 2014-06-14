@@ -33,6 +33,33 @@ namespace moses {
 
 using namespace combo;
 
+metapopulation::metapopulation(const std::vector<combo_tree>& bases,
+               behave_cscore& sc,
+               const metapop_parameters& pa) :
+    _cached_dst(pa.diversity),
+    _params(pa),
+    _cscorer(sc),
+    _merge_count(0),
+    _best_cscore(worst_composite_score)
+{
+    init(bases);
+}
+
+
+metapopulation::metapopulation(const combo_tree& base,
+               behave_cscore& sc,
+               const metapop_parameters& pa) :
+    _cached_dst(pa.diversity),
+    _params(pa),
+    _cscorer(sc),
+    _merge_count(0),
+    _best_cscore(worst_composite_score)
+{
+    std::vector<combo_tree> bases(1, base);
+    init(bases);
+}
+
+
 // Init the metapopulation with the following set of exemplars.
 void metapopulation::init(const std::vector<combo_tree>& exemplars)
 {
