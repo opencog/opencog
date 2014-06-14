@@ -73,24 +73,14 @@ bool metapopulation::has_been_visited(const combo_tree& tr) const
 }
 
 /// Convert the instances in the deme into scored combo_trees.
-/// While we are at it, we will also reject some obviously bad cases:
-/// instances with a whacked score; combo trees that are also in the
-/// already-visited list.  The rejection of combo trees that are already
-/// in the metapop happens in another stage, and not here.
+/// Return the resulting set of trees.
 ///
-/// The resulting scored combo trees are added to pot_candidates
 void metapopulation::deme_to_trees(deme_t& deme,
                                    const representation& rep,
                                    unsigned n_evals,
                                    scored_combo_tree_set& pot_candidates)
 {
-    // Use a shared mutex to allow multiple readers, but one writer
-    // for the list.
-    typedef boost::shared_mutex mutex;
-    typedef boost::shared_lock<mutex> shared_lock;
-    typedef boost::unique_lock<mutex> unique_lock;
-
-    mutex pot_cnd_mutex; // mutex for pot_candidates
+    std::mutex mtx;
 
     // NB, this is an anonymous function. In particular, some
     // compilers require that members be explicitly referenced
@@ -101,37 +91,18 @@ void metapopulation::deme_to_trees(deme_t& deme,
     {
         const composite_score& inst_csc = inst.second;
         score_t inst_sc = inst_csc.get_score();
-        // if it's really bad stops
+        // If score is really bad, don't bother.
         if (inst_sc <= very_worst_score || !isfinite(inst_sc))
             return;
 
         // Get the combo_tree associated to inst, cleaned and reduced.
-        //
-        // @todo: below, the candidate is reduced possibly for the
-        // second time.  This second reduction could probably be
-        // avoided with some clever cache or something. (or a flag?)
         combo_tree tr = rep.get_candidate(inst, true);
 
-// XXX FIXME, this ios obviously broken ... 
-        // Look for tr in the list of potential candidates.
-        // Return true if not found.
-        auto thread_safe_tr_not_found = [&]() {
-            shared_lock lock(pot_cnd_mutex);
-            scored_combo_tree sct(tr);
-            return pot_candidates.find(sct) == pot_candidates.end();
-        };
-
-        // XXX To make merge_deme thread safe, this needs to be
-        // locked too.  (to avoid collision with threads updating
-        // _visited, e.g. the MPI case.
-        bool not_already_visited = !this->has_been_visited(tr);
-
         // update the set of potential exemplars
-        if (not_already_visited && thread_safe_tr_not_found()) {
-            unique_lock lock(pot_cnd_mutex);
-            scored_combo_tree sct(tr, deme.getID(), inst_csc);
-            pot_candidates.insert(sct);
-        }
+        scored_combo_tree sct(tr, deme.getID(), inst_csc);
+
+        std::unique_lock<std::mutex> lock(mtx);
+        pot_candidates.insert(sct);
     };
 
     // It can happen that the true number of evals is less than the
@@ -152,6 +123,9 @@ void metapopulation::deme_to_trees(deme_t& deme,
     // takes anywhere from 25 to 500(!!) millisecs per instance (!!)
     // for me; my (reduced, simplified) instances have complexity
     // of about 100. This seems too long/slow (circa summer 2012).
+    // This may have been fixed in June 2014; select_candidates
+    // did some crazy, wasteful stuff, and wasn't actually free of ;races.
+    // Please remeasure...
     //
     // We first select the top max_pot_cnd from the deme. But some
     // candidates will be redundant so in order to reach the
