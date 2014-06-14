@@ -265,6 +265,10 @@ private:
 
     // Trim down deme before merging based the scores
     void trim_down_deme(deme_t& deme) const;
+
+    // convert instances in deme to trees
+    void deme_to_trees(deme_t&, const representation&, unsigned n_evals,
+                       scored_combo_tree_set&);
     
     // ------------------- Diversity-realted parts --------------------
 private:
