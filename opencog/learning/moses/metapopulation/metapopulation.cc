@@ -53,6 +53,11 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars)
 // -------------------------------------------------------------------
 // Exemplar selection-related code
 
+bool metapopulation::has_been_visited(const combo_tree& tr) const
+{
+    return _visited_exemplars.find(tr) != _visited_exemplars.cend();
+}
+
 void metapopulation::log_selected_exemplar(scored_combo_tree_ptr_set::const_iterator exemplar_it)
 {
     if (not logger().isDebugEnabled()) return;

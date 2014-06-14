@@ -535,11 +535,6 @@ void metapopulation::update_best_candidates(const scored_combo_tree_set& candida
     }
 }
 
-bool metapopulation::has_been_visited(const combo_tree& tr) const
-{
-    return _visited_exemplars.find(tr) != _visited_exemplars.cend();
-}
-
 // log the best candidates
 void metapopulation::log_best_candidates() const
 {
