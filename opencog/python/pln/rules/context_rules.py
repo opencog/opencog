@@ -2,6 +2,7 @@ __author__ = 'sebastian'
 
 from opencog.atomspace import types, TruthValue, get_type_name
 from pln.rules import Rule
+from pln.rules.formulas import contextFormula
 
 """
 Rules to convert certain types of links into ContextLinks
@@ -33,7 +34,7 @@ class InheritanceToContextRule(Rule):
 
         self.chainer = chainer
         Rule.__init__(self,
-                      formula=None,
+                      formula=contextFormula,
                       inputs=[chainer.link(types.InheritanceLink,  # InheritanceLink
                                            [chainer.link(types.AndLink, [c, a]),  # C ANDLink A
                                             chainer.link(types.AndLink, [c, b])])],  # C ANDLink B
@@ -86,7 +87,7 @@ class SubsetToContextRule(Rule):
 
         self.chainer = chainer
         Rule.__init__(self,
-                      formula=None,
+                      formula=contextFormula,
                       inputs=[chainer.link(types.SubsetLink, [c, a])],
                       outputs=[chainer.link(types.ContextLink, [c, a])])
 
@@ -100,14 +101,14 @@ class ContextToInheritanceRule(Rule):
 
         self.chainer = chainer
         Rule.__init__(self,
-                      formula=None,
-                      inputs=[chainer.link(types.ContextLink,  # ContextLink
-                                               [c,
-                                               chainer.link(types.InheritanceLink,  # InheritanceLink
+                      formula=contextFormula,
+                      inputs=[self.chainer.link(types.ContextLink,  # ContextLink
+                                                [c,
+                                                self.chainer.link(types.InheritanceLink,  # InheritanceLink
                                                           [a, b])])],
                       outputs=[self.chainer.link(types.InheritanceLink,  # InheritanceLink
-                                           [self.chainer.link(types.AndLink, [c, a]),  # C ANDLink A
-                                            self.chainer.link(types.AndLink, [c, b])])])  # C ANDLink B
+                                            [self.chainer.link(types.AndLink, [c, a]),  # C ANDLink A
+                                             self.chainer.link(types.AndLink, [c, b])])])  # C ANDLink B
 
 
 class ContextToEvaluationRule(Rule):
@@ -152,7 +153,7 @@ class ContextToSubsetRule(Rule):
 
         self.chainer = chainer
         Rule.__init__(self,
-                      formula=None,
+                      formula=contextFormula,
                       inputs=[chainer.link(types.ContextLink, [c, a])],
                       outputs=[chainer.link(types.SubsetLink, [c, a])])
 
@@ -165,6 +166,6 @@ class ContextFreeToSensitiveRule(Rule):
 
         self.chainer = chainer
         Rule.__init__(self,
-                      formula=None,  # still needs to be implemented
+                      formula=contextFormula,  # still needs to be implemented
                       inputs=[chainer.link(types.AndLink, [c, a])],
                       outputs=[chainer.link(types.ContextLink, [c, a])])
