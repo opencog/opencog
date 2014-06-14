@@ -1,6 +1,6 @@
 __author__ = 'sebastian'
 
-from opencog.atomspace import types, TruthValue, get_type_name
+from opencog.atomspace import types
 from pln.rules import Rule
 from pln.rules.formulas import contextFormula
 
@@ -23,7 +23,7 @@ class InheritanceToContextRule(Rule):
     ContextLink <TV>        ContextLink <TV>            ContextLink <TV>
         C                       C                           C
         InheritanceLink         EvaluationLink              A
-            A                       PredicateNode A
+            A                       PredicateNode Ac
             B                       ListLink
                                         B
     """
@@ -35,13 +35,17 @@ class InheritanceToContextRule(Rule):
         self.chainer = chainer
         Rule.__init__(self,
                       formula=contextFormula,
-                      inputs=[chainer.link(types.InheritanceLink,  # InheritanceLink
-                                           [chainer.link(types.AndLink, [c, a]),  # C ANDLink A
-                                            chainer.link(types.AndLink, [c, b])])],  # C ANDLink B
-                      outputs=[chainer.link(types.ContextLink,  # ContextLink
-                                            [c,
-                                             chainer.link(types.InheritanceLink,  # InheritanceLink
-                                                          [a, b])])])
+                      inputs=[chainer.link(
+                          types.InheritanceLink,  # InheritanceLink
+                          [chainer.link(types.AndLink, [c, a]),  # C ANDLink A
+                           # C ANDLink B
+                           chainer.link(types.AndLink, [c, b])])],
+                      outputs=[chainer.link(
+                          types.ContextLink,  # ContextLink
+                          [c,
+                           # InheritanceLink
+                           chainer.link(types.InheritanceLink,
+                                        [a, b])])])
 
 
 class EvaluationToContextRule(Rule):
@@ -54,10 +58,13 @@ class EvaluationToContextRule(Rule):
         self.chainer = chainer
         Rule.__init__(self,
                       formula=None,
-                      inputs=[chainer.link(types.EvaluationLink,  # InheritanceLink
-                                           [a,  # PredicateNode A
-                                            chainer.link(types.ListLink,  # ListLink
-                                                [chainer.link(types.AndLink, [c, b])])])],  # C ANDLink B
+                      inputs=[chainer.link(
+                          types.EvaluationLink,   # EvaluationLink
+                          [a,  # PredicateNode A
+                           chainer.link(
+                               types.ListLink,   # ListLink
+                               # C ANDLink B
+                               [chainer.link(types.AndLink, [c, b])])])],
                       outputs=[])
 
     # outputs is not used
@@ -102,13 +109,18 @@ class ContextToInheritanceRule(Rule):
         self.chainer = chainer
         Rule.__init__(self,
                       formula=contextFormula,
-                      inputs=[self.chainer.link(types.ContextLink,  # ContextLink
-                                                [c,
-                                                self.chainer.link(types.InheritanceLink,  # InheritanceLink
-                                                          [a, b])])],
-                      outputs=[self.chainer.link(types.InheritanceLink,  # InheritanceLink
-                                            [self.chainer.link(types.AndLink, [c, a]),  # C ANDLink A
-                                             self.chainer.link(types.AndLink, [c, b])])])  # C ANDLink B
+                      inputs=[chainer.link(
+                          types.ContextLink,   # ContextLink
+                          [c,
+                           # InheritanceLink
+                           chainer.link(types.InheritanceLink,
+                                        [a, b])])],
+                      outputs=[chainer.link(
+                          types.InheritanceLink,   # InheritanceLink
+                          # C ANDLink A
+                          [chainer.link(types.AndLink, [c, a]),
+                           # C ANDLink B
+                           chainer.link(types.AndLink, [c, b])])])
 
 
 class ContextToEvaluationRule(Rule):
@@ -121,11 +133,13 @@ class ContextToEvaluationRule(Rule):
         self.chainer = chainer
         Rule.__init__(self,
                       formula=None,
-                      inputs=[chainer.link(types.ContextLink,  # ContextLink
-                                           [c,  # ConceptNode C
-                                            chainer.link(types.EvaluationLink, # EvaluationLink
-                                                         [a,  # PredicateNode A
-                                                          chainer.link(types.ListLink, [b])])])],
+                      inputs=[chainer.link(
+                          types.ContextLink,  # ContextLink
+                          [c,  # ConceptNode C
+                           chainer.link(types.EvaluationLink,  # EvaluationLink
+                                        [a,  # PredicateNode Ac
+                                         chainer.link(types.ListLink,
+                                                      [b])])])],
                       outputs=[])
 
     # outputs is not used
@@ -162,7 +176,8 @@ class ContextToSubsetRule(Rule):
         if inputs.out[0].type == inputs.out[1].type == types.ConceptNode:
             concept_c = inputs.out[0]
             concept_a = inputs.out[1]
-            subset_link = [self.chainer.link(types.SubsetLink, [concept_c, concept_a])]
+            subset_link = [self.chainer.link(types.SubsetLink,
+                                             [concept_c, concept_a])]
             return subset_link, [tv]
         # if they are not ConceptNodes, just return the inputs
         return [inputs], [tv]
@@ -176,6 +191,6 @@ class ContextFreeToSensitiveRule(Rule):
 
         self.chainer = chainer
         Rule.__init__(self,
-                      formula=contextFormula,  # still needs to be implemented
+                      formula=contextFormula,
                       inputs=[chainer.link(types.AndLink, [c, a])],
                       outputs=[chainer.link(types.ContextLink, [c, a])])
