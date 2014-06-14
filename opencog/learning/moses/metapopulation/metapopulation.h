@@ -65,10 +65,6 @@ using combo::combo_tree;
 
 class metapopulation
 {
-    // XXX shouldn't this be scored_combo_tree ??
-    typedef std::unordered_map<combo_tree, unsigned,
-                               boost::hash<combo_tree> > combo_tree_hash_counter;
-
     // Init the metapopulation with the following set of exemplars.
     void init(const std::vector<combo_tree>& exemplars);
 
@@ -222,9 +218,9 @@ public:
      * 'evals' is a list of counts, indicating how many scoring
      *         function evaluations were made for each deme/rep.
      *
-     * This is almost but not quite thread-safe.  The use of
-     * _visited_exemplars is not yet protected. There may be other
-     * things.
+     * Although this is now thread safe, it itself uses many threads
+     * to get stuff done, and so prallelizing calls to this don't
+     * obviously make sense.
      */
     bool merge_demes(boost::ptr_vector<deme_t>& demes,
                      const boost::ptr_vector<representation>& reps,
@@ -426,7 +422,7 @@ private:
                                           output_penalty, output_bscore,
                                           output_python);
                 if (output_visited)
-                    out << "visited: " << has_been_visited(from->get_tree())
+                    out << "visited: " << has_been_visited(*from)
                         << std::endl;
             }
             return out;
@@ -452,7 +448,7 @@ private:
                                           output_penalty, output_bscore,
                                           output_python);
                 if (output_visited)
-                    out << "visited:" << has_been_visited(from->get_tree())
+                    out << "visited:" << has_been_visited(bt)
                         << std::endl;
             }
         }
@@ -500,12 +496,18 @@ protected:
     // Trees with composite score equal to _best_cscore.
     scored_combo_tree_set _best_candidates;
 
-    // contains the exemplars of demes that have been searched so far
-    // (and the number of times they have been searched)
-    combo_tree_hash_counter _visited_exemplars;
+    /// _visited_exemplars contains the exemplars of demes that have
+    ///  been previously expanded. The count indicated the number of
+    /// times that they've been expanded.
+    typedef std::unordered_map<scored_combo_tree, unsigned,
+                               scored_combo_tree_hash,
+                               scored_combo_tree_equal> scored_tree_counter;
 
-    // return true iff tr has already been visited
-    bool has_been_visited(const combo_tree& tr) const;
+    scored_tree_counter _visited_exemplars;
+
+    /// Return true iff the tree has already been visited; that is, if
+    /// its in _visited_exemplars
+    bool has_been_visited(const scored_combo_tree&) const;
 
     // lock to enable thread-safe deme merging.
     std::mutex _merge_mutex;
