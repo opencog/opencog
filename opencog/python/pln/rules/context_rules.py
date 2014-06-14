@@ -55,11 +55,12 @@ class EvaluationToContextRule(Rule):
                       formula=None,
                       inputs=[chainer.link(types.EvaluationLink,  # InheritanceLink
                                            [a,  # PredicateNode A
-                                            chainer.link(types.ListLink, [  # ListLink
-                                                chainer.link(types.AndLink(c, b))])])],  # C ANDLink B
+                                            chainer.link(types.ListLink,  # ListLink
+                                                [chainer.link(types.AndLink, [c, b])])])],  # C ANDLink B
                       outputs=[])
 
-    def custom_compute(self, inputs):
+    # outputs is not used
+    def custom_compute(self, inputs, outputs):
         [inputs] = inputs
         tv = inputs.tv
 
@@ -77,7 +78,7 @@ class EvaluationToContextRule(Rule):
         return context_link, [tv]
 
 
-class SubsetToContext(Rule):
+class SubsetToContextRule(Rule):
 
     def __init__(self, chainer):
         a = chainer.new_variable()
@@ -90,7 +91,7 @@ class SubsetToContext(Rule):
                       outputs=[chainer.link(types.ContextLink, [c, a])])
 
 
-class ContextToInheritance(Rule):
+class ContextToInheritanceRule(Rule):
 
     def __init__(self, chainer):
         a = chainer.new_variable()
@@ -101,15 +102,15 @@ class ContextToInheritance(Rule):
         Rule.__init__(self,
                       formula=None,
                       inputs=[chainer.link(types.ContextLink,  # ContextLink
-                                            [c,
-                                             chainer.link(types.InheritanceLink,  # InheritanceLink
+                                               [c,
+                                               chainer.link(types.InheritanceLink,  # InheritanceLink
                                                           [a, b])])],
-                      outputs=[chainer.link(types.InheritanceLink,  # InheritanceLink
-                                           [chainer.link(types.AndLink, [c, a]),  # C ANDLink A
-                                            chainer.link(types.AndLink, [c, b])])])  # C ANDLink B
+                      outputs=[self.chainer.link(types.InheritanceLink,  # InheritanceLink
+                                           [self.chainer.link(types.AndLink, [c, a]),  # C ANDLink A
+                                            self.chainer.link(types.AndLink, [c, b])])])  # C ANDLink B
 
 
-class ContextToEvaluation(Rule):
+class ContextToEvaluationRule(Rule):
 
     def __init__(self, chainer):
         a = chainer.new_variable()
@@ -126,7 +127,8 @@ class ContextToEvaluation(Rule):
                                                           chainer.link(types.ListLink, [b])])])],
                       outputs=[])
 
-    def custom_compute(self, inputs):
+    # outputs is not used
+    def custom_compute(self, inputs, outputs):
         [inputs] = inputs
         tv = inputs.tv
 
@@ -137,9 +139,9 @@ class ContextToEvaluation(Rule):
 
             and_link = self.chainer.link(types.AndLink, [concept_c, concept_b])
             list_link = self.chainer.link(types.ListLink, [and_link])
-            evaluation_link = self.chainer.link(types.EvaluationLink,
-                                                [predicate_a, list_link])
-        return evaluation_link, [tv]
+            evaluation_link = [self.chainer.link(types.EvaluationLink,
+                                                [predicate_a, list_link])]
+        return evaluation_link, tv
 
 
 class ContextToSubsetRule(Rule):
@@ -152,10 +154,10 @@ class ContextToSubsetRule(Rule):
         Rule.__init__(self,
                       formula=None,
                       inputs=[chainer.link(types.ContextLink, [c, a])],
-                      outputs=[chainer.link(types.SubsetLink, [c, a])])
+                      outputs=[])
 
 
-class ContextFreeToSensitive(Rule):
+class ContextFreeToSensitiveRule(Rule):
 
     def __init__(self, chainer):
         a = chainer.new_variable()
@@ -163,6 +165,6 @@ class ContextFreeToSensitive(Rule):
 
         self.chainer = chainer
         Rule.__init__(self,
-                      formula=contextFreeToSensitiveFormula,  # needs to be implemented
+                      formula=None,  # still needs to be implemented
                       inputs=[chainer.link(types.AndLink, [c, a])],
                       outputs=[chainer.link(types.ContextLink, [c, a])])
