@@ -1,6 +1,7 @@
 /** deme_expander.cc --- 
  *
  * Copyright (C) 2013 OpenCog Foundation
+ * Copyright (C) 2014 Aidyia Limited
  *
  * Author: Nil Geisweiller
  *
@@ -87,6 +88,47 @@ combo_tree deme_expander::prune_xmplr(const combo_tree& xmplr,
     return res;
 }
 
+/**
+ * Create one or more demes.
+ *
+ * Recall that a single deme consists of:
+ * -- A "representation", which is an exemplar decordated with knobs,
+ * -- A "field_set", which maps knobs in the representation, to a linear
+ *    array of knob setting locations,
+ * -- A collection of scored instances, where each instance is a linear
+ *    array of knob settings.
+ *
+ * By default, only one deme is created, by (randomly) using all
+ * possible features in knobs randomly attached to the given exemplar.
+ *
+ * If dynamic feature selection is enabled, then only the selected
+ * features will be used in creating the representation.
+ *
+ * More than one deme will be created if the feature-selection n_demes
+ * (aka fs-demes) option is set to a value greater than one. This causes
+ * the feature selector to return multiple different sets of features.
+ * In this case, a different representation is built for each feature
+ * set, and thus, a different deme.
+ *
+ * XXX TODO I honestly just don't see the utility of this multi-deme
+ * creation mechanism.  Feature selection is a very crude mechanism,
+ * and the representation is just randomly peppered with knobs. By
+ * experience, almost all knobs are completely worthless, except for
+ * a small handful (maybe half a dozen, maybe a few dozen, depending on
+ * the particular problem type. As a ratio, I've typically seen that
+ * 90% to 99.5% of all knobs are useless/ineffective/bad. There are
+ * some explicit graphs demonstrating this in the diary archive folder.)
+ * Given that almost all of the selected features end up attached to
+ * useless knobs, and are thus discarded after deme optimization and
+ * merging, I just completely fail to see how a minor twiddle in the 
+ * dynamic feature set makes any difference.  I mean, if you want to
+ * explore more stuff, why not just use a slightly larger feature set
+ * size?  For example, just use the union of the top N feature sets.
+ * This would give roughly the same thing, wich a lot less code
+ * complexity, it seems to me.  So unless we have some very explicit
+ * evidence suggesting that this mechanism does something positive,
+ * I suggest that it should be removed. -- Linas June 2014
+ */
 bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
 {
     using namespace reduct;
@@ -105,26 +147,29 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
     } else
         demeIDs.emplace_back(n_expansions + 1);
 
-    // Limit the number of features used to
-    // build the exemplar to a more manageable number.  Basically,
-    // this is 'on-the-fly' feature selection.  This differs from an
-    // ordinary, one-time only, up-front round of feature selection by
-    // using only those features which score well with the current
-    // exemplar.
+    // 'On-the-fly' feature selection.  This limits the number of
+    // features that will be used to build the deme to a smaller,
+    // more manageable number.  This is extremely useful when the
+    // dataset has thousands of features; pruning these to a few
+    // hundred or a few dozen sharply reduces the number of knobs
+    // in the representation.  This step differs from an ordinary
+    // one-time only, up-front round of feature selection by using
+    // only those features which score well with the current exemplar.
     std::vector<operator_set> ignore_ops_seq, considered_args_seq;
     std::vector<combo_tree> xmplr_seq;
     if (_params.fstor) {
-        // copy, any change in the parameters will not be remembered
+        // Copy, as any change in the parameters will not be remembered.
         feature_selector festor = *_params.fstor;
 
-        // return the set of selected features as column index
-        // (left most column corresponds to 0)
-        auto sf_pop = festor(exemplar);
+        // Return multiple sets of selected features.  Each feature set
+        // is a collection of integer-valued column indexes; with zero
+        // denotion the left-most column corresponds.
+        auto pop_of_selected_feats = festor(exemplar);
 
-        // get the set of features of the exemplar
+        // Get the set of features used in the exemplar.
         auto xmplr_features = get_argument_abs_idx_from_zero_set(exemplar);
 
-        // get labels corresponding to all the features
+        // Get feature labels (column labels) corresponding to all the features.
         const auto& ilabels = festor._ctable.get_input_labels();
 
         if (festor.params.n_demes > 1)
@@ -132,15 +177,18 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
                                "(same exemplar, multiple feature sets): "
                             << festor.params.n_demes << " demes";
 
-        log_selected_feature_sets(sf_pop, xmplr_features, ilabels, demeIDs);
+        log_selected_feature_sets(pop_of_selected_feats, xmplr_features, ilabels, demeIDs);
 
+        // pop_of_selected_feats is a set of feature sets. We will
+        // create a representation, and a deme, for each distinct
+        // feature set.
         unsigned sfi = 0;
-        for (auto& sf : sf_pop) {
+        for (auto& selected_feats : pop_of_selected_feats) {
             // Either prune the exemplar, or add all exemplars
             // features to the feature sets
             if (festor.params.prune_xmplr) {
                 auto xmplr_nsf = set_difference(xmplr_features,
-                                                sf.second);
+                                                selected_feats.second);
                 if (xmplr_features.empty())
                     logger().debug() << "No feature to prune in the "
                                      << "exemplar for deme " << demeIDs[sfi];
@@ -151,24 +199,26 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
                                      << ": ",
                                      fs_to_names(xmplr_nsf, ilabels));
                 }
-                xmplr_seq.push_back(prune_xmplr(exemplar, sf.second));
+                xmplr_seq.push_back(prune_xmplr(exemplar, selected_feats.second));
             }
             else {
                 logger().debug() << "Do not prune the exemplar from "
                                  << "non-selected features "
                                  << "for deme " << demeIDs[sfi];
                 // Insert exemplar features as they are not pruned
-                sf.second.insert(xmplr_features.begin(), xmplr_features.end());
+                selected_feats.second.insert(xmplr_features.begin(), xmplr_features.end());
                 xmplr_seq.push_back(exemplar);
             }
 
             // add the complement of the selected features to ignore_ops
             unsigned arity = festor._ctable.get_arity();
             std::set<arity_t> ignore_idxs;
+            std::set<arity_t>::iterator end = selected_feats.second.end();
             vertex_set ignore_ops, considered_args;
+            
             for (unsigned i = 0; i < arity; i++) {
                 argument arg(i + 1);
-                if (sf.second.find(i) == sf.second.end()) {
+                if (selected_feats.second.find(i) == end) {
                     ignore_idxs.insert(i);
                     ignore_ops.insert(arg);
                 }
@@ -183,7 +233,7 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
             sfi++;
         }
     }
-    else {                      // no feature selection within moses
+    else {                      // no dynamic feature selection
         ignore_ops_seq.push_back(_params.ignore_ops);
         xmplr_seq.push_back(exemplar);
     }
@@ -245,10 +295,15 @@ std::vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_ti
             _cscorer.ignore_idxs(_ignore_idxs_seq[i]);
         
             // compute the max target for that deme (if features have been
-            // selected is might be less that the global target)
+            // dynamically selected, it might be less that the global target;
+            // that is, the deme might not be able to reach the best score.)
             //
             // TODO: DO NOT CHANGE THE MAX SCORE IF USER SET IT: BUT THAT
             // OPTION ISN'T GLOBAL WHAT TO DO?
+            //
+            // But why would we want to over-ride the best-possible score?
+            // Typically, demes almost never hit the best score anyway, so
+            // why would this matter?
             score_t deme_target_score = _cscorer.best_possible_score();
             logger().info("Inferred target score for that deme = %g",
                           deme_target_score);
@@ -283,6 +338,9 @@ std::vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_ti
     if (_params.fstor) {
         // reset scorer to use all variables (important so that
         // behavioral score is consistent across generations
+        // XXX FIXME this is a bug .. the user may have specified that
+        // certain incdexes should be ignored, and this just wipes
+        // those out...
         _cscorer.ignore_idxs(std::set<arity_t>());
     }
 

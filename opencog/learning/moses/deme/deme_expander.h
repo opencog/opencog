@@ -101,8 +101,8 @@ protected:
     combo_tree prune_xmplr(const combo_tree& xmplr,
                            const feature_set& selected_features) const;
 
-    const combo::type_tree& _type_sig;    // type signature of the exemplar
-    const reduct::rule& simplify_candidate; // to simplify candidates
+    const combo::type_tree& _type_sig;          // type signature of the exemplar
+    const reduct::rule& simplify_candidate;     // rule to simplify candidates
     const reduct::rule& simplify_knob_building; // during knob building
     behave_cscore& _cscorer; // composite score
 

@@ -121,8 +121,11 @@ struct feature_selection_parameters
     bool pre_positive;
 };
 
+/// Set of (selected) features. These are all integer indexes standing
+/// in for the actual named/labelled features.
 typedef std::set<arity_t> feature_set;
-// Population of feature sets, ordered by scores (higher is better)
+
+/// Population of feature sets, ordered by scores (higher is better)
 typedef std::multimap<double, feature_set, std::greater<double>> feature_set_pop;
 
 void write_results(const Table& table,

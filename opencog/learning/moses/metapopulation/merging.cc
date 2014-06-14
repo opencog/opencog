@@ -23,8 +23,6 @@
 
 #include <math.h>
 
-#include <boost/range/algorithm/sort.hpp>
-
 #include <opencog/util/oc_omp.h>
 #include <opencog/util/selection.h>
 
@@ -37,6 +35,148 @@ using namespace std;
 using namespace combo;
 
 
+/// Trim the demes down to size.  The point here is that the next
+/// stage, deme_to_trees(), is very cpu-intensive; we should keep
+/// only those candidates that will survive in the metapop.  But what
+/// are these?  Well, select_exemplar() uses an exponential choice
+/// function; instances below a cut-off score have no chance at all
+/// of getting selected. So just eliminate them now, instead of later.
+///
+/// However, trimming too much is bad: it can happen that none
+/// of the best-scoring instances lead to a solution. So keep
+/// around a reasonable pool. Wild choice ot 250 seems reasonable.
+/// (_min_pool_size defaults to 250)
+///
+/// In order for this algo to work, the instances in the deme must be
+/// in score-sorted order, with the highest scores first, lowest
+/// scores last. The tail of the deme (a vector) is cut off.
+void metapopulation::trim_down_deme(deme_t& deme) const
+{
+    // Don't bother, if the deme is tiny.
+    if (_min_pool_size >= deme.size())
+        return;
+
+    if (logger().isDebugEnabled())
+    {
+        stringstream ss;
+        ss << "Trim down deme " << deme.getID()
+           << " of size: " << deme.size();
+        logger().debug(ss.str());
+    }
+
+    score_t top_sc = deme.begin()->second.get_penalized_score();
+    score_t bot_sc = top_sc - useful_score_range();
+
+    for (size_t i = deme.size()-1; 0 < i; --i) {
+        const composite_score &cscore = deme[i].second;
+        score_t score = cscore.get_penalized_score();
+        if (score < bot_sc) {
+            deme.pop_back();
+        }
+    }
+
+    if (logger().isDebugEnabled())
+    {
+        stringstream ss;
+        ss << "Deme trimmed down, new size: " << deme.size();
+        logger().debug(ss.str());
+    }
+}
+
+/// Convert the instances in the deme into scored combo_trees.
+/// Return the resulting set of trees. The number of trees returned
+/// is limited to _parms.max_candidates; in order for this limitation
+/// to work, the deme must be presented in score-sorted order (highest
+/// scores first, lowest scores last).
+///
+void metapopulation::deme_to_trees(deme_t& deme,
+                                   const representation& rep,
+                                   unsigned n_evals,
+                                   scored_combo_tree_set& pot_candidates)
+{
+    std::mutex mtx;
+
+    auto select_candidates =
+        [&](const scored_instance<composite_score>& inst)
+    {
+        const composite_score& inst_csc = inst.second;
+        score_t inst_sc = inst_csc.get_score();
+        // If score is really bad, don't bother.
+        if (inst_sc <= very_worst_score || !isfinite(inst_sc))
+            return;
+
+        // Get the combo_tree associated to inst, cleaned and reduced.
+        combo_tree tr = rep.get_candidate(inst, true);
+
+        // update the set of potential exemplars
+        scored_combo_tree sct(tr, deme.getID(), inst_csc);
+
+        std::lock_guard<std::mutex> lock(mtx);
+        pot_candidates.insert(sct);
+    };
+
+    unsigned max_pot_cnd = deme.size();
+    if (_params.max_candidates >= 0)
+        max_pot_cnd = std::min(max_pot_cnd, (unsigned)_params.max_candidates);
+    unsigned total_max_pot_cnd = pot_candidates.size() + max_pot_cnd;
+
+    if (logger().isDebugEnabled()) {
+        logger().debug() << "Select " << max_pot_cnd 
+                         << " candidates from deme " << deme.getID();
+    }
+
+    // select_candidates() can be very time consuming; it currently
+    // takes anywhere from 25 to 500(!!) millisecs per instance (!!)
+    // for me; my (reduced, simplified) instances have complexity
+    // of about 100. This seems too long/slow (circa summer 2012).
+    // This may have improved, circa June 2014.
+    //
+    // First, we select the top max_pot_cnd from the deme. (Recall, the
+    // instances in the deme are in score-sorted order).  Some of the
+    // trees will be redundant, so in order to reach the max_pot_cnd
+    // target, we reiterate with max_pot_cnd - pot_candidates.size(),
+    // until either the target is reached (pot_candidates.size() == 
+    // max_pot_cnd), or there are no more instances in the deme.
+    //
+    // XXX FIXME ... ummm, why is it important to accurately hit this
+    // target? All we really need to do is to get close, to get good
+    // enough. If we get fewer than max_pot_cnd, so what .. I just don't
+    // see that it matters. Who cares; most of the resulting demes will
+    // end up getting discarded anyway, with an extremely high
+    // probability ... But I guess this doesn't hurt, right? Just some
+    // extra code complexity, that's all.
+    //
+    // Note that we really need to take that twisted road because
+    // otherwise, if we just iterate in parallel till we get
+    // enough candidates, it can create race conditions
+    // (indeterminism) Huh? What? Where? How?
+    typedef deme_t::const_iterator deme_cit;
+    for (deme_cit deme_begin = deme.cbegin(),
+             deme_end = deme_begin + max_pot_cnd;
+         deme_begin != deme.cend()
+             && pot_candidates.size() < total_max_pot_cnd;)
+    {
+        // logger().debug("ITERATING TILL TARGET REACHED (%u/%u) "
+        //                "pot_candidates.size() = %u",
+        //                i, demes.size(), pot_candidates.size());
+
+        // select candidates in range = [deme_being, deme_end)
+        OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
+
+        // update range
+        OC_ASSERT(pot_candidates.size() <= total_max_pot_cnd,
+                  "there must be a bug");
+        unsigned delta = total_max_pot_cnd - pot_candidates.size();
+        deme_begin = deme_end;
+        deme_end = (unsigned int)std::distance(deme_begin, deme.cend()) <= delta ?
+            deme.end() : deme_begin + delta;
+    }
+}  
+
+/// Merge the given set of candidates into the metapopulation.
+/// It is assumed that these candiates have already be vetted for
+/// quality, quantity, suitability, etc.  This simply performs that
+/// final, actual merge.
 void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
 {
     if (logger().isDebugEnabled()) {
@@ -69,139 +209,55 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
     }
 }
 
-bool metapopulation::has_been_visited(const combo_tree& tr) const
-{
-    return _visited_exemplars.find(tr) != _visited_exemplars.cend();
-}
 
+/// Given a vector of demes, and the corresponding representations for
+/// those demes, convert the instances in the demes into scored combo
+/// trees, and merge them into the metapopulation.
+///
+/// During this merging, assorted cleanup and tuning is performed:
+/// low-scoring instances are discarded, duplicates are discarded,
+/// some diversity work is done.  The number of instances that are
+/// finally merged are limited by the _params.max_candidates value.
+/// (Its wise to set this value to something small-ish, say, a few
+/// thousand, at most, to avoid excess CPU-time consumption, and 
+/// excess RAM usage.  Some parts of this merger can be very CPU-time
+/// consuming.
+//
+// See also header file for a desciption of this method.
+//
 bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
                                  const boost::ptr_vector<representation>& reps,
                                  const vector<unsigned>& evals_seq)
 {
     // Note that univariate reports far more evals than the deme size;
-    // this is because univariate over-write deme entries.
+    // this is because univariate over-writes deme entries.
     logger().debug("Close deme(s); evaluations reported: %d",
                    boost::accumulate(evals_seq, 0U));
 
-    // Add, as potential exemplars for future demes, all unique
-    // trees in the final deme.
     scored_combo_tree_set pot_candidates;
-
-    logger().debug("Sort the deme(s)");
-
-    // Sort the deme according to composite_score (descending order)
-    for (deme_t& deme : demes)
-        boost::sort(deme, std::greater<scored_instance<composite_score> >());
-
-    trim_down_demes(demes);
-
-    ///////////////////////////////////////////////////////////////
-    // select the set of candidates to add in the metapopulation //
-    ///////////////////////////////////////////////////////////////
-    typedef boost::shared_mutex mutex;
-    typedef boost::shared_lock<mutex> shared_lock;
-    typedef boost::unique_lock<mutex> unique_lock;
-
-    mutex pot_cnd_mutex; // mutex for pot_candidates
-
     for (unsigned i = 0; i < demes.size(); i++) {
-        // NB, this is an anonymous function. In particular, some
-        // compilers require that members be explicitly referenced
-        // with this-> as otherwise we get compile fails:
-        // https://bugs.launchpad.net/bugs/933906
-        auto select_candidates =
-            [&, this](const scored_instance<composite_score>& inst) {
+        deme_t& deme = demes[i];
 
-            const composite_score& inst_csc = inst.second;
-            score_t inst_sc = inst_csc.get_score();
-            // if it's really bad stops
-            if (inst_sc <= very_worst_score || !isfinite(inst_sc))
-                return;
+        // Sort the deme according to composite_score (descending order)
+        // Both trim_down_deme(), and deme_to_trees(), requires that the
+        // instances be in sorted order.
+        std::sort(deme.begin(), deme.end(),
+                  std::greater<scored_instance<composite_score> >());
 
-            // Get the combo_tree associated to inst, cleaned and reduced.
-            //
-            // @todo: below, the candidate is reduced possibly for the
-            // second time.  This second reduction could probably be
-            // avoided with some clever cache or something. (or a flag?)
-            combo_tree tr = reps[i].get_candidate(inst, true);
+        // Discard the truly poor-scoring instances in each deme.
+        trim_down_deme(deme);
 
-            // Look for tr in the list of potential candidates.
-            // Return true if not found.
-            auto thread_safe_tr_not_found = [&]() {
-                shared_lock lock(pot_cnd_mutex);
-                scored_combo_tree sct(tr);
-                return pot_candidates.find(sct) == pot_candidates.end();
-            };
-
-            // XXX To make merge_deme thread safe, this needs to be
-            // locked too.  (to avoid collision with threads updating
-            // _visited, e.g. the MPI case.
-            bool not_already_visited = !this->has_been_visited(tr);
-
-            // update the set of potential exemplars
-            if (not_already_visited && thread_safe_tr_not_found()) {
-                unique_lock lock(pot_cnd_mutex);
-                scored_combo_tree sct(tr, demes[i].getID(), inst_csc);
-                pot_candidates.insert(sct);
-            }
-        };
-
-        // It can happen that the true number of evals is less than the
-        // deme size (certain cases involving the univariate optimizer)
-        // But also, the deme size can be smaller than the number of evals,
-        // if the deme was shrunk to save space.
-        unsigned max_pot_cnd = std::min(evals_seq[i], (unsigned)demes[i].size());
-        if (_params.max_candidates >= 0)
-            max_pot_cnd = std::min(max_pot_cnd, (unsigned)_params.max_candidates);
-        unsigned total_max_pot_cnd = pot_candidates.size() + max_pot_cnd;
-
-        stringstream ss;
-        ss << "Select candidates from deme " << demes[i].getID()
-           << " to merge amongst " << max_pot_cnd;
-        logger().debug(ss.str());
-
-        // select_candidates() can be very time consuming; it currently
-        // takes anywhere from 25 to 500(!!) millisecs per instance (!!)
-        // for me; my (reduced, simplified) instances have complexity
-        // of about 100. This seems too long/slow (circa summer 2012).
-        //
-        // We first select the top max_pot_cnd from the deme. But some
-        // candidates will be redundant so in order to reach the
-        // max_pot_cnd target we reiterate with max_pot_cnd -
-        // pot_candidates.size(), till either the target is reached
-        // (pot_candidates.size() == max_pot_cnd), or there is no more
-        // candidate in the deme.
-        //
-        // Note that we really need to take that twisted road because
-        // otherwise, if we just iterate in parallel till we get
-        // enough candidates, it can create race conditions
-        // (indeterminism)
-        typedef deme_t::const_iterator deme_cit;
-        for (deme_cit deme_begin = demes[i].cbegin(),
-                 deme_end = deme_begin + max_pot_cnd;
-             deme_begin != demes[i].cend()
-                 && pot_candidates.size() < total_max_pot_cnd;)
-        {
-            // logger().debug("ITERATING TILL TARGET REACHED (%u/%u) "
-            //                "pot_candidates.size() = %u",
-            //                i, demes.size(), pot_candidates.size());
-
-
-            // select candidates in range = [deme_being, deme_end)
-            OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
-
-            // update range
-            OC_ASSERT(pot_candidates.size() <= total_max_pot_cnd,
-                      "there must be a bug");
-            unsigned delta = total_max_pot_cnd - pot_candidates.size();
-            deme_begin = deme_end;
-            deme_end = (unsigned int)std::distance(deme_begin, demes[i].cend()) <= delta ?
-                demes[i].end() : deme_begin + delta;
-        }
+        // Convert the instances in the deme to trees.
+        deme_to_trees(deme, reps[i], evals_seq[i], pot_candidates);
     }
 
-    logger().debug("Selected %u candidates to be merged",
+    logger().debug("Selected %u candidate trees to be merged into the metapop",
                    pot_candidates.size());
+
+    // Remove candidate trees that are already in the metapop.
+    scored_combo_tree_set candidates = get_new_candidates(pot_candidates);
+    logger().debug("Selected %u candidates (%u were in the metapopulation)",
+                   candidates.size(), pot_candidates.size()-candidates.size());
 
     // Behavioral scores are needed only if domination-based
     // merging is asked for, or if the diversity penalty is in use.
@@ -211,7 +267,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         or diversity_enabled())
     {
         logger().debug("Compute behavioral score of %d selected candidates",
-                       pot_candidates.size());
+                       candidates.size());
 
 #ifdef FIXME_LATER
         // XXX TODO FIXME: the scores should be computed in-place, above,
@@ -225,14 +281,14 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
             // XXX this needs to be locked!
             new_pot.insert(sct);
         };
-        OMP_ALGO::for_each(pot_candidates.begin(), pot_candidates.end(),
+        OMP_ALGO::for_each(candidates.begin(), candidates.end(),
                            compute_bscore);
-        pot_candidates = new_pot;
+        candidates = new_pot;
 #endif
 #if WTF
 // XXX WTF compiler dislikes the below, it keeps complaining about constness.
 // I can't figure it out!
-        for (scored_combo_tree& cand : pot_candidates)
+        for (scored_combo_tree& cand : candidates)
         {
             behavioral_score bs(_cscorer.get_bscore(cand.get_tree()));
             cand._bscore = bs;
@@ -247,16 +303,8 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
                                   cand.get_composite_score(), bs);
             new_pot.insert(sct);
         }
-        pot_candidates = new_pot;
+        candidates = new_pot;
     }
-
-    // XXX FIXME TODO: we should reverse the step below and the step above,
-    // so that we only compute the bscores on the cands that are not yet
-    // in the metapop.
-    logger().debug("Select only candidates not already in the metapopulation");
-    scored_combo_tree_set candidates = get_new_candidates(pot_candidates);
-    logger().debug("Selected %u candidates (%u were in the metapopulation)",
-                   candidates.size(), pot_candidates.size()-candidates.size());
 
     if (_params.discard_dominated) {
 
@@ -288,6 +336,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
     // update the record of the best-seen score & trees
     update_best_candidates(candidates);
 
+    // Finally, merge the candidates into the metapop
     bool done = false;
     if (_params.merge_callback)
         done = (*_params.merge_callback)(candidates, _params.callback_user_data);
@@ -303,9 +352,11 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
     return done;
 }
 
+
+// See header file for a desciption of this method.
 void metapopulation::resize_metapop()
 {
-    if (size() <= min_pool_size)
+    if (size() <= _min_pool_size)
         return;
 
     unsigned old_size = size();
@@ -328,7 +379,7 @@ void metapopulation::resize_metapop()
     // ends up costing a lot.  I think... not sure.
 
     // Get the first score below worst_score (from begin() + min_pool_size)
-    scored_combo_tree_ptr_set::iterator it = std::next(_scored_trees.begin(), min_pool_size);
+    scored_combo_tree_ptr_set::iterator it = std::next(_scored_trees.begin(), _min_pool_size);
     while (it != _scored_trees.end()) {
         score_t sc = it->get_penalized_score();
         if (sc < worst_score) break;
@@ -382,7 +433,7 @@ void metapopulation::resize_metapop()
     }
 
     // remove them from _cached_dst
-    boost::sort(ptr_seq);
+    std::sort(ptr_seq.begin(), ptr_seq.end());
     _cached_dst.erase_ptr_seq(ptr_seq);
 
     if (logger().isDebugEnabled()) {
@@ -398,11 +449,39 @@ void metapopulation::resize_metapop()
     }
 }
 
-// Return the set of candidates not present in the metapopulation.
-// This makes merging faster because at best it decreases the number
-// of calls of dominates.
+/// Given a set of candidates, return the set of candidates not already
+/// present in the metapopulation.  This usually makes merging faster;
+/// for example, if domination is enabled, this will result in fewer
+/// calls to dominates().
 scored_combo_tree_set metapopulation::get_new_candidates(const scored_combo_tree_set& mcs)
 {
+
+#define PARALLEL_INSERT 1
+#ifdef PARALLEL_INSERT
+    // Parallel insert, uses locking to avoid corruption.
+    // This is probably faster than the lock-free version below,
+    // but who knows ... (the version below is also parallel, just
+    // that it's finer-grained than this one, which means its probably
+    // slower!?)
+    scored_combo_tree_set res;
+    std::mutex insert_cnd_mutex;
+
+    scored_combo_tree_ptr_set::const_iterator cbeg = _scored_trees.begin();
+    scored_combo_tree_ptr_set::const_iterator cend = _scored_trees.end();
+    auto insert_new_candidate = [&](const scored_combo_tree& cnd) {
+        const combo_tree& tr = cnd.get_tree();
+        scored_combo_tree_ptr_set::const_iterator fcnd =
+            std::find_if(cbeg, cend,
+                [&](const scored_combo_tree& v) { return tr == v.get_tree(); });
+        if (fcnd == cend) {
+            std::unique_lock<mutex> lock(insert_cnd_mutex);
+            res.insert(cnd);
+        }
+    };
+    OMP_ALGO::for_each(mcs.begin(), mcs.end(), insert_new_candidate);
+    return res;
+
+#else
     scored_combo_tree_set res;
     for (const auto& cnd : mcs) {
         const combo_tree& tr = cnd.get_tree();
@@ -413,68 +492,8 @@ scored_combo_tree_set metapopulation::get_new_candidates(const scored_combo_tree
         if (fcnd == _scored_trees.end())
             res.insert(cnd);
     }
-
-    // That version runs the insertion in parallel, I don't know what is faster
-    //
-    // mutex insert_cnd_mutex;
-    // typedef boost::unique_lock<mutex> unique_lock;
-
-    // auto insert_new_candidate = [&](scored_combo_tree_set::value_type& cnd) {
-    //     const combo_tree& tr = get_tree(cnd);
-    //     const_iterator fcnd = std::find_if(begin(), end(),
-    //                                        [&](const scored_combo_tree& v) {
-    //                                            return tr == get_tree(v); });
-    //     if (fcnd == end()) {
-    //         unique_lock lock(insert_cnd_mutex);
-    //         res.insert(cnd);
-    //     }
-    // };
-
     return res;
-}
-
-/// Trim the demes down to size.  The point here is that the next
-/// stage, select_candidates, is very cpu-intensive; we should keep
-/// only those candidates that will survive in the metapop.  But what
-/// are these?  Well, select_exemplar() uses an exponential choice
-/// function; instances below a cut-off score have no chance at all
-/// of getting selected. So just eliminate them now, instead of later.
-///
-/// However, trimming too much is bad: it can happen that none
-/// of the best-scoring instances lead to a solution. So keep
-/// around a reasonable pool. Wild choice ot 250 seems reasonable.
-void metapopulation::trim_down_demes(boost::ptr_vector<deme_t>& demes) const
-{
-    for (deme_t& deme : demes) {
-
-        if (logger().isDebugEnabled())
-        {
-            stringstream ss;
-            ss << "Trim down deme " << deme.getID()
-               << " of size: " << deme.size();
-            logger().debug(ss.str());
-        }
-
-        if (min_pool_size < deme.size()) {
-            score_t top_sc = deme.begin()->second.get_penalized_score();
-            score_t bot_sc = top_sc - useful_score_range();
-
-            for (size_t i = deme.size()-1; 0 < i; --i) {
-                const composite_score &cscore = deme[i].second;
-                score_t score = cscore.get_penalized_score();
-                if (score < bot_sc) {
-                    deme.pop_back();
-                }
-            }
-        }
-
-        if (logger().isDebugEnabled())
-        {
-            stringstream ss;
-            ss << "Deme trimmed down, new size: " << deme.size();
-            logger().debug(ss.str());
-        }
-    }
+#endif
 }
 
 /// Update the record of the best score seen, and the associated tree.
@@ -514,6 +533,11 @@ void metapopulation::update_best_candidates(const scored_combo_tree_set& candida
             _best_candidates.insert(cnd);
         }
     }
+}
+
+bool metapopulation::has_been_visited(const combo_tree& tr) const
+{
+    return _visited_exemplars.find(tr) != _visited_exemplars.cend();
 }
 
 // log the best candidates

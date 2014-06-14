@@ -106,6 +106,10 @@ void feature_selector::preprocess_params(const combo::combo_tree& xmplr)
     }
 }
 
+/// XXX TODO Explain what this function does. Why does it create a second
+/// table that is different than _ctable? How are these two different
+/// tables used?  Why do we need two different tables?  WTF.  This is 
+/// confusing.
 CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const
 {
     // set labels and signature

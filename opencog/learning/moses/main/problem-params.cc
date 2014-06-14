@@ -784,8 +784,13 @@ problem_params::add_options(boost::program_options::options_description& desc)
 
         ("fs-demes",
          po::value<unsigned>(&festor_params.n_demes)->default_value(1),
-         "Number of feature sets to select out of feature selection and the "
-         "number of demes to accordingly spawn.\n")
+         "Number of different feature sets to select during dynamic "
+         "feature selection.  Each different feature set will be used "
+         "to create a different deme for a single, given exemplar. By "
+         "default, only a single deme is created. (XXX Does this "
+         "actually improve anything? Or does this just add to the "
+         "complexity of the code base??? Cause I don't see the utility "
+         "of this.)\n")
 
         ("fs-algo",
          po::value<string>(&fs_params.algorithm)->default_value(simple),

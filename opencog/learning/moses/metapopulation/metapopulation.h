@@ -207,14 +207,20 @@ public:
     void merge_candidates(scored_combo_tree_set& candidates);
 
     /**
-     * merge deme -- convert instances to trees, and save them.
+     * merge demes -- convert instances to trees, and merge them
+     * back into the metapopulation.
      *
      * 1) cull the poorest scoring instances.
-     * 2) convert set of instances to trees
+     * 2) convert instances to trees
      * 3) merge trees into the metapopulation, possibly using domination
      *    as the merge criterion.
      *
      * Return true if further deme exploration should be halted.
+     *
+     * 'demes' is a list of demes
+     * 'reps' is a list of reps, each rep corresponding to a deme.
+     * 'evals' is a list of counts, indicating how many scoring
+     *         function evaluations were made for each deme/rep.
      *
      * This is almost but not quite thread-safe.  The use of
      * _visited_exemplars is not yet protected. There may be other
@@ -241,7 +247,7 @@ private:
      * However, lets not get over-zelous; if the metapop is too small,
      * then we have the nasty situation where none of the best-scoring
      * individuals lead to a solution.  Fix the minimum metapop size
-     * to, oh, say, 250.
+     * to, oh, say, 250 (aka _min_pool_size).
      *
      * But if the population starts exploding, this is also bad, as it
      * chews up RAM with unlikely exemplars. Keep it in check by
@@ -257,8 +263,12 @@ private:
     // calls of dominates.
     scored_combo_tree_set get_new_candidates(const scored_combo_tree_set&);
 
-    // Trim down demes before merging based the scores
-    void trim_down_demes(boost::ptr_vector<deme_t>& demes) const;
+    // Trim down deme before merging based the scores
+    void trim_down_deme(deme_t& deme) const;
+
+    // convert instances in deme to trees
+    void deme_to_trees(deme_t&, const representation&,
+                       unsigned n_evals, scored_combo_tree_set&);
     
     // ------------------- Diversity-realted parts --------------------
 private:
@@ -382,45 +392,8 @@ private:
     // that bcs contains no dominated candidates within itself
     void merge_nondominated(const scored_combo_tree_set& bcs, unsigned jobs = 1);
 
-    /**
-     * x dominates y if
-     *
-     * for all i x_i >= y_i and there exists i such that x_i > y_i
-     *
-     * this function returns true if x dominates y
-     *                       false if y dominates x
-     *                       indeterminate otherwise
-     */
-    static inline boost::logic::tribool dominates(const behavioral_score& x,
-                                    const behavioral_score& y)
-    {
-        // everything dominates an empty vector
-        if (x.empty()) {
-            if (y.empty())
-                return boost::logic::indeterminate;
-            return false;
-        } else if (y.empty()) {
-            return true;
-        }
-
-        boost::logic::tribool res = boost::logic::indeterminate;
-        for (behavioral_score::const_iterator xit = x.begin(), yit = y.begin();
-             xit != x.end(); ++xit, ++yit)
-        {
-            if (*xit > *yit) {
-                if (!res)
-                    return boost::logic::indeterminate;
-                else
-                    res = true;
-            } else if (*yit > *xit) {
-                if (res)
-                    return boost::logic::indeterminate;
-                else
-                    res = false;
-            }
-        }
-        return res;
-    }
+    static boost::logic::tribool dominates(const behavioral_score& x,
+                                           const behavioral_score& y);
 
     // --------------------- Miscellaneous functions --------------------
 public:
@@ -517,7 +490,7 @@ protected:
 
     scored_combo_tree_ptr_set _scored_trees;
 
-    static const unsigned min_pool_size = 250;
+    static const unsigned _min_pool_size = 250;
 
     size_t _merge_count;
 
