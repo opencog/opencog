@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2010 Novemente LLC
  * Copyright (C) 2012 Poulin Holdings LLC
+ * Copyright (C) 2014 Aidyia Limited
  *
  * Authors: Nil Geisweiller, Moshe Looks, Linas Vepstas
  *
@@ -31,7 +32,6 @@
 namespace opencog {
 namespace moses {
 
-using namespace std;
 using namespace combo;
 
 
@@ -58,7 +58,7 @@ void metapopulation::trim_down_deme(deme_t& deme) const
 
     if (logger().isDebugEnabled())
     {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Trim down deme " << deme.getID()
            << " of size: " << deme.size();
         logger().debug(ss.str());
@@ -77,7 +77,7 @@ void metapopulation::trim_down_deme(deme_t& deme) const
 
     if (logger().isDebugEnabled())
     {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Deme trimmed down, new size: " << deme.size();
         logger().debug(ss.str());
     }
@@ -183,7 +183,7 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
         logger().debug("Going to merge %u candidates with the metapopulation",
                        candidates.size());
         if (logger().isFineEnabled()) {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Candidates to merge with the metapopulation:" << std::endl;
             for (const auto& cnd : candidates)
                 ostream_scored_combo_tree(ss, cnd, true, true);
@@ -227,7 +227,7 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
 //
 bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
                                  const boost::ptr_vector<representation>& reps,
-                                 const vector<unsigned>& evals_seq)
+                                 const std::vector<unsigned>& evals_seq)
 {
     // Note that univariate reports far more evals than the deme size;
     // this is because univariate over-writes deme entries.
@@ -310,7 +310,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
 
         logger().debug("Remove dominated candidates");
         if (logger().isFineEnabled()) {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Candidates with their bscores before"
                 " removing the dominated candidates" << std::endl;
             for (const auto& cnd : candidates)
@@ -324,7 +324,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         logger().debug("Removed %u dominated candidates out of %u",
                        old_size - candidates.size(), old_size);
         if (logger().isFineEnabled()) {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Candidates with their bscores after"
                 " removing the dominated candidates" << std::endl;
             for (const auto& cnd : candidates)
@@ -442,7 +442,7 @@ void metapopulation::resize_metapop()
 
         logger().debug("Metapopulation size is %u", size());
         if (logger().isFineEnabled()) {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Metapopulation:" << std::endl;
             logger().fine(ostream(ss, -1, true, true).str());
         }
@@ -474,7 +474,7 @@ scored_combo_tree_set metapopulation::get_new_candidates(const scored_combo_tree
             std::find_if(cbeg, cend,
                 [&](const scored_combo_tree& v) { return tr == v.get_tree(); });
         if (fcnd == cend) {
-            std::unique_lock<mutex> lock(insert_cnd_mutex);
+            std::lock_guard<std::mutex> lock(insert_cnd_mutex);
             res.insert(cnd);
         }
     };

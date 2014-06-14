@@ -50,16 +50,42 @@ namespace opencog {
 namespace moses {
 
 /**
- * The metapopulation will store the expressions (as scored trees)
- * that were encountered during the learning process.  Only the
- * highest-scoring trees are typically kept.
+ * The metapopulation stores a pool of combo trees that are drawn from
+ * during the learning process.  The pool is expanded by adding the
+ * expressions (the combo trees) that were generated during the deme
+ * expansion and optimization step.
  *
  * The metapopulation is updated in iterations. In each iteration, one
  * of its elements is selected as an exemplar. The exemplar is then
  * decorated with knobs and optimized, to create a new deme.  Suitably
- * high-scoring members of the deme are then folded back into the
- * metapopulation.  At this point, the metapopulation may be pruned,
- * to keep it's size manageable.
+ * high-scoring members of the deme (instances) are then explicitly
+ * converted into trees, and folded back into the metapopulation.  At
+ * this point, the metapopulation may be pruned, to keep it's size
+ * manageable.
+ *
+ * Again, the primary purpose of the metapopulation is to provide a
+ * well-balanced, evenly-distributed collection of exemplars for future
+ * expansion into demes.  The metapopulation does NOT have to consist
+ * of the very best possible combo trees; rather, it must consist of
+ * the kinds of combo trees that will generate the fittest offspring,
+ * when expanded. It can be thought of as a kind of "breeding stock".
+ *
+ * The metapopulation should be contrasted with the ensemble, which
+ * also holds a colection of scored combo trees.  The explicit goal of
+ * the ensemble is to gather together the fittest combo trees (the most
+ * predictive, accurate, precise trees). Although, in general, the two
+ * are likely to hold similar sets of trees, the management policy for
+ * the ensemble and the metapopulation differ; the ensemble will be used
+ * for inference, the metapopulation for breeding.
+ *
+ * A number of different approaches are taken to maintain a well-balanced,
+ * evenly-distributed collection of exemplars.  One of these is the 
+ * "diversity" mechanism, which seeks to ensure that the distribution
+ * stays as diverse as possible, by means of a "diversity penalty", 
+ * which enables low-scoring combo trees to be kept around, without being
+ * crowded out by higher-scoring rivals. The point here is that it is
+ * often the case that low-scoring, unfit combo trees can generate very
+ * high-fitness offspring.
  */
 using combo::combo_tree;
 
