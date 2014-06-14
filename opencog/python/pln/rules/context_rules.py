@@ -154,7 +154,7 @@ class ContextToSubsetRule(Rule):
         Rule.__init__(self,
                       formula=None,
                       inputs=[chainer.link(types.ContextLink, [c, a])],
-                      outputs=[])
+                      outputs=[chainer.link(types.SubsetLink, [c, a])])
 
 
 class ContextFreeToSensitiveRule(Rule):
