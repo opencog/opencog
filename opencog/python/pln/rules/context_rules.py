@@ -150,12 +150,22 @@ class ContextToSubsetRule(Rule):
     def __init__(self, chainer):
         a = chainer.new_variable()
         c = chainer.new_variable()
-
         self.chainer = chainer
         Rule.__init__(self,
                       formula=contextFormula,
                       inputs=[chainer.link(types.ContextLink, [c, a])],
-                      outputs=[chainer.link(types.SubsetLink, [c, a])])
+                      outputs=[])
+
+    def custom_compute(self, inputs, outputs):
+        [inputs] = inputs
+        tv = inputs.tv
+        if inputs.out[0].type == inputs.out[1].type == types.ConceptNode:
+            concept_c = inputs.out[0]
+            concept_a = inputs.out[1]
+            subset_link = [self.chainer.link(types.SubsetLink, [concept_c, concept_a])]
+            return subset_link, [tv]
+        # if they are not ConceptNodes, just return the inputs
+        return [inputs], [tv]
 
 
 class ContextFreeToSensitiveRule(Rule):
