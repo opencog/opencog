@@ -33,11 +33,11 @@
     (EvaluationLink
         smokes
         (ListLink
-            (VariableNode "$X")))
+            (VariableNode "$X1")))
     (EvaluationLink
         cancer
         (ListLink
-            (VariableNode "$X"))))
+            (VariableNode "$X1"))))
 
 ;; In the case that X and Y are friends, if X smokes then so does Y.
 ;; ForAll(x,y) Friends(x,y) -> (Smokes(x) <-> Smokes(y))
@@ -49,17 +49,17 @@
     (EvaluationLink
         friends
         (ListLink
-            (VariableNode "$X")
-            (VariableNode "$Y")))
+            (VariableNode "$X2")
+            (VariableNode "$Y2")))
     (ImplicationLink
         (EvaluationLink
             smokes
             (ListLink
-                (VariableNode "$X")))
+                (VariableNode "$X2")))
         (EvaluationLink
             smokes
             (ListLink
-                (VariableNode "$Y")))))
+                (VariableNode "$Y2")))))
 
 ; If X and Y are friends, then Y and X are friends.
 ; Note: this is not currently used.
@@ -131,9 +131,3 @@
         cancer
         (ListLink
             (VariableNode "$hasCancer"))))
-
-;;; --------------------------------------------------------------------------
-;;; Attention allocation configuration
-
-(cog-set-av! cancer (av 1000 0 0))
-(cog-set-af-boundary! 1)

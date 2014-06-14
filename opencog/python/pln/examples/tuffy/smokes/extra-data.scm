@@ -40,26 +40,26 @@
     (EvaluationLink
         neighbors
         (ListLink
-            (VariableNode "$X")
-            (VariableNode "$Y")))
+            (VariableNode "$X3")
+            (VariableNode "$Y3")))
     (EvaluationLink
         knows
         (ListLink
-            (VariableNode "$X")
-            (VariableNode "$Y"))))
+            (VariableNode "$X3")
+            (VariableNode "$Y3"))))
 
 ; People who know each other have met.
 (ImplicationLink (stv 0.9 1.0)
     (EvaluationLink
         knows
         (ListLink
-            (VariableNode "$X")
-            (VariableNode "$Y")))
+            (VariableNode "$X4")
+            (VariableNode "$Y4")))
     (EvaluationLink
         hasMet
         (ListLink
-            (VariableNode "$X")
-            (VariableNode "$Y"))))
+            (VariableNode "$X4")
+            (VariableNode "$Y4"))))
 
 ; A is intelligent.
 (InheritanceLink (stv 0.9 1.0)
@@ -85,19 +85,19 @@
 ; Intelligent people are successful.
 (ImplicationLink (stv 0.9 1.0)
     (InheritanceLink
-        (VariableNode "$X")
+        (VariableNode "$X5")
         intelligent)
     (InheritanceLink
-        (VariableNode "$X")
+        (VariableNode "$X5")
         successful))
 
 ; Successful people are happy.
 (ImplicationLink (stv 0.9 1.0)
     (InheritanceLink
-        (VariableNode "$X")
+        (VariableNode "$X6")
         successful)
     (InheritanceLink
-        (VariableNode "$X")
+        (VariableNode "$X6")
         happy))
 
 ; People who have cancer are sick.
@@ -105,19 +105,19 @@
     (EvaluationLink
         cancer
         (ListLink
-            (VariableNode "$X")))
+            (VariableNode "$X7")))
     (EvaluationLink
         sick
         (ListLink
-            (VariableNode "$X"))))
+            (VariableNode "$X7"))))
 
 ; People who are sick are tired.
 (ImplicationLink (stv 1.0 1.0)
     (EvaluationLink
         sick
         (ListLink
-            (VariableNode "$X")))
+            (VariableNode "$X8")))
     (EvaluationLink
         tired
         (ListLink
-            (VariableNode "$X"))))
+            (VariableNode "$X8"))))
