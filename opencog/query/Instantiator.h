@@ -45,7 +45,7 @@ class Instantiator
 		std::vector<Handle> _oset;
 		bool walk_tree(Handle tree);
 		Handle execution_link(void);
-		bool did_exec;
+		bool _did_exec;
 
 	public:
 		Instantiator(AtomSpace* as) : _as(as) {}

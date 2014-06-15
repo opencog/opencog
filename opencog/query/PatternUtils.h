@@ -30,6 +30,10 @@
 #include <set>
 #include <vector>
 
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/types.h>
 
 namespace opencog {

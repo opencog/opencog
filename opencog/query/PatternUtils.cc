@@ -21,11 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/oc_assert.h>
-#include <opencog/util/foreach.h>
-#include <opencog/atomspace/Foreach.h>
-#include <opencog/atomspace/ForeachTwo.h>
-
 #include "PatternUtils.h"
 
 using namespace opencog;
@@ -114,7 +109,7 @@ void get_connected_components(
 		std::vector<Handle> no_con_yet;
 		bool did_at_least_one = false;
 
-		foreach (Handle cl, todo)
+		for (Handle cl: todo)
 		{
 			bool extended = false;
 
@@ -135,7 +130,7 @@ void get_connected_components(
 					// Add to the varset cache for that component.
 					FindVariables fv;
 					fv.find_vars(cl);
-					foreach (Handle v, fv.varset) cur_vars.insert(v);
+					for (Handle v : fv.varset) cur_vars.insert(v);
 					component_vars[i] = cur_vars;
 
 					extended = true;
@@ -173,7 +168,7 @@ void get_connected_components(
 	}
 
 	// We are done. Copy the components over.
-	foreach (auto comp, components)
+	for (auto comp : components)
 	{
 		compset.insert(comp);
 	}

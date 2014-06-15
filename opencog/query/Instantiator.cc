@@ -70,10 +70,10 @@ bool Instantiator::walk_tree(Handle expr)
 		walk_tree(h);
 
 	// Fire execution links, if found.
-	did_exec = false;  // set flag on top-level only
+	_did_exec = false;  // set flag on top-level only
 	if (t == EXECUTION_LINK)
 	{
-		did_exec = true;
+		_did_exec = true;
 		Handle sh(execution_link());
 		_oset = save_oset;
 		if (Handle::UNDEFINED != sh)
@@ -117,10 +117,10 @@ Handle Instantiator::instantiate(Handle& expr, const std::map<Handle, Handle> &v
 
 	_vmap = &vars;
 	_oset.clear();
-	did_exec = false;
+	_did_exec = false;
 
 	walk_tree(expr);
-	if ((false == did_exec) && (_oset.size() != 1))
+	if ((false == _did_exec) && (_oset.size() != 1))
 		throw InvalidParamException(TRACE_INFO,
 			"Failure to ground expression (found %d groundings)\n"
 			"Ungrounded expr is %s\n",
