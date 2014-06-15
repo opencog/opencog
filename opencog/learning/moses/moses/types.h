@@ -246,6 +246,11 @@ public:
        return _cscore;
     }
 
+    void set_bscore(behavioral_score& bs)
+    {
+       _bscore = bs;
+    }
+
     /* Utility wrappers */
     score_t get_score() const { return _cscore.get_score(); }
     complexity_t get_complexity() const { return _cscore.get_complexity(); }
@@ -259,16 +264,31 @@ public:
 // collections of trees
 
 /**
- * greater_than operator for scored_combo_tree.  The order is
- * determined by the composite score; that is, the composite
- * scores are compared to determin ordering.
+ * greater_than operator for scored_combo_tree.  The order is determined
+ * by the composite score; that is, the composite scores are compared to
+ * determine ordering.  If the scores are equal, then are equal, then the
+ * tree sizes are compared; if these are equal, the trees are compared
+ * lexicographically.  Note that tree equality requires two lexicographic
+ * compares :-(
  *
  * FYI, this ordering makes the non-standard assumption that anything
  * is greater than nan.   This is done so as to not pollute the
  * metapopulation or the deme with candidates with undefined scores
  * (as these are usually very bad candidates).
  */
-struct scored_combo_tree_greater
+struct sct_score_greater
+    : public std::binary_function<scored_combo_tree, scored_combo_tree, bool>
+{
+    bool operator()(const scored_combo_tree&,
+                    const scored_combo_tree&) const;
+};
+
+/**
+ * greater_than operator for scored_combo_tree.  The order is determined
+ * first by tree size, then by tree lexicographic order. Note that tree
+ * equality requires two  lexicographic compares :-(
+ */
+struct sct_tree_greater
     : public std::binary_function<scored_combo_tree, scored_combo_tree, bool>
 {
     bool operator()(const scored_combo_tree&,
@@ -288,14 +308,37 @@ struct scored_combo_tree_equal
                     const scored_combo_tree&) const;
 };
 
-/// scored_combo_tree_set provides an O(1) way of determining if a combo
-/// tree is in the set, or not (and getting its score, if it is).
+/// scored_combo_tree_hash_set provides an O(1) way of determining if
+/// a combo tree is in the set, or not (and getting its score, if it is).
+/// This can be kind-of slow, for two reasons: it invokes the copy 
+/// constructor for insertion, and combo trees can be big; it also 
+/// computes the hash of the tree, which can be fairly expensive.
 typedef std::unordered_set<scored_combo_tree,
                  scored_combo_tree_hash,
+                 // scored_combo_tree_equal> scored_combo_tree_hash_set;
                  scored_combo_tree_equal> scored_combo_tree_set;
 
+/// scored_combo_tree_tset offers a fairly fast, mutable storage for
+/// combo trees, based on the combo tree itself, and not how its scored.
+/// This has slghtly slower insert time than scored_combo_tree_ptr_set
+/// below, which uses scores to order the trees. But its more stable,
+/// precisely because it does not use the scores (which thus are allowed
+/// to change, depending on the situation).
 typedef boost::ptr_set<scored_combo_tree,
-                       scored_combo_tree_greater> scored_combo_tree_ptr_set;
+                       // sct_tree_greater> scored_combo_tree_set;
+                       sct_tree_greater> scored_combo_tree_tset;
+
+/// scored_combo_tree_ptr_set holds scored combo trees, using the
+/// composite score to order the elements. Thus, if the trees have
+/// all been consistently scored, then we can easily spot two unequal
+/// trees simply by looking at their scores. However, if the scorer
+/// is changing the way in which it is scoring over time, so that the
+/// same tree might be scored differently at tdifferent times, then
+/// there is no way to guarantee that a given tree appears only once
+/// in the set. You have been warned!
+///
+typedef boost::ptr_set<scored_combo_tree,
+                       sct_score_greater> scored_combo_tree_ptr_set;
 typedef scored_combo_tree_ptr_set::iterator scored_combo_tree_ptr_set_it;
 typedef scored_combo_tree_ptr_set::const_iterator scored_combo_tree_ptr_set_cit;
 

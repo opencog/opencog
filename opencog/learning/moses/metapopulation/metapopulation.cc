@@ -33,6 +33,33 @@ namespace moses {
 
 using namespace combo;
 
+metapopulation::metapopulation(const std::vector<combo_tree>& bases,
+               behave_cscore& sc,
+               const metapop_parameters& pa) :
+    _cached_dst(pa.diversity),
+    _params(pa),
+    _cscorer(sc),
+    _merge_count(0),
+    _best_cscore(worst_composite_score)
+{
+    init(bases);
+}
+
+
+metapopulation::metapopulation(const combo_tree& base,
+               behave_cscore& sc,
+               const metapop_parameters& pa) :
+    _cached_dst(pa.diversity),
+    _params(pa),
+    _cscorer(sc),
+    _merge_count(0),
+    _best_cscore(worst_composite_score)
+{
+    std::vector<combo_tree> bases(1, base);
+    init(bases);
+}
+
+
 // Init the metapopulation with the following set of exemplars.
 void metapopulation::init(const std::vector<combo_tree>& exemplars)
 {
@@ -53,6 +80,11 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars)
 // -------------------------------------------------------------------
 // Exemplar selection-related code
 
+bool metapopulation::has_been_visited(const scored_combo_tree& tr) const
+{
+    return _visited_exemplars.find(tr) != _visited_exemplars.cend();
+}
+
 void metapopulation::log_selected_exemplar(scored_combo_tree_ptr_set::const_iterator exemplar_it)
 {
     if (not logger().isDebugEnabled()) return;
@@ -62,7 +94,7 @@ void metapopulation::log_selected_exemplar(scored_combo_tree_ptr_set::const_iter
     } else {
         const auto& xmplr = *exemplar_it;
         unsigned pos = std::distance(_scored_trees.cbegin(), exemplar_it) + 1,
-            nth_vst = _visited_exemplars[xmplr.get_tree()];
+            nth_vst = _visited_exemplars[xmplr];
 
         logger().debug() << "Selected the " << pos
                          << "th exemplar, from deme " << xmplr.get_demeID()
@@ -83,9 +115,8 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     // though, the score is invalid.
     if (size() == 1) {
         scored_combo_tree_ptr_set::const_iterator selex = _scored_trees.cbegin();
-        const combo_tree& tr = selex->get_tree();
-        if (_params.revisit + 1 > _visited_exemplars[tr]) // not enough visited
-            _visited_exemplars[tr]++;
+        if (_params.revisit + 1 > _visited_exemplars[*selex]) // not enough visited
+            _visited_exemplars[*selex]++;
         else selex = _scored_trees.cend();    // enough visited
 
         log_selected_exemplar(selex);
@@ -105,8 +136,7 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
         score_t sc = bsct.get_penalized_score();
 
         // Skip exemplars that have been visited enough
-        const combo_tree& tr = bsct.get_tree();
-        if (_params.revisit + 1 > _visited_exemplars[tr]) {
+        if (_params.revisit + 1 > _visited_exemplars[bsct]) {
             probs.push_back(sc);
             found_exemplar = true;
             if (highest_score < sc) highest_score = sc;
@@ -158,7 +188,7 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     scored_combo_tree_ptr_set::const_iterator selex = std::next(_scored_trees.begin(), fwd);
 
     // We increment _visited_exemplar
-    _visited_exemplars[selex->get_tree()]++;
+    _visited_exemplars[*selex]++;
 
     log_selected_exemplar(selex);
     return selex;

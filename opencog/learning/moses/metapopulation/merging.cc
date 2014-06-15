@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2010 Novemente LLC
  * Copyright (C) 2012 Poulin Holdings LLC
+ * Copyright (C) 2014 Aidyia Limited
  *
  * Authors: Nil Geisweiller, Moshe Looks, Linas Vepstas
  *
@@ -31,7 +32,6 @@
 namespace opencog {
 namespace moses {
 
-using namespace std;
 using namespace combo;
 
 
@@ -58,7 +58,7 @@ void metapopulation::trim_down_deme(deme_t& deme) const
 
     if (logger().isDebugEnabled())
     {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Trim down deme " << deme.getID()
            << " of size: " << deme.size();
         logger().debug(ss.str());
@@ -77,7 +77,7 @@ void metapopulation::trim_down_deme(deme_t& deme) const
 
     if (logger().isDebugEnabled())
     {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Deme trimmed down, new size: " << deme.size();
         logger().debug(ss.str());
     }
@@ -121,7 +121,7 @@ void metapopulation::deme_to_trees(deme_t& deme,
     unsigned total_max_pot_cnd = pot_candidates.size() + max_pot_cnd;
 
     if (logger().isDebugEnabled()) {
-        logger().debug() << "Select " << max_pot_cnd 
+        logger().debug() << "Select " << max_pot_cnd
                          << " candidates from deme " << deme.getID();
     }
 
@@ -135,7 +135,7 @@ void metapopulation::deme_to_trees(deme_t& deme,
     // instances in the deme are in score-sorted order).  Some of the
     // trees will be redundant, so in order to reach the max_pot_cnd
     // target, we reiterate with max_pot_cnd - pot_candidates.size(),
-    // until either the target is reached (pot_candidates.size() == 
+    // until either the target is reached (pot_candidates.size() ==
     // max_pot_cnd), or there are no more instances in the deme.
     //
     // XXX FIXME ... ummm, why is it important to accurately hit this
@@ -171,7 +171,7 @@ void metapopulation::deme_to_trees(deme_t& deme,
         deme_end = (unsigned int)std::distance(deme_begin, deme.cend()) <= delta ?
             deme.end() : deme_begin + delta;
     }
-}  
+}
 
 /// Merge the given set of candidates into the metapopulation.
 /// It is assumed that these candiates have already be vetted for
@@ -183,7 +183,7 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
         logger().debug("Going to merge %u candidates with the metapopulation",
                        candidates.size());
         if (logger().isFineEnabled()) {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Candidates to merge with the metapopulation:" << std::endl;
             for (const auto& cnd : candidates)
                 ostream_scored_combo_tree(ss, cnd, true, true);
@@ -219,7 +219,7 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
 /// some diversity work is done.  The number of instances that are
 /// finally merged are limited by the _params.max_candidates value.
 /// (Its wise to set this value to something small-ish, say, a few
-/// thousand, at most, to avoid excess CPU-time consumption, and 
+/// thousand, at most, to avoid excess CPU-time consumption, and
 /// excess RAM usage.  Some parts of this merger can be very CPU-time
 /// consuming.
 //
@@ -227,7 +227,7 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
 //
 bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
                                  const boost::ptr_vector<representation>& reps,
-                                 const vector<unsigned>& evals_seq)
+                                 const std::vector<unsigned>& evals_seq)
 {
     // Note that univariate reports far more evals than the deme size;
     // this is because univariate over-writes deme entries.
@@ -261,56 +261,60 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
 
     // Behavioral scores are needed only if domination-based
     // merging is asked for, or if the diversity penalty is in use.
-    // Save CPU time by not computing them.
-    if (_params.keep_bscore
+    // Save CPU time, as well as RAM, by not computing them.
+    // Note that the instances were previously bscored; the bscores
+    // were thrown away way back when, to save on RAM... so we have to
+    // do it again here.
+    if (diversity_enabled()
+        or _params.do_boosting
         or _params.discard_dominated
-        or diversity_enabled())
+        or _params.keep_bscore)
     {
         logger().debug("Compute behavioral score of %d selected candidates",
                        candidates.size());
 
-#ifdef FIXME_LATER
-        // XXX TODO FIXME: the scores should be computed in-place, above,
-        // instead of involving copies.  This needs a lock.
+        // XXX FIXME: we should use a pointer set for scored_combo_tree_set
+        // This would avoid some pointless copying here and a few other
+        // places.  This is easier said than done, because the stupid
+        // domination code is so snarky and icky.  Domination should die.
+#define PARALLEL_SCORE 1
+#ifdef PARALLEL_SCORE
+        std::mutex insert_mutex;
         scored_combo_tree_set new_pot;
-        auto compute_bscore = [this, new_pot](const scored_combo_tree& cand) {
-            behavioral_score bs = this->_bscorer(cand.get_tree());
+        auto compute_bscore = [&, this](const scored_combo_tree& cand)
+        {
+            behavioral_score bs(this->_cscorer.get_bscore(cand.get_tree()));
             scored_combo_tree sct(cand.get_tree(),
                                   cand.get_demeID(),
                                   cand.get_composite_score(), bs);
-            // XXX this needs to be locked!
+            std::lock_guard<std::mutex> lock(insert_mutex);
             new_pot.insert(sct);
         };
         OMP_ALGO::for_each(candidates.begin(), candidates.end(),
                            compute_bscore);
         candidates = new_pot;
-#endif
-#if WTF
-// XXX WTF compiler dislikes the below, it keeps complaining about constness.
-// I can't figure it out!
-        for (scored_combo_tree& cand : candidates)
-        {
-            behavioral_score bs(_cscorer.get_bscore(cand.get_tree()));
-            cand._bscore = bs;
-        }
-#endif
+#else
         scored_combo_tree_set new_pot;
         for (const scored_combo_tree& cand : pot_candidates)
         {
             behavioral_score bs(_cscorer.get_bscore(cand.get_tree()));
             scored_combo_tree sct(cand.get_tree(),
-                                  cand.get_demeID(), 
+                                  cand.get_demeID(),
                                   cand.get_composite_score(), bs);
             new_pot.insert(sct);
         }
         candidates = new_pot;
+#endif
     }
 
     if (_params.discard_dominated) {
 
+        // The final merge of the candidates into the metapop will
+        // remove the dominated trees; what we do here is to trim down
+        // the deme some more, so that the final merge can go faster.
         logger().debug("Remove dominated candidates");
         if (logger().isFineEnabled()) {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Candidates with their bscores before"
                 " removing the dominated candidates" << std::endl;
             for (const auto& cnd : candidates)
@@ -324,7 +328,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         logger().debug("Removed %u dominated candidates out of %u",
                        old_size - candidates.size(), old_size);
         if (logger().isFineEnabled()) {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Candidates with their bscores after"
                 " removing the dominated candidates" << std::endl;
             for (const auto& cnd : candidates)
@@ -341,6 +345,10 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
     if (_params.merge_callback)
         done = (*_params.merge_callback)(candidates, _params.callback_user_data);
     merge_candidates(candidates);
+
+    // Insert candidates into the ensemble.
+    if (_params.do_boosting)
+        _ensemble.add_candidates(candidates);
 
     // update diversity penalties
     if (diversity_enabled())
@@ -442,7 +450,7 @@ void metapopulation::resize_metapop()
 
         logger().debug("Metapopulation size is %u", size());
         if (logger().isFineEnabled()) {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Metapopulation:" << std::endl;
             logger().fine(ostream(ss, -1, true, true).str());
         }
@@ -474,7 +482,7 @@ scored_combo_tree_set metapopulation::get_new_candidates(const scored_combo_tree
             std::find_if(cbeg, cend,
                 [&](const scored_combo_tree& v) { return tr == v.get_tree(); });
         if (fcnd == cend) {
-            std::unique_lock<mutex> lock(insert_cnd_mutex);
+            std::lock_guard<std::mutex> lock(insert_cnd_mutex);
             res.insert(cnd);
         }
     };
@@ -533,11 +541,6 @@ void metapopulation::update_best_candidates(const scored_combo_tree_set& candida
             _best_candidates.insert(cnd);
         }
     }
-}
-
-bool metapopulation::has_been_visited(const combo_tree& tr) const
-{
-    return _visited_exemplars.find(tr) != _visited_exemplars.cend();
 }
 
 // log the best candidates
