@@ -95,12 +95,12 @@ class PatternMatchCallback
 		virtual bool post_link_match(LinkPtr& link1, LinkPtr& link2) = 0;
 
 		/**
-		 * Called when a solution is found. Should
+		 * Called when a grounding is found. Should
 		 * return false to search for more solutions;
 		 * or return true to terminate search.
 		 */
-		virtual bool solution(std::map<Handle, Handle> &pred_soln,
-		                      std::map<Handle, Handle> &var_soln) = 0;
+		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
+                             const std::map<Handle, Handle> &pred_soln) = 0;
 
 		/**
 		 * Called when a top-level clause has been fully grounded.

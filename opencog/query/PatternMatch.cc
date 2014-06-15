@@ -33,8 +33,14 @@
 #include "DefaultPatternMatchCB.h"
 #include "CrispLogicPMCB.h"
 
-
 using namespace opencog;
+
+#define DEBUG 1
+#if DEBUG
+   #define dbgprt(f, varargs...) printf(f, ##varargs)
+#else
+   #define dbgprt(f, varargs...)
+#endif
 
 PatternMatch::PatternMatch(void)
 {
@@ -89,8 +95,8 @@ class PMCGroundings : public PatternMatchCallback
 
 		// This one we don't pass through. Instead, we collect the
 		// groundings.
-		bool solution(std::map<Handle, Handle> &pred_soln,
-		              std::map<Handle, Handle> &var_soln)
+		bool grounding(const std::map<Handle, Handle> &var_soln,
+		               const std::map<Handle, Handle> &pred_soln)
 		{
 			_pred_groundings.push_back(pred_soln);
 			_var_groundings.push_back(var_soln);
@@ -101,20 +107,23 @@ class PMCGroundings : public PatternMatchCallback
 		std::vector<std::map<Handle, Handle>> _var_groundings;
 };
 
-static void recursive_virtual(PatternMatchCallback *cb,
-            std::vector<Handle>& virtuals,
-            std::vector<Handle>& negations, // currently ignored
-            std::map<Handle, Handle>& var_gnds,
-            std::map<Handle, Handle>& pred_gnds,
+static bool recursive_virtual(PatternMatchCallback *cb,
+            const std::vector<Handle>& virtuals,
+            const std::vector<Handle>& negations, // currently ignored
+            const std::map<Handle, Handle>& var_gnds,
+            const std::map<Handle, Handle>& pred_gnds,
             std::vector<std::vector<std::map<Handle, Handle>>>& comp_var_gnds,
             std::vector<std::vector<std::map<Handle, Handle>>>& comp_pred_gnds)
 {
 	if (0 == comp_var_gnds.size())
 	{
-printf("duuuuuuuuuuuuuuuuuuuuuuuuuuuuude done recurse %d v=%d\n", comp_var_gnds.size(), virtuals.size());
-		return;
+		dbgprt("Explore combinatoric grounding: clauses: %zd variables: %zd\n",
+		       pred_gnds.size(), var_gnds.size());
+PatternMatchEngine::print_solution(var_gnds, pred_gnds);
+		bool accept = cb->grounding(var_gnds, pred_gnds);
+		return accept;
 	}
-printf("duuuuuuuuuuuuuuuuuuuuuuuuuuuuude recurs %d v=%d\n", comp_var_gnds.size(), virtuals.size());
+	dbgprt("Component recursion: num comp=%zd\n", comp_var_gnds.size());
 
 	// recurse over all components. If component k has N_k groundings,
 	// and there are m components, then we have to explore all
@@ -135,14 +144,20 @@ printf("duuuuuuuuuuuuuuuuuuuuuuuuuuuuude recurs %d v=%d\n", comp_var_gnds.size()
 		// and recurse, with one less component.
 		std::map<Handle, Handle> rvg(var_gnds);
 		std::map<Handle, Handle> rpg(pred_gnds);
+printf("duuuuuuuuude wtf i=%d nv=%d np=%d\n", rvg.size(), rpg.size());
 		
-		std::map<Handle, Handle>& cand_vg = vg[i];
-		std::map<Handle, Handle>& cand_pg = pg[i];
+		const std::map<Handle, Handle>& cand_vg(vg[i]);
+		const std::map<Handle, Handle>& cand_pg(pg[i]);
+printf("duuuuuuuuude wtf i=%d ncand v=%d ncandp=%d\n", i, cand_vg.size(), cand_pg.size());
 		rvg.insert(cand_vg.begin(), cand_vg.end());
 		rpg.insert(cand_pg.begin(), cand_pg.end());
 
-		recursive_virtual(cb, virtuals, negations, rvg, rpg, comp_var_gnds, comp_pred_gnds);
+		bool accept = recursive_virtual(cb, virtuals, negations, rvg, rpg, comp_var_gnds, comp_pred_gnds);
+
+		// Halt recursion immeditately if match is accepted.
+		if (accept) return true;
 	}
+	return false;
 }
 
 /* ================================================================= */
@@ -351,6 +366,8 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	}
 
 	// And now, try grounding each of the virtual clauses.
+	dbgprt("BEGIN component recursion: ====================== num comp=%zd num virts=%zd\n",
+	       comp_var_gnds.size(), virtuals.size());
 	std::map<Handle, Handle> empty_vg;
 	std::map<Handle, Handle> empty_pg;
 	recursive_virtual(cb, virtuals, negations,
@@ -407,13 +424,14 @@ void PatternMatch::match(PatternMatchCallback *cb,
  * expression, with the ground terms substituted for the variables.
  */
 namespace opencog {
+
 class Instantiator
 {
 	private:
 		AtomSpace *_as;
-		std::map<Handle, Handle> *vmap;
+		const std::map<Handle, Handle> *_vmap;
 
-		std::vector<Handle> oset;
+		std::vector<Handle> _oset;
 		bool walk_tree(Handle tree);
 		Handle execution_link(void);
 		bool did_exec;
@@ -421,7 +439,7 @@ class Instantiator
 	public:
 		Instantiator(AtomSpace* as) : _as(as) {}
 
-		Handle instantiate(Handle& expr, std::map<Handle, Handle> &vars)
+		Handle instantiate(Handle& expr, const std::map<Handle, Handle> &vars)
 			throw (InvalidParamException);
 };
 
@@ -429,7 +447,7 @@ Handle Instantiator::execution_link()
 {
 	// This throws if it can't figure out the schema ...
 	// should we try and catch here ?
-	return ExecutionLink::do_execute(_as, oset);
+	return ExecutionLink::do_execute(_as, _oset);
 
 	// Unkown proceedure type.  Return it, maybe some other
 	// execution-link handler will be able to process it.
@@ -443,24 +461,24 @@ bool Instantiator::walk_tree(Handle expr)
 	if (nexpr)
 	{
 		if (VARIABLE_NODE != t) {
-			oset.push_back(expr);
+			_oset.push_back(expr);
 			return false;
 		}
 
 		// If we are here, we found a variable. Look it up.
-		std::map<Handle,Handle>::const_iterator it = vmap->find(expr);
-		if (vmap->end() != it) {
+		std::map<Handle,Handle>::const_iterator it = _vmap->find(expr);
+		if (_vmap->end() != it) {
 			Handle soln = it->second;
-			oset.push_back(soln);
+			_oset.push_back(soln);
 		} else {
-			oset.push_back(expr);
+			_oset.push_back(expr);
 		}
 		return false;
 	}
 
 	// If we are here, then we have a link. Walk it.
-	std::vector<Handle> save_oset = oset;
-	oset.clear();
+	std::vector<Handle> save_oset = _oset;
+	_oset.clear();
 
 	// Walk the subtree, substituting values for variables.
 	LinkPtr lexpr(LinkCast(expr));
@@ -472,10 +490,10 @@ bool Instantiator::walk_tree(Handle expr)
 	{
 		did_exec = true;
 		Handle sh(execution_link());
-		oset = save_oset;
+		_oset = save_oset;
 		if (Handle::UNDEFINED != sh)
 		{
-			oset.push_back(sh);
+			_oset.push_back(sh);
 		}
 		return false;
 	}
@@ -483,10 +501,10 @@ bool Instantiator::walk_tree(Handle expr)
 	// Now create a duplicate link, but with an outgoing set where
 	// the variables have been substituted by their values.
 	TruthValuePtr tv(expr->getTruthValue());
-	Handle sh(_as->addLink(t, oset, tv));
+	Handle sh(_as->addLink(t, _oset, tv));
 
-	oset = save_oset;
-	oset.push_back(sh);
+	_oset = save_oset;
+	_oset.push_back(sh);
 
 	return false;
 }
@@ -504,7 +522,7 @@ bool Instantiator::walk_tree(Handle expr)
  * with their values, creating a new expression. The new expression is
  * added to the atomspace, and its handle is returned.
  */
-Handle Instantiator::instantiate(Handle& expr, std::map<Handle, Handle> &vars)
+Handle Instantiator::instantiate(Handle& expr, const std::map<Handle, Handle> &vars)
 	throw (InvalidParamException)
 {
 	// throw, not assert, because this is a user error ...
@@ -512,19 +530,19 @@ Handle Instantiator::instantiate(Handle& expr, std::map<Handle, Handle> &vars)
 		throw InvalidParamException(TRACE_INFO,
 			"Asked to ground a null expression");
 
-	vmap = &vars;
-	oset.clear();
+	_vmap = &vars;
+	_oset.clear();
 	did_exec = false;
 
 	walk_tree(expr);
-	if ((false == did_exec) && (oset.size() != 1))
+	if ((false == did_exec) && (_oset.size() != 1))
 		throw InvalidParamException(TRACE_INFO,
 			"Failure to ground expression (found %d groundings)\n"
 			"Ungrounded expr is %s\n",
-			oset.size(), expr->toShortString().c_str());
+			_oset.size(), expr->toShortString().c_str());
 
-	if (oset.size() >= 1)
-		return oset[0];
+	if (_oset.size() >= 1)
+		return _oset[0];
 	return Handle::UNDEFINED;
 }
 
@@ -555,12 +573,12 @@ class Implicator :
 		Implicator(AtomSpace* as) : _as(as), inst(as) {}
 		Handle implicand;
 		std::vector<Handle> result_list;
-		virtual bool solution(std::map<Handle, Handle> &pred_soln,
-		                      std::map<Handle, Handle> &var_soln);
+		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
+		                       const std::map<Handle, Handle> &pred_soln);
 };
 
-bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
-                          std::map<Handle, Handle> &var_soln)
+bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
+                           const std::map<Handle, Handle> &pred_soln)
 {
 	// PatternMatchEngine::print_solution(pred_soln,var_soln);
 	Handle h = inst.instantiate(implicand, var_soln);
@@ -570,6 +588,7 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 	}
 	return false;
 }
+
 } // namespace opencog
 
 /* ================================================================= */
@@ -963,10 +982,6 @@ class DefaultImplicator:
 		DefaultImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp) {}
 };
 
-} // namespace opencog
-
-namespace opencog {
-
 class CrispImplicator:
 	public virtual Implicator,
 	public virtual CrispLogicPMCB
@@ -975,9 +990,11 @@ class CrispImplicator:
 		CrispImplicator(AtomSpace* asp) :
 			Implicator(asp), DefaultPatternMatchCB(asp), CrispLogicPMCB(asp)
 		{}
-		virtual bool solution(std::map<Handle, Handle> &pred_soln,
-		                      std::map<Handle, Handle> &var_soln);
+		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
+		                       const std::map<Handle, Handle> &pred_soln);
 };
+
+} // namespace opencog
 
 /**
  * The crisp implicator needs to tweak the truth value of the
@@ -992,8 +1009,8 @@ class CrispImplicator:
  * to (true, certain).  That is the whole point of this function:
  * to tweak (affirm) the truth value of existing clauses!
  */
-bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
-                          std::map<Handle, Handle> &var_soln)
+bool CrispImplicator::grounding(const std::map<Handle, Handle> &var_soln,
+                                const std::map<Handle, Handle> &pred_soln)
 {
 	// PatternMatchEngine::print_solution(pred_soln,var_soln);
 	Handle h = inst.instantiate(implicand, var_soln);
@@ -1015,16 +1032,16 @@ class SingleImplicator:
 {
 	public:
 		SingleImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp) {}
-		virtual bool solution(std::map<Handle, Handle> &pred_soln,
-		                      std::map<Handle, Handle> &var_soln);
+		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
+		                       const std::map<Handle, Handle> &pred_soln);
 };
 
 /**
  * The single implicator behaves like the default implicator, except that
  * it terminates after the first solution is found.
  */
-bool SingleImplicator::solution(std::map<Handle, Handle> &pred_soln,
-                          std::map<Handle, Handle> &var_soln)
+bool SingleImplicator::grounding(const std::map<Handle, Handle> &var_soln,
+                                 const std::map<Handle, Handle> &pred_soln)
 {
 	Handle h = inst.instantiate(implicand, var_soln);
 
@@ -1034,8 +1051,6 @@ bool SingleImplicator::solution(std::map<Handle, Handle> &pred_soln,
 	}
 	return true;
 }
-
-} // namespace opencog
 
 /**
  * Evaluate an ImplicationLink embedded in a BindLink

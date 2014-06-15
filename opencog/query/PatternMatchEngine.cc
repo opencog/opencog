@@ -358,7 +358,7 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 			dbgprt ("==================== FINITO!\n");
 			print_solution(var_grounding, clause_grounding);
 #endif
-			found = pmc->solution(clause_grounding, var_grounding);
+			found = pmc->grounding(var_grounding, clause_grounding);
 		}
 		else
 		{
@@ -409,7 +409,7 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 #ifdef DEBUG
 					print_solution(var_grounding, clause_grounding);
 #endif
-					found = pmc->solution(clause_grounding, var_grounding);
+					found = pmc->grounding(var_grounding, clause_grounding);
 				}
 				else
 				{
