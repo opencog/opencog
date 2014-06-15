@@ -558,6 +558,8 @@ def evaluationImplicationFormula(tvs):
 
     return [eval_C_A]
 
+def contextFormula(tvs):
+    return tvs
 
 def low(n):
     return max(n, 0)

@@ -69,7 +69,7 @@
 ; This rule is used specifically to deal with evaluations
 ; that differ between different contexts.
 ; Example: "In the context of the earth, the sky is blue.
-; In the context of the earth, the sky is black."
+; In the context of the moon, the sky is black."
 (define pln-rule-contextualize-evaluation
     (BindLink
         (ListLink
@@ -81,9 +81,10 @@
         (ImplicationLink
             (EvaluationLink
                 (VariableNode "$A")
-                (AndLink
-                    (VariableNode "$C")
-                    (VariableNode "$B")))
+                (ListLink
+                    (AndLink
+                        (VariableNode "$C")
+                        (VariableNode "$B"))))
             (ExecutionLink
                 (GroundedSchemaNode "scm: pln-formula-context")
                 (ListLink
@@ -91,12 +92,14 @@
                         (VariableNode "$C")
                         (EvaluationLink
                             (VariableNode "$A")
-                            (VariableNode "$B")))
+                            (ListLink
+                                (VariableNode "$B"))))
                     (EvaluationLink
                         (VariableNode "$A")
-                        (AndLink
-                            (VariableNode "$C")
-                            (VariableNode "$B"))))))))
+                        (ListLink
+                            (AndLink
+                                (VariableNode "$C")
+                                (VariableNode "$B")))))))))
 
 ;----------------------------------------------------------------------
 ; b)
