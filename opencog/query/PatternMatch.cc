@@ -41,6 +41,66 @@ PatternMatch::PatternMatch(void)
 	_atom_space = NULL;
 }
 
+/// A pass-through class, which wrapps a regular callback, but captures
+/// all of the different possible groundings that result.  This class is
+/// used to piece together graphs out of multiple components.
+class PMCGroundings : public PatternMatchCallback
+{
+	private:
+		PatternMatchCallback* _cb;
+
+	public:
+		PMCGroundings(PatternMatchCallback* cb) : _cb(cb) {}
+
+		// Pass all the calls straight through, except one.
+		bool node_match(Handle& node1, Handle& node2) {
+			return _cb->node_match(node1, node2);
+		}
+		bool variable_match(Handle& node1, Handle& node2) {
+			return _cb->variable_match(node1, node2);
+		}
+		bool link_match(LinkPtr& link1, LinkPtr& link2) {
+			return _cb->link_match(link1, link2);
+		}
+		bool post_link_match(LinkPtr& link1, LinkPtr& link2) {
+			return _cb->post_link_match(link1, link2);
+		}
+		bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h) {
+			return _cb->clause_match(pattrn_link_h, grnd_link_h);
+		}
+		bool optional_clause_match(Handle& pattrn, Handle& grnd) {
+			return _cb->optional_clause_match(pattrn, grnd);
+		}
+		IncomingSet get_incoming_set(Handle h) {
+			return _cb->get_incoming_set(h);
+		}
+		void push(void) { _cb->push(); }
+		void pop(void) { _cb->pop(); }
+		void set_type_restrictions(VariableTypeMap &tm) {
+			_cb->set_type_restrictions(tm);
+		}
+		void perform_search(PatternMatchEngine* pme,
+                          std::set<Handle> &vars,
+                          std::vector<Handle> &clauses,
+                          std::vector<Handle> &negations)
+		{
+			_cb->perform_search(pme, vars, clauses, negations);
+		}
+
+		// This one we don't pass through. Instead, we collect the
+		// groundings.
+		bool solution(std::map<Handle, Handle> &pred_soln,
+                            std::map<Handle, Handle> &var_soln)
+		{
+			_pred_groundings.push_back(pred_soln);
+			_var_groundings.push_back(var_soln);
+			return false;
+		}
+
+		std::vector<std::map<Handle, Handle>> _pred_groundings;
+		std::vector<std::map<Handle, Handle>> _var_groundings;
+}
+
 /* ================================================================= */
 /**
  * Ground (solve) a pattern; perform unification. That is, find one
@@ -154,15 +214,55 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
 	}
 
+	// get_connected_components places the clauses in connection-
+	// sorted order. Use that, it makes matching slightly faster.
+	clauses = *components.begin();
+
 	// Are there any virtual links in the clauses? If so, then we need
 	// to do some special handling.
+	std::vector<Handle> virtuals;
+	std::vector<Handle> nonvirts;
+	for (Handle clause: clauses)
+	{
+		if (contains_linktype(clause, VIRTUAL_LINK))
+			virtuals.push_back(clause);
+		else
+			nonvirts.push_back(clause);
+	}
 
-	// get_connected_components places the clauses in
-	// connection-sorted order. Use that, it makes matching slightly
-	// faster.
-	clauses = *components.begin();
-	PatternMatchEngine pme;
-	pme.match(cb, vars, clauses, negations);
+	// The simple case -- unit propagation through all of the clauses.
+	if (0 == virtuals.size())
+	{
+		PatternMatchEngine pme;
+		pme.match(cb, vars, clauses, negations);
+		return;
+	}
+
+	// If we are here, then we've got a knot in the center of it all.
+	// Removing the virtual clauses from the hypergraph typically causes
+	// the hypergraph to fall apart into multiple components, (i.e. none
+	// are connected to one another). Teh virtual clauses tie all of
+	// these back together into a single connected graph.
+	//
+	// There are several solution strategies posible at this point.
+	// The one that we will pursue, for now, is to first ground all of
+   // the distinct components individually, and then run each possible
+	// grounding combination through the virtual link, for the final
+	// accept/reject determination.
+	std::set<std::vector<Handle>> nvcomps;
+	get_connected_components(vars, nonvirts, nvcomps);
+
+	std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds;
+	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
+	for (std::vector<Handle> comp : nvcomps)
+	{
+		PMCGroundings gcb(cb);
+		PatternMatchEngine pme;
+		// pme.match(&gcb, 
+		// xx
+		comp_pred_gnds.push_back(gcb._pred_groundings);
+		comp_var_gnds.push_back(gcb._var_groundings);
+	}
 }
 
 void PatternMatch::match(PatternMatchCallback *cb,
