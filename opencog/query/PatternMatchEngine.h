@@ -41,8 +41,8 @@ class PatternMatchEngine
 	typedef std::pair<Handle, RootList *> RootPair;
 
 	private:
-		bool prt(Handle& h);
-		void prtmsg(const char *msg, Handle& h);
+		static bool prt(Handle& h);
+		static void prtmsg(const char *msg, Handle& h);
 
 		// -------------------------------------------
 		// predicate to be solved.
@@ -103,13 +103,13 @@ class PatternMatchEngine
 		bool do_candidate(Handle&, Handle&, Handle&);
 
 		// Make sure that variables can be found in the clauses.
-		bool validate(const std::set<Handle> &vars,
+		static bool validate(const std::set<Handle> &vars,
 		              std::vector<Handle> &clauses);
 
-		bool validate(const std::set<Handle> &vars,
+		static bool validate(const std::set<Handle> &vars,
 		              Handle& clause);
 
-		void get_connected_components(const std::set<Handle> &vars,
+		static void get_connected_components(const std::set<Handle> &vars,
 		              const std::vector<Handle> &clauses,
 		              std::set<std::vector<Handle>> &components);
 
@@ -120,10 +120,10 @@ class PatternMatchEngine
 		           std::vector<Handle> &negations);
 
 		// Handy-dandy utilities
-		void print_solution(const std::map<Handle, Handle> &vars,
+		static void print_solution(const std::map<Handle, Handle> &vars,
 		                           const std::map<Handle, Handle> &clauses);
 
-		void print_predicate(const std::set<Handle> &vars,
+		static void print_predicate(const std::set<Handle> &vars,
 		                            const std::vector<Handle> &clauses);
 };
 

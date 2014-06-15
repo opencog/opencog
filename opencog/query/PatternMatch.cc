@@ -1,7 +1,7 @@
 /*
  * PatternMatch.cc
  *
- * Copyright (C) 2009 Linas Vepstas
+ * Copyright (C) 2009, 2014 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *
@@ -43,43 +43,63 @@ PatternMatch::PatternMatch(void)
 
 /* ================================================================= */
 /**
- * Solve a predicate by pattern matching.
+ * Ground (solve) a predicate by pattern matching.
  * The predicate is defined in terms of two hypergraphs: one is a
- * hypergraph defining a pattern to be matched for, and the other is a
+ * hypergraph defining a pattern to be grounded, and the other is a
  * list of bound variables in the first.
  *
- * The bound variables are, by definition, nodes. (XXX It might be
- * useful to loosen this restriction someday). The list of bound variables
- * is then assumed to be listed using the ListLink type. So, for
- * example:
+ * The bound variables are, by convention, VariableNodes.  (The code in
+ * the pattern match engine doesn't care whether the variable nodes are
+ * actually of type VariableNode, and so can work with variables that
+ * are any kind of node. However, the default callbacks do check for 
+ * this type. Thus, the restriction, by convention, that the variables
+ * must be of type VariableNode.)  The list of bound variables is then
+ * assumed to be listed using the ListLink type. So, for example:
  *
  *    ListLink
- *        SomeNode "variable 1"
- *        SomeOtherNode "another variable"
+ *        VariableNode "variable 1"
+ *        VariableNode "another variable"
  *
  * The predicate hypergraph is assumed to be a list of "clauses", where
- * each "clause" is a tree. The clauses are assumed to be connected,
- * i.e. share common nodes or links.  The algorithm to find solutions
- * will fail on disconnected hypergraphs.  The list of clauses is
- * specified by means of an AndLink, so, for example:
+ * each "clause" should be thought of as the tree defined by the outging
+ * sets in it.  The below assumes that the list of clauses is specified
+ * by means of an AndLink, so, for example:
  *
  *     AndLink
  *        SomeLink ....
  *        SomeOtherLink ...
  *
- * The solution proceeds by requiring each clause to match some part of
- * the atomspace (i.e. of the universe of hypergraphs stored in the
+ * The clauses are assumed to be connected by variables, i.e. each
+ * clause has a variable that also appears in some other clause.  Even
+ * more strongly, it is assumed that there is just one connected
+ * component; the code below throws an error if there is more than one
+ * connected component.  The reason for this is to avoid unintended
+ * combinatoric explosions: the grounding of any one (connected)
+ * component is completely independent of the grounding of any other
+ * component.  So, if there are two components, and one has N groundings
+ * and the other has M groundings, then the two together trivially have
+ * MxN groundings. Its worse if there are 4, 4... components. Rather
+ * than stupidly reporting a result MxNx... times, we just throw an
+ * error, and let the user decide what to do.
+ *
+ * The grounding proceeds by requiring each clause to match some part
+ * of the atomspace (i.e. of the universe of hypergraphs stored in the
  * atomspace). When a solution is found, PatternMatchCallback::solution
  * method is called, and it is passed two maps: one mapping the bound
- * variables to their solutions, and the other mapping the pattern
- * clauses to their corresponding solution clauses.
+ * variables to their groundings, and the other mapping the pattern
+ * clauses to their corresponding grounded clauses.
+ *
+ * Note: the pattern matcher itself doesn't use the atomspace, or care
+ * if the groundings live in the atomspace; it can search anything.
+ * However, the default callbacks do use the atomspace to find an
+ * initial starting point for the search, and thus the search defacto
+ * happens on the atomspace.  This restriction can be lifted by tweaking
+ * the callback that initially launches the search.
  *
  * At this time, the list of clauses is understood to be a single
  * disjunct; that is, all of the clauses must be simultaneously
- * satisfied.  Thus, in principle, one could build a layer on top of
- * this that accepts clauses in disjunctive normal form (and so on...)
- * It is not clear at this time how to benefit from Boolean SAT solver
- * technlogy (or at what point this would be needed).
+ * satisfied.  A future extension could allow the use of MatchOrLinks
+ * to support multiple exclusive disjuncts. See the README for more info.
  */
 void PatternMatch::do_match(PatternMatchCallback *cb,
                             std::set<Handle>& vars,

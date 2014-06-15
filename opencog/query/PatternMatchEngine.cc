@@ -919,7 +919,7 @@ bool PatternMatchEngine::validate(
  * components are added to the set "components".
  *
  * Two clauses are "connected" if they both contain a common
- * variable. A connected componet is a set of clauses that are
+ * variable. A connected component is the set of clauses that are
  * all connected.
  *
  * This method serves two different purposes.  First, if the
@@ -933,9 +933,9 @@ bool PatternMatchEngine::validate(
  * A side effect of the algorithm is that it sorts the clauses into
  * connected order. That is, given the vector of connected clauses,
  * each element in the vector is connected to some clause that came
- * before.  This is handy, because users do not always specify clauses
- * in such an order, and matching can be slightly speeded when they
- * are pursued in order.
+ * before (in the vector).  This is handy, because users do not always
+ * specify clauses in such an order, and traversal and matching is just
+ * a bit faster when pursued in order.
  */
 void PatternMatchEngine::get_connected_components(
                     const std::set<Handle> &vars,

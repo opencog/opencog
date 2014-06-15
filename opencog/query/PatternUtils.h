@@ -3,7 +3,7 @@
  *
  * Utilities for navigating a tree of outgoing edges.
  *
- * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2014 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -71,7 +71,7 @@ class FindVariables
  * Return true if any of the indicated node occurs somewhere in the
  * tree spanned by the outgoing set.
  */
-inline bool is_node_in_tree(const Handle& tree, const Handle& node)
+static inline bool is_node_in_tree(const Handle& tree, const Handle& node)
 {
 	if (tree == Handle::UNDEFINED) return false;
 	if (tree == node) return true;
@@ -91,7 +91,7 @@ inline bool is_node_in_tree(const Handle& tree, const Handle& node)
  * Return true if any of the indicated nodes occurs somewhere in
  * the tree spanned by the outgoing set.
  */
-inline bool any_node_in_tree(const Handle& tree, const std::set<Handle>& nodes)
+static inline bool any_node_in_tree(const Handle& tree, const std::set<Handle>& nodes)
 {
 	foreach(Handle n, nodes)
 	{
@@ -99,6 +99,29 @@ inline bool any_node_in_tree(const Handle& tree, const std::set<Handle>& nodes)
 	}
 	return false;
 }
+
+/**
+ * Returns true if the clause contains a link of type link_type.
+ */
+static inline bool contains_linktype(Handle& clause, Type link_type)
+{
+   LinkPtr lc(LinkCast(clause));
+   if (not lc) return false;
+
+   Type clause_type = clause->getType();
+   if (classserver().isA(clause_type, link_type)) return true;
+
+   const std::vector<Handle> &oset = lc->getOutgoingSet();
+   std::vector<Handle>::const_iterator i = oset.begin();
+   std::vector<Handle>::const_iterator iend = oset.end();
+   for (; i != iend; i++)
+   {
+      Handle subclause(*i);
+      if (contains_linktype(subclause, link_type)) return true;
+   }
+   return false;
+}
+
 
 } // namespace opencog
 
