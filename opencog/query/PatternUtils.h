@@ -68,8 +68,8 @@ class FindVariables
 };
 
 /**
- * Return true if any of the indicated node occurs somewhere in the
- * tree spanned by the outgoing set.
+ * Return true if the indicated node occurs somewhere in the tree
+ * (viz, the tree recursively spanned by the outgoing set of the handle)
  */
 static inline bool is_node_in_tree(const Handle& tree, const Handle& node)
 {
@@ -89,13 +89,25 @@ static inline bool is_node_in_tree(const Handle& tree, const Handle& node)
 
 /**
  * Return true if any of the indicated nodes occurs somewhere in
- * the tree spanned by the outgoing set.
+ * the tree (that is, the treee spanned by the outgoing set.)
  */
 static inline bool any_node_in_tree(const Handle& tree, const std::set<Handle>& nodes)
 {
-	foreach(Handle n, nodes)
+	for (Handle n: nodes)
 	{
 		if (is_node_in_tree(tree, n)) return true;
+	}
+	return false;
+}
+
+/**
+ * Return true if the indicated node occurs somewhere in any of the trees.
+ */
+static inline bool is_node_in_any_tree(const std::vector<Handle>& trees, const Handle& node)
+{
+	for (Handle tree: trees)
+	{
+		if (is_node_in_tree(tree, node)) return true;
 	}
 	return false;
 }

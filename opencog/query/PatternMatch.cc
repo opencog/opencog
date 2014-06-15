@@ -99,7 +99,7 @@ class PMCGroundings : public PatternMatchCallback
 
 		std::vector<std::map<Handle, Handle>> _pred_groundings;
 		std::vector<std::map<Handle, Handle>> _var_groundings;
-}
+};
 
 /* ================================================================= */
 /**
@@ -191,10 +191,35 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 			__FUNCTION__);
 	}
 
+	// Make sure that each declared variable appears in some clause.
+	// We can't ground variables that aren't attached to something.
+	for (Handle v : vars)
+	{
+		if ((not is_node_in_any_tree(clauses, v))
+		     and (not is_node_in_any_tree(negations, v)))
+		{
+			std::stringstream ss;
+			ss << "The variable " << v << " does not appear in any clause!";
+			throw InvalidParamException(TRACE_INFO, ss.str().c_str());
+		}
+	}
+
 	// Make sure that the pattern is connected
-	// XXX TODO: what about the negattion clasues ???
 	std::set<std::vector<Handle>> components;
-	get_connected_components(vars, clauses, components);
+
+	if (0 < negations.size())
+	{
+		// The negations should be connected to the clauses.
+		std::vector<Handle> all;
+		all.reserve(clauses.size() + negations.size());
+		all.insert(all.end(), clauses.begin(), clauses.end());
+		all.insert(all.end(), negations.begin(), negations.end());
+		get_connected_components(vars, all, components);
+	}
+	else
+	{
+		get_connected_components(vars, clauses, components);
+	}
 	if (1 != components.size())
 	{
 		// Users are going to be stumped by this one, so print
@@ -216,7 +241,8 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	// get_connected_components places the clauses in connection-
 	// sorted order. Use that, it makes matching slightly faster.
-	clauses = *components.begin();
+	if (0 == negations.size())
+		clauses = *components.begin();
 
 	// Are there any virtual links in the clauses? If so, then we need
 	// to do some special handling.
@@ -238,6 +264,12 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 		return;
 	}
 
+	// I'm too lazy to do the optional/negated clause bit, just right
+	// now. It adds complexity. So just throw, at this time.
+	if (0 < negations.size())
+		throw InvalidParamException(TRACE_INFO, 
+			"Patterns with both virtual and optional clauses not yet supported!");
+
 	// If we are here, then we've got a knot in the center of it all.
 	// Removing the virtual clauses from the hypergraph typically causes
 	// the hypergraph to fall apart into multiple components, (i.e. none
@@ -249,6 +281,8 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
    // the distinct components individually, and then run each possible
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
+	
+	std::vector<Handle> empty;
 	std::set<std::vector<Handle>> nvcomps;
 	get_connected_components(vars, nonvirts, nvcomps);
 
@@ -256,10 +290,18 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
 	for (std::vector<Handle> comp : nvcomps)
 	{
+		// Find the variables in each component.
+		std::set<Handle> cvars;
+		for (Handle v : vars)
+		{
+			if (is_node_in_any_tree(comp, v) cvars.insert(v);
+		}
+
+		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(cb);
 		PatternMatchEngine pme;
-		// pme.match(&gcb, 
-		// xx
+		pme.match(&gcb, cvars, comp, empty);
+
 		comp_pred_gnds.push_back(gcb._pred_groundings);
 		comp_var_gnds.push_back(gcb._var_groundings);
 	}
