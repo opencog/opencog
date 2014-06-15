@@ -39,16 +39,24 @@ class PatternMatch
 		                std::set<Handle>&,
 		                VariableTypeMap&);
 
-		static void do_match(PatternMatchCallback *,
+		void do_match(PatternMatchCallback *,
 		                std::set<Handle>& vars,
 		                std::vector<Handle>& clauses,
 		                std::vector<Handle>& negations)
 			throw (InvalidParamException);
 
-		static void do_imply(Handle, PatternMatchCallback *, std::set<Handle>&)
+		void do_imply(Handle, PatternMatchCallback *, std::set<Handle>&)
 			throw (InvalidParamException);
-		static void do_bindlink(Handle, PatternMatchCallback *)
+		void do_bindlink(Handle, PatternMatchCallback *)
 			throw (InvalidParamException);
+
+		bool recursive_virtual(PatternMatchCallback *cb,
+		            const std::vector<Handle>& virtuals,
+		            const std::vector<Handle>& negations,
+		            const std::map<Handle, Handle>& var_gnds,
+		            const std::map<Handle, Handle>& pred_gnds,
+		            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
+		            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds);
 
 	public:
 		PatternMatch(void);

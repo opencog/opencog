@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/ExectuionLink.h
+ * opencog/atomspace/GreaterThanLink.h
  *
  * Copyright (C) 2013,2014 Linas Vepstas
  * All Rights Reserved
@@ -32,7 +32,7 @@ namespace opencog
  *  @{
  */
 
-class GreaterThanLink : public Link
+class GreaterThanLink : public Link // actually, inherits from VirtualLink ...
 {
 public:
     GreaterThanLink(const HandleSeq& oset,
