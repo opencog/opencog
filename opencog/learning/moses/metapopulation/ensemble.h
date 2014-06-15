@@ -25,7 +25,6 @@
 #define _OPENCOG_ENSEMBLE_H
 
 #include "../moses/types.h"  // for scored_combo_tree
-#include "../optimization/optimization.h" // for deme_t
 
 namespace opencog {
 namespace moses {
@@ -59,7 +58,10 @@ class ensemble
 public:
     ensemble();
 
-    void add_deme(deme_t&, const representation&);
+    // Should this be the right interface ?? Similar to metapop ...
+    // void add_deme(deme_t&, const representation&);
+
+    void add_candidates(scored_combo_tree_set&);
 
 private:
     scored_combo_tree_ptr_set _scored_trees;

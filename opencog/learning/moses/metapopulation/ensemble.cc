@@ -30,8 +30,9 @@ using namespace combo;
 
 ensemble::ensemble() {}
 
-void ensemble::add_deme(deme_t& deme, const representation& rep)
+void ensemble::add_candidates(scored_combo_tree_set& cands)
 {
+printf ("Hello world\n");
 }
 
 

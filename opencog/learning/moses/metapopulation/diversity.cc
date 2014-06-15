@@ -145,8 +145,9 @@ void metapopulation::set_diversity()
 
         // take the max score, insert in the pool and remove from tmp
 
-        // Define less function to compare bsct_dp_pair
-        scored_combo_tree_greater bsct_gt;
+        // Define less function to compare bsct_dp_pair; comparison is
+        // based on the composite score ...
+        sct_score_greater bsct_gt;
         auto gt = [&](const bsct_dp_pair& l, const bsct_dp_pair& r) {
             return bsct_gt(*l.first, *r.first);
         };

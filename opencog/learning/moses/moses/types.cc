@@ -54,32 +54,38 @@ bool scored_combo_tree_equal::operator()(const scored_combo_tree& tr1,
     return tr1.get_tree() == tr2.get_tree();
 }
 
-bool scored_combo_tree_greater::operator()(const scored_combo_tree& bs_tr1,
-                                           const scored_combo_tree& bs_tr2) const
+// See header file for description.
+bool sct_score_greater::operator()(const scored_combo_tree& bs_tr1,
+                                   const scored_combo_tree& bs_tr2) const
 {
     const composite_score csc1 = bs_tr1.get_composite_score();
     const composite_score csc2 = bs_tr2.get_composite_score();
 
-    bool gt = (csc1 > csc2);
-    if (gt) return true;
-
-    bool lt = (csc1 < csc2);
-    if (lt) return false;
+    if (csc1 > csc2) return true;
+    if (csc1 < csc2) return false;
 
     // If we are here, then they are equal.  We are desperate to break
-    // a tie, because otherwise, the scored_combo_tree_set will discard
+    // a tie, because otherwise, the scored_combo_tree_ptr_set will discard
     // anything that compares equal, and we really don't want that.
     score_t sc1 = csc1.get_score();
     score_t sc2 = csc2.get_score();
 
-    gt = (sc1 > sc2);
-    if (gt) return true;
-
-    lt = (sc1 < sc2);
-    if (lt) return false;
+    if (sc1 > sc2) return true;
+    if (sc1 < sc2) return false;
 
     // Arghh, still tied!  The above already used complexity to break
-    // the tie.  We're grasping at straws, here.
+    // the tie.  Lets look at how the size of the trees compare. Note
+    // that size_tree_order uses tree size first, then the lexicographic
+    // order on the trees themselves, next.
+    return size_tree_order<vertex>()(bs_tr1.get_tree(), bs_tr2.get_tree());
+}
+
+// See header file for description.
+bool sct_tree_greater::operator()(const scored_combo_tree& bs_tr1,
+                                  const scored_combo_tree& bs_tr2) const
+{
+    // size_tree_order first uses tree size, then the lexicographic
+    // order on the trees themselves, for comparisons.
     return size_tree_order<vertex>()(bs_tr1.get_tree(), bs_tr2.get_tree());
 }
 
