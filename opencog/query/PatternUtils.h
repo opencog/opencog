@@ -30,7 +30,6 @@
 #include <set>
 #include <vector>
 
-#include <opencog/util/foreach.h>
 #include <opencog/atomspace/types.h>
 
 namespace opencog {
@@ -45,25 +44,22 @@ class FindVariables
        * Create a set of all of the VariableNodes that lie in the
        * outgoing set of the handle (recursively).
        */
-      inline bool find_vars(Handle h)
+      inline void find_vars(Handle h)
       {
          Type t = h->getType();
          if (classserver().isNode(t))
          {
-            if (t == VARIABLE_NODE)
-            {
-               varset.insert(h);
-            }
-            return false;
+            if (t == VARIABLE_NODE) varset.insert(h);
+            return;
          }
 
          LinkPtr l(LinkCast(h));
-         return foreach_outgoing_handle(l, &FindVariables::find_vars, this);
+			for (Handle oh : l->getOutgoingSet()) find_vars(oh);
       }
 
       inline void find_vars(std::vector<Handle> hlist)
       {
-			foreach(Handle h, hlist) find_vars(h);
+			for (Handle h : hlist) find_vars(h);
 		}
 };
 

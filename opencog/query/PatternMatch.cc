@@ -22,13 +22,12 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/Foreach.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/execution/ExecutionLink.h>
 #include <opencog/execution/GreaterThanLink.h>
 #include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 
+#include "Instantiator.h"
 #include "PatternMatch.h"
 #include "PatternUtils.h"
 #include "DefaultPatternMatchCB.h"
@@ -46,6 +45,155 @@ using namespace opencog;
 PatternMatch::PatternMatch(void)
 {
 	_atom_space = NULL;
+}
+
+/* ================================================================= */
+/// A pass-through class, which wraps a regular callback, but captures
+/// all of the different possible groundings that result.  This class is
+/// used to piece together graphs out of multiple components.
+class PMCGroundings : public PatternMatchCallback
+{
+	private:
+		PatternMatchCallback* _cb;
+
+	public:
+		PMCGroundings(PatternMatchCallback* cb) : _cb(cb) {}
+
+		// Pass all the calls straight through, except one.
+		bool node_match(Handle& node1, Handle& node2) {
+			return _cb->node_match(node1, node2);
+		}
+		bool variable_match(Handle& node1, Handle& node2) {
+			return _cb->variable_match(node1, node2);
+		}
+		bool link_match(LinkPtr& link1, LinkPtr& link2) {
+			return _cb->link_match(link1, link2);
+		}
+		bool post_link_match(LinkPtr& link1, LinkPtr& link2) {
+			return _cb->post_link_match(link1, link2);
+		}
+		bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h) {
+			return _cb->clause_match(pattrn_link_h, grnd_link_h);
+		}
+		bool optional_clause_match(Handle& pattrn, Handle& grnd) {
+			return _cb->optional_clause_match(pattrn, grnd);
+		}
+		IncomingSet get_incoming_set(Handle h) {
+			return _cb->get_incoming_set(h);
+		}
+		void push(void) { _cb->push(); }
+		void pop(void) { _cb->pop(); }
+		void set_type_restrictions(VariableTypeMap &tm) {
+			_cb->set_type_restrictions(tm);
+		}
+		void perform_search(PatternMatchEngine* pme,
+                          std::set<Handle> &vars,
+                          std::vector<Handle> &clauses,
+                          std::vector<Handle> &negations)
+		{
+			_cb->perform_search(pme, vars, clauses, negations);
+		}
+
+		// This one we don't pass through. Instead, we collect the
+		// groundings.
+		bool grounding(const std::map<Handle, Handle> &var_soln,
+		               const std::map<Handle, Handle> &pred_soln)
+		{
+			_pred_groundings.push_back(pred_soln);
+			_var_groundings.push_back(var_soln);
+			return false;
+		}
+
+		std::vector<std::map<Handle, Handle>> _pred_groundings;
+		std::vector<std::map<Handle, Handle>> _var_groundings;
+};
+
+bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
+            const std::vector<Handle>& virtuals,
+            const std::vector<Handle>& negations, // currently ignored
+            const std::map<Handle, Handle>& var_gnds,
+            const std::map<Handle, Handle>& pred_gnds,
+            // copies, NOT references!
+            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
+            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds)
+{
+	// If we are done with the recursive step, then submit the grounding
+	// to the virtual links, and see what happens.
+	if (0 == comp_var_gnds.size())
+	{
+		dbgprt("Explore combinatoric grounding: variables: %zd clauses: %zd\n",
+		       var_gnds.size(), pred_gnds.size());
+#ifdef DEBUG
+		PatternMatchEngine::print_solution(var_gnds, pred_gnds);
+#endif
+
+		for (Handle virt : virtuals)
+		{
+			// At this time, we exepect all virutal links to be
+			// GreaterThanLinks having the structure
+			//   GreaterThanLink
+			//       GroundedSchemaNode "scm:blah"
+			//       ListLink
+			//           Arg1Atom
+			//           Arg2Atom
+			// 
+			LinkPtr lvirt(LinkCast(virt));
+			Handle schema(lvirt->getOutgoingAtom(0));
+			Handle arglist(lvirt->getOutgoingAtom(1));
+			LinkPtr larglist(LinkCast(arglist));
+
+			HandleSeq grounded_oset;
+/**************
+			for (Handle ungrounded : 
+
+			GreaterThanLink gtl(grounded_oset);
+			bool relation_holds = GreaterThanLink::do_execute(as, xxx
+
+			// The virtual relation failed to hold. Try the
+			// next grounding.
+			if (not relation_holds) return false;
+************/
+		}
+
+		// Yay! We found one! See what the callback thinks!
+		return cb->grounding(var_gnds, pred_gnds);
+	}
+	dbgprt("Component recursion: num comp=%zd\n", comp_var_gnds.size());
+
+	// recurse over all components. If component k has N_k groundings,
+	// and there are m components, then we have to explore all
+	// N_0 * N_1 * N_2 * ... N_m possible combinations of groundings.
+	// We do this recursively, by poping N_m off the back, and calling
+	// ourselves.
+	//
+	// vg and vp will be the collection of groundings for one of the
+	// components (well, for compnent m, in the above notation.)
+	std::vector<std::map<Handle, Handle>> vg = comp_var_gnds.back();
+	comp_var_gnds.pop_back();
+	std::vector<std::map<Handle, Handle>> pg = comp_pred_gnds.back();
+	comp_pred_gnds.pop_back();
+
+size_t rico = comp_var_gnds.size();
+	size_t ngnds = vg.size();
+printf("duuude at rec level %zd ghave %zd gnds\n", rico, ngnds);
+	for (size_t i=0; i<ngnds; i++)
+	{
+		// Given a set of groundings, tack on those for this component,
+		// and recurse, with one less component. We need to make a copy, of course.
+		std::map<Handle, Handle> rvg(var_gnds);
+		std::map<Handle, Handle> rpg(pred_gnds);
+
+		const std::map<Handle, Handle>& cand_vg(vg[i]);
+		const std::map<Handle, Handle>& cand_pg(pg[i]);
+		rvg.insert(cand_vg.begin(), cand_vg.end());
+		rpg.insert(cand_pg.begin(), cand_pg.end());
+
+		bool accept = recursive_virtual(cb, virtuals, negations, rvg, rpg, comp_var_gnds, comp_pred_gnds);
+
+		// Halt recursion immeditately if match is accepted.
+		if (accept) return true;
+	}
+	return false;
 }
 
 /* ================================================================= */
@@ -305,285 +453,8 @@ void PatternMatch::match(PatternMatchCallback *cb,
 }
 
 /* ================================================================= */
-/**
- * class Instantiator -- create grounded expressions from ungrounded ones.
- * Given an ungrounded expression (i.e. an expression containing variables)
- * and a map between variables and ground terms, it will create a new
- * expression, with the ground terms substituted for the variables.
- */
+
 namespace opencog {
-
-class Instantiator
-{
-	private:
-		AtomSpace *_as;
-		const std::map<Handle, Handle> *_vmap;
-
-		std::vector<Handle> _oset;
-		bool walk_tree(Handle tree);
-		Handle execution_link(void);
-		bool did_exec;
-
-	public:
-		Instantiator(AtomSpace* as) : _as(as) {}
-
-		Handle instantiate(Handle& expr, const std::map<Handle, Handle> &vars)
-			throw (InvalidParamException);
-};
-
-Handle Instantiator::execution_link()
-{
-	// This throws if it can't figure out the schema ...
-	// should we try and catch here ?
-	return ExecutionLink::do_execute(_as, _oset);
-
-	// Unkown proceedure type.  Return it, maybe some other
-	// execution-link handler will be able to process it.
-	// return as->addLink(EXECUTION_LINK, oset, TruthValue::TRUE_TV());
-}
-
-bool Instantiator::walk_tree(Handle expr)
-{
-	Type t = expr->getType();
-	NodePtr nexpr(NodeCast(expr));
-	if (nexpr)
-	{
-		if (VARIABLE_NODE != t) {
-			_oset.push_back(expr);
-			return false;
-		}
-
-		// If we are here, we found a variable. Look it up.
-		std::map<Handle,Handle>::const_iterator it = _vmap->find(expr);
-		if (_vmap->end() != it) {
-			Handle soln = it->second;
-			_oset.push_back(soln);
-		} else {
-			_oset.push_back(expr);
-		}
-		return false;
-	}
-
-	// If we are here, then we have a link. Walk it.
-	std::vector<Handle> save_oset = _oset;
-	_oset.clear();
-
-	// Walk the subtree, substituting values for variables.
-	LinkPtr lexpr(LinkCast(expr));
-	foreach_outgoing_handle(lexpr, &Instantiator::walk_tree, this);
-
-	// Fire execution links, if found.
-	did_exec = false;  // set flag on top-level only
-	if (t == EXECUTION_LINK)
-	{
-		did_exec = true;
-		Handle sh(execution_link());
-		_oset = save_oset;
-		if (Handle::UNDEFINED != sh)
-		{
-			_oset.push_back(sh);
-		}
-		return false;
-	}
-
-	// Now create a duplicate link, but with an outgoing set where
-	// the variables have been substituted by their values.
-	TruthValuePtr tv(expr->getTruthValue());
-	Handle sh(_as->addLink(t, _oset, tv));
-
-	_oset = save_oset;
-	_oset.push_back(sh);
-
-	return false;
-}
-
-/**
- * instantiate -- create a grounded expression from an ungrounded one.
- *
- * Given a handle to an ungrounded expression, and a set of groundings,
- * this will create a grounded expression.
- *
- * The set of groundings is to be passed in with the map 'vars', which
- * maps variable names to their groundings -- it maps variable names to
- * atoms that already exist in the atomspace.  This method will then go
- * through all of the variables in the expression, and substitute them
- * with their values, creating a new expression. The new expression is
- * added to the atomspace, and its handle is returned.
- */
-Handle Instantiator::instantiate(Handle& expr, const std::map<Handle, Handle> &vars)
-	throw (InvalidParamException)
-{
-	// throw, not assert, because this is a user error ...
-	if (Handle::UNDEFINED == expr)
-		throw InvalidParamException(TRACE_INFO,
-			"Asked to ground a null expression");
-
-	_vmap = &vars;
-	_oset.clear();
-	did_exec = false;
-
-	walk_tree(expr);
-	if ((false == did_exec) && (_oset.size() != 1))
-		throw InvalidParamException(TRACE_INFO,
-			"Failure to ground expression (found %d groundings)\n"
-			"Ungrounded expr is %s\n",
-			_oset.size(), expr->toShortString().c_str());
-
-	if (_oset.size() >= 1)
-		return _oset[0];
-	return Handle::UNDEFINED;
-}
-
-/* ================================================================= */
-/// A pass-through class, which wraps a regular callback, but captures
-/// all of the different possible groundings that result.  This class is
-/// used to piece together graphs out of multiple components.
-class PMCGroundings : public PatternMatchCallback
-{
-	private:
-		PatternMatchCallback* _cb;
-
-	public:
-		PMCGroundings(PatternMatchCallback* cb) : _cb(cb) {}
-
-		// Pass all the calls straight through, except one.
-		bool node_match(Handle& node1, Handle& node2) {
-			return _cb->node_match(node1, node2);
-		}
-		bool variable_match(Handle& node1, Handle& node2) {
-			return _cb->variable_match(node1, node2);
-		}
-		bool link_match(LinkPtr& link1, LinkPtr& link2) {
-			return _cb->link_match(link1, link2);
-		}
-		bool post_link_match(LinkPtr& link1, LinkPtr& link2) {
-			return _cb->post_link_match(link1, link2);
-		}
-		bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h) {
-			return _cb->clause_match(pattrn_link_h, grnd_link_h);
-		}
-		bool optional_clause_match(Handle& pattrn, Handle& grnd) {
-			return _cb->optional_clause_match(pattrn, grnd);
-		}
-		IncomingSet get_incoming_set(Handle h) {
-			return _cb->get_incoming_set(h);
-		}
-		void push(void) { _cb->push(); }
-		void pop(void) { _cb->pop(); }
-		void set_type_restrictions(VariableTypeMap &tm) {
-			_cb->set_type_restrictions(tm);
-		}
-		void perform_search(PatternMatchEngine* pme,
-                          std::set<Handle> &vars,
-                          std::vector<Handle> &clauses,
-                          std::vector<Handle> &negations)
-		{
-			_cb->perform_search(pme, vars, clauses, negations);
-		}
-
-		// This one we don't pass through. Instead, we collect the
-		// groundings.
-		bool grounding(const std::map<Handle, Handle> &var_soln,
-		               const std::map<Handle, Handle> &pred_soln)
-		{
-			_pred_groundings.push_back(pred_soln);
-			_var_groundings.push_back(var_soln);
-			return false;
-		}
-
-		std::vector<std::map<Handle, Handle>> _pred_groundings;
-		std::vector<std::map<Handle, Handle>> _var_groundings;
-};
-
-bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
-            const std::vector<Handle>& virtuals,
-            const std::vector<Handle>& negations, // currently ignored
-            const std::map<Handle, Handle>& var_gnds,
-            const std::map<Handle, Handle>& pred_gnds,
-            // copies, NOT references!
-            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
-            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds)
-{
-	// If we are done with the recursive step, then submit the grounding
-	// to the virtual links, and see what happens.
-	if (0 == comp_var_gnds.size())
-	{
-		dbgprt("Explore combinatoric grounding: variables: %zd clauses: %zd\n",
-		       var_gnds.size(), pred_gnds.size());
-#ifdef DEBUG
-		PatternMatchEngine::print_solution(var_gnds, pred_gnds);
-#endif
-
-		for (Handle virt : virtuals)
-		{
-			// At this time, we exepect all virutal links to be
-			// GreaterThanLinks having the structure
-			//   GreaterThanLink
-			//       GroundedSchemaNode "scm:blah"
-			//       ListLink
-			//           Arg1Atom
-			//           Arg2Atom
-			// 
-			LinkPtr lvirt(LinkCast(virt));
-			Handle schema(lvirt->getOutgoingAtom(0));
-			Handle arglist(lvirt->getOutgoingAtom(1));
-			LinkPtr larglist(LinkCast(arglist));
-
-			HandleSeq grounded_oset;
-/**************
-			for (Handle ungrounded : 
-
-			GreaterThanLink gtl(grounded_oset);
-			bool relation_holds = GreaterThanLink::do_execute(as, xxx
-
-			// The virtual relation failed to hold. Try the
-			// next grounding.
-			if (not relation_holds) return false;
-************/
-		}
-
-		// Yay! We found one! See what the callback thinks!
-		return cb->grounding(var_gnds, pred_gnds);
-	}
-	dbgprt("Component recursion: num comp=%zd\n", comp_var_gnds.size());
-
-	// recurse over all components. If component k has N_k groundings,
-	// and there are m components, then we have to explore all
-	// N_0 * N_1 * N_2 * ... N_m possible combinations of groundings.
-	// We do this recursively, by poping N_m off the back, and calling
-	// ourselves.
-	//
-	// vg and vp will be the collection of groundings for one of the
-	// components (well, for compnent m, in the above notation.)
-	std::vector<std::map<Handle, Handle>> vg = comp_var_gnds.back();
-	comp_var_gnds.pop_back();
-	std::vector<std::map<Handle, Handle>> pg = comp_pred_gnds.back();
-	comp_pred_gnds.pop_back();
-
-size_t rico = comp_var_gnds.size();
-	size_t ngnds = vg.size();
-printf("duuude at rec level %zd ghave %zd gnds\n", rico, ngnds);
-	for (size_t i=0; i<ngnds; i++)
-	{
-		// Given a set of groundings, tack on those for this component,
-		// and recurse, with one less component. We need to make a copy, of course.
-		std::map<Handle, Handle> rvg(var_gnds);
-		std::map<Handle, Handle> rpg(pred_gnds);
-
-		const std::map<Handle, Handle>& cand_vg(vg[i]);
-		const std::map<Handle, Handle>& cand_pg(pg[i]);
-		rvg.insert(cand_vg.begin(), cand_vg.end());
-		rpg.insert(cand_pg.begin(), cand_pg.end());
-
-		bool accept = recursive_virtual(cb, virtuals, negations, rvg, rpg, comp_var_gnds, comp_pred_gnds);
-
-		// Halt recursion immeditately if match is accepted.
-		if (accept) return true;
-	}
-	return false;
-}
-
-/* ================================================================= */
 
 /**
  * class Implicator -- pattern matching callback for grounding implicands.
