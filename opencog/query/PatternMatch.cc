@@ -90,7 +90,7 @@ class PMCGroundings : public PatternMatchCallback
 		// This one we don't pass through. Instead, we collect the
 		// groundings.
 		bool solution(std::map<Handle, Handle> &pred_soln,
-                            std::map<Handle, Handle> &var_soln)
+		              std::map<Handle, Handle> &var_soln)
 		{
 			_pred_groundings.push_back(pred_soln);
 			_var_groundings.push_back(var_soln);
@@ -100,6 +100,50 @@ class PMCGroundings : public PatternMatchCallback
 		std::vector<std::map<Handle, Handle>> _pred_groundings;
 		std::vector<std::map<Handle, Handle>> _var_groundings;
 };
+
+static void recursive_virtual(PatternMatchCallback *cb,
+            std::vector<Handle>& virtuals,
+            std::vector<Handle>& negations, // currently ignored
+            std::map<Handle, Handle>& var_gnds,
+            std::map<Handle, Handle>& pred_gnds,
+            std::vector<std::vector<std::map<Handle, Handle>>>& comp_var_gnds,
+            std::vector<std::vector<std::map<Handle, Handle>>>& comp_pred_gnds)
+{
+	if (0 == comp_var_gnds.size())
+	{
+printf("duuuuuuuuuuuuuuuuuuuuuuuuuuuuude done recurse %d v=%d\n", comp_var_gnds.size(), virtuals.size());
+		return;
+	}
+printf("duuuuuuuuuuuuuuuuuuuuuuuuuuuuude recurs %d v=%d\n", comp_var_gnds.size(), virtuals.size());
+
+	// recurse over all components. If component k has N_k groundings,
+	// and there are m components, then we have to explore all
+	// N_0 * N_1 * N_2 * ... N_m possible combinations of groundings.
+	// We do this recursively, by poping N_m off the back, and calling
+	// ourselves.
+	//
+	// vg and vp will be the collection of groundings for one of the
+	// components (well, for compnent m, in the above notation.)
+	std::vector<std::map<Handle, Handle>> vg = comp_var_gnds.back();
+	comp_var_gnds.pop_back();
+	std::vector<std::map<Handle, Handle>> pg = comp_pred_gnds.back();
+	comp_pred_gnds.pop_back();
+	size_t ngnds = vg.size();
+	for (size_t i=0; i< ngnds; i++)
+	{
+		// Given a set of groundings, tack on those for this component,
+		// and recurse, with one less component.
+		std::map<Handle, Handle> rvg(var_gnds);
+		std::map<Handle, Handle> rpg(pred_gnds);
+		
+		std::map<Handle, Handle>& cand_vg = vg[i];
+		std::map<Handle, Handle>& cand_pg = pg[i];
+		rvg.insert(cand_vg.begin(), cand_vg.end());
+		rpg.insert(cand_pg.begin(), cand_pg.end());
+
+		recursive_virtual(cb, virtuals, negations, rvg, rpg, comp_var_gnds, comp_pred_gnds);
+	}
+}
 
 /* ================================================================= */
 /**
@@ -294,7 +338,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 		std::set<Handle> cvars;
 		for (Handle v : vars)
 		{
-			if (is_node_in_any_tree(comp, v) cvars.insert(v);
+			if (is_node_in_any_tree(comp, v)) cvars.insert(v);
 		}
 
 		// Pass through the callbacks, collect up answers.
@@ -302,9 +346,16 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 		PatternMatchEngine pme;
 		pme.match(&gcb, cvars, comp, empty);
 
-		comp_pred_gnds.push_back(gcb._pred_groundings);
 		comp_var_gnds.push_back(gcb._var_groundings);
+		comp_pred_gnds.push_back(gcb._pred_groundings);
 	}
+
+	// And now, try grounding each of the virtual clauses.
+	std::map<Handle, Handle> empty_vg;
+	std::map<Handle, Handle> empty_pg;
+	recursive_virtual(cb, virtuals, negations,
+	                  empty_vg, empty_pg,
+	                  comp_var_gnds, comp_pred_gnds);
 }
 
 void PatternMatch::match(PatternMatchCallback *cb,
