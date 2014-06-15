@@ -28,7 +28,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/PatternMatchCallback.h>
-#include <opencog/query/PatternMatchEngine.h>
 
 namespace opencog {
 
@@ -36,19 +35,19 @@ class PatternMatch
 {
 	private:
 		AtomSpace *_atom_space;
-		PatternMatchEngine pme;
-		int get_vartype(Handle,
+		static int get_vartype(Handle,
 		                std::set<Handle>&,
 		                VariableTypeMap&);
 
-		void do_match(PatternMatchCallback *,
+		static void do_match(PatternMatchCallback *,
 		                std::set<Handle>& vars,
 		                std::vector<Handle>& clauses,
 		                std::vector<Handle>& negations)
 			throw (InvalidParamException);
-		Handle do_imply(Handle, PatternMatchCallback *, std::set<Handle>&)
+
+		static void do_imply(Handle, PatternMatchCallback *, std::set<Handle>&)
 			throw (InvalidParamException);
-		Handle do_bindlink(Handle, PatternMatchCallback *)
+		static void do_bindlink(Handle, PatternMatchCallback *)
 			throw (InvalidParamException);
 
 	public:

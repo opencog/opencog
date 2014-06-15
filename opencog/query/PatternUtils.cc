@@ -30,6 +30,7 @@
 
 using namespace opencog;
 
+namespace opencog {
 
 /**
  * Remove constant clauses from the list of clauses.
@@ -178,5 +179,6 @@ void get_connected_components(
 	}
 }
 
+} // namespace opencog
 
 /* ===================== END OF FILE ===================== */

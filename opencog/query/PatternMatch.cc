@@ -38,7 +38,7 @@ using namespace opencog;
 
 PatternMatch::PatternMatch(void)
 {
-    _atom_space = NULL;
+	_atom_space = NULL;
 }
 
 /* ================================================================= */
@@ -55,7 +55,7 @@ PatternMatch::PatternMatch(void)
  * The bound variables are, by convention, VariableNodes.  (The code in
  * the pattern match engine doesn't care whether the variable nodes are
  * actually of type VariableNode, and so can work with variables that
- * are any kind of node. However, the default callbacks do check for 
+ * are any kind of node. However, the default callbacks do check for
  * this type. Thus, the restriction, by convention, that the variables
  * must be of type VariableNode.)  The list of bound variables is then
  * assumed to be listed using the ListLink type. So, for example:
@@ -132,6 +132,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	}
 
 	// Make sure that the pattern is connected
+	// XXX TODO: what about the negattion clasues ???
 	std::set<std::vector<Handle>> components;
 	get_connected_components(vars, clauses, components);
 	if (1 != components.size())
@@ -153,10 +154,14 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
 	}
 
+	// Are there any virtual links in the clauses? If so, then we need
+	// to do some special handling.
+
 	// get_connected_components places the clauses in
 	// connection-sorted order. Use that, it makes matching slightly
 	// faster.
 	clauses = *components.begin();
+	PatternMatchEngine pme;
 	pme.match(cb, vars, clauses, negations);
 }
 
@@ -463,9 +468,9 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
  * method repeatedly on them, until one is exhausted.
  */
 
-Handle PatternMatch::do_imply (Handle himplication,
-                               PatternMatchCallback *pmc,
-                               std::set<Handle>& varset)
+void PatternMatch::do_imply (Handle himplication,
+                             PatternMatchCallback *pmc,
+                             std::set<Handle>& varset)
 	throw (InvalidParamException)
 {
 	// Must be non-empty.
@@ -544,12 +549,6 @@ Handle PatternMatch::do_imply (Handle himplication,
 	Implicator *impl = dynamic_cast<Implicator *>(pmc);
 	impl->implicand = implicand;
 	do_match(pmc, varset, affirm, negate);
-
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = _atom_space->addLink(LIST_LINK, impl->result_list);
-
-	return gl;
 }
 
 /* ================================================================= */
@@ -678,8 +677,8 @@ int PatternMatch::get_vartype(Handle htypelink,
  * the types of acceptable groundings for the varaibles.
  */
 
-Handle PatternMatch::do_bindlink (Handle hbindlink,
-                                  PatternMatchCallback *pmc)
+void PatternMatch::do_bindlink (Handle hbindlink,
+                                PatternMatchCallback *pmc)
 	throw (InvalidParamException)
 {
 	// Must be non-empty.
@@ -756,10 +755,7 @@ Handle PatternMatch::do_bindlink (Handle hbindlink,
 	}
 
 	pmc->set_type_restrictions(typemap);
-
-	Handle gl = do_imply(himpl, pmc, vset);
-
-	return gl;
+	do_imply(himpl, pmc, vset);
 }
 
 /* ================================================================= */
@@ -862,7 +858,12 @@ Handle PatternMatch::bindlink (Handle himplication)
 {
 	// Now perform the search.
 	DefaultImplicator impl(_atom_space);
-	return do_bindlink(himplication, &impl);
+	do_bindlink(himplication, &impl);
+
+	// The result_list contains a list of the grounded expressions.
+	// Turn it into a true list, and return it.
+	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+	return gl;
 }
 
 /**
@@ -877,7 +878,12 @@ Handle PatternMatch::single_bindlink (Handle himplication)
 {
 	// Now perform the search.
 	SingleImplicator impl(_atom_space);
-	return do_bindlink(himplication, &impl);
+	do_bindlink(himplication, &impl);
+
+	// The result_list contains a list of the grounded expressions.
+	// Turn it into a true list, and return it.
+	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+	return gl;
 }
 
 /**
@@ -901,7 +907,12 @@ Handle PatternMatch::crisp_logic_bindlink (Handle himplication)
 {
 	// Now perform the search.
 	CrispImplicator impl(_atom_space);
-	return do_bindlink(himplication, &impl);
+	do_bindlink(himplication, &impl);
+
+	// The result_list contains a list of the grounded expressions.
+	// Turn it into a true list, and return it.
+	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+	return gl;
 }
 
 /* ================================================================= */
@@ -921,7 +932,13 @@ Handle PatternMatch::imply (Handle himplication)
 	// Now perform the search.
 	DefaultImplicator impl(_atom_space);
 	std::set<Handle> varset;
-	return do_imply(himplication, &impl, varset);
+
+	do_imply(himplication, &impl, varset);
+
+	// The result_list contains a list of the grounded expressions.
+	// Turn it into a true list, and return it.
+	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+	return gl;
 }
 
 /**
@@ -948,7 +965,13 @@ Handle PatternMatch::crisp_logic_imply (Handle himplication)
 	// Now perform the search.
 	CrispImplicator impl(_atom_space);
 	std::set<Handle> varset;
-	return do_imply(himplication, &impl, varset);
+
+	do_imply(himplication, &impl, varset);
+
+	// The result_list contains a list of the grounded expressions.
+	// Turn it into a true list, and return it.
+	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+	return gl;
 }
 
 /* ===================== END OF FILE ===================== */
