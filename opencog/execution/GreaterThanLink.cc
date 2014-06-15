@@ -113,7 +113,7 @@ bool GreaterThanLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
     // A very special-case C++ comparison
     // This can compare two NumberNodes 
     // Hard-coded in C++ for speed. (well, and convenience ...)
-    if (0 == schema.compare(0,4,"c++:greater", 11))
+    if (0 == schema.compare("c++:greater"))
     {
         LinkPtr ll(LinkCast(args));
         Handle h1(ll->getOutgoingAtom(0));

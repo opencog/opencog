@@ -35,7 +35,7 @@
 
 using namespace opencog;
 
-#define DEBUG 1
+// #define DEBUG 1
 #if DEBUG
    #define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
@@ -121,11 +121,13 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 	// to the virtual links, and see what happens.
 	if (0 == comp_var_gnds.size())
 	{
-		dbgprt("Explore combinatoric grounding: variables: %zd clauses: %zd\n",
-		       var_gnds.size(), pred_gnds.size());
 #ifdef DEBUG
+		dbgprt("Explore combinatoric grounding %zd clauses:\n",
+		       var_gnds.size(), pred_gnds.size());
 		PatternMatchEngine::print_solution(var_gnds, pred_gnds);
 #endif
+
+		Instantiator instor(_atom_space);
 
 		for (Handle virt : virtuals)
 		{
@@ -140,19 +142,23 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			LinkPtr lvirt(LinkCast(virt));
 			Handle schema(lvirt->getOutgoingAtom(0));
 			Handle arglist(lvirt->getOutgoingAtom(1));
-			LinkPtr larglist(LinkCast(arglist));
 
-			HandleSeq grounded_oset;
-/**************
-			for (Handle ungrounded : 
+			// Ground the args that the virtual node needs.
+			Handle gargs = instor.instantiate(arglist, var_gnds);
 
-			GreaterThanLink gtl(grounded_oset);
-			bool relation_holds = GreaterThanLink::do_execute(as, xxx
+			// Now, actually perform the test!
+			bool relation_holds = GreaterThanLink::do_execute(_atom_space, schema, gargs);
+			dbgprt("Virtual accept/reject: %d\n", relation_holds);
 
+			// Make a weak effort to clean up after ourselves. This is not
+			// obviously, entirely correct, since the instantiator might
+			// have created other odd-ball structures with possibly
+			// inapproprite truth values in them, etc. !?
+			_atom_space->purgeAtom(gargs, false);
+			
 			// The virtual relation failed to hold. Try the
 			// next grounding.
 			if (not relation_holds) return false;
-************/
 		}
 
 		// Yay! We found one! See what the callback thinks!
@@ -173,9 +179,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 	std::vector<std::map<Handle, Handle>> pg = comp_pred_gnds.back();
 	comp_pred_gnds.pop_back();
 
-size_t rico = comp_var_gnds.size();
 	size_t ngnds = vg.size();
-printf("duuude at rec level %zd ghave %zd gnds\n", rico, ngnds);
 	for (size_t i=0; i<ngnds; i++)
 	{
 		// Given a set of groundings, tack on those for this component,
