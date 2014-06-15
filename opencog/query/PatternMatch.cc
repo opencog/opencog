@@ -112,13 +112,14 @@ static bool recursive_virtual(PatternMatchCallback *cb,
             const std::vector<Handle>& negations, // currently ignored
             const std::map<Handle, Handle>& var_gnds,
             const std::map<Handle, Handle>& pred_gnds,
-            std::vector<std::vector<std::map<Handle, Handle>>>& comp_var_gnds,
-            std::vector<std::vector<std::map<Handle, Handle>>>& comp_pred_gnds)
+            // copies, NOT references!
+            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
+            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds)
 {
 	if (0 == comp_var_gnds.size())
 	{
-		dbgprt("Explore combinatoric grounding: clauses: %zd variables: %zd\n",
-		       pred_gnds.size(), var_gnds.size());
+		dbgprt("Explore combinatoric grounding: variables: %zd clauses: %zd\n",
+		       var_gnds.size(), pred_gnds.size());
 PatternMatchEngine::print_solution(var_gnds, pred_gnds);
 		bool accept = cb->grounding(var_gnds, pred_gnds);
 		return accept;
@@ -137,18 +138,19 @@ PatternMatchEngine::print_solution(var_gnds, pred_gnds);
 	comp_var_gnds.pop_back();
 	std::vector<std::map<Handle, Handle>> pg = comp_pred_gnds.back();
 	comp_pred_gnds.pop_back();
+
+size_t rico = comp_var_gnds.size();
 	size_t ngnds = vg.size();
-	for (size_t i=0; i< ngnds; i++)
+printf("duuude at rec level %zd ghave %zd gnds\n", rico, ngnds);
+	for (size_t i=0; i<ngnds; i++)
 	{
 		// Given a set of groundings, tack on those for this component,
-		// and recurse, with one less component.
+		// and recurse, with one less component. We need to make a copy, of course.
 		std::map<Handle, Handle> rvg(var_gnds);
 		std::map<Handle, Handle> rpg(pred_gnds);
-printf("duuuuuuuuude wtf i=%d nv=%d np=%d\n", rvg.size(), rpg.size());
-		
+
 		const std::map<Handle, Handle>& cand_vg(vg[i]);
 		const std::map<Handle, Handle>& cand_pg(pg[i]);
-printf("duuuuuuuuude wtf i=%d ncand v=%d ncandp=%d\n", i, cand_vg.size(), cand_pg.size());
 		rvg.insert(cand_vg.begin(), cand_vg.end());
 		rpg.insert(cand_pg.begin(), cand_pg.end());
 
