@@ -122,6 +122,17 @@ static inline bool contains_linktype(Handle& clause, Type link_type)
    return false;
 }
 
+// Make sure that variables can be found in the clauses.
+// See C file for description
+bool remove_constants(const std::set<Handle> &vars,
+                         std::vector<Handle> &clauses);
+
+
+// See C file for description
+void get_connected_components(
+                    const std::set<Handle> &vars,
+                    const std::vector<Handle> &clauses,
+                    std::set<std::vector<Handle>> &compset);
 
 } // namespace opencog
 

@@ -102,17 +102,6 @@ class PatternMatchEngine
 		// Examine each candidate for a match, in turn.
 		bool do_candidate(Handle&, Handle&, Handle&);
 
-		// Make sure that variables can be found in the clauses.
-		static bool validate(const std::set<Handle> &vars,
-		              std::vector<Handle> &clauses);
-
-		static bool validate(const std::set<Handle> &vars,
-		              Handle& clause);
-
-		static void get_connected_components(const std::set<Handle> &vars,
-		              const std::vector<Handle> &clauses,
-		              std::set<std::vector<Handle>> &components);
-
 		// Do the actual pattern search.
 		void match(PatternMatchCallback *,
 		           std::set<Handle> &vars,

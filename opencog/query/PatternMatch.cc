@@ -43,7 +43,11 @@ PatternMatch::PatternMatch(void)
 
 /* ================================================================= */
 /**
- * Ground (solve) a predicate by pattern matching.
+ * Ground (solve) a pattern; perform unification. That is, find one
+ * or more groundings for the variables occuring in a collection of
+ * clauses (a hypergraph). The hypergraph can be thought of as a
+ * a 'predicate' which becomes 'true' when a grounding exists.
+ *
  * The predicate is defined in terms of two hypergraphs: one is a
  * hypergraph defining a pattern to be grounded, and the other is a
  * list of bound variables in the first.
@@ -113,14 +117,14 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	// The presence of constant clauses will mess up the current
 	// pattern matcher.  Constant clauses are "trivial" to match,
 	// and so its pointless to even send them through the system.
-	bool bogus = pme.validate(vars, clauses);
+	bool bogus = remove_constants(vars, clauses);
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern matching",
 			__FUNCTION__);
 	}
 
-	bogus = pme.validate(vars, negations);
+	bogus = remove_constants(vars, negations);
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern negation",
@@ -129,7 +133,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	// Make sure that the pattern is connected
 	std::set<std::vector<Handle>> components;
-	pme.get_connected_components(vars, clauses, components);
+	get_connected_components(vars, clauses, components);
 	if (1 != components.size())
 	{
 		// Users are going to be stumped by this one, so print
@@ -149,7 +153,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
 	}
 
-	// pme.get_connected_components places the clauses in
+	// get_connected_components places the clauses in
 	// connection-sorted order. Use that, it makes matching slightly
 	// faster.
 	clauses = *components.begin();

@@ -5,6 +5,7 @@ ADD_LIBRARY(query SHARED
 	PatternMatch.cc
 	PatternMatchEngine.cc
 	PatternSCM.cc
+	PatternUtils.cc
 )
 
 ADD_DEPENDENCIES(query
