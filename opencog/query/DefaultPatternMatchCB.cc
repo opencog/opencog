@@ -269,14 +269,26 @@ bool DefaultPatternMatchCB::virtual_link_match(LinkPtr& lvirt, Handle& gargs)
 	//           Arg1Atom
 	//           Arg2Atom
 	//
+	// XXX TODO s discussed on the mailing list, we should perhaps first
+	// see if the following can be found in the atomspace:
+	//
+	//   EvaluationLink
+	//       PredicateNode "blah"  ; not Grounded any more, and scm: stripped
+	//       ListLink
+	//           Arg1Atom
+	//           Arg2Atom
+	//
+	// If it does, we should declare a match.  If not, only then run the
+	// do_evaluate callback.  Alternately, perhaps the 
+	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
 
 	Handle schema(lvirt->getOutgoingAtom(0));
 	bool relation_holds = EvaluationLink::do_evaluate(_atom_space, schema, gargs);
 
-	// Make a weak effort to clean up bad groundings. This is not
-	// obviously, entirely correct, since the instantiator might
-	// have created other odd-ball structures with possibly
-	// inapproprite truth values in them, etc. !?
+	// Make a weak effort to clean up bad groundings. gargs is a
+	// a grounded ListLink.  We should probably look at it's children;
+	// if any of those also do not have any incoming links, they too
+	// should be removed. XXX FIXME.
 	_atom_space->purgeAtom(gargs, false);
 
 	return not relation_holds;
