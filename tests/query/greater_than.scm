@@ -1,5 +1,5 @@
 ;
-; Test data for the GreaterThanLink
+; Test data for the GroundedPredicateNode
 ;
 ;
 (EvaluationLink
@@ -59,8 +59,8 @@
 					)
 				)
 
-				(GreaterThanLink
-					(GroundedSchemaNode "c++:greater")
+				(EvaluationLink
+					(GroundedPredicateNode "c++:greater")
 					(ListLink
 						(VariableNode "$more-wealth")
 						(VariableNode "$less-wealth")

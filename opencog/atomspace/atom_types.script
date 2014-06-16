@@ -102,12 +102,6 @@ SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
 EXECUTION_LINK <- ORDERED_LINK
 EXECUTION_OUTPUT_LINK <- ORDERED_LINK
 
-// Virtual links get a very special treatment by the patttern matcher.
-// Right now, there's just one kind ov virtual link: the greater-than
-// link, which is logical-true/false depending on its arguments.
-VIRTUAL_LINK <- EXECUTION_LINK
-GREATER_THAN_LINK <- VIRTUAL_LINK
-
 // ====================================================================
 // Synchronization primitive, used to mark stages of a processing
 // pipeline; used as a fence or guard barrier, make sure that earlier
