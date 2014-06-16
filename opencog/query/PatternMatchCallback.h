@@ -69,7 +69,7 @@ class PatternMatchCallback
 		 * needs to be compared to a possibly matching
 		 * link in the atomspace. The first argument
 		 * is a link from the pattern, and the second
-		 * is a possible solution link from the atomspace.
+		 * is a possible grounding link from the atomspace.
 		 * Return false if the links match, else return
 		 * true. (i.e. return true if mis-match).
 		 *
@@ -87,12 +87,43 @@ class PatternMatchCallback
 		 * for a link.  This callback offers a final chance
 		 * to reject the link match based on the actual
 		 * grounding, or to perform post-match processing.
-		 * For example, the post_link_match() callback is 
-		 * used by the GreaterThanLink to perform a comparison
-		 * of the grounded values; if the comparison fails,
-		 * the match is rejected.
+		 * Return true to reject the match.
 		 */
-		virtual bool post_link_match(LinkPtr& link1, LinkPtr& link2) = 0;
+		virtual bool post_link_match(LinkPtr& link1, LinkPtr& link2)
+		{
+			return false;
+		}
+
+		/**
+		 * Invoked to perform the matching of a virtual link.
+		 * A virtual link is one that does not (might not) exist as a
+		 * real link in the AtomSpace, but might still exist in a
+		 * 'virtual' sense, in that it is instead considered to exist if
+		 * a GroundedPredicateNode evaluates to true or not.  When such
+		 * a virtual link is encountered, this callback is called to make
+		 * this decision. This should return true to reject the match.
+		 * That is, a return value of "true" denotes that the virtual
+		 * atom does not exist; while "false" implies that it does exist.
+		 * This is the same convention as link_match() and post_link_match().
+		 *
+		 * Unlike the other callbacks, this takes arguments in s slightly
+		 * different form.  Here, 'virt' is the virtual link specification,
+		 * as it appears in the pattern.  At this time, it is assumed that
+		 * these are always of the form
+		 *
+		 *       EvaluationLink
+		 *          GroundedPredicateNode "scm:some-function"
+		 *          ListLink
+		 *             SomeAtom arg1       ;; could be a VariableNode
+		 *             VariableNode $arg2  ;; could be some other node, too.
+		 *             EtcAtom ...
+		 *
+		 * The 'args' handle is a candidate grounding for the ListLink.
+		 * Note that the grounding is fully instantiated in the AtomSpace,
+		 * so, if its undesired, then at least the ListLink should probably
+		 * be removed. Maybe even more ...
+		 */
+		virtual bool virtual_link_match(LinkPtr& virt, Handle& args) = 0;
 
 		/**
 		 * Called when a grounding is found. Should

@@ -21,10 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/execution/EvaluationLink.h>
+
 #include "DefaultPatternMatchCB.h"
 #include "PatternMatchEngine.h"
-
-#include <opencog/atomspace/Foreach.h>
 
 using namespace opencog;
 
@@ -258,9 +258,28 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 
 /* ======================================================== */
 
-bool DefaultPatternMatchCB::post_link_match(LinkPtr& lpat, LinkPtr& lsoln)
+bool DefaultPatternMatchCB::virtual_link_match(LinkPtr& lvirt, Handle& gargs)
 {
-	return false;
+	// At this time, we expect all virutal links to be
+	// EvaluationLinks having the structure
+	//
+	//   EvaluationLink
+	//       GroundedPredicateNode "scm:blah"
+	//       ListLink
+	//           Arg1Atom
+	//           Arg2Atom
+	//
+
+	Handle schema(lvirt->getOutgoingAtom(0));
+	bool relation_holds = EvaluationLink::do_evaluate(_atom_space, schema, gargs);
+
+	// Make a weak effort to clean up bad groundings. This is not
+	// obviously, entirely correct, since the instantiator might
+	// have created other odd-ball structures with possibly
+	// inapproprite truth values in them, etc. !?
+	_atom_space->purgeAtom(gargs, false);
+
+	return not relation_holds;
 }
 
 /* ===================== END OF FILE ===================== */

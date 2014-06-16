@@ -23,7 +23,6 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/execution/EvaluationLink.h>
 #include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 
@@ -66,6 +65,9 @@ class PMCGroundings : public PatternMatchCallback
 		}
 		bool post_link_match(LinkPtr& link1, LinkPtr& link2) {
 			return _cb->post_link_match(link1, link2);
+		}
+		bool virtual_link_match(LinkPtr& link1, Handle& args) {
+			throw InvalidParamException(TRACE_INFO, "Not expecting a virtual link here!");
 		}
 		bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h) {
 			return _cb->clause_match(pattrn_link_h, grnd_link_h);
@@ -142,37 +144,36 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 
 		for (Handle virt : virtuals)
 		{
-			// At this time, we exepect all virutal links to be
+			// At this time, we expect all virutal links to be
 			// EvaluationLinks having the structure
+			//
 			//   EvaluationLink
 			//       GroundedPredicateNode "scm:blah"
 			//       ListLink
 			//           Arg1Atom
 			//           Arg2Atom
 			//
+			// So, we ground the ListLink, and pass that to the callback.
 			LinkPtr lvirt(LinkCast(virt));
-			Handle schema(lvirt->getOutgoingAtom(0));
 			Handle arglist(lvirt->getOutgoingAtom(1));
 
 			// Ground the args that the virtual node needs.
-			Handle gargs = instor.instantiate(arglist, var_gnds);
+			Handle gargs(instor.instantiate(arglist, var_gnds));
 
 			// At last! Actually perform the test!
-			bool relation_holds = EvaluationLink::do_evaluate(_atom_space, schema, gargs);
-			dbgprt("Virtual accept/reject: %d\n", relation_holds);
+			if (cb->virtual_link_match(lvirt, gargs)) return false;
 
-			// Make a weak effort to clean up after ourselves. This is not
-			// obviously, entirely correct, since the instantiator might
-			// have created other odd-ball structures with possibly
-			// inapproprite truth values in them, etc. !?
-			_atom_space->purgeAtom(gargs, false);
-
-			// The virtual relation failed to hold. Try the
-			// next grounding.
-			if (not relation_holds) return false;
+			// FYI ... if the virtual_link_match() accepts the match, we
+			// still don't instantiate the grounded form in the atomspace,
+			// nor do we add the grounded form to pred_gnds.  The former
+			// can be done by the callback, if desired.  We can't do the
+			// latter without access to the former ... all of which might
+			// need to be unwound, if the final match is rejected. So...
+			// Hmmm. Unclear if this should change...
 		}
 
-		// Yay! We found one! See what the callback thinks!
+		// Yay! We found one! We now have a fully and completely grounded
+		// pattern! See what the callback thinks of it.
 		return cb->grounding(var_gnds, pred_gnds);
 	}
 	dbgprt("Component recursion: num comp=%zd\n", comp_var_gnds.size());
@@ -349,10 +350,11 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
 	}
 
-	// get_connected_components places the clauses in connection-
-	// sorted order. Use that, it makes matching slightly faster.
-   // We don't do this if there are negations because the above
-   // mangled it all.
+	// get_connected_components re-orders the clauses so that adjacent
+	// clauses are connected.  using this will make matching slightly
+	// faster. But we don't do this if there are negations, because the
+	// above jammed the negations into the thing, which we must keep 
+	// separate.
 	if (0 == negations.size())
 		clauses = *components.begin();
 
