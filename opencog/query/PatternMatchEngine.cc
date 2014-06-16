@@ -163,8 +163,9 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		// most) every possible permutation.
 		//
 		Type tp = hp->getType();
-		if (classserver().isA(tp, GREATER_THAN_LINK))
+		if (classserver().isA(tp, VIRTUAL_LINK))
 		{
+			throw InvalidParamException(TRACE_INFO, "Unexpected virtual link found!");
 			return false;
 		}
 		if (classserver().isA(tp, ORDERED_LINK))
