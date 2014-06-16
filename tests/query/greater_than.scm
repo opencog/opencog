@@ -60,7 +60,7 @@
 				)
 
 				(GreaterThanLink
-					(GroundedSchemaNode "c++:greater")
+					(GroundedPredicateNode "c++:greater")
 					(ListLink
 						(VariableNode "$more-wealth")
 						(VariableNode "$less-wealth")

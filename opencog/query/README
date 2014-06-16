@@ -538,6 +538,10 @@ D) The foreach abstraction allows complex iterators to be implemented.
 
 TODO
 ----
+ * Rename GreaterThanLink to EvaluationLink.  Use GroundedPredicateNode
+   and not GroundedSchemaNode with it. Provide new callbacks to
+   handle these. 
+
  * Enhancement: Add support for VariableLink, so that, for example,
    (VariableLink $R (VariableNode $A) (VariableNode $B)) matches
    any arity-2 link (as long as the type constraints are obeyed).
