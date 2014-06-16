@@ -113,15 +113,15 @@ static inline bool is_node_in_any_tree(const std::vector<Handle>& trees, const H
 }
 
 /**
- * Returns true if the clause contains a link of type link_type.
+ * Returns true if the clause contains an atom of type atom_type.
  */
-static inline bool contains_linktype(Handle& clause, Type link_type)
+static inline bool contains_atomtype(Handle& clause, Type atom_type)
 {
+   Type clause_type = clause->getType();
+   if (classserver().isA(clause_type, atom_type)) return true;
+
    LinkPtr lc(LinkCast(clause));
    if (not lc) return false;
-
-   Type clause_type = clause->getType();
-   if (classserver().isA(clause_type, link_type)) return true;
 
    const std::vector<Handle> &oset = lc->getOutgoingSet();
    std::vector<Handle>::const_iterator i = oset.begin();
@@ -129,7 +129,7 @@ static inline bool contains_linktype(Handle& clause, Type link_type)
    for (; i != iend; i++)
    {
       Handle subclause(*i);
-      if (contains_linktype(subclause, link_type)) return true;
+      if (contains_atomtype(subclause, atom_type)) return true;
    }
    return false;
 }

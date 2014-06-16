@@ -98,7 +98,7 @@ bool GreaterThanLink::do_execute(AtomSpace* as, const HandleSeq& sna)
 ///
 bool GreaterThanLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
 {
-    if (GROUNDED_SCHEMA_NODE != gsn->getType()) {
+    if (GROUNDED_PREDICATE_NODE != gsn->getType()) {
         throw RuntimeException(TRACE_INFO, "Expecting GroundedSchemaNode!");
     }
     if (LIST_LINK != args->getType())

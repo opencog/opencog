@@ -351,6 +351,8 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	// get_connected_components places the clauses in connection-
 	// sorted order. Use that, it makes matching slightly faster.
+   // We don't do this if there are negations because the above
+   // mangled it all.
 	if (0 == negations.size())
 		clauses = *components.begin();
 
@@ -360,7 +362,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	std::vector<Handle> nonvirts;
 	for (Handle clause: clauses)
 	{
-		if (contains_linktype(clause, VIRTUAL_LINK))
+		if (contains_atomtype(clause, GROUNDED_PREDICATE_NODE))
 			virtuals.push_back(clause);
 		else
 			nonvirts.push_back(clause);
