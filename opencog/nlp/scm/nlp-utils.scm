@@ -161,7 +161,7 @@
 ; ---------------------------------------------------------------------
 ; parse-get-words - Given a parse, return a list of all words in the parse
 ;
-; Given a parse, return all word instances in arbitary order, keeping LEFT-WALL
+; Given a parse, return all word instances in arbitary order
 ; This version is faster than the in order version.
 ;
 (define (parse-get-words parse-node)
@@ -171,7 +171,7 @@
 ; ---------------------------------------------------------------------
 ; parse-get-words-in-order - Given a parse, return a list of all words in the parse in order
 ;
-; Given a parse, return all word instances in order, skipping LEFT-WALL
+; Given a parse, return all word instances in order
 ;
 (define (parse-get-words-in-order parse-node)
 	(define word-inst-list (cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node))
@@ -180,7 +180,7 @@
 		(define index-1 (list-index (lambda (a-node) (equal? word-inst-1 a-node)) word-inst-list))
 		(define index-2 (list-index (lambda (a-node) (equal? word-inst-2 a-node)) word-inst-list))
 		(< (string->number (cog-name (list-ref number-list index-1))) (string->number (cog-name (list-ref number-list index-2)))))
-	(cdr (sort word-inst-list less-than))
+	(sort word-inst-list less-than)
 )
 
 ; --------------------------------------------------------------------
