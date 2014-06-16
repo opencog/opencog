@@ -432,7 +432,7 @@ void PatternMiner::extractAllNodesInLink(Handle link, set<Handle>& allNodes)
 //          (ConceptNode "meat")
 //       )
 //    )
-vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, unsigned int gram)
+vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, Handle sharedVarNode , unsigned int gram)
 {
     map<Handle,Handle> valueToVarMap;  // the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
     vector<HTreeNode*> allNewPatternKeys;
@@ -454,6 +454,25 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
 
     bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const
 
+    // Find the index of the sharedVarNode. It has to be an variable, not a const.
+    int varIndex = -1;
+    if (sharedVarNode != Handle::UNDEFINED)
+    {
+        map<Handle,Handle>::iterator varIt;
+        int j = 0;
+        for (varIt = valueToVarMap.begin(); varIt != valueToVarMap.end(); ++varIt, j++)
+        {
+            if ((varIt->first) == sharedVarNode)
+            {
+                varIndex = j;
+                break;
+            }
+        }
+
+        OC_ASSERT( (varIndex != -1),
+                  "PatternMiner::extractAllPossiblePatternsFromInputLinks: cannot find the shared variable!\n")
+    }
+
     // var_num is the number of variables
     for (int var_num = 1;var_num < n_limit; ++ var_num)
     {
@@ -473,58 +492,63 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
             map<Handle,Handle>::iterator iter;
 
             map<Handle,Handle> patternVarMap;
-            unsigned int index = 0;
-            for (iter = valueToVarMap.begin(); iter != valueToVarMap.end(); ++ iter)
-            {
-                if (indexes[index]) // this is considered as a const, add it into the variable to value map
-                    patternVarMap.insert(std::pair<Handle,Handle>(iter->first, iter->second));
 
-                index ++;
+            if ((varIndex == -1) || indexes[varIndex]) // this should be a variable
+            {
+                unsigned int index = 0;
+                for (iter = valueToVarMap.begin(); iter != valueToVarMap.end(); ++ iter)
+                {
+                    if (indexes[index]) // this is considered as a variable, add it into the variable to value map
+                        patternVarMap.insert(std::pair<Handle,Handle>(iter->first, iter->second));
+
+                    index ++;
+                }
+
+                HandleSeq pattern, unifiedPattern;
+
+                foreach (Handle link, inputLinks)
+                {
+                    // debug:
+                    string inputLinkStr = originalAtomSpace->atomAsString(link);
+
+                    HandleSeq outgoingLinks;
+                    generateALinkByChosenVariables(link, patternVarMap, outgoingLinks);
+                    Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),outgoingLinks,TruthValue::TRUE_TV());
+                    pattern.push_back(rebindedLink);
+                    // debug:
+                    string rebindedLinkStr = atomSpace->atomAsString(rebindedLink);
+                }
+
+                // unify the pattern
+                unifiedPattern = UnifyPatternOrder(pattern);
+
+                string keyString = unifiedPatternToKeyString(unifiedPattern);
+
+                // next, check if this pattern already exist (need lock)
+                HTreeNode* newHTreeNode = 0;
+                uniqueKeyLock.lock();
+
+                if (keyStrToHTreeNodeMap.find(keyString) == keyStrToHTreeNodeMap.end())
+                {
+                    newHTreeNode = new HTreeNode();
+                    keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
+                }
+                else
+                {
+                    // debug
+                    cout << "Unique Key already exists: \n" << keyString << "Skip this pattern!\n";
+                }
+
+                uniqueKeyLock.unlock();
+
+                if (newHTreeNode)
+                {
+                    newHTreeNode->pattern = unifiedPattern;
+                    allNewPatternKeys.push_back(newHTreeNode);
+                    (patternsForGram[gram-1]).push_back(newHTreeNode);
+                }
             }
 
-            HandleSeq pattern, unifiedPattern;
-
-            foreach (Handle link, inputLinks)
-            {
-                // debug:
-                string inputLinkStr = originalAtomSpace->atomAsString(link);
-
-                HandleSeq outgoingLinks;
-                generateALinkByChosenVariables(link, patternVarMap, outgoingLinks);
-                Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),outgoingLinks,TruthValue::TRUE_TV());
-                pattern.push_back(rebindedLink);
-                // debug:
-                string rebindedLinkStr = atomSpace->atomAsString(rebindedLink);
-            }
-
-            // unify the pattern
-            unifiedPattern = UnifyPatternOrder(pattern);           
-
-            string keyString = unifiedPatternToKeyString(unifiedPattern);
-
-            // next, check if this pattern already exist (need lock)
-            HTreeNode* newHTreeNode = 0;
-            uniqueKeyLock.lock();
-
-            if (keyStrToHTreeNodeMap.find(keyString) == keyStrToHTreeNodeMap.end())
-            {
-                newHTreeNode = new HTreeNode();
-                keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
-            }
-            else
-            {
-                // debug
-                cout << "Unique Key already exists: \n" << keyString << "Skip this pattern!\n";
-            }
-
-            uniqueKeyLock.unlock();
-
-            if (newHTreeNode)
-            {
-                newHTreeNode->pattern = unifiedPattern;
-                allNewPatternKeys.push_back(newHTreeNode);
-                (patternsForGram[gram-1]).push_back(newHTreeNode);
-            }
 
             if (isLastNElementsAllTrue(indexes, n_max, var_num))
                 break;
@@ -887,7 +911,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
             originalLinks.push_back(extendedHandle);
 
             // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
-            vector<HTreeNode*> newPatternNodes = extractAllPossiblePatternsFromInputLinks(originalLinks, gram);
+            vector<HTreeNode*> newPatternNodes = extractAllPossiblePatternsFromInputLinks(originalLinks,(Handle&)(*varIt), gram);
 
             foreach (HTreeNode* HNode, newPatternNodes)
             {
