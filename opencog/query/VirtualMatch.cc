@@ -382,9 +382,9 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	for (Handle v : virtuals)
 	{
 		Type vt = v->getType();
-		if (not classserver().isA(vt, VIRTUAL_LINK))
+		if (not classserver().isA(vt, EVALUATION_LINK))
 			throw InvalidParamException(TRACE_INFO,
-				"Expeting VirtualLink at the top level!");
+				"Expeting EvaluationLink at the top level!");
 	}
 
 	// I'm too lazy to do the optional/negated clause bit, just right
