@@ -37,9 +37,9 @@ using namespace opencog;
 
 // #define DEBUG 1
 #if DEBUG
-   #define dbgprt(f, varargs...) printf(f, ##varargs)
+	#define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
-   #define dbgprt(f, varargs...)
+	#define dbgprt(f, varargs...)
 #endif
 
 PatternMatch::PatternMatch(void)
@@ -108,6 +108,22 @@ class PMCGroundings : public PatternMatchCallback
 		std::vector<std::map<Handle, Handle>> _var_groundings;
 };
 
+/**
+ * Recursive evaluator/grounder/unifier of virtual link types.
+ * The virtual links are in virtuals, a partial set of groundings
+ * are in var_gnds and pred_gnds, and a collection of possible
+ * groundings for disconnected graph components are in comp_var_gnds
+ * and comp_pred_gnds.
+ *
+ * Notes below explain the recursive step: how the various disconnected
+ * components are brought together int a candidate grounding. That
+ * candidate is then run through each of the virtual links.  If these
+ * accept the grounding, then the callback is called to make the final
+ * determination.
+ *
+ * The recursion step terminates when comp_var_gnds, comp_pred_gnds
+ * are empty, at which point the actual unification is done.
+ */
 bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
             const std::vector<Handle>& virtuals,
             const std::vector<Handle>& negations, // currently ignored
@@ -138,7 +154,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			//       ListLink
 			//           Arg1Atom
 			//           Arg2Atom
-			// 
+			//
 			LinkPtr lvirt(LinkCast(virt));
 			Handle schema(lvirt->getOutgoingAtom(0));
 			Handle arglist(lvirt->getOutgoingAtom(1));
@@ -146,7 +162,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			// Ground the args that the virtual node needs.
 			Handle gargs = instor.instantiate(arglist, var_gnds);
 
-			// Now, actually perform the test!
+			// At last! Actually perform the test!
 			bool relation_holds = GreaterThanLink::do_execute(_atom_space, schema, gargs);
 			dbgprt("Virtual accept/reject: %d\n", relation_holds);
 
@@ -155,7 +171,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			// have created other odd-ball structures with possibly
 			// inapproprite truth values in them, etc. !?
 			_atom_space->purgeAtom(gargs, false);
-			
+
 			// The virtual relation failed to hold. Try the
 			// next grounding.
 			if (not relation_holds) return false;
@@ -166,7 +182,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 	}
 	dbgprt("Component recursion: num comp=%zd\n", comp_var_gnds.size());
 
-	// recurse over all components. If component k has N_k groundings,
+	// Recurse over all components. If component k has N_k groundings,
 	// and there are m components, then we have to explore all
 	// N_0 * N_1 * N_2 * ... N_m possible combinations of groundings.
 	// We do this recursively, by poping N_m off the back, and calling
@@ -363,10 +379,21 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 		return;
 	}
 
+	// For now, the virtual links must be at the top. That's because
+	// I don't understand what the semantics would be if they were
+	// anywhere else... need to ask ben on the mailing list.
+	for (Handle v : virtuals)
+	{
+		Type vt = v->getType();
+		if (not classserver().isA(vt, VIRTUAL_LINK))
+			throw InvalidParamException(TRACE_INFO,
+				"Expeting VirtualLink at the top level!");
+	}
+
 	// I'm too lazy to do the optional/negated clause bit, just right
 	// now. It adds complexity. So just throw, at this time.
 	if (0 < negations.size())
-		throw InvalidParamException(TRACE_INFO, 
+		throw InvalidParamException(TRACE_INFO,
 			"Patterns with both virtual and optional clauses not yet supported!");
 
 	// If we are here, then we've got a knot in the center of it all.
@@ -380,7 +407,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
    // the distinct components individually, and then run each possible
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
-	
+
 	std::vector<Handle> empty;
 	std::set<std::vector<Handle>> nvcomps;
 	get_connected_components(vars, nonvirts, nvcomps);
