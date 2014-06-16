@@ -15,7 +15,7 @@ and so on.
 This code does not currently expose a "hypergraph query language" (HQL),
 but doing so should not be hard to add. See the design notes below.
 
-A simple example of one possible use of this code is shown in the file 
+A simple example of one possible use of this code is shown in the file
 "implication-example.scm".
 
 
@@ -27,7 +27,7 @@ smaller graph within the universe graph.  The smaller graph may include
 one or more variable nodes or links; these denote variables which will
 be given values (groundings): a variable will match any corresponding
 node or link in the universe, as long as it occurs in the correct
-location.  Thus, subgraph matching can be used to perform query 
+location.  Thus, subgraph matching can be used to perform query
 processing, to "fill in the blanks".
 
 The subgraph matching algorithm is fairly general, but with an
@@ -45,8 +45,8 @@ within OpenCog: all OpenCog hypergraphs are always naturally
 specified as trees (Note: this is true in practice, but the AtomSpace
 doesn't actually enforce this).
 
-An easy example of decomposing a general graph into a collection 
-of trees comes from natural language (English) that has been 
+An easy example of decomposing a general graph into a collection
+of trees comes from natural language (English) that has been
 parsed to extract relations. So, for example:
 
   _subj(John, throw)
@@ -98,7 +98,7 @@ Levi graphs are bipartite; although the algorithm does not make
 use of this.
 
 A solution that assigns a value to a variable is called a "grounding"
-of that variable. Graphs that contain variables will sometimes be 
+of that variable. Graphs that contain variables will sometimes be
 called ungrounded graphs.
 
 The Basic Algorithmic Idea
@@ -106,7 +106,7 @@ The Basic Algorithmic Idea
 The basic idea is to treat the query as a graph, in which are embedded
 some number of variables or unknowns. This query graph can be loosely
 understood to be kind of like a predicate, in that the query is solved
-only when the variables take on appropriate values, i.e. when the 
+only when the variables take on appropriate values, i.e. when the
 variables are grounded.
 
 The goal of query processing is to scan the collection of all knowledge,
@@ -122,8 +122,8 @@ The input to the algorithm is a set of trees. Because each tree may have
 several groundings, the algorithm maintains a stack to hold intermediate
 groundings, as the universe is explored. A solution is declared when
 every tree has been grounded. If no grounding is found, or if another
-solution is to be searched for, the algorithm will backtrack to the 
-most recent unexplored part of the universe, poping the stack as it 
+solution is to be searched for, the algorithm will backtrack to the
+most recent unexplored part of the universe, poping the stack as it
 backtracks. To this degree, the algorithm resembles a pushdown automaton.
 
 Currently Implemented Algorithm
@@ -152,7 +152,7 @@ Currently Implemented Algorithm
    incidence tree under it.  Each tree is, by definition, acyclic.
    These trees are also refered to as "clauses", below [and in the code].
    This is because, in some cases, the tree can play the role of a
-   logical clause. In some cases, the tree is also refered to as a 
+   logical clause. In some cases, the tree is also refered to as a
    a "predicate", although sometimes the whole collection of clauses
    is also called the predicate. Sorry for the confusion.
 
@@ -168,7 +168,7 @@ Currently Implemented Algorithm
 
    A list of the common, or shared, vertices is made; this list is
    used later in the algorithm, to find all trees connected to a
-   specific vertex. [This list is implemented as 
+   specific vertex. [This list is implemented as
    PatternMatchEngine::root_map]
 
    The universe graph may have any structure whatsoever; there are no
@@ -179,9 +179,9 @@ Currently Implemented Algorithm
    to be solved for. The list serves to explicitly identify the
    variables, so that they do not need to be computed or guessed.
    The designated variables need not be leaf vertices. There may be
-   zero, one or more variables.  They are called "bound" simply 
+   zero, one or more variables.  They are called "bound" simply
    because they have been called out; whereas "free variables" are
-   variables that may occur in the clauses, but have not been 
+   variables that may occur in the clauses, but have not been
    identified to the algorithm.
 
 3) Node equivalence is determined by means of a callback; the user
@@ -193,7 +193,7 @@ Currently Implemented Algorithm
    in determining whether to accept or reject a candidate grounding.
    Link equivalence is likewise governed by a callback.
 
-   [The node equivalence callback is implemented in 
+   [The node equivalence callback is implemented in
    PatternMatchCallback::node_match(). The link equivalence callback is
    PatternMatchCallback::link_match().]
 
@@ -211,14 +211,14 @@ Currently Implemented Algorithm
 
    First, the tree matching algo checks to see if the given
    node in the predicate is a variable; if so, then the match
-   is considered to be successful. The node-match callback is 
+   is considered to be successful. The node-match callback is
    invoked to decide whether this grounding is to be accepted;
-   if it is, then the corresponding node in the universe is 
+   if it is, then the corresponding node in the universe is
     recorded as a grounding.
 
    If the clause itself is found in the universe, it is rejected.
 
-   If the atom is a link, the link-match callback is invoked to 
+   If the atom is a link, the link-match callback is invoked to
    determine whether its an acceptable grounding.
 
    The tree matching algorithm recurses to subtrees; recursion
@@ -226,8 +226,8 @@ Currently Implemented Algorithm
 
    [This step is implemented in PatternMatchEngine::tree_compare().]
 
-   After an entire clause has been grounded, another callback, the 
-   clause-match callback, is called. This callback may reject the 
+   After an entire clause has been grounded, another callback, the
+   clause-match callback, is called. This callback may reject the
    grounding of the clause as a whole.
 
 6) Assuming a single tree has been successfully matched in the previous
@@ -291,10 +291,26 @@ Currently Implemented Algorithm
    accepts a list of clauses that need only be optionally grounded. The
    optional list is exactly that: if no grounding is found, that's OK,
    and a solution is still reported for the must-list. The optional
-   list can be used to implement pattern-rejection: so, for example, 
-   if a grounding for an optional clause is found, then the match as 
-   as a whole can be rejected. This kind of pattern-rejection is 
+   list can be used to implement pattern-rejection: so, for example,
+   if a grounding for an optional clause is found, then the match as
+   as a whole can be rejected. This kind of pattern-rejection is
    explicitly done with the crisp-boolean-logic callback.
+
+9) Not mentioned above is a new whiz-bang feature: support for
+   VirtualLinks, which are links that do not actually exist in the
+   AtomSpace, but are evaluated on the fly, as needed.  The
+   prototypical such link is GreaterThanLink, which evaluates to
+   "exists" if the schema in it returns true; else it "doesn't
+   exist".  That is, a GreaterThanLink will match in the pattern
+   when its schema evaluates to true, behaving as it it existed in
+   the AtomSpace, else it behaves as if it does not exist in the
+   AtomSpace (and thus can't ground/mathc/unify).  This bit of
+   fraudulent trickery requires a bit of work: in short, all other
+   parts of the hypergraph are grounded first, leading to a possible
+   combinatoric explosion of goundings; these are then passed through
+   the virtual links to determine if a match has occured or not.
+   The code to do this is in PatternMatch::recursive_virtual()
+   (instead of in the engine proper, where you might expect it to be).
 
 
 Open Questions
@@ -332,18 +348,18 @@ that use probalistic logic, or for ranking matches by quality.
 
 Callbacks are provided to accept or reject individual node and link
 groundings, and to accpt of reject the grounding of individual clauses.
-In addition, the "optional clause" mechanism provides a means of 
+In addition, the "optional clause" mechanism provides a means of
 pattern rejection. This can be done by specifying the pattern to be
 rejected as "optional": thus, if it is not found, a solution is reported;
 but if it is found, then the callback can reject the solution.
-The callback is free to examine truth values, STI/LTI, etc. in 
+The callback is free to examine truth values, STI/LTI, etc. in
 accpeting or rejecting any given grounding.  Push and pop callbacks
 are provided to help maintain state on a stack, to deal with partial
 matches, if needed.
 
 The "optional" mechanism can also be used to implement approximate
 matching, by specifying the parts of the graph that would be "nice
-to match", but not strictly required. 
+to match", but not strictly required.
 
 Alternately, the ranking/acceptance/rejection of the solution subgraph
 can be performed in a post-processing stage.  This may be an easier
@@ -372,15 +388,15 @@ forward chainer: it is able to accept, as input, an ImplicationLink, and
 return as output, a ListLink of the implicands. An ImplicationLink is
 basically an IF ... THEN ... statement, expressed as an OpenCog hypergraph.
 
-Properly, one writes "IF ... THEN ..." as "IF predicate THEN implicand". 
+Properly, one writes "IF ... THEN ..." as "IF predicate THEN implicand".
 The predicate is presumed to contain VariableNodes, while the implicand
-is a hypergraph making used of those VariableNodes.  The predicate is 
-run through the pattern-matching engine. When groundings for the 
+is a hypergraph making used of those VariableNodes.  The predicate is
+run through the pattern-matching engine. When groundings for the
 variables are found, then a hypegraph is created based on the implicand,
 using the grounded values found.  Because there may be more than one
 grounding, a ListLink of all grounded implicands is returned.
 
-Thus, the PattnerMatch::imply() method can be used to implement a 
+Thus, the PattnerMatch::imply() method can be used to implement a
 simple forward-chainer. For example, one may create a collection of
 ImplicationLinks. Then, calling each in turn, from a loop, will cause
 cause each to be evaluated. Thus, N iterations of the loop is equivalent
@@ -392,10 +408,10 @@ Hypergraph Query Language (HQL)
 A "hypergraph query language" is a language that allows queries to be
 expressed as strings. Given *any* way of writing down a hypergraph as
 a string, a hypergraph query language can be trivially formed by adding
-variables to the expression, in exactly the same way that one adds 
-variables to logic predicates, lambda calculus, etc.  In order to feel 
-comfortable to programmers, the query language should maintain the 
-outward form of SQL, SPARQL, RQL, etc. 
+variables to the expression, in exactly the same way that one adds
+variables to logic predicates, lambda calculus, etc.  In order to feel
+comfortable to programmers, the query language should maintain the
+outward form of SQL, SPARQL, RQL, etc.
 
 So, for example, a hypergraph might be written as a list
 of links, and their contents:
@@ -405,13 +421,13 @@ of links, and their contents:
                     ...
                     <link-type> <atom> <atom> ... <atom>.
                   }
- 
-Here, <atom> is understood to refer to a specific, constant atom. 
+
+Here, <atom> is understood to refer to a specific, constant atom.
 Let ?var be a variable.  Then define <vatom> as
 
   <vatom> :=  <atom> | ?var
 
-That is, a vatom is a constant atom, or a variable. A hypergraph 
+That is, a vatom is a constant atom, or a variable. A hypergraph
 with variables in it is then
 
   <v-hypergraph> := { <link-type> <vatom> <vatom> ... <vatom>.
@@ -424,7 +440,7 @@ An HQL query, resembling the syntax used in SQL or SPARQL, is then
 
   SELECT ?var-a ?var-b ... ?var-z WHERE <v-hypergraph>;
 
-So, for example, the hypergraph for 
+So, for example, the hypergraph for
 
     _subj(throw, John )
     _obj(throw, ball)
@@ -447,7 +463,7 @@ The query to determine what John threw would then be:
       RELEX_LINK _obj  ?y ?item.
     }
 
-There is currently no code that will actually parse such strings, and 
+There is currently no code that will actually parse such strings, and
 return the query results, although, in principle, writing such code
 would not be hard.  In practice, its a little more subtle than that:
 we've glossed over the idea that truth values could be queryable, or
@@ -458,7 +474,7 @@ expressions in OpenCog is considerably more complicated than the above.
 To overcome these difficulties, it is strongly suggested (would make
 sense) to create the actual query language from within the scheme
 bindings. This is because it is straight-forward, in scheme, to create
-the "syntactic sugar" to hide RelEx intricacies, and hide many of the 
+the "syntactic sugar" to hide RelEx intricacies, and hide many of the
 other nasty details, while keeping a nice and simple interface for the
 user.
 
@@ -468,10 +484,11 @@ parsed by RelEx and turned into OpenCog hypergraphs with embedded query
 variables (_$qVar) in them.  The code in this directory will process
 these queries, and return values for _$qVar.
 
-Thus, at least for RelEx-based queries, there is no need for HQL, as 
+Thus, at least for RelEx-based queries, there is no need for HQL, as
 using the English language is (a lot) easier than writing a formal
 HQL query.  In this sense, English is the "best" query language, and
-it is supported. 
+it is supported.
+
 
 Foreach iterators
 -----------------
@@ -529,12 +546,10 @@ TODO
    That is, start with those clauses that have only a single variable
    in them, ground that, and propagate.  Not sure, I think this could
    should improve run-time.  Perhaps there are other ideas to steal,
-   e.g. from zChaff? 
-   
-   Anyway, the next clause to be selected is chosen by 
-   get_next_untried_clause(); there is a XXX note in there about this.
+   e.g. from zChaff?
 
- * GreaterThanLink is not yet done/working.  Its harder than I thought.
+   Anyway, the next clause to be selected is chosen by
+   get_next_untried_clause(); there is a XXX note in there about this.
 
  * Enhancement: Add support for OrLink's in the pattern: viz: having
    partly matched some fraction of the pattern, allow the OrLink to
@@ -557,5 +572,5 @@ TODO
    the consequenct part (e.g. if we matched clauses a,b,c, then the
    output could be just clause b only, and it would be nice to just say
    'clause b' instead of spelling it out.)
-   
+
  -------------------------- END OF FILE ------------------------

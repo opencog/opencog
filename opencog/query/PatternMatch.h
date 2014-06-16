@@ -28,7 +28,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/PatternMatchCallback.h>
-#include <opencog/query/PatternMatchEngine.h>
 
 namespace opencog {
 
@@ -36,8 +35,7 @@ class PatternMatch
 {
 	private:
 		AtomSpace *_atom_space;
-		PatternMatchEngine pme;
-		int get_vartype(Handle,
+		static int get_vartype(Handle,
 		                std::set<Handle>&,
 		                VariableTypeMap&);
 
@@ -46,10 +44,19 @@ class PatternMatch
 		                std::vector<Handle>& clauses,
 		                std::vector<Handle>& negations)
 			throw (InvalidParamException);
-		Handle do_imply(Handle, PatternMatchCallback *, std::set<Handle>&)
+
+		void do_imply(Handle, PatternMatchCallback *, std::set<Handle>&)
 			throw (InvalidParamException);
-		Handle do_bindlink(Handle, PatternMatchCallback *)
+		void do_bindlink(Handle, PatternMatchCallback *)
 			throw (InvalidParamException);
+
+		bool recursive_virtual(PatternMatchCallback *cb,
+		            const std::vector<Handle>& virtuals,
+		            const std::vector<Handle>& negations,
+		            const std::map<Handle, Handle>& var_gnds,
+		            const std::map<Handle, Handle>& pred_gnds,
+		            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
+		            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds);
 
 	public:
 		PatternMatch(void);

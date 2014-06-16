@@ -1,7 +1,7 @@
 /*
  * PatternMatch.cc
  *
- * Copyright (C) 2009 Linas Vepstas
+ * Copyright (C) 2009, 2014 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *
@@ -22,120 +22,26 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/Foreach.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/execution/ExecutionLink.h>
+#include <opencog/execution/GreaterThanLink.h>
 #include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 
+#include "Instantiator.h"
 #include "PatternMatch.h"
 #include "PatternUtils.h"
 #include "DefaultPatternMatchCB.h"
 #include "CrispLogicPMCB.h"
 
-
 using namespace opencog;
 
 PatternMatch::PatternMatch(void)
 {
-    _atom_space = NULL;
+	_atom_space = NULL;
 }
 
-/* ================================================================= */
-/**
- * Solve a predicate by pattern matching.
- * The predicate is defined in terms of two hypergraphs: one is a
- * hypergraph defining a pattern to be matched for, and the other is a
- * list of bound variables in the first.
- *
- * The bound variables are, by definition, nodes. (XXX It might be
- * useful to loosen this restriction someday). The list of bound variables
- * is then assumed to be listed using the ListLink type. So, for
- * example:
- *
- *    ListLink
- *        SomeNode "variable 1"
- *        SomeOtherNode "another variable"
- *
- * The predicate hypergraph is assumed to be a list of "clauses", where
- * each "clause" is a tree. The clauses are assumed to be connected,
- * i.e. share common nodes or links.  The algorithm to find solutions
- * will fail on disconnected hypergraphs.  The list of clauses is
- * specified by means of an AndLink, so, for example:
- *
- *     AndLink
- *        SomeLink ....
- *        SomeOtherLink ...
- *
- * The solution proceeds by requiring each clause to match some part of
- * the atomspace (i.e. of the universe of hypergraphs stored in the
- * atomspace). When a solution is found, PatternMatchCallback::solution
- * method is called, and it is passed two maps: one mapping the bound
- * variables to their solutions, and the other mapping the pattern
- * clauses to their corresponding solution clauses.
- *
- * At this time, the list of clauses is understood to be a single
- * disjunct; that is, all of the clauses must be simultaneously
- * satisfied.  Thus, in principle, one could build a layer on top of
- * this that accepts clauses in disjunctive normal form (and so on...)
- * It is not clear at this time how to benefit from Boolean SAT solver
- * technlogy (or at what point this would be needed).
- */
-void PatternMatch::do_match(PatternMatchCallback *cb,
-                            std::set<Handle>& vars,
-                            std::vector<Handle>& clauses,
-                            std::vector<Handle>& negations)
-
-	throw (InvalidParamException)
-{
-	// Make sure that the user did not pass in bogus clauses
-	// Make sure that every clause contains at least one variable.
-	// The presence of constant clauses will mess up the current
-	// pattern matcher.  Constant clauses are "trivial" to match,
-	// and so its pointless to even send them through the system.
-	bool bogus = pme.validate(vars, clauses);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern matching",
-			__FUNCTION__);
-	}
-
-	bogus = pme.validate(vars, negations);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern negation",
-			__FUNCTION__);
-	}
-
-	// Make sure that the pattern is connected
-	std::set<std::vector<Handle>> components;
-	pme.get_connected_components(vars, clauses, components);
-	if (1 != components.size())
-	{
-		// Users are going to be stumped by this one, so print
-		// out a verbose, user-freindly debug message to help
-		// them out.
-		std::stringstream ss;
-		ss << "Pattern is not connected! Found "
-			<< components.size() << " components:\n";
-		int cnt = 0;
-		foreach (auto comp, components)
-		{
-			ss << "Connected component " << cnt
-				<< " consists of ----------------: \n";
-			foreach (Handle h, comp) ss << h->toString();
-			cnt++;
-		}
-		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
-	}
-
-	// pme.get_connected_components places the clauses in
-	// connection-sorted order. Use that, it makes matching slightly
-	// faster.
-	clauses = *components.begin();
-	pme.match(cb, vars, clauses, negations);
-}
-
+/// See the documentation for do_match() to see what this function does.
+/// This is just a convenience wrapper around do_match().
 void PatternMatch::match(PatternMatchCallback *cb,
                          Handle hvarbles,
                          Handle hclauses,
@@ -178,135 +84,8 @@ void PatternMatch::match(PatternMatchCallback *cb,
 }
 
 /* ================================================================= */
-/**
- * class Instantiator -- create grounded expressions from ungrounded ones.
- * Given an ungrounded expression (i.e. an expression containing variables)
- * and a map between variables and ground terms, it will create a new
- * expression, with the ground terms substituted for the variables.
- */
+
 namespace opencog {
-class Instantiator
-{
-	private:
-		AtomSpace *_as;
-		std::map<Handle, Handle> *vmap;
-
-		std::vector<Handle> oset;
-		bool walk_tree(Handle tree);
-		Handle execution_link(void);
-		bool did_exec;
-
-	public:
-		Instantiator(AtomSpace* as) : _as(as) {}
-
-		Handle instantiate(Handle& expr, std::map<Handle, Handle> &vars)
-			throw (InvalidParamException);
-};
-
-Handle Instantiator::execution_link()
-{
-	// This throws if it can't figure out the schema ...
-	// should we try and catch here ?
-	return ExecutionLink::do_execute(_as, oset);
-
-	// Unkown proceedure type.  Return it, maybe some other
-	// execution-link handler will be able to process it.
-	// return as->addLink(EXECUTION_LINK, oset, TruthValue::TRUE_TV());
-}
-
-bool Instantiator::walk_tree(Handle expr)
-{
-	Type t = expr->getType();
-	NodePtr nexpr(NodeCast(expr));
-	if (nexpr)
-	{
-		if (VARIABLE_NODE != t) {
-			oset.push_back(expr);
-			return false;
-		}
-
-		// If we are here, we found a variable. Look it up.
-		std::map<Handle,Handle>::const_iterator it = vmap->find(expr);
-		if (vmap->end() != it) {
-			Handle soln = it->second;
-			oset.push_back(soln);
-		} else {
-			oset.push_back(expr);
-		}
-		return false;
-	}
-
-	// If we are here, then we have a link. Walk it.
-	std::vector<Handle> save_oset = oset;
-	oset.clear();
-
-	// Walk the subtree, substituting values for variables.
-	LinkPtr lexpr(LinkCast(expr));
-	foreach_outgoing_handle(lexpr, &Instantiator::walk_tree, this);
-
-	// Fire execution links, if found.
-	did_exec = false;  // set flag on top-level only
-	if (t == EXECUTION_LINK)
-	{
-		did_exec = true;
-		Handle sh(execution_link());
-		oset = save_oset;
-		if (Handle::UNDEFINED != sh)
-		{
-			oset.push_back(sh);
-		}
-		return false;
-	}
-
-	// Now create a duplicate link, but with an outgoing set where
-	// the variables have been substituted by their values.
-	TruthValuePtr tv(expr->getTruthValue());
-	Handle sh(_as->addLink(t, oset, tv));
-
-	oset = save_oset;
-	oset.push_back(sh);
-
-	return false;
-}
-
-/**
- * instantiate -- create a grounded expression from an ungrounded one.
- *
- * Given a handle to an ungrounded expression, and a set of groundings,
- * this will create a grounded expression.
- *
- * The set of groundings is to be passed in with the map 'vars', which
- * maps variable names to their groundings -- it maps variable names to
- * atoms that already exist in the atomspace.  This method will then go
- * through all of the variables in the expression, and substitute them
- * with their values, creating a new expression. The new expression is
- * added to the atomspace, and its handle is returned.
- */
-Handle Instantiator::instantiate(Handle& expr, std::map<Handle, Handle> &vars)
-	throw (InvalidParamException)
-{
-	// throw, not assert, because this is a user error ...
-	if (Handle::UNDEFINED == expr)
-		throw InvalidParamException(TRACE_INFO,
-			"Asked to ground a null expression");
-
-	vmap = &vars;
-	oset.clear();
-	did_exec = false;
-
-	walk_tree(expr);
-	if ((false == did_exec) && (oset.size() != 1))
-		throw InvalidParamException(TRACE_INFO,
-			"Failure to ground expression (found %d groundings)\n"
-			"Ungrounded expr is %s\n",
-			oset.size(), expr->toShortString().c_str());
-
-	if (oset.size() >= 1)
-		return oset[0];
-	return Handle::UNDEFINED;
-}
-
-/* ================================================================= */
 
 /**
  * class Implicator -- pattern matching callback for grounding implicands.
@@ -333,12 +112,12 @@ class Implicator :
 		Implicator(AtomSpace* as) : _as(as), inst(as) {}
 		Handle implicand;
 		std::vector<Handle> result_list;
-		virtual bool solution(std::map<Handle, Handle> &pred_soln,
-		                      std::map<Handle, Handle> &var_soln);
+		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
+		                       const std::map<Handle, Handle> &pred_soln);
 };
 
-bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
-                          std::map<Handle, Handle> &var_soln)
+bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
+                           const std::map<Handle, Handle> &pred_soln)
 {
 	// PatternMatchEngine::print_solution(pred_soln,var_soln);
 	Handle h = inst.instantiate(implicand, var_soln);
@@ -348,6 +127,7 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 	}
 	return false;
 }
+
 } // namespace opencog
 
 /* ================================================================= */
@@ -439,9 +219,9 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
  * method repeatedly on them, until one is exhausted.
  */
 
-Handle PatternMatch::do_imply (Handle himplication,
-                               PatternMatchCallback *pmc,
-                               std::set<Handle>& varset)
+void PatternMatch::do_imply (Handle himplication,
+                             PatternMatchCallback *pmc,
+                             std::set<Handle>& varset)
 	throw (InvalidParamException)
 {
 	// Must be non-empty.
@@ -520,12 +300,6 @@ Handle PatternMatch::do_imply (Handle himplication,
 	Implicator *impl = dynamic_cast<Implicator *>(pmc);
 	impl->implicand = implicand;
 	do_match(pmc, varset, affirm, negate);
-
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = _atom_space->addLink(LIST_LINK, impl->result_list);
-
-	return gl;
 }
 
 /* ================================================================= */
@@ -654,8 +428,8 @@ int PatternMatch::get_vartype(Handle htypelink,
  * the types of acceptable groundings for the varaibles.
  */
 
-Handle PatternMatch::do_bindlink (Handle hbindlink,
-                                  PatternMatchCallback *pmc)
+void PatternMatch::do_bindlink (Handle hbindlink,
+                                PatternMatchCallback *pmc)
 	throw (InvalidParamException)
 {
 	// Must be non-empty.
@@ -732,10 +506,7 @@ Handle PatternMatch::do_bindlink (Handle hbindlink,
 	}
 
 	pmc->set_type_restrictions(typemap);
-
-	Handle gl = do_imply(himpl, pmc, vset);
-
-	return gl;
+	do_imply(himpl, pmc, vset);
 }
 
 /* ================================================================= */
@@ -750,10 +521,6 @@ class DefaultImplicator:
 		DefaultImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp) {}
 };
 
-} // namespace opencog
-
-namespace opencog {
-
 class CrispImplicator:
 	public virtual Implicator,
 	public virtual CrispLogicPMCB
@@ -762,9 +529,11 @@ class CrispImplicator:
 		CrispImplicator(AtomSpace* asp) :
 			Implicator(asp), DefaultPatternMatchCB(asp), CrispLogicPMCB(asp)
 		{}
-		virtual bool solution(std::map<Handle, Handle> &pred_soln,
-		                      std::map<Handle, Handle> &var_soln);
+		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
+		                       const std::map<Handle, Handle> &pred_soln);
 };
+
+} // namespace opencog
 
 /**
  * The crisp implicator needs to tweak the truth value of the
@@ -779,8 +548,8 @@ class CrispImplicator:
  * to (true, certain).  That is the whole point of this function:
  * to tweak (affirm) the truth value of existing clauses!
  */
-bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
-                          std::map<Handle, Handle> &var_soln)
+bool CrispImplicator::grounding(const std::map<Handle, Handle> &var_soln,
+                                const std::map<Handle, Handle> &pred_soln)
 {
 	// PatternMatchEngine::print_solution(pred_soln,var_soln);
 	Handle h = inst.instantiate(implicand, var_soln);
@@ -802,16 +571,16 @@ class SingleImplicator:
 {
 	public:
 		SingleImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp) {}
-		virtual bool solution(std::map<Handle, Handle> &pred_soln,
-		                      std::map<Handle, Handle> &var_soln);
+		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
+		                       const std::map<Handle, Handle> &pred_soln);
 };
 
 /**
  * The single implicator behaves like the default implicator, except that
  * it terminates after the first solution is found.
  */
-bool SingleImplicator::solution(std::map<Handle, Handle> &pred_soln,
-                          std::map<Handle, Handle> &var_soln)
+bool SingleImplicator::grounding(const std::map<Handle, Handle> &var_soln,
+                                 const std::map<Handle, Handle> &pred_soln)
 {
 	Handle h = inst.instantiate(implicand, var_soln);
 
@@ -821,8 +590,6 @@ bool SingleImplicator::solution(std::map<Handle, Handle> &pred_soln,
 	}
 	return true;
 }
-
-} // namespace opencog
 
 /**
  * Evaluate an ImplicationLink embedded in a BindLink
@@ -838,7 +605,12 @@ Handle PatternMatch::bindlink (Handle himplication)
 {
 	// Now perform the search.
 	DefaultImplicator impl(_atom_space);
-	return do_bindlink(himplication, &impl);
+	do_bindlink(himplication, &impl);
+
+	// The result_list contains a list of the grounded expressions.
+	// Turn it into a true list, and return it.
+	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+	return gl;
 }
 
 /**
@@ -853,7 +625,12 @@ Handle PatternMatch::single_bindlink (Handle himplication)
 {
 	// Now perform the search.
 	SingleImplicator impl(_atom_space);
-	return do_bindlink(himplication, &impl);
+	do_bindlink(himplication, &impl);
+
+	// The result_list contains a list of the grounded expressions.
+	// Turn it into a true list, and return it.
+	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+	return gl;
 }
 
 /**
@@ -877,7 +654,12 @@ Handle PatternMatch::crisp_logic_bindlink (Handle himplication)
 {
 	// Now perform the search.
 	CrispImplicator impl(_atom_space);
-	return do_bindlink(himplication, &impl);
+	do_bindlink(himplication, &impl);
+
+	// The result_list contains a list of the grounded expressions.
+	// Turn it into a true list, and return it.
+	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+	return gl;
 }
 
 /* ================================================================= */
@@ -897,7 +679,13 @@ Handle PatternMatch::imply (Handle himplication)
 	// Now perform the search.
 	DefaultImplicator impl(_atom_space);
 	std::set<Handle> varset;
-	return do_imply(himplication, &impl, varset);
+
+	do_imply(himplication, &impl, varset);
+
+	// The result_list contains a list of the grounded expressions.
+	// Turn it into a true list, and return it.
+	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+	return gl;
 }
 
 /**
@@ -924,7 +712,13 @@ Handle PatternMatch::crisp_logic_imply (Handle himplication)
 	// Now perform the search.
 	CrispImplicator impl(_atom_space);
 	std::set<Handle> varset;
-	return do_imply(himplication, &impl, varset);
+
+	do_imply(himplication, &impl, varset);
+
+	// The result_list contains a list of the grounded expressions.
+	// Turn it into a true list, and return it.
+	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+	return gl;
 }
 
 /* ===================== END OF FILE ===================== */

@@ -106,8 +106,8 @@ class PMCB : public DefaultPatternMatchCB
 	public:
 		PMCB(AtomSpace* as) : DefaultPatternMatchCB(as), found(0) {}
 		virtual bool node_match(Node *, Node *);
-		virtual bool solution(std::map<Handle, Handle> &pred_soln,
-		                      std::map<Handle, Handle> &var_soln);
+		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
+		                       const std::map<Handle, Handle> &pred_soln);
 
 		int found;
 		std::map<Handle, Handle> preds;
@@ -132,8 +132,8 @@ bool PMCB::node_match(Node *npat, Node *nsoln)
 	return true;
 }
 
-bool PMCB::solution(std::map<Handle, Handle> &pred_soln,
-                    std::map<Handle, Handle> &var_soln)
+bool PMCB::grounding(const std::map<Handle, Handle> &var_soln,
+                     const std::map<Handle, Handle> &pred_soln)
 {
 	found ++;
 	preds = pred_soln;

@@ -3,7 +3,7 @@
  *
  * Utilities for navigating a tree of outgoing edges.
  *
- * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2014 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,10 @@
 #include <set>
 #include <vector>
 
-#include <opencog/util/foreach.h>
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/types.h>
 
 namespace opencog {
@@ -45,33 +48,30 @@ class FindVariables
        * Create a set of all of the VariableNodes that lie in the
        * outgoing set of the handle (recursively).
        */
-      inline bool find_vars(Handle h)
+      inline void find_vars(Handle h)
       {
          Type t = h->getType();
          if (classserver().isNode(t))
          {
-            if (t == VARIABLE_NODE)
-            {
-               varset.insert(h);
-            }
-            return false;
+            if (t == VARIABLE_NODE) varset.insert(h);
+            return;
          }
 
          LinkPtr l(LinkCast(h));
-         return foreach_outgoing_handle(l, &FindVariables::find_vars, this);
+			for (Handle oh : l->getOutgoingSet()) find_vars(oh);
       }
 
       inline void find_vars(std::vector<Handle> hlist)
       {
-			foreach(Handle h, hlist) find_vars(h);
+			for (Handle h : hlist) find_vars(h);
 		}
 };
 
 /**
- * Return true if any of the indicated node occurs somewhere in the
- * tree spanned by the outgoing set.
+ * Return true if the indicated node occurs somewhere in the tree
+ * (viz, the tree recursively spanned by the outgoing set of the handle)
  */
-inline bool is_node_in_tree(const Handle& tree, const Handle& node)
+static inline bool is_node_in_tree(const Handle& tree, const Handle& node)
 {
 	if (tree == Handle::UNDEFINED) return false;
 	if (tree == node) return true;
@@ -89,16 +89,62 @@ inline bool is_node_in_tree(const Handle& tree, const Handle& node)
 
 /**
  * Return true if any of the indicated nodes occurs somewhere in
- * the tree spanned by the outgoing set.
+ * the tree (that is, the treee spanned by the outgoing set.)
  */
-inline bool any_node_in_tree(const Handle& tree, const std::set<Handle>& nodes)
+static inline bool any_node_in_tree(const Handle& tree, const std::set<Handle>& nodes)
 {
-	foreach(Handle n, nodes)
+	for (Handle n: nodes)
 	{
 		if (is_node_in_tree(tree, n)) return true;
 	}
 	return false;
 }
+
+/**
+ * Return true if the indicated node occurs somewhere in any of the trees.
+ */
+static inline bool is_node_in_any_tree(const std::vector<Handle>& trees, const Handle& node)
+{
+	for (Handle tree: trees)
+	{
+		if (is_node_in_tree(tree, node)) return true;
+	}
+	return false;
+}
+
+/**
+ * Returns true if the clause contains a link of type link_type.
+ */
+static inline bool contains_linktype(Handle& clause, Type link_type)
+{
+   LinkPtr lc(LinkCast(clause));
+   if (not lc) return false;
+
+   Type clause_type = clause->getType();
+   if (classserver().isA(clause_type, link_type)) return true;
+
+   const std::vector<Handle> &oset = lc->getOutgoingSet();
+   std::vector<Handle>::const_iterator i = oset.begin();
+   std::vector<Handle>::const_iterator iend = oset.end();
+   for (; i != iend; i++)
+   {
+      Handle subclause(*i);
+      if (contains_linktype(subclause, link_type)) return true;
+   }
+   return false;
+}
+
+// Make sure that variables can be found in the clauses.
+// See C file for description
+bool remove_constants(const std::set<Handle> &vars,
+                         std::vector<Handle> &clauses);
+
+
+// See C file for description
+void get_connected_components(
+                    const std::set<Handle> &vars,
+                    const std::vector<Handle> &clauses,
+                    std::set<std::vector<Handle>> &compset);
 
 } // namespace opencog
 
