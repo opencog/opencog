@@ -159,7 +159,7 @@
 ; parse-get-words - Given a parse, return a list of all words in the parse
 ;
 (define (parse-get-words parse-node)
-	(cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node))
+	(cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node)
 )
 
 ; --------------------------------------------------------------------
