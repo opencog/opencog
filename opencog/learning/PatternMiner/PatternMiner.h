@@ -147,6 +147,8 @@ private:
     // Output all the variable nodes in the toAtomSpace BTW
     HandleSeq swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq &outVariableNodes, HandleSeq &linksWillBeDel);
 
+    void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, set<Handle>& allVarNodes);
+
     void extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
 
     void findAllInstancesForGivenPattern(HTreeNode* HNode);

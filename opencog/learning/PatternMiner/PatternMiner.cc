@@ -364,6 +364,33 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
     }
 }
 
+void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, set<Handle>& allVarNodes)
+{
+    HandleSeq ioutgoingLinks = originalAtomSpace->getOutgoing(instanceLink);
+    HandleSeq poutgoingLinks = atomSpace->getOutgoing(patternLink);
+
+    HandleSeq::iterator pit = poutgoingLinks.begin();
+
+    foreach (Handle h, ioutgoingLinks)
+    {
+        if (originalAtomSpace->isNode(h))
+        {
+            if ((atomSpace->getType(*pit) == opencog::VARIABLE_NODE))
+            {
+                if (allVarNodes.find(h) == allVarNodes.end())
+                {
+                    allVarNodes.insert(h);
+                }
+            }
+        }
+        else
+        {
+            extractAllVariableNodesInAnInstanceLink(h,(Handle&)(*pit),allVarNodes);
+        }
+    }
+
+}
+
 void PatternMiner::extractAllNodesInLink(Handle link, set<Handle>& allNodes)
 {
     HandleSeq outgoingLinks = originalAtomSpace->getOutgoing(link);
@@ -799,6 +826,7 @@ Handle PatternMiner::getFirstNonIgnoredIncomingLink(AtomSpace *atomspace, Handle
 
 }
 
+
 void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram)
 {
     // debug:
@@ -808,15 +836,21 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
         cout << "Debug: error! The instance contines variables!" << instanceInst << std::endl;
     }
 
-    // First, extract all the nodes in the instance links
-    set<Handle> allNodes;
+    // First, extract all the variable nodes in the instance links
+    // we only extend one more link on the nodes that are considered as varaibles for this pattern
+    set<Handle> allVarNodes;
 
+
+    HandleSeq::iterator patternLinkIt = curHTreeNode->pattern.begin();
     foreach (Handle link, instance)
-        extractAllNodesInLink(link, allNodes);
+    {
+        extractAllVariableNodesInAnInstanceLink(link, *(patternLinkIt), allVarNodes);
+        patternLinkIt ++;
+    }
 
     set<Handle>::iterator varIt;
 
-    for(varIt = allNodes.begin(); varIt != allNodes.end(); ++ varIt)
+    for(varIt = allVarNodes.begin(); varIt != allVarNodes.end(); ++ varIt)
     {
         // find what are the other links in the original Atomspace contain this variable
         HandleSeq incomings = originalAtomSpace->getIncoming( ((Handle)(*varIt)));
