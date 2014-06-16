@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/GreaterThanLink.cc
+ * opencog/atomspace/EvaluationLink.cc
  *
  * Copyright (C) 2009, 2013, 2014 Linas Vepstas
  * All Rights Reserved
@@ -24,39 +24,41 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
-#include "GreaterThanLink.h"
+#include "EvaluationLink.h"
 
 using namespace opencog;
 
-GreaterThanLink::GreaterThanLink(const HandleSeq& oset,
+EvaluationLink::EvaluationLink(const HandleSeq& oset,
                              TruthValuePtr tv,
                              AttentionValuePtr av)
-    : Link(EXECUTION_LINK, oset, tv, av)
+    : Link(EVALUATION_LINK, oset, tv, av)
 {
     if ((2 != oset.size()) or
        (LIST_LINK != oset[1]->getType()))
     {
-        throw RuntimeException(TRACE_INFO, "GreaterThanLink must have schema and args!");
+        throw RuntimeException(TRACE_INFO,
+            "EvaluationLink must have predicate and args!");
     }
 }
 
-GreaterThanLink::GreaterThanLink(Handle schema, Handle args,
+EvaluationLink::EvaluationLink(Handle schema, Handle args,
                              TruthValuePtr tv,
                              AttentionValuePtr av)
-    : Link(EXECUTION_LINK, schema, args, tv, av)
+    : Link(EVALUATION_LINK, schema, args, tv, av)
 {
     if (LIST_LINK != args->getType()) {
-        throw RuntimeException(TRACE_INFO, "GreaterThanLink must have schema and args!");
+        throw RuntimeException(TRACE_INFO,
+            "EvaluationLink must have args in a ListLink!");
     }
 }
 
-/// do_execute -- execute the GroundedSchemaNode of the GreaterThanLink
+/// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
 ///
-/// Expects the argument to be an GreaterThanLink, which should have the
+/// Expects the argument to be an EvaluationLink, which should have the
 /// following structure:
 ///
-///     GreaterThanLink
-///         GroundedSchemaNode "lang: func_name"
+///     EvaluationLink
+///         GroundedPredicateNode "lang: func_name"
 ///         ListLink
 ///             SomeAtom
 ///             OtherAtom
@@ -65,45 +67,45 @@ GreaterThanLink::GreaterThanLink(Handle schema, Handle args,
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-bool GreaterThanLink::do_execute(AtomSpace* as, Handle execlnk)
+bool EvaluationLink::do_evaluate(AtomSpace* as, Handle execlnk)
 {
-    if (EXECUTION_LINK != execlnk->getType()) {
-        throw RuntimeException(TRACE_INFO, "Expecting to get an GreaterThanLink!");
+    if (EVALUATION_LINK != execlnk->getType()) {
+        throw RuntimeException(TRACE_INFO, "Expecting to get an EvaluationLink!");
     }
     LinkPtr l(LinkCast(execlnk));
-    return do_execute(as, l->getOutgoingSet());
+    return do_evaluate(as, l->getOutgoingSet());
 }
 
-/// do_execute -- execute the GroundedSchemaNode of the GreaterThanLink
+/// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
 ///
 /// Expects the sequence to be exactly two atoms long.
-/// Expects the first handle of the sequence to be a GroundedSchemaNode
+/// Expects the first handle of the sequence to be a GroundedPredicateNode
 /// Expects the second handle of the sequence to be a ListLink
-/// Executes the GroundedSchemaNode, supplying the second handle as argument
+/// Executes the GroundedPredicateNode, supplying the second handle as argument
 ///
-bool GreaterThanLink::do_execute(AtomSpace* as, const HandleSeq& sna)
+bool EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
 {
     if (2 != sna.size())
     {
-        throw RuntimeException(TRACE_INFO, "Incorrect arity for an GreaterThanLink!");
+        throw RuntimeException(TRACE_INFO, "Incorrect arity for an EvaluationLink!");
     }
-    return do_execute(as, sna[0], sna[1]);
+    return do_evaluate(as, sna[0], sna[1]);
 }
 
-/// do_execute -- execute the GroundedSchemaNode of the GreaterThanLink
+/// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
 ///
-/// Expects "gsn" to be a GroundedSchemaNode
+/// Expects "gsn" to be a GroundedPredicateNode
 /// Expects "args" to be a ListLink
-/// Executes the GroundedSchemaNode, supplying the args as argument
+/// Executes the GroundedPredicateNode, supplying the args as argument
 ///
-bool GreaterThanLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
+bool EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args)
 {
     if (GROUNDED_PREDICATE_NODE != gsn->getType()) {
-        throw RuntimeException(TRACE_INFO, "Expecting GroundedSchemaNode!");
+        throw RuntimeException(TRACE_INFO, "Expecting GroundedPredicateNode!");
     }
     if (LIST_LINK != args->getType())
     {
-        throw RuntimeException(TRACE_INFO, "Expecting arguments to GreaterThanLink!");
+        throw RuntimeException(TRACE_INFO, "Expecting arguments to EvaluationLink!");
     }
 
     // Get the schema name.
@@ -144,7 +146,7 @@ bool GreaterThanLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
         if (rc.compare("#f") or rc.compare("()")) return false;
         return true;
 #else
-        throw RuntimeException(TRACE_INFO, "Cannot evaluate scheme GroundedSchemaNode!");
+        throw RuntimeException(TRACE_INFO, "Cannot evaluate scheme GroundedPredicateNode!");
 #endif /* HAVE_GUILE */
     }
 
@@ -161,11 +163,11 @@ bool GreaterThanLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
 
         return false;
 #else
-        throw RuntimeException(TRACE_INFO, "Cannot evaluate python GroundedSchemaNode!");
+        throw RuntimeException(TRACE_INFO, "Cannot evaluate python GroundedPredicateNode!");
 #endif /* HAVE_CYTHON */
     }
 
     // Unkown proceedure type.
-    throw RuntimeException(TRACE_INFO, "Cannot evaluate unknown GroundedSchemaNode!");
+    throw RuntimeException(TRACE_INFO, "Cannot evaluate unknown GroundedPredicateNode!");
 }
 

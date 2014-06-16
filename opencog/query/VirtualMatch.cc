@@ -23,7 +23,7 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/execution/GreaterThanLink.h>
+#include <opencog/execution/EvaluationLink.h>
 #include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 
@@ -143,9 +143,9 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 		for (Handle virt : virtuals)
 		{
 			// At this time, we exepect all virutal links to be
-			// GreaterThanLinks having the structure
-			//   GreaterThanLink
-			//       GroundedSchemaNode "scm:blah"
+			// EvaluationLinks having the structure
+			//   EvaluationLink
+			//       GroundedPredicateNode "scm:blah"
 			//       ListLink
 			//           Arg1Atom
 			//           Arg2Atom
@@ -158,7 +158,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			Handle gargs = instor.instantiate(arglist, var_gnds);
 
 			// At last! Actually perform the test!
-			bool relation_holds = GreaterThanLink::do_execute(_atom_space, schema, gargs);
+			bool relation_holds = EvaluationLink::do_evaluate(_atom_space, schema, gargs);
 			dbgprt("Virtual accept/reject: %d\n", relation_holds);
 
 			// Make a weak effort to clean up after ourselves. This is not

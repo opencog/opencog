@@ -23,8 +23,6 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/execution/GreaterThanLink.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 
 #include "Instantiator.h"
@@ -76,7 +74,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	}
 
 	std::set<Handle> vars;
-	foreach (Handle v, lvarbles->getOutgoingSet()) vars.insert(v);
+	for (Handle v: lvarbles->getOutgoingSet()) vars.insert(v);
 
 	std::vector<Handle> clauses(lclauses->getOutgoingSet());
 
