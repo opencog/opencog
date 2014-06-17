@@ -36,7 +36,6 @@ ADD_LIBRARY (atomspace SHARED
     Node.cc
     NodeIndex.cc
     NullTruthValue.cc
-    PredicateIndex.cc
     SimpleTruthValue.cc
     StringIndex.cc
     TargetTypeIndex.cc
@@ -96,8 +95,6 @@ INSTALL (FILES
     Node.h
     NodeIndex.h
     NullTruthValue.h
-    PredicateEvaluator.h
-    PredicateIndex.h
     SimpleTruthValue.h
     StringIndex.h
     TargetTypeIndex.h

@@ -101,7 +101,6 @@ bool AtomTable::isCleared(void) const
     if (typeIndex.size() != 0) return false;
     if (importanceIndex.size() != 0) return false;
     if (targetTypeIndex.size() != 0) return false;
-    if (predicateIndex.size() != 0) return false;
     return true;
 }
 
@@ -523,7 +522,6 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     atom->keep_incoming_set();
     targetTypeIndex.insertAtom(atom);
     importanceIndex.insertAtom(atom);
-    predicateIndex.insertAtom(atom);
 
     atom->setAtomTable(this);
 
@@ -672,7 +670,6 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     }
     targetTypeIndex.removeAtom(atom);
     importanceIndex.removeAtom(atom);
-    predicateIndex.removeAtom(atom);
 
     // XXX Setting the atom table causes AVChanged signals to be emitted.
     // We should really do this unlocked, but I'm tooo lazy to fix, and

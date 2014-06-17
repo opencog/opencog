@@ -40,8 +40,6 @@
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/NodeIndex.h>
-#include <opencog/atomspace/PredicateEvaluator.h>
-#include <opencog/atomspace/PredicateIndex.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/TypeIndex.h>
 #include <opencog/atomspace/TargetTypeIndex.h>
@@ -105,7 +103,6 @@ private:
     LinkIndex linkIndex;
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
-    PredicateIndex predicateIndex;
 	//!@}
 	
     /**
@@ -173,64 +170,6 @@ public:
     size_t getSize() const;
     size_t getNumNodes() const;
     size_t getNumLinks() const;
-
-    /**
-     * Adds a new predicate index to this atom table given the Handle of
-     * the PredicateNode.
-     * @param The handle of the predicate node, whose name is the id
-     *        of the predicate.
-     * @param The evaluator used to check if such predicate is true
-     *        for a given handle.
-     * Throws exception if:
-     *      - the given Handle is not in the AtomTable
-     *      - there is already an index for this predicate id/Handle
-     *      - the predicate index table is full.
-     * \note Does not apply the new predicate index to the atoms
-     * inserted previously in the AtomTable.
-     */
-    void addPredicateIndex(Handle& h, PredicateEvaluator *pe)
-    {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        predicateIndex.addPredicateIndex(h, pe);
-    }
-
-    /**
-     * Returns the Predicate evaluator for a given
-     * GroundedPredicateNode Handle, if it is being used as a
-     * lookup index. Otherwise, returns NULL.
-     */
-    PredicateEvaluator* getPredicateEvaluator(Handle& h) const
-    {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return predicateIndex.getPredicateEvaluator(h);
-    }
-
-    /**
-     * Returns a list of handles that matches the GroundedPredicateNode
-     * with the given name (id).
-     * @param the id of the predicate node.
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByGPN(OutputIterator result,
-                    const std::string& gpnNodeName) const
-    {
-        Handle gpnHandle(getHandle(GROUNDED_PREDICATE_NODE, gpnNodeName));
-        return getHandlesByGPN(result, gpnHandle);
-    }
-
-    /**
-     * Returns a list of handles that matches the GroundedPredicateNode
-     * with the given Handle.
-     * @param the Handle of the predicate node.
-     **/
-    template <typename OutputIterator> OutputIterator
-    getHandlesByGPN(OutputIterator result,
-                    Handle& h) const
-    {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        const UnorderedHandleSet& hs = predicateIndex.findHandlesByGPN(h);
-        return std::copy(hs.begin(), hs.end(), result);
-    }
 
     /**
      * Returns the exact atom for the given name and type.
