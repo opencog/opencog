@@ -37,7 +37,7 @@ chainer.create_chainer(atomspace=atomspace, stimulate_atoms=False)
 answer = False
 outputs_produced = 0
 
-for i in range(0, MAX_STEPS):
+for i in range(MAX_STEPS):
     result = chainer.run(atomspace)
 
     output = None

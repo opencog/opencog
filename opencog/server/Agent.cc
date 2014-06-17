@@ -28,6 +28,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/foreach.h>
 
+#define DEBUG
+
 using namespace opencog;
 
 Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f)
@@ -113,6 +115,11 @@ stim_t Agent::stimulateAtom(Handle h, stim_t amount)
                   h.value(), 
                   amount, 
                   totalStimulus);
+
+#ifdef DEBUG    
+    std::cout << "Atom " << h.value() << " received stimulus of " << amount <<
+                 ", total now " << totalStimulus << "\n";
+#endif
     
     return totalStimulus;
 }

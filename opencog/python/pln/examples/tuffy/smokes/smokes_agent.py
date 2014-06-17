@@ -27,13 +27,17 @@ from opencog.cogserver import MindAgent
 from opencog.atomspace import types
 from pln.chainers import Chainer
 from pln.rules import *
+from opencog.scheme_wrapper import scheme_eval_h, __init__
 
 __author__ = 'Cosmo Harrigan'
+
+TARGET_STIMULUS = 20
 
 
 class InferenceAgent(MindAgent):
     def __init__(self):
         self.chainer = None
+        print "Initializing InferenceAgent."
 
     def create_chainer(self, atomspace, stimulate_atoms=True):
         self.chainer = Chainer(atomspace,
@@ -53,18 +57,25 @@ class InferenceAgent(MindAgent):
     def run(self, atomspace):
         if self.chainer is None:
             self.create_chainer(atomspace)
+            print "PLN Chainer created."
             return
+
+        print "PLN continuing."
+
+        target = atomspace[scheme_eval_h(atomspace, "query")]
 
         if not check_result(atomspace):
             result = self.chainer.forward_step()
+            self.chainer._give_stimulus(target, TARGET_STIMULUS)
+
             return result
 
 
 def check_result(atomspace):
     """
-    Searches for EvaluationLinks where the first argument is: PredicateNode
-    "cancer" and the target of the predicate is a ConceptNode (representing a
-    person)
+    Searches for 4 instances of an EvaluationLink where the first argument is:
+      PredicateNode "cancer"
+    and the target of the predicate is a ConceptNode (representing a person)
     """
     eval_links = atomspace.get_atoms_by_type(types.EvaluationLink)
 
@@ -78,4 +89,8 @@ def check_result(atomspace):
             if argument.is_a(types.ConceptNode):
                 num_results += 1
 
-    return num_results == 4
+    result_found = (num_results == 4)
+    print "Result found? {0}. {1} results satisfy the query.".\
+        format(result_found, num_results)
+
+    return result_found
