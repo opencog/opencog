@@ -139,7 +139,7 @@ private:
     void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap);
     void extractAllNodesInLink(Handle link, set<Handle>& allNodes); // just find all the nodes in the original atomspace for this link
 
-    vector<HTreeNode *> extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, Handle sharedVarNode = Handle::UNDEFINED, unsigned int gram = 1);
+    void extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, HTreeNode* parentNode, vector<Handle>& sharedNodes, unsigned int gram = 1);
 
     void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings, HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool &containVar);
 

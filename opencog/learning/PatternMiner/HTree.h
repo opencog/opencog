@@ -46,6 +46,8 @@ namespace opencog
         vector<HTreeNode*> parentLinks;
         vector<HTreeNode*> childLinks;
 
+        HandleSeq sharedVarNodeList; // all the shared nodes in these links in the original AtomSpace, each handle is a shared node
+
         HTreeNode()
         {
             parentLinks.clear();

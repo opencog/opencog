@@ -387,6 +387,8 @@ void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink,
         {
             extractAllVariableNodesInAnInstanceLink(h,(Handle&)(*pit),allVarNodes);
         }
+
+        pit ++;
     }
 
 }
@@ -432,10 +434,18 @@ void PatternMiner::extractAllNodesInLink(Handle link, set<Handle>& allNodes)
 //          (ConceptNode "meat")
 //       )
 //    )
-vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, Handle sharedVarNode , unsigned int gram)
+// note: sharedNodes = parentInstance's sharedNodes + current shared node
+void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks,  HTreeNode* parentNode,
+                                                                          vector<Handle>& sharedNodes, unsigned int gram)
 {
     map<Handle,Handle> valueToVarMap;  // the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
-    vector<HTreeNode*> allNewPatternKeys;
+
+    // Debug
+    cout << "Extract patterns from these links: \n";
+    foreach (Handle ih, inputLinks)
+    {
+        cout << originalAtomSpace->atomAsString(ih) << std::endl;
+    }
 
     // First, extract all the nodes in the input links
     foreach (Handle link, inputLinks)
@@ -454,23 +464,30 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
 
     bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const
 
-    // Find the index of the sharedVarNode. It has to be an variable, not a const.
-    int varIndex = -1;
-    if (sharedVarNode != Handle::UNDEFINED)
+    // Find the indexes of the sharedVarNodes. They have to be an variable, not a const.
+    int sharedNum = sharedNodes.size();
+    int sharedNodesIndexes[sharedNum];
+
+    int sharedCout = 0;
+
+    foreach (Handle shardNode, sharedNodes)
     {
+        sharedNodesIndexes[sharedCout] = -1;
         map<Handle,Handle>::iterator varIt;
         int j = 0;
         for (varIt = valueToVarMap.begin(); varIt != valueToVarMap.end(); ++varIt, j++)
         {
-            if ((varIt->first) == sharedVarNode)
+            if ((varIt->first) == shardNode)
             {
-                varIndex = j;
+                sharedNodesIndexes[sharedCout] = j;
                 break;
             }
         }
 
-        OC_ASSERT( (varIndex != -1),
-                  "PatternMiner::extractAllPossiblePatternsFromInputLinks: cannot find the shared variable!\n")
+        OC_ASSERT( (sharedNodesIndexes[sharedCout] != -1),
+                  "PatternMiner::extractAllPossiblePatternsFromInputLinks: cannot find the shared variable!\n");
+        sharedCout ++;
+
     }
 
     // var_num is the number of variables
@@ -493,7 +510,20 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
 
             map<Handle,Handle> patternVarMap;
 
-            if ((varIndex == -1) || indexes[varIndex]) // this should be a variable
+            bool sharedAllVar = true;
+
+            if (sharedNum != 0)
+            {
+                // check if in this combination, all the sharednodes are considered as variables
+                for (int k = 0; k < sharedNum; k ++)
+                {
+                    int sharedIndex = sharedNodesIndexes[k];
+                    if (! indexes[sharedIndex])
+                        sharedAllVar = false;
+                }
+            }
+
+            if (sharedAllVar)
             {
                 unsigned int index = 0;
                 for (iter = valueToVarMap.begin(); iter != valueToVarMap.end(); ++ iter)
@@ -536,7 +566,7 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
                 else
                 {
                     // debug
-                    cout << "Unique Key already exists: \n" << keyString << "Skip this pattern!\n";
+                    cout << "Unique Key already exists: \n" << keyString << "Skip this pattern!\n\n";
                 }
 
                 uniqueKeyLock.unlock();
@@ -544,7 +574,21 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
                 if (newHTreeNode)
                 {
                     newHTreeNode->pattern = unifiedPattern;
-                    allNewPatternKeys.push_back(newHTreeNode);
+
+                    // Find All Instances in the original AtomSpace For this Pattern
+                    findAllInstancesForGivenPattern(newHTreeNode);
+
+                    if (parentNode)
+                    {
+                        newHTreeNode->parentLinks.push_back(parentNode);
+                        newHTreeNode->sharedVarNodeList = sharedNodes;
+                    }
+                    else
+                    {
+                        newHTreeNode->parentLinks.push_back(this->htree->rootNode);
+                    }
+
+
                     (patternsForGram[gram-1]).push_back(newHTreeNode);
                 }
             }
@@ -557,8 +601,6 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
             generateNextCombinationGroup(indexes, n_max);
         }
     }
-
-    return allNewPatternKeys;
 
 }
 
@@ -744,9 +786,6 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     originalAtomSpace->removeAtom(hAndLink);
     originalAtomSpace->removeAtom(hResultListLink);
     originalAtomSpace->removeAtom(hVariablesListLink);
-
-
-
 }
 
 void PatternMiner::removeLinkAndItsAllSubLinks(AtomSpace* _atomspace, Handle link)
@@ -793,15 +832,8 @@ void PatternMiner::growTheFirstGramPatternsTask()
         originalLinks.push_back(cur_link);
 
         // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
-        vector<HTreeNode*> newPatternNodes = extractAllPossiblePatternsFromInputLinks(originalLinks);
-
-        foreach (HTreeNode* HNode, newPatternNodes)
-        {
-            HNode->parentLinks.push_back(htree->rootNode);
-
-            // Find All Instances in the original AtomSpace For this Pattern
-            findAllInstancesForGivenPattern(HNode);
-        }
+        vector<Handle> sharedNodes;
+        extractAllPossiblePatternsFromInputLinks(originalLinks, 0, sharedNodes);
 
     }
 
@@ -864,7 +896,6 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
     // we only extend one more link on the nodes that are considered as varaibles for this pattern
     set<Handle> allVarNodes;
 
-
     HandleSeq::iterator patternLinkIt = curHTreeNode->pattern.begin();
     foreach (Handle link, instance)
     {
@@ -911,15 +942,9 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
             originalLinks.push_back(extendedHandle);
 
             // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
-            vector<HTreeNode*> newPatternNodes = extractAllPossiblePatternsFromInputLinks(originalLinks,(Handle&)(*varIt), gram);
-
-            foreach (HTreeNode* HNode, newPatternNodes)
-            {
-                HNode->parentLinks.push_back(curHTreeNode);
-
-                // Find All Instances in the original AtomSpace For this Pattern
-                findAllInstancesForGivenPattern(HNode);
-            }
+            HandleSeq sharedNodes = curHTreeNode->sharedVarNodeList;
+            sharedNodes.push_back( (Handle)(*varIt) );
+            extractAllPossiblePatternsFromInputLinks(originalLinks, curHTreeNode, sharedNodes , gram);
 
         }
     }
