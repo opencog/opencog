@@ -21,6 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
+#include <iostream>
+
 #include "ensemble.h"
 
 namespace opencog {
@@ -30,9 +33,28 @@ using namespace combo;
 
 ensemble::ensemble() {}
 
+/**
+ * Implement a boosted ensemble. Candidate combo trees are added to
+ * the ensemble one at a time, weights are adjusted, and etc.
+ */
 void ensemble::add_candidates(scored_combo_tree_set& cands)
 {
-printf ("Hello world\n");
+	while (true) {
+		// Find the element with the least error
+		scored_combo_tree_set::iterator best_p = 
+			std::min_element(cands.begin(), cands.end(),
+				[](const scored_combo_tree& a, const scored_combo_tree& b) {
+					return a.get_score() > b.get_score(); });
+
+std::cout << "===================================== "<<std::endl;
+std::cout << "duuude best " << *best_p << std::endl;
+std::cout << "===================================== "<<std::endl;
+		for (const scored_combo_tree& sct : cands)
+		{
+std::cout << "duuude its " << sct << std::endl;
+		}
+		break;
+	}
 }
 
 

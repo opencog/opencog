@@ -61,9 +61,11 @@ using boost::transform_iterator;
 // double, since float as the final score type is likely enough.
 typedef float score_t;
 
-// score precision used for logging and outputting results, it is set
-// very high because that information may be used by other tools
-static const int io_score_precision = 32;
+// Score precision used for logging and printing results. It is set
+// to maximum because the logged scores are used by other tools that
+// need the precision.  Note: max precision of single-presicion float
+// is about 8 decimal places; that for double is about 17 places.
+static const int io_score_precision = 18;
 
 static const score_t very_best_score = std::numeric_limits<score_t>::max();
 static const score_t very_worst_score = std::numeric_limits<score_t>::lowest();

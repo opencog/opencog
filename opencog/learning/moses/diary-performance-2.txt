@@ -227,7 +227,8 @@ Solution:
 -- provide a utility for #2 that assembles a composite score from the 
    parts, and can be queried for the scalar score. Done: its behave_cscore.
 
-
+Notes:
+-- complexity is not being factored in ... 
 
 
 

@@ -30,9 +30,6 @@
 #include <functional>
 #include <vector>
 
-#include <boost/range/numeric.hpp>
-#include <boost/range/algorithm_ext/push_back.hpp>
-#include <boost/range/algorithm/min_element.hpp>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/weighted_skewness.hpp>
