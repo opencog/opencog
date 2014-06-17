@@ -56,8 +56,14 @@ score_t boosting_ascore::operator()(const behavioral_score& bs) const
         // e.g brownboost, maybe logitboost, certainly gentleboost. But
         // for now this is discrete, exactly solvable adaboost.
 
-        res += _weights[i] * ((bs[i] > 0.5) ? M_E : M_OE);
+        // Note: bs is 0 when the answer is right, -1 when wrong.
+        // We want a larger value here when wrong, smaller when right,
+        // because this is measuring the total error.
+        res += _weights[i] * ((-bs[i] > 0.5) ? M_OE : M_E);
     }
+
+    // To be consistent with moses, the total score should be negative too.
+    res = -res;
     return res;
 }
 
