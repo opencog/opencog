@@ -220,32 +220,31 @@
         )
 )
 
-;Example: "She must be able to sing."
+;Example: "She must be able to sing." ; v1 = sing , v2 = she
 (define (to-do-rule-4 v1 v1_instance v2 v2_instance) 
-        (InheritanceLink (ConceptNode v2_instance) (ConceptNode v2))
-        (InheritanceLink (PredicateNode v1_instance) (PredicateNode v1))
-	(EvaluationLink
-		(PredicateNode "able_to")
-		(ListLink
-			(ConceptNode v2_instance)
-			(PredicateNode v1_instance)
-			
-		)
-	)
+    (InheritanceLink (ConceptNode v2_instance) (ConceptNode v2))
+    (InheritanceLink (PredicateNode v1_instance) (PredicateNode v1))
+    (EvaluationLink
+        (PredicateNode "able_to")
+        (ListLink
+            (ConceptNode v2_instance)
+            (PredicateNode v1_instance)
+        )
+    )
 )
 
 ;Example: "She wants to sing."; verb1 = want, verb2 = sing, subj = she
 (define (to-do-rule-5 verb1 verb1_instance verb2 verb2_instance subj subj_instance)
-	(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj))
-	(InheritanceLink (PredicateNode verb1_instance) (PredicateNode verb1))
-	(InheritanceLink (PredicateNode verb2_instance) (PredicateNode verb2))
-	(EvaluationLink
-		(PredicateNode verb1_instance)
-		(EvaluationLink
-			(PredicateNode verb2_instance)		 
-			(ConceptNode subj_instance)
-		)
-	)
+    (InheritanceLink (ConceptNode subj_instance) (ConceptNode subj))
+    (InheritanceLink (PredicateNode verb1_instance) (PredicateNode verb1))
+    (InheritanceLink (PredicateNode verb2_instance) (PredicateNode verb2))
+    (EvaluationLink
+        (PredicateNode verb1_instance)
+        (ListLink
+            (ConceptNode subj_instance)
+            (PredicateNode verb2_instance)
+        )
+    )
 )
 
 (define (to-be-rule verb verb_ins adj adj_ins subj subj_ins)
