@@ -77,3 +77,29 @@
                 (SatisfyingSetLink (VariableNode "$X")
                     (EvaluationLink (PredicateNode "main-root-verb")(ListLink (ConceptNode "concept-main-1")(VariableNode "$X")))))
 )))
+;For sentences with SVP and SVIO rule
+;Example:  "Books which you give me are interesting."
+;RelEx2Logic representaion:
+;(InheritanceLink
+;        (SatisfyingSetLink (VariableNode "$X")
+;            (AndLink
+;                (InheritanceLink (VariableNode "$X")(ConceptNode "book"))
+;                (EvaluationLink (PredicateNode "give@12")(ListLink (ConceptNode "you@13")(ConceptNode "me@18")(VariableNode "$x")))))
+;        (SatisfyingSetLink (VariableNode "$X")
+;            (InheritanceLink(VariableNode "$X")(ConceptNode "interesting@19"))))
+;$anticident-inst = book ,$concept-main-1 = interesting,$sub-root-verb = give, $concept-sub-1 = you and $concept-sub-2= me
+(define adjective-clause-SVP&SVIO
+    (BindLink
+        (ListLink anticident-inst concept-main-1 sub-root-verb concept-sub-1)
+        (ImplicationLink
+            (AndLink
+                (InheritanceLink (VariableNode "$anticident-inst")(VariableNode "$concept-main-1"))
+                (EvaluationLink (VariableNode "$sub-root-verb")(ListLink(VariableNode "$concept-sub-1")(VariableNode "$concept-sub-2")(VariableNode "$anticident-inst")))
+                (EvaluationLink (PredicateNode "whichmarker") (ListLink (VariableNode "$anticident-inst")(VariableNode "$sub-root-verb"))))
+            (InheritanceLink
+                (SatisfyingSetLink (VariableNode "$X")
+                (AndLink
+                    (InheritanceLink (VariableNode "$X")(ConceptNode "$anticident-inst"))
+                    (EvaluationLink (PredicateNode "$sub-root-verb")(ListLink (ConceptNode "$concept-sub-1")(ConceptNode "$concept-sub-2")(VariableNode "$x")))))
+                (SatisfyingSetLink (VariableNode "$X")
+                    (InheritanceLink(VariableNode "$X")(ConceptNode "$concept-main-1")))))))
