@@ -218,7 +218,7 @@ private:
     demeID_t _deme_id;
     composite_score _cscore;
     behavioral_score _bscore;
-    behavioral_score _boost;
+    double _weight;
 
 public:
     const combo::combo_tree& get_tree(void) const { return _tree; }
@@ -231,13 +231,13 @@ public:
     {
        return _bscore;
     }
-    const behavioral_score& get_boost(void) const
+    double get_weight(void) const
     {
-       return _boost;
+       return _weight;
     }
-    behavioral_score& get_bscore(void)
+    void set_weight(double w)
     {
-       return _bscore;
+       _weight = w;
     }
     const composite_score& get_composite_score(void) const
     {

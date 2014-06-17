@@ -64,8 +64,7 @@ public:
     void add_candidates(scored_combo_tree_set&);
 
 private:
-    scored_combo_tree_ptr_set _scored_trees;
-
+    scored_combo_tree_set _scored_trees;
 };
 
 }}; // namespace opencog::moses

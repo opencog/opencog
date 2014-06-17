@@ -59,6 +59,7 @@ score_t boosting_ascore::operator()(const behavioral_score& bs) const
         // Note: bs is 0 when the answer is right, -1 when wrong.
         // We want a larger value here when wrong, smaller when right,
         // because this is measuring the total error.
+// std::cout << "duuuude i="<<i<< " we=" << _weights[i] << " bs=" << bs[i] << std::endl;
         res += _weights[i] * ((-bs[i] > 0.5) ? M_OE : M_E);
     }
 

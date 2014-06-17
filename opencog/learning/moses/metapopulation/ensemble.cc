@@ -21,9 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <math.h>
+
 #include <algorithm>
 #include <iostream>
 
+#include  <opencog/util/oc_assert.h>
 #include "ensemble.h"
 
 namespace opencog {
@@ -39,6 +42,8 @@ ensemble::ensemble() {}
  */
 void ensemble::add_candidates(scored_combo_tree_set& cands)
 {
+	// We need the length of the behavioral score, as normalization
+	double behave_len = cands.begin()->get_bscore().size();
 	while (true) {
 		// Find the element with the least error
 		scored_combo_tree_set::iterator best_p = 
@@ -46,14 +51,37 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 				[](const scored_combo_tree& a, const scored_combo_tree& b) {
 					return a.get_score() > b.get_score(); });
 
+		// Compute alpha
+		double err = - best_p->get_score() / behave_len;
+		OC_ASSERT(0.0 < err and err < 1.0, "boosting score out of range");
+		double alpha = 0.5 * log ((1.0 - err) / err);
+
 std::cout << "===================================== "<<std::endl;
-std::cout << "duuude best " << *best_p << std::endl;
-std::cout << "===================================== "<<std::endl;
+std::cout << "duuude best " << *best_p  << " err=" << err << " apja=" << alpha << std::endl;
+		// Set the wieght for the tree, and stick it in the ensemble
+		scored_combo_tree best = *best_p;
+		best.set_weight(alpha);
+		_scored_trees.insert(best);
+
+		// Remove from the set of candidates.
+		cands.erase(best_p);
+
+std::cout << "===================================== ensemble"<<std::endl;
+		// Score the ensemble. XXX This should probably go into some class.
+		for (const scored_combo_tree& sct : _scored_trees)
+		{
+std::cout << "duuude ensemb is " << sct << std::endl;
+		}
+
+		// Now, re-score the candidates! Ugh.
+std::cout << "===================================== cands"<<std::endl;
 		for (const scored_combo_tree& sct : cands)
 		{
-std::cout << "duuude its " << sct << std::endl;
+std::cout << "duuude cand is " << sct << std::endl;
 		}
-		break;
+
+		// Are we done yet?
+		if (0 == cands.size()) break;
 	}
 }
 
