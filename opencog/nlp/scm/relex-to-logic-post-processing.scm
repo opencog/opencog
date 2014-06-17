@@ -91,7 +91,7 @@
 ;$anticident-inst = book ,$concept-main-1 = interesting,$sub-root-verb = give, $concept-sub-1 = you and $concept-sub-2= me
 (define adjective-clause-SVP&SVIO
     (BindLink
-        (ListLink anticident-inst concept-main-1 sub-root-verb concept-sub-1)
+        (ListLink anticident-inst concept-main-1 sub-root-verb concept-sub-1 concept-sub-2)
         (ImplicationLink
             (AndLink
                 (InheritanceLink (VariableNode "$anticident-inst")(VariableNode "$concept-main-1"))
