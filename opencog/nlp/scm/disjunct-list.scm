@@ -35,7 +35,9 @@
 	(let ((snt-wrds (parse-get-words parse-node)))
 
 		; Compare two link-grammar relations, and determine thier sentence
-		; word order.
+		; word order. XXX FIXME -- instead of doig teh below, it would be
+		; better and easier to use WordSequenceLink to get the correct
+		; word sequence.
 		(define (wless? rel-a rel-b)
 
 			; Return the index of the word in a sentence
