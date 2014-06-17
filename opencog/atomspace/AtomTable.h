@@ -251,13 +251,6 @@ public:
              });
     }
 
-    template <typename OutputIterator> OutputIterator
-    getHandlesByPred(OutputIterator result,
-                     AtomPredicate* pred) const
-    {
-        return getHandlesByTypePred(result, ATOM, true, pred);
-    }
-
     /**
      * Returns the set of atoms of a given type which have atoms of a
      * given target type in their outgoing set (subclasses optionally).
