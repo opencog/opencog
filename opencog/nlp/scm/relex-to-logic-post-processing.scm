@@ -46,3 +46,34 @@
                         (EvaluationLink (VariableNode "$sub-root-verb") (ListLink (VariableNode "$X") (VariableNode "$concept-sub-1")))))
                 (SatisfyingSetLink (VariableNode "$X")
                     (InheritanceLink (VariableNode "$X") (VariableNode "$concept-main-1")))))))
+;For sentences with SVO rule applied twice 
+;Example: "I like trees which have coffee beans." 
+;RelEx2Logic representaion:
+;(InheritanceLink
+;    (SatisfyingSetLink (VariableNode "$X")
+;        (AndLink
+;            (InheritanceLink (VariableNode "$X")(ConceptNode "trees"))
+;            (EvaluationLink
+;                   (PredicateNode "have@12")
+;                       (ListLink
+;                           (VariableNode "$X")
+;                           (ConceptNode "beans@13")))))
+;    (SatisfyingSetLink (VariableNode "$X")
+;        (EvaluationLink (PredicateNode "like@44")(ListLink (ConceptNode "I@09")(VariableNode "$X")))))
+;$main-root-verb =like,$concept-main-1=i,$anticident-inst=tree,$sub-root-verb=have and $concept-sub-1=been
+(define adjective-clause-SVO&SVO
+    (BindLink
+        (ListLink anticident-inst sub-root-verb concept-sub-1 concept-main-1 main-root-verb)
+        (ImplicationLink
+            (AndLink
+                (EvaluationLink (VariableNode "$main-root-verb")(ListLink(VariableNode "$concept-main-1")(VariableNode "$anticident-inst")))
+                (EvaluationLink (VariableNode "$sub-root-verb")(ListLink(VariableNode "$anticident-inst")(VariableNode "$concept-sub-1")))
+                (EvaluationLink (PredicateNode "whichmarker") (ListLink (VariableNode "$anticident-inst")(VariableNode "$sub-root-verb"))))
+            (InheritanceLink
+                (SatisfyingSetLink (VariableNode "$X")
+                    (AndLink
+                        (InheritanceLink (VariableNode "$X")(ConceptNode "$anticident-inst"))
+                        (EvaluationLink (PredicateNode "$sub-root-verb")(ListLink (VariableNode "$X") (ConceptNode "$concept-sub-1")))))
+                (SatisfyingSetLink (VariableNode "$X")
+                    (EvaluationLink (PredicateNode "main-root-verb")(ListLink (ConceptNode "concept-main-1")(VariableNode "$X")))))
+)))
