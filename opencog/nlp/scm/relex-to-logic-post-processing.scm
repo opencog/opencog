@@ -70,35 +70,37 @@
 		(map (lambda (inst word) (cog-link 'InheritanceLink inst word)) word-inst-concept-list word-concept-list)
 	)
 
-	; find all head links that included a word instance
-	(define involvement-list (map cog-get-root word-inst-concept-list))
-	(define involvement-cnt (map length involvement-list))
+	; find all head links that included one of the word instance
+	(define word-involvement-list (map cog-get-root word-inst-concept-list))
+	(define word-involvement-cnt (map length word-involvement-list))
 
 	; get word instances that only appear in one link (exclude the one
-	; linking itself with the word node
+	; linking itself with the word node)
 	(define lone-word-inst-list
 		(remove boolean? 
 			(map (lambda (inst cnt) (if (<= cnt 2) inst #f))
 				word-inst-concept-list
-				involvement-cnt
+				word-involvement-cnt
 			)
 		)
 	)
-
 	(define lone-word-list
 		(remove boolean? 
 			(map (lambda (word cnt) (if (<= cnt 2) word #f))
 				word-concept-list
-				involvement-cnt
+				word-involvement-cnt
 			)
 		)
 	)
 
-	; all the links that involved a word, no duplicate
+	; get all head links that contains one of the lone word
+	(define lone-word-involvement-list (map cog-get-root lone-word-inst-list))
+
+	; all the links that involved a lone word, no duplicate
 	(define cleaned-links
 		(remove (lambda (x)
 				(member x word-inheritance-list))
-			(delete-duplicates (apply append involvement-list))
+			(delete-duplicates (apply append lone-word-involvement-list))
 		)
 	)
 
