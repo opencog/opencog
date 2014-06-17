@@ -41,7 +41,7 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent(CogServer& cs) :
     // Starting values for rent and wage
     static const std::string defaultConfig[] = {
         "ECAN_STARTING_ATOM_STI_RENT", "10",
-        "ECAN_STARTING_ATOM_LTI_RENT", "10",
+        "ECAN_STARTING_ATOM_LTI_RENT", "0", // TEMPORARILY SET TO 0
         "ECAN_STARTING_ATOM_STI_WAGE", "2",
         "ECAN_STARTING_ATOM_LTI_WAGE", "2",
         "ECAN_RENT_TYPE","2", // RENT_LOG
