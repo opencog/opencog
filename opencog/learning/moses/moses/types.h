@@ -523,6 +523,11 @@ Out& ostream_combo_tree_cpbscore_python(Out& out,
     return out;
 }
 
+inline std::ostream& operator<<(std::ostream& out,
+                                const moses::scored_combo_tree& sct)
+{
+    return moses::ostream_scored_combo_tree(out, sct);
+}
 
 inline std::ostream& operator<<(std::ostream& out,
                                 const moses::composite_score& ts)
