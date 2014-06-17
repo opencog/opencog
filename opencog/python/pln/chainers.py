@@ -19,6 +19,7 @@ different argument sets.
 
 LOG_LEVEL = "FINE"
 LOG_DEFAULT_FILENAME = "/tmp/pln.log"
+DEFAULT_STIMULUS_PER_ATOM = 10
 
 '''
 There are lots of possible heuristics for choosing atoms. It also
@@ -933,12 +934,9 @@ class Chainer(AbstractChainer):
         # the current revisionFormula)
         assert atom.tv == revised_tv
 
-    def _give_stimulus(self, atom):
+    def _give_stimulus(self, atom, amount=DEFAULT_STIMULUS_PER_ATOM):
         if self._stimulateAtoms:
-            # Todo: Make this compatible with ECAN
-            # Arbitrary
-            STIMULUS_PER_ATOM = 10
-            self._agent.stimulate_atom(atom, STIMULUS_PER_ATOM)
+            self._agent.stimulate_atom(atom, amount)
 
     ### automatically reject some inferences based on various problems
 

@@ -24,13 +24,14 @@
 #include "ImportanceUpdatingAgent.h"
 
 #include <algorithm>
-
 #include <math.h>
 #include <time.h>
 
 #include <opencog/util/Config.h>
 #include <opencog/util/foreach.h>
 #include <opencog/util/mt19937ar.h>
+
+#define DEBUG
 
 using namespace opencog;
 
@@ -346,13 +347,30 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
         actualTax = getTaxAmount(taxAmount);
         beforeTax = a->getSTI(handle);
         afterTax = beforeTax - actualTax;
+        
+        if (afterTax < 0) 
+        {
+            afterTax = 0;
+        }
+        
         a->setSTI(handle, afterTax);
         log->fine("sti %d. Actual tax %d. after tax %d.", beforeTax, actualTax, afterTax);
+
+#ifdef DEBUG        
+        std::cout << "Atom " << handle.value() << " STI " << beforeTax << 
+                     ". Tax " << actualTax << ". After tax " << afterTax << 
+                     "." << std::endl;
+#endif
     }
 
     log->info("AtomSpace STI Funds were %d, now %d. All atoms taxed %f.", \
               oldTotal, a->getAttentionBank().getSTIFunds(), taxAmount);
-
+    
+#ifdef DEBUG
+    std::cout << "AtomSpace STI Funds were " << oldTotal << ", now " <<
+                 a->getAttentionBank().getSTIFunds() << ". All atoms taxed " <<
+                 taxAmount << "." << std::endl;
+#endif
 }
 
 void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
@@ -553,16 +571,19 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, const AgentSeq &agents
 
     int total_stim = 0;
     AttentionValue::sti_t exchangeAmount = -stiRentCharged;
+
     for (size_t n = 0; n < agents.size(); n++) {
         if (agents[n]->getTotalStimulus() == 0)
+        {
             continue;
+        }
         stim_t s = agents[n]->getAtomStimulus(h);
         total_stim += s;
         float wage = STIAtomWageForAgent[n];
         if (wage > STIAtomWage)
             wage = (float) STIAtomWage;
         exchangeAmount += (AttentionValue::sti_t) wage * s;
-
+        
         a->getAttentionBank().updateSTIFunds(exchangeAmount);
 
         AttentionValuePtr old_av = agents[n]->getAV();
@@ -574,7 +595,16 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, const AgentSeq &agents
     a->setSTI(h, current + exchangeAmount);
 
     log->fine("Atom %s total stim = %d, STI old = %d, new = %d, rent = %d", a->getName(h).c_str(), total_stim, current, a->getSTI(h), stiRentCharged);
-
+    
+#ifdef DEBUG
+    if (stiRentCharged != 0 || exchangeAmount != 0 || total_stim != 0)
+    {
+        std::cout << "Atom " << h.value() << " total stimulus = " << total_stim << 
+                     " STI old = " << current << ", new = " << a->getSTI(h) << 
+                     ", rent = " << stiRentCharged << 
+                     ", exchangeAmount = " << exchangeAmount << std::endl;
+    }
+#endif
 }
 
 AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, AttentionValue::sti_t c)
