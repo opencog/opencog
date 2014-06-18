@@ -17,6 +17,20 @@
                 #f))
         lst) temp-node))
 ;-------------------------------------------------------------------------------
+;re-write the graphs
+(define (rewrite-graph sub-clause main-clause anticident-inst)
+    (define anticident (find-anticident anticident-inst))
+    (InheritanceLink
+        (SatisfyingSetLink (VariableNode "$X")
+            (AndLink
+            (InheritanceLink (VariableNode "$X") anticident)
+            sub-clause))
+        (SatisfyingSetLink (VariableNode "$X")
+           main-clause)))
+;-------------------------------------------------------------------------------
+;Adjective clause rules
+;
+;-------------------------------------------------------------------------------
 ;For sentences with SVO and SVP rules
 ;Example: "Restaurants which serve frogs are famous."
 ;RelEx2Logic representaion:
