@@ -27,17 +27,8 @@
 #include "PatternMatchCallback.h"
 #include "DefaultPatternMatchCB.h"
 
-#include "DefaultPatternMatchCB.h"
-
-
 namespace opencog {
-
-
-class AttentionalFocusCB: public virtual DefaultPatternMatchCB {
-
-
-
-
+class AttentionalFocusCB: public  virtual PatternMatchCallback {
 private:
 	AtomSpace * _atom_space;
 	static bool compare_sti(LinkPtr lptr1,LinkPtr lptr2){
