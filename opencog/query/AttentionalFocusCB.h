@@ -27,7 +27,6 @@
 #include "PatternMatchCallback.h"
 #include "DefaultPatternMatchCB.h"
 
-
 #include "DefaultPatternMatchCB.h"
 
 
