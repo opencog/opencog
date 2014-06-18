@@ -150,10 +150,11 @@
 		)
 	)
 
-word-involvement-cleaned-list
-;	(map (lambda (a-link) (rebuild a-link lone-word-assoc-list non-lone-word-assoc-list))
-;		cleaned-links
-;	)
+;word-involvement-cleaned-list
+
+	(map (lambda (a-link) (rebuild a-link lone-word-assoc-list non-lone-word-assoc-list))
+		cleaned-links
+	)
 )
 
 
