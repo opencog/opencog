@@ -28,7 +28,7 @@
 #include "Instantiator.h"
 #include "PatternMatch.h"
 #include "PatternUtils.h"
-#include "DefaultPatternMatchCB.h"
+//#include "DefaultPatternMatchCB.h"
 #include "CrispLogicPMCB.h"
 #include "AttentionalFocusCB.h"
 
@@ -518,6 +518,7 @@ class DefaultImplicator:
 {
 	public:
 		DefaultImplicator(AtomSpace* asp) : Implicator(asp),DefaultPatternMatchCB(asp) {}
+
 };
 
 class CrispImplicator:
@@ -656,7 +657,7 @@ Handle PatternMatch::single_bindlink (Handle himplication)
 
 /**
  * Evaluate an ImplicationLink embedded in a BindLink
- *
+ <<<<<<< HEAD*
  * Use the crisp-logic callback to evaluate boolean implication
  * statements; i.e. statements that have truth values assigned
  * their clauses, and statements that start with NotLink's.
