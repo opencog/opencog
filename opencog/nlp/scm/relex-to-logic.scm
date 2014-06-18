@@ -91,10 +91,9 @@
 	(cond	((number? word-index)
 			(cog-name (list-ref (get-word-inst-nodes word parse-node) (- word-index 1)))
 		)
+		; in case word-index is a string, word-index is already the name we want to use
 		((and (string? word-index) (check-name? word-index 'WordInstanceNode))
-			(cog-name (list-ref
-					(get-word-inst-nodes word parse-node)
-					(- (get-word-inst-index (WordInstanceNode word-index)) 1)))
+			word-index
 		)
 	)
 )
