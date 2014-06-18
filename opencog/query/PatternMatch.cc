@@ -28,7 +28,7 @@
 #include "Instantiator.h"
 #include "PatternMatch.h"
 #include "PatternUtils.h"
-//#include "DefaultPatternMatchCB.h"
+#include "DefaultPatternMatchCB.h"
 #include "CrispLogicPMCB.h"
 #include "AttentionalFocusCB.h"
 
@@ -518,6 +518,7 @@ class DefaultImplicator:
 {
 	public:
 		DefaultImplicator(AtomSpace* asp) : Implicator(asp),DefaultPatternMatchCB(asp) {}
+
 
 };
 
