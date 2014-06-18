@@ -2,7 +2,7 @@ DOT Graph Description Language Utility
 ======================================
 
 Transforms an OpenCog subhypergraph into a directed graph and returns its
-representation in the DOT graph description language.
+representation in the DOT textual graph description language.
 
 ### Prerequisites
 
@@ -28,7 +28,7 @@ https://pypi.python.org/pypi/graphviz
 
 See the usage example in **example.py**.
 
-### Example Output
+### Example Visual Output
 ![Example](https://raw.githubusercontent.com/cosmoharrigan/diagrams/master/smokes/png/duplicate-conceptnode-predicatenode-shapes.png)
 
 ### Parameters
