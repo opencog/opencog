@@ -1,10 +1,8 @@
 DOT Graph Description Language Utility
 ======================================
 
-**Transforms an OpenCog subhypergraph into a directed graph and returns its
-representation in the DOT graph description language.**
-
-## Usage
+Transforms an OpenCog subhypergraph into a directed graph and returns its
+representation in the DOT graph description language.
 
 ### Prerequisites
 
@@ -30,11 +28,14 @@ https://pypi.python.org/pypi/graphviz
 
 See the usage example in **example.py**.
 
+### Example Output
+![Example](https://raw.githubusercontent.com/cosmoharrigan/diagrams/master/smokes/png/duplicate-conceptnode-predicatenode-shapes.png)
+
 ### Parameters
 
-- atomset (required) The set of OpenCog atoms that defines the subhypergraph
+- ```atomset``` ***(required)*** The set of OpenCog atoms that defines the subhypergraph
 
-- duplicated_types (optional, list of strings)
+- ```duplicated_types``` ***(optional, list of strings)***
     The types that should be duplicated to reduce tangling in the graph due to a large amount of shared vertices.
     By default, it will duplicate ConceptNodes and PredicateNodes.
     A different set of types can optionally be passed as a parameter.
@@ -53,7 +54,7 @@ rankdir=LR
 }
 ```
 
-## The DOT Graph Description Language
+### The DOT Graph Description Language
 
 For more details on DOT, refer to:
 
@@ -63,7 +64,7 @@ http://www.graphviz.org/Documentation.php
 
 ### Algorithm
 
-#### Convert the hypergraph
+#### Convert the hypergraph into a graph
 
 For each atom in the set to be processed:
 
@@ -71,21 +72,17 @@ For each atom in the set to be processed:
 2. Create vertex
 3. Get outgoing set of atom
 4. For each item in outgoing set:
-    a. Let this atom be the target
-    b. Create an edge from the source to the target
+    - Let this atom be the target
+    - Create an edge from the source to the target
 
 resulting in a digraph.
 
 #### Remove tangling
 
-Create duplicate nodes for all nodes that are of a type included in **duplicate_types**
+Create duplicate nodes for all nodes that are of a type included in **duplicated_types**
 
 #### Create DOT format
 Express the digraph in the DOT graph description language.
 
-## Visualizing the output
-
+### Visualizing the output
 Use Graphviz to render the output for visualization. See the example in **example-visualization.py**.
-
-### Example Visualization
-![Example](https://raw.githubusercontent.com/cosmoharrigan/diagrams/master/smokes/png/duplicate-conceptnode-predicatenode-shapes.png)
