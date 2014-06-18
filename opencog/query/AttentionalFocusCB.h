@@ -10,23 +10,22 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "DefaultPatternMatchCB.h"
+#include "PatternMatchCallback.h"
 
 namespace opencog{
 
-class AttentionalFocusCB: public  DefaultPatternMatchCB {
+class AttentionalFocusCB: public  virtual PatternMatchCallback {
 
 private:
  AtomSpace * _atom_space;
 public:
-	AttentionalFocusCB(AtomSpace * as) : DefaultPatternMatchCB(as),
-			_atom_space(as) {
-	}
-	//bool node_match(Handle& node1, Handle& node2);
+	AttentionalFocusCB(AtomSpace * as) : _atom_space(as){}
 
-	//bool link_match(LinkPtr& link1, LinkPtr& link2);
+	bool node_match(Handle& node1, Handle& node2);
 
-	//IncomingSet get_incoming_set(Handle h);
+	bool link_match(LinkPtr& link1, LinkPtr& link2);
+
+	IncomingSet get_incoming_set(Handle h);
 
 
 };
