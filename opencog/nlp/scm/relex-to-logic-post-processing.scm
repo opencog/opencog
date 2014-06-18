@@ -9,11 +9,11 @@
 ;-------------------------------------------------------------------------------
 ;find anticident of the given anticident instance 
 (define (find-anticident ant-inst)
-    (define temp-node '())
+    (define temp-node)
     (let ((lst (cog-chase-link 'InheritanceLink 'ConceptNode ant-inst)))
         (for-each (lambda (i)
             (if (equal? (cog-name ant-inst ) (cog-name i))
-                (append temp-node (list i))
+                (set! temp-node i)
                 #f))
         lst) temp-node))
 ;-------------------------------------------------------------------------------
