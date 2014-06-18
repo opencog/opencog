@@ -28,7 +28,7 @@
 #include "Instantiator.h"
 #include "PatternMatch.h"
 #include "PatternUtils.h"
-#include "DefaultPatternMatchCB.h"
+//#include "DefaultPatternMatchCB.h"
 #include "CrispLogicPMCB.h"
 #include "AttentionalFocusCB.h"
 
@@ -514,10 +514,10 @@ namespace opencog {
 
 class DefaultImplicator:
 	public virtual Implicator,
-	public virtual DefaultPatternMatchCB
+	public virtual /*DefaultPatternMatchCB*/ AttentionalFocusCB
 {
 	public:
-		DefaultImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp) {}
+		DefaultImplicator(AtomSpace* asp) : Implicator(asp),/*DefaultPatternMatchCB(asp)*/ AttentionalFocusCB(asp) {}
 };
 
 class CrispImplicator:
