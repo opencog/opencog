@@ -110,10 +110,10 @@
                 (InheritanceLink (VariableNode "$anticident-inst")(VariableNode "$concept-main-1"))
                 (EvaluationLink (VariableNode "$sub-root-verb")(ListLink(VariableNode "$concept-sub-1")(VariableNode "$concept-sub-2")(VariableNode "$anticident-inst")))
                 (EvaluationLink (PredicateNode "whichmarker") (ListLink (VariableNode "$anticident-inst")(VariableNode "$sub-root-verb"))))
-            (InheritanceLink
-                (SatisfyingSetLink (VariableNode "$X")
-                (AndLink
-                    (InheritanceLink (VariableNode "$X")(ConceptNode "$anticident-inst"))
-                    (EvaluationLink (PredicateNode "$sub-root-verb")(ListLink (ConceptNode "$concept-sub-1")(ConceptNode "$concept-sub-2")(VariableNode "$x")))))
-                (SatisfyingSetLink (VariableNode "$X")
-                    (InheritanceLink(VariableNode "$X")(ConceptNode "$concept-main-1")))))))
+        (ExecutionLink
+           (GroundedSchemaNode "scm: rewrite-graph")
+            (ListLink
+                (EvaluationLink (PredicateNode "$sub-root-verb")(ListLink (ConceptNode "$concept-sub-1")(ConceptNode "$concept-sub-2")(VariableNode "$x")))
+                (InheritanceLink(VariableNode "$X")(ConceptNode "$concept-main-1"))
+                (VariableNode "$anticident-inst")))
+)))
