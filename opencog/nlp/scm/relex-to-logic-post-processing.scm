@@ -84,13 +84,12 @@
                 (EvaluationLink (VariableNode "$main-root-verb")(ListLink(VariableNode "$concept-main-1")(VariableNode "$anticident-inst")))
                 (EvaluationLink (VariableNode "$sub-root-verb")(ListLink(VariableNode "$anticident-inst")(VariableNode "$concept-sub-1")))
                 (EvaluationLink (PredicateNode "whichmarker") (ListLink (VariableNode "$anticident-inst")(VariableNode "$sub-root-verb"))))
-            (InheritanceLink
-                (SatisfyingSetLink (VariableNode "$X")
-                    (AndLink
-                        (InheritanceLink (VariableNode "$X")(ConceptNode "$anticident-inst"))
-                        (EvaluationLink (PredicateNode "$sub-root-verb")(ListLink (VariableNode "$X") (ConceptNode "$concept-sub-1")))))
-                (SatisfyingSetLink (VariableNode "$X")
-                    (EvaluationLink (PredicateNode "main-root-verb")(ListLink (ConceptNode "concept-main-1")(VariableNode "$X")))))
+        (ExecutionLink
+           (GroundedSchemaNode "scm: rewrite-graph")
+            (ListLink
+                (EvaluationLink (VariableNode "$sub-root-verb") (ListLink (VariableNode "$X") (VariableNode "$concept-sub-1")))
+                (EvaluationLink (PredicateNode "main-root-verb")(ListLink (ConceptNode "concept-main-1")(VariableNode "$X")))
+                (VariableNode "$anticident-inst")))
 )))
 ;For sentences with SVP and SVIO rule
 ;Example:  "Books which you give me are interesting."
