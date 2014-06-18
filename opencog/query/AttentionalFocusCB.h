@@ -17,6 +17,7 @@
 #include "PatternMatchCallback.h"
 #include "DefaultPatternMatchCB.h"
 
+
 namespace opencog {
 
 class AttentionalFocusCB: public virtual DefaultPatternMatchCB {
