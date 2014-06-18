@@ -1,5 +1,4 @@
 /*
-<<<<<<< HEAD
  * AttentionalFocusCB.cc
  *
  * Copyright (C) 2014 Misgana Bayetta
@@ -24,17 +23,13 @@
 #ifndef _ATTENTIONAL_FOCUS_CB_H
 #define _ATTENTIONAL_FOCUS_CB_H
 
+
 #include "PatternMatchCallback.h"
 #include "DefaultPatternMatchCB.h"
 
+
 namespace opencog {
-
-
-class AttentionalFocusCB: public virtual DefaultPatternMatchCB {
-
-
-
-
+class AttentionalFocusCB: public  virtual PatternMatchCallback {
 private:
 	AtomSpace * _atom_space;
 	static bool compare_sti(LinkPtr lptr1,LinkPtr lptr2){
