@@ -1,4 +1,5 @@
 /*
+<<<<<<< HEAD
  * AttentionalFocusCB.cc
  *
  * Copyright (C) 2014 Misgana Bayetta
@@ -24,9 +25,6 @@
 #define _ATTENTIONAL_FOCUS_CB_H
 
 #include "PatternMatchCallback.h"
-#include "DefaultPatternMatchCB.h"
-
-
 #include "DefaultPatternMatchCB.h"
 
 namespace opencog {
