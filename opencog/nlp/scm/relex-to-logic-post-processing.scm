@@ -1,9 +1,19 @@
 ; -----------------------------------------------------------------------
-; Get the corresponding ConceptNode
-(define (cog-get-concept node)
+; Get the corresponding ConceptNode or PredicateNode
+(define (word-get-concept-or-predicate node)
+	(define concept
+		(if (null? node)
+			'()
+			(cog-node 'ConceptNode (cog-name node))
+		)
+	)
+
 	(if (null? node)
 		'()
-		(cog-node 'ConceptNode (cog-name node))
+		(if (null? concept)
+			(cog-node 'PredicateNode (cog-name node))
+			concept
+		)
 	)
 )
 
@@ -14,6 +24,19 @@
 	(if (null? iset)
 		(list atom)
 		(append-map cog-get-root iset))
+)
+
+(define (create-unique-word-name word)
+	(define (create-new-name w)
+		(define tail-name (random-string 36))
+		(string-append (cog-name w) "@" tail-name)
+	)
+	(define new-name (create-new-name word))
+
+	(while (check-name? new-name 'ConceptNode)
+		(set! new-name (create-new-name word))
+	)
+	new-name
 )
 
 ; split the list at each indices
@@ -31,22 +54,21 @@
 
 ; -----------------------------------------------------------------------
 ; Main recursive function to build the new abstracted links
-(define (rebuild ilink olds news)
+(define (rebuild ilink old-new-pairs other-name-pairs)
 
 
 	; get all the nodes linked by this link
 	(define old-oset (cog-outgoing-set ilink))
 
 	(define (replace-old candidate)
-		(define ind (list-index (lambda (x) (equal? candidate x)) olds))
-		; if no index found, this candidate is either a link or
-		; does not need to be replaced
-		(if (not ind)
+		(define new (assoc candidate old-new-pairs))
+		; if this candidate is either a link or does not need to be replaced
+		(if (not new)
 			(if (cog-link? candidate)
-				(rebuild candidate olds news)
+				(rebuild candidate old-new-pairs other-name-pairs)
 				candidate
 			)
-			(list-ref news ind)
+			(cdr new)
 		)
 	)
 
@@ -62,31 +84,36 @@
 	(define word-inst-list (parse-get-words parse-node))
 	(define word-list (map word-inst-get-lemma word-inst-list))
 
-	; find the ConceptNode of each word instance and word node
-	(define word-inst-concept-list (remove null? (map cog-get-concept word-inst-list)))
-	(define word-concept-list (remove null? (map cog-get-concept word-list)))
+	; find the ConceptNode/PredicateNode of each word instance and word node
+	(define word-inst-concept-list (remove null? (map word-get-concept-or-predicate word-inst-list)))
+	(define word-concept-list (remove null? (map word-get-concept-or-predicate word-list)))
+
 	; get a list of InheritanceLink linking word instance with its word
 	(define word-inheritance-list
 		(map (lambda (inst word) (cog-link 'InheritanceLink inst word)) word-inst-concept-list word-concept-list)
 	)
 
-	; find all head links that included one of the word instance
+	; for each word instant, find a list of all head links that includes it
 	(define word-involvement-list (map cog-get-root word-inst-concept-list))
 	(define word-involvement-cnt (map length word-involvement-list))
 
 	; get word instances that only appear in one link (exclude the one
-	; linking itself with the word node)
-	(define lone-word-inst-list
+	; linking itself with the word node), and their associated word
+	(define lone-word-assoc-list
 		(remove boolean? 
-			(map (lambda (inst cnt) (if (<= cnt 2) inst #f))
+			(map (lambda (inst word cnt) (if (<= cnt 2) (cons inst word) #f))
 				word-inst-concept-list
+				word-concept-list
 				word-involvement-cnt
 			)
 		)
 	)
-	(define lone-word-list
+
+	; get word instances that are not lone word, and create a new unique name for them
+	(define non-lone-word-assoc-list
 		(remove boolean? 
-			(map (lambda (word cnt) (if (<= cnt 2) word #f))
+			(map (lambda (inst word cnt) (if (> cnt 2) (cons inst (create-unique-word-name word)) #f))
+				word-inst-concept-list
 				word-concept-list
 				word-involvement-cnt
 			)
@@ -94,7 +121,7 @@
 	)
 
 	; get all head links that contains one of the lone word
-	(define lone-word-involvement-list (map cog-get-root lone-word-inst-list))
+	(define lone-word-involvement-list (map cog-get-root (map car lone-word-assoc-list)))
 
 	; all the links that involved a lone word, no duplicate
 	(define cleaned-links
@@ -104,7 +131,7 @@
 		)
 	)
 
-	(map (lambda (a-link) (rebuild a-link lone-word-inst-list lone-word-list))
+	(map (lambda (a-link) (rebuild a-link lone-word-assoc-list non-lone-word-assoc-list))
 		cleaned-links
 	)
 )
