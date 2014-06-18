@@ -26,7 +26,12 @@ https://pypi.python.org/pypi/graphviz
 
 ### Example
 
-See the usage example in **example.py**.
+```
+import dot
+dot_output = dot.get_dot_representation(atomset)
+```
+
+See the full usage example in **example.py**.
 
 ### Example Visual Output
 ![Example](https://raw.githubusercontent.com/cosmoharrigan/diagrams/master/smokes/png/duplicate-conceptnode-predicatenode-shapes.png)
