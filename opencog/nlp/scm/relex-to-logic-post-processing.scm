@@ -82,6 +82,40 @@
 	(define word-involvement-list (map cog-get-root word-inst-concept-list))
 	(define word-involvement-cnt (map length word-involvement-list))
 
+	(define word-involvement-cleaned-list
+		(map (lambda (involvement)
+				(remove boolean?
+					(map (lambda (l)
+							; if l is in word-inheritance-list, return false
+							; if l is from tense-rule, return false
+							; if l is from definite-rule, return false
+							(cond 	((member l word-inheritance-list)
+								 #f)
+								((and (equal? 'InheritanceLink (cog-type l))
+									(equal? 'ConceptNode (cog-type (cadr (cog-outgoing-set l))))
+									(or (string=? "past" (cog-name (cadr (cog-outgoing-set l))))
+									    (string=? "present" (cog-name (cadr (cog-outgoing-set l))))
+									)
+								 )
+								 #f
+								)
+								((and (equal? 'EvaluationLink (cog-type l))
+									(equal? 'PredicateNode (cog-type (car (cog-outgoing-set l))))
+									(string=? "definite" (cog-name (car (cog-outgoing-set l))))
+								 )
+								 #f
+								)
+								(else l)
+							)
+						)
+						involvement
+					)
+				)
+			)
+			word-involvement-list
+		)
+	)
+
 	; get word instances that only appear in one link (exclude the one
 	; linking itself with the word node), and their associated word
 	(define lone-word-assoc-list
@@ -116,9 +150,10 @@
 		)
 	)
 
-	(map (lambda (a-link) (rebuild a-link lone-word-assoc-list non-lone-word-assoc-list))
-		cleaned-links
-	)
+word-involvement-cleaned-list
+;	(map (lambda (a-link) (rebuild a-link lone-word-assoc-list non-lone-word-assoc-list))
+;		cleaned-links
+;	)
 )
 
 
