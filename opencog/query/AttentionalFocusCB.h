@@ -23,8 +23,6 @@
 #ifndef _ATTENTIONAL_FOCUS_CB_H
 #define _ATTENTIONAL_FOCUS_CB_H
 
-
-
 #include "PatternMatchCallback.h"
 #include "DefaultPatternMatchCB.h"
 
@@ -43,6 +41,7 @@ public:
 	bool node_match(Handle& node1, Handle& node2);
 	bool link_match(LinkPtr& lpat, LinkPtr& lsoln);
 	IncomingSet get_incoming_set(Handle h);
+
 };
 } //namespace opencog
 #endif /* _ATTENTIONALFOCUSCB_H */
