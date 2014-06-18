@@ -20,7 +20,9 @@
 ; -- sentence-get-parses    Get parses of a sentence.
 ; -- sent-list-get-parses   Get parses of a list of sentences.
 ; -- parse-get-words        Get all words occuring in a parse.
+; -- parse-get-words-in-order  Get all words occuring in a parse in order.
 ; -- parse-get-relations    Get all RelEx relations in a parse.
+; -- word-inst-get-number   Return the NumberNode associated with word-inst. 
 ; -- word-inst-get-word   Return the WordNode associated with word-inst.
 ; -- word-inst-get-word-str  Return the word string assoc with word-inst.
 ; -- word-inst-get-lemma  Return the lemma of word instance.
@@ -155,11 +157,30 @@
 	(concatenate! (map sentence-get-parses sent-list))
 )
 
+
 ; ---------------------------------------------------------------------
 ; parse-get-words - Given a parse, return a list of all words in the parse
 ;
+; Given a parse, return all word instances in arbitary order
+; This version is faster than the in order version.
+;
 (define (parse-get-words parse-node)
 	(cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node)
+)
+
+; ---------------------------------------------------------------------
+; parse-get-words-in-order - Given a parse, return a list of all words in the parse in order
+;
+; Given a parse, return all word instances in order
+;
+(define (parse-get-words-in-order parse-node)
+	(define word-inst-list (cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node))
+	(define number-list (map word-inst-get-number word-inst-list))
+	(define (less-than word-inst-1 word-inst-2)
+		(define index-1 (list-index (lambda (a-node) (equal? word-inst-1 a-node)) word-inst-list))
+		(define index-2 (list-index (lambda (a-node) (equal? word-inst-2 a-node)) word-inst-list))
+		(< (string->number (cog-name (list-ref number-list index-1))) (string->number (cog-name (list-ref number-list index-2)))))
+	(sort word-inst-list less-than)
 )
 
 ; --------------------------------------------------------------------
@@ -179,6 +200,15 @@
 			)
 		)
 	)
+)
+
+; ---------------------------------------------------------------------
+; word-inst-get-number   Return the NumberNode associated with word-inst
+;
+; Return the NumberNode associated with 'word-inst'
+;
+(define (word-inst-get-number word-inst)
+	(car (cog-chase-link 'WordSequenceLink 'NumberNode word-inst))
 )
 
 ; ---------------------------------------------------------------------

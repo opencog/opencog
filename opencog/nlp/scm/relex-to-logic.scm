@@ -57,14 +57,18 @@
 ; -----------------------------------------------------------------------
 ; Check if the lemma of a WordInstanceNode 'word-inst' is 'word'.
 (define (check-lemma? word word-inst)
-	(string=? word (cog-name (word-inst-get-lemma word-inst)))
+	(define lemma (word-inst-get-lemma word-inst))
+	(if (null? lemma)
+		#f
+		(string=? word (cog-name lemma))
+	)
 )
 
 ; -----------------------------------------------------------------------
 ; Returns a list of WordInstanceNodes from 'parse-node', which have a LemmaLink with a
 ; WordNode named 'word'.
 (define (get-word-inst-nodes word parse-node)
-	(define word-inst-list (parse-get-words parse-node))
+	(define word-inst-list (parse-get-words-in-order parse-node))
 	(append-map (lambda (a-predicate a-word-inst) (if a-predicate (list a-word-inst) '()))
 		(map (lambda (a-word-inst) (check-lemma? word a-word-inst)) word-inst-list)
 		word-inst-list

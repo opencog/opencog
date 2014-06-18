@@ -32,7 +32,7 @@
 (define (ldj-sort-rels word parse-node rel-list)
 
 	; rel-list is a list of the link-grammar relations.
-	(let ((snt-wrds (parse-get-words parse-node)))
+	(let ((snt-wrds (parse-get-words-in-order parse-node)))
 
 		; Compare two link-grammar relations, and determine thier sentence
 		; word order. XXX FIXME -- instead of doig teh below, it would be
@@ -44,10 +44,7 @@
 			; Caution! ice-9/boot-9.scm loads a *different* list-index than
 			; that defined in srfi-1. We want the srfi-1 variant.
 			(define (windex wrd)
-				(if (equal? "LEFT-WALL" (cog-name wrd))
-					-1
-					(list-index (lambda (w) (equal? wrd w)) snt-wrds)
-				)
+				(list-index (lambda (w) (equal? wrd w)) snt-wrds)
 			)
 
 			(let ((word-a (cog-pred-get-partner rel-a word))
