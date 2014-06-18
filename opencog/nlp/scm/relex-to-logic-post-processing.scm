@@ -26,9 +26,11 @@
 		(append-map cog-get-root iset))
 )
 
+; -----------------------------------------------------------------------
+; Generate a new unique name for a word
 (define (create-unique-word-name word)
 	(define (create-new-name w)
-		(define tail-name (random-string 36))
+		(define tail-name (random-string 32))
 		(string-append (cog-name w) "@" tail-name)
 	)
 	(define new-name (create-new-name word))
@@ -39,39 +41,22 @@
 	new-name
 )
 
-; split the list at each indices
-(define (split-at-indices lst ind)
-	(define (split-at-indices-helper lst ind)
-		(if (null? ind)
-			(list lst)
-			(cons (drop lst (car ind)) (split-at-indices-helper (take lst (car ind)) (cdr ind)))
-		)
-	)
-
-	(reverse (split-at-indices-helper lst (reverse ind)))
-)
-
-
 ; -----------------------------------------------------------------------
 ; Main recursive function to build the new abstracted links
 (define (rebuild ilink old-new-pairs other-name-pairs)
-
-
 	; get all the nodes linked by this link
 	(define old-oset (cog-outgoing-set ilink))
-
 	(define (replace-old candidate)
 		(define new (assoc candidate old-new-pairs))
 		; if this candidate is either a link or does not need to be replaced
 		(if (not new)
 			(if (cog-link? candidate)
 				(rebuild candidate old-new-pairs other-name-pairs)
-				candidate
+				(cog-new-node (cog-type candidate) (cdr (assoc candidate other-name-pairs)))
 			)
 			(cdr new)
 		)
 	)
-
 	(define new-oset (map replace-old old-oset))
 
 	; create a new link with the new node list
