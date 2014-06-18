@@ -340,6 +340,13 @@ int SchemeSmob::verify_int (SCM sint, const char *subrname,
 SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 {
     Type t = verify_node_type(stype, "cog-new-node", 1);
+
+    // Special case handling for NumberNode
+    if (NUMBER_NODE == t and scm_is_number(sname)) {
+        sname = scm_number_to_string(sname, _radix_ten);
+        // TODO: if we're given a string, I guess maybe we should check
+        // that the string is convertible to a number ??
+    }
     std::string name = verify_string (sname, "cog-new-node", 2,
         "string name for the node");
     AtomSpace* atomspace = ss_get_env_as("cog-new-node");

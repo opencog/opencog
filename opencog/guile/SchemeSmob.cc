@@ -51,6 +51,7 @@ using namespace opencog;
 scm_t_bits SchemeSmob::cog_uuid_tag;
 scm_t_bits SchemeSmob::cog_misc_tag;
 bool SchemeSmob::is_inited = false;
+SCM SchemeSmob::_radix_ten;
 
 void SchemeSmob::init()
 {
@@ -64,6 +65,7 @@ void SchemeSmob::init()
 
 		atomspace_variable = scm_c_define("*-atomspace-*", make_as(NULL));
 		atomspace_variable = scm_permanent_object(atomspace_variable);
+		_radix_ten = scm_from_int8(10);
 	}
 }
 
