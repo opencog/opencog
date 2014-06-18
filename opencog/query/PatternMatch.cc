@@ -28,7 +28,7 @@
 #include "Instantiator.h"
 #include "PatternMatch.h"
 #include "PatternUtils.h"
-//#include "DefaultPatternMatchCB.h"
+#include "DefaultPatternMatchCB.h"
 #include "CrispLogicPMCB.h"
 #include "AttentionalFocusCB.h"
 
@@ -132,7 +132,7 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
 /* ================================================================= */
 /**
  * do_imply -- Evaluate an ImplicationLink.
- *
+ *virtual
  * Given an ImplicationLink, this method will "evaluate" it, matching
  * the predicate, and creating a grounded implicand, assuming the
  * predicate can be satisfied. Thus, for example, given the structure
@@ -514,10 +514,10 @@ namespace opencog {
 
 class DefaultImplicator:
 	public virtual Implicator,
-	public virtual /*DefaultPatternMatchCB*/ AttentionalFocusCB
+	public virtual DefaultPatternMatchCB
 {
 	public:
-		DefaultImplicator(AtomSpace* asp) : Implicator(asp),/*DefaultPatternMatchCB(asp)*/ AttentionalFocusCB(asp) {}
+		DefaultImplicator(AtomSpace* asp) : Implicator(asp),DefaultPatternMatchCB(asp) {}
 };
 
 class CrispImplicator:

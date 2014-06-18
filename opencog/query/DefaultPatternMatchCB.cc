@@ -45,7 +45,7 @@ using namespace opencog;
 // most "typical" clauses will be of the form
 //
 //    EvaluationLink
-//        PredicateNode "blah"
+//        PredicteNode "blah"
 //        ListLink
 //            VariableNode $var
 //            ConceptNode  "item"
