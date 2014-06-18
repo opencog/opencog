@@ -54,13 +54,13 @@
                 (InheritanceLink (VariableNode "$anticident-inst")(VariableNode "$concept-main-1"))
                 (EvaluationLink (VariableNode "$sub-root-verb")(ListLink(VariableNode "$anticident-inst")(VariableNode "$concept-sub-1")))
                 (EvaluationLink (PredicateNode "whichmarker") (ListLink (VariableNode "$anticident-inst")(VariableNode "$sub-root-verb"))))
-            (InheritanceLink
-                (SatisfyingSetLink (VariableNode "$X")
-                    (AndLink
-                        (InheritanceLink (VariableNode "$X") (VariableNode "$anticident-inst"))
-                        (EvaluationLink (VariableNode "$sub-root-verb") (ListLink (VariableNode "$X") (VariableNode "$concept-sub-1")))))
-                (SatisfyingSetLink (VariableNode "$X")
-                    (InheritanceLink (VariableNode "$X") (VariableNode "$concept-main-1")))))))
+        (ExecutionLink
+           (GroundedSchemaNode "scm: rewrite-graph")
+            (ListLink
+                (EvaluationLink (VariableNode "$sub-root-verb") (ListLink (VariableNode "$X") (VariableNode "$concept-sub-1")))
+                (InheritanceLink (VariableNode "$X")(VariableNode "$concept-main-1"))
+                (VariableNode "$anticident-inst"))
+           ))))
 ;For sentences with SVO rule applied twice 
 ;Example: "I like trees which have coffee beans." 
 ;RelEx2Logic representaion:
