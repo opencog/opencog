@@ -11,22 +11,45 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "PatternMatchCallback.h"
+#include "DefaultPatternMatchCB.h"
 
-namespace opencog{
+namespace opencog {
 
-class AttentionalFocusCB: public  virtual PatternMatchCallback {
+class AttentionalFocusCB:public virtual DefaultPatternMatchCB {
 
 private:
- AtomSpace * _atom_space;
+	AtomSpace * _atom_space;
 public:
-	AttentionalFocusCB(AtomSpace * as) : _atom_space(as){}
+	AttentionalFocusCB(AtomSpace * as) :
+			 DefaultPatternMatchCB(as),_atom_space(as){
+	}
 
-	bool node_match(Handle& node1, Handle& node2);
+	// Pass all the calls straight through, except one.
+	bool node_match(Handle& node1, Handle& node2) {
+		// If equality, then a match.
+		if (node1 == node2)
+			return false;
+		return true;
+	}
 
-	bool link_match(LinkPtr& link1, LinkPtr& link2);
+	bool link_match(LinkPtr& lpat, LinkPtr& lsoln) {
+		if (lpat == lsoln)
+			return false;
 
-	IncomingSet get_incoming_set(Handle h);
+		if (lpat->getArity() != lsoln->getArity())
+			return true;
+		Type pattype = lpat->getType();
+		Type soltype = lsoln->getType();
 
+		// If types differ, no match,
+		if (pattype != soltype)
+			return true;
+		return false;
+	}
+
+	IncomingSet get_incoming_set(Handle h) {
+		return h->getIncomingSet();
+	}
 
 };
 } //namespace opencog
