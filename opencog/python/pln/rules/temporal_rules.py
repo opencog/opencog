@@ -120,7 +120,46 @@ class PredictiveAttractionRule(Rule):
 def create_temporal_rules(chainer):
     rules = []
 
+
+
+    relations = {
+        "P": (types.AfterLink, temporal_formulas.afterFormula),
+        "p": (types.BeforeLink, temporal_formulas.beforeFormula),
+        "D": (types.ContainsLink, temporal_formulas.containsFormula),
+        "d": (types.DuringLink, temporal_formulas.duringFormula),
+        "e": (types.EqualsLink, temporal_formulas.equalsFormula),
+        "F": (types.FinishedByLink, temporal_formulas.finished_byFormula),
+        "f": (types.FinishesLink, temporal_formulas.finishesFormula),
+        "M": (types.MetByLink, temporal_formulas.met_byFormula),
+        "m": (types.MeetsLink, temporal_formulas.meetsFormula),
+        "O": (types.OverlappedByLink, temporal_formulas.overlapped_byFormula),
+        "o": (types.OverlapsLink, temporal_formulas.overlapsFormula),
+        "S": (types.StartedByLink, temporal_formulas.started_byFormula),
+        "s": (types.StartsLink, temporal_formulas.startsFormula)}
+
+
+
+
+    # rules not only depend on link type, but also on type of first target
+    # custom link types: DuringLink $x $y
+    # or: EvaluationLink PredicateNode "During" ListLink $x $y
+    # rule:
+    # Implication
+    # ANDLink
+    #   Evaluation Precedes $x $y
+    #   Evaluation During $x $z
+    # ANDLink
+    #   Evaluation Overlaps $x $z
+    #   ExecutionLink
+    #       GroundedSchemaNode IntervalCompositionRule
+    #       ListLink
+    #           Evaluation Precedes $x $y
+    #           Evaluation During $x $z
+
+
     # directly evaluate temporal links
+
+    """
     combinations = [
         (types.BeforeLink, temporal_formulas.beforeFormula),
         (types.OverlapsLink, temporal_formulas.overlapsFormula),
@@ -129,6 +168,7 @@ def create_temporal_rules(chainer):
         (types.StartsLink, temporal_formulas.startsFormula),
         (types.FinishesLink, temporal_formulas.finishesFormula),
         (types.EqualsLink, temporal_formulas.equalsFormula)]
+    """
 
     for (type, formula) in combinations:
         rules.append(TemporalRule(chainer, type, formula))
