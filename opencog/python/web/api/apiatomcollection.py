@@ -1,8 +1,9 @@
 __author__ = 'Cosmo Harrigan'
 
-from flask import abort, json, current_app
+from flask import abort, json, current_app, jsonify
 from flask.ext.restful import Resource, reqparse, marshal
 from opencog.atomspace import Handle
+from graph_description import dot
 from mappers import *
 from flask.ext.restful.utils import cors
 
@@ -33,6 +34,9 @@ class AtomCollectionAPI(Resource):
             choices=['true', 'false', 'True', 'False', '0', '1'])
         self.reqparse.add_argument(
             'includeOutgoing', type=str, location='args',
+            choices=['true', 'false', 'True', 'False', '0', '1'])
+        self.reqparse.add_argument(
+            'dot', type=str, location='args',
             choices=['true', 'false', 'True', 'False', '0', '1'])
 
         super(AtomCollectionAPI, self).__init__()
@@ -78,6 +82,10 @@ class AtomCollectionAPI(Resource):
         :param includeOutgoing: (optional, boolean) Returns the conjunction of
             the set of atoms and their outgoing sets. Useful in combination
             with includeIncoming.
+
+        :param dot: (optional, boolean) Returns the atom set represented in
+            the DOT graph description language
+            (See opencog/python/graph_description/README.md for details)
 
         :param callback: (optional) JavaScript callback function for JSONP
             support
@@ -137,6 +145,8 @@ class AtomCollectionAPI(Resource):
         include_incoming = args.get('includeIncoming')
         include_outgoing = args.get('includeOutgoing')
 
+        dot_format = args.get('dot')
+
         if id != "":
             try:
                 atom = self.atomspace[Handle(id)]
@@ -195,17 +205,23 @@ class AtomCollectionAPI(Resource):
         if include_outgoing in ['True', 'true', '1']:
             atoms = self.atomspace.include_outgoing(atoms)
 
-        atom_list = AtomListResponse(atoms)
-        json_data = {'result': atom_list.format()}
-        
-        # if callback function supplied, pad the JSON data (i.e. JSONP):
-        if callback is not None:
-            response = str(callback) + '(' + json.dumps(json_data) + ');'
-            return current_app.response_class(
-                response, mimetype='application/javascript')
+        # The default is to return the atom set as JSON atoms. Optionally, a
+        # DOT return format is also supported
+        if dot_format not in ['True', 'true', '1']:
+            atom_list = AtomListResponse(atoms)
+            json_data = {'result': atom_list.format()}
+
+            # if callback function supplied, pad the JSON data (i.e. JSONP):
+            if callback is not None:
+                response = str(callback) + '(' + json.dumps(json_data) + ');'
+                return current_app.response_class(
+                    response, mimetype='application/javascript')
+            else:
+                return current_app.response_class(
+                    json.dumps(json_data), mimetype='application/json')
         else:
-            return current_app.response_class(
-                json.dumps(json_data), mimetype='application/json')
+            dot_output = dot.get_dot_representation(atoms)
+            return jsonify({'result': dot_output})
 
     def post(self):
         """

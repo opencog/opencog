@@ -3,6 +3,7 @@ __author__ = 'Cosmo Harrigan'
 from nose.tools import *
 import json
 from opencog.atomspace import *
+from graph_description import dot
 
 # Only run the unit tests if the required dependencies have been installed
 # (see: https://github.com/opencog/opencog/issues/337)
@@ -434,3 +435,18 @@ class TestRESTApi():
 
         # Verify that it matches the previous response
         assert post_result == "5\n"
+
+    def test_dot_export(self):
+        # Export the atomspace to DOT format and ensure that there is a
+        # properly defined DOT header created and the correct atoms are
+        # included in the description
+
+        get_response = self.client.get(
+            self.uri +
+            'atoms?filterby=attentionalfocus&dot=True')
+        get_result = json.loads(get_response.data)['result']
+        assert get_result.startswith("// OpenCog Graph")
+        assert "digraph" in get_result
+        assert "swan" in get_result
+        assert "bird" in get_result
+        assert get_result.count("label") == 2
