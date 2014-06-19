@@ -20,13 +20,14 @@
 ;re-write the graphs
 (define (rewrite-graph sub-clause main-clause anticident-inst)
     (define anticident (find-anticident anticident-inst))
+    (if (not (equal? (cog-name anticident) (cog-name (cog-get-partner main-clause (VariableNode "$X")))))
     (InheritanceLink
         (SatisfyingSetLink (VariableNode "$X")
             (AndLink
             (InheritanceLink (VariableNode "$X") anticident)
             sub-clause))
         (SatisfyingSetLink (VariableNode "$X")
-           main-clause)))
+           main-clause))))
 ;-------------------------------------------------------------------------------
 ;Adjective clause rules
 ;
@@ -42,7 +43,7 @@
 ;               (PredicateNode "serves@12")
 ;               (ListLink
 ;                   (VariableNode "$X")
-;                   (ConceptNode "food@11")))))
+;                   (ConceptNode "frog@11")))))
 ;   (SatisfyingSetLink (VariableNode "$X")
 ;        (InheritanceLink(VariableNode "$X")(ConceptNode "Famous@45"))
 ;$anticident-inst=Restaurant,$concept-main-1=famous,$sub-root-verb=serve and $concept-sub-1=frogs
