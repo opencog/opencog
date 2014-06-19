@@ -118,3 +118,38 @@
                 (InheritanceLink(VariableNode "$X")(ConceptNode "$concept-main-1"))
                 (VariableNode "$anticident-inst")))
 )))
+;For sentences with definite flag ,SVO and passive rule 
+; Example: "The books which I read in the library were written by Charles Dickens." 
+;RelEx2Logic representaion:
+;(MemberLink
+;    (ConceptNode Book@12)
+;    (SatisfyingSetLink (VariableNode $X)
+;        (AndLink
+;            (InheritanceLink (VariableNode $X) (ConceptNode Book))
+;            (EvaluationLink
+;                (PredicateNode write@34)
+;                (ListLink
+;                    (VariableNode $X)
+;                    (ConceptNode Charles_Dickens@45)))
+;            (EvaluationLink
+;                (PredicateNode read@39)
+;                (ListLink
+;                    (ConceptNode I@67)
+;                    (VariableNode $X))))))
+;$main-root-verb = write,$concept-main-1 = Charles_Dickens,$anticident-inst = book,$sub-root-verb = read and $concept-sub-1= I
+(define adjective-clause-SVO&PASSIVE
+    (BindLink
+         (ListLink)
+        (ImplicationLink
+            (AndLink
+                (EvaluationLink (VariableNode "$main-root-verb")(ListLink(VariableNode "$concept-main-1")(VariableNode "$anticident-inst")))
+                (EvaluationLink (VariableNode "$sub-root-verb")(ListLink(VariableNode "$concept-sub-1")(VariableNode "$anticident-inst")))
+                (EvaluationLink (PredicateNode "whichmarker") (ListLink (VariableNode "$anticident-inst")(VariableNode "$sub-root-verb"))))
+                (EvaluationLink (PredicateNode "definite") (ListLink (VariableNode "$anticident-inst")))
+        (ExecutionLink
+           (GroundedSchemaNode "scm: rewrite-graph")
+            (ListLink
+                (EvaluationLink (PredicateNode "$sub-root-verb")(ListLink (ConceptNode "$concept-sub-1")(VariableNode "$x")))
+                (EvaluationLink (PredicateNode "$main-root-verb")(ListLink (ConceptNode "$concept-main-1")(VariableNode "$x")))
+                (VariableNode "$anticident-inst")))
+)))
