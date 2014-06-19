@@ -38,6 +38,13 @@ class PLNUnitTester(TestCase):
         self.addTestFile("OrRule_new.scm")
         self.addTestFile("NotCreationRule.scm")
         self.addTestFile("TransitiveSimilarityRule_SimilarityLink.scm")
+        # context rules
+        self.addTestFile("InheritanceToContextRule.scm")
+        self.addTestFile("EvaluationToContextRule.scm")
+        self.addTestFile("SubsetToContextRule.scm")
+        self.addTestFile("ContextToInheritanceRule.scm")
+        self.addTestFile("ContextToEvaluationRule.scm")
+        self.addTestFile("ContextToSubsetRule.scm")
 
         # Testing (just a placeholder for where to put tests while...testing them)
         #self.addTestFile("SimilarityRule_And.scm")
