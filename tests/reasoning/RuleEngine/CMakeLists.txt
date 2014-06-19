@@ -20,5 +20,5 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(RuleUTest)
 ENDIF (HAVE_GUILE)
 
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/learning/RuleEngine/simple-assertions.scm
-    ${PROJECT_BINARY_DIR}/tests/learning/RuleEngine/simple-assertions.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/reasoning/RuleEngine/simple-assertions.scm
+    ${PROJECT_BINARY_DIR}/tests/reasoning/RuleEngine/simple-assertions.scm)

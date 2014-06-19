@@ -407,3 +407,13 @@
 		)
 	)
 )
+
+(define (definite-rule word word_instance)
+        (InheritanceLink (ConceptNode word_instance df-node-stv) (ConceptNode word df-node-stv) df-link-stv)
+        (EvaluationLink df-link-stv
+	        (PredicateNode "definite" df-node-stv)
+	        (ListLink df-link-stv
+		        (ConceptNode word_instance df-node-stv)
+	        )
+        )
+)
