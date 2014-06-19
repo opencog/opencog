@@ -162,6 +162,8 @@ public:
         return _best_candidates.begin()->get_tree();
     }
 
+    behave_cscore& get_cscorer() const { return  _cscorer; }
+
     // ---------------- Deme-expansion-related -----------------------
 public:
     /**

@@ -25,6 +25,8 @@
 #define _OPENCOG_ENSEMBLE_H
 
 #include "../moses/types.h"  // for scored_combo_tree
+#include "../scoring/behave_cscore.h"
+#include "../scoring/boosting_ascore.h"
 
 namespace opencog {
 namespace moses {
@@ -68,7 +70,8 @@ struct ensemble_parameters
 class ensemble
 {
 public:
-    ensemble(const ensemble_parameters& ep = ensemble_parameters());
+    ensemble(behave_cscore&,
+             const ensemble_parameters& ep = ensemble_parameters());
 
     // Should this be the right interface ?? Similar to metapop ...
     // void add_deme(deme_t&, const representation&);
@@ -77,6 +80,7 @@ public:
 
 private:
     const ensemble_parameters& _params;
+    boosting_ascore* _booster;
 
     scored_combo_tree_set _scored_trees;
 

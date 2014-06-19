@@ -34,9 +34,13 @@ namespace moses {
 
 using namespace combo;
 
-ensemble::ensemble(const ensemble_parameters& ep) :
+ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	_params(ep)
-{}
+{
+	_booster = dynamic_cast<boosting_ascore*>(&(cs.get_ascorer()));
+	OC_ASSERT(_booster, "Ensemble can only be sed with a weighted scorer");
+}
+
 
 /**
  * Implement a boosted ensemble. Candidate combo trees are added to
@@ -56,12 +60,12 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 
 		// Compute alpha
 		double err = - best_p->get_score() / behave_len;
-		OC_ASSERT(0.0 < err and err < 1.0, "boosting score out of range");
+		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 		double alpha = 0.5 * log ((1.0 - err) / err);
 
 std::cout << "===================================== "<<std::endl;
 std::cout << "duuude best " << *best_p  << " err=" << err << " apja=" << alpha << std::endl;
-		// Set the wieght for the tree, and stick it in the ensemble
+		// Set the weight for the tree, and stick it in the ensemble
 		scored_combo_tree best = *best_p;
 		best.set_weight(alpha);
 		_scored_trees.insert(best);

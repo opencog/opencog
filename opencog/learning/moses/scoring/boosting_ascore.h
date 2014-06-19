@@ -49,7 +49,10 @@ public:
 
     score_t operator()(const behavioral_score&) const;
 
-private:
+    std::vector<double> get_weights() const { return _weights; }
+    void set_weights(std::vector<double> w) { _weights = w; }
+
+protected:
     std::vector<double> _weights;
     size_t _size;
 };

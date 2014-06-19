@@ -75,6 +75,8 @@ public:
         _bscorer.ignore_idxs(idxs);
     }
 
+    ascore_base& get_ascorer() const { return _ascorer; }
+
 private:
     const bscore_base& _bscorer;
     ascore_base& _ascorer;

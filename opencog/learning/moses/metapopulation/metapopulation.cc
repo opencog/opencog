@@ -40,7 +40,8 @@ metapopulation::metapopulation(const std::vector<combo_tree>& bases,
     _params(pa),
     _cscorer(sc),
     _merge_count(0),
-    _best_cscore(worst_composite_score)
+    _best_cscore(worst_composite_score),
+    _ensemble(sc)
 {
     init(bases);
 }
@@ -53,7 +54,8 @@ metapopulation::metapopulation(const combo_tree& base,
     _params(pa),
     _cscorer(sc),
     _merge_count(0),
-    _best_cscore(worst_composite_score)
+    _best_cscore(worst_composite_score),
+    _ensemble(sc)
 {
     std::vector<combo_tree> bases(1, base);
     init(bases);
