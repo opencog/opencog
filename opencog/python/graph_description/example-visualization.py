@@ -13,4 +13,4 @@ with open('example.dot', 'w') as outfile:
     outfile.write(example.dot_output)
 
 from subprocess import check_call
-check_call(['dot', '-Tsvg', 'example.dot', '-o', 'example.svg'])
+check_call(['dot', '-Tpng', 'example.dot', '-o', 'example.png'])

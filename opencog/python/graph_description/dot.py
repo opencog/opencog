@@ -64,10 +64,6 @@ def get_dot_representation(atomset, duplicated_types=DEFAULT_DUPLICATED_TYPES):
     (processed_vertices,
      processed_edges) = process_graph(vertices, edges, duplicated_types)
 
-    #(dot_vertices,
-    # dot_edges) = dot_from_graph(processed_vertices, processed_edges)
-
-    #dot_output = make_dot_output(dot_vertices, dot_edges)
     dot_output = dot_from_graph(processed_vertices, processed_edges)
 
     return dot_output
@@ -115,12 +111,15 @@ def edges_from_atomset(atomset):
     """
     edges = []
     for atom in atomset:
+        sequence_number = 0
         for outgoing_atom in atom.out:
             edge = {
                 'source': atom.h.value(),
-                'target': outgoing_atom.h.value()
+                'target': outgoing_atom.h.value(),
+                'sequence_number': sequence_number
             }
             edges.append(edge)
+            sequence_number += 1
     return edges
 
 
@@ -175,6 +174,7 @@ def process_graph(vertices, edges, duplicated_types):
             processed_edge['target'] = target['handle']
             processed_vertices.append(target)
 
+        processed_edge['sequence_number'] = edge['sequence_number']
         processed_edges.append(processed_edge)
 
     return processed_vertices, processed_edges
@@ -228,4 +228,6 @@ def make_dot_edge(dot, edge):
     """
     Creates an edge in DOT syntax.
     """
-    dot.edge(str(edge['source']), str(edge['target']))
+    dot.edge(str(edge['source']),
+             str(edge['target']),
+             label=str(edge['sequence_number']))
