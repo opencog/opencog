@@ -32,36 +32,20 @@
                     (VariableNode "$word-inst-anaphor")
                     (DefinedLinguisticConceptNode "noun")
                 )
-                (NotLink
-                    (InheritanceLink
-                        (VariableNode "$word-inst-antecedent")
-                        (DefinedLinguisticConceptNode "pronoun")
-                    )
-                )
-                (InheritanceLink
-                    (VariableNode "$anaphor-number")
-                    ;;(DefinedNumberConceptNode "NumberNode") DEBUG
-                    (ConceptNode "NumberNodeConcept")
-                )
-                (InheritanceLink
-                    (VariableNode "$antecedent-number-number")
-                    ;;(DefinedNumberConceptNode "NumberNodeConcept") DEBUG
-                    (ConceptNode "NumberNodeConcept")
-                )
-                ;;(WordNumberLink  DEBUG)
-                (ListLink
+                (WordSequenceLink
                     (VariableNode "$word-inst-anaphor")
                     (VariableNode "$anaphor-number")
                 )
-                ;;(WordNumberLink  DEBUG)
-                (ListLink
+                (WordSequenceLink
                     (VariableNode "$word-inst-antecedent")
                     (VariableNode "$antecedent-number")
                 )
-                ;;(GreaterThanLink DEBUG)
-                (ListLink
-                    (VariableNode "$anaphor-number")
-                    (VariableNode "$antecedent-number")
+                (EvaluationLink
+                    (GroundedPredicateNode "c++:greater")
+                    (ListLink
+                        (VariableNode "$anaphor-number")
+                        (VariableNode "$antecedent-number")
+                    )
                 )
             )
             (ReferenceLink
@@ -71,6 +55,3 @@
         )
     )
 )
-
-
-
