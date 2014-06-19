@@ -8,7 +8,10 @@ bother with this configuration, so we disable it to avoid grief.
 
 To run this test, perform the following steps:
 
-1) Edit the CMakefile, uncomment the test.
+1) If you choose to change the default database name and username, then
+   edit tests/persist/sql/CMakeLists.txt and uncomment 
+   SET(DB_IS_CONFIGURED 1)  It probbly easier to just use the default
+   database name and username; see below.
 
 2) Configure an SQL server, as described in opencog/persist/sql/README
    Abreiviated instructions follow below; else skip to step 3.
@@ -114,3 +117,12 @@ To run this test, perform the following steps:
    $ ./tests/persist/sql/PersistUTest
 
    It should print OK! at the end, if all tests passed.
+
+3a) If the above doesn't work, note that the lib/opencog-test.conf being
+    used is the one in the BUILD directory not the SOURCE directory!
+
+3b) If the above still doesn't work, make sure that postgres is actually
+    listening on port 5432, and not some other port.  If it is using a 
+    different port, then change ~/.odbc.ini to that.  The postgres config
+    can be found in /etc/postgresql/9.1/main/postgresql.conf, look for 
+    "port =" near the begining of the file.

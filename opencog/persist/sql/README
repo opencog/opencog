@@ -238,10 +238,11 @@ the same reason; performance degrades substantially (by factors of
 
 
 Restarting the server might lead to errors stating that max shared mem
-usage has been exceeded. This can be fixed by:
+usage has been exceeded. This can be fixed by telling the kernel to use
+6.4 gigabytes (for example):
 
    vi /etc/sysctl.conf
-   kernel.shmmax = 440100100
+   kernel.shmmax = 6440100100
 
 save file contents, then:
 
@@ -369,12 +370,11 @@ The typical nuber of atoms stored will differ from this.
 
 How To Pass the Unit Test
 =========================
-There is a unit test for this API.  It is called BasicSaveUTest, and
-is disabled by default, because it requires the above complicated setup.
-Please run this test.  To do this:
+There are two unit tests for this API, called BasicSaveUTest and
+PersistUTest.  The CMakefile will not run compile or run these tests
+unless postgres is configured just-so.  To run and past these tests,
+you should:
 
- -- edit tests/persist/sql/CMakeLists.txt and uncomment:
-    SET(DB_IS_CONFIGURED 1)
  -- Read tests/persist/sql/README and follow the instructions there.
     They are almost identical to the instructions above, except that
     they call for a test user to be set up. You can do that, or you
@@ -384,21 +384,25 @@ Please run this test.  To do this:
 
 So here's a super-short recap:
 
+ -- Create a user 'opencog_tester' with password 'cheese'.
  -- Create a new database: e.g.
-        $ createdb opencog-test
+        $ createdb test-persist
  -- Create the tables:
-        $ cat atom.sql | psql opencog-test
- -- Create an entry in ~/.odbc.ini, as explained above.
- -- Edit lib/opencog-test.conf, and change the database name,
-    username, and password as appropriate.
+        $ cat atom.sql | psql test-persist
+ -- Create an entry in ~/.odbc.ini, as explained above.  The entry
+    should be called opencot_test, and use opencog_tester as the user.
+ -- The file lib/opencog-test.conf already has the above as the default
+    default username and database names.  Stick to these.
 
-After the above steps, the BasicSaveUTest should pass.
+
+After the above steps, BasicSaveUTest and PersistUTest should run and pass.
 
 
 Unit Test Status
 ----------------
 As of 2011-04-29 bzr revision 5314, BasicSaveUTest (still) passes.
 As of 2013-11-26 BasicSaveUTest works and passes, again.
+As of 2014-06-19 both unit tests work and pass.
 
 
 Using the System
