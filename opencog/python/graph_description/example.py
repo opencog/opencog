@@ -15,8 +15,10 @@ __init__(atomspace)
 
 data = ["opencog/atomspace/core_types.scm",
         "opencog/scm/utilities.scm",
-        "opencog/python/pln/examples/tuffy/smokes/smokes.scm"]#,
-#        "opencog/python/pln/examples/tuffy/smokes/extra-data.scm"]
+        "opencog/python/pln/examples/tuffy/smokes/smokes.scm"]
+
+# Optionally, you could also include this file for a larger graph sample:
+#   "opencog/python/pln/examples/tuffy/smokes/extra-data.scm"
 
 for item in data:
     load_scm(atomspace, item)
