@@ -142,6 +142,8 @@ def process_graph(vertices, edges, duplicated_types):
     processed_vertices = []
     processed_edges = []
 
+    vertices_visited = []
+
     for edge in edges:
         processed_edge = {}
 
@@ -176,6 +178,14 @@ def process_graph(vertices, edges, duplicated_types):
 
         processed_edge['sequence_number'] = edge['sequence_number']
         processed_edges.append(processed_edge)
+
+        vertices_visited.append(source['handle'])
+        vertices_visited.append(target['handle'])
+
+    # Add any disconnected vertices
+    [processed_vertices.append(vertex)
+     for vertex in vertices
+     if vertex not in vertices_visited]
 
     return processed_vertices, processed_edges
 
