@@ -34,7 +34,9 @@ namespace moses {
 
 using namespace combo;
 
-ensemble::ensemble() {}
+ensemble::ensemble(const ensemble_parameters& ep) :
+	_params(ep)
+{}
 
 /**
  * Implement a boosted ensemble. Candidate combo trees are added to
@@ -42,6 +44,7 @@ ensemble::ensemble() {}
  */
 void ensemble::add_candidates(scored_combo_tree_set& cands)
 {
+	int promoted = 0;
 	// We need the length of the behavioral score, as normalization
 	double behave_len = cands.begin()->get_bscore().size();
 	while (true) {
@@ -81,6 +84,8 @@ std::cout << "duuude cand is " << sct << std::endl;
 		}
 
 		// Are we done yet?
+		promoted ++;
+		if (_params.num_to_promote < promoted) break;
 		if (0 == cands.size()) break;
 	}
 }

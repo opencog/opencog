@@ -53,10 +53,22 @@ namespace moses {
  * kind-of coming along for the ride, because that's easier for now.
  * Someday, it should have an independent existance.
  */
+
+struct ensemble_parameters
+{
+	ensemble_parameters() :
+		num_to_promote(4)
+	{}
+
+	int num_to_promote;  // max number of demes to accept into ensemble,
+	                     // per learning iteration.
+
+};
+
 class ensemble
 {
 public:
-    ensemble();
+    ensemble(const ensemble_parameters& ep = ensemble_parameters());
 
     // Should this be the right interface ?? Similar to metapop ...
     // void add_deme(deme_t&, const representation&);
@@ -64,7 +76,11 @@ public:
     void add_candidates(scored_combo_tree_set&);
 
 private:
+    const ensemble_parameters& _params;
+
     scored_combo_tree_set _scored_trees;
+
+    // The below are actually paramaters, and should be 
 };
 
 }}; // namespace opencog::moses
