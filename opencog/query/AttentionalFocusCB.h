@@ -25,6 +25,8 @@
 
 
 #include "PatternMatchCallback.h"
+#include "DefaultPatternMatchCB.h"
+
 
 #include "DefaultPatternMatchCB.h"
 
@@ -33,6 +35,7 @@ namespace opencog {
 
 
 class AttentionalFocusCB: public virtual DefaultPatternMatchCB {
+
 
 
 private:
@@ -47,6 +50,7 @@ public:
 	bool node_match(Handle& node1, Handle& node2);
 	bool link_match(LinkPtr& lpat, LinkPtr& lsoln);
 	IncomingSet get_incoming_set(Handle h);
+
 
 };
 } //namespace opencog
