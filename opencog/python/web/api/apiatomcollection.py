@@ -3,9 +3,17 @@ __author__ = 'Cosmo Harrigan'
 from flask import abort, json, current_app, jsonify
 from flask.ext.restful import Resource, reqparse, marshal
 from opencog.atomspace import Handle
-from graph_description import dot
 from mappers import *
 from flask.ext.restful.utils import cors
+
+# If the system doesn't have these dependencies installed, display a warning
+# but allow the API to load
+try:
+    from graph_description import dot
+except ImportError:
+    print "DOT graph description format option not enabled in REST API. To " \
+          "enable, install the dependencies listed here:\n" \
+          "https://github.com/opencog/opencog/tree/master/opencog/python/graph_description#prerequisites"
 
 
 class AtomCollectionAPI(Resource):
