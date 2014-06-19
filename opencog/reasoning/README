@@ -1,0 +1,12 @@
+
+                    OpenCog Reasoning README
+                    -----------------------
+
+This directory currently contains the following subdirectories:
+
+-- RuleEngine -- An in-progress implementation of a general unified 
+   rule engine, to be utilized for PLN, Relex2Logic, and RelEx. For 
+   more details, view the README in the subdirectory, and also refer 
+   to http://wiki.opencog.org/w/Unified_rule_engine
+
+-- pln -- Atom type definitions for PLN
