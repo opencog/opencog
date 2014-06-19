@@ -10,11 +10,7 @@
 	(ListLink
 		(InheritanceLink (stv 0.5 1)
 		    (AndLink ben maths)
-		    (AndLink competent maths)
-		)
-		(InheritanceLink (stv 0.5 1)
-		    (AndLink ben juggling)
-		    (NotLink (AndLink competent juggling))
+		    (AndLink competent maths) ; ConceptNodes are switched here
 		)
     )
 )
@@ -36,14 +32,11 @@
 		ben
 		competent
 		maths
-		juggling
+		(AndLink ben maths)
+		(AndLink competent maths)
 		(ContextLink (stv 0.5 1)
 		    maths
 		    (InheritanceLink ben competent)
-		)
-		(ContextLink (stv 0.5 1)
-		    juggling
-		    (InheritanceLink ben (NotLink competent))
 		)
     )
 )

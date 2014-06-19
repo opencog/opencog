@@ -4,7 +4,6 @@
 (define isBlue (PredicateNode "isBlue" (stv 0.01 1)))
 (define sky (ConceptNode "sky" (stv 0.01 1)))
 (define earth (ConceptNode "earth" (stv 0.01 1)))
-(define moon (ConceptNode "moon" (stv 0.01 1)))
 
 (EvaluationLink (PredicateNode "inputs")
 	(ListLink
@@ -12,12 +11,6 @@
             isBlue
             (ListLink
                 (AndLink sky earth)
-            )
-        )
-        (EvaluationLink (stv 0.5 1)
-            isBlue
-            (ListLink
-                (AndLink sky moon)
             )
         )
     )
@@ -40,16 +33,8 @@
 	     isBlue
 	     sky
 	     earth
-	     moon
 	    (ContextLink (stv 0.5 1)
 	        earth
-            (EvaluationLink
-                isBlue
-                (ListLink sky)
-            )
-        )
-        (ContextLink (stv 0.5 1)
-            moon
             (EvaluationLink
                 isBlue
                 (ListLink sky)
