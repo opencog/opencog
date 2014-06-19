@@ -12,7 +12,7 @@
     (define temp-node)
     (let ((lst (cog-chase-link 'InheritanceLink 'ConceptNode ant-inst)))
         (for-each (lambda (i)
-            (if (equal? (cog-name ant-inst ) (cog-name i))
+            (if (equal? (string-trim-right (substring (cog-name ant-inst) 0 (string-index (cog-name ant-inst) #\@)) #\s)(cog-name i))
                 (set! temp-node i)
                 #f))
         lst) temp-node))
