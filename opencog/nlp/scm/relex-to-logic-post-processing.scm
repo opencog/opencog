@@ -29,6 +29,16 @@
         (SatisfyingSetLink (VariableNode "$X")
            main-clause))))
 ;-------------------------------------------------------------------------------
+;re-write the graphs for sentence with definite flag 
+(define (rewrite-graphs-with-definite sub-clause main-clause anticident-inst)
+    (define anticident (find-anticident anticident-inst))
+    (if (not (equal? (cog-name anticident) (cog-name (cog-get-partner main-clause (VariableNode "$X")))))
+    (MemberLink
+        (anticident-inst)
+        (SatisfyingSetLink (VariableNode "$X")
+            (AndLink
+            (InheritanceLink (VariableNode "$X") anticident) main-clause sub-clause)))))
+;-------------------------------------------------------------------------------
 ;Adjective clause rules
 ;
 ;-------------------------------------------------------------------------------
@@ -147,9 +157,10 @@
                 (EvaluationLink (PredicateNode "whichmarker") (ListLink (VariableNode "$anticident-inst")(VariableNode "$sub-root-verb"))))
                 (EvaluationLink (PredicateNode "definite") (ListLink (VariableNode "$anticident-inst")))
         (ExecutionLink
-           (GroundedSchemaNode "scm: rewrite-graph")
+           (GroundedSchemaNode "scm: rewrite-graphs-with-definite")
             (ListLink
                 (EvaluationLink (PredicateNode "$sub-root-verb")(ListLink (ConceptNode "$concept-sub-1")(VariableNode "$x")))
                 (EvaluationLink (PredicateNode "$main-root-verb")(ListLink (ConceptNode "$concept-main-1")(VariableNode "$x")))
                 (VariableNode "$anticident-inst")))
 )))
+
