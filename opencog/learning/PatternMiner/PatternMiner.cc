@@ -436,7 +436,7 @@ void PatternMiner::extractAllNodesInLink(Handle link, set<Handle>& allNodes)
 //    )
 // note: sharedNodes = parentInstance's sharedNodes + current shared node
 void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks,  HTreeNode* parentNode,
-                                                                          vector<Handle>& sharedNodes, unsigned int gram)
+                                                                          set<Handle>& sharedNodes, unsigned int gram)
 {
     map<Handle,Handle> valueToVarMap;  // the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
 
@@ -558,13 +558,19 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
                 HTreeNode* newHTreeNode = 0;
                 uniqueKeyLock.lock();
 
-                if (keyStrToHTreeNodeMap.find(keyString) == keyStrToHTreeNodeMap.end())
+                map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(keyString);
+
+                if (htreeNodeIter == keyStrToHTreeNodeMap.end())
                 {
                     newHTreeNode = new HTreeNode();
                     keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
                 }
                 else
                 {
+                    // which means the parent node is also the found HTreeNode
+                    set<HTreeNode*>& parentLinks= ((HTreeNode*)(htreeNodeIter->second))->parentLinks;
+                    if (parentLinks.find(parentNode) == parentLinks.end())
+                        parentLinks.insert(parentNode);
                     // debug
                     cout << "Unique Key already exists: \n" << keyString << "Skip this pattern!\n\n";
                 }
@@ -580,12 +586,11 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
 
                     if (parentNode)
                     {
-                        newHTreeNode->parentLinks.push_back(parentNode);
-                        newHTreeNode->sharedVarNodeList = sharedNodes;
+                        newHTreeNode->parentLinks.insert(parentNode);
                     }
                     else
                     {
-                        newHTreeNode->parentLinks.push_back(this->htree->rootNode);
+                        newHTreeNode->parentLinks.insert(this->htree->rootNode);
                     }
 
 
@@ -832,7 +837,7 @@ void PatternMiner::growTheFirstGramPatternsTask()
         originalLinks.push_back(cur_link);
 
         // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
-        vector<Handle> sharedNodes;
+        set<Handle> sharedNodes;
         extractAllPossiblePatternsFromInputLinks(originalLinks, 0, sharedNodes);
 
     }
@@ -942,9 +947,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
             originalLinks.push_back(extendedHandle);
 
             // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
-            HandleSeq sharedNodes = curHTreeNode->sharedVarNodeList;
-            sharedNodes.push_back( (Handle)(*varIt) );
-            extractAllPossiblePatternsFromInputLinks(originalLinks, curHTreeNode, sharedNodes , gram);
+            extractAllPossiblePatternsFromInputLinks(originalLinks, curHTreeNode, allVarNodes , gram);
 
         }
     }

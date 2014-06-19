@@ -43,8 +43,8 @@ namespace opencog
      public:
         HandleSeq pattern;
         vector<HandleSeq> instances; // the corresponding instances of this pattern in the original AtomSpace
-        vector<HTreeNode*> parentLinks;
-        vector<HTreeNode*> childLinks;
+        set<HTreeNode*> parentLinks;
+        set<HTreeNode*> childLinks;
 
         HandleSeq sharedVarNodeList; // all the shared nodes in these links in the original AtomSpace, each handle is a shared node
 
