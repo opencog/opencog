@@ -407,3 +407,12 @@
 		)
 	)
 )
+
+(define (definite-rule word word_instance) 
+        (EvaluationLink df-link-stv
+	        (PredicateNode "definite" df-node-stv)
+	        (ListLink df-link-stv
+		        (ConceptNode word_instance df-node-stv)
+	        )
+        )
+)
