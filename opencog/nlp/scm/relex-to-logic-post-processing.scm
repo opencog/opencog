@@ -26,7 +26,8 @@
 		(append-map cog-get-root iset))
 )
 
-
+; -----------------------------------------------------------------------
+; Create all possible pairwise combination of the items
 (define (pairwise-combination sets)
 	(define (create-with-index index rest)
 		(map (lambda (r) (list index r)) rest))
@@ -42,19 +43,22 @@
 	(recursive-helper (car sets) (cdr sets))
 )
 
+; -----------------------------------------------------------------------
+; Pairwise intersection
 (define (lset-pairwise-intersection sets)
 	(define all-pairs (pairwise-combination sets))
 	(append-map (lambda (pair-list) (lset-intersection equal? (car pair-list) (cadr pair-list)))
 			all-pairs)
 )
 
+; -----------------------------------------------------------------------
+; Custom member? function to return the item instead of a list
 (define (member? x lst)
 	(if (member x lst)
 		x
 		#f
 	)
 )
-
 
 ; -----------------------------------------------------------------------
 ; Generate a new unique name for a word
@@ -108,13 +112,12 @@
 		(map (lambda (inst word) (cog-link 'InheritanceLink inst word)) word-inst-concept-list word-concept-list)
 	)
 
-	; for each word instant, find a list of all head links that includes it
-	(define word-involvement-list (map cog-get-root word-inst-concept-list))
-
-	(define word-involvement-intersection (lset-pairwise-intersection word-involvement-list))
+	; for each word instant, find a list of all head links that includes it, and remove unneeded links
+	(define word-involvement-messy-list (map cog-get-root word-inst-concept-list))
+	(define word-involvement-intersection (lset-pairwise-intersection word-involvement-messy-list))
 	(define word-involvement-cleaned-list
 		(map (lambda (l) (filter-map (lambda (link) (member? link word-involvement-intersection)) l))
-			word-involvement-list
+			word-involvement-messy-list
 		)
 	)
 	(define word-involvement-cnt (map length word-involvement-cleaned-list))
@@ -137,6 +140,7 @@
 		)
 	)
 
+	; get the head links that include a lone word
 	(define lone-word-involvement-list
 		(delete-duplicates 
 			(filter-map (lambda (links cnt) (if (= cnt 1) (car links) #f))
@@ -146,6 +150,7 @@
 		)
 	)
 
+	; do the main creation
 	(map (lambda (a-link) (rebuild a-link lone-word-assoc-list non-lone-word-assoc-list))
 		lone-word-involvement-list
 	)
