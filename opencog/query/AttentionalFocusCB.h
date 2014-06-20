@@ -27,6 +27,7 @@ private:
 public:
 	AttentionalFocusCB(AtomSpace * as) :
 			DefaultPatternMatchCB(as), _atom_space(as) {
+
 	}
 	bool node_match(Handle& node1, Handle& node2);
 	bool link_match(LinkPtr& lpat, LinkPtr& lsoln);
