@@ -26,6 +26,29 @@
 		(append-map cog-get-root iset))
 )
 
+
+(define (pairwise-combination sets)
+	(define (create-with-index index rest)
+		(map (lambda (r) (list index r)) rest))
+	(define (recursive-helper index rest)
+		(if (null? (cdr rest))
+			(create-with-index index rest)
+			(append (create-with-index index rest)
+				(recursive-helper (car rest) (cdr rest))
+			)
+		)
+	)
+	
+	(recursive-helper (car sets) (cdr sets))
+)
+
+(define (lset-pairwise-intersection sets)
+	(define all-pairs (pairwise-combination sets))
+	(append-map (lambda (pair-list) (lset-intersection equal? (car pair-list) (cadr pair-list)))
+			all-pairs)
+)
+
+
 ; -----------------------------------------------------------------------
 ; Generate a new unique name for a word
 (define (create-unique-word-name word)
@@ -82,39 +105,7 @@
 	(define word-involvement-list (map cog-get-root word-inst-concept-list))
 	(define word-involvement-cnt (map length word-involvement-list))
 
-	(define word-involvement-cleaned-list
-		(map (lambda (involvement)
-				(remove boolean?
-					(map (lambda (l)
-							; if l is in word-inheritance-list, return false
-							; if l is from tense-rule, return false
-							; if l is from definite-rule, return false
-							(cond 	((member l word-inheritance-list)
-								 #f)
-								((and (equal? 'InheritanceLink (cog-type l))
-									(equal? 'ConceptNode (cog-type (cadr (cog-outgoing-set l))))
-									(or (string=? "past" (cog-name (cadr (cog-outgoing-set l))))
-									    (string=? "present" (cog-name (cadr (cog-outgoing-set l))))
-									)
-								 )
-								 #f
-								)
-								((and (equal? 'EvaluationLink (cog-type l))
-									(equal? 'PredicateNode (cog-type (car (cog-outgoing-set l))))
-									(string=? "definite" (cog-name (car (cog-outgoing-set l))))
-								 )
-								 #f
-								)
-								(else l)
-							)
-						)
-						involvement
-					)
-				)
-			)
-			word-involvement-list
-		)
-	)
+	(define word-involvement-cleaned-list (lset-pairwise-intersection word-involvement-list))
 
 	; get word instances that only appear in one link (exclude the one
 	; linking itself with the word node), and their associated word
@@ -149,8 +140,6 @@
 			(delete-duplicates (apply append lone-word-involvement-list))
 		)
 	)
-
-;word-involvement-cleaned-list
 
 	(map (lambda (a-link) (rebuild a-link lone-word-assoc-list non-lone-word-assoc-list))
 		cleaned-links
