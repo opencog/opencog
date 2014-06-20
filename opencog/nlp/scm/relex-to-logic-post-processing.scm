@@ -131,11 +131,6 @@
 	(define word-inst-concept-list (remove null? (map word-get-concept-or-predicate word-inst-list)))
 	(define word-concept-list (remove null? (map word-get-concept-or-predicate word-list)))
 
-	; get a list of InheritanceLink linking word instance with its word
-	(define word-inheritance-list
-		(map (lambda (inst word) (cog-link 'InheritanceLink inst word)) word-inst-concept-list word-concept-list)
-	)
-
 	; for each word instant, find a list of all head links that includes it, and remove unneeded links
 	(define word-involvement-messy-list (map cog-get-root word-inst-concept-list))
 	(define word-involvement-intersection (lset-pairwise-intersection word-involvement-messy-list))
