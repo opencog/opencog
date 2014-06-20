@@ -84,3 +84,4 @@ void AttentionalFocusCBUTest::test_pln_bindlink(void) {
 	    TS_ASSERT_EQUALS(0, as->getArity(answersSingle));
 }
 
+
