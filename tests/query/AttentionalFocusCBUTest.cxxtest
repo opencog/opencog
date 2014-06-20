@@ -85,3 +85,4 @@ void AttentionalFocusCBUTest::test_pln_bindlink(void) {
 	    Handle answersSingle = pm.pln_bindlink(findMan);
 	    TS_ASSERT_EQUALS(0, as->getArity(answersSingle));
 }
+
