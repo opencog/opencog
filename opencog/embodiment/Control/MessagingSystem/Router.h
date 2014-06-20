@@ -332,17 +332,17 @@ public:
      */
     bool knownID(const std::string &id);
 
-    //! Get the port number that a NetworkElement is listening on.
-    int getPortNumber(const std::string &id);
+    //! Get the listening port number of a NetworkElement.
+    int getPortNumber(const std::string &id) const;
 
-    //! Get the IP address that a connected NetworkElement is located at.
-    const std::string &getIPAddress(const std::string &id);
+    //! Get the IP address of NetworkElement.
+    const std::string &getIPAddress(const std::string &id) const;
 
     //! Retrieve network socket for sending control messages to network element?
-    tcp::socket* getControlSocket(const std::string &id);
+    tcp::socket* getControlSocket(const std::string &id) const;
 
     //! Retrieve network socket for sending data messages to network element?
-    tcp::socket* getDataSocket(const std::string &id);
+    tcp::socket* getDataSocket(const std::string &id) const;
 
     //! Close network socket for sending control messages to network element?
     void closeControlSocket(const std::string &id);

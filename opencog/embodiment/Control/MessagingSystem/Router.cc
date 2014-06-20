@@ -31,6 +31,7 @@
 
 #include <opencog/util/files.h>
 #include <opencog/util/StringManipulator.h>
+#include <opencog/util/oc_assert.h>
 
 #include "RouterServerSocket.h"
 #include "NetworkElementCommon.h"
@@ -252,35 +253,49 @@ MessageCentral* Router::getMessageCentral()
     return messageCentral;
 }
 
-int Router::getPortNumber(const std::string &id)
+int Router::getPortNumber(const std::string &id) const
 {
-    int port = portNumber[id];
-    return port;
+    auto it = portNumber.find(id);
+    if (it != portNumber.end())
+        return it->second;
+    OC_ASSERT(false, "Router::getPortNumber - "
+              "the network element %s is unknown", id.c_str());
+    return 0;
 }
 
-const std::string &Router::getIPAddress(const std::string &id)
+const std::string &Router::getIPAddress(const std::string &id) const
 {
-    const std::string &ip = ipAddress[id];
-    return ip;
+    auto it = ipAddress.find(id);
+    if (it != ipAddress.end())
+        return it->second;
+    OC_ASSERT(false, "Router::getIPAddress - "
+              "The network element %s is unknown", id.c_str());
+    return dummyIP;
 }
 
-tcp::socket* Router::getControlSocket(const std::string &id)
+tcp::socket* Router::getControlSocket(const std::string &id) const
 {
     tcp::socket* sock = NULL;
-    Id2SocketMap::iterator it = controlSockets.find(id);
+    Id2SocketMap::const_iterator it = controlSockets.find(id);
     if (it != controlSockets.end()) {
         sock = it->second;
+    } else {
+        OC_ASSERT(false, "Router::getControlSocket - "
+                  "The network element %s is unknown", id.c_str());
     }
     //logger().debug("Getting control socket(%d) for element '%s'.", sock,  id.c_str());
     return sock;
 }
 
-tcp::socket* Router::getDataSocket(const std::string &id)
+tcp::socket* Router::getDataSocket(const std::string &id) const
 {
     tcp::socket* sock = NULL;
-    Id2SocketMap::iterator it = dataSockets.find(id);
+    Id2SocketMap::const_iterator it = dataSockets.find(id);
     if (it != dataSockets.end()) {
         sock = it->second;
+    } else {
+        OC_ASSERT(false, "Router::getDataSocket - "
+                  "The network element %s is unknown", id.c_str());
     }
     //logger().debug("Getting data socket(%d) for element '%s'.", sock,  id.c_str());
     return sock;
@@ -475,9 +490,8 @@ void Router::notifyElementAvailability(const std::string& id, bool available)
 {
     logger().debug("Router::notifyElementAvailability(%s, %d)", id.c_str(), available);
 
-    std::map<std::string, std::string>::const_iterator it;
-    for (it = ipAddress.begin(); it != ipAddress.end(); it++) {
-        std::string toId = (*it).first;
+    for (const auto& IdIp : ipAddress) {
+        std::string toId = IdIp.first;
         //logger().debug("Router - Check need for sending notification to %s", toId.c_str());
 
         // Prevent from sending a availability messages to the own element.
@@ -653,11 +667,11 @@ bool Router::sendNotification(const NotificationData& data)
         }
 
         logger().debug("Router - Sending notification (socket = %p) '%s'.",
-                data.sock, cmd.c_str());
+                       data.sock, cmd.c_str());
  
         boost::system::error_code error;
         boost::asio::write(*data.sock, boost::asio::buffer(cmd),
-                boost::asio::transfer_all(), error);
+                           boost::asio::transfer_all(), error);
         if (error) {
             logger().error("Router - sendNotification. Error transfering data");
             return false;
@@ -693,11 +707,11 @@ bool Router::sendNotification(const NotificationData& data)
 
         if (answer == NetworkElementCommon::OK_MESSAGE) {
             logger().debug("Router - Sucessfully sent notification to '%s'.",
-                         data.toId.c_str());
+                           data.toId.c_str());
             markElementAvailable(data.toId);
         } else {
             logger().error("Router - Failed to send notification to '%s'. (answer = %s)",
-                         data.toId.c_str(), answer.c_str());
+                           data.toId.c_str(), answer.c_str());
         }
 
     } catch (std::exception &e) {
