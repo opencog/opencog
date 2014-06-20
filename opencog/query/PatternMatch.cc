@@ -514,7 +514,7 @@ namespace opencog {
 
 class DefaultImplicator:
 	public virtual Implicator,
-	public virtual DefaultPatternMatchCB
+	public virtual  DefaultPatternMatchCB
 {
 	public:
 		DefaultImplicator(AtomSpace* asp) : Implicator(asp),DefaultPatternMatchCB(asp) {}
