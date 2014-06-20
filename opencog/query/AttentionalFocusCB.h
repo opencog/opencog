@@ -29,6 +29,7 @@
 
 namespace opencog {
 class AttentionalFocusCB: public  virtual PatternMatchCallback {
+
 private:
 	AtomSpace * _atom_space;
 	static bool compare_sti(LinkPtr lptr1,LinkPtr lptr2){
@@ -37,6 +38,7 @@ private:
 public:
 	AttentionalFocusCB(AtomSpace * as) :
 			DefaultPatternMatchCB(as), _atom_space(as) {
+
 	}
 	bool node_match(Handle& node1, Handle& node2);
 	bool link_match(LinkPtr& lpat, LinkPtr& lsoln);
