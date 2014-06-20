@@ -18,7 +18,7 @@
 )
 
 ; -----------------------------------------------------------------------
-; Get the head link with no incoming set
+; Get the root link with no incoming set
 (define (cog-get-root atom)
 	(define iset (cog-incoming-set atom))
 	(if (null? iset)
@@ -61,10 +61,34 @@
 )
 
 ; -----------------------------------------------------------------------
+; Returns a random hex string of length 'str-length'.
+(define (random-hex-string str-length) 
+	(define alphanumeric "abcdef0123456789")
+	(define str "")
+	(while (> str-length 0)
+		(set! str (string-append str (string (string-ref alphanumeric (random (string-length alphanumeric))))))
+		(set! str-length (- str-length 1))
+	)
+	str
+)
+
+; -----------------------------------------------------------------------
+; Returns UUID version 4
+(define (random-UUID)
+	(define part1 (random-hex-string 8))
+	(define part2 (random-hex-string 4))
+	(define part3 (string-append "4" (random-hex-string 3)))
+	(define reserve (string (string-ref "89ab" (random 4))))
+	(define part4 (string-append reserve (random-hex-string 3)))
+	(define part5 (random-hex-string 12))
+	(string-append part1 "-" part2 "-" part3 "-" part4 "-" part5)
+)
+
+; -----------------------------------------------------------------------
 ; Generate a new unique name for a word
 (define (create-unique-word-name word)
 	(define (create-new-name w)
-		(define tail-name (random-string 32))
+		(define tail-name (random-UUID))
 		(string-append (cog-name w) "@" tail-name)
 	)
 	(define new-name (create-new-name word))
