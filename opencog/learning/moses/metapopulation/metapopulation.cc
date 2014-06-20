@@ -197,6 +197,43 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
 }
 
 // -------------------------------------------------------------------
+// Search-termination-related routines.  The scores that are returned
+// are used by the main program to terminate the search.
+
+/**
+ * Return the composite score of the highest-scoring tree in the metapop.
+ */
+const composite_score& metapopulation::best_composite_score() const
+{
+    return _best_cscore;
+}
+
+/**
+ * Return the score of the highest-scoring tree in the metapop.
+ */
+score_t metapopulation::best_score() const
+{
+    return _best_cscore.get_score();
+}
+
+/**
+ * Return the set of candidates with the highest composite
+ * scores.  These will all have the the same "best_composite_score".
+ */
+const scored_combo_tree_set& metapopulation::best_candidates() const
+{
+    return _best_candidates;
+}
+
+/**
+ * Return the best combo tree (shortest best candidate).
+ */
+const combo_tree& metapopulation::best_tree() const
+{
+    return _best_candidates.begin()->get_tree();
+}
+
+// -------------------------------------------------------------------
 // Misc routines
 
 // Like above, but using std::cout.

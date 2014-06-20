@@ -129,38 +129,10 @@ public:
 
     ~metapopulation() {}
 
-    /**
-     * Return the composite score of the highest-scoring tree in the metapop.
-     */
-    const composite_score& best_composite_score() const
-    {
-        return _best_cscore;
-    }
-
-    /**
-     * Return the score of the highest-scoring tree in the metapop.
-     */
-    score_t best_score() const
-    {
-        return _best_cscore.get_score();
-    }
-
-    /**
-     * Return the set of candidates with the highest composite
-     * scores.  These will all have the the same "best_composite_score".
-     */
-    const scored_combo_tree_set& best_candidates() const
-    {
-        return _best_candidates;
-    }
-
-    /**
-     * Return the best combo tree (shortest best candidate).
-     */
-    const combo_tree& best_tree() const
-    {
-        return _best_candidates.begin()->get_tree();
-    }
+    const composite_score& best_composite_score() const;
+    score_t best_score() const;
+    const scored_combo_tree_set& best_candidates() const;
+    const combo_tree& best_tree() const;
 
     behave_cscore& get_cscorer() const { return  _cscorer; }
 
