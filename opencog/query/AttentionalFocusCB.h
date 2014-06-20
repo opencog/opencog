@@ -15,16 +15,15 @@
 
 namespace opencog {
 
-class AttentionalFocusCB:public virtual DefaultPatternMatchCB {
+class AttentionalFocusCB: public virtual DefaultPatternMatchCB {
 
 private:
 	AtomSpace * _atom_space;
 public:
 	AttentionalFocusCB(AtomSpace * as) :
-			 DefaultPatternMatchCB(as),_atom_space(as){
+			DefaultPatternMatchCB(as), _atom_space(as) {
 	}
 
-	// Pass all the calls straight through, except one.
 	bool node_match(Handle& node1, Handle& node2) {
 		// If equality, then a match.
 		if (node1 == node2)
