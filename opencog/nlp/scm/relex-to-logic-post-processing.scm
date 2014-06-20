@@ -101,16 +101,20 @@
 
 ; -----------------------------------------------------------------------
 ; Main recursive function to build the new abstracted links
-(define (rebuild ilink old-new-pairs other-name-pairs)
+(define (rebuild ilink old-new-pairs other-name-triplets)
 	; get all the nodes linked by this link
 	(define old-oset (cog-outgoing-set ilink))
 	(define (replace-old candidate)
 		(define new (assoc candidate old-new-pairs))
+		(define triplet (assoc candidate other-name-triplets))
 		; if this candidate is either a link or does not need to be replaced
 		(if (not new)
 			(if (cog-link? candidate)
-				(rebuild candidate old-new-pairs other-name-pairs)
-				(cog-new-node (cog-type candidate) (cdr (assoc candidate other-name-pairs)))
+				(rebuild candidate old-new-pairs other-name-triplets)
+				(begin
+					(InheritanceLink (cog-new-node (cog-type candidate) (cadr triplet)) (caddr triplet))
+					(cog-node (cog-type candidate) (cadr triplet))
+				)
 			)
 			(cdr new)
 		)
@@ -150,9 +154,11 @@
 		)
 	)
 
-	; get word instances that are not lone word, and create a new unique name for them
+	; get word instances that are not lone word, and create a new unique name for them;
+	; note that the new name might not be needed, since two non-lone words can be linking to each
+	; other with no lone-word involved (so we won't be creating InheritanceLink new-inst word here)
 	(define non-lone-word-assoc-list
-		(filter-map (lambda (inst word cnt) (if (> cnt 1) (cons inst (create-unique-word-name word)) #f))
+		(filter-map (lambda (inst word cnt) (if (> cnt 1) (list inst (create-unique-word-name word) word) #f))
 			word-inst-concept-list
 			word-concept-list
 			word-involvement-cnt
