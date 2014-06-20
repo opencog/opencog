@@ -112,7 +112,10 @@
 			(if (cog-link? candidate)
 				(rebuild candidate old-new-pairs other-name-triplets)
 				(begin
-					(InheritanceLink (cog-new-node (cog-type candidate) (cadr triplet)) (caddr triplet))
+					(if (equal? 'ConceptNode (cog-type candidate))
+						(InheritanceLink (cog-new-node (cog-type candidate) (cadr triplet)) (caddr triplet))
+						(ImplicationLink (cog-new-node (cog-type candidate) (cadr triplet)) (caddr triplet))
+					)
 					(cog-node (cog-type candidate) (cadr triplet))
 				)
 			)
