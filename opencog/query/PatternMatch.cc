@@ -514,7 +514,7 @@ namespace opencog {
 
 class DefaultImplicator:
 	public virtual Implicator,
-	public virtual DefaultPatternMatchCB
+	public virtual  DefaultPatternMatchCB
 {
 	public:
 		DefaultImplicator(AtomSpace* asp) : Implicator(asp),DefaultPatternMatchCB(asp) {}
@@ -588,6 +588,28 @@ bool SingleImplicator::grounding(const std::map<Handle, Handle> &var_soln,
 		result_list.push_back(h);
 	}
 	return true;
+}
+
+/**
+ * PLN specific PatternMatchCallback implementation
+ */
+class PLNImplicator:
+	public virtual Implicator,
+	public virtual AttentionalFocusCB
+{
+	public:
+		PLNImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp),AttentionalFocusCB(asp) {}
+};
+
+Handle PatternMatch::pln_bindlink(Handle himplication){
+	// Now perform the search.
+		PLNImplicator impl(_atom_space);
+		do_bindlink(himplication, &impl);
+
+		// The result_list contains a list of the grounded expressions.
+		// Turn it into a true list, and return it.
+		Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+		return gl;
 }
 
 /**
