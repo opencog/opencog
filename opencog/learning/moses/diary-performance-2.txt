@@ -227,8 +227,10 @@ Solution:
 -- provide a utility for #2 that assembles a composite score from the 
    parts, and can be queried for the scalar score. Done: its behave_cscore.
 
-Notes:
+Notes/TODO:
 -- complexity is not being factored in ... 
+-- scorer is currently not using the user-specified wight column !?
+   or are those in the bscores already?
 
 
 
