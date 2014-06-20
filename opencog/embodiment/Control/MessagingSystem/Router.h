@@ -48,6 +48,7 @@ namespace opencog { namespace messaging {
 
 class RouterServerSocket;
 
+// Notification types sent by the router
 enum NotificationType {
     MESSAGE,
     AVAILABLE,
@@ -74,33 +75,39 @@ struct NotificationData {
 
 }; // struct NotificationData
 
-
 typedef std::map<std::string, tcp::socket*> Id2SocketMap;
 
+static const std::string dummyIP = std::string();
+
 /**
- * Router is not supposed to be used directly by PB entities. All communication
- * with it should be performed by NetworkElement's (NE) internals. NE
- * encapsulates the protocol used to communicate with Router but in the case
- * you want/need to simulate a NE communicating directly with the router, you
- * may find useful the protocol description provided below.
+ * Router is not supposed to be used directly by OpenCog (OC)
+ * entities. All communication with it should be performed by
+ * NetworkElement's (NE) internals. NE encapsulates the protocol used
+ * to communicate with Router but in the case you want/need to
+ * simulate a NE communicating directly with the router, you may find
+ * useful the protocol description provided below.
  *
  * There are five relevant use cases for the protocol:
  *
- * (1) YourEntity starts a handshake with router to enter PB network (no
- * autentication is required at this point. it is just to allow other entities
- * to know about YourEntity)
- * (2) YourEntity wants to send a Message to some other entity (it will always
- * contact the router to do so, regardless who is the actual target for that
- * message)
- * (3) YourEntity is asynchronously notified by router that there are unread
- * messages to it waiting in router's queue. YourEntity will need to be
- * listening to a given port to receive such a message.
- * (4) YourEntity decides it wants to retrieve unread messages from router so
- * it sends a proper request (this request will be answered assynchronously by
- * router)
- * (5) YourEntity is asynchronously contacted by the router to receive requested
- * unread messages. YourEntity will need to be listening to a given port to
- * receive the messages.
+ * (1) YourEntity starts a handshake with router to enter OC network
+ * (no authentication is required at this point. It is just to allow
+ * other entities to know about YourEntity)
+ *
+ * (2) YourEntity wants to send a Message to some other entity (it
+ * will always contact the router to do so, regardless who is the
+ * actual target for that message).
+ *
+ * (3) YourEntity is asynchronously notified by router that there are
+ * unread messages to it waiting in router's queue. YourEntity will
+ * need to be listening to a given port to receive such a message.
+ *
+ * (4) YourEntity decides it wants to retrieve unread messages from
+ * router so it sends a proper request (this request will be answered
+ * asynchronously by router).
+ *
+ * (5) YourEntity is asynchronously contacted by the router to receive
+ * requested unread messages. YourEntity will need to be listening to
+ * a given port to receive the messages.
  *
  * (1)
  *
@@ -112,7 +119,7 @@ typedef std::map<std::string, tcp::socket*> Id2SocketMap;
  * All communication is performed in line-based protocol. So everything
  * should go with an explicit '\\n'. (this is true from every command or
  * data line). YOUR_ENTITY is a literal string used to identify YourEntity in
- * PB network. <ip> and <port> will be used to connect to your entity.
+ * OC network. <ip> and <port> will be used to connect to your entity.
  * Please use ports > 5100 (obviously 5005 is already taken).
  *
  * router will answer in the same connection with
@@ -129,8 +136,8 @@ typedef std::map<std::string, tcp::socket*> Id2SocketMap;
  * NEW_MESSAGE <from> <to> <type> <no. lines>
  *
  * <from> and <to> are the string id of source/target. <from> will be YOUR_ENTITY
- * <to> may be either SPAWNER or any othe PB element you want to contact
- * <type> is message type, e.g. type = 1 is tringMessage.
+ * <to> may be either SPAWNER or any othe OC element you want to contact
+ * <type> is message type, e.g. type = 1 is stringMessage.
  * <no. lines> is the number of lines in your message. All messages are broken into
  * lines and sent line by line (lines should not be larger than 1024 chars).
  *
@@ -152,7 +159,8 @@ typedef std::map<std::string, tcp::socket*> Id2SocketMap;
  * the prefix 'c' is not a typo :-)
  * routers closes the connection
  *
- * (4) YourEntity decides it want to retrieve unread messages. It will connect to router's port and send:
+ * (4) YourEntity decides it want to retrieve unread messages. It will
+ * connect to router's port and send:
  *
  * REQUEST_UNREAD_MESSAGES YOUR_ENTITY <limit>
  *
@@ -167,7 +175,7 @@ typedef std::map<std::string, tcp::socket*> Id2SocketMap;
  *
  * cSTART_MESSAGE <from> <to> <type>
  *
- * than routers sends one or more lines of data (the message itself). note
+ * then routers sends one or more lines of data (the message itself). note
  * that each data line is prefixed with 'd'.
  * Then the router sends either:
  *
@@ -232,7 +240,7 @@ private:
     std::set<std::string> toNotifyAvailability;
     std::set<std::string> toNotifyUnavailability;
 
-    //interface to messageQueues
+    // Interface to messageQueues
     MessageCentral *messageCentral;
 
     std::string routerId;
@@ -251,13 +259,13 @@ private:
     void recoveryFromPersistedData(const std::string& filename);
 
     /**
-     * Notify all an element that the a given element about some situation:
+     * Notify an element about some situation:
      * a new message, an available or unavailable element.
      *
-     * This method called for all know elements, since there is no broadcast
-     * available for TCP protocol.
+     * This method has to be called for all know elements, since there
+     * is no broadcast available for TCP protocol.
      *
-     * @param An argument array with the sender and receiver IDs.
+     * @param data notification data, a struct with the notification message + receiver Id and socket
      * @return true if socket connection is still ok after trying to send the notification
      */
     bool sendNotification(const NotificationData& data);
@@ -291,10 +299,10 @@ private:
      * the ones related to OAC are considered.
      *
      * @param id The id of element that is available again.
-     * @param availabile True if the element is available and false
+     * @param available True if the element is available and false
      *        otherwise. Default = true.
      */
-    void notifyElementAvailability(const std::string& id, bool availabile = true);
+    void notifyElementAvailability(const std::string& id, bool available = true);
 
 public:
 
@@ -312,8 +320,8 @@ public:
     // ***********************************************/
     // Constructors/destructors
     
-    ~Router();
     Router();
+    ~Router();
 
     // ***********************************************/
     // public interface
