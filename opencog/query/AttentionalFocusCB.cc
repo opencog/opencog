@@ -85,3 +85,4 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h) {
 
 	return filtered_set;
 }
+

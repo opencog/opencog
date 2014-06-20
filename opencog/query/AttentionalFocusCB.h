@@ -38,6 +38,7 @@ class AttentionalFocusCB: public virtual DefaultPatternMatchCB {
 
 
 
+
 private:
 	AtomSpace * _atom_space;
 	static bool compare_sti(LinkPtr lptr1,LinkPtr lptr2){
@@ -50,8 +51,6 @@ public:
 	bool node_match(Handle& node1, Handle& node2);
 	bool link_match(LinkPtr& lpat, LinkPtr& lsoln);
 	IncomingSet get_incoming_set(Handle h);
-
-
 };
 } //namespace opencog
 #endif /* _ATTENTIONALFOCUSCB_H */
