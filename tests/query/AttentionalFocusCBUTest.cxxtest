@@ -1,0 +1,52 @@
+/*
+ * AttentionalFocusCBUTest.cxxtest
+ *
+ *  Created on: 20 Jun, 2014
+ *      Author: misgana
+ */
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/query/PatternMatch.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class AttentionalFocusCBUTest: public CxxTest::TestSuite {
+private:
+	PatternMatch pm;
+	AtomSpace * as;
+	SchemeEval * eval;
+public:
+	AttentionalFocusCBUTest(void) {
+
+		try {
+			config().load("opencog-test.conf");
+		} catch (RuntimeException &e) {
+			std::cerr << e.getMessage() << std::endl;
+		}
+		logger().setFilename(config()["LOG_FILE"]);
+		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+		server(CogServer::createInstance);
+		as = &cogserver().getAtomSpace();
+		pm.set_atomspace(as);
+		eval = new SchemeEval(as);
+	}
+	~AttentionalFocusCBUTest() {
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().getFilename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_single_bindlink(void);
+};
+
