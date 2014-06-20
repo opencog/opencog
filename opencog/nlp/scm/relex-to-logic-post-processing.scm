@@ -48,6 +48,13 @@
 			all-pairs)
 )
 
+(define (member? x lst)
+	(if (member x lst)
+		x
+		#f
+	)
+)
+
 
 ; -----------------------------------------------------------------------
 ; Generate a new unique name for a word
@@ -103,46 +110,44 @@
 
 	; for each word instant, find a list of all head links that includes it
 	(define word-involvement-list (map cog-get-root word-inst-concept-list))
-	(define word-involvement-cnt (map length word-involvement-list))
 
-	(define word-involvement-cleaned-list (lset-pairwise-intersection word-involvement-list))
+	(define word-involvement-intersection (lset-pairwise-intersection word-involvement-list))
+	(define word-involvement-cleaned-list
+		(map (lambda (l) (filter-map (lambda (link) (member? link word-involvement-intersection)) l))
+			word-involvement-list
+		)
+	)
+	(define word-involvement-cnt (map length word-involvement-cleaned-list))
 
-	; get word instances that only appear in one link (exclude the one
-	; linking itself with the word node), and their associated word
+	; get word instances that only appear in one link and their associated word
 	(define lone-word-assoc-list
-		(remove boolean? 
-			(map (lambda (inst word cnt) (if (<= cnt 2) (cons inst word) #f))
-				word-inst-concept-list
-				word-concept-list
-				word-involvement-cnt
-			)
+		(filter-map (lambda (inst word cnt) (if (= cnt 1) (cons inst word) #f))
+			word-inst-concept-list
+			word-concept-list
+			word-involvement-cnt
 		)
 	)
 
 	; get word instances that are not lone word, and create a new unique name for them
 	(define non-lone-word-assoc-list
-		(remove boolean? 
-			(map (lambda (inst word cnt) (if (> cnt 2) (cons inst (create-unique-word-name word)) #f))
-				word-inst-concept-list
-				word-concept-list
+		(filter-map (lambda (inst word cnt) (if (> cnt 1) (cons inst (create-unique-word-name word)) #f))
+			word-inst-concept-list
+			word-concept-list
+			word-involvement-cnt
+		)
+	)
+
+	(define lone-word-involvement-list
+		(delete-duplicates 
+			(filter-map (lambda (links cnt) (if (= cnt 1) (car links) #f))
+				word-involvement-cleaned-list
 				word-involvement-cnt
 			)
 		)
 	)
 
-	; get all head links that contains one of the lone word
-	(define lone-word-involvement-list (map cog-get-root (map car lone-word-assoc-list)))
-
-	; all the links that involved a lone word, no duplicate
-	(define cleaned-links
-		(remove (lambda (x)
-				(member x word-inheritance-list))
-			(delete-duplicates (apply append lone-word-involvement-list))
-		)
-	)
-
 	(map (lambda (a-link) (rebuild a-link lone-word-assoc-list non-lone-word-assoc-list))
-		cleaned-links
+		lone-word-involvement-list
 	)
 )
 
