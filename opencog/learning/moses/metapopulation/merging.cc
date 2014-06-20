@@ -337,6 +337,8 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         }
     }
 
+    if (0 == candidates.size()) return false;
+
     // update the record of the best-seen score & trees
     update_best_candidates(candidates);
 

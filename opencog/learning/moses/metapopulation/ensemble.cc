@@ -56,7 +56,8 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 {
 	int promoted = 0;
 	// We need the length of the behavioral score, as normalization
-	// XXX we should be using the user-weighted thingy her .. XX FIXME
+	// XXX we should be using the user-weighted thingy here .. XX FIXME
+
 	double behave_len = cands.begin()->get_bscore().size();
 	while (true) {
 		// Find the element with the least error
@@ -70,6 +71,9 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 
 		// XXX FIXME, this should be something else ... 
 		if (0.0 == err) break;
+
+		// any score worse than half is terrible. half gives a weight of zero.
+		if (0.5 <= err) break;
 
 		// Compute alpha
 		double alpha = 0.5 * log ((1.0 - err) / err);
@@ -88,7 +92,7 @@ std::cout << "duuude best " << *best_p  << " err=" << err << " alpha=" << alpha 
 			znorm += weights[i];
 		}
 
-		// normalization: sum of scores must equal vector length.
+		// Normalization: sum of scores must equal vector length.
 		znorm = behave_len / znorm;
 		for (int i=0; i<behave_len; i++)
 		{
@@ -103,19 +107,18 @@ std::cout << "duuude best " << *best_p  << " err=" << err << " alpha=" << alpha 
 		// Remove from the set of candidates.
 		cands.erase(best_p);
 
-std::cout << "===================================== ensemble"<<std::endl;
-		// Score the ensemble. XXX This should probably go into some class.
+		// Obtain cumulative score. XXX This can't stay here.
+		double cum = 0.0;
 		for (const scored_combo_tree& sct : _scored_trees)
 		{
-std::cout << "duuude ensemb is " << sct << std::endl;
+			double tree_weight = sct.get_weight();
+			double raw_score = sct.get_score();
+			raw_score *= 2.0;
+			raw_score += behave_len;
+std::cout << "duuude raw= " << raw_score << " wieght=" << tree_weight <<" tre="<< sct<<std::endl;
+			cum += tree_weight * raw_score;
 		}
-
-		// Now, re-score the candidates! Ugh.
-std::cout << "===================================== cands"<<std::endl;
-		for (const scored_combo_tree& sct : cands)
-		{
-std::cout << "duuude cand is " << sct << std::endl;
-		}
+std::cout << "duuude cum score is " << cum << std::endl;
 
 		// Are we done yet?
 		promoted ++;
