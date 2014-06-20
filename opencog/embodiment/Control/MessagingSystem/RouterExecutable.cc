@@ -41,15 +41,15 @@ int main(int argc, char *argv[])
 
     config(opencog::control::EmbodimentConfig::embodimentCreateInstance, true);
 
-    // if exists load file with configuration parameters
+    // If exists load file with configuration parameters
     // IMPORTANT: this file should be the same for all executables that create
     // a systemParameter object.
     if (fileExists(config().get("CONFIG_FILE").c_str())) {
         config().load(config().get("CONFIG_FILE").c_str());
     }
 
-    // setting unexpected handler in case a different exception from the
-    // especified ones is throw in the code
+    // Setting unexpected handler in case a different exception from the
+    // specified ones is thrown in the code
     std::set_unexpected(router_unexpected_handler);
 
     Router *router = new Router();
