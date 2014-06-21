@@ -57,6 +57,7 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h) {
 				> _atom_space->getAttentionalFocusBoundary()) {
 			filtered_set.push_back(LinkCast(candidate_handle));
 		}
+
 	}
 	// if none is in AF
 	if (filtered_set.empty()) {
@@ -65,9 +66,6 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h) {
 		filtered_set = incoming_set;
 	}
 	std::sort(filtered_set.begin(), filtered_set.end(), compare_sti); //sort by STI for better performance
-
 	return filtered_set;
 }
-
-
 

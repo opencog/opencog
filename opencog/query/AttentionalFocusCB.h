@@ -35,11 +35,8 @@ private:
 	}
 public:
 	AttentionalFocusCB(AtomSpace * as) : _atom_space(as){}
-
 	bool node_match(Handle& node1, Handle& node2);
-
 	bool link_match(LinkPtr& link1, LinkPtr& link2);
-
 	IncomingSet get_incoming_set(Handle h);
 };
 } //namespace opencog
