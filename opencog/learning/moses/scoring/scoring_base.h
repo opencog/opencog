@@ -55,8 +55,11 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     bscore_base() : _complexity_coef(0.0), _size(0) {};
     virtual ~bscore_base() {};
 
-    /// Return the behavioral score for the candidate combo_tree
+    /// Return the behavioral score for the combo_tree
     virtual behavioral_score operator()(const combo_tree&) const = 0;
+
+    /// Return the behavioral score for the ensemble
+    virtual behavioral_score operator()(const scored_combo_tree_set&) const;
 
     /// Return the size (length) of the behavioral_score that operator()
     /// above would return.
@@ -127,6 +130,10 @@ protected:
 };
 
 /// Abstract base class for summing behavioral scores.
+// XXX TODO FIXME: this should probably be completely removed,
+// and replaced by boosting_ascore everywhere, and boosting_ascore
+// should probably be renamed to weighted_score or something like
+// that ... in particular, simple_ascore should be killed.
 struct ascore_base : public std::unary_function<combo_tree, composite_score>
 {
     /// Sum up the behavioral score

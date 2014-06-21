@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
+ * Copyright (C) 2014 Aidyia Limited
  * All Rights Reserved
  *
  * Written by Moshe Looks, Nil Geisweiller, Linas Vepstas
@@ -61,7 +62,8 @@ struct logical_bscore : public bscore_base
     logical_bscore(const combo_tree& tr, int a)
             : _target(tr, a), _arity(a) { _size = _target.size(); }
 
-    behavioral_score operator()(const combo_tree& tr) const;
+    behavioral_score operator()(const combo_tree&) const;
+    behavioral_score operator()(const scored_combo_tree_set&) const;
 
     behavioral_score best_possible_bscore() const;
 
