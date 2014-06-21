@@ -209,29 +209,30 @@ const composite_score& metapopulation::best_composite_score() const
 }
 
 /**
- * Return the score of the highest-scoring tree in the metapop.
- */
-score_t metapopulation::best_score() const
-{
-    return _best_cscore.get_score();
-}
-
-/**
- * Return the set of candidates with the highest composite
- * scores.  These will all have the the same "best_composite_score".
+ * Return the set of scored combo trees with the highest composite
+ * scores.  If boosting (ensemble learning) is disabled, these will
+ * will all be members of the metapopulation having the same
+ * "best_composite_score".  If boosting is enabled, this returns the
+ * entire ensemble.
  */
 const scored_combo_tree_set& metapopulation::best_candidates() const
 {
-    return _best_candidates;
+    if (not _params.do_boosting)
+        return _best_candidates;
+
+    return _ensemble.get_ensemble();
 }
 
-/**
+/** 
  * Return the best combo tree (shortest best candidate).
  */
 const combo_tree& metapopulation::best_tree() const
 {
-    return _best_candidates.begin()->get_tree();
+    OC_ASSERT(not _params.do_boosting,
+        "No such thing as a best tree in an ensemble.");
+    return best_candidates().begin()->get_tree();
 }
+
 
 // -------------------------------------------------------------------
 // Misc routines

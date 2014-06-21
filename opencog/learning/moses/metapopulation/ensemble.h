@@ -78,6 +78,10 @@ public:
 
     void add_candidates(scored_combo_tree_set&);
 
+    const scored_combo_tree_set& get_ensemble() const {
+        return _scored_trees;
+    }
+
 private:
     const ensemble_parameters& _params;
     boosting_ascore* _booster;
