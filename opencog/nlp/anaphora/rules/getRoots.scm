@@ -3,7 +3,7 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$relationshipNode")
-                (VariableTypeNode "LinkGrammarRelationshipNode")
+                (VariableTypeNode "DefinedLinguisticRelationshipNode")
             )
             (TypedVariableLink
                 (VariableNode "$parent")
@@ -25,7 +25,7 @@
                 )
             )
             (ListLink
-                (AnchorNode "Roots")
+                (AnchorNode "currentTarget")
                 (VariableNode "$root")
             )
         )

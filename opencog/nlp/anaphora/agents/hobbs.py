@@ -5,45 +5,73 @@ from opencog.atomspace import types, AtomSpace, TruthValue
 from opencog.scheme_wrapper import scheme_eval_h, __init__
 import Queue
 
+class BindLinkExecution():
+    def __init__(self,atomspace,anchorNode, target, command,resultNode):
+        self.atomspace=atomspace
+        self.anchorNode=anchorNode
+        self.target=target
+        self.command=command
+        self.resultNode=resultNode
+
+    def execution(self):
+        if self.anchorNode != None and self.target != None:
+            self.tmpLink=self.atomspace.add_link(types.ListLink, [self.anchorNode, self.target], TruthValue(1.0, 100))
+        else:
+            self.tmpLink=None
+        response = scheme_eval_h(self.atomspace, self.command)
+
+    def returnResult(self):
+        if self.resultNode==None:
+            return
+        rv=[]
+        listOfLinks=self.resultNode.incoming
+        for link in listOfLinks:
+            rv.append((link.out)[1])
+        return rv
+
+    def clear(self):
+        if self.tmpLink!=None:
+            self.atomspace.remove(self.tmpLink)
+        name=self.resultNode.name
+        self.atomspace.remove(self.resultNode,True)
+        self.atomspace.add_node(types.AnchorNode, name, TruthValue(1.0, 100))
+
+
 class HobbsAgent(MindAgent):
     def __init__(self):
         self.checked={}
+
+    def bindLinkExe(self,anchorNode, target, command,resultNode):
+        bindLinkExe=BindLinkExecution(self.atomspace,anchorNode, target, command,resultNode)
+        bindLinkExe.execution()
+        rv=bindLinkExe.returnResult()
+        bindLinkExe.clear()
+        return rv
 
     def StringToNumber(self,str):
         return int(str)
 
     def getWordNumber(self,item):
-        tmpLink=self.atomspace.add_link(types.ListLink, [self.currentTarget, item], TruthValue(1.0, 100))
-        response = scheme_eval_h(self.atomspace, '(cog-bind getNumberNode)')
-        AnchorNode=self.atomspace.get_atoms_by_name(types.AnchorNode,"CurrentResult")
-        listOfLinks=AnchorNode.incoming
-        link=listOfLinks[0]
-        return self.StringToNumber((link.out)[1].name)
+        rv=self.bindLinkExe(self.currentTarget,item,'(cog-bind getNumberNode)',self.currentResult)
+        return self.StringToNumber(rv[0].name)
 
     def sortChildren(self,list):
         sorted(list,key=self.getWordNUmber)
 
     def getChildrens(self,node):
-        rv=[]
-        dict={}
-
-        tmpLink=self.atomspace.add_link(types.ListLink, [self.targetAnchorNode, node], TruthValue(1.0, 100))
-        response = scheme_eval_h(self.atomspace, '(cog-bind getChildrens)')
-        self.atomspace.remove(tmpLink)
-        childrenAnchorNode=self.atomspace.get_atoms_by_name(types.AnchorNode,"ChildrenAnchorNode")
-        listOfLinks=childrenAnchorNode.incoming
-        for link in listOfLinks:
-            outgoing=link.out
-            rv.append((outgoing[1])
+        rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind getChildren)',self.currentResult)
         self.sortChildren(rv)
         return rv
 
+    def propose(self,node):
+        self.bindLinkExe(self.currentProposal,node,'(cog-bind propose)',None)
 
     def bfs(self,node):
         q=Queue()
         q.put(node)
         while not q.empty():
             front=q.get()
+            self.propose(front)
             childrens=self.getChildrens(front)
             for node in childrens:
                 if not self.Checked(node):
@@ -51,41 +79,30 @@ class HobbsAgent(MindAgent):
                     q.put(node)
 
     def getPronouns(self):
-        rv=[]
-        response = scheme_eval_h(self.atomspace, '(cog-bind pronoun-finder)')
-        UnresolvedPronounsAnchorNode=self.atomspace.get_atoms_by_name(types.AnchorNode,"Recent Unresolved references")
-        listOfLinks=UnresolvedPronounsAnchorNode.incoming
-        for link in listOfLinks:
-            rv.append((link.out)[1])
-        return rv
+        return self.bindLinkExe(None,None,'(cog-bind pronoun-finder)',self.atomspace.get_atoms_by_name(types.AnchorNode,"Recent Unresolved references"))
 
     def getRoots(self):
-        rv=[]
-        response = scheme_eval_h(self.atomspace, '(cog-bind getRoots)')
-        RootsAnchorNode=self.atomspace.get_atoms_by_name(types.AnchorNode,"Roots")
-        listOfLinks=RootsAnchorNode.incoming
-        for link in listOfLinks:
-            rv.append((link.out)[1])
-        return rv
+        return self.bindLinkExe(None,None,'(cog-bind getRoots)',self.currentResult)
 
     def getRootOfNode(self,target):
-        rv=[]
-
-        tmpLink=self.atomspace.add_link(types.ListLink, [self.currentTarget, target], TruthValue(1.0, 100))
-        response = scheme_eval_h(self.atomspace, '(cog-bind getRootOfNode)')
-
-        listOfLinks=self.currentResult.incoming
+        '''
+        rv=self.bindLinkExe(self.currentTarget,target,'(cog-bind getRootOfNode)',self.currentResult)
         maximum=-1
         maxTarget=None
-        for link in listOfLinks:
-            number=self.getWordNumber((link.out)[1])
+        for node in rv:
+            number=self.getWordNumber(node)
             if number>maximum:
                 maximum=number
-                maxTarget=(link.out)[1]
+                maxTarget=node
         return maxTarget
+        '''
+        '''
+        Naive approach, but works
+        '''
+        return self.roots[len(self.roots)-1]
 
     def  previousRootExist(self,root):
-        return self.roots[0]==root
+        return not self.roots[0]==root
 
     def getPrevious(self,root):
         maximum=-1
@@ -104,6 +121,7 @@ class HobbsAgent(MindAgent):
         self.currentPronounNode = atomspace.add_node(types.AnchorNode, 'CurrentPronoun', TruthValue(1.0, 100))
         self.currentTarget = atomspace.add_node(types.AnchorNode, 'CurrentTarget', TruthValue(1.0, 100))
         self.currentResult = atomspace.add_node(types.AnchorNode, 'CurrentResult', TruthValue(1.0, 100))
+        self.currentProposal = atomspace.add_node(types.AnchorNode, 'CurrentProposal', TruthValue(1.0, 100))
         self.pronounNumber = -1
 
         for pronoun in self.pronouns:
