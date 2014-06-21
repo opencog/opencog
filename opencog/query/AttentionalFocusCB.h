@@ -37,7 +37,6 @@ public:
 	bool node_match(Handle& node1, Handle& node2);
 	bool link_match(LinkPtr& lpat, LinkPtr& lsoln);
 	IncomingSet get_incoming_set(Handle h);
-
 };
 } //namespace opencog
 #endif /* _ATTENTIONALFOCUSCB_H */
