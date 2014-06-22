@@ -59,7 +59,7 @@ namespace moses {
 struct ensemble_parameters
 {
 	ensemble_parameters() :
-		num_to_promote(4)
+		num_to_promote(1)
 	{}
 
 	int num_to_promote;  // max number of demes to accept into ensemble,

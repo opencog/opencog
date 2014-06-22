@@ -79,8 +79,8 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 		double alpha = 0.5 * log ((1.0 - err) / err);
 		double expalpha = exp(alpha);
 		double rcpalpha = 1.0 / expalpha;
-std::cout << "===================================== "<<std::endl;
-std::cout << "duuude best " << *best_p  << " err=" << err << " alpha=" << alpha <<" expalph=" << expalpha << std::endl;
+		logger().info() << "Add to ensemble " << *best_p  << std::endl
+			<< "With err=" << err << " alpha=" << alpha <<" exp(alpha)=" << expalpha;
 
 		// Recompute the weights
 		const behavioral_score& bs = best_p->get_bscore();

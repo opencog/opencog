@@ -210,7 +210,7 @@ public:
                       demeID_t id = demeID_t(),
                       composite_score cs = composite_score(),
                       behavioral_score bs = behavioral_score())
-        : _tree(tr), _deme_id(id), _cscore(cs), _bscore(bs)
+        : _tree(tr), _deme_id(id), _cscore(cs), _bscore(bs), _weight(1.0)
     {}
 
 private:
@@ -379,11 +379,12 @@ Out& ostream_scored_combo_tree(Out& out,
         return ostream_combo_tree_cpbscore_python(out, tr, cs, bs);
 
     out << cs << std::endl;
-    out << " weight=" << sct.get_weight() << " ";
-    out << tr << std::endl;
+    out << "weight=" << sct.get_weight() << " " << tr;
 
-    if (0 < bs.size())
-        ostream_behavioral_score(out, bs) << std::endl;
+    if (0 < bs.size()) {
+        out << std::endl;
+        ostream_behavioral_score(out, bs);
+    }
 
     return out;
 }
