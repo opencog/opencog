@@ -19,6 +19,7 @@ class TemporalRule(Rule):
     Base class for temporal Rules. They evaluate a time relation such
     as BeforeLink, based on some AtTimeLinks.
     """
+
     # TODO it can't use the formulas directly. They require some
     # preprocessing to create a temporal-distribution-dictionary
     # out of some AtTimeLinks. And how to find all of the AtTimeLinks
@@ -117,27 +118,37 @@ class PredictiveAttractionRule(Rule):
                                                          [A, B])])])
 
 
-def create_temporal_rules(chainer):
+class TemporalCompositionRule(Rule):
+    def __init__(self, chainer, link_type1, link_type2, output_type):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+        Rule.__init__(self,
+                      formula=None,
+                      inputs=[chainer.link(link_type1, [A, B]),
+                              chainer.link(link_type2, [A, B])],
+                      outputs=[chainer.link(output_type, [A, B])])
+
+def create_composition_rules(chainer):
     rules = []
-
-
-
     relations = {
-        "P": (types.AfterLink, temporal_formulas.afterFormula),
-        "p": (types.BeforeLink, temporal_formulas.beforeFormula),
-        "D": (types.ContainsLink, temporal_formulas.containsFormula),
-        "d": (types.DuringLink, temporal_formulas.duringFormula),
-        "e": (types.EqualsLink, temporal_formulas.equalsFormula),
-        "F": (types.FinishedByLink, temporal_formulas.finished_byFormula),
-        "f": (types.FinishesLink, temporal_formulas.finishesFormula),
-        "M": (types.MetByLink, temporal_formulas.met_byFormula),
-        "m": (types.MeetsLink, temporal_formulas.meetsFormula),
-        "O": (types.OverlappedByLink, temporal_formulas.overlapped_byFormula),
-        "o": (types.OverlapsLink, temporal_formulas.overlapsFormula),
-        "S": (types.StartedByLink, temporal_formulas.started_byFormula),
-        "s": (types.StartsLink, temporal_formulas.startsFormula)}
+        "P": types.AfterLink,
+        "p": types.BeforeLink,
+        "D": types.ContainsLink,
+        "d": types.DuringLink,
+        "e": types.EqualsLink,
+        "F": types.FinishedByLink,
+        "f": types.FinishesLink,
+        "M": types.MetByLink,
+        "m": types.MeetsLink,
+        "O": types.OverlappedByLink,
+        "o": types.OverlapsLink,
+        "S": types.StartedByLink,
+        "s": types.StartsLink}
 
-
+    rules.append(TemporalCompositionRule(chainer,
+                                         link_type1,
+                                         link_type2,
+                                         output_type))
 
 
     # rules not only depend on link type, but also on type of first target
@@ -159,7 +170,10 @@ def create_temporal_rules(chainer):
 
     # directly evaluate temporal links
 
-    """
+
+
+def create_temporal_rules(chainer):
+    rules = []
     combinations = [
         (types.BeforeLink, temporal_formulas.beforeFormula),
         (types.OverlapsLink, temporal_formulas.overlapsFormula),
@@ -168,7 +182,6 @@ def create_temporal_rules(chainer):
         (types.StartsLink, temporal_formulas.startsFormula),
         (types.FinishesLink, temporal_formulas.finishesFormula),
         (types.EqualsLink, temporal_formulas.equalsFormula)]
-    """
 
     for (type, formula) in combinations:
         rules.append(TemporalRule(chainer, type, formula))
