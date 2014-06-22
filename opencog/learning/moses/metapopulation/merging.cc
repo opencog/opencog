@@ -553,13 +553,22 @@ void metapopulation::log_best_candidates() const
         return;
 
     if (best_candidates().empty())
-        logger().info("No new best candidates");
+        logger().info("No best candidates");
     else {
-        logger().info()
-           << "The following candidate(s) have the best score "
-           << best_composite_score();
-        for (const auto& cand : best_candidates()) {
-            logger().info() << "" << cand.get_tree();
+        if (not _params.do_boosting) {
+            logger().info()
+               << "The following candidate(s) have the best score "
+               << best_composite_score();
+            for (const auto& cand : best_candidates()) {
+                logger().info() << cand.get_score() << " " << cand.get_tree();
+            }
+        } else {
+            logger().info()
+               << "The following ensemble has the score "
+               << best_composite_score();
+            for (const auto& cand : best_candidates()) {
+                logger().info() << cand.get_weight() << " " << cand.get_tree();
+            }
         }
     }
 }

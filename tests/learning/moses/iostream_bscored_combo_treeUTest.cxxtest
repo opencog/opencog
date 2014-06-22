@@ -49,7 +49,7 @@ public:
 
         // build expected string
         std::stringstream oss;
-        ostream_scored_combo_tree(oss, bct, true, true, true);
+        ostream_scored_combo_tree(oss, bct);
         std::cout << "oss.str() = " << oss.str() << std::endl;
 
         // check that it is the same object parse by istream_scored_combo_tree

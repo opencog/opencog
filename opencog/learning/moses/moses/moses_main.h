@@ -114,7 +114,8 @@ struct metapop_printer
 
         const scored_combo_tree_set& tree_set = metapop.best_candidates();
 
-        // search for the top score...
+        // search for the top score... we need this, if printing only
+        // the high-scorers.
         score_t best_score = very_worst_score;
         if (output_only_best) {
             for (const scored_combo_tree& sct : tree_set) {
@@ -134,9 +135,10 @@ struct metapop_printer
                        << sct.get_weight() << " "
                        << sct.get_tree();
                     if (output_score)
-                       ss << sct.get_composite_score();
+                       ss << " " << sct.get_composite_score();
                     if (output_bscore)
-                       ss << sct.get_bscore();
+                       ss << " " << sct.get_bscore();
+                    ss << std::endl;
                 }
             }
         }
