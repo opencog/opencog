@@ -202,11 +202,13 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
 /**
  * Return the composite score of the highest-scoring tree in the metapop.
  */
-const composite_score& metapopulation::best_composite_score() const
+composite_score metapopulation::best_composite_score() const
 {
     if (not _params.do_boosting)
         return _best_cscore;
 
+    // XXX FIXME should probably not recompute every time ... 
+    // need to figure who is calling this method, and what they are expecting.
     return _cscorer.get_cscore(_ensemble.get_ensemble());
 }
 
@@ -240,15 +242,9 @@ const combo_tree& metapopulation::best_tree() const
 // Misc routines
 
 // Like above, but using std::cout.
-void metapopulation::print(long n,
-           bool output_score,
-           bool output_penalty,
-           bool output_bscore,
-           bool output_visited,
-           bool output_only_best)
+void metapopulation::print(long n, bool output_only_best)
 {
-    ostream(std::cout, n, output_score, output_penalty,
-            output_bscore, output_visited, output_only_best);
+    ostream(std::cout, n, output_only_best);
 }
 
 } // ~namespace moses

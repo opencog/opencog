@@ -346,9 +346,16 @@ typedef scored_combo_tree_ptr_set::const_iterator scored_combo_tree_ptr_set_cit;
 
 // =======================================================================
 // ostream functions
+static const std::string complexity_prefix_str = "complexity:";
+static const std::string complexity_penalty_prefix_str = "complexity penalty:";
+static const std::string diversity_penalty_prefix_str = "diversity penalty:";
+static const std::string penalized_score_prefix_str = "penalized score:";
+static const std::string behavioral_score_prefix_str = "behavioral score:";
+
 template<typename Out>
 Out& ostream_behavioral_score(Out& out, const behavioral_score& bs)
 {
+    out << behavioral_score_prefix_str << " ";
     return ostreamContainer(out, bs, " ", "[", "]");
 }
 
@@ -359,18 +366,9 @@ Out& ostream_behavioral_score(Out& out, const behavioral_score& bs)
  * @param bool output_python if true, output is a python module
  *             instead of a combo program XXX currently broken XXX
  */
-static const std::string complexity_prefix_str = "complexity:";
-static const std::string complexity_penalty_prefix_str = "complexity penalty:";
-static const std::string diversity_penalty_prefix_str = "diversity penalty:";
-static const std::string penalized_score_prefix_str = "penalized score:";
-static const std::string behavioral_score_prefix_str = "behavioral score:";
-
 template<typename Out>
 Out& ostream_scored_combo_tree(Out& out,
                                  const scored_combo_tree& sct,
-                                 bool output_score = true,
-                                 bool output_penalty = false,
-                                 bool output_bscore = false,
                                  bool output_python = false)
 {
     const combo::combo_tree& tr = sct.get_tree();
@@ -378,30 +376,23 @@ Out& ostream_scored_combo_tree(Out& out,
     const behavioral_score& bs = sct.get_bscore();
 
     if (output_python)
-        return ostream_combo_tree_cpbscore_python(out, tr, cs, bs,
-                                                  output_score,
-                                                  output_penalty,
-                                                  output_bscore);
+        return ostream_combo_tree_cpbscore_python(out, tr, cs, bs);
 
-    if (output_score)
-        out << std::setprecision(io_score_precision)
-            << cs.get_score() << " ";
-
+    out << cs;
+    out << " weight=" << sct.get_weight() << " ";
     out << tr << std::endl;
 
-    if (output_penalty)
-        out << complexity_prefix_str << " "
-            << cs.get_complexity() << std::endl
-            << complexity_penalty_prefix_str << " "
-            << cs.get_complexity_penalty() << std::endl
-            << diversity_penalty_prefix_str << " "
-            << cs.get_diversity_penalty() << std::endl
-            << penalized_score_prefix_str << " "
-            << cs.get_penalized_score() << std::endl;
+    out << complexity_prefix_str << " "
+        << cs.get_complexity() << std::endl
+        << complexity_penalty_prefix_str << " "
+        << cs.get_complexity_penalty() << std::endl
+        << diversity_penalty_prefix_str << " "
+        << cs.get_diversity_penalty() << std::endl
+        << penalized_score_prefix_str << " "
+        << cs.get_penalized_score() << std::endl;
 
-    if (output_bscore)
-        ostream_behavioral_score(out << behavioral_score_prefix_str << " ",
-                                 bs) << std::endl;
+    if (0 < bs.size())
+        ostream_behavioral_score(out, bs) << std::endl;
 
     return out;
 }
@@ -487,10 +478,7 @@ template<typename Out>
 Out& ostream_combo_tree_cpbscore_python(Out& out,
                                         const combo::combo_tree& tr,
                                         const composite_score& cs,
-                                        const behavioral_score& bs,
-                                        bool output_score = true,
-                                        bool output_penalty = false,
-                                        bool output_bscore = false)
+                                        const behavioral_score& bs)
 {
     out << "#!/usr/bin/env python" << std::endl
         << "from operator import *" << std::endl
@@ -503,21 +491,18 @@ Out& ostream_combo_tree_cpbscore_python(Out& out,
         << "    return all(args)" << std::endl
         << std::endl;
 
-    if (output_score) {
-        out << "#score: " << std::setprecision(io_score_precision)
-            << cs.get_score() << std::endl;
-    }
-    if (output_penalty) {
-        out << " #complexity: " << cs.get_complexity() << std::endl;
-        out << " #complexity_penalty: " << cs.get_complexity_penalty() << std::endl;
-        out << " #diversity_penalty: " << cs.get_diversity_penalty() << std::endl;
-    }
+    out << "#score: " << std::setprecision(io_score_precision)
+        << cs.get_score() << std::endl;
+
+    out << " #complexity: " << cs.get_complexity() << std::endl;
+    out << " #complexity_penalty: " << cs.get_complexity_penalty() << std::endl;
+    out << " #diversity_penalty: " << cs.get_diversity_penalty() << std::endl;
 
     out << std::endl << "def moses_eval(i):" << std::endl << "    return ";
     ostream_combo_tree(out, tr, combo::fmt::python);
     out << std::endl;
 
-    if (output_bscore) {
+    if (0 < bs.size()) {
         out << std::endl<< "#bscore: " ;
         ostream_behavioral_score(out, bs);
         out << std::endl;

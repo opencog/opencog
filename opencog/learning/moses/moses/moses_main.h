@@ -99,10 +99,6 @@ struct metapop_printer
         stringstream ss;
         metapop.ostream(ss,
                         result_count,
-                        output_score,
-                        output_penalty,
-                        output_bscore,
-                        false,  // output_visited
                         output_only_best,
                         output_python); 
     
@@ -121,7 +117,7 @@ struct metapop_printer
     
         // Log the best candidate
         stringstream ssb;
-        metapop.ostream(ssb, 1, true, true);
+        metapop.ostream(ssb, 1, true);
         string resb = (output_with_labels && !ilabels.empty()?
                        ph2l(ssb.str(), ilabels) : ssb.str());
         if (resb.empty())

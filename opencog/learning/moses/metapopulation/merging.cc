@@ -186,7 +186,7 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
             std::stringstream ss;
             ss << "Candidates to merge with the metapopulation:" << std::endl;
             for (const auto& cnd : candidates)
-                ostream_scored_combo_tree(ss, cnd, true, true);
+                ss << cnd;
             logger().fine(ss.str());
         }
     }
@@ -318,7 +318,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
             ss << "Candidates with their bscores before"
                 " removing the dominated candidates" << std::endl;
             for (const auto& cnd : candidates)
-                ostream_scored_combo_tree(ss, cnd, true, true, true);
+                ss << cnd;
             logger().fine(ss.str());
         }
 
@@ -332,7 +332,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
             ss << "Candidates with their bscores after"
                 " removing the dominated candidates" << std::endl;
             for (const auto& cnd : candidates)
-                ostream_scored_combo_tree(ss, cnd, true, true, true);
+                ss << cnd;
             logger().fine(ss.str());
         }
     }

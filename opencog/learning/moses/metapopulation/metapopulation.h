@@ -130,7 +130,7 @@ public:
     ~metapopulation() {}
 
     const scored_combo_tree_set& best_candidates() const;
-    const composite_score& best_composite_score() const;
+    composite_score best_composite_score() const;
     const combo_tree& best_tree() const;
 
     /**
@@ -441,25 +441,15 @@ public:
     // Like above, but assumes that from = begin() and to = end().
     template<typename Out>
     Out& ostream(Out& out, long n = -1,
-                 bool output_score = true,
-                 bool output_penalty = false,
-                 bool output_bscore = false,
-                 bool output_visited = false,
                  bool output_only_best = false,
                  bool output_python = false)
     {
-        return ostream(out, _scored_trees.begin(), _scored_trees.end(),
-                       n, output_score, output_penalty, output_bscore,
-                       output_visited, output_only_best, output_python);
+        return ostream_metapop(out, _scored_trees.begin(), _scored_trees.end(),
+                       n, output_only_best, output_python);
     }
 
     // Like above, but using std::cout.
-    void print(long n = -1,
-               bool output_score = true,
-               bool output_penalty = false,
-               bool output_bscore = false,
-               bool output_visited = false,
-               bool output_only_best = false);
+    void print(long n = -1, bool output_only_best = false);
 
 private:
     void log_selected_exemplar(scored_combo_tree_ptr_set::const_iterator);
@@ -473,22 +463,15 @@ private:
      * candidates are not necessarily those with the best raw score.
      */
     template<typename Out, typename In>
-    Out& ostream(Out& out, In from, In to, long n = -1,
-                 bool output_score = true,
-                 bool output_penalty = false,
-                 bool output_bscore = false,
-                 bool output_visited = false,
-                 bool output_only_best = false,
-                 bool output_python = false)
+    Out& ostream_metapop(Out& out, In from, In to, long n = -1,
+                         bool output_only_best = false,
+                         bool output_python = false)
     {
         if (!output_only_best) {
             for (; from != to && n != 0; ++from, n--) {
-                ostream_scored_combo_tree(out, *from, output_score,
-                                          output_penalty, output_bscore,
-                                          output_python);
-                if (output_visited)
-                    out << "visited: " << has_been_visited(*from)
-                        << std::endl;
+                ostream_scored_combo_tree(out, *from, output_python);
+                out << "visited: " << has_been_visited(*from)
+                    << std::endl;
             }
             return out;
         }
@@ -509,12 +492,9 @@ private:
         for (In f = from; f != to && n != 0; ++f, n--) {
             const scored_combo_tree& bt = *f;
             if (best_score <= bt.get_score()) {
-                ostream_scored_combo_tree(out, bt, output_score,
-                                          output_penalty, output_bscore,
-                                          output_python);
-                if (output_visited)
-                    out << "visited:" << has_been_visited(bt)
-                        << std::endl;
+                ostream_scored_combo_tree(out, bt, output_python);
+                out << "visited:" << has_been_visited(bt)
+                    << std::endl;
             }
         }
         return out;
