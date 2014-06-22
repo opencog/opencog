@@ -83,23 +83,23 @@ bscore_base::operator()(const scored_combo_tree_set& ensemble) const
  */
 complexity_t bscore_base::get_complexity(const scored_combo_tree_set& ensemble) const
 {
-	if (0 == ensemble.size()) return 0.0;
+    if (0 == ensemble.size()) return 0.0;
 
-	complexity_t cpxy = 0.0;
-	complexity_t norm = 0.0;
-	for (const scored_combo_tree& sct : ensemble) {
-		complexity_t w = sct.get_weight();
-		cpxy += w * tree_complexity(sct.get_tree());
-		norm += w;
-std::cout << "duude its "<< sct<<std::endl;
-	}
+    double cpxy = 0.0;
+    double norm = 0.0;
+    for (const scored_combo_tree& sct : ensemble) {
+        double w = sct.get_weight();
+        cpxy += w * tree_complexity(sct.get_tree());
+        norm += w;
+    }
 
-	return cpxy / norm;
+    // XXX FIXME complexity_t should be a double not an int ...
+    return (complexity_t) floor (cpxy / norm + 0.5);
 }
 
 score_t simple_ascore::operator()(const behavioral_score& bs) const
 {
-	return boost::accumulate(bs, 0.0);
+    return boost::accumulate(bs, 0.0);
 }
 
 } // ~namespace moses

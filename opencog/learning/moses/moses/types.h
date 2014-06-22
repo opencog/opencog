@@ -378,18 +378,9 @@ Out& ostream_scored_combo_tree(Out& out,
     if (output_python)
         return ostream_combo_tree_cpbscore_python(out, tr, cs, bs);
 
-    out << cs;
+    out << cs << std::endl;
     out << " weight=" << sct.get_weight() << " ";
     out << tr << std::endl;
-
-    out << complexity_prefix_str << " "
-        << cs.get_complexity() << std::endl
-        << complexity_penalty_prefix_str << " "
-        << cs.get_complexity_penalty() << std::endl
-        << diversity_penalty_prefix_str << " "
-        << cs.get_diversity_penalty() << std::endl
-        << penalized_score_prefix_str << " "
-        << cs.get_penalized_score() << std::endl;
 
     if (0 < bs.size())
         ostream_behavioral_score(out, bs) << std::endl;
@@ -522,6 +513,7 @@ inline std::ostream& operator<<(std::ostream& out,
     return out << "[score="
                << std::setprecision(moses::io_score_precision)
                << ts.get_score()
+               << ", penalized score=" << ts.get_penalized_score()
                << ", complexity=" << ts.get_complexity()
                << ", complexity penalty=" << ts.get_complexity_penalty()
                << ", diversity penalty=" << ts.get_diversity_penalty()
