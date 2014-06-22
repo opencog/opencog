@@ -74,6 +74,19 @@ bscore_base::operator()(const scored_combo_tree_set& ensemble) const
     return behavioral_score();
 }
 
+complexity_t bscore_base::get_complexity(const scored_combo_tree_set& ensemble) const
+{
+	complexity_t cpxy = 0.0;
+	complexity_t norm = 0.0;
+	for (const scored_combo_tree& sct : ensemble) {
+		complexity_t w = sct.get_weight();
+		cpxy += w * tree_complexity(sct.get_tree());
+		norm += w;
+	}
+
+	return cpxy / norm;
+}
+
 score_t simple_ascore::operator()(const behavioral_score& bs) const
 {
 	return boost::accumulate(bs, 0.0);

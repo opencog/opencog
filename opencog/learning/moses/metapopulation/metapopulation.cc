@@ -68,9 +68,8 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars)
     scored_combo_tree_set candidates;
     for (const combo_tree& base : exemplars) {
 
-        behavioral_score bs(_cscorer.get_bscore(base));
-        composite_score csc(_cscorer.get_cscore(bs));
-        scored_combo_tree sct(base, demeID_t(), csc, bs);
+        composite_score csc(_cscorer.get_cscore(base));
+        scored_combo_tree sct(base, demeID_t(), csc);
 
         candidates.insert(sct);
     }
@@ -205,7 +204,10 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
  */
 const composite_score& metapopulation::best_composite_score() const
 {
-    return _best_cscore;
+    if (not _params.do_boosting)
+        return _best_cscore;
+
+    return _cscorer.get_cscore(_ensemble.get_ensemble());
 }
 
 /**

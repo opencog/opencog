@@ -102,6 +102,7 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     {
         return tree_complexity(tr);
     }
+    virtual complexity_t get_complexity(const scored_combo_tree_set&) const;
 
     /// Return the complexity coefficient.  This is used to obtain the
     /// complexity penalty for the score, which is meant to be computed

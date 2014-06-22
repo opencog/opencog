@@ -69,6 +69,9 @@ behavioral_score logical_bscore::operator()(const combo_tree& tr) const
     combo::complete_truth_table tt(tr, _arity);
     behavioral_score bs(_target.size());
 
+    // Compare the predictions of the tree to that of the desired
+    // result. A correct prdiction gets a score of 0, an incorrect
+    // prediction gets a score of -1.
     boost::transform(tt, _target, bs.begin(), [](bool b1, bool b2) {
             return -score_t(b1 != b2); });
 
@@ -82,6 +85,9 @@ behavioral_score logical_bscore::operator()(const combo_tree& tr) const
 behavioral_score logical_bscore::operator()(const scored_combo_tree_set& ensemble) const
 {
     size_t sz = _target.size();
+
+    // Step 1: accumulate the weighted prediction of each tree in
+    // the ensemble.
     behavioral_score hypoth(sz);
     for (const scored_combo_tree& sct: ensemble) {
         combo::complete_truth_table tt(sct.get_tree(), _arity);
@@ -95,6 +101,10 @@ behavioral_score logical_bscore::operator()(const scored_combo_tree_set& ensembl
         }
     }
 
+    // Step 2: compare the prediction of the ensemble to the desired
+    // result. The array "hypoth" is positive to predict true, and
+    // negative to predict false.  The resulting score is 0 if corrrect,
+    // and -1 if incorrect.
     behavioral_score bs(sz);
     boost::transform(hypoth, _target, bs.begin(),
         [](score_t hyp, bool b2) {

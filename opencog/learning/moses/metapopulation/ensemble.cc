@@ -107,19 +107,6 @@ std::cout << "duuude best " << *best_p  << " err=" << err << " alpha=" << alpha 
 		// Remove from the set of candidates.
 		cands.erase(best_p);
 
-		// Obtain cumulative score. XXX This can't stay here.
-		double cum = 0.0;
-		for (const scored_combo_tree& sct : _scored_trees)
-		{
-			double tree_weight = sct.get_weight();
-			double raw_score = sct.get_score();
-			raw_score *= 2.0;
-			raw_score += behave_len;
-std::cout << "duuude raw= " << raw_score << " wieght=" << tree_weight <<" tre="<< sct<<std::endl;
-			cum += tree_weight * raw_score;
-		}
-std::cout << "duuude cum score is " << cum << std::endl;
-
 		// Are we done yet?
 		promoted ++;
 		if (_params.num_to_promote < promoted) break;

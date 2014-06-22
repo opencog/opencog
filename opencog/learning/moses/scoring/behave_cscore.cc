@@ -35,6 +35,11 @@ behavioral_score behave_cscore::get_bscore(const combo_tree& tr) const
     return _bscorer(tr);
 }
 
+behavioral_score behave_cscore::get_bscore(const scored_combo_tree_set& ensemble) const
+{
+    return _bscorer(ensemble);
+}
+
 composite_score behave_cscore::get_cscore(const combo_tree& tr)
 {
     behavioral_score bs;
@@ -72,23 +77,20 @@ composite_score behave_cscore::get_cscore(const combo_tree& tr)
     return composite_score(res, cpxy, cpxy * cpxy_coef, 0.0);
 }
 
-composite_score behave_cscore::get_cscore(const behavioral_score& bs)
+composite_score behave_cscore::get_cscore(const scored_combo_tree_set& ensemble)
 {
+    behavioral_score bs(get_bscore(ensemble));
     score_t res = _ascorer(bs);
 
-#if 0
-XXX FIXME
-    complexity_t cpxy = _bscorer.get_complexity(tr);
+    complexity_t cpxy = _bscorer.get_complexity(ensemble);
     score_t cpxy_coef = _bscorer.get_complexity_coef();
     if (logger().isFineEnabled()) {
-        logger().fine() << "behave_cscore: " << res
+        logger().fine() << "ensemble behave_cscore: " << res
                         << " complexity: " << cpxy
                         << " cpxy_coeff: " << cpxy_coef;
     }
-    return composite_score(res, cpxy, cpxy * cpxy_coef, 0.0);
-#endif
 
-    return composite_score(res, 0, 0, 0.0);
+    return composite_score(res, cpxy, cpxy * cpxy_coef, 0.0);
 }
 
 score_t behave_cscore::best_possible_score() const

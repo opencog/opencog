@@ -87,8 +87,6 @@ private:
     boosting_ascore* _booster;
 
     scored_combo_tree_set _scored_trees;
-
-    // The below are actually paramaters, and should be 
 };
 
 }}; // namespace opencog::moses
