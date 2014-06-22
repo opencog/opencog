@@ -2,7 +2,7 @@ __author__ = 'hujie'
 
 from opencog.cogserver import MindAgent
 from opencog.atomspace import types, AtomSpace, TruthValue
-from opencog.scheme_wrapper import scheme_eval_h, __init__
+from opencog.scheme_wrapper import scheme_eval_h,scheme_eval, __init__
 import Queue
 
 class BindLinkExecution():
@@ -58,7 +58,7 @@ class HobbsAgent(MindAgent):
     def sortChildren(self,list):
         sorted(list,key=self.getWordNUmber)
 
-    def getChildrens(self,node):
+    def getChildren(self,node):
         rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind getChildren)',self.currentResult)
         self.sortChildren(rv)
         return rv
@@ -72,14 +72,14 @@ class HobbsAgent(MindAgent):
         while not q.empty():
             front=q.get()
             self.propose(front)
-            childrens=self.getChildrens(front)
+            childrens=self.getChildren(front)
             for node in childrens:
                 if not self.Checked(node):
                     self.checked[node.name]=True
                     q.put(node)
 
     def getPronouns(self):
-        return self.bindLinkExe(None,None,'(cog-bind pronoun-finder)',self.atomspace.get_atoms_by_name(types.AnchorNode,"Recent Unresolved references"))
+        return self.bindLinkExe(None,None,'(cog-bind pronoun-finder)',self.unresolvedReferences)
 
     def getRoots(self):
         return self.bindLinkExe(None,None,'(cog-bind-crisp getRoots)',self.currentResult)
@@ -114,15 +114,23 @@ class HobbsAgent(MindAgent):
                 maxTarget=item
         return maxTarget
 
-    def run(self, atomspace):
+    def initilization(self,atomspace):
         self.atomspace = atomspace
-        self.pronouns = self.getPronouns()
-        self.roots = self.getRoots()
+
         self.currentPronounNode = atomspace.add_node(types.AnchorNode, 'CurrentPronoun', TruthValue(1.0, 100))
         self.currentTarget = atomspace.add_node(types.AnchorNode, 'CurrentTarget', TruthValue(1.0, 100))
         self.currentResult = atomspace.add_node(types.AnchorNode, 'CurrentResult', TruthValue(1.0, 100))
         self.currentProposal = atomspace.add_node(types.AnchorNode, 'CurrentProposal', TruthValue(1.0, 100))
+        self.unresolvedReferences=atomspace.add_node(types.AnchorNode, 'Recent Unresolved references', TruthValue(1.0, 100))
         self.pronounNumber = -1
+
+
+
+
+        self.pronouns = self.getPronouns()
+        self.roots = self.getRoots()
+    def run(self, atomspace):
+        self.initilization(atomspace)
 
         for pronoun in self.pronouns:
             self.checked=[]
