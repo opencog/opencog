@@ -11,3 +11,4 @@ Flask==0.10.1
 Flask-RESTful==0.2.5
 mock==1.0.1
 six==1.4.1
+graphviz==0.3.4

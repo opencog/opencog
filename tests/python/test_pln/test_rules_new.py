@@ -132,7 +132,7 @@ class PLNUnitTester(TestCase):
 
             coreTypes = binFolder + "/opencog/atomspace/core_types.scm"
             utilities = sourceFolder + "/opencog/scm/utilities.scm"
-            plnTypes = binFolder + "/opencog/learning/pln/pln_types.scm"
+            plnTypes = binFolder + "/opencog/reasoning/pln/pln_types.scm"
 
         self.load_file_into_atomspace(coreTypes, atomspaceToReset)
         self.load_file_into_atomspace(utilities, atomspaceToReset)

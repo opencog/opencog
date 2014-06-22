@@ -6,10 +6,11 @@
 #       handled automatically using requirements.txt
 
 # Required:
-easy_install Flask
-easy_install -U mock
-easy_install -U flask-restful
-easy_install six
+pip install Flask
+pip install -U mock
+pip install -U flask-restful
+pip install six
+pip install graphviz
 
 # Optional:
-easy_install requests
+pip install requests
