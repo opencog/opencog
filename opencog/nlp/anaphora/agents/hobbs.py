@@ -82,7 +82,7 @@ class HobbsAgent(MindAgent):
         return self.bindLinkExe(None,None,'(cog-bind pronoun-finder)',self.atomspace.get_atoms_by_name(types.AnchorNode,"Recent Unresolved references"))
 
     def getRoots(self):
-        return self.bindLinkExe(None,None,'(cog-bind getRoots)',self.currentResult)
+        return self.bindLinkExe(None,None,'(cog-bind-crisp getRoots)',self.currentResult)
 
     def getRootOfNode(self,target):
         '''
