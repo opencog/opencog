@@ -27,6 +27,7 @@
 #define _OPENCOG_METAPOPULATION_H
 
 #include <atomic>
+#include <limits>
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
@@ -438,71 +439,13 @@ public:
     // log the best candidates
     void log_best_candidates() const;
 
-    // Like above, but assumes that from = begin() and to = end().
-    template<typename Out>
-    Out& ostream(Out& out, long n = -1,
-                 bool output_only_best = false,
-                 bool output_python = false)
-    {
-        return ostream_metapop(out, _scored_trees.begin(), _scored_trees.end(),
-                       n, output_only_best, output_python);
-    }
-
-    // Like above, but using std::cout.
-    void print(long n = -1, bool output_only_best = false);
+    std::ostream& ostream_metapop(std::ostream&, int n = INT_MAX) const;
 
 private:
     void log_selected_exemplar(scored_combo_tree_ptr_set::const_iterator);
 
-    /**
-     * stream out the metapopulation in decreasing order of their
-     * score along with their scores (optionally complexity and
-     * bscore).  If n is negative, then stream them all out.  Note
-     * that the default sort order for the metapop is a penalized
-     * scores and the smallest complexities, so that the best-ranked
-     * candidates are not necessarily those with the best raw score.
-     */
-    template<typename Out, typename In>
-    Out& ostream_metapop(Out& out, In from, In to, long n = -1,
-                         bool output_only_best = false,
-                         bool output_python = false)
-    {
-        if (!output_only_best) {
-            for (; from != to && n != 0; ++from, n--) {
-                ostream_scored_combo_tree(out, *from, output_python);
-                out << "visited: " << has_been_visited(*from)
-                    << std::endl;
-            }
-            return out;
-        }
-
-        // Else, search for the top score...
-        score_t best_score = very_worst_score;
-
-        for (In f = from; f != to; ++f) {
-            const scored_combo_tree& bt = *f;
-            score_t sc = bt.get_score();
-            if (best_score < sc) best_score = sc;
-        }
-
-        // And print only the top scorers.
-        // The problem here is that the highest scorers are not
-        // necessarily ranked highest, as the ranking is a linear combo
-        // of both score and complexity.
-        for (In f = from; f != to && n != 0; ++f, n--) {
-            const scored_combo_tree& bt = *f;
-            if (best_score <= bt.get_score()) {
-                ostream_scored_combo_tree(out, bt, output_python);
-                out << "visited:" << has_been_visited(bt)
-                    << std::endl;
-            }
-        }
-        return out;
-    }
-
-
-    // --------------------- Internal state -----------------------
 protected:
+    // --------------------- Internal state -----------------------
     const metapop_parameters& _params;
 
     behave_cscore& _cscorer;

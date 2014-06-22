@@ -151,5 +151,108 @@ bool composite_score::operator==(const composite_score &r) const
         ;
 }
 
+static const std::string behavioral_score_prefix_str = "behavioral score:";
+
+std::ostream& ostream_behavioral_score(std::ostream& out, const behavioral_score& bs)
+{
+    out << behavioral_score_prefix_str << " ";
+    return ostreamContainer(out, bs, " ", "[", "]");
+}
+
+/** stream out a scored combo tree */
+std::ostream& ostream_scored_combo_tree(std::ostream& out, const scored_combo_tree& sct)
+{
+    out << sct.get_composite_score() << std::endl;
+    out << "weight=" << sct.get_weight() << " " << sct.get_tree();
+
+    const behavioral_score& bs = sct.get_bscore();
+    if (0 < bs.size()) {
+        out << std::endl;
+        ostream_behavioral_score(out, bs);
+    }
+
+    return out;
+}
+
+
+/// Stream in scored_combo_tree, use the same format as
+/// ostream_scored_combo_tree. Note that for now we assume that combo
+/// tree is always preceeded by the score, it's easier that way.
+///
+/// You may want to set 'in' to send exceptions if something goes wrong
+/// such as
+///
+/// in.exceptions(ifstream::failbit | ifstream::badbit | ifstream::eofbit);
+///
+/// so a bad parse is detected (maybe istream_scored_combo_tree should
+/// set it automatically).
+///
+/// TODO: if the istream doesn't end by a bscore then it will
+/// completely exhaust it.
+scored_combo_tree istream_scored_combo_tree(std::istream& in)
+{
+    static const std::string complexity_prefix_str = "complexity:";
+    static const std::string complexity_penalty_prefix_str = "complexity penalty:";
+    static const std::string diversity_penalty_prefix_str = "diversity penalty:";
+    static const std::string penalized_score_prefix_str = "penalized score:";
+
+    // parse score
+    score_t sc;
+    in >> sc;
+
+    // parse combo tree
+    combo::combo_tree tr;
+    in >> tr;
+
+    // parse the rest
+    complexity_t cpx = 0;
+    score_t cpx_penalty = 0, diversity_penalty = 0, penalized_score = 0;
+    behavioral_score bs;
+    // whitespace, function split
+    auto ssplit = [](const std::string& s) {
+        std::vector<std::string> res;
+        boost::split(res, s, boost::algorithm::is_space());
+        return res;
+    };
+    std::vector<std::string> complexity_penalty_prefix_str_split =
+        ssplit(complexity_penalty_prefix_str);
+    std::vector<std::string> diversity_penalty_prefix_str_split =
+        ssplit(diversity_penalty_prefix_str);
+    std::vector<std::string> penalized_score_prefix_str_split =
+        ssplit(penalized_score_prefix_str);
+    std::vector<std::string> behavioral_score_prefix_str_split =
+        ssplit(behavioral_score_prefix_str);
+    while (in.good()) {
+        std::string token;
+        in >> token;
+        if (token == complexity_prefix_str)
+            in >> cpx;
+        else if (token == complexity_penalty_prefix_str_split[0]) {
+            in >> token;        // complexity_penalty_prefix_str_split[1]
+            in >> cpx_penalty;
+        }
+        else if (token == diversity_penalty_prefix_str_split[0]) {
+            in >> token;        // diversity_penalty_prefix_str_split[1]
+            in >> diversity_penalty;
+        }
+        else if (token == penalized_score_prefix_str_split[0]) {
+            in >> token;        // penalized_score_prefix_str_split[1]
+            in >> penalized_score;
+        }
+        else if (token == behavioral_score_prefix_str_split[0]) {
+            in >> token;        // behavioral_score_prefix_str_split[1]
+            istreamContainer(in, back_inserter(bs), "[", "]");
+            break;              // that way we don't consume 'in' further
+        }
+    }
+    // assign to candidate
+    combo::combo_tree tr_test = tr;
+
+    composite_score cs(sc, cpx, cpx_penalty, diversity_penalty);
+    return scored_combo_tree(tr, /* default demeID */ 0, cs, bs);
+}
+
+
+
 } // ~namespace moses
 } // ~namespace opencog

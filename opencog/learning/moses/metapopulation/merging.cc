@@ -454,7 +454,8 @@ void metapopulation::resize_metapop()
         if (logger().isFineEnabled()) {
             std::stringstream ss;
             ss << "Metapopulation:" << std::endl;
-            logger().fine(ostream(ss, -1, true, true).str());
+            ostream_metapop(ss);
+            logger().fine(ss.str());
         }
     }
 }

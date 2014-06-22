@@ -237,14 +237,15 @@ const combo_tree& metapopulation::best_tree() const
     return best_candidates().begin()->get_tree();
 }
 
-
-// -------------------------------------------------------------------
-// Misc routines
-
-// Like above, but using std::cout.
-void metapopulation::print(long n, bool output_only_best)
+std::ostream& metapopulation::ostream_metapop(std::ostream& out, int maxcnt) const
 {
-    ostream(std::cout, n, output_only_best);
+    const scored_combo_tree_set& tree_set = best_candidates();
+    int cnt = 0;
+    for (const scored_combo_tree& sct : tree_set) {
+        if (maxcnt < ++cnt) break;
+        out << sct;
+    }
+    return out;
 }
 
 } // ~namespace moses
