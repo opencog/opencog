@@ -26,7 +26,9 @@ class BindLinkExecution():
         rv=[]
         listOfLinks=self.resultNode.incoming
         for link in listOfLinks:
-            rv.append((link.out)[1])
+            atom=(link.out)[1]
+            if atom.type!=types.VariableNode:
+                rv.append(atom)
         return rv
 
     def clear(self):
