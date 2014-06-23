@@ -11,7 +11,7 @@
         (ImplicationLink
             (AndLink
                 (ListLink
-                    (AnchorNode "currentTarget")
+                    (AnchorNode "CurrentTarget")
                     (VariableNode "$target")
                 )
                 (EvaluationLink
@@ -23,7 +23,7 @@
                 )
             )
             (ListLink
-                (AnchorNode "ChildrenAnchorNode")
+                (AnchorNode "CurrentResult")
                 (VariableNode "$child")
             )
         )

@@ -67,6 +67,8 @@ data=["opencog/scm/config.scm",
       "opencog/nlp/anaphora/rules/getRoots.scm",
       "opencog/nlp/anaphora/rules/getPronouns.scm",
       "opencog/nlp/anaphora/rules/propose.scm",
+      "opencog/nlp/anaphora/rules/getResults.scm",
+
       "opencog/nlp/anaphora/tests/atomspace.scm"
     ]
 #status2 = load_scm(atomspace, "opencog/nlp/anaphora/tests/atomspace.scm")
@@ -74,8 +76,8 @@ data=["opencog/scm/config.scm",
 for item in data:
     load_scm(atomspace, item)
 
-dump=dumpAgent()
-dump.run(atomspace)
+#dump=dumpAgent()
+#dump.run(atomspace)
 hobbsAgent = HobbsAgent()
 hobbsAgent.run(atomspace)
 

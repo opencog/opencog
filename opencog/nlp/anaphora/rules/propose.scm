@@ -21,8 +21,12 @@
         (ImplicationLink
             (AndLink
                 (ListLink
-                    (AnchorNode "currentProposal")
-                    (VariableNode "$word-inst-anaphor")
+                  (AnchorNode "CurrentPronoun")
+                  (VariableNode "$word-inst-anaphor")
+                )
+                (ListLink
+                    (AnchorNode "CurrentProposal")
+                    (VariableNode "$word-inst-antecedent")
                 )
                 (PartOfSpeechLink
                     (VariableNode "$word-inst-antecedent")

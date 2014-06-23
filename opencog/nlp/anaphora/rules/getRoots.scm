@@ -42,7 +42,7 @@
                 )
             )
             (ListLink
-                (AnchorNode "currentTarget")
+                (AnchorNode "CurrentResult")
                 (VariableNode "$root")
             )
         )

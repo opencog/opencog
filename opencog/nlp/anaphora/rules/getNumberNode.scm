@@ -7,7 +7,7 @@
         (ImplicationLink
             (AndLink
                 (ListLink
-                    (AnchorNode "currentTarget")
+                    (AnchorNode "CurrentTarget")
                     (VariableNode "$target")
                 )
                 (WordSequenceLink
@@ -16,7 +16,7 @@
                 )
             )
             (ListLink
-                (AnchorNode "currentResult")
+                (AnchorNode "CurrentResult")
                 (VariableNode "$number")
             )
         )
