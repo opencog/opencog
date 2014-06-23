@@ -45,18 +45,6 @@ using boost::asio::ip::tcp;
 std::vector<RouterServerSocket*> Router::serverSockets;
 bool Router::stopListenerThreadFlag = false;
 
-Router::~Router()
-{
-    if (!Router::stopListenerThreadFlag) {
-        Router::stopListenerThread();
-    }
-
-    foreach(RouterServerSocket* rss, serverSockets) {
-        delete rss;
-    }
-
-}
-
 Router::Router()
 {
 
@@ -81,6 +69,19 @@ Router::Router()
 
     pthread_mutex_init(&unavailableIdsLock, NULL);
     stopListenerThreadFlag = false;
+}
+
+Router::~Router()
+{
+    if (!Router::stopListenerThreadFlag) {
+        Router::stopListenerThread();
+    }
+
+    for(RouterServerSocket* rss : serverSockets) {
+        delete rss;
+    }
+
+    delete(messageCentral);
 }
 
 void Router::startListener()
