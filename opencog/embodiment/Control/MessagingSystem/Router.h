@@ -378,7 +378,7 @@ public:
      * logged in the Router. This information will be used in router
      * recovery strategies
      */
-    void persistState();
+    void persistState() const;
 
     /**
      * Notify a component that a message has been sent to it.

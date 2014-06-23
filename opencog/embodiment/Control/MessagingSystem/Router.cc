@@ -379,7 +379,7 @@ void Router::clearNetworkElementMessageQueue(const std::string &id)
     messageCentral->clearQueue(id);
 }
 
-void Router::persistState()
+void Router::persistState() const
 {
     // TODO: add some timestamp info to filename
     std::string path = config().get("ROUTER_DATABASE_DIR");
