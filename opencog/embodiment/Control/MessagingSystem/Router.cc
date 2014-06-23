@@ -293,7 +293,7 @@ void Router::closeControlSocket(const std::string &id)
         tcp::socket* sock = it->second;
         sock->close();
         delete sock;
-        controlSockets.erase(id);
+        controlSockets.erase(it);
         logger().debug("Closed control socket for element '%s'.", id.c_str());
     }
 }
@@ -306,7 +306,7 @@ void Router::closeDataSocket(const std::string &id)
         tcp::socket* sock = it->second;
         sock->close();
         delete sock;
-        dataSockets.erase(id);
+        dataSockets.erase(it);
         logger().debug("Closed data socket for element '%s'.", id.c_str());
     }
 }
