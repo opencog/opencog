@@ -53,6 +53,7 @@ void AttentionalFocusCBUTest::tearDown(void){
 
 }
 void AttentionalFocusCBUTest::setUp(void) {
+
 	pm.set_atomspace(as);
 
 	config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
