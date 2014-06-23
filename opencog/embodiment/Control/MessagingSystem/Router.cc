@@ -174,46 +174,29 @@ void Router::run()
         }
 
         // copy set of elements whose availability notification is to be sent to a local variable
-        std::set<std::string> localToNotifyAvailability;
         pthread_mutex_lock(&unavailableIdsLock);
-        for (std::set<std::string>::iterator it = Router::toNotifyAvailability.begin();
-                it != Router::toNotifyAvailability.end(); it++) {
-            localToNotifyAvailability.insert(*it);
-        }
-        Router::toNotifyAvailability.clear();
+        std::set<std::string> localToNotifyAvailability(toNotifyAvailability);
+        toNotifyAvailability.clear();
         pthread_mutex_unlock(&unavailableIdsLock);
 
         //logger().debug("Router - Checked pending availability notifications: %d", localToNotifyAvailability.size());
 
         // Now sends the available element notifications
-        if (!localToNotifyAvailability.empty()) {
-            for (std::set<std::string>::iterator it = localToNotifyAvailability.begin();
-                    it != localToNotifyAvailability.end(); it++) {
-                notifyElementAvailability(*it, true);
-            }
-        }
-
+        for (const std::string& id : localToNotifyAvailability)
+            notifyElementAvailability(id, true);
 
         // copy set of elements whose unavailability notification is to be sent to a local variable
-        std::set<std::string> localToNotifyUnavailability;
         pthread_mutex_lock(&unavailableIdsLock);
-        for (std::set<std::string>::iterator it = Router::toNotifyUnavailability.begin();
-                it != Router::toNotifyUnavailability.end(); it++) {
-            localToNotifyUnavailability.insert(*it);
-        }
-        Router::toNotifyUnavailability.clear();
+        std::set<std::string> localToNotifyUnavailability(toNotifyUnavailability);
+        toNotifyUnavailability.clear();
         pthread_mutex_unlock(&unavailableIdsLock);
 
         //logger().debug("Router - Checked pending unavailability notifications: %d",
         //  localToNotifyUnavailability.size());
 
         // Now sends the unavailable element notifications
-        if (!localToNotifyUnavailability.empty()) {
-            for (std::set<std::string>::iterator it = localToNotifyUnavailability.begin();
-                    it != localToNotifyUnavailability.end(); it++) {
-                notifyElementAvailability(*it, false);
-            }
-        }
+        for (const std::string& id : localToNotifyUnavailability)
+            notifyElementAvailability(id, false);
 
         // NOTE: Uncomment the code to test a way to make router fail and raise
         // an execption
@@ -331,24 +314,21 @@ void Router::closeDataSocket(const std::string &id)
 int Router::addNetworkElement(const std::string &strId, const std::string &strIp, int port)
 {
 
-    std::string ip;
-    std::string id;
-    id.assign(strId);
-    ip.assign(strIp);
+    std::string id(strId);
+    std::string ip(strIp);
     int errorCode = NO_ERROR;
 
     ipAddress[id] = ip;
     portNumber[id] = port;
-    logger().debug(
-                 "Router - Adding component: '%s' - IP: '%s', Port: '%d'.",
-                 id.c_str(), ipAddress[id].c_str(), port);
+    logger().debug("Router - Adding component: '%s' - IP: '%s', Port: '%d'.",
+                   id.c_str(), ipAddress[id].c_str(), port);
 
     // new data inserted, updates persisted router table
     try {
         persistState();
     } catch (IOException& e) { }
 
-    // erease all messages from queue if have any
+    // erase all messages from queue if have any
     if (id == config().get("LS_ID") ||
         id == config().get("SPAWNER_ID")) {
 
@@ -381,13 +361,10 @@ int Router::addNetworkElement(const std::string &strId, const std::string &strIp
 
 void Router::removeNetworkElement(const std::string &id)
 {
-    std::string networkId;
-    networkId.assign(id);
-
-    ipAddress.erase(networkId);
-    portNumber.erase(networkId);
-    closeControlSocket(networkId);
-    closeDataSocket(networkId);
+    ipAddress.erase(id);
+    portNumber.erase(id);
+    closeControlSocket(id);
+    closeDataSocket(id);
 
     messageCentral->removeQueue(id);
 
@@ -423,11 +400,10 @@ void Router::persistState()
 
     try {
 
-        std::map<std::string, std::string>::const_iterator it;
-        for (it = ipAddress.begin(); it != ipAddress.end(); it++) {
+        for (const auto& IdIp : ipAddress) {
 
-            std::string id = (*it).first;
-            std::string ip = (*it).second;
+            std::string id = IdIp.first;
+            std::string ip = IdIp.second;
             std::string port = toString(getPortNumber(id));
 
             // save data
@@ -744,7 +720,7 @@ void Router::markElementAvailable(const std::string& ne_id)
     pthread_mutex_lock(&unavailableIdsLock);
     if (unavailableIds.find(ne_id) != unavailableIds.end()) {
         unavailableIds.erase(ne_id);
-        Router::toNotifyAvailability.insert(ne_id);
+        toNotifyAvailability.insert(ne_id);
     }
     pthread_mutex_unlock(&unavailableIdsLock);
 }
