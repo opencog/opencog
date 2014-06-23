@@ -347,12 +347,7 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
         actualTax = getTaxAmount(taxAmount);
         beforeTax = a->getSTI(handle);
         afterTax = beforeTax - actualTax;
-        
-        if (afterTax < 0) 
-        {
-            afterTax = 0;
-        }
-        
+               
         a->setSTI(handle, afterTax);
         log->fine("sti %d. Actual tax %d. after tax %d.", beforeTax, actualTax, afterTax);
 
