@@ -68,9 +68,9 @@ void AttentionalFocusCBUTest::setUp(void) {
 
 void AttentionalFocusCBUTest::test_pln_bindlink(void) {
 	    logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
 	    config().set("SCM_PRELOAD", "tests/query/single.scm");
 	    load_scm_files_from_config(*as);
+
 
 	    Handle findMan = eval->eval_h("find-man");
 
