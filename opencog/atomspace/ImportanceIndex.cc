@@ -58,14 +58,14 @@ void ImportanceIndex::updateImportance(AtomPtr atom, int bin)
 	insert(newbin, h);
 }
 
-void ImportanceIndex::insertAtom(AtomPtr atom)
+void ImportanceIndex::insertAtom(AtomPtr& atom)
 {
 	int sti = atom->getAttentionValue()->getSTI();
 	int bin = importanceBin(sti);
 	insert(bin, atom->getHandle());
 }
 
-void ImportanceIndex::removeAtom(AtomPtr atom)
+void ImportanceIndex::removeAtom(AtomPtr& atom)
 {
 	int sti = atom->getAttentionValue()->getSTI();
 	int bin = importanceBin(sti);

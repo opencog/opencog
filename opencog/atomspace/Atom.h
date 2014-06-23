@@ -199,13 +199,29 @@ public:
 
     /** Returns the AttentionValue object of the atom.
      *
-     * @return The const reference to the AttentionValue object
+     * @return The pointer to the AttentionValue object
      * of the atom.
      */
     AttentionValuePtr getAttentionValue();
 
     //! Sets the AttentionValue object of the atom.
     void setAttentionValue(AttentionValuePtr) throw (RuntimeException);
+
+    /// Handy-dandy convenience getters for attention values.
+    AttentionValue::sti_t getSTI()
+    {
+        return getAttentionValue()->getSTI();
+    }
+
+    AttentionValue::lti_t getLTI()
+    {
+        return getAttentionValue()->getLTI();
+    }
+
+    AttentionValue::vlti_t getVLTI()
+    {
+        return getAttentionValue()->getVLTI();
+    }
 
     /** Change the Short-Term Importance */
     void setSTI(AttentionValue::sti_t stiValue)
