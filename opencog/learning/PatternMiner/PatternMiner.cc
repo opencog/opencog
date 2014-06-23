@@ -366,6 +366,10 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
 
 void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, set<Handle>& allVarNodes)
 {
+    // Debug:
+    string instr = originalAtomSpace->atomAsString(instanceLink);
+    string pastr = atomSpace->atomAsString(patternLink);
+
     HandleSeq ioutgoingLinks = originalAtomSpace->getOutgoing(instanceLink);
     HandleSeq poutgoingLinks = atomSpace->getOutgoing(patternLink);
 
@@ -676,8 +680,10 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //        (ImplicationLink
 //          ;; The pattern to be searched for
 //          (pattern)
-//          ;; The instance to be returned.
-//          (result)
+//          (Listlink)
+//              ;; The instance to be returned.
+//              (result)
+//              (variable Listlink)
 //        )
 //     )
 
