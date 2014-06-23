@@ -142,7 +142,7 @@ void Router::run()
 
     /**
      * Recovery operation (if needed). First mount the filename full path and
-     * than check if such file exists in filesystem. If so, start recovery
+     * then check if such file exists in filesystem. If so, start recovery
      * process.
      */
     std::string recoveryFile = config().get("ROUTER_DATABASE_DIR");
@@ -454,7 +454,7 @@ void Router::recoveryFromPersistedData(const std::string& fileName)
     while (!fin.eof()) {
         fin.getline(line, 256);
 
-        // not a comentary or an empty line
+        // not a comment or an empty line
         if (line[0] != '#' && line[0] != 0x00) {
             std::istringstream in ((std::string)line);
 
