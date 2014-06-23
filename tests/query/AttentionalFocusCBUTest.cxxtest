@@ -47,6 +47,23 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
-	void test_single_bindlink(void);
+	void test_pln_bindlink(void);
 };
+void AttentionalFocusCBUTest::setUp(void) {
 
+	pm.set_atomspace(as);
+
+	config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
+			"opencog/scm/utilities.scm");
+
+	load_scm_files_from_config(*as);
+
+	config().set("MODULES", "opencog/query/libQueryModule.so");
+
+	cogserver().loadModules();
+
+}
+
+void AttentionalFocusCBUTest::test_pln_bindlink(void) {
+
+}
