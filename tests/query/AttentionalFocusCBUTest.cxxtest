@@ -79,7 +79,6 @@ void AttentionalFocusCBUTest::test_pln_bindlink(void) {
 	    // Socrates, Einstein and Peirce all inherit from man
 	    Handle answersAll = pm.bindlink(findMan);
 	    TS_ASSERT_EQUALS(3, as->getArity(answersAll));
-
 	    // Test PatternMatch::single_bindlink, which should only return the
 	    // first match
 	    Handle answersSingle = pm.pln_bindlink(findMan);
