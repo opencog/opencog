@@ -53,6 +53,7 @@ void AttentionalFocusCBUTest::tearDown(void){
 }
 void AttentionalFocusCBUTest::setUp(void) {
 
+
 	pm.set_atomspace(as);
 
 	config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
@@ -67,13 +68,6 @@ void AttentionalFocusCBUTest::setUp(void) {
 }
 
 void AttentionalFocusCBUTest::test_pln_bindlink(void) {
-	    logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	    config().set("SCM_PRELOAD", "tests/query/single.scm");
-	    load_scm_files_from_config(*as);
-
-
-	    Handle findMan = eval->eval_h("find-man");
-
 	    // First, get all the solutions. There should be 3 of them:
 	    // Socrates, Einstein and Peirce all inherit from man
 	    Handle answersAll = pm.bindlink(findMan);
@@ -83,5 +77,3 @@ void AttentionalFocusCBUTest::test_pln_bindlink(void) {
 	    Handle answersSingle = pm.pln_bindlink(findMan);
 	    TS_ASSERT_EQUALS(0, as->getArity(answersSingle));
 }
-
-
