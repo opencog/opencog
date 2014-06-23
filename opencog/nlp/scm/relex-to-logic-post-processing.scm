@@ -107,9 +107,9 @@
 		(define triplet (assoc candidate other-name-triplets))
 		; if this candidate is either a link or does not need to be replaced
 		(if (not new)
-			(if (cog-link? candidate)
-				(rebuild candidate old-new-pairs other-name-triplets)
-				(begin
+			(cond ((cog-link? candidate) (rebuild candidate old-new-pairs other-name-triplets))
+				((not triplet) candidate)
+				(else
 					(if (equal? 'PredicateNode (cog-type candidate))
 						(ImplicationLink (cog-new-node (cog-type candidate) (cadr triplet)) (caddr triplet))
 						(InheritanceLink (cog-new-node (cog-type candidate) (cadr triplet)) (caddr triplet))
