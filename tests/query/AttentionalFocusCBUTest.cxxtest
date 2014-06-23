@@ -49,6 +49,9 @@ public:
 
 	void test_pln_bindlink(void);
 };
+void AttentionalFocusCBUTest::tearDown(void){
+
+}
 void AttentionalFocusCBUTest::setUp(void) {
 
 	pm.set_atomspace(as);

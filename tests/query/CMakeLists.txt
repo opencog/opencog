@@ -43,7 +43,8 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(EinsteinUTest)
 	ADD_CXXTEST(SingleUTest)
-
+    ADD_CXXTEST(AttentionalFocusCBUTest)
+    
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		cogutil
 	)
