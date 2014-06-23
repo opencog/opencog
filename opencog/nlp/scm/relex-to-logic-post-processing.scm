@@ -1,19 +1,17 @@
 ; -----------------------------------------------------------------------
-; Get the corresponding ConceptNode or PredicateNode
-(define (word-get-concept-or-predicate node)
-	(define concept
-		(if (null? node)
-			'()
-			(cog-node 'ConceptNode (cog-name node))
+; Get the corresponding ConceptNode or PredicateNode or NumberNode
+(define (word-get-r2l-node node)
+	(define name
+		(if (not (null? node))
+			(cog-name node)
 		)
 	)
 
-	(if (null? node)
-		'()
-		(if (null? concept)
-			(cog-node 'PredicateNode (cog-name node))
-			concept
-		)
+	(cond ((null? node) '())
+		((not (null? (cog-node 'ConceptNode name))) (cog-node 'ConceptNode name))
+		((not (null? (cog-node 'PredicateNode name))) (cog-node 'PredicateNode name))
+		((not (null? (cog-node 'NumberNode name))) (cog-node 'NumberNode name))
+		(else '())
 	)
 )
 
@@ -112,9 +110,9 @@
 			(if (cog-link? candidate)
 				(rebuild candidate old-new-pairs other-name-triplets)
 				(begin
-					(if (equal? 'ConceptNode (cog-type candidate))
-						(InheritanceLink (cog-new-node (cog-type candidate) (cadr triplet)) (caddr triplet))
+					(if (equal? 'PredicateNode (cog-type candidate))
 						(ImplicationLink (cog-new-node (cog-type candidate) (cadr triplet)) (caddr triplet))
+						(InheritanceLink (cog-new-node (cog-type candidate) (cadr triplet)) (caddr triplet))
 					)
 					(cog-node (cog-type candidate) (cadr triplet))
 				)
@@ -135,10 +133,10 @@
 	(define word-list (map word-inst-get-lemma word-inst-list))
 
 	; find the ConceptNode/PredicateNode of each word instance and word node
-	(define word-inst-concept-list (remove null? (map word-get-concept-or-predicate word-inst-list)))
-	(define word-concept-list (remove null? (map word-get-concept-or-predicate word-list)))
+	(define word-inst-concept-list (remove null? (map word-get-r2l-node word-inst-list)))
+	(define word-concept-list (remove null? (map word-get-r2l-node word-list)))
 
-	; for each word instant, find a list of all head links that includes it, and remove unneeded links
+	; for each word instant, find a list of all root links that includes it, and remove unneeded links
 	(define word-involvement-messy-list (map cog-get-root word-inst-concept-list))
 	(define word-involvement-intersection (lset-pairwise-intersection word-involvement-messy-list))
 	(define word-involvement-cleaned-list
