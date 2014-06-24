@@ -682,8 +682,8 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //          (pattern)
 //          (Listlink)
 //              ;; The instance to be returned.
-//              (result)
 //              (variable Listlink)
+//              (result)
 //        )
 //     )
 
@@ -804,7 +804,24 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
         newInstance.instanceLinks = originalAtomSpace->getOutgoing(oneResultOutgoings[1]);
 
         HNode->instances.push_back(newInstance);
+
         originalAtomSpace->removeAtom(listH);
+        originalAtomSpace->removeAtom(oneResultOutgoings[0]);
+        originalAtomSpace->removeAtom(oneResultOutgoings[1]);
+
+        // Debug
+        foreach (Handle varh, newInstance.boundVars)
+        {
+            string varstr = originalAtomSpace->atomAsString(varh);
+            int it = 0;
+        }
+
+        foreach (Handle lh, newInstance.instanceLinks)
+        {
+            string lhstr = originalAtomSpace->atomAsString(lh);
+            int it = 0;
+        }
+
     }
 
     foreach (Handle toDelh, linksWillBeDel)
@@ -816,7 +833,7 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     originalAtomSpace->removeAtom(hAndLink);
     originalAtomSpace->removeAtom(hResultListLink);
     originalAtomSpace->removeAtom(hVariablesListLink);
-    originalAtomSpace->removeAtom(hListLinkResult);
+    originalAtomSpace->removeAtom(hListLinkResult, false);
 }
 
 void PatternMiner::removeLinkAndItsAllSubLinks(AtomSpace* _atomspace, Handle link)
