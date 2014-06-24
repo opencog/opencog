@@ -54,6 +54,7 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h) {
 		if (candidate_handle->getAttentionValue()->getSTI()
 				> _atom_space->getAttentionalFocusBoundary()) {
 			filtered_set.push_back(LinkCast(candidate_handle));
+
 		}
 	}
 	// if none is in AF

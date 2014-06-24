@@ -32,8 +32,9 @@ class AttentionalFocusCB: public virtual DefaultPatternMatchCB {
 
 private:
 	AtomSpace * _atom_space;
-	static bool compare_sti(LinkPtr lptr1,LinkPtr lptr2){
-		return lptr1->getAttentionValue()->getSTI() > lptr2->getAttentionValue()->getSTI();
+	static bool compare_sti(LinkPtr lptr1, LinkPtr lptr2) {
+		return lptr1->getAttentionValue()->getSTI()
+				> lptr2->getAttentionValue()->getSTI();
 	}
 public:
 	AttentionalFocusCB(AtomSpace * as) :
