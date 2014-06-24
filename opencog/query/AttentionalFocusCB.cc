@@ -69,6 +69,7 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h) {
 		filtered_set = incoming_set;
 	}
 	std::sort(filtered_set.begin(), filtered_set.end(), compare_sti); //sort by STI for better performance
+
 	return filtered_set;
 }
 
