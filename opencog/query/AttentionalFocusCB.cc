@@ -30,7 +30,6 @@ bool AttentionalFocusCB::node_match(Handle& node1, Handle& node2) {
 					> _atom_space->getAttentionalFocusBoundary()) {
 		return false;
 	} else {
-
 		return true;
 	}
 }
@@ -43,7 +42,6 @@ bool AttentionalFocusCB::link_match(LinkPtr& lpat, LinkPtr& lsoln) {
 			> _atom_space->getAttentionalFocusBoundary()) {
 		return false;
 	} else {
-
 		return true;
 	}
 }
@@ -58,7 +56,6 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h) {
 				> _atom_space->getAttentionalFocusBoundary()) {
 			filtered_set.push_back(LinkCast(candidate_handle));
 		}
-
 	}
 	// if none is in AF
 	if (filtered_set.empty()) {
