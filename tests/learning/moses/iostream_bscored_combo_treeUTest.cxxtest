@@ -31,7 +31,8 @@
 using namespace opencog;
 using namespace moses;
 
-class iostream_scored_combo_treeUTest : public CxxTest::TestSuite {
+class iostream_scored_combo_treeUTest : public CxxTest::TestSuite
+{
 public:
     void test_iostream_scored_combo_tree() {
         std::string tr_str = "and($1 $2 or($3 $4))";
@@ -39,8 +40,8 @@ public:
         std::stringstream(tr_str) >> tr;
         score_t sc = 0.5;
         complexity_t cpx = tree_complexity(tr);
-        score_t cpx_penalty = 0.1,
-            diversity_penalty = 0.2;
+        score_t cpx_penalty = 0.1;
+        score_t diversity_penalty = 0.2;
         behavioral_score bs = {0.25, 0, 0.25};
 
         // build the scored_combo_tree

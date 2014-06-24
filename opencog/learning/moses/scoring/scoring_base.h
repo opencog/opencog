@@ -143,7 +143,7 @@ struct ascore_base : public std::unary_function<combo_tree, composite_score>
     virtual ~ascore_base(){}
 };
 
-/// Simplest ascore, it just total up the bscore.
+/// Simplest ascore, it just totals up the bscore.
 struct simple_ascore : ascore_base
 {
     /// Sum up the behavioral score

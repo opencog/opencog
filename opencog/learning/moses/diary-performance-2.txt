@@ -263,3 +263,43 @@ struct instance_set : public vector<scored_instance<ScoreT> >
 All instances in instance set have same field description.
 
 why is there ever more than one instance set??
+
+==============
+
+24 June 2014
+------------
+Compare the boosted & non-boosted version of the parity problem.
+
+Time to perfect score:
+time moses -Hpa -k3 --boost=1  : 1/2 second
+time moses -Hpa -k4 --boost=1  : 1.8 seconds
+time moses -Hpa -k5 --boost=1  : 9.2 seconds
+time moses -Hpa -k6 --boost=1  : 6m13 seconds
+
+Wow!  Recall that without boosting, -k4 would take minutes, (depending
+very strongly on the initial random seed) and that -k5 was mostly 
+unsolvable (would take an hour or two for a few lucky random seeds)
+
+Wow, even -k6 finds a solution, although it is long, and takes much
+more time to find.   ... and needs to have --reveist=50
+
+So: -k4 speedup == 100x roughly
+    -k5 sppedup == more than 500x
+
+Hmm  different rand seeds:
+
+           -k4     -k5     -k6
+ random    time    time    time
+  seed    (secs)  (secs)  (secs)
+ ------   ------  ------  ------
+   r0      1.8      11.2    568
+   r1      1.8       9.2    392
+   r2      2.5      10.4    190
+   r3      2.6      11.8    260
+   r4      2.3       9.2    260
+   r5      2.2      18.0
+   r6      1.8      12.7
+   r7      2.6      13.5
+   r8      2.0      12.3
+   r9      2.0       9.9
+

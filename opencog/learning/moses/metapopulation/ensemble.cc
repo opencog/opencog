@@ -38,7 +38,6 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	_params(ep)
 {
 	_booster = dynamic_cast<boosting_ascore*>(&(cs.get_ascorer()));
-	OC_ASSERT(_booster, "Ensemble can only be used with a weighted scorer");
 }
 
 // Is this behavioral score correct? For boolean scores, correct is 0.0
@@ -54,6 +53,8 @@ static inline bool is_correct(score_t val)
  */
 void ensemble::add_candidates(scored_combo_tree_set& cands)
 {
+	OC_ASSERT(_booster, "Ensemble can only be used with a weighted scorer");
+
 	int promoted = 0;
 	// We need the length of the behavioral score, as normalization
 	// XXX we should be using the user-weighted thingy here .. XX FIXME
