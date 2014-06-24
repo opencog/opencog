@@ -1,5 +1,5 @@
 """
-For running the ContextAgent without the cogserver
+For running the TemporalAgent without the cogserver
 """
 
 from __future__ import print_function
