@@ -22,7 +22,7 @@ class BindLinkExecution():
         else:
             self.tmpLink=None
         response = scheme_eval(self.atomspace, self.command)
-        #time.sleep(1)
+        #time.sleep(0.5)
         a=3
 
     def returnResult(self):
@@ -47,6 +47,7 @@ class BindLinkExecution():
 class HobbsAgent(MindAgent):
     def __init__(self):
         self.checked=dict()
+        self.wordNumber=dict()
         self.atomspace = None
 
         self.currentPronounNode = None
@@ -70,11 +71,28 @@ class HobbsAgent(MindAgent):
         return int(str)
 
     def getWordNumber(self,node):
-        rv=self.bindLinkExe(self.currentTarget, node ,'(cog-bind getNumberNode)',self.currentResult,types.NumberNode)
-        return self.StringToNumber(rv[0].name)
+        '''
+        Some threading bugs, cannot be solved right now
 
+        rv=self.bindLinkExe(self.currentTarget, node ,'(cog-bind getNumberNode)',self.currentResult,types.NumberNode)
+        if len(rv)>0:
+            return self.StringToNumber(rv[0].name)
+        else:
+            print(node)
+            return 0
+        '''
+        if node==None:
+            print("found you")
+            return 0
+        print("word:")
+        print(node.name)
+        print("number:")
+        print(self.wordNumber[node.name])
+        return self.wordNumber[node.name]
     def sortNodes(self,list):
-        sorted(list,key=self.getWordNumber)
+        sorted(list,key=self.getWordNumber,reverse=True)
+        print("sorted:")
+        print(list)
 
     def getChildren(self,node):
         rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind getChildren)',self.currentResult,types.WordInstanceNode)
@@ -91,15 +109,19 @@ class HobbsAgent(MindAgent):
         return False
 
     def bfs(self,node):
+        if node==None:
+            print("found you bfs")
+            return
         q=Queue.Queue()
         q.put(node)
         while not q.empty():
             front=q.get()
             self.propose(front)
-            childrens=self.getChildren(front)
-            for node in childrens:
-                if not self.Checked(node):
-                    q.put(node)
+            children=self.getChildren(front)
+            if len(children)>0:
+                for node in children:
+                    if not self.Checked(node):
+                        q.put(node)
 
     def getPronouns(self):
         return self.bindLinkExe(None,None,'(cog-bind pronoun-finder)',self.unresolvedReferences,types.WordInstanceNode)
@@ -127,7 +149,7 @@ class HobbsAgent(MindAgent):
         return self.roots[len(self.roots)-1]
 
     def  previousRootExist(self,root):
-        return not self.roots[0]==root
+        return not self.roots[0].name==root.name
 
     def getPrevious(self,root):
 
@@ -136,6 +158,13 @@ class HobbsAgent(MindAgent):
             number=self.getWordNumber(root)
             if number<rootNumber:
                 return root
+        print("Impossible")
+    def getAllNumberNodes(self):
+        rv= self.bindLinkExe(None,None,'(cog-bind getAllNumberNodes)',self.currentResult,types.WordSequenceLink)
+        for link in rv:
+            out=link.out
+            if out[0].type==types.WordInstanceNode:
+                self.wordNumber[out[0].name]=self.StringToNumber(out[1].name)
 
     def initilization(self,atomspace):
         self.atomspace = atomspace
@@ -145,10 +174,15 @@ class HobbsAgent(MindAgent):
         self.currentResult = atomspace.add_node(types.AnchorNode, 'CurrentResult', TruthValue(1.0, 100))
         self.currentProposal = atomspace.add_node(types.AnchorNode, 'CurrentProposal', TruthValue(1.0, 100))
         self.unresolvedReferences=atomspace.add_node(types.AnchorNode, 'Recent Unresolved references', TruthValue(1.0, 100))
+        self.currentResolutionNode=atomspace.add_node(types.AnchorNode, 'CurrentResolution', TruthValue(1.0, 100))
+        self.currentResolutionLink_proposal=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentProposal], TruthValue(1.0, 100))
+        self.currentResolutionLink_pronoun=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentPronounNode], TruthValue(1.0, 100))
         self.pronounNumber = -1
 
+        self.getAllNumberNodes()
         self.pronouns = self.getPronouns()
         self.roots = self.getRoots()
+
 
     def printResults(self):
         rv = self.bindLinkExe(None,None,'(cog-bind getResults)',self.currentResult,types.ReferenceLink)
@@ -166,8 +200,14 @@ class HobbsAgent(MindAgent):
             self.pronounNumber=self.getWordNumber(pronoun)
             tmpLink=self.atomspace.add_link(types.ListLink, [self.currentPronounNode, pronoun], TruthValue(1.0, 100))
             root=self.getRootOfNode(pronoun)
-            #print(pronoun)
+            print("Resolving...........")
+            print(pronoun)
+
             while True:
+                print("in")
+                if root==None:
+                    print("found you while")
+                    break
                 self.bfs(root)
                 if self.previousRootExist(root):
                     root=self.getPrevious(root)

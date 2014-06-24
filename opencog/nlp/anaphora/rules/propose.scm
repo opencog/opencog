@@ -32,9 +32,9 @@
                     (VariableNode "$word-inst-antecedent")
                     (DefinedLinguisticConceptNode "noun")
                 )
-                (PartOfSpeechLink
+                (InheritanceLink
                     (VariableNode "$word-inst-anaphor")
-                    (DefinedLinguisticConceptNode "noun")
+                    (DefinedLinguisticConceptNode "pronoun")
                 )
                 (WordSequenceLink
                     (VariableNode "$word-inst-anaphor")

@@ -68,6 +68,7 @@ data=["opencog/scm/config.scm",
       "opencog/nlp/anaphora/rules/getPronouns.scm",
       "opencog/nlp/anaphora/rules/propose.scm",
       "opencog/nlp/anaphora/rules/getResults.scm",
+      "opencog/nlp/anaphora/rules/getAllNumberNodes.scm",
 
       "opencog/nlp/anaphora/tests/atomspace.scm"
     ]
