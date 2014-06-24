@@ -44,7 +44,6 @@ bool AttentionalFocusCB::link_match(LinkPtr& lpat, LinkPtr& lsoln) {
 	} else {
 		return true;
 	}
-
 }
 
 IncomingSet AttentionalFocusCB::get_incoming_set(Handle h) {
