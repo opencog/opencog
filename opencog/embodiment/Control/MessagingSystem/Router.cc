@@ -518,15 +518,18 @@ void Router::notifyElementAvailability(const std::string& id, bool available)
 bool Router::controlSocketConnection(const std::string& ne_id)
 {
     if ( controlSockets.find(ne_id) != controlSockets.end() ) {
-        // Check if socket connection is still ok. If not so, remove the corresponding entry from controlSockets map and tries to re-connect.
+        // Check if socket connection is still ok. If not so, remove
+        // the corresponding entry from controlSockets map and tries
+        // to re-connect.
         if (!isElementAvailable(ne_id)) {
-            logger().info(
-                         "Router - controlSocketConnection(%s): Element marked as unavailable. Trying to re-connect...", ne_id.c_str() );
+            logger().info("Router - controlSocketConnection(%s): "
+                          "Element marked as unavailable. Trying to re-connect...",
+                          ne_id.c_str() );
             closeControlSocket(ne_id);
             closeDataSocket(ne_id);
         } else {
-            logger().debug(
-                         "Router - controlSocketConnection(%s): Connection already established", ne_id.c_str() );
+            logger().debug("Router - controlSocketConnection(%s): "
+                           "Connection already established", ne_id.c_str() );
             return true;
         }
     } // if
@@ -539,17 +542,18 @@ bool Router::controlSocketConnection(const std::string& ne_id)
         tcp::resolver::query query(tcp::v4(), ipAddr, boost::lexical_cast<std::string>(port));
         tcp::resolver::iterator iterator = resolver.resolve(query);
         sock = new tcp::socket(io_service);
-        logger().debug("Router - controlSocketConnection(%s): created new socket: %p.", ne_id.c_str(), sock);
+        logger().debug("Router - controlSocketConnection(%s): "
+                       "created new socket: %p.", ne_id.c_str(), sock);
         sock->connect(*iterator);
-        logger().debug(
-                     "Router - controlSocketConnection(%s). Connection established. ip=%s, port=%d",
-                     ne_id.c_str(), ipAddr.c_str(), port);
+        logger().debug("Router - controlSocketConnection(%s): "
+                       "connection established. ip=%s, port=%d",
+                       ne_id.c_str(), ipAddr.c_str(), port);
         controlSockets[ne_id] = sock;
         return true;
-    }catch(std::exception& e){
-        logger().error(
-                 "Router - controlSocketConnection. Unable to connect to element %s. ip=%s, port=%d. Exception Message: %s",
-                 ne_id.c_str(), ipAddr.c_str(), port, e.what());
+    } catch(std::exception& e){
+        logger().error("Router - controlSocketConnection. "
+                       "Unable to connect to element %s. ip=%s, port=%d. Exception Message: %s",
+                       ne_id.c_str(), ipAddr.c_str(), port, e.what());
         if (sock != NULL) delete sock;
         sock = NULL;
     }
@@ -568,13 +572,13 @@ bool Router::dataSocketConnection(const std::string& ne_id)
         // corresponding entry from dataSockets map and tries to re-connect.
         if (!isElementAvailable(ne_id)) {
             logger().info("Router - dataSocketConnection(%s): "
-                    "Element marked as unavailable. Trying to re-connect...",
-                    ne_id.c_str() );
+                          "Element marked as unavailable. Trying to re-connect...",
+                          ne_id.c_str() );
             closeDataSocket(ne_id);
             closeControlSocket(ne_id);
         } else {
             logger().debug("Router - dataSocketConnection(%s): "
-                    "Connection already established", ne_id.c_str() );
+                           "Connection already established", ne_id.c_str() );
             return true;
         }
     }
@@ -588,17 +592,17 @@ bool Router::dataSocketConnection(const std::string& ne_id)
         tcp::resolver::iterator iterator = resolver.resolve(query);
         sock = new tcp::socket(io_service);
         logger().debug("Router - dataSocketConnection(%s): "
-                "created new socket: %p.", ne_id.c_str(), sock);
+                       "created new socket: %p.", ne_id.c_str(), sock);
         sock->connect(*iterator);
         logger().debug("Router - dataSocketConnection(%s). "
-                "Connection established. ip=%s, port=%d",
-                 ne_id.c_str(), ipAddr.c_str(), port);
+                       "Connection established. ip=%s, port=%d",
+                       ne_id.c_str(), ipAddr.c_str(), port);
         dataSockets[ne_id] = sock;
         return true;
     } catch(std::exception& e) {
         logger().error("Router - dataSocketConnection. "
-                "Unable to connect to element %s. ip=%s, port=%d. Exception Message: %s",
-                ne_id.c_str(), ipAddr.c_str(), port, e.what());
+                       "Unable to connect to element %s. ip=%s, port=%d. Exception Message: %s",
+                       ne_id.c_str(), ipAddr.c_str(), port, e.what());
         if (sock != NULL) delete sock;
         sock = NULL;
     }

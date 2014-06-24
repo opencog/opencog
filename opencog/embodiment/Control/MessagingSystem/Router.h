@@ -67,11 +67,12 @@ struct NotificationData {
     unsigned int numMessages;
 
     NotificationData(const std::string& _toId,
-                    tcp::socket* _sock,
-                    NotificationType _type,
-                    const std::string& _element,
-                    unsigned int _numMessages)
-    : toId(_toId), sock(_sock), type(_type), element(_element), numMessages(_numMessages) {}
+                     tcp::socket* _sock,
+                     NotificationType _type,
+                     const std::string& _element,
+                     unsigned int _numMessages)
+        : toId(_toId), sock(_sock), type(_type),
+          element(_element), numMessages(_numMessages) {}
 
 }; // struct NotificationData
 
@@ -416,7 +417,7 @@ public:
     void stopListenerThread();
 
     /**
-    * Estabish control connection to the network element with the given id, if
+    * Establish control connection to the network element with the given id, if
     * not yet connected.
     * Also updates internal map from network element ids to control sockets.
     * @return true if the connection is established.
@@ -424,7 +425,7 @@ public:
     bool controlSocketConnection(const std::string& ne_id);
 
     /**
-    * Estabish data connection to the network element with the given id, if not
+    * Estabsish data connection to the network element with the given id, if not
     * yet connected.
     * Also updates internal map from network element ids to data sockets.
     * @return true if the connection is established.
