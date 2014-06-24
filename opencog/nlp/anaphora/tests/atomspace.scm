@@ -1,3 +1,5 @@
+;; I simply dumped everything in the atomspace, so there can be some garbage in the testing data
+
 (ConceptNode "apple") 
 
 (ConceptNode "Tom") 
