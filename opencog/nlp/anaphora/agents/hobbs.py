@@ -4,45 +4,10 @@ from pprint import pprint
 from opencog.cogserver import MindAgent
 from opencog.atomspace import types, AtomSpace, TruthValue
 from opencog.scheme_wrapper import scheme_eval_h,scheme_eval, __init__
+from anaphora.python_classes.BindLinkExecution import BindLinkExecution
 import Queue
 import time
 __author__ = 'hujie'
-
-class BindLinkExecution():
-    def __init__(self,atomspace,anchorNode, target, command,resultNode,atomType):
-        self.atomspace=atomspace
-        self.anchorNode=anchorNode
-        self.target=target
-        self.command=command
-        self.resultNode=resultNode
-        self.atomType=atomType
-    def execution(self):
-        if self.anchorNode != None and self.target != None:
-            self.tmpLink=self.atomspace.add_link(types.ListLink, [self.anchorNode, self.target], TruthValue(1.0, 100))
-        else:
-            self.tmpLink=None
-        response = scheme_eval(self.atomspace, self.command)
-        #time.sleep(0.5)
-        a=3
-
-    def returnResult(self):
-        if self.resultNode==None:
-            return
-        rv=[]
-        listOfLinks=self.resultNode.incoming
-        for link in listOfLinks:
-            atom=(link.out)[1]
-            if atom.type==self.atomType:
-                rv.append(atom)
-
-        for link in listOfLinks:
-            self.atomspace.remove(link)
-        return rv
-
-    def clear(self):
-        if self.tmpLink!=None:
-            self.atomspace.remove(self.tmpLink)
-
 
 class HobbsAgent(MindAgent):
     def __init__(self):
@@ -59,6 +24,8 @@ class HobbsAgent(MindAgent):
 
         self.pronouns = None
         self.roots = None
+
+        self.numOfFilters=2
 
     def bindLinkExe(self,anchorNode, target, command,resultNode,atomType):
         exe=BindLinkExecution(self.atomspace,anchorNode, target, command,resultNode,atomType)
@@ -81,6 +48,8 @@ class HobbsAgent(MindAgent):
             print(node)
             return 0
         '''
+        '''
+        Debug information
         if node==None:
             print("found you")
             return 0
@@ -88,6 +57,7 @@ class HobbsAgent(MindAgent):
         print(node.name)
         print("number:")
         print(self.wordNumber[node.name])
+        '''
         return self.wordNumber[node.name]
     def sortNodes(self,list):
         return sorted(list,key=self.getWordNumber)
@@ -97,7 +67,24 @@ class HobbsAgent(MindAgent):
         return self.sortNodes(rv)
 
     def propose(self,node):
-        self.bindLinkExe(self.currentProposal,node,'(cog-bind-crisp propose)',None,None)
+        #self.bindLinkExe(self.currentProposal,node,'(cog-bind-crisp propose)',None,None)
+        '''
+        It iterates all filters, if one of them succeed, the current anaphora will be connected with current antecedent
+        '''
+        rejected = False
+        for index in range(1,self.numOfFilters):
+            command='(cog-bind-crisp filter-instance-#'+str(index)+')'
+            rv=self.bindLinkExe(self.currentProposal,node,command,self.currentResult,types.ListLink)
+            if len(rv)>0:
+                '''
+                Reject it
+                '''
+                rejected = True
+                break
+        if not rejected:
+            self.bindLinkExe(self.currentProposal,node,'(cog-bind propose)',None,None)
+        else:
+            print("rejected "+node.name)
 
     def Checked(self,node):
         if node.name in self.checked:
@@ -107,7 +94,7 @@ class HobbsAgent(MindAgent):
 
     def bfs(self,node):
         if node==None:
-            print("found you bfs")
+            #print("found you bfs")
             return
         q=Queue.Queue()
         q.put(node)
@@ -154,7 +141,8 @@ class HobbsAgent(MindAgent):
             number=self.getWordNumber(root)
             if number<rootNumber:
                 return root
-        print("Impossible")
+        #print("Impossible")
+
     def getAllNumberNodes(self):
         rv= self.bindLinkExe(None,None,'(cog-bind getAllNumberNodes)',self.currentResult,types.WordSequenceLink)
         for link in rv:
@@ -200,9 +188,8 @@ class HobbsAgent(MindAgent):
             print(pronoun)
 
             while True:
-                print("in")
                 if root==None:
-                    print("found you while")
+                    #print("found you while")
                     break
                 self.bfs(root)
                 if self.previousRootExist(root):

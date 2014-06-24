@@ -1,3 +1,12 @@
+### Adding python library path
+
+- Path
+
+    ```
+    "Your_path/opencog/opencog/nlp"
+    ```
+
+
 ### Example:
 
 - Example sentences:
