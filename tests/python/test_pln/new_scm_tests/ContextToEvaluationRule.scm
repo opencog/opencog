@@ -15,13 +15,6 @@
                 (ListLink sky)
             )
         )
-        (ContextLink (stv 0.5 1)
-            moon
-            (EvaluationLink
-                isBlue
-                (ListLink sky)
-            )
-        )
     )
 )
 
@@ -42,17 +35,10 @@
 	     isBlue
 	     sky
 	     earth
-	     moon
 		 (EvaluationLink (stv 0.5 1)
             isBlue
             (ListLink
                 (AndLink sky earth)
-            )
-        )
-        (EvaluationLink (stv 0.5 1)
-            isBlue
-            (ListLink
-                (AndLink sky moon)
             )
         )
     )
