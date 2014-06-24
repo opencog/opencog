@@ -181,7 +181,7 @@ class PLNUnitTester(TestCase):
     def load_rules(self):
         rules = self.get_predicate_arguments(self.atomSpaceFileData, "rules")
 
-        allRules = AllRules(self.atomSpaceFileData, self.chainer)
+        allRules = AllRules(self.atomSpaceInputs, self.chainer)
 
         for rule in rules:
             #allRules.import_rule(rule, self.chainer)
