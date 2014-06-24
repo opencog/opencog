@@ -90,17 +90,14 @@ class HobbsAgent(MindAgent):
         print(self.wordNumber[node.name])
         return self.wordNumber[node.name]
     def sortNodes(self,list):
-        sorted(list,key=self.getWordNumber,reverse=True)
-        print("sorted:")
-        print(list)
+        return sorted(list,key=self.getWordNumber)
 
     def getChildren(self,node):
         rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind getChildren)',self.currentResult,types.WordInstanceNode)
-        self.sortNodes(rv)
-        return rv
+        return self.sortNodes(rv)
 
     def propose(self,node):
-        self.bindLinkExe(self.currentProposal,node,'(cog-bind propose)',None,None)
+        self.bindLinkExe(self.currentProposal,node,'(cog-bind-crisp propose)',None,None)
 
     def Checked(self,node):
         if node.name in self.checked:
@@ -128,8 +125,7 @@ class HobbsAgent(MindAgent):
 
     def getRoots(self):
         rv= self.bindLinkExe(None,None,'(cog-bind-crisp getRoots)',self.currentResult,types.WordInstanceNode)
-        self.sortNodes(rv)
-        return rv
+        return self.sortNodes(rv)
 
     def getRootOfNode(self,target):
         '''

@@ -3,7 +3,10 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$relationshipNode")
-                (VariableTypeNode "DefinedLinguisticRelationshipNode")
+                (ListLink
+                    (VariableTypeNode "DefinedLinguisticRelationshipNode")
+                    (VariableTypeNode "PrepositionalRelationshipNode")
+                )
             )
             (VariableNode "$target")
             (VariableNode "$child")

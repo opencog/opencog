@@ -3,11 +3,17 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$top relationship")
-                (VariableTypeNode "DefinedLinguisticRelationshipNode")
+                (ListLink
+                    (VariableTypeNode "DefinedLinguisticRelationshipNode")
+                    (VariableTypeNode "PrepositionalRelationshipNode")
+                )
             )
             (TypedVariableLink
                 (VariableNode "$other relationship")
-                (VariableTypeNode "DefinedLinguisticRelationshipNode")
+                (ListLink
+                    (VariableTypeNode "DefinedLinguisticRelationshipNode")
+                    (VariableTypeNode "PrepositionalRelationshipNode")
+                )
             )
             (TypedVariableLink
                 (VariableNode "$parent")
