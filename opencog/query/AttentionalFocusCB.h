@@ -1,7 +1,7 @@
 /*
  * AttentionalFocusCB.cc
  *
- * Copyright (C) 2014 Misgana bayetta
+ * Copyright (C) 2014 Misgana Bayetta
  *
  * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  July 2014
  *
