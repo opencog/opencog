@@ -23,24 +23,6 @@
 #include "AttentionalFocusCB.h"
 
 using namespace opencog;
-bool AttentionalFocusCB::node_match(Handle& node1, Handle& node2) {
-	HandleSeq af_handle_seq;
-	_atom_space->getHandleSetInAttentionalFocus(back_inserter(af_handle_seq));
-	bool not_match = true;
-	if (af_handle_seq.empty()) {
-		std::cout << "[INFO]:No atom in AF looking for more node..."
-				<< std::endl;
-		return true; //not a match
-	} else {
-		for (std::vector<Handle>::const_iterator j = af_handle_seq.begin();
-				j != af_handle_seq.end(); ++j) {
-			Handle h(*j);
-			//select atom not in AF [what other criteria can we have here ?]
-			if (node2 == h) {
-				not_match = false;
-				break;
-			}
-		}
 
 bool AttentionalFocusCB::node_match(Handle& node1, Handle& node2) {
 	if (node1 == node2
