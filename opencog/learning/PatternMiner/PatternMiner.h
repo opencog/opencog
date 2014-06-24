@@ -182,7 +182,8 @@ public:
 
     void runPatternMiner();
 
-    void testPatternMatcher();
+    void testPatternMatcher1();
+    void testPatternMatcher2();
 
 
  };

@@ -1138,17 +1138,19 @@ PatternMiner::~PatternMiner()
 void PatternMiner::runPatternMiner()
 {
 
-    int start_time = time(NULL);
+//    int start_time = time(NULL);
 
-    std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << std::endl;
-    // first, generate the first layer patterns: patterns of 1 gram (contains only one link)
-    ConstructTheFirstGramPatterns();
+//    std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << std::endl;
+//    // first, generate the first layer patterns: patterns of 1 gram (contains only one link)
+//    ConstructTheFirstGramPatterns();
 
-    // and then generate all patterns
-    GrowAllPatterns();
+//    // and then generate all patterns
+//    GrowAllPatterns();
 
-    int end_time = time(NULL);
-    printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
+//    int end_time = time(NULL);
+//    printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
+
+    testPatternMatcher2();
 
 }
 
@@ -1179,7 +1181,7 @@ std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const At
     return answer.str();
 }
 
-void PatternMiner::testPatternMatcher()
+void PatternMiner::testPatternMatcher1()
 {
     originalAtomSpace->getHandlesByType(back_inserter(allLinks), (Type) LINK, true );
     std::cout<<"Debug: PatternMiner total link numer = "  << allLinks.size() << std::endl;
@@ -1293,3 +1295,119 @@ void PatternMiner::testPatternMatcher()
 
     
 }
+
+void PatternMiner::testPatternMatcher2()
+{
+
+//    (BindLink (stv 1.000000 1.000000)
+//      (ListLink (stv 1.000000 1.000000)
+//        (VariableNode "$var_1") ; [63]
+//        (VariableNode "$var_2") ; [545]
+//        (VariableNode "$var_3") ; [2003]
+//      ) ; [4575]
+//      (ImplicationLink (stv 1.000000 1.000000)
+//        (AndLink (stv 1.000000 1.000000)
+//          (EvaluationLink (stv 1.000000 1.000000)
+//            (VariableNode "$var_1") ; [63]
+//            (ListLink (stv 1.000000 1.000000)
+//              (ObjectNode "LiMing") ; [15]
+//              (ConceptNode "tea") ; [20]
+//            ) ; [44]
+//          ) ; [4569]
+//          (EvaluationLink (stv 1.000000 1.000000)
+//            (VariableNode "$var_1") ; [63]
+//            (ListLink (stv 1.000000 1.000000)
+//              (VariableNode "$var_2") ; [545]
+//              (VariableNode "$var_3") ; [2003]
+//            ) ; [4570]
+//          ) ; [4571]
+//          (InheritanceLink (stv 1.000000 1.000000)
+//            (VariableNode "$var_2") ; [545]
+//            (ConceptNode "human") ; [3]
+//          ) ; [4572]
+//        ) ; [4573]
+//        (AndLink (stv 1.000000 1.000000)
+//        .....the same as the pattern
+//      ) ; [4574]
+//    ) ; [4576]
+
+    HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, patternToMatch;
+
+    Handle varHandle1 = originalAtomSpace->addNode(opencog::VARIABLE_NODE,"$var_1" );
+    Handle varHandle2 = originalAtomSpace->addNode(opencog::VARIABLE_NODE,"$var_2" );
+    Handle varHandle3 = originalAtomSpace->addNode(opencog::VARIABLE_NODE,"$var_3" );
+
+    variableNodes.push_back(varHandle1);
+    variableNodes.push_back(varHandle2);
+    variableNodes.push_back(varHandle3);
+
+    // The first EvaluationLink
+    HandleSeq listlinkOutgoings1, evalLinkOutgoings1;
+    Handle LiMingNode = originalAtomSpace->addNode(opencog::OBJECT_NODE, "LiMing" );
+    listlinkOutgoings1.push_back(LiMingNode);
+    Handle teaNode = originalAtomSpace->addNode(opencog::CONCEPT_NODE, "tea" );
+    listlinkOutgoings1.push_back(teaNode);
+    Handle listlink1 = originalAtomSpace->addLink(LIST_LINK, listlinkOutgoings1, TruthValue::TRUE_TV());
+    evalLinkOutgoings1.push_back(varHandle1);
+    evalLinkOutgoings1.push_back(listlink1);
+    Handle evalLink1 = originalAtomSpace->addLink(EVALUATION_LINK, evalLinkOutgoings1, TruthValue::TRUE_TV());
+
+    // The second EvaluationLink
+    HandleSeq listlinkOutgoings2, evalLinkOutgoings2;
+    listlinkOutgoings2.push_back(varHandle2);
+    listlinkOutgoings2.push_back(varHandle3);
+    Handle listlink2 = originalAtomSpace->addLink(LIST_LINK, listlinkOutgoings2, TruthValue::TRUE_TV());
+    evalLinkOutgoings2.push_back(varHandle1);
+    evalLinkOutgoings2.push_back(listlink2);
+    Handle evalLink2 = originalAtomSpace->addLink(EVALUATION_LINK, evalLinkOutgoings2, TruthValue::TRUE_TV());
+
+    // The InheritanceLink
+    HandleSeq inherOutgoings;
+    Handle humanNode = originalAtomSpace->addNode(opencog::CONCEPT_NODE, "human" );
+    inherOutgoings.push_back(varHandle2);
+    inherOutgoings.push_back(humanNode);
+    Handle inherLink = originalAtomSpace->addLink(INHERITANCE_LINK, inherOutgoings, TruthValue::TRUE_TV());
+
+    patternToMatch.push_back(evalLink1);
+    patternToMatch.push_back(evalLink2);
+    patternToMatch.push_back(inherLink);
+
+    Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch, TruthValue::TRUE_TV());
+
+    implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
+    implicationLinkOutgoings.push_back(hAndLink); // the results to return
+
+    Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
+
+    // add variable atoms
+    Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
+
+    bindLinkOutgoings.push_back(hVariablesListLink);
+    bindLinkOutgoings.push_back(hImplicationLink);
+    Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
+
+    std::cout <<"Debug: PatternMiner::testPatternMatcher for pattern:" << std::endl
+              << originalAtomSpace->atomAsString(hBindLink).c_str() << std::endl;
+
+
+    // Run pattern matcher
+    PatternMatch pm;
+    pm.set_atomspace(originalAtomSpace);
+
+    Handle hResultListLink = pm.bindlink(hBindLink);
+
+    // Get result
+    // Note: Don't forget to remove the hResultListLink and BindLink
+    HandleSeq resultSet = originalAtomSpace->getOutgoing(hResultListLink);
+
+    std::cout << toString(resultSet.size())  << " instances found:" << std::endl ;
+
+    //debug
+    std::cout << originalAtomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
+
+    originalAtomSpace->removeAtom(hResultListLink);
+    originalAtomSpace->removeAtom(hBindLink);
+
+
+}
+
