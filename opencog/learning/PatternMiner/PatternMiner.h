@@ -149,7 +149,7 @@ private:
 
     void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, set<Handle>& allVarNodes);
 
-    void extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
+    void extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HandleSeq &varList, HTreeNode* curHTreeNode, unsigned int gram);
 
     void findAllInstancesForGivenPattern(HTreeNode* HNode);
 
