@@ -45,6 +45,7 @@ bool AttentionalFocusCB::link_match(LinkPtr& lpat, LinkPtr& lsoln) {
 			> _atom_space->getAttentionalFocusBoundary()) {
 		return false;
 	} else {
+
 		return true;
 	}
 }
