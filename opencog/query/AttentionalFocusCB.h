@@ -1,18 +1,5 @@
-/*
- * AttentionalFocusCB.h
- *
- *  Created on: 17 Jun, 2014
- *      Author: misgana
- */
-
 #ifndef _ATTENTIONAL_FOCUS_CB_H
 #define _ATTENTIONAL_FOCUS_CB_H
-
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Link.h>
-#include <iostream>
-#include <vector>
-#include <algorithm>
 
 #include "PatternMatchCallback.h"
 #include "DefaultPatternMatchCB.h"
@@ -24,6 +11,9 @@ class AttentionalFocusCB: public virtual DefaultPatternMatchCB {
 
 private:
 	AtomSpace * _atom_space;
+	static bool compare_sti(LinkPtr lptr1,LinkPtr lptr2){
+		return lptr1->getAttentionValue()->getSTI() > lptr2->getAttentionValue()->getSTI();
+	}
 public:
 	AttentionalFocusCB(AtomSpace * as) :
 			DefaultPatternMatchCB(as), _atom_space(as) {
