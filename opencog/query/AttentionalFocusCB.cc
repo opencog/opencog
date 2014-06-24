@@ -16,27 +16,18 @@ bool AttentionalFocusCB::node_match(Handle& node1, Handle& node2) {
 }
 
 bool AttentionalFocusCB::link_match(LinkPtr& lpat, LinkPtr& lsoln) {
-	HandleSeq af_handle_seq;
-	_atom_space->getHandleSetInAttentionalFocus(back_inserter(af_handle_seq));
-	bool not_match = true;
-	if (af_handle_seq.empty()) {
-		std::cout << "[INFO]:No atom in AF looking for more link..."
-				<< std::endl;
-		return true; //not a match
-	} else {
-		Handle hlsoln(lsoln);
-		for (std::vector<Handle>::const_iterator j = af_handle_seq.begin();
-				j != af_handle_seq.end(); ++j) {
-			Handle h(*j);
-			//select atom not in AF [what other criteria can we have here ?]
-			if (hlsoln == h) {
-				not_match = false;
-				break;
-			}
-		}
-
+	if(DefaultPatternMatchCB::link_match(lpat,lsoln))
+	{
+		return true;
 	}
-	return not_match;
+	if(lsoln->getAttentionValue()->getSTI() > _atom_space->getAttentionalFocusBoundary())
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 IncomingSet AttentionalFocusCB::get_incoming_set(Handle h) {
