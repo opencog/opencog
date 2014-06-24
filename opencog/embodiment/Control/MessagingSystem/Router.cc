@@ -703,7 +703,7 @@ bool Router::sendNotification(const NotificationData& data)
     return true;
 }
 
-bool Router::isElementAvailable(const std::string &id)
+bool Router::isElementAvailable(const std::string &id) const
 {
     pthread_mutex_lock(&unavailableIdsLock);
     bool answer = (unavailableIds.find(id) == unavailableIds.end());

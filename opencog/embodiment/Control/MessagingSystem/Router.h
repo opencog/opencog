@@ -274,7 +274,7 @@ private:
     /**
      * Coordinates access to unavailableIds
      */
-    pthread_mutex_t unavailableIdsLock;
+    mutable pthread_mutex_t unavailableIdsLock;
 
     pthread_t socketListenerThread; // thread which will listen to the router port
     pthread_attr_t socketListenerAttr; // thread attributes
@@ -391,13 +391,13 @@ public:
     void notifyMessageArrival(const std::string& toId, unsigned int numMessages);
 
     /**
-     * Return true if the component is available or false otherwise
-     * NetworkElements are unavailable when notification messages fail or the
+     * Return true if the component is available or false otherwise.
+     * NetworkElements are unavailable when notification messages fail or
      * when restarting the router using a saved set of connections.
      *
      * @param id The id of the element to be checked
      */
-    bool isElementAvailable(const std::string &id);
+    bool isElementAvailable(const std::string &id) const;
 
     /** Mark the network element with given id as unavailable.
      * This will cause Router to send UNAVAILABLE_ELEMENT to all other network
