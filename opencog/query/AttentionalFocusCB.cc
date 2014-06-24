@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+
 #include "AttentionalFocusCB.h"
 
 using namespace opencog;
@@ -31,6 +32,7 @@ bool AttentionalFocusCB::node_match(Handle& node1, Handle& node2) {
 					> _atom_space->getAttentionalFocusBoundary()) {
 		return false;
 	} else {
+
 		return true;
 	}
 }
