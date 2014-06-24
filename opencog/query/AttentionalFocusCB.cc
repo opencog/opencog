@@ -60,6 +60,7 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h) {
 	// if none is in AF
 	if (filtered_set.empty()) {
 		//xxx what shall we do here?, return the default or return empty ?
+
 		filtered_set = incoming_set;
 	}
 	std::sort(filtered_set.begin(), filtered_set.end(), compare_sti); //sort by STI for better performance
