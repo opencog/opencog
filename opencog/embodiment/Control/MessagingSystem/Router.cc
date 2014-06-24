@@ -509,7 +509,8 @@ void Router::notifyElementAvailability(const std::string& id, bool available)
                 markElementAvailable(toId);
             }
         } else {
-            logger().debug("Router - Discarding notification to element since it is unavailable (and reffered id is not router");
+            logger().debug("Router - Discarding notification to element since "
+                           "it is unavailable (and referred id is not router");
         }
     }
     //logger().debug("Router::notifyElementAvailability() ended");

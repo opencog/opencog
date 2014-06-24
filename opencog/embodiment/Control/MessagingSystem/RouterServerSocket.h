@@ -58,6 +58,8 @@ private:
 
     void sendAnswer(const std::string &msg);
     void addNetworkElement(const std::string &id, const std::string &ip, int port);
+
+    // Send messages in queue for network element id
     void sendRequestedMessages(const std::string &id, int limit);
     void storeNewMessage();
 
