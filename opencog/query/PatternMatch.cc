@@ -132,7 +132,7 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
 /* ================================================================= */
 /**
  * do_imply -- Evaluate an ImplicationLink.
- *virtual
+ *
  * Given an ImplicationLink, this method will "evaluate" it, matching
  * the predicate, and creating a grounded implicand, assuming the
  * predicate can be satisfied. Thus, for example, given the structure
