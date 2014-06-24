@@ -1331,7 +1331,7 @@ void PatternMiner::testPatternMatcher2()
 //      ) ; [4574]
 //    ) ; [4576]
 
-    HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, patternToMatch;
+    HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, patternToMatch, resultOutgoings;
 
     Handle varHandle1 = originalAtomSpace->addNode(opencog::VARIABLE_NODE,"$var_1" );
     Handle varHandle2 = originalAtomSpace->addNode(opencog::VARIABLE_NODE,"$var_2" );
@@ -1374,13 +1374,19 @@ void PatternMiner::testPatternMatcher2()
 
     Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch, TruthValue::TRUE_TV());
 
+    // add variable atoms
+    Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
+
+    resultOutgoings.push_back(hVariablesListLink);
+    resultOutgoings.push_back(hAndLink);
+
+    Handle hAndLinkResult = originalAtomSpace->addLink(AND_LINK, resultOutgoings, TruthValue::TRUE_TV());
+
     implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
-    implicationLinkOutgoings.push_back(hAndLink); // the results to return
+    implicationLinkOutgoings.push_back(hAndLinkResult); // the results to return
 
     Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
 
-    // add variable atoms
-    Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
 
     bindLinkOutgoings.push_back(hVariablesListLink);
     bindLinkOutgoings.push_back(hImplicationLink);
