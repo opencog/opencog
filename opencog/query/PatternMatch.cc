@@ -656,7 +656,7 @@ Handle PatternMatch::single_bindlink (Handle himplication)
 
 /**
  * Evaluate an ImplicationLink embedded in a BindLink
- <<<<<<< HEAD*
+ *
  * Use the crisp-logic callback to evaluate boolean implication
  * statements; i.e. statements that have truth values assigned
  * their clauses, and statements that start with NotLink's.
