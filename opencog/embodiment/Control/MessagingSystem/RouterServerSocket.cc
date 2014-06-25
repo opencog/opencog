@@ -205,8 +205,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
         unsigned int sentBytes = boost::asio::write(*sock, boost::asio::buffer(cmd));
         if (sentBytes != cmd.length()) {
             logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
-            master->closeDataSocket(id);
-            master->closeControlSocket(id);
+            master->closeSockets(id);
             master->markElementUnavailable(id);
             delete(message); // TODO: Shouldn't message be put back to the queue?
             return;
@@ -221,8 +220,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
             sentBytes = boost::asio::write(*sock, boost::asio::buffer(line));
             if (sentBytes != line.length()) {
                 logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, line.length() );
-                master->closeDataSocket(id);
-                master->closeControlSocket(id);
+                master->closeSockets(id);
                 master->markElementUnavailable(id);
                 delete(message); // TODO: Shouldn't message be put back to the queue?
                 return;
@@ -240,8 +238,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
     unsigned int sentBytes = boost::asio::write(*sock, boost::asio::buffer(cmd));
     if (sentBytes != cmd.length()) {
         logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
-        master->closeControlSocket(id);
-        master->closeDataSocket(id);
+        master->closeSockets(id);
         master->markElementUnavailable(id);
         return;
     }
@@ -254,8 +251,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
         size_t receivedBytes = sock->read_some(boost::asio::buffer(response), error);
         if (error && error != boost::asio::error::eof) {
             logger().error("RouterServerSocket - Invalid response. recv returned %d ", receivedBytes );
-            master->closeDataSocket(id);
-            master->closeControlSocket(id);
+            master->closeSockets(id);
             master->markElementUnavailable(id);
             return;
         }

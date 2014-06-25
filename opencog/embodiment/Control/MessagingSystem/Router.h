@@ -351,6 +351,9 @@ public:
     //! Close network socket for sending data messages to network element?
     void closeDataSocket(const std::string &id);
 
+    // Close control and data sockets of network element id
+    void closeSockets(const std::string& id);
+
     /** Remove network element from the embodiment system and clean up sockets
      * and queues associated with it.
      */

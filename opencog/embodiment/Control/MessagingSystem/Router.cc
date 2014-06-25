@@ -363,8 +363,7 @@ void Router::removeNetworkElement(const std::string &id)
 {
     ipAddress.erase(id);
     portNumber.erase(id);
-    closeControlSocket(id);
-    closeDataSocket(id);
+    closeSockets(id);
 
     messageCentral->removeQueue(id);
 
@@ -456,8 +455,7 @@ void Router::notifyMessageArrival(const std::string& toId, unsigned int numMessa
     if (isElementAvailable(toId) && dataSocketConnection(toId)) {
         NotificationData data(toId, getDataSocket(toId), MESSAGE, "", numMessages);
         if (!sendNotification(data)) {
-            closeDataSocket(toId);
-            closeControlSocket(toId);
+            closeSockets(toId);
             markElementUnavailable(toId);
         }
     }
@@ -502,8 +500,7 @@ void Router::notifyElementAvailability(const std::string& id, bool available)
 
             NotificationData data(toId, getControlSocket(toId), type, id, 0);
             if (!sendNotification(data)) {
-                closeControlSocket(toId);
-                closeDataSocket(toId);
+                closeSockets(toId);
                 markElementUnavailable(toId);
             } else {
                 markElementAvailable(toId);
@@ -516,6 +513,12 @@ void Router::notifyElementAvailability(const std::string& id, bool available)
     //logger().debug("Router::notifyElementAvailability() ended");
 }
 
+void Router::closeSockets(const string& id)
+{
+    closeControlSocket(id);
+    closeDataSocket(id);
+}
+
 bool Router::controlSocketConnection(const std::string& ne_id)
 {
     if ( controlSockets.find(ne_id) != controlSockets.end() ) {
@@ -526,8 +529,7 @@ bool Router::controlSocketConnection(const std::string& ne_id)
             logger().info("Router - controlSocketConnection(%s): "
                           "Element marked as unavailable. Trying to re-connect...",
                           ne_id.c_str() );
-            closeControlSocket(ne_id);
-            closeDataSocket(ne_id);
+            closeSockets(ne_id);
         } else {
             logger().debug("Router - controlSocketConnection(%s): "
                            "Connection already established", ne_id.c_str() );
@@ -559,8 +561,7 @@ bool Router::controlSocketConnection(const std::string& ne_id)
         sock = NULL;
     }
 
-    closeControlSocket(ne_id);
-    closeDataSocket(ne_id);
+    closeSockets(ne_id);
     markElementUnavailable(ne_id);
 
     return false;
@@ -575,8 +576,7 @@ bool Router::dataSocketConnection(const std::string& ne_id)
             logger().info("Router - dataSocketConnection(%s): "
                           "Element marked as unavailable. Trying to re-connect...",
                           ne_id.c_str() );
-            closeDataSocket(ne_id);
-            closeControlSocket(ne_id);
+            closeSockets(ne_id);
         } else {
             logger().debug("Router - dataSocketConnection(%s): "
                            "Connection already established", ne_id.c_str() );
@@ -608,8 +608,7 @@ bool Router::dataSocketConnection(const std::string& ne_id)
         sock = NULL;
     }
 
-    closeDataSocket(ne_id);
-    closeControlSocket(ne_id);
+    closeSockets(ne_id);
     markElementUnavailable(ne_id);
 
     return false;
