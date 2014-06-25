@@ -30,6 +30,10 @@
 	(ListLink
 	     dogs
 	     animals
+	     (ContextLink (stv 0.5 1)
+	        dogs
+	        animals
+	     )
 		 (SubsetLink (stv 0.5 1)
             dogs
             animals
