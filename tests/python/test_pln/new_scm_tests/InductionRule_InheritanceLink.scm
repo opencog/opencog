@@ -4,8 +4,8 @@
 
 (EvaluationLink (PredicateNode "inputs") 
 	(ListLink 
-		(InheritanceLink alex dutch (stv 0.5 1))
 		(InheritanceLink alex smoker (stv 0.5 1))
+		(InheritanceLink alex dutch (stv 0.5 1))
 	)
 )
 (EvaluationLink (PredicateNode "rules") 
