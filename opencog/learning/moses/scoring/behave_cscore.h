@@ -54,8 +54,9 @@ public:
         : _bscorer(b), _ascorer(a) {}
 
     behavioral_score get_bscore(const combo_tree&) const;
-    composite_score get_cscore(const behavioral_score&);
+    behavioral_score get_bscore(const scored_combo_tree_set&) const;
     composite_score get_cscore(const combo_tree&);
+    composite_score get_cscore(const scored_combo_tree_set&);
 
     /// Returns the best score reachable for this problem. Used as
     /// termination condition.
@@ -74,6 +75,8 @@ public:
     {
         _bscorer.ignore_idxs(idxs);
     }
+
+    ascore_base& get_ascorer() const { return _ascorer; }
 
 private:
     const bscore_base& _bscorer;

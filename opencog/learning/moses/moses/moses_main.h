@@ -97,14 +97,51 @@ struct metapop_printer
             return;
 
         stringstream ss;
-        metapop.ostream(ss,
-                        result_count,
-                        output_score,
-                        output_penalty,
-                        output_bscore,
-                        false,  // output_visited
-                        output_only_best,
-                        output_python); 
+        if (output_python) {
+            // Python boilerplate
+            // XXX FIXME -- I doubt that this actually works.
+            ss << "#!/usr/bin/env python" << std::endl
+               << "from operator import *" << std::endl
+               << std::endl
+               << "#These functions allow multiple args instead of lists." << std::endl
+               << "def ors(*args):" << std::endl
+               << "    return any(args)" << std::endl
+               << std::endl
+               << "def ands(*args):" << std::endl
+               << "    return all(args)" << std::endl << std::endl
+               << "def moses_eval(i):" << std::endl << "    return ";
+        }
+
+        const scored_combo_tree_set& tree_set = metapop.best_candidates();
+
+        // search for the top score... we need this, if printing only
+        // the high-scorers.
+        score_t best_score = very_worst_score;
+        if (output_only_best) {
+            for (const scored_combo_tree& sct : tree_set) {
+                score_t sc = sct.get_score();
+                if (best_score < sc) best_score = sc;
+            }
+        }
+
+        int cnt = 0;
+        for (const scored_combo_tree& sct : tree_set) {
+            if (result_count < ++cnt) break;
+            if (best_score <= sct.get_score()) {
+                if (output_python) {
+                    ostream_combo_tree (ss, sct.get_tree(), combo::fmt::python);
+                } else {
+                    ss << sct.get_score() << " "
+                       << sct.get_weight() << " "
+                       << sct.get_tree();
+                    if (output_score)
+                       ss << " " << sct.get_composite_score();
+                    if (output_bscore)
+                       ss << " " << sct.get_bscore();
+                    ss << std::endl;
+                }
+            }
+        }
     
         if (output_eval_number)
             ss << number_of_evals_str << ": " << stats.n_evals << std::endl;;
@@ -121,7 +158,7 @@ struct metapop_printer
     
         // Log the best candidate
         stringstream ssb;
-        metapop.ostream(ssb, 1, true, true);
+        metapop.ostream_metapop(ssb, 1);
         string resb = (output_with_labels && !ilabels.empty()?
                        ph2l(ssb.str(), ilabels) : ssb.str());
         if (resb.empty())
@@ -148,6 +185,7 @@ struct metapop_printer
         }
     #endif
     }
+
 private:
     long result_count;
     bool output_score;

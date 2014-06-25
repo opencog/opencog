@@ -21,6 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <math.h>
+
+#include <algorithm>
+#include <iostream>
+
+#include  <opencog/util/oc_assert.h>
 #include "ensemble.h"
 
 namespace opencog {
@@ -28,11 +34,85 @@ namespace moses {
 
 using namespace combo;
 
-ensemble::ensemble() {}
+ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
+	_params(ep)
+{
+	_booster = dynamic_cast<boosting_ascore*>(&(cs.get_ascorer()));
+}
 
+// Is this behavioral score correct? For boolean scores, correct is 0.0
+// and incorrect is -1.0.
+static inline bool is_correct(score_t val)
+{
+	return -0.5 < val;
+}
+
+/**
+ * Implement a boosted ensemble. Candidate combo trees are added to
+ * the ensemble one at a time, weights are adjusted, and etc.
+ */
 void ensemble::add_candidates(scored_combo_tree_set& cands)
 {
-printf ("Hello world\n");
+	OC_ASSERT(_booster, "Ensemble can only be used with a weighted scorer");
+
+	int promoted = 0;
+	// We need the length of the behavioral score, as normalization
+	// XXX we should be using the user-weighted thingy here .. XX FIXME
+
+	double behave_len = cands.begin()->get_bscore().size();
+	while (true) {
+		// Find the element with the least error
+		scored_combo_tree_set::iterator best_p = 
+			std::min_element(cands.begin(), cands.end(),
+				[](const scored_combo_tree& a, const scored_combo_tree& b) {
+					return a.get_score() > b.get_score(); });
+
+		double err = - best_p->get_score() / behave_len;
+		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
+
+		// XXX FIXME, this should be something else ... 
+		if (0.0 == err) break;
+
+		// any score worse than half is terrible. half gives a weight of zero.
+		if (0.5 <= err) break;
+
+		// Compute alpha
+		double alpha = 0.5 * log ((1.0 - err) / err);
+		double expalpha = exp(alpha);
+		double rcpalpha = 1.0 / expalpha;
+		logger().info() << "Add to ensemble " << *best_p  << std::endl
+			<< "With err=" << err << " alpha=" << alpha <<" exp(alpha)=" << expalpha;
+
+		// Recompute the weights
+		const behavioral_score& bs = best_p->get_bscore();
+		std::vector<double>& weights = _booster->get_weights();
+		double znorm = 0.0;
+		for (int i=0; i<behave_len; i++)
+		{
+			weights[i] *= is_correct(bs[i]) ? rcpalpha : expalpha;
+			znorm += weights[i];
+		}
+
+		// Normalization: sum of scores must equal vector length.
+		znorm = behave_len / znorm;
+		for (int i=0; i<behave_len; i++)
+		{
+			weights[i] *= znorm;
+		}
+
+		// Set the weight for the tree, and stick it in the ensemble
+		scored_combo_tree best = *best_p;
+		best.set_weight(alpha);
+		_scored_trees.insert(best);
+
+		// Remove from the set of candidates.
+		cands.erase(best_p);
+
+		// Are we done yet?
+		promoted ++;
+		if (_params.num_to_promote < promoted) break;
+		if (0 == cands.size()) break;
+	}
 }
 
 

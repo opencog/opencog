@@ -27,6 +27,7 @@
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 
+#include <opencog/util/oc_assert.h>
 #include "scoring_base.h"
 
 namespace opencog { namespace moses {
@@ -65,9 +66,40 @@ void bscore_base::set_complexity_coef(score_t complexity_ratio)
     logger().info() << "BScore complexity ratio = " << 1.0/_complexity_coef;
 }
 
+behavioral_score
+bscore_base::operator()(const scored_combo_tree_set& ensemble) const
+{
+    OC_ASSERT(false, "Ensemble scoring not implemented for bscorer %s",
+        typeid(*this).name());
+    return behavioral_score();
+}
+
+/**
+ * Compute the average (weighted) complexity of all the trees in the
+ * ensemble.  XXX this is probably wrong, we should probably do something
+ * like add the logarithm of the number of trees to the complexity, or 
+ * I dunno .. something.  Unclear how the theory should even work for this
+ * case.
+ */
+complexity_t bscore_base::get_complexity(const scored_combo_tree_set& ensemble) const
+{
+    if (0 == ensemble.size()) return 0.0;
+
+    double cpxy = 0.0;
+    double norm = 0.0;
+    for (const scored_combo_tree& sct : ensemble) {
+        double w = sct.get_weight();
+        cpxy += w * tree_complexity(sct.get_tree());
+        norm += w;
+    }
+
+    // XXX FIXME complexity_t should be a double not an int ...
+    return (complexity_t) floor (cpxy / norm + 0.5);
+}
+
 score_t simple_ascore::operator()(const behavioral_score& bs) const
 {
-	return boost::accumulate(bs, 0.0);
+    return boost::accumulate(bs, 0.0);
 }
 
 } // ~namespace moses

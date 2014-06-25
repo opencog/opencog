@@ -1254,7 +1254,7 @@ public:
       the operator returns the results.
     */
     template<typename It>
-    bool operator()(It from,It to) {
+    bool operator()(It from, It to) {
         const_iterator it = begin();
         for (int i = 1; from != to; ++from, i = i << 1)
             if (*from)

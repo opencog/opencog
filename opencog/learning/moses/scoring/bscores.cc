@@ -1,8 +1,9 @@
 /*
- * opencog/learning/moses/moses/scoring.cc
+ * opencog/learning/moses/scoring/bscores.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
+ * Copyright (C) 2014 Aidyia Limited
  * All Rights Reserved
  *
  * Written by Moshe Looks, Nil Geisweiller, Linas Vepstas
@@ -68,9 +69,48 @@ behavioral_score logical_bscore::operator()(const combo_tree& tr) const
     combo::complete_truth_table tt(tr, _arity);
     behavioral_score bs(_target.size());
 
+    // Compare the predictions of the tree to that of the desired
+    // result. A correct prdiction gets a score of 0, an incorrect
+    // prediction gets a score of -1.
     boost::transform(tt, _target, bs.begin(), [](bool b1, bool b2) {
             return -score_t(b1 != b2); });
 
+    return bs;
+}
+
+/// Boolean ensemble scorer.  Assumes that the ensemble signature outputs
+/// a boolean value.  All of the trees in the ensmble get a wieghted vote,
+/// that vote is totalled to get the prediction of the ensemble, and then
+/// compared to the desired output.
+behavioral_score logical_bscore::operator()(const scored_combo_tree_set& ensemble) const
+{
+    size_t sz = _target.size();
+
+    // Step 1: accumulate the weighted prediction of each tree in
+    // the ensemble.
+    behavioral_score hypoth(sz);
+    for (const scored_combo_tree& sct: ensemble) {
+        combo::complete_truth_table tt(sct.get_tree(), _arity);
+        score_t weight = sct.get_weight();
+        for (size_t i=0; i<sz; i++) {
+            // Add +1 if prediction is true and -1 if prediction is false.
+            // We could gain some minor performance improvement if we
+            // moved this out of the loop, but who cares, this scorer is
+            // used only for the demo problems.
+            hypoth[i] += weight * (2.0 * ((score_t) tt[i]) - 1.0);
+        }
+    }
+
+    // Step 2: compare the prediction of the ensemble to the desired
+    // result. The array "hypoth" is positive to predict true, and
+    // negative to predict false.  The resulting score is 0 if corrrect,
+    // and -1 if incorrect.
+    behavioral_score bs(sz);
+    boost::transform(hypoth, _target, bs.begin(),
+        [](score_t hyp, bool b2) {
+            bool b1 = (hyp > 0.0) ? true : false;
+            return -score_t(b1 != b2);
+         });
     return bs;
 }
 

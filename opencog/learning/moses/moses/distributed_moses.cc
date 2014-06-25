@@ -272,10 +272,7 @@ void parse_result(istream& in, scored_combo_tree_set& candidates, int& evals)
 
             if (logger().isFineEnabled()) {
                 logger().fine("Parsed candidate:");
-                stringstream ss;
-                ostream_scored_combo_tree(ss, candidate,
-                              true, true);
-                logger().fine(ss.str());
+                logger().fine() << candidate;
             }
         }
     }

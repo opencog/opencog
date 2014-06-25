@@ -2,6 +2,7 @@
  * opencog/learning/moses/moses/types.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2014 Aidyia Limited
  * All Rights Reserved
  *
  * Written by Moshe Looks
@@ -21,7 +22,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include <sstream>
+#include <string>
 
 #include <boost/functional/hash.hpp>
 
@@ -150,6 +153,133 @@ bool composite_score::operator==(const composite_score &r) const
         && CHK_EQ(penalized_score)
         ;
 }
+
+static const std::string behavioral_score_prefix_str = "behavioral score:";
+
+std::ostream& ostream_behavioral_score(std::ostream& out, const behavioral_score& bs)
+{
+    out << behavioral_score_prefix_str << " ";
+    return ostreamContainer(out, bs, " ", "[", "]");
+}
+
+/** stream out a scored combo tree */
+std::ostream& ostream_scored_combo_tree(std::ostream& out, const scored_combo_tree& sct)
+{
+    out << sct.get_score() << " " << sct.get_tree() << std::endl
+        << "weight=" << sct.get_weight() << " " 
+        << sct.get_composite_score();
+
+    const behavioral_score& bs = sct.get_bscore();
+    if (0 < bs.size()) {
+        out << std::endl;
+        ostream_behavioral_score(out, bs);
+    }
+    out << std::endl;
+
+    return out;
+}
+
+
+/// Stream in a scored_combo_tree, using any format that vaguely
+/// resembles ostream_scored_combo_tree.  We assume that the combo tree
+/// is always preceeded by the score, for backwards compatibility.
+///
+scored_combo_tree istream_scored_combo_tree(std::istream& in)
+{
+    static const char* score_str = "score";
+    static const char* weight_str = "weight";
+    static const char* complexity_str = "complexity";
+    static const char* complexity_penalty_str = "complexity penalty";
+    static const char* diversity_penalty_str = "diversity penalty";
+    static const char* behavioral_score_str = "behavioral score";
+
+    // parse score
+    score_t sc;
+    in >> sc;
+
+    // parse combo tree
+    combo::combo_tree tr;
+    in >> tr;
+
+    // parse the rest
+    complexity_t cpx = 0;
+    score_t cpx_penalty = 0, diversity_penalty = 0, penalized_score = 0;
+    score_t weight = 0.0;
+    behavioral_score bs;
+
+    // The following parser assumes that the input is of the form
+    // key=value or key:value, and is separated by commas, spaces
+    // or tabs. Any brackets [] braces {} or parens () in the input
+    // are ignored.
+    std::string line;
+    std::getline(in, line);
+    char* pline = strdup(line.c_str());
+    char* key = pline;
+    while (true) {
+        char* eq = strpbrk(key, ":=");
+        if (NULL == eq) break;
+        *eq = 0x0;
+        eq++;
+        char *tail = strpbrk(eq, " ,[](){}\t");
+        if (tail) *tail = 0x0;
+
+        double val = atof(eq);
+
+        // large string case statement
+        if (0 == strcmp(key, score_str)) {
+            sc = val;
+        }
+        else if (0 == strcmp(key, complexity_str)) {
+            cpx = val;
+        }
+        else if (0 == strcmp(key, weight_str)) {
+            weight = val;
+        }
+        else if (0 == strcmp(key, complexity_penalty_str)) {
+            cpx_penalty = val;
+        }
+        else if (0 == strcmp(key, diversity_penalty_str)) {
+            diversity_penalty = val;
+        }
+
+        if (tail) {
+             // next key starts at the first non-junk character
+             key = tail+1;
+             key += strspn(key, " ,[](){}\t");
+        }
+        else break;
+      
+    }
+    free(pline);
+
+    // OK, now we assume that the behavioral score is on a line all
+    // by itself, and consists of a squence of numbers, surrounded
+    // by brackets.
+    std::getline(in, line);
+    pline = strdup(line.c_str());
+    key = pline;
+    char* eq = strpbrk(key, ":=");
+    if (eq) {
+        *eq = 0x0;
+        eq++;
+
+        if (0 == strcmp(key, behavioral_score_str)) {
+            istringstream iss(eq);
+            istreamContainer(iss, back_inserter(bs), "[", "]");
+        }
+    }
+    free(pline);
+
+    // assign to candidate
+    combo::combo_tree tr_test = tr;
+
+    composite_score cs(sc, cpx, cpx_penalty, diversity_penalty);
+    scored_combo_tree sct(tr, /* default demeID */ 0, cs, bs);
+    sct.set_weight(weight);
+    return sct;
+}
+
+
 
 } // ~namespace moses
 } // ~namespace opencog
