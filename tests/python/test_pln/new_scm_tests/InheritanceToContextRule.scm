@@ -10,7 +10,7 @@
 	(ListLink
 		(InheritanceLink (stv 0.5 1)
 		    (AndLink ben maths)
-		    (AndLink competent maths) ; ConceptNodes are switched here
+		    (AndLink maths competent)
 		)
     )
 )
@@ -30,10 +30,12 @@
 (EvaluationLink (PredicateNode "outputs")
 	(ListLink
 		ben
-		competent
 		maths
-		(AndLink ben maths)
-		(AndLink competent maths)
+		competent
+		(InheritanceLink (stv 0.5 1)
+		    (AndLink ben maths)
+		    (AndLink maths competent)
+		)
 		(ContextLink (stv 0.5 1)
 		    maths
 		    (InheritanceLink ben competent)
