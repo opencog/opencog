@@ -2,6 +2,7 @@
  * opencog/learning/moses/moses/types.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2014 Aidyia Limited
  * All Rights Reserved
  *
  * Written by Moshe Looks
@@ -190,7 +191,6 @@ scored_combo_tree istream_scored_combo_tree(std::istream& in)
     static const char* complexity_str = "complexity";
     static const char* complexity_penalty_str = "complexity penalty";
     static const char* diversity_penalty_str = "diversity penalty";
-    static const char* penalized_score_str = "penalized score";
     static const char* behavioral_score_str = "behavioral score";
 
     // parse score
@@ -240,9 +240,6 @@ scored_combo_tree istream_scored_combo_tree(std::istream& in)
         }
         else if (0 == strcmp(key, diversity_penalty_str)) {
             diversity_penalty = val;
-        }
-        else if (0 == strcmp(key, penalized_score_str)) {
-            penalized_score = val;
         }
 
         if (tail) {
