@@ -369,7 +369,6 @@ void RouterServerSocket::storeNewMessage()
     logger().fine("RouterServerSocket - Finished queueing messages.");
 }
 
-
 void RouterServerSocket::OnLine(const std::string& line)
 {
 
@@ -392,19 +391,17 @@ void RouterServerSocket::OnLine(const std::string& line)
             int port = atoi(args.front().c_str());
             args.pop();
 
-            logger().info(
-                         "RouterServerSocket - Handshaking: id = %s ip = %s port = %d.",
-                         id.c_str(), ip.c_str(), port);
+            logger().info("RouterServerSocket - Handshaking: id = %s ip = %s port = %d.",
+                          id.c_str(), ip.c_str(), port);
 
             addNetworkElement(id, ip, port);
 
         } else if (command == "LOGOUT") {
-            // logout an NetworkElement - must of the time an OAC
+            // logout an NetworkElement - most of the time an OAC
             std::string id = args.front();
             args.pop();
 
-            logger().info(
-                         "RouterServerSocket - Logout: id = %s.", id.c_str());
+            logger().info("RouterServerSocket - Logout: id = %s.", id.c_str());
 
             master->removeNetworkElement(id);
             sendAnswer(NetworkElementCommon::OK_MESSAGE);
@@ -423,9 +420,8 @@ void RouterServerSocket::OnLine(const std::string& line)
             std::string targetId = args.front();
             args.pop();
 
-            logger().info(
-                         "RouterServerSocket - Clear message queue: id = '%s' requesting for '%s'.",
-                         requestorId.c_str(), targetId.c_str());
+            logger().info("RouterServerSocket - Clear message queue: id = '%s' requesting for '%s'.",
+                          requestorId.c_str(), targetId.c_str());
 
             master->clearNetworkElementMessageQueue(targetId);
             sendAnswer(NetworkElementCommon::OK_MESSAGE);
