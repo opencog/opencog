@@ -96,6 +96,8 @@ pair<score_t, string> cheap_parse_result(const string& tempfile)
        in >> weight;
        char tr_chars[4096];
        in.getline(tr_chars, 4096);
+       char* junk = strstr(tr_chars, "[score");
+       if (junk) *junk = 0x0;
        string tr_str(tr_chars);
        if (hiscore < score) {
            hiscore = score;
