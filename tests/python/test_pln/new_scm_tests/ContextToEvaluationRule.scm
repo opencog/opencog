@@ -33,12 +33,12 @@
 (EvaluationLink (PredicateNode "outputs")
 	(ListLink
 	     isBlue
-	     sky
 	     earth
+	     sky
 		 (EvaluationLink (stv 0.5 1)
             isBlue
             (ListLink
-                (AndLink sky earth)
+                (AndLink earth sky)
             )
         )
     )
