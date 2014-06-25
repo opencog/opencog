@@ -129,6 +129,7 @@ struct metapop_printer
             if (result_count < ++cnt) break;
             if (best_score <= sct.get_score()) {
                 if (output_python) {
+                    ss << "#score: " << sct.get_score() << std::endl;
                     ostream_combo_tree (ss, sct.get_tree(), combo::fmt::python);
                 } else {
                     ss << sct.get_score() << " "
