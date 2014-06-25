@@ -312,9 +312,11 @@ struct scored_combo_tree_equal
 
 /// scored_combo_tree_hash_set provides an O(1) way of determining if
 /// a combo tree is in the set, or not (and getting its score, if it is).
-/// This can be kind-of slow, for two reasons: it invokes the copy 
-/// constructor for insertion, and combo trees can be big; it also 
-/// computes the hash of the tree, which can be fairly expensive.
+/// Its O(1) in theory. In practice, it can be quite slow, for two
+/// reasons: one is that it needs to compute the hash of the tree, and
+/// since trees can be big, this will be expensive.  The other problem
+/// it that this invokes the copy constructor for insertion.
+/// See below for other containers with different properties.
 typedef std::unordered_set<scored_combo_tree,
                  scored_combo_tree_hash,
                  // scored_combo_tree_equal> scored_combo_tree_hash_set;

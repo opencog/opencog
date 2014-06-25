@@ -203,7 +203,7 @@ scored_combo_tree istream_scored_combo_tree(std::istream& in)
 
     // parse the rest
     complexity_t cpx = 0;
-    score_t cpx_penalty = 0, diversity_penalty = 0, penalized_score = 0;
+    score_t cpx_penalty = 0, diversity_penalty = 0;
     score_t weight = 0.0;
     behavioral_score bs;
 
