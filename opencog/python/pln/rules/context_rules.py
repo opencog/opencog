@@ -211,7 +211,6 @@ class ContextToEvaluationRule(Rule):
             list_link = self.chainer.link(types.ListLink, [and_link])
             evaluation_link = [self.chainer.link(types.EvaluationLink,
                                                 [predicate_a, list_link])]
-            print(evaluation_link)
         return evaluation_link, [tv]
 
 
