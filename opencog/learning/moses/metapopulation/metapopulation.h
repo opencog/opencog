@@ -445,10 +445,11 @@ public:
 private:
     void log_selected_exemplar(scored_combo_tree_ptr_set::const_iterator);
 
-protected:
+public:
     // --------------------- Internal state -----------------------
     const metapop_parameters& _params;
 
+protected:
     behave_cscore& _cscorer;
 
     scored_combo_tree_ptr_set _scored_trees;

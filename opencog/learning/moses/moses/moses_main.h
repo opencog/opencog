@@ -65,8 +65,8 @@ struct metapop_printer
                     bool _output_only_best,
                     bool _output_eval_number,
                     bool _output_with_labels,
-                    const vector<string>& _ilabels,
-                    const string& _output_file,
+                    const std::vector<std::string>& _ilabels,
+                    const std::string& _output_file,
                     bool _output_python,
                     bool _is_mpi) :
         result_count(_result_count), output_score(_output_score),
@@ -148,15 +148,29 @@ struct metapop_printer
             of.close();
         }
     
-        // Log the best candidate
-        stringstream ssb;
-        metapop.ostream_metapop(ssb, 1);
-        string resb = (output_with_labels && !ilabels.empty()?
-                       ph2l(ssb.str(), ilabels) : ssb.str());
-        if (resb.empty())
-            logger().warn("No candidate is good enough to be returned. Yeah that's bad!");
-        else
-            logger().info("Best candidates:\n%s", res.c_str());
+        if (metapop._params.do_boosting) {
+            stringstream ssb;
+            for (const auto& cand : metapop.best_candidates()) {
+                ssb << cand.get_weight() << " " << cand.get_tree();
+            }
+            string resb = (output_with_labels && !ilabels.empty()?
+                           ph2l(ssb.str(), ilabels) : ssb.str());
+            if (resb.empty())
+                logger().warn("Ensemble was empty!");
+            else
+                logger().info("Final ensemble, consisting of %d members:\n%s",
+                    metapop.best_candidates().size(), res.c_str());
+        } else {
+            // Log the best candidate
+            stringstream ssb;
+            metapop.ostream_metapop(ssb, 1);
+            string resb = (output_with_labels && !ilabels.empty()?
+                           ph2l(ssb.str(), ilabels) : ssb.str());
+            if (resb.empty())
+                logger().warn("No candidate is good enough to be returned. Yeah that's bad!");
+            else
+                logger().info("Best candidates:\n%s", res.c_str());
+        }
     
     #ifdef GATHER_STATS
         dex._optimize.hiscore /= dex._optimize.hicount;
@@ -187,7 +201,7 @@ private:
     bool output_eval_number;
     bool output_with_labels;
 public:
-    vector<string> ilabels;
+    std::vector<std::string> ilabels;
 private:
     string output_file;
     bool output_python;
