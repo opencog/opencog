@@ -1,5 +1,9 @@
+;This part of RelEx2Logic is used for post processing purpose of complex sentence 
+;like adjective clause ,coordinate conjunction , correlative conjunction etc
+;The rules are used to generate a new graph from already generated graphs at  pre stage of RelEx2logic 
+;in this process the temporary nodes like "WhichMarker" node, "AndMarker" node, "WhoMarker" node will be removed
 ;-------------------------------------------------------------------------------
-;Variables used for post processing process of Relex2Logic 
+;Variable declarations for the purpose of post processing 
 (define antecedent-inst (TypedVariableLink (VariableNode "$antecedent-inst") (VariableTypeNode "ConceptNode")))
 (define concept-sub-1 (TypedVariableLink (VariableNode "$concept-sub-1") (VariableTypeNode "ConceptNode")))
 (define concept-sub-2 (TypedVariableLink (VariableNode "$concept-sub-2") (VariableTypeNode "ConceptNode")))
@@ -7,17 +11,12 @@
 (define sub-root-verb (TypedVariableLink (VariableNode "$sub-root-verb") (VariableTypeNode "PredicateNode")))
 (define main-root-verb (TypedVariableLink (VariableNode "$main-root-verb") (VariableTypeNode "PredicateNode")))
 ;-------------------------------------------------------------------------------
-;find antecedent of the given antecedent instance 
+;accept the antecedent instance  and return the antecedent 
+;here, antecedent is the thing that is modified by the adjective clause
 (define (find-antecedent ant-inst)
-    (define temp-node)
-    (let ((lst (cog-chase-link 'InheritanceLink 'ConceptNode ant-inst)))
-        (for-each (lambda (i)
-            (if (equal? (string-trim-right (substring (cog-name ant-inst) 0 (string-index (cog-name ant-inst) #\@)) #\s)(cog-name i))
-                (set! temp-node i)
-                #f))
-        lst) temp-node))
+(cog-node 'ConceptNode (cog-name (word-inst-get-lemma(cog-node 'WordInstanceNode (cog-name ant-inst))))))
 ;-------------------------------------------------------------------------------
-;re-write the graphs
+;re-write the graphs to new form 
 (define (rewrite-graph sub-clause main-clause antecedent-inst)
     (define antecedent (find-antecedent antecedent-inst))
     (if (not (equal? (cog-name antecedent) (cog-name (cog-get-partner main-clause (VariableNode "$X")))))
@@ -29,7 +28,7 @@
         (SatisfyingSetLink (VariableNode "$X")
            main-clause))))
 ;-------------------------------------------------------------------------------
-;re-write the graphs for sentence with definite flag 
+;re-write the graphs to new form for sentence with definite flag 
 (define (rewrite-graphs-with-definite sub-clause main-clause antecedent-inst)
     (define antecedent (find-antecedent antecedent-inst))
     (if (not (equal? (cog-name antecedent) (cog-name (cog-get-partner main-clause (VariableNode "$X")))))
@@ -41,9 +40,9 @@
 ;Adjective clause rules
 ;
 ;-------------------------------------------------------------------------------
-;For sentences with SVO and SVP rules
+;For sentences with SVO and SVP rules at pre stage 
 ;Example: "Restaurants which serve frogs are famous."
-;RelEx2Logic representaion:
+;RelEx2Logic representaion after post processing 
 ;(InheritanceLink
 ;   (SatisfyingSetLink (VariableNode "$X")
 ;        (AndLink
@@ -71,9 +70,9 @@
                 (InheritanceLink (VariableNode "$X")(VariableNode "$concept-main-1"))
                 (VariableNode "$antecedent-inst"))
            ))))
-;For sentences with SVO rule applied twice 
+;For sentences with SVO rule applied twice at pre stage 
 ;Example: "I like trees which have coffee beans." 
-;RelEx2Logic representaion:
+;RelEx2Logic representaion after post processing 
 ;(InheritanceLink
 ;    (SatisfyingSetLink (VariableNode "$X")
 ;        (AndLink
@@ -101,9 +100,9 @@
                 (EvaluationLink (PredicateNode "main-root-verb")(ListLink (ConceptNode "concept-main-1")(VariableNode "$X")))
                 (VariableNode "$antecedent-inst")))
 )))
-;For sentences with SVP and SVIO rule
+;For sentences with SVP and SVIO rule at pre stage 
 ;Example:  "Books which you give me are interesting."
-;RelEx2Logic representaion:
+;RelEx2Logic representaion after post processing 
 ;(InheritanceLink
 ;        (SatisfyingSetLink (VariableNode "$X")
 ;            (AndLink
@@ -127,9 +126,9 @@
                 (InheritanceLink(VariableNode "$X")(ConceptNode "$concept-main-1"))
                 (VariableNode "$antecedent-inst")))
 )))
-;For sentences with definite flag ,SVO and passive rule 
+;For sentences with definite flag ,SVO and passive rule at pre stage 
 ; Example: "The books which I read in the library were written by Charles Dickens." 
-;RelEx2Logic representaion:
+;RelEx2Logic representaion after post processing 
 ;(MemberLink
 ;    (ConceptNode Book@12)
 ;    (SatisfyingSetLink (VariableNode $X)
