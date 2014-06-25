@@ -134,7 +134,6 @@
 ;    (ConceptNode Book@12)
 ;    (SatisfyingSetLink (VariableNode $X)
 ;        (AndLink
-;            (InheritanceLink (VariableNode $X) (ConceptNode Book))
 ;            (EvaluationLink
 ;                (PredicateNode write@34)
 ;                (ListLink
