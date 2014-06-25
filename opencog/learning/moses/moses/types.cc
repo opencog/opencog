@@ -21,7 +21,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include <sstream>
+#include <string>
 
 #include <boost/functional/hash.hpp>
 
@@ -162,39 +164,34 @@ std::ostream& ostream_behavioral_score(std::ostream& out, const behavioral_score
 /** stream out a scored combo tree */
 std::ostream& ostream_scored_combo_tree(std::ostream& out, const scored_combo_tree& sct)
 {
-    out << sct.get_composite_score() << std::endl;
-    out << "weight=" << sct.get_weight() << " " << sct.get_tree();
+    out << sct.get_score() << " " << sct.get_tree() << std::endl
+        << "weight=" << sct.get_weight() << " " 
+        << sct.get_composite_score();
 
     const behavioral_score& bs = sct.get_bscore();
     if (0 < bs.size()) {
         out << std::endl;
         ostream_behavioral_score(out, bs);
     }
+    out << std::endl;
 
     return out;
 }
 
 
-/// Stream in scored_combo_tree, use the same format as
-/// ostream_scored_combo_tree. Note that for now we assume that combo
-/// tree is always preceeded by the score, it's easier that way.
+/// Stream in a scored_combo_tree, using any format that vaguely
+/// resembles ostream_scored_combo_tree.  We assume that the combo tree
+/// is always preceeded by the score, for backwards compatibility.
 ///
-/// You may want to set 'in' to send exceptions if something goes wrong
-/// such as
-///
-/// in.exceptions(ifstream::failbit | ifstream::badbit | ifstream::eofbit);
-///
-/// so a bad parse is detected (maybe istream_scored_combo_tree should
-/// set it automatically).
-///
-/// TODO: if the istream doesn't end by a bscore then it will
-/// completely exhaust it.
 scored_combo_tree istream_scored_combo_tree(std::istream& in)
 {
-    static const std::string complexity_prefix_str = "complexity:";
-    static const std::string complexity_penalty_prefix_str = "complexity penalty:";
-    static const std::string diversity_penalty_prefix_str = "diversity penalty:";
-    static const std::string penalized_score_prefix_str = "penalized score:";
+    static const char* score_str = "score";
+    static const char* weight_str = "weight";
+    static const char* complexity_str = "complexity";
+    static const char* complexity_penalty_str = "complexity penalty";
+    static const char* diversity_penalty_str = "diversity penalty";
+    static const char* penalized_score_str = "penalized score";
+    static const char* behavioral_score_str = "behavioral score";
 
     // parse score
     score_t sc;
@@ -207,49 +204,82 @@ scored_combo_tree istream_scored_combo_tree(std::istream& in)
     // parse the rest
     complexity_t cpx = 0;
     score_t cpx_penalty = 0, diversity_penalty = 0, penalized_score = 0;
+    score_t weight = 0.0;
     behavioral_score bs;
-    // whitespace, function split
-    auto ssplit = [](const std::string& s) {
-        std::vector<std::string> res;
-        boost::split(res, s, boost::algorithm::is_space());
-        return res;
-    };
-    std::vector<std::string> complexity_penalty_prefix_str_split =
-        ssplit(complexity_penalty_prefix_str);
-    std::vector<std::string> diversity_penalty_prefix_str_split =
-        ssplit(diversity_penalty_prefix_str);
-    std::vector<std::string> penalized_score_prefix_str_split =
-        ssplit(penalized_score_prefix_str);
-    std::vector<std::string> behavioral_score_prefix_str_split =
-        ssplit(behavioral_score_prefix_str);
-    while (in.good()) {
-        std::string token;
-        in >> token;
-        if (token == complexity_prefix_str)
-            in >> cpx;
-        else if (token == complexity_penalty_prefix_str_split[0]) {
-            in >> token;        // complexity_penalty_prefix_str_split[1]
-            in >> cpx_penalty;
+
+    // The following parser assumes that the input is of the form
+    // key=value or key:value, and is separated by commas, spaces
+    // or tabs. Any brackets [] braces {} or parens () in the input
+    // are ignored.
+    std::string line;
+    std::getline(in, line);
+    char* pline = strdup(line.c_str());
+    char* key = pline;
+    while (true) {
+        char* eq = strpbrk(key, ":=");
+        if (NULL == eq) break;
+        *eq = 0x0;
+        eq++;
+        char *tail = strpbrk(eq, " ,[](){}\t");
+        if (tail) *tail = 0x0;
+
+        double val = atof(eq);
+
+        // large string case statement
+        if (0 == strcmp(key, score_str)) {
+            sc = val;
         }
-        else if (token == diversity_penalty_prefix_str_split[0]) {
-            in >> token;        // diversity_penalty_prefix_str_split[1]
-            in >> diversity_penalty;
+        else if (0 == strcmp(key, complexity_str)) {
+            cpx = val;
         }
-        else if (token == penalized_score_prefix_str_split[0]) {
-            in >> token;        // penalized_score_prefix_str_split[1]
-            in >> penalized_score;
+        else if (0 == strcmp(key, weight_str)) {
+            weight = val;
         }
-        else if (token == behavioral_score_prefix_str_split[0]) {
-            in >> token;        // behavioral_score_prefix_str_split[1]
-            istreamContainer(in, back_inserter(bs), "[", "]");
-            break;              // that way we don't consume 'in' further
+        else if (0 == strcmp(key, complexity_penalty_str)) {
+            cpx_penalty = val;
+        }
+        else if (0 == strcmp(key, diversity_penalty_str)) {
+            diversity_penalty = val;
+        }
+        else if (0 == strcmp(key, penalized_score_str)) {
+            penalized_score = val;
+        }
+
+        if (tail) {
+             // next key starts at the first non-junk character
+             key = tail+1;
+             key += strspn(key, " ,[](){}\t");
+        }
+        else break;
+      
+    }
+    free(pline);
+
+    // OK, now we assume that the behavioral score is on a line all
+    // by itself, and consists of a squence of numbers, surrounded
+    // by brackets.
+    std::getline(in, line);
+    pline = strdup(line.c_str());
+    key = pline;
+    char* eq = strpbrk(key, ":=");
+    if (eq) {
+        *eq = 0x0;
+        eq++;
+
+        if (0 == strcmp(key, behavioral_score_str)) {
+            istringstream iss(eq);
+            istreamContainer(iss, back_inserter(bs), "[", "]");
         }
     }
+    free(pline);
+
     // assign to candidate
     combo::combo_tree tr_test = tr;
 
     composite_score cs(sc, cpx, cpx_penalty, diversity_penalty);
-    return scored_combo_tree(tr, /* default demeID */ 0, cs, bs);
+    scored_combo_tree sct(tr, /* default demeID */ 0, cs, bs);
+    sct.set_weight(weight);
+    return sct;
 }
 
 
