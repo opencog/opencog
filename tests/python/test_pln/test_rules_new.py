@@ -28,9 +28,9 @@ class PLNUnitTester(TestCase):
 
         # context rules
         # top four fail because ConceptNodes are switched inside ANDLinks
-        #self.addTestFile("InheritanceToContextRule.scm")
-        #self.addTestFile("ContextToInheritanceRule.scm")
-        self.addTestFile("ContextToEvaluationRule.scm")
+        #self.addTestFile("InheritanceToContextRule.scm") # works
+        #self.addTestFile("ContextToInheritanceRule.scm") # works
+        #self.addTestFile("ContextToEvaluationRule.scm") # works
         #self.addTestFile("ContextToSubsetRule.scm") # works
         #self.addTestFile("EvaluationToContextRule.scm") # works
         #self.addTestFile("SubsetToContextRule.scm")  # works
