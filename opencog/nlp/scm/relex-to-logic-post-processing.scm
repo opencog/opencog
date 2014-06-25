@@ -36,8 +36,7 @@
     (MemberLink
         (antecedent-inst)
         (SatisfyingSetLink (VariableNode "$X")
-            (AndLink
-            (InheritanceLink (VariableNode "$X") antecedent) main-clause sub-clause)))))
+            (AndLink main-clause sub-clause)))))
 ;-------------------------------------------------------------------------------
 ;Adjective clause rules
 ;
