@@ -27,24 +27,21 @@ class PLNUnitTester(TestCase):
         self.chainer = None
 
         # context rules
-        # both fail because ConceptNodes are switched
-        # self.addTestFile("InheritanceToContextRule.scm")
-        # self.addTestFile("ContextToInheritanceRule.scm")
-
-        # next three: Error: atom in outgoing set must have been previously
-        # inserted into the atom table
-        self.addTestFile("EvaluationToContextRule.scm")
-        # self.addTestFile("ContextToEvaluationRule.scm")
-        # self.addTestFile("ContextToSubsetRule.scm")
-
+        # top four fail because ConceptNodes are switched inside ANDLinks
+        self.addTestFile("InheritanceToContextRule.scm")
+        self.addTestFile("ContextToInheritanceRule.scm")
+        self.addTestFile("ContextToEvaluationRule.scm")
+        self.addTestFile("ContextToSubsetRule.scm")
+        #self.addTestFile("EvaluationToContextRule.scm") # works
         # self.addTestFile("SubsetToContextRule.scm")  # works
 
         # Works:
+        self.addTestFile("InductionRule_InheritanceLink.scm") # disabled due to result swapping CNodes on buildbot
         self.addTestFile("AbductionRule_InheritanceLink.scm") # Under investigation
         self.addTestFile("AndRule_new.scm")
         self.addTestFile("BooleanTransformationRule_new.scm")
         self.addTestFile("DeductionRule_InheritanceLink.scm")
-        self.addTestFile("InductionRule_InheritanceLink.scm") # disabled due to result swapping CNodes on buildbot
+
         self.addTestFile("InheritanceRule.scm")
         self.addTestFile("InversionRule_InheritanceLink.scm")
         self.addTestFile("OrCreationRule.scm")
