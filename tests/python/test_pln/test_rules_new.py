@@ -26,28 +26,25 @@ class PLNUnitTester(TestCase):
 
         self.chainer = None
 
-        # context rules
-        # top four fail because ConceptNodes are switched inside ANDLinks
-        #self.addTestFile("InheritanceToContextRule.scm") # works
-        #self.addTestFile("ContextToInheritanceRule.scm") # works
-        #self.addTestFile("ContextToEvaluationRule.scm") # works
-        #self.addTestFile("ContextToSubsetRule.scm") # works
-        #self.addTestFile("EvaluationToContextRule.scm") # works
-        #self.addTestFile("SubsetToContextRule.scm")  # works
-
         # Works:
-        self.addTestFile("InductionRule_InheritanceLink.scm") # disabled due to result swapping CNodes on buildbot
-        self.addTestFile("AbductionRule_InheritanceLink.scm") # Under investigation
         self.addTestFile("AndRule_new.scm")
         self.addTestFile("BooleanTransformationRule_new.scm")
         self.addTestFile("DeductionRule_InheritanceLink.scm")
-
         self.addTestFile("InheritanceRule.scm")
+        self.addTestFile("InductionRule_InheritanceLink.scm")
+        self.addTestFile("AbductionRule_InheritanceLink.scm") # Under investigation
         self.addTestFile("InversionRule_InheritanceLink.scm")
         self.addTestFile("OrCreationRule.scm")
         self.addTestFile("OrRule_new.scm")
         self.addTestFile("NotCreationRule.scm")
         self.addTestFile("TransitiveSimilarityRule_SimilarityLink.scm")
+        # context rules
+        self.addTestFile("InheritanceToContextRule.scm")
+        self.addTestFile("ContextToInheritanceRule.scm")
+        self.addTestFile("ContextToEvaluationRule.scm")
+        self.addTestFile("ContextToSubsetRule.scm")
+        self.addTestFile("EvaluationToContextRule.scm")
+        self.addTestFile("SubsetToContextRule.scm")
 
 
         # Testing (just a placeholder for where to put tests while...testing them)
