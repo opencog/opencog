@@ -164,8 +164,9 @@ public:
      */
     scored_combo_tree_ptr_set::const_iterator select_exemplar();
 
-    scored_combo_tree_ptr_set::const_iterator end() const { return _scored_trees.end(); }
+    const scored_combo_tree_ptr_set& get_trees() const { return _scored_trees; }
     scored_combo_tree_ptr_set::const_iterator begin() const { return _scored_trees.begin(); }
+    scored_combo_tree_ptr_set::const_iterator end() const { return _scored_trees.end(); }
     bool empty() const { return _scored_trees.empty(); } 
     size_t size() const { return _scored_trees.size(); }
     void clear() { _scored_trees.clear(); }

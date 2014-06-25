@@ -30,9 +30,9 @@ class TestMOSES:
         assert isinstance(output[0], MosesCandidate)
         assert output[0].score == 0
         print "In run_xor_combo, the program is:" + str(output[0].program)
-        # Either one of teh two below are equally likely, both are correct.
-        # assert output[0].program == "and(or(!$1 !$2) or($1 $2)) "
-        assert output[0].program == "or(and(!$1 $2) and($1 !$2)) "
+        # Either one of the two below are equally likely, both are correct.
+        assert output[0].program == "and(or(!$1 !$2) or($1 $2)) "
+        # assert output[0].program == "or(and(!$1 $2) and($1 !$2)) "
 
     def test_run_majority_python(self):
         output = self.moses.run(args="-H maj -c 2", python=True)
