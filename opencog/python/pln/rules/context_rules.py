@@ -42,7 +42,7 @@ class InheritanceToContextRule(Rule):
                       formula=contextFormula,
                       inputs=[chainer.link(
                           types.InheritanceLink,  # InheritanceLink
-                          [chainer.link(types.AndLink, [c, a]),  # C ANDLink A
+                          [chainer.link(types.AndLink, [a, c]),  # C ANDLink A
                            # C ANDLink B
                            chainer.link(types.AndLink, [c, b])])],
                       outputs=[chainer.link(
@@ -206,15 +206,8 @@ class ContextToEvaluationRule(Rule):
             predicate_a = inputs.out[1].out[0]
             concept_c = inputs.out[0]
             concept_b = inputs.out[1].out[1].out[0]
-            print(inputs)
-            print(inputs.out[0])
-            print("concept_c", concept_c)
-            print("concept_b", concept_b)
 
             and_link = self.chainer.link(types.AndLink, [concept_c, concept_b])
-            and_link2 = self.chainer.link(types.AndLink, [concept_b, concept_c])
-            print("and_link:", and_link)
-            print("and_link2:", and_link2)
             list_link = self.chainer.link(types.ListLink, [and_link])
             evaluation_link = [self.chainer.link(types.EvaluationLink,
                                                 [predicate_a, list_link])]
