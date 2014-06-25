@@ -96,22 +96,6 @@ struct metapop_printer
         if (is_mpi && metapop.size() == 0)
             return;
 
-        stringstream ss;
-        if (output_python) {
-            // Python boilerplate
-            // XXX FIXME -- I doubt that this actually works.
-            ss << "#!/usr/bin/env python" << std::endl
-               << "from operator import *" << std::endl
-               << std::endl
-               << "#These functions allow multiple args instead of lists." << std::endl
-               << "def ors(*args):" << std::endl
-               << "    return any(args)" << std::endl
-               << std::endl
-               << "def ands(*args):" << std::endl
-               << "    return all(args)" << std::endl << std::endl
-               << "def moses_eval(i):" << std::endl << "    return ";
-        }
-
         const scored_combo_tree_set& tree_set = metapop.best_candidates();
 
         // search for the top score... we need this, if printing only
@@ -124,12 +108,25 @@ struct metapop_printer
             }
         }
 
+        stringstream ss;
         int cnt = 0;
         for (const scored_combo_tree& sct : tree_set) {
             if (result_count < ++cnt) break;
             if (best_score <= sct.get_score()) {
                 if (output_python) {
-                    ss << "#score: " << sct.get_score() << std::endl;
+                    // Python boilerplate
+                    ss << "#!/usr/bin/env python" << std::endl
+                       << "from operator import *" << std::endl
+                       << std::endl
+                       << "#These functions allow multiple args instead of lists." << std::endl
+                       << "def ors(*args):" << std::endl
+                       << "    return any(args)" << std::endl
+                       << std::endl
+                       << "def ands(*args):" << std::endl
+                       << "    return all(args)" << std::endl << std::endl
+                       << "#score: " << sct.get_score() << std::endl
+                       << "def moses_eval(i):" << std::endl << "    return ";
+                    // XXX this is incorrect when the ouotput is an ensemble.
                     ostream_combo_tree (ss, sct.get_tree(), combo::fmt::python);
                 } else {
                     ss << sct.get_score() << " "
