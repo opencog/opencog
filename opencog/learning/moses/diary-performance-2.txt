@@ -305,3 +305,14 @@ Hmm  different rand seeds:
 
 size(trees) above it the number of trees in the ensemble.
 
+crazy ideas:
+
+one rather crazy experiment would be to find three with almost equal
+scores, combine them as indicated, run reduct, and then repeat.  How
+badly would this damage things?  Would it be an effective way of
+obtaining a single tree that is almost right, and then can be finished
+off in the usual fashion?
+
+or perhaps the weights should be forced to be valued as small fractions,
+so that they can be exactly combined ... 
+

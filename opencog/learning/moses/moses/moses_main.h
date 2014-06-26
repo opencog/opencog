@@ -99,8 +99,11 @@ struct metapop_printer
             return;
 
         stringstream ss;
+        // A number of external tools read the printed results, and
+        // parse them. The floating-point scores must be printed with
+        // reasonable accuracy, else these tools fail.
+        ss << std::setprecision(moses::io_score_precision);
         if (output_ensemble) {
-            ss << std::setprecision(moses::io_score_precision);
             const scored_combo_tree_set& tree_set = metapop.get_ensemble();
             if (output_python) {
                 // Python boilerplate
