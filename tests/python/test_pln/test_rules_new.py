@@ -15,7 +15,7 @@ __VERBOSE__ = False
 
 # Set to True to search for needed .scm files in default IN-SOURCE build location, e.g. to write unit tests in the IDE
 # Set to False to search for needed .scm files based on environment variables PROJECT_SOURCE_DIR and PROJECT_BINARY_DIR
-__DEV_MODE__ = True
+__DEV_MODE__ = False
 
 class PLNUnitTester(TestCase):
     def setUp(self):
