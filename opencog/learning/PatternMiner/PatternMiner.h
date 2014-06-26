@@ -73,120 +73,120 @@ namespace PatternMining
 
  class PatternMiner
  {
-private:
+ private:
 
-    HTree* htree;
-    AtomSpace* atomSpace;
-    AtomSpace* originalAtomSpace;
+     HTree* htree;
+     AtomSpace* atomSpace;
+     AtomSpace* originalAtomSpace;
 
-    HandleSeq allLinks;// all links in the orginal atomspace
+     HandleSeq allLinks;// all links in the orginal atomspace
 
-    // Every pattern is reprented as a unique string as the key in this map, mapping to its cooresponding HTreeNode
-    map<string, HTreeNode*> keyStrToHTreeNodeMap;
+     // Every pattern is reprented as a unique string as the key in this map, mapping to its cooresponding HTreeNode
+     map<string, HTreeNode*> keyStrToHTreeNodeMap;
 
-    vector < vector<HTreeNode*> > patternsForGram;
+     vector < vector<HTreeNode*> > patternsForGram;
 
-    std::thread *threads;
+     std::thread *threads;
 
-    unsigned int THREAD_NUM;
+     unsigned int THREAD_NUM;
 
-    unsigned int MAX_GRAM;
+     unsigned int MAX_GRAM;
 
-    unsigned int cur_gram;
+     unsigned int cur_gram;
 
-    std::mutex allAtomListLock, uniqueKeyLock, patternForLastGramLock;
+     std::mutex allAtomListLock, uniqueKeyLock, patternForLastGramLock;
 
-    Type ignoredTypes[1];
+     Type ignoredTypes[1];
 
-    // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
-    // the input links should be a Pattern in such format:
-    //    (InheritanceLink
-    //       (VariableNode "$1")
-    //       (ConceptNode "Animal")
+     // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
+     // the input links should be a Pattern in such format:
+     //    (InheritanceLink
+     //       (VariableNode "$1")
+     //       (ConceptNode "Animal")
 
-    //    (InheritanceLink
-    //       (VariableNode "$2")
-    //       (VariableNode "$1")
+     //    (InheritanceLink
+     //       (VariableNode "$2")
+     //       (VariableNode "$1")
 
-    //    (InheritanceLink
-    //       (VariableNode "$3")
-    //       (VariableNode "$2")
+     //    (InheritanceLink
+     //       (VariableNode "$3")
+     //       (VariableNode "$2")
 
-    //    (EvaluationLink (stv 1 1)
-    //       (PredicateNode "like_food")
-    //       (ListLink
-    //          (VariableNode "$3")
-    //          (ConceptNode "meat")
-    //       )
-    //    )
-    // Return unified ordered Handle vector
-    vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern);
+     //    (EvaluationLink (stv 1 1)
+     //       (PredicateNode "like_food")
+     //       (ListLink
+     //          (VariableNode "$3")
+     //          (ConceptNode "meat")
+     //       )
+     //    )
+     // Return unified ordered Handle vector
+     vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern);
 
-    string unifiedPatternToKeyString(vector<Handle>& inputPattern , const AtomSpace *atomspace = 0);
+     string unifiedPatternToKeyString(vector<Handle>& inputPattern , const AtomSpace *atomspace = 0);
 
-    // this function is called by RebindVariableNames
-    void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks);
+     // this function is called by RebindVariableNames
+     void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks);
 
-    // rename the variable names in a ordered pattern according to the orders of the variables appear in the orderedPattern
-    vector<Handle> RebindVariableNames(vector<Handle>& orderedPattern, map<Handle, Handle> &orderedVarNameMap);
+     // rename the variable names in a ordered pattern according to the orders of the variables appear in the orderedPattern
+     vector<Handle> RebindVariableNames(vector<Handle>& orderedPattern, map<Handle, Handle> &orderedVarNameMap);
 
-    void generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector< vector<int> > &indexes);
+     void generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector< vector<int> > &indexes);
 
-    // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
-    void generateALinkByChosenVariables(Handle &originalLink, map<Handle,Handle>& valueToVarMap, HandleSeq &outputOutgoings);
+     // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
+     void generateALinkByChosenVariables(Handle &originalLink, map<Handle,Handle>& valueToVarMap, HandleSeq &outputOutgoings);
 
-     // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
-    void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap);
-    void extractAllNodesInLink(Handle link, set<Handle>& allNodes); // just find all the nodes in the original atomspace for this link
+      // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
+     void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap);
+     void extractAllNodesInLink(Handle link, set<Handle>& allNodes); // just find all the nodes in the original atomspace for this link
 
-    void extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, HTreeNode* parentNode, set<Handle> &sharedNodes, unsigned int gram = 1);
+     void extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, HTreeNode* parentNode, set<Handle> &sharedNodes, unsigned int gram = 1);
 
-    void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings, HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool &containVar);
+     void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings, HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool &containVar);
 
-    // Generate the links in toAtomSpace the same as the fromLinks in the fromAtomSpace. Return the swapped links in the toAtomSpace.
-    // Output all the variable nodes in the toAtomSpace BTW
-    HandleSeq swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq &outVariableNodes, HandleSeq &linksWillBeDel);
+     // Generate the links in toAtomSpace the same as the fromLinks in the fromAtomSpace. Return the swapped links in the toAtomSpace.
+     // Output all the variable nodes in the toAtomSpace BTW
+     HandleSeq swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq &outVariableNodes, HandleSeq &linksWillBeDel);
 
-    void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, set<Handle>& allVarNodes);
+     void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, set<Handle>& allVarNodes);
 
-    void extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HandleSeq &varList, HTreeNode* curHTreeNode, unsigned int gram);
+     void extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
 
-    void findAllInstancesForGivenPattern(HTreeNode* HNode);
+     void findAllInstancesForGivenPattern(HTreeNode* HNode);
 
-    void growTheFirstGramPatternsTask();
+     void growTheFirstGramPatternsTask();
 
-    void ConstructTheFirstGramPatterns();
+     void ConstructTheFirstGramPatterns();
 
-    void growPatternsTask();
+     void growPatternsTask();
 
-    void GrowAllPatterns();
+     void GrowAllPatterns();
 
-    bool isInHandleSeq(Handle handle, HandleSeq &handles);
+     bool isInHandleSeq(Handle handle, HandleSeq &handles);
 
-    Handle getFirstNonIgnoredIncomingLink(AtomSpace *atomspace, Handle &handle);
+     Handle getFirstNonIgnoredIncomingLink(AtomSpace *atomspace, Handle &handle);
 
-    bool isIgnoredType(Type type);
+     bool isIgnoredType(Type type);
 
-    // if atomspace = 0, it will use the pattern mining Atomspace
-    std::string Link2keyString(Handle& link, string indent = "", const AtomSpace *atomspace = 0);
+     // if atomspace = 0, it will use the pattern mining Atomspace
+     std::string Link2keyString(Handle& link, string indent = "", const AtomSpace *atomspace = 0);
 
-    void removeLinkAndItsAllSubLinks(AtomSpace *_atomspace, Handle link);
+     void removeLinkAndItsAllSubLinks(AtomSpace *_atomspace, Handle link);
 
-public:
-    PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram);
-    ~PatternMiner();
+ public:
+     PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram);
+     ~PatternMiner();
 
-    bool checkPatternExist(const string& patternKeyStr);
+     bool checkPatternExist(const string& patternKeyStr);
 
-    void OutPutPatternsToFile(unsigned int n_gram);
+     void OutPutPatternsToFile(unsigned int n_gram);
 
-    void runPatternMiner();
+     void runPatternMiner();
 
-    void testPatternMatcher1();
-    void testPatternMatcher2();
+     void testPatternMatcher1();
+     void testPatternMatcher2();
 
 
- };
+  };
 
 }
 }
