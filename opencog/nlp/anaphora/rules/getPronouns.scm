@@ -1,4 +1,4 @@
-(define pronoun-finder
+(define getPronouns
     (BindLink
         (ListLink
             (VariableNode "$sent")

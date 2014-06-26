@@ -14,10 +14,9 @@ from pln.examples.deduction import deduction_agent
 from opencog.atomspace import types, AtomSpace, TruthValue
 from hobbs import HobbsAgent
 from dumpAgent import dumpAgent
-from initAgent import initAgent
 from opencog.scheme_wrapper import load_scm,scheme_eval_h, __init__
 
-__author__ = 'Hujie'
+__author__ = 'Hujie Wang'
 
 # Create an AtomSpace with some sample information, equivalent to the
 # information in atomspace_contents.scm

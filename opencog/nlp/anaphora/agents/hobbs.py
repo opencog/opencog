@@ -11,23 +11,43 @@ __author__ = 'Hujie Wang'
 
 
 class BindLinkExecution():
+
+    '''
+    Executes a (cog-bind xxx) command and return the results of it
+    '''
+
     def __init__(self,atomspace,anchorNode, target, command,resultNode,atomType):
+
+        '''
+        Stores necessary information
+        '''
+
         self.atomspace=atomspace
         self.anchorNode=anchorNode
         self.target=target
         self.command=command
         self.resultNode=resultNode
         self.atomType=atomType
+
     def execution(self):
+
+        '''
+        First binds the "anchorNode" with the "target" if "anchorNode" exists, then executes scheme command "command"
+        '''
+
         if self.anchorNode != None and self.target != None:
             self.tmpLink=self.atomspace.add_link(types.ListLink, [self.anchorNode, self.target], TruthValue(1.0, 100))
         else:
             self.tmpLink=None
         response = scheme_eval(self.atomspace, self.command)
-        #time.sleep(0.5)
-        a=3
 
     def returnResult(self):
+
+        '''
+        Returns list of atoms resulted in previous execution of a scheme command
+        It only returns atoms which match the type of "self.atomType"
+        '''
+
         if self.resultNode==None:
             return
         rv=[]
@@ -42,11 +62,21 @@ class BindLinkExecution():
         return rv
 
     def clear(self):
+
+        '''
+        Cleans up the Link between the "anchorNode" and the "target".
+        '''
+
         if self.tmpLink!=None:
             self.atomspace.remove(self.tmpLink)
 
 
 class HobbsAgent(MindAgent):
+
+    '''
+    Does anaphora resolutions by doing Breadth-First search on the parse tree, rejects any antecedents which are matched by filters
+    '''
+
     def __init__(self):
         self.checked=dict()
         self.wordNumber=dict()
@@ -67,6 +97,11 @@ class HobbsAgent(MindAgent):
         self.logfile=open('/tmp/results.txt', 'w')
 
     def bindLinkExe(self,anchorNode, target, command,resultNode,atomType):
+
+        '''
+        Just combines all the steps of executing a scheme command into a single function.
+        '''
+
         exe=BindLinkExecution(self.atomspace,anchorNode, target, command,resultNode,atomType)
         exe.execution()
         rv=exe.returnResult()
@@ -80,17 +115,26 @@ class HobbsAgent(MindAgent):
         return self.wordNumber[node.name]
 
     def sortNodes(self,list):
+
+        '''
+        Sorts nodes according to their word sequence number and returns the sorted list.
+        '''
         return sorted(list,key=self.getWordNumber)
 
     def getChildren(self,node):
+
+        '''
+        Returns a sorted list of children nodes of current node.
+        '''
+
         rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind getChildren)',self.currentResult,types.WordInstanceNode)
         return self.sortNodes(rv)
 
     def propose(self,node):
-        #self.bindLinkExe(self.currentProposal,node,'(cog-bind-crisp propose)',None,None)
         '''
-        It iterates all filters, if one of them succeed, the current anaphora will be connected with current antecedent
+        It iterates all filters, reject the antecedent or "node" if it's matched by any filters.
         '''
+
         self.currentResolutionLink_pronoun=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentPronoun, node], TruthValue(1.0, 100))
         rejected = False
         for index in range(1,self.numOfFilters):
@@ -111,12 +155,22 @@ class HobbsAgent(MindAgent):
             #print("rejected "+node.name)
 
     def Checked(self,node):
+
+        '''
+        Since graph is not necessarily a forest, this agent actually does a Breadth-First search on a general graph for
+        each pronoun, so we need to avoid cycling around the graph by marking each node as checked if we have visited it once.
+        '''
+
         if node.name in self.checked:
             return True
         self.checked[node.name]=True
         return False
 
     def bfs(self,node):
+
+        '''
+        Does a Breadth-First search, starts with "node"
+        '''
 
         if node==None:
             #print("found you bfs")
@@ -133,33 +187,35 @@ class HobbsAgent(MindAgent):
                         q.put(node)
 
     def getPronouns(self):
-        return self.bindLinkExe(None,None,'(cog-bind pronoun-finder)',self.unresolvedReferences,types.WordInstanceNode)
+        return self.bindLinkExe(None,None,'(cog-bind getPronouns)',self.unresolvedReferences,types.WordInstanceNode)
 
     def getRoots(self):
+
+        '''
+        Return a list of roots(incoming degree of 0)
+        '''
+
         rv= self.bindLinkExe(None,None,'(cog-bind-crisp getRoots)',self.currentResult,types.WordInstanceNode)
         return self.sortNodes(rv)
 
     def getRootOfNode(self,target):
-        '''
-        rv=self.bindLinkExe(self.currentTarget,target,'(cog-bind getRootOfNode)',self.currentResult)
-        maximum=-1
-        maxTarget=None
-        for node in rv:
-            number=self.getWordNumber(node)
-            if number>maximum:
-                maximum=number
-                maxTarget=node
-        return maxTarget
-        '''
         '''
         Naive approach, but works
         '''
         return self.roots[len(self.roots)-1]
 
     def  previousRootExist(self,root):
+
+        '''
+        "previous" means that a root with smaller word sequence number than the word sequence number of current "roots".
+        '''
         return not self.roots[0].name==root.name
 
     def getPrevious(self,root):
+
+        '''
+        Return a previous root.
+        '''
 
         rootNumber=self.getWordNumber(root)
         for root in reversed(self.roots):
@@ -169,6 +225,11 @@ class HobbsAgent(MindAgent):
         #print("Impossible")
 
     def getAllNumberNodes(self):
+
+        '''
+        Finds word sequence number for each word
+        '''
+
         rv= self.bindLinkExe(None,None,'(cog-bind getAllNumberNodes)',self.currentResult,types.WordSequenceLink)
         for link in rv:
             out=link.out
@@ -214,6 +275,11 @@ class HobbsAgent(MindAgent):
 
 
     def printResults(self):
+
+        '''
+        Currently, this function is not used.
+        '''
+
         rv = self.bindLinkExe(None,None,'(cog-bind getResults)',self.currentResult,types.ReferenceLink)
 
         with open('/tmp/results.txt', 'w') as logfile:
@@ -227,11 +293,15 @@ class HobbsAgent(MindAgent):
         for pronoun in self.pronouns:
             self.checked.clear()
             self.pronounNumber=self.getWordNumber(pronoun)
+
+            '''
+            Binds current "pronoun" with "currentPronounNode".
+            This part is used by pattern matcher.
+            '''
+
             tmpLink=self.atomspace.add_link(types.ListLink, [self.currentPronounNode, pronoun], TruthValue(1.0, 100))
             self.currentPronoun=pronoun
             root=self.getRootOfNode(pronoun)
-            #print("\nResolving...........",file=self.logfile)
-            #print(pronoun,file=self.logfile)
             print("\nResolving...........")
             print(pronoun)
 
@@ -245,5 +315,3 @@ class HobbsAgent(MindAgent):
                 else:
                     break
             self.atomspace.remove(tmpLink)
-
-        #self.printResults()

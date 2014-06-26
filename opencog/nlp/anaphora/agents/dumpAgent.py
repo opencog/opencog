@@ -5,7 +5,7 @@ from pprint import pprint
 from opencog.cogserver import MindAgent
 from opencog.atomspace import types
 
-__author__ = 'hujie'
+__author__ = 'Hujie Wang'
 
 class dumpAgent(MindAgent):
     
