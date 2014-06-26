@@ -1,7 +1,7 @@
 /*
  * DefaultPatternMatchCB.h
  *
- * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2014 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -135,11 +135,10 @@ class DefaultPatternMatchCB :
 		}
 
 		/**
-		 * Called after a link has been grounded.  It offers
-		 * a second chance to reject a match, this time, based
-		 * on the grounding.
+		 * Called when a virtual link is encountered. Returns true
+		 * to reject the match.
 		 */
-		virtual bool post_link_match(LinkPtr& lpat, LinkPtr& lsoln);
+		virtual bool virtual_link_match(LinkPtr& lpat, Handle& args);
 
 		/**
 		 * Called to perform the actual search. This makes some default

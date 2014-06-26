@@ -1,10 +1,10 @@
 /*
- * opencog/atomspace/PredicateEvaluator.h
+ * opencog/reasoning/pln/PLNTypes.cc
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2014 Cosmo Harrigan
  * All Rights Reserved
  *
- * Written by Welter Silva <welter@vettalabs.com>
+ * Written by Cosmo Harrigan
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,26 +22,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PREDICATEEVALUATOR_H
-#define _OPENCOG_PREDICATEEVALUATOR_H
+#include <opencog/server/Module.h>
+#include "opencog/reasoning/pln/atom_types.definitions"
 
-#include <opencog/atomspace/types.h>
+#define INHERITANCE_FILE "opencog/reasoning/pln/atom_types.inheritance"
+#define INITNAME pln_types_init
 
-namespace opencog
-{
-/** \addtogroup grp_atomspace
- *  @{
- */
+#include <opencog/atomspace/atom_types.cc>
 
-class PredicateEvaluator
-{
-
-public:
-    virtual ~PredicateEvaluator();
-    virtual bool evaluate(Handle h) = 0;
-};
-
-/** @}*/
-} // namespace opencog
-
-#endif // _OPENCOG_PREDICATEEVALUATOR_H
+using namespace opencog;
+TRIVIAL_MODULE(PLNTypesModule)
+DECLARE_MODULE(PLNTypesModule)

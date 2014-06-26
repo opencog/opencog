@@ -15,7 +15,7 @@ __VERBOSE__ = False
 
 # Set to True to search for needed .scm files in default IN-SOURCE build location, e.g. to write unit tests in the IDE
 # Set to False to search for needed .scm files based on environment variables PROJECT_SOURCE_DIR and PROJECT_BINARY_DIR
-__DEV_MODE__ = False
+__DEV_MODE__ = True
 
 class PLNUnitTester(TestCase):
     def setUp(self):
@@ -25,6 +25,19 @@ class PLNUnitTester(TestCase):
         self.testFiles = []
 
         self.chainer = None
+
+        # context rules
+        # both fail because ConceptNodes are switched
+        # self.addTestFile("InheritanceToContextRule.scm")
+        # self.addTestFile("ContextToInheritanceRule.scm")
+
+        # next three: Error: atom in outgoing set must have been previously
+        # inserted into the atom table
+        self.addTestFile("EvaluationToContextRule.scm")
+        # self.addTestFile("ContextToEvaluationRule.scm")
+        # self.addTestFile("ContextToSubsetRule.scm")
+
+        # self.addTestFile("SubsetToContextRule.scm")  # works
 
         # Works:
         self.addTestFile("AbductionRule_InheritanceLink.scm") # Under investigation
@@ -38,6 +51,7 @@ class PLNUnitTester(TestCase):
         self.addTestFile("OrRule_new.scm")
         self.addTestFile("NotCreationRule.scm")
         self.addTestFile("TransitiveSimilarityRule_SimilarityLink.scm")
+
 
         # Testing (just a placeholder for where to put tests while...testing them)
         #self.addTestFile("SimilarityRule_And.scm")
@@ -132,7 +146,7 @@ class PLNUnitTester(TestCase):
 
             coreTypes = binFolder + "/opencog/atomspace/core_types.scm"
             utilities = sourceFolder + "/opencog/scm/utilities.scm"
-            plnTypes = binFolder + "/opencog/learning/pln/pln_types.scm"
+            plnTypes = binFolder + "/opencog/reasoning/pln/pln_types.scm"
 
         self.load_file_into_atomspace(coreTypes, atomspaceToReset)
         self.load_file_into_atomspace(utilities, atomspaceToReset)
@@ -193,6 +207,10 @@ class PLNUnitTester(TestCase):
         expectedList = self.atomspace_links_to_list(atomSpaceChecklist)
         actualList = self.atomspace_links_to_list(atomSpaceToCheck)
 
+        print("Produced:")
+        for item in actualList:
+            print item
+
         for listItem in expectedList:
             if not (listItem in actualList):
                 if not "VariableNode" in listItem:
@@ -220,7 +238,7 @@ class PLNUnitTester(TestCase):
             print "  Yes, all created items were predicted"
             allItemsWerePredicted = True
         else:
-            print "  No, not created items were predicted (see above for details)"
+            print "  No, some created items were not predicted (see above for details)"
 
         self.assertTrue(allPredictedItemsExist and allItemsWerePredicted)
 
@@ -434,6 +452,14 @@ class AllRules(object):
             IntensionalInheritanceEvaluationRule(self.chainer))
         self.chainer.add_rule(
             IntensionalSimilarityEvaluationRule(self.chainer))
+
+        # context rules
+        self.chainer.add_rule(InheritanceToContextRule(self.chainer))
+        self.chainer.add_rule(EvaluationToContextRule(self.chainer))
+        self.chainer.add_rule(SubsetToContextRule(self.chainer))
+        self.chainer.add_rule(ContextToInheritanceRule(self.chainer))
+        self.chainer.add_rule(ContextToEvaluationRule(self.chainer))
+        self.chainer.add_rule(ContextToSubsetRule(self.chainer))
 
         # self.member_rules = [GeneralEvaluationToMemberRule(self.chainer),
         #     MemberToEvaluationRule(self.chainer)]

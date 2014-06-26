@@ -82,6 +82,7 @@ class SchemeSmob
 		static SCM ss_atom_p(SCM);
 		static SCM ss_node_p(SCM);
 		static SCM ss_link_p(SCM);
+		static SCM _radix_ten;
 
 		// Atoms to ints, and back.
 		static SCM ss_atom(SCM);

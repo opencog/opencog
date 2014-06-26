@@ -8,6 +8,7 @@ ADD_LIBRARY(query SHARED
 	PatternSCM.cc
 	PatternUtils.cc
 	VirtualMatch.cc
+	AttentionalFocusCB.cc
 )
 
 ADD_DEPENDENCIES(query

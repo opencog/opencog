@@ -146,7 +146,7 @@ AttentionValuePtr Atom::getAttentionValue()
     // of _attentionValue before we use it, since it can go out of scope
     // because it can get set in another thread.  Viz, using it to
     // dereference can return a raw pointer to an object that has been
-    // deconstructed. Furthermore, we must ake a copy while holding
+    // deconstructed. Furthermore, we must make a copy while holding
     // the lock! Got that?
 
     std::lock_guard<std::mutex> lck(_mtx);

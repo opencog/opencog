@@ -12,7 +12,7 @@
 ; Release items attached to the named anchor
 ;
 (define (release-from-anchor anchor)
-   (for-each (lambda (x) (cog-delete x))
+   (for-each (lambda (x) (cog-purge x))
       (cog-incoming-set anchor)
    )
 )

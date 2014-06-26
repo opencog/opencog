@@ -20,7 +20,9 @@
 ; -- sentence-get-parses    Get parses of a sentence.
 ; -- sent-list-get-parses   Get parses of a list of sentences.
 ; -- parse-get-words        Get all words occuring in a parse.
+; -- parse-get-words-in-order  Get all words occuring in a parse in order.
 ; -- parse-get-relations    Get all RelEx relations in a parse.
+; -- word-inst-get-number   Return the NumberNode associated with word-inst. 
 ; -- word-inst-get-word   Return the WordNode associated with word-inst.
 ; -- word-inst-get-word-str  Return the word string assoc with word-inst.
 ; -- word-inst-get-lemma  Return the lemma of word instance.
@@ -155,11 +157,30 @@
 	(concatenate! (map sentence-get-parses sent-list))
 )
 
+
 ; ---------------------------------------------------------------------
 ; parse-get-words - Given a parse, return a list of all words in the parse
 ;
+; Given a parse, return all word instances in arbitary order
+; This version is faster than the in order version.
+;
 (define (parse-get-words parse-node)
-	(cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node))
+	(cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node)
+)
+
+; ---------------------------------------------------------------------
+; parse-get-words-in-order - Given a parse, return a list of all words in the parse in order
+;
+; Given a parse, return all word instances in order
+;
+(define (parse-get-words-in-order parse-node)
+	(define word-inst-list (cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node))
+	(define number-list (map word-inst-get-number word-inst-list))
+	(define (less-than word-inst-1 word-inst-2)
+		(define index-1 (list-index (lambda (a-node) (equal? word-inst-1 a-node)) word-inst-list))
+		(define index-2 (list-index (lambda (a-node) (equal? word-inst-2 a-node)) word-inst-list))
+		(< (string->number (cog-name (list-ref number-list index-1))) (string->number (cog-name (list-ref number-list index-2)))))
+	(sort word-inst-list less-than)
 )
 
 ; --------------------------------------------------------------------
@@ -179,6 +200,15 @@
 			)
 		)
 	)
+)
+
+; ---------------------------------------------------------------------
+; word-inst-get-number   Return the NumberNode associated with word-inst
+;
+; Return the NumberNode associated with 'word-inst'
+;
+(define (word-inst-get-number word-inst)
+	(car (cog-chase-link 'WordSequenceLink 'NumberNode word-inst))
 )
 
 ; ---------------------------------------------------------------------
@@ -515,10 +545,13 @@
 ; Delete the parses and word-instances associated with the sentence,
 ; including LemmaLink's, ReferenceLinks, RelEx relations, and 
 ; link-grammar linkages.
+;
+; Only the atoms in the atomspace are removed; if any are in the
+; backingstore (database) they are untouched.
 
 (define (delete-sentence sent)
 	(define (delete-word-instance wi)
-		(cog-delete-recursive wi)
+		(cog-purge-recursive wi)
 	)
 
 	; Delete, recusively, all of the word-instances in the parse.
@@ -531,7 +564,7 @@
 			)
 			(cog-incoming-set parse)
 		)
-		(cog-delete-recursive parse)
+		(cog-purge-recursive parse)
 	)
 
 	; For each parse of the sentence, delete parse
@@ -546,7 +579,7 @@
 
 	; This delete will fail if there are still incoming links ... 
 	; this is intentional. Its up to the caller to cleanup.
-	(cog-delete sent)
+	(cog-purge sent)
 )
 
 ; ---------------------------------------------------------------------
@@ -555,6 +588,9 @@
 ; Delete atoms that belong to particular sentence instances; we don't
 ; want to clog up the atomspace with old junk we don't want any more.
 ;
+; Only the atoms in the atomspace are removed; if any are in the
+; backingstore (database) they are untouched.
+;
 ; XXX TODO: In principle, this could be accomplished by lowering the
 ; AttentionValue for the atoms, and letting the ForgettingAgent do its
 ; work. In practice, this is too complicated, for now.
@@ -562,11 +598,11 @@
 (define (delete-sentences)
 	(let ((n 0))
 	; (define (delit atom) (set! n (+ n 1)) #f)
-	; (define (delit atom) (cog-delete-recursive atom) #f)
-	(define (delit atom) (cog-delete-recursive atom) (set! n (+ n 1)) #f)
+	; (define (delit atom) (cog-purge-recursive atom) #f)
+	(define (delit atom) (cog-purge-recursive atom) (set! n (+ n 1)) #f)
 
-	; (define (delone atom) (cog-delete atom) #f)
-	(define (delone atom) (cog-delete atom) (set! n (+ n 1)) #f)
+	; (define (delone atom) (cog-purge atom) #f)
+	(define (delone atom) (cog-purge atom) (set! n (+ n 1)) #f)
 
 	; Can't delete InheritanceLink, its used to mark wsd completed... 
 	; (cog-map-type delone 'InheritanceLink)

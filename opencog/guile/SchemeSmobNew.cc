@@ -340,6 +340,13 @@ int SchemeSmob::verify_int (SCM sint, const char *subrname,
 SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 {
     Type t = verify_node_type(stype, "cog-new-node", 1);
+
+    // Special case handling for NumberNode
+    if (NUMBER_NODE == t and scm_is_number(sname)) {
+        sname = scm_number_to_string(sname, _radix_ten);
+        // TODO: if we're given a string, I guess maybe we should check
+        // that the string is convertible to a number ??
+    }
     std::string name = verify_string (sname, "cog-new-node", 2,
         "string name for the node");
     AtomSpace* atomspace = ss_get_env_as("cog-new-node");
@@ -539,6 +546,8 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 /**
  * Delete the atom, but only if it has no incoming links.
  * Return SCM_BOOL_T if the atom was deleted, else return SCM_BOOL_F
+ * This deletes the atom from both the atomspace, and any attached
+ * backing store; thus deletion is permanent!
  */
 SCM SchemeSmob::ss_delete (SCM satom)
 {
@@ -565,6 +574,8 @@ SCM SchemeSmob::ss_delete (SCM satom)
 /* ============================================================== */
 /**
  * Delete the atom, and everything pointing to it.
+ * This deletes the atom from both the atomspace, and any attached
+ * backing store; thus deletion is permanent!
  */
 SCM SchemeSmob::ss_delete_recursive (SCM satom)
 {
@@ -579,8 +590,10 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom)
 
 /* ============================================================== */
 /**
- * Delete the atom, but only if it has no incoming links.
+ * Purgee the atom from the atomspace, but only if it has no incoming links.
  * Return SCM_BOOL_T if the atom was deleted, else return SCM_BOOL_F
+ * This does NOT remove the atom from any attached backing store, only
+ * from the atomspace.
  */
 SCM SchemeSmob::ss_purge (SCM satom)
 {
@@ -607,6 +620,8 @@ SCM SchemeSmob::ss_purge (SCM satom)
 /* ============================================================== */
 /**
  * Purge the atom, and everything pointing to it.
+ * This does NOT remove the atom from any attached backing store, only
+ * from the atomspace.
  */
 SCM SchemeSmob::ss_purge_recursive (SCM satom)
 {

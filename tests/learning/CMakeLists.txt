@@ -1,5 +1,4 @@
 #ADD_SUBDIRECTORY (hillclimbing)
-ADD_SUBDIRECTORY (RuleEngine)
 
 IF (HAVE_MOSES)
 	ADD_SUBDIRECTORY (moses)

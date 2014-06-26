@@ -57,14 +57,18 @@
 ; -----------------------------------------------------------------------
 ; Check if the lemma of a WordInstanceNode 'word-inst' is 'word'.
 (define (check-lemma? word word-inst)
-	(string=? word (cog-name (word-inst-get-lemma word-inst)))
+	(define lemma (word-inst-get-lemma word-inst))
+	(if (null? lemma)
+		#f
+		(string=? word (cog-name lemma))
+	)
 )
 
 ; -----------------------------------------------------------------------
 ; Returns a list of WordInstanceNodes from 'parse-node', which have a LemmaLink with a
 ; WordNode named 'word'.
 (define (get-word-inst-nodes word parse-node)
-	(define word-inst-list (parse-get-words parse-node))
+	(define word-inst-list (parse-get-words-in-order parse-node))
 	(append-map (lambda (a-predicate a-word-inst) (if a-predicate (list a-word-inst) '()))
 		(map (lambda (a-word-inst) (check-lemma? word a-word-inst)) word-inst-list)
 		word-inst-list
@@ -87,10 +91,9 @@
 	(cond	((number? word-index)
 			(cog-name (list-ref (get-word-inst-nodes word parse-node) (- word-index 1)))
 		)
+		; in case word-index is a string, word-index is already the name we want to use
 		((and (string? word-index) (check-name? word-index 'WordInstanceNode))
-			(cog-name (list-ref
-					(get-word-inst-nodes word parse-node)
-					(- (get-word-inst-index (WordInstanceNode word-index)) 1)))
+			word-index
 		)
 	)
 )
@@ -105,11 +108,11 @@
 (define (advmod-rule verb instance adv adv_instance)
 	(InheritanceLink  (ConceptNode adv_instance df-node-stv) (ConceptNode adv df-node-stv) df-link-stv)
 	(InheritanceLink  (SatisfyingSetLink (PredicateNode instance df-node-stv) df-link-stv) (ConceptNode adv_instance df-node-stv) df-link-stv)
-	(InheritanceLink  (PredicateNode instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+	(ImplicationLink  (PredicateNode instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 )
 
 (define (tense-rule verb instance tense)
-	(InheritanceLink (PredicateNode instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+	(ImplicationLink (PredicateNode instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(InheritanceLink (PredicateNode instance df-node-stv) (ConceptNode tense df-node-stv) df-link-stv)
 )
 
@@ -126,7 +129,7 @@
 )
 
 (define (negative-rule verb instance) 
-	(InheritanceLink (PredicateNode instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+	(ImplicationLink (PredicateNode instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(NotLink (PredicateNode instance df-node-stv) df-link-stv)
 )
 
@@ -169,8 +172,8 @@
 (define (to-do-rule-1 v1 v1_instance v2 v2_instance s s_instance o o_instance)
 	(InheritanceLink (ConceptNode s_instance df-node-stv) (ConceptNode s df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode o_instance df-node-stv) (ConceptNode o df-node-stv) df-link-stv)
-	(InheritanceLink (PredicateNode v1_instance df-node-stv) (PredicateNode v1 df-node-stv) df-link-stv)
-	(InheritanceLink (PredicateNode v2_instance df-node-stv) (PredicateNode v2 df-node-stv) df-link-stv)
+	(ImplicationLink (PredicateNode v1_instance df-node-stv) (PredicateNode v1 df-node-stv) df-link-stv)
+	(ImplicationLink (PredicateNode v2_instance df-node-stv) (PredicateNode v2 df-node-stv) df-link-stv)
 	(EvaluationLink df-link-stv
 		(PredicateNode v1_instance df-node-stv)
 		(ListLink df-link-stv
@@ -190,8 +193,8 @@
 	(InheritanceLink (ConceptNode s1_instance df-node-stv) (ConceptNode s1 df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode s2_instance df-node-stv) (ConceptNode s2 df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode o_instance df-node-stv) (ConceptNode o df-node-stv) df-link-stv)
-	(InheritanceLink (PredicateNode v1_instance df-node-stv) (PredicateNode v1 df-node-stv) df-link-stv)
-	(InheritanceLink (PredicateNode v2_instance df-node-stv) (PredicateNode v2 df-node-stv) df-link-stv)
+	(ImplicationLink (PredicateNode v1_instance df-node-stv) (PredicateNode v1 df-node-stv) df-link-stv)
+	(ImplicationLink (PredicateNode v2_instance df-node-stv) (PredicateNode v2 df-node-stv) df-link-stv)
 	(EvaluationLink df-link-stv
 		(PredicateNode v1_instance df-node-stv)
 		(ListLink df-link-stv
@@ -210,7 +213,7 @@
 ;Example: "She is nice to help with the project."
 (define (to-do-rule-3 v1 v1_instance v2 v2_instance v3 v3_instance)
         (InheritanceLink (ConceptNode v1_instance df-node-stv) (ConceptNode v1 df-node-stv) df-link-stv)
-        (InheritanceLink (PredicateNode v2_instance df-node-stv) (PredicateNode v2 df-node-stv) df-link-stv)
+        (ImplicationLink (PredicateNode v2_instance df-node-stv) (PredicateNode v2 df-node-stv) df-link-stv)
         (InheritanceLink (ConceptNode v3_instance df-node-stv) (ConceptNode v3 df-node-stv) df-link-stv)
         (EvaluationLink df-link-stv
                 (PredicateNode v2_instance df-node-stv)
@@ -220,36 +223,35 @@
         )
 )
 
-;Example: "She must be able to sing."
+;Example: "She must be able to sing." ; v1 = sing , v2 = she
 (define (to-do-rule-4 v1 v1_instance v2 v2_instance) 
-        (InheritanceLink (ConceptNode v2_instance) (ConceptNode v2))
-        (InheritanceLink (PredicateNode v1_instance) (PredicateNode v1))
-	(EvaluationLink
-		(PredicateNode "able_to")
-		(ListLink
-			(ConceptNode v2_instance)
-			(PredicateNode v1_instance)
-			
-		)
-	)
+    (InheritanceLink (ConceptNode v2_instance) (ConceptNode v2))
+    (ImplicationLink (PredicateNode v1_instance) (PredicateNode v1))
+    (EvaluationLink
+        (PredicateNode "able_to")
+        (ListLink
+            (ConceptNode v2_instance)
+            (PredicateNode v1_instance)
+        )
+    )
 )
 
 ;Example: "She wants to sing."; verb1 = want, verb2 = sing, subj = she
 (define (to-do-rule-5 verb1 verb1_instance verb2 verb2_instance subj subj_instance)
-	(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj))
-	(InheritanceLink (PredicateNode verb1_instance) (PredicateNode verb1))
-	(InheritanceLink (PredicateNode verb2_instance) (PredicateNode verb2))
-	(EvaluationLink
-		(PredicateNode verb1_instance)
-		(EvaluationLink
-			(PredicateNode verb2_instance)		 
-			(ConceptNode subj_instance)
-		)
-	)
+    (InheritanceLink (ConceptNode subj_instance) (ConceptNode subj))
+    (ImplicationLink (PredicateNode verb1_instance) (PredicateNode verb1))
+    (ImplicationLink (PredicateNode verb2_instance) (PredicateNode verb2))
+    (EvaluationLink
+        (PredicateNode verb1_instance)
+        (ListLink
+            (ConceptNode subj_instance)
+            (PredicateNode verb2_instance)
+        )
+    )
 )
 
 (define (to-be-rule verb verb_ins adj adj_ins subj subj_ins)
-	(InheritanceLink (PredicateNode verb_ins df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+	(ImplicationLink (PredicateNode verb_ins df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_ins df-node-stv) (ConceptNode subj df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode adj_ins df-node-stv) (ConceptNode adj df-node-stv) df-link-stv)
 	(EvaluationLink df-link-stv
@@ -282,7 +284,7 @@
 )
 
 (define (about-rule verb verb_instance  noun noun_instance)
-	(InheritanceLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+	(ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode noun_instance df-node-stv) (ConceptNode noun df-node-stv) df-link-stv)
 	(EvaluationLink (PredicateNode "about" df-node-stv) (PredicateNode verb_instance df-node-stv) (ConceptNode noun_instance df-node-stv) df-link-stv)
 ) 
@@ -294,13 +296,13 @@
 )
 
 (define (SV-rule subj_concept  subj_instance  verb  verb_instance)
-	(InheritanceLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+	(ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
 	(EvaluationLink (PredicateNode verb_instance df-node-stv) (ConceptNode subj_instance df-node-stv) df-link-stv)
 )
 
 (define (SVO-rule subj_concept  subj_instance  verb  verb_instance  obj_concept  obj_instance)
-	(InheritanceLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+	(ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj_concept df-node-stv) df-link-stv)
 	(EvaluationLink df-link-stv
@@ -320,7 +322,7 @@
 
 (define (which-rule antecedent  antecedent_instance  verb  verb_instance)
 	(InheritanceLink (ConceptNode antecedent_instance df-node-stv) (ConceptNode antecedent df-node-stv) df-link-stv)
-	(InheritanceLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+	(ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
         (EvaluationLink df-link-stv
 		(PredicateNode "whichmarker" df-node-stv)
 		(ListLink df-link-stv
@@ -331,7 +333,7 @@
 )
 
 (define (SVIO-rule subj_concept  subj_instance  verb  verb_instance  obj_concept  obj_instance iobj_concept iobj_instance)
-	(InheritanceLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+	(ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj_concept df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode iobj_instance df-node-stv) (ConceptNode iobj_concept df-node-stv) df-link-stv)
@@ -355,7 +357,7 @@
 
 ;Example: "The books were written by Charles Dickens."
 (define (passive-rule1 verb verb_instance obj obj_instance passive_obj passive_obj_instance)
-        (InheritanceLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+        (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
         (InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj df-node-stv) df-link-stv)
         (InheritanceLink (ConceptNode passive_obj_instance df-node-stv) (ConceptNode passive_obj df-node-stv) df-link-stv)
         (EvaluationLink df-link-stv
@@ -369,7 +371,7 @@
 
 ;Example: "The books are published."
 (define (passive-rule2 verb verb_instance obj obj_instance)
-        (InheritanceLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+        (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
         (InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj df-node-stv) df-link-stv)
         (EvaluationLink df-link-stv
                 (PredicateNode verb_instance df-node-stv)
@@ -377,5 +379,41 @@
                         (VariableNode "$x" df-node-stv)
                         (ConceptNode obj_instance df-node-stv)
                 )
+        )
+)
+
+;Example:"John and Madison eat the cake."
+(define (and-rule2 var1 var1_instance var2 var2_instance)
+	(InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
+	(InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
+        (EvaluationLink
+        (PredicateNode "AndMarker")
+		(ListLink
+			(ConceptNode var1_instance)
+			(ConceptNode var2_instance)
+		)
+	)
+)
+
+;Example:"I did my homework, and I went to school."
+(define (and-rule1 var1 var1_instance var2 var2_instance)
+	(ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
+	(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
+        (EvaluationLink
+        (PredicateNode "AndMarker")
+		(ListLink
+			(PredicateNode var1_instance)
+			(PredicateNode var2_instance)
+		)
+	)
+)
+
+(define (definite-rule word word_instance)
+        (InheritanceLink (ConceptNode word_instance df-node-stv) (ConceptNode word df-node-stv) df-link-stv)
+        (EvaluationLink df-link-stv
+	        (PredicateNode "definite" df-node-stv)
+	        (ListLink df-link-stv
+		        (ConceptNode word_instance df-node-stv)
+	        )
         )
 )

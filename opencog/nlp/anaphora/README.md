@@ -1,62 +1,64 @@
+### Example:
 
-Example:
+- Example sentences:
 
-Note that since GreaterThanLink and WordNumberNode have not been implemented yet, using generated
-fake GreaterThanLinks(using ListLinks instead) and WordNumberLinks(using ListLinks instead) instead.
-These fake links are located in "/opencog/opencog/nlp/anaphora/atomspace_data/generated_data.scm".
+    ```
+    (relex-parse "Tom ate an apple under a tree.")
+    (relex-parse "It was delicious.")
+    (relex-parse "It was small.")
+    ```
+    
+- Load rules:
 
-Sentences:
+    ```
+    (load-scm-from-file "nlp/anaphora/rules/anaphora_resolution.scm")
+    (load-scm-from-file "nlp/anaphora/rules/pronoun_finder.scm")
+    ```
 
-1) "Tom ate an apple under a tree."
-2) "It was delicious."
-3) "It was small."
+- Finding pronouns:
 
-1. Load rules and testing data
+     ```
+    (cog-bind pronoun-finder)
+     ```
 
-Change "YOUR_PATH" to the path to the opencog directory
+- Doing anaphora resolution:
 
-(load-scm-from-file "YOUR_PATH/opencog/opencog/nlp/anaphora/atomspace_data/atomspace.scm")
-(load-scm-from-file "YOUR_PATH/opencog/opencog/nlp/anaphora/atomspace_data/generated_data.scm")
-(load-scm-from-file "YOUR_PATH/opencog/opencog/nlp/anaphora/rules/anaphora_resolution.scm")
-(load-scm-from-file "YOUR_PATH/opencog/opencog/nlp/anaphora/rules/pronoun_finder.scm")
+    ```
+    (cog-bind anaphora-resolution)
+    ```
 
-2. Finding pronouns
 
-(cog-bind pronoun-finder)
+- Testing result:
 
-3. Doing anaphora resolution
-
-(cog-bind anaphora-resolution)
-
-Testing result:
-
+```
 (ListLink
    (ReferenceLink
-      (WordInstanceNode "Tom@765cc72e-56f7-4f43-b1e4-f3954091a5fb")
-      (WordInstanceNode "it@e60e24e7-80f9-4818-b5e4-e5efc0695268")
+      (WordInstanceNode "tree@98b1ee02-2dcc-46cc-8494-3fdd1ba0b3b9")
+      (WordInstanceNode "it@094c245d-543b-4fdd-aae1-ac6dcdebaac2")
    )
    (ReferenceLink
-      (WordInstanceNode "apple@a96a5f2d-f168-494d-8240-3c622884bffc")
-      (WordInstanceNode "it@e60e24e7-80f9-4818-b5e4-e5efc0695268")
+      (WordInstanceNode "Tom@8d1f1511-eee0-4bc1-a6b1-69ce13e754bf")
+      (WordInstanceNode "it@094c245d-543b-4fdd-aae1-ac6dcdebaac2")
    )
    (ReferenceLink
-      (WordInstanceNode "tree@fb31eb83-0271-4349-9dd8-5d2a0d248c81")
-      (WordInstanceNode "it@e60e24e7-80f9-4818-b5e4-e5efc0695268")
+      (WordInstanceNode "apple@4fd1556d-32f5-4ec5-8477-87eca9451fd6")
+      (WordInstanceNode "it@094c245d-543b-4fdd-aae1-ac6dcdebaac2")
    )
    (ReferenceLink
-      (WordInstanceNode "it@e60e24e7-80f9-4818-b5e4-e5efc0695268")
-      (WordInstanceNode "it@c48321a8-1dca-456b-90e9-01e8b588419e")
+      (WordInstanceNode "it@885025c5-a1ac-43bf-81de-03fd8b940866")
+      (WordInstanceNode "it@094c245d-543b-4fdd-aae1-ac6dcdebaac2")
    )
    (ReferenceLink
-      (WordInstanceNode "Tom@765cc72e-56f7-4f43-b1e4-f3954091a5fb")
-      (WordInstanceNode "it@c48321a8-1dca-456b-90e9-01e8b588419e")
+      (WordInstanceNode "tree@98b1ee02-2dcc-46cc-8494-3fdd1ba0b3b9")
+      (WordInstanceNode "it@885025c5-a1ac-43bf-81de-03fd8b940866")
    )
    (ReferenceLink
-      (WordInstanceNode "apple@a96a5f2d-f168-494d-8240-3c622884bffc")
-      (WordInstanceNode "it@c48321a8-1dca-456b-90e9-01e8b588419e")
+      (WordInstanceNode "Tom@8d1f1511-eee0-4bc1-a6b1-69ce13e754bf")
+      (WordInstanceNode "it@885025c5-a1ac-43bf-81de-03fd8b940866")
    )
    (ReferenceLink
-      (WordInstanceNode "tree@fb31eb83-0271-4349-9dd8-5d2a0d248c81")
-      (WordInstanceNode "it@c48321a8-1dca-456b-90e9-01e8b588419e")
+      (WordInstanceNode "apple@4fd1556d-32f5-4ec5-8477-87eca9451fd6")
+      (WordInstanceNode "it@885025c5-a1ac-43bf-81de-03fd8b940866")
    )
 )
+```

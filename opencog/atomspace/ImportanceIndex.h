@@ -37,14 +37,15 @@ class AtomTable;
 
 /**
  * Implements an index with additional routines needed for managing 
- * short-term importance.
+ * short-term importance.  This index is not thread-safe, by itself.
+ * Users of this class must gauarantee single-threaded access!
  */
 class ImportanceIndex: public FixedIntegerIndex
 {
 public:
     ImportanceIndex(void);
-    void insertAtom(const AtomPtr);
-    void removeAtom(const AtomPtr);
+    void insertAtom(AtomPtr&);
+    void removeAtom(AtomPtr&);
 
     /** Updates the importance index for the given atom.
      * According to the new importance of the atom, it may change importance

@@ -434,3 +434,26 @@ class TestRESTApi():
 
         # Verify that it matches the previous response
         assert post_result == "5\n"
+
+    def test_dot_export(self):
+        # Export the atomspace to DOT format and ensure that there is a
+        # properly defined DOT header created and the correct atoms are
+        # included in the description
+
+        # TODO: The Python module "graphviz" needs to be added to ocpkg, so
+        # that this dependency will be available for the continuous integration
+        # system
+        try:
+            from graph_description import dot
+
+            get_response = self.client.get(
+                self.uri +
+                'atoms?filterby=attentionalfocus&dot=True')
+            get_result = json.loads(get_response.data)['result']
+            assert get_result.startswith("// OpenCog Graph")
+            assert "digraph" in get_result
+            assert "swan" in get_result
+            assert "bird" in get_result
+            assert get_result.count("label") == 2
+        except ImportError:
+            pass

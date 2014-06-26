@@ -571,23 +571,6 @@ AttentionValuePtr SavingLoading::readAttentionValue(FILE *f)
     return createAV(tempSTI, tempLTI, tempVLTI);
 }
 
-static const char* typeToStr(TruthValueType t) throw (InvalidParamException)
-{
-    switch (t) {
-    case SIMPLE_TRUTH_VALUE:
-        return "SIMPLE_TRUTH_VALUE";
-    case COUNT_TRUTH_VALUE:
-        return "COUNT_TRUTH_VALUE";
-    case INDEFINITE_TRUTH_VALUE:
-        return "INDEFINITE_TRUTH_VALUE";
-    default:
-        throw InvalidParamException(TRACE_INFO,
-             "Invalid Truth Value type: '%d'.", t);
-    }
-}
-
-static TruthValuePtr tv_factory(TruthValueType type, const char* tvStr);
-
 static TruthValuePtr tv_factory(TruthValueType type, const char* tvStr)
 {
     switch (type) {

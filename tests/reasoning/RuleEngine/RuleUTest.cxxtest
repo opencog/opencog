@@ -1,5 +1,5 @@
 /*
- * tests/learning/RuleEngine/RuleUTest.cxxtest
+ * tests/reasoning/RuleEngine/RuleUTest.cxxtest
  *
  * Copyright (C) 2014 Cosmo Harrigan
  * All Rights Reserved
@@ -113,14 +113,14 @@ void RuleUTest::setUp(void)
 
 /*
  * Tests the deduction rule (pln-rule-deduction) defined in:
- * opencog/learning/RuleEngine/rules/pln/deduction.scm
+ * opencog/reasoning/RuleEngine/rules/pln/deduction.scm
  */
 void RuleUTest::test_deduction(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
-    config().set("SCM_PRELOAD", "tests/learning/RuleEngine/simple-assertions.scm, "
-                 "learning/RuleEngine/rules/pln/deduction.scm");
+    config().set("SCM_PRELOAD", "tests/reasoning/RuleEngine/simple-assertions.scm, "
+                 "reasoning/RuleEngine/rules/pln/deduction.scm");
     load_scm_files_from_config(*as);    
     
     Handle results;

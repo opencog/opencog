@@ -38,6 +38,7 @@ void PatternSCM::init(void)
 	define_scheme_primitive("cog-bind", &PatternSCM::do_bindlink, _inst);
 	define_scheme_primitive("cog-bind-single", &PatternSCM::do_single_bindlink, _inst);
 	define_scheme_primitive("cog-bind-crisp", &PatternSCM::do_crisp_bindlink, _inst);
+	define_scheme_primitive("cog-bind-pln", &PatternSCM::do_pln_bindlink, _inst);
 #endif
 }
 
@@ -88,6 +89,20 @@ Handle PatternSCM::do_crisp_bindlink(Handle h)
 	PatternMatch pm;
 	pm.set_atomspace(as);
 	Handle grounded_expressions = pm.crisp_logic_bindlink(h);
+	return grounded_expressions;
+#else
+	return Handle::UNDEFINED;
+#endif
+}
+
+Handle PatternSCM::do_pln_bindlink(Handle h)
+{
+#ifdef HAVE_GUILE
+	// XXX we should also allow opt-args to be a list of handles
+	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bind-pln");
+	PatternMatch pm;
+	pm.set_atomspace(as);
+	Handle grounded_expressions = pm.pln_bindlink(h);
 	return grounded_expressions;
 #else
 	return Handle::UNDEFINED;

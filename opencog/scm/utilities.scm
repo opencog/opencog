@@ -11,9 +11,9 @@
 ; -- simple traversal of outgoing set (gar, gdr, etc.)
 ; -- for-each-except loop.
 ; -- cog-atom-incr --  Increment count truth value on "atom" by "cnt".
-; -- delete-hypergraph -- delete a hypergraph and everything "under" it.
-; -- delete-type -- delete all atoms of type 'atom-type'.
-; -- clear -- delete all atoms in the atomspace.
+; -- purge-hypergraph -- purge a hypergraph and everything "under" it.
+; -- purge-type -- purge all atoms of type 'atom-type'.
+; -- clear -- purge all atoms in the atomspace.
 ; -- cog-get-atoms -- Return a list of all atoms of type 'atom-type'
 ; -- cog-prt-atomspace -- Prints all atoms in the atomspace
 ; -- cog-count-atoms -- Count of the number of atoms of given type.
@@ -138,42 +138,48 @@
 )
 
 ; --------------------------------------------------------------------
-; delete-hypergraph -- delete a hypergraph and everything "under" it
+; purge-hypergraph -- purge a hypergraph and everything "under" it
 ;
-; If the indicated atom has no incoming links, then delete it. Repeat
+; If the indicated atom has no incoming links, then purge it. Repeat
 ; recursively downwards, following the *outgoing* set of any links
-; encountered.
+; encountered.  This only removes the atoms from the atomspace, it
+; does NOT remove it from the backingstore, if attached!
 
-(define (delete-hypergraph atom)
+(define (purge-hypergraph atom)
 	(if (cog-node? atom)
-		(cog-delete atom)
+		(cog-purge atom)
 		(let* ((oset (cog-outgoing-set atom))
-				(flg (cog-delete atom))
+				(flg (cog-purge atom))
 			)
-			(if flg ;; halt recursion if link was not delete-able
-				(for-each delete-hypergraph oset)
+			(if flg ;; halt recursion if link was not purge-able
+				(for-each purge-hypergraph oset)
 			)
 		)
 	)
 )
 
 ; --------------------------------------------------------------------
-; delete-type -- delete all atoms of type 'atom-type'
+; purge-type -- purge all atoms of type 'atom-type'
 ;
 ; If any atoms of that type have incoming links, those links will be
-; deleted, and so on recursively.
-(define (delete-type atom-type)
+; purged, and so on recursively.  This only removes the atoms from the
+; atomspace, it does NOT remove it from the backingstore, if attached!
+
+(define (purge-type atom-type)
 	(cog-map-type
-		(lambda (x) (cog-delete-recursive x) #f)
+		(lambda (x) (cog-purge-recursive x) #f)
 		atom-type
 	)
 )
 
 ; --------------------------------------------------------------------
-; clear -- delete all atoms in the atomspace
+; clear -- purge all atoms in the atomspace.  This only removes the
+; atoms from the atomspace, it does NOT remove it from the backingstore,
+; if attached!
+
 (define (clear)
 	(for-each
-		delete-type
+		purge-type
 		(cog-get-types)
 	)
 )
@@ -817,8 +823,8 @@
 'gdddr
 'for-each-except
 'cog-atom-incr
-'delete-hypergraph
-'delete-type
+'purge-hypergraph
+'purge-type
 'clear
 'count-all
 'cog-get-atoms

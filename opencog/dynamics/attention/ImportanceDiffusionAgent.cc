@@ -267,7 +267,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
                 if (type == INVERSE_HEBBIAN_LINK) {
                     // source and target indices swapped because inverse
                     //gsl_matrix_set(connections,sourceIndex,targetIndex,val);
-                    connections(sourceIndex,targetIndex) = val;
+                    connections(sourceIndex,targetIndex) += val;
                 } else {
                     //gsl_matrix_set(connections,targetIndex,sourceIndex,val);
                     connections(targetIndex,sourceIndex) += val;
@@ -296,7 +296,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
                     targetPosItr = diffusionAtomsMap.find(*targetItr);
                     targetIndex = (*targetPosItr).second;
                     if (type == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
-                        connections(sourceIndex,targetIndex) = val;
+                        connections(sourceIndex,targetIndex) += val;
                     } else {
                         connections(targetIndex,sourceIndex) += val;
                     }

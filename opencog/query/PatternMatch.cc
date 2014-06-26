@@ -23,8 +23,6 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/execution/GreaterThanLink.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 
 #include "Instantiator.h"
@@ -32,6 +30,7 @@
 #include "PatternUtils.h"
 #include "DefaultPatternMatchCB.h"
 #include "CrispLogicPMCB.h"
+#include "AttentionalFocusCB.h"
 
 using namespace opencog;
 
@@ -76,7 +75,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	}
 
 	std::set<Handle> vars;
-	foreach (Handle v, lvarbles->getOutgoingSet()) vars.insert(v);
+	for (Handle v: lvarbles->getOutgoingSet()) vars.insert(v);
 
 	std::vector<Handle> clauses(lclauses->getOutgoingSet());
 
@@ -589,6 +588,28 @@ bool SingleImplicator::grounding(const std::map<Handle, Handle> &var_soln,
 		result_list.push_back(h);
 	}
 	return true;
+}
+
+/**
+ * PLN specific PatternMatchCallback implementation
+ */
+class PLNImplicator:
+	public virtual Implicator,
+	public virtual AttentionalFocusCB
+{
+	public:
+		PLNImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp),AttentionalFocusCB(asp) {}
+};
+
+Handle PatternMatch::pln_bindlink(Handle himplication){
+	// Now perform the search.
+		PLNImplicator impl(_atom_space);
+		do_bindlink(himplication, &impl);
+
+		// The result_list contains a list of the grounded expressions.
+		// Turn it into a true list, and return it.
+		Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+		return gl;
 }
 
 /**

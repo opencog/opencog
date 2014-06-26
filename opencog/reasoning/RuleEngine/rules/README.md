@@ -7,11 +7,17 @@ and GroundedSchemaNodes for execution of formulas written in Scheme
 
 The following rule bases are currently defined:
 
+- Relex2Logic
+
 - PLN
 
 ## Rules
 
 The following rules are defined for the corresponding rule bases:
+
+- Relex2Logic:
+    - be-inheritance
+    - svo
 
 - PLN:
     - pln-rule-deduction
@@ -49,7 +55,7 @@ in order to compile the rules and formulas for better performance.
 
 - Rules will require mutual exclusions and priorities, but that can likely be implemented outside of the definition of the rule itself for clarity.
 
-## Example
+## PLN Example
 
 - Load the deduction rule definitions:
 
@@ -108,3 +114,25 @@ in order to compile the rules and formulas for better performance.
 
     (ConceptNode "Peirce")
     ```
+
+## Relex2Logic Example
+
+The relex-to-logic subdirectory has the initial specification of the R2L-RuleBase for the English language.
+
+To test the rules, use the following steps.
+
+- Start the cogserver
+
+- Enter the scm shell.
+
+- Load the scheme files in this directory and the sub-directories using
+
+    ```
+    (load-scm-from-file "../path/to/scheme/files")
+    ```
+
+- Start the relex server using the --relex flag (don't use the --logic flag)
+
+- In the opencog scheme shell run (relex-parse "some sentence"), preferably sentences on which the rules are applicable.
+
+- Run (cog-bind name-of-the-variable-which-has-BindLink-as-its-value)

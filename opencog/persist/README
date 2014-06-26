@@ -33,3 +33,18 @@ currently, needs test cases, and general work to enable/support).
 Note that additional i/o methods can be found in the "visualization"
 directory, which e.g. dump the entire atomspace into various graphics
 formats.
+
+
+Future directions:
+------------------
+To understand the future directions for the (distributed) atomspace
+and its relation to storage, read the "Big Graph Anti-Pattern" blog
+post: http://blog.bigdata.com/?p=628
+
+OpenCog most closely resembles the fourth bullet in that post:
+"Graph query (aka graph pattern matching)"  Based on this, the
+most promising backend would seem to be "bigdata":
+http://sourceforge.net/projects/bigdata/ (GPLv2)
+http://www.bigdata.com/
+
+

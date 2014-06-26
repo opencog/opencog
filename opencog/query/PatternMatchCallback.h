@@ -65,20 +65,29 @@ class PatternMatchCallback
 		virtual bool variable_match(Handle& node1, Handle& node2) = 0;
 
 		/**
-		 * Called when a link in the template pattern
-		 * needs to be compared to a possibly matching
-		 * link in the atomspace. The first argument
-		 * is a link from the pattern, and the second
-		 * is a possible solution link from the atomspace.
-		 * Return false if the links match, else return
-		 * true. (i.e. return true if mis-match).
+		 * Called right before link in the template pattern 
+		 * is to be compared to a possibly matching link in
+		 * the atomspace. The first argument is a link from
+		 * the pattern, and the second is a possible
+		 * grounding link from the atomspace. Return false
+		 * if the link contents should be compared, else
+		 * return true. (i.e. return true if mis-match).
 		 *
-		 * The link_match() callback should not compare the
-		 * link contents; the pattern matcher will do that
-		 * next, if this callback accepts the match.
-		 * After the pattern matcher has found a grounding
-		 * for a link, the post_link_match() callback is
-		 * called, offering a second chance to reject a link.
+		 * If false is returned, then the pattern matcher
+		 * will proceed, and will compare the outgoing sets
+		 * of the two links.  Thus, this callback should not
+		 * bother with looking at the outgoing sets.  Indeed,
+		 * it is very possible that the outgoing sets will
+		 * fail to match; but this is not yet known, at the
+		 * time that this callback is made.  By contrast,
+		 * the post_link_match() callback will be called
+		 * after a full grounding has been established;
+		 * that is, after the outgoing sets have been compared.
+		 *
+		 * This callback offers a good time to check the
+		 * truth value, the attention value, and the link
+		 * type, and to proceed with the search, or cut it
+		 * off, based on these values.
 		 */
 		virtual bool link_match(LinkPtr& link1, LinkPtr& link2) = 0;
 
@@ -87,12 +96,49 @@ class PatternMatchCallback
 		 * for a link.  This callback offers a final chance
 		 * to reject the link match based on the actual
 		 * grounding, or to perform post-match processing.
-		 * For example, the post_link_match() callback is 
-		 * used by the GreaterThanLink to perform a comparison
-		 * of the grounded values; if the comparison fails,
-		 * the match is rejected.
+		 * Return true to reject the match.
+		 *
+		 * That is, this callback is called after the two
+		 * links have been fully compared, and have been
+		 * found to match.  It offers a chance to record
+		 * the candidate grounding, or to reject it for some
+		 * reason.
 		 */
-		virtual bool post_link_match(LinkPtr& link1, LinkPtr& link2) = 0;
+		virtual bool post_link_match(LinkPtr& link1, LinkPtr& link2)
+		{
+			return false; // Accept the match, by default.
+		}
+
+		/**
+		 * Invoked to perform the matching of a virtual link.
+		 * A virtual link is one that does not (might not) exist as a
+		 * real link in the AtomSpace, but might still exist in a
+		 * 'virtual' sense, in that it is instead considered to exist if
+		 * a GroundedPredicateNode evaluates to true or not.  When such
+		 * a virtual link is encountered, this callback is called to make
+		 * this decision. This should return true to reject the match.
+		 * That is, a return value of "true" denotes that the virtual
+		 * atom does not exist; while "false" implies that it does exist.
+		 * This is the same convention as link_match() and post_link_match().
+		 *
+		 * Unlike the other callbacks, this takes arguments in s slightly
+		 * different form.  Here, 'virt' is the virtual link specification,
+		 * as it appears in the pattern.  At this time, it is assumed that
+		 * these are always of the form
+		 *
+		 *       EvaluationLink
+		 *          GroundedPredicateNode "scm:some-function"
+		 *          ListLink
+		 *             SomeAtom arg1       ;; could be a VariableNode
+		 *             VariableNode $arg2  ;; could be some other node, too.
+		 *             EtcAtom ...
+		 *
+		 * The 'args' handle is a candidate grounding for the ListLink.
+		 * Note that the grounding is fully instantiated in the AtomSpace,
+		 * so, if its undesired, then at least the ListLink should probably
+		 * be removed. Maybe even more ...
+		 */
+		virtual bool virtual_link_match(LinkPtr& virt, Handle& args) = 0;
 
 		/**
 		 * Called when a grounding is found. Should

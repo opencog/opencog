@@ -22,9 +22,12 @@ class ShellAPI(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('command', type=str, location='args')
         
-        # Setup socket to communicate with OpenCog Cogserver
-        self.oc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.oc.connect(('localhost', COGSERVER_PORT))
+        # Setup socket to communicate with OpenCog CogServer
+        try:
+            self.oc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.oc.connect(('localhost', COGSERVER_PORT))
+        except socket.error as msg:
+            print msg
 
         super(ShellAPI, self).__init__()
 
