@@ -131,6 +131,7 @@ public:
     ~metapopulation() {}
 
     const scored_combo_tree_set& best_candidates() const;
+    const scored_combo_tree_set& get_ensemble() const;
     composite_score best_composite_score() const;
     const combo_tree& best_tree() const;
 
@@ -445,11 +446,10 @@ public:
 private:
     void log_selected_exemplar(scored_combo_tree_ptr_set::const_iterator);
 
-public:
+protected:
     // --------------------- Internal state -----------------------
     const metapop_parameters& _params;
 
-protected:
     behave_cscore& _cscorer;
 
     scored_combo_tree_ptr_set _scored_trees;

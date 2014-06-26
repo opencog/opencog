@@ -1199,6 +1199,7 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
                              output_penalty,
                              output_bscore,
                              output_only_best,
+                             boosting,
                              output_eval_number,
                              output_with_labels,
                              col_labels,
