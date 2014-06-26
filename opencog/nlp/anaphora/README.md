@@ -3,7 +3,7 @@
 - Adding python library path
 
     ```
-    "Your_path/opencog/opencog/nlp"
+    Your_path/opencog/opencog/nlp
     ```
 - Adding the path of hobbs agent to opencog.conf
 
@@ -45,6 +45,7 @@
     accepted tree@a482013b-0279-41f2-a5d5-e15820da3616
 
     ```
+    
 ### Example #2:
 
 - Example sentences:
@@ -76,4 +77,4 @@
     ```
 
 Note that accepted antecedents are sorted according to the order of Breadth-first traversal of the dependency tree.
-Suppose word A comes before word B, A should have a higher probability of being an antecedent to a anaphor.
+Suppose word A comes before word B, A should have a higher probability of being an antecedent to the current anaphor.
