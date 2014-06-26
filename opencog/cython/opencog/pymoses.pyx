@@ -167,8 +167,16 @@ cdef class moses:
             output_list = [element for element in output.splitlines()]
 
             for candidate in output_list:
+                # XXX FIXME, this is an utterly horrible way to get
+                # MOSES output, because it tries to parse what MOSES
+                # prints, and that will change for abitrary reasons.
+                # The output string is NOT a part of the formal API
+                # for moses!
                 score = int(candidate.partition(' ')[0])
-                program = candidate.partition(' ')[2]
+                rest = candidate.partition(' ')[2]
+                weight = int(rest.partition(' ')[0])
+                rest = rest.partition(' ')[2]
+                program = rest.partition('[')[0]
                 candidates.append(MosesCandidate(score = score,
                                                  program = program,
                                                  program_type = "combo"))

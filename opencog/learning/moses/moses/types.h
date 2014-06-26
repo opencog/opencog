@@ -61,9 +61,11 @@ using boost::transform_iterator;
 // double, since float as the final score type is likely enough.
 typedef float score_t;
 
-// score precision used for logging and outputting results, it is set
-// very high because that information may be used by other tools
-static const int io_score_precision = 32;
+// Score precision used for logging and printing results. It is set
+// to maximum because the logged scores are used by other tools that
+// need the precision.  Note: max precision of single-presicion float
+// is about 8 decimal places; that for double is about 17 places.
+static const int io_score_precision = 18;
 
 static const score_t very_best_score = std::numeric_limits<score_t>::max();
 static const score_t very_worst_score = std::numeric_limits<score_t>::lowest();
@@ -208,7 +210,7 @@ public:
                       demeID_t id = demeID_t(),
                       composite_score cs = composite_score(),
                       behavioral_score bs = behavioral_score())
-        : _tree(tr), _deme_id(id), _cscore(cs), _bscore(bs)
+        : _tree(tr), _deme_id(id), _cscore(cs), _bscore(bs), _weight(1.0)
     {}
 
 private:
@@ -216,7 +218,7 @@ private:
     demeID_t _deme_id;
     composite_score _cscore;
     behavioral_score _bscore;
-    behavioral_score _boost;
+    double _weight;
 
 public:
     const combo::combo_tree& get_tree(void) const { return _tree; }
@@ -229,13 +231,13 @@ public:
     {
        return _bscore;
     }
-    const behavioral_score& get_boost(void) const
+    double get_weight(void) const
     {
-       return _boost;
+       return _weight;
     }
-    behavioral_score& get_bscore(void)
+    void set_weight(double w)
     {
-       return _bscore;
+       _weight = w;
     }
     const composite_score& get_composite_score(void) const
     {
@@ -310,9 +312,11 @@ struct scored_combo_tree_equal
 
 /// scored_combo_tree_hash_set provides an O(1) way of determining if
 /// a combo tree is in the set, or not (and getting its score, if it is).
-/// This can be kind-of slow, for two reasons: it invokes the copy 
-/// constructor for insertion, and combo trees can be big; it also 
-/// computes the hash of the tree, which can be fairly expensive.
+/// Its O(1) in theory. In practice, it can be quite slow, for two
+/// reasons: one is that it needs to compute the hash of the tree, and
+/// since trees can be big, this will be expensive.  The other problem
+/// it that this invokes the copy constructor for insertion.
+/// See below for other containers with different properties.
 typedef std::unordered_set<scored_combo_tree,
                  scored_combo_tree_hash,
                  // scored_combo_tree_equal> scored_combo_tree_hash_set;
@@ -344,185 +348,17 @@ typedef scored_combo_tree_ptr_set::const_iterator scored_combo_tree_ptr_set_cit;
 
 // =======================================================================
 // ostream functions
-template<typename Out>
-Out& ostream_behavioral_score(Out& out, const behavioral_score& bs)
+
+std::ostream& ostream_behavioral_score(std::ostream& out, const behavioral_score&);
+std::ostream& ostream_scored_combo_tree(std::ostream& out, const scored_combo_tree&);
+
+scored_combo_tree istream_scored_combo_tree(std::istream& in);
+
+inline std::ostream& operator<<(std::ostream& out,
+                                const moses::scored_combo_tree& sct)
 {
-    return ostreamContainer(out, bs, " ", "[", "]");
+    return moses::ostream_scored_combo_tree(out, sct);
 }
-
-/**
- * stream out a candidate along with their scores (optionally
- * complexity and bscore).
- *
- * @param bool output_python if true, output is a python module
- *             instead of a combo program XXX currently broken XXX
- */
-static const std::string complexity_prefix_str = "complexity:";
-static const std::string complexity_penalty_prefix_str = "complexity penalty:";
-static const std::string diversity_penalty_prefix_str = "diversity penalty:";
-static const std::string penalized_score_prefix_str = "penalized score:";
-static const std::string behavioral_score_prefix_str = "behavioral score:";
-
-template<typename Out>
-Out& ostream_scored_combo_tree(Out& out,
-                                 const scored_combo_tree& sct,
-                                 bool output_score = true,
-                                 bool output_penalty = false,
-                                 bool output_bscore = false,
-                                 bool output_python = false)
-{
-    const combo::combo_tree& tr = sct.get_tree();
-    const composite_score& cs = sct.get_composite_score();
-    const behavioral_score& bs = sct.get_bscore();
-
-    if (output_python)
-        return ostream_combo_tree_cpbscore_python(out, tr, cs, bs,
-                                                  output_score,
-                                                  output_penalty,
-                                                  output_bscore);
-
-    if (output_score)
-        out << std::setprecision(io_score_precision)
-            << cs.get_score() << " ";
-
-    out << tr << std::endl;
-
-    if (output_penalty)
-        out << complexity_prefix_str << " "
-            << cs.get_complexity() << std::endl
-            << complexity_penalty_prefix_str << " "
-            << cs.get_complexity_penalty() << std::endl
-            << diversity_penalty_prefix_str << " "
-            << cs.get_diversity_penalty() << std::endl
-            << penalized_score_prefix_str << " "
-            << cs.get_penalized_score() << std::endl;
-
-    if (output_bscore)
-        ostream_behavioral_score(out << behavioral_score_prefix_str << " ",
-                                 bs) << std::endl;
-
-    return out;
-}
-
-// Stream in scored_combo_tree, use the same format as
-// ostream_scored_combo_tree. Note that for now we assume that combo
-// tree is always preceeded by the score, it's easier that way.
-//
-// You may want to set 'in' to send exceptions if something goes wrong
-// such as
-//
-// in.exceptions(ifstream::failbit | ifstream::badbit | ifstream::eofbit);
-//
-// so a bad parse is detected (maybe istream_scored_combo_tree should
-// set it automatically).
-//
-// TODO: if the istream doesn't end by a bscore then it will
-// completely exhaust it.
-template<typename In>
-scored_combo_tree istream_scored_combo_tree(In& in)
-{
-    // parse score
-    score_t sc;
-    in >> sc;
-
-    // parse combo tree
-    combo::combo_tree tr;
-    in >> tr;
-
-    // parse the rest
-    complexity_t cpx = 0;
-    score_t cpx_penalty = 0, diversity_penalty = 0, penalized_score = 0;
-    behavioral_score bs;
-    // whitespace, function split
-    auto ssplit = [](const std::string& s) {
-        std::vector<std::string> res;
-        boost::split(res, s, boost::algorithm::is_space());
-        return res;
-    };
-    std::vector<std::string> complexity_penalty_prefix_str_split =
-        ssplit(complexity_penalty_prefix_str);
-    std::vector<std::string> diversity_penalty_prefix_str_split =
-        ssplit(diversity_penalty_prefix_str);
-    std::vector<std::string> penalized_score_prefix_str_split =
-        ssplit(penalized_score_prefix_str);
-    std::vector<std::string> behavioral_score_prefix_str_split =
-        ssplit(behavioral_score_prefix_str);
-    while (in.good()) {
-        std::string token;
-        in >> token;
-        if (token == complexity_prefix_str)
-            in >> cpx;
-        else if (token == complexity_penalty_prefix_str_split[0]) {
-            in >> token;        // complexity_penalty_prefix_str_split[1]
-            in >> cpx_penalty;
-        }
-        else if (token == diversity_penalty_prefix_str_split[0]) {
-            in >> token;        // diversity_penalty_prefix_str_split[1]
-            in >> diversity_penalty;
-        }
-        else if (token == penalized_score_prefix_str_split[0]) {
-            in >> token;        // penalized_score_prefix_str_split[1]
-            in >> penalized_score;
-        }
-        else if (token == behavioral_score_prefix_str_split[0]) {
-            in >> token;        // behavioral_score_prefix_str_split[1]
-            istreamContainer(in, back_inserter(bs), "[", "]");
-            break;              // that way we don't consume 'in' further
-        }
-    }
-    // assign to candidate
-    combo::combo_tree tr_test = tr;
-
-    composite_score cs(sc, cpx, cpx_penalty, diversity_penalty);
-    return scored_combo_tree(tr, /* default demeID */ 0, cs, bs);
-}
-
-/**
- * stream out a candidate along with their scores (optionally
- * complexity and bscore) as a python module
- */
-template<typename Out>
-Out& ostream_combo_tree_cpbscore_python(Out& out,
-                                        const combo::combo_tree& tr,
-                                        const composite_score& cs,
-                                        const behavioral_score& bs,
-                                        bool output_score = true,
-                                        bool output_penalty = false,
-                                        bool output_bscore = false)
-{
-    out << "#!/usr/bin/env python" << std::endl
-        << "from operator import *" << std::endl
-        << std::endl
-        << "#These functions allow multiple args instead of lists." << std::endl
-        << "def ors(*args):" << std::endl
-        << "    return any(args)" << std::endl
-        << std::endl
-        << "def ands(*args):" << std::endl
-        << "    return all(args)" << std::endl
-        << std::endl;
-
-    if (output_score) {
-        out << "#score: " << std::setprecision(io_score_precision)
-            << cs.get_score() << std::endl;
-    }
-    if (output_penalty) {
-        out << " #complexity: " << cs.get_complexity() << std::endl;
-        out << " #complexity_penalty: " << cs.get_complexity_penalty() << std::endl;
-        out << " #diversity_penalty: " << cs.get_diversity_penalty() << std::endl;
-    }
-
-    out << std::endl << "def moses_eval(i):" << std::endl << "    return ";
-    ostream_combo_tree(out, tr, combo::fmt::python);
-    out << std::endl;
-
-    if (output_bscore) {
-        out << std::endl<< "#bscore: " ;
-        ostream_behavioral_score(out, bs);
-        out << std::endl;
-    }
-    return out;
-}
-
 
 inline std::ostream& operator<<(std::ostream& out,
                                 const moses::composite_score& ts)
@@ -530,6 +366,7 @@ inline std::ostream& operator<<(std::ostream& out,
     return out << "[score="
                << std::setprecision(moses::io_score_precision)
                << ts.get_score()
+               << ", penalized score=" << ts.get_penalized_score()
                << ", complexity=" << ts.get_complexity()
                << ", complexity penalty=" << ts.get_complexity_penalty()
                << ", diversity penalty=" << ts.get_diversity_penalty()

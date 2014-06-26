@@ -15,6 +15,7 @@ class TestMOSES:
         input_data = [[0, 0, 0], [1, 1, 0], [1, 0, 1], [0, 1, 1]]
         output = self.moses.run(input=input_data, python=True)
         assert isinstance(output[0], MosesCandidate)
+        print "In run_xor_python, the program is:\n", output[0].program
         assert output[0].score == 0
         model = output[0].eval
         assert not model([0, 0])
@@ -28,11 +29,15 @@ class TestMOSES:
         assert len(output) == 1
         assert isinstance(output[0], MosesCandidate)
         assert output[0].score == 0
-        assert output[0].program == "and(or(!$1 !$2) or($1 $2))"
+        print "In run_xor_combo, the program is:" + str(output[0].program)
+        # Either one of the two below are equally likely, both are correct.
+        assert output[0].program == "and(or(!$1 !$2) or($1 $2)) "
+        # assert output[0].program == "or(and(!$1 $2) and($1 !$2)) "
 
     def test_run_majority_python(self):
         output = self.moses.run(args="-H maj -c 2", python=True)
         assert isinstance(output[0], MosesCandidate)
+        print "In run_majority_python, the program is:\n", output[0].program
         assert output[0].score == 0
         model = output[0].eval
         assert not model([0, 1, 0, 1, 0])

@@ -5,7 +5,7 @@
 # to the parser. When done, move the file over to a 'finished'
 # directory.
 #
-# Set up assorted cnstants needed to run.
+# Set up assorted constants needed to run.
 
 lang=$1
 filename="$2"
@@ -38,7 +38,7 @@ cat "$filename" | $splitter -l $lang >  "$splitdir/$rest"
 cat "$splitdir/$rest" | ./submit-one.pl 
 
 # Punt if the cogserver has crashed (second test,
-# before doing teh mv and rm below)
+# before doing the mv and rm below)
 haveserver=`ps aux |grep cogserver |grep opencog-$lang`
 if [[ -z "$haveserver" ]] ; then
 	exit 1

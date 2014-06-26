@@ -186,7 +186,7 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
             std::stringstream ss;
             ss << "Candidates to merge with the metapopulation:" << std::endl;
             for (const auto& cnd : candidates)
-                ostream_scored_combo_tree(ss, cnd, true, true);
+                ss << cnd;
             logger().fine(ss.str());
         }
     }
@@ -318,7 +318,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
             ss << "Candidates with their bscores before"
                 " removing the dominated candidates" << std::endl;
             for (const auto& cnd : candidates)
-                ostream_scored_combo_tree(ss, cnd, true, true, true);
+                ss << cnd;
             logger().fine(ss.str());
         }
 
@@ -332,10 +332,12 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
             ss << "Candidates with their bscores after"
                 " removing the dominated candidates" << std::endl;
             for (const auto& cnd : candidates)
-                ostream_scored_combo_tree(ss, cnd, true, true, true);
+                ss << cnd;
             logger().fine(ss.str());
         }
     }
+
+    if (0 == candidates.size()) return false;
 
     // update the record of the best-seen score & trees
     update_best_candidates(candidates);
@@ -452,7 +454,8 @@ void metapopulation::resize_metapop()
         if (logger().isFineEnabled()) {
             std::stringstream ss;
             ss << "Metapopulation:" << std::endl;
-            logger().fine(ostream(ss, -1, true, true).str());
+            ostream_metapop(ss);
+            logger().fine(ss.str());
         }
     }
 }
@@ -550,13 +553,22 @@ void metapopulation::log_best_candidates() const
         return;
 
     if (best_candidates().empty())
-        logger().info("No new best candidates");
+        logger().info("No best candidates");
     else {
-        logger().info()
-           << "The following candidate(s) have the best score "
-           << best_composite_score();
-        for (const auto& cand : best_candidates()) {
-            logger().info() << "" << cand.get_tree();
+        if (not _params.do_boosting) {
+            logger().info()
+               << "The following candidate(s) have the best score "
+               << best_composite_score();
+            for (const auto& cand : best_candidates()) {
+                logger().info() << cand.get_score() << " " << cand.get_tree();
+            }
+        } else {
+            logger().info()
+               << "The following ensemble has the score "
+               << best_composite_score();
+            for (const auto& cand : best_candidates()) {
+                logger().info() << cand.get_weight() << " " << cand.get_tree();
+            }
         }
     }
 }
