@@ -707,8 +707,9 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //    }
 
     Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch, TruthValue::TRUE_TV());
+    Handle hOutPutListLink = originalAtomSpace->addLink(LIST_LINK, patternToMatch, TruthValue::TRUE_TV());
     implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
-    implicationLinkOutgoings.push_back(hAndLink); // the results to return
+    implicationLinkOutgoings.push_back(hOutPutListLink); // the results to return
 
 //    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
 //            << originalAtomSpace->atomAsString(hAndLink).c_str() << std::endl;
@@ -1138,19 +1139,19 @@ PatternMiner::~PatternMiner()
 void PatternMiner::runPatternMiner()
 {
 
-//    int start_time = time(NULL);
+    int start_time = time(NULL);
 
-//    std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << std::endl;
-//    // first, generate the first layer patterns: patterns of 1 gram (contains only one link)
-//    ConstructTheFirstGramPatterns();
+    std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << std::endl;
+    // first, generate the first layer patterns: patterns of 1 gram (contains only one link)
+    ConstructTheFirstGramPatterns();
 
-//    // and then generate all patterns
-//    GrowAllPatterns();
+    // and then generate all patterns
+    GrowAllPatterns();
 
-//    int end_time = time(NULL);
-//    printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
+    int end_time = time(NULL);
+    printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
 
-    testPatternMatcher2();
+//    testPatternMatcher2();
 
 }
 
