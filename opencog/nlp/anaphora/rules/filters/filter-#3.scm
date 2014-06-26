@@ -1,38 +1,64 @@
-;; filter #3: anaphor is "neuter", antecedent is not "feminine" or "masculine"
-;;            anaphor and antecedent are both "singular"
-;; Example: it -> a house
+;; antecedent's number > anaphora's number
 
 (define filter-#3
-    (AndLink
-        (InheritanceLink
-                (VariableNode "$word-inst-anaphor")
-                (DefinedLinguisticConceptNode "neuter")
-        )
-        (InheritanceLink
-                (VariableNode "$word-inst-anaphor")
-                (DefinedLinguisticConceptNode "singular")
-        )
-        (InheritanceLink
+    (BindLink
+        (ListLink
+            (TypedVariableLink
                 (VariableNode "$word-inst-antecedent")
-                (DefinedLinguisticConceptNode "singular")
+                (VariableTypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$word-inst-anaphor")
+                (VariableTypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$antecedent-number")
+                (VariableTypeNode "NumberNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$anaphor-number")
+                (VariableTypeNode "NumberNode")
+            )
         )
-        (NotLink
-            (InheritanceLink
-                (VariableNode "$word-inst-anaphor")
-                (DefinedLinguisticConceptNode "feminine")
+        (ImplicationLink
+            (AndLink
+                ;; Connection between two clauses
+                (ListLink
+                    (AnchorNode "CurrentResolution")
+                    (VariableNode "$word-inst-anaphor")
+                    (VariableNode "$word-inst-antecedent")
+                )
+                (ListLink
+                    (AnchorNode "CurrentPronoun")
+                    (VariableNode "$word-inst-anaphor")
+                )
+                (ListLink
+                    (AnchorNode "CurrentProposal")
+                    (VariableNode "$word-inst-antecedent")
+                )
+                (WordSequenceLink
+                    (VariableNode "$word-inst-anaphor")
+                    (VariableNode "$anaphor-number")
+                )
+                (WordSequenceLink
+                    (VariableNode "$word-inst-antecedent")
+                    (VariableNode "$antecedent-number")
+                )
+
+                ;; filter
+                (EvaluationLink
+                    (GroundedPredicateNode "c++:greater")
+                    (ListLink
+                        (VariableNode "$antecedent-number")
+                        (VariableNode "$anaphor-number")
+                    )
+                )
             )
-            (InheritanceLink
-                (VariableNode "$word-inst-antecedent")
-                (DefinedLinguisticConceptNode "feminine")
-            )
-            (InheritanceLink
-                (VariableNode "$word-inst-anaphor")
-                (DefinedLinguisticConceptNode "masculine")
-            )
-            (InheritanceLink
-                (VariableNode "$word-inst-antecedent")
-                (DefinedLinguisticConceptNode "masculine")
+            (ListLink
+                (AnchorNode "CurrentResult")
+                (AnchorNode "Filtered")
             )
         )
     )
 )
+

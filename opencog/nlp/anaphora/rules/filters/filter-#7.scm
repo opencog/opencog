@@ -1,6 +1,7 @@
-;; antecedent is not "noun"
+;; anaphor is "neuter"
+;; antecedent is "feminine"
 
-(define filter-#1
+(define filter-#7
     (BindLink
         (ListLink
             (TypedVariableLink
@@ -30,11 +31,13 @@
                 )
 
                 ;; filter
-                (NotLink
-                    (PartOfSpeechLink
-                        (VariableNode "$word-inst-antecedent")
-                        (DefinedLinguisticConceptNode "noun")
-                    )
+                (InheritanceLink
+                    (VariableNode "$word-inst-anaphor")
+                    (DefinedLinguisticConceptNode "neuter")
+                )
+                (InheritanceLink
+                    (VariableNode "$word-inst-antecedent")
+                    (DefinedLinguisticConceptNode "feminine")
                 )
             )
             (ListLink

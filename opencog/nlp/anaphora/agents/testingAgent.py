@@ -53,8 +53,8 @@ data=["opencog/scm/config.scm",
 for item in data:
     load_scm(atomspace, item)
 
-init=initAgent()
-init.run(atomspace)
+#init=initAgent()
+#init.run(atomspace)
 #dump=dumpAgent()
 #dump.run(atomspace)
 hobbsAgent = HobbsAgent()

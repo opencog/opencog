@@ -3,11 +3,47 @@ from __future__ import print_function
 from pprint import pprint
 from opencog.cogserver import MindAgent
 from opencog.atomspace import types, AtomSpace, TruthValue
-from opencog.scheme_wrapper import scheme_eval_h,scheme_eval, __init__
-from anaphora.python_classes.BindLinkExecution import BindLinkExecution
+from opencog.scheme_wrapper import load_scm,scheme_eval_h,scheme_eval, __init__
 import Queue
 import time
 __author__ = 'hujie'
+
+
+class BindLinkExecution():
+    def __init__(self,atomspace,anchorNode, target, command,resultNode,atomType):
+        self.atomspace=atomspace
+        self.anchorNode=anchorNode
+        self.target=target
+        self.command=command
+        self.resultNode=resultNode
+        self.atomType=atomType
+    def execution(self):
+        if self.anchorNode != None and self.target != None:
+            self.tmpLink=self.atomspace.add_link(types.ListLink, [self.anchorNode, self.target], TruthValue(1.0, 100))
+        else:
+            self.tmpLink=None
+        response = scheme_eval(self.atomspace, self.command)
+        #time.sleep(0.5)
+        a=3
+
+    def returnResult(self):
+        if self.resultNode==None:
+            return
+        rv=[]
+        listOfLinks=self.resultNode.incoming
+        for link in listOfLinks:
+            atom=(link.out)[1]
+            if atom.type==self.atomType:
+                rv.append(atom)
+
+        for link in listOfLinks:
+            self.atomspace.remove(link)
+        return rv
+
+    def clear(self):
+        if self.tmpLink!=None:
+            self.atomspace.remove(self.tmpLink)
+
 
 class HobbsAgent(MindAgent):
     def __init__(self):
@@ -25,7 +61,9 @@ class HobbsAgent(MindAgent):
         self.pronouns = None
         self.roots = None
 
-        self.numOfFilters=2
+        self.numOfFilters=7
+
+        self.logfile=open('/tmp/results.txt', 'w')
 
     def bindLinkExe(self,anchorNode, target, command,resultNode,atomType):
         exe=BindLinkExecution(self.atomspace,anchorNode, target, command,resultNode,atomType)
@@ -38,27 +76,8 @@ class HobbsAgent(MindAgent):
         return int(str)
 
     def getWordNumber(self,node):
-        '''
-        Some threading bugs, cannot be solved right now
-
-        rv=self.bindLinkExe(self.currentTarget, node ,'(cog-bind getNumberNode)',self.currentResult,types.NumberNode)
-        if len(rv)>0:
-            return self.StringToNumber(rv[0].name)
-        else:
-            print(node)
-            return 0
-        '''
-        '''
-        Debug information
-        if node==None:
-            print("found you")
-            return 0
-        print("word:")
-        print(node.name)
-        print("number:")
-        print(self.wordNumber[node.name])
-        '''
         return self.wordNumber[node.name]
+
     def sortNodes(self,list):
         return sorted(list,key=self.getWordNumber)
 
@@ -71,20 +90,24 @@ class HobbsAgent(MindAgent):
         '''
         It iterates all filters, if one of them succeed, the current anaphora will be connected with current antecedent
         '''
+        self.currentResolutionLink_pronoun=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentPronoun, node], TruthValue(1.0, 100))
         rejected = False
         for index in range(1,self.numOfFilters):
-            command='(cog-bind-crisp filter-instance-#'+str(index)+')'
-            rv=self.bindLinkExe(self.currentProposal,node,command,self.currentResult,types.ListLink)
+            command='(cog-bind-crisp filter-#'+str(index)+')'
+            rv=self.bindLinkExe(self.currentProposal,node,command,self.currentResult,types.AnchorNode)
             if len(rv)>0:
                 '''
                 Reject it
                 '''
                 rejected = True
                 break
+
         if not rejected:
-            self.bindLinkExe(self.currentProposal,node,'(cog-bind propose)',None,None)
-        else:
-            print("rejected "+node.name)
+            #self.bindLinkExe(self.currentProposal,node,'(cog-bind propose)',None,None)
+            print("accepted "+node.name,file=self.logfile)
+            print("accepted "+node.name)
+        #else:
+            #print("rejected "+node.name)
 
     def Checked(self,node):
         if node.name in self.checked:
@@ -93,6 +116,7 @@ class HobbsAgent(MindAgent):
         return False
 
     def bfs(self,node):
+
         if node==None:
             #print("found you bfs")
             return
@@ -163,6 +187,26 @@ class HobbsAgent(MindAgent):
         self.currentResolutionLink_pronoun=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentPronounNode], TruthValue(1.0, 100))
         self.pronounNumber = -1
 
+        data=["opencog/nlp/anaphora/rules/getChildren.scm",
+              "opencog/nlp/anaphora/rules/getNumberNode.scm",
+              "opencog/nlp/anaphora/rules/getRoots.scm",
+              "opencog/nlp/anaphora/rules/getPronouns.scm",
+              "opencog/nlp/anaphora/rules/propose.scm",
+              "opencog/nlp/anaphora/rules/getResults.scm",
+              "opencog/nlp/anaphora/rules/getAllNumberNodes.scm",
+
+              "opencog/nlp/anaphora/rules/filtersGenerator.scm",
+
+              "opencog/nlp/anaphora/rules/filters/filter-#1.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#2.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#3.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#4.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#5.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#6.scm",
+              ]
+        for item in data:
+            load_scm(atomspace, item)
+
         self.getAllNumberNodes()
         self.pronouns = self.getPronouns()
         self.roots = self.getRoots()
@@ -183,9 +227,10 @@ class HobbsAgent(MindAgent):
             self.checked.clear()
             self.pronounNumber=self.getWordNumber(pronoun)
             tmpLink=self.atomspace.add_link(types.ListLink, [self.currentPronounNode, pronoun], TruthValue(1.0, 100))
+            self.currentPronoun=pronoun
             root=self.getRootOfNode(pronoun)
-            print("Resolving...........")
-            print(pronoun)
+            print("\nResolving...........",file=self.logfile)
+            print(pronoun,file=self.logfile)
 
             while True:
                 if root==None:
@@ -198,4 +243,4 @@ class HobbsAgent(MindAgent):
                     break
             self.atomspace.remove(tmpLink)
 
-        self.printResults()
+        #self.printResults()

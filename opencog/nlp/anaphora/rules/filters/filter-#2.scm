@@ -1,15 +1,44 @@
-;; filter #2: anaphor and antecedent are both "feminine".
-;; Example: She -> Nancy
+;; antecedent is "pronoun"
 
 (define filter-#2
-    (AndLink
-        (InheritanceLink
-            (VariableNode "$word-inst-anaphor")
-            (DefinedLinguisticConceptNode "feminine")
+    (BindLink
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$word-inst-antecedent")
+                (VariableTypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$word-inst-anaphor")
+                (VariableTypeNode "WordInstanceNode")
+            )
         )
-        (InheritanceLink
-            (VariableNode "$word-inst-antecedent")
-            (DefinedLinguisticConceptNode "feminine")
+        (ImplicationLink
+            (AndLink
+                ;; Connection between two clauses
+                (ListLink
+                    (AnchorNode "CurrentResolution")
+                    (VariableNode "$word-inst-anaphor")
+                    (VariableNode "$word-inst-antecedent")
+                )
+                (ListLink
+                    (AnchorNode "CurrentPronoun")
+                    (VariableNode "$word-inst-anaphor")
+                )
+                (ListLink
+                    (AnchorNode "CurrentProposal")
+                    (VariableNode "$word-inst-antecedent")
+                )
+
+                ;; filter
+                (InheritanceLink
+                    (VariableNode "$word-inst-antecedent")
+                    (DefinedLinguisticConceptNode "pronoun")
+                )
+            )
+            (ListLink
+                (AnchorNode "CurrentResult")
+                (AnchorNode "Filtered")
+            )
         )
     )
 )
