@@ -6,7 +6,8 @@ from opencog.atomspace import types, AtomSpace, TruthValue
 from opencog.scheme_wrapper import load_scm,scheme_eval_h,scheme_eval, __init__
 import Queue
 import time
-__author__ = 'hujie'
+
+__author__ = 'Hujie Wang'
 
 
 class BindLinkExecution():
@@ -104,7 +105,7 @@ class HobbsAgent(MindAgent):
 
         if not rejected:
             #self.bindLinkExe(self.currentProposal,node,'(cog-bind propose)',None,None)
-            print("accepted "+node.name,file=self.logfile)
+            #print("accepted "+node.name,file=self.logfile)
             print("accepted "+node.name)
         #else:
             #print("rejected "+node.name)
@@ -229,8 +230,10 @@ class HobbsAgent(MindAgent):
             tmpLink=self.atomspace.add_link(types.ListLink, [self.currentPronounNode, pronoun], TruthValue(1.0, 100))
             self.currentPronoun=pronoun
             root=self.getRootOfNode(pronoun)
-            print("\nResolving...........",file=self.logfile)
-            print(pronoun,file=self.logfile)
+            #print("\nResolving...........",file=self.logfile)
+            #print(pronoun,file=self.logfile)
+            print("\nResolving...........")
+            print(pronoun)
 
             while True:
                 if root==None:
