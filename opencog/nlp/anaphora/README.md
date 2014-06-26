@@ -1,3 +1,9 @@
+### Summary:
+
+This is an implementation of a modified version of hobbs algorithm that is currently under development. It is still in-progress.
+
+There must be lots of bugs in the current algorithm, and many filters are missing.
+
 ### Prerequisites:
 
 - Adding python library path
@@ -45,7 +51,7 @@
     accepted tree@a482013b-0279-41f2-a5d5-e15820da3616
 
     ```
-    
+
 ### Example #2:
 
 - Example sentences:
