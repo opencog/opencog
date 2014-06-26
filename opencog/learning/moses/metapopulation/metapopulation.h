@@ -131,6 +131,7 @@ public:
     ~metapopulation() {}
 
     const scored_combo_tree_set& best_candidates() const;
+    const scored_combo_tree_set& get_ensemble() const;
     composite_score best_composite_score() const;
     const combo_tree& best_tree() const;
 

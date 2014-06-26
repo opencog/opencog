@@ -63,16 +63,18 @@ struct metapop_printer
                     bool _output_penalty,
                     bool _output_bscore,
                     bool _output_only_best,
+                    bool _output_ensemble,
                     bool _output_eval_number,
                     bool _output_with_labels,
-                    const vector<string>& _ilabels,
-                    const string& _output_file,
+                    const std::vector<std::string>& _ilabels,
+                    const std::string& _output_file,
                     bool _output_python,
                     bool _is_mpi) :
         result_count(_result_count), output_score(_output_score),
         output_penalty(_output_penalty),
         output_bscore(_output_bscore),
         output_only_best(_output_only_best),
+        output_ensemble(_output_ensemble),
         output_eval_number(_output_eval_number),
         output_with_labels(_output_with_labels),
         ilabels(_ilabels),
@@ -96,48 +98,85 @@ struct metapop_printer
         if (is_mpi && metapop.size() == 0)
             return;
 
-        scored_combo_tree_ptr_set tree_set;
-        if (output_only_best) {
-            for (const scored_combo_tree& sct : metapop.best_candidates())
-               tree_set.insert(new scored_combo_tree(sct));
-        } else {
-            tree_set = metapop.get_trees();
-        }
-
         stringstream ss;
-        int cnt = 0;
-        for (const scored_combo_tree& sct : tree_set) {
-            if (result_count < ++cnt) break;
+        // A number of external tools read the printed results, and
+        // parse them. The floating-point scores must be printed with
+        // reasonable accuracy, else these tools fail.
+        ss << std::setprecision(moses::io_score_precision);
+        if (output_ensemble) {
+            const scored_combo_tree_set& tree_set = metapop.get_ensemble();
             if (output_python) {
                 // Python boilerplate
-                ss << "#!/usr/bin/env python" << std::endl
-                   << "from operator import *" << std::endl
-                   << std::endl
-                   << "#These functions allow multiple args instead of lists." << std::endl
-                   << "def ors(*args):" << std::endl
-                   << "    return any(args)" << std::endl
-                   << std::endl
-                   << "def ands(*args):" << std::endl
-                   << "    return all(args)" << std::endl << std::endl
-                   << "#score: " << sct.get_score() << std::endl
-                   << "def moses_eval(i):" << std::endl << "    return ";
-                // XXX this is incorrect when the ouotput is an ensemble.
-                ostream_combo_tree (ss, sct.get_tree(), combo::fmt::python);
+                ss << "#!/usr/bin/env python\n"
+                   << "from operator import *\n\n"
+                   << "#These functions allow multiple args instead of lists.\n"
+                   << "def ors(*args):\n"
+                   << "    return any(args)\n\n"
+                   << "def ands(*args):\n"
+                   << "    return all(args)\n\n"
+                   << "#score: " << metapop.best_score() << std::endl
+                   << "def moses_eval(i):\n"
+                   << "    sum = 0.0 \\\n";
+                // XXX this is close to what we want but maybe borken.
+                // FIXME untested.
+                for (const scored_combo_tree& sct : tree_set)
+				       ss << "      + " << sct.get_weight()
+                      << " * " << sct.get_tree() << "\\\n";
+                ss << "\n    return (0.0 < val)\n";
             } else {
-                ss << sct.get_score() << " "
-                   << sct.get_weight() << " "
-                   << sct.get_tree();
-                if (output_score)
-                   ss << " " << sct.get_composite_score();
-                if (output_bscore)
-                   ss << " " << sct.get_bscore();
-                ss << std::endl;
+
+                // For ensembles, we woutput ONLY the weight and the tree.
+                for (const scored_combo_tree& sct : tree_set)
+                    ss << sct.get_weight() << " " << sct.get_tree() << std::endl;
+            }
+
+        } else {
+            // scored_combo_tree_ptr_set keeps the trees in score-sorted
+            // order. We want this, so that we can print them out in this
+            // order.
+            scored_combo_tree_ptr_set tree_set;
+            if (output_only_best) {
+                for (const scored_combo_tree& sct : metapop.best_candidates())
+                   tree_set.insert(new scored_combo_tree(sct));
+            } else {
+                tree_set = metapop.get_trees();
+            }
+
+            int cnt = 0;
+            for (const scored_combo_tree& sct : tree_set) {
+                if (result_count < ++cnt) break;
+                if (output_python) {
+                    // Python boilerplate
+                    ss << "#!/usr/bin/env python\n"
+                       << "from operator import *\n\n"
+                       << "#These functions allow multiple args instead of lists.\n"
+                       << "def ors(*args):\n"
+                       << "    return any(args)\n\n"
+                       << "def ands(*args):\n"
+                       << "    return all(args)\n\n"
+                       << "#score: " << sct.get_score() << std::endl
+                       << "def moses_eval(i):\n"
+                       << "    return ";
+                    ostream_combo_tree (ss, sct.get_tree(), combo::fmt::python);
+                } else {
+                    ss << sct.get_score() << " "
+                       << sct.get_weight() << " "
+                       << sct.get_tree();
+                    if (output_score)
+                       ss << " " << sct.get_composite_score();
+                    if (output_bscore)
+                       ss << " " << sct.get_bscore();
+                    ss << std::endl;
+                }
             }
         }
-    
+
         if (output_eval_number)
             ss << number_of_evals_str << ": " << stats.n_evals << std::endl;;
 
+        // OK, this is kind-of cheesy, but it goes and replaces $1 $2 $3
+        // etc with the strings from the ilabels vector. Its just a pure
+        // string search-n-replace.
         string res = (output_with_labels && !ilabels.empty()?
                       ph2l(ss.str(), ilabels) : ss.str());
         if (output_file.empty())
@@ -147,17 +186,31 @@ struct metapop_printer
             of << res;
             of.close();
         }
-    
-        // Log the best candidate
-        stringstream ssb;
-        metapop.ostream_metapop(ssb, 1);
-        string resb = (output_with_labels && !ilabels.empty()?
-                       ph2l(ssb.str(), ilabels) : ssb.str());
-        if (resb.empty())
-            logger().warn("No candidate is good enough to be returned. Yeah that's bad!");
-        else
-            logger().info("Best candidates:\n%s", res.c_str());
-    
+
+        if (output_ensemble) {
+            stringstream ssb;
+            for (const auto& cand : metapop.get_ensemble()) {
+                ssb << cand.get_weight() << " " << cand.get_tree();
+            }
+            string resb = (output_with_labels && !ilabels.empty()?
+                           ph2l(ssb.str(), ilabels) : ssb.str());
+            if (resb.empty())
+                logger().warn("Ensemble was empty!");
+            else
+                logger().info("Final ensemble, consisting of %d members:\n%s",
+                    metapop.get_ensemble().size(), res.c_str());
+        } else {
+            // Log the single best candidate
+            stringstream ssb;
+            metapop.ostream_metapop(ssb, 1);
+            string resb = (output_with_labels && !ilabels.empty()?
+                           ph2l(ssb.str(), ilabels) : ssb.str());
+            if (resb.empty())
+                logger().warn("No candidate is good enough to be returned. Yeah that's bad!");
+            else
+                logger().info("Best candidates:\n%s", res.c_str());
+        }
+
     #ifdef GATHER_STATS
         dex._optimize.hiscore /= dex._optimize.hicount;
         dex._optimize.num_improved /= dex._optimize.count_improved;
@@ -184,10 +237,11 @@ private:
     bool output_penalty;
     bool output_bscore;
     bool output_only_best;
+    bool output_ensemble;
     bool output_eval_number;
     bool output_with_labels;
 public:
-    vector<string> ilabels;
+    std::vector<std::string> ilabels;
 private:
     string output_file;
     bool output_python;
@@ -231,7 +285,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
         exit(1);
     }
 
-    // This seems kind of cheesy ... shouldn't the exemplars 
+    // This seems kind of cheesy ... shouldn't the exemplars
     // already be simplified, by now?
     std::vector<combo_tree> simple_bases;
     for (const combo_tree& xmplr: bases) {
