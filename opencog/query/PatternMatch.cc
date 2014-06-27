@@ -147,7 +147,7 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
  *          EvaluationList
  *             PredicateNode "from"
  *             ListLink
- *                Conce<<<<<<< HEADptNode "make"
+ *                ConceptNode "make"
  *                VariableNode "$var1"
  *       EvaluationList
  *          PredicateNode "make_from"
@@ -197,7 +197,7 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
  * there are several spots in the code where this is explicitly assumed,
  * and declaring some other node type as a vaiable may lead to
  * unexpected results.)
- *<<<<<<< HEAD
+ *
  * Pattern-matching proceeds by finding groundings for these variables.
  * When a pattern match is found, the variables can be understood as
  * being grounded by some explicit terms in the atomspace. This
@@ -229,7 +229,7 @@ void PatternMatch::do_imply (Handle himplication,
 		throw InvalidParamException(TRACE_INFO,
 			"Expected ImplicationLink");
 
-	// Type must be a<<<<<<< HEADs expected
+	// Type must be as expected
 	Type timpl = himplication->getType();
 	if (IMPLICATION_LINK != timpl)
 		throw InvalidParamException(TRACE_INFO,
@@ -242,7 +242,7 @@ void PatternMatch::do_imply (Handle himplication,
 
 	Handle hclauses(oset[0]);
 	Handle implicand(oset[1]);
-	<<<<<<< HEAD
+
 	// Must be non-empty.
 	LinkPtr lclauses(LinkCast(hclauses));
 	if (NULL == lclauses)
@@ -283,7 +283,7 @@ void PatternMatch::do_imply (Handle himplication,
 	{
 		// There's just one single clause!
 		affirm.push_back(hclauses);
-	}<<<<<<< HEAD
+	}
 
 	// Extract the set of variables, if needed.
 	// This is used only by the deprecated imply() function, as the
