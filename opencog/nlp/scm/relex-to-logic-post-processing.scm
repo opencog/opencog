@@ -59,6 +59,16 @@
 )
 
 ; -----------------------------------------------------------------------
+; Check if a word-inst has definite-rule applied
+(define (definite? word-concept-inst)
+	(define definite (cog-node 'PredicateNode "definite"))
+	(define llink (cog-link 'ListLink word-concept-inst))
+	(and (not (null? definite))
+		(not (null? llink))
+		(not (null? (cog-link 'EvaluationLink definite llink))))
+)
+
+; -----------------------------------------------------------------------
 ; Returns a random hex string of length 'str-length'.
 (define (random-hex-string str-length) 
 	(define alphanumeric "abcdef0123456789")
@@ -147,6 +157,7 @@
 	(define word-involvement-cnt (map length word-involvement-cleaned-list))
 
 	; get word instances that only appear in one link and their associated word
+	;;;;;; except words that are definite; check it here
 	(define lone-word-assoc-list
 		(filter-map (lambda (inst word cnt) (if (= cnt 1) (cons inst word) #f))
 			word-inst-concept-list
