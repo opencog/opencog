@@ -355,9 +355,10 @@ struct ctruth_table_bscore : public bscore_base
     ctruth_table_bscore(const Func& func,
                         arity_t arity,
                         int nsamples = -1)
-        : ctable(func, arity, nsamples)
-    {}
-    ctruth_table_bscore(const CTable& _ctt) : ctable(_ctt) {}
+        : _ctable(func, arity, nsamples)
+    { _size = _ctable.size(); }
+    ctruth_table_bscore(const CTable& ctt) : _ctable(ctt)
+    { _size = _ctable.size(); }
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -368,7 +369,7 @@ struct ctruth_table_bscore : public bscore_base
     score_t min_improv() const;
 
 protected:
-    CTable ctable;
+    CTable _ctable;
 };
 
 /**

@@ -266,7 +266,7 @@ behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
     interpreter_visitor iv(tr);
     auto interpret_tr = boost::apply_visitor(iv);
     // Evaluate the bscore components for all rows of the ctable
-    for (const CTable::value_type& vct : ctable) {
+    for (const CTable::value_type& vct : _ctable) {
         const CTable::counter_t& c = vct.second;
         score_t sc = c.get(negate_vertex(interpret_tr(vct.first.get_variant())));
         bs.push_back(-sc);
@@ -280,7 +280,7 @@ behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
 behavioral_score ctruth_table_bscore::best_possible_bscore() const
 {
     behavioral_score bs;
-    transform(ctable | map_values, back_inserter(bs),
+    transform(_ctable | map_values, back_inserter(bs),
               [](const CTable::counter_t& c) {
                   // OK, this looks like magic, but here's what it does:
                   // CTable is a compressed table; multiple rows may
