@@ -15,13 +15,6 @@
                 (ListLink sky)
             )
         )
-        (ContextLink (stv 0.5 1)
-            moon
-            (EvaluationLink
-                isBlue
-                (ListLink sky)
-            )
-        )
     )
 )
 
@@ -40,19 +33,12 @@
 (EvaluationLink (PredicateNode "outputs")
 	(ListLink
 	     isBlue
-	     sky
 	     earth
-	     moon
+	     sky
 		 (EvaluationLink (stv 0.5 1)
             isBlue
             (ListLink
-                (AndLink sky earth)
-            )
-        )
-        (EvaluationLink (stv 0.5 1)
-            isBlue
-            (ListLink
-                (AndLink sky moon)
+                (AndLink earth sky)
             )
         )
     )

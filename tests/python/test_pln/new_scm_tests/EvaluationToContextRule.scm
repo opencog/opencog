@@ -33,7 +33,8 @@
 	     isBlue
 	     sky
 	     earth
-	    (ContextLink (stv 0.5 1)
+	     (AndLink sky earth)
+	     (ContextLink (stv 0.5 1)
 	        earth
             (EvaluationLink
                 isBlue

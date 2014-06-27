@@ -15,7 +15,7 @@ __VERBOSE__ = False
 
 # Set to True to search for needed .scm files in default IN-SOURCE build location, e.g. to write unit tests in the IDE
 # Set to False to search for needed .scm files based on environment variables PROJECT_SOURCE_DIR and PROJECT_BINARY_DIR
-__DEV_MODE__ = True
+__DEV_MODE__ = False
 
 class PLNUnitTester(TestCase):
     def setUp(self):
@@ -26,31 +26,25 @@ class PLNUnitTester(TestCase):
 
         self.chainer = None
 
-        # context rules
-        # both fail because ConceptNodes are switched
-        # self.addTestFile("InheritanceToContextRule.scm")
-        # self.addTestFile("ContextToInheritanceRule.scm")
-
-        # next three: Error: atom in outgoing set must have been previously
-        # inserted into the atom table
-        self.addTestFile("EvaluationToContextRule.scm")
-        # self.addTestFile("ContextToEvaluationRule.scm")
-        # self.addTestFile("ContextToSubsetRule.scm")
-
-        # self.addTestFile("SubsetToContextRule.scm")  # works
-
         # Works:
-        self.addTestFile("AbductionRule_InheritanceLink.scm") # Under investigation
         self.addTestFile("AndRule_new.scm")
         self.addTestFile("BooleanTransformationRule_new.scm")
         self.addTestFile("DeductionRule_InheritanceLink.scm")
-        self.addTestFile("InductionRule_InheritanceLink.scm") # disabled due to result swapping CNodes on buildbot
         self.addTestFile("InheritanceRule.scm")
+        self.addTestFile("InductionRule_InheritanceLink.scm")
+        self.addTestFile("AbductionRule_InheritanceLink.scm") # Under investigation
         self.addTestFile("InversionRule_InheritanceLink.scm")
         self.addTestFile("OrCreationRule.scm")
         self.addTestFile("OrRule_new.scm")
         self.addTestFile("NotCreationRule.scm")
         self.addTestFile("TransitiveSimilarityRule_SimilarityLink.scm")
+        # context rules
+        self.addTestFile("InheritanceToContextRule.scm")
+        self.addTestFile("ContextToInheritanceRule.scm")
+        self.addTestFile("ContextToEvaluationRule.scm")
+        self.addTestFile("ContextToSubsetRule.scm")
+        self.addTestFile("EvaluationToContextRule.scm")
+        self.addTestFile("SubsetToContextRule.scm")
 
 
         # Testing (just a placeholder for where to put tests while...testing them)
@@ -181,7 +175,7 @@ class PLNUnitTester(TestCase):
     def load_rules(self):
         rules = self.get_predicate_arguments(self.atomSpaceFileData, "rules")
 
-        allRules = AllRules(self.atomSpaceFileData, self.chainer)
+        allRules = AllRules(self.atomSpaceInputs, self.chainer)
 
         for rule in rules:
             #allRules.import_rule(rule, self.chainer)
@@ -206,10 +200,6 @@ class PLNUnitTester(TestCase):
 
         expectedList = self.atomspace_links_to_list(atomSpaceChecklist)
         actualList = self.atomspace_links_to_list(atomSpaceToCheck)
-
-        print("Produced:")
-        for item in actualList:
-            print item
 
         for listItem in expectedList:
             if not (listItem in actualList):

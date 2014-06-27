@@ -545,6 +545,7 @@ class Chainer(AbstractChainer):
 
         # It stores a reference to the MindAgent object so it can
         # stimulate atoms.
+        self.atomspace = atomspace
         self._stimulateAtoms = stimulateAtoms
         self._agent = agent
         self._preferAttentionalFocus = preferAttentionalFocus
