@@ -157,9 +157,9 @@
 	(define word-involvement-cnt (map length word-involvement-cleaned-list))
 
 	; get word instances that only appear in one link and their associated word
-	;;;;;; except words that are definite; check it here
+	; except words that are definite, which should not be cleaned
 	(define lone-word-assoc-list
-		(filter-map (lambda (inst word cnt) (if (= cnt 1) (cons inst word) #f))
+		(filter-map (lambda (inst word cnt) (if (and (= cnt 1) (not (definite? inst))) (cons inst word) #f))
 			word-inst-concept-list
 			word-concept-list
 			word-involvement-cnt
@@ -170,7 +170,7 @@
 	; note that the new name might not be needed, since two non-lone words can be linking to each
 	; other with no lone-word involved (so we won't be creating InheritanceLink new-inst word here)
 	(define non-lone-word-assoc-list
-		(filter-map (lambda (inst word cnt) (if (> cnt 1) (list inst (create-unique-word-name word) word) #f))
+		(filter-map (lambda (inst word cnt) (if (or (> cnt 1) (definite? inst)) (list inst (create-unique-word-name word) word) #f))
 			word-inst-concept-list
 			word-concept-list
 			word-involvement-cnt
