@@ -129,10 +129,11 @@ class TemporalCompositionRule(Rule):
     def __init__(self, chainer, link_type1, link_type2, *args):
         A = chainer.new_variable()
         B = chainer.new_variable()
+        C = chainer.new_variable()
         # compositions can encompass either 1, 3, 5, 9 or 13 relations
         outputs = []
         for output_type in args:
-            outputs.append(chainer.link(output_type, [A, B]))
+            outputs.append(chainer.link(output_type, [A, C]))
         Rule.__init__(self,
                       name="TemporalCompositionRule ({0}).({1}) = ({2})"
                       .format(
@@ -143,7 +144,7 @@ class TemporalCompositionRule(Rule):
                       # a formula is still needed
                       formula=None,
                       inputs=[chainer.link(link_type1, [A, B]),
-                              chainer.link(link_type2, [A, B])],
+                              chainer.link(link_type2, [B, C])],
                       outputs=outputs)
 
 
