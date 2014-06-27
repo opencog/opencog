@@ -145,6 +145,7 @@
 	; find the ConceptNode/PredicateNode of each word instance and word node
 	(define word-inst-concept-list (remove null? (map word-get-r2l-node word-inst-list)))
 	(define word-concept-list (remove null? (map word-get-r2l-node word-list)))
+	(define word-assoc-list (zip word-inst-concept-list word-concept-list))
 
 	; for each word instant, find a list of all root links that includes it, and remove unneeded links
 	(define word-involvement-messy-list (map cog-get-root word-inst-concept-list))
@@ -187,10 +188,20 @@
 		)
 	)
 
-	; do the main creation
-	(map (lambda (a-link) (rebuild a-link lone-word-assoc-list non-lone-word-assoc-list))
-		lone-word-involvement-list
+	; do the main creation for the partially abstract version
+	(define partial
+		(map (lambda (a-link) (rebuild a-link lone-word-assoc-list non-lone-word-assoc-list))
+			lone-word-involvement-list
+		)
 	)
-)
 
+	; do the main creation for the fully abstract version
+	(define full
+		(map (lambda (a-link) (rebuild a-link word-assoc-list '()))
+			(delete-duplicates (apply append word-involvement-cleaned-list))
+		)
+	)
+
+	(append partial full)	
+)
 
