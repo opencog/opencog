@@ -112,21 +112,14 @@ void bool_problem_base::run(option_base* ob)
     unsigned as = alphabet_size(sig, pms.ignore_ops);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
-    ascore_base* ascorer = NULL;
-    if (pms.meta_params.do_boosting) {
-        ascorer = new boosting_ascore(bscore.size());
-    } else {
-        ascorer = new simple_ascore();
-    }
-    behave_cscore cscore(bscore, *ascorer);
+    boosting_ascore ascore(bscore.size());
+    behave_cscore cscore(bscore, ascore);
     metapop_moses_results(pms.exemplars, sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
                           cscore,
                           pms.opt_params, pms.hc_params,
                           pms.deme_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
-
-    delete ascorer;
 }
 
 // ==================================================================

@@ -674,9 +674,7 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
     logger().fine("total = %u", total);
     logger().fine("actives = %u", actives);
 
-    behavioral_score bs;
-
-    // Create a histogram of output values, ignoring non-slected rows.
+    // Create a histogram of output values, ignoring non-selected rows.
     // Do this by filtering the ctable output column according to the,
     // predicate, discarding non-selected rows. Then total up how often
     // each distinct output value occurs.
@@ -694,11 +692,13 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
     // If there's only one output value left, then punt.  Statistics
     // like skewness need a distribution that isn't a single spike.
     if (pred_counter.size() == 1) {
+        behavioral_score bs;
         bs.push_back(very_worst_score);
         log_candidate_bscore(tr, bs);
         return bs;
     }
 
+    behavioral_score bs;
     // Compute Kullback-Leibler divergence (KLD) of the filetered
     // distribution.
     if (_kld_w > 0.0) {
