@@ -7,10 +7,15 @@ https://github.com/cosmoharrigan/tuffy/tree/master/samples/smoke
 http://hazy.cs.wisc.edu/hazy/tuffy/doc/tuffy-manual.pdf
 
 Instructions:
-Method 1 -- Running the example in a standalone Python environment:
-- Run smokes_example.py
+Method 1 (preferred) -- Running the example with attention allocation using
+ a Python control interface
+- Follow the instructions here:
+  https://github.com/opencog/external-tools/tree/master/attention
 
-Method 2 -- Running the example within the cogserver:
+Method 2 -- Running the example in a standalone Python environment:
+- Run smokes_example.py: python smokes_example.py
+
+Method 3 -- Running the example within the cogserver:
 - Add the module path to your PYTHON_EXTENSION_DIRS in opencog.conf:
   ../opencog/python/pln/examples/tuffy/smokes
 - Run the cogserver
@@ -37,9 +42,22 @@ TARGET_STIMULUS = 20
 class InferenceAgent(MindAgent):
     def __init__(self):
         self.chainer = None
+        self.query = None
         print "Initializing InferenceAgent."
 
     def create_chainer(self, atomspace, stimulate_atoms=True):
+        """
+        Creates the chainer for the "smokes" example. Optionally, you can
+         define the target query before calling this method, by defining a
+         Scheme expression named "query". For example, you can issue the
+         Scheme expression "(define query hasCancer)" in reference to the
+         predicate defined in smokes.scm before loading this agent. Once
+         defined, the target query will receive stimulus at every time step.
+         Stimulus requires the agent to be running in a CogServer.
+         For a complete example that incorporates this behavior, see
+         example.py here:
+           https://github.com/opencog/external-tools/tree/master/attention
+        """
         self.chainer = Chainer(atomspace,
                                agent=self,
                                stimulateAtoms=stimulate_atoms,
@@ -54,6 +72,12 @@ class InferenceAgent(MindAgent):
         self.chainer.add_rule(
             ModusPonensRule(self.chainer, types.ImplicationLink))
 
+        # stimulateAtoms is only enabled when the agent is ran inside the
+        # CogServer, since the functionality requires a CogServer and
+        # attention allocation
+        if self.chainer._stimulateAtoms:
+            self.query = scheme_eval_h(atomspace, "query")
+
     def run(self, atomspace):
         if self.chainer is None:
             self.create_chainer(atomspace)
@@ -62,11 +86,12 @@ class InferenceAgent(MindAgent):
 
         print "PLN continuing."
 
-        target = atomspace[scheme_eval_h(atomspace, "query")]
-
         if not check_result(atomspace):
             result = self.chainer.forward_step()
-            self.chainer._give_stimulus(target, TARGET_STIMULUS)
+
+            if self.query is not None:
+                self.chainer._give_stimulus(atomspace[self.query],
+                                            TARGET_STIMULUS)
 
             return result
 
