@@ -46,7 +46,14 @@ class SocratesAgent(MindAgent):
 
 
 def check_result(atomspace):
-
+    """
+    Searches for an instance of
+    EvaluationLink
+        PredicateNode "breathe"
+        ListLink
+            ConceptNode "Socrates"
+            ConceptNode "air"
+    """
     result_found = False
     eval_links = atomspace.get_atoms_by_type(types.EvaluationLink)
 
