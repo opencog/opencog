@@ -1,0 +1,279 @@
+Test #1---------------------------------------------------------------------------------Passed
+
+Jane loved herself.
+
+Result:
+
+(WordInstanceNode "herself@b7cc8fc9-06dc-42c0-9eb0-31e922c9637e") ; [76]
+
+accepted Jane@11ee822e-8f5b-46fb-b150-573b7ecb1647
+================================================================================================
+Test #2---------------------------------------------------------------------------------Passed
+
+The window had a crack in it.
+
+Result:
+
+(WordInstanceNode "it@3fcd6209-a739-45e9-b900-e6dbef19cde1") ; [343]
+
+accepted window@f737a9b2-8d9a-4011-be44-324bfa786d97
+accepted crack@73804d38-cb79-4eb4-98c5-798584ce0eb4
+================================================================================================
+Test #3---------------------------------------------------------------------------------Passed
+
+The window had a crack in it.
+
+Result:
+
+(WordInstanceNode "it@3fcd6209-a739-45e9-b900-e6dbef19cde1") ; [343]
+
+accepted window@f737a9b2-8d9a-4011-be44-324bfa786d97
+accepted crack@73804d38-cb79-4eb4-98c5-798584ce0eb4
+================================================================================================
+Test #4---------------------------------------------------------------------------------Failed
+
+(Due to filter failures)
+
+Jane's mom loved her.
+
+Result:
+
+(WordInstanceNode "her@11a1862b-1306-44fc-854c-46f2c4cbc1ab") ; [630]
+
+accepted mom@85c41213-7ae2-4683-befb-0ef3e1a9e791
+accepted Jane@1d9e75f2-cf9e-42a1-a1e8-db8b0833dae0
+================================================================================================
+Test #5---------------------------------------------------------------------------------Passed
+
+The cup held coffee and it was hot.
+
+Result:
+
+(WordInstanceNode "it@a612da0f-dd06-49cb-8172-381dc9cbee43") ; [936]
+
+accepted cup@60be9f4d-66dd-46dd-864d-5e303710f998
+accepted coffee@48a736c7-1f64-419d-9ed0-a624b9ea29b0
+================================================================================================
+Test #6---------------------------------------------------------------------------------Failed
+
+(Due to filter failures)
+
+Alice walked to the chair and sat in it.
+
+Result:
+
+(WordInstanceNode "it@1682da20-5691-4ae1-bc0a-64a3a2c658ed") ; [1284]
+
+accepted Alice@5c19ee80-9961-458d-8bbc-33dc91c2b662
+accepted chair@da10a0b3-ce0d-4517-a491-1795001c3380
+================================================================================================
+Test #7---------------------------------------------------------------------------------Passed
+
+The window of the automobile had a crack in it.
+
+Result:
+
+(WordInstanceNode "it@d92b37ca-4a5b-4e8f-a0b2-9a9cfe905305") ; [1625]
+
+accepted window@d21bf40b-4fad-4691-9ba0-cf6e89804c00
+accepted crack@20a11b36-e424-463b-96c2-140f5f32bd83
+accepted automobile@324cd1cb-da2d-415c-82c3-5564612db720
+================================================================================================
+Test #8---------------------------------------------------------------------------------Passed
+
+It looked like a nice chair, and so Alice sat in it.
+
+Result:
+
+(WordInstanceNode "it@45f98f46-0824-44fb-9bae-de67ecfd5606") ; [1986]
+
+accepted chair@2e49136c-2933-444f-a326-93f1ab840062
+accepted Alice@4eb8cc7a-06c0-4d03-b24c-83889e231435
+================================================================================================
+Test #9---------------------------------------------------------------------------------Passed
+
+There was a large window with a good view out of it.
+
+Result:
+
+(WordInstanceNode "it@24c58f83-ead0-4697-9e35-1bf877c24436") ; [2460]
+
+accepted window@3eeadf4b-4b8c-4fcc-afc4-973045be32d6
+accepted view@3609adbb-e6d1-435c-af7f-1f2389948482
+================================================================================================
+Test #10---------------------------------------------------------------------------------Passed
+
+The window had a crack in it.
+
+Result:
+
+(WordInstanceNode "it@fb30be9c-02ca-4f3e-8369-baf33a3e67c6") ; [2816]
+
+accepted window@deaca25e-a9b9-4f59-b54d-b31a47176f49
+accepted crack@424ac386-ce80-4006-89bb-04f61bd7fff5
+================================================================================================
+Test #11---------------------------------------------------------------------------------Failed
+
+(Due to filter failures)
+
+Alice sat in it.
+
+Result:
+
+(WordInstanceNode "it@58984421-35fc-4c59-9751-3dcef9bf611f") ; [3097]
+
+accepted Alice@2468487d-497b-404a-a3e9-be209a5b68b9
+================================================================================================
+Test #12---------------------------------------------------------------------------------Failed
+
+(Due to unknown reasons)
+
+Jane looked at the plates and the cup.They were ugly.
+
+Result:
+================================================================================================
+Test #13---------------------------------------------------------------------------------Failed
+
+(Due to filter failures)
+
+Jane loved her.
+
+Result:
+
+(WordInstanceNode "her@93751166-67c7-4e2a-b5b5-005484302a2e") ; [3713]
+
+accepted Jane@e7d4e3fd-6854-4122-a833-940206101fdc
+================================================================================================
+Test #14---------------------------------------------------------------------------------Passed
+
+Jane loved herself.
+
+Result:
+
+(WordInstanceNode "herself@e0e4cec3-89f0-4388-93a5-90489955c977") ; [3967]
+
+accepted Jane@29d9d897-8147-4642-9fc0-05924a24bcc8
+================================================================================================
+Test #15---------------------------------------------------------------------------------Passed
+
+The windows all had cracks in them.
+
+Result:
+
+(WordInstanceNode "them@41a4f5dc-e3d4-491b-b58a-60367e18431d") ; [4247]
+
+accepted windows@a2d2ca39-3648-4aae-bc61-071dcf2d0192
+accepted cracks@8cc08215-6cf3-4e66-bcba-3227ac8258d6
+================================================================================================
+Test #16---------------------------------------------------------------------------------Passed
+
+Jane walked to the chair. She sat down.
+
+Result:
+
+(WordInstanceNode "she@998b7968-e87c-47c7-824b-9c92f06d76f4") ; [4566]
+
+accepted Jane@9199c0d1-a6d7-40f8-a04a-445c25684199
+================================================================================================
+Test #17---------------------------------------------------------------------------------Failed
+
+(Due to filter failures)
+
+Alice always wanted a new boyfreind. Then she found him, and he was beautiful.
+
+Result:
+
+(WordInstanceNode "he@ffd9b0ed-0084-47af-aa5a-96918a1a2821") ; [4966]
+
+(WordInstanceNode "him@f8df39f2-212a-473c-bb58-615397e6b0bb") ; [4948]
+
+(WordInstanceNode "she@952fae37-9906-473b-b854-3b6beca67dcf") ; [4936]
+
+accepted Alice@7375fde6-1a43-4da9-800a-5333b1c8356a
+================================================================================================
+Test #18---------------------------------------------------------------------------------Failed
+
+(Due to filter failures)
+
+Alice always wanted a new boyfreind. Then she found him, and she was enthralled.
+
+Result:
+
+(WordInstanceNode "she@e85b91ee-c644-46fa-89df-073f3cf4b22f") ; [5632]
+
+accepted Alice@f5e96c70-3e0e-43f3-9214-cefb8414bd2f
+
+(WordInstanceNode "she@90f508e0-3bac-436d-913a-e25d678cec27") ; [5602]
+
+accepted Alice@f5e96c70-3e0e-43f3-9214-cefb8414bd2f
+
+(WordInstanceNode "him@742f1a8e-3e40-40bc-970f-9ef2e677eaa1") ; [5614]
+================================================================================================
+Test #19---------------------------------------------------------------------------------Failed
+
+(Due to filter failures)
+
+Alice always wanted a new boyfreind. Then he bumped into her, and she was enthralled.
+
+Result:
+
+(WordInstanceNode "she@e85b91ee-c644-46fa-89df-073f3cf4b22f") ; [5632]
+
+accepted Alice@f5e96c70-3e0e-43f3-9214-cefb8414bd2f
+
+(WordInstanceNode "she@90f508e0-3bac-436d-913a-e25d678cec27") ; [5602]
+
+accepted Alice@f5e96c70-3e0e-43f3-9214-cefb8414bd2f
+
+(WordInstanceNode "him@742f1a8e-3e40-40bc-970f-9ef2e677eaa1") ; [5614]
+================================================================================================
+Test #20---------------------------------------------------------------------------------Failed
+
+(Unknown reason)
+
+Jane looked at the boxes and the cup. It was small.
+
+Result:
+================================================================================================
+Test #21---------------------------------------------------------------------------------Passed
+
+Then Alice saw what she had always looked for.
+
+Result:
+
+(WordInstanceNode "she@c9610ee4-2e99-42af-be11-5acb554453f6") ; [6902]
+
+accepted Alice@28a66346-47d9-47c1-857b-9089ec376448
+================================================================================================
+Test #22---------------------------------------------------------------------------------Passed
+
+Then Alice found what she had been looking for.
+
+Result:
+
+(WordInstanceNode "she@c7953da3-c526-4a12-84e0-de876a892570") ; [7281]
+
+accepted Alice@bb1a0d13-ecc6-41ef-a873-c062c058c3eb
+================================================================================================
+Test #23---------------------------------------------------------------------------------Passed
+
+The cup held coffee and it was hot.
+
+Result:
+
+(WordInstanceNode "it@4fdb751a-5ea4-494c-a55a-cba525411cf1") ; [7718]
+
+accepted cup@e849185d-aff6-4c84-a934-0a13c8fdece4
+accepted coffee@ce79be4e-56fc-40a3-a928-f46ca6b26319
+================================================================================================
+Test #24---------------------------------------------------------------------------------Passed
+
+It looked like a nice chair, and so Alice sat in it.
+
+Result:
+
+(WordInstanceNode "it@e6ad1dcd-c337-4617-b331-9abd63885cce") ; [8090]
+
+accepted chair@389fdcb7-0406-4f75-8fa6-07e7505e5e8a
+accepted Alice@1d3da71b-1296-407d-ad04-af316805f05a
+================================================================================================
