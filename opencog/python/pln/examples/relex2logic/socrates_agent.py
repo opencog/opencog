@@ -56,7 +56,6 @@ class SocratesAgent(MindAgent):
         # agent needs to be stopped when result is reached
 
 
-
 def check_result(atomspace):
     """
     Searches for an instance of
