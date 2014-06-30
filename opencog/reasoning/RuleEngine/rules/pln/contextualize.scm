@@ -146,6 +146,60 @@
 
 ;----------------------------------------------------------------------
 ; AndLink <TV1>
+;    InheritanceLink <TV2> A C
+;    InheritanceLink <TV3> B C
+; |-
+; InheritanceLink <TV??>
+;    AndLink <TV??> A B
+;    C
+;----------------------------------------------------------------------
+; This rule creates and AndLink as the first argument of an inheritance
+; if there are two InheritanceLinks with the same argument in 2nd postion.
+; This is necessary to create the InheritanceLinks required
+; for the above rules which have AndLinks as embedded links.
+(define pln-rule-create-and-as-1st-arg-of-inheritance
+    (BindLink
+        (ListLink
+            (VariableNode "$A")
+            (VariableNode "$B")
+            (VariableNode "$C"))
+        (ImplicationLink
+            (AndLink
+                (InheritanceLink
+                    (VariableNode "$A")
+                    (VariableNode "$C"))
+                (InheritanceLink
+                    (VariableNode "$B")
+                    (VariableNode "$C")))
+            (ExecutionLink
+                (GroundedSchemaNode "scm:pln-formula-create-and-inside-inheritance")
+                (ListLink
+                    (InheritanceLink ; main output link
+                        (AndLink
+                            (VariableNode "$A")
+                            (VariableNode "$B"))
+                        (VariableNode "$C"))
+                    (AndLink ; embedded output AndLink
+                        (VariableNode "$A")
+                        (VariableNode "$B"))
+                    (AndLink ; main input link
+                        (InheritanceLink
+                            (VariableNode "$A")
+                            (VariableNode "$C"))
+                        (InheritanceLink
+                            (VariableNode "$B")
+                            (VariableNode "$C")))
+                   (InheritanceLink ; embedded input InheritanceLink
+                        (VariableNode "$A")
+                        (VariableNode "$C"))
+                   (InheritanceLink ; embedded input InheritanceLink
+                        (VariableNode "$B")
+                        (VariableNode "$C")))))))
+
+
+
+;----------------------------------------------------------------------
+; AndLink <TV1>
 ;    InheritanceLink <TV2> A B
 ;    InheritanceLink <TV3> A C
 ; |-
@@ -153,11 +207,11 @@
 ;    A
 ;    AndLink <TV??> B C
 ;----------------------------------------------------------------------
-; This rule creates and AndLink inside an InheritanceLink
-; if there are two InheritanceLinks with the same argument.
+; This rule creates and AndLink as the second argument of an inheritance
+; if there are two InheritanceLinks with the same argument in the 1st position.
 ; This is necessary to create the InheritanceLinks required
 ; for the above rules which have AndLinks as embedded links.
-(define pln-rule-create-and-inside-inheritance
+(define pln-rule-create-and-as-2nd-arg-of-inheritance
     (BindLink
         (ListLink
             (VariableNode "$A")
@@ -198,8 +252,8 @@
 
 ; TODO define formula appropriately (see comment in inheritance_rules.py
 ; AndCreationInsideLinkRule) 
-(define pln-formula-create-and-inside-inheritance InhAAndBC AndBC AndInhABInhAC InhAB InhAC
-    (cog-set-tv! InhAAndBC (cog-tv AndBC)))                  
+(define pln-formula-create-and-inside-inheritance outInh outAnd inAnd inEmbedInh1 inEmbedInh2
+    (cog-set-tv! outInh (cog-tv inAnd)))                  
 
 (define (pln-formula-context Context Relation)
     (cog-set-tv! Context (cog-tv Relation)))

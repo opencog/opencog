@@ -305,15 +305,15 @@ class AndToSubsetRuleN(Rule):
                       formula=formulas.subsetFormula)
 
 
-class AndCreationInsideLinkRule(Rule):
+class AndAs1stArgInsideLinkRule(Rule):
     """
     ANDLink
-        InheritanceLink A B
         InheritanceLink A C
+        InheritanceLink B C
     |-
     InheritanceLink
-        A
-        ANDLink B C
+        ANDLink A B
+        C
     Created to create AndLinks inside InheritanceLinks (original use case:
     context rules); could be useful for other link types as well
     """
@@ -323,7 +323,41 @@ class AndCreationInsideLinkRule(Rule):
         C = chainer.new_variable()
 
         Rule.__init__(self,
-                      name="AndCreationInsideLinkRule<%s>"
+                      name="AndAs1stArgInsideLinkRule<%s>"
+                           %(get_type_name(link_type)),
+                      outputs=[chainer.link(types.InheritanceLink,
+                                            [chainer.link(types.AndLink,
+                                                          [A, B]),
+                                             C])],
+                      inputs=[chainer.link(types.AndLink,
+                                           [chainer.link(types.InheritanceLink,
+                                                        [A, C]),
+                                            chainer.link(types.InheritanceLink,
+                                                         [B, C])])],
+                      # TODO formula is still needed
+                      # should the tv of the new AndLink equal the tv of the
+                      # previous AndLink? what should the tv of the
+                      # Inheritancelink be?
+                      formula=None)
+
+
+class AndAs2ndArgInsideLinkRule(Rule):
+    """
+    ANDLink
+        InheritanceLink A B
+        InheritanceLink A C
+    |-
+    InheritanceLink
+        A
+        ANDLink B C
+    """
+    def __init__(self, chainer, link_type):
+        A = chainer.new_variable()
+        B = chainer.new_varialbe()
+        C = chainer.new_variable()
+
+        Rule.__init__(self,
+                      name="AndAs2ndArgInsideLinkRule<%s>"
                            %(get_type_name(link_type)),
                       outputs=[chainer.link(types.InheritanceLink,
                                             [A, chainer.link(types.AndLink,
@@ -333,8 +367,5 @@ class AndCreationInsideLinkRule(Rule):
                                                         [A, B]),
                                             chainer.link(types.InheritanceLink,
                                                          [A, C])])],
-                      # TODO formula is still needed
-                      # should the tv of the new AndLink equal the tv of the
-                      # previous AndLink? what should the tv of the
-                      # Inheritancelink be?
+                      # TODO formula is still needed (see above)
                       formula=None)
