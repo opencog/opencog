@@ -269,6 +269,7 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/filters/filter-#10.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#11.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#12.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#13.scm",
               ]
 
         self.numOfFilters=len(data)
