@@ -1,3 +1,6 @@
+Summary:
+
+25/25 tests passed(100%)
 ======================================================================================
 1. Fixed gender filters bugs, but there are still some problems:
 
