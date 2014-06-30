@@ -112,21 +112,14 @@ void bool_problem_base::run(option_base* ob)
     unsigned as = alphabet_size(sig, pms.ignore_ops);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
-    ascore_base* ascorer = NULL;
-    if (pms.meta_params.do_boosting) {
-        ascorer = new boosting_ascore(bscore.size());
-    } else {
-        ascorer = new simple_ascore();
-    }
-    behave_cscore cscore(bscore, *ascorer);
+    boosting_ascore ascore(bscore.size());
+    behave_cscore cscore(bscore, ascore);
     metapop_moses_results(pms.exemplars, sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
                           cscore,
                           pms.opt_params, pms.hc_params,
                           pms.deme_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
-
-    delete ascorer;
 }
 
 // ==================================================================
@@ -280,6 +273,8 @@ void polynomial_problem::run(option_base* ob)
     contin_bscore bscore(simple_symbolic_regression(_dparms.problem_size),
                          it, eft);
 
+    OC_ASSERT(not pms.meta_params.do_boosting, "Boosting not supported for this problem!");
+
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
     simple_ascore ascore;
     behave_cscore cscore(bscore, ascore);
@@ -385,6 +380,8 @@ void combo_problem::run(option_base* ob)
     type_tree tt = infer_type_tree(tr);
     type_node output_type = get_type_node(get_signature_output(tt));
     combo::arity_t arity = type_tree_arity(tt);
+
+    OC_ASSERT(not pms.meta_params.do_boosting, "Boosting not supported for this problem!");
 
     // If no exemplar has been provided in the options, use the
     // default one.
@@ -492,6 +489,7 @@ void ann_combo_problem::run(option_base* ob)
     int as = alphabet_size(tt, pms.ignore_ops);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
+    OC_ASSERT(not pms.meta_params.do_boosting, "Boosting not supported for this problem!");
     simple_ascore ascore;
     behave_cscore cscore(bscore, ascore);
     metapop_moses_results(pms.exemplars, tt,

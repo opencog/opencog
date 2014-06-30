@@ -40,7 +40,9 @@ namespace opencog { namespace moses {
  * supervised training set, that is, a row of a table contianing the
  * training data. The weight is an adjustment, computed by applying a
  * standard AdaBoost-style algorithm.  See, for example
- * http://en.wikipedia.org/wiki/AdaBoost
+ * http://en.wikipedia.org/wiki/AdaBoost Hoever, CAUTION! That wikipedia
+ * article currently contains serious, fundamental mistakes in it's
+ * desciption of the boosting algo!
  */
 class boosting_ascore : public ascore_base
 {
