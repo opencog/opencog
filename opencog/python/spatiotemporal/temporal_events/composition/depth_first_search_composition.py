@@ -112,16 +112,16 @@ if __name__ == '__main__':
 
     search_tree = DepthFirstSearchComposition()
     formula = RelationFormulaConvolution()
-    # A, B, C = generate_random_events(3)
-    # for event in [A, B, C]:
-    #     p = ''
-    #     for point in [event.a, event.b, event.beginning, event.ending]:
-    #         p += str((point - A.a) / (A.beginning - A.a)) + ', '
-    #     print p
+    A, B, C = generate_random_events(3)
+    for event in [A, B, C]:
+        p = ''
+        for point in [event.a, event.b, event.beginning, event.ending]:
+            p += str((point - A.a) / (A.beginning - A.a)) + ', '
+        print p
 
-    A = TemporalEventTrapezium(0, 30, 10, 20)
-    B = TemporalEventTrapezium(1, 9, 2, 8)
-    C = TemporalEventTrapezium(0, 30, 10, 20)
+    #A = TemporalEventTrapezium(0, 30, 10, 20)
+    #B = TemporalEventTrapezium(1, 9, 2, 8)
+    #C = TemporalEventTrapezium(0, 30, 10, 20)
 
     actual_solution = (A * C).to_vector()
     print 'Actual\n', actual_solution
