@@ -1017,7 +1017,7 @@ void PatternMiner::growPatternsTask()
         HTreeNode* cur_growing_pattern = last_gram_patterns[cur_index];
 
         if(cur_growing_pattern->instances.size() < thresholdFrequency)
-            continue;
+            break;
 
         foreach (HandleSeq instance , cur_growing_pattern->instances)
         {
