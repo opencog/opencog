@@ -163,6 +163,8 @@ namespace PatternMining
 
      bool isInHandleSeq(Handle handle, HandleSeq &handles);
 
+     bool containsDuplicateHandle(HandleSeq &handles);
+
      Handle getFirstNonIgnoredIncomingLink(AtomSpace *atomspace, Handle &handle);
 
      bool isIgnoredType(Type type);

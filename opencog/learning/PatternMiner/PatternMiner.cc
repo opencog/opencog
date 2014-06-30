@@ -458,13 +458,21 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
     // Generate all the possible combinations of all the nodes: all patterns including the 1 ~ n_max variables
     // If there are too many variables in a pattern, it doesn't make much sense, so we litmit the max number of variables to half of the node number
 
-    OC_ASSERT( (valueToVarMap.size() > 1),
-              "PatternMiner::extractAllPossiblePatternsFromInputLinks: this group of links only has one node: %s!\n",
-               atomSpace->atomAsString(inputLinks[0]).c_str() );
+//    OC_ASSERT( (valueToVarMap.size() > 1),
+//              "PatternMiner::extractAllPossiblePatternsFromInputLinks: this group of links only has one node: %s!\n",
+//               atomSpace->atomAsString(inputLinks[0]).c_str() );
 
     int n_max = valueToVarMap.size();
     int n_limit= valueToVarMap.size()/2.0f;
     n_limit ++;
+
+    // sometimes there is only one variable in a link, lik:
+//    (DuringLink
+//      (ConceptNode "dead")
+//      (ConceptNode "dead")
+//    ) ; [44694]
+    if (n_limit == 1)
+        n_limit = 2;
 
     bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const
 
@@ -785,7 +793,19 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 
     foreach (Handle listH , resultSet)
     {
-        HNode->instances.push_back(originalAtomSpace->getOutgoing(listH));
+        HandleSeq instanceLinks = originalAtomSpace->getOutgoing(listH);
+
+        if (cur_gram == 1)
+        {
+            HNode->instances.push_back(instanceLinks);
+        }
+        else
+        {
+            // instance that contains duplicate links will not be added
+            if (! containsDuplicateHandle(instanceLinks))
+                HNode->instances.push_back(instanceLinks);
+        }
+
         originalAtomSpace->removeAtom(listH);
     }
 
@@ -849,6 +869,20 @@ void PatternMiner::growTheFirstGramPatternsTask()
 
     }
 
+}
+
+bool PatternMiner::containsDuplicateHandle(HandleSeq &handles)
+{
+    for (int i = 0; i < handles.size(); i ++)
+    {
+        for (int j = i+1; j < handles.size(); j ++)
+        {
+            if (handles[j] == handles[i])
+                return true;
+        }
+    }
+
+    return false;
 }
 
 bool PatternMiner::isInHandleSeq(Handle handle, HandleSeq &handles)
