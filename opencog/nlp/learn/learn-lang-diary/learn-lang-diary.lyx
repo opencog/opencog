@@ -2579,6 +2579,297 @@ Convert to binary tree.
 \end_layout
 
 \begin_layout Section*
+29 June 2014
+\end_layout
+
+\begin_layout Subsection*
+Morphology Worked Example
+\end_layout
+
+\begin_layout Standard
+OK, this will be tedious, but I see no alternative.
+ Suppose we have the corpus 
+\begin_inset Quotes eld
+\end_inset
+
+test gift tester testy gifty tester gifter
+\begin_inset Quotes erd
+\end_inset
+
+ so that 
+\begin_inset Quotes eld
+\end_inset
+
+tester
+\begin_inset Quotes erd
+\end_inset
+
+ appears twice in the corpus.
+ Explore all possible splits into two parts.
+ The 4-letter splits split 3 ways, the 5-letter splits split 4 ways, etc.
+ so there is a total of N(*,*)=3+3+5+4+4+5+5=29 pairs.
+ All pairs appear once, except for tester, with appears twice.
+ Viz.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+P(x,y)=1/29 for (x,y) in {(t,est), (te,st), (tes,t), (g,ift), (gi,ft), (gif,t),
+ (t,esty), (te,sty), (tes,ty), (test,y), (g,ifty), (gi,fty), (gif,ty), (gift,y),
+ (g,ifter), (gi,fter), (gif,ter), (gift,er), gifte,r)}
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+and
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+P(x,y)=2/29 for (x,y) in {(t,ester), (te,ster), (tes,ter), (test,er), (teste,r)}
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Next, lets do the partials.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+P(t,*) = (1+1+2)/29 = 4/29 = P(te,*) = P(tes,*)
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+P(g,*) = (1+1+1)/29 = 3/29 = P(gi,*) = P(gif,*)
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+P(test,*) = (1+2)/29 = 3/29
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+P(teste,*) = 2/29
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+P(gift,*) = 2/29
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+P(gifte,*) = 1/29
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Next, the right-hand partials:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+P(*,est) = 1/29 = P(*,st) = P(*,esty) = P(*,sty) =P(,ift) = P(*,ft) = P(*,ifty)
+ = P(*,fty) = P(*,ifter) = P(*,fter)
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+P(*,t) = (1+1)/29 = 2/29 = P(*,ty) = P(*,y)
+\end_layout
+
+\begin_layout Standard
+P(*,ester) = 2/29 = P(*,ster)
+\end_layout
+
+\begin_layout Standard
+P(*,ter) = (1+2)/29 = 3/29 = P(*,er) = P(*,r)
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Now, the MI (we use log=log_2 in all cases below, for measuring bits)
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+MI(t,est) = log P(t,est)/P(t,*)P(*,est) = log (1/29)(29/4)(29/1) = log(29/4)
+ = 2.857981
+\end_layout
+
+\begin_layout Standard
+= MI(te,st) = MI(t,esty) = MI(te,sty) 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+MI(g,ift) = log P(g,ift)/P(g,*)P(*,ift) = log (1/29)(29/3)(29/1) = log(29/3)
+ = 3.273018
+\end_layout
+
+\begin_layout Standard
+=MI(gi,ft) = MI(g,ifty) = MI(gi,fty)
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+MI(tes,t) = log P(tes,t)/P(tes,*)P(*,t) = log (1/29)(29/4)(29/2) = log(29/8)
+ = 1.857981
+\end_layout
+
+\begin_layout Standard
+=MI(tes,ty)
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+MI(gif,t) = log P(gif,t)/P(gif,*)P(*,t) = log (1/29)(29/3)(29/2) = log(29/6)
+ = 2.273018
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+MI(test,y) = log P(test,y)/P(test,*)P(*,y) = log (1/29)(29/3)(29/2) = log(29/6)
+ = 2.273018
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+MI(gift,y) = log P(gift,y)/P(gift,*)P(*,y) = log (1/29)(29/2)(29/2) = log(29/4)
+ = 2.857981
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+MI(gif,ter) = log P(gif,ter)/P(gif,*)P(*,ter) = log (1/29)(29/3)(29/3) =
+ log(29/9) = 1.688056
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+MI(gift,er) = log P(gift,er)/P(gift,*)P(*,er) = log (1/29)(29/2)(29/3) =
+ log(29/6) = 2.273018
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+MI(gifte,r) = log P(gifte,r)/P(gifte,*)P(*,r) = log (1/29)(29/1)(29/3) =
+ log(29/3) = 3.273018
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+MI(tes,ter) = log P(tes,ter)/P(tes,*)P(*,ter) = log (2/29)(29/4)(29/3) =
+ log(29/6) = 2.273018
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+MI(test,er) = log P(test,er)/P(test,*)P(*,er) = log (2/29)(29/3)(29/3) =
+ log(38/9) = 2.078003
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+MI(teste,r) = log P(teste,r)/P(teste,*)P(*,r) = log (2/29)(29/2)(29/3) =
+ log(29/6) = 2.273018
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Phew.
+ I think that's all of them.
+ So, what can we conclude?
+\end_layout
+
+\begin_layout Section*
 The End 
 \end_layout
 
