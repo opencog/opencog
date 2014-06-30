@@ -88,13 +88,13 @@
             (ExecutionLink
                 (GroundedSchemaNode "scm: pln-formula-context")
                 (ListLink
-                    (ContextLink
+                    (ContextLink ; output link
                         (VariableNode "$C")
                         (EvaluationLink
                             (VariableNode "$A")
                             (ListLink
                                 (VariableNode "$B"))))
-                    (EvaluationLink
+                    (EvaluationLink ; input link
                         (VariableNode "$A")
                         (ListLink
                             (AndLink
@@ -137,13 +137,26 @@
            (ExecutionLink
                (GroundedSchemaNode "scm:pln-formula-context")
                (ListLink
-                   (ContextLink
+                   (ContextLink ; output link
                        (VariableNode "$C")
                        (VariableNode "$A"))
-                   (SubsetLink
+                   (SubsetLink ; input link
                        (VariableNode "$C")
                        (VariableNode "$A")))))))
 
+;----------------------------------------------------------------------
+; AndLink <TV1>
+;    InheritanceLink <TV2> A B
+;    InheritanceLink <TV3> A C
+; |-
+; InheritanceLink <TV??>
+;    A
+;    AndLink <TV??> B C
+;----------------------------------------------------------------------
+; This rule creates and AndLink inside an InheritanceLink
+; if there are two InheritanceLinks with the same argument.
+; This is necessary to create the InheritanceLinks required
+; for the above rules which have AndLinks as embedded links.
 (define pln-rule-create-and-inside-inheritance
     (BindLink
         (ListLink
@@ -161,25 +174,25 @@
             (ExecutionLink
                 (GroundedSchemaNode "scm:pln-formula-create-and-inside-inheritance")
                 (ListLink
-                    (InheritanceLink
+                    (InheritanceLink ; main output link
                         (VariableNode "$A")
                         (AndLink
                             (VariableNode "$B")
                             (VariableNode "$C")))
-                    (AndLink
+                    (AndLink ; embedded output AndLink
                             (VariableNode "$B")
                             (VariableNode "$C"))
-                    (AndLink
+                    (AndLink ; main input link
                         (InheritanceLink
                             (VariableNode "$A")
                             (VariableNode "$B"))
                         (InheritanceLink
                             (VariableNode "$A")
                             (VariableNode "$C")))
-                   (InheritanceLink
+                   (InheritanceLink ; embedded input InheritanceLink
                         (VariableNode "$A")
                         (VariableNode "$B"))
-                   (InheritanceLink
+                   (InheritanceLink ; embedded input InheritanceLink
                         (VariableNode "$A")
                         (VariableNode "$C")))))))
 
