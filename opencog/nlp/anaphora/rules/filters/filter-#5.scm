@@ -1,5 +1,5 @@
 ;; anaphor is "feminine"
-;; antecedent is not "feminine"
+;; antecedent is "masculine"
 
 (define filter-#5
     (BindLink
@@ -35,11 +35,9 @@
                     (VariableNode "$word-inst-anaphor")
                     (DefinedLinguisticConceptNode "feminine")
                 )
-                (NotLink
-                    (InheritanceLink
-                        (VariableNode "$word-inst-antecedent")
-                        (DefinedLinguisticConceptNode "feminine")
-                    )
+                (InheritanceLink
+                    (VariableNode "$word-inst-antecedent")
+                    (DefinedLinguisticConceptNode "masculine")
                 )
             )
             (ListLink
