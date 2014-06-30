@@ -32,8 +32,6 @@ accepted crack@73804d38-cb79-4eb4-98c5-798584ce0eb4
 ================================================================================================
 Test #4---------------------------------------------------------------------------------Passed
 
-(Due to filter failures)
-
 Jane's mom loved her.
 
 Result:
@@ -54,8 +52,6 @@ accepted cup@60be9f4d-66dd-46dd-864d-5e303710f998
 accepted coffee@48a736c7-1f64-419d-9ed0-a624b9ea29b0
 ================================================================================================
 Test #6---------------------------------------------------------------------------------Passed
-
-(Due to filter failures)
 
 Alice walked to the chair and sat in it.
 
@@ -110,8 +106,6 @@ accepted crack@424ac386-ce80-4006-89bb-04f61bd7fff5
 ================================================================================================
 Test #11---------------------------------------------------------------------------------Passed
 
-(Due to filter failures)
-
 Alice sat in it.
 
 Result:
@@ -128,7 +122,6 @@ Result:
 ================================================================================================
 Test #13---------------------------------------------------------------------------------Passed
 
-(Due to filter failures)
 
 Jane loved her.
 
@@ -167,57 +160,72 @@ Result:
 
 accepted Jane@9199c0d1-a6d7-40f8-a04a-445c25684199
 ================================================================================================
-Test #17---------------------------------------------------------------------------------Failed
-
-(Due to filter failures)
+Test #17---------------------------------------------------------------------------------Passed
 
 Alice always wanted a new boyfreind. Then she found him, and he was beautiful.
 
 Result:
 
-(WordInstanceNode "he@ffd9b0ed-0084-47af-aa5a-96918a1a2821") ; [4966]
+Resolving...........
+(WordInstanceNode "him@0a7310db-edb7-4086-88ad-e446eb7e6b4e") ; [203]
 
-(WordInstanceNode "him@f8df39f2-212a-473c-bb58-615397e6b0bb") ; [4948]
+accepted boyfreind@259bbf31-5872-492c-9913-6d9248b70edb
 
-(WordInstanceNode "she@952fae37-9906-473b-b854-3b6beca67dcf") ; [4936]
+Resolving...........
+(WordInstanceNode "she@afc170b0-0dfd-4425-87f3-b425c985289a") ; [191]
 
-accepted Alice@7375fde6-1a43-4da9-800a-5333b1c8356a
+accepted Alice@456f2e70-6639-43a8-831a-38c6d75ae293
+accepted boyfreind@259bbf31-5872-492c-9913-6d9248b70edb
+
+Resolving...........
+(WordInstanceNode "he@236c1e8b-ef7f-4b4b-8360-cab9ba9230c7") ; [221]
+
+accepted boyfreind@259bbf31-5872-492c-9913-6d9248b70edb
 ================================================================================================
-Test #18---------------------------------------------------------------------------------Failed
-
-(Due to filter failures)
+Test #18---------------------------------------------------------------------------------Passed
 
 Alice always wanted a new boyfreind. Then she found him, and she was enthralled.
 
 Result:
 
-(WordInstanceNode "she@e85b91ee-c644-46fa-89df-073f3cf4b22f") ; [5632]
+(WordInstanceNode "she@0b01282b-f2ec-469a-a442-420a3f6d9b04") ; [1008]
 
-accepted Alice@f5e96c70-3e0e-43f3-9214-cefb8414bd2f
+accepted Alice@9e48d3a3-7c91-4d2c-9631-ce0da0892662
+accepted boyfreind@c58192a1-0a9e-4c6a-879b-9cb415494104
 
-(WordInstanceNode "she@90f508e0-3bac-436d-913a-e25d678cec27") ; [5602]
+Resolving...........
+(WordInstanceNode "him@1f33c321-7d8a-4f9e-b7b4-4acc4a8fa8c4") ; [990]
 
-accepted Alice@f5e96c70-3e0e-43f3-9214-cefb8414bd2f
+accepted boyfreind@c58192a1-0a9e-4c6a-879b-9cb415494104
 
-(WordInstanceNode "him@742f1a8e-3e40-40bc-970f-9ef2e677eaa1") ; [5614]
+Resolving...........
+(WordInstanceNode "she@1f37903d-c71b-46d6-9f31-4cffbc965ee6") ; [978]
+
+accepted Alice@9e48d3a3-7c91-4d2c-9631-ce0da0892662
+accepted boyfreind@c58192a1-0a9e-4c6a-879b-9cb415494104
 ================================================================================================
-Test #19---------------------------------------------------------------------------------Failed
+Test #19---------------------------------------------------------------------------------Passed
 
-(Due to filter failures)
 
 Alice always wanted a new boyfreind. Then he bumped into her, and she was enthralled.
 
 Result:
 
-(WordInstanceNode "she@e85b91ee-c644-46fa-89df-073f3cf4b22f") ; [5632]
+(WordInstanceNode "she@b0d2d4fe-d734-43f8-8f2b-747d2093fec8") ; [2076]
 
-accepted Alice@f5e96c70-3e0e-43f3-9214-cefb8414bd2f
+accepted Alice@39871e8c-50d2-429f-9ea6-199c19adce79
+accepted boyfreind@3f35da90-a3e4-49c7-9977-40fc7632e951
 
-(WordInstanceNode "she@90f508e0-3bac-436d-913a-e25d678cec27") ; [5602]
+Resolving...........
+(WordInstanceNode "her@fdad1593-230c-4eb7-95a7-39e815fc8d5a") ; [2058]
 
-accepted Alice@f5e96c70-3e0e-43f3-9214-cefb8414bd2f
+accepted Alice@39871e8c-50d2-429f-9ea6-199c19adce79
+accepted boyfreind@3f35da90-a3e4-49c7-9977-40fc7632e951
 
-(WordInstanceNode "him@742f1a8e-3e40-40bc-970f-9ef2e677eaa1") ; [5614]
+Resolving...........
+(WordInstanceNode "he@a120de8c-58d0-4461-8734-0ace305898b2") ; [2040]
+
+accepted boyfreind@3f35da90-a3e4-49c7-9977-40fc7632e951
 ================================================================================================
 Test #20---------------------------------------------------------------------------------Failed
 
