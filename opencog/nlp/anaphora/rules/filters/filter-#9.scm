@@ -1,7 +1,7 @@
-;; anaphor is "masculine"
-;; antecedent is "feminine"
+;; anaphor is "feminine"
+;; antecedent is "neuter"
 
-(define filter-#4
+(define filter-#9
     (BindLink
         (ListLink
             (TypedVariableLink
@@ -33,11 +33,11 @@
                 ;; filter
                 (InheritanceLink
                     (VariableNode "$word-inst-anaphor")
-                    (DefinedLinguisticConceptNode "masculine")
+                    (DefinedLinguisticConceptNode "feminine")
                 )
                 (InheritanceLink
                     (VariableNode "$word-inst-antecedent")
-                    (DefinedLinguisticConceptNode "feminine")
+                    (DefinedLinguisticConceptNode "neuter")
                 )
             )
             (ListLink

@@ -92,8 +92,6 @@ class HobbsAgent(MindAgent):
         self.pronouns = None
         self.roots = None
 
-        self.numOfFilters=7
-
         self.logfile=open('/tmp/results.txt', 'w')
 
     def bindLinkExe(self,anchorNode, target, command,resultNode,atomType):
@@ -265,7 +263,12 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/filters/filter-#4.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#5.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#6.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#7.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#8.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#9.scm"
               ]
+
+        self.numOfFilters=len(data)
         for item in data:
             load_scm(atomspace, item)
 
