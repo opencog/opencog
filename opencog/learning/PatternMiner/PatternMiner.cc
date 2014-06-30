@@ -1015,6 +1015,10 @@ void PatternMiner::growPatternsTask()
             patternForLastGramLock.unlock();
 
         HTreeNode* cur_growing_pattern = last_gram_patterns[cur_index];
+
+        if(cur_growing_pattern->instances.size() < thresholdFrequency)
+            continue;
+
         foreach (HandleSeq instance , cur_growing_pattern->instances)
         {
             // debug
@@ -1170,9 +1174,9 @@ PatternMiner::~PatternMiner()
     delete atomSpace;
 }
 
-void PatternMiner::runPatternMiner()
+void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 {
-
+    thresholdFrequency = _thresholdFrequency;
     int start_time = time(NULL);
 
     std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << std::endl;
