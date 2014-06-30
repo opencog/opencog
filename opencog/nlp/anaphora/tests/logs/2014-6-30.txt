@@ -12,8 +12,8 @@
 
    This part need extra information and probably reasoning from PLN.
 
-   For tests(17,18,19), hobbs agent still cannot give correct results since the parsing results from relex are incorrect.
-   Those tests should be removed.
+   For tests(17,18,19), after splitting multiple sentences, hobbs agent produced accurate results.
+   Passed tests(17,18,19)
 
 2. Added singular-plural filters(10,11,12)
 
