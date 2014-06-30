@@ -313,7 +313,7 @@ behavioral_score enum_table_bscore::operator()(const combo_tree& tr) const
     // Evaluate the bscore components for all rows of the ctable
     interpreter_visitor iv(tr);
     auto interpret_tr = boost::apply_visitor(iv);
-    for (const CTable::value_type& vct : ctable) {
+    for (const CTable::value_type& vct : _ctable) {
         const CTable::counter_t& c = vct.second;
         // The number that are wrong equals total minus num correct.
         score_t sc = score_t(c.get(interpret_tr(vct.first.get_variant())));
@@ -328,7 +328,7 @@ behavioral_score enum_table_bscore::operator()(const combo_tree& tr) const
 behavioral_score enum_table_bscore::best_possible_bscore() const
 {
     behavioral_score bs;
-    transform(ctable | map_values, back_inserter(bs),
+    transform(_ctable | map_values, back_inserter(bs),
               [](const CTable::counter_t& c) {
                   // OK, this looks like magic, but here's what it does:
                   // CTable is a compressed table; multiple rows may
@@ -350,8 +350,8 @@ behavioral_score enum_table_bscore::best_possible_bscore() const
 behavioral_score enum_table_bscore::worst_possible_bscore() const
 {
     // Make an attempt too at least return the correct length
-    double bad = very_worst_score / ((double) ctable.size() + 1);
-    return behavioral_score(ctable.size(), bad);
+    double bad = very_worst_score / ((double) _ctable.size() + 1);
+    return behavioral_score(_ctable.size(), bad);
 }
 
 score_t enum_table_bscore::min_improv() const
@@ -382,7 +382,7 @@ behavioral_score enum_filter_bscore::operator()(const combo_tree& tr) const
     interpreter_visitor iv_tr(tr), iv_predicate(predicate);
     auto interpret_tr = boost::apply_visitor(iv_tr);
     auto interpret_predicate = boost::apply_visitor(iv_predicate);
-    for (const CTable::value_type& vct : ctable) {
+    for (const CTable::value_type& vct : _ctable) {
         const CTable::counter_t& c = vct.second;
 
         unsigned total = c.total_count();
@@ -454,7 +454,7 @@ behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) const
     // Evaluate the bscore components for all rows of the ctable
     // TODO
     sib_it predicate = it.begin();
-    for (const CTable::value_type& vct : ctable) {
+    for (const CTable::value_type& vct : _ctable) {
         const CTable::counter_t& c = vct.second;
 
         unsigned total = c.total_count();
@@ -521,7 +521,7 @@ behavioral_score enum_effective_bscore::operator()(const combo_tree& tr) const
     pre_it it = tr.begin();
     if (is_enum_type(*it)) {
         behavioral_score::iterator bit = bs.begin();
-        for (const CTable::value_type& vct : ctable) {
+        for (const CTable::value_type& vct : _ctable) {
             const CTable::counter_t& c = vct.second;
 
             // The number that are wrong equals total minus num correct.
@@ -550,7 +550,7 @@ behavioral_score enum_effective_bscore::operator()(const combo_tree& tr) const
 
             behavioral_score::iterator bit = bs.begin();
             vector<bool>::iterator dit = done.begin();
-            for (const CTable::value_type& vct : ctable) {
+            for (const CTable::value_type& vct : _ctable) {
                 if (*dit == false) {
                     const CTable::counter_t& c = vct.second;
 
@@ -574,7 +574,7 @@ behavioral_score enum_effective_bscore::operator()(const combo_tree& tr) const
         bool effective = false;
         interpreter_visitor iv(predicate);
         auto interpret_predicate = boost::apply_visitor(iv);
-        for (const CTable::value_type& vct : ctable) {
+        for (const CTable::value_type& vct : _ctable) {
             if (*dit == false) {
                 vertex pr = interpret_predicate(vct.first.get_variant());
                 if (pr == id::logical_true) {
