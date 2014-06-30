@@ -144,6 +144,50 @@
                        (VariableNode "$C")
                        (VariableNode "$A")))))))
 
+(define pln-rule-create-and-inside-inheritance
+    (BindLink
+        (ListLink
+            (VariableNode "$A")
+            (VariableNode "$B")
+            (VariableNode "$C"))
+        (ImplicationLink
+            (AndLink
+                (InheritanceLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (InheritanceLink
+                    (VariableNode "$A")
+                    (VariableNode "$C")))
+            (ExecutionLink
+                (GroundedSchemaNode "scm:pln-formula-create-and-inside-inheritance")
+                (ListLink
+                    (InheritanceLink
+                        (VariableNode "$A")
+                        (AndLink
+                            (VariableNode "$B")
+                            (VariableNode "$C")))
+                    (AndLink
+                            (VariableNode "$B")
+                            (VariableNode "$C"))
+                    (AndLink
+                        (InheritanceLink
+                            (VariableNode "$A")
+                            (VariableNode "$B"))
+                        (InheritanceLink
+                            (VariableNode "$A")
+                            (VariableNode "$C")))
+                   (InheritanceLink
+                        (VariableNode "$A")
+                        (VariableNode "$B"))
+                   (InheritanceLink
+                        (VariableNode "$A")
+                        (VariableNode "$C")))))))
+
+; TODO define formula appropriately (see comment in inheritance_rules.py
+; AndCreationInsideLinkRule) 
+(define pln-formula-create-and-inside-inheritance InhAAndBC AndBC AndInhABInhAC InhAB InhAC
+    (cog-set-tv! InhAAndBC (cog-tv AndBC)))                  
 
 (define (pln-formula-context Context Relation)
     (cog-set-tv! Context (cog-tv Relation)))
+

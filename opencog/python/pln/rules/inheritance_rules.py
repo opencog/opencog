@@ -248,6 +248,7 @@ class SimilarityRule(Rule):
                               chainer.link(types.OrLink, [A, B])],
                       formula=formulas.extensionalSimilarityFormula)
 
+
 class SubsetRule1(Rule):
     """
     SubsetLink A B
@@ -265,6 +266,7 @@ class SubsetRule1(Rule):
                               A],
                       formula=formulas.subsetFormula)
 
+
 class AndToSubsetRule1(Rule):
     """
     SubsetLink A B
@@ -281,6 +283,7 @@ class AndToSubsetRule1(Rule):
                       inputs=[chainer.link(types.AndLink, [A, B]),
                               A],
                       formula=formulas.subsetFormula)
+
 
 class AndToSubsetRuleN(Rule):
     """
@@ -301,3 +304,37 @@ class AndToSubsetRuleN(Rule):
                               lhs],
                       formula=formulas.subsetFormula)
 
+
+class AndCreationInsideLinkRule(Rule):
+    """
+    ANDLink
+        InheritanceLink A B
+        InheritanceLink A C
+    |-
+    InheritanceLink
+        A
+        ANDLink B C
+    Created to create AndLinks inside InheritanceLinks (original use case:
+    context rules); could be useful for other link types as well
+    """
+    def __init__(self, chainer, link_type):
+        A = chainer.new_variable()
+        B = chainer.new_varialbe()
+        C = chainer.new_variable()
+
+        Rule.__init__(self,
+                      name="AndCreationInsideLinkRule<%s>"
+                           %(get_type_name(link_type)),
+                      outputs=[chainer.link(types.InheritanceLink,
+                                            [A, chainer.link(types.AndLink,
+                                                             [B, C])])],
+                      inputs=[chainer.link(types.AndLink,
+                                           [chainer.link(types.InheritanceLink,
+                                                        [A, B]),
+                                            chainer.link(types.InheritanceLink,
+                                                         [A, C])])],
+                      # TODO formula is still needed
+                      # should the tv of the new AndLink equal the tv of the
+                      # previous AndLink? what should the tv of the
+                      # Inheritancelink be?
+                      formula=None)
