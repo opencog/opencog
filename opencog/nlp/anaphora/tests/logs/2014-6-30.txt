@@ -25,4 +25,9 @@
 
    Passed tests(4,13)
 
+4. For tests(12,20), after splitting multiple sentences, hobbs agent produced accurate results.
+
+   Although results are the same as results from relation-extractor, they are still wrong since handling "and" relation
+   is not supported.
+
 
