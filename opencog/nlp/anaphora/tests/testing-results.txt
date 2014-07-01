@@ -179,7 +179,7 @@ Test #17------------------------------------------------------------------------
 
 (Due to filter failures)
 
-Alice always wanted a new boyfreind. Then she found him, and he was beautiful.
+Alice always wanted a new boyfriend. Then she found him, and he was beautiful.
 
 Result:
 
@@ -195,7 +195,7 @@ Test #18------------------------------------------------------------------------
 
 (Due to filter failures)
 
-Alice always wanted a new boyfreind. Then she found him, and she was enthralled.
+Alice always wanted a new boyfriend. Then she found him, and she was enthralled.
 
 Result:
 
@@ -213,7 +213,7 @@ Test #19------------------------------------------------------------------------
 
 (Due to filter failures)
 
-Alice always wanted a new boyfreind. Then he bumped into her, and she was enthralled.
+Alice always wanted a new boyfriend. Then he bumped into her, and she was enthralled.
 
 Result:
 
@@ -268,7 +268,7 @@ accepted coffee@ce79be4e-56fc-40a3-a928-f46ca6b26319
 ================================================================================================
 Test #24---------------------------------------------------------------------------------Passed
 
-It looked like a nice chair, and so Alice sat in it.
+It looked like a nice chair. Alice sat in it.
 
 Result:
 
