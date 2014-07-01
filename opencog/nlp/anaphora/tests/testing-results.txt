@@ -169,18 +169,18 @@ Result:
 Resolving...........
 (WordInstanceNode "him@0a7310db-edb7-4086-88ad-e446eb7e6b4e") ; [203]
 
-accepted boyfreind@259bbf31-5872-492c-9913-6d9248b70edb
+accepted boyfriend@259bbf31-5872-492c-9913-6d9248b70edb
 
 Resolving...........
 (WordInstanceNode "she@afc170b0-0dfd-4425-87f3-b425c985289a") ; [191]
 
 accepted Alice@456f2e70-6639-43a8-831a-38c6d75ae293
-accepted boyfreind@259bbf31-5872-492c-9913-6d9248b70edb
+accepted boyfriend@259bbf31-5872-492c-9913-6d9248b70edb
 
 Resolving...........
 (WordInstanceNode "he@236c1e8b-ef7f-4b4b-8360-cab9ba9230c7") ; [221]
 
-accepted boyfreind@259bbf31-5872-492c-9913-6d9248b70edb
+accepted boyfriend@259bbf31-5872-492c-9913-6d9248b70edb
 ================================================================================================
 Test #18---------------------------------------------------------------------------------Passed
 
@@ -191,18 +191,18 @@ Result:
 (WordInstanceNode "she@0b01282b-f2ec-469a-a442-420a3f6d9b04") ; [1008]
 
 accepted Alice@9e48d3a3-7c91-4d2c-9631-ce0da0892662
-accepted boyfreind@c58192a1-0a9e-4c6a-879b-9cb415494104
+accepted boyfriend@c58192a1-0a9e-4c6a-879b-9cb415494104
 
 Resolving...........
 (WordInstanceNode "him@1f33c321-7d8a-4f9e-b7b4-4acc4a8fa8c4") ; [990]
 
-accepted boyfreind@c58192a1-0a9e-4c6a-879b-9cb415494104
+accepted boyfriend@c58192a1-0a9e-4c6a-879b-9cb415494104
 
 Resolving...........
 (WordInstanceNode "she@1f37903d-c71b-46d6-9f31-4cffbc965ee6") ; [978]
 
 accepted Alice@9e48d3a3-7c91-4d2c-9631-ce0da0892662
-accepted boyfreind@c58192a1-0a9e-4c6a-879b-9cb415494104
+accepted boyfriend@c58192a1-0a9e-4c6a-879b-9cb415494104
 ================================================================================================
 Test #19---------------------------------------------------------------------------------Passed
 
@@ -214,18 +214,18 @@ Result:
 (WordInstanceNode "she@b0d2d4fe-d734-43f8-8f2b-747d2093fec8") ; [2076]
 
 accepted Alice@39871e8c-50d2-429f-9ea6-199c19adce79
-accepted boyfreind@3f35da90-a3e4-49c7-9977-40fc7632e951
+accepted boyfriend@3f35da90-a3e4-49c7-9977-40fc7632e951
 
 Resolving...........
 (WordInstanceNode "her@fdad1593-230c-4eb7-95a7-39e815fc8d5a") ; [2058]
 
 accepted Alice@39871e8c-50d2-429f-9ea6-199c19adce79
-accepted boyfreind@3f35da90-a3e4-49c7-9977-40fc7632e951
+accepted boyfriend@3f35da90-a3e4-49c7-9977-40fc7632e951
 
 Resolving...........
 (WordInstanceNode "he@a120de8c-58d0-4461-8734-0ace305898b2") ; [2040]
 
-accepted boyfreind@3f35da90-a3e4-49c7-9977-40fc7632e951
+accepted boyfriend@3f35da90-a3e4-49c7-9977-40fc7632e951
 ================================================================================================
 Test #20---------------------------------------------------------------------------------Passed
 
