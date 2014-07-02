@@ -419,8 +419,15 @@ are ignored. If this option is absent, then all data rows are used.
 If this option is present, then the input table is sampled randomly
 to reach this size.
 .TP
-.BI \-G\  num \fR,\ \fB\-\-weighted\-accuracy= num
-Huh ???
+.BI \-G1\fR,\ \fB\-\-weighted\-accuracy=1
+This option is only used for the discretize_contin_bscore (when
+--discretize-threshold is used), if enabled, then the score
+corresponds to weighted accuracy Useful in case of unbalanced data.
+
+.TP
+.BI \-\-balance=1
+If the table has discrete output type (like bool or enum), balance the
+resulting ctable so all classes have the same weight.
 
 .\" ============================================================
 .SS "Algorithm control options"

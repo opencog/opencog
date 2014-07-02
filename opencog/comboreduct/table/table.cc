@@ -627,6 +627,40 @@ type_node CTable::get_output_type() const
     return get_type_node(get_signature_output(tsig));
 }
 
+void CTable::balance()
+{
+    type_node otype = get_output_type();
+    if (otype == id::boolean_type or otype == id::enum_type) {
+        // Get total count for each class (called Ni in comment below)
+        Counter<vertex, count_t> class_count;
+        for (auto iorow : *this)
+            class_count += iorow.second;
+
+        count_t usize = uncompressed_size(), n = class_count.size();
+        // N1 + ... + Nn = usize
+        //
+        // where Ni = ci1 + ... cim, with cij the count of each row j
+        // of class i.
+        //
+        // We want Ni' = usize / n, the new count of class i.
+        //
+        // where Ni' = ci1' + ... + cim', with cij' the count of each
+        // row of class i.
+        //
+        // cij' = ci * cij
+        //
+        // ci * ci1 + ... + ci * cim = usize / n
+        // ci = (usize/n) / Ni
+        for (auto iorow : *this)
+            for (auto vc : iorow.second)
+                vc.second *= (usize / n) / class_count[vc.first];
+    } else {
+        logger().warn() << "CTable::balance() - "
+                        << "cannot balance non discrete output type "
+                        << otype;
+    }
+}
+
 // -------------------------------------------------------
 
 // XXX TODO replace this by the util p_norm function.
