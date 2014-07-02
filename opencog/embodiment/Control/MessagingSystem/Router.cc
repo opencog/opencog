@@ -513,7 +513,7 @@ void Router::notifyElementAvailability(const std::string& id, bool available)
     //logger().debug("Router::notifyElementAvailability() ended");
 }
 
-void Router::closeSockets(const string& id)
+void Router::closeSockets(const std::string& id)
 {
     closeControlSocket(id);
     closeDataSocket(id);
