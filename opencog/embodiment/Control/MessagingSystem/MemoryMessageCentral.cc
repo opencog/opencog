@@ -98,14 +98,14 @@ void MemoryMessageCentral::removeQueue(const std::string id)
     }
 }
 
-const unsigned int MemoryMessageCentral::queueSize(const std::string id)
+unsigned int MemoryMessageCentral::queueSize(const std::string id) const
 {
 
     unsigned int value = 0;
 
     if (this->existsQueue(id)) {
         this->lockQueue();
-        std::queue<Message *> *queue = messageQueue[id];
+        const std::queue<Message *> *queue = messageQueue.find(id)->second;
         value = queue->size();
         this->unlockQueue();
     }
@@ -113,14 +113,14 @@ const unsigned int MemoryMessageCentral::queueSize(const std::string id)
     return value;
 }
 
-const bool MemoryMessageCentral::isQueueEmpty(const std::string id)
+bool MemoryMessageCentral::isQueueEmpty(const std::string id) const
 {
 
     bool value = true;
 
     if (this->existsQueue(id)) {
         this->lockQueue();
-        std::queue<Message *> *queue = messageQueue[id];
+        const std::queue<Message *> *queue = messageQueue.find(id)->second;
         value = queue->empty();
         this->unlockQueue();
     }
@@ -128,13 +128,13 @@ const bool MemoryMessageCentral::isQueueEmpty(const std::string id)
     return value;
 }
 
-const bool MemoryMessageCentral::existsQueue(const std::string id)
+bool MemoryMessageCentral::existsQueue(const std::string id) const
 {
 
     bool value = true;
 
     this->lockQueue();
-    std::map<std::string, std::queue<Message *> *>::iterator itr = messageQueue.find(id);
+    auto itr = messageQueue.find(id);
 
     if (itr == messageQueue.end()) {
         value = false;
@@ -168,7 +168,7 @@ Message* MemoryMessageCentral::pop(const std::string id)
     }
 
     this->lockQueue();
-    std::queue<Message *> *queue = messageQueue[id];
+    std::queue<Message *> *queue = messageQueue.find(id)->second;
     if (!queue->empty()) {
         value = queue->front();
         queue->pop();
@@ -178,5 +178,3 @@ Message* MemoryMessageCentral::pop(const std::string id)
     return value;
 
 }
-
-

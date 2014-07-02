@@ -42,12 +42,12 @@ MessageCentral::MessageCentral()
     pthread_mutex_init(&messageQueueLock, NULL);
 }
 
-void MessageCentral::lockQueue()
+void MessageCentral::lockQueue() const
 {
     pthread_mutex_lock(&messageQueueLock);
 }
 
-void MessageCentral::unlockQueue()
+void MessageCentral::unlockQueue() const
 {
     pthread_mutex_unlock(&messageQueueLock);
 }
