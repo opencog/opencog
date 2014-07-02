@@ -31,8 +31,18 @@ ADD_SUBDIRECTORY (example-progs)
 ADD_SUBDIRECTORY (man)
 
 ADD_LIBRARY (moses SHARED STATIC
+	deme/deme_expander
+	deme/feature_selector
+
 	eda/initialization
 	eda/local_structure
+
+	metapopulation/diversity
+	metapopulation/domination
+	metapopulation/ensemble
+	metapopulation/merging
+	metapopulation/metapopulation
+	metapopulation/metapop_params
 
 	moses/complexity
 	moses/distributed_moses
@@ -43,26 +53,16 @@ ADD_LIBRARY (moses SHARED STATIC
 	moses/partial
 	moses/types
 
-	metapopulation/diversity
-	metapopulation/domination
-	metapopulation/ensemble
-	metapopulation/merging
-	metapopulation/metapopulation
-	metapopulation/metapop_params
-
-	deme/deme_expander
-	deme/feature_selector
+	optimization/hill-climbing
+	optimization/optimization
+	optimization/star-anneal
+	optimization/univariate
 
 	representation/build_knobs
 	representation/field_set
 	representation/knob_mapper
 	representation/knobs
 	representation/representation
-
-	optimization/hill-climbing
-	optimization/optimization
-	optimization/star-anneal
-	optimization/univariate
 
 	scoring/scoring_base
 	scoring/behave_cscore
