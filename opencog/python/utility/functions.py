@@ -1,6 +1,6 @@
 from math import fabs, isnan
 from datetime import datetime
-from spatiotemporal.unix_time import UnixTime
+from temporal.unix_time import UnixTime
 from utility.generic import convert_dict_to_sorted_lists
 from utility.numeric.globals import EPSILON
 from numpy import NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY

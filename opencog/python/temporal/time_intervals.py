@@ -1,4 +1,4 @@
-from spatiotemporal.unix_time import UnixTime, random_time, is_unix_time
+from temporal.unix_time import UnixTime, random_time, is_unix_time
 
 __author__ = 'keyvan'
 

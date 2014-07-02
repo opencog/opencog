@@ -128,14 +128,14 @@ class DecompositionFitter(object):
         return data
 
     def check(self):
-        from spatiotemporal.temporal_events import FormulaCreator
+        from temporal.temporal_events import FormulaCreator
         print self.data
         print FormulaCreator(self).calculate_relations().to_vector()
         print
 
 if __name__ == '__main__':
-    from spatiotemporal.temporal_events import FormulaCreator
-    from spatiotemporal.temporal_events.trapezium import generate_random_events
+    from temporal.temporal_events import FormulaCreator
+    from temporal.temporal_events.trapezium import generate_random_events
     for i in xrange(50):
         A, B = generate_random_events(2)
         relations = A * B

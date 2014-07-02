@@ -1,5 +1,5 @@
-from spatiotemporal.temporal_events import FormulaCreator
-from spatiotemporal.temporal_events.relation_formulas import TemporalRelation
+from temporal.temporal_events import FormulaCreator
+from temporal.temporal_events.relation_formulas import TemporalRelation
 import numpy as np
 
 __author__ = 'keyvan'

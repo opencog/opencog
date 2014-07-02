@@ -1,7 +1,7 @@
 from copy import deepcopy
-from spatiotemporal.temporal_events.composition import unpack
-from spatiotemporal.temporal_events.composition.railway_framework import RailwaySystem, EPSILON
-from spatiotemporal.temporal_events.trapezium import TemporalEventTrapezium
+from temporal.temporal_events.composition import unpack
+from temporal.temporal_events.composition.railway_framework import RailwaySystem, EPSILON
+from temporal.temporal_events.trapezium import TemporalEventTrapezium
 from utility.functions import almost_equals
 
 
@@ -105,10 +105,10 @@ def convert_rail_to_trapezium_event(railway_system, rail_key):
 
 
 if __name__ == '__main__':
-    from spatiotemporal.temporal_events.trapezium import generate_random_events
-    from spatiotemporal.temporal_events.util import compute_railway_strength
+    from temporal.temporal_events.trapezium import generate_random_events
+    from temporal.temporal_events.util import compute_railway_strength
     import numpy
-    from spatiotemporal.temporal_events import RelationFormulaConvolution
+    from temporal.temporal_events import RelationFormulaConvolution
 
     search_tree = DepthFirstSearchComposition()
     formula = RelationFormulaConvolution()

@@ -1,8 +1,8 @@
 from matplotlib.lines import Line2D
 from matplotlib.ticker import AutoMinorLocator
 from numpy.core.multiarray import zeros
-from spatiotemporal.temporal_events.trapezium import TemporalEventTrapezium
-from spatiotemporal.time_intervals import TimeInterval
+from temporal.temporal_events.trapezium import TemporalEventTrapezium
+from temporal.time_intervals import TimeInterval
 from matplotlib import pyplot as plt
 from matplotlib import animation
 

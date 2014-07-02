@@ -1,8 +1,8 @@
 from math import fabs
 from random import random
 from scipy.stats.distributions import rv_frozen
-from spatiotemporal.time_intervals import TimeInterval
-from spatiotemporal.unix_time import random_time, UnixTime
+from temporal.time_intervals import TimeInterval
+from temporal.unix_time import random_time, UnixTime
 from utility.generic import convert_dict_to_sorted_lists
 from utility.functions import Function, FunctionPiecewiseLinear,\
     FunctionHorizontalLinear, FunctionComposite, FUNCTION_ZERO, FUNCTION_ONE, FunctionLinear

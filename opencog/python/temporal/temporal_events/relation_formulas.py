@@ -2,9 +2,9 @@ from math import fabs, sqrt
 from numpy import convolve, NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
 import numpy
 from scipy.stats.distributions import uniform_gen
-from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
-from spatiotemporal.temporal_interval_handling import calculateCenterMass
-from spatiotemporal.time_intervals import TimeInterval
+from temporal.temporal_events.util import calculate_bounds_of_probability_distribution
+from temporal.temporal_interval_handling import calculateCenterMass
+from temporal.time_intervals import TimeInterval
 from utility.functions import FunctionPiecewiseLinear, FunctionHorizontalLinear, integral, FUNCTION_ZERO, almost_equals
 from utility.numeric import EPSILON
 
@@ -335,7 +335,7 @@ class RelationFormulaGeometricMean(BaseRelationFormula):
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from scipy.stats import norm, uniform, expon
-    from spatiotemporal.temporal_events import TemporalEvent, TemporalEventPiecewiseLinear
+    from temporal.temporal_events import TemporalEvent, TemporalEventPiecewiseLinear
     import matplotlib.pyplot as plt
 
     figure_number = 1
