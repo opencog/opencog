@@ -555,6 +555,11 @@ public:
     const type_tree& get_signature() const {return tsig;}
     type_node get_output_type() const;
 
+    // Balance the ctable, so that, in case the output type is
+    // discrete, all class counts are equal, but the uncompressed size
+    // is till the same.
+    void balance();
+
     // hmmm, it doesn't compile, I give up
     // bool operator==(const CTable& r) const {
     //     return super::operator==(static_cast<super>(r))
