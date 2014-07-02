@@ -109,15 +109,22 @@ void table_problem_base::common_setup(problem_params& pms)
         logger().info("Read data file %s", idf.c_str());
         Table table = loadTable(idf, _tpp.target_feature, _tpp.ignore_features_str);
         num_rows += table.size();
+
         // Possibly subsample the table
         if (pms.nsamples > 0)
             subsampleTable(table, pms.nsamples);
+
         // Compressed table
         _ctables.push_back(table.compressed(_tpp.weighting_feature));
+
         // The compressed table removes the weighting feature, too.
         if (not _tpp.weighting_feature.empty())
             table.itable.delete_column(_tpp.weighting_feature);
         _tables.push_back(table);
+
+        // Possibly balance the ctable
+        if (pms.balance)
+            _ctables.back().balance();
     }
     logger().info("Number of rows in tables = %d", num_rows);
 
@@ -510,11 +517,11 @@ void it_table_problem::run(option_base* ob)
             // Works. Kind of. Not as well as hoped.
             // Might be good for some problem. See diary.
             partial_solver well(ctable,
-                            pms.exemplars, *pms.contin_reduct,
-                            pms.opt_params, pms.hc_params,
-                            pms.deme_params,
-                            pms.meta_params,
-                            pms.moses_params, pms.mmr_pa);
+                                pms.exemplars, *pms.contin_reduct,
+                                pms.opt_params, pms.hc_params,
+                                pms.deme_params,
+                                pms.meta_params,
+                                pms.moses_params, pms.mmr_pa);
             well.solve();
         } else {
             // Much like the boolean-output-type above,
@@ -544,7 +551,7 @@ void it_table_problem::run(option_base* ob)
                        *pms.contin_reduct, *pms.contin_reduct,
                        table, discretize_contin_bscore,
                        (table.otable, table.itable,
-                            pms.discretize_thresholds, pms.weighted_accuracy));
+                        pms.discretize_thresholds, pms.weighted_accuracy));
         }
     }
 

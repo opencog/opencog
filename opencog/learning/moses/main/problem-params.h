@@ -71,9 +71,16 @@ struct problem_params : public option_base
     int nsamples;
     double min_rand_input;
     double max_rand_input;
+
+    // Whether to balance the table
+    bool balance;
+
+    // Upper limit on resources spent
     unsigned long max_evals;
     time_t max_time;
     int max_gens;
+
+    // Logger options
     std::string log_level;
     std::string log_file;
 
