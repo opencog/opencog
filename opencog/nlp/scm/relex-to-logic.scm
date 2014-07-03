@@ -112,8 +112,9 @@
 )
 
 (define (tense-rule verb instance tense)
-	(ImplicationLink (PredicateNode instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+	(list (ImplicationLink (PredicateNode instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(InheritanceLink (PredicateNode instance df-node-stv) (ConceptNode tense df-node-stv) df-link-stv)
+	)
 )
 
 (define (det-rule concept instance var_name determiner)
@@ -349,9 +350,10 @@
 
 ; Examples: "Socrates is a man", "Cats are animals", "Trees are plants"
 (define (be-inheritance-rule subj_concept subj_instance obj_concept obj_instance)
-	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
+	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj_concept df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode obj_instance df-node-stv) df-link-stv)
+	)
 )
 
 
