@@ -1,8 +1,8 @@
 import csv
 import numpy
-from temporal.temporal_events.relation_formulas import TemporalRelation
-from temporal.temporal_events.trapezium import TemporalEventTrapezium, generate_random_events
-from temporal.time_intervals import TimeInterval
+from spatiotemporal.temporal_events.relation_formulas import TemporalRelation
+from spatiotemporal.temporal_events.trapezium import TemporalEventTrapezium, generate_random_events
+from spatiotemporal.time_intervals import TimeInterval
 
 __author__ = 'keyvan'
 
@@ -30,7 +30,7 @@ def generate_random_relations(size=1000):
 
 def generate_random_relations_file(size=20):
     from datetime import datetime
-    from temporal.time_intervals import TimeInterval
+    from spatiotemporal.time_intervals import TimeInterval
 
     csv_writer = csv.writer(open('relations.csv~', 'w'))
 

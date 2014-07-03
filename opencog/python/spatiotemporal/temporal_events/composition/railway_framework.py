@@ -1,6 +1,6 @@
 from itertools import chain
-from temporal.temporal_events.composition.emperical_distribution import overlaps
-from temporal.temporal_events.util import Dijkstra
+from spatiotemporal.temporal_events.composition.emperical_distribution import overlaps
+from spatiotemporal.temporal_events.util import Dijkstra
 from utility.functions import almost_equals
 
 __author__ = 'keyvan'

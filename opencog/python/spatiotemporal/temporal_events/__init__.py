@@ -1,9 +1,9 @@
 from scipy.stats.distributions import rv_frozen
-from temporal.temporal_events.relation_formulas import FormulaCreator, RelationFormulaGeometricMean, BaseRelationFormula, RelationFormulaConvolution
-from temporal.temporal_events.util import calculate_bounds_of_probability_distribution
-from temporal.time_intervals import check_is_time_interval, TimeInterval
-from temporal.temporal_events.membership_function import MembershipFunction, ProbabilityDistributionPiecewiseLinear
-from temporal.unix_time import UnixTime
+from spatiotemporal.temporal_events.relation_formulas import FormulaCreator, RelationFormulaGeometricMean, BaseRelationFormula, RelationFormulaConvolution
+from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
+from spatiotemporal.time_intervals import check_is_time_interval, TimeInterval
+from spatiotemporal.temporal_events.membership_function import MembershipFunction, ProbabilityDistributionPiecewiseLinear
+from spatiotemporal.unix_time import UnixTime
 from utility.generic import convert_dict_to_sorted_lists
 from utility.functions import FunctionPiecewiseLinear, FUNCTION_ZERO
 
@@ -185,7 +185,7 @@ class TemporalInstance(TimeInterval):
 
     def plot(self):
         import matplotlib.pyplot as plt
-        from temporal.unix_time import UnixTime
+        from spatiotemporal.unix_time import UnixTime
 
         plt.plot([UnixTime(self.a).to_datetime(), UnixTime(self.b).to_datetime()], [1, 1])
         return plt

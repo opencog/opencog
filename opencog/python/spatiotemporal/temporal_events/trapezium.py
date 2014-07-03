@@ -1,8 +1,8 @@
 from math import sqrt, fabs
 from numpy import PINF as POSITIVE_INFINITY
 from scipy.stats import t, uniform
-from temporal.temporal_events import TemporalEvent, BaseRelationFormula
-from temporal.unix_time import UnixTime, random_time
+from spatiotemporal.temporal_events import TemporalEvent, BaseRelationFormula
+from spatiotemporal.unix_time import UnixTime, random_time
 from utility.functions import FUNCTION_ONE, FunctionLinear, FunctionComposite, FUNCTION_ZERO
 
 __author__ = 'keyvan'
@@ -90,7 +90,7 @@ class TemporalEventTrapezium(TemporalEvent):
 
 def generate_random_events(size=20):
     from datetime import datetime
-    from temporal.time_intervals import TimeInterval
+    from spatiotemporal.time_intervals import TimeInterval
     events = []
 
     year_2010 = TimeInterval(datetime(2010, 1, 1), datetime(2011, 1, 1))
