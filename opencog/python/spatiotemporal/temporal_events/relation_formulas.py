@@ -148,6 +148,16 @@ class FormulaCreator(object):
         return self.calculate_relations(combinations)
 
     def calculate_relations(self, combinations=None):
+        """
+        Calculates the values of the 13 relations based on the before, same,
+        and after values of the combinations between the beginning and
+        ending distributions of the two intervals obtained, e.g. from
+        the DecompositionFitter.
+        :param combinations: the 4 combinations between beginning and ending
+        distribution
+        :return: a dictionary containing the 13 relations as keys and their
+        degrees as values
+        """
         if combinations is None:
             combinations = self.relation_formula.combinations
 
@@ -157,6 +167,7 @@ class FormulaCreator(object):
         before = {}
         same = {}
         after = {}
+        # iterates over the 4 combinations between beginning and ending
         for key in combinations:
             before[key], same[key], after[key] = self.relation_formula.compare(*key)
 
