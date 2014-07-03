@@ -139,6 +139,7 @@ class TemporalEvent(list, TimeInterval):
         return repr(self)
 
 
+# use TemporalEventTrapezium instead
 class TemporalEventPiecewiseLinear(TemporalEvent):
     def __init__(self, dictionary_beginning, dictionary_ending, bins=50):
         input_list_beginning, output_list_beginning = convert_dict_to_sorted_lists(dictionary_beginning)
