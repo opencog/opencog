@@ -36,19 +36,28 @@ same(dist1,dist2)
 after(dist1,dist2)
 ```
 
-The degree of the _{s}_ starts relation between two intervals c and d can be
+The degree of the _{s}_ starts relation between two intervals A and B can be
 computed as:
 
 ```
-same(dist_beg(c),dist_beg(d)) * before(dist_beg(c),dist_end(d))*
-after(dist_(end(c),dist_beg(d)) * before(dist_end(c),dist_end(b))
+same(dist_beg(A),dist_beg(B)) * before(dist_beg(A),dist_end(B))*
+after(dist_(end(A),dist_beg(B)) * before(dist_end(A),dist_end(B))
 ```
 
-meaning the degree of the beginning distribution of c being the same as the
-beginning distribution of d, times the degree of the beginning distribution of c
-being before the ending distribution of d, etc.
+meaning the degree of the beginning distribution of A being the same as the
+beginning distribution of B, times the degree of the beginning distribution of A
+being before the ending distribution of B, etc.
 
 ## Implementation
+
+### The time definition
+
+The system uses UnixTime as specified [here](unix_time.py) to measure time.
+Unix time is defined as the number of seconds that have elapsed since 00:00:00
+Coordinated Universal Time (UTC), Thursday, 1 January 1970, not counting leap
+seconds.
+
+### The trapezium
 
 The basic unit of the implementation is the TemporalEventTrapezium (specified
 [here](temporal_events/trapezium.py)) which inherits from [TemporalEvent](temporal_events/__init__.py).
@@ -58,19 +67,21 @@ parameters that were specified above: a, b, beginning, and ending. Two intervals
 are instantiated as follows:
 
 ```
-c = TemporalEventTrapezium(1, 12, 4, 8)
-d = TemporalEventTrapezium(9, 17, 13, 15)
+A = TemporalEventTrapezium(1, 12, 4, 8)
+B = TemporalEventTrapezium(9, 17, 13, 15)
 ```
 
 If only a and b are provided as parameters, beginning and ending are generated
 randomly.
 
-TemporalRelation overrideds the ```__mult__``` operator to use it for the
-computation of two intervals. The relations between the intervals c and d can
-thus be computed simply by multiplying them:
+### From events to relations
+
+To compute the relations between two intervals A and B, TemporalRelation
+overrideds the ```__mult__``` operator. The relations between the two intervals
+can thus be calculated simply by multiplying them:
 
 ```
-temporal_relations = c * d
+temporal_relations = A * B
 ```
 
 The result is a [TemporalRelation](temporal_events/relation_formulas.py), a
@@ -102,6 +113,43 @@ which yields the following values:
 ('M', 0.0)
 ('P', 0.0)
 ```
+
+### From relations to before, same, and after (and back to events)
+
+If one knows the 13 relations that exist between two intervals, one can compute
+the before, same, and after relationships that exist between their beginning and
+ending distributions.
+
+In order to do this, one passes the ```temporal_relations``` as defined above
+to the [DecompositionFitter](temporal_events/composition/non_linear_least_squares.py).
+The DecompositionFitter instantiates the before, same, and after relationships
+between the beginning and ending distributions of the two intervals with initial
+values. It then learns the correct values for the parameters using
+[lmfit.minimizer.minimize](http://cars9.uchicago.edu/software/python/lmfit/fitting.html#minimize)
+together with a fitness function. To calculate from the before, same, and after
+relationships the initial 13 Allen interval relations, one passes the
+DecompositionFitter to FormulaCreator defined [here](temporal_events/relation_formulas.py)
+and calls ```calculate_relations()```:
+
+```
+temporal_relations = FormulaCreator(DecompositionFitter(relations)).calculate_relations()
+```
+
+### Composition
+
+In order to perform composition, i.e. to calculate the relations that hold
+between events A and C if the relations between events A and B and between B
+and C are known, one passes the relations between A and B and between B and C
+again to the DecompositionFitter.
+
+```
+fitter_a_b = DecompositionFitter(relations_a_b)
+fitter_b_c = DecompositionFitter(relations_b_c)
+```
+
+DepthFirstSearchComposition defined [here](temporal_events/composition/depth_first_search_composition.py)
+works with these before, same, and after relationships to calculate the relations
+holding between A and C. Further details follow.
 
 An initial, simple demo can be viewed [here](demo.py).
 
