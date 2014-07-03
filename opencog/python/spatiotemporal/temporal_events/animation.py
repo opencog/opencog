@@ -124,4 +124,4 @@ if __name__ == '__main__':
     anim = Animation(TemporalEventTrapezium(4, 8, 5, 7),
                      TemporalEventTrapezium(0, 10, 6, 9),
                      TemporalEventTrapezium(0.5, 11, 1, 3))
-    # anim.show()
+    #anim.show()
