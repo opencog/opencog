@@ -93,6 +93,8 @@ class HobbsAgent(MindAgent):
         self.pronouns = None
         self.roots = None
 
+        self.numOfFilters=7
+
         self.logfile=open('/tmp/results.txt', 'w')
 
     def bindLinkExe(self,anchorNode, target, command,resultNode,atomType):
