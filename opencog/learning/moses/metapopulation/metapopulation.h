@@ -208,8 +208,7 @@ public:
      * obviously make sense.
      */
     bool merge_demes(boost::ptr_vector<deme_t>& demes,
-                     const boost::ptr_vector<representation>& reps,
-                     const std::vector<unsigned>& evals_seq);
+                     const boost::ptr_vector<representation>& reps);
 
     /// Update the record of the best score seen, and the associated tree.
     /// Safe to call in a multi-threaded context.
@@ -249,7 +248,7 @@ private:
 
     // convert instances in deme to trees
     void deme_to_trees(deme_t&, const representation&,
-                       unsigned n_evals, scored_combo_tree_set&);
+                       scored_combo_tree_set&);
     
     /// Given the current complexity temp, return the range of scores that
     /// are likely to be selected by the select_exemplar routine. Due to

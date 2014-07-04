@@ -91,7 +91,6 @@ void metapopulation::trim_down_deme(deme_t& deme) const
 ///
 void metapopulation::deme_to_trees(deme_t& deme,
                                    const representation& rep,
-                                   unsigned n_evals,
                                    scored_combo_tree_set& pot_candidates)
 {
     std::mutex mtx;
@@ -226,13 +225,11 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
 // See also header file for a desciption of this method.
 //
 bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
-                                 const boost::ptr_vector<representation>& reps,
-                                 const std::vector<unsigned>& evals_seq)
+                                 const boost::ptr_vector<representation>& reps)
 {
     // Note that univariate reports far more evals than the deme size;
     // this is because univariate over-writes deme entries.
-    logger().debug("Close deme(s); evaluations reported: %d",
-                   boost::accumulate(evals_seq, 0U));
+    logger().debug("Close and merge demes");
 
     scored_combo_tree_set pot_candidates;
     for (unsigned i = 0; i < demes.size(); i++) {
@@ -248,7 +245,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         trim_down_deme(deme);
 
         // Convert the instances in the deme to trees.
-        deme_to_trees(deme, reps[i], evals_seq[i], pot_candidates);
+        deme_to_trees(deme, reps[i], pot_candidates);
     }
 
     logger().debug("Selected %u candidate trees to be merged into the metapop",
