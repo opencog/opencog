@@ -40,6 +40,7 @@ class BindLinkExecution():
         else:
             self.tmpLink=None
         response = scheme_eval(self.atomspace, self.command)
+        d=3;
 
     def returnResult(self):
 
@@ -112,12 +113,21 @@ class HobbsAgent(MindAgent):
     def getWordNumber(self,node):
         return self.wordNumber[node.name]
 
-    def sortNodes(self,list):
+    def getSentenceNumber(self,node):
+
+        '''
+        Given a ParseNode, returns a SentenceNumber of a SentenceNode associated with it.
+        '''
+
+        rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind getNumberNode_ParseNode)',self.currentResult,types.NumberNode)
+        return int(rv[0].name)
+
+    def sortNodes(self,list,keyFunc):
 
         '''
         Sorts nodes according to their word sequence number and returns the sorted list.
         '''
-        return sorted(list,key=self.getWordNumber)
+        return sorted(list,key=keyFunc)
 
     def getChildren(self,node):
 
@@ -126,7 +136,7 @@ class HobbsAgent(MindAgent):
         '''
 
         rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind getChildren)',self.currentResult,types.WordInstanceNode)
-        return self.sortNodes(rv)
+        return self.sortNodes(rv,self.getWordNumber)
 
     def propose(self,node):
         '''
@@ -135,6 +145,7 @@ class HobbsAgent(MindAgent):
 
         self.currentResolutionLink_pronoun=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentPronoun, node], TruthValue(1.0, 100))
         rejected = False
+        filterNumber=-1
         for index in range(1,self.numOfFilters):
             command='(cog-bind-crisp filter-#'+str(index)+')'
             rv=self.bindLinkExe(self.currentProposal,node,command,self.currentResult,types.AnchorNode)
@@ -143,6 +154,7 @@ class HobbsAgent(MindAgent):
                 Reject it
                 '''
                 rejected = True
+                filterNumber=index
                 break
 
         if not rejected:
@@ -150,7 +162,7 @@ class HobbsAgent(MindAgent):
             #print("accepted "+node.name,file=self.logfile)
             print("accepted "+node.name)
         #else:
-            #print("rejected "+node.name)
+            #print("rejected "+node.name+" by filter-#"+str(filterNumber))
 
     def Checked(self,node):
 
@@ -193,8 +205,9 @@ class HobbsAgent(MindAgent):
         Return a list of roots(incoming degree of 0)
         '''
 
-        rv= self.bindLinkExe(None,None,'(cog-bind-crisp getRoots)',self.currentResult,types.WordInstanceNode)
-        return self.sortNodes(rv)
+        self.bindLinkExe(None,None,'(cog-bind-crisp connectRootsToParseNodes)',None,None)
+        rv= self.bindLinkExe(None,None,'(cog-bind getAllParseNodes)',self.currentResult,types.ParseNode)
+        return self.sortNodes(rv,self.getSentenceNumber)
 
     def getRootOfNode(self,target):
         '''
@@ -215,9 +228,9 @@ class HobbsAgent(MindAgent):
         Return a previous root.
         '''
 
-        rootNumber=self.getWordNumber(root)
+        rootNumber=self.getSentenceNumber(root)
         for root in reversed(self.roots):
-            number=self.getWordNumber(root)
+            number=self.getSentenceNumber(root)
             if number<rootNumber:
                 return root
         #print("Impossible")
@@ -248,12 +261,14 @@ class HobbsAgent(MindAgent):
         self.pronounNumber = -1
 
         data=["opencog/nlp/anaphora/rules/getChildren.scm",
-              "opencog/nlp/anaphora/rules/getNumberNode.scm",
-              "opencog/nlp/anaphora/rules/getRoots.scm",
+              "opencog/nlp/anaphora/rules/getNumberNode_WordInstanceNode.scm",
+              "opencog/nlp/anaphora/rules/getNumberNode_ParseNode.scm",
+              "opencog/nlp/anaphora/rules/connectRootsToParseNodes.scm",
               "opencog/nlp/anaphora/rules/getPronouns.scm",
               "opencog/nlp/anaphora/rules/propose.scm",
               "opencog/nlp/anaphora/rules/getResults.scm",
               "opencog/nlp/anaphora/rules/getAllNumberNodes.scm",
+              "opencog/nlp/anaphora/rules/getAllParseNodes.scm",
 
               "opencog/nlp/anaphora/rules/filtersGenerator.scm",
 
@@ -270,6 +285,7 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/filters/filter-#11.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#12.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#13.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#14.scm",
               ]
 
         self.numOfFilters=len(data)

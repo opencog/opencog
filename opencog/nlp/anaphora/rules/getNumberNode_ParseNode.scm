@@ -1,7 +1,8 @@
-(define getNumberNode
+(define getNumberNode_ParseNode
     (BindLink
         (ListLink
             (VariableNode "$target")
+            (VariableNode "$sentence")
             (VariableNode "$number")
         )
         (ImplicationLink
@@ -10,8 +11,12 @@
                     (AnchorNode "CurrentTarget")
                     (VariableNode "$target")
                 )
-                (WordSequenceLink
+                (ParseLink
                     (VariableNode "$target")
+                    (VariableNode "$sentence")
+                )
+                (SentenceSequenceLink
+                    (VariableNode "$sentence")
                     (VariableNode "$number")
                 )
             )

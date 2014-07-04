@@ -73,7 +73,7 @@ accepted automobile@324cd1cb-da2d-415c-82c3-5564612db720
 ================================================================================================
 Test #8---------------------------------------------------------------------------------Passed
 
-It looked like a nice chair, and so Alice sat in it.
+It looked like a nice chair. Alice sat in it.
 
 Result:
 
@@ -114,7 +114,7 @@ Result:
 ================================================================================================
 Test #12---------------------------------------------------------------------------------Passed
 
-Jane looked at the plates and the cup.They were ugly.
+Jane looked at the plates and the cup. They were ugly.
 
 (WordInstanceNode "they@f71b8119-e5d1-4b95-b946-7d3390c0af3f") ; [3315]
 
@@ -287,3 +287,54 @@ Result:
 
 accepted Graph@a5ca5f95-0589-495c-ad07-6093a33dc775
 ================================================================================================
+Test #26---------------------------------------------------------------------------------Unknown
+
+Air forces could field effective defenses with their own airbases destroyed.
+
+Result:
+
+(WordInstanceNode "their@e5533eb5-6dd6-4e93-8a29-5576ca5158f5") ; [183]
+
+accepted forces@14ff034a-cc21-46af-9295-20288f1a5903
+accepted defenses@fb517147-7ebc-4bed-b051-3055cfaaaad0
+accepted airstrikes@309851eb-fcdd-4150-826b-1745fb334a67
+accepted air@8783589d-528b-4282-909e-8ef476aaa064
+accepted air@dabc4902-d1e5-4524-8d8d-f221438511e1
+accepted launch@f93feea6-6019-4dae-a50b-97eb507347b6
+================================================================================================
+Test #27---------------------------------------------------------------------------------Unknown
+
+Koray Altınay began his career with SC Fürstenfeldbruck before joining Bayern Munich II in 2011.
+He made eleven appearances for the Bayern Munich reserve team in the 2011–12 season, scoring one goal, the winner in a 1–0 victory in the mini-Munich derby against TSV 1860 München II.
+
+Result:
+
+Resolving...........
+(WordInstanceNode "he@91bf5775-590a-4b23-8c0d-ccbbd65e0aca") ; [5745]
+
+accepted Altınay@a1d73e0f-70b3-46e5-88fa-da2fcb58a8c0
+accepted career@2bb1149f-0227-4ad4-a33d-55186d6fe738
+accepted Fürstenfeldbruck@c3b88086-6a51-4b0a-b670-9b8283874ced
+accepted Munich@645f118e-2b96-4183-849a-54948ec28a41
+accepted 2011@3495936c-df0d-4137-928f-cfae0424c215
+accepted II@f50c1626-32b7-4672-91bf-ac8bab774409
+
+Resolving...........
+(WordInstanceNode "his@ef835e02-eabd-4cba-b188-7df2ba2cecf7") ; [5497]
+
+accepted Altınay@a1d73e0f-70b3-46e5-88fa-da2fcb58a8c0
+
+
+================================================================================================
+Test #28---------------------------------------------------------------------------------Unknown
+
+Tom was in a firm before joining a club. He was happy.
+
+Result:
+
+Resolving...........
+(WordInstanceNode "he@53e94638-e260-487b-a7d9-98a73c6b4e41") ; [4146]
+
+accepted club@936012d7-2b4a-40a3-a92f-7355016f07ab
+accepted Tom@b47fcf9e-bdcd-4118-9bf1-6ca446a3fc70
+accepted firm@fa3970c4-327e-49ff-b9c6-b85f8e012a25

@@ -22,20 +22,6 @@
                 (VariableNode "$verb")
                 (VariableTypeNode "WordInstanceNode")
             )
-            (TypedVariableLink
-                (VariableNode "$relationship #1")
-                (ListLink
-                    (VariableTypeNode "DefinedLinguisticRelationshipNode")
-                    (VariableTypeNode "PrepositionalRelationshipNode")
-                )
-            )
-            (TypedVariableLink
-                (VariableNode "$relationship #2")
-                (ListLink
-                    (VariableTypeNode "DefinedLinguisticRelationshipNode")
-                    (VariableTypeNode "PrepositionalRelationshipNode")
-                )
-            )
         )
         (ImplicationLink
             (AndLink
@@ -62,14 +48,14 @@
                     )
                 )
                 (EvaluationLink
-                    (VariableNode "$relationship #1")
+                    (DefinedLinguisticRelationshipNode "_subj")
                     (ListLink
                         (VariableNode "$verb")
                         (VariableNode "$word-inst-antecedent")
                     )
                 )
                 (EvaluationLink
-                    (VariableNode "$relationship #2")
+                    (DefinedLinguisticRelationshipNode "_obj")
                     (ListLink
                         (VariableNode "$verb")
                         (VariableNode "$word-inst-anaphor")

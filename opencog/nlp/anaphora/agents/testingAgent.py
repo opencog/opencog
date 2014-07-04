@@ -45,7 +45,7 @@ data=["opencog/scm/config.scm",
       "opencog/nlp/scm/processing-utils.scm",
       "opencog/nlp/scm/relex-to-logic.scm",
 
-      "opencog/nlp/anaphora/tests/atomspace.scm"
+      "opencog/nlp/anaphora/tests/atomspace#1.scm"
     ]
 #status2 = load_scm(atomspace, "opencog/nlp/anaphora/tests/atomspace.scm")
 

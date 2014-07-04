@@ -1,4 +1,4 @@
-(define getRoots
+(define connectRootsToParseNodes
     (BindLink
         (ListLink
             (TypedVariableLink
@@ -16,6 +16,10 @@
                 )
             )
             (TypedVariableLink
+                (VariableNode "$parse node")
+                (VariableTypeNode "ParseNode")
+            )
+            (TypedVariableLink
                 (VariableNode "$parent")
                 (VariableTypeNode "WordInstanceNode")
             )
@@ -30,6 +34,10 @@
         )
         (ImplicationLink
             (AndLink
+               (WordInstanceLink
+                    (VariableNode "$root")
+                    (VariableNode "$parse node")
+               )
                (EvaluationLink
                     (VariableNode "$top relationship")
                     (ListLink
@@ -47,9 +55,12 @@
                     )
                 )
             )
-            (ListLink
-                (AnchorNode "CurrentResult")
-                (VariableNode "$root")
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "__temp__")
+                (ListLink
+                    (VariableNode "$parse node")
+                    (VariableNode "$root")
+                )
             )
         )
     )
