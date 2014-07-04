@@ -848,17 +848,24 @@ void PatternMiner::growTheFirstGramPatternsTask()
             allAtomListLock.lock();
 
         if (allLinks.size() <= 0)
+        {
+            if (THREAD_NUM > 1)
+                allAtomListLock.unlock();
+
             break;
+        }
 
         Handle cur_link = allLinks[allLinks.size() - 1];
         allLinks.pop_back();
 
-        // if this link is listlink, ignore it
-        if (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK)
-            continue;
-
         if (THREAD_NUM > 1)
             allAtomListLock.unlock();
+
+        // if this link is listlink, ignore it
+        if (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK)
+        {
+            continue;
+        }
 
         HandleSeq originalLinks;
         originalLinks.push_back(cur_link);
@@ -873,9 +880,9 @@ void PatternMiner::growTheFirstGramPatternsTask()
 
 bool PatternMiner::containsDuplicateHandle(HandleSeq &handles)
 {
-    for (int i = 0; i < handles.size(); i ++)
+    for (unsigned int i = 0; i < handles.size(); i ++)
     {
-        for (int j = i+1; j < handles.size(); j ++)
+        for (unsigned int j = i+1; j < handles.size(); j ++)
         {
             if (handles[j] == handles[i])
                 return true;
@@ -1009,7 +1016,10 @@ void PatternMiner::growPatternsTask()
 
         cur_index ++;
         if (cur_index >= total)
+        {
+            patternForLastGramLock.unlock();
             break;
+        }
 
         if (THREAD_NUM > 1)
             patternForLastGramLock.unlock();
@@ -1079,6 +1089,10 @@ void PatternMiner::ConstructTheFirstGramPatterns()
     for (unsigned int i = 0; i < THREAD_NUM; ++ i)
     {
         threads[i] = std::thread([this]{this->growTheFirstGramPatternsTask();}); // using C++11 lambda-expression
+    }
+
+    for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+    {
         threads[i].join();
     }
 
@@ -1101,7 +1115,11 @@ void PatternMiner::GrowAllPatterns()
 
         for (unsigned int i = 0; i < THREAD_NUM; ++ i)
         {
-            threads[i] = std::thread([this]{this->growPatternsTask();}); // using C++11 lambda-expression
+            threads[i].join();
+        }
+
+        for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+        {
             threads[i].join();
         }
 
@@ -1142,14 +1160,14 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     htree = new HTree();
     atomSpace = new AtomSpace();
 
-//    unsigned int system_thread_num  = std::thread::hardware_concurrency();
-//    if (system_thread_num > 2)
-//        THREAD_NUM = system_thread_num - 2;
-//    else
-//        THREAD_NUM = 1;
+    unsigned int system_thread_num  = std::thread::hardware_concurrency();
+    if (system_thread_num > 2)
+        THREAD_NUM = system_thread_num - 2;
+    else
+        THREAD_NUM = 1;
 
-    // test only one tread for now
-    THREAD_NUM = 1;
+//    // test only one tread for now
+//    THREAD_NUM = 1;
 
     threads = new thread[THREAD_NUM];
 
