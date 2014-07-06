@@ -65,6 +65,40 @@ void run_moses(metapopulation& metapop,
         distributed_moses(metapop, dex, moses_params, stats);
 }
 
+/**
+ * This twiddles the trmination criteria for deciding when to finish
+ * the search. Not sure why this code is here, instead of being earlier,
+ * and getting set up during the option sepcification stage ... 
+ */
+void adjust_termination_criteria(const behave_cscore& c_scorer,
+                                 optim_parameters& opt_params,
+                                 moses_parameters& moses_params)
+{
+    // Update terminate_if_gte and max_score criteria. An explicit
+    // user-specified max score always over-rides the inferred score.
+    score_t target_score = c_scorer.best_possible_score();
+    if (very_best_score != moses_params.max_score) {
+        target_score = moses_params.max_score;
+        logger().info("Target score = %g", target_score);
+    } else {
+        logger().info("Inferred target score = %g", target_score);
+    }
+
+    // negative min_improv is interpreted as percentage of
+    // improvement, if so then don't substract anything, since in that
+    // scenario the absolute min improvent can be arbitrarily small
+    score_t actual_min_improv = std::max(c_scorer.min_improv(), (score_t)0);
+    target_score -= actual_min_improv;
+    logger().info("Subtract %g (minimum significant improvement) "
+                  "from the target score to deal with float imprecision = %g",
+                  actual_min_improv, target_score);
+
+    opt_params.terminate_if_gte = target_score;
+    moses_params.max_score = target_score;
+
+    // update minimum score improvement
+    opt_params.set_min_score_improv(c_scorer.min_improv());
+}
 
 } // ~namespace moses
 } // ~namespace opencog
