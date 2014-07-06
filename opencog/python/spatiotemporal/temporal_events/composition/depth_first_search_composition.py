@@ -1,8 +1,39 @@
 from copy import deepcopy
-from spatiotemporal.temporal_events.composition import unpack
+from math import fabs, sqrt
 from spatiotemporal.temporal_events.composition.railway_framework import RailwaySystem, EPSILON
 from spatiotemporal.temporal_events.trapezium import TemporalEventTrapezium
 from utility.functions import almost_equals
+
+
+
+
+
+def unpack(relation, start_reference=0, length_reference=1):
+    before, same, after = relation
+    similarity = same / (1 - fabs(before - after))
+
+    solutions = []
+
+    lengths = length_reference / similarity**2, length_reference * similarity**2
+    for i in xrange(2):
+        length_solution = lengths[i]
+        starts = [
+            start_reference - (length_solution*before - 0.5*length_reference),
+            start_reference + length_reference - (length_reference*before + 0.5*length_solution)
+        ]
+        start_solution = starts[i]
+
+        comparison_operand = 0.5 * (length_reference / length_solution)**((-1)**i)
+        if before <= comparison_operand:
+            start_solution = start_reference + length_reference - sqrt(2*before*length_solution*length_reference)
+        elif before > 1 - comparison_operand:
+            start_solution = start_reference - length_solution + sqrt(2*after*length_solution*length_reference)
+
+        if i == 0 or i == 1 and solutions[0] != (start_solution, start_solution + length_solution):
+            solution_a, solution_b = round(start_solution, 15), round(start_solution + length_solution, 15)
+            solutions.append((solution_a, solution_b))
+
+    return solutions
 
 
 class Node(object):
@@ -112,16 +143,16 @@ if __name__ == '__main__':
 
     search_tree = DepthFirstSearchComposition()
     formula = RelationFormulaConvolution()
-    # A, B, C = generate_random_events(3)
-    # for event in [A, B, C]:
-    #     p = ''
-    #     for point in [event.a, event.b, event.beginning, event.ending]:
-    #         p += str((point - A.a) / (A.beginning - A.a)) + ', '
-    #     print p
+    A, B, C = generate_random_events(3)
+    for event in [A, B, C]:
+        p = ''
+        for point in [event.a, event.b, event.beginning, event.ending]:
+            p += str((point - A.a) / (A.beginning - A.a)) + ', '
+        print p
 
-    A = TemporalEventTrapezium(0, 30, 10, 20)
-    B = TemporalEventTrapezium(1, 9, 2, 8)
-    C = TemporalEventTrapezium(0, 30, 10, 20)
+    # A = TemporalEventTrapezium(0, 30, 10, 20)
+    # B = TemporalEventTrapezium(1, 9, 2, 8)
+    # C = TemporalEventTrapezium(0, 30, 10, 20)
 
     actual_solution = (A * C).to_vector()
     print 'Actual\n', actual_solution
@@ -166,6 +197,6 @@ if __name__ == '__main__':
                     estimate.append(relation)
         # print goal - numpy.array(estimate)
 
-    print compute_railway_strength(solutions)
+    print compute_railway_strength(solutions, goals=[('A', 'C')])
     print 'Average\n', average_solution
     print 'Error\n', actual_solution - average_solution

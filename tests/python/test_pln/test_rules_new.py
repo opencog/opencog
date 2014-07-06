@@ -27,17 +27,25 @@ class PLNUnitTester(TestCase):
         self.chainer = None
 
         # Works:
-        self.addTestFile("AbductionRule_InheritanceLink.scm") # Under investigation
         self.addTestFile("AndRule_new.scm")
         self.addTestFile("BooleanTransformationRule_new.scm")
         self.addTestFile("DeductionRule_InheritanceLink.scm")
-        self.addTestFile("InductionRule_InheritanceLink.scm") # disabled due to result swapping CNodes on buildbot
         self.addTestFile("InheritanceRule.scm")
+        self.addTestFile("InductionRule_InheritanceLink.scm")
+        self.addTestFile("AbductionRule_InheritanceLink.scm") # Under investigation
         self.addTestFile("InversionRule_InheritanceLink.scm")
         self.addTestFile("OrCreationRule.scm")
         self.addTestFile("OrRule_new.scm")
         self.addTestFile("NotCreationRule.scm")
         self.addTestFile("TransitiveSimilarityRule_SimilarityLink.scm")
+        # context rules
+        self.addTestFile("InheritanceToContextRule.scm")
+        self.addTestFile("ContextToInheritanceRule.scm")
+        self.addTestFile("ContextToEvaluationRule.scm")
+        self.addTestFile("ContextToSubsetRule.scm")
+        self.addTestFile("EvaluationToContextRule.scm")
+        self.addTestFile("SubsetToContextRule.scm")
+
 
         # Testing (just a placeholder for where to put tests while...testing them)
         #self.addTestFile("SimilarityRule_And.scm")
@@ -167,7 +175,7 @@ class PLNUnitTester(TestCase):
     def load_rules(self):
         rules = self.get_predicate_arguments(self.atomSpaceFileData, "rules")
 
-        allRules = AllRules(self.atomSpaceFileData, self.chainer)
+        allRules = AllRules(self.atomSpaceInputs, self.chainer)
 
         for rule in rules:
             #allRules.import_rule(rule, self.chainer)
@@ -220,7 +228,7 @@ class PLNUnitTester(TestCase):
             print "  Yes, all created items were predicted"
             allItemsWerePredicted = True
         else:
-            print "  No, not created items were predicted (see above for details)"
+            print "  No, some created items were not predicted (see above for details)"
 
         self.assertTrue(allPredictedItemsExist and allItemsWerePredicted)
 
@@ -434,6 +442,14 @@ class AllRules(object):
             IntensionalInheritanceEvaluationRule(self.chainer))
         self.chainer.add_rule(
             IntensionalSimilarityEvaluationRule(self.chainer))
+
+        # context rules
+        self.chainer.add_rule(InheritanceToContextRule(self.chainer))
+        self.chainer.add_rule(EvaluationToContextRule(self.chainer))
+        self.chainer.add_rule(SubsetToContextRule(self.chainer))
+        self.chainer.add_rule(ContextToInheritanceRule(self.chainer))
+        self.chainer.add_rule(ContextToEvaluationRule(self.chainer))
+        self.chainer.add_rule(ContextToSubsetRule(self.chainer))
 
         # self.member_rules = [GeneralEvaluationToMemberRule(self.chainer),
         #     MemberToEvaluationRule(self.chainer)]

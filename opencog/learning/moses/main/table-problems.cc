@@ -109,15 +109,22 @@ void table_problem_base::common_setup(problem_params& pms)
         logger().info("Read data file %s", idf.c_str());
         Table table = loadTable(idf, _tpp.target_feature, _tpp.ignore_features_str);
         num_rows += table.size();
+
         // Possibly subsample the table
         if (pms.nsamples > 0)
             subsampleTable(table, pms.nsamples);
+
         // Compressed table
         _ctables.push_back(table.compressed(_tpp.weighting_feature));
+
         // The compressed table removes the weighting feature, too.
         if (not _tpp.weighting_feature.empty())
             table.itable.delete_column(_tpp.weighting_feature);
         _tables.push_back(table);
+
+        // Possibly balance the ctable
+        if (pms.balance)
+            _ctables.back().balance();
     }
     logger().info("Number of rows in tables = %d", num_rows);
 
@@ -227,8 +234,7 @@ void ip_problem::run(option_base* ob)
 
     int as = alphabet_size(tt, pms.ignore_ops);
 
-    typedef interesting_predicate_bscore BScore;
-    BScore bscore(ctable,
+    interesting_predicate_bscore bscore(ctable,
                   _ippp.ip_kld_weight,
                   _ippp.ip_skewness_weight,
                   _ippp.ip_stdU_weight,
@@ -238,6 +244,12 @@ void ip_problem::run(option_base* ob)
                   pms.hardness, pms.hardness >= 0);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
+    // In order to support boosting, the interesting_predicate_bscore
+    // would have to modified to always return a bscore that is the
+    // smae length, and so that the same item akways refered to the
+    // same row in the ctable.
+    OC_ASSERT(not pms.meta_params.do_boosting,
+        "Boosting not supported for the ip problem!");
     simple_ascore ascore;
     behave_cscore mbcscore(bscore, ascore);
     metapop_moses_results(pms.exemplars, tt,
@@ -283,6 +295,10 @@ void ann_table_problem::run(option_base* ob)
 
     contin_bscore bscore(table);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
+
+    // Boosing for contin values needs a whole bunch of new code.
+    OC_ASSERT(not pms.meta_params.do_boosting,
+        "Boosting not supported for the ann problem!");
     simple_ascore ascore;
     behave_cscore cscore(bscore, ascore);
     metapop_moses_results(pms.exemplars, tt,
@@ -314,7 +330,7 @@ void ann_table_problem::run(option_base* ob)
     int as = alphabet_size(cand_sig, pms.ignore_ops);                \
     SCORER bscore ARGS ;                                             \
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio); \
-    simple_ascore ascore;                                            \
+    boosting_ascore ascore(bscore.size());                           \
     behave_cscore mbcscore(bscore, ascore);                          \
     metapop_moses_results(pms.exemplars, cand_sig,                   \
                       REDUCT, REDUCT_REP, mbcscore,                  \
@@ -337,8 +353,7 @@ void pre_table_problem::run(option_base* ob)
         get_signature_inputs(table_type_signature),
         type_tree(id::boolean_type));
     int as = alphabet_size(cand_sig, pms.ignore_ops);
-    typedef precision_bscore BScore;
-    BScore bscore(ctable,
+    precision_bscore bscore(ctable,
                        fabs(pms.hardness),
                        pms.min_rand_input,
                        pms.max_rand_input,
@@ -359,6 +374,11 @@ void pre_table_problem::run(option_base* ob)
                                                      pms.festor_params);
     }
  
+    // In order to support boosting, the precision_bscore
+    // would need to be reworked to always return a predictable,
+    // dixed number of rows.
+    OC_ASSERT(not pms.meta_params.do_boosting,
+        "Boosting not supported for the pre problem!");
     simple_ascore ascore;
     behave_cscore mbcscore(bscore, ascore);
     metapop_moses_results(pms.exemplars, cand_sig,
@@ -384,8 +404,7 @@ void pre_conj_table_problem::run(option_base* ob)
         get_signature_inputs(table_type_signature),
         type_tree(id::boolean_type));
     int as = alphabet_size(cand_sig, pms.ignore_ops);
-    typedef precision_conj_bscore BScore;
-    BScore bscore(ctable,
+    precision_conj_bscore bscore(ctable,
                    fabs(pms.hardness),
                    pms.hardness >= 0);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
@@ -396,6 +415,11 @@ void pre_conj_table_problem::run(option_base* ob)
                                                  pms.festor_params);
     }
 
+    // In order to support boosting, the precision_conj_bscore
+    // would need to be reworked to always return a predictable,
+    // dixed number of rows.
+    OC_ASSERT(not pms.meta_params.do_boosting,
+        "Boosting not supported for the pre problem!");
     simple_ascore ascore;
     behave_cscore mbcscore(bscore, ascore);
     metapop_moses_results(pms.exemplars, cand_sig,
@@ -493,11 +517,11 @@ void it_table_problem::run(option_base* ob)
             // Works. Kind of. Not as well as hoped.
             // Might be good for some problem. See diary.
             partial_solver well(ctable,
-                            pms.exemplars, *pms.contin_reduct,
-                            pms.opt_params, pms.hc_params,
-                            pms.deme_params,
-                            pms.meta_params,
-                            pms.moses_params, pms.mmr_pa);
+                                pms.exemplars, *pms.contin_reduct,
+                                pms.opt_params, pms.hc_params,
+                                pms.deme_params,
+                                pms.meta_params,
+                                pms.moses_params, pms.mmr_pa);
             well.solve();
         } else {
             // Much like the boolean-output-type above,
@@ -527,7 +551,7 @@ void it_table_problem::run(option_base* ob)
                        *pms.contin_reduct, *pms.contin_reduct,
                        table, discretize_contin_bscore,
                        (table.otable, table.itable,
-                            pms.discretize_thresholds, pms.weighted_accuracy));
+                        pms.discretize_thresholds, pms.weighted_accuracy));
         }
     }
 

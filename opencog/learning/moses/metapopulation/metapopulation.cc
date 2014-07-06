@@ -40,7 +40,8 @@ metapopulation::metapopulation(const std::vector<combo_tree>& bases,
     _params(pa),
     _cscorer(sc),
     _merge_count(0),
-    _best_cscore(worst_composite_score)
+    _best_cscore(worst_composite_score),
+    _ensemble(sc)
 {
     init(bases);
 }
@@ -53,7 +54,8 @@ metapopulation::metapopulation(const combo_tree& base,
     _params(pa),
     _cscorer(sc),
     _merge_count(0),
-    _best_cscore(worst_composite_score)
+    _best_cscore(worst_composite_score),
+    _ensemble(sc)
 {
     std::vector<combo_tree> bases(1, base);
     init(bases);
@@ -66,9 +68,8 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars)
     scored_combo_tree_set candidates;
     for (const combo_tree& base : exemplars) {
 
-        behavioral_score bs(_cscorer.get_bscore(base));
-        composite_score csc(_cscorer.get_cscore(bs));
-        scored_combo_tree sct(base, demeID_t(), csc, bs);
+        composite_score csc(_cscorer.get_cscore(base));
+        scored_combo_tree sct(base, demeID_t(), csc);
 
         candidates.insert(sct);
     }
@@ -195,18 +196,61 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
 }
 
 // -------------------------------------------------------------------
-// Misc routines
+// Search-termination-related routines.  The scores that are returned
+// are used by the main program to terminate the search.
 
-// Like above, but using std::cout.
-void metapopulation::print(long n,
-           bool output_score,
-           bool output_penalty,
-           bool output_bscore,
-           bool output_visited,
-           bool output_only_best)
+/**
+ * Return the composite score of the highest-scoring tree in the metapop.
+ */
+composite_score metapopulation::best_composite_score() const
 {
-    ostream(std::cout, n, output_score, output_penalty,
-            output_bscore, output_visited, output_only_best);
+    if (not _params.do_boosting)
+        return _best_cscore;
+
+    // XXX FIXME should probably not recompute every time ... 
+    // need to figure who is calling this method, and what they are expecting.
+    return _cscorer.get_cscore(_ensemble.get_ensemble());
+}
+
+/**
+ * Return the set of scored combo trees with the highest composite
+ * scores.  If boosting (ensemble learning) is enabled, these are
+ * not the trees that you are looking for.  Call get_ensemble()
+ * instead.
+ */
+const scored_combo_tree_set& metapopulation::best_candidates() const
+{
+    return _best_candidates;
+}
+
+/**
+ * Returen the trees in the ensemble.
+ * Returns something non-empty only if boosting is enabled.
+ */
+const scored_combo_tree_set& metapopulation::get_ensemble() const
+{
+    return _ensemble.get_ensemble();
+}
+
+/** 
+ * Return the best combo tree (shortest best candidate).
+ */
+const combo_tree& metapopulation::best_tree() const
+{
+    OC_ASSERT(not _params.do_boosting,
+        "No such thing as a best tree in an ensemble.");
+    return best_candidates().begin()->get_tree();
+}
+
+std::ostream& metapopulation::ostream_metapop(std::ostream& out, int maxcnt) const
+{
+    const scored_combo_tree_set& tree_set = best_candidates();
+    int cnt = 0;
+    for (const scored_combo_tree& sct : tree_set) {
+        if (maxcnt < ++cnt) break;
+        out << sct;
+    }
+    return out;
 }
 
 } // ~namespace moses

@@ -42,7 +42,7 @@ class InheritanceToContextRule(Rule):
                       formula=contextFormula,
                       inputs=[chainer.link(
                           types.InheritanceLink,  # InheritanceLink
-                          [chainer.link(types.AndLink, [c, a]),  # C ANDLink A
+                          [chainer.link(types.AndLink, [a, c]),  # C ANDLink A
                            # C ANDLink B
                            chainer.link(types.AndLink, [c, b])])],
                       outputs=[chainer.link(

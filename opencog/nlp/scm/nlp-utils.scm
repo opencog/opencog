@@ -545,10 +545,13 @@
 ; Delete the parses and word-instances associated with the sentence,
 ; including LemmaLink's, ReferenceLinks, RelEx relations, and 
 ; link-grammar linkages.
+;
+; Only the atoms in the atomspace are removed; if any are in the
+; backingstore (database) they are untouched.
 
 (define (delete-sentence sent)
 	(define (delete-word-instance wi)
-		(cog-delete-recursive wi)
+		(cog-purge-recursive wi)
 	)
 
 	; Delete, recusively, all of the word-instances in the parse.
@@ -561,7 +564,7 @@
 			)
 			(cog-incoming-set parse)
 		)
-		(cog-delete-recursive parse)
+		(cog-purge-recursive parse)
 	)
 
 	; For each parse of the sentence, delete parse
@@ -576,7 +579,7 @@
 
 	; This delete will fail if there are still incoming links ... 
 	; this is intentional. Its up to the caller to cleanup.
-	(cog-delete sent)
+	(cog-purge sent)
 )
 
 ; ---------------------------------------------------------------------
@@ -585,6 +588,9 @@
 ; Delete atoms that belong to particular sentence instances; we don't
 ; want to clog up the atomspace with old junk we don't want any more.
 ;
+; Only the atoms in the atomspace are removed; if any are in the
+; backingstore (database) they are untouched.
+;
 ; XXX TODO: In principle, this could be accomplished by lowering the
 ; AttentionValue for the atoms, and letting the ForgettingAgent do its
 ; work. In practice, this is too complicated, for now.
@@ -592,11 +598,11 @@
 (define (delete-sentences)
 	(let ((n 0))
 	; (define (delit atom) (set! n (+ n 1)) #f)
-	; (define (delit atom) (cog-delete-recursive atom) #f)
-	(define (delit atom) (cog-delete-recursive atom) (set! n (+ n 1)) #f)
+	; (define (delit atom) (cog-purge-recursive atom) #f)
+	(define (delit atom) (cog-purge-recursive atom) (set! n (+ n 1)) #f)
 
-	; (define (delone atom) (cog-delete atom) #f)
-	(define (delone atom) (cog-delete atom) (set! n (+ n 1)) #f)
+	; (define (delone atom) (cog-purge atom) #f)
+	(define (delone atom) (cog-purge atom) (set! n (+ n 1)) #f)
 
 	; Can't delete InheritanceLink, its used to mark wsd completed... 
 	; (cog-map-type delone 'InheritanceLink)

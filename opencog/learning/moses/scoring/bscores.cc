@@ -1,8 +1,9 @@
 /*
- * opencog/learning/moses/moses/scoring.cc
+ * opencog/learning/moses/scoring/bscores.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
+ * Copyright (C) 2014 Aidyia Limited
  * All Rights Reserved
  *
  * Written by Moshe Looks, Nil Geisweiller, Linas Vepstas
@@ -68,9 +69,48 @@ behavioral_score logical_bscore::operator()(const combo_tree& tr) const
     combo::complete_truth_table tt(tr, _arity);
     behavioral_score bs(_target.size());
 
+    // Compare the predictions of the tree to that of the desired
+    // result. A correct prdiction gets a score of 0, an incorrect
+    // prediction gets a score of -1.
     boost::transform(tt, _target, bs.begin(), [](bool b1, bool b2) {
             return -score_t(b1 != b2); });
 
+    return bs;
+}
+
+/// Boolean ensemble scorer.  Assumes that the ensemble signature outputs
+/// a boolean value.  All of the trees in the ensmble get a wieghted vote,
+/// that vote is totalled to get the prediction of the ensemble, and then
+/// compared to the desired output.
+behavioral_score logical_bscore::operator()(const scored_combo_tree_set& ensemble) const
+{
+    size_t sz = _target.size();
+
+    // Step 1: accumulate the weighted prediction of each tree in
+    // the ensemble.
+    behavioral_score hypoth(sz);
+    for (const scored_combo_tree& sct: ensemble) {
+        combo::complete_truth_table tt(sct.get_tree(), _arity);
+        score_t weight = sct.get_weight();
+        for (size_t i=0; i<sz; i++) {
+            // Add +1 if prediction is true and -1 if prediction is false.
+            // We could gain some minor performance improvement if we
+            // moved this out of the loop, but who cares, this scorer is
+            // used only for the demo problems.
+            hypoth[i] += weight * (2.0 * ((score_t) tt[i]) - 1.0);
+        }
+    }
+
+    // Step 2: compare the prediction of the ensemble to the desired
+    // result. The array "hypoth" is positive to predict true, and
+    // negative to predict false.  The resulting score is 0 if corrrect,
+    // and -1 if incorrect.
+    behavioral_score bs(sz);
+    boost::transform(hypoth, _target, bs.begin(),
+        [](score_t hyp, bool b2) {
+            bool b1 = (hyp > 0.0) ? true : false;
+            return -score_t(b1 != b2);
+         });
     return bs;
 }
 
@@ -226,7 +266,7 @@ behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
     interpreter_visitor iv(tr);
     auto interpret_tr = boost::apply_visitor(iv);
     // Evaluate the bscore components for all rows of the ctable
-    for (const CTable::value_type& vct : ctable) {
+    for (const CTable::value_type& vct : _ctable) {
         const CTable::counter_t& c = vct.second;
         score_t sc = c.get(negate_vertex(interpret_tr(vct.first.get_variant())));
         bs.push_back(-sc);
@@ -240,7 +280,7 @@ behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
 behavioral_score ctruth_table_bscore::best_possible_bscore() const
 {
     behavioral_score bs;
-    transform(ctable | map_values, back_inserter(bs),
+    transform(_ctable | map_values, back_inserter(bs),
               [](const CTable::counter_t& c) {
                   // OK, this looks like magic, but here's what it does:
                   // CTable is a compressed table; multiple rows may
@@ -273,7 +313,7 @@ behavioral_score enum_table_bscore::operator()(const combo_tree& tr) const
     // Evaluate the bscore components for all rows of the ctable
     interpreter_visitor iv(tr);
     auto interpret_tr = boost::apply_visitor(iv);
-    for (const CTable::value_type& vct : ctable) {
+    for (const CTable::value_type& vct : _ctable) {
         const CTable::counter_t& c = vct.second;
         // The number that are wrong equals total minus num correct.
         score_t sc = score_t(c.get(interpret_tr(vct.first.get_variant())));
@@ -288,7 +328,7 @@ behavioral_score enum_table_bscore::operator()(const combo_tree& tr) const
 behavioral_score enum_table_bscore::best_possible_bscore() const
 {
     behavioral_score bs;
-    transform(ctable | map_values, back_inserter(bs),
+    transform(_ctable | map_values, back_inserter(bs),
               [](const CTable::counter_t& c) {
                   // OK, this looks like magic, but here's what it does:
                   // CTable is a compressed table; multiple rows may
@@ -310,8 +350,8 @@ behavioral_score enum_table_bscore::best_possible_bscore() const
 behavioral_score enum_table_bscore::worst_possible_bscore() const
 {
     // Make an attempt too at least return the correct length
-    double bad = very_worst_score / ((double) ctable.size() + 1);
-    return behavioral_score(ctable.size(), bad);
+    double bad = very_worst_score / ((double) _ctable.size() + 1);
+    return behavioral_score(_ctable.size(), bad);
 }
 
 score_t enum_table_bscore::min_improv() const
@@ -342,7 +382,7 @@ behavioral_score enum_filter_bscore::operator()(const combo_tree& tr) const
     interpreter_visitor iv_tr(tr), iv_predicate(predicate);
     auto interpret_tr = boost::apply_visitor(iv_tr);
     auto interpret_predicate = boost::apply_visitor(iv_predicate);
-    for (const CTable::value_type& vct : ctable) {
+    for (const CTable::value_type& vct : _ctable) {
         const CTable::counter_t& c = vct.second;
 
         unsigned total = c.total_count();
@@ -414,7 +454,7 @@ behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) const
     // Evaluate the bscore components for all rows of the ctable
     // TODO
     sib_it predicate = it.begin();
-    for (const CTable::value_type& vct : ctable) {
+    for (const CTable::value_type& vct : _ctable) {
         const CTable::counter_t& c = vct.second;
 
         unsigned total = c.total_count();
@@ -481,7 +521,7 @@ behavioral_score enum_effective_bscore::operator()(const combo_tree& tr) const
     pre_it it = tr.begin();
     if (is_enum_type(*it)) {
         behavioral_score::iterator bit = bs.begin();
-        for (const CTable::value_type& vct : ctable) {
+        for (const CTable::value_type& vct : _ctable) {
             const CTable::counter_t& c = vct.second;
 
             // The number that are wrong equals total minus num correct.
@@ -510,7 +550,7 @@ behavioral_score enum_effective_bscore::operator()(const combo_tree& tr) const
 
             behavioral_score::iterator bit = bs.begin();
             vector<bool>::iterator dit = done.begin();
-            for (const CTable::value_type& vct : ctable) {
+            for (const CTable::value_type& vct : _ctable) {
                 if (*dit == false) {
                     const CTable::counter_t& c = vct.second;
 
@@ -534,7 +574,7 @@ behavioral_score enum_effective_bscore::operator()(const combo_tree& tr) const
         bool effective = false;
         interpreter_visitor iv(predicate);
         auto interpret_predicate = boost::apply_visitor(iv);
-        for (const CTable::value_type& vct : ctable) {
+        for (const CTable::value_type& vct : _ctable) {
             if (*dit == false) {
                 vertex pr = interpret_predicate(vct.first.get_variant());
                 if (pr == id::logical_true) {
@@ -634,9 +674,7 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
     logger().fine("total = %u", total);
     logger().fine("actives = %u", actives);
 
-    behavioral_score bs;
-
-    // Create a histogram of output values, ignoring non-slected rows.
+    // Create a histogram of output values, ignoring non-selected rows.
     // Do this by filtering the ctable output column according to the,
     // predicate, discarding non-selected rows. Then total up how often
     // each distinct output value occurs.
@@ -654,11 +692,13 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
     // If there's only one output value left, then punt.  Statistics
     // like skewness need a distribution that isn't a single spike.
     if (pred_counter.size() == 1) {
+        behavioral_score bs;
         bs.push_back(very_worst_score);
         log_candidate_bscore(tr, bs);
         return bs;
     }
 
+    behavioral_score bs;
     // Compute Kullback-Leibler divergence (KLD) of the filetered
     // distribution.
     if (_kld_w > 0.0) {

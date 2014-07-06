@@ -12,6 +12,10 @@ There are several very different ways of envisioning boosting in MOSES,
 each being more or less compatible with the formal definition of
 boosting. See http://en.wikipedia.org/wiki/Boosting_(meta-algorithm)
 
+(Caution: the formulas in http://en.wikipedia.org/wiki/AdaBoost
+are incorrect and misleading, and suggests an inapprorpriate algorithm
+and implementation. Beware!)
+
 The formal definition of boosting invokes the idea of a weighted
 ensemble of 'weak learners'.  Each member of the ensemble is given a
 weight, with the weights being issued so as to minimize the total error
@@ -40,7 +44,7 @@ metapopulation.
 
  *) A deme is an exemplar that has been decorated with knobs, together
     with a large set of possible knob settings (instances).  Each
-    instance is conceptually a single combio tree, that differs
+    instance is conceptually a single combo tree, that differs
     structurally from its parent exemplar in some 'minor' way.
 
 Lets look at how the boosting algo would work for each scenario. But
@@ -76,10 +80,9 @@ algo, so that H.3 is a bunch of steps.
  A.2) Generate N instances by turning N knobs. (same as H.2)
  A.3.1) Score all N instances, using a uniform weight on all samples.
  A.3.2) Pick the best instance, per boost, add it to the ensemble.
- A.3.3) Score the ensemble, see which samples are mis-predicted.
- A.3.4) Adjust per-sample weight based on ensemble mis-prediction
- A.3.5) Re-score remaining N-1 instances with new weighted scorer.
- A.3.6) Go to step A.3.2
+ A.3.3) Adjust per-sample weight based on ensemble mis-prediction
+ A.3.4) Re-score remaining N-1 instances with new weighted scorer.
+ A.3.5) Go to step A.3.2
 
  A.3.7) Terminate above loop using some criteria,
  A.4) Select the highest-scoring instance, based on the weighted
@@ -94,9 +97,9 @@ algo, so that H.3 is a bunch of steps.
  A.9) Same as H.9
  A.10) Same as H.10
 
-The above seems to make sense, and is fully compatible with the formal
-definition of boosting. However, step A.4 seems somewhat strange. Lets
-ponder it.
+The above seems to make sense, and superfically seems to be compatible
+with the formal definition of boosting.  However, step A.4 seems somewhat
+strange. Lets ponder this.
 
 In step A.4, we pick the instance with the highest weighted score,
 rather than the instance with the highest overall accuracy. What does
@@ -105,7 +108,7 @@ instance that gets right what previous instances got wrong.  By the time
 that we get past step A.7, what we've done is to create M exemplars that
 got things right that the initial exemplar did not.  Do any of these M
 exemplars have a better absolute value accuracy score than the initial
-exemplar? Unclear.  So we have research question 1:
+exemplar? Unclear, possibly not.  So we have research question 1:
 
  RQ.1) Compare the 'raw' score of the M exemplars from step A.7 to the
        score from ordinary hill-climbing H.7.  Is it possible that the
@@ -164,37 +167,45 @@ and
  RQ.5) Same as RQ.2 -- net-net, is this better?
 
 --------------
-Secnario C) The entire metapopulation is the ensemble.
+Secnario C) Maintain an ensemble drawn from the metapopulation.
 
 Again, this is a variant of the canonical hill-climbing algo, with
 modifications show below.  To summarize, step H.7 is replaced by the
-boost algo.  Unlike Bh.7, though, the ensemble is the entire metapop.
+boost algo.  Unlike Bh.7, though, the ensemble is drawn from the
+entire metapop.
 
  C.1) Select an exemplar from the metapopulation. (Same as H.1)
  C.2) Generate N instances by turning N knobs. (Same as H.2)
- C.3x) Score all N instances, weights from the metapop.
+ C.3x) Score all N instances, using weighted scorer.
  C.4) Select the highest-scoring instance. (Same as H.4)
  C.5) Go to step C.2 (Same as H.5)
 
  C.6) Terminate above loop in some way. (Same as H.6)
  C.7.1) From 1 till M, do:
- C.7.2) Pick the best instance, per boost, add it to the metapop.
- C.7.3) Score the whole metapop, see which samples are mis-predicted.
- C.7.4) Adjust per-sample weight based on ensemble mis-prediction
+ C.7.2) Pick the best instance, per boost, add it to the ensemble.
+ C.7.3) Adjust per-sample weight based on instance mis-prediction.
  C.7.5) Re-score remaining M-1 instances with new weighted scorer.
- C.7.6) Go to step C.7.2
+ C.7.6) Place all instances into the metapop.
+ C.7.7) Go to step C.7.2
 
  C.8) Go to step C.1 (Same as H.8)
 
  C.9) Terminate above loop in some way. (Same as H.9)
- C.10) Use the top K exemplars in the metapopulation to create a
-       traditional ensemble, for off-line prediction/classification.
+ C.10) Use the ensemble built in step C.7.2 as the final output of
+       the process. i.e. The ensemble is what is finally used for
+       off-line prediction/classification.
 
-Since, in all scenarios, it is step C.10 that is providing the final
-ensemble that will be deployed (or evaluated on the test set), it seems
-to me to me that pursuing scenario C first is the course of action that
-makes the most sense.
+Senario C appears to be the one that is closest in spirit to the 
+traditional boosting algos, and thus will be implemented first.
 
+Scenario C does have interesting issues with the metapopulation
+management.  With each iteration, the scoring criteria for managing the
+metapopulation will change, and the metapop will contain a mixture of
+trees from earlier rounds, and the current round.  This poses a
+question: 
+
+ RQ.6) Should the metapop be rescored with the new re-weighted scorer,
+       or is it OK to leave stale score in there?
 
 Design issues
 -------------
@@ -227,8 +238,19 @@ Solution:
 -- provide a utility for #2 that assembles a composite score from the 
    parts, and can be queried for the scalar score. Done: its behave_cscore.
 
+Notes/TODO:
+-- complexity is not being factored in ... 
+-- scorer is currently not using the user-specified wight column !?
+   or are those in the bscores already?
 
+loop termination is on mp.best_score
 
+Problems:
+1) best score must now be the ensemble score.
+2) the "update best cands" is no longer trying to beat the best in the
+   metapop, because the criteria for "best" haas changed.  This seems to
+   mean that the entire metapop needs to be rescored.  Maybe leave this
+   as open question.
 
 
 
@@ -241,3 +263,56 @@ struct instance_set : public vector<scored_instance<ScoreT> >
 All instances in instance set have same field description.
 
 why is there ever more than one instance set??
+
+==============
+
+24 June 2014
+------------
+Compare the boosted & non-boosted version of the parity problem.
+
+Time to perfect score:
+time moses -Hpa -k3 --boost=1  : 1/2 second
+time moses -Hpa -k4 --boost=1  : 1.8 seconds
+time moses -Hpa -k5 --boost=1  : 9.2 seconds
+time moses -Hpa -k6 --boost=1  : 6m13 seconds
+
+Wow!  Recall that without boosting, -k4 would take minutes, (depending
+very strongly on the initial random seed) and that -k5 was mostly 
+unsolvable (would take an hour or two for a few lucky random seeds)
+
+Wow, even -k6 finds a solution, although it is long, and takes much
+more time to find.   ... and needs to have --reveist=50
+
+So: -k4 speedup == 100x roughly
+    -k5 sppedup == more than 500x
+
+Hmm  different rand seeds:
+
+           -k4     -k5      -k6      -k6
+ random    time    time     time     size
+  seed    (secs)  (secs)   (secs)  (trees)
+ ------   ------  ------   ------  -------
+   r0      1.8      11.2     568
+   r1      1.8       9.2     392
+   r2      2.5      10.4     190
+   r3      2.6      11.8     260
+   r4      2.3       9.2     260     633
+   r5      2.2      18.0    2385    2244
+   r6      1.8      12.7     152     413
+   r7      2.6      13.5    2360    2266
+   r8      2.0      12.3     501     963
+   r9      2.0       9.9    1207    1644
+
+size(trees) above it the number of trees in the ensemble.
+
+crazy ideas:
+
+one rather crazy experiment would be to find three with almost equal
+scores, combine them as indicated, run reduct, and then repeat.  How
+badly would this damage things?  Would it be an effective way of
+obtaining a single tree that is almost right, and then can be finished
+off in the usual fashion?
+
+or perhaps the weights should be forced to be valued as small fractions,
+so that they can be exactly combined ... 
+

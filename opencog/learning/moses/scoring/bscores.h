@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
+ * Copyright (C) 2014 Aidyia Limited
  * All Rights Reserved
  *
  * Written by Moshe Looks, Nil Geisweiller, Linas Vepstas
@@ -30,9 +31,6 @@
 #include <functional>
 #include <vector>
 
-#include <boost/range/numeric.hpp>
-#include <boost/range/algorithm_ext/push_back.hpp>
-#include <boost/range/algorithm/min_element.hpp>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/weighted_skewness.hpp>
@@ -64,7 +62,8 @@ struct logical_bscore : public bscore_base
     logical_bscore(const combo_tree& tr, int a)
             : _target(tr, a), _arity(a) { _size = _target.size(); }
 
-    behavioral_score operator()(const combo_tree& tr) const;
+    behavioral_score operator()(const combo_tree&) const;
+    behavioral_score operator()(const scored_combo_tree_set&) const;
 
     behavioral_score best_possible_bscore() const;
 
@@ -356,9 +355,10 @@ struct ctruth_table_bscore : public bscore_base
     ctruth_table_bscore(const Func& func,
                         arity_t arity,
                         int nsamples = -1)
-        : ctable(func, arity, nsamples)
-    {}
-    ctruth_table_bscore(const CTable& _ctt) : ctable(_ctt) {}
+        : _ctable(func, arity, nsamples)
+    { _size = _ctable.size(); }
+    ctruth_table_bscore(const CTable& ctt) : _ctable(ctt)
+    { _size = _ctable.size(); }
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -369,7 +369,7 @@ struct ctruth_table_bscore : public bscore_base
     score_t min_improv() const;
 
 protected:
-    CTable ctable;
+    CTable _ctable;
 };
 
 /**
@@ -398,7 +398,8 @@ protected:
  */
 struct enum_table_bscore : public bscore_base
 {
-    enum_table_bscore(const CTable& _ctt) : ctable(_ctt) {}
+    enum_table_bscore(const CTable& ctt) : _ctable(ctt)
+    { _size = _ctable.size(); }
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -410,7 +411,7 @@ struct enum_table_bscore : public bscore_base
     virtual score_t min_improv() const;
 
 protected:
-    CTable ctable;
+    CTable _ctable;
 };
 
 /**
@@ -435,8 +436,8 @@ protected:
  */
 struct enum_filter_bscore : public enum_table_bscore
 {
-    enum_filter_bscore(const CTable& _ctt)
-        : enum_table_bscore(_ctt), punish(1.0)
+    enum_filter_bscore(const CTable& ctt)
+        : enum_table_bscore(ctt), punish(1.0)
     {}
 
     behavioral_score operator()(const combo_tree& tr) const;
@@ -479,8 +480,8 @@ struct enum_filter_bscore : public enum_table_bscore
  */
 struct enum_graded_bscore : public enum_table_bscore
 {
-    enum_graded_bscore(const CTable& _ctt)
-        : enum_table_bscore(_ctt), grading(0.9)
+    enum_graded_bscore(const CTable& ctt)
+        : enum_table_bscore(ctt), grading(0.9)
     {}
 
     behavioral_score operator()(const combo_tree&) const;
@@ -505,9 +506,9 @@ protected:
  */
 struct enum_effective_bscore : public enum_graded_bscore
 {
-    enum_effective_bscore(const CTable& _ctt)
-        : enum_graded_bscore(_ctt), _ctable_usize(_ctt.uncompressed_size())
-    {}
+    enum_effective_bscore(const CTable& ctt)
+        : enum_graded_bscore(ctt), _ctable_usize(ctt.uncompressed_size())
+    { _size = _ctable_usize; }
 
     behavioral_score operator()(const combo_tree& tr) const;
 protected:

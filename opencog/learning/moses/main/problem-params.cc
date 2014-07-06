@@ -228,6 +228,12 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "option then the dataset is subsampled randomly to reach the "
          "target size.\n")
 
+        ("balance",
+         po::value<bool>(&balance)->default_value(0),
+         "If the table has discrete output type (like bool or enum), "
+         "balance the resulting ctable so all classes have the same "
+         "weight.\n")
+
         // Algorithm control options
 
         (opt_desc_str(opt_algo_opt).c_str(),
@@ -613,9 +619,10 @@ problem_params::add_options(boost::program_options::options_description& desc)
 
         (opt_desc_str(weighted_accuracy_opt).c_str(),
          po::value<bool>(&weighted_accuracy)->default_value(false),
-         "This option is useful in case of unbalanced data as it "
-         "weights the score so that each class weights equally "
-         "regardless of their proportion in terms of sample size.\n")
+         "This option is only used for the discretize_contin_bscore "
+         "(when --discretize-threshold is used), "
+         "if enabled, then the score corresponds to weighted accuracy"
+         "Useful in case of unbalanced data.\n")
 
         ("diversity-pressure",
          po::value<score_t>(&diversity_pressure)->default_value(0.0),
@@ -1199,6 +1206,7 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
                              output_penalty,
                              output_bscore,
                              output_only_best,
+                             boosting,
                              output_eval_number,
                              output_with_labels,
                              col_labels,
