@@ -1,5 +1,5 @@
 from __future__ import generators
-from itertools import combinations
+from itertools import combinations, product
 from math import sqrt
 from numpy import isinf
 from scipy.stats.distributions import uniform_gen
@@ -10,17 +10,31 @@ __author__ = 'keyvan'
 DISTRIBUTION_INTEGRAL_LIMIT = 1 - EPSILON
 
 
-def compute_railway_strength(solutions):
+def compute_railway_strength(solutions, goals=None):
     railway_system = solutions[0]
+    if goals is None:
+        wagons = combinations(railway_system, 2)
+    else:
+        wagons = []
+        rail_pairs = [
+            (railway_system[rail_1_key], railway_system[rail_2_key])
+            for rail_1_key, rail_2_key in goals
+        ]
+
+        for rail_1, rail_2 in rail_pairs:
+            wagons += product(rail_1, rail_2)
+
     points = 0.0
     count = 0
-    for wagon_1, wagon_2 in combinations(railway_system, 2):
+    for wagon_1, wagon_2 in wagons:
         count += 1
         if railway_system.are_in_same_vertical_tree(wagon_1, wagon_2) or\
                 railway_system.are_in_same_horizontal_tree(wagon_1, wagon_2):
             points += 1
 
-    return points / count / len(solutions)
+    strength = points / count
+    # strength of all solutions, strength per solution
+    return strength, strength / len(solutions)
 
 
 def calculate_bounds_of_probability_distribution(probability_distribution,
