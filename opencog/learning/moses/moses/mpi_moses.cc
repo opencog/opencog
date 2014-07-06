@@ -312,7 +312,7 @@ void mpi_moses_worker(metapopulation& mp,
         time_t max_time = INT_MAX;
         std::vector<unsigned> actl_evals = dex.optimize_demes(max_evals, max_time);
 
-        mp.merge_demes(dex._demes, dex._reps, actl_evals);
+        mp.merge_demes(dex._demes, dex._reps);
         dex.free_demes();
 
         // logger().info() << "Sending " << mp.size() << " results";

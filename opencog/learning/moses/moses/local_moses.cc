@@ -79,7 +79,7 @@ static bool expand_deme(metapopulation& mp,
     stats.n_evals += boost::accumulate(actl_evals, 0U);
     stats.n_expansions++;
 
-    bool done = mp.merge_demes(dex._demes, dex._reps, actl_evals);
+    bool done = mp.merge_demes(dex._demes, dex._reps);
 
     if (logger().isInfoEnabled()) {
         logger().info() << "Expansion " << stats.n_expansions << " done";

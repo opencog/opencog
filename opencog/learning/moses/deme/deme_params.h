@@ -25,6 +25,7 @@
 #define _OPENCOG_DEME_PARAMETERS_H
 
 #include "feature_selector.h"
+#include "../representation/representation.h"
 
 namespace opencog { namespace moses {
 

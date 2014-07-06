@@ -28,6 +28,7 @@
 
 #include "../moses/types.h"
 #include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/table/table.h>
 
 namespace opencog { namespace moses {
 

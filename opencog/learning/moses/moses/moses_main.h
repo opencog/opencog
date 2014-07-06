@@ -120,12 +120,12 @@ struct metapop_printer
                 // XXX this is close to what we want but maybe borken.
                 // FIXME untested.
                 for (const scored_combo_tree& sct : tree_set)
-				       ss << "      + " << sct.get_weight()
-                      << " * " << sct.get_tree() << "\\\n";
+                    ss << "      + " << sct.get_weight()
+                       << " * " << sct.get_tree() << "\\\n";
                 ss << "\n    return (0.0 < val)\n";
             } else {
 
-                // For ensembles, we woutput ONLY the weight and the tree.
+                // For ensembles, we output ONLY the weight and the tree.
                 for (const scored_combo_tree& sct : tree_set)
                     ss << sct.get_weight() << " " << sct.get_tree() << std::endl;
             }
@@ -248,7 +248,6 @@ private:
     bool is_mpi;
 };
 
-
 /**
  * Create metapopulation, run moses, print results.
  */
@@ -303,6 +302,13 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
 }
 
 /**
+ * Adjust the termination criteria.
+ */
+void adjust_termination_criteria(const behave_cscore& sc,
+                                 optim_parameters& opt_params,
+                                 moses_parameters& moses_params);
+
+/**
  * like above, but assumes that the score is bscore based
  */
 template<typename Printer>
@@ -318,30 +324,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
                            moses_parameters moses_params,
                            Printer& printer)
 {
-    // Update terminate_if_gte and max_score criteria. An explicit
-    // user-specified max score always over-rides the inferred score.
-    score_t target_score = c_scorer.best_possible_score();
-    if (very_best_score != moses_params.max_score) {
-        target_score = moses_params.max_score;
-        logger().info("Target score = %g", target_score);
-    } else {
-        logger().info("Inferred target score = %g", target_score);
-    }
-
-    // negative min_improv is interpreted as percentage of
-    // improvement, if so then don't substract anything, since in that
-    // scenario the absolute min improvent can be arbitrarily small
-    score_t actual_min_improv = std::max(c_scorer.min_improv(), (score_t)0);
-    target_score -= actual_min_improv;
-    logger().info("Subtract %g (minimum significant improvement) "
-                  "from the target score to deal with float imprecision = %g",
-                  actual_min_improv, target_score);
-
-    opt_params.terminate_if_gte = target_score;
-    moses_params.max_score = target_score;
-
-    // update minimum score improvement
-    opt_params.set_min_score_improv(c_scorer.min_improv());
+    adjust_termination_criteria(c_scorer, opt_params, moses_params);
 
     metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
                                 c_scorer,

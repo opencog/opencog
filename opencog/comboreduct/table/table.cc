@@ -692,11 +692,11 @@ bool complete_truth_table::same_complete_truth_table(const combo_tree& tr) const
 double OTEntropy(const OTable& ot)
 {
     // Compute the probability distributions
-    Counter<vertex, unsigned> counter(ot);
+    Counter<vertex, count_t> counter(ot);
     vector<double> py(counter.size());
     double total = ot.size();
     transform(counter | map_values, py.begin(),
-              [&](unsigned c) { return c/total; });
+              [&](count_t c) { return c/total; });
     // Compute the entropy
     return entropy(py);
 }
