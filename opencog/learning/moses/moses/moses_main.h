@@ -120,12 +120,12 @@ struct metapop_printer
                 // XXX this is close to what we want but maybe borken.
                 // FIXME untested.
                 for (const scored_combo_tree& sct : tree_set)
-				       ss << "      + " << sct.get_weight()
-                      << " * " << sct.get_tree() << "\\\n";
+                    ss << "      + " << sct.get_weight()
+                       << " * " << sct.get_tree() << "\\\n";
                 ss << "\n    return (0.0 < val)\n";
             } else {
 
-                // For ensembles, we woutput ONLY the weight and the tree.
+                // For ensembles, we output ONLY the weight and the tree.
                 for (const scored_combo_tree& sct : tree_set)
                     ss << sct.get_weight() << " " << sct.get_tree() << std::endl;
             }
