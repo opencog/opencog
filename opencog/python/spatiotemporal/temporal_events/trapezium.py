@@ -50,7 +50,7 @@ class TemporalEventTrapezium(TemporalEvent):
             assert (beginning_factor, ending_factor) == (None, None), "PiecewiseTemporalEvent() only accepts " \
                                                                       "either 'beginning_factor' and 'ending_factor' " \
                                                                       "or 'beginning' and 'ending'"
-            if not a < beginning < ending < b:
+            if not a < beginning <= ending < b:
                 raise AttributeError("The inputs should satisfy 'a < beginning < ending < b' relation")
 
         if beginning_factor is not None:
