@@ -140,16 +140,19 @@ temporal_relations = FormulaCreator(DecompositionFitter(relations)).calculate_re
 In order to perform composition, i.e. to calculate the relations that hold
 between events A and C if the relations between events A and B and between B
 and C are known, one passes the relations between A and B and between B and C
-again to the DecompositionFitter.
+again to the DecompositionFitter to be subsequently able to retrieve the
+before, same, and after relationships holding between these events.
 
 ```
-fitter_a_b = DecompositionFitter(relations_a_b)
-fitter_b_c = DecompositionFitter(relations_b_c)
+relation_a_b = DecompositionFitter(relations_a_b)
+relation_b_c = DecompositionFitter(relations_b_c)
 ```
 
 DepthFirstSearchComposition defined [here](temporal_events/composition/depth_first_search_composition.py)
 works with these before, same, and after relationships to calculate the relations
-holding between A and C. Further details follow.
+holding between A and C.
+
+An example of a composition can be found [here](temporal_events/composition/__init__.py).
 
 An initial, simple demo can be viewed [here](demo.py).
 
