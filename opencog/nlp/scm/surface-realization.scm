@@ -81,6 +81,10 @@
                                 (filter (lambda (x)(not (string=? "" x)))
                                 (split-string "\n" (list-ref a-list 1)))))
                 )
+                (InterpretationLink
+                    (InterpretationNode (string-append parse-name "_interpretation_$X"))
+                    (ParseNode parse-name)
+                )
             ))
         )
     )
