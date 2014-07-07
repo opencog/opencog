@@ -223,22 +223,14 @@ const scored_combo_tree_set& metapopulation::best_candidates() const
     return _best_candidates;
 }
 
-/**
- * Returen the trees in the ensemble.
- * Returns something non-empty only if boosting is enabled.
- */
-const scored_combo_tree_set& metapopulation::get_ensemble() const
-{
-    return _ensemble.get_ensemble();
-}
-
 /** 
  * Return the best combo tree (shortest best candidate).
  */
 const combo_tree& metapopulation::best_tree() const
 {
-    OC_ASSERT(not _params.do_boosting,
-        "No such thing as a best tree in an ensemble.");
+    if (_params.do_boosting) {
+        return _ensemble.get_weighted_tree();
+    }
     return best_candidates().begin()->get_tree();
 }
 

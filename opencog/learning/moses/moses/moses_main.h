@@ -104,7 +104,7 @@ struct metapop_printer
         // reasonable accuracy, else these tools fail.
         ss << std::setprecision(moses::io_score_precision);
         if (output_ensemble) {
-            const scored_combo_tree_set& tree_set = metapop.get_ensemble();
+            const scored_combo_tree_set& tree_set = metapop.get_ensemble().get_ensemble();
             if (output_python) {
                 // Python boilerplate
                 ss << "#!/usr/bin/env python\n"
@@ -125,9 +125,17 @@ struct metapop_printer
                 ss << "\n    return (0.0 < val)\n";
             } else {
 
-                // For ensembles, we output ONLY the weight and the tree.
-                for (const scored_combo_tree& sct : tree_set)
-                    ss << sct.get_weight() << " " << sct.get_tree() << std::endl;
+                // For ensembles, output as usual: score followed by tree
+                composite_score cs = metapop.best_composite_score();
+                ss << cs.get_score() << " "
+                   << metapop.get_ensemble().get_weighted_tree();
+
+                if (output_score)
+                    ss << " " << cs;
+                // if (output_bscore)
+                //    ss << " " <<
+                //    metapop._cscorer.get_bscore(metapop.get_ensemble().get_weighted_tree());
+                ss << std::endl;
             }
 
         } else {
@@ -160,7 +168,6 @@ struct metapop_printer
                     ostream_combo_tree (ss, sct.get_tree(), combo::fmt::python);
                 } else {
                     ss << sct.get_score() << " "
-                       << sct.get_weight() << " "
                        << sct.get_tree();
                     if (output_score)
                        ss << " " << sct.get_composite_score();
@@ -187,28 +194,32 @@ struct metapop_printer
             of.close();
         }
 
-        if (output_ensemble) {
-            stringstream ssb;
-            for (const auto& cand : metapop.get_ensemble()) {
-                ssb << cand.get_weight() << " " << cand.get_tree();
+        // Also log the thing, if logging is enabled.
+        if (logger().isInfoEnabled()) {
+            if (output_ensemble) {
+                stringstream ssb;
+                for (const auto& cand : metapop.get_ensemble().get_ensemble()) {
+                    ssb << cand.get_weight() << " " << cand.get_tree();
+                }
+
+                string resb = (output_with_labels && !ilabels.empty()?
+                               ph2l(ssb.str(), ilabels) : ssb.str());
+                if (resb.empty())
+                    logger().warn("Ensemble was empty!");
+                else
+                    logger().info("Final ensemble, consisting of %d members:\n%s",
+                        metapop.get_ensemble().get_ensemble().size(), res.c_str());
+            } else {
+                // Log the single best candidate
+                stringstream ssb;
+                metapop.ostream_metapop(ssb, 1);
+                string resb = (output_with_labels && !ilabels.empty()?
+                               ph2l(ssb.str(), ilabels) : ssb.str());
+                if (resb.empty())
+                    logger().warn("No candidate is good enough to be returned. Yeah that's bad!");
+                else
+                    logger().info("Best candidates:\n%s", res.c_str());
             }
-            string resb = (output_with_labels && !ilabels.empty()?
-                           ph2l(ssb.str(), ilabels) : ssb.str());
-            if (resb.empty())
-                logger().warn("Ensemble was empty!");
-            else
-                logger().info("Final ensemble, consisting of %d members:\n%s",
-                    metapop.get_ensemble().size(), res.c_str());
-        } else {
-            // Log the single best candidate
-            stringstream ssb;
-            metapop.ostream_metapop(ssb, 1);
-            string resb = (output_with_labels && !ilabels.empty()?
-                           ph2l(ssb.str(), ilabels) : ssb.str());
-            if (resb.empty())
-                logger().warn("No candidate is good enough to be returned. Yeah that's bad!");
-            else
-                logger().info("Best candidates:\n%s", res.c_str());
         }
 
     #ifdef GATHER_STATS
