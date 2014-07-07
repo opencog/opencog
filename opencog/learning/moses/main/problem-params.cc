@@ -527,8 +527,8 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "then return all results.\n")
 
         (opt_desc_str(output_score_opt).c_str(),
-         po::value<bool>(&output_score)->default_value(true),
-         "If 1, output the score before each candidate (at the left of the complexity).\n")
+         po::value<bool>(&output_score)->default_value(false),
+         "If 1, output the score after each candidate\n")
 
         (opt_desc_str(output_penalty_opt).c_str(),
          po::value<bool>(&output_penalty)->default_value(false),
