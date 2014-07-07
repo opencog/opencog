@@ -83,7 +83,7 @@ enum __attribute__ ((packed)) builtin
     log, // if ABS_LOG is enabled then log(x) := log(abs(x))
     sin,
     greater_than_zero,
-    impulse,
+    impulse,      // 1.0 if true else 0.0
     rand,         // random contin_t in [0,1) FIXME TODO : update reduct rules
 
     list,           // List constructor

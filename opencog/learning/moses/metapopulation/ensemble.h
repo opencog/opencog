@@ -82,6 +82,8 @@ public:
         return _scored_trees;
     }
 
+    combo::combo_tree get_weighted_tree() const;
+
 private:
     const ensemble_parameters& _params;
     boosting_ascore* _booster;
