@@ -95,3 +95,12 @@ TARGET_LINK_LIBRARIES(gen-disj-conj
 # install eval-table
 INSTALL(TARGETS eval-table gen-table gen-disj-conj RUNTIME DESTINATION bin)
 
+INSTALL(FILES
+
+   tree_generation.h
+
+   DESTINATION
+
+   "include/${PROJECT_NAME}/main" 
+)
+

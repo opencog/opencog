@@ -1,7 +1,7 @@
 #install header files
 INSTALL(FILES
 	behave_cscore.h
-	boost_ascore.h
+	boosting_ascore.h
 	bscores.h
 	discriminating_bscore.h
 	precision_bscore.h
