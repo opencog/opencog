@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "June 6, 2014" "3.6.10" "OpenCog Learning"
+.TH MOSES 1 "July 6, 2014" "3.6.10" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -59,6 +59,7 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR use_only_operator ]
 .RB [ \-o
 .IR output_file ]
+.RB [ \-\-boost
 .RB [ \-A
 .IR max_score ]
 .RB [ \-a
@@ -618,6 +619,14 @@ problem types, especially those with large neighborhoods (i.e. those with
 high program complexity), this can lead to an order-of-magnitude
 speedup, or more.  For other problem types, especially those with 
 deceptive scoring functions, this can hurt performance.
+
+.TP
+.BI \-\-boost=1
+Enables the use of boosting. Currently, only the AdaBoost algorithm
+is implemented.  If boosting is enabled, then the system focuses on
+learning combo programs that correctly classify those values that
+were mis-classified in the previous round of learning.  The output
+is a set of weighted combo trees.
 
 .PP
 .\" ============================================================
