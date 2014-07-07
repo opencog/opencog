@@ -5,9 +5,6 @@ from spatiotemporal.temporal_events.trapezium import TemporalEventTrapezium
 from utility.functions import almost_equals
 
 
-
-
-
 def unpack(relation, start_reference=0, length_reference=1):
     before, same, after = relation
     similarity = same / (1 - fabs(before - after))

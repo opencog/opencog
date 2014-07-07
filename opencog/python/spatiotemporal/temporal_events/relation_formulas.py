@@ -1,4 +1,4 @@
-from math import fabs, sqrt
+from math import fabs, sqrt, floor
 from numpy import convolve, NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
 import numpy
 from scipy.stats.distributions import uniform_gen
@@ -6,7 +6,9 @@ from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_
 from spatiotemporal.temporal_interval_handling import calculateCenterMass
 from spatiotemporal.time_intervals import TimeInterval
 from utility.functions import FunctionPiecewiseLinear, FunctionHorizontalLinear, integral, FUNCTION_ZERO, almost_equals
-from utility.numeric import EPSILON
+
+
+DECOMPOSITION_PRECISION = 10 ** 14
 
 
 __author__ = 'keyvan'
@@ -63,11 +65,19 @@ class TemporalRelation(dict):
             self._type = ''.join([name for name in TemporalRelation.all_relations if self[name] > 0])
         return self._type
 
+    def __setitem__(self, relation_name, value):
+        if relation_name not in TemporalRelation.all_relations:
+            raise AttributeError("'{0}' is not a valid Allen relation'".format(relation_name))
+        dict.__setitem__(self, relation_name, floor(value * DECOMPOSITION_PRECISION) / DECOMPOSITION_PRECISION)
+
     def __repr__(self):
         return 'TemporalRelation({0})'.format(self.type)
 
     def __str__(self):
         return repr(self)
+
+    def __hash__(self):
+        return hash(tuple(self.to_list()))
 
 
 class BaseRelationFormula(object):

@@ -3,7 +3,7 @@ from numpy import PINF as POSITIVE_INFINITY
 from scipy.stats import t, uniform
 from spatiotemporal.temporal_events import TemporalEvent, BaseRelationFormula
 from spatiotemporal.unix_time import UnixTime, random_time
-from utility.functions import FUNCTION_ONE, FunctionLinear, FunctionComposite, FUNCTION_ZERO
+from utility.functions import FUNCTION_ONE, FunctionLinear, FunctionComposite, FUNCTION_ZERO, almost_equals
 
 __author__ = 'keyvan'
 
@@ -50,8 +50,8 @@ class TemporalEventTrapezium(TemporalEvent):
             assert (beginning_factor, ending_factor) == (None, None), "PiecewiseTemporalEvent() only accepts " \
                                                                       "either 'beginning_factor' and 'ending_factor' " \
                                                                       "or 'beginning' and 'ending'"
-            if not a < beginning <= ending < b:
-                raise AttributeError("The inputs should satisfy 'a < beginning < ending < b' relation")
+            if not a < beginning and ending < b and (beginning < ending or almost_equals(beginning, ending)):
+                raise AttributeError("The inputs should satisfy 'a < beginning <= ending < b' relation")
 
         if beginning_factor is not None:
             assert beginning_factor > 0
