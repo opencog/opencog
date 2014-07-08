@@ -200,6 +200,7 @@ struct contin_bscore : public bscore_base
         : target(score, r), cti(r)
     {
         init(eft);
+        _size = r.size();
     }
 
     contin_bscore(const OTable& t, const ITable& r,
@@ -207,12 +208,14 @@ struct contin_bscore : public bscore_base
         : target(t), cti(r)
     {
         init(eft);
+        _size = r.size();
     }
 
     contin_bscore(const Table& table,
                   err_function_type eft = squared_error)
         : target(table.otable), cti(table.itable) {
         init(eft);
+        _size = table.size();
     }
 
     behavioral_score operator()(const combo_tree& tr) const;
