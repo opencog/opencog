@@ -1,4 +1,6 @@
-(define anaphora-resolution
+;; antecedent's number > anaphora's number
+
+(define filter-#3
     (BindLink
         (ListLink
             (TypedVariableLink
@@ -20,17 +22,19 @@
         )
         (ImplicationLink
             (AndLink
+                ;; Connection between two clauses
                 (ListLink
-                    (AnchorNode "Recent Unresolved references")
+                    (AnchorNode "CurrentResolution")
                     (VariableNode "$word-inst-anaphor")
-                )
-                (PartOfSpeechLink
                     (VariableNode "$word-inst-antecedent")
-                    (DefinedLinguisticConceptNode "noun")
                 )
-                (PartOfSpeechLink
+                (ListLink
+                    (AnchorNode "CurrentPronoun")
                     (VariableNode "$word-inst-anaphor")
-                    (DefinedLinguisticConceptNode "noun")
+                )
+                (ListLink
+                    (AnchorNode "CurrentProposal")
+                    (VariableNode "$word-inst-antecedent")
                 )
                 (WordSequenceLink
                     (VariableNode "$word-inst-anaphor")
@@ -40,18 +44,21 @@
                     (VariableNode "$word-inst-antecedent")
                     (VariableNode "$antecedent-number")
                 )
+
+                ;; filter
                 (EvaluationLink
                     (GroundedPredicateNode "c++:greater")
                     (ListLink
-                        (VariableNode "$anaphor-number")
                         (VariableNode "$antecedent-number")
+                        (VariableNode "$anaphor-number")
                     )
                 )
             )
-            (ReferenceLink
-                (VariableNode "$word-inst-antecedent")
-                (VariableNode "$word-inst-anaphor")
+            (ListLink
+                (AnchorNode "CurrentResult")
+                (AnchorNode "Filtered")
             )
         )
     )
 )
+
