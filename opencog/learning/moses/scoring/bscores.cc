@@ -200,6 +200,11 @@ discretize_contin_bscore::discretize_contin_bscore(const OTable& ot,
     if (weighted_accuracy)
         for (size_t i = 0; i < weights.size(); ++i)
             weights[i] = classes.size() / (float)(weights.size() * cs.count(i));
+
+    OC_ASSERT(ot.size() == it.size(),
+        "Error: discretize_contin_bscore: input and output table size do not match: %d %d",
+        it.size(), ot.size());
+    _size = ot.size();
 }
 
 behavioral_score discretize_contin_bscore::best_possible_bscore() const
