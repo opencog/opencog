@@ -63,8 +63,8 @@ pair<score_t, combo_tree> parse_result(const string& tempfile)
        // parse result
        score_t score;
        in >> score;
-       score_t weight;
-       in >> weight;
+       // score_t weight;
+       // in >> weight;
        combo_tree tr;
        in >> tr;
        if (hiscore < score) {
@@ -92,8 +92,8 @@ pair<score_t, string> cheap_parse_result(const string& tempfile)
        // parse result
        score_t score;
        in >> score;
-       score_t weight;
-       in >> weight;
+       // score_t weight;
+       // in >> weight;
        char tr_chars[4096];
        in.getline(tr_chars, 4096);
        char* junk = strstr(tr_chars, "[score");
