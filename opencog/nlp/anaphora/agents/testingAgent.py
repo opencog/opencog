@@ -54,8 +54,8 @@ for item in data:
 
 #init=initAgent()
 #init.run(atomspace)
-#dump=dumpAgent()
-#dump.run(atomspace)
+dump=dumpAgent()
+dump.run(atomspace)
 hobbsAgent = HobbsAgent()
 hobbsAgent.run(atomspace)
 
