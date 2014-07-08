@@ -558,6 +558,52 @@ gives: 7.2199274514956
 
 
 ======================================================================
+Minimal morphology output
+
+
+;; Lets say that there was one word in the sentence, it was 'foobar'
+;; and the splitter split it into foo and bar
+;; then the following should be generated:
+
+;; for each sentence, create one of these, each with a distinct uuid:
+(ParseLink (stv 1 1)
+   (ParseNode "sentence@fc98a97a-4753-45d9-be5b-1c752b5b21d9_parse_0")
+   (SentenceNode "sentence@fc98a97a-4753-45d9-be5b-1c752b5b21d9")
+)
+
+;; For each pair of morphemes, cereate the below:
+(EvaluationLink (stv 1.0 1.0)
+   (LinkGrammarRelationshipNode "MOR")
+   (ListLink
+      (WordInstanceNode "foo@5e179119-3966-4bb9-8a38-ef2014b48f12")
+      (WordInstanceNode "bar@cb2443bb-fbec-472c-baee-36b822579861")
+   )
+)
+
+;; For each "word" aka morpheme, create these two clauses:
+;; note that the UUID's match up exactly with the above.
+;; the below shows only "foo", another pair is needed for "bar".
+(ReferenceLink (stv 1.0 1.0)
+   (WordInstanceNode "foo@5e179119-3966-4bb9-8a38-ef2014b48f12")
+   (WordNode "foo")
+)
+(WordInstanceLink (stv 1.0 1.0)
+   (WordInstanceNode "foo@5e179119-3966-4bb9-8a38-ef2014b48f12")
+   (ParseNode "sentence@fc98a97a-4753-45d9-be5b-1c752b5b21d9_parse_0")
+)
+
+
+;; finally, at the very end:
+;; again, the UUID must match with what was given above.
+
+(ListLink (stv 1 1)
+   (AnchorNode "# New Parsed Sentence")
+   (SentenceNode "sentence@68e51cae-98bc-4102-b19c-78649c5f6cfb")
+)
+
+
+
+======================================================================
 Crashes and bugs
 
 
