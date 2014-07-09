@@ -434,3 +434,39 @@
         )
     ))
 )
+
+
+(define (that-rule main main_instance main_pos sub sub_instance sub_pos)
+	; get the corresponding node
+	(define main-node
+		(if (string=? main_pos "verb")
+			(PredicateNode main_instance df-node-stv)
+			ConceptNode main_instance df-node-stv)
+		)
+	)
+	(define sub-node
+		(if (string=? sub_pos "verb")
+			(PredicateNode sub_instance df-node-stv)
+			(ConceptNode sub_instance df-node-stv)
+		)
+	)
+
+	; create the link between instance and word just in case
+	(if (string=? main_pos "verb")
+		(ImplicationLink (PredicateNode main_instance df-node-stv) (PredicateNode main df-node-stv) df-link-stv)
+		(InheritanceLink (ConceptNode main_instance df-node-stv) (ConceptNode main df-node-stv) df-link-stv)
+	)
+	(if (string=? sub_pos "verb")
+		(ImplicationLink (PredicateNode sub_instance df-node-stv) (PredicateNode sub df-node-stv) df-link-stv)
+		(InheritanceLink (ConceptNode sub_instance df-node-stv) (ConceptNode sub df-node-stv) df-link-stv)
+	)
+
+        (EvaluationLink df-link-stv
+		(PredicateNode "thatmarker" df-node-stv)
+		(ListLink df-link-stv
+			main-node
+			sub-node
+		)
+	)
+)
+
