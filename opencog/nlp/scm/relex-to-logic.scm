@@ -145,15 +145,15 @@
 	)
 )
 
-(define (comparative-rule w1 w1_instance w2 w2_instance adj adj_instance)
-	(InheritanceLink (ConceptNode adj_instance df-node-stv) (ConceptNode adj df-node-stv) df-link-stv)
-	(InheritanceLink (ConceptNode w1_instance df-node-stv) (ConceptNode w1 df-node-stv) df-link-stv)
-	(InheritanceLink (ConceptNode w2_instance df-node-stv) (ConceptNode w2 df-node-stv) df-link-stv)
-	(TruthValueGreaterThanLink df-link-stv
-		(InheritanceLink (ConceptNode w1_instance df-node-stv) (ConceptNode adj_instance df-node-stv) df-link-stv)
-		(InheritanceLink (ConceptNode w2_instance df-node-stv) (ConceptNode adj_instance df-node-stv) df-link-stv)
-	)
-)
+;(define (comparative-rule w1 w1_instance w2 w2_instance adj adj_instance)
+;	(InheritanceLink (ConceptNode adj_instance df-node-stv) (ConceptNode adj df-node-stv) df-link-stv)
+;	(InheritanceLink (ConceptNode w1_instance df-node-stv) (ConceptNode w1 df-node-stv) df-link-stv)
+;	(InheritanceLink (ConceptNode w2_instance df-node-stv) (ConceptNode w2 df-node-stv) df-link-stv)
+;	(TruthValueGreaterThanLink df-link-stv
+;		(InheritanceLink (ConceptNode w1_instance df-node-stv) (ConceptNode adj_instance df-node-stv) df-link-stv)
+;		(InheritanceLink (ConceptNode w2_instance df-node-stv) (ConceptNode adj_instance df-node-stv) df-link-stv)
+;	)
+;)
 
 (define (number-rule noun noun_instance num num_instance)
 	(define noun_ins_concept (ConceptNode noun_instance df-node-stv))
