@@ -41,3 +41,7 @@ normally would be automatically loaded with the opencog.conf file.
    on how to use this relex-to-logic pipeline can be found at
    http://wiki.opencog.org/w/Running_Relex2Logic_with_OpenCog
 
+ * surface-realization.scm: Functions for surface realization of output from
+   micro-planner's output. The main function is sureal which takes in a SetLink
+   and returns a sentence. Presently in alpha stage of development.
+
