@@ -2643,6 +2643,117 @@ P(x,y)=2/29 for (x,y) in {(t,ester), (te,ster), (tes,ter), (test,er), (teste,r)}
 \begin_inset Newline newline
 \end_inset
 
+Ther is a bit of a proceedural error in the above; we would like to discover
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+null morpheme
+\begin_inset Quotes erd
+\end_inset
+
+, that is, that 
+\begin_inset Quotes eld
+\end_inset
+
+test
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+gift
+\begin_inset Quotes erd
+\end_inset
+
+, with nothing following it, is a morpheme, so that possuble suffixes are
+ 
+\begin_inset Quotes eld
+\end_inset
+
+-y
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+-er
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+-nothing
+\begin_inset Quotes erd
+\end_inset
+
+.
+ However, the above failed to count this possibility separately.
+ Thus, given the above data, what we expect to find are two roots: 
+\begin_inset Quotes eld
+\end_inset
+
+gif-
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+tes-
+\begin_inset Quotes erd
+\end_inset
+
+ and three suffixes: 
+\begin_inset Quotes eld
+\end_inset
+
+-t
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+-ty
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+-ter
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Even if we did split and count in such a way as to allow a null suffix,
+ it would still be ambiguus as to whether the stems end with a 
+\begin_inset Quotes eld
+\end_inset
+
+t
+\begin_inset Quotes erd
+\end_inset
+
+ or not.
+ So, moving on...
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
 Next, lets do the partials.
 \begin_inset Newline newline
 \end_inset
@@ -2867,6 +2978,10 @@ MI(teste,r) = log P(teste,r)/P(teste,*)P(*,r) = log (2/29)(29/2)(29/3) =
 Phew.
  I think that's all of them.
  So, what can we conclude?
+\end_layout
+
+\begin_layout Standard
+Total entropy without morpheme splits: H(tot)=-(1/7)log(1/7)=0.4010507
 \end_layout
 
 \begin_layout Section*
