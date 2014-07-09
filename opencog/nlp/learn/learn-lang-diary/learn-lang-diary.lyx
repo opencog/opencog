@@ -908,7 +908,7 @@ Hubiness, length, crossings and their relationships in dependency trees
 \end_layout
 
 \begin_layout Itemize
-Languages tends to be close to the theoretical minimum possible dependency
+Language tends to be close to the theoretical minimum possible dependency
  distance, if it was legal to re-arrange words arbitrarily.
  See Temperley, D.
  (2008).
