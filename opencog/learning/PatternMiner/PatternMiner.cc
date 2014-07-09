@@ -678,6 +678,7 @@ HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, A
  // using PatternMatcher
 void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 {
+
 //     First, generate the Bindlink for using PatternMatcher to find all the instances for this pattern in the original Atomspace
 //    (BindLink
 //        ;; The variables to be bound
@@ -694,6 +695,9 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //              (variable Listlink)
 //        )
 //     )
+
+    if (THREAD_NUM > 1)
+        removeAtomLock.lock();
 
     // Debug
     static int count = 0;
@@ -818,6 +822,9 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     originalAtomSpace->removeAtom(hAndLink);
     originalAtomSpace->removeAtom(hResultListLink);
     originalAtomSpace->removeAtom(hVariablesListLink);
+
+    if (THREAD_NUM > 1)
+        removeAtomLock.unlock();
 }
 
 void PatternMiner::removeLinkAndItsAllSubLinks(AtomSpace* _atomspace, Handle link)
@@ -1105,6 +1112,31 @@ void PatternMiner::ConstructTheFirstGramPatterns()
     std::cout<<"Debug: PatternMiner: done (gram = 1) pattern mining! " + toString((patternsForGram[0]).size()) + " patterns found! " << std::endl;
     printf(" Total time: %d seconds. \n", end_time - start_time);
 
+    OutPutPatternsToFile(cur_gram);
+
+    HandleSeq allDumpNodes, allDumpLinks;
+    originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
+
+    // Debug : out put the current dump Atomspace to a file
+    ofstream dumpFile;
+    string fileName = "DumpAtomspace" + toString(cur_gram) + "gram.scm";
+
+    dumpFile.open(fileName.c_str());
+
+    foreach(Handle h, allDumpNodes)
+    {
+        dumpFile << originalAtomSpace->atomAsString(h);
+    }
+
+    originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
+
+    foreach(Handle h, allDumpLinks)
+    {
+        dumpFile << originalAtomSpace->atomAsString(h);
+    }
+
+    dumpFile.close();
+
 }
 
 void PatternMiner::GrowAllPatterns()
@@ -1115,7 +1147,7 @@ void PatternMiner::GrowAllPatterns()
 
         for (unsigned int i = 0; i < THREAD_NUM; ++ i)
         {
-            threads[i].join();
+            threads[i] = std::thread([this]{this->growPatternsTask();}); // using C++11 lambda-expression
         }
 
         for (unsigned int i = 0; i < THREAD_NUM; ++ i)
@@ -1133,7 +1165,7 @@ void PatternMiner::GrowAllPatterns()
         HandleSeq allDumpNodes, allDumpLinks;
         originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
 
-        // out put the n_gram patterns to a file
+        // Debug : out put the current dump Atomspace to a file
         ofstream dumpFile;
         string fileName = "DumpAtomspace" + toString(cur_gram) + "gram.scm";
 
@@ -1207,8 +1239,28 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
     int end_time = time(NULL);
     printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
 
-//    testPatternMatcher2();
+//   testPatternMatcher2();
 
+//   selectSubsetFromCorpus();
+
+
+
+}
+
+void PatternMiner::selectSubsetFromCorpus()
+{
+    // select a subset for test topics from the huge ConceptNet corpus
+    vector<string> topics;
+    topics.push_back("animal");
+    topics.push_back("pet");
+    topics.push_back("human");
+    topics.push_back("eat");
+    topics.push_back("man");
+    topics.push_back("woman");
+    topics.push_back("robot");
+    topics.push_back("computer");
+
+    _selectSubsetFromCorpus(topics,5);
 }
 
 std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const AtomSpace *atomspace)
@@ -1472,4 +1524,94 @@ void PatternMiner::testPatternMatcher2()
 
 
 }
+
+set<Handle> PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, set<Handle>& allSubsetLinks)
+{
+    set<Handle> newHandles;
+    HandleSeq incomings = originalAtomSpace->getIncoming(keywordNode);
+
+    foreach (Handle incomingHandle, incomings)
+    {
+        Handle newh = incomingHandle;
+        // if this atom is a igonred type, get its first parent that is not in the igonred types
+        if (isIgnoredType (originalAtomSpace->getType(incomingHandle)) )
+        {
+            Handle newh = getFirstNonIgnoredIncomingLink(originalAtomSpace, incomingHandle);
+            if (newh == Handle::UNDEFINED)
+                continue;
+        }
+
+        if (allSubsetLinks.find(newh) == allSubsetLinks.end())
+            newHandles.insert(newh);
+    }
+
+    return newHandles;
+}
+
+set<Handle> PatternMiner::_extendOneLinkForSubsetCorpus(set<Handle>& allNewLinksLastGram, set<Handle>& allSubsetLinks)
+{
+    set<Handle> allNewConnectedLinksThisGram;
+    // only extend the links in allNewLinksLastGram. allNewLinksLastGram is a part of allSubsetLinks
+    foreach(Handle link, allNewLinksLastGram)
+    {
+        // find all nodes in this link
+        set<Handle> allNodes;
+        extractAllNodesInLink(link, allNodes);
+
+        foreach (Handle neighborNode, allNodes)
+        {
+            set<Handle> newConnectedLinks;
+            newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(neighborNode, allSubsetLinks);
+            allNewConnectedLinksThisGram.insert(newConnectedLinks.begin(),newConnectedLinks.end());
+            allSubsetLinks.insert(newConnectedLinks.begin(),newConnectedLinks.end());
+        }
+
+    }
+
+    return allNewConnectedLinksThisGram;
+}
+
+// must load the corpus before calling this function
+void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection)
+{
+    std::cout << "\nSelecting a subset from loaded corpus in Atomspace for the following topics:" << std::endl ;
+    set<Handle> allSubsetLinks;
+    string topicsStr = "";
+
+    foreach (string keyword, subsetKeywords)
+    {
+        std::cout << keyword << std::endl;
+        Handle keywordNode = originalAtomSpace->addNode(opencog::CONCEPT_NODE,keyword);
+        set<Handle> newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(keywordNode, allSubsetLinks);
+        allSubsetLinks.insert(newConnectedLinks.begin(), newConnectedLinks.end());
+        topicsStr += "-";
+        topicsStr += keyword;
+
+    }
+
+    unsigned int order = 0;
+    set<Handle> allNewConnectedLinksThisGram = allSubsetLinks;
+
+    while (order < max_connection)
+    {
+        allNewConnectedLinksThisGram = _extendOneLinkForSubsetCorpus(allNewConnectedLinksThisGram, allSubsetLinks);
+        order ++;
+    }
+
+    ofstream subsetFile;
+
+    string fileName = "SubSet" + topicsStr + ".scm";
+
+    subsetFile.open(fileName.c_str());
+
+    foreach(Handle h, allSubsetLinks)
+    {
+        subsetFile << originalAtomSpace->atomAsString(h);
+    }
+
+    subsetFile.close();
+
+    std::cout << "\nDone! The subset has been written to file:  " << fileName << std::endl ;
+}
+
 

@@ -96,7 +96,7 @@ namespace PatternMining
 
      unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
 
-     std::mutex allAtomListLock, uniqueKeyLock, patternForLastGramLock;
+     std::mutex allAtomListLock, uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock;
 
      Type ignoredTypes[1];
 
@@ -176,6 +176,13 @@ namespace PatternMining
 
      void removeLinkAndItsAllSubLinks(AtomSpace *_atomspace, Handle link);
 
+     set<Handle> _getAllNonIgnoredLinksForGivenNode(Handle keywordNode, set<Handle>& allSubsetLinks);
+
+     set<Handle> _extendOneLinkForSubsetCorpus(set<Handle>& allNewLinksLastGram, set<Handle>& allSubsetLinks);
+
+     // will write the subset to a scm file
+     void _selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection);
+
  public:
      PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram);
      ~PatternMiner();
@@ -184,10 +191,13 @@ namespace PatternMining
 
      void OutPutPatternsToFile(unsigned int n_gram);
 
-     void runPatternMiner(unsigned int _thresholdFrequency = 3);
+     void runPatternMiner(unsigned int _thresholdFrequency = 1);
+
+     void selectSubsetFromCorpus();
 
      void testPatternMatcher1();
      void testPatternMatcher2();
+
 
 
   };
