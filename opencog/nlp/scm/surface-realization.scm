@@ -126,6 +126,44 @@
     )
 )
 
+; ---------------------------------------------------------------------
+; Create BindLink for query when a certain atom is given.
+(define (bind-link an-atom)
+    (if (cog-link? an-atom)
+        (display "This is a link")
+        (if (equal? 'VariableNode (cog-type an-atom))
+            (display "BindLink is not created for VariableNode.")
+            (display "This is a node.")
+        )
+    )
+)
 
+; ---------------------------------------------------------------------
+; A SetLink is the input because it is assumed that the output of the micro-planner
+; is unordered.
+(define (sureal a-set-link)
+    (if (equal? 'SetLink (cog-type a-set-link))
+        (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
+            (if (null? interpretations)
+            (create-sentence a-set-link)
+            (get-sentence interpretations)
+            )
+        )
+        (display "Please input a SetLink only")
+    )
+)
+
+(define (create-sentence a-set-link)
+    (display "creating")
+)
+
+(define (cog-stv-heuristic-value constant atom)
+    (* (expt (cog-stv-strength atom) constant) (expt (cog-stv-confidence atom) (- 2 constant)))
+)
+
+(define (get-sentence interpret-node-lst)
+    (define parse (list-ref (cog-chase-link 'InterpretationLink 'ParseNode (list-ref interpret-node-lst 0)) 0))
+    (string-join (cdr (map word-inst-get-word-str (parse-get-words-in-order parse))))
+)
 
 
