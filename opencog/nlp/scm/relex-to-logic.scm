@@ -452,20 +452,28 @@
 	)
 
 	; create the link between instance and word just in case
-	(if (string=? main_pos "verb")
-		(ImplicationLink (PredicateNode main_instance df-node-stv) (PredicateNode main df-node-stv) df-link-stv)
-		(InheritanceLink (ConceptNode main_instance df-node-stv) (ConceptNode main df-node-stv) df-link-stv)
+	(define main-link
+		(if (string=? main_pos "verb")
+			(ImplicationLink (PredicateNode main_instance df-node-stv) (PredicateNode main df-node-stv) df-link-stv)
+			(InheritanceLink (ConceptNode main_instance df-node-stv) (ConceptNode main df-node-stv) df-link-stv)
+		)
 	)
-	(if (string=? sub_pos "verb")
-		(ImplicationLink (PredicateNode sub_instance df-node-stv) (PredicateNode sub df-node-stv) df-link-stv)
-		(InheritanceLink (ConceptNode sub_instance df-node-stv) (ConceptNode sub df-node-stv) df-link-stv)
+	(define sub-link
+		(if (string=? sub_pos "verb")
+			(ImplicationLink (PredicateNode sub_instance df-node-stv) (PredicateNode sub df-node-stv) df-link-stv)
+			(InheritanceLink (ConceptNode sub_instance df-node-stv) (ConceptNode sub df-node-stv) df-link-stv)
+		)
 	)
 
-	(EvaluationLink df-link-stv
-		(PredicateNode "thatmarker" df-node-stv)
-		(ListLink df-link-stv
-			main-node
-			sub-node
+	(list
+		main-link
+		sub-link
+		(EvaluationLink df-link-stv
+			(PredicateNode "thatmarker" df-node-stv)
+			(ListLink df-link-stv
+				main-node
+				sub-node
+			)
 		)
 	)
 )
