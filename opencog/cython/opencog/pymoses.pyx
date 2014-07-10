@@ -174,8 +174,8 @@ cdef class moses:
                 # for moses!
                 score = int(candidate.partition(' ')[0])
                 rest = candidate.partition(' ')[2]
-                weight = int(rest.partition(' ')[0])
-                rest = rest.partition(' ')[2]
+                # weight = int(rest.partition(' ')[0])
+                # rest = rest.partition(' ')[2]
                 program = rest.partition('[')[0]
                 candidates.append(MosesCandidate(score = score,
                                                  program = program,
