@@ -133,7 +133,7 @@ public:
     const scored_combo_tree_set& best_candidates() const;
     const ensemble& get_ensemble() const { return _ensemble; }
     composite_score best_composite_score() const;
-    const combo_tree& best_tree() const;
+    combo_tree best_tree() const;
 
     /**
      * Return the best model score (either the score of the

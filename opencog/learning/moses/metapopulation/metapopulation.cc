@@ -226,7 +226,7 @@ const scored_combo_tree_set& metapopulation::best_candidates() const
 /** 
  * Return the best combo tree (shortest best candidate).
  */
-const combo_tree& metapopulation::best_tree() const
+combo_tree metapopulation::best_tree() const
 {
     if (_params.do_boosting) {
         return _ensemble.get_weighted_tree();
