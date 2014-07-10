@@ -67,9 +67,13 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars)
 {
     scored_combo_tree_set candidates;
     for (const combo_tree& base : exemplars) {
-
         composite_score csc(_cscorer.get_cscore(base));
-        scored_combo_tree sct(base, demeID_t(), csc);
+
+        // The behavioral score must be recomputed here, so we can
+        // store it in case diversity preservation is used
+        behavioral_score bs(_cscorer.get_bscore(base));
+
+        scored_combo_tree sct(base, demeID_t(), csc, bs);
 
         candidates.insert(sct);
     }
