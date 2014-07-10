@@ -35,11 +35,6 @@
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/weighted_skewness.hpp>
 
-#include <opencog/util/lru_cache.h>
-#include <opencog/util/algorithm.h>
-#include <opencog/util/functional.h>
-#include <opencog/util/KLD.h>
-
 #include <opencog/comboreduct/table/table.h>
 
 #include "scoring_base.h"
