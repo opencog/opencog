@@ -441,7 +441,7 @@
 	(define main-node
 		(if (string=? main_pos "verb")
 			(PredicateNode main_instance df-node-stv)
-			ConceptNode main_instance df-node-stv)
+			(ConceptNode main_instance df-node-stv)
 		)
 	)
 	(define sub-node
@@ -461,7 +461,7 @@
 		(InheritanceLink (ConceptNode sub_instance df-node-stv) (ConceptNode sub df-node-stv) df-link-stv)
 	)
 
-        (EvaluationLink df-link-stv
+	(EvaluationLink df-link-stv
 		(PredicateNode "thatmarker" df-node-stv)
 		(ListLink df-link-stv
 			main-node
