@@ -34,16 +34,16 @@ boosting_ascore::boosting_ascore(size_t sz)
     _size = sz;
 }
 
-/// Return a wieghted score.
+/// Return a weighted score.
 ///
 /// What is implemented below is correct only for boolean problems; it
 /// is assumed that correct answers have a behavioral score of zero,
 /// and that wrong answers have a score of -1.  Thus, this just sums up
 /// the total error seen in the score.
 ///
-/// BTW, the currrent wikipedia article on AdaBoost is wildly incorrect
-/// with regards to what is says about scoring.  The formulas in particular
-/// are broken.
+/// Caution: The current Wikipedia article (as of June 2014) on AdaBoost
+/// is wildly incorrect with regards to what is says about scoring.  In
+/// particular, the formulas are broken.
 score_t boosting_ascore::operator()(const behavioral_score& bs) const
 {
     OC_ASSERT(bs.size() == _size, "Unexpected behavioral score size! "
