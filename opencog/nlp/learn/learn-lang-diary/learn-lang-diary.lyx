@@ -6309,10 +6309,17 @@ tester
 \end_inset
 
 
-\end_layout
+\begin_inset Newline newline
+\end_inset
 
-\begin_layout Standard
-Total entropy without morpheme splits: H(tot)=-(1/7)log(1/7)=0.4010507
+
+\begin_inset Newline newline
+\end_inset
+
+What looks like the best split has been found.
+ After this, link-type clustering proceeds as if these were distinct words.
+ That is, the above has 6 distinct link types; clustering will then proceed
+ discover one link type, between the cluster {gif, tes} and {t,ty,ter}.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -6320,6 +6327,10 @@ Morfesssor
 \end_layout
 
 \begin_layout Standard
+An alternative algorithm is presented in:
+\end_layout
+
+\begin_layout Itemize
 Mathias Creutz Krista Lagus, 
 \begin_inset Quotes eld
 \end_inset
@@ -6330,6 +6341,18 @@ Unsupervised Morpheme Segmentation and Morphology Induction from Text Corpora
 \end_inset
 
  http://users.ics.aalto.fi/mcreutz/papers/Creutz05tr.pdf 
+\end_layout
+
+\begin_layout Standard
+That algorithm works only for contcatenative languages, and does not provide
+ a morphotactic structure; that is, it cannot learn the grammar governing
+ the morphemes.
+ It also requires several (plausable) assumptions about priors.
+ One assumption is that morpheme frquency follows a modified Zipfian distributio
+n, this is used to make estimates for morphemes that are observed only once
+ in the corpus.
+ Another assumption is is that the morpheme length distribution can be approxima
+ted by either a Poisson or a (two-parameter) gamma distribution.
 \end_layout
 
 \begin_layout Section*
