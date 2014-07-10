@@ -50,8 +50,7 @@ namespace opencog { namespace moses {
 class behave_cscore 
 {
 public:
-    behave_cscore(const bscore_base& b, ascore_base& a)
-        : _bscorer(b), _ascorer(a) {}
+    behave_cscore(const bscore_base& b, ascore_base& a, size_t initial_cache_size=0);
 
     behavioral_score get_bscore(const combo_tree&) const;
     behavioral_score get_bscore(const scored_combo_tree_set&) const;
@@ -82,11 +81,18 @@ private:
     const bscore_base& _bscorer;
     ascore_base& _ascorer;
 
-#ifdef LATER
-    prr_cache_threaded<cscore_base> score_cache(initial_cache_size, c_scorer,
-                                                 "composite scores");
-#endif
+    // Below follows some random infrastructure to allow compsite
+    // scoress for trees to be cached.
+    struct wrapper : public std::unary_function<combo_tree, composite_score>
+    {
+        composite_score operator()(const combo_tree&) const;
+        behave_cscore* self;
+    };
 
+    bool _have_cache;
+    wrapper _wrapper;
+    prr_cache_threaded<wrapper> _cscore_cache;
+    composite_score get_cscore_nocache(const combo_tree&);
 };
 
 
