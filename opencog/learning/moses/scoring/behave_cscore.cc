@@ -30,6 +30,14 @@
 
 namespace opencog { namespace moses {
 
+behave_cscore::behave_cscore(const bscore_base& b, ascore_base& a,
+                             size_t initial_cache_size)
+    : _bscorer(b), _ascorer(a), _have_cache(0<initial_cache_size),
+    _cscore_cache(initial_cache_size, _wrapper, "composite scores")
+{
+    _wrapper.self = this;
+}
+
 behavioral_score behave_cscore::get_bscore(const combo_tree& tr) const
 {
     return _bscorer(tr);
@@ -41,6 +49,18 @@ behavioral_score behave_cscore::get_bscore(const scored_combo_tree_set& ensemble
 }
 
 composite_score behave_cscore::get_cscore(const combo_tree& tr)
+{
+    // Use the cache, if it is enabled.
+    if (_have_cache) return _cscore_cache(tr);
+    return get_cscore_nocache(tr);
+}
+
+composite_score behave_cscore::wrapper::operator()(const combo_tree& tr) const
+{
+    return self->get_cscore_nocache(tr);
+}
+
+composite_score behave_cscore::get_cscore_nocache(const combo_tree& tr)
 {
     behavioral_score bs;
     try {
@@ -97,6 +117,7 @@ score_t behave_cscore::best_possible_score() const
 {
     return boost::accumulate(_bscorer.best_possible_bscore(), 0.0);
 }
+
 
 
 } // ~namespace moses

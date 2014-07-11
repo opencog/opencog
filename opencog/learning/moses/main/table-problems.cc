@@ -251,7 +251,7 @@ void ip_problem::run(option_base* ob)
     OC_ASSERT(not pms.meta_params.do_boosting,
         "Boosting not supported for the ip problem!");
     simple_ascore ascore;
-    behave_cscore mbcscore(bscore, ascore);
+    behave_cscore mbcscore(bscore, ascore, pms.cache_size);
     metapop_moses_results(pms.exemplars, tt,
                           *pms.bool_reduct, *pms.bool_reduct_rep, 
                           mbcscore,
@@ -300,7 +300,7 @@ void ann_table_problem::run(option_base* ob)
     OC_ASSERT(not pms.meta_params.do_boosting,
         "Boosting not supported for the ann problem!");
     simple_ascore ascore;
-    behave_cscore cscore(bscore, ascore);
+    behave_cscore cscore(bscore, ascore, pms.cache_size);
     metapop_moses_results(pms.exemplars, tt,
                           reduct::ann_reduction(), reduct::ann_reduction(),
                           cscore,
@@ -331,7 +331,7 @@ void ann_table_problem::run(option_base* ob)
     SCORER bscore ARGS ;                                             \
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio); \
     boosting_ascore ascore(bscore.size());                           \
-    behave_cscore mbcscore(bscore, ascore);                          \
+    behave_cscore mbcscore(bscore, ascore, pms.cache_size);          \
     metapop_moses_results(pms.exemplars, cand_sig,                   \
                       REDUCT, REDUCT_REP, mbcscore,                  \
                       pms.opt_params, pms.hc_params,                 \
@@ -380,7 +380,7 @@ void pre_table_problem::run(option_base* ob)
     OC_ASSERT(not pms.meta_params.do_boosting,
         "Boosting not supported for the pre problem!");
     simple_ascore ascore;
-    behave_cscore mbcscore(bscore, ascore);
+    behave_cscore mbcscore(bscore, ascore, pms.cache_size);
     metapop_moses_results(pms.exemplars, cand_sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
                           mbcscore,
@@ -421,7 +421,7 @@ void pre_conj_table_problem::run(option_base* ob)
     OC_ASSERT(not pms.meta_params.do_boosting,
         "Boosting not supported for the pre problem!");
     simple_ascore ascore;
-    behave_cscore mbcscore(bscore, ascore);
+    behave_cscore mbcscore(bscore, ascore, pms.cache_size);
     metapop_moses_results(pms.exemplars, cand_sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
                           mbcscore,
