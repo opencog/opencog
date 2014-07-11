@@ -137,7 +137,6 @@
 
 (define (negative-rule verb instance)
 	(ImplicationLink (PredicateNode instance df-node-stv) (NotLink (PredicateNode verb df-node-stv) df-link-stv) df-link-stv)
-	)
 )
 
 (define (possessive-rule noun noun_instance word word_instance)
@@ -273,6 +272,18 @@
 	(ForAllLink (ConceptNode noun_instance df-node-stv) df-link-stv
 		(InheritanceLink (ConceptNode noun_instance df-node-stv) (ConceptNode noun df-node-stv) df-link-stv)
 	)
+)
+
+; combination of all-rule and SVP-rule for testing syllogisms
+(define (all-SVP-rule concept instance predicative predicative_instance)
+    (ForAllLink
+        (VariableNode "$X")
+        (ImplicationLink
+            (InheritanceLink (VariableNode "$X") (ConceptNode instance df-node-stv) df-link-stv)
+            (InheritanceLink (VariableNode "$X") (ConceptNode predicative_instance df-node-stv) df-link-stv) df-link-stv
+        )
+    )
+    (SVP-rule concept instance predicative predicative_instance)
 )
 
 (define (entity-rule word word_instance) 
