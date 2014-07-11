@@ -42,7 +42,7 @@
 )
 
 ; -----------------------------------------------------------------------
-; Pairwise intersection
+; Pairwise intersection, keeping any items that appear in more than one set
 (define (lset-pairwise-intersection sets)
 	(define all-pairs (pairwise-combination sets))
 	(append-map (lambda (pair-list) (lset-intersection equal? (car pair-list) (cadr pair-list)))
@@ -150,7 +150,7 @@
 	; for each word instant, find a list of all root links that includes it, and remove unneeded links
 	(define word-involvement-messy-list (map cog-get-root word-inst-concept-list))
 	(define word-involvement-intersection (lset-pairwise-intersection word-involvement-messy-list))
-	(define word-involvement-cleaned-list
+	(define word-involvement-cleaned-list  ; removing links with only one word involved
 		(map (lambda (l) (filter-map (lambda (link) (member? link word-involvement-intersection)) l))
 			word-involvement-messy-list
 		)
