@@ -2668,7 +2668,7 @@ gift
 \begin_inset Quotes erd
 \end_inset
 
-, with nothing following it, is are morphemes, so that possible suffixes
+, with nothing following it, are morphemes, so that the possible suffixes
  are 
 \begin_inset Quotes eld
 \end_inset
@@ -5022,7 +5022,36 @@ The above is a sparse matrix showing the possible word splits.
 \end_layout
 
 \begin_layout Standard
-Next, lets do the partials.
+Next, lets do the partial sums.
+ Recall the notation for the partial summation of pairs.
+ writing P(x,y) for the probability of observing the 
+\emph on
+ordered
+\emph default
+ pair of items (x,y), the partial sums are: 
+\begin_inset Formula 
+\[
+P(x,*)=\sum_{y\in Y}P(x,y)
+\]
+
+\end_inset
+
+ and 
+\begin_inset Formula 
+\[
+P(*,y)=\sum_{x\in X}P(x,y)
+\]
+
+\end_inset
+
+ The left-hand sums are the column totals in the table above, table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Word-Split-Table"
+
+\end_inset
+
+
 \begin_inset Newline newline
 \end_inset
 
@@ -5082,7 +5111,15 @@ P(gifte,*) = 1/29
 \begin_inset Newline newline
 \end_inset
 
-Next, the right-hand partials:
+Next, the right-hand partial sums.
+ These are the row totals for the table above, table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Word-Split-Table"
+
+\end_inset
+
+:
 \begin_inset Newline newline
 \end_inset
 
@@ -5115,7 +5152,21 @@ P(*,ter) = (1+2)/29 = 3/29 = P(*,er) = P(*,r)
 \begin_inset Newline newline
 \end_inset
 
-Now, the MI (we use log=log_2 in all cases below, for measuring bits)
+Now, the compute the MI (we use log=log_2 in all cases below, for measuring
+ the entropy in units of bits).
+ Recall the definition of mutual information for 
+\emph on
+ordered
+\emph default
+ pairs, previously discussed and given above: 
+\begin_inset Formula 
+\[
+MI(x,y)=\log_{2}\frac{P(x,y)}{P(x,*)P(*,y)}
+\]
+
+\end_inset
+
+So, working these by hand:
 \begin_inset Newline newline
 \end_inset
 
@@ -5283,9 +5334,6 @@ Phew.
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="12">
 <features tabularvalignment="middle">
@@ -6083,7 +6131,7 @@ tester
 \begin_inset Newline newline
 \end_inset
 
-The above table can be summarized below
+The best results from the above table are summarized below
 \begin_inset Newline newline
 \end_inset
 
@@ -6316,8 +6364,10 @@ tester
 \begin_inset Newline newline
 \end_inset
 
-What looks like the best split has been found.
- After this, link-type clustering proceeds as if these were distinct words.
+What looks like the best split has been found; it certainly matches what
+ was expected.
+ Yay! After this, link-type clustering proceeds just as before, as if these
+ were distinct words.
  That is, the above has 6 distinct link types; clustering will then proceed
  discover one link type, between the cluster {gif, tes} and {t,ty,ter}.
 \end_layout
@@ -6344,13 +6394,13 @@ Unsupervised Morpheme Segmentation and Morphology Induction from Text Corpora
 \end_layout
 
 \begin_layout Standard
-That algorithm works only for contcatenative languages, and does not provide
+That algorithm works only for concatenative languages, and does not provide
  a morphotactic structure; that is, it cannot learn the grammar governing
  the morphemes.
- It also requires several (plausable) assumptions about priors.
- One assumption is that morpheme frquency follows a modified Zipfian distributio
-n, this is used to make estimates for morphemes that are observed only once
- in the corpus.
+ It also requires several (plausable) assumptions about Bayesian priors.
+ One assumption is that morpheme frequency follows a modified Zipfian distributi
+on, this is used to make estimates for morphemes that are observed only
+ once in the corpus.
  Another assumption is is that the morpheme length distribution can be approxima
 ted by either a Poisson or a (two-parameter) gamma distribution.
 \end_layout
