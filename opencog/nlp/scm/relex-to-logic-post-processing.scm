@@ -178,27 +178,21 @@
 		)
 	)
 
-	; get the head links that include a lone word
-	(define lone-word-involvement-list
-		(delete-duplicates 
-			(filter-map (lambda (links cnt) (if (= cnt 1) (car links) #f))
-				word-involvement-cleaned-list
-				word-involvement-cnt
-			)
-		)
+	(define all-links
+		(delete-duplicates (apply append word-involvement-cleaned-list))
 	)
 
 	; do the main creation for the partially abstract version
 	(define partial
 		(map (lambda (a-link) (rebuild a-link lone-word-assoc-list non-lone-word-assoc-list))
-			lone-word-involvement-list
+			all-links
 		)
 	)
 
 	; do the main creation for the fully abstract version
 	(define full
 		(map (lambda (a-link) (rebuild a-link word-assoc-list '()))
-			(delete-duplicates (apply append word-involvement-cleaned-list))
+			all-links
 		)
 	)
 
