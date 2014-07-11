@@ -135,9 +135,8 @@
 	)
 )
 
-(define (negative-rule verb instance) 
-	(list (ImplicationLink (PredicateNode instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
-	(NotLink (PredicateNode instance df-node-stv) df-link-stv)
+(define (negative-rule verb instance)
+	(ImplicationLink (PredicateNode instance df-node-stv) (NotLink (PredicateNode verb df-node-stv) df-link-stv) df-link-stv)
 	)
 )
 
