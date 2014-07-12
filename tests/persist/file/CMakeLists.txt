@@ -10,8 +10,11 @@ ADD_CUSTOM_TARGET(test_custom_atom_types DEPENDS atom_types.h)
 LINK_LIBRARIES(
 	savable
 	spacetime
+	spacetime-types
+	atomspace
 )
 
 ADD_CXXTEST(SavingLoadingUTest)
 ADD_DEPENDENCIES(SavingLoadingUTest test_custom_atom_types) 
 ADD_DEPENDENCIES(SavingLoadingUTest opencog_atom_types)
+ADD_DEPENDENCIES(SavingLoadingUTest spacetime_atom_types)

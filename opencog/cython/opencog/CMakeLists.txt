@@ -81,6 +81,7 @@ IF (HAVE_ATOMSPACE)
 	ADD_DEPENDENCIES(atomspace_cython spacetime_atom_types)
 	ADD_DEPENDENCIES(atomspace_cython pln_atom_types)
 	ADD_DEPENDENCIES(atomspace_cython embodiment_atom_types)
+	ADD_DEPENDENCIES(atomspace_cython spacetime_atom_types)
 
 	TARGET_LINK_LIBRARIES(atomspace_cython
 		atomspace
@@ -88,6 +89,7 @@ IF (HAVE_ATOMSPACE)
 		embodiment-types
 		nlp-types
 		PLNTypes
+		spacetime-types
 		cogutil
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}

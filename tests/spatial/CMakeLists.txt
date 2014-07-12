@@ -7,6 +7,7 @@
 # )
 
 LINK_LIBRARIES(
+	spacetime-types
 	spacetime
 )
 

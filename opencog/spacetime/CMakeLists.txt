@@ -5,8 +5,14 @@ OPENCOG_ADD_ATOM_TYPES(atom_types.script
    spacetime_types.scm)
 ADD_CUSTOM_TARGET(spacetime_atom_types DEPENDS atom_types.h)
 
-ADD_LIBRARY (spacetime SHARED
+ADD_LIBRARY (spacetime-types SHARED
 	atom_types_init.cc
+)
+
+ADD_DEPENDENCIES(spacetime-types opencog_atom_types)
+ADD_DEPENDENCIES(spacetime-types spacetime_atom_types)
+
+ADD_LIBRARY (spacetime SHARED
 	HandleToTemporalEntryMap.cc
 	HandleTemporalPairEntry.cc
 	HandleTemporalPair.cc
@@ -20,10 +26,7 @@ ADD_LIBRARY (spacetime SHARED
 	TimeServer.cc
 )
 
-ADD_DEPENDENCIES(spacetime opencog_atom_types)
-ADD_DEPENDENCIES(spacetime spacetime_atom_types)
-
-TARGET_LINK_LIBRARIES(spacetime SpaceMap server atomspace)
+TARGET_LINK_LIBRARIES(spacetime spacetime-types SpaceMap server atomspace)
 
 INSTALL (FILES
 	HandleToTemporalEntryMap.h

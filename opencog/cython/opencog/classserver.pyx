@@ -13,6 +13,9 @@ cdef extern :
 cdef extern :
     cdef void pln_types_init() 
 
+cdef extern :
+    cdef void spacetime_types_init() 
+
 
 # Dynamically construct a "types" module.
 # XXX FIXME This should also listen to "addtype" signals in case
@@ -60,6 +63,7 @@ cdef generate_type_module():
     nlp_types_init()
     pln_types_init()
     attention_types_init()
+    spacetime_types_init()
     embodiment_types_init()
     types = {}
     cdef string s
