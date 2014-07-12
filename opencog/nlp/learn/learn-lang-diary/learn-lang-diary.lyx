@@ -1609,7 +1609,7 @@ Reductio ad absurdum? No.
 \end_layout
 
 \begin_layout Standard
-What if we continue on this path, and (incorectly) reduce to 
+What if we continue on this path, and (incorrectly) reduce to 
 \begin_inset Formula $N=3$
 \end_inset
 
@@ -1647,7 +1647,11 @@ h_{SING}^{red}-h_{SING}^{rr}=0.4591479>0.4150375=h_{RAND}^{red}-h_{RAND}^{rr}
 \end_inset
 
 So this inequality allows an inappropriate reduction to take place.
- For the pairs, 
+ That implies that we must not use the SING inequality to obtain reductions!
+\end_layout
+
+\begin_layout Standard
+For the pairs, 
 \begin_inset Formula $p(\gamma,\eta)=p(\gamma,B)=2/3$
 \end_inset
 
@@ -1752,7 +1756,8 @@ where
 \emph on
 ever
 \emph default
- broken? Or does it always hold?
+ broken? Or does it always hold? At any rate, from the previous example,
+ it seems clear that we should not use the SING inequalities to obtain clusters.
 \end_layout
 
 \begin_layout Standard
@@ -6775,7 +6780,11 @@ How is this to be done?
 \end_layout
 
 \begin_layout Standard
-Out vocabulary consists of N=5 morphemes {gif.=, tes.=.
+Out vocabulary consists of N=5 morphemes 
+\begin_inset Formula $\alpha=$
+\end_inset
+
+{gif.=, tes.=.
  =t, =ty, =ter}.
  We begin by recomuting the MI for observed pairs, once-again starting with
  the initial corpus 
@@ -7145,7 +7154,111 @@ Note that three of the MI values are negative, and three are positive.
 \end_layout
 
 \begin_layout Standard
+Following the previous formulas, we compute the total pair entropy:
+\end_layout
 
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+h_{PAIR} & =-\sum_{w_{1},w_{2}\in\alpha}p(w_{1},w_{2})\log_{2}p(w_{1},w_{2})\\
+ & =-\frac{5}{7}\log_{2}\frac{1}{7}-\frac{2}{7}\log_{2}\frac{2}{7}=2.521641
+\end{align*}
+
+\end_inset
+
+This is a bit of a misnomer, or misleading; we are actually computing the
+ link-entropy: so the set is actually 
+\begin_inset Formula $\beta=\{GA,GB,GC,TA,TB,TC\}$
+\end_inset
+
+ the first five of which were observed once, and the last ws observed twice.
+ So really we should write:
+\begin_inset Formula 
+\[
+h_{PAIR}=-\sum_{t\in\beta}p(t)\log_{2}p(t)
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $p(t)$
+\end_inset
+
+ being the probability of observing link-type 
+\begin_inset Formula $t$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Link type reductions can be many ways.
+ In each case, we look to see if adding a new word to a category improves
+ the score.
+ The possibilites are:
+\end_layout
+
+\begin_layout Enumerate
+Group =ter and =ty together.
+\end_layout
+
+\begin_layout Enumerate
+Group =ter and =t together.
+\end_layout
+
+\begin_layout Enumerate
+Group =ty and =t together.
+\end_layout
+
+\begin_layout Enumerate
+Group gif.= and tes.= together.
+\end_layout
+
+\begin_layout Standard
+After this, we have more reductions:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+1.a.
+ Add =t to {=ter, =ty}, and finally group together gif.= and tes.=
+\end_layout
+
+\begin_layout Standard
+1.b.
+ Group together gif.= and tes.=, and finally, add =t to {=ter, =ty}
+\end_layout
+
+\begin_layout Standard
+2.a, 2.b.
+ 3.a 3.b variations of above
+\end_layout
+
+\begin_layout Standard
+4.a.
+ Group =ter and =ty together, then add =t.
+\end_layout
+
+\begin_layout Standard
+4.b.
+ Group =ter and =t together, then add =ty.
+\end_layout
+
+\begin_layout Standard
+4.c.
+ Group =ty and =t together, then add =ter.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+This gives 9 different orders in which the reductions can take place.
+ Lets do at least some of them.
 \end_layout
 
 \begin_layout Section*
