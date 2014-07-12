@@ -242,7 +242,11 @@
             (ConceptNode v2_instance)
             (PredicateNode v1_instance)
         )
-    ))
+    )
+    (EvaluationLink
+        (PredicateNode v1_instance)
+               (ListLink
+                    (ConceptNode v2_instance)))
 )
 
 ;Example: "She wants to sing."; verb1 = want, verb2 = sing, subj = she
