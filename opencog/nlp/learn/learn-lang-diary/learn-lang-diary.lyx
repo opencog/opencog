@@ -2583,6 +2583,47 @@ Convert to binary tree.
 \end_layout
 
 \begin_layout Subsection*
+Morphology Basic Claims
+\end_layout
+
+\begin_layout Standard
+We have two tasks to adress: the automated discovery of morpheme boundaries,
+ and the automated discovery of 
+\begin_inset Quotes eld
+\end_inset
+
+morphtactics
+\begin_inset Quotes erd
+\end_inset
+
+, the syntax of connected morphemes.
+ We make two claims: first.
+ the automated discovery of morpheme boundaries can be accomplished by searching
+ for breaks between word-parts that have the lowest mutual information.
+ Second, the doscivery of morphotactics is identical to the discevery of
+ syntax, as outlined above.
+\end_layout
+
+\begin_layout Standard
+The simplest approach to finding the breaks between morphemes is to randomly
+ break up words into two parts.
+ A worked example of this is given below.
+ Several questions present themselves:
+\end_layout
+
+\begin_layout Itemize
+To discover morphemes of words that split into three or more parts, is it
+ better to always split pairwise, and then perform recursion, or is it easier
+ to split into multiple parts immediately? Perhaps the answer is language-depend
+ent?
+\end_layout
+
+\begin_layout Itemize
+Does one obtain better mophological splits by immediately including morphtactic
+ analysis, or can this be deferred?
+\end_layout
+
+\begin_layout Subsection*
 Morphology Worked Example
 \end_layout
 
@@ -2608,7 +2649,7 @@ tester
  Explore all possible splits into two parts.
  The 4-letter splits split 3 ways, the 5-letter splits split 4 ways, etc.
  so there is a total of N(*,*)=3+3+5+4+4+5+5=29 pairs.
- All pairs appear once, except for tester, with appears twice.
+ All pairs appear once, except for tester, which appears twice.
  Viz.
 \begin_inset Newline newline
 \end_inset
@@ -5354,7 +5395,7 @@ Phew.
 \begin_inset Text
 
 \begin_layout Plain Layout
-word
+Word
 \end_layout
 
 \end_inset
@@ -5363,25 +5404,7 @@ word
 \begin_inset Text
 
 \begin_layout Plain Layout
-split
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-MI
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-split
+Split
 \end_layout
 
 \end_inset
@@ -5399,7 +5422,7 @@ MI
 \begin_inset Text
 
 \begin_layout Plain Layout
-split
+Split
 \end_layout
 
 \end_inset
@@ -5417,7 +5440,7 @@ MI
 \begin_inset Text
 
 \begin_layout Plain Layout
-split
+Split
 \end_layout
 
 \end_inset
@@ -5435,7 +5458,25 @@ MI
 \begin_inset Text
 
 \begin_layout Plain Layout
-split
+Split
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+MI
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Split
 \end_layout
 
 \end_inset
@@ -5453,7 +5494,7 @@ MI
 \begin_inset Text
 
 \begin_layout Plain Layout
-best
+Best
 \end_layout
 
 \end_inset
@@ -6154,7 +6195,7 @@ The best results from the above table are summarized below
 \begin_inset Text
 
 \begin_layout Plain Layout
-word
+Word
 \end_layout
 
 \end_inset
@@ -6163,7 +6204,7 @@ word
 \begin_inset Text
 
 \begin_layout Plain Layout
-most likely split(s)
+Lowest MI split(s)
 \end_layout
 
 \end_inset
@@ -6403,6 +6444,334 @@ on, this is used to make estimates for morphemes that are observed only
  once in the corpus.
  Another assumption is is that the morpheme length distribution can be approxima
 ted by either a Poisson or a (two-parameter) gamma distribution.
+\end_layout
+
+\begin_layout Section*
+12 July 2014
+\end_layout
+
+\begin_layout Subsection*
+Link-type discovery, worked example
+\end_layout
+
+\begin_layout Standard
+In keeping with the previous, lets look at a super-simplified version of
+ link-type discovery, continuing imediately from the previous example.
+ We begin with the intial observations, given in the table below:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="7" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Pair
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Initial Link Type
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+# observations
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+gif--t
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+GA
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+gif--ty
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+GB
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+gif--ter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+GC
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+tes--t
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+TA
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+tes--ty
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+TB
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+tes--ter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+TC
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The 
+\begin_inset Quotes eld
+\end_inset
+
+initial link type
+\begin_inset Quotes erd
+\end_inset
+
+ is handed out randomly; the actual letter string has no bearing on the
+ outcome.
+ Notice the above has 6 different, unique link types.
+ These correspond to the following link-grammar dictionary, written in the
+ classic link-grammar notation:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.=: GA+ or GB+ or GC+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     tes.=: TA+ or TB+ or TC+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t: GA- or TA-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ty: GB- or TB-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ter: GC- or TC-;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+From the above initial dictionary, we want to decude that a single link
+ type is sufficient to full describe what is happening.
+ That is, we wish to discover the following dictionary:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.= tes.=: LL+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t =ty =ter: LL-;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+How is this done?
 \end_layout
 
 \begin_layout Section*
