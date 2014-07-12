@@ -243,7 +243,12 @@
             (PredicateNode v1_instance)
         )
     )
-)
+    (EvaluationLink
+        (PredicateNode v1_instance)
+               (ListLink
+                    (ConceptNode v2_instance)))
+))
+
 
 ;Example: "She wants to sing."; verb1 = want, verb2 = sing, subj = she
 (define (to-do-rule-5 verb1 verb1_instance verb2 verb2_instance subj subj_instance)
