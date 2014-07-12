@@ -7172,7 +7172,7 @@ This is a bit of a misnomer, or misleading; we are actually computing the
 \begin_inset Formula $\beta=\{GA,GB,GC,TA,TB,TC\}$
 \end_inset
 
- the first five of which were observed once, and the last ws observed twice.
+ the first five of which were observed once, and the last was observed twice.
  So really we should write:
 \begin_inset Formula 
 \[
@@ -7926,9 +7926,77 @@ status open
 \begin_inset Newline newline
 \end_inset
 
-From the above initial dictionary, we want to decude that a single link
- type is sufficient to full describe what is happening.
- That is, we wish to discover the following dictionary:
+From the above initial dictionary, we hope to deduce one word class that
+ contains gif.= and tes.= and another that contains =t and =ter; eactly how
+ the rest plays out is unclear.
+ Lets begin by starting with the un-clustered entropy, and then see what
+ hapens if we try various different clusters.
+ So, as before, let 
+\begin_inset Formula $\beta=\{GA,GB,GC,TA,TB,TC,BB,BF\}$
+\end_inset
+
+ and write:
+\begin_inset Formula 
+\begin{align*}
+h_{PAIR} & =-\sum_{t\in\beta}p(t)\log_{2}p(t)\\
+ & =-\frac{6}{11}\log_{2}\frac{1}{11}-\frac{2}{11}\log_{2}\frac{2}{11}-\frac{3}{11}\log_{2}\frac{3}{11}\\
+ & =2.845351
+\end{align*}
+
+\end_inset
+
+with 
+\begin_inset Formula $p(t)$
+\end_inset
+
+ being the probability of observing link-type 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ Lets look at several cases:
+\end_layout
+
+\begin_layout Enumerate
+Group gif.= and tes.= together.
+\end_layout
+
+\begin_layout Enumerate
+Group gif.= and blo.= together.
+\end_layout
+
+\begin_layout Enumerate
+Group =t and =ty together.
+\end_layout
+
+\begin_layout Enumerate
+Group =ty and =fu together.
+\end_layout
+
+\begin_layout Enumerate
+Group =ter and =fu together.
+\end_layout
+
+\begin_layout Standard
+Here, we expect case 1 to go easily, cases 2 and 3 to to be ambiguous or
+ blocked, case 4 to be weakly blocked, and case 5 to be strongly blocked.
+ So, proceeding:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Case 1.
+ Let 
+\begin_inset Formula $\gamma=\{\mbox{gif.=, tes.=}\}$
+\end_inset
+
+.
+ Then the link types G* and T* need to be consolidated: A={GA,TA} and likewise
+ B={GB,TB} and C={GC,TC}.
+ The dictionary becomes
 \begin_inset Newline newline
 \end_inset
 
@@ -7942,12 +8010,32 @@ status open
 
 \begin_layout Plain Layout
 
-     gif.= tes.=: LL+;
+     gif.= tes.=: A+ or B+ or C+;
 \end_layout
 
 \begin_layout Plain Layout
 
-     =t =ty =ter: LL-;
+     blo.=: BB+ or BF+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t: A-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ty: B- or BB-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ter: C-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =fu: BF-;
 \end_layout
 
 \end_inset
@@ -7956,7 +8044,529 @@ status open
 \begin_inset Newline newline
 \end_inset
 
-How is this to be done?
+The observed pair probabilities become: 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(A) = p(gif,t) + p(tes,t) = 2/11 = p(B) = p(gif,ty) + p(tes,ty) 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(C) = p(gif,ter) + p(tes,ter) = 3/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(BB) = p(blo,ty) = 3/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(BF) = p(blo,fu) = 1/11
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+So the entropy is now
+\begin_inset Formula 
+\[
+h_{PAIR}^{red1.}=-\frac{4}{11}\log_{2}\frac{2}{11}-\frac{6}{11}\log_{2}\frac{3}{11}-\frac{1}{11}\log_{2}\frac{1}{11}=2.231270
+\]
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The entropy is clearly less, the grouping goes.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Case 2.
+ Let 
+\begin_inset Formula $\delta=\{\mbox{gif.=, blo.=}\}$
+\end_inset
+
+.
+ Then the link types GB and BB can be consolidated, because they share the
+ common suffix =ty: B={GB,BB}.
+ No other link consolidation is possible, without permitting impermissible
+ (previously unseen) linkages.
+ The dictionary becomes
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.= blo.=: GA+ or B+ or GC+ or BF+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     tes.=: TA+ or TB+ or TC+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t: GA- or TA-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ty: B- or TB-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ter: GC- or TC-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =fu: BF-;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Note that this dictionary does allow several previously unobserved words:
+ giffu, blot, bloter.
+ This is what happens when one hypothesizes unions between classes that
+ merely overlap, instead of being subsets.
+ What happens next depends on whether the overlap was large, or small.
+\end_layout
+
+\begin_layout Standard
+The observed pair probabilities become: 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(GA) = p(gif,t) = 1/11 = p(GC) = p(TA) = p(TB) 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(TC) = p(tes,ter) = 2/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(B) = p(gif,ty) + p(blo,ty) = 4/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(BF) = p(blo,fu) = 1/11
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+So the entropy is now
+\begin_inset Formula 
+\[
+h_{PAIR}^{red2.}=-\frac{5}{11}\log_{2}\frac{1}{11}-\frac{2}{11}\log_{2}\frac{2}{11}-\frac{4}{11}\log_{2}\frac{4}{11}=2.550341
+\]
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The entropy is clearly less, the grouping goes.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Case 3.
+ Let 
+\begin_inset Formula $\epsilon=\{\mbox{=t, =ty}\}$
+\end_inset
+
+ Then we may group G={GA, GB} and T={TA, TB}.
+ The corresponding link-grammar dictionary is:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.=: G+ or GC+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     tes.=: T+ or TC+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     blo.=: BB+ or BF+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t =ty: G- or T- or BB-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ter: GC- or TC-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =fu: BF-;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The above again allows a new, unobserved word: 
+\begin_inset Quotes eld
+\end_inset
+
+blot
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The observed pair probabilities become: 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(G) = p(gif,t) + p(gif,ty) = 2/11 = p(T) = p(tes,t) + p(tes,ty) 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(GC) = p(gif,ter) = 1/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(TC) = p(tes,ter) = 2/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(BB) = p(blo,ty) = 3/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(BF) = p(blo,fu) = 1/11
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+So the entropy is now
+\begin_inset Formula 
+\[
+h_{PAIR}^{red3.}=-\frac{6}{11}\log_{2}\frac{2}{11}-\frac{2}{11}\log_{2}\frac{1}{11}-\frac{3}{11}\log_{2}\frac{3}{11}=2.481715
+\]
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The entropy is clearly less, the grouping goes.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Case 4.
+ Let 
+\begin_inset Formula $\zeta=\{\mbox{=ty, =fu}\}$
+\end_inset
+
+.
+ Then we must group B={BB,BF} together.
+ The dictionary is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.=: GA+ or GB+ or GC+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     tes.=: TA+ or TB+ or TC+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     blo.=: B+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t: GA- or TA-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ty =fu: GB- or TB- or B-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ter: GC- or TC-;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+No new unobserved words are allowed by this grouping! The observed pair
+ probabilities are:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(GA) = p(gif,t) = 1/11 = p(GB) = p(GC) = p(TA) = p(TB) 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(TC) = p(tes,ter) = 2/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(B) = p(blo,ty) + p(blo,fu) = 4/11
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The entropy is then:
+\begin_inset Formula 
+\[
+h_{PAIR}^{red4.}=-\frac{5}{11}\log_{2}\frac{1}{11}-\frac{2}{11}\log_{2}\frac{2}{11}-\frac{4}{11}\log_{2}\frac{4}{11}=2.550341
+\]
+
+\end_inset
+
+Curiously, this entropy is identical to the completely different case 2.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Case 5.
+ Group =ter and =fu together, so that 
+\begin_inset Formula $\eta=\{\mbox{=ter, =fu}\}$
+\end_inset
+
+.
+ It does not appear that any link types get consolidated! This is not much
+ of a grouping, then ...
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.=: GA+ or GB+ or GC+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     tes.=: TA+ or TB+ or TC+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     blo.=: BB+ or BF+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t: GA- or TA-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ty: GB- or TB- or BB-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ter =fu: GC- or TC- or BF-;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Many new, unobserved words are allowed: bloter, giffu, tesfu.
+ The observed pair probabilities are:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(GA) = p(gif,t) = 1/11 = p(GB) = p(GC) = p(TA) = p(TB) 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(TC) = p(tes,ter) = 2/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(BB) = p(blo,ty) = 3/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(BF) = p(blu,fu) = 1/11
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The entropy is then:
+\begin_inset Formula 
+\[
+h_{PAIR}^{red5.}=-\frac{6}{11}\log_{2}\frac{1}{11}-\frac{2}{11}\log_{2}\frac{2}{11}-\frac{3}{11}\log_{2}\frac{3}{11}=2.845351
+\]
+
+\end_inset
+
+This is identical to the unreduced entropy: no surprise, because no link
+ consolidation was performed.
 \end_layout
 
 \begin_layout Section*
