@@ -6461,7 +6461,8 @@ Link-type discovery, worked example
 
 \begin_layout Standard
 In keeping with the previous, lets look at a super-simplified version of
- link-type discovery, continuing imediately from the previous example.
+ link-type discovery, continuing imediately from the previous morpheme-discovery
+ example.
  We begin with the intial observations, given in the table below:
 \begin_inset Newline newline
 \end_inset
@@ -6746,7 +6747,7 @@ status open
 \begin_inset Newline newline
 \end_inset
 
-From the above initial dictionary, we want to decude that a single link
+From the above initial dictionary, we want to deduce that a single link
  type is sufficient to full describe what is happening.
  That is, we wish to discover the following dictionary:
 \begin_inset Newline newline
@@ -7259,6 +7260,703 @@ After this, we have more reductions:
 
 This gives 9 different orders in which the reductions can take place.
  Lets do at least some of them.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Case 1.
+ Let 
+\begin_inset Formula $\gamma=\{\mbox{=ter, =ty}\}$
+\end_inset
+
+.
+ Then the link types GB and GC need to be consolidated: GG={GB,GC} and likewise
+ TT={TB,TC}.
+ The dictionary becomes
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.=: GA+ or GG+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     tes.=: TA+ or TT+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t: GA- or TA-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ty =ter: GG- or TT-;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The observed pair probabilities become: 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(GA) = p(gif,t) = 1/7 = p(TA) = p(tes,t)
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(GG) = p(gif,ter) + p(gif,ty) = 2/7
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(TT) = p(tes,ter) + p(tes,ty) = 3/7
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+So the entropy is now
+\begin_inset Formula 
+\[
+h_{PAIR}^{red1.}=-\frac{2}{7}\log_{2}\frac{1}{7}-\frac{2}{7}\log_{2}\frac{2}{7}-\frac{3}{7}\log_{2}\frac{3}{7}=1.842371
+\]
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Case 1.a.
+ Let 
+\begin_inset Formula $\delta=\{\mbox{=ter, =ty, =t}\}$
+\end_inset
+
+.
+ Then the link types GA and GG need to be consolidated: G={GA,GG} and likewise
+ T={TA,TT}.
+ The dictionary becomes
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.=: G+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     tes.=: T+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t =ty =ter: G- or T-;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The observed pair probabilities become: 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(G) = p(gif,t) + p(gif,ty) + p(gif,ter) = 3/7
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(T) = p(tes,t) + p(tes,ty) + p(tes,ter) = 4/7
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+So the entropy is now
+\begin_inset Formula 
+\[
+h_{PAIR}^{red1.a.}=-\frac{3}{7}\log_{2}\frac{3}{7}-\frac{4}{7}\log_{2}\frac{4}{7}=0.985228
+\]
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Case 1.b.
+ Let 
+\begin_inset Formula $\gamma=\{\mbox{=ter, =ty}\}$
+\end_inset
+
+ as before, and 
+\begin_inset Formula $\epsilon=\{\mbox{gif.=, tes.=}\}$
+\end_inset
+
+.
+ The dictionary becomes
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.= tes.=: EA+ or EM+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t: EA-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ty =ter: EM-;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The observed pair probabilities become: 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(EA) = p(gif,t) + p(tes,t) = 2/7
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(EM) = 5/7
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+So that the entropy is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+h_{PAIR}^{red1.b.}=-\frac{2}{7}\log_{2}\frac{2}{7}-\frac{5}{7}\log_{2}\frac{5}{7}=0.863121
+\]
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Case 2.a.
+ and case 2.b.
+ are identical to cases 1.a.
+ and 1.b.
+ because =t and =ty are interchangable, from the probability point of view.
+\end_layout
+
+\begin_layout Standard
+Case 3.a.
+ and case 3.b.
+ are similar, but with different probabilities.
+\end_layout
+
+\begin_layout Standard
+Case 4.
+ and the subcses are different, but not illuminating.
+\end_layout
+
+\begin_layout Subsection*
+Link-type discovery, better example
+\end_layout
+
+\begin_layout Standard
+In the previous, the unified link-type discovery is inevitable, so a more
+ complex version is needed, with a less-obvious outcome.
+ So lets take the original example of link-type discovery, and add some
+ confounding link types.
+ We begin with the intial observations, plus some extras, given in the table
+ below:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="9" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Pair
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Initial Link Type
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+# observations
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+gif--t
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+GA
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+gif--ty
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+GB
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+gif--ter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+GC
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+tes--t
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+TA
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+tes--ty
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+TB
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+tes--ter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+TC
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+blo--ty
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+BB
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+blo-fu
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+BF
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The addition of 
+\begin_inset Quotes eld
+\end_inset
+
+bloty
+\begin_inset Quotes erd
+\end_inset
+
+ to the link table, and with a strong weight, will tend to derail the consolidat
+ion of the =ty suffix with the others.
+ The addition of 
+\begin_inset Quotes eld
+\end_inset
+
+blofu
+\begin_inset Quotes erd
+\end_inset
+
+ helps make sure that there's some confusion about the 
+\begin_inset Quotes eld
+\end_inset
+
+blo=
+\begin_inset Quotes erd
+\end_inset
+
+ stem.
+\end_layout
+
+\begin_layout Standard
+The corresponding link-grammar dictionary is:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.=: GA+ or GB+ or GC+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     tes.=: TA+ or TB+ or TC+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     blo.=: BB+ or BF+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t: GA- or TA-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ty: GB- or TB- or BB-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ter: GC- or TC-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =fu: BF-;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+From the above initial dictionary, we want to decude that a single link
+ type is sufficient to full describe what is happening.
+ That is, we wish to discover the following dictionary:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.= tes.=: LL+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t =ty =ter: LL-;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+How is this to be done?
 \end_layout
 
 \begin_layout Section*
