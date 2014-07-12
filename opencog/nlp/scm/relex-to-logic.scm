@@ -219,7 +219,7 @@
 	))
 )
 
-;Example: "She is nice to help with the project."
+;Example: "She is nice to help with the project."; v1= nice , v2= help , v3= she
 (define (to-do-rule-3 v1 v1_instance v2 v2_instance v3 v3_instance)
     (list (InheritanceLink (ConceptNode v1_instance df-node-stv) (ConceptNode v1 df-node-stv) df-link-stv)
     (ImplicationLink (PredicateNode v2_instance df-node-stv) (PredicateNode v2 df-node-stv) df-link-stv)
@@ -231,7 +231,6 @@
                 (ConceptNode v1_instance df-node-stv))
         )
     ))
-)
 
 ;Example: "She must be able to sing." ; v1 = sing , v2 = she
 (define (to-do-rule-4 v1 v1_instance v2 v2_instance) 
