@@ -227,7 +227,8 @@
     (EvaluationLink df-link-stv
         (PredicateNode v2_instance df-node-stv)
         (ListLink df-link-stv ; does this ListLink make sense here? (by sebastianruder)
-                (InheritanceLink (ConceptNode v3_instance df-node-stv) (ConceptNode v1_instance df-node-stv) df-link-stv)
+                (ConceptNode v3_instance df-node-stv) 
+                (ConceptNode v1_instance df-node-stv))
         )
     ))
 )
