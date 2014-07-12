@@ -16,10 +16,10 @@ __init__(atomspace)
 
 coreTypes = "opencog/atomspace/core_types.scm"
 utilities = "opencog/scm/utilities.scm"
+timeLinks = "opencog/spacetime/spacetime_types.scm"
 data = "tests/python/test_pln/scm_disabled/temporal/temporalToyExample.scm"
-timeLinks = "opencog/spacetime/atom_types.script"
 
-for item in [coreTypes, utilities, data]:
+for item in [coreTypes, utilities, timeLinks, data]:
     load_scm(atomspace, item)
 
 """
