@@ -84,6 +84,21 @@ void * SchemeEval::c_wrap_finish(void *p)
 	return self;
 }
 
+// The following two routines are needed to avoid bad garbage collection
+// and to also to avoid a signal is accidentlaly unprotecting something
+// that isn't protected.
+void SchemeEval::set_captured_stack(SCM newstack)
+{
+	scm_gc_unprotect_object(captured_stack);
+	captured_stack = scm_gc_protect_object(newstack);
+}
+
+void SchemeEval::set_error_string(SCM newerror)
+{
+	scm_gc_unprotect_object(error_string);
+	error_string = scm_gc_protect_object(newerror);
+}
+
 static pthread_once_t eval_init_once = PTHREAD_ONCE_INIT;
 static pthread_key_t tid_key = 0;
 
@@ -263,7 +278,7 @@ SCM SchemeEval::preunwind_handler (SCM tag, SCM throw_args)
 	// We can only record the stack before it is unwound.
 	// The normal catch handler body runs only *after* the stack
 	// has been unwound.
-	captured_stack = scm_make_stack(SCM_BOOL_T, SCM_EOL);
+	set_captured_stack(scm_make_stack(SCM_BOOL_T, SCM_EOL));
 	return SCM_EOL;
 }
 
@@ -328,7 +343,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 		}
 #ifdef HAVE_GUILE2
 		if (SCM_STACK_LENGTH (captured_stack))
-			captured_stack = scm_stack_ref (captured_stack, SCM_INUM0);
+			set_captured_stack(scm_stack_ref (captured_stack, SCM_INUM0));
 #endif
 		scm_display_error (captured_stack, port, subr, message, parts, rest);
 	}
@@ -340,7 +355,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 	scm_puts(restr, port);
 	free(restr);
 
-	error_string = scm_get_output_string(port);
+	set_error_string(scm_get_output_string(port));
 	scm_close_port(port);
 	return SCM_BOOL_F;
 }
@@ -428,7 +443,7 @@ std::string SchemeEval::do_eval(const std::string &expr)
 
 	_caught_error = false;
 	_pending_input = false;
-	captured_stack = SCM_BOOL_F;
+	set_captured_stack(SCM_BOOL_F);
 	SCM rc = scm_c_catch (SCM_BOOL_T,
 	                      (scm_t_catch_body) scm_c_eval_string,
 	                      (void *) expr_str,
@@ -452,8 +467,8 @@ std::string SchemeEval::do_eval(const std::string &expr)
 		char * str = scm_to_locale_string(error_string);
 		std::string rv = str;
 		free(str);
-		error_string = SCM_EOL;
-		captured_stack = SCM_BOOL_F;
+		set_error_string(SCM_EOL);
+		set_captured_stack(SCM_BOOL_F);
 
 		scm_truncate_file(outport, scm_from_uint16(0));
 
@@ -507,7 +522,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	SchemeSmob::ss_set_env_as(atomspace);
 
 	_caught_error = false;
-	captured_stack = SCM_BOOL_F;
+	set_captured_stack(SCM_BOOL_F);
 	SCM rc = scm_c_catch (SCM_BOOL_T,
 	                 SchemeEval::thunk_scm_eval, (void *) sexpr,
 	                 SchemeEval::catch_handler_wrapper, this,
@@ -520,7 +535,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 		// (probably because someone called cog-bind with an ExecutionLink
 		// in it with a bad scheme schema node.)
 		// error_string = SCM_EOL;
-		captured_stack = SCM_BOOL_F;
+		set_captured_stack(SCM_BOOL_F);
 
 		scm_truncate_file(outport, scm_from_uint16(0));
 
@@ -614,7 +629,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 	SchemeSmob::ss_set_env_as(atomspace);
 
 	_caught_error = false;
-	captured_stack = SCM_BOOL_F;
+	set_captured_stack(SCM_BOOL_F);
 	SCM rc = scm_c_catch (SCM_BOOL_T,
 	                      (scm_t_catch_body) scm_c_eval_string,
 	                      (void *) expr.c_str(),
@@ -624,8 +639,8 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 	if (_caught_error)
 	{
 		char * str = scm_to_locale_string(error_string);
-		error_string = SCM_EOL;
-		captured_stack = SCM_BOOL_F;
+		set_error_string(SCM_EOL);
+		set_captured_stack(SCM_BOOL_F);
 
 		scm_truncate_file(outport, scm_from_uint16(0));
 

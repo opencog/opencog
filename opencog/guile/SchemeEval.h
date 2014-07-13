@@ -59,7 +59,9 @@ class SchemeEval : public GenericEval
 
 		// Error handling stuff
 		SCM error_string;
+		void set_error_string(SCM);
 		SCM captured_stack;
+		void set_captured_stack(SCM);
 		static SCM preunwind_handler_wrapper(void *, SCM, SCM);
 		static SCM catch_handler_wrapper(void *, SCM, SCM);
 		SCM preunwind_handler(SCM, SCM);
