@@ -137,7 +137,6 @@
 
 (define (negative-rule verb instance)
 	(ImplicationLink (PredicateNode instance df-node-stv) (NotLink (PredicateNode verb df-node-stv) df-link-stv) df-link-stv)
-	)
 )
 
 (define (possessive-rule noun noun_instance word word_instance)
