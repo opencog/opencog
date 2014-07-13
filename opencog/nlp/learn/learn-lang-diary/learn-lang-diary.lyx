@@ -6817,9 +6817,13 @@ This is inuitively obvious, because the morphemes obviously form a clique:
  each stem has been observed with each suffix.
  Technically, this is a bipartite clique or complete bipartite graph of
  order (2,3).
- However, lets assume that, in general it is not easy to search for bipartite
- subgraphs in a grammar.
- So how should we find grammar reductions? How is this to be done?
+ Here, we see it immediately; however, in general, it is very hard to search
+ for bipartite cliques in a grammar; general algorithms are provably NP-complete
+ and run in exponential time.
+\end_layout
+
+\begin_layout Standard
+So how should we find grammar reductions? How is this to be done?
 \end_layout
 
 \begin_layout Standard
@@ -7675,9 +7679,29 @@ In the previous, the unified link-type discovery is inevitable, so a more
 \end_inset
 
 
+\begin_inset Float table
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Example Link Frequency Table
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Example-Link-Frequency"
+
+\end_inset
+
+
 \end_layout
 
-\begin_layout Standard
+\end_inset
+
+
 \begin_inset Tabular
 <lyxtabular version="3" rows="9" columns="3">
 <features tabularvalignment="middle">
@@ -7950,13 +7974,22 @@ BF
 \end_inset
 
 
-\begin_inset Newline newline
+\end_layout
+
+\begin_layout Plain Layout
+Example distribution of link frequencies obtained from an example corpus.
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
 \end_inset
 
 
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
+\begin_layout Standard
 The addition of 
 \begin_inset Quotes eld
 \end_inset
@@ -7999,9 +8032,35 @@ name "gifty-grammar"
 \end_inset
 
 
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Example morpheme grammar
+\begin_inset CommandInset label
+LatexCommand label
+name "alg:Example-morpheme-grammar"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset listings
 inline false
 status open
@@ -8047,6 +8106,19 @@ status open
 
 \end_inset
 
+
+\end_layout
+
+\begin_layout Plain Layout
+A more complex grammar showing morpheme linkages.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 From the above initial dictionary, we hope to deduce one word class that
  contains gif.= and tes.= and another that contains =t and =ter; eactly how
  the rest plays out is unclear.
@@ -8118,14 +8190,14 @@ Group =ter and =fu together.
 Here, we expect case 1 to go easily, cases 2 and 3 to to be ambiguous or
  blocked, case 4 to be weakly blocked, and case 5 to be strongly blocked.
  So, proceeding:
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-
+\begin_layout Paragraph*
+Case 1.
 \end_layout
 
 \begin_layout Standard
-Case 1.
+Group gif.= and tes.= together.
  Let 
 \begin_inset Formula $\gamma=\{\mbox{gif.=, tes.=}\}$
 \end_inset
@@ -8229,10 +8301,6 @@ h_{PAIR}^{red1.}=-\frac{4}{11}\log_{2}\frac{2}{11}-\frac{6}{11}\log_{2}\frac{3}{
 
 \end_inset
 
-
-\begin_inset Newline newline
-\end_inset
-
 The generated entropy is 
 \begin_inset Formula $h^{gen}=\log_{2}5=2.321928$
 \end_inset
@@ -8249,14 +8317,15 @@ The generated entropy is
 \end_inset
 
  as before, since the generated language still has 8 words in it.
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-
+\begin_layout Paragraph*
+Case 2.
+ 
 \end_layout
 
 \begin_layout Standard
-Case 2.
+Group gif.= and blo.= together.
  Let 
 \begin_inset Formula $\delta=\{\mbox{gif.=, blo.=}\}$
 \end_inset
@@ -8370,10 +8439,6 @@ h_{PAIR}^{red2.}=-\frac{5}{11}\log_{2}\frac{1}{11}-\frac{2}{11}\log_{2}\frac{2}{
 
 \end_inset
 
-
-\begin_inset Newline newline
-\end_inset
-
 The generated entropy is 
 \begin_inset Formula $h^{gen}=\log_{2}7=2.807355$
 \end_inset
@@ -8392,8 +8457,13 @@ The generated entropy is
 
 \end_layout
 
-\begin_layout Standard
+\begin_layout Paragraph*
 Case 3.
+ 
+\end_layout
+
+\begin_layout Standard
+Group =t and =ty together.
  Let 
 \begin_inset Formula $\epsilon=\{\mbox{=t, =ty}\}$
 \end_inset
@@ -8534,8 +8604,13 @@ The equidistributional entropy is
 
 \end_layout
 
-\begin_layout Standard
+\begin_layout Paragraph*
 Case 4.
+ 
+\end_layout
+
+\begin_layout Standard
+Group =ty and =fu together.
  Let 
 \begin_inset Formula $\zeta=\{\mbox{=ty, =fu}\}$
 \end_inset
@@ -8653,9 +8728,13 @@ Curiously, this entropy is identical to the completely different case 2.
 
 \end_layout
 
-\begin_layout Standard
+\begin_layout Paragraph*
 Case 5.
- Group =ter and =fu together, so that 
+ 
+\end_layout
+
+\begin_layout Standard
+Group =ter and =fu together, so that 
 \begin_inset Formula $\eta=\{\mbox{=ter, =fu}\}$
 \end_inset
 
@@ -8776,6 +8855,512 @@ This is identical to the unreduced entropy: no surprise, because no link
  sideways slide, and yet, this grammar allows a bunch of nonsense words
  to be generated.
  That seems wrong.
+\end_layout
+
+\begin_layout Paragraph*
+Summary
+\end_layout
+
+\begin_layout Standard
+Of the 5 cases, three are blocked (cases 2,4,5), and two are acceptable
+ (1,3).
+ Case 1 looks to be the best.
+ Lets see what might happen next:
+\end_layout
+
+\begin_layout Itemize
+Case 1a.
+ Group =t and =ty
+\end_layout
+
+\begin_layout Itemize
+Case 1b.
+ Group =t and =ter
+\end_layout
+
+\begin_layout Itemize
+Case 1c.
+ Group =ty and =ter
+\end_layout
+
+\begin_layout Standard
+Case 1a resembles Case 3 so we expect it to advance.
+ Likewise for case 1c.
+ Its reasonable to guess that case 1b will be the strongest.
+ Lets try some of these.
+\end_layout
+
+\begin_layout Paragraph*
+Case 1a.
+\end_layout
+
+\begin_layout Standard
+Group =t and =ty.
+ The link merges are T={A,B}; the resulting gramar is:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.= tes.=: T+ or C+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     blo.=: BB+ or BF+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t =ty: T- or BB-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ter: C-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =fu: BF-;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+This grammar allows a new unobserved word: 
+\begin_inset Quotes eld
+\end_inset
+
+blot
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The observed pair probabilities become: 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(T) = p(gif,t) + p(tes,t) + p(gif,ty) + p(tes,ty) = 4/11 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(C) = p(gif,ter) + p(tes,ter) = 3/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(BB) = p(blo,ty) = 3/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(BF) = p(blo,fu) = 1/11
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+So the observed entropy is now
+\begin_inset Formula 
+\[
+h_{PAIR}^{red1.}=-\frac{4}{11}\log_{2}\frac{4}{11}-\frac{6}{11}\log_{2}\frac{3}{11}-\frac{1}{11}\log_{2}\frac{1}{11}=1.867634
+\]
+
+\end_inset
+
+The generated entropy is 
+\begin_inset Formula $h^{gen}=\log_{2}4=2$
+\end_inset
+
+.
+ The difference is 
+\begin_inset Formula $h^{gen}-h^{obs}=0.132366$
+\end_inset
+
+ which is not closer than the previous delta of 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+0.090658, so this is rejected.
+\end_layout
+
+\begin_layout Paragraph*
+Casse 1b.
+\end_layout
+
+\begin_layout Standard
+Group =t and =ter.
+ This consolidates links T={A,C} and so the dictionary becomes
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.= tes.=: T+ or B+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     blo.=: BB+ or BF+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t =ter: T-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ty: B- or BB-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =fu: BF-;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+This does not generate any new words.
+ The observed pair probabilities become: 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(A) = p(gif,t) + p(tes,t) + p(gif,ter) + p(tes,ter) = 5/11 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(B) = p(gif,ty) + p(tes,ty) = 2/11 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(BB) = p(blo,ty) = 3/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(BF) = p(blo,fu) = 1/11
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+So the observed entropy is now
+\begin_inset Formula 
+\[
+h_{PAIR}^{red1.}=-\frac{5}{11}\log_{2}\frac{5}{11}-\frac{2}{11}\log_{2}\frac{2}{11}-\frac{3}{11}\log_{2}\frac{3}{11}-\frac{1}{11}\log_{2}\frac{1}{11}=1.789929
+\]
+
+\end_inset
+
+The generated entropy is 
+\begin_inset Formula $h^{gen}=\log_{2}4=2$
+\end_inset
+
+.
+ The difference is 
+\begin_inset Formula $h^{gen}-h^{obs}=0.210071$
+\end_inset
+
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+ which does not get closer; the best still stands at 0.090658.
+ This is surprising: it sems to be blocking the discovery of the clique.
+\end_layout
+
+\begin_layout Paragraph*
+Case 1c.
+\end_layout
+
+\begin_layout Standard
+Group =ty and =ter.
+ This consolidates T={B,C}, so the dictionary becomes
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.= tes.=: A+ or T+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     blo.=: BB+ or BF+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t: A-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ty =ter: T- or BB-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =fu: BF-;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+This does not generate any new words.
+ The observed pair probabilities become: 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(A) = p(gif,t) + p(tes,t) = 2/11 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(C) = p(gif,ty) + p(tes,ty)+ p(gif,ter) + p(tes,ter) = 5/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(BB) = p(blo,ty) = 3/11
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(BF) = p(blo,fu) = 1/11
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The changes are the same as for case 1b.
+ Again, this is blocked.
+\end_layout
+
+\begin_layout Paragraph*
+Summary
+\end_layout
+
+\begin_layout Standard
+Movement to Cases 1a, 1b and 1c are all blocked.
+ This seems surprising.
+ The relatively high-frequency observation of =ter makes the distribution
+ of the consolidated grammar to deviate strongly from the distribution of
+ the observed corpus.
+ This seems like an undesired effect, as the point of learning how to simplify
+ the grammar is to obtain a smaller grammar, rather than to preserve the
+ the distribution of the corpus.
+ Mostly.
+\end_layout
+
+\begin_layout Standard
+Intuition suggests that the grammar for 
+\begin_inset Quotes eld
+\end_inset
+
+common
+\begin_inset Quotes erd
+\end_inset
+
+ cases should be consolidated.
+ The grammar for quite rare cases should indeed be handled distinctly.
+ To avoid this seemingly perverse outcome, perhaps the grammar should contain
+ frequency information, which is to be consolidated appropriately.
+ This is truly tedious, but seems to be neccessary.
+ So we have to start from scratch.
+\end_layout
+
+\begin_layout Subsection*
+Worked Link Consolidation Example, with Frequencies
+\end_layout
+
+\begin_layout Standard
+So we start all over again, using the same corpus frequences as before,
+ namely, those of table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Example-Link-Frequency"
+
+\end_inset
+
+.
+ The grammar is essentially identical to that of 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "alg:Example-morpheme-grammar"
+
+\end_inset
+
+, except that it is now annotated with probabilities.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.=: GA+ or GB+ or GC+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     tes.=: TA+ or TB+ or TC+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     blo.=: BB+ or BF+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t: GA- or TA-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ty: GB- or TB- or BB-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ter: GC- or TC-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =fu: BF-;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Thoughts
+\end_layout
+
+\begin_layout Standard
+What have we learned from the above?
+\end_layout
+
+\begin_layout Itemize
+The problem of condensing together morphemes into classes which share common
+ link types is the bipartite clique problem.
+ It is a known-hard problem.
+\end_layout
+
+\begin_layout Itemize
+Bad grammars increase the size of the language.
+ This could be acceptable, if the increase is small.
+ What's the crieteria? Unclear.
 \end_layout
 
 \begin_layout Section*
