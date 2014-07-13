@@ -6786,10 +6786,6 @@ status open
 From the above initial dictionary, we want to deduce that a single link
  type is sufficient to full describe what is happening.
  That is, we wish to discover the following dictionary:
-\begin_inset Newline newline
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -7380,10 +7376,6 @@ Case 1.
  Then the link types GB and GC need to be consolidated: GG={GB,GC} and likewise
  TT={TB,TC}.
  The dictionary becomes
-\begin_inset Newline newline
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -7462,15 +7454,15 @@ h_{PAIR}^{red1.}=-\frac{2}{7}\log_{2}\frac{1}{7}-\frac{2}{7}\log_{2}\frac{2}{7}-
 \end_inset
 
  since there are four total link types in the reduced grammar.
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-
+\begin_layout Paragraph*
+Case 1.a.
+ 
 \end_layout
 
 \begin_layout Standard
-Case 1.a.
- Let 
+Let 
 \begin_inset Formula $\delta=\{\mbox{=ter, =ty, =t}\}$
 \end_inset
 
@@ -7478,10 +7470,6 @@ Case 1.a.
  Then the link types GA and GG need to be consolidated: G={GA,GG} and likewise
  T={TA,TT}.
  The dictionary becomes
-\begin_inset Newline newline
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -7548,15 +7536,15 @@ The generated entropy is
 
  since there are only two link types in the grammar.
  
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-
+\begin_layout Paragraph*
+Case 1.b.
+ 
 \end_layout
 
 \begin_layout Standard
-Case 1.b.
- Let 
+Let 
 \begin_inset Formula $\gamma=\{\mbox{=ter, =ty}\}$
 \end_inset
 
@@ -7566,10 +7554,6 @@ Case 1.b.
 
 .
  The dictionary becomes
-\begin_inset Newline newline
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -7639,10 +7623,10 @@ The generated entropy is
 
  since there are only two link types in the grammar.
  
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-
+\begin_layout Paragraph*
+Other cases.
 \end_layout
 
 \begin_layout Standard
@@ -8206,10 +8190,6 @@ Group gif.= and tes.= together.
  Then the link types G* and T* need to be consolidated: A={GA,TA} and likewise
  B={GB,TB} and C={GC,TC}.
  The dictionary becomes
-\begin_inset Newline newline
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -8336,10 +8316,6 @@ Group gif.= and blo.= together.
  No other link consolidation is possible, without permitting impermissible
  (previously unseen) linkages.
  The dictionary becomes
-\begin_inset Newline newline
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -8470,10 +8446,6 @@ Group =t and =ty together.
 
  Then we may group G={GA, GB} and T={TA, TB}.
  The corresponding link-grammar dictionary is:
-\begin_inset Newline newline
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -8741,10 +8713,6 @@ Group =ter and =fu together, so that
 .
  It does not appear that any link types get consolidated! This is not much
  of a grouping, then ...
-\begin_inset Newline newline
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -8897,10 +8865,6 @@ Case 1a.
 \begin_layout Standard
 Group =t and =ty.
  The link merges are T={A,B}; the resulting gramar is:
-\begin_inset Newline newline
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -9027,10 +8991,6 @@ Casse 1b.
 \begin_layout Standard
 Group =t and =ter.
  This consolidates links T={A,C} and so the dictionary becomes
-\begin_inset Newline newline
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -9150,10 +9110,6 @@ Case 1c.
 \begin_layout Standard
 Group =ty and =ter.
  This consolidates T={B,C}, so the dictionary becomes
-\begin_inset Newline newline
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -9301,17 +9257,17 @@ status open
 
 \begin_layout Plain Layout
 
-     gif.=: GA+ or GB+ or GC+;
+     gif.=: (GA+)(1/11) or (GB+)(1/11) or (GC+)(1/11);
 \end_layout
 
 \begin_layout Plain Layout
 
-     tes.=: TA+ or TB+ or TC+;
+     tes.=: (TA+)(1/11) or (TB+)(1/11) or (TC+)(2/11);
 \end_layout
 
 \begin_layout Plain Layout
 
-     blo.=: BB+ or BF+;
+     blo.=: (BB+)(3/11) or (BF+)(1/11);
 \end_layout
 
 \begin_layout Plain Layout
@@ -9340,7 +9296,169 @@ status open
 
 \end_inset
 
+The above only annotates the +-going links; it seems like annotating the
+ --going links would cause double-counting.
+ This is somewhat confusing, since the probability has nothing to do with
+ directionality.
+ A better notation is not obvious.
+ Lets go through the cases as before.
+\end_layout
 
+\begin_layout Paragraph*
+Case 1.
+\end_layout
+
+\begin_layout Standard
+Group gif.= and tes.= together.
+ Let 
+\begin_inset Formula $\gamma=\{\mbox{gif.=, tes.=}\}$
+\end_inset
+
+.
+ Then the link types G* and T* need to be consolidated: A={GA,TA} and likewise
+ B={GB,TB} and C={GC,TC}.
+ The dictionary becomes
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.= tes.=: (A+)(2/11) or (B+)(2/11) or (C+)(3/11);
+\end_layout
+
+\begin_layout Plain Layout
+
+     blo.=: (BB+)(3/11) or (BF+)(1/11);
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t: A-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ty: B- or BB-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ter: C-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =fu: BF-;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+The observational probabilities are unchanged, as the dictionary probabilities
+ have no bearing on the parsing.
+ However, the entropy of the generated language is different, as it is no
+ longer 
+\begin_inset Formula $\log_{2}5$
+\end_inset
+
+ but instead 
+\begin_inset Formula 
+\[
+h^{gen}=-\frac{6}{11}\log_{2}\frac{1}{11}-\frac{2}{11}\log_{2}\frac{2}{11}-\frac{3}{11}\log_{2}\frac{3}{11}
+\]
+
+\end_inset
+
+That is, it is now identical to 
+\begin_inset Formula $h^{observed}$
+\end_inset
+
+.
+ No surprise, as we made it like that, by encoding the frequency information
+ in the dictionary.
+\end_layout
+
+\begin_layout Paragraph*
+Case 2.
+ 
+\end_layout
+
+\begin_layout Standard
+Group gif.= and blo.= together.
+ Let 
+\begin_inset Formula $\delta=\{\mbox{gif.=, blo.=}\}$
+\end_inset
+
+.
+ Then the link types GB and BB can be consolidated, because they share the
+ common suffix =ty: B={GB,BB}.
+ No other link consolidation is possible, without permitting impermissible
+ (previously unseen) linkages.
+ The dictionary becomes
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.= blo.=: (GA+)(1/11) or (B+)(4/11) or (GC+)(1/11) or (BF+)(1/11);
+\end_layout
+
+\begin_layout Plain Layout
+
+     tes.=: (TA+)(1/11) or (TB+)(1/11) or (TC+)(2/11);
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t: GA- or TA-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ty: B- or TB-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =ter: GC- or TC-;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =fu: BF-;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+The generated entropy is
+\begin_inset Formula 
+\[
+h^{gen}=-\frac{5}{11}\log_{2}\frac{1}{11}-\frac{4}{11}\log_{2}\frac{4}{11}-\frac{2}{11}\log_{2}\frac{2}{11}
+\]
+
+\end_inset
+
+which is identical to the corpus entropy, again.
+ Not surprising, I guess ...
+ we seem to be doing the same calculation, but in a different way.
+ Dohh.
+ Never mind ...
+  
 \end_layout
 
 \begin_layout Subsection*
