@@ -9226,12 +9226,20 @@ common
  So we have to start from scratch.
 \end_layout
 
+\begin_layout Standard
+And we do, below, and its a total failure, as now, the corpus frequencies
+ are recorded faithfully, so the consolidation process doesn't tell us anything
+ we didn't know.
+ Its the same calculation done differently.
+\end_layout
+
 \begin_layout Subsection*
-Worked Link Consolidation Example, with Frequencies
+Worked Link Consolidation Example, with Frequencies (XXX Fail)
 \end_layout
 
 \begin_layout Standard
-So we start all over again, using the same corpus frequences as before,
+(XXX The below fails, don't bother reading it).
+ So we start all over again, using the same corpus frequences as before,
  namely, those of table 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -9458,7 +9466,7 @@ which is identical to the corpus entropy, again.
  we seem to be doing the same calculation, but in a different way.
  Dohh.
  Never mind ...
-  
+ 
 \end_layout
 
 \begin_layout Subsection*
