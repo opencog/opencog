@@ -85,18 +85,20 @@ void * SchemeEval::c_wrap_finish(void *p)
 }
 
 // The following two routines are needed to avoid bad garbage collection
-// and to also to avoid a signal is accidentlaly unprotecting something
-// that isn't protected.
+// of anything we've kept in the object.  
 void SchemeEval::set_captured_stack(SCM newstack)
 {
-	scm_gc_unprotect_object(captured_stack);
+	// protect before unprotecting, to avoid multi-threaded races.
+	SCM oldstack = captured_stack;
 	captured_stack = scm_gc_protect_object(newstack);
+	scm_gc_unprotect_object(oldstack);
 }
 
 void SchemeEval::set_error_string(SCM newerror)
 {
-	scm_gc_unprotect_object(error_string);
+	SCM olderror = error_string;
 	error_string = scm_gc_protect_object(newerror);
+	scm_gc_unprotect_object(olderror);
 }
 
 static pthread_once_t eval_init_once = PTHREAD_ONCE_INIT;
