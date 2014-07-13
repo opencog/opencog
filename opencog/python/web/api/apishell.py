@@ -3,6 +3,7 @@ __author__ = 'Cosmo Harrigan'
 from flask import abort, jsonify
 from flask.ext.restful import Resource, reqparse
 import socket
+from flask_restful_swagger import swagger
 
 COGSERVER_PORT = 17001
 
@@ -31,18 +32,37 @@ class ShellAPI(Resource):
 
         super(ShellAPI, self).__init__()
 
+    @swagger.operation(
+	notes='''
+Include a JSON object with the POST request containing the command
+in a field named "command"
+
+<p>Examples:
+
+<pre>
+{'command': 'agents-step'}
+{'command': 'agents-step opencog::SimpleImportanceDiffusionAgent'}
+</pre>''',
+	responseClass='response',
+	nickname='post',
+	parameters=[
+	    {
+		'name': 'command',
+		'description': 'OpenCog Shell command',
+		'required': True,
+		'allowMultiple': False,
+		'dataType': 'string',
+		'paramType': 'body'
+	    }
+	],
+	responseMessages=[
+	    {'code': 200, 'message': 'OpenCog Shell command executed successfully'},
+	    {'code': 400, 'message': 'Invalid request: Required parameter command missing'}
+	]
+    )
     def post(self):
         """
         Send a shell command to the cogserver
-        Uri: shell
-
-        Include a JSON object with the POST request containing the command
-        in a field named "command"
-
-        Examples:
-
-        {'command': 'agents-step'}
-        {'command': 'agents-step opencog::SimpleImportanceDiffusionAgent'}
         """
 
         # Validate, parse and send the command

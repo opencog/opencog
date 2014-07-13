@@ -2,9 +2,10 @@ __author__ = 'Cosmo Harrigan'
 
 from flask import abort, json, current_app, jsonify
 from flask.ext.restful import Resource, reqparse, marshal
-from opencog.atomspace import Handle
+from opencog.atomspace import Handle, Atom
 from mappers import *
 from flask.ext.restful.utils import cors
+from flask_restful_swagger import swagger
 
 # If the system doesn't have these dependencies installed, display a warning
 # but allow the API to load
@@ -16,6 +17,7 @@ except ImportError:
           "https://github.com/opencog/opencog/tree/master/opencog/python/graph_description#prerequisites"
 
 
+"AtomSpace management functionality"
 class AtomCollectionAPI(Resource):
     # This is because of https://github.com/twilio/flask-restful/issues/134
     @classmethod
@@ -52,89 +54,191 @@ class AtomCollectionAPI(Resource):
     # Set CORS headers to allow cross-origin access
     # (https://github.com/twilio/flask-restful/pull/131):
     @cors.crossdomain(origin='*')
+    @swagger.operation(
+	notes='''
+<p>URI: <code>atoms/[id]</code>
+<p>(or)
+<code>atoms?type=[type]&name=[name]&filterby=[filterby]
+    &tvStrengthMin=[tvStrengthMin]&tvConfidenceMin=[tvConfidenceMin]
+    &tvCountMin=[tvCountMin]&includeIncoming=[includeIncoming]
+    &includeOutgoing=[includeOutgoing]&callback=[callback]</code>
+
+<p>Example:
+
+<pre>{
+  'result':
+  {
+    'complete': 'true',
+    'skipped': 'false',
+    'total': 10,
+    'atoms':
+      [
+	{ 'handle': 6,
+	  'name': '',
+	  'type': 'InheritanceLink',
+	  'outgoing': [2, 1],
+	  'incoming': [],
+	  'truthvalue':
+	    {
+	      'type': 'simple',
+	      'details':
+		{
+		  'count': '0.4000000059604645',
+		  'confidence': '0.0004997501382604241',
+		  'strength': '0.5'
+		}
+	    }
+	  'attentionvalue':
+	    {
+	      'lti': 0,
+	      'sti': 0,
+	      'vlti': false
+	    }
+	},
+	      ...
+      ]
+  }
+}</pre>''',
+	responseClass=Atom,
+	nickname='get',
+	parameters=[
+	    {
+		'name': 'id',
+		'description': '''to specifically request an atom by handle,
+		    can be combined with <code>includeIncoming</code> or <code>includeOutgoing</code> only;
+		    if specified, other query parameters will have no effect) Atom handle''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'int',
+		'paramType': 'path'
+	    },
+	    {
+		'name': 'type',
+		'description': '<a href="http://wiki.opencog.org/w/OpenCog_Atom_types">OpenCog Atom type</a>',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'string',
+		'paramType': 'query'
+	    },
+	    {
+		'name': 'name',
+		'description': '''(not allowed for Link types). If neither
+		    <code>type</code> or <code>name</code> are provided,
+		    all atoms will be retrieved.''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'string',
+		'paramType': 'query'
+	    },
+	    {
+		'name': 'filterby',
+		'description': '''(can't be combined with type or name)
+		    Allows certain predefined filters
+		    <dl>
+		      <dt>stirange</dt>
+		      <dd>The filter 'stirange' allows the additional parameters 'stimin'
+			(required, int) and 'stimax' (optional, int) and returns the atoms
+			in a given STI range</dd>
+		      <dt>attentionalfocus</dt>
+		      <dd>The filter 'attentionalfocus' (boolean) returns the atoms in the
+			AttentionalFocus</dd>
+		    </dl>''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'stirange | attentionalfocus',
+		'paramType': 'query'
+	    },
+	    {
+		'name': 'stimin',
+		'description': '''Only return atoms with STI (Short Term Importance)
+		    greater than or equal to this amount (only usable with <code>filterby=stirange</code>)''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'float',
+		'paramType': 'query'
+	    },
+	    {
+		'name': 'stimax',
+		'description': '''Only return atoms with STI (Short Term Importance)
+		    less than or equal to this amount (only usable with <code>filterby=stirange</code>)''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'float',
+		'paramType': 'query'
+	    },
+	    {
+		'name': 'tvStrengthMin',
+		'description': '''Only return atoms with
+		    TruthValue strength greater than or equal to this amount''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'float',
+		'paramType': 'query'
+	    },
+	    {
+		'name': 'tvConfidenceMin',
+		'description': '''Only return atoms with
+		    TruthValue confidence greater than or equal to this amount''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'float',
+		'paramType': 'query'
+	    },
+	    {
+		'name': 'tvCountMin',
+		'description': '''Only return atoms with
+		    TruthValue count greater than or equal to this amount''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'float',
+		'paramType': 'query'
+	    },
+	    {
+		'name': 'includeIncoming',
+		'description': '''Returns the conjunction of
+		    the set of atoms and their incoming sets''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'boolean',
+		'paramType': 'query'
+	    },
+	    {
+		'name': 'includeOutgoing',
+		'description': '''Returns the conjunction of
+		    the set of atoms and their outgoing sets. Useful in combination
+		    with includeIncoming.''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'boolean',
+		'paramType': 'query'
+	    },
+	    {
+		'name': 'dot',
+		'description': '''Returns the atom set represented in
+		    the DOT graph description language
+		    (See <a href="https://github.com/opencog/opencog/blob/master/opencog/python/graph_description/README.md">opencog/python/graph_description/README.md</a> for details)''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'boolean',
+		'paramType': 'query'
+	    },
+	    {
+		'name': 'callback',
+		'description': '''JavaScript callback function for JSONP support''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'string',
+		'paramType': 'query'
+	    }
+	],
+	responseMessages=[
+	    {'code': 200, 'message': 'Returned list of atoms matching specified criteria'},
+	    {'code': 400, 'message': 'Invalid request: stirange filter requires stimin parameter'}
+	]
+    )
     def get(self, id=""):
         """
         Returns a list of atoms matching the specified criteria
-        Uri:
-
-        atoms/[id]
-        (or)
-        atoms?type=[type]&name=[name]&filterby=[filterby]
-            &tvStrengthMin=[tvStrengthMin]&tvConfidenceMin=[tvConfidenceMin]
-            &tvCountMin=[tvCountMin]&includeIncoming=[includeIncoming]
-            &includeOutgoing=[includeOutgoing]&callback=[callback]
-
-        :param id: (optional, int, to specifically request an atom by handle,
-            can be combined with includeIncoming or includeOutgoing only; if
-            specified, other query parameters will have no effect) Atom handle
-
-        :param type: (optional) Atom type, see
-            http://wiki.opencog.org/w/OpenCog_Atom_types
-        :param name: (optional, string, not allowed for Link types) Atom name
-        If neither type or name are provided, all atoms will be retrieved
-        :param filterby: (optional, can't be combined with type or name)
-            Allows certain predefined filters
-          - The filter 'stirange' allows the additional parameters 'stimin'
-            (required, int) and 'stimax' (optional, int) and returns the atoms
-            in a given STI range
-          - The filter 'attentionalfocus' (boolean) returns the atoms in the
-            AttentionalFocus
-        :param tvStrengthMin: (optional, float) Only return atoms with
-            TruthValue strength greater than this amount
-        :param tvConfidenceMin: (optional, float) Only return atoms with
-            TruthValue confidence greater than this amount
-        :param tvCountMin: (optional, float) Only return atoms with TruthValue
-            count greater than this amount
-        :param includeIncoming: (optional, boolean) Returns the conjunction of
-            the set of atoms and their incoming sets
-        :param includeOutgoing: (optional, boolean) Returns the conjunction of
-            the set of atoms and their outgoing sets. Useful in combination
-            with includeIncoming.
-
-        :param dot: (optional, boolean) Returns the atom set represented in
-            the DOT graph description language
-            (See opencog/python/graph_description/README.md for details)
-
-        :param callback: (optional) JavaScript callback function for JSONP
-            support
-
-        :return result: Returns a JSON representation of an atom list.
-        Example:
-
-        {
-          'result':
-          {
-            'complete': 'true',
-            'skipped': 'false',
-            'total': 10,
-            'atoms':
-              [
-                { 'handle': 6,
-                  'name': '',
-                  'type': 'InheritanceLink',
-                  'outgoing': [2, 1],
-                  'incoming': [],
-                  'truthvalue':
-                    {
-                      'type': 'simple',
-                      'details':
-                        {
-                          'count': '0.4000000059604645',
-                          'confidence': '0.0004997501382604241',
-                          'strength': '0.5'
-                        }
-                    }
-                  'attentionvalue':
-                    {
-                      'lti': 0,
-                      'sti': 0,
-                      'vlti': false
-                    }
-                },
-                     ...
-              ]
-          }
-        }
         """
 
         args = self.reqparse.parse_args()
@@ -231,86 +335,135 @@ class AtomCollectionAPI(Resource):
             dot_output = dot.get_dot_representation(atoms)
             return jsonify({'result': dot_output})
 
+    @swagger.operation(
+	notes='''
+Include data with the POST request providing a JSON representation of
+the atom.
+
+<p>Examples:
+
+<p>Node:
+<pre>
+      {
+	'type': 'ConceptNode',
+	'name': 'Frog',
+	'truthvalue':
+	  {
+	    'type': 'simple',
+	    'details':
+	      {
+		'strength': 0.8,
+		'count': 0.2
+	      }
+	  }
+      }
+</pre>
+
+<p>Link:
+<pre>
+      {
+	'type': 'InheritanceLink',
+	'outgoing': [1, 2],
+	'truthvalue':
+	  {
+	    'type': 'simple',
+	    'details':
+	      {
+		'strength': 0.5,
+		'count': 0.4
+	      }
+	  }
+      }
+</pre>
+
+<p>Returns a JSON representation of an atom list containing
+the atom. Example:
+<pre>
+{
+  'atoms':
+  {
+    'handle': 6,
+    'name': '',
+    'type': 'InheritanceLink',
+    'outgoing': [2, 1],
+    'incoming': [],
+    'truthvalue':
+      {
+	'type': 'simple',
+	'details':
+	  {
+	    'count': '0.4000000059604645',
+	    'confidence': '0.0004997501382604241',
+	    'strength': '0.5'
+	  }
+      },
+    'attentionvalue':
+      {
+	'lti': 0,
+	'sti': 0,
+	'vlti': false
+      }
+  }
+}
+</pre>''',
+	responseClass=Atom,
+	nickname='post',
+	parameters=[
+	    {
+		'name': 'type',
+		'description': '<a href="http://wiki.opencog.org/w/OpenCog_Atom_types">OpenCog Atom type</a>',
+		'required': True,
+		'allowMultiple': False,
+		'dataType': 'string',
+		'paramType': 'body'
+	    },
+	    {
+		'name': 'name',
+		'description': '''(required for Node types, not allowed for Link types) Atom name''',
+		'required': True,
+		'allowMultiple': False,
+		'dataType': 'string',
+		'paramType': 'body'
+	    },
+	    {
+		'name': 'truthvalue',
+		'description': '''<a href="http://wiki.opencog.org/w/TruthValue">TruthValue</a>, formatted as follows:
+		    <dl>
+		      <dt><code>type</code> (required)</dt>
+		      <dd><a href="http://wiki.opencog.org/w/TruthValue">TruthValue type</a>
+			(only 'simple' is currently available)</dd>
+		      <dt><code>details</code> (required)</dt>
+		      <dd>TruthValue parameters, formatted as follows:
+			<ul>
+			  <li>strength (required)</li>
+			  <li>count (required)</li>
+			</ul>
+		      </dd>
+		    </dl>''',
+		'required': True,
+		'allowMultiple': False,
+		'dataType': 'TruthValue',
+		'paramType': 'body'
+	    },
+	    {
+		'name': 'outgoing',
+		'description': '''The set of arguments of the relation, formatted as
+		    <a href="http://wiki.opencog.org/w/Link#Incoming_and_Outgoing_Sets">a list of Atom handles (only valid for Links, not nodes)</a>''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'list',
+		'paramType': 'body'
+	    }
+	],
+	responseMessages=[
+	    {'code': 200, 'message': 'Created specified list of atoms'},
+	    {'code': 400, 'message': 'Invalid type or required parameter type missing'},
+	    {'code': 500, 'message': 'Error processing request. Check your parameters'}
+	]
+    )
     def post(self):
         """
         Creates a new atom. If the atom already exists, it updates the atom.
-        Uri: atoms
-
-        Include data with the POST request providing a JSON representation of
-        the atom.
-        Valid data elements:
-
-        type (required) Atom type, see
-            http://wiki.opencog.org/w/OpenCog_Atom_types
-        name (required for Node types, not allowed for Link types) Atom name
-        truthvalue (required) TruthValue, formatted as follows:
-            type (required) TruthValue type (only 'simple' is currently
-                available), see http://wiki.opencog.org/w/TruthValue
-            details (required) TruthValue parameters, formatted as follows:
-                strength (required)
-                count (required)
-        outgoing (optional) The set of arguments of the relation, formatted as
-            a list of Atom handles (only valid for Links, not nodes), see
-            http://wiki.opencog.org/w/Link#Incoming_and_Outgoing_Sets
-
-        Examples:
-
-        Node: {
-                'type': 'ConceptNode',
-                'name': 'Frog',
-                'truthvalue':
-                  {
-                    'type': 'simple',
-                    'details':
-                      {
-                        'strength': 0.8,
-                        'count': 0.2
-                      }
-                  }
-              }
-
-        Link: {
-                'type': 'InheritanceLink',
-                'outgoing': [1, 2],
-                'truthvalue':
-                  {
-                    'type': 'simple',
-                    'details':
-                      {
-                        'strength': 0.5,
-                        'count': 0.4
-                      }
-                  }
-              }
-
-        :return atoms: Returns a JSON representation of an atom list containing
-        the atom. Example:
-        {
-          'atoms':
-          {
-            'handle': 6,
-            'name': '',
-            'type': 'InheritanceLink',
-            'outgoing': [2, 1],
-            'incoming': [],
-            'truthvalue':
-              {
-                'type': 'simple',
-                'details':
-                  {
-                    'count': '0.4000000059604645',
-                    'confidence': '0.0004997501382604241',
-                    'strength': '0.5'
-                  }
-              },
-            'attentionvalue':
-              {
-                'lti': 0,
-                'sti': 0,
-                'vlti': false
-              }
-          }
-        }
         """
 
         # Prepare the atom data and validate it
@@ -357,76 +510,125 @@ class AtomCollectionAPI(Resource):
 
         return {'atoms': marshal(atom, atom_fields)}
 
+    @swagger.operation(
+	notes='''
+URI: <code>atoms/[id]</code>
+
+<p>Include data with the PUT request providing a JSON representation of
+the updated attributes.
+
+<p>Example:
+
+<pre>
+{
+  'truthvalue':
+  {
+    'type': 'simple',
+    'details':
+      {
+	'strength': 0.005,
+	'count': 0.8
+      }
+  },
+'attentionvalue':
+  {
+    'sti': 9,
+    'lti': 2,
+    'vlti': True
+  }
+}
+</pre>
+
+<p>Returns a JSON representation of an atom list
+containing the atom.
+
+<p>Example:
+
+<pre>
+{ 'atoms':
+  {
+    'handle': 6,
+    'name': '',
+    'type': 'InheritanceLink',
+    'outgoing': [2, 1],
+    'incoming': [],
+    'truthvalue':
+      {
+	'type': 'simple',
+	'details':
+	  {
+	    'count': '0.4000000059604645',
+	    'confidence': '0.0004997501382604241',
+	    'strength': '0.5'
+	  }
+      },
+    'attentionvalue':
+      {
+	'lti': 0,
+	'sti': 0,
+	'vlti': false
+      }
+    }
+  }
+}
+</pre>''',
+	responseClass=Atom,
+	nickname='put',
+	parameters=[
+	    {
+		'name': 'id',
+		'description': '<a href="http://wiki.opencog.org/w/Handle">Atom handle</a>',
+		'required': True,
+		'allowMultiple': False,
+		'dataType': 'int',
+		'paramType': 'path'
+	    },
+	    {
+		'name': 'truthvalue',
+		'description': '''<a href="http://wiki.opencog.org/w/TruthValue">TruthValue</a>, formatted as follows:
+		    <dl>
+		      <dt><code>type</code> (required)</dt>
+		      <dd><a href="http://wiki.opencog.org/w/TruthValue">TruthValue type</a>
+			(only 'simple' is currently available)</dd>
+		      <dt><code>details</code> (required)</dt>
+		      <dd>TruthValue parameters, formatted as follows:
+			<ul>
+			  <li>strength (required)</li>
+			  <li>count (required)</li>
+			</ul>
+		      </dd>
+		    </dl>''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'TruthValue',
+		'paramType': 'body'
+	    },
+	    {
+		'name': 'attentionvalue',
+		'description': '''<a href="http://wiki.opencog.org/w/AttentionValue">AttentionValue</a>, formatted as follows:
+		    <dl>
+		      <dt><code>sti</code> (optional)</dt>
+		      <dd>Short-Term Importance</dd>
+		      <dt><code>lti</code> (optional)</dt>
+		      <dd>Long-Term Importance</dd>
+		      <dt><code>vlti</code> (optional)</dt>
+		      <dd>Very-Long-Term Importance</dd>
+		    </dl>''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'AttentionValue',
+		'paramType': 'body'
+	    }
+	],
+	responseMessages=[
+	    {'code': 200, 'message': 'Atom truth and/or attention value updated'},
+	    {'code': 400, 'message': 'Invalid type or required parameter type missing'},
+	    {'code': 404, 'message': 'Handle not found'}
+	]
+    )
     def put(self, id):
         """
         Updates the AttentionValue (STI, LTI, VLTI) or TruthValue of an atom
-        Uri: atoms/[id]
-
-        :param id: Atom handle
-        Include data with the PUT request providing a JSON representation of
-        the updated attributes. Valid data elements:
-
-        truthvalue (optional) TruthValue, formatted as follows:
-            type (required) TruthValue type (only 'simple' is currently
-                available). See: http://wiki.opencog.org/w/TruthValue
-            details (required) TruthValue parameters, formatted as follows:
-                strength (required)
-                count (required)
-        attentionvalue (optional) AttentionValue, formatted as follows:
-            sti (optional) Short-Term Importance
-            lti (optional) Long-Term Importance
-            vlti (optional) Very-Long Term Importance
-
-        Example:
-
-        {
-          'truthvalue':
-          {
-            'type': 'simple',
-            'details':
-              {
-                'strength': 0.005,
-                'count': 0.8
-              }
-          },
-        'attentionvalue':
-          {
-            'sti': 9,
-            'lti': 2,
-            'vlti': True
-          }
-        }
-
-        :return atoms: Returns a JSON representation of an atom list
-        containing the atom.
-        Example:
-
-        { 'atoms':
-          {
-            'handle': 6,
-            'name': '',
-            'type': 'InheritanceLink',
-            'outgoing': [2, 1],
-            'incoming': [],
-            'truthvalue':
-              {
-                'type': 'simple',
-                'details':
-                  {
-                    'count': '0.4000000059604645',
-                    'confidence': '0.0004997501382604241',
-                    'strength': '0.5'
-                  }
-              },
-            'attentionvalue':
-              {
-                'lti': 0,
-                'sti': 0,
-                'vlti': false
-              }
-            }
-          }
-        }
         """
 
         if Handle(id) not in self.atomspace:
@@ -450,24 +652,41 @@ class AtomCollectionAPI(Resource):
         atom = self.atomspace[Handle(id)]
         return {'atoms': marshal(atom, atom_fields)}
 
+    @swagger.operation(
+	notes='''
+Returns a JSON representation of the result, indicating success or failure.
+
+<p>Example:
+
+<pre>
+{
+  'result':
+  {
+    'handle': 2,
+    'success': 'true'
+  }
+}
+</pre>''',
+	responseClass='result',
+	nickname='delete',
+	parameters=[
+	    {
+		'name': 'id',
+		'description': '<a href="http://wiki.opencog.org/w/Handle">Atom handle</a>',
+		'required': True,
+		'allowMultiple': False,
+		'dataType': 'int',
+		'paramType': 'path'
+	    }
+	],
+	responseMessages=[
+	    {'code': 200, 'message': 'Deleted the atom'},
+	    {'code': 404, 'message': 'Handle not found'},
+	]
+    )
     def delete(self, id):
         """
         Removes an atom from the AtomSpace
-        Uri: atoms/[id]
-
-        :param id: Atom handle
-
-        :return result:  Returns a JSON representation of the result,
-            indicating success or failure.
-        Example:
-
-        {
-          'result':
-          {
-            'handle': 2,
-            'success': 'true'
-          }
-        }
         """
 
         if Handle(id) not in self.atomspace:

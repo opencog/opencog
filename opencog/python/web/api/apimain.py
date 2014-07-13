@@ -6,6 +6,7 @@ from apiatomcollection import *
 from apitypes import *
 from apishell import *
 from apischeme import *
+from flask_restful_swagger import swagger
 
 
 class RESTAPI(object):
@@ -18,7 +19,7 @@ class RESTAPI(object):
     http://wiki.opencog.org/w/REST_API
 
     Prerequisites:
-    Flask, mock, flask-restful, six
+    Flask, mock, flask-restful, six, flask-restful-swagger
 
     Default endpoint: http://127.0.0.1:5000/api/v1.1/
     (Replace 127.0.0.1 with the IP address of the server if necessary)
@@ -35,12 +36,12 @@ class RESTAPI(object):
 
         # Initialize the web server and set the routing
         self.app = Flask(__name__, static_url_path="")
-        self.api = Api(self.app)
+        self.api = swagger.docs(Api(self.app), apiVersion='1.1', api_spec_url='/api/v1.1/spec')
 
         # Create and add each resource
         atom_collection_api = AtomCollectionAPI.new(self.atomspace)
-        atom_types_api = TypesAPI()
-        shell_api = ShellAPI()
+        atom_types_api = TypesAPI
+        shell_api = ShellAPI
         scheme_api = SchemeAPI.new(self.atomspace)
 
         self.api.add_resource(atom_collection_api,
