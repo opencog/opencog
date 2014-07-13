@@ -8085,6 +8085,9 @@ with
 \end_inset
 
 .
+ The observed corpus also has 8 words in it (not counting multiplicity):
+ this is by design; before reduction, there is always exactly one link type
+ for each morpheme pair.
 \end_layout
 
 \begin_layout Standard
@@ -8241,6 +8244,11 @@ The generated entropy is
 
  This clearly brings the entropy closer to the theoretical (equidistributional)
  maximum; the grouping goes.
+ However, 
+\begin_inset Formula $h^{lang}=\log_{2}8=3$
+\end_inset
+
+ as before, since the generated language still has 8 words in it.
 \begin_inset Newline newline
 \end_inset
 
@@ -8354,7 +8362,7 @@ p(BF) = p(blo,fu) = 1/11
 \begin_inset Newline newline
 \end_inset
 
-So the entropy is now
+So the observed entropy is now
 \begin_inset Formula 
 \[
 h_{PAIR}^{red2.}=-\frac{5}{11}\log_{2}\frac{1}{11}-\frac{2}{11}\log_{2}\frac{2}{11}-\frac{4}{11}\log_{2}\frac{4}{11}=2.550341
@@ -8757,6 +8765,12 @@ This is identical to the unreduced entropy: no surprise, because no link
 \end_inset
 
  since there are still 8 link types.
+ The language entropy increased: there are now 11 possible words in the
+ language, so 
+\begin_inset Formula $h^{lang}=\log_{2}11=3.459432$
+\end_inset
+
+.
  This is a very unsatisfying situation: the difference in entropies is no
  better or worse than the starting point, and so this seems like a reasonable
  sideways slide, and yet, this grammar allows a bunch of nonsense words
