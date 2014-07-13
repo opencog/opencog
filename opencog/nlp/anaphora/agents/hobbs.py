@@ -163,8 +163,8 @@ class HobbsAgent(MindAgent):
             #self.bindLinkExe(self.currentProposal,node,'(cog-bind propose)',None,None)
             #print("accepted "+node.name,file=self.logfile)
             print("accepted "+node.name)
-        else:
-            print("rejected "+node.name+" by filter-#"+str(filterNumber))
+        #else:
+            #print("rejected "+node.name+" by filter-#"+str(filterNumber))
 
     def Checked(self,node):
 
@@ -289,6 +289,8 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/filters/filter-#13.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#14.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#15.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#16.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#17.scm",
               ]
 
         self.numOfFilters=len(data)

@@ -1,31 +1,21 @@
 ;; anaphor is non-reflexive
 ;; The parse tree structure is:
 
-;;          verb
-;;         /    \
-;; antecedent    noun
+;;             antecedent
 ;;                 \ "of"
 ;;                 anaphor
 
 ;; This antecedent should be rejected
 
-(define filter-#16
+(define filter-#17
     (BindLink
         (ListLink
-            (TypedVariableLink
-                (VariableNode "$noun")
-                (VariableTypeNode "WordInstanceNode")
-            )
             (TypedVariableLink
                 (VariableNode "$word-inst-antecedent")
                 (VariableTypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$word-inst-anaphor")
-                (VariableTypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$verb")
                 (VariableTypeNode "WordInstanceNode")
             )
         )
@@ -54,23 +44,9 @@
                     )
                 )
                 (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_subj")
-                    (ListLink
-                        (VariableNode "$verb")
-                        (VariableNode "$word-inst-antecedent")
-                    )
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_obj")
-                    (ListLink
-                        (VariableNode "$verb")
-                        (VariableNode "$noun")
-                    )
-                )
-                (EvaluationLink
                     (PrepositionalRelationshipNode "of")
                     (ListLink
-                        (VariableNode "$noun")
+                        (VariableNode "$word-inst-antecedent")
                         (VariableNode "$word-inst-anaphor")
                     )
                 )
