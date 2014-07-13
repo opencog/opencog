@@ -6709,9 +6709,32 @@ initial link type
 \end_inset
 
 
+\begin_inset Float algorithm
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Morpheme grammar
+\begin_inset CommandInset label
+LatexCommand label
+name "alg:Morpheme-grammar"
+
+\end_inset
+
+
 \end_layout
 
-\begin_layout Standard
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset listings
 inline false
 status open
@@ -6741,12 +6764,25 @@ status open
      =ter: GC- or TC-;
 \end_layout
 
+\begin_layout Plain Layout
+
+\end_layout
+
 \end_inset
 
 
-\begin_inset Newline newline
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
 \end_inset
 
+
+\end_layout
+
+\begin_layout Standard
 From the above initial dictionary, we want to deduce that a single link
  type is sufficient to full describe what is happening.
  That is, we wish to discover the following dictionary:
@@ -6771,13 +6807,19 @@ status open
      =t =ty =ter: LL-;
 \end_layout
 
+\begin_layout Plain Layout
+
+\end_layout
+
 \end_inset
 
-
-\begin_inset Newline newline
-\end_inset
-
-How is this to be done?
+This is inuitively obvious, because the morphemes obviously form a clique:
+ each stem has been observed with each suffix.
+ Technically, this is a bipartite clique or complete bipartite graph of
+ order (2,3).
+ However, lets assume that, in general it is not easy to search for bipartite
+ subgraphs in a grammar.
+ So how should we find grammar reductions? How is this to be done?
 \end_layout
 
 \begin_layout Standard
@@ -7161,7 +7203,7 @@ Following the previous formulas, we compute the total pair entropy:
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-h_{PAIR} & =-\sum_{w_{1},w_{2}\in\alpha}p(w_{1},w_{2})\log_{2}p(w_{1},w_{2})\\
+h_{PAIR}^{observed} & =-\sum_{w_{1},w_{2}\in\alpha}p(w_{1},w_{2})\log_{2}p(w_{1},w_{2})\\
  & =-\frac{5}{7}\log_{2}\frac{1}{7}-\frac{2}{7}\log_{2}\frac{2}{7}=2.521641
 \end{align*}
 
@@ -7176,7 +7218,7 @@ This is a bit of a misnomer, or misleading; we are actually computing the
  So really we should write:
 \begin_inset Formula 
 \[
-h_{PAIR}=-\sum_{t\in\beta}p(t)\log_{2}p(t)
+h_{PAIR}^{observed}=-\sum_{t\in\beta}p(t)\log_{2}p(t)
 \]
 
 \end_inset
@@ -7190,6 +7232,64 @@ with
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+The above is the observed entropy, given the corpus, and the grammar shown
+ in listing 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "alg:Morpheme-grammar"
+
+\end_inset
+
+.
+ However, this grammar does not have any probability indicators attached
+ to it, so that if it was used to generate a corpus, the entropy would be
+ different.
+ Basically, the probability of observing any of the link-types would be
+ identical, and so the entropy would be:
+\begin_inset Formula 
+\begin{align*}
+h_{PAIR}^{generated} & =-\sum_{t\in\beta}p(t)\log_{2}p(t)\\
+ & =-\frac{6}{6}\log_{2}\frac{1}{6}=2.584963
+\end{align*}
+
+\end_inset
+
+This is obtained by observing that there are 6 link types in the set 
+\begin_inset Formula $\beta$
+\end_inset
+
+ and so, if chosen equi-probably, the resulting entropy is just 
+\begin_inset Formula $\log_{2}6$
+\end_inset
+
+.
+ For a given number 
+\begin_inset Formula $N$
+\end_inset
+
+ of link types, the entropy of the generated grammar will be 
+\begin_inset Formula $\log_{2}N$
+\end_inset
+
+, for this extremely simply type of grammar, where all disjuncts have only
+ one connector in them.
+ The generated entropy will always be maximal for the grammar, as the observed
+ distribution will surely never be equi-distributed.
+ Thus, we have as a general principle:
+\begin_inset Formula 
+\[
+h^{observed}\le h^{generated}
+\]
+
+\end_inset
+
+ Note that the equi-distributed link-types is the same as having each of
+ the words in the corpus appear with equal frequency.
+ The morphemes, however, do NOT appear with equally frequency (although
+ individually, all stems do, and all suffuxes do).
 \end_layout
 
 \begin_layout Standard
@@ -7307,10 +7407,10 @@ status open
      =ty =ter: GG- or TT-;
 \end_layout
 
-\end_inset
+\begin_layout Plain Layout
 
+\end_layout
 
-\begin_inset Newline newline
 \end_inset
 
 The observed pair probabilities become: 
@@ -7345,7 +7445,7 @@ p(TT) = p(tes,ter) + p(tes,ty) = 3/7
 \begin_inset Newline newline
 \end_inset
 
-So the entropy is now
+So the observed entropy is now
 \begin_inset Formula 
 \[
 h_{PAIR}^{red1.}=-\frac{2}{7}\log_{2}\frac{1}{7}-\frac{2}{7}\log_{2}\frac{2}{7}-\frac{3}{7}\log_{2}\frac{3}{7}=1.842371
@@ -7353,7 +7453,11 @@ h_{PAIR}^{red1.}=-\frac{2}{7}\log_{2}\frac{1}{7}-\frac{2}{7}\log_{2}\frac{2}{7}-
 
 \end_inset
 
+ The generated entropy is 
+\begin_inset Formula $\log_{2}4=2$
+\end_inset
 
+ since there are four total link types in the reduced grammar.
 \begin_inset Newline newline
 \end_inset
 
@@ -7396,10 +7500,10 @@ status open
      =t =ty =ter: G- or T-;
 \end_layout
 
-\end_inset
+\begin_layout Plain Layout
 
+\end_layout
 
-\begin_inset Newline newline
 \end_inset
 
 The observed pair probabilities become: 
@@ -7426,7 +7530,7 @@ p(T) = p(tes,t) + p(tes,ty) + p(tes,ter) = 4/7
 \begin_inset Newline newline
 \end_inset
 
-So the entropy is now
+So the observed entropy is now
 \begin_inset Formula 
 \[
 h_{PAIR}^{red1.a.}=-\frac{3}{7}\log_{2}\frac{3}{7}-\frac{4}{7}\log_{2}\frac{4}{7}=0.985228
@@ -7434,7 +7538,12 @@ h_{PAIR}^{red1.a.}=-\frac{3}{7}\log_{2}\frac{3}{7}-\frac{4}{7}\log_{2}\frac{4}{7
 
 \end_inset
 
+The generated entropy is 
+\begin_inset Formula $\log_{2}2=1$
+\end_inset
 
+ since there are only two link types in the grammar.
+ 
 \begin_inset Newline newline
 \end_inset
 
@@ -7479,10 +7588,10 @@ status open
      =ty =ter: EM-;
 \end_layout
 
-\end_inset
+\begin_layout Plain Layout
 
+\end_layout
 
-\begin_inset Newline newline
 \end_inset
 
 The observed pair probabilities become: 
@@ -7520,7 +7629,12 @@ h_{PAIR}^{red1.b.}=-\frac{2}{7}\log_{2}\frac{2}{7}-\frac{5}{7}\log_{2}\frac{5}{7
 
 \end_inset
 
+The generated entropy is 
+\begin_inset Formula $\log_{2}2=1$
+\end_inset
 
+ since there are only two link types in the grammar.
+ 
 \begin_inset Newline newline
 \end_inset
 
@@ -7873,7 +7987,14 @@ blo=
 \end_layout
 
 \begin_layout Standard
-The corresponding link-grammar dictionary is:
+The corresponding link-grammar dictionary is: 
+\begin_inset CommandInset label
+LatexCommand label
+name "gifty-grammar"
+
+\end_inset
+
+
 \begin_inset Newline newline
 \end_inset
 
@@ -7920,10 +8041,10 @@ status open
      =fu: BF-;
 \end_layout
 
-\end_inset
+\begin_layout Plain Layout
 
+\end_layout
 
-\begin_inset Newline newline
 \end_inset
 
 From the above initial dictionary, we hope to deduce one word class that
@@ -7938,7 +8059,7 @@ From the above initial dictionary, we hope to deduce one word class that
  and write:
 \begin_inset Formula 
 \begin{align*}
-h_{PAIR} & =-\sum_{t\in\beta}p(t)\log_{2}p(t)\\
+h_{PAIR}^{observed} & =-\sum_{t\in\beta}p(t)\log_{2}p(t)\\
  & =-\frac{6}{11}\log_{2}\frac{1}{11}-\frac{2}{11}\log_{2}\frac{2}{11}-\frac{3}{11}\log_{2}\frac{3}{11}\\
  & =2.845351
 \end{align*}
@@ -7954,7 +8075,20 @@ with
 \end_inset
 
 .
- Lets look at several cases:
+ Since there are 8 different link types, the generated entropy is 
+\begin_inset Formula $h_{PAIR}^{generated}=\log_{2}8=3$
+\end_inset
+
+.
+ The different between these two is 
+\begin_inset Formula $h^{gen}-h^{obs}=0.154649$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Lets look at several cases:
 \end_layout
 
 \begin_layout Enumerate
@@ -8038,10 +8172,10 @@ status open
      =fu: BF-;
 \end_layout
 
-\end_inset
+\begin_layout Plain Layout
 
+\end_layout
 
-\begin_inset Newline newline
 \end_inset
 
 The observed pair probabilities become: 
@@ -8084,7 +8218,7 @@ p(BF) = p(blo,fu) = 1/11
 \begin_inset Newline newline
 \end_inset
 
-So the entropy is now
+So the observed entropy is now
 \begin_inset Formula 
 \[
 h_{PAIR}^{red1.}=-\frac{4}{11}\log_{2}\frac{2}{11}-\frac{6}{11}\log_{2}\frac{3}{11}-\frac{1}{11}\log_{2}\frac{1}{11}=2.231270
@@ -8096,7 +8230,17 @@ h_{PAIR}^{red1.}=-\frac{4}{11}\log_{2}\frac{2}{11}-\frac{6}{11}\log_{2}\frac{3}{
 \begin_inset Newline newline
 \end_inset
 
-The entropy is clearly less, the grouping goes.
+The generated entropy is 
+\begin_inset Formula $h^{gen}=\log_{2}5=2.321928$
+\end_inset
+
+.
+ The difference is 
+\begin_inset Formula $h^{gen}-h^{obs}=0.090658.$
+\end_inset
+
+ This clearly brings the entropy closer to the theoretical (equidistributional)
+ maximum; the grouping goes.
 \begin_inset Newline newline
 \end_inset
 
@@ -8156,10 +8300,10 @@ status open
      =fu: BF-;
 \end_layout
 
-\end_inset
+\begin_layout Plain Layout
 
+\end_layout
 
-\begin_inset Newline newline
 \end_inset
 
 Note that this dictionary does allow several previously unobserved words:
@@ -8222,7 +8366,18 @@ h_{PAIR}^{red2.}=-\frac{5}{11}\log_{2}\frac{1}{11}-\frac{2}{11}\log_{2}\frac{2}{
 \begin_inset Newline newline
 \end_inset
 
-The entropy is clearly less, the grouping goes.
+The generated entropy is 
+\begin_inset Formula $h^{gen}=\log_{2}7=2.807355$
+\end_inset
+
+.
+ The difference is 
+\begin_inset Formula $h^{gen}-h^{obs}=0.257014$
+\end_inset
+
+.
+ The entropy is not getting closer to the equidistributional maximum; this
+ grammar is rejected.
 \begin_inset Newline newline
 \end_inset
 
@@ -8278,10 +8433,10 @@ status open
      =fu: BF-;
 \end_layout
 
-\end_inset
+\begin_layout Plain Layout
 
+\end_layout
 
-\begin_inset Newline newline
 \end_inset
 
 The above again allows a new, unobserved word: 
@@ -8341,7 +8496,7 @@ p(BF) = p(blo,fu) = 1/11
 \begin_inset Newline newline
 \end_inset
 
-So the entropy is now
+So the observed entropy is now
 \begin_inset Formula 
 \[
 h_{PAIR}^{red3.}=-\frac{6}{11}\log_{2}\frac{2}{11}-\frac{2}{11}\log_{2}\frac{1}{11}-\frac{3}{11}\log_{2}\frac{3}{11}=2.481715
@@ -8353,7 +8508,18 @@ h_{PAIR}^{red3.}=-\frac{6}{11}\log_{2}\frac{2}{11}-\frac{2}{11}\log_{2}\frac{1}{
 \begin_inset Newline newline
 \end_inset
 
-The entropy is clearly less, the grouping goes.
+The equidistributional entropy is 
+\begin_inset Formula $h^{gen}=\log_{2}6=2.584963$
+\end_inset
+
+.
+ The difference is 
+\begin_inset Formula $h^{gen}-h^{obs}=0.103248$
+\end_inset
+
+.
+ This difference means we are getting closer to the maximum; the grouping
+ is acceptable! Its really not much worse than case 1, which was unambiguous.
 \begin_inset Newline newline
 \end_inset
 
@@ -8406,10 +8572,10 @@ status open
      =ter: GC- or TC-;
 \end_layout
 
-\end_inset
+\begin_layout Plain Layout
 
+\end_layout
 
-\begin_inset Newline newline
 \end_inset
 
 No new unobserved words are allowed by this grouping! The observed pair
@@ -8445,7 +8611,7 @@ p(B) = p(blo,ty) + p(blo,fu) = 4/11
 \begin_inset Newline newline
 \end_inset
 
-The entropy is then:
+The observed entropy is then:
 \begin_inset Formula 
 \[
 h_{PAIR}^{red4.}=-\frac{5}{11}\log_{2}\frac{1}{11}-\frac{2}{11}\log_{2}\frac{2}{11}-\frac{4}{11}\log_{2}\frac{4}{11}=2.550341
@@ -8454,6 +8620,25 @@ h_{PAIR}^{red4.}=-\frac{5}{11}\log_{2}\frac{1}{11}-\frac{2}{11}\log_{2}\frac{2}{
 \end_inset
 
 Curiously, this entropy is identical to the completely different case 2.
+ The equidistributional entropy is 
+\begin_inset Formula $h^{gen}=\log_{2}7=2.807355$
+\end_inset
+
+ and the difference is thus 
+\begin_inset Formula $h^{gen}-h^{obs}=0.257014$
+\end_inset
+
+ which is sharply further away from the equidistributional maximum.
+ Thus, this grouping is rejected.
+ This is perhaps surprising ...
+ First, this grammar did not generate any new unobserved words; thus, it
+ is a faithful grammar.
+ Also, it suceeds in reducing the total number of link-types, and thus is
+ naively acceptable for that reason.
+ However, the frequency distribution of th generated grammar move away from
+ the observed frequency distribution, leading to the rejection.
+ This begs a question: when and how might we annotate the grammar with frequency
+ information?
 \begin_inset Newline newline
 \end_inset
 
@@ -8510,10 +8695,10 @@ status open
      =ter =fu: GC- or TC- or BF-;
 \end_layout
 
-\end_inset
+\begin_layout Plain Layout
 
+\end_layout
 
-\begin_inset Newline newline
 \end_inset
 
 Many new, unobserved words are allowed: bloter, giffu, tesfu.
@@ -8557,7 +8742,7 @@ p(BF) = p(blu,fu) = 1/11
 \begin_inset Newline newline
 \end_inset
 
-The entropy is then:
+The observed entropy is then:
 \begin_inset Formula 
 \[
 h_{PAIR}^{red5.}=-\frac{6}{11}\log_{2}\frac{1}{11}-\frac{2}{11}\log_{2}\frac{2}{11}-\frac{3}{11}\log_{2}\frac{3}{11}=2.845351
@@ -8567,6 +8752,16 @@ h_{PAIR}^{red5.}=-\frac{6}{11}\log_{2}\frac{1}{11}-\frac{2}{11}\log_{2}\frac{2}{
 
 This is identical to the unreduced entropy: no surprise, because no link
  consolidation was performed.
+ The equidistributional entropy is the same as well: 
+\begin_inset Formula $h^{gen}=\log_{2}8=3$
+\end_inset
+
+ since there are still 8 link types.
+ This is a very unsatisfying situation: the difference in entropies is no
+ better or worse than the starting point, and so this seems like a reasonable
+ sideways slide, and yet, this grammar allows a bunch of nonsense words
+ to be generated.
+ That seems wrong.
 \end_layout
 
 \begin_layout Section*
