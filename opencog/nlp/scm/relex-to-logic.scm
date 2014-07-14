@@ -275,6 +275,7 @@
 )
 
 ; combination of all-rule and SVP-rule for testing syllogisms
+; Example: "All Canadians are right-handed."
 (define (all-SVP-rule concept instance predicative predicative_instance)
     (ForAllLink
         (VariableNode "$X")
