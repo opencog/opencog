@@ -435,7 +435,8 @@
     ))
 )
 
-
+; Example: "I think that dogs can fly.", "He is glad that she won.", "He ran so quickly that he flew."
+; A that-rule for "object clause", "content clause", "complement clause", etc, but not "adjective clause"
 (define (that-rule main main_instance main_pos sub sub_instance sub_pos)
 	; get the corresponding node
 	(define main-node
