@@ -1,3 +1,13 @@
+;
+; relex-to-logic-post-processing.scm
+;
+; Assorted functions for post-processing relex2logic output.
+;
+
+; =======================================================================
+; Helper utilities for post-processing.
+; =======================================================================
+
 ; -----------------------------------------------------------------------
 ; Get the corresponding ConceptNode or PredicateNode or NumberNode
 (define (word-get-r2l-node node)
@@ -22,6 +32,20 @@
 	(if (null? iset)
 		(list atom)
 		(append-map cog-get-root iset))
+)
+
+; -----------------------------------------------------------------------
+; Get all the nodes within a hypergraph
+(define (cog-get-all-nodes link)
+	(define oset (cog-outgoing-set link))
+	(define (recursive-helper atom)
+		(if (cog-link? atom)
+			(cog-get-all-nodes atom)
+			(list atom)
+		)
+	)
+
+	(append-map recursive-helper oset)
 )
 
 ; -----------------------------------------------------------------------
@@ -106,6 +130,106 @@
 	)
 	new-name
 )
+
+
+; =======================================================================
+; Post-processsing functions for markers created from pre-processing.
+; =======================================================================
+
+; call all post-processing steps
+(define (r2l-post-processing)
+	thatmarker-cleaner
+)
+
+;EvaluationLink
+;	thatmarker
+;	ListLink
+;		think
+;		attack
+
+;EvaluationLink
+;        that
+;        ListLink
+;             think
+;             AndLink
+;                   EvaluationLink attack ListLink dog cat
+;                   InherianceLink cat angry
+
+
+(define (thatmarker-helper orig-link)
+	(define listlink (car (cog-filter 'ListLink (cog-outgoing-set orig-link))))
+	(define thatmarker (cog-node 'PredicateNode "thatmarker"))
+	(define word1 (gar listlink))
+	(define word2 (gdr listlink))
+	
+	; find all the words that link directly or indirectly with word2
+	(define (get-all-connected-words)
+		; helper function to get words that share the same hypergraph with 'word'
+		(define (get-all-closely-connected-words word)
+			(define all-links (cog-get-root word))
+			(delete-duplicates (append-map cog-get-all-nodes all-links))
+		)
+		; the main recursive function to gather all indirectly connected words
+		(define (get-all-connected-words word)
+			(cond ((not (member? word connected-words))
+				(set! connected-words (append (list word) connected-words))
+				(for-each get-all-connected-words (get-all-closely-connected-words word))
+				)
+			)
+		)
+		; starts with word1 & thatmarker to avoid getting their connected words
+		; then delete them afterward
+		(define connected-words (list word1 thatmarker)) 
+		(get-all-connected-words word2)
+		(set! connected-words (delete thatmarker connected-words))
+		(set! connected-words (delete word1 connected-words))
+		connected-words
+	)
+
+	(define all-connected-words (get-all-connected-words))
+
+	; for each word in connected-words, get the root link
+	(define all-root-links (delete-duplicates (append-map cog-get-root all-connected-words)))
+	
+	; helper function to check if a link contains a non-instance word
+	(define (check-words link)
+		(define words (cog-get-all-nodes link))
+		(find (lambda (w) (null? (cog-node 'WordInstanceNode (cog-name w)))) words)
+	)
+
+	; any links containing a non-instance word can be removed
+	(define final-links
+		(remove check-words all-root-links)
+	)
+
+	; the final representation
+	(EvaluationLink
+		(PredicateNode "that")
+		(ListLink
+			word1
+			(AndLink
+				final-links
+			)
+		)
+	) 
+)
+
+(define (thatmarker-cleaner)
+	(define thatmarker (cog-node 'PredicateNode "thatmarker"))
+	(define thatmarker-list (cog-get-root thatmarker))
+
+	;(for-each thatmarker-helper thatmarker-list)
+	;#t
+	(thatmarker-helper (car thatmarker-list))
+)
+
+
+
+
+; =======================================================================
+; Functions to create partially and fully abstract version of the
+; representaitons.
+; =======================================================================
 
 ; -----------------------------------------------------------------------
 ; Main recursive function to build the new abstracted links
