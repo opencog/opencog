@@ -14,3 +14,6 @@ pip install graphviz
 
 # Optional:
 pip install requests
+
+# Experimental:
+pip install flask-restful-swagger
