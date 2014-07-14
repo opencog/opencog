@@ -16,7 +16,6 @@ except ImportError:
           "enable, install the dependencies listed here:\n" \
           "https://github.com/opencog/opencog/tree/master/opencog/python/graph_description#prerequisites"
 
-
 "AtomSpace management functionality"
 class AtomCollectionAPI(Resource):
     # This is because of https://github.com/twilio/flask-restful/issues/134
@@ -98,7 +97,20 @@ class AtomCollectionAPI(Resource):
 	      ...
       ]
   }
-}</pre>''',
+}
+</pre>
+
+<p>Examples using optional predefined filters:
+
+<dl>
+  <dt>Get all atoms in the AttentionalFocus</dt>
+  <dd>URI: <code>atoms?filterby=attentionalfocus</dd>
+  <dt>Get all atoms in the STI range between 5 (inclusive) and 10 (inclusive)</dt>
+  <dd>URI: <code>atoms?filterby=stirange&stimin=5&stimax=10</code></dd>
+  <dt>Get all atoms with STI greater than or equal to 5</dt>
+  <dd>URI: <code>atoms?filterby=stirange&stimin=5</code></dd>
+</dl>
+''',
 	responseClass=Atom,
 	nickname='get',
 	parameters=[
