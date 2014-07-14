@@ -60,7 +60,7 @@ struct metapop_printer
     metapop_printer() {}
     metapop_printer(long _result_count,
                     bool _output_score,
-                    bool _output_penalty,
+                    bool _output_cscore,
                     bool _output_bscore,
                     bool _output_only_best,
                     bool _output_ensemble,
@@ -70,8 +70,9 @@ struct metapop_printer
                     const std::string& _output_file,
                     bool _output_python,
                     bool _is_mpi) :
-        result_count(_result_count), output_score(_output_score),
-        output_penalty(_output_penalty),
+        result_count(_result_count),
+        output_score(_output_score),
+        output_cscore(_output_cscore),
         output_bscore(_output_bscore),
         output_only_best(_output_only_best),
         output_ensemble(_output_ensemble),
@@ -127,10 +128,11 @@ struct metapop_printer
 
                 // For ensembles, output as usual: score followed by tree
                 composite_score cs = metapop.best_composite_score();
-                ss << cs.get_score() << " "
-                   << metapop.get_ensemble().get_weighted_tree();
-
                 if (output_score)
+                    ss << cs.get_score() << " ";
+                ss << metapop.get_ensemble().get_weighted_tree();
+
+                if (output_cscore)
                     ss << " " << cs;
                 // if (output_bscore)
                 //    ss << " " <<
@@ -167,13 +169,8 @@ struct metapop_printer
                        << "    return ";
                     ostream_combo_tree (ss, sct.get_tree(), combo::fmt::python);
                 } else {
-                    ss << sct.get_score() << " "
-                       << sct.get_tree();
-                    if (output_score)
-                       ss << " " << sct.get_composite_score();
-                    if (output_bscore)
-                       ss << " " << sct.get_bscore();
-                    ss << std::endl;
+                    ostream_scored_combo_tree(ss, sct, output_score,
+                                              output_cscore, output_bscore);
                 }
             }
         }
@@ -245,7 +242,7 @@ struct metapop_printer
 private:
     long result_count;
     bool output_score;
-    bool output_penalty;
+    bool output_cscore;
     bool output_bscore;
     bool output_only_best;
     bool output_ensemble;

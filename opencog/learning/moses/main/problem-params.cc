@@ -531,8 +531,8 @@ problem_params::add_options(boost::program_options::options_description& desc)
          po::value<bool>(&output_score)->default_value(false),
          "If 1, output the score after each candidate\n")
 
-        (opt_desc_str(output_penalty_opt).c_str(),
-         po::value<bool>(&output_penalty)->default_value(false),
+        (opt_desc_str(output_cscore_opt).c_str(),
+         po::value<bool>(&output_cscore)->default_value(false),
          "If 1, output the penalized score and it's compenents (below each candidate).\n")
 
         (opt_desc_str(output_bscore_opt).c_str(),
@@ -1252,7 +1252,7 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
     // Set metapop printer parameters.
     mmr_pa = metapop_printer(result_count,
                              output_score,
-                             output_penalty,
+                             output_cscore,
                              output_bscore,
                              output_only_best,
                              boosting,

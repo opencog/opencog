@@ -87,7 +87,7 @@ struct problem_params : public option_base
     // output printing options (metapop_printer)
     long result_count;
     bool output_score;
-    bool output_penalty;
+    bool output_cscore;
     bool output_bscore;
     bool output_only_best;
     bool output_eval_number;

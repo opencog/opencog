@@ -42,7 +42,7 @@ static const pair<string, string> max_rand_input_opt("max-rand-input", "w");
 static const pair<string, string> max_evals_opt("max-evals", "m");
 static const pair<string, string> result_count_opt("result-count", "c");
 static const pair<string, string> output_score_opt("output-score", "S");
-static const pair<string, string> output_penalty_opt("output-penalty", "x");
+static const pair<string, string> output_cscore_opt("output-cscore", "x");
 static const pair<string, string> output_bscore_opt("output-bscore", "t");
 static const pair<string, string> output_only_best_opt("output-only-best", "C");
 static const pair<string, string> output_eval_number_opt("output-eval-number", "V");
