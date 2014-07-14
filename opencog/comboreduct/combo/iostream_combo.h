@@ -112,7 +112,7 @@ void str_to_vertex(const std::string& str, vertex& v)
     // should be definite object then
     else {
         // Any word character (alphanumeric characters plus the
-        // underscore). If you find that too constraning feel free to
+        // underscore). If you find that too constraining feel free to
         // relax.
         static const boost::regex e("[\\w-]+");
         OC_ASSERT(boost::regex_match(str, e),
