@@ -186,7 +186,11 @@
 		; helper function to get words that share the same hypergraph with 'word'
 		(define (get-all-closely-connected-words word)
 			(define all-links (cog-get-root word))
-			(delete-duplicates (append-map cog-get-all-nodes all-links))
+			; clean any links that include any nodes that are not instanced word
+			; to avoid including other marker links, InheirtanceLink btwn word
+			; and instance, etc
+			(define cleaned-links (remove check-non-instance all-links))
+			(delete-duplicates (append-map cog-get-all-nodes cleaned-links))
 		)
 		; the main recursive function to gather all indirectly connected words
 		(define (get-all-connected-words word)
@@ -221,8 +225,9 @@
 			(PredicateNode "that")
 			(ListLink
 				word1
-				(AndLink
+				(if (= (length final-links) 1)
 					final-links
+					(AndLink final-links)
 				)
 			)
 		)
