@@ -98,6 +98,7 @@ class HobbsAgent(MindAgent):
         self.roots = None
 
         self.numOfFilters=7
+        self.DEBUG = True
 
         log.fine("\n===========================================================\n Starting hobbs agent.....\n=========================================================== ")
 
@@ -176,6 +177,8 @@ class HobbsAgent(MindAgent):
         if not rejected:
             #self.bindLinkExe(self.currentProposal,node,'(cog-bind propose)',None,None)
             #print("accepted "+node.name,file=self.logfile)
+            if self.DEBUG:
+                print("accepted "+node.name)
             log.fine("accepted "+node.name)
             self.generateReferenceLink(self.currentPronoun,node,self.confidence)
             self.confidence=self.confidence*0.5
@@ -347,6 +350,9 @@ class HobbsAgent(MindAgent):
             tmpLink=self.atomspace.add_link(types.ListLink, [self.currentPronounNode, pronoun], TruthValue(1.0, 100))
             self.currentPronoun=pronoun
             root=self.getRootOfNode(pronoun)
+            if self.DEBUG:
+                print("Resolving....")
+                print(pronoun)
             log.fine("Resolving \n{0}".format(pronoun))
 
             while True:
