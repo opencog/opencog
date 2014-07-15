@@ -177,7 +177,6 @@
 ;
 (define (thatmarker-helper orig-link)
 	(define listlink (car (cog-filter 'ListLink (cog-outgoing-set orig-link))))
-	(define thatmarker (cog-node 'PredicateNode "thatmarker"))
 	(define word1 (gar listlink))
 	(define word2 (gdr listlink))
 	
@@ -200,11 +199,9 @@
 				)
 			)
 		)
-		; starts with word1 & thatmarker to avoid getting their connected words
-		; then delete them afterward
-		(define connected-words (list word1 thatmarker)) 
+		; starts with word1 to avoid getting its connected words, then delete it afterward
+		(define connected-words (list word1)) 
 		(get-all-connected-words word2)
-		(set! connected-words (delete thatmarker connected-words))
 		(set! connected-words (delete word1 connected-words))
 		connected-words
 	)
