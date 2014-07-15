@@ -1,0 +1,113 @@
+
+================================================================================================
+Test #1---------------------------------------------------------------------------------Failed
+
+We had a pop quiz on a book, and I hadn't read it yet.
+
+Result:
+
+Resolving....
+(WordInstanceNode "it@c0ba39c6-ec08-4425-8c97-981a5a37974d") ; [1867]
+
+accepted quiz@39896d51-7437-4b56-9a39-389ec9b097fd
+accepted book@f2cbc86d-660a-4077-b80a-9c8ad4d20a3e
+accepted pop@33b0b7fa-433d-45bf-8e6e-fbed05d6a083
+================================================================================================
+Test #2---------------------------------------------------------------------------------Passed
+
+I bounced the ball and Jack ran after it.
+
+Result:
+
+Resolving....
+(WordInstanceNode "it@0adbd01a-4b23-43b9-acf1-6c33f1147230") ; [4457]
+
+accepted ball@770cf292-7358-4aab-9a8e-f2e56657fdc8
+================================================================================================
+Test #3---------------------------------------------------------------------------------Passed
+
+John is a mail carrier. He carries a blue bag.
+
+Resolving....
+(WordInstanceNode "he@7d5abbb0-faa0-4c9b-b9c4-4d8f364b9731") ; [4984]
+
+accepted John@07dcdd47-71a1-4445-b14f-ee77c5bcb33b
+accepted carrier@36953cb8-2eaf-4a53-b15c-cebe0b070004
+accepted mail@413f8157-f042-4a33-be85-50e802e166c9
+================================================================================================
+Test #4---------------------------------------------------------------------------------Failed
+
+Andy hit Jose, and he hit him back.
+
+Resolving....
+(WordInstanceNode "he@a14f3508-9612-4aba-a76e-a891813e1c4d") ; [5527]
+
+accepted Andy@f49a6e7a-bad7-4519-8114-3d3bbeb8b5e5
+accepted Jose@bcbbfc62-cbf9-41ed-908f-6c317ec32866
+Resolving....
+(WordInstanceNode "him@af7aee9b-f836-4cbd-b87b-3feb28f790a2") ; [5538]
+
+accepted Andy@f49a6e7a-bad7-4519-8114-3d3bbeb8b5e5
+accepted Jose@bcbbfc62-cbf9-41ed-908f-6c317ec32866
+
+================================================================================================
+Reflexive Pronouns
+================================================================================================
+
+1.  Reflexive Pronouns with Objects
+    (1) verb + reflexive pronoun + object
+
+        ---------------------------------------------------------------------------
+
+        "Emma cooked herself a quiche."
+
+        Results:
+
+        (WordInstanceNode "herself@ca20b6cb-a6a8-4578-bd68-dc02cc449521") ; [7010]
+
+        accepted Emma@de6911e6-fcca-4bf3-b996-1ca2eace457e
+
+        ---------------------------------------------------------------------------
+
+    (2) verb + object + reflexive pronoun
+
+        ---------------------------------------------------------------------------
+
+        "Tom repaired the tire himself."
+
+        Results:
+
+        accepted Tom@b12d4004-9adc-4f56-8370-622ef35df06d
+        accepted tire@f2d98785-25fd-49d3-aefc-10261412b1d4
+
+        ---------------------------------------------------------------------------
+
+        "My brother spoke to his boss himself about a raise."
+
+        Results:
+
+        (WordInstanceNode "himself@87496154-1b12-4a7a-b99d-570b22be0c24") ; [7448]
+
+        accepted brother@51f13d9c-5558-4e52-9419-83c0da43a755
+        accepted boss@ca78dc61-3b1a-4030-b7b2-13e06837032b
+
+        (WordInstanceNode "his@03a62037-4367-4db9-a22c-d6e5171b58ad") ; [7436]
+
+        accepted brother@51f13d9c-5558-4e52-9419-83c0da43a755
+
+        ---------------------------------------------------------------------------
+
+2.  By + Reflexive Pronouns
+
+    (1) by + myself/yourself/himself etc
+
+        ---------------------------------------------------------------------------
+
+        "Jacob went to the party by himself."
+
+        Results:
+
+        (WordInstanceNode "himself@dcb1d344-cfd8-437c-b81b-062976c27ff5") ; [9244]
+
+        accepted Jacob@be7cb3a4-5e14-40d3-8e77-7128dd129548
+

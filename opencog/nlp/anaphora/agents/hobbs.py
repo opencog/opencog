@@ -183,7 +183,8 @@ class HobbsAgent(MindAgent):
             self.generateReferenceLink(self.currentPronoun,node,self.confidence)
             self.confidence=self.confidence*0.5
         #else:
-            #print("rejected "+node.name+" by filter-#"+str(filterNumber))
+            #if self.DEBUG:
+                #print("rejected "+node.name+" by filter-#"+str(index))
 
     def Checked(self,node):
 
@@ -218,7 +219,7 @@ class HobbsAgent(MindAgent):
                         q.put(node)
 
     def getPronouns(self):
-        return self.bindLinkExe(None,None,'(cog-bind getPronouns)',self.unresolvedReferences,types.WordInstanceNode)
+        return self.bindLinkExe(None,None,'(cog-bind-crisp getPronouns)',self.unresolvedReferences,types.WordInstanceNode)
 
     def getRoots(self):
 
@@ -310,6 +311,8 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/filters/filter-#15.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#16.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#17.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#18.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#19.scm",
               ]
 
         self.numOfFilters=len(data)
