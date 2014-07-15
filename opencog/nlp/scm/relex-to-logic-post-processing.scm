@@ -146,7 +146,7 @@
 ; -----------------------------------------------------------------------
 ; call all post-processing steps
 (define (r2l-post-processing)
-	thatmarker-cleaner
+	(thatmarker-cleaner)
 )
 
 ; -----------------------------------------------------------------------
@@ -240,7 +240,7 @@
 		; call helper function to process them
 		(define results-list (append-map thatmarker-helper thatmarker-list))
 		; delete the thatmarkers links and the thatmarker itself
-		(for-each cog-delete thatmarker-list)
+		(for-each purge-hypergraph thatmarker-list)
 		(cog-delete thatmarker)
 		; return the results
 		results-list
