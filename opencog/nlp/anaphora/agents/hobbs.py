@@ -140,6 +140,16 @@ class HobbsAgent(MindAgent):
         rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind getChildren)',self.currentResult,types.WordInstanceNode)
         return self.sortNodes(rv,self.getWordNumber)
 
+    def generateReferenceLink(self,anaphora,antecedent,confidence):
+        '''
+        Generates a reference Link for a pair of anaphora and antecedent with confidence "confidence".
+        '''
+
+        link = self.atomspace.add_link(types.ReferenceLink, [anaphora, antecedent], TruthValue(.98, TruthValue().confidence_to_count(confidence)))
+        print("Generated a Reference :\n",file=self.logfile)
+        print(link,file=self.logfile)
+        print("=============================================\n",file=self.logfile)
+
     def propose(self,node):
         '''
         It iterates all filters, reject the antecedent or "node" if it's matched by any filters.
@@ -162,7 +172,9 @@ class HobbsAgent(MindAgent):
         if not rejected:
             #self.bindLinkExe(self.currentProposal,node,'(cog-bind propose)',None,None)
             #print("accepted "+node.name,file=self.logfile)
-            print("accepted "+node.name)
+            self.generateReferenceLink(self.currentPronoun,node,self.confidence)
+            self.confidence=self.confidence*0.5
+            print("accepted "+node.name,file=self.logfile)
         #else:
             #print("rejected "+node.name+" by filter-#"+str(filterNumber))
 
@@ -321,6 +333,7 @@ class HobbsAgent(MindAgent):
         for pronoun in self.pronouns:
             self.checked.clear()
             self.pronounNumber=self.getWordNumber(pronoun)
+            self.confidence=1.0
 
             '''
             Binds current "pronoun" with "currentPronounNode".
@@ -330,8 +343,8 @@ class HobbsAgent(MindAgent):
             tmpLink=self.atomspace.add_link(types.ListLink, [self.currentPronounNode, pronoun], TruthValue(1.0, 100))
             self.currentPronoun=pronoun
             root=self.getRootOfNode(pronoun)
-            print("\nResolving...........")
-            print(pronoun)
+            print("\nResolving...........",file=self.logfile)
+            print(pronoun,file=self.logfile)
 
             while True:
                 if root==None:
