@@ -136,26 +136,38 @@
 ; Post-processsing functions for markers created from pre-processing.
 ; =======================================================================
 
+; -----------------------------------------------------------------------
 ; call all post-processing steps
 (define (r2l-post-processing)
 	thatmarker-cleaner
 )
 
-;EvaluationLink
-;	thatmarker
-;	ListLink
-;		think
-;		attack
-
-;EvaluationLink
-;        that
-;        ListLink
-;             think
-;             AndLink
-;                   EvaluationLink attack ListLink dog cat
-;                   InherianceLink cat angry
-
-
+; -----------------------------------------------------------------------
+; The thatmarker helper function for post-processing one specific
+; thatmarker.
+;
+; Given sentence "I think that dogs attack angry cats.", and thatmarker
+; in the form:
+;
+;	EvaluationLink
+;		thatmarker
+;		ListLink
+;			think
+;			attack
+;
+; We create:
+;
+;	EvaluationLink
+;		that
+;		ListLink
+;			think
+;			AndLink
+;				EvaluationLink attack ListLink dog cat
+;				InherianceLink cat angry
+;
+; So basically, AndLink everything that directly or indirectly connects
+; with the word "attack" (ie. the part of the sentence after "that")
+;
 (define (thatmarker-helper orig-link)
 	(define listlink (car (cog-filter 'ListLink (cog-outgoing-set orig-link))))
 	(define thatmarker (cog-node 'PredicateNode "thatmarker"))
@@ -203,32 +215,46 @@
 	)
 
 	; the final representation
-	(EvaluationLink
-		(PredicateNode "that")
-		(ListLink
-			word1
-			(AndLink
-				final-links
+	(list
+		(EvaluationLink
+			(PredicateNode "that")
+			(ListLink
+				word1
+				(AndLink
+					final-links
+				)
 			)
 		)
-	) 
+	)
 )
 
+; -----------------------------------------------------------------------
+; The main thatmarker function that calls the helper to clean all
+; thatmarker in the atomspace, and delete them
 (define (thatmarker-cleaner)
 	(define thatmarker (cog-node 'PredicateNode "thatmarker"))
-	(define thatmarker-list (cog-get-root thatmarker))
+	(define (call-helper)
+		; get the list of all unprocessed thatmarker
+		(define thatmarker-list (cog-get-link 'EvaluationLink 'ListLink thatmarker))
+		; call helper function to process them
+		(define results-list (append-map thatmarker-helper thatmarker-list))
+		; delete the thatmarkers links and the thatmarker itself
+		(for-each cog-delete thatmarker-list)
+		(cog-delete thatmarker)
+		; return the results
+		results-list
+	)	
 
-	;(for-each thatmarker-helper thatmarker-list)
-	;#t
-	(thatmarker-helper (car thatmarker-list))
+	(if (null? thatmarker)
+		'()
+		(call-helper)
+	)
 )
-
-
 
 
 ; =======================================================================
 ; Functions to create partially and fully abstract version of the
-; representaitons.
+; representations.
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
