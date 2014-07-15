@@ -283,9 +283,7 @@
             (InheritanceLink (VariableNode "$X") (ConceptNode instance df-node-stv) df-link-stv)
             (InheritanceLink (VariableNode "$X") (ConceptNode predicative_instance df-node-stv) df-link-stv) df-link-stv
         )
-    )
-    (SVP-rule concept instance predicative predicative_instance)
-    )
+    ))
 )
 
 (define (entity-rule word word_instance) 
