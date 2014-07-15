@@ -26,6 +26,13 @@
 )
 
 ; -----------------------------------------------------------------------
+; Helper function to check if a link contains a non-instance word
+(define (check-non-instance link)
+	(define words (cog-get-all-nodes link))
+	(find (lambda (w) (null? (cog-node 'WordInstanceNode (cog-name w)))) words)
+)
+
+; -----------------------------------------------------------------------
 ; Get the root link with no incoming set
 (define (cog-get-root atom)
 	(define iset (cog-incoming-set atom))
@@ -163,7 +170,7 @@
 ;			think
 ;			AndLink
 ;				EvaluationLink attack ListLink dog cat
-;				InherianceLink cat angry
+;				InheritanceLink cat angry
 ;
 ; So basically, AndLink everything that directly or indirectly connects
 ; with the word "attack" (ie. the part of the sentence after "that")
@@ -203,15 +210,9 @@
 	; for each word in connected-words, get the root link
 	(define all-root-links (delete-duplicates (append-map cog-get-root all-connected-words)))
 	
-	; helper function to check if a link contains a non-instance word
-	(define (check-words link)
-		(define words (cog-get-all-nodes link))
-		(find (lambda (w) (null? (cog-node 'WordInstanceNode (cog-name w)))) words)
-	)
-
 	; any links containing a non-instance word can be removed
 	(define final-links
-		(remove check-words all-root-links)
+		(remove check-non-instance all-root-links)
 	)
 
 	; the final representation
