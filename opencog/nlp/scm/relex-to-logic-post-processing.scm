@@ -33,29 +33,6 @@
 )
 
 ; -----------------------------------------------------------------------
-; Get the root link with no incoming set
-(define (cog-get-root atom)
-	(define iset (cog-incoming-set atom))
-	(if (null? iset)
-		(list atom)
-		(append-map cog-get-root iset))
-)
-
-; -----------------------------------------------------------------------
-; Get all the nodes within a hypergraph
-(define (cog-get-all-nodes link)
-	(define oset (cog-outgoing-set link))
-	(define (recursive-helper atom)
-		(if (cog-link? atom)
-			(cog-get-all-nodes atom)
-			(list atom)
-		)
-	)
-
-	(append-map recursive-helper oset)
-)
-
-; -----------------------------------------------------------------------
 ; Create all possible pairwise combination of the items
 (define (pairwise-combination sets)
 	(define (create-with-index index rest)
