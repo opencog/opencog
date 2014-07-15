@@ -4,11 +4,15 @@ from pprint import pprint
 from opencog.cogserver import MindAgent
 from opencog.atomspace import types, AtomSpace, TruthValue
 from opencog.scheme_wrapper import load_scm,scheme_eval_h,scheme_eval, __init__
+from opencog import logger
+
 import Queue
 import time
 
 __author__ = 'Hujie Wang'
-
+LOG_LEVEL="fine"
+log = logger.create_logger("/tmp/hobbs.log")
+log.set_level(LOG_LEVEL)
 
 class BindLinkExecution():
 
@@ -95,7 +99,7 @@ class HobbsAgent(MindAgent):
 
         self.numOfFilters=7
 
-        self.logfile=open('/tmp/results.txt', 'w')
+        log.fine("\n===========================================================\n Starting hobbs agent.....\n=========================================================== ")
 
     def bindLinkExe(self,anchorNode, target, command,resultNode,atomType):
 
@@ -146,9 +150,9 @@ class HobbsAgent(MindAgent):
         '''
 
         link = self.atomspace.add_link(types.ReferenceLink, [anaphora, antecedent], TruthValue(.98, TruthValue().confidence_to_count(confidence)))
-        print("Generated a Reference :\n",file=self.logfile)
-        print(link,file=self.logfile)
-        print("=============================================\n",file=self.logfile)
+        log.fine("Generated a Reference :\n")
+        log.fine("{0}\n".format(link))
+        log.fine("===========================================================")
 
     def propose(self,node):
         '''
@@ -172,9 +176,9 @@ class HobbsAgent(MindAgent):
         if not rejected:
             #self.bindLinkExe(self.currentProposal,node,'(cog-bind propose)',None,None)
             #print("accepted "+node.name,file=self.logfile)
+            log.fine("accepted "+node.name)
             self.generateReferenceLink(self.currentPronoun,node,self.confidence)
             self.confidence=self.confidence*0.5
-            print("accepted "+node.name,file=self.logfile)
         #else:
             #print("rejected "+node.name+" by filter-#"+str(filterNumber))
 
@@ -343,8 +347,7 @@ class HobbsAgent(MindAgent):
             tmpLink=self.atomspace.add_link(types.ListLink, [self.currentPronounNode, pronoun], TruthValue(1.0, 100))
             self.currentPronoun=pronoun
             root=self.getRootOfNode(pronoun)
-            print("\nResolving...........",file=self.logfile)
-            print(pronoun,file=self.logfile)
+            log.fine("Resolving \n{0}".format(pronoun))
 
             while True:
                 if root==None:
