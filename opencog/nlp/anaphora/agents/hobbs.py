@@ -170,11 +170,15 @@ class HobbsAgent(MindAgent):
 
         conjunction=self.getConjunction(node);
 
-        if len(conjunction)==1:
+        if len(conjunction)>0:
+
+            conjunction_list=[]
+            conjunction_list.append(node)
+            conjunction_list.extend(conjunction)
             if self.DEBUG:
-                print("accepted "+"("+node.name+" and "+conjunction[0].name+")")
-            log.fine("accepted "+"("+node.name+" and "+conjunction[0].name+")")
-            self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, [node,conjunction[0]], TruthValue(1.0, TruthValue().confidence_to_count(1.0))),self.confidence)
+                print("accepted \n"+str(conjunction_list))
+            log.fine("accepted \n"+str(conjunction_list))
+            self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, conjunction_list, TruthValue(1.0, TruthValue().confidence_to_count(1.0))),self.confidence)
             self.confidence=self.confidence*0.5
 
         for index in range(1,self.numOfFilters):
