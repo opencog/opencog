@@ -17,6 +17,14 @@ Reflexive Pronouns
 
         ---------------------------------------------------------------------------
 
+        By contrast, for the sentence "Emma loves her.", "her" should not refer to "Emma"
+
+        "Emma loves her."
+
+        (WordInstanceNode "her@5c2ac973-2281-4edc-837b-d210b244a6e8") ; [23563]
+
+        (No antecedents found)
+
     (2) verb + object + reflexive pronoun
 
         ---------------------------------------------------------------------------
@@ -142,6 +150,25 @@ Non-reflexive definite Pronouns
 
         ("Weaver High School" can be found by looking at "School")
 
+    (6) Plural form subjects with a singular meaning
+
+        "The news has lost much of its sting two days later."
+
+        (WordInstanceNode "its@22c5ed50-c846-44b8-9467-e7d9618b2a80") ; [21410]
+
+        accepted news@483ae91d-4e97-4652-a581-718523cd2851
+
+
+    (7) Possessive pronouns
+
+        "The manager refused to acknowledge that the memo was hers."
+
+        (WordInstanceNode "hers@66f72533-ecc3-4ac3-a2bb-32b115cf9e25") ; [22054]
+
+        accepted manager@0526617d-54ee-4e0b-b42c-f9c50e7fc22d
+
+
+
 2.  Plural pronouns
 
     (1)  A plural pronoun with a plural antecedent
@@ -209,3 +236,11 @@ Non-reflexive definite Pronouns
         accepted plans@ae51ae94-ddb1-4d54-acfa-e4d7d0858dd1
 
         (Note that this result is incorrect, current algorithm does not work in this case)
+
+    (6) Possessive pronouns
+
+        "Managers refused to acknowledge that the memo was theirs."
+
+        (WordInstanceNode "theirs@1bc72fed-3b0a-421c-b1a7-82fc39da6a5f") ; [22572]
+
+        accepted managers@37194bd6-7c6f-4def-9031-a20e8d38b141

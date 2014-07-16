@@ -124,8 +124,6 @@ accepted plates@5a4665dc-4b87-475a-86aa-5e79d78b739b
 ================================================================================================
 Test #13---------------------------------------------------------------------------------Passed
 
-(Due to filter failures)
-
 Jane loved her.
 
 Result:
@@ -210,8 +208,6 @@ accepted Alice@9e48d3a3-7c91-4d2c-9631-ce0da0892662
 accepted boyfriend@c58192a1-0a9e-4c6a-879b-9cb415494104
 ================================================================================================
 Test #19---------------------------------------------------------------------------------Passed
-
-(Due to filter failures)
 
 Alice always wanted a new boyfriend. Then he bumped into her, and she was enthralled.
 
