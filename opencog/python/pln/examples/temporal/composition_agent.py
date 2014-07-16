@@ -1,15 +1,18 @@
 """
-A MindAgent to test the conversion of AtTimeLinks in Allen Interval relations
+A MindAgent to test the application of the temporal rules,
+specifically the composition of Allen Interval relations
 """
 
 from opencog.cogserver import MindAgent
 from pln.chainers import Chainer
-from pln.rules.temporal_rules import create_temporal_rules
+from pln.rules.temporal_rules import create_composition_rules
 
 __author__ = 'Sebastian Ruder'
 
+composition_table = "composition_table.txt"
 
-class TemporalAgent(MindAgent):
+
+class CompositionAgent(MindAgent):
     def __init__(self):
         self.chainer = None
 
@@ -20,8 +23,9 @@ class TemporalAgent(MindAgent):
                                allow_output_with_variables=True,
                                delete_temporary_variables=True)
 
-        for rule in create_temporal_rules(self.chainer):
+        for rule in create_composition_rules(self.chainer, composition_table):
             self.chainer.add_rule(rule)
+            print(rule.name)
 
     def run(self, atomspace):
         if self.chainer is None:
