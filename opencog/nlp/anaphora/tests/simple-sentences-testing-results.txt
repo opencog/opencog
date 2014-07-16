@@ -1,55 +1,3 @@
-
-================================================================================================
-Test #1---------------------------------------------------------------------------------Failed
-
-We had a pop quiz on a book, and I hadn't read it yet.
-
-Result:
-
-Resolving....
-(WordInstanceNode "it@c0ba39c6-ec08-4425-8c97-981a5a37974d") ; [1867]
-
-accepted quiz@39896d51-7437-4b56-9a39-389ec9b097fd
-accepted book@f2cbc86d-660a-4077-b80a-9c8ad4d20a3e
-accepted pop@33b0b7fa-433d-45bf-8e6e-fbed05d6a083
-================================================================================================
-Test #2---------------------------------------------------------------------------------Passed
-
-I bounced the ball and Jack ran after it.
-
-Result:
-
-Resolving....
-(WordInstanceNode "it@0adbd01a-4b23-43b9-acf1-6c33f1147230") ; [4457]
-
-accepted ball@770cf292-7358-4aab-9a8e-f2e56657fdc8
-================================================================================================
-Test #3---------------------------------------------------------------------------------Passed
-
-John is a mail carrier. He carries a blue bag.
-
-Resolving....
-(WordInstanceNode "he@7d5abbb0-faa0-4c9b-b9c4-4d8f364b9731") ; [4984]
-
-accepted John@07dcdd47-71a1-4445-b14f-ee77c5bcb33b
-accepted carrier@36953cb8-2eaf-4a53-b15c-cebe0b070004
-accepted mail@413f8157-f042-4a33-be85-50e802e166c9
-================================================================================================
-Test #4---------------------------------------------------------------------------------Failed
-
-Andy hit Jose, and he hit him back.
-
-Resolving....
-(WordInstanceNode "he@a14f3508-9612-4aba-a76e-a891813e1c4d") ; [5527]
-
-accepted Andy@f49a6e7a-bad7-4519-8114-3d3bbeb8b5e5
-accepted Jose@bcbbfc62-cbf9-41ed-908f-6c317ec32866
-Resolving....
-(WordInstanceNode "him@af7aee9b-f836-4cbd-b87b-3feb28f790a2") ; [5538]
-
-accepted Andy@f49a6e7a-bad7-4519-8114-3d3bbeb8b5e5
-accepted Jose@bcbbfc62-cbf9-41ed-908f-6c317ec32866
-
 ================================================================================================
 Reflexive Pronouns
 ================================================================================================
@@ -112,7 +60,7 @@ Reflexive Pronouns
         accepted Jacob@be7cb3a4-5e14-40d3-8e77-7128dd129548
 
 ================================================================================================
-Non-reflexive Pronouns
+Non-reflexive definite Pronouns
 ================================================================================================
 
 1.  Singular pronouns
@@ -174,6 +122,26 @@ Non-reflexive Pronouns
         (No antecedents found)
         ---------------------------------------------------------------------------
 
+    (4) Collective nouns(act in unison)
+
+        "The family is at the table, ready for its dinner."
+
+        (WordInstanceNode "its@ae33c005-0953-47a1-b007-0fe3ba675dd2") ; [18194]
+
+        accepted family@2f99088c-5df8-4f10-92bd-a797e6eb6e0a
+        accepted table@f7860f02-0165-4ef1-8349-430f82700d38
+
+
+    (5) Named businesses, schools, and organizations
+
+        "Weaver High School encourages its students to make leaner lunch choices."
+
+        (WordInstanceNode "its@7486a406-bdcc-488d-93eb-1ed6342441fc") ; [19820]
+
+        accepted School@e18c8c70-cb0b-4460-aa78-5455d038ea18
+
+        ("Weaver High School" can be found by looking at "School")
+
 2.  Plural pronouns
 
     (1)  A plural pronoun with a plural antecedent
@@ -232,3 +200,12 @@ Non-reflexive Pronouns
         accepted (cook@d3e3b74d-cc02-4c38-8e10-b4f35813f60d and waitresses@55fb9db8-25f3-42bf-abd3-67d25a4df630)
         accepted waitresses@55fb9db8-25f3-42bf-abd3-67d25a4df630
 
+    (5) Collective nouns(act as individuals)
+
+        "The family quickly find other plans for their dinner."
+
+        (WordInstanceNode "their@13f231e1-2a5d-4577-a6e9-f49f67d8e44c") ; [18730]
+
+        accepted plans@ae51ae94-ddb1-4d54-acfa-e4d7d0858dd1
+
+        (Note that this result is incorrect, current algorithm does not work in this case)
