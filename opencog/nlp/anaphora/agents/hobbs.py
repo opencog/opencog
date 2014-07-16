@@ -156,7 +156,7 @@ class HobbsAgent(MindAgent):
         log.fine("===========================================================")
 
     def getConjunction(self,node):
-        return self.bindLinkExe(self.currentTarget,node,'(cog-bind-crisp getConjunction)',self.currentResult,types.WordInstanceNode)
+        return self.bindLinkExe(self.currentProposal,node,'(cog-bind-crisp getConjunction)',self.currentResult,types.WordInstanceNode)
 
     def propose(self,node):
         '''
@@ -166,6 +166,16 @@ class HobbsAgent(MindAgent):
         self.currentResolutionLink_pronoun=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentPronoun, node], TruthValue(1.0, 100))
         rejected = False
         filterNumber=-1
+
+        conjunction=self.getConjunction(node);
+
+        if len(conjunction)==1:
+            if self.DEBUG:
+                print("accepted "+"("+node.name+" and "+conjunction[0].name+")")
+            log.fine("accepted "+"("+node.name+" and "+conjunction[0].name+")")
+            self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, [node,conjunction[0]], TruthValue(1.0, TruthValue().confidence_to_count(1.0))),self.confidence)
+            self.confidence=self.confidence*0.5
+
         for index in range(1,self.numOfFilters):
             command='(cog-bind-crisp filter-#'+str(index)+')'
             rv=self.bindLinkExe(self.currentProposal,node,command,self.currentResult,types.AnchorNode)
@@ -178,27 +188,16 @@ class HobbsAgent(MindAgent):
                 break
 
         if not rejected:
-            conjunction=self.getConjunction(node);
-
-            if len(conjunction)>0:
-                '''
-                If it's a conjunction, we don't want to search for the other part of this conjunction again, make the other part as checked
-                '''
-                if self.DEBUG:
-                    print("accepted "+"("+node.name+" and "+conjunction[0].name+")")
-                log.fine("accepted "+"("+node.name+" and "+conjunction[0].name+")")
-
-                #self.Checked(conjunction[0])
-                self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, [node,conjunction[0]], TruthValue(1.0, TruthValue().confidence_to_count(1.0))),self.confidence)
-            else:
-                if self.DEBUG:
-                    print("accepted "+node.name)
-                log.fine("accepted "+node.name)
-                self.generateReferenceLink(self.currentPronoun,node,self.confidence)
+            if self.DEBUG:
+                print("accepted "+node.name)
+            log.fine("accepted "+node.name)
+            self.generateReferenceLink(self.currentPronoun,node,self.confidence)
             self.confidence=self.confidence*0.5
         #else:
             #if self.DEBUG:
                 #print("rejected "+node.name+" by filter-#"+str(index))
+
+        self.atomspace.remove(self.currentResolutionLink_pronoun)
 
     def Checked(self,node):
 

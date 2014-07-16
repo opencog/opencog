@@ -138,12 +138,41 @@ Non-reflexive Pronouns
 
     (3) Plural noun + and + singular Noun with a singular pronoun
 
-        "An Apple and three bananas should be eaten once a day, it's delicious."
+        "An apple and a banana should be eaten once a day."
+        "It's delicious."
+
+        (WordInstanceNode "it@15d9ff8c-13d9-4ab8-84f4-07a6e46fcd82") ; [13605]
+
+        accepted apple@5d291a55-fc45-43ef-bd2f-45bd54571d1d
+        accepted banana@de41a0ef-8c6d-4e0c-a24f-4e4f01e3cd81
+
+        ---------------------------------------------------------------------------
+
+        "An apple and three bananas should be eaten once a day."
+        "It's delicious."
 
         (WordInstanceNode "it@5b6406d5-3804-4155-8499-30dc15e39a04") ; [973]
 
-        accepted Apple@1f48480b-be65-476e-aa6c-dbe7ea4846b1
+        accepted apple@1f48480b-be65-476e-aa6c-dbe7ea4846b1
 
+        ---------------------------------------------------------------------------
+
+        "Three apples and a banana should be eaten once a day."
+        "It's delicious."
+
+        (WordInstanceNode "it@b293520f-258b-4b20-b99d-b1f34eadf7f8") ; [14902]
+
+        accepted banana@232c5ccd-e804-4228-bb4b-00cee6fd1579
+
+        ---------------------------------------------------------------------------
+
+        "Three apples and three bananas should be eaten once a day."
+        "It's delicious."
+
+        (WordInstanceNode "it@a0ce4cf3-7b23-4fcd-8512-e8e8868c11c9") ; [15540]
+
+        (No antecedents found)
+        ---------------------------------------------------------------------------
 
 2.  Plural pronouns
 
@@ -168,18 +197,38 @@ Non-reflexive Pronouns
 
     (3) Noun + and + Noun with a plural pronoun
 
-        "Apples and bananas are delicious, they are my favourites."
+        "Apples and bananas are delicious."
+        "They are my favourites."
 
-        (WordInstanceNode "they@169d414c-27ec-4a21-b0b6-87697538fb6b") ; [4355]
+        accepted (Apples@efab0876-e75b-49f9-8906-21ae3530aa96 and bananas@311057ec-9e35-40c8-9103-4fa1586d490c)
+        accepted Apples@efab0876-e75b-49f9-8906-21ae3530aa96
+        accepted bananas@311057ec-9e35-40c8-9103-4fa1586d490c
 
-        accepted (Apples@9b31e1f9-938c-4a42-9464-09ffe7660cb3 and bananas@bf0a7ed3-f77f-4d6f-825f-50fb3c41bf61)
-        accepted bananas@bf0a7ed3-f77f-4d6f-825f-50fb3c41bf61
 
         ---------------------------------------------------------------------------
 
         "The cook and waitress sigh and roll their eyes."
 
-        (WordInstanceNode "their@71f3631b-ad59-4bec-b6df-1adb3d0ff5ed") ; [3822]
+        (WordInstanceNode "their@6c2dbded-75ab-475b-be3a-11203d6dee86") ; [8897]
 
-        accepted (cook@9c3c7cd3-041c-4938-963a-6102b7848f1f and waitress@18938ba4-1743-4875-8a45-90926e6ec677)
-        accepted waitress@18938ba4-1743-4875-8a45-90926e6ec677
+        accepted (cook@002df198-023c-4a2b-aa68-e90f4ff1ca69 and waitress@3e40e02d-b3c8-4092-844c-29e2f627682c)
+        accepted waitress@3e40e02d-b3c8-4092-844c-29e2f627682c
+
+        (Note that this incorrect result is due to incorrect parsing result from Relex.
+         More specifically, "waitress" doesn't have a "Singular" tag.)
+        ---------------------------------------------------------------------------
+        "waitresses and the cook sigh and roll their eyes."
+
+        (WordInstanceNode "their@76985117-afb1-43f7-b82b-3b22ec07779f") ; [10191]
+
+        accepted (waitresses@adcc38d3-b941-457a-8ee8-bf0953a3e65e and cook@e12c8fac-f142-42c9-9a65-ca1398860173)
+        accepted waitresses@adcc38d3-b941-457a-8ee8-bf0953a3e65e
+
+        ---------------------------------------------------------------------------
+        "The cook and waitresses sigh and roll their eyes."
+
+        (WordInstanceNode "their@f2d2111c-dcd4-4bf7-9796-a8e7566c0083") ; [10832]
+
+        accepted (cook@d3e3b74d-cc02-4c38-8e10-b4f35813f60d and waitresses@55fb9db8-25f3-42bf-abd3-67d25a4df630)
+        accepted waitresses@55fb9db8-25f3-42bf-abd3-67d25a4df630
+
