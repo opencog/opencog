@@ -168,6 +168,19 @@ Non-reflexive definite Pronouns
         accepted manager@0526617d-54ee-4e0b-b42c-f9c50e7fc22d
 
 
+    (8) Gender agreements
+
+        "Nancy named her dog Simon."
+        "Nancy named him Simon."
+
+        (WordInstanceNode "him@3efb0c7e-f0f5-41c8-b91f-650c751ec33b") ; [24054]
+
+        accepted dog@5220610e-11a3-4007-ab4a-1495a860066c
+        accepted Simon@3702d346-d5d5-4c1b-8f2d-41898303d5fd
+
+        (WordInstanceNode "her@b7497591-6b62-4fda-8254-bf461af2858d") ; [23949]
+
+        accepted Nancy@ca07e1a9-99cf-4a7e-b069-7e88a5960839
 
 2.  Plural pronouns
 
