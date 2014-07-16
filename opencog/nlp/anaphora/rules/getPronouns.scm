@@ -15,6 +15,12 @@
                     (DefinedLinguisticConceptNode "pronoun")
                  )
                  (NotLink
+                    (ListLink
+                        (AnchorNode "Resolved references")
+                        (VariableNode "$word-inst")
+                    )
+                 )
+                 (NotLink
                     (ReferenceLink
                         (VariableNode "$word-inst")
                         (WordNode "we")

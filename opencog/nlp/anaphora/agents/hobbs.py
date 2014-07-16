@@ -98,6 +98,7 @@ class HobbsAgent(MindAgent):
         self.roots = None
 
         self.numOfFilters=7
+        self.number_of_searching_sentences=3
         self.DEBUG = True
 
         log.fine("\n===========================================================\n Starting hobbs agent.....\n=========================================================== ")
@@ -247,9 +248,11 @@ class HobbsAgent(MindAgent):
 
     def getRootOfNode(self,target):
         '''
-        Naive approach, but works
+        Returns a ParseNode associated with the "target"
         '''
-        return self.roots[len(self.roots)-1]
+
+        rv=self.bindLinkExe(self.currentTarget,target,'(cog-bind-crisp getParseNode)',self.currentResult,types.ParseNode)
+        return rv[0]
 
     def  previousRootExist(self,root):
 
@@ -269,7 +272,6 @@ class HobbsAgent(MindAgent):
             number=self.getSentenceNumber(root)
             if number<rootNumber:
                 return root
-        #print("Impossible")
 
     def getAllNumberNodes(self):
 
@@ -291,6 +293,7 @@ class HobbsAgent(MindAgent):
         self.currentResult = atomspace.add_node(types.AnchorNode, 'CurrentResult', TruthValue(1.0, 100))
         self.currentProposal = atomspace.add_node(types.AnchorNode, 'CurrentProposal', TruthValue(1.0, 100))
         self.unresolvedReferences=atomspace.add_node(types.AnchorNode, 'Recent Unresolved references', TruthValue(1.0, 100))
+        self.resolvedReferences=atomspace.add_node(types.AnchorNode, 'Resolved references', TruthValue(1.0, 100))
         self.currentResolutionNode=atomspace.add_node(types.AnchorNode, 'CurrentResolution', TruthValue(1.0, 100))
         self.currentResolutionLink_proposal=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentProposal], TruthValue(1.0, 100))
         self.currentResolutionLink_pronoun=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentPronounNode], TruthValue(1.0, 100))
@@ -306,6 +309,7 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/getAllNumberNodes.scm",
               "opencog/nlp/anaphora/rules/getAllParseNodes.scm",
               "opencog/nlp/anaphora/rules/getConjunction.scm",
+              "opencog/nlp/anaphora/rules/getParseNode.scm",
 
               "opencog/nlp/anaphora/rules/filtersGenerator.scm",
 
@@ -352,6 +356,13 @@ class HobbsAgent(MindAgent):
                 print(atom)
                 print(atom, file=logfile)
 
+    def addPronounToResolvedList(self,node):
+        '''
+        Mark current pronoun as resolved.
+        '''
+
+        self.atomspace.add_link(types.ListLink,[self.resolvedReferences,node],TruthValue(1.0, 100))
+
     def run(self, atomspace):
         self.initilization(atomspace)
 
@@ -372,14 +383,16 @@ class HobbsAgent(MindAgent):
                 print("Resolving....")
                 print(pronoun)
             log.fine("Resolving \n{0}".format(pronoun))
-
+            sent_counter=1;
             while True:
                 if root==None:
                     #print("found you while")
                     break
                 self.bfs(root)
-                if self.previousRootExist(root):
+                if self.previousRootExist(root) and sent_counter<=self.number_of_searching_sentences:
                     root=self.getPrevious(root)
+                    sent_counter=sent_counter+1
                 else:
                     break
             self.atomspace.remove(tmpLink)
+            self.addPronounToResolvedList(pronoun)
