@@ -1,5 +1,13 @@
 ;; anaphor is "plural"
-;; antecedent is "singular"
+;; antecedent is "singular" and there is no "conj_and" link such that
+;; (EvaluationLink
+;;      (PrepositionalRelationshipNode "conj_and")
+;;             (ListLink
+;;                   (VariableNode "$word-inst-antecedent")
+                     (VariableNode "$noun")
+;;             )
+;;       )
+;; )
 
 (define filter-#11
     (BindLink
@@ -10,6 +18,10 @@
             )
             (TypedVariableLink
                 (VariableNode "$word-inst-anaphor")
+                (VariableTypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$noun")
                 (VariableTypeNode "WordInstanceNode")
             )
         )
@@ -38,6 +50,19 @@
                 (InheritanceLink
                     (VariableNode "$word-inst-antecedent")
                     (DefinedLinguisticConceptNode "singular")
+                )
+                (PartOfSpeechLink
+                    (VariableNode "$noun")
+                    (DefinedLinguisticConceptNode "noun")
+                )
+                (NotLink
+                    (EvaluationLink
+                        (PrepositionalRelationshipNode "conj_and")
+                        (ListLink
+                            (VariableNode "$word-inst-antecedent")
+                            (VariableNode "$noun")
+                        )
+                    )
                 )
             )
             (ListLink

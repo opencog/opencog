@@ -111,3 +111,75 @@ Reflexive Pronouns
 
         accepted Jacob@be7cb3a4-5e14-40d3-8e77-7128dd129548
 
+================================================================================================
+Non-reflexive Pronouns
+================================================================================================
+
+1.  Singular pronouns
+
+    (1)  A singular pronoun with a singular antecedent
+
+        "The boy scratched his armpit."
+
+        (WordInstanceNode "his@8e055013-9770-49e1-b952-7551b230f454") ; [82]
+
+        accepted boy@6669756a-a93b-4a55-8165-6beb5f0b563b
+
+        ---------------------------------------------------------------------------
+
+    (2)  A singular pronoun with a plural antecedent
+
+        "The boys scratched his armpit."
+
+        (WordInstanceNode "his@94e724d0-9239-448b-b7e5-63b5f7916391") ; [488]
+
+        (No antecedents found)
+        ---------------------------------------------------------------------------
+
+    (3) Plural noun + and + singular Noun with a singular pronoun
+
+        "An Apple and three bananas should be eaten once a day, it's delicious."
+
+        (WordInstanceNode "it@5b6406d5-3804-4155-8499-30dc15e39a04") ; [973]
+
+        accepted Apple@1f48480b-be65-476e-aa6c-dbe7ea4846b1
+
+
+2.  Plural pronouns
+
+    (1)  A plural pronoun with a plural antecedent
+
+        "The boys scratched their armpit."
+
+        (WordInstanceNode "their@1b552f2a-2529-4672-8c78-b48fde2d3aae") ; [893]
+
+        accepted boys@bfacb67b-b2d0-4531-b032-84355fb77e7e
+
+        ---------------------------------------------------------------------------
+
+    (2)  A plural pronoun with a singular antecedent
+
+        "The boy scratched their armpit."
+
+        (WordInstanceNode "their@aeeced4f-56c0-44ae-b0dc-b6ba06bbc279") ; [1315]
+
+        (No antecedents found)
+        ---------------------------------------------------------------------------
+
+    (3) Noun + and + Noun with a plural pronoun
+
+        "Apples and bananas are delicious, they are my favourites."
+
+        (WordInstanceNode "they@169d414c-27ec-4a21-b0b6-87697538fb6b") ; [4355]
+
+        accepted (Apples@9b31e1f9-938c-4a42-9464-09ffe7660cb3 and bananas@bf0a7ed3-f77f-4d6f-825f-50fb3c41bf61)
+        accepted bananas@bf0a7ed3-f77f-4d6f-825f-50fb3c41bf61
+
+        ---------------------------------------------------------------------------
+
+        "The cook and waitress sigh and roll their eyes."
+
+        (WordInstanceNode "their@71f3631b-ad59-4bec-b6df-1adb3d0ff5ed") ; [3822]
+
+        accepted (cook@9c3c7cd3-041c-4938-963a-6102b7848f1f and waitress@18938ba4-1743-4875-8a45-90926e6ec677)
+        accepted waitress@18938ba4-1743-4875-8a45-90926e6ec677

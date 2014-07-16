@@ -155,6 +155,9 @@ class HobbsAgent(MindAgent):
         log.fine("{0}\n".format(link))
         log.fine("===========================================================")
 
+    def getConjunction(self,node):
+        return self.bindLinkExe(self.currentTarget,node,'(cog-bind-crisp getConjunction)',self.currentResult,types.WordInstanceNode)
+
     def propose(self,node):
         '''
         It iterates all filters, reject the antecedent or "node" if it's matched by any filters.
@@ -175,12 +178,23 @@ class HobbsAgent(MindAgent):
                 break
 
         if not rejected:
-            #self.bindLinkExe(self.currentProposal,node,'(cog-bind propose)',None,None)
-            #print("accepted "+node.name,file=self.logfile)
-            if self.DEBUG:
-                print("accepted "+node.name)
-            log.fine("accepted "+node.name)
-            self.generateReferenceLink(self.currentPronoun,node,self.confidence)
+            conjunction=self.getConjunction(node);
+
+            if len(conjunction)>0:
+                '''
+                If it's a conjunction, we don't want to search for the other part of this conjunction again, make the other part as checked
+                '''
+                if self.DEBUG:
+                    print("accepted "+"("+node.name+" and "+conjunction[0].name+")")
+                log.fine("accepted "+"("+node.name+" and "+conjunction[0].name+")")
+
+                #self.Checked(conjunction[0])
+                self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, [node,conjunction[0]], TruthValue(1.0, TruthValue().confidence_to_count(1.0))),self.confidence)
+            else:
+                if self.DEBUG:
+                    print("accepted "+node.name)
+                log.fine("accepted "+node.name)
+                self.generateReferenceLink(self.currentPronoun,node,self.confidence)
             self.confidence=self.confidence*0.5
         #else:
             #if self.DEBUG:
@@ -291,6 +305,7 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/getResults.scm",
               "opencog/nlp/anaphora/rules/getAllNumberNodes.scm",
               "opencog/nlp/anaphora/rules/getAllParseNodes.scm",
+              "opencog/nlp/anaphora/rules/getConjunction.scm",
 
               "opencog/nlp/anaphora/rules/filtersGenerator.scm",
 
