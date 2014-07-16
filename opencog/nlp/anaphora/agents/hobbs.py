@@ -232,7 +232,8 @@ class HobbsAgent(MindAgent):
                         q.put(node)
 
     def getPronouns(self):
-        return self.bindLinkExe(None,None,'(cog-bind-crisp getPronouns)',self.unresolvedReferences,types.WordInstanceNode)
+        rv=self.bindLinkExe(None,None,'(cog-bind-crisp getPronouns)',self.unresolvedReferences,types.WordInstanceNode)
+        return self.sortNodes(rv,self.getWordNumber)
 
     def getRoots(self):
 
