@@ -239,11 +239,12 @@ Solution:
    parts, and can be queried for the scalar score. Done: its behave_cscore.
 
 Notes/TODO:
--- complexity is not being factored in ... 
--- scorer is currently not using the user-specified wight column !?
-   or are those in the bscores already?
-
-loop termination is on mp.best_score
+-- complexity is not being factored in ...  Done.
+-- scorer is currently not using the user-specified weight column !?
+   Done.  I thinnk there's nothing to do ... except maybe test ... 
+-- create unit test for boosting
+-- document eval-table
+   maybe rename eval-combo, or eval-combo-table
 
 Problems:
 1) best score must now be the ensemble score.
@@ -251,7 +252,6 @@ Problems:
    metapop, because the criteria for "best" haas changed.  This seems to
    mean that the entire metapop needs to be rescored.  Maybe leave this
    as open question.
-
 
 
 
@@ -284,7 +284,7 @@ Wow, even -k6 finds a solution, although it is long, and takes much
 more time to find.   ... and needs to have --reveist=50
 
 So: -k4 speedup == 100x roughly
-    -k5 sppedup == more than 500x
+    -k5 speedup == more than 500x
 
 Hmm  different rand seeds:
 
@@ -315,4 +315,21 @@ off in the usual fashion?
 
 or perhaps the weights should be forced to be valued as small fractions,
 so that they can be exactly combined ... 
+
+July 2014
+---------
+Discrete AdaBoost reference:
+
+ * Yoav Freund, Robert E. Schapire, "A Short Introduction to Boosting"
+   (1999) Journal of Japanese Society for Artificial Intelligence, vol. 14
+   issue 5 pp 771-780
+
+Boosting as gradient-descent, for contin-valued problems:
+ * Robert E. Schapire, YoramSinger, "Improved boosting algorithms using
+   confidence-rated predictions." (1998) Proc 11th Ann Conf Computational
+   Learning Theory pp 80-91
+
+Outlier mitigation:
+ * GentleAdaBoost
+ * BrownBoost
 
