@@ -384,8 +384,10 @@
         (ImplicationLink
             (InheritanceLink (VariableNode "$X") (ConceptNode instance df-node-stv) df-link-stv)
             (InheritanceLink (VariableNode "$X") (ConceptNode predicative_instance df-node-stv) df-link-stv) df-link-stv
-        )
-    ))
+        ))
+        (InheritanceLink (ConceptNode predicative_instance df-node-stv) (ConceptNode predicative df-node-stv) df-link-stv)
+	    (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj df-node-stv) df-link-stv)
+	)
 )
 
 
