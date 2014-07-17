@@ -528,16 +528,16 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "then return all results.\n")
 
         (opt_desc_str(output_score_opt).c_str(),
-         po::value<bool>(&output_score)->default_value(false),
-         "If 1, output the score after each candidate\n")
+         po::value<bool>(&output_score)->default_value(true),
+         "If 1, output the score before each candidate\n")
 
         (opt_desc_str(output_cscore_opt).c_str(),
          po::value<bool>(&output_cscore)->default_value(false),
-         "If 1, output the penalized score and it's compenents (below each candidate).\n")
+         "If 1, output the composite score after each candidate\n")
 
         (opt_desc_str(output_bscore_opt).c_str(),
          po::value<bool>(&output_bscore)->default_value(false),
-         "If 1, output the bscore (below each candidate).\n")
+         "If 1, output the bscore after each candidate (possibly after the composite score).\n")
 
         (opt_desc_str(output_only_best_opt).c_str(),
          po::value<bool>(&output_only_best)->default_value(false),
