@@ -558,6 +558,49 @@ def evaluationImplicationFormula(tvs):
 
     return [eval_C_A]
 
+
+def andAs1stArgInsideLinkFormula(tvs):
+    """
+    tv of InheritanceLink (AndLink A B) C =
+    P(C | A) * P(A) * P(C | B) * P(B) / (P(C) * P(A&B))
+
+    @see: https://github.com/opencog/opencog/pull/904
+
+    :param tvs: tvs of InheritanceLink A B,
+                       InheritanceLink B C,
+                       A, B, C
+    :return: tvs of InheritanceLink (AndLink A B) C, AndLink A B
+    """
+    [inh_ac_tv, inh_bc_tv, a_tv, b_tv, c_tv] = tvs
+
+    and_ab_tv = andFormula(a_tv, b_tv)
+    inh_and_ab_c_strength = (inh_ac_tv.mean * a_tv.mean * inh_bc_tv.mean
+                             * b_tv.mean) / (c_tv.mean * and_ab_tv.mean)
+    inh_and_ab_c_count = makeUpCount(tvs)
+
+    return [TruthValue(inh_and_ab_c_strength, inh_and_ab_c_count), and_ab_tv]
+
+
+def andAs2ndArgInsideLinkFormula(tvs):
+    """
+    tv of InheritanceLink A (AndLink B C) =
+    P(B | A) * P(A) * P(C | A) * P(B&C) / (P(B) * P(C))
+
+    :param tvs: tvs of InheritanceLink A B,
+                       InheritanceLink A C,
+                       A, B, C
+    :return: tvs of InheritanceLink A (AndLink B C), AndLink B C
+    """
+    [inh_ab_tv, inh_ac_tv, a_tv, b_tv, c_tv] = tvs
+
+    and_bc_tv = andFormula(b_tv, c_tv)
+    inh_a_and_bc_strength = (inh_ab_tv.mean * a_tv.mean * inh_ac_tv.mean
+                             * and_bc_tv.mean) / (b_tv.mean * c_tv.mean)
+    inh_a_and_bc_count = makeUpCount(tvs)
+
+    return [TruthValue(inh_a_and_bc_strength, inh_a_and_bc_count), and_bc_tv]
+
+
 def contextFormula(tvs):
     return tvs
 
