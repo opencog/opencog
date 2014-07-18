@@ -183,15 +183,21 @@ namespace PatternMining
      // will write the subset to a scm file
      void _selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection);
 
+     bool isIgnoredContent(string keyword);
+
+     bool containIgnoredContent(Handle link );
+
+     string ignoreKeyWords[9] = {"this", "that","these","those","it","he", "him", "her", "she" };
+
  public:
-     PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram);
+     PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram = 3);
      ~PatternMiner();
 
      bool checkPatternExist(const string& patternKeyStr);
 
      void OutPutPatternsToFile(unsigned int n_gram);
 
-     void runPatternMiner(unsigned int _thresholdFrequency = 1);
+     void runPatternMiner(unsigned int _thresholdFrequency = 2);
 
      void selectSubsetFromCorpus();
 

@@ -1071,6 +1071,9 @@ void PatternMiner::OutPutPatternsToFile(unsigned int n_gram)
 
     foreach(HTreeNode* htreeNode, patternsForThisGram)
     {
+        if (htreeNode->instances.size() < 2)
+            break;
+
         resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->instances.size()) << endl;
         foreach (Handle link, htreeNode->pattern)
         {
@@ -1260,7 +1263,7 @@ void PatternMiner::selectSubsetFromCorpus()
     topics.push_back("robot");
     topics.push_back("computer");
 
-    _selectSubsetFromCorpus(topics,5);
+    _selectSubsetFromCorpus(topics,4);
 }
 
 std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const AtomSpace *atomspace)
@@ -1537,7 +1540,8 @@ set<Handle> PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode,
         if (isIgnoredType (originalAtomSpace->getType(incomingHandle)) )
         {
             Handle newh = getFirstNonIgnoredIncomingLink(originalAtomSpace, incomingHandle);
-            if (newh == Handle::UNDEFINED)
+
+            if ((newh == Handle::UNDEFINED) || containIgnoredContent(newh ))
                 continue;
         }
 
@@ -1560,6 +1564,10 @@ set<Handle> PatternMiner::_extendOneLinkForSubsetCorpus(set<Handle>& allNewLinks
 
         foreach (Handle neighborNode, allNodes)
         {
+            string content = originalAtomSpace->getName(neighborNode);
+            if (isIgnoredContent(content))
+                continue;
+
             set<Handle> newConnectedLinks;
             newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(neighborNode, allSubsetLinks);
             allNewConnectedLinksThisGram.insert(newConnectedLinks.begin(),newConnectedLinks.end());
@@ -1606,6 +1614,9 @@ void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsig
 
     foreach(Handle h, allSubsetLinks)
     {
+        if (containIgnoredContent(h))
+            continue;
+
         subsetFile << originalAtomSpace->atomAsString(h);
     }
 
@@ -1614,4 +1625,28 @@ void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsig
     std::cout << "\nDone! The subset has been written to file:  " << fileName << std::endl ;
 }
 
+bool PatternMiner::isIgnoredContent(string keyword)
+{
+    foreach (string ignoreWord, ignoreKeyWords)
+    {
+        if (keyword == ignoreWord)
+            return true;
+    }
+
+    return false;
+}
+
+bool PatternMiner::containIgnoredContent(Handle link )
+{
+    string str = originalAtomSpace->atomAsString(link);
+
+    foreach (string ignoreWord, ignoreKeyWords)
+    {
+        string ignoreStr = "\"" + ignoreWord + "\"";
+        if (str.find(ignoreStr) != std::string::npos)
+            return true;
+    }
+
+    return false;
+}
 
