@@ -248,6 +248,7 @@ class SimilarityRule(Rule):
                               chainer.link(types.OrLink, [A, B])],
                       formula=formulas.extensionalSimilarityFormula)
 
+
 class SubsetRule1(Rule):
     """
     SubsetLink A B
@@ -265,6 +266,7 @@ class SubsetRule1(Rule):
                               A],
                       formula=formulas.subsetFormula)
 
+
 class AndToSubsetRule1(Rule):
     """
     SubsetLink A B
@@ -281,6 +283,7 @@ class AndToSubsetRule1(Rule):
                       inputs=[chainer.link(types.AndLink, [A, B]),
                               A],
                       formula=formulas.subsetFormula)
+
 
 class AndToSubsetRuleN(Rule):
     """
@@ -301,3 +304,60 @@ class AndToSubsetRuleN(Rule):
                               lhs],
                       formula=formulas.subsetFormula)
 
+
+class AndAs1stArgInsideLinkRule(Rule):
+    """
+    ANDLink
+        InheritanceLink A C
+        InheritanceLink B C
+    |-
+    InheritanceLink
+        ANDLink A B
+        C
+    Created to create AndLinks inside InheritanceLinks (original use case:
+    context rules); could be useful for other link types as well
+
+    @see: https://github.com/opencog/opencog/pull/904
+    """
+    def __init__(self, chainer, link_type):
+        A = chainer.new_variable()
+        B = chainer.new_varialbe()
+        C = chainer.new_variable()
+        AndAB = chainer.link(types.AndLink, [A, B])
+
+        Rule.__init__(self,
+                      name="AndAs1stArgInsideLinkRule<%s>"
+                           %(get_type_name(link_type)),
+                      inputs=[chainer.link(types.InheritanceLink, [A, C]),
+                              chainer.link(types.InheritanceLink, [B, C]),
+                              A, B, C],
+                      outputs=[chainer.link(types.InheritanceLink, [AndAB, C]),
+                               AndAB],
+                      formula=formulas.andAs1stArgInsideLinkFormula)
+
+
+class AndAs2ndArgInsideLinkRule(Rule):
+    """
+    ANDLink
+        InheritanceLink A B
+        InheritanceLink A C
+    |-
+    InheritanceLink
+        A
+        ANDLink B C
+    """
+    def __init__(self, chainer, link_type):
+        A = chainer.new_variable()
+        B = chainer.new_varialbe()
+        C = chainer.new_variable()
+        AndBC = chainer.link(types.AndLink, [B, C])
+
+        Rule.__init__(self,
+                      name="AndAs2ndArgInsideLinkRule<%s>"
+                           %(get_type_name(link_type)),
+                      inputs=[chainer.link(types.InheritanceLink, [A, B]),
+                              chainer.link(types.InheritanceLink, [A, C]),
+                              A, B, C],
+                      outputs=[chainer.link(types.InheritanceLink, [A, AndBC]),
+                               AndBC],
+                      formula=formulas.andAs2ndArgInsideLinkFormula)
