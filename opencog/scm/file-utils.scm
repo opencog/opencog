@@ -5,7 +5,6 @@
 ; The following utilities are provided in this file:
 ;
 ; -- list-files dir                List files in a directory
-; -- exec-scm-from-port            Execute scheme code read from port
 ; -- exec-scm-from-port port       Execute scheme code read from port
 ; -- exec-scm-from-cmd cmd-string  Run scheme returend by shell command
 ; -- load-scm-from-file filename   Run scheme code taken from file
@@ -64,6 +63,11 @@
  Read (UTF-8 encoded) data from the indicated port, and run it.
  The port should contain valid scheme; this routine will read and
  execute that scheme data.
+
+ CAUTION: This routine will hang until the remote end closes the port.
+ That is, it will continue to attempt to read more data from the port,
+ until an EOF is received.  For sockets, an EOF is sent only when the
+ remote end closes its transmit port.
 "
 
 	; get-string-all is a new r6rs proceedure, sucks in all bytes until
