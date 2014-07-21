@@ -370,23 +370,39 @@
 ; -----------------------------------------------------------------------
 ; all rules
 ; -----------------------------------------------------------------------
-(define (all-rule noun  noun_instance)
-	(ForAllLink (ConceptNode noun_instance df-node-stv) df-link-stv
-		(InheritanceLink (ConceptNode noun_instance df-node-stv) (ConceptNode noun df-node-stv) df-link-stv)
+
+; Create a "allmarker" to handle all forms of "all" sentences, such as
+; "All Canadians are right-handed."
+; "All my writings are bad.",
+; "All Canadians write letters to Einstein."
+; "All Canadians write."
+; "All right-handed Canadians write."
+(define (all-rule noun_instance)
+	(list
+		(EvaluationLink
+			(PredicateNode "allmarker")
+			(ConceptNode noun_instance)
+		)
 	)
 )
 
-; combination of all-rule and SVP-rule for testing syllogisms
-; Example: "All Canadians are right-handed."
-(define (all-SVP-rule concept instance predicative predicative_instance)
-    (list (ForAllLink
-        (VariableNode "$X")
-        (ImplicationLink
-            (InheritanceLink (VariableNode "$X") (ConceptNode instance df-node-stv) df-link-stv)
-            (InheritanceLink (VariableNode "$X") (ConceptNode predicative_instance df-node-stv) df-link-stv) df-link-stv
-        )
-    ))
-)
+;(define (all-rule noun  noun_instance)
+;	(ForAllLink (ConceptNode noun_instance df-node-stv) df-link-stv
+;		(InheritanceLink (ConceptNode noun_instance df-node-stv) (ConceptNode noun df-node-stv) df-link-stv)
+;	)
+;)
+
+;; combination of all-rule and SVP-rule for testing syllogisms
+;; Example: "All Canadians are right-handed."
+;(define (all-SVP-rule concept instance predicative predicative_instance)
+;    (list (ForAllLink
+;        (VariableNode "$X")
+;        (ImplicationLink
+;            (InheritanceLink (VariableNode "$X") (ConceptNode instance df-node-stv) df-link-stv)
+;            (InheritanceLink (VariableNode "$X") (ConceptNode predicative_instance df-node-stv) df-link-stv) df-link-stv
+;        )
+;    ))
+;)
 
 
 ; -----------------------------------------------------------------------
