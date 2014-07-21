@@ -381,7 +381,9 @@
 	(list
 		(EvaluationLink
 			(PredicateNode "allmarker")
-			(ConceptNode noun_instance)
+			(ListLink
+				(ConceptNode noun_instance)
+			)
 		)
 	)
 )
