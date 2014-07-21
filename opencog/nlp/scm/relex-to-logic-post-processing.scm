@@ -212,20 +212,34 @@
 ; The main thatmarker function that calls the helper to clean all
 ; thatmarker in the atomspace, and delete them
 (define (thatmarker-cleaner)
-	(define thatmarker (cog-node 'PredicateNode "thatmarker"))
+	(marker-cleaner "thatmarker" thatmarker-helper)
+)
+
+; -----------------------------------------------------------------------
+; The main allmarker function that calls the helper to clean all
+; allmarker in the atomspace, and delete them
+(define (allmarker-cleaner)
+	(marker-cleaner "allmarker" allmarker-helper)
+)
+
+; -----------------------------------------------------------------------
+; A general purpose marker function that calls a specific helper to clean
+; all instances of a marker in the atomspace, and delete them
+(define (marker-cleaner name helper)
+	(define marker (cog-node 'PredicateNode name))
 	(define (call-helper)
-		; get the list of all unprocessed thatmarker
-		(define thatmarker-list (cog-get-link 'EvaluationLink 'ListLink thatmarker))
+		; get the list of all unprocessed marker of type "name"
+		(define marker-list (cog-get-link 'EvaluationLink 'ListLink marker))
 		; call helper function to process them
-		(define results-list (append-map thatmarker-helper thatmarker-list))
-		; delete the thatmarkers links and the thatmarker itself
-		(for-each purge-hypergraph thatmarker-list)
-		(cog-delete thatmarker)
+		(define results-list (append-map helper marker-list))
+		; delete the markers links and the marker itself
+		(for-each purge-hypergraph marker-list)
+		(cog-delete marker)
 		; return the results
 		results-list
-	)	
+	)
 
-	(if (null? thatmarker)
+	(if (null? allmarker)
 		'()
 		(call-helper)
 	)
