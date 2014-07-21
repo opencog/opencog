@@ -1,3 +1,13 @@
+;
+; relex-to-logic-post-processing.scm
+;
+; Assorted functions for post-processing relex2logic output.
+;
+
+; =======================================================================
+; Helper utilities for post-processing.
+; =======================================================================
+
 ; -----------------------------------------------------------------------
 ; Get the corresponding ConceptNode or PredicateNode or NumberNode
 (define (word-get-r2l-node node)
@@ -16,12 +26,10 @@
 )
 
 ; -----------------------------------------------------------------------
-; Get the root link with no incoming set
-(define (cog-get-root atom)
-	(define iset (cog-incoming-set atom))
-	(if (null? iset)
-		(list atom)
-		(append-map cog-get-root iset))
+; Helper function to check if a link contains a non-instance word
+(define (check-non-instance link)
+	(define words (cog-get-all-nodes link))
+	(find (lambda (w) (null? (cog-node 'WordInstanceNode (cog-name w)))) words)
 )
 
 ; -----------------------------------------------------------------------
@@ -106,6 +114,128 @@
 	)
 	new-name
 )
+
+
+; =======================================================================
+; Post-processsing functions for markers created from pre-processing.
+; =======================================================================
+
+; -----------------------------------------------------------------------
+; call all post-processing steps
+(define (r2l-post-processing)
+	(thatmarker-cleaner)
+)
+
+; -----------------------------------------------------------------------
+; The thatmarker helper function for post-processing one specific
+; thatmarker.
+;
+; Given sentence "I think that dogs attack angry cats.", and thatmarker
+; in the form:
+;
+;	EvaluationLink
+;		thatmarker
+;		ListLink
+;			think
+;			attack
+;
+; We create:
+;
+;	EvaluationLink
+;		that
+;		ListLink
+;			think
+;			AndLink
+;				EvaluationLink attack ListLink dog cat
+;				InheritanceLink cat angry
+;
+; So basically, AndLink everything that directly or indirectly connects
+; with the word "attack" (ie. the part of the sentence after "that")
+;
+(define (thatmarker-helper orig-link)
+	(define listlink (car (cog-filter 'ListLink (cog-outgoing-set orig-link))))
+	(define word1 (gar listlink))
+	(define word2 (gdr listlink))
+	
+	; find all the words that link directly or indirectly with word2
+	(define (get-all-connected-words)
+		; helper function to get words that share the same hypergraph with 'word'
+		(define (get-all-closely-connected-words word)
+			(define all-links (cog-get-root word))
+			; clean any links that include any nodes that are not instanced word
+			; to avoid including other marker links, InheirtanceLink btwn word
+			; and instance, etc
+			(define cleaned-links (remove check-non-instance all-links))
+			(delete-duplicates (append-map cog-get-all-nodes cleaned-links))
+		)
+		; the main recursive function to gather all indirectly connected words
+		(define (get-all-connected-words word)
+			(cond ((not (member? word connected-words))
+				(set! connected-words (append (list word) connected-words))
+				(for-each get-all-connected-words (get-all-closely-connected-words word))
+				)
+			)
+		)
+		; starts with word1 to avoid getting its connected words, then delete it afterward
+		(define connected-words (list word1)) 
+		(get-all-connected-words word2)
+		(set! connected-words (delete word1 connected-words))
+		connected-words
+	)
+
+	(define all-connected-words (get-all-connected-words))
+
+	; for each word in connected-words, get the root link
+	(define all-root-links (delete-duplicates (append-map cog-get-root all-connected-words)))
+	
+	; any links containing a non-instance word can be removed
+	(define final-links
+		(remove check-non-instance all-root-links)
+	)
+
+	; the final representation
+	(list
+		(EvaluationLink
+			(PredicateNode "that")
+			(ListLink
+				word1
+				(if (= (length final-links) 1)
+					final-links
+					(AndLink final-links)
+				)
+			)
+		)
+	)
+)
+
+; -----------------------------------------------------------------------
+; The main thatmarker function that calls the helper to clean all
+; thatmarker in the atomspace, and delete them
+(define (thatmarker-cleaner)
+	(define thatmarker (cog-node 'PredicateNode "thatmarker"))
+	(define (call-helper)
+		; get the list of all unprocessed thatmarker
+		(define thatmarker-list (cog-get-link 'EvaluationLink 'ListLink thatmarker))
+		; call helper function to process them
+		(define results-list (append-map thatmarker-helper thatmarker-list))
+		; delete the thatmarkers links and the thatmarker itself
+		(for-each purge-hypergraph thatmarker-list)
+		(cog-delete thatmarker)
+		; return the results
+		results-list
+	)	
+
+	(if (null? thatmarker)
+		'()
+		(call-helper)
+	)
+)
+
+
+; =======================================================================
+; Functions to create partially and fully abstract version of the
+; representations.
+; =======================================================================
 
 ; -----------------------------------------------------------------------
 ; Main recursive function to build the new abstracted links
