@@ -124,8 +124,6 @@ accepted plates@5a4665dc-4b87-475a-86aa-5e79d78b739b
 ================================================================================================
 Test #13---------------------------------------------------------------------------------Passed
 
-(Due to filter failures)
-
 Jane loved her.
 
 Result:
@@ -211,8 +209,6 @@ accepted boyfriend@c58192a1-0a9e-4c6a-879b-9cb415494104
 ================================================================================================
 Test #19---------------------------------------------------------------------------------Passed
 
-(Due to filter failures)
-
 Alice always wanted a new boyfriend. Then he bumped into her, and she was enthralled.
 
 Result:
@@ -293,7 +289,7 @@ Result:
 
 accepted Graph@a5ca5f95-0589-495c-ad07-6093a33dc775
 ================================================================================================
-Test #26---------------------------------------------------------------------------------Unknown
+Test #26---------------------------------------------------------------------------------Passed
 
 Air forces could field effective defenses with their own airbases destroyed.
 
@@ -308,7 +304,7 @@ accepted air@8783589d-528b-4282-909e-8ef476aaa064
 accepted air@dabc4902-d1e5-4524-8d8d-f221438511e1
 accepted launch@f93feea6-6019-4dae-a50b-97eb507347b6
 ================================================================================================
-Test #27---------------------------------------------------------------------------------Unknown
+Test #27---------------------------------------------------------------------------------Passed
 
 Koray Altınay began his career with SC Fürstenfeldbruck before joining Bayern Munich II in 2011.
 He made eleven appearances for the Bayern Munich reserve team in the 2011–12 season, scoring one goal, the winner in a 1–0 victory in the mini-Munich derby against TSV 1860 München II.
@@ -370,7 +366,7 @@ accepted scientists@514aa4b2-cc7a-40c5-b26a-51edcba13137
 accepted honor@fb93ea78-9d62-438b-ac01-67c4e834fb4c
 accepted States@7e6d0d2d-0033-4bef-8e1c-1aec33c3123d
 ================================================================================================
-Test #30---------------------------------------------------------------------------------Unknown
+Test #30---------------------------------------------------------------------------------Passed
 
 Paul Galbraith (born March 18, 1964) is a Scottish classical guitarist known for his unique style of playing.
 
@@ -433,7 +429,7 @@ accepted London@b7132d9f-be41-422f-bd8d-ffd157868753
 accepted Tom@4cb3e923-74e2-47e3-92dc-50a21837a5bf
 accepted scientist@abba0f54-e2f4-45a7-8718-b492c929131c
 ================================================================================================
-Test #33---------------------------------------------------------------------------------Unknown
+Test #33---------------------------------------------------------------------------------Passed
 
 Phomopsis longicolla is a species of ascomycota fungi in the Diaporthaceae family.
 It is a plant pathogen and mainly responsible for a soybean disease called Phomopsis seed decay.
@@ -501,3 +497,245 @@ accepted members@76b2fe23-7598-426a-a068-7ecbd0d0e567
 accepted subgenera@d6e8586f-e075-4a94-af19-9e488103bc12
 accepted involving@977e0e37-fe97-4d45-b3a8-93139f3703d7
 accepted genus@61c298c4-ad18-42e6-b942-8ca5583507bb
+================================================================================================
+Test #37---------------------------------------------------------------------------------Passed
+
+The Rumonge Nature Reserve is found in Burundi.
+It was established in 1980.This site is 50 km².
+
+Result:
+
+Resolving...........
+(WordInstanceNode "it@23442124-4e06-4db3-a897-63f48e52e61a") ; [186]
+
+accepted Reserve@964a0b1d-99ea-4bbb-9d7a-94c5df9d773b
+accepted Burundi@6d7d6174-0063-4765-897e-eb370d6810b9
+================================================================================================
+Test #38---------------------------------------------------------------------------------Passed
+
+Iidaoka Station was officially opened on May 19, 1926 in a ceremony attended by the Railway Minster.
+However, it appears to have been in operation for some time prior to this.
+
+Result:
+
+Resolving...........
+(WordInstanceNode "this@02b7a7e9-7795-4e58-919d-de2258d57e08") ; [1017]
+
+accepted operation@8f7fe41e-c9fc-480a-9919-329d27bc2ab9
+accepted time@dae314ce-0931-476a-afb5-c422378c8c41
+accepted Station@e296017d-9501-4829-9d54-702875aade05
+accepted May@189af31c-2c6c-424a-9a90-61e9dfe0e1b2
+accepted Minster@c8ece1c8-17d4-4c58-bd47-d1af2614c164
+accepted ceremony@daee7fb3-1038-450c-99d9-7d583c2276ab
+
+Resolving...........
+(WordInstanceNode "it@d4c61228-b531-41a7-ae58-785453975d8d") ; [947]
+
+accepted Station@e296017d-9501-4829-9d54-702875aade05
+accepted May@189af31c-2c6c-424a-9a90-61e9dfe0e1b2
+accepted Minster@c8ece1c8-17d4-4c58-bd47-d1af2614c164
+accepted ceremony@daee7fb3-1038-450c-99d9-7d583c2276ab
+
+================================================================================================
+Test #39---------------------------------------------------------------------------------Failed
+
+Samuel Lee Warhurst was an English professional footballer who played as a goalkeeper.
+He started his career with Football League Third Division North club Nelson, where he made 76 league appearances in five seasons.
+
+(Failed to resolve (WordInstanceNode "he@082ff657-8267-43de-b880-b6a2d41fae65"))
+
+Result:
+
+Resolving...........
+(WordInstanceNode "his@f14ebf3f-3948-431d-982c-5be4464f4a68") ; [2162]
+
+accepted Warhurst@e8d5b837-b35f-4e9c-8428-2f41a81782b8
+accepted footballer@4a61336d-2d3c-43aa-ad6f-9725919a5539
+accepted goalkeeper@249a961c-1d66-46f3-965a-3873fee64444
+accepted professional@4a9451c2-42c4-4574-80a1-4333a7131b9a
+accepted English@e9ddee3c-513b-4b8d-9a1a-9e602b75ce98
+
+Resolving...........
+(WordInstanceNode "he@f7ae307b-226c-4eb7-ad50-5805db25d619") ; [2150]
+
+accepted Warhurst@e8d5b837-b35f-4e9c-8428-2f41a81782b8
+accepted footballer@4a61336d-2d3c-43aa-ad6f-9725919a5539
+accepted goalkeeper@249a961c-1d66-46f3-965a-3873fee64444
+accepted professional@4a9451c2-42c4-4574-80a1-4333a7131b9a
+accepted English@e9ddee3c-513b-4b8d-9a1a-9e602b75ce98
+
+Resolving...........
+(WordInstanceNode "he@082ff657-8267-43de-b880-b6a2d41fae65") ; [2234]
+
+accepted career@cb7350ec-2f4e-40b8-9ba2-705971d09ac9
+accepted Nelson@910eeb4d-975d-49b0-8aad-e2ef24f247dc
+accepted club@aeb47640-534a-4131-8ba9-29dadbbccc3a
+accepted Football@bbf98f76-9e8b-41b5-adeb-5fe927ab30a0
+accepted Division@62de2b24-f219-44f1-9eb4-1054ab63955b
+accepted North@32d1afed-cd28-413f-b8b3-8fac8ca21fb4
+accepted Warhurst@e8d5b837-b35f-4e9c-8428-2f41a81782b8
+accepted footballer@4a61336d-2d3c-43aa-ad6f-9725919a5539
+accepted goalkeeper@249a961c-1d66-46f3-965a-3873fee64444
+accepted professional@4a9451c2-42c4-4574-80a1-4333a7131b9a
+accepted English@e9ddee3c-513b-4b8d-9a1a-9e602b75ce98
+
+Resolving...........
+(WordInstanceNode "who@40f3a070-9663-4f51-8f5c-24bf9b1f6eb1") ; [1992]
+
+accepted Warhurst@e8d5b837-b35f-4e9c-8428-2f41a81782b8
+accepted footballer@4a61336d-2d3c-43aa-ad6f-9725919a5539
+accepted professional@4a9451c2-42c4-4574-80a1-4333a7131b9a
+accepted English@e9ddee3c-513b-4b8d-9a1a-9e602b75ce98
+
+================================================================================================
+Test #40---------------------------------------------------------------------------------Passed
+
+When the hotel was demolished in 1972 to build a shopping centre, Warhurst took retirement.
+He died in Southampton on 17 February 1981, at the age of 73.
+
+Result:
+
+Resolving...........
+(WordInstanceNode "his@f14ebf3f-3948-431d-982c-5be4464f4a68") ; [2162]
+
+accepted Warhurst@e8d5b837-b35f-4e9c-8428-2f41a81782b8
+accepted footballer@4a61336d-2d3c-43aa-ad6f-9725919a5539
+accepted goalkeeper@249a961c-1d66-46f3-965a-3873fee64444
+accepted professional@4a9451c2-42c4-4574-80a1-4333a7131b9a
+accepted English@e9ddee3c-513b-4b8d-9a1a-9e602b75ce98
+
+Resolving...........
+(WordInstanceNode "he@f7ae307b-226c-4eb7-ad50-5805db25d619") ; [2150]
+
+accepted Warhurst@e8d5b837-b35f-4e9c-8428-2f41a81782b8
+accepted footballer@4a61336d-2d3c-43aa-ad6f-9725919a5539
+accepted goalkeeper@249a961c-1d66-46f3-965a-3873fee64444
+accepted professional@4a9451c2-42c4-4574-80a1-4333a7131b9a
+accepted English@e9ddee3c-513b-4b8d-9a1a-9e602b75ce98
+
+================================================================================================
+Test #41---------------------------------------------------------------------------------Passed
+
+Warhurst was signed as an amateur by Football League Third Division North club Nelson in October 1926 after playing for the local British Legion team.
+He spent the 1926–27 season in the reserve team as an understudy to Fred Mace, playing six matches in the Lancashire Combination.
+
+Result:
+
+Resolving...........
+(WordInstanceNode "he@07af7a60-4f17-458a-a0f9-a9aba1a488ca") ; [5461]
+
+accepted Warhurst@15cf1e69-cf7d-48f7-9885-8c351ab7687a
+accepted amateur@27a76746-19c9-4309-866e-26d63c040214
+accepted Nelson@98062bc7-371a-40d8-97f1-fdaf42470944
+accepted October@74123bff-9875-4d49-a585-962210b968c5
+accepted team@8ca720fd-042a-4325-acc2-e370e335c2a8
+accepted club@047716db-8205-4f51-bd9d-9a3bf46d83ab
+accepted British@8855e384-abbd-46ae-ab21-efce8f832e11
+accepted Legion@ce6c59fe-7d03-4a20-8e49-d4f700232647
+accepted Division@658e19ae-6eaa-42d4-a9f9-0232e605eeac
+accepted North@caf9f0a4-78f8-4066-81a8-8578f74f23c2
+
+================================================================================================
+Test #42---------------------------------------------------------------------------------Failed
+
+Pratap Ravi hides in the jungle with his father's associates and vows to kill Narsimha Reddy, Nagamuni Reddy and Manda one by one, instilling fear of death in each one of them.
+
+Result:
+
+Resolving...........
+(WordInstanceNode "them@88a35517-1212-4986-b86f-0bf59dce01e6") ; [6672]
+
+accepted associates@9ae9ccf5-e801-47eb-b6ef-6160cfb915cc
+accepted instilling@1730f8e3-2719-459a-a68f-e932f3bcbe36
+accepted vows@70bb1fab-f79a-4380-ae25-5f2257c2dace
+accepted fear@d1367535-b199-4f34-b4bf-6d920ba7bdf5
+accepted death@abdfbd84-16ab-4c11-ba80-0d3287e0b5bc
+
+Resolving...........
+(WordInstanceNode "one@d5a5cf22-c2ea-439e-91a9-1a93c7eac7d9") ; [6662]
+
+accepted instilling@1730f8e3-2719-459a-a68f-e932f3bcbe36
+accepted Ravi@801cd6a1-94ce-4340-8766-8aa82fd97686
+accepted jungle@cf06b7bc-33c7-42f9-a9af-7d9f036d8c27
+accepted father@0e1d1452-a565-4850-b9a7-368368dd1800
+accepted fear@d1367535-b199-4f34-b4bf-6d920ba7bdf5
+accepted Manda@27d13a4e-4fc1-499d-8b00-6dd1601ab7b0
+accepted death@abdfbd84-16ab-4c11-ba80-0d3287e0b5bc
+================================================================================================
+Test #43---------------------------------------------------------------------------------Failed
+
+As Bukka Reddy and his brother Puru Reddy see their father's dead body, Bukka becomes enraged to the extent that he slaps the policewoman who has come to take the body for postmortem.
+
+Result:
+
+Resolving...........
+(WordInstanceNode "their@c8592b89-4652-473b-bec7-068f5b870cd5") ; [8041]
+
+
+Resolving...........
+(WordInstanceNode "who@c029cdb6-a041-4bf2-8479-15f24064632d") ; [8141]
+
+accepted Reddy@245a63de-61a2-468f-b411-e0d15a60330c
+accepted Reddy@b9b28a31-ce74-44de-b0dd-a5555ffe0651
+accepted body@1ca4b456-ad4b-445f-8b3b-b8b5f6f4933a
+accepted Bukka@b7c3faec-4a3b-4050-9563-1abfec85f574
+accepted extent@7af566d9-5d8f-4a23-b409-3bdb005b4f9e
+accepted policewoman@622b3db5-ace3-4c6c-9ef4-001f9b37a004
+accepted father@3527f66d-35df-4025-a49d-40eea55105e4
+
+Resolving...........
+(WordInstanceNode "he@b0515c86-c8b1-4650-aa29-515c350e0f65") ; [8118]
+
+accepted Reddy@245a63de-61a2-468f-b411-e0d15a60330c
+accepted Reddy@b9b28a31-ce74-44de-b0dd-a5555ffe0651
+accepted body@1ca4b456-ad4b-445f-8b3b-b8b5f6f4933a
+accepted Bukka@b7c3faec-4a3b-4050-9563-1abfec85f574
+accepted extent@7af566d9-5d8f-4a23-b409-3bdb005b4f9e
+accepted father@3527f66d-35df-4025-a49d-40eea55105e4
+
+Resolving...........
+(WordInstanceNode "his@854878fc-75cf-4326-8906-09f32d453f09") ; [8012]
+
+accepted Reddy@245a63de-61a2-468f-b411-e0d15a60330c
+================================================================================================
+Test #44---------------------------------------------------------------------------------Passed
+
+XXX is part of YYY.
+It is beautiful.
+
+Result:
+
+Resolving...........
+(WordInstanceNode "it@76193fe6-c063-402b-8f7b-0460e3f71eef") ; [9832]
+
+accepted XXX@b22a2efe-0b84-4e0c-af73-f9e241c269ef
+accepted YYY@f7a9855c-c40b-4680-be85-75292dc87331
+================================================================================================
+Test #45---------------------------------------------------------------------------------Passed
+
+XXX is part of YYY.
+It is part of ZZZ family.
+
+Result:
+
+Resolving...........
+(WordInstanceNode "it@c3c63efe-a95c-4e5b-a9b1-4b186011c2fb") ; [11089]
+
+accepted XXX@88671142-ebe9-4e59-9bfd-493cdab98238
+accepted YYY@12c95432-e81b-499b-81f9-ea26c31b6a29
+
+================================================================================================
+Test #46---------------------------------------------------------------------------------Passed
+
+EEE XXXs is a BBBs of diving YYY.
+It is part of the FFF and the PPP family.
+
+Result:
+
+Resolving...........
+(WordInstanceNode "it@4c5798f0-eb05-4cc0-9485-cc91f3e9aaf2") ; [12435]
+
+accepted XXXs@fa3ca070-5301-47e2-81e6-e9d22e6adeb6
+accepted BBBs@72157616-8df8-4c3e-a1ef-aee71f35523e
+accepted YYY@0a24f933-23e2-4075-be55-c301607a97c9
+

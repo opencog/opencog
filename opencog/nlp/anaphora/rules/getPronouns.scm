@@ -14,6 +14,30 @@
                     (VariableNode "$word-inst")
                     (DefinedLinguisticConceptNode "pronoun")
                  )
+                 (NotLink
+                    (ListLink
+                        (AnchorNode "Resolved references")
+                        (VariableNode "$word-inst")
+                    )
+                 )
+                 (NotLink
+                    (ReferenceLink
+                        (VariableNode "$word-inst")
+                        (WordNode "we")
+                    )
+                 )
+                 (NotLink
+                    (LemmaLink
+                        (VariableNode "$word-inst")
+                        (WordNode "I")
+                    )
+                 )
+                 (NotLink
+                    (LemmaLink
+                        (VariableNode "$word-inst")
+                        (WordNode "me")
+                    )
+                 )
             )
             (ListLink
                  (AnchorNode "Recent Unresolved references")

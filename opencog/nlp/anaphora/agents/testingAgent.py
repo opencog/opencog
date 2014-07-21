@@ -45,7 +45,7 @@ data=["opencog/scm/config.scm",
       "opencog/nlp/scm/processing-utils.scm",
       "opencog/nlp/scm/relex-to-logic.scm",
 
-      "opencog/nlp/anaphora/tests/atomspace#1.scm"
+      "opencog/nlp/anaphora/tests/atomspace.log"
     ]
 #status2 = load_scm(atomspace, "opencog/nlp/anaphora/tests/atomspace.scm")
 
@@ -54,8 +54,8 @@ for item in data:
 
 #init=initAgent()
 #init.run(atomspace)
-#dump=dumpAgent()
-#dump.run(atomspace)
+dump=dumpAgent()
+dump.run(atomspace)
 hobbsAgent = HobbsAgent()
 hobbsAgent.run(atomspace)
 
