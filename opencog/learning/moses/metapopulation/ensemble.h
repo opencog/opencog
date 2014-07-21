@@ -82,13 +82,14 @@ public:
         return _scored_trees;
     }
 
-    combo::combo_tree get_weighted_tree() const;
+    const combo::combo_tree& get_weighted_tree() const;
 
 private:
     const ensemble_parameters& _params;
     boosting_ascore* _booster;
 
     scored_combo_tree_set _scored_trees;
+    mutable combo_tree _weighted_tree;
 };
 
 }}; // namespace opencog::moses
