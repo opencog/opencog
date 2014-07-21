@@ -14,6 +14,26 @@ LOG_LEVEL="fine"
 log = logger.create_logger("/tmp/hobbs.log")
 log.set_level(LOG_LEVEL)
 
+'''
+========================================
+Configurations
+'''
+
+'''
+Number of searching sentences(including the one contains the pronoun)
+'''
+NUMBER_OF_SEARCHING_SENTENCES = 3
+
+'''
+Suppose the decreasing rate is x, then
+the ith accepted candidate will have confidence value of
+(x^(i-1))(1-x)  i starts at 1.
+'''
+CONFIDENCE_DECREASING_RATE=0.7
+
+'''
+========================================
+'''
 class BindLinkExecution():
 
     '''
@@ -179,7 +199,7 @@ class HobbsAgent(MindAgent):
                 print("accepted \n"+str(conjunction_list))
             log.fine("accepted \n"+str(conjunction_list))
             self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, conjunction_list, TruthValue(1.0, TruthValue().confidence_to_count(1.0))),self.confidence)
-            self.confidence=self.confidence*0.5
+            self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
 
         for index in range(1,self.numOfFilters):
             command='(cog-bind-crisp filter-#'+str(index)+')'
@@ -197,7 +217,7 @@ class HobbsAgent(MindAgent):
                 print("accepted "+node.name)
             log.fine("accepted "+node.name)
             self.generateReferenceLink(self.currentPronoun,node,self.confidence)
-            self.confidence=self.confidence*0.5
+            self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
         #else:
             #if self.DEBUG:
                 #print("rejected "+node.name+" by filter-#"+str(index))
@@ -373,7 +393,7 @@ class HobbsAgent(MindAgent):
         for pronoun in self.pronouns:
             self.checked.clear()
             self.pronounNumber=self.getWordNumber(pronoun)
-            self.confidence=1.0
+            self.confidence=1-CONFIDENCE_DECREASING_RATE
 
             '''
             Binds current "pronoun" with "currentPronounNode".
@@ -393,7 +413,7 @@ class HobbsAgent(MindAgent):
                     #print("found you while")
                     break
                 self.bfs(root)
-                if self.previousRootExist(root) and sent_counter<=self.number_of_searching_sentences:
+                if self.previousRootExist(root) and sent_counter<=NUMBER_OF_SEARCHING_SENTENCES:
                     root=self.getPrevious(root)
                     sent_counter=sent_counter+1
                 else:
