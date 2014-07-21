@@ -53,6 +53,19 @@ public:
         cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hpa", "-k3", "-m100000", "-j4"});
     }
+    void test_4_parity_boosting() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
+        // Without boosting, this takes many minutes. With boosting,
+        // it should be less than 2 seconds, and about 5K evaluations.
+        moses_test_score({"-Hpa", "-k4", "--boost=1"});
+    }
+    void test_5_parity_boosting() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
+        // Without boosting, this takes many hours. With boosting,
+        // it should be less than 12 seconds (on a circa-2009 commodity CPU)
+        // This should take about 18K or 20K evaluations.
+        moses_test_score({"-Hpa", "-k5", "--boost=1", "-m40000"});
+    }
     void test_1_mux() {
         cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hmux", "-k1"});
