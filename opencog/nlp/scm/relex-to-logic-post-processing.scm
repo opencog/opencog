@@ -258,6 +258,9 @@
 			)
 		)
 	)
+
+	; delete old rebuilt links
+	(for-each purge-hypergraph clean-links)
 )
 
 ; -----------------------------------------------------------------------
