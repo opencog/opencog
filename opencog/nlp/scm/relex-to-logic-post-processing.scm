@@ -215,6 +215,51 @@
 	(marker-cleaner "thatmarker" thatmarker-helper)
 )
 
+
+(define (allmarker-helper orig-link)
+	(define listlink (car (cog-filter 'ListLink (cog-outgoing-set orig-link))))
+	(define word (gar listlink))
+	(define root-links (cog-get-root word))
+	; get rid of links with non-instanced word
+	(define clean-links (remove check-non-instance root-links))
+	; helper recursive function to rebuild a link, replacing 'word' node with $X
+	(define (rebuild-with-x link)
+		(define old-oset (cog-outgoing-set link))
+		(define (rebuild-helper atom)
+			(if (cog-link? atom)
+				(rebuild-with-x atom)
+				(if (equal? atom word)
+					(VariableNode "$X")
+					atom
+				)
+			)
+		)
+		(define new-oset (map rebuild-helper old-oset))
+
+		(apply cog-new-link (cog-type link) new-oset)
+	)
+
+	; rebuild each link, replace 'word' with (VariableNode "$X")
+	(define final-links (map rebuild-with-x clean-links))
+
+	(list
+		(ForAllLink
+			(VariableNode "$X")
+			(ImplicationLink
+				(InheritanceLink
+					(VariableNode "$X")
+					word
+				)
+				; new rebuilt links
+				(if (= (length final-links) 1)
+					final-links
+					(AndLink final-links)
+				)
+			)
+		)
+	)
+)
+
 ; -----------------------------------------------------------------------
 ; The main allmarker function that calls the helper to clean all
 ; allmarker in the atomspace, and delete them
