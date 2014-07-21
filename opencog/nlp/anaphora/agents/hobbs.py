@@ -22,6 +22,7 @@ Configurations
 '''
 Number of searching sentences(including the one contains the pronoun)
 '''
+
 NUMBER_OF_SEARCHING_SENTENCES = 3
 
 '''
@@ -29,7 +30,20 @@ Suppose the decreasing rate is x, then
 the ith accepted candidate will have confidence value of
 (x^(i-1))(1-x)  i starts at 1.
 '''
+
 CONFIDENCE_DECREASING_RATE=0.7
+
+'''
+Strength for accepted antecedents
+'''
+
+STRENGTH_FOR_ACCEPTED_ANTECEDENTS=0.98
+
+'''
+Truth Value for antecendents which have been filtered out by filters.
+'''
+
+TV_FOR_FILTERED_OUT_ANTECEDENTS=TruthValue(0.02, TruthValue().confidence_to_count(0.9))
 
 '''
 ========================================
@@ -166,12 +180,12 @@ class HobbsAgent(MindAgent):
         rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind getChildren)',self.currentResult,types.WordInstanceNode)
         return self.sortNodes(rv,self.getWordNumber)
 
-    def generateReferenceLink(self,anaphora,antecedent,confidence):
+    def generateReferenceLink(self,anaphora,antecedent,tv):
         '''
         Generates a reference Link for a pair of anaphora and antecedent with confidence "confidence".
         '''
 
-        link = self.atomspace.add_link(types.ReferenceLink, [anaphora, antecedent], TruthValue(.98, TruthValue().confidence_to_count(confidence)))
+        link = self.atomspace.add_link(types.ReferenceLink, [anaphora, antecedent], tv)
         log.fine("Generated a Reference :\n")
         log.fine("{0}\n".format(link))
         log.fine("===========================================================")
@@ -198,7 +212,7 @@ class HobbsAgent(MindAgent):
             if self.DEBUG:
                 print("accepted \n"+str(conjunction_list))
             log.fine("accepted \n"+str(conjunction_list))
-            self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, conjunction_list, TruthValue(1.0, TruthValue().confidence_to_count(1.0))),self.confidence)
+            self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, conjunction_list, TruthValue(1.0, TruthValue().confidence_to_count(1.0))),TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, TruthValue().confidence_to_count(self.confidence)))
             self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
 
         for index in range(1,self.numOfFilters):
@@ -216,9 +230,10 @@ class HobbsAgent(MindAgent):
             if self.DEBUG:
                 print("accepted "+node.name)
             log.fine("accepted "+node.name)
-            self.generateReferenceLink(self.currentPronoun,node,self.confidence)
+            self.generateReferenceLink(self.currentPronoun,node,TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, TruthValue().confidence_to_count(self.confidence)))
             self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
-        #else:
+        else:
+            self.generateReferenceLink(self.currentPronoun,node,TV_FOR_FILTERED_OUT_ANTECEDENTS)
             #if self.DEBUG:
                 #print("rejected "+node.name+" by filter-#"+str(index))
 
