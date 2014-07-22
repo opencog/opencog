@@ -26,7 +26,9 @@
 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
+#include <boost/range/irange.hpp>
 
+#include <opencog/comboreduct/table/table_io.h>
 #include <opencog/util/oc_assert.h>
 #include "scoring_base.h"
 
@@ -101,6 +103,90 @@ score_t simple_ascore::operator()(const behavioral_score& bs) const
 {
     return boost::accumulate(bs, 0.0);
 }
+
+////////////////////////
+// bscore_ctable_base //
+////////////////////////
+
+bscore_ctable_base::bscore_ctable_base(const CTable& ctable)
+    : _orig_ctable(ctable), _wrk_ctable(ctable),
+      _all_rows_wrk_ctable(ctable),
+      _ctable_usize(ctable.uncompressed_size())
+{
+     _size = ctable.size();
+}
+
+void bscore_ctable_base::ignore_cols(const std::set<arity_t>& idxs) const
+{
+    if (logger().isDebugEnabled())
+    {
+        std::stringstream ss;
+        ss << "Compress CTable for optimization by ignoring features: ";
+        ostreamContainer(ss, idxs, ",");
+        logger().debug(ss.str());
+    }
+
+    // Get permitted idxs.
+    auto irng = boost::irange(0, _orig_ctable.get_arity());
+    std::set<arity_t> all_idxs(irng.begin(), irng.end());
+    std::set<arity_t> permitted_idxs = opencog::set_difference(all_idxs, idxs);
+
+    // Filter orig_table with permitted idxs.
+    _wrk_ctable = _orig_ctable.filtered_preserve_idxs(permitted_idxs);
+
+    // for debugging, keep that around till we fix best_possible_bscore
+    // fully_filtered_ctable = _orig_ctable.filtered(permitted_idxs);
+
+    logger().debug("Original CTable size = %u", _orig_ctable.size());
+    logger().debug("Working CTable size = %u", _wrk_ctable.size());
+
+    if (logger().isFineEnabled()) {
+        std::stringstream ss;
+        ss << "wrk_ctable =" << std::endl;
+        ostreamCTable(ss, _wrk_ctable);
+        logger().fine(ss.str());
+
+        // for debugging, keep that around till we fix best_possible_bscore
+        // {
+        //     std::stringstream ss;
+        //     ss << "fully_filtered_ctable =" << std::endl;
+        //     ostreamCTable(ss, fully_filtered_ctable);
+        //     logger().fine(ss.str());
+        // }
+    }
+
+    // Copy the working ctable in a temporary ctable that keeps track
+    // of all rows (so ignore_rows can be applied several times)
+    _all_rows_wrk_ctable = _wrk_ctable;
+}
+
+void bscore_ctable_base::ignore_rows(const std::set<unsigned>& idxs) const
+{
+    _wrk_ctable = _all_rows_wrk_ctable; // to include all rows in wrk_ctable
+
+    // if (logger().isFineEnabled())
+    //     logger().fine() << "Remove " << idxs.size() << " uncompressed rows from "
+    //                     << "wrk_ctable of compressed size " << wrk_ctable.size()
+    //                     << ", uncompressed size = " << wrk_ctable.uncompressed_size();
+    _wrk_ctable.remove_rows(idxs);
+    _ctable_usize = _wrk_ctable.uncompressed_size();
+    _size = _wrk_ctable.size();
+
+    // if (logger().isFineEnabled())
+    //     logger().fine() << "New wrk_ctable compressed size = " << wrk_ctable.size()
+    //                     << ", uncompressed size = " << ctable_usize;
+}
+
+unsigned bscore_ctable_base::get_ctable_usize() const
+{
+    return _ctable_usize;
+}
+
+const CTable& bscore_ctable_base::get_ctable() const
+{
+    return _orig_ctable;
+}
+
 
 } // ~namespace moses
 } // ~namespace opencog

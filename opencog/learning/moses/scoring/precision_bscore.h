@@ -108,7 +108,7 @@ using combo::type_node;
  * min_improv() and sum_outputs(). TODO In fact everything could be
  * replaced, if it were not for the worst_deciles stuff.
  */
-struct precision_bscore : public bscore_base
+struct precision_bscore : public bscore_ctable_base
 {
     precision_bscore(const CTable& _ctable,
                      float penalty = 1.0f,
@@ -125,12 +125,6 @@ struct precision_bscore : public bscore_base
     behavioral_score worst_possible_bscore() const;
 
     score_t min_improv() const;
-
-    /**
-     * Filter the table with all permitted idxs (the complementary
-     * with [0..arity).
-     */
-    void ignore_idxs(const std::set<arity_t>&) const;
 
     virtual void set_complexity_coef(score_t complexity_ratio);
     virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
@@ -159,17 +153,6 @@ struct precision_bscore : public bscore_base
     combo_tree gen_canonical_best_candidate() const;
 
 protected:
-    const CTable& orig_ctable;  // ref to the original table
-
-    // table actually used for the evaluation. It is mutable because
-    // we want to be able to change it to ignore some features (it may
-    // speed-up evaluation)
-    mutable CTable wrk_ctable;
-
-    // for debugging, keep that around till we fix best_possible_bscore
-    // mutable CTable fully_filtered_ctable;
-
-    size_t ctable_usize;   // uncompressed size of ctable
     score_t min_activation, max_activation;
     score_t max_output; // max output one gets (1 in case it is
                         // boolean). This is used to normalized the

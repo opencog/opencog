@@ -67,12 +67,14 @@ public:
         return _bscorer.min_improv();
     }
 
-    // In case the fitness function can be sped-up when certain
-    // features are ignored. The features are indicated as set of
-    // indices (from 0).
+    /// In table-based scorers, fitness function evaluation can be sped
+    /// up when unused features are ignored.  The unused features must
+    /// not subsequently appear in the combo tree to be scored.  Calling
+    /// this with the empty set restores all features. The features are
+    /// indicated as set of indices (from 0).
     void ignore_idxs(const std::set<arity_t>& idxs) const
     {
-        _bscorer.ignore_idxs(idxs);
+        _bscorer.ignore_cols(idxs);
     }
 
     ascore_base& get_ascorer() const { return _ascorer; }
@@ -81,7 +83,7 @@ private:
     const bscore_base& _bscorer;
     ascore_base& _ascorer;
 
-    // Below follows some random infrastructure to allow compsite
+    // Below follows some assorted infrastructure to allow composite
     // scoress for trees to be cached.
     struct wrapper : public std::unary_function<combo_tree, composite_score>
     {
