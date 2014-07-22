@@ -470,6 +470,14 @@ public:
     /// sum of all the row weights.
     count_t uncompressed_size() const;
 
+    /// Create a new table from this one, which contains only those 
+    /// columns specified by the filter.  The filter is assumed to be
+    /// either a set or a vector (or an iterable, in general) that
+    /// holds the index numbers of the columns to be kept.
+    ///
+    /// Note that the filtered CTable can typically be further
+    /// compressed, and so the compressed size will be smaller. This
+    /// can be exploted to obtain performance gains.
     template<typename F>
     CTable filtered(const F& filter) const
     {
@@ -509,7 +517,7 @@ public:
     }
 
     template<typename F>
-    multi_type_seq filtered_preverse_idxs(const F& filter,
+    multi_type_seq filtered_preserve_idxs(const F& filter,
                                           const multi_type_seq& seq) const
     {
         multi_type_seq res;
@@ -528,20 +536,29 @@ public:
     }
 
     /**
-     * Like filtered but preserve the indices on the columns,
-     * technically it replaces all input values filtered out by
-     * id::null_vertex.
+     * Create a new table from this one, with all column values not in
+     * the filtered set being replaced by id::null_vertex.  This is
+     * similar to the filtered() method above, except that the total
+     * number of columns remains unchanged.  The table signature is also
+     * left unchanged.
+     *
+     * The filter should be an iterable (set or vector) containing
+     * column index numbers. The specified columns are kept; all others
+     * are blanked.
+     *
+     *  Note that the filtered CTable can typically be further
+     *  compressed, and so the compressed size will be smaller. This
+     *  can be exploted to obtain performance gains.
      */
     template<typename F>
-    CTable filtered_preverse_idxs(const F& filter) const
+    CTable filtered_preserve_idxs(const F& filter) const
     {
-
         // Set new CTable
         CTable res(olabel, ilabels, tsig);
 
         // Filter the rows (replace filtered out values by id::null_vertex)
         for (const CTable::value_type v : *this)
-            res[filtered_preverse_idxs(filter, v.first)] += v.second;
+            res[filtered_preserve_idxs(filter, v.first)] += v.second;
 
         // return the filtered CTable
         return res;

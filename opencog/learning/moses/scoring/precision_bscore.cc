@@ -399,7 +399,7 @@ void precision_bscore::ignore_idxs(const std::set<arity_t>& idxs) const
     std::set<arity_t> permitted_idxs = opencog::set_difference(all_idxs, idxs);
 
     // Filter orig_table with permitted idxs.
-    wrk_ctable = orig_ctable.filtered_preverse_idxs(permitted_idxs);
+    wrk_ctable = orig_ctable.filtered_preserve_idxs(permitted_idxs);
 
     // for debugging, keep that around till we fix best_possible_bscore
     // fully_filtered_ctable = orig_ctable.filtered(permitted_idxs);
