@@ -46,19 +46,18 @@ using namespace combo;
 /// that you probably want the "recall" scorer, which maximizes recall
 /// while holding precision at or above a minimum level.
 
-precision_bscore::precision_bscore(const CTable& _ctable,
+precision_bscore::precision_bscore(const CTable& ctable_,
                                    float penalty_,
                                    float min_activation_,
                                    float max_activation_,
                                    bool positive_,
-                                   bool worst_norm_)
-    : orig_ctable(_ctable), wrk_ctable(orig_ctable),
-      ctable_usize(orig_ctable.uncompressed_size()),
-      min_activation(min_activation_), max_activation(max_activation_),
-      penalty(penalty_), positive(positive_), worst_norm(worst_norm_),
+                                   bool worst_norm_) :
+    bscore_ctable_base(ctable_),
+    min_activation(min_activation_), max_activation(max_activation_),
+    penalty(penalty_), positive(positive_), worst_norm(worst_norm_),
     precision_full_bscore(true)
 {
-    output_type = wrk_ctable.get_output_type();
+    output_type = _wrk_ctable.get_output_type();
     if (output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
         // in the output.  Ths sum represents the best possible score
@@ -104,7 +103,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         // For contin tables, we search for the largest value in the table.
         // (or smallest, if positive == false)
         max_output = very_worst_score;
-        for (const auto& cr : wrk_ctable) {
+        for (const auto& cr : _wrk_ctable) {
             const CTable::counter_t& c = cr.second;
             for (const auto& cv : c) {
                 score_t val = get_contin(cv.first);
@@ -125,7 +124,7 @@ void precision_bscore::set_complexity_coef(unsigned alphabet_size, float p)
     // comment above ctruth_table_bscore)
     if (p > 0.0f and p < 0.5f)
         _complexity_coef = discrete_complexity_coef(alphabet_size, p)
-            / ctable_usize;     // normalized by the size of the table
+            / _ctable_usize;     // normalized by the size of the table
                                 // because the precision is normalized
                                 // as well
 
@@ -157,7 +156,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     auto interpret_tr = boost::apply_visitor(iv);
     if (precision_full_bscore) {
         // compute active and sum of all active outputs
-        for (const CTable::value_type& vct : wrk_ctable) {
+        for (const CTable::value_type& vct : _wrk_ctable) {
             // for debugging, keep that around till we fix best_possible_bscore
             // {
             //     stringstream ss;
@@ -207,7 +206,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
         multimap<double, unsigned> worst_deciles;
 
         // compute active and sum of all active outputs
-        for (const CTable::value_type& vct : wrk_ctable) {
+        for (const CTable::value_type& vct : _wrk_ctable) {
             // vct.first = input vector
             // vct.second = counter of outputs
             if (interpret_tr(vct.first.get_variant()) == id::logical_true) {
@@ -257,7 +256,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     // i.e. the sum of all positives.   For contin tables, the activation
     // is likewise: the number of rows for which the combo tree returned
     // true (positive).
-    score_t activation = (score_t)active / ctable_usize;
+    score_t activation = (score_t)active / _ctable_usize;
     score_t activation_penalty = get_activation_penalty(activation);
     bs.push_back(activation_penalty);
     if (logger().isFineEnabled())
@@ -283,8 +282,8 @@ behavioral_score precision_bscore::best_possible_bscore() const
                                     unsigned> // total count
                           > max_precisions_t;
     max_precisions_t max_precisions;
-    for (CTable::const_iterator it = wrk_ctable.begin();
-         it != wrk_ctable.end(); ++it) {
+    for (CTable::const_iterator it = _wrk_ctable.begin();
+         it != _wrk_ctable.end(); ++it) {
         const CTable::counter_t& c = it->second;
         double sumo = sum_outputs(c);
         unsigned total = c.total_count();
@@ -327,7 +326,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
         // So before adding the recall penalty we add 0.5 to
         // compensate for that
         score_t precision = (sao / active) / max_output + 0.5,
-            activation = active / (score_t)ctable_usize,
+            activation = active / (score_t) _ctable_usize,
             activation_penalty = get_activation_penalty(activation),
             sc = precision + activation_penalty;
 
@@ -343,7 +342,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
         // logger().fine("sao = %g, active = %u, precision = %g, activation = %g, activation_penalty = %g, sc = %g, best_sc = %g, best_precision = %g, best_activation = %g, best_activation_penalty = %g", sao, active, precision, activation, activation_penalty, sc, best_sc, best_precision, best_activation, best_activation_penalty);
 
         // halt if min_activation is reached
-        if (ctable_usize * min_activation <= active)
+        if (_ctable_usize * min_activation <= active)
             break;
     }
 
@@ -359,8 +358,8 @@ behavioral_score precision_bscore::best_possible_bscore() const
 behavioral_score precision_bscore::worst_possible_bscore() const
 {
     // Make an attempt too at least return the correct length
-    double bad = very_worst_score / ((double) orig_ctable.size() + 1);
-    return behavioral_score(orig_ctable.size(), bad);
+    double bad = very_worst_score / ((double) _orig_ctable.size() + 1);
+    return behavioral_score(_orig_ctable.size(), bad);
 }
 
 // Note that the logarithm is always negative, so this method always
@@ -380,48 +379,7 @@ score_t precision_bscore::get_activation_penalty(score_t activation) const
 
 score_t precision_bscore::min_improv() const
 {
-    return 1.0 / ctable_usize;
-}
-
-void precision_bscore::ignore_cols(const std::set<arity_t>& idxs) const
-{
-    if (logger().isDebugEnabled())
-    {
-        stringstream ss;
-        ss << "Compress CTable for optimization by ignoring features: ";
-        ostreamContainer(ss, idxs, ",");
-        logger().debug(ss.str());
-    }
-
-    // Get permitted idxs.
-    auto irng = boost::irange(0, orig_ctable.get_arity());
-    std::set<arity_t> all_idxs(irng.begin(), irng.end());
-    std::set<arity_t> permitted_idxs = opencog::set_difference(all_idxs, idxs);
-
-    // Filter orig_table with permitted idxs.
-    wrk_ctable = orig_ctable.filtered_preserve_idxs(permitted_idxs);
-
-    // for debugging, keep that around till we fix best_possible_bscore
-    // fully_filtered_ctable = orig_ctable.filtered(permitted_idxs);
-
-    logger().debug("Original CTable size = %u", orig_ctable.size());
-    logger().debug("Working CTable size = %u", wrk_ctable.size());
-
-    if (logger().isFineEnabled()) {
-        {
-            stringstream ss;
-            ss << "wrk_ctable =" << endl;
-            ostreamCTable(ss, wrk_ctable);
-            logger().fine(ss.str());
-        }
-        // for debugging, keep that around till we fix best_possible_bscore
-        // {
-        //     stringstream ss;
-        //     ss << "fully_filtered_ctable =" << endl;
-        //     ostreamCTable(ss, fully_filtered_ctable);
-        //     logger().fine(ss.str());
-        // }
-    }
+    return 1.0 / _ctable_usize;
 }
 
 combo_tree precision_bscore::gen_canonical_best_candidate() const
@@ -439,8 +397,8 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
                                     unsigned> // total count
                           > precision_to_count_t;
     precision_to_count_t ptc;
-    for (CTable::const_iterator it = wrk_ctable.begin();
-         it != wrk_ctable.end(); ++it) {
+    for (CTable::const_iterator it = _wrk_ctable.begin();
+         it != _wrk_ctable.end(); ++it) {
         const CTable::counter_t& c = it->second;
         unsigned total = c.total_count();
         double precision = sum_outputs(c) / total;
@@ -471,7 +429,7 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
         }
 
         // termination conditional
-        if (ctable_usize * min_activation <= active)
+        if (_ctable_usize * min_activation <= active)
             break;
     }
     return tr;

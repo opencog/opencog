@@ -197,6 +197,9 @@ protected:
     mutable CTable _all_rows_wrk_ctable;
 
     mutable size_t _ctable_usize;   // uncompressed size of ctable
+
+    // for debugging, keep that around till we fix best_possible_bscore
+    // mutable CTable fully_filtered_ctable;
 };
 
 
