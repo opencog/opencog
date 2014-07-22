@@ -34,6 +34,7 @@ namespace opencog { namespace moses {
 
 using combo::combo_tree;
 using combo::arity_t;
+using combo::CTable;
 
 /// Used to define the complexity scoring component given that p is the
 /// probability of having an observation being wrong (see the comment
@@ -99,9 +100,23 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     ///
     /// Note that the best_possible_score may depend on the set of
     /// ignored features. Thus, the best_possible_score() method should
-    /// be called only after the ignore idex have been set.
+    /// be called only after this method.
     ///
-    virtual void ignore_idxs(const std::set<arity_t>&) const {}
+    /// This method may be called multiple times; with each call, the
+    /// previously-ignored features will first be restored, before the
+    /// new index set is ignored.  Thus, calling this with the empty set
+    /// will have the effect of restoring all columns that were previously
+    /// ignored.
+    virtual void ignore_cols(const std::set<arity_t>&) const {}
+
+    /// In case one wants to evaluate the fitness on a subset of the
+    /// data, one can provide a set of row indexes to ignore.
+    ///
+    /// This method may be called multiple times. With each call, the
+    /// previously ignored rows will be restored, before the
+    /// newly-specified rows are removed.  Thus, calling this with the
+    /// empty set has the effect of restoring all ignored rows.
+    virtual void ignore_rows(const std::set<unsigned>&) const {}
 
     /// Get the appropriate complexity measure for the indicated combo
     /// tree. By default, this is the tree complexity, although it may
@@ -135,8 +150,55 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
 
 protected:
     score_t _complexity_coef;
-    size_t _size;
+    mutable size_t _size;
 };
+
+
+/// Base class for fitness functions that use a ctable. Provides useful
+/// table compression
+struct bscore_ctable_base : public bscore_base
+{
+    bscore_ctable_base(const CTable&);
+
+    /// Indicate a set of features that should be ignored during scoring,
+    /// The features are indicated as indexes, starting from 0.
+    ///
+    /// This function is used to improve performance by avoiding
+    /// evaluation of the ignored features. By ignoring most columns,
+    /// the table can typically be significantly compressed, thus
+    /// reducing evaluation time. For tables with tens of thousands of
+    /// uncompressed rows, this can provide a significant speedup when
+    /// evaluating a large number of instances.
+    ///
+    void ignore_cols(const std::set<arity_t>&) const;
+
+    /// In case one wants to evaluate the fitness on a subset of the
+    /// data, one can provide a set of row indexes to ignore.
+    void ignore_rows(const std::set<unsigned>&) const;
+
+    // Return the uncompressed size of the CTable
+    unsigned get_ctable_usize() const;
+
+    // Return the original CTable
+    const CTable& get_ctable() const;
+
+protected:
+    const CTable& _orig_ctable;  // Reference to the original table.
+
+    // The table that is actually used for the evaluation. This is the
+    // the compressed table that results after ignore_cols() and
+    // ignore_rows() have been applied.  Must be mutable to avoid the
+    // const-ness of tables in general.
+    mutable CTable _wrk_ctable;
+
+    // A copy of wrk_ctable prior to ignore_rows() being applied.  This
+    // allows ignore_rows() to be called multiple times, without forcing
+    // a complete recalculation.
+    mutable CTable _all_rows_wrk_ctable;
+
+    mutable size_t _ctable_usize;   // uncompressed size of ctable
+};
+
 
 /// Abstract base class for summing behavioral scores.
 // XXX TODO FIXME: this should probably be completely removed,

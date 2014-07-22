@@ -130,7 +130,7 @@ struct precision_bscore : public bscore_base
      * Filter the table with all permitted idxs (the complementary
      * with [0..arity).
      */
-    void ignore_idxs(const std::set<arity_t>&) const;
+    void ignore_cols(const std::set<arity_t>&) const;
 
     virtual void set_complexity_coef(score_t complexity_ratio);
     virtual void set_complexity_coef(unsigned alphabet_size, float stddev);

@@ -383,7 +383,7 @@ score_t precision_bscore::min_improv() const
     return 1.0 / ctable_usize;
 }
 
-void precision_bscore::ignore_idxs(const std::set<arity_t>& idxs) const
+void precision_bscore::ignore_cols(const std::set<arity_t>& idxs) const
 {
     if (logger().isDebugEnabled())
     {
