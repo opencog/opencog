@@ -29,7 +29,17 @@
 ; Helper function to check if a link contains a non-instance word
 (define (check-non-instance link)
 	(define words (cog-get-all-nodes link))
-	(find (lambda (w) (null? (cog-node 'WordInstanceNode (cog-name w)))) words)
+	(define (check-word w)
+		(and
+			; exception that should not be considered as non-instance
+			; TODO better node name for automatic checking possible
+			(not (equal? 'VariableNode (cog-type w)))
+			(not (string=? "Possession" (cog-name w)))
+			; the actual check
+			(null? (cog-node 'WordInstanceNode (cog-name w)))
+		)
+	)
+	(find check-word words)
 )
 
 ; -----------------------------------------------------------------------
@@ -123,7 +133,8 @@
 ; -----------------------------------------------------------------------
 ; call all post-processing steps
 (define (r2l-post-processing)
-	(thatmarker-cleaner)
+	;(thatmarker-cleaner)
+	(allmarker-cleaner)
 )
 
 ; -----------------------------------------------------------------------
@@ -241,19 +252,20 @@
 
 	; rebuild each link, replace 'word' with (VariableNode "$X")
 	(define final-links (map rebuild-with-x clean-links))
-
-	(list
-		(ForAllLink
-			(VariableNode "$X")
-			(ImplicationLink
-				(InheritanceLink
-					(VariableNode "$X")
-					word
-				)
-				; new rebuilt links
-				(if (= (length final-links) 1)
-					final-links
-					(AndLink final-links)
+	(define results-list
+		(list
+			(ForAllLink
+				(VariableNode "$X")
+				(ImplicationLink
+					(InheritanceLink
+						(VariableNode "$X")
+						word
+					)
+					; new rebuilt links
+					(if (= (length final-links) 1)
+						final-links
+						(AndLink final-links)
+					)
 				)
 			)
 		)
@@ -261,6 +273,8 @@
 
 	; delete old rebuilt links
 	(for-each purge-hypergraph clean-links)
+
+	results-list
 )
 
 ; -----------------------------------------------------------------------
@@ -287,7 +301,7 @@
 		results-list
 	)
 
-	(if (null? allmarker)
+	(if (null? marker)
 		'()
 		(call-helper)
 	)
