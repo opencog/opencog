@@ -84,16 +84,23 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     /// Indicate a set of features that should be ignored during scoring,
     /// The features are indicated as indexes, starting from 0.
     ///
-    /// The primary use-case is for speeding up fitness evaluation. (???)
+    /// The primary intended use of this function is to improve
+    /// performance by avoiding evaluation of the ignored features.
+    /// At this time, the only users of this method are the table-based
+    /// scorers.  By ignoring most columns, the table can typically be
+    /// significantly compressed, thus reducing evaluation time.
+    ///
+    /// It is important that the combo trees to be scored do not use
+    /// any of the ignored indexes, as otherwise, a faulty scoring will
+    /// result.  Thus, the typical use case is to remove all columns
+    /// that do not appear in a knob-decorated combo tree.  The resulting
+    /// table is then safe to use during instance scoring, because no
+    /// instance could ever reference one of the ignored columns.
     ///
     /// Note that the best_possible_score may depend on the set of
     /// ignored features. Thus, the best_possible_score() method should
     /// be called only after the ignore idex have been set.
     ///
-    /// XXX I don't get it ... if we are going to ignore indexes,
-    /// shouldn't we ignore them when building the combo trees?  And
-    /// if a combo tree does make use of an index, how can one possibly
-    /// "ignore" it ??  This just does not seem correct to me...
     virtual void ignore_idxs(const std::set<arity_t>&) const {}
 
     /// Get the appropriate complexity measure for the indicated combo
