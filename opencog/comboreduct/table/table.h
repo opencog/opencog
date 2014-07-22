@@ -564,6 +564,16 @@ public:
         return res;
     }
 
+    /**
+     * Remove the rows of the ctable. It treats rows as if they were
+     * uncompressed. The indexes follow the order set by the input
+     * rows, and then the output values, so for instance if a
+     * compressed row has N 0s and M 1s output values, it will treat
+     * that as N+M rows, where the rows ending by 0s precedes the ones
+     * ending by 1s (since 0 < 1).
+     */
+    void remove_rows(const std::set<unsigned>& idxs);
+
     // return the output label + list of input labels
     void set_labels(const string_seq& labels);
     string_seq get_labels() const;

@@ -168,7 +168,7 @@ void bscore_ctable_base::ignore_rows(const std::set<unsigned>& idxs) const
     //     logger().fine() << "Remove " << idxs.size() << " uncompressed rows from "
     //                     << "wrk_ctable of compressed size " << wrk_ctable.size()
     //                     << ", uncompressed size = " << wrk_ctable.uncompressed_size();
-    // _wrk_ctable.remove_rows(idxs);
+    _wrk_ctable.remove_rows(idxs);
     _ctable_usize = _wrk_ctable.uncompressed_size();
     _size = _wrk_ctable.size();
 

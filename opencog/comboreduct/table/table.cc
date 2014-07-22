@@ -599,6 +599,60 @@ CTable::CTable(const std::string& _olabel, const string_seq& _ilabels,
     : tsig(tt), olabel(_olabel), ilabels(_ilabels)
 {}
 
+
+void CTable::remove_rows(const set<unsigned>& idxs)
+{
+    // iterator of the set of row indexes to remove
+    auto idx_it = idxs.begin();
+
+    // iterator index of the CTable from the perspective of an
+    // uncompressed table
+    unsigned i = 0;
+
+    // For each row check if some indexes are within uncompressed
+    // begining and end of that row and decrease their counts if
+    // so
+    for (auto row_it = begin();
+         row_it != end() and idx_it != idxs.end();) {
+        auto& outputs = row_it->second;
+        unsigned i_end = i + outputs.total_count();
+        if (i <= *idx_it and *idx_it < i_end) {
+            for (auto v_it = outputs.begin();
+                 v_it != outputs.end() and idx_it != idxs.end();) {
+                OC_ASSERT(i <= *idx_it, "There must be a bug");
+                // Remove all overlapping indexes with v and
+                // advance idx_it of that amount
+                unsigned i_v_end = i + v_it->second;
+                while (idx_it != idxs.end() and *idx_it < i_v_end) {
+                    OC_ASSERT(v_it->second > 0, "There must be a bug");
+                    --v_it->second;
+                    ++idx_it;
+                }
+
+                // Increment i with the count of that value
+                i = i_v_end;
+
+                // Check if the count went to zero, if so remove
+                // v_it entirely
+                if (v_it->second == 0)
+                    v_it = outputs.erase(v_it);
+                else
+                    ++v_it;
+            }
+
+            // Check if the output is empty, and if so remove the
+            // row entirely
+            if (row_it->second.empty())
+                row_it = erase(row_it);
+            else
+                ++row_it;
+        } else {
+            ++row_it;
+        }
+        i = i_end;
+    }
+}
+
 void CTable::set_labels(const vector<string>& labels)
 {
     olabel = labels.front();
