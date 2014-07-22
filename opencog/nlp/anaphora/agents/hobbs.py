@@ -215,7 +215,7 @@ class HobbsAgent(MindAgent):
             self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, conjunction_list, TruthValue(1.0, TruthValue().confidence_to_count(1.0))),TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, TruthValue().confidence_to_count(self.confidence)))
             self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
 
-        for index in range(1,self.numOfFilters):
+        for index in range(1,self.numOfFilters+1):
             command='(cog-bind-crisp filter-#'+str(index)+')'
             rv=self.bindLinkExe(self.currentProposal,node,command,self.currentResult,types.AnchorNode)
             if len(rv)>0:
@@ -270,6 +270,24 @@ class HobbsAgent(MindAgent):
                 for node in children:
                     if not self.Checked(node):
                         q.put(node)
+
+    def getWords(self):
+        rv=self.bindLinkExe(None,None,'(cog-bind-crisp getWords)',self.currentResult,types.WordInstanceNode)
+        return self.sortNodes(rv,self.getWordNumber)
+
+    def getTargets(self,words):
+        targets=[]
+        for word in words:
+            matched=False
+            for index in range(1,self.numOfPrePatterns+1):
+                command='(cog-bind-crisp pre-process-#'+str(index)+')'
+                rv=self.bindLinkExe(self.currentTarget,word,command,self.currentResult,types.AnchorNode)
+                if len(rv)>0:
+                    matched=True
+                    break
+            if matched:
+                targets.append(word)
+        return targets
 
     def getPronouns(self):
         rv=self.bindLinkExe(None,None,'(cog-bind-crisp getPronouns)',self.unresolvedReferences,types.WordInstanceNode)
@@ -349,6 +367,7 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/getAllParseNodes.scm",
               "opencog/nlp/anaphora/rules/getConjunction.scm",
               "opencog/nlp/anaphora/rules/getParseNode.scm",
+              "opencog/nlp/anaphora/rules/getWords.scm",
 
               "opencog/nlp/anaphora/rules/filtersGenerator.scm",
 
@@ -371,14 +390,22 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/filters/filter-#17.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#18.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#19.scm",
+
+              "opencog/nlp/anaphora/rules/pre-process/pre-process-#1.scm",
+              "opencog/nlp/anaphora/rules/pre-process/pre-process-#2.scm",
+              "opencog/nlp/anaphora/rules/pre-process/pre-process-#3.scm",
+              "opencog/nlp/anaphora/rules/pre-process/pre-process-#4.scm",
               ]
 
-        self.numOfFilters=len(data)
+        self.numOfFilters=19
+        self.numOfPrePatterns=4
+
         for item in data:
             load_scm(atomspace, item)
 
         self.getAllNumberNodes()
-        self.pronouns = self.getPronouns()
+        #self.pronouns = self.getPronouns()
+        self.pronouns=self.getTargets(self.getWords())
         self.roots = self.getRoots()
 
 
@@ -425,7 +452,6 @@ class HobbsAgent(MindAgent):
             sent_counter=1;
             while True:
                 if root==None:
-                    #print("found you while")
                     break
                 self.bfs(root)
                 if self.previousRootExist(root) and sent_counter<=NUMBER_OF_SEARCHING_SENTENCES:
