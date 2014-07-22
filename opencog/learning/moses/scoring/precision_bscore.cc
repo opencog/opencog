@@ -23,11 +23,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "precision_bscore.h"
-
 #include <boost/range/irange.hpp>
 
 #include <opencog/comboreduct/table/table_io.h>
+
+#include "precision_bscore.h"
 
 namespace opencog { namespace moses {
 
@@ -89,7 +89,7 @@ precision_bscore::precision_bscore(const CTable& ctable_,
                   penalty, min_activation, max_activation);
 
     // Verify that the penaly is sane
-    OC_ASSERT((0.0 < penalty) && (0.0 < min_activation) && (min_activation <= max_activation),
+    OC_ASSERT((0.0 < penalty) and (0.0 < min_activation) and (min_activation <= max_activation),
         "Precision scorer, invalid activation bounds.  "
         "The penalty must be non-zero, the minimum activation must be "
         "greater than zero, and the maximum activation must be greater "
