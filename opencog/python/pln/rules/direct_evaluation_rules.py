@@ -344,11 +344,6 @@ class GeneralEvaluationToMemberRule(Rule):
         # ListLink
         # Key = the atom under consideration
         # Values = the index of the atom in the ListLink
-
-        # To do: @AmeBel, why does the following line raise the following
-        # warning?
-        #   "Expected type 'Iterable' (matched generic type 'Iterable[T, V]'),
-        #   got '__generator[list]' instead"
         arg_indexs = dict(((j, [p for p, q in enumerate(arg.out) if q == j])
                            for i, j in enumerate(arg.out)))
         arg_indexs = dict([(j, p) for j, p in enumerate(arg.out)])
