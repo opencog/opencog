@@ -21,7 +21,7 @@
 ; global vars:
 ; new-sent anchor points at the node to which all new sentences are connected
 ;
-(define *new-parsed-sent-anchor* (AnchorNode "# New Parsed Sentence" (stv 1 1)))
+(define (*new-parsed-sent-anchor*) (AnchorNode "# New Parsed Sentence" (stv 1 1)))
 
 ; Return the list of SentenceNodes that are attached to the 
 ; freshly-parsed anchor.  This list will be non-empty if relex-parse
@@ -29,14 +29,14 @@
 ; release-new-parsed-sent below.
 ;
 (define (get-new-parsed-sentences)
-	(cog-chase-link 'ListLink 'SentenceNode *new-parsed-sent-anchor*)
+	(cog-chase-link 'ListLink 'SentenceNode (*new-parsed-sent-anchor*))
 )
 
 ; release-new-parsed-sents deletes the links that anchor sentences to 
 ; to new-parsed-sent anchor.
 ;
 (define (release-new-parsed-sents)
-	(release-from-anchor *new-parsed-sent-anchor*)
+	(release-from-anchor (*new-parsed-sent-anchor*))
 )
 
 ; -----------------------------------------------------------------------
