@@ -50,20 +50,60 @@ select_bscore::select_bscore(const CTable& ctable,
               (hardness <= 1.0),
         "Selection scorer, invalid bounds.");
 
-    std::vector<score_t> ranked_out;
+    // Maps are implicitly ordered, so the below has the effect of
+    // putting the rows into sorted order, by output score.
+    std::map<score_t, const CTable::value_type&> ranked_out;
 
+    score_t total_weight = 0.0;
     for (const CTable::value_type& io_row : ctable) {
         const auto& orow = io_row.second;
+        score_t weightiest_val = very_worst_score;
+        score_t weightiest = 0.0;
         for (const CTable::counter_t::value_type& tcv : orow) {
-            score_t val = get_contin(tcv.first);
-            if (!positive) val = -val;
-            for (unsigned i = 0; i < tcv.second; i++) {
-                ranked_out.push_back(val);
+            // The weight for a given value is in tcv.second.
+            if (weightiest < tcv.second) {
+                weightiest = tcv.second;
+                weightiest_val = get_contin(tcv.first);
+                if (!positive) weightiest_val = -weightiest_val;
             }
+        }
+        ranked_out.insert(std::pair<score_t, const CTable::value_type&>(weightiest_val, io_row));
+        total_weight += weightiest;
+    }
+
+    // Now, carve out the selected range.
+    upper_percentile *= total_weight;
+    lower_percentile *= total_weight;
+    score_t running_weight = 0.0;
+    bool found_lower = false;
+    bool found_upper = false;
+    for (auto score_row : ranked_out) {
+        score_t weightiest_val = score_row.first;
+        const auto& io_row = score_row.second;
+
+        // Exactly same code as above: find the heaviest contributor.
+        const auto& orow = io_row.second;
+        score_t weightiest = 0.0;
+        for (const CTable::counter_t::value_type& tcv : orow) {
+            // The weight for a given value is in tcv.second.
+            if (weightiest < tcv.second) {
+                weightiest = tcv.second;
+            }
+        }
+        running_weight += weightiest;
+
+        if (not found_lower and lower_percentile < running_weight) {
+            _lower_bound = weightiest_val;
+            found_lower = true;
+        }
+        if (not found_upper and upper_percentile < running_weight) {
+            _upper_bound = weightiest_val;
+            found_upper = true;
         }
     }
 
-    std::sort(ranked_out.begin(), ranked_out.end());
+    logger().info() << "select_bscore: lower_bound = " << _lower_bound
+                    << " upper bound = " << _upper_bound;
 }
 
 
