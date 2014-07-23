@@ -77,9 +77,11 @@
                 ; are the results of the evaluation of the relex-to-logic functions,
                 ; on the relex-opencog-outputs.
                 (SetLink
-                    (map-in-order eval-string
+                    (delete-duplicates 
+                        (apply append (map-in-order eval-string
                                 (filter (lambda (x)(not (string=? "" x)))
-                                (split-string "\n" (list-ref a-list 1)))))
+                                (split-string "\n" (list-ref a-list 1))))))
+                    )
                 )
                 (InterpretationLink
                     (InterpretationNode (string-append parse-name "_interpretation_$X"))
