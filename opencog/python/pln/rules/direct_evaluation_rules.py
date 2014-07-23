@@ -344,9 +344,11 @@ class GeneralEvaluationToMemberRule(Rule):
         # ListLink
         # Key = the atom under consideration
         # Values = the index of the atom in the ListLink
-        arg_indexs = dict(((j, [p for p, q in enumerate(arg.out) if q == j])
-                           for i, j in enumerate(arg.out)))
-        arg_indexs = dict([(j, p) for j, p in enumerate(arg.out)])
+
+        # Are these the same?
+        # arg_indexs = dict(((j, [p for p, q in enumerate(arg.out) if q == j]) for i, j in enumerate(arg.out)))
+        # arg_indexs = dict(((j, p) for j, p in enumerate(arg.out)))
+        arg_indexs = {j: p for j, p in enumerate(arg.out)}
 
         if arg.type == types.ListLink:
             for i in arg.out:
