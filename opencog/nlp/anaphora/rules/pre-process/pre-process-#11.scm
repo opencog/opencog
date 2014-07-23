@@ -1,6 +1,6 @@
-;; target is "some" and there does not exist "of" after it.
+;; target is "these" and there does not exist an adjacent noun after it.
 
-(define pre-process-#3
+(define pre-process-#11
     (BindLink
         (ListLink
             (TypedVariableLink
@@ -20,14 +20,14 @@
                 )
                 (LemmaLink
                     (VariableNode "$target")
-                    (WordNode "some")
+                    (WordNode "these")
                 )
                 (NotLink
                     (EvaluationLink
-                        (PrepositionalRelationshipNode "of")
+                        (DefinedLinguisticRelationshipNode "_det")
                         (ListLink
-                            (VariableNode "$target")
                             (VariableNode "$word")
+                            (VariableNode "$target")
                         )
                     )
                 )

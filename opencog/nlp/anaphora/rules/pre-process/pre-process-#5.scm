@@ -1,6 +1,6 @@
-;; target is "some" and there does not exist "of" after it.
+;; target is "much" and there does not exist "of" after it.
 
-(define pre-process-#3
+(define pre-process-#5
     (BindLink
         (ListLink
             (TypedVariableLink
@@ -20,7 +20,7 @@
                 )
                 (LemmaLink
                     (VariableNode "$target")
-                    (WordNode "some")
+                    (WordNode "much")
                 )
                 (NotLink
                     (EvaluationLink
@@ -36,7 +36,7 @@
                 ;; Adding a missing tag
                 (InheritanceLink
                     (VariableNode "$target")
-                    (DefinedLinguisticConceptNode "plural")
+                    (DefinedLinguisticConceptNode "singular")
                 )
                 (AnchorNode "CurrentResult")
                 (AnchorNode "Matched")

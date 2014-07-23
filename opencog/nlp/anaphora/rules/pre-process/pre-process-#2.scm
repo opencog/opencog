@@ -34,6 +34,7 @@
                 )
             )
             (ListLink
+                ;; Adding a missing tag
                 (InheritanceLink
                     (VariableNode "$target")
                     (DefinedLinguisticConceptNode "plural")

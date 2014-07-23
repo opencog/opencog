@@ -1,6 +1,6 @@
-;; target is "some" and there does not exist "of" after it.
+;; target is "this" and there does not exist an adjacent noun after it.
 
-(define pre-process-#3
+(define pre-process-#10
     (BindLink
         (ListLink
             (TypedVariableLink
@@ -20,14 +20,14 @@
                 )
                 (LemmaLink
                     (VariableNode "$target")
-                    (WordNode "some")
+                    (WordNode "this")
                 )
                 (NotLink
                     (EvaluationLink
-                        (PrepositionalRelationshipNode "of")
+                        (DefinedLinguisticRelationshipNode "_det")
                         (ListLink
-                            (VariableNode "$target")
                             (VariableNode "$word")
+                            (VariableNode "$target")
                         )
                     )
                 )
@@ -36,7 +36,7 @@
                 ;; Adding a missing tag
                 (InheritanceLink
                     (VariableNode "$target")
-                    (DefinedLinguisticConceptNode "plural")
+                    (DefinedLinguisticConceptNode "singular")
                 )
                 (AnchorNode "CurrentResult")
                 (AnchorNode "Matched")
