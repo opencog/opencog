@@ -454,7 +454,7 @@ CTable Table::compressed(const std::string weight_col) const
         {
             res[*in_it][*out_it] += 1.0;
         }
-        logger().debug("Size of the compressed dataset is %f", res.size());
+        logger().debug("Size of the compressed dataset is %d", res.size());
         return res;
     }
     else {
@@ -475,7 +475,7 @@ CTable Table::compressed(const std::string weight_col) const
             contin_t weight = get_contin(v);
             res[*in_it][*out_it] += weight;
         }
-        logger().debug("Size of the compressed dataset is %f", res.size());
+        logger().debug("Size of the compressed dataset is %d", res.size());
         return res;
     }
 }
