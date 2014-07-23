@@ -347,8 +347,8 @@ class GeneralEvaluationToMemberRule(Rule):
 
         # Are these the same?
         # arg_indexs = dict(((j, [p for p, q in enumerate(arg.out) if q == j]) for i, j in enumerate(arg.out)))
-        # arg_indexs = dict(((j, p) for j, p in enumerate(arg.out)))
-        arg_indexs = {j: p for j, p in enumerate(arg.out)}
+        # arg_indexs = dict(((j, [p]) for p, j in enumerate(arg.out)))
+        arg_indexs = {j: [p] for p, j in enumerate(arg.out)}
 
         if arg.type == types.ListLink:
             for i in arg.out:
