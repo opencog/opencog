@@ -193,6 +193,9 @@ discriminating_bscore::discriminating_bscore(const CTable& ct,
       _hardness(hardness),
       _full_bscore(true)
 {
+    // XXX Currently, this scorer does not return a true behavioral score
+    _size = 2;
+
     logger().info("Discriminating scorer, hardness = %f, "
                   "min_threshold = %f, "
                   "max_threshold = %f",
@@ -387,6 +390,8 @@ recall_bscore::recall_bscore(const CTable& ct,
                   float hardness)
     : discriminating_bscore(ct, min_precision, max_precision, hardness)
 {
+    // XXX Currently, this scorer does not return a true behavioral score
+    _size = 2;
 }
 
 behavioral_score recall_bscore::operator()(const combo_tree& tr) const
@@ -454,6 +459,9 @@ prerec_bscore::prerec_bscore(const CTable& ct,
                   float hardness)
     : discriminating_bscore(ct, min_recall, max_recall, hardness)
 {
+    // XXX TODO -- should not return the penalties as part of the bscore,
+    // since this messes up boosting.
+    _size = ct.size() + 2;
 }
 
 // Nearly identical to recall_bscore, except that the roles of precision
@@ -551,6 +559,8 @@ bep_bscore::bep_bscore(const CTable& ct,
                        float hardness)
     : discriminating_bscore(ct, min_diff, max_diff, hardness)
 {
+    // XXX Currently, this scorer does not return a true behavioral score
+    _size = 2;
 }
 
 behavioral_score bep_bscore::operator()(const combo_tree& tr) const
@@ -611,6 +621,8 @@ score_t bep_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 f_one_bscore::f_one_bscore(const CTable& ct)
     : discriminating_bscore(ct, 0.0, 1.0, 1.0e-20)
 {
+    // XXX Currently, this scorer does not return a true behavioral score
+    _size = 1;
 }
 
 behavioral_score f_one_bscore::operator()(const combo_tree& tr) const
