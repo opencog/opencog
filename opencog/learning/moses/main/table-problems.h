@@ -55,7 +55,7 @@ protected:
     typedef boost::ptr_vector<bscore_base> BScorerSeq;
 
     void common_setup(problem_params&);
-    void common_type_setup(problem_params&);
+    void common_type_setup(problem_params&, type_node = id::unknown_type);
 
     // Input data for table-based problems.
     std::vector<Table> _tables;
@@ -66,8 +66,7 @@ protected:
     combo::arity_t arity;
 
     type_tree table_type_signature;
-    type_tree table_output_tt;
-    type_node table_output_tn;
+    type_tree cand_type_signature;
     type_node output_type;
 };
 

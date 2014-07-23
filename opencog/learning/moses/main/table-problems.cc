@@ -158,32 +158,35 @@ void table_problem_base::common_setup(problem_params& pms)
     pms.mmr_pa.ilabels = ilabels;
 }
 
-void table_problem_base::common_type_setup(problem_params& pms)
+/**
+ * Set up the output
+ */
+void table_problem_base::common_type_setup(problem_params& pms,
+                                           type_node out_type)
 {
     // Infer the signature based on the input table.
     table_type_signature = table.get_signature();
-    logger().info() << "Inferred data signature " << table_type_signature;
+    logger().info() << "Table signature " << table_type_signature;
 
     // Infer the type of the input table
-    table_output_tt = get_signature_output(table_type_signature);
-    table_output_tn = get_type_node(table_output_tt);
-
-    // Determine the default exemplar to start with
-    // problem == pre  precision-based scoring
-    // precision combo trees always return booleans.
-    if (pms.exemplars.empty()) {
-        type_node pbr_type = pms.problem == pre_table_problem(_tpp).name() ?
-            id::boolean_type : table_output_tn;
-        pms.exemplars.push_back(type_to_exemplar(pbr_type));
+    if (id::unknown_type == out_type) {
+        type_tree table_output_tt = get_signature_output(table_type_signature);
+        out_type = get_type_node(table_output_tt);
     }
 
-    // XXX This seems strange to me .. when would the exemplar output
-    // type ever differ from the table?  Well,, it could for pre problem,
-    // but that's over-ridden later, anyway...
+    // Determine the default exemplar to start with
+    if (pms.exemplars.empty()) {
+        pms.exemplars.push_back(type_to_exemplar(out_type));
+    }
+
+    // The exemplar output type can differ from the table output type 
+    // for scorers that are trying to select rows (the pre and select scorers)
     output_type =
         get_type_node(get_output_type_tree(*pms.exemplars.begin()->begin()));
-    if (output_type == id::unknown_type)
-        output_type = table_output_tn;
+
+    cand_type_signature = gen_signature(
+        get_signature_inputs(table_type_signature),
+        type_tree(output_type)); 
 
     logger().info() << "Inferred output type: " << output_type;
 }
@@ -346,7 +349,7 @@ void pre_table_problem::run(option_base* ob)
     // except that some new experimental features are being tried.
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
-    common_type_setup(pms);
+    common_type_setup(pms, id::boolean_type);
 
     // Keep the table input signature, just make sure the
     // output is a boolean.
@@ -397,7 +400,7 @@ void pre_conj_table_problem::run(option_base* ob)
     // except that some new experimental features are being tried.
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
-    common_type_setup(pms);
+    common_type_setup(pms, id::boolean_type);
 
     // Keep the table input signature, just make sure the
     // output is a boolean.
@@ -435,7 +438,7 @@ void prerec_table_problem::run(option_base* ob)
 {
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
-    common_type_setup(pms);
+    common_type_setup(pms, id::boolean_type);
 
     if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.5;
         pms.max_rand_input = 1.0; }
@@ -449,7 +452,7 @@ void recall_table_problem::run(option_base* ob)
 {
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
-    common_type_setup(pms);
+    common_type_setup(pms, id::boolean_type);
 
     if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.8;
         pms.max_rand_input = 1.0; }
@@ -463,7 +466,7 @@ void bep_table_problem::run(option_base* ob)
 {
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
-    common_type_setup(pms);
+    common_type_setup(pms, id::boolean_type);
 
     if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.0;
         pms.max_rand_input = 0.5; }
@@ -477,7 +480,7 @@ void f_one_table_problem::run(option_base* ob)
 {
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
-    common_type_setup(pms);
+    common_type_setup(pms, id::boolean_type);
 
     REGRESSION(id::boolean_type,
                *pms.bool_reduct, *pms.bool_reduct_rep,
@@ -485,14 +488,12 @@ void f_one_table_problem::run(option_base* ob)
                (ctable));
 }
 
+// problem == it  i.e. input-table based scoring.
 void it_table_problem::run(option_base* ob)
 {
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
     common_type_setup(pms);
-
-    // problem == it  i.e. input-table based scoring.
-    OC_ASSERT(output_type == table_output_tn);
 
     // --------- Boolean output type
     if (output_type == id::boolean_type) {
@@ -570,7 +571,7 @@ void select_table_problem::run(option_base* ob)
 {
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
-    common_type_setup(pms);
+    common_type_setup(pms, id::boolean_type);
 
     REGRESSION(id::boolean_type,
                *pms.bool_reduct, *pms.bool_reduct_rep,
