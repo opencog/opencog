@@ -30,6 +30,7 @@
 #include "../moses/partial.h"
 #include "../scoring/bscores.h"
 #include "../scoring/discriminating_bscore.h"
+#include "../scoring/select_bscore.h"
 
 #include "moses_exec_def.h"
 #include "table-problems.h"
@@ -565,6 +566,18 @@ void it_table_problem::run(option_base* ob)
     }
 }
 
+void select_table_problem::run(option_base* ob)
+{
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
+    common_setup(pms);
+    common_type_setup(pms);
+
+    REGRESSION(id::boolean_type,
+               *pms.bool_reduct, *pms.bool_reduct_rep,
+               ctable, select_bscore,
+               (ctable));
+}
+
 void cluster_table_problem::run(option_base* ob)
 {
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
@@ -596,6 +609,7 @@ void register_table_problems(problem_manager& pmr, option_manager& mgr)
 	pmr.register_problem(new bep_table_problem(*tpp));
 	pmr.register_problem(new f_one_table_problem(*tpp));
 	pmr.register_problem(new it_table_problem(*tpp));
+	pmr.register_problem(new select_table_problem(*tpp));
 	pmr.register_problem(new cluster_table_problem(*tpp));
 }
 
