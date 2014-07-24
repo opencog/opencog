@@ -134,10 +134,10 @@ behavioral_score select_bscore::operator()(const combo_tree& tr) const
             if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
                 bs.push_back(weightiest);
             else
-                bs.push_back(0);
+                bs.push_back(-weightiest);
         } else {
             if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
-                bs.push_back(0);
+                bs.push_back(-weightiest);
             else
                 bs.push_back(weightiest);
         }
@@ -145,6 +145,34 @@ behavioral_score select_bscore::operator()(const combo_tree& tr) const
 
     return bs;
 }
+
+behavioral_score select_bscore::operator()(const scored_combo_tree_set&) const
+{
+    behavioral_score bs;
+#if 0
+    interpreter_visitor iv(tr);
+    auto interpret_tr = boost::apply_visitor(iv);
+
+    for (const CTable::value_type& io_row : _wrk_ctable) {
+        // io_row.first = input vector
+        // io_row.second = counter of outputs
+        const auto& orow = io_row.second;
+        score_t weightiest_val = very_worst_score;
+        score_t weightiest = 0.0;
+        for (const CTable::counter_t::value_type& tcv : orow) {
+            // The weight for a given value is in tcv.second.
+            if (weightiest < tcv.second) {
+                weightiest = tcv.second;
+                weightiest_val = get_contin(tcv.first);
+                if (not _positive) weightiest_val = -weightiest_val;
+            }
+        }
+        // if (interpret_tr(io_row.first.get_variant()) == id::logical_true) {
+    }
+#endif
+    return bs;
+}
+
 
 behavioral_score select_bscore::best_possible_bscore() const
 {
@@ -164,10 +192,7 @@ behavioral_score select_bscore::best_possible_bscore() const
                 if (not _positive) weightiest_val = -weightiest_val;
             }
         }
-        if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
-            bs.push_back(weightiest);
-        else
-            bs.push_back(0);
+        bs.push_back(weightiest);
     }
     return bs;
 }
