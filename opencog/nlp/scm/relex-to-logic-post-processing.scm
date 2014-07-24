@@ -157,7 +157,8 @@
 ;				** links involving noun_instance **
 ;
 ; meaning all links involving noun_instance (except maybe other markers,
-; or Inherit n n_inst) are included.
+; or Inherit n n_inst) are included.  Each noun_instance will be
+; replaced as (VariableNode "$X").
 ;
 (define (allmarker-helper orig-link)
 	(define listlink (car (cog-filter 'ListLink (cog-outgoing-set orig-link))))
