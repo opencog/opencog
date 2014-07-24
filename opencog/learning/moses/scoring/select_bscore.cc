@@ -146,13 +146,33 @@ behavioral_score select_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
-behavioral_score select_bscore::operator()(const scored_combo_tree_set&) const
+behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble) const
 {
-    behavioral_score bs;
-#if 0
-    interpreter_visitor iv(tr);
-    auto interpret_tr = boost::apply_visitor(iv);
+    // Step 1: accumulate the weighted prediction of each tree in
+    // the ensemble.
+    behavioral_score hypoth (_size);
+    for (const scored_combo_tree& sct: ensemble) {
+        const combo_tree& tr = sct.get_tree();
+        score_t trweight = sct.get_weight();
 
+        interpreter_visitor iv(tr);
+        auto interpret_tr = boost::apply_visitor(iv);
+
+        size_t i=0;
+        for (const CTable::value_type& io_row : _wrk_ctable) {
+            // io_row.first = input vector
+            bool select = (interpret_tr(io_row.first.get_variant()) == id::logical_true);
+            hypoth[i] += trweight * (2.0 * ((score_t) select) - 1.0);
+            i++;
+        }
+    }
+
+    // Step 2: compare the prediction of the ensemble to the desired
+    // result. The array "hypoth" is positive to predict true, and
+    // negative to predict false.  The resulting score is 0 if corrrect,
+    // and -1 if incorrect.
+    behavioral_score bs;
+    size_t i = 0;
     for (const CTable::value_type& io_row : _wrk_ctable) {
         // io_row.first = input vector
         // io_row.second = counter of outputs
@@ -167,9 +187,20 @@ behavioral_score select_bscore::operator()(const scored_combo_tree_set&) const
                 if (not _positive) weightiest_val = -weightiest_val;
             }
         }
-        // if (interpret_tr(io_row.first.get_variant()) == id::logical_true) {
+        if (0 < hypoth[i]) {
+            if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
+                bs.push_back(weightiest);
+            else
+                bs.push_back(-weightiest);
+        } else {
+            if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
+                bs.push_back(-weightiest);
+            else
+                bs.push_back(weightiest);
+        }
+        i++;
     }
-#endif
+
     return bs;
 }
 
