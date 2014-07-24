@@ -56,7 +56,7 @@ path, ```../opencog/python/pln/examples/socrates_demo```, to ```PYTHON_EXTENSION
 Start the cogserver at ```/opencog/build``` with ```./opencog/server/cogserver```.
 Telnet into the cogserver with ```rlwrap telnet localhost 17001```.
 Start the relex server at ```/relex``` with ```./opencog-server-sh```.
-Make sure that the RelEx2Logic output is turned in ```opencog-server.sh```.
+Make sure that the RelEx2Logic output is turned on in ```opencog-server.sh```.
 
 In the cogserver, clear the atomspace with ```(clear)```.
 Then run ```(relex-parse "Socrates is a man")``` and ```(relex-parse "Men breathe air")```.
