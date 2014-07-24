@@ -261,13 +261,7 @@ public:
     score_t get_diversity_penalty() const { return _cscore.get_diversity_penalty(); }
     score_t get_penalty() const { return _cscore.get_penalty(); }
 
-    bool operator==(const scored_combo_tree& r) const {
-        return get_tree() == r.get_tree()
-            and get_demeID() == r.get_demeID()
-            and get_bscore() == r.get_bscore()
-            and get_weight() == r.get_weight()
-            and get_composite_score() == r.get_composite_score();
-    }
+    bool operator==(const scored_combo_tree& r) const;
 };
 
 // =======================================================================

@@ -49,6 +49,14 @@ demeID_t::demeID_t(unsigned expansion, unsigned breadth_first, unsigned ss_deme)
              to_string(breadth_first) + ".SS-" +
              to_string(ss_deme)) {}
 
+bool scored_combo_tree::operator==(const scored_combo_tree& r) const {
+    return get_tree() == r.get_tree()
+        and get_demeID() == r.get_demeID()
+        and get_bscore() == r.get_bscore()
+        and get_weight() == r.get_weight()
+        and get_composite_score() == r.get_composite_score();
+}
+
 size_t scored_combo_tree_hash::operator()(const scored_combo_tree& sct) const
 {
     size_t hash = 0;
