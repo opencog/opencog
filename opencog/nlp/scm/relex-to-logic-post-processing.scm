@@ -131,8 +131,8 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-; call all post-processing steps
-(define (r2l-post-processing)
+; call all markers post-processing steps
+(define (r2l-marker-processing)
 	(allmarker-cleaner)
 )
 
