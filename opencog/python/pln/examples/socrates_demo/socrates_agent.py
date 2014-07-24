@@ -20,7 +20,7 @@ class SocratesAgent(MindAgent):
     def create_chainer(self, atomspace):
         self.chainer = Chainer(atomspace,
                                stimulateAtoms=False,
-                               allow_output_with_variables=True,
+                               allow_output_with_variables=False,
                                delete_temporary_variables=True)
 
         self.chainer.add_rule(

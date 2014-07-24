@@ -79,4 +79,3 @@
 (PredicateNode "is@9fb63f23-52ce-44ab-9bc4-806f0c4926e4" (stv .001 .99)) ; [224]
 
 (PredicateNode "be" (stv .001 .99)) ; [225]
-
