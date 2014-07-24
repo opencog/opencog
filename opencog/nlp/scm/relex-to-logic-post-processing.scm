@@ -131,13 +131,34 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-; call all markers post-processing steps
+; call all markers' post-processing steps
 (define (r2l-marker-processing)
 	(allmarker-cleaner)
 )
 
 ; -----------------------------------------------------------------------
-; call all post-processing steps
+; The allmarker helper function for post-processing one specific
+; allmarker.
+;
+; Given an allmarker of the form:
+;
+;	EvaluationLink
+;		PredicateNode "allmarker"
+;		ListLink
+;			ConceptNode noun_instance
+;
+; It creates:
+;
+;	ForAllLink
+;		VariableNode "$X"
+;		ImplicationLink
+;			InheritanceLink "$X" noun_instance
+;			AndLink
+;				** links involving noun_instance **
+;
+; meaning all links involving noun_instance (except maybe other markers,
+; or Inherit n n_inst) are included.
+;
 (define (allmarker-helper orig-link)
 	(define listlink (car (cog-filter 'ListLink (cog-outgoing-set orig-link))))
 	(define word (gar listlink))
