@@ -825,7 +825,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "For the -ainc algo only, the -C flag over-rides this setting.\n")
 
         ("fs-enforce-features-filename",
-         value<string>(&fs_enforce_features_filename),
+         po::value<string>(&fs_enforce_features_filename),
          "File containing a list (seperated by newline) of a feature name"
          "possibly followed by a weight between 0 and 1. If the weight is"
          "missing it is equivalent to being 1. The weight represent the"
