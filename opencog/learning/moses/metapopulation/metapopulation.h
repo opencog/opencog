@@ -207,7 +207,7 @@ public:
      * to get stuff done, and so prallelizing calls to this don't
      * obviously make sense.
      */
-    bool merge_demes(std::vector<deme_t>& demes,
+    bool merge_demes(std::vector<std::vector<deme_t>>& demes,
                      const boost::ptr_vector<representation>& reps);
 
     /// Update the record of the best score seen, and the associated tree.

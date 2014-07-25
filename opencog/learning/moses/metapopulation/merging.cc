@@ -224,7 +224,7 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
 //
 // See also header file for a desciption of this method.
 //
-bool metapopulation::merge_demes(std::vector<deme_t>& demes,
+bool metapopulation::merge_demes(std::vector<std::vector<deme_t>>& demes,
                                  const boost::ptr_vector<representation>& reps)
 {
     // Note that univariate reports far more evals than the deme size;
@@ -233,7 +233,8 @@ bool metapopulation::merge_demes(std::vector<deme_t>& demes,
 
     scored_combo_tree_set pot_candidates;
     for (unsigned i = 0; i < demes.size(); i++) {
-        deme_t& deme = demes[i];
+        OC_ASSERT(false, "TODO");
+        deme_t& deme = demes[i].front();
 
         // Sort the deme according to composite_score (descending order)
         // Both trim_down_deme(), and deme_to_trees(), requires that the

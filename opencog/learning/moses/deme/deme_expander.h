@@ -76,10 +76,28 @@ struct deme_expander
 
     // Structures related to the current deme
     boost::ptr_vector<representation> _reps; // representations of the demes
-    std::vector<deme_t> _demes; // current demes
+    std::vector<std::vector<deme_t>> _demes; // current demes, vector of
+                                             // vectors is used because a
+                                             // deme can be further
+                                             // subdiveded into multiple
+                                             // demes using a subsampled
+                                             // dataset
+
     optimizer_base &_optimize;
 
 protected:
+     /**
+     * Create deme IDs
+     */
+    void create_demeIDs(int n_expansions);
+
+    /**
+     * Create representations
+     *
+     * @return return true if it creates representations successfully, false otherwise
+     */
+    bool create_representations(const combo_tree& exemplar);
+
     /**
      * Takes a feature set, a header of the input features and return
      * a vector of the names of the featire set.
@@ -92,8 +110,7 @@ protected:
      */
     void log_selected_feature_sets(const feature_set_pop& sf_pop,
                                    const feature_set& xmplr_features,
-                                   const string_seq& ilabels,
-                                   const std::vector<demeID_t>& demeIDs) const;
+                                   const string_seq& ilabels) const;
 
     /**
      * Return pruned exemplar from non-selected features
@@ -110,6 +127,9 @@ protected:
     // optimizing evaluation (in case of feature selection) and
     // calculate max score per deme
     std::vector<std::set<arity_t>> _ignore_idxs_seq;
+
+    // Deme ids
+    std::vector<demeID_t> _demeIDs;
 
     deme_parameters _params;
 };
