@@ -167,6 +167,7 @@ struct problem_params : public option_base
     std::string fs_seed;
     feature_selector_parameters festor_params;
     feature_selection_parameters& fs_params;
+    std::string fs_enforce_features_filename;
 
     reduct::rule* bool_reduct;
     reduct::rule* bool_reduct_rep;

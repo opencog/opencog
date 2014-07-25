@@ -824,6 +824,13 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "will be selected. \n"
          "For the -ainc algo only, the -C flag over-rides this setting.\n")
 
+        ("fs-enforce-features-filename",
+         value<string>(&fs_enforce_features_filename),
+         "File containing a list (seperated by newline) of a feature name"
+         "possibly followed by a weight between 0 and 1. If the weight is"
+         "missing it is equivalent to being 1. The weight represent the"
+         "probability of being of the feature of being inserted in the deme.\n")
+
         // ======= Feature-selection diversity pressure =======
         ("fs-diversity-pressure",
          po::value<double>(&festor_params.diversity_pressure)->default_value(0.0),
@@ -1115,6 +1122,35 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
         festor_params.ignore_xmplr_features = false;
         festor_params.init_xmplr_features = false;
         festor_params.xmplr_as_feature = true;
+    }
+
+    // Parse enforce features
+    if (!fs_enforce_features_filename.empty()) {
+        ifstream in(fs_enforce_features_filename.c_str());
+        OC_ASSERT(in.is_open(), "Could not open %s",
+                  fs_enforce_features_filename.c_str());
+
+        while (in) {
+            string line;
+            getline(in, line);
+            if (line.empty())
+                continue;
+
+            // Check if there is a float (there must be a whiltespace then)
+            auto whitespace_pos = line.find(' ');
+            if (whitespace_pos != std::string::npos) {
+                string feature_name = line.substr(0, whitespace_pos);
+                float weight = stof(line.substr(whitespace_pos));
+                festor_params.enforce_features[feature_name] = weight;
+            } else {
+                festor_params.enforce_features[line] = 1;
+            }
+        }
+
+        for (auto& p : festor_params.enforce_features) {
+            logger().debug() << "Enforce feature " << p.first
+                             << " with probability " << p.second;
+        }
     }
 
     // Set deme expansion paramters
