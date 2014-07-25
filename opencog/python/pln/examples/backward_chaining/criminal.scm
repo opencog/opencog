@@ -13,7 +13,7 @@
             (ConceptNode "American"))
         (InheritanceLink
             (VariableNode "$y")
-            (ConceptNode "weapon))
+            (ConceptNode "weapon"))
         (EvaluationLink
             (PredicateNode "sell")
             (ListLink
