@@ -82,3 +82,9 @@
         (ListLink
             (ConceptNode "Nono")
             (ConceptNode "America")))
+
+; query: "Who is a criminal?"
+(define isCriminal
+    (InheritanceLink
+        (VariableNode "$isCriminal")
+        (ConceptNode "criminal")))
