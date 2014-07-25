@@ -76,7 +76,7 @@ struct deme_expander
 
     // Structures related to the current deme
     boost::ptr_vector<representation> _reps; // representations of the demes
-    boost::ptr_vector<deme_t> _demes; // current demes
+    std::vector<deme_t> _demes; // current demes
     optimizer_base &_optimize;
 
 protected:

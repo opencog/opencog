@@ -271,7 +271,7 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
 
     // Create empty demes with their IDs
     for (unsigned i = 0; i < _reps.size(); i++)
-        _demes.push_back(new deme_t(_reps[i].fields(), demeIDs[i]));
+        _demes.emplace_back(_reps[i].fields(), demeIDs[i]);
 
     return true;
 }

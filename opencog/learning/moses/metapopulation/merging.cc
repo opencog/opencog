@@ -224,8 +224,9 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
 //
 // See also header file for a desciption of this method.
 //
-bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
-                                 const boost::ptr_vector<representation>& reps)
+bool metapopulation::merge_demes(std::vector<deme_t>& demes,
+                                 const boost::ptr_vector<representation>& reps,
+                                 const vector<unsigned>& evals_seq)
 {
     // Note that univariate reports far more evals than the deme size;
     // this is because univariate over-writes deme entries.
