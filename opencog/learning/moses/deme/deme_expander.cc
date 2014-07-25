@@ -179,11 +179,16 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
 
         log_selected_feature_sets(pop_of_selected_feats, xmplr_features, ilabels, demeIDs);
 
+        logger().debug() << "Post-treatment: possibly enforce some features and prune"
+                         << " exemplars for each deme";
+
         // pop_of_selected_feats is a set of feature sets. We will
         // create a representation, and a deme, for each distinct
         // feature set.
         unsigned sfi = 0;
         for (auto& selected_feats : pop_of_selected_feats) {
+            logger().debug() << "Deme " << demeIDs[sfi] << ":";
+
             // Either prune the exemplar, or add all exemplars
             // features to the feature sets
             if (festor.params.prune_xmplr) {
@@ -208,6 +213,12 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
                 // Insert exemplar features as they are not pruned
                 selected_feats.second.insert(xmplr_features.begin(), xmplr_features.end());
                 xmplr_seq.push_back(exemplar);
+            }
+
+            if (!festor.params.enforce_features.empty()) {
+                // Enforce a set of features
+                feature_set enforced_features = festor.sample_enforced_features();
+                sf.second.insert(enforced_features.begin(), enforced_features.end());
             }
 
             // add the complement of the selected features to ignore_ops

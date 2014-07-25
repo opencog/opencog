@@ -136,6 +136,12 @@ struct feature_selector_parameters
      * negative value means all interactions.
      */
     int diversity_interaction;
+    
+    /**
+     * Map between feature name and probability of being inserted in
+     * the deme, regardless of whether it has been selected or not.
+     */
+    std::map<std::string,float> enforce_features;
 };
 
 // used for diversity ranking
@@ -158,6 +164,11 @@ struct feature_selector
     /// Return feature set population that is good when combined with
     /// the exemplar tr.
     feature_set_pop operator()(const combo::combo_tree& xmplr);
+
+    // Return a set of features randomly choosen given
+    // enforce_features, a map from feature to probability of being
+    // enforced
+    feature_set sample_enforced_features() const;
 
     // Parameters
     feature_selector_parameters params;

@@ -34,7 +34,7 @@
 #include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/table/table_io.h>
 #include <opencog/util/oc_omp.h>
-
+#include <opencog/util/random.h>
 
 // Name given to the feature corresponding to the output of the
 // exemplar
@@ -418,6 +418,27 @@ double feature_selector::mi(const feature_set& fs_l,
                 mi += mutualInformationBtwSets(_ctable, sub_fs_l, sub_fs_r);
         return mi / (pfs_l.size() * pfs_r.size());
     }
+}
+
+feature_set feature_selector::sample_enforced_features() const {
+    // Sample the enforced features
+    vector<string> sampled_features;
+    for (auto& p : params.enforce_features) {
+        if (biased_randbool(p.second)) {
+            sampled_features.push_back(p.first);
+        }
+    }
+
+    if (logger().isDebugEnabled()) {
+        stringstream ss;
+        ostreamContainer(ss << "Enforce features: ", sampled_features);
+        logger().debug() << ss.str();
+    }
+
+    // Convert that into their indexes
+    const auto& ilabels = _ctable.get_input_labels();
+    auto vec_idx = get_indices(sampled_features, ilabels);
+    return feature_set(vec_idx.begin(), vec_idx.end());
 }
 
 } // ~namespace moses
