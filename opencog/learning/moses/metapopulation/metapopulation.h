@@ -208,8 +208,7 @@ public:
      * obviously make sense.
      */
     bool merge_demes(std::vector<deme_t>& demes,
-                     const boost::ptr_vector<representation>& reps,
-                     const std::vector<unsigned>& evals_seq);
+                     const boost::ptr_vector<representation>& reps);
 
     /// Update the record of the best score seen, and the associated tree.
     /// Safe to call in a multi-threaded context.

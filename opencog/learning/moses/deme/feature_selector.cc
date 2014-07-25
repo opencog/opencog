@@ -422,7 +422,7 @@ double feature_selector::mi(const feature_set& fs_l,
 
 feature_set feature_selector::sample_enforced_features() const {
     // Sample the enforced features
-    vector<string> sampled_features;
+    std::vector<std::string> sampled_features;
     for (auto& p : params.enforce_features) {
         if (biased_randbool(p.second)) {
             sampled_features.push_back(p.first);
@@ -430,7 +430,7 @@ feature_set feature_selector::sample_enforced_features() const {
     }
 
     if (logger().isDebugEnabled()) {
-        stringstream ss;
+        std::stringstream ss;
         ostreamContainer(ss << "Enforce features: ", sampled_features);
         logger().debug() << ss.str();
     }

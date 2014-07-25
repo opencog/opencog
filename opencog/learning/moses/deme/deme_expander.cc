@@ -218,7 +218,7 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
             if (!festor.params.enforce_features.empty()) {
                 // Enforce a set of features
                 feature_set enforced_features = festor.sample_enforced_features();
-                sf.second.insert(enforced_features.begin(), enforced_features.end());
+                selected_feats.second.insert(enforced_features.begin(), enforced_features.end());
             }
 
             // add the complement of the selected features to ignore_ops
