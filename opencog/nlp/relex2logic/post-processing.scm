@@ -1,5 +1,5 @@
 ;
-; relex-to-logic-post-processing.scm
+; post-processing.scm
 ;
 ; Assorted functions for post-processing relex2logic output.
 ;
