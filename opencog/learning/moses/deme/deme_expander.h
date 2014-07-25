@@ -126,7 +126,7 @@ protected:
     // This is used to keep track of the ignored indices for
     // optimizing evaluation (in case of feature selection) and
     // calculate max score per deme
-    std::vector<std::set<arity_t>> _ignore_idxs_seq;
+    std::vector<std::set<arity_t>> _ignore_cols_seq;
 
     // Deme ids
     std::vector<demeID_t> _demeIDs;

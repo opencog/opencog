@@ -47,7 +47,7 @@ namespace opencog { namespace moses {
  * 2) Helps with keeping the score-caching code cleaner.
  * 3) When boosting, the summation above is no longer just a simple sum.
  */
-class behave_cscore 
+class behave_cscore
 {
 public:
     behave_cscore(const bscore_base& b, ascore_base& a, size_t initial_cache_size=0);
@@ -72,7 +72,7 @@ public:
     /// not subsequently appear in the combo tree to be scored.  Calling
     /// this with the empty set restores all features. The features are
     /// indicated as set of indices (from 0).
-    void ignore_idxs(const std::set<arity_t>& idxs) const
+    void ignore_cols(const std::set<arity_t>& idxs) const
     {
         _bscorer.ignore_cols(idxs);
     }

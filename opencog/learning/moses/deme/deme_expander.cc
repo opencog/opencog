@@ -191,7 +191,7 @@ bool deme_expander::create_representations(const combo_tree& exemplar)
                     considered_args.insert(arg);
                 }
             }
-            _ignore_idxs_seq.push_back(ignore_cols);
+            _ignore_cols_seq.push_back(ignore_cols);
             ignore_ops_seq.push_back(ignore_ops);
             considered_args_seq.push_back(considered_args);
 
@@ -281,7 +281,7 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
 {
     using namespace reduct;
 
-    OC_ASSERT(_ignore_idxs_seq.empty());
+    OC_ASSERT(_ignore_cols_seq.empty());
     OC_ASSERT(_reps.empty());
     OC_ASSERT(_demes.empty());
 
@@ -314,7 +314,7 @@ std::vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_ti
         if (_params.fstor) {
             // Attempt to compress the CTable further (to optimize and
             // update max score)
-            _cscorer.ignore_idxs(_ignore_idxs_seq[i]);
+            _cscorer.ignore_cols(_ignore_cols_seq[i]);
         
             // compute the max target for that deme (if features have been
             // dynamically selected, it might be less that the global target;
@@ -364,7 +364,7 @@ std::vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_ti
         // XXX FIXME this is a bug .. the user may have specified that
         // certain incdexes should be ignored, and this just wipes
         // those out...
-        _cscorer.ignore_idxs(std::set<arity_t>());
+        _cscorer.ignore_cols(std::set<arity_t>());
     }
 
     return actl_evals;
@@ -372,7 +372,7 @@ std::vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_ti
 
 void deme_expander::free_demes()
 {
-    _ignore_idxs_seq.clear();
+    _ignore_cols_seq.clear();
     _demes.clear();
     _reps.clear();
 }
