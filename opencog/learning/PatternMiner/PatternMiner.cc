@@ -1250,20 +1250,10 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
 }
 
-void PatternMiner::selectSubsetFromCorpus()
+void PatternMiner::selectSubsetFromCorpus(vector<string>& topics, unsigned int gram)
 {
     // select a subset for test topics from the huge ConceptNet corpus
-    vector<string> topics;
-    topics.push_back("animal");
-    topics.push_back("pet");
-    topics.push_back("human");
-    topics.push_back("eat");
-    topics.push_back("man");
-    topics.push_back("woman");
-    topics.push_back("robot");
-    topics.push_back("computer");
-
-    _selectSubsetFromCorpus(topics,4);
+    _selectSubsetFromCorpus(topics,3);
 }
 
 std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const AtomSpace *atomspace)

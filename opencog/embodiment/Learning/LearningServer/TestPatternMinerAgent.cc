@@ -64,7 +64,7 @@ TestPatternMinerAgent::TestPatternMinerAgent(CogServer& cs) : Agent(cs, 100)
 //                        "pm_test_corpus.scm"
 //                      );
 
-    this->patternMiner = new PatternMiner(&(cs.getAtomSpace()),4);
+    this->patternMiner = new PatternMiner(&(cs.getAtomSpace()));
 
     logger().info("[TestPatternMinerAgent] constructor");
 
@@ -81,7 +81,20 @@ void TestPatternMinerAgent::run()
     static bool hasRun = false;
     if (hasRun)
         return;
-    this->patternMiner->runPatternMiner();
+
+    // this->patternMiner->runPatternMiner();
+
+    vector<string> topics;
+    topics.push_back("Neurology");
+    topics.push_back("Geology");
+    topics.push_back("Physics");
+    topics.push_back("Politics");
+    topics.push_back("Music");
+    topics.push_back("Biology");
+    topics.push_back("Western_philosophy");
+    topics.push_back("Chemistry");
+    this->patternMiner->selectSubsetFromCorpus(topics, 3);
+
     hasRun = true;
 
 }
