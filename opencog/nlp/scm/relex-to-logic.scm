@@ -370,13 +370,12 @@
 ; -----------------------------------------------------------------------
 ; all rules
 ; -----------------------------------------------------------------------
-
 ; Create a "allmarker" to handle all forms of "all" sentences, such as
-; "All Canadians are right-handed."
-; "All my writings are bad.",
-; "All Canadians give their dogs a hug."
-; "All Canadians write."
-; "All right-handed Canadians write."
+; "All Canadians are right-handed."      -> (all-rule "Canadians@333")
+; "All my writings are bad."             -> (all-rule "writings@333")
+; "All Canadians give their dogs a hug." -> (all-rule "Canadians@333")
+; "All Canadians write."                 -> (all-rule "Canadians@333")
+; "All right-handed Canadians write."    -> (all-rule "Canadians@333")
 (define (all-rule noun_instance)
 	(list
 		(EvaluationLink

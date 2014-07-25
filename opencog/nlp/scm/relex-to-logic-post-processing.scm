@@ -3,13 +3,19 @@
 ;
 ; Assorted functions for post-processing relex2logic output.
 ;
+; Copyright (c) 2014 William Ma <https://github.com/williampma>
+;
 
 ; =======================================================================
 ; Helper utilities for post-processing.
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-; Get the corresponding ConceptNode or PredicateNode or NumberNode
+; word-get-r2l-node -- Retrieve corresponding R2L created node
+;
+; Given a WordInstanceNode created by RelEx, retrieve the corresponding
+; ConceptNode or PredicateNode or NumberNode created by R2L helper
+;
 (define (word-get-r2l-node node)
 	(define name
 		(if (not (null? node))
@@ -26,7 +32,11 @@
 )
 
 ; -----------------------------------------------------------------------
-; Helper function to check if a link contains a non-instance word
+; check-non-instance -- Check if any nodes is a non-instance word
+;
+; Given a link, check to see if any sub-node does not have the
+; corresponding WordInstanceNode from RelEx (with some exceptions)
+;
 (define (check-non-instance link)
 	(define words (cog-get-all-nodes link))
 	(define (check-word w)
@@ -43,7 +53,11 @@
 )
 
 ; -----------------------------------------------------------------------
-; Create all possible pairwise combination of the items
+; pairwise-combination -- Create all possible pairwise combination
+;
+; Given a list of lists, create all possible pairwise combination
+; between lists.
+;
 (define (pairwise-combination sets)
 	(define (create-with-index index rest)
 		(map (lambda (r) (list index r)) rest))
@@ -60,7 +74,11 @@
 )
 
 ; -----------------------------------------------------------------------
-; Pairwise intersection, keeping any items that appear in more than one set
+; lset-pairwise-intersection -- Pairwise intersection
+;
+; Given a list of lists, do pairwise intersection, keeping any items
+; that appear in more than one list.
+;
 (define (lset-pairwise-intersection sets)
 	(define all-pairs (pairwise-combination sets))
 	(append-map (lambda (pair-list) (lset-intersection equal? (car pair-list) (cadr pair-list)))
@@ -68,7 +86,10 @@
 )
 
 ; -----------------------------------------------------------------------
-; Custom member? function to return the item instead of a list
+; member? -- Custom member? function to return the item instead of a list
+;
+; Same as 'member' but return the original item instead of a list.
+;
 (define (member? x lst)
 	(if (member x lst)
 		x
@@ -77,7 +98,10 @@
 )
 
 ; -----------------------------------------------------------------------
-; Check if a word-inst has definite-rule applied
+; definite? -- Check if a ConceptNode, check if it is DEFINITE
+;
+; Check if a word-inst ConceptNode has definite-rule applied.
+;
 (define (definite? word-concept-inst)
 	(define definite (cog-node 'PredicateNode "definite"))
 	(define llink (cog-link 'ListLink word-concept-inst))
@@ -87,7 +111,10 @@
 )
 
 ; -----------------------------------------------------------------------
+; random-hex-string -- Generate a random string of hex
+;
 ; Returns a random hex string of length 'str-length'.
+;
 (define (random-hex-string str-length) 
 	(define alphanumeric "abcdef0123456789")
 	(define str "")
@@ -99,7 +126,10 @@
 )
 
 ; -----------------------------------------------------------------------
-; Returns UUID version 4
+; random-UUID -- Generate a new UUID version 4
+;
+; Returns UUID version 4 (ie, mostly just random hex with some fixed values)
+;
 (define (random-UUID)
 	(define part1 (random-hex-string 8))
 	(define part2 (random-hex-string 4))
@@ -111,7 +141,11 @@
 )
 
 ; -----------------------------------------------------------------------
-; Generate a new unique name for a word
+; create-unique-word-name -- Generate a new unique name for a word
+;
+; Given a non-instanced word's ConceptNode, generate a new instance,
+; appending @ UUID.
+;
 (define (create-unique-word-name word)
 	(define (create-new-name w)
 		(define tail-name (random-UUID))
@@ -131,16 +165,21 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-; call all markers' post-processing steps
+; r2l-marker-processing -- Entry point of markers post-processing
+;
+; Call all markers' post-processing steps.
+;
 (define (r2l-marker-processing)
 	(allmarker-cleaner)
 )
 
 ; -----------------------------------------------------------------------
+; allmarker-helper -- Helper function of allmarker post-processing
+;
 ; The allmarker helper function for post-processing one specific
 ; allmarker.
 ;
-; Given an allmarker of the form:
+; Given an allmarker of the form as 'orig-link':
 ;
 ;	EvaluationLink
 ;		PredicateNode "allmarker"
@@ -211,15 +250,22 @@
 )
 
 ; -----------------------------------------------------------------------
+; allmarker-clean -- Entry point of cleaning allmarker
+;
 ; The main allmarker function that calls the helper to clean all
-; allmarker in the atomspace, and delete them
+; allmarker in the atomspace, and delete them.
+;
 (define (allmarker-cleaner)
 	(marker-cleaner "allmarker" allmarker-helper)
 )
 
 ; -----------------------------------------------------------------------
-; A general purpose marker function that calls a specific helper to clean
-; all instances of a marker in the atomspace, and delete them
+; marker-clean -- Common code for calling marker's helper function
+;
+; A general purpose marker function that calls a specific 'helper' function
+; to clean all instances of a marker with 'name' in the atomspace, and
+; delete them.
+;
 (define (marker-cleaner name helper)
 	(define marker (cog-node 'PredicateNode name))
 	(define (call-helper)
@@ -247,7 +293,19 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-; Main recursive function to build the new abstracted links
+; rebuild -- Main recursive function to build the new abstracted links
+;
+; A helper function for building a new version of 'ilink' with abstraction.
+;
+; 'old-new-pairs' contains pairs (old, new) of nodes where 'old' needs
+; to be abstracted and 'new' is the non-instanced version. All 'old' in
+; 'ilink' will be replaced by 'new'.
+;
+; 'other-name-triplets' contains triplets (orig, new, word) of nodes where
+; 'orig' is an instanced word node, 'new' is the new instanced name, and
+; 'word' is the non-instanced version.  For each 'orig', a new instanced
+; node 'new' replaces it, and 'new' will inherit from 'word'. 
+;
 (define (rebuild ilink old-new-pairs other-name-triplets)
 	; get all the nodes linked by this link
 	(define old-oset (cog-outgoing-set ilink))
@@ -276,7 +334,12 @@
 )
 
 ; -----------------------------------------------------------------------
-; Find out which words can be abstracted and call the helper function to create them.
+; create-abstract-version -- Create the abstracted representation
+;
+; Given a 'parse-node' of a parse, find out which words can be abstracted
+; and call the helper function to create them. Both the partial and
+; fully abstracted version are created.
+;
 (define (create-abstract-version parse-node)
 	(define word-inst-list (parse-get-words parse-node))
 	(define word-list (map word-inst-get-lemma word-inst-list))
