@@ -38,6 +38,7 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	_params(ep)
 {
 	_booster = dynamic_cast<boosting_ascore*>(&(cs.get_ascorer()));
+	_best_possible_score = cs.best_possible_score();
 }
 
 // Is this behavioral score correct? For boolean scores, correct is 0.0
@@ -57,7 +58,7 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 
 	int promoted = 0;
 	// We need the length of the behavioral score, as normalization
-	// XXX we should be using the user-weighted thingy here .. XX FIXME
+	// XXX we should be using the user-weighted thingy here .. XXX FIXME
 
 	double behave_len = cands.begin()->get_bscore().size();
 	while (true) {
@@ -67,7 +68,7 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 				[](const scored_combo_tree& a, const scored_combo_tree& b) {
 					return a.get_score() > b.get_score(); });
 
-		double err = - best_p->get_score() / behave_len;
+		double err = (_best_possible_score - best_p->get_score()) / behave_len;
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
 		// XXX FIXME, this should be something else ... 

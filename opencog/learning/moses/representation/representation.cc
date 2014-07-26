@@ -96,7 +96,7 @@ combo_tree type_to_exemplar(type_node type)
                   "input table.");
     default: {
         std::stringstream ss;
-        ss << "Error: type " << type << " not supported";
+        ss << "Error: type \"" << type << "\" not supported";
         OC_ASSERT(false, ss.str());
     }
     }

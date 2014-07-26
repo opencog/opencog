@@ -64,12 +64,13 @@ ADD_LIBRARY (moses SHARED STATIC
 	representation/knobs
 	representation/representation
 
-	scoring/scoring_base
 	scoring/behave_cscore
 	scoring/boosting_ascore
+	scoring/bscores
 	scoring/discriminating_bscore
 	scoring/precision_bscore
-	scoring/bscores
+	scoring/scoring_base
+	scoring/select_bscore
 
 )
 

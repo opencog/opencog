@@ -55,7 +55,7 @@ protected:
     typedef boost::ptr_vector<bscore_base> BScorerSeq;
 
     void common_setup(problem_params&);
-    void common_type_setup(problem_params&);
+    void common_type_setup(problem_params&, type_node = id::unknown_type);
 
     // Input data for table-based problems.
     std::vector<Table> _tables;
@@ -66,11 +66,11 @@ protected:
     combo::arity_t arity;
 
     type_tree table_type_signature;
-    type_tree table_output_tt;
-    type_node table_output_tn;
+    type_tree cand_type_signature;
     type_node output_type;
 };
 
+// ==================================================================
 /// interesting predicates options.
 struct ip_problem_params : public option_base
 {
@@ -95,6 +95,7 @@ class ip_problem : public table_problem_base
         ip_problem_params& _ippp;
 };
 
+// ==================================================================
 /// Regression based on combo program using ann
 class ann_table_problem : public table_problem_base
 {
@@ -162,7 +163,7 @@ class recall_table_problem : public table_problem_base
 };
 
 // ==================================================================
-/// bep == beak-even point between bep and precision.
+/// bep == break-even point between recall and precision.
 class bep_table_problem : public table_problem_base
 {
     public:
@@ -197,6 +198,19 @@ class it_table_problem : public table_problem_base
         virtual const std::string name() const { return "it"; }
         virtual const std::string description() const {
              return "Maximize Accuracy"; }
+        virtual void run(option_base*);
+};
+
+// ==================================================================
+/// select == select a range of scores
+class select_table_problem : public table_problem_base
+{
+    public:
+        select_table_problem(table_problem_params& tp)
+            : table_problem_base(tp) {}
+        virtual const std::string name() const { return "select"; }
+        virtual const std::string description() const {
+             return "Select range of rows"; }
         virtual void run(option_base*);
 };
 
