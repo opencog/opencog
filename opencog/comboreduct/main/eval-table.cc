@@ -72,7 +72,7 @@ vector<string> get_all_combo_tree_str(const evalTableParameters& pa)
             while (in.good()) {
                 string line;
                 getline(in, line);
-                if(line.empty())
+                if (line.empty())
                     continue;
                 res += line;
             }
@@ -144,7 +144,8 @@ void read_eval_output_results(evalTableParameters& pa)
     }
     set<string> all_unique_variables(all_variables.begin(), all_variables.end());
 
-    /// HERE WE ARE ASSUMING THAT THE INPUT FILE HAS A HEADER!!!
+    // HERE WE ARE ASSUMING THAT THE INPUT FILE HAS A HEADER!!!
+// XXX FIXME
     vector<string> header = get_header(pa.input_table_file);
 
     // get (header - all_unique_variables - target feature)
@@ -152,7 +153,10 @@ void read_eval_output_results(evalTableParameters& pa)
     for (string f : header)
         if (f != pa.target_feature_str
             && all_unique_variables.find(f) == all_unique_variables.end())
+        {
             ignore_variables += f;
+            logger().debug() << "Table variable not in combo tree: " << f;
+        }
 
     // read data ITable (using ignore_variables)
     Table table;
@@ -162,6 +166,7 @@ void read_eval_output_results(evalTableParameters& pa)
         table = loadTable(pa.input_table_file, pa.target_feature_str,
                           ignore_variables);
     }
+    logger().debug() << "Done loading table from " << pa.input_table_file;
 
     ITable& it = table.itable;
 
@@ -169,10 +174,8 @@ void read_eval_output_results(evalTableParameters& pa)
     vector<combo_tree> trs;
     for (const string& tr_str : all_combo_tree_str) {
         combo_tree tr = str2combo_tree_label(tr_str, pa.has_labels, it.get_labels());
-        if (logger().isFineEnabled()) {
-            logger().fine() << "Combo str: " << tr_str;
-            logger().fine() << "Parsed combo: " << tr;
-        }
+        logger().fine() << "Combo str: " << tr_str << "\n";
+        logger().debug() << "Parsed combo: " << tr;
         trs += tr;
     }
 
