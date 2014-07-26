@@ -184,6 +184,8 @@ void table_problem_base::common_type_setup(problem_params& pms,
     output_type =
         get_type_node(get_output_type_tree(*pms.exemplars.begin()->begin()));
 
+    if (id::unknown_type == output_type) output_type = out_type;
+
     cand_type_signature = gen_signature(
         get_signature_inputs(table_type_signature),
         type_tree(output_type)); 
@@ -512,8 +514,8 @@ void it_table_problem::run(option_base* ob)
 
     // --------- Unknown output type
     else {
-        logger().error() << "Error: output type " << type_tree(output_type)
-            << " currently not supported.";
+        logger().error() << "Error: output type \"" << type_tree(output_type)
+            << "\" currently not supported.";
         std::cerr << "Error: output type " << type_tree(output_type)
             << " currently not supported." << std::endl;
         exit(1);
