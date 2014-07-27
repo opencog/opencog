@@ -631,6 +631,7 @@ protected:
  *
  * Each entry in the vector is a row.
  */
+class OTable;
 class ITable : public std::vector<multi_type_seq>
 {
 public:
@@ -641,6 +642,7 @@ public:
     ITable();
     ITable(const type_seq& ts, const string_seq& il = string_seq());
     ITable(const super& mat, const string_seq& il = string_seq());
+    ITable(const OTable&);
     /**
      * generate an input table according to the signature tt.
      *

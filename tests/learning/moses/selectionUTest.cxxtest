@@ -54,20 +54,24 @@ public:
         combo_tree comtr = parse_result(tempfile).second;
         unlink(tempfile.c_str());
 
-std::cout<<"duuuuude got "<<comtr<<endl;
+        std::cout << "Learned tree " << comtr << endl;
 
         // Re-read the data file
         Table datatable;
         datatable = loadTable(data_file_path, "output", std::vector<std::string>());
 
         OTable predicted(comtr, datatable.itable);
-std::cout<<"duuuuude got "<<predicted<<endl;
 
         // The expected output is this:
-        string expstr = "and( 0<( -($output 908.787)) 0<( -(1281.55 $output)))";
+        // string expstr = "and( 0<( -($output 908.787)) 0<( -(1281.55 $output)))";
+        string expstr = "and( 0<( -($1 908.787)) 0<( -(1281.55 $1)))";
         combo_tree exptr;
         std::stringstream(expstr) >> exptr;
-        OTable expected(exptr, datatable.itable);
+
+        // Copy the output column into an 'input table'.
+        ITable ocoli(datatable.otable);
+cout<<"duuude ocolit="<<ocoli << endl;
+        OTable expected(exptr, ocoli);
 std::cout<<"duuuuude wanted "<<expected<<endl;
 }
 };

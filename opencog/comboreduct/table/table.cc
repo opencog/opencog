@@ -77,6 +77,16 @@ ITable::ITable(const vector<type_node>& ts, const vector<string>& il)
 ITable::ITable(const ITable::super& mat, const vector<string>& il)
     : super(mat), labels(il) {}
 
+/// Construct an ITable holding a single column, the column from the OTable.
+ITable::ITable(const OTable& ot)
+{
+    insert_col(ot.get_label(), ot);
+
+    type_seq typs;
+    typs.push_back(ot.get_type());
+    set_types(typs);
+}
+
 ITable::ITable(const type_tree& tt, int nsamples,
                contin_t min_contin, contin_t max_contin)
 {
