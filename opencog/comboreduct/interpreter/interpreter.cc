@@ -224,11 +224,25 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
 // Mixed interpreter //
 ///////////////////////
 
-mixed_interpreter::mixed_interpreter(const std::vector<vertex>& inputs)
-    : _use_contin_inputs(false), mixed_inputs(inputs) {}
+mixed_interpreter::mixed_interpreter(const std::vector<vertex>& inputs) :
+    _use_boolean_inputs(false),
+    _use_contin_inputs(false),
+    _mixed_inputs(inputs)
+{}
 
-mixed_interpreter::mixed_interpreter(const std::vector<contin_t>& inputs)
-    : contin_interpreter(inputs), _use_contin_inputs(true), mixed_inputs(std::vector<vertex>()) {}
+mixed_interpreter::mixed_interpreter(const std::vector<contin_t>& inputs) :
+    contin_interpreter(inputs),
+    _use_boolean_inputs(false),
+    _use_contin_inputs(true),
+    _mixed_inputs(std::vector<vertex>())
+{}
+
+mixed_interpreter::mixed_interpreter(const std::vector<builtin>& inputs) :
+    boolean_interpreter(inputs),
+    _use_boolean_inputs(true),
+    _use_contin_inputs(false),
+    _mixed_inputs(std::vector<vertex>())
+{}
 
 vertex mixed_interpreter::operator()(const combo_tree& tr) const
 {
@@ -261,15 +275,20 @@ vertex mixed_interpreter::mixed_eval(combo_tree::iterator it) const
         // all contins, if the signature of the problem is
         // ->(contin ... contin boolean) or ->(contin ... contin enum_t)
         // so deal with this case.
-        // XXX FIXME, we should also handle the cases
-        // ->(bool ... bool contin) and ->(bool ... bool enum)
-        // which would have an empty contin and an empty mixed ...
         if (_use_contin_inputs)
             return contin_inputs[idx - 1];
 
+        // The mixed interpreter could be getting an array of 
+        // all booleans, if the signature of the problem is
+        // ->(bool ... bool contin) or ->(bool ... bool enum)
+        // so deal with this case.
+        if (_use_boolean_inputs)
+            return idx > 0 ? boolean_inputs[idx - 1]
+                : negate_builtin(boolean_inputs[-idx - 1]);
+
         // A negative index means boolean-negate. 
-        return idx > 0 ? mixed_inputs[idx - 1]
-            : negate_vertex(mixed_inputs[-idx - 1]);
+        return idx > 0 ? _mixed_inputs[idx - 1]
+            : negate_vertex(_mixed_inputs[-idx - 1]);
     }
     // mixed, boolean and contin builtin
     else if (const builtin* b = boost::get<builtin>(&v)) {
