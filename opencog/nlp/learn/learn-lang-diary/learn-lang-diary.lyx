@@ -91,10 +91,17 @@ Collection of thoughts and notes, pursuant to language learning.
 
 \begin_layout Standard
 Easier said than done.
- Seems 'obvious' but its not.
- Goal: constraint set of link rules to model only the observed language,
+ Should be 'obvious' but its not.
+ Goal: construct a set of linkage rules to model only the observed language,
  via link-grammar.
- Definitions.
+\end_layout
+
+\begin_layout Subsection*
+Notes on Mutual Information
+\end_layout
+
+\begin_layout Standard
+Definitions.
  Let 
 \begin_inset Formula $P(R(w_{l},w_{r}))$
 \end_inset
@@ -249,10 +256,10 @@ In practical use, one quickly observes that
 \begin_inset Formula $P(w_{l},*)\le P(w_{l})$
 \end_inset
 
- which can be viewed as a conditional probability:
+, which can be viewed as a conditional probability:
 \begin_inset Formula 
 \[
-P(w_{l},*)=P(R(w_{l},*))=P(R(w_{l},*)|w_{l})P(w_{l})
+P(w_{l},*)=P(R(w_{l},*))=P(R(w_{l},*)|w_{l})P(w_{l})\le P(w_{l})
 \]
 
 \end_inset
@@ -287,8 +294,8 @@ The right hand side above is recognizable from Yuret's work; he defines
 
 \end_inset
 
-so that laarge positive MI is associated with words that occur together
- only with themselves (e.g.
+so that large positive MI is associated with words that occur together only
+ with themselves (e.g.
  '
 \emph on
 Northern Ireland
@@ -371,9 +378,9 @@ P(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n})=\frac{P(R(x_{1},x_{
 The entropy is then built recursively by normalizing by the probability
  of wild-card relations:
 \begin_inset Formula 
-\[
-MI(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n}))=\log_{2}\frac{P(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n}))}{P(R(*,x_{2,}\cdots,x_{n})\,|\, x_{2,}\cdots,x_{n}))\, P(R(x_{1},*,\cdots,x_{n})\,|\, x_{1},x_{3,}\cdots,x_{n}))\cdots}
-\]
+\begin{equation}
+MI(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n}))=\log_{2}\frac{P(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n}))}{P(R(*,x_{2,}\cdots,x_{n})\,|\, x_{2,}\cdots,x_{n}))\, P(R(x_{1},*,\cdots,x_{n})\,|\, x_{1},x_{3,}\cdots,x_{n}))\cdots}\label{eq:Relation MI}
+\end{equation}
 
 \end_inset
 
@@ -435,7 +442,7 @@ OK ...
  someday, but for now it seems 'obvious').
  Also link-grammar is fully compatible with dependency grammar.
  So lets move forward.
- 
+ But this is an old debate, off to the side, immaterial for now.
 \end_layout
 
 \begin_layout Subsection*
@@ -460,7 +467,11 @@ Consider a sentence with
 \begin_inset Formula $P(R(w_{1},w_{2},\cdots,w_{n}))>0$
 \end_inset
 
- when the sentence is gramatically valid (i.e.
+ when the sentence is gramatically valid (
+\emph on
+i.e.
+
+\emph default
  such an 
 \begin_inset Formula $R$
 \end_inset
@@ -473,7 +484,11 @@ Consider a sentence with
 \begin_inset Formula $R$
 \end_inset
 
- exists (i.e.
+ exists (
+\emph on
+i.e.
+
+\emph default
  the sentence is not gramatically valid.) The first and most obvious simplificati
 on rule is to observe that 
 \begin_inset Formula $R$
@@ -588,9 +603,25 @@ So ...
  
 \end_layout
 
+\begin_layout Subsubsection*
+Revision: July 2014
+\end_layout
+
 \begin_layout Standard
-I think the correct counting rule is to count set-membership relations on
- equal footing with structural relations.
+There seem to be several ways of counting.
+ Some of these seem to give wrong answers.
+ Some just seem wrong.
+ This is all very confusing, so I've altered the entries to explicitly show
+ the different ways of counting.
+\end_layout
+
+\begin_layout Paragraph*
+Method 1 (naive counting):
+\end_layout
+
+\begin_layout Standard
+One counting rule is to count set-membership relations on equal footing
+ with structural relations.
  Thus, before simplification, we had 
 \begin_inset Formula $N+3$
 \end_inset
@@ -607,8 +638,8 @@ I think the correct counting rule is to count set-membership relations on
  set membership relations.
  Thus, this particular simplification step does not reduce the number of
  membership relations at all.
- I think this is the right way to count.
- Let provisionally go with this and see what happens.
+ This seems disconcerting...
+ Let's provisionally go with this and see what happens.
  Thus, before simplification, we had 
 \begin_inset Formula $2N+3$
 \end_inset
@@ -665,13 +696,25 @@ OK, so the space of word-sequences is very concrete, and easy to describe
 \end_inset
 
 , respectively.
- Neither of these matches the entropy of the set of allowed sentences, so
- this seems paradoxical, and begs the questions 'did we count correctly?'
- and 'did we actually simplify anything by making the above change of descritpio
+ Neither of these matches the entropy of the set of allowed sentences (which
+ is 
+\begin_inset Formula $\log_{2}N$
+\end_inset
+
+), so this seems paradoxical, and begs the questions 'did we count correctly?'
+ and 'did we actually simplify anything by making the above change of descriptio
 n?' Hmm.
  The correct answer seems to be 'no' and 'no'.
- The correct counting methodology seems to be to subtract 1 from the cardinality
- of every set.
+ 
+\end_layout
+
+\begin_layout Paragraph*
+Method 2 (subtract one):
+\end_layout
+
+\begin_layout Standard
+To 'fix' the oddball results above, an alternative counting methodology
+ is to subtract 1 from the cardinality of every set.
  This would then give both 
 \begin_inset Formula $\log_{2}N$
 \end_inset
@@ -685,24 +728,175 @@ n?' Hmm.
 \begin_inset Formula $N+3$
 \end_inset
 
- sets, each of weight zero, for a total wieghted-relation count of 
+ sets, each of weight zero, for a total weighted-relation count of 
 \begin_inset Formula $N$
 \end_inset
 
 .
- After, we have one relation and four sets; three of the sets have wieght
+ After, we have one relation and four sets; three of the sets have weight
  zero, one set has a weight of 
 \begin_inset Formula $N-1$
 \end_inset
 
- so the total wieghted relations is again 
+ so the total weighted relations is again 
 \begin_inset Formula $N$
 \end_inset
 
 .
  This seems to resolve the paradox.
- Lets move on to more challenging domains.
+ But why subtract one? That's a bizarre rule, almost unheard-of in information
+ theory.
+\end_layout
+
+\begin_layout Paragraph*
+Method 3 (naive log addition):
+\end_layout
+
+\begin_layout Standard
+Total complexity is given by:
+\begin_inset Formula 
+\[
+K=\log_{2}|Rel|+\sum_{W\in Wrds}\log_{2}|W|
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $Rel$
+\end_inset
+
+ is the set of relations, and 
+\begin_inset Formula $Wrds$
+\end_inset
+
+ is the set of word-lists, and 
+\begin_inset Formula $|W|$
+\end_inset
+
+ is the cardinality of each word-list.
+ We then get, before simplification, 
+\begin_inset Formula $|Rel|=N$
+\end_inset
+
+ and 
+\begin_inset Formula $|W|=1$
+\end_inset
+
+ for each of the word-sets.
+ The total complexity is thus 
+\begin_inset Formula $K=\log_{2}N$
+\end_inset
+
+ as expected (i.e.
+ equal to the log of the total number of possible sentences).
+ After simplification, there is 
+\begin_inset Formula $|Rel|=1$
+\end_inset
+
+ and 3 sets with 
+\begin_inset Formula $|W|=1$
+\end_inset
+
+ and one set with 
+\begin_inset Formula $|W|=N$
+\end_inset
+
+, thus yeilding a total of 
+\begin_inset Formula $K=\log_{2}N$
+\end_inset
+
+ again.
+ This seems to give a plausible answer, and provides a plausible argument.
  
+\end_layout
+
+\begin_layout Paragraph*
+Method 4 (relational complexity):
+\end_layout
+
+\begin_layout Standard
+Treating each relation as being equally complex seems odd.
+ It would seem to make more sense to have each relation contribute according
+ to its complexity, so that the contribution of the relations to the total
+ complexity is: 
+\begin_inset Formula 
+\[
+\sum_{R\in Rel}C_{R}
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $C_{R}$
+\end_inset
+
+ the complexity of each relation, itself the log of some measure.
+ But how do we measure complexity? Is it Kolmogorov complexity? There's
+ no obvious 
+\emph on
+a priori
+\emph default
+ defintion for this.
+ The defintion of this complexity would seem to depend on the particular
+ algorithm machinery of the grammar; that is, on the 'programming language'
+ used to represent the relation.
+ This is the traditional ambiguity attached to the Kolmogorov complexity.
+\end_layout
+
+\begin_layout Paragraph*
+Method 5 (corpus distribution):
+\end_layout
+
+\begin_layout Standard
+Instead of measuring the complexity of a grammatical expression (in an as-yet
+ unkown grammar), instead, use the corpus frequency ass a proxy.
+ For the above example, if the 
+\begin_inset Formula $N$
+\end_inset
+
+ sentences are equi-distributed (i.e.
+ occur equally likely in the corpus), then, before simplification, each
+ of the relations has a complexity 
+\begin_inset Formula 
+\[
+C_{R}=-\frac{1}{N}\log_{2}\frac{1}{N}
+\]
+
+\end_inset
+
+so that, before simplification, 
+\begin_inset Formula 
+\[
+K=\sum_{R\in Rel}C_{R}=\log_{2}N
+\]
+
+\end_inset
+
+which again seems to be the desired answer.
+ After simplification, there is one relation that applies to the entire
+ corpus, so that 
+\begin_inset Formula $C_{R}=0$
+\end_inset
+
+ after simplification.
+ Provisionally, this last method seems to be the best way to move forward.
+ To summarize, the complexity is given by 
+\begin_inset Formula 
+\begin{equation}
+K=-\sum_{R\in Rel}P_{R}\log_{2}P_{R}+\sum_{W\in Wrds}\log_{2}|W|\label{eq:counting complexity}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $P_{R}=P(R)=P(R(W_{1},W_{2},\cdots,W_{n}))$
+\end_inset
+
+ is the probability of observing the relation 
+\begin_inset Formula $R$
+\end_inset
+
+ in a sample corpus.
 \end_layout
 
 \begin_layout Subsection*
@@ -1291,8 +1485,8 @@ Unsupervised Named-Entity Extraction from the Web: An Experimental Study
 
 .
  So: KNOWITALL utilizes a set of eight domain-independent extraction patterns
- to generate candidate facts.1 For example, the generic pattern “NP1 such
- as NPList2” ...
+ to generate candidate facts.
+ For example, the generic pattern “NP1 such as NPList2” ...
  
 \begin_inset Quotes eld
 \end_inset
@@ -2605,7 +2799,7 @@ morphtactics
  We make two claims: first.
  the automated discovery of morpheme boundaries can be accomplished by searching
  for breaks between word-parts that have the lowest mutual information.
- Second, the doscivery of morphotactics is identical to the discevery of
+ Second, the discovery of morphotactics is identical to the discovery of
  syntax, as outlined above.
 \end_layout
 
@@ -11882,6 +12076,64 @@ The problem of condensing together morphemes into classes which share common
 Bad grammars increase the size of the language.
  This could be acceptable, if the increase is small.
  What's the crieteria? Unclear.
+\end_layout
+
+\begin_layout Section*
+27 July 2014
+\end_layout
+
+\begin_layout Subsection*
+Consciousness
+\end_layout
+
+\begin_layout Standard
+Two works:
+\end_layout
+
+\begin_layout Itemize
+Masafumi Oizumi, Larissa Albantakis, Giulio Tononi, 
+\begin_inset Quotes eld
+\end_inset
+
+From the Phenomenology to the Mechanisms of Consciousness: Integrated Informatio
+n Theory 3.0
+\begin_inset Quotes erd
+\end_inset
+
+ (2014) PLOS Computational Biology, http://www.ploscompbiol.org/article/info%3Adoi
+%2F10.1371%2Fjournal.pcbi.1003588
+\end_layout
+
+\begin_layout Itemize
+Max Tegmark, Consciousness as a State of Matter (27 Feb 2014) arXiv:1401.1219v2
+ [quant-ph]
+\end_layout
+
+\begin_layout Standard
+Curious points and thoughts:
+\end_layout
+
+\begin_layout Itemize
+CEI -- 
+\begin_inset Quotes eld
+\end_inset
+
+Cause-effect information
+\begin_inset Quotes erd
+\end_inset
+
+ -- Tononi -- sound like a time-ordered variant of mutual information.
+ How should this be defined? Answer: my guess is that its just like the
+ mutual information defined in eqn
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Relation MI"
+
+\end_inset
+
+, right? Because the relational complexity can deal with arbitrary structures,
+ so that seems appropriate.
+ 
 \end_layout
 
 \begin_layout Section*
