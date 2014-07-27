@@ -275,11 +275,16 @@ vertex mixed_interpreter::mixed_eval(combo_tree::iterator it) const
         // all contins, if the signature of the problem is
         // ->(contin ... contin boolean) or ->(contin ... contin enum_t)
         // so deal with this case.
-        // XXX FIXME, we should also handle the cases
-        // ->(bool ... bool contin) and ->(bool ... bool enum)
-        // which would have an empty contin and an empty mixed ...
         if (_use_contin_inputs)
             return contin_inputs[idx - 1];
+
+        // The mixed interpreter could be getting an array of 
+        // all booleans, if the signature of the problem is
+        // ->(bool ... bool contin) or ->(bool ... bool enum)
+        // so deal with this case.
+        if (_use_boolean_inputs)
+            return idx > 0 ? boolean_inputs[idx - 1]
+                : negate_builtin(boolean_inputs[-idx - 1]);
 
         // A negative index means boolean-negate. 
         return idx > 0 ? _mixed_inputs[idx - 1]
