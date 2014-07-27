@@ -1,4 +1,4 @@
-/** eval-table.cc --- 
+/** eval-table.cc ---
  *
  * Copyright (C) 2011 OpenCog Foundation
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -39,6 +39,22 @@ using namespace opencog;
  * Program to output the result of a combo program given input data
  * described in DSV format.
  */
+static const pair<string, string> rand_seed_opt("random-seed", "r");
+static const pair<string, string> input_table_opt("input-table", "i");
+static const pair<string, string> target_feature_opt("target-feature", "u");
+static const pair<string, string> ignore_feature_str_opt("ignore-feature", "Y");
+static const pair<string, string> force_feature_opt("force-feature", "e");
+static const pair<string, string> combo_str_opt("combo-program", "c");
+static const pair<string, string> combo_prog_file_opt("combo-programs-file", "C");
+static const pair<string, string> labels_opt("labels", "L");
+static const pair<string, string> output_file_opt("output-file", "o");
+static const pair<string, string> display_inputs_opt("display-inputs", "I");
+static const pair<string, string> log_level_opt("log-level", "l");
+static const pair<string, string> log_file_opt("log-file", "f");
+static const string default_log_file_prefix = "eval-table";
+static const string default_log_file_suffix = "log";
+static const string default_log_file = default_log_file_prefix + "." + default_log_file_suffix;
+
 
 /**
  * Convert a string representing a combo program in a combo_tree.
@@ -53,7 +69,7 @@ combo_tree str2combo_tree_label(const std::string& combo_prog_str,
                                 bool has_labels,
                                 const std::vector<std::string>& labels) {
     // combo pogram with place holders
-    std::string combo_prog_ph_str = 
+    std::string combo_prog_ph_str =
         has_labels? l2ph(combo_prog_str, labels) : combo_prog_str;
     std::stringstream ss(combo_prog_ph_str);
     combo_tree tr;
@@ -64,7 +80,7 @@ combo_tree str2combo_tree_label(const std::string& combo_prog_str,
 vector<string> get_all_combo_tree_str(const evalTableParameters& pa)
 {
     vector<string> res(pa.combo_programs);     // from command line
-    
+
     // from files
     for (const string& combo_programs_file : pa.combo_programs_files) {
         ifstream in(combo_programs_file.c_str());
@@ -186,8 +202,8 @@ void read_eval_output_results(evalTableParameters& pa)
 /**
  * Program to evaluate a combo program over a data set repsented as csv file.
  */
-int main(int argc,char** argv) { 
-
+static int eval_table(int argc, char** argv)
+{
     // program options, see options_description below for their meaning
     evalTableParameters pa;
     unsigned long rand_seed;
@@ -196,21 +212,21 @@ int main(int argc,char** argv) {
     options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "Produce help message.\n")
-        
+
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
          "Random seed.\n")
-        
+
         (opt_desc_str(input_table_opt).c_str(),
          value<string>(&pa.input_table_file),
          "Input table file in DSV format (seperators are comma, "
          "whitespace and tabulation).\n")
-        
+
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&pa.target_feature_str),
          "Target feature name. If empty (default) then no target feature "
          "is considered and the table is assumed to be all input data.\n")
-        
+
         (opt_desc_str(ignore_feature_str_opt).c_str(),
          value<vector<string>>(&pa.ignore_features_str),
          "Ignore feature from the datasets. Can be used several times "
@@ -227,13 +243,13 @@ int main(int argc,char** argv) {
          "to have variables not being interpreted as shell variables you may "
          "want to put the combi between single quotes. This option can be "
          "used several times so that several programs are evaluated at once.\n")
-        
+
         (opt_desc_str(combo_prog_file_opt).c_str(),
          value<vector<string>>(&pa.combo_programs_files),
          "File containing combo programs to evaluate against the input table. "
          "Each combo program in the file is seperated by a new line and each "
          "results are displaied in the same order, seperated by a new line.\n")
-        
+
         (opt_desc_str(labels_opt).c_str(),
          value<bool>(&pa.has_labels)->default_value(true),
          "If enabled then the combo program is expected to contain variables "
@@ -242,7 +258,7 @@ int main(int argc,char** argv) {
          "'and($24 $124)'. In such a case it is expected that the input data "
          "file contains the labels as first row. "
          "TODO could be detected automatically.\n")
-        
+
         (opt_desc_str(output_file_opt).c_str(),
          value<vector<string>>(&pa.output_files),
          "File where to save the results. If empty then it outputs on "
@@ -258,7 +274,7 @@ int main(int argc,char** argv) {
          "(starting from 0). Suffixes are 0-padded to respect lexicographic "
          "order as well. If disabled, or if no output file is provided "
          "(stdout) all outputs are appended.\n")
-                
+
         (opt_desc_str(display_inputs_opt).c_str(), value<bool>(&pa.display_inputs)->default_value(false),
          "Display all inputs (as well as the output and the forced features), "
          "the feature order is preserved.\n")
@@ -299,4 +315,9 @@ int main(int argc,char** argv) {
     randGen().seed(rand_seed);
 
     read_eval_output_results(pa);
+}
+
+int main(int argc, char** argv)
+{
+    return eval_table(argc, argv);
 }

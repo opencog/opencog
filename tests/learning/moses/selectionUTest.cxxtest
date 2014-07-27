@@ -22,8 +22,9 @@
  */
 
 #include <cxxtest/TestSuite.h>
-#include <opencog/learning/moses/main/moses_exec.h>
 #include <opencog/util/Logger.h>
+#include <opencog/comboreduct/main/eval-table.h>
+#include <opencog/learning/moses/main/moses_exec.h>
 #include "moses-framework.h"
 
 using namespace opencog::moses;
@@ -49,10 +50,10 @@ public:
         moses_exec(args);
 
         // get the combo tree string
-        auto score_tree = cheap_parse_result(tempfile);
+        string cts = cheap_parse_result(tempfile).second;
         unlink(tempfile.c_str());
 
-std::cout<<"duuuuude got "<<score_tree.second<<endl;
+std::cout<<"duuuuude got "<<cts<<endl;
 
     }
 };
