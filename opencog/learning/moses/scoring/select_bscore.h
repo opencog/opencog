@@ -26,11 +26,13 @@
 #ifndef _SELECT_BSCORE_H
 #define _SELECT_BSCORE_H
 
+#include <opencog/comboreduct/table/table.h>
 #include "scoring_base.h"
 
 namespace opencog { namespace moses {
 
 using combo::CTable;
+using combo::count_t;
 
 /**
  * Fitness function for selecting a range of rows from a continuous-
@@ -62,6 +64,8 @@ struct select_bscore : public bscore_ctable_base
     score_t min_improv() const;
 
 protected:
+    std::pair<double, double> get_weightiest(const Counter<vertex, count_t>&) const;
+
     bool _positive;
     score_t _lower_bound;
     score_t _upper_bound;
