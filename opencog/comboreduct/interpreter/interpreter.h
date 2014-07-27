@@ -81,6 +81,7 @@ struct mixed_interpreter : public boolean_interpreter, public contin_interpreter
     // ctor
     mixed_interpreter(const std::vector<vertex>& inputs = std::vector<vertex>());
     mixed_interpreter(const std::vector<contin_t>& inputs);
+    mixed_interpreter(const std::vector<builtin>& inputs);
 
     // interpreters
     vertex operator()(const combo_tree& tr) const;
@@ -90,8 +91,9 @@ struct mixed_interpreter : public boolean_interpreter, public contin_interpreter
     virtual vertex mixed_eval(combo_tree::iterator it) const;
 
 protected:
+    bool _use_boolean_inputs;
     bool _use_contin_inputs;
-    const std::vector<vertex>& mixed_inputs;
+    const std::vector<vertex>& _mixed_inputs;
 };            
 
 }} // ~namespaces combo opencog

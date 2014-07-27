@@ -224,11 +224,25 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
 // Mixed interpreter //
 ///////////////////////
 
-mixed_interpreter::mixed_interpreter(const std::vector<vertex>& inputs)
-    : _use_contin_inputs(false), mixed_inputs(inputs) {}
+mixed_interpreter::mixed_interpreter(const std::vector<vertex>& inputs) :
+    _use_boolean_inputs(false),
+    _use_contin_inputs(false),
+    _mixed_inputs(inputs)
+{}
 
-mixed_interpreter::mixed_interpreter(const std::vector<contin_t>& inputs)
-    : contin_interpreter(inputs), _use_contin_inputs(true), mixed_inputs(std::vector<vertex>()) {}
+mixed_interpreter::mixed_interpreter(const std::vector<contin_t>& inputs) :
+    contin_interpreter(inputs),
+    _use_boolean_inputs(false),
+    _use_contin_inputs(true),
+    _mixed_inputs(std::vector<vertex>())
+{}
+
+mixed_interpreter::mixed_interpreter(const std::vector<builtin>& inputs) :
+    boolean_interpreter(inputs),
+    _use_boolean_inputs(true),
+    _use_contin_inputs(false),
+    _mixed_inputs(std::vector<vertex>())
+{}
 
 vertex mixed_interpreter::operator()(const combo_tree& tr) const
 {
@@ -268,8 +282,8 @@ vertex mixed_interpreter::mixed_eval(combo_tree::iterator it) const
             return contin_inputs[idx - 1];
 
         // A negative index means boolean-negate. 
-        return idx > 0 ? mixed_inputs[idx - 1]
-            : negate_vertex(mixed_inputs[-idx - 1]);
+        return idx > 0 ? _mixed_inputs[idx - 1]
+            : negate_vertex(_mixed_inputs[-idx - 1]);
     }
     // mixed, boolean and contin builtin
     else if (const builtin* b = boost::get<builtin>(&v)) {
