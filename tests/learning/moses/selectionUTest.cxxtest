@@ -23,8 +23,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include <opencog/util/Logger.h>
-#include <opencog/comboreduct/main/eval-table.h>
 #include <opencog/learning/moses/main/moses_exec.h>
+#include <opencog/comboreduct/table/table.h>
+#include <opencog/comboreduct/table/table_io.h>
 #include "moses-framework.h"
 
 using namespace opencog::moses;
@@ -38,22 +39,35 @@ class selectionUTest : public CxxTest::TestSuite
 {
 public:
     selectionUTest() {
-        opencog::logger().setPrintToStdoutFlag(true);
+        // opencog::logger().setPrintToStdoutFlag(true);
     }
 
     void test_selection() {
-        string data_file_path("-i" + test_dir + "select.csv");
+        string data_file_path(test_dir + "select.csv");
 
         // create temp output file
-        vector<string> args = {data_file_path, "-Hselect", "-m10000", "--boost=1"};
+        vector<string> args = {"-i" + data_file_path, "-Hselect", "-m10000", "--boost=1"};
         string tempfile = build_arguments(args);
         moses_exec(args);
 
-        // get the combo tree string
-        string cts = cheap_parse_result(tempfile).second;
+        // get the combo tree
+        combo_tree comtr = parse_result(tempfile).second;
         unlink(tempfile.c_str());
 
-std::cout<<"duuuuude got "<<cts<<endl;
+std::cout<<"duuuuude got "<<comtr<<endl;
 
-    }
+        // Re-read the data file
+        Table datatable;
+        datatable = loadTable(data_file_path, "output", std::vector<std::string>());
+
+        OTable predicted(comtr, datatable.itable);
+std::cout<<"duuuuude got "<<predicted<<endl;
+
+        // The expected output is this:
+        string expstr = "and( 0<( -($output 908.787)) 0<( -(1281.55 $output)))";
+        combo_tree exptr;
+        std::stringstream(expstr) >> exptr;
+        OTable expected(exptr, datatable.itable);
+std::cout<<"duuuuude wanted "<<expected<<endl;
+}
 };
