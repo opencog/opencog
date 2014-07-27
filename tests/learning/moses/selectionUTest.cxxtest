@@ -1,0 +1,58 @@
+/** selectionUTest.cxxtest ---
+ *
+ * Copyright (C) 2011 OpenCog Foundation
+ * Copyright (C) 2014 Aidyia Limited
+ *
+ * Author: Linas Vepstas <linasvepstas@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+#include <opencog/learning/moses/main/moses_exec.h>
+#include <opencog/util/Logger.h>
+#include "moses-framework.h"
+
+using namespace opencog::moses;
+
+const string test_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
+
+/**
+ * Test of the selection scorer
+ */
+class selectionUTest : public CxxTest::TestSuite
+{
+public:
+    selectionUTest() {
+        opencog::logger().setPrintToStdoutFlag(true);
+    }
+
+    void test_selection() {
+        string data_file_path("-i" + test_dir + "select.csv");
+
+        // create temp output file
+        vector<string> args = {data_file_path, "-Hselect", "-m10000", "--boost=1"};
+        string tempfile = build_arguments(args);
+        moses_exec(args);
+
+        // get the combo tree string
+        auto score_tree = cheap_parse_result(tempfile);
+        unlink(tempfile.c_str());
+
+std::cout<<"duuuuude got "<<score_tree.second<<endl;
+
+    }
+};
