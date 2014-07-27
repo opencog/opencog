@@ -333,3 +333,39 @@ Outlier mitigation:
  * GentleAdaBoost
  * BrownBoost
 
+
+Selection scoring with boosting
+-------------------------------
+
+Performance of the selectionUTest on select.csv with differrent evals:
+
+     num_evals  error   dedupe   nodupe
+     ---------  -----   ------   ------
+           5     26
+          50     26
+         100     26
+         200     26
+         500     26
+          1K     26      29        33
+          2K     26
+          5K     26
+         10K     26      29        33
+         20K     26
+         40K     26      29
+         80K     26
+        160K     26                33
+        320K  
+        640K             29
+
+This is a very degenerate dataset: select.csv contains a total of 329 rows.
+Of these only 60 are unique, so max score can't really do better than that.
+
+Evaluation halts after after 49K evals ... 
+
+The dedupe column shows results for the select-less-dupe.csv file  This one
+has 329 rows, of which  286 are unique.
+
+The nodupe column shows results for the select-no-dupe.csv file  This one
+has 329 rows, all of which are unique.
+
+Well, there's a bug somewhere ... 

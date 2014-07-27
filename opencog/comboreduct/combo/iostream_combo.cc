@@ -123,7 +123,7 @@ bool builtin_str_to_vertex(const std::string& str, vertex& v)
     return true;
 }
 
-//* Concvert ANN string to vertex.
+//* Convert ANN string to vertex.
 //* Return false if str is not of ANN type.
 //*
 //* ANN strings must begin with $N or $I

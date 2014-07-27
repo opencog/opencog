@@ -1,0 +1,108 @@
+/** selectionUTest.cxxtest ---
+ *
+ * Copyright (C) 2011 OpenCog Foundation
+ * Copyright (C) 2014 Aidyia Limited
+ *
+ * Author: Linas Vepstas <linasvepstas@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+#include <opencog/util/Logger.h>
+#include <opencog/learning/moses/main/moses_exec.h>
+#include <opencog/comboreduct/table/table.h>
+#include <opencog/comboreduct/table/table_io.h>
+#include "moses-framework.h"
+
+using namespace opencog::moses;
+
+const string test_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
+
+/**
+ * Test of the selection scorer
+ */
+class selectionUTest : public CxxTest::TestSuite
+{
+public:
+    selectionUTest() {
+        // opencog::logger().setPrintToStdoutFlag(true);
+    }
+
+    void frame(string filename, string meval, string expstr, int hamm)
+    {
+        string data_file_path(test_dir + filename);
+
+        // create temp output file
+        vector<string> args = {"-i" + data_file_path, "-Hselect", meval, "--boost=1"};
+        string tempfile = build_arguments(args);
+        moses_exec(args);
+
+        // get the combo tree
+        combo_tree comtr = parse_result(tempfile).second;
+        unlink(tempfile.c_str());
+
+        std::cout << "Learned tree " << comtr << endl;
+
+        // Re-read the data file
+        Table datatable;
+        datatable = loadTable(data_file_path, "output", std::vector<std::string>());
+
+        OTable predicted(comtr, datatable.itable);
+
+        // The expected output is this:
+        combo_tree exptr;
+        std::stringstream(expstr) >> exptr;
+
+        // Copy the output column into an 'input table'.
+        ITable ocoli(datatable.otable);
+        OTable expected(exptr, ocoli);
+
+        // Place all the columns in one spot, for easier debugging.
+        ITable dbg;
+        dbg.insert_col("predicted", predicted);
+        dbg.insert_col("expected", expected);
+        dbg.insert_col("raw", datatable.otable);
+        // std::cout << "Debug table:\n" << dbg << std::endl;
+
+        double diff = expected.abs_distance(predicted);
+        std::cout << "Hamming distance=" << diff << endl;
+
+        TS_ASSERT(hamm == diff);
+    }
+
+    void test_selection()
+    {
+        // The expected output is this:
+        // string expstr = "and( 0<( +($output -1615.97)) not(0<( +($output -1878.99))))";
+        string expstr = "and( 0<( +($1 -1615.97)) not(0<( +($1 -1878.99))))";
+        frame("select.csv", "-m500", expstr, 26);
+    }
+
+    void test_selection_de()
+    {
+        // The expected output is this:
+        string expstr = "and( 0<( +($1 -1411.07)) not(0<( +($1 -1708.05))))";
+        frame("select-less-dupe.csv", "-m1000", expstr, 29);
+    }
+
+    void test_selection_no()
+    {
+        // The expected output is this:
+        string expstr = "and( 0<( +($1 -1329.39)) not(0<( +($1 -1663.79))))";
+        frame("select-less-dupe.csv", "-m1000", expstr, 33);
+    }
+};
