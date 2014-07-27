@@ -95,8 +95,14 @@ public:
     void test_selection_de()
     {
         // The expected output is this:
-        // string expstr = "and( 0<( +($output -1615.97)) not(0<( +($output -1878.99))))";
         string expstr = "and( 0<( +($1 -1411.07)) not(0<( +($1 -1708.05))))";
         frame("select-less-dupe.csv", "-m1000", expstr, 29);
+    }
+
+    void test_selection_no()
+    {
+        // The expected output is this:
+        string expstr = "and( 0<( +($1 -1329.39)) not(0<( +($1 -1663.79))))";
+        frame("select-less-dupe.csv", "-m1000", expstr, 33);
     }
 };
