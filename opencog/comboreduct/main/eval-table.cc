@@ -200,9 +200,10 @@ void read_eval_output_results(evalTableParameters& pa)
 }
 
 /**
- * Program to evaluate a combo program over a data set repsented as csv file.
+ * Read and parse the eval-table program arguments.
+ * Return the parsed results in the parameters struct.
  */
-static int eval_table(int argc, char** argv)
+evalTableParameters eval_table_program_args(int argc, char** argv)
 {
     // program options, see options_description below for their meaning
     evalTableParameters pa;
@@ -293,9 +294,9 @@ static int eval_table(int argc, char** argv)
     store(parse_command_line(argc, argv, desc), vm);
     notify(vm);
 
-    if(vm.count("help") || argc == 1) {
+    if (vm.count("help") || argc == 1) {
         cout << desc << "\n";
-        return 1;
+        exit(1);
     }
 
     // Remove old log_file before setting the new one.
@@ -314,10 +315,15 @@ static int eval_table(int argc, char** argv)
     // init random generator
     randGen().seed(rand_seed);
 
-    read_eval_output_results(pa);
+    return pa;
 }
 
+/**
+ * Program to evaluate a combo program over a data set repsented as csv file.
+ */
 int main(int argc, char** argv)
 {
-    return eval_table(argc, argv);
+    evalTableParameters pa = eval_table_program_args(argc, argv);
+    read_eval_output_results(pa);
+    return 0;
 }

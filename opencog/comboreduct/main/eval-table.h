@@ -65,6 +65,8 @@ struct evalTableParameters
     string log_file;
 };
 
+evalTableParameters eval_table_program_args(int argc, char** argv);
+
 template<typename Out>
 Out& output_results(Out& out, const evalTableParameters& pa,
                     const Table& table, const OTable& ot_tr)
