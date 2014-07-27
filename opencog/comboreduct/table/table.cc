@@ -402,8 +402,23 @@ contin_t OTable::abs_distance(const OTable& ot) const
 {
     OC_ASSERT(ot.size() == size());
     contin_t res = 0;
-    for(const_iterator x = begin(), y = ot.begin(); x != end();)
-        res += fabs(get_contin(*(x++)) - get_contin(*(y++)));
+    if (id::contin_type == type and id::contin_type == ot.type) {
+        for (const_iterator x = begin(), y = ot.begin(); x != end();) 
+            res += fabs(get_contin(*(x++)) - get_contin(*(y++)));
+    }
+    else
+    if (id::boolean_type == type and id::boolean_type == ot.type) {
+        for (const_iterator x = begin(), y = ot.begin(); x != end();) 
+            res += (contin_t) (get_builtin(*(x++)) != get_builtin(*(y++)));
+    }
+    else
+    if (id::enum_type == type and id::enum_type == ot.type) {
+        for (const_iterator x = begin(), y = ot.begin(); x != end();) 
+            res += (contin_t) (get_enum_type(*(x++)) != get_enum_type(*(y++)));
+    }
+    else
+        throw InconsistenceException(TRACE_INFO,
+            "Can't compare, mismatched column types.");
     return res;
 }
 
@@ -412,7 +427,7 @@ contin_t OTable::sum_squared_error(const OTable& ot) const
 {
     OC_ASSERT(ot.size() == size());
     contin_t res = 0;
-    for(const_iterator x = begin(), y = ot.begin(); x != end();)
+    for (const_iterator x = begin(), y = ot.begin(); x != end();)
         res += sq(get_contin(*(x++)) - get_contin(*(y++)));
     return res;
 }

@@ -333,3 +333,17 @@ Outlier mitigation:
  * GentleAdaBoost
  * BrownBoost
 
+
+Selection scoring with boosting
+-------------------------------
+
+Performance of the selectionUTest on select.csv with differrent evals:
+
+     num_evals  error
+     ---------  -----
+         10K     30
+         20K     27
+         40K    107
+         80K     70
+        160K     29
+        320K

@@ -46,7 +46,7 @@ public:
         string data_file_path(test_dir + "select.csv");
 
         // create temp output file
-        vector<string> args = {"-i" + data_file_path, "-Hselect", "-m10000", "--boost=1"};
+        vector<string> args = {"-i" + data_file_path, "-Hselect", "-m320000", "--boost=1"};
         string tempfile = build_arguments(args);
         moses_exec(args);
 
@@ -63,15 +63,23 @@ public:
         OTable predicted(comtr, datatable.itable);
 
         // The expected output is this:
-        // string expstr = "and( 0<( -($output 908.787)) 0<( -(1281.55 $output)))";
-        string expstr = "and( 0<( -($1 908.787)) 0<( -(1281.55 $1)))";
+        // string expstr = "and( 0<( +($output -908.787)) not(0<( +($output -1281.55))))";
+        string expstr = "and( 0<( +($1 -908.787)) not(0<( +($1 -1281.55))))";
         combo_tree exptr;
         std::stringstream(expstr) >> exptr;
 
         // Copy the output column into an 'input table'.
         ITable ocoli(datatable.otable);
-cout<<"duuude ocolit="<<ocoli << endl;
         OTable expected(exptr, ocoli);
-std::cout<<"duuuuude wanted "<<expected<<endl;
+
+        // Place all the columns in one spot, for easier debugging.
+        ITable dbg;
+        dbg.insert_col("predicted", predicted);
+        dbg.insert_col("expected", expected);
+        dbg.insert_col("raw", datatable.otable);
+        // std::cout << "Debug table:\n" << dbg << std::endl;
+
+        double diff = expected.abs_distance(predicted);
+        std::cout << "Hamming distance=" << diff << endl;
 }
 };
