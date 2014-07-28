@@ -291,7 +291,9 @@ void ITable::delete_columns(const vector<string>& ignore_features)
         delete_column(feat);
 }
 
-// -------------------------------------------------------
+////////////
+// OTable //
+////////////
 
 OTable::OTable(const string& ol)
     : label(ol), type(id::unknown_type) {}
@@ -419,7 +421,29 @@ contin_t OTable::root_mean_square_error(const OTable& ot) const
     return sqrt(mean_squared_error(ot));
 }
 
-// -------------------------------------------------------
+////////////
+// TTable //
+////////////
+
+TTable::TTable(const string& tl)
+    : label(tl) {}
+
+TTable::TTable(const super& tt, const string& tl)
+    : super(tt), label(tl) {}
+
+void TTable::set_label(const string& tl)
+{
+    label = tl;
+}
+
+const string& TTable::get_label() const
+{
+    return label;
+}
+
+///////////
+// Table //
+///////////
 
 Table::Table() : target_pos(0) {}
 

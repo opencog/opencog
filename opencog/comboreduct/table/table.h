@@ -783,11 +783,24 @@ protected:
     type_node type;    // the type of the column data.
 };
 
+static const std::string default_timestamp_label("timestamp");
+
 /**
  * Table containing timestamps.
  * There is only one column: a single timestamp for each row.
  */
-typedef std::vector<boost::gregorian::date> TTable;
+struct TTable : public std::vector<boost::gregorian::date> {
+    typedef std::vector<boost::gregorian::date> super;
+public:
+    typedef boost::gregorian::date value_type;
+
+    TTable(const std::string& tl = default_timestamp_label);
+    TTable(const super& tt, const std::string& tl = default_timestamp_label);
+    void set_label(const std::string&);
+    const std::string& get_label() const;
+protected:
+    std::string label;
+};
 
 /**
  * Typed data table.
