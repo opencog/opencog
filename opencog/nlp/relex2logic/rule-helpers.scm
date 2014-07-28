@@ -32,18 +32,19 @@
 )
 
 ; -----------------------------------------------------------------------
-; Creates a possible name 'node-name' of lenght 'name-length' for a node
+; Creates a possible name 'node-name' of length 'random-length' for a node
 ; of type 'node-type'. The 'node-name' is not used with any other node
-; of type 'node-type'. 
-(define (random-node-name node-type name-length)
-	(define node-name (random-string name-length))
-	(if (equal? node-type 'VariableNode)
-		(set! node-name (string-append "$" node-name))
+; of type 'node-type'. Prepend 'prepend-text' to the front.
+(define (random-node-name node-type random-length prepend-text)
+	(define node-name (random-string random-length))
+	(define prepend-length (string-length prepend-text))
+	(if (> prepend-length 0)
+		(set! node-name (string-append prepend-text node-name))
 	)
 	(while (check-name? node-name node-type)
-		(if (equal? node-type 'VariableNode)
-			(set! node-name (string-append "$" (random-string name-length)))
-			(set! node-name (random-string name-length))
+		(if (> prepend-length 0)
+			(set! node-name (string-append prepend-text (random-string random-length)))
+			(set! node-name (random-string random-length))
 		)
 	)
 	node-name
@@ -52,7 +53,7 @@
 ; -----------------------------------------------------------------------
 ; Creates name for VariableNodes after checking whether the name is being
 ; used by other VariableNode.
-(define (choose-var-name) (random-node-name 'VariableNode 36))
+(define (choose-var-name) (random-node-name 'VariableNode 36 "$"))
 
 ; -----------------------------------------------------------------------
 ; Check if the lemma of a WordInstanceNode 'word-inst' is 'word'.
