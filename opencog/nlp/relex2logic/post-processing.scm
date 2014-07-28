@@ -170,7 +170,10 @@
 ; Call all markers' post-processing steps.
 ;
 (define (r2l-marker-processing)
-	(allmarker-cleaner)
+	(append
+		(allmarker-cleaner)
+		(thatmarker-cleaner)
+	)
 )
 
 ; -----------------------------------------------------------------------
@@ -257,6 +260,99 @@
 ;
 (define (allmarker-cleaner)
 	(marker-cleaner "allmarker" allmarker-helper)
+)
+
+; -----------------------------------------------------------------------
+; thatmarker-helper -- Helper function for processing thatmarker
+;
+; The thatmarker helper function for post-processing one specific
+; thatmarker.
+;
+; Given sentence "I think that dogs attack angry cats.", and thatmarker
+; in the form as 'orig-link':
+;
+;	EvaluationLink
+;		thatmarker
+;		ListLink
+;			think
+;			attack
+;
+; We create:
+;
+;	EvaluationLink
+;		that
+;		ListLink
+;			think
+;			AndLink
+;				EvaluationLink attack ListLink dog cat
+;				InheritanceLink cat angry
+;
+; So basically, AndLink everything that directly or indirectly connects
+; with the word "attack" (ie. the part of the sentence after "that")
+;
+(define (thatmarker-helper orig-link)
+	(define listlink (car (cog-filter 'ListLink (cog-outgoing-set orig-link))))
+	(define word1 (gar listlink))
+	(define word2 (gdr listlink))
+	
+	; find all the words that link directly or indirectly with word2
+	(define (get-all-connected-words)
+		; helper function to get words that share the same hypergraph with 'word'
+		(define (get-all-closely-connected-words word)
+			(define all-links (cog-get-root word))
+			; clean any links that include any nodes that are not instanced word
+			; to avoid including other marker links, InheirtanceLink btwn word
+			; and instance, etc
+			(define cleaned-links (remove check-non-instance all-links))
+			(delete-duplicates (append-map cog-get-all-nodes cleaned-links))
+		)
+		; the main recursive function to gather all indirectly connected words
+		(define (get-all-connected-words word)
+			(cond ((not (member? word connected-words))
+				(set! connected-words (append (list word) connected-words))
+				(for-each get-all-connected-words (get-all-closely-connected-words word))
+				)
+			)
+		)
+		; starts with word1 to avoid getting its connected words, then delete it afterward
+		(define connected-words (list word1)) 
+		(get-all-connected-words word2)
+		(set! connected-words (delete word1 connected-words))
+		connected-words
+	)
+
+	(define all-connected-words (get-all-connected-words))
+
+	; for each word in connected-words, get the root link
+	(define all-root-links (delete-duplicates (append-map cog-get-root all-connected-words)))
+	
+	; any links containing a non-instance word can be removed
+	(define final-links
+		(remove check-non-instance all-root-links)
+	)
+
+	; the final representation
+	(list
+		(EvaluationLink
+			(PredicateNode "that")
+			(ListLink
+				word1
+				(if (= (length final-links) 1)
+					final-links
+					(AndLink final-links)
+				)
+			)
+		)
+	)
+)
+
+; -----------------------------------------------------------------------
+; thatmarker-cleaner -- Entry point for cleaning thatmarker
+;
+; The main thatmarker function that calls the helper to clean all
+; thatmarker in the atomspace, and delete them
+(define (thatmarker-cleaner)
+	(marker-cleaner "thatmarker" thatmarker-helper)
 )
 
 ; -----------------------------------------------------------------------
