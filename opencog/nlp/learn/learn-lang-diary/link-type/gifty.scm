@@ -11,16 +11,29 @@
 (use-modules (ice-9 format))
 
 
+; (define tester-rank 1)
+; (define testy-rank 2)
+; (define test-rank 3)
+; ; (define gifter-rank 4)
+; ; (define gifty-rank 5)
+; ; (define gift-rank 6)
+; (define gift-rank 4)
+; (define gifty-rank 5)
+; (define gifter-rank 6)
+
 (define tester-rank 1)
-(define testy-rank 2)
-(define test-rank 3)
-(define gifter-rank 4)
-(define gifty-rank 5)
+(define gifter-rank 2)
+(define testy-rank 3)
+(define gifty-rank 4)
+(define test-rank 5)
 (define gift-rank 6)
 
 ; Given a rank, return a probability. This is hacky
 (define (zipf rank)
-	(define (powie x)  (expt x -1.0))
+	(define (powie x)  (expt x 0.0))
+	; (define (powie x)  (expt x -1.0))
+	; (define (powie x)  (expt x -1.05))
+	; (define (powie x)  (expt x -1.5))
 	(define norm (reduce + 0 (map powie '(1 2 3 4 5 6))))
 	(/ (powie rank) norm)
 )
@@ -33,12 +46,12 @@
 (define gift-prob (zipf 6))
 
 ; diary distribution
-(set! tester-prob (/ 2 7))
-(set! testy-prob (/ 1 7))
-(set! test-prob (/ 1 7))
-(set! gifter-prob (/ 1 7))
-(set! gifty-prob (/ 1 7))
-(set! gift-prob (/ 1 7))
+; (set! tester-prob (/ 2 7))
+; (set! testy-prob (/ 1 7))
+; (set! test-prob (/ 1 7))
+; (set! gifter-prob (/ 1 7))
+; (set! gifty-prob (/ 1 7))
+; (set! gift-prob (/ 1 7))
 
 
 

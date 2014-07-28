@@ -9050,8 +9050,93 @@ link-type/gifty.scm
 \end_layout
 
 \begin_layout Standard
-Conclusions: based on entropy maximization, all cases advance, but not go
- to the final.
+Conclusions: based purely on entropy maximization, all cases advance, but
+ none go to the final case.
+ But we are not imposing any 'complexity penalty' on this.
+\end_layout
+
+\begin_layout Standard
+Results on some alternate distributions, for this ranking: 
+\begin_inset Quotes eld
+\end_inset
+
+tester testy test gifter gifty gift
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Pure Zipf: 
+\begin_inset Formula $(rank)^{-1.0}$
+\end_inset
+
+: none advance (
+\begin_inset Formula $h_{initial}=2.281979$
+\end_inset
+
+ and 
+\begin_inset Formula $h_{final}=2.293598$
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+Zipf 
+\begin_inset Formula $(rank)^{-1.05}$
+\end_inset
+
+ :none advance (
+\begin_inset Formula $h_{initial}=2.251204$
+\end_inset
+
+ and 
+\begin_inset Formula $h_{final}=2.263603$
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+Zipf 
+\begin_inset Formula $(rank)^{-1.5}$
+\end_inset
+
+ :none advance (
+\begin_inset Formula $h_{initial}=1.930661$
+\end_inset
+
+ and 
+\begin_inset Formula $h_{final}=1.948128$
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Standard
+None of these advance because the initial and final entropies are so very
+ close.
+ But, as before, there are advnces, with the biggest ones to case 4.c and
+ 3.b.
+ The alternative rankings 
+\begin_inset Quotes eld
+\end_inset
+
+tester testy test gift gifty gifter
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+tester gifter testy gifty test gift
+\begin_inset Quotes erd
+\end_inset
+
+ give only slightly different results.
 \end_layout
 
 \begin_layout Subsection*
