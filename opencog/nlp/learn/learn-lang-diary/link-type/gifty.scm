@@ -131,6 +131,47 @@
     h-case1b-obs w-case1b-obs (+ h-case1b-obs w-case1b-obs))
 
 ; -------------------------------------------------------------
+; Case 2.
+(define gac-prob (+ gc-prob ga-prob))
+(define tac-prob (+ tc-prob ta-prob))
+
+(define h-case2-obs
+	(h (list tb-prob tac-prob gb-prob gac-prob)))
+
+(define w-case2-obs
+	(hw (list =ter-prob =t-prob)))
+
+(format #t "case 2 obs h: ~f w: ~f tot: ~f ~%~%"
+    h-case2-obs w-case2-obs (+ h-case2-obs w-case2-obs))
+
+; Case 2.a.
+(define g2-prob (+ gb-prob gac-prob))
+(define t2-prob (+ tb-prob tac-prob))
+
+(define h-case2a-obs
+	(h (list t2-prob g2-prob)))
+
+(define w-case2a-obs
+	(hw (list =t-prob =ty-prob =ter-prob)))
+
+(format #t "case 2a obs h: ~f w: ~f tot: ~f ~%~%"
+    h-case2a-obs w-case2a-obs (+ h-case2a-obs w-case2a-obs))
+
+; Case 2.b.
+(define eb-prob (+ gb-prob tb-prob))
+(define eac-prob (+ gac-prob tac-prob))
+
+(define h-case2b-obs
+	(h (list eb-prob eac-prob)))
+
+(define w-case2b-obs
+	(+ (hw (list =ter-prob =t-prob))
+	   (hw (list gif-prob tes-prob))))
+
+(format #t "case 2b obs h: ~f w: ~f tot: ~f ~%~%"
+    h-case2b-obs w-case2b-obs (+ h-case2b-obs w-case2b-obs))
+
+; -------------------------------------------------------------
 ; Case 3.
 (define gab-prob (+ gb-prob ga-prob))
 (define tab-prob (+ tb-prob ta-prob))
