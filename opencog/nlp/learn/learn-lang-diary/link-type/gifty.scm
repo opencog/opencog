@@ -1,9 +1,14 @@
+#! /usr/bin/env guile
+!#
 ;
 ; gifty.scm
 ;
 ; Demo code, for the 12 July diary entry.
 ; Create a zipfian corpus, and see how the entropies work out.
 ; This avoids hand-calculation.
+
+(use-modules (srfi srfi-1))
+
 
 (define tester-rank 1)
 (define testy-rank 2)
@@ -14,7 +19,9 @@
 
 ; given a rank, return a probability. This is hacky
 (define (zipf rank)
-    (/ 1.0 6.0)
+	(define (powie x)  (expt x -1.0))
+	(define norm (reduce + 0 (map powie '(1 2 3 4 5 6))))
+	(/ (powie rank) norm)
 )
 
 (define tester-prob (zipf 1))
@@ -25,5 +32,11 @@
 (define gift-prob (zipf 6))
 
 (display "Probability tester-prob ") (display tester-prob) (newline)
+(display "Probability testy-prob ") (display testy-prob) (newline)
+(display "Probability test-prob ") (display test-prob) (newline)
+
+(display "Probability gifter-prob ") (display gifter-prob) (newline)
+(display "Probability gifty-prob ") (display gifty-prob) (newline)
+(display "Probability gift-prob ") (display gift-prob) (newline)
 
 
