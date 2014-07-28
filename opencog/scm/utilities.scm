@@ -18,6 +18,8 @@
 ; -- cog-prt-atomspace -- Prints all atoms in the atomspace
 ; -- cog-count-atoms -- Count of the number of atoms of given type.
 ; -- cog-report-counts -- Return an association list of counts.
+; -- cog-get-root -- Return all hypergraph roots containing 'atom'
+; -- cog-get-all-nodes -- Get all the nodes within a link and its sublinks
 ; -- cog-get-partner -- Return other atom of a link conecting two atoms.
 ; -- cog-pred-get-partner -- Get the partner in an EvaluationLink.
 ; -- cog-filter -- return a list of atoms of given type.
@@ -279,6 +281,37 @@
 		)
 		(filter-map rpt tlist)
 	)
+)
+
+; -----------------------------------------------------------------------
+; cog-get-root -- Return all hypergraph roots containing 'atom'
+;
+; Return the root links of a specific 'atom'; basically get the root link
+; with no incoming set.
+;
+(define (cog-get-root atom)
+	(define iset (cog-incoming-set atom))
+	(if (null? iset)
+		(list atom)
+		(append-map cog-get-root iset))
+)
+
+; -----------------------------------------------------------------------
+; cog-get-all-nodes -- Get all the nodes within a link and its sublinks
+;
+; Get all the nodes (non-link atoms) within a hypergraph, and return as
+; a list.
+;
+(define (cog-get-all-nodes link)
+	(define oset (cog-outgoing-set link))
+	(define (recursive-helper atom)
+		(if (cog-link? atom)
+			(cog-get-all-nodes atom)
+			(list atom)
+		)
+	)
+
+	(append-map recursive-helper oset)
 )
 
 ; -----------------------------------------------------------------------
@@ -828,8 +861,11 @@
 'clear
 'count-all
 'cog-get-atoms
+'cog-prt-atomspace
 'cog-count-atoms
 'cog-report-counts
+'cog-get-root
+'cog-get-all-nodes
 'cog-get-partner
 'cog-pred-get-partner
 'cog-filter
