@@ -83,18 +83,21 @@
 (define =t-prob   (+ gift-prob test-prob))
 
 ; Compute entropy of a list of probability values
-(define (h lst)
+(define (entropy lst)
    (define (lg x) (/ (log x) (log 2.0)))
 	(define (plogp x)  (* x (lg x)))
 	(- 0 (reduce + 0.0 (map plogp lst)))
 )
 ; Like the above, but explicitly normalize the list of probabilities
 ; That is, the input list is first normalized so tht it sums to 1.0
-(define (hw lst)
+(define (entropy-norm lst)
 	(define norm (reduce + 0.0 lst))
 	(define nlist (map (lambda (x) (/ x norm)) lst))
-	(h nlist)
+	(entropy nlist)
 )
+
+(define (h x) (entropy-norm x))
+(define (hw x) (entropy-norm x))
 
 ; Initial case.
 (define h-init-obs

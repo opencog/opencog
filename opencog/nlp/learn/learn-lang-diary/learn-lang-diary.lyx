@@ -7616,8 +7616,8 @@ Let
 \end_inset
 
 .
- Then the link types GB and GC need to be consolidated: GG={GB,GC} and likewise
- TT={TB,TC}.
+ Then the link types GB and GC need to be consolidated: GG={GB, GC} and
+ likewise TT={TB, TC}.
  The dictionary becomes
 \end_layout
 
@@ -7736,8 +7736,8 @@ Let
 \end_inset
 
 .
- Then the link types GA and GG need to be consolidated: G={GA,GG} and likewise
- T={TA,TT}.
+ Then the link types GA and GG need to be consolidated: G={GA, GG} and likewise
+ T={TA, TT}.
  The dictionary becomes
 \end_layout
 
