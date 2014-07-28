@@ -65,9 +65,9 @@
 ; We also want the morpheme (word) frequencies.
 (define gif-prob (+ gift-prob gifty-prob gifter-prob))
 (define tes-prob (+ test-prob testy-prob tester-prob))
-(define ter-prob (+ gifter-prob tester-prob))
-(define ty-prob  (+ gifty-prob testy-prob))
-(define t-prob   (+ gift-prob test-prob))
+(define =ter-prob (+ gifter-prob tester-prob))
+(define =ty-prob  (+ gifty-prob testy-prob))
+(define =t-prob   (+ gift-prob test-prob))
 
 ; Compute entropy of a list of probability values
 (define (h lst)
@@ -97,7 +97,7 @@
 	(h (list ta-prob tt-prob ga-prob gg-prob)))
 
 (define w-case1-obs
-	(hw (list ty-prob ter-prob)))
+	(hw (list =ty-prob =ter-prob)))
 
 (format #t "case 1 obs h: ~f w: ~f tot: ~f ~%~%"
     h-case1-obs w-case1-obs (+ h-case1-obs w-case1-obs))
@@ -110,7 +110,7 @@
 	(h (list t-prob g-prob)))
 
 (define w-case1a-obs
-	(hw (list t-prob ty-prob ter-prob)))
+	(hw (list =t-prob =ty-prob =ter-prob)))
 
 (format #t "case 1a obs h: ~f w: ~f tot: ~f ~%~%"
     h-case1a-obs w-case1a-obs (+ h-case1a-obs w-case1a-obs))
@@ -123,7 +123,7 @@
 	(h (list ea-prob em-prob)))
 
 (define w-case1b-obs
-	(+ (hw (list ty-prob ter-prob))
+	(+ (hw (list =ty-prob =ter-prob))
 	   (hw (list gif-prob tes-prob))))
 
 (format #t "case 1b obs h: ~f w: ~f tot: ~f ~%~%"
@@ -136,7 +136,7 @@
 	(h (list ll-prob)))
 
 (define w-case-fin-obs
-	(+ (hw (list t-prob ty-prob ter-prob))
+	(+ (hw (list =t-prob =ty-prob =ter-prob))
 	   (hw (list gif-prob tes-prob))))
 
 (format #t "case final obs h: ~f w: ~f tot: ~f ~%~%"
