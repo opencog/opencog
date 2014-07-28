@@ -778,6 +778,34 @@ OTable loadOTable(const string& file_name, const string& target_feature)
     return res;
 }
 
+/**
+ * Take a line and return a triple with vector containing the input
+ * elements, output element and timestamp.
+ */
+std::tuple<vector<string>, string, string>
+tokenizeRowIOT(const std::string& line,
+               const std::vector<unsigned>& ignored_indices,
+               int target_idx,  // < 0 == ignored
+               int timestamp_idx) // < 0 == ignored
+{
+    std::tuple<std::vector<string>, string, string> res;
+    table_tokenizer toker = get_row_tokenizer(line);
+    int i = 0;
+    for (const std::string& tok : toker) {
+        if (!boost::binary_search(ignored_indices, i)) {
+            string el = boost::lexical_cast<string>(tok);
+            if (target_idx == i)
+                std::get<1>(res) = el;
+            else if (timestamp_idx == i)
+                std::get<2>(res) = el;
+            else
+                std::get<0>(res).push_back(el);
+        }
+        i++;
+    }
+    return res;
+}
+
 ITable loadITable(const string& file_name,
                   const vector<string>& ignore_features)
 {
@@ -1050,7 +1078,8 @@ tokenizeRowIO(const std::string& line,
 
 static istream&
 istreamDenseTable_noHeader(istream& in, Table& tab,
-                           unsigned target_idx,
+                           int target_idx, // < 0 == ignore
+                           int timestamp_idx, // < 0 == ignore
                            const vector<unsigned>& ignore_idxs,
                            const type_tree& tt, bool has_header)
 {
@@ -1060,9 +1089,11 @@ istreamDenseTable_noHeader(istream& in, Table& tab,
     while (get_data_line(in, line))
         lines.push_back(line);
 
-    // Allocate all rows in the itable and otable
+    // Allocate all rows in the itable, otable and ttable
     tab.itable.resize(lines.size());
     tab.otable.resize(lines.size());
+    if (timestamp_idx >= 0)
+        tab.ttable.resize(lines.size());
 
     // Get the elementary io types
     vector<type_node> itypes =
@@ -1079,12 +1110,24 @@ istreamDenseTable_noHeader(istream& in, Table& tab,
     // Function to parse each line (to be called in parallel)
     auto parse_line = [&](unsigned i) {
         try {
-            auto tokenIO = tokenizeRowIO<string>(lines[i], ignore_idxs, target_idx);
-            tab.itable[i] = ftv(tokenIO.first);
+            // Fill input
+            auto tokenIOT = tokenizeRowIOT(lines[i], ignore_idxs,
+                                           target_idx, timestamp_idx);
+            tab.itable[i] = ftv(std::get<0>(tokenIOT));
 
-            // If there is no target index, then there is no "output" column!
-            if (""  != tokenIO.second)
-                tab.otable[i] = token_to_vertex(otype, tokenIO.second);
+            // Fill output
+            string output_str = std::get<1>(tokenIOT);
+            // If there is no valid target index, then there is no
+            // "output" column!
+            if (""  != output_str)
+                tab.otable[i] = token_to_vertex(otype, output_str);
+
+            // Fill date
+            string date_str = std::get<2>(tokenIOT);
+            // If there is no valid timestamp index, then there is no
+            // "output" column!
+            if (""  != date_str)
+                tab.ttable[i] = boost::gregorian::from_string(date_str);
         }
         catch (AssertionException& ex) {
             unsigned lineno = has_header? i+1 : i;
@@ -1120,7 +1163,10 @@ istream& istreamDenseTable(istream& in, Table& tab,
               "cannot be specified");
 
     // determine target, timestamp and ignore indexes
-    unsigned target_idx = 0;
+    int target_idx = 0;    // if no header, target is at the first
+                           // column by default
+
+    int timestamp_idx = -1;     // disabled by default
     vector<unsigned> ignore_idxs;
     if (has_header) {
         string line;
@@ -1136,16 +1182,28 @@ istream& istreamDenseTable(istream& in, Table& tab,
             target_idx = std::distance(header.begin(), target_it);
         }
 
+        // Set timestamp idx
+        if (!timestamp_feature.empty()) {
+            auto timestamp_it = std::find(header.begin(), header.end(),
+                                          target_feature);
+            OC_ASSERT(timestamp_it != header.end(), "Target %s not found",
+                      target_feature.c_str());
+            timestamp_idx = std::distance(header.begin(), timestamp_it);
+        }
+
         // Set ignore idxs
         ignore_idxs = get_indices(ignore_features, header);
 
         // get input and output labels from the header
-        auto iolabels = tokenizeRowIO<string>(line, ignore_idxs, target_idx);
-        tab.itable.set_labels(iolabels.first);
-        tab.otable.set_label(iolabels.second);
+        auto iotlabels = tokenizeRowIOT(line, ignore_idxs,
+                                        target_idx, timestamp_idx);
+        tab.itable.set_labels(std::get<0>(iotlabels));
+        tab.otable.set_label(std::get<1>(iotlabels));
+        tab.ttable.set_label(std::get<2>(iotlabels));
     }
 
-    return istreamDenseTable_noHeader(in, tab, target_idx, ignore_idxs, tt, has_header);
+    return istreamDenseTable_noHeader(in, tab, target_idx, timestamp_idx,
+                                      ignore_idxs, tt, has_header);
 }
 
 // ==================================================================
