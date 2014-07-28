@@ -1,5 +1,5 @@
 """
-For running evaluation_to_member_agent.py without the cogserver
+For running socrates_agent.py without the cogserver
 """
 
 from __future__ import print_function
@@ -8,7 +8,7 @@ from opencog.atomspace import types, AtomSpace, TruthValue
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
 from pln.examples.interactive_agent import InteractiveAgent
 
-__author__ = 'Cosmo Harrigan'
+__author__ = 'Cosmo Harrigan, Sebastian Ruder'
 
 atomspace = AtomSpace()
 __init__(atomspace)
