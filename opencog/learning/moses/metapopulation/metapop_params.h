@@ -94,6 +94,33 @@ struct diversity_parameters
 };
 
 /**
+ * Parameters about subsample deme filter
+ */
+struct subsample_deme_filter_parameters
+{
+    subsample_deme_filter_parameters(unsigned _n_subsample_demes = 0,
+                                     unsigned _n_top_candidates = 1) :
+        n_subsample_demes(_n_subsample_demes),
+        n_top_candidates(_n_top_candidates) {}
+
+    // Number of subsample demes. If set 0 or 1 subsample_deme_filter
+    // remains disactivated.
+    unsigned n_subsample_demes;
+
+    // Top candidates to consider for computing the score variance and
+    // selecting the candidates from all subsamples
+    unsigned n_top_candidates;
+
+    // Number of tuples used to estimate the mean of the variance of
+    // scores across the top candidates
+    unsigned n_tuples;
+
+    // Filter variance threshold. A deme is only selected with the
+    // score variance goes below var_threshold
+    float var_threshold;
+};
+
+/**
  * parameters about metapopulation management
  */
 struct metapop_parameters

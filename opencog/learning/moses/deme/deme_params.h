@@ -32,19 +32,6 @@ namespace opencog { namespace moses {
 static const operator_set empty_ignore_ops = operator_set();
 
 /**
- * Parameters about subsample deme filter
- */
-struct subsample_deme_filter_parameters
-{
-    subsample_deme_filter_parameters(unsigned _n_subsample_demes = 0) :
-        n_subsample_demes(_n_subsample_demes) {}
-
-    // Number of subsample demes. If set 0 or 1 subsample_deme_filter
-    // remains disactivated.
-    unsigned n_subsample_demes;
-};
-
-/**
  * parameters for deme management
  */
 struct deme_parameters
@@ -94,8 +81,9 @@ struct deme_parameters
     // literals and arity*(arity-1) pairs of literals
     float perm_ratio;
 
-    // parameter to control subsample deme filtering
-    subsample_deme_filter_parameters subsample_deme_filter;
+    // Number of subsample demes to spawn
+    // TODO don't forget to update that guy by moses-exec user options
+    unsigned n_subsample_demes;
 };
 
 } // ~namespace moses
