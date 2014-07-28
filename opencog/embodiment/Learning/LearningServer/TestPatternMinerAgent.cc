@@ -75,15 +75,8 @@ TestPatternMinerAgent::~TestPatternMinerAgent()
     logger().info("[TestPatternMinerAgent] destructor");
 }
 
-void TestPatternMinerAgent::run()
+void TestPatternMinerAgent::selectSubSetFromCorpus()
 {
-    // test, only run once
-    static bool hasRun = false;
-    if (hasRun)
-        return;
-
-    // this->patternMiner->runPatternMiner();
-
     vector<string> topics;
     topics.push_back("Neurology");
     topics.push_back("Geology");
@@ -94,6 +87,16 @@ void TestPatternMinerAgent::run()
     topics.push_back("Western_philosophy");
     topics.push_back("Chemistry");
     this->patternMiner->selectSubsetFromCorpus(topics, 3);
+}
+
+void TestPatternMinerAgent::run()
+{
+    // test, only run once
+    static bool hasRun = false;
+    if (hasRun)
+        return;
+    // selectSubSetFromCorpus();
+    this->patternMiner->runPatternMiner();
 
     hasRun = true;
 
