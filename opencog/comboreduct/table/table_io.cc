@@ -1323,8 +1323,12 @@ ostream& ostreamCTableRow(ostream& out, const CTable::value_type& ctv)
     // print map of outputs
     out << "{";
     for(auto it = ctv.second.cbegin(); it != ctv.second.cend();) {
-        out << "(" << table_fmt_vertex_to_str(it->first.value)
-            << "," << it->first.value << "):" << it->second;
+        if (it->first.timestamp != boost::gregorian::date())
+            out << "(" << table_fmt_vertex_to_str(it->first.value)
+                << "," << it->first.timestamp << "):" << it->second;
+        else
+            out << table_fmt_vertex_to_str(it->first.value)
+                << ":" << it->second;
         if (++it != ctv.second.cend())
             out << ",";
     }
