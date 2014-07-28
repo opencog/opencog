@@ -123,8 +123,11 @@ protected:
     const combo::type_tree& _type_sig;          // type signature of the exemplar
     const reduct::rule& simplify_candidate;     // rule to simplify candidates
     const reduct::rule& simplify_knob_building; // during knob building
+
+public:
     behave_cscore& _cscorer; // composite score
 
+protected:
     // This is used to keep track of the ignored indices for
     // optimizing evaluation (in case of feature selection) and
     // calculate max score per deme

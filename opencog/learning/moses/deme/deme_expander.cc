@@ -290,9 +290,9 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
     create_representations(exemplar);
 
     for (unsigned i = 0; i < _reps.size(); i++) {
-        if (_params.subsample_deme_filter.n_subsample_demes > 1) {
+        if (_params.n_subsample_demes > 1) {
             _demes.emplace_back();
-            for (unsigned j = 0; j < _params.subsample_deme_filter.n_subsample_demes; j++)
+            for (unsigned j = 0; j < _params.n_subsample_demes; j++)
                 _demes.back().emplace_back(_reps[i].fields(), demeID_t(n_expansions, i, j));
         } else {
             _demes.emplace_back(1, deme_t(_reps[i].fields(), _demeIDs[i]));
@@ -308,7 +308,7 @@ void deme_expander::optimize_demes(int max_evals, time_t max_time)
     int max_evals_per_deme = max_evals / _demes.size();
     // We set to 1 n_ss_demes in case n_subsample_demes was set to 0
     unsigned n_ss_demes =
-        std::max(_params.subsample_deme_filter.n_subsample_demes, 1U);
+        std::max(_params.n_subsample_demes, 1U);
     max_evals_per_deme /= n_ss_demes;
     for (unsigned i = 0; i < _demes.size(); i++)
     {
@@ -384,6 +384,13 @@ void deme_expander::optimize_demes(int max_evals, time_t max_time)
         // certain incdexes should be ignored, and this just wipes
         // those out...
         _cscorer.ignore_cols(std::set<arity_t>());
+    }
+
+    if (n_ss_demes > 1) {
+        // reset scorer to use all rows (important so that the
+        // ss_filter and the behavioral score is calculated over the
+        // whole data set)
+        _cscorer.ignore_rows(std::set<unsigned>());
     }
 }
 
