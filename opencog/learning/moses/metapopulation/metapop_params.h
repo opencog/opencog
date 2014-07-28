@@ -25,6 +25,7 @@
 #define _OPENCOG_METAPOP_PARAMETERS_H
 
 #include "../moses/types.h"
+#include "../deme/deme_params.h"
 
 namespace opencog { namespace moses {
 
@@ -93,7 +94,7 @@ struct diversity_parameters
 };
 
 /**
- * parameters for metapopulation management
+ * parameters about metapopulation management
  */
 struct metapop_parameters
 {
@@ -172,6 +173,9 @@ struct metapop_parameters
 
     // parameters to control diversity
     diversity_parameters diversity;
+
+    // parameter to control subsample deme filtering
+    subsample_deme_filter_parameters subsample_deme_filter;
 
     bool (*merge_callback)(scored_combo_tree_set&, void*);
     void *callback_user_data;

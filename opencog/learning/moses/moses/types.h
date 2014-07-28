@@ -175,6 +175,7 @@ struct demeID_t : public std::string
 {
     demeID_t(unsigned expansion = 0 /* default initial deme */);
     demeID_t(unsigned expansion, unsigned breadth_first);
+    demeID_t(unsigned expansion, unsigned breadth_first, unsigned ss_deme);
 };
 
 /// Behavioral scores record one score per row of input data.

@@ -40,6 +40,10 @@ demeID_t::demeID_t(unsigned expansion)
     : string(to_string(expansion)) {}
 demeID_t::demeID_t(unsigned expansion, unsigned breadth_first)
     : string(to_string(expansion) + "." + to_string(breadth_first)) {}
+demeID_t::demeID_t(unsigned expansion, unsigned breadth_first, unsigned ss_deme)
+    : string(to_string(expansion) + "." +
+             to_string(breadth_first) + ".SS" +
+             to_string(ss_deme)) {}
 
 size_t scored_combo_tree_hash::operator()(const scored_combo_tree& sct) const
 {

@@ -290,7 +290,13 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
     create_representations(exemplar);
 
     for (unsigned i = 0; i < _reps.size(); i++) {
-        _demes.emplace_back(1, deme_t(_reps[i].fields(), _demeIDs[i]));
+        if (_params.subsample_deme_filter.n_subsample_demes > 1) {
+            _demes.emplace_back();
+            for (unsigned j = 0; j < _params.subsample_deme_filter.n_subsample_demes; j++)
+                _demes.back().emplace_back(_reps[i].fields(), demeID_t(n_expansions, i, j));
+        } else {
+            _demes.emplace_back(1, deme_t(_reps[i].fields(), _demeIDs[i]));
+        }
     }
 
     return true;
@@ -301,61 +307,76 @@ std::vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_ti
 {
     std::vector<unsigned> actl_evals;
     int max_evals_per_deme = max_evals / _demes.size();
+    // We set to 1 n_ss_demes in case n_subsample_demes was set to 0
+    unsigned n_ss_demes =
+        std::max(_params.subsample_deme_filter.n_subsample_demes, 1U);
+    max_evals_per_deme /= n_ss_demes;
     for (unsigned i = 0; i < _demes.size(); i++)
     {
-        if (logger().isDebugEnabled()) {
-            std::stringstream ss;
-            OC_ASSERT(false, "TODO");
-            ss << "Optimize deme " << _demes[i].front().getID() << "; "
-               << "max evaluations allowed: " << max_evals_per_deme;
-            logger().debug(ss.str());
-        }
+        for (unsigned j = 0; j < n_ss_demes; j++)
+        {    
+            if (logger().isDebugEnabled()) {
+                std::stringstream ss;
+                ss << "Optimize deme " << _demes[i][j].getID() << "; "
+                   << "max evaluations allowed: " << max_evals_per_deme;
+                logger().debug(ss.str());
+            }
 
-        if (_params.fstor) {
-            // Attempt to compress the CTable further (to optimize and
-            // update max score)
-            _cscorer.ignore_cols(_ignore_cols_seq[i]);
+            if (_params.fstor) {
+                // Attempt to compress the CTable further (to optimize and
+                // update max score)
+                _cscorer.ignore_cols(_ignore_cols_seq[i]);
         
-            // compute the max target for that deme (if features have been
-            // dynamically selected, it might be less that the global target;
-            // that is, the deme might not be able to reach the best score.)
-            //
-            // TODO: DO NOT CHANGE THE MAX SCORE IF USER SET IT: BUT THAT
-            // OPTION ISN'T GLOBAL WHAT TO DO?
-            //
-            // But why would we want to over-ride the best-possible score?
-            // Typically, demes almost never hit the best score anyway, so
-            // why would this matter?
-            score_t deme_target_score = _cscorer.best_possible_score();
-            logger().info("Inferred target score for that deme = %g",
-                          deme_target_score);
-            // negative min_improv is interpreted as percentage of
-            // improvement, if so then don't substract anything, since in that
-            // scenario the absolute min improvent can be arbitrarily small
-            logger().info("It appears there is an algorithmic bug in "
-                          "precision_bscore::best_possible_bscore. "
-                          "Till not fixed we shall not rely on it to "
-                          "terminate deme search");
+                // compute the max target for that deme (if features have been
+                // dynamically selected, it might be less that the global target;
+                // that is, the deme might not be able to reach the best score.)
+                //
+                // TODO: DO NOT CHANGE THE MAX SCORE IF USER SET IT: BUT THAT
+                // OPTION ISN'T GLOBAL WHAT TO DO?
+                //
+                // But why would we want to over-ride the best-possible score?
+                // Typically, demes almost never hit the best score anyway, so
+                // why would this matter?
+                score_t deme_target_score = _cscorer.best_possible_score();
+                logger().info("Inferred target score for that deme = %g",
+                              deme_target_score);
+                // negative min_improv is interpreted as percentage of
+                // improvement, if so then don't substract anything, since in that
+                // scenario the absolute min improvent can be arbitrarily small
+                logger().info("It appears there is an algorithmic bug in "
+                              "precision_bscore::best_possible_bscore. "
+                              "Till not fixed we shall not rely on it to "
+                              "terminate deme search");
 
-            // TODO: re-enable that once best_possible_bscore is fixed
-            // score_t actual_min_improv = std::max(_cscorer.min_improv(),
-            //                                      (score_t)0);
-            // deme_target_score -= actual_min_improv;
-            // logger().info("Subtract %g (minimum significant improvement) "
-            //               "from the target score to deal with float "
-            //               "imprecision = %g",
-            //               actual_min_improv, deme_target_score);
+                // TODO: re-enable that once best_possible_bscore is fixed
+                // score_t actual_min_improv = std::max(_cscorer.min_improv(),
+                //                                      (score_t)0);
+                // deme_target_score -= actual_min_improv;
+                // logger().info("Subtract %g (minimum significant improvement) "
+                //               "from the target score to deal with float "
+                //               "imprecision = %g",
+                //               actual_min_improv, deme_target_score);
 
-            // // update max score optimizer
-            // _optimize.opt_params.terminate_if_gte = deme_target_score;
+                // // update max score optimizer
+                // _optimize.opt_params.terminate_if_gte = deme_target_score;
+            }
+
+            if (n_ss_demes > 1) {
+                OC_ASSERT(false, "TODO");
+                // Call _cscorer to get the subsampling Divide the
+                // working ctable into partitions, suffled of equal
+                // size each. To do so, consider a set [0, usize),
+                // turn that into a list, shuffle that list, cut that
+                // list into n_ss_demes equal parts. For each working
+                // ctable, remove that part for Nth subsample.
+            }
+
+            // Optimize
+            complexity_based_scorer cpx_scorer =
+                complexity_based_scorer(_cscorer, _reps[i], _params.reduce_all);
+            actl_evals.push_back(_optimize(_demes[i][j], cpx_scorer,
+                                           max_evals_per_deme, max_time));
         }
-
-        // Optimize
-        OC_ASSERT(false, "TODO");
-        complexity_based_scorer cpx_scorer =
-            complexity_based_scorer(_cscorer, _reps[i], _params.reduce_all);
-        actl_evals.push_back(_optimize(_demes[i].front(), cpx_scorer,
-                                       max_evals_per_deme, max_time));
     }
 
     if (_params.fstor) {
