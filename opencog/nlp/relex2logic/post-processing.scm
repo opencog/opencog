@@ -44,7 +44,7 @@
 			; exception that should not be considered as non-instance
 			; TODO better node name for automatic checking possible
 			(not (equal? 'VariableNode (cog-type w)))
-			(not (string=? "Possession" (cog-name w)))
+			(not (string=? "possession" (cog-name w)))
 			; the actual check
 			(null? (cog-node 'WordInstanceNode (cog-name w)))
 		)
