@@ -6,6 +6,11 @@
 
 ; "... it is a crime for an American to sell weapons to hostile nations":
 ; American(x) ∧ Weapon(y) ∧ Sells(x, y, z) ∧ Hostile(z) ⇒ Criminal (x).
+(BindLink
+    (ListLink
+        (VariableNode "$x")
+        (VariableNode "$y")
+        (VariableNode "$z"))
 (ImplicationLink
     (AndLink
         (InheritanceLink
@@ -25,7 +30,7 @@
             (ConceptNode "hostile")))
     (InheritanceLink
         (VariableNode "$x")
-        (ConceptNode "criminal")))
+        (ConceptNode "criminal"))))
 
 ; "Nono ... has some missiles."
 ; ∃x Owns(Nono, x) ∧ Missile(x) is transformed by Existential Instantiation to
@@ -36,9 +41,15 @@
         (ConceptNode "Nono")
         (ConceptNode "missile")))
 
+(InheritanceLink
+    (ConceptNode "missile@123")
+    (ConceptNode "missile"))
+
 ; "All of its missiles were sold to it by Colonel West":
 ; Missile(x) ∧ Owns(Nono, x) ⇒ Sells(West, x, Nono) .
-(ImplicationLink
+(BindLink
+    (VariableNode "$a")
+    (ImplicationLink
     (AndLink
         (InheritanceLink
             (VariableNode "$a")
@@ -53,7 +64,7 @@
         (ListLink
             (ConceptNode "West")
             (VariableNode "$a")
-            (ConceptNode "Nono"))))
+            (ConceptNode "Nono")))))
 
 ; Missiles are weapons: Missile(x) ⇒ Weapon(x)
 (InheritanceLink
@@ -61,6 +72,8 @@
     (ConceptNode "weapon"))
 
 ; An enemy of America is "hostile": Enemy(x,America) ⇒ Hostile(x) .
+(BindLink
+    (VariableNode "$b")
 (ImplicationLink
     (EvaluationLink
         (PredicateNode "enemy_of")
@@ -69,7 +82,7 @@
             (ConceptNode "America")))
     (InheritanceLink
         (VariableNode "$b")
-        (ConceptNode "hostile")))
+        (ConceptNode "hostile"))))
 
 ; "West, who is American ...": American(West).
 (InheritanceLink
