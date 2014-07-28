@@ -33,6 +33,7 @@
 #include <boost/range/algorithm/adjacent_find.hpp>
 #include <boost/range/algorithm/equal.hpp>
 #include <boost/operators.hpp>
+#include <boost/date_time/gregorian/gregorian.hpp>
 
 #include <opencog/util/algorithm.h>
 #include <opencog/util/Counter.h>
@@ -783,6 +784,12 @@ protected:
 };
 
 /**
+ * Table containing timestamps.
+ * There is only one column: a single timestamp for each row.
+ */
+typedef std::vector<boost::gregorian::date> TTable;
+
+/**
  * Typed data table.
  * The table consists of an ITable of inputs (independent variables),
  * an OTable holding the output (the dependent variable), and a type
@@ -871,6 +878,7 @@ struct Table
 
     ITable itable;
     OTable otable;
+    TTable ttable;
     int target_pos;             // position of the target, useful for
                                 // writing the table. If -1 means last
                                 // position

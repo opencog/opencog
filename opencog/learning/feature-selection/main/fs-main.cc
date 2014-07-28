@@ -417,6 +417,7 @@ int main(int argc, char** argv)
     // Read input_data_file file
     Table table = loadTable(fs_params.input_file,
                             fs_params.target_feature_str,
+                            fs_params.timestamp_feature_str,
                             fs_params.ignore_features_str);
 
     type_tree inferred_tt = table.get_signature();

@@ -78,6 +78,7 @@ struct feature_selection_parameters
     std::string scorer;
     std::string input_file;
     std::string target_feature_str;
+    std::string timestamp_feature_str;
     std::vector<std::string> ignore_features_str;
     std::vector<std::string> force_features_str;
     std::vector<std::string> initial_features;

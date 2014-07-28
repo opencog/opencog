@@ -142,10 +142,12 @@ void eval_output_results(const eval_features_parameters& pa,
 
 void read_eval_output_results(const eval_features_parameters& pa)
 {
-    string target_feature;
+    string target_feature, timestamp_feature;
     vector<string> ignore_features;
 
-    Table table = loadTable(pa.input_file, target_feature, ignore_features);
+    Table table = loadTable(pa.input_file, target_feature,
+                            timestamp_feature, ignore_features);
+
 
     // determine labels
     vector<string> labels = table.get_labels();

@@ -996,6 +996,7 @@ inferTableAttributes(istream& in, const string& target_feature,
  */
 istream& istreamTable(istream& in, Table& tab,
                       const string& target_feature,
+                      const string& timestamp_feature,
                       const vector<string>& ignore_features)
 {
     // Infer the properties of the table without loading its content
@@ -1009,10 +1010,11 @@ istream& istreamTable(istream& in, Table& tab,
     if (is_sparse) {
         // fallback on the old loader
         // TODO: this could definitely be optimized
+        OC_ASSERT(timestamp_feature.empty(), "Timestamp feature not implemented");
         return istreamTable_OLD(in, tab, target_feature, ignore_features);
     } else {
-        return istreamDenseTable(in, tab, target_feature, ignore_features,
-                                 tt, has_header);
+        return istreamDenseTable(in, tab, target_feature, timestamp_feature,
+                                 ignore_features, tt, has_header);
     }
 }
 
@@ -1106,15 +1108,18 @@ istreamDenseTable_noHeader(istream& in, Table& tab,
 
 istream& istreamDenseTable(istream& in, Table& tab,
                            const string& target_feature,
+                           const string& timestamp_feature,
                            const vector<string>& ignore_features,
                            const type_tree& tt, bool has_header)
 {
     OC_ASSERT(has_header
-              || (target_feature.empty() && ignore_features.empty()),
-              "If the data file has no header, "
-              "then a target feature or ignore features cannot be specified");
+              || (target_feature.empty()
+                  && ignore_features.empty()
+                  && timestamp_feature.empty()),
+              "then a target feature, ignore features or timestamp_feature "
+              "cannot be specified");
 
-    // determine target index and ignore feature indexes
+    // determine target, timestamp and ignore indexes
     unsigned target_idx = 0;
     vector<unsigned> ignore_idxs;
     if (has_header) {
@@ -1212,6 +1217,7 @@ std::istream& istreamCTable(std::istream& in, CTable& ctable)
 
 Table loadTable(const std::string& file_name,
                 const std::string& target_feature,
+                const std::string& timestamp_feature,
                 const std::vector<std::string>& ignore_features)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
@@ -1219,7 +1225,7 @@ Table loadTable(const std::string& file_name,
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
 
     Table res;
-    istreamTable(in, res, target_feature, ignore_features);
+    istreamTable(in, res, target_feature, timestamp_feature, ignore_features);
     return res;
 }
 

@@ -75,6 +75,10 @@ void table_problem_params::add_options(boost::program_options::options_descripti
          "Label of the target feature to fit. If none is given the "
          "first one is used.\n")
 
+        ("timestamp-feature",
+         po::value<string>(&timestamp_feature),
+         "Label of the timestamp feature. If none is given it is ignored.\n")
+
         ("score-weight",
          po::value<string>(&weighting_feature),
          "Feature (table column) to use as a weight during scoring. "
@@ -107,7 +111,10 @@ void table_problem_base::common_setup(problem_params& pms)
     size_t num_rows = 0;
     for (const string& idf : _tpp.input_data_files) {
         logger().info("Read data file %s", idf.c_str());
-        Table table = loadTable(idf, _tpp.target_feature, _tpp.ignore_features_str);
+        Table table = loadTable(idf, _tpp.target_feature,
+                                _tpp.timestamp_feature,
+                                _tpp.ignore_features_str);
+
         num_rows += table.size();
 
         // Possibly subsample the table
