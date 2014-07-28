@@ -390,15 +390,15 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/filters/filter-#17.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#18.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#19.scm",
+              "opencog/nlp/anaphora/rules/filters/filter-#20.scm",
 
               "opencog/nlp/anaphora/rules/pre-process/pre-process-#1.scm",
               "opencog/nlp/anaphora/rules/pre-process/pre-process-#2.scm",
               "opencog/nlp/anaphora/rules/pre-process/pre-process-#3.scm",
-              "opencog/nlp/anaphora/rules/pre-process/pre-process-#4.scm",
               ]
 
-        self.numOfFilters=19
-        self.numOfPrePatterns=4
+        self.numOfFilters=20
+        self.numOfPrePatterns=3
 
         for item in data:
             load_scm(atomspace, item)

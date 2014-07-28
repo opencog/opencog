@@ -1,4 +1,4 @@
-;; target is "many" and there does not exist "of" after it.
+;; target is a number and there does not exist "of" after it.
 
 (define pre-process-#2
     (BindLink
@@ -18,9 +18,9 @@
                     (AnchorNode "CurrentTarget")
                     (VariableNode "$target")
                 )
-                (LemmaLink
+                (InheritanceLink
                     (VariableNode "$target")
-                    (WordNode "many")
+                    (DefinedLinguisticConceptNode "numeric")
                 )
                 (NotLink
                     (EvaluationLink
@@ -34,11 +34,6 @@
                 )
             )
             (ListLink
-                ;; Adding a missing tag
-                (InheritanceLink
-                    (VariableNode "$target")
-                    (DefinedLinguisticConceptNode "plural")
-                )
                 (AnchorNode "CurrentResult")
                 (AnchorNode "Matched")
             )

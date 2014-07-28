@@ -1,8 +1,6 @@
-;; antecedent is not "noun" with two exceptions
-;; "that" can refer to a verb.
-;; "enough" can refer to a verb.
+;; antecedent should not be the anphor itself.
 
-(define filter-#1
+(define filter-#20
     (BindLink
         (ListLink
             (TypedVariableLink
@@ -32,25 +30,10 @@
                 )
 
                 ;; filter
-                (NotLink
-                    (PartOfSpeechLink
-                        (VariableNode "$word-inst-antecedent")
-                        (DefinedLinguisticConceptNode "noun")
-                    )
+                (ListLink
+                    (AnchorNode "CurrentPronoun")
+                    (VariableNode "$word-inst-antecedent")
                 )
-                (NotLink
-                    (LemmaLink
-                        (VariableNode "$word-inst-anaphor")
-                        (WordNode "that")
-                    )
-                )
-                (NotLink
-                    (LemmaLink
-                        (VariableNode "$word-inst-anaphor")
-                        (WordNode "enough")
-                    )
-                )
-
             )
             (ListLink
                 (AnchorNode "CurrentResult")

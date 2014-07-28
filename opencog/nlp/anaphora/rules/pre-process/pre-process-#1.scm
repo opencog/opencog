@@ -1,10 +1,14 @@
-;; target is a pronoun
+;; target is a pronoun and there does not exist "of" after it.
 
 (define pre-process-#1
     (BindLink
         (ListLink
             (TypedVariableLink
                 (VariableNode "$target")
+                (VariableTypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$word")
                 (VariableTypeNode "WordInstanceNode")
             )
         )
@@ -17,6 +21,15 @@
                 (InheritanceLink
                     (VariableNode "$target")
                     (DefinedLinguisticConceptNode "pronoun")
+                )
+                (NotLink
+                    (EvaluationLink
+                        (PrepositionalRelationshipNode "of")
+                        (ListLink
+                            (VariableNode "$target")
+                            (VariableNode "$word")
+                        )
+                    )
                 )
             )
             (ListLink
