@@ -362,7 +362,9 @@ arity_t type_tree_arity(const type_tree& ty)
 type_node get_type_node(const type_tree& tt)
 {
     OC_ASSERT(!tt.empty());
-    return *tt.begin();
+    auto head_it = tt.begin();
+    OC_ASSERT(head_it.is_childless());
+    return *head_it;
 }
 
 arity_t convert_index(arity_t arity, arity_t index)
