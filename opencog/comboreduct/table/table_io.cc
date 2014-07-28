@@ -822,10 +822,12 @@ ITable loadITable_optimized(const string& file_name,
  *
  * pos specifies the position of the output, if -1 it is the last
  * position. The default position is 0, the first column.
+ *
+ * This is only used for sparse table and could be optimized
  */
-istream& istreamTable(istream& in, Table& tab,
-                      const string& target_feature,
-                      const vector<string>& ignore_features)
+istream& istreamTable_OLD(istream& in, Table& tab,
+                          const string& target_feature,
+                          const vector<string>& ignore_features)
 {
     istreamITable(in, tab.itable, ignore_features);
 
@@ -992,9 +994,9 @@ inferTableAttributes(istream& in, const string& target_feature,
  *
  * 2) Load the actual data
  */
-istream& istreamTable_NEW(istream& in, Table& tab,
-                          const string& target_feature,
-                          const vector<string>& ignore_features)
+istream& istreamTable(istream& in, Table& tab,
+                      const string& target_feature,
+                      const vector<string>& ignore_features)
 {
     // Infer the properties of the table without loading its content
     type_tree tt;
@@ -1007,7 +1009,7 @@ istream& istreamTable_NEW(istream& in, Table& tab,
     if (is_sparse) {
         // fallback on the old loader
         // TODO: this could definitely be optimized
-        return istreamTable(in, tab, target_feature, ignore_features);
+        return istreamTable_OLD(in, tab, target_feature, ignore_features);
     } else {
         return istreamDenseTable(in, tab, target_feature, ignore_features,
                                  tt, has_header);
@@ -1217,7 +1219,7 @@ Table loadTable(const std::string& file_name,
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
 
     Table res;
-    istreamTable_NEW(in, res, target_feature, ignore_features);
+    istreamTable(in, res, target_feature, ignore_features);
     return res;
 }
 
