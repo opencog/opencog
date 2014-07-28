@@ -7804,7 +7804,11 @@ The generated entropy is
 \end_inset
 
  since there are only two link types in the grammar.
- The word-counting entropy contributes an additional 
+ The word-counting entropy for the set 
+\begin_inset Formula $\delta$
+\end_inset
+
+ contributes an additional 
 \begin_inset Formula 
 \[
 h_{gen}^{wrds1.a.}=\log_{2}3=1.584963

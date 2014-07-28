@@ -70,10 +70,17 @@
 (define t-prob   (+ gift-prob test-prob))
 
 ; Compute entropy of a list of probability values
-(define (h lst) 
+(define (h lst)
    (define (lg x) (/ (log x) (log 2.0)))
 	(define (plogp x)  (* x (lg x)))
 	(- 0 (reduce + 0.0 (map plogp lst)))
+)
+; Like the above, but explicitly normalize the list of probabilities
+; That is, the input list is first normalized so tht it sums to 1.0
+(define (hw lst)
+	(define norm (reduce + 0.0 lst))
+	(define nlist (map (lambda (x) (/ x norm)) lst))
+	(h nlist)
 )
 
 ; Initial case.
@@ -90,7 +97,7 @@
 	(h (list ta-prob tt-prob ga-prob gg-prob)))
 
 (define w-case1-obs
-	(h (list ty-prob ter-prob)))
+	(hw (list ty-prob ter-prob)))
 
 (format #t "case 1 obs h: ~f w: ~f tot: ~f ~%~%"
     h-case1-obs w-case1-obs (+ h-case1-obs w-case1-obs))
@@ -101,8 +108,12 @@
 
 (define h-case1a-obs
 	(h (list t-prob g-prob)))
-(display "h case 1a observed: ") (display h-case1a-obs) (newline)
-(newline)
+
+(define w-case1a-obs
+	(hw (list t-prob ty-prob ter-prob)))
+
+(format #t "case 1a obs h: ~f w: ~f tot: ~f ~%~%"
+    h-case1a-obs w-case1a-obs (+ h-case1a-obs w-case1a-obs))
 
 ; Case 1.b.
 (define ea-prob (+ ga-prob ta-prob))
@@ -110,15 +121,26 @@
 
 (define h-case1b-obs
 	(h (list ea-prob em-prob)))
-(display "h case 1b observed: ") (display h-case1b-obs) (newline)
-(newline)
+
+(define w-case1b-obs
+	(+ (hw (list ty-prob ter-prob))
+	   (hw (list gif-prob tes-prob))))
+
+(format #t "case 1b obs h: ~f w: ~f tot: ~f ~%~%"
+    h-case1b-obs w-case1b-obs (+ h-case1b-obs w-case1b-obs))
 
 ; Case Final.
 (define ll-prob (+ ea-prob em-prob))
 
-(define h-case-final-obs
+(define h-case-fin-obs
 	(h (list ll-prob)))
-(display "h case final observed: ") (display h-case-final-obs) (newline)
-(newline)
+
+(define w-case-fin-obs
+	(+ (hw (list t-prob ty-prob ter-prob))
+	   (hw (list gif-prob tes-prob))))
+
+(format #t "case final obs h: ~f w: ~f tot: ~f ~%~%"
+    h-case-fin-obs w-case-fin-obs (+ h-case-fin-obs w-case-fin-obs))
+
 
 
