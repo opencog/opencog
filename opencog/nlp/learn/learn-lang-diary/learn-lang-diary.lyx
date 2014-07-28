@@ -879,11 +879,42 @@ which again seems to be the desired answer.
 \end_inset
 
  after simplification.
- Provisionally, this last method seems to be the best way to move forward.
+ 
+\end_layout
+
+\begin_layout Paragraph*
+Method 6 (corpus word-counts):
+\end_layout
+
+\begin_layout Standard
+If we are taking word-relation frequencies from the corpus, then we should
+ be taking word-set frequencies from the corpus as well.
+ That is, the word-set contribution 
+\begin_inset Formula $\log_{2}|W|$
+\end_inset
+
+ is assuming an equi-distribution.
+ This should be replaced by the corpus contribution 
+\begin_inset Formula 
+\[
+-\sum_{w\in W}p(w)\log_{2}p(w)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph*
+Summary.
+\end_layout
+
+\begin_layout Standard
+Provisionally, the last two methods seem to be the best way to move forward.
  To summarize, the complexity is given by 
 \begin_inset Formula 
 \begin{equation}
-K=-\sum_{R\in Rel}P_{R}\log_{2}P_{R}+\sum_{W\in Wrds}\log_{2}|W|\label{eq:counting complexity}
+K=-\sum_{R\in Rel}P_{R}\log_{2}P_{R}-\sum_{W\in Wrds}\ \sum_{w\in W}P_{w}\log_{2}P_{w}\label{eq:counting complexity}
 \end{equation}
 
 \end_inset
@@ -896,7 +927,20 @@ where
 \begin_inset Formula $R$
 \end_inset
 
- in a sample corpus.
+ in a sample corpus, and 
+\begin_inset Formula $P_{w}=P(w|W)$
+\end_inset
+
+ is the probability of observing word 
+\begin_inset Formula $w$
+\end_inset
+
+ in the corpus, conditioned on its appearence in the corpus having to do
+ with it belonging to the word-class 
+\begin_inset Formula $W$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection*
@@ -7480,10 +7524,11 @@ h^{observed}\le h^{generated}
 
 \end_inset
 
- Note that the equi-distributed link-types is the same as having each of
+Note that the equi-distributed link-types is the same as having each of
  the words in the corpus appear with equal frequency.
  The morphemes, however, do NOT appear with equally frequency (although
- individually, all stems do, and all suffuxes do).
+ individually, all stems do, and all suffixes do).
+ 
 \end_layout
 
 \begin_layout Standard
@@ -7560,9 +7605,13 @@ This gives 9 different orders in which the reductions can take place.
 
 \end_layout
 
-\begin_layout Standard
+\begin_layout Paragraph*
 Case 1.
- Let 
+ 
+\end_layout
+
+\begin_layout Standard
+Let 
 \begin_inset Formula $\gamma=\{\mbox{=ter, =ty}\}$
 \end_inset
 
@@ -7643,11 +7692,37 @@ h_{PAIR}^{red1.}=-\frac{2}{7}\log_{2}\frac{1}{7}-\frac{2}{7}\log_{2}\frac{2}{7}-
 
 \end_inset
 
- The generated entropy is 
-\begin_inset Formula $\log_{2}4=2$
+The generated entropy is 
+\begin_inset Formula $h_{gen}^{red1.}=\log_{2}4=2$
 \end_inset
 
  since there are four total link types in the reduced grammar.
+ Pursuant to equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:counting complexity"
+
+\end_inset
+
+, we should add the log of the cardinality of the word-sets.
+ Here, only one word-set has a cardinality greater than one: {=ty, =ter}.
+ So, one gets:
+\begin_inset Formula 
+\[
+h_{gen}^{wrds1.}=\log_{2}2=1
+\]
+
+\end_inset
+
+The conditional entropy, based on the textual observations, is 
+\begin_inset Formula 
+\[
+h_{obs}^{wrds1.}=-\frac{3}{5}\log_{2}\frac{3}{5}-\frac{2}{5}\log_{2}\frac{2}{5}=0.970951
+\]
+
+\end_inset
+
+ 
 \end_layout
 
 \begin_layout Paragraph*
@@ -7729,7 +7804,23 @@ The generated entropy is
 \end_inset
 
  since there are only two link types in the grammar.
- 
+ The word-counting entropy contributes an additional 
+\begin_inset Formula 
+\[
+h_{gen}^{wrds1.a.}=\log_{2}3=1.584963
+\]
+
+\end_inset
+
+while the observed entropy is 
+\begin_inset Formula 
+\[
+h_{obs}^{wrds1.a.}=-\frac{4}{7}\log_{2}\frac{2}{7}-\frac{3}{7}\log_{2}\frac{3}{7}=1.556657
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Paragraph*
@@ -7816,6 +7907,22 @@ The generated entropy is
 \end_inset
 
  since there are only two link types in the grammar.
+ The word-set counting probability adds 
+\begin_inset Formula 
+\[
+h_{gen}^{wrds.1.b.}=2\log_{2}2=2
+\]
+
+\end_inset
+
+ while the observed probabilities are
+\begin_inset Formula 
+\[
+h_{obs}^{wrds.1.b.}=-\frac{3}{7}\log_{2}\frac{3}{7}-\frac{4}{7}\log_{2}\frac{4}{7}-\frac{3}{5}\log_{2}\frac{3}{5}-\frac{2}{5}\log_{2}\frac{2}{5}=1.956179
+\]
+
+\end_inset
+
  
 \end_layout
 
@@ -7828,7 +7935,7 @@ Case 2.a.
  and case 2.b.
  are identical to cases 1.a.
  and 1.b.
- because =t and =ty are interchangable, from the probability point of view.
+ because =t and =ty are interchangeable, from the probability point of view.
 \end_layout
 
 \begin_layout Standard
@@ -7839,7 +7946,699 @@ Case 3.a.
 
 \begin_layout Standard
 Case 4.
- and the subcses are different, but not illuminating.
+ and the subcases are different, but not illuminating.
+\end_layout
+
+\begin_layout Paragraph*
+Final Case.
+\end_layout
+
+\begin_layout Standard
+The final consolidation gives 
+\begin_inset Formula $\gamma=\{\mbox{=ter, =ty,=t}\}$
+\end_inset
+
+, and 
+\begin_inset Formula $\epsilon=\{\mbox{gif.=, tes.=}\}$
+\end_inset
+
+.
+ The dictionary becomes
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     gif.= tes.=: LL+;
+\end_layout
+
+\begin_layout Plain Layout
+
+     =t =ty =ter: LL-;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+The observed pair probabilities become: 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+p(LL) = 7/7
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+So that the entropy is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+h_{PAIR}^{final}=-\frac{7}{7}\log_{2}\frac{7}{7}=0
+\]
+
+\end_inset
+
+The generated entropy is 
+\begin_inset Formula $\log_{2}1=0$
+\end_inset
+
+ since there is only one link type in the grammar.
+ The word-set counting probability adds 
+\begin_inset Formula 
+\[
+h_{gen}^{wrds.fin}=\log_{2}2+\log_{2}3=2.584963
+\]
+
+\end_inset
+
+while the observed word count is 
+\begin_inset Formula 
+\[
+h_{obs}^{wrds.fin}=-\frac{4}{7}\log_{2}\frac{2}{7}-\frac{3}{7}\log_{2}\frac{3}{7}-\frac{3}{7}\log_{2}\frac{3}{7}-\frac{4}{7}\log_{2}\frac{4}{7}=
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph*
+Summary.
+\end_layout
+
+\begin_layout Standard
+The table below summaries these results.
+ The sum columns show the entropy according to the equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:counting complexity"
+
+\end_inset
+
+ for the observed frequencies, and the generated frequencies.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="7">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $h_{obs}^{red}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $h_{gen}^{red}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $h_{obs}^{wrds}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $h_{gen}^{wrds}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $h_{obs}^{red}+h_{obs}^{wrds}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $h_{gen}^{red}+h_{gen}^{wrds}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Initial
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+2.521641
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+2.584963
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+2.521641
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+2.584963
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Case 1.
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+1.842371
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+0.970951
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.813322
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Case 1.a.
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+0.985228
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+1.556657
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+1.584963
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.541885
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+2.584963
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Case 1.b.
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+0.863121
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.956179
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.819300
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Final
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.541885
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+2.584963
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.541885
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+2.584963
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Arghhh.
+ Such a simple case, so much complexity...
 \end_layout
 
 \begin_layout Subsection*
