@@ -89,6 +89,7 @@
 (display "h initial observed: ") (display h-init-obs) (newline)
 (newline)
 
+; -------------------------------------------------------------
 ; Case 1.
 (define gg-prob (+ gb-prob gc-prob))
 (define tt-prob (+ tb-prob tc-prob))
@@ -129,6 +130,48 @@
 (format #t "case 1b obs h: ~f w: ~f tot: ~f ~%~%"
     h-case1b-obs w-case1b-obs (+ h-case1b-obs w-case1b-obs))
 
+; -------------------------------------------------------------
+; Case 3.
+(define gab-prob (+ gb-prob ga-prob))
+(define tab-prob (+ tb-prob ta-prob))
+
+(define h-case3-obs
+	(h (list tc-prob tab-prob gc-prob gab-prob)))
+
+(define w-case3-obs
+	(hw (list =ty-prob =t-prob)))
+
+(format #t "case 3 obs h: ~f w: ~f tot: ~f ~%~%"
+    h-case3-obs w-case3-obs (+ h-case3-obs w-case3-obs))
+
+; Case 3.a.
+(define g3-prob (+ gc-prob gab-prob))
+(define t3-prob (+ tc-prob tab-prob))
+
+(define h-case3a-obs
+	(h (list t3-prob g3-prob)))
+
+(define w-case3a-obs
+	(hw (list =t-prob =ty-prob =ter-prob)))
+
+(format #t "case 3a obs h: ~f w: ~f tot: ~f ~%~%"
+    h-case3a-obs w-case3a-obs (+ h-case3a-obs w-case3a-obs))
+
+; Case 3.b.
+(define ec-prob (+ gc-prob tc-prob))
+(define eab-prob (+ gab-prob tab-prob))
+
+(define h-case3b-obs
+	(h (list ec-prob eab-prob)))
+
+(define w-case3b-obs
+	(+ (hw (list =ty-prob =t-prob))
+	   (hw (list gif-prob tes-prob))))
+
+(format #t "case 3b obs h: ~f w: ~f tot: ~f ~%~%"
+    h-case3b-obs w-case3b-obs (+ h-case3b-obs w-case3b-obs))
+
+; -------------------------------------------------------------
 ; Case Final.
 (define ll-prob (+ ea-prob em-prob))
 
