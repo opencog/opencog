@@ -8,6 +8,7 @@
 ; This avoids hand-calculation.
 
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 format))
 
 
 (define tester-rank 1)
@@ -52,7 +53,7 @@
 (newline)
 
 
-; convert to notation used in diary
+; Convert to notation used in diary -- these are the link frequencies
 (define ta-prob test-prob)
 (define tb-prob testy-prob)
 (define tc-prob tester-prob)
@@ -60,6 +61,13 @@
 (define ga-prob gift-prob)
 (define gb-prob gifty-prob)
 (define gc-prob gifter-prob)
+
+; We also want the morpheme (word) frequencies.
+(define gif-prob (+ gift-prob gifty-prob gifter-prob))
+(define tes-prob (+ test-prob testy-prob tester-prob))
+(define ter-prob (+ gifter-prob tester-prob))
+(define ty-prob  (+ gifty-prob testy-prob))
+(define t-prob   (+ gift-prob test-prob))
 
 ; Compute entropy of a list of probability values
 (define (h lst) 
@@ -80,8 +88,12 @@
 
 (define h-case1-obs
 	(h (list ta-prob tt-prob ga-prob gg-prob)))
-(display "h case 1 observed: ") (display h-case1-obs) (newline)
-(newline)
+
+(define w-case1-obs
+	(h (list ty-prob ter-prob)))
+
+(format #t "case 1 obs h: ~f w: ~f tot: ~f ~%~%"
+    h-case1-obs w-case1-obs (+ h-case1-obs w-case1-obs))
 
 ; Case 1.a.
 (define g-prob (+ ga-prob gg-prob))
