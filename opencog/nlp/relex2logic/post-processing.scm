@@ -325,22 +325,47 @@
 
 	; for each word in connected-words, get the root link
 	(define all-root-links (delete-duplicates (append-map cog-get-root all-connected-words)))
-	
+
 	; any links containing a non-instance word can be removed
-	(define final-links
-		(remove check-non-instance all-root-links)
+	(define word2-links (remove check-non-instance all-root-links))
+
+
+	; get the EvaluationLink where word1 act as Predicate, and the root
+	(define word1-predicate (car (cog-get-link 'EvaluationLink 'ListLink word1)))
+	(define word1-predicate-listlink (car (cog-filter 'ListLink (cog-outgoing-set word1-predicate))))
+	(define word1-predicate-root (cog-get-root word1-predicate))
+
+	(define that-reference-node (VariableNode (random-node-name 'VariableNode 32 "$that-")))
+
+	(define (rebuild-with-that link)
+		(define old-oset (cog-outgoing-set link))
+		(define (rebuild-helper atom)
+			(if (cog-link? atom)
+				(if (equal? atom word1-predicate-listlink)
+					(ListLink (cog-outgoing-set word1-predicate-listlink) that-reference-node)
+					(rebuild-with-that atom)
+				)
+				atom
+			)
+		)
+		(define new-oset (map rebuild-helper old-oset))
+		(apply cog-new-link (cog-type link) new-oset)
 	)
+
+	; rebuild word1-predicate with that-reference-node inside
+	(define word1-new-predicate-root (map rebuild-with-that word1-predicate-root))
+
+	(for-each purge-hypergraph word1-predicate-root)
 
 	; the final representation
 	(list
-		(EvaluationLink
-			(PredicateNode "that")
-			(ListLink
-				word1
-				(if (= (length final-links) 1)
-					final-links
-					(AndLink final-links)
-				)
+		word1-new-predicate-root
+		; create new ReferenceLink, AndLink everything
+		(ReferenceLink
+			that-reference-node
+			(if (= (length word2-links) 1)
+				word2-links
+				(AndLink word2-links)
 			)
 		)
 	)
@@ -370,8 +395,8 @@
 		; call helper function to process them
 		(define results-list (append-map helper marker-list))
 		; delete the markers links and the marker itself
-		(for-each purge-hypergraph marker-list)
-		(cog-delete marker)
+		;(for-each purge-hypergraph marker-list)
+		;(cog-delete marker)
 		; return the results
 		results-list
 	)
