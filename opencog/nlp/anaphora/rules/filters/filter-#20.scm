@@ -1,5 +1,9 @@
 ;; antecedent should not be the anphor itself.
 
+;; Examples:
+
+;; This one should be obvious.
+
 (define filter-#20
     (BindLink
         (ListLink

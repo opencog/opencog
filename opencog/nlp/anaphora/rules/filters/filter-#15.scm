@@ -1,5 +1,10 @@
 ;; antecedent is a number
 
+;; Examples:
+
+;; "Twenty cops are hiding in the corner, they are doing something secretly."
+;; "they" should not refer to "Twenty"
+
 
 (define filter-#15
     (BindLink

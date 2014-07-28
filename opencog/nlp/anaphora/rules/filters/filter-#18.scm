@@ -1,6 +1,12 @@
 ;; anaphor is "neuter"
 ;; antecedent is "person"
 
+;; Examples:
+
+;; "Tom likes hamburgers. It's beautiful."
+;; "It" should not refer to "Tom"
+
+
 (define filter-#18
     (BindLink
         (ListLink

@@ -7,6 +7,11 @@
 
 ;; This antecedent should be rejected
 
+;; Examples:
+
+;; "John's portrait of him."
+;; "him" should not refer to "portrait "
+
 (define filter-#17
     (BindLink
         (ListLink

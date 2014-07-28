@@ -1,6 +1,12 @@
 ;; anaphor is "singular"
 ;; antecedent is "plural"
 
+;; Examples:
+
+;; "There are some cops in the corner. He does not like it."
+;; "He" should not refer to "cops"
+
+
 (define filter-#10
     (BindLink
         (ListLink

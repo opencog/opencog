@@ -1,6 +1,10 @@
 ;; anaphor is "feminine"
 ;; antecedent is "neuter"
 
+;; Examples:
+
+;; Need to be added...
+
 (define filter-#9
     (BindLink
         (ListLink

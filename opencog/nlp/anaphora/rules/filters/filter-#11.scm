@@ -1,6 +1,13 @@
 ;; anaphor is "plural"
 ;; antecedent is "singular"
 
+
+;; Examples:
+
+;; "Alice ate an apple. They do not like it."
+;; "They" should not refer to "Alice"
+
+
 (define filter-#11
     (BindLink
         (ListLink

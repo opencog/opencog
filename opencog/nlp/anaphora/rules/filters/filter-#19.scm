@@ -9,6 +9,12 @@
 
 ;; This antecedent should be rejected
 
+;; Examples:
+
+;; "Jacob went to the party by himself."
+;; "himself" should not refer to "party"
+
+
 (define filter-#19
     (BindLink
         (ListLink

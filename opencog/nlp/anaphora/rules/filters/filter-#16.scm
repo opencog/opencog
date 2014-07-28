@@ -9,6 +9,11 @@
 
 ;; This antecedent should be rejected
 
+;; Examples:
+
+;; "John saw a picture of him."
+;; "him" should not refer to "John"
+
 (define filter-#16
     (BindLink
         (ListLink

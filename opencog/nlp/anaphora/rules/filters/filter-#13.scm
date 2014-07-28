@@ -7,6 +7,11 @@
 
 ;; This antecedent should be rejected
 
+;; Examples:
+
+;; "Tom likes him."
+;; "him" should not refer to "Tom"
+
 (define filter-#13
     (BindLink
         (ListLink

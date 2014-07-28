@@ -1,5 +1,10 @@
 ;; antecedent is "pronoun"
 
+;; Example:
+
+;; "He is good at math. She is good at math as well."
+;; "She" cannot refer to "He".
+
 (define filter-#2
     (BindLink
         (ListLink

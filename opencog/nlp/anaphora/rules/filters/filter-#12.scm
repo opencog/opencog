@@ -1,6 +1,12 @@
 ;; anaphor is "it"
 ;; antecedent is "plural"
 
+
+;; Examples:
+
+;; "There are some apples in the corner. It is beautiful."
+;; "It" should not refer to "apples"
+
 (define filter-#12
     (BindLink
         (ListLink

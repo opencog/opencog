@@ -1,5 +1,9 @@
 ;; antecedent is a ParseNode
 
+;; Examples:
+
+;; ParseNode should obviously be rejected.
+
 (define filter-#14
     (BindLink
         (ListLink
