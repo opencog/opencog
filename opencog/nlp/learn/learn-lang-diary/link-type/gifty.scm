@@ -71,9 +71,42 @@
 ; Initial case.
 (define h-init-obs
 	(h (list ta-prob tb-prob tc-prob ga-prob gb-prob gc-prob)))
-
 (display "h initial observed: ") (display h-init-obs) (newline)
+(newline)
 
 ; Case 1.
 (define gg-prob (+ gb-prob gc-prob))
 (define tt-prob (+ tb-prob tc-prob))
+
+(define h-case1-obs
+	(h (list ta-prob tt-prob ga-prob gg-prob)))
+(display "h case 1 observed: ") (display h-case1-obs) (newline)
+(newline)
+
+; Case 1.a.
+(define g-prob (+ ga-prob gg-prob))
+(define t-prob (+ ta-prob tt-prob))
+
+(define h-case1a-obs
+	(h (list t-prob g-prob)))
+(display "h case 1a observed: ") (display h-case1a-obs) (newline)
+(newline)
+
+; Case 1.b.
+(define ea-prob (+ ga-prob ta-prob))
+(define em-prob (+ gg-prob tt-prob))
+
+(define h-case1b-obs
+	(h (list ea-prob em-prob)))
+(display "h case 1b observed: ") (display h-case1b-obs) (newline)
+(newline)
+
+; Case Final.
+(define ll-prob (+ ea-prob em-prob))
+
+(define h-case-final-obs
+	(h (list ll-prob)))
+(display "h case final observed: ") (display h-case-final-obs) (newline)
+(newline)
+
+
