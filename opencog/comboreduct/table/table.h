@@ -412,6 +412,38 @@ struct seq_filtered_visitor : public boost::static_visitor<multi_type_seq>
     const F& _filter;
 };
 
+static const std::string default_timestamp_label("timestamp");
+
+/**
+ * Table containing timestamps.
+ * There is only one column: a single timestamp for each row.
+ */
+struct TTable : public std::vector<boost::gregorian::date> {
+    typedef std::vector<boost::gregorian::date> super;
+public:
+    typedef boost::gregorian::date value_type;
+
+    TTable(const std::string& tl = default_timestamp_label);
+    TTable(const super& tt, const std::string& tl = default_timestamp_label);
+    void set_label(const std::string&);
+    const std::string& get_label() const;
+protected:
+    std::string label;
+};
+
+typedef std::pair<vertex, TTable::value_type> TimedValue;
+
+struct TimedCounter : public Counter<TimedValue, unsigned> {
+    // Overload get(const TimedValue&) to work with a vertex v, in
+    // that case it returns the sum of that counter across all
+    // timestamps with vertex equal to v.
+    unsigned get(const vertex& v) const;
+
+    // Overload most_frequent() so that it returns the most frequent
+    // vertex over all timestamps.
+    vertex most_frequent() const;
+};
+
 /// CTable is a "compressed" table.  Compression is done by removing
 /// duplicated inputs, and the output column is replaced by a counter
 /// of the duplicated outputs.  That is, the output column is of the
@@ -781,25 +813,6 @@ public:
 protected:
     std::string label; // output label
     type_node type;    // the type of the column data.
-};
-
-static const std::string default_timestamp_label("timestamp");
-
-/**
- * Table containing timestamps.
- * There is only one column: a single timestamp for each row.
- */
-struct TTable : public std::vector<boost::gregorian::date> {
-    typedef std::vector<boost::gregorian::date> super;
-public:
-    typedef boost::gregorian::date value_type;
-
-    TTable(const std::string& tl = default_timestamp_label);
-    TTable(const super& tt, const std::string& tl = default_timestamp_label);
-    void set_label(const std::string&);
-    const std::string& get_label() const;
-protected:
-    std::string label;
 };
 
 /**

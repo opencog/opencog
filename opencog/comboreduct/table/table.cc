@@ -604,7 +604,25 @@ void Table::add_features_from_file(const string& input_file,
     }
 }
         
-// -------------------------------------------------------
+/////////////////
+// TimeCounter //
+/////////////////
+
+unsigned TimedCounter::get(const vertex& v) const {
+    unsigned res = 0;
+    for (const auto& vtc : *this)
+        if (vtc.first.first == v)
+            res += vtc.second;
+    return res;
+}
+
+vertex TimedCounter::most_frequent() const {
+    Counter<vertex, unsigned> vc;
+    for (const auto& vtc : *this)
+        vc[vtc.first.first] += vtc.second;
+    return vc.most_frequent();
+}
+
 ////////////
 // CTable //
 ////////////
