@@ -8030,7 +8030,7 @@ h_{gen}^{wrds.fin}=\log_{2}2+\log_{2}3=2.584963
 while the observed word count is 
 \begin_inset Formula 
 \[
-h_{obs}^{wrds.fin}=-\frac{4}{7}\log_{2}\frac{2}{7}-\frac{3}{7}\log_{2}\frac{3}{7}-\frac{3}{7}\log_{2}\frac{3}{7}-\frac{4}{7}\log_{2}\frac{4}{7}=
+h_{obs}^{wrds.fin}=-\frac{4}{7}\log_{2}\frac{2}{7}-\frac{3}{7}\log_{2}\frac{3}{7}-\frac{3}{7}\log_{2}\frac{3}{7}-\frac{4}{7}\log_{2}\frac{4}{7}=2.541885
 \]
 
 \end_inset
