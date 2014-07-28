@@ -172,6 +172,61 @@
     h-case3b-obs w-case3b-obs (+ h-case3b-obs w-case3b-obs))
 
 ; -------------------------------------------------------------
+; Case 4.
+(define a-prob (+ ga-prob ta-prob))
+(define b-prob (+ gb-prob tb-prob))
+(define c-prob (+ gc-prob tc-prob))
+
+(define h-case4-obs
+	(h (list a-prob b-prob c-prob)))
+
+(define w-case4-obs
+	(hw (list gif-prob tes-prob)))
+
+(format #t "case 4 obs h: ~f w: ~f tot: ~f ~%~%"
+    h-case4-obs w-case4-obs (+ h-case4-obs w-case4-obs))
+
+; Case 4.a.
+(define bc-prob (+ b-prob c-prob))
+
+(define h-case4a-obs
+	(h (list a-prob bc-prob)))
+
+(define w-case4a-obs
+	(+ (hw (list gif-prob tes-prob))
+	   (hw (list =ty-prob =ter-prob))))
+
+(format #t "case 4a obs h: ~f w: ~f tot: ~f ~%~%"
+    h-case4a-obs w-case4a-obs (+ h-case4a-obs w-case4a-obs))
+
+; Case 4.b.
+(define ac-prob (+ a-prob c-prob))
+
+(define h-case4b-obs
+	(h (list b-prob ac-prob)))
+
+(define w-case4b-obs
+	(+ (hw (list gif-prob tes-prob))
+	   (hw (list =t-prob =ter-prob))))
+
+(format #t "case 4b obs h: ~f w: ~f tot: ~f ~%~%"
+    h-case4b-obs w-case4b-obs (+ h-case4b-obs w-case4b-obs))
+
+; Case 4.c.
+(define ab-prob (+ b-prob a-prob))
+
+(define h-case4c-obs
+	(h (list c-prob ab-prob)))
+
+(define w-case4c-obs
+	(+ (hw (list gif-prob tes-prob))
+	   (hw (list =t-prob =ty-prob))))
+
+(format #t "case 4c obs h: ~f w: ~f tot: ~f ~%~%"
+    h-case4c-obs w-case4c-obs (+ h-case4c-obs w-case4c-obs))
+
+
+; -------------------------------------------------------------
 ; Case Final.
 (define ll-prob (+ ea-prob em-prob))
 
