@@ -345,6 +345,7 @@ class HobbsAgent(MindAgent):
     def initilization(self,atomspace):
         self.atomspace = atomspace
 
+        self.PleonasticItNode=atomspace.add_node(types.AnchorNode, 'Pleonastic-it', TruthValue(1.0, 100))
         self.currentPronounNode = atomspace.add_node(types.AnchorNode, 'CurrentPronoun', TruthValue(1.0, 100))
         self.currentTarget = atomspace.add_node(types.AnchorNode, 'CurrentTarget', TruthValue(1.0, 100))
         self.currentResult = atomspace.add_node(types.AnchorNode, 'CurrentResult', TruthValue(1.0, 100))
@@ -368,6 +369,7 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/getConjunction.scm",
               "opencog/nlp/anaphora/rules/getParseNode.scm",
               "opencog/nlp/anaphora/rules/getWords.scm",
+              "opencog/nlp/anaphora/rules/isIt.scm",
 
               "opencog/nlp/anaphora/rules/filtersGenerator.scm",
 
@@ -395,10 +397,16 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/pre-process/pre-process-#1.scm",
               "opencog/nlp/anaphora/rules/pre-process/pre-process-#2.scm",
               "opencog/nlp/anaphora/rules/pre-process/pre-process-#3.scm",
+
+              "opencog/nlp/anaphora/rules/pleonastic-it/pleonastic-it-#1.scm",
+              "opencog/nlp/anaphora/rules/pleonastic-it/pleonastic-it-#2.scm",
+              "opencog/nlp/anaphora/rules/pleonastic-it/pleonastic-it-#3.scm",
+
               ]
 
         self.numOfFilters=20
         self.numOfPrePatterns=3
+        self.numOfPleonasticItPatterns=3
 
         for item in data:
             load_scm(atomspace, item)
@@ -429,10 +437,29 @@ class HobbsAgent(MindAgent):
 
         self.atomspace.add_link(types.ListLink,[self.resolvedReferences,node],TruthValue(1.0, 100))
 
+    def pleonastic_it(self,node):
+        '''
+        Check if the node is the word "it".
+        '''
+        matched=False
+        rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind-crisp isIt)',self.currentResult,types.AnchorNode)
+        if len(rv)>0:
+            for index in range(1,self.numOfPleonasticItPatterns+1):
+                command='(cog-bind-crisp pleonastic-it-#'+str(index)+')'
+                rv=self.bindLinkExe(self.currentTarget,node,command,self.currentResult,types.AnchorNode)
+                if len(rv)>0:
+                    matched=True
+                    break
+                #print("rejected "+node.name+" by filter-#"+str(index))
+
+        return matched
+
     def run(self, atomspace):
         self.initilization(atomspace)
 
         for pronoun in self.pronouns:
+
+
             self.checked.clear()
             self.pronounNumber=self.getWordNumber(pronoun)
             self.confidence=1-CONFIDENCE_DECREASING_RATE
@@ -445,10 +472,23 @@ class HobbsAgent(MindAgent):
             tmpLink=self.atomspace.add_link(types.ListLink, [self.currentPronounNode, pronoun], TruthValue(1.0, 100))
             self.currentPronoun=pronoun
             root=self.getRootOfNode(pronoun)
+
             if self.DEBUG:
                 print("Resolving....")
                 print(pronoun)
             log.fine("Resolving \n{0}".format(pronoun))
+
+            '''
+            Check if it's a pleonastic it.
+            '''
+
+            if self.pleonastic_it(pronoun):
+                self.generateReferenceLink(pronoun,self.PleonasticItNode,TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, TruthValue().confidence_to_count(self.confidence)))
+                self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
+                if self.DEBUG:
+                    print("accepted "+self.PleonasticItNode.name)
+                    log.fine("accepted "+self.PleonasticItNode.name)
+
             sent_counter=1;
             while True:
                 if root==None:

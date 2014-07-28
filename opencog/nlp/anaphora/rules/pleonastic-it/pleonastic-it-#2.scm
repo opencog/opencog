@@ -1,6 +1,6 @@
 ;; "It seems that"
 
-(define pleonastic-it-#1
+(define pleonastic-it-#2
     (BindLink
         (ListLink
             (TypedVariableLink
