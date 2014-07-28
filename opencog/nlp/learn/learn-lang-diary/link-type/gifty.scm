@@ -243,6 +243,9 @@
 (format #t "case 4 obs h: ~f w: ~f tot: ~f ~%~%"
     h-case4-obs w-case4-obs (+ h-case4-obs w-case4-obs))
 
+; Note: case 4a should be identical to case 1b
+; Note: case 4b should be identical to case 2b
+; Note: case 4c should be identical to case 3b
 ; Case 4.a.
 (define bc-prob (+ b-prob c-prob))
 
