@@ -15,13 +15,9 @@ __init__(atomspace)
 
 coreTypes = "opencog/atomspace/core_types.scm"
 utilities = "opencog/scm/utilities.scm"
-<<<<<<< HEAD
-data = "opencog/python/pln/examples/relex2logic/socrates-r2l.scm"
+data = "opencog/python/pln/examples/socrates_demo/socrates-r2l.scm"
 
 number_of_steps = 1000
-=======
-data = "opencog/python/pln/examples/socrates_demo/socrates-r2l.scm"
->>>>>>> Fixed AbductionRule error
 
 for item in [coreTypes, utilities, data]:
     load_scm(atomspace, item)
