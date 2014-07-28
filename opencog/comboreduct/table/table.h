@@ -431,13 +431,38 @@ protected:
     std::string label;
 };
 
-typedef std::pair<vertex, TTable::value_type> TimedValue;
+struct TimedValue :
+    public boost::less_than_comparable<TimedValue>,
+    public boost::equality_comparable<TimedValue>
+{
+    TimedValue(const vertex v,
+               const TTable::value_type t = TTable::value_type())
+        : value(v), timestamp(t) {}
+    vertex value;
+    TTable::value_type timestamp;
 
-struct TimedCounter : public Counter<TimedValue, unsigned> {
+    bool operator<(const TimedValue &r) const {
+        return (value < r.value) || (timestamp < r.timestamp);
+    }
+
+    bool operator==(const TimedValue& r) const {
+        return (value == r.value) && (timestamp == r.timestamp);
+    }
+
+};
+
+// How to count timed inputs. The type is double to work weighted
+// features
+typedef double count_t;
+
+struct TimedCounter : public Counter<TimedValue, count_t> {
     // Overload get(const TimedValue&) to work with a vertex v, in
     // that case it returns the sum of that counter across all
     // timestamps with vertex equal to v.
-    unsigned get(const vertex& v) const;
+    count_t get(const vertex& v) const;
+
+    // Return a counter without timestamps
+    Counter<vertex, count_t> untimedCounter() const;
 
     // Overload most_frequent() so that it returns the most frequent
     // vertex over all timestamps.
@@ -447,13 +472,17 @@ struct TimedCounter : public Counter<TimedValue, unsigned> {
 /// CTable is a "compressed" table.  Compression is done by removing
 /// duplicated inputs, and the output column is replaced by a counter
 /// of the duplicated outputs.  That is, the output column is of the
-/// form {v1:c1, v2:c2, ...} where c1 is the number of times value v1
-/// was seen in the output, c2 the number of times v2 was observed, etc.
+/// form {(v1,t1):c1, {(v2,t2):c2, ...} where c1 is the number of
+/// times value v1 was seen in the output at timestamp t1, c2 the
+/// number of times v2 was observed at timestamps t2, etc. If the data
+/// are not timestamped, then it's only {v1:c1, {v2:c2, ...}. In
+/// practice the same structured is used with empty timestamp.
 ///
 /// For weighted rows, the counts c1, c2,... need not be integers; they
 /// will hold the sum of the (floating point) weights for the rows.
 ///
-/// For example, if one has the following table:
+/// For example, if one has the following table (there is no timestamp
+/// in this example):
 ///
 ///   output,input1,input2
 ///   1,1,0
@@ -470,15 +499,14 @@ struct TimedCounter : public Counter<TimedValue, unsigned> {
 /// Most scoring functions work on CTable, as it avoids re-evaluating a
 /// combo program on duplicated inputs.
 //
-typedef double count_t;
-
-class CTable : public std::map<multi_type_seq, Counter<vertex, count_t>>
+class CTable : public std::map<multi_type_seq, TimedCounter>
                // , public boost::equality_comparable<CTable>
 {
 public:
     typedef multi_type_seq key_type;
-    typedef Counter<vertex, count_t> counter_t;
-    typedef std::map<key_type, counter_t> super;
+    typedef TimedCounter mapped_type;
+    typedef TimedCounter counter_t;
+    typedef std::map<key_type, TimedCounter> super;
     typedef typename super::value_type value_type;
     typedef std::vector<std::string> string_seq;
 
@@ -1052,7 +1080,7 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
 
             // for each enum type counted in the row,
             for (const auto& val_pair : row.second) {
-                const vertex& v = val_pair.first; // key of map
+                const vertex& v = val_pair.first.value; // counter key value
 
                 count_t count = row.second.get(v);
                 ycount[v] += count;
@@ -1102,10 +1130,10 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
 
             // for each contin counted in the row,
             for (const auto& val_pair : row.second) {
-                const vertex& v = val_pair.first; // key of map
+                const auto& v = val_pair.first.value; // counter key value
                 contin_t y = get_contin(v); // typecast
 
-                count_t flt_count = row.second.get(y);
+                unsigned flt_count = val_pair.second;
                 dorepeat(flt_count) {
                     auto pr = std::make_pair(x,y);
                     sorted_list.insert(pr);

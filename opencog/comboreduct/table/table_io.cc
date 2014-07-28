@@ -1209,6 +1209,7 @@ istream& istreamDenseTable(istream& in, Table& tab,
 // ==================================================================
 
 // Parse a CTable row
+// TODO: implement timestamp support
 CTable::value_type parseCTableRow(const type_tree& tt, const std::string& row_str)
 {
     // split the string between input and output
@@ -1234,7 +1235,7 @@ CTable::value_type parseCTableRow(const type_tree& tt, const std::string& row_st
         vertex v = token_to_vertex(get_type_node(get_signature_output(tt)),
                                    key_str);
         count_t count = atof(value_str.c_str());
-        counter[v] = count;
+        counter[TimedValue(v)] = count;
     }
     return CTable::value_type(input_values, counter);
 }
@@ -1321,8 +1322,9 @@ ostream& ostreamCTableRow(ostream& out, const CTable::value_type& ctv)
     auto ats = boost::apply_visitor(tsv);
     // print map of outputs
     out << "{";
-    for (auto it = ctv.second.cbegin(); it != ctv.second.cend();) {
-        out << table_fmt_vertex_to_str(it->first) << ":" << it->second;
+    for(auto it = ctv.second.cbegin(); it != ctv.second.cend();) {
+        out << "(" << table_fmt_vertex_to_str(it->first.value)
+            << "," << it->first.value << "):" << it->second;
         if (++it != ctv.second.cend())
             out << ",";
     }

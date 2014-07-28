@@ -76,7 +76,7 @@ precision_bscore::precision_bscore(const CTable& ctable_,
         {
             score_t res = 0.0;
             for (const CTable::counter_t::value_type& cv : c)
-                res += get_contin(cv.first) * cv.second;
+                res += get_contin(cv.first.value) * cv.second;
             return (positive? res : -res);
         };
     } else {
@@ -106,7 +106,7 @@ precision_bscore::precision_bscore(const CTable& ctable_,
         for (const auto& cr : _wrk_ctable) {
             const CTable::counter_t& c = cr.second;
             for (const auto& cv : c) {
-                score_t val = get_contin(cv.first);
+                score_t val = get_contin(cv.first.value);
                 if (!positive) val = -val;
                 max_output = std::max(max_output, val);
             }

@@ -474,9 +474,13 @@ CTable Table::compressed(const std::string weight_col) const
 
         ITable::const_iterator in_it = itable.begin();
         OTable::const_iterator out_it = otable.begin();
-        for (; in_it != itable.end(); ++in_it, ++out_it)
-        {
-            res[*in_it][*out_it] += 1.0;
+        if (ttable.empty())
+            for(; in_it != itable.end(); ++in_it, ++out_it)
+                ++res[*in_it][TimedValue(*out_it)];
+        else {
+            TTable::const_iterator time_it = ttable.begin();
+            for(; in_it != itable.end(); ++in_it, ++out_it, ++time_it)
+                ++res[*in_it][TimedValue(*out_it, *time_it)];
         }
         logger().debug("Size of the compressed dataset is %f", res.size());
         return res;
@@ -493,6 +497,7 @@ CTable Table::compressed(const std::string weight_col) const
         ITable::const_iterator w_it = itable.begin();
         ITable::const_iterator in_it = trimmed.begin();
         OTable::const_iterator out_it = otable.begin();
+        OC_ASSERT(ttable.empty(), "Not implemented");
         for (; in_it != trimmed.end(); ++in_it, ++out_it, ++w_it)
         {
             vertex v = w_it->get_at<vertex>(widx);
@@ -608,19 +613,23 @@ void Table::add_features_from_file(const string& input_file,
 // TimeCounter //
 /////////////////
 
-unsigned TimedCounter::get(const vertex& v) const {
-    unsigned res = 0;
+count_t TimedCounter::get(const vertex& v) const {
+    count_t res = 0;
     for (const auto& vtc : *this)
-        if (vtc.first.first == v)
+        if (vtc.first.value == v)
             res += vtc.second;
     return res;
 }
 
-vertex TimedCounter::most_frequent() const {
-    Counter<vertex, unsigned> vc;
+Counter<vertex, count_t> TimedCounter::untimedCounter() const {
+    Counter<vertex, count_t> vc;
     for (const auto& vtc : *this)
-        vc[vtc.first.first] += vtc.second;
-    return vc.most_frequent();
+        vc[vtc.first.value] += vtc.second;
+    return vc;
+}
+
+vertex TimedCounter::most_frequent() const {
+    return untimedCounter().most_frequent();
 }
 
 ////////////
@@ -730,7 +739,7 @@ void CTable::balance()
         // Get total count for each class (called Ni in comment below)
         Counter<vertex, count_t> class_count;
         for (auto iorow : *this)
-            class_count += iorow.second;
+            class_count += iorow.second.untimedCounter();
 
         count_t usize = uncompressed_size(), n = class_count.size();
         // N1 + ... + Nn = usize
@@ -748,8 +757,8 @@ void CTable::balance()
         // ci * ci1 + ... + ci * cim = usize / n
         // ci = (usize/n) / Ni
         for (auto iorow : *this)
-            for (auto vc : iorow.second)
-                vc.second *= (usize / n) / class_count[vc.first];
+            for (auto tvc : iorow.second)
+                tvc.second *= (usize / n) / class_count[tvc.first.value];
     } else {
         logger().warn() << "CTable::balance() - "
                         << "cannot balance non discrete output type "
