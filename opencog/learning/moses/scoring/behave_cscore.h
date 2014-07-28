@@ -77,6 +77,13 @@ public:
         _bscorer.ignore_cols(idxs);
     }
 
+    // In case one wants to evaluate the fitness on a subset of the
+    // data, one can provide a set of row indexes to ignore
+    void ignore_rows(const std::set<unsigned>& idxs) const
+    {
+        _bscorer.ignore_rows(idxs);
+    }
+
     ascore_base& get_ascorer() const { return _ascorer; }
 
 private:
