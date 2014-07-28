@@ -52,11 +52,11 @@ namespace opencog { namespace moses {
 // convergence.  In particular, the optimal annealing schedule is
 // unknown. (i.e. what the temperatures should be at each iteration).
 //
-unsigned simulated_annealing::operator()(deme_t& deme,
-                    const instance& init_inst,
-                    const iscorer_base& iscorer,
-                    unsigned max_evals,
-                    time_t max_time)
+void simulated_annealing::operator()(deme_t& deme,
+                                     const instance& init_inst,
+                                     const iscorer_base& iscorer,
+                                     unsigned max_evals,
+                                     time_t max_time)
 {
     const field_set& fields = deme.fields();
     max_distance = opt_params.max_distance(fields);
@@ -155,7 +155,7 @@ unsigned simulated_annealing::operator()(deme_t& deme,
             current_temp >= sa_params.min_temp &&
             center_instance_energy > energy(opt_params.terminate_if_gte));
 
-    return current_number_of_instances;
+    deme.n_evals = current_number_of_instances;
 }
 
 } // ~namespace moses

@@ -133,20 +133,20 @@ struct simulated_annealing : optimizer_base
                            (max_distance - 1) + 1 );
     }
 
-    unsigned operator()(deme_t& deme,
-                        const instance& init_inst,
-                        const iscorer_base& iscorer,
-                        unsigned max_evals,
-                        time_t max_time);
+    void operator()(deme_t& deme,
+                    const instance& init_inst,
+                    const iscorer_base& iscorer,
+                    unsigned max_evals,
+                    time_t max_time);
 
     // like above but assumes that the initial instance is null
-    unsigned operator()(deme_t& deme,
-                        const iscorer_base& iscorer,
-                        unsigned max_evals,
-                        time_t max_time)
+    void operator()(deme_t& deme,
+                    const iscorer_base& iscorer,
+                    unsigned max_evals,
+                    time_t max_time)
     {
         const instance init_inst(deme.fields().packed_width());
-        return operator()(deme, init_inst, iscorer, max_evals, max_time);
+        operator()(deme, init_inst, iscorer, max_evals, max_time);
     }
 
     sa_parameters sa_params;

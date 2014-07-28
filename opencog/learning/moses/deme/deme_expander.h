@@ -66,13 +66,15 @@ struct deme_expander
      * @param max_evals the maximum number of evaluations of the scoring
      *                  function to perform.
      * @param max_time the maximum elapsed (wall-clock) time to allow.
-     *
-     * @return return the number of evaluations actually performed per
-     *         deme (in case of breadth-first search).
      */
-    std::vector<unsigned> optimize_demes(int max_evals, time_t max_time);
+    void optimize_demes(int max_evals, time_t max_time);
 
     void free_demes();
+
+    /**
+     * Return the total number of evaluations across all demes
+     */
+    unsigned total_evals();
 
     // Structures related to the current deme
     boost::ptr_vector<representation> _reps; // representations of the demes

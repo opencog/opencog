@@ -45,10 +45,9 @@ namespace opencog { namespace moses {
 // Univariate Optimization //
 /////////////////////////////
 
-//return # of evaluations actually performed
-unsigned univariate_optimization::operator()(deme_t& deme,
-                    const iscorer_base& iscorer,
-                    unsigned max_evals, time_t max_time)
+void univariate_optimization::operator()(deme_t& deme,
+                                         const iscorer_base& iscorer,
+                                         unsigned max_evals, time_t max_time)
 {
     unsigned pop_size = opt_params.pop_size(deme.fields());
     unsigned max_gens_total = information_theoretic_bits(deme.fields());
@@ -72,24 +71,23 @@ unsigned univariate_optimization::operator()(deme_t& deme,
 
     if (eda_params.is_tournament_selection()) {
         cout_log_best_and_gen logger;
-        return optimize
-               (deme, n_select, n_generate, max_gens_total, iscorer,
-                terminate_if_gte_or_no_improv<composite_score>
-                (composite_score(opt_params.terminate_if_gte,
-                                  worst_composite_score.get_complexity(),
-                                  0),
-                 max_gens_improv),
-                tournament_selection((unsigned)eda_params.selection),
-                univariate(), local_structure_probs_learning(),
-                // rtr_replacement(deme.fields(),
-                //                      opt_params.rtr_window_size(deme.fields())),
-                replace_the_worst(),
-                logger);
+        deme.n_evals = optimize
+            (deme, n_select, n_generate, max_gens_total, iscorer,
+             terminate_if_gte_or_no_improv<composite_score>
+             (composite_score(opt_params.terminate_if_gte,
+                              worst_composite_score.get_complexity(),
+                              0),
+              max_gens_improv),
+             tournament_selection((unsigned)eda_params.selection),
+             univariate(), local_structure_probs_learning(),
+             // rtr_replacement(deme.fields(),
+             //                      opt_params.rtr_window_size(deme.fields())),
+             replace_the_worst(),
+             logger);
     } else { //truncation selection
         OC_ASSERT(false,
                   "Trunction selection not implemented."
                   " Tournament should be used instead.");
-        return 42;
         /*
         return optimize(deme,n_select,n_generate,args.max_gens,score,
           terminate_if_gte_or_no_improv(opt_params.terminate_if_gte,

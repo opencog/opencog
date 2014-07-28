@@ -273,23 +273,22 @@ public:
      *         be equal or larger than the eval_best return, as not all
      *         evaluations lead to the best solution.
      */
-    unsigned operator()(deme_t& deme,
-                        const instance& init_inst,
-                        const iscorer_base& iscorer,
-                        unsigned max_evals,
-                        time_t max_time,
-                        unsigned* eval_best = NULL);
+    void operator()(deme_t& deme,
+                    const instance& init_inst,
+                    const iscorer_base& iscorer,
+                    unsigned max_evals,
+                    time_t max_time);
 
     // Like above but assumes that init_inst is null (backward compatibility)
     // XXX In fact, all of the current code uses this entry point, no one
     // bothers to supply an initial instance.
-    unsigned operator()(deme_t& deme,
-                        const iscorer_base& iscorer,
-                        unsigned max_evals,
-                        time_t max_time)
+    void operator()(deme_t& deme,
+                    const iscorer_base& iscorer,
+                    unsigned max_evals,
+                    time_t max_time)
     {
         instance init_inst(deme.fields().packed_width());
-        return operator()(deme, init_inst, iscorer, max_evals, max_time);
+        operator()(deme, init_inst, iscorer, max_evals, max_time);
     }
 
 protected:

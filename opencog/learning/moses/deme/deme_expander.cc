@@ -303,9 +303,8 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
 }
 
 
-std::vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_time)
+void deme_expander::optimize_demes(int max_evals, time_t max_time)
 {
-    std::vector<unsigned> actl_evals;
     int max_evals_per_deme = max_evals / _demes.size();
     // We set to 1 n_ss_demes in case n_subsample_demes was set to 0
     unsigned n_ss_demes =
@@ -374,8 +373,7 @@ std::vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_ti
             // Optimize
             complexity_based_scorer cpx_scorer =
                 complexity_based_scorer(_cscorer, _reps[i], _params.reduce_all);
-            actl_evals.push_back(_optimize(_demes[i][j], cpx_scorer,
-                                           max_evals_per_deme, max_time));
+            _optimize(_demes[i][j], cpx_scorer, max_evals_per_deme, max_time);
         }
     }
 
@@ -387,8 +385,6 @@ std::vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_ti
         // those out...
         _cscorer.ignore_cols(std::set<arity_t>());
     }
-
-    return actl_evals;
 }
 
 void deme_expander::free_demes()
@@ -396,6 +392,15 @@ void deme_expander::free_demes()
     _ignore_cols_seq.clear();
     _demes.clear();
     _reps.clear();
+}
+
+unsigned deme_expander::total_evals()
+{
+    unsigned res = 0;
+    for (const auto& ss_demes : _demes)
+        for (const auto& deme : ss_demes)
+            res += deme.n_evals;
+    return res;
 }
 
 } // ~namespace moses
