@@ -44,7 +44,8 @@ struct feature_selector_parameters
         restrict_true(false),
         init_xmplr_features(false),
         xmplr_as_feature(false),
-        subsampling_pbty(0.0),
+        subsampling_ratio(1.0),
+        subsampling_by_time(false),
         n_demes(1),
         diversity_pressure(0.0),
         diversity_cap(0),
@@ -100,9 +101,18 @@ struct feature_selector_parameters
     bool xmplr_as_feature;
 
     /**
-     * Probability of discarding a row
+     * Ratio size of the subsampled data set (this is used to
+     * introduce some randomness in feature selection).
      */
-    double subsampling_pbty;
+    double subsampling_ratio;
+
+    /**
+     * If set to true then the subsampling_ratio concerns
+     * timestamps. That is a subset of timestamps is selected (of size
+     * subsampling_ratio * #timestamps) and all rows timestamped at
+     * those timestamps are kept.
+     */
+    bool subsampling_by_time;
 
     /**
      * Number of feature sets to select out of feature selection and

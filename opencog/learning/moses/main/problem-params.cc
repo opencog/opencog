@@ -781,13 +781,19 @@ problem_params::add_options(boost::program_options::options_description& desc)
          po::value<bool>(&festor_params.prune_xmplr)->default_value(0),
          "Remove from the exemplar the literals of non-selected features.\n")
 
-        ("fs-subsampling-pbty",
-         po::value<double>(&festor_params.subsampling_pbty)->default_value(0),
-         "Probability of discarding an observation before carrying feature "
-         "selection. 0 means no observation is discard, 1 means all are discard. "
-         "This is to force to introduce some randomness in "
+        ("fs-subsampling-ratio",
+         po::value<double>(&festor_params.subsampling_ratio)->default_value(1),
+         "Subsampling size ratio. 1 means no subsampling is taking place. "
+         "0 means is the most extrem subsampling (all data are discarded). "
+         "This is useful to introduce some randomness in "
          "feature selection, as not all feature selection algorithms "
          "have some.\n")
+
+        ("fs-subsampling-by-time",
+         po::value<bool>(&festor_params.subsampling_by_time)->default_value(0),
+         "If enabled, then fs-subsampling-ratio applies to the set of timestamps "
+         "rather than the set of rows. And only rows timestamped at subsampled "
+         "timestamps are kept.\n")
 
         ("fs-demes",
          po::value<unsigned>(&festor_params.n_demes)->default_value(1),

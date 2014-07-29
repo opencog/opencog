@@ -35,6 +35,7 @@
 #include <opencog/comboreduct/table/table_io.h>
 #include <opencog/util/oc_omp.h>
 #include <opencog/util/random.h>
+#include <opencog/util/lazy_random_selector.h>
 
 // Name given to the feature corresponding to the output of the
 // exemplar
@@ -171,10 +172,6 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const
             consider_row = predicted_out != actual_out;
         }
 
-        // subsample
-        if (consider_row && params.subsampling_pbty > 0)
-            consider_row = params.subsampling_pbty <= randGen().randfloat();
-
         // add row
         if (consider_row) {
             auto inputs = vct.first;
@@ -197,6 +194,28 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const
             fs_ctable[inputs] += vct.second;
         }
     }
+
+    // subsample
+    if (params.subsampling_ratio < 1.0) {
+        if (params.subsampling_by_time) {
+            std::set<boost::gregorian::date> timestamps = fs_ctable.get_timestamps(),
+                rm_timestamps;
+            unsigned timestamps_size = timestamps.size(),
+                rm_size = (1.0 - params.subsampling_ratio) * timestamps_size;
+            dorepeat(rm_size)
+                rm_timestamps.insert(randset_erase(timestamps));
+            fs_ctable.remove_rows_at_times(rm_timestamps);
+        } else {
+            std::set<unsigned> rm_row_idxs;
+            unsigned fs_ctable_usize = fs_ctable.uncompressed_size(),
+                rm_size = (1.0 - params.subsampling_ratio) * fs_ctable_usize;
+            lazy_random_selector rm_selector(fs_ctable_usize);
+            dorepeat(rm_size)
+                rm_row_idxs.insert(rm_selector.select());
+            fs_ctable.remove_rows(rm_row_idxs);
+        }
+    }
+
     logger().debug("CTable size for feature selection = %u",
                    fs_ctable.size());
 
