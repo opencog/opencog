@@ -277,7 +277,7 @@ class MemberToEvaluationRule(Rule):
             variable = member_link.out[1].out[0]
             predicate = member_link.out[1].out[1].out[0]
             input_args = member_link.out[1].out[1].out[1].out
-            output_args =  [concept if i == variable else i for i in input_args]
+            output_args = [concept if i == variable else i for i in input_args]
 
             list_link = self.chainer.link(types.ListLink, output_args)
             evaluation_link = [self.chainer.link(types.EvaluationLink,
@@ -568,3 +568,60 @@ class ProcedureEvaluationRule(Rule):
 
         # Todo: Why is the count 1?
         return [TruthValue(fuzzy_tv, 1.0)]
+
+
+class SatisfyingSetToConceptRule(Rule):
+    """
+    Given:
+    (SatisfyingSetLink
+        (VariableNode ("$X")
+        (EvaluationLink
+            (PredicateNode "smokes")
+            (ListLink
+                (VariableNode "$X")))))
+    produces:
+    (AndLink
+    (ConceptToPredicateLink
+        (ConceptNode "smoke")
+        (PredicateNode "smoke")
+    (InheritanceLink
+        (ConceptNode "smokes")
+        (SatisfyingSetLink
+            (VariableNode ("$X")
+            (EvaluationLink
+                (PredicateNode "smokes")
+                (ListLink
+                    (VariableNode "$X")))))
+    """
+    def __init__(self, chainer):
+        self.chainer = chainer
+        X = self.chainer.new_variable()
+        EVAL = self.chainer.new_variable()
+
+        Rule.__init__(self,
+                      formula=None,
+                      inputs=[chainer.link(types.SatisfyingSetLink, [X, EVAL])],
+                      outputs=[])
+
+        self.probabilistic_inputs = False
+
+    # Todo: The 'outputs' parameter is not used
+    def custom_compute(self, inputs, outputs):
+        [satisfying_set_link] = inputs
+        and_link = []
+        tv = satisfying_set_link.tv
+
+        if satisfying_set_link.out[0].type == types.VariableNode and\
+                satisfying_set_link.out[1].type == types.EvaluationLink:
+            predicate = satisfying_set_link.out[1].out[0]
+            new_concept = self.chainer.atomspace.add_node(types.ConceptNode,
+                                                          predicate.name)
+            #TODO: ConceptToPredicateLink needs to be implemented
+            concept_to_predicate_link = self.chainer.link(
+                types.ConceptToPredicateLink, [new_concept, predicate])
+            inheritance_link = self.chainer.link(
+                types.InheritanceLink, [new_concept, satisfying_set_link])
+            and_link = self.chainer.link(
+                types.AndLink, [concept_to_predicate_link, inheritance_link])
+
+        return and_link, [tv]
