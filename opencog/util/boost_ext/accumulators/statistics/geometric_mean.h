@@ -31,7 +31,9 @@
 #include <boost/accumulators/statistics_fwd.hpp>
 #include <boost/accumulators/statistics/count.hpp>
 
-// Geometric mean boost accumulator extension
+// Geometric mean boost accumulator extension. That is formally
+//
+// sqrt(x1 * .. * xn)
 
 namespace boost { namespace accumulators
 {
