@@ -20,7 +20,7 @@
 #ifndef _OPENCOG_JACCARD_INDEX_H
 #define _OPENCOG_JACCARD_INDEX_H
 
-namespace moses3 {
+namespace opencog {
 
 /**
  * Calculate the Jaccard index (see
