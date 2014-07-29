@@ -288,10 +288,8 @@ void EinsteinPuzzle::test_full(void)
 
 	// -----------
 	// Two distinct people cannot have a common attribute
-	// XXX FIXME: this is wrong, its deducng that person4 does not live
-	// in the white house, when in fact, person4 does live there ... 
 	Handle distc = pm.crisp_logic_bindlink(distc_rule);
-	logger().debug("After first distinct-attr rule\n%s\n", SchemeSmob::to_string(distc).c_str());
+	logger().debug() << "After first distinct-attr rule\n" << SchemeSmob::to_string(distc).c_str();
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 234, getarity(distc));
 
 	// -----------
