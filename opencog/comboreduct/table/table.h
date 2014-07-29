@@ -50,7 +50,16 @@
                                // the number of trials needed to check
                                // a formula
 
+#define TARGET_DISCRETIZED_BINS_NUM 5  // discretize contin type target
+                                       // into # bins
+
 namespace opencog { namespace combo {
+
+std::vector<contin_t> discretize_contin_feature(contin_t min, contin_t max);
+
+// builtin is not used to represent builtins but to trick vertex to
+// represent discretized contin values
+builtin get_discrete_bin(std::vector<contin_t> disc_intvs, contin_t val);
 
 /**
  * Get indices (aka positions or offsets) of a list of labels given a
@@ -1049,10 +1058,24 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
     auto asf = boost::apply_visitor(sfv);
     type_node otype = ctable.get_output_type();
 
-    ///////////////////
-    // discrete case //
-    ///////////////////
-    if (id::enum_type == otype or id::boolean_type == otype)
+    const type_tree& tsig = ctable.get_signature();
+    bool all_discrete_inputs = true;
+    for (const type_tree& in_tt : get_signature_inputs(tsig)) {
+        type_node tn = get_type_node(in_tt);
+        if (tn != id::boolean_type and tn != id::enum_type) {
+            all_discrete_inputs = false;
+            break;
+        }
+    }
+
+
+    /////////////////////
+    // discrete inputs //
+    /////////////////////
+    if (all_discrete_inputs
+        and (id::enum_type == otype
+             or id::boolean_type == otype
+             or id::contin_type == otype))
     {
         // Let X1, ..., Xn be the input columns on the table (as given by fs),
         // and Y be the output column.  We need to compute the joint entropies
@@ -1065,6 +1088,27 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         VSCounter ic;  // for H(X1, ..., Xn)
         VSCounter ioc; // for H(Y, X1, ..., Xn)
         double total = 0.0;
+
+        std::vector<contin_t> disc_intvs;
+
+        if (id::contin_type == otype)
+        {
+            contin_t min = 100000.0;
+            contin_t max = 0.0;
+
+            for (const auto& row : ctable)
+            {
+                for (const auto& val_pair : row.second) {
+                    const vertex& v = val_pair.first; // key of map
+                    if (get_contin(v) < min)
+                        min = get_contin(v);
+
+                    if (get_contin(v) > max)
+                        max = get_contin(v);
+                }
+            }
+            disc_intvs = discretize_contin_feature(min, max);
+        }
 
         // Count the total number of times an enum appears in the table
         Counter<vertex, count_t> ycount;
@@ -1083,13 +1127,21 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
                 const vertex& v = val_pair.first.value; // counter key value
 
                 count_t count = row.second.get(v);
-                ycount[v] += count;
+
+                builtin b;
 
                 // update ioc == "input output counter"
                 switch (otype) {
                 case id::enum_type: vec.push_back(get_enum_type(v));
+                    ycount[v] += count;
                     break;
                 case id::boolean_type: vec.push_back(get_builtin(v));
+                    ycount[v] += count;
+                    break;
+                case id::contin_type:
+                    b = get_discrete_bin(disc_intvs,get_contin(v));
+                    vec.push_back(b);
+                    ycount[b] += count;
                     break;
                 default:
                     OC_ASSERT(false, "case not implemented");
@@ -1199,7 +1251,7 @@ double mutualInformationBtwSets(const CTable& ctable,
     ///////////////////
     // discrete case //
     ///////////////////
-    if (id::enum_type == otype or id::boolean_type == otype)
+    if (id::enum_type == otype or id::boolean_type == otype or id::contin_type)
     {
         // Let U1, ..., Un the features resulting from the union
         // between fs_l and fs_r.

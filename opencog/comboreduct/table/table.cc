@@ -526,6 +526,27 @@ vector<unsigned> get_indices(const vector<string>& labels,
     return res;
 }
 
+std::vector<contin_t> discretize_contin_feature(contin_t min,
+                                                contin_t max)
+{
+    std::vector<contin_t> res;
+    contin_t interval = (max - min)/TARGET_DISCRETIZED_BINS_NUM;
+    for (unsigned i = 0; i < TARGET_DISCRETIZED_BINS_NUM; ++i)
+        res.push_back(min+i*interval);
+    return res;
+}
+
+builtin get_discrete_bin(std::vector<contin_t> disc_intvs, contin_t val)
+{
+    unsigned i;
+    for (i = 1; i < TARGET_DISCRETIZED_BINS_NUM; i++)
+    {
+        if (val < disc_intvs[i])
+            break;
+    }
+    return (builtin)i;
+}
+
 unsigned get_index(const string& label, const vector<string>& header)
 {
     return std::distance(header.begin(), std::find(header.begin(), header.end(), label));
