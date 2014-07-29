@@ -189,3 +189,9 @@
 (is-a "birds" "pet")
 (is-a "cats" "pet")
 (is-a "horses" "pet")
+
+(is-a "Englishman" "citizenship")
+(is-a "Swede" "citizenship")
+(is-a "Dane" "citizenship")
+(is-a "Norwegian" "citizenship")
+(is-a "German" "citizenship")
