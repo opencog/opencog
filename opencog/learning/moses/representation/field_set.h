@@ -35,7 +35,7 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/RandGen.h>
-#include <moses3/util/Counter.h>
+#include <opencog/util/Counter.h>
 
 #include "instance.h"
 
