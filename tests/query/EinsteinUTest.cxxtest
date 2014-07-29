@@ -297,10 +297,10 @@ void EinsteinPuzzle::test_full(void)
 
 	// -----------
 	// By-elimination rule
-
+	// If a person doesn't smoke/drink/live-in four items, they must do the fifth.
 	Handle elimi = pm.crisp_logic_bindlink(elimi_rule);
-	logger().debug("After elimination\n%s\n", SchemeSmob::to_string(elimi).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 144, getarity(elimi));
+	logger().debug() << "After elimination\n" << SchemeSmob::to_string(elimi);
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 432, getarity(elimi));
 
 	// -----------
 	// Result should be a ListLink w/ five solutions

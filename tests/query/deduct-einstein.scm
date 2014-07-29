@@ -169,3 +169,14 @@
 (is-a "yellow house" "house")
 (is-a "blue house" "house")
 
+(is-a "water" "drink")
+(is-a "milk" "drink")
+(is-a "bier" "drink")
+(is-a "coffee" "drink")
+(is-a "tea" "drink")
+
+(is-a "Prince" "tobacco")
+(is-a "PallMall" "tobacco")
+(is-a "Dunhill" "tobacco")
+(is-a "Blend" "tobacco")
+(is-a "Blue Master" "tobacco")
