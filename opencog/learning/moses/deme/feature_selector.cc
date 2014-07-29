@@ -36,6 +36,7 @@
 #include <opencog/util/oc_omp.h>
 #include <opencog/util/random.h>
 #include <opencog/util/lazy_random_selector.h>
+#include <opencog/util/jaccard_index.h>
 
 // Name given to the feature corresponding to the output of the
 // exemplar
@@ -359,10 +360,11 @@ csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& f
         return csc_fs_l.first < csc_fs_r.first;
     };
 
-    auto mi_to_penalty = [&](double mi) {
-        return params.diversity_pressure * mi;
+    // Similarity to penalty function
+    auto sim_to_penalty = [&](double sim) {
+        return params.diversity_pressure * sim;
     };
-    
+
     while (!csc_fs_seq.empty()) {
 
         if (last_fs_cit != res.end()) {
@@ -371,8 +373,12 @@ csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& f
                                [&](csc_feature_set& csc_fs) {
                 // compute penalty between csc_fs and the last inserted
                 // feature set
-                float fsmi = mi(last_fs_cit->second, csc_fs.second),
-                    last_dp = mi_to_penalty(fsmi);
+
+                // feature set similarity measure
+                float sim = params.jaccard ?
+                    jaccardIndex(last_fs_cit->second, csc_fs.second)
+                    : mi(last_fs_cit->second, csc_fs.second);
+                float last_dp = sim_to_penalty(sim);
 
                 // // DEBUG
                 // ostreamContainer(logger().debug() << "last_fs_cit->second = ",

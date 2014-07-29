@@ -131,6 +131,11 @@ struct feature_selector_parameters
      * Where the feature sets fs_i are ordered by their penalized
      * scores. aggregate can be either generalized mean or sum, or
      * max.
+     *
+     * Alternatively if jaccard is enabled, then the calculation if
+     * the penalized score of a feature set fs_i is:
+     *
+     * q(fs_i) - diversity_pressure * aggregate_{j=0}^{i-1}(J(fs_i, fs_j))
      */
     double diversity_pressure;
 
@@ -147,6 +152,13 @@ struct feature_selector_parameters
      */
     int diversity_interaction;
     
+     /**
+     * If enabled then expensive multiple mi over feature set
+     * activations is replaced by one cheap calculation of the Jaccard
+     * index over feature sets.
+     */
+    bool jaccard;
+
     /**
      * Map between feature name and probability of being inserted in
      * the deme, regardless of whether it has been selected or not.
