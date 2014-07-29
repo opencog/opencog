@@ -103,6 +103,6 @@ public:
     {
         // The expected output is this:
         string expstr = "and( 0<( +($1 -1329.39)) not(0<( +($1 -1663.79))))";
-        frame("select-less-dupe.csv", "-m1000", expstr, 33);
+        frame("select-no-dupe.csv", "-m1000", expstr, 32);
     }
 };
