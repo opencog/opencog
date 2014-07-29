@@ -28,6 +28,7 @@
 #include <boost/range/algorithm/find.hpp>
 #include <boost/range/algorithm/count_if.hpp>
 #include <boost/range/algorithm/transform.hpp>
+#include <boost/range/algorithm/sort.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
@@ -1048,8 +1049,8 @@ istream& istreamTable(istream& in, Table& tab,
     type_tree tt;
     bool has_header, is_sparse;
     streampos beg = in.tellg();
-    inferTableAttributes(in, target_feature, ignore_features,
-                         tt, has_header, is_sparse);
+    inferTableAttributes(in, target_feature, timestamp_feature,
+                         ignore_features, tt, has_header, is_sparse);
     in.seekg(beg);
 
     if (is_sparse) {
@@ -1202,9 +1203,9 @@ istream& istreamDenseTable(istream& in, Table& tab,
         // Set timestamp idx
         if (!timestamp_feature.empty()) {
             auto timestamp_it = std::find(header.begin(), header.end(),
-                                          target_feature);
-            OC_ASSERT(timestamp_it != header.end(), "Target %s not found",
-                      target_feature.c_str());
+                                          timestamp_feature);
+            OC_ASSERT(timestamp_it != header.end(), "Timestamp feature %s not found",
+                      timestamp_feature.c_str());
             timestamp_idx = std::distance(header.begin(), timestamp_it);
         }
 
