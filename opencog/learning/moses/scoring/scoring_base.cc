@@ -177,6 +177,13 @@ void bscore_ctable_base::ignore_rows(const std::set<unsigned>& idxs) const
     //                     << ", uncompressed size = " << ctable_usize;
 }
 
+void bscore_ctable_base::ignore_rows_at_times(const std::set<TTable::value_type>& timestamps) const
+{
+    _wrk_ctable = _all_rows_wrk_ctable; // to include all rows in wrk_ctable
+    _wrk_ctable.remove_rows_at_times(timestamps);
+    _ctable_usize = _wrk_ctable.uncompressed_size();
+}
+
 unsigned bscore_ctable_base::get_ctable_usize() const
 {
     return _ctable_usize;
