@@ -20,6 +20,8 @@
 #ifndef _OPENCOG_JACCARD_INDEX_H
 #define _OPENCOG_JACCARD_INDEX_H
 
+#include "algorithm.h"
+
 namespace opencog {
 
 /**
