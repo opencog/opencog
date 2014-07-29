@@ -65,6 +65,15 @@ Atom::Atom(Type t, TruthValuePtr tv, AttentionValuePtr av)
 Atom::~Atom()
 {
     _atomTable = NULL;
+    if (0 < getIncomingSetSize()) {
+        // This can't ever possibly happen. If it does, then there is
+        // some very sick bug with the reference counting that the
+        // shared pointers are doing. (Or someone explcitly called the
+        // destructor! Which they shouldn't do.)
+        OC_ASSERT(0 == getIncomingSet().size(),
+             "Atom deletion failure; incoming set not empty for %s h=%d",
+             classserver().getTypeName(_type).c_str(), _uuid);
+    }
     drop_incoming_set();
 }
 
