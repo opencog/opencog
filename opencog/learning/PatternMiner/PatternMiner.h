@@ -189,7 +189,7 @@ namespace PatternMining
 
      bool containIgnoredContent(Handle link );
 
-     string ignoreKeyWords[9] = {"this", "that","these","those","it","he", "him", "her", "she" };
+     const static string ignoreKeyWords[];
 
  public:
      PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram = 3);

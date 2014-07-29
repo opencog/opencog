@@ -41,6 +41,8 @@
 using namespace opencog::PatternMining;
 using namespace opencog;
 
+const string PatternMiner::ignoreKeyWords[] = {"this", "that","these","those","it","he", "him", "her", "she" };
+
 void PatternMiner::generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector < vector<int> >& indexes)
 {
     HandleSeq outgoingLinks = atomSpace->getOutgoing(link);
