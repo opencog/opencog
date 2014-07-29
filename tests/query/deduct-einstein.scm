@@ -152,6 +152,20 @@
 
 ;; ---------------------------------------------------------------
 ;; By-process-of-elimination facts
-;; If person doesn't live in four of these, they must live in the fifth.
-(define color-list (list "red house" "white house" "green house" "yellow house" "blue house"))
+;; If person doesn't live in one of the four houses, they must live in
+;; the fifth. Likewsie, if person doesn't smoke/drink/keep one of the four,
+;; they must have the fifth.
+
+(define (is-a x y)
+	(InheritanceLink
+		(ConceptNode x)
+		(ConceptNode y)
+	)
+)
+
+(is-a "red house" "house")
+(is-a "white house" "house")
+(is-a "green house" "house")
+(is-a "yellow house" "house")
+(is-a "blue house" "house")
 
