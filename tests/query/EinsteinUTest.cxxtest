@@ -303,6 +303,12 @@ void EinsteinPuzzle::test_full(void)
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 696, getarity(elimi));
 
 	// -----------
+	// Print partial results.
+	Handle prt_stuff = eval->apply("print-results", Handle::UNDEFINED);
+	Handle stuff = pm.crisp_logic_bindlink(prt_stuff);
+	logger().debug() << "stuff\n" << SchemeSmob::to_string(stuff);
+
+	// -----------
 	// Result should be a ListLink w/ five solutions
 	// Right now, we accept zero solutions, because above was not yet
 	// enough to solve the pouzzle.
