@@ -464,6 +464,11 @@ Float p_norm_distance(const Vec& a, const Vec& b, Float p=1.0)
  * Warning: if a and b have negative elements then the result could be
  * negative. In that case you might prefer to use the angular
  * distance.
+ *
+ * Indeed the Tanimoto distance is considered as a generalization of
+ * the Jaccard distance over multisets (where the weights are the
+ * number of occurences, therefore never negative). See
+ * http://en.wikipedia.org/wiki/Talk%3AJaccard_index
  */
 template<typename Vec, typename Float>
 Float tanimoto_distance(const Vec& a, const Vec& b)
