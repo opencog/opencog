@@ -112,9 +112,9 @@ bool EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args)
     const std::string& schema = NodeCast(gsn)->getName();
     // printf ("Grounded schema name: %s\n", schema.c_str());
 
-    // A very special-case C++ comparison
-    // This can compare two NumberNodes 
-    // Hard-coded in C++ for speed. (well, and convenience ...)
+    // A very special-case C++ comparison.
+    // This compares two NumberNodes, by their numeric value.
+    // Hard-coded in C++ for speed. (well, and for convenience ...)
     if (0 == schema.compare("c++:greater"))
     {
         LinkPtr ll(LinkCast(args));
@@ -128,6 +128,23 @@ bool EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args)
         double v1 = atof(s1.c_str());
         double v2 = atof(s2.c_str());
         return v1 > v2;
+    }
+
+    // A very special-case C++ comparison.
+    // This compares a set of atoms, verifying that they are all different.
+    // Hard-coded in C++ for speed. (well, and for convenience ...)
+    if (0 == schema.compare("c++:exclusive"))
+    {
+        LinkPtr ll(LinkCast(args));
+        Arity sz = ll->getArity();
+        for (Arity i=0; i<sz-1; i++) {
+            Handle h1(ll->getOutgoingAtom(i));
+            for (Arity j=i+1; j<sz; j++) {
+                Handle h2(ll->getOutgoingAtom(j));
+                if (h1 == h2) return false;
+            }
+        }
+        return true;
     }
 
     // At this point, we only run scheme and python schemas.
