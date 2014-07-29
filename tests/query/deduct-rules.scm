@@ -114,6 +114,37 @@
 )
 
 ;; ---------------------------------------------------------------------
+;; Transitive-not deduction rule.
+;;
+;; If attribute X doesn't hold for person A, and person A is same as person B
+;; then attribute X also doesn't hold for person B.
+(define (transitive-not-rule)
+	(BindLink
+		;; variable declarations
+		(ListLink
+			(decl-var "PredicateNode" "$predicate")
+			(decl-var "FeatureNode" "$person_a")
+			(decl-var "FeatureNode" "$person_b")
+			(decl-var "ConceptNode" "$attribute")
+		)
+		(ImplicationLink
+			;; body -- if all parts of AndLink hold true ... then
+			(AndLink
+				(not-clause VN "$predicate" VN "$person_a" VN "$attribute")
+				(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
+				;; Don't deduce thigs we already know...
+				;; i.e. this not link is identical to conclusion, below.
+				(NotLink
+					(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
+				)
+			)
+			;; implicand -- then the following is true too
+			(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
+		)
+	)
+)
+
+;; ---------------------------------------------------------------------
 ;; neighbor-not-attr rule.
 ;; If some attribute holds true for a person, it cannot hold for the
 ;; person's neighbor.
@@ -132,6 +163,11 @@
 			(AndLink
 				(clause VN "$predicate" VN "$person_a" VN "$attribute")
 				(clause PN "Neighbor" VN "$person_a" VN "$person_b")
+				;; Don't deduce thigs we already know...
+				;; i.e. this not link is identical to conclusion, below.
+				(NotLink
+					(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
+				)
 			)
 
 			;; implicand -- then the following is true too
