@@ -1366,6 +1366,46 @@ ostream& ostreamCTable(ostream& out, const CTable& ct)
     return out;
 }
 
+ostream& ostreamCTableTimeHeader(ostream& out, const CTable& ct)
+{
+    out << "timestamp," << ct.get_output_label() << endl;
+    return out;
+}
+
+ostream& ostreamCTableTimeRow(ostream& out, const CTableTime::value_type& t2ov)
+{
+    out << t2ov.first << ",{";
+    for (auto it = t2ov.second.cbegin(); it != t2ov.second.cend();) {
+        out << table_fmt_vertex_to_str(it->first)
+            << ":" << it->second;
+        if(++it != t2ov.second.cend())
+            out << ",";
+    }
+    out << "}";
+    return out;
+}
+
+ostream& ostreamCTableTime(ostream& out, const CTable& ct, bool discard_input)
+{
+    // print header
+    ostreamCTableTimeHeader(out, ct);
+
+    // Turn the input to timestamped output map into timestamp to
+    // output map
+    OC_ASSERT(discard_input, "Not implemented yet");
+    map<TTable::value_type, Counter<vertex, unsigned>> time2outputs;
+    for (const auto& v : ct)
+        for (const auto& tcv : v.second)
+            time2outputs[tcv.first.timestamp] +=
+                Counter<vertex, unsigned>({{tcv.first.value, tcv.second}});
+
+    // print data by time
+    for (const auto& t2ov : time2outputs)
+        ostreamCTableTimeRow(out, t2ov);
+
+    return out;
+}
+
 // ===========================================================
 // subsample stuff
 
