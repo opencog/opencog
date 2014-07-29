@@ -3,6 +3,8 @@
 ;;
 ;; Trivial example of deduction.
 ;;
+;; Part of the "Einstein puzzle" demo.
+;;
 
 (define (stv mean conf) (cog-new-stv mean conf))
 

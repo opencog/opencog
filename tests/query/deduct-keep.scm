@@ -1,8 +1,9 @@
-
 ;;
 ;; deduct-keep.scm
 ;;
 ;; Print out who keeps what
+;;
+;; Part of the "Einstein puzzle" demo.
 
 (define (print-ownership)
 	(BindLink

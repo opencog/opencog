@@ -13,7 +13,7 @@
 (define (stv mean conf) (cog-new-stv mean conf))
 
 ;; A little handly-dandy utility to avoid over-reporting of "obvious"
-;; results. We declare that person1 is the same asm person1, etc.
+;; results. We declare that person1 is the same as person1, etc.
 ;; A kind-of pauli-exclusion-principle at work.
 (define (same person)
 	(EvaluationLink (stv 1 1)
@@ -126,7 +126,7 @@
 (fact "water_person" "Drinks" "water")
 
 ;; ---------------------------------------------------------------
-;; Assorted supplemental facts.  These are somhow implicit in the
+;; Assorted supplemental facts.  These are somehow implicit in the
 ;; problem statement. We'd mostly like to derive these, from more
 ;; basic assumptions, but, for now, we'l just state them.
 ;;
@@ -149,4 +149,9 @@
 (successor "102 Main Street" "103 Main Street")
 (successor "103 Main Street" "104 Main Street")
 (successor "104 Main Street" "105 Main Street")
+
+;; ---------------------------------------------------------------
+;; By-process-of-elimination facts
+;; If person doesn't live in four of these, they must live in the fifth.
+(define color-list (list "red house" "white house" "green house" "yellow house" "blue house"))
 

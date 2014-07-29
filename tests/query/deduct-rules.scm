@@ -11,6 +11,8 @@
 ;; possible set of rules; instead, they're the most "natural" or
 ;; "common-sense-like" for this task.
 
+(use-modules (srfi srfi-1))
+
 ;; Define simple truth value
 (define (stv mean conf) (cog-new-stv mean conf))
 
@@ -20,13 +22,24 @@
 (define CN ConceptNode)
 (define AN FeatureNode) ; AvatarNode
 
-;; Clause containing relating three things of three types
+;; Predicate clause specifies a predicate that associates attribute to person
 (define (clause t1 v1 t2 v2 t3 v3)
 	(EvaluationLink
 		(t1 v1)
 		(ListLink
 			(t2 v2)
 			(t3 v3)
+		)
+	)
+)
+
+;; Predicate clause negating the third attribute.
+(define (not-clause t1 v1 t2 v2 t3 v3)
+	(EvaluationLink
+		(t1 v1)
+		(ListLink
+			(t2 v2)
+			(NotLink (t3 v3))
 		)
 	)
 )
@@ -39,6 +52,7 @@
 	)
 )
 
+;; ---------------------------------------------------------------------
 ;; "Is the same person" deduction rule.
 ;; If person A and person B both share the same predicate and property,
 ;; then they must be the same person.
@@ -70,10 +84,11 @@
 	)
 )
 
-
-;; transitive deduction rule.
-;; If property X holds for person A, and person A is same as person B
-;; then property X also holds for person B.
+;; ---------------------------------------------------------------------
+;; Transitive deduction rule.
+;;
+;; If attribute X holds for person A, and person A is same as person B
+;; then attribute X also holds for person B.
 (define (transitive-rule)
 	(BindLink
 		;; variable declarations
@@ -100,7 +115,153 @@
 	)
 )
 
+;; ---------------------------------------------------------------------
+;; Transitive-not deduction rule.
+;;
+;; If attribute X doesn't hold for person A, and person A is same as person B
+;; then attribute X also doesn't hold for person B.
+;;
+;; Very similar to above
+(define (transitive-not-rule)
+	(BindLink
+		;; variable declarations
+		(ListLink
+			(decl-var "PredicateNode" "$predicate")
+			(decl-var "FeatureNode" "$person_a")
+			(decl-var "FeatureNode" "$person_b")
+			(decl-var "ConceptNode" "$attribute")
+		)
+		(ImplicationLink
+			;; body -- if all parts of AndLink hold true ... then
+			(AndLink
+				(not-clause VN "$predicate" VN "$person_a" VN "$attribute")
+				(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
+				;; Don't deduce thigs we already know...
+				;; i.e. this not link is identical to conclusion, below.
+				(NotLink
+					(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
+				)
+			)
+			;; implicand -- then the following is true too
+			(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
+		)
+	)
+)
 
+;; ---------------------------------------------------------------------
+;; elimination
+
+(define (by-elimination-rule a b c d e)
+	(BindLink
+		;; variable declarations
+		(ListLink
+			(decl-var "FeatureNode" "$person")
+			(decl-var "PredicateNode" "$predicate")
+		)
+		(ImplicationLink
+			;; body -- if all parts of AndLink hold true ... then
+			(AndLink
+				(not-clause VN "$predicate" VN "$person" CN a)
+				(not-clause VN "$predicate" VN "$person" CN b)
+				(not-clause VN "$predicate" VN "$person" CN c)
+				(not-clause VN "$predicate" VN "$person" CN d)
+				;; Don't deduce thigs we already know...
+				;; i.e. this not link is identical to conclusion, below.
+				(NotLink
+					(clause VN "$predicate" VN "$person" CN e)
+				)
+			)
+
+			;; implicand -- then the following is true too
+			(clause VN "$predicate" VN "$person" CN e)
+		)
+	)
+)
+
+(define (by-elim-rule lst excl)
+	(define exlist (remove (lambda (x) (string=? x excl)) lst))
+	(by-elimination-rule (car exlist) (cadr exlist) (caddr exlist) (cadddr exlist) excl)
+)
+
+(define (by-elimination-red) (by-elim-rule color-list "red house"))
+(define (by-elimination-green) (by-elim-rule color-list "green house"))
+(define (by-elimination-white) (by-elim-rule color-list "white house"))
+(define (by-elimination-blue) (by-elim-rule color-list "blue house"))
+(define (by-elimination-yellow) (by-elim-rule color-list "yellow house"))
+
+;; ---------------------------------------------------------------------
+;; distinct-attr rule.
+;; If, for a given attribute, person a and person b take on different
+;; values, then they cannot be the same person.  Therefore, any other
+;; attributes they have must also be exclusive.
+;;
+;; XXX Something is broken -- this is deducing that person4 does not
+;; live in the white house, which is false ... 
+
+(define (distinct-attr-rule)
+	(BindLink
+		;; variable declarations
+		(ListLink
+			(decl-var "FeatureNode" "$person_a")
+			(decl-var "FeatureNode" "$person_b")
+			(decl-var "PredicateNode" "$predicate_common")
+			(decl-var "ConceptNode" "$attribute_comm_a")
+			(decl-var "ConceptNode" "$attribute_comm_b")
+			(decl-var "PredicateNode" "$predicate_exclusive")
+			(decl-var "ConceptNode" "$attribute_excl")
+		)
+		(ImplicationLink
+			;; body -- if all parts of AndLink hold true ... then
+			(AndLink
+				(clause VN "$predicate_common" VN "$person_a" VN "$attribute_comm_a")
+				(clause VN "$predicate_common" VN "$person_b" VN "$attribute_comm_b")
+				(clause VN "$predicate_exclusive" VN "$person_a" VN "$attribute_excl")
+				;; Don't deduce thigs we already know...
+				;; i.e. this not link is identical to conclusion, below.
+				(NotLink
+					(not-clause VN "$predicate_exclusive" VN "$person_b" VN "$attribute_excl")
+				)
+			)
+
+			;; implicand -- then the following is true too
+			(not-clause VN "$predicate_exclusive" VN "$person_b" VN "$attribute_excl")
+		)
+	)
+)
+
+;; ---------------------------------------------------------------------
+;; neighbor-not-attr rule.
+;; If some attribute holds true for a person, it cannot hold for the
+;; person's neighbor.
+
+(define (neighbor-not-attr-rule)
+	(BindLink
+		;; variable declarations
+		(ListLink
+			(decl-var "FeatureNode" "$person_a")
+			(decl-var "FeatureNode" "$person_b")
+			(decl-var "PredicateNode" "$predicate")
+			(decl-var "ConceptNode" "$attribute")
+		)
+		(ImplicationLink
+			;; body -- if all parts of AndLink hold true ... then
+			(AndLink
+				(clause VN "$predicate" VN "$person_a" VN "$attribute")
+				(clause PN "Neighbor" VN "$person_a" VN "$person_b")
+				;; Don't deduce thigs we already know...
+				;; i.e. this not link is identical to conclusion, below.
+				(NotLink
+					(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
+				)
+			)
+
+			;; implicand -- then the following is true too
+			(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
+		)
+	)
+)
+
+;; ---------------------------------------------------------------------
 ;; Houses at the end of the street can only have one neighbor, ever.
 ;; This is a rather narrow rule, as it can only ever apply to the first
 ;; address (first ordinal -- a boundary condition).
@@ -136,9 +297,9 @@
 	)
 )
 
-
-
-;; neighbor deduction rule.
+;; ---------------------------------------------------------------------
+;; Neighbor deduction rule.
+;;
 ;; If Address X is left of address Y, then person who lives in X is
 ;; a neighbor of person who lives in Y
 (define (neighbor-rule)
@@ -167,7 +328,9 @@
 	)
 )
 
-;; neighbor relation is symmetric
+;; ---------------------------------------------------------------------
+;; Neighbor relation is symmetric
+;;
 ;; If A is a neighbor of B then B is a neighbor of A
 (define (neighbor-symmetry-rule)
 	(BindLink
@@ -191,7 +354,7 @@
 	)
 )
 
-
+;; ---------------------------------------------------------------------
 ;; Deduce if a solution has been found ... this simply tries to see
 ;; if all attributes have been deduced, and if so, just clumps them
 ;; together.
