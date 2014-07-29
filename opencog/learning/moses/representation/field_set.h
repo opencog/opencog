@@ -35,6 +35,7 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/RandGen.h>
+#include <moses3/util/Counter.h>
 
 #include "instance.h"
 
@@ -335,19 +336,15 @@ struct field_set
     template<typename It>
     field_set(It from, It to) : _nbool(0)
     {
-        typedef std::map<spec, size_t> spec_map;
-
         // Adding spec's to the map will cause identical specs to be
         // merged (and the count incremented for each).  Non-identical
         // specs are sorted. The sorting seems to follow the order of
         // the spec boost::variant.  Also, since disc_spec::operator<
         // compares by descending multiplicity, it is ensured that the
         // single-bit bit_spec's are at the end.
-        spec_map spec_counts;
-        while (from != to)
-            ++spec_counts[*from++];
+        Counter<spec, size_t> spec_counts(from, to);
 
-        for (const spec_map::value_type& v : spec_counts) //build them
+        for (const auto& v : spec_counts) //build them
             build_spec(v.first, v.second);
 
         compute_starts();                 //compute iterator positions
