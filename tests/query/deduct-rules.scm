@@ -194,6 +194,9 @@
 ;; If, for a given attribute, person a and person b take on different
 ;; values, then they cannot be the same person.  Therefore, any other
 ;; attributes they have must also be exclusive.
+;;
+;; XXX Something is broken -- this is deducing that person4 does not
+;; live in the white house, which is false ... 
 
 (define (distinct-attr-rule)
 	(BindLink
