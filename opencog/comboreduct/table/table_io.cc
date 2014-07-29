@@ -913,6 +913,7 @@ istream& istreamTable_ignore_indices(istream& in, Table& tab,
 
 static istream&
 inferTableAttributes(istream& in, const string& target_feature,
+                     const string& timestamp_feature,
                      const vector<string>& ignore_features,
                      type_tree& tt, bool& has_header, bool& is_sparse)
 {
@@ -993,10 +994,26 @@ inferTableAttributes(istream& in, const string& target_feature,
         }
         vector<unsigned> ignore_idxs =
             get_indices(ignore_features, maybe_header);
+        ignore_idxs.push_back(target_idx);
+        boost::sort(ignore_idxs);
+
+        // Include timestamp feature as idx to ignore
+        if (!timestamp_feature.empty()) {
+            auto timestamp_it = std::find(maybe_header.begin(), maybe_header.end(),
+                                          timestamp_feature);
+            OC_ASSERT(timestamp_it != maybe_header.end(),
+                      "Timestamp feature  %s not found",
+                      timestamp_feature.c_str());
+            unsigned timestamp_idx = std::distance(maybe_header.begin(), timestamp_it);
+            ignore_idxs.push_back(timestamp_idx);
+            boost::sort(ignore_idxs);
+        }
+
+        // Generate type signature
         type_node otype = types[target_idx];
         vector<type_node> itypes;
         for (unsigned i = 0; i < types.size(); ++i)
-            if (!boost::binary_search(ignore_idxs, i) && i != target_idx)
+            if (!boost::binary_search(ignore_idxs, i))
                 itypes.push_back(types[i]);
         tt = gen_signature(itypes, otype);
     } else {
