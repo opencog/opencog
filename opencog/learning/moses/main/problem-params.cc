@@ -858,6 +858,12 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "be high compared to the number of datapoints to decrease inacuracy "
          "of the mutual information.\n")
 
+        ("fs-diversity-jaccard",
+         value<bool>(&festor_params.diversity_jaccard)->default_value(true),
+         "Instead of using the expensive mutual information between feature "
+         "sets to measure diversity, it uses a cheap Jaccard index. In that "
+         "case the feature semantic is ignored")
+
         // ======= Feature-selection incremental algo params =======
         ("fs-inc-redundant-intensity",
          po::value<double>(&fs_params.inc_red_intensity)->default_value(-1.0),

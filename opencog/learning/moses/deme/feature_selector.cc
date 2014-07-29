@@ -375,7 +375,7 @@ csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& f
                 // feature set
 
                 // feature set similarity measure
-                float sim = params.jaccard ?
+                float sim = params.diversity_jaccard ?
                     jaccardIndex(last_fs_cit->second, csc_fs.second)
                     : mi(last_fs_cit->second, csc_fs.second);
                 float last_dp = sim_to_penalty(sim);

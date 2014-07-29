@@ -132,7 +132,7 @@ struct feature_selector_parameters
      * scores. aggregate can be either generalized mean or sum, or
      * max.
      *
-     * Alternatively if jaccard is enabled, then the calculation if
+     * Alternatively if jaccard is enabled, then the calculation of
      * the penalized score of a feature set fs_i is:
      *
      * q(fs_i) - diversity_pressure * aggregate_{j=0}^{i-1}(J(fs_i, fs_j))
@@ -157,7 +157,7 @@ struct feature_selector_parameters
      * activations is replaced by one cheap calculation of the Jaccard
      * index over feature sets.
      */
-    bool jaccard;
+    bool diversity_jaccard;
 
     /**
      * Map between feature name and probability of being inserted in
