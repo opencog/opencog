@@ -49,7 +49,7 @@ namespace moses {
             logger().debug("Generation: %d", gen);
             std::stringstream ss;
             ss << "Best instance: " << best->second << " "
-               << fs.stream(best->first);
+               << fs.to_string(best->first);
             logger().debug(ss.str());
         }
     };

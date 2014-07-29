@@ -433,8 +433,8 @@ struct field_set
     template<typename It, typename Out>
     Out pack(It from, Out out) const;
 
-    std::string stream(const instance&) const;
-    std::string stream_raw(const instance&) const;
+    std::string to_string(const instance&) const;
+    std::string to_string_raw(const instance&) const;
 
     /// Compute the Hamming distance between two instances.
     int hamming_distance(const instance& inst1, const instance& inst2) const

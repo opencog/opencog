@@ -84,7 +84,7 @@ void simulated_annealing::operator()(deme_t& deme,
     // Logger
     {
         std::stringstream ss;
-        ss << "Star search initial instance: " << fields.stream(center_instance);
+        ss << "Star search initial instance: " << fields.to_string(center_instance);
         logger().debug(ss.str());
         logger().debug("Energy = %f", center_instance_energy);
     }
@@ -139,7 +139,7 @@ void simulated_annealing::operator()(deme_t& deme,
             {
                 std::stringstream ss;
                 ss << "Center instance: "
-                   << fields.stream(center_instance);
+                   << fields.to_string(center_instance);
                 logger().debug(ss.str());
                 logger().debug("Energy = %f", center_instance_energy);
             }

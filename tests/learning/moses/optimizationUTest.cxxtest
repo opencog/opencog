@@ -62,7 +62,7 @@ public:
         // target instance
         instance target_inst(fs.packed_width());
         randomize(fs, target_inst);
-        std::cout << "target_inst =" << fs.stream(target_inst) << std::endl;
+        std::cout << "target_inst =" << fs.to_string(target_inst) << std::endl;
         // scorer
         distance_based_scorer scorer(fs, target_inst);
         // Local search optimization

@@ -67,7 +67,7 @@ struct deme_based_scorer : public iscorer_base
         if (logger().isFineEnabled()) {
             logger().fine()
                << "moses_based_scorer - Evaluate instance: " 
-               << _fields.stream(inst) << " " << csc;
+               << _fields.to_string(inst) << " " << csc;
         }
         // ~Logger
         return csc;

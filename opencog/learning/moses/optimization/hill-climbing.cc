@@ -344,7 +344,7 @@ void hill_climbing::operator()(deme_t& deme,
                 logger().debug() << "Best score: " << best_cscore;
                 if (logger().isFineEnabled()) {
                     logger().fine() << "Best instance: "
-                                    << fields.stream(center_inst);
+                                    << fields.to_string(center_inst);
                 }
             }
         }

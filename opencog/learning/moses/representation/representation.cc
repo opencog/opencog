@@ -223,7 +223,7 @@ representation::representation(const reduct::rule& simplify_candidate,
 
     {
         std::stringstream ss;
-        ss << "Exemplar instance: " << _fields.stream(_exemplar_inst);
+        ss << "Exemplar instance: " << _fields.to_string(_exemplar_inst);
         logger().debug(ss.str());
     }
 #endif // EXEMPLAR_INST_IS_UNDEAD
@@ -242,7 +242,7 @@ void representation::transform(const instance& inst)
         //_exemplar.validate();
     }
 
-    // cout << _fields.stream(inst) << endl;
+    // cout << _fields.to_string(inst) << endl;
     disc_map_it dkb = disc.begin();
     for (field_set::const_disc_iterator di = _fields.begin_disc(inst);
             di != _fields.end_disc(inst); ++di, ++dkb) {
