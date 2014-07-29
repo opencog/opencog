@@ -516,6 +516,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "This option is only worthwhile when there "
          "is a great deal of stochasticity in the search so that exploring "
          "a deme multiple times will yield substantially different results. "
+         "If the value is negative then the number of revisit is unbound. "
          "This might be the case is feature selection is used for instance.\n")
 
         // Output control options

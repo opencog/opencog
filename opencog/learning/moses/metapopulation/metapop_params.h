@@ -126,7 +126,7 @@ struct subsample_deme_filter_parameters
 struct metapop_parameters
 {
     metapop_parameters(int _max_candidates = -1,
-                       unsigned _revisit = 0,
+                       int _revisit = 0,
                        score_t _complexity_temperature = 6.0f,
                        unsigned _jobs = 1,
                        diversity_parameters _diversity = diversity_parameters()) :
@@ -148,8 +148,9 @@ struct metapop_parameters
     int max_candidates;
 
     // The number of times the same exemplar can be revisited. If 0
-    // then an exemplar can only be visited once.
-    unsigned revisit;
+    // then an exemplar can only be visited once. If negative then the
+    // number of revisit is infinite
+    int revisit;
 
     // If true, then an Ada-Boost-style algorithm is applied during
     // the metapopulation merge. In this case, the scorer must be

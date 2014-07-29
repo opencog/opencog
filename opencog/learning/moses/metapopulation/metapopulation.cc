@@ -116,7 +116,8 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     // though, the score is invalid.
     if (size() == 1) {
         scored_combo_tree_ptr_set::const_iterator selex = _scored_trees.cbegin();
-        if (_params.revisit + 1 > _visited_exemplars[*selex]) // not enough visited
+        if(_params.revisit < 0 or
+           (_params.revisit + 1 > _visited_exemplars[*selex])) // not enough visited
             _visited_exemplars[*selex]++;
         else selex = _scored_trees.cend();    // enough visited
 
@@ -137,7 +138,8 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
         score_t sc = bsct.get_penalized_score();
 
         // Skip exemplars that have been visited enough
-        if (_params.revisit + 1 > _visited_exemplars[bsct]) {
+        if (_params.revisit < 0 or
+            (_params.revisit + 1 > _visited_exemplars[bsct])) {
             probs.push_back(sc);
             found_exemplar = true;
             if (highest_score < sc) highest_score = sc;
