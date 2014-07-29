@@ -778,6 +778,26 @@ vector<string> CTable::get_labels() const
     return labels;
 }
 
+const string& CTable::get_output_label() const
+{
+    return olabel;
+}
+
+const string_seq& CTable::get_input_labels() const
+{
+    return ilabels;
+}
+
+void CTable::set_signature(const type_tree& tt)
+{
+    tsig = tt;
+}
+
+const type_tree& CTable::get_signature() const
+{
+    return tsig;
+}
+
 count_t CTable::uncompressed_size() const
 {
     count_t res = 0.0;

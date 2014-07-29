@@ -662,9 +662,10 @@ public:
     // return the output label + list of input labels
     void set_labels(const string_seq& labels);
     string_seq get_labels() const;
-    const string_seq& get_input_labels() const {return ilabels;}
-    void set_signature(const type_tree& tt) { tsig = tt; };
-    const type_tree& get_signature() const {return tsig;}
+    const std::string& get_output_label() const;
+    const string_seq& get_input_labels() const;
+    void set_signature(const type_tree& tt);
+    const type_tree& get_signature() const;
     type_node get_output_type() const;
 
     // Balance the ctable, so that, in case the output type is
