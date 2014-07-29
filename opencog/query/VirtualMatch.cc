@@ -161,7 +161,20 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			Handle gargs(instor.instantiate(arglist, var_gnds));
 
 			// At last! Actually perform the test!
-			if (cb->virtual_link_match(lvirt, gargs)) return false;
+			bool match = cb->virtual_link_match(lvirt, gargs);
+
+			// XXX FIXME: the instantiator inserted the atoms into the
+			// atomspace. It probably shouldn't.  These are undesirable,
+			// as they are just temporaries, created for the check. Thus,
+			// after checking,we remove them.  The below fails because
+			// it should also look at chlidren: if these down't have
+			// incoming links, these too should be removed.   Not putting
+			// them into the atomspace in the first place would solve that
+			// problem....
+			if (0 == gargs->getIncomingSetSize())
+				_atom_space->purgeAtom(gargs, false);
+
+			if (match) return false;
 
 			// FYI ... if the virtual_link_match() accepts the match, we
 			// still don't instantiate the grounded form in the atomspace,
