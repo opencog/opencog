@@ -20,13 +20,24 @@
 (define CN ConceptNode)
 (define AN FeatureNode) ; AvatarNode
 
-;; Clause containing relating three things of three types
+;; Predicate clause specifies a predicate that associates attribute to person
 (define (clause t1 v1 t2 v2 t3 v3)
 	(EvaluationLink
 		(t1 v1)
 		(ListLink
 			(t2 v2)
 			(t3 v3)
+		)
+	)
+)
+
+;; Predicate clause negating the third attribute.
+(define (not-clause t1 v1 t2 v2 t3 v3)
+	(EvaluationLink
+		(t1 v1)
+		(ListLink
+			(t2 v2)
+			(NotLink (t3 v3))
 		)
 	)
 )
@@ -39,6 +50,7 @@
 	)
 )
 
+;; ---------------------------------------------------------------------
 ;; "Is the same person" deduction rule.
 ;; If person A and person B both share the same predicate and property,
 ;; then they must be the same person.
@@ -70,7 +82,7 @@
 	)
 )
 
-
+;; ---------------------------------------------------------------------
 ;; Transitive deduction rule.
 ;;
 ;; If attribute X holds for person A, and person A is same as person B
@@ -101,7 +113,35 @@
 	)
 )
 
+;; ---------------------------------------------------------------------
+;; neighbor-not-attr rule.
+;; If some attribute holds true for a person, it cannot hold for the
+;; person's neighbor.
 
+(define (neighbor-not-attr-rule)
+	(BindLink
+		;; variable declarations
+		(ListLink
+			(decl-var "FeatureNode" "$person_a")
+			(decl-var "FeatureNode" "$person_b")
+			(decl-var "PredicateNode" "$predicate")
+			(decl-var "ConceptNode" "$attribute")
+		)
+		(ImplicationLink
+			;; body -- if all parts of AndLink hold true ... then
+			(AndLink
+				(clause VN "$predicate" VN "$person_a" VN "$attribute")
+				(clause PN "Neighbor" VN "$person_a" VN "$person_b")
+			)
+
+			;; implicand -- then the following is true too
+			(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
+		)
+	)
+)
+
+
+;; ---------------------------------------------------------------------
 ;; Houses at the end of the street can only have one neighbor, ever.
 ;; This is a rather narrow rule, as it can only ever apply to the first
 ;; address (first ordinal -- a boundary condition).
@@ -137,8 +177,7 @@
 	)
 )
 
-
-
+;; ---------------------------------------------------------------------
 ;; Neighbor deduction rule.
 ;;
 ;; If Address X is left of address Y, then person who lives in X is
@@ -169,6 +208,7 @@
 	)
 )
 
+;; ---------------------------------------------------------------------
 ;; Neighbor relation is symmetric
 ;;
 ;; If A is a neighbor of B then B is a neighbor of A
@@ -194,7 +234,7 @@
 	)
 )
 
-
+;; ---------------------------------------------------------------------
 ;; Deduce if a solution has been found ... this simply tries to see
 ;; if all attributes have been deduced, and if so, just clumps them
 ;; together.

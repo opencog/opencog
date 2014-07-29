@@ -206,6 +206,8 @@ void EinsteinPuzzle::test_full(void)
 	// Create an implication link that will be tested.
 	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
 	Handle trans_rule = eval->apply("transitive-rule", Handle::UNDEFINED);
+	Handle nattr_rule = eval->apply("neighbor-not-attr-rule", Handle::UNDEFINED);
+
 	Handle faddr_rule = eval->apply("first-addr-rule", Handle::UNDEFINED);
 	Handle neigh_rule = eval->apply("neighbor-rule", Handle::UNDEFINED);
 	Handle nesym_rule = eval->apply("neighbor-symmetry-rule", Handle::UNDEFINED);
@@ -214,6 +216,8 @@ void EinsteinPuzzle::test_full(void)
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != same_rule);
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != trans_rule);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != nattr_rule);
+
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != faddr_rule);
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != neigh_rule);
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != nesym_rule);
@@ -232,6 +236,11 @@ void EinsteinPuzzle::test_full(void)
 	Handle trans = pm.crisp_logic_bindlink(trans_rule);
 	logger().debug("After first transitive-rule\n%s\n", SchemeSmob::to_string(trans).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(trans));
+
+	// If some attribute holds for a neighbor, it cannot hold for a person.
+	Handle nattr = pm.crisp_logic_bindlink(nattr_rule);
+	logger().debug("After neighbor-not-attr rule\n%s\n", SchemeSmob::to_string(nattr).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 5, getarity(nattr));
 
 // ---------------
 	// Next, make a deducation about the house on the end.
