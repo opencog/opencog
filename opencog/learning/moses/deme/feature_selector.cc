@@ -267,8 +267,12 @@ void feature_selector::log_stats_top_feature_sets(const feature_set_pop& top_fs)
     // Stats about score and diversity
     for (auto i_it = top_fs.cbegin(); i_it != top_fs.cend(); ++i_it) {
         score_acc(i_it->first);
-        for (auto j_it = top_fs.cbegin(); j_it != i_it; ++j_it)
-            diversity_acc(mi(i_it->second, j_it->second));
+        for (auto j_it = top_fs.cbegin(); j_it != i_it; ++j_it) {
+            float sim = params.diversity_jaccard ?
+                jaccardIndex(i_it->second, j_it->second)
+                : mi(i_it->second, j_it->second);
+            diversity_acc(sim);
+        }
     }
 
     logger().info() << "Feature sets score stats (accounting for diversity) = "
