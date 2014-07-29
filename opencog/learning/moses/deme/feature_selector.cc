@@ -198,7 +198,7 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const
     // subsample
     if (params.subsampling_ratio < 1.0) {
         if (params.subsampling_by_time) {
-            std::set<boost::gregorian::date> timestamps = fs_ctable.get_timestamps(),
+            std::set<TTable::value_type> timestamps = fs_ctable.get_timestamps(),
                 rm_timestamps;
             unsigned timestamps_size = timestamps.size(),
                 rm_size = (1.0 - params.subsampling_ratio) * timestamps_size;
