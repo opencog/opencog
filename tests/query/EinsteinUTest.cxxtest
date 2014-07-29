@@ -293,14 +293,14 @@ void EinsteinPuzzle::test_full(void)
 
 	// XXX virtual link matcher does not yet do 'not' clauses ...
 	// TSM_ASSERT_EQUALS("wrong number of solutions found", 234, getarity(distc));
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 247, getarity(distc));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 257, getarity(distc));
 
 	// -----------
 	// By-elimination rule
 	// If a person doesn't smoke/drink/live-in four items, they must do the fifth.
 	Handle elimi = pm.crisp_logic_bindlink(elimi_rule);
 	logger().debug() << "After elimination\n" << SchemeSmob::to_string(elimi);
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 432, getarity(elimi));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 552, getarity(elimi));
 
 	// -----------
 	// Result should be a ListLink w/ five solutions

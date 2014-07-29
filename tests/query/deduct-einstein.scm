@@ -133,6 +133,9 @@
 ;; A supplemental fact for fact 4: someone lives in the white house.
 (fact "person4" "LivesIn" "white house")
 
+;; Supplemental fact: someone keeps fish.
+(fact "fish_person" "Keeps" "fish")
+
 ;; State some implicitly assumed facts about neighboring houses
 ;; This is the 'successor' function for ordinal numbers.
 (define (successor house1 house2)
@@ -180,3 +183,9 @@
 (is-a "Dunhill" "tobacco")
 (is-a "Blend" "tobacco")
 (is-a "Blue Master" "tobacco")
+
+(is-a "fish" "pet")
+(is-a "dogs" "pet")
+(is-a "birds" "pet")
+(is-a "cats" "pet")
+(is-a "horses" "pet")
