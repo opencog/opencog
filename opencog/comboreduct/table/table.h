@@ -1099,7 +1099,7 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
             for (const auto& row : ctable)
             {
                 for (const auto& val_pair : row.second) {
-                    const vertex& v = val_pair.first; // key of map
+                    const vertex& v = val_pair.first.value; // key of map
                     if (get_contin(v) < min)
                         min = get_contin(v);
 
