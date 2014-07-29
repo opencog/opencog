@@ -125,7 +125,7 @@
 				;; and A is neighbor of B
 				(clause PN "Neighbor" VN "$person_a" VN "$person_b")
 				;; and the next house is one over
-				(clause PN "Successor" VN "$addr_a" VN "$addr_b")
+				(clause PN "Successor" VN "$addr_b" VN "$addr_a")
 				;; and we don't already know the conclusion
 				(NotLink
 					(clause PN "Address" VN "$person_b" VN "$addr_b")

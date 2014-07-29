@@ -233,30 +233,32 @@ void EinsteinPuzzle::test_full(void)
 	logger().debug("After first transitive-rule\n%s\n", SchemeSmob::to_string(trans).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(trans));
 
+// ---------------
+	// Next, make a deducation about the house on the end.
+	// This combines facts 9+14: blue house has address 101. This is just a single result.
+//	Handle faddr = pm.crisp_logic_bindlink(faddr_rule);
+//	logger().debug("After first-address-rule\n%s\n", SchemeSmob::to_string(faddr).c_str());
+//	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(faddr));
 	// Neighbor relations are symmetric.  Propagate this symmetry.
 	// The original facts were's stated symmetrically; we make up for that now:
 	// symmetrize rules 10, 12, 14, 15
-	Handle neigh = pm.crisp_logic_bindlink(nesym_rule);
-	logger().debug("After neighbor-symmetry-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(neigh));
-
-	// Next, make a deducation about the house on the end.
-	// This combines facts 9+14: blue house has address 102. This is just a single result.
-	Handle faddr = pm.crisp_logic_bindlink(faddr_rule);
-	logger().debug("After first-address-rule\n%s\n", SchemeSmob::to_string(faddr).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(faddr));
+//	Handle neigh = pm.crisp_logic_bindlink(nesym_rule);
+//	logger().debug("After neighbor-symmetry-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
+//	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(neigh));
 
 	// Deduce new neighbors.
 	// The above made a deduction about address 102, and fact 8 has address 103 in it.
-	neigh = pm.crisp_logic_bindlink(neigh_rule);
-	logger().debug("After neighbor-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
+//	neigh = pm.crisp_logic_bindlink(neigh_rule);
+//	logger().debug("After neighbor-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
+//	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
 
 	// Neighbor relations are symmetric.  Propagate this symmetry.
 	// This symmetrizes the findings from the rulle application immediately above.
-	neigh = pm.crisp_logic_bindlink(nesym_rule);
-	logger().debug("After second neighbor-symmetry-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
+//	neigh = pm.crisp_logic_bindlink(nesym_rule);
+//	logger().debug("After second neighbor-symmetry-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
+//	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
+
+// ----------
 
 	// Result should be a ListLink w/ five solutions
 	// Right now, we accept zero solutions, because above was not yet
