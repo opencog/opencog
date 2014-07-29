@@ -239,42 +239,42 @@ void EinsteinPuzzle::test_full(void)
 	logger().debug("After first transitive-rule\n%s\n", SchemeSmob::to_string(trans).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(trans));
 
+	// -----------
+	// Next, make a deduction about the house on the end.
+	// This combines facts 9+14: blue house has address 101. This is just a single result.
+	Handle faddr = pm.crisp_logic_bindlink(faddr_rule);
+	logger().debug("After first-address-rule\n%s\n", SchemeSmob::to_string(faddr).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(faddr));
+
+	// Neighbor relations are symmetric.  Propagate this symmetry.
+	// The original facts were's stated symmetrically; we make up for that now:
+	// symmetrize rules 10, 12, 14, 15
+	Handle neigh = pm.crisp_logic_bindlink(nesym_rule);
+	logger().debug("After neighbor-symmetry-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(neigh));
+
+	// Deduce new neighbors.
+	// The above made a deduction about address 102, and fact 8 has address 103 in it.
+	neigh = pm.crisp_logic_bindlink(neigh_rule);
+	logger().debug("After first neighbor-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
+
+	// Neighbor relations are symmetric.  Propagate this symmetry.
+	// This symmetrizes the findings from the rulle application immediately above.
+	neigh = pm.crisp_logic_bindlink(nesym_rule);
+	logger().debug("After second neighbor-symmetry-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
+
+	// -----------
 	// If some attribute holds for a neighbor, it cannot hold for a person.
 	Handle nattr = pm.crisp_logic_bindlink(nattr_rule);
 	logger().debug("After first neighbor-not-attr rule\n%s\n", SchemeSmob::to_string(nattr).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 5, getarity(nattr));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 17, getarity(nattr));
 
 	// Next, propagate this knowledge transitively
 	Handle ntran = pm.crisp_logic_bindlink(ntran_rule);
 	logger().debug("After first transitive-not-rule\n%s\n", SchemeSmob::to_string(ntran).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(ntran));
-
-// ---------------
-	// Next, make a deducation about the house on the end.
-	// This combines facts 9+14: blue house has address 101. This is just a single result.
-//	Handle faddr = pm.crisp_logic_bindlink(faddr_rule);
-//	logger().debug("After first-address-rule\n%s\n", SchemeSmob::to_string(faddr).c_str());
-//	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(faddr));
-	// Neighbor relations are symmetric.  Propagate this symmetry.
-	// The original facts were's stated symmetrically; we make up for that now:
-	// symmetrize rules 10, 12, 14, 15
-//	Handle neigh = pm.crisp_logic_bindlink(nesym_rule);
-//	logger().debug("After neighbor-symmetry-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
-//	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(neigh));
-
-	// Deduce new neighbors.
-	// The above made a deduction about address 102, and fact 8 has address 103 in it.
-//	neigh = pm.crisp_logic_bindlink(neigh_rule);
-//	logger().debug("After neighbor-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
-//	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
-
-	// Neighbor relations are symmetric.  Propagate this symmetry.
-	// This symmetrizes the findings from the rulle application immediately above.
-//	neigh = pm.crisp_logic_bindlink(nesym_rule);
-//	logger().debug("After second neighbor-symmetry-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
-//	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
-
-// ----------
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 3, getarity(ntran));
 
 	// Result should be a ListLink w/ five solutions
 	// Right now, we accept zero solutions, because above was not yet
