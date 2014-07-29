@@ -458,13 +458,21 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
     // Generate all the possible combinations of all the nodes: all patterns including the 1 ~ n_max variables
     // If there are too many variables in a pattern, it doesn't make much sense, so we litmit the max number of variables to half of the node number
 
-    OC_ASSERT( (valueToVarMap.size() > 1),
-              "PatternMiner::extractAllPossiblePatternsFromInputLinks: this group of links only has one node: %s!\n",
-               atomSpace->atomAsString(inputLinks[0]).c_str() );
+//    OC_ASSERT( (valueToVarMap.size() > 1),
+//              "PatternMiner::extractAllPossiblePatternsFromInputLinks: this group of links only has one node: %s!\n",
+//               atomSpace->atomAsString(inputLinks[0]).c_str() );
 
     int n_max = valueToVarMap.size();
     int n_limit= valueToVarMap.size()/2.0f;
     n_limit ++;
+
+    // sometimes there is only one variable in a link, lik:
+//    (DuringLink
+//      (ConceptNode "dead")
+//      (ConceptNode "dead")
+//    ) ; [44694]
+    if (n_limit == 1)
+        n_limit = 2;
 
     bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const
 
@@ -670,6 +678,7 @@ HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, A
  // using PatternMatcher
 void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 {
+
 //     First, generate the Bindlink for using PatternMatcher to find all the instances for this pattern in the original Atomspace
 //    (BindLink
 //        ;; The variables to be bound
@@ -686,6 +695,9 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //              (variable Listlink)
 //        )
 //     )
+
+    if (THREAD_NUM > 1)
+        removeAtomLock.lock();
 
     // Debug
     static int count = 0;
@@ -707,8 +719,9 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //    }
 
     Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch, TruthValue::TRUE_TV());
+    Handle hOutPutListLink = originalAtomSpace->addLink(LIST_LINK, patternToMatch, TruthValue::TRUE_TV());
     implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
-    implicationLinkOutgoings.push_back(hAndLink); // the results to return
+    implicationLinkOutgoings.push_back(hOutPutListLink); // the results to return
 
 //    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
 //            << originalAtomSpace->atomAsString(hAndLink).c_str() << std::endl;
@@ -784,7 +797,19 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 
     foreach (Handle listH , resultSet)
     {
-        HNode->instances.push_back(originalAtomSpace->getOutgoing(listH));
+        HandleSeq instanceLinks = originalAtomSpace->getOutgoing(listH);
+
+        if (cur_gram == 1)
+        {
+            HNode->instances.push_back(instanceLinks);
+        }
+        else
+        {
+            // instance that contains duplicate links will not be added
+            if (! containsDuplicateHandle(instanceLinks))
+                HNode->instances.push_back(instanceLinks);
+        }
+
         originalAtomSpace->removeAtom(listH);
     }
 
@@ -797,6 +822,9 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     originalAtomSpace->removeAtom(hAndLink);
     originalAtomSpace->removeAtom(hResultListLink);
     originalAtomSpace->removeAtom(hVariablesListLink);
+
+    if (THREAD_NUM > 1)
+        removeAtomLock.unlock();
 }
 
 void PatternMiner::removeLinkAndItsAllSubLinks(AtomSpace* _atomspace, Handle link)
@@ -827,17 +855,24 @@ void PatternMiner::growTheFirstGramPatternsTask()
             allAtomListLock.lock();
 
         if (allLinks.size() <= 0)
+        {
+            if (THREAD_NUM > 1)
+                allAtomListLock.unlock();
+
             break;
+        }
 
         Handle cur_link = allLinks[allLinks.size() - 1];
         allLinks.pop_back();
 
-        // if this link is listlink, ignore it
-        if (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK)
-            continue;
-
         if (THREAD_NUM > 1)
             allAtomListLock.unlock();
+
+        // if this link is listlink, ignore it
+        if (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK)
+        {
+            continue;
+        }
 
         HandleSeq originalLinks;
         originalLinks.push_back(cur_link);
@@ -848,6 +883,20 @@ void PatternMiner::growTheFirstGramPatternsTask()
 
     }
 
+}
+
+bool PatternMiner::containsDuplicateHandle(HandleSeq &handles)
+{
+    for (unsigned int i = 0; i < handles.size(); i ++)
+    {
+        for (unsigned int j = i+1; j < handles.size(); j ++)
+        {
+            if (handles[j] == handles[i])
+                return true;
+        }
+    }
+
+    return false;
 }
 
 bool PatternMiner::isInHandleSeq(Handle handle, HandleSeq &handles)
@@ -961,7 +1010,6 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
 
 void PatternMiner::growPatternsTask()
 {
-    static unsigned int cur_index = -1;
 
     vector<HTreeNode*>& last_gram_patterns = patternsForGram[cur_gram-2];
 
@@ -974,12 +1022,20 @@ void PatternMiner::growPatternsTask()
 
         cur_index ++;
         if (cur_index >= total)
+        {
+            patternForLastGramLock.unlock();
             break;
+        }
 
         if (THREAD_NUM > 1)
             patternForLastGramLock.unlock();
 
         HTreeNode* cur_growing_pattern = last_gram_patterns[cur_index];
+
+        if(cur_growing_pattern->instances.size() < thresholdFrequency)
+            break;
+
+
         foreach (HandleSeq instance , cur_growing_pattern->instances)
         {
             // debug
@@ -1015,6 +1071,9 @@ void PatternMiner::OutPutPatternsToFile(unsigned int n_gram)
 
     foreach(HTreeNode* htreeNode, patternsForThisGram)
     {
+        if (htreeNode->instances.size() < 2)
+            break;
+
         resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->instances.size()) << endl;
         foreach (Handle link, htreeNode->pattern)
         {
@@ -1034,12 +1093,17 @@ void PatternMiner::ConstructTheFirstGramPatterns()
     std::cout<<"Debug: PatternMiner:  start (gram = 1) pattern mining..." << std::endl;
 
     cur_gram = 1;
+    cur_index = -1;
 
     originalAtomSpace->getHandlesByType(back_inserter(allLinks), (Type) LINK, true );
 
     for (unsigned int i = 0; i < THREAD_NUM; ++ i)
     {
         threads[i] = std::thread([this]{this->growTheFirstGramPatternsTask();}); // using C++11 lambda-expression
+    }
+
+    for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+    {
         threads[i].join();
     }
 
@@ -1052,17 +1116,47 @@ void PatternMiner::ConstructTheFirstGramPatterns()
     std::cout<<"Debug: PatternMiner: done (gram = 1) pattern mining! " + toString((patternsForGram[0]).size()) + " patterns found! " << std::endl;
     printf(" Total time: %d seconds. \n", end_time - start_time);
 
+    OutPutPatternsToFile(cur_gram);
+
+//    HandleSeq allDumpNodes, allDumpLinks;
+//    originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
+
+//    // Debug : out put the current dump Atomspace to a file
+//    ofstream dumpFile;
+//    string fileName = "DumpAtomspace" + toString(cur_gram) + "gram.scm";
+
+//    dumpFile.open(fileName.c_str());
+
+//    foreach(Handle h, allDumpNodes)
+//    {
+//        dumpFile << originalAtomSpace->atomAsString(h);
+//    }
+
+//    originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
+
+//    foreach(Handle h, allDumpLinks)
+//    {
+//        dumpFile << originalAtomSpace->atomAsString(h);
+//    }
+
+//    dumpFile.close();
+
 }
 
 void PatternMiner::GrowAllPatterns()
 {
     for ( cur_gram = 2; cur_gram <= MAX_GRAM; ++ cur_gram)
     {
+        cur_index = -1;
         std::cout<<"Debug: PatternMiner:  start (gram = " + toString(cur_gram) + ") pattern mining..." << std::endl;
 
         for (unsigned int i = 0; i < THREAD_NUM; ++ i)
         {
             threads[i] = std::thread([this]{this->growPatternsTask();}); // using C++11 lambda-expression
+        }
+
+        for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+        {
             threads[i].join();
         }
 
@@ -1073,28 +1167,28 @@ void PatternMiner::GrowAllPatterns()
 
         OutPutPatternsToFile(cur_gram);
 
-        HandleSeq allDumpNodes, allDumpLinks;
-        originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
+//        HandleSeq allDumpNodes, allDumpLinks;
+//        originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
 
-        // out put the n_gram patterns to a file
-        ofstream dumpFile;
-        string fileName = "DumpAtomspace" + toString(cur_gram) + "gram.scm";
+//        // Debug : out put the current dump Atomspace to a file
+//        ofstream dumpFile;
+//        string fileName = "DumpAtomspace" + toString(cur_gram) + "gram.scm";
 
-        dumpFile.open(fileName.c_str());
+//        dumpFile.open(fileName.c_str());
 
-        foreach(Handle h, allDumpNodes)
-        {
-            dumpFile << originalAtomSpace->atomAsString(h);
-        }
+//        foreach(Handle h, allDumpNodes)
+//        {
+//            dumpFile << originalAtomSpace->atomAsString(h);
+//        }
 
-        originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
+//        originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
 
-        foreach(Handle h, allDumpLinks)
-        {
-            dumpFile << originalAtomSpace->atomAsString(h);
-        }
+//        foreach(Handle h, allDumpLinks)
+//        {
+//            dumpFile << originalAtomSpace->atomAsString(h);
+//        }
 
-        dumpFile.close();
+//        dumpFile.close();
     }
 }
 
@@ -1103,14 +1197,14 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     htree = new HTree();
     atomSpace = new AtomSpace();
 
-//    unsigned int system_thread_num  = std::thread::hardware_concurrency();
-//    if (system_thread_num > 2)
-//        THREAD_NUM = system_thread_num - 2;
-//    else
-//        THREAD_NUM = 1;
+    unsigned int system_thread_num  = std::thread::hardware_concurrency();
+    if (system_thread_num > 2)
+        THREAD_NUM = system_thread_num - 2;
+    else
+        THREAD_NUM = 1;
 
-    // test only one tread for now
-    THREAD_NUM = 1;
+//    // test only one tread for now
+//    THREAD_NUM = 1;
 
     threads = new thread[THREAD_NUM];
 
@@ -1135,23 +1229,33 @@ PatternMiner::~PatternMiner()
     delete atomSpace;
 }
 
-void PatternMiner::runPatternMiner()
+void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 {
+    thresholdFrequency = _thresholdFrequency;
+    int start_time = time(NULL);
 
-//    int start_time = time(NULL);
+    std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << std::endl;
+    // first, generate the first layer patterns: patterns of 1 gram (contains only one link)
+    ConstructTheFirstGramPatterns();
 
-//    std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << std::endl;
-//    // first, generate the first layer patterns: patterns of 1 gram (contains only one link)
-//    ConstructTheFirstGramPatterns();
+    // and then generate all patterns
+    GrowAllPatterns();
 
-//    // and then generate all patterns
-//    GrowAllPatterns();
+    int end_time = time(NULL);
+    printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
 
-//    int end_time = time(NULL);
-//    printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
+//   testPatternMatcher2();
 
-    testPatternMatcher2();
+//   selectSubsetFromCorpus();
 
+
+
+}
+
+void PatternMiner::selectSubsetFromCorpus(vector<string>& topics, unsigned int gram)
+{
+    // select a subset for test topics from the huge ConceptNet corpus
+    _selectSubsetFromCorpus(topics,3);
 }
 
 std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const AtomSpace *atomspace)
@@ -1293,9 +1397,8 @@ void PatternMiner::testPatternMatcher1()
     originalAtomSpace->removeAtom(hResultListLink);
     originalAtomSpace->removeAtom(hBindLink);
 
-    
-}
 
+}
 void PatternMiner::testPatternMatcher2()
 {
 
@@ -1331,7 +1434,7 @@ void PatternMiner::testPatternMatcher2()
 //      ) ; [4574]
 //    ) ; [4576]
 
-    HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, patternToMatch;
+    HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, patternToMatch, resultOutgoings;
 
     Handle varHandle1 = originalAtomSpace->addNode(opencog::VARIABLE_NODE,"$var_1" );
     Handle varHandle2 = originalAtomSpace->addNode(opencog::VARIABLE_NODE,"$var_2" );
@@ -1374,13 +1477,19 @@ void PatternMiner::testPatternMatcher2()
 
     Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch, TruthValue::TRUE_TV());
 
+    // add variable atoms
+    Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
+
+    resultOutgoings.push_back(hVariablesListLink);
+    resultOutgoings.push_back(hAndLink);
+
+    Handle hListLinkResult = originalAtomSpace->addLink(LIST_LINK, resultOutgoings, TruthValue::TRUE_TV());
+
     implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
-    implicationLinkOutgoings.push_back(hAndLink); // the results to return
+    implicationLinkOutgoings.push_back(hListLinkResult); // the results to return
 
     Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
 
-    // add variable atoms
-    Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
 
     bindLinkOutgoings.push_back(hVariablesListLink);
     bindLinkOutgoings.push_back(hImplicationLink);
@@ -1409,5 +1518,127 @@ void PatternMiner::testPatternMatcher2()
     originalAtomSpace->removeAtom(hBindLink);
 
 
+}
+
+set<Handle> PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, set<Handle>& allSubsetLinks)
+{
+    set<Handle> newHandles;
+    HandleSeq incomings = originalAtomSpace->getIncoming(keywordNode);
+
+    foreach (Handle incomingHandle, incomings)
+    {
+        Handle newh = incomingHandle;
+        // if this atom is a igonred type, get its first parent that is not in the igonred types
+        if (isIgnoredType (originalAtomSpace->getType(incomingHandle)) )
+        {
+            Handle newh = getFirstNonIgnoredIncomingLink(originalAtomSpace, incomingHandle);
+
+            if ((newh == Handle::UNDEFINED) || containIgnoredContent(newh ))
+                continue;
+        }
+
+        if (allSubsetLinks.find(newh) == allSubsetLinks.end())
+            newHandles.insert(newh);
+    }
+
+    return newHandles;
+}
+
+set<Handle> PatternMiner::_extendOneLinkForSubsetCorpus(set<Handle>& allNewLinksLastGram, set<Handle>& allSubsetLinks)
+{
+    set<Handle> allNewConnectedLinksThisGram;
+    // only extend the links in allNewLinksLastGram. allNewLinksLastGram is a part of allSubsetLinks
+    foreach(Handle link, allNewLinksLastGram)
+    {
+        // find all nodes in this link
+        set<Handle> allNodes;
+        extractAllNodesInLink(link, allNodes);
+
+        foreach (Handle neighborNode, allNodes)
+        {
+            string content = originalAtomSpace->getName(neighborNode);
+            if (isIgnoredContent(content))
+                continue;
+
+            set<Handle> newConnectedLinks;
+            newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(neighborNode, allSubsetLinks);
+            allNewConnectedLinksThisGram.insert(newConnectedLinks.begin(),newConnectedLinks.end());
+            allSubsetLinks.insert(newConnectedLinks.begin(),newConnectedLinks.end());
+        }
+
+    }
+
+    return allNewConnectedLinksThisGram;
+}
+
+// must load the corpus before calling this function
+void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection)
+{
+    std::cout << "\nSelecting a subset from loaded corpus in Atomspace for the following topics:" << std::endl ;
+    set<Handle> allSubsetLinks;
+    string topicsStr = "";
+
+    foreach (string keyword, subsetKeywords)
+    {
+        std::cout << keyword << std::endl;
+        Handle keywordNode = originalAtomSpace->addNode(opencog::CONCEPT_NODE,keyword);
+        set<Handle> newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(keywordNode, allSubsetLinks);
+        allSubsetLinks.insert(newConnectedLinks.begin(), newConnectedLinks.end());
+        topicsStr += "-";
+        topicsStr += keyword;
+
+    }
+
+    unsigned int order = 0;
+    set<Handle> allNewConnectedLinksThisGram = allSubsetLinks;
+
+    while (order < max_connection)
+    {
+        allNewConnectedLinksThisGram = _extendOneLinkForSubsetCorpus(allNewConnectedLinksThisGram, allSubsetLinks);
+        order ++;
+    }
+
+    ofstream subsetFile;
+
+    string fileName = "SubSet" + topicsStr + ".scm";
+
+    subsetFile.open(fileName.c_str());
+
+    foreach(Handle h, allSubsetLinks)
+    {
+        if (containIgnoredContent(h))
+            continue;
+
+        subsetFile << originalAtomSpace->atomAsString(h);
+    }
+
+    subsetFile.close();
+
+    std::cout << "\nDone! The subset has been written to file:  " << fileName << std::endl ;
+}
+
+bool PatternMiner::isIgnoredContent(string keyword)
+{
+    foreach (string ignoreWord, ignoreKeyWords)
+    {
+        if (keyword == ignoreWord)
+            return true;
+    }
+
+    return false;
+}
+
+bool PatternMiner::containIgnoredContent(Handle link )
+{
+    string str = originalAtomSpace->atomAsString(link);
+
+    foreach (string ignoreWord, ignoreKeyWords)
+    {
+        string ignoreStr = "\"" + ignoreWord + "\"";
+        if (str.find(ignoreStr) != std::string::npos)
+            return true;
+    }
+
+    return false;
 }
 
