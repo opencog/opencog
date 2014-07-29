@@ -198,6 +198,8 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
             // compensate for that
             bs.push_back(0.5);
         }
+        else // Add 0.0 to ensure the bscore has the same size
+            bs.push_back(0.0);
 
     } else {
 
