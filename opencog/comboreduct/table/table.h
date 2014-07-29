@@ -478,6 +478,16 @@ struct TimedCounter : public Counter<TimedValue, count_t> {
     vertex most_frequent() const;
 };
 
+/**
+ * Like CTable (defined below) but the keys are timestamps.
+ *
+ * Inputs are currently not supported.
+ *
+ * For the moment it is a mere typedef, but it will probably have to
+ * be turned into a class eventually.
+ */
+typedef std::map<TTable::value_type, Counter<vertex, unsigned>> CTableTime;
+
 /// CTable is a "compressed" table.  Compression is done by removing
 /// duplicated inputs, and the output column is replaced by a counter
 /// of the duplicated outputs.  That is, the output column is of the
@@ -665,6 +675,8 @@ public:
     void set_signature(const type_tree& tt);
     const type_tree& get_signature() const;
     type_node get_output_type() const;
+
+    CTableTime ordered_by_time() const;
 
     // Balance the ctable, so that, in case the output type is
     // discrete, all class counts are equal, but the uncompressed size

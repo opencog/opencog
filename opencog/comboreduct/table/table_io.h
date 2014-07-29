@@ -231,13 +231,9 @@ void saveTable(const std::string& file_name, const Table& table);
 std::ostream& ostreamCTableRow(std::ostream& out, const CTable::value_type& ctv);
 std::ostream& ostreamCTable(std::ostream& out, const CTable& ct);
 
-/// TODO: add inputs (if ever useful)
-typedef std::map<TTable::value_type, Counter<vertex, unsigned>> CTableTime;
-
 /// Output a compressed table with each row corresponding to a
 /// timestamp, chronologically ordered.
-std::ostream& ostreamCTableTime(std::ostream& out, const CTable& ct,
-                                bool discard_input = true);
+std::ostream& ostreamCTableTime(std::ostream& out, const CTableTime& ctt);
 
 /**
  * template to subsample input and output tables, after subsampling

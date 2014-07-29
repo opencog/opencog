@@ -812,6 +812,18 @@ type_node CTable::get_output_type() const
     return get_type_node(get_signature_output(tsig));
 }
 
+CTableTime CTable::ordered_by_time() const
+{
+    // Turn the input to timestamped output map into timetamp to
+    // output map
+    CTableTime res;
+    for (const auto& v : *this)
+        for (const auto& tcv : v.second)
+            res[tcv.first.timestamp] +=
+                Counter<vertex, count_t>({{tcv.first.value, tcv.second}});
+    return res;
+}
+
 void CTable::balance()
 {
     type_node otype = get_output_type();
