@@ -44,6 +44,17 @@
 	)
 )
 
+;; Predicate clause, asserting that v2 and v3 are different atoms.
+(define (differ t2 v2 t3 v3)
+	(EvaluationLink
+		(GroundedPredicateNode "c++:exclusive")
+		(ListLink
+			(t2 v2)
+			(t3 v3)
+		)
+	)
+)
+
 ;; Declare a variable var to be of type type
 (define (decl-var type var)
 	(TypedVariableLink
@@ -194,9 +205,6 @@
 ;; If, for a given attribute, person a and person b take on different
 ;; values, then they cannot be the same person.  Therefore, any other
 ;; attributes they have must also be exclusive.
-;;
-;; XXX Something is broken -- this is deducing that person4 does not
-;; live in the white house, which is false ... 
 
 (define (distinct-attr-rule)
 	(BindLink
@@ -215,12 +223,13 @@
 			(AndLink
 				(clause VN "$predicate_common" VN "$person_a" VN "$attribute_comm_a")
 				(clause VN "$predicate_common" VN "$person_b" VN "$attribute_comm_b")
+				(differ VN "$attribute_comm_a" VN "$attribute_comm_b")
 				(clause VN "$predicate_exclusive" VN "$person_a" VN "$attribute_excl")
 				;; Don't deduce thigs we already know...
 				;; i.e. this not link is identical to conclusion, below.
-				(NotLink
-					(not-clause VN "$predicate_exclusive" VN "$person_b" VN "$attribute_excl")
-				)
+				;(NotLink
+				;	(not-clause VN "$predicate_exclusive" VN "$person_b" VN "$attribute_excl")
+				;)
 			)
 
 			;; implicand -- then the following is true too
