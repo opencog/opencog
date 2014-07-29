@@ -59,6 +59,25 @@ select_bscore::get_weightiest(const Counter<vertex, count_t>& orow) const
     return std::pair<double, double>(weightiest_val, weightiest);
 }
 
+/**
+ * The selection scorer will learn a window that selects a target range
+ * of values in a continuous-valued dataset.
+ *
+ * The dataset is assumed to have a contin-valued output column. The
+ * highest and lowest values are found in the output column, and the
+ * window is then framed relative to these two boundaries.  That is,
+ * if 'low_val' and 'hi_val' are the smallest and largest values in the
+ * table, then the bottom of the selected window is located at
+ *
+ *    window_bottom = low_val + lower_percentile * (hi_val - low_val)
+ *
+ * and the top is located at
+ *
+ *    window_top = low_val + upper_percentile * (hi_val - low_val)
+ *
+ * If the rows are weighted, then the weighted equivalent of the above
+ * boundaries is used.
+ */
 select_bscore::select_bscore(const CTable& ctable,
                              double lower_percentile,
                              double upper_percentile,
@@ -125,7 +144,7 @@ select_bscore::select_bscore(const CTable& ctable,
                     << " upper bound = " << _upper_bound;
 }
 
-
+/// scorer, as described in the constructor, above.
 behavioral_score select_bscore::operator()(const combo_tree& tr) const
 {
     behavioral_score bs;
@@ -156,6 +175,7 @@ behavioral_score select_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
+/// scorer, suitable for use with boosting.
 behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble) const
 {
     // Step 1: accumulate the weighted prediction of each tree in
