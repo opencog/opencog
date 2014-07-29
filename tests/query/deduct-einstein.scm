@@ -150,3 +150,8 @@
 (successor "103 Main Street" "104 Main Street")
 (successor "104 Main Street" "105 Main Street")
 
+;; ---------------------------------------------------------------
+;; By-process-of-elimination facts
+;; If person doesn't live in four of these, they must live in the fifth.
+(define color-list (list "red house" "white house" "green house" "yellow house" "blue house"))
+

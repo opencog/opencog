@@ -215,6 +215,8 @@ void EinsteinPuzzle::test_full(void)
 	Handle nattr_rule = eval->apply("neighbor-not-attr-rule", Handle::UNDEFINED);
 	Handle distc_rule = eval->apply("distinct-attr-rule", Handle::UNDEFINED);
 
+	Handle elim_red = eval->apply("by-elimination-red", Handle::UNDEFINED);
+
 	Handle solun_rule = eval->apply("found-solution-rule", Handle::UNDEFINED);
 
 	// Make sure the scheme file actually loaded!
@@ -228,6 +230,8 @@ void EinsteinPuzzle::test_full(void)
 
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != nattr_rule);
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != distc_rule);
+
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != elim_red);
 
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != solun_rule);
 
@@ -266,7 +270,7 @@ void EinsteinPuzzle::test_full(void)
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
 
 	// Neighbor relations are symmetric.  Propagate this symmetry.
-	// This symmetrizes the findings from the rulle application immediately above.
+	// This symmetrizes the findings from the rule application immediately above.
 	neigh = pm.crisp_logic_bindlink(nesym_rule);
 	logger().debug("After second neighbor-symmetry-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
@@ -283,10 +287,17 @@ void EinsteinPuzzle::test_full(void)
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 3, getarity(ntran));
 
 	// -----------
-	// Two distinct people cannot have a common ettribute
+	// Two distinct people cannot have a common attribute
 	Handle distc = pm.crisp_logic_bindlink(distc_rule);
 	logger().debug("After first distinct-attr rule\n%s\n", SchemeSmob::to_string(distc).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 234, getarity(distc));
+
+	// -----------
+	// By-elimination rules
+
+	Handle elred = pm.crisp_logic_bindlink(elim_red);
+	logger().debug("After red-house elimination\n%s\n", SchemeSmob::to_string(elred).c_str());
+	// TSM_ASSERT_EQUALS("wrong number of solutions found", 234, getarity(elred));
 
 	// -----------
 	// Result should be a ListLink w/ five solutions

@@ -11,6 +11,8 @@
 ;; possible set of rules; instead, they're the most "natural" or
 ;; "common-sense-like" for this task.
 
+(use-modules (srfi srfi-1))
+
 ;; Define simple truth value
 (define (stv mean conf) (cog-new-stv mean conf))
 
@@ -145,6 +147,47 @@
 		)
 	)
 )
+
+;; ---------------------------------------------------------------------
+;; elimination
+
+(define (by-elimination-rule a b c d e)
+	(BindLink
+		;; variable declarations
+		(ListLink
+			(decl-var "FeatureNode" "$person")
+			(decl-var "PredicateNode" "$predicate")
+		)
+		(ImplicationLink
+			;; body -- if all parts of AndLink hold true ... then
+			(AndLink
+				(not-clause VN "$predicate" VN "$person" CN a)
+				(not-clause VN "$predicate" VN "$person" CN b)
+				(not-clause VN "$predicate" VN "$person" CN c)
+				(not-clause VN "$predicate" VN "$person" CN d)
+				;; Don't deduce thigs we already know...
+				;; i.e. this not link is identical to conclusion, below.
+				(NotLink
+					(clause VN "$predicate" VN "$person" CN e)
+				)
+			)
+
+			;; implicand -- then the following is true too
+			(clause VN "$predicate" VN "$person" CN e)
+		)
+	)
+)
+
+(define (by-elim-rule lst excl)
+	(define exlist (remove (lambda (x) (string=? x excl)) lst))
+	(by-elimination-rule (car exlist) (cadr exlist) (caddr exlist) (cadddr exlist) excl)
+)
+
+(define (by-elimination-red) (by-elim-rule color-list "red house"))
+(define (by-elimination-green) (by-elim-rule color-list "green house"))
+(define (by-elimination-white) (by-elim-rule color-list "white house"))
+(define (by-elimination-blue) (by-elim-rule color-list "blue house"))
+(define (by-elimination-yellow) (by-elim-rule color-list "yellow house"))
 
 ;; ---------------------------------------------------------------------
 ;; distinct-attr rule.
