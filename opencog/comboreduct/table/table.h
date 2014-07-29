@@ -486,7 +486,7 @@ struct TimedCounter : public Counter<TimedValue, count_t> {
  * For the moment it is a mere typedef, but it will probably have to
  * be turned into a class eventually.
  */
-typedef std::map<TTable::value_type, Counter<vertex, unsigned>> CTableTime;
+typedef std::map<TTable::value_type, Counter<vertex, count_t>> CTableTime;
 
 /// CTable is a "compressed" table.  Compression is done by removing
 /// duplicated inputs, and the output column is replaced by a counter

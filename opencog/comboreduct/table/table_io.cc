@@ -1366,9 +1366,9 @@ ostream& ostreamCTable(ostream& out, const CTable& ct)
     return out;
 }
 
-ostream& ostreamCTableTimeHeader(ostream& out, const CTable& ct)
+ostream& ostreamCTableTimeHeader(ostream& out, const CTableTime& ctt)
 {
-    out << "timestamp" << ct.get_output_label() << endl;
+    out << "timestamp,output" << endl;
     return out;
 }
 
