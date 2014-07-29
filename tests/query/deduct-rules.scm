@@ -71,9 +71,10 @@
 )
 
 
-;; transitive deduction rule.
-;; If property X holds for person A, and person A is same as person B
-;; then property X also holds for person B.
+;; Transitive deduction rule.
+;;
+;; If attribute X holds for person A, and person A is same as person B
+;; then attribute X also holds for person B.
 (define (transitive-rule)
 	(BindLink
 		;; variable declarations
@@ -138,7 +139,8 @@
 
 
 
-;; neighbor deduction rule.
+;; Neighbor deduction rule.
+;;
 ;; If Address X is left of address Y, then person who lives in X is
 ;; a neighbor of person who lives in Y
 (define (neighbor-rule)
@@ -167,7 +169,8 @@
 	)
 )
 
-;; neighbor relation is symmetric
+;; Neighbor relation is symmetric
+;;
 ;; If A is a neighbor of B then B is a neighbor of A
 (define (neighbor-symmetry-rule)
 	(BindLink

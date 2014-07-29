@@ -13,7 +13,7 @@
 (define (stv mean conf) (cog-new-stv mean conf))
 
 ;; A little handly-dandy utility to avoid over-reporting of "obvious"
-;; results. We declare that person1 is the same asm person1, etc.
+;; results. We declare that person1 is the same as person1, etc.
 ;; A kind-of pauli-exclusion-principle at work.
 (define (same person)
 	(EvaluationLink (stv 1 1)
@@ -126,7 +126,7 @@
 (fact "water_person" "Drinks" "water")
 
 ;; ---------------------------------------------------------------
-;; Assorted supplemental facts.  These are somhow implicit in the
+;; Assorted supplemental facts.  These are somehow implicit in the
 ;; problem statement. We'd mostly like to derive these, from more
 ;; basic assumptions, but, for now, we'l just state them.
 ;;
