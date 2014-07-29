@@ -644,6 +644,21 @@ public:
      */
     void remove_rows(const std::set<unsigned>& idxs);
 
+    /**
+     * Similar to above but remove rows matching a set of dates.
+     */
+    void remove_rows_at_times(const std::set<TTable::value_type>& timestamps);
+
+    /**
+    * Remove rows timestamped timestamp.
+     */
+    void remove_rows_at_time(const TTable::value_type& timestamp);
+
+    /**
+     * Get the set of timestamps in the data (if any)
+     */
+    std::set<TTable::value_type> get_timestamps() const;
+
     // return the output label + list of input labels
     void set_labels(const string_seq& labels);
     string_seq get_labels() const;

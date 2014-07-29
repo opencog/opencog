@@ -725,6 +725,44 @@ void CTable::remove_rows(const set<unsigned>& idxs)
     }
 }
 
+void CTable::remove_rows_at_times(const set<TTable::value_type>& timestamps)
+{
+    for (const TTable::value_type& timestamp : timestamps)
+        remove_rows_at_time(timestamp);
+}
+
+void CTable::remove_rows_at_time(const TTable::value_type& timestamp)
+{
+    for (auto row_it = begin(); row_it != end();) {
+        auto& outputs = row_it->second;
+
+        // Remove all output values at timestamp
+        for (auto v_it = outputs.begin(); v_it != outputs.end();) {
+            if (v_it->first.timestamp == timestamp)
+                v_it = outputs.erase(v_it);
+            else
+                ++v_it;
+        }
+
+        // Check if the output is empty, and if so remove the
+        // row entirely
+        if (row_it->second.empty())
+            row_it = erase(row_it);
+        else
+            ++row_it;
+    }
+}
+
+set<TTable::value_type> CTable::get_timestamps() const
+{
+    set<TTable::value_type> res;
+    for (const CTable::value_type& row : *this)
+        for (const auto& vtc : row.second)
+            res.insert(vtc.first.timestamp);
+
+    return res;
+}
+
 void CTable::set_labels(const vector<string>& labels)
 {
     olabel = labels.front();
