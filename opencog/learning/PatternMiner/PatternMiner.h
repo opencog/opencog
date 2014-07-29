@@ -94,6 +94,8 @@ namespace PatternMining
 
      unsigned int cur_gram;
 
+     unsigned int cur_index;
+
      unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
 
      std::mutex allAtomListLock, uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock;
@@ -197,7 +199,7 @@ namespace PatternMining
 
      void OutPutPatternsToFile(unsigned int n_gram);
 
-     void runPatternMiner(unsigned int _thresholdFrequency = 2);
+     void runPatternMiner(unsigned int _thresholdFrequency = 1);
 
      void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram = 3);
 

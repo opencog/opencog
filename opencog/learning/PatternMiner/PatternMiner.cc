@@ -1010,7 +1010,6 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
 
 void PatternMiner::growPatternsTask()
 {
-    static unsigned int cur_index = -1;
 
     vector<HTreeNode*>& last_gram_patterns = patternsForGram[cur_gram-2];
 
@@ -1035,6 +1034,7 @@ void PatternMiner::growPatternsTask()
 
         if(cur_growing_pattern->instances.size() < thresholdFrequency)
             break;
+
 
         foreach (HandleSeq instance , cur_growing_pattern->instances)
         {
@@ -1093,6 +1093,7 @@ void PatternMiner::ConstructTheFirstGramPatterns()
     std::cout<<"Debug: PatternMiner:  start (gram = 1) pattern mining..." << std::endl;
 
     cur_gram = 1;
+    cur_index = -1;
 
     originalAtomSpace->getHandlesByType(back_inserter(allLinks), (Type) LINK, true );
 
@@ -1117,28 +1118,28 @@ void PatternMiner::ConstructTheFirstGramPatterns()
 
     OutPutPatternsToFile(cur_gram);
 
-    HandleSeq allDumpNodes, allDumpLinks;
-    originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
+//    HandleSeq allDumpNodes, allDumpLinks;
+//    originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
 
-    // Debug : out put the current dump Atomspace to a file
-    ofstream dumpFile;
-    string fileName = "DumpAtomspace" + toString(cur_gram) + "gram.scm";
+//    // Debug : out put the current dump Atomspace to a file
+//    ofstream dumpFile;
+//    string fileName = "DumpAtomspace" + toString(cur_gram) + "gram.scm";
 
-    dumpFile.open(fileName.c_str());
+//    dumpFile.open(fileName.c_str());
 
-    foreach(Handle h, allDumpNodes)
-    {
-        dumpFile << originalAtomSpace->atomAsString(h);
-    }
+//    foreach(Handle h, allDumpNodes)
+//    {
+//        dumpFile << originalAtomSpace->atomAsString(h);
+//    }
 
-    originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
+//    originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
 
-    foreach(Handle h, allDumpLinks)
-    {
-        dumpFile << originalAtomSpace->atomAsString(h);
-    }
+//    foreach(Handle h, allDumpLinks)
+//    {
+//        dumpFile << originalAtomSpace->atomAsString(h);
+//    }
 
-    dumpFile.close();
+//    dumpFile.close();
 
 }
 
@@ -1146,6 +1147,7 @@ void PatternMiner::GrowAllPatterns()
 {
     for ( cur_gram = 2; cur_gram <= MAX_GRAM; ++ cur_gram)
     {
+        cur_index = -1;
         std::cout<<"Debug: PatternMiner:  start (gram = " + toString(cur_gram) + ") pattern mining..." << std::endl;
 
         for (unsigned int i = 0; i < THREAD_NUM; ++ i)
@@ -1165,28 +1167,28 @@ void PatternMiner::GrowAllPatterns()
 
         OutPutPatternsToFile(cur_gram);
 
-        HandleSeq allDumpNodes, allDumpLinks;
-        originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
+//        HandleSeq allDumpNodes, allDumpLinks;
+//        originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
 
-        // Debug : out put the current dump Atomspace to a file
-        ofstream dumpFile;
-        string fileName = "DumpAtomspace" + toString(cur_gram) + "gram.scm";
+//        // Debug : out put the current dump Atomspace to a file
+//        ofstream dumpFile;
+//        string fileName = "DumpAtomspace" + toString(cur_gram) + "gram.scm";
 
-        dumpFile.open(fileName.c_str());
+//        dumpFile.open(fileName.c_str());
 
-        foreach(Handle h, allDumpNodes)
-        {
-            dumpFile << originalAtomSpace->atomAsString(h);
-        }
+//        foreach(Handle h, allDumpNodes)
+//        {
+//            dumpFile << originalAtomSpace->atomAsString(h);
+//        }
 
-        originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
+//        originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
 
-        foreach(Handle h, allDumpLinks)
-        {
-            dumpFile << originalAtomSpace->atomAsString(h);
-        }
+//        foreach(Handle h, allDumpLinks)
+//        {
+//            dumpFile << originalAtomSpace->atomAsString(h);
+//        }
 
-        dumpFile.close();
+//        dumpFile.close();
     }
 }
 
