@@ -519,13 +519,11 @@ public:
     typedef typename super::value_type value_type;
     typedef std::vector<std::string> string_seq;
 
-    CTable() {}
-
     // Definition is delayed until after Table, as it uses Table.
     template<typename Func>
     CTable(const Func& func, arity_t arity, int nsamples = -1);
 
-    CTable(const std::string& _olabel);
+    CTable(const std::string& _olabel = "output");
 
     CTable(const string_seq& labs, const type_tree& tt);
 

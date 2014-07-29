@@ -1381,7 +1381,7 @@ ostream& ostreamCTableTimeRow(ostream& out, const CTableTime::value_type& t2ov)
         if(++it != t2ov.second.cend())
             out << ",";
     }
-    out << "}";
+    out << "}" << endl;
     return out;
 }
 
