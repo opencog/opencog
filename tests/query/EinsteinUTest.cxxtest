@@ -207,22 +207,28 @@ void EinsteinPuzzle::test_full(void)
 	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
 	Handle trans_rule = eval->apply("transitive-rule", Handle::UNDEFINED);
 	Handle ntran_rule = eval->apply("transitive-not-rule", Handle::UNDEFINED);
-	Handle nattr_rule = eval->apply("neighbor-not-attr-rule", Handle::UNDEFINED);
 
 	Handle faddr_rule = eval->apply("first-addr-rule", Handle::UNDEFINED);
 	Handle neigh_rule = eval->apply("neighbor-rule", Handle::UNDEFINED);
 	Handle nesym_rule = eval->apply("neighbor-symmetry-rule", Handle::UNDEFINED);
+
+	Handle nattr_rule = eval->apply("neighbor-not-attr-rule", Handle::UNDEFINED);
+	Handle distc_rule = eval->apply("distinct-attr-rule", Handle::UNDEFINED);
+
 	Handle solun_rule = eval->apply("found-solution-rule", Handle::UNDEFINED);
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != same_rule);
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != trans_rule);
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != ntran_rule);
-	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != nattr_rule);
 
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != faddr_rule);
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != neigh_rule);
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != nesym_rule);
+
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != nattr_rule);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != distc_rule);
+
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != solun_rule);
 
 	// First, deduce if two seemingly different people are the same ...
@@ -276,6 +282,13 @@ void EinsteinPuzzle::test_full(void)
 	logger().debug("After first transitive-not-rule\n%s\n", SchemeSmob::to_string(ntran).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 3, getarity(ntran));
 
+	// -----------
+	// Two distinct people cannot have a common ettribute
+	Handle distc = pm.crisp_logic_bindlink(distc_rule);
+	logger().debug("After first distinct-attr rule\n%s\n", SchemeSmob::to_string(distc).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 234, getarity(distc));
+
+	// -----------
 	// Result should be a ListLink w/ five solutions
 	// Right now, we accept zero solutions, because above was not yet
 	// enough to solve the pouzzle.

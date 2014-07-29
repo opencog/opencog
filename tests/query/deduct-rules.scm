@@ -118,6 +118,8 @@
 ;;
 ;; If attribute X doesn't hold for person A, and person A is same as person B
 ;; then attribute X also doesn't hold for person B.
+;;
+;; Very similar to above
 (define (transitive-not-rule)
 	(BindLink
 		;; variable declarations
@@ -140,6 +142,43 @@
 			)
 			;; implicand -- then the following is true too
 			(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
+		)
+	)
+)
+
+;; ---------------------------------------------------------------------
+;; distinct-attr rule.
+;; If, for a given attribute, person a and person b take on different
+;; values, then they cannot be the same person.  Therefore, any other
+;; attributes they have must also be exclusive.
+
+(define (distinct-attr-rule)
+	(BindLink
+		;; variable declarations
+		(ListLink
+			(decl-var "FeatureNode" "$person_a")
+			(decl-var "FeatureNode" "$person_b")
+			(decl-var "PredicateNode" "$predicate_common")
+			(decl-var "ConceptNode" "$attribute_comm_a")
+			(decl-var "ConceptNode" "$attribute_comm_b")
+			(decl-var "PredicateNode" "$predicate_exclusive")
+			(decl-var "ConceptNode" "$attribute_excl")
+		)
+		(ImplicationLink
+			;; body -- if all parts of AndLink hold true ... then
+			(AndLink
+				(clause VN "$predicate_common" VN "$person_a" VN "$attribute_comm_a")
+				(clause VN "$predicate_common" VN "$person_b" VN "$attribute_comm_b")
+				(clause VN "$predicate_exclusive" VN "$person_a" VN "$attribute_excl")
+				;; Don't deduce thigs we already know...
+				;; i.e. this not link is identical to conclusion, below.
+				(NotLink
+					(not-clause VN "$predicate_exclusive" VN "$person_b" VN "$attribute_excl")
+				)
+			)
+
+			;; implicand -- then the following is true too
+			(not-clause VN "$predicate_exclusive" VN "$person_b" VN "$attribute_excl")
 		)
 	)
 )
@@ -175,7 +214,6 @@
 		)
 	)
 )
-
 
 ;; ---------------------------------------------------------------------
 ;; Houses at the end of the street can only have one neighbor, ever.
