@@ -758,7 +758,8 @@ set<TTable::value_type> CTable::get_timestamps() const
     set<TTable::value_type> res;
     for (const CTable::value_type& row : *this)
         for (const auto& vtc : row.second)
-            res.insert(vtc.first.timestamp);
+            if (vtc.first.timestamp != boost::gregorian::date())
+                res.insert(vtc.first.timestamp);
 
     return res;
 }
