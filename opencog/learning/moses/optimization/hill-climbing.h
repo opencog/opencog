@@ -267,11 +267,6 @@ public:
      * @prama init_inst Start the seach from this instance.
      * @param iscorer   the Scoring function.
      * @param max_evals The maximum number of evaluations to perform.
-     * @param eval_best returned: The number of evaluations performed
-     *                  to reach the best solution.
-     * @return number of evaluations actually performed. This will always
-     *         be equal or larger than the eval_best return, as not all
-     *         evaluations lead to the best solution.
      */
     void operator()(deme_t& deme,
                     const instance& init_inst,
