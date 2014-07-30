@@ -6,6 +6,7 @@ INSTALL(FILES
 	discriminating_bscore.h
 	precision_bscore.h
 	scoring_base.h
+    time_dispersion.h
 
 	DESTINATION
 

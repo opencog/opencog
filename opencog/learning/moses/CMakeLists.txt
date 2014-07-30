@@ -70,6 +70,7 @@ ADD_LIBRARY (moses SHARED STATIC
 	scoring/discriminating_bscore
 	scoring/precision_bscore
 	scoring/bscores
+    scoring/time_dispersion
 
 )
 
