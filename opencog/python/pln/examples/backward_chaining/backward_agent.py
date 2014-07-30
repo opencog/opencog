@@ -30,6 +30,8 @@ class BackwardAgent(MindAgent):
             MemberToEvaluationRule(self.chainer))
         self.chainer.add_rule(
             AbductionRule(self.chainer, types.InheritanceLink))
+        self.chainer.add_rule(
+            ModusPonensRule(self.chainer, types.InheritanceLink))
 
     def run(self, atomspace):
         if self.chainer is None:
