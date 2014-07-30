@@ -482,7 +482,7 @@ CTable Table::compressed(const std::string weight_col) const
             for(; in_it != itable.end(); ++in_it, ++out_it, ++time_it)
                 ++res[*in_it][TimedValue(*out_it, *time_it)];
         }
-        logger().debug("Size of the compressed dataset is %f", res.size());
+        logger().debug("Size of the compressed dataset is %u", res.size());
         return res;
     }
     else {
