@@ -87,8 +87,8 @@
         (ConceptNode "Nono")
         (ConceptNode "America")))
 
-; query: "Who is a criminal?"
-(define isCriminal
-    (InheritanceLink
-        (VariableNode "$isCriminal")
-        (ConceptNode "criminal")))
+; example query: "Who is a criminal?"; query is checked in backward_agent
+;(define isCriminal
+;    (InheritanceLink
+;        (VariableNode "$isCriminal")
+;        (ConceptNode "criminal")))
