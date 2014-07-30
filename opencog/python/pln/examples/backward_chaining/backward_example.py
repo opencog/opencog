@@ -15,13 +15,14 @@ __init__(atomspace)
 
 coreTypes = "opencog/atomspace/core_types.scm"
 utilities = "opencog/scm/utilities.scm"
-data = "opencog/python/pln/examples/backward_chaining/criminal.scm"
+#data = "opencog/python/pln/examples/backward_chaining/criminal.scm"
+data = "opencog/python/pln/examples/backward_chaining/small_example.scm"
 
 for item in [coreTypes, utilities, data]:
     load_scm(atomspace, item)
 
 agent = InteractiveAgent(atomspace=atomspace,
                          agent=backward_agent.BackwardAgent(),
-                         num_steps=100,
+                         num_steps=1000,
                          print_starting_contents=True)
 agent.run()
