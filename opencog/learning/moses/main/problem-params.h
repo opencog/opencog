@@ -136,6 +136,19 @@ struct problem_params : public option_base
     bool weighted_accuracy;
     std::vector<contin_t> discretize_thresholds;
 
+    // Control temporal dispersion pressure, typically between 0 and 1
+    score_t time_dispersion_pressure;
+
+    // Control temporal dispersion pressure, distort the penalty
+    score_t time_dispersion_exponent;
+
+    // Spread bscore across timestamps instead of datapoints
+    bool time_bscore;
+
+    // Control granularity of time bscore (day or month)
+    string time_bscore_granularity_str;
+    TemporalGranularity time_bscore_granularity;
+
     // hc_param  (hill-climbing)
     bool hc_widen_search;
     bool hc_single_step;

@@ -53,6 +53,10 @@ static const string inverse_str = "inverse";
 static const string complement_str = "complement";
 static const string power_str = "power";
 
+// Time bscore granularity
+static const string day_str = "day";
+static const string month_str = "month";
+
 // focus types (which data points feature selection within moses
 // should focus on)
 static const string focus_all = "all"; // all data points are considered
@@ -335,9 +339,8 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "metapop size cap = cap_coef*(x+250)*(1+2*exp(-x/500)), "
          "where x is the number of generations so far. The default usually works "
          "well but if you run out of memory you may decrease that value.\n")
-        
-        // Large problem parameters
 
+        // Large problem parameters
         ("hc-max-nn-evals",
          po::value<unsigned>(&hc_max_nn)->default_value(20000),
          str(format("Hillclimbing parameter (%s).  When exploring the "
@@ -515,8 +518,9 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "Number of times the same exemplar can be revisited. "
          "This option is only worthwhile when there "
          "is a great deal of stochasticity in the search so that exploring "
-         "a deme multiple times will yield substantially different results. "
-         "If the value is negative then the number of revisit is unbound. "
+         "a deme spawn from the same exemplar multiple times will yield "
+         "substantially different results. If the value is negative then the "
+         "number of revisit is unbound. "
          "This might be the case is feature selection is used for instance.\n")
 
         // Output control options
@@ -690,9 +694,24 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "the negative predictive value is maximized (instead of "
          "the precision).\n")
 
-        ("pre-worst-norm",
-         po::value<bool>(&pre_worst_norm)->default_value(false),
-         "Normalize the precision w.r.t. its worst decile [EXPERIMENTAL].\n")
+        ("time-dispersion-pressure",
+         po::value<score_t>(&time_dispersion_pressure)->default_value(0.0),
+         "Adds a penalty in the fitness to ensure that models have "
+         "their activation spread across time.\n")
+
+        ("time-dispersion-exponent",
+         po::value<score_t>(&time_dispersion_exponent)->default_value(1.0),
+         "Distort the penalty.\n")
+
+        ("time-bscore",
+         po::value<bool>(&time_bscore)->default_value(false),
+         "In case the data has timestamp, spread the bscore across the "
+         "timestamps instead of data points.\n")
+
+        ("time-bscore-granularity",
+         po::value<string>(&time_bscore_granularity_str)->default_value(day_str),
+         "Set the granularity of timestamp, in case the bscore is spread "
+         "across time. Options are 'day' and 'month'.\n")
 
         ("it-abs-err",
          po::value<bool>(&it_abs_err)->default_value(false),
@@ -1215,6 +1234,17 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
         d2de = diversity_parameters::inverse; // silent compiler warning
     }
     meta_params.diversity.set_dst2dp(d2de);
+
+    // Set time bscore granularity
+    if (time_bscore_granularity_str == day_str)
+        time_bscore_granularity = TemporalGranularity::day;
+    else if (time_bscore_granularity_str == month_str)
+        time_bscore_granularity = TemporalGranularity::month;
+    else {
+        stringstream ss;
+        ss << "Granularity " << time_bscore_granularity_str << " not implemented";
+        log_output_error_exit(ss.str());
+    }
 
     // Set optim_parameters.
     opt_params = optim_parameters(opt_algo, pop_size_ratio, max_score, max_dist);

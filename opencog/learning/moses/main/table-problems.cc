@@ -75,10 +75,6 @@ void table_problem_params::add_options(boost::program_options::options_descripti
          "Label of the target feature to fit. If none is given the "
          "first one is used.\n")
 
-        ("timestamp-feature",
-         po::value<string>(&timestamp_feature),
-         "Label of the timestamp feature. If none is given it is ignored.\n")
-
         ("score-weight",
          po::value<string>(&weighting_feature),
          "Feature (table column) to use as a weight during scoring. "
@@ -86,6 +82,10 @@ void table_problem_params::add_options(boost::program_options::options_descripti
          "weighted by this value, to determine the final score. This "
          "option is useful when not all of the rows in a table are "
          "equally important to model correctly.\n")
+
+        ("timestamp-feature",
+         po::value<string>(&timestamp_feature),
+         "Label of the timestamp feature. If none is given it is ignored.\n")
 
         ("ignore-feature,Y",
          po::value<vector<string>>(&ignore_features_str),
@@ -114,7 +114,6 @@ void table_problem_base::common_setup(problem_params& pms)
         Table table = loadTable(idf, _tpp.target_feature,
                                 _tpp.timestamp_feature,
                                 _tpp.ignore_features_str);
-
         num_rows += table.size();
 
         // Possibly subsample the table
@@ -360,16 +359,15 @@ void pre_table_problem::run(option_base* ob)
         get_signature_inputs(table_type_signature),
         type_tree(id::boolean_type));
     int as = alphabet_size(cand_sig, pms.ignore_ops);
-    OC_ASSERT(false, "TODO fix precision_bscore arguments");
     precision_bscore bscore(ctable,
                             fabs(pms.hardness),
                             pms.min_rand_input,
-                            pms.max_rand_input);
-                            // pms.time_dispersion_pressure,
-                            // pms.time_dispersion_exponent,
-                            // pms.hardness >= 0,
-                            // pms.time_bscore,
-                            // pms.time_bscore_granularity);
+                            pms.max_rand_input,
+                            pms.time_dispersion_pressure,
+                            pms.time_dispersion_exponent,
+                            pms.hardness >= 0,
+                            pms.time_bscore,
+                            pms.time_bscore_granularity);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
     if (pms.gen_best_tree) {
         // experimental: use some canonically generated
@@ -600,7 +598,7 @@ void register_table_problems(problem_manager& pmr, option_manager& mgr)
 
 	pmr.register_problem(new ip_problem(*tpp, *ippp));
 	pmr.register_problem(new ann_table_problem(*tpp));
-	pmr.register_problem(new pre_table_problem(*tpp));
+    pmr.register_problem(new pre_table_problem(*tpp));
 	pmr.register_problem(new pre_conj_table_problem(*tpp));
 	pmr.register_problem(new prerec_table_problem(*tpp));
 	pmr.register_problem(new recall_table_problem(*tpp));
