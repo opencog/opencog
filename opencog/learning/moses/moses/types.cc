@@ -5,7 +5,7 @@
  * Copyright (C) 2014 Aidyia Limited
  * All Rights Reserved
  *
- * Written by Moshe Looks
+ * Written by Moshe Looks, Nil Geisweiller, Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -27,6 +27,10 @@
 #include <string>
 
 #include <boost/functional/hash.hpp>
+
+// std::regex will only be implemented in gcc 4.9. Meanwhile we use
+// boost::regex
+#include <boost/regex.hpp>
 
 #include "types.h"
 #include "complexity.h"
@@ -143,12 +147,12 @@ bool composite_score::operator==(const composite_score &r) const
     // equality holds if they are equal within about 7 decimal places.
     // Note: this check is used in iostream_bscored_combo_treeUTest
     // and a simple equality test will fail on some cpu/os combos.
-    #define FLOAT_EPS 1.0e-7
-    #define CHK_EQ(NAME)  \
-        ((NAME == r.get_##NAME()) || /* Try this cheap test first */ \
-         (fabs(NAME) > 0.0f) ?  \
-            (fabs(r.get_##NAME() / NAME - 1.0f) < FLOAT_EPS) : \
-            (fabs(NAME - r.get_##NAME()) < FLOAT_EPS))
+#define FLOAT_EPS 1.0e-7
+#define CHK_EQ(NAME)                                                 \
+    ((NAME == r.get_##NAME()) || /* Try this cheap test first */     \
+     (fabs(NAME) > 0.0f) ?                                           \
+     (fabs(r.get_##NAME() / NAME - 1.0f) < FLOAT_EPS) :              \
+     (fabs(NAME - r.get_##NAME()) < FLOAT_EPS))
     return
         CHK_EQ(score)
         && CHK_EQ(complexity)
@@ -156,6 +160,8 @@ bool composite_score::operator==(const composite_score &r) const
         && CHK_EQ(diversity_penalty)
         && CHK_EQ(penalized_score)
         ;
++#undef FLOAT_EPS
++#undef CHK_EQ
 }
 
 static const std::string behavioral_score_prefix_str = "behavioral score:";
@@ -166,121 +172,94 @@ std::ostream& ostream_behavioral_score(std::ostream& out, const behavioral_score
     return ostreamContainer(out, bs, " ", "[", "]");
 }
 
-/** stream out a scored combo tree */
-std::ostream& ostream_scored_combo_tree(std::ostream& out, const scored_combo_tree& sct)
+std::ostream& ostream_scored_combo_tree(std::ostream& out,
+                                        const scored_combo_tree& sct,
+                                        bool output_score,
+                                        bool output_cscore,
+                                        bool output_bscore)
 {
-    out << sct.get_score() << " " << sct.get_tree() << std::endl
-        << "weight=" << sct.get_weight() << " " 
-        << sct.get_composite_score();
+    if (output_score)
+        out << sct.get_score() << " ";
+    out << sct.get_tree();
 
-    const behavioral_score& bs = sct.get_bscore();
-    if (0 < bs.size()) {
-        out << std::endl;
-        ostream_behavioral_score(out, bs);
-    }
-    out << std::endl;
+    // Is this really used?
+    static const bool output_weight = false;
+    if (output_weight)
+        out << " weight=" << sct.get_weight();
 
-    return out;
+    if (output_cscore)
+        out << " " << sct.get_composite_score();
+
+    if (output_bscore and sct.get_bscore().size() > 0)
+        ostream_behavioral_score(out << " ", sct.get_bscore());
+
+    return out << std::endl;
 }
 
 
-/// Stream in a scored_combo_tree, using any format that vaguely
-/// resembles ostream_scored_combo_tree.  We assume that the combo tree
-/// is always preceeded by the score, for backwards compatibility.
+/// Stream in a scored_combo_tree, using the format that resembles
+/// ostream_scored_combo_tree.
 ///
 scored_combo_tree istream_scored_combo_tree(std::istream& in)
 {
-    static const char* score_str = "score";
-    static const char* weight_str = "weight";
-    static const char* complexity_str = "complexity";
-    static const char* complexity_penalty_str = "complexity penalty";
-    static const char* diversity_penalty_str = "diversity penalty";
-    static const char* behavioral_score_str = "behavioral score";
+    static const string uncaptured_float_re = "[-+]?\\d*\\.?\\d+(?:[eE][-+]?\\d+)?";
+    static const string float_re = string("(") + uncaptured_float_re + ")";
+ 
 
-    // parse score
-    score_t sc;
-    in >> sc;
+    // very crude because handed to another parser
+    static const string combo_tree_re = "(.+)";
 
-    // parse combo tree
-    combo::combo_tree tr;
-    in >> tr;
+    static const string cscore_re = string("\\[")
+        + "score=" + float_re + ", "
+        + "penalized score=" + float_re + ", "
+        + "complexity=" + "(\\d+)" + ", "
+        + "complexity penalty=" + float_re + ", "
+        + "diversity penalty=" + float_re + "\\]";
 
-    // parse the rest
-    complexity_t cpx = 0;
-    score_t cpx_penalty = 0, diversity_penalty = 0;
-    score_t weight = 0.0;
-    behavioral_score bs;
+    // very crude because handed to another parser
+    static const string bscore_re = string("behavioral score: (\\[.+\\])");
 
-    // The following parser assumes that the input is of the form
-    // key=value or key:value, and is separated by commas, spaces
-    // or tabs. Any brackets [] braces {} or parens () in the input
-    // are ignored.
+    static const string scored_combo_tree_re = float_re + " "
+        + combo_tree_re + " " + cscore_re + " " + bscore_re;
+    
+    static const boost::regex sct_regex(scored_combo_tree_re);
+
+    // Everything should be on the same line
     std::string line;
     std::getline(in, line);
-    char* pline = strdup(line.c_str());
-    char* key = pline;
-    while (true) {
-        char* eq = strpbrk(key, ":=");
-        if (NULL == eq) break;
-        *eq = 0x0;
-        eq++;
-        char *tail = strpbrk(eq, " ,[](){}\t");
-        if (tail) *tail = 0x0;
 
-        double val = atof(eq);
+    // Match the regex
+    boost::smatch sct_match;
+    bool match_result = boost::regex_match(line, sct_match, sct_regex);
 
-        // large string case statement
-        if (0 == strcmp(key, score_str)) {
-            sc = val;
-        }
-        else if (0 == strcmp(key, complexity_str)) {
-            cpx = val;
-        }
-        else if (0 == strcmp(key, weight_str)) {
-            weight = val;
-        }
-        else if (0 == strcmp(key, complexity_penalty_str)) {
-            cpx_penalty = val;
-        }
-        else if (0 == strcmp(key, diversity_penalty_str)) {
-            diversity_penalty = val;
-        }
+    for (auto const& sm : sct_match)
+        cout << "sm = \"" << sm << "\"" << std::endl;
+    
+    OC_ASSERT(match_result, "Line '%s' doesn't match regex '%s'",
+              line.c_str(), scored_combo_tree_re.c_str());
+    OC_ASSERT(sct_match.size() == 9,
+              "Wrong number of sub-matches %u, 8 are expected",
+              sct_match.size());
+ 
+    // Parse score
+    score_t sc = std::stof(sct_match[1]);
 
-        if (tail) {
-             // next key starts at the first non-junk character
-             key = tail+1;
-             key += strspn(key, " ,[](){}\t");
-        }
-        else break;
-      
-    }
-    free(pline);
+    // Parse combo tree
+    combo::combo_tree tr;
+    std::stringstream(sct_match[2].str()) >> tr;
 
-    // OK, now we assume that the behavioral score is on a line all
-    // by itself, and consists of a squence of numbers, surrounded
-    // by brackets.
-    std::getline(in, line);
-    pline = strdup(line.c_str());
-    key = pline;
-    char* eq = strpbrk(key, ":=");
-    if (eq) {
-        *eq = 0x0;
-        eq++;
-
-        if (0 == strcmp(key, behavioral_score_str)) {
-            istringstream iss(eq);
-            istreamContainer(iss, back_inserter(bs), "[", "]");
-        }
-    }
-    free(pline);
-
-    // assign to candidate
-    combo::combo_tree tr_test = tr;
-
+    // Parse composite score
+    complexity_t cpx = std::stoi(sct_match[5].str());
+    score_t cpx_penalty = std::stof(sct_match[6].str()),
+        diversity_penalty = std::stof(sct_match[7].str());
     composite_score cs(sc, cpx, cpx_penalty, diversity_penalty);
-    scored_combo_tree sct(tr, /* default demeID */ 0, cs, bs);
-    sct.set_weight(weight);
-    return sct;
+
+    // Parse behavioral score
+    behavioral_score bs;
+    istringstream iss(sct_match[8].str());
+    istreamContainer(iss, back_inserter(bs), "[", "]");
+ 
+    return scored_combo_tree(tr, demeID_t(), cs, bs);
 }
 
 
