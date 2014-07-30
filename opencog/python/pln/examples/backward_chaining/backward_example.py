@@ -52,7 +52,7 @@ for i in range(MAX_STEPS):
         break
 
 if result_found:
-    print("\n---- Answer found after {0} inference steps that produced a new "
+    print("---- Answer found after {0} inference steps that produced a new "
           "output, out of {1} total inference steps attempted.".
           format(outputs_produced, i+1))
 else:

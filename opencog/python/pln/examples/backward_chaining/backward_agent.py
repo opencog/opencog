@@ -49,8 +49,10 @@ def check_result(atomspace):
         args = atomspace.get_outgoing(inh_link.h)
         if args[0].is_a(types.ConceptNode) and args[1].name == "criminal":
             criminal = args[0].name
+            evidence = inh_link
             result_found = True
-            print inh_link
     if result_found:
-        print("Suspect found guilty! {0} is a criminal!".format(criminal))
+        print("\nSuspect found guilty! {0} is a criminal! The following "
+              "incriminating evidence proves it:\n{1}"
+              .format(criminal, evidence))
     return result_found
