@@ -360,12 +360,16 @@ void pre_table_problem::run(option_base* ob)
         get_signature_inputs(table_type_signature),
         type_tree(id::boolean_type));
     int as = alphabet_size(cand_sig, pms.ignore_ops);
+    OC_ASSERT(false, "TODO fix precision_bscore arguments");
     precision_bscore bscore(ctable,
-                       fabs(pms.hardness),
-                       pms.min_rand_input,
-                       pms.max_rand_input,
-                       pms.hardness >= 0,
-                       pms.pre_worst_norm);
+                            fabs(pms.hardness),
+                            pms.min_rand_input,
+                            pms.max_rand_input);
+                            // pms.time_dispersion_pressure,
+                            // pms.time_dispersion_exponent,
+                            // pms.hardness >= 0,
+                            // pms.time_bscore,
+                            // pms.time_bscore_granularity);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
     if (pms.gen_best_tree) {
         // experimental: use some canonically generated
