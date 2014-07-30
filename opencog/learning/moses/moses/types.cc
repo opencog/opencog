@@ -200,8 +200,10 @@ std::ostream& ostream_scored_combo_tree(std::ostream& out,
 /// Stream in a scored_combo_tree, using the format that resembles
 /// ostream_scored_combo_tree.
 ///
-scored_combo_tree istream_scored_combo_tree(std::istream& in)
+scored_combo_tree string_to_scored_combo_tree(const std::string& line)
 {
+    // cout << "line = " << line << "END" << endl;
+
     static const string uncaptured_float_re = "[-+]?\\d*\\.?\\d+(?:[eE][-+]?\\d+)?";
     static const string float_re = string("(") + uncaptured_float_re + ")";
  
@@ -219,21 +221,17 @@ scored_combo_tree istream_scored_combo_tree(std::istream& in)
     // very crude because handed to another parser
     static const string bscore_re = string("behavioral score: (\\[.+\\])");
 
-    static const string scored_combo_tree_re = float_re + " "
-        + combo_tree_re + " " + cscore_re + " " + bscore_re;
-    
-    static const boost::regex sct_regex(scored_combo_tree_re);
+    static const string scored_combo_tree_re = "^" + float_re + " "
+        + combo_tree_re + " " + cscore_re + " " + bscore_re + "\n?$";
 
-    // Everything should be on the same line
-    std::string line;
-    std::getline(in, line);
+    static const boost::regex sct_regex(scored_combo_tree_re);
 
     // Match the regex
     boost::smatch sct_match;
     bool match_result = boost::regex_match(line, sct_match, sct_regex);
 
-    for (auto const& sm : sct_match)
-        cout << "sm = \"" << sm << "\"" << std::endl;
+    // for (auto const& sm : sct_match)
+    //     cout << "sm = \"" << sm << "\"" << std::endl;
     
     OC_ASSERT(match_result, "Line '%s' doesn't match regex '%s'",
               line.c_str(), scored_combo_tree_re.c_str());
@@ -262,7 +260,13 @@ scored_combo_tree istream_scored_combo_tree(std::istream& in)
     return scored_combo_tree(tr, demeID_t(), cs, bs);
 }
 
-
+// Fill a vector of scored_combo_tree parsed from stream
+std::istream& istream_scored_combo_trees(std::istream& in,
+                                         std::vector<scored_combo_tree>& scts) {
+    for (std::string line; std::getline(in, line); )
+        scts.push_back(string_to_scored_combo_tree(line));
+    return in;
+}
 
 } // ~namespace moses
 } // ~namespace opencog

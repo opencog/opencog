@@ -366,7 +366,10 @@ std::ostream& ostream_scored_combo_tree(std::ostream& out,
                                         bool output_cscore = true,
                                         bool output_bscore = true);
 
-scored_combo_tree istream_scored_combo_tree(std::istream& in);
+scored_combo_tree string_to_scored_combo_tree(const std::string& line);
+
+std::istream& istream_scored_combo_trees(std::istream& in,
+                                         std::vector<scored_combo_tree>& scts);
 
 inline std::ostream& operator<<(std::ostream& out,
                                 const moses::scored_combo_tree& sct)
