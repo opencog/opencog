@@ -6,12 +6,7 @@
 
 ; "... it is a crime for an American to sell weapons to hostile nations":
 ; American(x) ∧ Weapon(y) ∧ Sells(x, y, z) ∧ Hostile(z) ⇒ Criminal (x).
-(BindLink
-    (ListLink
-        (VariableNode "$x")
-        (VariableNode "$y")
-        (VariableNode "$z"))
-(ImplicationLink
+(ImplicationLink (stv .99 .99)
     (AndLink
         (InheritanceLink
             (VariableNode "$x")
@@ -30,26 +25,24 @@
             (ConceptNode "hostile")))
     (InheritanceLink
         (VariableNode "$x")
-        (ConceptNode "criminal"))))
+        (ConceptNode "criminal")))
 
 ; "Nono ... has some missiles."
 ; ∃x Owns(Nono, x) ∧ Missile(x) is transformed by Existential Instantiation to
 ; Owns(Nono,M1), Missile(M1)
-(EvaluationLink
-    (PredicateNode "own")
-    (ListLink
-        (ConceptNode "Nono")
-        (ConceptNode "missile")))
-
-(InheritanceLink
-    (ConceptNode "missile@123")
-    (ConceptNode "missile"))
+(AndLink (stv .99 .99)
+    (InheritanceLink (stv .99 .99)
+        (ConceptNode "missile@123")
+        (ConceptNode "missile"))
+    (EvaluationLink (stv .99 .99)
+        (PredicateNode "own")
+        (ListLink
+            (ConceptNode "Nono")
+            (ConceptNode "missile@123"))))
 
 ; "All of its missiles were sold to it by Colonel West":
 ; Missile(x) ∧ Owns(Nono, x) ⇒ Sells(West, x, Nono) .
-(BindLink
-    (VariableNode "$a")
-    (ImplicationLink
+(ImplicationLink (stv .99 .99)
     (AndLink
         (InheritanceLink
             (VariableNode "$a")
@@ -64,17 +57,15 @@
         (ListLink
             (ConceptNode "West")
             (VariableNode "$a")
-            (ConceptNode "Nono")))))
+            (ConceptNode "Nono"))))
 
 ; Missiles are weapons: Missile(x) ⇒ Weapon(x)
-(InheritanceLink
+(InheritanceLink (stv .99 .99)
     (ConceptNode "missile")
     (ConceptNode "weapon"))
 
 ; An enemy of America is "hostile": Enemy(x,America) ⇒ Hostile(x) .
-(BindLink
-    (VariableNode "$b")
-(ImplicationLink
+(ImplicationLink (stv .99 .99)
     (EvaluationLink
         (PredicateNode "enemy_of")
         (ListLink
@@ -82,19 +73,19 @@
             (ConceptNode "America")))
     (InheritanceLink
         (VariableNode "$b")
-        (ConceptNode "hostile"))))
+        (ConceptNode "hostile")))
 
 ; "West, who is American ...": American(West).
-(InheritanceLink
+(InheritanceLink (stv .99 .99)
     (ConceptNode "West")
     (ConceptNode "American"))
 
 ; "The country Nono, an enemy of America ...": Enemy(Nono,America).
-(EvaluationLink
-        (PredicateNode "enemy_of")
-        (ListLink
-            (ConceptNode "Nono")
-            (ConceptNode "America")))
+(EvaluationLink (stv .99 .99)
+    (PredicateNode "enemy_of")
+    (ListLink
+        (ConceptNode "Nono")
+        (ConceptNode "America")))
 
 ; query: "Who is a criminal?"
 (define isCriminal
