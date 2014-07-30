@@ -592,6 +592,16 @@ class SatisfyingSetToConceptRule(Rule):
                 (PredicateNode "smokes")
                 (ListLink
                     (VariableNode "$X")))))
+    while
+    (ConceptToPredicateLink
+        (ConceptNode "smoke")
+        (PredicateNode "smoke"))
+    is equivalent to
+    (EvaluationLink
+        (PredicateNode "ConceptToPredicate")
+        (ListLink
+            (ConceptNode "smoke")
+            (PredicateNode "smoke")))
     """
     def __init__(self, chainer):
         self.chainer = chainer
@@ -611,17 +621,21 @@ class SatisfyingSetToConceptRule(Rule):
         and_link = []
         tv = satisfying_set_link.tv
 
+        # Todo: Construct unit test
         if satisfying_set_link.out[0].type == types.VariableNode and\
                 satisfying_set_link.out[1].type == types.EvaluationLink:
             predicate = satisfying_set_link.out[1].out[0]
             new_concept = self.chainer.atomspace.add_node(types.ConceptNode,
                                                           predicate.name)
-            #TODO: ConceptToPredicateLink needs to be implemented
-            concept_to_predicate_link = self.chainer.link(
-                types.ConceptToPredicateLink, [new_concept, predicate])
+            concept_to_predicate = self.chainer.atomspace.add_node(
+                types.PredicateNode, "ConceptToPredicate")
+            list_link = self.chainer.link(types.ListLink,
+                                          [new_concept, predicate])
+            eval_link = self.chainer.link(
+                types.EvaluationLink, [concept_to_predicate, list_link])
             inheritance_link = self.chainer.link(
                 types.InheritanceLink, [new_concept, satisfying_set_link])
             and_link = self.chainer.link(
-                types.AndLink, [concept_to_predicate_link, inheritance_link])
+                types.AndLink, [eval_link, inheritance_link])
 
         return and_link, [tv]
