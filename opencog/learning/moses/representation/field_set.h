@@ -439,6 +439,7 @@ struct field_set
     /// Compute the Hamming distance between two instances.
     int hamming_distance(const instance& inst1, const instance& inst2) const
     {
+        OC_ASSERT(inst1.size() == inst1.size());
         int d = 0;
         for (const_disc_iterator it1 = begin_raw(inst1), it2 = begin_raw(inst2);
                 it1 != end_raw(inst1); ++it1, ++it2)
@@ -468,6 +469,8 @@ struct field_set
                         const instance& base,
                         const instance& reference) const
     {
+        OC_ASSERT(base.size() == reference.size() and
+                  base.size() == target.size());
         disc_iterator tit = begin_raw(target);
         for (const_disc_iterator bit = begin_raw(base),
                                  rit = begin_raw(reference);
@@ -588,16 +591,6 @@ struct field_set
     size_t contin_to_raw_idx(size_t spec_idx) const
     {
         return _contin_raw_offsets[spec_idx];
-
-        // Below is the old code, useful as documentation of what
-        // the cache avoids.
-#ifdef USE_UNCACHED_VERSION
-        size_t raw_idx = begin_contin_raw_idx();
-        for (std::vector<contin_spec>::const_iterator it = _contin.begin();
-                it != _contin.begin() + spec_idx; ++it)
-            raw_idx += it->depth;
-        return raw_idx;
-#endif // USE_UNCACHED_VERSION
     }
 
     /// Given an index into the 'raw' field array, this returns an
