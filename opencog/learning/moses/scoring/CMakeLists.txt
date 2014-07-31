@@ -7,6 +7,7 @@ INSTALL(FILES
 	precision_bscore.h
 	scoring_base.h
     time_dispersion.h
+    ss_bscore.h
 
 	DESTINATION
 
