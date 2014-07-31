@@ -87,6 +87,7 @@ public:
 private:
     const ensemble_parameters& _params;
     boosting_ascore* _booster;
+    double _best_possible_score;
 
     scored_combo_tree_set _scored_trees;
     mutable combo_tree _weighted_tree;

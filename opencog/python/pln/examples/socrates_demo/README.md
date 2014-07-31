@@ -26,17 +26,15 @@ represented in AtomSpace notation (rather than natural language).
 Important notes:
 
 - There are some outstanding issues concerning satisfying sets:
-  - https://github.com/opencog/opencog/issues/601
-  - https://github.com/opencog/opencog/issues/603
-  - https://github.com/opencog/opencog/issues/613
+  - [General issue](https://github.com/opencog/opencog/issues/601) linking to
+    [#733 (Incorrect input set during deduction)](https://github.com/opencog/opencog/issues/733),
+    [#734 (Incorrect SatisfyingSetLink syntax)](https://github.com/opencog/opencog/issues/734) and
+    [#735](https://github.com/opencog/opencog/issues/735) (in need of review by @AmeBel.
+  - [Should links with VariableNodes have the semantics of AverageLinks
+    or SatisfyingSetLinks?](https://github.com/opencog/opencog/issues/603)
+  - [Adding a SatisfyingSetToConceptRule](https://github.com/opencog/opencog/issues/613) - is this still necessary?
 
-- And some concerning duplicates or bugs in the output:
-  - https://github.com/opencog/opencog/issues/733
-  - https://github.com/opencog/opencog/issues/734
-  - https://github.com/opencog/opencog/issues/735
-
-- The introduction of the Abduction rule was discussed here:
-  - https://github.com/opencog/opencog/pull/777
+- The introduction of the Abduction rule was discussed [here](https://github.com/opencog/opencog/pull/777).
 
 PLN rules needed:
 
@@ -47,10 +45,28 @@ PLN rules needed:
 - MemberToEvaluationRule
 - AbductionRule
 
-#### Note
+### Instructions to run it with Python
 
-The example can be loaded into the Cogserver as a MindAgent or run
-with Python.
+Run ```socrates_example.py```.
+
+### Instructions to run it as a MindAgent in the CogServer
+
+Include the MindAgent as a preloaded module in the cogserver by adding its
+path, ```../opencog/python/pln/examples/socrates_demo```, to ```PYTHON_EXTENSION_DIRS```.
+Start the cogserver at ```/opencog/build``` with ```./opencog/server/cogserver```.
+Telnet into the cogserver with ```rlwrap telnet localhost 17001```.
+Start the relex server at ```/relex``` with ```./opencog-server-sh```.
+Make sure that the RelEx2Logic output is turned on in ```opencog-server.sh```.
+
+In the cogserver, clear the atomspace with ```(clear)```.
+Then run ```(relex-parse "Socrates is a man")``` and ```(relex-parse "Men breathe air")```.
+Enter ```(delete-sentences)``` to remove all atoms but the RelEx2Logic output.
+Enter ```.``` to exit the Scheme shell.
+Optionally, use ```list -a``` to show the current atomspace contents.
+
+Load the MindAgent with ```loadpy socrates_agent```.
+Enter ```restapi.Start``` to start the REST API.
+Start the MindAgent with ```agents-start socrates_agent.SocratesAgent```.
 
 ### The inference process
 
@@ -258,7 +274,7 @@ with Python.
 ) ; [6375]
 ```
 
-##### 5) MemberToEvaluationRule
+##### 7) MemberToEvaluationRule
 
 ###### Input is previous output
 

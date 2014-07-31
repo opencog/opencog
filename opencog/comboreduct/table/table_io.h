@@ -136,7 +136,7 @@ std::istream& istreamTable(std::istream& in, Table& tab,
 std::istream& istreamCTable(std::istream& in, CTable& ctable);
 
 /**
- * Load a OTable givent the file name. Only works for dense DSV data.
+ * Load a OTable given the file name. Only works for dense DSV data.
  */
 OTable loadOTable(const std::string& file_name,
                   const std::string& target_feature);

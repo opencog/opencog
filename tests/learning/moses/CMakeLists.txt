@@ -41,6 +41,13 @@ TARGET_LINK_LIBRARIES(representationUTest
 	cogutil
 )
 
+ADD_CXXTEST(scoringUTest)
+TARGET_LINK_LIBRARIES(scoringUTest
+	moses
+	comboreduct
+	cogutil
+)
+
 ADD_CXXTEST(metapopulationUTest)
 TARGET_LINK_LIBRARIES(metapopulationUTest
 	moses
@@ -87,16 +94,17 @@ TARGET_LINK_LIBRARIES(irisUTest
 	cogutil		
 )
 
-ADD_CXXTEST(dynFeatSelUTest)
-TARGET_LINK_LIBRARIES(dynFeatSelUTest
+ADD_CXXTEST(selectionUTest)
+TARGET_LINK_LIBRARIES(selectionUTest
 	moses_exec
 	moses
 	comboreduct
-	cogutil
+	cogutil		
 )
 
-ADD_CXXTEST(scoringUTest)
-TARGET_LINK_LIBRARIES(scoringUTest
+ADD_CXXTEST(dynFeatSelUTest)
+TARGET_LINK_LIBRARIES(dynFeatSelUTest
+	moses_exec
 	moses
 	comboreduct
 	cogutil

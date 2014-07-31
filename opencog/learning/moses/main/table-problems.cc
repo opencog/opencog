@@ -30,6 +30,7 @@
 #include "../moses/partial.h"
 #include "../scoring/bscores.h"
 #include "../scoring/discriminating_bscore.h"
+#include "../scoring/select_bscore.h"
 
 #include "moses_exec_def.h"
 #include "table-problems.h"
@@ -163,32 +164,37 @@ void table_problem_base::common_setup(problem_params& pms)
     pms.mmr_pa.ilabels = ilabels;
 }
 
-void table_problem_base::common_type_setup(problem_params& pms)
+/**
+ * Set up the output
+ */
+void table_problem_base::common_type_setup(problem_params& pms,
+                                           type_node out_type)
 {
     // Infer the signature based on the input table.
     table_type_signature = table.get_signature();
-    logger().info() << "Inferred data signature " << table_type_signature;
+    logger().info() << "Table signature " << table_type_signature;
 
     // Infer the type of the input table
-    table_output_tt = get_signature_output(table_type_signature);
-    table_output_tn = get_type_node(table_output_tt);
-
-    // Determine the default exemplar to start with
-    // problem == pre  precision-based scoring
-    // precision combo trees always return booleans.
-    if (pms.exemplars.empty()) {
-        type_node pbr_type = pms.problem == pre_table_problem(_tpp).name() ?
-            id::boolean_type : table_output_tn;
-        pms.exemplars.push_back(type_to_exemplar(pbr_type));
+    if (id::unknown_type == out_type) {
+        type_tree table_output_tt = get_signature_output(table_type_signature);
+        out_type = get_type_node(table_output_tt);
     }
 
-    // XXX This seems strange to me .. when would the exemplar output
-    // type ever differ from the table?  Well,, it could for pre problem,
-    // but that's over-ridden later, anyway...
+    // Determine the default exemplar to start with
+    if (pms.exemplars.empty()) {
+        pms.exemplars.push_back(type_to_exemplar(out_type));
+    }
+
+    // The exemplar output type can differ from the table output type 
+    // for scorers that are trying to select rows (the pre and select scorers)
     output_type =
         get_type_node(get_output_type_tree(*pms.exemplars.begin()->begin()));
-    if (output_type == id::unknown_type)
-        output_type = table_output_tn;
+
+    if (id::unknown_type == output_type) output_type = out_type;
+
+    cand_type_signature = gen_signature(
+        get_signature_inputs(table_type_signature),
+        type_tree(output_type)); 
 
     logger().info() << "Inferred output type: " << output_type;
 }
@@ -321,25 +327,27 @@ void ann_table_problem::run(option_base* ob)
 // the args are variable length, tables is a variable, and scorer is a type,
 // and I don't feel like fighting templates to make all three happen just
 // exactly right.
-#define REGRESSION(OUT_TYPE, REDUCT, REDUCT_REP, TABLE, SCORER, ARGS) \
+#define REGRESSION(TABLE, SCORER, ARGS)                              \
 {                                                                    \
     /* Enable feature selection while selecting exemplar */          \
     if (pms.enable_feature_selection and pms.fs_params.target_size > 0) { \
         pms.deme_params.fstor =                                      \
                      new feature_selector(TABLE, pms.festor_params); \
     }                                                                \
-    /* Keep the table input signature, just make sure */             \
-    /* the output is the desired type. */                            \
-    type_tree cand_sig = gen_signature(                              \
-        get_signature_inputs(table_type_signature),                  \
-        type_tree(OUT_TYPE));                                        \
-    int as = alphabet_size(cand_sig, pms.ignore_ops);                \
+    int as = alphabet_size(cand_type_signature, pms.ignore_ops);     \
     SCORER bscore ARGS ;                                             \
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio); \
     boosting_ascore ascore(bscore.size());                           \
     behave_cscore mbcscore(bscore, ascore, pms.cache_size);          \
-    metapop_moses_results(pms.exemplars, cand_sig,                   \
-                      REDUCT, REDUCT_REP, mbcscore,                  \
+    reduct::rule* reduct_cand = pms.bool_reduct;                     \
+    reduct::rule* reduct_rep = pms.bool_reduct_rep;                  \
+    /* Use the contin reductors for everything else */               \
+    if (id::boolean_type != output_type) {                           \
+        reduct_cand = pms.contin_reduct;                             \
+        reduct_rep = pms.contin_reduct;                              \
+    }                                                                \
+    metapop_moses_results(pms.exemplars, cand_type_signature,        \
+                      *reduct_cand, *reduct_rep, mbcscore,           \
                       pms.opt_params, pms.hc_params,                 \
                       pms.deme_params, pms.filter_params, pms.meta_params,              \
                       pms.moses_params, pms.mmr_pa);                 \
@@ -351,14 +359,9 @@ void pre_table_problem::run(option_base* ob)
     // except that some new experimental features are being tried.
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
-    common_type_setup(pms);
+    common_type_setup(pms, id::boolean_type);
 
-    // Keep the table input signature, just make sure the
-    // output is a boolean.
-    type_tree cand_sig = gen_signature(
-        get_signature_inputs(table_type_signature),
-        type_tree(id::boolean_type));
-    int as = alphabet_size(cand_sig, pms.ignore_ops);
+    int as = alphabet_size(cand_type_signature, pms.ignore_ops);
     precision_bscore bscore(ctable,
                             fabs(pms.hardness),
                             pms.min_rand_input,
@@ -390,7 +393,7 @@ void pre_table_problem::run(option_base* ob)
         "Boosting not supported for the pre problem!");
     simple_ascore ascore;
     behave_cscore mbcscore(bscore, ascore, pms.cache_size);
-    metapop_moses_results(pms.exemplars, cand_sig,
+    metapop_moses_results(pms.exemplars, cand_type_signature,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
                           mbcscore,
                           pms.opt_params, pms.hc_params,
@@ -401,55 +404,28 @@ void pre_table_problem::run(option_base* ob)
 
 void pre_conj_table_problem::run(option_base* ob)
 {
-    // Very nearly identical to the REGRESSION macro above,
-    // except that some new experimental features are being tried.
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
-    common_type_setup(pms);
-
-    // Keep the table input signature, just make sure the
-    // output is a boolean.
-    type_tree cand_sig = gen_signature(
-        get_signature_inputs(table_type_signature),
-        type_tree(id::boolean_type));
-    int as = alphabet_size(cand_sig, pms.ignore_ops);
-    precision_conj_bscore bscore(ctable,
-                   fabs(pms.hardness),
-                   pms.hardness >= 0);
-    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
-
-    // Enable feature selection while selecting exemplar
-    if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
-        pms.deme_params.fstor = new feature_selector(ctable,
-                                                 pms.festor_params);
-    }
+    common_type_setup(pms, id::boolean_type);
 
     // In order to support boosting, the precision_conj_bscore
     // would need to be reworked to always return a predictable,
-    // dixed number of rows.
+    // indexed number of rows.
     OC_ASSERT(not pms.meta_params.do_boosting,
         "Boosting not supported for the pre problem!");
-    simple_ascore ascore;
-    behave_cscore mbcscore(bscore, ascore, pms.cache_size);
-    metapop_moses_results(pms.exemplars, cand_sig,
-                          *pms.bool_reduct, *pms.bool_reduct_rep,
-                          mbcscore,
-                          pms.opt_params, pms.hc_params,
-                          pms.deme_params, pms.filter_params, pms.meta_params,
-                          pms.moses_params, pms.mmr_pa);
+    REGRESSION(ctable, precision_conj_bscore, 
+               (ctable, fabs(pms.hardness), pms.hardness >= 0));
 }
 
 void prerec_table_problem::run(option_base* ob)
 {
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
-    common_type_setup(pms);
+    common_type_setup(pms, id::boolean_type);
 
     if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.5;
         pms.max_rand_input = 1.0; }
-    REGRESSION(id::boolean_type,
-               *pms.bool_reduct, *pms.bool_reduct_rep,
-               ctable, prerec_bscore,
+    REGRESSION(ctable, prerec_bscore,
                (ctable, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
 
@@ -457,13 +433,11 @@ void recall_table_problem::run(option_base* ob)
 {
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
-    common_type_setup(pms);
+    common_type_setup(pms, id::boolean_type);
 
     if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.8;
         pms.max_rand_input = 1.0; }
-    REGRESSION(id::boolean_type,
-               *pms.bool_reduct, *pms.bool_reduct_rep,
-               ctable, recall_bscore,
+    REGRESSION(ctable, recall_bscore,
                (ctable, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
 
@@ -471,13 +445,11 @@ void bep_table_problem::run(option_base* ob)
 {
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
-    common_type_setup(pms);
+    common_type_setup(pms, id::boolean_type);
 
     if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.0;
         pms.max_rand_input = 0.5; }
-    REGRESSION(id::boolean_type,
-               *pms.bool_reduct, *pms.bool_reduct_rep,
-               ctable, bep_bscore,
+    REGRESSION(ctable, bep_bscore,
                (ctable, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
 
@@ -485,29 +457,21 @@ void f_one_table_problem::run(option_base* ob)
 {
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
-    common_type_setup(pms);
+    common_type_setup(pms, id::boolean_type);
 
-    REGRESSION(id::boolean_type,
-               *pms.bool_reduct, *pms.bool_reduct_rep,
-               ctable, f_one_bscore,
-               (ctable));
+    REGRESSION(ctable, f_one_bscore, (ctable));
 }
 
+// problem == it  i.e. input-table based scoring.
 void it_table_problem::run(option_base* ob)
 {
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
     common_type_setup(pms);
 
-    // problem == it  i.e. input-table based scoring.
-    OC_ASSERT(output_type == table_output_tn);
-
     // --------- Boolean output type
     if (output_type == id::boolean_type) {
-        REGRESSION(output_type,
-                   *pms.bool_reduct, *pms.bool_reduct_rep,
-                   ctable, ctruth_table_bscore,
-                   (ctable));
+        REGRESSION(ctable, ctruth_table_bscore, (ctable));
     }
 
     // --------- Enumerated output type
@@ -535,10 +499,7 @@ void it_table_problem::run(option_base* ob)
         } else {
             // Much like the boolean-output-type above,
             // just uses a slightly different scorer.
-            REGRESSION(output_type,
-                       *pms.contin_reduct, *pms.contin_reduct,
-                       ctable, enum_effective_bscore,
-                       (ctable));
+            REGRESSION(ctable, enum_effective_bscore, (ctable));
         }
     }
 
@@ -550,15 +511,10 @@ void it_table_problem::run(option_base* ob)
                 pms.it_abs_err ? contin_bscore::abs_error :
                 contin_bscore::squared_error;
 
-            REGRESSION(output_type,
-                       *pms.contin_reduct, *pms.contin_reduct,
-                       table, contin_bscore,
-                       (table, eft));
+            REGRESSION(table, contin_bscore, (table, eft));
 
         } else {
-            REGRESSION(output_type,
-                       *pms.contin_reduct, *pms.contin_reduct,
-                       table, discretize_contin_bscore,
+            REGRESSION(table, discretize_contin_bscore,
                        (table.otable, table.itable,
                         pms.discretize_thresholds, pms.weighted_accuracy));
         }
@@ -566,24 +522,30 @@ void it_table_problem::run(option_base* ob)
 
     // --------- Unknown output type
     else {
-        logger().error() << "Error: output type " << type_tree(output_type)
-            << " currently not supported.";
+        logger().error() << "Error: output type \"" << type_tree(output_type)
+            << "\" currently not supported.";
         std::cerr << "Error: output type " << type_tree(output_type)
             << " currently not supported." << std::endl;
         exit(1);
     }
 }
 
+void select_table_problem::run(option_base* ob)
+{
+    problem_params& pms = *dynamic_cast<problem_params*>(ob);
+    common_setup(pms);
+    common_type_setup(pms, id::boolean_type);
+
+    REGRESSION(ctable, select_bscore, (ctable));
+}
+
 void cluster_table_problem::run(option_base* ob)
 {
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
-    common_type_setup(pms);
+    common_type_setup(pms, id::contin_type);
 
-    REGRESSION(output_type,
-               *pms.contin_reduct, *pms.contin_reduct,
-               table, cluster_bscore,
-               (table.itable));
+    REGRESSION(table, cluster_bscore, (table.itable));
 }
 
 // ==================================================================
@@ -605,6 +567,7 @@ void register_table_problems(problem_manager& pmr, option_manager& mgr)
 	pmr.register_problem(new bep_table_problem(*tpp));
 	pmr.register_problem(new f_one_table_problem(*tpp));
 	pmr.register_problem(new it_table_problem(*tpp));
+	pmr.register_problem(new select_table_problem(*tpp));
 	pmr.register_problem(new cluster_table_problem(*tpp));
 }
 

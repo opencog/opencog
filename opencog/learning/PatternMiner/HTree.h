@@ -36,26 +36,23 @@ namespace opencog
      namespace PatternMining
     {
 
-     // HTree is an efficient data strusture to store all the patterns , for quick index / query
-
      class HTreeNode
-     {
-     public:
-        HandleSeq pattern;
-        vector<HandleSeq> instances; // the corresponding instances of this pattern in the original AtomSpace
-        set<HTreeNode*> parentLinks;
-        set<HTreeNode*> childLinks;
+         {
+         public:
+            HandleSeq pattern;
+            vector<HandleSeq> instances; // the corresponding instances of this pattern in the original AtomSpace
+            set<HTreeNode*> parentLinks;
+            set<HTreeNode*> childLinks;
 
-        HandleSeq sharedVarNodeList; // all the shared nodes in these links in the original AtomSpace, each handle is a shared node
+            HandleSeq sharedVarNodeList; // all the shared nodes in these links in the original AtomSpace, each handle is a shared node
 
-        HTreeNode()
-        {
-            parentLinks.clear();
-            childLinks.clear();
-        }
+            HTreeNode()
+            {
+                parentLinks.clear();
+                childLinks.clear();
+            }
 
-     };
-
+         };
      class HTree
      {
 

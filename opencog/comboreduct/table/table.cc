@@ -77,6 +77,16 @@ ITable::ITable(const vector<type_node>& ts, const vector<string>& il)
 ITable::ITable(const ITable::super& mat, const vector<string>& il)
     : super(mat), labels(il) {}
 
+/// Construct an ITable holding a single column, the column from the OTable.
+ITable::ITable(const OTable& ot)
+{
+    insert_col(ot.get_label(), ot);
+
+    type_seq typs;
+    typs.push_back(ot.get_type());
+    set_types(typs);
+}
+
 ITable::ITable(const type_tree& tt, int nsamples,
                contin_t min_contin, contin_t max_contin)
 {
@@ -394,8 +404,23 @@ contin_t OTable::abs_distance(const OTable& ot) const
 {
     OC_ASSERT(ot.size() == size());
     contin_t res = 0;
-    for(const_iterator x = begin(), y = ot.begin(); x != end();)
-        res += fabs(get_contin(*(x++)) - get_contin(*(y++)));
+    if (id::contin_type == type and id::contin_type == ot.type) {
+        for (const_iterator x = begin(), y = ot.begin(); x != end();) 
+            res += fabs(get_contin(*(x++)) - get_contin(*(y++)));
+    }
+    else
+    if (id::boolean_type == type and id::boolean_type == ot.type) {
+        for (const_iterator x = begin(), y = ot.begin(); x != end();) 
+            res += (contin_t) (get_builtin(*(x++)) != get_builtin(*(y++)));
+    }
+    else
+    if (id::enum_type == type and id::enum_type == ot.type) {
+        for (const_iterator x = begin(), y = ot.begin(); x != end();) 
+            res += (contin_t) (get_enum_type(*(x++)) != get_enum_type(*(y++)));
+    }
+    else
+        throw InconsistenceException(TRACE_INFO,
+            "Can't compare, mismatched column types.");
     return res;
 }
 
@@ -404,7 +429,7 @@ contin_t OTable::sum_squared_error(const OTable& ot) const
 {
     OC_ASSERT(ot.size() == size());
     contin_t res = 0;
-    for(const_iterator x = begin(), y = ot.begin(); x != end();)
+    for (const_iterator x = begin(), y = ot.begin(); x != end();)
         res += sq(get_contin(*(x++)) - get_contin(*(y++)));
     return res;
 }
@@ -514,7 +539,7 @@ CTable Table::compressed(const std::string weight_col) const
                 res[*in_it][TimedValue(*out_it, *time_it)] += weight;
             }
         }
-        logger().debug("Size of the compressed dataset is %f", res.size());
+        logger().debug("Size of the compressed dataset is %d", res.size());
         return res;
     }
 }

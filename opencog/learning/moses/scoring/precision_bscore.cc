@@ -23,9 +23,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "precision_bscore.h"
+#include <boost/range/irange.hpp>
 
 #include <opencog/comboreduct/table/table_io.h>
+
+#include "precision_bscore.h"
 
 namespace opencog { namespace moses {
 
@@ -86,10 +88,10 @@ precision_bscore::precision_bscore(const CTable& ctable_,
     // Verify that the activation parameters are sane
     OC_ASSERT((0.0 < activation_pressure) && (0.0 < min_activation)
               && (min_activation <= max_activation),
-        "Precision scorer, invalid activation bounds.  "
-        "The activation pressure must be non-zero, the minimum activation must be "
-        "greater than zero, and the maximum activation must be greater "
-        "than or equal to the minimum activation.\n");
+              "Precision scorer, invalid activation bounds.  "
+              "The activation pressure must be non-zero, the minimum activation must be "
+              "greater than zero, and the maximum activation must be greater "
+              "than or equal to the minimum activation.\n");
 }
 
 void precision_bscore::set_complexity_coef(unsigned alphabet_size, float p)

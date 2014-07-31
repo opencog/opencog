@@ -11,6 +11,7 @@ __author__ = 'Cosmo Harrigan'
 
 
 class SocratesAgent(MindAgent):
+
     def __init__(self):
         self.chainer = None
 

@@ -8,6 +8,7 @@ INSTALL(FILES
 	scoring_base.h
     time_dispersion.h
     ss_bscore.h
+	select_bscore.h
 
 	DESTINATION
 

@@ -38,22 +38,6 @@ using namespace boost::assign;
 using namespace opencog;
 using namespace combo;
 
-static const pair<string, string> rand_seed_opt("random-seed", "r");
-static const pair<string, string> input_table_opt("input-table", "i");
-static const pair<string, string> target_feature_opt("target-feature", "u");
-static const pair<string, string> ignore_feature_str_opt("ignore-feature", "Y");
-static const pair<string, string> force_feature_opt("force-feature", "e");
-static const pair<string, string> combo_str_opt("combo-program", "c");
-static const pair<string, string> combo_prog_file_opt("combo-programs-file", "C");
-static const pair<string, string> labels_opt("labels", "L");
-static const pair<string, string> output_file_opt("output-file", "o");
-static const pair<string, string> display_inputs_opt("display-inputs", "I");
-static const pair<string, string> log_level_opt("log-level", "l");
-static const pair<string, string> log_file_opt("log-file", "f");
-static const string default_log_file_prefix = "eval-table";
-static const string default_log_file_suffix = "log";
-static const string default_log_file = default_log_file_prefix + "." + default_log_file_suffix;
-
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
 }
@@ -81,6 +65,8 @@ struct evalTableParameters
     string log_level;
     string log_file;
 };
+
+evalTableParameters eval_table_program_args(int argc, char** argv);
 
 template<typename Out>
 Out& output_results(Out& out, const evalTableParameters& pa,

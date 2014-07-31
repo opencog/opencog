@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2010 OpenCog Foundation
  * Copyright (C) 2012 Poulin Holdings LLC
+ * Copyright (C) 2014 Aidyia Limited
  *
  * Author: Nil Geisweiller <ngeiswei@gmail.com>
  * Additions and tweaks, Linas Vepstas <linasvepstas@gmail.com>
@@ -295,15 +296,35 @@ struct get_type_tree_at_visitor : public boost::static_visitor<type_tree>
 
 /**
  * Interpreter visitor.
- * Chooses the interpreter type, based on the types of the input columns.
- * Note that the choice of the correct interpreter also depends on the
- * output type, which is currently not handled here. XXX FIXME.
+ * Chooses the interpreter type, based on the type of vertexes appearing
+ * in the combo tree.
  */
 struct interpreter_visitor : public boost::static_visitor<vertex>
 {
-    interpreter_visitor(const combo_tree& tr) : _it(tr.begin()) {}
-    interpreter_visitor(const combo_tree::iterator& it) : _it(it) {}
+    interpreter_visitor(const combo_tree& tr) : _it(tr.begin())
+    {
+        // If any of the vertexes in the tree are contin-type,
+        // then the mixed interpreter will have to be used.
+        mixed = false;
+        combo_tree::iterator mit = tr.begin();
+        combo_tree::iterator mend = tr.end();
+        for (; mit != mend; mit++ ) {
+            mixed = is_contin_expr(*mit);
+            if (mixed) break;
+            mixed = (id::greater_than_zero == *mit);
+            if (mixed) break;
+        }
+    }
+
+    interpreter_visitor(const combo_tree::iterator& it) : _it(it)
+    {
+        // Cannot check the entire tree with this ctor.
+        mixed = is_contin_expr(*_it);
+        if (not mixed) mixed = (id::greater_than_zero == *_it);
+    }
+
     vertex operator()(const std::vector<builtin>& inputs) {
+        if (mixed) return mixed_interpreter(inputs)(_it);
         return boolean_interpreter(inputs)(_it);
     }
     vertex operator()(const std::vector<contin_t>& inputs) {
@@ -324,6 +345,7 @@ struct interpreter_visitor : public boost::static_visitor<vertex>
         return vertex();
     }
     combo_tree::iterator _it;
+    bool mixed;
 };
 
 /**
@@ -705,6 +727,7 @@ protected:
  *
  * Each entry in the vector is a row.
  */
+class OTable;
 class ITable : public std::vector<multi_type_seq>
 {
 public:
@@ -715,6 +738,7 @@ public:
     ITable();
     ITable(const type_seq& ts, const string_seq& il = string_seq());
     ITable(const super& mat, const string_seq& il = string_seq());
+    ITable(const OTable&);
     /**
      * generate an input table according to the signature tt.
      *

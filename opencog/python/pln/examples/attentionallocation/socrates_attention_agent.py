@@ -44,21 +44,29 @@ class SocratesAgent(MindAgent):
             result = self.chainer.forward_step()
             return result
 
-@staticmethod
-def check_result(self, atomspace):
 
+def check_result(atomspace):
+    """
+    Searches for an instance of
+    EvaluationLink
+        PredicateNode "breathe"
+        ListLink
+            ConceptNode "Socrates"
+            ConceptNode "air"
+    """
     result_found = False
     eval_links = atomspace.get_atoms_by_type(types.EvaluationLink)
 
     for eval_link in eval_links:
         out = atomspace.get_outgoing(eval_link.h)
-        if out[0].is_a(types.PredicateNode) and out[0].name == "breathe"\
+        if out[0].is_a(types.PredicateNode) and "breathe" in out[0].name\
             and out[1].is_a(types.ListLink)\
-            and "Socrates" in out[1][0]\
-            and "air" in out[1][1]:
+            and "Socrates" in out[1].out[0].name\
+                and "air" in out[1].out[1].name:
             result_found = True
             break
 
-    print "Result found {0}".format(result_found)
-    return result_found
+    if result_found:
+        print("Result found? {0}.".format(result_found))
 
+    return result_found

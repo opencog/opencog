@@ -54,6 +54,8 @@ public:
 private:
     PatternMiner* patternMiner;
 
+    void selectSubSetFromCorpus();
+
 }; // class
 
 class TestPatternMinerModule : public Module
