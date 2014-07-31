@@ -104,6 +104,7 @@ struct subsample_deme_filter_parameters
         contiguous_time(true),
         n_subsample_demes(_n_subsample_demes),
         n_top_candidates(_n_top_candidates) {}
+        n_tuples(UINT_MAX) {}
 
     // Subsample by time
     bool by_time;
@@ -123,9 +124,23 @@ struct subsample_deme_filter_parameters
     // scores across the top candidates
     unsigned n_tuples;
 
-    // Filter variance threshold. A deme is only selected with the
-    // score variance goes below var_threshold
-    float var_threshold;
+    // Filter standard deviation threshold. A deme is only selected if
+    // the average score standard deviation goes below std_dev_threshold
+    float std_dev_threshold;
+
+    // Filter mean, geometric mean and max tanimoto distance thresholds.
+    float tanimoto_mean_threshold,
+        tanimoto_geo_mean_threshold,
+        tanimoto_max_threshold;
+
+    // Instead of filtering accoring to threshold select the breadth first demes
+    unsigned n_best_bfdemes;
+
+    // Tanimoto mean, geometric mean and max weights used to calculate
+    // the aggregate agreement distance for n_best_bfdemes
+    float tanimoto_mean_weight,
+        tanimoto_geo_mean_weight,
+        tanimoto_max_weight;
 
     unsigned n_subsample_fitnesses;
     float low_dev_pressure;    
@@ -212,9 +227,6 @@ struct metapop_parameters
 
     // parameters to control diversity
     diversity_parameters diversity;
-
-    // parameter to control subsample deme filtering
-    subsample_deme_filter_parameters subsample_deme_filter;
 
     bool (*merge_callback)(scored_combo_tree_set&, void*);
     void *callback_user_data;
