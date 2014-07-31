@@ -28,6 +28,8 @@
 #include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/max.hpp>
 
+#include <boost/range/algorithm/sort.hpp>
+
 #include <boost/range/irange.hpp>
 
 #include <opencog/util/lazy_random_selector.h>

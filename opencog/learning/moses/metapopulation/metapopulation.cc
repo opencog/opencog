@@ -35,9 +35,11 @@ using namespace combo;
 
 metapopulation::metapopulation(const std::vector<combo_tree>& bases,
                behave_cscore& sc,
-               const metapop_parameters& pa) :
+               const metapop_parameters& pa,
+               const subsample_deme_filter_parameters& subp) :
     _cached_dst(pa.diversity),
     _params(pa),
+    _filter_params(subp),
     _cscorer(sc),
     _merge_count(0),
     _best_cscore(worst_composite_score),
@@ -49,9 +51,11 @@ metapopulation::metapopulation(const std::vector<combo_tree>& bases,
 
 metapopulation::metapopulation(const combo_tree& base,
                behave_cscore& sc,
-               const metapop_parameters& pa) :
+               const metapop_parameters& pa,
+               const subsample_deme_filter_parameters& subp) :
     _cached_dst(pa.diversity),
     _params(pa),
+    _filter_params(subp),
     _cscorer(sc),
     _merge_count(0),
     _best_cscore(worst_composite_score),
@@ -232,7 +236,7 @@ const scored_combo_tree_set& metapopulation::best_candidates() const
 /** 
  * Return the best combo tree (shortest best candidate).
  */
-combo_tree metapopulation::best_tree() const
+const combo_tree& metapopulation::best_tree() const
 {
     if (_params.do_boosting) {
         return _ensemble.get_weighted_tree();

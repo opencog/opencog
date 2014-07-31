@@ -126,20 +126,22 @@ public:
      */
     metapopulation(const std::vector<combo_tree>& bases,
                    behave_cscore& sc,
-                   const metapop_parameters& pa = metapop_parameters());
+                   const metapop_parameters& pa = metapop_parameters(),
+                   const subsample_deme_filter_parameters& subp = subsample_deme_filter_parameters());
 
     // Like above but using a single base, and a single reduction rule.
     /// @todo use C++11 redirection
     metapopulation(const combo_tree& base,
                    behave_cscore& sc,
-                   const metapop_parameters& pa = metapop_parameters());
+                   const metapop_parameters& pa = metapop_parameters(),
+                   const subsample_deme_filter_parameters& subp = subsample_deme_filter_parameters());
 
     ~metapopulation() {}
 
     const scored_combo_tree_set& best_candidates() const;
     const ensemble& get_ensemble() const { return _ensemble; }
     composite_score best_composite_score() const;
-    combo_tree best_tree() const;
+    const combo_tree& best_tree() const;
 
     /**
      * Return the best model score (either the score of the
@@ -441,7 +443,19 @@ private:
     static boost::logic::tribool dominates(const behavioral_score& x,
                                            const behavioral_score& y);
 
-        // ------------------ Subsampling-related -----------------------
+private:
+    // Sort all demes by decreasing penalized score
+    void sort_demes(std::vector<std::vector<deme_t>>& ss_demes);
+
+    // Remove duplicate candidates across all demes. It assumes that
+    // the demes are sorted, that way it only needs to compare
+    // candidates with identical scores (which saves a lot of
+    // computation)
+    void keep_top_unique_candidates(
+        std::vector<std::vector<deme_t>>& all_demes,
+        const boost::ptr_vector<representation>& reps);
+
+    // ------------------ Subsampling-related -----------------------
 
     // Subsample filter. Return true if it passes the subsample
     // filter. I.e. if the variance of the score across demes pass the
@@ -511,6 +525,8 @@ private:
 protected:
     // --------------------- Internal state -----------------------
     const metapop_parameters& _params;
+
+    const subsample_deme_filter_parameters& _filter_params;
 
     behave_cscore& _cscorer;
 

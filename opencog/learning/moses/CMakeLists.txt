@@ -43,6 +43,7 @@ ADD_LIBRARY (moses SHARED STATIC
 	metapopulation/merging
 	metapopulation/metapopulation
 	metapopulation/metapop_params
+    metapopulation/subsample
 
 	moses/complexity
 	moses/distributed_moses
