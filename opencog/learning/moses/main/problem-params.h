@@ -173,6 +173,25 @@ struct problem_params : public option_base
     // it params
     bool it_abs_err;
 
+    // Subsample deme params
+    unsigned ss_n_subsample_demes,
+        ss_n_top_candidates,
+        ss_n_tuples,
+        ss_n_best_bfdemes;
+    float ss_std_dev_threshold,
+        ss_tanimoto_mean_threshold,
+        ss_tanimoto_geo_mean_threshold,
+        ss_tanimoto_max_threshold,
+        ss_tanimoto_mean_weight,
+        ss_tanimoto_geo_mean_weight,
+        ss_tanimoto_max_weight;
+    bool ss_by_time,
+        ss_contiguous_time;
+
+    // Subsample fitness params
+    unsigned ss_n_subsample_fitnesses;
+    float ss_low_dev_pressure;
+    
     /// Enable feature selection while selecting exemplar
     /// feature selection happens before each representation building
     bool enable_feature_selection;

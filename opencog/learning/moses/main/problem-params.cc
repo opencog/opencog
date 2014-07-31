@@ -978,6 +978,85 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "Stochastic max dependency parameter. Number of feature subset "
          "candidates to consider building the next superset.\n")
 
+        // ======= Subsample-deme params =======
+        ("ss-n-subsample-demes",
+         po::value<unsigned>(&ss_n_subsample_demes)->default_value(0),
+         "Number of demes to use for subsampling filter.\n")
+
+        ("ss-n-top-candidates",
+         po::value<unsigned>(&ss_n_top_candidates)->default_value(1),
+         "Number of top candidates to consider to calculate the score standard "
+         "deviation.\n")
+
+        ("ss-n-tuples",
+         po::value<unsigned>(&ss_n_tuples)->default_value(UINT_MAX),
+         "Number of tuples used to calculate the estimate of the standard "
+         "deviation of the top candidates. If the number of top candidates "
+         "(set by --ss-n-top-candidates) is too high you might want to set "
+         "that value lower than default to avoid a computational "
+         "bottleneck.\n")
+
+        ("ss-std-dev-threshold",
+         po::value<float>(&ss_std_dev_threshold)->default_value(std::numeric_limits<float>::max()),
+         "An average deme score standard deviation needs to fall under that value to"
+         "be included in the metapopulation.\n")
+
+        ("ss-tanimoto-mean-threshold",
+         po::value<float>(&ss_tanimoto_mean_threshold)->default_value(1.0),
+         "Demes are merged to the metapopulation only if the average tanimoto "
+         "distances between the top candidates of "
+         "the subsampled demes fall below that value.\n")
+
+        ("ss-tanimoto-geometric-mean-threshold",
+         po::value<float>(&ss_tanimoto_geo_mean_threshold)->default_value(1.0),
+         "Demes are merged to the metapopulation only if the geometric average tanimoto "
+         "distances between the top candidates of "
+         "the subsampled demes fall below that value.\n")
+
+        ("ss-tanimoto-max-threshold",
+         po::value<float>(&ss_tanimoto_max_threshold)->default_value(1.0),
+         "Demes are merged to the metapopulation only if the max tanimoto "
+         "distances between the top candidates of "
+         "the subsampled demes fall below that value.\n")
+
+        ("ss-n-best-bfdemes",
+         po::value<unsigned>(&ss_n_best_bfdemes)->default_value(0),
+         "Alternate way to subsampling filter. "
+         "Instead the n best breadth first demes are selected.\n")
+
+        ("ss-tanimoto-mean-weight",
+         po::value<float>(&ss_tanimoto_mean_weight)->default_value(0.0),
+         "Weight to determine the aggregated tanimoto distance for "
+         "--ss-n-best-bfdemes.\n")
+
+        ("ss-tanimoto-geometric-mean-weight",
+         po::value<float>(&ss_tanimoto_geo_mean_weight)->default_value(0.0),
+         "Weight to determine the aggregated tanimoto distance for "
+         "--ss-n-best-bfdemes.\n")
+
+        ("ss-tanimoto-max-weight",
+         po::value<float>(&ss_tanimoto_max_weight)->default_value(0.0),
+         "Weight to determine the aggregated tanimoto distance for "
+         "--ss-n-best-bfdemes.\n")
+
+        ("ss-n-subsample-fitnesses",
+         po::value<unsigned>(&ss_n_subsample_fitnesses)->default_value(0),
+         "Number of subsampled fitnesses to use for low score deviation pressure. "
+         "Ignored is 0 r 1.\n")
+
+        ("ss-low-dev-pressure",
+         po::value<float>(&ss_low_dev_pressure)->default_value(1.0),
+         "How much low score deviation pressure there is.\n")
+
+        ("ss-by-time",
+         po::value<bool>(&ss_by_time)->default_value(0),
+         "Subsample by time.\n")
+
+        ("ss-contiguous-time",
+         po::value<bool>(&ss_contiguous_time)->default_value(1),
+         "If subsample by time is enable then subsample contiguous "
+         "(chronologically ordered) time segments.\n")
+
         // ========== THE END of the options; note semicolon ===========
         ;
 
@@ -1190,6 +1269,15 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
     deme_params.ignore_ops = ignore_ops;
     deme_params.linear_contin = linear_regression;
     deme_params.perm_ratio = perm_ratio;
+    if (ss_n_subsample_demes > 1 or ss_n_subsample_fitnesses > 1) {
+        // If SS-MOSES is enabled then the cache is automatically
+        // disabled because SS-MOSES implies to re-evaluate the same
+        // candidates over slightly different fitness functions
+        logger().debug() << "Disable cache because subsampling is enabled";
+        cache_size = 0;
+    } else {
+        cache_size = cache_size;
+    }
 
     // Set metapopulation parameters
     meta_params.max_candidates = max_candidates;
@@ -1245,6 +1333,24 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
         ss << "Granularity " << time_bscore_granularity_str << " not implemented";
         log_output_error_exit(ss.str());
     }
+
+    // Subsampling deme and fitness parameters
+    auto& ss_params = filter_params;
+    ss_params.n_subsample_demes = ss_n_subsample_demes;
+    ss_params.n_top_candidates = ss_n_top_candidates;
+    ss_params.n_tuples = ss_n_tuples;
+    ss_params.std_dev_threshold = ss_std_dev_threshold;
+    ss_params.tanimoto_mean_threshold = ss_tanimoto_mean_threshold;
+    ss_params.tanimoto_geo_mean_threshold = ss_tanimoto_geo_mean_threshold;
+    ss_params.tanimoto_max_threshold = ss_tanimoto_max_threshold;
+    ss_params.n_best_bfdemes = ss_n_best_bfdemes;
+    ss_params.tanimoto_mean_weight = ss_tanimoto_mean_weight;
+    ss_params.tanimoto_geo_mean_weight = ss_tanimoto_geo_mean_weight;
+    ss_params.tanimoto_max_weight = ss_tanimoto_max_weight;
+    ss_params.n_subsample_fitnesses = ss_n_subsample_fitnesses;
+    ss_params.low_dev_pressure = ss_low_dev_pressure;
+    ss_params.by_time = ss_by_time;
+    ss_params.contiguous_time = ss_contiguous_time;
 
     // Set optim_parameters.
     opt_params = optim_parameters(opt_algo, pop_size_ratio, max_score, max_dist);
