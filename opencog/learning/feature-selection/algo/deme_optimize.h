@@ -52,10 +52,7 @@ feature_set_pop optimize_deme_select_feature_sets(const field_set& fields,
                                                   const feature_selection_parameters& fs_params)
 {
     // optimize feature set
-    unsigned ae; // actual number of evaluations to reached the best candidate
-    unsigned evals = optimize(deme, init_inst, scorer,
-                              fs_params.hc_max_evals, fs_params.max_time,
-                              &ae);
+    optimize(deme, init_inst, scorer, fs_params.hc_max_evals, fs_params.max_time);
 
     // convert the deme into feature_set_pop (ignoring redundant sets)
     feature_set_pop fs_pop;
@@ -71,7 +68,7 @@ feature_set_pop optimize_deme_select_feature_sets(const field_set& fields,
         // log its score
         std::stringstream ss;
         ss << "Selected feature set has composite score: ";
-        if (evals > 0)
+        if (deme.n_evals > 0)
             ss << fs_pop.begin()->first;
         else
             ss << "Unknown";
@@ -79,8 +76,9 @@ feature_set_pop optimize_deme_select_feature_sets(const field_set& fields,
     }
     {
         // Log the actual number of evaluations
-        logger().info("Total number of evaluations performed: %u", evals);
-        logger().info("Actual number of evaluations to reach the best feature set: %u", ae);
+        logger().info("Total number of evaluations performed: %u", deme.n_evals);
+        logger().info("Actual number of evaluations to reach the best feature set: %u",
+                      deme.n_best_evals);
     }
     // ~Logger
     return fs_pop;

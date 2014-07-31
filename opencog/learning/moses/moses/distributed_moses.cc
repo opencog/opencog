@@ -103,7 +103,7 @@ string build_cmdline(const boost::program_options::variables_map& vm,
             and it->first != exemplars_str_opt.first
             and it->first != output_score_opt.first
             and it->first != output_bscore_opt.first
-            and it->first != output_penalty_opt.first
+            and it->first != output_cscore_opt.first
             and it->first != output_eval_number_opt.first
             and it->first != output_with_labels_opt.first
             and it->first != output_file_opt.first
@@ -134,7 +134,7 @@ string build_cmdline(const boost::program_options::variables_map& vm,
     res += string(" -") + exemplars_str_opt.second + " \"" + trs + "\"";
     // add output options
     res += string(" -") + output_bscore_opt.second + " 1";
-    res += string(" -") + output_penalty_opt.second + " 1";
+    res += string(" -") + output_cscore_opt.second + " 1";
     res += string(" -") + output_eval_number_opt.second + " 1";
     // add number of jobs option
     res += string(" -") + jobs_opt.second + boost::lexical_cast<string>(n_jobs);

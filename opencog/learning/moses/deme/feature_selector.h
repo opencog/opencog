@@ -44,7 +44,8 @@ struct feature_selector_parameters
         restrict_true(false),
         init_xmplr_features(false),
         xmplr_as_feature(false),
-        subsampling_pbty(0.0),
+        subsampling_ratio(1.0),
+        subsampling_by_time(false),
         n_demes(1),
         diversity_pressure(0.0),
         diversity_cap(0),
@@ -100,9 +101,18 @@ struct feature_selector_parameters
     bool xmplr_as_feature;
 
     /**
-     * Probability of discarding a row
+     * Ratio size of the subsampled data set (this is used to
+     * introduce some randomness in feature selection).
      */
-    double subsampling_pbty;
+    double subsampling_ratio;
+
+    /**
+     * If set to true then the subsampling_ratio concerns
+     * timestamps. That is a subset of timestamps is selected (of size
+     * subsampling_ratio * #timestamps) and all rows timestamped at
+     * those timestamps are kept.
+     */
+    bool subsampling_by_time;
 
     /**
      * Number of feature sets to select out of feature selection and
@@ -121,6 +131,11 @@ struct feature_selector_parameters
      * Where the feature sets fs_i are ordered by their penalized
      * scores. aggregate can be either generalized mean or sum, or
      * max.
+     *
+     * Alternatively if jaccard is enabled, then the calculation of
+     * the penalized score of a feature set fs_i is:
+     *
+     * q(fs_i) - diversity_pressure * aggregate_{j=0}^{i-1}(J(fs_i, fs_j))
      */
     double diversity_pressure;
 
@@ -136,6 +151,19 @@ struct feature_selector_parameters
      * negative value means all interactions.
      */
     int diversity_interaction;
+    
+     /**
+     * If enabled then expensive multiple mi over feature set
+     * activations is replaced by one cheap calculation of the Jaccard
+     * index over feature sets.
+     */
+    bool diversity_jaccard;
+
+    /**
+     * Map between feature name and probability of being inserted in
+     * the deme, regardless of whether it has been selected or not.
+     */
+    std::map<std::string,float> enforce_features;
 };
 
 // used for diversity ranking
@@ -158,6 +186,11 @@ struct feature_selector
     /// Return feature set population that is good when combined with
     /// the exemplar tr.
     feature_set_pop operator()(const combo::combo_tree& xmplr);
+
+    // Return a set of features randomly choosen given
+    // enforce_features, a map from feature to probability of being
+    // enforced
+    feature_set sample_enforced_features() const;
 
     // Parameters
     feature_selector_parameters params;

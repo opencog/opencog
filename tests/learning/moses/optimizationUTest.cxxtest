@@ -62,7 +62,7 @@ public:
         // target instance
         instance target_inst(fs.packed_width());
         randomize(fs, target_inst);
-        std::cout << "target_inst =" << fs.stream(target_inst) << std::endl;
+        std::cout << "target_inst =" << fs.to_string(target_inst) << std::endl;
         // scorer
         distance_based_scorer scorer(fs, target_inst);
         // Local search optimization
@@ -73,7 +73,8 @@ public:
         instance_set<composite_score> deme(fs);
         // perform the search
         time_t max_time = INT_MAX;
-        unsigned int actual_evals = hc(deme, init_inst, scorer, eval_n, max_time);
+        hc(deme, init_inst, scorer, eval_n, max_time);
+        unsigned int actual_evals = deme.n_evals;
         std::cout << "actual_evals = " << actual_evals << std::endl;
         std::sort(deme.begin(), deme.end(),
                   std::greater<scored_instance<composite_score> >());

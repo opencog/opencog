@@ -55,7 +55,7 @@ struct distance_based_scorer : public iscorer_base
         // Logger
         if (logger().isFineEnabled()) {
             logger().fine() << "distance_based_scorer - Evaluate instance: "
-                            << fs.stream(inst) << "\n"
+                            << fs.to_string(inst) << "\n"
                             << "Score = " << sc << std::endl;
         }
         // ~Logger
@@ -77,7 +77,7 @@ struct complexity_based_scorer : public iscorer_base
     {
         if (logger().isFineEnabled()) {
             logger().fine() << "complexity_based_scorer - Evaluate instance: "
-                            << _rep.fields().stream(inst);
+                            << _rep.fields().to_string(inst);
         }
 
         try {
@@ -89,7 +89,7 @@ struct complexity_based_scorer : public iscorer_base
             combo_tree raw_tr = _rep.get_candidate(inst, false);
             combo_tree red_tr = _rep.get_candidate(inst, true);
             logger().warn() << "The following instance could not be evaluated: "
-                            << _rep.fields().stream(inst)
+                            << _rep.fields().to_string(inst)
                             << "\nUnreduced tree: " << raw_tr
                             << "\nreduced tree: "<< red_tr;
         }

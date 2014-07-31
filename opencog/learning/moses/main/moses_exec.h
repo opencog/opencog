@@ -36,6 +36,8 @@ int moses_exec(int argc, char** argv);
 /// the name of the supposed executable
 int moses_exec(const std::vector<std::string>& argv);
 
+/// Like above but takes the arguments as single string
+int moses_exec(const std::string& argvs);
 
 } // ~namespace moses
 } // ~namespace opencog

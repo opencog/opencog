@@ -310,13 +310,13 @@ void mpi_moses_worker(metapopulation& mp,
 
         // XXX TODO should probably fetch max_time from somewhere...
         time_t max_time = INT_MAX;
-        std::vector<unsigned> actl_evals = dex.optimize_demes(max_evals, max_time);
+        dex.optimize_demes(max_evals, max_time);
 
         mp.merge_demes(dex._demes, dex._reps);
         dex.free_demes();
 
         // logger().info() << "Sending " << mp.size() << " results";
-        unsigned total_evals = boost::accumulate(actl_evals, 0U);
+        unsigned total_evals = dex.total_evals();
         mompi.send_deme(mp, total_evals);
 
         // Print timing stats and counts for this work unit.

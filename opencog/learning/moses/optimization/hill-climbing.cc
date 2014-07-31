@@ -44,12 +44,11 @@ namespace opencog { namespace moses {
 // Hill Climbing //
 ///////////////////
 
-unsigned hill_climbing::operator()(deme_t& deme,
-                                   const instance& init_inst,
-                                   const iscorer_base& iscorer,
-                                   unsigned max_evals,
-                                   time_t max_time,
-                                   unsigned* eval_best)
+void hill_climbing::operator()(deme_t& deme,
+                               const instance& init_inst,
+                               const iscorer_base& iscorer,
+                               unsigned max_evals,
+                               time_t max_time)
 {
     logger().debug("Local Search Optimization");
 
@@ -61,10 +60,6 @@ unsigned hill_climbing::operator()(deme_t& deme,
     over_budget = false;
     struct timeval start;
     gettimeofday(&start, NULL);
-
-    // Initial eval_best in case nothing is found.
-    if (eval_best)
-        *eval_best = 0;
 
     const field_set& fields = deme.fields();
 
@@ -343,14 +338,13 @@ unsigned hill_climbing::operator()(deme_t& deme,
 
         if (has_improved) {
             distance = 1;
-            if (eval_best)
-                *eval_best = current_number_of_instances;
+            deme.n_best_evals = current_number_of_instances;
 
             if (logger().isDebugEnabled()) {
                 logger().debug() << "Best score: " << best_cscore;
                 if (logger().isFineEnabled()) {
                     logger().fine() << "Best instance: "
-                                    << fields.stream(center_inst);
+                                    << fields.to_string(center_inst);
                 }
             }
         }
@@ -471,7 +465,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
         }
     }
 
-    return current_number_of_evals;
+    deme.n_evals = current_number_of_evals;
 }
 
 size_t hill_climbing::estimate_neighborhood(size_t distance,

@@ -75,7 +75,7 @@ discriminator::discriminator(const CTable& ct)
         {
             score_t res = 0.0;
             for (const CTable::counter_t::value_type& cv : c)
-                res += std::max(0.0, get_contin(cv.first) * cv.second);
+                res += std::max(0.0, get_contin(cv.first.value) * cv.second);
             return res;
         };
         // For contin tables, we return the sum of the row values < 0
@@ -83,7 +83,7 @@ discriminator::discriminator(const CTable& ct)
         {
             score_t res = 0.0;
             for (const CTable::counter_t::value_type& cv : c)
-                res += std::min(0.0, get_contin(cv.first) * cv.second);
+                res += std::min(0.0, get_contin(cv.first.value) * cv.second);
             return res;
         };
     } else {
@@ -221,7 +221,7 @@ discriminating_bscore::discriminating_bscore(const CTable& ct,
         for (const auto& cr : _ctable) {
             const CTable::counter_t& c = cr.second;
             for (const auto& cv : c) {
-                score_t val = get_contin(cv.first);
+                score_t val = get_contin(cv.first.value);
                 _max_output = std::max(_max_output, val);
                 _min_output = std::min(_min_output, val);
             }

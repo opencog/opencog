@@ -59,13 +59,16 @@ struct instance_set : public std::vector<scored_instance<ScoreT> >
 
     // Create a deme initialized with n null instances.
     instance_set(unsigned int n, const field_set& fs)
-        : super(n, instance(fs.packed_width())), _fields(fs) { }
+        : super(n, instance(fs.packed_width())), _fields(fs),
+          n_evals(0), n_best_evals(0) {}
     // Create a deme initialized with n instances of inst.
     instance_set(unsigned int n, const instance& inst, const field_set& fs)
-        : super(n, inst), _fields(fs) { }
+        : super(n, inst), _fields(fs),
+          n_evals(0), n_best_evals(0) {}
     // Create an empty deme.
     instance_set(const field_set& fs, const demeID_t& id = demeID_t())
-        : _fields(fs), _id(id) { }
+        : _fields(fs), _id(id),
+          n_evals(0), n_best_evals(0) {}
 
     // Insert or erase instances so that the size becomes n.
     // In case of insertions, it will insert null instances.
@@ -100,7 +103,17 @@ struct instance_set : public std::vector<scored_instance<ScoreT> >
     demeID_t getID() const { return _id; }
 protected:
     const field_set& _fields;
+
+    // ID of the deme
     demeID_t _id;
+
+public:
+    // Number of evaluations performed on that deme
+    unsigned n_evals;
+
+    // Number of evaluations performed on that deme to reach the best
+    // candidate (of that deme)
+    unsigned n_best_evals;
 };
 
 } // ~namespace moses

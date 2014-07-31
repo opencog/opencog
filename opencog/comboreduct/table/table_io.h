@@ -129,6 +129,7 @@ std::istream& istreamITable(std::istream& in, ITable& tab,
 
 std::istream& istreamTable(std::istream& in, Table& tab,
                            const std::string& target_feature,
+                           const std::string& timestamp_feature,
                            const std::vector<std::string>& ignore_features);
 
 // WARNING: this implementation only supports boolean ctable!!!!
@@ -156,11 +157,13 @@ ITable loadITable_optimized(const std::string& file_name,
  */
 Table loadTable(const std::string& file_name,
                 const std::string& target_feature = std::string(),
+                const std::string& timestamp_feature = std::string(),
                 const std::vector<std::string>& ignore_features
                 = empty_string_vec);
 
 std::istream& istreamDenseTable(std::istream& in, Table& tab,
                                 const std::string& target_feature,
+                                const std::string& timestamp_feature,
                                 const std::vector<std::string>& ignore_features,
                                 const type_tree& tt, bool has_header);
 
@@ -227,6 +230,10 @@ void saveTable(const std::string& file_name, const Table& table);
 /// output a compressed table in pseudo CSV format
 std::ostream& ostreamCTableRow(std::ostream& out, const CTable::value_type& ctv);
 std::ostream& ostreamCTable(std::ostream& out, const CTable& ct);
+
+/// Output a compressed table with each row corresponding to a
+/// timestamp, chronologically ordered.
+std::ostream& ostreamCTableTime(std::ostream& out, const CTableTime& ctt);
 
 /**
  * template to subsample input and output tables, after subsampling

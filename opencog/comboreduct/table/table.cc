@@ -301,7 +301,9 @@ void ITable::delete_columns(const vector<string>& ignore_features)
         delete_column(feat);
 }
 
-// -------------------------------------------------------
+////////////
+// OTable //
+////////////
 
 OTable::OTable(const string& ol)
     : label(ol), type(id::unknown_type) {}
@@ -444,7 +446,29 @@ contin_t OTable::root_mean_square_error(const OTable& ot) const
     return sqrt(mean_squared_error(ot));
 }
 
-// -------------------------------------------------------
+////////////
+// TTable //
+////////////
+
+TTable::TTable(const string& tl)
+    : label(tl) {}
+
+TTable::TTable(const super& tt, const string& tl)
+    : super(tt), label(tl) {}
+
+void TTable::set_label(const string& tl)
+{
+    label = tl;
+}
+
+const string& TTable::get_label() const
+{
+    return label;
+}
+
+///////////
+// Table //
+///////////
 
 Table::Table() : target_pos(0) {}
 
@@ -475,11 +499,15 @@ CTable Table::compressed(const std::string weight_col) const
 
         ITable::const_iterator in_it = itable.begin();
         OTable::const_iterator out_it = otable.begin();
-        for (; in_it != itable.end(); ++in_it, ++out_it)
-        {
-            res[*in_it][*out_it] += 1.0;
+        if (ttable.empty())
+            for(; in_it != itable.end(); ++in_it, ++out_it)
+                ++res[*in_it][TimedValue(*out_it)];
+        else {
+            TTable::const_iterator time_it = ttable.begin();
+            for(; in_it != itable.end(); ++in_it, ++out_it, ++time_it)
+                ++res[*in_it][TimedValue(*out_it, *time_it)];
         }
-        logger().debug("Size of the compressed dataset is %d", res.size());
+        logger().debug("Size of the compressed dataset is %u", res.size());
         return res;
     }
     else {
@@ -494,11 +522,22 @@ CTable Table::compressed(const std::string weight_col) const
         ITable::const_iterator w_it = itable.begin();
         ITable::const_iterator in_it = trimmed.begin();
         OTable::const_iterator out_it = otable.begin();
-        for (; in_it != trimmed.end(); ++in_it, ++out_it, ++w_it)
-        {
-            vertex v = w_it->get_at<vertex>(widx);
-            contin_t weight = get_contin(v);
-            res[*in_it][*out_it] += weight;
+        if (ttable.empty()) {
+            for (; in_it != trimmed.end(); ++in_it, ++out_it, ++w_it)
+            {
+                vertex v = w_it->get_at<vertex>(widx);
+                contin_t weight = get_contin(v);
+                res[*in_it][TimedValue(*out_it)] += weight;
+            }
+        }
+        else {
+            TTable::const_iterator time_it = ttable.begin();
+            for (; in_it != trimmed.end(); ++in_it, ++out_it, ++w_it, ++time_it)
+            {
+                vertex v = w_it->get_at<vertex>(widx);
+                contin_t weight = get_contin(v);
+                res[*in_it][TimedValue(*out_it, *time_it)] += weight;
+            }
         }
         logger().debug("Size of the compressed dataset is %d", res.size());
         return res;
@@ -520,6 +559,27 @@ vector<unsigned> get_indices(const vector<string>& labels,
         if (std::find(labels.begin(), labels.end(), header[i]) != labels.end())
             res.push_back(i);
     return res;
+}
+
+std::vector<contin_t> discretize_contin_feature(contin_t min,
+                                                contin_t max)
+{
+    std::vector<contin_t> res;
+    contin_t interval = (max - min)/TARGET_DISCRETIZED_BINS_NUM;
+    for (unsigned i = 0; i < TARGET_DISCRETIZED_BINS_NUM; ++i)
+        res.push_back(min+i*interval);
+    return res;
+}
+
+builtin get_discrete_bin(std::vector<contin_t> disc_intvs, contin_t val)
+{
+    unsigned i;
+    for (i = 1; i < TARGET_DISCRETIZED_BINS_NUM; i++)
+    {
+        if (val < disc_intvs[i])
+            break;
+    }
+    return (builtin)i;
 }
 
 unsigned get_index(const string& label, const vector<string>& header)
@@ -605,7 +665,29 @@ void Table::add_features_from_file(const string& input_file,
     }
 }
         
-// -------------------------------------------------------
+/////////////////
+// TimeCounter //
+/////////////////
+
+count_t TimedCounter::get(const vertex& v) const {
+    count_t res = 0;
+    for (const auto& vtc : *this)
+        if (vtc.first.value == v)
+            res += vtc.second;
+    return res;
+}
+
+Counter<vertex, count_t> TimedCounter::untimedCounter() const {
+    Counter<vertex, count_t> vc;
+    for (const auto& vtc : *this)
+        vc[vtc.first.value] += vtc.second;
+    return vc;
+}
+
+vertex TimedCounter::most_frequent() const {
+    return untimedCounter().most_frequent();
+}
+
 ////////////
 // CTable //
 ////////////
@@ -678,6 +760,45 @@ void CTable::remove_rows(const set<unsigned>& idxs)
     }
 }
 
+void CTable::remove_rows_at_times(const set<TTable::value_type>& timestamps)
+{
+    for (const TTable::value_type& timestamp : timestamps)
+        remove_rows_at_time(timestamp);
+}
+
+void CTable::remove_rows_at_time(const TTable::value_type& timestamp)
+{
+    for (auto row_it = begin(); row_it != end();) {
+        auto& outputs = row_it->second;
+
+        // Remove all output values at timestamp
+        for (auto v_it = outputs.begin(); v_it != outputs.end();) {
+            if (v_it->first.timestamp == timestamp)
+                v_it = outputs.erase(v_it);
+            else
+                ++v_it;
+        }
+
+        // Check if the output is empty, and if so remove the
+        // row entirely
+        if (row_it->second.empty())
+            row_it = erase(row_it);
+        else
+            ++row_it;
+    }
+}
+
+set<TTable::value_type> CTable::get_timestamps() const
+{
+    set<TTable::value_type> res;
+    for (const CTable::value_type& row : *this)
+        for (const auto& vtc : row.second)
+            if (vtc.first.timestamp != boost::gregorian::date())
+                res.insert(vtc.first.timestamp);
+
+    return res;
+}
+
 void CTable::set_labels(const vector<string>& labels)
 {
     olabel = labels.front();
@@ -690,6 +811,26 @@ vector<string> CTable::get_labels() const
     vector<string> labels = ilabels;
     labels.insert(labels.begin(), olabel);
     return labels;
+}
+
+const string& CTable::get_output_label() const
+{
+    return olabel;
+}
+
+const string_seq& CTable::get_input_labels() const
+{
+    return ilabels;
+}
+
+void CTable::set_signature(const type_tree& tt)
+{
+    tsig = tt;
+}
+
+const type_tree& CTable::get_signature() const
+{
+    return tsig;
 }
 
 count_t CTable::uncompressed_size() const
@@ -706,6 +847,18 @@ type_node CTable::get_output_type() const
     return get_type_node(get_signature_output(tsig));
 }
 
+CTableTime CTable::ordered_by_time() const
+{
+    // Turn the input to timestamped output map into timetamp to
+    // output map
+    CTableTime res;
+    for (const auto& v : *this)
+        for (const auto& tcv : v.second)
+            res[tcv.first.timestamp] +=
+                Counter<vertex, count_t>({{tcv.first.value, tcv.second}});
+    return res;
+}
+
 void CTable::balance()
 {
     type_node otype = get_output_type();
@@ -713,7 +866,7 @@ void CTable::balance()
         // Get total count for each class (called Ni in comment below)
         Counter<vertex, count_t> class_count;
         for (auto iorow : *this)
-            class_count += iorow.second;
+            class_count += iorow.second.untimedCounter();
 
         count_t usize = uncompressed_size(), n = class_count.size();
         // N1 + ... + Nn = usize
@@ -731,8 +884,8 @@ void CTable::balance()
         // ci * ci1 + ... + ci * cim = usize / n
         // ci = (usize/n) / Ni
         for (auto iorow : *this)
-            for (auto vc : iorow.second)
-                vc.second *= (usize / n) / class_count[vc.first];
+            for (auto tvc : iorow.second)
+                tvc.second *= (usize / n) / class_count[tvc.first.value];
     } else {
         logger().warn() << "CTable::balance() - "
                         << "cannot balance non discrete output type "

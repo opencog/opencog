@@ -32,8 +32,14 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/count.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/max.hpp>
 #include <boost/logic/tribool.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+
+#include <opencog/util/boost_ext/accumulators/statistics/geometric_mean_mirror.h>
 
 #include <opencog/comboreduct/combo/combo.h>
 #include "../optimization/optimization.h"
@@ -120,20 +126,22 @@ public:
      */
     metapopulation(const std::vector<combo_tree>& bases,
                    behave_cscore& sc,
-                   const metapop_parameters& pa = metapop_parameters());
+                   const metapop_parameters& pa = metapop_parameters(),
+                   const subsample_deme_filter_parameters& subp = subsample_deme_filter_parameters());
 
     // Like above but using a single base, and a single reduction rule.
     /// @todo use C++11 redirection
     metapopulation(const combo_tree& base,
                    behave_cscore& sc,
-                   const metapop_parameters& pa = metapop_parameters());
+                   const metapop_parameters& pa = metapop_parameters(),
+                   const subsample_deme_filter_parameters& subp = subsample_deme_filter_parameters());
 
     ~metapopulation() {}
 
     const scored_combo_tree_set& best_candidates() const;
     const ensemble& get_ensemble() const { return _ensemble; }
     composite_score best_composite_score() const;
-    combo_tree best_tree() const;
+    const combo_tree& best_tree() const;
 
     /**
      * Return the best model score (either the score of the
@@ -207,7 +215,7 @@ public:
      * to get stuff done, and so prallelizing calls to this don't
      * obviously make sense.
      */
-    bool merge_demes(boost::ptr_vector<deme_t>& demes,
+    bool merge_demes(std::vector<std::vector<deme_t>>& demes,
                      const boost::ptr_vector<representation>& reps);
 
     /// Update the record of the best score seen, and the associated tree.
@@ -435,6 +443,75 @@ private:
     static boost::logic::tribool dominates(const behavioral_score& x,
                                            const behavioral_score& y);
 
+private:
+    // Sort all demes by decreasing penalized score
+    void sort_demes(std::vector<std::vector<deme_t>>& ss_demes);
+
+    // Remove duplicate candidates across all demes. It assumes that
+    // the demes are sorted, that way it only needs to compare
+    // candidates with identical scores (which saves a lot of
+    // computation)
+    void keep_top_unique_candidates(
+        std::vector<std::vector<deme_t>>& all_demes,
+        const boost::ptr_vector<representation>& reps);
+
+    // ------------------ Subsampling-related -----------------------
+
+    // Subsample filter. Return true if it passes the subsample
+    // filter. I.e. if the variance of the score across demes pass the
+    // filter. Note that ss_filter is not a const method because it
+    // modifies the SS-demes scores (the candidates re-evaluated
+    // will be on the whole dataset).
+    bool ss_score_dev_filter(const representation& rep,
+                             const std::vector<deme_t>& ss_demes) const;
+
+    // Given the top candidates of each deme, what is the average
+    // agreement between those candidates, for each data point, across
+    // all ss-demes.
+    float ss_average_agreement(const representation& rep,
+                               std::vector<deme_t>& ss_demes);
+
+    // Accumulator used to collect stats for the subsampling tanimoto
+    // filter
+    typedef boost::accumulators::accumulator_set
+    <double,
+     boost::accumulators::stats<boost::accumulators::tag::count,
+                                boost::accumulators::tag::mean,
+                                boost::accumulators::tag::geometric_mean_mirror,
+                                boost::accumulators::tag::max>> tanimoto_acc_t;
+
+    // In case of ss filter, the candidates during optimization will
+    // not have their scores computed over the whole dataset, that
+    // method corrects that.
+    void recompute_scores_over_whole_dataset(
+        std::vector<std::vector<deme_t>>& ss_demes,
+        const boost::ptr_vector<representation>& reps);
+
+    // For each breadth first deme compute whether it passes the
+    // subsample filter
+    std::vector<bool> ss_filter(
+        const std::vector<std::vector<deme_t>>& all_demes,
+        const boost::ptr_vector<representation>& reps) const;
+
+    // Return stats about the Tanimoto distances of a vector of combo trees
+    void ss_tanimoto_stats(const std::vector<combo_tree>& trs,
+                           tanimoto_acc_t& acc) const;
+
+    // Return stats about the Tanimoto distances of the top candidates
+    // of a certain breadth first deme
+    void ss_tanimoto_stats(const representation& rep,
+                           const std::vector<deme_t>& ss_demes,
+                           tanimoto_acc_t& acc) const;
+
+    // Return true if the top candidates of the subsampled demes have
+    // sufficiently low Tanimoto distance (mean or max). The Tanimoto
+    // distance is used because it is a generalization of the Jaccard
+    // distance over multisets. Here we are dealing with multisets
+    // because rows of ctables are weighted by their uncompressed
+    // count.
+    bool ss_tanimoto_filter(const representation& rep,
+                            const std::vector<deme_t>& ss_demes) const;
+
     // --------------------- Printing/Logging functions --------------------
 public:
     // log the best candidates
@@ -448,6 +525,8 @@ private:
 protected:
     // --------------------- Internal state -----------------------
     const metapop_parameters& _params;
+
+    const subsample_deme_filter_parameters& _filter_params;
 
     behave_cscore& _cscorer;
 

@@ -175,11 +175,10 @@ struct optimizer_base : optim_stats
     optimizer_base(const optim_parameters& op = optim_parameters())
         : opt_params(op) {}
     
-    // Return # of evaluations actually performed
-    virtual unsigned operator()(deme_t& deme,
-                                const iscorer_base& iscorer,
-                                unsigned max_evals,
-                                time_t max_time) = 0;
+    virtual void operator()(deme_t& deme,
+                            const iscorer_base& iscorer,
+                            unsigned max_evals,
+                            time_t max_time) = 0;
 
     virtual ~optimizer_base() {}
 

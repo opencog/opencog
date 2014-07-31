@@ -176,11 +176,15 @@ void read_eval_output_results(evalTableParameters& pa)
 
     // read data ITable (using ignore_variables)
     Table table;
-    if (pa.target_feature_str.empty())
-        table.itable = loadITable_optimized(pa.input_table_file, ignore_variables);
+    if (pa.target_feature_str.empty()) {
+        OC_ASSERT(pa.timestamp_feature_str.empty(),
+                  "Timestamp feature not implemented");
+        table.itable = loadITable_optimized(pa.input_table_file,
+                                            ignore_variables);
+    }
     else {
         table = loadTable(pa.input_table_file, pa.target_feature_str,
-                          ignore_variables);
+                          pa.timestamp_feature_str, ignore_variables);
     }
     logger().debug() << "Done loading table from " << pa.input_table_file;
 

@@ -59,19 +59,24 @@ public:
         logger().setPrintToStdoutFlag(true);
         logger().setLevel(Logger::FINE);
 
-        string target_feature;
+        string target_feature, timestamps_feature;
         vector<string> ignore_features;
 
         // load big table
-        big_table = loadTable(big_table_path, target_feature, ignore_features);
+        big_table = loadTable(big_table_path, target_feature,
+                              timestamps_feature,
+                              ignore_features);
 
         // load small table
         small_table = loadTable(small_table_path, target_feature,
+                                timestamps_feature,
                                 ignore_features);
 
         // load small table with f2 and f3 swapped
         small_table_swap_f2_f3 = loadTable(small_table_swap_f2_f3_path,
-                                           target_feature, ignore_features);
+                                           target_feature,
+                                           timestamps_feature,
+                                           ignore_features);
 
         // load sparse contin table, with date and string columns.
         vector<string> ignore_date;
@@ -82,13 +87,16 @@ public:
         ignore_date.push_back("date");
         ignore_date.push_back("swoosh");
         sparse_table = loadTable(sparse_table_path,
-                                 target_feature, ignore_date);
+                                 target_feature, timestamps_feature,
+                                 ignore_date);
 
         // load ignore_enfore_target table
         ignore_features.push_back("timestamp");
         target_feature = "target";
         ignore_enforce_target_table = loadTable(ignore_enforce_target_table_path,
-                                                target_feature, ignore_features);
+                                                target_feature,
+                                                timestamps_feature,
+                                                ignore_features);
     }
 
     void test_incremental_selection_j1() {

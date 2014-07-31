@@ -18,8 +18,8 @@ public:
 
         randomize(fs, inst);
         std::cout << std::endl
-                  << fs.stream(inst) << std::endl;
-        std::cout << fs.stream_raw(inst) << std::endl;
+                  << fs.to_string(inst) << std::endl;
+        std::cout << fs.to_string_raw(inst) << std::endl;
         
         field_set::const_contin_iterator it = fs.begin_contin(inst);
         size_t idx = fs.contin_to_raw_idx(it.idx());
@@ -31,7 +31,7 @@ public:
         rv = fs.get_contin(inst, idx);
         TS_ASSERT_EQUALS(v, rv);
         
-        std::cout << "after test: " << fs.stream(inst) << std::endl;        
+        std::cout << "after test: " << fs.to_string(inst) << std::endl;
     }
     
     void test_get_set_raw()
@@ -54,7 +54,7 @@ public:
         field_set fs(field_set::disc_spec(2), 40);
         instance inst(fs.packed_width());
 
-        std::cout << "bits : " << fs.stream(inst) << std::endl;
+        std::cout << "bits : " << fs.to_string(inst) << std::endl;
 
         size_t idx = 35;
         disc_t rv(1), v(1);
@@ -62,7 +62,7 @@ public:
         fs.set_raw(inst, idx, v);
         rv = fs.get_raw(inst,idx);
 
-        std::cout << "bits : " << fs.stream(inst) << std::endl;
+        std::cout << "bits : " << fs.to_string(inst) << std::endl;
 
         TS_ASSERT_EQUALS(v, rv);
     }
@@ -106,7 +106,7 @@ public:
 
         instance inst(fs.packed_width());
         randomize(fs,inst);
-        std::cout << " raw : " << fs.stream(inst) << std::endl;
+        std::cout << " raw : " << fs.to_string(inst) << std::endl;
         std::cout << " the number of contin_spec:" << fs.contin().size() << std::endl;
         TS_ASSERT_EQUALS(fs.contin().size(), 3);
         TS_ASSERT_EQUALS(fs.disc_and_bit().size(), 1);
