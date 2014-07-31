@@ -1,10 +1,10 @@
 ;; Test #2
 
-;; Anaphora is not "that" or "enough"
-;; Antecedent is a verb
+;; anaphor is "feminine"
+;; antecedent is "feminine"
 
 ;; Expected result:
-;; Rejection
+;; Acceptance
 
 ;; Connection between two clauses
 
@@ -23,7 +23,11 @@
 )
 ;; filter tests
 
-(PartOfSpeechLink
+(InheritanceLink
+    (WordInstanceNode "anaphor")
+    (DefinedLinguisticConceptNode "feminine")
+)
+(InheritanceLink
     (WordInstanceNode "antecedent")
-    (DefinedLinguisticConceptNode ".v")
+    (DefinedLinguisticConceptNode "feminine")
 )

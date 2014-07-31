@@ -1,10 +1,10 @@
 ;; Test #2
 
-;; anaphor is "feminine"
+;; anaphor is "masculine"
 ;; antecedent is "masculine"
 
 ;; Expected result:
-;; Rejection
+;; Acceptance
 
 ;; Connection between two clauses
 
@@ -25,7 +25,7 @@
 
 (InheritanceLink
     (WordInstanceNode "anaphor")
-    (DefinedLinguisticConceptNode "feminine")
+    (DefinedLinguisticConceptNode "masculine")
 )
 (InheritanceLink
     (WordInstanceNode "antecedent")

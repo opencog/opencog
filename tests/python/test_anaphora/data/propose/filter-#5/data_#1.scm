@@ -1,10 +1,10 @@
-;; Test #3
+;; Test #1
 
-;; Anaphora is "that"
-;; Antecedent is a verb
+;; anaphor is "feminine"
+;; antecedent is "masculine"
 
 ;; Expected result:
-;; Acceptance
+;; Rejection
 
 ;; Connection between two clauses
 
@@ -21,14 +21,13 @@
     (AnchorNode "CurrentProposal")
     (WordInstanceNode "antecedent")
 )
-(LemmaLink
-    (WordInstanceNode "anaphor")
-    (WordNode "that")
-)
-
 ;; filter tests
 
 (InheritanceLink
+    (WordInstanceNode "anaphor")
+    (DefinedLinguisticConceptNode "feminine")
+)
+(InheritanceLink
     (WordInstanceNode "antecedent")
-    (DefinedLinguisticConceptNode ".v")
+    (DefinedLinguisticConceptNode "masculine")
 )

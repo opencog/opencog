@@ -1,10 +1,10 @@
-;; Test #3
+;; Test #2
 
-;; Anaphora is "that"
+;; Anaphora is not "that" or "enough"
 ;; Antecedent is a verb
 
 ;; Expected result:
-;; Acceptance
+;; Rejection
 
 ;; Connection between two clauses
 
@@ -21,11 +21,6 @@
     (AnchorNode "CurrentProposal")
     (WordInstanceNode "antecedent")
 )
-(LemmaLink
-    (WordInstanceNode "anaphor")
-    (WordNode "that")
-)
-
 ;; filter tests
 
 (InheritanceLink

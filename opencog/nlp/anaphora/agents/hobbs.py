@@ -121,6 +121,7 @@ class HobbsAgent(MindAgent):
         self.wordNumber=dict()
         self.atomspace = None
 
+        self.currentPronoun = None
         self.currentPronounNode = None
         self.currentTarget = None
         self.currentResult = None
@@ -130,6 +131,8 @@ class HobbsAgent(MindAgent):
 
         self.pronouns = None
         self.roots = None
+
+        self.confidence = 1.0
 
         self.numOfFilters=7
         self.number_of_searching_sentences=3
@@ -193,7 +196,7 @@ class HobbsAgent(MindAgent):
     def getConjunction(self,node):
         return self.bindLinkExe(self.currentProposal,node,'(cog-bind-crisp getConjunction)',self.currentResult,types.WordInstanceNode)
 
-    def propose(self,node):
+    def propose(self,node,filter=-1):
         '''
         It iterates all filters, reject the antecedent or "node" if it's matched by any filters.
         '''
@@ -215,7 +218,17 @@ class HobbsAgent(MindAgent):
             self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, conjunction_list, TruthValue(1.0, TruthValue().confidence_to_count(1.0))),TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, TruthValue().confidence_to_count(self.confidence)))
             self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
 
-        for index in range(1,self.numOfFilters+1):
+        start=1
+        end=self.numOfFilters+1
+
+        '''
+        For debugging purposes.
+        '''
+        if filter!=-1:
+            start=filter
+            end=filter+1
+
+        for index in range(start,end):
             command='(cog-bind-crisp filter-#'+str(index)+')'
             rv=self.bindLinkExe(self.currentProposal,node,command,self.currentResult,types.AnchorNode)
             if len(rv)>0:
@@ -235,9 +248,10 @@ class HobbsAgent(MindAgent):
         else:
             self.generateReferenceLink(self.currentPronoun,node,TV_FOR_FILTERED_OUT_ANTECEDENTS)
             #if self.DEBUG:
-                #print("rejected "+node.name+" by filter-#"+str(index))
+            print("rejected "+node.name+" by filter-#"+str(index))
 
         self.atomspace.remove(self.currentResolutionLink_pronoun)
+        return not rejected
 
     def Checked(self,node):
 
@@ -257,6 +271,11 @@ class HobbsAgent(MindAgent):
         Does a Breadth-First search, starts with "node"
         '''
 
+        '''
+        rv is used for unit tests
+        '''
+        rv=[]
+
         if node==None:
             #print("found you bfs")
             return
@@ -264,12 +283,14 @@ class HobbsAgent(MindAgent):
         q.put(node)
         while not q.empty():
             front=q.get()
+            rv.append(front)
             self.propose(front)
             children=self.getChildren(front)
             if len(children)>0:
                 for node in children:
                     if not self.Checked(node):
                         q.put(node)
+        return rv
 
     def getWords(self):
         rv=self.bindLinkExe(None,None,'(cog-bind-crisp getWords)',self.currentResult,types.WordInstanceNode)
@@ -391,8 +412,6 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/filters/filter-#16.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#17.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#18.scm",
-              "opencog/nlp/anaphora/rules/filters/filter-#19.scm",
-              "opencog/nlp/anaphora/rules/filters/filter-#20.scm",
 
               "opencog/nlp/anaphora/rules/pre-process/pre-process-#1.scm",
               "opencog/nlp/anaphora/rules/pre-process/pre-process-#2.scm",

@@ -45,9 +45,9 @@
 
                 ;; filter
                 (NotLink
-                    (PartOfSpeechLink
+                    (InheritanceLink
                         (VariableNode "$word-inst-antecedent")
-                        (DefinedLinguisticConceptNode "noun")
+                        (DefinedLinguisticConceptNode ".n")
                     )
                 )
                 (NotLink

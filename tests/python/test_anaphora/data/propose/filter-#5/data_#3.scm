@@ -1,7 +1,7 @@
-;; Test #4
+;; Test #3
 
-;; Anaphora is "enough"
-;; Antecedent is a verb
+;; anaphor is "masculine"
+;; antecedent is "masculine"
 
 ;; Expected result:
 ;; Acceptance
@@ -21,14 +21,13 @@
     (AnchorNode "CurrentProposal")
     (WordInstanceNode "antecedent")
 )
-(LemmaLink
-    (WordInstanceNode "anaphor")
-    (WordNode "enough")
-)
-
 ;; filter tests
 
-(PartOfSpeechLink
+(InheritanceLink
+    (WordInstanceNode "anaphor")
+    (DefinedLinguisticConceptNode "masculine")
+)
+(InheritanceLink
     (WordInstanceNode "antecedent")
-    (DefinedLinguisticConceptNode ".v")
+    (DefinedLinguisticConceptNode "masculine")
 )
