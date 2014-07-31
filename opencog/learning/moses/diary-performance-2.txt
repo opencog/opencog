@@ -341,21 +341,14 @@ Performance of the selectionUTest on select.csv with differrent evals:
 
      num_evals  error   dedupe   nodupe
      ---------  -----   ------   ------
-           5     26
-          50     26
-         100     26
-         200     26
-         500     26
-          1K     26      29        33
-          2K     26
-          5K     26
-         10K     26      29        33
-         20K     26
-         40K     26      29
-         80K     26
-        160K     26                33
-        320K  
-        640K             29
+          1K     58      29        32
+          2K     58      29        32 
+          5K     56      29        28
+         10K     56      28        22
+         20K     56      20        11
+         40K     56      15         1
+         80K     56      15         1
+        160K                        1
 
 This is a very degenerate dataset: select.csv contains a total of 329 rows.
 Of these only 60 are unique, so max score can't really do better than that.
@@ -370,45 +363,8 @@ has 329 rows, all of which are unique.
 
 Well, there's a bug somewhere ... 
 
---------------------
-sum of weights = 329
+Hmm OK, bug partly fixed. Looks like still have an off-by-one error.
 
-boosting scorer is returning +1/-1 which is not what we want .. 
-we want 0==correct, -1 == incorrect ...
-
-first: 33 wrong, err = 0.10  exp(alpha)=3
-
- Ensemble has 1 members, and a score of [score=-164.5, penalized
-score=-165.642852783203125, complexity=4, complexity
-penalty=1.14285719394683838, diversity penalty=0]
-
-best_composite_score(); reports -164
-calling get_cscore(_ensemble.get_ensemble())
-
-which get
-
-Ahh .. in metapop merging, we have to re-score the entire metapop,
-because weights changed, and the will mess up everything ...
--- update the metapop _best_cscore
--- update _best_candidates   auto
--- scored_combo_tree_ptr_set  _scored_trees done
-
-scored_combo_tree get_bscore on the sct
-
-metapop _cscorer.
-
-now:
-                                   const iscorer_base& iscorer,
-deme.begin_scores()
-            const composite_score &inst_cscore = deme[i].second;
-
-typedef instance_set<composite_score> deme_t;
-
-complexity_based_scorer
-
-XX must not chace if its boosting and it won't if init_cache size==0
-
-set pms.cache_size =- 0 if pms.meta_params.do_boosting,
 
 
 
