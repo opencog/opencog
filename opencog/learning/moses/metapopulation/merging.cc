@@ -583,12 +583,12 @@ void metapopulation::log_best_candidates() const
             }
         } else {
             logger().info()
-               << "Ensemble has " << best_candidates().size()
+               << "Ensemble has " << _ensemble.get_ensemble().size()
                << " members, and a score of "
                << best_composite_score();
             if (logger().isDebugEnabled()) {
                 logger().debug() << "The ensemble is " << std::endl;
-                for (const auto& cand : best_candidates()) {
+                for (const auto& cand : _ensemble.get_ensemble()) {
                     logger().debug() << cand.get_weight() << " " << cand.get_tree();
                 }
             }
