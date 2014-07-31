@@ -1,12 +1,16 @@
-;; anaphor is "plural"
-;; antecedent is "singular"
+;; anaphor is non-reflexive
+;; The parse tree structure is:
 
+;;          verb
+;;         /    \
+;; antecedent   anaphor
+
+;; This antecedent should be rejected
 
 ;; Examples:
 
-;; "Alice ate an apple. They do not like it."
-;; "They" should not refer to "Alice"
-
+;; "Tom likes him."
+;; "him" should not refer to "Tom"
 
 (define filter-#11
     (BindLink
@@ -17,6 +21,10 @@
             )
             (TypedVariableLink
                 (VariableNode "$word-inst-anaphor")
+                (VariableTypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$verb")
                 (VariableTypeNode "WordInstanceNode")
             )
         )
@@ -38,13 +46,25 @@
                 )
 
                 ;; filter
-                (InheritanceLink
-                    (VariableNode "$word-inst-anaphor")
-                    (DefinedLinguisticConceptNode "plural")
+                (NotLink
+                    (InheritanceLink
+                        (VariableNode "$word-inst-anaphor")
+                        (DefinedLinguisticConceptNode "reflexive")
+                    )
                 )
-                (InheritanceLink
-                    (VariableNode "$word-inst-antecedent")
-                    (DefinedLinguisticConceptNode "singular")
+                (EvaluationLink
+                    (DefinedLinguisticRelationshipNode "_subj")
+                    (ListLink
+                        (VariableNode "$verb")
+                        (VariableNode "$word-inst-antecedent")
+                    )
+                )
+                (EvaluationLink
+                    (DefinedLinguisticRelationshipNode "_obj")
+                    (ListLink
+                        (VariableNode "$verb")
+                        (VariableNode "$word-inst-anaphor")
+                    )
                 )
             )
             (ListLink

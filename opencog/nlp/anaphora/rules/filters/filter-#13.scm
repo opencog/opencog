@@ -1,16 +1,10 @@
-;; anaphor is non-reflexive
-;; The parse tree structure is:
-
-;;          verb
-;;         /    \
-;; antecedent   anaphor
-
-;; This antecedent should be rejected
+;; antecedent is a number
 
 ;; Examples:
 
-;; "Tom likes him."
-;; "him" should not refer to "Tom"
+;; "Twenty cops are hiding in the corner, they are doing something secretly."
+;; "they" should not refer to "Twenty"
+
 
 (define filter-#13
     (BindLink
@@ -26,6 +20,10 @@
             (TypedVariableLink
                 (VariableNode "$verb")
                 (VariableTypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
+                (VariableNode "a number")
+                (VariableTypeNode "NumberNode")
             )
         )
         (ImplicationLink
@@ -46,25 +44,9 @@
                 )
 
                 ;; filter
-                (NotLink
-                    (InheritanceLink
-                        (VariableNode "$word-inst-anaphor")
-                        (DefinedLinguisticConceptNode "reflexive")
-                    )
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_subj")
-                    (ListLink
-                        (VariableNode "$verb")
-                        (VariableNode "$word-inst-antecedent")
-                    )
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_obj")
-                    (ListLink
-                        (VariableNode "$verb")
-                        (VariableNode "$word-inst-anaphor")
-                    )
+                (ReferenceLink
+                    (VariableNode "$word-inst-antecedent")
+                    (VariableNode "a number")
                 )
             )
             (ListLink

@@ -1,18 +1,15 @@
-;; anaphor is "it"
-;; antecedent is "plural"
-
+;; antecedent is a ParseNode
 
 ;; Examples:
 
-;; "There are some apples in the corner. It is beautiful."
-;; "It" should not refer to "apples"
+;; ParseNode should obviously be rejected.
 
 (define filter-#12
     (BindLink
         (ListLink
             (TypedVariableLink
                 (VariableNode "$word-inst-antecedent")
-                (VariableTypeNode "WordInstanceNode")
+                (VariableTypeNode "ParseNode")
             )
             (TypedVariableLink
                 (VariableNode "$word-inst-anaphor")
@@ -34,16 +31,6 @@
                 (ListLink
                     (AnchorNode "CurrentProposal")
                     (VariableNode "$word-inst-antecedent")
-                )
-
-                ;; filter
-                (ReferenceLink
-                    (VariableNode "$word-inst-anaphor")
-                    (WordNode "it")
-                )
-                (InheritanceLink
-                    (VariableNode "$word-inst-antecedent")
-                    (DefinedLinguisticConceptNode "plural")
                 )
             )
             (ListLink

@@ -404,7 +404,7 @@ class HobbsAgent(MindAgent):
 
               ]
 
-        self.numOfFilters=20
+        self.numOfFilters=18
         self.numOfPrePatterns=3
         self.numOfPleonasticItPatterns=3
 
