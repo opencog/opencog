@@ -29,6 +29,7 @@
 
 #include "../optimization/optimization.h"
 #include "../scoring/behave_cscore.h"
+#include "../metapopulation/metapop_params.h"
 #include "deme_params.h"
 
 namespace opencog {
@@ -41,14 +42,8 @@ struct deme_expander
                   const reduct::rule& si_kb,
                   behave_cscore& sc,
                   optimizer_base& opt,
-                  const deme_parameters& pa = deme_parameters()) :
-        _optimize(opt),
-        _type_sig(type_signature),
-        simplify_candidate(si_ca),
-        simplify_knob_building(si_kb),
-        _cscorer(sc),
-        _params(pa)
-    {}
+                  const deme_parameters& pa = deme_parameters(),
+                  const subsample_deme_filter_parameters& fp = subsample_deme_filter_parameters());
 
     ~deme_expander() {}
 
@@ -124,6 +119,9 @@ protected:
     const reduct::rule& simplify_candidate;     // rule to simplify candidates
     const reduct::rule& simplify_knob_building; // during knob building
 
+    // Used by random_shuffle
+    std::function<ptrdiff_t(ptrdiff_t)> random_shuffle_gen;
+
 public:
     behave_cscore& _cscorer; // composite score
 
@@ -136,7 +134,9 @@ protected:
     // Deme ids
     std::vector<demeID_t> _demeIDs;
 
-    deme_parameters _params;
+    const deme_parameters& _params;
+
+    const subsample_deme_filter_parameters& _filter_params;
 };
 
 } // ~namespace moses

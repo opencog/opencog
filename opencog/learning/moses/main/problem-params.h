@@ -190,6 +190,7 @@ struct problem_params : public option_base
     hc_parameters hc_params;
     moses_parameters moses_params;
     deme_parameters deme_params;
+    subsample_deme_filter_parameters filter_params;
     metapop_parameters meta_params;
     metapop_printer mmr_pa;
 protected:

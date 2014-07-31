@@ -80,10 +80,6 @@ struct deme_parameters
     // literals and arity pairs of literals, 1 means arity positive
     // literals and arity*(arity-1) pairs of literals
     float perm_ratio;
-
-    // Number of subsample demes to spawn
-    // TODO don't forget to update that guy by moses-exec user options
-    unsigned n_subsample_demes;
 };
 
 } // ~namespace moses

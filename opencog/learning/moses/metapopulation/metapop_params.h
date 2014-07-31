@@ -100,8 +100,16 @@ struct subsample_deme_filter_parameters
 {
     subsample_deme_filter_parameters(unsigned _n_subsample_demes = 0,
                                      unsigned _n_top_candidates = 1) :
+        by_time(true),
+        contiguous_time(true),
         n_subsample_demes(_n_subsample_demes),
         n_top_candidates(_n_top_candidates) {}
+
+    // Subsample by time
+    bool by_time;
+
+    // Contiguous time segment
+    bool contiguous_time;
 
     // Number of subsample demes. If set 0 or 1 subsample_deme_filter
     // remains disactivated.
@@ -118,6 +126,9 @@ struct subsample_deme_filter_parameters
     // Filter variance threshold. A deme is only selected with the
     // score variance goes below var_threshold
     float var_threshold;
+
+    unsigned n_subsample_fitnesses;
+    float low_dev_pressure;    
 };
 
 /**

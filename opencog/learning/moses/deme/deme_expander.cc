@@ -26,6 +26,19 @@
 namespace opencog {
 namespace moses {
 
+deme_expander::deme_expander(const type_tree& type_signature,
+                             const reduct::rule& si_ca,
+                             const reduct::rule& si_kb,
+                             behave_cscore& sc,
+                             optimizer_base& opt,
+                             const deme_parameters& pa,
+                             const subsample_deme_filter_parameters& fp) :
+    _optimize(opt), _type_sig(type_signature), simplify_candidate(si_ca),
+    simplify_knob_building(si_kb), _cscorer(sc), _params(pa), _filter_params(fp)
+{
+    random_shuffle_gen = [&](ptrdiff_t i) { return randGen().randint(i); };
+}
+
 string_seq deme_expander::fs_to_names(const std::set<arity_t>& fs,
                                       const string_seq& ilabels) const
 {
@@ -290,9 +303,9 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
     create_representations(exemplar);
 
     for (unsigned i = 0; i < _reps.size(); i++) {
-        if (_params.n_subsample_demes > 1) {
+        if (_filter_params.n_subsample_demes > 1) {
             _demes.emplace_back();
-            for (unsigned j = 0; j < _params.n_subsample_demes; j++)
+            for (unsigned j = 0; j < _filter_params.n_subsample_demes; j++)
                 _demes.back().emplace_back(_reps[i].fields(), demeID_t(n_expansions, i, j));
         } else {
             _demes.emplace_back(1, deme_t(_reps[i].fields(), _demeIDs[i]));
@@ -308,7 +321,7 @@ void deme_expander::optimize_demes(int max_evals, time_t max_time)
     int max_evals_per_deme = max_evals / _demes.size();
     // We set to 1 n_ss_demes in case n_subsample_demes was set to 0
     unsigned n_ss_demes =
-        std::max(_params.n_subsample_demes, 1U);
+        std::max(_filter_params.n_subsample_demes, 1U);
     max_evals_per_deme /= n_ss_demes;
     for (unsigned i = 0; i < _demes.size(); i++)
     {
