@@ -574,7 +574,7 @@ class SatisfyingSetToConceptRule(Rule):
     """
     Given:
     (SatisfyingSetLink
-        (VariableNode ("$X")
+        (VariableNode "$X")
         (EvaluationLink
             (PredicateNode "smokes")
             (ListLink
@@ -603,14 +603,18 @@ class SatisfyingSetToConceptRule(Rule):
             (ConceptNode "smoke")
             (PredicateNode "smoke")))
     """
-    def __init__(self, chainer):
+    def __init__(self, chainer, list_link_arg_count):
         self.chainer = chainer
-        X = self.chainer.new_variable()
-        EVAL = self.chainer.new_variable()
+        variable = chainer.new_variable()
+        predicate = chainer.new_variable()
+        list_link_args = chainer.make_n_variables(list_link_arg_count)
+        list_link = chainer.link(types.ListLink, list_link_args)
+        eval_link = chainer.link(types.EvaluationLink, [predicate, list_link])
 
         Rule.__init__(self,
                       formula=None,
-                      inputs=[chainer.link(types.SatisfyingSetLink, [X, EVAL])],
+                      inputs=[chainer.link(types.SatisfyingSetLink,
+                                           [variable, eval_link])],
                       outputs=[])
 
         self.probabilistic_inputs = False
@@ -621,7 +625,8 @@ class SatisfyingSetToConceptRule(Rule):
         and_link = []
         tv = satisfying_set_link.tv
 
-        # Todo: Construct unit test
+        print satisfying_set_link
+
         if satisfying_set_link.out[0].type == types.VariableNode and\
                 satisfying_set_link.out[1].type == types.EvaluationLink:
             predicate = satisfying_set_link.out[1].out[0]

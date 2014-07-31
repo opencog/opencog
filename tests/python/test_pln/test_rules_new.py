@@ -71,8 +71,9 @@ class PLNUnitTester(TestCase):
         # Doesn't work, as the unit test setup doesn't allow for changing TV's (YET)
         # self.addTestFile("AndBreakdownRule.scm")
 
-
-
+        # Doesn't work yet
+        # self.addTestFile("SatisfyingSetToConceptRule.scm")
+        
     def tearDown(self):
         del self.atomSpaceFileData
         del self.atomSpaceInputs
@@ -444,6 +445,7 @@ class AllRules(object):
             IntensionalInheritanceEvaluationRule(self.chainer))
         self.chainer.add_rule(
             IntensionalSimilarityEvaluationRule(self.chainer))
+        self.chainer.add_rule(SatisfyingSetToConceptRule(self.chainer))
 
         # context rules
         self.chainer.add_rule(InheritanceToContextRule(self.chainer))
