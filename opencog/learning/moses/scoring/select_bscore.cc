@@ -161,14 +161,14 @@ behavioral_score select_bscore::operator()(const combo_tree& tr) const
 
         if (interpret_tr(io_row.first.get_variant()) == id::logical_true) {
             if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
-                bs.push_back(weightiest);
+                bs.push_back(0.0);
             else
                 bs.push_back(-weightiest);
         } else {
             if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
                 bs.push_back(-weightiest);
             else
-                bs.push_back(weightiest);
+                bs.push_back(0.0);
         }
     }
 
@@ -199,7 +199,7 @@ behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble
 
     // Step 2: compare the prediction of the ensemble to the desired
     // result. The array "hypoth" is positive to predict true, and
-    // negative to predict false.  The resulting score is 0 if corrrect,
+    // negative to predict false.  The resulting score is 0 if correct,
     // and -1 if incorrect.
     behavioral_score bs;
     size_t i = 0;
@@ -212,14 +212,14 @@ behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble
 
         if (0 < hypoth[i]) {
             if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
-                bs.push_back(weightiest);
+                bs.push_back(0.0);
             else
                 bs.push_back(-weightiest);
         } else {
             if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
                 bs.push_back(-weightiest);
             else
-                bs.push_back(weightiest);
+                bs.push_back(0.0);
         }
         i++;
     }
@@ -233,12 +233,9 @@ behavioral_score select_bscore::best_possible_bscore() const
     behavioral_score bs;
 
     for (const CTable::value_type& io_row : _wrk_ctable) {
-        // io_row.first = input vector
-        // io_row.second = counter of outputs
-        auto w = get_weightiest(io_row.second);
-        score_t weightiest = w.second;
-
-        bs.push_back(weightiest);
+        // It should always be possible to correctly predict one
+        // entry of the ctable; so best score is zero.
+        bs.push_back(0.0);
     }
     return bs;
 }

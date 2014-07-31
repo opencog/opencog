@@ -195,7 +195,7 @@ entire metapop.
        the process. i.e. The ensemble is what is finally used for
        off-line prediction/classification.
 
-Senario C appears to be the one that is closest in spirit to the 
+Scenario C appears to be the one that is closest in spirit to the 
 traditional boosting algos, and thus will be implemented first.
 
 Scenario C does have interesting issues with the metapopulation
@@ -369,3 +369,22 @@ The nodupe column shows results for the select-no-dupe.csv file  This one
 has 329 rows, all of which are unique.
 
 Well, there's a bug somewhere ... 
+
+--------------------
+sum of weights = 329
+
+boosting scorer is returning +1/-1 which is not what we want .. 
+we want 0==correct, -1 == incorrect ...
+
+first: 33 wrong, err = 0.10  exp(alpha)=3
+
+ Ensemble has 1 members, and a score of [score=-164.5, penalized
+score=-165.642852783203125, complexity=4, complexity
+penalty=1.14285719394683838, diversity penalty=0]
+
+best_composite_score(); reports -164
+calling get_cscore(_ensemble.get_ensemble())
+
+which get
+
+
