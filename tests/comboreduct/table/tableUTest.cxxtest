@@ -243,25 +243,26 @@ public:
                          "price", "", {"temperature"});
     }
 
-    void test_ignore_col_numeric()
-    {
-        vertex_seq o{1, 0.44, 9.5}; // price column
-        OTable ot(o, label1);
-        vector<type_node> itypes({id::enum_type, id::boolean_type});
-        vector<string> il{olabel, "truth"};
-        ITable it(itypes, il);
-        it.push_back(vertex_seq({enum_t("sad"), id::logical_false}));
-        it.push_back(vertex_seq({enum_t("bored"), id::logical_true}));
-        it.push_back(vertex_seq({enum_t("super-happy"), id::logical_false}));
-        testIStreamTable("happiness,price,temperature,truth\n"
-                         "sad,1,1,0\n"
-                         "bored,0.44,244.2,T\n"
-                         "super-happy,9.5,4.2,F\n", it, ot, true,
-                         // numeric values for these columns; the left-most is column 1
-                         // so price is column 2...
-                         // "price", {"temperature"});
-                         "2", "", {"3"});
-    }
+    // // This is no longer supported
+    // void test_ignore_col_numeric()
+    // {
+    //     vertex_seq o{1, 0.44, 9.5}; // price column
+    //     OTable ot(o, label1);
+    //     vector<type_node> itypes({id::enum_type, id::boolean_type});
+    //     vector<string> il{olabel, "truth"};
+    //     ITable it(itypes, il);
+    //     it.push_back(vertex_seq({enum_t("sad"), id::logical_false}));
+    //     it.push_back(vertex_seq({enum_t("bored"), id::logical_true}));
+    //     it.push_back(vertex_seq({enum_t("super-happy"), id::logical_false}));
+    //     testIStreamTable("happiness,price,temperature,truth\n"
+    //                      "sad,1,1,0\n"
+    //                      "bored,0.44,244.2,T\n"
+    //                      "super-happy,9.5,4.2,F\n", it, ot, true,
+    //                      // numeric values for these columns; the left-most is column 1
+    //                      // so price is column 2...
+    //                      // "price", {"temperature"});
+    //                      "2", "", {"3"});
+    // }
 
     void test_sparseFile1()
     {
