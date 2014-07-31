@@ -105,4 +105,87 @@ public:
               // -45);
               ans);
     }
+
+    // Similar to test_dyn_feat_score() but consider hillclimbing to
+    // search the feature sets, and spawn more than one deme for each
+    // exemplar (one for each top selected feature set)
+    void test_dyn_feat_hc_breadth_first()
+    {
+        // Reset the seed, so that this, and the next test, give exactly the same result.
+        opencog::randGen().seed(1);
+        vector<scored_combo_tree> scts;
+        scts.push_back(string_to_scored_combo_tree("-33 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53) and($16 !$36 !$59)) !$105) [score=-33, penalized score=-36.1428565979003906, complexity=11, complexity penalty=3.14285731315612793, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("-33 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53) and($16 !$36 !$161)) !$105) [score=-33, penalized score=-36.1428565979003906, complexity=11, complexity penalty=3.14285731315612793, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("-33 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53 !$290) and($16 !$36)) !$105) [score=-33, penalized score=-36.1428565979003906, complexity=11, complexity penalty=3.14285731315612793, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("-33 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53) and($16 !$36)) or($22 !$290) !$105) [score=-33, penalized score=-36.4285736083984375, complexity=12, complexity penalty=3.42857170104980469, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("-33 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53 !$290) and($16 !$36)) or($22 !$290) !$105) [score=-33, penalized score=-36.7142868041992188, complexity=13, complexity penalty=3.71428585052490234, diversity penalty=0]"));
+
+        string data_file_path("-i" + test_dir + "feat-sel.csv");
+
+        moses_test_scored_combo_trees({"-Hit",
+              "-uchange_predict",
+              "-B0",     // knob-building effort of zero -- no effort at all.
+              "-m12000",
+              "-x1",
+              "-Z1",     // enable cross-over
+              "-j1",
+              "-c5",
+              "--hc-max-nn-evals=5000",
+              "--enable-fs=1",   // use run-time dynamic feat sel.
+              "--fs-focus=all",
+              "--fs-algo=hc",
+              "--fs-demes=5",
+              "--fs-hc-max-evals=1000",
+              "-r1",
+              data_file_path,
+              },
+              scts);
+    }
+
+    // Similar to test_dyn_feat_score() but consider hillclimbing to
+    // search the feature sets, and spawn more than one deme for each
+    // exemplar (one for each top selected feature set)
+    void test_dyn_feat_hc_breadth_first_subsampling()
+    {
+        // Reset the seed, so that this, and the next test, give exactly the same result.
+        opencog::randGen().seed(1);
+        vector<scored_combo_tree> scts;
+        scts.push_back(string_to_scored_combo_tree("1 and($16 !$209) [score=1, penalized score=0.980000019073486328, complexity=2, complexity penalty=0.0199999995529651642, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("0.923076927661895752 and($16 !$60 !$105) [score=0.923076927661895752, penalized score=0.893076956272125244, complexity=3, complexity penalty=0.0299999993294477463, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("0.892857134342193604 and(!$10 $16 !$22 !$105) [score=0.892857134342193604, penalized score=0.852857112884521484, complexity=4, complexity penalty=0.0399999991059303284, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("0.892857134342193604 and($16 !$22 !$105 !$191) [score=0.892857134342193604, penalized score=0.852857112884521484, complexity=4, complexity penalty=0.0399999991059303284, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("0.863636374473571777 and($16 !$105 !$250) [score=0.863636374473571777, penalized score=0.83363640308380127, complexity=3, complexity penalty=0.0299999993294477463, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("0.826086938381195068 and($16 !$250) [score=0.826086938381195068, penalized score=0.806086957454681396, complexity=2, complexity penalty=0.0199999995529651642, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("0.833333373069763184 and($16 !$22 !$105) [score=0.833333373069763184, penalized score=0.803333401679992676, complexity=3, complexity penalty=0.0299999993294477463, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("0.806451618671417236 and(!$10 $16 !$22) [score=0.806451618671417236, penalized score=0.776451647281646729, complexity=3, complexity penalty=0.0299999993294477463, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("0.702702701091766357 $16 [score=0.702702701091766357, penalized score=0.692702710628509521, complexity=1, complexity penalty=0.00999999977648258209, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("0.487500011920928955 true [score=0.487500011920928955, penalized score=0.487500011920928955, complexity=0, complexity penalty=0, diversity penalty=0]"));
+
+        string data_file_path("-i" + test_dir + "feat-sel.csv");
+
+        moses_test_scored_combo_trees({"-Hpre",
+              "-q0.1",
+              "-Q1",
+              "-uchange_predict",
+              "-B0",     // knob-building effort of zero -- no effort at all.
+              "-m12000",
+              "-x1",
+              "-Z1",     // enable cross-over
+              "-j1",
+              "-c10",
+              "-l fine",
+              "--hc-max-nn-evals=5000",
+              "--enable-fs=1",   // use run-time dynamic feat sel.
+              "--fs-focus=all",
+              "--fs-algo=hc",
+              "--fs-demes=10",
+              "--ss-tanimoto-mean-threshold=0.1",
+              "--ss-n-subsample-demes=2",
+              "--fs-hc-max-evals=1000",
+              "-r1",
+              "--complexity-ratio=100",
+              data_file_path,
+              },
+              scts);
+    }
 };
