@@ -25,7 +25,6 @@
 #define _OPENCOG_METAPOP_PARAMETERS_H
 
 #include "../moses/types.h"
-#include "../deme/deme_params.h"
 
 namespace opencog { namespace moses {
 
@@ -103,7 +102,7 @@ struct subsample_deme_filter_parameters
         by_time(true),
         contiguous_time(true),
         n_subsample_demes(_n_subsample_demes),
-        n_top_candidates(_n_top_candidates) {}
+        n_top_candidates(_n_top_candidates),
         n_tuples(UINT_MAX) {}
 
     // Subsample by time

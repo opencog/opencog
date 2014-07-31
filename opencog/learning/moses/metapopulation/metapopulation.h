@@ -32,8 +32,14 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/count.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/max.hpp>
 #include <boost/logic/tribool.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+
+#include <opencog/util/boost_ext/accumulators/statistics/geometric_mean_mirror.h>
 
 #include <opencog/comboreduct/combo/combo.h>
 #include "../optimization/optimization.h"
@@ -434,6 +440,63 @@ private:
 
     static boost::logic::tribool dominates(const behavioral_score& x,
                                            const behavioral_score& y);
+
+        // ------------------ Subsampling-related -----------------------
+
+    // Subsample filter. Return true if it passes the subsample
+    // filter. I.e. if the variance of the score across demes pass the
+    // filter. Note that ss_filter is not a const method because it
+    // modifies the SS-demes scores (the candidates re-evaluated
+    // will be on the whole dataset).
+    bool ss_score_dev_filter(const representation& rep,
+                             const std::vector<deme_t>& ss_demes) const;
+
+    // Given the top candidates of each deme, what is the average
+    // agreement between those candidates, for each data point, across
+    // all ss-demes.
+    float ss_average_agreement(const representation& rep,
+                               std::vector<deme_t>& ss_demes);
+
+    // Accumulator used to collect stats for the subsampling tanimoto
+    // filter
+    typedef boost::accumulators::accumulator_set
+    <double,
+     boost::accumulators::stats<boost::accumulators::tag::count,
+                                boost::accumulators::tag::mean,
+                                boost::accumulators::tag::geometric_mean_mirror,
+                                boost::accumulators::tag::max>> tanimoto_acc_t;
+
+    // In case of ss filter, the candidates during optimization will
+    // not have their scores computed over the whole dataset, that
+    // method corrects that.
+    void recompute_scores_over_whole_dataset(
+        std::vector<std::vector<deme_t>>& ss_demes,
+        const boost::ptr_vector<representation>& reps);
+
+    // For each breadth first deme compute whether it passes the
+    // subsample filter
+    std::vector<bool> ss_filter(
+        const std::vector<std::vector<deme_t>>& all_demes,
+        const boost::ptr_vector<representation>& reps) const;
+
+    // Return stats about the Tanimoto distances of a vector of combo trees
+    void ss_tanimoto_stats(const std::vector<combo_tree>& trs,
+                           tanimoto_acc_t& acc) const;
+
+    // Return stats about the Tanimoto distances of the top candidates
+    // of a certain breadth first deme
+    void ss_tanimoto_stats(const representation& rep,
+                           const std::vector<deme_t>& ss_demes,
+                           tanimoto_acc_t& acc) const;
+
+    // Return true if the top candidates of the subsampled demes have
+    // sufficiently low Tanimoto distance (mean or max). The Tanimoto
+    // distance is used because it is a generalization of the Jaccard
+    // distance over multisets. Here we are dealing with multisets
+    // because rows of ctables are weighted by their uncompressed
+    // count.
+    bool ss_tanimoto_filter(const representation& rep,
+                            const std::vector<deme_t>& ss_demes) const;
 
     // --------------------- Printing/Logging functions --------------------
 public:
