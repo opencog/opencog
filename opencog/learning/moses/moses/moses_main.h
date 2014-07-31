@@ -304,7 +304,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
     }
 
     deme_expander dex(tt, si_ca, si_kb, sc, *optimizer, deme_params, filter_params);
-    metapopulation metapop(simple_bases, sc, meta_params);
+    metapopulation metapop(simple_bases, sc, meta_params, filter_params);
 
     run_moses(metapop, dex, moses_params, stats);
     printer(metapop, dex, stats);
