@@ -387,4 +387,22 @@ calling get_cscore(_ensemble.get_ensemble())
 
 which get
 
+Ahh .. in metapop merging, we have to re-score the entire metapop,
+because weights changed, and the will mess up everything ...
+-- update the metapop _best_cscore
+-- update _best_candidates
+-- scored_combo_tree_ptr_set  _scored_trees
+
+scored_combo_tree get_bscore on the sct
+
+metapop _cscorer.
+
+  scored_combo_tree sct(cand.get_tree(),
+                                  cand.get_demeID(),
+                                  cand.get_composite_score(), bs);
+
+
+
+
+
 
