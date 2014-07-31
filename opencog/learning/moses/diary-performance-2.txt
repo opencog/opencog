@@ -390,17 +390,25 @@ which get
 Ahh .. in metapop merging, we have to re-score the entire metapop,
 because weights changed, and the will mess up everything ...
 -- update the metapop _best_cscore
--- update _best_candidates
--- scored_combo_tree_ptr_set  _scored_trees
+-- update _best_candidates   auto
+-- scored_combo_tree_ptr_set  _scored_trees done
 
 scored_combo_tree get_bscore on the sct
 
 metapop _cscorer.
 
-  scored_combo_tree sct(cand.get_tree(),
-                                  cand.get_demeID(),
-                                  cand.get_composite_score(), bs);
+now:
+                                   const iscorer_base& iscorer,
+deme.begin_scores()
+            const composite_score &inst_cscore = deme[i].second;
 
+typedef instance_set<composite_score> deme_t;
+
+complexity_based_scorer
+
+XX must not chace if its boosting and it won't if init_cache size==0
+
+set pms.cache_size =- 0 if pms.meta_params.do_boosting,
 
 
 

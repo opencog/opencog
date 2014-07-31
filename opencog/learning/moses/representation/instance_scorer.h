@@ -85,7 +85,8 @@ struct complexity_based_scorer : public iscorer_base
             return _cscorer.get_cscore(tr);
         } catch (...) {
 // XXX FIXME, calling score_tree above does not throw the exception; this should be done
-// differntly, maybe call bcorer directly, then a.
+// differntly, maybe call bscorer directly, then ascorer...
+// ??? Huh? why couldn't we evaluate a tree anyway?  why would we want an exception here?
             combo_tree raw_tr = _rep.get_candidate(inst, false);
             combo_tree red_tr = _rep.get_candidate(inst, true);
             logger().warn() << "The following instance could not be evaluated: "
@@ -99,9 +100,10 @@ struct complexity_based_scorer : public iscorer_base
 protected:
     behave_cscore& _cscorer;
     representation& _rep;
-    bool _reduce; // whether the exemplar is reduced before being
-                  // evaluated, this may be advantagous if Scoring is
-                  // also a cache
+    bool _reduce; // whether the exemplar should be reduced before being
+                  // evaluated.  This is advantagous when _cscorer is
+                  // also a cache; the reduced form will have more cache
+                  // hits.
 };
 
 } //~namespace moses

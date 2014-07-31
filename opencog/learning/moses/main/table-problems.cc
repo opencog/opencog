@@ -461,6 +461,10 @@ void it_table_problem::run(option_base* ob)
     common_setup(pms);
     common_type_setup(pms);
 
+    // When boosting, cache must not be used, as otherwise, stale
+    // composite scores get cached and returned.
+    if (pms.meta_params.do_boosting) pms.cache_size = 0;
+
     // --------- Boolean output type
     if (output_type == id::boolean_type) {
         REGRESSION(ctable, ctruth_table_bscore, (ctable));
@@ -527,6 +531,10 @@ void select_table_problem::run(option_base* ob)
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
     common_type_setup(pms, id::boolean_type);
+
+    // When boosting, cache must not be used, as otherwise, stale
+    // composite scores get cached and returned.
+    if (pms.meta_params.do_boosting) pms.cache_size = 0;
 
     REGRESSION(ctable, select_bscore, (ctable));
 }
