@@ -122,6 +122,19 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     // Like ignore_rows but consider timestamps instead of indexes
     virtual void ignore_rows_at_times(const std::set<TTable::value_type>&) const {}
 
+    // Return the uncompressed size of the CTable
+    virtual unsigned get_ctable_usize() const {
+        OC_ASSERT(false, "You must implement me in the derived class");
+        return 0U;
+    }
+
+    // Return the original CTable
+    virtual const CTable& get_ctable() const {
+        static const CTable empty_ctable;
+        OC_ASSERT(false, "You must implement me in the derived class");
+        return empty_ctable;
+    }
+
     /// Get the appropriate complexity measure for the indicated combo
     /// tree. By default, this is the tree complexity, although it may
     /// depend on the scorer.
@@ -154,9 +167,8 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
 
 protected:
     score_t _complexity_coef;
-    mutable size_t _size;
+    size_t _size;
 };
-
 
 /// Base class for fitness functions that use a ctable. Provides useful
 /// table compression
@@ -173,7 +185,6 @@ struct bscore_ctable_base : public bscore_base
     /// reducing evaluation time. For tables with tens of thousands of
     /// uncompressed rows, this can provide a significant speedup when
     /// evaluating a large number of instances.
-    ///
     void ignore_cols(const std::set<arity_t>&) const;
 
     /// In case one wants to evaluate the fitness on a subset of the
@@ -204,11 +215,7 @@ protected:
     mutable CTable _all_rows_wrk_ctable;
 
     mutable size_t _ctable_usize;   // uncompressed size of ctable
-
-    // for debugging, keep that around till we fix best_possible_bscore
-    // mutable CTable fully_filtered_ctable;
 };
-
 
 /// Abstract base class for summing behavioral scores.
 // XXX TODO FIXME: this should probably be completely removed,

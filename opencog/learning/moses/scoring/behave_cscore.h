@@ -84,6 +84,23 @@ public:
         _bscorer.ignore_rows(idxs);
     }
 
+    // Like ignore_rows but consider timestamps instead of indexes
+    void ignore_rows_at_times(const std::set<TTable::value_type>& timestamps) const
+    {
+        _bscorer.ignore_rows_at_times(timestamps);
+    }
+
+    // Return the uncompressed size of the CTable
+    unsigned get_ctable_usize() const
+    {
+        return _bscorer.get_ctable_usize();
+    }
+
+    // Return the original CTable
+    const CTable& get_ctable() const {
+        return _bscorer.get_ctable();
+    }
+
     ascore_base& get_ascorer() const { return _ascorer; }
 
 private:
@@ -102,6 +119,11 @@ private:
     wrapper _wrapper;
     prr_cache_threaded<wrapper> _cscore_cache;
     composite_score get_cscore_nocache(const combo_tree&);
+
+public:
+    // weird hack for subsample scoring...
+    ascore_base& get_ascorer() { return _ascorer; }
+    const bscore_base& get_bscorer() const { return _bscorer; }
 };
 
 
