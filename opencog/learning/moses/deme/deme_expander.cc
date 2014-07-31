@@ -21,6 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <string>
+#include <boost/range/irange.hpp>
+#include <boost/range/algorithm/random_shuffle.hpp>
+
+#include <opencog/util/random.h>
+
 #include "deme_expander.h"
 
 namespace opencog {
@@ -74,30 +80,69 @@ void deme_expander::log_selected_feature_sets(const feature_set_pop& sf_pop,
     }
 }
 
-combo_tree deme_expander::prune_xmplr(const combo_tree& xmplr,
-                                      const feature_set& selected_features) const
+std::vector<std::set<TTable::value_type>> deme_expander::subsample_by_time() const
 {
-    combo_tree res = xmplr;
-    // remove literals of non selected features from the exemplar
-    for (auto it = res.begin(); it != res.end();) {
-        if (is_argument(*it)) {
-            arity_t feature = get_argument(*it).abs_idx_from_zero();
-            auto fit = selected_features.find(feature);
-            if (fit == selected_features.end())
-                it = res.erase(it); // not selected, prune it
-            else
-                ++it;
+    std::vector<std::set<TTable::value_type>> ignore_timestamps_per_ss_deme;
+    unsigned n_ss_demes = _filter_params.n_subsample_demes;
+
+    if (n_ss_demes > 1) {       // subsampling deme is enabled
+        std::set<TTable::value_type> timestamps =
+            _cscorer.get_ctable().get_timestamps();
+        unsigned tt_size = timestamps.size();
+        std::vector<TTable::value_type> timestamps_vec(timestamps.begin(),
+                                                       timestamps.end());
+
+        if (!_filter_params.contiguous_time) {
+            logger().debug() << "Random subsampling by time";
+            boost::random_shuffle(timestamps_vec, this->random_shuffle_gen);
         }
-        else
-            ++it;
+
+        // Divide the vector into n_ss_demes equal parts
+        unsigned seg_size = tt_size / n_ss_demes;
+        for (auto from = timestamps_vec.cbegin(), to = from + seg_size;
+             from != timestamps_vec.cbegin() + n_ss_demes * seg_size;
+             from += seg_size, to += seg_size)
+        {
+            ignore_timestamps_per_ss_deme.emplace_back(from, to);
+            if (_filter_params.contiguous_time) {
+                logger().debug() << "Discard segment from " << *from
+                                 << " to " << *(from + (seg_size - 1))
+                                 << " (included)";
+            }
+        }
     }
-    simplify_knob_building(res);
-    // if the exemplar is empty use a seed
-    if (res.empty()) {
-        type_node otn = get_type_node(get_signature_output(_type_sig));
-        res = type_to_exemplar(otn);
+    else {                      // subsampling deme is disabled
+        ignore_timestamps_per_ss_deme.emplace_back();
     }
-    return res;
+    return ignore_timestamps_per_ss_deme;
+}
+
+std::vector<std::set<unsigned>> deme_expander::subsample_by_row() const
+{
+    std::vector<std::set<unsigned>> ignore_row_idxs_per_ss_deme;
+    unsigned n_ss_demes = _filter_params.n_subsample_demes;
+
+    if (n_ss_demes > 1) {       // subsampling deme is enabled
+        unsigned usize = _cscorer.get_ctable_usize();
+
+        // Create a vector [0, usize)
+        auto rng = boost::irange(0U, usize);
+        std::vector<unsigned> row_idxs(rng.begin(), rng.end());
+
+        // Randomly shuffle the order
+        boost::random_shuffle(row_idxs, random_shuffle_gen);
+
+        // Divide the vector into n_ss_demes equal parts
+        unsigned seg_size = usize / n_ss_demes;
+        for (auto it = row_idxs.cbegin();
+             it != row_idxs.cbegin() + n_ss_demes * seg_size;
+             it += seg_size)
+            ignore_row_idxs_per_ss_deme.emplace_back(it, it + seg_size);
+    } else {
+        ignore_row_idxs_per_ss_deme.emplace_back();
+    }
+
+    return ignore_row_idxs_per_ss_deme;
 }
 
 void deme_expander::create_demeIDs(int n_expansions)
@@ -249,6 +294,32 @@ bool deme_expander::create_representations(const combo_tree& exemplar)
     return not _reps.empty();
 }
 
+combo_tree deme_expander::prune_xmplr(const combo_tree& xmplr,
+                                      const feature_set& selected_features) const
+{
+    combo_tree res = xmplr;
+    // remove literals of non selected features from the exemplar
+    for (auto it = res.begin(); it != res.end();) {
+        if (is_argument(*it)) {
+            arity_t feature = get_argument(*it).abs_idx_from_zero();
+            auto fit = selected_features.find(feature);
+            if (fit == selected_features.end())
+                it = res.erase(it); // not selected, prune it
+            else
+                ++it;
+        }
+        else
+            ++it;
+    }
+    simplify_knob_building(res);
+    // if the exemplar is empty use a seed
+    if (res.empty()) {
+        type_node otn = get_type_node(get_signature_output(_type_sig));
+        res = type_to_exemplar(otn);
+    }
+    return res;
+}
+
 /**
  * Create one or more demes.
  *
@@ -301,12 +372,14 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
     create_demeIDs(n_expansions);
 
     create_representations(exemplar);
-
+    
+    // Create empty demes with their IDs
     for (unsigned i = 0; i < _reps.size(); i++) {
         if (_filter_params.n_subsample_demes > 1) {
             _demes.emplace_back();
             for (unsigned j = 0; j < _filter_params.n_subsample_demes; j++)
-                _demes.back().emplace_back(_reps[i].fields(), demeID_t(n_expansions, i, j));
+                _demes.back().emplace_back(_reps[i].fields(),
+                                           demeID_t(n_expansions, i, j));
         } else {
             _demes.emplace_back(1, deme_t(_reps[i].fields(), _demeIDs[i]));
         }
@@ -325,6 +398,17 @@ void deme_expander::optimize_demes(int max_evals, time_t max_time)
     max_evals_per_deme /= n_ss_demes;
     for (unsigned i = 0; i < _demes.size(); i++)
     {
+        if (n_ss_demes > 1)
+            logger().debug("Subsample data and optimize SS-demes");
+
+        // For each subsample-deme hold set of row indexes to remove
+        std::vector<std::set<unsigned>> ignore_row_idxs_per_ss_deme =
+            subsample_by_row();
+
+        // For each subsample-deme hold set of timestamps to remove
+        std::vector<std::set<TTable::value_type>> ignore_timestamps_per_ss_deme =
+            subsample_by_time();
+
         for (unsigned j = 0; j < n_ss_demes; j++)
         {    
             if (logger().isDebugEnabled()) {
@@ -374,13 +458,15 @@ void deme_expander::optimize_demes(int max_evals, time_t max_time)
             }
 
             if (n_ss_demes > 1) {
-                OC_ASSERT(false, "TODO");
-                // Call _cscorer to get the subsampling Divide the
-                // working ctable into partitions, suffled of equal
-                // size each. To do so, consider a set [0, usize),
-                // turn that into a list, shuffle that list, cut that
-                // list into n_ss_demes equal parts. For each working
-                // ctable, remove that part for Nth subsample.
+                if (_filter_params.by_time) {
+                    OC_ASSERT(ignore_timestamps_per_ss_deme.size() == n_ss_demes,
+                              "Apparently subsample_by_time() was not able to work properly. "
+                              "Are you sure your data has timestamps, "
+                              "and those are properly loaded (see option --timestamp-feature)");
+                    _cscorer.ignore_rows_at_times(ignore_timestamps_per_ss_deme[j]);
+                }
+                else
+                    _cscorer.ignore_rows(ignore_row_idxs_per_ss_deme[j]);
             }
 
             // Optimize
@@ -388,6 +474,9 @@ void deme_expander::optimize_demes(int max_evals, time_t max_time)
                 complexity_based_scorer(_cscorer, _reps[i], _params.reduce_all);
             _optimize(_demes[i][j], cpx_scorer, max_evals_per_deme, max_time);
         }
+
+        if (n_ss_demes > 1)
+            logger().debug("Done optimizing SS-demes");
     }
 
     if (_params.fstor) {

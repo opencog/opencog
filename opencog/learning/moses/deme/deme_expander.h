@@ -83,7 +83,20 @@ struct deme_expander
     optimizer_base &_optimize;
 
 protected:
-     /**
+    /**
+     * Subsample by time. Return a vector (of size n_ss_demes) of sets
+     * of timestamps to be discarded during subsampling.
+     */
+    std::vector<std::set<TTable::value_type>> subsample_by_time() const;
+
+    /**
+     * Subsample by row. return a vector (of size n_ss_demes) of sets
+     * of indexes (of a corresponding uncompressed table) to be
+     * discarded during subsampling.
+     */
+    std::vector<std::set<unsigned>> subsample_by_row() const;
+
+    /**
      * Create deme IDs
      */
     void create_demeIDs(int n_expansions);
