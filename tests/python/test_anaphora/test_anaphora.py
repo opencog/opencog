@@ -203,12 +203,48 @@ class AnaphoraUnitTester(TestCase):
             self.assertTrue(self.hobbsAgent.propose(self.getWord('antecedent'),5))
             self.atomspace.clear()
 
+        def filter_6():
+
+            self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#6/data_#1.scm"))
+            self.hobbsAgent.initilization(self.atomspace)
+            self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),6))
+            self.atomspace.clear()
+
+            self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#6/data_#2.scm"))
+            self.hobbsAgent.initilization(self.atomspace)
+            self.assertTrue(self.hobbsAgent.propose(self.getWord('antecedent'),6))
+            self.atomspace.clear()
+
+            self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#6/data_#3.scm"))
+            self.hobbsAgent.initilization(self.atomspace)
+            self.assertTrue(self.hobbsAgent.propose(self.getWord('antecedent'),6))
+            self.atomspace.clear()
+
+        def filter_7():
+
+            self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#7/data_#1.scm"))
+            self.hobbsAgent.initilization(self.atomspace)
+            self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),7))
+            self.atomspace.clear()
+
+            self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#7/data_#2.scm"))
+            self.hobbsAgent.initilization(self.atomspace)
+            self.assertTrue(self.hobbsAgent.propose(self.getWord('antecedent'),7))
+            self.atomspace.clear()
+
+            self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#7/data_#3.scm"))
+            self.hobbsAgent.initilization(self.atomspace)
+            self.assertTrue(self.hobbsAgent.propose(self.getWord('antecedent'),7))
+            self.atomspace.clear()
+
 
         filter_1()
         filter_2()
         filter_3()
         filter_4()
         filter_5()
+        filter_6()
+        filter_7()
 
 if __name__ == '__main__':
     unittest.main()
