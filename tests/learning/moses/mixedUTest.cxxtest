@@ -83,8 +83,8 @@ public:
         moses_test_score({"-Hit", 
                           "-upred",
                           "-nimpulse", "-nsin", "-nexp", "-nlog",
-                          "-m150000",
-                          "-r11",  // Much faster with this rand seed.
+                          "-m1500000",
+                          "-r10",  // Much faster with this rand seed.
                           "-z1",   // Seems to work much better with this weight...
                           "-Z1",   // much much faster w/this flag...
                           data_file_path,
@@ -103,9 +103,9 @@ public:
         moses_test_score({"-Hit", 
                           "-upred",
                           "-nimpulse", "-nsin", "-nexp", "-nlog",
-                          "-m150000",
+                          "-m1500000",
                           "-j2",   // two threads
-                          "-r11",   // Much faster with this rand seed.
+                          "-r10",   // Much faster with this rand seed.
                           "-z1",   // Seems to work much better with this weight...
                           "-Z1",   // much much faster w/this flag...
                           data_file_path,
