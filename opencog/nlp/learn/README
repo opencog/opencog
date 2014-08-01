@@ -608,6 +608,37 @@ Tagalog status:
 4519631 = 4.5M morpehem pairs
 204K morpehemes
 
+   62 | LinkGrammarRelationshipNode
+select * from atoms where type=62;
+
+select * from atoms order by stv_confidence;
+
+{60,5592759}
+{60,4941961}
+{60,1710609}
+17720161
+7337858
+2586082
+16810147
+9548076
+3844852
+
+select * from atoms where stv_count > 100 order by stv_confidence;
+
+1217445
+
+1043142
+
+
+select * from atoms where uuid=5592759;
+
+{223,223}
+236
+541
+
+
+
+
 
 
 ======================================================================
