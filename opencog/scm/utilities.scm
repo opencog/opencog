@@ -318,7 +318,7 @@
 ; cog-get-partner -- Return other atom of a link conecting two atoms
 ; cog-get-partner pair atom
 ;
-; If 'pare' is a link containing two atoms, and 'wrd' is one of the
+; If 'pare' is a link containing two atoms, and 'atom' is one of the
 ; two atoms, then this returns the other atom in the link.
 ;
 ; See also cog-chase-link which does not require the link to be
