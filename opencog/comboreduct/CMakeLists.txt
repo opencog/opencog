@@ -64,7 +64,6 @@ ADD_LIBRARY(comboreduct SHARED
 
 TARGET_LINK_LIBRARIES (comboreduct
 	cogutil
-    ${Boost_DATE_TIME_LIBRARY}
 )
 
 ADD_LIBRARY(comboant SHARED

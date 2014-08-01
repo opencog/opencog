@@ -53,10 +53,6 @@ static const string inverse_str = "inverse";
 static const string complement_str = "complement";
 static const string power_str = "power";
 
-// Time bscore granularity
-static const string day_str = "day";
-static const string month_str = "month";
-
 // focus types (which data points feature selection within moses
 // should focus on)
 static const string focus_all = "all"; // all data points are considered
@@ -339,8 +335,9 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "metapop size cap = cap_coef*(x+250)*(1+2*exp(-x/500)), "
          "where x is the number of generations so far. The default usually works "
          "well but if you run out of memory you may decrease that value.\n")
-
+        
         // Large problem parameters
+
         ("hc-max-nn-evals",
          po::value<unsigned>(&hc_max_nn)->default_value(20000),
          str(format("Hillclimbing parameter (%s).  When exploring the "
@@ -518,9 +515,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "Number of times the same exemplar can be revisited. "
          "This option is only worthwhile when there "
          "is a great deal of stochasticity in the search so that exploring "
-         "a deme spawn from the same exemplar multiple times will yield "
-         "substantially different results. If the value is negative then the "
-         "number of revisit is unbound. "
+         "a deme multiple times will yield substantially different results. "
          "This might be the case is feature selection is used for instance.\n")
 
         // Output control options
@@ -532,16 +527,16 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "then return all results.\n")
 
         (opt_desc_str(output_score_opt).c_str(),
-         po::value<bool>(&output_score)->default_value(true),
-         "If 1, output the score before each candidate\n")
+         po::value<bool>(&output_score)->default_value(false),
+         "If 1, output the score after each candidate\n")
 
-        (opt_desc_str(output_cscore_opt).c_str(),
-         po::value<bool>(&output_cscore)->default_value(false),
-         "If 1, output the composite score after each candidate\n")
+        (opt_desc_str(output_penalty_opt).c_str(),
+         po::value<bool>(&output_penalty)->default_value(false),
+         "If 1, output the penalized score and it's compenents (below each candidate).\n")
 
         (opt_desc_str(output_bscore_opt).c_str(),
          po::value<bool>(&output_bscore)->default_value(false),
-         "If 1, output the bscore after each candidate (possibly after the composite score).\n")
+         "If 1, output the bscore (below each candidate).\n")
 
         (opt_desc_str(output_only_best_opt).c_str(),
          po::value<bool>(&output_only_best)->default_value(false),
@@ -694,24 +689,9 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "the negative predictive value is maximized (instead of "
          "the precision).\n")
 
-        ("time-dispersion-pressure",
-         po::value<score_t>(&time_dispersion_pressure)->default_value(0.0),
-         "Adds a penalty in the fitness to ensure that models have "
-         "their activation spread across time.\n")
-
-        ("time-dispersion-exponent",
-         po::value<score_t>(&time_dispersion_exponent)->default_value(1.0),
-         "Distort the penalty.\n")
-
-        ("time-bscore",
-         po::value<bool>(&time_bscore)->default_value(false),
-         "In case the data has timestamp, spread the bscore across the "
-         "timestamps instead of data points.\n")
-
-        ("time-bscore-granularity",
-         po::value<string>(&time_bscore_granularity_str)->default_value(day_str),
-         "Set the granularity of timestamp, in case the bscore is spread "
-         "across time. Options are 'day' and 'month'.\n")
+        ("pre-worst-norm",
+         po::value<bool>(&pre_worst_norm)->default_value(false),
+         "Normalize the precision w.r.t. its worst decile [EXPERIMENTAL].\n")
 
         ("it-abs-err",
          po::value<bool>(&it_abs_err)->default_value(false),
@@ -801,19 +781,13 @@ problem_params::add_options(boost::program_options::options_description& desc)
          po::value<bool>(&festor_params.prune_xmplr)->default_value(0),
          "Remove from the exemplar the literals of non-selected features.\n")
 
-        ("fs-subsampling-ratio",
-         po::value<double>(&festor_params.subsampling_ratio)->default_value(1),
-         "Subsampling size ratio. 1 means no subsampling is taking place. "
-         "0 means is the most extrem subsampling (all data are discarded). "
-         "This is useful to introduce some randomness in "
+        ("fs-subsampling-pbty",
+         po::value<double>(&festor_params.subsampling_pbty)->default_value(0),
+         "Probability of discarding an observation before carrying feature "
+         "selection. 0 means no observation is discard, 1 means all are discard. "
+         "This is to force to introduce some randomness in "
          "feature selection, as not all feature selection algorithms "
          "have some.\n")
-
-        ("fs-subsampling-by-time",
-         po::value<bool>(&festor_params.subsampling_by_time)->default_value(0),
-         "If enabled, then fs-subsampling-ratio applies to the set of timestamps "
-         "rather than the set of rows. And only rows timestamped at subsampled "
-         "timestamps are kept.\n")
 
         ("fs-demes",
          po::value<unsigned>(&festor_params.n_demes)->default_value(1),
@@ -850,13 +824,6 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "will be selected. \n"
          "For the -ainc algo only, the -C flag over-rides this setting.\n")
 
-        ("fs-enforce-features-filename",
-         po::value<string>(&fs_enforce_features_filename),
-         "File containing a list (seperated by newline) of a feature name"
-         "possibly followed by a weight between 0 and 1. If the weight is"
-         "missing it is equivalent to being 1. The weight represent the"
-         "probability of being of the feature of being inserted in the deme.\n")
-
         // ======= Feature-selection diversity pressure =======
         ("fs-diversity-pressure",
          po::value<double>(&festor_params.diversity_pressure)->default_value(0.0),
@@ -876,12 +843,6 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "This is used in case the number of selected features tends to "
          "be high compared to the number of datapoints to decrease inacuracy "
          "of the mutual information.\n")
-
-        ("fs-diversity-jaccard",
-         po::value<bool>(&festor_params.diversity_jaccard)->default_value(true),
-         "Instead of using the expensive mutual information between feature "
-         "sets to measure diversity, it uses a cheap Jaccard index. In that "
-         "case the feature semantic is ignored")
 
         // ======= Feature-selection incremental algo params =======
         ("fs-inc-redundant-intensity",
@@ -977,85 +938,6 @@ problem_params::add_options(boost::program_options::options_description& desc)
          po::value<unsigned>(&fs_params.smd_top_size)->default_value(10),
          "Stochastic max dependency parameter. Number of feature subset "
          "candidates to consider building the next superset.\n")
-
-        // ======= Subsample-deme params =======
-        ("ss-n-subsample-demes",
-         po::value<unsigned>(&ss_n_subsample_demes)->default_value(0),
-         "Number of demes to use for subsampling filter.\n")
-
-        ("ss-n-top-candidates",
-         po::value<unsigned>(&ss_n_top_candidates)->default_value(1),
-         "Number of top candidates to consider to calculate the score standard "
-         "deviation.\n")
-
-        ("ss-n-tuples",
-         po::value<unsigned>(&ss_n_tuples)->default_value(UINT_MAX),
-         "Number of tuples used to calculate the estimate of the standard "
-         "deviation of the top candidates. If the number of top candidates "
-         "(set by --ss-n-top-candidates) is too high you might want to set "
-         "that value lower than default to avoid a computational "
-         "bottleneck.\n")
-
-        ("ss-std-dev-threshold",
-         po::value<float>(&ss_std_dev_threshold)->default_value(std::numeric_limits<float>::max()),
-         "An average deme score standard deviation needs to fall under that value to"
-         "be included in the metapopulation.\n")
-
-        ("ss-tanimoto-mean-threshold",
-         po::value<float>(&ss_tanimoto_mean_threshold)->default_value(1.0),
-         "Demes are merged to the metapopulation only if the average tanimoto "
-         "distances between the top candidates of "
-         "the subsampled demes fall below that value.\n")
-
-        ("ss-tanimoto-geometric-mean-threshold",
-         po::value<float>(&ss_tanimoto_geo_mean_threshold)->default_value(1.0),
-         "Demes are merged to the metapopulation only if the geometric average tanimoto "
-         "distances between the top candidates of "
-         "the subsampled demes fall below that value.\n")
-
-        ("ss-tanimoto-max-threshold",
-         po::value<float>(&ss_tanimoto_max_threshold)->default_value(1.0),
-         "Demes are merged to the metapopulation only if the max tanimoto "
-         "distances between the top candidates of "
-         "the subsampled demes fall below that value.\n")
-
-        ("ss-n-best-bfdemes",
-         po::value<unsigned>(&ss_n_best_bfdemes)->default_value(0),
-         "Alternate way to subsampling filter. "
-         "Instead the n best breadth first demes are selected.\n")
-
-        ("ss-tanimoto-mean-weight",
-         po::value<float>(&ss_tanimoto_mean_weight)->default_value(0.0),
-         "Weight to determine the aggregated tanimoto distance for "
-         "--ss-n-best-bfdemes.\n")
-
-        ("ss-tanimoto-geometric-mean-weight",
-         po::value<float>(&ss_tanimoto_geo_mean_weight)->default_value(0.0),
-         "Weight to determine the aggregated tanimoto distance for "
-         "--ss-n-best-bfdemes.\n")
-
-        ("ss-tanimoto-max-weight",
-         po::value<float>(&ss_tanimoto_max_weight)->default_value(0.0),
-         "Weight to determine the aggregated tanimoto distance for "
-         "--ss-n-best-bfdemes.\n")
-
-        ("ss-n-subsample-fitnesses",
-         po::value<unsigned>(&ss_n_subsample_fitnesses)->default_value(0),
-         "Number of subsampled fitnesses to use for low score deviation pressure. "
-         "Ignored is 0 r 1.\n")
-
-        ("ss-low-dev-pressure",
-         po::value<float>(&ss_low_dev_pressure)->default_value(1.0),
-         "How much low score deviation pressure there is.\n")
-
-        ("ss-by-time",
-         po::value<bool>(&ss_by_time)->default_value(0),
-         "Subsample by time.\n")
-
-        ("ss-contiguous-time",
-         po::value<bool>(&ss_contiguous_time)->default_value(1),
-         "If subsample by time is enable then subsample contiguous "
-         "(chronologically ordered) time segments.\n")
 
         // ========== THE END of the options; note semicolon ===========
         ;
@@ -1235,49 +1117,11 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
         festor_params.xmplr_as_feature = true;
     }
 
-    // Parse enforce features
-    if (!fs_enforce_features_filename.empty()) {
-        ifstream in(fs_enforce_features_filename.c_str());
-        OC_ASSERT(in.is_open(), "Could not open %s",
-                  fs_enforce_features_filename.c_str());
-
-        while (in) {
-            string line;
-            getline(in, line);
-            if (line.empty())
-                continue;
-
-            // Check if there is a float (there must be a whiltespace then)
-            auto whitespace_pos = line.find(' ');
-            if (whitespace_pos != std::string::npos) {
-                string feature_name = line.substr(0, whitespace_pos);
-                float weight = stof(line.substr(whitespace_pos));
-                festor_params.enforce_features[feature_name] = weight;
-            } else {
-                festor_params.enforce_features[line] = 1;
-            }
-        }
-
-        for (auto& p : festor_params.enforce_features) {
-            logger().debug() << "Enforce feature " << p.first
-                             << " with probability " << p.second;
-        }
-    }
-
     // Set deme expansion paramters
     deme_params.reduce_all = reduce_all;
     deme_params.ignore_ops = ignore_ops;
     deme_params.linear_contin = linear_regression;
     deme_params.perm_ratio = perm_ratio;
-    if (ss_n_subsample_demes > 1 or ss_n_subsample_fitnesses > 1) {
-        // If SS-MOSES is enabled then the cache is automatically
-        // disabled because SS-MOSES implies to re-evaluate the same
-        // candidates over slightly different fitness functions
-        logger().debug() << "Disable cache because subsampling is enabled";
-        cache_size = 0;
-    } else {
-        cache_size = cache_size;
-    }
 
     // Set metapopulation parameters
     meta_params.max_candidates = max_candidates;
@@ -1323,35 +1167,6 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
     }
     meta_params.diversity.set_dst2dp(d2de);
 
-    // Set time bscore granularity
-    if (time_bscore_granularity_str == day_str)
-        time_bscore_granularity = TemporalGranularity::day;
-    else if (time_bscore_granularity_str == month_str)
-        time_bscore_granularity = TemporalGranularity::month;
-    else {
-        stringstream ss;
-        ss << "Granularity " << time_bscore_granularity_str << " not implemented";
-        log_output_error_exit(ss.str());
-    }
-
-    // Subsampling deme and fitness parameters
-    auto& ss_params = filter_params;
-    ss_params.n_subsample_demes = ss_n_subsample_demes;
-    ss_params.n_top_candidates = ss_n_top_candidates;
-    ss_params.n_tuples = ss_n_tuples;
-    ss_params.std_dev_threshold = ss_std_dev_threshold;
-    ss_params.tanimoto_mean_threshold = ss_tanimoto_mean_threshold;
-    ss_params.tanimoto_geo_mean_threshold = ss_tanimoto_geo_mean_threshold;
-    ss_params.tanimoto_max_threshold = ss_tanimoto_max_threshold;
-    ss_params.n_best_bfdemes = ss_n_best_bfdemes;
-    ss_params.tanimoto_mean_weight = ss_tanimoto_mean_weight;
-    ss_params.tanimoto_geo_mean_weight = ss_tanimoto_geo_mean_weight;
-    ss_params.tanimoto_max_weight = ss_tanimoto_max_weight;
-    ss_params.n_subsample_fitnesses = ss_n_subsample_fitnesses;
-    ss_params.low_dev_pressure = ss_low_dev_pressure;
-    ss_params.by_time = ss_by_time;
-    ss_params.contiguous_time = ss_contiguous_time;
-
     // Set optim_parameters.
     opt_params = optim_parameters(opt_algo, pop_size_ratio, max_score, max_dist);
     hc_params.widen_search = hc_widen_search;
@@ -1388,7 +1203,7 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
     // Set metapop printer parameters.
     mmr_pa = metapop_printer(result_count,
                              output_score,
-                             output_cscore,
+                             output_penalty,
                              output_bscore,
                              output_only_best,
                              boosting,

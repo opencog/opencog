@@ -75,8 +75,8 @@ static bool expand_deme(metapopulation& mp,
         OC_ASSERT(false, "Exemplar failed to expand!\n");
     }
 
-    dex.optimize_demes(max_evals, max_time);
-    stats.n_evals += dex.total_evals();
+    std::vector<unsigned> actl_evals = dex.optimize_demes(max_evals, max_time);
+    stats.n_evals += boost::accumulate(actl_evals, 0U);
     stats.n_expansions++;
 
     bool done = mp.merge_demes(dex._demes, dex._reps);

@@ -47,10 +47,10 @@ struct dummy_bscore : public bscore_base
 
 struct dummy_optimization : public optimizer_base
 {
-    void operator()(instance_set<composite_score>& deme,
-                    const iscorer_base& iscorer, unsigned max_evals,
-                    time_t max_time)
-    {}
+    unsigned operator()(instance_set<composite_score>& deme,
+                        const iscorer_base& iscorer, unsigned max_evals,
+                        time_t max_time)
+    { return 0; }
 };
 
 

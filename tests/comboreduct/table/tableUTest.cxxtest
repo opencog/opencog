@@ -37,14 +37,13 @@ private:
     void testIStreamTable(const string& ts, ITable& it, OTable& ot,
                           bool has_header,
                           const string& target_feature = string(),
-                          const string& timestamp_feature = string(),
                           const vector<string>& ignore_features = vector<string>())
     {
         std::cout << "\n----------------------------" << std::endl;
 
         stringstream ss(ts);
         Table tab;
-        istreamTable(ss, tab, target_feature, timestamp_feature, ignore_features);
+        istreamTable(ss, tab, target_feature, ignore_features);
         ITable& it_test = tab.itable;
         OTable& ot_test = tab.otable;
 
@@ -191,11 +190,9 @@ public:
     {
         std::cout << "\n----------------------------" << std::endl;
         string target_feature("r");
-        string timestamp_feature("");
         vector<string> ignore_features;
         Table tt = loadTable(tableUTest_dir + "weighted.csv",
-                             target_feature, timestamp_feature,
-                             ignore_features);
+                             target_feature, ignore_features);
         CTable ctt = tt.compressed("wgt");
 
         cout << "weighted result:\n" << ctt << endl;
@@ -223,7 +220,7 @@ public:
         testIStreamTable("happiness,price,temperature\n"
                          "10.1,0.4,244.2\n"
                          "6.5,9.5,4.2\n", it, ot, true,
-                         "price", "", {"temperature"});
+                         "price", {"temperature"});
     }
 
     void test_ignore_col_complicated()
@@ -240,39 +237,36 @@ public:
                          "sad,1,1,0\n"
                          "bored,0.44,244.2,T\n"
                          "super-happy,9.5,4.2,F\n", it, ot, true,
-                         "price", "", {"temperature"});
+                         "price", {"temperature"});
     }
 
-    // // This is no longer supported
-    // void test_ignore_col_numeric()
-    // {
-    //     vertex_seq o{1, 0.44, 9.5}; // price column
-    //     OTable ot(o, label1);
-    //     vector<type_node> itypes({id::enum_type, id::boolean_type});
-    //     vector<string> il{olabel, "truth"};
-    //     ITable it(itypes, il);
-    //     it.push_back(vertex_seq({enum_t("sad"), id::logical_false}));
-    //     it.push_back(vertex_seq({enum_t("bored"), id::logical_true}));
-    //     it.push_back(vertex_seq({enum_t("super-happy"), id::logical_false}));
-    //     testIStreamTable("happiness,price,temperature,truth\n"
-    //                      "sad,1,1,0\n"
-    //                      "bored,0.44,244.2,T\n"
-    //                      "super-happy,9.5,4.2,F\n", it, ot, true,
-    //                      // numeric values for these columns; the left-most is column 1
-    //                      // so price is column 2...
-    //                      // "price", {"temperature"});
-    //                      "2", "", {"3"});
-    // }
+    void test_ignore_col_numeric()
+    {
+        vertex_seq o{1, 0.44, 9.5}; // price column
+        OTable ot(o, label1);
+        vector<type_node> itypes({id::enum_type, id::boolean_type});
+        vector<string> il{olabel, "truth"};
+        ITable it(itypes, il);
+        it.push_back(vertex_seq({enum_t("sad"), id::logical_false}));
+        it.push_back(vertex_seq({enum_t("bored"), id::logical_true}));
+        it.push_back(vertex_seq({enum_t("super-happy"), id::logical_false}));
+        testIStreamTable("happiness,price,temperature,truth\n"
+                         "sad,1,1,0\n"
+                         "bored,0.44,244.2,T\n"
+                         "super-happy,9.5,4.2,F\n", it, ot, true,
+                         // numeric values for these columns; the left-most is column 1
+                         // so price is column 2...
+                         // "price", {"temperature"});
+                         "2", {"3"});
+    }
 
     void test_sparseFile1()
     {
         std::cout << "\n----------------------------" << std::endl;
         string target_feature = "target1";
-        string timestamp_feature = "";
         vector<string> ignore_features = {"a", "b", "c", "target2"};
         Table tt = loadTable(tableUTest_dir + "sparse.data",
-                             target_feature, timestamp_feature,
-                             ignore_features);
+                             target_feature, ignore_features);
 
         testIStreamTable("target1,date,d,e,f,g,x,y,z\n"
                          "thing,12-04-2012,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
@@ -286,11 +280,9 @@ public:
     {
         std::cout << "\n----------------------------" << std::endl;
         string target_feature = "target2";
-        string timestamp_feature = "";
         vector<string> ignore_features = {"a", "b", "c", "target1"};
         Table tt = loadTable(tableUTest_dir + "sparse.data",
-                             target_feature, timestamp_feature,
-                             ignore_features);
+                             target_feature, ignore_features);
 
         testIStreamTable("target2,date,d,e,f,g,x,y,z\n"
                          "3.0,12-04-2012,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
@@ -304,11 +296,9 @@ public:
     {
         std::cout << "\n----------------------------" << std::endl;
         string target_feature;
-        string timestamps_feature;
         vector<string> ignore_features;
         Table tt = loadTable(tableUTest_dir + "dataset.csv",
-                             target_feature, timestamps_feature,
-                             ignore_features);
+                             target_feature, ignore_features);
         set<arity_t> fs{0, 1};
         CTable ctt = tt.compressed();
         double mi = mutualInformation(ctt, fs);
@@ -362,11 +352,9 @@ public:
     void test_force_feature()
     {
         string target_feature = "target";
-        string timestamps_feature = "";
         vector<string> ignore_features = {"time", "f1"};
         string input_file = tableUTest_dir + "dataset_force_feature.csv";
-        Table tt = loadTable(input_file, target_feature, timestamps_feature,
-                             ignore_features);
+        Table tt = loadTable(input_file, target_feature, ignore_features);
 
         ostreamTable(cout << "before" << endl, tt);
         

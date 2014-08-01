@@ -195,14 +195,16 @@ void moses_learning::operator()()
 
         // learning time is uncapped.
         time_t max_time = INT_MAX;
-        _dex->optimize_demes(max_for_generation - _stats.n_evals, max_time);
-        unsigned evals = _dex->total_evals();
-        std::cout << "number of evaluations: " << evals << std::endl;
+        auto evals = _dex->optimize_demes(max_for_generation
+                                                  - _stats.n_evals,
+                                                  max_time);
+        int o = boost::accumulate(evals, 0);
+        std::cout << "number of evaluations: " << o << std::endl;
 
-        // if (evals < 0)
-        //     _hcState = HC_FINISH_CANDIDATES;
+        if (o < 0)
+            _hcState = HC_FINISH_CANDIDATES;
 
-        _stats.n_evals += evals;
+        _stats.n_evals += o;
 
         //print the generation number and a best solution
 //          std::cout << "EST sampled " << metapop->n_evals()

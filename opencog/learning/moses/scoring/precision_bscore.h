@@ -26,7 +26,6 @@
 #define _PRECISION_BSCORE_H
 
 #include "scoring_base.h"
-#include "time_dispersion.h"
 
 namespace opencog { namespace moses {
 
@@ -73,6 +72,12 @@ using combo::type_node;
  * description of discriminating_bscore::get_threshold_penalty() for
  * details.
  *
+ * If worst_norm is true, then the percision is divided by the absolute
+ * average of the negative lower (resp. positive upper if
+ * this->positive is false) decile or less. If there is no negative
+ * (resp. positive if this->positive is false) values then it is not
+ * normalized. (??)
+ *
  * If substract_neg_target is true then the negation of the target (in
  * the boolean case) count for -1/2 instead of 0 and 1/2 instead of
  * 1. In other words the fitness to maximize is:
@@ -100,19 +105,17 @@ using combo::type_node;
  * XXX This class should be reworked to derive from
  * discriminating_bscore.  This would allow us to get rid of duplicate
  * code for sec_complexity_coef() and for get_activation_penalty() and
- * min_improv() and sum_outputs().
+ * min_improv() and sum_outputs(). TODO In fact everything could be
+ * replaced, if it were not for the worst_deciles stuff.
  */
-struct precision_bscore : public bscore_ctable_time_dispersion
+struct precision_bscore : public bscore_ctable_base
 {
     precision_bscore(const CTable& _ctable,
-                     float activation_pressure = 1.0f,
+                     float penalty = 1.0f,
                      float min_activation = 0.5f,
                      float max_activation = 1.0f,
-                     float dispersion_pressure = 0.0f,
-                     float dispersion_exponent = 1.0f,
                      bool positive = true,
-                     bool time_bscore = false,
-                     TemporalGranularity granularity = TemporalGranularity::day);
+                     bool worst_norm = false);
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -151,12 +154,17 @@ struct precision_bscore : public bscore_ctable_time_dispersion
 
 protected:
     score_t min_activation, max_activation;
-    score_t activation_pressure;
+    score_t max_output; // max output one gets (1 in case it is
+                        // boolean). This is used to normalized the
+                        // precision in case the output isn't boolean.
+    score_t penalty;
+    bool positive, worst_norm;
 
-    bool positive;
-
-    bool time_bscore;           // whether the bscore is spread over
-                                // the temporal axis
+    // if enabled then each datapoint is an entry in the bscore (its
+    // part contributing to the precision, and the activation penalty
+    // is the last one).
+    // WARNING: worst_score isn't supported then
+    bool precision_full_bscore;
 
     type_node output_type;
 
