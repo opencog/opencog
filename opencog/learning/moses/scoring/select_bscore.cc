@@ -230,14 +230,9 @@ behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble
 
 behavioral_score select_bscore::best_possible_bscore() const
 {
-    behavioral_score bs;
-
-    for (const CTable::value_type& io_row : _wrk_ctable) {
-        // It should always be possible to correctly predict one
-        // entry of the ctable; so best score is zero.
-        bs.push_back(0.0);
-    }
-    return bs;
+    // It should always be possible to correctly predict one entry
+    // of the ctable; and so the  best score is zero for each row.
+    return behavioral_score(_wrk_ctable.size(), 0.0);
 }
 
 
