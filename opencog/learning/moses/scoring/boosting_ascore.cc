@@ -46,12 +46,8 @@ boosting_ascore::boosting_ascore(size_t sz)
 /// particular, the formulas are broken.
 score_t boosting_ascore::operator()(const behavioral_score& bs) const
 {
-    // OC_ASSERT(bs.size() == _size, "Unexpected behavioral score size! "
-    //           " Got %d expected %d", bs.size(), _size);
-
-    // Hack (temporary?) to have variable size bscore work (without boost)
-    if (_size == 0)
-        return boost::accumulate(bs, (score_t)0);
+    OC_ASSERT(bs.size() == _size, "Unexpected behavioral score size! "
+        " Got %d expected %d", bs.size(), _size);
 
     score_t res = 0.0;
     for (size_t i=0; i<_size; i++) {

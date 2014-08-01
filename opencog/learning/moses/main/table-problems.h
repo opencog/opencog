@@ -39,7 +39,6 @@ struct table_problem_params : public option_base
 
     std::vector<std::string> input_data_files;
     std::string target_feature;
-    std::string timestamp_feature;
     std::string weighting_feature;
     std::vector<std::string> ignore_features_str;
 };

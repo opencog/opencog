@@ -93,65 +93,12 @@ struct diversity_parameters
 };
 
 /**
- * Parameters about subsample deme filter
- */
-struct subsample_deme_filter_parameters
-{
-    subsample_deme_filter_parameters(unsigned _n_subsample_demes = 0,
-                                     unsigned _n_top_candidates = 1) :
-        by_time(true),
-        contiguous_time(true),
-        n_subsample_demes(_n_subsample_demes),
-        n_top_candidates(_n_top_candidates),
-        n_tuples(UINT_MAX) {}
-
-    // Subsample by time
-    bool by_time;
-
-    // Contiguous time segment
-    bool contiguous_time;
-
-    // Number of subsample demes. If set 0 or 1 subsample_deme_filter
-    // remains disactivated.
-    unsigned n_subsample_demes;
-
-    // Top candidates to consider for computing the score variance and
-    // selecting the candidates from all subsamples
-    unsigned n_top_candidates;
-
-    // Number of tuples used to estimate the mean of the variance of
-    // scores across the top candidates
-    unsigned n_tuples;
-
-    // Filter standard deviation threshold. A deme is only selected if
-    // the average score standard deviation goes below std_dev_threshold
-    float std_dev_threshold;
-
-    // Filter mean, geometric mean and max tanimoto distance thresholds.
-    float tanimoto_mean_threshold,
-        tanimoto_geo_mean_threshold,
-        tanimoto_max_threshold;
-
-    // Instead of filtering accoring to threshold select the breadth first demes
-    unsigned n_best_bfdemes;
-
-    // Tanimoto mean, geometric mean and max weights used to calculate
-    // the aggregate agreement distance for n_best_bfdemes
-    float tanimoto_mean_weight,
-        tanimoto_geo_mean_weight,
-        tanimoto_max_weight;
-
-    unsigned n_subsample_fitnesses;
-    float low_dev_pressure;    
-};
-
-/**
- * parameters about metapopulation management
+ * parameters for metapopulation management
  */
 struct metapop_parameters
 {
     metapop_parameters(int _max_candidates = -1,
-                       int _revisit = 0,
+                       unsigned _revisit = 0,
                        score_t _complexity_temperature = 6.0f,
                        unsigned _jobs = 1,
                        diversity_parameters _diversity = diversity_parameters()) :
@@ -173,9 +120,8 @@ struct metapop_parameters
     int max_candidates;
 
     // The number of times the same exemplar can be revisited. If 0
-    // then an exemplar can only be visited once. If negative then the
-    // number of revisit is infinite
-    int revisit;
+    // then an exemplar can only be visited once.
+    unsigned revisit;
 
     // If true, then an Ada-Boost-style algorithm is applied during
     // the metapopulation merge. In this case, the scorer must be

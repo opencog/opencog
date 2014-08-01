@@ -37,7 +37,6 @@ partial_solver::partial_solver(const CTable &ctable,
                                const optim_parameters& opt_params,
                                const hc_parameters& hc_params,
                                const deme_parameters& deme_params,
-                               const subsample_deme_filter_parameters& filter_params,
                                const metapop_parameters& meta_params,
                                const moses_parameters& moses_params,
                                const metapop_printer& mmr_pa)
@@ -51,7 +50,6 @@ partial_solver::partial_solver(const CTable &ctable,
      _opt_params(opt_params),
      _hc_params(hc_params),
      _deme_params(deme_params),
-     _filter_params(filter_params),
      _meta_params(meta_params),
      _moses_params(moses_params), _printer(mmr_pa),
      _ascore(NULL), 
@@ -108,7 +106,7 @@ void partial_solver::solve()
         metapop_moses_results(_exemplars, _table_type_signature,
                               _reduct, _reduct, *_cscore,
                               _opt_params, _hc_params, 
-                              _deme_params, _filter_params,
+                              _deme_params,
                               _meta_params, _moses_params,
                               *this);
 
@@ -124,7 +122,7 @@ void partial_solver::solve()
             metapop_moses_results(_exemplars, _table_type_signature,
                                   _reduct, _reduct, *_straight_cscore,
                                   _opt_params, _hc_params, 
-                                  _deme_params, _filter_params,
+                                  _deme_params,
                                   _meta_params, _moses_params,
                                   _printer);
 

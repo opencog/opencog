@@ -34,7 +34,6 @@
 #include <boost/range/algorithm/adjacent_find.hpp>
 #include <boost/range/algorithm/equal.hpp>
 #include <boost/operators.hpp>
-#include <boost/date_time/gregorian/gregorian.hpp>
 
 #include <opencog/util/algorithm.h>
 #include <opencog/util/Counter.h>
@@ -51,16 +50,7 @@
                                // the number of trials needed to check
                                // a formula
 
-#define TARGET_DISCRETIZED_BINS_NUM 5  // discretize contin type target
-                                       // into # bins
-
 namespace opencog { namespace combo {
-
-std::vector<contin_t> discretize_contin_feature(contin_t min, contin_t max);
-
-// builtin is not used to represent builtins but to trick vertex to
-// represent discretized contin values
-builtin get_discrete_bin(std::vector<contin_t> disc_intvs, contin_t val);
 
 /**
  * Get indices (aka positions or offsets) of a list of labels given a
@@ -443,87 +433,16 @@ struct seq_filtered_visitor : public boost::static_visitor<multi_type_seq>
     const F& _filter;
 };
 
-static const std::string default_timestamp_label("timestamp");
-
-/**
- * Table containing timestamps.
- * There is only one column: a single timestamp for each row.
- */
-struct TTable : public std::vector<boost::gregorian::date> {
-    typedef std::vector<boost::gregorian::date> super;
-public:
-    typedef boost::gregorian::date value_type;
-
-    TTable(const std::string& tl = default_timestamp_label);
-    TTable(const super& tt, const std::string& tl = default_timestamp_label);
-    void set_label(const std::string&);
-    const std::string& get_label() const;
-protected:
-    std::string label;
-};
-
-struct TimedValue :
-    public boost::less_than_comparable<TimedValue>,
-    public boost::equality_comparable<TimedValue>
-{
-    TimedValue(const vertex v,
-               const TTable::value_type t = TTable::value_type())
-        : value(v), timestamp(t) {}
-    vertex value;
-    TTable::value_type timestamp;
-
-    bool operator<(const TimedValue &r) const {
-        return (value < r.value) || (timestamp < r.timestamp);
-    }
-
-    bool operator==(const TimedValue& r) const {
-        return (value == r.value) && (timestamp == r.timestamp);
-    }
-
-};
-
-// How to count timed inputs. The type is double to work weighted
-// features
-typedef double count_t;
-
-struct TimedCounter : public Counter<TimedValue, count_t> {
-    // Overload get(const TimedValue&) to work with a vertex v, in
-    // that case it returns the sum of that counter across all
-    // timestamps with vertex equal to v.
-    count_t get(const vertex& v) const;
-
-    // Return a counter without timestamps
-    Counter<vertex, count_t> untimedCounter() const;
-
-    // Overload most_frequent() so that it returns the most frequent
-    // vertex over all timestamps.
-    vertex most_frequent() const;
-};
-
-/**
- * Like CTable (defined below) but the keys are timestamps.
- *
- * Inputs are currently not supported.
- *
- * For the moment it is a mere typedef, but it will probably have to
- * be turned into a class eventually.
- */
-typedef std::map<TTable::value_type, Counter<vertex, count_t>> CTableTime;
-
 /// CTable is a "compressed" table.  Compression is done by removing
 /// duplicated inputs, and the output column is replaced by a counter
 /// of the duplicated outputs.  That is, the output column is of the
-/// form {(v1,t1):c1, {(v2,t2):c2, ...} where c1 is the number of
-/// times value v1 was seen in the output at timestamp t1, c2 the
-/// number of times v2 was observed at timestamps t2, etc. If the data
-/// are not timestamped, then it's only {v1:c1, {v2:c2, ...}. In
-/// practice the same structured is used with empty timestamp.
+/// form {v1:c1, v2:c2, ...} where c1 is the number of times value v1
+/// was seen in the output, c2 the number of times v2 was observed, etc.
 ///
 /// For weighted rows, the counts c1, c2,... need not be integers; they
 /// will hold the sum of the (floating point) weights for the rows.
 ///
-/// For example, if one has the following table (there is no timestamp
-/// in this example):
+/// For example, if one has the following table:
 ///
 ///   output,input1,input2
 ///   1,1,0
@@ -540,22 +459,25 @@ typedef std::map<TTable::value_type, Counter<vertex, count_t>> CTableTime;
 /// Most scoring functions work on CTable, as it avoids re-evaluating a
 /// combo program on duplicated inputs.
 //
-class CTable : public std::map<multi_type_seq, TimedCounter>
+typedef double count_t;
+
+class CTable : public std::map<multi_type_seq, Counter<vertex, count_t>>
                // , public boost::equality_comparable<CTable>
 {
 public:
     typedef multi_type_seq key_type;
-    typedef TimedCounter mapped_type;
-    typedef TimedCounter counter_t;
-    typedef std::map<key_type, TimedCounter> super;
+    typedef Counter<vertex, count_t> counter_t;
+    typedef std::map<key_type, counter_t> super;
     typedef typename super::value_type value_type;
     typedef std::vector<std::string> string_seq;
+
+    CTable() {}
 
     // Definition is delayed until after Table, as it uses Table.
     template<typename Func>
     CTable(const Func& func, arity_t arity, int nsamples = -1);
 
-    CTable(const std::string& _olabel = "output");
+    CTable(const std::string& _olabel);
 
     CTable(const string_seq& labs, const type_tree& tt);
 
@@ -674,31 +596,13 @@ public:
      */
     void remove_rows(const std::set<unsigned>& idxs);
 
-    /**
-     * Similar to above but remove rows matching a set of dates.
-     */
-    void remove_rows_at_times(const std::set<TTable::value_type>& timestamps);
-
-    /**
-    * Remove rows timestamped timestamp.
-     */
-    void remove_rows_at_time(const TTable::value_type& timestamp);
-
-    /**
-     * Get the set of timestamps in the data (if any)
-     */
-    std::set<TTable::value_type> get_timestamps() const;
-
     // return the output label + list of input labels
     void set_labels(const string_seq& labels);
     string_seq get_labels() const;
-    const std::string& get_output_label() const;
-    const string_seq& get_input_labels() const;
-    void set_signature(const type_tree& tt);
-    const type_tree& get_signature() const;
+    const string_seq& get_input_labels() const {return ilabels;}
+    void set_signature(const type_tree& tt) { tsig = tt; };
+    const type_tree& get_signature() const {return tsig;}
     type_node get_output_type() const;
-
-    CTableTime ordered_by_time() const;
 
     // Balance the ctable, so that, in case the output type is
     // discrete, all class counts are equal, but the uncompressed size
@@ -991,7 +895,6 @@ struct Table
 
     ITable itable;
     OTable otable;
-    TTable ttable;
     int target_pos;             // position of the target, useful for
                                 // writing the table. If -1 means last
                                 // position
@@ -1108,24 +1011,10 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
     auto asf = boost::apply_visitor(sfv);
     type_node otype = ctable.get_output_type();
 
-    const type_tree& tsig = ctable.get_signature();
-    bool all_discrete_inputs = true;
-    for (const type_tree& in_tt : get_signature_inputs(tsig)) {
-        type_node tn = get_type_node(in_tt);
-        if (tn != id::boolean_type and tn != id::enum_type) {
-            all_discrete_inputs = false;
-            break;
-        }
-    }
-
-
-    /////////////////////
-    // discrete inputs //
-    /////////////////////
-    if (all_discrete_inputs
-        and (id::enum_type == otype
-             or id::boolean_type == otype
-             or id::contin_type == otype))
+    ///////////////////
+    // discrete case //
+    ///////////////////
+    if (id::enum_type == otype or id::boolean_type == otype)
     {
         // Let X1, ..., Xn be the input columns on the table (as given by fs),
         // and Y be the output column.  We need to compute the joint entropies
@@ -1138,27 +1027,6 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         VSCounter ic;  // for H(X1, ..., Xn)
         VSCounter ioc; // for H(Y, X1, ..., Xn)
         double total = 0.0;
-
-        std::vector<contin_t> disc_intvs;
-
-        if (id::contin_type == otype)
-        {
-            contin_t min = 100000.0;
-            contin_t max = 0.0;
-
-            for (const auto& row : ctable)
-            {
-                for (const auto& val_pair : row.second) {
-                    const vertex& v = val_pair.first.value; // key of map
-                    if (get_contin(v) < min)
-                        min = get_contin(v);
-
-                    if (get_contin(v) > max)
-                        max = get_contin(v);
-                }
-            }
-            disc_intvs = discretize_contin_feature(min, max);
-        }
 
         // Count the total number of times an enum appears in the table
         Counter<vertex, count_t> ycount;
@@ -1174,24 +1042,16 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
 
             // for each enum type counted in the row,
             for (const auto& val_pair : row.second) {
-                const vertex& v = val_pair.first.value; // counter key value
+                const vertex& v = val_pair.first; // key of map
 
                 count_t count = row.second.get(v);
-
-                builtin b;
+                ycount[v] += count;
 
                 // update ioc == "input output counter"
                 switch (otype) {
                 case id::enum_type: vec.push_back(get_enum_type(v));
-                    ycount[v] += count;
                     break;
                 case id::boolean_type: vec.push_back(get_builtin(v));
-                    ycount[v] += count;
-                    break;
-                case id::contin_type:
-                    b = get_discrete_bin(disc_intvs,get_contin(v));
-                    vec.push_back(b);
-                    ycount[b] += count;
                     break;
                 default:
                     OC_ASSERT(false, "case not implemented");
@@ -1232,10 +1092,10 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
 
             // for each contin counted in the row,
             for (const auto& val_pair : row.second) {
-                const auto& v = val_pair.first.value; // counter key value
+                const vertex& v = val_pair.first; // key of map
                 contin_t y = get_contin(v); // typecast
 
-                unsigned flt_count = val_pair.second;
+                count_t flt_count = row.second.get(y);
                 dorepeat(flt_count) {
                     auto pr = std::make_pair(x,y);
                     sorted_list.insert(pr);
@@ -1301,7 +1161,7 @@ double mutualInformationBtwSets(const CTable& ctable,
     ///////////////////
     // discrete case //
     ///////////////////
-    if (id::enum_type == otype or id::boolean_type == otype or id::contin_type)
+    if (id::enum_type == otype or id::boolean_type == otype)
     {
         // Let U1, ..., Un the features resulting from the union
         // between fs_l and fs_r.
