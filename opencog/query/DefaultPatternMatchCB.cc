@@ -269,7 +269,7 @@ bool DefaultPatternMatchCB::virtual_link_match(LinkPtr& lvirt, Handle& gargs)
 	//           Arg1Atom
 	//           Arg2Atom
 	//
-	// XXX TODO s discussed on the mailing list, we should perhaps first
+	// XXX TODO as discussed on the mailing list, we should perhaps first
 	// see if the following can be found in the atomspace:
 	//
 	//   EvaluationLink
@@ -284,12 +284,6 @@ bool DefaultPatternMatchCB::virtual_link_match(LinkPtr& lvirt, Handle& gargs)
 
 	Handle schema(lvirt->getOutgoingAtom(0));
 	bool relation_holds = EvaluationLink::do_evaluate(_atom_space, schema, gargs);
-
-	// Make a weak effort to clean up bad groundings. gargs is a
-	// a grounded ListLink.  We should probably look at it's children;
-	// if any of those also do not have any incoming links, they too
-	// should be removed. XXX FIXME.
-	_atom_space->purgeAtom(gargs, false);
 
 	return not relation_holds;
 }

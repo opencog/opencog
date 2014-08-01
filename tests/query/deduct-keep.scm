@@ -53,3 +53,38 @@
 )
 
 
+(define (print-results)
+	(BindLink
+		;; variable declarations
+		(ListLink
+			(TypedVariableLink
+				(VariableNode "$person")
+				(VariableTypeNode "FeatureNode")
+			)
+			(VariableNode "$pred")
+			(TypedVariableLink
+				(VariableNode "$attr")
+				(VariableTypeNode "ConceptNode")
+			)
+		)
+		(ImplicationLink
+			;; body -- if all parts of AndLink hold true ... then
+			(AndLink
+				(EvaluationLink
+					(VariableNode "$pred")
+					(ListLink
+						(VariableNode "$person")
+						(VariableNode "$attr")
+					)
+				)
+			)
+			(OrderedLink
+				(VariableNode "$person")
+				(VariableNode "$pred")
+				(VariableNode "$attr")
+			)
+		)
+	)
+)
+
+

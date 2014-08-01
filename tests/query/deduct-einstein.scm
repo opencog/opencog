@@ -133,6 +133,9 @@
 ;; A supplemental fact for fact 4: someone lives in the white house.
 (fact "person4" "LivesIn" "white house")
 
+;; Supplemental fact: someone keeps fish.
+(fact "fish_person" "Keeps" "fish")
+
 ;; State some implicitly assumed facts about neighboring houses
 ;; This is the 'successor' function for ordinal numbers.
 (define (successor house1 house2)
@@ -152,6 +155,43 @@
 
 ;; ---------------------------------------------------------------
 ;; By-process-of-elimination facts
-;; If person doesn't live in four of these, they must live in the fifth.
-(define color-list (list "red house" "white house" "green house" "yellow house" "blue house"))
+;; If person doesn't live in one of the four houses, they must live in
+;; the fifth. Likewsie, if person doesn't smoke/drink/keep one of the four,
+;; they must have the fifth.
 
+(define (is-a x y)
+	(InheritanceLink
+		(ConceptNode x)
+		(ConceptNode y)
+	)
+)
+
+(is-a "red house" "house")
+(is-a "white house" "house")
+(is-a "green house" "house")
+(is-a "yellow house" "house")
+(is-a "blue house" "house")
+
+(is-a "water" "drink")
+(is-a "milk" "drink")
+(is-a "bier" "drink")
+(is-a "coffee" "drink")
+(is-a "tea" "drink")
+
+(is-a "Prince" "tobacco")
+(is-a "PallMall" "tobacco")
+(is-a "Dunhill" "tobacco")
+(is-a "Blend" "tobacco")
+(is-a "Blue Master" "tobacco")
+
+(is-a "fish" "pet")
+(is-a "dogs" "pet")
+(is-a "birds" "pet")
+(is-a "cats" "pet")
+(is-a "horses" "pet")
+
+(is-a "Englishman" "citizenship")
+(is-a "Swede" "citizenship")
+(is-a "Dane" "citizenship")
+(is-a "Norwegian" "citizenship")
+(is-a "German" "citizenship")

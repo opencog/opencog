@@ -44,6 +44,17 @@
 	)
 )
 
+;; Predicate clause, asserting that v2 and v3 are different atoms.
+(define (differ t2 v2 t3 v3)
+	(EvaluationLink
+		(GroundedPredicateNode "c++:exclusive")
+		(ListLink
+			(t2 v2)
+			(t3 v3)
+		)
+	)
+)
+
 ;; Declare a variable var to be of type type
 (define (decl-var type var)
 	(TypedVariableLink
@@ -151,52 +162,63 @@
 ;; ---------------------------------------------------------------------
 ;; elimination
 
-(define (by-elimination-rule a b c d e)
+(define (by-elimination-rule)
 	(BindLink
 		;; variable declarations
 		(ListLink
 			(decl-var "FeatureNode" "$person")
 			(decl-var "PredicateNode" "$predicate")
+			(decl-var "ConceptNode" "$attr_a")
+			(decl-var "ConceptNode" "$attr_b")
+			(decl-var "ConceptNode" "$attr_c")
+			(decl-var "ConceptNode" "$attr_d")
+			(decl-var "ConceptNode" "$attr_e")
+			(decl-var "ConceptNode" "$attr_type")
 		)
 		(ImplicationLink
 			;; body -- if all parts of AndLink hold true ... then
 			(AndLink
-				(not-clause VN "$predicate" VN "$person" CN a)
-				(not-clause VN "$predicate" VN "$person" CN b)
-				(not-clause VN "$predicate" VN "$person" CN c)
-				(not-clause VN "$predicate" VN "$person" CN d)
+				;; If person does NOT have atttribute a,b,c or d ...
+				(not-clause VN "$predicate" VN "$person" VN "$attr_a")
+				(not-clause VN "$predicate" VN "$person" VN "$attr_b")
+				(not-clause VN "$predicate" VN "$person" VN "$attr_c")
+				(not-clause VN "$predicate" VN "$person" VN "$attr_d")
+				;; and the attributes a,b,c,d,e are all of the same kind
+				(InheritanceLink (VN "$attr_a") (VN "$attr_type"))
+				(InheritanceLink (VN "$attr_b") (VN "$attr_type"))
+				(InheritanceLink (VN "$attr_c") (VN "$attr_type"))
+				(InheritanceLink (VN "$attr_d") (VN "$attr_type"))
+				(InheritanceLink (VN "$attr_e") (VN "$attr_type"))
+				;; and attributes a,b,c,d,e are all different from one-another
+				(EvaluationLink
+					(GroundedPredicateNode "c++:exclusive")
+					(ListLink
+						(VN "$attr_a")
+						(VN "$attr_b")
+						(VN "$attr_c")
+						(VN "$attr_d")
+						(VN "$attr_e")
+					)
+				)
 				;; Don't deduce thigs we already know...
 				;; i.e. this not link is identical to conclusion, below.
-				(NotLink
-					(clause VN "$predicate" VN "$person" CN e)
-				)
+				;(NotLink
+				;	(clause VN "$predicate" VN "$person" VN "$attr_e")
+				;)
 			)
 
 			;; implicand -- then the following is true too
-			(clause VN "$predicate" VN "$person" CN e)
+			;; Then by elimination, person must have attribute e.
+			(clause VN "$predicate" VN "$person" VN "$attr_e")
 		)
 	)
 )
-
-(define (by-elim-rule lst excl)
-	(define exlist (remove (lambda (x) (string=? x excl)) lst))
-	(by-elimination-rule (car exlist) (cadr exlist) (caddr exlist) (cadddr exlist) excl)
-)
-
-(define (by-elimination-red) (by-elim-rule color-list "red house"))
-(define (by-elimination-green) (by-elim-rule color-list "green house"))
-(define (by-elimination-white) (by-elim-rule color-list "white house"))
-(define (by-elimination-blue) (by-elim-rule color-list "blue house"))
-(define (by-elimination-yellow) (by-elim-rule color-list "yellow house"))
 
 ;; ---------------------------------------------------------------------
 ;; distinct-attr rule.
 ;; If, for a given attribute, person a and person b take on different
 ;; values, then they cannot be the same person.  Therefore, any other
 ;; attributes they have must also be exclusive.
-;;
-;; XXX Something is broken -- this is deducing that person4 does not
-;; live in the white house, which is false ... 
 
 (define (distinct-attr-rule)
 	(BindLink
@@ -215,12 +237,13 @@
 			(AndLink
 				(clause VN "$predicate_common" VN "$person_a" VN "$attribute_comm_a")
 				(clause VN "$predicate_common" VN "$person_b" VN "$attribute_comm_b")
+				(differ VN "$attribute_comm_a" VN "$attribute_comm_b")
 				(clause VN "$predicate_exclusive" VN "$person_a" VN "$attribute_excl")
 				;; Don't deduce thigs we already know...
 				;; i.e. this not link is identical to conclusion, below.
-				(NotLink
-					(not-clause VN "$predicate_exclusive" VN "$person_b" VN "$attribute_excl")
-				)
+				;(NotLink
+				;	(not-clause VN "$predicate_exclusive" VN "$person_b" VN "$attribute_excl")
+				;)
 			)
 
 			;; implicand -- then the following is true too

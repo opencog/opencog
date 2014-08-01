@@ -639,7 +639,11 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
 
     // Check for an invalid condition that should not occur. See:
     // https://github.com/opencog/opencog/commit/a08534afb4ef7f7e188e677cb322b72956afbd8f#commitcomment-5842682
-    if (0 < handle->getIncomingSetSize())
+    // The check is done twice: the call to getIncomingSetSize() can
+    // return a non-zero value if the incoming set has weak pointers to
+    // deleted atoms. Thus, a second check is made for strong pointers,
+    // since getIncomingSet() converts weak to strong.
+    if (0 < handle->getIncomingSetSize() and 0 < handle->getIncomingSet().size())
     {
         atom->unsetRemovalFlag();
 
