@@ -348,7 +348,6 @@ Performance of the selectionUTest on select.csv with differrent evals:
          20K     56      20        11
          40K     56      15         1
          80K     56      15         1
-        160K                        1
 
 This is a very degenerate dataset: select.csv contains a total of 329 rows.
 Of these only 60 are unique, so max score can't really do better than that.
@@ -361,9 +360,9 @@ has 329 rows, of which  286 are unique.
 The nodupe column shows results for the select-no-dupe.csv file  This one
 has 329 rows, all of which are unique.
 
-Well, there's a bug somewhere ... 
+Above results are off-by-one, final results are 55, 14 and 0 not 56, 15 and 1.
 
-Hmm OK, bug partly fixed. Looks like still have an off-by-one error.
+
 
 
 

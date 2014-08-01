@@ -90,23 +90,24 @@ public:
     {
         // The expected output is this:
         // string expstr = "and( 0<( +($output -1615.97)) not(0<( +($output -1878.99))))";
-        string expstr = "and( 0<( +($1 -1615.97)) not(0<( +($1 -1878.99))))";
+        string expstr = "and( 0<( +($1 -1615.965)) not(0<( +($1 -1878.995))))";
         // Maximum reachable score is 56, and should be reachable in about 4K evaluations.
-        frame("select.csv", "-m10000", expstr, 56);
+        frame("select.csv", "-m10000", expstr, 55);
     }
 
     void test_selection_de()
     {
         // The expected output is this:
-        string expstr = "and( 0<( +($1 -1411.07)) not(0<( +($1 -1708.05))))";
+        string expstr = "and( 0<( +($1 -1411.065)) not(0<( +($1 -1708.055))))";
         // Maximum reachable score is 15, and should be reachable in about 32K evaluations.
-        frame("select-less-dupe.csv", "-m50000", expstr, 15);
+        frame("select-less-dupe.csv", "-m50000", expstr, 14);
     }
 
     void test_selection_no()
     {
         // The expected output is this:
-        string expstr = "and( 0<( +($1 -1329.39)) not(0<( +($1 -1663.79))))";
-        frame("select-no-dupe.csv", "-m80000", expstr, 1);
+        string expstr = "and( 0<( +($1 -1329.385)) not(0<( +($1 -1663.795))))";
+        // Maximum reachable score is 0, and should be reachable in about 42K evaluations.
+        frame("select-no-dupe.csv", "-m80000", expstr, 0);
     }
 };
