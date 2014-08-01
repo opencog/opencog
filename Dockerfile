@@ -8,6 +8,7 @@
 FROM ubuntu:14.04
 MAINTAINER David Hart "dhart@opencog.org"
 RUN echo "deb http://archive.ubuntu.com/ubuntu trusty main universe" > /etc/apt/sources.list
+RUN echo "deb http://archive.ubuntu.com/ubuntu trusty-updates main universe" >> /etc/apt/sources.list
 RUN apt-get update 
 RUN apt-get -y install software-properties-common wget sudo 
 
