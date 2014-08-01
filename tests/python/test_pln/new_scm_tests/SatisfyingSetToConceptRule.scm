@@ -1,10 +1,10 @@
 (EvaluationLink (PredicateNode "inputs")
-	(SatisfyingSetLink
-	    (VariableNode "$X")
+	(SatisfyingSetLink (stv .99 .99)
+	    (VariableNode "$x")
 	    (EvaluationLink
 	        (PredicateNode "smokes")
 	        (ListLink
-	            (VariableNode "$X")
+	            (VariableNode "$x")
 	        )
 	    )
     )
@@ -34,12 +34,12 @@
 	        )
 	        (InheritanceLink
 	            (ConceptNode "smokes")
-	            (SatisfyingSetLink
-	                (VariableNode "$X")
+	            (SatisfyingSetLink (stv .99 .99)
+	                (VariableNode "$x")
 	                (EvaluationLink
 	                    (PredicateNode "smokes")
 	                    (ListLink
-	                        (VariableNode "$X")
+	                        (VariableNode "$x")
 	                    )
 	                )
 	            )

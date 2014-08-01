@@ -625,10 +625,7 @@ class SatisfyingSetToConceptRule(Rule):
         and_link = []
         tv = satisfying_set_link.tv
 
-        print satisfying_set_link
-
-        if satisfying_set_link.out[0].type == types.VariableNode and\
-                satisfying_set_link.out[1].type == types.EvaluationLink:
+        if satisfying_set_link.out[0].type == types.VariableNode:
             predicate = satisfying_set_link.out[1].out[0]
             new_concept = self.chainer.atomspace.add_node(types.ConceptNode,
                                                           predicate.name)
@@ -643,4 +640,4 @@ class SatisfyingSetToConceptRule(Rule):
             and_link = self.chainer.link(
                 types.AndLink, [eval_link, inheritance_link])
 
-        return and_link, [tv]
+        return [and_link], [tv]
