@@ -38,13 +38,77 @@ using namespace combo;
 // precision_bscore //
 //////////////////////
 
-/// NOTE: The "precision" bscore, below, does NOT correspond to the
-/// standard definition of "precision", as usually given in textbooks
-/// or wikipedia, but is something similar but different in various
-/// details. To get the standard, text-book definition of a "precision"
-/// scorer, use the "prerec" class above.  Actually, chances are good
-/// that you probably want the "recall" scorer, which maximizes recall
-/// while holding precision at or above a minimum level.
+/// This scorer attempts to maximize precision while holding "activation"
+/// at or above a given level.  The precision is computed in a somewhat
+/// unusual fashion, and there is no standard texbook definition for
+/// activation, so we define these below.  But first: please note that
+/// there are also text-book-style scorers for maximizing precision or
+/// recall, while holding the other constant.  These are more directly
+/// sutiable for generating ROC curves.  For these, see the "prerec",
+/// "recall", "fone" (F_1) and "bep" (break-even point) scorers, derived
+/// from the discriminating scorer in discriminating_bscore.[cc|h]
+///
+/// This scorer supports both boolean-valued data tables, and contin-
+/// valued tables.  The scoring is slightly different for each.  First,
+/// the scoring of boolean-valued tables is described.
+/// 
+/// The combo tree given to the scorer below is always assumed to be a
+/// binary-valued tree, which either selects a row, or does not.  If the
+/// row is selected, then it is said to be "activated".  We then define:
+/// 
+///    tp == true-positive, a row that is 'activated' and row has value 1
+///    fp == false-positive, a row that is 'activated' and row has value 0
+/// 
+/// and similarly
+/// 
+///    #tp == +1 if it is a tp row, else 0
+///    #fp == -1 if it is an fp row, else 0 
+/// 
+/// In addition, define:
+/// 
+///    TP == total number of tp rows
+///    FP == total number of fp rows.
+///    AC == TP + FP, the total number of "activated" rows.
+/// 
+/// Note that, with the above definition of #tp and #fp, that summing
+/// #tp over all rows gives TP, but that summing #fp over all rows
+/// gives -FP.
+/// 
+/// Each element of the behavioral score is then given a value of
+/// 
+///    0.5 * (#tp + #fp) / (TP+FP)    if the row is "activated"
+///    0  (zero)                      if the row is not "activated"
+/// 
+/// If the above were to be summed over all rows, one would obtain
+/// a total score of
+/// 
+///    0.5 * (TP-FP)/(TP+FP) == TP/(TP+FP) - 0.5
+///                          == precision - 0.5
+/// 
+/// Notice the extra 0.5 -- to compensate for this, the behavioral
+/// score gets an extra 'phantom' row tacked on, which has a value
+/// of +0.5, so that the resulting composite score always contains
+/// the precision.
+/// 
+/// This scorer also uses a penalty mechanism to make sure that the
+/// activation stays above a minimum value. See get_activation_penaly()
+/// for details.
+/// 
+/// This scorer also supports contin-valued tables.  In this case, the
+/// combo tree is still treated as described above: it is boolean, and
+/// either "activates" a row, or it does not.  However, the scoring is
+/// now different.  Each row is now given the score
+/// 
+///    val/AC    if the row is activated
+///    0.0       if the row is not activated
+/// 
+/// where "val" is the contin-value of the table row, and AC is the 
+/// total number of activated rows.
+/// 
+/// The above only descirbes the "precision_full_bscore" (default)
+/// scoring; something else is done when precision_full_bscore is
+/// set to false.  TBD XXX document that someday.
+
 
 precision_bscore::precision_bscore(const CTable& ctable_,
                                    float penalty_,
@@ -60,7 +124,7 @@ precision_bscore::precision_bscore(const CTable& ctable_,
     output_type = _wrk_ctable.get_output_type();
     if (output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
-        // in the output.  Ths sum represents the best possible score
+        // in the output.  This sum represents the best possible score
         // i.e. we found all of the true values correcty.  Count
         // 'F' is 'positive' is false.
         vertex target = bool_to_vertex(positive),
@@ -195,8 +259,11 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
             // = precision - 1/2
             //
             // So before adding the recall penalty we add +1/2 to
-            // compensate for that
-            bs.push_back(0.5);
+            // compensate for that.  But do this only for the boolean-
+            // valued tables; this doesn't make sense for the contin-
+            // valued tables.
+            if (output_type == id::boolean_type)
+                bs.push_back(0.5);
         }
 
     } else {
@@ -249,9 +316,6 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
         bs.push_back(precision);
     }
 
-    if (0 < active)
-        precision = (sao / active + 0.5) / max_output;
-
     // For boolean tables, activation sum of true and false positives
     // i.e. the sum of all positives.   For contin tables, the activation
     // is likewise: the number of rows for which the combo tree returned
@@ -259,9 +323,17 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     score_t activation = (score_t)active / _ctable_usize;
     score_t activation_penalty = get_activation_penalty(activation);
     bs.push_back(activation_penalty);
-    if (logger().isFineEnabled())
+    if (logger().isFineEnabled()) {
+        if (0 < active) {
+            if (output_type == id::boolean_type)
+                // See above for explanation for the extra 0.5
+                precision = (sao / active + 0.5) / max_output;
+            else
+                precision = (sao / active) / max_output;
+        }
         logger().fine("precision = %f  activation=%f  activation penalty=%e",
                       precision, activation, activation_penalty);
+    }
 
     log_candidate_bscore(tr, bs);
     return bs;

@@ -74,14 +74,17 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 		// XXX FIXME, this should be something else ... 
 		if (0.0 == err) break;
 
-		// any score worse than half is terrible. half gives a weight of zero.
-		if (0.5 <= err) break;
+		// Any score worse than half is terrible. half gives a weight of zero.
+		if (0.5 <= err) {
+			logger().info() << "Boosting: no improvement, ensemble not expanded";
+			break;
+		}
 
 		// Compute alpha
 		double alpha = 0.5 * log ((1.0 - err) / err);
 		double expalpha = exp(alpha);
 		double rcpalpha = 1.0 / expalpha;
-		logger().info() << "Add to ensemble " << *best_p  << std::endl
+		logger().info() << "Boosting: add to ensemble " << *best_p  << std::endl
 			<< "With err=" << err << " alpha=" << alpha <<" exp(alpha)=" << expalpha;
 
 		// Recompute the weights

@@ -59,6 +59,25 @@ select_bscore::get_weightiest(const Counter<vertex, count_t>& orow) const
     return std::pair<double, double>(weightiest_val, weightiest);
 }
 
+/**
+ * The selection scorer will learn a window that selects a target range
+ * of values in a continuous-valued dataset.
+ *
+ * The dataset is assumed to have a contin-valued output column. The
+ * highest and lowest values are found in the output column, and the
+ * window is then framed relative to these two boundaries.  That is,
+ * if 'low_val' and 'hi_val' are the smallest and largest values in the
+ * table, then the bottom of the selected window is located at
+ *
+ *    window_bottom = low_val + lower_percentile * (hi_val - low_val)
+ *
+ * and the top is located at
+ *
+ *    window_top = low_val + upper_percentile * (hi_val - low_val)
+ *
+ * If the rows are weighted, then the weighted equivalent of the above
+ * boundaries is used.
+ */
 select_bscore::select_bscore(const CTable& ctable,
                              double lower_percentile,
                              double upper_percentile,
@@ -125,7 +144,7 @@ select_bscore::select_bscore(const CTable& ctable,
                     << " upper bound = " << _upper_bound;
 }
 
-
+/// scorer, as described in the constructor, above.
 behavioral_score select_bscore::operator()(const combo_tree& tr) const
 {
     behavioral_score bs;
@@ -142,20 +161,21 @@ behavioral_score select_bscore::operator()(const combo_tree& tr) const
 
         if (interpret_tr(io_row.first.get_variant()) == id::logical_true) {
             if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
-                bs.push_back(weightiest);
+                bs.push_back(0.0);
             else
                 bs.push_back(-weightiest);
         } else {
             if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
                 bs.push_back(-weightiest);
             else
-                bs.push_back(weightiest);
+                bs.push_back(0.0);
         }
     }
 
     return bs;
 }
 
+/// scorer, suitable for use with boosting.
 behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble) const
 {
     // Step 1: accumulate the weighted prediction of each tree in
@@ -179,7 +199,7 @@ behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble
 
     // Step 2: compare the prediction of the ensemble to the desired
     // result. The array "hypoth" is positive to predict true, and
-    // negative to predict false.  The resulting score is 0 if corrrect,
+    // negative to predict false.  The resulting score is 0 if correct,
     // and -1 if incorrect.
     behavioral_score bs;
     size_t i = 0;
@@ -192,14 +212,14 @@ behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble
 
         if (0 < hypoth[i]) {
             if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
-                bs.push_back(weightiest);
+                bs.push_back(0.0);
             else
                 bs.push_back(-weightiest);
         } else {
             if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
                 bs.push_back(-weightiest);
             else
-                bs.push_back(weightiest);
+                bs.push_back(0.0);
         }
         i++;
     }
@@ -213,12 +233,9 @@ behavioral_score select_bscore::best_possible_bscore() const
     behavioral_score bs;
 
     for (const CTable::value_type& io_row : _wrk_ctable) {
-        // io_row.first = input vector
-        // io_row.second = counter of outputs
-        auto w = get_weightiest(io_row.second);
-        score_t weightiest = w.second;
-
-        bs.push_back(weightiest);
+        // It should always be possible to correctly predict one
+        // entry of the ctable; so best score is zero.
+        bs.push_back(0.0);
     }
     return bs;
 }

@@ -216,6 +216,17 @@ public:
 
 private:
     /**
+     * Recompute the composite scores for the entire metapopulation.
+     * This rouine is used only during boosting. When boosting is
+     * enabled, the relative weights of each item in the bscore will be
+     * dynamically changing; thus, the composite score associated with
+     * a given combo tree needs to change as well.  This method loops
+     * over the metapop, and recomputes the the composite score from
+     * each bscore.
+     */
+    void rescore();
+
+    /**
      * Weed out excessively bad scores. The select_exemplar() routine
      * picks an exemplar out of the metapopulation, using an
      * exponential distribution of the score. Scores that are much

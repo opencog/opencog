@@ -195,7 +195,7 @@ entire metapop.
        the process. i.e. The ensemble is what is finally used for
        off-line prediction/classification.
 
-Senario C appears to be the one that is closest in spirit to the 
+Scenario C appears to be the one that is closest in spirit to the 
 traditional boosting algos, and thus will be implemented first.
 
 Scenario C does have interesting issues with the metapopulation
@@ -341,21 +341,13 @@ Performance of the selectionUTest on select.csv with differrent evals:
 
      num_evals  error   dedupe   nodupe
      ---------  -----   ------   ------
-           5     26
-          50     26
-         100     26
-         200     26
-         500     26
-          1K     26      29        33
-          2K     26
-          5K     26
-         10K     26      29        33
-         20K     26
-         40K     26      29
-         80K     26
-        160K     26                33
-        320K  
-        640K             29
+          1K     58      29        32
+          2K     58      29        32 
+          5K     56      29        28
+         10K     56      28        22
+         20K     56      20        11
+         40K     56      15         1
+         80K     56      15         1
 
 This is a very degenerate dataset: select.csv contains a total of 329 rows.
 Of these only 60 are unique, so max score can't really do better than that.
@@ -368,4 +360,12 @@ has 329 rows, of which  286 are unique.
 The nodupe column shows results for the select-no-dupe.csv file  This one
 has 329 rows, all of which are unique.
 
-Well, there's a bug somewhere ... 
+Above results are off-by-one, final results are 55, 14 and 0 not 56, 15 and 1.
+
+
+
+
+
+
+
+

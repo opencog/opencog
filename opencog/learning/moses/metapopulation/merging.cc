@@ -172,6 +172,26 @@ void metapopulation::deme_to_trees(deme_t& deme,
     }
 }
 
+// Recompute the composite score for each member of the metapop.
+// Used only when boosting. See header file for additioal documentation.
+void metapopulation::rescore()
+{
+    ascore_base& ascorer = _cscorer.get_ascorer();
+#define SERIAL_RESCORING 1
+#if SERIAL_RESCORING
+    for (scored_combo_tree& sct : _scored_trees) {
+        score_t new_score = ascorer(sct.get_bscore());
+        sct.get_composite_score().set_score(new_score);
+    }
+#else
+    auto rescore_sct = [&](scored_combo_tree& sct) {
+        score_t new_score = ascorer(sct.get_bscore());
+        sct.get_composite_score().set_score(new_score);
+    }
+    OMP_ALGO::for_each(_scored_trees.begin(), _scored_trees.end(), rescore_sct);
+#endif
+}
+
 /// Merge the given set of candidates into the metapopulation.
 /// It is assumed that these candiates have already be vetted for
 /// quality, quantity, suitability, etc.  This simply performs that
@@ -253,7 +273,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
 
     // Remove candidate trees that are already in the metapop.
     scored_combo_tree_set candidates = get_new_candidates(pot_candidates);
-    logger().debug("Selected %u candidates (%u were in the metapopulation)",
+    logger().debug("Selected %u candidates (%u were already in the metapopulation)",
                    candidates.size(), pot_candidates.size()-candidates.size());
 
     // Behavioral scores are needed only if domination-based
@@ -336,7 +356,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
 
     if (0 == candidates.size()) return false;
 
-    // update the record of the best-seen score & trees
+    // Update the record of the best-seen score & trees
     update_best_candidates(candidates);
 
     // Finally, merge the candidates into the metapop
@@ -346,8 +366,10 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
     merge_candidates(candidates);
 
     // Insert candidates into the ensemble.
-    if (_params.do_boosting)
+    if (_params.do_boosting) {
         _ensemble.add_candidates(candidates);
+        rescore();
+    }
 
     // update diversity penalties
     if (diversity_enabled())
@@ -561,12 +583,12 @@ void metapopulation::log_best_candidates() const
             }
         } else {
             logger().info()
-               << "Ensemble has " << best_candidates().size()
+               << "Ensemble has " << _ensemble.get_ensemble().size()
                << " members, and a score of "
                << best_composite_score();
             if (logger().isDebugEnabled()) {
                 logger().debug() << "The ensemble is " << std::endl;
-                for (const auto& cand : best_candidates()) {
+                for (const auto& cand : _ensemble.get_ensemble()) {
                     logger().debug() << cand.get_weight() << " " << cand.get_tree();
                 }
             }

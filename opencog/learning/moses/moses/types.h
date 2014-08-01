@@ -100,6 +100,13 @@ struct composite_score:
     complexity_t get_complexity() const { return complexity; }
     score_t get_penalized_score() const { return penalized_score; }
 
+    // Use this only to over-ride the score, wehn re-scoring.
+    void set_score(score_t sc)
+    {
+        score = sc;
+        update_penalized_score();
+    }
+
     /// Sign convention: the penalty is positive, it is subtracted from
     /// the "raw" score to get the penalized score.
     score_t get_complexity_penalty() const { return complexity_penalty; }
@@ -135,7 +142,13 @@ struct composite_score:
     // EXPERIMENTAL: if multiply_diversity is set to true then the
     // diversity_penalty is multiplied with the raw score instead
     // being subtracted. This makes more sense if the diversity
-    // penalty represent a probability
+    // penalty represent a probability. Hmm. Except that scores 
+    // behave kind-of-like the logarithm of a (solomonoff) probability... 
+    // so if if the diversity is acting like a probability, we should
+    // probably be taking it's log, and adding that.  Certainly,
+    // that's exatly how we treat the complexity penalty: its the log
+    // of the total number of states the combo tree represents, which
+    // is why we add it ...
     bool multiply_diversity;
 
 protected:
@@ -202,7 +215,7 @@ typedef std::vector<score_t> behavioral_score;
 ///    penalties)
 /// -- a behavioral score (how well the tree did on each row of a table;
 ///    exactly which table it is is implicit)
-/// -- a boosing vector (used to implement the boosting algorithm)
+/// -- a boosting weight (used to implement the boosting algorithm)
 class scored_combo_tree
 {
 public:
