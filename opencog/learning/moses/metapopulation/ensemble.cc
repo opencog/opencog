@@ -58,11 +58,13 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 
 	int promoted = 0;
 	// We need the length of the behavioral score, as normalization
-	// XXX we should be using the user-weighted thingy here .. XXX FIXME
+	// XXX we should be using the user-defined weight column, right?
+	// Or is that taken care of already, with the CTable scorers? .. XXX FIXME
 
 	double behave_len = cands.begin()->get_bscore().size();
 	while (true) {
-		// Find the element with the least error
+		// Find the element (the combo tree) with the least error. This is
+		// the element with the highest score.
 		scored_combo_tree_set::iterator best_p = 
 			std::min_element(cands.begin(), cands.end(),
 				[](const scored_combo_tree& a, const scored_combo_tree& b) {

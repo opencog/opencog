@@ -89,13 +89,13 @@ select_bscore::select_bscore(const CTable& ctable,
         "The selection scorer can only be used with contin-valued tables!");
 
     // Verify that the bounds are sane
-    OC_ASSERT((0.0 <= lower_percentile) and
-              (lower_percentile < 1.0) and
-              (0.0 < upper_percentile) and
-              (upper_percentile <= 1.0) and
-              (0.0 <= hardness) and
-              (hardness <= 1.0),
-        "Selection scorer, invalid bounds.");
+    lower_percentile = fmax(0.0, lower_percentile);
+    lower_percentile = fmin(1.0, lower_percentile);
+    upper_percentile = fmax(0.0, upper_percentile);
+    upper_percentile = fmin(1.0, upper_percentile);
+    OC_ASSERT((lower_percentile < upper_percentile),
+        "Selection scorer, invalid percentiles: %f and %f",
+        lower_percentile, upper_percentile);
 
     // Maps are implicitly ordered, so the below has the effect of
     // putting the rows into sorted order, by output score.
@@ -121,6 +121,7 @@ select_bscore::select_bscore(const CTable& ctable,
     upper_percentile *= total_weight;
     lower_percentile *= total_weight;
     score_t running_weight = 0.0;
+    score_t last_val = -1.0e37;
     bool found_lower = false;
     bool found_upper = false;
     for (auto score_row : ranked_out) {
@@ -138,7 +139,14 @@ select_bscore::select_bscore(const CTable& ctable,
             _upper_bound = weightiest_val;
             found_upper = true;
         }
+        last_val = weightiest_val;
     }
+    if (not found_upper) {
+        _upper_bound = last_val * (1.0 + 1.0e-7);
+    }
+    OC_ASSERT((_lower_bound < _upper_bound),
+        "Selection scorer, invalid bounds: %f and %f",
+        _lower_bound, _upper_bound);
 
     logger().info() << "select_bscore: lower_bound = " << _lower_bound
                     << " upper bound = " << _upper_bound;

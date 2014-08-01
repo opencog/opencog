@@ -48,6 +48,7 @@ public:
 
         // create temp output file
         vector<string> args = {"-i" + data_file_path, "-Hselect", meval,
+                               "-q0.8", "-w0.89999999", // 0.9 rounds up weird.
                                // "-lDEBUG",
                                "--boost=1" };
         string tempfile = build_arguments(args);
@@ -91,7 +92,7 @@ public:
         // The expected output is this:
         // string expstr = "and( 0<( +($output -1615.97)) not(0<( +($output -1878.99))))";
         string expstr = "and( 0<( +($1 -1615.965)) not(0<( +($1 -1878.995))))";
-        // Maximum reachable score is 56, and should be reachable in about 4K evaluations.
+        // Maximum reachable score is 55, and should be reachable in about 4K evaluations.
         frame("select.csv", "-m10000", expstr, 55);
     }
 
@@ -99,7 +100,7 @@ public:
     {
         // The expected output is this:
         string expstr = "and( 0<( +($1 -1411.065)) not(0<( +($1 -1708.055))))";
-        // Maximum reachable score is 15, and should be reachable in about 32K evaluations.
+        // Maximum reachable score is 14, and should be reachable in about 32K evaluations.
         frame("select-less-dupe.csv", "-m50000", expstr, 14);
     }
 

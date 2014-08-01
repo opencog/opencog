@@ -363,6 +363,31 @@ has 329 rows, all of which are unique.
 Above results are off-by-one, final results are 55, 14 and 0 not 56, 15 and 1.
 
 
+Localized Boosting AKA Mixture of Experts
+-----------------------------------------
+To be used with the pre scorer. 
+
+The pre scorer is used to mine for "experts": combo trees that give
+correct answers only on that subset of positive results that they are
+certain about.
+
+To boost the pre scorer, the boosting discriminator needs to:
+-- get rewarded for TP answers
+-- get punished for FP answers
+-- no-op for FN, TN answers
+
+Thus, the weights only get adjusted for rows that are part of the
+positive set. 
+
+
+moses -Hpre -m100 -q0.2 -w0.5 -Q1 -z10000 -iprecision.csv
+
+should select $2
+
+
+select.csv: 70% is 1281.55
+
+
 
 
 

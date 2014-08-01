@@ -45,6 +45,7 @@ using combo::count_t;
  * then the rows are ranked in reverse order.
  *
  * The 'hardness' indicates just how sharp it selection will be TBD.
+ * Not yet implemented.
  */
 struct select_bscore : public bscore_ctable_base
 {
