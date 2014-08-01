@@ -169,3 +169,19 @@
 )
 
 
+; ---------------------------------------------------------------------
+; Some Utilities
+; Returns a list of the r2l logic outputs associated with the InterpretationNode.
+(define (interp-get-logic-outputs interp-node)
+    (cog-outgoing-set (list-ref (cog-chase-link 'ReferenceLink 'SetLink inter)0))
+)
+
+; Returns a list of the r2l logic outputs associated with the ParseNode.
+(define (parse-get-logic-outputs parse-node)
+    (let ((inter (cog-chase-link 'InterpretationLink 'InterpretationNode parse)))
+        (interp-get-logic-outputs inter)
+    )
+)
+
+
+
