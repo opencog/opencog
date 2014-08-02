@@ -79,7 +79,7 @@ behavioral_score logical_bscore::operator()(const combo_tree& tr) const
 }
 
 /// Boolean ensemble scorer.  Assumes that the ensemble signature outputs
-/// a boolean value.  All of the trees in the ensmble get a wieghted vote,
+/// a boolean value.  All of the trees in the ensmble get a weighted vote,
 /// that vote is totalled to get the prediction of the ensemble, and then
 /// compared to the desired output.
 behavioral_score logical_bscore::operator()(const scored_combo_tree_set& ensemble) const
@@ -103,7 +103,7 @@ behavioral_score logical_bscore::operator()(const scored_combo_tree_set& ensembl
 
     // Step 2: compare the prediction of the ensemble to the desired
     // result. The array "hypoth" is positive to predict true, and
-    // negative to predict false.  The resulting score is 0 if corrrect,
+    // negative to predict false.  The resulting score is 0 if correct,
     // and -1 if incorrect.
     behavioral_score bs(sz);
     boost::transform(hypoth, _target, bs.begin(),
@@ -279,6 +279,51 @@ behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
 
     log_candidate_bscore(tr, bs);
 
+    return bs;
+}
+
+/// Boolean ensemble scorer.  Assumes that the ensemble signature outputs
+/// a boolean value.  All of the trees in the ensmble get a weighted vote,
+/// that vote is totalled to get the prediction of the ensemble, and then
+/// compared to the desired output.
+behavioral_score ctruth_table_bscore::operator()(const scored_combo_tree_set& ensemble) const
+{
+    size_t sz = _ctable.size();
+
+    // Step 1: accumulate the weighted prediction of each tree in
+    // the ensemble.
+    behavioral_score hypoth(sz);
+    for (const scored_combo_tree& sct: ensemble) {
+        // apply each tree, in turn.
+        interpreter_visitor iv(sct.get_tree());
+        auto interpret_tr = boost::apply_visitor(iv);
+        score_t weight = sct.get_weight();
+
+        // Evaluate the tree for all rows of the ctable
+        size_t i=0;
+        for (const CTable::value_type& vct : _ctable) {
+            // Add +1 if prediction is up and -1 if prediction is down.
+            vertex prediction(interpret_tr(vct.first.get_variant()));
+            hypoth[i] += (id::logical_true == prediction)? weight : -weight;
+            i++;
+        }
+    }
+
+    // Step 2: compare the prediction of the ensemble to the desired
+    // result. The array "hypoth" is positive to predict up, and
+    // negative to predict down.  The compressed table holds the 
+    // (possibly weighted) count of up and down values; in the limit
+    // of an uncompressed table, the number of 'wrong' answers is
+    // the count of the iverted prediction.
+    behavioral_score bs(sz);
+    size_t i =0;
+    for (const CTable::value_type& vct : _ctable) {
+        const CTable::counter_t& cnt = vct.second;
+        vertex inverted_prediction = (hypoth[i] > 0.0) ? 
+            id::logical_false : id::logical_true;
+        bs[i] = -cnt.get(inverted_prediction);
+        i++;
+    }
     return bs;
 }
 

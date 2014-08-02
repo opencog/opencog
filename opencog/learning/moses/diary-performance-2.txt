@@ -387,6 +387,9 @@ select.csv: the 70% mark is at 1281.55
 So preselect.csv is select.csv, with all scores above 1281.55 marked.
 Ditto, preselect-less-dupe.csv and preselect-no-dupe.csv.
 
+The result are tables w/ 329 data points, of which 256 lines are
+false, 73 are true. (i.e. 256/329 = 77.8% of lines...)
+
 Compare the -Hit and -Hselect scorer directly on preselect-no-dupe.csv
 
 moses -Hit -Yval -ipreselect-no-dupe.csv 
