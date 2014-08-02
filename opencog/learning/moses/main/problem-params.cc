@@ -679,7 +679,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "to produce n classes and the thresholds are automatically sorted.\n")
 
         (opt_desc_str(alpha_opt).c_str(),
-         po::value<score_t>(&hardness)->default_value(0.0),
+         po::value<score_t>(&hardness)->default_value(1.0),
          "If problems pre, prerec, recall, f_one or bep are specified, "
          "this option is used to set the 'hardness' of the constraint, "
          "with larger values corresponding to a harder constraint "
