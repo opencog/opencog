@@ -380,12 +380,26 @@ Thus, the weights only get adjusted for rows that are part of the
 positive set. 
 
 
-moses -Hpre -m100 -q0.2 -w0.5 -Q1 -z10000 -iprecision.csv
+Precision, selection base results
+---------------------------------
+Create 3 files with top scorers marked s boolean 1 else 0.
+select.csv: the 70% mark is at 1281.55
+So preselect.csv is select.csv, with all scores above 1281.55 marked.
+Ditto, preselect-less-dupe.csv and preselect-no-dupe.csv.
 
-should select $2
+Compare the -Hit and -Hselect scorer directly on preselect-no-dupe.csv
+
+moses -Hit -Yval -ipreselect-no-dupe.csv 
+moses -Hit -Yval -ipreselect-no-dupe.csv --boost=1
+moses -Hselect  -iselect-no-dupe.csv -q0.7
 
 
-select.csv: 70% is 1281.55
+     num_evals  Hit   Hit-boost   Hselect   Hselect-boost
+     ---------  ---   ---------   -------   -------------
+        10K      40                  48          49
+
+moses -Hpre -q0.05 -Y val -itests/learning/moses/preselect.csv
+
 
 
 

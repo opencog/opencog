@@ -35,7 +35,7 @@ namespace moses {
 using namespace combo;
 
 ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
-	_params(ep)
+	_params(ep), _bcscorer(cs)
 {
 	_booster = dynamic_cast<boosting_ascore*>(&(cs.get_ascorer()));
 	_best_possible_score = cs.best_possible_score();
@@ -154,6 +154,18 @@ combo::combo_tree ensemble::get_weighted_tree() const
 	}
 
 	return tr;
+}
+
+/**
+ * Return the plain, unweighted, "flat" score for the ensemble as a
+ * whole.  This is the score that the ensemble would get when used
+ * for prediction; by contrast, the weighted score only applies for
+ * training, and is always driven to be 50% wrong, on average.
+ */
+score_t ensemble::flat_score() const
+{
+	behavioral_score bs = _bcscorer.get_bscore(_scored_trees);
+	return _flat_scorer(bs);
 }
 
 

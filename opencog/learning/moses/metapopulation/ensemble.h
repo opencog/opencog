@@ -73,9 +73,6 @@ public:
     ensemble(behave_cscore&,
              const ensemble_parameters& ep = ensemble_parameters());
 
-    // Should this be the right interface ?? Similar to metapop ...
-    // void add_deme(deme_t&, const representation&);
-
     void add_candidates(scored_combo_tree_set&);
 
     const scored_combo_tree_set& get_ensemble() const {
@@ -84,9 +81,13 @@ public:
 
     combo::combo_tree get_weighted_tree() const;
 
+    score_t flat_score() const;
+
 private:
     const ensemble_parameters& _params;
+    behave_cscore& _bcscorer;
     boosting_ascore* _booster;
+    simple_ascore _flat_scorer;
     double _best_possible_score;
 
     scored_combo_tree_set _scored_trees;
