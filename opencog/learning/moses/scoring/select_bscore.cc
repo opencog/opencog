@@ -235,12 +235,41 @@ behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble
     return bs;
 }
 
-
 behavioral_score select_bscore::best_possible_bscore() const
 {
     // It should always be possible to correctly predict one entry
     // of the ctable; and so the  best score is zero for each row.
+    // XXX right? 
     return behavioral_score(_wrk_ctable.size(), 0.0);
+}
+
+behavioral_score select_bscore::worst_possible_bscore() const
+{
+    behavioral_score bs;
+    for (const CTable::value_type& io_row : _wrk_ctable) {
+        // io_row.first = input vector
+        // io_row.second = counter of outputs
+
+        // Any row with a multiplicity of just one can be inherently
+        // mis-classified.  Thus, we push back -1 for that case. But
+        // for rows with multiplicities greater than one, the situation
+        // is trickier: some may be inside, and some outside the
+        // selection range.
+        score_t n_inside = 0.0;
+        score_t n_outside = 0.0;
+        const Counter<vertex, count_t>& orow = io_row.second;
+        for (const CTable::counter_t::value_type& tcv : orow) {
+            score_t val = get_contin(tcv.first);
+            if (not _positive) val = -val;
+            score_t weight = tcv.second;
+            if (_lower_bound <= val and val <= _upper_bound)
+                n_inside += weight;
+            else
+                n_outside += weight;
+        }
+        bs.push_back(-fabs(n_inside - n_outside));
+    }
+    return bs;
 }
 
 
