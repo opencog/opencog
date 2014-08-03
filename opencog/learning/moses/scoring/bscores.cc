@@ -119,6 +119,11 @@ behavioral_score logical_bscore::best_possible_bscore() const
     return behavioral_score(_target.size(), 0);
 }
 
+behavioral_score logical_bscore::worst_possible_bscore() const
+{
+    return behavioral_score(_target.size(), -1);
+}
+
 score_t logical_bscore::min_improv() const
 {
     return 0.5;
