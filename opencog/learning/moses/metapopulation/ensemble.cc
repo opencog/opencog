@@ -35,10 +35,11 @@ namespace moses {
 using namespace combo;
 
 ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
-	_params(ep)
+	_params(ep), _bcscorer(cs)
 {
 	_booster = dynamic_cast<boosting_ascore*>(&(cs.get_ascorer()));
 	_best_possible_score = cs.best_possible_score();
+	_worst_possible_score = cs.worst_possible_score();
 }
 
 // Is this behavioral score correct? For boolean scores, correct is 0.0
@@ -57,12 +58,54 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 	OC_ASSERT(_booster, "Ensemble can only be used with a weighted scorer");
 
 	int promoted = 0;
-	// We need the length of the behavioral score, as normalization
-	// XXX we should be using the user-weighted thingy here .. XXX FIXME
 
-	double behave_len = cands.begin()->get_bscore().size();
+	// We need the length of the behavioral score, as normalization.
+	// The correct "length" is kind-of tricky to understand when a table
+	// has weighted rows, or when it is degenerate, so that no matter
+	// what selection is made, some rows will be wrong.  So we review
+	// the cases here: the table may have degenerate or non-degenerate
+	// rows, and these may be weighted or non-weighted.  Here, the
+	// "weights" are not the boosting weights, but the user-specified row
+	// weights.
+	//
+	//  non-degenerate, non weighted:
+	//       (each row has defacto weight of 1.0)
+	//       best score = 0 so  err = score / num rows;
+	// 
+	//  non-degenerate, weighted:
+	//       best score = 0 so  err = score / weighted num rows;
+	//       since the score is a sum of weighted rows.
+	// 
+	//       e.g. two rows with user-specified weights:
+	//            0.1
+	//            2.3
+	//       so if first row is wrong, then err = 0.1/2.4
+	//       and if second row is wrong, err = 2.3/2.4
+	// 
+	//  degenerate, non-weighted:
+	//       best score > 0   err = (score - best_score) / eff_num_rows;
+	// 
+	//       where eff_num_rows = sum_row fabs(up-count - down-count)
+	//       is the "effective" number of rows, as opposing rows
+	//       effectively cancel each-other out.  This is also the
+	//       "worst possible score", what would be returned if every
+	//       row was marked wrong.
+	// 
+	//       e.g. table five uncompressed rows:
+	//            up:1  input-a
+	//            dn:2  input-a
+	//            up:2  input-b
+	//       best score is -1 (i.e. is 4-5 where 4 = 2+2).
+	//       so if first row is wrong, then err = (1-1)/5 = 0/3
+	//       so if second row is wrong, then err = (2-1)/5 = 1/3
+	//       so if third & first is wrong, then err = (3-1)/3 = 2/3
+	//       so if third & second is wrong, then err = (4-1)/3 = 3/3
+	//
+	// Thus, "behave_len" is (minus) the worst possible score.
+	double behave_len = - _worst_possible_score;
 	while (true) {
-		// Find the element with the least error
+		// Find the element (the combo tree) with the least error. This is
+		// the element with the highest score.
 		scored_combo_tree_set::iterator best_p = 
 			std::min_element(cands.begin(), cands.end(),
 				[](const scored_combo_tree& a, const scored_combo_tree& b) {
@@ -74,7 +117,7 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 		// XXX FIXME, this should be something else ... 
 		if (0.0 == err) break;
 
-		// Any score worse than half is terrible. half gives a weight of zero.
+		// Any score worse than half is terrible. Half gives a weight of zero.
 		if (0.5 <= err) {
 			logger().info() << "Boosting: no improvement, ensemble not expanded";
 			break;
@@ -152,6 +195,18 @@ combo::combo_tree ensemble::get_weighted_tree() const
 	}
 
 	return tr;
+}
+
+/**
+ * Return the plain, unweighted, "flat" score for the ensemble as a
+ * whole.  This is the score that the ensemble would get when used
+ * for prediction; by contrast, the weighted score only applies for
+ * training, and is always driven to be 50% wrong, on average.
+ */
+score_t ensemble::flat_score() const
+{
+	behavioral_score bs = _bcscorer.get_bscore(_scored_trees);
+	return _flat_scorer(bs);
 }
 
 

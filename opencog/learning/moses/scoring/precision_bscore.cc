@@ -147,17 +147,25 @@ precision_bscore::precision_bscore(const CTable& ctable_,
         OC_ASSERT(false, "Precision scorer, unsupported output type");
     }
 
-    logger().fine("Precision scorer, penalty = %f, "
+    min_activation = fmax(min_activation, 0.0);
+    min_activation = fmin(min_activation, 1.0);
+    max_activation = fmax(max_activation, 0.0);
+    max_activation = fmin(max_activation, 1.0);
+    logger().info("Precision scorer, penalty = %f, "
                   "min_activation = %f, "
                   "max_activation = %f",
                   penalty, min_activation, max_activation);
 
     // Verify that the penaly is sane
-    OC_ASSERT((0.0 < penalty) and (0.0 < min_activation) and (min_activation <= max_activation),
-        "Precision scorer, invalid activation bounds.  "
-        "The penalty must be non-zero, the minimum activation must be "
-        "greater than zero, and the maximum activation must be greater "
-        "than or equal to the minimum activation.\n");
+    OC_ASSERT((0.0 < penalty) and
+              (0.0 < min_activation) and
+              (min_activation <= max_activation),
+        "Precision scorer, invalid activation bounds.\n"
+        "The penalty must be non-zero (got %f)\n"
+        "The minimum activation must be greater than zero (got %f)\n"
+        "The maximum activation must be greater than or equal to "
+        "the minimum activation (got %f.\n",
+        penalty, min_activation, max_activation);
 
     // For boolean tables, the highest possible precision is 1.0 (of course)
     if (output_type == id::boolean_type)

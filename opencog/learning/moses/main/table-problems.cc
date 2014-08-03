@@ -536,7 +536,11 @@ void select_table_problem::run(option_base* ob)
     // composite scores get cached and returned.
     if (pms.meta_params.do_boosting) pms.cache_size = 0;
 
-    REGRESSION(ctable, select_bscore, (ctable));
+    REGRESSION(ctable, select_bscore, 
+               (ctable, pms.min_rand_input, 
+                        pms.max_rand_input,
+                        fabs(pms.hardness),
+                        pms.hardness >= 0.0));
 }
 
 void cluster_table_problem::run(option_base* ob)

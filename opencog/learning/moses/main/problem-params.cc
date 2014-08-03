@@ -582,7 +582,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "recall, prerec, bep and f_one "
          "problems all require a range of values to be sampled in "
          "order to measure the fitness of a proposed solution. This "
-         "option sets the low high of the sampled range. In the case of "
+         "option sets the high end of the sampled range. In the case of "
          "fitness function pre, the range corresponds to the activation "
          "of the precision.\n")
 
@@ -679,7 +679,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "to produce n classes and the thresholds are automatically sorted.\n")
 
         (opt_desc_str(alpha_opt).c_str(),
-         po::value<score_t>(&hardness)->default_value(0.0),
+         po::value<score_t>(&hardness)->default_value(1.0),
          "If problems pre, prerec, recall, f_one or bep are specified, "
          "this option is used to set the 'hardness' of the constraint, "
          "with larger values corresponding to a harder constraint "

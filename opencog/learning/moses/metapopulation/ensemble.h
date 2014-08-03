@@ -64,7 +64,6 @@ struct ensemble_parameters
 
 	int num_to_promote;  // max number of demes to accept into ensemble,
 	                     // per learning iteration.
-
 };
 
 class ensemble
@@ -72,9 +71,6 @@ class ensemble
 public:
     ensemble(behave_cscore&,
              const ensemble_parameters& ep = ensemble_parameters());
-
-    // Should this be the right interface ?? Similar to metapop ...
-    // void add_deme(deme_t&, const representation&);
 
     void add_candidates(scored_combo_tree_set&);
 
@@ -84,10 +80,15 @@ public:
 
     combo::combo_tree get_weighted_tree() const;
 
+    score_t flat_score() const;
+
 private:
     const ensemble_parameters& _params;
+    behave_cscore& _bcscorer;
     boosting_ascore* _booster;
+    simple_ascore _flat_scorer;
     double _best_possible_score;
+    double _worst_possible_score;
 
     scored_combo_tree_set _scored_trees;
 };

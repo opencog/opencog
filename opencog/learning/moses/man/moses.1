@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "July 30, 2014" "3.6.10" "OpenCog Learning"
+.TH MOSES 1 "August 1, 2014" "3.6.10" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -306,7 +306,12 @@ T}
 Regression on an input table, maximizing precision, instead of accuracy
 (that is, minimizing the number of false positives, at the risk of
 sometimes failing to identify true positives).  Maximization is done
-while holding activation constant.
+while holding activation constant.  This scorer is ideal for learning
+"domain experts", which provide a result only when they are certain
+that the result is correct.  So, for a binary classifier, the output
+is meant to be interpreted as "yes, certain" or "no, don't know".
+An ensemble of such combo expressions is commmonly called a "mixture
+of experts".
 T}
 
 \fBprerec\fR@T{

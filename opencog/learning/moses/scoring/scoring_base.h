@@ -72,6 +72,11 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     /// possible score has been reached.
     virtual behavioral_score best_possible_bscore() const = 0;
 
+    /// Return the worst possible bscore achievable with this fitness
+    /// function. This is needed during boosting, to ascertain if at
+    // least half the answers are correct.
+    virtual behavioral_score worst_possible_bscore() const;
+
     /// Return the smallest change in the score which can be considered
     /// to be an improvement over the previous score. This is useful for
     /// avoiding local maxima which have a very flat top. That is, where
@@ -155,7 +160,7 @@ protected:
 
 
 /// Base class for fitness functions that use a ctable. Provides useful
-/// table compression
+/// table compression.
 struct bscore_ctable_base : public bscore_base
 {
     bscore_ctable_base(const CTable&);

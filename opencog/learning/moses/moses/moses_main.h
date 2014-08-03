@@ -126,12 +126,10 @@ struct metapop_printer
             } else {
 
                 // For ensembles, output as usual: score followed by tree
-                composite_score cs = metapop.best_composite_score();
-                ss << cs.get_score() << " "
-                   << metapop.get_ensemble().get_weighted_tree();
+                const ensemble& ensm(metapop.get_ensemble());
+                ss << ensm.flat_score() << " "
+                   << ensm.get_weighted_tree();
 
-                if (output_score)
-                    ss << " " << cs;
                 // if (output_bscore)
                 //    ss << " " <<
                 //    metapop._cscorer.get_bscore(metapop.get_ensemble().get_weighted_tree());

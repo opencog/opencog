@@ -59,10 +59,17 @@ pair<score_t, combo_tree> parse_result(const string& tempfile)
 
     // Results are printed in random order these days...
     // WARNING: you must output only the score of the candidate!
-    while (!in.eof()) {
+    while (not in.eof()) {
        // parse result
        score_t score;
        in >> score;
+
+       if (in.eof()) break;
+       // If the score is a NaN, then the read will fail.
+       if (in.fail()) {
+           std::cout << "Error: fail to read score and tree" << std::endl;
+           break;
+       }
        // score_t weight;
        // in >> weight;
        combo_tree tr;
@@ -70,7 +77,7 @@ pair<score_t, combo_tree> parse_result(const string& tempfile)
        if (hiscore < score) {
            hiscore = score;
            hitr = tr;
-           cout << score << " " << tr << endl;
+           std::cout << score << " " << tr << std::endl;
        }
     }
 
@@ -92,6 +99,13 @@ pair<score_t, string> cheap_parse_result(const string& tempfile)
        // parse result
        score_t score;
        in >> score;
+
+       if (in.eof()) break;
+       // If the score is a NaN, then the read will fail.
+       if (in.fail()) {
+           std::cout << "Error: fail to read score and tree" << std::endl;
+           break;
+       }
        // score_t weight;
        // in >> weight;
        char tr_chars[4096];

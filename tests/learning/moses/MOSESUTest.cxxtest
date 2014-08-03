@@ -151,7 +151,9 @@ public:
         string tr1_str("or(and(!$1 $2) and($1 !$2))");
         string tr2_str("and(or(!$1 !$2) or($1 $2))");
         string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
-        moses_test_combo({"-Hip", data_file_path, "-m500", "-l debug", "-U0", "-X0", "-z100000"},
+        moses_test_combo({"-Hip", data_file_path, "-m500", "-l debug",
+                          "-U0", "-X0", "-z100000",
+                          "-q0.2", "-w0.8"},
                          {tr1_str, tr2_str});
     }
     void test_multi_kl() {
@@ -159,7 +161,11 @@ public:
         string tr1_str("or(and(!$1 $2) and($1 !$2))");
         string tr2_str("and(or(!$1 !$2) or($1 $2))");
         string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
-        moses_test_combo({"-Hip", data_file_path,  data_file_path, "-m500", "-l debug", "-U0", "-X0", "-z100000"}, {tr1_str, tr2_str});
+        moses_test_combo({"-Hip", data_file_path,  data_file_path,
+                          "-m500", "-l debug", "-U0", "-X0",
+                          "-z100000",
+                          "-q0.2", "-w0.8"},
+                          {tr1_str, tr2_str});
     }
     
     void test_precision() {
