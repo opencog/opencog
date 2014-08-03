@@ -333,14 +333,20 @@ behavioral_score ctruth_table_bscore::best_possible_bscore() const
     transform(_ctable | map_values, back_inserter(bs),
               [](const CTable::counter_t& c) {
                   // OK, this looks like magic, but here's what it does:
-                  // CTable is a compressed table; multiple rows may
+                  // CTable is a compressed table; different rows may
                   // have identical inputs, differing only in output.
                   // Clearly, in such a case, both outputs cannot be
                   // simultanously satisfied, but we can try to satisfy
-                  // the one of which there is more.  Thus, we take
-                  // the min of the two possiblities.
-                  return -score_t(min(c.get(id::logical_true),
-                                      c.get(id::logical_false)));
+                  // the one of which there is more (the max).  Thus,
+                  // we take the fmin of the two possiblities as the
+                  // number of wrong answers we are doomed to get.
+                  //
+                  // fmin is used, because the rows may be weighted
+                  // by fractional values. This gives the correct
+                  // result for weighted datasets: the most heavily
+                  // weighted outcome is the prefered one.
+                  return -score_t(fmin(c.get(id::logical_true),
+                                       c.get(id::logical_false)));
               });
 
     return bs;
@@ -348,7 +354,22 @@ behavioral_score ctruth_table_bscore::best_possible_bscore() const
 
 score_t ctruth_table_bscore::min_improv() const
 {
-    return 0.5;
+    // A return value of 0.5 would be correct only if all rows had
+    // a weight of exactly 1.0.  Otherwise, we look for the row with
+    // the smallest (positive) weight, and return that.
+    // return 0.5;
+
+    score_t min_weight = FLT_MAX;
+    for (const CTable::value_type& vct : _ctable) {
+        const CTable::counter_t& cnt = vct.second;
+
+        // The most that the score can improve is to flip
+        // true to false, or v.v.
+        score_t w = fabs (cnt.get(id::logical_true) -
+                          cnt.get(id::logical_false));
+        if (w != 0.0 and w < min_weight) min_weight = w;
+    }
+    return 0.5 * min_weight;
 }
 
 

@@ -392,14 +392,58 @@ false, 73 are true. (i.e. 256/329 = 77.8% of lines...)
 
 Compare the -Hit and -Hselect scorer directly on preselect-no-dupe.csv
 
+The 4 columns below are:
+
 moses -Hit -Yval -ipreselect-no-dupe.csv 
 moses -Hit -Yval -ipreselect-no-dupe.csv --boost=1
 moses -Hselect  -iselect-no-dupe.csv -q0.7
+moses -Hselect  -iselect-no-dupe.csv -q0.7 --boost=1
 
 
-     num_evals  Hit   Hit-boost   Hselect   Hselect-boost
-     ---------  ---   ---------   -------   -------------
-        10K      40                  48          49
+     num_evals  Hit         Hit            Hselect     Hselect
+                  (time)   boost (time)      (time)  boost (time)
+     --------- ---------   ------------   ----------  ----------
+        10K    39 (0m23s)    45 (0m10s)   47 (0m19s)  49 (0m11s)
+        20K    30 (1m9s)     27 (0m31s)   36 (0m40s)  35 (0m37s)
+        40K    26 (3m48s)    17 (1m36s)   27 (2m24s)  11 (1m51s)
+        80K    17 (10m18s)    0 (4m18s)   26 (8m35s)   0 (3m55s)
+       160K    16 (32m3s)     -           22 (24m37s)  -
+
+Conclude: The differences between Hit and Hselect would surely wash out
+if the results were averaged over different initial random seeds. This
+is not a surprise; both scorers are doing essentially the same thing
+for this dataset.  So the above is really just a "sanity check" to make
+sure that the code is good, and, indeed, it seems to be good.
+
+Try again on the dataset with duplicates:
+
+moses -Hit -Yval -ipreselect.csv 
+moses -Hit -Yval -ipreselect.csv --boost=1
+moses -Hselect  -iselect.csv -q0.7
+moses -Hselect  -iselect.csv -q0.7 --boost=1
+
+
+     num_evals  Hit         Hit            Hselect     Hselect
+                  (time)   boost (time)      (time)  boost (time)
+     --------- ---------   ------------   ----------  ----------
+        10K    66 (0m6s)     72 (0m15s)    8 (0m9s)    4 (0m11s)
+        20K    58 (0m21s)    72 (0m43s)    5 (0m23s)   0 (0m9s)
+        40K    55 (1m21s)    72 (2m13s)    4 (0m54s)   -
+        80K    55 (5m17s)    72 (8m8s)     4 (3m1s)    -
+       160K    55 (19m1s)     -            4 (10m59s)  -
+
+Why so different?
+-- preselect.csv has best score of 51, due to duplicate rows; so, for
+   the first column, subtract 51 to get the actual number of bad rows.
+
+Since there are 329 rows, this means 329-51 = 278 rows, half of which
+are 278/2 = 139 which is what the ense3mble scorer needs to beat.
+
+wtf:  -51 + 87 = 36 / 329
+
+OK, so this looks like a bug to me; number of rows is being handled
+incorrectly for the degenerate boosted case.
+
 
 moses -Hpre -q0.05 -Y val -itests/learning/moses/preselect.csv
 

@@ -76,7 +76,7 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 		// XXX FIXME, this should be something else ... 
 		if (0.0 == err) break;
 
-		// Any score worse than half is terrible. half gives a weight of zero.
+		// Any score worse than half is terrible. Half gives a weight of zero.
 		if (0.5 <= err) {
 			logger().info() << "Boosting: no improvement, ensemble not expanded";
 			break;
