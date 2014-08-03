@@ -443,15 +443,42 @@ wtf:  -51 + 87 = 36 / 329
 
 OK, so this looks like a bug to me; number of rows is being handled
 incorrectly for the degenerate boosted case.
+behave_len is wrong for ensemble err.
+
+We need: 
+ non-degenerate, non weighted:
+      best score = 0 so  err = score / num rows; 
+
+ non-degenerate, weighted:
+      best score = 0 so  err = score / weighted num rows; 
+      since the score is weighted.
+
+      e.g. two rows with weights: 
+           0.1
+           2.3
+      so if 0.1 wrong, then err = 0.1/2.4
+      and if 2.3 is wrong, err = 2.3/2.4  
+
+ degenerate, non-weighted:
+
+      best score > 0   err = (score - best_score) / eff_num_rows;
+
+      where eff_num_rows = sum_row fabs(up-count - down-count)
+      (its also the "worst possible score")
+
+      e.g. five uncompressed rows:
+           up:1  input-a  
+           dn:2  input-a
+           up:2  input-b
+      best score is 1 (i.e. is 4-5 where 4 = 2+2).
+      so if first is wrong, then err = (1-1)/5 = 0/3
+      so if second is wrong, then err = (2-1)/5 = 1/3
+      so if third & first is wrong, then err = (3-1)/3 = 2/3
+      so if third & second is wrong, then err = (4-1)/3 = 3/3
+      
 
 
 moses -Hpre -q0.05 -Y val -itests/learning/moses/preselect.csv
 
 
-
-
-
-
-
-
-
+very_worst_score

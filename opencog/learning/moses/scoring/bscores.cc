@@ -352,6 +352,23 @@ behavioral_score ctruth_table_bscore::best_possible_bscore() const
     return bs;
 }
 
+behavioral_score ctruth_table_bscore::worst_possible_bscore() const
+{
+    behavioral_score bs;
+    for (const CTable::value_type& vct : _ctable) {
+        const CTable::counter_t& cnt = vct.second;
+
+        // The most that the score can improve is to flip true to false,
+        // or v.v. The worst score is to get the majority wrong.  This
+        // workes correctly even for weighted tables, where the counts
+        // could be arbitrary float-point values.
+        score_t w = fabs (cnt.get(id::logical_true) -
+                          cnt.get(id::logical_false));
+        bs.push_back(-w);
+    }
+    return bs;
+}
+
 score_t ctruth_table_bscore::min_improv() const
 {
     // A return value of 0.5 would be correct only if all rows had
@@ -416,13 +433,6 @@ behavioral_score enum_table_bscore::best_possible_bscore() const
               });
 
     return bs;
-}
-
-behavioral_score enum_table_bscore::worst_possible_bscore() const
-{
-    // Make an attempt too at least return the correct length
-    double bad = very_worst_score / ((double) _ctable.size() + 1);
-    return behavioral_score(_ctable.size(), bad);
 }
 
 score_t enum_table_bscore::min_improv() const
