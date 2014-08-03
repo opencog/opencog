@@ -728,7 +728,7 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
         for (const auto& v : _pdf)
             acc(v.first, weight = v.second);
         _skewness = weighted_skewness(acc);
-        logger().fine("interesting_predicate_bscore::_skewness = %f", _skewness);
+        logger().debug("interesting_predicate_bscore::_skewness = %f", _skewness);
     }
 }
 
@@ -757,8 +757,8 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
                         total += tc;
                     });
 
-    logger().fine("total = %u", total);
-    logger().fine("actives = %u", actives);
+    logger().fine("ip scorer: total = %u", total);
+    logger().fine("ip scorer: actives = %u", actives);
 
     // Create a histogram of output values, ignoring non-selected rows.
     // Do this by filtering the ctable output column according to the,
@@ -772,8 +772,8 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
                                 pred_counter[get_contin(mv.first)] = mv.second;
                         }});
 
-    logger().fine("pred_cache.size() = %u", pred_cache.size());
-    logger().fine("pred_counter.size() = %u", pred_counter.size());
+    logger().fine("ip scorer: pred_cache.size() = %u", pred_cache.size());
+    logger().fine("ip scorer: pred_counter.size() = %u", pred_counter.size());
 
     // If there's only one output value left, then punt.  Statistics
     // like skewness need a distribution that isn't a single spike.
@@ -793,7 +793,7 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
             boost::transform(bs, bs.begin(), _kld_w * arg1);
         } else {
             score_t pred_klds = _klds(pred_counter);
-            logger().fine("klds = %f", pred_klds);
+            logger().fine("ip scorer: klds = %f", pred_klds);
             bs.push_back(_kld_w * pred_klds);
         }
     }
@@ -815,7 +815,7 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
             score_t val_skewness = (_abs_skewness?
                                     abs(diff_skewness):
                                     diff_skewness);
-            logger().fine("pred_skewness = %f", pred_skewness);
+            logger().fine("ip scorer: pred_skewness = %f", pred_skewness);
             if (_skewness_w > 0)
                 bs.push_back(_skewness_w * val_skewness);
         }
@@ -825,7 +825,7 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
 
             // Compute the standardized Mann–Whitney U
             stdU = standardizedMannWhitneyU(_counter, pred_counter);
-            logger().fine("stdU = %f", stdU);
+            logger().fine("ip scorer: stdU = %f", stdU);
             if (_stdU_w > 0.0)
                 bs.push_back(_stdU_w * abs(stdU));
         }
@@ -841,8 +841,8 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
     // add activation_penalty component
     score_t activation = actives / (score_t) total;
     score_t activation_penalty = get_activation_penalty(activation);
-    logger().fine("activation = %f", activation);
-    logger().fine("activation penalty = %e", activation_penalty);
+    logger().fine("ip scorer: activation = %f", activation);
+    logger().fine("ip scorer: activation penalty = %e", activation_penalty);
     bs.push_back(activation_penalty);
 
     log_candidate_bscore(tr, bs);
@@ -868,12 +868,12 @@ void interesting_predicate_bscore::set_complexity_coef(unsigned alphabet_size,
 
 score_t interesting_predicate_bscore::get_activation_penalty(score_t activation) const
 {
-    score_t dst = max(max(_min_activation - activation, score_t(0))
+    score_t dst = fmax(fmax(_min_activation - activation, score_t(0))
                       / _min_activation,
-                      max(activation - _max_activation, score_t(0))
-                      / (1 - _max_activation));
-    logger().fine("dst = %f", dst);
-    return log(pow((1 - dst), _penalty));
+                      fmax(activation - _max_activation, score_t(0))
+                      / (1.0 - _max_activation));
+    logger().fine("ip scorer: dst = %f", dst);
+    return log(pow((1.0 - dst), _penalty));
 }
 
 score_t interesting_predicate_bscore::min_improv() const

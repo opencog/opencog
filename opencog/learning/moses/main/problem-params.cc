@@ -582,7 +582,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "recall, prerec, bep and f_one "
          "problems all require a range of values to be sampled in "
          "order to measure the fitness of a proposed solution. This "
-         "option sets the low high of the sampled range. In the case of "
+         "option sets the high end of the sampled range. In the case of "
          "fitness function pre, the range corresponds to the activation "
          "of the precision.\n")
 
