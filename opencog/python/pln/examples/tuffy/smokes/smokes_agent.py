@@ -90,6 +90,20 @@ class InferenceAgent(MindAgent):
             result = self.chainer.forward_step()
 
             if self.query is not None:
+                # Allow the stimulus amount to be set dynamically by setting
+                # a configuration atom in the atomspace
+                list = atomspace.get_atoms_by_name(
+                    types.PredicateNode, "CONFIG-StimulusAmount")
+                if list is not None:
+                    # Given the PredicateNode, walk to the NumberNode
+                    list = atomspace.get_incoming(list[0].h)  # EvaluationLink
+                    list = atomspace.get_outgoing(list[0].h)  # ListLink
+                    list = atomspace.get_outgoing(list[1].h)  # NumberNode
+                    value = atomspace.get_name(list[0].h)
+                    TARGET_STIMULUS = int(value)
+                    print "Target stimulus amount updated to {0}".\
+                        format(TARGET_STIMULUS)
+
                 self.chainer._give_stimulus(atomspace[self.query],
                                             TARGET_STIMULUS)
 
