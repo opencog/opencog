@@ -3226,7 +3226,7 @@ template<typename T>
 std::ostream& operator<<(std::ostream& out, const opencog::tree<T>& tr)
 {
     typename opencog::tree<T>::sibling_iterator it = tr.begin();
-    out << subtree_to_string(it);
+    if (it != tr.end()) out << subtree_to_string(it);
     return out;
 }
 
