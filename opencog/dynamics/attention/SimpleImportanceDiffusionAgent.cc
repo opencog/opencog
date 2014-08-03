@@ -104,6 +104,34 @@ void SimpleImportanceDiffusionAgent::setMaxSpreadPercentage(float percent)
 }
 
 /*
+ * Allow the maximum diffusion percentage parameter to be varied dynamically by
+ * modifying a configuration atom in the atomspace. This method checks for the
+ * existence of the configuration atom, and if it exists, updates the parameter
+ * to its current value. The value should be a probability between 0 and 1.
+ */
+void SimpleImportanceDiffusionAgent::updateMaxSpreadPercentage() {
+    HandleSeq resultSet;
+    as->getHandlesByName(back_inserter(resultSet), "CONFIG-DiffusionPercent");
+    if (resultSet.size() > 0) {
+        // Given the PredicateNode, walk to the NumberNode
+        Handle h = resultSet.front();
+        resultSet = as->getIncoming(h);
+        h = resultSet.front();
+        resultSet = as->getOutgoing(h);
+        h = resultSet.back();
+        resultSet = as->getOutgoing(h);
+        h = resultSet.front();
+        float value = std::atof(as->getName(h).c_str());
+        setMaxSpreadPercentage(value);
+
+#ifdef DEBUG
+        std::cout << "Diffusion percentage set to: " <<
+                     maxSpreadPercentage << std::endl;
+#endif
+    }
+}
+
+/*
  * Set the value of the parameter that determines how much of an atom's STI 
  * will be allocated for potential diffusion to hebbian links. Note that any 
  * unused STI that was available but unused for diffusion to hebbian links
@@ -587,6 +615,8 @@ SimpleImportanceDiffusionAgent::combineIncidentAdjacentVectors(
 AttentionValue::sti_t SimpleImportanceDiffusionAgent::calculateDiffusionAmount(
         Handle h)
 {
+    updateMaxSpreadPercentage();
+
     return (AttentionValue::sti_t) round(as->getSTI(h) * maxSpreadPercentage);
     
     // TODO: Using integers for STI values can cause strange consequences.

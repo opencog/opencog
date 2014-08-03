@@ -95,6 +95,7 @@ private:
     std::map<Handle, double> combineIncidentAdjacentVectors(
             std::map<Handle, double>, std::map<Handle, double>);
     void tradeSTI(DiffusionEventType);
+    void updateMaxSpreadPercentage();
     
 public:
     enum { HYPERBOLIC, STEP };
