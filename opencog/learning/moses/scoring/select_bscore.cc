@@ -36,6 +36,8 @@ using namespace combo;
  * CTable rows may have multiple, weighted output values. Several of
  * these output values may have the same weight, and only one of these
  * will be the largest. Find and return that.
+ *
+ * XXX This is not used any more ...
  */
 std::pair<double, double> 
 select_bscore::get_weightiest(const Counter<vertex, count_t>& orow) const
@@ -99,18 +101,20 @@ select_bscore::select_bscore(const CTable& ctable,
 
     // Maps are implicitly ordered, so the below has the effect of
     // putting the rows into sorted order, by output score.
-    std::map<score_t, const CTable::value_type&> ranked_out;
+    std::map<score_t, score_t> ranked_out;
 
     score_t total_weight = 0.0;
     for (const CTable::value_type& io_row : ctable) {
         // io_row.first = input vector
         // io_row.second = counter of outputs
-        auto w = get_weightiest(io_row.second);
-        score_t weightiest_val = w.first;
-        score_t weightiest = w.second;
-
-        ranked_out.insert(std::pair<score_t, const CTable::value_type&>(weightiest_val, io_row));
-        total_weight += weightiest;
+        const Counter<vertex, count_t>& orow = io_row.second;
+        for (const CTable::counter_t::value_type& tcv : orow) {
+            score_t val = get_contin(tcv.first);
+            if (not _positive) val = -val;
+            score_t weight = tcv.second;
+            ranked_out.insert(std::pair<score_t, score_t>(val, weight));
+            total_weight += weight;
+        }
     }
 
     logger().info() << "select_bscore: lower_percentile = " << lower_percentile
@@ -125,24 +129,23 @@ select_bscore::select_bscore(const CTable& ctable,
     bool found_lower = false;
     bool found_upper = false;
     for (auto score_row : ranked_out) {
-        score_t weightiest_val = score_row.first;
+        score_t val = score_row.first;
 
-        auto w = get_weightiest(score_row.second.second);
-        score_t weightiest = w.second;
-        running_weight += weightiest;
+        score_t weight = score_row.second;
+        running_weight += weight;
 
-        if (not found_lower and lower_percentile < running_weight) {
-            _lower_bound = weightiest_val;
+        if (not found_lower and lower_percentile <= running_weight) {
+            _lower_bound = val;
             found_lower = true;
         }
-        if (not found_upper and upper_percentile < running_weight) {
-            _upper_bound = weightiest_val;
+        if (not found_upper and upper_percentile <= running_weight) {
+            _upper_bound = val;
             found_upper = true;
         }
-        last_val = weightiest_val;
+        last_val = val;
     }
     if (not found_upper) {
-        _upper_bound = last_val * (1.0 + 1.0e-7);
+        _upper_bound = last_val * (1.0 + 2.0*FLT_EPSILON);
     }
     OC_ASSERT((_lower_bound < _upper_bound),
         "Selection scorer, invalid bounds: %f and %f",
@@ -152,7 +155,14 @@ select_bscore::select_bscore(const CTable& ctable,
                     << " upper bound = " << _upper_bound;
 }
 
-/// scorer, as described in the constructor, above.
+/**
+ * selection scorer, indicates if a row is inside or outside of the 
+ * selection range.
+ *
+ * If the boolean tree predicts that a row is inside/outside the
+ * selection range, then scorer reqards this with a score of zero.
+ * Otherwise, the score is minus the weight of that row.
+ */
 behavioral_score select_bscore::operator()(const combo_tree& tr) const
 {
     behavioral_score bs;
@@ -163,21 +173,19 @@ behavioral_score select_bscore::operator()(const combo_tree& tr) const
     for (const CTable::value_type& io_row : _wrk_ctable) {
         // io_row.first = input vector
         // io_row.second = counter of outputs
-        auto w = get_weightiest(io_row.second);
-        score_t weightiest_val = w.first;
-        score_t weightiest = w.second;
 
-        if (interpret_tr(io_row.first.get_variant()) == id::logical_true) {
-            if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
-                bs.push_back(0.0);
-            else
-                bs.push_back(-weightiest);
-        } else {
-            if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
-                bs.push_back(-weightiest);
-            else
-                bs.push_back(0.0);
+        bool predict_inside = (id::logical_true == interpret_tr(io_row.first.get_variant()));
+        score_t fail = 0.0;
+        const Counter<vertex, count_t>& orow = io_row.second;
+        for (const CTable::counter_t::value_type& tcv : orow) {
+            score_t val = get_contin(tcv.first);
+            if (not _positive) val = -val;
+            score_t weight = tcv.second;
+            bool inside = (_lower_bound <= val and val <= _upper_bound);
+            if ((predict_inside and not inside) or (not predict_inside and inside))
+                fail += weight;
         }
+        bs.push_back(-fail);
     }
 
     return bs;
@@ -214,21 +222,19 @@ behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble
     for (const CTable::value_type& io_row : _wrk_ctable) {
         // io_row.first = input vector
         // io_row.second = counter of outputs
-        auto w = get_weightiest(io_row.second);
-        score_t weightiest_val = w.first;
-        score_t weightiest = w.second;
 
-        if (0 < hypoth[i]) {
-            if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
-                bs.push_back(0.0);
-            else
-                bs.push_back(-weightiest);
-        } else {
-            if (_lower_bound <= weightiest_val and weightiest_val <= _upper_bound)
-                bs.push_back(-weightiest);
-            else
-                bs.push_back(0.0);
+        bool predict_inside = (0 < hypoth[i]);
+        score_t fail = 0.0;
+        const Counter<vertex, count_t>& orow = io_row.second;
+        for (const CTable::counter_t::value_type& tcv : orow) {
+            score_t val = get_contin(tcv.first);
+            if (not _positive) val = -val;
+            score_t weight = tcv.second;
+            bool inside = (_lower_bound <= val and val <= _upper_bound);
+            if ((predict_inside and not inside) or (not predict_inside and inside))
+                fail += weight;
         }
+        bs.push_back(-fail);
         i++;
     }
 
@@ -237,10 +243,33 @@ behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble
 
 behavioral_score select_bscore::best_possible_bscore() const
 {
-    // It should always be possible to correctly predict one entry
-    // of the ctable; and so the  best score is zero for each row.
-    // XXX right? 
-    return behavioral_score(_wrk_ctable.size(), 0.0);
+    behavioral_score bs;
+    for (const CTable::value_type& io_row : _wrk_ctable) {
+        // io_row.first = input vector
+        // io_row.second = counter of outputs
+
+        // Any row with a multiplicity of just one can be inherently
+        // classified.  Thus, we push back 0.0 for that case. But
+        // for rows with multiplicities greater than one, the situation
+        // is trickier: some may be inside, and some outside the
+        // selection range.
+        score_t n_inside = 0.0;
+        score_t n_outside = 0.0;
+        const Counter<vertex, count_t>& orow = io_row.second;
+        for (const CTable::counter_t::value_type& tcv : orow) {
+            score_t val = get_contin(tcv.first);
+            if (not _positive) val = -val;
+            score_t weight = tcv.second;
+            if (_lower_bound <= val and val <= _upper_bound)
+                n_inside += weight;
+            else
+                n_outside += weight;
+        }
+        score_t sum = n_inside + n_outside;
+        score_t split = fabs(n_inside - n_outside);
+        bs.push_back(-0.5 * fabs(sum - split));
+    }
+    return bs;
 }
 
 behavioral_score select_bscore::worst_possible_bscore() const
