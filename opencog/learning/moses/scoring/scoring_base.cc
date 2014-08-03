@@ -79,8 +79,9 @@ bscore_base::operator()(const scored_combo_tree_set& ensemble) const
 behavioral_score
 bscore_base::worst_possible_bscore() const
 {
-    OC_ASSERT(false, "Worst possible score not implemented for bscorer %s",
-        typeid(*this).name());
+    // Can't assert; this will fail during ensemble setup.
+    // OC_ASSERT(false, "Worst possible score not implemented for bscorer %s",
+    //     typeid(*this).name());
     return behavioral_score();
 }
 
