@@ -61,6 +61,10 @@ public:
     /// termination condition.
     score_t best_possible_score() const;
 
+    /// Returns the worst score reachable for this problem. Used to
+    /// compute the scoring error during boosting.
+    score_t worst_possible_score() const;
+
     /// Return the minimum value considered for improvement.
     score_t min_improv() const
     {

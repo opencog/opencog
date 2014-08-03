@@ -118,6 +118,10 @@ score_t behave_cscore::best_possible_score() const
     return boost::accumulate(_bscorer.best_possible_bscore(), 0.0);
 }
 
+score_t behave_cscore::worst_possible_score() const
+{
+    return boost::accumulate(_bscorer.worst_possible_bscore(), 0.0);
+}
 
 
 } // ~namespace moses
