@@ -20,6 +20,9 @@ RUN /octool -v -a -d
 # hack for libiberty package found in trusty main
 RUN sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h
 
+# clean apt cache to decrease image size
+RUN apt-get clean
+
 # build opencog
 ADD . /opencog
 RUN ln -s -v /opencog /opencog/src
