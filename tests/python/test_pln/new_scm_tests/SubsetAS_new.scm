@@ -15,8 +15,6 @@
 ; define default confidence
 (define dc 0.5)
 
-(define target (SubsetLink sub super))
-
 (EvaluationLink (PredicateNode "inputs") 
 	(ListLink 
 		(MemberLink (stv 0.1 dc) e0 sub)
@@ -58,7 +56,7 @@
 		(MemberLink (stv 0.4 dc) e6 super)
 		(MemberLink (stv 0.6 dc) e8 super)
 		(MemberLink (stv 0.0 dc) e9 super)
-		(SubsetLink sub super)
+		(SubsetLink (stv 1.0 0.001248) sub super)
 	)
 )
 
