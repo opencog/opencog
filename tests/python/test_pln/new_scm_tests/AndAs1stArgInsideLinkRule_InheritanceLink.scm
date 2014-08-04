@@ -1,16 +1,14 @@
 (define dogs (ConceptNode "dogs" (stv 0.01 1)))
-(define animals (ConceptNode "animals" (stv 0.01 1)))
 (define bulldogs (ConceptNode "bulldogs" (stv 0.01 1)))
+(define animals (ConceptNode "animals" (stv 0.01 1)))
 
 (EvaluationLink (PredicateNode "inputs")
 	(ListLink
 	    dogs
-	    animals
 	    bulldogs
-	    (AndLink (stv 0.5 1)
-	        (InheritanceLink (stv 0.5 1) dogs animals)
-	        (InheritanceLink (stv 0.5 1) bulldogs animals)
-	    )
+	    animals
+	    (InheritanceLink dogs animals (stv 0.5 1))
+	    (InheritanceLink bulldogs animals (stv 0.5 1))
     )
 )
 
@@ -31,6 +29,11 @@
 	     dogs
 	     animals
 	     bulldogs
-	     (InheritanceLink (AndLink dogs bulldogs) animals)
+	     (InheritanceLink dogs animals (stv 0.5 1))
+	     (InheritanceLink bulldogs animals (stv 0.5 1))
+	     (InheritanceLink (stv .5 1.0)
+	        (AndLink dogs bulldogs (stv .005 1.0))
+	        animals
+	     )
     )
 )

@@ -7,10 +7,8 @@
 	    bulldogs
 	    dogs
 	    animals
-	    (AndLink (stv 0.5 1)
-	        (InheritanceLink (stv 0.5 1) bulldogs dogs)
-	        (InheritanceLink (stv 0.5 1) bulldogs animals)
-	    )
+	    (InheritanceLink (stv 0.5 1) bulldogs dogs)
+	    (InheritanceLink (stv 0.5 1) bulldogs animals)
     )
 )
 
@@ -31,6 +29,11 @@
 	     bulldogs
 	     dogs
 	     animals
-	     (InheritanceLink bulldogs (AndLink dogs animals))
+	     (InheritanceLink (stv 0.5 1) bulldogs dogs)
+	     (InheritanceLink (stv 0.5 1) bulldogs animals)
+	     (InheritanceLink (stv .0025 1.0)
+	        bulldogs
+	        (AndLink dogs animals (stv .0001 1.0))
+	     )
     )
 )

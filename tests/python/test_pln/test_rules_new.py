@@ -11,11 +11,11 @@ from unittest import TestCase
 import re
 import os
 
-__VERBOSE__ = False
+__VERBOSE__ = True
 
 # Set to True to search for needed .scm files in default IN-SOURCE build location, e.g. to write unit tests in the IDE
 # Set to False to search for needed .scm files based on environment variables PROJECT_SOURCE_DIR and PROJECT_BINARY_DIR
-__DEV_MODE__ = False
+__DEV_MODE__ = True
 
 
 class PLNUnitTester(TestCase):
@@ -39,6 +39,8 @@ class PLNUnitTester(TestCase):
         self.addTestFile("OrRule_new.scm")
         self.addTestFile("NotCreationRule.scm")
         self.addTestFile("TransitiveSimilarityRule_SimilarityLink.scm")
+        self.addTestFile("AndAs1stArgInsideLinkRule_InheritanceLink.scm")
+        self.addTestFile("AndAs2ndArgInsideLinkRule_InheritanceLink.scm")
         # context rules
         self.addTestFile("InheritanceToContextRule.scm")
         self.addTestFile("ContextToInheritanceRule.scm")
@@ -71,9 +73,7 @@ class PLNUnitTester(TestCase):
         # Doesn't work, as the unit test setup doesn't allow for changing TV's (YET)
         # self.addTestFile("AndBreakdownRule.scm")
 
-        # Don't work yet, files keep loading
-        # self.addTestFile("AndAs1stArgInsideLinkRule_InheritanceLink.scm")
-        # self.addTestFile("AndAs2ndArgInsideLinkRule_InheritanceLink.scm")
+
 
     def tearDown(self):
         del self.atomSpaceFileData
