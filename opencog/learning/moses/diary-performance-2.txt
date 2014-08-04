@@ -362,6 +362,12 @@ has 329 rows, all of which are unique.
 
 Above results are off-by-one, final results are 55, 14 and 0 not 56, 15 and 1.
 
+Arghh. Also, inappropriatte weight tallys.  Redo the above.
+select.csv has 329 rows. The 0.8 and 0.9 bounds are at
+   select_bscore: lower_bound = 1329.39 upper bound = 1650.22
+
+XXXXX TODO
+
 
 Localized Boosting AKA Mixture of Experts
 -----------------------------------------
@@ -383,12 +389,16 @@ positive set.
 Precision, selection base results
 ---------------------------------
 Create 3 files with top scorers marked s boolean 1 else 0.
-select.csv: the 70% mark is at 1281.55
-So preselect.csv is select.csv, with all scores above 1281.55 marked.
+select.csv: 70% mark should be at 0.7*329 = 230.2 so should
+have 230 lines marked with 0 and 99 lines marked with 1.
+
+   954.393 < div < 955.542
+
+So preselect.csv is select.csv, with all scores above 955 are marked.
 Ditto, preselect-less-dupe.csv and preselect-no-dupe.csv.
 
-The result are tables w/ 329 data points, of which 256 lines are
-false, 73 are true. (i.e. 256/329 = 77.8% of lines...)
+The result are tables w/ 329 data points, of which 230 lines are
+false, 99 are true. (i.e. 230/329 = 70% of lines...)
 
 Compare the -Hit and -Hselect scorer directly on preselect-no-dupe.csv
 
@@ -403,17 +413,18 @@ moses -Hselect  -iselect-no-dupe.csv -q0.7 --boost=1
      num_evals  Hit         Hit            Hselect     Hselect
                   (time)   boost (time)      (time)  boost (time)
      --------- ---------   ------------   ----------  ----------
-        10K    39 (0m23s)    45 (0m10s)   47 (0m19s)  49 (0m11s)
-        20K    30 (1m9s)     27 (0m31s)   36 (0m40s)  35 (0m37s)
-        40K    26 (3m48s)    17 (1m36s)   27 (2m24s)  11 (1m51s)
-        80K    17 (10m18s)    0 (4m18s)   26 (8m35s)   0 (3m55s)
-       160K    16 (32m3s)     -           22 (24m37s)  -
+        10K    46 (0m17s)    40 (0m13s)   48 (0m19s)  49 (0m11s)
+        20K    41 (0m42s)    32 (0m35s)   36 (0m39s)  35 (0m36s)
+        40K    29 (2m34s)     9 (1m30s)   27 (2m24s)  11 (1m51s)
+        80K    24 (9m21s)     0 (3m12s)   26 (8m40s)   0 (3m55s)
+       160K    22 (30m18s)    -           22 (24m10s)  -
 
-Conclude: The differences between Hit and Hselect would surely wash out
-if the results were averaged over different initial random seeds. This
-is not a surprise; both scorers are doing essentially the same thing
-for this dataset.  So the above is really just a "sanity check" to make
-sure that the code is good, and, indeed, it seems to be good.
+Conclude: The differences between Hit and Hselect are small and would
+surely wash out if the results were averaged over different initial
+random seeds. This is not a surprise; both scorers are doing essentially
+the same thing for this dataset.  So the above is really just a
+"sanity check" to make sure that the code is good, and, indeed, it
+seems to be good.
 
 Try again on the dataset with duplicates:
 
@@ -426,18 +437,24 @@ moses -Hselect  -iselect.csv -q0.7 --boost=1
      num_evals  Hit         Hit            Hselect     Hselect
                   (time)   boost (time)      (time)  boost (time)
      --------- ---------   ------------   ----------  ----------
-        10K    66 (0m6s)     72 (0m15s)    8 (0m9s)    4 (0m11s)
-        20K    58 (0m21s)    72 (0m43s)    5 (0m23s)   0 (0m9s)
-        40K    55 (1m21s)    72 (2m13s)    4 (0m54s)   -
-        80K    55 (5m17s)    72 (8m8s)     4 (3m1s)    -
-       160K    55 (19m1s)     -            4 (10m59s)  -
+        10K    79 (0m11s)   x72 (0m15s)   79 (0m11s)  x4 (0m11s)
+        20K    54 (0m22s)   x72 (0m43s)   54 (0m23s)  x0 (0m9s)
+        40K    54 (0m57s)   x72 (2m13s)   54 (0m57s)   -
+        80K    54 (3m2s)    x72 (8m8s)    54 (3m7s)    -
+       160K    50 (3m41s)     -           50 (3m45s)   -
+
+Hsel crash
+Hit crash.
 
 Why so different?
 -- preselect.csv has best score of 51, due to duplicate rows; so, for
    the first column, subtract 51 to get the actual number of bad rows.
 
+-- Due to rounding error (greater vs greater-or-equal) the -q0.7 only
+   has 50 rows (i.e. we prepared preselect incorrectly!?)
+
 Since there are 329 rows, this means 329-51 = 278 rows, half of which
-are 278/2 = 139 which is what the ense3mble scorer needs to beat.
+are 278/2 = 139 which is what the ensemble scorer needs to beat.
 
 wtf:  -51 + 87 = 36 / 329
 
