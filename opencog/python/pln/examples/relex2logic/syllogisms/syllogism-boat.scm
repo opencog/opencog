@@ -10,6 +10,7 @@
 ; Evokes relation _quantity(boat, no).
 ; This prompts the question: Should this be handled with a NotLink
 ; or use a ForAllLink which itself contains a NotLink?
+; discuss
 
 (EvaluationLink (PredicateNode "inputs")
     (ListLink

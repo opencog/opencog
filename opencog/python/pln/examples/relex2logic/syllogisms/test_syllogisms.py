@@ -8,7 +8,6 @@ For testing syllogisms
 
 from opencog.atomspace import types, AtomSpace, TruthValue
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
-from opencog.cogserver import MindAgent
 from opencog.atomspace import types
 from pln.chainers import Chainer
 from pln.rules import *
@@ -94,6 +93,19 @@ def transfer_atom(new_atomspace, atom):
         outgoing = [transfer_atom(new_atomspace, out) for out in atom.out]
         return new_atomspace.add_link(atom.type, outgoing, tv=atom.tv)
 
+
+def check_result(atomspace, expected_output_list):
+    all_found = True
+    atoms = atomspace.get_atoms_by_type(types.Atom)
+    for expected_output in expected_output_list:
+        if expected_output not in atoms:
+            if all_found:
+                print("\nFailed to produce the following atoms:")
+            print("{0}\n".format(expected_output))
+            all_found = False
+    if all_found:
+        print("Produced expected output!")
+
 # Parameters
 num_steps = 100
 print_starting_contents = True
@@ -144,3 +156,6 @@ for syllogism in syllogisms:
                 print("-- Output:\n{0}".format(j))
             print("-- using production rule: {0}".format(rule.name))
             print("\n-- based on this input:\n{0}".format(input))
+
+    check_result(inference_space,
+                 get_predicate_arguments(configuration_space, "outputs"))

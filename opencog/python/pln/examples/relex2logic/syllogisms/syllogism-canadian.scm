@@ -70,11 +70,16 @@
 (EvaluationLink (PredicateNode "rules")
 	(ListLink
 		(ConceptNode "ModusPonensRule:ImplicationLink")
+		; rule to handle ForAllRule is needed
 	)
 )
 
 (EvaluationLink (PredicateNode "outputs")
 	(ListLink
+	    (InheritanceLink
+	        (ConceptNode "optician")
+	        (ConceptNode "Canadian")
+	    )
 	    ; Conclusion: Some opticians are Canadian
 	    ; needs proper handling of quantities!
 	)
