@@ -279,6 +279,11 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     else // Add 0.0 to ensure the bscore has the same size
         bs.push_back(0.0);
 
+    if (0 < active) {
+        // See above for explanation for the extra 0.5
+        precision = sao / active + 0.5;
+    }
+
     // For boolean tables, activation sum of true and false positives
     // i.e. the sum of all positives.   For contin tables, the activation
     // is likewise: the number of rows for which the combo tree returned
@@ -287,13 +292,6 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     score_t activation_penalty = get_activation_penalty(activation);
     bs.push_back(activation_penalty);
     if (logger().isFineEnabled()) {
-        if (0 < active) {
-            if (output_type == id::boolean_type)
-                // See above for explanation for the extra 0.5
-                precision = (sao / active + 0.5) / max_output;
-            else
-                precision = (sao / active) / max_output;
-        }
         logger().fine("precision = %f  activation=%f  activation penalty=%e",
                       precision, activation, activation_penalty);
     }
