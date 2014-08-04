@@ -51,18 +51,19 @@ public:
                                "-q0.8", "-w0.9",
                                // "-lDEBUG",
                                "--boost=1" };
-        string tempfile = build_arguments(args);
-        moses_exec(args);
+        auto cmd_tempfile = build_cmd(args);
+        moses_exec(cmd_tempfile.first);
 
         // get the combo tree
-        combo_tree comtr = parse_result(tempfile).second;
-        unlink(tempfile.c_str());
+        combo_tree comtr = parse_result(cmd_tempfile.second).second;
+        unlink(cmd_tempfile.second.c_str());
 
         std::cout << "Learned tree " << comtr << endl;
 
         // Re-read the data file
         Table datatable;
-        datatable = loadTable(data_file_path, "output", std::vector<std::string>());
+        datatable = loadTable(data_file_path, "output", "",
+                              std::vector<std::string>());
 
         OTable predicted(comtr, datatable.itable);
 
