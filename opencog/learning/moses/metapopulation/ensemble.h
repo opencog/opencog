@@ -87,8 +87,7 @@ private:
     behave_cscore& _bcscorer;
     boosting_ascore* _booster;
     simple_ascore _flat_scorer;
-    double _best_possible_score;
-    double _worst_possible_score;
+    double _effective_length;
 
     scored_combo_tree_set _scored_trees;
 };
