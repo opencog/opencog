@@ -74,7 +74,7 @@
 	)
 )
 
-(EvaluationLink (PredicateNode "outputs")
+(EvaluationLink (PredicateNode "desired_outputs")
 	(ListLink
 	    (InheritanceLink
 	        (ConceptNode "optician")

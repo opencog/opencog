@@ -57,8 +57,11 @@ def get_predicate_arguments(atomspace, predicate_name):
     # The template needs to be removed from the results
     queries.remove(template)
     if len(queries) != 1:
-        raise ValueError("Predicate " + predicate_name +
-                         " must have 1 EvaluationLink")
+        if predicate_name == "undesired_outputs":
+            return None
+        else:
+            raise ValueError("Predicate {0} must have 1 EvaluationLink"
+                             .format(predicate_name))
     return queries[0].out[1].out
 
 
@@ -94,17 +97,36 @@ def transfer_atom(new_atomspace, atom):
         return new_atomspace.add_link(atom.type, outgoing, tv=atom.tv)
 
 
-def check_result(atomspace, expected_output_list):
-    all_found = True
+def check_result(atomspace, desired_output_list, undesired_output_list):
+    """
+    Checks if the atomspace contains all atoms in the desired output and no
+    atoms that should be specifically avoided.
+    :param atomspace: atomspace to be checked
+    :param desired_output_list: list of expected atoms
+    :param undesired_output_list: list of atoms that should not be produced
+    """
+    all_desired_produced = True
+    undesired_produced = False
     atoms = atomspace.get_atoms_by_type(types.Atom)
-    for expected_output in expected_output_list:
-        if expected_output not in atoms:
-            if all_found:
+    for desired_output in desired_output_list:
+        if desired_output not in atoms:
+            if all_desired_produced:
                 print("\nFailed to produce the following atoms:")
-            print("{0}\n".format(expected_output))
-            all_found = False
-    if all_found:
-        print("Produced expected output!")
+            print("{0}".format(desired_output))
+            all_desired_produced = False
+    if all_desired_produced:
+        print("Success! All desired output has been produced!")
+    if undesired_output_list:
+        for undesired_output in undesired_output_list:
+            if undesired_output in atoms:
+                if not undesired_produced:
+                    print("\nThe following undesired atoms have been produced:")
+                print("{0}\n".format(undesired_output))
+                undesired_produced = True
+        if not undesired_produced:
+            print("Success! No undesired output has been produced!")
+    else:
+        print("No atoms had to be avoided.")
 
 # Parameters
 num_steps = 100
@@ -158,4 +180,7 @@ for syllogism in syllogisms:
             print("\n-- based on this input:\n{0}".format(input))
 
     check_result(inference_space,
-                 get_predicate_arguments(configuration_space, "outputs"))
+                 get_predicate_arguments(configuration_space,
+                                         "desired_outputs"),
+                 get_predicate_arguments(configuration_space,
+                                         "undesired_outputs"))
