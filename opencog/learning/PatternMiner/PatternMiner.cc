@@ -607,8 +607,9 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
                         newHTreeNode->parentLinks.insert(this->htree->rootNode);
                     }
 
-
+                    addNewPatternLock.lock();
                     (patternsForGram[gram-1]).push_back(newHTreeNode);
+                    addNewPatternLock.unlock();
                 }
             }
 
@@ -1040,14 +1041,6 @@ void PatternMiner::growPatternsTask()
 
         foreach (HandleSeq instance , cur_growing_pattern->instances)
         {
-            // debug
-            int i =0;
-            foreach(Handle h , instance)
-            {
-                string x = originalAtomSpace->atomAsString(h);
-                i ++;
-            }
-
             extendAllPossiblePatternsForOneMoreGram(instance, cur_growing_pattern, cur_gram);
         }
 
