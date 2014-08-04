@@ -132,9 +132,10 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 
 		// Recompute the weights
 		const behavioral_score& bs = best_p->get_bscore();
+		size_t bslen = bs.size();
 		std::vector<double>& weights = _booster->get_weights();
 		double znorm = 0.0;
-		for (int i=0; i<behave_len; i++)
+		for (size_t i=0; i<bslen; i++)
 		{
 			weights[i] *= is_correct(bs[i]) ? rcpalpha : expalpha;
 			znorm += weights[i];
@@ -142,7 +143,7 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 
 		// Normalization: sum of scores must equal vector length.
 		znorm = behave_len / znorm;
-		for (int i=0; i<behave_len; i++)
+		for (size_t i=0; i<bslen; i++)
 		{
 			weights[i] *= znorm;
 		}
