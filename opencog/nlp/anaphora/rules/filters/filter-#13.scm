@@ -18,10 +18,6 @@
                 (VariableTypeNode "WordInstanceNode")
             )
             (TypedVariableLink
-                (VariableNode "$verb")
-                (VariableTypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
                 (VariableNode "a number")
                 (VariableTypeNode "NumberNode")
             )
