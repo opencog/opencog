@@ -27,6 +27,7 @@ class PLNUnitTester(TestCase):
         self.chainer = None
 
         # Works:
+        self.addTestFile("SubsetAS_new.scm")
         self.addTestFile("AndRule_new.scm")
         self.addTestFile("BooleanTransformationRule_new.scm")
         self.addTestFile("DeductionRule_InheritanceLink.scm")
@@ -64,9 +65,6 @@ class PLNUnitTester(TestCase):
         #self.addTestFile("AndBulkEvaluationRuleEvaluationLinks_new.scm")
         #self.addTestFile("AndBulkEvaluationRulePredicates_new.scm")
         #self.addTestFile("NegatedAndBulkEvaluationRule3EvaluationLinks_new.scm")
-
-        # Doesn't work, not sure yet why.
-        #self.addTestFile("SubsetAS_new.scm")
 
         # Doesn't work, as the unit test setup doesn't allow for changing TV's (YET)
         # self.addTestFile("AndBreakdownRule.scm")
