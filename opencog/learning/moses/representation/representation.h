@@ -119,6 +119,10 @@ struct representation : public knob_mapper, boost::noncopyable
         return _fields;
     }
 
+    field_set& fields() {
+        return _fields;
+    }
+
     const combo_tree& exemplar() const {
         return _exemplar;
     }

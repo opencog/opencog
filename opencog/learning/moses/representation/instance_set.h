@@ -32,6 +32,19 @@
 #include "scored_instance.h"
 #include "../moses/types.h"
 
+// This is a workaround to the improper implementation of
+// emplace_back() in gcc-4.6, it uses assignement operator=, but since
+// a const cannot be assigned a new value _fields has to be un-const
+#if (__GNUC__ == 4) && (__GNUC_MINOR__ == 6)
+#define GCC46_EMPLACE_BACK_WORKAROUND
+#endif
+
+#ifdef GCC46_EMPLACE_BACK_WORKAROUND
+#define MAYBE_CONST
+#else
+#define MAYBE_CONST const
+#endif
+
 namespace opencog {
 namespace moses {
 
@@ -58,17 +71,26 @@ struct instance_set : public std::vector<scored_instance<ScoreT> >
                                         const instance& > const_instance_iterator;
 
     // Create a deme initialized with n null instances.
-    instance_set(unsigned int n, const field_set& fs)
+    instance_set(unsigned int n, MAYBE_CONST field_set& fs)
         : super(n, instance(fs.packed_width())), _fields(fs),
           n_evals(0), n_best_evals(0) {}
     // Create a deme initialized with n instances of inst.
-    instance_set(unsigned int n, const instance& inst, const field_set& fs)
+    instance_set(unsigned int n, const instance& inst, MAYBE_CONST field_set& fs)
         : super(n, inst), _fields(fs),
           n_evals(0), n_best_evals(0) {}
     // Create an empty deme.
-    instance_set(const field_set& fs, const demeID_t& id = demeID_t())
+    instance_set(MAYBE_CONST field_set& fs, const demeID_t& id = demeID_t())
         : _fields(fs), _id(id),
           n_evals(0), n_best_evals(0) {}
+
+#ifdef GCC46_EMPLACE_BACK_WORKAROUND
+    instance_set<ScoreT>& operator=(const instance_set<ScoreT>& rhs) {
+        _fields = rhs.fields();
+        _id = rhs.getID();
+        n_evals = rhs.n_evals;
+        n_best_evals = rhs.n_best_evals;
+    }
+#endif
 
     // Insert or erase instances so that the size becomes n.
     // In case of insertions, it will insert null instances.
@@ -79,6 +101,12 @@ struct instance_set : public std::vector<scored_instance<ScoreT> >
     const field_set& fields() const {
         return _fields;
     }
+
+#ifdef GCC46_EMPLACE_BACK_WORKAROUND
+    field_set& fields() {
+        return _fields;
+    }
+#endif
 
     score_iterator begin_scores() {
         return score_iterator(this->begin());
@@ -102,7 +130,7 @@ struct instance_set : public std::vector<scored_instance<ScoreT> >
     void setID(const demeID_t& id) { _id = id; }
     demeID_t getID() const { return _id; }
 protected:
-    const field_set& _fields;
+    MAYBE_CONST field_set& _fields;
 
     // ID of the deme
     demeID_t _id;
@@ -118,5 +146,8 @@ public:
 
 } // ~namespace moses
 } // ~namespace opencog
+
+#undef GCC46_EMPLACE_BACK_WORKAROUND
+#undef MAYBE_CONST
 
 #endif
