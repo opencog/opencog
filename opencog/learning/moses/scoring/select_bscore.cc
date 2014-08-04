@@ -40,12 +40,12 @@ using namespace combo;
  * XXX This is not used any more ...
  */
 std::pair<double, double> 
-select_bscore::get_weightiest(const Counter<vertex, count_t>& orow) const
+select_bscore::get_weightiest(const CTable::counter_t& orow) const
 {
     score_t weightiest_val = very_worst_score;
     score_t weightiest = 0.0;
     for (const CTable::counter_t::value_type& tcv : orow) {
-        score_t val = get_contin(tcv.first);
+        score_t val = get_contin(tcv.first.value);
         if (not _positive) val = -val;
         // The weight for a given value is in tcv.second.
         // We look for weightiest, or, if tied, then for the
@@ -107,9 +107,9 @@ select_bscore::select_bscore(const CTable& ctable,
     for (const CTable::value_type& io_row : ctable) {
         // io_row.first = input vector
         // io_row.second = counter of outputs
-        const Counter<vertex, count_t>& orow = io_row.second;
+        const CTable::counter_t& orow = io_row.second;
         for (const CTable::counter_t::value_type& tcv : orow) {
-            score_t val = get_contin(tcv.first);
+            score_t val = get_contin(tcv.first.value);
             if (not _positive) val = -val;
             score_t weight = tcv.second;
             ranked_out.insert(std::pair<score_t, score_t>(val, weight));
@@ -145,7 +145,7 @@ select_bscore::select_bscore(const CTable& ctable,
         last_val = val;
     }
     if (not found_upper) {
-        _upper_bound = last_val * (1.0 + 2.0*FLT_EPSILON);
+        _upper_bound = last_val * (1.0 + 2.0*EPSILON);
     }
     OC_ASSERT((_lower_bound < _upper_bound),
         "Selection scorer, invalid bounds: %f and %f",
@@ -176,9 +176,9 @@ behavioral_score select_bscore::operator()(const combo_tree& tr) const
 
         bool predict_inside = (id::logical_true == interpret_tr(io_row.first.get_variant()));
         score_t fail = 0.0;
-        const Counter<vertex, count_t>& orow = io_row.second;
+        const CTable::counter_t& orow = io_row.second;
         for (const CTable::counter_t::value_type& tcv : orow) {
-            score_t val = get_contin(tcv.first);
+            score_t val = get_contin(tcv.first.value);
             if (not _positive) val = -val;
             score_t weight = tcv.second;
             bool inside = (_lower_bound <= val and val <= _upper_bound);
@@ -225,9 +225,9 @@ behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble
 
         bool predict_inside = (0 < hypoth[i]);
         score_t fail = 0.0;
-        const Counter<vertex, count_t>& orow = io_row.second;
+        const CTable::counter_t& orow = io_row.second;
         for (const CTable::counter_t::value_type& tcv : orow) {
-            score_t val = get_contin(tcv.first);
+            score_t val = get_contin(tcv.first.value);
             if (not _positive) val = -val;
             score_t weight = tcv.second;
             bool inside = (_lower_bound <= val and val <= _upper_bound);
@@ -255,9 +255,9 @@ behavioral_score select_bscore::best_possible_bscore() const
         // selection range.
         score_t n_inside = 0.0;
         score_t n_outside = 0.0;
-        const Counter<vertex, count_t>& orow = io_row.second;
+        const CTable::counter_t& orow = io_row.second;
         for (const CTable::counter_t::value_type& tcv : orow) {
-            score_t val = get_contin(tcv.first);
+            score_t val = get_contin(tcv.first.value);
             if (not _positive) val = -val;
             score_t weight = tcv.second;
             if (_lower_bound <= val and val <= _upper_bound)
@@ -286,9 +286,9 @@ behavioral_score select_bscore::worst_possible_bscore() const
         // selection range.
         score_t n_inside = 0.0;
         score_t n_outside = 0.0;
-        const Counter<vertex, count_t>& orow = io_row.second;
+        const CTable::counter_t& orow = io_row.second;
         for (const CTable::counter_t::value_type& tcv : orow) {
-            score_t val = get_contin(tcv.first);
+            score_t val = get_contin(tcv.first.value);
             if (not _positive) val = -val;
             score_t weight = tcv.second;
             if (_lower_bound <= val and val <= _upper_bound)

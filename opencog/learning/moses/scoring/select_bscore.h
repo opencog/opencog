@@ -66,7 +66,7 @@ struct select_bscore : public bscore_ctable_base
     score_t min_improv() const;
 
 protected:
-    std::pair<double, double> get_weightiest(const Counter<vertex, count_t>&) const;
+    std::pair<double, double> get_weightiest(const CTable::counter_t&) const;
 
     bool _positive;
     score_t _lower_bound;
