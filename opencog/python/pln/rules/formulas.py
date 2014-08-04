@@ -593,7 +593,7 @@ def andAs2ndArgInsideLinkFormula(tvs):
     """
     inh_ab_tv, inh_ac_tv, a_tv, b_tv, c_tv = tvs
 
-    and_bc_tv = andFormula(b_tv, c_tv)[0]
+    and_bc_tv = andFormula([b_tv, c_tv])[0]
     inh_a_and_bc_strength = (inh_ab_tv.mean * a_tv.mean * inh_ac_tv.mean
                              * and_bc_tv.mean) / (b_tv.mean * c_tv.mean)
     inh_a_and_bc_count = makeUpCount(tvs)
