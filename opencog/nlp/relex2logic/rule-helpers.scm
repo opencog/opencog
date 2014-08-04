@@ -160,8 +160,12 @@
 (define (SVP-rule subj  subj_instance  predicative  predicative_instance)
 	(list (InheritanceLink (ConceptNode predicative_instance df-node-stv) (ConceptNode predicative df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj df-node-stv) df-link-stv)
-	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode predicative_instance df-node-stv) df-link-stv)
-	)
+	(EvaluationLink df-link-stv
+		(PredicateNode predicative_instance df-node-stv)
+		(ListLink df-link-stv
+			(ConceptNode subj_instance df-node-stv)
+		)
+	))
 )
 
 (define (to-be-rule verb verb_ins adj adj_ins subj subj_ins)
