@@ -111,15 +111,20 @@ using namespace combo;
 
 
 precision_bscore::precision_bscore(const CTable& ctable_,
-                                   float penalty_,
+                                   float activation_pressure_,
                                    float min_activation_,
                                    float max_activation_,
+                                   float dispersion_pressure,
+                                   float dispersion_exponent,
                                    bool positive_,
-                                   bool worst_norm_) :
-    bscore_ctable_base(ctable_),
-    min_activation(min_activation_), max_activation(max_activation_),
-    penalty(penalty_), positive(positive_), worst_norm(worst_norm_),
-    precision_full_bscore(true)
+                                   bool time_bscore_,
+                                   TemporalGranularity granularity)
+    : bscore_ctable_time_dispersion(ctable_, dispersion_pressure,
+                                    dispersion_exponent, granularity),
+    min_activation(bound(min_activation_, 0.0f, 1.0f)),
+    max_activation(bound(max_activation_, 0.0f, 1.0f)),
+    activation_pressure(activation_pressure_), positive(positive_),
+    time_bscore(time_bscore_)
 {
     output_type = _wrk_ctable.get_output_type();
     if (output_type == id::boolean_type) {
@@ -134,58 +139,24 @@ precision_bscore::precision_bscore(const CTable& ctable_,
         {
             return ((int)c.get(target) - (int)c.get(neg_target)) * 0.5;
         };
-    } else if (output_type == id::contin_type) {
-        // For contin tables, we return the sum of the row values.
-        sum_outputs = [this](const CTable::counter_t& c)->score_t
-        {
-            score_t res = 0.0;
-            for (const CTable::counter_t::value_type& cv : c)
-                res += get_contin(cv.first) * cv.second;
-            return (positive? res : -res);
-        };
     } else {
         OC_ASSERT(false, "Precision scorer, unsupported output type");
     }
 
-    min_activation = fmax(min_activation, 0.0);
-    min_activation = fmin(min_activation, 1.0);
-    max_activation = fmax(max_activation, 0.0);
-    max_activation = fmin(max_activation, 1.0);
-    logger().info("Precision scorer, penalty = %f, "
+    logger().fine("Precision scorer, activation_pressure = %f, "
                   "min_activation = %f, "
-                  "max_activation = %f",
-                  penalty, min_activation, max_activation);
+                  "max_activation = %f, "
+                  "dispersion_pressure = %f",
+                  activation_pressure, min_activation, max_activation,
+                  dispersion_pressure);
 
-    // Verify that the penaly is sane
-    OC_ASSERT((0.0 < penalty) and
-              (0.0 < min_activation) and
-              (min_activation <= max_activation),
-        "Precision scorer, invalid activation bounds.\n"
-        "The penalty must be non-zero (got %f)\n"
-        "The minimum activation must be greater than zero (got %f)\n"
-        "The maximum activation must be greater than or equal to "
-        "the minimum activation (got %f.\n",
-        penalty, min_activation, max_activation);
-
-    // For boolean tables, the highest possible precision is 1.0 (of course)
-    if (output_type == id::boolean_type)
-        max_output = 1.0;
-    else if (output_type == id::contin_type) {
-
-        // For contin tables, we search for the largest value in the table.
-        // (or smallest, if positive == false)
-        max_output = very_worst_score;
-        for (const auto& cr : _wrk_ctable) {
-            const CTable::counter_t& c = cr.second;
-            for (const auto& cv : c) {
-                score_t val = get_contin(cv.first);
-                if (!positive) val = -val;
-                max_output = std::max(max_output, val);
-            }
-        }
-    }
-
-    logger().fine("Precision scorer, max_output = %f", max_output);
+    // Verify that the activation parameters are sane
+    OC_ASSERT((0.0 < activation_pressure) && (0.0 < min_activation)
+              && (min_activation <= max_activation),
+              "Precision scorer, invalid activation bounds.  "
+              "The activation pressure must be non-zero, the minimum activation must be "
+              "greater than zero, and the maximum activation must be greater "
+              "than or equal to the minimum activation.\n");
 }
 
 void precision_bscore::set_complexity_coef(unsigned alphabet_size, float p)
@@ -226,103 +197,87 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 
     interpreter_visitor iv(tr);
     auto interpret_tr = boost::apply_visitor(iv);
-    if (precision_full_bscore) {
-        // compute active and sum of all active outputs
-        for (const CTable::value_type& vct : _wrk_ctable) {
-            // for debugging, keep that around till we fix best_possible_bscore
-            // {
-            //     stringstream ss;
-            //     ostreamCTableRow(ss, vct);
-            //     logger().fine(ss.str());
-            // }
-            const auto& ct = vct.second;
-            double sumo = 0.0;
-            if (interpret_tr(vct.first.get_variant()) == id::logical_true) {
-                sumo = sum_outputs(ct);
-                sao += sumo;
-                active += ct.total_count();
+
+    // 1. Compute active and sum of all active outputs
+    //
+    // 2. If time_bscore enabled build map between timestamps and a
+    // counter of a bool, representing tp and fp. Specifically if the
+    // program output is true tp corresponds the target output being
+    // true (resp. false if positive is false), and fp correspond to
+    // the the target being false (resp. true if positive is false).
+    //
+    // 3. Otherwise build CTable holding the results for dispersion
+    // penalty
+    map<TTable::value_type, Counter<bool, unsigned>> time2res;
+    CTable ctable_res;
+    for (const CTable::value_type& io_row : _wrk_ctable) {
+        const auto& irow = io_row.first;
+        const auto& orow = io_row.second;
+
+        vertex result = interpret_tr(irow.get_variant());
+
+        score_t sumo = 0.0;  // zero if not active
+        if (result == id::logical_true) {
+            sumo = sum_outputs(orow);
+            sao += sumo;
+            active += orow.total_count();
+        }
+
+        if (time_bscore) {
+            for (const CTable::counter_t::value_type& tcv : orow) {
+                bool target = vertex_to_bool(tcv.first.value);
+                if (!positive) target = !target;
+                unsigned count = result == id::logical_true ? tcv.second : 0;
+                time2res[tcv.first.timestamp][target] += count;
             }
-            // for debugging, keep that around till we fix best_possible_bscore
-            // logger().fine("sumo = %g, sao = %g, active = %u, is_true = %d",
-            //               sumo, sao, active,
-            //               interpret_tr(vct.first.get_variant()) == id::logical_true);
+        } else {
             bs.push_back(sumo);
         }
 
-        if (active > 0) {
-            // normalize all components by active
-            score_t iac = 1.0 / active; // inverse of activity to be faster
-            for (auto& v : bs) v *= iac;
-
-            // tp = true positive
-            // fp = false positive
-            //
-            // By using (tp-fp)/2 the sum of all the per-row contributions
-            // is offset by -1/2 from the precision, as proved below
-            //
-            // 1/2 * (tp - fp) / (tp + fp)
-            // = 1/2 * (tp - tp + tp - fp) / (tp + fp)
-            // = 1/2 * (tp + tp) / (tp + fp) - (tp + fp) / (tp + fp)
-            // = 1/2 * 2*tp / (tp + fp) - 1
-            // = precision - 1/2
-            //
-            // So before adding the recall penalty we add +1/2 to
-            // compensate for that.  But do this only for the boolean-
-            // valued tables; this doesn't make sense for the contin-
-            // valued tables.
-            if (output_type == id::boolean_type)
-                bs.push_back(0.5);
-        }
-
-    } else {
-
-        // associate sum of worst outputs with number of observations for
-        // that sum
-        multimap<double, unsigned> worst_deciles;
-
-        // compute active and sum of all active outputs
-        for (const CTable::value_type& vct : _wrk_ctable) {
-            // vct.first = input vector
-            // vct.second = counter of outputs
-            if (interpret_tr(vct.first.get_variant()) == id::logical_true) {
-                double sumo = sum_outputs(vct.second);
-                unsigned totalc = vct.second.total_count();
-                // For boolean tables, sao == sum of all true positives,
-                // and active == sum of true+false positives.
-                // For contin tables, sao = sum of contin values, and
-                // active == count of rows.
-                sao += sumo;
-                active += totalc;
-                if (worst_norm && sumo < 0)
-                    worst_deciles.insert({sumo, totalc});
+        // Build CTable of results
+        if (_pressure > 0.0) {
+            CTable::key_type dummy_input;
+            for (const CTable::counter_t::value_type& tcv : orow) {
+                auto tclass = get_timestamp_class(tcv.first.timestamp);
+                TimedValue timed_result({result, tclass});
+                ctable_res[dummy_input][timed_result] += tcv.second;
             }
         }
-
-        // remove all observations from worst_norm so that only the worst
-        // n_deciles or less remains and compute its average
-        double avg_worst_deciles = 0.0;
-        if (worst_norm and sao > 0) {
-            unsigned worst_count = 0,
-                n_deciles = active / 10;
-            for (const auto& pr : worst_deciles) {
-                worst_count += pr.second;
-                avg_worst_deciles += pr.first;
-                if (worst_count > n_deciles)
-                    break;
-            }
-            avg_worst_deciles /= worst_count;
-        }
-        // normalize precision w.r.t. worst deciles
-        if (avg_worst_deciles < 0) {
-            logger().fine("precision before worst_norm = %f", precision);
-            logger().fine("abs(avg_worst_deciles) = %f", -avg_worst_deciles);
-            precision /= -avg_worst_deciles;
-            if (avg_worst_deciles >= 0)
-                logger().fine("Weird: worst_norm (%f) is positive, maybe the activation is really low", avg_worst_deciles);
-        }
-
-        bs.push_back(precision);
     }
+
+    // Fill un-normalized bscore spread over the temporal axis
+    if (time_bscore) {
+        for (const auto& v : time2res) {
+            unsigned tp = v.second.get(true),
+                fp = v.second.get(false);
+            score_t contribution = 0.5 * ((int)tp - (int)fp);
+            bs.push_back(contribution);
+        }
+    }
+
+    if (active > 0) {
+        // normalize all components by active
+        score_t iac = 1.0 / active; // inverse of activity to be faster
+        for (auto& v : bs) v *= iac;
+
+        // tp = true positive
+        // fp = false positive
+        //
+        // By using (tp-fp)/2 the sum of all the per-row contributions
+        // is offset by -1/2 from the precision, as proved below
+        //
+        // 1/2 * (tp - fp) / (tp + fp)
+        // = 1/2 * (tp - tp + tp - fp) / (tp + fp)
+        // = 1/2 * (tp + tp) / (tp + fp) - (tp + fp) / (tp + fp)
+        // = 1/2 * 2*tp / (tp + fp) - 1
+        // = precision - 1/2
+        //
+        // So before adding the recall penalty we add +1/2 to
+        // compensate for that
+        bs.push_back(0.5);
+    }
+    else // Add 0.0 to ensure the bscore has the same size
+        bs.push_back(0.0);
 
     // For boolean tables, activation sum of true and false positives
     // i.e. the sum of all positives.   For contin tables, the activation
@@ -343,14 +298,20 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
                       precision, activation, activation_penalty);
     }
 
+    // Add time dispersion penalty
+    if (_pressure > 0.0) {
+        score_t dispersion_penalty =
+            get_time_dispersion_penalty(ctable_res.ordered_by_time());
+        bs.push_back(dispersion_penalty);
+        logger().fine("dispersion_penalty = %f", dispersion_penalty);
+    }
+
     log_candidate_bscore(tr, bs);
     return bs;
 }
 
 behavioral_score precision_bscore::best_possible_bscore() const
 {
-    // @todo doesn't treat the case with worst_norm
-
     // For each row, compute the maximum precision it can get.
     // Typically, this is 0 or 1 for nondegenerate boolean tables.
     // Also store the sumo and total, so that they don't need to be
@@ -405,8 +366,8 @@ behavioral_score precision_bscore::best_possible_bscore() const
         //
         // So before adding the recall penalty we add 0.5 to
         // compensate for that
-        score_t precision = (sao / active) / max_output + 0.5,
-            activation = active / (score_t) _ctable_usize,
+        score_t precision = (sao / active) + 0.5,
+            activation = active / (score_t)_ctable_usize,
             activation_penalty = get_activation_penalty(activation),
             sc = precision + activation_penalty;
 
@@ -454,7 +415,7 @@ score_t precision_bscore::get_activation_penalty(score_t activation) const
         dst = (activation - max_activation) / (1.0 - max_activation);
 
     // logger().fine("activation penalty = %f", dst);
-    return penalty * log(1.0 - dst);
+    return activation_pressure * log(1.0 - dst);
 }
 
 score_t precision_bscore::min_improv() const

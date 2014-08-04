@@ -37,6 +37,7 @@
 #include "../optimization/star-anneal.h"
 #include "../optimization/univariate.h"
 #include "../scoring/behave_cscore.h"
+#include "../scoring/ss_bscore.h"
 #include "distributed_moses.h"
 #include "moses_params.h"
 
@@ -60,7 +61,7 @@ struct metapop_printer
     metapop_printer() {}
     metapop_printer(long _result_count,
                     bool _output_score,
-                    bool _output_penalty,
+                    bool _output_cscore,
                     bool _output_bscore,
                     bool _output_only_best,
                     bool _output_ensemble,
@@ -70,8 +71,9 @@ struct metapop_printer
                     const std::string& _output_file,
                     bool _output_python,
                     bool _is_mpi) :
-        result_count(_result_count), output_score(_output_score),
-        output_penalty(_output_penalty),
+        result_count(_result_count),
+        output_score(_output_score),
+        output_cscore(_output_cscore),
         output_bscore(_output_bscore),
         output_only_best(_output_only_best),
         output_ensemble(_output_ensemble),
@@ -165,13 +167,8 @@ struct metapop_printer
                        << "    return ";
                     ostream_combo_tree (ss, sct.get_tree(), combo::fmt::python);
                 } else {
-                    ss << sct.get_score() << " "
-                       << sct.get_tree();
-                    if (output_score)
-                       ss << " " << sct.get_composite_score();
-                    if (output_bscore)
-                       ss << " " << sct.get_bscore();
-                    ss << std::endl;
+                    ostream_scored_combo_tree(ss, sct, output_score,
+                                              output_cscore, output_bscore);
                 }
             }
         }
@@ -243,7 +240,7 @@ struct metapop_printer
 private:
     long result_count;
     bool output_score;
-    bool output_penalty;
+    bool output_cscore;
     bool output_bscore;
     bool output_only_best;
     bool output_ensemble;
@@ -269,6 +266,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const optim_parameters& opt_params,
                              const hc_parameters& hc_params,
                              const deme_parameters& deme_params,
+                             const subsample_deme_filter_parameters& filter_params,
                              const metapop_parameters& meta_params,
                              const moses_parameters& moses_params,
                              Printer& printer)
@@ -302,8 +300,8 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
         simple_bases.push_back(siba);
     }
 
-    deme_expander dex(tt, si_ca, si_kb, sc, *optimizer, deme_params);
-    metapopulation metapop(simple_bases, sc, meta_params);
+    deme_expander dex(tt, si_ca, si_kb, sc, *optimizer, deme_params, filter_params);
+    metapopulation metapop(simple_bases, sc, meta_params, filter_params);
 
     run_moses(metapop, dex, moses_params, stats);
     printer(metapop, dex, stats);
@@ -329,17 +327,35 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
                            optim_parameters opt_params,
                            hc_parameters hc_params,
                            const deme_parameters& deme_params,
+                           const subsample_deme_filter_parameters& filter_params,
                            const metapop_parameters& meta_params,
                            moses_parameters moses_params,
                            Printer& printer)
 {
     adjust_termination_criteria(c_scorer, opt_params, moses_params);
 
-    metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
+    if (filter_params.n_subsample_fitnesses > 1
+        and filter_params.low_dev_pressure > 0.0)
+    {
+        // Enable SS-fitness
+        const bscore_base& bscorer = c_scorer.get_bscorer();
+        ss_bscore ss_bscorer(bscorer,
+                             filter_params.n_subsample_fitnesses,
+                             filter_params.low_dev_pressure,
+                             filter_params.by_time);
+        behave_cscore ss_cscorer(ss_bscorer, c_scorer.get_ascorer());
+        metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
+                                ss_cscorer,
+                                opt_params, hc_params,
+                                deme_params, filter_params, meta_params,
+                                moses_params, printer);
+    } else {
+        metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
                                 c_scorer,
                                 opt_params, hc_params,
-                                deme_params, meta_params,
+                                deme_params, filter_params, meta_params,
                                 moses_params, printer);
+    }
 }
 
 } // ~namespace moses

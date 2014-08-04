@@ -127,9 +127,9 @@ public:
         // choose randomly a contin among the num_fields ones
         int rnd_idx = randGen().randint(num_fields);
         field_set::contin_iterator it = fs.begin_contin(inst) + rnd_idx;
-        cout << "before generate:" << fs.stream_raw(inst) << endl;
+        cout << "before generate:" << fs.to_string_raw(inst) << endl;
         generate_contin_neighbor(fs, new_inst, it, distance);
-        cout << "after generate:" << fs.stream_raw(new_inst) << endl;
+        cout << "after generate:" << fs.to_string_raw(new_inst) << endl;
         
         int new_dist = fs.hamming_distance(inst, new_inst);
         cout << "new distance: " << new_dist << endl;
@@ -193,7 +193,7 @@ public:
             instance_set<composite_score> 
                 deme(100, center_inst, fs);
           
-            // cout<<fs.stream(center_inst)<<endl; 
+            // cout<<fs.to_string(center_inst)<<endl;
 
             sample_from_neighborhood(deme.fields(),
                                      distance,
@@ -226,7 +226,7 @@ public:
             instance_set<composite_score> deme(100, center_inst, fs);
             
             cout << "the initial randomized contin_spec instance: "
-                 << fs.stream_raw(center_inst) << endl;
+                 << fs.to_string_raw(center_inst) << endl;
             
             sample_from_neighborhood(deme.fields(),
                                      distance,
@@ -342,7 +342,7 @@ public:
         size_t b_size = 40;
         field_set fs(field_set::disc_spec(width), b_size);
         instance inst(fs.packed_width());
-        std::cout << "bits : " << fs.stream(inst) << std::endl;
+        std::cout << "bits : " << fs.to_string(inst) << std::endl;
         test_generate_all_in_neighborhood(fs, distance, 100, inst);
     }
 
@@ -355,7 +355,7 @@ public:
         size_t b_size = 40;
         field_set fs(field_set::disc_spec(width), b_size);
         instance inst(fs.packed_width());
-        std::cout << "bits : " << fs.stream(inst) << std::endl;
+        std::cout << "bits : " << fs.to_string(inst) << std::endl;
         instance_set<composite_score> deme(n_modif, fs);
         vary_n_knobs(fs, inst, distance, b_size-n_modif, deme.begin(), deme.end());
 

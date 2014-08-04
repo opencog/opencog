@@ -53,6 +53,7 @@ struct evalTableParameters
     vector<string> combo_programs;
     vector<string> combo_programs_files;
     string target_feature_str;
+    string timestamp_feature_str;
     vector<string> ignore_features_str;
     vector<string> force_features_str;
     bool has_labels;

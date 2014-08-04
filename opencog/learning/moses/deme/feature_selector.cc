@@ -34,7 +34,9 @@
 #include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/table/table_io.h>
 #include <opencog/util/oc_omp.h>
-
+#include <opencog/util/random.h>
+#include <opencog/util/lazy_random_selector.h>
+#include <opencog/util/jaccard_index.h>
 
 // Name given to the feature corresponding to the output of the
 // exemplar
@@ -166,14 +168,10 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const
             // we use most_frequent() to determine wrongness, but this
             // could be relaxed.
             //
-            const Counter<vertex, count_t> cnt = vct.second;
-            vertex actual_out = cnt.most_frequent();
+            const TimedCounter& tc = vct.second;
+            vertex actual_out = tc.most_frequent();
             consider_row = predicted_out != actual_out;
         }
-
-        // subsample
-        if (consider_row && params.subsampling_pbty > 0)
-            consider_row = params.subsampling_pbty <= randGen().randfloat();
 
         // add row
         if (consider_row) {
@@ -197,6 +195,28 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const
             fs_ctable[inputs] += vct.second;
         }
     }
+
+    // subsample
+    if (params.subsampling_ratio < 1.0) {
+        if (params.subsampling_by_time) {
+            std::set<TTable::value_type> timestamps = fs_ctable.get_timestamps(),
+                rm_timestamps;
+            unsigned timestamps_size = timestamps.size(),
+                rm_size = (1.0 - params.subsampling_ratio) * timestamps_size;
+            dorepeat(rm_size)
+                rm_timestamps.insert(randset_erase(timestamps));
+            fs_ctable.remove_rows_at_times(rm_timestamps);
+        } else {
+            std::set<unsigned> rm_row_idxs;
+            unsigned fs_ctable_usize = fs_ctable.uncompressed_size(),
+                rm_size = (1.0 - params.subsampling_ratio) * fs_ctable_usize;
+            lazy_random_selector rm_selector(fs_ctable_usize);
+            dorepeat(rm_size)
+                rm_row_idxs.insert(rm_selector.select());
+            fs_ctable.remove_rows(rm_row_idxs);
+        }
+    }
+
     logger().debug("CTable size for feature selection = %u",
                    fs_ctable.size());
 
@@ -247,8 +267,12 @@ void feature_selector::log_stats_top_feature_sets(const feature_set_pop& top_fs)
     // Stats about score and diversity
     for (auto i_it = top_fs.cbegin(); i_it != top_fs.cend(); ++i_it) {
         score_acc(i_it->first);
-        for (auto j_it = top_fs.cbegin(); j_it != i_it; ++j_it)
-            diversity_acc(mi(i_it->second, j_it->second));
+        for (auto j_it = top_fs.cbegin(); j_it != i_it; ++j_it) {
+            float sim = params.diversity_jaccard ?
+                jaccardIndex(i_it->second, j_it->second)
+                : mi(i_it->second, j_it->second);
+            diversity_acc(sim);
+        }
     }
 
     logger().info() << "Feature sets score stats (accounting for diversity) = "
@@ -340,10 +364,11 @@ csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& f
         return csc_fs_l.first < csc_fs_r.first;
     };
 
-    auto mi_to_penalty = [&](double mi) {
-        return params.diversity_pressure * mi;
+    // Similarity to penalty function
+    auto sim_to_penalty = [&](double sim) {
+        return params.diversity_pressure * sim;
     };
-    
+
     while (!csc_fs_seq.empty()) {
 
         if (last_fs_cit != res.end()) {
@@ -352,8 +377,12 @@ csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& f
                                [&](csc_feature_set& csc_fs) {
                 // compute penalty between csc_fs and the last inserted
                 // feature set
-                float fsmi = mi(last_fs_cit->second, csc_fs.second),
-                    last_dp = mi_to_penalty(fsmi);
+
+                // feature set similarity measure
+                float sim = params.diversity_jaccard ?
+                    jaccardIndex(last_fs_cit->second, csc_fs.second)
+                    : mi(last_fs_cit->second, csc_fs.second);
+                float last_dp = sim_to_penalty(sim);
 
                 // // DEBUG
                 // ostreamContainer(logger().debug() << "last_fs_cit->second = ",
@@ -418,6 +447,27 @@ double feature_selector::mi(const feature_set& fs_l,
                 mi += mutualInformationBtwSets(_ctable, sub_fs_l, sub_fs_r);
         return mi / (pfs_l.size() * pfs_r.size());
     }
+}
+
+feature_set feature_selector::sample_enforced_features() const {
+    // Sample the enforced features
+    std::vector<std::string> sampled_features;
+    for (auto& p : params.enforce_features) {
+        if (biased_randbool(p.second)) {
+            sampled_features.push_back(p.first);
+        }
+    }
+
+    if (logger().isDebugEnabled()) {
+        std::stringstream ss;
+        ostreamContainer(ss << "Enforce features: ", sampled_features);
+        logger().debug() << ss.str();
+    }
+
+    // Convert that into their indexes
+    const auto& ilabels = _ctable.get_input_labels();
+    auto vec_idx = get_indices(sampled_features, ilabels);
+    return feature_set(vec_idx.begin(), vec_idx.end());
 }
 
 } // ~namespace moses

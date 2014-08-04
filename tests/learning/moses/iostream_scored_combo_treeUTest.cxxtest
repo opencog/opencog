@@ -54,9 +54,7 @@ public:
         std::cout << "original tree = " << oss.str() << std::endl;
 
         // check that it is the same object parse by istream_scored_combo_tree
-        std::stringstream iss;
-        iss << oss.str();
-        scored_combo_tree parsed_bct = istream_scored_combo_tree(iss);
+        scored_combo_tree parsed_bct = string_to_scored_combo_tree(oss.str());
 
         std::cout << "parsed tree = " << parsed_bct << std::endl;
         // check the combo trees

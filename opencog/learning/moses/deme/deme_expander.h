@@ -29,6 +29,7 @@
 
 #include "../optimization/optimization.h"
 #include "../scoring/behave_cscore.h"
+#include "../metapopulation/metapop_params.h"
 #include "deme_params.h"
 
 namespace opencog {
@@ -41,14 +42,8 @@ struct deme_expander
                   const reduct::rule& si_kb,
                   behave_cscore& sc,
                   optimizer_base& opt,
-                  const deme_parameters& pa = deme_parameters()) :
-        _optimize(opt),
-        _type_sig(type_signature),
-        simplify_candidate(si_ca),
-        simplify_knob_building(si_kb),
-        _cscorer(sc),
-        _params(pa)
-    {}
+                  const deme_parameters& pa = deme_parameters(),
+                  const subsample_deme_filter_parameters& fp = subsample_deme_filter_parameters());
 
     ~deme_expander() {}
 
@@ -66,20 +61,53 @@ struct deme_expander
      * @param max_evals the maximum number of evaluations of the scoring
      *                  function to perform.
      * @param max_time the maximum elapsed (wall-clock) time to allow.
-     *
-     * @return return the number of evaluations actually performed per
-     *         deme (in case of breadth-first search).
      */
-    std::vector<unsigned> optimize_demes(int max_evals, time_t max_time);
+    void optimize_demes(int max_evals, time_t max_time);
 
     void free_demes();
 
+    /**
+     * Return the total number of evaluations across all demes
+     */
+    unsigned total_evals();
+
     // Structures related to the current deme
     boost::ptr_vector<representation> _reps; // representations of the demes
-    boost::ptr_vector<deme_t> _demes; // current demes
+    std::vector<std::vector<deme_t>> _demes; // current demes, vector of
+                                             // vectors is used because a
+                                             // deme can be further
+                                             // subdiveded into multiple
+                                             // demes using a subsampled
+                                             // dataset
+
     optimizer_base &_optimize;
 
 protected:
+    /**
+     * Subsample by time. Return a vector (of size n_ss_demes) of sets
+     * of timestamps to be discarded during subsampling.
+     */
+    std::vector<std::set<TTable::value_type>> subsample_by_time() const;
+
+    /**
+     * Subsample by row. return a vector (of size n_ss_demes) of sets
+     * of indexes (of a corresponding uncompressed table) to be
+     * discarded during subsampling.
+     */
+    std::vector<std::set<unsigned>> subsample_by_row() const;
+
+    /**
+     * Create deme IDs
+     */
+    void create_demeIDs(int n_expansions);
+
+    /**
+     * Create representations
+     *
+     * @return return true if it creates representations successfully, false otherwise
+     */
+    bool create_representations(const combo_tree& exemplar);
+
     /**
      * Takes a feature set, a header of the input features and return
      * a vector of the names of the featire set.
@@ -92,8 +120,7 @@ protected:
      */
     void log_selected_feature_sets(const feature_set_pop& sf_pop,
                                    const feature_set& xmplr_features,
-                                   const string_seq& ilabels,
-                                   const std::vector<demeID_t>& demeIDs) const;
+                                   const string_seq& ilabels) const;
 
     /**
      * Return pruned exemplar from non-selected features
@@ -104,14 +131,25 @@ protected:
     const combo::type_tree& _type_sig;          // type signature of the exemplar
     const reduct::rule& simplify_candidate;     // rule to simplify candidates
     const reduct::rule& simplify_knob_building; // during knob building
+
+    // Used by random_shuffle
+    std::function<ptrdiff_t(ptrdiff_t)> random_shuffle_gen;
+
+public:
     behave_cscore& _cscorer; // composite score
 
+protected:
     // This is used to keep track of the ignored indices for
     // optimizing evaluation (in case of feature selection) and
     // calculate max score per deme
-    std::vector<std::set<arity_t>> _ignore_idxs_seq;
+    std::vector<std::set<arity_t>> _ignore_cols_seq;
 
-    deme_parameters _params;
+    // Deme ids
+    std::vector<demeID_t> _demeIDs;
+
+    const deme_parameters& _params;
+
+    const subsample_deme_filter_parameters& _filter_params;
 };
 
 } // ~namespace moses

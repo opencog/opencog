@@ -100,6 +100,7 @@ INSTALL(FILES
 	misc.h
 	mt19937ar.h
 	numeric.h
+    jaccard_index.h
 	oc_assert.h
 	oc_omp.h
 	octime.h

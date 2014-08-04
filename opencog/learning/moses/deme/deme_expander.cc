@@ -21,10 +21,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <string>
+#include <boost/range/irange.hpp>
+#include <boost/range/algorithm/random_shuffle.hpp>
+
+#include <opencog/util/random.h>
+
 #include "deme_expander.h"
 
 namespace opencog {
 namespace moses {
+
+deme_expander::deme_expander(const type_tree& type_signature,
+                             const reduct::rule& si_ca,
+                             const reduct::rule& si_kb,
+                             behave_cscore& sc,
+                             optimizer_base& opt,
+                             const deme_parameters& pa,
+                             const subsample_deme_filter_parameters& fp) :
+    _optimize(opt), _type_sig(type_signature), simplify_candidate(si_ca),
+    simplify_knob_building(si_kb), _cscorer(sc), _params(pa), _filter_params(fp)
+{
+    random_shuffle_gen = [&](ptrdiff_t i) { return randGen().randint(i); };
+}
 
 string_seq deme_expander::fs_to_names(const std::set<arity_t>& fs,
                                       const string_seq& ilabels) const
@@ -37,15 +56,14 @@ string_seq deme_expander::fs_to_names(const std::set<arity_t>& fs,
 
 void deme_expander::log_selected_feature_sets(const feature_set_pop& sf_pop,
                                               const feature_set& xmplr_features,
-                                              const string_seq& ilabels,
-                                              const std::vector<demeID_t>& demeIDs) const
+                                              const string_seq& ilabels) const
 {
     unsigned sfps = sf_pop.size(), sfi = 0;
 
-    OC_ASSERT(sfps == demeIDs.size(), "The code is probably not robust enough");
+    OC_ASSERT(sfps == _demeIDs.size(), "The code is probably not robust enough");
     for (const auto& sf : sf_pop) {
         logger().info() << "Breadth-first expansion for deme : "
-                        << demeIDs[sfi];
+                        << _demeIDs[sfi];
         logger().info() << "Selected " << sf.second.size()
                         << " features for representation building";
         auto xmplr_sf = set_intersection(sf.second, xmplr_features);
@@ -60,6 +78,220 @@ void deme_expander::log_selected_feature_sets(const feature_set_pop& sf_pop,
                          fs_to_names(new_sf, ilabels), ",");
         sfi++;
     }
+}
+
+std::vector<std::set<TTable::value_type>> deme_expander::subsample_by_time() const
+{
+    std::vector<std::set<TTable::value_type>> ignore_timestamps_per_ss_deme;
+    unsigned n_ss_demes = _filter_params.n_subsample_demes;
+
+    if (n_ss_demes > 1) {       // subsampling deme is enabled
+        std::set<TTable::value_type> timestamps =
+            _cscorer.get_ctable().get_timestamps();
+        unsigned tt_size = timestamps.size();
+        std::vector<TTable::value_type> timestamps_vec(timestamps.begin(),
+                                                       timestamps.end());
+
+        if (!_filter_params.contiguous_time) {
+            logger().debug() << "Random subsampling by time";
+            boost::random_shuffle(timestamps_vec, this->random_shuffle_gen);
+        }
+
+        // Divide the vector into n_ss_demes equal parts
+        unsigned seg_size = tt_size / n_ss_demes;
+        for (auto from = timestamps_vec.cbegin(), to = from + seg_size;
+             from != timestamps_vec.cbegin() + n_ss_demes * seg_size;
+             from += seg_size, to += seg_size)
+        {
+            ignore_timestamps_per_ss_deme.emplace_back(from, to);
+            if (_filter_params.contiguous_time) {
+                logger().debug() << "Discard segment from " << *from
+                                 << " to " << *(from + (seg_size - 1))
+                                 << " (included)";
+            }
+        }
+    }
+    else {                      // subsampling deme is disabled
+        ignore_timestamps_per_ss_deme.emplace_back();
+    }
+    return ignore_timestamps_per_ss_deme;
+}
+
+std::vector<std::set<unsigned>> deme_expander::subsample_by_row() const
+{
+    std::vector<std::set<unsigned>> ignore_row_idxs_per_ss_deme;
+    unsigned n_ss_demes = _filter_params.n_subsample_demes;
+
+    if (n_ss_demes > 1) {       // subsampling deme is enabled
+        unsigned usize = _cscorer.get_ctable_usize();
+
+        // Create a vector [0, usize)
+        auto rng = boost::irange(0U, usize);
+        std::vector<unsigned> row_idxs(rng.begin(), rng.end());
+
+        // Randomly shuffle the order
+        boost::random_shuffle(row_idxs, random_shuffle_gen);
+
+        // Divide the vector into n_ss_demes equal parts
+        unsigned seg_size = usize / n_ss_demes;
+        for (auto it = row_idxs.cbegin();
+             it != row_idxs.cbegin() + n_ss_demes * seg_size;
+             it += seg_size)
+            ignore_row_idxs_per_ss_deme.emplace_back(it, it + seg_size);
+    } else {
+        ignore_row_idxs_per_ss_deme.emplace_back();
+    }
+
+    return ignore_row_idxs_per_ss_deme;
+}
+
+void deme_expander::create_demeIDs(int n_expansions)
+{
+    // Define the demeIDs of the demes to be spawned
+    _demeIDs.clear();
+    if (_params.fstor && _params.fstor->params.n_demes > 1) {
+        for (unsigned i = 0; i < _params.fstor->params.n_demes; i++)
+            _demeIDs.emplace_back(n_expansions + 1, i);
+    } else
+        _demeIDs.emplace_back(n_expansions + 1);
+}
+
+bool deme_expander::create_representations(const combo_tree& exemplar)
+{
+    // 'On-the-fly' feature selection.  This limits the number of
+    // features that will be used to build the deme to a smaller,
+    // more manageable number.  This is extremely useful when the
+    // dataset has thousands of features; pruning these to a few
+    // hundred or a few dozen sharply reduces the number of knobs
+    // in the representation.  This step differs from an ordinary
+    // one-time only, up-front round of feature selection by using
+    // only those features which score well with the current exemplar.
+    std::vector<operator_set> ignore_ops_seq, considered_args_seq;
+    std::vector<combo_tree> xmplr_seq;
+    if (_params.fstor) {
+        // Copy, as any change in the parameters will not be remembered.
+        feature_selector festor = *_params.fstor;
+
+        // Return multiple sets of selected features.  Each feature set
+        // is a collection of integer-valued column indexes; with zero
+        // denotion the left-most column corresponds.
+        auto pop_of_selected_feats = festor(exemplar);
+
+        // Get the set of features used in the exemplar.
+        auto xmplr_features = get_argument_abs_idx_from_zero_set(exemplar);
+
+        // Get feature labels (column labels) corresponding to all the features.
+        const auto& ilabels = festor._ctable.get_input_labels();
+
+        if (festor.params.n_demes > 1)
+            logger().info() << "Breadth-first deme expansion "
+                            << "(same exemplar, multiple feature sets): "
+                            << festor.params.n_demes << " demes";
+
+        log_selected_feature_sets(pop_of_selected_feats, xmplr_features, ilabels);
+
+        logger().debug() << "Post-treatment: possibly enforce some features and prune"
+                         << " exemplars for each deme";
+
+        // pop_of_selected_feats is a set of feature sets. We will
+        // create a representation, and a deme, for each distinct
+        // feature set.
+        unsigned sfi = 0;
+        for (auto& selected_feats : pop_of_selected_feats) {
+            logger().debug() << "Deme " << _demeIDs[sfi] << ":";
+
+            // Either prune the exemplar, or add all exemplars
+            // features to the feature sets
+            if (festor.params.prune_xmplr) {
+                auto xmplr_nsf = set_difference(xmplr_features,
+                                                selected_feats.second);
+                if (xmplr_features.empty())
+                    logger().debug() << "No feature to prune in the "
+                                     << "exemplar for deme " << _demeIDs[sfi];
+                else {
+                    ostreamContainer(logger().debug() <<
+                                     "Prune the exemplar from non-selected "
+                                     "features for deme " << _demeIDs[sfi]
+                                     << ": ",
+                                     fs_to_names(xmplr_nsf, ilabels));
+                }
+                xmplr_seq.push_back(prune_xmplr(exemplar, selected_feats.second));
+            }
+            else {
+                logger().debug() << "Do not prune the exemplar from "
+                                 << "non-selected features "
+                                 << "for deme " << _demeIDs[sfi];
+                // Insert exemplar features as they are not pruned
+                selected_feats.second.insert(xmplr_features.begin(), xmplr_features.end());
+                xmplr_seq.push_back(exemplar);
+            }
+
+            if (!festor.params.enforce_features.empty()) {
+                // Enforce a set of features
+                feature_set enforced_features = festor.sample_enforced_features();
+                selected_feats.second.insert(
+                    enforced_features.begin(), enforced_features.end());
+            }
+
+            // add the complement of the selected features to ignore_ops
+            unsigned arity = festor._ctable.get_arity();
+            std::set<arity_t> ignore_cols;
+            std::set<arity_t>::iterator end = selected_feats.second.end();
+            vertex_set ignore_ops, considered_args;
+
+            for (unsigned i = 0; i < arity; i++) {
+                argument arg(i + 1);
+                if (selected_feats.second.find(i) == end) {
+                    ignore_cols.insert(i);
+                    ignore_ops.insert(arg);
+                }
+                else {
+                    considered_args.insert(arg);
+                }
+            }
+            _ignore_cols_seq.push_back(ignore_cols);
+            ignore_ops_seq.push_back(ignore_ops);
+            considered_args_seq.push_back(considered_args);
+
+            sfi++;
+        }
+    }
+    else {                      // no dynamic feature selection
+        ignore_ops_seq.push_back(_params.ignore_ops);
+        xmplr_seq.push_back(exemplar);
+    }
+
+    for (unsigned i = 0; i < xmplr_seq.size(); i++) {
+        if (logger().isDebugEnabled()) {
+            logger().debug() << "Attempt to build rep from exemplar "
+                             << "for deme " << _demeIDs[i]
+                             << " : " << xmplr_seq[i];
+            if (!considered_args_seq.empty())
+                ostreamContainer(logger().debug() << "Using arguments: ",
+                                 considered_args_seq[i]);
+        }
+
+        // Build a representation by adding knobs to the exemplar,
+        // creating a field set, and a mapping from field set to knobs.
+        _reps.push_back(new representation(simplify_candidate,
+                                           simplify_knob_building,
+                                           xmplr_seq[i], _type_sig,
+                                           ignore_ops_seq[i],
+                                           _params.perceptions,
+                                           _params.actions,
+                                           _params.linear_contin,
+                                           _params.perm_ratio));
+
+        // If the representation is empty, try the next
+        // best-scoring exemplar.
+        if (_reps.back().fields().empty()) {
+            _reps.pop_back();
+            logger().warn("The representation is empty, perhaps the reduct "
+                          "effort for knob building is too high.");
+        }
+    }
+
+    return not _reps.empty();
 }
 
 combo_tree deme_expander::prune_xmplr(const combo_tree& xmplr,
@@ -133,206 +365,118 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
 {
     using namespace reduct;
 
-    OC_ASSERT(_ignore_idxs_seq.empty());
+    OC_ASSERT(_ignore_cols_seq.empty());
     OC_ASSERT(_reps.empty());
     OC_ASSERT(_demes.empty());
 
-    combo_tree xmplr = exemplar;
+    create_demeIDs(n_expansions);
 
-    // Define the demeIDs of the demes to be spawned
-    std::vector<demeID_t> demeIDs;
-    if (_params.fstor && _params.fstor->params.n_demes > 1) {
-        for (unsigned i = 0; i < _params.fstor->params.n_demes; i++)
-            demeIDs.emplace_back(n_expansions + 1, i);
-    } else
-        demeIDs.emplace_back(n_expansions + 1);
-
-    // 'On-the-fly' feature selection.  This limits the number of
-    // features that will be used to build the deme to a smaller,
-    // more manageable number.  This is extremely useful when the
-    // dataset has thousands of features; pruning these to a few
-    // hundred or a few dozen sharply reduces the number of knobs
-    // in the representation.  This step differs from an ordinary
-    // one-time only, up-front round of feature selection by using
-    // only those features which score well with the current exemplar.
-    std::vector<operator_set> ignore_ops_seq, considered_args_seq;
-    std::vector<combo_tree> xmplr_seq;
-    if (_params.fstor) {
-        // Copy, as any change in the parameters will not be remembered.
-        feature_selector festor = *_params.fstor;
-
-        // Return multiple sets of selected features.  Each feature set
-        // is a collection of integer-valued column indexes; with zero
-        // denotion the left-most column corresponds.
-        auto pop_of_selected_feats = festor(exemplar);
-
-        // Get the set of features used in the exemplar.
-        auto xmplr_features = get_argument_abs_idx_from_zero_set(exemplar);
-
-        // Get feature labels (column labels) corresponding to all the features.
-        const auto& ilabels = festor._ctable.get_input_labels();
-
-        if (festor.params.n_demes > 1)
-            logger().info() << "Breadth-first deme expansion "
-                               "(same exemplar, multiple feature sets): "
-                            << festor.params.n_demes << " demes";
-
-        log_selected_feature_sets(pop_of_selected_feats, xmplr_features, ilabels, demeIDs);
-
-        // pop_of_selected_feats is a set of feature sets. We will
-        // create a representation, and a deme, for each distinct
-        // feature set.
-        unsigned sfi = 0;
-        for (auto& selected_feats : pop_of_selected_feats) {
-            // Either prune the exemplar, or add all exemplars
-            // features to the feature sets
-            if (festor.params.prune_xmplr) {
-                auto xmplr_nsf = set_difference(xmplr_features,
-                                                selected_feats.second);
-                if (xmplr_features.empty())
-                    logger().debug() << "No feature to prune in the "
-                                     << "exemplar for deme " << demeIDs[sfi];
-                else {
-                    ostreamContainer(logger().debug() <<
-                                     "Prune the exemplar from non-selected "
-                                     "features for deme " << demeIDs[sfi]
-                                     << ": ",
-                                     fs_to_names(xmplr_nsf, ilabels));
-                }
-                xmplr_seq.push_back(prune_xmplr(exemplar, selected_feats.second));
-            }
-            else {
-                logger().debug() << "Do not prune the exemplar from "
-                                 << "non-selected features "
-                                 << "for deme " << demeIDs[sfi];
-                // Insert exemplar features as they are not pruned
-                selected_feats.second.insert(xmplr_features.begin(), xmplr_features.end());
-                xmplr_seq.push_back(exemplar);
-            }
-
-            // add the complement of the selected features to ignore_ops
-            unsigned arity = festor._ctable.get_arity();
-            std::set<arity_t> ignore_idxs;
-            std::set<arity_t>::iterator end = selected_feats.second.end();
-            vertex_set ignore_ops, considered_args;
-            
-            for (unsigned i = 0; i < arity; i++) {
-                argument arg(i + 1);
-                if (selected_feats.second.find(i) == end) {
-                    ignore_idxs.insert(i);
-                    ignore_ops.insert(arg);
-                }
-                else {
-                    considered_args.insert(arg);
-                }
-            }
-            _ignore_idxs_seq.push_back(ignore_idxs);
-            ignore_ops_seq.push_back(ignore_ops);
-            considered_args_seq.push_back(considered_args);
-
-            sfi++;
-        }
-    }
-    else {                      // no dynamic feature selection
-        ignore_ops_seq.push_back(_params.ignore_ops);
-        xmplr_seq.push_back(exemplar);
-    }
-
-    for (unsigned i = 0; i < xmplr_seq.size(); i++) {
-        if (logger().isDebugEnabled()) {
-            logger().debug() << "Attempt to build rep from exemplar "
-                             << "for deme " << demeIDs[i]
-                             << " : " << xmplr_seq[i];
-            if (!considered_args_seq.empty())
-                ostreamContainer(logger().debug() << "Using arguments: ",
-                                 considered_args_seq[i]);
-        }
-
-        // Build a representation by adding knobs to the exemplar,
-        // creating a field set, and a mapping from field set to knobs.
-        _reps.push_back(new representation(simplify_candidate,
-                                           simplify_knob_building,
-                                           xmplr_seq[i], _type_sig,
-                                           ignore_ops_seq[i],
-                                           _params.perceptions,
-                                           _params.actions,
-                                           _params.linear_contin,
-                                           _params.perm_ratio));
-
-        // If the representation is empty, try the next
-        // best-scoring exemplar.
-        if (_reps.back().fields().empty()) {
-            _reps.pop_back();
-            logger().warn("The representation is empty, perhaps the reduct "
-                          "effort for knob building is too high.");
-        }
-    }
-    if (_reps.empty()) return false;
-
+    create_representations(exemplar);
+    
     // Create empty demes with their IDs
-    for (unsigned i = 0; i < _reps.size(); i++)
-        _demes.push_back(new deme_t(_reps[i].fields(), demeIDs[i]));
+    for (unsigned i = 0; i < _reps.size(); i++) {
+        if (_filter_params.n_subsample_demes > 1) {
+            _demes.emplace_back();
+            for (unsigned j = 0; j < _filter_params.n_subsample_demes; j++)
+                _demes.back().emplace_back(_reps[i].fields(),
+                                           demeID_t(n_expansions, i, j));
+        } else {
+            _demes.emplace_back(1, deme_t(_reps[i].fields(), _demeIDs[i]));
+        }
+    }
 
     return true;
 }
 
-std::vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_time)
+
+void deme_expander::optimize_demes(int max_evals, time_t max_time)
 {
-    std::vector<unsigned> actl_evals;
     int max_evals_per_deme = max_evals / _demes.size();
+    // We set to 1 n_ss_demes in case n_subsample_demes was set to 0
+    unsigned n_ss_demes =
+        std::max(_filter_params.n_subsample_demes, 1U);
+    max_evals_per_deme /= n_ss_demes;
     for (unsigned i = 0; i < _demes.size(); i++)
     {
-        if (logger().isDebugEnabled()) {
-            std::stringstream ss;
-            ss << "Optimize deme " << _demes[i].getID() << "; "
-               << "max evaluations allowed: " << max_evals_per_deme;
-            logger().debug(ss.str());
-        }
+        if (n_ss_demes > 1)
+            logger().debug("Subsample data and optimize SS-demes");
 
-        if (_params.fstor) {
-            // Attempt to compress the CTable further (to optimize and
-            // update max score)
-            _cscorer.ignore_idxs(_ignore_idxs_seq[i]);
+        // For each subsample-deme hold set of row indexes to remove
+        std::vector<std::set<unsigned>> ignore_row_idxs_per_ss_deme =
+            subsample_by_row();
+
+        // For each subsample-deme hold set of timestamps to remove
+        std::vector<std::set<TTable::value_type>> ignore_timestamps_per_ss_deme =
+            subsample_by_time();
+
+        for (unsigned j = 0; j < n_ss_demes; j++)
+        {    
+            if (logger().isDebugEnabled()) {
+                std::stringstream ss;
+                ss << "Optimize deme " << _demes[i][j].getID() << "; "
+                   << "max evaluations allowed: " << max_evals_per_deme;
+                logger().debug(ss.str());
+            }
+
+            if (_params.fstor) {
+                // Attempt to compress the CTable further (to optimize and
+                // update max score)
+                _cscorer.ignore_cols(_ignore_cols_seq[i]);
         
-            // compute the max target for that deme (if features have been
-            // dynamically selected, it might be less that the global target;
-            // that is, the deme might not be able to reach the best score.)
-            //
-            // TODO: DO NOT CHANGE THE MAX SCORE IF USER SET IT: BUT THAT
-            // OPTION ISN'T GLOBAL WHAT TO DO?
-            //
-            // But why would we want to over-ride the best-possible score?
-            // Typically, demes almost never hit the best score anyway, so
-            // why would this matter?
-            score_t deme_target_score = _cscorer.best_possible_score();
-            logger().info("Inferred target score for that deme = %g",
-                          deme_target_score);
-            // negative min_improv is interpreted as percentage of
-            // improvement, if so then don't substract anything, since in that
-            // scenario the absolute min improvent can be arbitrarily small
-            logger().info("It appears there is an algorithmic bug in "
-                          "precision_bscore::best_possible_bscore. "
-                          "Till not fixed we shall not rely on it to "
-                          "terminate deme search");
+                // compute the max target for that deme (if features have been
+                // dynamically selected, it might be less that the global target;
+                // that is, the deme might not be able to reach the best score.)
+                //
+                // TODO: DO NOT CHANGE THE MAX SCORE IF USER SET IT: BUT THAT
+                // OPTION ISN'T GLOBAL WHAT TO DO?
+                //
+                // But why would we want to over-ride the best-possible score?
+                // Typically, demes almost never hit the best score anyway, so
+                // why would this matter?
+                score_t deme_target_score = _cscorer.best_possible_score();
+                logger().info("Inferred target score for that deme = %g",
+                              deme_target_score);
+                // negative min_improv is interpreted as percentage of
+                // improvement, if so then don't substract anything, since in that
+                // scenario the absolute min improvent can be arbitrarily small
+                logger().info("It appears there is an algorithmic bug in "
+                              "precision_bscore::best_possible_bscore. "
+                              "Till not fixed we shall not rely on it to "
+                              "terminate deme search");
 
-            // TODO: re-enable that once best_possible_bscore is fixed
-            // score_t actual_min_improv = std::max(_cscorer.min_improv(),
-            //                                      (score_t)0);
-            // deme_target_score -= actual_min_improv;
-            // logger().info("Subtract %g (minimum significant improvement) "
-            //               "from the target score to deal with float "
-            //               "imprecision = %g",
-            //               actual_min_improv, deme_target_score);
+                // TODO: re-enable that once best_possible_bscore is fixed
+                // score_t actual_min_improv = std::max(_cscorer.min_improv(),
+                //                                      (score_t)0);
+                // deme_target_score -= actual_min_improv;
+                // logger().info("Subtract %g (minimum significant improvement) "
+                //               "from the target score to deal with float "
+                //               "imprecision = %g",
+                //               actual_min_improv, deme_target_score);
 
-            // // update max score optimizer
-            // _optimize.opt_params.terminate_if_gte = deme_target_score;
+                // // update max score optimizer
+                // _optimize.opt_params.terminate_if_gte = deme_target_score;
+            }
+
+            if (n_ss_demes > 1) {
+                if (_filter_params.by_time) {
+                    OC_ASSERT(ignore_timestamps_per_ss_deme.size() == n_ss_demes,
+                              "Apparently subsample_by_time() was not able to work properly. "
+                              "Are you sure your data has timestamps, "
+                              "and those are properly loaded (see option --timestamp-feature)");
+                    _cscorer.ignore_rows_at_times(ignore_timestamps_per_ss_deme[j]);
+                }
+                else
+                    _cscorer.ignore_rows(ignore_row_idxs_per_ss_deme[j]);
+            }
+
+            // Optimize
+            complexity_based_scorer cpx_scorer =
+                complexity_based_scorer(_cscorer, _reps[i], _params.reduce_all);
+            _optimize(_demes[i][j], cpx_scorer, max_evals_per_deme, max_time);
         }
 
-        // Optimize
-        complexity_based_scorer cpx_scorer =
-            complexity_based_scorer(_cscorer, _reps[i], _params.reduce_all);
-        actl_evals.push_back(_optimize(_demes[i], cpx_scorer,
-                                       max_evals_per_deme, max_time));
+        if (n_ss_demes > 1)
+            logger().debug("Done optimizing SS-demes");
     }
 
     if (_params.fstor) {
@@ -341,17 +485,31 @@ std::vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_ti
         // XXX FIXME this is a bug .. the user may have specified that
         // certain incdexes should be ignored, and this just wipes
         // those out...
-        _cscorer.ignore_idxs(std::set<arity_t>());
+        _cscorer.ignore_cols(std::set<arity_t>());
     }
 
-    return actl_evals;
+    if (n_ss_demes > 1) {
+        // reset scorer to use all rows (important so that the
+        // ss_filter and the behavioral score is calculated over the
+        // whole data set)
+        _cscorer.ignore_rows(std::set<unsigned>());
+    }
 }
 
 void deme_expander::free_demes()
 {
-    _ignore_idxs_seq.clear();
+    _ignore_cols_seq.clear();
     _demes.clear();
     _reps.clear();
+}
+
+unsigned deme_expander::total_evals()
+{
+    unsigned res = 0;
+    for (const auto& ss_demes : _demes)
+        for (const auto& deme : ss_demes)
+            res += deme.n_evals;
+    return res;
 }
 
 } // ~namespace moses

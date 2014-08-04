@@ -23,6 +23,9 @@
  */
 
 #include "moses_exec.h"
+
+#include <boost/algorithm/string/find_iterator.hpp>
+
 #include "demo-problems.h"
 #include "table-problems.h"
 #include "problem.h"
@@ -68,6 +71,13 @@ int moses_exec(const vector<string>& argvs)
     int res = moses_exec(argvs.size(), argv);
     delete[] argv;
     return res;
+}
+
+int moses_exec(const string& args)
+{
+    vector<string> argvs;
+    boost::split(argvs, args, boost::is_space());
+    return moses_exec(argvs);
 }
 
 } // ~namespace moses

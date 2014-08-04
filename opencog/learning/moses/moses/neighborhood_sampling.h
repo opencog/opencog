@@ -298,7 +298,7 @@ void sample_from_neighborhood(const field_set& fs, unsigned dist,
         }
         OC_ASSERT(out != end); // to avoid invalid memory write
         *out++ = new_inst;
-        // cout << "********** Added instance:" << fs.stream(new_inst) << endl;
+        // cout << "********** Added instance:" << fs.to_string(new_inst) << endl;
     }
 }
 

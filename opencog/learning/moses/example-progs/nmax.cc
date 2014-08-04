@@ -172,7 +172,7 @@ int main(int argc, char** argv)
     instance_set<int>::const_iterator it = population.begin();
     for(; it != population.end(); it++) {
        cout << "Score: " << it->second
-            << "\tindividual: " << population.fields().stream(it->first)
+            << "\tindividual: " << population.fields().to_string(it->first)
             << endl;
     }
 }

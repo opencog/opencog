@@ -66,7 +66,8 @@ struct pre_scorer : public fs_scorer_base<FeatureSet>
         CTable filtered_ctable = super::_ctable.filtered(fs);
         // create the scorer
         precision_bscore sc(filtered_ctable, _penalty,
-                            _min_activation, _max_activation, _positive);
+                            _min_activation, _max_activation,
+                            0.0f, 1.0f, _positive);
         double precision = boost::accumulate(sc.best_possible_bscore(), 0.0);
         double cfdence = super::confidence(fs.size());
         logger().fine("pre_scorer precision = %g, confidence = %g",

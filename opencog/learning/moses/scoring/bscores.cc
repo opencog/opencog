@@ -715,8 +715,8 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
     // That is, create a historgram showing how often each output value
     // occurs in the ctable.
     boost::for_each(_ctable | map_values, [this](const CTable::mapped_type& mv) {
-            boost::for_each(mv, [this](const CTable::mapped_type::value_type& v) {
-                    _counter[get_contin(v.first)] += v.second; }); });
+            boost::for_each(mv, [this](const CTable::counter_t::value_type& v) {
+                    _counter[get_contin(v.first.value)] += v.second; }); });
 
     // Precompute pdf (probability distribution function)
     if (_kld_w > 0) {
@@ -769,7 +769,7 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
                     [&](const CTable::counter_t& c, const vertex& v) {
                         if (v == target) {
                             for (const auto& mv : c)
-                                pred_counter[get_contin(mv.first)] = mv.second;
+                                pred_counter[get_contin(mv.first.value)] = mv.second;
                         }});
 
     logger().fine("ip scorer: pred_cache.size() = %u", pred_cache.size());

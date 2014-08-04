@@ -1,8 +1,8 @@
 /** metapop_params.cc --- 
  *
- * Copyright (C) 2013 Nil Geiswiller
+ * Copyright (C) 2013 OpenCog Foundation
  *
- * Author: Nil Geiswiller <nilg@laptop>
+ * Author: Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as

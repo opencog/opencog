@@ -99,8 +99,8 @@ int main(int argc, char** argv)
     instance_set<contin_t> population(args.popsize, fs);
     for (instance& inst : population) {
         occam_randomize_contin(fs, inst);
-        cout << fs.stream(inst) << endl;
-        cout << fs.stream_raw(inst) << endl;
+        cout << fs.to_string(inst) << endl;
+        cout << fs.to_string_raw(inst) << endl;
     }
 
     contin_t epsilon = fs.contin().front().epsilon();
@@ -135,7 +135,7 @@ int main(int argc, char** argv)
     instance_set<int>::const_iterator it = population.begin();
     for(; it != population.end(); it++) {
        cout << "Score: " << it->second
-            << "\tindividual: " << population.fields().stream(it->first)
+            << "\tindividual: " << population.fields().to_string(it->first)
             << endl;
     }
 #endif

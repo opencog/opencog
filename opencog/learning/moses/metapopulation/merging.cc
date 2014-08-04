@@ -24,6 +24,8 @@
 
 #include <math.h>
 
+#include <boost/range/algorithm/sort.hpp>
+
 #include <opencog/util/oc_omp.h>
 #include <opencog/util/selection.h>
 
@@ -114,62 +116,12 @@ void metapopulation::deme_to_trees(deme_t& deme,
         pot_candidates.insert(sct);
     };
 
-    unsigned max_pot_cnd = deme.size();
-    if (_params.max_candidates >= 0)
-        max_pot_cnd = std::min(max_pot_cnd, (unsigned)_params.max_candidates);
-    unsigned total_max_pot_cnd = pot_candidates.size() + max_pot_cnd;
-
     if (logger().isDebugEnabled()) {
-        logger().debug() << "Select " << max_pot_cnd
+        logger().debug() << "Select " << deme.size()
                          << " candidates from deme " << deme.getID();
     }
 
-    // select_candidates() can be very time consuming; it currently
-    // takes anywhere from 25 to 500(!!) millisecs per instance (!!)
-    // for me; my (reduced, simplified) instances have complexity
-    // of about 100. This seems too long/slow (circa summer 2012).
-    // This may have improved, circa June 2014.
-    //
-    // First, we select the top max_pot_cnd from the deme. (Recall, the
-    // instances in the deme are in score-sorted order).  Some of the
-    // trees will be redundant, so in order to reach the max_pot_cnd
-    // target, we reiterate with max_pot_cnd - pot_candidates.size(),
-    // until either the target is reached (pot_candidates.size() ==
-    // max_pot_cnd), or there are no more instances in the deme.
-    //
-    // XXX FIXME ... ummm, why is it important to accurately hit this
-    // target? All we really need to do is to get close, to get good
-    // enough. If we get fewer than max_pot_cnd, so what .. I just don't
-    // see that it matters. Who cares; most of the resulting demes will
-    // end up getting discarded anyway, with an extremely high
-    // probability ... But I guess this doesn't hurt, right? Just some
-    // extra code complexity, that's all.
-    //
-    // Note that we really need to take that twisted road because
-    // otherwise, if we just iterate in parallel till we get
-    // enough candidates, it can create race conditions
-    // (indeterminism) Huh? What? Where? How?
-    typedef deme_t::const_iterator deme_cit;
-    for (deme_cit deme_begin = deme.cbegin(),
-             deme_end = deme_begin + max_pot_cnd;
-         deme_begin != deme.cend()
-             && pot_candidates.size() < total_max_pot_cnd;)
-    {
-        // logger().debug("ITERATING TILL TARGET REACHED (%u/%u) "
-        //                "pot_candidates.size() = %u",
-        //                i, demes.size(), pot_candidates.size());
-
-        // select candidates in range = [deme_being, deme_end)
-        OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
-
-        // update range
-        OC_ASSERT(pot_candidates.size() <= total_max_pot_cnd,
-                  "there must be a bug");
-        unsigned delta = total_max_pot_cnd - pot_candidates.size();
-        deme_begin = deme_end;
-        deme_end = (unsigned int)std::distance(deme_begin, deme.cend()) <= delta ?
-            deme.end() : deme_begin + delta;
-    }
+    OMP_ALGO::for_each(deme.cbegin(), deme.cend(), select_candidates);
 }
 
 // Recompute the composite score for each member of the metapop.
@@ -243,31 +195,47 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
 /// consuming.
 //
 // See also header file for a desciption of this method.
-//
-bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
+bool metapopulation::merge_demes(std::vector<std::vector<deme_t>>& all_demes,
                                  const boost::ptr_vector<representation>& reps)
 {
     // Note that univariate reports far more evals than the deme size;
     // this is because univariate over-writes deme entries.
     logger().debug("Close and merge demes");
 
+    // Sort all demes, keep_top_unique_candidates, trim_dowm_demes and
+    // deme_to_trees rely on the assumption that the demes are sorted.
+    sort_demes(all_demes);
+
+    keep_top_unique_candidates(all_demes, reps);
+
+    // In case of subsampling filter
+    recompute_scores_over_whole_dataset(all_demes, reps);
+
+    // Perform subsampling filtering and return a vector of bool,
+    // corresponding to each breadth first deme indicating whether it
+    // passes the filter or not.
+    std::vector<bool> pass_filter = ss_filter(all_demes, reps);
+
+    // Loop through breadth first demes
     scored_combo_tree_set pot_candidates;
-    for (unsigned i = 0; i < demes.size(); i++) {
-        deme_t& deme = demes[i];
+    for (unsigned j = 0; j < all_demes.size(); j++) {
 
-        // Sort the deme according to composite_score (descending order)
-        // Both trim_down_deme(), and deme_to_trees(), requires that the
-        // instances be in sorted order.
-        std::sort(deme.begin(), deme.end(),
-                  std::greater<scored_instance<composite_score> >());
+        // Skip merging that breadth first deme if it hasn't passed
+        // the filter
+        if (!pass_filter[j])
+            continue;
 
-        // Discard the truly poor-scoring instances in each deme.
-        trim_down_deme(deme);
-
-        // Convert the instances in the deme to trees.
-        deme_to_trees(deme, reps[i], pot_candidates);
+        std::vector<deme_t>& demes = all_demes[j];
+        for (unsigned i = 0; i < demes.size(); i++) {
+            deme_t& deme = demes[i];
+    
+            // Discard the truly poor-scoring instances in each deme.
+            trim_down_deme(deme);
+    
+            // Convert the instances in the deme to trees.
+            deme_to_trees(deme, reps[j], pot_candidates);
+        }
     }
-
     logger().debug("Selected %u candidate trees to be merged into the metapop",
                    pot_candidates.size());
 
@@ -524,6 +492,78 @@ scored_combo_tree_set metapopulation::get_new_candidates(const scored_combo_tree
     }
     return res;
 #endif
+}
+
+void metapopulation::sort_demes(std::vector<std::vector<deme_t>>& all_demes) {
+    logger().debug("Sort the deme(s)");
+    for (auto& ss_demes : all_demes)
+        for (auto& deme : ss_demes)
+            boost::sort(deme, std::greater<scored_instance<composite_score> >());
+}
+
+void metapopulation::keep_top_unique_candidates(
+    std::vector<std::vector<deme_t>>& all_demes,
+    const boost::ptr_vector<representation>& reps)
+{
+    for (unsigned i = 0; i < all_demes.size(); ++i) {
+        const representation& rep = reps[i];
+        std::vector<deme_t>& ss_demes = all_demes[i];
+        for (auto& deme : ss_demes) {
+            // Determine number of top unique candidate to keep
+
+            // It can happen that the true number of evals is less than the
+            // deme size (certain cases involving the univariate optimizer)
+            // But also, the deme size can be smaller than the number of evals,
+            // if the deme was shrunk to save space.
+            unsigned top_cnd = std::min(deme.n_evals, (unsigned)deme.size());
+
+            // If the user have specified to keep only the top candidates
+            if (_params.max_candidates >= 0)
+                top_cnd = std::min(top_cnd, (unsigned)_params.max_candidates);
+            if (_filter_params.n_subsample_demes > 1)
+                top_cnd = std::min(top_cnd,
+                                   _filter_params.n_top_candidates);
+
+            if (logger().isDebugEnabled())
+            {
+                std::stringstream ss;
+                ss << "Keep " << top_cnd
+                   << " top unique candidates from deme " << deme.getID()
+                   << " of size: " << deme.size();
+                logger().debug(ss.str());
+            }
+
+            // Remove duplicates till at most top_cnd unique
+            // candidates remains
+            for (auto it = deme.begin(), prev_it = it++;
+                 it != deme.begin() + top_cnd;) {
+                score_t sc = (select_tag()(*it)).get_penalized_score(),
+                    prev_sc = (select_tag()(*prev_it)).get_penalized_score();
+                if (isApproxEq(prev_sc, sc)) { // they might be identical
+                    combo_tree tr = rep.get_candidate(*it, true),
+                        prev_tr = rep.get_candidate(*prev_it, true);
+                    if (prev_tr == tr) { // they actually are identical
+                        it = deme.erase(it);
+                        top_cnd = std::min(top_cnd, (unsigned)deme.size());
+                        continue;
+                    }
+                }
+
+// XXX FIXME looks to me like it++ can often be collaed twice within this loop!
+                prev_it = it++;
+            }
+
+            // Remove the bottom
+            deme.erase(deme.begin() + top_cnd, deme.end());
+
+            if (logger().isDebugEnabled())
+            {
+                std::stringstream ss;
+                ss << "Kept unique top candidates, new size: " << deme.size();
+                logger().debug(ss.str());
+            }
+        }
+    }
 }
 
 /// Update the record of the best score seen, and the associated tree.

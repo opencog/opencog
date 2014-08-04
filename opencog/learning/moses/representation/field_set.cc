@@ -125,7 +125,7 @@ void field_set::set_contin(instance& inst, size_t idx, contin_t target) const
 }
 
 
-std::string field_set::stream(const instance& inst) const
+std::string field_set::to_string(const instance& inst) const
 {
     std::stringstream ss;
     ss << "[";
@@ -137,7 +137,7 @@ std::string field_set::stream(const instance& inst) const
     return ss.str();
 }
 
-std::string field_set::stream_raw(const instance& inst) const
+std::string field_set::to_string_raw(const instance& inst) const
 {
     std::stringstream ss;
     ostreamContainer(ss, begin_raw(inst), end_raw(inst), "", "[", "]");

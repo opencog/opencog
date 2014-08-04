@@ -169,32 +169,32 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 /// i.e. true if the summation is positive, else false, as per standard
 /// AdaBoost definition.
 ///
-combo::combo_tree ensemble::get_weighted_tree() const
+const combo::combo_tree& ensemble::get_weighted_tree() const
 {
-	combo::combo_tree tr;
+    _weighted_tree.clear();
 
 	combo::combo_tree::pre_order_iterator head, plus, times, minus, impulse;
 
-	head = tr.set_head(combo::id::greater_than_zero);
-	plus = tr.append_child(head, combo::id::plus);
+	head = _weighted_tree.set_head(combo::id::greater_than_zero);
+	plus = _weighted_tree.append_child(head, combo::id::plus);
 
 	for (const scored_combo_tree& sct : _scored_trees)
 	{
 		// times is (weight * (tree - 0.5))
-		times = tr.append_child(plus, combo::id::times);
+		times = _weighted_tree.append_child(plus, combo::id::times);
 		vertex weight = sct.get_weight();
-		tr.append_child(times, weight);
+		_weighted_tree.append_child(times, weight);
 
 		// minus is (tree - 0.5) so that minus is equal to +0.5 if
 		// tree is true, else it is equal to -0.5
-		minus = tr.append_child(times, combo::id::plus);
+		minus = _weighted_tree.append_child(times, combo::id::plus);
 		vertex half = -0.5;
-		tr.append_child(minus, half);
-		impulse = tr.append_child(minus, combo::id::impulse);
-		tr.append_child(impulse, sct.get_tree().begin());
+		_weighted_tree.append_child(minus, half);
+		impulse = _weighted_tree.append_child(minus, combo::id::impulse);
+		_weighted_tree.append_child(impulse, sct.get_tree().begin());
 	}
 
-	return tr;
+	return _weighted_tree;
 }
 
 /**
