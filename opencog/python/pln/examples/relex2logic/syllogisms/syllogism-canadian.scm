@@ -1,6 +1,6 @@
 ; All Canadians are right-handed.
 ; All right-handed are opticians.
-; |- Some right-handed are opticians.
+; |- Some right-handed people are opticians.
 
 (EvaluationLink (PredicateNode "inputs")
     (ListLink
@@ -69,16 +69,7 @@
 
 (EvaluationLink (PredicateNode "rules")
 	(ListLink
-	    ; which rules need to be used here? inference path to be specified in
-	    ; README
-		(ConceptNode "")
-	)
-)
-
-(EvaluationLink (PredicateNode "forwardSteps")
-	(ListLink
-	    ; set this in test_syllogisms.py
-		(NumberNode "")
+		(ConceptNode "ModusPonensRule:ImplicationLink")
 	)
 )
 
