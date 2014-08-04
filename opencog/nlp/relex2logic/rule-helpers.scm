@@ -158,7 +158,7 @@
 )
 
 (define (SVP-rule subj  subj_instance  predicative  predicative_instance)
-	(list (InheritanceLink (ConceptNode predicative_instance df-node-stv) (ConceptNode predicative df-node-stv) df-link-stv)
+	(list (ImplicationLink (PredicateNode predicative_instance df-node-stv) (PredicateNode predicative df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj df-node-stv) df-link-stv)
 	(EvaluationLink df-link-stv
 		(PredicateNode predicative_instance df-node-stv)
