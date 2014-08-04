@@ -571,9 +571,9 @@ def andAs1stArgInsideLinkFormula(tvs):
                        A, B, C
     :return: tvs of InheritanceLink (AndLink A B) C, AndLink A B
     """
-    [inh_ac_tv, inh_bc_tv, a_tv, b_tv, c_tv] = tvs
+    inh_ac_tv, inh_bc_tv, a_tv, b_tv, c_tv = tvs
 
-    and_ab_tv = andFormula(a_tv, b_tv)
+    and_ab_tv = andFormula([a_tv, b_tv])[0]
     inh_and_ab_c_strength = (inh_ac_tv.mean * a_tv.mean * inh_bc_tv.mean
                              * b_tv.mean) / (c_tv.mean * and_ab_tv.mean)
     inh_and_ab_c_count = makeUpCount(tvs)
@@ -591,9 +591,9 @@ def andAs2ndArgInsideLinkFormula(tvs):
                        A, B, C
     :return: tvs of InheritanceLink A (AndLink B C), AndLink B C
     """
-    [inh_ab_tv, inh_ac_tv, a_tv, b_tv, c_tv] = tvs
+    inh_ab_tv, inh_ac_tv, a_tv, b_tv, c_tv = tvs
 
-    and_bc_tv = andFormula(b_tv, c_tv)
+    and_bc_tv = andFormula([b_tv, c_tv])[0]
     inh_a_and_bc_strength = (inh_ab_tv.mean * a_tv.mean * inh_ac_tv.mean
                              * and_bc_tv.mean) / (b_tv.mean * c_tv.mean)
     inh_a_and_bc_count = makeUpCount(tvs)

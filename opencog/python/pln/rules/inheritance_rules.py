@@ -321,17 +321,16 @@ class AndAs1stArgInsideLinkRule(Rule):
     """
     def __init__(self, chainer, link_type):
         A = chainer.new_variable()
-        B = chainer.new_varialbe()
+        B = chainer.new_variable()
         C = chainer.new_variable()
         AndAB = chainer.link(types.AndLink, [A, B])
 
         Rule.__init__(self,
                       name="AndAs1stArgInsideLinkRule<%s>"
                            %(get_type_name(link_type)),
-                      inputs=[chainer.link(types.InheritanceLink, [A, C]),
-                              chainer.link(types.InheritanceLink, [B, C]),
-                              A, B, C],
-                      outputs=[chainer.link(types.InheritanceLink, [AndAB, C]),
+                      inputs=[C, chainer.link(link_type, [A, C]),
+                              chainer.link(link_type, [B, C]), A, B],
+                      outputs=[chainer.link(link_type, [AndAB, C]),
                                AndAB],
                       formula=formulas.andAs1stArgInsideLinkFormula)
 
@@ -348,7 +347,7 @@ class AndAs2ndArgInsideLinkRule(Rule):
     """
     def __init__(self, chainer, link_type):
         A = chainer.new_variable()
-        B = chainer.new_varialbe()
+        B = chainer.new_variable()
         C = chainer.new_variable()
         AndBC = chainer.link(types.AndLink, [B, C])
 
