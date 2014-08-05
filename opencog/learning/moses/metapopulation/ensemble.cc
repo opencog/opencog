@@ -45,7 +45,9 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	// _tolerance is an estimate of the accumulated rounding error
 	// that arises when totaling the bscores.  As usual, assumes a
 	// normal distribution for this, so that its a square-root.
-	_tolerance = 2.0 * FLT_EPSILON * sqrt(_booster->get_weights().size());
+	_tolerance = 2.0 * FLT_EPSILON;
+	if (_booster)  // null if boosting not being used!
+		_tolerance *= sqrt(_booster->get_weights().size());
 }
 
 // Is this behavioral score correct? For boolean scores, correct is 0.0
@@ -138,7 +140,7 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 		// divergent for this situation.  Halt proceedings in this case.
 		if (err < _tolerance) {
 			logger().info() << "Boosting: perfect score; search halted.";
-			return true;
+			return false;
 		}
 
 		// Any score worse than half is terrible. Half gives a weight of zero.
@@ -153,6 +155,27 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 		double rcpalpha = 1.0 / expalpha;
 		logger().info() << "Boosting: add to ensemble " << *best_p  << std::endl
 			<< "With err=" << err << " alpha=" << alpha <<" exp(alpha)=" << expalpha;
+
+		// Set the weight for the tree, and stick it in the ensemble
+		scored_combo_tree best = *best_p;
+		best.set_weight(alpha);
+		_scored_trees.insert(best);
+
+		// If there was no actual improvement in the real score, then
+		// boosting has come to the end of this limits.  This typically
+		// happens with the CTable scorer, when there are degenerate
+		// rows.  The boosting starts amplifying the rows that are
+		// degenerate,  but such amplification cannot help the situation.
+		// So we use this to terminate the search.
+		//
+		double new_flat_score = flat_score();
+		if (new_flat_score < _current_flat_score + _min_improv) {
+			logger().info() << "Boosting: stalled; search halted";
+			_scored_trees.erase(best);
+			return false;
+		}
+		_current_flat_score = new_flat_score;
+		logger().info() << "Boosting: current ensemble score=" << _current_flat_score;
 
 		// Recompute the weights
 		const behavioral_score& bs = best_p->get_bscore();
@@ -172,28 +195,8 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 			weights[i] *= znorm;
 		}
 
-		// Set the weight for the tree, and stick it in the ensemble
-		scored_combo_tree best = *best_p;
-		best.set_weight(alpha);
-		_scored_trees.insert(best);
-
 		// Remove from the set of candidates.
 		cands.erase(best_p);
-
-		// If there was no actual improvement in the real score, then
-		// boosting has come to the end of this limits.  This typically
-		// happens with the CTable scorer, when there are degenerate
-		// rows.  The boosting starts amplifying the rows that are
-		// degenerate,  but such amplification cannot help the situation.
-		// So we use this to terminate the search.
-		//
-		double new_flat_score = flat_score();
-		if (new_flat_score < _current_flat_score + _min_improv) {
-			logger().info() << "Boosting: stalled; search halted";
-			_scored_trees.erase(best);
-			return true;
-		}
-		_current_flat_score = new_flat_score;
 
 		// Are we done yet?
 		promoted ++;
