@@ -391,9 +391,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
     logger().fine("activation penalty at best score = %f", best_activation_penalty);
 
     // @todo it's not really the best bscore but rather the best score
-    behavioral_score bs;
-    bs.push_back(best_sc);
-    return bs;
+    return {best_sc};
 }
 
 behavioral_score precision_bscore::worst_possible_bscore() const
@@ -569,10 +567,7 @@ behavioral_score precision_conj_bscore::operator()(const combo_tree& tr) const
 
 behavioral_score precision_conj_bscore::best_possible_bscore() const
 {
-    behavioral_score bs;
-    bs.push_back(1.0);
-    bs.push_back(0.0);
-    return bs;
+    return {1.0, 0.0};
 }
 
 score_t precision_conj_bscore::min_improv() const

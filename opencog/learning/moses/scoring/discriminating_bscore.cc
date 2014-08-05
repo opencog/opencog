@@ -319,10 +319,7 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
     logger().info("Discriminating scorer, fixed component of best score = %f", best_fixed);
     logger().info("Discriminating scorer, fixation penalty of best score = %f", best_fixation_penalty);
 
-    behavioral_score bs;
-    bs.push_back(best_vary);
-    bs.push_back(best_fixation_penalty);
-    return bs;
+    return {best_vary, best_fixation_penalty};
 }
 
 score_t discriminating_bscore::min_improv() const

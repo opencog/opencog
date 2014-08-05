@@ -212,9 +212,9 @@ struct demeID_t : public std::string
 struct behavioral_score : public std::vector<score_t>
 {
     behavioral_score() {}
-    behavioral_score(const std::vector<score_t>& v) :std::vector<score_t>(v)  {}
     behavioral_score(size_t sz) : std::vector<score_t>(sz) {}
     behavioral_score(size_t sz, score_t val) : std::vector<score_t>(sz, val) {}
+    behavioral_score(std::initializer_list<score_t> il) : std::vector<score_t>(il) {}
 
     std::vector<score_t> operator-=(const std::vector<score_t>& rhs)
     {
