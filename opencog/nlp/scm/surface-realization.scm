@@ -63,6 +63,19 @@
     (define z-list (map (lambda (x) (split-string pattern2 x)) 
                                     (split-string pattern1 a-string)))
 
+    ; helper function that prune away atoms that no longer exists from subsequent
+    ; rules, or atoms that are wrapped inside another link
+    (define (pruner x)
+        (define deref-x (cog-atom (cog-handle x)))
+        ; if 'deref-x' is #<Invalid handle>, than both cog-node?
+        ; and cog-link? will return false
+        (if (and (or (cog-node? deref-x) (cog-link? deref-x))
+                 (null? (cog-incoming-set x)))
+            x
+            '()
+        )
+    )
+
     ; Given any one of the sub-lists from the z-lists it will evaluate the strings
     ; elements from left to right resulting in the creation of the Atoms of the 
     ; relex-to-logic pipeline.
@@ -72,15 +85,22 @@
             (begin (eval-string (list-ref a-list 0))
             (let ((parse-name (parse-str (list-ref a-list 0))))
                 (ReferenceLink 
-                (InterpretationNode (string-append parse-name "_interpretation_$X"))
-                ; The function in the SetLink returns a list of ouputs that
-                ; are the results of the evaluation of the relex-to-logic functions,
-                ; on the relex-opencog-outputs.
-                (SetLink
-                    (delete-duplicates 
-                        (apply append (map-in-order eval-string
-                                (filter (lambda (x)(not (string=? "" x)))
-                                (split-string "\n" (list-ref a-list 1))))))
+                    (InterpretationNode (string-append parse-name "_interpretation_$X"))
+                    ; The function in the SetLink returns a list of outputs that
+                    ; are the results of the evaluation of the relex-to-logic functions,
+                    ; on the relex-opencog-outputs.
+                    (SetLink
+                        (map pruner
+                            (delete-duplicates 
+                                (apply append 
+                                    (map-in-order eval-string
+                                        (filter (lambda (x) (not (string=? "" x)))
+                                            (split-string "\n" (list-ref a-list 1))
+                                        )
+                                    )
+                                )
+                            )
+                        )
                     )
                 )
                 (InterpretationLink
