@@ -413,10 +413,10 @@ moses -Hselect  -iselect-no-dupe.csv -q0.7 --boost=1
      num_evals  Hit         Hit            Hselect     Hselect
                   (time)   boost (time)      (time)  boost (time)
      --------- ---------   ------------   ----------  ----------
-        10K    46 (0m17s)    40 (0m13s)   48 (0m19s)  49 (0m11s)
-        20K    41 (0m42s)    32 (0m35s)   36 (0m39s)  35 (0m36s)
-        40K    29 (2m34s)     9 (1m30s)   27 (2m24s)  11 (1m51s)
-        80K    24 (9m21s)     0 (3m12s)   26 (8m40s)   0 (3m55s)
+        10K    46 (0m17s)    30 (0m15s)   48 (0m19s)  36 (0m14s)
+        20K    41 (0m42s)    22 (0m47s)   36 (0m39s)  35 (0m36s)
+        40K    29 (2m34s)     8 (2m8s)    27 (2m24s)  11 (1m51s)
+        80K    24 (9m21s)     0 (4m35s)   26 (8m40s)   0 (3m55s)
        160K    22 (30m18s)    -           22 (24m10s)  -
 
 Conclude: The differences between Hit and Hselect are small and would

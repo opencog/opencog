@@ -119,7 +119,10 @@ score_t simple_ascore::operator()(const behavioral_score& bs) const
 bscore_ctable_base::bscore_ctable_base(const CTable& ctable)
     : _orig_ctable(ctable), _wrk_ctable(_orig_ctable),
       _all_rows_wrk_ctable(_wrk_ctable),
-      _ctable_usize(_orig_ctable.uncompressed_size()) {}
+      _ctable_usize(_orig_ctable.uncompressed_size())
+{
+    _size = ctable.size();
+}
 
 void bscore_ctable_base::ignore_cols(const std::set<arity_t>& idxs) const
 {
@@ -146,19 +149,15 @@ void bscore_ctable_base::ignore_cols(const std::set<arity_t>& idxs) const
     logger().debug("Working CTable size = %u", _wrk_ctable.size());
 
     if (logger().isFineEnabled()) {
-        {
-            std::stringstream ss;
-            ss << "_wrk_ctable =" << std::endl;
-            ostreamCTable(ss, _wrk_ctable);
-            logger().fine(ss.str());
-        }
+        std::stringstream ss;
+        ss << "_wrk_ctable =" << std::endl;
+        ostreamCTable(ss, _wrk_ctable);
+        logger().fine(ss.str());
         // for debugging, keep that around till we fix best_possible_bscore
-        // {
-        //     std::stringstream ss;
-        //     ss << "fully_filtered_ctable =" << std::endl;
-        //     ostreamCTable(ss, fully_filtered_ctable);
-        //     logger().fine(ss.str());
-        // }
+        //     std::stringstream ss2;
+        //     ss2 << "fully_filtered_ctable =" << std::endl;
+        //     ostreamCTable(ss2, fully_filtered_ctable);
+        //     logger().fine(ss2.str());
     }
 
     // Copy the working ctable in a temporary ctable that keeps track
@@ -176,6 +175,7 @@ void bscore_ctable_base::ignore_rows(const std::set<unsigned>& idxs) const
     //                     << ", uncompressed size = " << _wrk_ctable.uncompressed_size();
     _wrk_ctable.remove_rows(idxs);
     _ctable_usize = _wrk_ctable.uncompressed_size();
+    _size = _wrk_ctable.size();
 
     // if (logger().isFineEnabled())
     //     logger().fine() << "New _wrk_ctable compressed size = " << _wrk_ctable.size()
@@ -196,6 +196,7 @@ void bscore_ctable_base::ignore_rows_at_times(const std::set<TTable::value_type>
 
     _wrk_ctable.remove_rows_at_times(timestamps);
     _ctable_usize = _wrk_ctable.uncompressed_size();
+    _size = _wrk_ctable.size();
 
     // if (logger().isFineEnabled())
     //     logger().fine() << "New _wrk_ctable compressed size = " << _wrk_ctable.size()

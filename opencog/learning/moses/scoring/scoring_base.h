@@ -172,7 +172,7 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
 
 protected:
     score_t _complexity_coef;
-    size_t _size;
+    mutable size_t _size; // mutable to work around const bugs
 };
 
 /// Base class for fitness functions that use a ctable. Provides useful
@@ -217,7 +217,7 @@ protected:
     // A copy of wrk_ctable prior to ignore_rows() being applied.  This
     // allows ignore_rows() to be called multiple times, without forcing
     // a complete recalculation.
-    mutable CTable _all_rows_wrk_ctable;
+    mutable CTable _all_rows_wrk_ctable; // mutable to work around const bugs.
 
     mutable size_t _ctable_usize;   // uncompressed size of ctable
 };
