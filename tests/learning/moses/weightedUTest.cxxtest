@@ -75,7 +75,9 @@ public:
     void test_neg_weighted_score()
     {
         // Test weighting, where some of the weights are negative or zero.
-        // score must be exactly 2
+        // Score must be exactly 2 ... except that the CTable now
+        // reports scores relative to the best-possible score, so, in
+        // this case, it will be 0.0
         string data_file_path("-i" + weightedUTest_dir + "weight-neg.csv");
         moses_test_score({"-Hit", 
                           "-uout",
@@ -83,7 +85,7 @@ public:
                           "-m200",
                           data_file_path,
                           },
-                          2);
+                          0);
     }
 
 };

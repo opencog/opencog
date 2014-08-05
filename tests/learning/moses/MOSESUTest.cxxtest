@@ -91,15 +91,19 @@ public:
         cout << BOOST_CURRENT_FUNCTION << endl;
         string data_file_path("-i" + MOSESUTest_dir + "dataset.csv");
         string max_evals("-m1000");
-        moses_test_score({data_file_path, max_evals}, -3);
+        // The expected score is now 0 and not -3, since its relative
+        // to the best-possible-score, which is -3.
+        moses_test_score({data_file_path, max_evals}, 0);
     }
     void test_it_target_ignore() {
         cout << BOOST_CURRENT_FUNCTION << endl;
         // try to predict arg1 given arg2
         string data_file_path("-i" + MOSESUTest_dir + "dataset.csv"),
             max_evals("-m1000"), target("-uarg2"), ignore_feature("-Yres");
+        // The expected score is now 0 and not -3, since its relative
+        // to the best-possible-score, which is -3.
         moses_test_score({data_file_path, max_evals, target, ignore_feature},
-                         -3);
+                         0);
     }
 
     /* SR is polynomial regression; it has a very deceptive scoring
