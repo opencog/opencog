@@ -335,7 +335,7 @@ bool metapopulation::merge_demes(std::vector<std::vector<deme_t>>& all_demes,
 
     // Insert candidates into the ensemble.
     if (_params.do_boosting) {
-        _ensemble.add_candidates(candidates);
+        done |= _ensemble.add_candidates(candidates);
         rescore();
     }
 

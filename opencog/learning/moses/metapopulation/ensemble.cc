@@ -38,8 +38,14 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	_params(ep), _bcscorer(cs)
 {
 	_booster = dynamic_cast<boosting_ascore*>(&(cs.get_ascorer()));
-	_best_possible_score = cs.best_possible_score();
-	_worst_possible_score = cs.worst_possible_score();
+	_current_flat_score = cs.worst_possible_score();
+	_effective_length = -_current_flat_score;
+	_min_improv = cs.min_improv();
+
+	// _tolerance is an estimate of the accumulated rounding error
+	// that arises when totaling the bscores.  As usual, assumes a
+	// normal distribution for this, so that its a square-root.
+	_tolerance = 2.0 * FLT_EPSILON * sqrt(_booster->get_weights().size());
 }
 
 // Is this behavioral score correct? For boolean scores, correct is 0.0
@@ -52,8 +58,14 @@ static inline bool is_correct(score_t val)
 /**
  * Implement a boosted ensemble. Candidate combo trees are added to
  * the ensemble one at a time, weights are adjusted, and etc.
+ *
+ * Returns true if all further search should be halted; else returns
+ * false.  The problem adressed with this return value is that basic
+ * AdaBoost can sometimes stop making forward progress when the dataset
+ * is degenerate, i.e. when it has rows with the same inputs but
+ * opposite outputs.
  */
-void ensemble::add_candidates(scored_combo_tree_set& cands)
+bool ensemble::add_candidates(scored_combo_tree_set& cands)
 {
 	OC_ASSERT(_booster, "Ensemble can only be used with a weighted scorer");
 
@@ -71,26 +83,26 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 	//  non-degenerate, non weighted:
 	//       (each row has defacto weight of 1.0)
 	//       best score = 0 so  err = score / num rows;
-	// 
+	//
 	//  non-degenerate, weighted:
 	//       best score = 0 so  err = score / weighted num rows;
 	//       since the score is a sum of weighted rows.
-	// 
+	//
 	//       e.g. two rows with user-specified weights:
 	//            0.1
 	//            2.3
 	//       so if first row is wrong, then err = 0.1/2.4
 	//       and if second row is wrong, err = 2.3/2.4
-	// 
+	//
 	//  degenerate, non-weighted:
 	//       best score > 0   err = (score - best_score) / eff_num_rows;
-	// 
+	//
 	//       where eff_num_rows = sum_row fabs(up-count - down-count)
 	//       is the "effective" number of rows, as opposing rows
 	//       effectively cancel each-other out.  This is also the
 	//       "worst possible score", what would be returned if every
 	//       row was marked wrong.
-	// 
+	//
 	//       e.g. table five uncompressed rows:
 	//            up:1  input-a
 	//            dn:2  input-a
@@ -101,21 +113,33 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 	//       so if third & first is wrong, then err = (3-1)/3 = 2/3
 	//       so if third & second is wrong, then err = (4-1)/3 = 3/3
 	//
-	// Thus, "behave_len" is (minus) the worst possible score.
-	double behave_len = - _worst_possible_score;
+	// Thus, the "effective_length" is (minus) the worst possible score.
+	//
+	// Also: Note: the best_score needs to be continually re-computed
+	// using the current (boosted) row weights.
+	//
 	while (true) {
 		// Find the element (the combo tree) with the least error. This is
 		// the element with the highest score.
-		scored_combo_tree_set::iterator best_p = 
+		scored_combo_tree_set::iterator best_p =
 			std::min_element(cands.begin(), cands.end(),
 				[](const scored_combo_tree& a, const scored_combo_tree& b) {
 					return a.get_score() > b.get_score(); });
 
-		double err = (_best_possible_score - best_p->get_score()) / behave_len;
+      double best_score = _bcscorer.weighted_best_score();
+		logger().info() << "Boosting: best=" << best_score
+		                << " actual=" << best_p->get_score()
+		                << " effective length=" << _effective_length;
+		double err = (best_score - best_p->get_score()) / _effective_length;
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
-		// XXX FIXME, this should be something else ... 
-		if (0.0 == err) break;
+		// This conditionn indicates "perfect score". It shouldn't happen...
+		// This is one of the issues with the hardness of AdaBoost; its
+		// divergent for this situation.  Halt proceedings in this case.
+		if (err < _tolerance) {
+			logger().info() << "Boosting: perfect score; search halted.";
+			return true;
+		}
 
 		// Any score worse than half is terrible. Half gives a weight of zero.
 		if (0.5 <= err) {
@@ -132,17 +156,18 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 
 		// Recompute the weights
 		const behavioral_score& bs = best_p->get_bscore();
+		size_t bslen = bs.size();
 		std::vector<double>& weights = _booster->get_weights();
 		double znorm = 0.0;
-		for (int i=0; i<behave_len; i++)
+		for (size_t i=0; i<bslen; i++)
 		{
 			weights[i] *= is_correct(bs[i]) ? rcpalpha : expalpha;
 			znorm += weights[i];
 		}
 
 		// Normalization: sum of scores must equal vector length.
-		znorm = behave_len / znorm;
-		for (int i=0; i<behave_len; i++)
+		znorm = _effective_length / znorm;
+		for (size_t i=0; i<bslen; i++)
 		{
 			weights[i] *= znorm;
 		}
@@ -155,16 +180,32 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 		// Remove from the set of candidates.
 		cands.erase(best_p);
 
+		// If there was no actual improvement in the real score, then
+		// boosting has come to the end of this limits.  This typically
+		// happens with the CTable scorer, when there are degenerate
+		// rows.  The boosting starts amplifying the rows that are
+		// degenerate,  but such amplification cannot help the situation.
+		// So we use this to terminate the search.
+		//
+		double new_flat_score = flat_score();
+		if (new_flat_score < _current_flat_score + _min_improv) {
+			logger().info() << "Boosting: stalled; search halted";
+			_scored_trees.erase(best);
+			return true;
+		}
+		_current_flat_score = new_flat_score;
+
 		// Are we done yet?
 		promoted ++;
 		if (_params.num_to_promote <= promoted) break;
 		if (0 == cands.size()) break;
 	}
+	return false;
 }
 
 /// Return the ensemble contents as a single, large weighted tree.
-/// 
-/// Returns the combo tree expressing 
+///
+/// Returns the combo tree expressing
 /// (sum_i weight_i * (tree_i ? 1.0 : -1.0)) > 0)
 /// i.e. true if the summation is positive, else false, as per standard
 /// AdaBoost definition.
