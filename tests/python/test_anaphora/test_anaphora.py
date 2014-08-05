@@ -6,6 +6,7 @@ from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
 from opencog.atomspace import types, is_a, get_type, get_type_name
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
 from anaphora.agents.hobbs import HobbsAgent
+#from agents.hobbs import HobbsAgent
 from unittest import TestCase
 
 

@@ -3,9 +3,7 @@
 
 ;;          verb
 ;;         /    \
-;; antecedent    noun
-;;                 \ "of"
-;;                 anaphor
+;; antecedent    anaphor
 
 ;; This antecedent should be rejected
 

@@ -148,10 +148,16 @@ resolutions.
 
     ```
     Resolving...........
-    (WordInstanceNode "their@76985117-afb1-43f7-b82b-3b22ec07779f") ; [10191]
+    (WordInstanceNode "their@9c845be5-461e-419b-94f7-fbd72f3a314c") ; [5686]
 
-    accepted (waitresses@adcc38d3-b941-457a-8ee8-bf0953a3e65e and cook@e12c8fac-f142-42c9-9a65-ca1398860173)
-    accepted waitresses@adcc38d3-b941-457a-8ee8-bf0953a3e65e
+    accepted
+    [(WordInstanceNode "waitresses@55cf46d0-9243-43dd-b1dd-133e9b43fab3" (av 0 0 0) (stv 1.000000 0.000000)) ; [5645]
+    , (WordInstanceNode "cook@e9eb2ba8-9f1b-4fbc-a82f-c3e552c503f0" (av 0 0 0) (stv 1.000000 0.000000)) ; [5663]
+    ]
+    
+    ([a,b] stands for a and b)
+    
+    accepted waitresses@55cf46d0-9243-43dd-b1dd-133e9b43fab3
 
     ```
 ### Debugging

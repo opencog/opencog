@@ -23,7 +23,7 @@
 )
 ;; filter tests
 
-(InheritanceLink
+(PartOfSpeechLink
     (WordInstanceNode "antecedent")
-    (DefinedLinguisticConceptNode ".v")
+    (DefinedLinguisticConceptNode "verb")
 )

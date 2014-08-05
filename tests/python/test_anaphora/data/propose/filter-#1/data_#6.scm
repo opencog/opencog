@@ -28,7 +28,7 @@
 
 ;; filter tests
 
-(InheritanceLink
+(PartOfSpeechLink
     (WordInstanceNode "antecedent")
-    (DefinedLinguisticConceptNode ".n")
+    (DefinedLinguisticConceptNode "noun")
 )
