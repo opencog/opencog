@@ -203,7 +203,37 @@ struct demeID_t : public std::string
 /// That is, a behavioral score is always for a particular combot tree,
 /// in reference to a particular table of data.  Exactly which tree it
 /// is, and which table, is implicit.
-typedef std::vector<score_t> behavioral_score;
+//
+// TODO this should be a std::valarray not std::vector but I am too
+// lazy to make the switch right now.
+struct behavioral_score :std::vector<score_t>
+{
+    std::vector<score_t> operator-=(const std::vector<score_t>& rhs)
+    {
+        size_t sz = rhs.size();
+        OC_ASSERT(size() == sz,
+            "Error: Incompatible behavioral_score sizes, this=%z rhs=%z",
+            size(), sz); 
+        for (size_t i=0; i<sz; i++) {
+            (*this)[i] -= rhs[i];
+        }
+        return *this;
+    }
+};
+
+behavioral_score operator-(const behavioral_score& lhs,
+                           const behavioral_score& rhs)
+{
+    size_t sz = rhs.size();
+    OC_ASSERT(lhs.size() == sz,
+        "Error: Incompatible behavioral_score sizes, lhs=%z rhs=%z",
+         lhs.size(), sz); 
+    behavioral_score bs;
+    for (size_t i=0; i<sz; i++) {
+        bs.push_back(lhs[i] - rhs[i]);
+    }
+    return bs;
+}
 
 /// A single combo tree, together with various score metrics for it.
 ///
