@@ -11,6 +11,9 @@ from unittest import TestCase
 
 __VERBOSE__ = False
 
+# Set to True to search for needed .scm files in default IN-SOURCE build location, e.g. to write unit tests in the IDE
+# Set to False to search for needed .scm files based on environment variables PROJECT_SOURCE_DIR and PROJECT_BINARY_DIR
+__DEV_MODE__ = False
 
 class AnaphoraUnitTester(TestCase):
 
@@ -63,7 +66,7 @@ class AnaphoraUnitTester(TestCase):
         else:
             return False
 
-    #@unittest.skip("debugging skipping")
+    @unittest.skip("debugging skipping")
     def test_bfs(self):
 
         '''
@@ -77,7 +80,7 @@ class AnaphoraUnitTester(TestCase):
         self.assertTrue(self.compare(['a','b','c','d','e','f','g'],self.hobbsAgent.bfs(self.getWord('a'))))
         self.atomspace.clear()
 
-    #@unittest.skip("debugging skipping")
+    @unittest.skip("debugging skipping")
     def test_getWords(self):
 
         '''
@@ -89,7 +92,7 @@ class AnaphoraUnitTester(TestCase):
         self.assertTrue(self.compare(['a','b','c','d','e','f','g','h','j'],self.hobbsAgent.getWords()))
         self.atomspace.clear()
 
-    #@unittest.skip("debugging skipping")
+    @unittest.skip("debugging skipping")
     def test_propose(self):
 
         '''
@@ -404,8 +407,9 @@ class AnaphoraUnitTester(TestCase):
         filter_17()
         filter_18()
 
-   # @unittest.skip("debugging skipping")
+    @unittest.skip("debugging skipping")
     def test_pleonastic_if(self):
+
         self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/pleonastic_it/data_#1.scm"))
         self.hobbsAgent.initilization(self.atomspace)
         self.assertTrue(self.hobbsAgent.pleonastic_it(self.getWord('it')))
@@ -430,6 +434,14 @@ class AnaphoraUnitTester(TestCase):
         self.hobbsAgent.initilization(self.atomspace)
         self.assertFalse(self.hobbsAgent.pleonastic_it(self.getWord('it')))
         self.atomspace.clear()
+
+    def test_conjunctions(self):
+
+        self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/conjunction.scm"))
+        self.hobbsAgent.initilization(self.atomspace)
+        self.assertFalse(self.hobbsAgent.pleonastic_it(self.getWord('waitresses')))
+        self.atomspace.clear()
+
 
 if __name__ == '__main__':
     unittest.main()
