@@ -355,22 +355,32 @@ struct ctruth_table_bscore : public bscore_base
                         arity_t arity,
                         int nsamples = -1)
         : _ctable(func, arity, nsamples)
-    { _size = _ctable.size(); }
+    {
+        _size = _ctable.size();
+        set_best_possible_bscore();
+    }
+
     ctruth_table_bscore(const CTable& ctt) : _ctable(ctt)
-    { _size = _ctable.size(); }
+    {
+        _size = _ctable.size();
+        set_best_possible_bscore();
+    }
 
     behavioral_score operator()(const combo_tree& tr) const;
     behavioral_score operator()(const scored_combo_tree_set&) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
-    behavioral_score best_possible_bscore() const;
+    behavioral_score best_possible_bscore() const
+    { return _best_possible_score; }
     behavioral_score worst_possible_bscore() const;
 
     score_t min_improv() const;
 
 protected:
     CTable _ctable;
+    behavioral_score _best_possible_score;
+    void set_best_possible_bscore();
 };
 
 /**

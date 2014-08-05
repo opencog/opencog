@@ -145,7 +145,8 @@ select_bscore::select_bscore(const CTable& ctable,
         last_val = val;
     }
     if (not found_upper) {
-        _upper_bound = last_val * (1.0 + 2.0*EPSILON);
+        // FLT_EPSILON, not EPSILON, because it must be float, not double!
+        _upper_bound = last_val * (1.0 + 2.0*FLT_EPSILON);
     }
     OC_ASSERT((_lower_bound < _upper_bound),
         "Selection scorer, invalid bounds: %f and %f",
