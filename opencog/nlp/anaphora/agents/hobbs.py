@@ -194,16 +194,18 @@ class HobbsAgent(MindAgent):
         log.fine("===========================================================")
 
     def getConjunction(self,node):
+
+        '''
+        Returning the other part of a conjunction if conjunction exists and anaphor is "Plural"
+        '''
+
         return self.bindLinkExe(self.currentProposal,node,'(cog-bind-crisp getConjunction)',self.currentResult,types.WordInstanceNode)
 
-    def propose(self,node,filter=-1):
-        '''
-        It iterates all filters, reject the antecedent or "node" if it's matched by any filters.
-        '''
+    def checkConjunctions(self,node):
 
-        self.currentResolutionLink_pronoun=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentPronoun, node], TruthValue(1.0, 100))
-        rejected = False
-        filterNumber=-1
+        '''
+        Checking if conjunction resolution applies to the "node", returning True if it applies, False otherwise.
+        '''
 
         conjunction=self.getConjunction(node);
 
@@ -219,6 +221,19 @@ class HobbsAgent(MindAgent):
             log.fine("accepted \n"+str(conjunction_list))
             self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, conjunction_list, TruthValue(1.0, TruthValue().confidence_to_count(1.0))),TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, TruthValue().confidence_to_count(self.confidence)))
             self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
+            return True
+        return False
+
+    def propose(self,node,filter=-1):
+        '''
+        It iterates all filters, reject the antecedent or "node" if it's matched by any filters.
+        '''
+
+        self.currentResolutionLink_pronoun=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentPronoun, node], TruthValue(1.0, 100))
+        rejected = False
+        filterNumber=-1
+
+        self.checkConjunctions(node)
 
         start=1
         end=self.numOfFilters+1
