@@ -65,7 +65,7 @@ static inline bool is_correct(score_t val)
  * is degenerate, i.e. when it has rows with the same inputs but
  * opposite outputs.
  */
-bool ensemble::add_candidates(scored_combo_tree_set& cands)
+void ensemble::add_candidates(scored_combo_tree_set& cands)
 {
 	OC_ASSERT(_booster, "Ensemble can only be used with a weighted scorer");
 
@@ -140,18 +140,16 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 		if (err < _tolerance) {
 			logger().info() << "Boosting: perfect score found: " << &best_p;
 
+			// Wipe out the ensemble.
 			_scored_trees.clear();
-
-			scored_combo_tree best = *best_p;
+			scored_combo_tree best(*best_p);
 			best.set_weight(1.0);
 			_scored_trees.insert(best);
 
-			std::vector<double>& weights = _booster->get_weights();
-			size_t bslen = weights.size();
-			for (size_t i=0; i<bslen; i++)
-				weights[i] = 1.0;
+			// Clear out the scorer weights, to avoid down-stream confusion.
+			_booster->reset_weights();
 
-			return false;
+			return;
 		}
 
 		// Any score worse than half is terrible. Half gives a weight of zero.
@@ -198,7 +196,6 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 		if (_params.num_to_promote <= promoted) break;
 		if (0 == cands.size()) break;
 	}
-	return false;
 }
 
 /// Return the ensemble contents as a single, large weighted tree.
@@ -210,15 +207,22 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 ///
 const combo::combo_tree& ensemble::get_weighted_tree() const
 {
-    _weighted_tree.clear();
+	_weighted_tree.clear();
 
-	combo::combo_tree::pre_order_iterator head, plus, times, minus, impulse;
+	if (1 == _scored_trees.size()) {
+		_weighted_tree = _scored_trees.begin()->get_tree();
+		return _weighted_tree;
+	}
+
+	combo::combo_tree::pre_order_iterator head, plus;
 
 	head = _weighted_tree.set_head(combo::id::greater_than_zero);
 	plus = _weighted_tree.append_child(head, combo::id::plus);
 
 	for (const scored_combo_tree& sct : _scored_trees)
 	{
+		combo::combo_tree::pre_order_iterator times, minus, impulse;
+
 		// times is (weight * (tree - 0.5))
 		times = _weighted_tree.append_child(plus, combo::id::times);
 		vertex weight = sct.get_weight();

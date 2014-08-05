@@ -54,6 +54,8 @@ public:
     // A reference, not a const, allows them to be modified in-place.
     std::vector<double>& get_weights() { return _weights; }
 
+    void reset_weights();
+
 protected:
     std::vector<double> _weights;
     size_t _size;
