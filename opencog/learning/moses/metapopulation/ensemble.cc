@@ -132,7 +132,8 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 		logger().info() << "Boosting: best=" << best_score
 		                << " actual=" << best_p->get_score()
 		                << " effective length=" << _effective_length;
-		double err = (best_score - best_p->get_score()) / _effective_length;
+		// double err = (best_score - best_p->get_score()) / _effective_length;
+		double err = (- best_p->get_score()) / _effective_length;
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
 		// This conditionn indicates "perfect score". It shouldn't happen...
@@ -169,13 +170,13 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 		// So we use this to terminate the search.
 		//
 		double new_flat_score = flat_score();
-#if NO_THIS_IS_A_BAD_IDEA
 		if (new_flat_score < _current_flat_score + _min_improv) {
 			logger().info() << "Boosting: stalled; search halted";
+#if NO_THIS_IS_A_BAD_IDEA
 			_scored_trees.erase(best);
 			return false;
-		}
 #endif
+		}
 		_current_flat_score = new_flat_score;
 		logger().info() << "Boosting: current ensemble score=" << _current_flat_score;
 

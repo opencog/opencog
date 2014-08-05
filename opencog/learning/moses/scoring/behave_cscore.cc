@@ -115,8 +115,6 @@ composite_score behave_cscore::get_cscore(const scored_combo_tree_set& ensemble)
 
 score_t behave_cscore::best_possible_score() const
 {
-    logger().info() << "Best possible bscore="
-                    << _bscorer.best_possible_bscore();
     // This uses a flat, uniform weighting
     return boost::accumulate(_bscorer.best_possible_bscore(), 0.0);
 }
