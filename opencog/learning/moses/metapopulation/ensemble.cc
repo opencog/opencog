@@ -45,7 +45,9 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	// _tolerance is an estimate of the accumulated rounding error
 	// that arises when totaling the bscores.  As usual, assumes a
 	// normal distribution for this, so that its a square-root.
-	_tolerance = 2.0 * FLT_EPSILON * sqrt(_booster->get_weights().size());
+	_tolerance = 2.0 * FLT_EPSILON;
+	if (_booster)  // null if boosting not being used!
+		_tolerance *= sqrt(_booster->get_weights().size());
 }
 
 // Is this behavioral score correct? For boolean scores, correct is 0.0

@@ -455,7 +455,10 @@ Notes:
 
 -- boosting is not making forward progress.
 No improvement, but not terminatiing, crazy alpha ...
--
+
+OK, there is still a bug and I see it now ... 
+Got to subtract best-possible score much earlier in the game ..
+
 
 ===============
 The bug below got fixed.
