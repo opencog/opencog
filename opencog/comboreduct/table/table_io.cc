@@ -1145,7 +1145,7 @@ istreamDenseTable_noHeader(istream& in, Table& tab,
             // If there is no valid timestamp index, then there is no
             // "output" column!
             if (""  != date_str)
-                tab.ttable[i] = boost::gregorian::from_string(date_str);
+                tab.ttable[i] = TTable::from_string(date_str);
         }
         catch (AssertionException& ex) {
             unsigned lineno = has_header? i+1 : i;

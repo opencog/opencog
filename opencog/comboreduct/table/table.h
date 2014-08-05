@@ -449,7 +449,8 @@ static const std::string default_timestamp_label("timestamp");
  * Table containing timestamps.
  * There is only one column: a single timestamp for each row.
  */
-struct TTable : public std::vector<boost::gregorian::date> {
+struct TTable : public std::vector<boost::gregorian::date>
+{
     typedef std::vector<boost::gregorian::date> super;
 public:
     typedef boost::gregorian::date value_type;
@@ -458,6 +459,11 @@ public:
     TTable(const super& tt, const std::string& tl = default_timestamp_label);
     void set_label(const std::string&);
     const std::string& get_label() const;
+
+    static TTable::value_type from_string(const std::string& timestamp_str) {
+        return boost::gregorian::from_string(timestamp_str);
+    }
+
 protected:
     std::string label;
 };
