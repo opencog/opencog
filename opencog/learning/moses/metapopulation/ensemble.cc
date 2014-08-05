@@ -169,11 +169,13 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 		// So we use this to terminate the search.
 		//
 		double new_flat_score = flat_score();
+#if NO_THIS_IS_A_BAD_IDEA
 		if (new_flat_score < _current_flat_score + _min_improv) {
 			logger().info() << "Boosting: stalled; search halted";
 			_scored_trees.erase(best);
 			return false;
 		}
+#endif
 		_current_flat_score = new_flat_score;
 		logger().info() << "Boosting: current ensemble score=" << _current_flat_score;
 

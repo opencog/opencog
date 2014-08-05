@@ -64,7 +64,7 @@ public:
         // Without boosting, this takes many hours. With boosting,
         // it should be less than 12 seconds (on a circa-2009 commodity CPU)
         // This should take about 18K or 20K evaluations.
-        moses_test_score({"-Hpa", "-k5", "--boost=1", "-m80000"});
+        moses_test_score({"-Hpa", "-k5", "--boost=1", "-m40000"});
     }
     void test_1_mux() {
         cout << BOOST_CURRENT_FUNCTION << endl;
