@@ -68,6 +68,9 @@ struct select_bscore : public bscore_ctable_base
 protected:
     std::pair<double, double> get_weightiest(const CTable::counter_t&) const;
 
+    void set_best_possible_bscore();
+    behavioral_score _best_possible_score;
+
     bool _positive;
     score_t _lower_bound;
     score_t _upper_bound;

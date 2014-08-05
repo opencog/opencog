@@ -414,9 +414,9 @@ moses -Hselect  -iselect-no-dupe.csv -q0.7 --boost=1
                   (time)   boost (time)      (time)  boost (time)
      --------- ---------   ------------   ----------  ----------
         10K    46 (0m17s)    30 (0m15s)   48 (0m19s)  36 (0m14s)
-        20K    41 (0m42s)    22 (0m47s)   36 (0m39s)  35 (0m36s)
-        40K    29 (2m34s)     8 (2m8s)    27 (2m24s)  11 (1m51s)
-        80K    24 (9m21s)     0 (4m35s)   26 (8m40s)   0 (3m55s)
+        20K    41 (0m42s)    22 (0m47s)   36 (0m39s)  21 (0m41s)
+        40K    29 (2m34s)     8 (2m8s)    27 (2m24s)   6 (1m46s)
+        80K    24 (9m21s)     0 (4m35s)   26 (8m40s)   0 (2m56s)
        160K    22 (30m18s)    -           22 (24m10s)  -
 
 Conclude: The differences between Hit and Hselect are small and would
@@ -441,23 +441,20 @@ moses -Hselect  -iselect.csv -q0.7 --boost=1
      num_evals  Hit         Hit            Hselect     Hselect
                   (time)   boost (time)      (time)  boost (time)
      --------- ---------   ------------   ----------  ----------
-        10K    79 (0m11s)    54 (0m3s)    79 (0m11s)  54 (0m3s)
-        20K    54 (0m22s)    54 (0m3s)    54 (0m23s)   -
-        40K    54 (0m57s)     -           54 (0m57s)   -
-        80K    54 (3m2s)      -           54 (3m7s)    -
-       160K    50 (3m41s)     -           50 (3m45s)   -
+         5K                   3 (0m6s)                 4 (0m7s)
+        10K    29 (0m16s)     0 (0m11s)   29 (0m16s)   0 (0m12s)
+        20K     4 (0m35s)     -            4 (0m36s)   -
+        40K     4 (1m24s)     -            4 (1m24s)   -
+        80K     4 (4m7s)      -            4 (4m2s)    -
+       160K     0 (4m45s)     -            0 (11m38s)  -
 
 
 Notes:
--- preselect.csv has best score of 50, due to duplicate rows; so, for
-   the first and third columns, subtract 50 to get the actual number
-   of bad rows. 
+-- preselect.csv has best score of 50, due to duplicate rows.
+   All reported scores are realtive to this score.
 
--- boosting is not making forward progress.
-No improvement, but not terminatiing, crazy alpha ...
-
-OK, there is still a bug and I see it now ... 
-Got to subtract best-possible score much earlier in the game ..
+-- The Hselect and the Hit scorers behave nearly identically, as
+   expected for this case.
 
 
 ===============
