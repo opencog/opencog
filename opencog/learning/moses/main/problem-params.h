@@ -92,6 +92,7 @@ struct problem_params : public option_base
     bool output_only_best;
     bool output_eval_number;
     bool output_with_labels;
+    bool output_deme_id;
     bool output_python;
     std::string output_file;
 

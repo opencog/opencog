@@ -559,6 +559,13 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "works for data fitting problems where the data file contains "
          "labels in its header.\n")
 
+        ("output-deme-id",
+         po::value<bool>(&output_deme_id)->default_value(false),
+         "If 1, output the deme ID where the candidates have been produced first. "
+         "Deme 0 is the initial deme (before the first expansion). "
+         "Specifically the ID follows the format "
+         "EXPANSION[.BREADTH_FIRST_INDEX[.SUBSAMPLED_INDEX]].\n")
+
         ("python",
          po::value<bool>(&output_python)->default_value(false),
          "If 1, output the program(s) as python code instead of combo. "
