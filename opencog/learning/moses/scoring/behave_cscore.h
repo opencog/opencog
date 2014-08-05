@@ -108,9 +108,6 @@ public:
         return _bscorer.get_ctable();
     }
 
-    ascore_base& get_ascorer() const { return _ascorer; }
-    const bscore_base& get_bscorer() const { return _bscorer; }
-
 private:
     const bscore_base& _bscorer;
     ascore_base& _ascorer;
