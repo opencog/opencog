@@ -124,6 +124,35 @@ resolutions.
 
     ```
 
+### Example #3:
+
+- Example sentences:
+
+    ```
+    (relex-parse "waitresses and the cook sigh and roll their eyes.")
+    ```
+
+- Load hobbs agent:
+
+    ```
+    loadpy hobbs
+    ```
+- run a single cycle of hobbs agent
+
+    ```
+    agents-step hobbs.HobbsAgent
+    ```
+
+- Testing result(displayed on cogserver server console):
+
+    ```
+    Resolving...........
+    (WordInstanceNode "their@76985117-afb1-43f7-b82b-3b22ec07779f") ; [10191]
+
+    accepted (waitresses@adcc38d3-b941-457a-8ee8-bf0953a3e65e and cook@e12c8fac-f142-42c9-9a65-ca1398860173)
+    accepted waitresses@adcc38d3-b941-457a-8ee8-bf0953a3e65e
+
+    ```
 ### Debugging
 
 - Where to find the log file?

@@ -5,7 +5,7 @@ import unittest
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
 from opencog.atomspace import types, is_a, get_type, get_type_name
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
-from agents.hobbs import HobbsAgent
+from anaphora.agents.hobbs import HobbsAgent
 from unittest import TestCase
 
 
@@ -66,7 +66,7 @@ class AnaphoraUnitTester(TestCase):
         else:
             return False
 
-    @unittest.skip("debugging skipping")
+    #@unittest.skip("debugging skipping")
     def test_bfs(self):
 
         '''
@@ -80,7 +80,7 @@ class AnaphoraUnitTester(TestCase):
         self.assertTrue(self.compare(['a','b','c','d','e','f','g'],self.hobbsAgent.bfs(self.getWord('a'))))
         self.atomspace.clear()
 
-    @unittest.skip("debugging skipping")
+    #@unittest.skip("debugging skipping")
     def test_getWords(self):
 
         '''
@@ -92,7 +92,7 @@ class AnaphoraUnitTester(TestCase):
         self.assertTrue(self.compare(['a','b','c','d','e','f','g','h','j'],self.hobbsAgent.getWords()))
         self.atomspace.clear()
 
-    @unittest.skip("debugging skipping")
+    #@unittest.skip("debugging skipping")
     def test_propose(self):
 
         '''
@@ -133,7 +133,7 @@ class AnaphoraUnitTester(TestCase):
             self.atomspace.clear()
 
         def filter_2():
-            
+
             print("Testing filter #2...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#2/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
@@ -146,7 +146,7 @@ class AnaphoraUnitTester(TestCase):
             self.atomspace.clear()
 
         def filter_3():
-            
+
             print("Testing filter #3...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#3/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
@@ -407,7 +407,7 @@ class AnaphoraUnitTester(TestCase):
         filter_17()
         filter_18()
 
-    @unittest.skip("debugging skipping")
+    #@unittest.skip("debugging skipping")
     def test_pleonastic_if(self):
 
         self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/pleonastic_it/data_#1.scm"))
@@ -435,6 +435,7 @@ class AnaphoraUnitTester(TestCase):
         self.assertFalse(self.hobbsAgent.pleonastic_it(self.getWord('it')))
         self.atomspace.clear()
 
+    #@unittest.skip("debugging skipping")
     def test_conjunctions(self):
 
         self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/conjunction.scm"))
