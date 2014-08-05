@@ -392,4 +392,20 @@ public:
                                           "{1:10,0:3},1,0\n"
                                           "{1:4,0:5},0,1\n"));
     }
+
+    void test_timestamp_feature()
+    {
+        string input_file = tableUTest_dir + "timestamp_table.csv";
+        Table table = loadTable(input_file, "length", "time");
+
+        std::vector<std::string> dates_str = {"2012-Jan-11",
+                                              "2012-Jan-13",
+                                              "2012-Feb-18"};
+        std::vector<TTable::value_type> dates;
+        for (const auto& ds : dates_str)
+            dates.push_back(TTable::from_string(ds));
+        TTable expected_ttable(dates, "time");
+
+        TS_ASSERT_EQUALS(table.ttable, dates);
+    }
 };
