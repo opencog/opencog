@@ -45,7 +45,17 @@ resolutions.
     A set of patterns which are used to identify words which need to be resolved.
     ```
  
-    
+- pleonastic-it
+
+    ```
+    Pleonastic it(s) will be connected to (AnchorNode "Pleonastic-it").
+    i.e.
+    [2014-08-05 03:34:05:997] [FINE] (ReferenceLink (stv 0.980000 0.300000)
+    (WordInstanceNode "it@36845a59-09d9-40c9-a07e-e4cf442edecf") ; [8606]
+    (AnchorNode "Pleonastic-it") ; [8717]
+    ) ; [9070]
+
+    ```
 ### Prerequisites:
 
 - Adding python library path
@@ -160,6 +170,34 @@ resolutions.
     accepted waitresses@55cf46d0-9243-43dd-b1dd-133e9b43fab3
 
     ```
+### Example #4:
+
+- Example sentences:
+
+    ```
+    (relex-parse "It seems that there is a car.")
+    ```
+
+- Load hobbs agent:
+
+    ```
+    loadpy hobbs
+    ```
+- run a single cycle of hobbs agent
+
+    ```
+    agents-step hobbs.HobbsAgent
+    ```
+
+- Testing result(displayed on cogserver server console):
+
+    ```
+    Resolving...........
+    (WordInstanceNode "it@36845a59-09d9-40c9-a07e-e4cf442edecf") ; [8606]
+
+    accepted Pleonastic-it
+    ```
+    
 ### Debugging
 
 - Where to find the log file?
