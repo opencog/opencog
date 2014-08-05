@@ -39,7 +39,7 @@ using namespace combo;
  *
  * XXX This is not used any more ...
  */
-std::pair<double, double> 
+std::pair<double, double>
 select_bscore::get_weightiest(const CTable::counter_t& orow) const
 {
     score_t weightiest_val = very_worst_score;
@@ -51,7 +51,7 @@ select_bscore::get_weightiest(const CTable::counter_t& orow) const
         // We look for weightiest, or, if tied, then for the
         // largest value. This gives a unique sort order, even
         // for randomly re-ordereed tables.
-        if (weightiest < tcv.second or 
+        if (weightiest < tcv.second or
             (weightiest == tcv.second and weightiest_val < val))
         {
             weightiest = tcv.second;
@@ -153,10 +153,12 @@ select_bscore::select_bscore(const CTable& ctable,
 
     logger().info() << "select_bscore: lower_bound = " << _lower_bound
                     << " upper bound = " << _upper_bound;
+
+    set_best_possible_bscore();
 }
 
 /**
- * selection scorer, indicates if a row is inside or outside of the 
+ * selection scorer, indicates if a row is inside or outside of the
  * selection range.
  *
  * If the boolean tree predicts that a row is inside/outside the
@@ -187,6 +189,9 @@ behavioral_score select_bscore::operator()(const combo_tree& tr) const
         }
         bs.push_back(-fail);
     }
+
+    // Report the score only relative to the best-possible score.
+    bs -= _best_possible_score;
 
     return bs;
 }
@@ -238,12 +243,19 @@ behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble
         i++;
     }
 
+    // Report the score only relative to the best-possible score.
+    bs -= _best_possible_score;
+
     return bs;
 }
 
 behavioral_score select_bscore::best_possible_bscore() const
 {
-    behavioral_score bs;
+    return behavioral_score(_size, 0.0);
+}
+
+void select_bscore::set_best_possible_bscore()
+{
     for (const CTable::value_type& io_row : _wrk_ctable) {
         // io_row.first = input vector
         // io_row.second = counter of outputs
@@ -267,9 +279,11 @@ behavioral_score select_bscore::best_possible_bscore() const
         }
         score_t sum = n_inside + n_outside;
         score_t split = fabs(n_inside - n_outside);
-        bs.push_back(-0.5 * fabs(sum - split));
+        _best_possible_score.push_back(-0.5 * fabs(sum - split));
     }
-    return bs;
+
+    logger().info() << "select_bscore: Best possible: "
+                    << _best_possible_score;
 }
 
 behavioral_score select_bscore::worst_possible_bscore() const

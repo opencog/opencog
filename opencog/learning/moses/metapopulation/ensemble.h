@@ -72,7 +72,7 @@ public:
     ensemble(behave_cscore&,
              const ensemble_parameters& ep = ensemble_parameters());
 
-    bool add_candidates(scored_combo_tree_set&);
+    void add_candidates(scored_combo_tree_set&);
 
     const scored_combo_tree_set& get_ensemble() const {
         return _scored_trees;
@@ -89,8 +89,6 @@ private:
     simple_ascore _flat_scorer;
     double _effective_length;
     double _tolerance;
-    double _current_flat_score;
-    double _min_improv;
 
     scored_combo_tree_set _scored_trees;
     mutable combo_tree _weighted_tree;

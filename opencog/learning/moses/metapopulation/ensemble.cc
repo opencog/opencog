@@ -38,9 +38,7 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	_params(ep), _bcscorer(cs)
 {
 	_booster = dynamic_cast<boosting_ascore*>(&(cs.get_ascorer()));
-	_current_flat_score = cs.worst_possible_score();
-	_effective_length = -_current_flat_score;
-	_min_improv = cs.min_improv();
+	_effective_length = - cs.worst_possible_score();
 
 	// _tolerance is an estimate of the accumulated rounding error
 	// that arises when totaling the bscores.  As usual, assumes a
@@ -67,7 +65,7 @@ static inline bool is_correct(score_t val)
  * is degenerate, i.e. when it has rows with the same inputs but
  * opposite outputs.
  */
-bool ensemble::add_candidates(scored_combo_tree_set& cands)
+void ensemble::add_candidates(scored_combo_tree_set& cands)
 {
 	OC_ASSERT(_booster, "Ensemble can only be used with a weighted scorer");
 
@@ -75,12 +73,12 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 
 	// We need the length of the behavioral score, as normalization.
 	// The correct "length" is kind-of tricky to understand when a table
-	// has weighted rows, or when it is degenerate, so that no matter
-	// what selection is made, some rows will be wrong.  So we review
-	// the cases here: the table may have degenerate or non-degenerate
-	// rows, and these may be weighted or non-weighted.  Here, the
-	// "weights" are not the boosting weights, but the user-specified row
-	// weights.
+	// has weighted rows, or when it is degenerate.  In the degenerate
+	// case, no matter what selection is made, some rows will be wrong.
+	// So we explicitly review these cases here: the table may have
+	// degenerate or non-degenerate rows, and these may be weighted or
+	// non-weighted.  Here, the "weights" are not the boosting weights,
+	// but the user-specified row weights.
 	//
 	//  non-degenerate, non weighted:
 	//       (each row has defacto weight of 1.0)
@@ -117,8 +115,10 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 	//
 	// Thus, the "effective_length" is (minus) the worst possible score.
 	//
-	// Also: Note: the best_score needs to be continually re-computed
-	// using the current (boosted) row weights.
+	// The subtraction (score - best_score) needs to be done in the
+	// scorer itself, and not here: that's because the boost row weighting
+	// must be performed on this difference, so that only the rows that
+	// are far away from their best-possible values get boosted.
 	//
 	while (true) {
 		// Find the element (the combo tree) with the least error. This is
@@ -128,19 +128,28 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 				[](const scored_combo_tree& a, const scored_combo_tree& b) {
 					return a.get_score() > b.get_score(); });
 
-      double best_score = _bcscorer.weighted_best_score();
-		logger().info() << "Boosting: best=" << best_score
-		                << " actual=" << best_p->get_score()
+		logger().info() << "Boosting: candidate score=" << best_p->get_score()
 		                << " effective length=" << _effective_length;
-		double err = (best_score - best_p->get_score()) / _effective_length;
+		double err = (- best_p->get_score()) / _effective_length;
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
-		// This conditionn indicates "perfect score". It shouldn't happen...
-		// This is one of the issues with the hardness of AdaBoost; its
-		// divergent for this situation.  Halt proceedings in this case.
+		// This condition indicates "perfect score". It does not typically
+		// happen, but if it does, then we have no need for all the boosting
+		// done up to this point.  Thus, we erase the entire ensemble; its
+		// now superfluous, and replace it by the single best answer.
 		if (err < _tolerance) {
-			logger().info() << "Boosting: perfect score; search halted.";
-			return false;
+			logger().info() << "Boosting: perfect score found: " << &best_p;
+
+			// Wipe out the ensemble.
+			_scored_trees.clear();
+			scored_combo_tree best(*best_p);
+			best.set_weight(1.0);
+			_scored_trees.insert(best);
+
+			// Clear out the scorer weights, to avoid down-stream confusion.
+			_booster->reset_weights();
+
+			return;
 		}
 
 		// Any score worse than half is terrible. Half gives a weight of zero.
@@ -160,24 +169,6 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 		scored_combo_tree best = *best_p;
 		best.set_weight(alpha);
 		_scored_trees.insert(best);
-
-		// If there was no actual improvement in the real score, then
-		// boosting has come to the end of this limits.  This typically
-		// happens with the CTable scorer, when there are degenerate
-		// rows.  The boosting starts amplifying the rows that are
-		// degenerate,  but such amplification cannot help the situation.
-		// So we use this to terminate the search.
-		//
-		double new_flat_score = flat_score();
-#if NO_THIS_IS_A_BAD_IDEA
-		if (new_flat_score < _current_flat_score + _min_improv) {
-			logger().info() << "Boosting: stalled; search halted";
-			_scored_trees.erase(best);
-			return false;
-		}
-#endif
-		_current_flat_score = new_flat_score;
-		logger().info() << "Boosting: current ensemble score=" << _current_flat_score;
 
 		// Recompute the weights
 		const behavioral_score& bs = best_p->get_bscore();
@@ -205,7 +196,6 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 		if (_params.num_to_promote <= promoted) break;
 		if (0 == cands.size()) break;
 	}
-	return false;
 }
 
 /// Return the ensemble contents as a single, large weighted tree.
@@ -217,15 +207,22 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 ///
 const combo::combo_tree& ensemble::get_weighted_tree() const
 {
-    _weighted_tree.clear();
+	_weighted_tree.clear();
 
-	combo::combo_tree::pre_order_iterator head, plus, times, minus, impulse;
+	if (1 == _scored_trees.size()) {
+		_weighted_tree = _scored_trees.begin()->get_tree();
+		return _weighted_tree;
+	}
+
+	combo::combo_tree::pre_order_iterator head, plus;
 
 	head = _weighted_tree.set_head(combo::id::greater_than_zero);
 	plus = _weighted_tree.append_child(head, combo::id::plus);
 
 	for (const scored_combo_tree& sct : _scored_trees)
 	{
+		combo::combo_tree::pre_order_iterator times, minus, impulse;
+
 		// times is (weight * (tree - 0.5))
 		times = _weighted_tree.append_child(plus, combo::id::times);
 		vertex weight = sct.get_weight();

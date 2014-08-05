@@ -61,6 +61,10 @@ score_t boosting_ascore::operator()(const behavioral_score& bs) const
     return res;
 }
 
+void boosting_ascore::reset_weights()
+{
+    for (size_t i=0; i<_size; i++) _weights[i] = 1.0;
+}
 
 } // ~namespace moses
 } // ~namespace opencog
