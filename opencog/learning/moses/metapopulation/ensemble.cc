@@ -133,11 +133,24 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 		double err = (- best_p->get_score()) / _effective_length;
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
-		// This conditionn indicates "perfect score". It shouldn't happen...
-		// This is one of the issues with the hardness of AdaBoost; its
-		// divergent for this situation.  Halt proceedings in this case.
+		// This condition indicates "perfect score". It does not typically
+		// happen, but if it does, then we have no need for all the boosting
+		// done up to this point.  Thus, we erase the entire ensemble; its
+		// now superfluous, and replace it by the single best answer.
 		if (err < _tolerance) {
-			logger().info() << "Boosting: perfect score; search halted.";
+			logger().info() << "Boosting: perfect score found: " << &best_p;
+
+			_scored_trees.clear();
+
+			scored_combo_tree best = *best_p;
+			best.set_weight(1.0);
+			_scored_trees.insert(best);
+
+			std::vector<double>& weights = _booster->get_weights();
+			size_t bslen = weights.size();
+			for (size_t i=0; i<bslen; i++)
+				weights[i] = 1.0;
+
 			return false;
 		}
 
