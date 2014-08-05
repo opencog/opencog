@@ -136,7 +136,7 @@ class HobbsAgent(MindAgent):
 
         self.numOfFilters=7
         self.number_of_searching_sentences=3
-        self.DEBUG = True
+        self.DEBUG = False
 
         log.fine("\n===========================================================\n Starting hobbs agent.....\n=========================================================== ")
 
@@ -212,7 +212,9 @@ class HobbsAgent(MindAgent):
             conjunction_list=[]
             conjunction_list.append(node)
             conjunction_list.extend(conjunction)
-            if self.DEBUG:
+
+            # We don't want to output this to unit tests
+            if self.DEBUG and filter!=-1:
                 print("accepted \n"+str(conjunction_list))
             log.fine("accepted \n"+str(conjunction_list))
             self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, conjunction_list, TruthValue(1.0, TruthValue().confidence_to_count(1.0))),TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, TruthValue().confidence_to_count(self.confidence)))
@@ -240,15 +242,17 @@ class HobbsAgent(MindAgent):
                 break
 
         if not rejected:
+
+            # We don't want to output this to unit tests
             if self.DEBUG:
-                print("accepted "+node.name)
+                    print("accepted "+node.name)
             log.fine("accepted "+node.name)
             self.generateReferenceLink(self.currentPronoun,node,TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, TruthValue().confidence_to_count(self.confidence)))
             self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
         else:
             self.generateReferenceLink(self.currentPronoun,node,TV_FOR_FILTERED_OUT_ANTECEDENTS)
-            #if self.DEBUG:
-            print("rejected "+node.name+" by filter-#"+str(index))
+            if self.DEBUG:
+                    print("rejected "+node.name+" by filter-#"+str(index))
 
         self.atomspace.remove(self.currentResolutionLink_pronoun)
         return not rejected

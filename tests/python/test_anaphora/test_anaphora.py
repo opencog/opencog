@@ -63,7 +63,7 @@ class AnaphoraUnitTester(TestCase):
         else:
             return False
 
-    #@unittest.skip("demonstrating skipping")
+    #@unittest.skip("debugging skipping")
     def test_bfs(self):
 
         '''
@@ -77,7 +77,7 @@ class AnaphoraUnitTester(TestCase):
         self.assertTrue(self.compare(['a','b','c','d','e','f','g'],self.hobbsAgent.bfs(self.getWord('a'))))
         self.atomspace.clear()
 
-    #@unittest.skip("demonstrating skipping")
+    #@unittest.skip("debugging skipping")
     def test_getWords(self):
 
         '''
@@ -89,19 +89,7 @@ class AnaphoraUnitTester(TestCase):
         self.assertTrue(self.compare(['a','b','c','d','e','f','g','h','j'],self.hobbsAgent.getWords()))
         self.atomspace.clear()
 
-    #@unittest.skip("demonstrating skipping")
-    def test_getTargets(self):
-
-        '''
-        Testing the getTargets function
-        '''
-
-        self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/getTargets.scm"))
-        self.hobbsAgent.initilization(self.atomspace)
-        self.assertTrue(self.compare(['a','c','d'],self.hobbsAgent.getTargets(self.hobbsAgent.getWords())))
-        self.atomspace.clear()
-
-    #unittest.skip("demonstrating skipping")
+    #@unittest.skip("debugging skipping")
     def test_propose(self):
 
         '''
@@ -110,7 +98,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_1():
 
-
+            print("Testing filter #1...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#1/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertTrue(self.hobbsAgent.propose(self.getWord('antecedent')))
@@ -142,7 +130,8 @@ class AnaphoraUnitTester(TestCase):
             self.atomspace.clear()
 
         def filter_2():
-
+            
+            print("Testing filter #2...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#2/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent')))
@@ -154,7 +143,8 @@ class AnaphoraUnitTester(TestCase):
             self.atomspace.clear()
 
         def filter_3():
-
+            
+            print("Testing filter #3...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#3/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),3))
@@ -172,6 +162,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_4():
 
+            print("Testing filter #4...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#4/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),4))
@@ -189,6 +180,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_5():
 
+            print("Testing filter #5...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#5/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),5))
@@ -206,6 +198,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_6():
 
+            print("Testing filter #6...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#6/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),6))
@@ -223,6 +216,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_7():
 
+            print("Testing filter #7...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#7/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),7))
@@ -240,6 +234,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_8():
 
+            print("Testing filter #8...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#8/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),8))
@@ -257,6 +252,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_9():
 
+            print("Testing filter #9...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#9/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),9))
@@ -274,6 +270,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_10():
 
+            print("Testing filter #10...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#10/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),10))
@@ -286,6 +283,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_11():
 
+            print("Testing filter #11...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#11/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),11))
@@ -298,6 +296,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_12():
 
+            print("Testing filter #12...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#12/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent',types.ParseNode),12))
@@ -310,6 +309,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_13():
 
+            print("Testing filter #13...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#13/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),13))
@@ -322,6 +322,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_14():
 
+            print("Testing filter #14...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#14/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),14))
@@ -334,6 +335,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_15():
 
+            print("Testing filter #15...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#15/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),15))
@@ -346,6 +348,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_16():
 
+            print("Testing filter #16...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#16/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),16))
@@ -358,6 +361,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_17():
 
+            print("Testing filter #17...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#17/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),17))
@@ -370,6 +374,7 @@ class AnaphoraUnitTester(TestCase):
 
         def filter_18():
 
+            print("Testing filter #18...")
             self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/propose/filter-#18/data_#1.scm"))
             self.hobbsAgent.initilization(self.atomspace)
             self.assertFalse(self.hobbsAgent.propose(self.getWord('antecedent'),18))
@@ -398,6 +403,33 @@ class AnaphoraUnitTester(TestCase):
         filter_16()
         filter_17()
         filter_18()
+
+   # @unittest.skip("debugging skipping")
+    def test_pleonastic_if(self):
+        self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/pleonastic_it/data_#1.scm"))
+        self.hobbsAgent.initilization(self.atomspace)
+        self.assertTrue(self.hobbsAgent.pleonastic_it(self.getWord('it')))
+        self.atomspace.clear()
+
+        self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/pleonastic_it/data_#2.scm"))
+        self.hobbsAgent.initilization(self.atomspace)
+        self.assertTrue(self.hobbsAgent.pleonastic_it(self.getWord('it')))
+        self.atomspace.clear()
+
+        self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/pleonastic_it/data_#3.scm"))
+        self.hobbsAgent.initilization(self.atomspace)
+        self.assertTrue(self.hobbsAgent.pleonastic_it(self.getWord('it')))
+        self.atomspace.clear()
+
+        self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/pleonastic_it/data_#4.scm"))
+        self.hobbsAgent.initilization(self.atomspace)
+        self.assertFalse(self.hobbsAgent.pleonastic_it(self.getWord('it')))
+        self.atomspace.clear()
+
+        self.assertTrue(load_scm(self.atomspace, "tests/python/test_anaphora/data/pleonastic_it/data_#5.scm"))
+        self.hobbsAgent.initilization(self.atomspace)
+        self.assertFalse(self.hobbsAgent.pleonastic_it(self.getWord('it')))
+        self.atomspace.clear()
 
 if __name__ == '__main__':
     unittest.main()
