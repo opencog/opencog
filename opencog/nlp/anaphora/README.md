@@ -81,16 +81,17 @@ resolutions.
 - Testing result(displayed on cogserver server console):
 
     ```
-    Resolving...........
-    (WordInstanceNode "he@0b328c6e-3a84-431d-9856-534d5a2640c6") ; [112]
+    Resolving....
+    (WordInstanceNode "he@c300d23e-e837-44f8-95b3-25e04f150153") ; [2790]
 
-    accepted Tom@e68745b7-6266-45c1-b020-de4d7c81dccf
+    accepted Tom@bccfc991-be8e-4624-b03f-22aac01ff872
+    accepted apple@8b05b856-44d4-494d-917f-06f299375d3f
+    accepted tree@38e7cdad-3430-4176-bffe-e484bb267eef
+    Resolving....
+    (WordInstanceNode "it@4dfaa49a-6b77-4a3e-b83e-f86f2a261921") ; [2802]
 
-    Resolving...........
-    (WordInstanceNode "it@31c03890-5ffa-4af9-a536-ee25ff0bfcd8") ; [124]
-
-    accepted apple@6f6bd594-952b-491b-8b6a-691e7c56e4ce
-    accepted tree@a482013b-0279-41f2-a5d5-e15820da3616
+    accepted apple@8b05b856-44d4-494d-917f-06f299375d3f
+    accepted tree@38e7cdad-3430-4176-bffe-e484bb267eef
 
     ```
 

@@ -136,7 +136,7 @@ class HobbsAgent(MindAgent):
 
         self.numOfFilters=7
         self.number_of_searching_sentences=3
-        self.DEBUG = False
+        self.DEBUG = True
 
         log.fine("\n===========================================================\n Starting hobbs agent.....\n=========================================================== ")
 
@@ -266,8 +266,8 @@ class HobbsAgent(MindAgent):
             self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
         else:
             self.generateReferenceLink(self.currentPronoun,node,TV_FOR_FILTERED_OUT_ANTECEDENTS)
-            if self.DEBUG:
-                    print("rejected "+node.name+" by filter-#"+str(index))
+            #if self.DEBUG:
+                   # print("rejected "+node.name+" by filter-#"+str(index))
 
         self.atomspace.remove(self.currentResolutionLink_pronoun)
         return not rejected
@@ -439,7 +439,7 @@ class HobbsAgent(MindAgent):
 
               ]
 
-        self.numOfFilters=18
+        self.numOfFilters=20
         self.numOfPrePatterns=3
         self.numOfPleonasticItPatterns=3
 
