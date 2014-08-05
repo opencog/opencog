@@ -332,10 +332,10 @@ behavioral_score ctruth_table_bscore::operator()(const scored_combo_tree_set& en
     return bs;
 }
 
-behavioral_score ctruth_table_bscore::best_possible_bscore() const
+void ctruth_table_bscore::set_best_possible_bscore()
 {
-    behavioral_score bs;
-    transform(_ctable | map_values, back_inserter(bs),
+    transform(_ctable | map_values,
+              back_inserter(_best_possible_score),
               [](const CTable::counter_t& c) {
                   // OK, this looks like magic, but here's what it does:
                   // CTable is a compressed table; different rows may
@@ -353,8 +353,6 @@ behavioral_score ctruth_table_bscore::best_possible_bscore() const
                   return -score_t(fmin(c.get(id::logical_true),
                                        c.get(id::logical_false)));
               });
-
-    return bs;
 }
 
 behavioral_score ctruth_table_bscore::worst_possible_bscore() const
@@ -1044,7 +1042,7 @@ behavioral_score cluster_bscore::operator()(const combo_tree& tr) const
 // termination conditions (when the best bscore is reached).
 behavioral_score cluster_bscore::best_possible_bscore() const
 {
-    return behavioral_score(1, 1.0e37);
+    return behavioral_score(1, very_best_score);
 }
 
 score_t cluster_bscore::min_improv() const

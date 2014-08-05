@@ -45,7 +45,7 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	// _tolerance is an estimate of the accumulated rounding error
 	// that arises when totaling the bscores.  As usual, assumes a
 	// normal distribution for this, so that its a square-root.
-	_tolerance = 2.0 * FLT_EPSILON;
+	_tolerance = 2.0 * epsilon_score;
 	if (_booster)  // null if boosting not being used!
 		_tolerance *= sqrt(_booster->get_weights().size());
 }
@@ -169,11 +169,13 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 		// So we use this to terminate the search.
 		//
 		double new_flat_score = flat_score();
+#if NO_THIS_IS_A_BAD_IDEA
 		if (new_flat_score < _current_flat_score + _min_improv) {
 			logger().info() << "Boosting: stalled; search halted";
 			_scored_trees.erase(best);
 			return false;
 		}
+#endif
 		_current_flat_score = new_flat_score;
 		logger().info() << "Boosting: current ensemble score=" << _current_flat_score;
 
