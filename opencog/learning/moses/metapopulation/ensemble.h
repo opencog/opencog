@@ -88,6 +88,9 @@ private:
     boosting_ascore* _booster;
     simple_ascore _flat_scorer;
     double _effective_length;
+    double _tolerance;
+    double _current_flat_score;
+    double _min_improv;
 
     scored_combo_tree_set _scored_trees;
 };

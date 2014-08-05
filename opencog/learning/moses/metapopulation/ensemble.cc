@@ -38,7 +38,14 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	_params(ep), _bcscorer(cs)
 {
 	_booster = dynamic_cast<boosting_ascore*>(&(cs.get_ascorer()));
-	_effective_length = -cs.worst_possible_score();
+	_current_flat_score = cs.worst_possible_score();
+	_effective_length = -_current_flat_score;
+	_min_improv = cs.min_improv();
+
+	// _tolerance is an estimate of the accumulated rounding error
+	// that arises when totaling the bscores.  As usual, assumes a
+	// normal distribution for this, so that its a square-root.
+	_tolerance = 2.0 * FLT_EPSILON * sqrt(_booster->get_weights().size());
 }
 
 // Is this behavioral score correct? For boolean scores, correct is 0.0
@@ -102,8 +109,9 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 	//
 	// Thus, the "effective_length" is (minus) the worst possible score.
 	//
-	// Also: Note: the bet_score needs to be continually re-computed
+	// Also: Note: the best_score needs to be continually re-computed
 	// using the current (boosted) row weights.
+	//
 	while (true) {
 		// Find the element (the combo tree) with the least error. This is
 		// the element with the highest score.
@@ -113,14 +121,16 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 					return a.get_score() > b.get_score(); });
 
       double best_score = _bcscorer.weighted_best_score();
-		logger().debug() << "Best score=" << best_score
-		                 << " Actual score=" << best_p->get_score()
-		                 << " Effective legnth:" << _effective_length;
+		logger().info() << "Boosting: best=" << best_score
+		                << " actual=" << best_p->get_score()
+		                << " effective length=" << _effective_length;
 		double err = (best_score - best_p->get_score()) / _effective_length;
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
-		// XXX FIXME, this should be something else ...
-		if (0.0 == err) break;
+		// This conditino indicates "perfect score". It shouldn't happen...
+		// This is one of teh issues with the hardness of AdaBoost; its
+		// divergent for this situation.
+		OC_ASSERT(_tolerance < err, "Perfect boosted score shouldn't be possible.");
 
 		// Any score worse than half is terrible. Half gives a weight of zero.
 		if (0.5 <= err) {
@@ -160,6 +170,21 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 
 		// Remove from the set of candidates.
 		cands.erase(best_p);
+
+		// If there was no actual improvement in the real score, then
+		// boosting has come to the end of this limits.  This typically
+		// happens with the CTable scorer, when there are degenerate
+		// rows.  The boosting starts amplifying the rows that are
+		// degenerate,  but such amplification cannot help the situation.
+		// So we use this to terminate the search.
+		//
+		double new_flat_score = flat_score();
+		if (new_flat_score < _current_flat_score + _min_improv) {
+			logger().info() << "Boosting: stalled";
+			_scored_trees.erase(best);
+			break;
+		}
+		_current_flat_score = new_flat_score;
 
 		// Are we done yet?
 		promoted ++;

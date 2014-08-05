@@ -426,7 +426,11 @@ the same thing for this dataset.  So the above is really just a
 "sanity check" to make sure that the code is good, and, indeed, it
 seems to be good.
 
-Try again on the dataset with duplicates:
+--------------------------------------------
+
+Try again on the dataset with duplicates. As before, there are 329 rows
+total, with 230 false, and 99 true.  However, due to duplicates, the
+best possible score is -50, and the effective length is 329-2*50=229.
 
 moses -Hit -Yval -ipreselect.csv 
 moses -Hit -Yval -ipreselect.csv --boost=1
@@ -443,13 +447,13 @@ moses -Hselect  -iselect.csv -q0.7 --boost=1
         80K    54 (3m2s)    x72 (8m8s)    54 (3m7s)    -
        160K    50 (3m41s)     -           50 (3m45s)   -
 
-Hsel crash
-Hit crash.
 
 Why so different?
--- preselect.csv has best score of 51, due to duplicate rows; so, for
-   the first column, subtract 51 to get the actual number of bad rows.
+-- preselect.csv has best score of 50, due to duplicate rows; so, for
+   the first column, subtract 50 to get the actual number of bad rows.
 
+
+xxxxxxxxx
 -- Due to rounding error (greater vs greater-or-equal) the -q0.7 only
    has 50 rows (i.e. we prepared preselect incorrectly!?)
 
@@ -494,8 +498,11 @@ We need:
       so if third & second is wrong, then err = (4-1)/3 = 3/3
       
 
+However, above is wrong because -very-best needs to be rescaled too..
+
+
 
 moses -Hpre -q0.05 -Y val -itests/learning/moses/preselect.csv
 
 
-very_worst_score
+
