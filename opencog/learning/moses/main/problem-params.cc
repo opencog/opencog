@@ -1394,6 +1394,7 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
                              boosting,
                              output_eval_number,
                              output_with_labels,
+                             output_deme_id,
                              col_labels,
                              output_file,
                              output_python,

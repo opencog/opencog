@@ -67,6 +67,7 @@ struct metapop_printer
                     bool _output_ensemble,
                     bool _output_eval_number,
                     bool _output_with_labels,
+                    bool _output_demeID,
                     const std::vector<std::string>& _ilabels,
                     const std::string& _output_file,
                     bool _output_python,
@@ -79,6 +80,7 @@ struct metapop_printer
         output_ensemble(_output_ensemble),
         output_eval_number(_output_eval_number),
         output_with_labels(_output_with_labels),
+        output_demeID(_output_demeID),
         ilabels(_ilabels),
         output_file(_output_file),
         output_python(_output_python),
@@ -168,7 +170,8 @@ struct metapop_printer
                     ostream_combo_tree (ss, sct.get_tree(), combo::fmt::python);
                 } else {
                     ostream_scored_combo_tree(ss, sct, output_score,
-                                              output_cscore, output_bscore);
+                                              output_cscore, output_demeID,
+                                              output_bscore);
                 }
             }
         }
@@ -246,6 +249,7 @@ private:
     bool output_ensemble;
     bool output_eval_number;
     bool output_with_labels;
+    bool output_demeID;
 public:
     std::vector<std::string> ilabels;
 private:

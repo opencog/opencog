@@ -172,6 +172,7 @@ std::ostream& ostream_scored_combo_tree(std::ostream& out,
                                         const scored_combo_tree& sct,
                                         bool output_score,
                                         bool output_cscore,
+                                        bool output_demeID,
                                         bool output_bscore)
 {
     if (output_score)
@@ -185,6 +186,9 @@ std::ostream& ostream_scored_combo_tree(std::ostream& out,
 
     if (output_cscore)
         out << " " << sct.get_composite_score();
+
+    if (output_demeID)
+        out << " demeID: " << sct.get_demeID();
 
     if (output_bscore and sct.get_bscore().size() > 0)
         ostream_behavioral_score(out << " ", sct.get_bscore());
@@ -215,12 +219,15 @@ scored_combo_tree string_to_scored_combo_tree(const std::string& line)
         + "complexity penalty=" + float_re + ", "
         + "diversity penalty=" + float_re + "\\]";
 
+    static const string demeID_re = string("( demeID: ")
+        + "([0-9]+)(\\.([0-9]+))?(\\.SS-([0-9]+))?)?";
+
     // very crude because handed to another parser
     static const string bscore_re = string("behavioral score: (\\[.+\\])");
     static const string opt_bscore_re = string("( ") + bscore_re + ")?"; // optional
 
     static const string scored_combo_tree_re = "^" + float_re + " "
-        + combo_tree_re + " " + cscore_re + opt_bscore_re + "\n?$";
+        + combo_tree_re + " " + cscore_re + demeID_re + opt_bscore_re + "\n?$";
 
     static const boost::regex sct_regex(scored_combo_tree_re);
 
@@ -230,13 +237,13 @@ scored_combo_tree string_to_scored_combo_tree(const std::string& line)
 
     // for (size_t i = 0; i < sct_match.size(); i++)
     //     cout << "sct_match[" << i << "] = \"" << sct_match[i] << "\"" << std::endl;
-    
+
     OC_ASSERT(match_result, "Line '%s' doesn't match regex '%s'",
               line.c_str(), scored_combo_tree_re.c_str());
-    OC_ASSERT(sct_match.size() == 10,
+    OC_ASSERT(sct_match.size() == 16,
               "Wrong number of sub-matches %u, 10 are expected",
               sct_match.size());
- 
+
     // Parse score
     score_t sc = std::stof(sct_match[1]);
 
@@ -250,14 +257,29 @@ scored_combo_tree string_to_scored_combo_tree(const std::string& line)
         diversity_penalty = std::stof(sct_match[7].str());
     composite_score cs(sc, cpx, cpx_penalty, diversity_penalty);
 
+    // Parse demeID
+    demeID_t demeID;
+    if (sct_match[8].length() > 0) {
+        unsigned expansion = stoi(sct_match[9].str());
+        demeID = demeID_t(expansion);
+        if (sct_match[10].length() > 0) {
+            unsigned breadth_first = stoi(sct_match[11].str());
+            demeID = demeID_t(expansion, breadth_first);
+            if (sct_match[12].length() > 0) {
+                unsigned ss_deme = stoi(sct_match[13].str());
+                demeID = demeID_t(expansion, breadth_first, ss_deme);
+            }
+        }
+    }
+
     // Parse behavioral score
     behavioral_score bs;
-    if (sct_match[9].length() > 0) {
-        istringstream iss(sct_match[9].str());
+    if (sct_match[15].length() > 0) {
+        istringstream iss(sct_match[15].str());
         istreamContainer(iss, back_inserter(bs), "[", "]");
     }
 
-    return scored_combo_tree(tr, demeID_t(), cs, bs);
+    return scored_combo_tree(tr, demeID, cs, bs);
 }
 
 // Fill a vector of scored_combo_tree parsed from stream

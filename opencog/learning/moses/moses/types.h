@@ -371,6 +371,7 @@ std::ostream& ostream_scored_combo_tree(std::ostream& out,
                                         const scored_combo_tree&,
                                         bool output_score = true,
                                         bool output_cscore = true,
+                                        bool output_demeID = true,
                                         bool output_bscore = true);
 
 scored_combo_tree string_to_scored_combo_tree(const std::string& line);
