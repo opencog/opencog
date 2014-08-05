@@ -89,6 +89,7 @@ struct instance_set : public std::vector<scored_instance<ScoreT> >
         _id = rhs.getID();
         n_evals = rhs.n_evals;
         n_best_evals = rhs.n_best_evals;
+        return *this;
     }
 #endif
 
