@@ -441,22 +441,24 @@ moses -Hselect  -iselect.csv -q0.7 --boost=1
      num_evals  Hit         Hit            Hselect     Hselect
                   (time)   boost (time)      (time)  boost (time)
      --------- ---------   ------------   ----------  ----------
-        10K    79 (0m11s)   x72 (0m15s)   79 (0m11s)  x4 (0m11s)
-        20K    54 (0m22s)   x72 (0m43s)   54 (0m23s)  x0 (0m9s)
-        40K    54 (0m57s)   x72 (2m13s)   54 (0m57s)   -
-        80K    54 (3m2s)    x72 (8m8s)    54 (3m7s)    -
+        10K    79 (0m11s)    54 (0m3s)    79 (0m11s)  54 (0m3s)
+        20K    54 (0m22s)    54 (0m3s)    54 (0m23s)   -
+        40K    54 (0m57s)     -           54 (0m57s)   -
+        80K    54 (3m2s)      -           54 (3m7s)    -
        160K    50 (3m41s)     -           50 (3m45s)   -
 
 
-Why so different?
+Notes:
 -- preselect.csv has best score of 50, due to duplicate rows; so, for
-   the first column, subtract 50 to get the actual number of bad rows.
+   the first and third columns, subtract 50 to get the actual number
+   of bad rows. 
 
+-- boosting is not making forward progress.
+No improvement, but not terminatiing, crazy alpha ...
+-
 
-xxxxxxxxx
--- Due to rounding error (greater vs greater-or-equal) the -q0.7 only
-   has 50 rows (i.e. we prepared preselect incorrectly!?)
-
+===============
+The bug below got fixed.
 Since there are 329 rows, this means 329-51 = 278 rows, half of which
 are 278/2 = 139 which is what the ensemble scorer needs to beat.
 
@@ -497,7 +499,6 @@ We need:
       so if third & first is wrong, then err = (3-1)/3 = 2/3
       so if third & second is wrong, then err = (4-1)/3 = 3/3
       
-
 However, above is wrong because -very-best needs to be rescaled too..
 
 
