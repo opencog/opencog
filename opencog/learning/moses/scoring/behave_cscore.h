@@ -65,9 +65,6 @@ public:
     /// compute the scoring error during boosting.
     score_t worst_possible_score() const;
 
-    /// Best score, boosting-weighted.
-    score_t weighted_best_score() const;
-
     /// Return the minimum value considered for improvement.
     score_t min_improv() const
     {

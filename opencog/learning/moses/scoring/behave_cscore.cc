@@ -124,12 +124,5 @@ score_t behave_cscore::worst_possible_score() const
     return boost::accumulate(_bscorer.worst_possible_bscore(), 0.0);
 }
 
-score_t behave_cscore::weighted_best_score() const
-{
-    // This uses the current boosted weighting.
-    return _ascorer(_bscorer.best_possible_bscore());
-}
-
-
 } // ~namespace moses
 } // ~namespace opencog

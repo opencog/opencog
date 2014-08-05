@@ -73,12 +73,12 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 
 	// We need the length of the behavioral score, as normalization.
 	// The correct "length" is kind-of tricky to understand when a table
-	// has weighted rows, or when it is degenerate, so that no matter
-	// what selection is made, some rows will be wrong.  So we review
-	// the cases here: the table may have degenerate or non-degenerate
-	// rows, and these may be weighted or non-weighted.  Here, the
-	// "weights" are not the boosting weights, but the user-specified row
-	// weights.
+	// has weighted rows, or when it is degenerate.  In the degenerate
+	// case, no matter what selection is made, some rows will be wrong.
+	// So we explicitly review these cases here: the table may have
+	// degenerate or non-degenerate rows, and these may be weighted or
+	// non-weighted.  Here, the "weights" are not the boosting weights,
+	// but the user-specified row weights.
 	//
 	//  non-degenerate, non weighted:
 	//       (each row has defacto weight of 1.0)
@@ -115,8 +115,10 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 	//
 	// Thus, the "effective_length" is (minus) the worst possible score.
 	//
-	// Also: Note: the best_score needs to be continually re-computed
-	// using the current (boosted) row weights.
+	// The subtraction (score - best_score) needs to be done in the
+	// scorer itself, and not here: that's because the boost row weighting
+	// must be performed on this difference, so that only the rows that
+	// are far away from their best-possible values get boosted.
 	//
 	while (true) {
 		// Find the element (the combo tree) with the least error. This is
@@ -126,11 +128,8 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 				[](const scored_combo_tree& a, const scored_combo_tree& b) {
 					return a.get_score() > b.get_score(); });
 
-      double best_score = _bcscorer.weighted_best_score();
-		logger().info() << "Boosting: best=" << best_score
-		                << " actual=" << best_p->get_score()
+		logger().info() << "Boosting: candidate score=" << best_p->get_score()
 		                << " effective length=" << _effective_length;
-		// double err = (best_score - best_p->get_score()) / _effective_length;
 		double err = (- best_p->get_score()) / _effective_length;
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
