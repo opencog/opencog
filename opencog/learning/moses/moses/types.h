@@ -26,6 +26,7 @@
 #ifndef _MOSES_TYPES_H
 #define _MOSES_TYPES_H
 
+#include <cfloat>
 #include <functional>
 #include <iomanip>
 #include <unordered_set>
@@ -69,6 +70,8 @@ static const int io_score_precision = 18;
 
 static const score_t very_best_score = std::numeric_limits<score_t>::max();
 static const score_t very_worst_score = std::numeric_limits<score_t>::lowest();
+// use FLT_EPSILON not EPSILON because its float, not double.
+static const score_t epsilon_score = FLT_EPSILON;
 
 // But modify the default sort ordering for these objects.
 struct composite_score:
@@ -206,8 +209,13 @@ struct demeID_t : public std::string
 //
 // TODO this should be a std::valarray not std::vector but I am too
 // lazy to make the switch right now.
-struct behavioral_score :std::vector<score_t>
+struct behavioral_score : public std::vector<score_t>
 {
+    behavioral_score() {}
+    behavioral_score(const std::vector<score_t>& v) :std::vector<score_t>(v)  {}
+    behavioral_score(size_t sz) : std::vector<score_t>(sz) {}
+    behavioral_score(size_t sz, score_t val) : std::vector<score_t>(sz, val) {}
+
     std::vector<score_t> operator-=(const std::vector<score_t>& rhs)
     {
         size_t sz = rhs.size();
@@ -221,8 +229,8 @@ struct behavioral_score :std::vector<score_t>
     }
 };
 
-behavioral_score operator-(const behavioral_score& lhs,
-                           const behavioral_score& rhs)
+static inline behavioral_score operator-(const behavioral_score& lhs,
+                                         const behavioral_score& rhs)
 {
     size_t sz = rhs.size();
     OC_ASSERT(lhs.size() == sz,

@@ -1042,7 +1042,7 @@ behavioral_score cluster_bscore::operator()(const combo_tree& tr) const
 // termination conditions (when the best bscore is reached).
 behavioral_score cluster_bscore::best_possible_bscore() const
 {
-    return behavioral_score(1, 1.0e37);
+    return behavioral_score(1, very_best_score);
 }
 
 score_t cluster_bscore::min_improv() const

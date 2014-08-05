@@ -125,7 +125,7 @@ select_bscore::select_bscore(const CTable& ctable,
     upper_percentile *= total_weight;
     lower_percentile *= total_weight;
     score_t running_weight = 0.0;
-    score_t last_val = -1.0e37;
+    score_t last_val = very_worst_score;
     bool found_lower = false;
     bool found_upper = false;
     for (auto score_row : ranked_out) {
@@ -145,8 +145,7 @@ select_bscore::select_bscore(const CTable& ctable,
         last_val = val;
     }
     if (not found_upper) {
-        // FLT_EPSILON, not EPSILON, because it must be float, not double!
-        _upper_bound = last_val * (1.0 + 2.0*FLT_EPSILON);
+        _upper_bound = last_val * (1.0 + 2.0*epsilon_score);
     }
     OC_ASSERT((_lower_bound < _upper_bound),
         "Selection scorer, invalid bounds: %f and %f",
