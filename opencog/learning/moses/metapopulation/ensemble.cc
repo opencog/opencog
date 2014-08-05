@@ -38,9 +38,7 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	_params(ep), _bcscorer(cs)
 {
 	_booster = dynamic_cast<boosting_ascore*>(&(cs.get_ascorer()));
-	_current_flat_score = cs.worst_possible_score();
-	_effective_length = -_current_flat_score;
-	_min_improv = cs.min_improv();
+	_effective_length = - cs.worst_possible_score();
 
 	// _tolerance is an estimate of the accumulated rounding error
 	// that arises when totaling the bscores.  As usual, assumes a
@@ -161,24 +159,6 @@ bool ensemble::add_candidates(scored_combo_tree_set& cands)
 		scored_combo_tree best = *best_p;
 		best.set_weight(alpha);
 		_scored_trees.insert(best);
-
-		// If there was no actual improvement in the real score, then
-		// boosting has come to the end of this limits.  This typically
-		// happens with the CTable scorer, when there are degenerate
-		// rows.  The boosting starts amplifying the rows that are
-		// degenerate,  but such amplification cannot help the situation.
-		// So we use this to terminate the search.
-		//
-		double new_flat_score = flat_score();
-		if (new_flat_score < _current_flat_score + _min_improv) {
-			logger().info() << "Boosting: stalled; search halted";
-#if NO_THIS_IS_A_BAD_IDEA
-			_scored_trees.erase(best);
-			return false;
-#endif
-		}
-		_current_flat_score = new_flat_score;
-		logger().info() << "Boosting: current ensemble score=" << _current_flat_score;
 
 		// Recompute the weights
 		const behavioral_score& bs = best_p->get_bscore();
