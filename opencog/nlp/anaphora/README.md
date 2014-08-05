@@ -124,6 +124,8 @@ resolutions.
 
     ```
 
+### Debugging
+
 - Where to find the log file?
 
     ```
