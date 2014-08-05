@@ -1,3 +1,4 @@
+;; Returning all ParseNodes in the atomspace.
 (define getAllParseNodes
     (BindLink
         (ListLink

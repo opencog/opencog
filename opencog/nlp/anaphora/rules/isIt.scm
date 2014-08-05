@@ -1,4 +1,4 @@
-;; Check if the target is the word "it".
+;; Checking if the target is the word "it".
 
 (define isIt
     (BindLink

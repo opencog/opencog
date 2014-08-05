@@ -1,3 +1,5 @@
+;; Returning all WordInstanceNode
+
 (define getWords
     (BindLink
         (ListLink

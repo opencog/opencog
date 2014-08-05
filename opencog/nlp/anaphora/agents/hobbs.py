@@ -386,9 +386,6 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/getNumberNode_WordInstanceNode.scm",
               "opencog/nlp/anaphora/rules/getNumberNode_ParseNode.scm",
               "opencog/nlp/anaphora/rules/connectRootsToParseNodes.scm",
-              "opencog/nlp/anaphora/rules/getPronouns.scm",
-              "opencog/nlp/anaphora/rules/propose.scm",
-              "opencog/nlp/anaphora/rules/getResults.scm",
               "opencog/nlp/anaphora/rules/getAllNumberNodes.scm",
               "opencog/nlp/anaphora/rules/getAllParseNodes.scm",
               "opencog/nlp/anaphora/rules/getConjunction.scm",
@@ -435,23 +432,9 @@ class HobbsAgent(MindAgent):
             load_scm(atomspace, item)
 
         self.getAllNumberNodes()
-        #self.pronouns = self.getPronouns()
         self.pronouns=self.getTargets(self.getWords())
         self.roots = self.getRoots()
 
-
-    def printResults(self):
-
-        '''
-        Currently, this function is not used.
-        '''
-
-        rv = self.bindLinkExe(None,None,'(cog-bind getResults)',self.currentResult,types.ReferenceLink)
-
-        with open('/tmp/results.txt', 'w') as logfile:
-            for atom in rv:
-                print(atom)
-                print(atom, file=logfile)
 
     def addPronounToResolvedList(self,node):
         '''

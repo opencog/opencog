@@ -124,6 +124,13 @@ resolutions.
 
     ```
 
+- Where to find the log file?
+
+    ```
+    The log file is located at "tmp/hobbs.log"
+
+    ```
+
 ### More examples:
 
 - /tests/hobbs-testing-results.txt:
