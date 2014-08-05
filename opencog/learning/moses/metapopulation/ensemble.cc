@@ -58,8 +58,14 @@ static inline bool is_correct(score_t val)
 /**
  * Implement a boosted ensemble. Candidate combo trees are added to
  * the ensemble one at a time, weights are adjusted, and etc.
+ *
+ * Returns true if all further search should be halted; else returns
+ * false.  The problem adressed with this return value is that basic
+ * AdaBoost can sometimes stop making forward progress when the dataset
+ * is degenerate, i.e. when it has rows with the same inputs but
+ * opposite outputs.
  */
-void ensemble::add_candidates(scored_combo_tree_set& cands)
+bool ensemble::add_candidates(scored_combo_tree_set& cands)
 {
 	OC_ASSERT(_booster, "Ensemble can only be used with a weighted scorer");
 
@@ -127,10 +133,13 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 		double err = (best_score - best_p->get_score()) / _effective_length;
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
-		// This conditino indicates "perfect score". It shouldn't happen...
-		// This is one of teh issues with the hardness of AdaBoost; its
-		// divergent for this situation.
-		OC_ASSERT(_tolerance < err, "Perfect boosted score shouldn't be possible.");
+		// This conditionn indicates "perfect score". It shouldn't happen...
+		// This is one of the issues with the hardness of AdaBoost; its
+		// divergent for this situation.  Halt proceedings in this case.
+		if (err < _tolerance) {
+			logger().info() << "Boosting: perfect score; search halted.";
+			return true;
+		}
 
 		// Any score worse than half is terrible. Half gives a weight of zero.
 		if (0.5 <= err) {
@@ -180,9 +189,9 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 		//
 		double new_flat_score = flat_score();
 		if (new_flat_score < _current_flat_score + _min_improv) {
-			logger().info() << "Boosting: stalled";
+			logger().info() << "Boosting: stalled; search halted";
 			_scored_trees.erase(best);
-			break;
+			return true;
 		}
 		_current_flat_score = new_flat_score;
 
@@ -191,6 +200,7 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 		if (_params.num_to_promote <= promoted) break;
 		if (0 == cands.size()) break;
 	}
+	return false;
 }
 
 /// Return the ensemble contents as a single, large weighted tree.

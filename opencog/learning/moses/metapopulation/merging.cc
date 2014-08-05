@@ -367,7 +367,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
 
     // Insert candidates into the ensemble.
     if (_params.do_boosting) {
-        _ensemble.add_candidates(candidates);
+        done |= _ensemble.add_candidates(candidates);
         rescore();
     }
 

@@ -72,7 +72,7 @@ public:
     ensemble(behave_cscore&,
              const ensemble_parameters& ep = ensemble_parameters());
 
-    void add_candidates(scored_combo_tree_set&);
+    bool add_candidates(scored_combo_tree_set&);
 
     const scored_combo_tree_set& get_ensemble() const {
         return _scored_trees;
