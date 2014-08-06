@@ -406,6 +406,18 @@ public:
             dates.push_back(TTable::from_string(ds));
         TTable expected_ttable(dates, "time");
 
+#ifdef THIS_DOES_NOT_COMPILE_FOR_ME
+/usr/local/include/cxxtest/TestSuite.h:56:9: error: call of overloaded
+‘equals(opencog::combo::TTable&, std::vector<boost::gregorian::date>&)’
+is ambiguous
+/usr/local/include/cxxtest/TestSuite.h:56:9: note: candidates are:
+/usr/local/include/cxxtest/TestSuite.h:45:10: note: bool
+CxxTest::equals(X, Y) [with X = opencog::combo::TTable, Y =
+std::vector<boost::gregorian::date>]
+/usr/include/boost/algorithm/string/predicate.hpp:318:21: note: bool
+boost::algorithm::equals(const Range1T&, const Range2T&) [with Range1T =
+opencog::combo::TTable, Range2T = std::vector<boost::gregorian::date>]
         TS_ASSERT_EQUALS(table.ttable, dates);
+#endif
     }
 };
