@@ -508,15 +508,28 @@ However, above is wrong because -very-best needs to be rescaled too..
 Precision scoring
 -----------------
 Results for the Hpre scorer, using the same datasets as above.
-The results are pathetic.
+
+Results depend sharply on the complexity ratio and the temperature,
+a quick sniff test shows: -z150 for the ratio and -v25 for the
+temperature seem to work very well for preselect-no-dupe.csv and
+
+-z350 -v45 for preselect.csv
 
    moses -Hpre -q0.05 -Yval -ipreselect.csv
+
+Max attainable precision on preselect.csv should be: 
+(329-50)/329 = 0.848024
+  
 
      num_evals  preselect       no-dupe       
                       (time)       (time)  
      --------- --------------   ---------
-        10K    0.6164 (0m6s)    0.6265 (0m6s)
-        40K    0.6353 (1m14s)   0.6265 (1m18s)
-       160K    0.6164 (1m14s)
+        10K    0.78476 (0m14s)  1.0 (0m2s)
+        40K    0.78947 (3m31s)
 
+Above: the no-dupe column uses -v25 -z150
+the plain  preselect column uses -v45 -z350
+
+Results might improve with additional tuning; but this requires
+averaging over multiple random seeds.
 

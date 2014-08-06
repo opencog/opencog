@@ -41,7 +41,7 @@ namespace moses {
  * also holds a collection of combo trees. However, the metapopulation
  * is meant to do something different: to provide the 'breeding stock'
  * for deme expansion and optimization.  Therefore, the metapopulation
- * management policy is different from the ensemble, although it is 
+ * management policy is different from the ensemble, although it is
  * likely that the two will hold similar contents. The ensemble is
  * intended for inference; the metapopulation for breeding.
  *
@@ -59,9 +59,11 @@ namespace moses {
 struct ensemble_parameters
 {
 	ensemble_parameters() :
+		experts(false),
 		num_to_promote(1)
 	{}
 
+	bool experts;        // do "ensemble-of-experts" boosting.
 	int num_to_promote;  // max number of demes to accept into ensemble,
 	                     // per learning iteration.
 };

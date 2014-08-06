@@ -227,6 +227,9 @@ struct metapop_parameters
     // parameters to control diversity
     diversity_parameters diversity;
 
+    // parameters that control the ensemble
+    ensemble_parameters ensemble_parms;
+
     bool (*merge_callback)(scored_combo_tree_set&, void*);
     void *callback_user_data;
 };
