@@ -126,6 +126,8 @@ precision_bscore::precision_bscore(const CTable& ctable_,
     activation_pressure(activation_pressure_), positive(positive_),
     time_bscore(time_bscore_)
 {
+    reset_weights();
+
     // _target will be either id::logical_true, or id::logical_false
     _target = bool_to_vertex(positive);
     _neg_target = negate_vertex(_target);
@@ -317,6 +319,14 @@ behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensem
     behavioral_score bs (_size, 0);
 logger().info() <<"duuude olaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     return bs;
+}
+
+score_t precision_bscore::get_error(const behavioral_score& bs) const
+{
+    score_t sc = 1.0 - score(bs);
+logger().info() <<"duuude precision err: " << sc;
+    sc = fmin(sc, 0.0);
+    return sc;
 }
 
 behavioral_score precision_bscore::best_possible_bscore() const

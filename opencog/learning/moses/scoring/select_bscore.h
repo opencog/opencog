@@ -57,6 +57,7 @@ struct select_bscore : public bscore_ctable_base
 
     behavioral_score operator()(const combo_tree& tr) const;
     behavioral_score operator()(const scored_combo_tree_set&) const;
+    score_t get_error(const behavioral_score&) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
@@ -66,8 +67,6 @@ struct select_bscore : public bscore_ctable_base
     score_t min_improv() const;
 
 protected:
-    std::pair<double, double> get_weightiest(const CTable::counter_t&) const;
-
     void set_best_possible_bscore();
     behavioral_score _best_possible_score;
 
