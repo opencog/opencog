@@ -24,6 +24,7 @@
 #ifndef _OPENCOG_METAPOP_PARAMETERS_H
 #define _OPENCOG_METAPOP_PARAMETERS_H
 
+#include "ensemble_params.h"
 #include "../moses/types.h"
 
 namespace opencog { namespace moses {
@@ -228,7 +229,7 @@ struct metapop_parameters
     diversity_parameters diversity;
 
     // parameters that control the ensemble
-    ensemble_parameters ensemble_parms;
+    ensemble_parameters ensemble_params;
 
     bool (*merge_callback)(scored_combo_tree_set&, void*);
     void *callback_user_data;

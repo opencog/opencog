@@ -386,12 +386,13 @@ void pre_table_problem::run(option_base* ob)
                                                      pms.festor_params);
     }
  
-    // In order to support boosting, the precision_bscore
-    // would need to be reworked to always return a predictable,
-    // dixed number of rows.
-    OC_ASSERT(not pms.meta_params.do_boosting,
-        "Boosting not supported for the pre problem!");
-    simple_ascore ascore;
+    // We support boosting by generating an "ensemble of experts" model.
+    pms.meta_params.ensemble_params.experts = true;
+    // When boosting, cache must not be used, as otherwise, stale
+    // composite scores get cached and returned.
+    if (pms.meta_params.do_boosting) pms.cache_size = 0;
+
+    boosting_ascore ascore(bscore.size());
     behave_cscore mbcscore(bscore, ascore, pms.cache_size);
     metapop_moses_results(pms.exemplars, cand_type_signature,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
@@ -399,7 +400,6 @@ void pre_table_problem::run(option_base* ob)
                           pms.opt_params, pms.hc_params,
                           pms.deme_params, pms.filter_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
-
 }
 
 void pre_conj_table_problem::run(option_base* ob)

@@ -24,6 +24,7 @@
 #ifndef _OPENCOG_ENSEMBLE_H
 #define _OPENCOG_ENSEMBLE_H
 
+#include "ensemble_params.h"
 #include "../moses/types.h"  // for scored_combo_tree
 #include "../scoring/behave_cscore.h"
 #include "../scoring/boosting_ascore.h"
@@ -55,18 +56,6 @@ namespace moses {
  * kind-of coming along for the ride, because that's easier for now.
  * Someday, it should have an independent existance.
  */
-
-struct ensemble_parameters
-{
-	ensemble_parameters() :
-		experts(false),
-		num_to_promote(1)
-	{}
-
-	bool experts;        // do "ensemble-of-experts" boosting.
-	int num_to_promote;  // max number of demes to accept into ensemble,
-	                     // per learning iteration.
-};
 
 class ensemble
 {
