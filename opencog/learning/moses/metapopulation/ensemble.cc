@@ -126,7 +126,8 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 
 		logger().info() << "Boosting: candidate score=" << best_p->get_score()
 		                << " effective length=" << _effective_length;
-		double err = (- best_p->get_score()) / _effective_length;
+		// double err = (- best_p->get_score()) / _effective_length;
+		double err = _bscorer.get_error(best_p->get_bscore());
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
 		// This condition indicates "perfect score". It does not typically
@@ -168,7 +169,7 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 
 		// Recompute the weights
 		const behavioral_score& bs = best_p->get_bscore();
-		size_t bslen = bs.size();
+		size_t bslen = _bscorer.size();
 		std::vector<double>& weights = _bscorer.get_weights();
 		double znorm = 0.0;
 		for (size_t i=0; i<bslen; i++)

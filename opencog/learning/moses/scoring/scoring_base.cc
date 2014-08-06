@@ -123,7 +123,7 @@ score_t bscore_base::score(const behavioral_score& bs) const
     //           " Got %d expected %d", bs.size(), _size);
 
     // Hack (temporary?) to have variable size bscore work (without boost)
-    if (_size == 0)
+    if (_size == 0 or _weights.size() == 0)
         return boost::accumulate(bs, 0.0);
 
     score_t res = 0.0;
