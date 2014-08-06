@@ -45,8 +45,7 @@ int main(int argc, char** argv)
 
     // DOUBLE MARKOVIAN POLE TASK`
     ann_pole2_bscore p2_bscore;
-    simple_ascore ascorer;
-    behave_cscore cscorer(p2_bscore, ascorer);
+    behave_cscore cscorer(p2_bscore);
 
     hill_climbing hc;
     deme_expander dex(tt, clean_reduction(), clean_reduction(), cscorer, hc);

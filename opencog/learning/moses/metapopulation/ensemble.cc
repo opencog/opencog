@@ -35,17 +35,15 @@ namespace moses {
 using namespace combo;
 
 ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
-	_params(ep), _bcscorer(cs)
+	_params(ep), _bscorer(cs.get_bscorer())
 {
-	_booster = dynamic_cast<boosting_ascore*>(&(cs.get_ascorer()));
 	_effective_length = - cs.worst_possible_score();
 
 	// _tolerance is an estimate of the accumulated rounding error
 	// that arises when totaling the bscores.  As usual, assumes a
 	// normal distribution for this, so that its a square-root.
 	_tolerance = 2.0 * epsilon_score;
-	if (_booster)  // null if boosting not being used!
-		_tolerance *= sqrt(_booster->get_weights().size());
+	_tolerance *= sqrt(_bscorer.get_weights().size());
 }
 
 // Is this behavioral score correct? For boolean scores, correct is 0.0
@@ -67,8 +65,6 @@ static inline bool is_correct(score_t val)
  */
 void ensemble::add_candidates(scored_combo_tree_set& cands)
 {
-	OC_ASSERT(_booster, "Ensemble can only be used with a weighted scorer");
-
 	int promoted = 0;
 
 	// We need the length of the behavioral score, as normalization.
@@ -147,7 +143,7 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 			_scored_trees.insert(best);
 
 			// Clear out the scorer weights, to avoid down-stream confusion.
-			_booster->reset_weights();
+			_bscorer.reset_weights();
 
 			return;
 		}
@@ -173,7 +169,7 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 		// Recompute the weights
 		const behavioral_score& bs = best_p->get_bscore();
 		size_t bslen = bs.size();
-		std::vector<double>& weights = _booster->get_weights();
+		std::vector<double>& weights = _bscorer.get_weights();
 		double znorm = 0.0;
 		for (size_t i=0; i<bslen; i++)
 		{
@@ -248,8 +244,8 @@ const combo::combo_tree& ensemble::get_weighted_tree() const
  */
 score_t ensemble::flat_score() const
 {
-	behavioral_score bs = _bcscorer.get_bscore(_scored_trees);
-	return _flat_scorer(bs);
+	behavioral_score bs(_bscorer(_scored_trees));
+	return boost::accumulate(bs, 0.0);
 }
 
 

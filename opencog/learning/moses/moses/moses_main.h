@@ -349,7 +349,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
                              filter_params.n_subsample_fitnesses,
                              filter_params.low_dev_pressure,
                              filter_params.by_time);
-        behave_cscore ss_cscorer(ss_bscorer, c_scorer.get_ascorer());
+        behave_cscore ss_cscorer(ss_bscorer);
         metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
                                 ss_cscorer,
                                 opt_params, hc_params,

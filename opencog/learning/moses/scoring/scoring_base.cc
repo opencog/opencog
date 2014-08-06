@@ -24,6 +24,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <math.h>
+
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/irange.hpp>
 
@@ -115,10 +117,28 @@ bscore_base::get_error(const behavioral_score&) const
     return -1.0;
 }
 
-score_t simple_ascore::operator()(const behavioral_score& bs) const
+score_t bscore_base::score(const behavioral_score& bs) const
 {
-    return boost::accumulate(bs, 0.0);
+    // OC_ASSERT(bs.size() == _size, "Unexpected behavioral score size! "
+    //           " Got %d expected %d", bs.size(), _size);
+
+    // Hack (temporary?) to have variable size bscore work (without boost)
+    if (_size == 0)
+        return boost::accumulate(bs, 0.0);
+
+    score_t res = 0.0;
+    for (size_t i=0; i<_size; i++) {
+        res += _weights[i] * bs[i];
+    }
+
+    return res;
 }
+
+void bscore_base::reset_weights()
+{
+    _weights = std::vector<double>(_size, 1.0);
+}
+
 
 ////////////////////////
 // bscore_ctable_base //

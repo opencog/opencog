@@ -262,8 +262,7 @@ void ip_problem::run(option_base* ob)
     // same row in the ctable.
     OC_ASSERT(not pms.meta_params.do_boosting,
         "Boosting not supported for the ip problem!");
-    simple_ascore ascore;
-    behave_cscore mbcscore(bscore, ascore, pms.cache_size);
+    behave_cscore mbcscore(bscore, pms.cache_size);
     metapop_moses_results(pms.exemplars, tt,
                           *pms.bool_reduct, *pms.bool_reduct_rep, 
                           mbcscore,
@@ -311,8 +310,7 @@ void ann_table_problem::run(option_base* ob)
     // Boosing for contin values needs a whole bunch of new code.
     OC_ASSERT(not pms.meta_params.do_boosting,
         "Boosting not supported for the ann problem!");
-    simple_ascore ascore;
-    behave_cscore cscore(bscore, ascore, pms.cache_size);
+    behave_cscore cscore(bscore, pms.cache_size);
     metapop_moses_results(pms.exemplars, tt,
                           reduct::ann_reduction(), reduct::ann_reduction(),
                           cscore,
@@ -337,8 +335,7 @@ void ann_table_problem::run(option_base* ob)
     int as = alphabet_size(cand_type_signature, pms.ignore_ops);     \
     SCORER bscore ARGS ;                                             \
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio); \
-    boosting_ascore ascore(bscore.size());                           \
-    behave_cscore mbcscore(bscore, ascore, pms.cache_size);          \
+    behave_cscore mbcscore(bscore, pms.cache_size);                  \
     reduct::rule* reduct_cand = pms.bool_reduct;                     \
     reduct::rule* reduct_rep = pms.bool_reduct_rep;                  \
     /* Use the contin reductors for everything else */               \
@@ -392,8 +389,7 @@ void pre_table_problem::run(option_base* ob)
     // composite scores get cached and returned.
     if (pms.meta_params.do_boosting) pms.cache_size = 0;
 
-    boosting_ascore ascore(bscore.size());
-    behave_cscore mbcscore(bscore, ascore, pms.cache_size);
+    behave_cscore mbcscore(bscore, pms.cache_size);
     metapop_moses_results(pms.exemplars, cand_type_signature,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
                           mbcscore,

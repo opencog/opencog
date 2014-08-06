@@ -89,6 +89,32 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     /// than the min_improv(). Returns 0.0 by default.
     virtual score_t min_improv() const { return 0.0; }
 
+    /// Return the (weighted) sum of the behavioral score.
+    /// The score is calculated as a weighted sum of the bscore over
+    /// all samples:
+    ///      score = sum_x weight(x) * BScore(x)
+    ///
+    /// Each element in the bscore typically corresponds to a sample in
+    /// a supervised training set, that is, a row of a table contianing
+    /// the training data.  By default, the weight is 1.0 for each entry.
+    /// The intended use of the weights is for boosting, so that the
+    /// the score for erroneous rows can be magnified, such as in AdaBoost.
+    ///
+    /// See, for example, http://en.wikipedia.org/wiki/AdaBoost --
+    /// However, CAUTION! That wikipedia article currently (as of July
+    /// 2014) contains serious, fundamental mistakes in it's desciption
+    /// of the boosting algo!
+    virtual score_t score(const behavioral_score&) const;
+
+    /// A vector of per-bscore weights, used to tote up the behavioral
+    /// score into a single number.  This returns a reference, not const,
+    /// allowing them to be modified in-place.
+    // XXX TODO should be a std::valarray not a vector.
+    std::vector<double>& get_weights() { return _weights; }
+
+    /// Reset the weights.
+    void reset_weights();
+
     /// Return the amount by which the bscore differs from a perfect
     /// score.  This is used by the boosting algorithm to weight the
     /// a scored combo tree.
@@ -188,6 +214,7 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
 protected:
     score_t _complexity_coef;
     mutable size_t _size; // mutable to work around const bugs
+    std::vector<double> _weights;
 };
 
 /// Base class for fitness functions that use a ctable. Provides useful
@@ -238,26 +265,6 @@ protected:
     mutable count_t _ctable_weight;  // Total weight of all rows in table.
 
     void recompute_weight() const;   // recompute _ctable_weight
-};
-
-/// Abstract base class for summing behavioral scores.
-// XXX TODO FIXME: this should probably be completely removed,
-// and replaced by boosting_ascore everywhere, and boosting_ascore
-// should probably be renamed to weighted_score or something like
-// that ... in particular, simple_ascore should be killed.
-struct ascore_base : public std::unary_function<combo_tree, composite_score>
-{
-    /// Sum up the behavioral score
-    virtual score_t operator()(const behavioral_score&) const = 0;
-
-    virtual ~ascore_base(){}
-};
-
-/// Simplest ascore, it just totals up the bscore.
-struct simple_ascore : ascore_base
-{
-    /// Sum up the behavioral score
-    virtual score_t operator()(const behavioral_score&) const;
 };
 
 // helper to log a combo_tree and its behavioral score

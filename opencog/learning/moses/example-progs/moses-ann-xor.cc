@@ -63,8 +63,7 @@ int main(int argc, char** argv)
 
     // binary XOR task
     ann_xor_bscore bscore;
-    simple_ascore ascorer;
-    behave_cscore cscorer(bscore, ascorer);
+    behave_cscore cscorer(bscore);
 
     const reduct::rule* si = &(ann_reduction());
     if(!reduce)

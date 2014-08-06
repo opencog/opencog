@@ -27,7 +27,7 @@
 #include "ensemble_params.h"
 #include "../moses/types.h"  // for scored_combo_tree
 #include "../scoring/behave_cscore.h"
-#include "../scoring/boosting_ascore.h"
+#include "../scoring/scoring_base.h"
 
 namespace opencog {
 namespace moses {
@@ -75,9 +75,7 @@ public:
 
 private:
     const ensemble_parameters& _params;
-    behave_cscore& _bcscorer;
-    boosting_ascore* _booster;
-    simple_ascore _flat_scorer;
+    bscore_base& _bscorer;
     double _effective_length;
     double _tolerance;
 

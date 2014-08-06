@@ -56,14 +56,13 @@ struct dummy_optimization : public optimizer_base
 
 class metapopulationUTest : public CxxTest::TestSuite
 {
-    simple_ascore _asc;
     dummy_bscore _dbsc;
     behave_cscore _csc;
     metapopulation _metapopulation;
 
 public:
     metapopulationUTest()
-        : _asc(), _dbsc(), _csc(_dbsc, _asc),
+        : _dbsc(), _csc(_dbsc),
           _metapopulation(combo_tree(), _csc)
     {
         logger().setPrintToStdoutFlag(true);
