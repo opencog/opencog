@@ -458,7 +458,9 @@ Notes:
 
 
 ===============
-The bug below got fixed.
+The bug below got fixed. The fix is to always score relative to the
+best-possible score.
+
 Since there are 329 rows, this means 329-51 = 278 rows, half of which
 are 278/2 = 139 which is what the ensemble scorer needs to beat.
 
@@ -501,9 +503,20 @@ We need:
       
 However, above is wrong because -very-best needs to be rescaled too..
 
+===========================
 
+Precision scoring
+-----------------
+Results for the Hpre scorer, using the same datasets as above.
+The results are pathetic.
 
-moses -Hpre -q0.05 -Y val -itests/learning/moses/preselect.csv
+   moses -Hpre -q0.05 -Yval -ipreselect.csv
 
+     num_evals  preselect       no-dupe       
+                      (time)       (time)  
+     --------- --------------   ---------
+        10K    0.6164 (0m6s)    0.6265 (0m6s)
+        40K    0.6353 (1m14s)   0.6265 (1m18s)
+       160K    0.6164 (1m14s)
 
 
