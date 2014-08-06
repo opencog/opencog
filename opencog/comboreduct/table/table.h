@@ -488,8 +488,8 @@ struct TimedValue :
 
 };
 
-// How to count timed inputs. The type is double to work weighted
-// features
+// How to count timed inputs. The type is double, so that this will
+// work with weighted features.
 typedef double count_t;
 
 struct TimedCounter : public Counter<TimedValue, count_t> {

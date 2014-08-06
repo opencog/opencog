@@ -22,9 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <iomanip>
 #include <ctype.h>
+#include <math.h>
 #include <stdlib.h>
+
+#include <iomanip>
 
 #include <boost/range/algorithm/for_each.hpp>
 #include <boost/range/algorithm/transform.hpp>
@@ -722,7 +724,15 @@ void CTable::remove_rows(const set<unsigned>& idxs)
     for (auto row_it = begin();
          row_it != end() and idx_it != idxs.end();) {
         auto& outputs = row_it->second;
-        unsigned i_end = i + outputs.total_count();
+// XXX this cannot possibly be correct, the total count is in general
+// a fraction, not an integer; it is merely the sum of the weights
+// of the rows. It is NOT equal to the toal number of rows!
+// I cannot figure out what this algo is trying to do, so I can't
+// actually fix it :-(
+        count_t total_row_weights = outputs.total_count();
+        count_t truncate = floor(total_row_weights);
+OC_ASSERT(0.0 == (total_row_weights - truncate), "This algo is broken!");
+        unsigned i_end = i + ((unsigned) truncate);
         if (i <= *idx_it and *idx_it < i_end) {
             for (auto v_it = outputs.begin();
                  v_it != outputs.end() and idx_it != idxs.end();) {
