@@ -85,7 +85,6 @@ public:
     void reset_estimator();
 
 private:
-    struct ascore_base *ascore;
     struct petaverse_bscore *bscore;
     struct behave_cscore *cscore;
     struct hill_climbing *climber;

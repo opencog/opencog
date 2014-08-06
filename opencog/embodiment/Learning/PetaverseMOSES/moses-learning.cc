@@ -79,9 +79,8 @@ moses_learning::moses_learning(int nepc,
     for (combo_tree_ns_set_it i = actions.begin(); i != actions.end(); ++i)
         std::cout << "action: " << *i << std::endl;
 
-    ascore = new simple_ascore();
     bscore = new petaverse_bscore(_fitness_estimator);
-    cscore = new behave_cscore(*bscore, *ascore);
+    cscore = new behave_cscore(*bscore);
     climber = new hill_climbing;
     _demeparms = new deme_parameters;
     _metaparms = new metapop_parameters;
@@ -104,7 +103,6 @@ moses_learning::~moses_learning()
 {
     delete cscore;
     delete bscore;
-    delete ascore;
     delete climber;
     if (_dex)
         delete _dex;
@@ -331,11 +329,9 @@ void moses_learning::reset_estimator()
 
     delete cscore;
     delete bscore;
-    delete ascore;
 
-    ascore = new simple_ascore();
     bscore = new petaverse_bscore(_fitness_estimator);
-    cscore = new behave_cscore(*bscore, *ascore); 
+    cscore = new behave_cscore(*bscore); 
 
     //we get restarted from the best program so far
     _center = (_best_program.empty() ? _best_program_estimated : _best_program);
