@@ -161,8 +161,8 @@ select_bscore::select_bscore(const CTable& ctable,
  * selection scorer, indicates if a row is inside or outside of the
  * selection range.
  *
- * If the boolean tree predicts that a row is inside/outside the
- * selection range, then scorer reqards this with a score of zero.
+ * If the boolean tree correctly predicts that a row is inside/outside
+ * the selection range, then scorer rewards this with a score of zero.
  * Otherwise, the score is minus the weight of that row.
  */
 behavioral_score select_bscore::operator()(const combo_tree& tr) const
@@ -315,7 +315,9 @@ behavioral_score select_bscore::worst_possible_bscore() const
     return bs;
 }
 
-
+// XXX This is not quite right, for weighted rows.  A row with a small
+// weight could result in a much small min-improv. 
+// (But I think boosting should not affect min-improv, right?)
 score_t select_bscore::min_improv() const
 {
     return 1.0 / _ctable_usize;

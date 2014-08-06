@@ -533,3 +533,19 @@ the plain  preselect column uses -v45 -z350
 Results might improve with additional tuning; but this requires
 averaging over multiple random seeds.
 
+-------------------------
+General strategy:
+
+current scorer:
+  if row picked, sum the outputs (= 0.5 *pos - neg)
+  active += pos+neg (weighted correctly)
+
+  row score = sum of outputs / total weight of selected.
+
+best-possible-score:
+   tree picks only rows that are true positives, never picks
+   rows that are true negatives.
+
+   Ergo, this should be 1/total active weight
+
+
