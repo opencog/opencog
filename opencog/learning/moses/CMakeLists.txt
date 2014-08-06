@@ -43,7 +43,7 @@ ADD_LIBRARY (moses SHARED STATIC
 	metapopulation/merging
 	metapopulation/metapopulation
 	metapopulation/metapop_params
-    metapopulation/subsample
+	metapopulation/subsample
 
 	moses/complexity
 	moses/distributed_moses
@@ -66,13 +66,12 @@ ADD_LIBRARY (moses SHARED STATIC
 	representation/representation
 
 	scoring/behave_cscore
-	scoring/boosting_ascore
 	scoring/bscores
 	scoring/discriminating_bscore
 	scoring/precision_bscore
 	scoring/bscores
-    scoring/time_dispersion
-    scoring/ss_bscore
+	scoring/time_dispersion
+	scoring/ss_bscore
 	scoring/scoring_base
 	scoring/select_bscore
 

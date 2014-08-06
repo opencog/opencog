@@ -123,7 +123,6 @@ class partial_solver
         moses_parameters _moses_params;
         const metapop_printer& _printer;
 
-        ascore_base *_ascore;
         // typedef enum_filter_bscore BScore;
         // typedef enum_graded_bscore BScore;
         typedef enum_effective_bscore BScore;

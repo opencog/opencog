@@ -77,9 +77,8 @@ int main(int argc, char** argv)
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(), id::action_result_type, 1);
 
-    simple_ascore ascorer;
     interactive_bscore bscorer;
-    behave_cscore cscorer(bscorer, ascorer);
+    behave_cscore cscorer(bscorer);
     hill_climbing climber;
 
     combo_tree_ns_set perceptions;

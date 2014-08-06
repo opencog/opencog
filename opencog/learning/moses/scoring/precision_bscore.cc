@@ -51,60 +51,60 @@ using namespace combo;
 /// This scorer supports both boolean-valued data tables, and contin-
 /// valued tables.  The scoring is slightly different for each.  First,
 /// the scoring of boolean-valued tables is described.
-/// 
+///
 /// The combo tree given to the scorer below is always assumed to be a
 /// binary-valued tree, which either selects a row, or does not.  If the
 /// row is selected, then it is said to be "activated".  We then define:
-/// 
+///
 ///    tp == true-positive, a row that is 'activated' and row has value 1
 ///    fp == false-positive, a row that is 'activated' and row has value 0
-/// 
+///
 /// and similarly
-/// 
+///
 ///    #tp == +1 if it is a tp row, else 0
-///    #fp == -1 if it is an fp row, else 0 
-/// 
+///    #fp == -1 if it is an fp row, else 0
+///
 /// In addition, define:
-/// 
+///
 ///    TP == total number of tp rows
 ///    FP == total number of fp rows.
 ///    AC == TP + FP, the total number of "activated" rows.
-/// 
+///
 /// Note that, with the above definition of #tp and #fp, that summing
 /// #tp over all rows gives TP, but that summing #fp over all rows
 /// gives -FP.
-/// 
+///
 /// Each element of the behavioral score is then given a value of
-/// 
+///
 ///    0.5 * (#tp + #fp) / (TP+FP)    if the row is "activated"
 ///    0  (zero)                      if the row is not "activated"
-/// 
+///
 /// If the above were to be summed over all rows, one would obtain
 /// a total score of
-/// 
+///
 ///    0.5 * (TP-FP)/(TP+FP) == TP/(TP+FP) - 0.5
 ///                          == precision - 0.5
-/// 
+///
 /// Notice the extra 0.5 -- to compensate for this, the behavioral
 /// score gets an extra 'phantom' row tacked on, which has a value
 /// of +0.5, so that the resulting composite score always contains
 /// the precision.
-/// 
+///
 /// This scorer also uses a penalty mechanism to make sure that the
 /// activation stays above a minimum value. See get_activation_penaly()
 /// for details.
-/// 
+///
 /// This scorer also supports contin-valued tables.  In this case, the
 /// combo tree is still treated as described above: it is boolean, and
 /// either "activates" a row, or it does not.  However, the scoring is
 /// now different.  Each row is now given the score
-/// 
+///
 ///    val/AC    if the row is activated
 ///    0.0       if the row is not activated
-/// 
-/// where "val" is the contin-value of the table row, and AC is the 
+///
+/// where "val" is the contin-value of the table row, and AC is the
 /// total number of activated rows.
-/// 
+///
 /// The above only descirbes the "precision_full_bscore" (default)
 /// scoring; something else is done when precision_full_bscore is
 /// set to false.  TBD XXX document that someday.
@@ -126,27 +126,23 @@ precision_bscore::precision_bscore(const CTable& ctable_,
     activation_pressure(activation_pressure_), positive(positive_),
     time_bscore(time_bscore_)
 {
-    output_type = _wrk_ctable.get_output_type();
-    if (output_type == id::boolean_type) {
-        // For boolean tables, sum the total number of 'T' values
-        // in the output.  This sum represents the best possible score
-        // i.e. we found all of the true values correcty.  Count
-        // 'F' is 'positive' is false.
-        vertex target = bool_to_vertex(positive),
-            neg_target = negate_vertex(target);
-        sum_outputs = [this, target, neg_target](const CTable::counter_t& c)
-            -> score_t
-        {
-            return ((int)c.get(target) - (int)c.get(neg_target)) * 0.5;
-        };
-    } else {
-        OC_ASSERT(false, "Precision scorer, unsupported output type");
-    }
+    reset_weights();
 
-    logger().fine("Precision scorer, activation_pressure = %f, "
+    // _target will be either id::logical_true, or id::logical_false
+    _target = bool_to_vertex(positive);
+    _neg_target = negate_vertex(_target);
+
+    output_type = _wrk_ctable.get_output_type();
+    OC_ASSERT(output_type == id::boolean_type,
+        "Error: Precision scorer: output type must be boolean!");
+
+    logger().fine("Precision scorer, "
+                  "total table weight = %f, "
+                  "activation_pressure = %f, "
                   "min_activation = %f, "
                   "max_activation = %f, "
                   "dispersion_pressure = %f",
+                  _ctable_weight,
                   activation_pressure, min_activation, max_activation,
                   dispersion_pressure);
 
@@ -159,6 +155,15 @@ precision_bscore::precision_bscore(const CTable& ctable_,
               "than or equal to the minimum activation.\n");
 }
 
+/// For boolean tables, sum the total number of 'T' values
+/// in the output.  This sum represents the best possible score
+/// i.e. we found all of the true values correcty.  Count
+/// 'F' is 'positive' is false.
+score_t precision_bscore::sum_outputs(const CTable::counter_t& c) const
+{
+    return 0.5 * (c.get(_target) - c.get(_neg_target));
+}
+
 void precision_bscore::set_complexity_coef(unsigned alphabet_size, float p)
 {
     _complexity_coef = 0.0;
@@ -167,7 +172,7 @@ void precision_bscore::set_complexity_coef(unsigned alphabet_size, float p)
     // comment above ctruth_table_bscore)
     if (p > 0.0f and p < 0.5f)
         _complexity_coef = discrete_complexity_coef(alphabet_size, p)
-            / _ctable_usize;     // normalized by the size of the table
+            / _ctable_weight;   // normalized by the size of the table
                                 // because the precision is normalized
                                 // as well
 
@@ -192,7 +197,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     // Initial precision. No hits means perfect precision :)
     // Yes, zero hits is common, early on.
     score_t precision = 1.0;
-    unsigned active = 0;   // total number of active outputs by tr
+    score_t active = 0.0;  // total weight of active outputs by tr
     score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
 
     interpreter_visitor iv(tr);
@@ -208,7 +213,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     //
     // 3. Otherwise build CTable holding the results for dispersion
     // penalty
-    map<TTable::value_type, Counter<bool, unsigned>> time2res;
+    map<TTable::value_type, Counter<bool, count_t>> time2res;
     CTable ctable_res;
     for (const CTable::value_type& io_row : _wrk_ctable) {
         const auto& irow = io_row.first;
@@ -227,7 +232,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
             for (const CTable::counter_t::value_type& tcv : orow) {
                 bool target = vertex_to_bool(tcv.first.value);
                 if (!positive) target = !target;
-                unsigned count = result == id::logical_true ? tcv.second : 0;
+                count_t count = result == id::logical_true ? tcv.second : 0.0;
                 time2res[tcv.first.timestamp][target] += count;
             }
         } else {
@@ -248,9 +253,9 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     // Fill un-normalized bscore spread over the temporal axis
     if (time_bscore) {
         for (const auto& v : time2res) {
-            unsigned tp = v.second.get(true),
-                fp = v.second.get(false);
-            score_t contribution = 0.5 * ((int)tp - (int)fp);
+            count_t tp = v.second.get(true);
+            count_t fp = v.second.get(false);
+            score_t contribution = 0.5 * (tp - fp);
             bs.push_back(contribution);
         }
     }
@@ -288,7 +293,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     // i.e. the sum of all positives.   For contin tables, the activation
     // is likewise: the number of rows for which the combo tree returned
     // true (positive).
-    score_t activation = (score_t)active / _ctable_usize;
+    score_t activation = active / _ctable_weight;
     score_t activation_penalty = get_activation_penalty(activation);
     bs.push_back(activation_penalty);
     if (logger().isFineEnabled()) {
@@ -308,6 +313,22 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
+/// scorer, suitable for use with boosting.
+behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensemble) const
+{
+    behavioral_score bs (_size, 0);
+logger().info() <<"duuude olaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    return bs;
+}
+
+score_t precision_bscore::get_error(const behavioral_score& bs) const
+{
+    score_t sc = 1.0 - score(bs);
+logger().info() <<"duuude precision err: " << sc;
+    sc = fmin(sc, 0.0);
+    return sc;
+}
+
 behavioral_score precision_bscore::best_possible_bscore() const
 {
     // For each row, compute the maximum precision it can get.
@@ -318,14 +339,15 @@ behavioral_score precision_bscore::best_possible_bscore() const
     // (which is the case).
     typedef std::multimap<contin_t,           // precision
                           std::pair<contin_t, // sum_outputs
-                                    unsigned> // total count
+                                    count_t> // total count
                           > max_precisions_t;
     max_precisions_t max_precisions;
     for (CTable::const_iterator it = _wrk_ctable.begin();
-         it != _wrk_ctable.end(); ++it) {
+         it != _wrk_ctable.end(); ++it)
+    {
         const CTable::counter_t& c = it->second;
-        double sumo = sum_outputs(c);
-        unsigned total = c.total_count();
+        count_t sumo = sum_outputs(c);
+        count_t total = c.total_count();
         double precision = sumo / total;
 
         // for debugging, keep that around till we fix best_possible_bscore
@@ -342,7 +364,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
     // reason we keep going until min_activation is reached. At the
     // end we keep the best score (considering both precision and
     // activation penalty at each step).
-    unsigned active = 0;
+    count_t active = 0.0;
     score_t sao = 0.0,
         best_sc = very_worst_score,
         best_precision = 0.0,
@@ -364,10 +386,10 @@ behavioral_score precision_bscore::best_possible_bscore() const
         //
         // So before adding the recall penalty we add 0.5 to
         // compensate for that
-        score_t precision = (sao / active) + 0.5,
-            activation = active / (score_t)_ctable_usize,
-            activation_penalty = get_activation_penalty(activation),
-            sc = precision + activation_penalty;
+        score_t precision = (sao / active) + 0.5;
+        score_t activation = active / _ctable_weight;
+        score_t activation_penalty = get_activation_penalty(activation);
+        score_t sc = precision + activation_penalty;
 
         // update best score
         if (sc > best_sc) {
@@ -381,14 +403,14 @@ behavioral_score precision_bscore::best_possible_bscore() const
         // logger().fine("sao = %g, active = %u, precision = %g, activation = %g, activation_penalty = %g, sc = %g, best_sc = %g, best_precision = %g, best_activation = %g, best_activation_penalty = %g", sao, active, precision, activation, activation_penalty, sc, best_sc, best_precision, best_activation, best_activation_penalty);
 
         // halt if min_activation is reached
-        if (_ctable_usize * min_activation <= active)
+        if (_ctable_weight * min_activation <= active)
             break;
     }
 
-    logger().fine("Precision scorer, best score = %f", best_sc);
-    logger().fine("precision at best score = %f", best_precision);
-    logger().fine("activation at best score = %f", best_activation);
-    logger().fine("activation penalty at best score = %f", best_activation_penalty);
+    logger().debug("Precision scorer, best score = %f", best_sc);
+    logger().debug("precision at best score = %f", best_precision);
+    logger().debug("activation at best score = %f", best_activation);
+    logger().debug("activation penalty at best score = %f", best_activation_penalty);
 
     // @todo it's not really the best bscore but rather the best score
     return {best_sc};
@@ -396,9 +418,21 @@ behavioral_score precision_bscore::best_possible_bscore() const
 
 behavioral_score precision_bscore::worst_possible_bscore() const
 {
-    // Make an attempt too at least return the correct length
-    double bad = very_worst_score / ((double) _orig_ctable.size() + 1);
-    return behavioral_score(_orig_ctable.size(), bad);
+    // The worst possible score would occur if the scorer selected
+    // only the negative rows, and makred them all as possitive.
+    behavioral_score bs;
+    for (const CTable::value_type& vct : _wrk_ctable) {
+        const CTable::counter_t& cnt = vct.second;
+
+        // The most that the score can improve is to flip true to false,
+        // or v.v. The worst score is to get the majority wrong.  This
+        // workes correctly even for weighted tables, where the counts
+        // could be arbitrary float-point values.
+        score_t w = fabs (cnt.get(id::logical_true) -
+                          cnt.get(id::logical_false));
+        bs.push_back(-w);
+    }
+    return bs;
 }
 
 // Note that the logarithm is always negative, so this method always
@@ -407,7 +441,7 @@ score_t precision_bscore::get_activation_penalty(score_t activation) const
 {
     score_t dst = 0.0;
     if (activation < min_activation)
-        dst = 1.0 - activation/min_activation;
+        dst = 1.0 - activation / min_activation;
 
     if (max_activation < activation)
         dst = (activation - max_activation) / (1.0 - max_activation);
@@ -418,7 +452,7 @@ score_t precision_bscore::get_activation_penalty(score_t activation) const
 
 score_t precision_bscore::min_improv() const
 {
-    return 1.0 / _ctable_usize;
+    return 1.0 / _ctable_weight;
 }
 
 combo_tree precision_bscore::gen_canonical_best_candidate() const
@@ -433,13 +467,14 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
     // (which is planned).
     typedef std::multimap<double, // precision
                           std::pair<CTable::const_iterator,
-                                    unsigned> // total count
+                                    count_t> // total count
                           > precision_to_count_t;
     precision_to_count_t ptc;
     for (CTable::const_iterator it = _wrk_ctable.begin();
-         it != _wrk_ctable.end(); ++it) {
+         it != _wrk_ctable.end(); ++it)
+    {
         const CTable::counter_t& c = it->second;
-        unsigned total = c.total_count();
+        count_t total = c.total_count();
         double precision = sum_outputs(c) / total;
         ptc.insert(std::make_pair(precision, std::make_pair(it, total)));
     }
@@ -453,7 +488,7 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
     // anyway, so it's an acceptable inacurracy.  (It would be a
     // problem only if activation constraint is very loose.)
     //
-    unsigned active = 0;
+    count_t active = 0.0;
     combo_tree tr;
     auto head = tr.set_head(id::logical_or);
     reverse_foreach (const auto& v, ptc) {
@@ -468,7 +503,7 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
         }
 
         // termination conditional
-        if (_ctable_usize * min_activation <= active)
+        if (_ctable_weight * min_activation <= active)
             break;
     }
     return tr;
@@ -520,7 +555,7 @@ behavioral_score precision_conj_bscore::operator()(const combo_tree& tr) const
     behavioral_score bs;
 
     // compute active and sum of all active outputs
-    unsigned active = 0;   // total number of active outputs by tr
+    count_t active = 0.0;  // total weight of active outputs by tr
     score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
     interpreter_visitor iv(tr);
     auto interpret_tr = boost::apply_visitor(iv);
@@ -529,7 +564,7 @@ behavioral_score precision_conj_bscore::operator()(const combo_tree& tr) const
         // vct.second = counter of outputs
         if (interpret_tr(vct.first.get_variant()) == id::logical_true) {
             double sumo = sum_outputs(vct.second);
-            unsigned totalc = vct.second.total_count();
+            count_t totalc = vct.second.total_count();
             // For boolean tables, sao == sum of all true positives,
             // and active == sum of true+false positives.
             sao += sumo;

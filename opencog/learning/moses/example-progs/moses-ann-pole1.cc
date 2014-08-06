@@ -82,8 +82,7 @@ int main(int argc, char** argv)
 
     //SINGLE MARKOVIAN POLE TASK
     ann_pole_bscore p_bscore; 
-    simple_ascore ascorer;
-    behave_cscore cscorer(p_bscore, ascorer);
+    behave_cscore cscorer(p_bscore);
 
     univariate_optimization optim_algo;
     deme_expander dex(tt, *si,  *si, cscorer, optim_algo);

@@ -67,7 +67,7 @@ using namespace boost::accumulators;
 behavioral_score logical_bscore::operator()(const combo_tree& tr) const
 {
     combo::complete_truth_table tt(tr, _arity);
-    behavioral_score bs(_target.size());
+    behavioral_score bs(_size);
 
     // Compare the predictions of the tree to that of the desired
     // result. A correct prdiction gets a score of 0, an incorrect
@@ -84,15 +84,13 @@ behavioral_score logical_bscore::operator()(const combo_tree& tr) const
 /// compared to the desired output.
 behavioral_score logical_bscore::operator()(const scored_combo_tree_set& ensemble) const
 {
-    size_t sz = _target.size();
-
     // Step 1: accumulate the weighted prediction of each tree in
     // the ensemble.
-    behavioral_score hypoth(sz);
+    behavioral_score hypoth(_size);
     for (const scored_combo_tree& sct: ensemble) {
         combo::complete_truth_table tt(sct.get_tree(), _arity);
         score_t weight = sct.get_weight();
-        for (size_t i=0; i<sz; i++) {
+        for (size_t i=0; i<_size; i++) {
             // Add +1 if prediction is true and -1 if prediction is false.
             // We could gain some minor performance improvement if we
             // moved this out of the loop, but who cares, this scorer is
@@ -105,7 +103,7 @@ behavioral_score logical_bscore::operator()(const scored_combo_tree_set& ensembl
     // result. The array "hypoth" is positive to predict true, and
     // negative to predict false.  The resulting score is 0 if correct,
     // and -1 if incorrect.
-    behavioral_score bs(sz);
+    behavioral_score bs(_size);
     boost::transform(hypoth, _target, bs.begin(),
         [](score_t hyp, bool b2) {
             bool b1 = (hyp > 0.0) ? true : false;
@@ -116,17 +114,23 @@ behavioral_score logical_bscore::operator()(const scored_combo_tree_set& ensembl
 
 behavioral_score logical_bscore::best_possible_bscore() const
 {
-    return behavioral_score(_target.size(), 0);
+    return behavioral_score(_size, 0);
 }
 
 behavioral_score logical_bscore::worst_possible_bscore() const
 {
-    return behavioral_score(_target.size(), -1);
+    return behavioral_score(_size, -1);
 }
 
 score_t logical_bscore::min_improv() const
 {
     return 0.5;
+}
+
+score_t logical_bscore::get_error(const behavioral_score& bs) const
+{
+    // Its minus the score: 0.0 is perfect score, 1.0 is worst score.
+    return - score(bs) / ((score_t) _size);
 }
 
 ///////////////////

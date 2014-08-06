@@ -31,6 +31,7 @@
 namespace opencog { namespace moses {
 
 using combo::CTable;
+using combo::count_t;
 using combo::type_node;
 
 /**
@@ -115,6 +116,8 @@ struct precision_bscore : public bscore_ctable_time_dispersion
                      TemporalGranularity granularity = TemporalGranularity::day);
 
     behavioral_score operator()(const combo_tree& tr) const;
+    behavioral_score operator()(const scored_combo_tree_set&) const;
+    score_t get_error(const behavioral_score&) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
@@ -157,15 +160,15 @@ protected:
 
     bool time_bscore;           // whether the bscore is spread over
                                 // the temporal axis
-
     type_node output_type;
 
 private:
+    vertex _target, _neg_target; // same as positive
     score_t get_activation_penalty(score_t activation) const;
 
     // function to calculate the total weight of the observations
     // associated to an input vector
-    std::function<score_t(const CTable::counter_t&)> sum_outputs;
+    score_t sum_outputs(const CTable::counter_t&) const;
 };
 
 /**

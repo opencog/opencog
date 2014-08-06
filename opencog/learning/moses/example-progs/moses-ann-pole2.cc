@@ -82,8 +82,7 @@ int main(int argc, char** argv)
         si = &(clean_reduction());
     
     ann_pole2_bscore p2_bscore; 
-    simple_ascore ascorer;
-    behave_cscore cscorer(p2_bscore, ascorer);
+    behave_cscore cscorer(p2_bscore);
 
     univariate_optimization univ;
     deme_expander dex(tt, *si, *si, cscorer, univ);

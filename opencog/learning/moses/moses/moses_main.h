@@ -141,9 +141,11 @@ struct metapop_printer
             }
 
         } else {
-            // scored_combo_tree_ptr_set keeps the trees in score-sorted
-            // order. We want this, so that we can print them out in this
-            // order.
+            // scored_combo_tree_ptr_set keeps the trees in penalized-
+            // score-sorted order. We want this, so that we can print
+            // them out in this order.  Note, however, the printed scores
+            // are the raw scores, not the penalized scores, so the
+            // results can seem out-of-order.
             scored_combo_tree_ptr_set tree_set;
             if (output_only_best) {
                 for (const scored_combo_tree& sct : metapop.best_candidates())
@@ -347,7 +349,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
                              filter_params.n_subsample_fitnesses,
                              filter_params.low_dev_pressure,
                              filter_params.by_time);
-        behave_cscore ss_cscorer(ss_bscorer, c_scorer.get_ascorer());
+        behave_cscore ss_cscorer(ss_bscorer);
         metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
                                 ss_cscorer,
                                 opt_params, hc_params,

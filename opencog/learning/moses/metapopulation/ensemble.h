@@ -24,9 +24,10 @@
 #ifndef _OPENCOG_ENSEMBLE_H
 #define _OPENCOG_ENSEMBLE_H
 
+#include "ensemble_params.h"
 #include "../moses/types.h"  // for scored_combo_tree
 #include "../scoring/behave_cscore.h"
-#include "../scoring/boosting_ascore.h"
+#include "../scoring/scoring_base.h"
 
 namespace opencog {
 namespace moses {
@@ -41,7 +42,7 @@ namespace moses {
  * also holds a collection of combo trees. However, the metapopulation
  * is meant to do something different: to provide the 'breeding stock'
  * for deme expansion and optimization.  Therefore, the metapopulation
- * management policy is different from the ensemble, although it is 
+ * management policy is different from the ensemble, although it is
  * likely that the two will hold similar contents. The ensemble is
  * intended for inference; the metapopulation for breeding.
  *
@@ -55,16 +56,6 @@ namespace moses {
  * kind-of coming along for the ride, because that's easier for now.
  * Someday, it should have an independent existance.
  */
-
-struct ensemble_parameters
-{
-	ensemble_parameters() :
-		num_to_promote(1)
-	{}
-
-	int num_to_promote;  // max number of demes to accept into ensemble,
-	                     // per learning iteration.
-};
 
 class ensemble
 {
@@ -84,9 +75,7 @@ public:
 
 private:
     const ensemble_parameters& _params;
-    behave_cscore& _bcscorer;
-    boosting_ascore* _booster;
-    simple_ascore _flat_scorer;
+    bscore_base& _bscorer;
     double _effective_length;
     double _tolerance;
 

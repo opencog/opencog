@@ -24,6 +24,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <math.h>
+
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/irange.hpp>
 
@@ -107,10 +109,36 @@ complexity_t bscore_base::get_complexity(const scored_combo_tree_set& ensemble) 
     return (complexity_t) floor (cpxy / norm + 0.5);
 }
 
-score_t simple_ascore::operator()(const behavioral_score& bs) const
+score_t
+bscore_base::get_error(const behavioral_score&) const
 {
-    return boost::accumulate(bs, 0.0);
+    OC_ASSERT(false, "score error not implemented for bscorer %s",
+        typeid(*this).name());
+    return -1.0;
 }
+
+score_t bscore_base::score(const behavioral_score& bs) const
+{
+    // OC_ASSERT(bs.size() == _size, "Unexpected behavioral score size! "
+    //           " Got %d expected %d", bs.size(), _size);
+
+    // Hack (temporary?) to have variable size bscore work (without boost)
+    if (_size == 0 or _weights.size() == 0)
+        return boost::accumulate(bs, 0.0);
+
+    score_t res = 0.0;
+    for (size_t i=0; i<_size; i++) {
+        res += _weights[i] * bs[i];
+    }
+
+    return res;
+}
+
+void bscore_base::reset_weights()
+{
+    _weights = std::vector<double>(_size, 1.0);
+}
+
 
 ////////////////////////
 // bscore_ctable_base //
@@ -122,6 +150,19 @@ bscore_ctable_base::bscore_ctable_base(const CTable& ctable)
       _ctable_usize(_orig_ctable.uncompressed_size())
 {
     _size = ctable.size();
+    recompute_weight();
+}
+
+void bscore_ctable_base::recompute_weight() const
+{
+    // Sum of all of the weights in the working table.
+    // Note that these weights can be fractional!
+    _ctable_weight = 0.0;
+    for (const CTable::value_type& vct : _wrk_ctable) {
+        const CTable::counter_t& cnt = vct.second;
+
+        _ctable_weight += cnt.total_count();
+    }
 }
 
 void bscore_ctable_base::ignore_cols(const std::set<arity_t>& idxs) const
@@ -141,6 +182,7 @@ void bscore_ctable_base::ignore_cols(const std::set<arity_t>& idxs) const
 
     // Filter orig_table with permitted idxs.
     _wrk_ctable = _orig_ctable.filtered_preserve_idxs(permitted_idxs);
+    recompute_weight();
 
     // for debugging, keep that around till we fix best_possible_bscore
     // fully_filtered_ctable = _orig_ctable.filtered(permitted_idxs);
@@ -176,6 +218,7 @@ void bscore_ctable_base::ignore_rows(const std::set<unsigned>& idxs) const
     _wrk_ctable.remove_rows(idxs);
     _ctable_usize = _wrk_ctable.uncompressed_size();
     _size = _wrk_ctable.size();
+    recompute_weight();
 
     // if (logger().isFineEnabled())
     //     logger().fine() << "New _wrk_ctable compressed size = " << _wrk_ctable.size()
@@ -197,6 +240,7 @@ void bscore_ctable_base::ignore_rows_at_times(const std::set<TTable::value_type>
     _wrk_ctable.remove_rows_at_times(timestamps);
     _ctable_usize = _wrk_ctable.uncompressed_size();
     _size = _wrk_ctable.size();
+    recompute_weight();
 
     // if (logger().isFineEnabled())
     //     logger().fine() << "New _wrk_ctable compressed size = " << _wrk_ctable.size()

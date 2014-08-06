@@ -90,8 +90,7 @@ int main(int argc,char** argv)
     // See the diary for the complexity ratio.
     double complexity_ratio = 0.16;
     bscorer.set_complexity_coef(complexity_ratio);
-    simple_ascore ascorer;
-    behave_cscore cscorer(bscorer, ascorer);
+    behave_cscore cscorer(bscorer);
 
     combo_tree_ns_set perceptions;
     combo_tree_ns_set actions;

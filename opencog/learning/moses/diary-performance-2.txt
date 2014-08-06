@@ -458,7 +458,9 @@ Notes:
 
 
 ===============
-The bug below got fixed.
+The bug below got fixed. The fix is to always score relative to the
+best-possible score.
+
 Since there are 329 rows, this means 329-51 = 278 rows, half of which
 are 278/2 = 139 which is what the ensemble scorer needs to beat.
 
@@ -501,9 +503,49 @@ We need:
       
 However, above is wrong because -very-best needs to be rescaled too..
 
+===========================
 
+Precision scoring
+-----------------
+Results for the Hpre scorer, using the same datasets as above.
 
-moses -Hpre -q0.05 -Y val -itests/learning/moses/preselect.csv
+Results depend sharply on the complexity ratio and the temperature,
+a quick sniff test shows: -z150 for the ratio and -v25 for the
+temperature seem to work very well for preselect-no-dupe.csv and
 
+-z350 -v45 for preselect.csv
+
+   moses -Hpre -q0.05 -Yval -ipreselect.csv
+
+Max attainable precision on preselect.csv should be: 
+(329-50)/329 = 0.848024
+  
+
+     num_evals  preselect       no-dupe       
+                      (time)       (time)  
+     --------- --------------   ---------
+        10K    0.78476 (0m14s)  1.0 (0m2s)
+        40K    0.78947 (3m31s)
+
+Above: the no-dupe column uses -v25 -z150
+the plain  preselect column uses -v45 -z350
+
+Results might improve with additional tuning; but this requires
+averaging over multiple random seeds.
+
+-------------------------
+General strategy:
+
+current scorer:
+  if row picked, sum the outputs (= 0.5 *pos - neg)
+  active += pos+neg (weighted correctly)
+
+  row score = sum of outputs / total weight of selected.
+
+best-possible-score:
+   tree picks only rows that are true positives, never picks
+   rows that are true negatives.
+
+   Ergo, this should be 1/total active weight
 
 

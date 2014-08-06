@@ -182,7 +182,7 @@ std::ostream& ostream_scored_combo_tree(std::ostream& out,
     // Is this really used?
     static const bool output_weight = false;
     if (output_weight)
-        out << " weight=" << sct.get_weight();
+        out << " weight:" << sct.get_weight();
 
     if (output_cscore)
         out << " " << sct.get_composite_score();

@@ -28,7 +28,6 @@
 #include <opencog/learning/moses/main/problem-params.h>
 #include <opencog/learning/moses/moses/types.h>
 #include <opencog/learning/moses/scoring/behave_cscore.h>
-#include <opencog/learning/moses/scoring/boosting_ascore.h>
 #include <opencog/learning/moses/scoring/bscores.h>
 #include <opencog/learning/moses/example-progs/scoring_iterators.h>
 
@@ -112,8 +111,7 @@ void bool_problem_base::run(option_base* ob)
     unsigned as = alphabet_size(sig, pms.ignore_ops);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
-    boosting_ascore ascore(bscore.size());
-    behave_cscore cscore(bscore, ascore);
+    behave_cscore cscore(bscore);
     metapop_moses_results(pms.exemplars, sig,
                           *pms.bool_reduct, *pms.bool_reduct_rep,
                           cscore,
@@ -276,8 +274,7 @@ void polynomial_problem::run(option_base* ob)
     OC_ASSERT(not pms.meta_params.do_boosting, "Boosting not supported for this problem!");
 
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
-    simple_ascore ascore;
-    behave_cscore cscore(bscore, ascore);
+    behave_cscore cscore(bscore);
     metapop_moses_results(pms.exemplars, tt,
                           *pms.contin_reduct, *pms.contin_reduct,
                           cscore,
@@ -392,8 +389,7 @@ void combo_problem::run(option_base* ob)
     if (output_type == id::boolean_type) {
         // @todo: Occam's razor and nsamples is not taken into account
         logical_bscore bscore(tr, arity);
-        simple_ascore ascore;
-        behave_cscore cscore(bscore, ascore);
+        behave_cscore cscore(bscore);
         metapop_moses_results(pms.exemplars, tt,
                               *pms.bool_reduct, *pms.bool_reduct_rep,
                               cscore,
@@ -436,8 +432,7 @@ void combo_problem::run(option_base* ob)
 
         contin_bscore bscore(ot, it);
         set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
-        simple_ascore ascore;
-        behave_cscore cscore(bscore, ascore);
+        behave_cscore cscore(bscore);
         metapop_moses_results(pms.exemplars, tt,
                               *pms.contin_reduct, *pms.contin_reduct,
                               cscore,
@@ -490,8 +485,7 @@ void ann_combo_problem::run(option_base* ob)
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
     OC_ASSERT(not pms.meta_params.do_boosting, "Boosting not supported for this problem!");
-    simple_ascore ascore;
-    behave_cscore cscore(bscore, ascore);
+    behave_cscore cscore(bscore);
     metapop_moses_results(pms.exemplars, tt,
                           *pms.contin_reduct, *pms.contin_reduct,
                           cscore,

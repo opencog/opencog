@@ -54,7 +54,6 @@ partial_solver::partial_solver(const CTable &ctable,
      _filter_params(filter_params),
      _meta_params(meta_params),
      _moses_params(moses_params), _printer(mmr_pa),
-     _ascore(NULL), 
      _bscore(NULL), 
      _cscore(NULL), 
      _straight_bscore(NULL), 
@@ -63,13 +62,10 @@ partial_solver::partial_solver(const CTable &ctable,
      _done(false),
      _most_good(0)
 {
-	// XXX FIXME, should be configurable, to use boosting!?
-	_ascore = new simple_ascore();
 }
 
 partial_solver::~partial_solver()
 {
-    delete _ascore;
     delete _bscore;
     delete _straight_bscore;
     delete _cscore;
@@ -83,7 +79,7 @@ void partial_solver::solve()
     _done = false;
 
     _bscore =  new BScore(_ctable);
-    _cscore = new behave_cscore(*_bscore, *_ascore);
+    _cscore = new behave_cscore(*_bscore);
 
     _meta_params.merge_callback = check_candidates;
     _meta_params.callback_user_data = (void *) this;
@@ -188,7 +184,7 @@ void partial_solver::final_cleanup(const metapopulation& cands)
     // the number of right & wrong, without weighting.
 
     _straight_bscore = new BScore(_ctable);
-    _straight_cscore = new behave_cscore(*_straight_bscore, *_ascore);
+    _straight_cscore = new behave_cscore(*_straight_bscore);
 }
 
 /// Compute the effectiveness of the predicate.
@@ -347,7 +343,7 @@ void partial_solver::record_prefix()
     delete _bscore;
     _bscore = new BScore(_ctable);
     delete _cscore;
-    _cscore = new behave_cscore(*_bscore, *_ascore);
+    _cscore = new behave_cscore(*_bscore);
 }
 
 

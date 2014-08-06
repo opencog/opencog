@@ -31,37 +31,6 @@ namespace opencog { namespace moses {
 using namespace combo;
 
 /**
- * Return the highest-weighted value (and its weight) in a given CTable row.
- *
- * CTable rows may have multiple, weighted output values. Several of
- * these output values may have the same weight, and only one of these
- * will be the largest. Find and return that.
- *
- * XXX This is not used any more ...
- */
-std::pair<double, double>
-select_bscore::get_weightiest(const CTable::counter_t& orow) const
-{
-    score_t weightiest_val = very_worst_score;
-    score_t weightiest = 0.0;
-    for (const CTable::counter_t::value_type& tcv : orow) {
-        score_t val = get_contin(tcv.first.value);
-        if (not _positive) val = -val;
-        // The weight for a given value is in tcv.second.
-        // We look for weightiest, or, if tied, then for the
-        // largest value. This gives a unique sort order, even
-        // for randomly re-ordereed tables.
-        if (weightiest < tcv.second or
-            (weightiest == tcv.second and weightiest_val < val))
-        {
-            weightiest = tcv.second;
-            weightiest_val = val;
-        }
-    }
-    return std::pair<double, double>(weightiest_val, weightiest);
-}
-
-/**
  * The selection scorer will learn a window that selects a target range
  * of values in a continuous-valued dataset.
  *
@@ -89,6 +58,8 @@ select_bscore::select_bscore(const CTable& ctable,
 {
     OC_ASSERT(id::contin_type == _wrk_ctable.get_output_type(),
         "The selection scorer can only be used with contin-valued tables!");
+
+    reset_weights();
 
     // Verify that the bounds are sane
     lower_percentile = fmax(0.0, lower_percentile);
@@ -161,8 +132,8 @@ select_bscore::select_bscore(const CTable& ctable,
  * selection scorer, indicates if a row is inside or outside of the
  * selection range.
  *
- * If the boolean tree predicts that a row is inside/outside the
- * selection range, then scorer reqards this with a score of zero.
+ * If the boolean tree correctly predicts that a row is inside/outside
+ * the selection range, then scorer rewards this with a score of zero.
  * Otherwise, the score is minus the weight of that row.
  */
 behavioral_score select_bscore::operator()(const combo_tree& tr) const
@@ -315,10 +286,17 @@ behavioral_score select_bscore::worst_possible_bscore() const
     return bs;
 }
 
+score_t select_bscore::get_error(const behavioral_score& bs) const
+{
+    return - score(bs) / _ctable_weight;
+}
 
+// XXX This is not quite right, for weighted rows.  A row with a small
+// weight could result in a much small min-improv. 
+// (But I think boosting should not affect min-improv, right?)
 score_t select_bscore::min_improv() const
 {
-    return 1.0 / _ctable_usize;
+    return 1.0 / _ctable_weight;
 }
 
 } // ~namespace moses

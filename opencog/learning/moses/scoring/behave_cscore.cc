@@ -30,9 +30,9 @@
 
 namespace opencog { namespace moses {
 
-behave_cscore::behave_cscore(const bscore_base& b, ascore_base& a,
-                             size_t initial_cache_size)
-    : _bscorer(b), _ascorer(a), _have_cache(0<initial_cache_size),
+behave_cscore::behave_cscore(bscore_base& b, size_t initial_cache_size)
+    : _bscorer(b),
+    _have_cache(0<initial_cache_size),
     _cscore_cache(initial_cache_size, _wrapper, "composite scores")
 {
     _wrapper.self = this;
@@ -84,7 +84,7 @@ composite_score behave_cscore::get_cscore_nocache(const combo_tree& tr)
         }
         return worst_composite_score;
     }
-    score_t res = _ascorer(bs);
+    score_t res = _bscorer.score(bs);
 
     complexity_t cpxy = _bscorer.get_complexity(tr);
     score_t cpxy_coef = _bscorer.get_complexity_coef();
@@ -100,7 +100,7 @@ composite_score behave_cscore::get_cscore_nocache(const combo_tree& tr)
 composite_score behave_cscore::get_cscore(const scored_combo_tree_set& ensemble)
 {
     behavioral_score bs(get_bscore(ensemble));
-    score_t res = _ascorer(bs);
+    score_t res = _bscorer.score(bs);
 
     complexity_t cpxy = _bscorer.get_complexity(ensemble);
     score_t cpxy_coef = _bscorer.get_complexity_coef();

@@ -128,16 +128,16 @@ void metapopulation::deme_to_trees(deme_t& deme,
 // Used only when boosting. See header file for additioal documentation.
 void metapopulation::rescore()
 {
-    ascore_base& ascorer = _cscorer.get_ascorer();
+    bscore_base& bscorer = _cscorer.get_bscorer();
 #define SERIAL_RESCORING 1
 #if SERIAL_RESCORING
     for (scored_combo_tree& sct : _scored_trees) {
-        score_t new_score = ascorer(sct.get_bscore());
+        score_t new_score = bscorer.score(sct.get_bscore());
         sct.get_composite_score().set_score(new_score);
     }
 #else
     auto rescore_sct = [&](scored_combo_tree& sct) {
-        score_t new_score = ascorer(sct.get_bscore());
+        score_t new_score = bscorer.score(sct.get_bscore());
         sct.get_composite_score().set_score(new_score);
     }
     OMP_ALGO::for_each(_scored_trees.begin(), _scored_trees.end(), rescore_sct);

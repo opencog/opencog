@@ -50,7 +50,7 @@ namespace opencog { namespace moses {
 class behave_cscore
 {
 public:
-    behave_cscore(const bscore_base& b, ascore_base& a, size_t initial_cache_size=0);
+    behave_cscore(bscore_base& b, size_t initial_cache_size=0);
 
     behavioral_score get_bscore(const combo_tree&) const;
     behavioral_score get_bscore(const scored_combo_tree_set&) const;
@@ -106,8 +106,7 @@ public:
     }
 
 private:
-    const bscore_base& _bscorer;
-    ascore_base& _ascorer;
+    bscore_base& _bscorer;
 
     // Below follows some assorted infrastructure to allow composite
     // scoress for trees to be cached.
@@ -124,8 +123,7 @@ private:
 
 public:
     // weird hack for subsample scoring...
-    ascore_base& get_ascorer() { return _ascorer; }
-    const bscore_base& get_bscorer() const { return _bscorer; }
+    bscore_base& get_bscorer() { return _bscorer; }
 };
 
 
