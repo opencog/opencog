@@ -34,6 +34,7 @@ namespace opencog { namespace moses {
 
 using combo::combo_tree;
 using combo::arity_t;
+using combo::count_t;
 using combo::CTable;
 using combo::TTable;
 
@@ -219,7 +220,10 @@ protected:
     // a complete recalculation.
     mutable CTable _all_rows_wrk_ctable; // mutable to work around const bugs.
 
-    mutable size_t _ctable_usize;   // uncompressed size of ctable
+    mutable size_t _ctable_usize;    // uncompressed size of ctable
+    mutable count_t _ctable_weight;  // Total weight of all rows in table.
+
+    void recompute_weight() const;   // recompute _ctable_weight
 };
 
 /// Abstract base class for summing behavioral scores.

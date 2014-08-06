@@ -122,6 +122,19 @@ bscore_ctable_base::bscore_ctable_base(const CTable& ctable)
       _ctable_usize(_orig_ctable.uncompressed_size())
 {
     _size = ctable.size();
+    recompute_weight();
+}
+
+void bscore_ctable_base::recompute_weight() const
+{
+    // Sum of all of the weights in the working table.
+    // Note that these weights can be fractional!
+    _ctable_weight = 0.0;
+    for (const CTable::value_type& vct : _wrk_ctable) {
+        const CTable::counter_t& cnt = vct.second;
+
+        _ctable_weight += cnt.total_count();
+    }
 }
 
 void bscore_ctable_base::ignore_cols(const std::set<arity_t>& idxs) const
@@ -141,6 +154,7 @@ void bscore_ctable_base::ignore_cols(const std::set<arity_t>& idxs) const
 
     // Filter orig_table with permitted idxs.
     _wrk_ctable = _orig_ctable.filtered_preserve_idxs(permitted_idxs);
+    recompute_weight();
 
     // for debugging, keep that around till we fix best_possible_bscore
     // fully_filtered_ctable = _orig_ctable.filtered(permitted_idxs);
@@ -176,6 +190,7 @@ void bscore_ctable_base::ignore_rows(const std::set<unsigned>& idxs) const
     _wrk_ctable.remove_rows(idxs);
     _ctable_usize = _wrk_ctable.uncompressed_size();
     _size = _wrk_ctable.size();
+    recompute_weight();
 
     // if (logger().isFineEnabled())
     //     logger().fine() << "New _wrk_ctable compressed size = " << _wrk_ctable.size()
@@ -197,6 +212,7 @@ void bscore_ctable_base::ignore_rows_at_times(const std::set<TTable::value_type>
     _wrk_ctable.remove_rows_at_times(timestamps);
     _ctable_usize = _wrk_ctable.uncompressed_size();
     _size = _wrk_ctable.size();
+    recompute_weight();
 
     // if (logger().isFineEnabled())
     //     logger().fine() << "New _wrk_ctable compressed size = " << _wrk_ctable.size()

@@ -152,7 +152,6 @@ struct precision_bscore : public bscore_ctable_time_dispersion
     combo_tree gen_canonical_best_candidate() const;
 
 protected:
-    count_t _ctable_weight;    // Total weight of all rows in table.
     score_t min_activation, max_activation;
     score_t activation_pressure;
 

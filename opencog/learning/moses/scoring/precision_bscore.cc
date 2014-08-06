@@ -134,15 +134,6 @@ precision_bscore::precision_bscore(const CTable& ctable_,
     OC_ASSERT(output_type == id::boolean_type,
         "Error: Precision scorer: output type must be boolean!");
 
-    // Sum of all of the weights in the working table.
-    // Note that these weights can be fractional!
-    _ctable_weight = 0.0;
-    for (const CTable::value_type& vct : _wrk_ctable) {
-        const CTable::counter_t& cnt = vct.second;
-
-        _ctable_weight += cnt.total_count();
-    }
-
     logger().fine("Precision scorer, "
                   "total table weight = %f, "
                   "activation_pressure = %f, "
@@ -406,10 +397,10 @@ behavioral_score precision_bscore::best_possible_bscore() const
             break;
     }
 
-    logger().fine("Precision scorer, best score = %f", best_sc);
-    logger().fine("precision at best score = %f", best_precision);
-    logger().fine("activation at best score = %f", best_activation);
-    logger().fine("activation penalty at best score = %f", best_activation_penalty);
+    logger().debug("Precision scorer, best score = %f", best_sc);
+    logger().debug("precision at best score = %f", best_precision);
+    logger().debug("activation at best score = %f", best_activation);
+    logger().debug("activation penalty at best score = %f", best_activation_penalty);
 
     // @todo it's not really the best bscore but rather the best score
     return {best_sc};
