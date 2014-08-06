@@ -89,6 +89,20 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     /// than the min_improv(). Returns 0.0 by default.
     virtual score_t min_improv() const { return 0.0; }
 
+    /// Return the amount by which the bscore differs from a perfect
+    /// score.  This is used by the boosting algorithm to weight the
+    /// a scored combo tree.
+    ///
+    /// The is normalized so that 0.0 stands for a perfect score (all
+    /// answers are the best possible), a value of 0.5 stands for a
+    /// score that corresponds to "random guessing", and 1.0 corresponds
+    /// to a worst-possible score (all answers are the worst possible.)
+    /// This error amount does not have to be a metric or distance
+    /// measure, nor does it have to be linear; however, boosting will
+    /// probably work better if the error is vaguely metric-like and
+    /// quasi-linear.
+    virtual score_t get_error(const behavioral_score&) const;
+
     /// Indicate a set of features that should be ignored during scoring,
     /// The features are indicated as indexes, starting from 0.
     ///

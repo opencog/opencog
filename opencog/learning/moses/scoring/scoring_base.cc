@@ -107,6 +107,14 @@ complexity_t bscore_base::get_complexity(const scored_combo_tree_set& ensemble) 
     return (complexity_t) floor (cpxy / norm + 0.5);
 }
 
+score_t
+bscore_base::get_error(const behavioral_score&) const
+{
+    OC_ASSERT(false, "score error not implemented for bscorer %s",
+        typeid(*this).name());
+    return -1.0;
+}
+
 score_t simple_ascore::operator()(const behavioral_score& bs) const
 {
     return boost::accumulate(bs, 0.0);
