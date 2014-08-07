@@ -35,12 +35,6 @@ normally would be automatically loaded with the opencog.conf file.
    grammar disjunct is a list of connectors that are used to connect
    a word to the other words in a sentence.
 
- * relex-to-logic.scm: Helper-functions and rule-functions for mapping
-   mapping RelEx output into a style of OpenCog representation that is
-   better suited for automated reasoning by PLN and other tools. Details
-   on how to use this relex-to-logic pipeline can be found at
-   http://wiki.opencog.org/w/Running_Relex2Logic_with_OpenCog
-
  * surface-realization.scm: Functions for surface realization of output from
    micro-planner's output. The main function is sureal which takes in a SetLink
    and returns a sentence. Presently in alpha stage of development.
