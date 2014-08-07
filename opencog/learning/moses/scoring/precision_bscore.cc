@@ -194,11 +194,8 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 {
     behavioral_score bs;
 
-    // Initial precision. No hits means perfect precision :)
-    // Yes, zero hits is common, early on.
-    score_t precision = 1.0;
     score_t active = 0.0;  // total weight of active outputs by tr
-    score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
+    score_t sao = 0.0;     // sum of all active outputs
 
     interpreter_visitor iv(tr);
     auto interpret_tr = boost::apply_visitor(iv);
@@ -284,11 +281,6 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     else // Add 0.0 to ensure the bscore has the same size
         bs.push_back(0.0);
 
-    if (0 < active) {
-        // See above for explanation for the extra 0.5
-        precision = sao / active + 0.5;
-    }
-
     // For boolean tables, activation sum of true and false positives
     // i.e. the sum of all positives.   For contin tables, the activation
     // is likewise: the number of rows for which the combo tree returned
@@ -296,7 +288,13 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     score_t activation = active / _ctable_weight;
     score_t activation_penalty = get_activation_penalty(activation);
     bs.push_back(activation_penalty);
+
     if (logger().isFineEnabled()) {
+        score_t precision = 0.0;
+        if (0 < active) {
+            // See above for explanation for the extra 0.5
+            precision = sao / active + 0.5;
+        }
         logger().fine("precision = %f  activation=%f  activation penalty=%e",
                       precision, activation, activation_penalty);
     }
@@ -316,17 +314,106 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 /// scorer, suitable for use with boosting.
 behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensemble) const
 {
-    behavioral_score bs (_size, 0);
-logger().info() <<"duuude olaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    // Step 1: If any tree in the ensemble picks a row, that row is
+    // picked by the ensemble as a whole.
+    behavioral_score hypoth(_size, 0.0);
+    for (const scored_combo_tree& sct: ensemble) {
+        const combo_tree& tr = sct.get_tree();
+
+        interpreter_visitor iv(tr);
+        auto interpret_tr = boost::apply_visitor(iv);
+
+        size_t i=0;
+        for (const CTable::value_type& io_row : _wrk_ctable) {
+            // io_row.first = input vector
+            const auto& irow = io_row.first;
+
+            if (interpret_tr(irow.get_variant()) == id::logical_true) {
+                hypoth[i] = 1.0;
+            }
+            i++;
+        }
+    }
+
+    // Step 2: tot up the active rows. XXX TODO -- this should be
+    // *identical* to the code above, except that instead of calling
+    // interpret_tr we would pull the resolt from the hypoth array ...
+    // FIXME: need to do the above to get the time stuff to work
+    // correctly.
+    score_t active = 0.0;  // total weight of active outputs
+    score_t sao = 0.0;     // sum of all active outputs
+    behavioral_score bs(_size, 0.0);
+    size_t i = 0;
+    for (const CTable::value_type& io_row : _wrk_ctable) {
+        // io_row.first = input vector
+        // io_row.second = counter of outputs
+        const auto& orow = io_row.second;
+
+        bool predict_inside = (0 < hypoth[i]);
+        score_t sumo = 0.0;  // zero if not active
+        if (predict_inside) {
+            sumo = sum_outputs(orow);
+            sao += sumo;
+            active += orow.total_count();
+        }
+        bs[i] = sumo;
+
+        i++;
+    }
+
+    if (active > 0) {
+        // normalize all components by active
+        score_t iac = 1.0 / active; // inverse of activity to be faster
+        for (auto& v : bs) v *= iac;
+        bs.push_back(0.5);
+    }
+    else // Add 0.0 to ensure the bscore has the same size
+        bs.push_back(0.0);
+
+#ifdef WHY_DO_WE_NEED_TO_DO_THIS // ????
+    score_t activation = active / _ctable_weight;
+    score_t activation_penalty = get_activation_penalty(activation);
+    bs.push_back(activation_penalty);
+#endif
+
+logger().info() <<"duuude olaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << bs;
     return bs;
 }
 
 score_t precision_bscore::get_error(const behavioral_score& bs) const
 {
-    score_t sc = 1.0 - score(bs);
-logger().info() <<"duuude precision err: " << sc;
-    sc = fmin(sc, 0.0);
-    return sc;
+    // The incoming bscore will have 0.0 for non-selected rows, a
+    // positive value for correct selected rows, and a negative value
+    // for incorrect selected rows.  If summed with flat weighting,
+    // then the bscore would total to +0.5 if all selected rows are
+    // correct, and will total to -0.5 if all selected rows are wrong.
+    //
+    // If summed with the boosted weights, we have a cross-product of
+    // the following cases:
+    // a) row is lightly weighted, because previous trees added to 
+    //    ensemble were already picking it correctly.
+    // b) row is heavily weighted, because previous trees added to 
+    //    ensemble were picking it wrongly.
+    //
+    // G) bscore is positive; this tree is correctly selecting the row.
+    // Z) bscore is zero; this tree is not selecting the row.
+    // W) bscore is negative; this tree is wrongly selecting the row.
+    //
+    // So, the weighted sum of the bscore would then be:
+    // bG) strong positive contribution.
+    // bW) strong negative contribution.
+    // all others) mild or zero contribution.
+    //
+    // But what we want is the effective error of the bscore.  To get
+    // this, sum only the W rows, times the row weights.  Since the
+    // max-wrongness in the bscore is -0.5, we multiply by two.
+    // Also, ignore the appended penalties at the end of the bscore.
+    // Thus, we only sum up to size.
+    double accum = 0.0;
+    for (size_t i=0; i<_size; i++) if (bs[i] < 0.0) accum -= 2.0 * bs[i];
+
+logger().info() <<"duuude precision err: " << accum;
+    return accum;
 }
 
 behavioral_score precision_bscore::best_possible_bscore() const

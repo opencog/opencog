@@ -37,7 +37,11 @@ using namespace combo;
 ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	_params(ep), _bscorer(cs.get_bscorer())
 {
-	_effective_length = - cs.worst_possible_score();
+	// The current normalization is to have all row weights sum to 1.0
+	std::vector<double>& weights = _bscorer.get_weights();
+	size_t bslen = _bscorer.size();
+	double znorm = 1.0 / ((double) bslen);
+	for (size_t i=0; i<bslen; i++) weights[i] = znorm;
 
 	// _tolerance is an estimate of the accumulated rounding error
 	// that arises when totaling the bscores.  As usual, assumes a
@@ -56,14 +60,20 @@ static inline bool is_correct(score_t val)
 /**
  * Implement a boosted ensemble. Candidate combo trees are added to
  * the ensemble one at a time, weights are adjusted, and etc.
- *
- * Returns true if all further search should be halted; else returns
- * false.  The problem adressed with this return value is that basic
- * AdaBoost can sometimes stop making forward progress when the dataset
- * is degenerate, i.e. when it has rows with the same inputs but
- * opposite outputs.
  */
 void ensemble::add_candidates(scored_combo_tree_set& cands)
+{
+	if (_params.experts) {
+		add_expert(cands);
+		return;
+	}
+	add_adaboost(cands);
+}
+
+/**
+ * Implement a boosted ensemble, using the classic AdaBoost algo.
+ */
+void ensemble::add_adaboost(scored_combo_tree_set& cands)
 {
 	int promoted = 0;
 
@@ -124,8 +134,7 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 				[](const scored_combo_tree& a, const scored_combo_tree& b) {
 					return a.get_score() > b.get_score(); });
 
-		logger().info() << "Boosting: candidate score=" << best_p->get_score()
-		                << " effective length=" << _effective_length;
+		logger().info() << "Boosting: candidate score=" << best_p->get_score();
 		// double err = (- best_p->get_score()) / _effective_length;
 		double err = _bscorer.get_error(best_p->get_bscore());
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
@@ -178,12 +187,9 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 			znorm += weights[i];
 		}
 
-		// Normalization: sum of scores must equal vector length.
-		znorm = _effective_length / znorm;
-		for (size_t i=0; i<bslen; i++)
-		{
-			weights[i] *= znorm;
-		}
+		// Normalization: sum of weights must equal 1.0
+		znorm = 1.0 / znorm;
+		for (size_t i=0; i<bslen; i++) weights[i] *= znorm;
 
 		// Remove from the set of candidates.
 		cands.erase(best_p);
@@ -195,14 +201,88 @@ void ensemble::add_candidates(scored_combo_tree_set& cands)
 	}
 }
 
+/**
+ * Add trees that expertly select rows.
+ */
+void ensemble::add_expert(scored_combo_tree_set& cands)
+{
+	int promoted = 0;
+	while (true) {
+		// Find the element (the combo tree) with the least error. This is
+		// the element with the highest score.
+		scored_combo_tree_set::iterator best_p =
+			std::min_element(cands.begin(), cands.end(),
+				[](const scored_combo_tree& a, const scored_combo_tree& b) {
+					return a.get_score() > b.get_score(); });
+
+		logger().info() << "Expert: candidate score=" << best_p->get_score();
+		double err = _bscorer.get_error(best_p->get_bscore());
+
+		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
+
+		// This condition indicates "perfect score". This is the only type
+		// of tree that we accept.
+		if (err >= _tolerance) {
+			logger().info() << "Expert: Best tree not good enough: " << err;
+			break;
+		}
+
+		// Set the weight for the tree, and stick it in the ensemble
+		scored_combo_tree best = *best_p;
+		best.set_weight(1.0);
+		_scored_trees.insert(best);
+
+		double expalpha = 1.2; // Add-hoc boosting value ...:1/bs
+		double rcpalpha = 1.0 / expalpha;
+		logger().info() << "Expert: add to ensemble " << *best_p;
+
+		// Increase the importance of all remaining, unselected rows.
+		const behavioral_score& bs = best_p->get_bscore();
+		size_t bslen = _bscorer.size();
+		std::vector<double>& weights = _bscorer.get_weights();
+		double znorm = 0.0;
+		for (size_t i=0; i<bslen; i++)
+		{
+			// A row is correctly selected if its score is strictly positive.
+			// The weights of unselected rows increase.
+			weights[i] *= (0.0 < bs[i]) ? rcpalpha : expalpha;
+			znorm += weights[i];
+		}
+
+		// Normalization: sum of scores must equal 1.0
+		znorm = 1.0 / znorm;
+		for (size_t i=0; i<bslen; i++) weights[i] *= znorm;
+
+		// Remove from the set of candidates.
+		cands.erase(best_p);
+
+		// Are we done yet?
+		promoted ++;
+		if (_params.num_to_promote <= promoted) break;
+		if (0 == cands.size()) break;
+	}
+}
+
+/// Return the ensemble contents as a single, large tree.
+///
+const combo::combo_tree& ensemble::get_weighted_tree() const
+{
+	if (_params.experts) {
+		get_expert_tree();
+	} else {
+		get_adaboost_tree();
+	}
+	return _weighted_tree;
+}
+
 /// Return the ensemble contents as a single, large weighted tree.
 ///
 /// Returns the combo tree expressing
-/// (sum_i weight_i * (tree_i ? 1.0 : -1.0)) > 0)
+///    (sum_i weight_i * (tree_i ? 1.0 : -1.0)) > 0)
 /// i.e. true if the summation is positive, else false, as per standard
 /// AdaBoost definition.
 ///
-const combo::combo_tree& ensemble::get_weighted_tree() const
+const combo::combo_tree& ensemble::get_adaboost_tree() const
 {
 	_weighted_tree.clear();
 
@@ -233,6 +313,29 @@ const combo::combo_tree& ensemble::get_weighted_tree() const
 		impulse = _weighted_tree.append_child(minus, combo::id::impulse);
 		_weighted_tree.append_child(impulse, sct.get_tree().begin());
 	}
+
+	return _weighted_tree;
+}
+
+/// Return the ensemble contents as a single, large tree.
+///
+/// Returns the combo tree expressing
+///   or_i tree_i
+/// i.e. true if any member of the ensemble picked true.
+///
+const combo::combo_tree& ensemble::get_expert_tree() const
+{
+	_weighted_tree.clear();
+	if (1 == _scored_trees.size()) {
+		_weighted_tree = _scored_trees.begin()->get_tree();
+		return _weighted_tree;
+	}
+
+	combo::combo_tree::pre_order_iterator head;
+	head = _weighted_tree.set_head(combo::id::logical_or);
+
+	for (const scored_combo_tree& sct : _scored_trees)
+		_weighted_tree.append_child(head, sct.get_tree().begin());
 
 	return _weighted_tree;
 }

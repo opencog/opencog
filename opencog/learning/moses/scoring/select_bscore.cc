@@ -172,7 +172,7 @@ behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble
 {
     // Step 1: accumulate the weighted prediction of each tree in
     // the ensemble.
-    behavioral_score hypoth (_size);
+    behavioral_score hypoth (_size, 0.0);
     for (const scored_combo_tree& sct: ensemble) {
         const combo_tree& tr = sct.get_tree();
         score_t trweight = sct.get_weight();
