@@ -46,6 +46,7 @@
 			; exception that should not be considered as non-instance
 			; TODO better node name for automatic checking possible
 			(not (equal? 'VariableNode (cog-type w)))
+			(not (equal? 'ReferenceNode (cog-type w)))
 			(not (string=? "possession" (cog-name w)))
 			; the actual check
 			(null? (cog-node 'WordInstanceNode (cog-name w)))
@@ -347,7 +348,7 @@
 	(define word1-predicate-listlink (car (cog-filter 'ListLink (cog-outgoing-set word1-predicate))))
 	(define word1-predicate-root (cog-get-root word1-predicate))
 
-	(define that-reference-node (VariableNode (random-node-name 'VariableNode 32 "$that-")))
+	(define that-reference-node (ReferenceNode (random-node-name 'ReferenceNode 32 "$that-")))
 
 	(define (rebuild-with-that link)
 		(define old-oset (cog-outgoing-set link))
