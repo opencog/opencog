@@ -369,8 +369,8 @@ select.csv has 329 rows. The 0.8 and 0.9 bounds are at
 XXXXX TODO
 
 
-Localized Boosting AKA Mixture of Experts
------------------------------------------
+Localized Boosting; Mixture of Experts
+--------------------------------------
 To be used with the pre scorer. 
 
 The pre scorer is used to mine for "experts": combo trees that give
@@ -384,6 +384,41 @@ To boost the pre scorer, the boosting discriminator needs to:
 
 Thus, the weights only get adjusted for rows that are part of the
 positive set. 
+
+
+search terms:
+-- localized boosting  LocBoost
+-- boosting by resampling.
+
+
+Localized Boosting
+------------------
+Definition: "Localized Boosting" and the LocBoost algo is used to
+train and apply experts only in a "local" part of the dataset. That
+is, the experts are expert only for those inputs that are near (e.g
+Hamming-distance-near) to thier domain of expertize.  This idea makes
+sense if the inut data is real-valued but low-dimensional: the local
+experts are expert only in some submanifold of R^n.  For us, the input
+is high-dimensional and is boolean.
+
+
+Irrelevant variables, Ignored variables, Local experts.
+-------------------------------------------------------
+The precision-scorer does this: a given combo tree pays attention to
+only certain inputs, but ignores all others.  If those inputs are
+present/absent, then the row is selected.  However, it could happen
+that the training set simply did not include (enough) values of the
+ignored variables that could be important.  Thus, an expert should be
+considered to be "reliable" if, for the subset that it selects, the
+ignored variables are uniformly distributed.   We do not currently
+make this kind of a check for truly irrelevant variables
+
+The idea of localized boosting is to say "this expert is an expert
+only when the pattern is selected *and also* the input training set
+had a uniform distribution on these specific ignored variables".
+If the training set did not have a uniform distribution of *some*
+of the ignored variables, then the expert is no longer expert for
+those cases (e.g. the confidence is ranked lower).
 
 
 Precision, selection base results
@@ -550,12 +585,40 @@ best-possible-score:
 
 
 ensemble addition:
-   If a selectiion has perfect score, then add it to the ensebmle
+   If a selection has perfect score, then add it to the ensebmle
    with ??? weight.
 
    +1 for every correct entry
    less for partially correct...
 
+   If its perfect, and activation is high enough, then we are done
+   (the single solution is sufficient)
+
+   If its perfect, but activation too low, then add with ??? weight.
+
+   If its not perfect, means some selections are wrong.
+   two alternatives:
+    a) just don't add it.
+    b) add it, but ... ?
+
+ensemble scoring: 
+   Members in ensemble select rows.  Alternatives:
+    a) if ensemble selects, then done, because selection is never
+       wrong, because we never added wrong selectors.
+       (ensemble members are T to select or F for don't-care) 
+
+    b) ensemble is sometimes wrong, selecting bad rows.  How
+       can this be corrected?  How do I un-select? 
+       b1) alter weights so that bad rows are almost never
+           selected again by new ensemble members.
+       b2) add a dual un-select ensemble, which un-selects
+           bad rows.
+
+yet another alternative;
+    c) if a row is correctly selected, decrease its weight.
+       if a row is incorrectly selected, don't admit to ensemble.
+       if a row is not selected, but should have been, increase
+       its desirablilty.
 
 row weights: these need to be normalized to sum to 1.0
 
@@ -564,5 +627,31 @@ row weight adjust:
        *= expalpha if selected & wrong
        *= 1.0 if not selected.
 
+Strategy A:
+-----------
+-- Accept a tree into ensemble only if it has perfect score. 
+   The weight it is given does not matter.
+-- Decrease the weight of the rows it selects.  Increase the
+   weights of all the other rows.
+
+Strategy B:
+-----------
+-- Maintain two ensembles: one that selects, and one that
+   anti-selects.  However, these require two distinct metapops,
+   one metapop to train each.
+-- This allows imperfect selectors to be admitted into the ensemble,
+   as long as a counter-manding selector is found for the badly-choosen
+   rows.
+-- The above seems too complex, for now.
+
+Strategy C:
+-----------
+-- Allow imperfect selectors into the ensemble.  Problem: this makes
+   it unclear on how the ensemble chooses: does a row need a minimum
+   number of votes to be elected? What is that minimum? Is it ad-hoc?
+   Is there a running-bias that we can maintain to find this minimum?
+
+   i.e. bad rows are being selected with strrength s; thus, the ensemble
+   should reject all rows with a vote of less than s. 
 
 
