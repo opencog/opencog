@@ -76,11 +76,16 @@ public:
 private:
     const ensemble_parameters& _params;
     bscore_base& _bscorer;
-    double _effective_length;
     double _tolerance;
 
     scored_combo_tree_set _scored_trees;
     mutable combo_tree _weighted_tree;
+
+    void add_adaboost(scored_combo_tree_set&);
+    void add_expert(scored_combo_tree_set&);
+
+    const combo::combo_tree& get_adaboost_tree() const;
+    const combo::combo_tree& get_expert_tree() const;
 };
 
 }}; // namespace opencog::moses
