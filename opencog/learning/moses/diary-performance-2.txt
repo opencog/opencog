@@ -549,3 +549,20 @@ best-possible-score:
    Ergo, this should be 1/total active weight
 
 
+ensemble addition:
+   If a selectiion has perfect score, then add it to the ensebmle
+   with ??? weight.
+
+   +1 for every correct entry
+   less for partially correct...
+
+
+row weights: these need to be normalized to sum to 1.0
+
+row weight adjust:
+  w[i] *= rcpalpha if selected & right
+       *= expalpha if selected & wrong
+       *= 1.0 if not selected.
+
+
+

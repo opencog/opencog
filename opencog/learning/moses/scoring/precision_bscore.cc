@@ -316,6 +316,46 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 /// scorer, suitable for use with boosting.
 behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensemble) const
 {
+#if 0 // LATER
+    // Step 1: accumulate the weighted prediction of each tree in
+    // the ensemble.
+    behavioral_score hypoth (_size, 0.0);
+    for (const scored_combo_tree& sct: ensemble) {
+        const combo_tree& tr = sct.get_tree();
+        score_t trweight = sct.get_weight();
+
+        interpreter_visitor iv(tr);
+        auto interpret_tr = boost::apply_visitor(iv);
+
+        size_t i=0;
+        for (const CTable::value_type& io_row : _wrk_ctable) {
+            // io_row.first = input vector
+            const auto& irow = io_row.first;
+
+            if (interpret_tr(irow.get_variant()) == id::logical_true) {
+                hypoth[i] += trweight;
+            }
+            i++;
+        }
+    }
+                score_t sumo = sum_outputs(orow);
+
+    // Step 2: compare the prediction of the ensemble to the desired
+    // result. The array "hypoth" is positive to predict true, and
+    // negative to predict false.  The resulting score is 0 if correct,
+    // and -1 if incorrect.
+    behavioral_score bs;
+    size_t i = 0;
+    for (const CTable::value_type& io_row : _wrk_ctable) {
+        // io_row.first = input vector
+        // io_row.second = counter of outputs
+
+        bool predict_inside = (0 < hypoth[i]);
+    }
+
+#endif
+
+
     behavioral_score bs (_size, 0);
 logger().info() <<"duuude olaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     return bs;
@@ -323,10 +363,38 @@ logger().info() <<"duuude olaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
 score_t precision_bscore::get_error(const behavioral_score& bs) const
 {
-    score_t sc = 1.0 - score(bs);
-logger().info() <<"duuude precision err: " << sc;
-    sc = fmin(sc, 0.0);
-    return sc;
+    // The incoming bscore will have 0.0 for non-selected rows, a
+    // positive value for correct selected rows, and a negative value
+    // for incorrect selected rows.  If summed with flat weighting,
+    // then the bscore would total to +0.5 if all selected rows are
+    // correct, and will total to -0.5 if all selected rows are wrong.
+    //
+    // If summed with the boosted weights, we have a cross-product of
+    // the following cases:
+    // a) row is lightly weighted, because previous trees added to 
+    //    ensemble were already picking it correctly.
+    // b) row is heavily weighted, because previous trees added to 
+    //    ensemble were picking it wrongly.
+    //
+    // G) bscore is positive; this tree is correctly selecting the row.
+    // Z) bscore is zero; this tree is not selecting the row.
+    // W) bscore is negative; this tree is wrongly selecting the row.
+    //
+    // So, the weighted sum of the bscore would then be:
+    // bG) strong positive contribution.
+    // bW) strong negative contribution.
+    // all others) mild or zero contribution.
+    //
+    // But what we want is the effective error of the bscore.  To get
+    // this, sum only the W rows, times the row weights.  Since the
+    // max-wrongness in the bscore is -0.5, we multiply by two.
+    // Also, ignore the appended penalties at the end of the bscore.
+    // Thus, we only sum up to size.
+    double accum = 0.0;
+    for (size_t i=0; i<_size; i++) if (bs[i] < 0.0) accum -= 2.0 * bs[i];
+
+logger().info() <<"duuude precision err: " << accum;
+    return accum;
 }
 
 behavioral_score precision_bscore::best_possible_bscore() const

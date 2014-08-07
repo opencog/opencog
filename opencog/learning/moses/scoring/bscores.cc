@@ -86,7 +86,7 @@ behavioral_score logical_bscore::operator()(const scored_combo_tree_set& ensembl
 {
     // Step 1: accumulate the weighted prediction of each tree in
     // the ensemble.
-    behavioral_score hypoth(_size);
+    behavioral_score hypoth(_size, 0.0);
     for (const scored_combo_tree& sct: ensemble) {
         combo::complete_truth_table tt(sct.get_tree(), _arity);
         score_t weight = sct.get_weight();
@@ -304,7 +304,7 @@ behavioral_score ctruth_table_bscore::operator()(const scored_combo_tree_set& en
 
     // Step 1: accumulate the weighted prediction of each tree in
     // the ensemble.
-    behavioral_score hypoth(sz);
+    behavioral_score hypoth(sz, 0.0);
     for (const scored_combo_tree& sct: ensemble) {
         // apply each tree, in turn.
         interpreter_visitor iv(sct.get_tree());
