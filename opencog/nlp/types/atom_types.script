@@ -90,8 +90,11 @@ SEME_NODE <- CONCEPT_NODE
 SEMANTIC_RELATION_NODE <- SEME_NODE
 // CONTEXT_NODE <- CONCEPT_NODE // apparently useless
 
-// Atoms to identify different interpreations of a single parse.
+// Atoms to identify different interpretation of a single parse.
 // Added for Relex2Logic processing of meanings in sentences.
 INTERPRETATION_NODE <- NODE
 INTERPRETATION_LINK <- LINK
 SPECIFIC_ENTITY_NODE <- NODE
+
+// Atom used to link disjoint parts of a single interpretation.
+REFERENCE_NODE <- NODE

@@ -32,24 +32,27 @@
 )
 
 ; -----------------------------------------------------------------------
-; check-non-instance -- Check if any nodes is a non-instance word
+; check-exception -- Check if 'link' should be excluded from markers post-processing
 ;
-; Given a link, check to see if any sub-node does not have the
-; corresponding WordInstanceNode from RelEx (with some exceptions)
+; Given a link, check to see if it should be ignored.  This could be a ReferenceLink
+; or a link with any sub-node does not have the corresponding WordInstanceNode
+; from RelEx (with some exceptions)
 ;
-(define (check-non-instance link)
+(define (check-exception link)
 	(define words (cog-get-all-nodes link))
+	; check if a node has no corresponding 'WordInstanceNode
 	(define (check-word w)
 		(and
 			; exception that should not be considered as non-instance
 			; TODO better node name for automatic checking possible
 			(not (equal? 'VariableNode (cog-type w)))
-			(not (string=? "Possession" (cog-name w)))
+			(not (equal? 'ReferenceNode (cog-type w)))
+			(not (string=? "possession" (cog-name w)))
 			; the actual check
 			(null? (cog-node 'WordInstanceNode (cog-name w)))
 		)
 	)
-	(find check-word words)
+	(or (equal? 'ReferenceLink (cog-type link)) (find check-word words))
 )
 
 ; -----------------------------------------------------------------------
@@ -170,7 +173,26 @@
 ; Call all markers' post-processing steps.
 ;
 (define (r2l-marker-processing)
-	(allmarker-cleaner)
+	(define results
+		(append
+			(marker-cleaner "allmarker" allmarker-helper)
+			(marker-cleaner "thatmarker" thatmarker-helper)
+		)
+	)
+	; helper function that prune away atoms that no longer exists
+	; from subsequent cleaners, or atoms that are wrapped inside
+	; another link
+	(define (pruner x)
+		(define deref-x (cog-atom (cog-handle x)))
+		; if 'deref-x' is #<Invalid handle>, than both cog-node?
+		; and cog-link? will return false
+		(if (and (or (cog-node? deref-x) (cog-link? deref-x))
+			 (null? (cog-incoming-set x)))
+			x
+			'()
+		)
+	)
+	(map pruner results)
 )
 
 ; -----------------------------------------------------------------------
@@ -204,7 +226,7 @@
 	(define word (gar listlink))
 	(define root-links (cog-get-root word))
 	; get rid of links with non-instanced word
-	(define clean-links (remove check-non-instance root-links))
+	(define clean-links (remove check-exception root-links))
 	; helper recursive function to rebuild a link, replacing 'word' node with $X
 	(define (rebuild-with-x link)
 		(define old-oset (cog-outgoing-set link))
@@ -250,20 +272,126 @@
 )
 
 ; -----------------------------------------------------------------------
-; allmarker-clean -- Entry point of cleaning allmarker
+; thatmarker-helper -- Helper function for processing thatmarker
 ;
-; The main allmarker function that calls the helper to clean all
-; allmarker in the atomspace, and delete them.
+; The thatmarker helper function for post-processing one specific
+; thatmarker.
 ;
-(define (allmarker-cleaner)
-	(marker-cleaner "allmarker" allmarker-helper)
+; Given sentence "I think that dogs attack angry cats.", and thatmarker
+; in the form as 'orig-link':
+;
+;	EvaluationLink
+;		thatmarker
+;		ListLink
+;			think
+;			attack
+;
+; We create (by bring in other R2L rules result):
+;
+;	EvaluationLink
+;		think
+;		ListLink
+;			I
+;			$that-ab12
+;
+;	ReferenceLink
+;		$that-ab12
+;		AndLink
+;			EvaluationLink
+;				attack
+;				ListLink
+;					dog
+;					cat
+;			InheritanceLink
+;				cat
+;				angry
+;
+(define (thatmarker-helper orig-link)
+	(define listlink (car (cog-filter 'ListLink (cog-outgoing-set orig-link))))
+	(define word1 (gar listlink))
+	(define word2 (gdr listlink))
+	
+	; find all the words that link directly or indirectly with word2
+	(define (get-all-connected-words)
+		; helper function to get words that share the same hypergraph with 'word'
+		(define (get-all-closely-connected-words word)
+			(define all-links (cog-get-root word))
+			; clean away links that should be ignored
+			(define cleaned-links (remove check-exception all-links))
+			(delete-duplicates (append-map cog-get-all-nodes cleaned-links))
+		)
+		; the main recursive function to gather all indirectly connected words
+		(define (get-all-connected-words word)
+			(cond ((not (member? word connected-words))
+				(set! connected-words (append (list word) connected-words))
+				(for-each get-all-connected-words (get-all-closely-connected-words word))
+				)
+			)
+		)
+		; starts with word1 to avoid getting its connected words, then delete it afterward
+		(define connected-words (list word1)) 
+		(get-all-connected-words word2)
+		(set! connected-words (delete word1 connected-words))
+		connected-words
+	)
+
+	(define all-connected-words (get-all-connected-words))
+
+	; for each word in connected-words, get the root link
+	(define all-root-links (delete-duplicates (append-map cog-get-root all-connected-words)))
+
+	; clean away links that should be ignored
+	(define word2-links (remove check-exception all-root-links))
+
+	; get the EvaluationLink where word1 act as Predicate, and its root
+	(define word1-predicate (car (cog-get-link 'EvaluationLink 'ListLink word1)))
+	(define word1-predicate-listlink (car (cog-filter 'ListLink (cog-outgoing-set word1-predicate))))
+	(define word1-predicate-root (cog-get-root word1-predicate))
+
+	(define that-reference-node (ReferenceNode (random-node-name 'ReferenceNode 32 "$that-")))
+
+	(define (rebuild-with-that link)
+		(define old-oset (cog-outgoing-set link))
+		(define (rebuild-helper atom)
+			(if (cog-link? atom)
+				; if we found the ListLink of the predicate, insert the that-reference-node
+				(if (equal? atom word1-predicate-listlink)
+					(ListLink (cog-outgoing-set word1-predicate-listlink) that-reference-node)
+					(rebuild-with-that atom)
+				)
+				atom
+			)
+		)
+		(define new-oset (map rebuild-helper old-oset))
+		(apply cog-new-link (cog-type link) new-oset)
+	)
+
+	; rebuild word1-predicate's root with that-reference-node inside
+	(define word1-new-predicate-root (map rebuild-with-that word1-predicate-root))
+
+	(for-each purge-hypergraph word1-predicate-root)
+
+	; the final representation
+	(append
+		word1-new-predicate-root
+		; create new ReferenceLink, AndLink everything
+		(list
+			(ReferenceLink
+				that-reference-node
+				(if (= (length word2-links) 1)
+					word2-links
+					(AndLink word2-links)
+				)
+			)
+		)
+	)
 )
 
 ; -----------------------------------------------------------------------
-; marker-clean -- Common code for calling marker's helper function
+; marker-cleaner -- Common code for calling marker's helper function
 ;
 ; A general purpose marker function that calls a specific 'helper' function
-; to clean all instances of a marker with 'name' in the atomspace, and
+; to clean each instance of a marker with 'name' in the atomspace, and
 ; delete them.
 ;
 (define (marker-cleaner name helper)
