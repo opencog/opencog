@@ -174,8 +174,8 @@
 (define (r2l-marker-processing)
 	(define results
 		(append
-			(allmarker-cleaner)
-			(thatmarker-cleaner)
+			(marker-cleaner "allmarker" allmarker-helper)
+			(marker-cleaner "thatmarker" thatmarker-helper)
 		)
 	)
 	; helper function that prune away atoms that no longer exists
@@ -268,16 +268,6 @@
 	(for-each purge-hypergraph clean-links)
 
 	results-list
-)
-
-; -----------------------------------------------------------------------
-; allmarker-cleaner -- Entry point of cleaning allmarker
-;
-; The main allmarker function that calls the helper to clean all
-; allmarker in the atomspace, and delete them.
-;
-(define (allmarker-cleaner)
-	(marker-cleaner "allmarker" allmarker-helper)
 )
 
 ; -----------------------------------------------------------------------
@@ -397,19 +387,10 @@
 )
 
 ; -----------------------------------------------------------------------
-; thatmarker-cleaner -- Entry point for cleaning thatmarker
-;
-; The main thatmarker function that calls the helper to clean all
-; thatmarker in the atomspace, and delete them
-(define (thatmarker-cleaner)
-	(marker-cleaner "thatmarker" thatmarker-helper)
-)
-
-; -----------------------------------------------------------------------
 ; marker-cleaner -- Common code for calling marker's helper function
 ;
 ; A general purpose marker function that calls a specific 'helper' function
-; to clean all instances of a marker with 'name' in the atomspace, and
+; to clean each instance of a marker with 'name' in the atomspace, and
 ; delete them.
 ;
 (define (marker-cleaner name helper)
