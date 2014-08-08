@@ -56,7 +56,7 @@ score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
 /// A behavioral score is a vector of scores, one per sample of a dataset.
 struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
 {
-    bscore_base() : _complexity_coef(0.0), _size(0) {};
+    bscore_base() : _return_weighted_score(false), _complexity_coef(0.0), _size(0) {};
     virtual ~bscore_base() {};
 
     /// Return the behavioral score for the combo_tree
@@ -89,9 +89,19 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     /// than the min_improv(). Returns 0.0 by default.
     virtual score_t min_improv() const { return 0.0; }
 
-    /// Return the (weighted) sum of the behavioral score.
-    /// The score is calculated as a weighted sum of the bscore over
-    /// all samples:
+    /// Return weighted scores instead of flat scores.  The weighted
+    /// scores are needed by the boosting algorithms; the unweighted
+    /// scores are needed to find out what the "actual" score would be.
+    void use_weighted_scores() { _return_weighted_score = true; }
+
+    /// Return the (possbily  weighted) sum of the behavioral score.
+    /// If _return_weighted_score is false, then this returns the "flat"
+    /// score, a simple sum over all samples:
+    /// 
+    ///      score = sum_x BScore(x)
+    /// 
+    /// Otherwise, it returns a weighted sum of the bscore:
+    /// 
     ///      score = sum_x weight(x) * BScore(x)
     ///
     /// Each element in the bscore typically corresponds to a sample in
@@ -104,7 +114,7 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     /// However, CAUTION! That wikipedia article currently (as of July
     /// 2014) contains serious, fundamental mistakes in it's desciption
     /// of the boosting algo!
-    virtual score_t score(const behavioral_score&) const;
+    virtual score_t sum_bscore(const behavioral_score&) const;
 
     /// A vector of per-bscore weights, used to tote up the behavioral
     /// score into a single number.  This returns a reference, not const,
@@ -212,6 +222,7 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     virtual void set_complexity_coef(unsigned alphabet_size, float p);
 
 protected:
+    bool _return_weighted_score;
     score_t _complexity_coef;
     mutable size_t _size; // mutable to work around const bugs
     std::vector<double> _weights;

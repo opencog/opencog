@@ -288,7 +288,7 @@ behavioral_score select_bscore::worst_possible_bscore() const
 
 score_t select_bscore::get_error(const behavioral_score& bs) const
 {
-    return - score(bs) / _ctable_weight;
+    return - sum_bscore(bs) / _ctable_weight;
 }
 
 // XXX This is not quite right, for weighted rows.  A row with a small

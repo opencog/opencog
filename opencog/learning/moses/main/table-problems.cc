@@ -335,6 +335,11 @@ void ann_table_problem::run(option_base* ob)
     int as = alphabet_size(cand_type_signature, pms.ignore_ops);     \
     SCORER bscore ARGS ;                                             \
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio); \
+    if (pms.meta_params.do_boosting) bscore.use_weighted_scores();   \
+                                                                     \
+    /* When boosting, cache must not be used, as otherwise, stale */ \
+    /* composite scores get cached and returned.                  */ \
+    if (pms.meta_params.do_boosting) pms.cache_size = 0;             \
     behave_cscore mbcscore(bscore, pms.cache_size);                  \
     reduct::rule* reduct_cand = pms.bool_reduct;                     \
     reduct::rule* reduct_rep = pms.bool_reduct_rep;                  \
@@ -358,6 +363,12 @@ void pre_table_problem::run(option_base* ob)
     common_setup(pms);
     common_type_setup(pms, id::boolean_type);
 
+    // Enable feature selection while selecting exemplar
+    if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
+        pms.deme_params.fstor = new feature_selector(ctable,
+                                                     pms.festor_params);
+    }
+ 
     int as = alphabet_size(cand_type_signature, pms.ignore_ops);
     precision_bscore bscore(ctable,
                             fabs(pms.hardness),
@@ -369,6 +380,8 @@ void pre_table_problem::run(option_base* ob)
                             pms.time_bscore,
                             pms.time_bscore_granularity);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
+    if (pms.meta_params.do_boosting) bscore.use_weighted_scores();
+
     if (pms.gen_best_tree) {
         // experimental: use some canonically generated
         // candidate as exemplar seed
@@ -377,12 +390,6 @@ void pre_table_problem::run(option_base* ob)
         pms.exemplars.push_back(tr);
     }
 
-    // Enable feature selection while selecting exemplar
-    if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
-        pms.deme_params.fstor = new feature_selector(ctable,
-                                                     pms.festor_params);
-    }
- 
     // We support boosting by generating an "ensemble of experts" model.
     pms.meta_params.ensemble_params.experts = true;
     // When boosting, cache must not be used, as otherwise, stale
@@ -465,10 +472,6 @@ void it_table_problem::run(option_base* ob)
     common_setup(pms);
     common_type_setup(pms);
 
-    // When boosting, cache must not be used, as otherwise, stale
-    // composite scores get cached and returned.
-    if (pms.meta_params.do_boosting) pms.cache_size = 0;
-
     // --------- Boolean output type
     if (output_type == id::boolean_type) {
         REGRESSION(ctable, ctruth_table_bscore, (ctable));
@@ -535,10 +538,6 @@ void select_table_problem::run(option_base* ob)
     problem_params& pms = *dynamic_cast<problem_params*>(ob);
     common_setup(pms);
     common_type_setup(pms, id::boolean_type);
-
-    // When boosting, cache must not be used, as otherwise, stale
-    // composite scores get cached and returned.
-    if (pms.meta_params.do_boosting) pms.cache_size = 0;
 
     REGRESSION(ctable, select_bscore, 
                (ctable, pms.min_rand_input, 

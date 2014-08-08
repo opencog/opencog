@@ -84,7 +84,7 @@ composite_score behave_cscore::get_cscore_nocache(const combo_tree& tr)
         }
         return worst_composite_score;
     }
-    score_t res = _bscorer.score(bs);
+    score_t res = _bscorer.sum_bscore(bs);
 
     complexity_t cpxy = _bscorer.get_complexity(tr);
     score_t cpxy_coef = _bscorer.get_complexity_coef();
