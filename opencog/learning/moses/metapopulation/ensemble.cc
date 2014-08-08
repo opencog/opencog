@@ -37,6 +37,9 @@ using namespace combo;
 ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	_params(ep), _bscorer(cs.get_bscorer())
 {
+	// Don't mess with the scorer weights if not doing boosting.
+	if (not ep.do_boosting) return;
+
 	// The current normalization is to have all row weights sum to 1.0
 	_bscorer.reset_weights();
 	std::vector<double>& weights = _bscorer.get_weights();
