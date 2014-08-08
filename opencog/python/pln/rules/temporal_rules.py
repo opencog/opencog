@@ -51,7 +51,7 @@ class TemporalRule(Rule):
 
         dist1 = make_distribution(links_a)
         dist2 = make_distribution(links_b)
-
+        print(input_tuples)
         strength = self.formula(dist1, dist2)
         
         # I'm not sure what to choose for this

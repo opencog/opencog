@@ -119,6 +119,12 @@ def startsFormula(dist1, dist2):
     size_beg_2 = getSize(beg_2)
     size_end_2 = getSize(end_2)
 
+    print("Beg1: {0}, end1: {1}".format(beg_1, end_1))
+    print("Beg2: {0}, end2: {1}".format(beg_2, end_2))
+    print("{0}, {1}".format(dist1, dist2))
+    print(size_beg_1 + size_beg_2)
+    print(size_end_2 + size_end_1)
+
     return normalize(min(((size_beg_1 + size_beg_2) - abs(com_beg_1[0] - com_beg_2[0]))
                          / (size_beg_1 + size_beg_2),
                          (com_end_2[0] - com_end_1[0]) / (size_end_2 + size_end_1)))
