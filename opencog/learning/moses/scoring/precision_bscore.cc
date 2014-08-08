@@ -256,7 +256,7 @@ behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_
         }
     }
 
-    if (active > 0) {
+    if (0.0 < active) {
         // normalize all components by active
         score_t iac = 1.0 / active; // inverse of activity to be faster
         for (auto& v : bs) v *= iac;
@@ -329,9 +329,16 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 /// scorer, suitable for use with boosting.
 behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensemble) const
 {
+
+    // For large tables, it is much more efficient to convert the
+    // ensemble into a single tree, and just iterate on that, instead
+    // of having multiple iterations on multiple trees.  But either way,
+    // the two scorers here should be functionally equivalent.
+#define SCORE_MANY_TREES
+#ifdef SCORE_MANY_TREES
     // Step 1: If any tree in the ensemble picks a row, that row is
     // picked by the ensemble as a whole.
-    behavioral_score hypoth(_size, 0.0);
+    std::vector<bool> hypoth(_size, false);
     for (const scored_combo_tree& sct: ensemble) {
         const combo_tree& tr = sct.get_tree();
 
@@ -344,7 +351,7 @@ behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensem
             const auto& irow = io_row.first;
 
             if (interpret_tr(irow.get_variant()) == id::logical_true) {
-                hypoth[i] = 1.0;
+                hypoth[i] = true;
             }
             i++;
         }
@@ -355,12 +362,30 @@ behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensem
     std::function<bool(const multi_type_seq&)> selector;
     selector = [&](const multi_type_seq& irow)->bool
     {
-        return (0 < hypoth[i++]);
+        return hypoth[i++];
     };
     // return do_score(selector);
 behavioral_score bs(do_score(selector));
 logger().info() <<"duuude olaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << bs;
 return bs;
+#else // SCORE_MANY_TREES
+
+    // For large tables, it is much more efficient to convert the
+    // ensemble into a single tree, so that we iterate over the table
+    // just once, instead of many times.
+    if (1 == ensemble.size()) {
+        return this->operator()(ensemble.begin()->get_tree());
+    }
+
+    combo_tree tr;
+    combo_tree::pre_order_iterator head;
+    head = tr.set_head(combo::id::logical_or);
+
+    for (const scored_combo_tree& sct : ensemble)
+        tr.append_child(head, sct.get_tree().begin());
+
+    return this->operator()(tr);
+#endif // SCORE_MANY_TREES
 }
 
 score_t precision_bscore::get_error(const behavioral_score& bs) const
@@ -373,9 +398,9 @@ score_t precision_bscore::get_error(const behavioral_score& bs) const
     //
     // If summed with the boosted weights, we have a cross-product of
     // the following cases:
-    // a) row is lightly weighted, because previous trees added to 
+    // a) row is lightly weighted, because previous trees added to
     //    ensemble were already picking it correctly.
-    // b) row is heavily weighted, because previous trees added to 
+    // b) row is heavily weighted, because previous trees added to
     //    ensemble were picking it wrongly.
     //
     // G) bscore is positive; this tree is correctly selecting the row.
