@@ -334,7 +334,7 @@ behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensem
     // ensemble into a single tree, and just iterate on that, instead
     // of having multiple iterations on multiple trees.  But either way,
     // the two scorers here should be functionally equivalent.
-#define SCORE_MANY_TREES
+// #define SCORE_MANY_TREES
 #ifdef SCORE_MANY_TREES
     // Step 1: If any tree in the ensemble picks a row, that row is
     // picked by the ensemble as a whole.
@@ -364,15 +364,12 @@ behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensem
     {
         return hypoth[i++];
     };
-    // return do_score(selector);
-behavioral_score bs(do_score(selector));
-logger().info() <<"duuude olaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << bs;
-return bs;
+    return do_score(selector);
 #else // SCORE_MANY_TREES
 
     // For large tables, it is much more efficient to convert the
     // ensemble into a single tree, so that we iterate over the table
-    // just once, instead of many times.
+    // just once, instead of once-per-tree.
     if (1 == ensemble.size()) {
         return this->operator()(ensemble.begin()->get_tree());
     }
@@ -530,7 +527,8 @@ behavioral_score precision_bscore::worst_possible_bscore() const
 }
 
 // Note that the logarithm is always negative, so this method always
-// returns a value that is zero or negative.
+// returns a value that is zero or negative.  Note that it returns
+// -inf if activation is 0.0 -- but that's OK, it won't hurt anything.
 score_t precision_bscore::get_activation_penalty(score_t activation) const
 {
     score_t dst = 0.0;

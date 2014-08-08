@@ -100,7 +100,14 @@ composite_score behave_cscore::get_cscore_nocache(const combo_tree& tr)
 composite_score behave_cscore::get_cscore(const scored_combo_tree_set& ensemble)
 {
     behavioral_score bs(get_bscore(ensemble));
-    score_t res = _bscorer.score(bs);
+
+    // Listen up, this is confusing ... For ensembles, this method is
+    // called to obtain the "true" composite score, as it would hold 
+    // for the unadulterated dataset.  Thus we do NOT use the row
+    // weights is the weighted scorer, but use the flat, uniform 
+    // weighting.
+    // score_t res = _bscorer.score(bs);    // this returns the weighted score.
+    score_t res = boost::accumulate(bs, 0.0);
 
     complexity_t cpxy = _bscorer.get_complexity(ensemble);
     score_t cpxy_coef = _bscorer.get_complexity_coef();

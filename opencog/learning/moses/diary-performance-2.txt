@@ -548,6 +548,7 @@ Results depend sharply on the complexity ratio and the temperature,
 a quick sniff test shows: -z150 for the ratio and -v25 for the
 temperature seem to work very well for preselect-no-dupe.csv and
 
+-z150 -v25 for preselect-no-dupe.csv
 -z350 -v45 for preselect.csv
 
    moses -Hpre -q0.05 -Yval -ipreselect.csv
@@ -673,3 +674,6 @@ call 4: local_moses.cc:124    what is the mp best score ... ?
 const multi_type_seq& 
 
 std::function<score_t(const multi_type_seq&)>
+
+ metapopulation::best_composite_score() should call
+    behave_cscore::best_possible_score
