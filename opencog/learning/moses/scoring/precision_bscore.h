@@ -32,6 +32,7 @@ namespace opencog { namespace moses {
 
 using combo::CTable;
 using combo::count_t;
+using combo::multi_type_seq;
 using combo::type_node;
 
 /**
@@ -161,6 +162,9 @@ protected:
     bool time_bscore;           // whether the bscore is spread over
                                 // the temporal axis
     type_node output_type;
+
+    // the actual work-horse.
+    behavioral_score do_score(std::function<bool(const multi_type_seq&)>) const;
 
 private:
     vertex _target, _neg_target; // same as positive

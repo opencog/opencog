@@ -666,6 +666,10 @@ call 0:  moses_main.h:313 local_moses.cc:124 metapopulation.cc:222  behave_cscor
 
 call 1: local_moses.cc:89  metapopulation.cc:222  dex.free_demes(); ?? 
                                         mp.log_best_candidates(); ??
-call 2: local_moses.cc:151
-call 3: metapopulation.h:151
-call 4: local_moses.cc:124
+call 2: local_moses.cc:151     stats print
+call 3: metapopulation.h:151   
+call 4: local_moses.cc:124    what is the mp best score ... ?
+
+const multi_type_seq& 
+
+std::function<score_t(const multi_type_seq&)>
