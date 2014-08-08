@@ -1283,13 +1283,15 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
         logger().debug() << "Disable cache because subsampling is enabled";
         cache_size = 0;
     } else {
-        cache_size = cache_size;
+        // cache_size = cache_size;
     }
 
     // Set metapopulation parameters
     meta_params.max_candidates = max_candidates;
     meta_params.revisit = revisit;
     meta_params.do_boosting = boosting;
+    meta_params.ensemble_params.do_boosting = boosting;
+    if (boosting) cache_size = 0;  // cached cscores are stale!
     meta_params.discard_dominated = discard_dominated;
     meta_params.keep_bscore = output_bscore;
     meta_params.complexity_temperature = complexity_temperature;

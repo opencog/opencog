@@ -37,10 +37,19 @@ using namespace combo;
 ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	_params(ep), _bscorer(cs.get_bscorer())
 {
+	// Don't mess with the scorer weights if not doing boosting.
+	if (not ep.do_boosting) return;
+
+	if (_params.experts)
+		_effective_length = 1.0;
+	else
+		_effective_length = - cs.worst_possible_score();
+
 	// The current normalization is to have all row weights sum to 1.0
+	_bscorer.reset_weights();
 	std::vector<double>& weights = _bscorer.get_weights();
 	size_t bslen = _bscorer.size();
-	double znorm = 1.0 / ((double) bslen);
+	double znorm = _effective_length / ((double) bslen);
 	for (size_t i=0; i<bslen; i++) weights[i] = znorm;
 
 	// _tolerance is an estimate of the accumulated rounding error
@@ -188,7 +197,7 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 		}
 
 		// Normalization: sum of weights must equal 1.0
-		znorm = 1.0 / znorm;
+		znorm = _effective_length / znorm;
 		for (size_t i=0; i<bslen; i++) weights[i] *= znorm;
 
 		// Remove from the set of candidates.

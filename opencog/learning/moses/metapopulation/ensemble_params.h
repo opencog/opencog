@@ -30,10 +30,12 @@ namespace moses {
 struct ensemble_parameters
 {
 	ensemble_parameters() :
+		do_boosting(false),
 		experts(false),
 		num_to_promote(1)
 	{}
 
+	bool do_boosting;    // boosting is enabled ... 
 	bool experts;        // do "ensemble-of-experts" boosting.
 	int num_to_promote;  // max number of demes to accept into ensemble,
 	                     // per learning iteration.
