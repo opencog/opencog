@@ -38,6 +38,7 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	_params(ep), _bscorer(cs.get_bscorer())
 {
 	// The current normalization is to have all row weights sum to 1.0
+	_bscorer.reset_weights();
 	std::vector<double>& weights = _bscorer.get_weights();
 	size_t bslen = _bscorer.size();
 	double znorm = 1.0 / ((double) bslen);
