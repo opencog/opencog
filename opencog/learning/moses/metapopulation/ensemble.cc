@@ -27,6 +27,8 @@
 #include <iostream>
 
 #include  <opencog/util/oc_assert.h>
+#include  <opencog/comboreduct/reduct/reduct.h>
+#include  <opencog/learning/moses/moses/complexity.h>
 #include "ensemble.h"
 
 namespace opencog {
@@ -346,6 +348,11 @@ const combo::combo_tree& ensemble::get_expert_tree() const
 
 	for (const scored_combo_tree& sct : _scored_trees)
 		_weighted_tree.append_child(head, sct.get_tree().begin());
+
+	// Very surprisingly, reduct does not seem to make a differrence! Hmmm.
+	// std::cout << "before reduct " << tree_complexity(_weighted_tree) << std::endl;
+	// reduct::logical_reduce(1, _weighted_tree);
+	// std::cout << "ater reduct " << tree_complexity(_weighted_tree) << std::endl;
 
 	return _weighted_tree;
 }

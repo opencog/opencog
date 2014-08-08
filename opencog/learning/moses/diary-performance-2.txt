@@ -659,21 +659,61 @@ Strategy C:
    should reject all rows with a vote of less than s. 
 
 
-Notes: complexity penalty is much too sharp.
-set complexity ratio to 200 or more
+Boosted pre-scorer results
+--------------------------
+Strategy A has been implemented. Since the ensemble always has a
+precision of 1.0, the actual score is always 1.0 - activation_penalty.
 
-excess calls:
-call 0:  moses_main.h:313 local_moses.cc:124 metapopulation.cc:222  behave_cscore.cc:103
+Columns are:
+no-dupe: -i preselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 --boost=1
+presel: -i preselect.csv -Hpre -Yval -q0.05 -z350 -v45 --boost=1
 
-call 1: local_moses.cc:89  metapopulation.cc:222  dex.free_demes(); ?? 
-                                        mp.log_best_candidates(); ??
-call 2: local_moses.cc:151     stats print
-call 3: metapopulation.h:151   
-call 4: local_moses.cc:124    what is the mp best score ... ?
+     num_evals  no-dupe         presel
+                      (time)       (time)  
+     --------- --------------   --------------
+        10K    0.50226 (0m21s)  0.27912 (0m16s)
+        20K    0.50226 (1m25s)  0.80556 (0m59s)
+        40K    0.68458 (4m36s)  0.80488 (3m48s)
+        80K    1.0     (6m8s)   0.80000 (14m15s) 
 
-const multi_type_seq& 
+The last one went down!  How odd ... 
 
-std::function<score_t(const multi_type_seq&)>
+But an activation of 0.05 seems far too easy.  Try again with -q0.25:
 
- metapopulation::best_composite_score() should call
-    behave_cscore::best_possible_score
+     num_evals  no-dupe          presel
+                      (time)        (time)  
+     --------- --------------    --------------
+        10K    -1.10718 (0m21s)  -1.33032 (0m16s)
+        20K    -1.10718 (1m27s)  -0.02069 (0m57s)
+        40K    -0.92486 (4m50s)   0.10869 (3m39s)
+        80K    -0.46532 (17m4s)   0.30226 (14m48s)
+
+Both these activations are still pathetic ... 
+
+Comparable non-boosted results:
+
+     num_evals  no-dupe          presel
+                      (time)        (time)  
+     --------- --------------    --------------
+        10K    0.5 (0m15s)       0.5 (0m25s)
+        20K    0.5 (0m52s)       0.5 (1m28s)
+        40K
+
+
+     num_evals  preselect       no-dupe       
+                      (time)       (time)  
+     --------- --------------   ---------
+        10K    0.78476 (0m14s)  1.0 (0m2s)
+        40K    0.78947 (3m31s)
+
+
+The precision scorer just strikes me as being awfully underwhelming ... 
+
+
+
+Future directions
+-----------------
+* Explore the "local expert" idea above.
+* Try to understand the underlying claim about getting good results
+  from the precision scorer.
+
