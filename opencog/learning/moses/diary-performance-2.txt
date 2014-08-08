@@ -633,6 +633,7 @@ Strategy A:
    The weight it is given does not matter.
 -- Decrease the weight of the rows it selects.  Increase the
    weights of all the other rows.
+-- The retrned get_weighted_tree() also needs modification.
 
 Strategy B:
 -----------
