@@ -690,21 +690,41 @@ But an activation of 0.05 seems far too easy.  Try again with -q0.25:
 
 Both these activations are still pathetic ... 
 
-Comparable non-boosted results:
+Comparable non-boosted results, for -q0.05:
 
      num_evals  no-dupe          presel
                       (time)        (time)  
      --------- --------------    --------------
-        10K    0.5 (0m15s)       0.5 (0m25s)
-        20K    0.5 (0m52s)       0.5 (1m28s)
-        40K    0.5 (3m10s)
+         1K    0.61643 (0m1s)    0.72727 (0m1s)
+         2K    0.80952 (0m2s)    0.72727 (0m2s)
+         5K    1.0 (0m2s)        0.76471 (0m5s)
+        10K     -                0.78476 (0m14s)
+        40K     -                0.78947 (3m35s)
+        80K     -                0.82143 (14m0s)
 
+Comparable non-boosted results, for -q0.25:
 
-     num_evals  preselect       no-dupe       
-                      (time)       (time)  
-     --------- --------------   ---------
-        10K    0.78476 (0m14s)  1.0 (0m2s)
-        40K    0.78947 (3m31s)
+     num_evals  no-dupe          presel
+                      (time)        (time)  
+     --------- --------------    --------------
+         5K    0.68421 (0m6s)    
+        10K    0.68421 (0m21s)   0.65549 (0m16s)
+        20K    0.72043 (1m11s)   0.70588 (1m4s)
+        40K    0.72043 (4m9s)    0.70588 (4m32s)
+        80K    0.72414 (15m6s)
+
+OK, the non-boosted results are better or sometimes a tie, this is
+because the hill-climbing stage was not making use of the penalties.
+This was a mis-design in the score-mangling stages.  Yuck, scoring is
+just complicated.  So redo:  below are boosted versions, with the
+fixed ranking during hill-climbing:
+
+     num_evals  no-dupe          presel
+                       (time)        (time)  
+     --------- ---------------   --------------
+        10K    0.59757 (0m17s)   0.76190 (0m21s)
+        20K    0.83873 (1m2s)    0.77272 (1m21s)
+        40K    1.0     (2m53s)
 
 
 The precision scorer just strikes me as being awfully underwhelming ... 

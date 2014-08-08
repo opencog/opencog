@@ -123,11 +123,18 @@ score_t bscore_base::sum_bscore(const behavioral_score& bs) const
     if (not _return_weighted_score or _size == 0 or _weights.size() == 0)
         return boost::accumulate(bs, 0.0);
 
+    size_t i=0;
     score_t res = 0.0;
-    for (size_t i=0; i<_size; i++) {
+    for (; i<_size; i++) {
         res += _weights[i] * bs[i];
     }
 
+    // Any extra penalties tacked onto the end of the bscore get added
+    // without any weights.  For example, the "pre" scoer tacks these
+    // on, so that the minimum activation can be hit.
+    for (; i<bs.size(); i++) {
+        res += bs[i];
+    }
     return res;
 }
 
