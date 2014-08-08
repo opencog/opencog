@@ -632,8 +632,10 @@ Strategy A:
 -- Accept a tree into ensemble only if it has perfect score. 
    The weight it is given does not matter.
 -- Decrease the weight of the rows it selects.  Increase the
-   weights of all the other rows.
--- The retrned get_weighted_tree() also needs modification.
+   weights of all the other rows.  The idea is to have it focus on
+   those rows it hasn't learned.  These weights will affect the
+   optimization (hill-climbing) stage.
+-- The returned get_weighted_tree() also needs modification.
 
 Strategy B:
 -----------
@@ -656,3 +658,14 @@ Strategy C:
    should reject all rows with a vote of less than s. 
 
 
+Notes: complexity penalty is much too sharp.
+set complexity ratio to 200 or more
+
+excess calls:
+call 0:  moses_main.h:313 local_moses.cc:124 metapopulation.cc:222  behave_cscore.cc:103
+
+call 1: local_moses.cc:89  metapopulation.cc:222  dex.free_demes(); ?? 
+                                        mp.log_best_candidates(); ??
+call 2: local_moses.cc:151
+call 3: metapopulation.h:151
+call 4: local_moses.cc:124

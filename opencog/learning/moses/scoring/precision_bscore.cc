@@ -361,14 +361,15 @@ behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensem
         i++;
     }
 
-    if (active > 0) {
+    logger().info() << "Precision scorer: ensemble activity: " << active;
+    if (0.0 < active) {
         // normalize all components by active
         score_t iac = 1.0 / active; // inverse of activity to be faster
         for (auto& v : bs) v *= iac;
-        bs.push_back(0.5);
+        // bs.push_back(0.5);
     }
     else // Add 0.0 to ensure the bscore has the same size
-        bs.push_back(0.0);
+        // bs.push_back(0.0);
 
 #ifdef WHY_DO_WE_NEED_TO_DO_THIS // ????
     score_t activation = active / _ctable_weight;
@@ -412,7 +413,6 @@ score_t precision_bscore::get_error(const behavioral_score& bs) const
     double accum = 0.0;
     for (size_t i=0; i<_size; i++) if (bs[i] < 0.0) accum -= 2.0 * bs[i];
 
-logger().info() <<"duuude precision err: " << accum;
     return accum;
 }
 

@@ -211,7 +211,8 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 }
 
 /**
- * Add trees that expertly select rows.
+ * Add trees that expertly select rows.  These are trees that select
+ * only a handful of rows, but they are exactly the true-positive rows.
  */
 void ensemble::add_expert(scored_combo_tree_set& cands)
 {
@@ -230,8 +231,8 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
 		// This condition indicates "perfect score". This is the only type
-		// of tree that we accept.
-		if (err >= _tolerance) {
+		// of tree that we accept into the ensemble.
+		if (_tolerance <= err) {
 			logger().info() << "Expert: Best tree not good enough: " << err;
 			break;
 		}
