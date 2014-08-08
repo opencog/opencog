@@ -142,13 +142,14 @@ void local_moses(metapopulation& mp,
         // (columns of tab-seprated numbers)
         if (logger().isInfoEnabled()) {
 
+            composite_score best(mp.best_composite_score());
             std::stringstream ss;
             ss << "Stats: " << stats.n_expansions
                << "\t" << stats.n_evals    // number of evaluations so far
                << "\t" << ((int) stats.elapsed_secs)  // wall-clock time.
-               << "\t" << mp.size()       // size of the metapopulation
-               << "\t" << mp.best_score() // score of the highest-ranked exemplar.
-               << "\t" << mp.best_composite_score().get_complexity(); // as above.
+               << "\t" << mp.size()        // size of the metapopulation
+               << "\t" << best.get_score() // score of the highest-ranked exemplar.
+               << "\t" << best.get_complexity(); // as above.
             if (os) {
                 ss << "\t" << os->field_set_size  // number of bits in the knobs
                    << "\t" << os->nsteps  // number of iterations of optimizer
