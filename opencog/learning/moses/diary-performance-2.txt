@@ -548,6 +548,7 @@ Results depend sharply on the complexity ratio and the temperature,
 a quick sniff test shows: -z150 for the ratio and -v25 for the
 temperature seem to work very well for preselect-no-dupe.csv and
 
+-z150 -v25 for preselect-no-dupe.csv
 -z350 -v45 for preselect.csv
 
    moses -Hpre -q0.05 -Yval -ipreselect.csv
@@ -632,8 +633,10 @@ Strategy A:
 -- Accept a tree into ensemble only if it has perfect score. 
    The weight it is given does not matter.
 -- Decrease the weight of the rows it selects.  Increase the
-   weights of all the other rows.
--- The retrned get_weighted_tree() also needs modification.
+   weights of all the other rows.  The idea is to have it focus on
+   those rows it hasn't learned.  These weights will affect the
+   optimization (hill-climbing) stage.
+-- The returned get_weighted_tree() also needs modification.
 
 Strategy B:
 -----------
@@ -655,4 +658,92 @@ Strategy C:
    i.e. bad rows are being selected with strrength s; thus, the ensemble
    should reject all rows with a vote of less than s. 
 
+
+Boosted pre-scorer results
+--------------------------
+Strategy A has been implemented. Since the ensemble always has a
+precision of 1.0, the actual score is always 1.0 - activation_penalty.
+
+Columns are:
+no-dupe: -i preselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 --boost=1
+presel: -i preselect.csv -Hpre -Yval -q0.05 -z350 -v45 --boost=1
+
+     num_evals  no-dupe         presel
+                       (time)           (time)  
+     --------- --------------   --------------
+        10K    0.50226 (0m21s)  0.27912 (0m16s)
+        20K    0.50226 (1m25s)  0.80556 (0m59s)
+        40K    0.68458 (4m36s)  0.80488 (3m48s)
+        80K    1.0     (6m8s)   0.80000 (14m15s) 
+
+The last one went down!  How odd ... 
+
+But an activation of 0.05 seems far too easy.  Try again with -q0.25:
+
+     num_evals  no-dupe          presel
+                        (time)            (time)  
+     --------- --------------    --------------
+        10K    -1.10718 (0m21s)  -1.33032 (0m16s)
+        20K    -1.10718 (1m27s)  -0.02069 (0m57s)
+        40K    -0.92486 (4m50s)   0.10869 (3m39s)
+        80K    -0.46532 (17m4s)   0.30226 (14m48s)
+
+Both these activations are still pathetic ... 
+
+Comparable non-boosted results, for -q0.05:
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- --------------    --------------
+         1K    0.61643 (0m1s)    0.72727 (0m1s)
+         2K    0.80952 (0m2s)    0.72727 (0m2s)
+         5K    1.0 (0m2s)        0.76471 (0m5s)
+        10K     -                0.78476 (0m14s)
+        40K     -                0.78947 (3m35s)
+        80K     -                0.82143 (14m0s)
+
+Comparable non-boosted results, for -q0.25:
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- --------------    --------------
+         5K    0.68421 (0m6s)    
+        10K    0.68421 (0m21s)   0.65549 (0m16s)
+        20K    0.72043 (1m11s)   0.70588 (1m4s)
+        40K    0.72043 (4m9s)    0.70588 (4m32s)
+        80K    0.72414 (15m6s)   0.72043 (18m19s)
+
+OK, the non-boosted results are better or sometimes a tie, this is
+because the hill-climbing stage was not making use of the penalties.
+This was a mis-design in the score-mangling stages.  Yuck, scoring is
+just complicated.  So redo:  below are boosted versions, with the
+fixed ranking during hill-climbing:
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- ---------------   --------------
+        10K    0.59757 (0m17s)   0.76190 (0m21s)
+        20K    0.83873 (1m2s)    0.77272 (1m21s)
+        40K    1.0     (2m53s)   0.78788 (4m44s)
+        80K     -                0.80000 (17m1s)
+
+And again with -q0.25:
+
+     num_evals  no-dupe            presel
+                        (time)            (time)  
+     --------- ----------------   --------------
+        10K    -2.02347 (0m19s)   0.63925 (0m21s)
+        20K    -1.80032 (1m2s)    0.65588 (1m15s)
+        40K    -1.46385 (3m48)    0.68839 (4m34s)
+        80K    -0.92485 (13m36s)  0.71084 (16m5s)
+
+The precision scorer just strikes me as being awfully underwhelming ... 
+
+
+
+Future directions
+-----------------
+* Explore the "local expert" idea above.
+* Try to understand the underlying claim about getting good results
+  from the precision scorer.
 

@@ -117,26 +117,33 @@ bscore_base::get_error(const behavioral_score&) const
     return -1.0;
 }
 
-score_t bscore_base::score(const behavioral_score& bs) const
+score_t bscore_base::sum_bscore(const behavioral_score& bs) const
 {
-    // OC_ASSERT(bs.size() == _size, "Unexpected behavioral score size! "
-    //           " Got %d expected %d", bs.size(), _size);
-
-    // Hack (temporary?) to have variable size bscore work (without boost)
-    if (_size == 0 or _weights.size() == 0)
+    // Don't use weights if not boosting.
+    if (not _return_weighted_score or _size == 0 or _weights.size() == 0)
         return boost::accumulate(bs, 0.0);
 
+    size_t i=0;
     score_t res = 0.0;
-    for (size_t i=0; i<_size; i++) {
+    for (; i<_size; i++) {
         res += _weights[i] * bs[i];
     }
 
+    // Any extra penalties tacked onto the end of the bscore get added
+    // without any weights.  For example, the "pre" scoer tacks these
+    // on, so that the minimum activation can be hit.
+    for (; i<bs.size(); i++) {
+        res += bs[i];
+    }
     return res;
 }
 
 void bscore_base::reset_weights()
 {
-    _weights = std::vector<double>(_size, 1.0);
+    if (_return_weighted_score)
+        _weights = std::vector<double>(_size, 1.0);
+    else
+        _weights = std::vector<double>();
 }
 
 

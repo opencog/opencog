@@ -106,6 +106,7 @@ void bool_problem_base::run(option_base* ob)
     }
 
     logical_bscore bscore = get_bscore(_dparms.problem_size);
+    if (pms.meta_params.do_boosting) bscore.use_weighted_scores();
 
     type_tree sig = gen_signature(id::boolean_type, get_arity(_dparms.problem_size));
     unsigned as = alphabet_size(sig, pms.ignore_ops);

@@ -190,15 +190,13 @@ void precision_bscore::set_complexity_coef(score_t ratio)
     logger().info() << "Precision scorer, complexity ratio = " << 1.0f/_complexity_coef;
 }
 
-behavioral_score precision_bscore::operator()(const combo_tree& tr) const
+/// scorer, the workhorse that does the actual scoring.
+behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_seq&)> select) const
 {
     behavioral_score bs;
 
     score_t active = 0.0;  // total weight of active outputs by tr
     score_t sao = 0.0;     // sum of all active outputs
-
-    interpreter_visitor iv(tr);
-    auto interpret_tr = boost::apply_visitor(iv);
 
     // 1. Compute active and sum of all active outputs
     //
@@ -213,13 +211,13 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     map<TTable::value_type, Counter<bool, count_t>> time2res;
     CTable ctable_res;
     for (const CTable::value_type& io_row : _wrk_ctable) {
-        const auto& irow = io_row.first;
+        // const auto& irow = io_row.first;
+        const multi_type_seq& irow = io_row.first;
         const auto& orow = io_row.second;
 
-        vertex result = interpret_tr(irow.get_variant());
-
         score_t sumo = 0.0;  // zero if not active
-        if (result == id::logical_true) {
+        bool selected = select(irow);
+        if (selected) {
             sumo = sum_outputs(orow);
             sao += sumo;
             active += orow.total_count();
@@ -229,7 +227,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
             for (const CTable::counter_t::value_type& tcv : orow) {
                 bool target = vertex_to_bool(tcv.first.value);
                 if (!positive) target = !target;
-                count_t count = result == id::logical_true ? tcv.second : 0.0;
+                count_t count = selected ? tcv.second : 0.0;
                 time2res[tcv.first.timestamp][target] += count;
             }
         } else {
@@ -241,6 +239,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
             CTable::key_type dummy_input;
             for (const CTable::counter_t::value_type& tcv : orow) {
                 auto tclass = get_timestamp_class(tcv.first.timestamp);
+                vertex result = selected? id::logical_true : id::logical_false;
                 TimedValue timed_result({result, tclass});
                 ctable_res[dummy_input][timed_result] += tcv.second;
             }
@@ -257,7 +256,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
         }
     }
 
-    if (active > 0) {
+    if (0.0 < active) {
         // normalize all components by active
         score_t iac = 1.0 / active; // inverse of activity to be faster
         for (auto& v : bs) v *= iac;
@@ -307,6 +306,22 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
         logger().fine("dispersion_penalty = %f", dispersion_penalty);
     }
 
+    return bs;
+}
+
+/// scorer, for use with individual combo trees
+behavioral_score precision_bscore::operator()(const combo_tree& tr) const
+{
+    interpreter_visitor iv(tr);
+    auto interpret_tr = boost::apply_visitor(iv);
+
+    std::function<bool(const multi_type_seq&)> selector;
+    selector = [&](const multi_type_seq& irow)->bool
+    {
+        return id::logical_true == interpret_tr(irow.get_variant());
+    };
+
+    behavioral_score bs(do_score(selector));
     log_candidate_bscore(tr, bs);
     return bs;
 }
@@ -314,9 +329,16 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 /// scorer, suitable for use with boosting.
 behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensemble) const
 {
+
+    // For large tables, it is much more efficient to convert the
+    // ensemble into a single tree, and just iterate on that, instead
+    // of having multiple iterations on multiple trees.  But either way,
+    // the two scorers here should be functionally equivalent.
+// #define SCORE_MANY_TREES
+#ifdef SCORE_MANY_TREES
     // Step 1: If any tree in the ensemble picks a row, that row is
     // picked by the ensemble as a whole.
-    behavioral_score hypoth(_size, 0.0);
+    std::vector<bool> hypoth(_size, false);
     for (const scored_combo_tree& sct: ensemble) {
         const combo_tree& tr = sct.get_tree();
 
@@ -329,55 +351,38 @@ behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensem
             const auto& irow = io_row.first;
 
             if (interpret_tr(irow.get_variant()) == id::logical_true) {
-                hypoth[i] = 1.0;
+                hypoth[i] = true;
             }
             i++;
         }
     }
 
-    // Step 2: tot up the active rows. XXX TODO -- this should be
-    // *identical* to the code above, except that instead of calling
-    // interpret_tr we would pull the resolt from the hypoth array ...
-    // FIXME: need to do the above to get the time stuff to work
-    // correctly.
-    score_t active = 0.0;  // total weight of active outputs
-    score_t sao = 0.0;     // sum of all active outputs
-    behavioral_score bs(_size, 0.0);
+    // Step 2: tot up the active rows.
     size_t i = 0;
-    for (const CTable::value_type& io_row : _wrk_ctable) {
-        // io_row.first = input vector
-        // io_row.second = counter of outputs
-        const auto& orow = io_row.second;
+    std::function<bool(const multi_type_seq&)> selector;
+    selector = [&](const multi_type_seq& irow)->bool
+    {
+        return hypoth[i++];
+    };
+    return do_score(selector);
+#else // SCORE_MANY_TREES
 
-        bool predict_inside = (0 < hypoth[i]);
-        score_t sumo = 0.0;  // zero if not active
-        if (predict_inside) {
-            sumo = sum_outputs(orow);
-            sao += sumo;
-            active += orow.total_count();
-        }
-        bs[i] = sumo;
-
-        i++;
+    // For large tables, it is much more efficient to convert the
+    // ensemble into a single tree, so that we iterate over the table
+    // just once, instead of once-per-tree.
+    if (1 == ensemble.size()) {
+        return this->operator()(ensemble.begin()->get_tree());
     }
 
-    if (active > 0) {
-        // normalize all components by active
-        score_t iac = 1.0 / active; // inverse of activity to be faster
-        for (auto& v : bs) v *= iac;
-        bs.push_back(0.5);
-    }
-    else // Add 0.0 to ensure the bscore has the same size
-        bs.push_back(0.0);
+    combo_tree tr;
+    combo_tree::pre_order_iterator head;
+    head = tr.set_head(combo::id::logical_or);
 
-#ifdef WHY_DO_WE_NEED_TO_DO_THIS // ????
-    score_t activation = active / _ctable_weight;
-    score_t activation_penalty = get_activation_penalty(activation);
-    bs.push_back(activation_penalty);
-#endif
+    for (const scored_combo_tree& sct : ensemble)
+        tr.append_child(head, sct.get_tree().begin());
 
-logger().info() <<"duuude olaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << bs;
-    return bs;
+    return this->operator()(tr);
+#endif // SCORE_MANY_TREES
 }
 
 score_t precision_bscore::get_error(const behavioral_score& bs) const
@@ -390,9 +395,9 @@ score_t precision_bscore::get_error(const behavioral_score& bs) const
     //
     // If summed with the boosted weights, we have a cross-product of
     // the following cases:
-    // a) row is lightly weighted, because previous trees added to 
+    // a) row is lightly weighted, because previous trees added to
     //    ensemble were already picking it correctly.
-    // b) row is heavily weighted, because previous trees added to 
+    // b) row is heavily weighted, because previous trees added to
     //    ensemble were picking it wrongly.
     //
     // G) bscore is positive; this tree is correctly selecting the row.
@@ -412,7 +417,6 @@ score_t precision_bscore::get_error(const behavioral_score& bs) const
     double accum = 0.0;
     for (size_t i=0; i<_size; i++) if (bs[i] < 0.0) accum -= 2.0 * bs[i];
 
-logger().info() <<"duuude precision err: " << accum;
     return accum;
 }
 
@@ -523,7 +527,8 @@ behavioral_score precision_bscore::worst_possible_bscore() const
 }
 
 // Note that the logarithm is always negative, so this method always
-// returns a value that is zero or negative.
+// returns a value that is zero or negative.  Note that it returns
+// -inf if activation is 0.0 -- but that's OK, it won't hurt anything.
 score_t precision_bscore::get_activation_penalty(score_t activation) const
 {
     score_t dst = 0.0;

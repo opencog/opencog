@@ -27,6 +27,8 @@
 #include <iostream>
 
 #include  <opencog/util/oc_assert.h>
+#include  <opencog/comboreduct/reduct/reduct.h>
+#include  <opencog/learning/moses/moses/complexity.h>
 #include "ensemble.h"
 
 namespace opencog {
@@ -211,17 +213,24 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 }
 
 /**
- * Add trees that expertly select rows.
+ * Add trees that expertly select rows.  These are trees that select
+ * only a handful of rows, but they are exactly the true-positive rows.
  */
 void ensemble::add_expert(scored_combo_tree_set& cands)
 {
 	int promoted = 0;
 	while (true) {
 		// Find the element (the combo tree) with the least error. This is
-		// the element with the highest score.
+		// the element with the highest score, that does not also accept
+		// undesirable members. (i.e. has an imperfect classifcation)
 		scored_combo_tree_set::iterator best_p =
 			std::min_element(cands.begin(), cands.end(),
-				[](const scored_combo_tree& a, const scored_combo_tree& b) {
+				[&](const scored_combo_tree& a, const scored_combo_tree& b) {
+               bool abad = (_tolerance < _bscorer.get_error(a.get_bscore()));
+               bool bbad = (_tolerance < _bscorer.get_error(b.get_bscore()));
+               if (abad and bbad) return a.get_score() > b.get_score();
+               if (abad) return false;
+               if (bbad) return true;
 					return a.get_score() > b.get_score(); });
 
 		logger().info() << "Expert: candidate score=" << best_p->get_score();
@@ -230,8 +239,8 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
 		// This condition indicates "perfect score". This is the only type
-		// of tree that we accept.
-		if (err >= _tolerance) {
+		// of tree that we accept into the ensemble.
+		if (_tolerance <= err) {
 			logger().info() << "Expert: Best tree not good enough: " << err;
 			break;
 		}
@@ -345,6 +354,11 @@ const combo::combo_tree& ensemble::get_expert_tree() const
 
 	for (const scored_combo_tree& sct : _scored_trees)
 		_weighted_tree.append_child(head, sct.get_tree().begin());
+
+	// Very surprisingly, reduct does not seem to make a differrence! Hmmm.
+	// std::cout << "before reduct " << tree_complexity(_weighted_tree) << std::endl;
+	// reduct::logical_reduce(1, _weighted_tree);
+	// std::cout << "ater reduct " << tree_complexity(_weighted_tree) << std::endl;
 
 	return _weighted_tree;
 }

@@ -130,7 +130,7 @@ score_t logical_bscore::min_improv() const
 score_t logical_bscore::get_error(const behavioral_score& bs) const
 {
     // Its minus the score: 0.0 is perfect score, 1.0 is worst score.
-    return - score(bs) / ((score_t) _size);
+    return - sum_bscore(bs) / ((score_t) _size);
 }
 
 ///////////////////
