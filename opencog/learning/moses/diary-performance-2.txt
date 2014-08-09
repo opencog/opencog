@@ -748,17 +748,25 @@ experts.
         10K    0.14558 (0m15s)   0.69587 (0m19s)
         20K    0.90772 (0m44s)   0.69587 (1m9s)
         40K    1.0     (1m3s)    0.78378 (4m15s)
-        80K     -                0
+        80K     -                0.79070 (16m26s)
 
 And again, with -q0.25:
 
      num_evals  no-dupe          presel
                         (time)            (time)  
      --------- ----------------   --------------
-        10K    -1.33032 (0m18s)   
-        20K    -1.21254 (1m0s)
-        40K    -1.01187 (3m33s)
-        80K
+        10K    -1.33032 (0m18s)   0.50092 (0m28s)
+        20K    -1.21254 (1m0s)    0.52000 (1m30s)
+        40K    -1.01187 (3m33s)   0.66387 (5m1s)
+        80K    -0.84481 (13m15s)  0.66667 (19m42s)
+
+A third possibility: try adding multiple trees per run ... below results
+are boosted, and add 3 trees per knob-expansion cycle.
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- ---------------   --------------
+        10K    
 
 The precision scorer just strikes me as being awfully underwhelming ... 
 

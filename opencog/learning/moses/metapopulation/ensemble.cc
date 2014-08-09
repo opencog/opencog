@@ -460,6 +460,7 @@ const combo::combo_tree& ensemble::get_expert_tree() const
 		impulse = _weighted_tree.append_child(times, combo::id::impulse);
 		_weighted_tree.append_child(impulse, sct.get_tree().begin());
 	}
+	return _weighted_tree;
 }
 
 /**

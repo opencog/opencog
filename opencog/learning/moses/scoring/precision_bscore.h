@@ -173,6 +173,9 @@ private:
     // function to calculate the total weight of the observations
     // associated to an input vector
     score_t sum_outputs(const CTable::counter_t&) const;
+
+    behavioral_score exact_selection(const scored_combo_tree_set&) const;
+    behavioral_score bias_selection(const scored_combo_tree_set&) const;
 };
 
 /**
