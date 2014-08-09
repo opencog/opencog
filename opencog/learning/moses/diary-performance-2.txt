@@ -650,17 +650,17 @@ Strategy B:
 
 Strategy C:
 -----------
--- Allow imperfect selectors into the ensemble.  Problem: this makes
-   it unclear on how the ensemble chooses: does a row need a minimum
-   number of votes to be elected? What is that minimum? Is it ad-hoc?
-   Is there a running-bias that we can maintain to find this minimum?
+-- Allow imperfect selectors into the ensemble.  The ensemble then
+   selects only when a row gets more than a minimum vote.  The actual
+   minimum is maintained as a running bias in the ensemble: it is
+   a hair larger than the strongest vote for an incorrect row.  That
+   is, if bad rows are being selected with a strength s; then the bias
+   is the largest such s, and the ensemble should reject all rows with
+   a vote of less than s. 
 
-   i.e. bad rows are being selected with strrength s; thus, the ensemble
-   should reject all rows with a vote of less than s. 
 
-
-Boosted pre-scorer results
---------------------------
+Stragetgy A Boosted pre-scorer results
+--------------------------------------
 Strategy A has been implemented. Since the ensemble always has a
 precision of 1.0, the actual score is always 1.0 - activation_penalty.
 
@@ -737,8 +737,35 @@ And again with -q0.25:
         40K    -1.46385 (3m48)    0.68839 (4m34s)
         80K    -0.92485 (13m36s)  0.71084 (16m5s)
 
+Take a third shot, with a different weighting scheme.  The above
+used an expalpha of 1.2, while the below uses an expalpha of 2.0.
+The larger exalpha should encrourage the discovery of more diverse
+experts.
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- ---------------   --------------
+        10K    0.14558 (0m15s)   0.69587 (0m19s)
+        20K    0.90772 (0m44s)   0.69587 (1m9s)
+        40K    1.0     (1m3s)    0.78378 (4m15s)
+        80K     -                0
+
+And again, with -q0.25:
+
+     num_evals  no-dupe          presel
+                        (time)            (time)  
+     --------- ----------------   --------------
+        10K    -1.33032 (0m18s)   
+        20K    -1.21254 (1m0s)
+        40K    -1.01187 (3m33s)
+        80K
+
 The precision scorer just strikes me as being awfully underwhelming ... 
 
+
+Stragetgy C Boosted pre-scorer results
+--------------------------------------
+The strategy A results are underwhelming.  Try again with strategy C.
 
 
 Future directions
