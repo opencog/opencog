@@ -76,11 +76,21 @@
 
 (EvaluationLink (PredicateNode "desired_outputs")
 	(ListLink
-	    (InheritanceLink
-	        (ConceptNode "optician")
-	        (ConceptNode "Canadian")
+	    ; "Some right-handed people are opticians"
+	    (EvaluationLink (stv 0.99 0.99)
+	        (PredicateNode "some")
+	        (ListLink
+	            (AndLink
+	                (InheritanceLink
+	                    (ConceptNode "people")
+	                    (ConceptNode "right-handed")
+	                )
+	                (InheritanceLink
+	                    (ConceptNode "people")
+	                    (ConceptNode "optician")
+	                )
+	            )
+	        )
 	    )
-	    ; Conclusion: Some opticians are Canadian
-	    ; needs proper handling of quantities!
 	)
 )
