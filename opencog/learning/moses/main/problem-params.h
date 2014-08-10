@@ -110,7 +110,6 @@ struct problem_params : public option_base
     int revisit;
     bool reduce_all;
     bool linear_regression;
-    bool boosting;
     bool discard_dominated;
     double noise;
     score_t complexity_temperature;
@@ -118,6 +117,10 @@ struct problem_params : public option_base
     double cap_coef;
     unsigned cache_size;
     double perm_ratio;
+    bool boosting;
+    int num_to_promote;
+    bool exact_experts;
+    double expalpha;
     
     // metapopulation diversity parameters
     score_t diversity_pressure;

@@ -32,10 +32,9 @@ struct ensemble_parameters
 	ensemble_parameters() :
 		do_boosting(false),
 		experts(false),
-		// exact_experts(false),
 		exact_experts(true),
 		expalpha(2.0),
-		num_to_promote(3)
+		num_to_promote(1)
 	{}
 
 	bool do_boosting;    // boosting is enabled ... 

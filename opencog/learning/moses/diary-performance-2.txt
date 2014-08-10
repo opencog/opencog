@@ -766,7 +766,12 @@ are boosted, and add 3 trees per knob-expansion cycle.
      num_evals  no-dupe          presel
                        (time)            (time)  
      --------- ---------------   --------------
-        10K    
+        10K    0.27912 (0m21s)   0.80000 (0m17s)
+        20K    0.83873 (1m5s)    0.80000 (1m2s)
+        40K    1.0     (2m48s)   0.80435 (3m50s)
+        80K                      0.68539 (15m0s)
+
+Wow. The score went down for the last one ... strange.
 
 The precision scorer just strikes me as being awfully underwhelming ... 
 
@@ -774,6 +779,22 @@ The precision scorer just strikes me as being awfully underwhelming ...
 Stragetgy C Boosted pre-scorer results
 --------------------------------------
 The strategy A results are underwhelming.  Try again with strategy C.
+
+no-dupe: moses -ipreselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 
+         --boost=1 --boost-exact=0
+
+presel: moses -ipreselect.csv -Hpre -Yval -q0.05 -z350 -v45 
+         --boost=1 --boost-exact=0
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- ---------------   --------------
+        10K    0.48969 (0m17s)   0.38672 (0m19s)
+        20K    0.41525 (0m55s)   0.38224 (1m7s)
+        40K    0.31731 (3m27s)   0.38224 (4m13s)
+        80K    0.30091 (13m44s)  0.30091 (15m54)
+
+What a disaster.
 
 
 Future directions

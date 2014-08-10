@@ -64,6 +64,13 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	if (not ep.exact_experts) {
 		_row_bias = std::vector<double>(bslen, 0.0);
 	}
+
+	logger().info() << "Boosting: effective length: " << _effective_length;
+	logger().info() << "Boosting: number to promote: " << ep.num_to_promote;
+	if (ep.experts) {
+		logger().info() << "Boosting: exact experts: " << ep.exact_experts;
+		logger().info() << "Boosting: expalpha: " << ep.expalpha;
+	}
 }
 
 // Is this behavioral score correct? For boolean scores, correct is 0.0
@@ -257,7 +264,8 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
 		// This condition indicates "perfect score". This is the only type
-		// of tree that we accept into the ensemble.
+		// of tree that we accept into the ensemble.  Its unlikely that the
+		// next-highest scoring one will be any good, so just break.
 		if (_params.exact_experts and _tolerance <= err) {
 			logger().info() << "Exact expert: Best tree not good enough: " << err;
 			break;
