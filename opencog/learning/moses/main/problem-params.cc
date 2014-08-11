@@ -420,7 +420,27 @@ problem_params::add_options(boost::program_options::options_description& desc)
         ("boost",
          po::value<bool>(&boosting)->default_value(false),
          "Enable boosting for supervised learning problems.\n")
-        
+
+        ("boost-promote",
+         po::value<int>(&num_to_promote)->default_value(1),
+         "When boosting is enabled, this sets the number of candidates "
+         "that, after every deme expansion cycle, should be added to "
+         "the boosted ensemble.")
+
+        ("boost-exact",
+         po::value<bool>(&exact_experts)->default_value(true),
+         "When boosting is enabled with the -Hpre table problem, this "
+         "determines whether the expert candidates admitted into the "
+         "ensemble must be perfect, exact experts, or if they can make "
+         "mistakes.")
+
+        ("boost-expalpha",
+         po::value<double>(&expalpha)->default_value(2.0),
+         "When boosting is enabled with the -Hpre table problem, and "
+         "if the experts must be exact (option above), then this "
+         "determines the ad-hoc weighting that magnifies unselected "
+         "items in the dataset. ")
+
         (opt_desc_str(reduct_knob_building_effort_opt).c_str(),
          po::value<int>(&reduct_knob_building_effort)->default_value(2),
          "Effort allocated for reduction during knob building, 0-3, "
@@ -524,7 +544,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "This might be the case is feature selection is used for instance.\n")
 
         // Output control options
-        
+
         (opt_desc_str(result_count_opt).c_str(),
          po::value<long>(&result_count)->default_value(10),
          "The number of results to return, ordered according to "
@@ -577,7 +597,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "File where to place the output. If empty, then output to stdout.\n")
 
         // The remaining options (TODO organize this)
-        
+
         (opt_desc_str(min_rand_input_opt).c_str(),
          po::value<double>(&min_rand_input)->default_value(0.0),
          "Minimum value of a sampled coninuous input.  The cp, ip, pre, "
@@ -609,7 +629,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
                     " the log name is moses_random-seed_123_problem_pa.log."
                     " The name will be truncated in order not to"
                     " be longer than %s characters.\n")
-             % rand_seed_opt.second % problem_opt.second 
+             % rand_seed_opt.second % problem_opt.second
              % max_filename_size).c_str())
 
         (opt_desc_str(log_file_opt).c_str(),
@@ -1291,6 +1311,9 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
     meta_params.revisit = revisit;
     meta_params.do_boosting = boosting;
     meta_params.ensemble_params.do_boosting = boosting;
+    meta_params.ensemble_params.num_to_promote = num_to_promote;
+    meta_params.ensemble_params.exact_experts = exact_experts;
+    meta_params.ensemble_params.expalpha = expalpha;
     if (boosting) cache_size = 0;  // cached cscores are stale!
     meta_params.discard_dominated = discard_dominated;
     meta_params.keep_bscore = output_bscore;

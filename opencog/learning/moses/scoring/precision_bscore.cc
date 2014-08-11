@@ -326,10 +326,17 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
-/// scorer, suitable for use with boosting.
 behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensemble) const
 {
+    return exact_selection(ensemble);
+    // return bias_selection(ensemble);
+}
 
+/// scorer, suitable for use with boosting, where the members of the
+/// boosted ensemble are always correct in their selections. That is,
+/// they are "exact" scorers.
+behavioral_score precision_bscore::exact_selection(const scored_combo_tree_set& ensemble) const
+{
     // For large tables, it is much more efficient to convert the
     // ensemble into a single tree, and just iterate on that, instead
     // of having multiple iterations on multiple trees.  But either way,
@@ -383,6 +390,58 @@ behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensem
 
     return this->operator()(tr);
 #endif // SCORE_MANY_TREES
+}
+
+/// scorer, suitable for use with boosting, where the members of the
+/// ensemble sometimes make mistakes. The mistakes are avoided by 
+/// requiring the ensemble to cast a minimum vote, before a row is
+/// truely considered to be selected.  The minimum vote is clled the
+/// "bias" in the code below.
+behavioral_score precision_bscore::bias_selection(const scored_combo_tree_set& ensemble) const
+{
+    // Step 1: If any tree in the ensemble picks a row, that row is
+    // picked with appropriate weight.
+    std::vector<double> hypoth(_size, 0.0);
+    for (const scored_combo_tree& sct: ensemble) {
+        const combo_tree& tr = sct.get_tree();
+        score_t trweight = sct.get_weight();
+
+        interpreter_visitor iv(tr);
+        auto interpret_tr = boost::apply_visitor(iv);
+
+        size_t i=0;
+        for (const CTable::value_type& io_row : _wrk_ctable) {
+            // io_row.first = input vector
+            const auto& irow = io_row.first;
+
+            if (interpret_tr(irow.get_variant()) == id::logical_true) {
+                hypoth[i] += trweight;
+            }
+            i++;
+        }
+    }
+
+    // Step 2: find the worst wrong answer; that is our bias.
+    size_t i=0;
+    double bias = 0.0;
+    for (const CTable::value_type& io_row : _wrk_ctable) {
+        const CTable::counter_t& orow = io_row.second;
+
+        // sumo will be negative if it should not be selected.
+        double sumo = sum_outputs(orow);
+        if (0.0 > sumo and bias < hypoth[i]) bias = hypoth[i];
+        i++;
+    }
+    logger().info() << "Precision ensemble bias: " << bias;
+
+    // Step 3: tot up the active rows.
+    i = 0;
+    std::function<bool(const multi_type_seq&)> selector;
+    selector = [&](const multi_type_seq& irow)->bool
+    {
+        return bias < hypoth[i++];
+    };
+    return do_score(selector);
 }
 
 score_t precision_bscore::get_error(const behavioral_score& bs) const

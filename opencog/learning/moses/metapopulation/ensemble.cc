@@ -50,7 +50,7 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	// The current normalization is to have all row weights sum to 1.0
 	_bscorer.reset_weights();
 	std::vector<double>& weights = _bscorer.get_weights();
-	size_t bslen = _bscorer.size();
+	size_t bslen = weights.size();
 	double znorm = _effective_length / ((double) bslen);
 	for (size_t i=0; i<bslen; i++) weights[i] = znorm;
 
@@ -58,7 +58,19 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	// that arises when totaling the bscores.  As usual, assumes a
 	// normal distribution for this, so that its a square-root.
 	_tolerance = 2.0 * epsilon_score;
-	_tolerance *= sqrt(_bscorer.get_weights().size());
+	_tolerance *= sqrt((double)bslen);
+
+	_bias = 0.0;
+	if (not ep.exact_experts) {
+		_row_bias = std::vector<double>(bslen, 0.0);
+	}
+
+	logger().info() << "Boosting: effective length: " << _effective_length;
+	logger().info() << "Boosting: number to promote: " << ep.num_to_promote;
+	if (ep.experts) {
+		logger().info() << "Boosting: exact experts: " << ep.exact_experts;
+		logger().info() << "Boosting: expalpha: " << ep.expalpha;
+	}
 }
 
 // Is this behavioral score correct? For boolean scores, correct is 0.0
@@ -214,24 +226,37 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 
 /**
  * Add trees that expertly select rows.  These are trees that select
- * only a handful of rows, but they are exactly the true-positive rows.
+ * only a handful of rows, usually just the true-postive rows, unless
+ * exact_experts is set, in which case only the trees that are exactly
+ * correct are admitted to the ensemble.
  */
 void ensemble::add_expert(scored_combo_tree_set& cands)
 {
 	int promoted = 0;
 	while (true) {
-		// Find the element (the combo tree) with the least error. This is
-		// the element with the highest score, that does not also accept
-		// undesirable members. (i.e. has an imperfect classifcation)
-		scored_combo_tree_set::iterator best_p =
-			std::min_element(cands.begin(), cands.end(),
-				[&](const scored_combo_tree& a, const scored_combo_tree& b) {
-               bool abad = (_tolerance < _bscorer.get_error(a.get_bscore()));
-               bool bbad = (_tolerance < _bscorer.get_error(b.get_bscore()));
-               if (abad and bbad) return a.get_score() > b.get_score();
-               if (abad) return false;
-               if (bbad) return true;
-					return a.get_score() > b.get_score(); });
+		// Find the element (the combo tree) with the least error.
+		scored_combo_tree_set::iterator best_p;
+		if (_params.exact_experts) {
+			// Find the element (the combo tree) with the least error. This is
+			// the element with the highest score, that does not also accept
+			// undesirable members. (i.e. has an imperfect classifcation)
+			best_p =
+				std::min_element(cands.begin(), cands.end(),
+					[&](const scored_combo_tree& a, const scored_combo_tree& b) {
+						bool abad = (_tolerance < _bscorer.get_error(a.get_bscore()));
+						bool bbad = (_tolerance < _bscorer.get_error(b.get_bscore()));
+						if (abad and bbad) return a.get_score() > b.get_score();
+			 	 		if (abad) return false;
+						if (bbad) return true;
+						return a.get_score() > b.get_score(); });
+		} else {
+			// Find the element (the combo tree) with the least error. This is
+			// the element with the highest score. Imprecise experts are allowed.
+			best_p =
+				std::min_element(cands.begin(), cands.end(),
+					[&](const scored_combo_tree& a, const scored_combo_tree& b) {
+						return a.get_score() > b.get_score(); });
+		}
 
 		logger().info() << "Expert: candidate score=" << best_p->get_score();
 		double err = _bscorer.get_error(best_p->get_bscore());
@@ -239,25 +264,64 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
 		// This condition indicates "perfect score". This is the only type
-		// of tree that we accept into the ensemble.
-		if (_tolerance <= err) {
-			logger().info() << "Expert: Best tree not good enough: " << err;
+		// of tree that we accept into the ensemble.  Its unlikely that the
+		// next-highest scoring one will be any good, so just break.
+		if (_params.exact_experts and _tolerance <= err) {
+			logger().info() << "Exact expert: Best tree not good enough: " << err;
 			break;
 		}
 
 		// Set the weight for the tree, and stick it in the ensemble
 		scored_combo_tree best = *best_p;
-		best.set_weight(1.0);
+		double alpha;
+		double expalpha;
+		if (_params.exact_experts) {
+			alpha = 1.0;    // Ad-hoc but uniform weight.
+			expalpha = _params.expalpha; // Add-hoc boosting value ...
+			logger().info() << "Exact expert: add to ensemble " << *best_p;
+		} else {
+			// AdaBoost-style alpha; except we allow perfect scorers.
+			if (err < _tolerance) err = _tolerance;
+			alpha = 0.5 * log ((1.0 - err) / err);
+			expalpha = exp(alpha);
+			logger().info() << "Expert: add to ensemble " << *best_p  << std::endl
+				<< "With err=" << err << " alpha=" << alpha <<" exp(alpha)=" << expalpha;
+		}
+
+		best.set_weight(alpha);
 		_scored_trees.insert(best);
 
-		double expalpha = 1.2; // Add-hoc boosting value ...:1/bs
-		double rcpalpha = 1.0 / expalpha;
-		logger().info() << "Expert: add to ensemble " << *best_p;
+		// Adjust the bias, if needed.
+		if (not _params.exact_experts) {
+			const behavioral_score& bs = best_p->get_bscore();
+			const std::vector<double>& weights = _bscorer.get_weights();
+			size_t bslen = weights.size();
+
+			// Now, look to see where this scorer was wrong, and bump the
+			// bias for that.  Here, we make the defacto assumption that
+			// the scorer is the "pre" scorer, and so the bs ranges from
+			// -0.5 to +0.5, with zero denoting "row not selected by tree",
+			// a positive score denoting "row correctly selected by tree",
+			// and a negative score denoting "row wrongly selected by tree".
+			// The scores differ from +/-0.5 only if the rows are degenerate.
+			// Thus, the ensemble will incorrectly pick a row if it picks
+			// the row, and the weight isn't at least _bias.
+			for (size_t i=0; i<bslen; i++) {
+				if (bs[i] >= 0.0) continue;
+				// Get the unweighted score.
+				double unweighted = bs[i] / weights[i];
+				// -2.0 to cancel the -0.5 for bad row.
+				_row_bias[i] += -2.0 * alpha * unweighted;
+				if (_bias < _row_bias[i]) _bias = _row_bias[i];
+			}
+			logger().info() << "Experts: bias is now: " << _bias;
+		}
 
 		// Increase the importance of all remaining, unselected rows.
+		double rcpalpha = 1.0 / expalpha;
 		const behavioral_score& bs = best_p->get_bscore();
-		size_t bslen = _bscorer.size();
 		std::vector<double>& weights = _bscorer.get_weights();
+		size_t bslen = weights.size();
 		double znorm = 0.0;
 		for (size_t i=0; i<bslen; i++)
 		{
@@ -286,7 +350,10 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 const combo::combo_tree& ensemble::get_weighted_tree() const
 {
 	if (_params.experts) {
-		get_expert_tree();
+		if (_params.exact_experts)
+			get_exact_tree();
+		else
+			get_expert_tree();
 	} else {
 		get_adaboost_tree();
 	}
@@ -341,7 +408,7 @@ const combo::combo_tree& ensemble::get_adaboost_tree() const
 ///   or_i tree_i
 /// i.e. true if any member of the ensemble picked true.
 ///
-const combo::combo_tree& ensemble::get_expert_tree() const
+const combo::combo_tree& ensemble::get_exact_tree() const
 {
 	_weighted_tree.clear();
 	if (1 == _scored_trees.size()) {
@@ -360,6 +427,47 @@ const combo::combo_tree& ensemble::get_expert_tree() const
 	// reduct::logical_reduce(1, _weighted_tree);
 	// std::cout << "ater reduct " << tree_complexity(_weighted_tree) << std::endl;
 
+	return _weighted_tree;
+}
+
+/// Return the ensemble contents as a single, large tree.
+///
+/// Returns the combo tree expressing
+///    (sum_i weight_i * (tree_i ? 1.0 : 0.0)) > _bias)
+/// i.e. true if the summation is greater than the bias, else false.
+/// The goal of the bias is to neuter those members of the ensemble
+/// that are making mistakes in their selection.
+///
+const combo::combo_tree& ensemble::get_expert_tree() const
+{
+	_weighted_tree.clear();
+	if (1 == _scored_trees.size()) {
+		_weighted_tree = _scored_trees.begin()->get_tree();
+		return _weighted_tree;
+	}
+
+	combo::combo_tree::pre_order_iterator head, plus;
+
+	head = _weighted_tree.set_head(combo::id::greater_than_zero);
+	plus = _weighted_tree.append_child(head, combo::id::plus);
+
+	// score must be bettter than the bias.
+	vertex bias = -_bias;
+	_weighted_tree.append_child(plus, bias);
+
+	for (const scored_combo_tree& sct : _scored_trees)
+	{
+		combo::combo_tree::pre_order_iterator times, impulse;
+
+		// times is (weight * tree)
+		times = _weighted_tree.append_child(plus, combo::id::times);
+		vertex weight = sct.get_weight();
+		_weighted_tree.append_child(times, weight);
+
+		// impulse is +1.0 if tree is true, else it is equal to 0.0
+		impulse = _weighted_tree.append_child(times, combo::id::impulse);
+		_weighted_tree.append_child(impulse, sct.get_tree().begin());
+	}
 	return _weighted_tree;
 }
 

@@ -650,17 +650,17 @@ Strategy B:
 
 Strategy C:
 -----------
--- Allow imperfect selectors into the ensemble.  Problem: this makes
-   it unclear on how the ensemble chooses: does a row need a minimum
-   number of votes to be elected? What is that minimum? Is it ad-hoc?
-   Is there a running-bias that we can maintain to find this minimum?
+-- Allow imperfect selectors into the ensemble.  The ensemble then
+   selects only when a row gets more than a minimum vote.  The actual
+   minimum is maintained as a running bias in the ensemble: it is
+   a hair larger than the strongest vote for an incorrect row.  That
+   is, if bad rows are being selected with a strength s; then the bias
+   is the largest such s, and the ensemble should reject all rows with
+   a vote of less than s. 
 
-   i.e. bad rows are being selected with strrength s; thus, the ensemble
-   should reject all rows with a vote of less than s. 
 
-
-Boosted pre-scorer results
---------------------------
+Stragetgy A Boosted pre-scorer results
+--------------------------------------
 Strategy A has been implemented. Since the ensemble always has a
 precision of 1.0, the actual score is always 1.0 - activation_penalty.
 
@@ -737,8 +737,80 @@ And again with -q0.25:
         40K    -1.46385 (3m48)    0.68839 (4m34s)
         80K    -0.92485 (13m36s)  0.71084 (16m5s)
 
+Take a third shot, with a different weighting scheme.  The above
+used an expalpha of 1.2, while the below uses an expalpha of 2.0.
+The larger exalpha should encourage the discovery of more diverse
+experts.
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- ---------------   --------------
+        10K    0.14558 (0m15s)   0.69587 (0m19s)
+        20K    0.90772 (0m44s)   0.69587 (1m9s)
+        40K    1.0     (1m3s)    0.78378 (4m15s)
+        80K     -                0.79070 (16m26s)
+
+And again, with -q0.25:
+
+     num_evals  no-dupe          presel
+                        (time)            (time)  
+     --------- ----------------   --------------
+        10K    -1.33032 (0m18s)   0.50092 (0m28s)
+        20K    -1.21254 (1m0s)    0.52000 (1m30s)
+        40K    -1.01187 (3m33s)   0.66387 (5m1s)
+        80K    -0.84481 (13m15s)  0.66667 (19m42s)
+
+A third possibility: try adding multiple trees per run ... below results
+are boosted, and add 3 trees per knob-expansion cycle.
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- ---------------   --------------
+        10K    0.27912 (0m21s)   0.80000 (0m17s)
+        20K    0.83873 (1m5s)    0.80000 (1m2s)
+        40K    1.0     (2m48s)   0.80435 (3m50s)
+        80K                      0.68539 (15m0s)
+
+Wow. The score went down for the last one ... strange.
+
+Try adding the top 7:  (--boost-promote=7)
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- ---------------   --------------
+        10K    0.39690 (0m16s)   0.78049 (0m17s)
+        20K    0.83873 (1m4s)    0.78049 (1m4s)
+        40K    1.0     (3m11s)   0.77049 (3m54s)
+        80K                      0.68421 (15m19s)
+
+Hmm .. score dropping in the left column. How odd ... 
+
 The precision scorer just strikes me as being awfully underwhelming ... 
 
+
+Stragetgy C Boosted pre-scorer results
+--------------------------------------
+The strategy A results are underwhelming.  Try again with strategy C.
+
+no-dupe: moses -ipreselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 
+         --boost=1 --boost-exact=0
+
+presel: moses -ipreselect.csv -Hpre -Yval -q0.05 -z350 -v45 
+         --boost=1 --boost-exact=0
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- ---------------   --------------
+        10K    0.48969 (0m17s)   0.38672 (0m19s)
+        20K    0.41525 (0m55s)   0.38224 (1m7s)
+        40K    0.31731 (3m27s)   0.38224 (4m13s)
+        80K    0.30091 (13m44s)  0.30091 (15m54)
+
+What a disaster.  The harder we look, the worse the results.
+Presumably, what is happening is that, as the bias increases more and
+more to prevent bad rows from entering the selection, that the number
+of good rows is decreasing as well, thus raising the penalty and
+lowering the score.
 
 
 Future directions
