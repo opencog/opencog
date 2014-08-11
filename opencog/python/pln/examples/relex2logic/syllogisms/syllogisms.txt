@@ -1,0 +1,31 @@
+# Premises and conclusions of syllogisms that are supposed to be parsed with
+# RelEx2Logic and loaded into Python using load_r2l.py
+
+# Easy syllogisms
+a. Some travellers are not Caucasian.
+b. No tourists are travellers.
+|- Some tourists are not Caucasian.
+
+a. All trees are plants.
+b. Some trees are bushes.
+|- No plants are bushes.
+
+a. No pilots are stewardesses.
+b. All passengers are stewardesses.
+|- Some pilots are passengers.
+
+a. Some plants are not green.
+b. No organisms are plants.
+|- Some organisms are not green.
+
+a. All instruments are pianos.
+b. No instruments are guitars.
+|- Some guitars are not pianos.
+
+a. No chemists are athletes.
+b. All managers are athletes.
+|- Some chemists are managers.
+
+a. No bee keepers are cooks.
+b. All Dutch are bee keepers.
+|- Some cooks are not Dutch.
