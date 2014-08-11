@@ -739,7 +739,7 @@ And again with -q0.25:
 
 Take a third shot, with a different weighting scheme.  The above
 used an expalpha of 1.2, while the below uses an expalpha of 2.0.
-The larger exalpha should encrourage the discovery of more diverse
+The larger exalpha should encourage the discovery of more diverse
 experts.
 
      num_evals  no-dupe          presel
@@ -773,6 +773,18 @@ are boosted, and add 3 trees per knob-expansion cycle.
 
 Wow. The score went down for the last one ... strange.
 
+Try adding the top 7:  (--boost-promote=7)
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- ---------------   --------------
+        10K    0.39690 (0m16s)   0.78049 (0m17s)
+        20K    0.83873 (1m4s)    0.78049 (1m4s)
+        40K    1.0     (3m11s)   0.77049 (3m54s)
+        80K                      0.68421 (15m19s)
+
+Hmm .. score dropping in the left column. How odd ... 
+
 The precision scorer just strikes me as being awfully underwhelming ... 
 
 
@@ -794,7 +806,11 @@ presel: moses -ipreselect.csv -Hpre -Yval -q0.05 -z350 -v45
         40K    0.31731 (3m27s)   0.38224 (4m13s)
         80K    0.30091 (13m44s)  0.30091 (15m54)
 
-What a disaster.
+What a disaster.  The harder we look, the worse the results.
+Presumably, what is happening is that, as the bias increases more and
+more to prevent bad rows from entering the selection, that the number
+of good rows is decreasing as well, thus raising the penalty and
+lowering the score.
 
 
 Future directions

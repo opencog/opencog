@@ -310,7 +310,7 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 				if (bs[i] >= 0.0) continue;
 				// Get the unweighted score.
 				double unweighted = bs[i] / weights[i];
-				// -.20 to cancel the -0.5 for bad row.
+				// -2.0 to cancel the -0.5 for bad row.
 				_row_bias[i] += -2.0 * alpha * unweighted;
 				if (_bias < _row_bias[i]) _bias = _row_bias[i];
 			}
