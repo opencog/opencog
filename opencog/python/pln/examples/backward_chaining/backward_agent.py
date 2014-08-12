@@ -21,8 +21,6 @@ class BackwardAgent(MindAgent):
 
         self.chainer.add_rule(
             ModusPonensRule(self.chainer, types.ImplicationLink))
-        #self.chainer.add_rule(
-         #   AndCreationRule(self.chainer, 2))
 
     def run(self, atomspace):
         if self.chainer is None:
@@ -30,7 +28,6 @@ class BackwardAgent(MindAgent):
             print "PLN Chainer created."
             return
 
-        #if not check_result(atomspace):
         result = self.chainer.backward_step()
         return result
 
