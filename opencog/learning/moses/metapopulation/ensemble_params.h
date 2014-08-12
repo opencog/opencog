@@ -34,13 +34,15 @@ struct ensemble_parameters
 		experts(false),
 		exact_experts(true),
 		expalpha(2.0),
+		bias_scale(1.0),
 		num_to_promote(1)
 	{}
 
 	bool do_boosting;    // boosting is enabled ... 
 	bool experts;        // do "ensemble-of-experts" boosting.
 	bool exact_experts;  // experts must be perfectly correct.
-	double expalpha;     // Ad-hoc boosting coefficient.
+	double expalpha;     // Ad-hoc exact-expert boosting coefficient.
+	double bias_scale;   // Ad-hoc inexact-expert bias scale.
 	int num_to_promote;  // max number of demes to accept into ensemble,
 	                     // per learning iteration.
 };

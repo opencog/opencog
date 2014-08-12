@@ -801,10 +801,10 @@ presel: moses -ipreselect.csv -Hpre -Yval -q0.05 -z350 -v45
      num_evals  no-dupe          presel
                        (time)            (time)  
      --------- ---------------   --------------
-        10K    0.48969 (0m17s)   0.38672 (0m19s)
-        20K    0.41525 (0m55s)   0.38224 (1m7s)
-        40K    0.31731 (3m27s)   0.38224 (4m13s)
-        80K    0.30091 (13m44s)  0.30091 (15m54)
+        10    -1.10718 (0m17s)   0.00273 (0m18s)
+        20K   -0.70171 (1m10s)  -1.80032 (1m7s)
+        40K   -0.70171 (4m26s)  -inf     (4m6s)
+        80K   -0.70171 (15m32s)
 
 What a disaster.  The harder we look, the worse the results.
 Presumably, what is happening is that, as the bias increases more and
@@ -812,6 +812,19 @@ more to prevent bad rows from entering the selection, that the number
 of good rows is decreasing as well, thus raising the penalty and
 lowering the score.
 
+Experiment: scale the bias.  Same as above, but with --boost-bias=0.5
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- ---------------   --------------
+        10K    0.68000 (0m17s)   0.62025 (0m18s)
+        20K    0.60976 (1m10s)   0.65101 (1m6s)
+        40K    0.56757 (4m27s)   0.62821 (4m10s)
+        80K    0.71111 (15m40s)  0.63514 (14m42s)
+
+Much better. Not great, but better.  Presumably, the scaled bias now
+allows some imprecise selection to happen .. but overall, its an
+improvement.
 
 Future directions
 -----------------

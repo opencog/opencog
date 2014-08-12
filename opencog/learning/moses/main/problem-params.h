@@ -121,6 +121,7 @@ struct problem_params : public option_base
     int num_to_promote;
     bool exact_experts;
     double expalpha;
+    double bias_scale;
     
     // metapopulation diversity parameters
     score_t diversity_pressure;

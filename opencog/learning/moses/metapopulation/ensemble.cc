@@ -263,29 +263,36 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
-		// This condition indicates "perfect score". This is the only type
-		// of tree that we accept into the ensemble.  Its unlikely that the
-		// next-highest scoring one will be any good, so just break.
-		if (_params.exact_experts and _tolerance <= err) {
-			logger().info() << "Exact expert: Best tree not good enough: " << err;
-			break;
-		}
-
 		// Set the weight for the tree, and stick it in the ensemble
 		scored_combo_tree best = *best_p;
 		double alpha;
 		double expalpha;
 		if (_params.exact_experts) {
+			// This condition indicates "perfect score". This is the only type
+			// of tree that we accept into the ensemble.  Its unlikely that the
+			// next-highest scoring one will be any good, so just break.
+			if (_tolerance <= err) {
+				logger().info() << "Exact expert: Best tree not good enough: " << err;
+				break;
+			}
+
 			alpha = 1.0;    // Ad-hoc but uniform weight.
 			expalpha = _params.expalpha; // Add-hoc boosting value ...
-			logger().info() << "Exact expert: add to ensemble " << *best_p;
+			logger().info() << "Exact expert: add to ensemble " << best;
 		} else {
+			// Any score worse than half is terrible. Half gives a weight of zero.
+			// More than half gives negative weights, which wreaks things.
+			if (0.5 <= err) {
+				logger().info() << "Expert: terrible precision, ensemble not expanded: " << err;
+				break;
+			}
 			// AdaBoost-style alpha; except we allow perfect scorers.
 			if (err < _tolerance) err = _tolerance;
 			alpha = 0.5 * log ((1.0 - err) / err);
 			expalpha = exp(alpha);
-			logger().info() << "Expert: add to ensemble " << *best_p  << std::endl
-				<< "With err=" << err << " alpha=" << alpha <<" exp(alpha)=" << expalpha;
+			logger().info() << "Expert: add to ensemble; err=" << err
+			                << " alpha=" << alpha <<" exp(alpha)=" << expalpha
+			                << std::endl << best;
 		}
 
 		best.set_weight(alpha);
@@ -305,13 +312,12 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 			// and a negative score denoting "row wrongly selected by tree".
 			// The scores differ from +/-0.5 only if the rows are degenerate.
 			// Thus, the ensemble will incorrectly pick a row if it picks
-			// the row, and the weight isn't at least _bias.
+			// the row, and the weight isn't at least _bias.  (Keep in mind
+			// that alpha is the weight of the current tree.)
 			for (size_t i=0; i<bslen; i++) {
 				if (bs[i] >= 0.0) continue;
-				// Get the unweighted score.
-				double unweighted = bs[i] / weights[i];
 				// -2.0 to cancel the -0.5 for bad row.
-				_row_bias[i] += -2.0 * alpha * unweighted;
+				_row_bias[i] += -2.0 * alpha * bs[i];
 				if (_bias < _row_bias[i]) _bias = _row_bias[i];
 			}
 			logger().info() << "Experts: bias is now: " << _bias;
@@ -452,7 +458,7 @@ const combo::combo_tree& ensemble::get_expert_tree() const
 	plus = _weighted_tree.append_child(head, combo::id::plus);
 
 	// score must be bettter than the bias.
-	vertex bias = -_bias;
+	vertex bias = -_bias * _params.bias_scale;
 	_weighted_tree.append_child(plus, bias);
 
 	for (const scored_combo_tree& sct : _scored_trees)

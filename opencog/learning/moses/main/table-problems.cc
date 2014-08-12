@@ -376,6 +376,8 @@ void pre_table_problem::run(option_base* ob)
                             pms.max_rand_input,
                             pms.time_dispersion_pressure,
                             pms.time_dispersion_exponent,
+                            pms.meta_params.ensemble_params.exact_experts,
+                            pms.meta_params.ensemble_params.bias_scale,
                             pms.hardness >= 0,
                             pms.time_bscore,
                             pms.time_bscore_granularity);
