@@ -435,6 +435,7 @@ behavioral_score precision_bscore::bias_selection(const scored_combo_tree_set& e
         const CTable::counter_t& orow = io_row.second;
 
         // sumo will be negative if it should not be selected.
+        // We look at the negative ones, because they are wrong...
         double sumo = sum_outputs(orow);
         if (0.0 > sumo and bias < hypoth[i]) bias = hypoth[i];
         i++;

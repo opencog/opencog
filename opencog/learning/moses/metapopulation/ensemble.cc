@@ -312,13 +312,12 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 			// and a negative score denoting "row wrongly selected by tree".
 			// The scores differ from +/-0.5 only if the rows are degenerate.
 			// Thus, the ensemble will incorrectly pick a row if it picks
-			// the row, and the weight isn't at least _bias.
+			// the row, and the weight isn't at least _bias.  (Keep in mind
+			// that alpha is the weight of the current tree.)
 			for (size_t i=0; i<bslen; i++) {
 				if (bs[i] >= 0.0) continue;
-				// Get the unweighted score.
-				double unweighted = bs[i] / weights[i];
 				// -2.0 to cancel the -0.5 for bad row.
-				_row_bias[i] += -2.0 * alpha * unweighted;
+				_row_bias[i] += -2.0 * alpha * bs[i];
 				if (_bias < _row_bias[i]) _bias = _row_bias[i];
 			}
 			logger().info() << "Experts: bias is now: " << _bias;
