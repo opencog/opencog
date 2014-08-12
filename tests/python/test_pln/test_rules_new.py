@@ -42,6 +42,7 @@ class PLNUnitTester(TestCase):
         self.addTestFile("TransitiveSimilarityRule_SimilarityLink.scm")
         self.addTestFile("AndAs1stArgInsideLinkRule_InheritanceLink.scm")
         self.addTestFile("AndAs2ndArgInsideLinkRule_InheritanceLink.scm")
+        self.addTestFile("SatisfyingSetToConceptRule.scm")
         # context rules
         self.addTestFile("InheritanceToContextRule.scm")
         self.addTestFile("ContextToInheritanceRule.scm")
@@ -70,8 +71,6 @@ class PLNUnitTester(TestCase):
 
         # Doesn't work, as the unit test setup doesn't allow for changing TV's (YET)
         # self.addTestFile("AndBreakdownRule.scm")
-
-
 
     def tearDown(self):
         del self.atomSpaceFileData
@@ -444,6 +443,7 @@ class AllRules(object):
             IntensionalInheritanceEvaluationRule(self.chainer))
         self.chainer.add_rule(
             IntensionalSimilarityEvaluationRule(self.chainer))
+        self.chainer.add_rule(SatisfyingSetToConceptRule(self.chainer, 1))
 
         # context rules
         self.chainer.add_rule(InheritanceToContextRule(self.chainer))
