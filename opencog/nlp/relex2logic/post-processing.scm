@@ -176,6 +176,7 @@
 	(define results
 		(append
 			(marker-cleaner "allmarker" allmarker-helper)
+			(marker-cleaner "maybemarker" maybemarker-helper)
 			(marker-cleaner "thatmarker" thatmarker-helper)
 		)
 	)
@@ -269,6 +270,36 @@
 	(for-each purge-hypergraph clean-links)
 
 	results-list
+)
+
+; -----------------------------------------------------------------------
+; maybemarker-helper -- Helper function of maybemarker post-processing
+;
+; The maybemarker helper function for post-processing one specific
+; maybemarker.
+;
+; Given an maybemarker of the form as 'orig-link':
+;
+;	EvaluationLink
+;		PredicateNode "maybemarker"
+;		ListLink
+;			ConceptNode word_instance
+;
+; we find all root links containing 'word_instance' and change the
+; confidence to 0.5.
+;
+(define (maybemarker-helper orig-link)
+	(define listlink (car (cog-filter 'ListLink (cog-outgoing-set orig-link))))
+	(define word (gar listlink))
+	(define root-links (cog-get-root word))
+	; get rid of links with non-instanced word
+	(define clean-links (remove check-exception root-links))
+	(define (change-tv l)
+		(cog-set-tv! l (cog-new-stv 0.99 0.5))
+	)
+
+	; modify the TV
+	(map change-tv clean-links)
 )
 
 ; -----------------------------------------------------------------------
