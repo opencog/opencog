@@ -801,7 +801,7 @@ presel: moses -ipreselect.csv -Hpre -Yval -q0.05 -z350 -v45
      num_evals  no-dupe          presel
                        (time)            (time)  
      --------- ---------------   --------------
-        10K    0.48969 (0m17s)   0.38672 (0m19s)
+        10K    -inf (0m17s)   0.38672 (0m19s)
         20K    0.41525 (0m55s)   0.38224 (1m7s)
         40K    0.31731 (3m27s)   0.38224 (4m13s)
         80K    0.30091 (13m44s)  0.30091 (15m54)
@@ -811,6 +811,13 @@ Presumably, what is happening is that, as the bias increases more and
 more to prevent bad rows from entering the selection, that the number
 of good rows is decreasing as well, thus raising the penalty and
 lowering the score.
+
+Experiment: scale the bias.  Same as above, but with --boost-bias=0.5
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- ---------------   --------------
+        10K    0.48969 (0m17s)
 
 
 Future directions

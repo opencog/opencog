@@ -441,6 +441,14 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "determines the ad-hoc weighting that magnifies unselected "
          "items in the dataset. ")
 
+        ("boost-bias",
+         po::value<double>(&bias_scale)->default_value(1.0),
+         "When boosting is enabled with the -Hpre table problem, and "
+         "if the experts are not exact, then a bias is used to distinguish "
+         "the correctly selected and non-selected results.  This scale "
+         "factor multiplies that bias. Best values are probably a bias "
+         "of less than one.")
+
         (opt_desc_str(reduct_knob_building_effort_opt).c_str(),
          po::value<int>(&reduct_knob_building_effort)->default_value(2),
          "Effort allocated for reduction during knob building, 0-3, "
@@ -1314,6 +1322,7 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
     meta_params.ensemble_params.num_to_promote = num_to_promote;
     meta_params.ensemble_params.exact_experts = exact_experts;
     meta_params.ensemble_params.expalpha = expalpha;
+    meta_params.ensemble_params.bias_scale = bias_scale;
     if (boosting) cache_size = 0;  // cached cscores are stale!
     meta_params.discard_dominated = discard_dominated;
     meta_params.keep_bscore = output_bscore;

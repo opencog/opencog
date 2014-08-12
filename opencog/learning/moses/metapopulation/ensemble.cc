@@ -452,7 +452,7 @@ const combo::combo_tree& ensemble::get_expert_tree() const
 	plus = _weighted_tree.append_child(head, combo::id::plus);
 
 	// score must be bettter than the bias.
-	vertex bias = -_bias;
+	vertex bias = -_bias * _params.bias_scale;
 	_weighted_tree.append_child(plus, bias);
 
 	for (const scored_combo_tree& sct : _scored_trees)

@@ -116,6 +116,8 @@ precision_bscore::precision_bscore(const CTable& ctable_,
                                    float max_activation_,
                                    float dispersion_pressure,
                                    float dispersion_exponent,
+                                   bool exact_experts_,
+                                   double bias_scale_,
                                    bool positive_,
                                    bool time_bscore_,
                                    TemporalGranularity granularity)
@@ -123,7 +125,10 @@ precision_bscore::precision_bscore(const CTable& ctable_,
                                     dispersion_exponent, granularity),
     min_activation(bound(min_activation_, 0.0f, 1.0f)),
     max_activation(bound(max_activation_, 0.0f, 1.0f)),
-    activation_pressure(activation_pressure_), positive(positive_),
+    activation_pressure(activation_pressure_),
+    bias_scale(bias_scale_),
+    exact_experts(exact_experts_),
+    positive(positive_),
     time_bscore(time_bscore_)
 {
     reset_weights();
@@ -328,8 +333,10 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 
 behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensemble) const
 {
-    return exact_selection(ensemble);
-    // return bias_selection(ensemble);
+    if (exact_experts)
+        return exact_selection(ensemble);
+    else
+        return bias_selection(ensemble);
 }
 
 /// scorer, suitable for use with boosting, where the members of the
@@ -395,7 +402,7 @@ behavioral_score precision_bscore::exact_selection(const scored_combo_tree_set& 
 /// scorer, suitable for use with boosting, where the members of the
 /// ensemble sometimes make mistakes. The mistakes are avoided by 
 /// requiring the ensemble to cast a minimum vote, before a row is
-/// truely considered to be selected.  The minimum vote is clled the
+/// truely considered to be selected.  The minimum vote is called the
 /// "bias" in the code below.
 behavioral_score precision_bscore::bias_selection(const scored_combo_tree_set& ensemble) const
 {
@@ -439,7 +446,7 @@ behavioral_score precision_bscore::bias_selection(const scored_combo_tree_set& e
     std::function<bool(const multi_type_seq&)> selector;
     selector = [&](const multi_type_seq& irow)->bool
     {
-        return bias < hypoth[i++];
+        return bias_scale * bias < hypoth[i++];
     };
     return do_score(selector);
 }

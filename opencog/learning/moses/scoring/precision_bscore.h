@@ -112,6 +112,8 @@ struct precision_bscore : public bscore_ctable_time_dispersion
                      float max_activation = 1.0f,
                      float dispersion_pressure = 0.0f,
                      float dispersion_exponent = 1.0f,
+                     bool exact_experts = true,
+                     double bias_scale = 1.0,
                      bool positive = true,
                      bool time_bscore = false,
                      TemporalGranularity granularity = TemporalGranularity::day);
@@ -156,6 +158,8 @@ struct precision_bscore : public bscore_ctable_time_dispersion
 protected:
     score_t min_activation, max_activation;
     score_t activation_pressure;
+    double bias_scale;
+    bool exact_experts;
 
     bool positive;
 
