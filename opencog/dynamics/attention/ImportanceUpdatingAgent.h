@@ -337,6 +337,8 @@ private:
      * @param hs The HandleSeq to add handles to.
      */
     void getHandlesToUpdate(AtomSpace* a, HandleSeq& hs);
+    
+    void updateRentAndWages(AtomSpace*);
 
     /** Set the agent's logger object
      *

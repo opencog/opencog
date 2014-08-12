@@ -561,6 +561,9 @@ void ImportanceUpdatingAgent::updateAgentLTI(AtomSpace* a, AgentPtr agent)
 
 void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, const AgentSeq &agents, Handle h)
 {
+    // Check for changes to the rent and wage parameters
+    updateRentAndWages(a);
+    
     AttentionValue::sti_t current = a->getSTI(h);
     AttentionValue::sti_t stiRentCharged = calculateSTIRent(a, current);
 
@@ -641,6 +644,13 @@ AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, At
 			}
 			break;
 	}
+    
+    // Do not charge rent in excess of an atom's STI, so that STI does not go
+    // below zero
+    if (stiRentCharged > c) {
+        stiRentCharged = c;
+    }
+    
 	return stiRentCharged;
 
 }
@@ -747,7 +757,62 @@ std::string ImportanceUpdatingAgent::toString()
 
     s.put(0); //null terminate the string cout
     return s.str();
+}
 
+/*
+ * Allow the atom rent and wage parameters to be varied dynamically by modifying
+ * a configuration atom in the atomspace. This method checks for the existence
+ * of the configuration atom, and if it exists, updates the parameter to its
+ * current value. The value should be an integer between 0 and MAXSTI.
+ */
+void ImportanceUpdatingAgent::updateRentAndWages(AtomSpace* a) {
+    // Update rent
+    HandleSeq wage;
+    a->getHandlesByName(back_inserter(wage), "CONFIG-Rent");
+    if (wage.size() > 0) {
+        // Given the PredicateNode, walk to the NumberNode
+        Handle h = wage.front();
+        wage = a->getIncoming(h);
+        h = wage.front();
+        wage = a->getOutgoing(h);
+        h = wage.back();
+        wage = a->getOutgoing(h);
+        h = wage.front();
+        int value = std::stoi(a->getName(h));
+        
+        if (STIAtomRent != value) {
+#ifdef DEBUG
+            std::cout << "Rent parameter set to: " << value << 
+                         " [previous value: " << STIAtomRent << 
+                         "]" << std::endl;
+#endif
+            STIAtomRent = value;
+        }
+    }
+    
+    // Update wages
+    HandleSeq rent;
+    a->getHandlesByName(back_inserter(rent), "CONFIG-Wages");
+    if (rent.size() > 0) {
+        // Given the PredicateNode, walk to the NumberNode
+        Handle h = rent.front();
+        rent = a->getIncoming(h);
+        h = rent.front();
+        rent = a->getOutgoing(h);
+        h = rent.back();
+        rent = a->getOutgoing(h);
+        h = rent.front();
+        int value = std::stoi(a->getName(h));
+
+        if (STIAtomWage != value) {      
+#ifdef DEBUG
+        std::cout << "Wage parameter set to: " << value << 
+                     " [previous value: " << STIAtomRent << 
+                     "]" << std::endl;
+#endif
+            STIAtomWage = value;
+        }
+    }
 }
 
 //AttentionValue::sti_t ImportanceUpdatingAgent::getSTIAtomWage()
