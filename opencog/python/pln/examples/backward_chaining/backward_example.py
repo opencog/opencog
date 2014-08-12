@@ -45,6 +45,7 @@ for i in range(MAX_STEPS):
         print("\n----- [Output # {0}] -----".format(outputs_produced))
         print("-- Output:\n{0}".format(output[0]))
         print("-- using production rule: {0}".format(rule.name))
+        print("-- after {0} inferences attempted so far".format(i))
         print("\n-- based on this input:\n{0}".format(input))
 
     if check_result(atomspace):
