@@ -198,19 +198,6 @@
 	)
 )
 
-; Example: "Maybe she eats lunch.", "Perhaps she is nice."
-(define (maybe-rule word word_instance)
-	(list
-		(ImplicationLink (PredicateNode word_instance df-node-stv) (PredicateNode word df-node-stv) df-link-stv)
-		(EvaluationLink df-link-stv
-			(PredicateNode "maybemarker" df-node-stv)
-			(ListLink df-link-stv
-				(PredicateNode word_instance df-node-stv)
-			)
-		)
-	)
-)
-
 
 ; -----------------------------------------------------------------------
 ; unary rules
@@ -264,6 +251,19 @@
 	        (ConceptNode word_instance df-node-stv)
         )
     ))
+)
+
+; Example: "Maybe she eats lunch.", "Perhaps she is nice."
+(define (maybe-rule word word_instance)
+	(list
+		(ImplicationLink (PredicateNode word_instance df-node-stv) (PredicateNode word df-node-stv) df-link-stv)
+		(EvaluationLink df-link-stv
+			(PredicateNode "maybemarker" df-node-stv)
+			(ListLink df-link-stv
+				(PredicateNode word_instance df-node-stv)
+			)
+		)
+	)
 )
 
 
