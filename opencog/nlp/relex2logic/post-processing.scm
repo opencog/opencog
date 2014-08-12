@@ -235,31 +235,31 @@
 			(if (cog-link? atom)
 				(rebuild-with-x atom)
 				(if (equal? atom word)
-					(VariableNode "$X")
+					(VariableNode "$X" df-node-stv)
 					atom
 				)
 			)
 		)
 		(define new-oset (map rebuild-helper old-oset))
 
-		(apply cog-new-link (cog-type link) new-oset)
+		(apply cog-new-link (append (list (cog-type link) (cog-tv link)) new-oset))
 	)
 
 	; rebuild each link, replace 'word' with (VariableNode "$X")
 	(define final-links (map rebuild-with-x clean-links))
 	(define results-list
 		(list
-			(ForAllLink
-				(VariableNode "$X")
-				(ImplicationLink
-					(InheritanceLink
-						(VariableNode "$X")
+			(ForAllLink df-link-stv
+				(VariableNode "$X" df-node-stv)
+				(ImplicationLink df-link-stv
+					(InheritanceLink df-link-stv
+						(VariableNode "$X" df-node-stv)
 						word
 					)
 					; new rebuilt links
 					(if (= (length final-links) 1)
 						final-links
-						(AndLink final-links)
+						(AndLink df-link-stv final-links)
 					)
 				)
 			)
@@ -379,7 +379,7 @@
 	(define word1-predicate-listlink (car (cog-filter 'ListLink (cog-outgoing-set word1-predicate))))
 	(define word1-predicate-root (cog-get-root word1-predicate))
 
-	(define that-reference-node (ReferenceNode (random-node-name 'ReferenceNode 32 "$that-")))
+	(define that-reference-node (ReferenceNode (random-node-name 'ReferenceNode 32 "$that-") df-node-stv))
 
 	(define (rebuild-with-that link)
 		(define old-oset (cog-outgoing-set link))
@@ -387,14 +387,14 @@
 			(if (cog-link? atom)
 				; if we found the ListLink of the predicate, insert the that-reference-node
 				(if (equal? atom word1-predicate-listlink)
-					(ListLink (cog-outgoing-set word1-predicate-listlink) that-reference-node)
+					(ListLink df-link-stv (cog-outgoing-set word1-predicate-listlink) that-reference-node)
 					(rebuild-with-that atom)
 				)
 				atom
 			)
 		)
 		(define new-oset (map rebuild-helper old-oset))
-		(apply cog-new-link (cog-type link) new-oset)
+		(apply cog-new-link (append (list (cog-type link) (cog-tv link)) new-oset))
 	)
 
 	; rebuild word1-predicate's root with that-reference-node inside
@@ -407,11 +407,11 @@
 		word1-new-predicate-root
 		; create new ReferenceLink, AndLink everything
 		(list
-			(ReferenceLink
+			(ReferenceLink df-link-stv
 				that-reference-node
 				(if (= (length word2-links) 1)
 					word2-links
-					(AndLink word2-links)
+					(AndLink df-link-stv word2-links)
 				)
 			)
 		)
