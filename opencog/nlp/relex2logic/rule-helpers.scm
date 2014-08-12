@@ -185,8 +185,8 @@
 ; Adjective and adverb rules
 ; -----------------------------------------------------------------------
 (define (amod-rule concept instance adj adj_instance)
-	(list (InheritanceLink  (ConceptNode adj_instance df-node-stv) (ConceptNode adj df-node-stv) df-link-stv)
-	(InheritanceLink  (ConceptNode instance df-node-stv) (ConceptNode adj_instance df-node-stv) df-link-stv)
+	(list (ImplicationLink  (PredicateNode adj_instance df-node-stv) (PredicateNode adj df-node-stv) df-link-stv)
+	(InheritanceLink  (ConceptNode instance df-node-stv) (PredicateNode adj_instance df-node-stv) df-link-stv)
 	(InheritanceLink  (ConceptNode instance df-node-stv) (ConceptNode concept df-node-stv) df-link-stv)
 	)
 )
@@ -473,13 +473,13 @@
 (define (that-rule main main_instance main_pos sub sub_instance sub_pos)
 	; get the corresponding node
 	(define main-node
-		(if (string=? main_pos "verb")
+		(if (or (string=? main_pos "verb") (string=? main_pos "adj"))
 			(PredicateNode main_instance df-node-stv)
 			(ConceptNode main_instance df-node-stv)
 		)
 	)
 	(define sub-node
-		(if (string=? sub_pos "verb")
+		(if (or (string=? main_pos "verb") (string=? main_pos "adj"))
 			(PredicateNode sub_instance df-node-stv)
 			(ConceptNode sub_instance df-node-stv)
 		)
@@ -487,13 +487,13 @@
 
 	; create the link between instance and word just in case
 	(define main-link
-		(if (string=? main_pos "verb")
+		(if (or (string=? main_pos "verb") (string=? main_pos "adj"))
 			(ImplicationLink (PredicateNode main_instance df-node-stv) (PredicateNode main df-node-stv) df-link-stv)
 			(InheritanceLink (ConceptNode main_instance df-node-stv) (ConceptNode main df-node-stv) df-link-stv)
 		)
 	)
 	(define sub-link
-		(if (string=? sub_pos "verb")
+		(if (or (string=? main_pos "verb") (string=? main_pos "adj"))
 			(ImplicationLink (PredicateNode sub_instance df-node-stv) (PredicateNode sub df-node-stv) df-link-stv)
 			(InheritanceLink (ConceptNode sub_instance df-node-stv) (ConceptNode sub df-node-stv) df-link-stv)
 		)
