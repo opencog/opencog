@@ -217,11 +217,11 @@ is evaluated by supplying explicit values for the variables,
 and then applying operations until the root node is reached.
 .PP
 By convention, variables are denoted by a dollar-sign followed by
-a number, although they may also be named. Variables are not 
+a number, although they may also be named. Variables are not
 explicitly typed; they are only implicitly typed during program
 evaluation. Thus, for example, \fIor ($1 $2)\fP is a combo
 program that represents the boolean-or of two inputs,
-\fI$1\fP and \fI$2\fP.   Built-in constants include \fItrue\fR and 
+\fI$1\fP and \fI$2\fP.   Built-in constants include \fItrue\fR and
 \fIfalse\fR; numbers may be written with or without a decimal point.
 .PP
 Logical operators include \fIand\fR, \fIor\fR and \fInot\fR.
@@ -229,14 +229,14 @@ Logical operators include \fIand\fR, \fIor\fR and \fInot\fR.
 Arithmetic operators include +, - * and / for addition, subtraction,
 multiplication and division. Additional arithmetic operators
 include \fIsin\fR, \fIlog\fR, \fIexp\fR and \fIrand\fR. The \fIrand\fR
-operator returns a value in the range from 0.0 to 1.0.  The predicate 
+operator returns a value in the range from 0.0 to 1.0.  The predicate
 operator \fI0<\fR (greater than zero) takes a single continuous-valued
-expression, and returns a boolean. The operator \fIimpulse\fR does 
+expression, and returns a boolean. The operator \fIimpulse\fR does
 the opposite: it takes a single boolean-valued expression, and returns
 0.0 or 1.0, depending on whether the argument evaluates to false or true.
 .PP
 The \fIcond\fR operator takes an alternating sequence of predicates and
-values, terminated by an 'else' value.  It evaluates as a chain of 
+values, terminated by an 'else' value.  It evaluates as a chain of
 if-then-else statements, so that it returns the value following the first
 predicate to evaluate to \fItrue\fR.
 .PP
@@ -285,7 +285,7 @@ of values.
 
 .TP
 .BI \-H\  type \fR,\ \fB\-\-problem\-type= type
-The 
+The
 .I type
 of problem may be one of:
 .TS
@@ -297,7 +297,7 @@ of columns, all but one considered 'inputs', and one is considered an
 output.  The goal of regression is to learn a combo program that most
 accurately predicts the output.  For boolean-valued and enumerated
 outputs, the scoring function simply counts the number of incorrect
-answers, and tries to minimize this score.  That is, this scorer 
+answers, and tries to minimize this score.  That is, this scorer
 attempts to maximize accuracy (defined below). For contin-valued outputs,
 the mean-square variation is minimized.
 T}
@@ -316,7 +316,7 @@ T}
 
 \fBprerec\fR@T{
 Regression on an input table, maximizing precision, while attempting
-to maintain the recall (sensitivity) at or above a given level.  
+to maintain the recall (sensitivity) at or above a given level.
 T}
 
 \fBrecall\fR@T{
@@ -341,15 +341,15 @@ T}
 
 \fBip\fR@T{
 Discovery of "interesting predicates" that select rows from the
-input table. The data table is assumed to consist of a number of 
+input table. The data table is assumed to consist of a number of
 boolean-valued input columns, and a contin-valued (floating point)
-target column. \fBmoses\fP will learn predicates that select the 
+target column. \fBmoses\fP will learn predicates that select the
 most "interesting" subset of the rows in the table.  The values in
 the output columns of the selected rows form a probability
 distribution (PDF); this PDF is considered to be "interesting"
 if it maximizes a linear combination of several different measures
 of the the PDF: the Kullback-Leibler divergence, the skewness, and
-the standardized Mann-Whitney U statistic. 
+the standardized Mann-Whitney U statistic.
 T}
 
 \fBkl\fR@T{
@@ -395,12 +395,12 @@ Defined as the formula (TP + FP) / (TP + TN + FP + FN)
 Defined as the formula TP / (TP + FP)
 .TP
 .B recall
-Also known as sensitivity, this is 
+Also known as sensitivity, this is
 defined as the formula TP / (TP + FN)
 .TP
 .B F_1
 Harmonic mean of precision and recall,
-defined as the formula (2 * precision * recall) / (precision + recall) 
+defined as the formula (2 * precision * recall) / (precision + recall)
 = 2TP / (2TP + FP + FN)
 .TP
 .B bep
@@ -429,8 +429,8 @@ column names on output is controlled with the \fB\-W1\fR flag.
 .TP
 .BI \-i\  filename \fR,\ \fB\-\-input\-file= filename
 The \fIfilename\fR specifies the input data file. The input table must
-be in 'delimiter-separated value' (DSV) format.  Valid separators 
-are comma (CSV, or comma-separated values), blanks and tabs 
+be in 'delimiter-separated value' (DSV) format.  Valid separators
+are comma (CSV, or comma-separated values), blanks and tabs
 (whitespace). Columns correspond to features; there is one sample per
 (non-blank) row. Comment characters are hash, bang and semicolon (#!;)
 lines starting with a comment are ignored.
@@ -462,7 +462,7 @@ zero effectively causes the row to be ignored. A negative weight
 enourages the system to learn models that get the row incorrect.
 For boolean problems, this is the same as flipping the output
 value.  This option can only be used once, and, if used, it should
-specify a column containing an integer or floating-point value.  
+specify a column containing an integer or floating-point value.
 .TP
 .BI \-b\  num \fR,\ \fB\-\-nsamples= num
 The number of samples to be taken from the input file. Valid values
@@ -484,7 +484,7 @@ resulting ctable so all classes have the same weight.
 .\" ============================================================
 .SS "Algorithm control options"
 These options provide overall control over the algorithm execution.
-The most important of these, for controlling behavior, are the 
+The most important of these, for controlling behavior, are the
 \fB-A\fR, \fB\-a\fR, \fB\-m\fR, \fB\-\-max\-time\fR, \fB\-r\fR,
 \fB\-v\fR and \fB\-z\fR flags.
 .TP
@@ -501,11 +501,11 @@ l lx.
 \fBhc\fR@T{
 Hill-climbing. There are two primary modes of operation; each has
 strengths and weaknesses for different problem types.
-In the default mode, one begins with an initial collection of 
+In the default mode, one begins with an initial collection of
 knob settings, called an \fIinstance\fR. The settings of each knob is
 then varied, in turn, until one setting is found that most improves
-the score. This setting then becomes the new instance, and the 
-process is repeated, until no further improvement is seen. The 
+the score. This setting then becomes the new instance, and the
+process is repeated, until no further improvement is seen. The
 resulting instance is a local maximum; it is returned to
 the outer loop.
 
@@ -521,12 +521,12 @@ In this alternate mode, the local hill is \fBnot\fR climbed to
 the top; instead, any improvement is immediately handed back to the
 outer loop, for another round of exemplar selection and knob-building.
 For certain types of problems, including maximally misleading problems,
-this can arrive at better solutions, more quickly, than the 
+this can arrive at better solutions, more quickly, than the
 traditional hill-climbing algorithm described above.
 T}
 
 \fBsa\fR@T{
-Simulated annealing.  (Deprecated). The \fB\-D\fR flag controls the size 
+Simulated annealing.  (Deprecated). The \fB\-D\fR flag controls the size
 of the neighborhood that is searched during the early, "high-temperature"
 phase.  It has a significant effect on the run-time performance of the
 algorithm. Using \fB\-D2\fR or \fB\-D3\fR is likely to provide the best
@@ -595,14 +595,14 @@ is used, instead of a scoring function evaluation.  The effectiveness of
 memoization is greatly increased by also using the \fB\-d1\fR flag.
 .TP
 .BI \-v\  temperature \fR,\ \fB\-\-complexity\-temperature= temperature
-Set the "temperature" of the Boltzmann-like distribution used to 
+Set the "temperature" of the Boltzmann-like distribution used to
 select the next exemplar out of the metapopulation. A temperature that
 is too high or too low will make it likely that poor exemplars will be
 chosen for exploration, thus resulting in excessively long search times.
 The recommended temperature depends strongly on the type of problem
 being solved.  If it is known that the problem has false maxima, and
 that the distance from the top of the false maximum to the saddle
-separating the false and true maximum is H, then the recommended 
+separating the false and true maximum is H, then the recommended
 temerature is 30*H.  Here, H is the 'height' or difference in score
 from false peak to saddle, the saddle being the highest mountain pass
 between the false and true minumum. Varying the temperature by a factor
@@ -615,7 +615,7 @@ the demo Ant trail problem requies a temperature of 2000.
 
 .TP
 .BI \-z\  ratio \fR,\ \fB\-\-complexity\-ratio= ratio
-Fix the ratio of score to complexity, to be used as a penalty, 
+Fix the ratio of score to complexity, to be used as a penalty,
 when ranking the metapopulation for fitness. This ratio is meant to
 be used to limit the size of the search space, and, when used with
 an appropriate temperature, to avoid gettting trapped in local
@@ -633,17 +633,17 @@ actually provide a better solution.
 
 The complexity ratio is used to calculate a scoring penalty; the
 penalty lowers the score in proportion to the solution complexity;
-specifically, the penalty is set to the complexity divided by the 
+specifically, the penalty is set to the complexity divided by the
 complexity ratio.
 
-Setting the ratio too low causes the algorithm to ignore the more 
+Setting the ratio too low causes the algorithm to ignore the more
 complex solutions, ranking them in a way so that they are not much
 explored. Thus, the algorithm may get trapped examining only the
 simplest solutions, which are probably inappropriate.
 
 Setting this ratio too high will prevent a good solution from being
 found.  In such cases, the algorithm will spend too much time
-evaluating overly-complex solutions, blithly leaving simpler, better 
+evaluating overly-complex solutions, blithly leaving simpler, better
 solutions unexplored.
 
 The relationship between the score change and the complexity change
@@ -660,7 +660,7 @@ the 3.5 default, the Ant trail demo problem works well with 0.16.
 Controls hill-climbing algorithm behavior.  If false (the default),
 then the entire local neighborhood of the current center instance is
 explored. The highest-scoring instance is then chosen as the new center
-instance, and the process is repeated.  For many datasets, however, 
+instance, and the process is repeated.  For many datasets, however,
 the highest-scoring instances tend to cluster together, and so an
 exhaustive search may not be required. When this option is specified,
 a handful of the highest-scoring instances are crossed-over (in the
@@ -668,7 +668,7 @@ genetic sense of cross-over) to create new instances.  Only these are
 evaluated for fitness; the exhaustive search step is skipped.  For many
 problem types, especially those with large neighborhoods (i.e. those with
 high program complexity), this can lead to an order-of-magnitude
-speedup, or more.  For other problem types, especially those with 
+speedup, or more.  For other problem types, especially those with
 deceptive scoring functions, this can hurt performance.
 
 .TP
@@ -690,9 +690,9 @@ Problems with a large number of input features (typically, hundreds
 or more) can lead to excessively long run-times, and overwhelming
 amounts of memory usage.  Such problems can be tackled by limiting
 the number of features used during knob building, resulting in smaller
-demes that can be searched more quickly.  Integrated feature selection 
-is enabled with the \fB\-\-enable\-fs=1\fR option.  The number of 
-features to use during knob bilding is specified using the 
+demes that can be searched more quickly.  Integrated feature selection
+is enabled with the \fB\-\-enable\-fs=1\fR option.  The number of
+features to use during knob bilding is specified using the
 \fB\-\-fs\-target\-size\fR option.  A number of additional flags
 control the behaviour of the feature selection algorithm; these are
 best left alone; the defaults should be adequate for almost all
@@ -709,7 +709,7 @@ Select \fInum\fR features for use.  This argument is mandatory if
 feature selection is enabled.
 .TP
 .BI \-\-fs\-algo
-Choose the feature-selection algorithm.  Possible choices are 
+Choose the feature-selection algorithm.  Possible choices are
 \fBinc\fR, \fBsmd\fR and \fBhc\fR.  The default value is \fbinc\fR,
 which is the fastest bu least accurate algo.
 .TP
@@ -743,21 +743,21 @@ TODO write description
 .PP
 .\" ============================================================
 .SS "Large problem parameters"
-Problems with a large number of features (100 and above) often 
+Problems with a large number of features (100 and above) often
 evolve exemplars with a complexity of 100 or more, which in turn
 may have instances with hundreds of thousands of nearest neighbors.
-Exploring one nearest neighbor requires one evaluation of the 
-scoring function, and so an exhaustive search can be prohibitive.  
-A partial search can often work quite well, especially when 
+Exploring one nearest neighbor requires one evaluation of the
+scoring function, and so an exhaustive search can be prohibitive.
+A partial search can often work quite well, especially when
 cross-over is enabled.  The following flags control such partial
 searches.
 .TP
 .BI \-\-hc\-max\-nn\-evals= num
 Controls hill-climbing algorithm behavior.  When exploring the
-nearest neighborhood of an instance, \fInum\fP specifies 
-the maximum number of nearest neighbors to explore.  An 
-exhaustive search of the nearest neighborhood is performed 
-when the number of nearest neighbors is less than this value.  
+nearest neighborhood of an instance, \fInum\fP specifies
+the maximum number of nearest neighbors to explore.  An
+exhaustive search of the nearest neighborhood is performed
+when the number of nearest neighbors is less than this value.
 .TP
 .BI \-\-hc\-fraction\-of\-nn= frac
 Controls hill-climbing algorithm behavior.   When exploring the
@@ -822,7 +822,7 @@ metapopulation as a whole, and are discarded only at considerable
 risk to the future adaptability of the overall population.  Put another
 way: specifying this flag makes it more likely that the metapopulation
 will get trapped in a non-optimal local maximum.
-    
+
 Note that the algorithms to compute domination are quite slow,
 and so keeping doinated individuals has a double benefit: not only
 is the metapopulation healthier, but metapopulation management
@@ -860,7 +860,7 @@ Controls amount of time spent on a deme. Default value is 20.
 This option provides an alternative means of setting the complexity
 ratio.  If specified, it over-rides the \fB\-z\fR option.  For
 discrete problems, \fIfraction\fR can be interpreted as being
-the fraction of score values that are incorrect (e.g. due to 
+the fraction of score values that are incorrect (e.g. due to
 noisy data).  As such, only values in the range 0 < \fIfraction\fR
 < 0.5 are meaningful (i.e. less than half of the data values are
 incorrect).  Typical recommended values are in the range of 0.001
@@ -887,7 +887,7 @@ set the maximum search radius.
 .TP
 .BI \-\-well\-enough=1
 For problems with an enumerated ('nominal') output, the learned combo
-program is always of the form \fBcond\fR\fI(pred_1 value_1 pred_2 value_2 ... 
+program is always of the form \fBcond\fR\fI(pred_1 value_1 pred_2 value_2 ...
 pred_n value_n else_val)\fR  where \fIpred_1\fR is a predicate, which,
 if true, causes the output to be \fIvalue_1\fR.  If false, then
 \fIpred_2\fR is tested, and so on.  If none of the predicates evaluate to
@@ -971,7 +971,7 @@ of the test.
 .PP
 In \fBmoses\fR, precision and recall (sensitivity) are defined as usual.
 Precision is defined as the number of true positives, divided by the number
-of true positives plus the number of false positives.  Classifiers 
+of true positives plus the number of false positives.  Classifiers
 with a high precision make very few mistakes identifying positives:
 they have very few or no false positives.  However, precise classifiers
 may completely fail to identify many, if not most positives; they just
@@ -1009,8 +1009,8 @@ specified.
 the \fB\-Hpre\fR option.  This option searches for the test with the
 highest precision, while holding the 'activation' in a bounded range.
 The definition of 'activation' is idiosyncratic to moses; it is defined
-as the sum of true positives plus false positives: that is, it is 
-the fraction of rows for which the trial combo program returned 
+as the sum of true positives plus false positives: that is, it is
+the fraction of rows for which the trial combo program returned
 a positive answer, regardless of whether this was the right answer.
 Activation ranges from 0.0, to 1.0.  It is never desirable to maximize
 activation; rather, most commonly, one wants to peg activation at
@@ -1019,16 +1019,16 @@ exactly the fraction of positives in the training set.
 The minimum level to which a fixed component should be held may be
 specified with the \fB\-q\fR or \fB\-\-min\-rand\-input\fR option.
 Thus, for the \fB\-Hrecall\fR problem, the \fB\-q\fR flag is used
-to specify the minimum desired precision.  Similarly, for the 
+to specify the minimum desired precision.  Similarly, for the
 \fB\-Hprerec\fR problem, the \fB\-q\fR flag is used to specify the
 minimum desired recall.
-For the \fB\-Hpre\fR problem, the  \fB\-w\fR or 
+For the \fB\-Hpre\fR problem, the  \fB\-w\fR or
 \fB\-\-max\-rand\-input\fR option should be used to make sure the
 activation does not get too high.
 .PP
 The \fB\-q\fR  and \fB\-w\fR options also set lower and upper
 bounds for the BEP problem as well.   When maximizing
-BEP, the system attempts to keep the absolute value of the 
+BEP, the system attempts to keep the absolute value of the
 difference between precision and recall less than 0.5.  This
 maximum difference can be over-ridden with the \fB\-w\fR option.
 .PP
@@ -1088,7 +1088,7 @@ When specifying combo programs with continuous variables in them, be
 sure to use the \fB\-q\fR, \fB\-w\fR and \fB\-b\fR flags to specify
 a range of input values to be sampled. In order to determine the fitness
 of any candidate, it must be compared to the specified combo
-program.  The comparison is done at a variety of different input 
+program.  The comparison is done at a variety of different input
 values. If the range of sampled input values is inappropriate, or if
 there are not enough sampled values, then the fitness function may
 select unexpected, undesired candidates.
@@ -1147,7 +1147,7 @@ with a backslash in order to be passed to moses.
 .\" ============================================================
 .SH Complexity Penalty
 The speed with which the search algorithm can find a reasonable solution
-is significantly affected by the complexity ratio specified with the 
+is significantly affected by the complexity ratio specified with the
 \fB\-z\fR or \fB\-p\fR options. This section provides the theoretical
 underpinning for the meaning of these flags, and how they affect the
 the algorithm.  The complexity penalty has two slightly different
@@ -1217,7 +1217,7 @@ Distribution, approximated by (for now)
     P(M) = |A|^-|M|
          = exp(-|M|*log(|A|))
 
-where A is the alphabet of the model, |A| is the alphabet size, 
+where A is the alphabet of the model, |A| is the alphabet size,
 and |M| is the complexity of the model.  Note that this
 distribution is identical to the Boltzmann distribution, for an
 inverse temperature of log(|A|). Putting it all together,
@@ -1244,14 +1244,14 @@ The complexity ratio, as set by the \fB\-z\fR option, is given by
 
 By contrast, the \fB\-p\fR option may be used to set p directly, as
 given in the formulas above.  The value of |A| is computed internally,
-depending on the specific problem type (discrete vs. continuous, 
+depending on the specific problem type (discrete vs. continuous,
 number of included-excluded operators, etc.)  The complexity of each
 solution is also computed, using an ad-hoc complexity measure.
 
 .\" ============================================================
 .SS "Continuous case"
 
-A similar argument to the above holds for the case of a 
+A similar argument to the above holds for the case of a
 continuously-valued observable.
 
 Let dP(..) be the notation for a probability density (or measure).
@@ -1264,7 +1264,7 @@ log likelihood of M knowing D as:
 
     LL(M) = log(dP(D|M)) + log(P(M))
 
-Assume the output of of the model M on input x has a Gaussian 
+Assume the output of of the model M on input x has a Gaussian
 distributions, of mean M(x) and variance V, so that dP(D|M),
 the probability density of the data D given the modem M is:
 

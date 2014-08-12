@@ -1,4 +1,4 @@
-/** metapop_params.cc --- 
+/** metapop_params.cc ---
  *
  * Copyright (C) 2013 OpenCog Foundation
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -54,7 +54,7 @@ void diversity_parameters::set_dst(diversity_parameters::dst_enum_t de,
         break;
     default:
         OC_ASSERT(false);
-    }    
+    }
 }
 
 void diversity_parameters::set_dst2dp(diversity_parameters::dst2dp_enum_t d2de)

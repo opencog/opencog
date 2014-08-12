@@ -1,4 +1,4 @@
-/** metapop_params.h --- 
+/** metapop_params.h ---
  *
  * Copyright (C) 2013 OpenCog Foundation
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -143,7 +143,7 @@ struct subsample_deme_filter_parameters
         tanimoto_max_weight;
 
     unsigned n_subsample_fitnesses;
-    float low_dev_pressure;    
+    float low_dev_pressure;
 };
 
 /**

@@ -185,7 +185,7 @@ void table_problem_base::common_type_setup(problem_params& pms,
         pms.exemplars.push_back(type_to_exemplar(out_type));
     }
 
-    // The exemplar output type can differ from the table output type 
+    // The exemplar output type can differ from the table output type
     // for scorers that are trying to select rows (the pre and select scorers)
     output_type =
         get_type_node(get_output_type_tree(*pms.exemplars.begin()->begin()));
@@ -194,7 +194,7 @@ void table_problem_base::common_type_setup(problem_params& pms,
 
     cand_type_signature = gen_signature(
         get_signature_inputs(table_type_signature),
-        type_tree(output_type)); 
+        type_tree(output_type));
 
     logger().info() << "Inferred output type: " << output_type;
 }
@@ -264,7 +264,7 @@ void ip_problem::run(option_base* ob)
         "Boosting not supported for the ip problem!");
     behave_cscore mbcscore(bscore, pms.cache_size);
     metapop_moses_results(pms.exemplars, tt,
-                          *pms.bool_reduct, *pms.bool_reduct_rep, 
+                          *pms.bool_reduct, *pms.bool_reduct_rep,
                           mbcscore,
                           pms.opt_params, pms.hc_params,
                           pms.deme_params, pms.filter_params, pms.meta_params,
@@ -368,7 +368,7 @@ void pre_table_problem::run(option_base* ob)
         pms.deme_params.fstor = new feature_selector(ctable,
                                                      pms.festor_params);
     }
- 
+
     int as = alphabet_size(cand_type_signature, pms.ignore_ops);
     precision_bscore bscore(ctable,
                             fabs(pms.hardness),
@@ -418,7 +418,7 @@ void pre_conj_table_problem::run(option_base* ob)
     // indexed number of rows.
     OC_ASSERT(not pms.meta_params.do_boosting,
         "Boosting not supported for the pre problem!");
-    REGRESSION(ctable, precision_conj_bscore, 
+    REGRESSION(ctable, precision_conj_bscore,
                (ctable, fabs(pms.hardness), pms.hardness >= 0));
 }
 
@@ -541,8 +541,8 @@ void select_table_problem::run(option_base* ob)
     common_setup(pms);
     common_type_setup(pms, id::boolean_type);
 
-    REGRESSION(ctable, select_bscore, 
-               (ctable, pms.min_rand_input, 
+    REGRESSION(ctable, select_bscore,
+               (ctable, pms.min_rand_input,
                         pms.max_rand_input,
                         fabs(pms.hardness),
                         pms.hardness >= 0.0));

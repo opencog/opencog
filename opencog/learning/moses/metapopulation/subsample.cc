@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2014 Aidyia Limited
  *
- * Author: Linas Vepstas <linasvepstas@gmail.com>
+ * Author: Author: Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -198,7 +198,7 @@ bool metapopulation::ss_score_dev_filter(const representation& rep,
         }
 
         stat_acc_t var_score_acc;         // accumulator for score variance
-        
+
         for (unsigned i_deme = 0; i_deme < ss_demes.size(); ++i_deme) {
             const deme_t& ss_deme = ss_demes[i_deme];
             unsigned i_inst = tuple_idxs[i_deme];
@@ -234,7 +234,7 @@ bool metapopulation::ss_score_dev_filter(const representation& rep,
                              << _filter_params.std_dev_threshold
                              << ")";
     }
-    
+
     return pass;
 }
 

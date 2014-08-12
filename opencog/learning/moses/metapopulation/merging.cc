@@ -228,10 +228,10 @@ bool metapopulation::merge_demes(std::vector<std::vector<deme_t>>& all_demes,
         std::vector<deme_t>& demes = all_demes[j];
         for (unsigned i = 0; i < demes.size(); i++) {
             deme_t& deme = demes[i];
-    
+
             // Discard the truly poor-scoring instances in each deme.
             trim_down_deme(deme);
-    
+
             // Convert the instances in the deme to trees.
             deme_to_trees(deme, reps[j], pot_candidates);
         }

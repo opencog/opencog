@@ -203,10 +203,10 @@ class mux_problem : public bool_problem_base
             if (4 < sz) {
                 // A mux of 5 would multiplex 32 bits, requiring a truth
                 // table of 2^37 rows ... which is some many umpteen gigabytes.
-                logger().warn() << 
+                logger().warn() <<
                     "Error: maximum mux demo problem size is 4;\n"
                     "use the -k flag to pick a smaller size";
-                std::cerr << 
+                std::cerr <<
                     "Error: maximum mux demo problem size is 4;\n"
                     "use the -k flag to pick a smaller size" << std::endl;
                 exit(-1);
@@ -326,7 +326,7 @@ void combo_problem_base::check_args(problem_params& pms)
         std::cerr << "The combo tree " << tr << " is not well formed." << std::endl;
         exit(-1);
     }
-    
+
     combo::arity_t arity = type_tree_arity(tt);
 
     // If the user specifies the combo program from bash or similar

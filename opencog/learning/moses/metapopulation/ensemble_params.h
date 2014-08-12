@@ -38,7 +38,7 @@ struct ensemble_parameters
 		num_to_promote(1)
 	{}
 
-	bool do_boosting;    // boosting is enabled ... 
+	bool do_boosting;    // boosting is enabled ...
 	bool experts;        // do "ensemble-of-experts" boosting.
 	bool exact_experts;  // experts must be perfectly correct.
 	double expalpha;     // Ad-hoc exact-expert boosting coefficient.

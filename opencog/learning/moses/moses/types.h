@@ -145,8 +145,8 @@ struct composite_score:
     // EXPERIMENTAL: if multiply_diversity is set to true then the
     // diversity_penalty is multiplied with the raw score instead
     // being subtracted. This makes more sense if the diversity
-    // penalty represent a probability. Hmm. Except that scores 
-    // behave kind-of-like the logarithm of a (solomonoff) probability... 
+    // penalty represent a probability. Hmm. Except that scores
+    // behave kind-of-like the logarithm of a (solomonoff) probability...
     // so if if the diversity is acting like a probability, we should
     // probably be taking it's log, and adding that.  Certainly,
     // that's exatly how we treat the complexity penalty: its the log
@@ -221,7 +221,7 @@ struct behavioral_score : public std::vector<score_t>
         size_t sz = rhs.size();
         OC_ASSERT(size() == sz,
             "Error: Incompatible behavioral_score sizes, this=%z rhs=%z",
-            size(), sz); 
+            size(), sz);
         for (size_t i=0; i<sz; i++) {
             (*this)[i] -= rhs[i];
         }
@@ -235,7 +235,7 @@ static inline behavioral_score operator-(const behavioral_score& lhs,
     size_t sz = rhs.size();
     OC_ASSERT(lhs.size() == sz,
         "Error: Incompatible behavioral_score sizes, lhs=%z rhs=%z",
-         lhs.size(), sz); 
+         lhs.size(), sz);
     behavioral_score bs;
     for (size_t i=0; i<sz; i++) {
         bs.push_back(lhs[i] - rhs[i]);

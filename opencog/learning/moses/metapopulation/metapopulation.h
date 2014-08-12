@@ -92,9 +92,9 @@ namespace moses {
  * Someday, it should have an independent existance.
  *
  * A number of different approaches are taken to maintain a well-balanced,
- * evenly-distributed collection of exemplars.  One of these is the 
+ * evenly-distributed collection of exemplars.  One of these is the
  * "diversity" mechanism, which seeks to ensure that the distribution
- * stays as diverse as possible, by means of a "diversity penalty", 
+ * stays as diverse as possible, by means of a "diversity penalty",
  * which enables low-scoring combo trees to be kept around, without being
  * crowded out by higher-scoring rivals. The point here is that it is
  * often the case that low-scoring, unfit combo trees can generate very
@@ -176,13 +176,13 @@ public:
     const scored_combo_tree_ptr_set& get_trees() const { return _scored_trees; }
     scored_combo_tree_ptr_set::const_iterator begin() const { return _scored_trees.begin(); }
     scored_combo_tree_ptr_set::const_iterator end() const { return _scored_trees.end(); }
-    bool empty() const { return _scored_trees.empty(); } 
+    bool empty() const { return _scored_trees.empty(); }
     size_t size() const { return _scored_trees.size(); }
     void clear() { _scored_trees.clear(); }
 
     // -------------------------- Merge related ----------------------
 public:
-    /// Merge candidates in to the metapopulation. If the param 
+    /// Merge candidates in to the metapopulation. If the param
     /// discard_dominated flag is not set, then no culling or scoring
     /// is performed; it is assumed that previous stages have already
     /// determined that the candidates are suitable for merging.
@@ -268,7 +268,7 @@ private:
     // convert instances in deme to trees
     void deme_to_trees(deme_t&, const representation&,
                        scored_combo_tree_set&);
-    
+
     /// Given the current complexity temp, return the range of scores that
     /// are likely to be selected by the select_exemplar routine. Due to
     /// exponential decay of scores in select_exemplar(), this is fairly

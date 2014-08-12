@@ -217,7 +217,7 @@ composite_score metapopulation::best_composite_score() const
     if (not _params.do_boosting)
         return _best_cscore;
 
-    // XXX FIXME should probably not recompute every time ... 
+    // XXX FIXME should probably not recompute every time ...
     // need to figure who is calling this method, and what they are expecting.
     return _cscorer.get_cscore(_ensemble.get_ensemble());
 }
@@ -233,7 +233,7 @@ const scored_combo_tree_set& metapopulation::best_candidates() const
     return _best_candidates;
 }
 
-/** 
+/**
  * Return the best combo tree (shortest best candidate).
  */
 const combo_tree& metapopulation::best_tree() const

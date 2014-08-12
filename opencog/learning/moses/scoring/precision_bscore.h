@@ -205,7 +205,6 @@ struct precision_conj_bscore : public bscore_base
 protected:
     const CTable& ctable;
 
-    size_t ctable_usize;   // uncompressed size of ctable
     float hardness;
     bool positive;
 
