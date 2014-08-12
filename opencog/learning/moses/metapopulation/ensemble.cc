@@ -263,29 +263,36 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
-		// This condition indicates "perfect score". This is the only type
-		// of tree that we accept into the ensemble.  Its unlikely that the
-		// next-highest scoring one will be any good, so just break.
-		if (_params.exact_experts and _tolerance <= err) {
-			logger().info() << "Exact expert: Best tree not good enough: " << err;
-			break;
-		}
-
 		// Set the weight for the tree, and stick it in the ensemble
 		scored_combo_tree best = *best_p;
 		double alpha;
 		double expalpha;
 		if (_params.exact_experts) {
+			// This condition indicates "perfect score". This is the only type
+			// of tree that we accept into the ensemble.  Its unlikely that the
+			// next-highest scoring one will be any good, so just break.
+			if (_tolerance <= err) {
+				logger().info() << "Exact expert: Best tree not good enough: " << err;
+				break;
+			}
+
 			alpha = 1.0;    // Ad-hoc but uniform weight.
 			expalpha = _params.expalpha; // Add-hoc boosting value ...
-			logger().info() << "Exact expert: add to ensemble " << *best_p;
+			logger().info() << "Exact expert: add to ensemble " << best;
 		} else {
+			// Any score worse than half is terrible. Half gives a weight of zero.
+			// More than half gives negative weights, which wreaks things.
+			if (0.5 <= err) {
+				logger().info() << "Expert: terrible precision, ensemble not expanded: " << err;
+				break;
+			}
 			// AdaBoost-style alpha; except we allow perfect scorers.
 			if (err < _tolerance) err = _tolerance;
 			alpha = 0.5 * log ((1.0 - err) / err);
 			expalpha = exp(alpha);
-			logger().info() << "Expert: add to ensemble " << *best_p  << std::endl
-				<< "With err=" << err << " alpha=" << alpha <<" exp(alpha)=" << expalpha;
+			logger().info() << "Expert: add to ensemble; err=" << err
+			                << " alpha=" << alpha <<" exp(alpha)=" << expalpha
+			                << std::endl << best;
 		}
 
 		best.set_weight(alpha);
