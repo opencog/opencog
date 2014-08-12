@@ -6,9 +6,8 @@ __author__ = 'sebastian'
 For testing syllogisms
 """
 
-from opencog.atomspace import types, AtomSpace, TruthValue
-from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
-from opencog.atomspace import types
+from opencog.atomspace import AtomSpace
+from opencog.scheme_wrapper import load_scm, __init__
 from pln.chainers import Chainer
 from pln.rules import *
 
@@ -83,8 +82,7 @@ def transfer_atom(new_atomspace, atom):
     """
     Transfers (or rather copies) an atom from one atomspace to another under
     the assumption that the atomspaces have the same list of atom types.
-
-    returns the equivalent of atom in new_atomspace. creates it if
+    Returns the equivalent atom in new_atomspace; creates it if
     necessary, including the outgoing set of links.
     :param new_atomspace: the atomspace where the atoms should be copied to
     :param atom: the atom to be copied
@@ -128,59 +126,61 @@ def check_result(atomspace, desired_output_list, undesired_output_list):
     else:
         print("No atoms had to be avoided.")
 
-# Parameters
-num_steps = 100
-print_starting_contents = True
+if __name__ == "__main__":
+    # Parameters
+    num_steps = 100
+    print_starting_contents = True
 
-# Syllogism files
-syllogisms = [
-    # "abductive-syllogism.scm",
-    # "conditional-syllogism.scm",
-    # "disjunctive-syllogism.scm",
-    # "easy-syllogisms.scm",
-    # "hard-syllogisms.scm",
-    # "medium-syllogisms.scm",
-    # "syllogism-boat.scm",
-    "syllogism-canadian.scm",
-    # "wrong-can-be-right.scm"
-    ]
+    # Syllogism files
+    syllogisms = [
+        # "abductive-syllogism.scm",
+        # "conditional-syllogism.scm",
+        # "disjunctive-syllogism.scm",
+        # "easy-syllogisms.scm",
+        # "hard-syllogisms.scm",
+        # "medium-syllogisms.scm",
+        # "syllogism-boat.scm",
+        "syllogism-canadian.scm",
+        # "wrong-can-be-right.scm"
+        ]
 
-syllogism_path = "opencog/python/pln/examples/relex2logic/syllogisms/"
+    syllogism_path = "opencog/python/pln/examples/relex2logic/syllogisms/"
 
-for syllogism in syllogisms:
-    # sets up atomspace where inputs, rules, and outputs can be retrieved
-    configuration_space = set_up_atomspace()
-    load_scm(configuration_space, syllogism_path + syllogism)
+    for syllogism in syllogisms:
+        # sets up atomspace where inputs, rules, and outputs can be retrieved
+        configuration_space = set_up_atomspace()
+        load_scm(configuration_space, syllogism_path + syllogism)
 
-    # sets up atomspace that is used for the actual inference
-    inference_space = set_up_atomspace()
-    for atom in get_predicate_arguments(configuration_space, "inputs"):
-        transfer_atom(inference_space, atom)
+        # sets up atomspace that is used for the actual inference
+        inference_space = set_up_atomspace()
+        for atom in get_predicate_arguments(configuration_space, "inputs"):
+            transfer_atom(inference_space, atom)
 
-    if print_starting_contents:
-        print('AtomSpace starting contents:')
-        inference_space.print_list()
+        if print_starting_contents:
+            print('AtomSpace starting contents:')
+            inference_space.print_list()
 
-    syllogism_chainer = create_chainer(
-        inference_space, get_predicate_arguments(configuration_space, "rules"))
+        syllogism_chainer = create_chainer(
+            inference_space,
+            get_predicate_arguments(configuration_space, "rules"))
 
-    outputs_produced = 0
+        outputs_produced = 0
 
-    for i in range(0, num_steps):
-        result = syllogism_chainer.forward_step()
+        for i in range(0, num_steps):
+            result = syllogism_chainer.forward_step()
 
-        if result is not None:
-            (rule, input, output) = result
-            outputs_produced += 1
+            if result is not None:
+                (rule, input, output) = result
+                outputs_produced += 1
 
-            print("\n----- [Output # {0}] -----".format(outputs_produced))
-            for j in output:
-                print("-- Output:\n{0}".format(j))
-            print("-- using production rule: {0}".format(rule.name))
-            print("\n-- based on this input:\n{0}".format(input))
+                print("\n----- [Output # {0}] -----".format(outputs_produced))
+                for j in output:
+                    print("-- Output:\n{0}".format(j))
+                print("-- using production rule: {0}".format(rule.name))
+                print("\n-- based on this input:\n{0}".format(input))
 
-    check_result(inference_space,
-                 get_predicate_arguments(configuration_space,
-                                         "desired_outputs"),
-                 get_predicate_arguments(configuration_space,
-                                         "undesired_outputs"))
+        check_result(inference_space,
+                     get_predicate_arguments(configuration_space,
+                                             "desired_outputs"),
+                     get_predicate_arguments(configuration_space,
+                                             "undesired_outputs"))
