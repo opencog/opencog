@@ -383,6 +383,10 @@ class HobbsAgent(MindAgent):
                 self.wordNumber[out[0].name]=self.StringToNumber(out[1].name)
 
     def initilization(self,atomspace):
+        '''
+        Initializes necessary variables. Loads rules.
+        '''
+
         self.atomspace = atomspace
 
         self.PleonasticItNode=atomspace.add_node(types.AnchorNode, 'Pleonastic-it', TruthValue(1.0, 100))

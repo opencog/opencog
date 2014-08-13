@@ -8,3 +8,5 @@
 ### Examples:
 
     "It seems that he is a human."
+    
+    "It" is a pleonastic it.
