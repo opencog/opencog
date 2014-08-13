@@ -7,16 +7,17 @@ resolutions.
 
 - /agents/hobbs.py
 
-    ```
     It does Breadth-first search on the dependency tree for each word which needs to be resolved, each antecedent encountered
     in the traversal will go through a set of filters which filter out unqualified antecedents(i.e. gender mismatches, plura-singular mismatches, etc.)
     
     Each antecedent will be linked to the current target(the word we are trying to solve for) with a reference link:
     
+    ```
     (ReferenceLink (some TV values)
         (target)
         (antecedent)
     )
+    ```
     
     Unqualified antecedents will be linked to the target with ReferenceLinks with TV of (stv 0.020000 0.900000).
     
@@ -25,8 +26,7 @@ resolutions.
     
     Suppose the decreasing rate is x, then
     the ith accepted candidate(in Breadth-first traversal order) will have confidence value of
-    (x^(i-1))(1-x)  i starts at 1.
-    ```
+    (x^(i-1))(1-x), i starts at 1.
        
 - rules
 
@@ -57,9 +57,10 @@ resolutions.
  
 - pleonastic-it
 
+    
+    - Pleonastic it(s) will be connected to (AnchorNode "Pleonastic-it"). For example,
+    
     ```
-    Pleonastic it(s) will be connected to (AnchorNode "Pleonastic-it").
-    i.e.
     [2014-08-05 03:34:05:997] [FINE] (ReferenceLink (stv 0.980000 0.300000)
     (WordInstanceNode "it@36845a59-09d9-40c9-a07e-e4cf442edecf") ; [8606]
     (AnchorNode "Pleonastic-it") ; [8717]
