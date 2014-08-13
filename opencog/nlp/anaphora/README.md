@@ -3,7 +3,7 @@
 This is an implementation of a modified version of hobbs algorithm which does anaphora resolutions and zero-pronoun 
 resolutions.
 
-### Algorithm:
+## Algorithm:
 
 - /agents/hobbs.py
 
@@ -30,31 +30,30 @@ resolutions.
        
 - rules
 
-    ```
-    /rules/filters:
+
+    - /rules/filters:
     
-    A set of filters which are used to filter out unqualified antecedents.
+        A set of filters which are used to filter out unqualified antecedents.
     
-    Why do filters exist?
+        Why do filters exist?
     
-    There are restrictions which can be used to disqualify antecedent candidates immediately, such as gender mismatches, plural-singular mismatches.
+        There are restrictions which can be used to disqualify antecedent candidates immediately, such as gender mismatches, plural-singular mismatches.
     
-    /rules/pleonastic-it:
+    - /rules/pleonastic-it:
     
-    A set of patterns which are used to identify pleonastic it(s).
+        A set of patterns which are used to identify pleonastic it(s).
     
-    /rules/pre-process:
+    - /rules/pre-process:
     
-    A set of patterns which are used to identify references which need to be resolved.
+        A set of patterns which are used to identify references which need to be resolved.
     
-    Three sets of rules need to be applied in the following order:
-    1. pre-process
-    for each antecedent candidate:
-        2. pleonastic-it
-        3. filters
+        Three sets of rules need to be applied in the following order:
+        1. pre-process
+        for each antecedent candidate:
+            2. pleonastic-it
+            3. filters
     
-    Note that rules in each set are independent with each other, or rules in the same set can be run in parallel.
-    ```
+    - Note that rules in each set are independent with each other, or rules in the same set can be run in parallel.
  
 - pleonastic-it
 
@@ -66,7 +65,8 @@ resolutions.
     (AnchorNode "Pleonastic-it") ; [8717]
     ) ; [9070]
     ```
-### Prerequisites:
+
+## Prerequisites:
 
 - Adding python library path
 
@@ -79,7 +79,7 @@ resolutions.
     ../opencog/nlp/anaphora/agents
     ```
 
-### Example #1:
+## Example #1:
 
 - Example sentences:
 
@@ -114,7 +114,7 @@ resolutions.
     accepted tree@38e7cdad-3430-4176-bffe-e484bb267eef
     ```
 
-### Example #2:
+## Example #2:
 
 - Example sentences:
 
@@ -143,7 +143,7 @@ resolutions.
     accepted crack@35d449fa-deeb-46a3-bf94-58a746aa5784
     ```
 
-### Example #3:
+## Example #3:
 
 - Example sentences:
 
@@ -177,7 +177,7 @@ resolutions.
     
     accepted waitresses@55cf46d0-9243-43dd-b1dd-133e9b43fab3
     ```
-### Example #4:
+## Example #4:
 
 - Example sentences:
 
@@ -205,7 +205,7 @@ resolutions.
     
     ```
     
-### Debugging
+## Debugging
 
 - Where to find the log file?
 
@@ -213,7 +213,7 @@ resolutions.
     The log file is located at "tmp/hobbs.log"
     ```
 
-### More examples:
+## More examples:
 
 - /tests/hobbs-testing-results.txt:
 
