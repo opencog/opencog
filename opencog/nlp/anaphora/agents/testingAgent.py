@@ -58,4 +58,3 @@ dump=dumpAgent()
 dump.run(atomspace)
 hobbsAgent = HobbsAgent()
 hobbsAgent.run(atomspace)
-
