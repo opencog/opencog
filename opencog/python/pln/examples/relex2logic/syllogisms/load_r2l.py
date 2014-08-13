@@ -15,7 +15,7 @@ Premises:
     - REST API must have been started in the CogServer (restapi.Start)
 """
 
-from attention_interface import clear_atomspace, scheme, dump_atomspace_scheme
+from client.client import clear_atomspace, scheme, dump_atomspace_scheme
 from test_syllogisms import set_up_atomspace
 
 file_name = "syllogisms.txt"
