@@ -26,7 +26,6 @@ resolutions.
     Suppose the decreasing rate is x, then
     the ith accepted candidate(in Breadth-first traversal order) will have confidence value of
     (x^(i-1))(1-x)  i starts at 1.
-    
     ```
        
 - rules
@@ -55,7 +54,6 @@ resolutions.
         3. filters
     
     Note that rules in each set are independent with each other, or rules in the same set can be run in parallel.
-    
     ```
  
 - pleonastic-it
@@ -67,7 +65,6 @@ resolutions.
     (WordInstanceNode "it@36845a59-09d9-40c9-a07e-e4cf442edecf") ; [8606]
     (AnchorNode "Pleonastic-it") ; [8717]
     ) ; [9070]
-
     ```
 ### Prerequisites:
 
@@ -115,7 +112,6 @@ resolutions.
 
     accepted apple@8b05b856-44d4-494d-917f-06f299375d3f
     accepted tree@38e7cdad-3430-4176-bffe-e484bb267eef
-
     ```
 
 ### Example #2:
@@ -145,7 +141,6 @@ resolutions.
 
     accepted window@5d75f283-ec1f-4db7-86bc-984d00cc18c9
     accepted crack@35d449fa-deeb-46a3-bf94-58a746aa5784
-
     ```
 
 ### Example #3:
@@ -181,7 +176,6 @@ resolutions.
     ([a,b] stands for a and b)
     
     accepted waitresses@55cf46d0-9243-43dd-b1dd-133e9b43fab3
-
     ```
 ### Example #4:
 
@@ -207,8 +201,8 @@ resolutions.
     ```
     Resolving...........
     (WordInstanceNode "it@36845a59-09d9-40c9-a07e-e4cf442edecf") ; [8606]
-
     accepted Pleonastic-it
+    
     ```
     
 ### Debugging
@@ -217,7 +211,6 @@ resolutions.
 
     ```
     The log file is located at "tmp/hobbs.log"
-
     ```
 
 ### More examples:
@@ -232,6 +225,7 @@ resolutions.
 
     ```
     Simple sentences taken from different categories of sentence structures.
+    ```
 
 - /tests/testing-results.txt:
 
