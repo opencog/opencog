@@ -36,13 +36,17 @@ resolutions.
     
     A set of filters which are used to filter out unqualified antecedents.
     
+    Why do filters exist?
+    
+    There are restrictions which can be used to disqualify antecedent candidates immediately, such as gender mismatches, plural-singular mismatches.
+    
     /rules/pleonastic-it:
     
     A set of patterns which are used to identify pleonastic it(s).
     
     /rules/pre-process:
     
-    A set of patterns which are used to identify words which need to be resolved.
+    A set of patterns which are used to identify references which need to be resolved.
     
     Three sets of rules need to be applied in the following order:
     1. pre-process
