@@ -43,6 +43,15 @@ resolutions.
     /rules/pre-process:
     
     A set of patterns which are used to identify words which need to be resolved.
+    
+    Three sets of rules need to be applied in the following order:
+    1. pre-process
+    for each antecedent candidate:
+        2. pleonastic-it
+        3. filters
+    
+    Note that rules in each set are independent with each other, or rules in the same set can be run in parallel.
+    
     ```
  
 - pleonastic-it
