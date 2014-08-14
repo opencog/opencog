@@ -201,7 +201,7 @@ namespace PatternMining
 
      void runPatternMiner(unsigned int _thresholdFrequency = 2);
 
-     void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram = 3);
+     void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram = 2);
 
      void testPatternMatcher1();
      void testPatternMatcher2();

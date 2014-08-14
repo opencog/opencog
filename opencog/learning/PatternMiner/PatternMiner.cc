@@ -83,8 +83,6 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
 
     foreach (Handle h, outgoingLinks)
     {
-        // debug
-        string hstr = atomSpace->atomAsString(h);
 
         if (atomSpace->isNode(h))
         {
@@ -129,9 +127,6 @@ vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern,
 
     foreach (Handle link, orderedPattern)
     {
-        // debug
-        string linkstr = atomSpace->atomAsString(link);
-
         HandleSeq renameOutgoingLinks;
         findAndRenameVariablesForOneLink(link, orderedVarNameMap, renameOutgoingLinks);
         Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),renameOutgoingLinks,TruthValue::TRUE_TV());
@@ -345,9 +340,6 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
 {
     HandleSeq outgoingLinks = originalAtomSpace->getOutgoing(link);
 
-    // Debug
-    string linkstr = originalAtomSpace->atomAsString(link);
-
     foreach (Handle h, outgoingLinks)
     {
         if (originalAtomSpace->isNode(h))
@@ -368,9 +360,6 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
 
 void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, set<Handle>& allVarNodes)
 {
-    // Debug:
-    string instr = originalAtomSpace->atomAsString(instanceLink);
-    string pastr = atomSpace->atomAsString(patternLink);
 
     HandleSeq ioutgoingLinks = originalAtomSpace->getOutgoing(instanceLink);
     HandleSeq poutgoingLinks = atomSpace->getOutgoing(patternLink);
@@ -552,15 +541,10 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
 
                 foreach (Handle link, inputLinks)
                 {
-                    // debug:
-                    string inputLinkStr = originalAtomSpace->atomAsString(link);
-
                     HandleSeq outgoingLinks;
                     generateALinkByChosenVariables(link, patternVarMap, outgoingLinks);
                     Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),outgoingLinks,TruthValue::TRUE_TV());
                     pattern.push_back(rebindedLink);
-                    // debug:
-                    string rebindedLinkStr = atomSpace->atomAsString(rebindedLink);
                 }
 
                 // unify the pattern
@@ -702,12 +686,6 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     if (THREAD_NUM > 1)
         removeAtomLock.lock();
 
-    // Debug
-    static int count = 0;
-    count ++;
-
-    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern: count = " << count << std::endl;
-
     HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, linksWillBeDel;
 
     HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpace(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
@@ -740,7 +718,7 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
 
     std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
-              << originalAtomSpace->atomAsString(hBindLink).c_str() << std::endl;
+              << originalAtomSpace->atomAsString(hAndLink).c_str() << std::endl;
 
 //    // debug
 //    if ((variableNodes.size() == 4) && (patternToMatch.size() == 3))
@@ -793,10 +771,10 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     // Note: Don't forget to remove the hResultListLink and BindLink
     HandleSeq resultSet = originalAtomSpace->getOutgoing(hResultListLink);
 
-    std::cout << toString(resultSet.size())  << " instances found:" << std::endl ;
+    std::cout << toString(resultSet.size())  << " instances found!" << std::endl ;
 
-    //debug
-    std::cout << originalAtomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
+//    //debug
+//    std::cout << originalAtomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
 
     foreach (Handle listH , resultSet)
     {
@@ -833,8 +811,8 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 void PatternMiner::removeLinkAndItsAllSubLinks(AtomSpace* _atomspace, Handle link)
 {
 
-    //debug
-    std::cout << "Remove atom: " << _atomspace->atomAsString(link) << std::endl;
+//    //debug
+//    std::cout << "Remove atom: " << _atomspace->atomAsString(link) << std::endl;
 
     HandleSeq Outgoings = _atomspace->getOutgoing(link);
     foreach (Handle h, Outgoings)
@@ -1250,7 +1228,7 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 void PatternMiner::selectSubsetFromCorpus(vector<string>& topics, unsigned int gram)
 {
     // select a subset for test topics from the huge ConceptNet corpus
-    _selectSubsetFromCorpus(topics,3);
+    _selectSubsetFromCorpus(topics,gram);
 }
 
 std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const AtomSpace *atomspace)
@@ -1523,10 +1501,11 @@ set<Handle> PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode,
     foreach (Handle incomingHandle, incomings)
     {
         Handle newh = incomingHandle;
+
         // if this atom is a igonred type, get its first parent that is not in the igonred types
         if (isIgnoredType (originalAtomSpace->getType(incomingHandle)) )
         {
-            Handle newh = getFirstNonIgnoredIncomingLink(originalAtomSpace, incomingHandle);
+            newh = getFirstNonIgnoredIncomingLink(originalAtomSpace, incomingHandle);
 
             if ((newh == Handle::UNDEFINED) || containIgnoredContent(newh ))
                 continue;
@@ -1534,6 +1513,7 @@ set<Handle> PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode,
 
         if (allSubsetLinks.find(newh) == allSubsetLinks.end())
             newHandles.insert(newh);
+
     }
 
     return newHandles;
