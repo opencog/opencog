@@ -56,6 +56,9 @@ class NotCreationRule(BooleanLinkCreationRule):
                       inputs=[A])
 
 
+#TODO: some heuristic is necessary when this rule is applied so that AndLinks
+#aren't produced arbitrarily; otherwise AndLinks of AndLinks will also be
+#produced
 class AndCreationRule(BooleanLinkCreationRule):
     """
     Take a set of N atoms and create AndLink(atoms)
@@ -69,7 +72,6 @@ class AndCreationRule(BooleanLinkCreationRule):
                       outputs=[chainer.link(types.AndLink, atoms)],
                       inputs=atoms,
                       name = "AndCreationRule<"+str(N)+">")
-
 
 
 class OrCreationRule(BooleanLinkCreationRule):
