@@ -519,35 +519,26 @@
 ; second argument of before() and after() can be a pronoun or a noun
 ; as in "I before him", "I left after him"
 ; Other examples: "She went home before I left", etc.
-(define (before-rule $x_instance $y_instance $y_pos)
+(define (before-after-rule $x_instance $y_instance $y_pos $before_or_after)
     (define y-node
         (if (string=? $y_pos "verb")
             (PredicateNode $y_instance df-node-stv)
             (ConceptNode $y_instance df-node-stv)
         )
     )
+    (define before-or-after-node
+        (if (string=? $before_or_after "before")
+            (PredicateNode "before" df-node-stv)
+            (PredicateNode "after" df-node-stv)
+        )
+    )
     (list
         (EvaluationLink df-link-stv
-            (PredicateNode "before" df-node-stv)
+            before-or-after-node
             (ListLink df-link-stv (PredicateNode $x_instance df-node-stv) y-node)
         )
     )
 )
-
-(define (after-rule $x_instance $y_instance $y_pos)
-    (define y-node
-        (if (string=? $y_pos "verb")
-            (PredicateNode $y_instance df-node-stv)
-            (ConceptNode $y_instance df-node-stv)
-        )   
-    )   
-    (list
-        (EvaluationLink df-link-stv
-            (PredicateNode "after" df-node-stv)
-            (ListLink df-link-stv (PredicateNode $x_instance df-node-stv) y-node)
-        )   
-    )   
-)     
 
 ; Examples: "I had dinner at 6 pm", "I went to sleep at 1 am"
 (define (time-rule $hour $period $v_instance)
