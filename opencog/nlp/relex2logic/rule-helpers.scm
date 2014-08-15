@@ -511,14 +511,15 @@
 		)
 	)
 )
-
-
-; -----------------------------------------------------------------------
+; ----------------------------------
 ; time rules to create time relations
 ; -----------------------------------------------------------------------
-; second argument of before() and after() can be a pronoun or a noun
-; as in "I before him", "I left after him"
-; Other examples: "She went home before I left", etc.
+; second argument of before() and after() can be a verb, adjective, pronoun
+; or noun; rule can be invoked both with a before or after relation; it is
+; checked which node needs to be created; discussion can be viewed here:
+; https://github.com/opencog/opencog/pull/993
+; Examples: "She went home before I left", "I went after him", "He sleeps
+; before he is tired"
 (define (before-after-rule $x_instance $y_instance $y_pos $before_or_after)
     (define y-node
         (if (or (string=? $y_pos "verb") (string=? $y_pos "adj"))
