@@ -28,18 +28,3 @@ agent = InteractiveAgent(atomspace=atomspace,
                          print_starting_contents=True)
 
 agent.run()
-
-
-"""
-for i in range(number_of_steps):
-    result = agent.run()
-    print("Checking result")
-    if socrates_agent.check_result(atomspace):
-        answer = True
-        break
-
-if answer:
-    print("Result found after {0} steps.".format(i))
-else:
-    print("No result found.")
-"""

@@ -26,13 +26,14 @@ represented in AtomSpace notation (rather than natural language).
 Important notes:
 
 - There are some outstanding issues concerning satisfying sets:
-  - [General issue](https://github.com/opencog/opencog/issues/601) linking to
-    [#733 (Incorrect input set during deduction)](https://github.com/opencog/opencog/issues/733),
-    [#734 (Incorrect SatisfyingSetLink syntax)](https://github.com/opencog/opencog/issues/734) and
-    [#735](https://github.com/opencog/opencog/issues/735) (in need of review by @AmeBel.
-  - [Should links with VariableNodes have the semantics of AverageLinks
-    or SatisfyingSetLinks?](https://github.com/opencog/opencog/issues/603)
-  - [Adding a SatisfyingSetToConceptRule](https://github.com/opencog/opencog/issues/613) - is this still necessary?
+  - [This general issue](https://github.com/opencog/opencog/issues/601) links to
+    [#733 (Incorrect input set during deduction)](https://github.com/opencog/opencog/issues/733) and
+    [#734 (Incorrect SatisfyingSetLink syntax)](https://github.com/opencog/opencog/issues/734)
+    which require debugging
+  - [This issue](https://github.com/opencog/opencog/issues/603) discusses the
+    question if links with VariableNodes should have the semantics of AverageLinks
+    or SatisfyingSetLinks and requires changing stvs in the
+    GeneralEvaluationToMemberRule
 
 - The introduction of the Abduction rule was discussed [here](https://github.com/opencog/opencog/pull/777).
 
