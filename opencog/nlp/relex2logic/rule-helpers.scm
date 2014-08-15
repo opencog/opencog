@@ -436,8 +436,9 @@
 
 
 ; -----------------------------------------------------------------------
-; and rules
+;  conjunction rules
 ; -----------------------------------------------------------------------
+;coordinating conjunction - And, but, for, nor, or, so, and yet
 ; Example:"I did my homework, and I went to school."
 (define (and-rule1 var1 var1_instance var2 var2_instance)
 	(list (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
@@ -464,7 +465,51 @@
 	))
 )
 
+(define (but-rule var1 var1_instance var2 var2_instance pos)
+    (cond [(equal? pos "verb") 
+	(list (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
+	(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
+        (EvaluationLink
+        (PredicateNode "butmarker")
+		(ListLink
+			(PredicateNode var1_instance)
+			(PredicateNode var2_instance)
+		)
+	))]
+	[else 
+    (list (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
+	(InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
+        (EvaluationLink
+        (PredicateNode "butmarker")
+		(ListLink
+			(ConceptNode var1_instance)
+			(ConceptNode var2_instance)
+		)
+	))])
+)
 
+(define (or-rule var1 var1_instance var2 var2_instance pos)
+    (cond [(equal? pos "verb") 
+	(list (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
+	(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
+        (EvaluationLink
+        (PredicateNode "ormarker")
+		(ListLink
+			(PredicateNode var1_instance)
+			(PredicateNode var2_instance)
+		)
+	))]
+	[else 
+    (list (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
+	(InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
+        (EvaluationLink
+        (PredicateNode "ormarker")
+		(ListLink
+			(ConceptNode var1_instance)
+			(ConceptNode var2_instance)
+		)
+	))])
+)
 ; -----------------------------------------------------------------------
 ; that rule for creating thatmarker
 ; -----------------------------------------------------------------------
