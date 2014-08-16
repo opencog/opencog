@@ -527,15 +527,9 @@
             (ConceptNode $y_instance df-node-stv)
         )
     )
-    (define before-or-after-node
-        (if (string=? $before_or_after "before")
-            (PredicateNode "before" df-node-stv)
-            (PredicateNode "after" df-node-stv)
-        )
-    )
     (list
         (EvaluationLink df-link-stv
-            before-or-after-node
+            (PredicateNode $before_or_after df-node-stv)
             (ListLink df-link-stv (PredicateNode $x_instance df-node-stv) y-node)
         )
     )
