@@ -27,13 +27,14 @@ with open(file_name, "r") as f:
         line = line.strip("\n")
         if line == "":
             atomspace_inputs = ""
-            expected_outputs = ""
+            desired_outputs = ""
+            undesired_outputs = ""
             continue
         elif line.startswith("#"):
             continue
         print line
         clear_atomspace()
-        # removes a., b. or |-, parses string with relex
+        # removes a., b., |-, or |/-; parses string with relex
         scheme("""(relex-parse "{0}")""".format(" ".join(line.split(" ")[1:])))
         scheme("(delete-sentences)")
         print(dump_atomspace_scheme())
@@ -42,8 +43,11 @@ with open(file_name, "r") as f:
         # if there is only one expected conclusion, chainer can be run
         # after the |- has been seen
         elif line.startswith("|-"):
-            expected_outputs += dump_atomspace_scheme()
+            desired_outputs += dump_atomspace_scheme()
             atomspace = set_up_atomspace()
             # run chainer/agent either in Python or in the CogServer on the
             # atomspace_inputs, then check if the expected outputs have been
             # produced
+        elif line.startswith("|/-"):
+            undesired_outputs += dump_atomspace_scheme()
+            atomspace = set_up_atomspace()
