@@ -18,13 +18,40 @@ and can be viewed [here](http://wiki.opencog.org/w/List_of_Test_Syllogisms).
 
 ## Architecture
 
+### Full pipeline
+
+```syllogism_r2l_pln_pipeline``` provides the full RelEx2Logic-PLN-pipeline:
+It takes as input natural language syllogisms (at the moment) of the form
+```
+a. 1st premise
+b. 2nd premise
+|- correct conclusion
+|/- false conclusion
+
+# next syllogism
+```
+and retrieves their RelEx2Logic representation by using the REST API and parsing
+these with RelEx and RelEx2Logic in a running CogServer. Subsequently, it uses
+the ```client``` interface specified in the ```external-tools``` repository to
+run a MindAgent on these inputs. The pipeline can thus be easily supplemented
+by methods from ```client.py```.
+Potentially, it might produce the conclusion in natural language
+using NLGen and surface realization.
+
+
 ### PLN reasoning
 
-```test_syllogisms.py``` provides a way to run the syllogisms, similar to the
+```test_syllogisms.py``` on the other hand focuses exclusively on PLN 
+and provides a way to run the syllogisms, similar to the
 PLNUnitTester by Alex in ```opencog/tests/python/test_pln/test_rules_new.py```.
+In contrast to the previous module it uses Python to run the chainer.
+Furthermore, the input needs to be in a Scheme file such as
+```syllogism-canadian.scm```. This has the disadvantage that the input has to
+be specified manually. Conversely, PLN experimentation and testing with this
+module can already be done if RelEx2Logic is not yet able to produce the
+required output.
 
-The input needs to be in a Scheme file such as ```syllogism-canadian.scm``` where
-the input for the chainer is wrapped as follows:
+The input for the chainer in the Scheme file is wrapped as follows:
 ```
 (EvaluationLink (PredicateNode "inputs")
     (ListLink
@@ -57,22 +84,3 @@ while atoms that should explicitly not be represented are to be represented as f
 	)
 )
 ```
-
-### RelEx2Logic parsing
-
-Whereas ```test_syllogisms.py``` focuses on PLN and requires the input to
-specified manually in what would be produced by RelEx2Logic, ```load_r2l```
-bridges this gap and takes as input natural language syllogisms (at the moment)
-of the form
-```
-a. 1st premise
-b. 2nd premise
-|- conclusion
-```
-and retrieves their RelEx2Logic representation by using the REST API and parsing
-these with RelEx and RelEx2Logic in a running CogServer.
-
-Potentially, both modules can be linked to provide a comprehensive
-RelEx2Logic-PLN-pipeline which is able to automatically parse and solve a 
-plethora of syllogisms and ultimately produce the conclusion in natural language
-using NLGen and surface realization.
