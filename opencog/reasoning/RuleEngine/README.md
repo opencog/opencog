@@ -38,7 +38,7 @@ Examples for the current PLN implementation in Python can be found in the
 The PLN rules can be found in the [rules directory](../../python/pln/rules).
 Among them are the following:
 
-* [Boolean rules](../../python/pln/rules(boolean_rules.py) create or eliminate
+* [Boolean rules](../../python/pln/rules/boolean_rules.py) create or eliminate
   AndLinks, OrLinks and NotLinks. They haven't been used extensively in PLN
   reasoning so far. They necessitate a guiding heuristic so that links aren't
   produced at random.
