@@ -540,7 +540,7 @@
     (define time-node
         (if (string=? $period "am")
             (TimeNode $hour df-node-stv)
-            (TimeNode (number-string (+ (string->number $hour) 12)) df-node-stv)
+            (TimeNode (number->string (+ (string->number $hour) 12)) df-node-stv)
         )
     )
     (list (AtTimeLink time-node (PredicateNode $v_instance df-node-stv) df-link-stv))
