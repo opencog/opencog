@@ -35,3 +35,6 @@ AtTimeLinks in the example would need to be conceptualized differently.
 Keyvan and Ramin have provided ideas on how to handle composition in temporal
 reasoning which can be viewed [here](https://groups.google.com/forum/#!topic/opencog/NhWMI4p72UI).
 This should be the subject of further discussions.
+
+The relevant pull request can be viewed [here](https://github.com/opencog/opencog/pull/934)
+for future reference.
