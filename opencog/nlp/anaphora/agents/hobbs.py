@@ -153,9 +153,19 @@ class HobbsAgent(MindAgent):
         return rv
 
     def StringToNumber(self,str):
+
+        '''
+        Converts a string to an integer.
+        '''
+
         return int(str)
 
     def getWordNumber(self,node):
+
+        '''
+        Returns the WordSequence number associated with the 'node'
+        '''
+
         return self.wordNumber[node.name]
 
     def getSentenceNumber(self,node):
@@ -312,10 +322,20 @@ class HobbsAgent(MindAgent):
         return rv
 
     def getWords(self):
+
+        '''
+        Returns a list of words in the atomspace
+        '''
+
         rv=self.bindLinkExe(None,None,'(cog-bind-crisp getWords)',self.currentResult,types.WordInstanceNode)
         return self.sortNodes(rv,self.getWordNumber)
 
     def getTargets(self,words):
+
+        '''
+        Returns a list of references needed to be resolved.
+        '''
+
         targets=[]
         for word in words:
             matched=False
