@@ -370,7 +370,7 @@ class AtomSpaceBasedInferenceHistory:
 
         # Find all the apps for that output, and then select only the
         # ones for this rule
-        apps = self._lookup_applications_by_output_atom(self, output)
+        apps = self._lookup_applications_by_output_atom(output)
         relevant_apps = [app for app in apps if self._get_rule(app).name == rule.name]
         input_tuples = [tuple(self._get_inputs(app)) for app in relevant_apps]
         return input_tuples
