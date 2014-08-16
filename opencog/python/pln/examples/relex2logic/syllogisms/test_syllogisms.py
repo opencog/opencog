@@ -136,13 +136,9 @@ if __name__ == "__main__":
         # "abductive-syllogism.scm",
         # "conditional-syllogism.scm",
         # "disjunctive-syllogism.scm",
-        # "easy-syllogisms.scm",
-        # "hard-syllogisms.scm",
-        # "medium-syllogisms.scm",
         # "syllogism-boat.scm",
-        "syllogism-canadian.scm",
-        # "wrong-can-be-right.scm"
-        ]
+        "syllogism-canadian.scm"
+    ]
 
     syllogism_path = "opencog/python/pln/examples/relex2logic/syllogisms/"
 
