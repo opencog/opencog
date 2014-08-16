@@ -8,9 +8,9 @@ so far use obsolete [temporal formulas](../../../spatiotemporal) written by
 Dario. These thus have to be revised, rewritten and integrated into PLN. They
 should be tested on a fuzzy example.
 
-[Temporal_example.py][temporal_example.py] can hereby act as a starting point,
+The [temporal example](temporal_example.py) can hereby act as a starting point,
 albeit with a new input as it currently uses the already existing
-[temporal_toy_example.scm](../../../../../tests/python/test_pln/scm_disabled/temporal/temporalToyExample.scm)
+[temporal toy example](../../../../../tests/python/test_pln/scm_disabled/temporal/temporalToyExample.scm)
 to test the temporal rules which can only be used for crisp reasoning.
 
 In the example, links are of the following form:
