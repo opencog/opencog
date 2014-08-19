@@ -448,7 +448,7 @@
 	(list (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
 	(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
         (EvaluationLink
-        (PredicateNode "andmarker")
+        (PredicateNode "and")
 		(ListLink
 			(PredicateNode var1_instance)
 			(PredicateNode var2_instance)
@@ -458,7 +458,7 @@
     (list (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
 	(InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
         (EvaluationLink
-        (PredicateNode "andmarker")
+        (PredicateNode "and")
 		(ListLink
 			(ConceptNode var1_instance)
 			(ConceptNode var2_instance)
@@ -471,7 +471,7 @@
 	(list (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
 	(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
         (EvaluationLink
-        (PredicateNode "butmarker")
+        (PredicateNode "but")
 		(ListLink
 			(PredicateNode var1_instance)
 			(PredicateNode var2_instance)
@@ -481,7 +481,7 @@
     (list (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
 	(InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
         (EvaluationLink
-        (PredicateNode "butmarker")
+        (PredicateNode "but")
 		(ListLink
 			(ConceptNode var1_instance)
 			(ConceptNode var2_instance)
@@ -494,7 +494,7 @@
 	(list (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
 	(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
         (EvaluationLink
-        (PredicateNode "ormarker")
+        (PredicateNode "or")
 		(ListLink
 			(PredicateNode var1_instance)
 			(PredicateNode var2_instance)
@@ -504,7 +504,7 @@
     (list (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
 	(InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
         (EvaluationLink
-        (PredicateNode "ormarker")
+        (PredicateNode "or")
 		(ListLink
 			(ConceptNode var1_instance)
 			(ConceptNode var2_instance)
