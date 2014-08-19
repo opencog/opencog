@@ -511,8 +511,40 @@
 		)
 	)
 )
+; ----------------------------------
+; time rules to create time relations
+; -----------------------------------------------------------------------
+; second argument of before() and after() can be a verb, adjective, pronoun
+; or noun; rule can be invoked both with a before or after relation; it is
+; checked which node needs to be created; discussion can be viewed here:
+; https://github.com/opencog/opencog/pull/993
+; Examples: "She went home before I left", "I went after him", "He sleeps
+; before he is tired"
+(define (before-after-rule $x_instance $y_instance $y_pos $before_or_after)
+    (define y-node
+        (if (or (string=? $y_pos "verb") (string=? $y_pos "adj"))
+            (PredicateNode $y_instance df-node-stv)
+            (ConceptNode $y_instance df-node-stv)
+        )
+    )
+    (list
+        (EvaluationLink df-link-stv
+            (PredicateNode $before_or_after df-node-stv)
+            (ListLink df-link-stv (PredicateNode $x_instance df-node-stv) y-node)
+        )
+    )
+)
 
-
+; Examples: "I had dinner at 6 pm", "I went to sleep at 1 am"
+(define (time-rule $hour $period $v_instance)
+    (define time-node
+        (if (string=? $period "am")
+            (TimeNode $hour df-node-stv)
+            (TimeNode (number->string (+ (string->number $hour) 12)) df-node-stv)
+        )
+    )
+    (list (AtTimeLink time-node (PredicateNode $v_instance df-node-stv) df-link-stv))
+)
 
 
 ; -----------------------------------------------------------------------
