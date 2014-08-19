@@ -186,7 +186,7 @@
 	(EvaluationLink df-link-stv
 		(PredicateNode verb_instance df-node-stv)
 		(ListLink df-link-stv
-			(ConceptNode "$x" df-node-stv)
+			(ConceptNode "you" df-node-stv)
 			(ConceptNode obj_instance df-node-stv)
 		)
     ))
