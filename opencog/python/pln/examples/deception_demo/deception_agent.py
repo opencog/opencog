@@ -32,8 +32,8 @@ class DeceptionAgent(MindAgent):
 
         result = self.chainer.forward_step()
 
-        if __VERBOSE__:
-            print result
+        # if __VERBOSE__:
+        #     print result
 
         return result
 
@@ -46,5 +46,3 @@ class DeceptionAgent(MindAgent):
 
 def check_result(atomspace):
     pass
-
-
