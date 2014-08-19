@@ -1,5 +1,34 @@
 ; The following are 
 
+;All agents want a battery.
+(EvaluationLink
+    (PredicateNode "want")
+    (ListLink
+        (ConceptNode "Agent")
+        (ConceptNode "Battery")
+    )
+)
+
+;I know that a battery appears at a random location, e.g. (2,1).
+(EvaluationLink
+    (PredicateNode "know")
+    (ListLink
+        (HumanoidNode "me")
+        (EvaluationLink
+            (PredicateNode "appear")
+            (ListLink
+                (ConceptNode "Battery")
+                (EvaluationLink
+                    (PredicateNode "atLocation")
+                    (ListLink
+                        (NumberNode 2)
+                        (NumberNode 1)
+                    )
+                )
+            )
+        )
+    )
+)
 
 ;If an agent can see two objects X and Y,
 ;it probably can see the spatial relationships
@@ -33,17 +62,17 @@
         )
     )
     (EvaluationLink
-            (PredicateNode "know")
-            (ListLink
-                (VariableNode "$A")
-                (EvaluationLink
-                    (PredicateNode "$R")
-                    (ListLink
-                        (VariableNode "$X")
-                        (VariableNode "$y")
-                    )
+        (PredicateNode "know")
+        (ListLink
+            (VariableNode "$A")
+            (EvaluationLink
+                (PredicateNode "$R")
+                (ListLink
+                    (VariableNode "$X")
+                    (VariableNode "$y")
                 )
             )
+        )
     )
 )
 

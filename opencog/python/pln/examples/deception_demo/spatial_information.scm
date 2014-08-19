@@ -1,7 +1,7 @@
 ; The atoms below describe the space/environment which the agents are in.
-; The world is a 3D one but information the 3rd dimenstion are not considered.
+; The world is a 3D one but information the 3rd dimension are not considered.
 
-; Atoms describing the dimenstion of the 3D World
+; Atoms describing the dimension of the 3D World
 (EvaluationLink
     (PredicateNode "has")
     (ListLink
@@ -88,4 +88,7 @@
     (ConceptNode "Agent")
 )
 
-
+(InheritanceLink
+    (ObjectNode "red_battery_18")
+    (ConceptNode "Battery")
+)
