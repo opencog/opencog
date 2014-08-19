@@ -167,6 +167,8 @@ namespace PatternMining
 
      bool isInHandleSeq(Handle handle, HandleSeq &handles);
 
+     bool isInHandleSeqSeq(Handle handle, HandleSeqSeq &handleSeqs);
+
      bool containsDuplicateHandle(HandleSeq &handles);
 
      Handle getFirstNonIgnoredIncomingLink(AtomSpace *atomspace, Handle &handle);
@@ -190,6 +192,12 @@ namespace PatternMining
      bool containIgnoredContent(Handle link );
 
      const static string ignoreKeyWords[];
+
+     bool splitDisconnectedLinksIntoConnectedGroups(HandleSeq& inputLinks, HandleSeqSeq& outputConnectedGroups);
+
+     double calculateEntropyOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern);
+
+     double calculateInteractionInformation(HTreeNode* HNode);
 
  public:
      PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram = 3);

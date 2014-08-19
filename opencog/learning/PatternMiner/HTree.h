@@ -44,12 +44,15 @@ namespace opencog
             set<HTreeNode*> parentLinks;
             set<HTreeNode*> childLinks;
 
+            double interactionInformation;
+
             HandleSeq sharedVarNodeList; // all the shared nodes in these links in the original AtomSpace, each handle is a shared node
 
             HTreeNode()
             {
                 parentLinks.clear();
                 childLinks.clear();
+
             }
 
          };

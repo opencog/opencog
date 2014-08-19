@@ -64,7 +64,7 @@ TestPatternMinerAgent::TestPatternMinerAgent(CogServer& cs) : Agent(cs, 100)
 //                        "pm_test_corpus.scm"
 //                      );
 
-    this->patternMiner = new PatternMiner(&(cs.getAtomSpace()), 4);
+    this->patternMiner = new PatternMiner(&(cs.getAtomSpace()), 3);
 
     logger().info("[TestPatternMinerAgent] constructor");
 
@@ -95,8 +95,8 @@ void TestPatternMinerAgent::run()
     static bool hasRun = false;
     if (hasRun)
         return;
-    selectSubSetFromCorpus();
-    // this->patternMiner->runPatternMiner(1);
+    // selectSubSetFromCorpus();
+    this->patternMiner->runPatternMiner(1);
 
     hasRun = true;
 
