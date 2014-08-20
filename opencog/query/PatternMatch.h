@@ -47,8 +47,6 @@ class PatternMatch
 
 		void do_imply(Handle, PatternMatchCallback *, std::set<Handle>&)
 			throw (InvalidParamException);
-		void do_bindlink(Handle, PatternMatchCallback *)
-			throw (InvalidParamException);
 
 		bool recursive_virtual(PatternMatchCallback *cb,
 		            const std::vector<Handle>& virtuals,
@@ -71,6 +69,8 @@ class PatternMatch
 		           Handle negations = Handle::UNDEFINED)
 			throw (InvalidParamException);
 
+		void do_bindlink(Handle, PatternMatchCallback *)
+					throw (InvalidParamException);
 		Handle bindlink(Handle);
 		Handle single_bindlink (Handle);
 		Handle crisp_logic_bindlink(Handle);
