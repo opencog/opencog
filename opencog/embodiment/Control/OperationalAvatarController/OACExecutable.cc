@@ -120,15 +120,13 @@ int main(int argc, char *argv[])
         oac.serverLoop();
 
     } catch (std::bad_alloc) {
-        logger().error(
-                     "OACExecutable - OAC raised a bad_alloc exception.");
+        logger().error("OACExecutable - OAC raised a bad_alloc exception.");
         static_cast<OAC&>(server()).saveState();
     } catch (StandardException se) {
-        logger().error(
-                     "OACExecutable - An exceptional situation occured"
-                     " with the following message '%s'"
-                     ". Check log for more information.",
-                     se.getMessage());
+        logger().error("OACExecutable - An exceptional situation occured"
+                       " with the following message '%s'"
+                       ". Check log for more information.",
+                       se.getMessage());
         static_cast<OAC&>(server()).saveState();
     } /*catch (...) {
         logger().error(
