@@ -102,7 +102,8 @@ void RouterServerSocket::handle_connection(RouterServerSocket* ss)
 void RouterServerSocket::Send(const std::string& cmd)
 {
     boost::system::error_code error;
-    boost::asio::write(socket, boost::asio::buffer(cmd), boost::asio::transfer_all(), error);
+    boost::asio::write(socket, boost::asio::buffer(cmd),
+                       boost::asio::transfer_all(), error);
     if (error) {
         logger().error("RouterServerSocket::Send(): Error transfering data.");
     }
@@ -116,21 +117,25 @@ void RouterServerSocket::sendAnswer(const std::string &msg)
     }
 }
 
-void RouterServerSocket::addNetworkElement(const std::string &id, const std::string &ip, int port)
+void RouterServerSocket::addNetworkElement(const std::string &id,
+                                           const std::string &ip,
+                                           int port)
 {
-    logger().debug("RouterServerSocket - Add network element (%s,%s,%d)", id.c_str(), ip.c_str(), port);
+    logger().debug("RouterServerSocket - Add network element (%s,%s,%d)",
+                   id.c_str(), ip.c_str(), port);
 
     char errorCode = master->addNetworkElement(id, ip, port);
     std::string answer;
 
     if (errorCode == Router::PORT_EXISTS) {
-        answer.assign("FAILED - port number already exists: "); answer.append(opencog::toString(port));
+        answer = "FAILED - port number already exists: " + opencog::toString(port);
     } else if (errorCode == Router::ID_EXISTS) {
-        answer.assign("FAILED - id already exists: "); answer.append(id);
-    } else if (errorCode == Router::NO_ERROR || errorCode == Router::HAS_PENDING_MSGS) {
-        answer.assign(NetworkElementCommon::OK_MESSAGE);
+        answer = "FAILED - id already exists: " +  answer.append(id);
+    } else if (errorCode == Router::NO_ERROR ||
+               errorCode == Router::HAS_PENDING_MSGS) {
+        answer = NetworkElementCommon::OK_MESSAGE;
     } else {
-        answer.assign("FAILED - unknown error code.");
+        answer = "FAILED - unknown error code.";
     }
     sendAnswer(answer);
 
@@ -166,11 +171,11 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
 
     if (known) {
         logger().fine("RouterServerSocket - known destination");
-        answer.assign(NetworkElementCommon::OK_MESSAGE);
+        answer = NetworkElementCommon::OK_MESSAGE;
         sendAnswer(answer);
     } else {
         logger().warn("RouterServerSocket - unknow destination");
-        answer.assign("FAILED - could not send messages. Unknown ID: "); answer.append(id);
+        answer = "FAILED - could not send messages. Unknown ID: " +  id;
         sendAnswer(answer);
         return;
     }
@@ -181,12 +186,12 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
     }
 
     logger().info("RouterServerSocket - Delivering messages to %s", id.c_str());
-    std::string cmd;
     if (!master->dataSocketConnection(id)) {
         return;
     }
     tcp::socket* sock = master->getDataSocket(id);
 
+    std::string cmd;
     while (limit != 0 && !master->getMessageCentral()->isQueueEmpty(id)) {
 
         // Remember that all message stored within the router are of
@@ -194,15 +199,13 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
         RouterMessage *message = (RouterMessage *)master->getMessageCentral()->pop(id);
         sprintf(s, "cSTART_MESSAGE %s %s %d", message->getFrom().c_str(),
                 message->getTo().c_str(), message->getEncapsulateType());
-        logger().debug("RouterServerSocket - Sending message (socket = %d): <%s>", sock, s);
+        logger().debug("RouterServerSocket - Sending message (socket = %p): <%s>", sock, s);
 
-        cmd.assign(s);
-        cmd.append("\n");
-        unsigned int sentBytes = 0;
-        if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(cmd.c_str(), cmd.length())) ) != cmd.length() ) { 
+        cmd = std::string(s) + "\n";
+        unsigned int sentBytes = boost::asio::write(*sock, boost::asio::buffer(cmd));
+        if (sentBytes != cmd.length()) {
             logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
-            master->closeDataSocket(id);
-            master->closeControlSocket(id);
+            master->closeSockets(id);
             master->markElementUnavailable(id);
             delete(message); // TODO: Shouldn't message be put back to the queue?
             return;
@@ -214,32 +217,31 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
             logger().debug("Sending line <d%s>", line.c_str());
             line.insert(0, "d");
             line.append("\n");
-            sentBytes = 0;
-            if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(line.c_str(), line.length())) ) != line.length() ) { 
+            sentBytes = boost::asio::write(*sock, boost::asio::buffer(line));
+            if (sentBytes != line.length()) {
                 logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, line.length() );
-                master->closeDataSocket(id);
-                master->closeControlSocket(id);
+                master->closeSockets(id);
                 master->markElementUnavailable(id);
                 delete(message); // TODO: Shouldn't message be put back to the queue?
                 return;
             }
-            // TODO: Shouldn't the protocol be changed to expect a feedback (OK or FAILED) per message here?
-            // And, if OK is not received, message may be kept on the queue (until it be eventually sent or,
-            // at least, until N attempts are made)
+            // TODO: Shouldn't the protocol be changed to expect a
+            // feedback (OK or FAILED) per message here?
+            // And, if OK is not received, message may be kept on the
+            // queue (until it be eventually sent or, at least, until
+            // N attempts are made)
         }
         delete(message);
         if (limit > 0) limit--;
     }
-    cmd.assign("cNO_MORE_MESSAGES\n");
-    unsigned int sentBytes = 0;
-    if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(cmd.c_str(), cmd.length())) ) != cmd.length() ) {
+    cmd = "cNO_MORE_MESSAGES\n";
+    unsigned int sentBytes = boost::asio::write(*sock, boost::asio::buffer(cmd));
+    if (sentBytes != cmd.length()) {
         logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
-        master->closeControlSocket(id);
-        master->closeDataSocket(id);
+        master->closeSockets(id);
         master->markElementUnavailable(id);
         return;
     }
-
 
     if (!master->noAckMessages) {
         logger().debug("RouterServerSocket - Waiting OK (after sending message).");
@@ -249,8 +251,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
         size_t receivedBytes = sock->read_some(boost::asio::buffer(response), error);
         if (error && error != boost::asio::error::eof) {
             logger().error("RouterServerSocket - Invalid response. recv returned %d ", receivedBytes );
-            master->closeDataSocket(id);
-            master->closeControlSocket(id);
+            master->closeSockets(id);
             master->markElementUnavailable(id);
             return;
         }
@@ -263,19 +264,20 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
         }
 
         logger().debug("RouterServerSocket - Received response (after chomp): '%s' bytes: %d",
-                     response, receivedBytes );
+                       response, receivedBytes );
         std::string answer = response;
 
         if (answer == NetworkElementCommon::OK_MESSAGE) {
             logger().debug("RouterServerSocket - Sucessfully sent messages to '%s'.",
-                         id.c_str());
+                           id.c_str());
         } else {
             logger().error("RouterServerSocket - Failed to send messages to '%s'. (answer = %s)",
-                         id.c_str(), answer.c_str());
+                           id.c_str(), answer.c_str());
         }
     }
 
-    logger().debug("RouterServerSocket - id <%s> message queue size %d", id.c_str(), master->getMessageCentral()->queueSize(id));
+    logger().debug("RouterServerSocket - id <%s> message queue size %d",
+                   id.c_str(), master->getMessageCentral()->queueSize(id));
 
     logger().debug("RouterServerSocket - OK");
 }
@@ -287,20 +289,27 @@ void RouterServerSocket::storeNewMessage()
     bool addToMasterQueue = true;
     bool notifyMessageArrival = true;
 
-    logger().debug("RouterServerSocket - New message arrived. From '%s'. To '%s'. Type '%d'. Lines: %d", currentMessageFrom.c_str(), currentMessageTo.c_str(), currentMessageType, currentMessageSize);
-    logger().debug("RouterServerSocket - Message body:\n%s", currentMessageText.c_str());
+    logger().debug("RouterServerSocket - New message arrived. "
+                   "From '%s'. To '%s'. Type '%d'. Lines: %d",
+                   currentMessageFrom.c_str(), currentMessageTo.c_str(),
+                   currentMessageType, currentMessageSize);
+    logger().debug("RouterServerSocket - Message body:\n%s",
+                   currentMessageText.c_str());
 
     bool knownFrom = master->knownID(currentMessageFrom);
     bool knownTo   = master->knownID(currentMessageTo);
 
     if (!knownFrom) {
-        logger().debug("RouterServerSocket - Unknown from '%s'. Discarding message.", currentMessageFrom.c_str());
-        answer.assign("FAILED - Unknown <from> ID: "); answer.append(currentMessageFrom);
+        logger().debug("RouterServerSocket - Unknown from '%s'. "
+                       "Discarding message.", currentMessageFrom.c_str());
+        answer = "FAILED - Unknown <from> ID: " + currentMessageFrom;
         sendAnswer(answer);
         return;
 
     } else if (!knownTo) {
-        logger().debug("RouterServerSocket - Unknown to '%s' (from '%s'). Wont be notified.", currentMessageTo.c_str(), currentMessageFrom.c_str());
+        logger().debug("RouterServerSocket - Unknown to '%s' (from '%s'). "
+                       "Wont be notified.", currentMessageTo.c_str(),
+                       currentMessageFrom.c_str());
 
         // since the component is not registred there is no need to notify it about new messages
         notifyMessageArrival = false;
@@ -313,8 +322,9 @@ void RouterServerSocket::storeNewMessage()
         //sendAnswer(answer);
         //return;
     } else if (!master->isElementAvailable(currentMessageTo)) {
-        logger().warn("RouterServerSocket - Element '%s' unavailable. Discarding message.", currentMessageTo.c_str());
-        answer.assign("FAILED - Element unavailable: "); answer.append(currentMessageTo);
+        logger().warn("RouterServerSocket - Element '%s' unavailable. "
+                      "Discarding message.", currentMessageTo.c_str());
+        answer = "FAILED - Element unavailable: " + currentMessageTo;
         sendAnswer(answer);
         return;
     }
@@ -323,16 +333,16 @@ void RouterServerSocket::storeNewMessage()
 
 //        try {
 
-        // Router has its own message type (RouterMessage) to encapsulate all
-        // messages received. It is not Router's duty to check if a message
-        // is well formed or not. This should be done by the NetworkElement
-        // receiving the message.
+        // Router has its own message type (RouterMessage) to
+        // encapsulate all messages received. It is not Router's duty
+        // to check if a message is well formed or not. This should be
+        // done by the NetworkElement receiving the message.
 
 
 
         logger().debug("RouterServerSocket - Building Message object.");
         Message *message = routerMessageFactory(currentMessageFrom, currentMessageTo,
-                           currentMessageType, currentMessageText);
+                                                currentMessageType, currentMessageText);
 
         logger().debug("RouterServerSocket - Queueing message.");
         master->getMessageCentral()->push(currentMessageTo, message);
@@ -345,7 +355,7 @@ void RouterServerSocket::storeNewMessage()
     }
 
     // Ack sender that message was delivered successfully
-    answer.assign(NetworkElementCommon::OK_MESSAGE);
+    answer = NetworkElementCommon::OK_MESSAGE;
     logger().debug("RouterServerSocket - Sending OK.");
     sendAnswer(answer);
 
@@ -358,7 +368,6 @@ void RouterServerSocket::storeNewMessage()
     }
     logger().fine("RouterServerSocket - Finished queueing messages.");
 }
-
 
 void RouterServerSocket::OnLine(const std::string& line)
 {
@@ -382,19 +391,17 @@ void RouterServerSocket::OnLine(const std::string& line)
             int port = atoi(args.front().c_str());
             args.pop();
 
-            logger().info(
-                         "RouterServerSocket - Handshaking: id = %s ip = %s port = %d.",
-                         id.c_str(), ip.c_str(), port);
+            logger().info("RouterServerSocket - Handshaking: id = %s ip = %s port = %d.",
+                          id.c_str(), ip.c_str(), port);
 
             addNetworkElement(id, ip, port);
 
         } else if (command == "LOGOUT") {
-            // logout an NetworkElement - must of the time an OAC
+            // logout an NetworkElement - most of the time an OAC
             std::string id = args.front();
             args.pop();
 
-            logger().info(
-                         "RouterServerSocket - Logout: id = %s.", id.c_str());
+            logger().info("RouterServerSocket - Logout: id = %s.", id.c_str());
 
             master->removeNetworkElement(id);
             sendAnswer(NetworkElementCommon::OK_MESSAGE);
@@ -413,9 +420,8 @@ void RouterServerSocket::OnLine(const std::string& line)
             std::string targetId = args.front();
             args.pop();
 
-            logger().info(
-                         "RouterServerSocket - Clear message queue: id = '%s' requesting for '%s'.",
-                         requestorId.c_str(), targetId.c_str());
+            logger().info("RouterServerSocket - Clear message queue: id = '%s' requesting for '%s'.",
+                          requestorId.c_str(), targetId.c_str());
 
             master->clearNetworkElementMessageQueue(targetId);
             sendAnswer(NetworkElementCommon::OK_MESSAGE);

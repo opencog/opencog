@@ -67,11 +67,12 @@ struct NotificationData {
     unsigned int numMessages;
 
     NotificationData(const std::string& _toId,
-                    tcp::socket* _sock,
-                    NotificationType _type,
-                    const std::string& _element,
-                    unsigned int _numMessages)
-    : toId(_toId), sock(_sock), type(_type), element(_element), numMessages(_numMessages) {}
+                     tcp::socket* _sock,
+                     NotificationType _type,
+                     const std::string& _element,
+                     unsigned int _numMessages)
+        : toId(_toId), sock(_sock), type(_type),
+          element(_element), numMessages(_numMessages) {}
 
 }; // struct NotificationData
 
@@ -273,7 +274,7 @@ private:
     /**
      * Coordinates access to unavailableIds
      */
-    pthread_mutex_t unavailableIdsLock;
+    mutable pthread_mutex_t unavailableIdsLock;
 
     pthread_t socketListenerThread; // thread which will listen to the router port
     pthread_attr_t socketListenerAttr; // thread attributes
@@ -350,6 +351,9 @@ public:
     //! Close network socket for sending data messages to network element?
     void closeDataSocket(const std::string &id);
 
+    // Close control and data sockets of network element id
+    void closeSockets(const std::string& id);
+
     /** Remove network element from the embodiment system and clean up sockets
      * and queues associated with it.
      */
@@ -378,7 +382,7 @@ public:
      * logged in the Router. This information will be used in router
      * recovery strategies
      */
-    void persistState();
+    void persistState() const;
 
     /**
      * Notify a component that a message has been sent to it.
@@ -390,13 +394,13 @@ public:
     void notifyMessageArrival(const std::string& toId, unsigned int numMessages);
 
     /**
-     * Return true if the component is available or false otherwise
-     * NetworkElements are unavailable when notification messages fail or the
+     * Return true if the component is available or false otherwise.
+     * NetworkElements are unavailable when notification messages fail or
      * when restarting the router using a saved set of connections.
      *
      * @param id The id of the element to be checked
      */
-    bool isElementAvailable(const std::string &id);
+    bool isElementAvailable(const std::string &id) const;
 
     /** Mark the network element with given id as unavailable.
      * This will cause Router to send UNAVAILABLE_ELEMENT to all other network
@@ -416,7 +420,7 @@ public:
     void stopListenerThread();
 
     /**
-    * Estabish control connection to the network element with the given id, if
+    * Establish control connection to the network element with the given id, if
     * not yet connected.
     * Also updates internal map from network element ids to control sockets.
     * @return true if the connection is established.
@@ -424,7 +428,7 @@ public:
     bool controlSocketConnection(const std::string& ne_id);
 
     /**
-    * Estabish data connection to the network element with the given id, if not
+    * Estabsish data connection to the network element with the given id, if not
     * yet connected.
     * Also updates internal map from network element ids to data sockets.
     * @return true if the connection is established.

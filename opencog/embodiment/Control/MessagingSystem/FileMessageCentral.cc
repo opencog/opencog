@@ -118,7 +118,7 @@ void FileMessageCentral::removeQueue(const std::string id)
     }
 }
 
-const bool FileMessageCentral::isQueueEmpty(const std::string id)
+bool FileMessageCentral::isQueueEmpty(const std::string id) const
 {
 
     bool value = true;
@@ -141,7 +141,7 @@ const bool FileMessageCentral::isQueueEmpty(const std::string id)
     return value;
 }
 
-const unsigned int FileMessageCentral::queueSize(const std::string id)
+unsigned int FileMessageCentral::queueSize(const std::string id) const
 {
 
     unsigned int value = 0;
@@ -166,7 +166,7 @@ const unsigned int FileMessageCentral::queueSize(const std::string id)
     return value;
 }
 
-const bool FileMessageCentral::existsQueue(const std::string id)
+bool FileMessageCentral::existsQueue(const std::string id) const
 {
 
     bool value = true;

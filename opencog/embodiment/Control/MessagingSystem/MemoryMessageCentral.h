@@ -58,11 +58,11 @@ public:
 
     void removeQueue(const std::string id);
 
-    const unsigned int queueSize(const std::string id);
+    unsigned int queueSize(const std::string id) const;
 
-    const bool isQueueEmpty(const std::string id);
+    bool isQueueEmpty(const std::string id) const;
 
-    const bool existsQueue(const std::string id);
+    bool existsQueue(const std::string id) const;
 
     void push(const std::string id, Message *message);
 

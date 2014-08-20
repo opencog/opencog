@@ -38,14 +38,14 @@ class MessageCentral
 
 protected:
 
-    void lockQueue();
-    void unlockQueue();
+    void lockQueue() const;
+    void unlockQueue() const;
 
 
 private:
 
     //! lock used coordinate manipulation of the messageQueue (main thread and listener thread)
-    pthread_mutex_t messageQueueLock;
+    mutable pthread_mutex_t messageQueueLock;
 
 public:
 
@@ -75,19 +75,19 @@ public:
      * Check if the queue is empty
      * @param id representation of queue name
      */
-    virtual const bool isQueueEmpty(const std::string id) = 0;
+    virtual bool isQueueEmpty(const std::string id) const = 0;
 
     /**
      * Gets the size of a given queue
      * @param id representation of queue name
      */
-    virtual const unsigned int queueSize(const std::string id) = 0;
+    virtual unsigned int queueSize(const std::string id) const = 0;
 
     /**
      * Check if the queue exists
      * @param id representation of queue name
      */
-    virtual const bool existsQueue(const std::string id) = 0;
+    virtual bool existsQueue(const std::string id) const = 0;
 
     /**
      * Put a message in a queue
@@ -102,7 +102,6 @@ public:
      * @return a message
      */
     virtual Message* pop(const std::string id) = 0;
-
 
 }; // class
 } } // namespace opencog::messaging

@@ -45,18 +45,6 @@ using boost::asio::ip::tcp;
 std::vector<RouterServerSocket*> Router::serverSockets;
 bool Router::stopListenerThreadFlag = false;
 
-Router::~Router()
-{
-    if (!Router::stopListenerThreadFlag) {
-        Router::stopListenerThread();
-    }
-
-    foreach(RouterServerSocket* rss, serverSockets) {
-        delete rss;
-    }
-
-}
-
 Router::Router()
 {
 
@@ -81,6 +69,19 @@ Router::Router()
 
     pthread_mutex_init(&unavailableIdsLock, NULL);
     stopListenerThreadFlag = false;
+}
+
+Router::~Router()
+{
+    if (!Router::stopListenerThreadFlag) {
+        Router::stopListenerThread();
+    }
+
+    for(RouterServerSocket* rss : serverSockets) {
+        delete rss;
+    }
+
+    delete(messageCentral);
 }
 
 void Router::startListener()
@@ -141,7 +142,7 @@ void Router::run()
 
     /**
      * Recovery operation (if needed). First mount the filename full path and
-     * than check if such file exists in filesystem. If so, start recovery
+     * then check if such file exists in filesystem. If so, start recovery
      * process.
      */
     std::string recoveryFile = config().get("ROUTER_DATABASE_DIR");
@@ -173,46 +174,29 @@ void Router::run()
         }
 
         // copy set of elements whose availability notification is to be sent to a local variable
-        std::set<std::string> localToNotifyAvailability;
         pthread_mutex_lock(&unavailableIdsLock);
-        for (std::set<std::string>::iterator it = Router::toNotifyAvailability.begin();
-                it != Router::toNotifyAvailability.end(); it++) {
-            localToNotifyAvailability.insert(*it);
-        }
-        Router::toNotifyAvailability.clear();
+        std::set<std::string> localToNotifyAvailability(toNotifyAvailability);
+        toNotifyAvailability.clear();
         pthread_mutex_unlock(&unavailableIdsLock);
 
         //logger().debug("Router - Checked pending availability notifications: %d", localToNotifyAvailability.size());
 
         // Now sends the available element notifications
-        if (!localToNotifyAvailability.empty()) {
-            for (std::set<std::string>::iterator it = localToNotifyAvailability.begin();
-                    it != localToNotifyAvailability.end(); it++) {
-                notifyElementAvailability(*it, true);
-            }
-        }
-
+        for (const std::string& id : localToNotifyAvailability)
+            notifyElementAvailability(id, true);
 
         // copy set of elements whose unavailability notification is to be sent to a local variable
-        std::set<std::string> localToNotifyUnavailability;
         pthread_mutex_lock(&unavailableIdsLock);
-        for (std::set<std::string>::iterator it = Router::toNotifyUnavailability.begin();
-                it != Router::toNotifyUnavailability.end(); it++) {
-            localToNotifyUnavailability.insert(*it);
-        }
-        Router::toNotifyUnavailability.clear();
+        std::set<std::string> localToNotifyUnavailability(toNotifyUnavailability);
+        toNotifyUnavailability.clear();
         pthread_mutex_unlock(&unavailableIdsLock);
 
         //logger().debug("Router - Checked pending unavailability notifications: %d",
         //  localToNotifyUnavailability.size());
 
         // Now sends the unavailable element notifications
-        if (!localToNotifyUnavailability.empty()) {
-            for (std::set<std::string>::iterator it = localToNotifyUnavailability.begin();
-                    it != localToNotifyUnavailability.end(); it++) {
-                notifyElementAvailability(*it, false);
-            }
-        }
+        for (const std::string& id : localToNotifyUnavailability)
+            notifyElementAvailability(id, false);
 
         // NOTE: Uncomment the code to test a way to make router fail and raise
         // an execption
@@ -309,7 +293,7 @@ void Router::closeControlSocket(const std::string &id)
         tcp::socket* sock = it->second;
         sock->close();
         delete sock;
-        controlSockets.erase(id);
+        controlSockets.erase(it);
         logger().debug("Closed control socket for element '%s'.", id.c_str());
     }
 }
@@ -322,7 +306,7 @@ void Router::closeDataSocket(const std::string &id)
         tcp::socket* sock = it->second;
         sock->close();
         delete sock;
-        dataSockets.erase(id);
+        dataSockets.erase(it);
         logger().debug("Closed data socket for element '%s'.", id.c_str());
     }
 }
@@ -330,24 +314,21 @@ void Router::closeDataSocket(const std::string &id)
 int Router::addNetworkElement(const std::string &strId, const std::string &strIp, int port)
 {
 
-    std::string ip;
-    std::string id;
-    id.assign(strId);
-    ip.assign(strIp);
+    std::string id(strId);
+    std::string ip(strIp);
     int errorCode = NO_ERROR;
 
     ipAddress[id] = ip;
     portNumber[id] = port;
-    logger().debug(
-                 "Router - Adding component: '%s' - IP: '%s', Port: '%d'.",
-                 id.c_str(), ipAddress[id].c_str(), port);
+    logger().debug("Router - Adding component: '%s' - IP: '%s', Port: '%d'.",
+                   id.c_str(), ipAddress[id].c_str(), port);
 
     // new data inserted, updates persisted router table
     try {
         persistState();
     } catch (IOException& e) { }
 
-    // erease all messages from queue if have any
+    // erase all messages from queue if have any
     if (id == config().get("LS_ID") ||
         id == config().get("SPAWNER_ID")) {
 
@@ -380,13 +361,9 @@ int Router::addNetworkElement(const std::string &strId, const std::string &strIp
 
 void Router::removeNetworkElement(const std::string &id)
 {
-    std::string networkId;
-    networkId.assign(id);
-
-    ipAddress.erase(networkId);
-    portNumber.erase(networkId);
-    closeControlSocket(networkId);
-    closeDataSocket(networkId);
+    ipAddress.erase(id);
+    portNumber.erase(id);
+    closeSockets(id);
 
     messageCentral->removeQueue(id);
 
@@ -401,7 +378,7 @@ void Router::clearNetworkElementMessageQueue(const std::string &id)
     messageCentral->clearQueue(id);
 }
 
-void Router::persistState()
+void Router::persistState() const
 {
     // TODO: add some timestamp info to filename
     std::string path = config().get("ROUTER_DATABASE_DIR");
@@ -422,11 +399,10 @@ void Router::persistState()
 
     try {
 
-        std::map<std::string, std::string>::const_iterator it;
-        for (it = ipAddress.begin(); it != ipAddress.end(); it++) {
+        for (const auto& IdIp : ipAddress) {
 
-            std::string id = (*it).first;
-            std::string ip = (*it).second;
+            std::string id = IdIp.first;
+            std::string ip = IdIp.second;
             std::string port = toString(getPortNumber(id));
 
             // save data
@@ -453,7 +429,7 @@ void Router::recoveryFromPersistedData(const std::string& fileName)
     while (!fin.eof()) {
         fin.getline(line, 256);
 
-        // not a comentary or an empty line
+        // not a comment or an empty line
         if (line[0] != '#' && line[0] != 0x00) {
             std::istringstream in ((std::string)line);
 
@@ -479,8 +455,7 @@ void Router::notifyMessageArrival(const std::string& toId, unsigned int numMessa
     if (isElementAvailable(toId) && dataSocketConnection(toId)) {
         NotificationData data(toId, getDataSocket(toId), MESSAGE, "", numMessages);
         if (!sendNotification(data)) {
-            closeDataSocket(toId);
-            closeControlSocket(toId);
+            closeSockets(toId);
             markElementUnavailable(toId);
         }
     }
@@ -525,31 +500,39 @@ void Router::notifyElementAvailability(const std::string& id, bool available)
 
             NotificationData data(toId, getControlSocket(toId), type, id, 0);
             if (!sendNotification(data)) {
-                closeControlSocket(toId);
-                closeDataSocket(toId);
+                closeSockets(toId);
                 markElementUnavailable(toId);
             } else {
                 markElementAvailable(toId);
             }
         } else {
-            logger().debug("Router - Discarding notification to element since it is unavailable (and reffered id is not router");
+            logger().debug("Router - Discarding notification to element since "
+                           "it is unavailable (and referred id is not router");
         }
     }
     //logger().debug("Router::notifyElementAvailability() ended");
 }
 
+void Router::closeSockets(const std::string& id)
+{
+    closeControlSocket(id);
+    closeDataSocket(id);
+}
+
 bool Router::controlSocketConnection(const std::string& ne_id)
 {
     if ( controlSockets.find(ne_id) != controlSockets.end() ) {
-        // Check if socket connection is still ok. If not so, remove the corresponding entry from controlSockets map and tries to re-connect.
+        // Check if socket connection is still ok. If not so, remove
+        // the corresponding entry from controlSockets map and tries
+        // to re-connect.
         if (!isElementAvailable(ne_id)) {
-            logger().info(
-                         "Router - controlSocketConnection(%s): Element marked as unavailable. Trying to re-connect...", ne_id.c_str() );
-            closeControlSocket(ne_id);
-            closeDataSocket(ne_id);
+            logger().info("Router - controlSocketConnection(%s): "
+                          "Element marked as unavailable. Trying to re-connect...",
+                          ne_id.c_str() );
+            closeSockets(ne_id);
         } else {
-            logger().debug(
-                         "Router - controlSocketConnection(%s): Connection already established", ne_id.c_str() );
+            logger().debug("Router - controlSocketConnection(%s): "
+                           "Connection already established", ne_id.c_str() );
             return true;
         }
     } // if
@@ -562,23 +545,23 @@ bool Router::controlSocketConnection(const std::string& ne_id)
         tcp::resolver::query query(tcp::v4(), ipAddr, boost::lexical_cast<std::string>(port));
         tcp::resolver::iterator iterator = resolver.resolve(query);
         sock = new tcp::socket(io_service);
-        logger().debug("Router - controlSocketConnection(%s): created new socket: %p.", ne_id.c_str(), sock);
+        logger().debug("Router - controlSocketConnection(%s): "
+                       "created new socket: %p.", ne_id.c_str(), sock);
         sock->connect(*iterator);
-        logger().debug(
-                     "Router - controlSocketConnection(%s). Connection established. ip=%s, port=%d",
-                     ne_id.c_str(), ipAddr.c_str(), port);
+        logger().debug("Router - controlSocketConnection(%s): "
+                       "connection established. ip=%s, port=%d",
+                       ne_id.c_str(), ipAddr.c_str(), port);
         controlSockets[ne_id] = sock;
         return true;
-    }catch(std::exception& e){
-        logger().error(
-                 "Router - controlSocketConnection. Unable to connect to element %s. ip=%s, port=%d. Exception Message: %s",
-                 ne_id.c_str(), ipAddr.c_str(), port, e.what());
+    } catch(std::exception& e){
+        logger().error("Router - controlSocketConnection. "
+                       "Unable to connect to element %s. ip=%s, port=%d. Exception Message: %s",
+                       ne_id.c_str(), ipAddr.c_str(), port, e.what());
         if (sock != NULL) delete sock;
         sock = NULL;
     }
 
-    closeControlSocket(ne_id);
-    closeDataSocket(ne_id);
+    closeSockets(ne_id);
     markElementUnavailable(ne_id);
 
     return false;
@@ -591,13 +574,12 @@ bool Router::dataSocketConnection(const std::string& ne_id)
         // corresponding entry from dataSockets map and tries to re-connect.
         if (!isElementAvailable(ne_id)) {
             logger().info("Router - dataSocketConnection(%s): "
-                    "Element marked as unavailable. Trying to re-connect...",
-                    ne_id.c_str() );
-            closeDataSocket(ne_id);
-            closeControlSocket(ne_id);
+                          "Element marked as unavailable. Trying to re-connect...",
+                          ne_id.c_str() );
+            closeSockets(ne_id);
         } else {
             logger().debug("Router - dataSocketConnection(%s): "
-                    "Connection already established", ne_id.c_str() );
+                           "Connection already established", ne_id.c_str() );
             return true;
         }
     }
@@ -611,23 +593,22 @@ bool Router::dataSocketConnection(const std::string& ne_id)
         tcp::resolver::iterator iterator = resolver.resolve(query);
         sock = new tcp::socket(io_service);
         logger().debug("Router - dataSocketConnection(%s): "
-                "created new socket: %p.", ne_id.c_str(), sock);
+                       "created new socket: %p.", ne_id.c_str(), sock);
         sock->connect(*iterator);
         logger().debug("Router - dataSocketConnection(%s). "
-                "Connection established. ip=%s, port=%d",
-                 ne_id.c_str(), ipAddr.c_str(), port);
+                       "Connection established. ip=%s, port=%d",
+                       ne_id.c_str(), ipAddr.c_str(), port);
         dataSockets[ne_id] = sock;
         return true;
     } catch(std::exception& e) {
         logger().error("Router - dataSocketConnection. "
-                "Unable to connect to element %s. ip=%s, port=%d. Exception Message: %s",
-                ne_id.c_str(), ipAddr.c_str(), port, e.what());
+                       "Unable to connect to element %s. ip=%s, port=%d. Exception Message: %s",
+                       ne_id.c_str(), ipAddr.c_str(), port, e.what());
         if (sock != NULL) delete sock;
         sock = NULL;
     }
 
-    closeDataSocket(ne_id);
-    closeControlSocket(ne_id);
+    closeSockets(ne_id);
     markElementUnavailable(ne_id);
 
     return false;
@@ -722,7 +703,7 @@ bool Router::sendNotification(const NotificationData& data)
     return true;
 }
 
-bool Router::isElementAvailable(const std::string &id)
+bool Router::isElementAvailable(const std::string &id) const
 {
     pthread_mutex_lock(&unavailableIdsLock);
     bool answer = (unavailableIds.find(id) == unavailableIds.end());
@@ -743,7 +724,7 @@ void Router::markElementAvailable(const std::string& ne_id)
     pthread_mutex_lock(&unavailableIdsLock);
     if (unavailableIds.find(ne_id) != unavailableIds.end()) {
         unavailableIds.erase(ne_id);
-        Router::toNotifyAvailability.insert(ne_id);
+        toNotifyAvailability.insert(ne_id);
     }
     pthread_mutex_unlock(&unavailableIdsLock);
 }

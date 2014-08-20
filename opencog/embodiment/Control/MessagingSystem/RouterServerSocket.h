@@ -41,6 +41,8 @@ private:
     static const int WAITING_COMMAND = 1;
     static const int READING_MESSAGE = 2;
 
+    // Used for NEW_MESSAGE command, to keep track of the src/dst,
+    // type and size of the message transmitted
     std::string currentMessageText;
     std::string currentMessageFrom;
     std::string currentMessageTo;
@@ -58,7 +60,12 @@ private:
 
     void sendAnswer(const std::string &msg);
     void addNetworkElement(const std::string &id, const std::string &ip, int port);
+
+    // Send messages in queue to network element id. If limit is
+    // negative then all messages are sent, otherwise only 'limit'
+    // messages are sent.
     void sendRequestedMessages(const std::string &id, int limit);
+
     void storeNewMessage();
 
 public:

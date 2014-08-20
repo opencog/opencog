@@ -260,7 +260,8 @@ public:
     /**
      * Contacts the Router and retrieve at most N unread messages.
      *
-     * @param limit Max number of messages which will be retrieved
+     * @param limit Max number of messages which will be retrieved. If
+     *              negative all messages are retrieved.
      */
     bool retrieveMessages(int limit = -1);
 
