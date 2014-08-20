@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 	int i;
     i = system("./router &");
     sleep(5);
-    i = system("./learningServer &");
+    // i = system("./learningServer &");
     //i = system("./pvpSimulator &"); // proxy
 	OC_UNUSED( i );
 	
