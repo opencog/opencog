@@ -144,6 +144,9 @@ namespace PatternMining
      void extractAllNodesInLink(Handle link, set<Handle>& allNodes); // just find all the nodes in the original atomspace for this link
      void extractAllVariableNodesInLink(Handle link, set<Handle>& allNodes, AtomSpace* _atomSpace);
 
+     // if a link contains only variableNodes , no const nodes
+     bool onlyContainVariableNodes(Handle link, AtomSpace* _atomSpace);
+
      void extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, HTreeNode* parentNode, set<Handle> &sharedNodes, unsigned int gram = 1);
 
      void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings, HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool &containVar);
