@@ -54,11 +54,10 @@ class SCMExecutionUTest :  public CxxTest::TestSuite
 		logger().setFilename(config()["LOG_FILE"]);
 		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
 		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
-                
-                config().set("SCM_PRELOAD",
-                        "opencog/atomspace/core_types.scm");
-        
-                cogserver().loadSCMModules();
+
+        config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm");
+
+        cogserver().loadSCMModules();
 	}
 
 	~SCMExecutionUTest()

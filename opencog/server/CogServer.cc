@@ -643,50 +643,44 @@ Module* CogServer::getModule(const std::string& moduleId)
     return getModuleData(moduleId).module;
 }
 
-void CogServer::loadModules(const char* module_paths[])
+void CogServer::loadModules(std::vector<std::string> module_paths)
 {
-    if (NULL == module_paths) {
+    if (module_paths.empty())
         module_paths = DEFAULT_MODULE_PATHS;
-    }
 
     // Load modules specified in the config file
     std::vector<std::string> modules;
     tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
-    std::vector<std::string>::const_iterator it;
-    for (it = modules.begin(); it != modules.end(); ++it) {
+    for (const std::string& module : modules) {
         bool rc = false;
-        const char * mod = (*it).c_str();
-        if ( module_paths != NULL ) {
-            for (int i = 0; module_paths[i] != NULL; ++i) {
-                boost::filesystem::path modulePath(module_paths[i]);
-                modulePath /= *it;
+        if (not module_paths.empty()) {
+            for (const std::string& module_path : module_paths) {
+                boost::filesystem::path modulePath(module_path);
+                modulePath /= module;
                 if (boost::filesystem::exists(modulePath)) {
-                    mod = modulePath.string().c_str();
-                    rc = loadModule(mod);
+                    rc = loadModule(modulePath.string());
                     if (rc) break;
                 }
             }
         } else {
-            rc = loadModule(mod);
+            rc = loadModule(module);
         }
         if (!rc)
         {
-           logger().warn("Failed to load %s", mod);
+            logger().warn("Failed to load %s", module.c_str());
         }
     }
 }
 
-void CogServer::loadSCMModules(const char* config_paths[])
+void CogServer::loadSCMModules(std::vector<std::string> module_paths)
 {
 #ifdef HAVE_GUILE
-    if (NULL == config_paths) {
-        config_paths = DEFAULT_MODULE_PATHS;
-    }
+    if (module_paths.empty())
+        module_paths = DEFAULT_MODULE_PATHS;
 
-    load_scm_files_from_config(*atomSpace, config_paths);
+    load_scm_files_from_config(*atomSpace, module_paths);
 #else /* HAVE_GUILE */
-    logger().warn(
-        "Server compiled without SCM support");
+    logger().warn("Server compiled without SCM support");
 #endif /* HAVE_GUILE */
 }
 

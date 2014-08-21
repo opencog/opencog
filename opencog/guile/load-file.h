@@ -32,15 +32,23 @@ namespace opencog {
 
 
 #ifdef HAVE_GUILE
-int load_scm_file (AtomSpace& as, const char * filename);
-int load_scm_file_relative (AtomSpace& as, const char * filename, const char * paths[] = NULL);
-void load_scm_files_from_config (AtomSpace& as, const char * paths[] = NULL);
+int load_scm_file (AtomSpace& as, const std::string& filename);
+int load_scm_file_relative (AtomSpace& as, const std::string& filename,
+                            std::vector<std::string> paths =
+                            std::vector<std::string>());
+void load_scm_files_from_config (AtomSpace& as,
+                                 std::vector<std::string> paths =
+                                 std::vector<std::string>());
 #else 
 // If there is no guile, then load_scm_file() must always return 
 // an error (i.e. a non-zero return value).
-static inline int load_scm_file (AtomSpace& as, const char *) { return 2; }
-static int load_scm_file_relative (AtomSpace& as, const char *, const char ** = NULL) { return 2; }
-static inline void load_scm_files_from_config (AtomSpace& as, const char ** = NULL) { }
+static inline int load_scm_file (AtomSpace& as, const std::string&) { return 2; }
+static int load_scm_file_relative (AtomSpace& as, const std::string&,
+                                   std::vector<std::string> =
+                                   std::vector<std::string>()) { return 2; }
+static inline void load_scm_files_from_config (AtomSpace& as,
+                                               std::vector<std::string> =
+                                               std::vector<std::string>()) {}
 #endif /* HAVE_GUILE */
 
 /** @}*/

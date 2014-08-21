@@ -43,17 +43,17 @@ namespace opencog {
  *
  * Return errno if file cannot be opened.
  */
-int load_scm_file (AtomSpace& as, const char * filename)
+int load_scm_file (AtomSpace& as, const std::string& filename)
 {
 #define BUFSZ 4120
 	char buff[BUFSZ];
 
-	FILE * fh = fopen (filename, "r");
+	FILE * fh = fopen (filename.c_str(), "r");
 	if (NULL == fh)
 	{
 		int norr = errno;
 		fprintf(stderr, "Error: %d %s: %s\n",
-			norr, strerror(norr), filename);
+                norr, strerror(norr), filename.c_str());
 		return norr;
 	}
 
@@ -69,7 +69,7 @@ int load_scm_file (AtomSpace& as, const char * filename)
 
 		if (evaluator->eval_error())
 		{
-			fprintf(stderr, "File: %s line: %d\n", filename, lineno);
+			fprintf(stderr, "File: %s line: %d\n", filename.c_str(), lineno);
 			fprintf(stderr, "%s\n", rv.c_str());
 			delete evaluator;
 			return 1;
@@ -83,7 +83,7 @@ int load_scm_file (AtomSpace& as, const char * filename)
 	{
 		// Pending input... print error
 		fprintf(stderr, "Warning file %s ended with unterminated "
-		        "input begun at line %d\n", filename, pending_lineno);
+		        "input begun at line %d\n", filename.c_str(), pending_lineno);
 		delete evaluator;
 		return 1;
 	}
@@ -98,22 +98,21 @@ int load_scm_file (AtomSpace& as, const char * filename)
  * and the search paths prepended to the relative path.  If the search
  * paths are null, a list of defaults search paths are used.
  */
-int load_scm_file_relative (AtomSpace& as, const char * filename, const char* search_paths[])
+int load_scm_file_relative (AtomSpace& as, const std::string& filename,
+                            std::vector<std::string> search_paths)
 {
-    if (NULL == search_paths) {
+    if (search_paths.empty())
         search_paths = DEFAULT_MODULE_PATHS;
-    }
 
     int rc = 2;
-    for (int i = 0; search_paths[i] != NULL; ++i) {
-        boost::filesystem::path modulePath(search_paths[i]);
+    for (const std::string& search_path : search_paths) {
+        boost::filesystem::path modulePath(search_path);
         modulePath /= filename;
         logger().debug("Searching path %s", modulePath.string().c_str());
         if (boost::filesystem::exists(modulePath)) {
-            const char * mod = modulePath.string().c_str();
-            rc = load_scm_file(as, mod);
+            rc = load_scm_file(as, modulePath.string());
             if (0 == rc) {
-                logger().info("Loaded %s", mod);
+                logger().info("Loaded %s", modulePath.string().c_str());
                 break;
             }
         }
@@ -122,7 +121,7 @@ int load_scm_file_relative (AtomSpace& as, const char * filename, const char* se
     if (rc)
     {
        logger().warn("Failed to load file %s: %d %s",
-             filename, rc, strerror(rc));
+                     filename.c_str(), rc, strerror(rc));
     }
     return rc;
 }
@@ -131,18 +130,16 @@ int load_scm_file_relative (AtomSpace& as, const char * filename, const char* se
  * Pull the names of scm files out of the config file, the SCM_PRELOAD
  * key, and try to load those, relative to the search paths.
  */
-void load_scm_files_from_config(AtomSpace& atomSpace, const char* search_paths[])
+void load_scm_files_from_config(AtomSpace& atomSpace,
+                                std::vector<std::string> search_paths)
 {
     // Load scheme modules specified in the config file
     std::vector<std::string> scm_modules;
     tokenize(config()["SCM_PRELOAD"], std::back_inserter(scm_modules), ", ");
 
     std::vector<std::string>::const_iterator it;
-    for (it = scm_modules.begin(); it != scm_modules.end(); ++it)
-    {
-        const char * mod = (*it).c_str();
-        load_scm_file_relative(atomSpace, mod, search_paths);
-    }
+    for (const std::string& scm_module : scm_modules)
+        load_scm_file_relative(atomSpace, scm_module, search_paths);
 }
 
 }

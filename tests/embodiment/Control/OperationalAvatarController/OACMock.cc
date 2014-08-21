@@ -95,8 +95,7 @@ OAC & OACMock::createOAC()
     // Load modules specified in config
     oac->loadModules(); 
 
-    const char* config_path[] = {"."};
-    oac->loadSCMModules(config_path);
+    oac->loadSCMModules({"."});
 
     // Initialize OAC
     //

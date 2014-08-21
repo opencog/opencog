@@ -31,6 +31,7 @@
  */
 
 #include <string>
+#include <vector>
 
 namespace opencog
 {
@@ -42,7 +43,7 @@ namespace opencog
  * Set of paths to search when attempting to load a module.
  * This is used both for loading shared libs and scheme files.
  */
-extern const char** DEFAULT_MODULE_PATHS;
+extern const std::vector<std::string> DEFAULT_MODULE_PATHS;
 
 /**
  * Check if a file exists in the current directory

@@ -56,7 +56,7 @@
  * searched, as they will not exist on the user's machine.  I don't
  * know how to disable this, though...
  */
-static const char *paths[] =
+static const std::vector<std::string> paths =
 {
     PROJECT_BINARY_DIR,
     PROJECT_BINARY_DIR "/opencog",
@@ -71,9 +71,8 @@ static const char *paths[] =
     "/usr/share/opencog",
     "/",
 #endif // !WIN32
-    NULL
 };
-const char ** opencog::DEFAULT_MODULE_PATHS = paths;
+const std::vector<std::string> opencog::DEFAULT_MODULE_PATHS = paths;
 
 bool opencog::fileExists(const char* filename)
 {

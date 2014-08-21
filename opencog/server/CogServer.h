@@ -210,11 +210,19 @@ public:
     /** Retrieves the module's instance. Takes the module's id */
     virtual Module* getModule(const std::string& id);
 
-    /** Load all modules specified in configuration file */
-    virtual void loadModules(const char* [] = NULL);
+    /** Load all modules specified in configuration file. If
+        module_paths is empty then DEFAULT_MODULE_PATHS is used
+        instead, which is why it is passed as copy instead of const
+        ref. */
+    virtual void loadModules(std::vector<std::string> module_paths =
+                             std::vector<std::string>());
 
-    /** Load all Scheme modules specified in configuration file */
-    virtual void loadSCMModules(const char* [] = NULL);
+    /** Load all Scheme modules specified in configuration file. If
+        module_paths is empty then DEFAULT_MODULE_PATHS is used
+        instead, which is why it is passed as copy instead of const
+        ref. */
+    virtual void loadSCMModules(std::vector<std::string> module_paths =
+                                std::vector<std::string>());
 
     /** Open database specified in configuration file */
     virtual void openDatabase();
