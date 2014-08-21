@@ -399,7 +399,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 		Type vt = v->getType();
 		if (not classserver().isA(vt, EVALUATION_LINK))
 			throw InvalidParamException(TRACE_INFO,
-				"Expeting EvaluationLink at the top level!");
+				"Expecting EvaluationLink at the top level!");
 	}
 
 	// I'm too lazy to do the optional/negated clause bit, just right
