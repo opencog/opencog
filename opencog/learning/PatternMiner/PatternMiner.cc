@@ -1377,12 +1377,19 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
 
     // Start from the last gram:
     int maxgram = HNode->pattern.size();
-    double II = - log2(HNode->instances.size());
-    std::cout << "-H(curpattern) = log" << HNode->instances.size() << "="  << II  << std::endl;
+    int sign;
+    if (maxgram%2)
+        sign = 1;
+    else
+        sign = -1;
 
-    int sign = 1;
+    double II = sign * log2(HNode->instances.size());
+    std::cout << "H(curpattern) = log" << HNode->instances.size() << "="  << II << " sign=" << sign << std::endl;
+
+
     for (int gram = maxgram-1; gram > 0; gram --)
     {
+         sign *= -1;
          std::cout << "start subpatterns of gram = " << gram << std::endl;
 
          bool* indexes = new bool[maxgram];
@@ -1445,7 +1452,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
              generateNextCombinationGroup(indexes, maxgram);
          }
 
-         sign *= -1;
+
     }
 
     HNode->interactionInformation = II;
