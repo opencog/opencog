@@ -520,7 +520,8 @@
 		)
 	)
 )
-; ----------------------------------
+
+; -----------------------------------------------------------------------
 ; time rules to create time relations
 ; -----------------------------------------------------------------------
 ; second argument of before() and after() can be a verb, adjective, pronoun
@@ -531,7 +532,7 @@
 ; before he is tired"
 (define (before-after-rule $x_instance $y_instance $y_pos $before_or_after)
     (define y-node
-        (if (or (string=? $y_pos "verb") (string=? $y_pos "adj"))
+        (if (string=? $y_pos "verb")
             (PredicateNode $y_instance df-node-stv)
             (ConceptNode $y_instance df-node-stv)
         )
