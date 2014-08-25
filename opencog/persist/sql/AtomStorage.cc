@@ -147,10 +147,11 @@ class AtomStorage::Response
 			return false;
 		}
 
-		// Load an atom into the atom table, but only if its not in
-		// it already.  The goal is to avoid clobbering the truth value,
-		// since normally atom-table adds of an existing atom cause the
-		// truth value to be merged, which is probably undesired.
+		// Load an atom into the atom table, but only if it's not in
+		// it already.  The goal is to avoid clobbering the truth value
+		// that is currently in the AtomTable.  Adding an atom to the
+		// atom table that already exists causes the two TV's to be
+		// merged, which is probably not what was wanted...
 		bool load_if_not_exists_cb(void)
 		{
 			// printf ("---- New atom found ----\n");
@@ -1392,7 +1393,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 			getOutgoing(outvec, h);
 #else
 			char *p = (char *) rp.outlist;
-			while(p)
+			while (p)
 			{
 				if (*p == '}') break;
 				Handle hout = (Handle) strtoul(p+1, &p, 10);
