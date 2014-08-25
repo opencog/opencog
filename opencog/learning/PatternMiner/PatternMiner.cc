@@ -37,6 +37,7 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <math.h>
+#include <opencog/util/Config.h>
 #include "PatternMiner.h"
 
 using namespace opencog::PatternMining;
@@ -1068,7 +1069,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
 
             if (extendedHandleStr.find("$var") != std::string::npos)
             {
-                cout << "Debug: error! The extended link contines variables!" << extendedHandleStr << std::endl;
+               // cout << "Debug: error! The extended link contines variables!" << extendedHandleStr << std::endl;
                 continue;
             }
 
@@ -1130,24 +1131,42 @@ bool compareHTreeNodeByInteractionInformation(HTreeNode* node1, HTreeNode* node2
     return (node1->interactionInformation > node2->interactionInformation);
 }
 
-void PatternMiner::OutPutPatternsToFile(unsigned int n_gram)
+bool compareHTreeNodeBySurprisingness(HTreeNode* node1, HTreeNode* node2)
+{
+    return (node1->surprisingness > node2->surprisingness);
+}
+
+void PatternMiner::OutPutPatternsToFile(unsigned int n_gram, bool is_interesting_pattern)
 {
     // out put the n_gram patterns to a file
     ofstream resultFile;
-    string fileName = "FrequentPatterns_" + toString(n_gram) + "gram.scm";
+    string fileName;
+    if (is_interesting_pattern)
+        fileName = "InterestingPatterns_" + toString(n_gram) + "gram.scm";
+    else
+        fileName = "FrequentPatterns_" + toString(n_gram) + "gram.scm";
     std::cout<<"Debug: PatternMiner: writing (gram = " + toString(n_gram) + ") patterns to file " + fileName << std::endl;
 
     resultFile.open(fileName.c_str());
     vector<HTreeNode*> &patternsForThisGram = patternsForGram[n_gram-1];
-    resultFile << "Frequenc Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
+
+    if (is_interesting_pattern)
+        resultFile << "Frequenc Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
+    else
+        resultFile << "Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
 
     foreach(HTreeNode* htreeNode, patternsForThisGram)
     {
         if (htreeNode->instances.size() < 2)
             continue;
 
-        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->instances.size())
-                           << " InteractionInformation = " << toString(htreeNode->interactionInformation) << endl;
+        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->instances.size());
+
+        if (is_interesting_pattern)
+            resultFile << " InteractionInformation = " << toString(htreeNode->interactionInformation);
+
+        resultFile << endl;
+
         foreach (Handle link, htreeNode->pattern)
         {
             resultFile << atomSpace->atomAsString(link);
@@ -1233,22 +1252,53 @@ void PatternMiner::GrowAllPatterns()
             threads[i].join();
         }
 
-        // sort by frequency
-        // std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
-
-        // calculate interaction information
-        foreach(HTreeNode* htreeNode, patternsForGram[cur_gram-1])
+        if (enable_Frequent_Pattern)
         {
-            calculateInteractionInformation(htreeNode);
+            // sort by frequency
+            std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
+
+            // Finished mining cur_gram patterns; output to file
+            std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") frequent pattern mining!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! " << std::endl;
+
+            OutPutPatternsToFile(cur_gram);
         }
 
-        // sort by interaction information
-        std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
 
-        // Finished mining cur_gram patterns; output to file
-        std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") pattern mining!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! " << std::endl;
+        if (enable_Interesting_Pattern)
+        {
+            // evaluate the interestingness
+            // Only effective when Enable_Interesting_Pattern is true. The options are "Interaction_Information", "surprisingness"
+            if (interestingness_Evaluation_method == "Interaction_Information")
+            {
+               // calculate interaction information
+               foreach(HTreeNode* htreeNode, patternsForGram[cur_gram-1])
+               {
+                   calculateInteractionInformation(htreeNode);
+               }
 
-        OutPutPatternsToFile(cur_gram);
+               // sort by interaction information
+               std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
+            }
+            else if (interestingness_Evaluation_method == "surprisingness")
+            {
+                // Todo:
+                // calculate surprisingness
+                foreach(HTreeNode* htreeNode, patternsForGram[cur_gram-1])
+                {
+                    calculateSurprisingness(htreeNode);
+                }
+
+                // sort by surprisingness
+                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness);
+            }
+
+            // Finished mining cur_gram patterns; output to file
+            std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") interesting pattern mining!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! " << std::endl;
+
+            OutPutPatternsToFile(cur_gram, true);
+        }
+
+
 
 //        HandleSeq allDumpNodes, allDumpLinks;
 //        originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
@@ -1609,6 +1659,13 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
 
 //}
 
+void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
+{
+
+}
+
+
+
 PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram): originalAtomSpace(_originalAtomSpace)
 {
     htree = new HTree();
@@ -1629,6 +1686,14 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     cur_gram = 0;
 
     ignoredTypes[0] = LIST_LINK;
+
+    enable_Frequent_Pattern = config().get_bool("Enable_Frequent_Pattern");
+    enable_Interesting_Pattern = config().get_bool("Enable_Interesting_Pattern");
+    interestingness_Evaluation_method = config().get("Interestingness_Evaluation_method");
+
+    assert(enable_Frequent_Pattern || enable_Interesting_Pattern);
+    //The options are "Interaction_Information", "surprisingness"
+    assert( (interestingness_Evaluation_method == "Interaction_Information") || (interestingness_Evaluation_method == "surprisingness") );
 
     // vector < vector<HTreeNode*> > patternsForGram
     for (unsigned int i = 0; i < max_gram; ++i)
