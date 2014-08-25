@@ -23,7 +23,7 @@
 
 #include <opencog/atomspace/SimpleTruthValue.h>
 
-#include "Implicator.h"
+#include "DefaultImplicator.h"
 #include "PatternMatch.h"
 
 using namespace opencog;
@@ -100,7 +100,7 @@ Handle PatternMatch::bindlink (Handle himplication)
 {
 	// Now perform the search.
 	DefaultImplicator impl(_atom_space);
-	do_bindlink(himplication, &impl);
+	do_bindlink(himplication, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -120,7 +120,7 @@ Handle PatternMatch::single_bindlink (Handle himplication)
 {
 	// Now perform the search.
 	SingleImplicator impl(_atom_space);
-	do_bindlink(himplication, &impl);
+	do_bindlink(himplication, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -149,7 +149,7 @@ Handle PatternMatch::crisp_logic_bindlink (Handle himplication)
 {
 	// Now perform the search.
 	CrispImplicator impl(_atom_space);
-	do_bindlink(himplication, &impl);
+	do_bindlink(himplication, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -164,7 +164,7 @@ Handle PatternMatch::pln_bindlink(Handle himplication)
 {
 	// Now perform the search.
 	PLNImplicator impl(_atom_space);
-	do_bindlink(himplication, &impl);
+	do_bindlink(himplication, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.

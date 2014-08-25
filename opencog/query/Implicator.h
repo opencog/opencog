@@ -24,13 +24,12 @@
 #ifndef _OPENCOG_IMPLICATOR_H
 #define _OPENCOG_IMPLICATOR_H
 
+#include <vector>
+
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "AttentionalFocusCB.h"
-#include "CrispLogicPMCB.h"
-#include "DefaultPatternMatchCB.h"
-#include "Instantiator.h"
-#include "PatternMatchCallback.h"
+#include <opencog/query/Instantiator.h>
+#include <opencog/query/PatternMatchCallback.h>
 
 
 namespace opencog {
@@ -62,49 +61,6 @@ class Implicator :
 		std::vector<Handle> result_list;
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 		                       const std::map<Handle, Handle> &pred_soln);
-};
-
-class DefaultImplicator:
-	public virtual Implicator,
-	public virtual DefaultPatternMatchCB
-{
-	public:
-		DefaultImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp) {}
-};
-
-class CrispImplicator:
-	public virtual Implicator,
-	public virtual CrispLogicPMCB
-{
-	public:
-		CrispImplicator(AtomSpace* asp) :
-			Implicator(asp), DefaultPatternMatchCB(asp), CrispLogicPMCB(asp)
-		{}
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &pred_soln);
-};
-
-class SingleImplicator:
-	public virtual Implicator,
-	public virtual DefaultPatternMatchCB
-{
-	public:
-		SingleImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp) {}
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &pred_soln);
-};
-
-
-/**
- * PLN specific PatternMatchCallback implementation
- */
-class PLNImplicator:
-	public virtual Implicator,
-	public virtual AttentionalFocusCB
-{
-	public:
-		PLNImplicator(AtomSpace* asp) : 
-			Implicator(asp), DefaultPatternMatchCB(asp), AttentionalFocusCB(asp) {}
 };
 
 }; // namespace opencog

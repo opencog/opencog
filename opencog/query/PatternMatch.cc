@@ -22,16 +22,11 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
 
-#include "Implicator.h"
-#include "Instantiator.h"
+#include "DefaultImplicator.h"
 #include "PatternMatch.h"
 #include "PatternUtils.h"
-#include "DefaultPatternMatchCB.h"
-#include "CrispLogicPMCB.h"
-#include "AttentionalFocusCB.h"
 
 using namespace opencog;
 
@@ -173,7 +168,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
  */
 
 void PatternMatch::do_imply (Handle himplication,
-                             PatternMatchCallback *pmc,
+                             Implicator &impl,
                              std::set<Handle>& varset)
 	throw (InvalidParamException)
 {
@@ -250,9 +245,8 @@ void PatternMatch::do_imply (Handle himplication,
 	}
 
 	// Now perform the search.
-	Implicator *impl = dynamic_cast<Implicator *>(pmc);
-	impl->implicand = implicand;
-	do_match(pmc, varset, affirm, negate);
+	impl.implicand = implicand;
+	do_match(&impl, varset, affirm, negate);
 }
 
 /* ================================================================= */
@@ -382,7 +376,7 @@ int PatternMatch::get_vartype(Handle htypelink,
  */
 
 void PatternMatch::do_bindlink (Handle hbindlink,
-                                PatternMatchCallback *pmc)
+                                Implicator& implicator)
 	throw (InvalidParamException)
 {
 	// Must be non-empty.
@@ -458,8 +452,8 @@ void PatternMatch::do_bindlink (Handle hbindlink,
 			"Expected a ListLink holding variable declarations");
 	}
 
-	pmc->set_type_restrictions(typemap);
-	do_imply(himpl, pmc, vset);
+	implicator.set_type_restrictions(typemap);
+	do_imply(himpl, implicator, vset);
 }
 
 /* ================================================================= */
@@ -480,7 +474,7 @@ Handle PatternMatch::imply (Handle himplication)
 	DefaultImplicator impl(_atom_space);
 	std::set<Handle> varset;
 
-	do_imply(himplication, &impl, varset);
+	do_imply(himplication, impl, varset);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -513,7 +507,7 @@ Handle PatternMatch::crisp_logic_imply (Handle himplication)
 	CrispImplicator impl(_atom_space);
 	std::set<Handle> varset;
 
-	do_imply(himplication, &impl, varset);
+	do_imply(himplication, impl, varset);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.

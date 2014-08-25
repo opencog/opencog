@@ -27,7 +27,7 @@
 #include <set>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/PatternMatchCallback.h>
+#include <opencog/query/Implicator.h>
 
 namespace opencog {
 
@@ -45,7 +45,7 @@ class PatternMatch
 		                std::vector<Handle>& negations)
 			throw (InvalidParamException);
 
-		void do_imply(Handle, PatternMatchCallback *, std::set<Handle>&)
+		void do_imply(Handle, Implicator&, std::set<Handle>&)
 			throw (InvalidParamException);
 
 		bool recursive_virtual(PatternMatchCallback *cb,
@@ -69,8 +69,9 @@ class PatternMatch
 		           Handle negations = Handle::UNDEFINED)
 			throw (InvalidParamException);
 
-		void do_bindlink(Handle, PatternMatchCallback *)
+		void do_bindlink(Handle, Implicator&)
 					throw (InvalidParamException);
+
 		Handle bindlink(Handle);
 		Handle single_bindlink (Handle);
 		Handle crisp_logic_bindlink(Handle);
