@@ -7,6 +7,10 @@ from opencog.atomspace import types
 
 __author__ = 'Hujie Wang'
 
+'''
+DumpAgent is used to dump atomspace content into a file for testing purposes.
+'''
+
 class dumpAgent(MindAgent):
     
     def run(self, atomspace):

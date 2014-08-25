@@ -1,3 +1,5 @@
+;; Returning the NumberNode of a WordInstanceNode.
+
 (define getNumberNode_WordInstanceNode
     (BindLink
         (ListLink

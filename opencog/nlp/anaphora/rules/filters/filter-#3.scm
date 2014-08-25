@@ -1,5 +1,10 @@
 ;; antecedent's number > anaphora's number
 
+;; Examples:
+
+;; "Tom saw an apple under a tree, he ate a banana."
+;; While resolving the pronoun "he", "banana" should not be an antecedent.
+
 (define filter-#3
     (BindLink
         (ListLink
@@ -61,4 +66,3 @@
         )
     )
 )
-

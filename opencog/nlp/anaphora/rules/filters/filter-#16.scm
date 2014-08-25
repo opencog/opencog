@@ -1,31 +1,21 @@
-;; anaphor is non-reflexive
-;; The parse tree structure is:
+;; anaphor is "neuter"
+;; antecedent is "person"
 
-;;          verb
-;;         /    \
-;; antecedent    noun
-;;                 \ "of"
-;;                 anaphor
+;; Examples:
 
-;; This antecedent should be rejected
+;; "Tom likes hamburgers. It's beautiful."
+;; "It" should not refer to "Tom"
+
 
 (define filter-#16
     (BindLink
         (ListLink
-            (TypedVariableLink
-                (VariableNode "$noun")
-                (VariableTypeNode "WordInstanceNode")
-            )
             (TypedVariableLink
                 (VariableNode "$word-inst-antecedent")
                 (VariableTypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$word-inst-anaphor")
-                (VariableTypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$verb")
                 (VariableTypeNode "WordInstanceNode")
             )
         )
@@ -47,32 +37,13 @@
                 )
 
                 ;; filter
-                (NotLink
-                    (InheritanceLink
-                        (VariableNode "$word-inst-anaphor")
-                        (DefinedLinguisticConceptNode "reflexive")
-                    )
+                (InheritanceLink
+                    (VariableNode "$word-inst-anaphor")
+                    (DefinedLinguisticConceptNode "neuter")
                 )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_subj")
-                    (ListLink
-                        (VariableNode "$verb")
-                        (VariableNode "$word-inst-antecedent")
-                    )
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_obj")
-                    (ListLink
-                        (VariableNode "$verb")
-                        (VariableNode "$noun")
-                    )
-                )
-                (EvaluationLink
-                    (PrepositionalRelationshipNode "of")
-                    (ListLink
-                        (VariableNode "$noun")
-                        (VariableNode "$word-inst-anaphor")
-                    )
+                (InheritanceLink
+                    (VariableNode "$word-inst-antecedent")
+                    (DefinedLinguisticConceptNode "person")
                 )
             )
             (ListLink

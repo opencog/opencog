@@ -1,3 +1,5 @@
+;; Returning all number nodes for all WordInstanceNodes.
+
 (define getAllNumberNodes
     (BindLink
         (ListLink

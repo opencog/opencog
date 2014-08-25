@@ -1,3 +1,5 @@
+;; Returning the NumberNode of a ParseNode.
+
 (define getNumberNode_ParseNode
     (BindLink
         (ListLink

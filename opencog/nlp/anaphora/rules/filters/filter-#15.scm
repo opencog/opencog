@@ -1,5 +1,16 @@
-;; antecedent is a number
+;; anaphor is non-reflexive
+;; The parse tree structure is:
 
+;;             antecedent
+;;                 \ "of"
+;;                 anaphor
+
+;; This antecedent should be rejected
+
+;; Examples:
+
+;; "John's portrait of him."
+;; "him" should not refer to "portrait "
 
 (define filter-#15
     (BindLink
@@ -11,14 +22,6 @@
             (TypedVariableLink
                 (VariableNode "$word-inst-anaphor")
                 (VariableTypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$verb")
-                (VariableTypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "a number")
-                (VariableTypeNode "NumberNode")
             )
         )
         (ImplicationLink
@@ -39,9 +42,18 @@
                 )
 
                 ;; filter
-                (ReferenceLink
-                    (VariableNode "$word-inst-antecedent")
-                    (VariableNode "a number")
+                (NotLink
+                    (InheritanceLink
+                        (VariableNode "$word-inst-anaphor")
+                        (DefinedLinguisticConceptNode "reflexive")
+                    )
+                )
+                (EvaluationLink
+                    (PrepositionalRelationshipNode "of")
+                    (ListLink
+                        (VariableNode "$word-inst-antecedent")
+                        (VariableNode "$word-inst-anaphor")
+                    )
                 )
             )
             (ListLink

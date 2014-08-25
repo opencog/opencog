@@ -1,5 +1,8 @@
-;; anaphor is "neuter"
-;; antecedent is "person"
+;; antecedent should not be the anphor itself.
+
+;; Examples:
+
+;; This one should be obvious.
 
 (define filter-#18
     (BindLink
@@ -31,13 +34,9 @@
                 )
 
                 ;; filter
-                (InheritanceLink
-                    (VariableNode "$word-inst-anaphor")
-                    (DefinedLinguisticConceptNode "neuter")
-                )
-                (InheritanceLink
+                (ListLink
+                    (AnchorNode "CurrentPronoun")
                     (VariableNode "$word-inst-antecedent")
-                    (DefinedLinguisticConceptNode "person")
                 )
             )
             (ListLink

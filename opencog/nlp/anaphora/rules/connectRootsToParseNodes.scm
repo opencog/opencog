@@ -1,3 +1,5 @@
+;; Converting a multi-root graph to a single root graph, it's easier to run Breadth-first search on such graph.
+
 (define connectRootsToParseNodes
     (BindLink
         (ListLink

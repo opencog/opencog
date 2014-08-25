@@ -1,6 +1,12 @@
 ;; anaphor is "neuter"
 ;; antecedent is "feminine"
 
+;; Examples:
+
+;; "Alice ate an apple. It does not like it."
+;; "It" should not refer to "Alice"
+
+
 (define filter-#7
     (BindLink
         (ListLink

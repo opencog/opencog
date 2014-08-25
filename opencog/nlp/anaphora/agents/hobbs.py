@@ -22,6 +22,7 @@ Configurations
 '''
 Number of searching sentences(including the one contains the pronoun)
 '''
+
 NUMBER_OF_SEARCHING_SENTENCES = 3
 
 '''
@@ -29,7 +30,20 @@ Suppose the decreasing rate is x, then
 the ith accepted candidate will have confidence value of
 (x^(i-1))(1-x)  i starts at 1.
 '''
+
 CONFIDENCE_DECREASING_RATE=0.7
+
+'''
+Strength for accepted antecedents
+'''
+
+STRENGTH_FOR_ACCEPTED_ANTECEDENTS=0.98
+
+'''
+Truth Value for antecendents which have been filtered out by filters.
+'''
+
+TV_FOR_FILTERED_OUT_ANTECEDENTS=TruthValue(0.02, TruthValue().confidence_to_count(0.9))
 
 '''
 ========================================
@@ -107,6 +121,7 @@ class HobbsAgent(MindAgent):
         self.wordNumber=dict()
         self.atomspace = None
 
+        self.currentPronoun = None
         self.currentPronounNode = None
         self.currentTarget = None
         self.currentResult = None
@@ -116,6 +131,8 @@ class HobbsAgent(MindAgent):
 
         self.pronouns = None
         self.roots = None
+
+        self.confidence = 1.0
 
         self.numOfFilters=7
         self.number_of_searching_sentences=3
@@ -136,9 +153,19 @@ class HobbsAgent(MindAgent):
         return rv
 
     def StringToNumber(self,str):
+
+        '''
+        Converts a string to an integer.
+        '''
+
         return int(str)
 
     def getWordNumber(self,node):
+
+        '''
+        Returns the WordSequence number associated with the 'node'
+        '''
+
         return self.wordNumber[node.name]
 
     def getSentenceNumber(self,node):
@@ -166,27 +193,29 @@ class HobbsAgent(MindAgent):
         rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind getChildren)',self.currentResult,types.WordInstanceNode)
         return self.sortNodes(rv,self.getWordNumber)
 
-    def generateReferenceLink(self,anaphora,antecedent,confidence):
+    def generateReferenceLink(self,anaphora,antecedent,tv):
         '''
         Generates a reference Link for a pair of anaphora and antecedent with confidence "confidence".
         '''
 
-        link = self.atomspace.add_link(types.ReferenceLink, [anaphora, antecedent], TruthValue(.98, TruthValue().confidence_to_count(confidence)))
+        link = self.atomspace.add_link(types.ReferenceLink, [anaphora, antecedent], tv)
         log.fine("Generated a Reference :\n")
         log.fine("{0}\n".format(link))
         log.fine("===========================================================")
 
     def getConjunction(self,node):
+
+        '''
+        Returning the other part of a conjunction if conjunction exists and anaphor is "Plural"
+        '''
+
         return self.bindLinkExe(self.currentProposal,node,'(cog-bind-crisp getConjunction)',self.currentResult,types.WordInstanceNode)
 
-    def propose(self,node):
-        '''
-        It iterates all filters, reject the antecedent or "node" if it's matched by any filters.
-        '''
+    def checkConjunctions(self,node):
 
-        self.currentResolutionLink_pronoun=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentPronoun, node], TruthValue(1.0, 100))
-        rejected = False
-        filterNumber=-1
+        '''
+        Checking if conjunction resolution applies to the "node", returning True if it applies, False otherwise.
+        '''
 
         conjunction=self.getConjunction(node);
 
@@ -195,13 +224,38 @@ class HobbsAgent(MindAgent):
             conjunction_list=[]
             conjunction_list.append(node)
             conjunction_list.extend(conjunction)
-            if self.DEBUG:
+
+            # We don't want to output this to unit tests
+            if self.DEBUG and filter!=-1:
                 print("accepted \n"+str(conjunction_list))
             log.fine("accepted \n"+str(conjunction_list))
-            self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, conjunction_list, TruthValue(1.0, TruthValue().confidence_to_count(1.0))),self.confidence)
+            self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, conjunction_list, TruthValue(1.0, TruthValue().confidence_to_count(1.0))),TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, TruthValue().confidence_to_count(self.confidence)))
             self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
+            return True
+        return False
 
-        for index in range(1,self.numOfFilters):
+    def propose(self,node,filter=-1):
+        '''
+        It iterates all filters, reject the antecedent or "node" if it's matched by any filters.
+        '''
+
+        self.currentResolutionLink_pronoun=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentPronoun, node], TruthValue(1.0, 100))
+        rejected = False
+        filterNumber=-1
+
+        self.checkConjunctions(node)
+
+        start=1
+        end=self.numOfFilters+1
+
+        '''
+        For debugging purposes.
+        '''
+        if filter!=-1:
+            start=filter
+            end=filter+1
+
+        for index in range(start,end):
             command='(cog-bind-crisp filter-#'+str(index)+')'
             rv=self.bindLinkExe(self.currentProposal,node,command,self.currentResult,types.AnchorNode)
             if len(rv)>0:
@@ -213,16 +267,20 @@ class HobbsAgent(MindAgent):
                 break
 
         if not rejected:
+
+            # We don't want to output this to unit tests
             if self.DEBUG:
-                print("accepted "+node.name)
+                    print("accepted "+node.name)
             log.fine("accepted "+node.name)
-            self.generateReferenceLink(self.currentPronoun,node,self.confidence)
+            self.generateReferenceLink(self.currentPronoun,node,TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, TruthValue().confidence_to_count(self.confidence)))
             self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
-        #else:
+        else:
+            self.generateReferenceLink(self.currentPronoun,node,TV_FOR_FILTERED_OUT_ANTECEDENTS)
             #if self.DEBUG:
-                #print("rejected "+node.name+" by filter-#"+str(index))
+                   # print("rejected "+node.name+" by filter-#"+str(index))
 
         self.atomspace.remove(self.currentResolutionLink_pronoun)
+        return not rejected
 
     def Checked(self,node):
 
@@ -242,6 +300,11 @@ class HobbsAgent(MindAgent):
         Does a Breadth-First search, starts with "node"
         '''
 
+        '''
+        rv is used for unit tests
+        '''
+        rv=[]
+
         if node==None:
             #print("found you bfs")
             return
@@ -249,12 +312,42 @@ class HobbsAgent(MindAgent):
         q.put(node)
         while not q.empty():
             front=q.get()
+            rv.append(front)
             self.propose(front)
             children=self.getChildren(front)
             if len(children)>0:
                 for node in children:
                     if not self.Checked(node):
                         q.put(node)
+        return rv
+
+    def getWords(self):
+
+        '''
+        Returns a list of words in the atomspace
+        '''
+
+        rv=self.bindLinkExe(None,None,'(cog-bind-crisp getWords)',self.currentResult,types.WordInstanceNode)
+        return self.sortNodes(rv,self.getWordNumber)
+
+    def getTargets(self,words):
+
+        '''
+        Returns a list of references needed to be resolved.
+        '''
+
+        targets=[]
+        for word in words:
+            matched=False
+            for index in range(1,self.numOfPrePatterns+1):
+                command='(cog-bind-crisp pre-process-#'+str(index)+')'
+                rv=self.bindLinkExe(self.currentTarget,word,command,self.currentResult,types.AnchorNode)
+                if len(rv)>0:
+                    matched=True
+                    break
+            if matched:
+                targets.append(word)
+        return targets
 
     def getPronouns(self):
         rv=self.bindLinkExe(None,None,'(cog-bind-crisp getPronouns)',self.unresolvedReferences,types.WordInstanceNode)
@@ -310,8 +403,13 @@ class HobbsAgent(MindAgent):
                 self.wordNumber[out[0].name]=self.StringToNumber(out[1].name)
 
     def initilization(self,atomspace):
+        '''
+        Initializes necessary variables. Loads rules.
+        '''
+
         self.atomspace = atomspace
 
+        self.PleonasticItNode=atomspace.add_node(types.AnchorNode, 'Pleonastic-it', TruthValue(1.0, 100))
         self.currentPronounNode = atomspace.add_node(types.AnchorNode, 'CurrentPronoun', TruthValue(1.0, 100))
         self.currentTarget = atomspace.add_node(types.AnchorNode, 'CurrentTarget', TruthValue(1.0, 100))
         self.currentResult = atomspace.add_node(types.AnchorNode, 'CurrentResult', TruthValue(1.0, 100))
@@ -327,13 +425,12 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/getNumberNode_WordInstanceNode.scm",
               "opencog/nlp/anaphora/rules/getNumberNode_ParseNode.scm",
               "opencog/nlp/anaphora/rules/connectRootsToParseNodes.scm",
-              "opencog/nlp/anaphora/rules/getPronouns.scm",
-              "opencog/nlp/anaphora/rules/propose.scm",
-              "opencog/nlp/anaphora/rules/getResults.scm",
               "opencog/nlp/anaphora/rules/getAllNumberNodes.scm",
               "opencog/nlp/anaphora/rules/getAllParseNodes.scm",
               "opencog/nlp/anaphora/rules/getConjunction.scm",
               "opencog/nlp/anaphora/rules/getParseNode.scm",
+              "opencog/nlp/anaphora/rules/getWords.scm",
+              "opencog/nlp/anaphora/rules/isIt.scm",
 
               "opencog/nlp/anaphora/rules/filtersGenerator.scm",
 
@@ -355,30 +452,28 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/filters/filter-#16.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#17.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#18.scm",
-              "opencog/nlp/anaphora/rules/filters/filter-#19.scm",
+
+              "opencog/nlp/anaphora/rules/pre-process/pre-process-#1.scm",
+              "opencog/nlp/anaphora/rules/pre-process/pre-process-#2.scm",
+              "opencog/nlp/anaphora/rules/pre-process/pre-process-#3.scm",
+
+              "opencog/nlp/anaphora/rules/pleonastic-it/pleonastic-it-#1.scm",
+              "opencog/nlp/anaphora/rules/pleonastic-it/pleonastic-it-#2.scm",
+              "opencog/nlp/anaphora/rules/pleonastic-it/pleonastic-it-#3.scm",
+
               ]
 
-        self.numOfFilters=len(data)
+        self.numOfFilters=20
+        self.numOfPrePatterns=3
+        self.numOfPleonasticItPatterns=3
+
         for item in data:
             load_scm(atomspace, item)
 
         self.getAllNumberNodes()
-        self.pronouns = self.getPronouns()
+        self.pronouns=self.getTargets(self.getWords())
         self.roots = self.getRoots()
 
-
-    def printResults(self):
-
-        '''
-        Currently, this function is not used.
-        '''
-
-        rv = self.bindLinkExe(None,None,'(cog-bind getResults)',self.currentResult,types.ReferenceLink)
-
-        with open('/tmp/results.txt', 'w') as logfile:
-            for atom in rv:
-                print(atom)
-                print(atom, file=logfile)
 
     def addPronounToResolvedList(self,node):
         '''
@@ -387,10 +482,29 @@ class HobbsAgent(MindAgent):
 
         self.atomspace.add_link(types.ListLink,[self.resolvedReferences,node],TruthValue(1.0, 100))
 
+    def pleonastic_it(self,node):
+        '''
+        Check if the node is the word "it".
+        '''
+        matched=False
+        rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind-crisp isIt)',self.currentResult,types.AnchorNode)
+        if len(rv)>0:
+            for index in range(1,self.numOfPleonasticItPatterns+1):
+                command='(cog-bind-crisp pleonastic-it-#'+str(index)+')'
+                rv=self.bindLinkExe(self.currentTarget,node,command,self.currentResult,types.AnchorNode)
+                if len(rv)>0:
+                    matched=True
+                    break
+                #print("rejected "+node.name+" by filter-#"+str(index))
+
+        return matched
+
     def run(self, atomspace):
         self.initilization(atomspace)
 
         for pronoun in self.pronouns:
+
+
             self.checked.clear()
             self.pronounNumber=self.getWordNumber(pronoun)
             self.confidence=1-CONFIDENCE_DECREASING_RATE
@@ -403,14 +517,26 @@ class HobbsAgent(MindAgent):
             tmpLink=self.atomspace.add_link(types.ListLink, [self.currentPronounNode, pronoun], TruthValue(1.0, 100))
             self.currentPronoun=pronoun
             root=self.getRootOfNode(pronoun)
+
             if self.DEBUG:
                 print("Resolving....")
                 print(pronoun)
             log.fine("Resolving \n{0}".format(pronoun))
+
+            '''
+            Check if it's a pleonastic it.
+            '''
+
+            if self.pleonastic_it(pronoun):
+                self.generateReferenceLink(pronoun,self.PleonasticItNode,TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, TruthValue().confidence_to_count(self.confidence)))
+                self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
+                if self.DEBUG:
+                    print("accepted "+self.PleonasticItNode.name)
+                    log.fine("accepted "+self.PleonasticItNode.name)
+
             sent_counter=1;
             while True:
                 if root==None:
-                    #print("found you while")
                     break
                 self.bfs(root)
                 if self.previousRootExist(root) and sent_counter<=NUMBER_OF_SEARCHING_SENTENCES:

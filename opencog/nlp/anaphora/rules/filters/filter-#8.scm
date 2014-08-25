@@ -1,5 +1,11 @@
-;; anaphor is "masculine"
-;; antecedent is "neuter"
+;; anaphor is "singular"
+;; antecedent is "plural"
+
+;; Examples:
+
+;; "There are some cops in the corner. He does not like it."
+;; "He" should not refer to "cops"
+
 
 (define filter-#8
     (BindLink
@@ -33,11 +39,11 @@
                 ;; filter
                 (InheritanceLink
                     (VariableNode "$word-inst-anaphor")
-                    (DefinedLinguisticConceptNode "masculine")
+                    (DefinedLinguisticConceptNode "singular")
                 )
                 (InheritanceLink
                     (VariableNode "$word-inst-antecedent")
-                    (DefinedLinguisticConceptNode "neuter")
+                    (DefinedLinguisticConceptNode "plural")
                 )
             )
             (ListLink

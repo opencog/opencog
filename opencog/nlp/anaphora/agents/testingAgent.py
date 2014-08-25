@@ -1,12 +1,3 @@
-"""
-PLN Deduction Example
-
-Demonstrates how to run the example in deduction_agent.py when
-when interacting with PLN from a standalone Python environment
-for development or testing purposes. The normal use case is to
-run the example from the CogServer, for which you should use
-deduction_agent.py instead.
-"""
 
 from __future__ import print_function
 from pprint import pprint
@@ -18,8 +9,10 @@ from opencog.scheme_wrapper import load_scm,scheme_eval_h, __init__
 
 __author__ = 'Hujie Wang'
 
-# Create an AtomSpace with some sample information, equivalent to the
-# information in atomspace_contents.scm
+'''
+This agent is purely for testing purposes, which can be used to test hobbsAgent in a standalone atomspace environment.
+'''
+
 atomspace = AtomSpace()
 __init__(atomspace)
 
@@ -58,4 +51,3 @@ dump=dumpAgent()
 dump.run(atomspace)
 hobbsAgent = HobbsAgent()
 hobbsAgent.run(atomspace)
-

@@ -1,5 +1,4 @@
-;; Returns the other part of a conjunction if conjunction exists and anaphor is "Plural"
-
+;; Returning the other part of a conjunction if conjunction exists and anaphor is "Plural"
 
 (define getConjunction
     (BindLink

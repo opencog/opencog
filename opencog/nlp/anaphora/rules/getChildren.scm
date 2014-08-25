@@ -1,3 +1,5 @@
+;; Returning children associated with current target.
+
 (define getChildren
     (BindLink
         (ListLink

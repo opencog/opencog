@@ -1,11 +1,19 @@
-;; anaphor is non-reflexive
+;; anaphor is reflexive
 ;; The parse tree structure is:
 
-;;             antecedent
-;;                 \ "of"
-;;                 anaphor
+;;               verb
+;;         to   /    \ by
+;;             /      \
+;;       antecedent    anaphor
+
 
 ;; This antecedent should be rejected
+
+;; Examples:
+
+;; "Jacob went to the party by himself."
+;; "himself" should not refer to "party"
+
 
 (define filter-#17
     (BindLink
@@ -16,6 +24,10 @@
             )
             (TypedVariableLink
                 (VariableNode "$word-inst-anaphor")
+                (VariableTypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$verb")
                 (VariableTypeNode "WordInstanceNode")
             )
         )
@@ -37,16 +49,21 @@
                 )
 
                 ;; filter
-                (NotLink
-                    (InheritanceLink
-                        (VariableNode "$word-inst-anaphor")
-                        (DefinedLinguisticConceptNode "reflexive")
+                (InheritanceLink
+                    (VariableNode "$word-inst-anaphor")
+                    (DefinedLinguisticConceptNode "reflexive")
+                )
+                (EvaluationLink
+                    (PrepositionalRelationshipNode "to")
+                    (ListLink
+                        (VariableNode "$verb")
+                        (VariableNode "$word-inst-antecedent")
                     )
                 )
                 (EvaluationLink
-                    (PrepositionalRelationshipNode "of")
+                    (PrepositionalRelationshipNode "by")
                     (ListLink
-                        (VariableNode "$word-inst-antecedent")
+                        (VariableNode "$verb")
                         (VariableNode "$word-inst-anaphor")
                     )
                 )

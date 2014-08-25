@@ -1,5 +1,12 @@
-;; anaphor is "feminine"
-;; antecedent is "neuter"
+;; anaphor is "plural"
+;; antecedent is "singular"
+
+
+;; Examples:
+
+;; "Alice ate an apple. They do not like it."
+;; "They" should not refer to "Alice"
+
 
 (define filter-#9
     (BindLink
@@ -33,11 +40,11 @@
                 ;; filter
                 (InheritanceLink
                     (VariableNode "$word-inst-anaphor")
-                    (DefinedLinguisticConceptNode "feminine")
+                    (DefinedLinguisticConceptNode "plural")
                 )
                 (InheritanceLink
                     (VariableNode "$word-inst-antecedent")
-                    (DefinedLinguisticConceptNode "neuter")
+                    (DefinedLinguisticConceptNode "singular")
                 )
             )
             (ListLink

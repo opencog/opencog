@@ -1,6 +1,11 @@
 ;; anaphor is "masculine"
 ;; antecedent is "feminine"
 
+;; Examples:
+
+;; "Alice ate an apple. He does not like it."
+;; "He" should not refer to "Alice"
+
 (define filter-#4
     (BindLink
         (ListLink
