@@ -79,6 +79,10 @@ class PatternMatch
 		// deprecated; used only in the unit-test cases.
 		Handle imply(Handle);             // deprecated
 		Handle crisp_logic_imply(Handle); // deprecated
+
+		void do_imply(Handle, Implicator&)
+			throw (InvalidParamException);
+
 };
 
 } // namespace opencog

@@ -188,9 +188,7 @@ Handle PatternMatch::imply (Handle himplication)
 {
 	// Now perform the search.
 	DefaultImplicator impl(_atom_space);
-	std::set<Handle> varset;
-
-	do_imply(himplication, impl, varset);
+	do_imply(himplication, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -221,9 +219,7 @@ Handle PatternMatch::crisp_logic_imply (Handle himplication)
 {
 	// Now perform the search.
 	CrispImplicator impl(_atom_space);
-	std::set<Handle> varset;
-
-	do_imply(himplication, impl, varset);
+	do_imply(himplication, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.

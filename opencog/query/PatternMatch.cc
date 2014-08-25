@@ -455,4 +455,12 @@ void PatternMatch::do_bindlink (Handle hbindlink,
 	do_imply(himpl, implicator, vset);
 }
 
+void PatternMatch::do_imply (Handle himplication,
+                             Implicator &impl)
+	throw (InvalidParamException)
+{
+	std::set<Handle> varset;
+	do_imply(himplication, impl);
+}
+
 /* ===================== END OF FILE ===================== */
