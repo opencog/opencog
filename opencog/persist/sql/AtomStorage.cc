@@ -1473,7 +1473,7 @@ void AtomStorage::load(AtomTable &table)
 	TLB::reserve_range(0,max_nrec);
 	fprintf(stderr, "Max observed UUID is %lu\n", max_nrec);
 	load_count = 0;
-	max_height = getMaxHeight();
+	max_height = getMaxObservedHeight();
 	fprintf(stderr, "Max Height is %d\n", max_height);
 
 	setup_typemap();
