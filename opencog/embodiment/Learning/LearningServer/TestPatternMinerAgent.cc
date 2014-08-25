@@ -86,7 +86,7 @@ void TestPatternMinerAgent::selectSubSetFromCorpus()
     topics.push_back("Biology");
     topics.push_back("Western_philosophy");
     topics.push_back("Chemistry");
-    this->patternMiner->selectSubsetFromCorpus(topics, 3);
+    this->patternMiner->selectSubsetFromCorpus(topics, 2);
 }
 
 void TestPatternMinerAgent::run()

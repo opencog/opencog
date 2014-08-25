@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/ClassServer.h>
+#include <math.h>
 #include "PatternMiner.h"
 
 using namespace opencog::PatternMining;
@@ -83,8 +84,6 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
 
     foreach (Handle h, outgoingLinks)
     {
-        // debug
-        string hstr = atomSpace->atomAsString(h);
 
         if (atomSpace->isNode(h))
         {
@@ -129,9 +128,6 @@ vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern,
 
     foreach (Handle link, orderedPattern)
     {
-        // debug
-        string linkstr = atomSpace->atomAsString(link);
-
         HandleSeq renameOutgoingLinks;
         findAndRenameVariablesForOneLink(link, orderedVarNameMap, renameOutgoingLinks);
         Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),renameOutgoingLinks,TruthValue::TRUE_TV());
@@ -309,6 +305,25 @@ bool isLastNElementsAllTrue(bool* array, int size, int n)
     return true;
 }
 
+unsigned int combinationCalculate(int r, int n)
+{
+    // = n!/(r!*(n-r)!)
+    int top = 1;
+    for (int i = n; i > r; i-- )
+    {
+        top *= i;
+    }
+
+    int bottom = 1;
+    for (int j = n-r; j > 1; j--)
+    {
+        bottom *= j;
+    }
+
+    return top/bottom;
+
+}
+
  // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
 void PatternMiner::generateALinkByChosenVariables(Handle& originalLink, map<Handle,Handle>& valueToVarMap,  HandleSeq& outputOutgoings)
 {
@@ -345,9 +360,6 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
 {
     HandleSeq outgoingLinks = originalAtomSpace->getOutgoing(link);
 
-    // Debug
-    string linkstr = originalAtomSpace->atomAsString(link);
-
     foreach (Handle h, outgoingLinks)
     {
         if (originalAtomSpace->isNode(h))
@@ -368,9 +380,6 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
 
 void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, set<Handle>& allVarNodes)
 {
-    // Debug:
-    string instr = originalAtomSpace->atomAsString(instanceLink);
-    string pastr = atomSpace->atomAsString(patternLink);
 
     HandleSeq ioutgoingLinks = originalAtomSpace->getOutgoing(instanceLink);
     HandleSeq poutgoingLinks = atomSpace->getOutgoing(patternLink);
@@ -419,6 +428,50 @@ void PatternMiner::extractAllNodesInLink(Handle link, set<Handle>& allNodes)
     }
 }
 
+void PatternMiner::extractAllVariableNodesInLink(Handle link, set<Handle>& allNodes, AtomSpace* _atomSpace)
+{
+    HandleSeq outgoingLinks = _atomSpace->getOutgoing(link);
+
+    foreach (Handle h, outgoingLinks)
+    {
+        if (_atomSpace->isNode(h))
+        {
+            if ((_atomSpace->getType(h) == opencog::VARIABLE_NODE) && (allNodes.find(h) == allNodes.end()))
+            {
+                allNodes.insert(h);
+            }
+        }
+        else
+        {
+            extractAllVariableNodesInLink(h,allNodes, _atomSpace);
+        }
+    }
+}
+
+bool PatternMiner::onlyContainVariableNodes(Handle link, AtomSpace* _atomSpace)
+{
+    HandleSeq outgoingLinks = _atomSpace->getOutgoing(link);
+
+    foreach (Handle h, outgoingLinks)
+    {
+        if (_atomSpace->isNode(h))
+        {
+            if (_atomSpace->getType(h) != opencog::VARIABLE_NODE)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (! onlyContainVariableNodes(h, _atomSpace))
+                return false;
+        }
+    }
+
+    return true;
+}
+
+
 // Extract all possible patterns from the original Atomspace input links (full Combination), and add to the patternmining Atomspace
 // Patterns are in the following format:
 //    (InheritanceLink
@@ -446,12 +499,12 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
 {
     map<Handle,Handle> valueToVarMap;  // the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
 
-    // Debug
-    cout << "Extract patterns from these links: \n";
-    foreach (Handle ih, inputLinks)
-    {
-        cout << originalAtomSpace->atomAsString(ih) << std::endl;
-    }
+//    // Debug
+//    cout << "Extract patterns from these links: \n";
+//    foreach (Handle ih, inputLinks)
+//    {
+//        cout << originalAtomSpace->atomAsString(ih) << std::endl;
+//    }
 
     // First, extract all the nodes in the input links
     foreach (Handle link, inputLinks)
@@ -549,66 +602,80 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
                 }
 
                 HandleSeq pattern, unifiedPattern;
+                bool hasLinkContainsOnlyVars = false;
 
                 foreach (Handle link, inputLinks)
                 {
-                    // debug:
-                    string inputLinkStr = originalAtomSpace->atomAsString(link);
-
                     HandleSeq outgoingLinks;
                     generateALinkByChosenVariables(link, patternVarMap, outgoingLinks);
                     Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),outgoingLinks,TruthValue::TRUE_TV());
-                    pattern.push_back(rebindedLink);
-                    // debug:
-                    string rebindedLinkStr = atomSpace->atomAsString(rebindedLink);
-                }
-
-                // unify the pattern
-                unifiedPattern = UnifyPatternOrder(pattern);
-
-                string keyString = unifiedPatternToKeyString(unifiedPattern);
-
-                // next, check if this pattern already exist (need lock)
-                HTreeNode* newHTreeNode = 0;
-                uniqueKeyLock.lock();
-
-                map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(keyString);
-
-                if (htreeNodeIter == keyStrToHTreeNodeMap.end())
-                {
-                    newHTreeNode = new HTreeNode();
-                    keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
-                }
-                else
-                {
-                    // which means the parent node is also the found HTreeNode
-                    set<HTreeNode*>& parentLinks= ((HTreeNode*)(htreeNodeIter->second))->parentLinks;
-                    if (parentLinks.find(parentNode) == parentLinks.end())
-                        parentLinks.insert(parentNode);
-                    // debug
-                    cout << "Unique Key already exists: \n" << keyString << "Skip this pattern!\n\n";
-                }
-
-                uniqueKeyLock.unlock();
-
-                if (newHTreeNode)
-                {
-                    newHTreeNode->pattern = unifiedPattern;
-
-                    // Find All Instances in the original AtomSpace For this Pattern
-                    findAllInstancesForGivenPattern(newHTreeNode);
-
-                    if (parentNode)
+                    if (onlyContainVariableNodes(rebindedLink, atomSpace))
                     {
-                        newHTreeNode->parentLinks.insert(parentNode);
+                        hasLinkContainsOnlyVars = true;
+                    }
+                    pattern.push_back(rebindedLink);
+                }
+
+                // skip the patterns that has links that only contain variable nodes, no const nodes
+                if (! hasLinkContainsOnlyVars)
+                {
+
+                    // unify the pattern
+                    unifiedPattern = UnifyPatternOrder(pattern);
+
+                    string keyString = unifiedPatternToKeyString(unifiedPattern);
+
+                    // next, check if this pattern already exist (need lock)
+                    HTreeNode* newHTreeNode = 0;
+                    uniqueKeyLock.lock();
+
+                    map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(keyString);
+
+                    if (htreeNodeIter == keyStrToHTreeNodeMap.end())
+                    {
+                        newHTreeNode = new HTreeNode();
+                        keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
                     }
                     else
                     {
-                        newHTreeNode->parentLinks.insert(this->htree->rootNode);
+                        // which means the parent node is also a parent node of the found HTreeNode
+                        if (parentNode)
+                        {
+                            set<HTreeNode*>& parentLinks= ((HTreeNode*)(htreeNodeIter->second))->parentLinks;
+                            if (parentLinks.find(parentNode) == parentLinks.end())
+                            {
+                                parentLinks.insert(parentNode);
+                                parentNode->childLinks.insert(((HTreeNode*)(htreeNodeIter->second)));
+                            }
+                        }
+    //                    // debug
+    //                    cout << "Unique Key already exists: \n" << keyString << "Skip this pattern!\n\n";
                     }
 
+                    uniqueKeyLock.unlock();
 
-                    (patternsForGram[gram-1]).push_back(newHTreeNode);
+                    if (newHTreeNode)
+                    {
+                        newHTreeNode->pattern = unifiedPattern;
+
+                        // Find All Instances in the original AtomSpace For this Pattern
+                        findAllInstancesForGivenPattern(newHTreeNode);
+
+                        if (parentNode)
+                        {
+                            newHTreeNode->parentLinks.insert(parentNode);
+                            parentNode->childLinks.insert(newHTreeNode);
+                        }
+                        else
+                        {
+                            newHTreeNode->parentLinks.insert(this->htree->rootNode);
+                            this->htree->rootNode->childLinks.insert(newHTreeNode);
+                        }
+
+                        addNewPatternLock.lock();
+                        (patternsForGram[gram-1]).push_back(newHTreeNode);
+                        addNewPatternLock.unlock();
+                    }
                 }
             }
 
@@ -701,12 +768,6 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     if (THREAD_NUM > 1)
         removeAtomLock.lock();
 
-    // Debug
-    static int count = 0;
-    count ++;
-
-    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern: count = " << count << std::endl;
-
     HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, linksWillBeDel;
 
     HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpace(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
@@ -738,8 +799,8 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
 
-    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
-              << originalAtomSpace->atomAsString(hBindLink).c_str() << std::endl;
+//    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
+//              << originalAtomSpace->atomAsString(hAndLink).c_str() << std::endl;
 
 //    // debug
 //    if ((variableNodes.size() == 4) && (patternToMatch.size() == 3))
@@ -792,10 +853,10 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     // Note: Don't forget to remove the hResultListLink and BindLink
     HandleSeq resultSet = originalAtomSpace->getOutgoing(hResultListLink);
 
-    std::cout << toString(resultSet.size())  << " instances found:" << std::endl ;
+//    std::cout << toString(resultSet.size())  << " instances found!" << std::endl ;
 
-    //debug
-    std::cout << originalAtomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
+//    //debug
+//    std::cout << originalAtomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
 
     foreach (Handle listH , resultSet)
     {
@@ -832,8 +893,8 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 void PatternMiner::removeLinkAndItsAllSubLinks(AtomSpace* _atomspace, Handle link)
 {
 
-    //debug
-    std::cout << "Remove atom: " << _atomspace->atomAsString(link) << std::endl;
+//    //debug
+//    std::cout << "Remove atom: " << _atomspace->atomAsString(link) << std::endl;
 
     HandleSeq Outgoings = _atomspace->getOutgoing(link);
     foreach (Handle h, Outgoings)
@@ -901,11 +962,23 @@ bool PatternMiner::containsDuplicateHandle(HandleSeq &handles)
     return false;
 }
 
+
 bool PatternMiner::isInHandleSeq(Handle handle, HandleSeq &handles)
 {
     foreach(Handle h, handles)
     {
         if (handle == h)
+            return true;
+    }
+
+    return false;
+}
+
+bool PatternMiner::isInHandleSeqSeq(Handle handle, HandleSeqSeq &handleSeqs)
+{
+    foreach(HandleSeq handles, handleSeqs)
+    {
+        if (isInHandleSeq(handle,handles))
             return true;
     }
 
@@ -1040,14 +1113,6 @@ void PatternMiner::growPatternsTask()
 
         foreach (HandleSeq instance , cur_growing_pattern->instances)
         {
-            // debug
-            int i =0;
-            foreach(Handle h , instance)
-            {
-                string x = originalAtomSpace->atomAsString(h);
-                i ++;
-            }
-
             extendAllPossiblePatternsForOneMoreGram(instance, cur_growing_pattern, cur_gram);
         }
 
@@ -1058,6 +1123,11 @@ void PatternMiner::growPatternsTask()
 bool compareHTreeNodeByFrequency(HTreeNode* node1, HTreeNode* node2)
 {
     return (node1->instances.size() > node2->instances.size());
+}
+
+bool compareHTreeNodeByInteractionInformation(HTreeNode* node1, HTreeNode* node2)
+{
+    return (node1->interactionInformation > node2->interactionInformation);
 }
 
 void PatternMiner::OutPutPatternsToFile(unsigned int n_gram)
@@ -1074,9 +1144,10 @@ void PatternMiner::OutPutPatternsToFile(unsigned int n_gram)
     foreach(HTreeNode* htreeNode, patternsForThisGram)
     {
         if (htreeNode->instances.size() < 2)
-            break;
+            continue;
 
-        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->instances.size()) << endl;
+        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->instances.size())
+                           << " InteractionInformation = " << toString(htreeNode->interactionInformation) << endl;
         foreach (Handle link, htreeNode->pattern)
         {
             resultFile << atomSpace->atomAsString(link);
@@ -1162,7 +1233,17 @@ void PatternMiner::GrowAllPatterns()
             threads[i].join();
         }
 
-        std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
+        // sort by frequency
+        // std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
+
+        // calculate interaction information
+        foreach(HTreeNode* htreeNode, patternsForGram[cur_gram-1])
+        {
+            calculateInteractionInformation(htreeNode);
+        }
+
+        // sort by interaction information
+        std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
 
         // Finished mining cur_gram patterns; output to file
         std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") pattern mining!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! " << std::endl;
@@ -1193,6 +1274,340 @@ void PatternMiner::GrowAllPatterns()
 //        dumpFile.close();
     }
 }
+
+// return true if the inputLinks are disconnected
+// when the inputLinks are connected, the outputConnectedGroups has only one group, which is the same as inputLinks
+bool PatternMiner::splitDisconnectedLinksIntoConnectedGroups(HandleSeq& inputLinks, HandleSeqSeq& outputConnectedGroups)
+{
+    if(inputLinks.size() < 2)
+        return false;
+
+    set<Handle> allNodesInEachLink[inputLinks.size()];
+    for (unsigned int i = 0; i < inputLinks.size(); ++i)
+    {
+        extractAllVariableNodesInLink(inputLinks[i],allNodesInEachLink[i], atomSpace);
+    }
+
+    int i = -1;
+    foreach (Handle link, inputLinks)
+    {
+        i ++;
+
+        if (isInHandleSeqSeq(link, outputConnectedGroups))
+            continue;
+
+        // This link is not in outputConnectedGroups, which means none of its previous links connect to this link.
+        // So, make a new group.
+        HandleSeq newGroup;
+        newGroup.push_back(link);
+
+        // Only need to scan the links after this link
+        for (unsigned int j = i+1; j < inputLinks.size(); j++)
+        {
+            foreach(Handle node, allNodesInEachLink[i])
+            {
+                if (allNodesInEachLink[j].find(node) != allNodesInEachLink[j].end())
+                {
+                    // they share same node -> they are connected.
+                    newGroup.push_back(inputLinks[j]);
+                    break;
+                }
+            }
+        }
+
+        outputConnectedGroups.push_back(newGroup);
+
+    }
+
+    return  (outputConnectedGroups.size() > 1);
+
+}
+
+double PatternMiner::calculateEntropyOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern)
+{
+    // try to find if it has a correponding HtreeNode
+    map<string, HTreeNode*>::iterator subPatternNodeIter = keyStrToHTreeNodeMap.find(connectedSubPatternKey);
+    if (subPatternNodeIter != keyStrToHTreeNodeMap.end())
+    {
+        // it's in the H-Tree, add its entropy
+        HTreeNode* subPatternNode = (HTreeNode*)subPatternNodeIter->second;
+        cout << "CalculateEntropy: Found in H-tree! h = log" << subPatternNode->instances.size() << " ";
+        return log2(subPatternNode->instances.size());
+    }
+    else
+    {
+        // can't find its HtreeNode, have to calculate its frequency again by calling pattern matcher
+        // Todo: need to decide if add this missing HtreeNode into H-Tree or not
+
+        HTreeNode* newHTreeNode = new HTreeNode();
+        keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(connectedSubPatternKey, newHTreeNode));
+        newHTreeNode->pattern = connectedSubPattern;
+
+        // Find All Instances in the original AtomSpace For this Pattern
+        findAllInstancesForGivenPattern(newHTreeNode);
+         cout << "CalculateEntropy: Not found in H-tree! call pattern matcher again! h = log" << newHTreeNode->instances.size()<< " ";
+
+        return log2(newHTreeNode->instances.size());
+
+    }
+}
+
+
+void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
+{
+    // this pattern has HandleSeq HNode->pattern.size() gram
+    // the formula of interaction information I(XYZ..) =    sign*( H(X) + H(Y) + H(Z) + ...)
+    //                                                   + -sign*( H(XY) + H(YZ) + H(XZ) + ...)
+    //                                                   +  sign*( H(XYZ) ...)
+    // H(X) is the entropy of X
+    // Because in our sistuation, for each pattern X, we only care about how many instance it has, we don't record how many times each instance repeats.
+    // Let C(X) as the count of instances for patten X, so each instance x for pattern X has an equal chance  1/C(X) of frequency.
+    // Therefore, ,  H(X) =  (1/C(X))*log2(C(X))*1/C(X) = log2(C(X)). e.g. if a pattern appears 8 times in a corpus, its entropy is log2(8)
+
+    // First, find all its subpatterns (its parent nodes in the HTree).
+    // For the subpatterns those are mising in the HTree, need to call Pattern Matcher to find its frequency again.
+
+    std::cout << "=================Debug: calculateInteractionInformation for pattern: ====================\n";
+    foreach (Handle link, HNode->pattern)
+    {
+        std::cout << atomSpace->atomAsString(link);
+    }
+
+    std::cout << "II = ";
+
+    // Start from the last gram:
+    int maxgram = HNode->pattern.size();
+    int sign;
+    if (maxgram%2)
+        sign = 1;
+    else
+        sign = -1;
+
+    double II = sign * log2(HNode->instances.size());
+    std::cout << "H(curpattern) = log" << HNode->instances.size() << "="  << II << " sign=" << sign << std::endl;
+
+
+    for (int gram = maxgram-1; gram > 0; gram --)
+    {
+         sign *= -1;
+         std::cout << "start subpatterns of gram = " << gram << std::endl;
+
+         bool* indexes = new bool[maxgram];
+
+         // generate the first combination
+         for (int i = 0; i < gram; ++ i)
+             indexes[i] = true;
+
+         for (int i = gram; i < maxgram; ++ i)
+             indexes[i] = false;
+
+         while(true)
+         {
+             HandleSeq subPattern;
+             for (int index = 0; index < maxgram; index ++)
+             {
+                 if (indexes[index])
+                     subPattern.push_back(HNode->pattern[index]);
+             }
+
+             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern);
+             string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
+
+             std::cout<< "Subpattern: " << subPatternKey;
+
+             // First check if this subpattern is disconnected. If it is disconnected, it won't exist in the H-Tree anyway.
+             HandleSeqSeq splittedSubPattern;
+             if (splitDisconnectedLinksIntoConnectedGroups(unifiedSubPattern, splittedSubPattern))
+             {
+                 std::cout<< " is disconnected! splitted it into connected parts: \n" ;
+                 // The splitted parts are disconnected, so they are independent. So the entroy = the sum of each part.
+                 // e.g. if ABC is disconneted, and it's splitted into connected subgroups by splitDisconnectedLinksIntoConnectedGroups,
+                 // for example: AC, B  then H(ABC) = H(AC) + H(B)
+                 foreach(HandleSeq aConnectedSubPart, splittedSubPattern)
+                 {
+                     // Unify it again
+                     HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart);
+                     string connectedSubPatternKey = unifiedPatternToKeyString(unifiedConnectedSubPattern);
+                     cout << "a splitted part: " << connectedSubPatternKey;
+                     double h = calculateEntropyOfASubConnectedPattern(connectedSubPatternKey, unifiedConnectedSubPattern);
+                     II += sign*h;
+                     cout << "sign="<<sign << " h =" << h << std::endl << std::endl;
+
+                 }
+
+             }
+             else
+             {
+                 std::cout<< " is connected! \n" ;
+                 double h =calculateEntropyOfASubConnectedPattern(subPatternKey, unifiedSubPattern);
+                 II += sign*h;
+                 cout << "sign="<<sign << " h =" << h << std::endl << std::endl;
+             }
+
+
+             if (isLastNElementsAllTrue(indexes, maxgram, gram))
+                 break;
+
+             // generate the next combination
+             generateNextCombinationGroup(indexes, maxgram);
+         }
+
+
+    }
+
+    HNode->interactionInformation = II;
+    std::cout<< "\n total II = " << II << "\n" ;
+
+}
+
+// try to use H-tree first
+//void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
+//{
+//    // this pattern has HandleSeq HNode->pattern.size() gram
+//    // the formula of interaction information I(XYZ..) =    sign*( H(X) + H(Y) + H(Z) + ...)
+//    //                                                   + -sign*( H(XY) + H(YZ) + H(XZ) + ...)
+//    //                                                   +  sign*( H(XYZ) ...)
+//    // H(X) is the entropy of X
+//    // Because in our sistuation, for each pattern X, we only care about how many instance it has, we don't record how many times each instance repeats.
+//    // Let C(X) as the count of instances for patten X, so each instance x for pattern X has an equal chance  1/C(X) of frequency.
+//    // Therefore, ,  H(X) =  (1/C(X))*log2(C(X))*1/C(X) = log2(C(X)). e.g. if a pattern appears 8 times in a corpus, its entropy is log2(8)
+
+//    // First, find all its subpatterns (its parent nodes in the HTree).
+//    // For the subpatterns those are mising in the HTree, need to call Pattern Matcher to find its frequency again.
+
+//    std::cout << "=================Debug: calculateInteractionInformation for pattern: ====================\n";
+//    foreach (Handle link, HNode->pattern)
+//    {
+//        std::cout << atomSpace->atomAsString(link);
+//    }
+
+//    std::cout << "II = ";
+
+//    // Start from the last gram:
+//    int maxgram = HNode->pattern.size();
+//    double II = - log2(HNode->instances.size());
+//    std::cout << "-H(curpattern) = log" << HNode->instances.size() << "="  << II  << std::endl;
+
+
+//    set<HTreeNode*> lastlevelNodes;
+
+//    lastlevelNodes.insert(HNode);
+
+//    int sign = 1;
+//    for (int gram = maxgram-1; gram > 0; gram --)
+//    {
+//         std::cout << "start subpatterns of gram = " << gram << std::endl;
+//        // get how many subpatterns this gram should have
+//        unsigned int combinNum = combinationCalculate(gram, maxgram);
+//        set<HTreeNode*> curlevelNodes;
+//        set<string> keystrings;
+
+//        foreach(HTreeNode* curNode, lastlevelNodes)
+//        {
+//            foreach(HTreeNode* pNode, curNode->parentLinks)
+//            {
+//                if (curlevelNodes.find(pNode) == curlevelNodes.end())
+//                {
+//                    std::cout << "H(subpattern): \n";
+//                    foreach (Handle link, pNode->pattern)
+//                    {
+//                        std::cout << atomSpace->atomAsString(link);
+//                    }
+
+//                    std::cout << "= " <<  sign << "*" << "log" << pNode->instances.size() << "=" << sign*log2(pNode->instances.size()) << "\n";
+
+//                    II += sign*log2(pNode->instances.size());
+//                    curlevelNodes.insert(pNode);
+//                    keystrings.insert(unifiedPatternToKeyString(pNode->pattern));
+//                }
+//            }
+//        }
+
+//        if (curlevelNodes.size() < combinNum)
+//        {
+//             std::cout<<"Debug: calculateInteractionInformation:  missing sub patterns in the H-Tree, need to regenerate them." << std::endl;
+//             bool* indexes = new bool[maxgram];
+
+//             // generate the first combination
+//             for (int i = 0; i < gram; ++ i)
+//                 indexes[i] = true;
+
+//             for (int i = gram; i < maxgram; ++ i)
+//                 indexes[i] = false;
+
+//             while(true)
+//             {
+//                 HandleSeq subPattern;
+//                 for (int index = 0; index < maxgram; index ++)
+//                 {
+//                     if (indexes[index])
+//                         subPattern.push_back(HNode->pattern[index]);
+//                 }
+
+//                 HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern);
+//                 string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
+
+//                 std::cout<< "Subpattern: " << subPatternKey;
+
+//                 if (keystrings.find(subPatternKey)== keystrings.end())
+//                 {
+//                     std::cout<< " not found above! \n" ;
+
+//                     // a missing subpattern
+//                     // First check if this subpattern is disconnected. If it is disconnected, it won't exist in the H-Tree anyway.
+//                     HandleSeqSeq splittedSubPattern;
+//                     if (splitDisconnectedLinksIntoConnectedGroups(unifiedSubPattern, splittedSubPattern))
+//                     {
+//                         std::cout<< " is disconnected! splitted it into connected parts: \n" ;
+//                         // The splitted parts are disconnected, so they are independent. So the entroy = the sum of each part.
+//                         // e.g. if ABC is disconneted, and it's splitted into connected subgroups by splitDisconnectedLinksIntoConnectedGroups,
+//                         // for example: AC, B  then H(ABC) = H(AC) + H(B)
+//                         foreach(HandleSeq aConnectedSubPart, splittedSubPattern)
+//                         {
+//                             // Unify it again
+//                             HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart);
+//                             string connectedSubPatternKey = unifiedPatternToKeyString(unifiedConnectedSubPattern);
+//                             cout << "a splitted part: " << connectedSubPatternKey;
+//                             double h = calculateEntropyOfASubConnectedPattern(connectedSubPatternKey, unifiedConnectedSubPattern);
+//                             II += sign*h;
+//                             cout << "sign="<<sign << " h =" << h << std::endl << std::endl;
+
+//                         }
+
+//                     }
+//                     else
+//                     {
+//                         std::cout<< " is connected! \n" ;
+//                         double h =calculateEntropyOfASubConnectedPattern(subPatternKey, unifiedSubPattern);
+//                         II += sign*h;
+//                         cout << "sign="<<sign << " h =" << h << std::endl << std::endl;
+//                     }
+
+//                 }
+//                 else
+//                 {
+//                     std::cout<< " already calculated above! skip! \n\n" ;
+//                 }
+
+
+//                 if (isLastNElementsAllTrue(indexes, maxgram, gram))
+//                     break;
+
+//                 // generate the next combination
+//                 generateNextCombinationGroup(indexes, maxgram);
+//             }
+//        }
+
+
+//        lastlevelNodes.clear();
+//        lastlevelNodes = curlevelNodes;
+//        sign *= -1;
+//    }
+
+//    HNode->interactionInformation = II;
+//    std::cout<< "\n total II = " << II << "\n" ;
+
+//}
 
 PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram): originalAtomSpace(_originalAtomSpace)
 {
@@ -1257,7 +1672,7 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 void PatternMiner::selectSubsetFromCorpus(vector<string>& topics, unsigned int gram)
 {
     // select a subset for test topics from the huge ConceptNet corpus
-    _selectSubsetFromCorpus(topics,3);
+    _selectSubsetFromCorpus(topics,gram);
 }
 
 std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const AtomSpace *atomspace)
@@ -1530,10 +1945,11 @@ set<Handle> PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode,
     foreach (Handle incomingHandle, incomings)
     {
         Handle newh = incomingHandle;
+
         // if this atom is a igonred type, get its first parent that is not in the igonred types
         if (isIgnoredType (originalAtomSpace->getType(incomingHandle)) )
         {
-            Handle newh = getFirstNonIgnoredIncomingLink(originalAtomSpace, incomingHandle);
+            newh = getFirstNonIgnoredIncomingLink(originalAtomSpace, incomingHandle);
 
             if ((newh == Handle::UNDEFINED) || containIgnoredContent(newh ))
                 continue;
@@ -1541,6 +1957,7 @@ set<Handle> PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode,
 
         if (allSubsetLinks.find(newh) == allSubsetLinks.end())
             newHandles.insert(newh);
+
     }
 
     return newHandles;
@@ -1605,6 +2022,9 @@ void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsig
     string fileName = "SubSet" + topicsStr + ".scm";
 
     subsetFile.open(fileName.c_str());
+
+    // write the first line to enable unicode
+    std::cout <<  "(setlocale LC_CTYPE \"\")" << std::endl ;
 
     foreach(Handle h, allSubsetLinks)
     {
