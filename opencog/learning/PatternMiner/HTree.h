@@ -45,6 +45,7 @@ namespace opencog
             set<HTreeNode*> childLinks;
 
             double interactionInformation;
+            double surprisingness;
 
             HandleSeq sharedVarNodeList; // all the shared nodes in these links in the original AtomSpace, each handle is a shared node
 

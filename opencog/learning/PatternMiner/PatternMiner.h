@@ -102,6 +102,12 @@ namespace PatternMining
 
      Type ignoredTypes[1];
 
+     bool enable_Frequent_Pattern;
+     bool enable_Interesting_Pattern;
+
+     // Only effective when Enable_Interesting_Pattern is true. The options are "Interaction_Information", "surprisingness"
+     string interestingness_Evaluation_method;
+
      // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
      // the input links should be a Pattern in such format:
      //    (InheritanceLink
@@ -203,13 +209,15 @@ namespace PatternMining
 
      void calculateInteractionInformation(HTreeNode* HNode);
 
+     void calculateSurprisingness( HTreeNode* HNode);
+
  public:
      PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram = 3);
      ~PatternMiner();
 
      bool checkPatternExist(const string& patternKeyStr);
 
-     void OutPutPatternsToFile(unsigned int n_gram);
+     void OutPutPatternsToFile(unsigned int n_gram, bool is_interesting_pattern = false);
 
      void runPatternMiner(unsigned int _thresholdFrequency = 2);
 
