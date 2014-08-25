@@ -35,8 +35,8 @@
 #include <memory>
 #include <thread>
 
+#include <opencog/util/foreach.h>
 #include <opencog/util/oc_assert.h>
-#include <opencog/util/platform.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CountTruthValue.h>
@@ -147,10 +147,11 @@ class AtomStorage::Response
 			return false;
 		}
 
-		// Load an atom into the atom table, but only if its not in
-		// it already.  The goal is to avoid clobbering the truth value,
-		// since normally atom-table adds of an existing atom cause the
-		// truth value to be merged, which is probably undesired.
+		// Load an atom into the atom table, but only if it's not in
+		// it already.  The goal is to avoid clobbering the truth value
+		// that is currently in the AtomTable.  Adding an atom to the
+		// atom table that already exists causes the two TV's to be
+		// merged, which is probably not what was wanted...
 		bool load_if_not_exists_cb(void)
 		{
 			// printf ("---- New atom found ----\n");
@@ -159,9 +160,29 @@ class AtomStorage::Response
 			if (not table->holds(handle))
 			{
 				AtomPtr atom(store->makeAtom(*this, handle));
-				table->add(atom);
+				load_recursive_if_not_exists(atom);
 			}
 			return false;
+		}
+
+		// Helper function for the above.  The problem is that, when
+		// adding links of unknown provenance, it could happen that
+		// the outgoing set of the link has not yet been loaded.  In
+		// that case, we have to load the outgoing set first.
+		void load_recursive_if_not_exists(AtomPtr atom)
+		{
+			LinkPtr link(LinkCast(atom));
+			if (link)
+			{
+				const HandleSeq& oset = link->getOutgoingSet();
+				foreach(Handle h, oset)
+				{
+					if (table->holds(h)) continue;
+					AtomPtr a(store->getAtom(h));
+					load_recursive_if_not_exists(a);
+				}
+			}
+			table->add(atom);
 		}
 
 		std::vector<Handle> *hvec;
@@ -1252,7 +1273,7 @@ AtomPtr  AtomStorage::getAtom(const char * query, int height)
 }
 
 /**
- * Create a new atom, retreived from storage
+ * Create a new atom, retrieved from storage
  *
  * This method does *not* register the atom with any atomtable/atomspace
  * However, it does register with the TLB, as the SQL uuids and the
@@ -1392,7 +1413,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 			getOutgoing(outvec, h);
 #else
 			char *p = (char *) rp.outlist;
-			while(p)
+			while (p)
 			{
 				if (*p == '}') break;
 				Handle hout = (Handle) strtoul(p+1, &p, 10);
