@@ -468,6 +468,10 @@ const string& TTable::get_label() const
     return label;
 }
 
+TTable::value_type TTable::from_string(const std::string& timestamp_str) {
+    return boost::gregorian::from_string(timestamp_str);
+}
+
 ///////////
 // Table //
 ///////////

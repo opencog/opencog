@@ -460,9 +460,7 @@ public:
     void set_label(const std::string&);
     const std::string& get_label() const;
 
-    static TTable::value_type from_string(const std::string& timestamp_str) {
-        return boost::gregorian::from_string(timestamp_str);
-    }
+    static TTable::value_type from_string(const std::string& timestamp_str);
 
 protected:
     std::string label;
