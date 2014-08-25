@@ -20,7 +20,7 @@ RUN sed 's/archive.ubuntu.com/hk.archive.ubuntu.com/' -i /etc/apt/sources.list
 
 RUN apt-get -y update
 RUN apt-get -y install software-properties-common wget tmux qtcreator \
-                       lxterminal git gitk git-gui meld lxtask pcmanfm
+                       lxterminal git gitk git-gui meld lxde
 
 ADD scripts/ocpkg install-dependencies-trusty
 RUN chmod +x /install-dependencies-trusty
