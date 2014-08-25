@@ -59,10 +59,14 @@ TTable::value_type bscore_ctable_time_dispersion::get_timestamp_class(const TTab
     case TemporalGranularity::day:
         return timestamp;
     case TemporalGranularity::month:
+        OC_ASSERT(!timestamp.is_not_a_date(),
+                  "timestamp is not a valid date, "
+                  "are you sure you have loaded a timestamp feature "
+                  "(option --timestamp-feature)?")
         return TTable::value_type(timestamp.year(), timestamp.month(), 1);
     default: {
         std::stringstream ss;
-        ss << "Case ";// << _granularity << " not implement";
+        ss << "Case " << static_cast<size_t>(_granularity) << " not implemented";
         OC_ASSERT(false, ss.str());
         return TTable::value_type();
     }
