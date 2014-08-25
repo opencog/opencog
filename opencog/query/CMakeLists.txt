@@ -2,6 +2,7 @@
 # Build the query shlib
 ADD_LIBRARY(query SHARED
 	DefaultPatternMatchCB.cc
+	Implicator.cc
 	Instantiator.cc
 	PatternMatch.cc
 	PatternMatchEngine.cc
