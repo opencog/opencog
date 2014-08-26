@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_GENERIC_SHELL_H
 #define _OPENCOG_GENERIC_SHELL_H
 
+#include <mutex>
 #include <string>
 
 /**
@@ -49,6 +50,9 @@ class GenericEval;
 
 class GenericShell
 {
+	private:
+		std::string pending_output;
+
 	protected:
 		std::string abort_prompt;
 		std::string normal_prompt;
@@ -59,10 +63,11 @@ class GenericShell
 
 		// Async output handling.
 		bool do_async_output;
-		std::string pending_output;
 		static void async_wrapper(GenericShell*, const std::string &expr);
 		void async_evaluator(const std::string &expr);
+		virtual void put_output(const std::string&);
 		virtual std::string poll_output();
+		std::mutex _output_mutex;
 
 		ConsoleSocket* socket;
 		GenericEval* evaluator;

@@ -184,7 +184,7 @@ void GenericShell::do_eval(const std::string &expr)
 	size_t len = expr.length();
 	if (0 == len)
 	{
-		pending_output = get_prompt();
+		put_output(get_prompt());
 		return;
 	}
 
@@ -208,14 +208,14 @@ void GenericShell::do_eval(const std::string &expr)
 			if ((IP == c) || (AO == c))
 			{
 				evaluator->clear_pending();
-				pending_output = abort_prompt;
+				put_output(abort_prompt);
 				return;
 			}
 
 			// Erase line -- just ignore this line.
 			if (EL == c)
 			{
-				pending_output = get_prompt();
+				put_output(get_prompt());
 				return;
 			}
 		}
@@ -229,7 +229,8 @@ void GenericShell::do_eval(const std::string &expr)
 	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
 		evaluator->clear_pending();
-		pending_output = "\n" + normal_prompt;
+		put_output("\n");
+		put_output(normal_prompt);
 		return;
 	}
 
@@ -241,9 +242,9 @@ void GenericShell::do_eval(const std::string &expr)
 	    ((EOT == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
 	{
 		self_destruct = true;
-		pending_output = "";
+		put_output("");
 		if (show_prompt)
-			pending_output = "Exiting the shell\n";
+			put_output("Exiting the shell\n");
 		return;
 	}
 
@@ -265,15 +266,15 @@ void GenericShell::do_eval(const std::string &expr)
 	}
 	else
 	{
-		pending_output = evaluator->eval(input.c_str());
+		put_output(evaluator->eval(input.c_str()));
 	}
 
 	if (evaluator->input_pending())
 	{
 		if (show_output && show_prompt)
-			pending_output = pending_prompt;
+			put_output(pending_prompt);
 		else
-			pending_output = "";
+			put_output("");
 		return;
 	}
 
@@ -283,13 +284,22 @@ void GenericShell::do_eval(const std::string &expr)
 	}
 	else
 	{
-		pending_output = "";
+		put_output("");
 	}
 	return;
 }
 
+/* ============================================================== */
+
+void GenericShell::put_output(const std::string& s)
+{
+	std::lock_guard<std::mutex> lock(_output_mutex);
+	pending_output += s;	
+}
+
 std::string GenericShell::poll_output()
 {
+	std::lock_guard<std::mutex> lock(_output_mutex);
 	std::string result = pending_output;
 	pending_output.clear();
 	return result;
