@@ -17,7 +17,7 @@
 		(VariableNode "$var-a")
 		(ImplicationLink
 			(EvaluationLink
-				(PredicateNode "$var-a")
+				(VariableNode "$var-a")
 				; quote cannot have two things under it; this should cause
 				; an exception to be thrown from the pattern matcher.
 				(QuoteLink

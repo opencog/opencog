@@ -48,8 +48,8 @@
 (EvaluationLink
 	(PredicateNode "similar")
 	(ListLink
-		(VariableNode "$wrong-var-a")
-		(ConceptNode "apple")
+		(VariableNode "$var-a")
+		(VariableNode "$wrong-var-b")
 	)
 )
 
@@ -58,7 +58,7 @@
 		(VariableNode "$var-a")
 		(ImplicationLink
 			(EvaluationLink
-				(PredicateNode "$var-a")
+				(VariableNode "$var-a")
 				(QuoteLink (ListLink
 					(VariableNode "$var-a")
 					(VariableNode "$var-b")
