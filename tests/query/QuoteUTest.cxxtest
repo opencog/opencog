@@ -132,6 +132,10 @@ void QuoteUTest::test_quoted_variable(void)
     Handle bindy = eval->eval_h("bindy");
 
     Handle bananna = bindlink(as, bindy);
-
     TS_ASSERT_EQUALS(1, as->getArity(bananna));
+
+    bananna = as->getOutgoing(bananna, 0);
+    TS_ASSERT_EQUALS(CONCEPT_NODE, bananna->getType());
+ 
+    TS_ASSERT_EQUALS(0, strcmp("bananna", as->getName(bananna).c_str()));
 }
