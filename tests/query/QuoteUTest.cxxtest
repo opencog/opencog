@@ -70,6 +70,7 @@ public:
 
     void test_numeric_greater(void);
     void test_quoted_variable(void);
+    void test_nest(void);
 };
 
 void QuoteUTest::tearDown(void)
@@ -158,3 +159,24 @@ void QuoteUTest::test_quoted_variable(void)
     TS_ASSERT_EQUALS(CONCEPT_NODE, bananna->getType());
     TS_ASSERT_EQUALS(0, strcmp("bananna", as->getName(bananna).c_str()));
 }
+
+/*
+ * QuoteLink unit test.  Test nested quoted variables.
+ */
+void QuoteUTest::test_nest(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/quote-nest.scm");
+    load_scm_files_from_config(*as);
+
+    Handle bindy = eval->eval_h("bindy");
+
+    Handle allstar = bindlink(as, bindy);
+    TS_ASSERT_EQUALS(1, as->getArity(allstar));
+
+    allstar = as->getOutgoing(allstar, 0);
+    TS_ASSERT_EQUALS(PREDICATE_NODE, allstar->getType());
+    TS_ASSERT_EQUALS(0, strcmp("all-var", as->getName(allstar).c_str()));
+}
+

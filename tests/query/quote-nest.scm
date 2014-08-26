@@ -1,8 +1,8 @@
 ;
-; quote-var.scm
+; quote-nest.scm
 ;
-; Test simple quoted variables.  The pattern will search for a 
-; quoted variable.
+; Test nested quoted variables.  The pattern will search for
+; several quoted variables.
 ;
 
 (EvaluationLink
@@ -38,6 +38,14 @@
 )
 
 (EvaluationLink
+	(PredicateNode "all-var")
+	(ListLink
+		(VariableNode "$var-a")
+		(VariableNode "$var-b")
+	)
+)
+
+(EvaluationLink
 	(PredicateNode "similar")
 	(ListLink
 		(VariableNode "$wrong-var-a")
@@ -50,45 +58,14 @@
 		(VariableNode "$var-a")
 		(ImplicationLink
 			(EvaluationLink
-				(PredicateNode "similar")
-				(ListLink
-					(QuoteLink (VariableNode "$var-a"))
+				(PredicateNode "$var-a")
+				(QuoteLink (ListLink
 					(VariableNode "$var-a")
-				)
+					(VariableNode "$var-b")
+				))
 			)
 			(VariableNode "$var-a")
 		)
 	)
 )
 
-(define bother
-	(BindLink
-		(VariableNode "$other")
-		(ImplicationLink
-			(EvaluationLink
-				(PredicateNode "similar")
-				(ListLink
-					(QuoteLink (VariableNode "$var-a"))
-					(VariableNode "$other")
-				)
-			)
-			(VariableNode "$other")
-		)
-	)
-)
-
-(define bunbound
-	(BindLink
-		(VariableNode "$other")
-		(ImplicationLink
-			(EvaluationLink
-				(PredicateNode "similar")
-				(ListLink
-					(VariableNode "$var-a")
-					(VariableNode "$other")
-				)
-			)
-			(VariableNode "$other")
-		)
-	)
-)
