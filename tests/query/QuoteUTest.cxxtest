@@ -137,32 +137,32 @@ void QuoteUTest::test_quoted_variable(void)
 
     Handle bindy = eval->eval_h("bindy");
 
-    Handle bananna = bindlink(as, bindy);
-    TS_ASSERT_EQUALS(1, as->getArity(bananna));
+    Handle banana = bindlink(as, bindy);
+    TS_ASSERT_EQUALS(1, as->getArity(banana));
 
-    bananna = as->getOutgoing(bananna, 0);
-    TS_ASSERT_EQUALS(CONCEPT_NODE, bananna->getType());
-    TS_ASSERT_EQUALS(0, strcmp("bananna", as->getName(bananna).c_str()));
+    banana = as->getOutgoing(banana, 0);
+    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
+    TS_ASSERT_EQUALS(0, strcmp("banana", as->getName(banana).c_str()));
 
     // ----------------------------------------------
     bindy = eval->eval_h("bother");
 
-    bananna = bindlink(as, bindy);
-    TS_ASSERT_EQUALS(1, as->getArity(bananna));
+    banana = bindlink(as, bindy);
+    TS_ASSERT_EQUALS(1, as->getArity(banana));
 
-    bananna = as->getOutgoing(bananna, 0);
-    TS_ASSERT_EQUALS(CONCEPT_NODE, bananna->getType());
-    TS_ASSERT_EQUALS(0, strcmp("bananna", as->getName(bananna).c_str()));
+    banana = as->getOutgoing(banana, 0);
+    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
+    TS_ASSERT_EQUALS(0, strcmp("banana", as->getName(banana).c_str()));
 
     // ----------------------------------------------
     bindy = eval->eval_h("bunbound");
 
-    bananna = bindlink(as, bindy);
-    TS_ASSERT_EQUALS(1, as->getArity(bananna));
+    banana = bindlink(as, bindy);
+    TS_ASSERT_EQUALS(1, as->getArity(banana));
 
-    bananna = as->getOutgoing(bananna, 0);
-    TS_ASSERT_EQUALS(CONCEPT_NODE, bananna->getType());
-    TS_ASSERT_EQUALS(0, strcmp("bananna", as->getName(bananna).c_str()));
+    banana = as->getOutgoing(banana, 0);
+    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
+    TS_ASSERT_EQUALS(0, strcmp("banana", as->getName(banana).c_str()));
 }
 
 /*
@@ -238,11 +238,11 @@ void QuoteUTest::test_double_quote(void)
 
     Handle bindy = eval->eval_h("bindy");
 
-    Handle bananna = bindlink(as, bindy);
-    TS_ASSERT_EQUALS(1, as->getArity(bananna));
+    Handle banana = bindlink(as, bindy);
+    TS_ASSERT_EQUALS(1, as->getArity(banana));
 
-    bananna = as->getOutgoing(bananna, 0);
-    TS_ASSERT_EQUALS(CONCEPT_NODE, bananna->getType());
-    TS_ASSERT_EQUALS(0, strcmp("bananna", as->getName(bananna).c_str()));
+    banana = as->getOutgoing(banana, 0);
+    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
+    TS_ASSERT_EQUALS(0, strcmp("banana", as->getName(banana).c_str()));
 }
 
