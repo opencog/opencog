@@ -62,6 +62,7 @@ class GenericShell
 		std::string pending_output;
 		static void async_wrapper(GenericShell*, const std::string &expr);
 		void async_evaluator(const std::string &expr);
+		virtual std::string poll_output();
 
 		ConsoleSocket* socket;
 		GenericEval* evaluator;
@@ -69,7 +70,7 @@ class GenericShell
 		virtual void set_socket(ConsoleSocket *);
 		virtual const std::string& get_prompt(void);
 
-		virtual std::string do_eval(const std::string &expr);
+		virtual void do_eval(const std::string &expr);
 
 	public:
 		GenericShell(void);

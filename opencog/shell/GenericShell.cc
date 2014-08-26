@@ -154,10 +154,16 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 	{
 		socket = s;
 	}
-	const std::string &retstr = do_eval(expr);
-	// logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
-	//
-	socket->Send(retstr);
+
+	// Launch the evaluator, possibly in a different thread,
+	// and then send out whatever is reported back.
+	do_eval(expr);
+	std::string retstr = poll_output();
+	while (0 < retstr.size())
+	{
+		socket->Send(retstr);
+		retstr = poll_output();
+	}
 
 	// The user is exiting the shell. No one will ever call a method on
 	// this instance ever again. So stop hogging space, and self-destruct.
@@ -173,12 +179,13 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 /**
  * Evaluate the expression
  */
-std::string GenericShell::do_eval(const std::string &expr)
+void GenericShell::do_eval(const std::string &expr)
 {
 	size_t len = expr.length();
 	if (0 == len)
 	{
-		return get_prompt();
+		pending_output = get_prompt();
+		return;
 	}
 
 	// Handle Telnet RFC 854 IAC format
@@ -201,13 +208,15 @@ std::string GenericShell::do_eval(const std::string &expr)
 			if ((IP == c) || (AO == c))
 			{
 				evaluator->clear_pending();
-				return abort_prompt;
+				pending_output = abort_prompt;
+				return;
 			}
 
 			// Erase line -- just ignore this line.
 			if (EL == c)
 			{
-				return get_prompt();
+				pending_output = get_prompt();
+				return;
 			}
 		}
 		i--;
@@ -220,7 +229,8 @@ std::string GenericShell::do_eval(const std::string &expr)
 	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
 		evaluator->clear_pending();
-		return "\n" + normal_prompt;
+		pending_output = "\n" + normal_prompt;
+		return;
 	}
 
 	// Look for either an isolated control-D, or a single period on a line
@@ -231,8 +241,10 @@ std::string GenericShell::do_eval(const std::string &expr)
 	    ((EOT == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
 	{
 		self_destruct = true;
-		if (show_prompt) return "Exiting the shell\n";
-		return "";
+		pending_output = "";
+		if (show_prompt)
+			pending_output = "Exiting the shell\n";
+		return;
 	}
 
 	/* 
@@ -246,38 +258,41 @@ std::string GenericShell::do_eval(const std::string &expr)
 	 * (This is a pointless string copy, it should be eliminated)
 	 */
 	std::string input = expr + "\n";
-
-	std::string result;
 	if (do_async_output)
 	{
 		std::thread evalth(async_wrapper, this, input);
-
 		evalth.join();
-		result = pending_output;
 	}
 	else
 	{
-		result = evaluator->eval(input.c_str());
+		pending_output = evaluator->eval(input.c_str());
 	}
 
 	if (evaluator->input_pending())
 	{
 		if (show_output && show_prompt)
-			return pending_prompt;
+			pending_output = pending_prompt;
 		else
-			return "";
+			pending_output = "";
+		return;
 	}
 
 	if (show_output || evaluator->eval_error())
 	{
-		if (show_prompt) result += normal_prompt;
-		return result;
+		if (show_prompt) pending_output += normal_prompt;
 	}
 	else
 	{
-		return "";
+		pending_output = "";
 	}
+	return;
+}
 
+std::string GenericShell::poll_output()
+{
+	std::string result = pending_output;
+	pending_output.clear();
+	return result;
 }
 
 /* ============================================================== */
