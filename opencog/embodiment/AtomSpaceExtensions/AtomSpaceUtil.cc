@@ -2641,7 +2641,10 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
     Handle hEvaluationLinkDemandGoal = atomSpace.addLink(EVALUATION_LINK, tempOutgoings,TruthValue::TRUE_TV());
 
     tempOutgoings.clear(); 
-    tempOutgoings.push_back( atomSpace.addNode(GROUNDED_PREDICATE_NODE, "fuzzy_within") ); 
+    tempOutgoings.push_back( 
+        // Must quote the GPN, else the pattern matcher tries to evaluate it!
+        atomSpace.addLink(QUOTE_LINK,
+                          atomSpace.addNode(GROUNDED_PREDICATE_NODE, "fuzzy_within")) );
     tempOutgoings.push_back(hVariableNodeListLink); 
     Handle hEvaluationLinkFuzzyWithin = atomSpace.addLink(EVALUATION_LINK, tempOutgoings,TruthValue::TRUE_TV());
 
