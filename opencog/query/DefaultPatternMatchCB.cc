@@ -95,22 +95,24 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
 	Handle hdeepest(Handle::UNDEFINED);
 	size_t thinnest = SIZE_MAX;
 
-	// Blow past the QuoteLinks, since they just screw up the search start.
-	LinkPtr ll(LinkCast(h));
-	if (QUOTE_LINK == h->getType())
-		return find_starter(ll->getOutgoingAtom(0), depth, start, width);
-
 	// Iterate over all the handles in the outgoing set.
 	// Find the deepest one that contains a constant, and start
 	// the search there.  If there are two at the same depth,
 	// then start with the skinnier one.
+	LinkPtr ll(LinkCast(h));
 	const std::vector<Handle> &vh = ll->getOutgoingSet();
 	for (size_t i = 0; i < vh.size(); i++) {
 
 		size_t brdepth = depth + 1;
 		size_t brwid = SIZE_MAX;
 		Handle sbr(h);
-		Handle s(find_starter(vh[i], brdepth, sbr, brwid));
+
+		// Blow past the QuoteLinks, since they just screw up the search start.
+		Handle hunt(vh[i]);
+		if (QUOTE_LINK == vh[i]->getType())
+			hunt = LinkCast(hunt)->getOutgoingAtom(0);
+
+		Handle s(find_starter(hunt, brdepth, sbr, brwid));
 
 		if (s != Handle::UNDEFINED
 		    and (brwid < thinnest
@@ -237,7 +239,7 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 	}
 
 	if ((Handle::UNDEFINED != best_start) and 
-	    (Handle::UNDEFINED != _starter_pred) and
+	    // (Handle::UNDEFINED != _starter_pred) and
 	    (0 != vars.size()))
 	{
 		_root = clauses[bestclause];
