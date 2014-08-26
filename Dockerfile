@@ -19,24 +19,30 @@ MAINTAINER David Hart "dhart@opencog.org"
 RUN sed 's/archive.ubuntu.com/hk.archive.ubuntu.com/' -i /etc/apt/sources.list
 
 RUN apt-get -y update
-RUN apt-get -y install software-properties-common wget tmux git
-RUN apt-get -y install gitg
-RUN apt-get -y install git-gui
-RUN apt-get -y install meld
-RUN apt-get -y install lxterminal
-RUN apt-get -y install qtcreator
-RUN apt-get -y install lxde
+RUN apt-get -y install software-properties-common git
 
 ADD scripts/ocpkg install-dependencies-trusty
 RUN chmod +x /install-dependencies-trusty
 RUN /install-dependencies-trusty
 
+RUN apt-get -y install wget tmux
+RUN apt-get -y install gitg
+RUN apt-get -y install git-gui
+RUN apt-get -y install meld
+RUN apt-get -y install qtcreator
+RUN apt-get -y install gnome-session
+RUN apt-get -y install gnome-panel
+RUN apt-get -y install gnome-terminal
+RUN apt-get -y install nautilus
+RUN apt-get -y install vim-gnome
+
 RUN adduser --disabled-password --gecos "Shujing Ke,,," shujingke
 
+WORKDIR /home/shujingke
 USER shujingke
 ENV STARTSCRIPT "\
 echo evaluating startup script... ;\
-tmux new-session -d '/usr/bin/lxpanel&/bin/bash' ;\
+tmux new-session -d '/usr/bin/gnome-panel&/bin/bash' ;\
 tmux set -g set-remain-on-exit on ;\
 tmux set-option -g set-remain-on-exit on ;\
 tmux bind-key R respawn-window ;\
