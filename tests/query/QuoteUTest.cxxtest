@@ -99,7 +99,7 @@ void QuoteUTest::test_numeric_greater(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/quote.scm");
+    config().set("SCM_PRELOAD", "tests/query/quote-greater.scm");
     load_scm_files_from_config(*as);
 
     Handle richer_than_george = eval->eval_h("(richer-than-george)");

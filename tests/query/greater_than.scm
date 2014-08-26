@@ -1,6 +1,10 @@
 ;
-; Test data for the GroundedPredicateNode
+; greater_than.scm
 ;
+; Test data for the GroundedPredicateNode, which is a virtual node.
+; This declares the net worth of four individuals.  It also declares
+; four BindLinks, which find everyone who is richer.  The greater-than
+; comparison of richness is performed via the virtual link evaluation.
 ;
 (EvaluationLink
 	(PredicateNode "net-worth")

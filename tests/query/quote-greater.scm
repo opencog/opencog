@@ -1,6 +1,9 @@
 ;
-; Test data for the QuoteLink -- should ignore the GroundedPredicateNode
+; quote-greater.scm
 ;
+; Test data for the QuoteLink -- should ignore the GroundedPredicateNode
+; This is very similar to the greater-than unit test, except that the
+; GPN is explicitly disabled with a quote.
 ;
 (EvaluationLink
 	(PredicateNode "net-worth")
@@ -34,8 +37,9 @@
 	)
 )
 
-;; this is throughly bogs, but that's intetional: the quotelink
-;; is being tested,
+;; this is thoroughly bogus, but that's intentional: the quotelink
+;; is being tested, and so we put some non-virtual data into the
+;; the atomspace.
 (EvaluationLink
 	(GroundedPredicateNode "c++:greater")
 	(ListLink
@@ -58,6 +62,7 @@
 	)
 )
 
+;; The actual BindLink that will be tested.
 (define (richer-than-person-x person-x)
 	(BindLink
 		(ListLink
