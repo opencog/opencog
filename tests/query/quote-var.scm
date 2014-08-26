@@ -60,3 +60,35 @@
 		)
 	)
 )
+
+(define bother
+	(BindLink
+		(VariableNode "$other")
+		(ImplicationLink
+			(EvaluationLink
+				(PredicateNode "similar")
+				(ListLink
+					(QuoteLink (VariableNode "$var-a"))
+					(VariableNode "$other")
+				)
+			)
+			(VariableNode "$other")
+		)
+	)
+)
+
+(define bunbound
+	(BindLink
+		(VariableNode "$other")
+		(ImplicationLink
+			(EvaluationLink
+				(PredicateNode "similar")
+				(ListLink
+					(VariableNode "$var-a")
+					(VariableNode "$other")
+				)
+			)
+			(VariableNode "$other")
+		)
+	)
+)
