@@ -112,6 +112,22 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle& h)
  */
 bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 {
+	// If the pattern link is a quote, then we compare the quoted
+	// contents. This is done recursively, of course.  The QuoteLink
+	// must have only one child; anything else beyond that is ignored
+	// (as its not clear what else could possibly be done).
+	Type tp = hp->getType();
+	if (not in_quote and QUOTE_LINK == tp)
+	{
+		in_quote = true;
+		LinkPtr lp(LinkCast(hp));
+		if (1 != lp->getArity())
+			throw InvalidParamException(TRACE_INFO, "QuoteLink has unexpected arity!");
+		bool misma = tree_compare(lp->getOutgoingAtom(0), hg);
+		in_quote = false;
+		return misma;
+	}
+
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
 	if (not in_quote and _bound_vars.end() != _bound_vars.find(hp))
@@ -154,22 +170,6 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	{
 		var_grounding[hp] = hg;
 		return false;
-	}
-
-	// If the pattern link is a quote, then we compare the quoted
-	// contents. This is done recursively, of course.  The QuoteLink
-	// must have only one child; anything else beyond that is ignored
-	// (as its not clear what else could possibly be done).
-	Type tp = hp->getType();
-	if (not in_quote and QUOTE_LINK == tp)
-	{
-		in_quote = true;
-		LinkPtr lp(LinkCast(hp));
-		if (1 != lp->getArity())
-			throw InvalidParamException(TRACE_INFO, "QuoteLink has unexpected arity!");
-		bool misma = tree_compare(lp->getOutgoingAtom(0), hg);
-		in_quote = false;
-		return misma;
 	}
 
 	// If both are links, compare them as such.
