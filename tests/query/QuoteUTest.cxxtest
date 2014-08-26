@@ -55,6 +55,11 @@ public:
         server(CogServer::createInstance);
         as = &cogserver().getAtomSpace();
         eval = new SchemeEval(as);
+
+        config().set("MODULES",
+            "opencog/query/libQueryModule.so");
+
+        cogserver().loadModules();
     }
 
     ~QuoteUTest()
@@ -76,20 +81,17 @@ public:
 
 void QuoteUTest::tearDown(void)
 {
+    as->clear();
 }
 
 void QuoteUTest::setUp(void)
 {
+    as->clear();
     config().set("SCM_PRELOAD",
         "opencog/atomspace/core_types.scm, "
         "opencog/scm/utilities.scm");
 
     load_scm_files_from_config(*as);
-
-    config().set("MODULES",
-        "opencog/query/libQueryModule.so");
-
-    cogserver().loadModules();
 }
 
 /*
