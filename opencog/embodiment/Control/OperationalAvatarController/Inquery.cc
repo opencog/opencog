@@ -38,8 +38,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParamType.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/server/BaseServer.h>
-#include <opencog/query/PatternMatch.h>
-#include <opencog/query/PatternMatchEngine.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/util/StringManipulator.h>
 
 #include <opencog/atomspace/atom_types.h>
@@ -1350,10 +1349,7 @@ HandleSeq Inquery::_findCandidatesByPatternMatching(RuleNode *ruleNode, vector<i
 //            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
 
     // Run pattern matcher
-    PatternMatch pm;
-    pm.set_atomspace(atomSpace);
-
-    Handle hResultListLink = pm.bindlink(hBindLink);
+    Handle hResultListLink = bindlink(atomSpace, hBindLink);
 
 //    std::cout<<"Debug: pattern matching results: " << std::endl
 //            << atomSpace->atomAsString(hResultListLink).c_str() <<std::endl;

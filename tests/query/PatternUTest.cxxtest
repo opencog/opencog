@@ -27,6 +27,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
+#include "imply.h"
+
 using namespace opencog;
 
 class PatternUTest: public CxxTest::TestSuite
@@ -186,8 +188,6 @@ void PatternUTest::tearDown(void)
 }
 void PatternUTest::setUp(void)
 {
-	pm.set_atomspace(as);
-
 	// create a gnarly graph
 	hconst_1 = as->addNode(CONCEPT_NODE, "some const concept node 1");
 	hconst_2 = as->addNode(CONCEPT_NODE, "some const concept node 2");
@@ -438,7 +438,7 @@ void PatternUTest::test_implication(void)
 	Handle hpa = as->addLink(PARSE_LINK, h2);
 	Handle him = as->addLink(IMPLICATION_LINK, han, hpa);
 
-	pm.imply(him);
+	imply(as, him);
 
 	// Remove the parse link, so that the other one is easier to find.
 	as->removeAtom(him);

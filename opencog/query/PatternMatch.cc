@@ -22,22 +22,14 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
 
-#include "Instantiator.h"
 #include "PatternMatch.h"
 #include "PatternUtils.h"
-#include "DefaultPatternMatchCB.h"
-#include "CrispLogicPMCB.h"
-#include "AttentionalFocusCB.h"
 
 using namespace opencog;
 
-PatternMatch::PatternMatch(void)
-{
-	_atom_space = NULL;
-}
+PatternMatch::PatternMatch(void) {}
 
 /// See the documentation for do_match() to see what this function does.
 /// This is just a convenience wrapper around do_match().
@@ -81,53 +73,6 @@ void PatternMatch::match(PatternMatchCallback *cb,
 
 	do_match(cb, vars, clauses, negs);
 }
-
-/* ================================================================= */
-
-namespace opencog {
-
-/**
- * class Implicator -- pattern matching callback for grounding implicands.
- *
- * This class is meant to be used with the pattern matcher. When the
- * pattern matcher calls the callback, it will do so with a particular
- * grounding of the search pattern. If this class is holding an ungrounded
- * implicand, and will create a grounded version of the implicand. If
- * the implicand is already grounded, then it's a no-op -- this class
- * alone will *NOT* change its truth value.  Use a derived class for
- * this.
- *
- * The 'var_soln' argument in the callback contains the map from variables
- * to ground terms. 'class Instantiator' is used to perform the actual
- * grounding.  A list of grounded expressions is created in 'result_list'.
- */
-class Implicator :
-	public virtual PatternMatchCallback
-{
-	protected:
-		AtomSpace *_as;
-		Instantiator inst;
-	public:
-		Implicator(AtomSpace* as) : _as(as), inst(as) {}
-		Handle implicand;
-		std::vector<Handle> result_list;
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &pred_soln);
-};
-
-bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
-                           const std::map<Handle, Handle> &pred_soln)
-{
-	// PatternMatchEngine::print_solution(pred_soln,var_soln);
-	Handle h = inst.instantiate(implicand, var_soln);
-	if (Handle::UNDEFINED != h)
-	{
-		result_list.push_back(h);
-	}
-	return false;
-}
-
-} // namespace opencog
 
 /* ================================================================= */
 /**
@@ -219,7 +164,7 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
  */
 
 void PatternMatch::do_imply (Handle himplication,
-                             PatternMatchCallback *pmc,
+                             Implicator &impl,
                              std::set<Handle>& varset)
 	throw (InvalidParamException)
 {
@@ -296,9 +241,8 @@ void PatternMatch::do_imply (Handle himplication,
 	}
 
 	// Now perform the search.
-	Implicator *impl = dynamic_cast<Implicator *>(pmc);
-	impl->implicand = implicand;
-	do_match(pmc, varset, affirm, negate);
+	impl.implicand = implicand;
+	do_match(&impl, varset, affirm, negate);
 }
 
 /* ================================================================= */
@@ -428,7 +372,7 @@ int PatternMatch::get_vartype(Handle htypelink,
  */
 
 void PatternMatch::do_bindlink (Handle hbindlink,
-                                PatternMatchCallback *pmc)
+                                Implicator& implicator)
 	throw (InvalidParamException)
 {
 	// Must be non-empty.
@@ -504,242 +448,16 @@ void PatternMatch::do_bindlink (Handle hbindlink,
 			"Expected a ListLink holding variable declarations");
 	}
 
-	pmc->set_type_restrictions(typemap);
-	do_imply(himpl, pmc, vset);
+	implicator.set_type_restrictions(typemap);
+	do_imply(himpl, implicator, vset);
 }
 
-/* ================================================================= */
-
-namespace opencog {
-
-class DefaultImplicator:
-	public virtual Implicator,
-	public virtual DefaultPatternMatchCB
+void PatternMatch::do_imply (Handle himplication,
+                             Implicator &impl)
+	throw (InvalidParamException)
 {
-	public:
-		DefaultImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp) {}
-};
-
-class CrispImplicator:
-	public virtual Implicator,
-	public virtual CrispLogicPMCB
-{
-	public:
-		CrispImplicator(AtomSpace* asp) :
-			Implicator(asp), DefaultPatternMatchCB(asp), CrispLogicPMCB(asp)
-		{}
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &pred_soln);
-};
-
-} // namespace opencog
-
-/**
- * The crisp implicator needs to tweak the truth value of the
- * resulting implicand. In most cases, this is not (strictly) needed,
- * for example, if the implicand has ungrounded variables, then
- * a truth value can be assigned to it, and the implicand will obtain
- * that truth value upon grounding.
- *
- * HOWEVER, if the implicand is fully grounded, then it will be given
- * a truth value of (false, uncertain) to start out with, and, if a
- * solution is found, then the goal here is to change its truth value
- * to (true, certain).  That is the whole point of this function:
- * to tweak (affirm) the truth value of existing clauses!
- */
-bool CrispImplicator::grounding(const std::map<Handle, Handle> &var_soln,
-                                const std::map<Handle, Handle> &pred_soln)
-{
-	// PatternMatchEngine::print_solution(pred_soln,var_soln);
-	Handle h = inst.instantiate(implicand, var_soln);
-
-	if (h != Handle::UNDEFINED)
-	{
-		result_list.push_back(h);
-
-		// Set truth value to true+confident
-		TruthValuePtr stv(SimpleTruthValue::createTV(1, SimpleTruthValue::confidenceToCount(1)));
-		h->setTruthValue(stv);
-	}
-	return false;
-}
-
-class SingleImplicator:
-	public virtual Implicator,
-	public virtual DefaultPatternMatchCB
-{
-	public:
-		SingleImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp) {}
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &pred_soln);
-};
-
-/**
- * The single implicator behaves like the default implicator, except that
- * it terminates after the first solution is found.
- */
-bool SingleImplicator::grounding(const std::map<Handle, Handle> &var_soln,
-                                 const std::map<Handle, Handle> &pred_soln)
-{
-	Handle h = inst.instantiate(implicand, var_soln);
-
-	if (h != Handle::UNDEFINED)
-	{
-		result_list.push_back(h);
-	}
-	return true;
-}
-
-/**
- * PLN specific PatternMatchCallback implementation
- */
-class PLNImplicator:
-	public virtual Implicator,
-	public virtual AttentionalFocusCB
-{
-	public:
-		PLNImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp),AttentionalFocusCB(asp) {}
-};
-
-Handle PatternMatch::pln_bindlink(Handle himplication){
-	// Now perform the search.
-		PLNImplicator impl(_atom_space);
-		do_bindlink(himplication, &impl);
-
-		// The result_list contains a list of the grounded expressions.
-		// Turn it into a true list, and return it.
-		Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
-		return gl;
-}
-
-/**
- * Evaluate an ImplicationLink embedded in a BindLink
- *
- * Use the default implicator to find pattern-matches. Associated truth
- * values are completely ignored during pattern matching; if a set of
- * atoms that could be a ground are found in the atomspace, then they
- * will be reported.
- *
- * See the do_bindlink function documentation for details.
- */
-Handle PatternMatch::bindlink (Handle himplication)
-{
-	// Now perform the search.
-	DefaultImplicator impl(_atom_space);
-	do_bindlink(himplication, &impl);
-
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
-	return gl;
-}
-
-/**
- * Evaluate an ImplicationLink embedded in a BindLink
- *
- * Returns the first match only. Otherwise, the behavior is identical to
- * PatternMatch::bindlink above.
- *
- * See the do_bindlink function documentation for details.
- */
-Handle PatternMatch::single_bindlink (Handle himplication)
-{
-	// Now perform the search.
-	SingleImplicator impl(_atom_space);
-	do_bindlink(himplication, &impl);
-
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
-	return gl;
-}
-
-/**
- * Evaluate an ImplicationLink embedded in a BindLink
- *
- * Use the crisp-logic callback to evaluate boolean implication
- * statements; i.e. statements that have truth values assigned
- * their clauses, and statements that start with NotLink's.
- * These are evaluated using "crisp" logic: if a matched clause
- * is true, its accepted, if its false, its rejected. If the
- * clause begins with a NotLink, true and false are reversed.
- *
- * The NotLink is also interpreted as an "absence of a clause";
- * if the atomspace does NOT contain a NotLink clause, then the
- * match is considered postive, and the clause is accepted (and
- * it has a null or "invalid" grounding).
- *
- * See the do_bindlink function documentation for details.
- */
-Handle PatternMatch::crisp_logic_bindlink (Handle himplication)
-{
-	// Now perform the search.
-	CrispImplicator impl(_atom_space);
-	do_bindlink(himplication, &impl);
-
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
-	return gl;
-}
-
-/* ================================================================= */
-/**
- * DEPRECATED: USE BIND_LINK INSTEAD!
- * Right now, this method is used only in the unit test cases;
- * and it should stay that way.
- *
- * Default evaluator of implication statements.  Does not consider
- * the truth value of any of the matched clauses; instead, looks
- * purely for a structural match.
- *
- * See the do_imply function for details.
- */
-Handle PatternMatch::imply (Handle himplication)
-{
-	// Now perform the search.
-	DefaultImplicator impl(_atom_space);
 	std::set<Handle> varset;
-
-	do_imply(himplication, &impl, varset);
-
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
-	return gl;
-}
-
-/**
- * DEPRECATED: USE CRISP_LOGIC_BINDLINK INSTEAD!
- * At this time, this method is used only by the unit test cases.
- * It should stay that way, too; no one else should use this.
- *
- * Use the crisp-logic callback to evaluate boolean implication
- * statements; i.e. statements that have truth values assigned
- * their clauses, and statements that start with NotLink's.
- * These are evaluated using "crisp" logic: if a matched clause
- * is true, its accepted, if its false, its rejected. If the
- * clause begins with a NotLink, true and false are reversed.
- *
- * The NotLink is also interpreted as an "absence of a clause";
- * if the atomspace does NOT contain a NotLink clause, then the
- * match is considered postive, and the clause is accepted (and
- * it has a null or "invalid" grounding).
- *
- * See the do_imply function for details.
- */
-Handle PatternMatch::crisp_logic_imply (Handle himplication)
-{
-	// Now perform the search.
-	CrispImplicator impl(_atom_space);
-	std::set<Handle> varset;
-
-	do_imply(himplication, &impl, varset);
-
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
-	return gl;
+	do_imply(himplication, impl, varset);
 }
 
 /* ===================== END OF FILE ===================== */

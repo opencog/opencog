@@ -2,6 +2,7 @@
 # Build the query shlib
 ADD_LIBRARY(query SHARED
 	DefaultPatternMatchCB.cc
+	Implicator.cc
 	Instantiator.cc
 	PatternMatch.cc
 	PatternMatchEngine.cc
@@ -33,14 +34,10 @@ ELSEIF (CYGWIN)
    INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 ENDIF (WIN32)
 
-# Why are we installing all of these? Not all are for public consumption;
-# some are internal-use-only header files...
 INSTALL (FILES
-	CrispLogicPMCB.h
-	DefaultPatternMatchCB.h
+	Implicator.h
+	Instantiator.h
 	PatternMatch.h
 	PatternMatchCallback.h
-	PatternMatchEngine.h
-	QueryModule.h
 	DESTINATION "include/${PROJECT_NAME}/query"
 )

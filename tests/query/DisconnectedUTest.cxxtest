@@ -23,8 +23,7 @@
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -34,9 +33,8 @@ using namespace opencog;
 class Disconnected :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatch pm;
 		AtomSpace *as;
-		Handle bindlink;
+		Handle bindlinkh;
 
 	public:
 
@@ -80,7 +78,6 @@ void Disconnected::setUp(void)
 {
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
-	pm.set_atomspace(as);
 
 	// Load the required data
 	config().set("MODULES",
@@ -96,7 +93,7 @@ void Disconnected::setUp(void)
 
 	// Create an implication link that will be tested.
 	SchemeEval* evaluator = new SchemeEval(as);
-	bindlink = evaluator->apply("get-bindlink", Handle::UNDEFINED);
+	bindlinkh = evaluator->apply("get-bindlink", Handle::UNDEFINED);
 	delete evaluator;
 }
 
@@ -115,13 +112,13 @@ void Disconnected::test_exec(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Make sure the scheme file actually loaded!
-	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindlink);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindlinkh);
 
 	// We expect to catch an error here.
 	bool caught = false;
 	try
 	{
-		pm.bindlink(bindlink);
+		bindlink(as, bindlinkh);
 	}
 	catch (const InvalidParamException& ex)
 	{

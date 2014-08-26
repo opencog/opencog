@@ -21,17 +21,16 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
+
+#include "imply.h"
 
 using namespace opencog;
 
 class Boolean2NotUTest :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatch pm;
 		AtomSpace *as;
 
 		Handle implication, his_a, hberlin, hcity;
@@ -88,7 +87,6 @@ void Boolean2NotUTest::tearDown(void)
 void Boolean2NotUTest::setUp(void)
 {
 	as = new AtomSpace();
-	pm.set_atomspace(as);
 
 	// Create an implication link that will be tested.
 	implication = 
@@ -267,7 +265,7 @@ void Boolean2NotUTest::test_isa(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle result = pm.crisp_logic_imply(implication);
+	Handle result = crisp_logic_imply(as, implication);
 
 	// There should be only one solution: the Berlin one.
 	// The Madrid graph should be rejected because of the 

@@ -23,8 +23,7 @@
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -34,7 +33,6 @@ using namespace opencog;
 class BuggyStackUTest :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatch pm;
 		AtomSpace *as;
 		Handle restrict;
 
@@ -81,7 +79,6 @@ void BuggyStackUTest::setUp(void)
 {
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
-	pm.set_atomspace(as);
 
 	// Load the required data
 	config().set("MODULES",
@@ -123,7 +120,7 @@ void BuggyStackUTest::test_exec(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != restrict);
 
 	// Result should be a ListLink w/ one solution
-	Handle result = pm.bindlink(restrict);
+	Handle result = bindlink(as, restrict);
 #ifdef HAVE_GUILE
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
 #endif 

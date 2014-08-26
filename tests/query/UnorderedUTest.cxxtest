@@ -23,8 +23,7 @@
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -34,7 +33,6 @@ using namespace opencog;
 class UnorderedUTest :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatch pm;
 		AtomSpace *as;
 		Handle disorder;
 		Handle disordered;
@@ -84,7 +82,6 @@ void UnorderedUTest::setUp(void)
 {
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
-	pm.set_atomspace(as);
 
 	// Load the required data
 	config().set("MODULES",
@@ -132,13 +129,13 @@ void UnorderedUTest::test_un1(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != disordered);
 
 	// Result should be a ListLink w/ one solution
-	Handle result = pm.bindlink(disorder);
+	Handle result = bindlink(as, disorder);
 
 	logger().debug("first result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	// Result should be a ListLink w/ one solution
-	result = pm.bindlink(disordered);
+	result = bindlink(as, disordered);
 
 	logger().debug("next result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
@@ -154,7 +151,7 @@ void UnorderedUTest::test_un2(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != disor_more);
 
 	// Result should be a ListLink w/ one solution
-	Handle result = pm.bindlink(disor_more);
+	Handle result = bindlink(as, disor_more);
 
 	logger().debug("second result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));

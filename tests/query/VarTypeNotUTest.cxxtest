@@ -23,8 +23,7 @@
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -34,7 +33,6 @@ using namespace opencog;
 class VarTypeNot :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatch pm;
 		AtomSpace *as;
 		Handle vscope_good, vscope_bad;
 
@@ -80,7 +78,6 @@ void VarTypeNot::setUp(void)
 {
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
-	pm.set_atomspace(as);
 
 	// Load the required data
 	config().set("MODULES",
@@ -125,14 +122,14 @@ void VarTypeNot::test_exec(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_bad);
 
 	// Result should be a ListLink w/ zero solutions
-	Handle result_good = pm.crisp_logic_bindlink(vscope_good);
+	Handle result_good = crisp_logic_bindlink(as, vscope_good);
 	logger().debug("result-good is %s\n", SchemeSmob::to_string(result_good).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 0, getarity(result_good));
 
 	bool caught = false;
 	try
 	{
-		pm.crisp_logic_bindlink(vscope_bad);
+		crisp_logic_bindlink(as, vscope_bad);
    }
    catch (const InvalidParamException& ex)
    {

@@ -23,8 +23,7 @@
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -34,7 +33,6 @@ using namespace opencog;
 class EinsteinPuzzle :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatch pm;
 		AtomSpace* as;
 		SchemeEval* eval;
 
@@ -59,7 +57,6 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 
 			server(CogServer::createInstance);
 			as = &cogserver().getAtomSpace();
-			pm.set_atomspace(as);
 			eval = new SchemeEval(as);
 
 			// Load the required data
@@ -136,7 +133,7 @@ void EinsteinPuzzle::test_trivial_deduct(void)
 	// Note that we explicitly filter sameness to avoid double counting, as otherwise,
 	// there would be six solutions. Why six? Obviously, four above, but also, the
 	// reversed gounding matches: (1,1) and (2,2)
-	Handle puzzle_solution = pm.crisp_logic_bindlink(puzzle_rules);
+	Handle puzzle_solution = crisp_logic_bindlink(as, puzzle_rules);
 	logger().debug("trivial puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(puzzle_solution));
 
@@ -167,13 +164,13 @@ void EinsteinPuzzle::test_trivial_keep(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != print_rule);
 
 	// First, deduce if two seemingly different people are the same ...
-	pm.crisp_logic_bindlink(same_rule);
+	crisp_logic_bindlink(as, same_rule);
 	// Next, deduce that the same properties apply to each
-	pm.crisp_logic_bindlink(trans_rule);
+	crisp_logic_bindlink(as, trans_rule);
 
 	// Result should be a ListLink w/ two solutions
 	// Why two? Because person 1 and 2 are the same person, so both solutions get listed.
-	Handle puzzle_solution = pm.crisp_logic_bindlink(print_rule);
+	Handle puzzle_solution = crisp_logic_bindlink(as, print_rule);
 	logger().debug("trivial puzzle keepers are %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(puzzle_solution));
 
@@ -240,55 +237,55 @@ void EinsteinPuzzle::test_full(void)
 	// person10 == person15 (blend)
 	// person14 == person9 (norweigan)
 	// dunhill smoker(rule 12) == person7
-	Handle same = pm.crisp_logic_bindlink(same_rule);
+	Handle same = crisp_logic_bindlink(as, same_rule);
 	logger().debug("After first same-rule\n%s\n", SchemeSmob::to_string(same).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(same));
 
 	// Next, propagate this knowledge transitively
-	Handle trans = pm.crisp_logic_bindlink(trans_rule);
+	Handle trans = crisp_logic_bindlink(as, trans_rule);
 	logger().debug("After first transitive-rule\n%s\n", SchemeSmob::to_string(trans).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(trans));
 
 	// -----------
 	// Next, make a deduction about the house on the end.
 	// This combines facts 9+14: blue house has address 101. This is just a single result.
-	Handle faddr = pm.crisp_logic_bindlink(faddr_rule);
+	Handle faddr = crisp_logic_bindlink(as, faddr_rule);
 	logger().debug("After first-address-rule\n%s\n", SchemeSmob::to_string(faddr).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(faddr));
 
 	// Neighbor relations are symmetric.  Propagate this symmetry.
 	// The original facts were's stated symmetrically; we make up for that now:
 	// symmetrize rules 10, 12, 14, 15
-	Handle neigh = pm.crisp_logic_bindlink(nesym_rule);
+	Handle neigh = crisp_logic_bindlink(as, nesym_rule);
 	logger().debug("After neighbor-symmetry-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(neigh));
 
 	// Deduce new neighbors.
 	// The above made a deduction about address 102, and fact 8 has address 103 in it.
-	neigh = pm.crisp_logic_bindlink(neigh_rule);
+	neigh = crisp_logic_bindlink(as, neigh_rule);
 	logger().debug("After first neighbor-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
 
 	// Neighbor relations are symmetric.  Propagate this symmetry.
 	// This symmetrizes the findings from the rule application immediately above.
-	neigh = pm.crisp_logic_bindlink(nesym_rule);
+	neigh = crisp_logic_bindlink(as, nesym_rule);
 	logger().debug("After second neighbor-symmetry-rule\n%s\n", SchemeSmob::to_string(neigh).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
 
 	// -----------
 	// If some attribute holds for a neighbor, it cannot hold for a person.
-	Handle nattr = pm.crisp_logic_bindlink(nattr_rule);
+	Handle nattr = crisp_logic_bindlink(as, nattr_rule);
 	logger().debug("After first neighbor-not-attr rule\n%s\n", SchemeSmob::to_string(nattr).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 17, getarity(nattr));
 
 	// Next, propagate this knowledge transitively
-	Handle ntran = pm.crisp_logic_bindlink(ntran_rule);
+	Handle ntran = crisp_logic_bindlink(as, ntran_rule);
 	logger().debug("After first transitive-not-rule\n%s\n", SchemeSmob::to_string(ntran).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 3, getarity(ntran));
 
 	// -----------
 	// Two distinct people cannot have a common attribute
-	Handle distc = pm.crisp_logic_bindlink(distc_rule);
+	Handle distc = crisp_logic_bindlink(as, distc_rule);
 	logger().debug() << "After first distinct-attr rule\n" << SchemeSmob::to_string(distc).c_str();
 
 	// XXX virtual link matcher does not yet do 'not' clauses ...
@@ -298,21 +295,21 @@ void EinsteinPuzzle::test_full(void)
 	// -----------
 	// By-elimination rule
 	// If a person doesn't smoke/drink/live-in four items, they must do the fifth.
-	Handle elimi = pm.crisp_logic_bindlink(elimi_rule);
+	Handle elimi = crisp_logic_bindlink(as, elimi_rule);
 	logger().debug() << "After elimination\n" << SchemeSmob::to_string(elimi);
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 696, getarity(elimi));
 
 	// -----------
 	// Print partial results.
 	Handle prt_stuff = eval->apply("print-results", Handle::UNDEFINED);
-	Handle stuff = pm.crisp_logic_bindlink(prt_stuff);
+	Handle stuff = crisp_logic_bindlink(as, prt_stuff);
 	logger().debug() << "stuff\n" << SchemeSmob::to_string(stuff);
 
 	// -----------
 	// Result should be a ListLink w/ five solutions
 	// Right now, we accept zero solutions, because above was not yet
 	// enough to solve the pouzzle.
-	Handle puzzle_solution = pm.crisp_logic_bindlink(solun_rule);
+	Handle puzzle_solution = crisp_logic_bindlink(as, solun_rule);
 	logger().debug("puzzle solution is\n%s\n", SchemeSmob::to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 0, getarity(puzzle_solution));
 

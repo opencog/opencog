@@ -25,12 +25,13 @@
 #include <opencog/query/PatternMatch.h>
 #include <opencog/util/Logger.h>
 
+#include "imply.h"
+
 using namespace opencog;
 
 class LoopPatternUTest :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatch pm;
 		AtomSpace *as;
 
 		Handle imlink;
@@ -71,7 +72,6 @@ void LoopPatternUTest::tearDown(void)
 void LoopPatternUTest::setUp(void)
 {
 	as = new AtomSpace();
-	pm.set_atomspace(as);
 
 	// Create an implication link that will be tested.
 	imlink = 
@@ -162,7 +162,7 @@ void LoopPatternUTest::test_prep(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
  
 	// Result should be a ListLink
-	Handle result = pm.imply(imlink);
+	Handle result = imply(as, imlink);
 
 	// Expect three answers.
 	TSM_ASSERT_EQUALS("incorrect arity", as->getArity(result), 3);

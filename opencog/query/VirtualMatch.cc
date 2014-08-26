@@ -140,7 +140,12 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 		PatternMatchEngine::print_solution(var_gnds, pred_gnds);
 #endif
 
-		Instantiator instor(_atom_space);
+		// We put all of the temporary atoms into a temporary atomspace.
+		// Everything in here will go poof and disappear when this class
+		// is destructed. And that's OK, that's exactly what we want for
+		// these temporaries.  The atomspace is blown away when we finish.
+		AtomSpace aspace;
+		Instantiator instor(&aspace);
 
 		for (Handle virt : virtuals)
 		{
@@ -163,16 +168,11 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			// At last! Actually perform the test!
 			bool match = cb->virtual_link_match(lvirt, gargs);
 
-			// XXX FIXME: the instantiator inserted the atoms into the
-			// atomspace. It probably shouldn't.  These are undesirable,
-			// as they are just temporaries, created for the check. Thus,
-			// after checking,we remove them.  The below fails because
-			// it should also look at chlidren: if these down't have
-			// incoming links, these too should be removed.   Not putting
-			// them into the atomspace in the first place would solve that
-			// problem....
-			if (0 == gargs->getIncomingSetSize())
-				_atom_space->purgeAtom(gargs, false);
+			// After checking, remove the temporary atoms. 
+			// The most fool-proof way to do this is to blow
+			// away the entire atomspace.
+			// if (0 == gargs->getIncomingSetSize())
+				// _atom_space->purgeAtom(gargs, false);
 
 			if (match) return false;
 

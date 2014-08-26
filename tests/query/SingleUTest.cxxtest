@@ -25,7 +25,7 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -34,7 +34,6 @@ using namespace opencog;
 class SingleUTest: public CxxTest::TestSuite
 {
 private:
-        PatternMatch pm;
         AtomSpace *as;
         SchemeEval* eval;
 
@@ -55,7 +54,6 @@ public:
 
         server(CogServer::createInstance);
         as = &cogserver().getAtomSpace();
-        pm.set_atomspace(as);
         eval = new SchemeEval(as);
     }
 
@@ -79,8 +77,6 @@ void SingleUTest::tearDown(void)
 
 void SingleUTest::setUp(void)
 {
-    pm.set_atomspace(as);
-    
     config().set("SCM_PRELOAD",
         "opencog/atomspace/core_types.scm, "
         "opencog/scm/utilities.scm");
@@ -110,11 +106,11 @@ void SingleUTest::test_single_bindlink(void)
     
     // First, get all the solutions. There should be 3 of them:
     // Socrates, Einstein and Peirce all inherit from man
-    Handle answersAll = pm.bindlink(findMan);
+    Handle answersAll = bindlink(as, findMan);
     TS_ASSERT_EQUALS(3, as->getArity(answersAll));
     
     // Test PatternMatch::single_bindlink, which should only return the
     // first match
-    Handle answersSingle = pm.single_bindlink(findMan);
+    Handle answersSingle = single_bindlink(as, findMan);
     TS_ASSERT_EQUALS(1, as->getArity(answersSingle));
 }

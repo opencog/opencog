@@ -22,17 +22,16 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
+
+#include "imply.h"
 
 using namespace opencog;
 
 class ExecutionUTest :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatch pm;
 		AtomSpace *as;
 		Handle implication;
 		Handle hcapital, hprep;
@@ -85,7 +84,6 @@ void ExecutionUTest::tearDown(void)
 void ExecutionUTest::setUp(void)
 {
 	as = new AtomSpace();
-	pm.set_atomspace(as);
 
 	// Create an implication link that will be tested.
 	implication = 
@@ -172,7 +170,7 @@ void ExecutionUTest::test_exec(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle result = pm.crisp_logic_imply(implication);
+	Handle result = crisp_logic_imply(as, implication);
 
 	// There should be only one solution: the Berlin one.
 	// The Madrid graph should be rejected because of the 

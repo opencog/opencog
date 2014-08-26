@@ -25,7 +25,7 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -33,12 +33,11 @@ using namespace opencog;
 
 class AttentionalFocusCBUTest: public CxxTest::TestSuite {
 private:
-	PatternMatch pm;
 	AtomSpace * as;
 	SchemeEval * eval;
 public:
-	AttentionalFocusCBUTest(void) {
-
+	AttentionalFocusCBUTest(void)
+	{
 		try {
 			config().load("opencog-test.conf");
 		} catch (RuntimeException &e) {
@@ -50,10 +49,11 @@ public:
 
 		server(CogServer::createInstance);
 		as = &cogserver().getAtomSpace();
-		pm.set_atomspace(as);
 		eval = new SchemeEval(as);
 	}
-	~AttentionalFocusCBUTest() {
+
+	~AttentionalFocusCBUTest()
+	{
 		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -64,12 +64,13 @@ public:
 	void tearDown(void);
 	void test_pln_bindlink(void);
 };
-void AttentionalFocusCBUTest::tearDown(void) {
 
+void AttentionalFocusCBUTest::tearDown(void)
+{
 }
-void AttentionalFocusCBUTest::setUp(void) {
-	pm.set_atomspace(as);
 
+void AttentionalFocusCBUTest::setUp(void)
+{
 	config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
 			"opencog/scm/utilities.scm");
 
@@ -81,7 +82,8 @@ void AttentionalFocusCBUTest::setUp(void) {
 
 }
 
-void AttentionalFocusCBUTest::test_pln_bindlink(void) {
+void AttentionalFocusCBUTest::test_pln_bindlink(void)
+{
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
     as->setAttentionalFocusBoundary(20); //for test purpose
 	config().set("SCM_PRELOAD", "tests/query/af-filtering-test.scm");
@@ -89,9 +91,7 @@ void AttentionalFocusCBUTest::test_pln_bindlink(void) {
 	Handle findMan = eval->eval_h("find-man");
 	// Test PatternMatch::pln_bindlink, which should only return the
 	// first match
-	Handle answersSingle = pm.pln_bindlink(findMan);
+	Handle answersSingle = pln_bindlink(as, findMan);
 	TS_ASSERT_EQUALS(1, as->getArity(answersSingle));
 	TS_ASSERT_EQUALS(20,as->getAttentionalFocusBoundary());
-
 }
-
