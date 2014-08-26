@@ -77,6 +77,7 @@ public:
     void test_quoted_variable(void);
     void test_nest(void);
     void test_throw(void);
+    void test_gpn(void);
 };
 
 void QuoteUTest::tearDown(void)
@@ -203,3 +204,24 @@ void QuoteUTest::test_throw(void)
     }
     TS_ASSERT_EQUALS(true, did_throw);
 }
+
+/*
+ * QuoteLink unit test.  Test proper search scope
+ */
+void QuoteUTest::test_gpn(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/quote-gpn.scm");
+    load_scm_files_from_config(*as);
+
+    Handle bindy = eval->eval_h("bindy");
+
+    Handle allstar = bindlink(as, bindy);
+    TS_ASSERT_EQUALS(1, as->getArity(allstar));
+
+    allstar = as->getOutgoing(allstar, 0);
+    TS_ASSERT_EQUALS(LIST_LINK, allstar->getType());
+    TS_ASSERT_EQUALS(2, as->getArity(allstar));
+}
+

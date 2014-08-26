@@ -59,7 +59,7 @@ using namespace opencog;
 // this is a form of "greedy" search.
 //
 // Note that the algo performs a full-depth search to find this. That's
-// OK, because typeical clauses are never deep.
+// OK, because typeical clauses are never very deep.
 //
 // Note that the size of the incoming set really is a better measure,
 // and not the depth.  So, for example, if "item" has a huge incoming
@@ -95,11 +95,15 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
 	Handle hdeepest(Handle::UNDEFINED);
 	size_t thinnest = SIZE_MAX;
 
+	// Blow past the QuoteLinks, since they just screw up the search start.
+	LinkPtr ll(LinkCast(h));
+	if (QUOTE_LINK == h->getType())
+		return find_starter(ll->getOutgoingAtom(0), depth, start, width);
+
 	// Iterate over all the handles in the outgoing set.
 	// Find the deepest one that contains a constant, and start
 	// the search there.  If there are two at the same depth,
 	// then start with the skinnier one.
-	LinkPtr ll(LinkCast(h));
 	const std::vector<Handle> &vh = ll->getOutgoingSet();
 	for (size_t i = 0; i < vh.size(); i++) {
 
@@ -232,7 +236,9 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 		}
 	}
 
-	if ((Handle::UNDEFINED != best_start) && (0 != vars.size()))
+	if ((Handle::UNDEFINED != best_start) and 
+	    (Handle::UNDEFINED != _starter_pred) and
+	    (0 != vars.size()))
 	{
 		_root = clauses[bestclause];
 		dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
