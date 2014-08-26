@@ -44,6 +44,8 @@ SchemeShell::SchemeShell(void)
 
 	pending_prompt = "... ";
 	evaluator = NULL;
+
+	do_async_output = true;
 }
 
 SchemeShell::~SchemeShell()

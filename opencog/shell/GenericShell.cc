@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include <opencog/server/ConsoleSocket.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
@@ -59,6 +61,7 @@ GenericShell::GenericShell(void)
 	evaluator = NULL;
 	socket = NULL;
 	self_destruct = false;
+	do_async_output = false;
 }
 
 GenericShell::~GenericShell()
@@ -167,7 +170,6 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 }
 
 /* ============================================================== */
-
 /**
  * Evaluate the expression
  */
@@ -245,7 +247,18 @@ std::string GenericShell::do_eval(const std::string &expr)
 	 */
 	std::string input = expr + "\n";
 
-	std::string result = evaluator->eval(input.c_str());
+	std::string result;
+	if (do_async_output)
+	{
+		std::thread evalth(async_wrapper, this, input);
+
+		evalth.join();
+		result = pending_output;
+	}
+	else
+	{
+		result = evaluator->eval(input.c_str());
+	}
 
 	if (evaluator->input_pending())
 	{
@@ -265,6 +278,20 @@ std::string GenericShell::do_eval(const std::string &expr)
 		return "";
 	}
 
+}
+
+/* ============================================================== */
+
+void GenericShell::async_wrapper(GenericShell* p, const std::string& in)
+{
+	p->async_evaluator(in);
+}
+
+void GenericShell::async_evaluator(const std::string& input)
+{
+printf("duuuuude ola async evalu\n");
+	pending_output = evaluator->eval(input.c_str());
+printf("duuuuude bye async evalu %s\n", pending_output.c_str());
 }
 
 /* ===================== END OF FILE ============================ */
