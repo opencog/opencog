@@ -114,10 +114,12 @@ static inline bool is_node_in_any_tree(const std::vector<Handle>& trees, const H
 
 /**
  * Returns true if the clause contains an atom of type atom_type.
+ * ... but only if it is not quoted.  Quoted terms are constants.
  */
 static inline bool contains_atomtype(Handle& clause, Type atom_type)
 {
    Type clause_type = clause->getType();
+   if (QUOTE_LINK == clause_type) return false;
    if (classserver().isA(clause_type, atom_type)) return true;
 
    LinkPtr lc(LinkCast(clause));

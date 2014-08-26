@@ -1,5 +1,5 @@
 /*
- * tests/query/GreaterThanUTest.cxxtest
+ * tests/query/QuoteUTest.cxxtest
  *
  * Copyright (C) 2014 Linas Vepstas
  * All Rights Reserved
@@ -31,14 +31,14 @@
 
 using namespace opencog;
 
-class GreaterThanUTest: public CxxTest::TestSuite
+class QuoteUTest: public CxxTest::TestSuite
 {
 private:
         AtomSpace *as;
         SchemeEval* eval;
 
 public:
-    GreaterThanUTest(void)
+    QuoteUTest(void)
     {
         try
         {
@@ -57,7 +57,7 @@ public:
         eval = new SchemeEval(as);
     }
 
-    ~GreaterThanUTest()
+    ~QuoteUTest()
     {
         delete as;
         // Erase the log file if no assertions failed.
@@ -71,11 +71,11 @@ public:
     void test_numeric_greater(void);
 };
 
-void GreaterThanUTest::tearDown(void)
+void QuoteUTest::tearDown(void)
 {
 }
 
-void GreaterThanUTest::setUp(void)
+void QuoteUTest::setUp(void)
 {
     config().set("SCM_PRELOAD",
         "opencog/atomspace/core_types.scm, "
@@ -90,15 +90,16 @@ void GreaterThanUTest::setUp(void)
 }
 
 /*
- * Basic GreaterThanLink unit test. Defines several relationships
- * involving NumberNodes, and then verifies that the GreaterThanLink
- * is actually performing the numeric comparison correctly.
+ * QuoteLink unit test.  Derivative of the GreaterThanUTest,
+ * this one differs by explicitly quoting the GroundedSchemaNode,
+ * so that it is explicitly matched, instead of being treated as
+ * a virtual.
  */
-void GreaterThanUTest::test_numeric_greater(void)
+void QuoteUTest::test_numeric_greater(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/greater_than.scm");
+    config().set("SCM_PRELOAD", "tests/query/quote.scm");
     load_scm_files_from_config(*as);
 
     Handle richer_than_george = eval->eval_h("(richer-than-george)");
@@ -112,7 +113,7 @@ void GreaterThanUTest::test_numeric_greater(void)
     Handle people_richer_than_gates = bindlink(as, richer_than_gates);
 
     TS_ASSERT_EQUALS(0, as->getArity(people_richer_than_gates));
-    TS_ASSERT_EQUALS(1, as->getArity(people_richer_than_obama));
-    TS_ASSERT_EQUALS(2, as->getArity(people_richer_than_george));
-    TS_ASSERT_EQUALS(3, as->getArity(people_richer_than_susan));
+    TS_ASSERT_EQUALS(0, as->getArity(people_richer_than_obama));
+    TS_ASSERT_EQUALS(1, as->getArity(people_richer_than_george));
+    TS_ASSERT_EQUALS(1, as->getArity(people_richer_than_susan));
 }
