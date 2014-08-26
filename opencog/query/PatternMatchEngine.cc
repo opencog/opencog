@@ -899,16 +899,6 @@ void PatternMatchEngine::print_solution(
 
 		const std::string &vart = classserver().getTypeName(tyv);
 		const std::string &slnt = classserver().getTypeName(tys);
-		std::string solstr;
-		if (classserver().isNode(tyv))
-		{
-			NodePtr n(NodeCast(soln));
-			solstr = n->getName().c_str();
-		}
-		else
-		{
-			solstr = soln->toShortString().c_str();
-		}
 
 		if (soln == Handle::UNDEFINED)
 		{
@@ -917,6 +907,7 @@ void PatternMatchEngine::print_solution(
 				vart.c_str(), nv->getName().c_str());
 			continue;
 		}
+		std::string solstr(soln->toShortString());
 
 		NodePtr nv(NodeCast(var));
 		printf("\t%s %s maps to %s %s\n", vart.c_str(),
