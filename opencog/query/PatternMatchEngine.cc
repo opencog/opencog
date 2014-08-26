@@ -166,9 +166,11 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 
 	// If they're the same atom, then clearly they match.
 	// ... but only if hg is not a subclause of the current clause.
-	if ((hp == hg) && (hg != curr_pred_handle))
+	if ((hp == hg) and (hg != curr_pred_handle))
 	{
-		var_grounding[hp] = hg;
+		// Quoted variables cannot be solutions to themselves.
+		if (not in_quote or (in_quote and VARIABLE_NODE != tp))
+			var_grounding[hp] = hg;
 		return false;
 	}
 
