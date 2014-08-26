@@ -242,9 +242,6 @@ void QuoteUTest::test_double_quote(void)
     TS_ASSERT_EQUALS(1, as->getArity(bananna));
 
     bananna = as->getOutgoing(bananna, 0);
-    TS_ASSERT_EQUALS(QUOTE_LINK, bananna->getType());
-
-    bananna = as->getOutgoing(bananna, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, bananna->getType());
     TS_ASSERT_EQUALS(0, strcmp("bananna", as->getName(bananna).c_str()));
 }

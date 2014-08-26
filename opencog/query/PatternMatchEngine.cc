@@ -891,28 +891,19 @@ void PatternMatchEngine::print_solution(
 		Handle var(j->first);
 		Handle soln(j->second);
 
-		Type tyv = var->getType();
-		Type tys = soln->getType();
-
 		// Only print grounding for variables.
-		if (VARIABLE_NODE != tyv) continue;
-
-		const std::string &vart = classserver().getTypeName(tyv);
-		const std::string &slnt = classserver().getTypeName(tys);
+		if (VARIABLE_NODE != var->getType()) continue;
 
 		if (soln == Handle::UNDEFINED)
 		{
-			NodePtr nv(NodeCast(var));
-			printf("ERROR: ungrounded variable %s %s\n",
-				vart.c_str(), nv->getName().c_str());
+			printf("ERROR: ungrounded variable %s\n",
+				var->toShortString().c_str());
 			continue;
 		}
-		std::string solstr(soln->toShortString());
 
-		NodePtr nv(NodeCast(var));
-		printf("\t%s %s maps to %s %s\n", vart.c_str(),
-			nv->getName().c_str(),
-			slnt.c_str(), solstr.c_str());
+		printf("\t%s maps to %s\n",
+			var->toShortString().c_str(),
+			soln->toShortString().c_str());
 	}
 
 	// Print out the full binding to all of the clauses.
