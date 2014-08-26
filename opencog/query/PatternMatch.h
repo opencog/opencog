@@ -26,15 +26,15 @@
 
 #include <set>
 
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Handle.h>
 #include <opencog/query/Implicator.h>
+#include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog {
 
 class PatternMatch
 {
 	private:
-		AtomSpace *_atom_space;
 		static int get_vartype(Handle,
 		                std::set<Handle>&,
 		                VariableTypeMap&);
@@ -58,10 +58,6 @@ class PatternMatch
 
 	public:
 		PatternMatch(void);
-		void set_atomspace(AtomSpace *as)
-		{
-			_atom_space = as;
-		}
 
 		void match(PatternMatchCallback *,
 		           Handle vars,
@@ -72,15 +68,9 @@ class PatternMatch
 		void do_bindlink(Handle, Implicator&)
 					throw (InvalidParamException);
 
-		Handle bindlink(Handle);
-		Handle single_bindlink (Handle);
-		Handle crisp_logic_bindlink(Handle);
-		Handle pln_bindlink(Handle);
-
 		// Deprecated: used only in the unit-test cases.
 		void do_imply(Handle, Implicator&)
 			throw (InvalidParamException);
-
 };
 
 } // namespace opencog

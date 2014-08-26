@@ -140,6 +140,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 		PatternMatchEngine::print_solution(var_gnds, pred_gnds);
 #endif
 
+#if FIXME
 		Instantiator instor(_atom_space);
 
 		for (Handle virt : virtuals)
@@ -166,7 +167,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			// XXX FIXME: the instantiator inserted the atoms into the
 			// atomspace. It probably shouldn't.  These are undesirable,
 			// as they are just temporaries, created for the check. Thus,
-			// after checking,we remove them.  The below fails because
+			// after checking, we remove them.  The below fails because
 			// it should also look at chlidren: if these down't have
 			// incoming links, these too should be removed.   Not putting
 			// them into the atomspace in the first place would solve that
@@ -184,6 +185,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			// need to be unwound, if the final match is rejected. So...
 			// Hmmm. Unclear if this should change...
 		}
+#endif
 
 		// Yay! We found one! We now have a fully and completely grounded
 		// pattern! See what the callback thinks of it.

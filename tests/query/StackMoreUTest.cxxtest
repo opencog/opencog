@@ -23,8 +23,7 @@
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -34,7 +33,6 @@ using namespace opencog;
 class StackMoreUTest :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatch pm;
 		AtomSpace *as;
 		Handle bind_oo, bind_ou, bind_uo, bind_uu;
 
@@ -84,7 +82,6 @@ void StackMoreUTest::setUp(void)
 {
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
-	pm.set_atomspace(as);
 
 	// Load the required data
 	config().set("MODULES",
@@ -130,7 +127,7 @@ void StackMoreUTest::test_oo(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bind_oo);
 
 	// Result should be a ListLink w/ one solution
-	Handle result = pm.bindlink(bind_oo);
+	Handle result = bindlink(as, bind_oo);
 
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
@@ -146,7 +143,7 @@ void StackMoreUTest::test_ou(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bind_ou);
 
 	// Result should be a ListLink w/ one solution
-	Handle result = pm.bindlink(bind_ou);
+	Handle result = bindlink(as, bind_ou);
 
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
@@ -162,7 +159,7 @@ void StackMoreUTest::test_uo(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bind_uo);
 
 	// Result should be a ListLink w/ one solution
-	Handle result = pm.bindlink(bind_uo);
+	Handle result = bindlink(as, bind_uo);
 
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
@@ -178,7 +175,7 @@ void StackMoreUTest::test_uu(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bind_uu);
 
 	// Result should be a ListLink w/ one solution
-	Handle result = pm.bindlink(bind_uu);
+	Handle result = bindlink(as, bind_uu);
 
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));

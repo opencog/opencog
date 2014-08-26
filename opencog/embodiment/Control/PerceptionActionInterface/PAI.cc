@@ -58,7 +58,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
@@ -4079,10 +4079,7 @@ double PAI::getAvatarWeight(Handle avatarNode)
     Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
 
     // Run pattern matcher
-    PatternMatch pm;
-    pm.set_atomspace(&atomSpace);
-
-    Handle hResultListLink = pm.bindlink(hBindLink);
+    Handle hResultListLink = bindlink(&atomSpace, hBindLink);
 
     // Get result
     // Note: Don't forget remove the hResultListLink, otherwise some scheme script

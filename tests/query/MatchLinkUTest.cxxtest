@@ -23,8 +23,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/guile/load-file.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -34,7 +33,6 @@ using namespace opencog;
 class MatchLink :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatch pm;
 		AtomSpace *as;
 		Handle untyped_link_match, typed_link_match, untyped_any_match;
 		Handle typed_memb_link_match, typed_pet_node_match;
@@ -82,7 +80,6 @@ void MatchLink::setUp(void)
 {
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
-	pm.set_atomspace(as);
 
 	// Load the required data
 	config().set("MODULES",
@@ -130,26 +127,26 @@ void MatchLink::test_exec(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != typed_pet_node_match);
 
 	// Result should be a ListLink w/ three solutions
-	result = pm.bindlink(untyped_link_match);
+	result = bindlink(as, untyped_link_match);
 	logger().debug("untyped-link-match is: \n%s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 3, getarity(result));
 
 	// Result should be a ListLink w/ one solution
-	result = pm.bindlink(typed_link_match);
+	result = bindlink(as, typed_link_match);
 	logger().debug("typed-link-match is: \n%s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	// There are currently four arity-2 associative-links in the atomspace...
-	result = pm.bindlink(untyped_any_match);
+	result = bindlink(as, untyped_any_match);
 	logger().debug("untyped-any-match is: \n%s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));
 
 	// There's just one arity-2 associative-link with MemberLink in second place.
-	result = pm.bindlink(typed_memb_link_match);
+	result = bindlink(as, typed_memb_link_match);
 	logger().debug("typed-memb-link-match is: \n%s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 3, getarity(result));
 
-	result = pm.bindlink(typed_pet_node_match);
+	result = bindlink(as, typed_pet_node_match);
 	logger().debug("typed-pet-node-match is: \n%s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 

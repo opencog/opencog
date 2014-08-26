@@ -25,7 +25,6 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/query/PatternMatch.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -51,7 +50,6 @@ using namespace opencog;
 class RuleUTest: public CxxTest::TestSuite
 {
 private:
-        PatternMatch pm;
         AtomSpace *as;
         SchemeEval* eval;
 
@@ -72,7 +70,6 @@ public:
 
         server(CogServer::createInstance);
         as = &cogserver().getAtomSpace();
-        pm.set_atomspace(as);
         eval = new SchemeEval(as);
     }
 
@@ -96,8 +93,6 @@ void RuleUTest::tearDown(void)
 
 void RuleUTest::setUp(void)
 {
-    pm.set_atomspace(as);
-    
     config().set("SCM_PRELOAD",
         "opencog/atomspace/core_types.scm, "
         "opencog/scm/utilities.scm, "

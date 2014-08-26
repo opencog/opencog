@@ -9,6 +9,7 @@
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 
+#include "BindLink.h"
 #include "PatternMatch.h"
 #include "PatternSCM.h"
 
@@ -51,9 +52,7 @@ Handle PatternSCM::do_bindlink(Handle h)
 #ifdef HAVE_GUILE
 	// XXX we should also allow opt-args to be a list of handles
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bind");
-	PatternMatch pm;
-	pm.set_atomspace(as);
-	Handle grounded_expressions = pm.bindlink(h);
+	Handle grounded_expressions = bindlink(as, h);
 	return grounded_expressions;
 #else
 	return Handle::UNDEFINED;
@@ -68,9 +67,7 @@ Handle PatternSCM::do_single_bindlink(Handle h)
 #ifdef HAVE_GUILE
 	// XXX we should also allow opt-args to be a list of handles
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bind-single");
-	PatternMatch pm;
-	pm.set_atomspace(as);
-	Handle grounded_expressions = pm.single_bindlink(h);
+	Handle grounded_expressions = single_bindlink(as, h);
 	return grounded_expressions;
 #else
 	return Handle::UNDEFINED;
@@ -86,9 +83,7 @@ Handle PatternSCM::do_crisp_bindlink(Handle h)
 #ifdef HAVE_GUILE
 	// XXX we should also allow opt-args to be a list of handles
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bind-crisp");
-	PatternMatch pm;
-	pm.set_atomspace(as);
-	Handle grounded_expressions = pm.crisp_logic_bindlink(h);
+	Handle grounded_expressions = crisp_logic_bindlink(as, h);
 	return grounded_expressions;
 #else
 	return Handle::UNDEFINED;
@@ -100,9 +95,7 @@ Handle PatternSCM::do_pln_bindlink(Handle h)
 #ifdef HAVE_GUILE
 	// XXX we should also allow opt-args to be a list of handles
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bind-pln");
-	PatternMatch pm;
-	pm.set_atomspace(as);
-	Handle grounded_expressions = pm.pln_bindlink(h);
+	Handle grounded_expressions = pln_bindlink(as, h);
 	return grounded_expressions;
 #else
 	return Handle::UNDEFINED;

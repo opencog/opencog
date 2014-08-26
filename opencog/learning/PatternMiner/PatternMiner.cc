@@ -21,23 +21,27 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <thread>
-#include <sstream>
-#include <iostream>
+
+#include <math.h>
+#include <stdlib.h>
+
 #include <fstream>
-#include <map>
+#include <iostream>
 #include <iterator>
+#include <map>
+#include <sstream>
+#include <thread>
+
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
-#include <opencog/util/StringManipulator.h>
-#include <opencog/util/foreach.h>
-#include <opencog/query/PatternMatch.h>
-#include <stdlib.h>
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/ClassServer.h>
-#include <math.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/foreach.h>
+#include <opencog/util/StringManipulator.h>
+
 #include "PatternMiner.h"
 
 using namespace opencog::PatternMining;
@@ -845,10 +849,7 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 
 
     // Run pattern matcher
-    PatternMatch pm;
-    pm.set_atomspace(originalAtomSpace);
-
-    Handle hResultListLink = pm.bindlink(hBindLink);
+    Handle hResultListLink = bindlink(originalAtomSpace, hBindLink);
 
     // Get result
     // Note: Don't forget to remove the hResultListLink and BindLink
@@ -1862,10 +1863,7 @@ void PatternMiner::testPatternMatcher1()
 
 
     // Run pattern matcher
-    PatternMatch pm;
-    pm.set_atomspace(originalAtomSpace);
-
-    Handle hResultListLink = pm.bindlink(hBindLink);
+    Handle hResultListLink = bindlink(originalAtomSpace, hBindLink);
 
     // Get result
     // Note: Don't forget to remove the hResultListLink and BindLink
@@ -1982,10 +1980,7 @@ void PatternMiner::testPatternMatcher2()
 
 
     // Run pattern matcher
-    PatternMatch pm;
-    pm.set_atomspace(originalAtomSpace);
-
-    Handle hResultListLink = pm.bindlink(hBindLink);
+    Handle hResultListLink = bindlink(originalAtomSpace, hBindLink);
 
     // Get result
     // Note: Don't forget to remove the hResultListLink and BindLink

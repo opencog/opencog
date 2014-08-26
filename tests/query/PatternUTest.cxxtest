@@ -188,8 +188,6 @@ void PatternUTest::tearDown(void)
 }
 void PatternUTest::setUp(void)
 {
-	pm.set_atomspace(as);
-
 	// create a gnarly graph
 	hconst_1 = as->addNode(CONCEPT_NODE, "some const concept node 1");
 	hconst_2 = as->addNode(CONCEPT_NODE, "some const concept node 2");

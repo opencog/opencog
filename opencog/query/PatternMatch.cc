@@ -29,10 +29,7 @@
 
 using namespace opencog;
 
-PatternMatch::PatternMatch(void)
-{
-	_atom_space = NULL;
-}
+PatternMatch::PatternMatch(void) {}
 
 /// See the documentation for do_match() to see what this function does.
 /// This is just a convenience wrapper around do_match().

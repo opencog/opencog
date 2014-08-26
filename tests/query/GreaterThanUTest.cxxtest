@@ -25,7 +25,7 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -34,7 +34,6 @@ using namespace opencog;
 class GreaterThanUTest: public CxxTest::TestSuite
 {
 private:
-        PatternMatch pm;
         AtomSpace *as;
         SchemeEval* eval;
 
@@ -55,7 +54,6 @@ public:
 
         server(CogServer::createInstance);
         as = &cogserver().getAtomSpace();
-        pm.set_atomspace(as);
         eval = new SchemeEval(as);
     }
 
@@ -79,8 +77,6 @@ void GreaterThanUTest::tearDown(void)
 
 void GreaterThanUTest::setUp(void)
 {
-    pm.set_atomspace(as);
-
     config().set("SCM_PRELOAD",
         "opencog/atomspace/core_types.scm, "
         "opencog/scm/utilities.scm");
@@ -110,10 +106,10 @@ void GreaterThanUTest::test_numeric_greater(void)
     Handle richer_than_obama = eval->eval_h("(richer-than-obama)");
     Handle richer_than_gates = eval->eval_h("(richer-than-gates)");
 
-    Handle people_richer_than_george = pm.bindlink(richer_than_george);
-    Handle people_richer_than_susan = pm.bindlink(richer_than_susan);
-    Handle people_richer_than_obama = pm.bindlink(richer_than_obama);
-    Handle people_richer_than_gates = pm.bindlink(richer_than_gates);
+    Handle people_richer_than_george = bindlink(as, richer_than_george);
+    Handle people_richer_than_susan = bindlink(as, richer_than_susan);
+    Handle people_richer_than_obama = bindlink(as, richer_than_obama);
+    Handle people_richer_than_gates = bindlink(as, richer_than_gates);
 
     TS_ASSERT_EQUALS(0, as->getArity(people_richer_than_gates));
     TS_ASSERT_EQUALS(1, as->getArity(people_richer_than_obama));

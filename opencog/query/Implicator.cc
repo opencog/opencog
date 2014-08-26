@@ -21,8 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
+#include "BindLink.h"
 #include "DefaultImplicator.h"
 #include "PatternMatch.h"
 
@@ -96,15 +98,16 @@ bool SingleImplicator::grounding(const std::map<Handle, Handle> &var_soln,
  *
  * See the do_bindlink function documentation for details.
  */
-Handle PatternMatch::bindlink (Handle himplication)
+Handle opencog::bindlink(AtomSpace* as, Handle himplication)
 {
 	// Now perform the search.
-	DefaultImplicator impl(_atom_space);
-	do_bindlink(himplication, impl);
+	DefaultImplicator impl(as);
+	PatternMatch pm;
+	pm.do_bindlink(himplication, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
-	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+	Handle gl = as->addLink(LIST_LINK, impl.result_list);
 	return gl;
 }
 
@@ -116,15 +119,16 @@ Handle PatternMatch::bindlink (Handle himplication)
  *
  * See the do_bindlink function documentation for details.
  */
-Handle PatternMatch::single_bindlink (Handle himplication)
+Handle opencog::single_bindlink (AtomSpace* as, Handle himplication)
 {
 	// Now perform the search.
-	SingleImplicator impl(_atom_space);
-	do_bindlink(himplication, impl);
+	SingleImplicator impl(as);
+	PatternMatch pm;
+	pm.do_bindlink(himplication, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
-	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+	Handle gl = as->addLink(LIST_LINK, impl.result_list);
 	return gl;
 }
 
@@ -145,30 +149,32 @@ Handle PatternMatch::single_bindlink (Handle himplication)
  *
  * See the do_bindlink function documentation for details.
  */
-Handle PatternMatch::crisp_logic_bindlink (Handle himplication)
+Handle opencog::crisp_logic_bindlink(AtomSpace* as, Handle himplication)
 {
 	// Now perform the search.
-	CrispImplicator impl(_atom_space);
-	do_bindlink(himplication, impl);
+	CrispImplicator impl(as);
+	PatternMatch pm;
+	pm.do_bindlink(himplication, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
-	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+	Handle gl = as->addLink(LIST_LINK, impl.result_list);
 	return gl;
 }
 
 /**
  * PLN specific PatternMatchCallback implementation
  */
-Handle PatternMatch::pln_bindlink(Handle himplication)
+Handle opencog::pln_bindlink(AtomSpace* as, Handle himplication)
 {
 	// Now perform the search.
-	PLNImplicator impl(_atom_space);
-	do_bindlink(himplication, impl);
+	PLNImplicator impl(as);
+	PatternMatch pm;
+	pm.do_bindlink(himplication, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
-	Handle gl = _atom_space->addLink(LIST_LINK, impl.result_list);
+	Handle gl = as->addLink(LIST_LINK, impl.result_list);
 	return gl;
 }
 

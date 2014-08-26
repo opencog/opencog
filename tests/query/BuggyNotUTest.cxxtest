@@ -23,8 +23,7 @@
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -34,7 +33,6 @@ using namespace opencog;
 class BuggyNot :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatch pm;
 		AtomSpace *as;
 
 	public:
@@ -58,7 +56,6 @@ class BuggyNot :  public CxxTest::TestSuite
 
 			server(CogServer::createInstance);
 			as = &cogserver().getAtomSpace();
-			pm.set_atomspace(as);
 
 			// Load the required data
 			config().set("MODULES",
@@ -128,7 +125,7 @@ void BuggyNot::test_bugnot(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != trans_rule);
 
 	// First, deduce if two seemingly different people are the same ...
-	Handle same = pm.crisp_logic_bindlink(same_rule);
+	Handle same = crisp_logic_bindlink(as, same_rule);
 	logger().debug("Same-people list is %s\n", SchemeSmob::to_string(same).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(same));
 
@@ -140,7 +137,7 @@ void BuggyNot::test_bugnot(void)
 	// failed, because it was still using a left-over portion of the previous
 	// implication link. This was a rather distressing bug ... a very obvious
 	// but poor bug, and hadn't been noticed before. Alas.
-	Handle trans = pm.crisp_logic_bindlink(trans_rule);
+	Handle trans = crisp_logic_bindlink(as, trans_rule);
 	logger().debug("Transitive list is %s\n", SchemeSmob::to_string(trans).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(trans));
 
