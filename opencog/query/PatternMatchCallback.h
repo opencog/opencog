@@ -65,7 +65,7 @@ class PatternMatchCallback
 		virtual bool variable_match(Handle& node1, Handle& node2) = 0;
 
 		/**
-		 * Called right before link in the template pattern 
+		 * Called right before link in the template pattern
 		 * is to be compared to a possibly matching link in
 		 * the atomspace. The first argument is a link from
 		 * the pattern, and the second is a possible
@@ -91,7 +91,7 @@ class PatternMatchCallback
 		 */
 		virtual bool link_match(LinkPtr& link1, LinkPtr& link2) = 0;
 
-		/** 
+		/**
 		 * Called after a candidate grounding has been found
 		 * for a link.  This callback offers a final chance
 		 * to reject the link match based on the actual
@@ -134,16 +134,16 @@ class PatternMatchCallback
 		 *             EtcAtom ...
 		 *
 		 * The 'args' handle is a candidate grounding for the ListLink.
-		 * Note that the grounding is fully instantiated in the AtomSpace,
-		 * so, if its undesired, then at least the ListLink should probably
-		 * be removed. Maybe even more ...
+		 * Note that the candidate grounding is NOT instantiated in the
+		 * main AtomSpace (it is held in a temporary AtomSpace that is
+		 * deleted upon return from this callback).
 		 */
 		virtual bool virtual_link_match(LinkPtr& virt, Handle& args) = 0;
 
 		/**
-		 * Called when a grounding is found. Should
-		 * return false to search for more solutions;
-		 * or return true to terminate search.
+		 * Called when a complete grounding to all clauses is found.
+		 * Should return false to search for more solutions; or return
+		 * true to terminate search.
 		 */
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
                              const std::map<Handle, Handle> &pred_soln) = 0;
@@ -186,11 +186,12 @@ class PatternMatchCallback
 
 		/**
 		 * Called whenever the incoming set of an atom is to be explored.
-		 * The search space can be prioritized by returning a list in
-		 * some sorted order: the first ones will be searched first.
+		 * This callback allows the search space to be prioritized, by
+		 * returning (all or some of) the incoming set in some sorted
+		 * order: the first in the list will be searched first.
 		 * The search space can also be limited, by returning a set that
 		 * is smaller than the full incoming set (for example, by
-		 * returning only those atoms with a high av sti).
+		 * returning only those atoms with a high av-sti).
 		 */
 		virtual IncomingSet get_incoming_set(Handle h)
 		{
@@ -207,8 +208,8 @@ class PatternMatchCallback
 		/**
 		 * Called prior to starting a back-track, retreating from the
 		 * most recently grounded top-level predicate (tree). This
-		 * gives the callee the opportunity to save state onto a stack,
-		 * if needed.
+		 * gives the callee the opportunity to maintain state with a
+		 * stack, if needed.
 		 */
 		virtual void pop(void) {}
 
@@ -217,12 +218,13 @@ class PatternMatchCallback
 		 * conveys how the variable declarations in a BindLink were
 		 * decoded.  The argument is nothing more than the variable
 		 * declarations, as given in the atomspace, but re-expressed
-		 * in a slightly more convenient C++ form, is all.
+		 * in a slightly more convenient C++ form, is all.  This
+		 * callback may alter the typemap before returning.
 		 */
 		virtual void set_type_restrictions(VariableTypeMap &tm) {}
 
 		/**
-		 * Called to initiaite the search. This callback is responsbile
+		 * Called to initiate the search. This callback is responsible
 		 * for performing the top-most, outer loop of the search. That is,
 		 * it gets to pick the starting points for the search, thereby
 		 * possibly limiting the breadth of the search.  It may also cull

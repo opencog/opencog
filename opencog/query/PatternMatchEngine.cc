@@ -82,21 +82,23 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle& h)
 /**
  * tree_compare compares two trees, side-by-side.
  *
- * Compare two incidence trees, side-by-side. It is assumed that the
- * first of these is a clause in the predicate, and so the comparison
- * is between the clause, and a candidate grounding.
+ * Compare two incidence trees, side-by-side.  The incidence tree is
+ * given by following the "outgoing set" of the links appearing in the
+ * tree.  The incidence tree is the so-called "Levi graph" of the
+ * hypergraph.  The first arg should be a handle to a clause in the
+ * pattern, while the second arg is a handle to a candidate grounding.
+ * The pattern (predicate) clause is compared to the candidate grounding,
+ * returning true if there is a mis-match.
  *
- * The graph/tree refered to here is the incidence graph/tree (aka
- * Levi graph) of the hypergraph (and not the hypergraph itself).
- * The incidence graph is given by the "outgoing set" of the atom.
- *
- * This routine is recursive, calling itself on each subtree of the
- * predicate clause, performing comparisions until a match is found
- * (or not found).
+ * The comparison is recursive, so this method calls itself on each
+ * subtree of the predicate clause, performing comparisions until a
+ * match is found (or not found).
  *
  * Return true if there's a mis-match. The goal here is to walk over
  * the entire tree, without mismatches.  Since a return value of true
  * stops the iteration, true is used to signal a mismatch.
+ *
+ * quotes...
  */
 bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 {
@@ -341,6 +343,7 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 		pred_solutn_stack.push(clause_grounding);
 		var_solutn_stack.push(var_grounding);
 		issued_stack.push(issued);
+		in_quote_stack.push(in_quote);
 		pmc->push();
 
 		get_next_untried_clause();
@@ -438,6 +441,9 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 
 		issued = issued_stack.top();
 		issued_stack.pop();
+
+		in_quote = in_quote_stack.top();
+		in_quote_stack.pop();
 
 		prtmsg("pop to joiner", curr_pred_handle);
 		prtmsg("pop to clause", curr_root);
