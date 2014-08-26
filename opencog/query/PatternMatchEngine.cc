@@ -82,27 +82,55 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle& h)
 /**
  * tree_compare compares two trees, side-by-side.
  *
- * Compare two incidence trees, side-by-side. It is assumed that the
- * first of these is a clause in the predicate, and so the comparison
- * is between the clause, and a candidate grounding.
+ * Compare two incidence trees, side-by-side.  The incidence tree is
+ * given by following the "outgoing set" of the links appearing in the
+ * tree.  The incidence tree is the so-called "Levi graph" of the
+ * hypergraph.  The first arg should be a handle to a clause in the
+ * pattern, while the second arg is a handle to a candidate grounding.
+ * The pattern (predicate) clause is compared to the candidate grounding,
+ * returning true if there is a mis-match.
  *
- * The graph/tree refered to here is the incidence graph/tree (aka
- * Levi graph) of the hypergraph (and not the hypergraph itself).
- * The incidence graph is given by the "outgoing set" of the atom.
- *
- * This routine is recursive, calling itself on each subtree of the
- * predicate clause, performing comparisions until a match is found
- * (or not found).
+ * The comparison is recursive, so this method calls itself on each
+ * subtree of the predicate clause, performing comparisions until a
+ * match is found (or not found).
  *
  * Return true if there's a mis-match. The goal here is to walk over
  * the entire tree, without mismatches.  Since a return value of true
  * stops the iteration, true is used to signal a mismatch.
+ *
+ * The pattern clause may contain quotes (QuoteLinks), which signify
+ * that what follows must be treated as a literal (constant), rather
+ * than being interpreted.  Thus, quotes can be used to search for
+ * expressions containing variables (since a quoted variable is no
+ * longer a variable, but a constant).  Quotes can also be used to
+ * search for GroundedPredicateNodes (since a quoted GPN will be
+ * treated as a constant, and not as a function).  Quotes can be nested,
+ * only the first quote is used to escape into the literal context,
+ * and so quotes can be used to search for expressions containing
+ * quotes.  It is assumed that the QuoteLink has an arity of one, as
+ * its quite unclear what an arity of more than one could ever mean.
  */
 bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 {
+	// If the pattern link is a quote, then we compare the quoted
+	// contents. This is done recursively, of course.  The QuoteLink
+	// must have only one child; anything else beyond that is ignored
+	// (as its not clear what else could possibly be done).
+	Type tp = hp->getType();
+	if (not in_quote and QUOTE_LINK == tp)
+	{
+		in_quote = true;
+		LinkPtr lp(LinkCast(hp));
+		if (1 != lp->getArity())
+			throw InvalidParamException(TRACE_INFO, "QuoteLink has unexpected arity!");
+		bool misma = tree_compare(lp->getOutgoingAtom(0), hg);
+		in_quote = false;
+		return misma;
+	}
+
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (_bound_vars.end() != _bound_vars.find(hp))
+	if (not in_quote and _bound_vars.end() != _bound_vars.find(hp))
 	{
 		// But... if handle hg happens to also be a bound var,
 		// then its a mismatch.
@@ -138,13 +166,22 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 
 	// If they're the same atom, then clearly they match.
 	// ... but only if hg is not a subclause of the current clause.
-	if ((hp == hg) && (hg != curr_pred_handle))
+	if ((hp == hg) and (hg != curr_pred_handle))
 	{
-		var_grounding[hp] = hg;
+		// Bound, quoted variables cannot be solutions to themselves.
+		if (not in_quote or
+		    (in_quote and
+		     (VARIABLE_NODE != tp or
+		       _bound_vars.end() == _bound_vars.find(hp))))
+		{
+			var_grounding[hp] = hg;
+		}
 		return false;
 	}
 
 	// If both are links, compare them as such.
+	// Unless pattern link is a QuoteLink, in which case, the quoted
+	// contents is compared.
 	LinkPtr lp(LinkCast(hp));
 	LinkPtr lg(LinkCast(hg));
 	if (lp and lg)
@@ -162,13 +199,12 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		// this. If they are un-ordered, then we have to compare (at
 		// most) every possible permutation.
 		//
-		Type tp = hp->getType();
 		if (classserver().isA(tp, ORDERED_LINK))
 		{
 			LinkPtr lp(LinkCast(hp));
 			LinkPtr lg(LinkCast(hg));
-			const std::vector<Handle> &osp = lp->getOutgoingSet();
-			const std::vector<Handle> &osg = lg->getOutgoingSet();
+			const HandleSeq &osp = lp->getOutgoingSet();
+			const HandleSeq &osg = lg->getOutgoingSet();
 
 			// The recursion step: traverse down the tree.
 			// In principle, we could/should push the current groundings
@@ -341,6 +377,7 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 		pred_solutn_stack.push(clause_grounding);
 		var_solutn_stack.push(var_grounding);
 		issued_stack.push(issued);
+		in_quote_stack.push(in_quote);
 		pmc->push();
 
 		get_next_untried_clause();
@@ -439,6 +476,9 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 		issued = issued_stack.top();
 		issued_stack.pop();
 
+		in_quote = in_quote_stack.top();
+		in_quote_stack.pop();
+
 		prtmsg("pop to joiner", curr_pred_handle);
 		prtmsg("pop to clause", curr_root);
 
@@ -514,7 +554,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	bool solved = false;
 
 	RootMap::iterator k;
-	for (k = root_map.begin(); k != root_map.end(); k++)
+	for (k = _root_map.begin(); k != _root_map.end(); k++)
 	{
 		RootPair vk = *k;
 		RootList *rl = vk.second;
@@ -548,7 +588,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		//
 		// In particular, the "thinnest" one is probably the one with the
 		// fewest ungrounded variables in it. Thus, if there is just one
-		// variable that needs to be grounded, then this can be done in 
+		// variable that needs to be grounded, then this can be done in
 		// direct fashion; it resembles the concept of "unit propagation"
 		// in the DPLL algorithm.
 		//
@@ -579,7 +619,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	solved = false;
 
 	// Try again, this time, considering the optional clauses.
-	for (k=root_map.begin(); k != root_map.end(); k++)
+	for (k = _root_map.begin(); k != _root_map.end(); k++)
 	{
 		RootPair vk = *k;
 		RootList *rl = vk.second;
@@ -650,15 +690,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 bool PatternMatchEngine::do_candidate(Handle& do_clause, Handle& starter, Handle& ah)
 {
 	// Cleanup
-	var_grounding.clear();
-	clause_grounding.clear();
-	issued.clear();
-	while(!pred_handle_stack.empty()) pred_handle_stack.pop();
-	while(!soln_handle_stack.empty()) soln_handle_stack.pop();
-	while(!root_handle_stack.empty()) root_handle_stack.pop();
-	while(!pred_solutn_stack.empty()) pred_solutn_stack.pop();
-	while(!var_solutn_stack.empty()) var_solutn_stack.pop();
-	while(!issued_stack.empty()) issued_stack.pop();
+	clear_state();
 
 	// Match the required clauses.
 	curr_root = do_clause;
@@ -677,11 +709,11 @@ bool PatternMatchEngine::do_candidate(Handle& do_clause, Handle& starter, Handle
  */
 bool PatternMatchEngine::note_root(Handle h)
 {
-	RootList *rl = root_map[h];
+	RootList *rl = _root_map[h];
 	if (NULL == rl)
 	{
 		rl = new RootList();
-		root_map[h] = rl;
+		_root_map[h] = rl;
 	}
 	rl->push_back(curr_root);
 
@@ -692,18 +724,15 @@ bool PatternMatchEngine::note_root(Handle h)
 
 /**
  * Clear all internal state.
- * This allows a given instance of this class to be used again.
+ * This resets the class for continuing a search, from the top.
  */
-void PatternMatchEngine::clear(void)
+void PatternMatchEngine::clear_state(void)
 {
 	// Clear all state.
-	_bound_vars.clear();
-	_cnf_clauses.clear();
-	_optionals.clear();
 	var_grounding.clear();
 	clause_grounding.clear();
-	root_map.clear();
 	issued.clear();
+	in_quote = false;
 
 	curr_root = Handle::UNDEFINED;
 	curr_soln_handle = Handle::UNDEFINED;
@@ -716,6 +745,25 @@ void PatternMatchEngine::clear(void)
 	while (!pred_solutn_stack.empty()) pred_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
+	while (!in_quote_stack.empty()) in_quote_stack.pop();
+}
+
+
+/**
+ * Clear all internal and pattern state.
+ * This allows a given instance of this class to be used again, with
+ * a different pattern.
+ */
+void PatternMatchEngine::clear(void)
+{
+	// Clear all pattern-related state.
+	_bound_vars.clear();
+	_cnf_clauses.clear();
+	_optionals.clear();
+	_root_map.clear();
+
+	// Clear internal recursive state.
+	clear_state();
 }
 
 

@@ -1,10 +1,9 @@
 ;
-; greater_than.scm
+; quote-greater.scm
 ;
-; Test data for the GroundedPredicateNode, which is a virtual node.
-; This declares the net worth of four individuals.  It also declares
-; four BindLinks, which find everyone who is richer.  The greater-than
-; comparison of richness is performed via the virtual link evaluation.
+; Test data for the QuoteLink -- should ignore the GroundedPredicateNode
+; This is very similar to the greater-than unit test, except that the
+; GPN is explicitly disabled with a quote.
 ;
 (EvaluationLink
 	(PredicateNode "net-worth")
@@ -38,6 +37,32 @@
 	)
 )
 
+;; this is thoroughly bogus, but that's intentional: the quotelink
+;; is being tested, and so we put some non-virtual data into the
+;; the atomspace.
+(EvaluationLink
+	(GroundedPredicateNode "c++:greater")
+	(ListLink
+		(NumberNode "1000")
+		(NumberNode "310")
+	)
+)
+(EvaluationLink
+	(GroundedPredicateNode "c++:greater")
+	(ListLink
+		(NumberNode "310")
+		(NumberNode "200")
+	)
+)
+(EvaluationLink
+	(GroundedPredicateNode "c++:greater")
+	(ListLink
+		(NumberNode "1000")
+		(NumberNode "200")
+	)
+)
+
+;; The actual BindLink that will be tested.
 (define (richer-than-person-x person-x)
 	(BindLink
 		(ListLink
@@ -64,7 +89,9 @@
 				)
 
 				(EvaluationLink
-					(GroundedPredicateNode "c++:greater")
+					(QuoteLink
+						(GroundedPredicateNode "c++:greater")
+					)
 					(ListLink
 						(VariableNode "$more-wealth")
 						(VariableNode "$less-wealth")

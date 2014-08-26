@@ -134,20 +134,41 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
  *
  * This search algo makes the following (important) assumptions:
  *
- * 1) If there are no variables in the clauses, then this will search
- *    over all links which have the same type as the first clause.
- *    Clearly, this kind of search can fail if link_match() callback
- *    was prepared to accept other link types as well.
+ * 1) If none of the clauses have any variables in them, (that is, if
+ *    all of the clauses are "constant" clauses) then the search will
+ *    begin by looping over all links in the atomspace that have the
+ *    same link type as the first clause.  This will fail to examine
+ *    all possible solutions if the link_match() callback is leniant,
+ *    and accepts a broader range of types than just this one. This
+ *    seems like a reasonable limitation: trying to search all-possible
+ *    link-types would be a huge performance impact, especially if the
+ *    link_match() callback was not interested in this broadened search.
  *
- * 2) If there are variables, then the search will begin at the first
- *    non-variable node in the first clause.  The search will proceed
- *    by exploring the entire incoming-set for this node, but no farther.
+ *    At any rate, this limitation doesn't even apply, because the
+ *    current PatternMatch::do_match() method completely removes
+ *    constant clauses anyway.  (It needs to do this in order to
+ *    simplify handling of connected graphs, so that virtual atoms are
+ *    properly handled.  This is based on the assumption that support
+ *    for virtual atoms is more important than support for unusual
+ *    link_match() callbacks.
+ *
+ * 2) Search will begin at the first non-variable node in the "smallest"
+ *    clause.  The smallest clause is chosen, so as to improve performance;
+ *    but this has no effect on the throughness of the search.  The search
+ *    will proceed by exploring the entire incoming-set for this node.
+ *    The search will NOT examine other non-variable node types.
  *    If the node_match() callback is willing to accept a broader range
- *    of node matches, esp for this initial node, then many possible
- *    solutions will be missed.
+ *    of node matches, esp. for this initial node, then many possible
+ *    solutions will be missed.  This seems like a reasonable limitation:
+ *    if you really want a very lenient node_match(), then use variables.
  *
- * 3) If the clauses consist entirely of variables, the same search
- *    as described in 1) will be performed.
+ * 3) If the clauses consist entirely of variables, then the search
+ *    will start by looking for all links that are of the same type as
+ *    the type of the first clause.  This can fail to find all possible
+ *    matches, if the link_match() callback is willing to accept a larger
+ *    set of types.  This is a reasonable limitation: anything looser
+ *    would very seriously degrade performance; if you really need a
+ *    very lenient link_match(), then use variables.
  *
  * The above describes the limits to the "typical" search that this
  * algo can do well. In particular, if the constraint of 2) can be met,
@@ -156,8 +177,9 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
  * connected atoms.
  *
  * Note that the default implementation of node_match() and link_match()
- * in this class does satisfy both 1) and 2), so this algo will work
- * correctly if these two methods are not overloaded.
+ * in this class does satisfy both 2) and 3), so this algo will work
+ * correctly if these two methods are not overloaded with more callbacks
+ * that are lenient about matching types.
  *
  * If you overload node_match(), and do so in a way that breaks
  * assumption 2), then you will scratch your head, thinking

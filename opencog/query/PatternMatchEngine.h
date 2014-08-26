@@ -52,14 +52,15 @@ class PatternMatchEngine
 
 		// -------------------------------------------
 		// Traversal utilities
-		RootMap root_map;
+		RootMap _root_map;
 		Handle curr_root;
 		bool note_root(Handle);
 		
 		// -------------------------------------------
 		// Recurisve tree comparison algorithm.
 		bool tree_compare(Handle, Handle);
-		int depth;  // recursion depth for tree_compare.
+		int depth;      // Recursion depth for tree_compare.
+		bool in_quote;  // Everything is literal in a quote.
 
 		bool pred_up(Handle);
 		bool soln_up(Handle);
@@ -69,10 +70,11 @@ class PatternMatchEngine
 		Handle curr_pred_handle;
 		void get_next_untried_clause(void);
 
-		// Stack used during recursive exploration
+		// Stack used during recursive exploration.
 		std::stack<Handle> pred_handle_stack;
 		std::stack<Handle> soln_handle_stack;
 		std::stack<Handle> root_handle_stack;
+		std::stack<bool> in_quote_stack;
 
 		// Stacks containing partial groundings.
 		typedef std::map<Handle, Handle> SolnMap;
@@ -90,13 +92,15 @@ class PatternMatchEngine
 		std::map<Handle, Handle> var_grounding;
 		std::map<Handle, Handle> clause_grounding;
 
-		// callback to whom the results are reported.
+		void clear_state(void);
+
+		// Callback to whom the results are reported.
 		PatternMatchCallback *pmc;
 
 	public:
 		PatternMatchEngine(void) {}
 
-		// Clear all internal state
+		// Clear all internal state.
 		void clear(void);
 
 		// Examine each candidate for a match, in turn.

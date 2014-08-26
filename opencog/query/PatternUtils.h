@@ -41,28 +41,28 @@ namespace opencog {
 ///  Find all of the variable nodes occuring in a clause.
 class FindVariables
 {
-   public:
-      std::set<Handle> varset;
+	public:
+		std::set<Handle> varset;
 
-      /**
-       * Create a set of all of the VariableNodes that lie in the
-       * outgoing set of the handle (recursively).
-       */
-      inline void find_vars(Handle h)
-      {
-         Type t = h->getType();
-         if (classserver().isNode(t))
-         {
-            if (t == VARIABLE_NODE) varset.insert(h);
-            return;
-         }
+		/**
+		 * Create a set of all of the VariableNodes that lie in the
+		 * outgoing set of the handle (recursively).
+		 */
+		inline void find_vars(Handle h)
+		{
+			Type t = h->getType();
+			if (classserver().isNode(t))
+			{
+				if (t == VARIABLE_NODE) varset.insert(h);
+				return;
+			}
 
-         LinkPtr l(LinkCast(h));
+			LinkPtr l(LinkCast(h));
 			for (Handle oh : l->getOutgoingSet()) find_vars(oh);
-      }
+		}
 
-      inline void find_vars(std::vector<Handle> hlist)
-      {
+		inline void find_vars(std::vector<Handle> hlist)
+		{
 			for (Handle h : hlist) find_vars(h);
 		}
 };
@@ -114,30 +114,32 @@ static inline bool is_node_in_any_tree(const std::vector<Handle>& trees, const H
 
 /**
  * Returns true if the clause contains an atom of type atom_type.
+ * ... but only if it is not quoted.  Quoted terms are constants.
  */
 static inline bool contains_atomtype(Handle& clause, Type atom_type)
 {
-   Type clause_type = clause->getType();
-   if (classserver().isA(clause_type, atom_type)) return true;
+	Type clause_type = clause->getType();
+	if (QUOTE_LINK == clause_type) return false;
+	if (classserver().isA(clause_type, atom_type)) return true;
 
-   LinkPtr lc(LinkCast(clause));
-   if (not lc) return false;
+	LinkPtr lc(LinkCast(clause));
+	if (not lc) return false;
 
-   const std::vector<Handle> &oset = lc->getOutgoingSet();
-   std::vector<Handle>::const_iterator i = oset.begin();
-   std::vector<Handle>::const_iterator iend = oset.end();
-   for (; i != iend; i++)
-   {
-      Handle subclause(*i);
-      if (contains_atomtype(subclause, atom_type)) return true;
-   }
-   return false;
+	const std::vector<Handle> &oset = lc->getOutgoingSet();
+	std::vector<Handle>::const_iterator i = oset.begin();
+	std::vector<Handle>::const_iterator iend = oset.end();
+	for (; i != iend; i++)
+	{
+		Handle subclause(*i);
+		if (contains_atomtype(subclause, atom_type)) return true;
+	}
+	return false;
 }
 
 // Make sure that variables can be found in the clauses.
 // See C file for description
 bool remove_constants(const std::set<Handle> &vars,
-                         std::vector<Handle> &clauses);
+                      std::vector<Handle> &clauses);
 
 
 // See C file for description
