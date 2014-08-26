@@ -57,6 +57,9 @@ VARIABLE_NODE <- NODE
 VARIABLE_TYPE_NODE <- NODE
 TYPED_VARIABLE_LINK <- ORDERED_LINK
 
+// Everything under a QuoteLink is interpreted literally.
+QUOTE_LINK <- ORDERED_LINK
+
 // Scoping and Logical quantifiers
 BIND_LINK <- ORDERED_LINK
 FORALL_LINK <- BIND_LINK "ForAllLink"
