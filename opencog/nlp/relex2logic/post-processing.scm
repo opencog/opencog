@@ -48,6 +48,9 @@
 			(not (equal? 'VariableNode (cog-type w)))
 			(not (equal? 'ReferenceNode (cog-type w)))
 			(not (string=? "possession" (cog-name w)))
+			(not (string=? "after" (cog-name w)))
+			(not (string=? "before" (cog-name w)))
+			(not (string=? "that" (cog-name w)))
 			; the actual check
 			(null? (cog-node 'WordInstanceNode (cog-name w)))
 		)
@@ -177,7 +180,6 @@
 		(append
 			(marker-cleaner "allmarker" allmarker-helper)
 			(marker-cleaner "maybemarker" maybemarker-helper)
-			(marker-cleaner "thatmarker" thatmarker-helper)
 		)
 	)
 	; helper function that prune away atoms that no longer exists
@@ -300,122 +302,6 @@
 
 	; modify the TV
 	(map change-tv clean-links)
-)
-
-; -----------------------------------------------------------------------
-; thatmarker-helper -- Helper function for processing thatmarker
-;
-; The thatmarker helper function for post-processing one specific
-; thatmarker.
-;
-; Given sentence "I think that dogs attack angry cats.", and thatmarker
-; in the form as 'orig-link':
-;
-;	EvaluationLink
-;		thatmarker
-;		ListLink
-;			think
-;			attack
-;
-; We create (by bring in other R2L rules result):
-;
-;	EvaluationLink
-;		think
-;		ListLink
-;			I
-;			$that-ab12
-;
-;	ReferenceLink
-;		$that-ab12
-;		AndLink
-;			EvaluationLink
-;				attack
-;				ListLink
-;					dog
-;					cat
-;			InheritanceLink
-;				cat
-;				angry
-;
-(define (thatmarker-helper orig-link)
-	(define listlink (car (cog-filter 'ListLink (cog-outgoing-set orig-link))))
-	(define word1 (gar listlink))
-	(define word2 (gdr listlink))
-	
-	; find all the words that link directly or indirectly with word2
-	(define (get-all-connected-words)
-		; helper function to get words that share the same hypergraph with 'word'
-		(define (get-all-closely-connected-words word)
-			(define all-links (cog-get-root word))
-			; clean away links that should be ignored
-			(define cleaned-links (remove check-exception all-links))
-			(delete-duplicates (append-map cog-get-all-nodes cleaned-links))
-		)
-		; the main recursive function to gather all indirectly connected words
-		(define (get-all-connected-words word)
-			(cond ((not (member? word connected-words))
-				(set! connected-words (append (list word) connected-words))
-				(for-each get-all-connected-words (get-all-closely-connected-words word))
-				)
-			)
-		)
-		; starts with word1 to avoid getting its connected words, then delete it afterward
-		(define connected-words (list word1)) 
-		(get-all-connected-words word2)
-		(set! connected-words (delete word1 connected-words))
-		connected-words
-	)
-
-	(define all-connected-words (get-all-connected-words))
-
-	; for each word in connected-words, get the root link
-	(define all-root-links (delete-duplicates (append-map cog-get-root all-connected-words)))
-
-	; clean away links that should be ignored
-	(define word2-links (remove check-exception all-root-links))
-
-	; get the EvaluationLink where word1 act as Predicate, and its root
-	(define word1-predicate (car (cog-get-link 'EvaluationLink 'ListLink word1)))
-	(define word1-predicate-listlink (car (cog-filter 'ListLink (cog-outgoing-set word1-predicate))))
-	(define word1-predicate-root (cog-get-root word1-predicate))
-
-	(define that-reference-node (ReferenceNode (random-node-name 'ReferenceNode 32 "$that-") df-node-stv))
-
-	(define (rebuild-with-that link)
-		(define old-oset (cog-outgoing-set link))
-		(define (rebuild-helper atom)
-			(if (cog-link? atom)
-				; if we found the ListLink of the predicate, insert the that-reference-node
-				(if (equal? atom word1-predicate-listlink)
-					(ListLink df-link-stv (cog-outgoing-set word1-predicate-listlink) that-reference-node)
-					(rebuild-with-that atom)
-				)
-				atom
-			)
-		)
-		(define new-oset (map rebuild-helper old-oset))
-		(apply cog-new-link (append (list (cog-type link) (cog-tv link)) new-oset))
-	)
-
-	; rebuild word1-predicate's root with that-reference-node inside
-	(define word1-new-predicate-root (map rebuild-with-that word1-predicate-root))
-
-	(for-each purge-hypergraph word1-predicate-root)
-
-	; the final representation
-	(append
-		word1-new-predicate-root
-		; create new ReferenceLink, AndLink everything
-		(list
-			(ReferenceLink df-link-stv
-				that-reference-node
-				(if (= (length word2-links) 1)
-					word2-links
-					(AndLink df-link-stv word2-links)
-				)
-			)
-		)
-	)
 )
 
 ; -----------------------------------------------------------------------

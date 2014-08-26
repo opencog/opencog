@@ -158,14 +158,10 @@
 )
 
 (define (SVP-rule subj  subj_instance  predicative  predicative_instance)
-	(list (ImplicationLink (PredicateNode predicative_instance df-node-stv) (PredicateNode predicative df-node-stv) df-link-stv)
+	(list (InheritanceLink (ConceptNode predicative_instance df-node-stv) (ConceptNode predicative df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj df-node-stv) df-link-stv)
-	(EvaluationLink df-link-stv
-		(PredicateNode predicative_instance df-node-stv)
-		(ListLink df-link-stv
-			(ConceptNode subj_instance df-node-stv)
-		)
-	))
+	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode predicative_instance df-node-stv) df-link-stv)
+	)
 )
 
 (define (to-be-rule verb verb_ins adj adj_ins subj subj_ins)
@@ -516,7 +512,7 @@
 		main-link
 		sub-link
 		(EvaluationLink df-link-stv
-			(PredicateNode "thatmarker" df-node-stv)
+			(PredicateNode "that" df-node-stv)
 			(ListLink df-link-stv
 				main-node
 				sub-node
@@ -524,7 +520,8 @@
 		)
 	)
 )
-; ----------------------------------
+
+; -----------------------------------------------------------------------
 ; time rules to create time relations
 ; -----------------------------------------------------------------------
 ; second argument of before() and after() can be a verb, adjective, pronoun
@@ -535,7 +532,7 @@
 ; before he is tired"
 (define (before-after-rule $x_instance $y_instance $y_pos $before_or_after)
     (define y-node
-        (if (or (string=? $y_pos "verb") (string=? $y_pos "adj"))
+        (if (string=? $y_pos "verb")
             (PredicateNode $y_instance df-node-stv)
             (ConceptNode $y_instance df-node-stv)
         )
