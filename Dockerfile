@@ -19,8 +19,13 @@ MAINTAINER David Hart "dhart@opencog.org"
 RUN sed 's/archive.ubuntu.com/hk.archive.ubuntu.com/' -i /etc/apt/sources.list
 
 RUN apt-get -y update
-RUN apt-get -y install software-properties-common wget tmux qtcreator \
-                       lxterminal git gitk git-gui meld lxde
+RUN apt-get -y install software-properties-common wget tmux git
+RUN apt-get -y install gitg 
+RUN apt-get -y install git-gui 
+RUN apt-get -y install meld
+RUN apt-get -y install lxterminal
+RUN apt-get -y install qtcreator
+RUN apt-get -y install lxde
 
 ADD scripts/ocpkg install-dependencies-trusty
 RUN chmod +x /install-dependencies-trusty
