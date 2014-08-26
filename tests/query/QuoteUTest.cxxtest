@@ -71,6 +71,7 @@ public:
     void test_numeric_greater(void);
     void test_quoted_variable(void);
     void test_nest(void);
+    void test_throw(void);
 };
 
 void QuoteUTest::tearDown(void)
@@ -180,3 +181,23 @@ void QuoteUTest::test_nest(void)
     TS_ASSERT_EQUALS(0, strcmp("all-var", as->getName(allstar).c_str()));
 }
 
+void QuoteUTest::test_throw(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/quote-throw.scm");
+    load_scm_files_from_config(*as);
+
+    Handle bindy = eval->eval_h("bindy");
+
+    bool did_throw = false;
+    try
+    {
+        bindlink(as, bindy);
+    }
+    catch (InvalidParamException &e)
+    {
+        did_throw = true;
+    }
+    TS_ASSERT_EQUALS(true, did_throw);
+}
