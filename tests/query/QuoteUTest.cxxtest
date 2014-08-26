@@ -115,5 +115,5 @@ void QuoteUTest::test_numeric_greater(void)
     TS_ASSERT_EQUALS(0, as->getArity(people_richer_than_gates));
     TS_ASSERT_EQUALS(0, as->getArity(people_richer_than_obama));
     TS_ASSERT_EQUALS(1, as->getArity(people_richer_than_george));
-    TS_ASSERT_EQUALS(1, as->getArity(people_richer_than_susan));
+    TS_ASSERT_EQUALS(2, as->getArity(people_richer_than_susan));
 }

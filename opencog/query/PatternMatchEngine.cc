@@ -98,13 +98,23 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle& h)
  * the entire tree, without mismatches.  Since a return value of true
  * stops the iteration, true is used to signal a mismatch.
  *
- * quotes...
+ * The pattern clause may contain quotes (QuoteLinks), which signify
+ * that what follows must be treated as a literal (constant), rather
+ * than being interpreted.  Thus, quotes can be used to search for
+ * expressions containing variables (since a quoted variable is no
+ * longer a variable, but a constant).  Quotes can also be used to
+ * search for GroundedPredicateNodes (since a quoted GPN will be
+ * treated as a constant, and not as a function).  Quotes can be nested,
+ * only the first quote is used to escape into the literal context,
+ * and so quotes can be used to search for expressions containing
+ * quotes.  It is assumed that the QuoteLink has an arity of one, as
+ * its quite unclear what an arity of more than one could ever mean.
  */
 bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 {
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (_bound_vars.end() != _bound_vars.find(hp))
+	if (not in_quote and _bound_vars.end() != _bound_vars.find(hp))
 	{
 		// But... if handle hg happens to also be a bound var,
 		// then its a mismatch.
@@ -146,7 +156,25 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		return false;
 	}
 
+	// If the pattern link is a quote, then we compare the quoted
+	// contents. This is done recursively, of course.  The QuoteLink
+	// must have only one child; anything else beyond that is ignored
+	// (as its not clear what else could possibly be done).
+	Type tp = hp->getType();
+	if (not in_quote and QUOTE_LINK == tp)
+	{
+		in_quote = true;
+		LinkPtr lp(LinkCast(hp));
+		if (1 != lp->getArity())
+			throw InvalidParamException(TRACE_INFO, "QuoteLink has unexpected arity!");
+		bool misma = tree_compare(lp->getOutgoingAtom(0), hg);
+		in_quote = false;
+		return misma;
+	}
+
 	// If both are links, compare them as such.
+	// Unless pattern link is a QuoteLink, in which case, the quoted
+	// contents is compared.
 	LinkPtr lp(LinkCast(hp));
 	LinkPtr lg(LinkCast(hg));
 	if (lp and lg)
@@ -164,13 +192,12 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		// this. If they are un-ordered, then we have to compare (at
 		// most) every possible permutation.
 		//
-		Type tp = hp->getType();
 		if (classserver().isA(tp, ORDERED_LINK))
 		{
 			LinkPtr lp(LinkCast(hp));
 			LinkPtr lg(LinkCast(hg));
-			const std::vector<Handle> &osp = lp->getOutgoingSet();
-			const std::vector<Handle> &osg = lg->getOutgoingSet();
+			const HandleSeq &osp = lp->getOutgoingSet();
+			const HandleSeq &osg = lg->getOutgoingSet();
 
 			// The recursion step: traverse down the tree.
 			// In principle, we could/should push the current groundings

@@ -39,6 +39,13 @@
 (EvaluationLink
 	(GroundedPredicateNode "c++:greater")
 	(ListLink
+		(NumberNode "1000")
+		(NumberNode "310")
+	)
+)
+(EvaluationLink
+	(GroundedPredicateNode "c++:greater")
+	(ListLink
 		(NumberNode "310")
 		(NumberNode "200")
 	)
