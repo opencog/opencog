@@ -4,7 +4,7 @@
 # cd ~ && git clone http://shujingke@github.com/shujingke/opencog && cd opencog && git pull
 # docker build -t shujingke/opencog-dev-qt .
 # xhost +
-# docker run -t shujingke/opencog-dev-qt -i -v /tmp/.X11-unix/X0:/tmp/.X11-unix/X0 -v /home/shujingke:/home/shujingke 
+# docker run --rm -i -v /tmp/.X11-unix/X0:/tmp/.X11-unix/X0 -v /home/shujingke:/home/shujingke -e DISPLAY=:0.0 -t shujingke/opencog-dev-qt 
 
 # New run command:
 # docker run --rm -i -v /tmp/.X11-unix/X0:/tmp/.X11-unix/X0 -v /dev/dri:/dev/dri -v /dev/shm:/dev/shm -v /home/shujingke:/home/shujingke -e DISPLAY=:0.0 -p 17001:17001 -t shujingke/opencog-dev-qt
@@ -30,8 +30,6 @@ RUN apt-get -y install lxde
 ADD scripts/ocpkg install-dependencies-trusty
 RUN chmod +x /install-dependencies-trusty
 RUN /install-dependencies-trusty
-
-ENV DISPLAY 0:0
 
 ENV STARTSCRIPT "\
 echo evaluating startup script... &&\
