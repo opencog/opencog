@@ -168,9 +168,14 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	// ... but only if hg is not a subclause of the current clause.
 	if ((hp == hg) and (hg != curr_pred_handle))
 	{
-		// Quoted variables cannot be solutions to themselves.
-		if (not in_quote or (in_quote and VARIABLE_NODE != tp))
+		// Bound, quoted variables cannot be solutions to themselves.
+		if (not in_quote or
+		    (in_quote and
+		     (VARIABLE_NODE != tp or
+		       _bound_vars.end() == _bound_vars.find(hp))))
+		{
 			var_grounding[hp] = hg;
+		}
 		return false;
 	}
 
