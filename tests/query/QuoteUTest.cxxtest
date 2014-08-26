@@ -69,6 +69,7 @@ public:
     void tearDown(void);
 
     void test_numeric_greater(void);
+    void test_quoted_variable(void);
 };
 
 void QuoteUTest::tearDown(void)
@@ -116,4 +117,21 @@ void QuoteUTest::test_numeric_greater(void)
     TS_ASSERT_EQUALS(0, as->getArity(people_richer_than_obama));
     TS_ASSERT_EQUALS(1, as->getArity(people_richer_than_george));
     TS_ASSERT_EQUALS(2, as->getArity(people_richer_than_susan));
+}
+
+/*
+ * QuoteLink unit test.  Test quoted variables.
+ */
+void QuoteUTest::test_quoted_variable(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/quote-var.scm");
+    load_scm_files_from_config(*as);
+
+    Handle bindy = eval->eval_h("bindy");
+
+    Handle bananna = bindlink(as, bindy);
+
+    TS_ASSERT_EQUALS(1, as->getArity(bananna));
 }
