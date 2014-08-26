@@ -27,6 +27,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
+#include "imply.h"
+
 using namespace opencog;
 
 class PatternUTest: public CxxTest::TestSuite
@@ -438,7 +440,7 @@ void PatternUTest::test_implication(void)
 	Handle hpa = as->addLink(PARSE_LINK, h2);
 	Handle him = as->addLink(IMPLICATION_LINK, han, hpa);
 
-	pm.imply(him);
+	imply(as, him);
 
 	// Remove the parse link, so that the other one is easier to find.
 	as->removeAtom(him);

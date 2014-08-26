@@ -20,17 +20,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
+
+#include "imply.h"
 
 using namespace opencog;
 
 class BigPatternUTest :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatch pm;
 		AtomSpace *as;
 
 		Handle imake, hmake_from, hpottery, hclay;
@@ -82,7 +81,6 @@ void BigPatternUTest::tearDown(void)
 void BigPatternUTest::setUp(void)
 {
 	as = new AtomSpace();
-	pm.set_atomspace(as);
 
 	// Create an implication link that will be tested.
 	imake = 
@@ -148,7 +146,7 @@ void BigPatternUTest::test_prep(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle result = pm.imply(imake);
+	Handle result = imply(as, imake);
 	TSM_ASSERT_DIFFERS("no solutions found", 0, getarity(result));
 
 	// Then, evaluationLink, as above.

@@ -21,18 +21,17 @@
  */
 
 #include <opencog/nlp/types/atom_types.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
+
+#include "imply.h"
 
 using namespace opencog;
 
 class BiggerPatternUTest :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatch pm;
 		AtomSpace *as;
 
 		Handle imake;
@@ -103,7 +102,6 @@ void BiggerPatternUTest::tearDown(void)
 void BiggerPatternUTest::setUp(void)
 {
 	as = new AtomSpace();
-	pm.set_atomspace(as);
 
 	// Create an implication link that will be tested.
 	imake =
@@ -243,7 +241,7 @@ void BiggerPatternUTest::test_prep(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle imlist = pm.imply(imake);
+	Handle imlist = imply(as, imake);
 
 	// Expect two answers: Berlin is the capital of Germany,
 	// and of France. (just for this test case :-)

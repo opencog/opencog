@@ -75,11 +75,9 @@ class PatternMatch
 		Handle bindlink(Handle);
 		Handle single_bindlink (Handle);
 		Handle crisp_logic_bindlink(Handle);
-        	Handle pln_bindlink(Handle);
-		// deprecated; used only in the unit-test cases.
-		Handle imply(Handle);             // deprecated
-		Handle crisp_logic_imply(Handle); // deprecated
+		Handle pln_bindlink(Handle);
 
+		// Deprecated: used only in the unit-test cases.
 		void do_imply(Handle, Implicator&)
 			throw (InvalidParamException);
 
