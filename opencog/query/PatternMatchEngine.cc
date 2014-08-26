@@ -514,7 +514,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	bool solved = false;
 
 	RootMap::iterator k;
-	for (k = root_map.begin(); k != root_map.end(); k++)
+	for (k = _root_map.begin(); k != _root_map.end(); k++)
 	{
 		RootPair vk = *k;
 		RootList *rl = vk.second;
@@ -548,7 +548,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		//
 		// In particular, the "thinnest" one is probably the one with the
 		// fewest ungrounded variables in it. Thus, if there is just one
-		// variable that needs to be grounded, then this can be done in 
+		// variable that needs to be grounded, then this can be done in
 		// direct fashion; it resembles the concept of "unit propagation"
 		// in the DPLL algorithm.
 		//
@@ -579,7 +579,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	solved = false;
 
 	// Try again, this time, considering the optional clauses.
-	for (k=root_map.begin(); k != root_map.end(); k++)
+	for (k = _root_map.begin(); k != _root_map.end(); k++)
 	{
 		RootPair vk = *k;
 		RootList *rl = vk.second;
@@ -650,15 +650,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 bool PatternMatchEngine::do_candidate(Handle& do_clause, Handle& starter, Handle& ah)
 {
 	// Cleanup
-	var_grounding.clear();
-	clause_grounding.clear();
-	issued.clear();
-	while(!pred_handle_stack.empty()) pred_handle_stack.pop();
-	while(!soln_handle_stack.empty()) soln_handle_stack.pop();
-	while(!root_handle_stack.empty()) root_handle_stack.pop();
-	while(!pred_solutn_stack.empty()) pred_solutn_stack.pop();
-	while(!var_solutn_stack.empty()) var_solutn_stack.pop();
-	while(!issued_stack.empty()) issued_stack.pop();
+	clear_state();
 
 	// Match the required clauses.
 	curr_root = do_clause;
@@ -677,11 +669,11 @@ bool PatternMatchEngine::do_candidate(Handle& do_clause, Handle& starter, Handle
  */
 bool PatternMatchEngine::note_root(Handle h)
 {
-	RootList *rl = root_map[h];
+	RootList *rl = _root_map[h];
 	if (NULL == rl)
 	{
 		rl = new RootList();
-		root_map[h] = rl;
+		_root_map[h] = rl;
 	}
 	rl->push_back(curr_root);
 
@@ -692,18 +684,15 @@ bool PatternMatchEngine::note_root(Handle h)
 
 /**
  * Clear all internal state.
- * This allows a given instance of this class to be used again.
+ * This resets the class for continuing a search, from the top.
  */
-void PatternMatchEngine::clear(void)
+void PatternMatchEngine::clear_state(void)
 {
 	// Clear all state.
-	_bound_vars.clear();
-	_cnf_clauses.clear();
-	_optionals.clear();
 	var_grounding.clear();
 	clause_grounding.clear();
-	root_map.clear();
 	issued.clear();
+	in_quote = false;
 
 	curr_root = Handle::UNDEFINED;
 	curr_soln_handle = Handle::UNDEFINED;
@@ -716,6 +705,25 @@ void PatternMatchEngine::clear(void)
 	while (!pred_solutn_stack.empty()) pred_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
+	while (!in_quote_stack.empty()) in_quote_stack.pop();
+}
+
+
+/**
+ * Clear all internal and pattern state.
+ * This allows a given instance of this class to be used again, with
+ * a different pattern.
+ */
+void PatternMatchEngine::clear(void)
+{
+	// Clear all pattern-related state.
+	_bound_vars.clear();
+	_cnf_clauses.clear();
+	_optionals.clear();
+	_root_map.clear();
+
+	// Clear internal recursive state.
+	clear_state();
 }
 
 
