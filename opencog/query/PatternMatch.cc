@@ -460,7 +460,7 @@ void PatternMatch::do_imply (Handle himplication,
 	throw (InvalidParamException)
 {
 	std::set<Handle> varset;
-	do_imply(himplication, impl);
+	do_imply(himplication, impl, varset);
 }
 
 /* ===================== END OF FILE ===================== */
