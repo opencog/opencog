@@ -134,19 +134,29 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
  *
  * This search algo makes the following (important) assumptions:
  *
- * 1) Every clause has at least one variable in it. Clearly, this will
- *    fail for the user who expected to match constant clauses by using
- *    a link_match() callback that mixed-n-matched different link types.
- *    This assumption is "reasonable" because the current PatternMatch::
- *    do_match() method removes constant clauses.  It needs to do this
- *    in order to handle connected graphs, so that virtual atoms are
- *    properly handled.  This, in turn, is based on the assumption that
- *    support for virtual atoms is more important than support for
- *    unusual link_match() callbacks.
+ * 1) If none of the clauses have any variables in them, (that is, if
+ *    all of the clauses are "constant" clauses) then the search will
+ *    begin by looping over all links in the atomspace that have the
+ *    same link type as the first clause.  This will fail to examine
+ *    all possible solutions if the link_match() callback is leniant,
+ *    and accepts a broader range of types than just this one. This
+ *    seems like a reasonable limitation: trying to search all-possible
+ *    link-types would be a huge performance impact, especially if the
+ *    link_match() callback was not interested in this broadened search.
  *
- * 2) Search will begin at the first non-variable node in the first clause.
- *    The search will proceed by exploring the entire incoming-set for this
- *    node.  The search will NOT examine other non-variable node types.
+ *    At any rate, this limitation doesn't even apply, because the
+ *    current PatternMatch::do_match() method completely removes
+ *    constant clauses anyway.  (It needs to do this in order to
+ *    simplify handling of connected graphs, so that virtual atoms are
+ *    properly handled.  This is based on the assumption that support
+ *    for virtual atoms is more important than support for unusual
+ *    link_match() callbacks.
+ *
+ * 2) Search will begin at the first non-variable node in the "smallest"
+ *    clause.  The smallest clause is chosen, so as to improve performance;
+ *    but this has no effect on the throughness of the search.  The search
+ *    will proceed by exploring the entire incoming-set for this node.
+ *    The search will NOT examine other non-variable node types.
  *    If the node_match() callback is willing to accept a broader range
  *    of node matches, esp. for this initial node, then many possible
  *    solutions will be missed.  This seems like a reasonable limitation:
@@ -168,7 +178,8 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
  *
  * Note that the default implementation of node_match() and link_match()
  * in this class does satisfy both 2) and 3), so this algo will work
- * correctly if these two methods are not overloaded.
+ * correctly if these two methods are not overloaded with more callbacks
+ * that are lenient about matching types.
  *
  * If you overload node_match(), and do so in a way that breaks
  * assumption 2), then you will scratch your head, thinking
