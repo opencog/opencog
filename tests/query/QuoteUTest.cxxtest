@@ -78,6 +78,7 @@ public:
     void test_nest(void);
     void test_throw(void);
     void test_gpn(void);
+    void test_double_quote(void);
 };
 
 void QuoteUTest::tearDown(void)
@@ -223,5 +224,28 @@ void QuoteUTest::test_gpn(void)
     allstar = as->getOutgoing(allstar, 0);
     TS_ASSERT_EQUALS(LIST_LINK, allstar->getType());
     TS_ASSERT_EQUALS(2, as->getArity(allstar));
+}
+
+/*
+ * QuoteLink unit test.  Test double-quotes.
+ */
+void QuoteUTest::test_double_quote(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/quote-quote.scm");
+    load_scm_files_from_config(*as);
+
+    Handle bindy = eval->eval_h("bindy");
+
+    Handle bananna = bindlink(as, bindy);
+    TS_ASSERT_EQUALS(1, as->getArity(bananna));
+
+    bananna = as->getOutgoing(bananna, 0);
+    TS_ASSERT_EQUALS(QUOTE_LINK, bananna->getType());
+
+    bananna = as->getOutgoing(bananna, 0);
+    TS_ASSERT_EQUALS(CONCEPT_NODE, bananna->getType());
+    TS_ASSERT_EQUALS(0, strcmp("bananna", as->getName(bananna).c_str()));
 }
 
