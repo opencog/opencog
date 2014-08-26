@@ -59,7 +59,7 @@ using namespace opencog;
 // this is a form of "greedy" search.
 //
 // Note that the algo performs a full-depth search to find this. That's
-// OK, because typeical clauses are never deep.
+// OK, because typeical clauses are never very deep.
 //
 // Note that the size of the incoming set really is a better measure,
 // and not the depth.  So, for example, if "item" has a huge incoming
@@ -106,7 +106,13 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
 		size_t brdepth = depth + 1;
 		size_t brwid = SIZE_MAX;
 		Handle sbr(h);
-		Handle s(find_starter(vh[i], brdepth, sbr, brwid));
+
+		// Blow past the QuoteLinks, since they just screw up the search start.
+		Handle hunt(vh[i]);
+		if (QUOTE_LINK == vh[i]->getType())
+			hunt = LinkCast(hunt)->getOutgoingAtom(0);
+
+		Handle s(find_starter(hunt, brdepth, sbr, brwid));
 
 		if (s != Handle::UNDEFINED
 		    and (brwid < thinnest
@@ -232,7 +238,9 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 		}
 	}
 
-	if ((Handle::UNDEFINED != best_start) && (0 != vars.size()))
+	if ((Handle::UNDEFINED != best_start) and 
+	    // (Handle::UNDEFINED != _starter_pred) and
+	    (0 != vars.size()))
 	{
 		_root = clauses[bestclause];
 		dbgprt("Search start node: %s\n", best_start->toShortString().c_str());

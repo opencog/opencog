@@ -9,7 +9,7 @@
 	(PredicateNode "similar")
 	(ListLink
 		(ConceptNode "apple")
-		(ConceptNode "bananna")
+		(ConceptNode "banana")
 	)
 )
 
@@ -33,7 +33,7 @@
 	(PredicateNode "similar")
 	(ListLink
 		(VariableNode "$var-a")
-		(ConceptNode "bananna")
+		(ConceptNode "banana")
 	)
 )
 

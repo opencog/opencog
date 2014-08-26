@@ -77,6 +77,8 @@ public:
     void test_quoted_variable(void);
     void test_nest(void);
     void test_throw(void);
+    void test_gpn(void);
+    void test_double_quote(void);
 };
 
 void QuoteUTest::tearDown(void)
@@ -135,32 +137,32 @@ void QuoteUTest::test_quoted_variable(void)
 
     Handle bindy = eval->eval_h("bindy");
 
-    Handle bananna = bindlink(as, bindy);
-    TS_ASSERT_EQUALS(1, as->getArity(bananna));
+    Handle banana = bindlink(as, bindy);
+    TS_ASSERT_EQUALS(1, as->getArity(banana));
 
-    bananna = as->getOutgoing(bananna, 0);
-    TS_ASSERT_EQUALS(CONCEPT_NODE, bananna->getType());
-    TS_ASSERT_EQUALS(0, strcmp("bananna", as->getName(bananna).c_str()));
+    banana = as->getOutgoing(banana, 0);
+    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
+    TS_ASSERT_EQUALS(0, strcmp("banana", as->getName(banana).c_str()));
 
     // ----------------------------------------------
     bindy = eval->eval_h("bother");
 
-    bananna = bindlink(as, bindy);
-    TS_ASSERT_EQUALS(1, as->getArity(bananna));
+    banana = bindlink(as, bindy);
+    TS_ASSERT_EQUALS(1, as->getArity(banana));
 
-    bananna = as->getOutgoing(bananna, 0);
-    TS_ASSERT_EQUALS(CONCEPT_NODE, bananna->getType());
-    TS_ASSERT_EQUALS(0, strcmp("bananna", as->getName(bananna).c_str()));
+    banana = as->getOutgoing(banana, 0);
+    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
+    TS_ASSERT_EQUALS(0, strcmp("banana", as->getName(banana).c_str()));
 
     // ----------------------------------------------
     bindy = eval->eval_h("bunbound");
 
-    bananna = bindlink(as, bindy);
-    TS_ASSERT_EQUALS(1, as->getArity(bananna));
+    banana = bindlink(as, bindy);
+    TS_ASSERT_EQUALS(1, as->getArity(banana));
 
-    bananna = as->getOutgoing(bananna, 0);
-    TS_ASSERT_EQUALS(CONCEPT_NODE, bananna->getType());
-    TS_ASSERT_EQUALS(0, strcmp("bananna", as->getName(bananna).c_str()));
+    banana = as->getOutgoing(banana, 0);
+    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
+    TS_ASSERT_EQUALS(0, strcmp("banana", as->getName(banana).c_str()));
 }
 
 /*
@@ -203,3 +205,44 @@ void QuoteUTest::test_throw(void)
     }
     TS_ASSERT_EQUALS(true, did_throw);
 }
+
+/*
+ * QuoteLink unit test.  Test proper search scope
+ */
+void QuoteUTest::test_gpn(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/quote-gpn.scm");
+    load_scm_files_from_config(*as);
+
+    Handle bindy = eval->eval_h("bindy");
+
+    Handle allstar = bindlink(as, bindy);
+    TS_ASSERT_EQUALS(1, as->getArity(allstar));
+
+    allstar = as->getOutgoing(allstar, 0);
+    TS_ASSERT_EQUALS(LIST_LINK, allstar->getType());
+    TS_ASSERT_EQUALS(2, as->getArity(allstar));
+}
+
+/*
+ * QuoteLink unit test.  Test double-quotes.
+ */
+void QuoteUTest::test_double_quote(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/quote-quote.scm");
+    load_scm_files_from_config(*as);
+
+    Handle bindy = eval->eval_h("bindy");
+
+    Handle banana = bindlink(as, bindy);
+    TS_ASSERT_EQUALS(1, as->getArity(banana));
+
+    banana = as->getOutgoing(banana, 0);
+    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
+    TS_ASSERT_EQUALS(0, strcmp("banana", as->getName(banana).c_str()));
+}
+
