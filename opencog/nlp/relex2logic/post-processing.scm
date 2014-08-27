@@ -192,10 +192,10 @@
 		(if (and (or (cog-node? deref-x) (cog-link? deref-x))
 			 (null? (cog-incoming-set x)))
 			x
-			'()
+			#f
 		)
 	)
-	(map pruner results)
+	(filter-map pruner results)
 )
 
 ; -----------------------------------------------------------------------
