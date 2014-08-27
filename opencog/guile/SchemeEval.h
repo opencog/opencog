@@ -9,6 +9,8 @@
 #define OPENCOG_SCHEME_EVAL_H
 #ifdef HAVE_GUILE
 
+#include <condition_variable>
+#include <mutex>
 #include <string>
 #include <sstream>
 #include <pthread.h>
@@ -38,7 +40,7 @@ class SchemeEval : public GenericEval
 		void finish(void);
 		static void * c_wrap_finish(void *);
 
-		// Things related to shell-evaluation
+		// Things related to (async) shell-evaluation
 		void do_eval(const std::string &);
 		std::string do_poll_result();
 		static void * c_wrap_eval(void *);
@@ -47,6 +49,10 @@ class SchemeEval : public GenericEval
 		std::string answer;
 		SCM _rc;
 		bool _eval_done;
+		bool _poll_done;
+		std::mutex _poll_mtx;
+		std::condition_variable _wait_done;
+		std::string poll_port();
 
 		// Straight-up evaluation
 		static SCM thunk_scm_eval(void *);
@@ -75,9 +81,9 @@ class SchemeEval : public GenericEval
 		static std::string prt(SCM);
 
 		// Output port
-		SCM outport;
-		SCM saved_outport;
-		bool in_shell;
+		SCM _outport;
+		SCM _saved_outport;
+		bool _in_shell;
 		AtomSpace* atomspace;
 
 	public:

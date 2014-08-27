@@ -36,15 +36,15 @@ void SchemeEval::init(void)
 	PrimitiveEnviron::init();
 
 	// Output ports for side-effects.
-	saved_outport = scm_current_output_port();
-	saved_outport = scm_gc_protect_object(saved_outport);
+	_saved_outport = scm_current_output_port();
+	_saved_outport = scm_gc_protect_object(_saved_outport);
 
-	outport = scm_open_output_string();
-	outport = scm_gc_protect_object(outport);
+	_outport = scm_open_output_string();
+	_outport = scm_gc_protect_object(_outport);
 
-	scm_set_current_output_port(outport);
+	scm_set_current_output_port(_outport);
 
-	in_shell = false;
+	_in_shell = false;
 
 	// User error and crash management
 	error_string = SCM_EOL;
@@ -55,6 +55,7 @@ void SchemeEval::init(void)
 
 	pexpr = NULL;
 	_eval_done = false;
+	_poll_done = false;
 }
 
 void * SchemeEval::c_wrap_init(void *p)
@@ -67,12 +68,12 @@ void * SchemeEval::c_wrap_init(void *p)
 void SchemeEval::finish(void)
 {
 	// Restore the previous outport (if its still alive)
-	if (scm_is_false(scm_port_closed_p(saved_outport)))
-		scm_set_current_output_port(saved_outport);
-	scm_gc_unprotect_object(saved_outport);
+	if (scm_is_false(scm_port_closed_p(_saved_outport)))
+		scm_set_current_output_port(_saved_outport);
+	scm_gc_unprotect_object(_saved_outport);
 
-	scm_close_port(outport);
-	scm_gc_unprotect_object(outport);
+	scm_close_port(_outport);
+	scm_gc_unprotect_object(_outport);
 
 	scm_gc_unprotect_object(error_string);
 	scm_gc_unprotect_object(captured_stack);
@@ -86,7 +87,7 @@ void * SchemeEval::c_wrap_finish(void *p)
 }
 
 // The following two routines are needed to avoid bad garbage collection
-// of anything we've kept in the object.  
+// of anything we've kept in the object.
 void SchemeEval::set_captured_stack(SCM newstack)
 {
 	// protect before unprotecting, to avoid multi-threaded races.
@@ -141,7 +142,7 @@ static void * do_bogus_scm(void *p)
  * guile-2.0.5 and gc-7.1 from Ubuntu Precise.
  *
  * Its claimed that the bug only happens for top-level defines.
- * Thus, in principle, theading should be OK after all scripts have
+ * Thus, in principle, threading should be OK after all scripts have
  * been loaded.
  */
 static pthread_mutex_t serialize_lock;
@@ -222,7 +223,7 @@ void SchemeEval::per_thread_init(void)
 
 	// Guile implements the current port as a fluid on each thread.
 	// So, for every new thread, we need to set this.
-	scm_set_current_output_port(outport);
+	scm_set_current_output_port(_outport);
 }
 
 SchemeEval::~SchemeEval()
@@ -391,9 +392,9 @@ void SchemeEval::eval_expr(const std::string &expr)
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-	in_shell = true;
+	_in_shell = true;
 	scm_with_guile(c_wrap_eval, this);
-	in_shell = false;
+	_in_shell = false;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_unlock();
@@ -427,10 +428,6 @@ void* SchemeEval::c_wrap_eval(void* p)
 	return self;
 }
 
-static std::mutex serial_hack;
-static std::condition_variable waiter_hack;
-static bool ready_hack = false;
-
 /**
  * do_eval -- evaluate a scheme expression string.
  * This implements the working guts of the shell-freindly evaluator.
@@ -442,7 +439,6 @@ void SchemeEval::do_eval(const std::string &expr)
 {
 	per_thread_init();
 
-std::unique_lock<std::mutex> lck(serial_hack);
 	// Set global atomspace variable in the execution environment.
 	SchemeSmob::ss_set_env_as(atomspace);
 
@@ -457,28 +453,74 @@ std::unique_lock<std::mutex> lck(serial_hack);
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
 
-ready_hack = true;
-waiter_hack.notify_all();
+	_eval_done = true;
+	_wait_done.notify_all();
 }
 
 void SchemeEval::begin_eval()
 {
 	_eval_done = false;
+	_poll_done = false;
 	_rc = SCM_EOL;
+}
+
+std::string SchemeEval::poll_port()
+{
+	// The below performs a little two-step dance, in an attempt
+	// to prevent reader-writer races.  Basically, it sets a new
+	// string port, so that any current/future writers will write
+	// there. Then it reads the previous string port, which, by now,
+	// should not have any more writers to it. Thus it can be safelty
+	// drained.  This two-step dance assumes that guile itself is
+	// thread-safe for this kind of swapping.  I dunno if it actually
+	// is.  I kind-of suspect that its not ... we shall find out the
+	// hard way, I suppose ... 
+	SCM new_out = scm_open_output_string();
+	scm_set_current_output_port(new_out);
+	SCM out = scm_get_output_string(_outport);
+	scm_close_port(_outport);
+	scm_gc_unprotect_object(_outport);
+	_outport = scm_gc_protect_object(new_out);
+	char * str = scm_to_locale_string(out);
+	std::string rv = str;
+	free(str);
+	return rv;
 }
 
 std::string SchemeEval::do_poll_result()
 {
 	per_thread_init();
-	if (_eval_done) return "";
+	if (_poll_done) return "";
+	if (_eval_done) _poll_done = true;
 
-std::unique_lock<std::mutex> lck(serial_hack);
-while (not ready_hack) waiter_hack.wait(lck);
-ready_hack = false;
-_eval_done = true;
+	if (not _eval_done)
+	{
+		std::string rv = poll_port();
+		if (0 < rv.size()) return rv;
+		
+		// We don't actualy need to lock anything here; we're just
+		// using this as a hack, so that the condition variable will
+		// wake us up periodically.  The goal here is to block when
+		// there's no output to be reported.  Since guile does not
+		// offer a blocking string port, we hack up a poll-n-wait
+		// loop here.   Guile probably doesn't provide this, because
+		// guile is probably not thread-safe for this operation. So
+		// there's a good chance this will result in corruption.
+		// I don't know. Crossing fingers.  To disable all this,
+		// go edit SchemeShell.cc and set async_output to false.
+		std::unique_lock<std::mutex> lck(_poll_mtx);
+		while (not _eval_done)
+		{
+			_wait_done.wait_for(lck, std::chrono::milliseconds(300));
+			std::string rv = poll_port();
+			if (0 < rv.size()) return rv;
+		}
+	}
+	// If we are here, then evaluation is done. Check the various
+	// evalution result flags, etc.
 
 	/* An error is thrown if the input expression is incomplete,
-	 * in which case the error handler sets the pending_input flag
+	 * in which case the error handler sets the _pending_input flag
 	 * to true. */
 	if (_pending_input)
 	{
@@ -495,7 +537,7 @@ _eval_done = true;
 		set_error_string(SCM_EOL);
 		set_captured_stack(SCM_BOOL_F);
 
-		scm_truncate_file(outport, scm_from_uint16(0));
+		scm_truncate_file(_outport, scm_from_uint16(0));
 
 		rv += "\n";
 		return rv;
@@ -504,11 +546,11 @@ _eval_done = true;
 	{
 		// First, we get the contents of the output port,
 		// and pass that on.
-		SCM out = scm_get_output_string(outport);
+		SCM out = scm_get_output_string(_outport);
+		scm_truncate_file(_outport, scm_from_uint16(0));
 		char * str = scm_to_locale_string(out);
 		std::string rv = str;
 		free(str);
-		scm_truncate_file(outport, scm_from_uint16(0));
 
 		// Next, we append the "interpreter" output
 		rv += prt(_rc);
@@ -560,7 +602,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 		// error_string = SCM_EOL;
 		set_captured_stack(SCM_BOOL_F);
 
-		scm_truncate_file(outport, scm_from_uint16(0));
+		scm_truncate_file(_outport, scm_from_uint16(0));
 
 		// Unlike errors seen on the interpreter, log these to the logger.
 		// That's because these errors will be predominantly script
@@ -578,7 +620,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	// Get the contents of the output port, and log it
 	if (logger().isInfoEnabled())
 	{
-		SCM out = scm_get_output_string(outport);
+		SCM out = scm_get_output_string(_outport);
 		char * str = scm_to_locale_string(out);
 		if (str && *str)
 		{
@@ -594,8 +636,8 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	// buffers.) If we are in_shell, then we are here probably because
 	// user typed something that caused some ExecutionLink to call some
 	// scheme snippet.  Display that.
-	if (not in_shell)
-		scm_truncate_file(outport, scm_from_uint16(0));
+	if (not _in_shell)
+		scm_truncate_file(_outport, scm_from_uint16(0));
 
 	return rc;
 }
@@ -666,7 +708,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 		set_error_string(SCM_EOL);
 		set_captured_stack(SCM_BOOL_F);
 
-		scm_truncate_file(outport, scm_from_uint16(0));
+		scm_truncate_file(_outport, scm_from_uint16(0));
 
 		// Unlike errors seen on the interpreter, log these to the logger.
 		// That's because these errors will be predominantly script
@@ -684,7 +726,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 	// Get the contents of the output port, and log it
 	if (logger().isInfoEnabled())
 	{
-		SCM out = scm_get_output_string(outport);
+		SCM out = scm_get_output_string(_outport);
 		char * str = scm_to_locale_string(out);
 		if (str && *str)
 		{
@@ -693,7 +735,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 		}
 		free(str);
 	}
-	scm_truncate_file(outport, scm_from_uint16(0));
+	scm_truncate_file(_outport, scm_from_uint16(0));
 
 	return rc;
 }
@@ -745,7 +787,7 @@ void * SchemeEval::c_wrap_apply(void * p)
  * XXX This seems awfully hacky to me -- is this really a good idea?
  * Isn't there some other, better way of accomplishing this?  My
  * gut instinct is the say "this should be reviewed and possibly
- * dprecated/removed". XXX
+ * deprecated/removed". XXX
  */
 std::string SchemeEval::apply_generic(const std::string &func, Handle varargs)
 {
