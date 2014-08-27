@@ -383,7 +383,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
  * An "unforgiving" evaluator, with none of these amenities, can be
  * found in eval_h(), below.
  */
-void SchemeEval::eval(const std::string &expr)
+void SchemeEval::eval_expr(const std::string &expr)
 {
 	pexpr = &expr;
 
@@ -453,7 +453,7 @@ void SchemeEval::do_eval(const std::string &expr)
 	per_thread_init();
 
 std::unique_lock<std::mutex> lck(serial_hack);
-
+printf("duuude before eval\n");
 	// Set global atomspace variable in the execution environment.
 	SchemeSmob::ss_set_env_as(atomspace);
 
@@ -468,12 +468,14 @@ std::unique_lock<std::mutex> lck(serial_hack);
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
 
+printf("duuude after eval\n");
 ready_hack = true;
 waiter_hack.notify_all();
 }
 
 void SchemeEval::begin_eval()
 {
+printf("duuude beguine\n");
 	_eval_done = false;
 	_rc = SCM_EOL;
 }
@@ -481,12 +483,14 @@ void SchemeEval::begin_eval()
 std::string SchemeEval::do_poll_result()
 {
 	per_thread_init();
+printf("duuude enter poll eval=%d\n", _eval_done);
 	if (_eval_done) return "";
 
 std::unique_lock<std::mutex> lck(serial_hack);
 while (not ready_hack) waiter_hack.wait(lck);
 ready_hack = false;
 _eval_done = true;
+printf("duuude result poll ----------\n");
 
 	/* An error is thrown if the input expression is incomplete,
 	 * in which case the error handler sets the pending_input flag

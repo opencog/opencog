@@ -418,7 +418,7 @@ void PythonEval::addModuleFromPath(std::string path)
 
 }
 
-void PythonEval::eval(const std::string& partial_expr)
+void PythonEval::eval_expr(const std::string& partial_expr)
 {
     init();
 

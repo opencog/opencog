@@ -2,7 +2,7 @@
  * GenericShell.cc
  *
  * Generic interactive shell
- * Copyright (c) 2008, 2103 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2013, 2014 Linas Vepstas <linas@linas.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -265,7 +265,7 @@ void GenericShell::do_eval(const std::string &expr)
 	{
 		auto async_wrapper = [&](GenericShell* p, const std::string& in)
 		{
-			p->evaluator->eval(in.c_str());
+			p->evaluator->eval_expr(in.c_str());
 		};
 
 		std::thread evalth(async_wrapper, this, input);
@@ -273,7 +273,7 @@ void GenericShell::do_eval(const std::string &expr)
 	}
 	else
 	{
-		evaluator->eval(input.c_str());
+		evaluator->eval_expr(input.c_str());
 	}
 }
 

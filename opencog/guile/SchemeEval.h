@@ -2,7 +2,7 @@
  * SchemeEval.h
  *
  * Simple scheme expression evaluator
- * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2014 Linas Vepstas <linas@linas.org>
  */
 
 #ifndef OPENCOG_SCHEME_EVAL_H
@@ -85,10 +85,11 @@ class SchemeEval : public GenericEval
 		~SchemeEval();
 
 		void begin_eval();
-		void eval(const std::string&);
+		void eval_expr(const std::string&);
 		std::string poll_result();
+
 		std::string eval(const std::stringstream& ss)
-			{ begin_eval(); eval(ss.str()); return poll_result(); }
+			{ begin_eval(); eval_expr(ss.str()); return poll_result(); }
 
 		Handle eval_h(const std::string&);
 		Handle eval_h(const std::stringstream& ss) { return eval_h(ss.str()); }

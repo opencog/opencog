@@ -62,7 +62,9 @@ void SchemeShell::set_socket(ConsoleSocket *s)
 	GenericShell::set_socket(s);
 
 	if (!evaluator) evaluator = new SchemeEval(&cogserver().getAtomSpace());
-	evaluator->eval("(setlocale LC_CTYPE \"\")");
+	evaluator->begin_eval();
+	evaluator->eval_expr("(setlocale LC_CTYPE \"\")");
+	evaluator->poll_result();
 }
 
 #endif

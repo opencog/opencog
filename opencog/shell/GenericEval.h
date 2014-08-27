@@ -1,8 +1,8 @@
 /*
  * GenericEval.h
  *
- * Template for a generic evaluator
- * Copyright (c) 2008, 2013 Linas Vepstas <linas@linas.org>
+ * Template for a generic shell-oriented evaluator
+ * Copyright (c) 2008, 2013, 2014 Linas Vepstas <linas@linas.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -79,14 +79,14 @@ class GenericEval
 
 		/**
 		 * begin_eval() must be called in the same thread as poll_result()
-		 * and it must be called before eval().  The eval() method may be
-		 * called in the same thread, or a different one.  The poll_result()
-		 * method can be called at any time after begin_eval().  The
-		 * poll_result() method might block, until results are available.
+		 * an it must be called before eval_expr().  The eval_expr() method
+		 * may be called in the same thread, or a different one.  The
+		 * poll_result() method can be called at any time after begin_eval().
+		 * The poll_result() method might block, until results are available.
 		 * It must return the empty string when there are no more results.
 		 */
 		virtual void begin_eval() = 0;
-		virtual void eval(const std::string&) = 0;
+		virtual void eval_expr(const std::string&) = 0;
 		virtual std::string poll_result() = 0;
 };
 
