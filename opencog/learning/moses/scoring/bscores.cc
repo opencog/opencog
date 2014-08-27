@@ -24,7 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <cmath>
-#include <values.h>
+#include <limits.h>
 
 #include <boost/range/irange.hpp>
 #include <boost/range/algorithm/sort.hpp>
