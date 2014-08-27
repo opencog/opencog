@@ -177,8 +177,11 @@
 ;
 (define (r2l-marker-processing)
 	(define results
+		; XXX TODO need to determine the best order of markers processing
+		; since different orders will generate different results
 		(append
 			(marker-cleaner "allmarker" allmarker-helper)
+			(marker-cleaner "negativemarker" negativemarker-helper)
 			(marker-cleaner "maybemarker" maybemarker-helper)
 		)
 	)
@@ -272,6 +275,42 @@
 	(for-each purge-hypergraph clean-links)
 
 	results-list
+)
+
+; -----------------------------------------------------------------------
+; negativemarker-helper -- Helper function of negativemarker processing
+;
+; The negativemarker helper function for post-processing one specific
+; negativemarker.
+;
+; Given a negativemarker of the form as 'orig-link':
+;
+;	EvaluationLink
+;		PredicateNode "negativemarker"
+;		ListLink
+;			word_instance
+;
+; It creates:
+;
+;	NotLink
+;		AndLink
+;			** links involving word_instance **
+;
+(define (negativemarker-helper orig-link)
+	(define listlink (car (cog-filter 'ListLink (cog-outgoing-set orig-link))))
+	(define word (gar listlink))
+	(define root-links (cog-get-root word))
+	; get rid of links with non-instanced word
+	(define final-links (remove check-exception root-links))
+
+	(list
+		(NotLink df-link-stv
+			(if (= (length final-links) 1)
+				final-links
+				(AndLink df-link-stv final-links)
+			)
+		)
+	)
 )
 
 ; -----------------------------------------------------------------------

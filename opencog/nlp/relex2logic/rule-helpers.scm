@@ -237,8 +237,21 @@
 	)
 )
 
-(define (negative-rule verb instance)
-	(list (ImplicationLink (PredicateNode instance df-node-stv) (NotLink (PredicateNode verb df-node-stv) df-link-stv) df-link-stv))
+; Examples:
+; "I do not eat injera." instance = eat@1111, instance_pos = verb
+; "The cat is not small." instance = small@1111, instance_pos = adj
+(define (negative-rule instance instance_pos)
+	(list
+		(EvaluationLink df-link-stv
+			(PredicateNode "negativemarker" df-node-stv)
+			(ListLink df-link-stv
+				(if (string=? instance_pos "verb")
+					(PredicateNode instance df-node-stv)
+					(ConceptNode instance df-node-stv)
+				)
+			)
+		)
+	)
 )
 
 (define (definite-rule word word_instance)
