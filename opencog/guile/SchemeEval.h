@@ -54,6 +54,7 @@ class SchemeEval : public GenericEval
 		std::condition_variable _wait_done;
 		std::string poll_port();
 		SCM _pipe;
+		int _pipeno;
 
 		// Straight-up evaluation
 		static SCM thunk_scm_eval(void *);

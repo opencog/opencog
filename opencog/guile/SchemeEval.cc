@@ -9,6 +9,9 @@
 
 #ifdef HAVE_GUILE
 
+#include <unistd.h>
+#include <fcntl.h>
+
 #include <libguile.h>
 #include <libguile/backtrace.h>
 #include <libguile/debug.h>
@@ -42,9 +45,15 @@ void SchemeEval::init(void)
 	SCM pair = scm_pipe();
 	_pipe = scm_car(pair);
 	_pipe = scm_gc_protect_object(_pipe);
+	_pipeno = scm_to_int(scm_fileno(_pipe));
 	_outport = scm_cdr(pair);
 	_outport = scm_gc_protect_object(_outport);
 	scm_setvbuf(_outport, scm_from_int (_IONBF), SCM_UNDEFINED);
+
+	// We want non-blocking reads.
+	int flags = fcntl(_pipeno, F_GETFL, 0);
+	if (flags < 0) flags = 0;
+	fcntl(_pipeno, F_SETFL, flags | O_NONBLOCK);
 
 	scm_set_current_output_port(_outport);
 
@@ -471,13 +480,25 @@ void SchemeEval::begin_eval()
 	_rc = SCM_EOL;
 }
 
+// Read one end of a pipe. The other end of the pipe is attached to
+// guile's default output port.  We use standard posix to read, as
+// that will be faster than mucking with guile's one-char-at-a-time
+// API.  The below assumes that the pipe is non-blcoking; if it blocks,
+// then things might get wonky.  The below is also very simple; it does
+// not check for any standard unix errors, closed pipes, etc. I think
+// that simplicity is just fine, here.
 std::string SchemeEval::poll_port()
 {
-	// Ahh crap. Read one char at a time, because we don't have a
-	// fast non-blocking drain.  Kind-of-sucks for performance.
 	std::string rv;
-	while (scm_is_true(scm_char_ready_p(_pipe)))
-		rv += scm_getc(_pipe);
+#define BUFSZ 1000
+	char buff[BUFSZ];
+	while (1)
+	{
+		int nr = read(_pipeno, buff, BUFSZ-1);
+		if (-1 == nr) return rv;
+		buff[nr] = 0x0;
+		rv += buff;
+	}
 	return rv;
 }
 
