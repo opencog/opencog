@@ -63,6 +63,7 @@ class GenericShell
 
 		// Async output handling.
 		bool do_async_output;
+		bool eval_done;
 		static void async_wrapper(GenericShell*, const std::string &expr);
 		void async_evaluator(const std::string &expr);
 		virtual void put_output(const std::string&);

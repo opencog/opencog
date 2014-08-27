@@ -401,7 +401,9 @@ void SchemeEval::eval(const std::string &expr)
 
 std::string SchemeEval::poll_result()
 {
-	return answer;
+	std::string rv = answer;
+	answer.clear();
+	return rv;
 }
 
 void * SchemeEval::c_wrap_eval(void * p)

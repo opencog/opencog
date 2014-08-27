@@ -259,6 +259,7 @@ void GenericShell::do_eval(const std::string &expr)
 	 * (This is a pointless string copy, it should be eliminated)
 	 */
 	std::string input = expr + "\n";
+	eval_done = false;
 	if (do_async_output)
 	{
 		std::thread evalth(async_wrapper, this, input);
@@ -267,27 +268,7 @@ void GenericShell::do_eval(const std::string &expr)
 	else
 	{
 		evaluator->eval(input.c_str());
-		put_output(evaluator->poll_result());
 	}
-
-	if (evaluator->input_pending())
-	{
-		if (show_output && show_prompt)
-			put_output(pending_prompt);
-		else
-			put_output("");
-		return;
-	}
-
-	if (show_output || evaluator->eval_error())
-	{
-		if (show_prompt) pending_output += normal_prompt;
-	}
-	else
-	{
-		put_output("");
-	}
-	return;
 }
 
 /* ============================================================== */
@@ -300,10 +281,40 @@ void GenericShell::put_output(const std::string& s)
 
 std::string GenericShell::poll_output()
 {
+	// Must lock before checking pending_output size ...
 	std::lock_guard<std::mutex> lock(_output_mutex);
-	std::string result = pending_output;
-	pending_output.clear();
-	return result;
+
+	// If there's pending output, return that.
+	if (0 < pending_output.size())
+	{
+		std::string result = pending_output;
+		pending_output.clear();
+		return result;
+	}
+
+	// If we are here, there's no pending output. Does the
+	// evaluator have anything for us?
+	std::string result = evaluator->poll_result();
+	if (0 < result.size())
+		return result;
+
+	if (eval_done) return "";
+	eval_done = true;
+
+	// If we are here, the evaluator is done. Return shell prompts.
+	if (evaluator->input_pending())
+	{
+		if (show_output && show_prompt)
+			return pending_prompt;
+		else
+			return "";
+	}
+
+	if (show_output || evaluator->eval_error())
+	{
+		if (show_prompt) return normal_prompt;
+	}
+	return "";
 }
 
 /* ============================================================== */
@@ -317,8 +328,7 @@ void GenericShell::async_evaluator(const std::string& input)
 {
 printf("duuuuude ola async evalu\n");
 	evaluator->eval(input.c_str());
-	pending_output = evaluator->poll_result();
-printf("duuuuude bye async evalu %s\n", pending_output.c_str());
+printf("duuuuude bye async evalu\n");
 }
 
 /* ===================== END OF FILE ============================ */
