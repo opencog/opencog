@@ -268,8 +268,7 @@ void GenericShell::do_eval(const std::string &expr)
 		};
 
 		std::thread evalth(async_wrapper, this, input);
-		// evalth.detach();
-		evalth.join();
+		evalth.detach();
 	}
 	else
 	{

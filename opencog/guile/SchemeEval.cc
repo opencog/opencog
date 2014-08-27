@@ -54,6 +54,7 @@ void SchemeEval::init(void)
 	captured_stack = scm_gc_protect_object(captured_stack);
 
 	pexpr = NULL;
+	_rc = SCM_EOL;
 }
 
 void * SchemeEval::c_wrap_init(void *p)
@@ -399,16 +400,32 @@ void SchemeEval::eval(const std::string &expr)
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 }
 
-std::string SchemeEval::poll_result()
+void* SchemeEval::c_wrap_poll(void* p)
 {
-	std::string rv = answer;
-	answer.clear();
-	return rv;
+	SchemeEval* self = (SchemeEval*) p;
+	self->answer = self->do_poll_result();
+	return p;
 }
 
-void * SchemeEval::c_wrap_eval(void * p)
+std::string SchemeEval::poll_result()
 {
-	SchemeEval *self = (SchemeEval *) p;
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	thread_lock();
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
+	in_shell = true;
+	scm_with_guile(c_wrap_poll, this);
+	in_shell = false;
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	thread_unlock();
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+	return answer;
+}
+
+void* SchemeEval::c_wrap_eval(void* p)
+{
+	SchemeEval* self = (SchemeEval*) p;
 
 	// Normally, neither of these are ever null.
 	// But sometimes, a heavily loaded server can crash here.
@@ -416,9 +433,13 @@ void * SchemeEval::c_wrap_eval(void * p)
 	OC_ASSERT(self, "c_wrap_eval got null pointer!");
 	OC_ASSERT(self->pexpr, "c_wrap_eval got null expression!");
 
-	self->answer = self->do_eval(*(self->pexpr));
+	self->do_eval(*(self->pexpr));
 	return self;
 }
+
+static std::mutex serial_hack;
+static std::condition_variable waiter_hack;
+static bool ready_hack = false;
 
 /**
  * do_eval -- evaluate a scheme expression string.
@@ -427,43 +448,43 @@ void * SchemeEval::c_wrap_eval(void * p)
  * This method *must* be called in guile mode, in order for garbage
  * collection, etc. to work correctly!
  */
-std::string SchemeEval::do_eval(const std::string &expr)
+void SchemeEval::do_eval(const std::string &expr)
 {
 	per_thread_init();
+
+std::unique_lock<std::mutex> lck(serial_hack);
 
 	// Set global atomspace variable in the execution environment.
 	SchemeSmob::ss_set_env_as(atomspace);
 
-	/* Avoid a string buffer copy if there is no pending input */
-	const char *expr_str;
-	bool newin = false;
-	if (_pending_input)
-	{
-		_input_line += expr;
-		expr_str = _input_line.c_str();
-	}
-	else
-	{
-		expr_str = expr.c_str();
-		newin = true;
-	}
+	_input_line += expr;
 
 	_caught_error = false;
 	_pending_input = false;
 	set_captured_stack(SCM_BOOL_F);
-	SCM rc = scm_c_catch (SCM_BOOL_T,
+	_rc = scm_c_catch (SCM_BOOL_T,
 	                      (scm_t_catch_body) scm_c_eval_string,
-	                      (void *) expr_str,
+	                      (void *) _input_line.c_str(),
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
+
+ready_hack = true;
+waiter_hack.notify_all();
+}
+
+std::string SchemeEval::do_poll_result()
+{
+	per_thread_init();
+	if (SCM_EOL == _rc) return "";
+std::unique_lock<std::mutex> lck(serial_hack);
+while (not ready_hack) waiter_hack.wait(lck);
+ready_hack = false;
 
 	/* An error is thrown if the input expression is incomplete,
 	 * in which case the error handler sets the pending_input flag
 	 * to true. */
 	if (_pending_input)
 	{
-		/* Save input for later */
-		if (newin) _input_line += expr;
 		return "";
 	}
 	_pending_input = false;
@@ -493,14 +514,14 @@ std::string SchemeEval::do_eval(const std::string &expr)
 		scm_truncate_file(outport, scm_from_uint16(0));
 
 		// Next, we append the "interpreter" output
-		rv += prt(rc);
+		rv += prt(_rc);
 		rv += "\n";
 
+		_rc = SCM_EOL;
 		return rv;
 	}
 	return "#<Error: Unreachable statement reached>";
 }
-
 
 /* ============================================================== */
 

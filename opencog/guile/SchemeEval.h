@@ -38,17 +38,20 @@ class SchemeEval : public GenericEval
 		void finish(void);
 		static void * c_wrap_finish(void *);
 
-		// Things related to evaluation
-		std::string do_eval(const std::string &);
+		// Things related to shell-evaluation
+		void do_eval(const std::string &);
+		std::string do_poll_result();
 		static void * c_wrap_eval(void *);
-		static void * c_wrap_eval_h(void *);
+		static void * c_wrap_poll(void *);
 		const std::string *pexpr;
 		std::string answer;
+		SCM _rc;
 
 		// Straight-up evaluation
 		static SCM thunk_scm_eval(void *);
 		SCM do_scm_eval(SCM);
 		SCM do_scm_eval_str(const std::string &);
+		static void * c_wrap_eval_h(void *);
 
 		// Handle apply
 		Handle do_apply(const std::string& func, Handle varargs);
