@@ -29,6 +29,7 @@
 #include <iostream>
 #include <iterator>
 #include <map>
+#include <vector>
 #include <sstream>
 #include <thread>
 
@@ -890,6 +891,8 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 
     if (THREAD_NUM > 1)
         removeAtomLock.unlock();
+
+    HNode->count = HNode->instances.size();
 }
 
 void PatternMiner::removeLinkAndItsAllSubLinks(AtomSpace* _atomspace, Handle link)
@@ -1109,7 +1112,7 @@ void PatternMiner::growPatternsTask()
 
         HTreeNode* cur_growing_pattern = last_gram_patterns[cur_index];
 
-        if(cur_growing_pattern->instances.size() < thresholdFrequency)
+        if(cur_growing_pattern->count < thresholdFrequency)
             break;
 
 
@@ -1118,13 +1121,16 @@ void PatternMiner::growPatternsTask()
             extendAllPossiblePatternsForOneMoreGram(instance, cur_growing_pattern, cur_gram);
         }
 
+        cur_growing_pattern->instances.clear();
+        (vector<HandleSeq>()).swap(cur_growing_pattern->instances);
+
     }
 
 }
 
 bool compareHTreeNodeByFrequency(HTreeNode* node1, HTreeNode* node2)
 {
-    return (node1->instances.size() > node2->instances.size());
+    return (node1->count > node2->count);
 }
 
 bool compareHTreeNodeByInteractionInformation(HTreeNode* node1, HTreeNode* node2)
@@ -1152,16 +1158,16 @@ void PatternMiner::OutPutPatternsToFile(unsigned int n_gram, bool is_interesting
     vector<HTreeNode*> &patternsForThisGram = patternsForGram[n_gram-1];
 
     if (is_interesting_pattern)
-        resultFile << "Frequenc Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
-    else
         resultFile << "Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
+    else
+        resultFile << "Frequent Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
 
     foreach(HTreeNode* htreeNode, patternsForThisGram)
     {
-        if (htreeNode->instances.size() < 2)
+        if (htreeNode->count < 2)
             continue;
 
-        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->instances.size());
+        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
 
         if (is_interesting_pattern)
             resultFile << " InteractionInformation = " << toString(htreeNode->interactionInformation);
@@ -1382,8 +1388,8 @@ double PatternMiner::calculateEntropyOfASubConnectedPattern(string& connectedSub
     {
         // it's in the H-Tree, add its entropy
         HTreeNode* subPatternNode = (HTreeNode*)subPatternNodeIter->second;
-        cout << "CalculateEntropy: Found in H-tree! h = log" << subPatternNode->instances.size() << " ";
-        return log2(subPatternNode->instances.size());
+        cout << "CalculateEntropy: Found in H-tree! h = log" << subPatternNode->count << " ";
+        return log2(subPatternNode->count);
     }
     else
     {
@@ -1396,9 +1402,9 @@ double PatternMiner::calculateEntropyOfASubConnectedPattern(string& connectedSub
 
         // Find All Instances in the original AtomSpace For this Pattern
         findAllInstancesForGivenPattern(newHTreeNode);
-         cout << "CalculateEntropy: Not found in H-tree! call pattern matcher again! h = log" << newHTreeNode->instances.size()<< " ";
+         cout << "CalculateEntropy: Not found in H-tree! call pattern matcher again! h = log" << newHTreeNode->count << " ";
 
-        return log2(newHTreeNode->instances.size());
+        return log2(newHTreeNode->count);
 
     }
 }
@@ -1434,8 +1440,8 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
     else
         sign = -1;
 
-    double II = sign * log2(HNode->instances.size());
-    std::cout << "H(curpattern) = log" << HNode->instances.size() << "="  << II << " sign=" << sign << std::endl;
+    double II = sign * log2(HNode->count);
+    std::cout << "H(curpattern) = log" << HNode->count << "="  << II << " sign=" << sign << std::endl;
 
 
     for (int gram = maxgram-1; gram > 0; gram --)

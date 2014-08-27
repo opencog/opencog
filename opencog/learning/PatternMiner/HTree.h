@@ -44,6 +44,7 @@ namespace opencog
             set<HTreeNode*> parentLinks;
             set<HTreeNode*> childLinks;
 
+            unsigned int count; // instance number
             double interactionInformation;
             double surprisingness;
 
