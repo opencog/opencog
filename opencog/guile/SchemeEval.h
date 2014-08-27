@@ -90,12 +90,16 @@ class SchemeEval : public GenericEval
 		SchemeEval(AtomSpace*);
 		~SchemeEval();
 
+		// The async-output interface.
 		void begin_eval();
 		void eval_expr(const std::string&);
 		std::string poll_result();
 
+		// The synchronous-output interfaces.
+		std::string eval(const std::string& expr)
+			{ begin_eval(); eval_expr(expr); return poll_result(); }
 		std::string eval(const std::stringstream& ss)
-			{ begin_eval(); eval_expr(ss.str()); return poll_result(); }
+			{ return eval(ss.str()); }
 
 		Handle eval_h(const std::string&);
 		Handle eval_h(const std::stringstream& ss) { return eval_h(ss.str()); }

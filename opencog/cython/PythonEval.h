@@ -120,9 +120,14 @@ class PythonEval : public GenericEval
         void addModuleFromPath(std::string path);
         void addSysPath(std::string path);
 
+        // The async-output interface.
         virtual void begin_eval() {}
         virtual void eval_expr(const std::string&);
         virtual std::string poll_result();
+
+        // The synchronous-output interface.
+        std::string eval(const std::string& expr)
+            { begin_eval(); eval_expr(expr); return poll_result(); }
 
         PyThreadState * getMainThreadState() {
             return this->mainThreadState;
