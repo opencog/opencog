@@ -23,7 +23,6 @@
 #ifndef _OPENCOG_GENERIC_SHELL_H
 #define _OPENCOG_GENERIC_SHELL_H
 
-#include <mutex>
 #include <string>
 
 /**
@@ -68,7 +67,6 @@ class GenericShell
 		void async_evaluator(const std::string &expr);
 		virtual void put_output(const std::string&);
 		virtual std::string poll_output();
-		std::mutex _output_mutex;
 
 		ConsoleSocket* socket;
 		GenericEval* evaluator;

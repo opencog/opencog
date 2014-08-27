@@ -275,15 +275,11 @@ void GenericShell::do_eval(const std::string &expr)
 
 void GenericShell::put_output(const std::string& s)
 {
-	std::lock_guard<std::mutex> lock(_output_mutex);
 	pending_output += s;	
 }
 
 std::string GenericShell::poll_output()
 {
-	// Must lock before checking pending_output size ...
-	std::lock_guard<std::mutex> lock(_output_mutex);
-
 	// If there's pending output, return that.
 	if (0 < pending_output.size())
 	{
