@@ -491,13 +491,9 @@ std::string SchemeEval::do_poll_result()
 {
 	per_thread_init();
 	if (_poll_done) return "";
-	if (_eval_done) _poll_done = true;
 
 	if (not _eval_done)
 	{
-		std::string rv = poll_port();
-		if (0 < rv.size()) return rv;
-		
 		// We don't actualy need to lock anything here; we're just
 		// using this as a hack, so that the condition variable will
 		// wake us up periodically.  The goal here is to block when
@@ -518,6 +514,7 @@ std::string SchemeEval::do_poll_result()
 	}
 	// If we are here, then evaluation is done. Check the various
 	// evalution result flags, etc.
+	_poll_done = true;
 
 	/* An error is thrown if the input expression is incomplete,
 	 * in which case the error handler sets the _pending_input flag
