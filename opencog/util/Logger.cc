@@ -59,6 +59,10 @@
 #include "Logger.h"
 #include "Config.h"
 
+#ifdef __APPLE__
+#define fdatasync fsync
+#endif
+
 using namespace opencog;
 
 // messages greater than this will be truncated
