@@ -9,6 +9,9 @@
 
 #ifdef HAVE_GUILE
 
+#include <unistd.h>
+#include <fcntl.h>
+
 #include <libguile.h>
 #include <libguile/backtrace.h>
 #include <libguile/debug.h>
@@ -39,8 +42,18 @@ void SchemeEval::init(void)
 	_saved_outport = scm_current_output_port();
 	_saved_outport = scm_gc_protect_object(_saved_outport);
 
-	_outport = scm_open_output_string();
+	SCM pair = scm_pipe();
+	_pipe = scm_car(pair);
+	_pipe = scm_gc_protect_object(_pipe);
+	_pipeno = scm_to_int(scm_fileno(_pipe));
+	_outport = scm_cdr(pair);
 	_outport = scm_gc_protect_object(_outport);
+	scm_setvbuf(_outport, scm_from_int (_IONBF), SCM_UNDEFINED);
+
+	// We want non-blocking reads.
+	int flags = fcntl(_pipeno, F_GETFL, 0);
+	if (flags < 0) flags = 0;
+	fcntl(_pipeno, F_SETFL, flags | O_NONBLOCK);
 
 	scm_set_current_output_port(_outport);
 
@@ -74,6 +87,9 @@ void SchemeEval::finish(void)
 
 	scm_close_port(_outport);
 	scm_gc_unprotect_object(_outport);
+
+	scm_close_port(_pipe);
+	scm_gc_unprotect_object(_pipe);
 
 	scm_gc_unprotect_object(error_string);
 	scm_gc_unprotect_object(captured_stack);
@@ -464,40 +480,26 @@ void SchemeEval::begin_eval()
 	_rc = SCM_EOL;
 }
 
+// Read one end of a pipe. The other end of the pipe is attached to
+// guile's default output port.  We use standard posix to read, as
+// that will be faster than mucking with guile's one-char-at-a-time
+// API.  The below assumes that the pipe is non-blcoking; if it blocks,
+// then things might get wonky.  The below is also very simple; it does
+// not check for any standard unix errors, closed pipes, etc. I think
+// that simplicity is just fine, here.
 std::string SchemeEval::poll_port()
 {
-#if GUILE_FAIL
-	// The below performs a little two-step dance, in an attempt
-	// to prevent reader-writer races.  Basically, it sets a new
-	// string port, so that any current/future writers will write
-	// there. Then it reads the previous string port, which, by now,
-	// should not have any more writers to it. Thus it can be safelty
-	// drained.  This two-step dance assumes that guile itself is
-	// thread-safe for this kind of swapping.  I dunno if it actually
-	// is.  I kind-of suspect that its not ... OK, its not. The code
-	// below will sometimes hit the following error:
-	// ERROR: In procedure display: Wrong type argument in position 2: #<closed: string 0>
-	// I don't understand how it could happen, but it does ... 
-	SCM new_out = scm_open_output_string();
-	scm_set_current_output_port(new_out);
-	SCM out = scm_get_output_string(_outport);
-	scm_close_port(_outport);
-	scm_gc_unprotect_object(_outport);
-	_outport = scm_gc_protect_object(new_out);
-	char * str = scm_to_locale_string(out);
-	std::string rv = str;
-	free(str);
+	std::string rv;
+#define BUFSZ 1000
+	char buff[BUFSZ];
+	while (1)
+	{
+		int nr = read(_pipeno, buff, BUFSZ-1);
+		if (-1 == nr) return rv;
+		buff[nr] = 0x0;
+		rv += buff;
+	}
 	return rv;
-#else
-	// See above.  The below might loose some output, because its racy.
-	// there does not seem to be any way of fixing it ... !?
-	SCM out = scm_get_output_string(_outport);
-	scm_truncate_file(_outport, scm_from_uint16(0));
-	char * str = scm_to_locale_string(out);
-	std::string rv = str;
-	free(str);
-	return rv;
-#endif
 }
 
 std::string SchemeEval::do_poll_result()
@@ -510,13 +512,13 @@ std::string SchemeEval::do_poll_result()
 		// We don't actualy need to lock anything here; we're just
 		// using this as a hack, so that the condition variable will
 		// wake us up periodically.  The goal here is to block when
-		// there's no output to be reported.  Since guile does not
-		// offer a blocking string port, we hack up a poll-n-wait
-		// loop here.   Guile probably doesn't provide this, because
-		// guile is probably not thread-safe for this operation. So
-		// there's a good chance this will result in corruption.
-		// I don't know. Crossing fingers.  To disable all this,
-		// go edit SchemeShell.cc and set async_output to false.
+		// there's no output to be reported.
+		//
+		// Hmmm. I guess we could just block on reading the pipe...
+		// unless the eval did not produce any output, in which case
+		// I guess we could ... close and re-open the pipe? Somehow
+		// unblock it?  I dunno. The below curently works, and I'm
+		// loosing interest just right now.
 		std::unique_lock<std::mutex> lck(_poll_mtx);
 		while (not _eval_done)
 		{
@@ -541,13 +543,13 @@ std::string SchemeEval::do_poll_result()
 
 	if (_caught_error)
 	{
+		std::string rv = poll_port();
+
 		char * str = scm_to_locale_string(error_string);
-		std::string rv = str;
+		rv += str;
 		free(str);
 		set_error_string(SCM_EOL);
 		set_captured_stack(SCM_BOOL_F);
-
-		scm_truncate_file(_outport, scm_from_uint16(0));
 
 		rv += "\n";
 		return rv;
@@ -556,11 +558,7 @@ std::string SchemeEval::do_poll_result()
 	{
 		// First, we get the contents of the output port,
 		// and pass that on.
-		SCM out = scm_get_output_string(_outport);
-		scm_truncate_file(_outport, scm_from_uint16(0));
-		char * str = scm_to_locale_string(out);
-		std::string rv = str;
-		free(str);
+		std::string rv = poll_port();
 
 		// Next, we append the "interpreter" output
 		rv += prt(_rc);
@@ -612,7 +610,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 		// error_string = SCM_EOL;
 		set_captured_stack(SCM_BOOL_F);
 
-		scm_truncate_file(_outport, scm_from_uint16(0));
+		scm_drain_input(_outport);
 
 		// Unlike errors seen on the interpreter, log these to the logger.
 		// That's because these errors will be predominantly script
@@ -630,15 +628,13 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	// Get the contents of the output port, and log it
 	if (logger().isInfoEnabled())
 	{
-		SCM out = scm_get_output_string(_outport);
-		char * str = scm_to_locale_string(out);
-		if (str && *str)
+		std::string str(poll_port());
+		if (0 < str.size())
 		{
 			logger().info("%s: Output: %s\n"
 			              "Was generated by expr: %s\n",
-			              __FUNCTION__, str, prt(sexpr).c_str());
+			              __FUNCTION__, str.c_str(), prt(sexpr).c_str());
 		}
-		free(str);
 	}
 
 	// If we are not in a shell context, truncate the output, because
@@ -647,7 +643,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	// user typed something that caused some ExecutionLink to call some
 	// scheme snippet.  Display that.
 	if (not _in_shell)
-		scm_truncate_file(_outport, scm_from_uint16(0));
+		scm_drain_input(_outport);
 
 	return rc;
 }
@@ -718,7 +714,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 		set_error_string(SCM_EOL);
 		set_captured_stack(SCM_BOOL_F);
 
-		scm_truncate_file(_outport, scm_from_uint16(0));
+		scm_drain_input(_outport);
 
 		// Unlike errors seen on the interpreter, log these to the logger.
 		// That's because these errors will be predominantly script
@@ -736,16 +732,14 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 	// Get the contents of the output port, and log it
 	if (logger().isInfoEnabled())
 	{
-		SCM out = scm_get_output_string(_outport);
-		char * str = scm_to_locale_string(out);
-		if (str && *str)
+		std::string str(poll_port());
+		if (0 < str.size())
 		{
 			logger().info("%s: Output: %s\nWas generated by expr: %s\n",
-			              __FUNCTION__, str, expr.c_str());
+			              __FUNCTION__, str.c_str(), expr.c_str());
 		}
-		free(str);
 	}
-	scm_truncate_file(_outport, scm_from_uint16(0));
+	scm_drain_input(_outport);
 
 	return rc;
 }
