@@ -2,7 +2,7 @@
  * GenericShell.h
  *
  * Template for a generic shell
- * Copyright (c) 2008, 2013 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2013, 2014 Linas Vepstas <linas@linas.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -49,6 +49,9 @@ class GenericEval;
 
 class GenericShell
 {
+	private:
+		std::string pending_output;
+
 	protected:
 		std::string abort_prompt;
 		std::string normal_prompt;
@@ -63,7 +66,13 @@ class GenericShell
 		virtual void set_socket(ConsoleSocket *);
 		virtual const std::string& get_prompt(void);
 
-		virtual std::string do_eval(const std::string &expr);
+		virtual void do_eval(const std::string &expr);
+
+		// Async output handling.
+		bool do_async_output;
+		bool eval_done;
+		virtual void put_output(const std::string&);
+		virtual std::string poll_output();
 
 	public:
 		GenericShell(void);

@@ -418,15 +418,15 @@ void PythonEval::addModuleFromPath(std::string path)
 
 }
 
-std::string PythonEval::eval(const std::string& partial_expr)
+void PythonEval::eval_expr(const std::string& partial_expr)
 {
     init();
 
-    std::string result = "";
+    _result = "";
     if (partial_expr == "\n")
     {
         _pending_input = false;
-        result = this->apply_script(_input_line);
+        _result = this->apply_script(_input_line);
         _input_line = "";
     }
     else
@@ -445,9 +445,15 @@ std::string PythonEval::eval(const std::string& partial_expr)
 
         if (not _pending_input)
         {
-            result = this->apply_script(_input_line);
+            _result = this->apply_script(_input_line);
             _input_line = "";
         }
     }
-    return result;
+}
+
+std::string PythonEval::poll_result()
+{
+	std::string r = _result;
+	_result.clear();
+	return r;
 }

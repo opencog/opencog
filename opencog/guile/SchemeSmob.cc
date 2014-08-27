@@ -3,7 +3,7 @@
  *
  * Scheme small objects (SMOBS) for opencog -- core functions.
  *
- * Copyright (c) 2008, 2013, 2104 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2013, 2014 Linas Vepstas <linas@linas.org>
  */
 
 #ifdef HAVE_GUILE

@@ -98,7 +98,9 @@ std::string PythonShellModule::do_eval(Request *req, std::list<std::string> args
     }
 
     PythonEval& eval = PythonEval::instance();
-    out = eval.eval(expr);
+    eval.begin_eval();
+    eval.eval_expr(expr);
+    out = eval.poll_result();
     // May not be necessary since an error message and backtrace are provided.
 //	if (eval.eval_error()) {
 //		out += "An error occurred\n";

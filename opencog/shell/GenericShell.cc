@@ -2,7 +2,7 @@
  * GenericShell.cc
  *
  * Generic interactive shell
- * Copyright (c) 2008, 2103 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2013, 2014 Linas Vepstas <linas@linas.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,6 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <thread>
 
 #include <opencog/server/ConsoleSocket.h>
 #include <opencog/util/Logger.h>
@@ -59,6 +61,7 @@ GenericShell::GenericShell(void)
 	evaluator = NULL;
 	socket = NULL;
 	self_destruct = false;
+	do_async_output = false;
 }
 
 GenericShell::~GenericShell()
@@ -78,18 +81,17 @@ void GenericShell::socketClosed(void)
 	// else will ever call a method on this instance ever again. Thus,
 	// we should self-destruct. Three remarks:
 	// 1) This wouldn't be needed if we had garbage collection, and
+	//    (or maybe used smart pointers to manage this object ???)
 	// 2) If this feels hacky to you, well, it is, but I simply do not
 	//    see a solution that is easier/better/simpler within the
 	//    confines of the current module/socket/request design. (I can
 	//    envision all sorts of complicated solutions, but none easy).
 	// 3) This is safe in the current threading design, since the thread
 	//    that is calling eval() is the same thread that is calling this
-	//    method. Thus, no locks. If, instead, it ever happened that the
-	//    eval() method was called from a different thread than the socket
-	//    closed method, then there would be a race leading to a horrible
-	//    crash. The only cure for that would be a redesign of the
-	//    socket/request layers. Again, this would not be needed if we
-	//    had garbage collection. Wah wah wah.
+	//    method. Thus, no locks.  That is, the socket won't close until
+	//    this->eval() returns.  This must not be changed, as otherwise
+	//    hard-to-debug races and crashes will ensue.
+	// 4) In short: don't change this.
 	delete this;
 }
 
@@ -151,10 +153,16 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 	{
 		socket = s;
 	}
-	const std::string &retstr = do_eval(expr);
-	// logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
-	//
-	socket->Send(retstr);
+
+	// Launch the evaluator, possibly in a different thread,
+	// and then send out whatever is reported back.
+	do_eval(expr);
+	std::string retstr = poll_output();
+	while (0 < retstr.size())
+	{
+		socket->Send(retstr);
+		retstr = poll_output();
+	}
 
 	// The user is exiting the shell. No one will ever call a method on
 	// this instance ever again. So stop hogging space, and self-destruct.
@@ -167,16 +175,16 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 }
 
 /* ============================================================== */
-
 /**
  * Evaluate the expression
  */
-std::string GenericShell::do_eval(const std::string &expr)
+void GenericShell::do_eval(const std::string &expr)
 {
 	size_t len = expr.length();
 	if (0 == len)
 	{
-		return get_prompt();
+		put_output(get_prompt());
+		return;
 	}
 
 	// Handle Telnet RFC 854 IAC format
@@ -199,13 +207,15 @@ std::string GenericShell::do_eval(const std::string &expr)
 			if ((IP == c) || (AO == c))
 			{
 				evaluator->clear_pending();
-				return abort_prompt;
+				put_output(abort_prompt);
+				return;
 			}
 
 			// Erase line -- just ignore this line.
 			if (EL == c)
 			{
-				return get_prompt();
+				put_output(get_prompt());
+				return;
 			}
 		}
 		i--;
@@ -218,7 +228,9 @@ std::string GenericShell::do_eval(const std::string &expr)
 	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
 		evaluator->clear_pending();
-		return "\n" + normal_prompt;
+		put_output("\n");
+		put_output(normal_prompt);
+		return;
 	}
 
 	// Look for either an isolated control-D, or a single period on a line
@@ -229,8 +241,10 @@ std::string GenericShell::do_eval(const std::string &expr)
 	    ((EOT == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
 	{
 		self_destruct = true;
-		if (show_prompt) return "Exiting the shell\n";
-		return "";
+		put_output("");
+		if (show_prompt)
+			put_output("Exiting the shell\n");
+		return;
 	}
 
 	/* 
@@ -244,8 +258,50 @@ std::string GenericShell::do_eval(const std::string &expr)
 	 * (This is a pointless string copy, it should be eliminated)
 	 */
 	std::string input = expr + "\n";
+	eval_done = false;
+	evaluator->begin_eval(); // must be called in same thread as result_poll
+	if (do_async_output)
+	{
+		auto async_wrapper = [&](GenericShell* p, const std::string& in)
+		{
+			p->evaluator->eval_expr(in.c_str());
+		};
 
-	std::string result = evaluator->eval(input.c_str());
+		std::thread evalth(async_wrapper, this, input);
+		evalth.detach();
+	}
+	else
+	{
+		evaluator->eval_expr(input.c_str());
+	}
+}
+
+/* ============================================================== */
+
+void GenericShell::put_output(const std::string& s)
+{
+	pending_output += s;	
+}
+
+std::string GenericShell::poll_output()
+{
+	// If there's pending output, return that.
+	if (0 < pending_output.size())
+	{
+		std::string result = pending_output;
+		pending_output.clear();
+		return result;
+	}
+
+	// If we are here, there's no pending output. Does the
+	// evaluator have anything for us?
+	std::string result = evaluator->poll_result();
+	if (0 < result.size())
+		return result;
+
+	// If we are here, the evaluator is done. Return shell prompts.
+	if (eval_done) return "";
+	eval_done = true;
 
 	if (evaluator->input_pending())
 	{
@@ -257,14 +313,9 @@ std::string GenericShell::do_eval(const std::string &expr)
 
 	if (show_output || evaluator->eval_error())
 	{
-		if (show_prompt) result += normal_prompt;
-		return result;
+		if (show_prompt) return normal_prompt;
 	}
-	else
-	{
-		return "";
-	}
-
+	return "";
 }
 
 /* ===================== END OF FILE ============================ */

@@ -65,7 +65,9 @@ int load_scm_file (AtomSpace& as, const std::string& filename)
 	{
 		char * rc = fgets(buff, BUFSZ, fh);
 		if (NULL == rc) break;
-		std::string rv = evaluator->eval(buff);
+		evaluator->begin_eval();
+		evaluator->eval_expr(buff);
+		std::string rv = evaluator->poll_result();
 
 		if (evaluator->eval_error())
 		{
