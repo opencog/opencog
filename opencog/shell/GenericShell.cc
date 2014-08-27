@@ -81,18 +81,17 @@ void GenericShell::socketClosed(void)
 	// else will ever call a method on this instance ever again. Thus,
 	// we should self-destruct. Three remarks:
 	// 1) This wouldn't be needed if we had garbage collection, and
+	//    (or maybe used smart pointers to manage this object ???)
 	// 2) If this feels hacky to you, well, it is, but I simply do not
 	//    see a solution that is easier/better/simpler within the
 	//    confines of the current module/socket/request design. (I can
 	//    envision all sorts of complicated solutions, but none easy).
 	// 3) This is safe in the current threading design, since the thread
 	//    that is calling eval() is the same thread that is calling this
-	//    method. Thus, no locks. If, instead, it ever happened that the
-	//    eval() method was called from a different thread than the socket
-	//    closed method, then there would be a race leading to a horrible
-	//    crash. The only cure for that would be a redesign of the
-	//    socket/request layers. Again, this would not be needed if we
-	//    had garbage collection. Wah wah wah.
+	//    method. Thus, no locks.  That is, the socket won't close until
+	//    this->eval() returns.  This must not be changed, as otherwise
+	//    hard-to-debug races and crashes will ensue.
+	// 4) In short: don't change this.
 	delete this;
 }
 
