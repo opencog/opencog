@@ -60,14 +60,6 @@ class GenericShell
 		bool show_prompt;
 		bool self_destruct;
 
-		// Async output handling.
-		bool do_async_output;
-		bool eval_done;
-		static void async_wrapper(GenericShell*, const std::string &expr);
-		void async_evaluator(const std::string &expr);
-		virtual void put_output(const std::string&);
-		virtual std::string poll_output();
-
 		ConsoleSocket* socket;
 		GenericEval* evaluator;
 
@@ -75,6 +67,12 @@ class GenericShell
 		virtual const std::string& get_prompt(void);
 
 		virtual void do_eval(const std::string &expr);
+
+		// Async output handling.
+		bool do_async_output;
+		bool eval_done;
+		virtual void put_output(const std::string&);
+		virtual std::string poll_output();
 
 	public:
 		GenericShell(void);

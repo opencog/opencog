@@ -262,7 +262,13 @@ void GenericShell::do_eval(const std::string &expr)
 	eval_done = false;
 	if (do_async_output)
 	{
+		auto async_wrapper = [&](GenericShell* p, const std::string& in)
+		{
+			p->evaluator->eval(in.c_str());
+		};
+
 		std::thread evalth(async_wrapper, this, input);
+		// evalth.detach();
 		evalth.join();
 	}
 	else
@@ -294,10 +300,10 @@ std::string GenericShell::poll_output()
 	if (0 < result.size())
 		return result;
 
+	// If we are here, the evaluator is done. Return shell prompts.
 	if (eval_done) return "";
 	eval_done = true;
 
-	// If we are here, the evaluator is done. Return shell prompts.
 	if (evaluator->input_pending())
 	{
 		if (show_output && show_prompt)
@@ -311,20 +317,6 @@ std::string GenericShell::poll_output()
 		if (show_prompt) return normal_prompt;
 	}
 	return "";
-}
-
-/* ============================================================== */
-
-void GenericShell::async_wrapper(GenericShell* p, const std::string& in)
-{
-	p->async_evaluator(in);
-}
-
-void GenericShell::async_evaluator(const std::string& input)
-{
-printf("duuuuude ola async evalu\n");
-	evaluator->eval(input.c_str());
-printf("duuuuude bye async evalu\n");
 }
 
 /* ===================== END OF FILE ============================ */
