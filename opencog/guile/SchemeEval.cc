@@ -466,6 +466,7 @@ void SchemeEval::begin_eval()
 
 std::string SchemeEval::poll_port()
 {
+#if GUILE_FAIL
 	// The below performs a little two-step dance, in an attempt
 	// to prevent reader-writer races.  Basically, it sets a new
 	// string port, so that any current/future writers will write
@@ -473,8 +474,10 @@ std::string SchemeEval::poll_port()
 	// should not have any more writers to it. Thus it can be safelty
 	// drained.  This two-step dance assumes that guile itself is
 	// thread-safe for this kind of swapping.  I dunno if it actually
-	// is.  I kind-of suspect that its not ... we shall find out the
-	// hard way, I suppose ... 
+	// is.  I kind-of suspect that its not ... OK, its not. The code
+	// below will sometimes hit the following error:
+	// ERROR: In procedure display: Wrong type argument in position 2: #<closed: string 0>
+	// I don't understand how it could happen, but it does ... 
 	SCM new_out = scm_open_output_string();
 	scm_set_current_output_port(new_out);
 	SCM out = scm_get_output_string(_outport);
@@ -485,6 +488,16 @@ std::string SchemeEval::poll_port()
 	std::string rv = str;
 	free(str);
 	return rv;
+#else
+	// See above.  The below might loose some output, because its racy.
+	// there does not seem to be any way of fixing it ... !?
+	SCM out = scm_get_output_string(_outport);
+	scm_truncate_file(_outport, scm_from_uint16(0));
+	char * str = scm_to_locale_string(out);
+	std::string rv = str;
+	free(str);
+	return rv;
+#endif
 }
 
 std::string SchemeEval::do_poll_result()
