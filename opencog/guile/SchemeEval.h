@@ -46,6 +46,7 @@ class SchemeEval : public GenericEval
 		const std::string *pexpr;
 		std::string answer;
 		SCM _rc;
+		bool _eval_done;
 
 		// Straight-up evaluation
 		static SCM thunk_scm_eval(void *);
@@ -83,9 +84,11 @@ class SchemeEval : public GenericEval
 		SchemeEval(AtomSpace*);
 		~SchemeEval();
 
+		void begin_eval();
 		void eval(const std::string&);
 		std::string poll_result();
-		std::string eval(const std::stringstream& ss) { eval(ss.str()); return poll_result(); }
+		std::string eval(const std::stringstream& ss)
+			{ begin_eval(); eval(ss.str()); return poll_result(); }
 
 		Handle eval_h(const std::string&);
 		Handle eval_h(const std::stringstream& ss) { return eval_h(ss.str()); }

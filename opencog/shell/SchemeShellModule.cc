@@ -93,6 +93,7 @@ std::string SchemeShellModule::do_eval(Request *req, std::list<std::string> args
 		expr += arg + " ";
 	}
 
+	evaluator->begin_eval();
 	evaluator->eval(expr);
 	out = evaluator->poll_result();
 	// May not be necessary since an error message and backtrace are provided.

@@ -77,6 +77,15 @@ class GenericEval
 			return _caught_error;
 		}
 
+		/**
+		 * begin_eval() must be called in the same thread as poll_result()
+		 * and it must be called before eval().  The eval() method may be
+		 * called in the same thread, or a different one.  The poll_result()
+		 * method can be called at any time after begin_eval().  The
+		 * poll_result() method might block, until results are available.
+		 * It must return the empty string when there are no more results.
+		 */
+		virtual void begin_eval() = 0;
 		virtual void eval(const std::string&) = 0;
 		virtual std::string poll_result() = 0;
 };

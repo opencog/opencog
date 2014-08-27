@@ -120,6 +120,7 @@ class PythonEval : public GenericEval
         void addModuleFromPath(std::string path);
         void addSysPath(std::string path);
 
+        virtual void begin_eval() {}
         virtual void eval(const std::string&);
         virtual std::string poll_result();
 

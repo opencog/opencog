@@ -260,6 +260,7 @@ void GenericShell::do_eval(const std::string &expr)
 	 */
 	std::string input = expr + "\n";
 	eval_done = false;
+	evaluator->begin_eval(); // must be called in same thread as result_poll
 	if (do_async_output)
 	{
 		auto async_wrapper = [&](GenericShell* p, const std::string& in)

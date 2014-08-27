@@ -54,7 +54,7 @@ void SchemeEval::init(void)
 	captured_stack = scm_gc_protect_object(captured_stack);
 
 	pexpr = NULL;
-	_rc = SCM_EOL;
+	_eval_done = false;
 }
 
 void * SchemeEval::c_wrap_init(void *p)
@@ -472,13 +472,21 @@ ready_hack = true;
 waiter_hack.notify_all();
 }
 
+void SchemeEval::begin_eval()
+{
+	_eval_done = false;
+	_rc = SCM_EOL;
+}
+
 std::string SchemeEval::do_poll_result()
 {
 	per_thread_init();
-	if (SCM_EOL == _rc) return "";
+	if (_eval_done) return "";
+
 std::unique_lock<std::mutex> lck(serial_hack);
 while (not ready_hack) waiter_hack.wait(lck);
 ready_hack = false;
+_eval_done = true;
 
 	/* An error is thrown if the input expression is incomplete,
 	 * in which case the error handler sets the pending_input flag
@@ -516,8 +524,6 @@ ready_hack = false;
 		// Next, we append the "interpreter" output
 		rv += prt(_rc);
 		rv += "\n";
-
-		_rc = SCM_EOL;
 		return rv;
 	}
 	return "#<Error: Unreachable statement reached>";
