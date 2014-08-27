@@ -72,7 +72,7 @@
         (if (and (or (cog-node? deref-x) (cog-link? deref-x))
                  (null? (cog-incoming-set x)))
             x
-            '()
+            #f
         )
     )
 
@@ -90,7 +90,7 @@
                     ; are the results of the evaluation of the relex-to-logic functions,
                     ; on the relex-opencog-outputs.
                     (SetLink
-                        (map pruner
+                        (filter-map pruner
                             (delete-duplicates 
                                 (apply append 
                                     (map-in-order eval-string
