@@ -80,8 +80,9 @@ class SchemeEval : public GenericEval
 		SchemeEval(AtomSpace*);
 		~SchemeEval();
 
-		std::string eval(const std::string&);
-		std::string eval(const std::stringstream& ss) { return eval(ss.str()); }
+		void eval(const std::string&);
+		std::string poll_result();
+		std::string eval(const std::stringstream& ss) { eval(ss.str()); return poll_result(); }
 
 		Handle eval_h(const std::string&);
 		Handle eval_h(const std::stringstream& ss) { return eval_h(ss.str()); }

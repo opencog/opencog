@@ -115,11 +115,13 @@ class PythonEval : public GenericEval
 
         std::map <std::string, PyObject*> modules;
 
+        std::string _result;
     public:
         void addModuleFromPath(std::string path);
         void addSysPath(std::string path);
 
-        virtual std::string eval(const std::string&);
+        virtual void eval(const std::string&);
+        virtual std::string poll_result();
 
         PyThreadState * getMainThreadState() {
             return this->mainThreadState;

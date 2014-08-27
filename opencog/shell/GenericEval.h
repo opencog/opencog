@@ -77,7 +77,8 @@ class GenericEval
 			return _caught_error;
 		}
 
-		virtual std::string eval(const std::string&) = 0;
+		virtual void eval(const std::string&) = 0;
+		virtual std::string poll_result() = 0;
 };
 
 /** @}*/

@@ -382,7 +382,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
  * An "unforgiving" evaluator, with none of these amenities, can be
  * found in eval_h(), below.
  */
-std::string SchemeEval::eval(const std::string &expr)
+void SchemeEval::eval(const std::string &expr)
 {
 	pexpr = &expr;
 
@@ -397,7 +397,10 @@ std::string SchemeEval::eval(const std::string &expr)
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
+}
 
+std::string SchemeEval::poll_result()
+{
 	return answer;
 }
 

@@ -266,7 +266,8 @@ void GenericShell::do_eval(const std::string &expr)
 	}
 	else
 	{
-		put_output(evaluator->eval(input.c_str()));
+		evaluator->eval(input.c_str());
+		put_output(evaluator->poll_result());
 	}
 
 	if (evaluator->input_pending())
@@ -315,7 +316,8 @@ void GenericShell::async_wrapper(GenericShell* p, const std::string& in)
 void GenericShell::async_evaluator(const std::string& input)
 {
 printf("duuuuude ola async evalu\n");
-	pending_output = evaluator->eval(input.c_str());
+	evaluator->eval(input.c_str());
+	pending_output = evaluator->poll_result();
 printf("duuuuude bye async evalu %s\n", pending_output.c_str());
 }
 
