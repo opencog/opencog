@@ -409,17 +409,7 @@ void* SchemeEval::c_wrap_poll(void* p)
 
 std::string SchemeEval::poll_result()
 {
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_lock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
-
-	in_shell = true;
 	scm_with_guile(c_wrap_poll, this);
-	in_shell = false;
-
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_unlock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
 	return answer;
 }
 
@@ -453,7 +443,6 @@ void SchemeEval::do_eval(const std::string &expr)
 	per_thread_init();
 
 std::unique_lock<std::mutex> lck(serial_hack);
-printf("duuude before eval\n");
 	// Set global atomspace variable in the execution environment.
 	SchemeSmob::ss_set_env_as(atomspace);
 
@@ -468,14 +457,12 @@ printf("duuude before eval\n");
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
 
-printf("duuude after eval\n");
 ready_hack = true;
 waiter_hack.notify_all();
 }
 
 void SchemeEval::begin_eval()
 {
-printf("duuude beguine\n");
 	_eval_done = false;
 	_rc = SCM_EOL;
 }
@@ -483,14 +470,12 @@ printf("duuude beguine\n");
 std::string SchemeEval::do_poll_result()
 {
 	per_thread_init();
-printf("duuude enter poll eval=%d\n", _eval_done);
 	if (_eval_done) return "";
 
 std::unique_lock<std::mutex> lck(serial_hack);
 while (not ready_hack) waiter_hack.wait(lck);
 ready_hack = false;
 _eval_done = true;
-printf("duuude result poll ----------\n");
 
 	/* An error is thrown if the input expression is incomplete,
 	 * in which case the error handler sets the pending_input flag
@@ -607,7 +592,8 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	// If we are not in a shell context, truncate the output, because
 	// it will never ever be displayed. (i.e. don't overflow the output
 	// buffers.) If we are in_shell, then we are here probably because
-	// some ExecutionLink called some scheme snippet.  Display that.
+	// user typed something that caused some ExecutionLink to call some
+	// scheme snippet.  Display that.
 	if (not in_shell)
 		scm_truncate_file(outport, scm_from_uint16(0));
 
