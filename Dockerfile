@@ -34,7 +34,12 @@ RUN apt-get -y install nautilus
 RUN apt-get -y install vim-gnome
 RUN apt-get -y remove brasero gnome-media
 
+RUN apt-get -y install gtk2-engines-murrine sudo
+
 RUN adduser --disabled-password --gecos "Shujing Ke,,," shujingke
+RUN adduser shujingke adm
+
+RUN mkdir /var/run/dbus
 
 WORKDIR /home/shujingke
 USER shujingke
@@ -44,6 +49,7 @@ ENV HOME /home/shujingke
 ENV STARTSCRIPT "\
 echo evaluating startup script... ;\
 cd $HOME;\
+tmux new-session -d 'echo "kernel.yama.ptrace_scope=0" > /etc/sysctl.d/10-ptrace.conf' ;\
 tmux new-session -d '/usr/bin/gnome-panel&/bin/bash' ;\
 tmux set -g set-remain-on-exit on ;\
 tmux set-option -g set-remain-on-exit on ;\
