@@ -108,6 +108,8 @@ namespace PatternMining
      // Only effective when Enable_Interesting_Pattern is true. The options are "Interaction_Information", "surprisingness"
      string interestingness_Evaluation_method;
 
+     vector<vector<vector<unsigned int>>> components_ngram[3];
+
      // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
      // the input links should be a Pattern in such format:
      //    (InheritanceLink
@@ -208,6 +210,10 @@ namespace PatternMining
      double calculateEntropyOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern);
 
      void calculateInteractionInformation(HTreeNode* HNode);
+
+     void generateComponentCombinations(string componentsStr, vector<vector<vector<unsigned int>>> &componentCombinations);
+
+     float calculateProbabilityOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern, int &component_count);
 
      void calculateSurprisingness( HTreeNode* HNode);
 

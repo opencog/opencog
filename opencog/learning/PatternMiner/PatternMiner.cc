@@ -1152,7 +1152,7 @@ void PatternMiner::OutPutPatternsToFile(unsigned int n_gram, bool is_interesting
         fileName = "InterestingPatterns_" + toString(n_gram) + "gram.scm";
     else
         fileName = "FrequentPatterns_" + toString(n_gram) + "gram.scm";
-    std::cout<<"Debug: PatternMiner: writing (gram = " + toString(n_gram) + ") patterns to file " + fileName << std::endl;
+    std::cout<<"Debug: PatternMiner: writing00 (gram = " + toString(n_gram) + ") patterns to file " + fileName << std::endl;
 
     resultFile.open(fileName.c_str());
     vector<HTreeNode*> &patternsForThisGram = patternsForGram[n_gram-1];
@@ -1170,7 +1170,12 @@ void PatternMiner::OutPutPatternsToFile(unsigned int n_gram, bool is_interesting
         resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
 
         if (is_interesting_pattern)
-            resultFile << " InteractionInformation = " << toString(htreeNode->interactionInformation);
+        {
+            if (interestingness_Evaluation_method == "Interaction_Information")
+                resultFile << " InteractionInformation = " << toString(htreeNode->interactionInformation);
+            else if (interestingness_Evaluation_method == "surprisingness")
+                resultFile << " Surprisingness = " << toString(htreeNode->surprisingness);
+        }
 
         resultFile << endl;
 
@@ -1666,12 +1671,153 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
 
 //}
 
-void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
+float PatternMiner::calculateProbabilityOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern, int &component_count)
 {
+    // try to find if it has a correponding HtreeNode
+    map<string, HTreeNode*>::iterator subPatternNodeIter = keyStrToHTreeNodeMap.find(connectedSubPatternKey);
+    if (subPatternNodeIter != keyStrToHTreeNodeMap.end())
+    {
+        // it's in the H-Tree, add its entropy
+        HTreeNode* subPatternNode = (HTreeNode*)subPatternNodeIter->second;
+        cout << "CalculateProbability: Found in H-tree! p = " << subPatternNode->count << " / " << "20";//todo
+        component_count = subPatternNode->count;
+        return (float)(subPatternNode->count) / (20.0f); // todo
+    }
+    else
+    {
+        // can't find its HtreeNode, have to calculate its frequency again by calling pattern matcher
+        // Todo: need to decide if add this missing HtreeNode into H-Tree or not
 
+        HTreeNode* newHTreeNode = new HTreeNode();
+        keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(connectedSubPatternKey, newHTreeNode));
+        newHTreeNode->pattern = connectedSubPattern;
+
+        // Find All Instances in the original AtomSpace For this Pattern
+        findAllInstancesForGivenPattern(newHTreeNode);
+        cout << "CalculateProbability: Not found in H-tree! call pattern matcher again! p = " << newHTreeNode->count << " / " << "20";//todo
+        component_count = newHTreeNode->count;
+        return (float)(newHTreeNode->count) / (20.0f); // todo
+
+    }
 }
 
 
+// make sure only input 2~4 gram patterns
+void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
+{
+    std::cout << "=================Debug: calculateSurprisingness for pattern: ====================\n";
+    foreach (Handle link, HNode->pattern)
+    {
+        std::cout << atomSpace->atomAsString(link);
+    }
+    std::cout << std::endl;
+
+    unsigned int gram = HNode->pattern.size();
+    // get the predefined combination:
+    // vector<vector<vector<unsigned int>>>
+    float maxProbability = 0.0f;
+    float minProbability = 1.0f;
+
+    foreach(vector<vector<unsigned int>>&  oneCombin, components_ngram[gram-2])
+    {
+        float total_p = 1.0f;
+        int total_count = 0;
+        bool containsComponentDisconnected = false;
+        foreach (vector<unsigned int>& oneComponent, oneCombin)
+        {
+            HandleSeq subPattern;
+            foreach(unsigned int index, oneComponent)
+            {
+                subPattern.push_back(HNode->pattern[index]);
+            }
+
+            HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern);
+            string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
+
+            std::cout<< "Subpattern: " << subPatternKey;
+
+            // First check if this subpattern is disconnected. If it is disconnected, it won't exist in the H-Tree anyway.
+            HandleSeqSeq splittedSubPattern;
+            if (splitDisconnectedLinksIntoConnectedGroups(unifiedSubPattern, splittedSubPattern))
+            {
+                std::cout<< " is disconnected! skip it \n" ;
+                containsComponentDisconnected = true;
+                break;
+            }
+            else
+            {
+                std::cout<< " is connected! \n" ;
+                int component_count;
+                float p = calculateProbabilityOfASubConnectedPattern(subPatternKey, unifiedSubPattern, component_count);
+                std::cout<< " = " << p << std::endl << std::endl;
+                total_p *= p;
+                total_count += component_count;
+            }
+
+        }
+
+        if (containsComponentDisconnected)
+            continue;
+
+        cout << "\nTotal p = " <<  total_p << "; ";
+        // normalize the total_p
+        float np = total_p /((float)(total_count - HNode->count));
+        cout << "Normalized np = " << total_p << " / (" << total_count  << "-" << HNode->count <<") = " << np << std::endl;
+
+        if(total_p > maxProbability)
+            maxProbability = total_p;
+
+        if (total_p < minProbability)
+            minProbability = total_p;
+
+    }
+
+    cout << "\nmaxProbability = " << maxProbability << "; minProbability = " << minProbability << std::endl;
+
+    float patternP = ((float)(HNode->count)) / 20.0f/((float)(HNode->count)); //todo
+
+    float surprisingness1 = patternP - maxProbability;
+    float surprisingness2 = minProbability - patternP;
+
+    if (surprisingness1 > surprisingness2)
+        HNode->surprisingness = surprisingness1;
+    else
+        HNode->surprisingness = surprisingness2;
+
+    cout << "\nsurprisingness = " << HNode->surprisingness << std::endl;
+
+}
+
+// in vector<vector<vector<unsigned int>>> the  <unsigned int> is the index in pattern HandleSeq : 0~n
+void PatternMiner::generateComponentCombinations(string componentsStr, vector<vector<vector<unsigned int>>> &componentCombinations)
+{
+    // "0,12|1,02|2,01|0,1,2"
+
+    vector<string> allCombinationsStrs = StringManipulator::split(componentsStr,"|");
+
+    foreach(string oneCombinStr, allCombinationsStrs)
+    {
+        // "0,12"
+        vector<vector<unsigned int>> oneCombin;
+
+        vector<string> allComponentStrs = StringManipulator::split(oneCombinStr,",");
+        foreach(string oneComponentStr, allComponentStrs)
+        {
+            vector<unsigned int> oneComponent;
+            for(std::string::size_type i = 0; i < oneComponentStr.size(); ++i)
+            {
+                oneComponent.push_back((unsigned int)(oneComponentStr[i] - '0'));
+            }
+
+            oneCombin.push_back(oneComponent);
+
+        }
+
+        componentCombinations.push_back(oneCombin);
+    }
+
+
+}
 
 PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram): originalAtomSpace(_originalAtomSpace)
 {
@@ -1707,6 +1853,28 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     {
         vector<HTreeNode*> patternVector;
         patternsForGram.push_back(patternVector);
+    }
+
+    // define (hard coding) all the possible subcomponent combinations for 2~4 gram patterns
+    string gramNcomponents[3];
+    // for 2 gram patterns [01], the only possible combination is [0][1]
+    gramNcomponents[0] = "0,1";
+
+    // for 3 gram patterns [012], the possible combinations are [0][12],[1][02],[2][01],[0][1][2]
+    gramNcomponents[1] = "0,12|1,02|2,01|0,1,2";
+
+    // for 4 gram patterns [0123], the possible combinations are:
+    // [0][123],[1][023],[2][013], [3][012], [01][23],[02][13],[03][12],
+    // [0][1][23],[0][2][13],[0][3][12],[1][2][03],[1][3][02],[2][3][01], [0][1][2][3]
+    gramNcomponents[2] = "0,123|1,023|2,013|3,012|01,23|02,13|03,12|0,1,23|0,2,13|0,3,12|1,2,03|1,3,02|2,3,01|0,1,2,3";
+
+    // generate vector<vector<vector<unsigned int>>> components_ngram[3] from above hard coding combinations for 2~4 grams
+
+    int ngram = 0;
+    foreach(string componentCombinsStr, gramNcomponents)
+    {
+        generateComponentCombinations(componentCombinsStr, this->components_ngram[ngram]);
+        ngram ++;
     }
 
     std::cout<<"Debug: PatternMiner init finished! " + toString(THREAD_NUM) + " threads used!" << std::endl;
