@@ -1671,7 +1671,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
 
 //}
 
-float PatternMiner::calculateProbabilityOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern, int &component_count)
+unsigned int PatternMiner::getCountOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern)
 {
     // try to find if it has a correponding HtreeNode
     map<string, HTreeNode*>::iterator subPatternNodeIter = keyStrToHTreeNodeMap.find(connectedSubPatternKey);
@@ -1679,9 +1679,8 @@ float PatternMiner::calculateProbabilityOfASubConnectedPattern(string& connected
     {
         // it's in the H-Tree, add its entropy
         HTreeNode* subPatternNode = (HTreeNode*)subPatternNodeIter->second;
-        cout << "CalculateProbability: Found in H-tree! p = " << subPatternNode->count << " / " << "20";//todo
-        component_count = subPatternNode->count;
-        return (float)(subPatternNode->count) / (20.0f); // todo
+        cout << "Found in H-tree! count = " << subPatternNode->count << std::endl;
+        return subPatternNode->count;
     }
     else
     {
@@ -1694,9 +1693,8 @@ float PatternMiner::calculateProbabilityOfASubConnectedPattern(string& connected
 
         // Find All Instances in the original AtomSpace For this Pattern
         findAllInstancesForGivenPattern(newHTreeNode);
-        cout << "CalculateProbability: Not found in H-tree! call pattern matcher again! p = " << newHTreeNode->count << " / " << "20";//todo
-        component_count = newHTreeNode->count;
-        return (float)(newHTreeNode->count) / (20.0f); // todo
+        cout << "Not found in H-tree! call pattern matcher again! count = " << newHTreeNode->count << std::endl;
+        return newHTreeNode->count;
 
     }
 }
@@ -1710,18 +1708,22 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
     {
         std::cout << atomSpace->atomAsString(link);
     }
+    std::cout << "count of this pattern = " << HNode->count << std::endl;
     std::cout << std::endl;
 
     unsigned int gram = HNode->pattern.size();
     // get the predefined combination:
     // vector<vector<vector<unsigned int>>>
-    float maxProbability = 0.0f;
-    float minProbability = 1.0f;
+    float minSurprisingness = 1.0f;
+    int comcount = 0;
 
     foreach(vector<vector<unsigned int>>&  oneCombin, components_ngram[gram-2])
     {
-        float total_p = 1.0f;
-        int total_count = 0;
+        unsigned int countsForEachComponent[oneCombin.size()];
+        int com_i = 0;
+        std::cout <<" -----Combination " << comcount++ << "-----" << std::endl;
+
+        unsigned int total_count = 0;
         bool containsComponentDisconnected = false;
         foreach (vector<unsigned int>& oneComponent, oneCombin)
         {
@@ -1747,44 +1749,52 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
             else
             {
                 std::cout<< " is connected! \n" ;
-                int component_count;
-                float p = calculateProbabilityOfASubConnectedPattern(subPatternKey, unifiedSubPattern, component_count);
-                std::cout<< " = " << p << std::endl << std::endl;
-                total_p *= p;
+                unsigned int component_count = getCountOfASubConnectedPattern(subPatternKey, unifiedSubPattern);
+                countsForEachComponent[com_i] = component_count;
+
                 total_count += component_count;
+                std::cout << std::endl;
             }
+
+            com_i ++;
 
         }
 
         if (containsComponentDisconnected)
             continue;
 
-        cout << "\nTotal p = " <<  total_p << "; ";
-        // normalize the total_p
-        float np = total_p /((float)(total_count - HNode->count));
-        cout << "Normalized np = " << total_p << " / (" << total_count  << "-" << HNode->count <<") = " << np << std::endl;
+        float Normalized_count = (float)(total_count);
+        cout << "\nNormalized_count = " <<  total_count << " - " << HNode->count << " = " << (int)Normalized_count << std::endl;
+        float p = ((float)HNode->count)/Normalized_count;
+        cout << "p = " <<  HNode->count << " / " << (int)Normalized_count << " = " << p << std::endl;
 
-        if(total_p > maxProbability)
-            maxProbability = total_p;
+        float total_p = 1.0f;
+        cout << "total_p = \n" ;
+        for (unsigned int i = 0; i < oneCombin.size(); i++)
+        {
+            float p_i = ((float)(countsForEachComponent[i])) /((float)(total_count - HNode->count));
+            total_p *= p_i;
+            cout << " * p[" << i << "] = " <<  countsForEachComponent[i] << " / " << (int)Normalized_count << " = " << p_i << std::endl;
+        }
+        cout << " = " << total_p << std::endl;
 
-        if (total_p < minProbability)
-            minProbability = total_p;
+        float diff = total_p - p;
+        if (diff < 0)
+            diff = -diff;
+
+        cout << "diff = |" << p << " - " << total_p << "| = " << diff << ". ";
+        float surprising_degree = diff/total_p;
+        cout << "surprising_degree = " <<  diff << " / " << total_p << " = " << surprising_degree << std::endl;
+
+        if (surprising_degree < minSurprisingness)
+            minSurprisingness = surprising_degree;
 
     }
 
-    cout << "\nmaxProbability = " << maxProbability << "; minProbability = " << minProbability << std::endl;
+    cout << "\nminSurprisingness = " << minSurprisingness << std::endl;
 
-    float patternP = ((float)(HNode->count)) / 20.0f/((float)(HNode->count)); //todo
+    HNode->surprisingness = minSurprisingness;
 
-    float surprisingness1 = patternP - maxProbability;
-    float surprisingness2 = minProbability - patternP;
-
-    if (surprisingness1 > surprisingness2)
-        HNode->surprisingness = surprisingness1;
-    else
-        HNode->surprisingness = surprisingness2;
-
-    cout << "\nsurprisingness = " << HNode->surprisingness << std::endl;
 
 }
 

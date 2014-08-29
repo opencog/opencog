@@ -46,7 +46,7 @@ namespace opencog
 
             unsigned int count; // instance number
             double interactionInformation;
-            double surprisingness;
+            float surprisingness;
 
             HandleSeq sharedVarNodeList; // all the shared nodes in these links in the original AtomSpace, each handle is a shared node
 

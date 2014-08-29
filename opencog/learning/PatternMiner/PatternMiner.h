@@ -213,7 +213,7 @@ namespace PatternMining
 
      void generateComponentCombinations(string componentsStr, vector<vector<vector<unsigned int>>> &componentCombinations);
 
-     float calculateProbabilityOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern, int &component_count);
+     unsigned int getCountOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern);
 
      void calculateSurprisingness( HTreeNode* HNode);
 
