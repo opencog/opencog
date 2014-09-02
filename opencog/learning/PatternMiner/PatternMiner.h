@@ -39,6 +39,7 @@ namespace opencog
 {
 namespace PatternMining
 {
+#define FLOAT_MIN_DIFF 0.00001
 
  struct _non_ordered_pattern
  {
@@ -107,6 +108,10 @@ namespace PatternMining
 
      // Only effective when Enable_Interesting_Pattern is true. The options are "Interaction_Information", "surprisingness"
      string interestingness_Evaluation_method;
+
+     float atomspaceSizeFloat;
+
+     vector<vector<vector<unsigned int>>> components_ngram[3];
 
      // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
      // the input links should be a Pattern in such format:
@@ -208,6 +213,10 @@ namespace PatternMining
      double calculateEntropyOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern);
 
      void calculateInteractionInformation(HTreeNode* HNode);
+
+     void generateComponentCombinations(string componentsStr, vector<vector<vector<unsigned int>>> &componentCombinations);
+
+     unsigned int getCountOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern);
 
      void calculateSurprisingness( HTreeNode* HNode);
 
