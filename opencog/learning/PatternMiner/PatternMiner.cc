@@ -1141,7 +1141,12 @@ bool compareHTreeNodeByInteractionInformation(HTreeNode* node1, HTreeNode* node2
 
 bool compareHTreeNodeBySurprisingness(HTreeNode* node1, HTreeNode* node2)
 {
-    return (node1->surprisingness > node2->surprisingness);
+    if (node1->surprisingness - node2->surprisingness > FLOAT_MIN_DIFF)
+        return true;
+    else if (node2->surprisingness - node1->surprisingness > FLOAT_MIN_DIFF)
+        return false;
+
+    return (node1->var_num < node2->var_num);
 }
 
 void PatternMiner::OutPutPatternsToFile(unsigned int n_gram, bool is_interesting_pattern)
@@ -1789,11 +1794,11 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
     cout << "\np - maxProbability = " << surprisingness_max << "; minProbability - p = " << surprisingness_min << std::endl;
 
     if (surprisingness_max >= surprisingness_min)
-        HNode->surprisingness = surprisingness_max;
+        HNode->surprisingness = surprisingness_max ;
     else
         HNode->surprisingness = surprisingness_min;
 
-    cout << "surprisingness = " << HNode->surprisingness  << std::endl;
+    cout << "surprisingness = surprisingness " << HNode->surprisingness  << std::endl;
 
 }
 

@@ -39,6 +39,7 @@ namespace opencog
 {
 namespace PatternMining
 {
+#define FLOAT_MIN_DIFF 0.00001
 
  struct _non_ordered_pattern
  {
