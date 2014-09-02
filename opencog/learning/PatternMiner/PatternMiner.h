@@ -108,6 +108,8 @@ namespace PatternMining
      // Only effective when Enable_Interesting_Pattern is true. The options are "Interaction_Information", "surprisingness"
      string interestingness_Evaluation_method;
 
+     float atomspaceSizeFloat;
+
      vector<vector<vector<unsigned int>>> components_ngram[3];
 
      // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted

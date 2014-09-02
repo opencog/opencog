@@ -1201,6 +1201,8 @@ void PatternMiner::ConstructTheFirstGramPatterns()
 
     originalAtomSpace->getHandlesByType(back_inserter(allLinks), (Type) LINK, true );
 
+    atomspaceSizeFloat = (float)(allLinks.size());
+
     for (unsigned int i = 0; i < THREAD_NUM; ++ i)
     {
         threads[i] = std::thread([this]{this->growTheFirstGramPatternsTask();}); // using C++11 lambda-expression
@@ -1714,16 +1716,16 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
     unsigned int gram = HNode->pattern.size();
     // get the predefined combination:
     // vector<vector<vector<unsigned int>>>
-    float minSurprisingness = 1.0f;
+    float minProbability = 9999999999.00000f;
+    float maxProbability = 0.0000000f;
     int comcount = 0;
 
     foreach(vector<vector<unsigned int>>&  oneCombin, components_ngram[gram-2])
     {
-        unsigned int countsForEachComponent[oneCombin.size()];
         int com_i = 0;
         std::cout <<" -----Combination " << comcount++ << "-----" << std::endl;
+        float total_p = 1.0f;
 
-        unsigned int total_count = 0;
         bool containsComponentDisconnected = false;
         foreach (vector<unsigned int>& oneComponent, oneCombin)
         {
@@ -1748,11 +1750,13 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
             }
             else
             {
-                std::cout<< " is connected! \n" ;
+                std::cout<< " is connected!" ;
                 unsigned int component_count = getCountOfASubConnectedPattern(subPatternKey, unifiedSubPattern);
-                countsForEachComponent[com_i] = component_count;
+                cout << ", count = " << component_count;
+                float p_i = ((float)(component_count)) / atomspaceSizeFloat;
 
-                total_count += component_count;
+                cout << ", p = " << component_count  << " / " << (int)atomspaceSizeFloat << " = " << p_i << std::endl;
+                total_p *= p_i;
                 std::cout << std::endl;
             }
 
@@ -1763,38 +1767,32 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
         if (containsComponentDisconnected)
             continue;
 
-        float Normalized_count = (float)(total_count);
-        cout << "\nNormalized_count = " <<  total_count << " - " << HNode->count << " = " << (int)Normalized_count << std::endl;
-        float p = ((float)HNode->count)/Normalized_count;
-        cout << "p = " <<  HNode->count << " / " << (int)Normalized_count << " = " << p << std::endl;
 
-        float total_p = 1.0f;
-        cout << "total_p = \n" ;
-        for (unsigned int i = 0; i < oneCombin.size(); i++)
-        {
-            float p_i = ((float)(countsForEachComponent[i])) /((float)(total_count - HNode->count));
-            total_p *= p_i;
-            cout << " * p[" << i << "] = " <<  countsForEachComponent[i] << " / " << (int)Normalized_count << " = " << p_i << std::endl;
-        }
-        cout << " = " << total_p << std::endl;
+        cout << "\n ---- total_p = " << total_p << " ----\n" ;
 
-        float diff = total_p - p;
-        if (diff < 0)
-            diff = -diff;
 
-        cout << "diff = |" << p << " - " << total_p << "| = " << diff << ". ";
-        float surprising_degree = diff/total_p;
-        cout << "surprising_degree = " <<  diff << " / " << total_p << " = " << surprising_degree << std::endl;
+        if (total_p < minProbability)
+            minProbability = total_p;
 
-        if (surprising_degree < minSurprisingness)
-            minSurprisingness = surprising_degree;
+        if (total_p > maxProbability)
+            maxProbability = total_p;
 
     }
 
-    cout << "\nminSurprisingness = " << minSurprisingness << std::endl;
+    cout << "\nIn all the probability calculated by all possible component combinations, maxProbability  = " << maxProbability << ", minProbability = " << minProbability << std::endl;
+    float p = ((float)HNode->count)/atomspaceSizeFloat;
+    cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  (int)atomspaceSizeFloat << " = " << p << std::endl;
 
-    HNode->surprisingness = minSurprisingness;
+    float surprisingness_max = p - maxProbability;
+    float surprisingness_min = minProbability - p;
+    cout << "\np - maxProbability = " << surprisingness_max << "; minProbability - p = " << surprisingness_min << std::endl;
 
+    if (surprisingness_max >= surprisingness_min)
+        HNode->surprisingness = surprisingness_max;
+    else
+        HNode->surprisingness = surprisingness_min;
+
+    cout << "surprisingness = " << HNode->surprisingness  << std::endl;
 
 }
 
