@@ -45,6 +45,7 @@ namespace opencog
             set<HTreeNode*> childLinks;
 
             unsigned int count; // instance number
+            unsigned int var_num; // the number of all the variables in this pattern
             double interactionInformation;
             float surprisingness;
 

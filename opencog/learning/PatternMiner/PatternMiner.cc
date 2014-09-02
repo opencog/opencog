@@ -663,6 +663,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
                     if (newHTreeNode)
                     {
                         newHTreeNode->pattern = unifiedPattern;
+                        newHTreeNode->var_num = var_num;
 
                         // Find All Instances in the original AtomSpace For this Pattern
                         findAllInstancesForGivenPattern(newHTreeNode);
