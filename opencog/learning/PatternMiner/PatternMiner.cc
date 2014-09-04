@@ -376,6 +376,10 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
                 Handle varHandle = atomSpace->addNode(opencog::VARIABLE_NODE,"$var~" + toString(valueToVarMap.size()) );
                 valueToVarMap.insert(std::pair<Handle,Handle>(h,varHandle));
             }
+
+            if ((originalAtomSpace->getType(h) == opencog::VARIABLE_NODE))
+                cout<<"Error: instance link contains variables: \n" << originalAtomSpace->atomAsString(h)<<std::endl;
+
         }
         else
         {
@@ -772,8 +776,8 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //        )
 //     )
 
-    if (THREAD_NUM > 1)
-        removeAtomLock.lock();
+//    if (THREAD_NUM > 1)
+//        removeAtomLock.lock();
 
     HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, linksWillBeDel;
 
@@ -888,10 +892,11 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     originalAtomSpace->removeAtom(hBindLink);
     originalAtomSpace->removeAtom(hAndLink);
     originalAtomSpace->removeAtom(hResultListLink);
-    originalAtomSpace->removeAtom(hVariablesListLink);
+    // originalAtomSpace->removeAtom(hVariablesListLink);
 
-    if (THREAD_NUM > 1)
-        removeAtomLock.unlock();
+
+//    if (THREAD_NUM > 1)
+//        removeAtomLock.unlock();
 
     HNode->count = HNode->instances.size();
 }
@@ -918,6 +923,7 @@ void PatternMiner::removeLinkAndItsAllSubLinks(AtomSpace* _atomspace, Handle lin
 void PatternMiner::growTheFirstGramPatternsTask()
 {
 
+    static int count = 0;
     while (true)
     {
         if (THREAD_NUM > 1)
@@ -949,6 +955,8 @@ void PatternMiner::growTheFirstGramPatternsTask()
         // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
         set<Handle> sharedNodes;
         extractAllPossiblePatternsFromInputLinks(originalLinks, 0, sharedNodes);
+        count ++;
+        cout<< "\r" + toString(((float)(count)/atomspaceSizeFloat)*100.0f) + "% completed." ;
 
     }
 
@@ -1124,6 +1132,8 @@ void PatternMiner::growPatternsTask()
 
         cur_growing_pattern->instances.clear();
         (vector<HandleSeq>()).swap(cur_growing_pattern->instances);
+
+        cout<< "\r" + toString(((float)(cur_index)/(float)(total))*100.0f) + "% completed." ;
 
     }
 
@@ -1320,28 +1330,28 @@ void PatternMiner::GrowAllPatterns()
 
 
 
-//        HandleSeq allDumpNodes, allDumpLinks;
-//        originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
+        HandleSeq allDumpNodes, allDumpLinks;
+        originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
 
-//        // Debug : out put the current dump Atomspace to a file
-//        ofstream dumpFile;
-//        string fileName = "DumpAtomspace" + toString(cur_gram) + "gram.scm";
+        // Debug : out put the current dump Atomspace to a file
+        ofstream dumpFile;
+        string fileName = "DumpAtomspace" + toString(cur_gram) + "gram.scm";
 
-//        dumpFile.open(fileName.c_str());
+        dumpFile.open(fileName.c_str());
 
-//        foreach(Handle h, allDumpNodes)
-//        {
-//            dumpFile << originalAtomSpace->atomAsString(h);
-//        }
+        foreach(Handle h, allDumpNodes)
+        {
+            dumpFile << originalAtomSpace->atomAsString(h);
+        }
 
-//        originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
+        originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
 
-//        foreach(Handle h, allDumpLinks)
-//        {
-//            dumpFile << originalAtomSpace->atomAsString(h);
-//        }
+        foreach(Handle h, allDumpLinks)
+        {
+            dumpFile << originalAtomSpace->atomAsString(h);
+        }
 
-//        dumpFile.close();
+        dumpFile.close();
     }
 }
 
@@ -1839,10 +1849,9 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     atomSpace = new AtomSpace();
 
     unsigned int system_thread_num  = std::thread::hardware_concurrency();
-    if (system_thread_num > 2)
-        THREAD_NUM = system_thread_num - 2;
-    else
-        THREAD_NUM = 1;
+
+    THREAD_NUM = system_thread_num;
+
 
 //    // test only one tread for now
 //    THREAD_NUM = 1;
