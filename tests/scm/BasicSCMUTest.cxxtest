@@ -77,15 +77,12 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 
 	void tearDown(void);
 
+	// First, check the basics, before doing more advanced stuff!
 	void test_utf8(void);
-
-	// TVs
-	void check_truth_value(const TruthValue& tv);
-	void test_truth_value(void);
+	void test_single_atom(void);
 
 	// Nodes
 	void check_node(const char *, const char *, float, float);
-	void test_single_atom(void);
 
 	// Links
 	void check_link(const char *, Type, const char *, const char *,
@@ -96,6 +93,10 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 	void test_inheritance_link(void);
 	// TODO
 	//void test_evaluation_link(void);
+
+	// TVs
+	void check_truth_value(const TruthValue& tv);
+	void test_truth_value(void);
 
 	// Relex links
 	void check_parse_link(const char *, Type, const char *, const char *, const char *, const char *, float, float);
@@ -122,6 +123,7 @@ void BasicSCMUTest::setUp(void)
 	eval->eval("(setlocale LC_CTYPE \"\")");
 	eval->clear_pending();
 }
+
 void BasicSCMUTest::tearDown(void)
 {
 	delete eval;
@@ -134,8 +136,18 @@ void BasicSCMUTest::test_utf8(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(display \"Ćićolina\")");
+	eval->eval("(+ 2 2)");
 	bool eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to find functional scheme iterpreter", !eval_err);
+
+	eval->eval("Evaluating this will cause an error to be thrown!");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Scheme iterpreter fails to throw errors", eval_err);
+
+	eval->eval("(display \"Ćićolina\")");
+	eval_err = eval->eval_error();
 	eval->clear_pending();
 	TSM_ASSERT("Failed to eval a UTF-8 string", !eval_err);
 
@@ -147,9 +159,78 @@ void BasicSCMUTest::test_utf8(void)
 
 // ============================================================
 
+void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float truth, float conf)
+{
+	printf("check_node(%s,%s,%f,%f)\n", tipo, nodename, truth, conf);
+	char buff[500];
+	snprintf(buff, 500, "(%s \"%s\" (stv %f %f))", tipo, nodename, truth, conf);
+	eval->eval(buff);
+	bool eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to create a node", !eval_err);
+
+	Type t = classserver().getType(tipo);
+	Handle h = as->getHandle(t, nodename);
+	TSM_ASSERT("Failed to find handle", h != NULL);
+
+	NodePtr n = NodeCast(h);
+	TSM_ASSERT("Failed to find node", n != NULL);
+
+	if (n)
+	{
+		TruthValuePtr tv = n->getTruthValue();
+		float m = tv->getMean();
+		float c = tv->getConfidence();
+
+		TS_ASSERT_LESS_THAN_EQUALS(fabs(m-truth), 1.0e-6);
+		TS_ASSERT_LESS_THAN_EQUALS(fabs(c-conf), 1.0e-6);
+	}
+
+	// Test the eval_h function also -- it returns a handle.
+	snprintf(buff, 500, "(cog-atom %lu)", h.value());
+	Handle h2 = eval->eval_h(buff);
+
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to eval_h", !eval_err);
+	TSM_ASSERT("Failed to get the correct handle", h == h2);
+}
+
+void BasicSCMUTest::test_single_atom(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Check basic guile-atomspace integration.
+	eval->eval("(cog-new-node 'Node \"My First Node\")");
+	bool eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to create the first atom!", !eval_err);
+
+	Type t = classserver().getType("Node");
+	Handle h = as->getHandle(t, "My First Node");
+	TSM_ASSERT("Failed to find handle for first atom", h != NULL);
+
+	// Load the utility definitions
+	int rc = load_scm_file(*as,PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
+	TSM_ASSERT_EQUALS("Failed to load type definitions", 0, rc);
+	printf("typedefs now loaded!\n");
+
+	// We should add many more nodes, but I'm feeling lazy ...
+	check_node("Node", "ola amigos", 0.2, 0.3);
+	check_node("SentenceNode", "Watashi mo sou ooimasu", 0.52, 0.5433);
+	check_node("DocumentNode", "Blamoo yadda", 0.852, 0.95433);
+	check_node("WordNode", "The Bird is the Word", 0.7652, 0.1154);
+	check_node("LemmaNode", "When life gives you lemmas, make conjugations", 0.4765, 0.61154);
+	check_node("PartOfSpeechNode", "はにがうりだそうであってるのかはちょっと不安ですが翻訳ソフトでやくし てみました。", 0.34765, 0.33611);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
 void BasicSCMUTest::check_truth_value(const TruthValue& tv)
 {
-	std::cout << "check_truth_value(" << tv << ")" << std::endl;
+	logger().debug() << "check_node_truth_value(" << tv << ")";
 
 	// added check_truth_value_node in the atomspace
 	string node_str = "check_truth_value_node";
@@ -158,7 +239,7 @@ void BasicSCMUTest::check_truth_value(const TruthValue& tv)
 	eval->eval(add_node_str);
 	bool eval_err = eval->eval_error();
 	eval->clear_pending();
-	TSM_ASSERT("Failed to create the first atom!", !eval_err);
+	TSM_ASSERT("Failed to create atom!", !eval_err);
 
 	// set its truth value
 	stringstream ss;
@@ -201,89 +282,12 @@ void BasicSCMUTest::check_truth_value(const TruthValue& tv)
 	as->removeAtom(h);
 }
 
-void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float truth, float conf)
-{
-	printf("check_node(%s,%s,%f,%f)\n", tipo, nodename, truth, conf);
-	char buff[500];
-	snprintf(buff, 500, "(%s \"%s\" (stv %f %f))", tipo, nodename, truth, conf);
-	eval->eval(buff);
-	bool eval_err = eval->eval_error();
-	eval->clear_pending();
-	TSM_ASSERT("Failed to create a node", !eval_err);
-
-	Type t = classserver().getType(tipo);
-	Handle h = as->getHandle(t, nodename);
-	TSM_ASSERT("Failed to find handle", h != NULL);
-
-	NodePtr n = NodeCast(h);
-	TSM_ASSERT("Failed to find node", n != NULL);
-
-	if (n)
-	{
-		TruthValuePtr tv = n->getTruthValue();
-		float m = tv->getMean();
-		float c = tv->getConfidence();
-
-		TS_ASSERT_LESS_THAN_EQUALS(fabs(m-truth), 1.0e-6);
-		TS_ASSERT_LESS_THAN_EQUALS(fabs(c-conf), 1.0e-6);
-	}
-
-	// Test the eval_h function also -- it returns a handle.
-	snprintf(buff, 500, "(cog-atom %lu)", h.value());
-	Handle h2 = eval->eval_h(buff);
-
-	eval_err = eval->eval_error();
-	eval->clear_pending();
-	TSM_ASSERT("Failed to eval_h", !eval_err);
-	TSM_ASSERT("Failed to get the correct handle", h == h2);
-}
-
 void BasicSCMUTest::test_truth_value(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	check_truth_value(SimpleTruthValue(0.5, 0.5));
 	check_truth_value(SimpleTruthValue(0.2, 0.7));
 	// @todo : add more
-}
-
-void BasicSCMUTest::test_single_atom(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	eval->eval("(+ 2 2)");
-	bool eval_err = eval->eval_error();
-	eval->clear_pending();
-	TSM_ASSERT("Failed to find functional scheme iterpreter", !eval_err);
-
-	eval->eval("Evaluating this will cause an error to be thrown!");
-	eval_err = eval->eval_error();
-	eval->clear_pending();
-	TSM_ASSERT("Scheme iterpreter fails to throw errors", eval_err);
-
-	// Check basic guile-atomspace integration.
-	eval->eval("(cog-new-node 'Node \"My First Node\")");
-	eval_err = eval->eval_error();
-	eval->clear_pending();
-	TSM_ASSERT("Failed to create the first atom!", !eval_err);
-
-	Type t = classserver().getType("Node");
-	Handle h = as->getHandle(t, "My First Node");
-	TSM_ASSERT("Failed to find handle for first atom", h != NULL);
-
-	// Load the utility definitions
-	int rc = load_scm_file(*as,PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
-	TSM_ASSERT_EQUALS("Failed to load type definitions", 0, rc);
-	printf("typedefs now loaded!\n");
-
-	// We should add many more nodes, but I'm feeling lazy ...
-	check_node("Node", "ola amigos", 0.2, 0.3);
-	check_node("SentenceNode", "Watashi mo sou ooimasu", 0.52, 0.5433);
-	check_node("DocumentNode", "Blamoo yadda", 0.852, 0.95433);
-	check_node("WordNode", "The Bird is the Word", 0.7652, 0.1154);
-	check_node("LemmaNode", "When life gives you lemmas, make conjugations", 0.4765, 0.61154);
-	check_node("PartOfSpeechNode", "はにがうりだそうであってるのかはちょっと不安ですが翻訳ソフトでやくし てみました。", 0.34765, 0.33611);
-
-	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // ============================================================

@@ -175,7 +175,8 @@ public:
 namespace std {
     template<typename Out>
     Out& operator<<(Out& out, const opencog::TruthValue& tv) {
-        return out << tv.toString();
+        out << tv.toString();
+        return out;
     }
 } // ~namespace std
 
