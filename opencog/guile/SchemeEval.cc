@@ -71,6 +71,13 @@ void SchemeEval::init(void)
 	_poll_done = false;
 }
 
+/// Discard all chars in the outport.
+void SchemeEval::drain_output(void)
+{
+	// read and discard.
+	poll_port();
+}
+
 void * SchemeEval::c_wrap_init(void *p)
 {
 	SchemeEval *self = (SchemeEval *) p;
@@ -610,7 +617,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 		// error_string = SCM_EOL;
 		set_captured_stack(SCM_BOOL_F);
 
-		scm_drain_input(_outport);
+		drain_output();
 
 		// Unlike errors seen on the interpreter, log these to the logger.
 		// That's because these errors will be predominantly script
@@ -643,7 +650,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	// user typed something that caused some ExecutionLink to call some
 	// scheme snippet.  Display that.
 	if (not _in_shell)
-		scm_drain_input(_outport);
+		drain_output();
 
 	return rc;
 }
@@ -686,7 +693,7 @@ void * SchemeEval::c_wrap_eval_h(void * p)
  * do_scm_eval_str -- evaluate a scheme expression
  *
  * Similar to do_scm_eval(), but several important differences:
- * 1) The arugment must be a scheme in a string
+ * 1) The arugment must be a string containing valid scheme,
  * 2) No shell-freindly string and output management is performed,
  * 3) Evaluation errors are logged to the log file.
  *
@@ -714,7 +721,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 		set_error_string(SCM_EOL);
 		set_captured_stack(SCM_BOOL_F);
 
-		scm_drain_input(_outport);
+		drain_output();
 
 		// Unlike errors seen on the interpreter, log these to the logger.
 		// That's because these errors will be predominantly script
@@ -739,7 +746,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 			              __FUNCTION__, str.c_str(), expr.c_str());
 		}
 	}
-	scm_drain_input(_outport);
+	drain_output();
 
 	return rc;
 }
