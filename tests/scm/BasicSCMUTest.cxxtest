@@ -230,7 +230,7 @@ void BasicSCMUTest::test_single_atom(void)
 
 void BasicSCMUTest::check_truth_value(const TruthValue& tv)
 {
-	// logger().debug() << "check_node_truth_value(" << tv << ")";
+	logger().debug() << "check_node_truth_value(" << tv << ")";
 
 	// added check_truth_value_node in the atomspace
 	string node_str = "check_truth_value_node";
