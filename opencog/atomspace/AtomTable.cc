@@ -469,6 +469,18 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
         } else {
             LinkPtr lll(LinkCast(atom));
             atom = createLink(*lll);
+
+            // Well, if the link was in some other atomspace, then
+            // the outgoing set will be too. So we recursively clone
+            // that too. Cautionary note: this could result in TV
+            // merging, if equivalent atoms already exist in this
+            // atomspace.  This might catch some users by surprise.
+            // Not sure what to do about that.
+            const HandleSeq ogset(lll->getOutgoingSet());
+            size_t arity = ogset.size();
+            for (size_t i = 0; i < arity; i++) {
+                add(ogset[i]);
+            }
         }
     }
 
@@ -479,7 +491,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     // Check for bad outgoing set members; fix them up if needed.
     LinkPtr lll(LinkCast(atom));
     if (lll) {
-        const HandleSeq ogs = lll->getOutgoingSet();
+        const HandleSeq ogs(lll->getOutgoingSet());
         size_t arity = ogs.size();
         for (size_t i = 0; i < arity; i++) {
             Handle h(ogs[i]);
@@ -487,6 +499,8 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
             // is NULL. In that case, we should at least know about this
             // uuid.  We explicitly test h._ptr.get() so as not to
             // accidentally resolve during the test.
+            // XXX ??? How? How can this happen ??? Some persistance
+            // scenario ???
             if (NULL == h._ptr.get() and Handle::UNDEFINED != h) {
                 auto it = _atom_set.find(h);
                 if (it != _atom_set.end()) {
@@ -504,6 +518,9 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                     // atom table adds appropriately for their app.
                     lll->_outgoing[i] = h;
                 } else {
+
+                    // XXX why are we throwing here? Why not just doe
+                    // the right thing?
                     throw RuntimeException(TRACE_INFO,
                         "AtomTable - Atom in outgoing set must have been "
                         "previously inserted into the atom table!");
