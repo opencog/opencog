@@ -662,11 +662,10 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
         // We need to make a copy of the incoming set because the
         // recursive call will trash the incoming set when the atom
         // is removed.
-        HandleSeq is;
-        handle->getIncomingSet(back_inserter(is));
+        IncomingSet is(handle->getIncomingSet());
 
-        HandleSeq::iterator is_it = is.begin();
-        HandleSeq::iterator is_end = is.end();
+        IncomingSet::iterator is_it = is.begin();
+        IncomingSet::iterator is_end = is.end();
         for (; is_it != is_end; ++is_it)
         {
             Handle his(*is_it);
@@ -688,12 +687,25 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // return a non-zero value if the incoming set has weak pointers to
     // deleted atoms. Thus, a second check is made for strong pointers,
     // since getIncomingSet() converts weak to strong.
-    if (0 < handle->getIncomingSetSize() and 0 < handle->getIncomingSet().size())
+    if (0 < handle->getIncomingSetSize())
     {
-        atom->unsetRemovalFlag();
-
-        throw RuntimeException(TRACE_INFO,
-           "Cannot extract an atom with a non-empty incoming set!");
+        IncomingSet iset(handle->getIncomingSet());
+        if (0 < iset.size()) {
+            size_t ilen = iset.size();
+            for (size_t i=0; i<ilen; i++)
+            {
+                // Its OK if the atom being extracted is in a link
+                // that is not currently in any atom space.
+                // XXX this might not be exactly thread-safe, if
+                // other atomspaces are involved...
+                if (iset[i]->getAtomTable() != NULL) {
+                    atom->unsetRemovalFlag();
+                    throw RuntimeException(TRACE_INFO,
+                        "Internal Error: Cannot extract an atom with "
+                        "a non-empty incoming set!");
+                }
+            }
+        }
     }
 
     // Issue the atom removal signal *BEFORE* the atom is actually
