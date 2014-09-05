@@ -601,8 +601,17 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     AtomPtr atom(handle);
     if (!atom || atom->isMarkedForRemoval()) return result;
 
-    // Perhaps the atom is not in the table?
-    if (atom->getAtomTable() == NULL) return result;
+    // Perhaps the atom is not in any table?
+    AtomTable *at = atom->getAtomTable();
+    if (NULL == at) return result;
+
+    // It should not be possible to have atoms in this atomspace
+    // being pointed at by atoms in other atomspaces.  Atomspaces
+    // are not currently allowed to be 'hierarchical'.
+    if (at != this) {
+        throw RuntimeException(TRACE_INFO,
+             "Attempted to extract an atom belonging to some other atomspace!");
+    }
 
     // lock before fetching the incoming set. Since getting the
     // incoming set also grabs a lock, we need this mutex to be
