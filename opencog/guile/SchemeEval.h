@@ -86,6 +86,8 @@ class SchemeEval : public GenericEval
 		SCM _outport;
 		SCM _saved_outport;
 		bool _in_shell;
+		void drain_output();
+
 		AtomSpace* atomspace;
 
 	public:
