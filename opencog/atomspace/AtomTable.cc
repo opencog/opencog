@@ -426,12 +426,8 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
 
 Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
 {
-    // Sometimes one inserts an atom that was previously deleted.
-    // In this case, the removal flag might still be set. Clear it.
-    atom->unsetRemovalFlag();
-
-    // Is the atom already in the table?
-    if (atom->getAtomTable() != NULL) {
+    // Is the atom already in this table?
+    if (atom->getAtomTable() == this) {
         return atom->getHandle();
     }
 
@@ -439,6 +435,8 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     // XXX FIXME -- technically, this throw is correct, except
     // thatSavingLoading gives us atoms with handles preset.
     // So we have to accept that, and hope its correct and consistent.
+    // XXX this can also occur if the atom is in some other atomspace;
+    // so wee need to move this check elsewhere.
     if (atom->_uuid != Handle::UNDEFINED.value())
         throw RuntimeException(TRACE_INFO,
           "AtomTable - Attempting to insert atom with handle already set!");
@@ -450,7 +448,9 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     std::unique_lock<std::recursive_mutex> lck(_mtx);
 
     // Is the equivalent of this atom already in the table?
-    // If so, then we merge the truth values.
+    // If so, then we merge the truth values.  (Note that this 'existing'
+    // atom might be in another atomspace, or might not be in any
+    // atomspace yet.)
     Handle hexist(getHandle(atom));
     if (hexist) {
         DPRINTF("Merging existing Atom with the Atom being added ...\n");
@@ -458,6 +458,23 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
         // XXX TODO -- should merge attention value too, right ???
         return hexist;
     }
+
+    // If this atom is in some other atomspace, then we need to clone
+    // it. We cannot insert it into this atomtable as-is.
+    AtomTable* at = atom->getAtomTable();
+    if (at != NULL and at != this) {
+        NodePtr nnn(NodeCast(atom));
+        if (nnn) {
+            atom = createNode(*nnn);
+        } else {
+            LinkPtr lll(LinkCast(atom));
+            atom = createLink(*lll);
+        }
+    }
+
+    // Sometimes one inserts an atom that was previously deleted.
+    // In this case, the removal flag might still be set. Clear it.
+    atom->unsetRemovalFlag();
 
     // Check for bad outgoing set members; fix them up if needed.
     LinkPtr lll(LinkCast(atom));
