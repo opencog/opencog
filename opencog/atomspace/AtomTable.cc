@@ -426,12 +426,8 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
 
 Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
 {
-    // Sometimes one inserts an atom that was previously deleted.
-    // In this case, the removal flag might still be set. Clear it.
-    atom->unsetRemovalFlag();
-
-    // Is the atom already in the table?
-    if (atom->getAtomTable() != NULL) {
+    // Is the atom already in this table?
+    if (atom->getAtomTable() == this) {
         return atom->getHandle();
     }
 
@@ -439,6 +435,8 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     // XXX FIXME -- technically, this throw is correct, except
     // thatSavingLoading gives us atoms with handles preset.
     // So we have to accept that, and hope its correct and consistent.
+    // XXX this can also occur if the atom is in some other atomspace;
+    // so wee need to move this check elsewhere.
     if (atom->_uuid != Handle::UNDEFINED.value())
         throw RuntimeException(TRACE_INFO,
           "AtomTable - Attempting to insert atom with handle already set!");
@@ -450,7 +448,9 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     std::unique_lock<std::recursive_mutex> lck(_mtx);
 
     // Is the equivalent of this atom already in the table?
-    // If so, then we merge the truth values.
+    // If so, then we merge the truth values.  (Note that this 'existing'
+    // atom might be in another atomspace, or might not be in any
+    // atomspace yet.)
     Handle hexist(getHandle(atom));
     if (hexist) {
         DPRINTF("Merging existing Atom with the Atom being added ...\n");
@@ -459,10 +459,39 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
         return hexist;
     }
 
+    // If this atom is in some other atomspace, then we need to clone
+    // it. We cannot insert it into this atomtable as-is.
+    AtomTable* at = atom->getAtomTable();
+    if (at != NULL and at != this) {
+        NodePtr nnn(NodeCast(atom));
+        if (nnn) {
+            atom = createNode(*nnn);
+        } else {
+            LinkPtr lll(LinkCast(atom));
+            atom = createLink(*lll);
+
+            // Well, if the link was in some other atomspace, then
+            // the outgoing set will be too. So we recursively clone
+            // that too. Cautionary note: this could result in TV
+            // merging, if equivalent atoms already exist in this
+            // atomspace.  This might catch some users by surprise.
+            // Not sure what to do about that.
+            const HandleSeq ogset(lll->getOutgoingSet());
+            size_t arity = ogset.size();
+            for (size_t i = 0; i < arity; i++) {
+                add(ogset[i]);
+            }
+        }
+    }
+
+    // Sometimes one inserts an atom that was previously deleted.
+    // In this case, the removal flag might still be set. Clear it.
+    atom->unsetRemovalFlag();
+
     // Check for bad outgoing set members; fix them up if needed.
     LinkPtr lll(LinkCast(atom));
     if (lll) {
-        const HandleSeq ogs = lll->getOutgoingSet();
+        const HandleSeq ogs(lll->getOutgoingSet());
         size_t arity = ogs.size();
         for (size_t i = 0; i < arity; i++) {
             Handle h(ogs[i]);
@@ -470,6 +499,8 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
             // is NULL. In that case, we should at least know about this
             // uuid.  We explicitly test h._ptr.get() so as not to
             // accidentally resolve during the test.
+            // XXX ??? How? How can this happen ??? Some persistance
+            // scenario ???
             if (NULL == h._ptr.get() and Handle::UNDEFINED != h) {
                 auto it = _atom_set.find(h);
                 if (it != _atom_set.end()) {
@@ -487,6 +518,9 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                     // atom table adds appropriately for their app.
                     lll->_outgoing[i] = h;
                 } else {
+
+                    // XXX why are we throwing here? Why not just doe
+                    // the right thing?
                     throw RuntimeException(TRACE_INFO,
                         "AtomTable - Atom in outgoing set must have been "
                         "previously inserted into the atom table!");
@@ -601,15 +635,26 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     AtomPtr atom(handle);
     if (!atom || atom->isMarkedForRemoval()) return result;
 
-    // Perhaps the atom is not in the table?
-    if (atom->getAtomTable() == NULL) return result;
+    // Perhaps the atom is not in any table?
+    AtomTable *at = atom->getAtomTable();
+    if (NULL == at) return result;
 
-    atom->markForRemoval();
+    // It should not be possible to have atoms in this atomspace
+    // being pointed at by atoms in other atomspaces.  Atomspaces
+    // are not currently allowed to be 'hierarchical'.
+    if (at != this) {
+        throw RuntimeException(TRACE_INFO,
+             "Attempted to extract an atom belonging to some other atomspace!");
+    }
+
     // lock before fetching the incoming set. Since getting the
     // incoming set also grabs a lock, we need this mutex to be
     // recursive. We need to lock here to avoid confusion if multiple
     // threads are trying to delete the same atom.
     std::unique_lock<std::recursive_mutex> lck(_mtx);
+
+    if (atom->isMarkedForRemoval()) return result;
+    atom->markForRemoval();
 
     // If recursive-flag is set, also extract all the links in the atom's
     // incoming set
