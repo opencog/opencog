@@ -776,8 +776,6 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //        )
 //     )
 
-//    if (THREAD_NUM > 1)
-//        removeAtomLock.lock();
 
     HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, linksWillBeDel;
 
@@ -866,6 +864,7 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //    //debug
 //    std::cout << originalAtomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
 
+    removeAtomLock.lock();
     foreach (Handle listH , resultSet)
     {
         HandleSeq instanceLinks = originalAtomSpace->getOutgoing(listH);
@@ -894,9 +893,8 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     originalAtomSpace->removeAtom(hResultListLink);
     // originalAtomSpace->removeAtom(hVariablesListLink);
 
+    removeAtomLock.unlock();
 
-//    if (THREAD_NUM > 1)
-//        removeAtomLock.unlock();
 
     HNode->count = HNode->instances.size();
 }
@@ -1038,7 +1036,8 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
     string instanceInst = unifiedPatternToKeyString(instance, originalAtomSpace);
     if (instanceInst.find("$var") != std::string::npos)
     {
-        cout << "Debug: error! The instance contines variables!" << instanceInst << std::endl;
+        cout << "Debug: error! The instance contines variables!" << instanceInst <<  "Skip it!" << std::endl;
+        return;
     }
 
     // First, extract all the variable nodes in the instance links
@@ -1121,8 +1120,9 @@ void PatternMiner::growPatternsTask()
 
         HTreeNode* cur_growing_pattern = last_gram_patterns[cur_index];
 
+
         if(cur_growing_pattern->count < thresholdFrequency)
-            break;
+            continue;
 
 
         foreach (HandleSeq instance , cur_growing_pattern->instances)
@@ -1133,10 +1133,17 @@ void PatternMiner::growPatternsTask()
         cur_growing_pattern->instances.clear();
         (vector<HandleSeq>()).swap(cur_growing_pattern->instances);
 
-        cout<< "\r" + toString(((float)(cur_index)/(float)(total))*100.0f) + "% completed." ;
-
     }
 
+}
+
+void PatternMiner::reportProgress()
+{
+    while(still_mining)
+    {
+        cout<< "\r" + toString(((float)(cur_index)/last_gram_total_float)*100.0f) + "% completed." ;
+        sleep(1);
+    }
 }
 
 bool compareHTreeNodeByFrequency(HTreeNode* node1, HTreeNode* node2)
@@ -1168,7 +1175,7 @@ void PatternMiner::OutPutPatternsToFile(unsigned int n_gram, bool is_interesting
         fileName = "InterestingPatterns_" + toString(n_gram) + "gram.scm";
     else
         fileName = "FrequentPatterns_" + toString(n_gram) + "gram.scm";
-    std::cout<<"Debug: PatternMiner: writing00 (gram = " + toString(n_gram) + ") patterns to file " + fileName << std::endl;
+    std::cout<<"\nDebug: PatternMiner: writing (gram = " + toString(n_gram) + ") patterns to file " + fileName << std::endl;
 
     resultFile.open(fileName.c_str());
     vector<HTreeNode*> &patternsForThisGram = patternsForGram[n_gram-1];
@@ -1272,6 +1279,12 @@ void PatternMiner::GrowAllPatterns()
         cur_index = -1;
         std::cout<<"Debug: PatternMiner:  start (gram = " + toString(cur_gram) + ") pattern mining..." << std::endl;
 
+        last_gram_total_float = (float)((patternsForGram[cur_gram-2]).size());
+        still_mining = true;
+
+        std::thread reportProgreeThree = std::thread([this]{this->reportProgress();});
+
+
         for (unsigned int i = 0; i < THREAD_NUM; ++ i)
         {
             threads[i] = std::thread([this]{this->growPatternsTask();}); // using C++11 lambda-expression
@@ -1281,6 +1294,9 @@ void PatternMiner::GrowAllPatterns()
         {
             threads[i].join();
         }
+        reportProgreeThree.join();
+
+        still_mining = false;
 
         if (enable_Frequent_Pattern)
         {
@@ -1850,6 +1866,12 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
 
     unsigned int system_thread_num  = std::thread::hardware_concurrency();
 
+//    if (system_thread_num > 1)
+//        THREAD_NUM = system_thread_num - 1;
+//    else
+//        THREAD_NUM = 1;
+
+    // use all the threads in this machine
     THREAD_NUM = system_thread_num;
 
 

@@ -97,6 +97,10 @@ namespace PatternMining
 
      unsigned int cur_index;
 
+     float last_gram_total_float;
+
+     bool still_mining;
+
      unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
 
      std::mutex allAtomListLock, uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock;
@@ -179,6 +183,8 @@ namespace PatternMining
      void growPatternsTask();
 
      void GrowAllPatterns();
+
+     void reportProgress();
 
      bool isInHandleSeq(Handle handle, HandleSeq &handles);
 
