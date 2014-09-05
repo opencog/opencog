@@ -604,12 +604,14 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // Perhaps the atom is not in the table?
     if (atom->getAtomTable() == NULL) return result;
 
-    atom->markForRemoval();
     // lock before fetching the incoming set. Since getting the
     // incoming set also grabs a lock, we need this mutex to be
     // recursive. We need to lock here to avoid confusion if multiple
     // threads are trying to delete the same atom.
     std::unique_lock<std::recursive_mutex> lck(_mtx);
+
+    if (atom->isMarkedForRemoval()) return result;
+    atom->markForRemoval();
 
     // If recursive-flag is set, also extract all the links in the atom's
     // incoming set
