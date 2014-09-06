@@ -547,7 +547,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                     // sure its a user error if the user fails to serialize
                     // atom table adds appropriately for their app.
                     lll->_outgoing[i] = h;
-                } else if (not inEnivorn(h)) {
+                } else if (not inEnviron(h)) {
 
                     // XXX why are we throwing here? Why not just do
                     // the right thing?
