@@ -521,14 +521,19 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     // Check for bad outgoing set members; fix them up if needed.
     LinkPtr lll(LinkCast(atom));
     if (lll) {
-        const HandleSeq ogs(lll->getOutgoingSet());
+        const HandleSeq& ogs(lll->getOutgoingSet());
         size_t arity = ogs.size();
+
+        // First, make sure that every member of the outgoing set has
+        // a valid atom pointer. We need this, cause we need to call
+        // methods on those atoms.
+        bool need_copy = false;
         for (size_t i = 0; i < arity; i++) {
             Handle h(ogs[i]);
             // It can happen that the uuid is assigned, but the pointer
             // is NULL. In that case, we should at least know about this
             // uuid.  We explicitly test h._ptr.get() so as not to
-            // accidentally resolve during the test.
+            // accidentally call resolve() during the test.
             // XXX ??? How? How can this happen ??? Some persistance
             // scenario ???
             if (NULL == h._ptr.get() and Handle::UNDEFINED != h) {
@@ -547,17 +552,12 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                     // sure its a user error if the user fails to serialize
                     // atom table adds appropriately for their app.
                     lll->_outgoing[i] = h;
-                } else if (not inEnviron(h)) {
-
-                    // XXX why are we throwing here? Why not just do
-                    // the right thing?
-                    throw RuntimeException(TRACE_INFO,
-                        "AtomTable - Atom in outgoing set must have been "
-                        "previously inserted into the atom table!");
                 } else {
-                     // no-op. We allow links to point at atoms in the
-                     // environment.  Indeed, this is the very heart of
-                     // what "environment" means.
+                    // XXX Perhaps we could find the atom in the
+                    // environment ?? Not sure how we can ever get
+                    // here anyway.
+                    throw RuntimeException(TRACE_INFO,
+                        "AtomTable - Atom in outgoing set isn't known!");
                 }
             }
             else if (Handle::UNDEFINED == h) {
@@ -565,7 +565,29 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                            "AtomTable - Attempting to insert link with "
                            "invalid outgoing members");
             }
-            h->insert_atom(lll);
+
+            // h has to point to an actual atom, else below will crash.
+            // Anyway, the outgoing set must consist entirely of atoms
+            // either in this atomtable, or its environment.
+            if (not inEnviron(h)) need_copy = true;
+        }
+
+        if (need_copy) {
+            atom = createLink(*lll);
+        }
+
+        // llc not lll, in case a copy was made.
+        LinkPtr llc(LinkCast(atom));
+        for (size_t i = 0; i < arity; i++) {
+
+            // Make sure all children are in the atom table.
+            Handle ho(llc->_outgoing[i]);
+            if (not inEnviron(ho)) {
+                llc->_outgoing[i] = add(ho);
+            }
+
+            // Build the incoming set of outgoing atom h.
+            llc->_outgoing[i]->insert_atom(llc);
         }
     }
 
