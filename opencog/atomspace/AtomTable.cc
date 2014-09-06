@@ -50,8 +50,9 @@ using namespace opencog;
 
 std::recursive_mutex AtomTable::_mtx;
 
-AtomTable::AtomTable()
+AtomTable::AtomTable(AtomTable* parent)
 {
+    _environ = parent;
     size = 0;
 
     // Set resolver before doing anything else, such as getting
@@ -119,7 +120,10 @@ AtomTable::AtomTable(const AtomTable& other)
 Handle AtomTable::getHandle(Type t, const std::string& name) const
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    return nodeIndex.getHandle(t, name.c_str());
+    Handle h(nodeIndex.getHandle(t, name.c_str()));
+    if (_environ and Handle::UNDEFINED == h)
+        return _environ->getHandle(t, name);
+    return h;
 }
 
 /// Find an equivalent atom that has exactly the same name and type.
@@ -127,13 +131,19 @@ Handle AtomTable::getHandle(Type t, const std::string& name) const
 /// the table, then return that; else return undefined.
 Handle AtomTable::getHandle(const NodePtr n) const
 {
-    return getHandle(n->getType(), n->getName());
+    Handle h(getHandle(n->getType(), n->getName()));
+    if (_environ and Handle::UNDEFINED == h)
+        _environ->getHandle(n);
+    return h;
 }
 
 Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    return linkIndex.getHandle(t, seq);
+    Handle h(linkIndex.getHandle(t, seq));
+    if (_environ and Handle::UNDEFINED == h)
+        return _environ->getHandle(t, seq);
+    return h;
 }
 
 /// Find an equivalent atom that has exactly the same type and outgoing
@@ -141,7 +151,10 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 /// in the table, then return that; else return undefined.
 Handle AtomTable::getHandle(LinkPtr l) const
 {
-    return getHandle(l->getType(), l->getOutgoingSet());
+    Handle h(getHandle(l->getType(), l->getOutgoingSet()));
+    if (_environ and Handle::UNDEFINED == h)
+        return _environ->getHandle(l);
+    return h;
 }
 
 /// Find an equivalent atom that is exactly the same as the arg. If
@@ -424,12 +437,24 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
     return intersection(sets);
 }
 
+bool AtomTable::inEnviron(AtomPtr atom)
+{
+    AtomTable* atab = atom->getAtomTable();
+    AtomTable* env = this;
+    while (env) {
+        if (atom->getAtomTable() == env) {
+            return true;
+        }
+        env = env->_environ;
+    }
+    return false;
+}
+
 Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
 {
-    // Is the atom already in this table?
-    if (atom->getAtomTable() == this) {
+    // Is the atom already in this table, or one of its environments?
+    if (inEnviron(atom))
         return atom->getHandle();
-    }
 
 #if LATER
     // XXX FIXME -- technically, this throw is correct, except
