@@ -536,7 +536,12 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
             // accidentally call resolve() during the test.
             // XXX ??? How? How can this happen ??? Some persistance
             // scenario ???
-            if (NULL == h._ptr.get() and Handle::UNDEFINED != h) {
+            if (NULL == h._ptr.get()) {
+                if (Handle::UNDEFINED == h) {
+                    throw RuntimeException(TRACE_INFO,
+                               "AtomTable - Attempting to insert link with "
+                               "invalid outgoing members");
+                }
                 auto it = _atom_set.find(h);
                 if (it != _atom_set.end()) {
                     h = *it;
@@ -559,11 +564,6 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                     throw RuntimeException(TRACE_INFO,
                         "AtomTable - Atom in outgoing set isn't known!");
                 }
-            }
-            else if (Handle::UNDEFINED == h) {
-                throw RuntimeException(TRACE_INFO,
-                           "AtomTable - Attempting to insert link with "
-                           "invalid outgoing members");
             }
 
             // h has to point to an actual atom, else below will crash.
