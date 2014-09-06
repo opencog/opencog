@@ -795,19 +795,6 @@ public:
         logger().debug("END TEST: filter");
     }
 
-    void testCopyConstructor() {
-        AtomSpace* asCopy = new AtomSpace(*atomSpace);
-        // Check they access the same AtomSpaceImpl
-        Handle h1 = asCopy->addNode(NODE, "test1");
-        Handle h2 = atomSpace->getHandle(NODE, "test1");
-        TS_ASSERT_EQUALS(h1, h2);
-
-        delete asCopy;
-        // Ensure AtomSpace still exists via original AtomSpace.
-        h2 = atomSpace->getHandle(NODE, "test1");
-        TS_ASSERT_EQUALS(h1, h2);
-    }
-
     void testGetHandleSetByName()
     {
         Handle h1 = atomSpace->addNode(PREDICATE_NODE, "dog1", SimpleTruthValue::createTV(0.001f, 0.00001f));

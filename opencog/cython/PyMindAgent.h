@@ -37,9 +37,6 @@ class PythonModuleUTest;
 namespace opencog
 {
 
-class CogServer;
-class AtomSpaceImpl;
-
 /** The PyMindAgent Class
  * This class wraps Python MindAgents and allows the CogServer to interact
  * and manage them.
