@@ -62,7 +62,7 @@ typedef boost::signals2::signal<void (const AtomPtr&)> AtomPtrSignal;
 typedef boost::signals2::signal<void (const Handle&,
                                       const AttentionValuePtr&,
                                       const AttentionValuePtr&)> AVCHSigl;
-typedef boost::signals2::signal<void (const Handle&, 
+typedef boost::signals2::signal<void (const Handle&,
                                       const TruthValuePtr&,
                                       const TruthValuePtr&)> TVCHSigl;
 
@@ -74,10 +74,7 @@ typedef boost::signals2::signal<void (const Handle&,
  */
 class AtomTable
 {
-    friend class ImportanceUpdatingAgent;
     friend class SavingLoading;
-    friend class AtomSpace;
-    friend class AtomSpaceImpl;
     friend class ::AtomTableUTest;
 
 private:
@@ -103,8 +100,8 @@ private:
     LinkIndex linkIndex;
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
-	//!@}
-	
+    //!@}
+
     /**
      * signal connection used to find out about atom type additions in the
      * ClassServer
@@ -127,9 +124,15 @@ private:
     // JUST FOR TESTS:
     bool isCleared() const;
 
+    /// Parent environment for this table.  Null if top-level.
+    /// This allows atomspaces to be nested; atoms in this atomspace
+    /// can reference those in the parent environment.
+    AtomTable* _environ;
+    bool inEnviron(AtomPtr);
+
     /**
-     * Overrides and declares copy constructor and equals operator as private
-     * for avoiding large object copying by mistake.
+     * Override and declare copy constructor and equals operator as
+     * private.  This is to prevent large object copying by mistake.
      */
     AtomTable& operator=(const AtomTable&);
     AtomTable(const AtomTable&);
@@ -139,7 +142,7 @@ public:
     /**
      * Constructor and destructor for this class.
      */
-    AtomTable();
+    AtomTable(AtomTable* parent=NULL);
     ~AtomTable();
 
     /**
@@ -189,14 +192,8 @@ public:
     Handle getHandle(Handle&) const;
 
 protected:
-    /* Some basic predicates */
+    /* A basic predicates */
     static bool isDefined(Handle h) { return h != Handle::UNDEFINED; }
-    bool hasNullName(Handle& h) const
-    {
-        if (LinkCast(h)) return true;
-        if (NodeCast(h)->getName().c_str()[0] == 0) return true;
-        return false;
-    }
 
 public:
     /**

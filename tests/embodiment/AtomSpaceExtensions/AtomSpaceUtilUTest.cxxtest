@@ -79,7 +79,7 @@ public:
     void testAddRewardPredicate() {
         server(SpaceTimeCogServer::createInstance);
         SpaceTimeCogServer srv;
-        AtomSpace atomSpace = srv.getAtomSpace();
+        AtomSpace& atomSpace = srv.getAtomSpace();
         Handle evalLink = AtomSpaceUtil::addRewardPredicate(atomSpace, "1", 1000);
         TS_ASSERT(evalLink != Handle::UNDEFINED);
         Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000));
@@ -103,7 +103,7 @@ public:
     void testAddPunishmentPredicate() {
         server(SpaceTimeCogServer::createInstance);
         SpaceTimeCogServer srv;
-        AtomSpace atomSpace = srv.getAtomSpace();
+        AtomSpace& atomSpace = srv.getAtomSpace();
         Handle evalLink = AtomSpaceUtil::addPunishmentPredicate(atomSpace, "1", 1000);
         TS_ASSERT(evalLink != Handle::UNDEFINED);
         Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000));
@@ -127,7 +127,7 @@ public:
     void testIsActionPredicatePresent() {
         server(SpaceTimeCogServer::createInstance);
         SpaceTimeCogServer srv;
-        AtomSpace atomSpace = srv.getAtomSpace();
+        AtomSpace& atomSpace(srv.getAtomSpace());
         TimeServer& timeServer = srv.getTimeServer();
         HandleSeq execListLinkOutgoing;
         execListLinkOutgoing.push_back(AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "arg1"));

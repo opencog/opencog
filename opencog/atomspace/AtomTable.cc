@@ -50,8 +50,9 @@ using namespace opencog;
 
 std::recursive_mutex AtomTable::_mtx;
 
-AtomTable::AtomTable()
+AtomTable::AtomTable(AtomTable* parent)
 {
+    _environ = parent;
     size = 0;
 
     // Set resolver before doing anything else, such as getting
@@ -119,7 +120,10 @@ AtomTable::AtomTable(const AtomTable& other)
 Handle AtomTable::getHandle(Type t, const std::string& name) const
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    return nodeIndex.getHandle(t, name.c_str());
+    Handle h(nodeIndex.getHandle(t, name.c_str()));
+    if (_environ and Handle::UNDEFINED == h)
+        return _environ->getHandle(t, name);
+    return h;
 }
 
 /// Find an equivalent atom that has exactly the same name and type.
@@ -127,13 +131,19 @@ Handle AtomTable::getHandle(Type t, const std::string& name) const
 /// the table, then return that; else return undefined.
 Handle AtomTable::getHandle(const NodePtr n) const
 {
-    return getHandle(n->getType(), n->getName());
+    Handle h(getHandle(n->getType(), n->getName()));
+    if (_environ and Handle::UNDEFINED == h)
+        _environ->getHandle(n);
+    return h;
 }
 
 Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    return linkIndex.getHandle(t, seq);
+    Handle h(linkIndex.getHandle(t, seq));
+    if (_environ and Handle::UNDEFINED == h)
+        return _environ->getHandle(t, seq);
+    return h;
 }
 
 /// Find an equivalent atom that has exactly the same type and outgoing
@@ -141,7 +151,10 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 /// in the table, then return that; else return undefined.
 Handle AtomTable::getHandle(LinkPtr l) const
 {
-    return getHandle(l->getType(), l->getOutgoingSet());
+    Handle h(getHandle(l->getType(), l->getOutgoingSet()));
+    if (_environ and Handle::UNDEFINED == h)
+        return _environ->getHandle(l);
+    return h;
 }
 
 /// Find an equivalent atom that is exactly the same as the arg. If
@@ -424,19 +437,31 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
     return intersection(sets);
 }
 
+/// Return true if the atom is in this atomtable, or in its
+/// environment.
+bool AtomTable::inEnviron(AtomPtr atom)
+{
+    AtomTable* atab = atom->getAtomTable();
+    AtomTable* env = this;
+    while (env) {
+        if (atab == env) return true;
+        env = env->_environ;
+    }
+    return false;
+}
+
 Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
 {
-    // Is the atom already in this table?
-    if (atom->getAtomTable() == this) {
+    // Is the atom already in this table, or one of its environments?
+    if (inEnviron(atom))
         return atom->getHandle();
-    }
 
 #if LATER
     // XXX FIXME -- technically, this throw is correct, except
     // thatSavingLoading gives us atoms with handles preset.
     // So we have to accept that, and hope its correct and consistent.
     // XXX this can also occur if the atom is in some other atomspace;
-    // so wee need to move this check elsewhere.
+    // so we need to move this check elsewhere.
     if (atom->_uuid != Handle::UNDEFINED.value())
         throw RuntimeException(TRACE_INFO,
           "AtomTable - Attempting to insert atom with handle already set!");
@@ -446,6 +471,10 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     // be found in the atomspace.  We need to lock here, to avoid two
     // different threads from trying to add exactly the same atom.
     std::unique_lock<std::recursive_mutex> lck(_mtx);
+
+    // Check again, under the lock this time.
+    if (inEnviron(atom))
+        return atom->getHandle();
 
     // Is the equivalent of this atom already in the table?
     // If so, then we merge the truth values.  (Note that this 'existing'
@@ -460,9 +489,10 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     }
 
     // If this atom is in some other atomspace, then we need to clone
-    // it. We cannot insert it into this atomtable as-is.
+    // it. We cannot insert it into this atomtable as-is.  (We already
+    // know that its not in this atomsapce, or its environ.)
     AtomTable* at = atom->getAtomTable();
-    if (at != NULL and at != this) {
+    if (at != NULL) {
         NodePtr nnn(NodeCast(atom));
         if (nnn) {
             atom = createNode(*nnn);
@@ -517,13 +547,17 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                     // sure its a user error if the user fails to serialize
                     // atom table adds appropriately for their app.
                     lll->_outgoing[i] = h;
-                } else {
+                } else if (not inEnviron(h)) {
 
-                    // XXX why are we throwing here? Why not just doe
+                    // XXX why are we throwing here? Why not just do
                     // the right thing?
                     throw RuntimeException(TRACE_INFO,
                         "AtomTable - Atom in outgoing set must have been "
                         "previously inserted into the atom table!");
+                } else {
+                     // no-op. We allow links to point at atoms in the
+                     // environment.  Indeed, this is the very heart of
+                     // what "environment" means.
                 }
             }
             else if (Handle::UNDEFINED == h) {
@@ -639,9 +673,11 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     AtomTable *at = atom->getAtomTable();
     if (NULL == at) return result;
 
-    // It should not be possible to have atoms in this atomspace
-    // being pointed at by atoms in other atomspaces.  Atomspaces
-    // are not currently allowed to be 'hierarchical'.
+    // It should be impossible to have atoms in this atomspace
+    // being pointed at by atoms in other atomspaces, unless those
+    // other atomspaces are children of this one. But in that case,
+    // extract should not be getting called with this atom anyway.
+    // So the below is an error in all cases.
     if (at != this) {
         throw RuntimeException(TRACE_INFO,
              "Attempted to extract an atom belonging to some other atomspace!");
@@ -672,6 +708,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
             DPRINTF("[AtomTable::extract] incoming set: %s",
                  (his) ? his->toString().c_str() : "INVALID HANDLE");
 
+            // Note: the below will throw, if the recursion ends
+            // in a child atomspace.  Kind of weird,ugly, but hey...
             if (not his->isMarkedForRemoval()) {
                 DPRINTF("[AtomTable::extract] marked for removal is false");
 

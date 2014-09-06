@@ -59,7 +59,7 @@ class AtomSpaceImpl
     friend class ::AtomSpaceImplUTest;
 
 public:
-    AtomSpaceImpl(void);
+    AtomSpaceImpl(AtomSpaceImpl* parent = NULL);
     ~AtomSpaceImpl();
 
     /**
@@ -233,10 +233,9 @@ private:
      */
     BackingStore *backing_store;
 
-public:
     /**
-     * Overrides and declares copy constructor and equals operator as private 
-     * for avoiding large object copying by mistake.
+     * Override and declare copy constructor and equals operator to
+     * be private.  This avoids inadvertent copying of large objects.
      */
     AtomSpaceImpl& operator=(const AtomSpaceImpl&);
     AtomSpaceImpl(const AtomSpaceImpl&);
