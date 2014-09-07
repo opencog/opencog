@@ -691,19 +691,11 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     AtomPtr atom(handle);
     if (!atom || atom->isMarkedForRemoval()) return result;
 
-    // Perhaps the atom is not in any table?
-    AtomTable *at = atom->getAtomTable();
-    if (NULL == at) return result;
-
-    // It should be impossible to have atoms in this atomspace
-    // being pointed at by atoms in other atomspaces, unless those
-    // other atomspaces are children of this one. But in that case,
-    // extract should not be getting called with this atom anyway.
-    // So the below is an error in all cases.
-    if (at != this) {
-        throw RuntimeException(TRACE_INFO,
-             "Attempted to extract an atom belonging to some other atomspace!");
-    }
+    // Perhaps the atom is not in any table? Or at least, not in this
+    // atom table? Its a user-error if the user is trying to extract
+    // atoms that are not in this atomspace, but we're going to be
+    // silent about this error -- it seems pointess to throw.
+    if (atom->getAtomTable() != this) return result;
 
     // lock before fetching the incoming set. Since getting the
     // incoming set also grabs a lock, we need this mutex to be
