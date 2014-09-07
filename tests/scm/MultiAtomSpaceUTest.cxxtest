@@ -55,6 +55,8 @@ class MultiAtomSpace :  public CxxTest::TestSuite
 
 			// logger().setLevel(Logger::DEBUG);
 			// logger().setPrintToStdoutFlag(true);
+
+			cogserver().loadModules();
 		}
 
 		~MultiAtomSpace()
@@ -70,6 +72,7 @@ class MultiAtomSpace :  public CxxTest::TestSuite
 		void test_two(void);
 		void test_three(void);
 		void test_load(void);
+		void test_nest(void);
 };
 
 /*
@@ -86,9 +89,7 @@ void MultiAtomSpace::setUp(void)
 		"opencog/atomspace/core_types.scm, "
 		"tests/scm/multispace.scm");
 
-	cogserver().loadModules();
 	cogserver().loadSCMModules();
-
 }
 
 void MultiAtomSpace::tearDown(void)
@@ -289,4 +290,8 @@ void MultiAtomSpace::test_load(void)
 	delete as1;
 	delete as2;
 	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MultiAtomSpace::test_nest(void)
+{
 }
