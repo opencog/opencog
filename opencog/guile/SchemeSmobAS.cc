@@ -104,10 +104,34 @@ AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 
 /* ============================================================== */
 /**
+ * Return current atomspace for this dynamic state
+ */
+SCM SchemeSmob::atomspace_variable;
+
+SCM SchemeSmob::ss_get_as (void)
+{
+	return scm_variable_ref(atomspace_variable);
+}
+
+SCM SchemeSmob::ss_set_as (SCM s)
+{
+	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
+		return SCM_BOOL_F;
+
+	if (COG_AS != SCM_SMOB_FLAGS(s))
+		return SCM_BOOL_F;
+
+	SCM old_as = scm_variable_ref(atomspace_variable);
+	scm_variable_set_x(atomspace_variable, s);
+	return old_as;
+}
+
+
+/* ============================================================== */
+/**
  * Set the atomspace into the top-level interaction environment
  */
 
-SCM SchemeSmob::atomspace_variable;
 
 void SchemeSmob::ss_set_env_as(AtomSpace *as)
 {

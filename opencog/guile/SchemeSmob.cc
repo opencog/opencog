@@ -227,7 +227,9 @@ void SchemeSmob::register_procs(void)
 
 	// Atom Spaces
 	scm_c_define_gsubr("cog-new-atomspace",     0, 1, 0, C(ss_new_as));
-	scm_c_define_gsubr("cog-atomspace?",        1, 0, 1, C(ss_as_p));
+	scm_c_define_gsubr("cog-atomspace?",        1, 0, 0, C(ss_as_p));
+	scm_c_define_gsubr("cog-atomspace",         0, 0, 0, C(ss_get_as));
+	scm_c_define_gsubr("cog-set-atomspace!",    1, 0, 0, C(ss_set_as));
 
 	// Attention values
 	scm_c_define_gsubr("cog-new-av",            3, 0, 0, C(ss_new_av));
