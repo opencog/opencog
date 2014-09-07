@@ -441,7 +441,7 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
     // Verify that second arg is an actual list. Allow null list
     // (which is rather unusal, but legit.  Allow embedded nulls
     // as this can be convenient for writing scheme code.
-    if (!scm_is_pair(satom_list) && !scm_is_null(satom_list))
+    if (!scm_is_pair(satom_list) and !scm_is_null(satom_list))
         scm_wrong_type_arg_msg(subrname, pos, satom_list, "a list of atoms");
 
     std::vector<Handle> outgoing_set;
@@ -455,7 +455,7 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
         if (Handle::UNDEFINED != h) {
             outgoing_set.push_back(h);
         }
-        else if (scm_is_pair(satom) && !scm_is_null(satom_list)) {
+        else if (scm_is_pair(satom) and !scm_is_null(satom_list)) {
             // Allow lists to be specified: e.g.
             // (cog-new-link 'ListLink (list x y z))
             // Do this via a recursive call, flattening nested lists
@@ -474,7 +474,8 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
             // Its legit to have embedded truth values, just skip them.
             const TruthValue *tv = get_tv_from_list(sl);
             const AttentionValue *av = get_av_from_list(sl);
-            if ((tv == NULL) && (av == NULL)) {
+            AtomSpace *as = get_as_from_list(sl);
+            if ((tv == NULL) and (av == NULL) and (as == NULL)) {
                 // If its not an atom, and its not a truth value, and its
                 // not an attention value, then whatever it is, its bad.
                 scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");

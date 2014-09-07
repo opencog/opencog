@@ -74,6 +74,7 @@ class MultiAtomSpace :  public CxxTest::TestSuite
 		void test_load(void);
 		void test_nest(void);
 		void test_nest_scm(void);
+		void test_arg_scm(void);
 };
 
 /*
@@ -438,6 +439,88 @@ void MultiAtomSpace::test_nest_scm(void)
 		"(cog-link 'ListLink "
 		"	(ConceptNode \"aaa-stuff\")"
 		"	(ConceptNode \"bbb-stuff\")"
+		")");
+	CHKERR;
+	TSM_ASSERT_EQUALS("Expect undefined handle", hsil, Handle::UNDEFINED);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Very similar to above, but the al atomspace is specified explicitly
+// as arg.
+void MultiAtomSpace::test_arg_scm(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Define an alternate atomspace
+	evaluator->eval("(define arg-as (cog-new-atomspace (cog-atomspace)))");
+	std::string msg = evaluator->eval("arg-as");
+	printf("Arg atomspace is: %s\n", msg.c_str());
+
+	// Define a function that performs a thunk in the nested atomspace.
+	evaluator->eval("(define (arg-env f) "
+   	"(let ((curr-as (cog-set-atomspace! arg-as)) "
+		"      (result (f))) "
+   	"   (cog-set-atomspace! curr-as) result))");
+
+	msg = evaluator->eval("(cog-atomspace)");
+	printf("Primary atomspace is: %s\n", msg.c_str());
+
+	msg = evaluator->eval("(arg-env cog-atomspace)");
+	printf("Check arg atomspace is: %s\n", msg.c_str());
+
+	// Populate atomspace with some misc junk
+	Handle ha = evaluator->eval_h("(ConceptNode \"aaa-arg-stuff\")");
+	CHKERR;
+	Handle hb = evaluator->eval_h("(ConceptNode \"bbb-arg-stuff\")");
+	CHKERR;
+
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != ha);
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != hb);
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, ha->getType());
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, hb->getType());
+
+	// Create a link in the arg atomspace
+	Handle hl = evaluator->eval_h(
+		"(ListLink "
+		"	(ConceptNode \"aaa-arg-stuff\")"
+		"	(ConceptNode \"bbb-arg-stuff\")"
+		"	arg-as)");
+	CHKERR;
+
+	// Get these same atoms, again in the nested space
+	Handle hpa = evaluator->eval_h(
+		"(arg-env (lambda () (ConceptNode \"aaa-arg-stuff\")))");
+	CHKERR;
+	Handle hpb = evaluator->eval_h(
+		"(arg-env (lambda () (ConceptNode \"bbb-arg-stuff\")))");
+	CHKERR;
+	TSM_ASSERT_EQUALS("Expect the same atom", ha, hpa);
+	TSM_ASSERT_EQUALS("Expect the same atom", hb, hpb);
+
+	// The Link should NOT be in the primary atomspace.
+	Handle hnol = evaluator->eval_h(
+		"(cog-link 'ListLink "
+		"	(ConceptNode \"aaa-arg-stuff\")"
+		"	(ConceptNode \"bbb-arg-stuff\")"
+		")");
+	CHKERR;
+	TSM_ASSERT_EQUALS("Expect undefined handle", hnol, Handle::UNDEFINED);
+
+	// The Link should be in the nested atomspace.
+	Handle hnestl = evaluator->eval_h(
+		"(cog-link 'ListLink "
+		"	(ConceptNode \"aaa-arg-stuff\")"
+		"	(ConceptNode \"bbb-arg-stuff\")"
+		"	arg-as)");
+	CHKERR;
+	TSM_ASSERT_EQUALS("Expect list handle", hnestl, hl);
+
+	// The Link should STILL NOT be in the primary atomspace.
+	Handle hsil = evaluator->eval_h(
+		"(cog-link 'ListLink "
+		"	(ConceptNode \"aaa-arg-stuff\")"
+		"	(ConceptNode \"bbb-arg-stuff\")"
 		")");
 	CHKERR;
 	TSM_ASSERT_EQUALS("Expect undefined handle", hsil, Handle::UNDEFINED);
