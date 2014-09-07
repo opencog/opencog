@@ -472,12 +472,10 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
         }
         else {
             // Its legit to have embedded truth values, just skip them.
-            const TruthValue *tv = get_tv_from_list(sl);
-            const AttentionValue *av = get_av_from_list(sl);
-            AtomSpace *as = get_as_from_list(sl);
-            if ((tv == NULL) and (av == NULL) and (as == NULL)) {
-                // If its not an atom, and its not a truth value, and its
-                // not an attention value, then whatever it is, its bad.
+				if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, satom)) {
+                // If its not an atom, and its not a truth value, and
+                // its not an attention value, and its not an atomspace,
+                // then whatever it is, its bad.
                 scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
             }
         }
