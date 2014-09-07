@@ -109,6 +109,21 @@ void MultiAtomSpace::test_two(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	// Define an alternate atomspace
+	evaluator->eval("(define alt-as (cog-new-atomspace))");
+	std::string msg = evaluator->eval("alt-as");
+	printf("New atomspace is: %s\n", msg.c_str());
+
+	// Define a function that performs a thunk in the alternate atomspace.
+	evaluator->eval("(define (alt-env f) "
+   	"(begin (cog-set-atomspace! alt-as) (f)))");
+
+	msg = evaluator->eval("(cog-atomspace)");
+	printf("Primary atomspace is: %s\n", msg.c_str());
+
+	msg = evaluator->eval("(alt-env cog-atomspace)");
+	printf("Alternate atomspace is: %s\n", msg.c_str());
+
 	// Populate atomspace with some misc junk
 	evaluator->eval("(NumberNode \"42\")");
 	evaluator->eval("(VariableNode \"$var\")");
@@ -119,10 +134,9 @@ void MultiAtomSpace::test_two(void)
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h1);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, h1->getType());
 
-	std::string msg = evaluator->eval("(dbg)");
-	printf("Evaluation returned: %s\n", msg.c_str());
-
-	Handle h2 = evaluator->eval_h("(func-env)");
+	// Create the 'same' ConceptNode in a different atomspace
+	Handle h2 = evaluator->eval_h(
+		"(alt-env (lambda () (ConceptNode \"stuff\")))");
 	CHKERR;
 
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h2);
