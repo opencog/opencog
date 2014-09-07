@@ -174,7 +174,7 @@ class SchemeSmob
 		static int verify_int (SCM, const char *, int pos = 1,
 		                       const char *msg = "expecting integer");
 
-		static SCM atomspace_variable;
+		static SCM atomspace_fluid;
 		static void ss_set_env_as(AtomSpace *);
 		static void init();
 		SchemeSmob();

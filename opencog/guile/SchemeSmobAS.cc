@@ -104,15 +104,19 @@ AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 
 /* ============================================================== */
 /**
- * Return current atomspace for this dynamic state
+ * Return current atomspace for this dynamic state.
  */
-SCM SchemeSmob::atomspace_variable;
+SCM SchemeSmob::atomspace_fluid;
 
 SCM SchemeSmob::ss_get_as (void)
 {
-	return scm_variable_ref(atomspace_variable);
+	return scm_fluid_ref(atomspace_fluid);
 }
 
+/**
+ * Set the current atomspace for this dynamic state.
+ * Return the previous atomspace.
+ */
 SCM SchemeSmob::ss_set_as (SCM s)
 {
 	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
@@ -121,33 +125,30 @@ SCM SchemeSmob::ss_set_as (SCM s)
 	if (COG_AS != SCM_SMOB_FLAGS(s))
 		return SCM_BOOL_F;
 
-	SCM old_as = scm_variable_ref(atomspace_variable);
-	scm_variable_set_x(atomspace_variable, s);
+	SCM old_as = scm_fluid_ref(atomspace_fluid);
+	scm_fluid_set_x(atomspace_fluid, s);
 	return old_as;
 }
-
 
 /* ============================================================== */
 /**
  * Set the atomspace into the top-level interaction environment
+ * Since its held in a fluid, it can have a different value in each
+ * thread, so that different threads can use different atomspaces,
+ * all at the same time.
  */
-
 
 void SchemeSmob::ss_set_env_as(AtomSpace *as)
 {
-	// XXX this should be replaced by a fluid, so that the reference
-	// is thead-safe.
-	scm_variable_set_x(atomspace_variable, make_as(as));
+	scm_fluid_set_x(atomspace_fluid, make_as(as));
 }
 
 AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
 {
-	// XXX this should be replaced by a fluid, so that the reference
-	// is thead-safe.
-	SCM ref = scm_variable_ref(atomspace_variable);
+	SCM ref = scm_fluid_ref(atomspace_fluid);
 	AtomSpace* as = ss_to_atomspace(ref);
 	if (NULL == as)
-		scm_out_of_range(subr, atomspace_variable);
+		scm_out_of_range(subr, atomspace_fluid);
 	return as;
 }
 

@@ -63,8 +63,8 @@ void SchemeSmob::init()
 		init_smob_type();
 		register_procs();
 
-		atomspace_variable = scm_c_define("*-atomspace-*", make_as(NULL));
-		atomspace_variable = scm_permanent_object(atomspace_variable);
+		atomspace_fluid = scm_make_fluid();
+		atomspace_fluid = scm_permanent_object(atomspace_fluid);
 		_radix_ten = scm_from_int8(10);
 	}
 }
