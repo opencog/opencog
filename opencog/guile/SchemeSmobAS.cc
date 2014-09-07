@@ -55,11 +55,14 @@ SCM SchemeSmob::take_as (AtomSpace *as)
 
 /* ============================================================== */
 /**
- * Create a new atom space.
+ * Create a new atom space.  The parent argument might not
+ * be present -- its optional.
  */
-SCM SchemeSmob::ss_new_as (void)
+SCM SchemeSmob::ss_new_as (SCM s)
 {
-	AtomSpace *as = new AtomSpace();
+	AtomSpace *parent = ss_to_atomspace(s);
+
+	AtomSpace *as = new AtomSpace(parent);
 	return take_as(as);
 }
 
@@ -89,9 +92,13 @@ SCM SchemeSmob::ss_as_p (SCM s)
 
 AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 {
+	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sas))
+		return NULL;
+
    scm_t_bits misctype = SCM_SMOB_FLAGS(sas);
 	if (COG_AS != misctype)
 		return NULL;
+
    return (AtomSpace *) SCM_SMOB_DATA(sas);
 }
 
@@ -104,14 +111,14 @@ SCM SchemeSmob::atomspace_variable;
 
 void SchemeSmob::ss_set_env_as(AtomSpace *as)
 {
-	// XXX this should be replaced by a fluid, so that reference
+	// XXX this should be replaced by a fluid, so that the reference
 	// is thead-safe.
 	scm_variable_set_x(atomspace_variable, make_as(as));
 }
 
 AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
 {
-	// XXX this should be replaced by a fluid, so that reference
+	// XXX this should be replaced by a fluid, so that the reference
 	// is thead-safe.
 	SCM ref = scm_variable_ref(atomspace_variable);
 	AtomSpace* as = ss_to_atomspace(ref);

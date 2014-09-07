@@ -126,7 +126,7 @@ class SchemeSmob
 		static SCM ss_tv_get_value(SCM);
 
 		// Atom Spaces
-		static SCM ss_new_as(void);
+		static SCM ss_new_as(SCM);
 		static SCM ss_as_p(SCM);
 		static SCM take_as(AtomSpace *);
 		static SCM make_as(AtomSpace *);

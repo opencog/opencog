@@ -226,7 +226,7 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
 
 	// Atom Spaces
-	scm_c_define_gsubr("cog-new-atomspace",     0, 0, 0, C(ss_new_as));
+	scm_c_define_gsubr("cog-new-atomspace",     0, 1, 0, C(ss_new_as));
 	scm_c_define_gsubr("cog-atomspace?",        1, 0, 1, C(ss_as_p));
 
 	// Attention values
