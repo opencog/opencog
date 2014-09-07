@@ -116,7 +116,9 @@ void MultiAtomSpace::test_two_scm(void)
 
 	// Define a function that performs a thunk in the alternate atomspace.
 	evaluator->eval("(define (alt-env f) "
-   	"(begin (cog-set-atomspace! alt-as) (f)))");
+   	"(let ((curr-as (cog-set-atomspace! alt-as)) "
+		"      (result (f))) "
+   	"   (cog-set-atomspace! curr-as) result))");
 
 	msg = evaluator->eval("(cog-atomspace)");
 	printf("Primary atomspace is: %s\n", msg.c_str());
@@ -363,7 +365,9 @@ void MultiAtomSpace::test_nest_scm(void)
 
 	// Define a function that performs a thunk in the nested atomspace.
 	evaluator->eval("(define (nest-env f) "
-   	"(begin (cog-set-atomspace! nest-as) (f)))");
+   	"(let ((curr-as (cog-set-atomspace! nest-as)) "
+		"      (result (f))) "
+   	"   (cog-set-atomspace! curr-as) result))");
 
 	msg = evaluator->eval("(cog-atomspace)");
 	printf("Primary atomspace is: %s\n", msg.c_str());

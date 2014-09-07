@@ -476,6 +476,7 @@ void SchemeEval::do_eval(const std::string &expr)
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
 
+	atomspace = SchemeSmob::ss_get_env_as("do_eval");
 	_eval_done = true;
 	_wait_done.notify_all();
 }
@@ -650,6 +651,8 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 		return SCM_EOL;
 	}
 
+	atomspace = SchemeSmob::ss_get_env_as("do_scm_eval");
+
 	// Get the contents of the output port, and log it
 	if (logger().isInfoEnabled())
 	{
@@ -753,6 +756,8 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 		free(str);
 		return SCM_EOL;
 	}
+
+	atomspace = SchemeSmob::ss_get_env_as("do_scm_eval_str");
 
 	// Get the contents of the output port, and log it
 	if (logger().isInfoEnabled())
