@@ -160,6 +160,7 @@ class SchemeSmob
 		static std::string uuid_to_string(SCM);
 		static TruthValue *get_tv_from_list(SCM);
 		static AttentionValue *get_av_from_list(SCM);
+		static AtomSpace *get_as_from_list(SCM);
 
 		// validate arguments coming from scheme passing into C++
 		static Type verify_atom_type(SCM, const char *, int pos = 1);

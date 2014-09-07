@@ -153,5 +153,26 @@ AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
 }
 
 
+/* ============================================================== */
+
+/**
+ * Search for an atomspace in a list of values.
+ * Return the atomspace if found, else return null.
+ * Throw errors if the list is not stictly just key-value pairs
+ */
+AtomSpace* SchemeSmob::get_as_from_list(SCM slist)
+{
+	while (scm_is_pair(slist))
+	{
+		SCM sval = SCM_CAR(slist);
+		AtomSpace* as = ss_to_atomspace(sval);
+		if (as) return as;
+		slist = SCM_CDR(slist);
+	}
+
+	return NULL;
+}
+
+
 #endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */
