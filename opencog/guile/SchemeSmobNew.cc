@@ -349,7 +349,9 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
     }
     std::string name = verify_string (sname, "cog-new-node", 2,
         "string name for the node");
-    AtomSpace* atomspace = ss_get_env_as("cog-new-node");
+
+    AtomSpace* atomspace = get_as_from_list(kv_pairs);
+    if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-node");
 
     Handle h;
     // Now, create the actual node... in the actual atom space.
@@ -384,7 +386,9 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
     Type t = verify_node_type(stype, "cog-node", 1);
     std::string name = verify_string (sname, "cog-node", 2,
                                     "string name for the node");
-    AtomSpace* atomspace = ss_get_env_as("cog-node");
+
+    AtomSpace* atomspace = get_as_from_list(kv_pairs);
+    if (NULL == atomspace) atomspace = ss_get_env_as("cog-node");
 
     // Now, look for the actual node... in the actual atom space.
     Handle h(atomspace->getHandle(t, name));
@@ -490,10 +494,12 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 {
     Handle h;
     Type t = verify_link (stype, "cog-new-link");
-    AtomSpace* atomspace = ss_get_env_as("cog-new-link");
 
     std::vector<Handle> outgoing_set;
     outgoing_set = verify_handle_list (satom_list, "cog-new-link", 2);
+
+    AtomSpace* atomspace = get_as_from_list(satom_list);
+    if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-link");
 
     // Fish out a truth value, if its there.
     const TruthValue *tv = get_tv_from_list(satom_list);
@@ -521,10 +527,12 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 {
     Type t = verify_link (stype, "cog-link");
-    AtomSpace* atomspace = ss_get_env_as("cog-link");
 
     std::vector<Handle> outgoing_set;
     outgoing_set = verify_handle_list (satom_list, "cog-link", 2);
+
+    AtomSpace* atomspace = get_as_from_list(satom_list);
+    if (NULL == atomspace) atomspace = ss_get_env_as("cog-link");
 
     // Now, look to find the actual link... in the actual atom space.
     Handle h(atomspace->getHandle(t, outgoing_set));
@@ -549,10 +557,9 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
  * This deletes the atom from both the atomspace, and any attached
  * backing store; thus deletion is permanent!
  */
-SCM SchemeSmob::ss_delete (SCM satom)
+SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
 {
     Handle h = verify_handle(satom, "cog-delete");
-    AtomSpace* atomspace = ss_get_env_as("cog-delete");
 
     // It can happen that the atom has already been deleted, but we're
     // still holding on to its UUID.  This is rare... but possible. So
@@ -561,6 +568,9 @@ SCM SchemeSmob::ss_delete (SCM satom)
 
     // The remove will fail/log warning if the incoming set isn't null.
     if (h->getIncomingSetSize() > 0) return SCM_BOOL_F;
+
+    AtomSpace* atomspace = get_as_from_list(kv_pairs);
+    if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete");
 
     // AtomSpace::removeAtom() returns true if atom was deleted,
     // else returns false
@@ -577,10 +587,12 @@ SCM SchemeSmob::ss_delete (SCM satom)
  * This deletes the atom from both the atomspace, and any attached
  * backing store; thus deletion is permanent!
  */
-SCM SchemeSmob::ss_delete_recursive (SCM satom)
+SCM SchemeSmob::ss_delete_recursive (SCM satom, SCM kv_pairs)
 {
     Handle h = verify_handle(satom, "cog-delete-recursive");
-    AtomSpace* atomspace = ss_get_env_as("cog-delete-recursive");
+
+    AtomSpace* atomspace = get_as_from_list(kv_pairs);
+    if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete-recursive");
 
     bool rc = atomspace->removeAtom(h, true);
 
@@ -595,10 +607,9 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom)
  * This does NOT remove the atom from any attached backing store, only
  * from the atomspace.
  */
-SCM SchemeSmob::ss_purge (SCM satom)
+SCM SchemeSmob::ss_purge (SCM satom, SCM kv_pairs)
 {
     Handle h = verify_handle(satom, "cog-purge");
-    AtomSpace* atomspace = ss_get_env_as("cog-purge");
 
     // It can happen that the atom has already been purged, but we're
     // still holding on to its UUID.  This is rare... but possible. So
@@ -607,6 +618,9 @@ SCM SchemeSmob::ss_purge (SCM satom)
 
     // The purge will fail/log warning if the incoming set isn't null.
     if (h->getIncomingSetSize() > 0) return SCM_BOOL_F;
+
+    AtomSpace* atomspace = get_as_from_list(kv_pairs);
+    if (NULL == atomspace) atomspace = ss_get_env_as("cog-purge");
 
     // AtomSpace::purgeAtom() returns true if atom was purged,
     // else returns false
@@ -623,10 +637,12 @@ SCM SchemeSmob::ss_purge (SCM satom)
  * This does NOT remove the atom from any attached backing store, only
  * from the atomspace.
  */
-SCM SchemeSmob::ss_purge_recursive (SCM satom)
+SCM SchemeSmob::ss_purge_recursive (SCM satom, SCM kv_pairs)
 {
     Handle h = verify_handle(satom, "cog-purge-recursive");
-    AtomSpace* atomspace = ss_get_env_as("cog-purge-recursive");
+
+    AtomSpace* atomspace = get_as_from_list(kv_pairs);
+    if (NULL == atomspace) atomspace = ss_get_env_as("cog-purge-recursive");
 
     bool rc = atomspace->purgeAtom(h, true);
 

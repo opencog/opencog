@@ -75,10 +75,10 @@ class SchemeSmob
 		static SCM ss_new_link(SCM, SCM);
 		static SCM ss_node(SCM, SCM, SCM);
 		static SCM ss_link(SCM, SCM);
-		static SCM ss_delete(SCM);
-		static SCM ss_delete_recursive(SCM);
-		static SCM ss_purge(SCM);
-		static SCM ss_purge_recursive(SCM);
+		static SCM ss_delete(SCM, SCM);
+		static SCM ss_delete_recursive(SCM, SCM);
+		static SCM ss_purge(SCM, SCM);
+		static SCM ss_purge_recursive(SCM, SCM);
 		static SCM ss_atom_p(SCM);
 		static SCM ss_node_p(SCM);
 		static SCM ss_link_p(SCM);
