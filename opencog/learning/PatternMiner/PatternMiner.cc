@@ -864,7 +864,7 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //    //debug
 //    std::cout << originalAtomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
 
-    removeAtomLock.lock();
+ //   removeAtomLock.lock();
     foreach (Handle listH , resultSet)
     {
         HandleSeq instanceLinks = originalAtomSpace->getOutgoing(listH);
@@ -893,7 +893,7 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     originalAtomSpace->removeAtom(hResultListLink);
     // originalAtomSpace->removeAtom(hVariablesListLink);
 
-    removeAtomLock.unlock();
+ //   removeAtomLock.unlock();
 
 
     HNode->count = HNode->instances.size();
