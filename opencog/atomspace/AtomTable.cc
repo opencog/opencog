@@ -754,12 +754,12 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
                     logger().error() << "Non-empty incoming set of size "
                                      << ilen << " First trouble at " << i;
                     logger().error() << "This atomtable=" << ((void*) this)
-                                     << "non-null atomtale=" << iset[i]->getAtomTable();
+                                     << "non-null atomtale=" << ((void*) iset[i]->getAtomTable());
                     logger().error() << "This atom: " << handle;
                     for (size_t j=0; j<ilen; j++) {
                         logger().error() << "Atom j=" << j << " " << iset[j];
                         logger().error() << "Marked: " << iset[j]->isMarkedForRemoval()
-                                         << " Table: " << iset[j]->getAtomTable();
+                                         << " Table: " << ((void*) iset[j]->getAtomTable());
                     }
                     atom->unsetRemovalFlag();
                     throw RuntimeException(TRACE_INFO,
