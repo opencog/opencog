@@ -795,8 +795,8 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
     implicationLinkOutgoings.push_back(hOutPutListLink); // the results to return
 
-    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
-            << atomSpace->atomAsString(hAndLink).c_str() << std::endl;
+//    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
+//            << atomSpace->atomAsString(hAndLink).c_str() << std::endl;
 
 
     Handle hImplicationLink = atomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
@@ -808,8 +808,7 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = atomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
 
-//    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
-//              << originalAtomSpace->atomAsString(hAndLink).c_str() << std::endl;
+
 
 //    // debug
 //    if ((variableNodes.size() == 4) && (patternToMatch.size() == 3))
@@ -859,10 +858,10 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     // Note: Don't forget to remove the hResultListLink and BindLink
     HandleSeq resultSet = atomSpace->getOutgoing(hResultListLink);
 
-    std::cout << toString(resultSet.size())  << " instances found!" << std::endl ;
+//     std::cout << toString(resultSet.size())  << " instances found!" << std::endl ;
 
-//    //debug
-   std::cout << atomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
+    //    //debug
+//    std::cout << atomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
 
     foreach (Handle listH , resultSet)
     {
@@ -912,25 +911,23 @@ void PatternMiner::removeLinkAndItsAllSubLinks(AtomSpace* _atomspace, Handle lin
 void PatternMiner::growTheFirstGramPatternsTask()
 {
 
-    static int count = 0;
     while (true)
     {
-        if (THREAD_NUM > 1)
-            allAtomListLock.lock();
+        patternForLastGramLock.lock();
 
-        if (allLinks.size() <= 0)
+        cur_index ++;
+        cout<< "\r" + toString(((float)(cur_index)/atomspaceSizeFloat)*100.0f) + "% completed." ;
+        std::cout.flush();
+
+        if (cur_index >= allLinks.size())
         {
-            if (THREAD_NUM > 1)
-                allAtomListLock.unlock();
-
+            patternForLastGramLock.unlock();
             break;
         }
 
-        Handle cur_link = allLinks[allLinks.size() - 1];
-        allLinks.pop_back();
+        patternForLastGramLock.unlock();
 
-        if (THREAD_NUM > 1)
-            allAtomListLock.unlock();
+        Handle cur_link = allLinks[cur_index];
 
         // if this link is listlink, ignore it
         if (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK)
@@ -944,8 +941,7 @@ void PatternMiner::growTheFirstGramPatternsTask()
         // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
         set<Handle> sharedNodes;
         extractAllPossiblePatternsFromInputLinks(originalLinks, 0, sharedNodes);
-        count ++;
-        cout<< "\r" + toString(((float)(count)/atomspaceSizeFloat)*100.0f) + "% completed." ;
+
 
     }
 
@@ -1096,18 +1092,21 @@ void PatternMiner::growPatternsTask()
 
     while(true)
     {
-        if (THREAD_NUM > 1)
-            patternForLastGramLock.lock();
+
+        patternForLastGramLock.lock();
 
         cur_index ++;
+        cout<< "\r" + toString(((float)(cur_index)/last_gram_total_float)*100.0f) + "% completed." ;
+        std::cout.flush();
+
         if (cur_index >= total)
         {
             patternForLastGramLock.unlock();
             break;
         }
 
-        if (THREAD_NUM > 1)
-            patternForLastGramLock.unlock();
+        patternForLastGramLock.unlock();
+
 
         HTreeNode* cur_growing_pattern = last_gram_patterns[cur_index];
 
@@ -1124,7 +1123,7 @@ void PatternMiner::growPatternsTask()
         cur_growing_pattern->instances.clear();
         (vector<HandleSeq>()).swap(cur_growing_pattern->instances);
 
-        cout<< "\r" + toString(((float)(cur_index)/last_gram_total_float)*100.0f) + "% completed." ;
+
 
     }
 
@@ -1221,6 +1220,10 @@ void PatternMiner::ConstructTheFirstGramPatterns()
         threads[i].join();
     }
 
+    // release allLinks
+    allLinks.clear();
+    (vector<Handle>()).swap(allLinks);
+
     // sort the patterns by frequency
     std::sort((patternsForGram[0]).begin(), (patternsForGram[0]).end(),compareHTreeNodeByFrequency );
 
@@ -1276,6 +1279,8 @@ void PatternMiner::GrowAllPatterns()
             threads[i].join();
         }
 
+        cout << "\nFinished mining " << cur_gram << "gram patterns.\n";
+
         if (enable_Frequent_Pattern)
         {
             // sort by frequency
@@ -1290,10 +1295,12 @@ void PatternMiner::GrowAllPatterns()
 
         if (enable_Interesting_Pattern)
         {
+            cout << "\nCalculating interestingness for " << cur_gram << "gram patterns";
             // evaluate the interestingness
             // Only effective when Enable_Interesting_Pattern is true. The options are "Interaction_Information", "surprisingness"
             if (interestingness_Evaluation_method == "Interaction_Information")
             {
+                cout << "by evaluating Interaction_Information ...\n";
                // calculate interaction information
                foreach(HTreeNode* htreeNode, patternsForGram[cur_gram-1])
                {
@@ -1305,7 +1312,7 @@ void PatternMiner::GrowAllPatterns()
             }
             else if (interestingness_Evaluation_method == "surprisingness")
             {
-                // Todo:
+                cout << "by evaluating surprisingness ...\n";
                 // calculate surprisingness
                 foreach(HTreeNode* htreeNode, patternsForGram[cur_gram-1])
                 {
@@ -1691,7 +1698,7 @@ unsigned int PatternMiner::getCountOfASubConnectedPattern(string& connectedSubPa
     {
         // it's in the H-Tree, add its entropy
         HTreeNode* subPatternNode = (HTreeNode*)subPatternNodeIter->second;
-        cout << "Found in H-tree! count = " << subPatternNode->count << std::endl;
+//        cout << "Found in H-tree! count = " << subPatternNode->count << std::endl;
         return subPatternNode->count;
     }
     else
@@ -1705,7 +1712,7 @@ unsigned int PatternMiner::getCountOfASubConnectedPattern(string& connectedSubPa
 
         // Find All Instances in the original AtomSpace For this Pattern
         findAllInstancesForGivenPattern(newHTreeNode);
-        cout << "Not found in H-tree! call pattern matcher again! count = " << newHTreeNode->count << std::endl;
+//        cout << "Not found in H-tree! call pattern matcher again! count = " << newHTreeNode->count << std::endl;
         return newHTreeNode->count;
 
     }
@@ -1715,25 +1722,25 @@ unsigned int PatternMiner::getCountOfASubConnectedPattern(string& connectedSubPa
 // make sure only input 2~4 gram patterns
 void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
 {
-    std::cout << "=================Debug: calculateSurprisingness for pattern: ====================\n";
+//    std::cout << "=================Debug: calculateSurprisingness for pattern: ====================\n";
     foreach (Handle link, HNode->pattern)
     {
         std::cout << atomSpace->atomAsString(link);
     }
-    std::cout << "count of this pattern = " << HNode->count << std::endl;
-    std::cout << std::endl;
+//    std::cout << "count of this pattern = " << HNode->count << std::endl;
+//    std::cout << std::endl;
 
     unsigned int gram = HNode->pattern.size();
     // get the predefined combination:
     // vector<vector<vector<unsigned int>>>
     float minProbability = 9999999999.00000f;
     float maxProbability = 0.0000000f;
-    int comcount = 0;
+//    int comcount = 0;
 
     foreach(vector<vector<unsigned int>>&  oneCombin, components_ngram[gram-2])
     {
         int com_i = 0;
-        std::cout <<" -----Combination " << comcount++ << "-----" << std::endl;
+//        std::cout <<" -----Combination " << comcount++ << "-----" << std::endl;
         float total_p = 1.0f;
 
         bool containsComponentDisconnected = false;
@@ -1748,24 +1755,24 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern);
             string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
-            std::cout<< "Subpattern: " << subPatternKey;
+//            std::cout<< "Subpattern: " << subPatternKey;
 
             // First check if this subpattern is disconnected. If it is disconnected, it won't exist in the H-Tree anyway.
             HandleSeqSeq splittedSubPattern;
             if (splitDisconnectedLinksIntoConnectedGroups(unifiedSubPattern, splittedSubPattern))
             {
-                std::cout<< " is disconnected! skip it \n" ;
+//                std::cout<< " is disconnected! skip it \n" ;
                 containsComponentDisconnected = true;
                 break;
             }
             else
             {
-                std::cout<< " is connected!" ;
+//                std::cout<< " is connected!" ;
                 unsigned int component_count = getCountOfASubConnectedPattern(subPatternKey, unifiedSubPattern);
-                cout << ", count = " << component_count;
+//                cout << ", count = " << component_count;
                 float p_i = ((float)(component_count)) / atomspaceSizeFloat;
 
-                cout << ", p = " << component_count  << " / " << (int)atomspaceSizeFloat << " = " << p_i << std::endl;
+//                cout << ", p = " << component_count  << " / " << (int)atomspaceSizeFloat << " = " << p_i << std::endl;
                 total_p *= p_i;
                 std::cout << std::endl;
             }
@@ -1778,7 +1785,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
             continue;
 
 
-        cout << "\n ---- total_p = " << total_p << " ----\n" ;
+//        cout << "\n ---- total_p = " << total_p << " ----\n" ;
 
 
         if (total_p < minProbability)
@@ -1789,20 +1796,20 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
 
     }
 
-    cout << "\nIn all the probability calculated by all possible component combinations, maxProbability  = " << maxProbability << ", minProbability = " << minProbability << std::endl;
+//    cout << "\nIn all the probability calculated by all possible component combinations, maxProbability  = " << maxProbability << ", minProbability = " << minProbability << std::endl;
     float p = ((float)HNode->count)/atomspaceSizeFloat;
-    cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  (int)atomspaceSizeFloat << " = " << p << std::endl;
+//    cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  (int)atomspaceSizeFloat << " = " << p << std::endl;
 
     float surprisingness_max = p - maxProbability;
     float surprisingness_min = minProbability - p;
-    cout << "\np - maxProbability = " << surprisingness_max << "; minProbability - p = " << surprisingness_min << std::endl;
+//    cout << "\np - maxProbability = " << surprisingness_max << "; minProbability - p = " << surprisingness_min << std::endl;
 
     if (surprisingness_max >= surprisingness_min)
         HNode->surprisingness = surprisingness_max ;
     else
         HNode->surprisingness = surprisingness_min;
 
-    cout << "surprisingness = surprisingness " << HNode->surprisingness  << std::endl;
+//    cout << "surprisingness = surprisingness " << HNode->surprisingness  << std::endl;
 
 }
 
@@ -1850,7 +1857,7 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
 //        THREAD_NUM = 1;
 
     // use all the threads in this machine
-    THREAD_NUM = system_thread_num;
+    THREAD_NUM = system_thread_num + system_thread_num/2;
 
 
 //    // test only one tread for now
