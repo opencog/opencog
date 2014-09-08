@@ -99,8 +99,6 @@ namespace PatternMining
 
      float last_gram_total_float;
 
-     bool still_mining;
-
      unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
 
      std::mutex allAtomListLock, uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock;

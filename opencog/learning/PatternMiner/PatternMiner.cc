@@ -777,9 +777,9 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //     )
 
 
-    HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, linksWillBeDel;
+    HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings;
 
-    HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpace(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
+    // HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpace(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
 
 //    if (HNode->pattern.size() == 1) // this pattern only contains one link
 //    {
@@ -790,23 +790,23 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //                << originalAtomSpace->atomAsString(patternToMatch[0]).c_str() << std::endl;
 //    }
 
-    Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch, TruthValue::TRUE_TV());
-    Handle hOutPutListLink = originalAtomSpace->addLink(LIST_LINK, patternToMatch, TruthValue::TRUE_TV());
+    Handle hAndLink = atomSpace->addLink(AND_LINK, HNode->pattern, TruthValue::TRUE_TV());
+    Handle hOutPutListLink = atomSpace->addLink(LIST_LINK, HNode->pattern, TruthValue::TRUE_TV());
     implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
     implicationLinkOutgoings.push_back(hOutPutListLink); // the results to return
 
-//    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
-//            << originalAtomSpace->atomAsString(hAndLink).c_str() << std::endl;
+    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
+            << atomSpace->atomAsString(hAndLink).c_str() << std::endl;
 
 
-    Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
+    Handle hImplicationLink = atomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
 
     // add variable atoms
-    Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
+    Handle hVariablesListLink = atomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
 
     bindLinkOutgoings.push_back(hVariablesListLink);
     bindLinkOutgoings.push_back(hImplicationLink);
-    Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
+    Handle hBindLink = atomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
 
 //    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
 //              << originalAtomSpace->atomAsString(hAndLink).c_str() << std::endl;
@@ -853,21 +853,20 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 
 
     // Run pattern matcher
-    Handle hResultListLink = bindlink(originalAtomSpace, hBindLink);
+    Handle hResultListLink = bindlink(atomSpace, hBindLink);
 
     // Get result
     // Note: Don't forget to remove the hResultListLink and BindLink
-    HandleSeq resultSet = originalAtomSpace->getOutgoing(hResultListLink);
+    HandleSeq resultSet = atomSpace->getOutgoing(hResultListLink);
 
-//    std::cout << toString(resultSet.size())  << " instances found!" << std::endl ;
+    std::cout << toString(resultSet.size())  << " instances found!" << std::endl ;
 
 //    //debug
-//    std::cout << originalAtomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
+   std::cout << atomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
 
- //   removeAtomLock.lock();
     foreach (Handle listH , resultSet)
     {
-        HandleSeq instanceLinks = originalAtomSpace->getOutgoing(listH);
+        HandleSeq instanceLinks = atomSpace->getOutgoing(listH);
 
         if (cur_gram == 1)
         {
@@ -880,21 +879,13 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
                 HNode->instances.push_back(instanceLinks);
         }
 
-        originalAtomSpace->removeAtom(listH);
+        atomSpace->removeAtom(listH);
     }
 
-    foreach (Handle toDelh, linksWillBeDel)
-    {
-        originalAtomSpace->removeAtom(toDelh);
-    }
-
-    originalAtomSpace->removeAtom(hBindLink);
-    originalAtomSpace->removeAtom(hAndLink);
-    originalAtomSpace->removeAtom(hResultListLink);
+    atomSpace->removeAtom(hBindLink);
+    atomSpace->removeAtom(hAndLink);
+    atomSpace->removeAtom(hResultListLink);
     // originalAtomSpace->removeAtom(hVariablesListLink);
-
- //   removeAtomLock.unlock();
-
 
     HNode->count = HNode->instances.size();
 }
@@ -1133,18 +1124,12 @@ void PatternMiner::growPatternsTask()
         cur_growing_pattern->instances.clear();
         (vector<HandleSeq>()).swap(cur_growing_pattern->instances);
 
-    }
-
-}
-
-void PatternMiner::reportProgress()
-{
-    while(still_mining)
-    {
         cout<< "\r" + toString(((float)(cur_index)/last_gram_total_float)*100.0f) + "% completed." ;
-        sleep(1);
+
     }
+
 }
+
 
 bool compareHTreeNodeByFrequency(HTreeNode* node1, HTreeNode* node2)
 {
@@ -1280,10 +1265,6 @@ void PatternMiner::GrowAllPatterns()
         std::cout<<"Debug: PatternMiner:  start (gram = " + toString(cur_gram) + ") pattern mining..." << std::endl;
 
         last_gram_total_float = (float)((patternsForGram[cur_gram-2]).size());
-        still_mining = true;
-
-        std::thread reportProgreeThree = std::thread([this]{this->reportProgress();});
-
 
         for (unsigned int i = 0; i < THREAD_NUM; ++ i)
         {
@@ -1294,9 +1275,6 @@ void PatternMiner::GrowAllPatterns()
         {
             threads[i].join();
         }
-        reportProgreeThree.join();
-
-        still_mining = false;
 
         if (enable_Frequent_Pattern)
         {
@@ -1862,7 +1840,7 @@ void PatternMiner::generateComponentCombinations(string componentsStr, vector<ve
 PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram): originalAtomSpace(_originalAtomSpace)
 {
     htree = new HTree();
-    atomSpace = new AtomSpace();
+    atomSpace = new AtomSpace( _originalAtomSpace);
 
     unsigned int system_thread_num  = std::thread::hardware_concurrency();
 
