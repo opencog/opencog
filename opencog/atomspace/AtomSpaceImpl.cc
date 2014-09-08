@@ -52,8 +52,9 @@ using namespace opencog;
 
 // ====================================================================
 
-AtomSpaceImpl::AtomSpaceImpl(void)
-    : bank(&atomTable)
+AtomSpaceImpl::AtomSpaceImpl(AtomSpaceImpl* parent) :
+    atomTable(parent? &parent->atomTable : NULL),
+    bank(&atomTable)
 {
     backing_store = NULL;
     DPRINTF("AtomSpaceImpl::Constructor AtomTable address: %p\n", &atomTable);

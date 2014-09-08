@@ -58,26 +58,20 @@ class AtomSpace
     friend class SaveRequest;
 
     /**
-     * Overrides and declares equals operator as private
-     * for avoiding large object copying by mistake.
+     * Override and declare copy constructor and equals operator, to
+     * prevent the accidental copying of large objects.
      */
     AtomSpace& operator=(const AtomSpace&);
+    AtomSpace(const AtomSpace&);
 
     /**
-     * The AtomSpace class is essentially just be a wrapper of the AtomTable
+     * The AtomSpace class is just a wrapper of the AtomTable
      */
-    mutable AtomSpaceImpl* _atomSpaceImpl;
-    bool _ownsAtomSpaceImpl;
+    AtomSpaceImpl* _atomSpaceImpl;
 
 public:
-    AtomSpace(void);
-    /**
-     * Create an atomspace that will send requests to an existing AtomSpace
-     * event-loop.
-     */
-    AtomSpace(AtomSpaceImpl* a);
+    AtomSpace(AtomSpace* parent = NULL);
 
-    AtomSpace(const AtomSpace&);
     ~AtomSpace();
 
     inline AttentionBank& getAttentionBank()

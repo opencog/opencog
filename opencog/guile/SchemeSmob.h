@@ -75,10 +75,10 @@ class SchemeSmob
 		static SCM ss_new_link(SCM, SCM);
 		static SCM ss_node(SCM, SCM, SCM);
 		static SCM ss_link(SCM, SCM);
-		static SCM ss_delete(SCM);
-		static SCM ss_delete_recursive(SCM);
-		static SCM ss_purge(SCM);
-		static SCM ss_purge_recursive(SCM);
+		static SCM ss_delete(SCM, SCM);
+		static SCM ss_delete_recursive(SCM, SCM);
+		static SCM ss_purge(SCM, SCM);
+		static SCM ss_purge_recursive(SCM, SCM);
 		static SCM ss_atom_p(SCM);
 		static SCM ss_node_p(SCM);
 		static SCM ss_link_p(SCM);
@@ -126,8 +126,10 @@ class SchemeSmob
 		static SCM ss_tv_get_value(SCM);
 
 		// Atom Spaces
-		static SCM ss_new_as(void);
+		static SCM ss_new_as(SCM);
 		static SCM ss_as_p(SCM);
+		static SCM ss_get_as(void);
+		static SCM ss_set_as(SCM);
 		static SCM take_as(AtomSpace *);
 		static SCM make_as(AtomSpace *);
 		static AtomSpace* ss_to_atomspace(SCM);
@@ -158,6 +160,7 @@ class SchemeSmob
 		static std::string uuid_to_string(SCM);
 		static TruthValue *get_tv_from_list(SCM);
 		static AttentionValue *get_av_from_list(SCM);
+		static AtomSpace *get_as_from_list(SCM);
 
 		// validate arguments coming from scheme passing into C++
 		static Type verify_atom_type(SCM, const char *, int pos = 1);
@@ -172,7 +175,7 @@ class SchemeSmob
 		static int verify_int (SCM, const char *, int pos = 1,
 		                       const char *msg = "expecting integer");
 
-		static SCM atomspace_variable;
+		static SCM atomspace_fluid;
 		static void ss_set_env_as(AtomSpace *);
 		static void init();
 		SchemeSmob();

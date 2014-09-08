@@ -63,8 +63,8 @@ void SchemeSmob::init()
 		init_smob_type();
 		register_procs();
 
-		atomspace_variable = scm_c_define("*-atomspace-*", make_as(NULL));
-		atomspace_variable = scm_permanent_object(atomspace_variable);
+		atomspace_fluid = scm_make_fluid();
+		atomspace_fluid = scm_permanent_object(atomspace_fluid);
 		_radix_ten = scm_from_int8(10);
 	}
 }
@@ -192,10 +192,10 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-new-link",          1, 0, 1, C(ss_new_link));
 	scm_c_define_gsubr("cog-node",              2, 0, 1, C(ss_node));
 	scm_c_define_gsubr("cog-link",              1, 0, 1, C(ss_link));
-	scm_c_define_gsubr("cog-delete",            1, 0, 0, C(ss_delete));
-	scm_c_define_gsubr("cog-delete-recursive",  1, 0, 0, C(ss_delete_recursive));
-	scm_c_define_gsubr("cog-purge",             1, 0, 0, C(ss_purge));
-	scm_c_define_gsubr("cog-purge-recursive",   1, 0, 0, C(ss_purge_recursive));
+	scm_c_define_gsubr("cog-delete",            1, 0, 1, C(ss_delete));
+	scm_c_define_gsubr("cog-delete-recursive",  1, 0, 1, C(ss_delete_recursive));
+	scm_c_define_gsubr("cog-purge",             1, 0, 1, C(ss_purge));
+	scm_c_define_gsubr("cog-purge-recursive",   1, 0, 1, C(ss_purge_recursive));
 	scm_c_define_gsubr("cog-atom?",             1, 0, 1, C(ss_atom_p));
 	scm_c_define_gsubr("cog-node?",             1, 0, 1, C(ss_node_p));
 	scm_c_define_gsubr("cog-link?",             1, 0, 1, C(ss_link_p));
@@ -226,8 +226,10 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
 
 	// Atom Spaces
-	scm_c_define_gsubr("cog-new-atomspace",     0, 0, 0, C(ss_new_as));
-	scm_c_define_gsubr("cog-atomspace?",        1, 0, 1, C(ss_as_p));
+	scm_c_define_gsubr("cog-new-atomspace",     0, 1, 0, C(ss_new_as));
+	scm_c_define_gsubr("cog-atomspace?",        1, 0, 0, C(ss_as_p));
+	scm_c_define_gsubr("cog-atomspace",         0, 0, 0, C(ss_get_as));
+	scm_c_define_gsubr("cog-set-atomspace!",    1, 0, 0, C(ss_set_as));
 
 	// Attention values
 	scm_c_define_gsubr("cog-new-av",            3, 0, 0, C(ss_new_av));

@@ -47,6 +47,8 @@ private:
 public:
     void setUp(void)
     {        
+        this->as = &cogserver().getAtomSpace();
+
         config().set("SCM_PRELOAD",
             "opencog/atomspace/core_types.scm, "
             "opencog/scm/utilities.scm");
@@ -57,7 +59,6 @@ public:
             "opencog/dynamics/attention/libattention.so");
         
         cogserver().loadModules();
-        this->as = &cogserver().getAtomSpace();
         
         cogserver().registerAgent(SimpleImportanceDiffusionAgent::info().id, &factory);
         agent = cogserver().createAgent<SimpleImportanceDiffusionAgent>(true);

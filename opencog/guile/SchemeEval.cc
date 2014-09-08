@@ -476,6 +476,7 @@ void SchemeEval::do_eval(const std::string &expr)
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
 
+	atomspace = SchemeSmob::ss_get_env_as("do_eval");
 	_eval_done = true;
 	_wait_done.notify_all();
 }
@@ -534,7 +535,7 @@ std::string SchemeEval::do_poll_result()
 
 	if (not _eval_done)
 	{
-		// We don't actualy need to lock anything here; we're just
+		// We don't have a real need to lock anything here; we're just
 		// using this as a hack, so that the condition variable will
 		// wake us up periodically.  The goal here is to block when
 		// there's no output to be reported.
@@ -626,6 +627,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	                 SchemeEval::catch_handler_wrapper, this,
 	                 SchemeEval::preunwind_handler_wrapper, this);
 
+	_eval_done = true;
 	if (_caught_error)
 	{
 		char * str = scm_to_locale_string(error_string);
@@ -649,6 +651,8 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 		free(str);
 		return SCM_EOL;
 	}
+
+	atomspace = SchemeSmob::ss_get_env_as("do_scm_eval");
 
 	// Get the contents of the output port, and log it
 	if (logger().isInfoEnabled())
@@ -733,6 +737,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
 
+	_eval_done = true;
 	if (_caught_error)
 	{
 		char * str = scm_to_locale_string(error_string);
@@ -753,6 +758,8 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 		free(str);
 		return SCM_EOL;
 	}
+
+	atomspace = SchemeSmob::ss_get_env_as("do_scm_eval_str");
 
 	// Get the contents of the output port, and log it
 	if (logger().isInfoEnabled())

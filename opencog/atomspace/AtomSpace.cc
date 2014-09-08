@@ -37,29 +37,14 @@ using namespace opencog;
 // ====================================================================
 //
 
-AtomSpace::AtomSpace(void)
+AtomSpace::AtomSpace(AtomSpace* parent)
 {
-    _atomSpaceImpl = new AtomSpaceImpl();
-    _ownsAtomSpaceImpl = true;
-}
-
-AtomSpace::AtomSpace(const AtomSpace& other)
-{
-    _atomSpaceImpl = other._atomSpaceImpl;
-    _ownsAtomSpaceImpl = false;
-}
-
-AtomSpace::AtomSpace(AtomSpaceImpl* a)
-{
-    _atomSpaceImpl = a;
-    _ownsAtomSpaceImpl = false;
+    _atomSpaceImpl = new AtomSpaceImpl(parent? parent->_atomSpaceImpl : NULL);
 }
 
 AtomSpace::~AtomSpace()
 {
-    // Will be unnecessary once GC is implemented
-    if (_ownsAtomSpaceImpl)
-        delete _atomSpaceImpl;
+    delete _atomSpaceImpl;
 }
 
 AtomSpace& AtomSpace::operator=(const AtomSpace& other)
@@ -67,6 +52,13 @@ AtomSpace& AtomSpace::operator=(const AtomSpace& other)
     throw opencog::RuntimeException(TRACE_INFO,
             "AtomSpace - Cannot copy an object of this class");
 }
+
+AtomSpace::AtomSpace(const AtomSpace& other)
+{
+    throw opencog::RuntimeException(TRACE_INFO,
+            "AtomSpace - Cannot copy an object of this class");
+}
+
 
 Handle AtomSpace::addPrefixedNode(Type t, const std::string& prefix, TruthValuePtr tvn)
 {

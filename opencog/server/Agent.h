@@ -42,7 +42,6 @@ typedef short stim_t;
 typedef std::unordered_map<Handle, stim_t, handle_hash> AtomStimHashMap;
 
 class CogServer;
-class AtomSpaceImpl;
 
 /** The MindAgent Class
  * This class defines the base abstract class that should be extended by all

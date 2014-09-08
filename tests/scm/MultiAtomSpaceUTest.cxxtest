@@ -55,6 +55,8 @@ class MultiAtomSpace :  public CxxTest::TestSuite
 
 			// logger().setLevel(Logger::DEBUG);
 			// logger().setPrintToStdoutFlag(true);
+
+			cogserver().loadModules();
 		}
 
 		~MultiAtomSpace()
@@ -67,9 +69,12 @@ class MultiAtomSpace :  public CxxTest::TestSuite
 		void setUp(void);
 		void tearDown(void);
 
-		void test_two(void);
+		void test_two_scm(void);
 		void test_three(void);
 		void test_load(void);
+		void test_nest(void);
+		void test_nest_scm(void);
+		void test_arg_scm(void);
 };
 
 /*
@@ -83,12 +88,9 @@ void MultiAtomSpace::setUp(void)
 	evaluator = new SchemeEval(&cogserver().getAtomSpace());
 
 	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm, "
-		"tests/scm/multispace.scm");
+		"opencog/atomspace/core_types.scm");
 
-	cogserver().loadModules();
 	cogserver().loadSCMModules();
-
 }
 
 void MultiAtomSpace::tearDown(void)
@@ -104,9 +106,26 @@ void MultiAtomSpace::tearDown(void)
  * Test assorted functions from opencog/scm/utilities.scm
  */
 
-void MultiAtomSpace::test_two(void)
+void MultiAtomSpace::test_two_scm(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Define an alternate atomspace
+	evaluator->eval("(define alt-as (cog-new-atomspace))");
+	std::string msg = evaluator->eval("alt-as");
+	printf("New atomspace is: %s\n", msg.c_str());
+
+	// Define a function that performs a thunk in the alternate atomspace.
+	evaluator->eval("(define (alt-env f) "
+   	"(let ((curr-as (cog-set-atomspace! alt-as)) "
+		"      (result (f))) "
+   	"   (cog-set-atomspace! curr-as) result))");
+
+	msg = evaluator->eval("(cog-atomspace)");
+	printf("Primary atomspace is: %s\n", msg.c_str());
+
+	msg = evaluator->eval("(alt-env cog-atomspace)");
+	printf("Alternate atomspace is: %s\n", msg.c_str());
 
 	// Populate atomspace with some misc junk
 	evaluator->eval("(NumberNode \"42\")");
@@ -118,10 +137,9 @@ void MultiAtomSpace::test_two(void)
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h1);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, h1->getType());
 
-	std::string msg = evaluator->eval("(dbg)");
-	printf("Evaluation returned: %s\n", msg.c_str());
-
-	Handle h2 = evaluator->eval_h("(func-env)");
+	// Create the 'same' ConceptNode in a different atomspace
+	Handle h2 = evaluator->eval_h(
+		"(alt-env (lambda () (ConceptNode \"stuff\")))");
 	CHKERR;
 
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h2);
@@ -211,11 +229,11 @@ void MultiAtomSpace::test_load(void)
 	AtomSpace* as1 = new AtomSpace();
 	AtomSpace* as2 = new AtomSpace();
 
-   config().set("SCM_PRELOAD",
-      "opencog/atomspace/core_types.scm, "
-      "opencog/nlp/types/nlp_types.scm, "
-      "opencog/scm/utilities.scm, "
-	   "tests/scm/utils-test.scm");
+	config().set("SCM_PRELOAD",
+		"opencog/atomspace/core_types.scm, "
+		"opencog/nlp/types/nlp_types.scm, "
+		"opencog/scm/utilities.scm, "
+		"tests/scm/utils-test.scm");
 
 	load_scm_files_from_config(*as1);
 	load_scm_files_from_config(*as2);
@@ -227,62 +245,62 @@ void MultiAtomSpace::test_load(void)
 
 	// The below is a complicated multi-atom-space version of part of 
 	// the SCMUtilsUTest suite.  Different atoms in different spaces...
-   // Increment a count tv in atomspace 1 ---------------------------------
-   ev1->eval("(set! counter (ConceptNode \"asdf\"))");
-   Handle counter1 = ev1->eval_h("counter");
+	// Increment a count tv in atomspace 1 ---------------------------------
+	ev1->eval("(set! counter (ConceptNode \"asdf\"))");
+	Handle counter1 = ev1->eval_h("counter");
 	CHKEV(ev1);
 	printf ("counter1 = %lu %p\n", counter1.value(), counter1.operator->());
 
-   TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter1);
-   TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter1->getType());
+	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter1);
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter1->getType());
 
-   ev1->eval("(test-incr-cnt)");
+	ev1->eval("(test-incr-cnt)");
 	CHKEV(ev1);
-   ev1->eval("(test-incr-cnt)");
+	ev1->eval("(test-incr-cnt)");
 	CHKEV(ev1);
-   ev1->eval("(test-incr-cnt)");
+	ev1->eval("(test-incr-cnt)");
 	CHKEV(ev1);
-   ev1->eval("(test-incr-cnt)");
+	ev1->eval("(test-incr-cnt)");
 	CHKEV(ev1);
-   TruthValuePtr tv1 = counter1->getTruthValue();
+	TruthValuePtr tv1 = counter1->getTruthValue();
 
-   TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv1->getType());
-   TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv1->getCount()));
+	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv1->getType());
+	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv1->getCount()));
 
-   // Count tv in atomspace2 should be unscathed. ----------------------------
-   ev2->eval("(set! counter (ConceptNode \"asdf\"))");
-   Handle counter2 = ev2->eval_h("counter");
+	// Count tv in atomspace2 should be unscathed. ----------------------------
+	ev2->eval("(set! counter (ConceptNode \"asdf\"))");
+	Handle counter2 = ev2->eval_h("counter");
 	CHKEV(ev2);
 	printf ("counter2 = %lu %p\n", counter2.value(), counter2.operator->());
 
-   TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter2);
-   TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter2->getType());
+	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter2);
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter2->getType());
 
-   TSM_ASSERT("Atoms fail to differ", counter1 != counter2);
+	TSM_ASSERT("Atoms fail to differ", counter1 != counter2);
 
-   ev2->eval("(test-incr-cnt)");
+	ev2->eval("(test-incr-cnt)");
 	CHKEV(ev2);
 
-   TruthValuePtr tv2 = counter2->getTruthValue();
+	TruthValuePtr tv2 = counter2->getTruthValue();
 
-   TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv2->getType());
-   TSM_ASSERT_EQUALS("wrong count found", 1, (int)(tv2->getCount()));
+	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv2->getType());
+	TSM_ASSERT_EQUALS("wrong count found", 1, (int)(tv2->getCount()));
 
-   // Count tv in atomspace1 should be unscathed. ----------------------------
-   ev1->eval("(set! counter (ConceptNode \"asdf\"))");
-   Handle counter3 = ev1->eval_h("counter");
+	// Count tv in atomspace1 should be unscathed. ----------------------------
+	ev1->eval("(set! counter (ConceptNode \"asdf\"))");
+	Handle counter3 = ev1->eval_h("counter");
 	CHKEV(ev1);
 	printf ("counter3 = %lu %p\n", counter3.value(), counter3.operator->());
 
-   TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter3);
-   TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter3->getType());
+	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter3);
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter3->getType());
 
-   TSM_ASSERT("Atoms should be same", counter1 == counter3);
+	TSM_ASSERT("Atoms should be same", counter1 == counter3);
 
-   TruthValuePtr tv3 = counter3->getTruthValue();
+	TruthValuePtr tv3 = counter3->getTruthValue();
 
-   TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv3->getType());
-   TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv3->getCount()));
+	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv3->getType());
+	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv3->getCount()));
 
 	delete ev1;
 	delete ev2;
@@ -290,3 +308,223 @@ void MultiAtomSpace::test_load(void)
 	delete as2;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
+
+// Test the operation of nested atomspaces
+void MultiAtomSpace::test_nest(void)
+{
+	AtomSpace& main = cogserver().getAtomSpace();
+	main.clear();
+	AtomSpace* locas = new AtomSpace(&main);
+	SchemeEval* lev = new SchemeEval(locas);
+
+	// Push some atoms into the main space
+	Handle ha = evaluator->eval_h("(ConceptNode \"aaa\")");
+	Handle hb = evaluator->eval_h("(ConceptNode \"bbb\")");
+
+	evaluator->eval("(define a (ConceptNode \"aaa\"))");
+	evaluator->eval("(define b (ConceptNode \"bbb\"))");
+
+	// Put a link into the local space
+	Handle hl = lev->eval_h("(ListLink a b)");
+
+	// The atomspace sizes should be as expected ...
+	TSM_ASSERT("Expect two atoms in main atomspace", 2 == main.getSize());
+	TSM_ASSERT("Expect two nodes in main atomspace", 2 == main.getNumNodes());
+	TSM_ASSERT("Expect zero links in main atomspace", 0 == main.getNumLinks());
+
+	TSM_ASSERT("Expect one atoms in local atomspace", 1 == locas->getSize());
+	TSM_ASSERT("Expect zero nodes in local atomspace", 0 == locas->getNumNodes());
+	TSM_ASSERT("Expect one link in local atomspace", 1 == locas->getNumLinks());
+
+	// The outgoing set should not be copied, but should be the original.
+	LinkPtr lll(LinkCast(hl));
+	TSM_ASSERT("Expect atom a in position 0", ha == lll->getOutgoingAtom(0));
+	TSM_ASSERT("Expect atom b in position 1", hb == lll->getOutgoingAtom(1));
+
+	delete lev;
+	delete locas;
+
+	// Above deletion should not affect the main atomspace
+	TSM_ASSERT("Still two atoms in main atomspace", 2 == main.getSize());
+	TSM_ASSERT("Still two nodes in main atomspace", 2 == main.getNumNodes());
+	TSM_ASSERT("Still zero links in main atomspace", 0 == main.getNumLinks());
+
+	// The pointer lll should still be alive, even though the atomspace
+	// is gone.
+	TSM_ASSERT("Still atom a in position 0", ha == lll->getOutgoingAtom(0));
+	TSM_ASSERT("Still atom b in position 1", hb == lll->getOutgoingAtom(1));
+}
+
+void MultiAtomSpace::test_nest_scm(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Define an alternate atomspace
+	evaluator->eval("(define nest-as (cog-new-atomspace (cog-atomspace)))");
+	std::string msg = evaluator->eval("nest-as");
+	printf("Nested atomspace is: %s\n", msg.c_str());
+
+	// Define a function that performs a thunk in the nested atomspace.
+	evaluator->eval("(define (nest-env f) "
+   	"(let ((curr-as (cog-set-atomspace! nest-as)) "
+		"      (result (f))) "
+   	"   (cog-set-atomspace! curr-as) result))");
+
+	msg = evaluator->eval("(cog-atomspace)");
+	printf("Primary atomspace is: %s\n", msg.c_str());
+
+	msg = evaluator->eval("(nest-env cog-atomspace)");
+	printf("Check nested atomspace is: %s\n", msg.c_str());
+
+	// Populate atomspace with some misc junk
+	Handle ha = evaluator->eval_h("(ConceptNode \"aaa-stuff\")");
+	CHKERR;
+	Handle hb = evaluator->eval_h("(ConceptNode \"bbb-stuff\")");
+	CHKERR;
+
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != ha);
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != hb);
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, ha->getType());
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, hb->getType());
+
+	// Get these same atoms in the nested space
+	Handle hna = evaluator->eval_h(
+		"(nest-env (lambda () (ConceptNode \"aaa-stuff\")))");
+	CHKERR;
+	Handle hnb = evaluator->eval_h(
+		"(nest-env (lambda () (ConceptNode \"bbb-stuff\")))");
+	CHKERR;
+	TSM_ASSERT_EQUALS("Expect the same atom", ha, hna);
+	TSM_ASSERT_EQUALS("Expect the same atom", hb, hnb);
+
+	// Create a link in the nested atomspace
+	Handle hl = evaluator->eval_h(
+		"(nest-env (lambda () (ListLink "
+		"	(ConceptNode \"aaa-stuff\")"
+		"	(ConceptNode \"bbb-stuff\")"
+		")))");
+	CHKERR;
+
+	// Get these same atoms, again in the nested space
+	Handle hpa = evaluator->eval_h(
+		"(nest-env (lambda () (ConceptNode \"aaa-stuff\")))");
+	CHKERR;
+	Handle hpb = evaluator->eval_h(
+		"(nest-env (lambda () (ConceptNode \"bbb-stuff\")))");
+	CHKERR;
+	TSM_ASSERT_EQUALS("Expect the same atom", ha, hpa);
+	TSM_ASSERT_EQUALS("Expect the same atom", hb, hpb);
+
+	// The Link should NOT be in the primary atomspace.
+	Handle hnol = evaluator->eval_h(
+		"(cog-link 'ListLink "
+		"	(ConceptNode \"aaa-stuff\")"
+		"	(ConceptNode \"bbb-stuff\")"
+		")");
+	CHKERR;
+	TSM_ASSERT_EQUALS("Expect undefined handle", hnol, Handle::UNDEFINED);
+
+	// The Link should be in the nested atomspace.
+	Handle hnestl = evaluator->eval_h(
+		"(nest-env (lambda () "
+		"(cog-link 'ListLink "
+		"	(ConceptNode \"aaa-stuff\")"
+		"	(ConceptNode \"bbb-stuff\")"
+		")))");
+	CHKERR;
+	TSM_ASSERT_EQUALS("Expect list handle", hnestl, hl);
+
+	// The Link should STILL NOT be in the primary atomspace.
+	Handle hsil = evaluator->eval_h(
+		"(cog-link 'ListLink "
+		"	(ConceptNode \"aaa-stuff\")"
+		"	(ConceptNode \"bbb-stuff\")"
+		")");
+	CHKERR;
+	TSM_ASSERT_EQUALS("Expect undefined handle", hsil, Handle::UNDEFINED);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Very similar to above, but the al atomspace is specified explicitly
+// as arg.
+void MultiAtomSpace::test_arg_scm(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Define an alternate atomspace
+	evaluator->eval("(define arg-as (cog-new-atomspace (cog-atomspace)))");
+	std::string msg = evaluator->eval("arg-as");
+	printf("Arg atomspace is: %s\n", msg.c_str());
+
+	// Define a function that performs a thunk in the nested atomspace.
+	evaluator->eval("(define (arg-env f) "
+   	"(let ((curr-as (cog-set-atomspace! arg-as)) "
+		"      (result (f))) "
+   	"   (cog-set-atomspace! curr-as) result))");
+
+	msg = evaluator->eval("(cog-atomspace)");
+	printf("Primary atomspace is: %s\n", msg.c_str());
+
+	msg = evaluator->eval("(arg-env cog-atomspace)");
+	printf("Check arg atomspace is: %s\n", msg.c_str());
+
+	// Populate atomspace with some misc junk
+	Handle ha = evaluator->eval_h("(ConceptNode \"aaa-arg-stuff\")");
+	CHKERR;
+	Handle hb = evaluator->eval_h("(ConceptNode \"bbb-arg-stuff\")");
+	CHKERR;
+
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != ha);
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != hb);
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, ha->getType());
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, hb->getType());
+
+	// Create a link in the arg atomspace
+	Handle hl = evaluator->eval_h(
+		"(ListLink "
+		"	(ConceptNode \"aaa-arg-stuff\")"
+		"	(ConceptNode \"bbb-arg-stuff\")"
+		"	arg-as)");
+	CHKERR;
+
+	// Get these same atoms, again in the nested space
+	Handle hpa = evaluator->eval_h(
+		"(arg-env (lambda () (ConceptNode \"aaa-arg-stuff\")))");
+	CHKERR;
+	Handle hpb = evaluator->eval_h(
+		"(arg-env (lambda () (ConceptNode \"bbb-arg-stuff\")))");
+	CHKERR;
+	TSM_ASSERT_EQUALS("Expect the same atom", ha, hpa);
+	TSM_ASSERT_EQUALS("Expect the same atom", hb, hpb);
+
+	// The Link should NOT be in the primary atomspace.
+	Handle hnol = evaluator->eval_h(
+		"(cog-link 'ListLink "
+		"	(ConceptNode \"aaa-arg-stuff\")"
+		"	(ConceptNode \"bbb-arg-stuff\")"
+		")");
+	CHKERR;
+	TSM_ASSERT_EQUALS("Expect undefined handle", hnol, Handle::UNDEFINED);
+
+	// The Link should be in the nested atomspace.
+	Handle hnestl = evaluator->eval_h(
+		"(cog-link 'ListLink "
+		"	(ConceptNode \"aaa-arg-stuff\")"
+		"	(ConceptNode \"bbb-arg-stuff\")"
+		"	arg-as)");
+	CHKERR;
+	TSM_ASSERT_EQUALS("Expect list handle", hnestl, hl);
+
+	// The Link should STILL NOT be in the primary atomspace.
+	Handle hsil = evaluator->eval_h(
+		"(cog-link 'ListLink "
+		"	(ConceptNode \"aaa-arg-stuff\")"
+		"	(ConceptNode \"bbb-arg-stuff\")"
+		")");
+	CHKERR;
+	TSM_ASSERT_EQUALS("Expect undefined handle", hsil, Handle::UNDEFINED);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+

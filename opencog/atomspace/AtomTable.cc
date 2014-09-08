@@ -50,8 +50,9 @@ using namespace opencog;
 
 std::recursive_mutex AtomTable::_mtx;
 
-AtomTable::AtomTable()
+AtomTable::AtomTable(AtomTable* parent)
 {
+    _environ = parent;
     size = 0;
 
     // Set resolver before doing anything else, such as getting
@@ -119,7 +120,10 @@ AtomTable::AtomTable(const AtomTable& other)
 Handle AtomTable::getHandle(Type t, const std::string& name) const
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    return nodeIndex.getHandle(t, name.c_str());
+    Handle h(nodeIndex.getHandle(t, name.c_str()));
+    if (_environ and Handle::UNDEFINED == h)
+        return _environ->getHandle(t, name);
+    return h;
 }
 
 /// Find an equivalent atom that has exactly the same name and type.
@@ -127,13 +131,19 @@ Handle AtomTable::getHandle(Type t, const std::string& name) const
 /// the table, then return that; else return undefined.
 Handle AtomTable::getHandle(const NodePtr n) const
 {
-    return getHandle(n->getType(), n->getName());
+    Handle h(getHandle(n->getType(), n->getName()));
+    if (_environ and Handle::UNDEFINED == h)
+        _environ->getHandle(n);
+    return h;
 }
 
 Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    return linkIndex.getHandle(t, seq);
+    Handle h(linkIndex.getHandle(t, seq));
+    if (_environ and Handle::UNDEFINED == h)
+        return _environ->getHandle(t, seq);
+    return h;
 }
 
 /// Find an equivalent atom that has exactly the same type and outgoing
@@ -141,7 +151,10 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 /// in the table, then return that; else return undefined.
 Handle AtomTable::getHandle(LinkPtr l) const
 {
-    return getHandle(l->getType(), l->getOutgoingSet());
+    Handle h(getHandle(l->getType(), l->getOutgoingSet()));
+    if (_environ and Handle::UNDEFINED == h)
+        return _environ->getHandle(l);
+    return h;
 }
 
 /// Find an equivalent atom that is exactly the same as the arg. If
@@ -424,21 +437,31 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
     return intersection(sets);
 }
 
+/// Return true if the atom is in this atomtable, or in its
+/// environment.
+bool AtomTable::inEnviron(AtomPtr atom)
+{
+    AtomTable* atab = atom->getAtomTable();
+    AtomTable* env = this;
+    while (env) {
+        if (atab == env) return true;
+        env = env->_environ;
+    }
+    return false;
+}
+
 Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
 {
-    // Sometimes one inserts an atom that was previously deleted.
-    // In this case, the removal flag might still be set. Clear it.
-    atom->unsetRemovalFlag();
-
-    // Is the atom already in the table?
-    if (atom->getAtomTable() != NULL) {
+    // Is the atom already in this table, or one of its environments?
+    if (inEnviron(atom))
         return atom->getHandle();
-    }
 
 #if LATER
     // XXX FIXME -- technically, this throw is correct, except
     // thatSavingLoading gives us atoms with handles preset.
     // So we have to accept that, and hope its correct and consistent.
+    // XXX this can also occur if the atom is in some other atomspace;
+    // so we need to move this check elsewhere.
     if (atom->_uuid != Handle::UNDEFINED.value())
         throw RuntimeException(TRACE_INFO,
           "AtomTable - Attempting to insert atom with handle already set!");
@@ -449,8 +472,14 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     // different threads from trying to add exactly the same atom.
     std::unique_lock<std::recursive_mutex> lck(_mtx);
 
+    // Check again, under the lock this time.
+    if (inEnviron(atom))
+        return atom->getHandle();
+
     // Is the equivalent of this atom already in the table?
-    // If so, then we merge the truth values.
+    // If so, then we merge the truth values.  (Note that this 'existing'
+    // atom might be in another atomspace, or might not be in any
+    // atomspace yet.)
     Handle hexist(getHandle(atom));
     if (hexist) {
         DPRINTF("Merging existing Atom with the Atom being added ...\n");
@@ -459,18 +488,60 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
         return hexist;
     }
 
+    // If this atom is in some other atomspace, then we need to clone
+    // it. We cannot insert it into this atomtable as-is.  (We already
+    // know that its not in this atomsapce, or its environ.)
+    AtomTable* at = atom->getAtomTable();
+    if (at != NULL) {
+        NodePtr nnn(NodeCast(atom));
+        if (nnn) {
+            atom = createNode(*nnn);
+        } else {
+            LinkPtr lll(LinkCast(atom));
+            atom = createLink(*lll);
+
+            // Well, if the link was in some other atomspace, then
+            // the outgoing set will be too. So we recursively clone
+            // that too. Cautionary note: this could result in TV
+            // merging, if equivalent atoms already exist in this
+            // atomspace.  This might catch some users by surprise.
+            // Not sure what to do about that.
+            const HandleSeq ogset(lll->getOutgoingSet());
+            size_t arity = ogset.size();
+            for (size_t i = 0; i < arity; i++) {
+                add(ogset[i]);
+            }
+        }
+    }
+
+    // Sometimes one inserts an atom that was previously deleted.
+    // In this case, the removal flag might still be set. Clear it.
+    atom->unsetRemovalFlag();
+
     // Check for bad outgoing set members; fix them up if needed.
     LinkPtr lll(LinkCast(atom));
     if (lll) {
-        const HandleSeq ogs = lll->getOutgoingSet();
+        const HandleSeq& ogs(lll->getOutgoingSet());
         size_t arity = ogs.size();
+
+        // First, make sure that every member of the outgoing set has
+        // a valid atom pointer. We need this, cause we need to call
+        // methods on those atoms.
+        bool need_copy = false;
         for (size_t i = 0; i < arity; i++) {
             Handle h(ogs[i]);
             // It can happen that the uuid is assigned, but the pointer
             // is NULL. In that case, we should at least know about this
             // uuid.  We explicitly test h._ptr.get() so as not to
-            // accidentally resolve during the test.
-            if (NULL == h._ptr.get() and Handle::UNDEFINED != h) {
+            // accidentally call resolve() during the test.
+            // XXX ??? How? How can this happen ??? Some persistance
+            // scenario ???
+            if (NULL == h._ptr.get()) {
+                if (Handle::UNDEFINED == h) {
+                    throw RuntimeException(TRACE_INFO,
+                               "AtomTable - Attempting to insert link with "
+                               "invalid outgoing members");
+                }
                 auto it = _atom_set.find(h);
                 if (it != _atom_set.end()) {
                     h = *it;
@@ -487,17 +558,36 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                     // atom table adds appropriately for their app.
                     lll->_outgoing[i] = h;
                 } else {
+                    // XXX Perhaps we could find the atom in the
+                    // environment ?? Not sure how we can ever get
+                    // here anyway.
                     throw RuntimeException(TRACE_INFO,
-                        "AtomTable - Atom in outgoing set must have been "
-                        "previously inserted into the atom table!");
+                        "AtomTable - Atom in outgoing set isn't known!");
                 }
             }
-            else if (Handle::UNDEFINED == h) {
-                throw RuntimeException(TRACE_INFO,
-                           "AtomTable - Attempting to insert link with "
-                           "invalid outgoing members");
+
+            // h has to point to an actual atom, else below will crash.
+            // Anyway, the outgoing set must consist entirely of atoms
+            // either in this atomtable, or its environment.
+            if (not inEnviron(h)) need_copy = true;
+        }
+
+        if (need_copy) {
+            atom = createLink(*lll);
+        }
+
+        // llc not lll, in case a copy was made.
+        LinkPtr llc(LinkCast(atom));
+        for (size_t i = 0; i < arity; i++) {
+
+            // Make sure all children are in the atom table.
+            Handle ho(llc->_outgoing[i]);
+            if (not inEnviron(ho)) {
+                llc->_outgoing[i] = add(ho);
             }
-            h->insert_atom(lll);
+
+            // Build the incoming set of outgoing atom h.
+            llc->_outgoing[i]->insert_atom(llc);
         }
     }
 
@@ -601,15 +691,20 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     AtomPtr atom(handle);
     if (!atom || atom->isMarkedForRemoval()) return result;
 
-    // Perhaps the atom is not in the table?
-    if (atom->getAtomTable() == NULL) return result;
+    // Perhaps the atom is not in any table? Or at least, not in this
+    // atom table? Its a user-error if the user is trying to extract
+    // atoms that are not in this atomspace, but we're going to be
+    // silent about this error -- it seems pointess to throw.
+    if (atom->getAtomTable() != this) return result;
 
-    atom->markForRemoval();
     // lock before fetching the incoming set. Since getting the
     // incoming set also grabs a lock, we need this mutex to be
     // recursive. We need to lock here to avoid confusion if multiple
     // threads are trying to delete the same atom.
     std::unique_lock<std::recursive_mutex> lck(_mtx);
+
+    if (atom->isMarkedForRemoval()) return result;
+    atom->markForRemoval();
 
     // If recursive-flag is set, also extract all the links in the atom's
     // incoming set
@@ -617,17 +712,18 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
         // We need to make a copy of the incoming set because the
         // recursive call will trash the incoming set when the atom
         // is removed.
-        HandleSeq is;
-        handle->getIncomingSet(back_inserter(is));
+        IncomingSet is(handle->getIncomingSet());
 
-        HandleSeq::iterator is_it = is.begin();
-        HandleSeq::iterator is_end = is.end();
+        IncomingSet::iterator is_it = is.begin();
+        IncomingSet::iterator is_end = is.end();
         for (; is_it != is_end; ++is_it)
         {
             Handle his(*is_it);
             DPRINTF("[AtomTable::extract] incoming set: %s",
                  (his) ? his->toString().c_str() : "INVALID HANDLE");
 
+            // Note: the below will throw, if the recursion ends
+            // in a child atomspace.  Kind of weird,ugly, but hey...
             if (not his->isMarkedForRemoval()) {
                 DPRINTF("[AtomTable::extract] marked for removal is false");
 
@@ -643,12 +739,25 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // return a non-zero value if the incoming set has weak pointers to
     // deleted atoms. Thus, a second check is made for strong pointers,
     // since getIncomingSet() converts weak to strong.
-    if (0 < handle->getIncomingSetSize() and 0 < handle->getIncomingSet().size())
+    if (0 < handle->getIncomingSetSize())
     {
-        atom->unsetRemovalFlag();
-
-        throw RuntimeException(TRACE_INFO,
-           "Cannot extract an atom with a non-empty incoming set!");
+        IncomingSet iset(handle->getIncomingSet());
+        if (0 < iset.size()) {
+            size_t ilen = iset.size();
+            for (size_t i=0; i<ilen; i++)
+            {
+                // Its OK if the atom being extracted is in a link
+                // that is not currently in any atom space.
+                // XXX this might not be exactly thread-safe, if
+                // other atomspaces are involved...
+                if (iset[i]->getAtomTable() != NULL) {
+                    atom->unsetRemovalFlag();
+                    throw RuntimeException(TRACE_INFO,
+                        "Internal Error: Cannot extract an atom with "
+                        "a non-empty incoming set!");
+                }
+            }
+        }
     }
 
     // Issue the atom removal signal *BEFORE* the atom is actually
