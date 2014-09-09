@@ -710,8 +710,17 @@ feature selection is enabled.
 .TP
 .BI \-\-fs\-algo
 Choose the feature-selection algorithm.  Possible choices are
-\fBinc\fR, \fBsmd\fR and \fBhc\fR.  The default value is \fbinc\fR,
-which is the fastest but least accurate algo.
+\fBsimple\fR, \fBinc\fR, \fBsmd\fR and \fBhc\fR.  The default value is
+\fBsimple\fR, which is the fastest but least accurate algo.
+The \fBsimple\fR algorithm selects those features that maxmize the
+mutual information with the target. The \fBinc\fR is similar, except
+that it attempts to remove redundant features (that is, to remove
+features that have a high mutual information bettween each-ohter).
+The \fBsmd\fR algorithm implements "stochastic maximal dependency",
+which implements another form of maximum mutual information.
+XXX FIXME -- this needs a better description. The \fBhc\fR algorithm
+runs moses hill-climbing to discover those features most likely to
+appear.
 .TP
 .BI \-\-fs\-threshold= num
 Set the minimum threshold for selecting a feature.
@@ -1373,7 +1382,11 @@ remote machines.
 
 .\" ============================================================
 .SH TODO
-Finish documenting these algo flags:  -M
+Finish documenting these algo flags:
+--fs-scorer
+
+
+  -M
 --diversity-pressure
 --diversity-exponent
 --diversity-normalize
