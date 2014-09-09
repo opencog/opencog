@@ -182,7 +182,7 @@ are comma (CSV, or comma-separated values), blanks and tabs
 (whitespace). Columns correspond to features; there is one sample per
 (non-blank) row. Comment characters are hash, bang and semicolon (#!;)
 lines starting with a comment are ignored.
-The \fB\-i\fR flag may be specified multiple times, to indicate multiple
+The \fB\-i\fR option may be specified multiple times, to indicate multiple
 input files. All files must have the same number of columns.
 .TP
 .BI \-L\fR,\ \fB\-\-log\-file\-dep\-opt
@@ -289,11 +289,18 @@ by more than a minimum amount.
 One may specify either the number of features to be selected, or
 one may specify a general "pressure" to automatically modulate the
 number of features found.  That is, one must specify either the
-\fB\-C\fP or the \fB\-T\fP flag, as otherwise, all features will
+\fB\-C\fP or the \fB\-T\fP option, as otherwise, all features will
 be selected.
 
 This algorithm has a runtime approximately equal to the square of the
 number of features selected.
+T}
+
+\fBrandom\fR@T{
+Random selection.
+
+Choose features randomly.  The number of features to choose must be
+indicated with the \fP\-C\fP option.
 T}
 
 \fBhc\fR@T{
