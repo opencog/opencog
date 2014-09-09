@@ -685,14 +685,54 @@ answer.
 
 .PP
 .\" ============================================================
-.SS "Integrated feature selection"
+.SS "Boosted dynamic feature selection"
 Problems with a large number of input features (typically, hundreds
 or more) can lead to excessively long run-times, and overwhelming
-amounts of memory usage.  Such problems can be tackled by limiting
-the number of features used during knob building, resulting in smaller
-demes that can be searched more quickly.  Integrated feature selection
-is enabled with the \fB\-\-enable\-fs=1\fR option.  The number of
-features to use during knob bilding is specified using the
+amounts of memory usage.  Such problems can be tamed in two different
+ways: by static feature pre-selection (i.e. by giving \fBmoses\fR
+fewer features to work with) or by reducing the number of features
+considered during the knob-building stage.
+
+Recall that, as \fBmoses\fR runs, it iterates over two loops: an outer
+loop where an exemplar is selected and decorated with knobs, and an 
+inner loop, where the knobs are 'turned', searching for the best
+knob-settings.  Each knob corresponds to one feature added to a
+particular location in the exemplar tree.  A single, given feature
+will then be used to build a number of different knobs, each in
+a different place in the tree.  As trees get larger, there are more
+places in each tree that can be decorated with knobs; thus, the 
+number of knobs, and the search space, increases over time.
+If there are \fBM\fR places in the tree that can be decorated,
+and there are \fBN\fR features, then \fBM*N\fR knobs will be created.
+The search space is exponential in the number of knobs; so, e.g. for
+boolean problems, three knob settings are explored: present, absent
+and negated, leading to a search space of \fB3^(M*N)\fR.  Worse,
+the resulting large trees also take longer to simplify and evaluate.
+Clearly, limiting the number of knobs created can be a good strategy.
+
+This can be done with dynamic, boosted feature selection.  When enabled,
+a feature-selection step is performed, to find those features that are
+most likely to improve on the examplar.  These are the features that
+will be strongly (anti-)correlated with incorrect answers from the
+currently-selected exemplar.  By using only these features during
+knob building, the total number of knobs can be sharply decreased.
+The resulting size ofthe decorated tree is smaller, and the total
+search space is much smaller.
+
+Dynamic, boosted feature selection differs from static feature
+pre-selection in many important ways.  In dynamic selection, the total
+number of features available to moses is not reduced: just because
+a feature was not used in a given round of knob-decoration does not
+mean that it won't be used next time.  Dynamic feature selection also
+resembles boosting, in that it focuses on fixing the wrong answers
+of the current exemplar.  By contrast, static pre-selection permanently
+discards features, making them unavailable to moses; it is also unable
+to predict which features are the most likely to be useful during
+iteration.
+
+Boosted, dynamic, feature selection is enabled with the
+\fB\-\-enable\-fs=1\fR option.  The number
+of features to use during knob building is specified using the
 \fB\-\-fs\-target\-size\fR option.  A number of additional flags
 control the behaviour of the feature selection algorithm; these are
 best left alone; the defaults should be adequate for almost all
@@ -710,17 +750,34 @@ feature selection is enabled.
 .TP
 .BI \-\-fs\-algo
 Choose the feature-selection algorithm.  Possible choices are
-\fBsimple\fR, \fBinc\fR, \fBsmd\fR and \fBhc\fR.  The default value is
-\fBsimple\fR, which is the fastest but least accurate algo.
-The \fBsimple\fR algorithm selects those features that maxmize the
-mutual information with the target. The \fBinc\fR is similar, except
-that it attempts to remove redundant features (that is, to remove
-features that have a high mutual information bettween each-ohter).
-The \fBsmd\fR algorithm implements "stochastic maximal dependency",
-which implements another form of maximum mutual information.
-XXX FIXME -- this needs a better description. The \fBhc\fR algorithm
-runs moses hill-climbing to discover those features most likely to
-appear.
+\fBsimple\fR, \fBinc\fR, \fBsmd\fR, \fBhc\fR and \fBrandom\fR. 
+The default value is \fBsimple\fR, which is the fastest and 
+best algo.
+The \fBsimple\fR algorithm computes the pair-wise mutual information
+(MI) between the target and each feature, and then selects the list 
+of \fInum\fR features with the highest MI.  It is strongly recommended
+that this algo be used.
+The \fBsmd\fR algorithm implements "stochastic mutual dependency",
+by computing the MI between a candidate featureset and the target.
+Starting with an initially empty featureset, features are randomly
+added one-by-one, with the MI then computed.  Only the featureset
+with the highest MI is kept; the process is then repeated until the
+featureset has the desired number of features in it, or the MI has
+stopped increasing.  Note that the \fBsmd\fR algorithm effectively
+prevents redundant features from being added to the featureset.
+Note that \fBsmd\fR runs orders of magnitude more slowly than
+\fBsimple\fR, and probably does not provide better results.
+The \fBinc\fR is similar to the \fBsmd\fR algo, except that it adds
+many features, all at once, to the featureset, and then attempts to
+find the redundant features in the featureset, removing those. This
+is iteratively repeated until the desired number of features is
+obtained.  Note that \fBinc\fR runs orders of magnitude more slowly
+than \fBsimple\fR, and probably does not provide better results.
+The \fBhc\fR algorithm runs moses hill-climbing to discover those
+features most likely to appear.
+The \fBrandom\fR algorithm selects features randomly.  It is useful
+only for limiting the numberof knobs created, but not otherwise
+slantnig the choice of features.
 .TP
 .BI \-\-fs\-threshold= num
 Set the minimum threshold for selecting a feature.
