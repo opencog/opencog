@@ -76,14 +76,19 @@ private:
 
 /**
  * Returns a set S of features following the algo:
+ * 1) Compute the pair-wise mutual information between the target and 
+ *    each feature in the input set.
+ * 2) If return the highest num_desired of these.  If use_exp_distrib
+ *    is true, then a random exponential distribution is used to pick
+ *    the highest of these; otherwise only the very best as choosen.
+ *    The exponential distrib is nice, as it rounds down the sharp
+ *    cornder that the sharp cutoff otherise imposes.
+ *
+ * Clearly, this is a very simple, very fast algrotihm.
  *
  * @param features       The initial set of features to be selected from
  * @param scorer         The function to score a set of features.
  * @param threshold      The threshold to select a set of feature
- * @param red_threshold  If >0 it modulates the intensity of the
- *                       threshold of redundant_features(), precisely
- *                       red_threshold * threshold
- *                       Otherwise redundant features are ignored.
  *
  * @return               The set of selected features
  */
@@ -92,8 +97,7 @@ FeatureSet simple_selection(const FeatureSet& features,
                             const Scorer& scorer,
                             size_t num_desired,
                             bool use_exp_distrib,
-                            double threshold,
-                            double red_threshold = 0)
+                            double threshold)
 {
     typedef std::pair<double, FeatureSet> ScoredFeatureSet;
     // std::greater<>: First, sort by score, then sort by lexicographic order.
@@ -150,9 +154,6 @@ FeatureSet simple_selection(const FeatureSet& features,
             if (num_desired <= 0) break;
         }
     }
-
-    // TODO: if there is a non-negative red_threshold, then remove any
-    // pair-wise redundant features. 
 
     return final;
 }
