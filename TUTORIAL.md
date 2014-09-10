@@ -62,6 +62,7 @@ https://github.com/opencog/opencog/blob/master/opencog/python/graph_description/
 * Paste the output into its interface, and render the graph
 * Observe the hypergraph that is produced, which represents the current atomspace you are working with
 * Note particularly how Scheme files are loaded in this Python example
+* From your command line, run *sudo apt-get install graphviz*
 * Run the following script and observe the PNG graphics file that is produced by it: https://github.com/opencog/opencog/blob/master/opencog/python/graph_description/example-visualization.py
 
 ###### Pattern matching
