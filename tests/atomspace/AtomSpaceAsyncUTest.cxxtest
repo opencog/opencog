@@ -1,11 +1,10 @@
 /*
  * tests/atomspace/AtomSpaceAsyncUTest.cxxtest
  *
- * Copyright (C) 2010 OpenCog Foundation
- * Copyright (C) 2013 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
- * Written by Joel Pitt <joel@opencog.org>
+ * Written by Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -57,10 +56,12 @@ private:
     std::atomic_size_t __testAFSignalsCounter;
     std::atomic_size_t __totalAdded;
     std::atomic_size_t __totalChanged;
+    std::atomic_size_t __totalPurged;
     RandGen *rng;
 
     int n_threads;
     int num_atoms;
+    bool spinwait;
 
     void setSTI(Handle h, AttentionValue::sti_t stiValue) const
     {
@@ -302,13 +303,13 @@ public:
 
     void countAtomAdded(Handle h)
     {
-        //logger().debug("atomAdded1: %s", h->toString().c_str());
+        //logger().debug("atomAdded: %s", h->toString().c_str());
         __totalAdded += 1;
     }
 
     void countAtomChanged(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
     {
-        // logger().debug("atomMerged1: %s", h->toString().c_str());
+        // logger().debug("atomMerged: %s", h->toString().c_str());
         __totalChanged +=1;
     }
 
@@ -506,7 +507,7 @@ public:
 
     // =================================================================
 
-    // similar to threadedLinkAdd, but add whole evaluation link
+    // Similar to threadedLinkAdd, but add whole evaluation link
     void threadedEvalAdd(int thread_id, int N)
     {
         static int bogus = 0;
@@ -551,4 +552,59 @@ public:
         // num_atoms nodes, and num_atoms links.
         TS_ASSERT_EQUALS(size, 3*num_atoms + 1);
     }
+
+    // =================================================================
+
+    void threadedEvalRemove(int thread_id, HandleSeq& seq)
+    {
+        while (spinwait) std::this_thread::yield();
+
+        size_t nc = seq.size();
+        for (size_t i=0; i<nc; i++) {
+            size_t j = (i+111*thread_id) % nc;
+            atomSpace->purgeAtom(seq[j]);
+        }
+    }
+
+    void countAtomPurged(AtomPtr a)
+    {
+        //logger().debug("atomPurged: %s", h->toString().c_str());
+        __totalPurged += 1;
+        std::this_thread::yield();
+    }
+
+    void testEvalRemove()
+    {
+        // First, seetup the contents, and get all the concept nodes
+        testEvalAdd();
+        HandleSeq hs;
+        atomSpace->getHandlesByType(back_inserter(hs), CONCEPT_NODE);
+
+        std::cout << "Num concept nodes:" << hs.size() << std::endl;
+        TS_ASSERT_EQUALS(hs.size(), num_atoms);
+
+        __totalPurged = 0;
+
+        boost::signals2::connection del =
+            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomPurged, this, _1));
+
+        spinwait = true;
+        std::vector<std::thread> thread_pool;
+        for (int i=0; i < n_threads; i++) {
+            thread_pool.push_back(
+                std::thread(&AtomSpaceAsyncUTest::threadedEvalRemove, this, i, hs));
+        }
+        spinwait = false;
+        for (std::thread& t : thread_pool) t.join();
+
+        // Only the predicate node should be leeft after the above.
+        size_t size = atomSpace->getSize();
+
+        std::cout << "Total atoms removed:" << __totalPurged << std::endl;
+        TS_ASSERT_EQUALS((int) __totalPurged, 3*num_atoms);
+
+        std::cout << "Final size:" << size << std::endl;
+        TS_ASSERT_EQUALS(size, 1);
+    }
+
 };
