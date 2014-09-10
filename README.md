@@ -10,7 +10,8 @@ alone and in combination.
 
 The main project site is at http://opencog.org
 
-Please see doc/ for platform and OS specific READMEs.
+An interactive tutorial for getting started is available at:
+https://github.com/opencog/opencog/blob/master/TUTORIAL.md
 
 Prerequisites
 -------------

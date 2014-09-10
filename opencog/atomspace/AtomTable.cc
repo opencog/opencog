@@ -751,6 +751,19 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
                 // XXX this might not be exactly thread-safe, if
                 // other atomspaces are involved...
                 if (iset[i]->getAtomTable() != NULL) {
+                    Logger::Level lev = logger().getBackTraceLevel();
+                    logger().setBackTraceLevel(Logger::ERROR);
+                    logger().warn() << "Non-empty incoming set of size "
+                                    << ilen << " First trouble at " << i;
+                    logger().warn() << "This atomtable=" << ((void*) this)
+                                    << "non-null atomtale=" << ((void*) iset[i]->getAtomTable());
+                    logger().warn() << "This atom: " << handle;
+                    for (size_t j=0; j<ilen; j++) {
+                        logger().warn() << "Atom j=" << j << " " << iset[j];
+                        logger().warn() << "Marked: " << iset[j]->isMarkedForRemoval()
+                                        << " Table: " << ((void*) iset[j]->getAtomTable());
+                    }
+                    logger().setBackTraceLevel(lev);
                     atom->unsetRemovalFlag();
                     throw RuntimeException(TRACE_INFO,
                         "Internal Error: Cannot extract an atom with "

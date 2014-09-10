@@ -55,34 +55,37 @@ feature_selector::feature_selector(const combo::Table& table,
                                    const feature_selector_parameters& festor_params)
     : params(festor_params), _ctable(table.compressed()) {}
 
+// Do some sanity checking and mangling on the parameters.
 void feature_selector::preprocess_params(const combo::combo_tree& xmplr)
 {
-    // Note that this is gonna overwrite some parameters. It is OK
-    // because feature_selector being copied before being called by
+    // Note that this is going to overwrite some parameters. This is OK
+    // because this struct is being copied before being called by
     // deme_expander::create_deme
 
-    // get the set of features of the exemplar
+    // Get the set of features of the exemplar.
     auto xmplr_features = get_argument_abs_idx_from_zero_set(xmplr);
 
-    // get labels corresponding to all the features
+    // Get labels corresponding to all the features
     const auto& ilabels = _ctable.get_input_labels();
 
-    // names of the exemplar features
+    // Names of the exemplar features
     std::vector<std::string> xmplr_feature_names;
     for (arity_t i : xmplr_features)
         xmplr_feature_names.push_back(ilabels[i]);
 
-    // Use the features of the exemplar as initial feature set to
-    // seed the feature selection algorithm. That way the new
-    // features will be selected to combine well with the
-    // exemplar.
+    // Some of the feature-selection ealgos, such as "inc" and "smd",
+    // wortk with a pool of features at a time.  These work best if
+    // the feature pool is seeded with the features in the exemplar.
+    // That way, any new features selected by these two algos will 
+    // combine well with the exemplar.  This is un-needed/unwanted,
+    // for the "simple" selector.
     if (params.init_xmplr_features) {
         auto& pif = params.fs_params.initial_features;
         pif.insert(pif.end(),
                    xmplr_feature_names.begin(),
                    xmplr_feature_names.end());
-        // we increase the size to output new features (not the
-        // ones already in the exemplar)
+        // We need to increase the size to make room for the new
+        // features (i.e. for those not already in the exemplar)
         params.increase_target_size = true;
     }
 
@@ -96,12 +99,14 @@ void feature_selector::preprocess_params(const combo::combo_tree& xmplr)
         params.fs_params.target_size += xmplr_features.size();
     }
 
-    // Alternatively to params.increase_target_size, one can ignore
-    // the features in the exemplar during feature selection.
+    // Instead of using params.increase_target_size, one can ignore
+    // the features in the exemplar during feature selection. That
+    // way, fs will never pick features in the exemplar.
     params.ignored_features = params.ignore_xmplr_features ?
         xmplr_features : std::set<arity_t>();
 
     // Or one can use the output of the exemplar as an initial feature
+    // Huh ???
     if (params.xmplr_as_feature) {
         params.fs_params.initial_features.push_back(EXEMPLAR_FEATURE_NAME);
         ++params.fs_params.target_size;
@@ -292,20 +297,21 @@ void feature_selector::log_stats_top_feature_sets(const feature_set_pop& top_fs)
 
 void feature_selector::remove_useless_features(feature_set_pop& sf_pop) const
 {
-    // remove last feature if it's the feature exemplar
-    if (params.xmplr_as_feature) {
-        size_t xmplar_f_pos = _ctable.get_arity();
-        for (auto& sf : sf_pop) {
-            auto xmplar_f_it = sf.second.find(xmplar_f_pos);
-            if (xmplar_f_it == sf.second.end()) {
-                logger().debug("The exemplar feature has not been selected, "
-                               "that exemplar must be pretty bad! As a result "
-                               "one more feature is returned by feature selection "
-                               "(as we obviously can't remove the exemplar feature).");
-            } else {
-                sf.second.erase(xmplar_f_it);
-                logger().debug("Remove the exemplar feature");
-            }
+    if (not params.xmplr_as_feature)
+        return;
+
+    // Remove last feature if it's the feature exemplar
+    size_t xmplar_f_pos = _ctable.get_arity();
+    for (auto& sf : sf_pop) {
+        auto xmplar_f_it = sf.second.find(xmplar_f_pos);
+        if (xmplar_f_it == sf.second.end()) {
+            logger().debug("The exemplar feature has not been selected, "
+                           "that exemplar must be pretty bad! As a result "
+                           "one more feature is returned by feature selection "
+                           "(as we obviously can't remove the exemplar feature).");
+        } else {
+            sf.second.erase(xmplar_f_it);
+            logger().debug("Remove the exemplar feature");
         }
     }
 }
@@ -317,7 +323,7 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& xmplr)
     // deme_expander::create_deme
     preprocess_params(xmplr);
 
-    // Build ctable, possibly different than _ctable, used for feature
+    // Build a ctable, possibly different than _ctable, used for feature
     // selection
     CTable fs_ctable = build_fs_ctable(xmplr);
 

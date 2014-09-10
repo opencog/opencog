@@ -125,7 +125,7 @@ public:
     void test_ignore_enforce_feature_selection() {
         // set feature selection parameters
         feature_selection_parameters fsp;
-        fsp.algorithm = opencog::inc;
+        fsp.algorithm = "inc";
         fsp.scorer = mi;
         fsp.input_file = ignore_enforce_target_table_path;
         fsp.force_features_str = {"timestamp"};
@@ -146,7 +146,7 @@ public:
     void test_smd_with_init_feature1() {
         // set feature selection parameters
         feature_selection_parameters fsp;
-        fsp.algorithm = smd;
+        fsp.algorithm = "smd";
         fsp.scorer = mi;
         fsp.input_file = small_table_path;
         fsp.initial_features = {"f1"};
@@ -163,7 +163,7 @@ public:
     void test_smd_with_init_feature2() {
         // set feature selection parameters
         feature_selection_parameters fsp;
-        fsp.algorithm = smd;
+        fsp.algorithm = "smd";
         fsp.scorer = mi;
         fsp.input_file = small_table_path;
         fsp.initial_features = {"f2"};
@@ -181,7 +181,7 @@ public:
     {
         // set feature selection parameters
         feature_selection_parameters fsp;
-        fsp.algorithm = simple;
+        fsp.algorithm = "simple";
         fsp.input_file = sparse_table_path;
         // Ask for 9 because features 10 through 61 have identical scores
         // and will thus show up randomly, and thus this test will fail
@@ -205,7 +205,7 @@ public:
     {
         // set feature selection parameters
         feature_selection_parameters fsp;
-        fsp.algorithm = simple;
+        fsp.algorithm = "simple";
         fsp.input_file = sparse_table_path;
         // Features 10 through 61 have identical scores and will show
         // up randomly, unless we ask for all of them.
@@ -223,6 +223,27 @@ public:
         // run and test feature selection
         test_feature_selection(sparse_table, fsp,
             "change_percent,ADDS,AG,ANALYST,ANGELES,ARMOR,BECAUSE,BEFORE,BETWEEN,CLIENTS,COMPUTER,DIFFERENT,EIGHT,ERN,FEB,FIRM,FIVE,GOV,GOVERNMENT,INCLUDED,INCLUDING,IN_LOCATION,IN_PERSONBYRULE,JOINT,KNOWN,LESS,LOS,MAJOR,MARTIN,MICHAEL,MODEL,MONTHS,NATIONAL,NOV,NUMBER15402473,NUMBER23,NUMBER35,NUMBER4055922,NUMBER654,ORLAND,OUTLAYS,PARAGRAPH,PERCENT,PLANES,PRICE,PROGRAMS,QUARTER,RAY,REPORTERS,SECURITY,SHARES,STARTED,SUCH,SUSANNA,THROUGH,TOGETHER,TOLD,VERY,WAYS,WERE,WHICH,WORTH,swoosh,date");
+    }
+
+    void test_random_selection()
+    {
+        // set feature selection parameters
+        feature_selection_parameters fsp;
+        fsp.algorithm = "random";
+        fsp.input_file = sparse_table_path;
+        // Ask for 20
+        fsp.target_size = 20;
+        fsp.jobs = 1;
+        setting_omp(fsp.jobs);
+
+        // Copy the date field over to the final table.
+        fsp.input_file = sparse_table_path;
+        fsp.force_features_str = {"date", "swoosh"};
+
+        // run and test feature selection
+        // 22 not 20 here, because +2 for the two forced features,
+        // above.
+        test_random_feature_selection(sparse_table, fsp, 22);
     }
 
 private:
@@ -250,16 +271,16 @@ private:
         FeatureScorer fs(ctable);
 
         {
-            set<arity_t> features{1, 2};
-            set<arity_t> redundant = redundant_features(features, fs, 0.2);
+            std::set<arity_t> features{1, 2};
+            std::set<arity_t> redundant = redundant_features(features, fs, 0.2);
             ostreamContainer(cout, redundant) << endl;;
-            TS_ASSERT_EQUALS(redundant, set<arity_t>{1});
+            TS_ASSERT_EQUALS(redundant, std::set<arity_t>{1});
         }
         {
-            set<arity_t> features{0, 1};
-            set<arity_t> redundant = redundant_features(features, fs, 1.1);
+            std::set<arity_t> features{0, 1};
+            std::set<arity_t> redundant = redundant_features(features, fs, 1.1);
             ostreamContainer(cout, redundant) << endl;;
-            TS_ASSERT_EQUALS(redundant, set<arity_t>{1});
+            TS_ASSERT_EQUALS(redundant, std::set<arity_t>{1});
         }
     }
     
@@ -340,6 +361,37 @@ private:
         in >> header;
         std::cout << "header = " << header << std::endl;
         TS_ASSERT_EQUALS(header, expected_selected_features);
+
+        // cleanup the junk.
+        unlink(tempfile);
+    }
+
+    void test_random_feature_selection(const Table& table,
+                                feature_selection_parameters& fsp,
+                                int num_expected)
+    {
+        // create temporary file to put the results
+        char tempfile[] = "/tmp/feature_selectionUTestXXXXXX";
+        int fd = mkstemp(tempfile);
+        OC_ASSERT (fd != -1);
+        fsp.output_file = tempfile;
+
+        // run feature selection (put the result into fsp.output_file)
+        feature_selection(table, fsp);
+
+        // check that the correct number of features was selected
+        ifstream in(fsp.output_file);
+        string header;
+        in >> header;
+        std::cout << "header = " << header << std::endl;
+
+        // count number of commas in the header. Recall the output
+        // will appear in the header, accounting for one extra comma.
+        int nc = 0;
+        for (size_t i=0; i<header.size(); i++) {
+            if (',' == header[i]) nc++;
+        }
+        TS_ASSERT_EQUALS(nc, num_expected);
 
         // cleanup the junk.
         unlink(tempfile);

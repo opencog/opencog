@@ -861,11 +861,12 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "of this.)\n")
 
         ("fs-algo",
-         po::value<string>(&fs_params.algorithm)->default_value(simple),
-         string("Feature selection algorithm. Supported algorithms are:\n")
-         .append(simple).append(" for a simple, fast max-mutual-information algo.\n")
-         .append(inc).append(" for incremental max-relevency, min-redundancy.\n")
-         .append(smd).append(" for stochastic maximal dependency,\n")
+         po::value<string>(&fs_params.algorithm)->default_value("simple"),
+         string("Feature selection algorithm. Supported algorithms are:\n"
+         "  simple, for a fast maximun mutual information algo.\n"
+         "  inc, for incremental max-relevency, min-redundancy.\n"
+         "  smd, for stochastic mutual dependency,\n"
+         "  random, for uniform random dependency,\n")
          .append(moses::hc).append(" for moses-hillclimbing.\n").c_str())
 
         ("fs-scorer",

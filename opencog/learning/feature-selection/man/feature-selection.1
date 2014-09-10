@@ -1,13 +1,13 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
 .\" Man page for feature-selection
 .\"
-.\" Copyright (C) 2012 Linas Vepstas
+.\" Copyright (C) 2012, 2014 Linas Vepstas
 .\"
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH FEATURE-SELECTION 1 "October 9, 2012" "3.2.8" "OpenCog Learning"
+.TH FEATURE-SELECTION 1 "September 9, 2014" "3.2.8" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -126,9 +126,8 @@ It can happen that two (or more) features are strongly correlated with
 each-other, and that only one of these is needed as a predictor. Adding
 any one of these features to the featureset will improve the
 correlation considerably, but adding any of the others will have little
-or no effect.  Such sets of features are called \'redundant\'.  A good
-selection algorithm will select only one of the features of the
-redundant set, omitting the others.
+or no effect.  Such sets of features are called \'redundant\'.  In some
+cases, it can be useful to avoid redundant features.
 
 This program accepts inputs in a fairly generic whitespace or comma
 delimited table format: whitespace may consist of repeated tabs or
@@ -183,7 +182,7 @@ are comma (CSV, or comma-separated values), blanks and tabs
 (whitespace). Columns correspond to features; there is one sample per
 (non-blank) row. Comment characters are hash, bang and semicolon (#!;)
 lines starting with a comment are ignored.
-The \fB\-i\fR flag may be specified multiple times, to indicate multiple
+The \fB\-i\fR option may be specified multiple times, to indicate multiple
 input files. All files must have the same number of columns.
 .TP
 .BI \-L\fR,\ \fB\-\-log\-file\-dep\-opt
@@ -234,8 +233,21 @@ Available algorithms include:
 .TS
 tab (@);
 l lx.
+\fBsimple\fR@T{
+Simple highest mutual information.
+
+This algorithm computes the (simple, 2-point) mutual information (MI)
+between the target variable and each feature, and then returns a list
+of those features with the highest MI.  The number of features that are
+returned must be specified with the \fB\-C\fP option.
+
+The algorithm is 'simple' in that it does not look for any redundancy
+or cross-correlation between the various features.  This makes this
+algorithm very fast.
+T}
+
 \fBsmd\fR@T{
-Stochastic Maximal Dependency.
+Stochastic Mutual Dependency.
 
 This algorithm searches for the featureset with the highest mutual
 information (MI) with regard to the target variable.  It does so by
@@ -277,11 +289,18 @@ by more than a minimum amount.
 One may specify either the number of features to be selected, or
 one may specify a general "pressure" to automatically modulate the
 number of features found.  That is, one must specify either the
-\fB\-C\fP or the \fB\-T\fP flag, as otherwise, all features will
+\fB\-C\fP or the \fB\-T\fP option, as otherwise, all features will
 be selected.
 
 This algorithm has a runtime approximately equal to the square of the
 number of features selected.
+T}
+
+\fBrandom\fR@T{
+Random selection.
+
+Choose features randomly.  The number of features to choose must be
+indicated with the \fP\-C\fP option.
 T}
 
 \fBhc\fR@T{

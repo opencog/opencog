@@ -121,18 +121,14 @@ int main(int argc, char** argv)
         ("version,v", "Display the version number.\n")
 
         (opt_desc_str(algo_opt).c_str(),
-         value<string>(&fs_params.algorithm)->default_value(smd),
+         value<string>(&fs_params.algorithm)->default_value("simple"),
          string("Feature selection algorithm. Supported algorithms are:\n")
-             /*
-              * We're not going to support univariate or sa any time
-              * soon, and maybe never; they're kind-of deprecated in
-              * MOSES, at the moment.
-             .append(un).append(" for univariate,\n")
-             .append(sa).append(" for simulated annealing,\n")
-             */
-             .append(smd).append(" for stochastic maximal dependency,\n")
+             .append("simple for maximum mutual information,\n")
+             .append("smd for stochastic mutual dependency,\n")
+             .append("inc for incremental max-relevancy, min-redundancy.\n")
              .append(moses::hc).append(" for moses-hillclimbing,\n")
-             .append(inc).append(" for incremental max-relevancy, min-redundancy.\n").c_str())
+             .append("random for uniform, random selection.\n")
+             .append("The edefault is \"simple\".\n").c_str())
 
         (opt_desc_str(scorer_opt).c_str(),
          value<string>(&fs_params.scorer)->default_value(mi),
@@ -145,7 +141,8 @@ int main(int argc, char** argv)
         // ======= File I/O opts =========
         (opt_desc_str(input_data_file_opt).c_str(),
          value<string>(&fs_params.input_file),
-         "Input table file in DSV format (seperators are comma, whitespace and tabulation).\n")
+         "Input table file in DSV format (seperators are comma, "
+         "whitespace and tabulation).\n")
 
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&fs_params.target_feature_str),

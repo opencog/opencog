@@ -41,8 +41,8 @@ namespace opencog {
  *  @{
  */
 
-//! choose uniformly randomly an element of the set s
-/// \warning it is assumed that s is non-empty
+//! Choose an element of the set s randomly, with uniform distribution.
+//! \warning it is assumed that s is non-empty
 template<typename T, typename C>
 const T& randset(const std::set<T, C>& s, RandGen& rng = randGen())
 {
@@ -50,8 +50,8 @@ const T& randset(const std::set<T, C>& s, RandGen& rng = randGen())
     return *std::next(s.begin(), rng.randint(s.size()));
 }
 
-//! choose uniformly randomly an element of the set s
-/// and remove it
+//! Choose an element of the set s, with uniform distribution, 
+//! and remove it
 template<typename T>
 T randset_erase(std::set<T>& s, RandGen& rng = randGen())
 {
@@ -62,9 +62,9 @@ T randset_erase(std::set<T>& s, RandGen& rng = randGen())
     return val;
 }
 
-//! return a random number sampled according to a Gaussian
-//! distribution. If the number falls out of the range of T then it is
-//! automatically truncated.
+//! Return a random number sampled according to a Gaussian distribution.
+//! If the number falls out of the range of T then it is automatically
+//! truncated.
 template<typename T>
 T gaussian_rand(T mean, T std_dev, RandGen& rng = randGen())
 {
@@ -84,7 +84,8 @@ T gaussian_rand(T mean, T std_dev, RandGen& rng = randGen())
 
 //! linear biased random bool, b in [0,1] when b tends to 1 the result
 //! tends to be true
-static inline bool biased_randbool(float b, RandGen& rng = randGen()) {
+static inline bool biased_randbool(float b, RandGen& rng = randGen())
+{
     return b > rng.randfloat();
 }
 

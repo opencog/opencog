@@ -51,8 +51,7 @@ feature_set_pop simple_select_feature_sets(const CTable& ctable,
     feature_set fs = simple_selection(all_features, fsc,
                                       fs_params.target_size,
                                       fs_params.exp_distrib,
-                                      fs_params.threshold,
-                                      fs_params.inc_red_intensity);
+                                      fs_params.threshold);
     // XXX: fsc(all_features) is skipped because that algorithm is
     // used in combination with contin MI in
     // feature_selectionUTest.cxxtest and contin MI does not support
