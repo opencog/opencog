@@ -1,4 +1,4 @@
-/** algo/simple.cc ---
+/** algo/random.cc ---
  *
  * Copyright (C) 2011 OpenCog Foundation
  * Copyright (C) 2012 Poulin Holdings LLC
