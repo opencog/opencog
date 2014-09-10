@@ -38,8 +38,9 @@
 #include "feature-selection.h"
 #include "../algo/deme_optimize.h"
 #include "../algo/incremental.h"
-#include "../algo/stochastic_max_dependency.h"
+#include "../algo/random.h"
 #include "../algo/simple.h"
+#include "../algo/stochastic_max_dependency.h"
 
 namespace opencog {
     
@@ -179,6 +180,8 @@ feature_set_pop select_feature_sets(const CTable& ctable,
         return incremental_select_feature_sets(ctable, fs_params);
     } else if (fs_params.algorithm == "smd") {
         return smd_select_feature_sets(ctable, fs_params);
+    } else if (fs_params.algorithm == "random") {
+        return random_select_feature_sets(ctable, fs_params);
     } else if (fs_params.algorithm == "simple") {
         return simple_select_feature_sets(ctable, fs_params);
     } else {
