@@ -526,7 +526,12 @@ public:
 
             Handle hl = atomSpace->addLink(LIST_LINK, ha, hb); 
 
-            Handle hp = atomSpace->addNode(PREDICATE_NODE, "The unique predicate");
+            // The goal here is that each ListLink will have an
+            // incoming set of size n_threads.  This should make a
+            // later recursive remove somewhat contentious...
+            std::ostringstream ossp;
+            ossp << "thread " << thread_id << " predicate node ";
+            Handle hp = atomSpace->addNode(PREDICATE_NODE, ossp.str());
 
             bogus ++;
             bogus %= N;
@@ -547,21 +552,27 @@ public:
         size_t size = atomSpace->getSize();
         std::cout << "Eval atomspace size:" << size << std::endl;
 
-        // We should get only 3*num_atoms+1, because all threads
-        // created duplicates.
-        // num_atoms nodes, and num_atoms links.
-        TS_ASSERT_EQUALS(size, 3*num_atoms + 1);
+        // We should get only n_thread*num_atoms + 2*num_atoms +
+        // n_thread, because all threads created duplicate ListLinks,
+        // duplicate PredicateNodes, but unique EvaluationLinks.
+        TS_ASSERT_EQUALS(size, (n_threads+2)*num_atoms + n_threads);
     }
 
     // =================================================================
 
+    // Removal test. The goal here is to have a fairly high incoming
+    // for some atoms and then have threads compete trying to
+    // recursively erase this same incoming set, and then trip on
+    // one-another.
     void threadedEvalRemove(int thread_id, HandleSeq& seq)
     {
         while (spinwait) std::this_thread::yield();
 
         size_t nc = seq.size();
         for (size_t i=0; i<nc; i++) {
-            size_t j = (i+111*thread_id) % nc;
+            // size_t j = (i+111*thread_id) % nc;
+            size_t j = (i+11*thread_id) % nc;
+            // size_t j = i;
             atomSpace->purgeAtom(seq[j]);
         }
     }
@@ -604,10 +615,10 @@ public:
         size_t size = atomSpace->getSize();
 
         std::cout << "Total atoms removed:" << __totalPurged << std::endl;
-        TS_ASSERT_EQUALS((int) __totalPurged, 3*num_atoms);
+        TS_ASSERT_EQUALS((int) __totalPurged, (n_threads + 2)*num_atoms);
 
         std::cout << "Final size:" << size << std::endl;
-        TS_ASSERT_EQUALS(size, 1);
+        TS_ASSERT_EQUALS(size, n_threads);
     }
 
 };
