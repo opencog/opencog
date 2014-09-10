@@ -43,15 +43,18 @@ struct tournament_selection
     {
         OC_ASSERT(t_size > 0);
     }
-    
+
     unsigned int t_size;
     RandGen& rng;
 
     /**
-     * Selects randomly n_select elements in [from, to( such that each element
-     * is the winner of a random selection of t_size elements in [from, to(
-     * (so there is n_select random selections of t_size element in total)
-     * and append the winners in dst.
+     * Selects randomly n_select elements in [from, to) such that each
+     * element is the winner of a random selection of t_size elements
+     * in [from, to).  That is, a tournament is played n_select times.
+     * The winner of each tournament is the largest element from a set
+     * of t_size randomly choosen elements.
+     *
+     * The winners of each tournament are appended to dst.
      */
     template<typename In, typename Out>
     void operator()(In from, In to, Out dst, unsigned int n_select) const
@@ -59,9 +62,9 @@ struct tournament_selection
         typename std::iterator_traits<In>::difference_type d =
            distance(from, to);
 
-        dorepeat(n_select) {
+        dorepeat (n_select) {
             In res = from + rng.randint(d);
-            dorepeat(t_size - 1) {
+            dorepeat (t_size - 1) {
                 In tmp = from + rng.randint(d);
                 if (*res < *tmp)
                     res = tmp;
@@ -72,13 +75,15 @@ struct tournament_selection
 };
 
 /**
- * Select randomly an iterator in [from, to( according to the
- * probability distribution described by the elements (of type ScoreT)
- * of these iterators (the higher the ScoreT the higher the
- * probability of being selected).
+ * Select an iterator randomly from the interval [from, to), according
+ * to the probability distribution described by the elements (of type
+ * ScoreT) of these iterators.  The higher the ScoreT, the higher the
+ * probability of being selected.
  *
- * To work effectively, the following assumption must hold
- * sum = sum_{x in [from, to(} *x
+ * To work effectively, the following assumption must hold:
+ *    sum = sum_{x in [from, to) } (*x)
+ * where (*x) is the dereferenced iterator.  That is, the sum
+ * should be the sum of all of the iterated elements.
  */
 template<typename It, typename ScoreT>
 It roulette_select(It from, It to, ScoreT sum, RandGen& rng = randGen())
@@ -88,7 +93,7 @@ It roulette_select(It from, It to, ScoreT sum, RandGen& rng = randGen())
         sum -= *from++;
     } while ((sum > 0) && (from != to));
 
-    // Do not use sum >=0 in the above. For integer-avlued arrays,
+    // Do not use sum >=0 in the above. For integer-valued arrays,
     // it can happen that *from are all zero just at the point where
     // sum == 0, which causes the above to increment to the end of
     // the array.

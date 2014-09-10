@@ -36,14 +36,6 @@ namespace opencog {
 
 // using namespace moses;
 
-// Feature selection algorithms
-// XXX do we really need to have these in a header file ?? Can't we hide them?
-static const std::string inc="inc"; // incremental_selection (see
-                                    // algo/incrementalh)
-static const std::string smd="smd"; // stochastic_max_dependency (see
-                                    // algo/stochastic_max_dependency.h)
-static const std::string simple="simple"; // See algo/simple.h
-
 // Feature selection scorers
 static const std::string mi="mi";   // Mutual Information (see feature_scorer.h)
 static const std::string pre="pre"; // Precision (see
@@ -55,7 +47,7 @@ struct feature_selection_parameters
 {
     // avoid utter insanity by providing some reasonable values.
     feature_selection_parameters() :
-        algorithm(simple), scorer(mi),
+        algorithm("simple"), scorer(mi),
         target_size(1), exp_distrib(false), threshold(0.0),
         jobs(1),
         inc_target_size_epsilon(1.0e-10),
