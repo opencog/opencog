@@ -15,7 +15,9 @@ Getting started
 
 ##### Setting up the Python development environment
 * Setup your Python OpenCog environment using http://wiki.opencog.org/w/Python#Setting_up
-* Download the [PyCharm IDE](http://www.jetbrains.com/pycharm/), and after launching it, open the folder containing the OpenCog repository
+* Download the [PyCharm IDE](http://www.jetbrains.com/pycharm/)
+* Open the *~/opencog* folder containing the OpenCog repository
+* Configure the project to recognize the OpenCog libraries, by navigating to *File - Settings - Project Structure*, and then right clicking on both the *opencog/python* and *build/opencog/cython* subfolders and marking them as a *Source Folder*
 
 Automated Program Learning
 ---
