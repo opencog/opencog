@@ -582,9 +582,11 @@ public:
         //logger().debug("atomPurged: %s", h->toString().c_str());
         __totalPurged += 1;
 
-        // A lock is released, to call this, and then re-acquired.
-        // Perhaps a yield can help scramble things up a bit.
-        std::this_thread::yield();
+        // A lock is released, to call this signal handler, and is 
+        // then re-acquired. Perhaps a yield can help scramble things
+        // up a bit. So try to stall.
+        for (int i=0; i<3*n_threads; i++)
+            std::this_thread::yield();
     }
 
     void testEvalRemove()
