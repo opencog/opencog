@@ -57,6 +57,7 @@ private:
     std::atomic_size_t __totalAdded;
     std::atomic_size_t __totalChanged;
     std::atomic_size_t __totalPurged;
+    std::atomic_size_t __altTotalPurged;
     RandGen *rng;
 
     int n_threads;
@@ -613,14 +614,98 @@ public:
         spinwait = false;
         for (std::thread& t : thread_pool) t.join();
 
-        // Only the predicate node should be leeft after the above.
-        size_t size = atomSpace->getSize();
-
         std::cout << "Total atoms removed:" << __totalPurged << std::endl;
         TS_ASSERT_EQUALS((int) __totalPurged, (n_threads + 2)*num_atoms);
+
+        // Only the predicate node should be left after the above.
+        size_t size = atomSpace->getSize();
 
         std::cout << "Final size:" << size << std::endl;
         TS_ASSERT_EQUALS(size, n_threads);
     }
 
+    // =================================================================
+
+    // Recursive remove is already tested above; this one is another
+    // variation.
+    void threadedRecursiveRemove(int thread_id, int N)
+    {
+        while (spinwait) std::this_thread::yield();
+
+        for (int i = 0; i < N; i++) {
+            std::ostringstream oss;
+            oss << "thread " << thread_id << " concept node " << i;
+            //std::cout << "removing " << oss.str() << std::endl;
+            HandleSeq hs;
+            atomSpace->getHandlesByName(back_inserter(hs), oss.str(), CONCEPT_NODE);
+            TS_ASSERT_EQUALS(hs.size(), 1); 
+            if (hs.size() != 0) {
+                //std::cout << " handle " << hs[0] << std::endl;
+                atomSpace->purgeAtom(hs[0]);
+            }
+        }
+    }
+
+    void simpleCountPurged(AtomPtr a)
+    {
+        //logger().debug("atomPurged: %s", h->toString().c_str());
+        __altTotalPurged += 1;
+    }
+
+    void testRecursiveRemove()
+    {
+        // First add stuff.
+        for (int i = 0; i < num_atoms; i++) {
+
+            HandleSeq hs;
+            for (int j=0; j < n_threads; j++) {
+
+                std::ostringstream oss;
+                oss << "thread " << j << " concept node " << i;
+                Handle ha = atomSpace->addNode(CONCEPT_NODE, oss.str());
+                hs.push_back(ha);
+            }
+
+            // The goal here is that there will be lots of threads
+            // trying to erase the links below.
+#define NEST 16
+            for (int k=0; k<NEST; k++) {
+                Handle hl = atomSpace->addLink(LIST_LINK, hs); 
+                hs.push_back(hl);
+            }
+        }
+
+        // Shoud have lots
+        size_t size = atomSpace->getSize();
+
+        std::cout << "Total created:" << size << std::endl;
+        TS_ASSERT_EQUALS(size, (n_threads+NEST)*num_atoms);
+
+        // Now start removing ... 
+        __totalPurged = 0;
+        __altTotalPurged = 0;
+
+        boost::signals2::connection del =
+            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomPurged, this, _1));
+            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::simpleCountPurged, this, _1));
+
+        spinwait = true;
+        std::vector<std::thread> thread_pool;
+        for (int i=0; i < n_threads; i++) {
+            thread_pool.push_back(
+                std::thread(&AtomSpaceAsyncUTest::threadedRecursiveRemove, this, i, num_atoms));
+        }
+        spinwait = false;
+        for (std::thread& t : thread_pool) t.join();
+
+        std::cout << "Total removed:" << __totalPurged << std::endl;
+        TS_ASSERT_EQUALS((int) __totalPurged, (n_threads + NEST)*num_atoms);
+        TS_ASSERT_EQUALS((int) __altTotalPurged, (n_threads + NEST)*num_atoms);
+
+        // Nothing should be left after the above.
+        size = atomSpace->getSize();
+
+        std::cout << "Final size:" << size << std::endl;
+        TS_ASSERT_EQUALS(size, 0);
+    }
 };
