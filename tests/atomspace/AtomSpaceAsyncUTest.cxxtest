@@ -570,6 +570,9 @@ public:
     {
         //logger().debug("atomPurged: %s", h->toString().c_str());
         __totalPurged += 1;
+
+        // A lock is released, to call this, and then re-acquired.
+        // Perhaps a yield can help scramble things up a bit.
         std::this_thread::yield();
     }
 
