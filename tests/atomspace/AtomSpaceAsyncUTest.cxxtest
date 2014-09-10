@@ -272,7 +272,7 @@ public:
             oss << "thread -1 node " << i;
             //std::cout << "removing " << oss.str() << std::endl;
             HandleSeq hs;
-            atomSpace->getAtomTable().getHandlesByName(back_inserter(hs), oss.str(), NODE);
+            atomSpace->getHandlesByName(back_inserter(hs), oss.str(), NODE);
             TS_ASSERT_EQUALS(hs.size(), 1); 
             if (hs.size() != 0) {
                 //std::cout << " handle " << hs[0] << std::endl;
@@ -342,7 +342,7 @@ public:
             oss << "thread -1 node " << i;
 
             HandleSeq hs;
-            atomSpace->getAtomTable().getHandlesByName(back_inserter(hs), oss.str(), NODE);
+            atomSpace->getHandlesByName(back_inserter(hs), oss.str(), NODE);
             TS_ASSERT_EQUALS(hs.size(), 1); 
             Handle h = hs[0];
 
@@ -406,7 +406,7 @@ public:
             oss << "thread -1 node " << i;
 
             HandleSeq hs;
-            atomSpace->getAtomTable().getHandlesByName(back_inserter(hs), oss.str(), NODE);
+            atomSpace->getHandlesByName(back_inserter(hs), oss.str(), NODE);
             TS_ASSERT_EQUALS(hs.size(), 1); 
             Handle ha = hs[0];
 
@@ -414,7 +414,7 @@ public:
             ossb << "thread -1 node " << (2*i) % N;
 
             HandleSeq hsb;
-            atomSpace->getAtomTable().getHandlesByName(back_inserter(hsb), ossb.str(), NODE);
+            atomSpace->getHandlesByName(back_inserter(hsb), ossb.str(), NODE);
             TS_ASSERT_EQUALS(hsb.size(), 1); 
 
             bogus ++;
@@ -503,4 +503,5 @@ public:
 
         addAFConnection.disconnect();
     }
+
 };
