@@ -748,18 +748,30 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
             {
                 // Its OK if the atom being extracted is in a link
                 // that is not currently in any atom space.
+                // Also, a bit of a race can happen: when the unlock
+                // is done beelow, to send the removed signal, another
+                // thread can sneak in and get to here, because its
+                // deleting a different atom with a shared incoming
+                // and since the incoming set hasn't yet been updated
+                // (that happens after re-acquiring the lock) and so
+                // it will look like the incoming set has not yet been
+                // fully cleared.  Well, it hasn't been, but as long as
+                // we are marked for removal, things should end up OK.
+                //
                 // XXX this might not be exactly thread-safe, if
                 // other atomspaces are involved...
-                if (iset[i]->getAtomTable() != NULL) {
+                if (iset[i]->getAtomTable() != NULL and
+                    (iset[i]->getAtomTable() != this or 
+                     iset[i]->isMarkedForRemoval() != true)) {
                     Logger::Level lev = logger().getBackTraceLevel();
                     logger().setBackTraceLevel(Logger::ERROR);
                     logger().warn() << "Non-empty incoming set of size "
                                     << ilen << " First trouble at " << i;
                     logger().warn() << "This atomtable=" << ((void*) this)
-                                    << "non-null atomtale=" << ((void*) iset[i]->getAtomTable());
-                    logger().warn() << "This atom: " << handle;
+                                    << " non-null atomtale=" << ((void*) iset[i]->getAtomTable());
+                    logger().warn() << "This atom: " << handle->toString();
                     for (size_t j=0; j<ilen; j++) {
-                        logger().warn() << "Atom j=" << j << " " << iset[j];
+                        logger().warn() << "Atom j=" << j << " " << iset[j]->toString();
                         logger().warn() << "Marked: " << iset[j]->isMarkedForRemoval()
                                         << " Table: " << ((void*) iset[j]->getAtomTable());
                     }
