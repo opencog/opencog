@@ -20,13 +20,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_EVAL_CANDIDATE_H
-#define _OPENCOG_EVAL_CANDIDATE_H
+#ifndef _OPENCOG_EVAL_CANDIDATE_LIKELIHOOD_H
+#define _OPENCOG_EVAL_CANDIDATE_LIKELIHOOD_H
 
 namespace opencog { namespace moses {
 
 // structure holding the options
-struct eval_candidate_params
+struct eval_candidate_likelihood_params
 {
     // IO
     std::string input_file;
@@ -35,10 +35,21 @@ struct eval_candidate_params
         target_feature_str;
     // parameters
     std::string problem;
+    double noise;
+    bool normalize;
+    double complexity_amplifier;
+    // prerec parameters
+    double prerec_min_recall;
+    bool prerec_simple_precision;
 };
 
 // problems
-static const std::string f_one="f_one";
+static const std::string it="it"; // regression based on input table
+                                  // maximize accuracy.
+
+static const std::string prerec="prerec"; // regression based on input table,
+                                          // maximize precision, while holding
+                                          // recall const.
 
 } // ~namespace moses
 } // ~namespace opencog

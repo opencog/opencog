@@ -33,8 +33,16 @@ TARGET_LINK_LIBRARIES (eval-candidate
 	${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
 
+ADD_EXECUTABLE (eval-candidate-likelihood eval-candidate-likelihood)
+TARGET_LINK_LIBRARIES (eval-candidate-likelihood
+	moses
+	comboant
+	cogutil
+	${Boost_PROGRAM_OPTIONS_LIBRARY}
+)
+
 # install moses-exec
-INSTALL(TARGETS moses-exec eval-diversity eval-candidate RUNTIME DESTINATION bin)
+INSTALL(TARGETS moses-exec eval-diversity eval-candidate eval-candidate-likelihood RUNTIME DESTINATION bin)
 
 #install header files
 INSTALL(FILES
