@@ -1,9 +1,15 @@
 # Replace all instances of shujingke with your github / docker.io / system username.
 # Replace hk.archive.ubuntu.com with your own country code, e.g. nl.archive.ubuntu.com
+# If you have apparmor, on the host system edit the file 
+# gedit /etc/apparmor.d/docker
+# and add the line
+# ptrace peer=docker-default,
+# before the last closing brace ( } )
 # adduser shujingke
 # cd ~ && git clone http://shujingke@github.com/shujingke/opencog && cd opencog && git pull
 # docker build -t shujingke/opencog-dev-qt .
 # xhost +
+# 
 # docker run --rm -i -v /tmp/.X11-unix/X0:/tmp/.X11-unix/X0 -v /etc/passwd:/etc/passwd -v /etc/shadow:/etc/shadow -v /etc/group:/etc/group -v /etc/group-:/etc/group- -v /home/shujingke:/home/shujingke -e DISPLAY=:0.0 -t shujingke/opencog-dev-qt 
 # remote
 # ssh -L 17001:localhost:17001 -XC hostname 'docker run --rm -i -v /home/shujingke:/home/shujingke -e DISPLAY=$DISPLAY -p 17001:17001 -t shujingke/opencog-dev-qt'
@@ -35,6 +41,10 @@ RUN apt-get -y install vim-gnome
 RUN apt-get -y remove brasero gnome-media
 
 RUN apt-get -y install gtk2-engines-murrine sudo
+
+RUN apt-get -y install lxterminal
+RUN apt-get -y install telnet
+RUN apt-get -y install valgrind
 
 RUN adduser --disabled-password --gecos "Shujing Ke,,," shujingke
 RUN adduser shujingke adm
