@@ -1105,15 +1105,12 @@ void PatternMiner::growPatternsTask()
             break;
         }
 
-        patternForLastGramLock.unlock();
-
-
         HTreeNode* cur_growing_pattern = last_gram_patterns[cur_index];
 
+        patternForLastGramLock.unlock();
 
         if(cur_growing_pattern->count < thresholdFrequency)
             continue;
-
 
         foreach (HandleSeq instance , cur_growing_pattern->instances)
         {
@@ -1857,7 +1854,7 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
 //        THREAD_NUM = 1;
 
     // use all the threads in this machine
-    THREAD_NUM = system_thread_num + system_thread_num/2;
+    THREAD_NUM = system_thread_num * 2;
 
 
 //    // test only one tread for now
@@ -2327,4 +2324,8 @@ bool PatternMiner::containIgnoredContent(Handle link )
 
     return false;
 }
+
+
+
+//----------------------------------Next: Depth-first mining----------------------------------------------------
 
