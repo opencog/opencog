@@ -83,6 +83,9 @@ static void prt_backtrace(std::ostringstream& oss)
 	char **syms = backtrace_symbols(bt_buf, stack_depth);
 #endif
 
+    // Depending on how the dependencies are met, syms could be NULL 
+    if (syms == NULL) return;
+
 	// Start printing at a bit into the stack, so as to avoid recording
 	// the logger functions in the stack trace.
 	oss << "\tStack Trace:\n";
