@@ -1409,7 +1409,7 @@ double PatternMiner::calculateEntropyOfASubConnectedPattern(string& connectedSub
     {
         // it's in the H-Tree, add its entropy
         HTreeNode* subPatternNode = (HTreeNode*)subPatternNodeIter->second;
-        cout << "CalculateEntropy: Found in H-tree! h = log" << subPatternNode->count << " ";
+        // cout << "CalculateEntropy: Found in H-tree! h = log" << subPatternNode->count << " ";
         return log2(subPatternNode->count);
     }
     else
@@ -1423,7 +1423,7 @@ double PatternMiner::calculateEntropyOfASubConnectedPattern(string& connectedSub
 
         // Find All Instances in the original AtomSpace For this Pattern
         findAllInstancesForGivenPattern(newHTreeNode);
-         cout << "CalculateEntropy: Not found in H-tree! call pattern matcher again! h = log" << newHTreeNode->count << " ";
+        // cout << "CalculateEntropy: Not found in H-tree! call pattern matcher again! h = log" << newHTreeNode->count << " ";
 
         return log2(newHTreeNode->count);
 
@@ -1445,13 +1445,13 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
     // First, find all its subpatterns (its parent nodes in the HTree).
     // For the subpatterns those are mising in the HTree, need to call Pattern Matcher to find its frequency again.
 
-    std::cout << "=================Debug: calculateInteractionInformation for pattern: ====================\n";
-    foreach (Handle link, HNode->pattern)
-    {
-        std::cout << atomSpace->atomAsString(link);
-    }
+//    std::cout << "=================Debug: calculateInteractionInformation for pattern: ====================\n";
+//    foreach (Handle link, HNode->pattern)
+//    {
+//        std::cout << atomSpace->atomAsString(link);
+//    }
 
-    std::cout << "II = ";
+//    std::cout << "II = ";
 
     // Start from the last gram:
     int maxgram = HNode->pattern.size();
@@ -1462,13 +1462,13 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
         sign = -1;
 
     double II = sign * log2(HNode->count);
-    std::cout << "H(curpattern) = log" << HNode->count << "="  << II << " sign=" << sign << std::endl;
+//    std::cout << "H(curpattern) = log" << HNode->count << "="  << II << " sign=" << sign << std::endl;
 
 
     for (int gram = maxgram-1; gram > 0; gram --)
     {
          sign *= -1;
-         std::cout << "start subpatterns of gram = " << gram << std::endl;
+//         std::cout << "start subpatterns of gram = " << gram << std::endl;
 
          bool* indexes = new bool[maxgram];
 
@@ -1491,13 +1491,13 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
              HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern);
              string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
-             std::cout<< "Subpattern: " << subPatternKey;
+//             std::cout<< "Subpattern: " << subPatternKey;
 
              // First check if this subpattern is disconnected. If it is disconnected, it won't exist in the H-Tree anyway.
              HandleSeqSeq splittedSubPattern;
              if (splitDisconnectedLinksIntoConnectedGroups(unifiedSubPattern, splittedSubPattern))
              {
-                 std::cout<< " is disconnected! splitted it into connected parts: \n" ;
+//                 std::cout<< " is disconnected! splitted it into connected parts: \n" ;
                  // The splitted parts are disconnected, so they are independent. So the entroy = the sum of each part.
                  // e.g. if ABC is disconneted, and it's splitted into connected subgroups by splitDisconnectedLinksIntoConnectedGroups,
                  // for example: AC, B  then H(ABC) = H(AC) + H(B)
@@ -1506,20 +1506,20 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
                      // Unify it again
                      HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart);
                      string connectedSubPatternKey = unifiedPatternToKeyString(unifiedConnectedSubPattern);
-                     cout << "a splitted part: " << connectedSubPatternKey;
+//                     cout << "a splitted part: " << connectedSubPatternKey;
                      double h = calculateEntropyOfASubConnectedPattern(connectedSubPatternKey, unifiedConnectedSubPattern);
                      II += sign*h;
-                     cout << "sign="<<sign << " h =" << h << std::endl << std::endl;
+//                     cout << "sign="<<sign << " h =" << h << std::endl << std::endl;
 
                  }
 
              }
              else
              {
-                 std::cout<< " is connected! \n" ;
+//                 std::cout<< " is connected! \n" ;
                  double h =calculateEntropyOfASubConnectedPattern(subPatternKey, unifiedSubPattern);
                  II += sign*h;
-                 cout << "sign="<<sign << " h =" << h << std::endl << std::endl;
+//                 cout << "sign="<<sign << " h =" << h << std::endl << std::endl;
              }
 
 
@@ -1534,7 +1534,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
     }
 
     HNode->interactionInformation = II;
-    std::cout<< "\n total II = " << II << "\n" ;
+//    std::cout<< "\n total II = " << II << "\n" ;
 
 }
 
@@ -2326,6 +2326,4 @@ bool PatternMiner::containIgnoredContent(Handle link )
 }
 
 
-
-//----------------------------------Next: Depth-first mining----------------------------------------------------
 
