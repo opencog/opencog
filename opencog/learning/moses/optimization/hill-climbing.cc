@@ -144,16 +144,16 @@ void hill_climbing::operator()(deme_t& deme,
         // whether crossover must be attempted for the current iteration
         bool large_nbh = total_number_of_neighbors >= xover_min_neighbors,
             xover = hc_params.crossover
-            && (iteration > 2)
-            && !already_xover
-            && current_number_of_instances >= xover_min_deme
-            && (large_nbh || last_chance);
+            and (iteration > 2)
+            and !already_xover
+            and current_number_of_instances >= xover_min_deme
+            and (large_nbh || last_chance);
 
         if (xover) {
             // log why crossover is enabled
             std::stringstream why_xover;
             if (large_nbh)
-                why_xover << "too large neighborhood "
+                why_xover << "n'bhood too large for exhaustive srch"
                           << total_number_of_neighbors << ">="
                           << xover_min_neighbors;
             else if (last_chance)
