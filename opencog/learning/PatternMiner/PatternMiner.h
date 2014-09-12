@@ -159,7 +159,7 @@ namespace PatternMining
 
       // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
      void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap, AtomSpace* _fromAtomSpace);
-     void extractAllNodesInLink(Handle link, set<Handle>& allNodes); // just find all the nodes in the original atomspace for this link
+     void extractAllNodesInLink(Handle link, set<Handle>& allNodes, AtomSpace *_fromAtomSpace = originalAtomSpace); // just find all the nodes in the original atomspace for this link
      void extractAllVariableNodesInLink(Handle link, set<Handle>& allNodes, AtomSpace* _atomSpace);
 
      // if a link contains only variableNodes , no const nodes
@@ -175,7 +175,7 @@ namespace PatternMining
 
      void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, set<Handle>& allVarNodes);
 
-     void extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
+     void extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, AtomSpace *_fromAtomSpace, unsigned int gram);
 
      void findAllInstancesForGivenPattern(HTreeNode* HNode);
 

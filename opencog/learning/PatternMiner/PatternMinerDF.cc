@@ -98,6 +98,11 @@ void PatternMiner::growPatternsDepthFirstTask()
         set<Handle> sharedNodes;
         extractAllPossiblePatternsFromInputLinks(observedLinks, 0, sharedNodes, observingAtomSpace,1);
 
+        for ( cur_gram = 2; cur_gram <= MAX_GRAM; ++ cur_gram)
+        {
+            // find all the cur_gram distance neighbour links of newLink
+
+        }
 
     }
 }

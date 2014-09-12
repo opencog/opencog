@@ -419,13 +419,13 @@ void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink,
 
 }
 
-void PatternMiner::extractAllNodesInLink(Handle link, set<Handle>& allNodes)
+void PatternMiner::extractAllNodesInLink(Handle link, set<Handle>& allNodes, AtomSpace* _fromAtomSpace)
 {
-    HandleSeq outgoingLinks = originalAtomSpace->getOutgoing(link);
+    HandleSeq outgoingLinks = _fromAtomSpace->getOutgoing(link);
 
     foreach (Handle h, outgoingLinks)
     {
-        if (originalAtomSpace->isNode(h))
+        if (_fromAtomSpace->isNode(h))
         {
             if (allNodes.find(h) == allNodes.end())
             {
@@ -514,7 +514,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
 //    cout << "Extract patterns from these links: \n";
 //    foreach (Handle ih, inputLinks)
 //    {
-//        cout << originalAtomSpace->atomAsString(ih) << std::endl;
+//        cout << _fromAtomSpace->atomAsString(ih) << std::endl;
 //    }
 
     // First, extract all the nodes in the input links
@@ -1031,25 +1031,33 @@ Handle PatternMiner::getFirstNonIgnoredIncomingLink(AtomSpace *atomspace, Handle
 }
 
 
-void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram)
+void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, AtomSpace* _fromAtomSpace, unsigned int gram)
 {
-    // debug:
-    string instanceInst = unifiedPatternToKeyString(instance, originalAtomSpace);
-    if (instanceInst.find("$var") != std::string::npos)
-    {
-        cout << "Debug: error! The instance contines variables!" << instanceInst <<  "Skip it!" << std::endl;
-        return;
-    }
+//    // debug:
+//    string instanceInst = unifiedPatternToKeyString(instance, originalAtomSpace);
+//    if (instanceInst.find("$var") != std::string::npos)
+//    {
+//        cout << "Debug: error! The instance contines variables!" << instanceInst <<  "Skip it!" << std::endl;
+//        return;
+//    }
 
     // First, extract all the variable nodes in the instance links
     // we only extend one more link on the nodes that are considered as varaibles for this pattern
     set<Handle> allVarNodes;
 
-    HandleSeq::iterator patternLinkIt = curHTreeNode->pattern.begin();
-    foreach (Handle link, instance)
+    if (Pattern_mining_mode == "Breadth_First")
     {
-        extractAllVariableNodesInAnInstanceLink(link, *(patternLinkIt), allVarNodes);
-        patternLinkIt ++;
+        HandleSeq::iterator patternLinkIt = curHTreeNode->pattern.begin();
+        foreach (Handle link, _fromAtomSpace)
+        {
+            extractAllVariableNodesInAnInstanceLink(link, *(patternLinkIt), allVarNodes);
+            patternLinkIt ++;
+        }
+    }
+    else  // for Depth first
+    {
+        foreach (Handle link, _fromAtomSpace)
+            extractAllNodesInLink(link, allVarNodes, _fromAtomSpace);
     }
 
     set<Handle>::iterator varIt;
@@ -1057,17 +1065,17 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
     for(varIt = allVarNodes.begin(); varIt != allVarNodes.end(); ++ varIt)
     {
         // find what are the other links in the original Atomspace contain this variable
-        HandleSeq incomings = originalAtomSpace->getIncoming( ((Handle)(*varIt)));
+        HandleSeq incomings = _fromAtomSpace->getIncoming( ((Handle)(*varIt)));
         // debug
-        string curvarstr = originalAtomSpace->atomAsString((Handle)(*varIt));
+        // string curvarstr = _fromAtomSpace->atomAsString((Handle)(*varIt));
 
         foreach(Handle incomingHandle, incomings)
         {
             Handle extendedHandle;
             // if this atom is a igonred type, get its first parent that is not in the igonred types
-            if (isIgnoredType (originalAtomSpace->getType(incomingHandle)) )
+            if (isIgnoredType (_fromAtomSpace->getType(incomingHandle)) )
             {
-                extendedHandle = getFirstNonIgnoredIncomingLink(originalAtomSpace, incomingHandle);
+                extendedHandle = getFirstNonIgnoredIncomingLink(_fromAtomSpace, incomingHandle);
                 if (extendedHandle == Handle::UNDEFINED)
                     continue;
             }
@@ -1075,7 +1083,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
                 extendedHandle = incomingHandle;
 
             // debug
-            string extendedHandleStr = originalAtomSpace->atomAsString(extendedHandle);
+            string extendedHandleStr = _fromAtomSpace->atomAsString(extendedHandle);
 
             if (isInHandleSeq(extendedHandle, instance))
                 continue;
@@ -1091,7 +1099,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
             originalLinks.push_back(extendedHandle);
 
             // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
-            extractAllPossiblePatternsFromInputLinks(originalLinks, curHTreeNode, allVarNodes,originalAtomSpace , gram);
+            extractAllPossiblePatternsFromInputLinks(originalLinks, curHTreeNode, allVarNodes, _fromAtomSpace , gram);
 
         }
     }
