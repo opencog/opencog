@@ -102,14 +102,16 @@ void PatternMiner::growPatternsDepthFirstTask()
         HandleSeqSeq allLastGramConnectedLinks; // for this cur_link
         allLastGramConnectedLinks.push_back(observedLinks);
 
-        for ( cur_gram = 2; cur_gram <= MAX_GRAM; ++ cur_gram)
+        unsigned int gram;
+
+        for ( gram = 2; gram <= MAX_GRAM; ++ gram)
         {
             vector<set<Handle>> newConnectedLinksFoundThisGram;
 
             foreach(HandleSeq linksToExtend, allLastGramConnectedLinks)
             {
                 // find all the cur_gram distance neighbour links of newLink
-                extendAllPossiblePatternsForOneMoreGram(linksToExtend,0,observingAtomSpace,cur_gram,newConnectedLinksFoundThisGram);
+                extendAllPossiblePatternsForOneMoreGram(linksToExtend,0,observingAtomSpace,gram,newConnectedLinksFoundThisGram);
             }
 
             allLastGramConnectedLinks.clear();
@@ -146,4 +148,7 @@ void PatternMiner::runPatternMinerDepthFirst()
     // release allLinks
     allLinks.clear();
     (vector<Handle>()).swap(allLinks);
+
+    cout << "\nFinished mining 1~" << MAX_GRAM << " gram patterns.\n";
+
 }
