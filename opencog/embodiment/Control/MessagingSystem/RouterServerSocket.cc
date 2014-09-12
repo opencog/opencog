@@ -373,7 +373,7 @@ void RouterServerSocket::OnLine(const std::string& line)
 {
 
     logger().debug("RouterServerSocket[%p] - Received line <%s>",
-                 this, line.c_str());
+                   this, line.c_str());
     logger().debug("RouterServerSocket - State = %d", currentState);
 
     switch (currentState) {
