@@ -67,7 +67,6 @@
 #include "PAI.h"
 #include "PAIUtils.h"
 #include "PVPXmlConstants.h"
-#include "EmbodimentDOMParser.h"
 #include "EmbodimentErrorHandler.h"
 #include "EventResponder.h"
 #include <opencog/embodiment/Control/OperationalAvatarController/EventDetectionAgent.h>
@@ -105,7 +104,7 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
     blockNum = 0;
 
     // Set up the xml parser
-    parser = new EmbodimentDOMParser();
+    parser = new XERCES_CPP_NAMESPACE::XercesDOMParser();
     parser->setErrorHandler(&errorHandler);
 
     // The following lines enable validation
@@ -281,12 +280,9 @@ void PAI::sendEmotionalFeelings(const std::string& petId, const std::map<std::st
     }
 
     XMLCh tmpStr[PAIUtils::MAX_TAG_LENGTH+1];
-    // Set encoding
-    XMLString::transcode("UTF-8", tmpStr, PAIUtils::MAX_TAG_LENGTH);
-    doc->setEncoding(tmpStr);
     // Set version
     XMLString::transcode("1.0", tmpStr, PAIUtils::MAX_TAG_LENGTH);
-    doc->setVersion(tmpStr);
+    doc->setXmlVersion(tmpStr);
 
     // filling emotional feeling element with pet id
     DOMElement *emotionalFeeling = doc->getDocumentElement();
@@ -345,12 +341,9 @@ void PAI::sendDemandSatisfactions(const std::string& petId, const std::map<std::
     }
 
     XMLCh tmpStr[PAIUtils::MAX_TAG_LENGTH+1];
-    // set encoding
-    XMLString::transcode("UTF-8", tmpStr, PAIUtils::MAX_TAG_LENGTH);
-    doc->setEncoding(tmpStr);
     // set version
     XMLString::transcode("1.0", tmpStr, PAIUtils::MAX_TAG_LENGTH);
-    doc->setVersion(tmpStr);
+    doc->setXmlVersion(tmpStr);
 
     // filling emotional feeling element with pet id
     DOMElement * demandSatisfaction = doc->getDocumentElement();
@@ -408,12 +401,9 @@ void PAI::sendSingleActionCommand(std::string& actionName, std::vector<ActionPar
     }
 
     XMLCh tmpStr[PAIUtils::MAX_TAG_LENGTH+1];
-    // Set encoding
-    XMLString::transcode("UTF-8", tmpStr, PAIUtils::MAX_TAG_LENGTH);
-    doc->setEncoding(tmpStr);
     // Set version
     XMLString::transcode("1.0", tmpStr, PAIUtils::MAX_TAG_LENGTH);
-    doc->setVersion(tmpStr);
+    doc->setXmlVersion(tmpStr);
 
     // filling single action command element with pet id
     DOMElement *singleActionElement = doc->getDocumentElement();
@@ -2650,7 +2640,7 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
         std::string msg(XMLString::transcode(dataElement->getTextContent()));
 
         // Decode the base64 string into binary
-        unsigned int length = (unsigned int)msg.size();
+        unsigned long length = (unsigned long)msg.size();
         XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(), &length);
 
         MapInfoSeq mapinfoSeq;
@@ -2678,7 +2668,7 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
 
         }
         
-        XMLString::release(&binary);
+        delete(binary);
     }
 /*
     bool keepPreviousMap = avatarInterface.isExemplarInProgress();
@@ -3514,7 +3504,7 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
         std::string msg(XMLString::transcode(dataElement->getTextContent()));
 
         // Decode the base64 string into binary
-        unsigned int length = (unsigned int)msg.size();
+        unsigned long length = (unsigned long)msg.size();
         XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(), &length);
 
         Chunk chunk;
@@ -3546,7 +3536,7 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
                 blockNum ++;
         }
         
-        XMLString::release(&binary);
+        delete(binary);
     }
 
     if (isFirstPerceptTerrian)

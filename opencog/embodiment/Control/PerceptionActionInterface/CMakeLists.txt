@@ -24,7 +24,6 @@ ADD_LIBRARY (PAI SHARED
 	ActionPlan
 	PAI
 	ActionPlanDispatcher
-	EmbodimentDOMParser
 	EmbodimentErrorHandler
 	EventResponder
 	${PROTO_SRCS}

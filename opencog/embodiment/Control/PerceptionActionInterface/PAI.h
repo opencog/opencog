@@ -34,6 +34,7 @@
 
 #include <xercesc/dom/DOMElement.hpp>
 #include <xercesc/dom/DOMDocument.hpp>
+#include <xercesc/parsers/XercesDOMParser.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -44,7 +45,6 @@
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <opencog/embodiment/Control/Language/LanguageComprehension.h>
 
-#include "EmbodimentDOMParser.h"
 #include "EmbodimentErrorHandler.h"
 
 #ifdef HAVE_LIBPTHREAD
@@ -163,7 +163,7 @@ private:
      **/
     unsigned long latestSimWorldTimestamp;
 
-    EmbodimentDOMParser * parser;
+    XERCES_CPP_NAMESPACE::XercesDOMParser *parser;
     EmbodimentErrorHandler errorHandler;
     string schemaLocation;
 
