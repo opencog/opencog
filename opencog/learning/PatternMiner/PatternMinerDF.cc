@@ -98,9 +98,26 @@ void PatternMiner::growPatternsDepthFirstTask()
         set<Handle> sharedNodes;
         extractAllPossiblePatternsFromInputLinks(observedLinks, 0, sharedNodes, observingAtomSpace,1);
 
+
+        HandleSeqSeq allLastGramConnectedLinks; // for this cur_link
+        allLastGramConnectedLinks.push_back(observedLinks);
+
         for ( cur_gram = 2; cur_gram <= MAX_GRAM; ++ cur_gram)
         {
-            // find all the cur_gram distance neighbour links of newLink
+            vector<set<Handle>> newConnectedLinksFoundThisGram;
+
+            foreach(HandleSeq linksToExtend, allLastGramConnectedLinks)
+            {
+                // find all the cur_gram distance neighbour links of newLink
+                extendAllPossiblePatternsForOneMoreGram(linksToExtend,0,observingAtomSpace,cur_gram,newConnectedLinksFoundThisGram);
+            }
+
+            allLastGramConnectedLinks.clear();
+            foreach(set<Handle>& newFoundLinksGroup, newConnectedLinksFoundThisGram)
+            {
+                HandleSeq newFoundLinks(newFoundLinksGroup.begin(), newFoundLinksGroup.end());
+                allLastGramConnectedLinks.push_back(newFoundLinks);
+            }
 
         }
 

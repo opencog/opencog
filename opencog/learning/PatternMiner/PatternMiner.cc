@@ -434,7 +434,7 @@ void PatternMiner::extractAllNodesInLink(Handle link, set<Handle>& allNodes, Ato
         }
         else
         {
-            extractAllNodesInLink(h,allNodes);
+            extractAllNodesInLink(h,allNodes,_fromAtomSpace);
         }
     }
 }
@@ -505,6 +505,7 @@ bool PatternMiner::onlyContainVariableNodes(Handle link, AtomSpace* _atomSpace)
 //       )
 //    )
 // note: sharedNodes = parentInstance's sharedNodes + current shared node
+// if sharedNodes is empty, then will not check if the node connected to an extended link is in it or not , all the nodes in inputLinks can be considered as varaible or const.
 void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks,  HTreeNode* parentNode,
                                                                           set<Handle>& sharedNodes, AtomSpace* _fromAtomSpace, unsigned int gram)
 {
@@ -618,7 +619,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
                 foreach (Handle link, inputLinks)
                 {
                     HandleSeq outgoingLinks;
-                    generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, originalAtomSpace);
+                    generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
                     Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),outgoingLinks,TruthValue::TRUE_TV());
                     if (onlyContainVariableNodes(rebindedLink, atomSpace))
                     {
@@ -656,7 +657,15 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
                     }
                     else
                     {
-                        if (Pattern_mining_mode == "Breadth_First")
+    //                    // debug
+    //                    cout << "Unique Key already exists: \n" << keyString << "Skip this pattern!\n\n";
+
+                        if (Pattern_mining_mode == "Depth_First")
+                        {
+                            ((HTreeNode*)(htreeNodeIter->second))->count ++;
+                            cout << "Unique Key already exists. count ++ !\n\n";
+                        }
+                        else
                         {
                             // which means the parent node is also a parent node of the found HTreeNode
                             if (parentNode)
@@ -668,14 +677,8 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
                                     parentNode->childLinks.insert(((HTreeNode*)(htreeNodeIter->second)));
                                 }
                             }
-        //                    // debug
-        //                    cout << "Unique Key already exists: \n" << keyString << "Skip this pattern!\n\n";
                         }
-                        else // Depth_First
-                        {
-                            ((HTreeNode*)(htreeNodeIter->second))->count ++;
-                            cout << "Unique Key already exists. count ++ !\n\n";
-                        }
+
                     }
 
                     uniqueKeyLock.unlock();
@@ -695,6 +698,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
 
                             findAllInstancesForGivenPattern(newHTreeNode);
 
+
                             if (parentNode)
                             {
                                 newHTreeNode->parentLinks.insert(parentNode);
@@ -708,6 +712,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
 
                         }
                     }
+
                 }
             }
 
@@ -1031,7 +1036,7 @@ Handle PatternMiner::getFirstNonIgnoredIncomingLink(AtomSpace *atomspace, Handle
 }
 
 
-void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, AtomSpace* _fromAtomSpace, unsigned int gram)
+void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, AtomSpace* _fromAtomSpace, unsigned int gram, vector<set<Handle>>& newExtendedLinks)
 {
 //    // debug:
 //    string instanceInst = unifiedPatternToKeyString(instance, originalAtomSpace);
@@ -1048,7 +1053,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
     if (Pattern_mining_mode == "Breadth_First")
     {
         HandleSeq::iterator patternLinkIt = curHTreeNode->pattern.begin();
-        foreach (Handle link, _fromAtomSpace)
+        foreach (Handle link, instance)
         {
             extractAllVariableNodesInAnInstanceLink(link, *(patternLinkIt), allVarNodes);
             patternLinkIt ++;
@@ -1056,7 +1061,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
     }
     else  // for Depth first
     {
-        foreach (Handle link, _fromAtomSpace)
+        foreach (Handle link, instance)
             extractAllNodesInLink(link, allVarNodes, _fromAtomSpace);
     }
 
@@ -1088,6 +1093,8 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
             if (isInHandleSeq(extendedHandle, instance))
                 continue;
 
+            cout << "Debug: Extended link :" << extendedHandleStr << std::endl;
+
             if (extendedHandleStr.find("$var") != std::string::npos)
             {
                // cout << "Debug: error! The extended link contines variables!" << extendedHandleStr << std::endl;
@@ -1098,8 +1105,38 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
             HandleSeq originalLinks = instance;
             originalLinks.push_back(extendedHandle);
 
+
             // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
-            extractAllPossiblePatternsFromInputLinks(originalLinks, curHTreeNode, allVarNodes, _fromAtomSpace , gram);
+            if (Pattern_mining_mode == "Breadth_First")
+            {
+                extractAllPossiblePatternsFromInputLinks(originalLinks, curHTreeNode, allVarNodes, _fromAtomSpace , gram);
+            }
+            else // for Depth first
+            {
+                vector<set<Handle> >::iterator newExtendIt;
+                set<Handle> originalLinksToSet(originalLinks.begin(),originalLinks.end());
+                bool alreadyExtracted = false;
+
+                // check if these links have been extracted
+                for(newExtendIt = newExtendedLinks.begin(); newExtendIt != newExtendedLinks.end(); newExtendIt++)
+                {
+                    set<Handle>& exitstingLinks = (set<Handle>&)(*newExtendIt);
+                    if (exitstingLinks == originalLinksToSet)
+                    {
+                        alreadyExtracted = true;
+                        cout<< "Debug: these links have already been extracted! Skip them!"<<std::endl;
+                        break;
+                    }
+
+                }
+
+                if (! alreadyExtracted)
+                {
+                    newExtendedLinks.push_back(originalLinksToSet);
+                    set<Handle> sharedNodes; // use empty sharedNodes for Depth first
+                    extractAllPossiblePatternsFromInputLinks(originalLinks, 0, sharedNodes, _fromAtomSpace , gram);
+                }
+            }
 
         }
     }
@@ -1136,12 +1173,12 @@ void PatternMiner::growPatternsTask()
 
         foreach (HandleSeq instance , cur_growing_pattern->instances)
         {
-            extendAllPossiblePatternsForOneMoreGram(instance, cur_growing_pattern, cur_gram);
+            vector<set<Handle>> newExtendedLinks;
+            extendAllPossiblePatternsForOneMoreGram(instance, cur_growing_pattern, originalAtomSpace,cur_gram, newExtendedLinks);
         }
 
         cur_growing_pattern->instances.clear();
         (vector<HandleSeq>()).swap(cur_growing_pattern->instances);
-
 
 
     }
@@ -2267,7 +2304,7 @@ set<Handle> PatternMiner::_extendOneLinkForSubsetCorpus(set<Handle>& allNewLinks
     {
         // find all nodes in this link
         set<Handle> allNodes;
-        extractAllNodesInLink(link, allNodes);
+        extractAllNodesInLink(link, allNodes, originalAtomSpace);
 
         foreach (Handle neighborNode, allNodes)
         {
