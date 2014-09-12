@@ -186,8 +186,6 @@ int main(int argc, char** argv)
     vector<string> all_combo_tree_str = get_all_combo_tree_str(ecp);
 
     // read data ITable
-    OC_ASSERT(!ecp.target_feature_str.empty(),
-              "target_feature_str must be non empty (not implemented otherwise)");
     Table table = loadTable(ecp.input_file, ecp.target_feature_str);
     ITable& it = table.itable;
 
