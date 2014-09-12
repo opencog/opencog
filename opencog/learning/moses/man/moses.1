@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "September 6, 2014" "3.6.10" "OpenCog Learning"
+.TH MOSES 1 "September 12, 2014" "3.6.10" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -670,6 +670,21 @@ problem types, especially those with large neighborhoods (i.e. those with
 high program complexity), this can lead to an order-of-magnitude
 speedup, or more.  For other problem types, especially those with
 deceptive scoring functions, this can hurt performance.
+
+.TP
+.BI \-\-hc\-crossover\-min\-neighbors= num
+If crossover is enabled, and an instance is smaller than this size,
+then an exhaustive search of the neighborhood will be performed.
+Otherwise, the search will be limited to a cross-over of the highest
+scoring instances.  Exhaustive searches are more accurate, but can
+take much longer, when instances are large.  Recommended values for
+this option are 100 to 500. Default is 400.
+
+.TP
+.BI \-\-hc\-crossover\-pop\-size= num
+If crossover is enabled, this controls the number of cross-ever
+instances that are created.  A few hundred is normally sufficient
+to locate contain the actual maximum. Default value is 120.
 
 .TP
 .BI \-\-boost=1
