@@ -408,13 +408,22 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "the given number (and at least 2 iterations has passed) then "
          "crossover kicks in.\n")
 
+        ("hc-resize-to-fit-ram",
+         po::value<bool>(&hc_resize_to_fit_ram)->default_value(false),
+         str(format("Hillclimbing parameter (%s). If true, then the deme "
+                    "is resized to fit in available memory. Note that "
+                    "since it depends on the size of the installed RAM, "
+                    "it will possibly introduce indeterminism between "
+                    "runs on machines with different amounts of RAM.\n") % hc).c_str())
+
+        // Same as above, old, deprecated name.
         ("hc-allow-resize-deme",
-         po::value<bool>(&hc_allow_resize_deme)->default_value(true),
-         str(format("Hillclimbing parameter (%s). If true then the deme "
-                    "is allowed to resized to fit in memory. Not that as it "
-                    "uses the RAM of the machine therefore it possibly introduces "
-                    "an indeterminism between instances run on machines with "
-                    "different RAM.\n") % hc).c_str())
+         po::value<bool>(&hc_resize_to_fit_ram)->default_value(false),
+         str(format("Hillclimbing parameter (%s). If true, then the deme "
+                    "is resized to fit in available memory. Note that "
+                    "since it depends on the size of the installed RAM, "
+                    "it will possibly introduce indeterminism between "
+                    "runs on machines with different amounts of RAM.\n") % hc).c_str())
 
         // Algorithm tuning options
         ("boost",
@@ -1403,7 +1412,7 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
     hc_params.crossover_min_neighbors = hc_crossover_min_neighbors;
     hc_params.max_nn_evals = hc_max_nn;
     hc_params.fraction_of_nn = hc_frac_of_nn;
-    hc_params.allow_resize_deme = hc_allow_resize_deme;
+    hc_params.resize_to_fit_ram = hc_resize_to_fit_ram;
     hc_params.prefix_stat_deme = "Demes";
 
     // Set moses_parameters.

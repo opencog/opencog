@@ -304,7 +304,7 @@ void hill_climbing::operator()(deme_t& deme,
         current_number_of_evals += number_of_new_instances;
         current_number_of_instances += number_of_new_instances;
 
-        if (hc_params.allow_resize_deme) {
+        if (hc_params.resize_to_fit_ram) {
             // Keep the size of the deme at a managable level.
             // Large populations can easily blow out the RAM on a machine,
             // so we want to keep it at some reasonably trim level.
@@ -540,7 +540,7 @@ size_t hill_climbing::n_new_instances(size_t distance, unsigned max_evals,
     if (nleft < number_of_new_instances)
         number_of_new_instances = nleft;
     
-    if (hc_params.allow_resize_deme) {
+    if (hc_params.resize_to_fit_ram) {
         // To avoid being OOM-killed, set ACCEPTABLE_RAM_FRACTION to
         // half of installed RAM on the machine. This should work in a
         // more or less scalable fashion on all machines, and still
