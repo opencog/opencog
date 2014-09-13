@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "September 12, 2014" "3.6.10" "OpenCog Learning"
+.TH MOSES 1 "September 13, 2014" "3.6.10" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -276,7 +276,7 @@ Print program version, and exit.
 .PP
 .\" ============================================================
 .SS "Problem-type options"
-MOSES is able to handle a variety of different 'problem types',
+\fBmoses\fR is able to handle a variety of different 'problem types',
 such as regression, categorization and clustering, as well as a number
 of demo problems, such as parity and factorization.  The \fB\-H\fR
 option is used to specify the problem type; the demo problem types are
@@ -587,15 +587,6 @@ linear regression is recommended.
 .TP
 .BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
 Use \fIseed\fR as the seed value for the pseudo-random number generator.
-.TP
-.BI \-s\ num \fR,\ \fB\-\-cache\-size= num
-Enable memoization of candidate scores.  This allows the number of scoring
-function evaluations to be reduced, by maintaining a cache of recently
-scored candidates. If a new candidate is found in the cache, that score
-is used, instead of a scoring function evaluation.  The effectiveness of
-memoization is greatly increased by also using the \fB\-d1\fR flag.
-The maximum number of cached scores is set at \fBnum\fR, which defaults
-to 3000. Careful: scores can be quite large, and use a lot of memory.
 .TP
 .BI \-v\  temperature \fR,\ \fB\-\-complexity\-temperature= temperature
 Set the "temperature" of the Boltzmann-like distribution used to
@@ -981,7 +972,9 @@ Controls hill-climbing algorithm behavior.  If false (the default),
 then deme search terminates when a local hilltop is found. If true,
 then the search radius is progressively widened, until another
 termination condition is met.  Consider using the \fB\-D\fR flag to
-set the maximum search radius.
+set the maximum search radius.  Note that the size of the search
+space increases exponentially with the search radius, so this kind
+of search becomes very rapidly intractible.
 
 .TP
 .BI \-\-well\-enough=1
@@ -997,6 +990,64 @@ can be found, then it can be left alone ('leave well-enough alone'),
 thus simplifying the remainder of the search problem.  Performing this
 evaluation is costly, and may lead to a slow-down, without improving
 overall accuracy.
+
+.\" ============================================================
+.SS "Controlling RAM usage"
+Deploying \fBmoses\fR on large problems can cause all available RAM on a
+given machine to be used up.  Actual RAM usage depends strongly on
+the dataset, and on various tuning paramters. Typical tasks require
+systems with dozens or hundreds of gigabytes of RAM.
+
+There are three primary consumers of RAM within \fBmoses\fR: the
+metapopulation (the set of combo trees being evolved), the deme
+(the set of instances describing the knob setttings, when a single
+combo tree is being explored), and the score casche.  The following
+options can be used to limit the size of each of these to a more
+managable size.
+
+.TP
+.BI \-s\ num \fR,\ \fB\-\-cache\-size= num
+Enable memoization of candidate scores.  This allows the number of scoring
+function evaluations to be reduced, by maintaining a cache of recently
+scored candidates. If a new candidate is found in the cache, that score
+is used, instead of a scoring function evaluation.  The effectiveness of
+memoization is greatly increased by also using the \fB\-d1\fR flag.
+The maximum number of cached scores is set at \fBnum\fR, which defaults
+to 3000. Careful: scores can be quite large, and use a lot of memory.
+.TP
+.BI \-\-cap\-coef= num
+A coefficient used to control the size of the metapopulation. The 
+metapopulation is trimmed, by removing a random subset of the lowest
+scorers, so that the maximum size is given by the formula
+
+    pop-size = cap_coef * (N + 250) * (1 + 2 * exp(-N/500))
+
+where \fBN\fR is the number of metapop iterations (tree expansions)
+so far.  The default value for this option is 50.
+
+Note that the prefered way of keeping the metapopulation small is to
+set a low temperature (the \fB\-\-complexity\-temperature\fR option).
+For a given temperature, trees which have such a poor score that they
+have a probability of less than one in a billion of being selected are
+automatically discarded from the metapopulation.  In most cases, this
+is enough to keep the metapopulation under control. However, if there
+are a vast number of trees with almost exactly the same score, the 
+temperature alone will not be enough to control the metapopulation
+size.
+
+If the metapopulation is growing out of control, then do verify that
+the temerpature is set to an appropriatte value, before making use of
+this flag.
+.TP
+.BI \-\-hc\-resize\-to\-fit\-ram=1
+If set to true, this will cause \fBmoses\fR to try to limit memory
+usage so that it will fit in available RAM (and thus avoid an OOM kill).
+The RAM usage is controlled by automatically resizing the deme during
+the hillclimbing search. (The deme contains instances of knob settings
+that were explored).  Note that the use of this option may introduce
+indeterminacy, when comparing runs from different machines, having
+different amounts of installed RAM.
+
 
 .\" ============================================================
 .SS "Output control options"
@@ -1388,7 +1439,7 @@ feature that must be fit.
 .\" ============================================================
 .SH Distributed processing
 .PP
-MOSES provides two different styles of distributed processing for
+\fBmoses\fR provides two different styles of distributed processing for
 cluster computing systems.  One style is to use MPI (as implemented in
 the OpenMPI/MPICH2 systems), the second is to use SSH. The first style
 is best suited for local area networks (LANs) and compute clusters. The
@@ -1408,7 +1459,7 @@ and the root node will report the merged, best results.
 .PP
 .SS "MPI"
 Using MPI requires a \fBmoses\fR binary with MPI support compiled in, with
-either the OpenMPI or the MPICH2 implementations.  MPI support in MOSES
+either the OpenMPI or the MPICH2 implementations.  MPI support in \fBmoses\fR
 is enabled with the \fB\-\-mpi=1\fR command-line flag.  When this flag
 is specified, \fBmoses\fR may be run as usual in an MPI environment.
 Details will vary from one system configuration to another, but a
