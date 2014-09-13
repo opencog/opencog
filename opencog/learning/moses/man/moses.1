@@ -99,7 +99,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .RB [ \-R
 .IR threshold ]
 .RB [ \-S0 ]
-.RB [ \-s1 ]
+.RB [ \-s ]
+.IR cache_size ]
 .RB [ \-\-score\-weight
 .IR column ]
 .RB [ \-T1 ]
@@ -587,12 +588,14 @@ linear regression is recommended.
 .BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
 Use \fIseed\fR as the seed value for the pseudo-random number generator.
 .TP
-.BI \-s1\fR,\ \fB\-\-enable\-cache=1
+.BI \-s\ num \fR,\ \fB\-\-cache\-size= num
 Enable memoization of candidate scores.  This allows the number of scoring
 function evaluations to be reduced, by maintaining a cache of recently
 scored candidates. If a new candidate is found in the cache, that score
 is used, instead of a scoring function evaluation.  The effectiveness of
 memoization is greatly increased by also using the \fB\-d1\fR flag.
+The maximum number of cached scores is set at \fBnum\fR, which defaults
+to 3000. Careful: scores can be quite large, and use a lot of memory.
 .TP
 .BI \-v\  temperature \fR,\ \fB\-\-complexity\-temperature= temperature
 Set the "temperature" of the Boltzmann-like distribution used to

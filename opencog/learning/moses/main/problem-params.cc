@@ -266,7 +266,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "Longest allowed runtime, in seconds.\n")
 
         (opt_desc_str(cache_size_opt).c_str(),
-         po::value<unsigned>(&cache_size)->default_value(100000),
+         po::value<unsigned>(&cache_size)->default_value(3000),
          "Cache size. Memoize, that is, cache evaluation results, "
          "so that identical candidates are not re-evaluated.\n")
          // adaptive_cache has been temporarly disabled because it is
