@@ -829,12 +829,27 @@ TODO write description
 .SS "Large problem parameters"
 Problems with a large number of features (100 and above) often
 evolve exemplars with a complexity of 100 or more, which in turn
-may have instances with hundreds of thousands of nearest neighbors.
+may have instances with hundreds of thousands of knobs, and thus,
+hundreds of thouands of nearest neighbors.
 Exploring one nearest neighbor requires one evaluation of the
 scoring function, and so an exhaustive search can be prohibitive.
 A partial search can often work quite well, especially when
 cross-over is enabled.  The following flags control such partial
 searches.
+
+Note, however, that usually one can obtain better results by
+using dynamic feature selection, instead of using the options
+below to limit the search.  The reason for this is that the
+options below cause the search to be limited in a random
+fashion: the knobs to turn are selected randomly, with a 
+uniform distribution, without any guidance as to whether they
+might mae a difference.  By contrast, dynamic feature selection
+also limits the search space, by creating knobs only for
+those features most likely to make a difference.  Unless the
+scoring function is particularly decietful, limiting the
+search to the likely directions should perform better than
+limiting it to a random subset.
+
 .TP
 .BI \-\-hc\-max\-nn\-evals= num
 Controls hill-climbing algorithm behavior.  When exploring the
