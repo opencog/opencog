@@ -712,13 +712,13 @@ fewer features to work with) or by reducing the number of features
 considered during the knob-building stage.
 
 Recall that, as \fBmoses\fR runs, it iterates over two loops: an outer
-loop where an exemplar is selected and decorated with knobs, and an 
+loop where an exemplar is selected and decorated with knobs, and an
 inner loop, where the knobs are 'turned', searching for the best
 knob-settings.  Each knob corresponds to one feature added to a
 particular location in the exemplar tree.  A single, given feature
 will then be used to build a number of different knobs, each in
 a different place in the tree.  As trees get larger, there are more
-places in each tree that can be decorated with knobs; thus, the 
+places in each tree that can be decorated with knobs; thus, the
 number of knobs, and the search space, increases over time.
 If there are \fBM\fR places in the tree that can be decorated,
 and there are \fBN\fR features, then \fBM*N\fR knobs will be created.
@@ -768,11 +768,11 @@ feature selection is enabled.
 .TP
 .BI \-\-fs\-algo
 Choose the feature-selection algorithm.  Possible choices are
-\fBsimple\fR, \fBinc\fR, \fBsmd\fR, \fBhc\fR and \fBrandom\fR. 
-The default value is \fBsimple\fR, which is the fastest and 
+\fBsimple\fR, \fBinc\fR, \fBsmd\fR, \fBhc\fR and \fBrandom\fR.
+The default value is \fBsimple\fR, which is the fastest and
 best algo.
 The \fBsimple\fR algorithm computes the pair-wise mutual information
-(MI) between the target and each feature, and then selects the list 
+(MI) between the target and each feature, and then selects the list
 of \fInum\fR features with the highest MI.  It is strongly recommended
 that this algo be used.
 The \fBsmd\fR algorithm implements "stochastic mutual dependency",
@@ -841,7 +841,7 @@ Note, however, that usually one can obtain better results by
 using dynamic feature selection, instead of using the options
 below to limit the search.  The reason for this is that the
 options below cause the search to be limited in a random
-fashion: the knobs to turn are selected randomly, with a 
+fashion: the knobs to turn are selected randomly, with a
 uniform distribution, without any guidance as to whether they
 might mae a difference.  By contrast, dynamic feature selection
 also limits the search space, by creating knobs only for
