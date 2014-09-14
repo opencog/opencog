@@ -199,7 +199,7 @@ void bscore_ctable_base::ignore_cols(const std::set<arity_t>& idxs) const
 
     if (logger().isFineEnabled()) {
         std::stringstream ss;
-        ss << "_wrk_ctable =" << std::endl;
+        ss << "Contents of _wrk_ctable =" << std::endl;
         ostreamCTable(ss, _wrk_ctable);
         logger().fine(ss.str());
         // for debugging, keep that around till we fix best_possible_bscore

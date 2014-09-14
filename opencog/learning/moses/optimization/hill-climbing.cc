@@ -198,10 +198,10 @@ void hill_climbing::operator()(deme_t& deme,
         prev_size = number_of_new_instances;
         prev_center = center_inst;
 
-        auto deme_from = next(deme.begin(), current_number_of_instances);
-        auto deme_inst_from = next(deme.begin_instances(),
+        auto deme_from = std::next(deme.begin(), current_number_of_instances);
+        auto deme_inst_from = std::next(deme.begin_instances(),
                                    current_number_of_instances);
-        auto deme_score_from = next(deme.begin_scores(),
+        auto deme_score_from = std::next(deme.begin_scores(),
                                     current_number_of_instances);
 
         // log neighborhood distance
@@ -240,7 +240,8 @@ void hill_climbing::operator()(deme_t& deme,
 
         unsigned ibest = current_number_of_instances;
         for (unsigned i = current_number_of_instances;
-             deme.begin() + i != deme.end(); ++i) {
+             std::next(deme.begin(), i) != deme.end(); ++i)
+        {
             const composite_score &inst_cscore = deme[i].second;
             score_t iscore = inst_cscore.get_penalized_score();
             if (iscore >  best_score) {
