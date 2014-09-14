@@ -89,7 +89,7 @@ bscore_base::worst_possible_bscore() const
 /**
  * Compute the average (weighted) complexity of all the trees in the
  * ensemble.  XXX this is probably wrong, we should probably do something
- * like add the logarithm of the number of trees to the complexity, or 
+ * like add the logarithm of the number of trees to the complexity, or
  * I dunno .. something.  Unclear how the theory should even work for this
  * case.
  */
