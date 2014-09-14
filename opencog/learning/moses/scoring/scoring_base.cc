@@ -177,6 +177,11 @@ void bscore_ctable_base::recompute_weight() const
 
 void bscore_ctable_base::ignore_cols(const std::set<arity_t>& idxs) const
 {
+    // Must not compress if boosting: the booster keeps track of a
+    // weight for each row, and so altering the number of rows will
+    // just confuse the mechanisn.
+    if (_return_weighted_score) return;
+
     if (logger().isDebugEnabled())
     {
         std::stringstream ss;
@@ -219,6 +224,11 @@ void bscore_ctable_base::ignore_cols(const std::set<arity_t>& idxs) const
 
 void bscore_ctable_base::ignore_rows(const std::set<unsigned>& idxs) const
 {
+    // Must not compress if boosting: the booster keeps track of a
+    // weight for each row, and so altering the number of rows will
+    // just confuse the mechanisn.
+    if (_return_weighted_score) return;
+
     _wrk_ctable = _all_rows_wrk_ctable; // to include all rows in _wrk_ctable
 
     // if (logger().isFineEnabled())
@@ -237,6 +247,11 @@ void bscore_ctable_base::ignore_rows(const std::set<unsigned>& idxs) const
 
 void bscore_ctable_base::ignore_rows_at_times(const std::set<TTable::value_type>& timestamps) const
 {
+    // Must not compress if boosting: the booster keeps track of a
+    // weight for each row, and so altering the number of rows will
+    // just confuse the mechanisn.
+    if (_return_weighted_score) return;
+
     // logger().fine() << "bscore_ctable_base::ignore_rows_at_times";
     // ostreamContainer(logger().fine() << "timestamps = ", timestamps);
 
