@@ -116,8 +116,9 @@ void write_results(const Table& selected_table,
                    const feature_selection_parameters& fs_params)
 {
     Table table_wff = selected_table;
-    table_wff.add_features_from_file(fs_params.input_file,
-                                     fs_params.force_features_str);
+    if (!fs_params.force_features_str.empty())
+        table_wff.add_features_from_file(fs_params.input_file,
+                                         fs_params.force_features_str);
     if (fs_params.output_file.empty())
         ostreamTable(cout, table_wff);
     else
