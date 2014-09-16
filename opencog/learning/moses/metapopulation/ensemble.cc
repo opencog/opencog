@@ -45,7 +45,7 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	if (_params.experts)
 		_effective_length = 1.0;
 	else
-		_effective_length = cs.best_possible_score - cs.worst_possible_score();
+		_effective_length = cs.best_possible_score() - cs.worst_possible_score();
 
 	// The current normalization is to have all row weights sum to 1.0
 	_bscorer.reset_weights();
