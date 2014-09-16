@@ -258,8 +258,9 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 						return a.get_score() > b.get_score(); });
 		}
 
-		logger().info() << "Expert: candidate score=" << best_p->get_score();
 		double err = _bscorer.get_error(best_p->get_bscore());
+		logger().info() << "Expert: candidate score=" << best_p->get_score()
+                      << " error=" << err;
 
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 

@@ -53,7 +53,7 @@ struct hc_parameters
           fraction_of_nn(_fraction_of_nn),
           score_range(5.0),
           max_allowed_instances(10000),
-          allow_resize_deme(false)
+          resize_to_fit_ram(false)
     {
         OC_ASSERT(0.0 < fraction_of_nn);
     }
@@ -124,11 +124,11 @@ struct hc_parameters
     size_t max_allowed_instances;
 
     // Flag to allow resizing the deme to keep memory usage under
-    // control. Note however that it depends on the RAM of the
-    // machine, as such 2 execution of moses with identical inputs and
-    // parameters may not behave indentically between 2 machines, thus
-    // the motivation of that flag.
-    bool allow_resize_deme;
+    // control. Note, however, since it depends on the size of the
+    // installed RAM, that two different runs of MOSES on two different
+    // machines but otheriwse identical inputs and parameters, may not
+    // behave identically to one-another.
+    bool resize_to_fit_ram;
 
     // Deme stat name. String to indicate that TAB seperated deme
     // statistics are logged. By default 'Demes'.

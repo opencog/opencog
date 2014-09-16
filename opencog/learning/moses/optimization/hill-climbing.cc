@@ -89,12 +89,12 @@ void hill_climbing::operator()(deme_t& deme,
     instance prev_center = center_inst;
     size_t prev_start = 0;
     size_t prev_size = 0;
-    
+
     // keep track whether the population generated from the same
     // center has already been crossover. This is to prevent to redo a
     // useless crossover when distance widening is occurs
     bool already_xover = false;
-    
+
     // try a last crossover if no improvements (it's cheap)
     bool last_chance = false;
 
@@ -144,16 +144,16 @@ void hill_climbing::operator()(deme_t& deme,
         // whether crossover must be attempted for the current iteration
         bool large_nbh = total_number_of_neighbors >= xover_min_neighbors,
             xover = hc_params.crossover
-            && (iteration > 2)
-            && !already_xover
-            && current_number_of_instances >= xover_min_deme
-            && (large_nbh || last_chance);
+            and (iteration > 2)
+            and !already_xover
+            and current_number_of_instances >= xover_min_deme
+            and (large_nbh || last_chance);
 
         if (xover) {
             // log why crossover is enabled
             std::stringstream why_xover;
             if (large_nbh)
-                why_xover << "too large neighborhood "
+                why_xover << "n'bhood too large for exhaustive srch"
                           << total_number_of_neighbors << ">="
                           << xover_min_neighbors;
             else if (last_chance)
@@ -185,7 +185,7 @@ void hill_climbing::operator()(deme_t& deme,
                 OC_ASSERT(false, "There must be a bug");
             logger().debug() << "Crossover disabled ("
                              << whynot_xover.str() << ")";
-            
+
             // The current_number_of_instances arg is needed only to
             // be able to manage the size of the deme appropriately.
             number_of_new_instances =
@@ -198,10 +198,10 @@ void hill_climbing::operator()(deme_t& deme,
         prev_size = number_of_new_instances;
         prev_center = center_inst;
 
-        auto deme_from = next(deme.begin(), current_number_of_instances);
-        auto deme_inst_from = next(deme.begin_instances(),
+        auto deme_from = std::next(deme.begin(), current_number_of_instances);
+        auto deme_inst_from = std::next(deme.begin_instances(),
                                    current_number_of_instances);
-        auto deme_score_from = next(deme.begin_scores(),
+        auto deme_score_from = std::next(deme.begin_scores(),
                                     current_number_of_instances);
 
         // log neighborhood distance
@@ -240,7 +240,8 @@ void hill_climbing::operator()(deme_t& deme,
 
         unsigned ibest = current_number_of_instances;
         for (unsigned i = current_number_of_instances;
-             deme.begin() + i != deme.end(); ++i) {
+             std::next(deme.begin(), i) != deme.end(); ++i)
+        {
             const composite_score &inst_cscore = deme[i].second;
             score_t iscore = inst_cscore.get_penalized_score();
             if (iscore >  best_score) {
@@ -304,13 +305,13 @@ void hill_climbing::operator()(deme_t& deme,
         current_number_of_evals += number_of_new_instances;
         current_number_of_instances += number_of_new_instances;
 
-        if (hc_params.allow_resize_deme) {
+        if (hc_params.resize_to_fit_ram) {
             // Keep the size of the deme at a managable level.
             // Large populations can easily blow out the RAM on a machine,
             // so we want to keep it at some reasonably trim level.
             //
             // To avoid wasting cpu time pointlessly, don't bother with
-            // population size management if its already small.  Thus, 
+            // population size management if its already small.  Thus,
             // ACCEPTABLE_SIZE is fairly "large".
             //
             // "deme_usage" is the RAM usage; the goal is to avoid OOM
@@ -473,7 +474,7 @@ size_t hill_climbing::estimate_neighborhood(size_t distance,
 {
     if (distance == 0)
         return 1;
-    
+
     const size_t nn_estimate = information_theoretic_bits(fields);
 
     if (nn_estimate < distance) {
@@ -494,7 +495,7 @@ size_t hill_climbing::estimate_neighborhood(size_t distance,
         // -T1 flags are used.  This puts this algo into a very
         // different mode of operation, in an attempt to overcome
         // deceptive scoring functions.
-        
+
         // For large-distance searches, there is a combinatorial
         // explosion of the size of the search volume. Thus, be
         // careful budget our available cycles.
@@ -508,25 +509,25 @@ size_t hill_climbing::n_new_instances(size_t distance, unsigned max_evals,
 {
     if (distance == 0)
         return 1;
-    
+
     size_t number_of_new_instances = total_number_of_neighbors;
-    
+
     // binomial coefficient has a combinatoric explosion to the power
     // distance. So throttle back by fraction raised to power dist.
     for (unsigned k=0; k<distance; k++)
         number_of_new_instances *= hc_params.fraction_of_nn;
-    
+
     // Clamp the number of nearest-neighbor evaluations
     // we'll do.  This is necessitated because some systems
     // have a vast number of nearest neighbors, and searching
     // them all explodes the RAM usage, for no gain.
     if (number_of_new_instances > hc_params.max_nn_evals)
         number_of_new_instances = hc_params.max_nn_evals;
-    
+
     // avoid overflow.
     size_t nleft =
         max_evals - current_number_of_evals;
-    
+
 // we choose the number 100 because below that multithreading is
 // disabled and it leads to some massive slow down because then most
 // of the computational power is spent on successive representation
@@ -536,11 +537,11 @@ size_t hill_climbing::n_new_instances(size_t distance, unsigned max_evals,
     // If fraction is small, just use up the rest of the cycles.
     if (number_of_new_instances < MINIMUM_DEME_SIZE)
         number_of_new_instances = nleft;
-    
+
     if (nleft < number_of_new_instances)
         number_of_new_instances = nleft;
-    
-    if (hc_params.allow_resize_deme) {
+
+    if (hc_params.resize_to_fit_ram) {
         // To avoid being OOM-killed, set ACCEPTABLE_RAM_FRACTION to
         // half of installed RAM on the machine. This should work in a
         // more or less scalable fashion on all machines, and still
@@ -562,7 +563,7 @@ size_t hill_climbing::n_new_instances(size_t distance, unsigned max_evals,
             // Cap ram usage at the lesser of the desired usage,
             // or the actual available space.
             uint64_t free_ram = getFreeRAM();
-            uint64_t cap = std::min(ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes, 
+            uint64_t cap = std::min(ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes,
                                MAX_RAM_LIMIT * free_ram);
             number_of_new_instances = cap / _instance_bytes;
             logger().debug("Cap new instances. "
@@ -697,7 +698,7 @@ size_t hill_climbing::crossover(deme_t& deme, size_t deme_size,
     size_t number_of_new_instances =
         cross_top_one(deme, deme_size, hc_params.crossover_pop_size / 3,
                       sample_start, sample_size, base);
-    
+
     number_of_new_instances +=
         cross_top_two(deme, deme_size + number_of_new_instances,
                       hc_params.crossover_pop_size / 3,
@@ -711,7 +712,7 @@ size_t hill_climbing::crossover(deme_t& deme, size_t deme_size,
     return number_of_new_instances;
 }
 
-        
+
 /// Shrink the deme, by removing all instances with score less than
 /// 'cutoff'.  This is implemented with in-place deletion of elements
 /// from a vector, with at least a token attempt to delete contigous
@@ -739,7 +740,7 @@ size_t hill_climbing::resize_by_score(deme_t& deme, score_t cutoff)
              }
          }
 
-         if (0 == contig) 
+         if (0 == contig)
              break;
 
          if (last != deme.end()) last++;
@@ -829,7 +830,7 @@ void hill_climbing::log_stats_legend()
         "delta_raw\t"
         "complexity";
 }
- 
+
 } // ~namespace moses
 } // ~namespace opencog
 

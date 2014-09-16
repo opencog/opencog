@@ -598,7 +598,8 @@ void metapopulation::update_best_candidates(const scored_combo_tree_set& candida
                 best_sc = _best_cscore.get_score();
                 best_cpx = _best_cscore.get_complexity();
                 _best_candidates.clear();
-                logger().debug() << "New best score: " << _best_cscore;
+                logger().debug() << "New best score: " << _best_cscore
+                                 << "\n\tfor tree: " << cnd.get_tree();
             }
             _best_candidates.insert(cnd);
         }

@@ -89,7 +89,7 @@ bscore_base::worst_possible_bscore() const
 /**
  * Compute the average (weighted) complexity of all the trees in the
  * ensemble.  XXX this is probably wrong, we should probably do something
- * like add the logarithm of the number of trees to the complexity, or 
+ * like add the logarithm of the number of trees to the complexity, or
  * I dunno .. something.  Unclear how the theory should even work for this
  * case.
  */
@@ -123,6 +123,9 @@ score_t bscore_base::sum_bscore(const behavioral_score& bs) const
     if (not _return_weighted_score or _size == 0 or _weights.size() == 0)
         return boost::accumulate(bs, 0.0);
 
+    size_t bsz = bs.size();
+    OC_ASSERT(_size <= bsz, "Behavioral score too small!");
+
     size_t i=0;
     score_t res = 0.0;
     for (; i<_size; i++) {
@@ -132,7 +135,7 @@ score_t bscore_base::sum_bscore(const behavioral_score& bs) const
     // Any extra penalties tacked onto the end of the bscore get added
     // without any weights.  For example, the "pre" scoer tacks these
     // on, so that the minimum activation can be hit.
-    for (; i<bs.size(); i++) {
+    for (; i < bsz; i++) {
         res += bs[i];
     }
     return res;
@@ -174,6 +177,11 @@ void bscore_ctable_base::recompute_weight() const
 
 void bscore_ctable_base::ignore_cols(const std::set<arity_t>& idxs) const
 {
+    // Must not compress if boosting: the booster keeps track of a
+    // weight for each row, and so altering the number of rows will
+    // just confuse the mechanisn.
+    if (_return_weighted_score) return;
+
     if (logger().isDebugEnabled())
     {
         std::stringstream ss;
@@ -199,7 +207,7 @@ void bscore_ctable_base::ignore_cols(const std::set<arity_t>& idxs) const
 
     if (logger().isFineEnabled()) {
         std::stringstream ss;
-        ss << "_wrk_ctable =" << std::endl;
+        ss << "Contents of _wrk_ctable =" << std::endl;
         ostreamCTable(ss, _wrk_ctable);
         logger().fine(ss.str());
         // for debugging, keep that around till we fix best_possible_bscore
@@ -216,6 +224,11 @@ void bscore_ctable_base::ignore_cols(const std::set<arity_t>& idxs) const
 
 void bscore_ctable_base::ignore_rows(const std::set<unsigned>& idxs) const
 {
+    // Must not compress if boosting: the booster keeps track of a
+    // weight for each row, and so altering the number of rows will
+    // just confuse the mechanisn.
+    if (_return_weighted_score) return;
+
     _wrk_ctable = _all_rows_wrk_ctable; // to include all rows in _wrk_ctable
 
     // if (logger().isFineEnabled())
@@ -234,6 +247,11 @@ void bscore_ctable_base::ignore_rows(const std::set<unsigned>& idxs) const
 
 void bscore_ctable_base::ignore_rows_at_times(const std::set<TTable::value_type>& timestamps) const
 {
+    // Must not compress if boosting: the booster keeps track of a
+    // weight for each row, and so altering the number of rows will
+    // just confuse the mechanisn.
+    if (_return_weighted_score) return;
+
     // logger().fine() << "bscore_ctable_base::ignore_rows_at_times";
     // ostreamContainer(logger().fine() << "timestamps = ", timestamps);
 

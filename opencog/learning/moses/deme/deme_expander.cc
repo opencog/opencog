@@ -434,7 +434,7 @@ void deme_expander::optimize_demes(int max_evals, time_t max_time)
                 // update max score)
                 _cscorer.ignore_cols(_ignore_cols_seq[i]);
 
-                // compute the max target for that deme (if features have been
+                // Compute the max target for that deme (if features have been
                 // dynamically selected, it might be less that the global target;
                 // that is, the deme might not be able to reach the best score.)
                 //
@@ -442,30 +442,36 @@ void deme_expander::optimize_demes(int max_evals, time_t max_time)
                 // OPTION ISN'T GLOBAL WHAT TO DO?
                 //
                 // But why would we want to over-ride the best-possible score?
-                // Typically, demes almost never hit the best score anyway, so
-                // why would this matter?
+                // The point here is to figure out when to stop working on the
+                // deme, and not when to stop working onthe problem as a whole,
+                // right?
                 score_t deme_target_score = _cscorer.best_possible_score();
                 logger().info("Inferred target score for that deme = %g",
                               deme_target_score);
-                // negative min_improv is interpreted as percentage of
-                // improvement, if so then don't substract anything, since in that
-                // scenario the absolute min improvent can be arbitrarily small
                 logger().info("It appears there is an algorithmic bug in "
                               "precision_bscore::best_possible_bscore. "
                               "Till not fixed we shall not rely on it to "
-                              "terminate deme search");
+                              "terminate deme search. Except I think this "
+                              "is fixed now. It needs review and testing.");
 
                 // TODO: re-enable that once best_possible_bscore is fixed
-                // score_t actual_min_improv = std::max(_cscorer.min_improv(),
-                //                                      (score_t)0);
-                // deme_target_score -= actual_min_improv;
-                // logger().info("Subtract %g (minimum significant improvement) "
-                //               "from the target score to deal with float "
-                //               "imprecision = %g",
-                //               actual_min_improv, deme_target_score);
+                // I think its now fixed, but I'm not sure.  It needs to be
+                // reviewed and tested.
+#if THIS_IS_DISABLED_UNTIL_ABOVE_IS_FIXED
+                // negative min_improv is interpreted as percentage of
+                // improvement, if so then don't substract anything, since in that
+                // scenario the absolute min improvent can be arbitrarily small
+                score_t actual_min_improv = std::max(_cscorer.min_improv(),
+                                                     (score_t)0);
+                deme_target_score -= actual_min_improv;
+                logger().info("Subtract %g (minimum significant improvement) "
+                              "from the target score to deal with float "
+                              "imprecision = %g",
+                              actual_min_improv, deme_target_score);
 
-                // // update max score optimizer
-                // _optimize.opt_params.terminate_if_gte = deme_target_score;
+                // update max score optimizer
+                _optimize.opt_params.terminate_if_gte = deme_target_score;
+#endif // THIS_IS_DISABLED_UNTIL_ABOVE_IS_FIXED
             }
 
             if (n_ss_demes > 1) {

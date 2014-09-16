@@ -284,7 +284,8 @@ static inline void log_candidate_bscore(const combo_tree& tr,
 {
     if (logger().isFineEnabled())
         logger().fine() << "Evaluate candidate: " << tr << "\n"
-                        << "\tBScored: " << bs;
+                        << "\tBScore size=" << bs.size()
+                        << " bscore: " << bs;
 }
 
 } //~namespace moses
