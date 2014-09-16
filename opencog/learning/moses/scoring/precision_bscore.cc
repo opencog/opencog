@@ -205,9 +205,9 @@ behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_
 
     // 1. Compute active and sum of all active outputs
     //
-    // 2. If time_bscore enabled build map between timestamps and a
-    // counter of a bool, representing tp and fp. Specifically if the
-    // program output is true tp corresponds the target output being
+    // 2. If time_bscore enabled, build map between timestamps and a
+    // counter of a bool, representing tp and fp. Specifically, if the
+    // combo output is true, then tp corresponds the target output being
     // true (resp. false if positive is false), and fp correspond to
     // the the target being false (resp. true if positive is false).
     //
@@ -262,20 +262,20 @@ behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_
     }
 
     if (0.0 < active) {
-        // normalize all components by active
+        // Normalize all components by active, where active = tp+fp
         score_t iac = 1.0 / active; // inverse of activity to be faster
         for (auto& v : bs) v *= iac;
 
         // tp = true positive
         // fp = false positive
         //
-        // By using (tp-fp)/2 the sum of all the per-row contributions
-        // is offset by -1/2 from the precision, as proved below
+        // By using (tp-fp)/2, the sum of all the per-row contributions
+        // is offset by -1/2 from the precision, as proved below.
         //
         // 1/2 * (tp - fp) / (tp + fp)
         // = 1/2 * (tp - tp + tp - fp) / (tp + fp)
-        // = 1/2 * (tp + tp) / (tp + fp) - (tp + fp) / (tp + fp)
-        // = 1/2 * 2*tp / (tp + fp) - 1
+        // = 1/2 * [(tp + tp) / (tp + fp) - (tp + fp) / (tp + fp)]
+        // = 1/2 * [2*tp / (tp + fp) - 1]
         // = precision - 1/2
         //
         // So before adding the recall penalty we add +1/2 to
@@ -574,17 +574,19 @@ behavioral_score precision_bscore::best_possible_bscore() const
     return {best_sc};
 }
 
+// For non-degenerate boolean tables, the worst possible score
+
 behavioral_score precision_bscore::worst_possible_bscore() const
 {
     // The worst possible score would occur if the scorer selected
-    // only the negative rows, and makred them all as possitive.
+    // only the negative rows, and marked them all as positive.
     behavioral_score bs;
     for (const CTable::value_type& vct : _wrk_ctable) {
         const CTable::counter_t& cnt = vct.second;
 
         // The most that the score can improve is to flip true to false,
         // or v.v. The worst score is to get the majority wrong.  This
-        // workes correctly even for weighted tables, where the counts
+        // works correctly even for weighted tables, where the counts
         // could be arbitrary float-point values.
         score_t w = fabs (cnt.get(id::logical_true) -
                           cnt.get(id::logical_false));
