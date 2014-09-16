@@ -421,23 +421,6 @@ int main(int argc, char** argv)
     type_tree output_tt = get_signature_output(inferred_tt);
     type_node inferred_type = get_type_node(output_tt);
 
-    if (inferred_type == id::contin_type) {
-        if (1 < fs_params.inc_interaction_terms) {
-            cerr << "Fatal Error: Currently, contin feature selection "
-                    "does not support more than one interaction term."
-                 << endl;
-            exit(1);
-        }
-        if (0.0 < fs_params.inc_red_intensity) {
-            // Its not supported, because it requires tw interaction
-            // terms to be computed for MI, and I am too lazy ...
-            cerr << "Fatal Error: Currently, contin feature selection "
-                    "does not support redundant feature removal."
-                 << endl;
-            exit(1);
-        }
-    }
-
     // Go and do it.
     if ((inferred_type == id::boolean_type) or
         (inferred_type == id::enum_type) or
