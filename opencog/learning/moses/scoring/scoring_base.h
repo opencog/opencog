@@ -129,9 +129,9 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     /// score.  This is used by the boosting algorithm to weight the
     /// a scored combo tree.
     ///
-    /// The is normalized so that 0.0 stands for a perfect score (all
-    /// answers are the best possible), a value of 0.5 stands for a
-    /// score that corresponds to "random guessing", and 1.0 corresponds
+    /// The returned value must be normalized so that 0.0 stands for
+    /// a perfect score (all answers are the best possible), a value
+    /// of 0.5 corresponds to "random guessing", and 1.0 corresponds
     /// to a worst-possible score (all answers are the worst possible.)
     /// This error amount does not have to be a metric or distance
     /// measure, nor does it have to be linear; however, boosting will
@@ -249,15 +249,69 @@ struct bscore_ctable_base : public bscore_base
     /// data, one can provide a set of row indexes to ignore.
     void ignore_rows(const std::set<unsigned>&) const;
 
-    // Like ignore_rows but consider timestamps instead of indexes
+    /// Like ignore_rows but consider timestamps instead of indexes
     void ignore_rows_at_times(const std::set<TTable::value_type>&) const;
 
-    // Return the uncompressed size of the CTable
+    /// Return the uncompressed size of the CTable
     unsigned get_ctable_usize() const;
 
-    // Return the original CTable
+    /// Return the original CTable
     const CTable& get_ctable() const;
 
+    /// Implementing get_error() for CTables-based scorers equires some
+    /// special consideration.  First, the length of the behavioral
+    /// score is needed, for normalization.  The correct "length" is
+    /// kind-of tricky to understand when a table has weighted rows,
+    /// or when it is degenerate.  In the degenerate case, no matter
+    /// what selection is made, some rows will be wrong.
+    ///
+    /// We explicitly review these cases here: the table may have
+    /// degenerate or non-degenerate rows, and these may be weighted or
+    /// non-weighted.  Here, the "weights" are not the boosting weights,
+    /// but the user-specified row weights.
+    ///
+    ///  non-degenerate, non weighted:
+    ///       (each row has defacto weight of 1.0)
+    ///       best score = 0.0 so  err = score / num rows;
+    ///
+    ///  non-degenerate, weighted:
+    ///       best score = 0.0 so  err = score / weighted num rows;
+    ///       since the score is a sum of weighted rows.
+    ///
+    ///       e.g. two rows with user-specified weights:
+    ///            0.1
+    ///            2.3
+    ///       so if first row is wrong, then err = 0.1/2.4
+    ///       and if second row is wrong, err = 2.3/2.4
+    ///
+    ///  degenerate, non-weighted:
+    ///       best score > 0.0   err = (score - best_score) / eff_num_rows;
+    ///
+    ///       where eff_num_rows = sum_row fabs(up-count - down-count)
+    ///       is the "effective" number of rows, as opposing rows
+    ///       effectively cancel each-other out.  This is also the
+    ///       "worst possible score", what would be returned if every
+    ///       row was marked wrong.
+    ///
+    ///       e.g. table five uncompressed rows:
+    ///            up:1  input-a
+    ///            dn:2  input-a
+    ///            up:2  input-b
+    ///       best score is -1 (i.e. is 4-5 where 4 = 2+2).
+    ///       so if first row is wrong, then err = (1-1)/5 = 0/3
+    ///       so if second row is wrong, then err = (2-1)/5 = 1/3
+    ///       so if third & first is wrong, then err = (3-1)/3 = 2/3
+    ///       so if third & second is wrong, then err = (4-1)/3 = 3/3
+    ///
+    /// Thus, the "effective_length" is (minus) the worst possible score.
+    ///
+    /// The subtraction (score - best_score) needs to be done in the
+    /// by the get_error() method, and not somewhere else: that's
+    /// because the boost row weighting must be performed on this
+    /// difference, so that only the rows that are far away from their
+    /// best-possible values get boosted.
+    ///
+    // score_t get_error(const behavioral_score&) const;
 protected:
     const CTable& _orig_ctable;  // Reference to the original table.
 

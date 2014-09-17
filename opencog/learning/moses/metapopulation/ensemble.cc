@@ -100,55 +100,6 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 {
 	int promoted = 0;
 
-	// We need the length of the behavioral score, as normalization.
-	// The correct "length" is kind-of tricky to understand when a table
-	// has weighted rows, or when it is degenerate.  In the degenerate
-	// case, no matter what selection is made, some rows will be wrong.
-	// So we explicitly review these cases here: the table may have
-	// degenerate or non-degenerate rows, and these may be weighted or
-	// non-weighted.  Here, the "weights" are not the boosting weights,
-	// but the user-specified row weights.
-	//
-	//  non-degenerate, non weighted:
-	//       (each row has defacto weight of 1.0)
-	//       best score = 0 so  err = score / num rows;
-	//
-	//  non-degenerate, weighted:
-	//       best score = 0 so  err = score / weighted num rows;
-	//       since the score is a sum of weighted rows.
-	//
-	//       e.g. two rows with user-specified weights:
-	//            0.1
-	//            2.3
-	//       so if first row is wrong, then err = 0.1/2.4
-	//       and if second row is wrong, err = 2.3/2.4
-	//
-	//  degenerate, non-weighted:
-	//       best score > 0   err = (score - best_score) / eff_num_rows;
-	//
-	//       where eff_num_rows = sum_row fabs(up-count - down-count)
-	//       is the "effective" number of rows, as opposing rows
-	//       effectively cancel each-other out.  This is also the
-	//       "worst possible score", what would be returned if every
-	//       row was marked wrong.
-	//
-	//       e.g. table five uncompressed rows:
-	//            up:1  input-a
-	//            dn:2  input-a
-	//            up:2  input-b
-	//       best score is -1 (i.e. is 4-5 where 4 = 2+2).
-	//       so if first row is wrong, then err = (1-1)/5 = 0/3
-	//       so if second row is wrong, then err = (2-1)/5 = 1/3
-	//       so if third & first is wrong, then err = (3-1)/3 = 2/3
-	//       so if third & second is wrong, then err = (4-1)/3 = 3/3
-	//
-	// Thus, the "effective_length" is (minus) the worst possible score.
-	//
-	// The subtraction (score - best_score) needs to be done in the
-	// scorer itself, and not here: that's because the boost row weighting
-	// must be performed on this difference, so that only the rows that
-	// are far away from their best-possible values get boosted.
-	//
 	while (true) {
 		// Find the element (the combo tree) with the least error. This is
 		// the element with the highest score.
