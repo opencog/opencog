@@ -137,6 +137,9 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     /// measure, nor does it have to be linear; however, boosting will
     /// probably work better if the error is vaguely metric-like and
     /// quasi-linear.
+    ///
+    /// See the notes below, for the CTable sccorer, for special
+    /// considerations that CTable-based scorers must make.
     virtual score_t get_error(const behavioral_score&) const;
 
     /// Indicate a set of features that should be ignored during scoring,

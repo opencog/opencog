@@ -42,17 +42,8 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	// Don't mess with the scorer weights if not doing boosting.
 	if (not ep.do_boosting) return;
 
-	if (_params.experts)
-		_effective_length = 1.0;
-	else
-		_effective_length = cs.best_possible_score() - cs.worst_possible_score();
-
-	// The current normalization is to have all row weights sum to 1.0
+	// Initialize the weights that the scorer will use.
 	_bscorer.reset_weights();
-	std::vector<double>& weights = _bscorer.get_weights();
-	size_t bslen = weights.size();
-	double znorm = _effective_length / ((double) bslen);
-	for (size_t i=0; i<bslen; i++) weights[i] = znorm;
 
 	// _tolerance is an estimate of the accumulated rounding error
 	// that arises when totaling the bscores.  As usual, assumes a
@@ -65,7 +56,6 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 		_row_bias = std::vector<double>(bslen, 0.0);
 	}
 
-	logger().info() << "Boosting: effective length: " << _effective_length;
 	logger().info() << "Boosting: number to promote: " << ep.num_to_promote;
 	if (ep.experts) {
 		logger().info() << "Boosting: exact experts: " << ep.exact_experts;
@@ -109,7 +99,6 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 					return a.get_score() > b.get_score(); });
 
 		logger().info() << "Boosting: candidate score=" << best_p->get_score();
-		// double err = (- best_p->get_score()) / _effective_length;
 		double err = _bscorer.get_error(best_p->get_bscore());
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
@@ -162,7 +151,7 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 		}
 
 		// Normalization: sum of weights must equal 1.0
-		znorm = _effective_length / znorm;
+		znorm = 1.0 / znorm;
 		for (size_t i=0; i<bslen; i++) weights[i] *= znorm;
 
 		// Remove from the set of candidates.
