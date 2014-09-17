@@ -143,17 +143,12 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 		// Recompute the weights
 		const behavioral_score& bs = best_p->get_bscore();
 		size_t bslen = _bscorer.size();
-		std::vector<double>& weights = _bscorer.get_weights();
-		double znorm = 0.0;
+		std::vector<double> weights(bslen);
 		for (size_t i=0; i<bslen; i++)
 		{
-			weights[i] *= is_correct(bs[i]) ? rcpalpha : expalpha;
-			znorm += weights[i];
+			weights[i] = is_correct(bs[i]) ? rcpalpha : expalpha;
 		}
-
-		// Normalization: sum of weights must equal 1.0
-		znorm = 1.0 / znorm;
-		for (size_t i=0; i<bslen; i++) weights[i] *= znorm;
+      _bscorer.update_weights(weights);
 
 		// Remove from the set of candidates.
 		cands.erase(best_p);
@@ -267,15 +262,16 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 		// Increase the importance of all remaining, unselected rows.
 		double rcpalpha = 1.0 / expalpha;
 		const behavioral_score& bs = best_p->get_bscore();
-		std::vector<double>& weights = _bscorer.get_weights();
-		size_t bslen = weights.size();
+		size_t bslen = _bscorer.size();
+		std::vector<double> weights(bslen);
 		for (size_t i=0; i<bslen; i++)
 		{
 			// Again, here we explicitly assume the pre scorer: A row is
 			// correctly selected if its score is strictly positive.
 			// The weights of unselected rows must increase.
-			weights[i] *= (0.0 < bs[i]) ? rcpalpha : expalpha;
+			weights[i] = (0.0 < bs[i]) ? rcpalpha : expalpha;
 		}
+      _bscorer.update_weights(weights);
 
 		// Remove from the set of candidates.
 		cands.erase(best_p);

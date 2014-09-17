@@ -116,14 +116,13 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     /// of the boosting algo!
     virtual score_t sum_bscore(const behavioral_score&) const;
 
-    /// A vector of per-bscore weights, used to tote up the behavioral
-    /// score into a single number.  This returns a reference, not const,
-    /// allowing them to be modified in-place.
-    // XXX TODO should be a std::valarray not a vector.
-    std::vector<double>& get_weights() { return _weights; }
-
-    /// Reset the weights.
+    /// Reset the weights to a uniform distribution.
     void reset_weights();
+
+    /// A vector of per-bscore weights, used to tote up the behavioral
+    /// score into a single number.
+    // XXX TODO should be a std::valarray not a vector.
+    virtual void update_weights(const std::vector<double>&);
 
     /// Return the amount by which the bscore differs from a perfect
     /// score.  This is used by the boosting algorithm to weight the
