@@ -128,7 +128,7 @@ score_t bscore_base::sum_bscore(const behavioral_score& bs) const
 
     size_t i=0;
     score_t res = 0.0;
-    for (; i<_size; i++) {
+    for (; i < _size; i++) {
         res += _weights[i] * bs[i];
     }
 

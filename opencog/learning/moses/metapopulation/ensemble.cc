@@ -48,8 +48,9 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	// _tolerance is an estimate of the accumulated rounding error
 	// that arises when totaling the bscores.  As usual, assumes a
 	// normal distribution for this, so that its a square-root.
+	size_t bslen = _bscorer.size();
 	_tolerance = 2.0 * epsilon_score;
-	_tolerance *= sqrt((double)bslen);
+	_tolerance *= sqrt((double) bslen);
 
 	_bias = 0.0;
 	if (not ep.exact_experts) {
@@ -242,8 +243,7 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 		// Adjust the bias, if needed.
 		if (not _params.exact_experts) {
 			const behavioral_score& bs = best_p->get_bscore();
-			const std::vector<double>& weights = _bscorer.get_weights();
-			size_t bslen = weights.size();
+			size_t bslen = _bscorer.size();
 
 			// Now, look to see where this scorer was wrong, and bump the
 			// bias for that.  Here, we make the defacto assumption that
@@ -269,18 +269,13 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 		const behavioral_score& bs = best_p->get_bscore();
 		std::vector<double>& weights = _bscorer.get_weights();
 		size_t bslen = weights.size();
-		double znorm = 0.0;
 		for (size_t i=0; i<bslen; i++)
 		{
-			// A row is correctly selected if its score is strictly positive.
-			// The weights of unselected rows increase.
+			// Again, here we explicitly assume the pre scorer: A row is
+			// correctly selected if its score is strictly positive.
+			// The weights of unselected rows must increase.
 			weights[i] *= (0.0 < bs[i]) ? rcpalpha : expalpha;
-			znorm += weights[i];
 		}
-
-		// Normalization: sum of scores must equal 1.0
-		znorm = 1.0 / znorm;
-		for (size_t i=0; i<bslen; i++) weights[i] *= znorm;
 
 		// Remove from the set of candidates.
 		cands.erase(best_p);
