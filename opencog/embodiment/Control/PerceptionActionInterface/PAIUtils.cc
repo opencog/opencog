@@ -81,30 +81,32 @@ std::string PAIUtils::getSerializedXMLString(XERCES_CPP_NAMESPACE::DOMDocument *
         XERCES_CPP_NAMESPACE::XMLString::transcode("LS", tag, PAIUtils::MAX_TAG_LENGTH);
         XERCES_CPP_NAMESPACE::DOMImplementation * pImplement =
             XERCES_CPP_NAMESPACE::DOMImplementationRegistry::getDOMImplementation(tag);
-        XERCES_CPP_NAMESPACE::DOMWriter * pSerializer = ((XERCES_CPP_NAMESPACE::DOMImplementationLS*)pImplement)->createDOMWriter();
-        XERCES_CPP_NAMESPACE::XMLFormatTarget * formatTarget = new XERCES_CPP_NAMESPACE::MemBufFormatTarget();
+        //XERCES_CPP_NAMESPACE::DOMWriter * pSerializer = ((XERCES_CPP_NAMESPACE::DOMImplementationLS*)pImplement)->createDOMWriter();
+        //XERCES_CPP_NAMESPACE::XMLFormatTarget * formatTarget = new XERCES_CPP_NAMESPACE::MemBufFormatTarget();
         // TODO: test this some day, at the moment we require users to use
         // xerces version < 3
         // --
         // Xerces version 3 replaces DOMWriter with DOMLSSerializer
-        //XERCES_CPP_NAMESPACE::DOMLSSerializer* pSerializer = ((DOMImplementationLS*)pImplement)->createLSSerializer();
-        //XERCES_CPP_NAMESPACE::DOMConfiguration* dc = writer->getDomConfig();
+        XERCES_CPP_NAMESPACE::DOMLSSerializer* pSerializer = ((XERCES_CPP_NAMESPACE::DOMImplementationLS*)pImplement)->createLSSerializer();
+        XERCES_CPP_NAMESPACE::DOMConfiguration* dc = pSerializer->getDomConfig();
         //dc->setParameter(XMLUni::fgDOMErrorHandler,errorHandler);
-        //dc->setParameter(XMLUni::fgDOMWRTDiscardDefaultContent,true);
-
+        dc->setParameter(XERCES_CPP_NAMESPACE::XMLUni::fgDOMWRTDiscardDefaultContent,true);
+        //
+        if (dc->canSetParameter(XERCES_CPP_NAMESPACE::XMLUni::fgDOMWRTFormatPrettyPrint, true))
+            dc->setParameter(XERCES_CPP_NAMESPACE::XMLUni::fgDOMWRTFormatPrettyPrint, true);
         XERCES_CPP_NAMESPACE::XMLString::transcode("\n", tag, PAIUtils::MAX_TAG_LENGTH);
         pSerializer->setNewLine(tag);
-        XERCES_CPP_NAMESPACE::XMLString::transcode("UTF-8", tag, PAIUtils::MAX_TAG_LENGTH);
-        pSerializer->setEncoding(tag);
 
-        if (pSerializer->canSetFeature(XERCES_CPP_NAMESPACE::XMLUni::fgDOMWRTFormatPrettyPrint, true))
-            pSerializer->setFeature(XERCES_CPP_NAMESPACE::XMLUni::fgDOMWRTFormatPrettyPrint, true);
+        XERCES_CPP_NAMESPACE::DOMLSOutput* theOutput = ((XERCES_CPP_NAMESPACE::DOMImplementationLS*)pImplement)->createLSOutput();
+        XERCES_CPP_NAMESPACE::XMLString::transcode("UTF-8", tag, 99);
+        theOutput->setEncoding(tag);
+        XERCES_CPP_NAMESPACE::MemBufFormatTarget memTarget;
+        theOutput->setByteStream(&memTarget);
+        pSerializer->write(doc, theOutput);
+        result = std::string(reinterpret_cast<const char*>(memTarget.getRawBuffer()));
 
-        pSerializer->writeNode(formatTarget, *doc);
-        result = ((char *)((XERCES_CPP_NAMESPACE::MemBufFormatTarget *)formatTarget)->getRawBuffer());
 
         pSerializer->release();
-        delete (formatTarget);
     } catch (const XERCES_CPP_NAMESPACE::OutOfMemoryException& toCatch) {
         throw opencog::RuntimeException(TRACE_INFO, "PAIUtils - Out of Memory Exception!");
     } catch (const XERCES_CPP_NAMESPACE::XMLException& toCatch) {
