@@ -148,6 +148,10 @@ int main(int argc, char** argv)
          value<string>(&fs_params.target_feature_str),
          "Label of the target feature to fit. If none is given the first one is used.\n")
 
+        ("timestamp-feature",
+         value<string>(&fs_params.timestamp_feature_str),
+         "Label of the timestamp feature. If none is given it is ignored.\n")
+
         (opt_desc_str(ignore_feature_opt).c_str(),
          value<vector<string>>(&fs_params.ignore_features_str),
          "Ignore feature from the datasets. Can be used several times "
