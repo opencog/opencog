@@ -157,7 +157,7 @@ void bscore_base::update_weights(const std::vector<double>& rew)
     OC_ASSERT(rew.size() == _size,
         "Unexpected size of weight array!");
 
-    double znorm 0.0;
+    double znorm = 0.0;
     for (size_t i = 0; i < _size; i++) {
         _weights[i] *= rew[i];
         znorm += _weights[i];
@@ -167,7 +167,7 @@ void bscore_base::update_weights(const std::vector<double>& rew)
     // Uhhh, not all scorers need this.  Mostly, this is used
     // to make get_error() return the right thing ...
     znorm = 1.0 / znorm;
-    for (size_t i=0; i<bslen; i++) weights[i] *= znorm;
+    for (size_t i=0; i<_size; i++) _weights[i] *= znorm;
 }
 
 ////////////////////////
