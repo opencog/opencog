@@ -804,7 +804,7 @@ public:
     vertex_seq get_column_data(const std::string& name) const;
     vertex_seq get_column_data(int offset) const;
 
-    /// return a copy of the input table filtered according to a given
+    /// Return a copy of the input table filtered according to a given
     /// container of arity_t. Each value of that container corresponds
     /// to the column index of the ITable (starting from 0).
     template<typename F>
@@ -957,20 +957,23 @@ struct Table : public boost::equality_comparable<Table>
 
     // Useful for filtered (see below), return some column position
     // after a filter has been applied
-    template<typename F> int update_pos(int pos, const F& f) const {
-        if (pos > 0) {
-            auto it = boost::adjacent_find(f, [&](int l, int r) {
-                    return l < pos && pos < r; });
-            if (it == f.end())  // it is at the end
-                return f.size();
-            else                // it is in between f
-                return distance(f.begin(), ++it);
-        } else
-            return pos;
+    template<typename F> unsigned update_pos(unsigned pos, const F& f) const {
+        unsigned filtered_out_count = 0,
+            last = 0;
+        for (unsigned v : f) {
+            if (v < pos)
+                filtered_out_count += v - last;
+            else {
+                filtered_out_count += pos - last;
+                break;
+            }
+            last = v;
+        }
+        return pos - filtered_out_count;
     }
 
-    // Filter according to a container of arity_t. Each value of that
-    // container corresponds to the column index of the ITable
+    // Filter in, according to a container of arity_t. Each value of
+    // that container corresponds to the column index of the ITable
     // (starting from 0).
     template<typename F> Table filtered(const F& f) const {
         Table res;
