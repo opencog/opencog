@@ -83,7 +83,7 @@ public:
         // std::cout << "Debug table:\n" << dbg << std::endl;
 
         double diff = expected.abs_distance(predicted);
-        std::cout << "Hamming distance=" << diff << endl;
+        std::cout << "Hamming distance=" << diff << " expected "<< hamm << endl;
 
         TS_ASSERT(hamm == diff);
     }

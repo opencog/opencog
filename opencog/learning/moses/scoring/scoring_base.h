@@ -117,7 +117,7 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     virtual score_t sum_bscore(const behavioral_score&) const;
 
     /// Reset the weights to a uniform distribution.
-    void reset_weights();
+    virtual void reset_weights();
 
     /// A vector of per-bscore weights, used to tote up the behavioral
     /// score into a single number.

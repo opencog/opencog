@@ -66,9 +66,13 @@ struct select_bscore : public bscore_ctable_base
 
     score_t min_improv() const;
 
+    void reset_weights();
+    void update_weights(const std::vector<double>&);
+
 protected:
     void set_best_possible_bscore();
     behavioral_score _best_possible_score;
+    double _effective_length;
 
     bool _positive;
     score_t _lower_bound;
