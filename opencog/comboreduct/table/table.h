@@ -925,7 +925,7 @@ struct Table
     Table(const Func& func, arity_t a, int nsamples = -1) :
         itable(gen_signature(type_node_of<bool>(),
                              type_node_of<bool>(), a)),
-        otable(func, itable) {}
+        otable(func, itable), target_pos(0), timestamp_pos(0) {}
 
     Table(const combo_tree& tr, int nsamples = -1,
           contin_t min_contin = -1.0, contin_t max_contin = 1.0);
@@ -954,6 +954,20 @@ struct Table
 
     const std::string& get_target() const { return otable.get_label(); }
 
+    // Useful for filtered (see below), return some column position
+    // after a filter has been applied
+    template<typename F> int update_pos(int pos, const F& f) const {
+        if (pos > 0) {
+            auto it = boost::adjacent_find(f, [&](int l, int r) {
+                    return l < pos && pos < r; });
+            if (it == f.end())  // it is at the end
+                return f.size();
+            else                // it is in between f
+                return distance(f.begin(), ++it);
+        } else
+            return pos;
+    }
+
     // Filter according to a container of arity_t. Each value of that
     // container corresponds to the column index of the ITable
     // (starting from 0).
@@ -966,16 +980,15 @@ struct Table
         // set output table
         res.otable = otable;
 
+        // set timestamp table
+        res.ttable = ttable;
+
         // update target_pos
-        if (target_pos > 0) {
-            auto it = boost::adjacent_find(f, [&](int l, int r) {
-                    return l < target_pos && target_pos < r; });
-            if (it == f.end())  // it is at the end
-                res.target_pos = f.size();
-            else                // it is in between f
-                res.target_pos = distance(f.begin(), ++it);
-        } else
-            res.target_pos = target_pos;
+        res.target_pos = update_pos(target_pos, f);
+
+        // update timestamp_pos
+        if (!ttable.empty())
+            res.timestamp_pos = update_pos(timestamp_pos, f);
 
         return res;
     }
@@ -996,9 +1009,15 @@ struct Table
     ITable itable;
     OTable otable;
     TTable ttable;
-    int target_pos;             // position of the target, useful for
-                                // writing the table. If -1 means last
-                                // position
+
+    // Position of the target, useful for writing the table. If -1
+    // means last position.
+    int target_pos;
+
+    // Position of the timestamp feature, useful for writing the
+    // table. If -1 means last position. If the timestamp feature is
+    // empty then it is irrelevant.
+    int timestamp_pos;
 };
 
 template<typename Func>

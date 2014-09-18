@@ -476,15 +476,15 @@ TTable::value_type TTable::from_string(const std::string& timestamp_str) {
 // Table //
 ///////////
 
-Table::Table() : target_pos(0) {}
+Table::Table() : target_pos(0), timestamp_pos(0) {}
 
 Table::Table(const OTable& otable_, const ITable& itable_)
-    : itable(itable_), otable(otable_), target_pos(0) {}
+    : itable(itable_), otable(otable_), target_pos(0), timestamp_pos(0) {}
 
 Table::Table(const combo_tree& tr, int nsamples,
              contin_t min_contin, contin_t max_contin) :
     itable(infer_type_tree(tr), nsamples, min_contin, max_contin),
-    otable(tr, itable), target_pos(0) {}
+    otable(tr, itable), target_pos(0), timestamp_pos(0) {}
 
 vector<string> Table::get_labels() const
 {
