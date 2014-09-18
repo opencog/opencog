@@ -461,6 +461,7 @@ public:
     const std::string& get_label() const;
 
     static TTable::value_type from_string(const std::string& timestamp_str);
+    static std::string to_string(const TTable::value_type& timestamp);
 
 protected:
     std::string label;
@@ -1002,14 +1003,12 @@ struct Table : public boost::equality_comparable<Table>
     OTable otable;
     TTable ttable;
 
-    // Position of the target, useful for writing the table. If -1
-    // means last position.
-    int target_pos;
+    // Position of the target, useful for writing the table
+    unsigned target_pos;
 
     // Position of the timestamp feature, useful for writing the
-    // table. If -1 means last position. If the timestamp feature is
-    // empty then it is irrelevant.
-    int timestamp_pos;
+    // table. If the timestamp feature is empty then it is irrelevant.
+    unsigned timestamp_pos;
 
     bool operator==(const Table& rhs) const;
 };

@@ -472,6 +472,10 @@ TTable::value_type TTable::from_string(const std::string& timestamp_str) {
     return boost::gregorian::from_string(timestamp_str);
 }
 
+std::string TTable::to_string(const TTable::value_type& timestamp) {
+    return boost::gregorian::to_iso_extended_string(timestamp);
+}
+
 ///////////
 // Table //
 ///////////

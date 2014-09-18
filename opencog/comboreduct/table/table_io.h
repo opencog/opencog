@@ -180,24 +180,15 @@ Out& ostreamTableHeader(Out& out, const Table& table)
 {
     // Add input features in header
     std::vector<std::string> header = table.itable.get_labels();
-    OC_ASSERT(table.target_pos <= (int)header.size(),
-              "target_pos %d greater than number of inputs %u",
-              table.target_pos, header.size());
 
     // Add target feature in header
     const std::string& ol = table.otable.get_label();
-    if (table.target_pos < 0)
-        header.push_back(ol);
-    else
-        header.insert(header.begin() + table.target_pos, ol);
+    header.insert(header.begin() + table.target_pos, ol);
 
     // Add timestamp feature in header
     if (!table.ttable.empty()) {
         const std::string& tl = table.ttable.get_label();
-        if (table.timestamp_pos < 0)
-            header.push_back(tl);
-        else
-            header.insert(header.begin() + table.timestamp_pos, tl);
+        header.insert(header.begin() + table.timestamp_pos, tl);
     }
 
     // Write the header
@@ -217,14 +208,22 @@ Out& ostreamTable(Out& out, const Table& table)
     unsigned isize = table.itable.size(), osize = table.otable.size();
     OC_ASSERT(table.itable.empty() || isize == osize);
     for (size_t row = 0; row < osize; ++row) {
+        // Add input values
         std::vector<std::string> content;
         if (!table.itable.empty())
             content = table.itable[row].to_strings();
+
+        // Add target feature value
         std::string oc = table_fmt_vertex_to_str(table.otable[row]);
-        if (table.target_pos < 0)
-            content.push_back(oc);
-        else
-            content.insert(content.begin() + table.target_pos, oc);
+        content.insert(content.begin() + table.target_pos, oc);
+
+        // Add timestamp feature value
+        if (!table.ttable.empty()) {
+            std::string tc = TTable::to_string(table.ttable[row]);
+            content.insert(content.begin() + table.timestamp_pos, tc);
+        }
+
+        // Write content row
         ostreamContainer(out, content, ",") << std::endl;
     }
     return out;
