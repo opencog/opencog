@@ -308,10 +308,8 @@ public:
         std::cout << "\n----------------------------" << std::endl;
         string target_feature;
         string timestamps_feature;
-        vector<string> ignore_features;
         Table tt = loadTable(tableUTest_dir + "dataset.csv",
-                             target_feature, timestamps_feature,
-                             ignore_features);
+                             target_feature, timestamps_feature);
         set<arity_t> fs{0, 1};
         CTable ctt = tt.compressed();
         double mi = mutualInformation(ctt, fs);
@@ -389,5 +387,32 @@ public:
         TTable expected_ttable(dates, "time");
 
         TS_ASSERT_EQUALS(table.ttable, dates);
+    }
+
+    void test_ostream_timestamp_table() {
+        { // timestamp feature before target and ignore the second feature
+            string input_file = tableUTest_dir + "timestamp_table2.csv";
+            // vector<string> ignore_features = ;
+
+            Table table = loadTable(input_file, "target", "time", {"input1"});
+
+            stringstream ss;
+            ostreamTable(ss, table);
+            TS_ASSERT_EQUALS(ss.str(),
+                             "input0,time,target\n"
+                             "0,2012-03-11,6\n"
+                             "1,2012-03-23,7\n")
+        }
+        { // timestamp feature after target
+            string input_file = tableUTest_dir + "timestamp_table3.csv";
+            Table table = loadTable(input_file, "target", "time");
+
+            stringstream ss;
+            ostreamTable(ss, table);
+            TS_ASSERT_EQUALS(ss.str(),
+                             "input1,target,time\n"
+                             "1,6,2012-03-11\n"
+                             "0,7,2012-03-23\n")
+        }
     }
 };
