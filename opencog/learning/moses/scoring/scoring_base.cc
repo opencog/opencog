@@ -157,6 +157,12 @@ void bscore_base::update_weights(const std::vector<double>& rew)
     OC_ASSERT(rew.size() == _size,
         "Unexpected size of weight array!");
 
+#if 1
+    // Simple rescaling, without normalization.
+    for (size_t i = 0; i < _size; i++) {
+        _weights[i] *= rew[i];
+    }
+#else
     double znorm = 0.0;
     for (size_t i = 0; i < _size; i++) {
         _weights[i] *= rew[i];
@@ -168,6 +174,7 @@ void bscore_base::update_weights(const std::vector<double>& rew)
     // to make get_error() return the right thing ...
     znorm = 1.0 / znorm;
     for (size_t i=0; i<_size; i++) _weights[i] *= znorm;
+#endif
 }
 
 ////////////////////////
