@@ -912,7 +912,7 @@ protected:
  * an OTable holding the output (the dependent variable), and a type
  * tree identifiying the types of the inputs and outputs.
  */
-struct Table
+struct Table : public boost::equality_comparable<Table>
 {
     typedef std::vector<std::string> string_seq;
     typedef vertex value_type;
@@ -1018,6 +1018,8 @@ struct Table
     // table. If -1 means last position. If the timestamp feature is
     // empty then it is irrelevant.
     int timestamp_pos;
+
+    bool operator==(const Table& rhs) const;
 };
 
 template<typename Func>

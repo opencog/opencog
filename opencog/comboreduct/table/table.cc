@@ -670,6 +670,11 @@ void Table::add_features_from_file(const string& input_file,
             OC_ASSERT(full_target_pos == target_pos, "smells a bug");
     }
 }
+
+bool Table::operator==(const Table& rhs) const {
+    return itable == rhs.itable and otable == rhs.otable and ttable == rhs.ttable
+        and target_pos == rhs.target_pos and timestamp_pos == rhs.timestamp_pos;
+}
         
 /////////////////
 // TimeCounter //

@@ -176,52 +176,43 @@ CTable loadCTable(const std::string& file_name);
 
 /// output the header of a data table in CSV format.
 template<typename Out>
-Out& ostreamTableHeader(Out& out, const ITable& it, const OTable& ot,
-                        int target_pos)
+Out& ostreamTableHeader(Out& out, const Table& table)
 {
-    std::vector<std::string> header = it.get_labels();
-    const std::string& ol = ot.get_label();
-    OC_ASSERT(target_pos <= (int)header.size(),
+    std::vector<std::string> header = table.itable.get_labels();
+    const std::string& ol = table.otable.get_label();
+    OC_ASSERT(table.target_pos <= (int)header.size(),
               "target_pos %d greater than number of inputs %u",
-              target_pos, header.size());
-    if (target_pos < 0)
+              table.target_pos, header.size());
+    if (table.target_pos < 0)
         header.push_back(ol);
     else
-        header.insert(header.begin() + target_pos, ol);
+        header.insert(header.begin() + table.target_pos, ol);
     ostreamContainer(out, header, ",") << std::endl;
     return out;
 }
 
-/// output a data table in CSV format. Boolean values are output in
+/// Output a data table in CSV format. Boolean values are output in
 /// binary form (0 for false, 1 for true).
-template<typename Out>
-Out& ostreamTable(Out& out,
-                  const ITable& it, const OTable& ot,
-                  int target_pos = 0)
-{
-    // print header
-    ostreamTableHeader(out, it, ot, target_pos);
-    // print data
-    OC_ASSERT(it.empty() || it.size() == ot.size());
-    for (size_t row = 0; row < ot.size(); ++row) {
-        std::vector<std::string> content;
-        if (!it.empty())
-            content = it[row].to_strings();
-        std::string oc = table_fmt_vertex_to_str(ot[row]);
-        if (target_pos < 0)
-            content.push_back(oc);
-        else
-            content.insert(content.begin() + target_pos, oc);
-        ostreamContainer(out, content, ",") << std::endl;
-    }
-    return out;
-}
-
-/// like above but take a table instead of an input and output table
 template<typename Out>
 Out& ostreamTable(Out& out, const Table& table)
 {
-    return ostreamTable(out, table.itable, table.otable, table.target_pos);
+    // print header
+    ostreamTableHeader(out, table);
+    // print data
+    unsigned isize = table.itable.size(), osize = table.otable.size();
+    OC_ASSERT(table.itable.empty() || isize == osize);
+    for (size_t row = 0; row < osize; ++row) {
+        std::vector<std::string> content;
+        if (!table.itable.empty())
+            content = table.itable[row].to_strings();
+        std::string oc = table_fmt_vertex_to_str(table.otable[row]);
+        if (table.target_pos < 0)
+            content.push_back(oc);
+        else
+            content.insert(content.begin() + table.target_pos, oc);
+        ostreamContainer(out, content, ",") << std::endl;
+    }
+    return out;
 }
 
 /// like above but take a table instead of a input and output table

@@ -1164,6 +1164,10 @@ istreamDenseTable_noHeader(istream& in, Table& tab,
     tab.target_pos = target_idx - boost::count_if(ignore_idxs,
                                                   arg1 < target_idx);
 
+    if (timestamp_idx >= 0)
+        tab.timestamp_pos = timestamp_idx -
+            boost::count_if(ignore_idxs, arg1 < timestamp_idx);
+
     return in;
 }
 
