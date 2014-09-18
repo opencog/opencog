@@ -229,6 +229,8 @@ namespace PatternMining
 
      void calculateSurprisingness( HTreeNode* HNode);
 
+     void sharedNodesAndLeavesFilter(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, set<Handle> &leaves, AtomSpace* _atomSpace);
+
  public:
      PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram = 3);
      ~PatternMiner();
