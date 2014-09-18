@@ -180,10 +180,11 @@ Out& ostreamTableHeader(Out& out, const Table& table)
 {
     // Add input features in header
     std::vector<std::string> header = table.itable.get_labels();
+    unsigned hsize = header.size();
 
     // Add target feature in header
     const std::string& ol = table.otable.get_label();
-    header.insert(header.begin() + table.target_pos, ol);
+    header.insert(header.begin() + std::min(table.target_pos, hsize), ol);
 
     // Add timestamp feature in header
     if (!table.ttable.empty()) {
@@ -212,10 +213,11 @@ Out& ostreamTable(Out& out, const Table& table)
         std::vector<std::string> content;
         if (!table.itable.empty())
             content = table.itable[row].to_strings();
+        unsigned csize = content.size();
 
         // Add target feature value
         std::string oc = table_fmt_vertex_to_str(table.otable[row]);
-        content.insert(content.begin() + table.target_pos, oc);
+        content.insert(content.begin() + std::min(table.target_pos, csize), oc);
 
         // Add timestamp feature value
         if (!table.ttable.empty()) {
