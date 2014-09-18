@@ -160,6 +160,20 @@ public:
                          "0,0\n");
     }
 
+    void test_filterTable()
+    {
+        string input_file = tableUTest_dir + "timestamp_table2.csv";
+        Table table = loadTable(input_file, "target", "time");
+        Table filtered_table = table.filtered(std::set<int>({1}));
+
+        stringstream ss;
+        ostreamTable(ss, filtered_table);
+        TS_ASSERT_EQUALS(ss.str(),
+                         "input1,time,target\n"
+                         "1,2012-03-11,6\n"
+                         "0,2012-03-23,7\n")
+    }
+
     void test_filterCTable()
     {
         std::cout << "\n----------------------------" << std::endl;
