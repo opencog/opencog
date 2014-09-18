@@ -362,27 +362,6 @@ public:
         }
     }
 
-    void test_force_feature()
-    {
-        string target_feature = "target";
-        string timestamps_feature = "";
-        vector<string> ignore_features = {"time", "f1"};
-        string input_file = tableUTest_dir + "dataset_force_feature.csv";
-        Table tt = loadTable(input_file, target_feature, timestamps_feature,
-                             ignore_features);
-
-        ostreamTable(cout << "before" << endl, tt);
-        
-        vector<string> features = {"time"};
-        tt.add_features_from_file(input_file, features);
-
-        ostreamTable(cout << "after" << endl, tt);
-
-        stringstream ss;
-        ostreamTable(ss, tt);
-        TS_ASSERT_EQUALS(ss.str(), string("time,target,f2\n12-04-2012,1,0\n"));
-    }
-
     void test_loadCTable()
     {
         string input_file = tableUTest_dir + "dataset.ctable";

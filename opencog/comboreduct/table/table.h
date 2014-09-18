@@ -998,14 +998,6 @@ struct Table : public boost::equality_comparable<Table>
     /// for each row, during compression.
     CTable compressed(const std::string = "") const;
 
-    /// add raw features given an input file and a list of
-    /// features. It is assumed that the table has a subset of
-    /// features as the ones present in the given file, so what that
-    /// function is doing is inserting some missing features in the
-    /// same order.
-    void add_features_from_file(const std::string& input_file,
-                                std::vector<std::string> features);
-
     ITable itable;
     OTable otable;
     TTable ttable;

@@ -117,8 +117,7 @@ void write_results(const Table& selected_table,
 {
     Table table_wff = selected_table;
     if (!fs_params.force_features_str.empty())
-        table_wff.add_features_from_file(fs_params.input_file,
-                                         fs_params.force_features_str);
+        OC_ASSERT(false, "TODO");
     if (fs_params.output_file.empty())
         ostreamTable(cout, table_wff);
     else
