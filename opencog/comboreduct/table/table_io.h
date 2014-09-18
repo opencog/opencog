@@ -178,15 +178,29 @@ CTable loadCTable(const std::string& file_name);
 template<typename Out>
 Out& ostreamTableHeader(Out& out, const Table& table)
 {
+    // Add input features in header
     std::vector<std::string> header = table.itable.get_labels();
-    const std::string& ol = table.otable.get_label();
     OC_ASSERT(table.target_pos <= (int)header.size(),
               "target_pos %d greater than number of inputs %u",
               table.target_pos, header.size());
+
+    // Add target feature in header
+    const std::string& ol = table.otable.get_label();
     if (table.target_pos < 0)
         header.push_back(ol);
     else
         header.insert(header.begin() + table.target_pos, ol);
+
+    // Add timestamp feature in header
+    if (!table.ttable.empty()) {
+        const std::string& tl = table.ttable.get_label();
+        if (table.timestamp_pos < 0)
+            header.push_back(tl);
+        else
+            header.insert(header.begin() + table.timestamp_pos, tl);
+    }
+
+    // Write the header
     ostreamContainer(out, header, ",") << std::endl;
     return out;
 }
@@ -198,6 +212,7 @@ Out& ostreamTable(Out& out, const Table& table)
 {
     // print header
     ostreamTableHeader(out, table);
+
     // print data
     unsigned isize = table.itable.size(), osize = table.otable.size();
     OC_ASSERT(table.itable.empty() || isize == osize);
