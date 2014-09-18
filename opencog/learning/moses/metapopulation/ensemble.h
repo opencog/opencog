@@ -76,7 +76,6 @@ public:
 private:
     const ensemble_parameters& _params;
     bscore_base& _bscorer;
-    double _effective_length;
     double _tolerance;
     double _bias;
     std::vector<double> _row_bias;

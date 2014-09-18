@@ -292,11 +292,36 @@ score_t select_bscore::get_error(const behavioral_score& bs) const
 }
 
 // XXX This is not quite right, for weighted rows.  A row with a small
-// weight could result in a much small min-improv. 
+// weight could result in a much smaller min-improv. 
 // (But I think boosting should not affect min-improv, right?)
 score_t select_bscore::min_improv() const
 {
     return 1.0 / _ctable_weight;
+}
+
+void select_bscore::reset_weights()
+{
+    behavioral_score bs = worst_possible_bscore();
+    double znorm = 0.0;
+    for (size_t i=0; i<_size; i++) znorm -= bs[i];
+    _effective_length = znorm;
+    znorm /= _size;
+    _weights = std::vector<double>(_size, znorm);
+
+    logger().info() << "select_bscore::reset_weights() norm=" << znorm;
+}
+
+void select_bscore::update_weights(const std::vector<double>& rew)
+{
+    double znorm = 0.0;
+    for (size_t i = 0; i < _size; i++) {
+        _weights[i] *= rew[i];
+        znorm += _weights[i];
+    }
+
+    // Normalization: sum of weights must equal 1.0
+    znorm = _effective_length / znorm;
+    for (size_t i=0; i<_size; i++) _weights[i] *= znorm;
 }
 
 } // ~namespace moses

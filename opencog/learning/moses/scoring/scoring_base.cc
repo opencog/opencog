@@ -128,7 +128,7 @@ score_t bscore_base::sum_bscore(const behavioral_score& bs) const
 
     size_t i=0;
     score_t res = 0.0;
-    for (; i<_size; i++) {
+    for (; i < _size; i++) {
         res += _weights[i] * bs[i];
     }
 
@@ -149,6 +149,26 @@ void bscore_base::reset_weights()
         _weights = std::vector<double>();
 }
 
+void bscore_base::update_weights(const std::vector<double>& rew)
+{
+    OC_ASSERT(_return_weighted_score,
+        "Unexpected use of weights in the bscorer!");
+
+    OC_ASSERT(rew.size() == _size,
+        "Unexpected size of weight array!");
+
+    double znorm = 0.0;
+    for (size_t i = 0; i < _size; i++) {
+        _weights[i] *= rew[i];
+        znorm += _weights[i];
+    }
+
+    // Normalization: sum of weights must equal 1.0
+    // Uhhh, not all scorers need this.  Mostly, this is used
+    // to make get_error() return the right thing ...
+    znorm = 1.0 / znorm;
+    for (size_t i=0; i<_size; i++) _weights[i] *= znorm;
+}
 
 ////////////////////////
 // bscore_ctable_base //

@@ -42,30 +42,21 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	// Don't mess with the scorer weights if not doing boosting.
 	if (not ep.do_boosting) return;
 
-	if (_params.experts)
-		_effective_length = 1.0;
-	else
-		_effective_length = - cs.worst_possible_score();
-
-	// The current normalization is to have all row weights sum to 1.0
+	// Initialize the weights that the scorer will use.
 	_bscorer.reset_weights();
-	std::vector<double>& weights = _bscorer.get_weights();
-	size_t bslen = weights.size();
-	double znorm = _effective_length / ((double) bslen);
-	for (size_t i=0; i<bslen; i++) weights[i] = znorm;
 
 	// _tolerance is an estimate of the accumulated rounding error
 	// that arises when totaling the bscores.  As usual, assumes a
 	// normal distribution for this, so that its a square-root.
+	size_t bslen = _bscorer.size();
 	_tolerance = 2.0 * epsilon_score;
-	_tolerance *= sqrt((double)bslen);
+	_tolerance *= sqrt((double) bslen);
 
 	_bias = 0.0;
 	if (not ep.exact_experts) {
 		_row_bias = std::vector<double>(bslen, 0.0);
 	}
 
-	logger().info() << "Boosting: effective length: " << _effective_length;
 	logger().info() << "Boosting: number to promote: " << ep.num_to_promote;
 	if (ep.experts) {
 		logger().info() << "Boosting: exact experts: " << ep.exact_experts;
@@ -100,55 +91,6 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 {
 	int promoted = 0;
 
-	// We need the length of the behavioral score, as normalization.
-	// The correct "length" is kind-of tricky to understand when a table
-	// has weighted rows, or when it is degenerate.  In the degenerate
-	// case, no matter what selection is made, some rows will be wrong.
-	// So we explicitly review these cases here: the table may have
-	// degenerate or non-degenerate rows, and these may be weighted or
-	// non-weighted.  Here, the "weights" are not the boosting weights,
-	// but the user-specified row weights.
-	//
-	//  non-degenerate, non weighted:
-	//       (each row has defacto weight of 1.0)
-	//       best score = 0 so  err = score / num rows;
-	//
-	//  non-degenerate, weighted:
-	//       best score = 0 so  err = score / weighted num rows;
-	//       since the score is a sum of weighted rows.
-	//
-	//       e.g. two rows with user-specified weights:
-	//            0.1
-	//            2.3
-	//       so if first row is wrong, then err = 0.1/2.4
-	//       and if second row is wrong, err = 2.3/2.4
-	//
-	//  degenerate, non-weighted:
-	//       best score > 0   err = (score - best_score) / eff_num_rows;
-	//
-	//       where eff_num_rows = sum_row fabs(up-count - down-count)
-	//       is the "effective" number of rows, as opposing rows
-	//       effectively cancel each-other out.  This is also the
-	//       "worst possible score", what would be returned if every
-	//       row was marked wrong.
-	//
-	//       e.g. table five uncompressed rows:
-	//            up:1  input-a
-	//            dn:2  input-a
-	//            up:2  input-b
-	//       best score is -1 (i.e. is 4-5 where 4 = 2+2).
-	//       so if first row is wrong, then err = (1-1)/5 = 0/3
-	//       so if second row is wrong, then err = (2-1)/5 = 1/3
-	//       so if third & first is wrong, then err = (3-1)/3 = 2/3
-	//       so if third & second is wrong, then err = (4-1)/3 = 3/3
-	//
-	// Thus, the "effective_length" is (minus) the worst possible score.
-	//
-	// The subtraction (score - best_score) needs to be done in the
-	// scorer itself, and not here: that's because the boost row weighting
-	// must be performed on this difference, so that only the rows that
-	// are far away from their best-possible values get boosted.
-	//
 	while (true) {
 		// Find the element (the combo tree) with the least error. This is
 		// the element with the highest score.
@@ -158,7 +100,6 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 					return a.get_score() > b.get_score(); });
 
 		logger().info() << "Boosting: candidate score=" << best_p->get_score();
-		// double err = (- best_p->get_score()) / _effective_length;
 		double err = _bscorer.get_error(best_p->get_bscore());
 		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
 
@@ -202,17 +143,12 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 		// Recompute the weights
 		const behavioral_score& bs = best_p->get_bscore();
 		size_t bslen = _bscorer.size();
-		std::vector<double>& weights = _bscorer.get_weights();
-		double znorm = 0.0;
+		std::vector<double> weights(bslen);
 		for (size_t i=0; i<bslen; i++)
 		{
-			weights[i] *= is_correct(bs[i]) ? rcpalpha : expalpha;
-			znorm += weights[i];
+			weights[i] = is_correct(bs[i]) ? rcpalpha : expalpha;
 		}
-
-		// Normalization: sum of weights must equal 1.0
-		znorm = _effective_length / znorm;
-		for (size_t i=0; i<bslen; i++) weights[i] *= znorm;
+      _bscorer.update_weights(weights);
 
 		// Remove from the set of candidates.
 		cands.erase(best_p);
@@ -302,8 +238,7 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 		// Adjust the bias, if needed.
 		if (not _params.exact_experts) {
 			const behavioral_score& bs = best_p->get_bscore();
-			const std::vector<double>& weights = _bscorer.get_weights();
-			size_t bslen = weights.size();
+			size_t bslen = _bscorer.size();
 
 			// Now, look to see where this scorer was wrong, and bump the
 			// bias for that.  Here, we make the defacto assumption that
@@ -327,20 +262,16 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 		// Increase the importance of all remaining, unselected rows.
 		double rcpalpha = 1.0 / expalpha;
 		const behavioral_score& bs = best_p->get_bscore();
-		std::vector<double>& weights = _bscorer.get_weights();
-		size_t bslen = weights.size();
-		double znorm = 0.0;
+		size_t bslen = _bscorer.size();
+		std::vector<double> weights(bslen);
 		for (size_t i=0; i<bslen; i++)
 		{
-			// A row is correctly selected if its score is strictly positive.
-			// The weights of unselected rows increase.
-			weights[i] *= (0.0 < bs[i]) ? rcpalpha : expalpha;
-			znorm += weights[i];
+			// Again, here we explicitly assume the pre scorer: A row is
+			// correctly selected if its score is strictly positive.
+			// The weights of unselected rows must increase.
+			weights[i] = (0.0 < bs[i]) ? rcpalpha : expalpha;
 		}
-
-		// Normalization: sum of scores must equal 1.0
-		znorm = 1.0 / znorm;
-		for (size_t i=0; i<bslen; i++) weights[i] *= znorm;
+      _bscorer.update_weights(weights);
 
 		// Remove from the set of candidates.
 		cands.erase(best_p);
