@@ -231,6 +231,10 @@ evalTableParameters eval_table_program_args(int argc, char** argv)
          "Target feature name. If empty (default) then no target feature "
          "is considered and the table is assumed to be all input data.\n")
 
+        ("timestamp-feature",
+         value<string>(&pa.timestamp_feature_str),
+         "Label of the timestamp feature. If none is given it is ignored.\n")
+
         (opt_desc_str(ignore_feature_str_opt).c_str(),
          value<vector<string>>(&pa.ignore_features_str),
          "Ignore feature from the datasets. Can be used several times "
