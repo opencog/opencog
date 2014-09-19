@@ -671,17 +671,21 @@ Columns are:
 no-dupe: -i preselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 --boost=1
 presel: -i preselect.csv -Hpre -Yval -q0.05 -z350 -v45 --boost=1
 
-
      num_evals  no-dupe                 presel
-                       (time) recall            (time)
-     --------- ----------------------   ---------------
-        10K    1.0     (0m5s) 0.19192   0.72449 (0m12s)
-        20K                             0.67133 (0m33s)
-        40K                             0.67133 (1m28s)
+                       (time) recall            (time)  recall
+     --------- ----------------------   ----------------------
+        10K    1.0     (0m5s) 0.19192   0.72449 (0m12s) 0.71717
+        20K                             0.67133 (0m33s) 0.96970 
+        40K                             0.67133 (1m28s) 0.96970
         80K                             0.67133 (3m35s)
 
-The unbugged version runs faster, but makes less progress.  And also
-the scores go down!  Why?
+
+Wow! These results are excellent!
+
+The scores go down!  Why? Oh, I see .. the recall actually goes up.
+The recall is obtained by running eval-candidate 9see below). Strange
+side effect, that the recall goes up ... but precision goes down.
+Is this a bug ??
 
 Are the reported trees correct?  Verify:
 
@@ -696,13 +700,26 @@ Size of the compressed dataset is 329
 ----
 An activation of 0.05 seems far too easy.  Try again with -q0.25:
 
-     num_evals  no-dupe          presel             unbugged
-                        (time)            (time)          (time)
-     --------- ----------------  ----------------   ------------
-        10K    -1.10718 (0m21s)  -1.33032 (0m16s)   0.73034 (0m5s)
-        20K    -1.10718 (1m27s)  -0.02069 (0m57s)   0.73034 (0m5s)
-        40K    -0.92486 (4m50s)   0.10869 (3m39s)   0.73034 (0m5s)
-        80K    -0.46532 (17m4s)   0.30226 (14m48s)  
+  nevals  no-dupe                           presel
+                  (time)  recall  activa            (time) recall
+  ------ -------- ------- ------- -------   -------------- ------
+    10K   0.27912 (0m12s) 0.40404 0.12158   0.73034 (0m5s) 0.65657
+    20K   0.50226 (0m42s) 0.50505 0.15198   0.73034 (0m5s)
+    40K   0.63329 (2m57s) 0.57576 0.17325   0.73034 (0m5s)
+    80K   0.85292 (9m2s)  0.71717 0.21580 
+
+When validating: for the 10K result, the prerec scorer claims:
+precision = 1.000000  recall = 0.404040  recall penalty = 0
+But the pre scorer claims:
+precision = 1.000000  activation=0.121581  activation penalty=-7.208840e-01
+
+The matrix of results is:
+   tp = 40  fp = 0    tp+fp = 40 
+   fn = 59  tn = 230  fn+tn = 289 
+   tp+fn = 99  fp+tn = 230  total = 329
+
+Activation = tp/total =  0.121580547112462
+
 
 OK, so the no-dupe results are now pathetic, and the boosted version
 is a major improvement.  (the presel column, as before, is the old and
