@@ -659,6 +659,35 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
     return tr;
 }
 
+void precision_bscore::reset_weights()
+{
+    if (_return_weighted_score)
+        _weights = std::vector<double>(_size, 1.0);
+    else
+        _weights = std::vector<double>();
+}
+
+void precision_bscore::update_weights(const std::vector<double>& rew)
+{
+    OC_ASSERT(_return_weighted_score,
+        "Unexpected use of weights in the bscorer!");
+
+    OC_ASSERT(rew.size() == _size,
+        "Unexpected size of weight array!");
+
+    double znorm = 0.0;
+    for (size_t i = 0; i < _size; i++) {
+        _weights[i] *= rew[i];
+        znorm += _weights[i];
+    }
+
+    // Normalization: sum of weights must equal _size
+    // This is not really correct, but it keeps us in the general
+    // area of having each row have an average weight of 1.0.
+    znorm = ((double) _size) / znorm;
+    for (size_t i=0; i<_size; i++) _weights[i] *= znorm;
+}
+
 ///////////////////////////
 // precision_conj_bscore //
 ///////////////////////////

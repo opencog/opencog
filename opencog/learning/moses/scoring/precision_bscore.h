@@ -129,8 +129,12 @@ struct precision_bscore : public bscore_ctable_time_dispersion
 
     score_t min_improv() const;
 
-    virtual void set_complexity_coef(score_t complexity_ratio);
-    virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
+    void set_complexity_coef(score_t complexity_ratio);
+    void set_complexity_coef(unsigned alphabet_size, float stddev);
+
+    // For boosting
+    void reset_weights();
+    void update_weights(const std::vector<double>&);
 
     /**
      * This is a experimental feature, we generate a massive combo
