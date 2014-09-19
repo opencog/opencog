@@ -94,24 +94,6 @@ void log_selected_features(arity_t old_arity, const Table& ftable,
     }
 }
 
-/**
- * Get indices (aka positions or offsets) of a list of labels given a header
- */
-vector<unsigned> get_indices(const vector<string>& labels,
-                             const vector<string>& header)
-{
-    vector<unsigned> res;
-    for (unsigned i = 0; i < header.size(); ++i)
-        if (boost::find(labels, header[i]) != labels.end())
-            res.push_back(i);
-    return res;
-}
-
-unsigned get_index(const string& label, const vector<string>& header)
-{
-    return distance(header.begin(), boost::find(header, label));
-}
-
 void write_results(const Table& selected_table,
                    const feature_selection_parameters& fs_params)
 {
@@ -216,7 +198,7 @@ void feature_selection(const Table& table,
     if (!fs_params.force_features_str.empty()) {
         vector<unsigned> force_idxs =
             get_indices(fs_params.force_features_str, table.itable.get_labels());
-        select_features.insert(force_idxs.begin(), force_idxs.end());
+        selected_features.insert(force_idxs.begin(), force_idxs.end());
     }
 
     // Write the features (in log and output)
