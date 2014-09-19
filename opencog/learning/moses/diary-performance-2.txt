@@ -672,13 +672,13 @@ no-dupe: -i preselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 --boost=1
 presel: -i preselect.csv -Hpre -Yval -q0.05 -z350 -v45 --boost=1
 
 
-     num_evals  no-dupe         presel
-                       (time)           (time)
-     --------- ---------------  ---------------
-        10K    1.0     (0m5s)   0.72449 (0m12s)
-        20K                     0.67133 (0m33s)
-        40K                     0.67133 (1m28s)
-        80K                     0.67133 (3m35s)
+     num_evals  no-dupe                 presel
+                       (time) recall            (time)
+     --------- ----------------------   ---------------
+        10K    1.0     (0m5s) 0.19192   0.72449 (0m12s)
+        20K                             0.67133 (0m33s)
+        40K                             0.67133 (1m28s)
+        80K                             0.67133 (3m35s)
 
 The unbugged version runs faster, but makes less progress.  And also
 the scores go down!  Why?
@@ -689,11 +689,9 @@ Are the reported trees correct?  Verify:
 
 This gives 0.72449 . Yep. so that works.  Checked the 20K tree too.
 
-The no-dupe result gives 1.0 for the pre scorer with -q0.05  whoa..
-but the prerec scorer says its only 0.0424664 !??? wtf?
+The no-dupe result gives 1.0 for the pre scorer with -q0.05  whoa ...
 
 Size of the compressed dataset is 329
-prerec_bscore: precision = 0.000000  recall=0.191919
 
 ----
 An activation of 0.05 seems far too easy.  Try again with -q0.25:
