@@ -1,6 +1,7 @@
 /** eval-candidate.h --- 
  *
  * Copyright (C) 2013 OpenCog Foundation
+ * Copyright (C) 2014 Aidyia Limited
  *
  * Author: Nil Geisweiller <ngeiswei@gmail.com>
  *
@@ -31,10 +32,15 @@ struct eval_candidate_params
     // IO
     std::string input_file;
     std::vector<std::string> combo_program_files;
-    std::string output_file,
-        target_feature_str;
+    std::string output_file;
+    std::string target_feature_str;
     // parameters
     std::string problem;
+
+    // problem params, for the "pre" problem.
+    double activation_pressure;
+    double min_activation;
+    double max_activation;
 };
 
 // problems

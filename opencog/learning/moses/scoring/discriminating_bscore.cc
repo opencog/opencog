@@ -142,6 +142,23 @@ discriminator::d_counts discriminator::count(const combo_tree& tr) const
             ctr.negative_count += totalc;
         }
     }
+
+    if (logger().isFineEnabled()) {
+        logger().fine("counter: tp = %f  fp = %f  tp+fp = %f pos = %f",
+                      ctr.true_positive_sum, ctr.false_positive_sum,
+                      ctr.true_positive_sum + ctr.false_positive_sum,
+                      ctr.positive_count);
+
+        logger().fine("counter: fn = %f  tn = %f  fn+tn = %f neg=%f",
+                      ctr.false_negative_sum, ctr.true_negative_sum,
+                      ctr.false_negative_sum + ctr.true_negative_sum,
+                      ctr.negative_count);
+
+        logger().fine("counter: tp+fn = %f  fp+tn = %f  total = %f",
+                      ctr.true_positive_sum + ctr.false_negative_sum,
+                      ctr.false_positive_sum + ctr.true_negative_sum,
+                      ctr.positive_count + ctr.negative_count);
+    }
     return ctr;
 }
 
@@ -278,12 +295,12 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
     // Then we select the best score obtained (accounting for both
     // variable and fixed parts).
     unsigned acc_cnt = 0;
-    score_t acc_pos = 0.0,     // accumulation of positive
-        acc_neg = 0.0,      // accumulation of negative
-        best_sc = very_worst_score,      // best score
-        best_vary = 0.0,    // best score varying component
-        best_fixed = 0.0,   // the best score fixed component
-        best_fixation_penalty = 0.0; // best score fixed component penalty
+    score_t acc_pos = 0.0;      // accumulation of positive
+    score_t acc_neg = 0.0;      // accumulation of negative
+    score_t best_sc = very_worst_score;      // best score
+    score_t best_vary = 0.0;    // best score varying component
+    score_t best_fixed = 0.0;   // the best score fixed component
+    score_t best_fixation_penalty = 0.0; // best score fixed component penalty
 
     logger().fine() << "Disc: min_thresh=" << _min_threshold;
 
@@ -293,10 +310,10 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
         acc_cnt += std::get<2>(pnc);
 
         // compute current score (and its varying and fixed parts)
-        score_t vary = get_variable(acc_pos, acc_neg, acc_cnt),
-            fixed = get_fixed(acc_pos, acc_neg, acc_cnt),
-            fixation_penalty = get_threshold_penalty(fixed),
-            sc = vary + fixation_penalty;
+        score_t vary = get_variable(acc_pos, acc_neg, acc_cnt);
+        score_t fixed = get_fixed(acc_pos, acc_neg, acc_cnt);
+        score_t fixation_penalty = get_threshold_penalty(fixed);
+        score_t sc = vary + fixation_penalty;
 
         // update best score (and its varying and fixed parts)
         if (sc > best_sc) {
@@ -411,10 +428,10 @@ behavioral_score recall_bscore::operator()(const combo_tree& tr) const
 
     score_t precision_penalty = get_threshold_penalty(precision);
     bs.push_back(precision_penalty);
-    if (logger().isFineEnabled())
+    if (logger().isFineEnabled()) {
         logger().fine("recall_bcore: precision = %f  recall=%f  precision penalty=%e",
                      precision, recall, precision_penalty);
-
+    }
     log_candidate_bscore(tr, bs);
     return bs;
 }
@@ -502,7 +519,7 @@ behavioral_score prerec_bscore::operator()(const combo_tree& tr) const
         bs.push_back(0.5);
 
         // compute precision and recall
-        precision = boost::accumulate(bs, 0);
+        precision = boost::accumulate(bs, 0.0);
         for (const d_counts& ctr : ctr_seq)
             recall += ctr.true_positive_sum;
         if (0.0 < _true_total)
@@ -529,7 +546,7 @@ behavioral_score prerec_bscore::operator()(const combo_tree& tr) const
     // Log precision, recall and penalty
     if (logger().isFineEnabled())
         logger().fine("prerec_bscore: precision = %f  "
-                      "recall=%f  recall penalty=%e",
+                      "recall = %f  recall penalty = %f",
                       precision, recall, recall_penalty);
 
     log_candidate_bscore(tr, bs);

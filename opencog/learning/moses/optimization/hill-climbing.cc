@@ -153,7 +153,7 @@ void hill_climbing::operator()(deme_t& deme,
             // log why crossover is enabled
             std::stringstream why_xover;
             if (large_nbh)
-                why_xover << "n'bhood too large for exhaustive srch"
+                why_xover << "n'bhood too large for exhaustive srch: "
                           << total_number_of_neighbors << ">="
                           << xover_min_neighbors;
             else if (last_chance)

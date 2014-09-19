@@ -225,12 +225,14 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const
     logger().debug("CTable size for feature selection = %u",
                    fs_ctable.size());
 
+#if NOT_NOW_THIS_CREATES_HUGE_LOGFILE
     if (logger().isFineEnabled()) {
         logger().fine("fs_ctable:");
         std::stringstream ss;
         ostreamCTable(ss, fs_ctable);
         logger().fine() << ss.str();
     }
+#endif
 
     return fs_ctable;
 }
