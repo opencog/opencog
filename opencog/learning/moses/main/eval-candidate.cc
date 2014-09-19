@@ -1,6 +1,7 @@
 /** eval-candidate.cc --- 
  *
  * Copyright (C) 2013 OpenCog Foundation
+ * Copyright (C) 2014 Aidyia Limited
  *
  * Author: Nil Geisweiller <ngeiswei@gmail.com>
  *
@@ -32,15 +33,18 @@
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
 
-#include <opencog/comboreduct/combo/iostream_combo.h>
-#include <opencog/util/oc_assert.h>
 #include <opencog/util/iostreamContainer.h>
+#include <opencog/util/oc_assert.h>
+
+#include <opencog/comboreduct/combo/iostream_combo.h>
 #include <opencog/comboreduct/table/table_io.h>
 #include <opencog/learning/moses/moses/types.h>
 #include <opencog/learning/moses/moses/complexity.h>
 
 #include "../scoring/discriminating_bscore.h"
 #include "../scoring/behave_cscore.h"
+#include "../scoring/bscores.h"
+#include "../scoring/precision_bscore.h"
 
 #include "eval-candidate.h"
 
@@ -145,10 +149,14 @@ int main(int argc, char** argv)
 
         // Parameters
         ("problem,H", po::value<string>(&ecp.problem)->default_value(f_one),
-         str(boost::format("Problem to solve, supported problems are:\n\n"
-                           "%s, regression based on input table, maximizing F1-score\n")
-             % f_one).c_str())
-
+         "Scorer to run. Supported scorers all erquire an input table. "
+         "Supported scorers are:\n\n"
+         "\trecall: show recall\n"
+         "\tprerec: show precision\n"
+         "\tf_one:  show F1-score (geometric mean of precision and recall)\n"
+         "\tbep:    break-even point\n"
+         "\tit:     accuracy scorer\n"
+         "\tpre:    precision-activation scorer\n")
         ;
 
     po::variables_map vm;
@@ -179,6 +187,13 @@ int main(int argc, char** argv)
     }
     logger().setBackTraceLevel(Logger::ERROR);
 
+    // Record original command line
+    std::stringstream ss;
+    for (int i=0; i<argc; i++) {
+        ss << " " << argv[i];
+    }
+    logger().info() << "Command line:" << ss.str();
+
     // init random generator
     randGen().seed(rand_seed);
 
@@ -193,16 +208,39 @@ int main(int argc, char** argv)
     vector<combo_tree> trs;
     for (const string& tr_str : all_combo_tree_str) {
         combo_tree tr = str2combo_tree_label(tr_str, it.get_labels());
-        if (logger().isFineEnabled()) {
+        if (logger().isDebugEnabled()) {
             logger().fine() << "Combo str: " << tr_str;
-            logger().fine() << "Parsed combo: " << tr;
+            logger().debug() << "Parsed combo: " << tr;
         }
         trs.push_back(tr);
     }
 
     // Define scorer (only support f_one for now)
-    f_one_bscore bscore(table.compressed());
-    behave_cscore bcscore(bscore);
+    bscore_base* bscore = NULL;
+    if ("recall" == ecp.problem) {
+        bscore = new recall_bscore(table.compressed());
+    }
+    else if ("prerec" == ecp.problem) {
+        bscore = new prerec_bscore(table.compressed());
+    }
+    else if ("bep" == ecp.problem) {
+        bscore = new bep_bscore(table.compressed());
+    }
+    else if ("f_one" == ecp.problem) {
+        bscore = new f_one_bscore(table.compressed());
+    }
+    else if ("it" == ecp.problem) {
+        bscore = new ctruth_table_bscore(table.compressed());
+    }
+    else if ("pre" == ecp.problem) {
+        // XXX need to set activation pressure, etc.
+        bscore = new precision_bscore(table.compressed());
+    }
+    else {
+        OC_ASSERT(false, "Unknown scorer type.");
+    }
+
+    behave_cscore bcscore(*bscore);
 
     // Evaluate the fitness score of each program
     vector<composite_score> css;
