@@ -43,7 +43,6 @@ static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> input_table_opt("input-table", "i");
 static const pair<string, string> target_feature_opt("target-feature", "u");
 static const pair<string, string> ignore_feature_str_opt("ignore-feature", "Y");
-static const pair<string, string> force_feature_opt("force-feature", "e");
 static const pair<string, string> combo_str_opt("combo-program", "c");
 static const pair<string, string> combo_prog_file_opt("combo-programs-file", "C");
 static const pair<string, string> labels_opt("labels", "L");
@@ -237,11 +236,6 @@ evalTableParameters eval_table_program_args(int argc, char** argv)
          "Ignore feature from the datasets. Can be used several times "
          "to ignore several features.\n")
 
-        (opt_desc_str(force_feature_opt).c_str(),
-         value<vector<string>>(&pa.force_features_str),
-         "Force feature to be displayed (including ones which have been ignored). "
-         "Can be used several times to force several features.\n")
-
         (opt_desc_str(combo_str_opt).c_str(),
          value<vector<string>>(&pa.combo_programs),
          "Combo program to evaluate against the input table. Note that in order "
@@ -281,7 +275,7 @@ evalTableParameters eval_table_program_args(int argc, char** argv)
          "(stdout) all outputs are appended.\n")
 
         (opt_desc_str(display_inputs_opt).c_str(), value<bool>(&pa.display_inputs)->default_value(false),
-         "Display all inputs (as well as the output and the forced features), "
+         "Display all inputs (as well as the output), "
          "the feature order is preserved.\n")
 
         (opt_desc_str(log_level_opt).c_str(),
