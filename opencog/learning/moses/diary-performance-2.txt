@@ -721,14 +721,14 @@ The matrix of results is:
 Activation = tp/total =  0.121580547112462
 
 
-OK, so the no-dupe results are now pathetic, and the boosted version
-is a major improvement.  (the presel column, as before, is the old and
-buggy code.)
+Why is it terminating?  Because its getting perfect score on ensemble
+... !? even though min ctivation not yet hit ??
 
-Why does the unbugged column not change?  Why does the score not go up?
-Why the fast termination?
 
 wtf in the logfile:  Expert: candidate score=-1.90976 error=0
+ Best score: [score=153.4647216796875
+
+so the normalization is bad ... 
 
 -------
 Comparable non-boosted results, for -q0.05:
