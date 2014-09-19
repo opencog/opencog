@@ -157,6 +157,18 @@ int main(int argc, char** argv)
          "\tbep:    break-even point\n"
          "\tit:     accuracy scorer\n"
          "\tpre:    precision-activation scorer\n")
+
+        ("alpha,Q",
+         po::value<double>(&ecp.activation_pressure)->default_value(1.0),
+         "pre scorer: Activation pressure.\n")
+
+        (",q",
+         po::value<double>(&ecp.min_activation)->default_value(0.5),
+         "pre scorer: Minimum activation.\n")
+
+        (",w",
+         po::value<double>(&ecp.max_activation)->default_value(1.0),
+         "pre scorer: Maximum activation.\n")
         ;
 
     po::variables_map vm;
@@ -233,8 +245,9 @@ int main(int argc, char** argv)
         bscore = new ctruth_table_bscore(table.compressed());
     }
     else if ("pre" == ecp.problem) {
-        // XXX need to set activation pressure, etc.
-        bscore = new precision_bscore(table.compressed());
+        bscore = new precision_bscore(table.compressed(),
+                      ecp.activation_pressure, ecp.min_activation,
+                      ecp.max_activation);
     }
     else {
         OC_ASSERT(false, "Unknown scorer type.");
