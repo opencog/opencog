@@ -116,8 +116,6 @@ void write_results(const Table& selected_table,
                    const feature_selection_parameters& fs_params)
 {
     Table table_wff = selected_table;
-    if (!fs_params.force_features_str.empty())
-        OC_ASSERT(false, "TODO");
     if (fs_params.output_file.empty())
         ostreamTable(cout, table_wff);
     else
@@ -211,7 +209,17 @@ feature_set select_features(const Table& table,
 void feature_selection(const Table& table,
                        const feature_selection_parameters& fs_params)
 {
+    // Select the best features
     feature_set selected_features = select_features(table, fs_params);
+
+    // Add the enforced features
+    if (!fs_params.force_features_str.empty()) {
+        vector<unsigned> force_idxs = 
+            get_indices(fs_params.force_features_str, table.itable.get_labels());
+        select_features.insert(force_idxs.begin(), force_idxs.end());
+    }
+
+    // Write the features (in log and output)
     if (selected_features.empty())
         err_empty_features(fs_params.output_file);
     else {
