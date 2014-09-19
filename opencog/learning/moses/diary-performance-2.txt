@@ -664,32 +664,39 @@ Stragetgy A Boosted pre-scorer results
 Strategy A has been implemented. Since the ensemble always has a
 precision of 1.0, the actual score is always 1.0 - activation_penalty.
 
+Scored below are after a mid-Seept2014 bug-fix to the boosted
+precision scorer.
+
 Columns are:
 no-dupe: -i preselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 --boost=1
 presel: -i preselect.csv -Hpre -Yval -q0.05 -z350 -v45 --boost=1
 
-unbugged: same as presel, but w/ bug fixes (mid-Sept 2014)
 
-     num_evals  no-dupe         presel              unbugged
-                       (time)           (time)            (time)
-     --------- ---------------  ---------------   ---------------
-        10K    0.50226 (0m21s)  0.27912 (0m16s)   0.72449 (0m12s)
-        20K    0.50226 (1m25s)  0.80556 (0m59s)   0.67133 (0m33s)
-        40K    0.68458 (4m36s)  0.80488 (3m48s)   0.67133 (1m28s)
-        80K    1.0     (6m8s)   0.80000 (14m15s)  0.67133 (3m35s)
+     num_evals  no-dupe         presel
+                       (time)           (time)
+     --------- ---------------  ---------------
+        10K    1.0     (0m5s)   0.72449 (0m12s)
+        20K                     0.67133 (0m33s)
+        40K                     0.67133 (1m28s)
+        80K                     0.67133 (3m35s)
 
-The last one went down!  How odd ...
 The unbugged version runs faster, but makes less progress.  And also
-goes backwards!
+the scores go down!  Why?
 
 Are the reported trees correct?  Verify:
 
    eval-candidate -i preselect.csv -uoutput -C pre.combo -Hprerec
 
-This gives 0.72449 . Yep. so that works.
+This gives 0.72449 . Yep. so that works.  Checked the 20K tree too.
 
+The no-dupe result gives 1.0 for the pre scorer with -q0.05  whoa..
+but the prerec scorer says its only 0.0424664 !??? wtf?
 
-But an activation of 0.05 seems far too easy.  Try again with -q0.25:
+Size of the compressed dataset is 329
+prerec_bscore: precision = 0.000000  recall=0.191919
+
+----
+An activation of 0.05 seems far too easy.  Try again with -q0.25:
 
      num_evals  no-dupe          presel             unbugged
                         (time)            (time)          (time)
@@ -699,10 +706,16 @@ But an activation of 0.05 seems far too easy.  Try again with -q0.25:
         40K    -0.92486 (4m50s)   0.10869 (3m39s)   0.73034 (0m5s)
         80K    -0.46532 (17m4s)   0.30226 (14m48s)  
 
-Both these activations are still pathetic ...
+OK, so the no-dupe results are now pathetic, and the boosted version
+is a major improvement.  (the presel column, as before, is the old and
+buggy code.)
 
-wtf:  Expert: candidate score=-1.90976 error=0
+Why does the unbugged column not change?  Why does the score not go up?
+Why the fast termination?
 
+wtf in the logfile:  Expert: candidate score=-1.90976 error=0
+
+-------
 Comparable non-boosted results, for -q0.05:
 
      num_evals  no-dupe          presel

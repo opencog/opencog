@@ -154,21 +154,34 @@ int main(int argc, char** argv)
          "\trecall: show recall\n"
          "\tprerec: show precision\n"
          "\tf_one:  show F1-score (geometric mean of precision and recall)\n"
-         "\tbep:    break-even point\n"
+         "\tbep:    break-even point (difference between precision and recall)\n"
          "\tit:     accuracy scorer\n"
          "\tpre:    precision-activation scorer\n")
 
         ("alpha,Q",
          po::value<double>(&ecp.activation_pressure)->default_value(1.0),
-         "pre scorer: Activation pressure.\n")
+         "pre scorer: Activation pressure.\n"
+         "recall, prerec, bep scorers: Hardness.\n"
+         "\nIf the score is not between the minimum and mixiimum, it is "
+         "penalized with the pressure/hardness penalty.\n" )
 
         (",q",
-         po::value<double>(&ecp.min_activation)->default_value(0.5),
-         "pre scorer: Minimum activation.\n")
+         po::value<double>(&ecp.min_activation)->default_value(0.0),
+         "pre scorer: Minimum activation.\n"
+         "prerec scorer: Minimum recall.\n"
+         "recall scorer: Minimum precision.\n"
+         "bep    scorer: Minimum difference between precision and recall.\n"
+         "\nIf the score is not between the minimum and mixiimum, it is "
+         "penalized with the pressure/hardness penalty.\n" )
 
         (",w",
          po::value<double>(&ecp.max_activation)->default_value(1.0),
-         "pre scorer: Maximum activation.\n")
+         "pre scorer: Maximum activation.\n"
+         "prerec scorer: Maximum recall.\n"
+         "recall scorer: Maximum precision.\n"
+         "bep    scorer: Maximum difference between precision and recall.\n"
+         "\nIf the score is not between the minimum and mixiimum, it is "
+         "penalized with the pressure/hardness penalty.\n" )
         ;
 
     po::variables_map vm;
@@ -230,13 +243,16 @@ int main(int argc, char** argv)
     // Define scorer (only support f_one for now)
     bscore_base* bscore = NULL;
     if ("recall" == ecp.problem) {
-        bscore = new recall_bscore(table.compressed());
+        bscore = new recall_bscore(table.compressed(),
+            ecp.min_activation, ecp.max_activation, ecp.activation_pressure);
     }
     else if ("prerec" == ecp.problem) {
-        bscore = new prerec_bscore(table.compressed());
+        bscore = new prerec_bscore(table.compressed(),
+            ecp.min_activation, ecp.max_activation, ecp.activation_pressure);
     }
     else if ("bep" == ecp.problem) {
-        bscore = new bep_bscore(table.compressed());
+        bscore = new bep_bscore(table.compressed(),
+            ecp.min_activation, ecp.max_activation, ecp.activation_pressure);
     }
     else if ("f_one" == ecp.problem) {
         bscore = new f_one_bscore(table.compressed());
@@ -246,8 +262,7 @@ int main(int argc, char** argv)
     }
     else if ("pre" == ecp.problem) {
         bscore = new precision_bscore(table.compressed(),
-                      ecp.activation_pressure, ecp.min_activation,
-                      ecp.max_activation);
+            ecp.activation_pressure, ecp.min_activation, ecp.max_activation);
     }
     else {
         OC_ASSERT(false, "Unknown scorer type.");
