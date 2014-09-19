@@ -262,8 +262,20 @@ behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_
     }
 
     if (0.0 < active) {
+        // normalization is the inverse of activity
+        score_t iac = 1.0 / active;
+
+        // For the boosted scorer, the active rows are weighted too.
+        // Its still tp+fp, except that the bscore for fp are negative...
+        if (_return_weighted_score) {
+            double znorm = 0.0;
+            for (size_t i=0; i< _size; i++) {
+                znorm += _weights[i] * fabs(bs[i]);
+            }
+            iac = 0.5 / znorm;
+        }
+
         // Normalize all components by active, where active = tp+fp
-        score_t iac = 1.0 / active; // inverse of activity to be faster
         for (auto& v : bs) v *= iac;
 
         // tp = true positive

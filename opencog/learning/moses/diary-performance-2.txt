@@ -553,8 +553,13 @@ temperature seem to work very well for preselect-no-dupe.csv and
 
    moses -Hpre -q0.05 -Yval -ipreselect.csv
 
-Max attainable precision on preselect.csv should be: 
-(329-50)/329 = 0.848024
+Max attainable precision, with perfect recall, on preselect.csv should
+be: 
+   (329-50)/329 = 0.848024
+That's because 50 rows are dupes, and selecting those will give fp's.
+However, if we allow a smaller recall, and never recall the dupe rows,
+then a best-possible precision of 1.0 is acheivable, if the allowed
+recall is small enough.
   
 
      num_evals  preselect       no-dupe       
@@ -573,7 +578,7 @@ averaging over multiple random seeds.
 General strategy:
 
 current scorer:
-  if row picked, sum the outputs (= 0.5 *pos - neg)
+  if row picked, sum the outputs (= 0.5 * (pos - neg))
   active += pos+neg (weighted correctly)
 
   row score = sum of outputs / total weight of selected.
@@ -664,8 +669,13 @@ Stragetgy A Boosted pre-scorer results
 Strategy A has been implemented. Since the ensemble always has a
 precision of 1.0, the actual score is always 1.0 - activation_penalty.
 
-Scored below are after a mid-Seept2014 bug-fix to the boosted
+Scored below are after a mid-Sept 2014 bug-fix to the boosted
 precision scorer.
+
+Code currently claims:
+Precision scorer, best score = 0.941176
+activation at best score = 0.051672
+precision of 'true' is 0.300912
 
 Columns are:
 no-dupe: -i preselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 --boost=1
