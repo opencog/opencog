@@ -214,7 +214,7 @@ void feature_selection(const Table& table,
 
     // Add the enforced features
     if (!fs_params.force_features_str.empty()) {
-        vector<unsigned> force_idxs = 
+        vector<unsigned> force_idxs =
             get_indices(fs_params.force_features_str, table.itable.get_labels());
         select_features.insert(force_idxs.begin(), force_idxs.end());
     }
