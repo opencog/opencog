@@ -199,7 +199,7 @@
 ; unary rules
 ; -----------------------------------------------------------------------
 (define (entity-rule word word_instance) 
-	(InheritanceLink (SpecificEntityNode word_instance df-node-stv) (ConceptNode word df-node-stv) df-link-stv)
+	(list (InheritanceLink (SpecificEntityNode word_instance df-node-stv) (ConceptNode word df-node-stv) df-link-stv))
 )
 
 (define (gender-rule word word_instance gender_type)
@@ -225,18 +225,18 @@
 
 (define (det-rule concept instance var_name determiner)
 	(cond ((or (string=? determiner "those") (string=? determiner "these"))
-		(ImplicationLink df-link-stv
+		(list (ImplicationLink df-link-stv
 			(MemberLink (VariableNode var_name df-node-stv) (ConceptNode instance df-node-stv) df-link-stv)
-			(InheritanceLink (VariableNode var_name df-node-stv) (ConceptNode concept df-node-stv) df-link-stv))
+			(InheritanceLink (VariableNode var_name df-node-stv) (ConceptNode concept df-node-stv) df-link-stv)))
 		)
 		((or (string=? determiner "this") (string=? determiner "that"))
-			(InheritanceLink (VariableNode var_name df-node-stv) (ConceptNode concept df-node-stv) df-link-stv)
+			(list (InheritanceLink (VariableNode var_name df-node-stv) (ConceptNode concept df-node-stv) df-link-stv))
 		)
 	)
 )
 
 (define (negative-rule verb instance)
-	(ImplicationLink (PredicateNode instance df-node-stv) (NotLink (PredicateNode verb df-node-stv) df-link-stv) df-link-stv)
+	(list (ImplicationLink (PredicateNode instance df-node-stv) (NotLink (PredicateNode verb df-node-stv) df-link-stv) df-link-stv))
 )
 
 (define (definite-rule word word_instance)
