@@ -668,27 +668,40 @@ Columns are:
 no-dupe: -i preselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 --boost=1
 presel: -i preselect.csv -Hpre -Yval -q0.05 -z350 -v45 --boost=1
 
-     num_evals  no-dupe         presel
-                       (time)           (time)  
-     --------- --------------   --------------
-        10K    0.50226 (0m21s)  0.27912 (0m16s)
-        20K    0.50226 (1m25s)  0.80556 (0m59s)
-        40K    0.68458 (4m36s)  0.80488 (3m48s)
-        80K    1.0     (6m8s)   0.80000 (14m15s) 
+unbugged: same as presel, but w/ bug fixes (mid-Sept 2014)
 
-The last one went down!  How odd ... 
+     num_evals  no-dupe         presel              unbugged
+                       (time)           (time)            (time)
+     --------- ---------------  ---------------   ---------------
+        10K    0.50226 (0m21s)  0.27912 (0m16s)   0.72449 (0m12s)
+        20K    0.50226 (1m25s)  0.80556 (0m59s)   0.67133 (0m33s)
+        40K    0.68458 (4m36s)  0.80488 (3m48s)   0.67133 (1m28s)
+        80K    1.0     (6m8s)   0.80000 (14m15s)  0.67133 (3m35s)
+
+The last one went down!  How odd ...
+The unbugged version runs faster, but makes less progress.  And also
+goes backwards!
+
+Are the reported trees correct?  Verify:
+
+   eval-candidate -i preselect.csv -uoutput -C pre.combo -Hprerec
+
+This gives 0.72449 . Yep. so that works.
+
 
 But an activation of 0.05 seems far too easy.  Try again with -q0.25:
 
-     num_evals  no-dupe          presel
-                        (time)            (time)  
-     --------- --------------    --------------
-        10K    -1.10718 (0m21s)  -1.33032 (0m16s)
-        20K    -1.10718 (1m27s)  -0.02069 (0m57s)
-        40K    -0.92486 (4m50s)   0.10869 (3m39s)
-        80K    -0.46532 (17m4s)   0.30226 (14m48s)
+     num_evals  no-dupe          presel             unbugged
+                        (time)            (time)          (time)
+     --------- ----------------  ----------------   ------------
+        10K    -1.10718 (0m21s)  -1.33032 (0m16s)   0.73034 (0m5s)
+        20K    -1.10718 (1m27s)  -0.02069 (0m57s)   0.73034 (0m5s)
+        40K    -0.92486 (4m50s)   0.10869 (3m39s)   0.73034 (0m5s)
+        80K    -0.46532 (17m4s)   0.30226 (14m48s)  
 
-Both these activations are still pathetic ... 
+Both these activations are still pathetic ...
+
+wtf:  Expert: candidate score=-1.90976 error=0
 
 Comparable non-boosted results, for -q0.05:
 
@@ -831,4 +844,11 @@ Future directions
 * Explore the "local expert" idea above.
 * Try to understand the underlying claim about getting good results
   from the precision scorer.
+
+Sept 2014
+---------
+There were some bugs affecting the precision scorer. Re-run above
+experiments.
+
+:q
 
