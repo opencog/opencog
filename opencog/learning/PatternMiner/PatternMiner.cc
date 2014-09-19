@@ -573,9 +573,9 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
 
     // Get all the shared nodes and leaves
     HandleSeqSeq oneOfEachSeqShouldBeVars;
-    set<Handle> leaves;
+    HandleSeq leaves, shouldNotBeVars;
 
-    sharedNodesAndLeavesFilter(inputLinks, oneOfEachSeqShouldBeVars, leaves, _fromAtomSpace);
+    filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace);
 
     // var_num is the number of variables
     for (int var_num = 1;var_num < n_limit; ++ var_num)
@@ -636,51 +636,60 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
                     index ++;
                 }
 
-                // HandleSeqSeq oneOfEachSeqShouldBeVars;
-                // set<Handle> leaves;
-
-                // check if in this combination, if at least one node in each Seq of oneOfEachSeqShouldBeVars is considered as variable
-                bool allSeqContainsVar = true;
-                foreach(HandleSeq& oneSharedSeq, oneOfEachSeqShouldBeVars)
+                if (enable_filter_links_should_connect_by_vars)
                 {
-                    bool thisSeqContainsVar = false;
-                    foreach (Handle& toBeSharedNode, oneSharedSeq)
+
+                    // check if in this combination, if at least one node in each Seq of oneOfEachSeqShouldBeVars is considered as variable
+                    bool allSeqContainsVar = true;
+                    foreach(HandleSeq& oneSharedSeq, oneOfEachSeqShouldBeVars)
                     {
-                        if (patternVarMap.find(toBeSharedNode) != patternVarMap.end())
+                        bool thisSeqContainsVar = false;
+                        foreach (Handle& toBeSharedNode, oneSharedSeq)
                         {
-                            thisSeqContainsVar = true;
-                            break;
+                            if (patternVarMap.find(toBeSharedNode) != patternVarMap.end())
+                            {
+                                thisSeqContainsVar = true;
+                                break;
+                            }
+
                         }
 
+                        if (! thisSeqContainsVar)
+                        {
+                            allSeqContainsVar = false;
+                            break;
+                        }
                     }
 
-                    if (! thisSeqContainsVar)
-                    {
-                        allSeqContainsVar = false;
-                        break;
-                    }
+                    if (! allSeqContainsVar)
+                        skip = true;
                 }
-
-                if (! allSeqContainsVar)
-                    skip = true;
 
             }
 
 
-            bool isLeafVar = false;
-            if ( (! skip) && (gram > 1) ) // for gram > 1, any leaf should not considered as variable
+            if ( (! skip) && (enable_filter_leaves_should_not_be_vars) && (gram > 1) ) // for gram > 1, any leaf should not considered as variable
             {
                 foreach (Handle leaf , leaves)
                 {
                     if (patternVarMap.find(leaf) != patternVarMap.end())
                     {
-                        isLeafVar = true;
+                        skip = true;
                         break;
                     }
                 }
+            }
 
-                if (isLeafVar)
-                    skip = true;
+            if ( (! skip) && (enable_filter_node_types_should_not_be_vars))
+            {
+                foreach (Handle noTypeNode , shouldNotBeVars)
+                {
+                    if (patternVarMap.find(noTypeNode) != patternVarMap.end())
+                    {
+                        skip = true;
+                        break;
+                    }
+                }
             }
 
 
@@ -717,7 +726,8 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
                     // option: Breadth_First , Depth_First
                     if (Pattern_mining_mode == "Depth_First")
                     {
-                        cout << "This is a new pattern !\n" << std::endl;
+                        cout << "A a new pattern Found:\n"<< keyString << std::endl;
+
                         newHTreeNode->count = 1;
                     }
                 }
@@ -1134,6 +1144,24 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
 
     for(varIt = allVarNodes.begin(); varIt != allVarNodes.end(); ++ varIt)
     {
+
+        if (enable_filter_node_types_should_not_be_vars)
+        {
+            bool isIgnoredType = false;
+            Type t = _fromAtomSpace->getType((Handle)(*varIt));
+            foreach (Type noType, node_types_should_not_be_vars)
+            {
+                if (t == noType)
+                {
+                    isIgnoredType = true;
+                    break;
+                }
+            }
+
+            if (isIgnoredType )
+                continue;
+        }
+
         // find what are the other links in the original Atomspace contain this variable
         HandleSeq incomings = _fromAtomSpace->getIncoming( ((Handle)(*varIt)));
         // debug
@@ -1158,7 +1186,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
             if (isInHandleSeq(extendedHandle, instance))
                 continue;
 
-            cout << "Debug: Extended link :" << extendedHandleStr << std::endl;
+            // cout << "Debug: Extended link :" << extendedHandleStr << std::endl;
 
             if (extendedHandleStr.find("$var") != std::string::npos)
             {
@@ -1189,7 +1217,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
                     if (exitstingLinks == originalLinksToSet)
                     {
                         alreadyExtracted = true;
-                        cout<< "Debug: these links have already been extracted! Skip them!"<<std::endl;
+                        // cout<< "Debug: these links have already been extracted! Skip them!"<<std::endl;
                         break;
                     }
 
@@ -1476,7 +1504,7 @@ void PatternMiner::GrowAllPatterns()
 // Each HandleSeq in HandleSeqSeq oneOfEachSeqShouldBeVars is a list of nodes that connect two links in inputLinks,
 // at least one node in a HandleSeq should be variable, which means two connected links in inputLinks should be connected by at least a variable
 // leaves are those nodes that are not connected to any other links in inputLinks, they should be
-void PatternMiner::sharedNodesAndLeavesFilter(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, set<Handle>& leaves, AtomSpace* _atomSpace)
+void PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, AtomSpace* _atomSpace)
 {
     if(inputLinks.size() < 2)
         return;
@@ -1487,47 +1515,72 @@ void PatternMiner::sharedNodesAndLeavesFilter(HandleSeq& inputLinks, HandleSeqSe
         extractAllNodesInLink(inputLinks[i],allNodesInEachLink[i], _atomSpace);
     }
 
-    // find the common nodes which are shared among inputLinks
-    for (unsigned i = 0; i < inputLinks.size() - 1; i ++)
+    if (enable_filter_links_should_connect_by_vars)
     {
-        for (unsigned j = i+1; j < inputLinks.size(); j ++)
+        // find the common nodes which are shared among inputLinks
+        for (unsigned i = 0; i < inputLinks.size() - 1; i ++)
         {
-            vector<Handle> commonNodes;
-            // get the common nodes in allNodesInEachLink[i] and allNodesInEachLink[j]
-            std::set_intersection(allNodesInEachLink[i].begin(), allNodesInEachLink[i].end(),
-                                  allNodesInEachLink[j].begin(), allNodesInEachLink[j].end(),
-                                  std::back_inserter(commonNodes));
-
-            if (commonNodes.size() > 0)
-                oneOfEachSeqShouldBeVars.push_back(commonNodes);
-
-        }
-
-    }
-
-    // find leaves
-    for (unsigned i = 0; i < inputLinks.size(); i ++)
-    {
-        foreach (Handle node, allNodesInEachLink[i])
-        {
-            bool is_leaf = true;
-
-            // try to find if this node exist in other links of inputLinks
-            for (unsigned j = 0; j < inputLinks.size(); j ++)
+            for (unsigned j = i+1; j < inputLinks.size(); j ++)
             {
-                if (j == i)
-                    continue;
+                vector<Handle> commonNodes;
+                // get the common nodes in allNodesInEachLink[i] and allNodesInEachLink[j]
+                std::set_intersection(allNodesInEachLink[i].begin(), allNodesInEachLink[i].end(),
+                                      allNodesInEachLink[j].begin(), allNodesInEachLink[j].end(),
+                                      std::back_inserter(commonNodes));
 
-                if (allNodesInEachLink[j].find(node) != allNodesInEachLink[j].end())
-                {
-                    is_leaf = false;
-                    break;
-                }
+                if (commonNodes.size() > 0)
+                    oneOfEachSeqShouldBeVars.push_back(commonNodes);
 
             }
 
-            if (is_leaf)
-                leaves.insert(node);
+        }
+    }
+
+    if ( (enable_filter_leaves_should_not_be_vars) || (enable_filter_node_types_should_not_be_vars) )
+    {
+
+        for (unsigned i = 0; i < inputLinks.size(); i ++)
+        {
+            foreach (Handle node, allNodesInEachLink[i])
+            {
+
+                // find leaves
+                if (enable_filter_leaves_should_not_be_vars)
+                {
+                    bool is_leaf = true;
+
+                    // try to find if this node exist in other links of inputLinks
+                    for (unsigned j = 0; j < inputLinks.size(); j ++)
+                    {
+                        if (j == i)
+                            continue;
+
+                        if (allNodesInEachLink[j].find(node) != allNodesInEachLink[j].end())
+                        {
+                            is_leaf = false;
+                            break;
+                        }
+
+                    }
+
+                    if (is_leaf)
+                        leaves.push_back(node);
+                }
+
+                // check if this node is in node_types_should_not_be_vars
+                if (enable_filter_node_types_should_not_be_vars)
+                {
+                    Type t = _atomSpace->getType(node);
+                    foreach(Type noType, node_types_should_not_be_vars)
+                    {
+                        if (t == noType)
+                        {
+                            shouldNotBeVars.push_back(node);
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -2035,7 +2088,7 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
 //        THREAD_NUM = 1;
 
     // use all the threads in this machine
-    THREAD_NUM = system_thread_num * 2;
+    THREAD_NUM = system_thread_num;
 
 
 //    // test only one tread for now
@@ -2055,6 +2108,21 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     assert(enable_Frequent_Pattern || enable_Interesting_Pattern);
     //The options are "Interaction_Information", "surprisingness"
     assert( (interestingness_Evaluation_method == "Interaction_Information") || (interestingness_Evaluation_method == "surprisingness") );
+
+    enable_filter_leaves_should_not_be_vars = config().get_bool("enable_filter_leaves_should_not_be_vars");
+    enable_filter_links_should_connect_by_vars = config().get_bool("enable_filter_links_should_connect_by_vars");
+    enable_filter_node_types_should_not_be_vars =  config().get_bool("enable_filter_node_types_should_not_be_vars");
+
+    if (enable_filter_node_types_should_not_be_vars)
+    {
+        string node_types_str = config().get("node_types_should_not_be_vars");
+        node_types_str.erase(std::remove(node_types_str.begin(), node_types_str.end(), ' '), node_types_str.end());
+        vector<string> typeStrs = StringManipulator::split(node_types_str,",");
+        foreach(string typestr, typeStrs)
+        {
+            node_types_should_not_be_vars.push_back( classserver().getType(typestr) );
+        }
+    }
 
     // vector < vector<HTreeNode*> > patternsForGram
     for (unsigned int i = 0; i < max_gram; ++i)

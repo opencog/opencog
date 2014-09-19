@@ -104,6 +104,11 @@ namespace PatternMining
 
      float last_gram_total_float;
 
+     bool enable_filter_leaves_should_not_be_vars;
+     bool enable_filter_links_should_connect_by_vars;
+     bool enable_filter_node_types_should_not_be_vars;
+     vector<Type> node_types_should_not_be_vars;
+
      unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
 
      std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock, readNextLinkLock;
@@ -229,7 +234,7 @@ namespace PatternMining
 
      void calculateSurprisingness( HTreeNode* HNode);
 
-     void sharedNodesAndLeavesFilter(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, set<Handle> &leaves, AtomSpace* _atomSpace);
+     void filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, AtomSpace* _atomSpace);
 
  public:
      PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram = 3);
