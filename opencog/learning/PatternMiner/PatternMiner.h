@@ -79,6 +79,7 @@ namespace PatternMining
      HTree* htree;
      AtomSpace* atomSpace;
      AtomSpace* originalAtomSpace;
+     AtomSpace* observingAtomSpace;
 
      HandleSeq allLinks;// all links in the orginal atomspace
 
@@ -93,15 +94,24 @@ namespace PatternMining
 
      unsigned int MAX_GRAM;
 
+     string Pattern_mining_mode;
+
      unsigned int cur_gram;
 
-     unsigned int cur_index;
+     int cur_index;
+
+     int allLinkNumber;
 
      float last_gram_total_float;
 
+     bool enable_filter_leaves_should_not_be_vars;
+     bool enable_filter_links_should_connect_by_vars;
+     bool enable_filter_node_types_should_not_be_vars;
+     vector<Type> node_types_should_not_be_vars;
+
      unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
 
-     std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock;
+     std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock, readNextLinkLock;
 
      Type ignoredTypes[1];
 
@@ -150,27 +160,27 @@ namespace PatternMining
      void generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector< vector<int> > &indexes);
 
      // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
-     void generateALinkByChosenVariables(Handle &originalLink, map<Handle,Handle>& valueToVarMap, HandleSeq &outputOutgoings);
+     void generateALinkByChosenVariables(Handle &originalLink, map<Handle,Handle>& valueToVarMap, HandleSeq &outputOutgoings, AtomSpace *_fromAtomSpace);
 
       // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
-     void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap);
-     void extractAllNodesInLink(Handle link, set<Handle>& allNodes); // just find all the nodes in the original atomspace for this link
+     void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap, AtomSpace* _fromAtomSpace);
+     void extractAllNodesInLink(Handle link, set<Handle>& allNodes, AtomSpace *_fromAtomSpace); // just find all the nodes in the original atomspace for this link
      void extractAllVariableNodesInLink(Handle link, set<Handle>& allNodes, AtomSpace* _atomSpace);
 
      // if a link contains only variableNodes , no const nodes
      bool onlyContainVariableNodes(Handle link, AtomSpace* _atomSpace);
 
-     void extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, HTreeNode* parentNode, set<Handle> &sharedNodes, unsigned int gram = 1);
+     void extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, HTreeNode* parentNode, set<Handle> &sharedNodes, AtomSpace *_fromAtomSpace, unsigned int gram = 1);
 
-     void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings, HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool &containVar);
+     void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings, HandleSeq &outVariableNodes);
 
      // Generate the links in toAtomSpace the same as the fromLinks in the fromAtomSpace. Return the swapped links in the toAtomSpace.
      // Output all the variable nodes in the toAtomSpace BTW
-     HandleSeq swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq &outVariableNodes, HandleSeq &linksWillBeDel);
+     HandleSeq swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq &outVariableNodes);
 
      void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, set<Handle>& allVarNodes);
 
-     void extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
+     void extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, AtomSpace *_fromAtomSpace, unsigned int gram, vector<set<Handle> > &newExtendedLinks);
 
      void findAllInstancesForGivenPattern(HTreeNode* HNode);
 
@@ -182,7 +192,7 @@ namespace PatternMining
 
      void GrowAllPatterns();
 
-     void reportProgress();
+     void growPatternsDepthFirstTask();
 
      bool isInHandleSeq(Handle handle, HandleSeq &handles);
 
@@ -224,6 +234,8 @@ namespace PatternMining
 
      void calculateSurprisingness( HTreeNode* HNode);
 
+     void filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, AtomSpace* _atomSpace);
+
  public:
      PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram = 3);
      ~PatternMiner();
@@ -233,6 +245,10 @@ namespace PatternMining
      void OutPutPatternsToFile(unsigned int n_gram, bool is_interesting_pattern = false);
 
      void runPatternMiner(unsigned int _thresholdFrequency = 2);
+
+     void runPatternMinerBreadthFirst();
+
+     void runPatternMinerDepthFirst();
 
      void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram = 2);
 

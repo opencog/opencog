@@ -3,6 +3,7 @@ ADD_LIBRARY (PatternMiner SHARED
 	Pattern
 	HTree
 	PatternMiner
+        PatternMinerDF
 )
 
 ADD_DEPENDENCIES(PatternMiner opencog_atom_types)
