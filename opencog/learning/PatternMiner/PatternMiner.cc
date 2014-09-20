@@ -2178,6 +2178,8 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
     allLinkNumber = (int)(allLinks.size());
     atomspaceSizeFloat = (float)(allLinkNumber);
 
+    std::cout<<"Corpus size: "<< allLinkNumber << " links in total. \n";
+
     if (Pattern_mining_mode == "Breadth_First")
         runPatternMinerBreadthFirst();
     else
@@ -2241,6 +2243,7 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
     int end_time = time(NULL);
     printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
+    std::cout<<"Corpus size: "<< allLinkNumber << " links in total. \n";
 
 //   testPatternMatcher2();
 
