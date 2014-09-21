@@ -675,7 +675,18 @@ precision scorer.
 Code currently claims:
 Precision scorer, best score = 0.941176
 activation at best score = 0.051672
-precision of 'true' is 0.300912
+precision of 'true' exemplar is 0.300912 = 99 / 329
+(all 329 rows selected, of which 99 are true.)
+This leaves 329-99 = 230 false rows.
+
+sum = -65.5 = 0.5 (tp - fp) of the selected rows, all rows selected.
+= 0.5 *(99 - 230) = -131 / 2 = sum_outputs(orow)
+
+Note that sum/active = -65.5 / 329 = - 0.19908 = 0.300912 - 0.5 = prec - 0.5
+just as expected....
+
+ahh .. another bug ...
+-------
 
 Columns are:
 no-dupe: -i preselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 --boost=1

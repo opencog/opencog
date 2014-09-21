@@ -162,8 +162,8 @@ precision_bscore::precision_bscore(const CTable& ctable_,
 
 /// For boolean tables, sum the total number of 'T' values
 /// in the output.  This sum represents the best possible score
-/// i.e. we found all of the true values correcty.  Count
-/// 'F' is 'positive' is false.
+/// i.e. we found all of the true values correcty.  The 'F's are 
+/// false positives.
 score_t precision_bscore::sum_outputs(const CTable::counter_t& c) const
 {
     return 0.5 * (c.get(_target) - c.get(_neg_target));
@@ -199,6 +199,7 @@ void precision_bscore::set_complexity_coef(score_t ratio)
 behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_seq&)> select) const
 {
     behavioral_score bs;
+    behavioral_score ac;
 
     score_t active = 0.0;  // total weight of active outputs by tr
     score_t sao = 0.0;     // sum of all active outputs
@@ -220,12 +221,14 @@ behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_
         const multi_type_seq& irow = io_row.first;
         const auto& orow = io_row.second;
 
-        score_t sumo = 0.0;  // zero if not active
+        score_t sumo = 0.0;  // (tp-fp)/2 if active, else 0 if not active
+        score_t acto = 0.0;  // fp + tp if active, else 0 if not active
         bool selected = select(irow);
         if (selected) {
             sumo = sum_outputs(orow);
             sao += sumo;
-            active += orow.total_count();
+            acto = orow.total_count();
+            active += acto;
         }
 
         if (time_bscore) {
@@ -237,6 +240,7 @@ behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_
             }
         } else {
             bs.push_back(sumo);
+            ac.push_back(acto);
         }
 
         // Build CTable of results
@@ -258,6 +262,7 @@ behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_
             count_t fp = v.second.get(false);
             score_t contribution = 0.5 * (tp - fp);
             bs.push_back(contribution);
+            ac.push_back(tp+fp);
         }
     }
 
@@ -268,11 +273,11 @@ behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_
         // For the boosted scorer, the active rows are weighted too.
         // Its still tp+fp, except that the bscore for fp are negative...
         if (_return_weighted_score) {
-            double znorm = 0.0;
+            double wactive = 0.0;
             for (size_t i=0; i< _size; i++) {
-                znorm += _weights[i] * fabs(bs[i]);
+                wactive += _weights[i] * ac[i];
             }
-            iac = 0.5 / znorm;
+            iac = 1.0 / wactive;
         }
 
         // Normalize all components by active, where active = tp+fp
