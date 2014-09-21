@@ -695,11 +695,22 @@ presel: -i preselect.csv -Hpre -Yval -q0.05 -z350 -v45 --boost=1
      num_evals  no-dupe                 presel
                        (time) recall            (time)  recall
      --------- ----------------------   ----------------------
-        10K    1.0     (0m5s) 0.19192   0.72449 (0m12s) 0.71717
+        10K    1.0     (0m5s) 0.19192   0.71429 (0m23s) 0.70701
         20K                             0.67133 (0m33s) 0.96970 
         40K                             0.67133 (1m28s) 0.96970
         80K                             0.67133 (3m35s)
 
+
+-oo
+wtf
+tp = 13 fp = 4 precision = 0.764706  recall=0.131313 activation=0.051672
+
+no don't want the weighted one,   best_composite_score()
+whant the flat one ...
+_cscorer.get_cscore(_ensemble.get_ensemble());
+cscorer is behave_cscore&
+
+_return_weighted_score
 
 Wow! These results are excellent!
 

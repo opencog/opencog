@@ -224,7 +224,7 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     virtual void set_complexity_coef(unsigned alphabet_size, float p);
 
 protected:
-    bool _return_weighted_score;
+    mutable bool _return_weighted_score;
     score_t _complexity_coef;
     mutable size_t _size; // mutable to work around const bugs
     std::vector<double> _weights;

@@ -350,10 +350,22 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 
 behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensemble) const
 {
-    if (exact_experts)
-        return exact_selection(ensemble);
-    else
-        return bias_selection(ensemble);
+    // The ensemble score must not use weights, but must be give the
+    // result that the ensemble would give on regular data.  Thus,
+    // disable weighting while we compute the ensemble score.
+    OC_ASSERT(_return_weighted_score, "Unexpected call to ensemble scorer!");
+    if (exact_experts) {
+        _return_weighted_score = false;
+        behavioral_score bs(exact_selection(ensemble));
+        _return_weighted_score = true;
+        return bs;
+    }
+    else {
+        _return_weighted_score = false;
+        behavioral_score bs(bias_selection(ensemble));
+        _return_weighted_score = true;
+        return bs;
+    }
 }
 
 /// scorer, suitable for use with boosting, where the members of the
@@ -469,11 +481,21 @@ behavioral_score precision_bscore::bias_selection(const scored_combo_tree_set& e
     return do_score(selector);
 }
 
+// XXX the below is still buggy. See XXX below...
 score_t precision_bscore::get_error(const behavioral_score& bs) const
 {
     // The incoming bscore will have 0.0 for non-selected rows, a
     // positive value for correct selected rows, and a negative value
-    // for incorrect selected rows.  If summed with flat weighting,
+    // for incorrect selected rows.  
+    //
+    // XXX Except that is not correct for compressed tables. If could
+    // that, for example, a compressed row consists of three regular
+    // rows, two positive, and one negative. the bscore for this row
+    // would be 0.5*(tp-fp)/(tp+fp) = 0.5/3 = 1/6 which is positive,
+    // but it still has an error of 1/3 ...so the assumptions here
+    // are bad. XXX this needs fixing ...
+
+    // If summed with flat weighting,
     // then the bscore would total to +0.5 if all selected rows are
     // correct, and will total to -0.5 if all selected rows are wrong.
     //
