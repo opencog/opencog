@@ -590,9 +590,9 @@ problem_params::add_options(boost::program_options::options_description& desc)
 
         (opt_desc_str(output_with_labels_opt).c_str(),
          po::value<bool>(&output_with_labels)->default_value(false),
-         "If 1, output the candidates with using the argument labels "
+         "If 1, output the candidates with argument labels "
          "instead of argument numbers. For instance "
-         "*(\"$price\" \"$temprature\") instead of *($1 $2). This only "
+         "*(\"$price\" \"$temperature\") instead of *($1 $2). This only "
          "works for data fitting problems where the data file contains "
          "labels in its header.\n")
 

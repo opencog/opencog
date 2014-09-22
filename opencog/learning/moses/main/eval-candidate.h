@@ -33,7 +33,9 @@ struct eval_candidate_params
     std::string input_file;
     std::vector<std::string> combo_program_files;
     std::string output_file;
+    bool output_with_labels;
     std::string target_feature_str;
+
     // parameters
     std::string problem;
 
