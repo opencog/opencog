@@ -74,6 +74,24 @@ combo_tree str2combo_tree_label(const std::string& combo_prog_str,
     return tr;
 }
 
+/**
+ * Reverse of str2combo_tree_label
+ *
+ * @param combo_prog       combo tree of the program
+ * @param labels           a vector of labels
+ * @return                 string representing the combo tree with labels
+ */
+std::string combo_tree2str_label(const combo_tree& tr,
+                                 const std::vector<std::string>& input_labels)
+{
+    // Stream combo tree into a string
+    stringstream ss;
+    ss << tr;
+
+    // Replace the place holders by labels
+    return ph2l(ss.str(), input_labels);
+}
+
 vector<string> get_all_combo_tree_str(const eval_candidate_params& ecp)
 {
     vector<string> res;
@@ -100,11 +118,23 @@ vector<string> get_all_combo_tree_str(const eval_candidate_params& ecp)
 
 std::ostream& ostream_scored_trees(std::ostream& out,
                                    const vector<combo_tree>& trs,
-                                   const vector<composite_score>& css) {
+                                   const vector<composite_score>& css,
+                                   const eval_candidate_params& ecp,
+                                   const vector<string>& ilabels) {
     unsigned size = trs.size();
     OC_ASSERT(size == css.size());
-    for (unsigned i = 0; i < size; ++i)
-        out << css[i].get_score() << " " << trs[i] << std::endl;
+    for (unsigned i = 0; i < size; ++i) {
+        // Stream out score
+        out << css[i].get_score() << " ";
+
+        // Stream out tree
+        if (ecp.output_with_labels)
+            out << combo_tree2str_label(trs[i], ilabels);
+        else
+            out << trs[i];
+
+        out << std::endl;
+    }
     return out;
 }
 
@@ -132,12 +162,21 @@ int main(int argc, char** argv)
         ("target-feature,u", po::value<string>(&ecp.target_feature_str),
          "Name of the target feature.\n")
 
-        ("combo-program-file,C", po::value<vector<string>>(&ecp.combo_program_files),
+        ("combo-program-file,C",
+         po::value<vector<string>>(&ecp.combo_program_files),
          "File containing combo programs. "
          "Can be used several times for several files.\n")
 
         ("output-file,o", po::value<string>(&ecp.output_file),
          "File to write the results. If none is given it write on the stdout.\n")
+
+        ("output-with-labels,W",
+         po::value<bool>(&ecp.output_with_labels)->default_value(false),
+         "If 1, output the candidates with argument labels "
+         "instead of argument numbers. For instance "
+         "*(\"$price\" \"$temperature\") instead of *($1 $2), "
+         "where price and temperature are the first two features "
+         "of the input table.\n")
 
         ("level,l", po::value<string>(&log_level)->default_value("INFO"),
          "Log level, possible levels are NONE, ERROR, WARN, INFO, "
@@ -277,9 +316,9 @@ int main(int argc, char** argv)
 
     // Output the trees preceded by their scores
     if(ecp.output_file.empty())
-        ostream_scored_trees(cout, trs, css);
+        ostream_scored_trees(cout, trs, css, ecp, it.get_labels());
     else {
         ofstream of(ecp.output_file.c_str());
-        ostream_scored_trees(of, trs, css);
+        ostream_scored_trees(of, trs, css, ecp, it.get_labels());
     }
 }
