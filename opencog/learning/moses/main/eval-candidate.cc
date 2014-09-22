@@ -240,8 +240,8 @@ int main(int argc, char** argv)
         trs.push_back(tr);
     }
 
-    // Define scorer (only support f_one for now)
-    bscore_base* bscore = NULL;
+    // Define scorer
+    bscore_base* bscore = nullptr;
     if ("recall" == ecp.problem) {
         bscore = new recall_bscore(table.compressed(),
             ecp.min_activation, ecp.max_activation, ecp.activation_pressure);
