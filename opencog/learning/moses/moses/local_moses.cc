@@ -44,9 +44,9 @@ using namespace combo;
  *
  */
 static bool expand_deme(metapopulation& mp,
-                 deme_expander& dex,
-                 int max_evals, time_t max_time,
-                 moses_statistics& stats)
+                        deme_expander& dex,
+                        int max_evals, time_t max_time,
+                        moses_statistics& stats)
 {
     if (mp.empty())
         return true;
@@ -121,16 +121,28 @@ void local_moses(metapopulation& mp,
     gettimeofday(&start, NULL);
     stats.elapsed_secs = 0.0;
 
-    while ((stats.n_evals < pa.max_evals)
-           and (pa.max_gens != stats.n_expansions)
-           and (mp.best_score() < pa.max_score)
-           and (stats.elapsed_secs < pa.max_time))
+    // In iterative hillclimbing, it is possible (but not likely)
+    // that the metapop gets empty and expand returns false.
+    // Alternately, the candidate callback may urge a premature
+    // termination.
+    bool premature_termination = false;
+
+    // Other termination conditions
+    auto not_max_evals = [&]() { return stats.n_evals < pa.max_evals; };
+    auto not_max_gens = [&]() { return pa.max_gens != stats.n_expansions; };
+    auto not_max_score = [&]() { return mp.best_score() < pa.max_score; };
+    auto not_max_time = [&]() { return stats.elapsed_secs < pa.max_time; };
+
+    while (not_max_evals() and not_max_gens()
+           and not_max_score() and not_max_time()
+           and !premature_termination)
     {
         // Run a generation
-        bool done = expand_deme(mp, dex,
-                                pa.max_evals - stats.n_evals, 
-                                pa.max_time - stats.elapsed_secs, 
-                                stats);
+        premature_termination =
+            expand_deme(mp, dex,
+                        pa.max_evals - stats.n_evals, 
+                        pa.max_time - stats.elapsed_secs, 
+                        stats);
 
         struct timeval stop, elapsed;
         gettimeofday(&stop, NULL);
@@ -183,16 +195,27 @@ void local_moses(metapopulation& mp,
             ss << pa.max_cnd_output << " best candidates of the metapopulation (with scores and visited status):" << std::endl;
             mp.ostream_metapop(ss, pa.max_cnd_output);
             logger().debug(ss.str());
-        }
-        
-        // In iterative hillclimbing, it is possible (but not likely)
-        // that the metapop gets empty and expand returns false.
-        // Alternately, the candidate callback may urge a premature
-        // termination.
-        if (done) break;
+        }        
     }
-
-    logger().info("MOSES ends");
+    
+    // Log that MOSES ends and why
+    std::stringstream ss;
+    ss << "MOSES ends. ";
+    if (!not_max_evals())
+        ss << "Number of evaluations has reached maximum number of evaluations, "
+           << stats.n_evals << " >= " << pa.max_evals;
+    else if (!not_max_gens())
+        ss << "Number of expansions has reached its maximum, "
+           << stats.n_expansions << " == " << pa.max_gens;
+    else if (!not_max_score())
+        ss << "Best score has reached maximum score, " << mp.best_score()
+           << " >= " << pa.max_score;
+    else if (!not_max_time())
+        ss << "Run-time has exceeded it's limit, " << stats.elapsed_secs
+           << " >= " << pa.max_time;
+    else if (premature_termination)
+        ss << "A premature termination has occured (sorry I can't tell you more)";
+    logger().debug() << ss.str();
 }
 
 } // ~namespace moses
