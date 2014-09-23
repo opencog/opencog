@@ -211,6 +211,23 @@ public:
         test_random_feature_selection(sparse_table, fsp, fsp.target_size);
     }
 
+    void test_random_selection_with_timestamp()
+    {
+        // set feature selection parameters
+        feature_selection_parameters fsp;
+        fsp.algorithm = "random";
+        fsp.input_file = timestamp_table_path;
+        // Ask for 1
+        fsp.target_size = 1;
+        fsp.jobs = 1;
+        setting_omp(fsp.jobs);
+
+        // run and test feature selection
+        test_random_feature_selection(timestamp_table, fsp,
+                                      // +1 for timestamp
+                                      fsp.target_size + 1);
+    }
+
 private:
 
     void test_incremental_selection(unsigned n_jobs) {
