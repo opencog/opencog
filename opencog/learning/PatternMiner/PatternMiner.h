@@ -234,6 +234,11 @@ namespace PatternMining
 
      void calculateSurprisingness( HTreeNode* HNode);
 
+     void getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtendedLink, Handle& leaf, Handle& varNode,
+                                                                 HandleSeq& outPutExtendedPatternLinks, AtomSpace* _fromAtomSpace);
+
+     bool isALinkOneInstanceOfGivenPattern(Handle &instanceLink, Handle& patternLink, AtomSpace* instanceLinkAtomSpace);
+
      void filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, AtomSpace* _atomSpace);
 
  public:

@@ -1292,9 +1292,9 @@ bool compareHTreeNodeByInteractionInformation(HTreeNode* node1, HTreeNode* node2
 
 bool compareHTreeNodeBySurprisingness(HTreeNode* node1, HTreeNode* node2)
 {
-    if (node1->surprisingness - node2->surprisingness > FLOAT_MIN_DIFF)
+    if (node1->nI_Surprisingness - node2->nI_Surprisingness > FLOAT_MIN_DIFF)
         return true;
-    else if (node2->surprisingness - node1->surprisingness > FLOAT_MIN_DIFF)
+    else if (node2->nI_Surprisingness - node1->nI_Surprisingness > FLOAT_MIN_DIFF)
         return false;
 
     return (node1->var_num < node2->var_num);
@@ -1331,7 +1331,7 @@ void PatternMiner::OutPutPatternsToFile(unsigned int n_gram, bool is_interesting
             if (interestingness_Evaluation_method == "Interaction_Information")
                 resultFile << " InteractionInformation = " << toString(htreeNode->interactionInformation);
             else if (interestingness_Evaluation_method == "surprisingness")
-                resultFile << " Surprisingness = " << toString(htreeNode->surprisingness);
+                resultFile << " Surprisingness = " << toString(htreeNode->nI_Surprisingness);
         }
 
         resultFile << endl;
@@ -1949,11 +1949,88 @@ unsigned int PatternMiner::getCountOfASubConnectedPattern(string& connectedSubPa
     }
 }
 
+bool PatternMiner::isALinkOneInstanceOfGivenPattern(Handle &instanceLink, Handle& patternLink, AtomSpace* instanceLinkAtomSpace)
+{
+    if (instanceLinkAtomSpace->getType(instanceLink) != atomSpace->getType(patternLink))
+        return false;
+
+    HandleSeq outComingsOfPattern = atomSpace->getOutgoing(patternLink);
+    HandleSeq outComingsOfInstance = instanceLinkAtomSpace->getOutgoing(instanceLink);
+
+    if (outComingsOfPattern.size() != outComingsOfInstance.size())
+        return false;
+
+    for(int i = 0; i < outComingsOfPattern.size(); i ++)
+    {
+        bool pIsLink = atomSpace->isLink(outComingsOfPattern[i]);
+        bool iIsLink = instanceLinkAtomSpace->isLink(outComingsOfInstance[i]);
+
+        if (pIsLink && iIsLink)
+        {
+            if (isALinkOneInstanceOfGivenPattern(outComingsOfInstance[i], outComingsOfPattern[i], instanceLinkAtomSpace))
+                continue;
+            else
+                return false;
+        }
+        else if ( (!pIsLink)&&(!iIsLink) )
+        {
+            // they are both nodes
+
+            // If this node is a variable, skip it
+            if (atomSpace->getType(outComingsOfPattern[i]) == VARIABLE_NODE)
+                continue;
+            else
+            {
+                if (outComingsOfInstance[i] == outComingsOfPattern[i])
+                    continue;
+                else
+                    return false;
+            }
+        }
+        else
+            return false; // this two atoms are of different type
+    }
+
+    return true;
+
+
+
+}
+
+// the return links is in Pattern mining AtomSpace
+// toBeExtendedLink is the link contains leaf in the pattern
+void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtendedLink, Handle& leaf, Handle& varNode,
+                                                            HandleSeq& outPutExtendedPatternLinks, AtomSpace* _fromAtomSpace)
+{
+    HandleSeq incomings = _fromAtomSpace->getIncoming(leaf);
+
+    foreach(Handle incomingHandle, incomings)
+    {
+        Handle extendedHandle;
+        // if this atom is a igonred type, get its first parent that is not in the igonred types
+        if (isIgnoredType (_fromAtomSpace->getType(incomingHandle)) )
+        {
+            extendedHandle = getFirstNonIgnoredIncomingLink(_fromAtomSpace, incomingHandle);
+            if (extendedHandle == Handle::UNDEFINED)
+                continue;
+        }
+        else
+            extendedHandle = incomingHandle;
+
+        // skip this extendedHandle if it's one instance of toBeExtendedLink
+        if (isALinkOneInstanceOfGivenPattern(extendedHandle, toBeExtendedLink, _fromAtomSpace))
+            continue;
+
+        // todo
+
+    }
+
+}
 
 // make sure only input 2~4 gram patterns
 void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
 {
-//    std::cout << "=================Debug: calculateSurprisingness for pattern: ====================\n";
+    std::cout << "=================Debug: calculateSurprisingness for pattern: ====================\n";
     foreach (Handle link, HNode->pattern)
     {
         std::cout << atomSpace->atomAsString(link);
@@ -2031,16 +2108,25 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
     float p = ((float)HNode->count)/atomspaceSizeFloat;
 //    cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  (int)atomspaceSizeFloat << " = " << p << std::endl;
 
-    float surprisingness_max = p - maxProbability;
-    float surprisingness_min = minProbability - p;
+    float surprisingness_max = (p - maxProbability) / p;
+    float surprisingness_min = (minProbability - p) / p;
 //    cout << "\np - maxProbability = " << surprisingness_max << "; minProbability - p = " << surprisingness_min << std::endl;
 
     if (surprisingness_max >= surprisingness_min)
-        HNode->surprisingness = surprisingness_max ;
+        HNode->nI_Surprisingness = surprisingness_max;
     else
-        HNode->surprisingness = surprisingness_min;
+        HNode->nI_Surprisingness = surprisingness_min;
 
-//    cout << "surprisingness = surprisingness " << HNode->surprisingness  << std::endl;
+//    cout << "nI_Surprisingness = " << HNode->nI_Surprisingness  << std::endl;
+
+    if (gram == MAX_GRAM ) // can't calculate II_Surprisingness for MAX_GRAM patterns, becasue it required gram +1 patterns
+        return;
+
+    std::cout << "=================Debug: calculate II_Surprisingness for pattern: ====================\n";
+
+    // first , get all its superpatterns
+
+
 
 }
 
