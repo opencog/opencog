@@ -866,8 +866,6 @@ istream& istreamTable_OLD(istream& in, Table& tab,
               target_feature.c_str());
 
     tab.target_pos = tab.itable.get_column_offset(target_feature);
-    if (tab.target_pos == tab.get_arity() - 1)
-        tab.target_pos = -1;    // the last position is -1
     
     type_node targ_type = tab.itable.get_type(target_feature);
 
@@ -897,8 +895,6 @@ istream& istreamTable_ignore_indices(istream& in, Table& tab,
               target_feature.c_str());
 
     tab.target_pos = tab.itable.get_column_offset(target_feature);
-    if (tab.target_pos == tab.get_arity() - 1)
-        tab.target_pos = -1;    // the last position is -1
     
     type_node targ_type = tab.itable.get_type(target_feature);
 
@@ -1163,6 +1159,10 @@ istreamDenseTable_noHeader(istream& in, Table& tab,
     // (useful for writing that file back)
     tab.target_pos = target_idx - boost::count_if(ignore_idxs,
                                                   arg1 < target_idx);
+
+    if (timestamp_idx >= 0)
+        tab.timestamp_pos = timestamp_idx -
+            boost::count_if(ignore_idxs, arg1 < timestamp_idx);
 
     return in;
 }

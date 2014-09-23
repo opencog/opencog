@@ -94,31 +94,10 @@ void log_selected_features(arity_t old_arity, const Table& ftable,
     }
 }
 
-/**
- * Get indices (aka positions or offsets) of a list of labels given a header
- */
-vector<unsigned> get_indices(const vector<string>& labels,
-                             const vector<string>& header)
-{
-    vector<unsigned> res;
-    for (unsigned i = 0; i < header.size(); ++i)
-        if (boost::find(labels, header[i]) != labels.end())
-            res.push_back(i);
-    return res;
-}
-
-unsigned get_index(const string& label, const vector<string>& header)
-{
-    return distance(header.begin(), boost::find(header, label));
-}
-
 void write_results(const Table& selected_table,
                    const feature_selection_parameters& fs_params)
 {
     Table table_wff = selected_table;
-    if (!fs_params.force_features_str.empty())
-        table_wff.add_features_from_file(fs_params.input_file,
-                                         fs_params.force_features_str);
     if (fs_params.output_file.empty())
         ostreamTable(cout, table_wff);
     else
@@ -212,7 +191,17 @@ feature_set select_features(const Table& table,
 void feature_selection(const Table& table,
                        const feature_selection_parameters& fs_params)
 {
+    // Select the best features
     feature_set selected_features = select_features(table, fs_params);
+
+    // Add the enforced features
+    if (!fs_params.force_features_str.empty()) {
+        vector<unsigned> force_idxs =
+            get_indices(fs_params.force_features_str, table.itable.get_labels());
+        selected_features.insert(force_idxs.begin(), force_idxs.end());
+    }
+
+    // Write the features (in log and output)
     if (selected_features.empty())
         err_empty_features(fs_params.output_file);
     else {
