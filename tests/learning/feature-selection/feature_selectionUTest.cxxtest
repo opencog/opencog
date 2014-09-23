@@ -42,9 +42,9 @@ using boost::counting_iterator;
 class feature_selectionUTest : public CxxTest::TestSuite
 {
     Table big_table, small_table, small_table_swap_f2_f3,
-        ignore_enforce_target_table, sparse_table;
+        timestamp_table, sparse_table;
     string big_table_path, small_table_path, small_table_swap_f2_f3_path,
-        ignore_enforce_target_table_path, sparse_table_path;
+        timestamp_table_path, sparse_table_path;
 
 public:
     typedef MutualInformation<set<arity_t>> FeatureScorer;
@@ -53,7 +53,7 @@ public:
         : big_table_path(FEATURE_SELECTION_TEST_DIR"big-dataset.csv"),
           small_table_path(FEATURE_SELECTION_TEST_DIR"small-dataset.csv"),
           small_table_swap_f2_f3_path(FEATURE_SELECTION_TEST_DIR"small-dataset_swap_f2_f3.csv"),
-          ignore_enforce_target_table_path(FEATURE_SELECTION_TEST_DIR"ignore-enfore-target-dataset.csv"),
+          timestamp_table_path(FEATURE_SELECTION_TEST_DIR"timestamp-dataset.csv"),
           sparse_table_path(FEATURE_SELECTION_TEST_DIR"contin-sparse.data")
     {
         logger().setPrintToStdoutFlag(true);
@@ -79,9 +79,8 @@ public:
         // load ignore_enfore_target table
         string timestamp_feature = "timestamp";
         string target_feature = "target";
-        ignore_enforce_target_table = loadTable(ignore_enforce_target_table_path,
-                                                target_feature,
-                                                timestamp_feature);
+        timestamp_table = loadTable(timestamp_table_path,
+                                    target_feature, timestamp_feature);
     }
 
     void test_incremental_selection_j1() {
@@ -107,25 +106,22 @@ public:
         test_moses_based_feature_selection(1);
     }
 
-    void test_ignore_enforce_feature_selection() {
+    void test_timestamp_feature_selection() {
         // set feature selection parameters
         feature_selection_parameters fsp;
         fsp.algorithm = "inc";
         fsp.scorer = mi;
-        fsp.input_file = ignore_enforce_target_table_path;
-        fsp.force_features_str = {"timestamp"};
+        fsp.input_file = timestamp_table_path;
         fsp.target_size = 1;
         fsp.jobs = 1;
         setting_omp(fsp.jobs);
         fsp.inc_target_size_epsilon = 1e-10;
         fsp.inc_interaction_terms = 1;
 
-        ostreamTable(std::cout << "ignore/enforce target table = ",
-                     ignore_enforce_target_table);
+        ostreamTable(std::cout << "timestamp target table = ", timestamp_table);
 
         // run and test feature selection
-        test_feature_selection(ignore_enforce_target_table, fsp,
-                               "timestamp,f2,target");
+        test_feature_selection(timestamp_table, fsp, "timestamp,f2,target");
     }
 
     void test_smd_with_init_feature1() {
