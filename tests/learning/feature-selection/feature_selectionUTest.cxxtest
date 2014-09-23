@@ -70,8 +70,8 @@ public:
 
         // Load sparse contin table, ignoring the date and swoosh
         // features, cause loadTable does support timestamp features
-        // yet, and feature-selection is not yet able to interpret the
-        // swoosh feature.
+        // for sparse table yet, and feature-selection is not yet able
+        // to interpret the swoosh feature.
         vector<string> ignore_features = {"date", "swoosh"};
         sparse_table = loadTable(sparse_table_path, string(), string(),
                                  ignore_features);
