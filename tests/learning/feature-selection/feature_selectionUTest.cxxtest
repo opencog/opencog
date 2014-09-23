@@ -172,9 +172,6 @@ public:
         fsp.jobs = 1;
         setting_omp(fsp.jobs);
 
-        // Copy the date field over to the final table.
-        fsp.input_file = sparse_table_path;
-
         // run and test feature selection
         test_feature_selection(sparse_table, fsp,
             "change_percent,BECAUSE,BETWEEN,FEB,IN_PERSONBYRULE,NUMBER23,PERCENT,QUARTER,WERE,WHICH");
@@ -194,9 +191,6 @@ public:
         fsp.jobs = 1;
         setting_omp(fsp.jobs);
 
-        // Copy the date field over to the final table.
-        fsp.input_file = sparse_table_path;
-
         // run and test feature selection
         test_feature_selection(sparse_table, fsp,
             "change_percent,ADDS,AG,ANALYST,ANGELES,ARMOR,BECAUSE,BEFORE,BETWEEN,CLIENTS,COMPUTER,DIFFERENT,EIGHT,ERN,FEB,FIRM,FIVE,GOV,GOVERNMENT,INCLUDED,INCLUDING,IN_LOCATION,IN_PERSONBYRULE,JOINT,KNOWN,LESS,LOS,MAJOR,MARTIN,MICHAEL,MODEL,MONTHS,NATIONAL,NOV,NUMBER15402473,NUMBER23,NUMBER35,NUMBER4055922,NUMBER654,ORLAND,OUTLAYS,PARAGRAPH,PERCENT,PLANES,PRICE,PROGRAMS,QUARTER,RAY,REPORTERS,SECURITY,SHARES,STARTED,SUCH,SUSANNA,THROUGH,TOGETHER,TOLD,VERY,WAYS,WERE,WHICH,WORTH");
@@ -212,9 +206,6 @@ public:
         fsp.target_size = 20;
         fsp.jobs = 1;
         setting_omp(fsp.jobs);
-
-        // Copy the date field over to the final table.
-        fsp.input_file = sparse_table_path;
 
         // run and test feature selection
         test_random_feature_selection(sparse_table, fsp, fsp.target_size);
@@ -341,8 +332,8 @@ private:
     }
 
     void test_random_feature_selection(const Table& table,
-                                feature_selection_parameters& fsp,
-                                int num_expected)
+                                       feature_selection_parameters& fsp,
+                                       int num_expected)
     {
         // create temporary file to put the results
         char tempfile[] = "/tmp/feature_selectionUTestXXXXXX";
