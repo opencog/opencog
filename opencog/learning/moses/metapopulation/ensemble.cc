@@ -222,7 +222,11 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 				// (because we would like to not select them again).
 				// For the weights of unselected rows, positive or negative,
 				// well hey, we have a choice: we could increase them, or we
-				// could leave them alone. It sort-of doesn't matter.
+				// could leave them alone. We should leave them alone, as 
+				// otherwise, we are increasing the weight on rows that had
+				// been previously selected, but aren't now.  We can do this
+				// here, or in the pre scorer ... probably best to do it in
+				// the pre scorer.
 				weights[i] = (0.0 < bs[i]) ? rcpalpha : expalpha;
 			}
 			_bscorer.update_weights(weights);

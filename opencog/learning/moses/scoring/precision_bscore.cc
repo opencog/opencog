@@ -699,7 +699,12 @@ void precision_bscore::update_weights(const std::vector<double>& rew)
 
     double znorm = 0.0;
     for (size_t i = 0; i < _size; i++) {
-        _weights[i] *= rew[i];
+        // Knock down the weights of the selected rows. The goal here
+        // is to more-or-less keep them knocked down. Yes, due to
+        // renorm (below), they'll slowly drift back up; I guess that's
+        // OK. But whatever we do, we don't want to let later updates
+        // push them up.
+        if (rew[i] < 1.0) _weights[i] *= rew[i];
         znorm += _weights[i];
     }
 
