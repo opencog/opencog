@@ -669,9 +669,40 @@ Stragetgy A Boosted pre-scorer results
 Strategy A has been implemented. Since the ensemble always has a
 precision of 1.0, the actual score is always 1.0 - activation_penalty.
 
-Scored below are after a mid-Sept 2014 bug-fix to the boosted
-precision scorer.
+Columns are:
+ no-dupe: -i preselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 --boost=1
+ presel: -i preselect.csv -Hpre -Yval -q0.05 -z350 -v45 --boost=1
+ 
+     num_evals  no-dupe         presel
+                       (time)           (time)  
+     --------- --------------   --------------
+        10K    0.50226 (0m21s)  0.27912 (0m16s)
+        20K    0.50226 (1m25s)  0.80556 (0m59s)
+        40K    0.68458 (4m36s)  0.80488 (3m48s)
+        80K    1.0     (6m8s)   0.80000 (14m15s) 
 
+XXX except above numbers include a bug in the code: the scores sent in
+for training were mis-computed; basically, weights were being
+double-applied.  Anyway, they kind of suck. So this bug gets fixed
+mid-Sept 2014 and gives the results below...
+
+     num_evals  no-dupe                 presel
+                       (time) recall            (time)  recall
+     --------- ----------------------   ----------------------
+        10K    1.0     (0m5s) 0.19192   0.72449 (0m12s) 0.71717
+        20K                             0.67133 (0m33s) 0.96970 
+        40K                             0.67133 (1m28s) 0.96970
+        80K                             0.67133 (3m35s)
+
+These look pretty good ... except ... 
+XXX there is still another bug lurking. For compressed tables,
+with both pos and neg compressed together, with pos dominating
+over the neg, these compressed rows were allowed into the ensemble
+(because they were mostly pos).  This bug incorrectly allowed
+imprecise scorers (as they pick the mixed rows) into the ensemble.
+This is why the score goes down, even as the recall stoots way up.
+
+Some debug and verification:
 Code currently claims:
 Precision scorer, best score = 0.941176
 activation at best score = 0.051672
@@ -685,10 +716,9 @@ sum = -65.5 = 0.5 (tp - fp) of the selected rows, all rows selected.
 Note that sum/active = -65.5 / 329 = - 0.19908 = 0.300912 - 0.5 = prec - 0.5
 just as expected....
 
-ahh .. another bug ...
 -----------
-OK, there were yet more bugs in the boosted precision scorer.
-Need to fix them.
+OK, as mentioned above, there is another bug in the boosted precision scorer.
+Need to fix this.
 
 The plan: for training, need to use the weighted bscores. Due to
 normalization, the weighted bscore is NOT a simple dot-product of 
@@ -704,23 +734,32 @@ plan:
 2) get_error() needs to take combo trees, no bscores.
 3) in precision_bscore, can just call operator() for trees.
 
-Now fixed, I think.
+Now fixed, I think. circa 21 Sept 2014 or so.
 -------
+So, remeasure:
 
 Columns are:
 no-dupe: -i preselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 --boost=1
 presel: -i preselect.csv -Hpre -Yval -q0.05 -z350 -v45 --boost=1
 
 
-     num_evals  no-dupe                 presel
-                       (time) recall            (time)  recall  activation
-     --------- ----------------------   ----------------------------------
-        10K    1.0     (0m5s) 0.19192  -0.41403 (0m26s) 0.04040  0.012158
-        20K                            -0.19089 (1m20s) 0.05051  0.015198
-        40K                             0.50226 (5m23s) 0.10101  0.030395
+ num      no-dupe                           presel
+ evals     (time)  recall  activation           (time)  recall  activation
+ ----- ----------------------------   ----------------------------------
+ 10K   1.0 (0m11s) 0.19192 0.051672   -0.41403 (0m26s) 0.04040  0.012158
+ 20K                                  -0.19089 (1m20s) 0.05051  0.015198
+ 40K                                   0.50226 (5m23s) 0.10101  0.030395
 
 
-Wow. That sucks.  Try again with --boost-promote=9999, as that will add
+Wow. That sucks. Review of log syas..WOW... remove the activation penalty
+during training!!! ... as we expect that most perfect scorers will have a
+huge penalty  ... the varying weights should prevent on type taking over,
+and should help w/ diversity.
+
+
+---------
+
+Try again with --boost-promote=9999, as that will add
 all of the perfect scorers in every round.
 
      num_evals    presel  --boost-promote=9999
@@ -737,11 +776,6 @@ good as one might have hoped.)
 
 ================================
 
-
-The scores go down!  Why? Oh, I see .. the recall actually goes up.
-The recall is obtained by running eval-candidate (see below). Strange
-side effect, that the recall goes up ... but precision goes down.
-Is this a bug ??
 
 Are the reported trees correct?  Verify:
 
