@@ -302,30 +302,39 @@ behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_
     else // Add 0.0 to ensure the bscore has the same size
         bs.push_back(0.0);
 
-    // For boolean tables, activation sum of true and false positives
-    // i.e. the sum of all positives.   For contin tables, the activation
-    // is likewise: the number of rows for which the combo tree returned
-    // true (positive).
-    score_t activation = active / _ctable_weight;
-    score_t activation_penalty = get_activation_penalty(activation);
-    bs.push_back(activation_penalty);
+    // Append the activation penalty only if we are not performing
+    // boosting. Why? Because the boosted scorer only wants those
+    // selectors that are exactly correct, even if they have a terrible
+    // activation.  It will patch these together in the ensemble.  If
+    // these perfect scorers were penalized, they'd be discarded in the
+    // metapop, and we don't want that.  The member "_return_weighted_score"
+    // is a synonym for "we're doing boosting now".
+    if (not _return_weighted_score) {
+        // For boolean tables, activation sum of true and false positives
+        // i.e. the sum of all positives.   For contin tables, the activation
+        // is likewise: the number of rows for which the combo tree returned
+        // true (positive).
+        score_t activation = active / _ctable_weight;
+        score_t activation_penalty = get_activation_penalty(activation);
+        bs.push_back(activation_penalty);
 
-    if (logger().isFineEnabled()) {
-        score_t precision = 0.0;
-        if (0 < active) {
-            // See above for explanation for the extra 0.5
-            precision = sao / active + 0.5;
+        if (logger().isFineEnabled()) {
+            score_t precision = 0.0;
+            if (0 < active) {
+                // See above for explanation for the extra 0.5
+                precision = sao / active + 0.5;
+            }
+            logger().fine("precision = %f  activation=%f  activation penalty=%e",
+                          precision, activation, activation_penalty);
         }
-        logger().fine("precision = %f  activation=%f  activation penalty=%e",
-                      precision, activation, activation_penalty);
-    }
 
-    // Add time dispersion penalty
-    if (_pressure > 0.0) {
-        score_t dispersion_penalty =
-            get_time_dispersion_penalty(ctable_res.ordered_by_time());
-        bs.push_back(dispersion_penalty);
-        logger().fine("dispersion_penalty = %f", dispersion_penalty);
+        // Add time dispersion penalty
+        if (_pressure > 0.0) {
+            score_t dispersion_penalty =
+                get_time_dispersion_penalty(ctable_res.ordered_by_time());
+            bs.push_back(dispersion_penalty);
+            logger().fine("dispersion_penalty = %f", dispersion_penalty);
+        }
     }
 
     return bs;
