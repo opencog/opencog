@@ -756,7 +756,6 @@ during training!!! ... as we expect that most perfect scorers will have a
 huge penalty  ... the varying weights should prevent on type taking over,
 and should help w/ diversity.
 
-
 ---------
 
 Try again with --boost-promote=9999, as that will add

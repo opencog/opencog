@@ -218,7 +218,11 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 			{
 				// Again, here we explicitly assume the pre scorer: A row is
 				// correctly selected if its score is strictly positive.
-				// The weights of unselected rows must increase.
+				// The weights of positive and selected rows must decrease.
+				// (because we would like to not select them again).
+				// For the weights of unselected rows, positive or negative,
+				// well hey, we have a choice: we could increase them, or we
+				// could leave them alone. It sort-of doesn't matter.
 				weights[i] = (0.0 < bs[i]) ? rcpalpha : expalpha;
 			}
 			_bscorer.update_weights(weights);
