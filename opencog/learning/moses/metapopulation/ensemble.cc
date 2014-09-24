@@ -164,7 +164,7 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 /**
  * Add trees that expertly select rows.  These are trees that select
  * only a handful of rows, those that are exactly the true-postive rows.
- * If the flag exact_experts is NOT set, then some inexact trees are 
+ * If the flag exact_experts is NOT set, then some inexact trees are
  * admitted to the ensemble; a voting/iasing scheme is used to make sure
  * that they don't do too much damage.
  *
@@ -202,8 +202,29 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 
 			logger().info() << "Exact expert " << num << " add to ensemble: " << sct;
 			_scored_trees.insert(sct);
-		} else {
 
+			// Increase the importance of all remaining, unselected rows.
+			double expalpha = _params.expalpha; // Add-hoc boosting value ...
+			double rcpalpha = 1.0 / expalpha;
+
+			// Trick the scorer into using the flat scorer.  Do this by
+			// sticking the single tree into a tree set.
+			scored_combo_tree_set treeset;
+         treeset.insert(sct);
+			behavioral_score bs(_bscorer.operator()(treeset));
+			size_t bslen = _bscorer.size();
+			std::vector<double> weights(bslen);
+			for (size_t i=0; i<bslen; i++)
+			{
+				// Again, here we explicitly assume the pre scorer: A row is
+				// correctly selected if its score is strictly positive.
+				// The weights of unselected rows must increase.
+				weights[i] = (0.0 < bs[i]) ? rcpalpha : expalpha;
+			}
+			_bscorer.update_weights(weights);
+
+		} else {
+			// if we are here, its the in-exact experts code.  XXX currently broken ...
 			// Any score worse than half is terrible. Half gives a weight of zero.
 			// More than half gives negative weights, which wreaks things.
 			if (0.5 <= err) {
@@ -256,31 +277,13 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 				// correctly selected if its score is strictly positive.
 				// The weights of unselected rows must increase.
 				weights[i] = (0.0 < bs[i]) ? rcpalpha : expalpha;
-			}	
+			}
 			_bscorer.update_weights(weights);
 		}
 
 		// Are we done yet?
 		promoted ++;
 		if (_params.num_to_promote <= promoted) break;
-	}
-
-	if (_params.exact_experts) {
-		// Increase the importance of all remaining, unselected rows.
-		double expalpha = _params.expalpha; // Add-hoc boosting value ...
-		double rcpalpha = 1.0 / expalpha;
-
-		behavioral_score bs(_bscorer.operator()(_scored_trees));
-		size_t bslen = _bscorer.size();
-		std::vector<double> weights(bslen);
-		for (size_t i=0; i<bslen; i++)
-		{
-			// Again, here we explicitly assume the pre scorer: A row is
-			// correctly selected if its score is strictly positive.
-			// The weights of unselected rows must increase.
-			weights[i] = (0.0 < bs[i]) ? rcpalpha : expalpha;
-		}	
-		_bscorer.update_weights(weights);
 	}
 }
 
