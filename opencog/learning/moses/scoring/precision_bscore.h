@@ -120,7 +120,7 @@ struct precision_bscore : public bscore_ctable_time_dispersion
 
     behavioral_score operator()(const combo_tree& tr) const;
     behavioral_score operator()(const scored_combo_tree_set&) const;
-    score_t get_error(const behavioral_score&) const;
+    score_t get_error(const combo_tree&) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).

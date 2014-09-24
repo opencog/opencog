@@ -481,49 +481,23 @@ behavioral_score precision_bscore::bias_selection(const scored_combo_tree_set& e
     return do_score(selector);
 }
 
-// XXX the below is still buggy. See XXX below...
-score_t precision_bscore::get_error(const behavioral_score& bs) const
+score_t precision_bscore::get_error(const combo_tree& tr) const
 {
-    // The incoming bscore will have 0.0 for non-selected rows, a
-    // positive value for correct selected rows, and a negative value
-    // for incorrect selected rows.  
-    //
-    // XXX Except that is not correct for compressed tables. If could
-    // that, for example, a compressed row consists of three regular
-    // rows, two positive, and one negative. the bscore for this row
-    // would be 0.5*(tp-fp)/(tp+fp) = 0.5/3 = 1/6 which is positive,
-    // but it still has an error of 1/3 ...so the assumptions here
-    // are bad. XXX this needs fixing ...
+    OC_ASSERT (exact_experts,
+        "Precision scorer: inexact experts not yet supported!");
 
-    // If summed with flat weighting,
-    // then the bscore would total to +0.5 if all selected rows are
-    // correct, and will total to -0.5 if all selected rows are wrong.
-    //
-    // If summed with the boosted weights, we have a cross-product of
-    // the following cases:
-    // a) row is lightly weighted, because previous trees added to
-    //    ensemble were already picking it correctly.
-    // b) row is heavily weighted, because previous trees added to
-    //    ensemble were picking it wrongly.
-    //
-    // G) bscore is positive; this tree is correctly selecting the row.
-    // Z) bscore is zero; this tree is not selecting the row.
-    // W) bscore is negative; this tree is wrongly selecting the row.
-    //
-    // So, the weighted sum of the bscore would then be:
-    // bG) strong positive contribution.
-    // bW) strong negative contribution.
-    // all others) mild or zero contribution.
-    //
-    // But what we want is the effective error of the bscore.  To get
-    // this, sum only the W rows, times the row weights.  Since the
-    // max-wrongness in the bscore is -0.5, we multiply by two.
-    // Also, ignore the appended penalties at the end of the bscore.
-    // Thus, we only sum up to size.
+    // We want the flat, unweighted score!
+    _return_weighted_score = false;
+    behavioral_score bs(operator()(tr));
+    _return_weighted_score = true;
+
+    // We only accumulate up to the _size, and ignore the penalties on
+    // the end!
     double accum = 0.0;
-    for (size_t i=0; i<_size; i++) if (bs[i] < 0.0) accum -= 2.0 * bs[i];
+    for (size_t i=0; i<_size; i++) accum += bs[i];
 
-    return accum;
+    // perfect score has accum = 0.5.
+    return 0.5 - accum;
 }
 
 behavioral_score precision_bscore::best_possible_bscore() const
