@@ -230,7 +230,7 @@ namespace PatternMining
 
      void generateComponentCombinations(string componentsStr, vector<vector<vector<unsigned int>>> &componentCombinations);
 
-     unsigned int getCountOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern);
+     unsigned int getCountOfAConnectedPattern(string& connectedPatternKey, HandleSeq& connectedPattern);
 
      void calculateSurprisingness( HTreeNode* HNode);
 
@@ -238,6 +238,9 @@ namespace PatternMining
                                                                  HandleSeq& outPutExtendedPatternLinks, AtomSpace* _fromAtomSpace);
 
      bool isALinkOneInstanceOfGivenPattern(Handle &instanceLink, Handle& patternLink, AtomSpace* instanceLinkAtomSpace);
+
+     void reNameNodesForALink(Handle& inputLink, Handle& nodeToBeRenamed, Handle& newNamedNode,HandleSeq& renameOutgoingLinks,
+                                            AtomSpace* _fromAtomSpace, AtomSpace* _toAtomSpace);
 
      void filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, AtomSpace* _atomSpace);
 

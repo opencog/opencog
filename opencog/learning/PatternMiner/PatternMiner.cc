@@ -1921,16 +1921,19 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
 
 //}
 
-unsigned int PatternMiner::getCountOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern)
+unsigned int PatternMiner::getCountOfAConnectedPattern(string& connectedPatternKey, HandleSeq& connectedPattern)
 {
+    uniqueKeyLock.lock();
     // try to find if it has a correponding HtreeNode
-    map<string, HTreeNode*>::iterator subPatternNodeIter = keyStrToHTreeNodeMap.find(connectedSubPatternKey);
-    if (subPatternNodeIter != keyStrToHTreeNodeMap.end())
+    map<string, HTreeNode*>::iterator patternNodeIter = keyStrToHTreeNodeMap.find(connectedPatternKey);
+
+    if (patternNodeIter != keyStrToHTreeNodeMap.end())
     {
-        // it's in the H-Tree, add its entropy
-        HTreeNode* subPatternNode = (HTreeNode*)subPatternNodeIter->second;
-//        cout << "Found in H-tree! count = " << subPatternNode->count << std::endl;
-        return subPatternNode->count;
+        uniqueKeyLock.unlock();
+
+        HTreeNode* patternNode = (HTreeNode*)patternNodeIter->second;
+
+        return patternNode->count;
     }
     else
     {
@@ -1938,8 +1941,10 @@ unsigned int PatternMiner::getCountOfASubConnectedPattern(string& connectedSubPa
         // Todo: need to decide if add this missing HtreeNode into H-Tree or not
 
         HTreeNode* newHTreeNode = new HTreeNode();
-        keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(connectedSubPatternKey, newHTreeNode));
-        newHTreeNode->pattern = connectedSubPattern;
+        keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(connectedPatternKey, newHTreeNode));
+        uniqueKeyLock.unlock();
+
+        newHTreeNode->pattern = connectedPattern;
 
         // Find All Instances in the original AtomSpace For this Pattern
         findAllInstancesForGivenPattern(newHTreeNode);
@@ -1947,6 +1952,8 @@ unsigned int PatternMiner::getCountOfASubConnectedPattern(string& connectedSubPa
         return newHTreeNode->count;
 
     }
+
+
 }
 
 bool PatternMiner::isALinkOneInstanceOfGivenPattern(Handle &instanceLink, Handle& patternLink, AtomSpace* instanceLinkAtomSpace)
@@ -1960,7 +1967,7 @@ bool PatternMiner::isALinkOneInstanceOfGivenPattern(Handle &instanceLink, Handle
     if (outComingsOfPattern.size() != outComingsOfInstance.size())
         return false;
 
-    for(int i = 0; i < outComingsOfPattern.size(); i ++)
+    for(unsigned int i = 0; i < outComingsOfPattern.size(); i ++)
     {
         bool pIsLink = atomSpace->isLink(outComingsOfPattern[i]);
         bool iIsLink = instanceLinkAtomSpace->isLink(outComingsOfInstance[i]);
@@ -1997,8 +2004,41 @@ bool PatternMiner::isALinkOneInstanceOfGivenPattern(Handle &instanceLink, Handle
 
 }
 
+void PatternMiner::reNameNodesForALink(Handle& inputLink, Handle& nodeToBeRenamed, Handle& newNamedNode,HandleSeq& renameOutgoingLinks,
+                                       AtomSpace* _fromAtomSpace, AtomSpace* _toAtomSpace)
+{
+    HandleSeq outgoingLinks = _fromAtomSpace->getOutgoing(inputLink);
+
+    foreach (Handle h, outgoingLinks)
+    {
+
+        if (_fromAtomSpace->isNode(h))
+        {
+           if (h == nodeToBeRenamed)
+           {
+               renameOutgoingLinks.push_back(newNamedNode);
+           }
+           else
+           {
+               // it's a not the node to be renamed, just add it
+               renameOutgoingLinks.push_back(h);
+           }
+        }
+        else
+        {
+             HandleSeq _renameOutgoingLinks;
+             reNameNodesForALink(h, nodeToBeRenamed, newNamedNode, _renameOutgoingLinks, _fromAtomSpace, _toAtomSpace);
+             Handle reLink = _toAtomSpace->addLink(_fromAtomSpace->getType(h),_renameOutgoingLinks,_fromAtomSpace->getTV(h));
+             renameOutgoingLinks.push_back(reLink);
+        }
+
+    }
+
+}
+
 // the return links is in Pattern mining AtomSpace
 // toBeExtendedLink is the link contains leaf in the pattern
+// varNode is the variableNode of leaf
 void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtendedLink, Handle& leaf, Handle& varNode,
                                                             HandleSeq& outPutExtendedPatternLinks, AtomSpace* _fromAtomSpace)
 {
@@ -2021,8 +2061,11 @@ void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtended
         if (isALinkOneInstanceOfGivenPattern(extendedHandle, toBeExtendedLink, _fromAtomSpace))
             continue;
 
-        // todo
-
+        // Rebind this extendedHandle into Pattern Mining Atomspace
+        HandleSeq renameOutgoingLinks;
+        reNameNodesForALink(extendedHandle, leaf, varNode, renameOutgoingLinks, _fromAtomSpace, atomSpace);
+        Handle reLink = atomSpace->addLink(_fromAtomSpace->getType(extendedHandle),renameOutgoingLinks,_fromAtomSpace->getTV(extendedHandle));
+        outPutExtendedPatternLinks.push_back(reLink);
     }
 
 }
@@ -2076,7 +2119,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
             else
             {
 //                std::cout<< " is connected!" ;
-                unsigned int component_count = getCountOfASubConnectedPattern(subPatternKey, unifiedSubPattern);
+                unsigned int component_count = getCountOfAConnectedPattern(subPatternKey, unifiedSubPattern);
 //                cout << ", count = " << component_count;
                 float p_i = ((float)(component_count)) / atomspaceSizeFloat;
 
@@ -2124,7 +2167,52 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
 
     std::cout << "=================Debug: calculate II_Surprisingness for pattern: ====================\n";
 
+    Handle newVarNode = atomSpace->addNode(VARIABLE_NODE, "$var_" + toString(HNode->var_num));
+
     // first , get all its superpatterns
+    foreach (Handle toBeExtendLink, HNode->pattern)
+    {
+        set<Handle> allNodes;
+        extractAllNodesInLink(toBeExtendLink, allNodes, atomSpace);
+
+        HandleSeq extendedPattern;
+        foreach (Handle link, HNode->pattern)
+        {
+            if (link != toBeExtendLink)
+                extendedPattern.push_back(link);
+        }
+
+        foreach(Handle toBeExtendNode, allNodes)
+        {
+            if ( atomSpace->getType(toBeExtendNode) == VARIABLE_NODE)
+                continue; // only extend leaf
+
+            HandleSeq extendedHandles;
+            if (Pattern_mining_mode == "Breadth_First")
+                getOneMoreGramExtendedLinksFromGivenLeaf(toBeExtendLink, toBeExtendNode, newVarNode, extendedHandles, originalAtomSpace);
+            else // (Pattern_mining_mode == "Depth_First")
+                getOneMoreGramExtendedLinksFromGivenLeaf(toBeExtendLink, toBeExtendNode, newVarNode, extendedHandles, observingAtomSpace);
+
+            // reBind the toBeExtendLink too, toBeExtendNode -> newVarNode
+            HandleSeq reToBeExtendLinkOutgoings;
+            reNameNodesForALink(toBeExtendLink,toBeExtendNode, newVarNode, reToBeExtendLinkOutgoings, atomSpace, atomSpace);
+            Handle reToBeExtendLink = atomSpace->addLink(atomSpace->getType(toBeExtendLink), reToBeExtendLinkOutgoings, atomSpace->getTV(toBeExtendLink));
+            extendedPattern.push_back(reToBeExtendLink);
+
+            // note that extendedLink has been already added into Pattern Mining Atomspace with new variable node
+
+            foreach(Handle extendedLink, extendedHandles)
+            {
+                // add this extendedLink into pattern, get an n+1 gram pattern
+                extendedPattern.push_back(extendedLink);
+
+                HandleSeq unifiedExtendedPattern = UnifyPatternOrder(extendedPattern);
+                string keyStr = unifiedPatternToKeyString(unifiedExtendedPattern);
+                int count = getCountOfAConnectedPattern(keyStr, unifiedExtendedPattern);
+            }
+
+        }
+    }
 
 
 
