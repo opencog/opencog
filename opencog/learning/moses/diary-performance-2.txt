@@ -755,9 +755,51 @@ Wow. That sucks. Review of log syas..WOW... remove the activation penalty
 during training!!! ... as we expect that most perfect scorers will have a
 huge penalty  ... the varying weights should prevent on type taking over,
 and should help w/ diversity.
+-------
+
+OK, so above now implemented. Try again.
+
+ num      no-dupe                           presel
+ evals     (time)  recall activa  cpxy          (time)  recall  activ  cpxy
+ ----- -------------------------------  -----------------------------------
+ 10K   1.0 (0m17s) 0.1717 0.05167 103   -0.1909 (0m31s) 0.0505 0.0152   77
+ 20K                                    -0.0086 (1m55s) 0.0606 0.0182  176
+ 40K                                     0.1456 (7m24s) 0.0707 0.0213  416
+
+Still not very impressive...
+
+two more wtfs:
+
+1) are the expalpha reversed ???
+2) push down weights forever, not just per-shot.
+
+Explore 1) -- reverse things.
+All three columns are 'presel' as above.
+
+reverse means: weights[i] = (0.0 < bs[i]) ? expalpha : rcpalpha;
+       in metapopulation/ensemble.cc -- the weighting is reversed, which should
+       be very wrong.
+
+promo means flag:  --boost-promote=9999 tacked on, to promote all
+       perfect scorers found.
+
+ num      reverse        reverse-promo     promo
+ evals         (time)           (time)          (time) recall  activ  cpxy
+ ----- ---------------- --------------   ---------------------------------
+ 10K   -0.4140 (0m6s)   -0.1909 (0m8s)   0.2791 (0m34s) 0.0808 0.0243  240
+ 20K   -0.1909 (0m16s)  -0.1909 (0m22s)  0.2791 (1m56s) 0.0808 0.0243  400
+ 40K   -0.1909 (0m42s)  -0.1909 (1m8s)   0.2791 (6m55s) 0.0808 0.0243  900
+
+Reverse certainly blows through the scoring function evaluations much much
+quicker.  The results stink, as they should.
+
+promo starts with a bang then fades. Probably due to issue number 2) above.
+So lets fix that issue.
+
+
 
 ---------
-
+xxxxxxxxxxx
 Try again with --boost-promote=9999, as that will add
 all of the perfect scorers in every round.
 
