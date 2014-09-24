@@ -140,6 +140,7 @@ struct bscore_base : public std::unary_function<combo_tree, behavioral_score>
     /// See the notes below, for the CTable sccorer, for special
     /// considerations that CTable-based scorers must make.
     virtual score_t get_error(const behavioral_score&) const;
+    virtual score_t get_error(const combo_tree&) const;
 
     /// Indicate a set of features that should be ignored during scoring,
     /// The features are indicated as indexes, starting from 0.
@@ -260,7 +261,7 @@ struct bscore_ctable_base : public bscore_base
     /// Return the original CTable
     const CTable& get_ctable() const;
 
-    /// Implementing get_error() for CTables-based scorers equires some
+    /// Implementing get_error() for CTables-based scorers requires some
     /// special consideration.  First, the length of the behavioral
     /// score is needed, for normalization.  The correct "length" is
     /// kind-of tricky to understand when a table has weighted rows,

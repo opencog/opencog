@@ -701,16 +701,39 @@ presel: -i preselect.csv -Hpre -Yval -q0.05 -z350 -v45 --boost=1
         80K                             0.67133 (3m35s)
 
 
--oo
-wtf
-tp = 13 fp = 4 precision = 0.764706  recall=0.131313 activation=0.051672
+-----------
+Some thinking aloud:
+OK, so, when adding to the ensemble, weights are adjusted, with the
+expectation that get_error() uses the weights!  So that multiple
+perfect trees can be added, without selecting any trees that give
+existing results.  The current get_error() function is not using 
+these weights.
 
-no don't want the weighted one,   best_composite_score()
-whant the flat one ...
-_cscorer.get_cscore(_ensemble.get_ensemble());
-cscorer is behave_cscore&
+On the other hand ... perfect selectors, which select some previously-
+selected rows in addition to the new ones, will be unfairly penalized.
+So that's wrong too.
 
-_return_weighted_score
+A better measure is this: does the new perfect selector select anything
+that is not yet in the ensemble?  If so, then add it. If not, then discard.
+
+Conclude: for training, need to use the weighted bscores. Due to
+normalization, the weighted bscore is NOT a simple dot-product of 
+weights times bscore.  For acceptance into the ensemble, a flat bscore
+needs to be used.  There is no easy way of getting the flat score from
+the weighted score, and v.v. (Well, one alternative is to extend the
+bscore ... that would require upcasting to use it...) So, for now,
+just recalculate the bscore as needed.
+
+plan:
+1) add_expert() needs to obtain/compute flat bscore.
+   add only those that are perfect, and not anticipated.
+2) get_error() needs to take combo trees, no bscores.
+3) in precision_bscore, can just call operator() for trees.
+
+
+_params.expalpha = 2.0
+
+
 
 Wow! These results are excellent!
 
