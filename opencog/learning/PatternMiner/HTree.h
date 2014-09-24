@@ -36,6 +36,17 @@ namespace opencog
      namespace PatternMining
     {
 
+     class  HTreeNode;
+
+     struct ExtendRelation // to store all the super patterns of a pattern
+     {
+         HTreeNode* extendedHTreeNode;
+         Handle extendedOldNode; // the node that is extended in the original pattern; this node could be a var node or const node.
+         Handle extendedNewNode; // this extendedNode becomes a new varnode in the super pattern; this node can only be a var node.
+         Handle extendedLink; // in super pattern
+
+     };
+
      class HTreeNode
          {
          public:
@@ -43,6 +54,7 @@ namespace opencog
             vector<HandleSeq> instances; // the corresponding instances of this pattern in the original AtomSpace
             set<HTreeNode*> parentLinks;
             set<HTreeNode*> childLinks;
+            vector<ExtendRelation> superPatternRelations; // store all the connections to its super patterns
 
             unsigned int count; // instance number
             unsigned int var_num; // the number of all the variables in this pattern
