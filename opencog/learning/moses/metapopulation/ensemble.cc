@@ -163,32 +163,44 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 
 /**
  * Add trees that expertly select rows.  These are trees that select
- * only a handful of rows, usually just the true-postive rows, unless
- * exact_experts is set, in which case only the trees that are exactly
- * correct are admitted to the ensemble.
+ * only a handful of rows, those that are exactly the true-postive rows.
+ * If the flag exact_experts is NOT set, then some inexact trees are 
+ * admitted to the ensemble; a voting/iasing scheme is used to make sure
+ * that they don't do too much damage.
+ *
+ * The current algo, as implemented, admits any tree that expertly
+ * selects rows, even if the ensemble already knows how to select those
+ * same rows. This may be good, or it may be bad ... depending on what
+ * you want.   An alternative would be to add only those experts that
+ * know things that the ensemble does not yet know about.
+ *
+ * At most, _params.num_to_promote are added.
  */
 void ensemble::add_expert(scored_combo_tree_set& cands)
 {
 	int promoted = 0;
+	int num = 0;
 	for (const scored_combo_tree& sct : cands) {
+		num++;
 		// Add all elements that have a perfect score, or at least,
 		// a good-enough score.
 		double err = _bscorer.get_error(sct.get_tree());
 
-		logger().debug() << "Expert: candidate score=" << sct.get_score()
-                       << " error=" << err;
-		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
+		OC_ASSERT(0.0 <= err+_tolerance and err-_tolerance <= 1.0,
+		          "boosting score out of range; got %g", err);
 
 		// Set the weight for the tree, and stick it in the ensemble
 		if (_params.exact_experts) {
 			// This condition indicates "perfect score". This is the only type
 			// of tree that we accept into the ensemble.
 			if (_tolerance < err) {
-				logger().debug() << "Exact expert not good enough: " << err;
+				logger().debug() << "Exact expert " << num
+				                 << " not good enough, err=" << err
+				                 << " score=" << sct.get_score();
 				continue;
 			}
 
-			logger().info() << "Exact expert: add to ensemble " << sct;
+			logger().info() << "Exact expert " << num << " add to ensemble: " << sct;
 			_scored_trees.insert(sct);
 		} else {
 
