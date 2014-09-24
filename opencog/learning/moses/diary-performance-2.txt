@@ -711,23 +711,35 @@ Columns are:
 no-dupe: -i preselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 --boost=1
 presel: -i preselect.csv -Hpre -Yval -q0.05 -z350 -v45 --boost=1
 
+
      num_evals  no-dupe                 presel
-                       (time) recall            (time)  recall
-     --------- ----------------------   ----------------------
-        10K    1.0     (0m5s) 0.19192   0.71429 (0m23s) 0.70701
-        20K                             0.67133 (0m33s) 0.96970 
-        40K                             0.67133 (1m28s) 0.96970
-        80K                             0.67133 (3m35s)
+                       (time) recall            (time)  recall  activation
+     --------- ----------------------   ----------------------------------
+        10K    1.0     (0m5s) 0.19192  -0.41403 (0m26s) 0.04040  0.012158
+        20K                            -0.19089 (1m20s) 0.05051  0.015198
+        40K                             0.50226 (5m23s) 0.10101  0.030395
 
 
+Wow. That sucks.  Try again with --boost-promote=9999, as that will add
+all of the perfect scorers in every round.
+
+     num_evals    presel  --boost-promote=9999
+                          (time)  recall  activation
+     ---------    ----------------------------------
+        10K       0.27912 (0m31s) 0.08081  0.024316
+        20K       0.39690 (1m49s) 0.09091  0.027356
+        40K       0.39690 (6m17s) 0.09091  0.027356
 
 
-xxxxxxxxxx
+Well, that's pretty dismal, too.  This is confusing, because the scores
+for the buggy version were considerably better (although still not as
+good as one might have hoped.)
 
-Wow! These results are excellent!
+================================
+
 
 The scores go down!  Why? Oh, I see .. the recall actually goes up.
-The recall is obtained by running eval-candidate 9see below). Strange
+The recall is obtained by running eval-candidate (see below). Strange
 side effect, that the recall goes up ... but precision goes down.
 Is this a bug ??
 
