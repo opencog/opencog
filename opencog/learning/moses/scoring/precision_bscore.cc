@@ -683,6 +683,7 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
 
 void precision_bscore::reset_weights()
 {
+    wnorm = 1.0;
     if (_return_weighted_score)
         _weights = std::vector<double>(_size, 1.0);
     else
@@ -704,6 +705,7 @@ void precision_bscore::update_weights(const std::vector<double>& rew)
         // renorm (below), they'll slowly drift back up; I guess that's
         // OK. But whatever we do, we don't want to let later updates
         // push them up.
+        _weights[i] *= wnorm;
         if (rew[i] < 1.0) _weights[i] *= rew[i];
         znorm += _weights[i];
     }
@@ -712,6 +714,7 @@ void precision_bscore::update_weights(const std::vector<double>& rew)
     // This is not really correct, but it keeps us in the general
     // area of having each row have an average weight of 1.0.
     znorm = ((double) _size) / znorm;
+    wnorm = 1.0 / znorm;
     for (size_t i=0; i<_size; i++) _weights[i] *= znorm;
 }
 

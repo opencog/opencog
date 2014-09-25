@@ -806,7 +806,28 @@ Now we get:
  20K   0.6846 (1m22s) 0.1212 0.0365 1401
  40K   0.6846 (5m1s)  0.1212 0.0365 1817
 
-Much better. But it stil stalls out.
+Much better. But it stil stalls out.  Lets try a permanent-knockout variation.
+
+Same as above, but flatter weight accumulation.
+
+ num     promo
+ evals        (time) recall  activ  cpxy
+ ----- ---------------------------------
+ 10K  -0.0086 (0m33s) 0.0606 0.0182  108
+ 20K  -0.0086 (1m45s) 0.0606 0.0182  195
+ 40K   0.2791 (5m50s) 0.0808 0.0243  365
+
+Not as good as above...  Below is same as above, but different random seed values:
+
+ -r    score
+ -----------------
+ 0   0.1456
+ 1  -0.0086 
+ 2  -0.1909
+ 3   0.1456
+ 4  -0.4140
+ 5  -0.0086
+
 
 ---------
 xxxxxxxxxxx

@@ -163,6 +163,7 @@ protected:
     score_t min_activation, max_activation;
     score_t activation_pressure;
     double bias_scale;
+    double wnorm;
     bool exact_experts;
 
     bool positive;
