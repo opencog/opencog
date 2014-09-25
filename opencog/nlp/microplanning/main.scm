@@ -1,235 +1,7 @@
-(load "sentence-forms.scm")
-
-
-; =======================================================================
-; Helper functions
-; =======================================================================
-
-; -----------------------------------------------------------------------
-; r2l-get-word-inst -- Retrieve WordInstanceNode given R2L style node
-;
-; Given a R2L style node, find the corresponding WordInstanceNode.
-;
-(define (r2l-get-word-inst node)
-	(cond ((null? node) '())
-	      ((word-instance? node) (cog-node 'WordInstanceNode (cog-name node)))
-	      (else '())
-	)
-)
-
-; -----------------------------------------------------------------------
-; word-instance? -- Check if a node has the corresponding WordInstanceNode
-;
-; Return #t or #f depends on whether the node as a WordInstanceNode.
-;
-(define (word-instance? node)
-	(not (null? (cog-node 'WordInstanceNode (cog-name node))))
-)
-
-; -----------------------------------------------------------------------
-; cog-has-node? -- Check if "atom" contains node "target"
-;
-; Return #t or #f depends on whether the hypergraph "atom" contains the
-; node "target.  Basically doing BFS.
-;
-(define (cog-has-node? atom target)
-	(define (recursive-helper queue)
-		(cond ((null? queue)
-			#f
-		      )
-		      ((equal? (car queue) target)
-			#t
-		      )
-		      (else
-			(if (cog-link? (car queue))
-				(set! queue (append queue (cog-outgoing-set (car queue))))
-			)
-			(recursive-helper (cdr queue))
-		      )
-		)
-	)
-
-	(recursive-helper (append (list atom) (cog-outgoing-set atom)))
-)
-
-; -----------------------------------------------------------------------
-; pos-match? -- Check if a R2L "node" has part-of-speech "target-pos"
-;
-; Return #t for "node" if the corresponding WordInstanceNode has
-; PartOfSpeechLink to type "target-pos" (eg. verb, noun, adj).
-;
-(define (pos-match? node target-pos)
-	(define word-inst (r2l-get-word-inst node))
-
-	(if (null? word-inst)
-		#f
-		(string=? (cog-name (car (word-inst-get-pos word-inst))) target-pos)
-	)
-)
-
-; -----------------------------------------------------------------------
-; and-l -- Apply 'and' operator to a list
-;
-; Helper function for since we cannot do (apply and ...)
-;
-(define (and-l x)
-	(if (null? x)
-		#t
-		(if (car x) (and-l (cdr x)) #f)
-	)
-)
-
-; -----------------------------------------------------------------------
-; form-graph-match? -- Basic pattern match between "atom" and "form"
-;
-; Check "atom" against a sentence form "form" to see if the two structures
-; are the same, and if specified, also check if POS matches.
-;
-(define (form-graph-match? atom form)
-	(if (cog-node? atom)
-		(if (equal? (cog-type atom) (cog-type form))
-			; check if we need to check POS or not
-			(if (string=? (cog-name form) "_")
-				#t
-				(pos-match? atom (cog-name form))
-			)
-			#f
-		)
-		(if (and (= (cog-arity atom) (cog-arity form)) (equal? (cog-type atom) (cog-type form)))
-			; check the outgoing set recursively
-			(and-l (map form-graph-match? (cog-outgoing-set atom) (cog-outgoing-set form)))
-			#f
-		)
-	)
-)
-
-; not used at the moment
-(define (distance-transform main-list anchor-list)
-	; initialize where the anchors are
-	; XXX optimization possible? This makes the whole function O(mn) rather than O(n)
-	(define len (length main-list))
-	(define result-list (map (lambda (i) (if (member i anchor-list) 0 1)) main-list))
-
-	(define (left2right-helper sub-list curr-dist)
-		(cond ((null? sub-list)
-			'()
-		      )
-		      ((= (car sub-list) 0)
-			(cons 0 (left2right-helper (cdr sub-list) 1))
-		      )
-		      (else
-			(cons curr-dist (left2right-helper (cdr sub-list) (+ 1 curr-dist)))
-		      )
-		)
-	)
-
-	(define (right2left-helper sub-list curr-dist)
-		(cond ((null? sub-list)
-			'()
-		      )
-		      ((= (car sub-list) 0)
-			(cons 0 (right2left-helper (cdr sub-list) 1))
-		      )
-		      (else
-			(if (< (car sub-list) curr-dist)
-				(cons (car sub-list) (right2left-helper (cdr sub-list) (+ 1 curr-dist)))
-				(cons curr-dist (right2left-helper (cdr sub-list) (+ 1 curr-dist)))
-			)
-		      )
-		)				
-	)
-
-	(set! result-list (left2right-helper result-list len))
-	(set! result-list (reverse result-list))
-	(set! result-list (right2left-helper result-list len))
-	(set! result-list (reverse result-list))
-	result-list
-)
-
-; -----------------------------------------------------------------------
-; check-chunk -- Check if a chunk is "say-able"
-;
-; Call Surface Realization pipeline to see if a chunk of atoms are
-; "say-able", and if so, determines whether the sentence is too long or
-; complex.
-;
-; Returns 0 = not sayable, 1 = sayable, 2 = too long/complex
-;
-(define (check-chunk atoms)
-	(define (get-pos n)
-		(define wi (r2l-get-word-inst n))
-		(if (null? wi)
-			"_"
-			(cog-name (car (word-inst-get-pos wi)))
-		)
-	)
-	(define (sort-n-count l)
-		(define sorted-list (sort l string<?))
-		(define (count-helper curr-subset curr-pos curr-count)
-			(cond ((null? curr-subset)
-				(cons (cons curr-pos curr-count) '())
-			      )
-			      ((not (string=? (car curr-subset) curr-pos))
-				(cons (cons curr-pos curr-count) (count-helper (cdr curr-subset) (car curr-subset) 1))
-			      )
-			      (else
-				(count-helper (cdr curr-subset) curr-pos (+ 1 curr-count))
-			      )
-			)
-		)
-		(if (not (null? sorted-list))
-			(count-helper (cdr sorted-list) (car sorted-list) 1)
-			'()
-		)
-	)
-
-	; XXX optimization needed?
-	(define all-nodes (delete-duplicates (append-map cog-get-all-nodes atoms)))
-	(define pos-alist (sort-n-count (map get-pos all-nodes)))
-	
-	(define (pos-checker al)
-		(define pos (car al))
-		(define count (cdr al))
-		
-		(cond ; prefer max 2 verbs per sentence
-		      ((and (string=? "verb" pos) (>= count 2))
-			#f
-		      )
-		      ; prefer max 3 nouns per sentence
-		      ((and (string=? "noun" pos) (>= count 3))
-			#f
-		      )
-		      ; prefer max 5 adjectives
-		      ((and (string=? "adj" pos) (>= count 5))
-			#f
-		      )
-		      ; prefer max 3 adverbs
-		      ((and (string=? "adv" pos) (>= count 3))
-			#f
-		      )
-		      (else
-			#t
-		      )
-		 )
-	)
-
-	(define pos-result (and-l (map pos-checker pos-alist)))
-
-	;;; do something with SuReal to see if it is sayable?
-	(define say-able #t)
-
-	(cond 
-	      ; not long/complex but sayable
-	      ((and pos-result say-able) 1)
-	      ; long/complex but sayable
-	      ((and (not pos-result) say-able) 2)
-	      ; not sayable
-	      (else 0)
-	)
-
-	;(length (append-map cog-get-all-nodes atoms))
-)
-
+; loading additional dependency
+(load-scm-from-file "../opencog/nlp/microplanning/sentence-forms.scm")
+(load-scm-from-file "../opencog/nlp/microplanning/helpers.scm")
+(load-scm-from-file "../opencog/nlp/microplanning/anaphora.scm")
 
 
 ; =======================================================================
@@ -244,57 +16,13 @@
 ; or 'interjective'
 ;
 (define (microplanning seq-link utterance-type)
-	; initialize the sentence forms as needed
-	(microplanning-init)
+	(define chunks '())
 
-	; should utterance-type be part of the link (or just outside) instead of passing as parameter
-	(make-utterance (cog-outgoing-set seq-link) utterance-type)
-)
-
-; -----------------------------------------------------------------------
-; make-utterance -- The main helper function for handling a microplanning request
-;
-; Calls make-sentence repeatedly until all informations have been spoken, or
-; no longer say-able.
-;
-(define (make-utterance atoms-set utterance-type)
-	(define atoms-unused atoms-set)
-	(define sentence-chunks '())
-	(define (recursive-helper)
-		(define new-chunk '())
-
-		; keep calling make sentence until all atoms are used
-		(cond ((not (null? atoms-unused))
-			(set! new-chunk (make-sentence atoms-unused atoms-set utterance-type))
-			(set! sentence-chunks (cons new-chunk sentence-chunks))
-			; XXX keep some of the atoms (those that do not satisfy sentence forms) for later use?
-			(set! atoms-unused (lset-difference equal? atoms-unused new-chunk))
-			(recursive-helper)
-		      )
-		)
-	)
-	(define (call-sureal atoms)
-		; wrap a SetLink around the atoms
-		(sureal (SetLink atoms))
-	)
-
-	; loop make-sentence on remaining atoms
-	(recursive-helper)
-
-	(reverse sentence-chunks)
-
-	; call SuReal on each item in sentence-chunks
-	;(map call-sureal (reverse sentence-chunks))
-)
-
-; -----------------------------------------------------------------------
-; make-sentence -- Create a single sentence
-;
-; Greedily add new atoms (using some heristics) to form a new sentence.
-;
-(define (make-sentence atoms-unused atoms-set utterance-type)
 	; find the preferred sentence forms base on utterance-type
-	(define favored-forms
+	; XXX should utterance-type be part of the link instead of passing as parameter
+	(define (get-favored-forms)
+		; initialize the sentence forms as needed
+		(microplanning-init)
 		(cog-outgoing-set (car
 			(cond ((string=? "declarative" utterance-type)
 				(cog-chase-link 'InheritanceLink 'OrLink (ConceptNode "declarative"))
@@ -311,12 +39,62 @@
 			)
 		))
 	)
+	
+	(define (call-sureal atoms)
+		; wrap a SetLink around the atoms
+		(sureal (SetLink atoms))
+	)
+	(define favored-forms (get-favored-forms))
 
-	; helper function to see if an atom matches a sentence form
-	(define (match-sentence-forms atom)
-		(find (lambda (form) (form-graph-match? atom form)) favored-forms)
+	(set! chunks (make-sentence-chunks (cog-outgoing-set seq-link) favored-forms))
+	
+	(cond ((not (null? chunks))
+		; insert anaphora
+		(set! chunks (insert-anaphora chunks favored-forms))
+	
+		chunks	
+		; call SuReal on each item in sentence-chunks
+		;(map call-sureal chunks)
+	      )
+	)
+)
+
+; -----------------------------------------------------------------------
+; make-sentence-chunks -- The main helper function for handling a microplanning request
+;
+; Calls make-sentence repeatedly until all informations have been spoken, or
+; no longer say-able.
+;
+(define (make-sentence-chunks atoms-set favored-forms)
+	(define atoms-unused atoms-set)
+	(define sentence-chunks '())
+	(define (recursive-helper)
+		(define new-chunk '())
+
+		; keep calling make sentence until all atoms are used
+		(cond ((not (null? atoms-unused))
+			(set! new-chunk (make-sentence atoms-unused atoms-set favored-forms))
+			(set! sentence-chunks (cons new-chunk sentence-chunks))
+			; XXX keep some of the atoms (those that do not satisfy sentence forms) for later use?
+			(set! atoms-unused (lset-difference equal? atoms-unused new-chunk))
+			(recursive-helper)
+		      )
+		)
 	)
 
+	; loop make-sentence on remaining atoms
+	(recursive-helper)
+
+	; reverse since we were adding to the front
+	(reverse sentence-chunks)
+)
+
+; -----------------------------------------------------------------------
+; make-sentence -- Create a single sentence
+;
+; Greedily add new atoms (using some heuristics) to form a new sentence.
+;
+(define (make-sentence atoms-unused atoms-set favored-forms)
 	; initialize weight bases on "time ordering"
 	(define time-weights '())
 	; initialize weight (0, 1) bases on whether the atom satisfy a sentence form
@@ -337,7 +115,7 @@
 		)
 
 		(set! time-weights (list-tabulate choices-len (lambda (i) (- choices-len i))))
-		(set! form-weights (map (lambda (atom) (if (match-sentence-forms atom) 1 0)) choices))
+		(set! form-weights (map (lambda (atom) (if (match-sentence-forms atom favored-forms) 1 0)) choices))
 		(set! link-weights (map link-count choices))
 		
 		(display "current weights\n")
@@ -406,7 +184,7 @@
 				; look to see if the newest link has any ConceptNode that is solo
 				(set! temp-var1 (cog-get-all-nodes head))
 				(set! temp-var2 (append-map cog-get-all-nodes (cdr atoms-to-try)))
-				(set! temp-differences (filter word-instance? (lset-difference temp-var1 temp-var2)))
+				(set! temp-differences (filter has-word-inst? (lset-difference temp-var1 temp-var2)))
 
 				(cond ((null? temp-differences)
 					(give-up-unadded-part)
@@ -468,3 +246,42 @@
 	(reverse chunk)
 )
 
+
+
+;;;;;;;; brain organizing stuff 
+
+; if not long enough
+; add external links that share a node? how to determine what to include?
+; add the next highest weight atom?
+;    prefer atoms with low form-weights & high link weights (with the new chunk, not the old stuff said)?
+
+
+; some atoms used can be leave out of used to be reused later?
+; eg. atoms that do not satisfy a sentence form?
+
+
+
+
+
+
+;; base on utterance-type, pick a sentence form?
+;; do we need some sort of template in the atomspace to tell what SVO looks like?
+;; try hard-coding first?
+
+;;; loop
+;; assuming SV or SVO, pick an atom with link to a verb node (PartOfSpeechLink)
+
+; look at atoms-unused and find first node that is verb?
+; or, find all nodes that is verb, then use the list index as a weight
+; then check how many outgoing links connect to a "used" set?
+
+; highest weight, try to say
+
+
+;; get the root link
+;; check if it is "sayable"
+;; if sentence not long enough, greedily add another link (closest link in the saying set)
+;; check if "sayable" again, or too long, and discard the new addition if necessary
+;; update used atoms and loop
+
+;; return a set of atoms used
