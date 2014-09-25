@@ -41,10 +41,8 @@ namespace opencog
      struct ExtendRelation // to store all the super patterns of a pattern
      {
          HTreeNode* extendedHTreeNode;
-         Handle extendedOldNode; // the node that is extended in the original pattern; this node could be a var node or const node.
-         Handle extendedNewNode; // this extendedNode becomes a new varnode in the super pattern; this node can only be a var node.
-         Handle extendedLink; // in super pattern
-
+         Handle sharedLink; // the link in original pattern that connect to new extended Link
+         Handle newExtendedLink; // in super pattern
      };
 
      class HTreeNode

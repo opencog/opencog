@@ -43,6 +43,7 @@
 #include <opencog/util/foreach.h>
 #include <opencog/util/StringManipulator.h>
 
+#include "HTree.h"
 #include "PatternMiner.h"
 
 using namespace opencog::PatternMining;
@@ -90,42 +91,41 @@ void PatternMiner::growPatternsDepthFirstTask()
         swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
         Handle newLink = observingAtomSpace->addLink(originalAtomSpace->getType(cur_link),outgoingLinks,originalAtomSpace->getTV(cur_link));
 
-
         HandleSeq observedLinks;
         observedLinks.push_back(newLink);
 
         // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
         set<Handle> sharedNodes;
-        extractAllPossiblePatternsFromInputLinks(observedLinks, 0, sharedNodes, observingAtomSpace,1);
 
+        vector<HTreeNode*> _allLastGramHTreeNodes; // it's empty for the 1-gram patterns, because there is no last gram
 
-        HandleSeqSeq allLastGramConnectedLinks; // for this cur_link
-        allLastGramConnectedLinks.push_back(observedLinks);
+        vector<HTreeNode*> _allThisGramHTreeNodes;
+
+        extractAllPossiblePatternsFromInputLinks(observedLinks, 0, sharedNodes, 0, observingAtomSpace, _allLastGramHTreeNodes,_allThisGramHTreeNodes,1);
+
+        map<HandleSeq, vector<HTreeNode*> > allLastGramLinksToPatterns; // for this cur_link
+        allLastGramLinksToPatterns.insert(std::pair<HandleSeq, vector<HTreeNode*>>(observedLinks, _allThisGramHTreeNodes));
 
         unsigned int gram;
 
         for ( gram = 2; gram <= MAX_GRAM; ++ gram)
         {
+            map<HandleSeq, vector<HTreeNode*> > ::iterator it = allLastGramLinksToPatterns.begin();
+            map<HandleSeq, vector<HTreeNode*> > allThisGramLinksToPatterns;
             vector<set<Handle>> newConnectedLinksFoundThisGram;
 
-            foreach(HandleSeq linksToExtend, allLastGramConnectedLinks)
+            for(; it != allLastGramLinksToPatterns.end(); ++ it)
             {
-                // find all the cur_gram distance neighbour links of newLink
-                extendAllPossiblePatternsForOneMoreGram(linksToExtend,0,observingAtomSpace,gram,newConnectedLinksFoundThisGram);
+                // find all the 2~MAX_GRAM gram distance neighbour links of newLink
+                extendAllPossiblePatternsForOneMoreGram((HandleSeq&)(it->first),0,observingAtomSpace,gram, (vector<HTreeNode*>&)(it->second), allThisGramLinksToPatterns, newConnectedLinksFoundThisGram);
             }
 
-            allLastGramConnectedLinks.clear();
-            foreach(set<Handle>& newFoundLinksGroup, newConnectedLinksFoundThisGram)
-            {
-                HandleSeq newFoundLinks(newFoundLinksGroup.begin(), newFoundLinksGroup.end());
-                allLastGramConnectedLinks.push_back(newFoundLinks);
-            }
+            allLastGramLinksToPatterns = allThisGramLinksToPatterns;
 
         }
 
     }
 }
-
 
 
 void PatternMiner::runPatternMinerDepthFirst()
