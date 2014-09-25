@@ -834,7 +834,8 @@ No discernable change ... I suppose thats good, right?
 Below is how the above varies, for different random seeds.
 The variation is pretty dramatic ...
 
- -r  score
+ seed  promo
+ -r   score
  ----------   
  0   0.5023 
  1   0.5976
@@ -1061,3 +1062,75 @@ Again, with -q0.25
  80K  -0.9249 (23m42s) 0.1212 0.0365 16016
 
 OK, that's pretty grim...
+
+ num     no-mo
+ evals        (time) recall  activ  cpxy
+ ----- ---------------------------------
+  10K   1.0  (0m16s) 0.1717 0.0517  673
+
+OK, so that works well, as alwasy. Of course its far less challenging.
+
+ num     no-mo -q0.25  (no-dupe, with boosting and full promotion)
+ evals         (time)  recall  activ  cpxy
+ ----- -----------------------------------
+  10K  -0.4653 (0m23s) 0.1919 0.0578  774
+  20K   0.0242 (1m23s) 0.3131 0.0942 1163
+  40K   0.1456 (5m19s) 0.3535 0.1064 2305
+  80K   0.6156 (20m0s) 0.5657 0.1702 5069
+ 160K   0.7949 (57m7s) 0.6768 0.2036 7569
+
+-------
+Lets compare these to the non-boosted results, from up-top.
+Sadly, the non-boosted results prety much always win,
+speed-wise and score-wise.
+
+Comparable non-boosted results, for -q0.05:
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- --------------    --------------
+         1K    0.61643 (0m1s)    0.72727 (0m1s)
+         2K    0.80952 (0m2s)    0.72727 (0m2s)
+         5K    1.0 (0m2s)        0.76471 (0m5s)
+        10K     -                0.78476 (0m14s)
+        40K     -                0.78947 (3m35s)
+        80K     -                0.82143 (14m0s)
+
+Comparable non-boosted results, for -q0.25:
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- --------------    --------------
+         5K    0.68421 (0m6s)    
+        10K    0.68421 (0m21s)   0.65549 (0m16s)
+        20K    0.72043 (1m11s)   0.70588 (1m4s)
+        40K    0.72043 (4m9s)    0.70588 (4m32s)
+        80K    0.72414 (15m6s)   0.72043 (18m19s)
+
+How much of this is due to a fateful random number choice?
+All evals are for 10K and -q0.05. All promo times are about 20s to 30s.
+
+   seed  promo   presel
+    -r   score   score    time  precision
+    ----------   ------------------------
+    0   0.5023   0.76000  26s
+    1   0.5976   0.78476  16s
+    2   0.1456   0.08769  29s
+    3   0.1456   0.78261  18s
+    4   0.3969   0.73684  34s
+    5  -0.1909   0.88888  29s 0.88880
+    6   0.2791   0.76190  16s
+    7  -0.0086   0.65000  24s
+    8   0.5023   0.78947  19s
+    9  -0.1909   0.73684  27s
+
+OK, so boosting is beaten every time, it seems.  But here's one notable
+thing: the non-boosted ones don't have perfect precision, but they do
+mostly seem to always meet thier activation goals.  By contrast, the 
+boosted ones always have perfect precision, but fail to meet thier
+activation goals.  So this is kind-ocf comparing apples to oranges.
+
+The penalty for missing activation is severe -- but there is no penalty
+for imperfect precision. How would the non-boosted scorer fare, if there
+was a penalty for poor precision?
+
