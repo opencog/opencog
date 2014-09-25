@@ -146,12 +146,14 @@ scored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
         score_t sc = bsct.get_penalized_score();
 
         // Skip exemplars that have been visited enough
-        if (_params.revisit < 0 or
-            (_params.revisit + 1 > (int)_visited_exemplars[bsct])) {
+        if (isfinite(sc) and 
+            ((_params.revisit < 0) or
+            (_params.revisit + 1 > (int)_visited_exemplars[bsct])))
+        {
             probs.push_back(sc);
             found_exemplar = true;
             if (highest_score < sc) highest_score = sc;
-        } else // If the tree is visited enough then put a
+        } else // If the tree is visited too often, then put a
                // nan score so we know it must be ignored
             probs.push_back(NAN);
     }
