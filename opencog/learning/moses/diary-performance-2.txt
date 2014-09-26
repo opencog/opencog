@@ -694,7 +694,13 @@ mid-Sept 2014 and gives the results below...
         40K                             0.67133 (1m28s) 0.96970
         80K                             0.67133 (3m35s)
 
-These look pretty good ... except ...  XXXX there is still another bug.
+
+Wow! These results are excellent!
+
+The scores go down!  Why? Oh, I see .. the recall actually goes up.
+The recall is obtained by running eval-candidate 9see below). Strange
+side effect, that the recall goes up ... but precision goes down.
+Is this a bug ??  Yes it is ... it needs fixing. See below.
 
 ---------
 But first -- Are the reported trees correct?  Verify:
