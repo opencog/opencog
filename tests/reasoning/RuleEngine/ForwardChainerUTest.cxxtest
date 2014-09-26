@@ -1,0 +1,157 @@
+/*
+ * ForwardChainer.cxxtest
+ *
+ *  Created on: Sep 2, 2014
+ *      Author: misgana
+ */
+#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/ForwardChainer.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/guile/load-file.h>
+//TODO test choose_target
+using namespace opencog;
+class ForwardChainerUTest: public CxxTest::TestSuite {
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
+	ForwardChainer * fc;
+	const std::string find_node_test1 =
+			"(InheritanceLink (EvaluationLink (PredicateNode \"rich\") (ListLink (ConceptNode \"M\") (ConceptNode \"R\"))) (EvaluationLink (PredicateNode \"happy\") (ListLink (ConceptNode \"M\") (ConceptNode \"R\"))))";
+public:
+	ForwardChainerUTest() {
+		server(CogServer::createInstance);
+		as = &cogserver().getAtomSpace();
+		eval = new SchemeEval(as);
+		as->clear();
+		config().set("SCM_PRELOAD",
+				"opencog/atomspace/core_types.scm,opencog/scm/utilities.scm,opencog/python/pln/examples/deduction/atomspace_contents.scm");
+		config().set("MODULES", "opencog/query/libQueryModule.so");
+		cogserver().loadModules();
+		cogserver().loadSCMModules();
+		load_scm_files_from_config(*as);
+		fc = new ForwardChainer(as);
+	}
+	~ForwardChainerUTest() {
+		delete as;
+	}
+	void setUp(void);
+	void tearDown(void);
+	void test_find_node(void);
+	void test_exists(void);
+	void test_target_to_pmimplicant(void);
+	void test_choose_variable(void);
+	void test_create_bindLink(void);
+	void test_load_fc_conf(void);
+	void test_choose_target(void);
+	void test_choose_input(void);
+	void test_do_chain(void);
+};
+void ForwardChainerUTest::setUp(void) {
+
+}
+
+void ForwardChainerUTest::tearDown(void) {
+
+}
+
+void ForwardChainerUTest::test_find_node(void) {
+	Handle h = eval->eval_h(find_node_test1);
+	TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
+	HandleSeq hs = fc->get_nodes(h, vector<Type> { CONCEPT_NODE });
+	TS_ASSERT_EQUALS(2, hs.size());
+	HandleSeq hs1 = fc->get_nodes(h, vector<Type> { PREDICATE_NODE });
+	TS_ASSERT_EQUALS(2, hs1.size());
+	h =
+			eval->eval_h(
+					"(ConceptNode \"man@80d4e852-1b93-4c49-84e1-5a7352b0dcb1\" (stv 0.001 0.99000001))");
+	TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
+	hs = fc->get_nodes(h, vector<Type> { CONCEPT_NODE });
+}
+void ForwardChainerUTest::test_exists() {
+	Handle x = eval->eval_h("(ConceptNode \"x\")");
+	Handle y = eval->eval_h("(ConceptNode \"y\")");
+	Handle z = eval->eval_h("(ConceptNode \"z\")");
+	Handle zx = eval->eval_h("(ConceptNode \"z\")");
+	HandleSeq hs = { x, y, z };
+	TS_ASSERT(fc->exists(hs, zx));
+}
+void ForwardChainerUTest::test_target_to_pmimplicant(void) {
+	Handle hc1 = eval->eval_h("(ConceptNode \"rich\")");
+	TS_ASSERT_DIFFERS(hc1, Handle::UNDEFINED);
+
+	Handle hc2 = eval->eval_h("(ConceptNode \"happy\")");
+	TS_ASSERT_DIFFERS(hc2, Handle::UNDEFINED);
+
+	HandleSeq hseq = { hc1, hc2 };
+	Handle htarget = as->addLink(INHERITANCE_LINK, hseq,
+			TruthValue::DEFAULT_TV());
+	Handle himplicant = fc->target_to_pmimplicant(htarget, map<Handle, string> {
+			{ hc1, "$var-rich" } });
+	Handle himp_expected =
+			eval->eval_h(
+					"(InheritanceLink (VariableNode \"$var-rich\") (ConceptNode \"happy\"))");
+	TS_ASSERT_EQUALS(himplicant.value(), himp_expected.value());
+
+	himplicant = fc->target_to_pmimplicant(hc2, map<Handle, string> { { hc2,
+			"$var-happy" } });
+	himp_expected = eval->eval_h("(VariableNode \"$var-happy\")");
+	TS_ASSERT_EQUALS(himplicant.value(), himp_expected.value());
+
+	string expected =
+			"(InheritanceLink (EvaluationLink (PredicateNode \"rich\") (ListLink (VariableNode \"$var-M\") (VariableNode \"$var-R\"))) (EvaluationLink (PredicateNode \"happy\") (ListLink (VariableNode \"$var-M\") (VariableNode \"$var-R\"))))";
+	himp_expected = eval->eval_h(expected);
+	Handle h = eval->eval_h(find_node_test1);
+	TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
+	himplicant = fc->target_to_pmimplicant(h,
+			map<Handle, string> { { eval->eval_h("(ConceptNode \"M\")"),
+					"$var-M" },
+					{ eval->eval_h("(ConceptNode \"R\")"), "$var-R" } });
+	TS_ASSERT_EQUALS(himplicant.value(), himp_expected.value());
+}
+void ForwardChainerUTest::test_choose_variable(void) {
+	Handle h = eval->eval_h(find_node_test1);
+	Handle h2 =
+			eval->eval_h(
+					"(ConceptNode \"man@80d4e852-1b93-4c49-84e1-5a7352b0dcb1\" (stv 0.001 0.99000001))");
+	map<Handle, string> var_name_map = fc->choose_variable(h2);
+	Handle hcomp = eval->eval_h(
+			"(ConceptNode \"man@80d4e852-1b93-4c49-84e1-5a7352b0dcb1\")");
+	TS_ASSERT_EQUALS(1, var_name_map.size());
+	auto i = var_name_map.begin();
+	TS_ASSERT_EQUALS(hcomp.value(), i->first.value());
+	var_name_map = fc->choose_variable(h);
+	//for (auto mit: var_name_map)
+	//	cout <<endl<< SchemeSmob::to_string(mit.first)<<endl;
+}
+void ForwardChainerUTest::test_create_bindLink() {
+	Handle himplicant =
+			eval->eval_h(
+					"(InheritanceLink (VariableNode \"$var-rich\") (ConceptNode \"happy\"))");
+	Handle hbindlink = fc->create_bindLink(himplicant);
+	//cout <<endl<< SchemeSmob::to_string(hbindlink)<<endl;
+	Handle h =
+			eval->eval_h(
+					"(ConceptNode \"man@80d4e852-1b93-4c49-84e1-5a7352b0dcb1\" (stv 0.001 0.99000001))");
+	TS_ASSERT_THROWS_ANYTHING(fc->create_bindLink(h));
+}
+void ForwardChainerUTest::test_load_fc_conf() {
+	fc->load_fc_conf();
+	for (string s : fc->bind_link_name_) {
+		cout << endl << "RULE VARIABLES:" << s << endl;
+	}
+
+}
+void ForwardChainerUTest::test_choose_target() {
+
+}
+void ForwardChainerUTest::test_choose_input() {
+
+}
+void ForwardChainerUTest::test_do_chain() {
+	Handle h = eval->eval_h("(ConceptNode \"Peter\" )");
+	//Handle h2 = as->addNode(CONCEPT_NODE,"Peter",TruthValue::DEFAULT_TV());
+	fc->do_chain(h);
+}
