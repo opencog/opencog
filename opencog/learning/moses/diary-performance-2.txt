@@ -553,8 +553,13 @@ temperature seem to work very well for preselect-no-dupe.csv and
 
    moses -Hpre -q0.05 -Yval -ipreselect.csv
 
-Max attainable precision on preselect.csv should be: 
-(329-50)/329 = 0.848024
+Max attainable precision, with perfect recall, on preselect.csv should
+be: 
+   (329-50)/329 = 0.848024
+That's because 50 rows are dupes, and selecting those will give fp's.
+However, if we allow a smaller recall, and never recall the dupe rows,
+then a best-possible precision of 1.0 is acheivable, if the allowed
+recall is small enough.
   
 
      num_evals  preselect       no-dupe       
@@ -573,7 +578,7 @@ averaging over multiple random seeds.
 General strategy:
 
 current scorer:
-  if row picked, sum the outputs (= 0.5 *pos - neg)
+  if row picked, sum the outputs (= 0.5 * (pos - neg))
   active += pos+neg (weighted correctly)
 
   row score = sum of outputs / total weight of selected.
@@ -664,12 +669,22 @@ Stragetgy A Boosted pre-scorer results
 Strategy A has been implemented. Since the ensemble always has a
 precision of 1.0, the actual score is always 1.0 - activation_penalty.
 
-Scored below are after a mid-Seept2014 bug-fix to the boosted
-precision scorer.
-
 Columns are:
-no-dupe: -i preselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 --boost=1
-presel: -i preselect.csv -Hpre -Yval -q0.05 -z350 -v45 --boost=1
+ no-dupe: -i preselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 --boost=1
+ presel: -i preselect.csv -Hpre -Yval -q0.05 -z350 -v45 --boost=1
+ 
+     num_evals  no-dupe         presel
+                       (time)           (time)  
+     --------- --------------   --------------
+        10K    0.50226 (0m21s)  0.27912 (0m16s)
+        20K    0.50226 (1m25s)  0.80556 (0m59s)
+        40K    0.68458 (4m36s)  0.80488 (3m48s)
+        80K    1.0     (6m8s)   0.80000 (14m15s) 
+
+XXX except above numbers include a bug in the code: the scores sent in
+for training were mis-computed; basically, weights were being
+double-applied.  Anyway, they kind of suck. So this bug gets fixed
+mid-Sept 2014 and gives the results below...
 
      num_evals  no-dupe                 presel
                        (time) recall            (time)  recall
@@ -685,20 +700,165 @@ Wow! These results are excellent!
 The scores go down!  Why? Oh, I see .. the recall actually goes up.
 The recall is obtained by running eval-candidate 9see below). Strange
 side effect, that the recall goes up ... but precision goes down.
-Is this a bug ??
+Is this a bug ??  Yes it is ... it needs fixing. See below.
 
-Are the reported trees correct?  Verify:
+---------
+But first -- Are the reported trees correct?  Verify:
 
    eval-candidate -i preselect.csv -uoutput -C pre.combo -Hprerec
 
 This gives 0.72449 . Yep. so that works.  Checked the 20K tree too.
 
 The no-dupe result gives 1.0 for the pre scorer with -q0.05  whoa ...
+So that all checks out.
+---------
 
-Size of the compressed dataset is 329
+XXX there is still another bug lurking. For compressed tables,
+with both pos and neg compressed together, with pos dominating
+over the neg, these compressed rows were allowed into the ensemble
+(because they were mostly pos).  This bug incorrectly allowed
+imprecise scorers (as they pick the mixed rows) into the ensemble.
+This is why the score goes down, even as the recall stoots way up.
 
-----
+Some debug and verification:
+Code currently claims:
+Precision scorer, best score = 0.941176
+activation at best score = 0.051672
+precision of 'true' exemplar is 0.300912 = 99 / 329
+(all 329 rows selected, of which 99 are true.)
+This leaves 329-99 = 230 false rows.
+
+sum = -65.5 = 0.5 (tp - fp) of the selected rows, all rows selected.
+= 0.5 *(99 - 230) = -131 / 2 = sum_outputs(orow)
+
+Note that sum/active = -65.5 / 329 = - 0.19908 = 0.300912 - 0.5 = prec - 0.5
+just as expected....
+
+-----------
+OK, as mentioned above, there is another bug in the boosted precision scorer.
+Need to fix this.
+
+The plan: for training, need to use the weighted bscores. Due to
+normalization, the weighted bscore is NOT a simple dot-product of 
+weights times bscore.  For acceptance into the ensemble, a flat bscore
+needs to be used.  There is no easy way of getting the flat score from
+the weighted score, and v.v. (Well, one alternative is to extend the
+bscore ... that would require upcasting to use it...) So, for now,
+just recalculate the bscore as needed.
+
+plan:
+1) add_expert() needs to obtain/compute flat bscore.
+   add only those that are perfect, and not anticipated.
+2) get_error() needs to take combo trees, no bscores.
+3) in precision_bscore, can just call operator() for trees.
+
+Now fixed, I think. circa 21 Sept 2014 or so.
+-------
+So, remeasure:
+
+Columns are:
+no-dupe: -i preselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 --boost=1
+presel: -i preselect.csv -Hpre -Yval -q0.05 -z350 -v45 --boost=1
+
+
+ num      no-dupe                           presel
+ evals     (time)  recall  activation           (time)  recall  activation
+ ----- ----------------------------   ----------------------------------
+ 10K   1.0 (0m11s) 0.19192 0.051672   -0.41403 (0m26s) 0.04040  0.012158
+ 20K                                  -0.19089 (1m20s) 0.05051  0.015198
+ 40K                                   0.50226 (5m23s) 0.10101  0.030395
+
+
+Wow. That sucks. Review of log syas..WOW... remove the activation penalty
+during training!!! ... as we expect that most perfect scorers will have a
+huge penalty  ... the varying weights should prevent on type taking over,
+and should help w/ diversity.
+-------
+
+OK, so above now implemented. Try again.
+
+ num      no-dupe                           presel
+ evals     (time)  recall activa  cpxy          (time)  recall  activ  cpxy
+ ----- -------------------------------  -----------------------------------
+ 10K   1.0 (0m17s) 0.1717 0.05167 103   -0.1909 (0m31s) 0.0505 0.0152   77
+ 20K                                    -0.0086 (1m55s) 0.0606 0.0182  176
+ 40K                                     0.1456 (7m24s) 0.0707 0.0213  416
+
+Still not very impressive...
+
+two more wtfs:
+
+1) are the expalpha reversed ???
+2) push down weights forever, not just per-shot.
+
+Explore 1) -- reverse things.
+All three columns are 'presel' as above.
+
+reverse means: weights[i] = (0.0 < bs[i]) ? expalpha : rcpalpha;
+       in metapopulation/ensemble.cc -- the weighting is reversed, which should
+       be very wrong.
+
+promo means flag:  --boost-promote=9999 tacked on, to promote all
+       perfect scorers found.
+
+ num      reverse        reverse-promo     promo
+ evals         (time)           (time)          (time) recall  activ  cpxy
+ ----- ---------------- --------------   ---------------------------------
+ 10K   -0.4140 (0m6s)   -0.1909 (0m8s)   0.2791 (0m34s) 0.0808 0.0243  240
+ 20K   -0.1909 (0m16s)  -0.1909 (0m22s)  0.2791 (1m56s) 0.0808 0.0243  400
+ 40K   -0.1909 (0m42s)  -0.1909 (1m8s)   0.2791 (6m55s) 0.0808 0.0243  900
+
+Reverse certainly blows through the scoring function evaluations much much
+quicker.  The results stink, as they should.
+
+promo starts with a bang then fades. Probably due to issue number 2) above.
+So lets fix that issue.
+---------
+OK, so patch ensemble to keep scores low on previously selected rows.
+Now we get:
+
+ num     promo
+ evals        (time) recall  activ  cpxy
+ ----- ---------------------------------
+ 10K   0.5976 (0m24s) 0.1111 0.0334 1306
+ 20K   0.6846 (1m22s) 0.1212 0.0365 1401
+ 40K   0.6846 (5m1s)  0.1212 0.0365 1817
+
+Much better. But it stil stalls out.  Lets try a permanent-knockout variation.
+
+Same as above, but flatter weight accumulation.
+
+ num     promo
+ evals        (time) recall  activ  cpxy
+ ----- ---------------------------------
+ 10K   0.5976 (0m24s)
+ 20K   0.6846 (1m45s)
+ 40K   0.6846 (5m1s)
+
+No discernable change ... I suppose thats good, right?
+
+Below is how the above varies, for different random seeds.
+The variation is pretty dramatic ...
+
+ seed  promo
+ -r   score
+ ----------   
+ 0   0.5023 
+ 1   0.5976
+ 2   0.1456
+ 3   0.1456
+ 4   0.3969
+ 5  -0.1909
+ 6   0.2791
+ 7  -0.0086
+ 8   0.5023
+ 9  -0.1909
+
+
+================================
 An activation of 0.05 seems far too easy.  Try again with -q0.25:
+
+Immediatly below are the late-August 2014 results, with the buggy code.
 
   nevals  no-dupe                           presel
                   (time)  recall  activa            (time) recall
@@ -720,10 +880,9 @@ The matrix of results is:
 
 Activation = tp/total =  0.121580547112462
 
-
 Why is it terminating?  Because its getting perfect score on ensemble
-... !? even though min ctivation not yet hit ??
-
+... !? even though min activation not yet hit ??
+... that's due to another bug, now fixed (mid-Sept 2014)
 
 wtf in the logfile:  Expert: candidate score=-1.90976 error=0
  Best score: [score=153.4647216796875
@@ -731,6 +890,7 @@ wtf in the logfile:  Expert: candidate score=-1.90976 error=0
 so the normalization is bad ... 
 
 -------
+
 Comparable non-boosted results, for -q0.05:
 
      num_evals  no-dupe          presel
@@ -759,6 +919,8 @@ because the hill-climbing stage was not making use of the penalties.
 This was a mis-design in the score-mangling stages.  Yuck, scoring is
 just complicated.  So redo:  below are boosted versions, with the
 fixed ranking during hill-climbing:
+
+(This and the rest are late-August 2014 results)
 
      num_evals  no-dupe          presel
                        (time)            (time)  
@@ -873,10 +1035,108 @@ Future directions
 * Try to understand the underlying claim about getting good results
   from the precision scorer.
 
+=================================================================
 Sept 2014
 ---------
-There were some bugs affecting the precision scorer. Re-run above
-experiments.
+There were multiple bugs/design issues affecting the precision scorer.
+Re-run above experiments.
 
-:q
+no-mo: moses -ipreselect-no-dupe.csv -Hpre -Yval -q0.05 -z150 -v25 
+         --boost=1 --boost-promote=9999
+
+promo: moses -ipreselect.csv -Hpre -Yval -q0.05 -z350 -v45 
+         --boost=1 --boost-promote=9999
+
+ num     promo
+ evals        (time) recall  activ  cpxy
+ ----- ---------------------------------
+ 10K   0.5976 (0m24s) 0.1111 0.0334 1306
+ 20K   0.6846 (1m22s) 0.1212 0.0365 1401
+ 40K   0.6846 (5m1s)  0.1212 0.0365 1817
+
+Above are validated with
+   eval-candidate -i preselect.csv -uoutput -C pre.combo -Hpre -q0.05
+
+Again, with -q0.25
+
+ num     promo -q0.25
+ evals         (time)  recall  activ  cpxy
+ ----- -----------------------------------
+ 10K  -1.2125  (0m24s) 0.0909 0.0274   345
+ 20K  -1.1072  (1m27s) 0.1010 0.0304   680
+ 40K  -1.1072  (5m29s) 0.1010 0.0304  1739
+ 80K  -0.9249 (23m42s) 0.1212 0.0365 16016
+
+OK, that's pretty grim...
+
+ num     no-mo
+ evals        (time) recall  activ  cpxy
+ ----- ---------------------------------
+  10K   1.0  (0m16s) 0.1717 0.0517  673
+
+OK, so that works well, as alwasy. Of course its far less challenging.
+
+ num     no-mo -q0.25  (no-dupe, with boosting and full promotion)
+ evals         (time)  recall  activ  cpxy
+ ----- -----------------------------------
+  10K  -0.4653 (0m23s) 0.1919 0.0578  774
+  20K   0.0242 (1m23s) 0.3131 0.0942 1163
+  40K   0.1456 (5m19s) 0.3535 0.1064 2305
+  80K   0.6156 (20m0s) 0.5657 0.1702 5069
+ 160K   0.7949 (57m7s) 0.6768 0.2036 7569
+
+-------
+Lets compare these to the non-boosted results, from up-top.
+Sadly, the non-boosted results prety much always win,
+speed-wise and score-wise.
+
+Comparable non-boosted results, for -q0.05:
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- --------------    --------------
+         1K    0.61643 (0m1s)    0.72727 (0m1s)
+         2K    0.80952 (0m2s)    0.72727 (0m2s)
+         5K    1.0 (0m2s)        0.76471 (0m5s)
+        10K     -                0.78476 (0m14s)
+        40K     -                0.78947 (3m35s)
+        80K     -                0.82143 (14m0s)
+
+Comparable non-boosted results, for -q0.25:
+
+     num_evals  no-dupe          presel
+                       (time)            (time)  
+     --------- --------------    --------------
+         5K    0.68421 (0m6s)    
+        10K    0.68421 (0m21s)   0.65549 (0m16s)
+        20K    0.72043 (1m11s)   0.70588 (1m4s)
+        40K    0.72043 (4m9s)    0.70588 (4m32s)
+        80K    0.72414 (15m6s)   0.72043 (18m19s)
+
+How much of this is due to a fateful random number choice?
+All evals are for 10K and -q0.05. All promo times are about 20s to 30s.
+
+   seed  promo   presel
+    -r   score   score    time  precision
+    ----------   ------------------------
+    0   0.5023   0.76000  26s
+    1   0.5976   0.78476  16s
+    2   0.1456   0.08769  29s
+    3   0.1456   0.78261  18s
+    4   0.3969   0.73684  34s
+    5  -0.1909   0.88888  29s 0.88880
+    6   0.2791   0.76190  16s
+    7  -0.0086   0.65000  24s
+    8   0.5023   0.78947  19s
+    9  -0.1909   0.73684  27s
+
+OK, so boosting is beaten every time, it seems.  But here's one notable
+thing: the non-boosted ones don't have perfect precision, but they do
+mostly seem to always meet thier activation goals.  By contrast, the 
+boosted ones always have perfect precision, but fail to meet thier
+activation goals.  So this is kind-ocf comparing apples to oranges.
+
+The penalty for missing activation is severe -- but there is no penalty
+for imperfect precision. How would the non-boosted scorer fare, if there
+was a penalty for poor precision?
 

@@ -104,7 +104,7 @@ composite_score behave_cscore::get_cscore(const scored_combo_tree_set& ensemble)
     // Listen up, this is confusing ... For ensembles, this method is
     // called to obtain the "true" composite score, as it would hold 
     // for the unadulterated dataset.  Thus we do NOT use the row
-    // weights is the weighted scorer, but use the flat, uniform 
+    // weights as the weighted scorer would, but use the flat, uniform 
     // weighting.
     // score_t res = _bscorer.score(bs);    // this returns the weighted score.
     score_t res = boost::accumulate(bs, 0.0);

@@ -162,8 +162,8 @@ precision_bscore::precision_bscore(const CTable& ctable_,
 
 /// For boolean tables, sum the total number of 'T' values
 /// in the output.  This sum represents the best possible score
-/// i.e. we found all of the true values correcty.  Count
-/// 'F' is 'positive' is false.
+/// i.e. we found all of the true values correcty.  The 'F's are 
+/// false positives.
 score_t precision_bscore::sum_outputs(const CTable::counter_t& c) const
 {
     return 0.5 * (c.get(_target) - c.get(_neg_target));
@@ -199,6 +199,7 @@ void precision_bscore::set_complexity_coef(score_t ratio)
 behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_seq&)> select) const
 {
     behavioral_score bs;
+    behavioral_score ac;
 
     score_t active = 0.0;  // total weight of active outputs by tr
     score_t sao = 0.0;     // sum of all active outputs
@@ -220,12 +221,14 @@ behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_
         const multi_type_seq& irow = io_row.first;
         const auto& orow = io_row.second;
 
-        score_t sumo = 0.0;  // zero if not active
+        score_t sumo = 0.0;  // (tp-fp)/2 if active, else 0 if not active
+        score_t acto = 0.0;  // fp + tp if active, else 0 if not active
         bool selected = select(irow);
         if (selected) {
             sumo = sum_outputs(orow);
             sao += sumo;
-            active += orow.total_count();
+            acto = orow.total_count();
+            active += acto;
         }
 
         if (time_bscore) {
@@ -237,6 +240,7 @@ behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_
             }
         } else {
             bs.push_back(sumo);
+            ac.push_back(acto);
         }
 
         // Build CTable of results
@@ -258,12 +262,25 @@ behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_
             count_t fp = v.second.get(false);
             score_t contribution = 0.5 * (tp - fp);
             bs.push_back(contribution);
+            ac.push_back(tp+fp);
         }
     }
 
     if (0.0 < active) {
+        // normalization is the inverse of activity
+        score_t iac = 1.0 / active;
+
+        // For the boosted scorer, the active rows are weighted too.
+        // Its still tp+fp, except that the bscore for fp are negative...
+        if (_return_weighted_score) {
+            double wactive = 0.0;
+            for (size_t i=0; i< _size; i++) {
+                wactive += _weights[i] * ac[i];
+            }
+            iac = 1.0 / wactive;
+        }
+
         // Normalize all components by active, where active = tp+fp
-        score_t iac = 1.0 / active; // inverse of activity to be faster
         for (auto& v : bs) v *= iac;
 
         // tp = true positive
@@ -285,30 +302,39 @@ behavioral_score precision_bscore::do_score(std::function<bool(const multi_type_
     else // Add 0.0 to ensure the bscore has the same size
         bs.push_back(0.0);
 
-    // For boolean tables, activation sum of true and false positives
-    // i.e. the sum of all positives.   For contin tables, the activation
-    // is likewise: the number of rows for which the combo tree returned
-    // true (positive).
-    score_t activation = active / _ctable_weight;
-    score_t activation_penalty = get_activation_penalty(activation);
-    bs.push_back(activation_penalty);
+    // Append the activation penalty only if we are not performing
+    // boosting. Why? Because the boosted scorer only wants those
+    // selectors that are exactly correct, even if they have a terrible
+    // activation.  It will patch these together in the ensemble.  If
+    // these perfect scorers were penalized, they'd be discarded in the
+    // metapop, and we don't want that.  The member "_return_weighted_score"
+    // is a synonym for "we're doing boosting now".
+    if (not _return_weighted_score) {
+        // For boolean tables, activation sum of true and false positives
+        // i.e. the sum of all positives.   For contin tables, the activation
+        // is likewise: the number of rows for which the combo tree returned
+        // true (positive).
+        score_t activation = active / _ctable_weight;
+        score_t activation_penalty = get_activation_penalty(activation);
+        bs.push_back(activation_penalty);
 
-    if (logger().isFineEnabled()) {
-        score_t precision = 0.0;
-        if (0 < active) {
-            // See above for explanation for the extra 0.5
-            precision = sao / active + 0.5;
+        if (logger().isFineEnabled()) {
+            score_t precision = 0.0;
+            if (0 < active) {
+                // See above for explanation for the extra 0.5
+                precision = sao / active + 0.5;
+            }
+            logger().fine("precision = %f  activation=%f  activation penalty=%e",
+                          precision, activation, activation_penalty);
         }
-        logger().fine("precision = %f  activation=%f  activation penalty=%e",
-                      precision, activation, activation_penalty);
-    }
 
-    // Add time dispersion penalty
-    if (_pressure > 0.0) {
-        score_t dispersion_penalty =
-            get_time_dispersion_penalty(ctable_res.ordered_by_time());
-        bs.push_back(dispersion_penalty);
-        logger().fine("dispersion_penalty = %f", dispersion_penalty);
+        // Add time dispersion penalty
+        if (_pressure > 0.0) {
+            score_t dispersion_penalty =
+                get_time_dispersion_penalty(ctable_res.ordered_by_time());
+            bs.push_back(dispersion_penalty);
+            logger().fine("dispersion_penalty = %f", dispersion_penalty);
+        }
     }
 
     return bs;
@@ -333,10 +359,22 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 
 behavioral_score precision_bscore::operator()(const scored_combo_tree_set& ensemble) const
 {
-    if (exact_experts)
-        return exact_selection(ensemble);
-    else
-        return bias_selection(ensemble);
+    // The ensemble score must not use weights, but must be give the
+    // result that the ensemble would give on regular data.  Thus,
+    // disable weighting while we compute the ensemble score.
+    OC_ASSERT(_return_weighted_score, "Unexpected call to ensemble scorer!");
+    if (exact_experts) {
+        _return_weighted_score = false;
+        behavioral_score bs(exact_selection(ensemble));
+        _return_weighted_score = true;
+        return bs;
+    }
+    else {
+        _return_weighted_score = false;
+        behavioral_score bs(bias_selection(ensemble));
+        _return_weighted_score = true;
+        return bs;
+    }
 }
 
 /// scorer, suitable for use with boosting, where the members of the
@@ -452,39 +490,23 @@ behavioral_score precision_bscore::bias_selection(const scored_combo_tree_set& e
     return do_score(selector);
 }
 
-score_t precision_bscore::get_error(const behavioral_score& bs) const
+score_t precision_bscore::get_error(const combo_tree& tr) const
 {
-    // The incoming bscore will have 0.0 for non-selected rows, a
-    // positive value for correct selected rows, and a negative value
-    // for incorrect selected rows.  If summed with flat weighting,
-    // then the bscore would total to +0.5 if all selected rows are
-    // correct, and will total to -0.5 if all selected rows are wrong.
-    //
-    // If summed with the boosted weights, we have a cross-product of
-    // the following cases:
-    // a) row is lightly weighted, because previous trees added to
-    //    ensemble were already picking it correctly.
-    // b) row is heavily weighted, because previous trees added to
-    //    ensemble were picking it wrongly.
-    //
-    // G) bscore is positive; this tree is correctly selecting the row.
-    // Z) bscore is zero; this tree is not selecting the row.
-    // W) bscore is negative; this tree is wrongly selecting the row.
-    //
-    // So, the weighted sum of the bscore would then be:
-    // bG) strong positive contribution.
-    // bW) strong negative contribution.
-    // all others) mild or zero contribution.
-    //
-    // But what we want is the effective error of the bscore.  To get
-    // this, sum only the W rows, times the row weights.  Since the
-    // max-wrongness in the bscore is -0.5, we multiply by two.
-    // Also, ignore the appended penalties at the end of the bscore.
-    // Thus, we only sum up to size.
-    double accum = 0.0;
-    for (size_t i=0; i<_size; i++) if (bs[i] < 0.0) accum -= 2.0 * bs[i];
+    OC_ASSERT (exact_experts,
+        "Precision scorer: inexact experts not yet supported!");
 
-    return accum;
+    // We want the flat, unweighted score!
+    _return_weighted_score = false;
+    behavioral_score bs(operator()(tr));
+    _return_weighted_score = true;
+
+    // We only accumulate up to the _size, and ignore the penalties on
+    // the end!
+    double accum = 0.0;
+    for (size_t i=0; i<_size; i++) accum += bs[i];
+
+    // perfect score has accum = 0.5.
+    return 0.5 - accum;
 }
 
 behavioral_score precision_bscore::best_possible_bscore() const
@@ -657,6 +679,43 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
             break;
     }
     return tr;
+}
+
+void precision_bscore::reset_weights()
+{
+    wnorm = 1.0;
+    if (_return_weighted_score)
+        _weights = std::vector<double>(_size, 1.0);
+    else
+        _weights = std::vector<double>();
+}
+
+void precision_bscore::update_weights(const std::vector<double>& rew)
+{
+    OC_ASSERT(_return_weighted_score,
+        "Unexpected use of weights in the bscorer!");
+
+    OC_ASSERT(rew.size() == _size,
+        "Unexpected size of weight array!");
+
+    double znorm = 0.0;
+    for (size_t i = 0; i < _size; i++) {
+        // Knock down the weights of the selected rows. The goal here
+        // is to more-or-less keep them knocked down. Yes, due to
+        // renorm (below), they'll slowly drift back up; I guess that's
+        // OK. But whatever we do, we don't want to let later updates
+        // push them up.
+        _weights[i] *= wnorm;
+        if (rew[i] < 1.0) _weights[i] *= rew[i];
+        znorm += _weights[i];
+    }
+
+    // Normalization: sum of weights must equal _size
+    // This is not really correct, but it keeps us in the general
+    // area of having each row have an average weight of 1.0.
+    znorm = ((double) _size) / znorm;
+    wnorm = 1.0 / znorm;
+    for (size_t i=0; i<_size; i++) _weights[i] *= znorm;
 }
 
 ///////////////////////////

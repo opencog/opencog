@@ -120,7 +120,7 @@ struct precision_bscore : public bscore_ctable_time_dispersion
 
     behavioral_score operator()(const combo_tree& tr) const;
     behavioral_score operator()(const scored_combo_tree_set&) const;
-    score_t get_error(const behavioral_score&) const;
+    score_t get_error(const combo_tree&) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
@@ -129,8 +129,12 @@ struct precision_bscore : public bscore_ctable_time_dispersion
 
     score_t min_improv() const;
 
-    virtual void set_complexity_coef(score_t complexity_ratio);
-    virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
+    void set_complexity_coef(score_t complexity_ratio);
+    void set_complexity_coef(unsigned alphabet_size, float stddev);
+
+    // For boosting
+    void reset_weights();
+    void update_weights(const std::vector<double>&);
 
     /**
      * This is a experimental feature, we generate a massive combo
@@ -159,6 +163,7 @@ protected:
     score_t min_activation, max_activation;
     score_t activation_pressure;
     double bias_scale;
+    double wnorm;
     bool exact_experts;
 
     bool positive;
