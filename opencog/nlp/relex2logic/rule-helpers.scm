@@ -415,7 +415,7 @@
 ;
 (define (predadj-ynQ-rule subj_concept subj_instance predicative_concept predicative_instance)
 	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
-	(InheritanceLink (ConceptNode predicative_instance df-node-stv) (ConceptNode predicative_concept df-node-stv) df-link-stv)
+	(InheritanceLink (PredicateNode predicative_instance df-node-stv) (ConceptNode predicative_concept df-node-stv) df-link-stv)
 	(EvaluationLink (PredicateNode "Truth Value")
 		(EvaluationLink df-link-stv (PredicateNode predicative_instance df-node-stv) 
 			(ListLink df-link-stv (ConceptNode subj_instance df-node-stv)))
@@ -428,12 +428,13 @@
 ; of ways, including the prepobj relation and also treating the prep as a simple predicate; those sentences that do not
 ; call the rule below, call the SV-ynq rule.
 ;
-(define (prepobj-ynQ-rule subj_concept subj_instance predprep_concept predprep_instance)
+(define (prepobj-ynQ-rule subj_concept subj_instance predprep_concept predprep_instance obj_concept obj_instance)
 	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
-	(InheritanceLink (ConceptNode predprep_instance df-node-stv) (ConceptNode predprep_concept df-node-stv) df-link-stv)
+	(InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj_concept df-node-stv) df-link-stv)
+	(InheritanceLink (PredicateNode predprep_instance df-node-stv) (ConceptNode predprep_concept df-node-stv) df-link-stv)
 	(EvaluationLink (PredicateNode "Truth Value")
 		(EvaluationLink df-link-stv (PredicateNode predprep_instance df-node-stv)
-			(ListLink df-link-stv (ConceptNode subj_instance df-node-stv)))
+			(ListLink df-link-stv (ConceptNode subj_instance df-node-stv)(ConceptNode obj_instance df-node-stv)))
 			(VariableNode "$var1"))
 ))
 ;
@@ -452,7 +453,8 @@
 ; Examples: "Have you slept?", "Will you sleep?", "Did you sleep?"
 ; 
 ; NB: This rule 'ought to' apply to all main verbs with auxilliaries, however [to-be + V-ing] (progressive) is interpreted
-; by relex as [to-be + obj, so e.g., "Are you sleeping?" calls the SVO and / or yn-obj rules instead of this rule.
+; by relex as [to-be + obj] or [to-be + predadj], so e.g., "Are you sleeping?" calls the yn-obj rule or the yn-predadj rule
+; instead of this rule.  However, the results of those rules seem to give the desired result, so I'm not sure it needs a fix. . . 
 ;
 (define (SV-ynQ-rule subj_concept subj_instance verb verb_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -465,7 +467,7 @@
 ;
 ; Example: "Did you eat the leftover baba-ganoush?"
 ;
-; NB: 	This rule also gets called for progressive sentences like 'Are you sleeping?" due to a relex error.
+; NB: 	This rule also gets called sometimes for progressive sentences like 'Are you sleeping?" due to a relex error.
 ; 	and it also applies incorrectly to many SVIO sentences where the IO is interpreted by relex as 
 ;	an extra prepositional phrase rather than an IO.
 ;
@@ -504,7 +506,7 @@
 ; Examples: "Who farted?", "What happened?"
 ;
 ; NB: This rule should but does not apply to progressive sentences because they get interpreted
-; by relex as [to-be + object]
+; by relex as [to-be + object] or [to-be+predadj] and call SVP or SVO
 ;
 (define (whowhatsubj-SV-Q-rule verb verb_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -565,8 +567,6 @@
 ;
 ; Examples: "Who do you love?", "What do you think?"
 ;
-; Works okay, but also calls whosubj-SV-Q regardless of exclusion clause -- attempted fix not tested yet . . .
-;
 (define (whowhatobj-Q-rule subj_concept subj_instance verb verb_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
@@ -580,8 +580,9 @@
 ; Examples: "To whom did you sell the children?"
 ; Examples not working (see NB below): "To what do we owe the pleasure of your company?", "Who did you give it to?", "To what did you dedicate yourself?"
 ;
-; NB: this rule not getting called for different reasons with different questions: The first sentence above doesn't work because there is no 
-; interrogative or truth flag in the relex output. The other two don't work because relex doesn't recognize that they have IO.
+; NB: this rule not getting called for different reasons with different questions: The what sentences don't have qVars in the relex output, nor the correct
+; query flags; it's a mess. 
+; The who sentences should trigger one of the three whoiobj rules. Unclear why they're not.
 ;
 (define (whowhatiobj-Q-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -615,12 +616,14 @@
 				(VariableNode "$qVar")
 				(EvaluationLink df-link-stv
 					(PredicateNode verb_instance df-node-stv)
-					(ConceptNode subj_instance df-node-stv))))
+					(ListLink (ConceptNode subj_instance df-node-stv) df-link-stv)))
 ))
 ;
-; This rule is not getting called because relex is classifying the verb as an indirect-object, as in . . .
-; "Where did you eat dinner?" -- 'eat' gets relexed as an iobj
-; "Where can I buy a fedora?" -- 'buy' gets relexed as an iobj
+; "Where did you eat dinner?", "Where can I buy a fedora?"
+; Appears to call correct rules in plain-text-server, but gets a guile error in the scheme shell
+; Progressive aspect versions "Where are you eating dinner?" "calls SVP instead because relex outputes a predadj relation
+; "Where were you eating dinner?" getrs it right on the second and third parses but not the one that goes to the atomspace
+; And "Where did you put the book?" doesn't call any Q-ruole because relex gives not query or interrog flag nor %atlocation.
 ;
 (define (where-SVOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -637,8 +640,10 @@
 							(ConceptNode obj_instance df-node-stv)))))
 ))
 ;
-; Not working: "Where did you give him the message?" doesn't call any Q-rule because relex doesn't make an interrogative or truth-query flag
-; NB: need to compose to-do rules for sentences like "Where did she tell him to meet her?" if we want to use such sentences . . .
+; Not working: "Where did you give him the message?" calls the rule below for the second parse, but the first parse doesn't call
+; any Q-rule because relex doesn't make an interrogative or truth-query flag
+;
+; NB: need to compose to-do rules for sentences like "Where did she tell him to meet her?" (to-do) if we want to use such sentences . . .
 ;
 (define (where-SVIOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance iobj_concept iobj_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -681,7 +686,7 @@
 		(VariableNode "$qVar")
 		(EvaluationLink df-link-stv
 			(PredicateNode verb_instance df-node-stv)
-				(ConceptNode subj_instance df-node-stv)))
+				(ListLink (ConceptNode subj_instance df-node-stv) df-ink-stv))
 ))
 ;
 ; Example: "When did you bake the cake?" 
@@ -740,10 +745,10 @@
 				(VariableNode "$qVar")
 				(EvaluationLink df-link-stv
 					(PredicateNode verb_instance df-node-stv)
-					(ConceptNode subj_instance df-node-stv))))
+					(ListLink (ConceptNode subj_instance df-node-stv) df-link-stv)))
 ))
 ;
-; Example: "Why do like terrible music?" 
+; Example: "Why do you like terrible music?" 
 ;
 (define (why-SVOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -807,7 +812,7 @@
 				(VariableNode "$qVar")
 				(EvaluationLink df-link-stv
 					(PredicateNode verb_instance df-node-stv)
-					(ConceptNode subj_instance df-node-stv))))
+					(ListLink (ConceptNode subj_instance df-node-stv) df-link-stv)))
 ))
 ;
 ; Example: "How did you like the movie?"
@@ -849,8 +854,7 @@
 ; Predicative How
 ;---------------------------------------------------------------------------------------------
 ; 
-; Examples: "How was the party?" !!only gets called for past tense; present tense (i.e. "How is your food?") doesn't get 
-; called because the relex output lacks both the QUERY-TYPE and the %copula arguments output for the past tense versions!!
+; Examples: "How was the party?" "How is your food?")
 ;
 (define (howpredadj-Q-rule subj_concept subj_instance)
 	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
@@ -890,6 +894,7 @@
 ;-----------------------------------------------------------------------------------------------
 ;
 ; Example: "Which girl do you like?"
+;
 (define (whichobjQ-rule obj_concept obj_instance verb verb_instance subj_concept subj_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
@@ -900,7 +905,12 @@
 			(ConceptNode subj_instance df-node-stv)
 			(ConceptNode obj_instance df-node-stv)))
 ))
+;
 ; Example: "Which girl likes you?"
+;
+;need to write SV, SVO, and SVIO versions of these -- or can we just write a rule to replace the subject with the questioned subject? 
+;
+;
 (define (whichsubjQ-rule subj_concept subj_instance verb verb_instance pred_concept pred_instance)			
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
@@ -911,7 +921,9 @@
 			(ConceptNode subj_instance df-node-stv)
 			(PredicateNode pred_instance df-node-stv)))
 ))
+;
 ; Example: "Which girl is crazy?"
+;
 (define (whichpredadjQ-rule subj_concept subj_instance pred_concept pred_instance)
 	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
 	(ImplicationLink (PredicateNode pred_instance df-node-stv) (PredicateNode pred_concept df-node-stv) df-link-stv)	
