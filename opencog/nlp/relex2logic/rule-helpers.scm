@@ -692,6 +692,7 @@
 		(EvaluationLink df-link-stv
 			(PredicateNode verb_instance df-node-stv)
 				(ListLink (ConceptNode subj_instance df-node-stv) df-ink-stv))
+	)
 ))
 ;
 ; Example: "When did you bake the cake?" 
@@ -751,6 +752,7 @@
 				(EvaluationLink df-link-stv
 					(PredicateNode verb_instance df-node-stv)
 					(ListLink (ConceptNode subj_instance df-node-stv) df-link-stv)))
+	)
 ))
 ;
 ; Example: "Why do you like terrible music?" 
@@ -818,6 +820,7 @@
 				(EvaluationLink df-link-stv
 					(PredicateNode verb_instance df-node-stv)
 					(ListLink (ConceptNode subj_instance df-node-stv) df-link-stv)))
+	)
 ))
 ;
 ; Example: "How did you like the movie?"
