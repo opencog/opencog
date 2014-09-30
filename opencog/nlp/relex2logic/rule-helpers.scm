@@ -455,8 +455,9 @@
 ; Examples: "Have you slept?", "Will you sleep?", "Did you sleep?"
 ; 
 ; NB: This rule 'ought to' apply to all main verbs with auxilliaries, however [to-be + V-ing] (progressive) is interpreted
-; by relex as [to-be + obj] or [to-be + predadj], so e.g., "Are you sleeping?" calls the yn-obj rule or the yn-predadj rule
-; instead of this rule.  However, the results of those rules seem to give the desired result, so I'm not sure it needs a fix. . . 
+; by relex as [to-be + predadj], so e.g., "Are you sleeping?" calls the yn-obj rule or the yn-predadj rule instead of this rule.
+; However, the results of those rules seem to give the desired result, so instead of fixing relex I may just write predadj
+; rules that handle it for other Q-types . . . 
 ;
 (define (SV-ynQ-rule subj_concept subj_instance verb verb_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -508,7 +509,7 @@
 ; Examples: "Who farted?", "What happened?"
 ;
 ; NB: This rule should but does not apply to progressive sentences because they get interpreted
-; by relex as [to-be + object] or [to-be+predadj] and call SVP or SVO
+; by relex as [to-be+predadj] and call SVP or SVO at the moment . . . 
 ;
 (define (whowhatsubj-SV-Q-rule verb verb_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -581,10 +582,7 @@
 ;
 ; Examples: "To whom did you sell the children?"
 ; Examples not working (see NB below): "To what do we owe the pleasure of your company?", "Who did you give it to?", "To what did you dedicate yourself?"
-;
-; NB: this rule not getting called for different reasons with different questions: The what sentences don't have qVars in the relex output, nor the correct
-; query flags; it's a mess. 
-; The who sentences should trigger one of the three whoiobj rules. Unclear why they're not.
+; NB: Have just implemented fixes for these errors, but cannot be sure they all work until the next link-grammar update . . . .
 ;
 (define (whowhatiobj-Q-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -627,8 +625,7 @@
 ; "Where did you eat dinner?", "Where can I buy a fedora?"
 ; Appears to call correct rules in plain-text-server, but gets a guile error in the scheme shell
 ; Progressive aspect versions "Where are you eating dinner?" "calls SVP instead because relex outputes a predadj relation
-; "Where were you eating dinner?" getrs it right on the second and third parses but not the one that goes to the atomspace
-; And "Where did you put the book?" doesn't call any Q-ruole because relex gives not query or interrog flag nor %atlocation.
+; "Where were you eating dinner?" gets it right on the second and third parses but not the one that goes to the atomspace
 ;
 (define (where-SVOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
