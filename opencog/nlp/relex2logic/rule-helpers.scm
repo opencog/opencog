@@ -417,7 +417,7 @@
 ;
 (define (predadj-ynQ-rule subj_concept subj_instance predicative_concept predicative_instance)
 	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
-	(InheritanceLink (PredicateNode predicative_instance df-node-stv) (ConceptNode predicative_concept df-node-stv) df-link-stv)
+	(ImplicationLink (PredicateNode predicative_instance df-node-stv) (PredicateNode predicative_concept df-node-stv) df-link-stv)
 	(EvaluationLink (PredicateNode "Truth Value")
 		(EvaluationLink df-link-stv (PredicateNode predicative_instance df-node-stv) 
 			(ListLink df-link-stv (ConceptNode subj_instance df-node-stv)))
@@ -433,7 +433,7 @@
 (define (prepobj-ynQ-rule subj_concept subj_instance predprep_concept predprep_instance obj_concept obj_instance)
 	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj_concept df-node-stv) df-link-stv)
-	(InheritanceLink (PredicateNode predprep_instance df-node-stv) (ConceptNode predprep_concept df-node-stv) df-link-stv)
+	(ImplicationLink (PredicateNode predprep_instance df-node-stv) (PredicateNode predprep_concept df-node-stv) df-link-stv)
 	(EvaluationLink (PredicateNode "Truth Value")
 		(EvaluationLink df-link-stv (PredicateNode predprep_instance df-node-stv)
 			(ListLink df-link-stv (ConceptNode subj_instance df-node-stv)(ConceptNode obj_instance df-node-stv)))
@@ -618,8 +618,11 @@
 				(VariableNode "$qVar")
 				(EvaluationLink df-link-stv
 					(PredicateNode verb_instance df-node-stv)
-					(ListLink (ConceptNode subj_instance df-node-stv) df-link-stv)))
-))
+					(ListLink (ConceptNode subj_instance df-node-stv) df-link-stv)
+				)
+			)
+    ))
+)
 ;
 ; "Where did you eat dinner?", "Where can I buy a fedora?"
 ; Appears to call correct rules in plain-text-server, but gets a guile error in the scheme shell
