@@ -618,8 +618,11 @@
 				(VariableNode "$qVar")
 				(EvaluationLink df-link-stv
 					(PredicateNode verb_instance df-node-stv)
-					(ListLink (ConceptNode subj_instance df-node-stv) df-link-stv)))
-))
+					(ListLink (ConceptNode subj_instance df-node-stv) df-link-stv)
+				)
+			)
+    ))
+)
 ;
 ; "Where did you eat dinner?", "Where can I buy a fedora?"
 ; Appears to call correct rules in plain-text-server, but gets a guile error in the scheme shell
