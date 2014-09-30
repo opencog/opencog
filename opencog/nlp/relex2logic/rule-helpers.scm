@@ -887,8 +887,6 @@
 ;-----------------------------------------------------------------------------------------------
 ; CHOICE-TYPE QUESTIONS
 ;-----------------------------------------------------------------------------------------------
-; WHICH -- NONE OF THESE RULES ARE GETTING CALLED YET -- DON'T KNOW WHY
-;-----------------------------------------------------------------------------------------------
 ;
 ; Example: "Which girl do you like?"
 ;
@@ -896,27 +894,31 @@
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj_concept df-node-stv) df-link-stv)
-	(InheritanceLink (ConceptNode obj_instance df-node-stv) (VariableNode "$qVar") df-link-stv)
-	(EvaluationLink df-link-stv (PredicateNode verb_instance df-node-stv)
-		(ListlInk df-link-stv
-			(ConceptNode subj_instance df-node-stv)
-			(ConceptNode obj_instance df-node-stv)))
+	(InheritanceLink (VariableNode "$qVar") (ConceptNode obj_instance df-node-stv) df-link-stv)
+	(SatisfyingSetLink df-link-stv
+		(VariableNode "$qVar") 	
+		(EvaluationLink df-link-stv (PredicateNode verb_instance df-node-stv)
+			(ListlInk df-link-stv
+				(ConceptNode subj_instance df-node-stv)
+				(VariableNode "$qVar" df-node-stv))))
 ))
 ;
 ; Example: "Which girl likes you?"
 ;
-;need to write SV, SVO, and SVIO versions of these -- or can we just write a rule to replace the subject with the questioned subject? 
+;need to write SV, SVIO versions of these 
 ;
 ;
-(define (whichsubjQ-rule subj_concept subj_instance verb verb_instance pred_concept pred_instance)			
+(define (whichsubjQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)			
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
-	(ImplicationLink (PredicateNode pred_instance df-node-stv) (PredicateNode pred_concept df-node-stv) df-link-stv)
-	(InheritanceLink (ConceptNode subj_instance df-node-stv) (VariableNode "$qVar") df-link-stv)
-	(EvaluationLink df-link-stv (PredicateNode verb_instance df-node-stv)
-		(ListlInk df-link-stv
-			(ConceptNode subj_instance df-node-stv)
-			(PredicateNode pred_instance df-node-stv)))
+	(ImplicationLink (PredicateNode obj_instance df-node-stv) (PredicateNode obj_concept df-node-stv) df-link-stv)
+	(InheritanceLink (VariableNode "$qVar") (ConceptNode subj_instance df-node-stv) df-link-stv)
+	(SatisfyingSetLink df-link-stv
+		(variableNode "$qVar")
+		(EvaluationLink df-link-stv (PredicateNode verb_instance df-node-stv)
+			(ListlInk df-link-stv
+			(VariableNode "$qVar" df-node-stv)
+			(PredicateNode obj_instance df-node-stv))))
 ))
 ;
 ; Example: "Which girl is crazy?"
@@ -924,8 +926,8 @@
 (define (whichpredadjQ-rule subj_concept subj_instance pred_concept pred_instance)
 	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
 	(ImplicationLink (PredicateNode pred_instance df-node-stv) (PredicateNode pred_concept df-node-stv) df-link-stv)	
-	(InheritanceLink (ConceptNode subj_instance df-node-stv) (VariableNode "$qVar") df-link-stv)
-	(InheritanceLink (ConceptNode subj_instance df-node-stv) (PredicateNode pred_instance df-node-stv) df-link-stv)
+	(InheritanceLink (VariableNode "$qVar") (ConceptNode subj_instance df-node-stv)  df-link-stv)
+	(InheritanceLink (VariableNode "$qVar") (PredicateNode pred_instance df-node-stv) df-link-stv)
 ))
 ;
 ; -----------------------------------------------------------------------
