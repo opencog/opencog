@@ -530,7 +530,7 @@ bool PatternMiner::onlyContainVariableNodes(Handle link, AtomSpace* _atomSpace)
 //       for Depth first: sharedNodes = current shared node
 // sharedNodes have to be variables , should not be const
 // sharedLinkIndex is the index in the inputLinks which contains the shared node
-void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, HTreeNode* parentNode, set<Handle>& sharedNodes, unsigned int sharedLinkIndex,
+void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, HTreeNode* parentNode, set<Handle>& sharedNodes,unsigned int sharedLinkIndex,
                                                             AtomSpace* _fromAtomSpace, vector<HTreeNode*>& allLastGramHTreeNodes, vector<HTreeNode*>& allHTreeNodes, unsigned int gram)
 {
     map<Handle,Handle> valueToVarMap;  // the ground value node in the _fromAtomSpace to the variable handle in pattenmining Atomspace
@@ -568,30 +568,30 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
     bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const
 
     // Find the indexes of the sharedVarNodes. They have to be an variable, not a const.
-    int sharedNum = sharedNodes.size();
-    int sharedNodesIndexes[sharedNum];
+//    int sharedNum = sharedNodes.size();
+//    int sharedNodesIndexes[sharedNum];
 
-    int sharedCout = 0;
+//    int sharedCout = 0;
 
-    foreach (Handle shardNode, sharedNodes)
-    {
-        sharedNodesIndexes[sharedCout] = -1;
-        map<Handle,Handle>::iterator varIt;
-        int j = 0;
-        for (varIt = valueToVarMap.begin(); varIt != valueToVarMap.end(); ++varIt, j++)
-        {
-            if ((varIt->first) == shardNode)
-            {
-                sharedNodesIndexes[sharedCout] = j;
-                break;
-            }
-        }
+//    foreach (Handle shardNode, sharedNodes)
+//    {
+//        sharedNodesIndexes[sharedCout] = -1;
+//        map<Handle,Handle>::iterator varIt;
+//        int j = 0;
+//        for (varIt = valueToVarMap.begin(); varIt != valueToVarMap.end(); ++varIt, j++)
+//        {
+//            if ((varIt->first) == shardNode)
+//            {
+//                sharedNodesIndexes[sharedCout] = j;
+//                break;
+//            }
+//        }
 
-        OC_ASSERT( (sharedNodesIndexes[sharedCout] != -1),
-                  "PatternMiner::extractAllPossiblePatternsFromInputLinks: cannot find the shared variable!\n");
-        sharedCout ++;
+//        OC_ASSERT( (sharedNodesIndexes[sharedCout] != -1),
+//                  "PatternMiner::extractAllPossiblePatternsFromInputLinks: cannot find the shared variable!\n");
+//        sharedCout ++;
 
-    }
+//    }
 
     // Get all the shared nodes and leaves
     HandleSeqSeq oneOfEachSeqShouldBeVars;
@@ -621,73 +621,70 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inpu
 
             bool skip = false;
 
-            // For Breadth_First, checked if all the nodes in sharedNodes are considered as variables
-            if (Pattern_mining_mode == "Breadth_First")
+//            // For Breadth_First, checked if all the nodes in sharedNodes are considered as variables
+//            if (Pattern_mining_mode == "Breadth_First")
+//            {
+
+//                bool sharedAllVar = true;
+
+//                if (sharedNum != 0)
+//                {
+//                    // check if in this combination, all the sharednodes are considered as variables
+//                    for (int k = 0; k < sharedNum; k ++)
+//                    {
+//                        int sharedIndex = sharedNodesIndexes[k];
+//                        if (! indexes[sharedIndex])
+//                            sharedAllVar = false;
+//                    }
+//                }
+
+//                if (! sharedAllVar)
+//                {
+//                    skip = true;
+//                }
+
+//            }
+
+
+
+            unsigned int index = 0;
+            for (iter = valueToVarMap.begin(); iter != valueToVarMap.end(); ++ iter)
             {
+                if (indexes[index]) // this is considered as a variable, add it into the variable to value map
+                    patternVarMap.insert(std::pair<Handle,Handle>(iter->first, iter->second));
 
-                bool sharedAllVar = true;
-
-                if (sharedNum != 0)
-                {
-                    // check if in this combination, all the sharednodes are considered as variables
-                    for (int k = 0; k < sharedNum; k ++)
-                    {
-                        int sharedIndex = sharedNodesIndexes[k];
-                        if (! indexes[sharedIndex])
-                            sharedAllVar = false;
-                    }
-                }
-
-                if (! sharedAllVar)
-                {
-                    skip = true;
-                }
-
+                index ++;
             }
 
-
-            if (! skip)
+            if (enable_filter_links_should_connect_by_vars)
             {
 
-                unsigned int index = 0;
-                for (iter = valueToVarMap.begin(); iter != valueToVarMap.end(); ++ iter)
+                // check if in this combination, if at least one node in each Seq of oneOfEachSeqShouldBeVars is considered as variable
+                bool allSeqContainsVar = true;
+                foreach(HandleSeq& oneSharedSeq, oneOfEachSeqShouldBeVars)
                 {
-                    if (indexes[index]) // this is considered as a variable, add it into the variable to value map
-                        patternVarMap.insert(std::pair<Handle,Handle>(iter->first, iter->second));
-
-                    index ++;
-                }
-
-                if (enable_filter_links_should_connect_by_vars)
-                {
-
-                    // check if in this combination, if at least one node in each Seq of oneOfEachSeqShouldBeVars is considered as variable
-                    bool allSeqContainsVar = true;
-                    foreach(HandleSeq& oneSharedSeq, oneOfEachSeqShouldBeVars)
+                    bool thisSeqContainsVar = false;
+                    foreach (Handle& toBeSharedNode, oneSharedSeq)
                     {
-                        bool thisSeqContainsVar = false;
-                        foreach (Handle& toBeSharedNode, oneSharedSeq)
+                        if (patternVarMap.find(toBeSharedNode) != patternVarMap.end())
                         {
-                            if (patternVarMap.find(toBeSharedNode) != patternVarMap.end())
-                            {
-                                thisSeqContainsVar = true;
-                                break;
-                            }
-
-                        }
-
-                        if (! thisSeqContainsVar)
-                        {
-                            allSeqContainsVar = false;
+                            thisSeqContainsVar = true;
                             break;
                         }
+
                     }
 
-                    if (! allSeqContainsVar)
-                        skip = true;
+                    if (! thisSeqContainsVar)
+                    {
+                        allSeqContainsVar = false;
+                        break;
+                    }
                 }
 
+                if (! allSeqContainsVar)
+                    skip = true;
             }
+
 
 
             if ( (! skip) && (enable_filter_leaves_should_not_be_vars) && (gram > 1) ) // for gram > 1, any leaf should not considered as variable
@@ -1404,10 +1401,12 @@ void PatternMiner::OutPutPatternsToFile(unsigned int n_gram, bool is_interesting
 
         resultFile << endl;
 
-        foreach (Handle link, htreeNode->pattern)
-        {
-            resultFile << atomSpace->atomAsString(link);
-        }
+        resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+
+//        foreach (Handle link, htreeNode->pattern)
+//        {
+//            resultFile << atomSpace->atomAsString(link);
+//        }
     }
 
     resultFile.close();

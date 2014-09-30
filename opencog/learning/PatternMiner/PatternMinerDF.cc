@@ -75,9 +75,9 @@ void PatternMiner::growPatternsDepthFirstTask()
 
         }
 
-        readNextLinkLock.unlock();
-
         Handle& cur_link = allLinks[cur_index];
+
+        readNextLinkLock.unlock();
 
         // if this link is listlink, ignore it
         if (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK)
