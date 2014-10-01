@@ -49,8 +49,8 @@ Router::Router()
 {
 
     running = true;
-    // this will force ther router to send AVAILABLE_ELEMENT for all known NE
-    // as soon it starts up...
+    // This will force the router to send AVAILABLE_ELEMENT for all
+    // known NE as soon it starts up...
     lastNotifyTimestamp = 0;
     messageCentral = new MemoryMessageCentral();
 
