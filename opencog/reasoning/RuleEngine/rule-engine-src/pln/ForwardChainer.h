@@ -37,7 +37,7 @@ class ForwardChainer: public virtual Chainer {
 private:
 	friend class ForwardChainerUTest;
 	int ITERATION_SIZE;
-	bool search_in_af = true;
+	bool search_in_af; // = true;
 
 	friend class ForwardChainInputMatchCB;
 	friend class ForwardChainPatternMatchCB;
@@ -47,7 +47,7 @@ private:
 	HandleSeq prev_chosen_targets;
 	vector<string> bind_link_name_;  // the variable name assigned to a BindLink
 	//  eg. (define human (BindLink ...)human is the variable name
-	Handle hcurrent_choosen_rule_ = Handle::UNDEFINED; //Handle to chosen BindLink on a praticular step of forward chaining
+	Handle hcurrent_choosen_rule_; // = Handle::UNDEFINED; //Handle to chosen BindLink on a praticular step of forward chaining
 
 	ForwardChainInputMatchCB * fcim_;
 	ForwardChainPatternMatchCB * fcpm_;

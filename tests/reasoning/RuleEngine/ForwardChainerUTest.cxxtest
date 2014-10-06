@@ -18,16 +18,20 @@ private:
 	AtomSpace *as;
 	SchemeEval* eval;
 	ForwardChainer * fc;
-	const std::string find_node_test1 =
-			"(InheritanceLink (EvaluationLink (PredicateNode \"rich\") (ListLink (ConceptNode \"M\") (ConceptNode \"R\"))) (EvaluationLink (PredicateNode \"happy\") (ListLink (ConceptNode \"M\") (ConceptNode \"R\"))))";
+	const std::string find_node_test1;
 public:
-	ForwardChainerUTest() {
+	ForwardChainerUTest()
+		: find_node_test1(
+			"(InheritanceLink (EvaluationLink (PredicateNode \"rich\") (ListLink (ConceptNode \"M\") (ConceptNode \"R\"))) (EvaluationLink (PredicateNode \"happy\") (ListLink (ConceptNode \"M\") (ConceptNode \"R\"))))")
+	{
 		server(CogServer::createInstance);
 		as = &cogserver().getAtomSpace();
 		eval = new SchemeEval(as);
 		as->clear();
 		config().set("SCM_PRELOAD",
-				"opencog/atomspace/core_types.scm,opencog/scm/utilities.scm,opencog/python/pln/examples/deduction/atomspace_contents.scm");
+				"opencog/atomspace/core_types.scm, "
+				"opencog/scm/utilities.scm, "
+				"opencog/python/pln/examples/deduction/atomspace_contents.scm");
 		config().set("MODULES", "opencog/query/libQueryModule.so");
 		cogserver().loadModules();
 		cogserver().loadSCMModules();
