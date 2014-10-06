@@ -992,35 +992,81 @@
 
 
 ; -----------------------------------------------------------------------
-; and rules
+;  conjunction rules
 ; -----------------------------------------------------------------------
-; Example:"I did my homework, and I went to school."
-(define (and-rule1 var1 var1_instance var2 var2_instance)
+;coordinating conjunction - And, but, for, nor, or, so, and yet
+;Example:"I did my homework, and I went to school."
+;       "John and Madison eat the cake."
+;       " Joan is poor  but  happy." 
+
+(define (and-rule var1 var1_instance var2 var2_instance pos)
+    (cond [(equal? pos "verb") 
 	(list (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
 	(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
-	(EvaluationLink
-        (PredicateNode "andmarker")
+        (EvaluationLink
+        (PredicateNode "and")
 		(ListLink
 			(PredicateNode var1_instance)
 			(PredicateNode var2_instance)
 		)
-	))
-)
-
-; Example:"John and Madison eat the cake."
-(define (and-rule2 var1 var1_instance var2 var2_instance)
-	(list (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
+	))]
+	[else 
+    (list (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
 	(InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
         (EvaluationLink
-        (PredicateNode "andmarker")
+        (PredicateNode "and")
 		(ListLink
 			(ConceptNode var1_instance)
 			(ConceptNode var2_instance)
 		)
-	))
+	))])
 )
 
+(define (but-rule var1 var1_instance var2 var2_instance pos)
+    (cond [(equal? pos "verb") 
+	(list (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
+	(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
+        (EvaluationLink
+        (PredicateNode "but")
+		(ListLink
+			(PredicateNode var1_instance)
+			(PredicateNode var2_instance)
+		)
+	))]
+	[else 
+    (list (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
+	(InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
+        (EvaluationLink
+        (PredicateNode "but")
+		(ListLink
+			(ConceptNode var1_instance)
+			(ConceptNode var2_instance)
+		)
+	))])
+)
 
+(define (or-rule var1 var1_instance var2 var2_instance pos)
+    (cond [(equal? pos "verb") 
+	(list (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
+	(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
+        (EvaluationLink
+        (PredicateNode "or")
+		(ListLink
+			(PredicateNode var1_instance)
+			(PredicateNode var2_instance)
+		)
+	))]
+	[else 
+    (list (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
+	(InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
+        (EvaluationLink
+        (PredicateNode "or")
+		(ListLink
+			(ConceptNode var1_instance)
+			(ConceptNode var2_instance)
+		)
+	))])
+)
 ; -----------------------------------------------------------------------
 ; that rule for creating thatmarker
 ; -----------------------------------------------------------------------
