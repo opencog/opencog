@@ -10,6 +10,7 @@
 
 (use-modules (ice-9 rdelim))
 (use-modules (ice-9 regex))
+(use-modules (ice-9 receive))
 ; ---------------------------------------------------------------------
 ; Patterns used for spliting the string passed from relex server
 (define pattern1 "; ##### END OF A PARSE #####")
@@ -36,6 +37,23 @@
 (define (parse-str a-string)
     (substring (match:substring
         (string-match "ParseNode \"sentence@[[:alnum:]_-]*" a-string)) 11)
+)
+
+; ---------------------------------------------------------------------
+; Creates a single list  made of the elements of lists within it with the exception
+; of empty-lists.
+(define (list-squash lst member-output)
+    (receive (list-lst member-lst) (partition list? lst)
+        (if (null? list-lst)
+            (lset-union equal? member-output member-lst)
+            (lset-union equal? member-lst
+                (append-map
+                    (lambda (x) (list-squash x '()))
+                    list-lst
+                )
+            )
+        )
+    )
 )
 
 ; ---------------------------------------------------------------------
@@ -362,7 +380,7 @@
 ; * 'new-dict' : It could be an empty list or an existing index to be updated.
 (define (reorder old-dict new-dict)
     (if (null? (cdr old-dict))
-        new-dict
+        (alist-inverse (car old-dict) new-dict)
         (reorder (cdr old-dict) (alist-inverse (car old-dict) new-dict))
     )
 )
@@ -381,8 +399,8 @@
 ; Returns a pair of atom handles structured as (r2l-node . output-node) provided
 ; they are equivalent as in (eqv-node? arg1 arg2).
 ; or an empty list other wise.
-; * 'pattern' : It is a link we want to surealize
-; * 'link' ; It is a link we are using for extracting relations between words.
+; * 'output-atom' : It is a link we want to surealize
+; * 'r2l-atom' ; It is a link we are using for extracting relations between words.
 (define (get-mapping output-atom r2l-atom)
     (if (equal? (cog-type output-atom) (cog-type r2l-atom))
         (cond
@@ -393,16 +411,34 @@
                 )
             )
             ((cog-link? output-atom)
-                (map
-                    (lambda (x y)
-                        (let ((mapping (get-mapping x y)))
-                            (if (equal? mapping 'not-eqv-node)
-                                (cons (cog-handle y) (cog-handle x))
-                                mapping
+                ; if the arity of the links are equal then assuming that the order
+                ; of the nodes is associated with the property/functionality of
+                ; of the node with in the language, a mapping is made. If the
+                ; arity are not equal then a mapping of equvalent-nodes is only made.
+                (if (equal? (cog-arity output-atom) (cog-arity r2l-atom))
+                        (map
+                            (lambda (x y)
+                                (let ((mapping (get-mapping x y)))
+                                    (if (equal? mapping 'not-eqv-node)
+                                        (cons (cog-handle y) (cog-handle x))
+                                        mapping
+                                    )
+                                )
                             )
+                            (cog-outgoing-set output-atom) (cog-outgoing-set r2l-atom)
                         )
-                    )
-                (cog-outgoing-set output-atom) (cog-outgoing-set r2l-atom))
+                        (remove null? (map
+                            (lambda (x y)
+                                (let ((mapping (get-mapping x y)))
+                                    (if (equal? mapping 'not-eqv-node)
+                                        '()
+                                        mapping
+                                    )
+                                )
+                            )
+                            (cog-outgoing-set output-atom) (cog-outgoing-set r2l-atom)
+                        ))
+                )
             )
         )
         '()
@@ -431,11 +467,12 @@
         (let
             ((r2l-set (remove is-abstraction? (cog-outgoing-set (cog-atom (car a-pair)))))
             )
-            (apply append (par-map (lambda (x)
+            (delete-duplicates (list-squash
+                   (par-map (lambda (x)
                         (remove null?
                         (append-map get-mapping (make-list (length r2l-set) (cog-atom x)) r2l-set))
-                    )
-                    (cdr a-pair))
+                        ) (cdr a-pair)
+                    ) '() )
             )
         )
     )
