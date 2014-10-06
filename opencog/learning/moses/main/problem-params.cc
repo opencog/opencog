@@ -207,6 +207,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "recall, regression based on input table, maximizing recall while holding precision fixed\n\n"
          "bep, regression based on input table, maximizing break-even point (BEP) between precision and recall\n\n"
          "f_one, regression based on input table, maximizing the F_1 score (harmonic mean of precision and recall)\n\n"
+         "select, regression based on input table, selecting a range of rows\n\n"
          "ip, search interesting patterns, where interestingness"
          " is defined in terms of several features such as maximizing"
          " the Kullback-Leibler"
@@ -618,7 +619,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
         (opt_desc_str(min_rand_input_opt).c_str(),
          po::value<double>(&min_rand_input)->default_value(0.0),
          "Minimum value of a sampled coninuous input.  The cp, ip, pre, "
-         "recall, prerec, bep and f_one "
+         "recall, prerec, bep, f_one and select "
          "problems all require a range of values to be sampled in "
          "order to measure the fitness of a proposed solution. This "
          "option sets the low end of the sampled range. In the case of "
@@ -628,7 +629,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
         (opt_desc_str(max_rand_input_opt).c_str(),
          po::value<double>(&max_rand_input)->default_value(1.0),
          "Maximum value of a sampled coninuous input.  The cp, ip, pre, "
-         "recall, prerec, bep and f_one "
+         "recall, prerec, bep, f_one and select "
          "problems all require a range of values to be sampled in "
          "order to measure the fitness of a proposed solution. This "
          "option sets the high end of the sampled range. In the case of "
@@ -729,7 +730,8 @@ problem_params::add_options(boost::program_options::options_description& desc)
 
         (opt_desc_str(alpha_opt).c_str(),
          po::value<score_t>(&hardness)->default_value(1.0),
-         "If problems pre, prerec, recall, f_one or bep are specified, "
+         "If problems pre, prerec, recall, f_one, bep ore select are "
+         "specified, "
          "this option is used to set the 'hardness' of the constraint, "
          "with larger values corresponding to a harder constraint "
          "(i.e. punishing the score more strongly if the contraint "
