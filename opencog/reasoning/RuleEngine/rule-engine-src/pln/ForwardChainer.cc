@@ -32,7 +32,10 @@
 using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace * as) :
-		Chainer(as) {
+		Chainer(as)
+{
+	search_in_af = true;
+	hcurrent_choosen_rule_ = Handle::UNDEFINED;
 	scm_eval_ = new SchemeEval(as);
 	fcim_ = new ForwardChainInputMatchCB(main_atom_space,
 			target_list_atom_space, this); //fetching from main and copying it to target_list_atom_space
@@ -41,19 +44,22 @@ ForwardChainer::ForwardChainer(AtomSpace * as) :
 	init();
 }
 
-ForwardChainer::~ForwardChainer() {
+ForwardChainer::~ForwardChainer()
+{
 	delete scm_eval_;
 	delete fcim_;
 	delete fcpm_;
 }
 
-void ForwardChainer::init(void) {
+void ForwardChainer::init(void)
+{
 	load_fc_conf();
 	if(not search_in_af)
 		main_atom_space->setAttentionalFocusBoundary(0);
 }
 
-Handle ForwardChainer::tournament_select(map<Handle, float> hfitnes_map) {
+Handle ForwardChainer::tournament_select(map<Handle, float> hfitnes_map)
+{
 	if (hfitnes_map.size() == 1) {
 		return hfitnes_map.begin()->first;
 	}
@@ -78,7 +84,8 @@ Handle ForwardChainer::tournament_select(map<Handle, float> hfitnes_map) {
 	return hbest;
 }
 
-Handle ForwardChainer::choose_target_from_list(HandleSeq hs_list) {
+Handle ForwardChainer::choose_target_from_list(HandleSeq hs_list)
+{
 	map<Handle, float> tournament_elem;
 	for (Handle h : hs_list) {
 		float fitness = target_tv_fitness(h);
@@ -87,7 +94,8 @@ Handle ForwardChainer::choose_target_from_list(HandleSeq hs_list) {
 	return tournament_select(tournament_elem);
 }
 
-Handle ForwardChainer::choose_target_from_atomspace(AtomSpace * as) {
+Handle ForwardChainer::choose_target_from_atomspace(AtomSpace * as)
+{
 	HandleSeq hs;
 	as->getHandlesByType(back_inserter(hs), ATOM, true); //xxx experimental must be replaced by atoms in AF
 	for (Handle h : hs)
@@ -95,7 +103,8 @@ Handle ForwardChainer::choose_target_from_atomspace(AtomSpace * as) {
 	return choose_target_from_list(target_list_);
 }
 
-void ForwardChainer::do_chain(Handle htarget) {
+void ForwardChainer::do_chain(Handle htarget)
+{
 	Handle hcurrent_target;
 	//bool terminate = false;
 	int steps = 0;
@@ -123,7 +132,8 @@ void ForwardChainer::do_chain(Handle htarget) {
 }
 
 Handle ForwardChainer::create_bindLink(Handle himplicant)
-		throw (opencog::InvalidParamException) {
+		throw (opencog::InvalidParamException)
+{
 	if (!LinkCast(himplicant))
 		throw opencog::InvalidParamException(TRACE_INFO,
 				"Input must be a link type ");
@@ -144,7 +154,8 @@ Handle ForwardChainer::create_bindLink(Handle himplicant)
 	return bindLink;
 }
 
-void ForwardChainer::choose_input(Handle htarget) {
+void ForwardChainer::choose_input(Handle htarget)
+{
 	if (NodeCast(htarget)) {
 		HandleSeq hs = main_atom_space->getIncoming(htarget);
 		for (Handle h : hs)
@@ -159,7 +170,8 @@ void ForwardChainer::choose_input(Handle htarget) {
 	}
 }
 
-map<Handle, string> ForwardChainer::choose_variable(Handle htarget) {
+map<Handle, string> ForwardChainer::choose_variable(Handle htarget)
+{
 	map<Handle, string> hnode_vname_map;
 	vector<Handle> candidates = get_nodes(htarget, vector<Type>());
 	map<Handle, HandleSeq> node_iset_map;
@@ -196,7 +208,8 @@ map<Handle, string> ForwardChainer::choose_variable(Handle htarget) {
 }
 
 HandleSeq ForwardChainer::get_nodes(Handle hinput,
-		vector<Type> required_nodes) {
+		vector<Type> required_nodes)
+{
 	HandleSeq found_nodes;
 	if (LinkCast(hinput)) {
 		HandleSeq hsoutgoing = main_atom_space->getOutgoing(hinput);
@@ -229,7 +242,8 @@ HandleSeq ForwardChainer::get_nodes(Handle hinput,
 }
 
 Handle ForwardChainer::target_to_pmimplicant(Handle htarget,
-		map<Handle, string> hnode_vname_map) {
+		map<Handle, string> hnode_vname_map)
+{
 	Type link_type;
 	HandleSeq hsvariablized;
 
@@ -256,14 +270,17 @@ Handle ForwardChainer::target_to_pmimplicant(Handle htarget,
 	return Handle::UNDEFINED; //unreachable?
 }
 
-void ForwardChainer::choose_rule() {
+void ForwardChainer::choose_rule()
+{
 	//TODO choose rule via stochastic selection, HOW?
 	string var_name = bind_link_name_[random() % bind_link_name_.size()];
 	//string scm_command = "(" + fc_bind_command_ + "  " + var_name + ")";
 	Handle h = scm_eval_->eval_h(var_name);
 	hcurrent_choosen_rule_ = h;
 }
-void ForwardChainer::load_fc_conf() {
+
+void ForwardChainer::load_fc_conf()
+{
 	try {
 		config().load(conf_path.c_str());
 	} catch (RuntimeException &e) {
@@ -297,7 +314,9 @@ void ForwardChainer::load_fc_conf() {
 
 	logger().setLevel(Logger::getLevelFromString(config()["FC_LOG_LEVEL"]));
 }
-void ForwardChainer::add_to_target_list(Handle h) {
+
+void ForwardChainer::add_to_target_list(Handle h)
+{
 	if (NodeCast(h)) {
 		if (find_if(target_list_.begin(), target_list_.end(),[h](Handle hi){return h.value()==hi.value();}) == target_list_.end())
 			target_list_.push_back(h);
@@ -312,16 +331,22 @@ void ForwardChainer::add_to_target_list(Handle h) {
 		}
 	}
 }
-HandleSeq ForwardChainer::get_chaining_result(void){
+
+HandleSeq ForwardChainer::get_chaining_result(void)
+{
 	return chaining_results;
 }
-bool ForwardChainer::exists(HandleSeq& hseq, Handle& h) {
+
+bool ForwardChainer::exists(HandleSeq& hseq, Handle& h)
+{
 	for (Handle hi : hseq) {
 		if (hi.value() == h.value())
 			return true;
 	}
 	return false;
 }
-bool ForwardChainer::is_in_target_list(Handle h) {
+
+bool ForwardChainer::is_in_target_list(Handle h)
+{
 	return exists(target_list_, h);
 }

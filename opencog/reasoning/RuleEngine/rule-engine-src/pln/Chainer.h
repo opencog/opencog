@@ -34,13 +34,13 @@ using namespace opencog;
  */
 class Chainer {
 private:
-	const float ctv_fitnes = 0.9; // this might need to be configurable at runtime
+	const float ctv_fitnes; // = 0.9; // this might need to be configurable at runtime
 protected:
 	AtomSpace * main_atom_space; // knowledge base atomspace
 	AtomSpace * target_list_atom_space;
 	Handle hinitial_target;
 	PatternMatch chaining_pm;
-	const std::string conf_path = "rule-engine.conf";
+	const std::string conf_path; // = "rule-engine.conf";
 public:
 	Chainer(AtomSpace *);
 	virtual ~Chainer();
