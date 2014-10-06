@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "September 13, 2014" "3.6.10" "OpenCog Learning"
+.TH MOSES 1 "October 6, 2014" "3.6.10" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -338,6 +338,21 @@ T}
 \fBf_one\fR@T{
 Regression on an input table, maximizing the harmonic mean of the
 precision and recall, that is, the F_1 score.
+T}
+
+\fBselect\fR@T{
+Regression on an input table, selecting a range of rows from a 
+continuous-valued distribution.  The range of rows selected are
+expressed as percentiles. That is, if the input table has N rows,
+then rows that are selected will be rows N*lower_percentile through
+N*upper_percentile, where the rows are ordered in ascending rank
+of the output column.  That is, this scorer will rank (sort) the
+rows according to the output column, and then select those only in
+the indicated range.
+
+The lower and upper percentile can be sepcified with the \fB\-q\fR
+and the \fB\-w\fR options (the \fB\-\-min-rand\-input\fR and
+\fB\-\-max\-rand\-input\fR options), and should lie between 0.0 and 1.0.
 T}
 
 \fBip\fR@T{
