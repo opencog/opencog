@@ -154,7 +154,7 @@ PACKAGES_BUILD="
 		binutils-dev \
 		libgsl0-dev \
 		unixodbc-dev \
-		libxerces-c2-dev \
+		libxerces-c-dev \
 		uuid-dev \
 		libprotoc-dev \
 		protobuf-compiler \
