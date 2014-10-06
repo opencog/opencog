@@ -10,6 +10,7 @@
 
 (use-modules (ice-9 rdelim))
 (use-modules (ice-9 regex))
+(use-modules (ice-9 receive))
 ; ---------------------------------------------------------------------
 ; Patterns used for spliting the string passed from relex server
 (define pattern1 "; ##### END OF A PARSE #####")
