@@ -43,52 +43,6 @@
 ;    )
 ;)
 
-;If an agent can see two objects X and Y,
-;it probably can see the spatial relationships
-;between them
-(ImplicationLink
-    (AndLink
-        (EvaluationLink
-            (PredicateNode "see")
-            (ListLink
-                (VariableNode "$A")
-                (VariableNode "$X")
-            )
-        )
-        (EvaluationLink
-            (PredicateNode "see")
-            (ListLink
-                (VariableNode "$A")
-                (VariableNode "$y")
-            )
-        )
-        (EvaluationLink
-            (PredicateNode "$R")
-            (ListLink
-                (VariableNode "$X")
-                (VariableNode "$y")
-            )
-        )
-        (InheritanceLink 
-            (VariableNode "$R")
-            (ObjectNode "SpatialRelation")
-        )
-    )
-    (EvaluationLink
-            (PredicateNode "know")
-            (ListLink
-                (VariableNode "$A")
-                (EvaluationLink
-                    (PredicateNode "$R")
-                    (ListLink
-                        (VariableNode "$X")
-                        (VariableNode "$y")
-                    )
-                )
-            )
-    )
-)
-
 (ImplicationLink
     (EvaluationLink
             (PredicateNode "believe")
@@ -104,49 +58,6 @@
             (VariableNode "$X")
         )
     )
-)
-
-;If an agent can see an object X, it probably
-;can see X's visual properties (the definition
-;of "visual property"
-(ImplicationLink
-    (AndLink
-        (EvaluationLink
-            (PredicateNode "see")
-            (ListLink
-                (VariableNode "$A")
-                (VariableNode "$X")
-            )
-        )
-        (InheritanceLink
-            (VariableNode "$X")
-            (VariableNode "$P")
-        )
-        (InheritanceLink
-            (VariableNode "$P")
-            (ConceptNode "VisualProperty")
-        )
-        (EvaluationLink (stv 1 .8)
-            (PredicateNode "know")
-            (ListLink
-                (VariableNode "$A")
-                (InheritanceLink
-                    (VariableNode "$X")
-                    (VariableNode "$P")
-                )
-            )
-        )
-    )
-)
-
-(InheritanceLink
-    (ConceptNode "Color")
-    (ConceptNode "VisualProperty")
-)
-
-(InheritanceLink
-    (ConceptNode "Red")
-    (ConceptNode "Color")
 )
 
 ;Knowledge implies belief
@@ -268,10 +179,8 @@
     )
 )
 
-
 ;If an agent A wants some X, and believes that X is at location L,
 ;then A will likely move to L
-
 (ImplicationLink (stv .7 .7)
     (AndLink
         (EvaluationLink
@@ -300,92 +209,6 @@
         (ListLink
             (VariableNode "$A")
             (VariableNode "$L")
-        )
-    )
-)
-
-;Spatial predicates specify locations.
-(ImplicationLink
-    (AndLink
-        (InheritanceLink
-            (VariableNode "$R")
-            (ConceptNode "SpatialRelation")
-        )
-        (EvaluationLink
-            (VariableNode "$R")
-            (ListLink 
-                (VariableNode "$A")
-                (VariableNode "$B")
-            )
-        )
-    )
-    (EvaluationLink
-        (PredicateNode "atLocation")
-        (ListLink
-            (VariableNode "$A")
-            (SatisfyingSetLink
-                (VariableNode "$X")
-                (EvaluationLink
-                    (VariableNode "$R")
-                    (ListLink
-                        (VariableNode "$X")
-                        (VariableNode "$B")
-                    )
-                )
-            )
-        )
-    )
-)
-
-;A conjunction of spatial predicates is a spatial predicate
-(ImplicationLink
-    (AndLink
-        (InheritanceLink
-            (VariableNode "$R")
-            (ConceptNode "SpatialPredicate")
-        )
-        (InheritanceLink
-            (VariableNode "$S")
-            (ConceptNode "SpatialPredicate")
-        )
-    )
-    (InheritanceLink
-        (AndLink
-            (VariableNode "$R")
-            (VariableNode "$S")
-        )
-        (ConceptNode "SpatialPredicate")
-    )
-)
-
-(ImplicationLink
-    (AndLink
-        (InheritanceLink
-            (VariableNode "$R")
-            (ConceptNode "SpatialRelation")
-        )
-        (EvaluationLink
-            (VariableNode "$R")
-            (ListLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-            )
-        )
-    )
-    (EvaluationLink
-        (PredicateNode "atLocation")
-        (ListLink
-            (VariableNode "$B")
-            (SatisfyingSetLink
-                (VariableNode "$X")
-                (EvaluationLink
-                    (VariableNode "$R")
-                    (ListLink
-                        (VariableNode "$A")
-                        (VariableNode "$X")
-                    )
-                )
-            )
         )
     )
 )
@@ -466,111 +289,15 @@
     )
 )
 
-;If X is near Y, but X is not near Z, then Y is not near Z
-(ImplicationLink (stv .8 .7)
-    (AndLink
-        (EvaluationLink
-            (PredicateNode "Near")
-            (ListLink
-                (VariableNode "$X")
-                (VariableNode "$Y")
-            )
-        )
-        (NotLink
-            (EvaluationLink
-                (PredicateNode "Near")
-                (ListLink
-                    (VariableNode "$X")
-                    (VariableNode "$Z")
-                )
-            )
-        )
-    )
-    (NotLink
-        (EvaluationLink
-            (PredicateNode "Near")
-            (ListLink
-                (VariableNode "$Y")
-                (VariableNode "$Z")
-            )
-        )
-    )
-)
-
-;If Bob is near House_15, and House_15 is not near Red_Battery_18,
-;then Bob is not near Red_Battery_18
-(ImplicationLink
-    (AndLink
-        (EvaluationLink
-            (PredicateNode "Near")
-            (ListLink
-                (ConceptNode "Bob")
-                (ConceptNode "House_15")
-            )
-        )
-        (NotLink
-             (EvaluationLink
-                (PredicateNode "Near")
-                (ListLink
-                    (ConceptNode "House_15")
-                    (ConceptNode "Red_Battery_18")
-                )
-            )
-        )
-    )
-    (NotLink
-        (EvaluationLink
-            (PredicateNode "Near")
-            (ListLink
-                (ConceptNode "Bob")
-                (ConceptNode "Red_Battery_15")
-            )
-        )
-    )
-)
-
-;If X is near Y, but X is not near Z, then X is further from Z than from Y
-(ImplicationLink (stv .8 .7)
-    (AndLink
-        (EvaluationLink
-            (PredicateNode "Near")
-            (ListLink
-                (VariableNode "$X")
-                (VariableNode "$Y")
-            )
-        )
-        (NotLink
-            (EvaluationLink
-                (PredicateNode "Near")
-                (ListLink
-                    (VariableNode "$X")
-                    (VariableNode "$Z")
-                )
-            )
-        )
-    )
+; The spatial information that is going to be infered from the spatial reasoning
+; will give the following output.
+(NotLink
     (EvaluationLink
-        (PredicateNode "GreaterThan")
+        (PredicateNode "Near")
         (ListLink
-            (EvaluationLink
-                (PredicateNode "Distance")
-                (ListLink
-                    (VariableNode "$X")
-                    (VariableNode "$Z")
-                )
-            )
-            (EvaluationLink
-                (PredicateNode "Distance")
-                (ListLink
-                    (VariableNode "$X")
-                    (VariableNode "$Y")
-                )
-            )
+            (ConceptNode "Bob")
+            (ConceptNode "Red_Battery_15")
         )
     )
 )
-
-; Modus Ponens for grounding $X
-; Bob is likely to believe if we tell it something that is believable.
-; if the can't see something then they are likely to beliveable.
 
