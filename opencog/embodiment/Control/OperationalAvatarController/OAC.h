@@ -27,6 +27,7 @@
 #define OAC_H
 
 #include <string>
+#include <exception>
 #include <boost/thread/thread.hpp>
 
 #include <opencog/util/RandGen.h>

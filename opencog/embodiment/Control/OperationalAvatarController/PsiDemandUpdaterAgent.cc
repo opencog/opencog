@@ -73,8 +73,10 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
     // Get the GroundedPredicateNode "fuzzy_within"
     Handle hGroundedPredicateNode = atomSpace.getOutgoing(hFuzzyWithin, 0);
 
-    if ( hGroundedPredicateNode == opencog::Handle::UNDEFINED ||
-         atomSpace.getType(hGroundedPredicateNode) != GROUNDED_PREDICATE_NODE ) {
+    bool isNotPredicateNode = atomSpace.getType(hGroundedPredicateNode) != GROUNDED_PREDICATE_NODE;
+    bool isOutgoingNotPredicateNode = atomSpace.getType(atomSpace.getOutgoing(hGroundedPredicateNode, 0)) != GROUNDED_PREDICATE_NODE;
+
+    if ( hGroundedPredicateNode == opencog::Handle::UNDEFINED || (isNotPredicateNode && isOutgoingNotPredicateNode)) {
 
         logger().error("PsiDemandUpdaterAgent::Demand::%s - Expect a GroundedPredicateNode for demand '%s'. But got '%s'",
                        __FUNCTION__, this->demandName.c_str(), atomSpace.atomAsString(hGroundedPredicateNode).c_str());
