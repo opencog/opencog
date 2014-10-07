@@ -23,7 +23,13 @@ LINK_LIBRARIES(
 IF (HAVE_GUILE)
 	ADD_CXXTEST(RuleUTest)
 	ADD_CXXTEST(ForwardChainerUTest)
+	ADD_CXXTEST(BackwardChainerUTest)
+	ADD_CXXTEST(PLNCommonsUTest)
 ENDIF (HAVE_GUILE)
 
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/reasoning/RuleEngine/simple-assertions.scm
     ${PROJECT_BINARY_DIR}/tests/reasoning/RuleEngine/simple-assertions.scm)
+ 
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/reasoning/RuleEngine/bc-test/bc-example.scm
+    ${PROJECT_BINARY_DIR}/tests/reasoning/RuleEngine/bc-test/bc-example.scm)    
+    

@@ -26,6 +26,7 @@
 #include "Chainer.h"
 #include "ForwardChainInputMatchCB.h"
 #include "ForwardChainPatternMatchCB.h"
+#include "PLNCommons.h"
 
 #include <opencog/guile/SchemeEval.h>
 
@@ -39,6 +40,7 @@ private:
 	int ITERATION_SIZE;
 	bool search_in_af; // = true;
 
+	PLNCommons * commons_;
 	friend class ForwardChainInputMatchCB;
 	friend class ForwardChainPatternMatchCB;
 	HandleSeq target_list_; /*potential target list*/
@@ -58,20 +60,6 @@ private:
 	 * @return a map of Handle to a node to be replaced by VariableNode and name for the replacing VariableNode
 	 */
 	map<Handle, string> choose_variable(Handle htarget);
-	/**
-	 * Given an atom (a link or node), Find and return all the nodes associated
-	 * @param hinput - an atoms to be looked
-	 * @param required_nodes - a list of nodes to look for. if vector is empty, all kinds of nodes are looked
-	 * @return - a set of nodes
-	 */
-	vector<Handle> get_nodes(Handle hinput, vector<Type> required_nodes);
-	/**
-	 * create a BindLink instance that could be passed to to PatternMatching module
-	 * @param himplicant - an implicant part of the BindLink must have a variable node(no checking is done now).
-	 * @return - a Handle to the BindLink instance created
-	 */
-	Handle create_bindLink(Handle himplicant)
-			throw (opencog::InvalidParamException);
 	/**
 	 * a callback handler for forward chaining invocation from scm shell
 	 */

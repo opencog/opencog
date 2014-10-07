@@ -1,0 +1,161 @@
+/*
+ * PLNCommons.cxxtest
+ *
+ *  Created on: Oct 22, 2014
+ *      Author: misgana
+ */
+
+#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/PLNCommons.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/guile/load-file.h>
+//TODO test choose_target
+using namespace opencog;
+class PLNCommonsUTest: public CxxTest::TestSuite {
+private:
+	PLNCommons * commons_;
+	AtomSpace * as_;
+	SchemeEval * eval_;
+public:
+	PLNCommonsUTest() {
+		server(CogServer::createInstance);
+		as_ = &cogserver().getAtomSpace();
+		eval_ = new SchemeEval(as_);
+		commons_ = new PLNCommons(as_);
+
+		config().set("MODULES", "opencog/query/libQueryModule.so");
+		cogserver().loadModules();
+		cogserver().loadSCMModules();
+	}
+	~PLNCommonsUTest() {
+		delete as_;
+	}
+	void setUp();
+	void tearDown();
+
+	void test_create_quoted(void);
+	void test_create_bindLink(void);
+	void test_replace_vars(void);
+	void test_create_with_unique_var(void);
+	void test_remove_vnode_containing_links(void);
+
+};
+void PLNCommonsUTest::setUp() {
+	config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
+			"opencog/scm/utilities.scm, "
+			"opencog/python/pln/examples/deduction/atomspace_contents.scm");
+	load_scm_files_from_config(*as_);
+}
+void PLNCommonsUTest::tearDown() {
+	as_->clear();
+}
+
+void PLNCommonsUTest::test_create_quoted() {
+	string test =
+			"(InheritanceLink (VariableNode \"$x\") (ConceptNode \"criminal\"))";
+	Handle h = eval_->eval_h(test);
+	Handle hc = commons_->create_quoted(h);
+	string expected =
+			"(InheritanceLink (QuoteLink (VariableNode \"$x\")) (ConceptNode \"criminal\"))";
+	Handle hexpect = eval_->eval_h(expected);
+	TS_ASSERT_EQUALS(hc.value(), hexpect.value());
+}
+
+void PLNCommonsUTest::test_remove_vnode_containing_links() {
+	string implink =
+			"(ImplicationLink (stv .99 .99)(AndLink(InheritanceLink(VariableNode \"$x\")(ConceptNode \"American\")) (InheritanceLink(VariableNode \"$y\")"
+					"(ConceptNode \"weapon\")) (EvaluationLink(PredicateNode \"sell\")(ListLink (VariableNode \"$x\") (VariableNode \"$y\")"
+					"     (VariableNode \"$z\"))) (InheritanceLink(VariableNode \"$z\")(ConceptNode \"hostile\")))(InheritanceLink  (VariableNode \"$x\")(ConceptNode \"criminal\")))";
+	Handle himplicant = eval_->eval_h(implink);
+	commons_->remove_vnode_containing_links(himplicant);
+	HandleSeq result;
+	as_->getHandlesByName(back_inserter(result), "$x",VARIABLE_NODE);
+	TS_ASSERT(result.empty());
+	as_->getHandlesByName(back_inserter(result),"$y",VARIABLE_NODE);
+	TS_ASSERT(result.empty());
+	as_->getHandlesByName(back_inserter(result),"$z",VARIABLE_NODE);
+	TS_ASSERT(result.empty());
+}
+void PLNCommonsUTest::test_create_bindLink() {
+	//xxx create bind link generates unique variables. so I need good ways of testing it.
+	/*Handle himplicant =
+	 eval_->eval_h(
+	 "(InheritanceLink (VariableNode \"$var-rich\") (ConceptNode \"happy\"))");
+	 Handle h = commons_->create_bindLink(himplicant, false);
+	 Handle cmp =
+	 eval_->eval_h(
+	 "(BindLink"
+	 "(ListLink"
+	 "(VariableNode \"$var-rich\")"
+	 ")"
+	 "(ImplicationLink"
+	 "(InheritanceLink (VariableNode \"$var-rich\") (ConceptNode \"happy\"))"
+	 "(InheritanceLink (VariableNode \"$var-rich\") (ConceptNode \"happy\"))"
+	 "))");
+	 TS_ASSERT_EQUALS(cmp.value(), h.value());
+
+	 h =
+	 eval_->eval_h(
+	 "(ConceptNode \"man@80d4e852-1b93-4c49-84e1-5a7352b0dcb1\" (stv 0.001 0.99000001))");
+	 TS_ASSERT_THROWS_ANYTHING(commons_->create_bindLink(h, false));
+
+	 himplicant = eval_->eval_h("(InheritanceLink"
+	 "(VariableNode \"$x\")"
+	 "(ConceptNode \"criminal\")"
+	 ")");
+	 h = commons_->create_bindLink(himplicant, true);
+	 cmp = eval_->eval_h("(BindLink"
+	 "(ListLink"
+	 "(TypedVariableLink"
+	 "(VariableNode \"$x\")"
+	 "(VariableTypeNode \"VariableNode\")"
+	 ")"
+	 ")"
+	 "(ImplicationLink"
+	 "(InheritanceLink"
+	 "(VariableNode \"$x\")"
+	 "(ConceptNode \"criminal\")"
+	 ")"
+	 "(InheritanceLink"
+	 "(VariableNode \"$x\")"
+	 "(ConceptNode \"criminal\")"
+	 ")"
+	 ")"
+	 ")");
+	 TS_ASSERT_DIFFERS(cmp.value(), h.value());*/
+}
+
+void PLNCommonsUTest::test_replace_vars() {
+	string implink =
+			"(ImplicationLink (stv .99 .99)(AndLink(InheritanceLink(VariableNode \"$x\")(ConceptNode \"American\")) (InheritanceLink(VariableNode \"$y\")"
+					"(ConceptNode \"weapon\")) (EvaluationLink(PredicateNode \"sell\")(ListLink (VariableNode \"$x\") (VariableNode \"$y\")"
+					"     (VariableNode \"$z\"))) (InheritanceLink(VariableNode \"$z\")(ConceptNode \"hostile\")))(InheritanceLink  (VariableNode \"$x\")(ConceptNode \"criminal\")))";
+	Handle himplicant = eval_->eval_h(implink);
+	Handle h1 = eval_->eval_h("(VariableNode \"$x\")");
+	Handle h2 = eval_->eval_h("(VariableNode \"$y\")");
+	Handle h3 = eval_->eval_h("(VariableNode \"$z\")");
+	Handle h11 = eval_->eval_h("(VariableNode \"$x@123\")");
+	Handle h22 = eval_->eval_h("(VariableNode \"$y@123\")");
+	Handle h33 = eval_->eval_h("(VariableNode \"$z@123\")");
+	map<Handle, Handle> var_uvar_map = { { h1, h11 }, { h2, h22 }, { h3, h33 } };
+	Handle h = commons_->replace_vars(himplicant, var_uvar_map);
+	string implink_cmp =
+			"(ImplicationLink (stv .99 .99)(AndLink(InheritanceLink(VariableNode \"$x@123\")(ConceptNode \"American\")) (InheritanceLink(VariableNode \"$y@123\")"
+					"(ConceptNode \"weapon\")) (EvaluationLink(PredicateNode \"sell\")(ListLink (VariableNode \"$x@123\") (VariableNode \"$y@123\")"
+					"     (VariableNode \"$z@123\"))) (InheritanceLink(VariableNode \"$z@123\")(ConceptNode \"hostile\")))(InheritanceLink  (VariableNode \"$x@123\")(ConceptNode \"criminal\")))";
+	Handle himplicant_cmp = eval_->eval_h(implink);
+	TS_ASSERT_EQUALS(himplicant.value(), himplicant_cmp.value());
+}
+
+void PLNCommonsUTest::test_create_with_unique_var() {
+	string implink =
+			"(ImplicationLink (stv .99 .99)(AndLink(InheritanceLink(VariableNode \"$x\")(ConceptNode \"American\")) (InheritanceLink(VariableNode \"$y\")"
+					"(ConceptNode \"weapon\")) (EvaluationLink(PredicateNode \"sell\")(ListLink (VariableNode \"$x\") (VariableNode \"$y\")"
+					"     (VariableNode \"$z\"))) (InheritanceLink(VariableNode \"$z\")(ConceptNode \"hostile\")))(InheritanceLink  (VariableNode \"$x\")(ConceptNode \"criminal\")))";
+	Handle himplicant = eval_->eval_h(implink);
+	Handle h = commons_->create_with_unique_var(himplicant);
+	TS_ASSERT_DIFFERS(himplicant.value(), h.value());
+}
