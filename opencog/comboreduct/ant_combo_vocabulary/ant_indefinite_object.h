@@ -95,8 +95,8 @@ public:
     //if no such action_symbol exists then return NULL pointer
     static indefinite_object get_instance(const std::string& name);
 
-    //return a pointer of the static pet_perception_action corresponding
-    //to a given pet_perception_enum
+    //return a pointer of the static ant_perception_action corresponding
+    //to a given ant_perception_enum
     static indefinite_object get_instance(ant_indefinite_object_enum);
 
 };

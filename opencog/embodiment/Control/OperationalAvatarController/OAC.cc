@@ -79,6 +79,8 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                const std::string& petId, const std::string& ownerId,
                const std::string& agentType, const std::string& agentTraits)
 {
+    try
+    {
     setNetworkElement(new NetworkElement(myId, ip, portNumber));
 
     // Initialize ZeroMQ
@@ -423,6 +425,11 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 
     // TODO: multi-threading doesn't work. 
 //    this->thread_attention_allocation = boost::thread( boost::bind(&attention_allocation, this) ); 
+    }
+    catch(std::exception e)
+    {
+        std::cout << e.what() << std::endl;
+    }
 }
 
 void OAC::attention_allocation(OAC * oac)

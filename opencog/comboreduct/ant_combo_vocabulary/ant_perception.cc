@@ -82,7 +82,7 @@ void ant_perception::set_perception(ant_perception_enum ape) {
 }
 
 const ant_perception* ant_perception::get_instance(const std::string& name) {
-    //look up for pet_builtin_action_enum corresponding to that name
+    //look up for ant_builtin_action_enum corresponding to that name
     bool found = false;
     const ant_perception* p = NULL;
     for(unsigned int i = 0; i<id::ant_perception_count && !found; ++i) {
