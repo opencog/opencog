@@ -6,7 +6,7 @@ from threading import Thread
 
 # Endpoint configuration
 # To allow public access, set to 0.0.0.0; for local access, set to 127.0.0.1
-IP_ADDRESS = '127.0.0.1'
+IP_ADDRESS = '0.0.0.0'
 PORT = 5000
 
 
