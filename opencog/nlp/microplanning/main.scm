@@ -40,21 +40,23 @@
 		))
 	)
 	
-	(define (call-sureal atoms)
-		; wrap a SetLink around the atoms
-		(sureal (SetLink atoms))
-	)
 	(define favored-forms (get-favored-forms))
+	
+	(define (wrap-setlink atoms)
+		(SetLink atoms)
+	)
 
 	(set! chunks (make-sentence-chunks (cog-outgoing-set seq-link) favored-forms))
 	
 	(cond ((not (null? chunks))
 		; insert anaphora
 		(set! chunks (insert-anaphora chunks favored-forms))
-	
-		chunks	
-		; call SuReal on each item in sentence-chunks
-		;(map call-sureal chunks)
+		
+		; wrap SetLink around each chunk for Surface Realization
+		(map wrap-setlink chunks)
+	      )
+	      (else
+		#f
 	      )
 	)
 )
@@ -74,10 +76,14 @@
 		; keep calling make sentence until all atoms are used
 		(cond ((not (null? atoms-unused))
 			(set! new-chunk (make-sentence atoms-unused atoms-set favored-forms))
-			(set! sentence-chunks (cons new-chunk sentence-chunks))
-			; XXX keep some of the atoms (those that do not satisfy sentence forms) for later use?
-			(set! atoms-unused (lset-difference equal? atoms-unused new-chunk))
-			(recursive-helper)
+			; if make-sentence returns empty, it means nothing is 'say-able'
+			(cond ((not (null? new-chunk))
+				(set! sentence-chunks (cons new-chunk sentence-chunks))
+				; TODO keep some of the atoms (those that do not satisfy sentence forms) for later use?
+				(set! atoms-unused (lset-difference equal? atoms-unused new-chunk))
+				(recursive-helper)
+			      )
+			)
 		      )
 		)
 	)
@@ -144,23 +150,33 @@
 	(define (recursive-helper atoms-to-try)
 		(define head (car atoms-to-try))
 		(define result (check-chunk atoms-to-try))
+		(define atoms-not-tried (lset-difference equal? atoms-unused atoms-to-try))
 
 		(define (give-up-unadded-part)
 			; atoms that did not work
-			(define dead-set (lset-difference atoms-to-try chunk))
+			(define dead-set (lset-difference equal? atoms-to-try chunk))
 			; atoms that worked
-			(define good-set (lset-intersection atoms-to-try chunk))
+			(define good-set (lset-intersection equal? atoms-to-try chunk))
 
 			(set! atoms-failed (append dead-set atoms-failed))
-			(set! atoms-unused (lset-difference dead-set atoms-unused))
+			(set! atoms-unused (lset-difference equal? atoms-unused dead-set))
 
-			; try "saying" the previous working iteration again and re-choose a new atom
-			(recursive-helper good-set)
+			(display "giving up atoms\n")
+			(display atoms-failed)
+			(display "\n")
+
+			; try "saying" the previous working iteration again (if available) and re-choose a new atom
+			(if (null? good-set)
+				(if (not (null? atoms-unused))
+					(recursive-helper (list (pick-atom atoms-unused (calc-weights atoms-unused atoms-used (lambda (t f l) (* (+ t l) f))))))
+				)
+				(recursive-helper good-set)
+			)
 		)
 		(define (update-chunk)
 			; add anything that has not been included in the chunk yet
 			(set! chunk (lset-union equal? atoms-to-try chunk))
-			(set! atoms-unused (lset-difference equal? atoms-unused atoms-to-try))
+			(set! atoms-unused atoms-not-tried)
 			(display "updating chunk\n")
 			(display chunk)
 			(display "\nupdating chunk ended\n")
@@ -182,25 +198,26 @@
 			; try to add more (up to 3 different links)
 			(cond ((<= (length atoms-to-try) 3)
 				; look to see if the newest link has any ConceptNode that is solo
+				; (ie. appear only once in the current set)
 				(set! temp-var1 (cog-get-all-nodes head))
 				(set! temp-var2 (append-map cog-get-all-nodes (cdr atoms-to-try)))
-				(set! temp-differences (filter has-word-inst? (lset-difference temp-var1 temp-var2)))
+				(set! temp-differences (filter has-word-inst? (lset-difference equal? temp-var1 temp-var2)))
 
 				(cond ((null? temp-differences)
 					(give-up-unadded-part)
 				      )
 				      (else
-					; find the first link in atoms-unused that contains one of the solo word
+					; find the first link in atoms-leftover that contains one of the solo word
 					(set! temp-var1
 						(find (lambda (a)
 							(find (lambda (w) (cog-has-node? a w)) temp-differences)
 						     )
-						     atoms-unused
+						     atoms-not-tried
 						)
 					)
 
 					; if an atom with the solo word exists
-					(if (temp-var1)
+					(if temp-var1
 						(recursive-helper (cons temp-var1 atoms-to-try))
 						(give-up-unadded-part)
 					)
@@ -247,6 +264,97 @@
 )
 
 
+; -----------------------------------------------------------------------
+; check-chunk -- Check if a chunk is "say-able"
+;
+; Call Surface Realization pipeline to see if a chunk of atoms are
+; "say-able", and if so, determines whether the sentence is too long or
+; complex.
+;
+; Returns 0 = not sayable, 1 = sayable, 2 = too long/complex
+;
+(define (check-chunk atoms)
+	(define (get-pos n)
+		(define wi (r2l-get-word-inst n))
+		(if (null? wi)
+			"_"
+			(cog-name (car (word-inst-get-pos wi)))
+		)
+	)
+	(define (sort-n-count l)
+		(define sorted-list (sort l string<?))
+		(define (count-helper curr-subset curr-pos curr-count)
+			(cond ((null? curr-subset)
+				(cons (cons curr-pos curr-count) '())
+			      )
+			      ((not (string=? (car curr-subset) curr-pos))
+				(cons (cons curr-pos curr-count) (count-helper (cdr curr-subset) (car curr-subset) 1))
+			      )
+			      (else
+				(count-helper (cdr curr-subset) curr-pos (+ 1 curr-count))
+			      )
+			)
+		)
+		(if (not (null? sorted-list))
+			(count-helper (cdr sorted-list) (car sorted-list) 1)
+			'()
+		)
+	)
+
+	; XXX optimization needed?
+	(define all-nodes (delete-duplicates (append-map cog-get-all-nodes atoms)))
+	(define pos-alist (sort-n-count (map get-pos all-nodes)))
+	
+	(define (pos-checker al)
+		(define pos (car al))
+		(define count (cdr al))
+		
+		(cond ; prefer max 2 verbs per sentence
+		      ((and (string=? "verb" pos) (>= count 2))
+			#f
+		      )
+		      ; prefer max 3 nouns per sentence
+		      ((and (string=? "noun" pos) (>= count 3))
+			#f
+		      )
+		      ; prefer max 5 adjectives
+		      ((and (string=? "adj" pos) (>= count 5))
+			#f
+		      )
+		      ; prefer max 3 adverbs
+		      ((and (string=? "adv" pos) (>= count 3))
+			#f
+		      )
+		      (else
+			#t
+		      )
+		 )
+	)
+
+	(define pos-result (and-l (map pos-checker pos-alist)))
+
+	(define temp-set-link (SetLink atoms))
+
+	; do something with SuReal to see if it is sayable
+	(define say-able (not (null? (sureal temp-set-link))))
+
+	(display "\nSuReal output: ")
+	(display (sureal temp-set-link))
+	(display "\n")
+	
+	; remove the temporary SetLink
+	(cog-delete temp-set-link)
+
+	(cond 
+	      ; not long/complex but sayable
+	      ((and pos-result say-able) 1)
+	      ; long/complex but sayable
+	      ((and (not pos-result) say-able) 2)
+	      ; not sayable
+	      (else 0)
+	)
+)
+
 
 ;;;;;;;; brain organizing stuff 
 
@@ -260,28 +368,3 @@
 ; eg. atoms that do not satisfy a sentence form?
 
 
-
-
-
-
-;; base on utterance-type, pick a sentence form?
-;; do we need some sort of template in the atomspace to tell what SVO looks like?
-;; try hard-coding first?
-
-;;; loop
-;; assuming SV or SVO, pick an atom with link to a verb node (PartOfSpeechLink)
-
-; look at atoms-unused and find first node that is verb?
-; or, find all nodes that is verb, then use the list index as a weight
-; then check how many outgoing links connect to a "used" set?
-
-; highest weight, try to say
-
-
-;; get the root link
-;; check if it is "sayable"
-;; if sentence not long enough, greedily add another link (closest link in the saying set)
-;; check if "sayable" again, or too long, and discard the new addition if necessary
-;; update used atoms and loop
-
-;; return a set of atoms used

@@ -1,23 +1,26 @@
 ; loading additional dependency
 (load-scm-from-file "../opencog/nlp/microplanning/helpers.scm")
 
+
+; =======================================================================
+; Main anaphora insertion functions
+; =======================================================================
+
+; -----------------------------------------------------------------------
+; insert-anaphora -- The main function for inserting anaphora
+;
+; Accepts a list of chunks from make-sentence-chunks and the current
+; list of sentence forms.  Returns new chunks with anaphora inserted (as
+; new atoms).
+;
 (define (insert-anaphora chunks favored-forms)
-
-
-
-	;; for each noun, get the possible pronoun
-	;; accept a pronoun if:
-	;;     the noun is not the first occurrence (except for cataphora??)
-	;;     the noun that is close to it do not use the same pronoun (how close is close?)
-	;;     the noun was mentioned no more than one sentence ago
-	
-
-	; XXX checking which atom satisfy a sentence form again... is there way to store the result from
-	; previous check in make-sentence?
+	; XXX checking which atom satisfy a sentence form again... is there ways
+	; to store the result from previous check in make-sentence?
 	(define form-check-list
 		(map (lambda (c) (map (lambda (atom) (if (match-sentence-forms atom favored-forms) #t #f)) c)) chunks)
 	)
 	
+	; helper function for 'nouns-list'
 	(define (get-noun atom formed chunk-index link-index)
 		(filter-map
 			(lambda (x) (if (word-inst-is-noun? (r2l-get-word-inst x))
@@ -28,22 +31,34 @@
 	
 	; create a noun list of the form:
 	;    (noun1 formed1 link-index1 chunk-index1) (noun2 formed2 link-index2 chunk-index2) ...
-	; where link-index is the index within a chunk, and chunk-index is the index of the chunk
+	; where
+	;    noun# is one of the noun as OpenCog node
+	;    formed# is #t or #f indicating whether the link satisfy sentence form
+	;    link-index# is the link index within a chunk
+	;    chunk-index# is the index of the chunk
 	(define nouns-list
 		(append-map
 			(lambda (c fl ci)
-				(append-map (lambda (a f li) (get-noun a f ci li)) c fl (iota (length c))))
+				(append-map (lambda (a f li) (get-noun a f ci li))
+					c
+					fl
+					(iota (length c)) ; generate the links index list
+				)
+			)
 			chunks
 			form-check-list
-			(iota (length chunks))
+			(iota (length chunks)) ; generate the chunks index list
 		)
 	)
+	
+	; bunch of accessors of an item in the nouns-list
 	(define (nouns-list-get-noun noun-item)	(car noun-item))
 	(define (nouns-list-get-formed noun-item) (cadr noun-item))
 	(define (nouns-list-get-li noun-item) (caddr noun-item))
 	(define (nouns-list-get-ci noun-item) (cadddr noun-item))
 	
-	
+	; helper function for pronouns-list that, given a nouns-list item, determine
+	; a suitable pronoun
 	(define (determine-pronoun n)
 		(define word-inst (r2l-get-word-inst (nouns-list-get-noun n)))
 		(define is-pronoun (word-inst-has-attr? word-inst "pronoun"))
@@ -51,27 +66,12 @@
 		(define is-human (word-inst-has-attr? word-inst "person"))
 		(define is-male (and is-human (word-inst-has-attr? word-inst "masculine")))
 		
-		;;;; check if already a pronoun????
-		;;;;; "I", "my", "me", "mine", "you", "your", "yours" might never be a third person ConceptNode in the atomspace
-		;;;;; so even if encountering a pronoun, might still need to change it (eg. "You poison you" where both "you" the
-		;;;;; same ConceptNode)
-		
-		;;;; check possession for "our", "his", "their", etc??? and "ours", "hers", "theirs" etc
-		;;;;    "our group" -> "we"
-		;;;;    "our cars" -> "they"
-		;;;; ????????
-		
-		;;;; what about "myself", "himself", etc???
-		;;;;  this should be for noun which is "object" and which the subject is the same noun
-		
-		;;;; what about "him", "her", "us", "them"???
-		;;;; this should be for noun which is "object" and which the subject is a different noun
-		
-		;;;;;;;;;;;;; Perhaps determine the pronoun base here (he, she, it, they, etc), and determine how to
-		;;;;;;;;;;;;; modify it in later step (to him, her, it, them, himself, herself, itself, themselves, etc)
-		
-		
-		(cond (is-pronoun
+		; TODO check possession for "our", "his", "their", etc. and "ours", "hers", "theirs" etc.
+		;    "our group" -> "we"
+		;    "our cars" -> "they"
+				
+		(cond ; do nothing if already pronoun (such as "I", "you", "we")
+		      (is-pronoun
 			(word-inst-get-word-str word-inst)
 		      )
 		      ((and is-human is-male)
@@ -94,14 +94,16 @@
 		(map determine-pronoun nouns-list)
 	)
 	
-	; for each noun, check the whole list
+	; helper function that, given an index to the nouns-list, check if the corresponding
+	; item actually can be changed to pronoun
 	(define (check-pronoun index)
-		(define the-noun (list-ref nouns-list index))
-		(define the-pronoun (list-ref pronouns-list index))
+		(define the-noun (list-ref nouns-list index))       ; the item in the nouns-list
+		(define the-pronoun (list-ref pronouns-list index)) ; the corresponding pronoun
 		
 		; indicate whether this noun is in a sentence-formed link or not
 		(define is-not-well-formed (not (nouns-list-get-formed the-noun)))
 		
+		; the main helper function to check all conditions
 		(define (check-helper)
 			; indices of all occurrences of a noun instance in structure ((i1 n1) (i2 n2) ...)
 			; excluding occurrences within non-sentence-formed link
@@ -113,11 +115,11 @@
 							(cons i n)
 							#f))
 					nouns-list
-					(iota (length nouns-list))
+					(iota (length nouns-list)) ; generate indices into nouns-list
 				)
 			)
 				
-			; second check if a prounoun is close to the same pronoun (so would be ambiguous)
+			; check if a prounoun is close to the same pronoun (so would be ambiguous)
 			(define (check-ambiguity)
 				(define min-index (max 0 (- index 3))) ; inclusive
 				(define max-index (min (length pronouns-list) (+ index 3))) ; exclusive
@@ -136,10 +138,12 @@
 			
 				; TODO sometimes it is OK depends on the main subject (current and previous sentence)
 				; (eg.  John helped Sam to prepare his project.)
+				; (eg.  John helped Sam to feed himself.)
 			)
 			
-			; check if a noun is modified by other non-sentence form links in current chunk
-			; noun that get supported from supporting link cannot be pronoun (eg. the green it, the tall he, etc)
+			; check if a noun is modified by other non-sentence form links in current chunk,
+			; since noun that get supported from supporting link cannot be pronoun
+			; (eg. the green it, the tall he, etc)
 			(define (check-modified)
 				(define chunk-number (nouns-list-get-ci the-noun))
 				(find (lambda (n) 
@@ -152,7 +156,7 @@
 				)
 			)
 			
-			; third check if mentioned in last sentence or not
+			; check if mentioned in last sentence or not
 			(define (get-last-mentioned)
 				(define this-time (list-index (lambda (o) (= index (car o))) all-occurrences))
 				(define last-time (- this-time 1))
@@ -160,13 +164,14 @@
 				(nouns-list-get-ci (cdr (list-ref all-occurrences last-time)))
 			)
 			
+			; gather all the different conditions
 			; first check the occurrence list to see if this noun is the first occurrence
 			(define is-first-occurrence (= index (caar all-occurrences)))
-		
+			; second check if ambiguous
 			(define is-ambiguous (check-ambiguity))
-		
+			; third check if modified by non-sentenced formed link
 			(define is-modified (check-modified))
-		
+			; fourth check if mentioned too far back
 			(define is-too-far-back
 				(and (not is-first-occurrence) (not (>= (+ 1 (get-last-mentioned)) (nouns-list-get-ci the-noun))))
 			)
@@ -174,15 +179,18 @@
 			(not (or is-first-occurrence is-ambiguous is-modified is-too-far-back))
 		)
 		
+		; only check if the link is sentence-formed (aka. well formed)
 		(if is-not-well-formed
 			#f
 			(check-helper)
 		)
 	)
 	
+	; generate #t & #f bases on whether a noun can be replaced
 	(define decisions-list (list-tabulate (length nouns-list) check-pronoun))
 	;(define decisions-list (list #t #f #f #f #f #f #t #t))
 	
+	; helper function to clone at 'link' level
 	(define (clone-link-with-pronoun orig-link ns ps ds)
 		(define (finalize-pronoun atom pronoun)
 			(cond ((not (is-object? orig-link atom))
@@ -253,6 +261,7 @@
 		)
 	)
 	
+	; helper function to clone at 'chunk' level
 	(define (clone-chunk-with-pronoun orig-chunk nouns-subset pronouns-subset decisions-subset)
 		(define max-length (length orig-chunk))
 		
@@ -296,6 +305,7 @@
 		(recursive-helper 0)
 	)
 	
+	; the base cloning function
 	(define (clone-with-pronoun)
 		(define max-length (length chunks))
 		

@@ -24,13 +24,14 @@
 	(not (null? (cog-node 'WordInstanceNode (cog-name node))))
 )
 
+; -----------------------------------------------------------------------
+; word-inst-has-attr? -- Check if a WordInstanceNode has a particular attribute
+;
+; Return #t or #f depends on whether the node has the attribute 'attr-string' or not.
+;
 (define (word-inst-has-attr? word-inst attr-string)
 	(define attr-list (word-inst-get-attr word-inst))
 	(and (not (null? attr-list)) (member attr-string attr-list (lambda (s a) (string=? s (cog-name a)))))
-)
-
-(define (word-inst-is-singular? word-inst)
-	(word-inst-has-attr word-inst "singular")
 )
 
 ; -----------------------------------------------------------------------
@@ -71,7 +72,11 @@
 	)
 )
 
-
+; -----------------------------------------------------------------------
+; sublist -- Returns a sublist of a list.
+;
+; Returns a sublist from index 'start' (inclusive) to index 'end' (exclusive)
+;
 (define (sublist l start end)
 	(define len (length l))
 	(if (or (>= start len) (< end start))
@@ -104,35 +109,46 @@
 	)
 )
 
-
-; helper function to see if an atom matches a sentence form
+; -----------------------------------------------------------------------
+; match-sentence-forms -- Helper function to see if an atom matches a sentence form
+;
+; Check "atom" against a list of sentence forms and returns the first form
+; matched;  returns #f if none matched.
+;
 (define (match-sentence-forms atom favored-forms)
 	(find (lambda (form) (form-graph-match? atom form)) favored-forms)
 )
 
-
-(define (is-subject? link node)
-	; a node can only be subject if within an EvaluationLink
-	(if (not (equal? 'EvaluationLink (cog-type link)))
-		#f
-		(if (equal? 'ListLink (cog-type (gdr link)))
-			(equal? node (gadr link))
-			(equal? node (gdr link))
-		)
-	)
-)
-
+; -----------------------------------------------------------------------
+; is-object? -- Check if 'node' is "(indirect) object" within 'link'
+;
+; Given a link 'link', check if the node 'node' can be considered "object"
+; or "indirect object" as in "subject-verb-object".
+;
 (define (is-object? link node)
+	; subject-object property must be in EvaluationLink
 	(if (not (equal? 'EvaluationLink (cog-type link)))
 		#f
+		; (indirect) object must be in a ListLink with the subject
 		(if (and (equal? 'ListLink (cog-type (gdr link))) (> (cog-arity (gdr link)) 1))
-			(equal? node (gddr link))
+			; check either "object" or "indirect object"
+			(if (= (cog-arity (gdr link)) 2)
+				(equal? node (gddr link))
+				(equal? node (caddr (cog-outgoing-set (gdr link))))
+			)
 			#f
 		)
 	)
 )
 
+; -----------------------------------------------------------------------
+; get-subject -- Get the subject of a link
+;
+; Given a link 'link', get the node that can be considered "subject" as
+; in "subject-verb-object".
+;
 (define (get-subject link)
+	; similar to is-object? check, must be in EvaluationLink
 	(if (not (equal? 'EvaluationLink (cog-type link)))
 		#f
 		(if (equal? 'ListLink (cog-type (gdr link)))
@@ -142,7 +158,11 @@
 	)
 )
 
-; not used at the moment
+; -----------------------------------------------------------------------
+; distance-transform -- 2D distance transform
+;
+; Not used at the moment.
+;
 (define (distance-transform main-list anchor-list)
 	; initialize where the anchors are
 	; XXX optimization possible? This makes the whole function O(mn) rather than O(n)
@@ -183,89 +203,5 @@
 	(set! result-list (right2left-helper result-list len))
 	(set! result-list (reverse result-list))
 	result-list
-)
-
-; -----------------------------------------------------------------------
-; check-chunk -- Check if a chunk is "say-able"
-;
-; Call Surface Realization pipeline to see if a chunk of atoms are
-; "say-able", and if so, determines whether the sentence is too long or
-; complex.
-;
-; Returns 0 = not sayable, 1 = sayable, 2 = too long/complex
-;
-(define (check-chunk atoms)
-	(define (get-pos n)
-		(define wi (r2l-get-word-inst n))
-		(if (null? wi)
-			"_"
-			(cog-name (car (word-inst-get-pos wi)))
-		)
-	)
-	(define (sort-n-count l)
-		(define sorted-list (sort l string<?))
-		(define (count-helper curr-subset curr-pos curr-count)
-			(cond ((null? curr-subset)
-				(cons (cons curr-pos curr-count) '())
-			      )
-			      ((not (string=? (car curr-subset) curr-pos))
-				(cons (cons curr-pos curr-count) (count-helper (cdr curr-subset) (car curr-subset) 1))
-			      )
-			      (else
-				(count-helper (cdr curr-subset) curr-pos (+ 1 curr-count))
-			      )
-			)
-		)
-		(if (not (null? sorted-list))
-			(count-helper (cdr sorted-list) (car sorted-list) 1)
-			'()
-		)
-	)
-
-	; XXX optimization needed?
-	(define all-nodes (delete-duplicates (append-map cog-get-all-nodes atoms)))
-	(define pos-alist (sort-n-count (map get-pos all-nodes)))
-	
-	(define (pos-checker al)
-		(define pos (car al))
-		(define count (cdr al))
-		
-		(cond ; prefer max 2 verbs per sentence
-		      ((and (string=? "verb" pos) (>= count 2))
-			#f
-		      )
-		      ; prefer max 3 nouns per sentence
-		      ((and (string=? "noun" pos) (>= count 3))
-			#f
-		      )
-		      ; prefer max 5 adjectives
-		      ((and (string=? "adj" pos) (>= count 5))
-			#f
-		      )
-		      ; prefer max 3 adverbs
-		      ((and (string=? "adv" pos) (>= count 3))
-			#f
-		      )
-		      (else
-			#t
-		      )
-		 )
-	)
-
-	(define pos-result (and-l (map pos-checker pos-alist)))
-
-	;;; do something with SuReal to see if it is sayable?
-	(define say-able #t)
-
-	(cond 
-	      ; not long/complex but sayable
-	      ((and pos-result say-able) 1)
-	      ; long/complex but sayable
-	      ((and (not pos-result) say-able) 2)
-	      ; not sayable
-	      (else 0)
-	)
-
-	;(length (append-map cog-get-all-nodes atoms))
 )
 

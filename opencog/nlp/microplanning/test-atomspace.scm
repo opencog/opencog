@@ -1,3 +1,19 @@
+; =========================
+; Basic knowledge
+; =========================
+;(r2l "The beautiful cat hates the tree.")
+;(r2l "The ugly cat climbs the stairs.")
+;(r2l "He swallowed the apple.")
+;(r2l "The funny man collects interesting stories.")
+;(r2l "A cat ate the seeds.")
+
+; =========================
+; More complex knowledge
+; =========================
+;(r2l "The ugly cat climbs the stairs and enters the house.")
+;(r2l "He takes the cookies and eats them.")
+;(r2l "She collects damaged stamps and categorizes them.")
+
 (define test-sal
 	(SequentialAndLink
 		(EvaluationLink (stv 0.99000001 0.99000001)
@@ -348,6 +364,7 @@
 
 
 ;;;;;;;;;;;;;;;;; RelEx2Logic style output ;;;;;;;;;;;;;;;;;;;
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 (ImplicationLink (stv 0.99000001 0.99000001)
 	(PredicateNode "steals@d88d647d-5c02-481e-b8d0-cfd20d33fb23" (stv 0.001 0.99000001))
@@ -509,4 +526,5 @@
 	(ConceptNode "present" (stv 0.001 0.99000001))
 )
 
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 
