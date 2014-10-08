@@ -360,7 +360,7 @@
 (define (alist-inverse a-pair a-dict)
     (if (null? (cdr a-pair))
         (if (assoc-ref a-dict "NO_PATTERN")
-            (acons "NO_PATTERN" (delete-duplicates! (append (assoc-ref a-dict "NO_PATTERN") (list (car a-pair)))) a-dict)
+            (assoc-set! a-dict "NO_PATTERN" (delete-duplicates (append (assoc-ref a-dict "NO_PATTERN") (list (car a-pair)))))
             (acons "NO_PATTERN" (list (car a-pair)) a-dict)
         )
         (delete-duplicates (append-map (lambda (x)
