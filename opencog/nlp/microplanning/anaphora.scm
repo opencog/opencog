@@ -355,12 +355,12 @@
 	(display "\n")
 	(display decisions-list)
 	(display "\n===============\n")
-	(display new-chunks)
+	(display chunks)
 	(display "\n===============\n")
 	(display "\n...\n")
 
 	; TODO also insert anaphora for missing subjects/objects
 	
-	chunks
+	new-chunks
 )
 
