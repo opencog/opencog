@@ -508,6 +508,6 @@
             )
         )
     )
-    (map chunk dict)
+    (remove null? (map chunk dict))
 )
 
