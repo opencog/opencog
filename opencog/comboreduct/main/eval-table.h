@@ -55,7 +55,6 @@ struct evalTableParameters
     string target_feature_str;
     string timestamp_feature_str;
     vector<string> ignore_features_str;
-    vector<string> force_features_str;
     bool has_labels;
     vector<string> features;
     string features_file;
@@ -78,9 +77,6 @@ Out& output_results(Out& out, const evalTableParameters& pa,
         eval_table.itable = ITable();
         eval_table.target_pos = 0;
     }
-    if (!pa.force_features_str.empty())
-        eval_table.add_features_from_file(pa.input_table_file,
-                                          pa.force_features_str);
     return ostreamTable(out, eval_table);
 }
 

@@ -472,19 +472,23 @@ TTable::value_type TTable::from_string(const std::string& timestamp_str) {
     return boost::gregorian::from_string(timestamp_str);
 }
 
+std::string TTable::to_string(const TTable::value_type& timestamp) {
+    return boost::gregorian::to_iso_extended_string(timestamp);
+}
+
 ///////////
 // Table //
 ///////////
 
-Table::Table() : target_pos(0) {}
+Table::Table() : target_pos(0), timestamp_pos(0) {}
 
 Table::Table(const OTable& otable_, const ITable& itable_)
-    : itable(itable_), otable(otable_), target_pos(0) {}
+    : itable(itable_), otable(otable_), target_pos(0), timestamp_pos(0) {}
 
 Table::Table(const combo_tree& tr, int nsamples,
              contin_t min_contin, contin_t max_contin) :
     itable(infer_type_tree(tr), nsamples, min_contin, max_contin),
-    otable(tr, itable), target_pos(0) {}
+    otable(tr, itable), target_pos(0), timestamp_pos(0) {}
 
 vector<string> Table::get_labels() const
 {
@@ -593,82 +597,9 @@ unsigned get_index(const string& label, const vector<string>& header)
     return std::distance(header.begin(), std::find(header.begin(), header.end(), label));
 }
 
-void Table::add_features_from_file(const string& input_file,
-                                   vector<string> features)
-{
-    // consider only the features not already present
-    const vector<string>& labels = itable.get_labels();
-    for (const string& f : labels) {
-        auto it = std::find(features.begin(), features.end(), f);
-        if (it != features.end())
-            features.erase(it);
-    }
-
-    // If no feature to force, there is nothing to do
-    if (not features.empty()) {
-        // header of the DSV file
-        vector<string> full_header = get_header(input_file);
-
-        // [0, header.size())
-        vector<unsigned> full_header_pos = get_indices(full_header, full_header);
-        // indices of table's features relative to full_header
-        vector<unsigned> header_pos =  get_indices(labels, full_header);
-        // indices of features to insert relative to full_header
-        vector<unsigned> features_pos = get_indices(features, full_header);
-        // target position relative to full_header
-        int full_target_pos = get_index(otable.get_label(), full_header);
-
-        // Get the complement of features_pos
-        vector<unsigned> features_pos_comp;
-        boost::set_difference(full_header_pos, features_pos,
-                              back_inserter(features_pos_comp));
-
-        // Look up the corresponding feature names for each index.
-        vector<string> ignore_feats;
-        for (size_t i=0; i< features_pos_comp.size(); i++) {
-            ignore_feats.push_back(full_header[features_pos_comp[i]]);
-        }
-
-        // Load the table, removing the undesired features.
-        ITable features_table;
-        ifstream in(input_file.c_str());
-        istreamITable(in, features_table, ignore_feats);
-        const vector<string>& features_labels = features_table.get_labels();
-
-        // Insert the forced features in the right order. We want to keep
-        // the features in order because that is likely what the user
-        // expects.
-        
-        // insert missing columns from features_itable to itable
-        for (auto lit = features_pos.cbegin(), rit = header_pos.cbegin();
-             lit != features_pos.cend(); ++lit) {
-            int lpos = distance(features_pos.cbegin(), lit);
-            vertex_seq cd = features_table.get_column_data(lpos);
-            string cl = features_labels[lpos];
-            while(rit != header_pos.cend() && *lit > *rit) ++rit;
-            int rpos = rit != header_pos.cend() ?
-                distance(header_pos.cbegin(), rit) + lpos : -1;
-            itable.insert_col(cl, cd, rpos);
-        }
-
-        // update target_pos, does union of features_pos and
-        // header_pos and put the result in new_header_pos
-        vector<unsigned> new_header_pos;
-        boost::set_union(header_pos, features_pos, back_inserter(new_header_pos));
-        if (full_target_pos > 0) {
-            if (full_target_pos < (int)new_header_pos.front()) // target is first
-                target_pos = 0;
-            else if (full_target_pos > (int)new_header_pos.back()) // target is last
-                target_pos = -1;
-            else {              // target is in between
-                auto it = boost::adjacent_find(new_header_pos, [&](int l, int r) {
-                        return l < full_target_pos && full_target_pos < r; });
-                target_pos = distance(new_header_pos.begin(), ++it);
-            }
-        } else                  // target_pos is already at the 0 or
-                                // -1 no need to change it
-            OC_ASSERT(full_target_pos == target_pos, "smells a bug");
-    }
+bool Table::operator==(const Table& rhs) const {
+    return itable == rhs.itable and otable == rhs.otable and ttable == rhs.ttable
+        and target_pos == rhs.target_pos and timestamp_pos == rhs.timestamp_pos;
 }
         
 /////////////////

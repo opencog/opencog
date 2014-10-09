@@ -39,10 +39,10 @@ using combo::count_t;
  * valued distribution.  The range of rows selected are expressed as
  * percentiles. That is, if the input table has N rows, then rows that
  * are selected will be rows N*lower_percentile through N*upper_percentile,
- * where the rows are numbered in ascending rank.  That is, this scorer
- * will rank (sort) the rows according to the output column, and then
- * select those only in the indicated range.  If 'positive' is false,
- * then the rows are ranked in reverse order.
+ * where the rows are ordered in ascending rank of the output column.
+ * That is, this scorer will rank (sort) the rows according to the
+ * output column, and then select those only in the indicated range.
+ * If 'positive' is false, then the rows are ranked in reverse order.
  *
  * The 'hardness' indicates just how sharp it selection will be TBD.
  * Not yet implemented.

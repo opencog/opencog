@@ -3,11 +3,11 @@ INCLUDE(AddCxxtest)
 
 IF (WIN32)
 	ADD_DEFINITIONS(-D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
-				   -D_CRT_SECURE_NO_WARNINGS)
+	                -D_CRT_SECURE_NO_WARNINGS)
 ENDIF (WIN32)
 
 ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
-				-DPROJECT_BINARY_DIR=\\"${CMAKE_BINARY_DIR}\\")
+                -DPROJECT_BINARY_DIR=\\"${CMAKE_BINARY_DIR}\\")
 
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
@@ -36,6 +36,9 @@ IF (CXXTEST_FOUND)
 		# these only after guile has been tested.
 		ADD_SUBDIRECTORY (query)
 
+		# Currently, reasoning depends on query, above.
+		ADD_SUBDIRECTORY (reasoning)
+
 		# The cogserver exposes the atomspace to outside users.
 		IF (HAVE_SERVER)
 			ADD_SUBDIRECTORY (server)
@@ -58,15 +61,13 @@ IF (CXXTEST_FOUND)
 		ADD_SUBDIRECTORY (dynamics)
 	ENDIF (HAVE_ATTENTION)
 
-	# currently, does not depend on atomspace...
+	# Currently, does not depend on atomspace...
 	ADD_SUBDIRECTORY (comboreduct)
 
 	# learning requires a working comboreduct.
-        ADD_SUBDIRECTORY (learning)
+	ADD_SUBDIRECTORY (learning)
 
-	ADD_SUBDIRECTORY (reasoning)
-
-        # Embodiment requires that learning, spatial, etc.
+	# Embodiment requires that learning, spatial, etc.
 	# all works fine. So run this last.
 	IF (HAVE_EMBODIMENT)
 		ADD_SUBDIRECTORY (embodiment)

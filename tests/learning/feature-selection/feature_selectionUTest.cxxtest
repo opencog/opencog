@@ -42,9 +42,9 @@ using boost::counting_iterator;
 class feature_selectionUTest : public CxxTest::TestSuite
 {
     Table big_table, small_table, small_table_swap_f2_f3,
-        ignore_enforce_target_table, sparse_table;
+        timestamp_table, sparse_table;
     string big_table_path, small_table_path, small_table_swap_f2_f3_path,
-        ignore_enforce_target_table_path, sparse_table_path;
+        timestamp_table_path, sparse_table_path;
 
 public:
     typedef MutualInformation<set<arity_t>> FeatureScorer;
@@ -53,50 +53,34 @@ public:
         : big_table_path(FEATURE_SELECTION_TEST_DIR"big-dataset.csv"),
           small_table_path(FEATURE_SELECTION_TEST_DIR"small-dataset.csv"),
           small_table_swap_f2_f3_path(FEATURE_SELECTION_TEST_DIR"small-dataset_swap_f2_f3.csv"),
-          ignore_enforce_target_table_path(FEATURE_SELECTION_TEST_DIR"ignore-enfore-target-dataset.csv"),
+          timestamp_table_path(FEATURE_SELECTION_TEST_DIR"timestamp-dataset.csv"),
           sparse_table_path(FEATURE_SELECTION_TEST_DIR"contin-sparse.data")
     {
         logger().setPrintToStdoutFlag(true);
         logger().setLevel(Logger::FINE);
 
-        string target_feature, timestamps_feature;
-        vector<string> ignore_features;
+        // Load big table
+        big_table = loadTable(big_table_path);
 
-        // load big table
-        big_table = loadTable(big_table_path, target_feature,
-                              timestamps_feature,
-                              ignore_features);
+        // Load small table
+        small_table = loadTable(small_table_path);
 
-        // load small table
-        small_table = loadTable(small_table_path, target_feature,
-                                timestamps_feature,
-                                ignore_features);
+        // Load small table with f2 and f3 swapped
+        small_table_swap_f2_f3 = loadTable(small_table_swap_f2_f3_path);
 
-        // load small table with f2 and f3 swapped
-        small_table_swap_f2_f3 = loadTable(small_table_swap_f2_f3_path,
-                                           target_feature,
-                                           timestamps_feature,
-                                           ignore_features);
-
-        // load sparse contin table, with date and string columns.
-        vector<string> ignore_date;
-
-        // Ignore the date and swoosh columns during feature selection.
-        // Afterwards, the date and string columns get copied over, as
-        // "forced" aka preserved features.
-        ignore_date.push_back("date");
-        ignore_date.push_back("swoosh");
-        sparse_table = loadTable(sparse_table_path,
-                                 target_feature, timestamps_feature,
-                                 ignore_date);
+        // Load sparse contin table, ignoring the date and swoosh
+        // features, cause loadTable does support timestamp features
+        // for sparse table yet, and feature-selection is not yet able
+        // to interpret the swoosh feature.
+        vector<string> ignore_features = {"date", "swoosh"};
+        sparse_table = loadTable(sparse_table_path, string(), string(),
+                                 ignore_features);
 
         // load ignore_enfore_target table
-        ignore_features.push_back("timestamp");
-        target_feature = "target";
-        ignore_enforce_target_table = loadTable(ignore_enforce_target_table_path,
-                                                target_feature,
-                                                timestamps_feature,
-                                                ignore_features);
+        string timestamp_feature = "timestamp";
+        string target_feature = "target";
+        timestamp_table = loadTable(timestamp_table_path,
+                                    target_feature, timestamp_feature);
     }
 
     void test_incremental_selection_j1() {
@@ -122,25 +106,22 @@ public:
         test_moses_based_feature_selection(1);
     }
 
-    void test_ignore_enforce_feature_selection() {
+    void test_timestamp_feature_selection() {
         // set feature selection parameters
         feature_selection_parameters fsp;
         fsp.algorithm = "inc";
         fsp.scorer = mi;
-        fsp.input_file = ignore_enforce_target_table_path;
-        fsp.force_features_str = {"timestamp"};
+        fsp.input_file = timestamp_table_path;
         fsp.target_size = 1;
         fsp.jobs = 1;
         setting_omp(fsp.jobs);
         fsp.inc_target_size_epsilon = 1e-10;
         fsp.inc_interaction_terms = 1;
 
-        ostreamTable(std::cout << "ignore/enforce target table = ",
-                     ignore_enforce_target_table);
+        ostreamTable(std::cout << "timestamp target table = ", timestamp_table);
 
         // run and test feature selection
-        test_feature_selection(ignore_enforce_target_table, fsp,
-                               "timestamp,f2,target");
+        test_feature_selection(timestamp_table, fsp, "timestamp,f2,target");
     }
 
     void test_smd_with_init_feature1() {
@@ -191,13 +172,9 @@ public:
         fsp.jobs = 1;
         setting_omp(fsp.jobs);
 
-        // Copy the date field over to the final table.
-        fsp.input_file = sparse_table_path;
-        fsp.force_features_str = {"date", "swoosh"};
-
         // run and test feature selection
         test_feature_selection(sparse_table, fsp,
-            "change_percent,BECAUSE,BETWEEN,FEB,IN_PERSONBYRULE,NUMBER23,PERCENT,QUARTER,WERE,WHICH,swoosh,date");
+            "change_percent,BECAUSE,BETWEEN,FEB,IN_PERSONBYRULE,NUMBER23,PERCENT,QUARTER,WERE,WHICH");
     }
 
     // Same as above, but ask for more features.
@@ -214,15 +191,9 @@ public:
         fsp.jobs = 1;
         setting_omp(fsp.jobs);
 
-        // Copy the date field over to the final table.
-        fsp.input_file = sparse_table_path;
-        // fsp.force_features_str = {"date", "swoosh"};
-        fsp.force_features_str.push_back("date");
-        fsp.force_features_str.push_back("swoosh");
-
         // run and test feature selection
         test_feature_selection(sparse_table, fsp,
-            "change_percent,ADDS,AG,ANALYST,ANGELES,ARMOR,BECAUSE,BEFORE,BETWEEN,CLIENTS,COMPUTER,DIFFERENT,EIGHT,ERN,FEB,FIRM,FIVE,GOV,GOVERNMENT,INCLUDED,INCLUDING,IN_LOCATION,IN_PERSONBYRULE,JOINT,KNOWN,LESS,LOS,MAJOR,MARTIN,MICHAEL,MODEL,MONTHS,NATIONAL,NOV,NUMBER15402473,NUMBER23,NUMBER35,NUMBER4055922,NUMBER654,ORLAND,OUTLAYS,PARAGRAPH,PERCENT,PLANES,PRICE,PROGRAMS,QUARTER,RAY,REPORTERS,SECURITY,SHARES,STARTED,SUCH,SUSANNA,THROUGH,TOGETHER,TOLD,VERY,WAYS,WERE,WHICH,WORTH,swoosh,date");
+            "change_percent,ADDS,AG,ANALYST,ANGELES,ARMOR,BECAUSE,BEFORE,BETWEEN,CLIENTS,COMPUTER,DIFFERENT,EIGHT,ERN,FEB,FIRM,FIVE,GOV,GOVERNMENT,INCLUDED,INCLUDING,IN_LOCATION,IN_PERSONBYRULE,JOINT,KNOWN,LESS,LOS,MAJOR,MARTIN,MICHAEL,MODEL,MONTHS,NATIONAL,NOV,NUMBER15402473,NUMBER23,NUMBER35,NUMBER4055922,NUMBER654,ORLAND,OUTLAYS,PARAGRAPH,PERCENT,PLANES,PRICE,PROGRAMS,QUARTER,RAY,REPORTERS,SECURITY,SHARES,STARTED,SUCH,SUSANNA,THROUGH,TOGETHER,TOLD,VERY,WAYS,WERE,WHICH,WORTH");
     }
 
     void test_random_selection()
@@ -236,14 +207,25 @@ public:
         fsp.jobs = 1;
         setting_omp(fsp.jobs);
 
-        // Copy the date field over to the final table.
-        fsp.input_file = sparse_table_path;
-        fsp.force_features_str = {"date", "swoosh"};
+        // run and test feature selection
+        test_random_feature_selection(sparse_table, fsp, fsp.target_size);
+    }
+
+    void test_random_selection_with_timestamp()
+    {
+        // set feature selection parameters
+        feature_selection_parameters fsp;
+        fsp.algorithm = "random";
+        fsp.input_file = timestamp_table_path;
+        // Ask for 1
+        fsp.target_size = 1;
+        fsp.jobs = 1;
+        setting_omp(fsp.jobs);
 
         // run and test feature selection
-        // 22 not 20 here, because +2 for the two forced features,
-        // above.
-        test_random_feature_selection(sparse_table, fsp, 22);
+        test_random_feature_selection(timestamp_table, fsp,
+                                      // +1 for timestamp
+                                      fsp.target_size + 1);
     }
 
 private:
@@ -367,8 +349,8 @@ private:
     }
 
     void test_random_feature_selection(const Table& table,
-                                feature_selection_parameters& fsp,
-                                int num_expected)
+                                       feature_selection_parameters& fsp,
+                                       int num_expected)
     {
         // create temporary file to put the results
         char tempfile[] = "/tmp/feature_selectionUTestXXXXXX";

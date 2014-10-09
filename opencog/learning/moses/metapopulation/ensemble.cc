@@ -48,6 +48,7 @@ ensemble::ensemble(behave_cscore& cs, const ensemble_parameters& ep) :
 	// _tolerance is an estimate of the accumulated rounding error
 	// that arises when totaling the bscores.  As usual, assumes a
 	// normal distribution for this, so that its a square-root.
+	// Typical values should be about 1e-5 for floats, 1e-14 for doubles.
 	size_t bslen = _bscorer.size();
 	_tolerance = 2.0 * epsilon_score;
 	_tolerance *= sqrt((double) bslen);
@@ -162,84 +163,101 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 
 /**
  * Add trees that expertly select rows.  These are trees that select
- * only a handful of rows, usually just the true-postive rows, unless
- * exact_experts is set, in which case only the trees that are exactly
- * correct are admitted to the ensemble.
+ * only a handful of rows, those that are exactly the true-postive rows.
+ * If the flag exact_experts is NOT set, then some inexact trees are
+ * admitted to the ensemble; a voting/iasing scheme is used to make sure
+ * that they don't do too much damage.
+ *
+ * The current algo, as implemented, admits any tree that expertly
+ * selects rows, even if the ensemble already knows how to select those
+ * same rows. This may be good, or it may be bad ... depending on what
+ * you want.   An alternative would be to add only those experts that
+ * know things that the ensemble does not yet know about.
+ *
+ * At most, _params.num_to_promote are added.
  */
 void ensemble::add_expert(scored_combo_tree_set& cands)
 {
 	int promoted = 0;
-	while (true) {
-		// Find the element (the combo tree) with the least error.
-		scored_combo_tree_set::iterator best_p;
-		if (_params.exact_experts) {
-			// Find the element (the combo tree) with the least error. This is
-			// the element with the highest score, that does not also accept
-			// undesirable members. (i.e. has an imperfect classifcation)
-			best_p =
-				std::min_element(cands.begin(), cands.end(),
-					[&](const scored_combo_tree& a, const scored_combo_tree& b) {
-						bool abad = (_tolerance < _bscorer.get_error(a.get_bscore()));
-						bool bbad = (_tolerance < _bscorer.get_error(b.get_bscore()));
-						if (abad and bbad) return a.get_score() > b.get_score();
-			 	 		if (abad) return false;
-						if (bbad) return true;
-						return a.get_score() > b.get_score(); });
-		} else {
-			// Find the element (the combo tree) with the least error. This is
-			// the element with the highest score. Imprecise experts are allowed.
-			best_p =
-				std::min_element(cands.begin(), cands.end(),
-					[&](const scored_combo_tree& a, const scored_combo_tree& b) {
-						return a.get_score() > b.get_score(); });
-		}
+	int num = 0;
+	for (const scored_combo_tree& sct : cands) {
+		num++;
+		// Add all elements that have a perfect score, or at least,
+		// a good-enough score.
+		double err = _bscorer.get_error(sct.get_tree());
 
-		double err = _bscorer.get_error(best_p->get_bscore());
-		logger().info() << "Expert: candidate score=" << best_p->get_score()
-                      << " error=" << err;
-
-		OC_ASSERT(0.0 <= err and err < 1.0, "boosting score out of range; got %g", err);
+		OC_ASSERT(0.0 <= err+_tolerance and err-_tolerance <= 1.0,
+		          "boosting score out of range; got %g", err);
 
 		// Set the weight for the tree, and stick it in the ensemble
-		scored_combo_tree best = *best_p;
-		double alpha;
-		double expalpha;
 		if (_params.exact_experts) {
 			// This condition indicates "perfect score". This is the only type
-			// of tree that we accept into the ensemble.  Its unlikely that the
-			// next-highest scoring one will be any good, so just break.
-			if (_tolerance <= err) {
-				logger().info() << "Exact expert: Best tree not good enough: " << err;
-				break;
+			// of tree that we accept into the ensemble.
+			if (_tolerance < err) {
+				logger().debug() << "Exact expert " << num
+				                 << " not good enough, err=" << err
+				                 << " score=" << sct.get_score();
+				continue;
 			}
 
-			alpha = 1.0;    // Ad-hoc but uniform weight.
-			expalpha = _params.expalpha; // Add-hoc boosting value ...
-			logger().info() << "Exact expert: add to ensemble " << best;
+			logger().info() << "Exact expert " << num << " add to ensemble: " << sct;
+			_scored_trees.insert(sct);
+
+			// Increase the importance of all remaining, unselected rows.
+			double expalpha = _params.expalpha; // Add-hoc boosting value ...
+			double rcpalpha = 1.0 / expalpha;
+
+			// Trick the scorer into using the flat scorer.  Do this by
+			// sticking the single tree into a tree set.
+			scored_combo_tree_set treeset;
+         treeset.insert(sct);
+			behavioral_score bs(_bscorer.operator()(treeset));
+			size_t bslen = _bscorer.size();
+			std::vector<double> weights(bslen);
+			for (size_t i=0; i<bslen; i++)
+			{
+				// Again, here we explicitly assume the pre scorer: A row is
+				// correctly selected if its score is strictly positive.
+				// The weights of positive and selected rows must decrease.
+				// (because we would like to not select them again).
+				// For the weights of unselected rows, positive or negative,
+				// well hey, we have a choice: we could increase them, or we
+				// could leave them alone. We should leave them alone, as 
+				// otherwise, we are increasing the weight on rows that had
+				// been previously selected, but aren't now.  We can do this
+				// here, or in the pre scorer ... probably best to do it in
+				// the pre scorer.
+				weights[i] = (0.0 < bs[i]) ? rcpalpha : expalpha;
+			}
+			_bscorer.update_weights(weights);
+
 		} else {
+			// if we are here, its the in-exact experts code.  XXX currently broken ...
 			// Any score worse than half is terrible. Half gives a weight of zero.
 			// More than half gives negative weights, which wreaks things.
 			if (0.5 <= err) {
-				logger().info() << "Expert: terrible precision, ensemble not expanded: " << err;
-				break;
+				logger().debug() <<
+				    "Expert: terrible precision, ensemble not expanded: " << err;
+				continue;
 			}
 			// AdaBoost-style alpha; except we allow perfect scorers.
 			if (err < _tolerance) err = _tolerance;
-			alpha = 0.5 * log ((1.0 - err) / err);
-			expalpha = exp(alpha);
+			double alpha = 0.5 * log ((1.0 - err) / err);
+			double expalpha = exp(alpha);
 			logger().info() << "Expert: add to ensemble; err=" << err
 			                << " alpha=" << alpha <<" exp(alpha)=" << expalpha
-			                << std::endl << best;
-		}
+			                << std::endl << sct;
 
-		best.set_weight(alpha);
-		_scored_trees.insert(best);
+			scored_combo_tree kopy(sct);
+			kopy.set_weight(alpha);
+			_scored_trees.insert(kopy);
 
-		// Adjust the bias, if needed.
-		if (not _params.exact_experts) {
-			const behavioral_score& bs = best_p->get_bscore();
+			// Adjust the bias, if needed.
+			const behavioral_score& bs = sct.get_bscore();
 			size_t bslen = _bscorer.size();
 
+			// XXX the logic below is probably wrong.
+			OC_ASSERT(false, "this doesn't work right now.");
 			// Now, look to see where this scorer was wrong, and bump the
 			// bias for that.  Here, we make the defacto assumption that
 			// the scorer is the "pre" scorer, and so the bs ranges from
@@ -257,29 +275,23 @@ void ensemble::add_expert(scored_combo_tree_set& cands)
 				if (_bias < _row_bias[i]) _bias = _row_bias[i];
 			}
 			logger().info() << "Experts: bias is now: " << _bias;
-		}
 
-		// Increase the importance of all remaining, unselected rows.
-		double rcpalpha = 1.0 / expalpha;
-		const behavioral_score& bs = best_p->get_bscore();
-		size_t bslen = _bscorer.size();
-		std::vector<double> weights(bslen);
-		for (size_t i=0; i<bslen; i++)
-		{
-			// Again, here we explicitly assume the pre scorer: A row is
-			// correctly selected if its score is strictly positive.
-			// The weights of unselected rows must increase.
-			weights[i] = (0.0 < bs[i]) ? rcpalpha : expalpha;
+			// Increase the importance of all remaining, unselected rows.
+			double rcpalpha = 1.0 / expalpha;
+			std::vector<double> weights(bslen);
+			for (size_t i=0; i<bslen; i++)
+			{
+				// Again, here we explicitly assume the pre scorer: A row is
+				// correctly selected if its score is strictly positive.
+				// The weights of unselected rows must increase.
+				weights[i] = (0.0 < bs[i]) ? rcpalpha : expalpha;
+			}
+			_bscorer.update_weights(weights);
 		}
-      _bscorer.update_weights(weights);
-
-		// Remove from the set of candidates.
-		cands.erase(best_p);
 
 		// Are we done yet?
 		promoted ++;
 		if (_params.num_to_promote <= promoted) break;
-		if (0 == cands.size()) break;
 	}
 }
 

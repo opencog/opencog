@@ -54,7 +54,7 @@ void ant_action_symbol::set_action_symbol(ant_action_symbol_enum pase) {
 }
 
 action_symbol ant_action_symbol::get_instance(const std::string& name) {
-  //look up for pet_action_symbol_enum corresponding to that name
+  //look up for ant_action_symbol_enum corresponding to that name
   bool found = false;
   action_symbol as = NULL;
   for(unsigned int i = 0; i<id::ant_action_symbol_count && !found; ++i) {

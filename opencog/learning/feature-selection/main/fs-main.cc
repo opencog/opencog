@@ -162,7 +162,9 @@ int main(int argc, char** argv)
          "Force feature to be selected. Can be used several times "
          "to force several features. Please note that those features "
          "do not necessarily interact with the selected features, they are "
-         "simply added at the end whether or not they are in the selection.\n")
+         "simply added at the end whether or not they are in the selection. "
+         "Also ignored features cannot be brought back by forcing them, "
+         "that is --ignore-feature has the precedence over --force-feature. \n")
 
         (opt_desc_str(output_file_opt).c_str(),
          value<string>(&fs_params.output_file),

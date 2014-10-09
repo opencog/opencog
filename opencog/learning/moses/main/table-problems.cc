@@ -569,7 +569,7 @@ void register_table_problems(problem_manager& pmr, option_manager& mgr)
 
 	pmr.register_problem(new ip_problem(*tpp, *ippp));
 	pmr.register_problem(new ann_table_problem(*tpp));
-    pmr.register_problem(new pre_table_problem(*tpp));
+	pmr.register_problem(new pre_table_problem(*tpp));
 	pmr.register_problem(new pre_conj_table_problem(*tpp));
 	pmr.register_problem(new prerec_table_problem(*tpp));
 	pmr.register_problem(new recall_table_problem(*tpp));

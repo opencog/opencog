@@ -461,6 +461,7 @@ public:
     const std::string& get_label() const;
 
     static TTable::value_type from_string(const std::string& timestamp_str);
+    static std::string to_string(const TTable::value_type& timestamp);
 
 protected:
     std::string label;
@@ -803,7 +804,7 @@ public:
     vertex_seq get_column_data(const std::string& name) const;
     vertex_seq get_column_data(int offset) const;
 
-    /// return a copy of the input table filtered according to a given
+    /// Return a copy of the input table filtered according to a given
     /// container of arity_t. Each value of that container corresponds
     /// to the column index of the ITable (starting from 0).
     template<typename F>
@@ -912,7 +913,7 @@ protected:
  * an OTable holding the output (the dependent variable), and a type
  * tree identifiying the types of the inputs and outputs.
  */
-struct Table
+struct Table : public boost::equality_comparable<Table>
 {
     typedef std::vector<std::string> string_seq;
     typedef vertex value_type;
@@ -925,7 +926,7 @@ struct Table
     Table(const Func& func, arity_t a, int nsamples = -1) :
         itable(gen_signature(type_node_of<bool>(),
                              type_node_of<bool>(), a)),
-        otable(func, itable) {}
+        otable(func, itable), target_pos(0), timestamp_pos(0) {}
 
     Table(const combo_tree& tr, int nsamples = -1,
           contin_t min_contin = -1.0, contin_t max_contin = 1.0);
@@ -954,8 +955,25 @@ struct Table
 
     const std::string& get_target() const { return otable.get_label(); }
 
-    // Filter according to a container of arity_t. Each value of that
-    // container corresponds to the column index of the ITable
+    // Useful for filtered (see below), return some column position
+    // after a filter has been applied
+    template<typename F> unsigned update_pos(unsigned pos, const F& f) const {
+        unsigned filtered_out_count = 0,
+            last = 0;
+        for (unsigned v : f) {
+            if (v < pos)
+                filtered_out_count += v - last;
+            else {
+                filtered_out_count += pos - last;
+                break;
+            }
+            last = v;
+        }
+        return pos - filtered_out_count;
+    }
+
+    // Filter in, according to a container of arity_t. Each value of
+    // that container corresponds to the column index of the ITable
     // (starting from 0).
     template<typename F> Table filtered(const F& f) const {
         Table res;
@@ -966,16 +984,15 @@ struct Table
         // set output table
         res.otable = otable;
 
+        // set timestamp table
+        res.ttable = ttable;
+
         // update target_pos
-        if (target_pos > 0) {
-            auto it = boost::adjacent_find(f, [&](int l, int r) {
-                    return l < target_pos && target_pos < r; });
-            if (it == f.end())  // it is at the end
-                res.target_pos = f.size();
-            else                // it is in between f
-                res.target_pos = distance(f.begin(), ++it);
-        } else
-            res.target_pos = target_pos;
+        res.target_pos = update_pos(target_pos, f);
+
+        // update timestamp_pos
+        if (!ttable.empty())
+            res.timestamp_pos = update_pos(timestamp_pos, f);
 
         return res;
     }
@@ -985,20 +1002,18 @@ struct Table
     /// for each row, during compression.
     CTable compressed(const std::string = "") const;
 
-    /// add raw features given an input file and a list of
-    /// features. It is assumed that the table has a subset of
-    /// features as the ones present in the given file, so what that
-    /// function is doing is inserting some missing features in the
-    /// same order.
-    void add_features_from_file(const std::string& input_file,
-                                std::vector<std::string> features);
-
     ITable itable;
     OTable otable;
     TTable ttable;
-    int target_pos;             // position of the target, useful for
-                                // writing the table. If -1 means last
-                                // position
+
+    // Position of the target, useful for writing the table
+    unsigned target_pos;
+
+    // Position of the timestamp feature, useful for writing the
+    // table. If the timestamp feature is empty then it is irrelevant.
+    unsigned timestamp_pos;
+
+    bool operator==(const Table& rhs) const;
 };
 
 template<typename Func>

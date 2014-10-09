@@ -34,8 +34,7 @@ const string tableUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/comboreduct/t
 class tableUTest : public CxxTest::TestSuite
 {
 private:
-    void testIStreamTable(const string& ts, ITable& it, OTable& ot,
-                          bool has_header,
+    void testIStreamTable(const string& ts, const Table& expected_table,
                           const string& target_feature = string(),
                           const string& timestamp_feature = string(),
                           const vector<string>& ignore_features = vector<string>())
@@ -43,21 +42,13 @@ private:
         std::cout << "\n----------------------------" << std::endl;
 
         stringstream ss(ts);
-        Table tab;
-        istreamTable(ss, tab, target_feature, timestamp_feature, ignore_features);
-        ITable& it_test = tab.itable;
-        OTable& ot_test = tab.otable;
+        Table table;
+        istreamTable(ss, table, target_feature,
+                     timestamp_feature, ignore_features);
 
-        std::cout << "it =" << std::endl;
-        std::cout << it << std::endl;
-        std::cout << "it_test =" << std::endl;
-        std::cout << it_test << std::endl;
-        std::cout << "ot =" << std::endl;
-        std::cout << ot << std::endl;
-        std::cout << "ot_test =" << std::endl;
-        std::cout << ot_test << std::endl;
-        TS_ASSERT_EQUALS(it, it_test);
-        TS_ASSERT_EQUALS(ot, ot_test);
+        std::cout << "table test =" << std::endl;
+        std::cout << table << std::endl;
+        TS_ASSERT_EQUALS(table, expected_table);
     }
 public:
     
@@ -74,8 +65,10 @@ public:
         ITable it(vector<type_node>(2, id::boolean_type));
         it.push_back({id::logical_true, id::logical_false});
         it.push_back({id::logical_false, id::logical_true});
+        Table table(ot, it);
         testIStreamTable("1,1,0\n"
-                         "0,0,1\n", it, ot, false);
+                         "0,0,1\n",
+                         table);
     }
 
     void test_ContinTable()
@@ -85,8 +78,9 @@ public:
         ITable it(vector<type_node>(2, id::contin_type));
         it.push_back({0.4, 244.2});
         it.push_back({9.5, 4.2});
+        Table table(ot, it);
         testIStreamTable("10.1,0.4,244.2\n"
-                         "6.5,9.5,4.2\n", it, ot, false);
+                         "6.5,9.5,4.2\n", table);
     }
 
     void test_ContinTable_type_inference()
@@ -98,10 +92,11 @@ public:
         it.push_back({0.0, 1.0});
         it.push_back({0.4, 244.2});
         it.push_back({9.5, 4.2});
+        Table table(ot, it);
         testIStreamTable("0,1,1\n"
                          "1,0,1\n"
                          "10.1,0.4,244.2\n"
-                         "6.5,9.5,4.2\n", it, ot, false);
+                         "6.5,9.5,4.2\n", table);
     }
 
     void test_ContinTableLabels()
@@ -114,10 +109,11 @@ public:
         it.push_back({9.5, 4.2});
         vector<string> il{label1, label2};
         it.set_labels(il);
+        Table table(ot, it);
         testIStreamTable("happiness,price,temperature\n"
                          "0,1,1\n"
                          "10.1,0.4,244.2\n"
-                         "6.5,9.5,4.2\n", it, ot, true);
+                         "6.5,9.5,4.2\n", table);
     }
 
     void test_EnumTableLabels()
@@ -130,10 +126,11 @@ public:
         it.push_back(vertex_seq({1, 1, id::logical_false}));
         it.push_back(vertex_seq({0.44, 244.2, id::logical_true}));
         it.push_back(vertex_seq({9.5, 4.2, id::logical_false}));
+        Table table(ot, it);
         testIStreamTable("happiness,price,temperature,truth\n"
                          "sad,1,1,0\n"
                          "bored,0.44,244.2,T\n"
-                         "super-happy,9.5,4.2,F\n", it, ot, true);
+                         "super-happy,9.5,4.2,F\n", table);
     }
 
     void test_filterITable()
@@ -148,8 +145,9 @@ public:
         vector<arity_t> args{0};
         ITable fit_it = it.filtered(args);
         OTable ot(o, "troc");
+        Table table(ot, fit_it);
         stringstream ss;
-        ostreamTable(ss, fit_it, ot);
+        ostreamTable(ss, table);
         cout << "result: filterITable" << endl;
         cout << ss.str();
         cout << "fit_it:" << endl;
@@ -160,6 +158,20 @@ public:
                          "troc,truc\n"
                          "1,1\n"
                          "0,0\n");
+    }
+
+    void test_filterTable()
+    {
+        string input_file = tableUTest_dir + "timestamp_table2.csv";
+        Table table = loadTable(input_file, "target", "time");
+        Table filtered_table = table.filtered(std::set<int>({1}));
+
+        stringstream ss;
+        ostreamTable(ss, filtered_table);
+        TS_ASSERT_EQUALS(ss.str(),
+                         "input1,time,target\n"
+                         "1,2012-03-11,6\n"
+                         "0,2012-03-23,7\n")
     }
 
     void test_filterCTable()
@@ -219,10 +231,12 @@ public:
         ITable it(vector<type_node>({id::contin_type}), il);
         it.push_back({10.1});
         it.push_back({6.5});
+        Table table(ot, it);
+        table.target_pos = 1;
 
         testIStreamTable("happiness,price,temperature\n"
                          "10.1,0.4,244.2\n"
-                         "6.5,9.5,4.2\n", it, ot, true,
+                         "6.5,9.5,4.2\n", table,
                          "price", "", {"temperature"});
     }
 
@@ -236,10 +250,13 @@ public:
         it.push_back(vertex_seq({enum_t("sad"), id::logical_false}));
         it.push_back(vertex_seq({enum_t("bored"), id::logical_true}));
         it.push_back(vertex_seq({enum_t("super-happy"), id::logical_false}));
+        Table table(ot, it);
+        table.target_pos = 1;
+
         testIStreamTable("happiness,price,temperature,truth\n"
                          "sad,1,1,0\n"
                          "bored,0.44,244.2,T\n"
-                         "super-happy,9.5,4.2,F\n", it, ot, true,
+                         "super-happy,9.5,4.2,F\n", table,
                          "price", "", {"temperature"});
     }
 
@@ -279,7 +296,7 @@ public:
                          "some,12-05-2012,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
                          "other,12-06-2012T14:35:02-0500,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
                          "last,12-07-2012T16:00:00-0500,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
-                         tt.itable, tt.otable, true);
+                         tt);
     }
 
     void test_sparseFile2()
@@ -297,7 +314,7 @@ public:
                          "4.4,12-05-2012,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
                          "5.5,12-06-2012T14:35:02-0500,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
                          "6.6,12-07-2012T16:00:00-0500,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
-                         tt.itable, tt.otable, true);
+                         tt);
     }
 
     void test_mutualInformation()
@@ -305,10 +322,8 @@ public:
         std::cout << "\n----------------------------" << std::endl;
         string target_feature;
         string timestamps_feature;
-        vector<string> ignore_features;
         Table tt = loadTable(tableUTest_dir + "dataset.csv",
-                             target_feature, timestamps_feature,
-                             ignore_features);
+                             target_feature, timestamps_feature);
         set<arity_t> fs{0, 1};
         CTable ctt = tt.compressed();
         double mi = mutualInformation(ctt, fs);
@@ -359,27 +374,6 @@ public:
         }
     }
 
-    void test_force_feature()
-    {
-        string target_feature = "target";
-        string timestamps_feature = "";
-        vector<string> ignore_features = {"time", "f1"};
-        string input_file = tableUTest_dir + "dataset_force_feature.csv";
-        Table tt = loadTable(input_file, target_feature, timestamps_feature,
-                             ignore_features);
-
-        ostreamTable(cout << "before" << endl, tt);
-        
-        vector<string> features = {"time"};
-        tt.add_features_from_file(input_file, features);
-
-        ostreamTable(cout << "after" << endl, tt);
-
-        stringstream ss;
-        ostreamTable(ss, tt);
-        TS_ASSERT_EQUALS(ss.str(), string("time,target,f2\n12-04-2012,1,0\n"));
-    }
-
     void test_loadCTable()
     {
         string input_file = tableUTest_dir + "dataset.ctable";
@@ -406,18 +400,33 @@ public:
             dates.push_back(TTable::from_string(ds));
         TTable expected_ttable(dates, "time");
 
-#ifdef THIS_DOES_NOT_COMPILE_FOR_ME
-/usr/local/include/cxxtest/TestSuite.h:56:9: error: call of overloaded
-‘equals(opencog::combo::TTable&, std::vector<boost::gregorian::date>&)’
-is ambiguous
-/usr/local/include/cxxtest/TestSuite.h:56:9: note: candidates are:
-/usr/local/include/cxxtest/TestSuite.h:45:10: note: bool
-CxxTest::equals(X, Y) [with X = opencog::combo::TTable, Y =
-std::vector<boost::gregorian::date>]
-/usr/include/boost/algorithm/string/predicate.hpp:318:21: note: bool
-boost::algorithm::equals(const Range1T&, const Range2T&) [with Range1T =
-opencog::combo::TTable, Range2T = std::vector<boost::gregorian::date>]
         TS_ASSERT_EQUALS(table.ttable, dates);
-#endif
+    }
+
+    void test_ostream_timestamp_table() {
+        { // timestamp feature before target and ignore the second feature
+            string input_file = tableUTest_dir + "timestamp_table2.csv";
+            // vector<string> ignore_features = ;
+
+            Table table = loadTable(input_file, "target", "time", {"input1"});
+
+            stringstream ss;
+            ostreamTable(ss, table);
+            TS_ASSERT_EQUALS(ss.str(),
+                             "input0,time,target\n"
+                             "0,2012-03-11,6\n"
+                             "1,2012-03-23,7\n")
+        }
+        { // timestamp feature after target
+            string input_file = tableUTest_dir + "timestamp_table3.csv";
+            Table table = loadTable(input_file, "target", "time");
+
+            stringstream ss;
+            ostreamTable(ss, table);
+            TS_ASSERT_EQUALS(ss.str(),
+                             "input1,target,time\n"
+                             "1,6,2012-03-11\n"
+                             "0,7,2012-03-23\n")
+        }
     }
 };
