@@ -43,6 +43,7 @@
 ;    )
 ;)
 
+;Belief implies Knowledge
 (ImplicationLink
     (EvaluationLink
             (PredicateNode "believe")
@@ -96,7 +97,7 @@
     )
 )
 
-;People often believe what they're told
+;Agents often believe what they're told
 (ImplicationLink (stv .8 .8)
     (EvaluationLink
         (PredicateNode "tell")
@@ -115,72 +116,74 @@
     )
 )
 
+
 ;If I tell Bob there is a battery behind  $x and near House_15, 
 ;he may believe there is a battery behind  $x and near House_15
-(ImplicationLink
-    (EvaluationLink
-        (PredicateNode "tell")
-        (ListLink
-            (ConceptNode "me")
-            (ConceptNode "Bob")
-            (ExistsLink 
-                (VariableNode"$X")
-                (AndLink
-                    (InheritanceLink
-                        (VariableNode "$X")
-                        (ConceptNode "Battery")
-                    )
-                    (EvaluationLink
-                        (PredicateNode "Behind")
-                        (ListLink
-                            (VariableNode "$X")
-                            (VariableNode "House_15")
-                        )
-                    )
-                    (EvaluationLink
-                        (PredicateNode "Near")
-                        (ListLink
-                            (VariableNode "$X")
-                            (VariableNode "House_15")
-                        )
-                    )
-                )
-            )
-        )
-    )
-    (EvaluationLink
-        (PredicateNode "believe")
-        (ListLink
-            (ConceptNode "Bob")
-            (ExistsLink
-                (VariableNode "$X")
-                (AndLink
-                    (InheritanceLink
-                        (VariableNode "$X")
-                        (ConceptNode "Battery")
-                    )
-                    (EvaluationLink
-                        (PredicateNode "Behind")
-                        (ListLink
-                            (VariableNode "$X")
-                            (VariableNode "House_15")
-                        )
-                    )
-                    (EvaluationLink
-                        (PredicateNode "Near")
-                        (ListLink
-                            (VariableNode "$X")
-                            (VariableNode "House_15")
-                        )
-                    )
-                )
-            )
-        )
-    )
-)
+; Possibly an intermediate output
+;(ImplicationLink
+;    (EvaluationLink
+;        (PredicateNode "tell")
+;        (ListLink
+;            (ConceptNode "me")
+;            (ConceptNode "Bob")
+;            (ExistsLink 
+;                (VariableNode"$X")
+;                (AndLink
+;                    (InheritanceLink
+;                        (VariableNode "$X")
+;                        (ConceptNode "Battery")
+;                    )
+;                    (EvaluationLink
+;                        (PredicateNode "Behind")
+;                        (ListLink
+;                            (VariableNode "$X")
+;                            (VariableNode "House_15")
+;                        )
+;                    )
+;                    (EvaluationLink
+;                        (PredicateNode "Near")
+;                        (ListLink
+;                            (VariableNode "$X")
+;                            (VariableNode "House_15")
+;                        )
+;                    )
+;                )
+;            )
+;        )
+;    )
+;    (EvaluationLink
+;        (PredicateNode "believe")
+;        (ListLink
+;            (ConceptNode "Bob")
+;            (ExistsLink
+;                (VariableNode "$X")
+;                (AndLink
+;                    (InheritanceLink
+;                        (VariableNode "$X")
+;                        (ConceptNode "Battery")
+;                    )
+;                    (EvaluationLink
+;                        (PredicateNode "Behind")
+;                        (ListLink
+;                            (VariableNode "$X")
+;                            (VariableNode "House_15")
+;                        )
+;                    )
+;                    (EvaluationLink
+;                        (PredicateNode "Near")
+;                        (ListLink
+;                            (VariableNode "$X")
+;                            (VariableNode "House_15")
+;                        )
+;                    )
+;                )
+;            )
+;        )
+;    )
+;)
 
-;If an agent A wants some X, and believes that X is at location L,
-;then A will likely move to L
+;If an agent A wants some X, and believes that X is at location L, then A will
+; likely move to L
 (ImplicationLink (stv .7 .7)
     (AndLink
         (EvaluationLink
@@ -213,77 +216,17 @@
     )
 )
 
-;An agent must be near something to pick it up
+; Agents want battery.
 (ImplicationLink
-    (EvaluationLink
-        (PredicateNode "PickUp")
-        (ListLink
-            (VariableNode "$A")
+        (InheritanceLink
             (VariableNode "$X")
-        )
-    )
-    (EvaluationLink
-        (PredicateNode "Near")
-        (ListLink
-            (VariableNode "$A")
-            (VariableNode "$X")
-        )
-    )
-)
-
-;If A and B both want some X, but
-;B is closer to X, then B is more likely to get it
-(ImplicationLink (stv .7 .3)
-    (AndLink
-        (EvaluationLink
-            (PredicateNode "want")
-            (ListLink
-                (VariableNode "$A")
-                (VariableNode "$X")
-            )
+            (ConceptNode "Agent")
         )
         (EvaluationLink
             (PredicateNode "want")
             (ListLink
-                (VariableNode "$B")
                 (VariableNode "$X")
-            )
-        )
-        (EvaluationLink
-            (PredicateNode "GreaterThan")
-            (ListLink
-                (EvaluationLink
-                    (PredicateNode "Distance")
-                    (ListLink
-                        (VariableNode "$A")
-                        (VariableNode "$X")
-                    )
-                )
-                (EvaluationLink
-                    (PredicateNode "Distance")
-                    (ListLink
-                        (VariableNode "$B")
-                        (VariableNode "$X")
-                    )
-                )
-            )
-        )
-    )
-    (AndLink
-        (EvaluationLink
-            (PredicateNode "PickUp")
-            (ListLink
-                (VariableNode "$A")
-                (VariableNode "$X")
-            )
-        )
-        (NotLink
-            (EvaluationLink
-                (PredicateNode "PickUp")
-                (ListLink
-                    (VariableNode "$B")
-                    (VariableNode "$X")
-                )
+                (ObjectNode "Battery")
             )
         )
     )

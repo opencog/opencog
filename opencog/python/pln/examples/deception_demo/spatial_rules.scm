@@ -1,3 +1,6 @@
+; The following are 
+
+
 ;If an agent can see two objects X and Y,
 ;it probably can see the spatial relationships
 ;between them
@@ -272,6 +275,83 @@
                         (VariableNode "$X")
                         (VariableNode "$B")
                     )
+                )
+            )
+        )
+    )
+)
+
+;An agent must be near something to pick it up
+(ImplicationLink
+    (EvaluationLink
+        (PredicateNode "PickUp")
+        (ListLink
+            (VariableNode "$A")
+            (VariableNode "$X")
+        )
+    )
+    (EvaluationLink
+        (PredicateNode "Near")
+        (ListLink
+            (VariableNode "$A")
+            (VariableNode "$X")
+        )
+    )
+)
+
+
+;If A and B both want some X, but
+;B is closer to X, then B is more likely to get it
+(ImplicationLink (stv .7 .3)
+    (AndLink
+        (EvaluationLink
+            (PredicateNode "want")
+            (ListLink
+                (VariableNode "$A")
+                (VariableNode "$X")
+            )
+        )
+        (EvaluationLink
+            (PredicateNode "want")
+            (ListLink
+                (VariableNode "$B")
+                (VariableNode "$X")
+            )
+        )
+        (EvaluationLink
+            (PredicateNode "GreaterThan")
+            (ListLink
+                (EvaluationLink
+                    (PredicateNode "Distance")
+                    (ListLink
+                        (VariableNode "$A")
+                        (VariableNode "$X")
+                    )
+                )
+                (EvaluationLink
+                    (PredicateNode "Distance")
+                    (ListLink
+                        (VariableNode "$B")
+                        (VariableNode "$X")
+                    )
+                )
+            )
+        )
+    )
+    (AndLink
+        (EvaluationLink
+            (PredicateNode "PickUp")
+            (ListLink
+                (VariableNode "$A")
+                (VariableNode "$X")
+            )
+        )
+        (NotLink
+            (EvaluationLink
+                (PredicateNode "PickUp")
+                (ListLink
+                    (VariableNode "$B")
+                    (VariableNode "$X")
                 )
             )
         )
