@@ -428,9 +428,10 @@ public:
     bool controlSocketConnection(const std::string& ne_id);
 
     /**
-    * Estabsish data connection to the network element with the given id, if not
-    * yet connected.
-    * Also updates internal map from network element ids to data sockets.
+    * Establish data connection to the network element with the given
+    * id, if not yet connected.  Also updates internal map from
+    * network element ids to data sockets.
+    *
     * @return true if the connection is established.
     */
     bool dataSocketConnection(const std::string& ne_id);
