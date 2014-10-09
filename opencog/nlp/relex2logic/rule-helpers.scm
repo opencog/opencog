@@ -402,8 +402,6 @@
 ;--------------------------------------------------------------------------------------------------------------------
 ;
 ; Example: "Are you the one?"
-; 
-; NB: this rule also applies (incorrectly) to progressive sentences like 'are you sleeping' at the moment due to relex error.
 ;
 (define (obj-ynQ-rule subj_concept subj_instance obj_concept obj_instance)
 	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
@@ -454,11 +452,6 @@
 ;
 ; Examples: "Have you slept?", "Will you sleep?", "Did you sleep?"
 ; 
-; NB: This rule 'ought to' apply to all main verbs with auxilliaries, however [to-be + V-ing] (progressive) is interpreted
-; by relex as [to-be + predadj], so e.g., "Are you sleeping?" calls the yn-obj rule or the yn-predadj rule instead of this rule.
-; However, the results of those rules seem to give the desired result, so instead of fixing relex I may just write predadj
-; rules that handle it for other Q-types . . . 
-;
 (define (SV-ynQ-rule subj_concept subj_instance verb verb_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
@@ -470,8 +463,7 @@
 ;
 ; Example: "Did you eat the leftover baba-ganoush?"
 ;
-; NB: 	This rule also gets called sometimes for progressive sentences like 'Are you sleeping?" due to a relex error.
-; 	and it also applies incorrectly to many SVIO sentences where the IO is interpreted by relex as 
+; NB: 	This rule applies incorrectly to many SVIO sentences where the IO is interpreted by relex as 
 ;	an extra prepositional phrase rather than an IO.
 ;
 (define (SVO-ynQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
@@ -507,9 +499,6 @@
 ;------------------------------------------------------------------------------------------
 ;
 ; Examples: "Who farted?", "What happened?"
-;
-; NB: This rule should but does not apply to progressive sentences because they get interpreted
-; by relex as [to-be+predadj] and call SVP or SVO at the moment . . . 
 ;
 (define (whowhatsubj-SV-Q-rule verb verb_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -581,8 +570,6 @@
 ))
 ;
 ; Examples: "To whom did you sell the children?"
-; Examples not working (see NB below): "To what do we owe the pleasure of your company?", "Who did you give it to?", "To what did you dedicate yourself?"
-; NB: Have just implemented fixes for these errors, but cannot be sure they all work until the next link-grammar update . . . .
 ;
 (define (whowhatiobj-Q-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -623,9 +610,6 @@
 )
 ;
 ; "Where did you eat dinner?", "Where can I buy a fedora?"
-; Appears to call correct rules in plain-text-server, but gets a guile error in the scheme shell
-; Progressive aspect versions "Where are you eating dinner?" "calls SVP instead because relex outputes a predadj relation
-; "Where were you eating dinner?" gets it right on the second and third parses but not the one that goes to the atomspace
 ;
 (define (where-SVOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -642,8 +626,7 @@
 							(ConceptNode obj_instance df-node-stv)))))
 ))
 ;
-; Not working: "Where did you give him the message?" calls the rule below for the second parse, but the first parse doesn't call
-; any Q-rule because relex doesn't make an interrogative or truth-query flag
+; "Where did you give him the message?" 
 ;
 ; NB: need to compose to-do rules for sentences like "Where did she tell him to meet her?" (to-do) if we want to use such sentences . . .
 ;
