@@ -911,8 +911,8 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //        )
 //     )
 
-
-    HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings;
+    this->patternMatcherLock.lock();
+    HandleSeq  implicationLinkOutgoings, bindLinkOutgoings;
 
     // HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpace(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
 
@@ -937,6 +937,14 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     Handle hImplicationLink = atomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
 
     // add variable atoms
+    set<Handle> allNodesInPattern;
+    for (unsigned int i = 0; i < HNode->pattern.size(); ++i)
+    {
+        extractAllVariableNodesInLink(HNode->pattern[i],allNodesInPattern, atomSpace);
+    }
+
+    HandleSeq variableNodes(allNodesInPattern.begin(), allNodesInPattern.end());
+
     Handle hVariablesListLink = atomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
 
     bindLinkOutgoings.push_back(hVariablesListLink);
@@ -985,9 +993,11 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 
 //    }
 
+    string s = atomSpace->atomAsString(hBindLink);
 
     // Run pattern matcher
     Handle hResultListLink = bindlink(atomSpace, hBindLink);
+
 
     // Get result
     // Note: Don't forget to remove the hResultListLink and BindLink
@@ -1013,14 +1023,14 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
                 HNode->instances.push_back(instanceLinks);
         }
 
-        atomSpace->removeAtom(listH);
+//        atomSpace->removeAtom(listH);
     }
 
-    atomSpace->removeAtom(hBindLink);
-    atomSpace->removeAtom(hAndLink);
-    atomSpace->removeAtom(hResultListLink);
-    // originalAtomSpace->removeAtom(hVariablesListLink);
+//    atomSpace->removeAtom(hBindLink);
+//    atomSpace->removeAtom(hAndLink);
+//    atomSpace->removeAtom(hResultListLink);
 
+this->patternMatcherLock.unlock();
     HNode->count = HNode->instances.size();
 }
 
