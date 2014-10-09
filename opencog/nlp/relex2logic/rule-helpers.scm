@@ -602,7 +602,7 @@
 				(EvaluationLink df-link-stv
 					(PredicateNode verb_instance df-node-stv)
 					(ListLink (ConceptNode subj_instance df-node-stv) df-link-stv)))
-))
+)))
 ;
 ; "Where did you eat dinner?", "Where can I buy a fedora?"
 ;
