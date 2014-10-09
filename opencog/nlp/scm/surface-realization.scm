@@ -358,19 +358,20 @@
 ; It has a weired side-effect in that it both modifies 'a-dict' as well as
 ; returning a new alist which is equal (as in #t for equal? and #f for eq?)
 (define (alist-inverse a-pair a-dict)
-    (delete-duplicates (append-map (lambda (x)
-            (if (null? x)
-                (if (assoc-ref a-dict "NO_PATTERN")
-                    (acons "NO_PATTERN" (delete-duplicates! (append (assoc-ref a-dict "NO_PATTERN") (list (car a-pair)))) a-dict)
-                    (acons "NO_PATTERN" (list (car a-pair)) a-dict)
-                )
+    (if (null? (cdr a-pair))
+        (if (assoc-ref a-dict "NO_PATTERN")
+            (assoc-set! a-dict "NO_PATTERN" (delete-duplicates (append (assoc-ref a-dict "NO_PATTERN") (list (car a-pair)))))
+            (acons "NO_PATTERN" (list (car a-pair)) a-dict)
+        )
+        (delete-duplicates (append-map (lambda (x)
                 (if (assoc-ref a-dict x)
                     (acons x (delete-duplicates! (append! (assoc-ref a-dict x) (list (car a-pair)))) a-dict)
                     (acons x (list (car a-pair)) a-dict)
                 )
             )
+            (delete-duplicates (cdr a-pair)))
         )
-        (delete-duplicates (cdr a-pair))))
+    )
 )
 
 ; Returns an alist of key-value pairs structured as handles of
@@ -499,11 +500,14 @@
     ; * 'a-pair' : the pair passed as input has to be a mapping sturctured as handles of
     ;               (r2l-SetLink . (output-link1 output-link2))
     (define (chunk a-pair)
-        (let ((mapping (get-mapping-pair a-pair)) (sntc (get-sntc (cog-atom (car a-pair)))))
-                (map-in-order (lambda (x) (replace-word sntc x)) mapping)
-             sntc
+        (if (equal? (car a-pair) "NO_PATTERN")
+            '()
+            (let ((mapping (get-mapping-pair a-pair)) (sntc (get-sntc (cog-atom (car a-pair)))))
+                    (map-in-order (lambda (x) (replace-word sntc x)) mapping)
+                 sntc
+            )
         )
     )
-    (map chunk dict)
+    (remove null? (map chunk dict))
 )
 
