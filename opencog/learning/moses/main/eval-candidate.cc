@@ -35,6 +35,7 @@
 
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/oc_omp.h>
 
 #include <opencog/comboreduct/combo/iostream_combo.h>
 #include <opencog/comboreduct/table/table_io.h>
@@ -155,6 +156,10 @@ int main(int argc, char** argv)
         ("r,random-seed", po::value<unsigned long>(&rand_seed)->default_value(1),
          "Random seed.\n")
 
+        ("j,jobs",
+         po::value<unsigned>(&ecp.jobs),
+         "Number of jobs allocated for evaluation.\n")
+
         // IO
         ("input-file,i", po::value<string>(&ecp.input_file),
          "DSV file containing inputs and outputs.\n")
@@ -251,6 +256,9 @@ int main(int argc, char** argv)
     }
     logger().setBackTraceLevel(Logger::ERROR);
 
+    // Set multi-threading
+    setting_omp(ecp.jobs, 10);
+
     // Record original command line
     std::stringstream ss;
     for (int i=0; i<argc; i++) {
@@ -310,9 +318,11 @@ int main(int argc, char** argv)
     behave_cscore bcscore(*bscore);
 
     // Evaluate the fitness score of each program
-    vector<composite_score> css;
-    for (const combo_tree& tr : trs)
-        css.push_back(bcscore.get_cscore(tr));
+    vector<composite_score> css(trs.size());
+    OMP_ALGO::transform(trs.begin(), trs.end(), css.begin(),
+                        [&](const combo_tree& tr) {
+                            return bcscore.get_cscore(tr);
+                        });
 
     // Output the trees preceded by their scores
     if(ecp.output_file.empty())

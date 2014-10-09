@@ -38,6 +38,7 @@ struct eval_candidate_params
 
     // parameters
     std::string problem;
+    unsigned jobs;
 
     // problem params, for the "pre" problem.
     double activation_pressure;
