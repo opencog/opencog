@@ -3,6 +3,7 @@ ADD_LIBRARY (PatternMiner SHARED
 	Pattern
 	HTree
 	PatternMiner
+	PatternMinerBF
         PatternMinerDF
 )
 
