@@ -65,4 +65,3 @@ class Start(opencog.cogserver.Request):
     def invoke(self):
         self.api = RESTAPI(self.atomspace)
         self.api.run(host=IP_ADDRESS, port=PORT)
-
