@@ -42,15 +42,18 @@ public:
         // opencog::logger().setPrintToStdoutFlag(true);
     }
 
-    void frame(string filename, string meval, string expstr, int hamm)
+    void frame(string filename, string meval, bool boosting,
+               string expstr, int hamm)
     {
         string data_file_path(test_dir + filename);
 
-        // create temp output file
+        // Create temp output file
         vector<string> args = {"-i" + data_file_path, "-Hselect", meval,
-                               "-q0.8", "-w0.9",
                                // "-lDEBUG",
-                               "--boost=1" };
+                               "-q0.8", "-w0.9"};
+
+        if (boosting) args.push_back("--boost=1");
+
         auto cmd_tempfile = build_cmd(args);
         moses_exec(cmd_tempfile.first);
 
@@ -88,13 +91,15 @@ public:
         TS_ASSERT(hamm == diff);
     }
 
+    // -----------------------------------------------------------
+    // The next three test boosted versions of the selection scorer.
     void test_selection()
     {
         // The expected output is this:
         string expstr = "and( 0<( +($1 -1329.385)) not(0<( +($1 -1650.225))))";
         // Maximum reachable score is 28, and should be reachable in
         // about 7K evaluations.
-        frame("select.csv", "-m15000", expstr, 28);
+        frame("select.csv", "-m15000", true, expstr, 28);
     }
 
     void test_selection_de()
@@ -103,7 +108,7 @@ public:
         string expstr = "and( 0<( +($1 -1329.385)) not(0<( +($1 -1663.795))))";
         // Maximum reachable score is 12, and should be reachable in 
         // about 32K evaluations.
-        frame("select-less-dupe.csv", "-m50000", expstr, 12);
+        frame("select-less-dupe.csv", "-m50000", true, expstr, 12);
     }
 
     void test_selection_no()
@@ -112,6 +117,38 @@ public:
         string expstr = "and( 0<( +($1 -1329.385)) not(0<( +($1 -1663.795))))";
         // Maximum reachable score is 0, and should be reachable in
         // about 42K evaluations.
-        frame("select-no-dupe.csv", "-m80000", expstr, 0);
+        frame("select-no-dupe.csv", "-m80000", true, expstr, 0);
+    }
+
+    // -----------------------------------------------------------
+    // The next three test NON-boosted versions of the selection scorer.
+    void test_selection_noboo()
+    {
+        // The expected output is this:
+        string expstr = "and( 0<( +($1 -1329.385)) not(0<( +($1 -1650.225))))";
+        // Maximum reachable score is 28.  Without boosting, as
+        // compared to above, the solution is not as good: the ones
+        // that are typically found have a score of -4, so 28+4 = 32
+        frame("select.csv", "-m10000", false, expstr, 32);
+    }
+
+    void test_selection_de_noboo()
+    {
+        // The expected output is this:
+        string expstr = "and( 0<( +($1 -1329.385)) not(0<( +($1 -1663.795))))";
+        // Maximum reachable score is 12, but, without boosting, as
+        // compared to above, the solution is not as good: the ones
+        // that are typically found have a score of -21, so 12+21 = 33
+        frame("select-less-dupe.csv", "-m20000", false, expstr, 33);
+    }
+
+    void test_selection_no_noboo()
+    {
+        // The expected output is this:
+        string expstr = "and( 0<( +($1 -1329.385)) not(0<( +($1 -1663.795))))";
+        // Maximum reachable score is 0, but, without boosting, as
+        // compared to above, the solution is not as good: the ones
+        // that are typically found have a score of -21, so 0+21 = 21
+        frame("select-no-dupe.csv", "-m40000", false, expstr, 21);
     }
 };

@@ -258,7 +258,7 @@ void ip_problem::run(option_base* ob)
 
     // In order to support boosting, the interesting_predicate_bscore
     // would have to modified to always return a bscore that is the
-    // smae length, and so that the same item akways refered to the
+    // smae length, and so that the same item always refered to the
     // same row in the ctable.
     OC_ASSERT(not pms.meta_params.do_boosting,
         "Boosting not supported for the ip problem!");
