@@ -59,6 +59,11 @@ select_bscore::select_bscore(const CTable& ctable,
     OC_ASSERT(id::contin_type == _wrk_ctable.get_output_type(),
         "The selection scorer can only be used with contin-valued tables!");
 
+    // This is needed even if not boosted, as otherwise the 
+    // ignore_cols(), ignore_rows() methods strip out rows,
+    // and cause mis-matches during scoring.
+    _return_weighted_score = true;
+
     reset_weights();
 
     // Verify that the bounds are sane
