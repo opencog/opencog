@@ -163,10 +163,11 @@ void read_eval_output_results(evalTableParameters& pa)
 // XXX FIXME
     vector<string> header = get_header(pa.input_table_file);
 
-    // get (header - all_unique_variables - target feature)
+    // Add to ignore_valuesget (header - all_unique_variables - target feature)
     vector<string> ignore_variables;
     for (string f : header)
         if (f != pa.target_feature_str
+            && f != pa.timestamp_feature_str
             && all_unique_variables.find(f) == all_unique_variables.end())
         {
             ignore_variables += f;
