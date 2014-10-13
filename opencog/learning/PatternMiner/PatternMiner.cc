@@ -605,7 +605,6 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //        )
 //     )
 
-    this->patternMatcherLock.lock();
     HandleSeq  implicationLinkOutgoings, bindLinkOutgoings;
 
     // HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpace(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
@@ -681,14 +680,14 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
                 HNode->instances.push_back(instanceLinks);
         }
 
-//        atomSpace->removeAtom(listH);
+        atomSpace->removeAtom(listH);
     }
 
-//    atomSpace->removeAtom(hBindLink);
-//    atomSpace->removeAtom(hAndLink);
-//    atomSpace->removeAtom(hResultListLink);
+    atomSpace->removeAtom(hBindLink);
+    atomSpace->removeAtom(hAndLink);
+    atomSpace->removeAtom(hResultListLink);
+    atomSpace->removeAtom(hVariablesListLink);
 
-this->patternMatcherLock.unlock();
     HNode->count = HNode->instances.size();
 }
 
@@ -1614,11 +1613,11 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
 //        THREAD_NUM = 1;
 
     // use all the threads in this machine
-    THREAD_NUM = system_thread_num;
+    // THREAD_NUM = system_thread_num;
 
 
 //    // test only one tread for now
-//    THREAD_NUM = 1;
+    THREAD_NUM = 1;
 
     threads = new thread[THREAD_NUM];
 
