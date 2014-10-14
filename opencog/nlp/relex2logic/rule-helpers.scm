@@ -106,7 +106,18 @@
 ; The atoms added to the atomspace , by the helper functions below must be
 ; returned in a list or should be a single atom so as to simplify
 ; post-processing and NLG tasks.
-
+;------------------------------------------------------------------------
+;Speech-acts 
+;------------------------------------------------------------------------
+; Imperative example: "Call me!"
+(define (imperative-rule sentence_instance)
+	(list (InheritanceLink (SentenceNode setence_instance df-node-stv) (ConceptNode "ImperativeSpeechAct" df-node-stv) df-link-stv)))
+; Interrogative example: "What do you want?"
+(define (interrogative-rule sentence_instance)
+	(list (InheritanceLink (SentenceNode setence_instance df-node-stv) (ConceptNode "InterrogativeSpeechAct" df-node-stv) df-link-stv)))
+; truh-query example: "Am I the one?"
+(define (truth-query-rule sentence_instance)
+	(list (InheritanceLink (SentenceNode setence_instance df-node-stv) (ConceptNode "TruthQuerySpeechAct" df-node-stv) df-link-stv)))
 ; -----------------------------------------------------------------------
 ; SV and related rules
 ; -----------------------------------------------------------------------
