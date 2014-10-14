@@ -9,8 +9,9 @@
 ; -----------------------------------------------------------------------
 ; insert-anaphora -- The main function for inserting anaphora
 ;
-; Accepts a list of chunks from make-sentence-chunks and the current
-; list of sentence forms.  Returns new chunks with anaphora inserted (as
+; Accepts a list of 'chunks' from make-sentence-chunks and the current
+; list of sentence forms from sentences-form.scm (eg. the list from
+; "declarative").  Returns new chunks with anaphora inserted (as
 ; new atoms).
 ;
 (define (insert-anaphora chunks favored-forms)
@@ -35,7 +36,7 @@
 	;    noun# is one of the noun as OpenCog node
 	;    formed# is #t or #f indicating whether the link satisfy sentence form
 	;    link-index# is the link index within a chunk
-	;    chunk-index# is the index of the chunk
+	;    chunk-index# is the index of the chunk in 'chunks'
 	(define nouns-list
 		(append-map
 			(lambda (c fl ci)
@@ -236,7 +237,6 @@
 				      	(cond ((and n-index (list-ref ds n-index))
 				      		; XXX do we need this new node to inherit from original?
 				      		; XXX do it like anaphore resolution?
-				      		; TODO convert pronoun to proper form based on usage
 				      		(cog-new-node (cog-type atom)
 			      				(finalize-pronoun atom (list-ref ps n-index))
 			      				(cog-tv atom))

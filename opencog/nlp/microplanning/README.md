@@ -27,7 +27,7 @@ The folder contains microplanning code for the NLG pipeline.
 
 ### Chunking
 
-1. Rank each link in the current incoming set bases on several weighting factors:
+1. Rank each link in the current incoming set (the list extracted from a `SequentialAndLink` that get passed from the planner, containing everything we want to say) bases on several weighting factors:
     - **form-weight** (0..1): whether the link satisfy the basic sentence form defined in `sentence-forms.scm`
     - **time-weight** (n..0): the time sequential order within the set
     - **link-weight** (n): the number of nodes in common with what is already said from the current incoming set

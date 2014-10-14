@@ -65,7 +65,8 @@
 ; make-sentence-chunks -- The main helper function for handling a microplanning request
 ;
 ; Calls make-sentence repeatedly until all informations have been spoken, or
-; no longer say-able.
+; no longer say-able.  Accepts a list of links 'atoms-set' from within the original
+; SequentialAndLink, and a list of sentence forms for a specific utterance-type.
 ;
 (define (make-sentence-chunks atoms-set favored-forms)
 	(define atoms-unused atoms-set)
@@ -99,6 +100,8 @@
 ; make-sentence -- Create a single sentence
 ;
 ; Greedily add new atoms (using some heuristics) to form a new sentence.
+; Accepts a list of un-said links, the complete set, and the utterance-type
+; sentence forms.
 ;
 (define (make-sentence atoms-unused atoms-set favored-forms)
 	; initialize weight bases on "time ordering"
