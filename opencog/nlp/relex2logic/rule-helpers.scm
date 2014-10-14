@@ -111,13 +111,13 @@
 ;------------------------------------------------------------------------
 ; Imperative example: "Call me!"
 (define (imperative-rule sentence_instance)
-	(list (InheritanceLink (SentenceNode setence_instance df-node-stv) (ConceptNode "ImperativeSpeechAct" df-node-stv) df-link-stv)))
+	(list (InheritanceLink (InterpretationNode sentence_instance df-node-stv) (ConceptNode "ImperativeSpeechAct" df-node-stv) df-link-stv)))
 ; Interrogative example: "What do you want?"
 (define (interrogative-rule sentence_instance)
-	(list (InheritanceLink (SentenceNode setence_instance df-node-stv) (ConceptNode "InterrogativeSpeechAct" df-node-stv) df-link-stv)))
+	(list (InheritanceLink (InterpretationNode sentence_instance df-node-stv) (ConceptNode "InterrogativeSpeechAct" df-node-stv) df-link-stv)))
 ; truh-query example: "Am I the one?"
 (define (truth-query-rule sentence_instance)
-	(list (InheritanceLink (SentenceNode setence_instance df-node-stv) (ConceptNode "TruthQuerySpeechAct" df-node-stv) df-link-stv)))
+	(list (InheritanceLink (InterpretationNode sentence_instance df-node-stv) (ConceptNode "TruthQuerySpeechAct" df-node-stv) df-link-stv)))
 ; -----------------------------------------------------------------------
 ; SV and related rules
 ; -----------------------------------------------------------------------
