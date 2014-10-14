@@ -107,7 +107,7 @@
 		; the main helper function to check all conditions
 		(define (check-helper)
 			; indices of all occurrences of a noun instance in structure ((i1 n1) (i2 n2) ...)
-			; excluding occurrences within non-sentence-formed link
+			; excluding occurrences within links that are not sentence-formed
 			(define all-occurrences 
 				(filter-map 
 					(lambda (n i) 
@@ -191,7 +191,8 @@
 	(define decisions-list (list-tabulate (length nouns-list) check-pronoun))
 	;(define decisions-list (list #t #f #f #f #f #f #t #t))
 	
-	; helper function to clone at 'link' level
+	; helper function to clone at 'link' level, creating a copy of the link with
+	; some of the nouns replaced with pronouns
 	(define (clone-link-with-pronoun orig-link ns ps ds)
 		(define (finalize-pronoun atom pronoun)
 			(cond ((not (is-object? orig-link atom))
