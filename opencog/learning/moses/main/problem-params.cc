@@ -735,10 +735,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "this option is used to set the 'hardness' of the constraint, "
          "with larger values corresponding to a harder constraint "
          "(i.e. punishing the score more strongly if the contraint "
-         "is not met.)  For the 'pre' problem, if alpha is negative, "
-         "then its absolute value is used for the hardness, and "
-         "the negative predictive value is maximized (instead of "
-         "the precision).\n")
+         "is not met.).\n")
 
         ("time-dispersion-pressure",
          po::value<score_t>(&time_dispersion_pressure)->default_value(0.0),
@@ -759,13 +756,19 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "Set the granularity of timestamp, in case the bscore is spread "
          "across time. Options are 'day' and 'month'.\n")
 
+        ("gen-best-tree",
+         po::value<bool>(&gen_best_tree)->default_value(false),
+         "Attempts to generate the best candidate (possibly huge and overfit) head-on. Only works combined with -Hpre for now.\n")
+
+        // ======= Fitness specific params =======
         ("it-abs-err",
          po::value<bool>(&it_abs_err)->default_value(false),
          "Use absolute error instead of squared error [EXPERIMENTAL, the occam's razor hasn't been calibrated for that fitness function yet].\n")
 
-        ("gen-best-tree",
-         po::value<bool>(&gen_best_tree)->default_value(false),
-         "Attempts to generate the best candidate (possibly huge and overfit) head-on. Only works combined with -Hpre for now.\n")
+        ("pre-positive",
+         po::value<bool>(&pre_positive)->default_value(true),
+         "For the 'pre' problem, if 1 then precision is maximized, "
+         "if 0 then negative predictive value is maximized.\n")
 
         // ======= Feature-selection params =======
         ("enable-fs",
