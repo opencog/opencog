@@ -217,7 +217,7 @@ int main(int argc, char** argv)
          po::value<double>(&ecp.activation_pressure)->default_value(1.0),
          "pre scorer: Activation pressure.\n"
          "recall, prerec, bep scorers: Hardness.\n"
-         "\nIf the score is not between the minimum and mixiimum, it is "
+         "\nIf the score is not between the minimum and maximum, it is "
          "penalized with the pressure/hardness penalty.\n" )
 
         (",q",
@@ -237,6 +237,12 @@ int main(int argc, char** argv)
          "bep    scorer: Maximum difference between precision and recall.\n"
          "\nIf the score is not between the minimum and mixiimum, it is "
          "penalized with the pressure/hardness penalty.\n" )
+
+        ("pre-positive",
+         po::value<bool>(&ecp.pre_positive)->default_value(true),
+         "For the 'pre' problem, if 1 then precision is maximized, "
+         "if 0 then negative predictive value is maximized.\n")
+
         ;
 
     po::variables_map vm;
@@ -320,7 +326,14 @@ int main(int argc, char** argv)
     }
     else if ("pre" == ecp.problem) {
         bscore = new precision_bscore(table.compressed(),
-            ecp.activation_pressure, ecp.min_activation, ecp.max_activation);
+                                      ecp.activation_pressure,
+                                      ecp.min_activation,
+                                      ecp.max_activation,
+                                      0.0, // dispersion_pressure
+                                      0.0, // dispersion_exponent
+                                      false, // exact_experts
+                                      0.0,   // bias_scale
+                                      ecp.pre_positive);
     }
     else {
         OC_ASSERT(false, "Unknown scorer type.");

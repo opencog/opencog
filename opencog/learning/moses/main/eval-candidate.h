@@ -45,6 +45,7 @@ struct eval_candidate_params
     double activation_pressure;
     double min_activation;
     double max_activation;
+    bool pre_positive;
 };
 
 // problems

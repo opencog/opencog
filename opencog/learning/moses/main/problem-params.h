@@ -172,7 +172,7 @@ struct problem_params : public option_base
     score_t hardness;
 
     // pre params
-    bool pre_worst_norm;
+    bool pre_positive;
     bool gen_best_tree;
 
     // it params

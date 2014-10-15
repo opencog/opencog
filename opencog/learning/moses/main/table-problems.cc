@@ -253,7 +253,7 @@ void ip_problem::run(option_base* ob)
                   _ippp.ip_skew_U_weight,
                   pms.min_rand_input,
                   pms.max_rand_input,
-                  pms.hardness, pms.hardness >= 0);
+                  pms.hardness, pms.pre_positive);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
     // In order to support boosting, the interesting_predicate_bscore
@@ -371,14 +371,14 @@ void pre_table_problem::run(option_base* ob)
 
     int as = alphabet_size(cand_type_signature, pms.ignore_ops);
     precision_bscore bscore(ctable,
-                            fabs(pms.hardness),
+                            pms.hardness,
                             pms.min_rand_input,
                             pms.max_rand_input,
                             pms.time_dispersion_pressure,
                             pms.time_dispersion_exponent,
                             pms.meta_params.ensemble_params.exact_experts,
                             pms.meta_params.ensemble_params.bias_scale,
-                            pms.hardness >= 0,
+                            pms.pre_positive,
                             pms.time_bscore,
                             pms.time_bscore_granularity);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
@@ -419,7 +419,7 @@ void pre_conj_table_problem::run(option_base* ob)
     OC_ASSERT(not pms.meta_params.do_boosting,
         "Boosting not supported for the pre problem!");
     REGRESSION(ctable, precision_conj_bscore,
-               (ctable, fabs(pms.hardness), pms.hardness >= 0));
+               (ctable, pms.hardness, pms.pre_positive));
 }
 
 void prerec_table_problem::run(option_base* ob)
@@ -431,7 +431,7 @@ void prerec_table_problem::run(option_base* ob)
     if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.5;
         pms.max_rand_input = 1.0; }
     REGRESSION(ctable, prerec_bscore,
-               (ctable, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
+               (ctable, pms.min_rand_input, pms.max_rand_input, pms.hardness));
 }
 
 void recall_table_problem::run(option_base* ob)
@@ -443,7 +443,7 @@ void recall_table_problem::run(option_base* ob)
     if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.8;
         pms.max_rand_input = 1.0; }
     REGRESSION(ctable, recall_bscore,
-               (ctable, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
+               (ctable, pms.min_rand_input, pms.max_rand_input, pms.hardness));
 }
 
 void bep_table_problem::run(option_base* ob)
@@ -455,7 +455,7 @@ void bep_table_problem::run(option_base* ob)
     if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.0;
         pms.max_rand_input = 0.5; }
     REGRESSION(ctable, bep_bscore,
-               (ctable, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
+               (ctable, pms.min_rand_input, pms.max_rand_input, pms.hardness));
 }
 
 void f_one_table_problem::run(option_base* ob)
@@ -544,8 +544,8 @@ void select_table_problem::run(option_base* ob)
     REGRESSION(ctable, select_bscore,
                (ctable, pms.min_rand_input,
                         pms.max_rand_input,
-                        fabs(pms.hardness),
-                        pms.hardness >= 0.0));
+                        pms.hardness,
+                        pms.pre_positive));
 }
 
 void cluster_table_problem::run(option_base* ob)
