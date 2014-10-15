@@ -182,8 +182,8 @@ public:
         cout << BOOST_CURRENT_FUNCTION << endl;
         string tr_str("$1");
         string data_file_path("-i" + MOSESUTest_dir + "precision.csv");
-        moses_test_combo({"-Hpre", data_file_path, "-m100", "-q0.2", "-w0.5", "-Q-1", "-z10000"}, {tr_str});
-    }    
+        moses_test_combo({"-Hpre", data_file_path, "-m100", "-q0.2", "-w0.5", "-Q1", "--pre-positive=0", "-z10000"}, {tr_str});
+    }
 
     void test_output_labels() {
         cout << BOOST_CURRENT_FUNCTION << endl;
