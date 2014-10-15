@@ -96,9 +96,13 @@ std::string combo_tree2str_label(const combo_tree& tr,
 vector<string> get_all_combo_tree_str(const eval_candidate_params& ecp)
 {
     vector<string> res;
-    // from files
-    for (const std::string& combo_prg : ecp.combo_program_files) {
-        ifstream in(combo_prg);
+
+    // From command line
+    res = ecp.combo_programs;
+
+    // From files
+    for (const std::string& combo_prg_file : ecp.combo_program_files) {
+        ifstream in(combo_prg_file);
         if (in) {
             while (in.good()) {
                 string line;
@@ -109,7 +113,7 @@ vector<string> get_all_combo_tree_str(const eval_candidate_params& ecp)
             }
         } else {
             logger().error("Error: file %s can not be found.",
-                           combo_prg.c_str());
+                           combo_prg_file.c_str());
             exit(1);
         }
     }
@@ -166,6 +170,13 @@ int main(int argc, char** argv)
 
         ("target-feature,u", po::value<string>(&ecp.target_feature_str),
          "Name of the target feature.\n")
+
+        ("combo-program,y",
+         po::value<vector<string>>(&ecp.combo_programs),
+         "Combo program to evaluate. "
+         "Can be used several times for several programs. "
+         "Be careful to put it between single quotes, or escape the $ signs "
+         "to prevent bash from applying variable substitution.\n")
 
         ("combo-program-file,C",
          po::value<vector<string>>(&ecp.combo_program_files),

@@ -31,6 +31,7 @@ struct eval_candidate_params
 {
     // IO
     std::string input_file;
+    std::vector<std::string> combo_programs;
     std::vector<std::string> combo_program_files;
     std::string output_file;
     bool output_with_labels;
