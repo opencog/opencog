@@ -98,7 +98,8 @@ vector<vector<string>> get_all_combo_tree_str(const eval_candidate_params& ecp)
     vector<vector<string>> res;
 
     // From command line
-    res.push_back(ecp.combo_programs);
+    if (!ecp.combo_programs.empty())
+        res.push_back(ecp.combo_programs);
 
     // From files
     for (const std::string& combo_prg_file : ecp.combo_program_files) {
@@ -374,7 +375,7 @@ int main(int argc, char** argv)
                   "ofiles_size=%u != ecp.combo_program_files.size()=%u",
                   ofiles_size, ecp.combo_program_files.size());
         OC_ASSERT(ofiles_size == all_combo_tree_str.size(),
-                  "ofiles_size=%u != all_combo_tree_str.size()",
+                  "ofiles_size=%u != all_combo_tree_str.size()=%u",
                   ofiles_size, all_combo_tree_str.size());
         for (unsigned i = 0; i < ofiles_size; ++i) {
             to += all_combo_tree_str[i].size();
