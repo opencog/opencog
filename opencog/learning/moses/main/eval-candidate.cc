@@ -93,23 +93,24 @@ std::string combo_tree2str_label(const combo_tree& tr,
     return ph2l(ss.str(), input_labels);
 }
 
-vector<string> get_all_combo_tree_str(const eval_candidate_params& ecp)
+vector<vector<string>> get_all_combo_tree_str(const eval_candidate_params& ecp)
 {
-    vector<string> res;
+    vector<vector<string>> res;
 
     // From command line
-    res = ecp.combo_programs;
+    res.push_back(ecp.combo_programs);
 
     // From files
     for (const std::string& combo_prg_file : ecp.combo_program_files) {
         ifstream in(combo_prg_file);
         if (in) {
+            res.emplace_back();
             while (in.good()) {
                 string line;
                 getline(in, line);
                 if(line.empty())
                     continue;
-                res.push_back(line);
+                res.back().push_back(line);
             }
         } else {
             logger().error("Error: file %s can not be found.",
@@ -122,21 +123,18 @@ vector<string> get_all_combo_tree_str(const eval_candidate_params& ecp)
 }
 
 std::ostream& ostream_scored_trees(std::ostream& out,
-                                   const vector<combo_tree>& trs,
+                                   const vector<string>& trs_str,
                                    const vector<composite_score>& css,
                                    const eval_candidate_params& ecp,
                                    const vector<string>& ilabels) {
-    unsigned size = trs.size();
+    unsigned size = trs_str.size();
     OC_ASSERT(size == css.size());
     for (unsigned i = 0; i < size; ++i) {
         // Stream out score
         out << css[i].get_score() << " ";
 
         // Stream out tree
-        if (ecp.output_with_labels)
-            out << combo_tree2str_label(trs[i], ilabels);
-        else
-            out << trs[i];
+        out << trs_str[i];
 
         out << std::endl;
     }
@@ -183,8 +181,11 @@ int main(int argc, char** argv)
          "File containing combo programs. "
          "Can be used several times for several files.\n")
 
-        ("output-file,o", po::value<string>(&ecp.output_file),
-         "File to write the results. If none is given it write on the stdout.\n")
+        ("output-file,o", po::value<vector<string>>(&ecp.output_files),
+         "File to write the results. If none is given it write on the stdout. "
+         "If used multiple time, then the number must be equal "
+         "to that of option -C and each output corresponds to the "
+         "combo program file of the same order.\n")
 
         ("output-with-labels,W",
          po::value<bool>(&ecp.output_with_labels)->default_value(false),
@@ -283,19 +284,25 @@ int main(int argc, char** argv)
     }
     logger().info() << "Command line:" << ss.str();
 
-    // init random generator
+    // Init random generator
     randGen().seed(rand_seed);
 
-    // get all combo tree strings (from command line and file)
-    vector<string> all_combo_tree_str = get_all_combo_tree_str(ecp);
+    // Get all combo tree strings (from command line and file)
+    vector<vector<string>> all_combo_tree_str = get_all_combo_tree_str(ecp);
 
-    // read data ITable
+    // Flatten all combo tree strings
+    vector<string> flat_all_combo_tree_str;
+    for (const auto& trs_str : all_combo_tree_str)
+        flat_all_combo_tree_str.insert(flat_all_combo_tree_str.end(),
+                                       trs_str.begin(), trs_str.end());
+
+    // Read data ITable
     Table table = loadTable(ecp.input_file, ecp.target_feature_str);
     ITable& it = table.itable;
 
-    // parse combo programs
+    // Parse combo programs
     vector<combo_tree> trs;
-    for (const string& tr_str : all_combo_tree_str) {
+    for (const string& tr_str : flat_all_combo_tree_str) {
         combo_tree tr = str2combo_tree_label(tr_str, it.get_labels());
         if (logger().isDebugEnabled()) {
             logger().fine() << "Combo str: " << tr_str;
@@ -349,10 +356,29 @@ int main(int argc, char** argv)
                         });
 
     // Output the trees preceded by their scores
-    if(ecp.output_file.empty())
-        ostream_scored_trees(cout, trs, css, ecp, it.get_labels());
-    else {
-        ofstream of(ecp.output_file.c_str());
-        ostream_scored_trees(of, trs, css, ecp, it.get_labels());
+    if(ecp.output_files.empty())
+    { // All on stdout
+        ostream_scored_trees(cout, flat_all_combo_tree_str,
+                             css, ecp, it.get_labels());
+    } else if (ecp.output_files.size() == 1)
+    { // All on single output_file
+        ofstream of(ecp.output_files.front().c_str());
+        ostream_scored_trees(of, flat_all_combo_tree_str,
+                             css, ecp, it.get_labels());
+    } else
+    { // Results from combo programs of a file is written in its
+      // corresponding output file (-o is used multiple times)
+        unsigned ofiles_size = ecp.output_files.size(),
+            from = 0, to = 0;
+        OC_ASSERT(ofiles_size == ecp.combo_program_files.size());
+        for (unsigned i = 0; i < ofiles_size; ++i) {
+            to += ecp.combo_program_files[i].size();
+            vector<composite_score> css_chunk(css.begin() + from,
+                                              css.begin() + to);
+            ofstream of(ecp.output_files[i].c_str());
+            ostream_scored_trees(of, all_combo_tree_str[i],
+                                 css_chunk, ecp, it.get_labels());
+            from = to;
+        }
     }
 }
