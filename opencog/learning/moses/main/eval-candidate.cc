@@ -370,8 +370,12 @@ int main(int argc, char** argv)
       // corresponding output file (-o is used multiple times)
         unsigned ofiles_size = ecp.output_files.size(),
             from = 0, to = 0;
-        OC_ASSERT(ofiles_size == ecp.combo_program_files.size());
-        OC_ASSERT(ofiles_size == all_combo_tree_str.size());
+        OC_ASSERT(ofiles_size == ecp.combo_program_files.size(),
+                  "ofiles_size=%u != ecp.combo_program_files.size()=%u",
+                  ofiles_size, ecp.combo_program_files.size());
+        OC_ASSERT(ofiles_size == all_combo_tree_str.size(),
+                  "ofiles_size=%u != all_combo_tree_str.size()",
+                  ofiles_size, all_combo_tree_str.size());
         for (unsigned i = 0; i < ofiles_size; ++i) {
             to += all_combo_tree_str[i].size();
             vector<composite_score> css_chunk(css.begin() + from,
