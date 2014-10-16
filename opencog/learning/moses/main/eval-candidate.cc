@@ -128,7 +128,7 @@ std::ostream& ostream_scored_trees(std::ostream& out,
                                    const eval_candidate_params& ecp,
                                    const vector<string>& ilabels) {
     unsigned size = trs_str.size();
-    OC_ASSERT(size == css.size());
+    OC_ASSERT(size == css.size(), "size=%u != css.size()=%u", size, css.size());
     for (unsigned i = 0; i < size; ++i) {
         // Stream out score
         out << css[i].get_score() << " ";
@@ -371,8 +371,9 @@ int main(int argc, char** argv)
         unsigned ofiles_size = ecp.output_files.size(),
             from = 0, to = 0;
         OC_ASSERT(ofiles_size == ecp.combo_program_files.size());
+        OC_ASSERT(ofiles_size == all_combo_tree_str.size());
         for (unsigned i = 0; i < ofiles_size; ++i) {
-            to += ecp.combo_program_files[i].size();
+            to += all_combo_tree_str[i].size();
             vector<composite_score> css_chunk(css.begin() + from,
                                               css.begin() + to);
             ofstream of(ecp.output_files[i].c_str());
