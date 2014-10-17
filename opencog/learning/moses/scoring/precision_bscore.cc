@@ -114,11 +114,11 @@ precision_bscore::precision_bscore(const CTable& ctable_,
                                    float activation_pressure_,
                                    float min_activation_,
                                    float max_activation_,
+                                   bool positive_,
                                    float dispersion_pressure,
                                    float dispersion_exponent,
                                    bool exact_experts_,
                                    double bias_scale_,
-                                   bool positive_,
                                    bool time_bscore_,
                                    TemporalGranularity granularity)
     : bscore_ctable_time_dispersion(ctable_, dispersion_pressure,
@@ -126,9 +126,9 @@ precision_bscore::precision_bscore(const CTable& ctable_,
     min_activation(bound(min_activation_, 0.0f, 1.0f)),
     max_activation(bound(max_activation_, 0.0f, 1.0f)),
     activation_pressure(activation_pressure_),
+    positive(positive_),
     bias_scale(bias_scale_),
     exact_experts(exact_experts_),
-    positive(positive_),
     time_bscore(time_bscore_)
 {
     reset_weights();

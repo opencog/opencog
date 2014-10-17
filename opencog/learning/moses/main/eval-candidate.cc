@@ -337,10 +337,6 @@ int main(int argc, char** argv)
                                       ecp.activation_pressure,
                                       ecp.min_activation,
                                       ecp.max_activation,
-                                      0.0, // dispersion_pressure
-                                      0.0, // dispersion_exponent
-                                      false, // exact_experts
-                                      0.0,   // bias_scale
                                       ecp.pre_positive);
     }
     else {
