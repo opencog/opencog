@@ -681,8 +681,8 @@ bool Router::sendNotification(const NotificationData& data)
         }
 
         logger().debug("Router - sendNotification. "
-                "Received response (after chomp): '%s' bytes: %d",
-                response, receivedBytes );
+                       "Received response (after chomp): '%s' bytes: %d",
+                       response, receivedBytes );
 
         std::string answer = response;
 
