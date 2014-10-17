@@ -75,6 +75,7 @@ class PatternMatchEngine
 		std::stack<Handle> soln_handle_stack;
 		std::stack<Handle> root_handle_stack;
 		std::stack<bool> in_quote_stack;
+		unsigned int stack_depth;
 
 		// Stacks containing partial groundings.
 		typedef std::map<Handle, Handle> SolnMap;

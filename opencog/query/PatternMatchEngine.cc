@@ -31,7 +31,7 @@
 
 using namespace opencog;
 
-// #define DEBUG 1
+#define DEBUG 1
 #ifdef WIN32
 #if DEBUG
 	#define dbgprt printf
@@ -367,9 +367,10 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 
 		curr_soln_handle = hsoln;
 		clause_grounding[curr_root] = curr_soln_handle;
+		stack_depth++;
 		prtmsg("---------------------\nclause:", curr_root);
 		prtmsg("ground:", curr_soln_handle);
-		dbgprt("--- That's it, now push and do the next one.\n\n");
+		dbgprt("--- That's it, now push to stack depth=%d\n\n", stack_depth);
 
 		root_handle_stack.push(curr_root);
 		pred_handle_stack.push(curr_pred_handle);
@@ -478,7 +479,9 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 
 		in_quote = in_quote_stack.top();
 		in_quote_stack.pop();
+		stack_depth --;
 
+		dbgprt("pop to depth %d\n", stack_depth);
 		prtmsg("pop to joiner", curr_pred_handle);
 		prtmsg("pop to clause", curr_root);
 
@@ -739,6 +742,7 @@ void PatternMatchEngine::clear_state(void)
 	curr_pred_handle = Handle::UNDEFINED;
 	depth = 0;
 
+	stack_depth = 0;
 	while (!pred_handle_stack.empty()) pred_handle_stack.pop();
 	while (!soln_handle_stack.empty()) soln_handle_stack.pop();
 	while (!root_handle_stack.empty()) root_handle_stack.pop();
