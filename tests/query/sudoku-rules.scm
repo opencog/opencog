@@ -15,7 +15,7 @@
 (EvaluationLink (PredicateNode "IsNumber") (ConceptNode "nine"))
 
 ; The set of numbers that can be chosen from
-(UnorderedSet
+(SetLink
 	(ConceptNode "one")
 	(ConceptNode "two")
 	(ConceptNode "three")
@@ -28,7 +28,7 @@
 )
 
 ; The contents of the cells must be numbers!
-(define cells_are_numbers
+(define (cells_are_numbers)
 	(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_11"))
 	(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_12"))
 	(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_13"))
@@ -123,7 +123,7 @@
 ; twenty-seven solution constraints
 ; First, nine row constraints
 (define row1
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_11")
 		(VariableNode "$cell_12")
 		(VariableNode "$cell_13")
@@ -136,7 +136,7 @@
 	)
 )
 (define row2
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_21")
 		(VariableNode "$cell_22")
 		(VariableNode "$cell_23")
@@ -149,7 +149,7 @@
 	)
 )
 (define row3
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_31")
 		(VariableNode "$cell_32")
 		(VariableNode "$cell_33")
@@ -162,7 +162,7 @@
 	)
 )
 (define row4
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_41")
 		(VariableNode "$cell_42")
 		(VariableNode "$cell_43")
@@ -175,7 +175,7 @@
 	)
 )
 (define row5
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_51")
 		(VariableNode "$cell_52")
 		(VariableNode "$cell_53")
@@ -188,7 +188,7 @@
 	)
 )
 (define row6
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_61")
 		(VariableNode "$cell_62")
 		(VariableNode "$cell_63")
@@ -201,7 +201,7 @@
 	)
 )
 (define row7
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_71")
 		(VariableNode "$cell_72")
 		(VariableNode "$cell_73")
@@ -214,7 +214,7 @@
 	)
 )
 (define row8
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_81")
 		(VariableNode "$cell_82")
 		(VariableNode "$cell_83")
@@ -227,7 +227,7 @@
 	)
 )
 (define row9
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_91")
 		(VariableNode "$cell_92")
 		(VariableNode "$cell_93")
@@ -242,7 +242,7 @@
 
 ;; Next, nine column constraints
 (define col1
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_11")
 		(VariableNode "$cell_21")
 		(VariableNode "$cell_31")
@@ -255,7 +255,7 @@
 	)
 )
 (define col2
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_12")
 		(VariableNode "$cell_22")
 		(VariableNode "$cell_32")
@@ -268,7 +268,7 @@
 	)
 )
 (define col3
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_13")
 		(VariableNode "$cell_23")
 		(VariableNode "$cell_33")
@@ -281,7 +281,7 @@
 	)
 )
 (define col4
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_14")
 		(VariableNode "$cell_24")
 		(VariableNode "$cell_34")
@@ -294,7 +294,7 @@
 	)
 )
 (define col5
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_15")
 		(VariableNode "$cell_25")
 		(VariableNode "$cell_35")
@@ -307,7 +307,7 @@
 	)
 )
 (define col6
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_16")
 		(VariableNode "$cell_26")
 		(VariableNode "$cell_36")
@@ -320,7 +320,7 @@
 	)
 )
 (define col7
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_17")
 		(VariableNode "$cell_27")
 		(VariableNode "$cell_37")
@@ -333,7 +333,7 @@
 	)
 )
 (define col8
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_18")
 		(VariableNode "$cell_28")
 		(VariableNode "$cell_38")
@@ -346,7 +346,7 @@
 	)
 )
 (define col9
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_19")
 		(VariableNode "$cell_29")
 		(VariableNode "$cell_39")
@@ -361,7 +361,7 @@
 
 ;; And finally, 9 box constraints
 (define box11
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_11")
 		(VariableNode "$cell_12")
 		(VariableNode "$cell_13")
@@ -375,7 +375,7 @@
 )
 
 (define box14
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_14")
 		(VariableNode "$cell_15")
 		(VariableNode "$cell_16")
@@ -389,7 +389,7 @@
 )
 
 (define box17
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_17")
 		(VariableNode "$cell_18")
 		(VariableNode "$cell_19")
@@ -403,7 +403,7 @@
 )
 
 (define box41
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_41")
 		(VariableNode "$cell_42")
 		(VariableNode "$cell_43")
@@ -417,7 +417,7 @@
 )
 
 (define box44
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_44")
 		(VariableNode "$cell_45")
 		(VariableNode "$cell_46")
@@ -431,7 +431,7 @@
 )
 
 (define box47
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_47")
 		(VariableNode "$cell_48")
 		(VariableNode "$cell_49")
@@ -445,7 +445,7 @@
 )
 
 (define box71
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_71")
 		(VariableNode "$cell_72")
 		(VariableNode "$cell_73")
@@ -459,7 +459,7 @@
 )
 
 (define box74
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_74")
 		(VariableNode "$cell_75")
 		(VariableNode "$cell_76")
@@ -473,7 +473,7 @@
 )
 
 (define box77
-	(UnorderedSet
+	(SetLink
 		(VariableNode "$cell_77")
 		(VariableNode "$cell_78")
 		(VariableNode "$cell_79")
@@ -485,4 +485,131 @@
 		(VariableNode "$cell_99")
 	)
 )
+
+(define (sudoku-constraints)
+	(cells_are_numbers)
+	row1
+	row2
+	row3
+	row4
+	row5
+	row6
+	row7
+	row8
+	row9
+	col1
+	col2
+	col3
+	col4
+	col5
+	col6
+	col7
+	col8
+	col9
+	box11
+	box14
+	box17
+	box41
+	box44
+	box47
+	box71
+	box74
+	box77
+)
+
+; Define the variables to be solved for.
+(define (variable-decls)
+	(ListLink
+		(VariableNode "$cell_11")
+		(VariableNode "$cell_12")
+		(VariableNode "$cell_13")
+		(VariableNode "$cell_14")
+		(VariableNode "$cell_15")
+		(VariableNode "$cell_16")
+		(VariableNode "$cell_17")
+		(VariableNode "$cell_18")
+		(VariableNode "$cell_19")
+
+		(VariableNode "$cell_21")
+		(VariableNode "$cell_22")
+		(VariableNode "$cell_23")
+		(VariableNode "$cell_24")
+		(VariableNode "$cell_25")
+		(VariableNode "$cell_26")
+		(VariableNode "$cell_27")
+		(VariableNode "$cell_28")
+		(VariableNode "$cell_29")
+
+		(VariableNode "$cell_31")
+		(VariableNode "$cell_32")
+		(VariableNode "$cell_33")
+		(VariableNode "$cell_34")
+		(VariableNode "$cell_35")
+		(VariableNode "$cell_36")
+		(VariableNode "$cell_37")
+		(VariableNode "$cell_38")
+		(VariableNode "$cell_39")
+
+		(VariableNode "$cell_41")
+		(VariableNode "$cell_42")
+		(VariableNode "$cell_43")
+		(VariableNode "$cell_44")
+		(VariableNode "$cell_45")
+		(VariableNode "$cell_46")
+		(VariableNode "$cell_47")
+		(VariableNode "$cell_48")
+		(VariableNode "$cell_49")
+
+		(VariableNode "$cell_51")
+		(VariableNode "$cell_52")
+		(VariableNode "$cell_53")
+		(VariableNode "$cell_54")
+		(VariableNode "$cell_55")
+		(VariableNode "$cell_56")
+		(VariableNode "$cell_57")
+		(VariableNode "$cell_58")
+		(VariableNode "$cell_59")
+
+		(VariableNode "$cell_61")
+		(VariableNode "$cell_62")
+		(VariableNode "$cell_63")
+		(VariableNode "$cell_64")
+		(VariableNode "$cell_65")
+		(VariableNode "$cell_66")
+		(VariableNode "$cell_67")
+		(VariableNode "$cell_68")
+		(VariableNode "$cell_69")
+
+		(VariableNode "$cell_71")
+		(VariableNode "$cell_72")
+		(VariableNode "$cell_73")
+		(VariableNode "$cell_74")
+		(VariableNode "$cell_75")
+		(VariableNode "$cell_76")
+		(VariableNode "$cell_77")
+		(VariableNode "$cell_78")
+		(VariableNode "$cell_79")
+
+		(VariableNode "$cell_81")
+		(VariableNode "$cell_82")
+		(VariableNode "$cell_83")
+		(VariableNode "$cell_84")
+		(VariableNode "$cell_85")
+		(VariableNode "$cell_86")
+		(VariableNode "$cell_87")
+		(VariableNode "$cell_88")
+		(VariableNode "$cell_89")
+
+		(VariableNode "$cell_91")
+		(VariableNode "$cell_92")
+		(VariableNode "$cell_93")
+		(VariableNode "$cell_94")
+		(VariableNode "$cell_95")
+		(VariableNode "$cell_96")
+		(VariableNode "$cell_97")
+		(VariableNode "$cell_98")
+		(VariableNode "$cell_99")
+	)
+)
+
 
