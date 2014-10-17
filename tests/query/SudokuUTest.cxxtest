@@ -115,13 +115,14 @@ void SudokuPuzzle::test_puzzle(void)
 	load_scm_files_from_config(*as);
 
 	// Create an implication link that will be tested.
-	Handle puzzle = eval->eval_h("(puzzle)");
+	Handle puzzle = eval->eval_h("(ListLink (puzzle))");
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle);
+	logger().debug("puzzle is:\n%s\n", SchemeSmob::to_string(puzzle).c_str());
 
 	// Solve the puzzle
-	Handle puzzle_solution = eval->apply("solver", puzzle);
+	Handle puzzle_solution = eval->apply("(lambda (x) (cog-bind x))", puzzle);
 	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(puzzle_solution));
 
