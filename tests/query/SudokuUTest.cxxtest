@@ -60,12 +60,9 @@ class SudokuPuzzle :  public CxxTest::TestSuite
 			eval = new SchemeEval(as);
 
 			// Load the required data
-			// config().set("MODULES",
-			//	"opencog/nlp/types/libnlp-types.so");
+			config().set("MODULES", "opencog/query/libQueryModule.so");
 
-			// cogserver().loadModules();
-
-
+			cogserver().loadModules();
 		}
 
 		~SudokuPuzzle()
@@ -122,7 +119,7 @@ void SudokuPuzzle::test_puzzle(void)
 	logger().debug("puzzle is:\n%s\n", SchemeSmob::to_string(puzzle).c_str());
 
 	// Solve the puzzle
-	Handle puzzle_solution = eval->apply("(lambda (x) (cog-bind x))", puzzle);
+	Handle puzzle_solution = eval->apply("cog-bind", puzzle);
 	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(puzzle_solution));
 
