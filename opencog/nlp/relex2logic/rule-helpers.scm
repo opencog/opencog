@@ -116,17 +116,20 @@
 ; Declarative Examples: "Socrates is a man", "Cats are animals", "Trees are plants"
 ; Question Examples: 	"What is Socrates?" (object query) "Who is the teacher?" (object query) "Who is a man?" (subject query (rare))
 ;
+; (*actually relex processes all of these questions as subject-queries, making the logic of the rule below right only for some of them;
+; my perception is that it is more usual for these questions to be an object-query with subject-verb inversion; requires a semantic algorithm fix*)
+;
 (define (be-inheritance-rule subj_concept subj_instance obj_concept obj_instance)
 	(cond ((string=? subj_concept "_$qVar")
 			(list 
 				(InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj_concept df-node-stv) df-link-stv)
-				(InheritanceLink (ConceptNode subj_instance df-node-stv) (VariableNode "_$qVar" df-node-stv))
+				(InheritanceLink (ConceptNode "_$qVar" df-node-stv) (VariableNode obj_instance df-node-stv))
 			)
 		)	
 		((string=? obj_concept "_$qVar")
 			(list 
 				(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
-				(InheritanceLink (ConceptNode "_$qVar" df-node-stv) (VariableNode obj_instance df-node-stv))
+				(InheritanceLink (ConceptNode subj_instance df-node-stv) (VariableNode "_$qVar" df-node-stv))
 			)
 		)
 	(else (list 
@@ -144,10 +147,9 @@
 ; Declarative: 			"Bill gave Mary the pox." / "Bill sold his children to the gypsies."
 ; Questioned subject: 		"Who told you that bullshit?" "Who told that story to the police?," "What gives you that idea?" "What gave that idea to the police?"
 ; Questioned object: 		"What did you tell the fuzz?" "What did you give to Mary?" "Who did you give the slavers?" "Who did you sell to the slavers?"
-; Questioned indirect object: 	"To whom did you sell the children?" "To what do we owe the pleasure?"
+; Questioned indirect object: 	"To whom did you sell the children?" "To what do we owe the pleasure?" "Who did you sell the children to?"
 ;
-;	NB: At present (10-14-14) "Who did you give the money to?" still produces incorrect relex output; although it triggers this rule,
-;	it passes "to" as the iobj -- awaiting bug-fix to semantic-algorithms . . . 
+;	NB: At present (10-14-14) questioned indirect objects are a mess -- working on it . . . 
 ;
 (define (SVIO-rule subj_concept  subj_instance  verb  verb_instance  obj_concept  obj_instance iobj_concept iobj_instance)
 	(cond ((string=? subj_concept "_$qVar")
@@ -289,7 +291,10 @@
 )
 ;----------------------------------------------------------------------------------------------------------------------------
 ;
-; "To-be" rule -- called by "seems" and I don't know what else . . .
+; "To-be" rule
+; Declarative: "He seems happy." "He seems to be happy."
+;
+; NB: This rule is not getting called enough; with the verb "appears" it only gets called on the second parse. With the verb "looks" not at all.
 ;
 (define (to-be-rule verb verb_ins adj adj_ins subj subj_ins)
 	(list (ImplicationLink (PredicateNode verb_ins df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -320,9 +325,17 @@
 ;
 ; Predicate Adjective example: 			"Are you mad?" 
 ; Predicate prepositional phrase example: 	"Is the book under the table?"
+; to-be example:				"Does he seem mad?"
+; to-do1 example:				"Does she want to help us?"
+; to-do2 example:				"Does she want you to help us?" (questions appropriately but the original rule assigns the wrong subject to verb2*)
+; to-do3 example:				"Was she good enough to help?" (questions appropriately but the original rule is a logical disaster -- rewrite*)
+; to-do4 example:				"Must she be able to sing?" (*ditto*)
+; to-do5 example:				"Does she want to sing?"
 ; SV examples: 					"Have you slept?", "Will you sleep?", "Did you sleep?"
 ; SVO example: 					"Did you eat the leftover baba-ganoush?"
 ; SVIO examples: 				"Did you give her the money?", "Did you give the money to her?"
+;
+; NB: this rule also allows the system to handle all intonation-only versions of these questions (i.e. "The book is under the table?" etc.)
 ;
 (define (pred-ynQ-rule predicate_concept predicate_instance)
 	(list	(ImplicationLink (PredicateNode predicate_instance df-node-stv) (PredicateNode predicate_concept df-node-stv) df-link-stv)
@@ -461,12 +474,12 @@
 		)
 	))
 )
-
-
 ; -----------------------------------------------------------------------
 ; to-do rules
 ; -----------------------------------------------------------------------
+;
 ; Example: "She wants to help John."
+;
 (define (to-do-rule-1 v1 v1_instance v2 v2_instance s s_instance o o_instance)
 	(list (InheritanceLink (ConceptNode s_instance df-node-stv) (ConceptNode s df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode o_instance df-node-stv) (ConceptNode o df-node-stv) df-link-stv)
@@ -486,7 +499,9 @@
 		)
 	))
 )
-
+;
+; Example: "She wants you to help us." -- assigns wrong subject in second clause
+;
 (define (to-do-rule-2 v1 v1_instance v2 v2_instance s1 s1_instance s2 s2_instance o o_instance) 
 	(list (InheritanceLink (ConceptNode s1_instance df-node-stv) (ConceptNode s1 df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode s2_instance df-node-stv) (ConceptNode s2 df-node-stv) df-link-stv)
@@ -507,8 +522,9 @@
 		)
 	))
 )
-
-; Example: "She is nice to help with the project."
+;
+; Example: "She is nice to help with the project." -- the scheme output for this rule is a logical mess
+;
 (define (to-do-rule-3 v1 v1_instance v2 v2_instance v3 v3_instance)
     (list (InheritanceLink (ConceptNode v1_instance df-node-stv) (ConceptNode v1 df-node-stv) df-link-stv)
     (ImplicationLink (PredicateNode v2_instance df-node-stv) (PredicateNode v2 df-node-stv) df-link-stv)
@@ -520,8 +536,11 @@
         )
     ))
 )
-
+;
 ; Example: "She must be able to sing." ; v1 = sing , v2 = she
+;
+; What about "She must need to sing?" "She must want to sing?" -- why is must being treated as a main-verb rather than an auxiliary?
+;
 (define (to-do-rule-4 v1 v1_instance v2 v2_instance) 
     (list (InheritanceLink (ConceptNode v2_instance) (ConceptNode v2))
     (ImplicationLink (PredicateNode v1_instance) (PredicateNode v1))
@@ -533,8 +552,9 @@
         )
     ))
 )
-
+;
 ; Example: "She wants to sing."; verb1 = want, verb2 = sing, subj = she
+;
 (define (to-do-rule-5 verb1 verb1_instance verb2 verb2_instance subj subj_instance)
     (list (InheritanceLink (ConceptNode subj_instance) (ConceptNode subj))
     (ImplicationLink (PredicateNode verb1_instance) (PredicateNode verb1))
@@ -547,14 +567,16 @@
         )
     ))
 )
-
-
-
+;-------------------------------------------------------------------------------------------------------
+;
+; Where, When, Why, and How (of manner) -- the first rule of each of these groups handles questions with
+; any of the templates SV, SVO, SVIO, SP, to-be, to-do, prep etc. (see the Y/N question rules for a complete list) 
+;
 ;-------------------------------------------------------------------------------------------------------
 ; WHERE QUESTIONS
 ;-------------------------------------------------------------------------------------------------------
 ;
-; Examples: "Where do you live?","Where did you eat dinner?"
+; Examples: "Where do you live?","Where did you eat dinner?" etc.
 ;
 (define (where-rule verb verb_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -562,15 +584,13 @@
 		(PredicateNode "AtPlace" df-node-stv)
 			(ListLink df-link-stv	
 				(VariableNode "$qVar")
-				(EvaluationLink df-link-stv
-					(PredicateNode verb_instance df-node-stv)
-				)
+				(PredicateNode verb_instance df-node-stv)
 			)
 	)
 	)
 )
 ;
-; Examples: "Where is the party?", "Where are we?"
+; Examples: "Where is the party?", "Where will she be happy?" etc.
 ; 
 (define (wherecop-Q-rule subj_concept subj_instance)
 	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
@@ -578,35 +598,37 @@
 		(PredicateNode "AtPlace" df-node-stv)
 			(ListLink df-link-stv	
 				(VariableNode "$qVar")
-				(ConceptNode subj_instance df-node-stv)))
-))
+				(ConceptNode subj_instance df-node-stv)
+			)
+	)
+	)
+)
 ;
 ;--------------------------------------------------------------------------------------------------------
 ; WHEN QUESTIONS
 ;--------------------------------------------------------------------------------------------------------
 ; 
-; Example: "When did jazz die?","When did you bake the cake?", "When did you give him the money?"
+; Example: "When did jazz die?","When did you bake the cake?", "When did you give him the money?" etc.
 ;
 (define (when-rule verb verb_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	(AtTimeLink df-link-stv
 		(VariableNode "$qVar")
-		(EvaluationLink df-link-stv
-			(PredicateNode verb_instance df-node-stv)
-		)
+		(PredicateNode verb_instance df-node-stv)
 	)
 	)
 )
-
 ;
-; Example "When is the party?"
+; Example "When is the party?" etc.
 ;
 (define (whencop-Q-rule subj_concept subj_instance)
 	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
 	(AtTimeLink df-link-stv
 		(VariableNode "$qVar")
-		(ConceptNode subj_instance df-node-stv))
-))
+		(ConceptNode subj_instance df-node-stv)
+	)
+	)
+)
 ;
 ;----------------------------------------------------------------------------------------------------------
 ; Why questions
@@ -620,35 +642,41 @@
 		(PredicateNode "Because" df-node-stv)
 			(ListLink df-link-stv	
 				(VariableNode "$qVar")
-				(EvaluationLink df-link-stv
-					(PredicateNode verb_instance df-node-stv)
-				)
+				(PredicateNode verb_instance df-node-stv)
 			)
 	)
 	)
 )
-
+;
+; Example "Why are you such a fool?" etc.
+;
+(define (whencop-Q-rule subj_concept subj_instance)
+	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
+	(EvaluationLink df-link-stv 
+		(PredicateNode "Because" df-node-stv)
+			(ListLink df-link-stv	
+				(VariableNode "$qVar")
+				(ConceptNode subj_instance df-node-stv)
+			)
+	)
+))
 ;----------------------------------------------------------------------------------------------------------
 ; How adverbial (manner) questions
 ;----------------------------------------------------------------------------------------------------------
 ; 
-; Example: "How did you sleep?"
+; Example: "How did you sleep?" etc.
 ;
 (define (how-rule verb verb_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
-	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
 	(EvaluationLink df-link-stv 
 		(PredicateNode "InManner" df-node-stv)
 			(ListLink df-link-stv	
 				(VariableNode "$qVar")
-				(EvaluationLink df-link-stv
-					(PredicateNode verb_instance df-node-stv)
-				)
+				(PredicateNode verb_instance df-node-stv)
 			)
-	`)
+	)
 	)
 )
-
 ;---------------------------------------------------------------------------------------------
 ; Predicative How
 ;---------------------------------------------------------------------------------------------
@@ -658,7 +686,8 @@
 (define (howpredadj-Q-rule subj_concept subj_instance)
 	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
 	(InheritanceLink (ConceptNode subj_instance df-node-stv) (VariableNode "$qVar"))
-))
+	)
+)
 ;
 ;----------------------------------------------------------------------------------------------------------------	
 ; How of quantity and degree questions
@@ -672,8 +701,10 @@
 	(list (InheritanceLink (ConceptNode instance df-node-stv) (ConceptNode concept df-node-stv) df-link-stv)
 	(QuantityLink df-link-stv	
 		(VariableNode "_$qVar")
-		(ConceptNode instance df-node-stv))
-))
+		(ConceptNode instance df-node-stv)
+	)
+	)
+)
 ;
 ; Example: "How fast does it go?"
 ;
@@ -683,27 +714,34 @@
 		(PredicateNode "DegreeLink" df-node-stv)
 			(ListLink df-link-stv
 				(VariableNode "_$qVar")
-				(ConceptNode instance df-node-stv)))
-))
+				(ConceptNode instance df-node-stv)
+			)
+	)
+	)
+)
 ;
 ;-----------------------------------------------------------------------------------------------
-; CHOICE-TYPE QUESTIONS
+; CHOICE-TYPE QUESTIONS -- these rules, which are working before now are not getting called . . . .
 ;-----------------------------------------------------------------------------------------------
 ;
 ; Example: "Which girl do you like?"
 ;
 (define (whichobjQ-rule obj_concept obj_instance verb verb_instance subj_concept subj_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
-	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
-	(InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj_concept df-node-stv) df-link-stv)
-	(InheritanceLink (VariableNode "$qVar") (ConceptNode obj_instance df-node-stv) df-link-stv)
-	(SatisfyingSetLink df-link-stv
-		(VariableNode "$qVar") 	
-		(EvaluationLink df-link-stv (PredicateNode verb_instance df-node-stv)
-			(ListLInk df-link-stv
-				(ConceptNode subj_instance df-node-stv)
-				(VariableNode "$qVar" df-node-stv))))
-))
+		(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
+		(InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj_concept df-node-stv) df-link-stv)
+		(InheritanceLink (VariableNode "$qVar") (ConceptNode obj_instance df-node-stv) df-link-stv)
+		(SatisfyingSetLink df-link-stv
+			(VariableNode "$qVar") 	
+			(EvaluationLink df-link-stv (PredicateNode verb_instance df-node-stv)
+				(ListLink df-link-stv
+					(ConceptNode subj_instance df-node-stv)
+					(VariableNode "$qVar" df-node-stv)
+				)
+			)
+		)
+	)
+)
 ;
 ; Example: "Which girl likes you?"
 ;
@@ -712,25 +750,37 @@
 ;
 (define (whichsubjQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)			
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
-	(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
-	(ImplicationLink (PredicateNode obj_instance df-node-stv) (PredicateNode obj_concept df-node-stv) df-link-stv)
-	(InheritanceLink (VariableNode "$qVar") (ConceptNode subj_instance df-node-stv) df-link-stv)
-	(SatisfyingSetLink df-link-stv
-		(variableNode "$qVar")
-		(EvaluationLink df-link-stv (PredicateNode verb_instance df-node-stv)
-			(ListlInk df-link-stv
-			(VariableNode "$qVar" df-node-stv)
-			(PredicateNode obj_instance df-node-stv))))
-))
+		(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
+		(ImplicationLink (PredicateNode obj_instance df-node-stv) (PredicateNode obj_concept df-node-stv) df-link-stv)
+		(InheritanceLink (VariableNode "$qVar") (ConceptNode subj_instance df-node-stv) df-link-stv)
+		(SatisfyingSetLink df-link-stv
+			(VariableNode "$qVar")
+			(EvaluationLink df-link-stv (PredicateNode verb_instance df-node-stv)
+				(ListLink df-link-stv
+					(VariableNode "$qVar" df-node-stv)
+					(PredicateNode obj_instance df-node-stv)
+				)
+			)
+		)
+	)
+)
 ;
 ; Example: "Which girl is crazy?"
 ;
 (define (whichpredadjQ-rule subj_concept subj_instance pred_concept pred_instance)
 	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
-	(ImplicationLink (PredicateNode pred_instance df-node-stv) (PredicateNode pred_concept df-node-stv) df-link-stv)	
-	(InheritanceLink (VariableNode "$qVar") (ConceptNode subj_instance df-node-stv)  df-link-stv)
-	(InheritanceLink (VariableNode "$qVar") (PredicateNode pred_instance df-node-stv) df-link-stv)
-))
+		(ImplicationLink (PredicateNode pred_instance df-node-stv) (PredicateNode pred_concept df-node-stv) df-link-stv)	
+		(InheritanceLink (VariableNode "$qVar") (ConceptNode subj_instance df-node-stv)  df-link-stv)
+		(SatisfyingSetLink df-link-stv
+			(VariableNode "$qVar")
+			(EvaluationLink df-link-stv (PredicateNode pred_instance df-node-stv)
+				(ListLink df-link-stv
+					(VariableNode "$qVar" df-node-stv)
+				)
+			)
+		)
+	)
+)
 ;
 ; -----------------------------------------------------------------------
 ; all rules
