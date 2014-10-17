@@ -374,11 +374,11 @@ void pre_table_problem::run(option_base* ob)
                             pms.hardness,
                             pms.min_rand_input,
                             pms.max_rand_input,
+                            pms.pre_positive,
                             pms.time_dispersion_pressure,
                             pms.time_dispersion_exponent,
                             pms.meta_params.ensemble_params.exact_experts,
                             pms.meta_params.ensemble_params.bias_scale,
-                            pms.pre_positive,
                             pms.time_bscore,
                             pms.time_bscore_granularity);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
