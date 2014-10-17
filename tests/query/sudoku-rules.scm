@@ -1,9 +1,10 @@
-
 ;
-; Sudoku puzzle rules
+; Sudoku puzzle rules, encoded in such a way that the pattern matcher
+; can try to do a brute-force exploration.
 ;
 
-; Definition of a number
+; Definition of a number.  Cells in the sudoku puzzle can only contain
+; numbers.
 (EvaluationLink (PredicateNode "IsNumber") (ConceptNode "one"))
 (EvaluationLink (PredicateNode "IsNumber") (ConceptNode "two"))
 (EvaluationLink (PredicateNode "IsNumber") (ConceptNode "three"))
@@ -14,7 +15,8 @@
 (EvaluationLink (PredicateNode "IsNumber") (ConceptNode "eight"))
 (EvaluationLink (PredicateNode "IsNumber") (ConceptNode "nine"))
 
-; The set of numbers that can be chosen from
+; The set of numbers that can be chosen from. Every row, column
+; and three-by-three box must hold this set.
 (SetLink
 	(ConceptNode "one")
 	(ConceptNode "two")
@@ -28,6 +30,9 @@
 )
 
 ; The contents of the cells must be numbers!
+; Actually, this constraint will not be needed, as the requirement that
+; the columns, rows and boxes be a number set is sufficient.  So the
+; below only adds complexity to the problem, slowing down solving.
 (define (cells_are_numbers)
 	(list
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_11"))
@@ -122,7 +127,14 @@
 	)
 )
 
-; twenty-seven solution constraints
+; Twenty-seven solution constraints.  There ae nine row, nine column,
+; and nine box constraints: each row, column and box must form the 
+; set of numerals.
+;
+; I've avoided using whizzy scheme for-loops to specify these, and
+; instead tediously wrote them out by hand.  The goal here is to make
+; the structure slightly easier to read and understand.
+;
 ; First, nine row constraints
 (define (row1)
 	(SetLink
@@ -488,9 +500,10 @@
 	)
 )
 
+;; The grand-total set of constraints.
 (define (sudoku-constraints)
 	(list
-		(cells_are_numbers)
+		;; (cells_are_numbers) ; constraint isn't needed.
 		(row1)
 		(row2)
 		(row3)
@@ -522,6 +535,8 @@
 )
 
 ; Define the variables to be solved for.
+; This is just a big list of all the cells.
+;
 (define (variable-decls)
 	(ListLink
 		(VariableNode "$cell_11")
