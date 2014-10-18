@@ -364,169 +364,171 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 	// If no match, then try the next one.
 	if (no_match) return false;
 
-	// If we've navigated to the top of the clause, and its matched,
-	// then it is fully grounded, and we're done with it.
-	// Start work on the next unsovled predicate. But do all of this
-	// only if the callback allows it.
-	if (curr_pred_handle == curr_root)
+	// If we are here, then everything below us matches.  If we are
+	// not yet at the top of a clause, i.e. we are in the middle of
+	// a clause, then we need to move up.
+	if (curr_pred_handle != curr_root)
 	{
-		// Is this required to match? If so, then let the callback
-		// make the final decision; if callback rejects, then it's
-		// the same as a mismatch; try the next one.
-		if (_optionals.count(curr_root))
-		{
-			clause_accepted = true;
-			no_match = pmc->optional_clause_match(curr_pred_handle, hsoln);
-		}
-		else
-		{
-			no_match = pmc->clause_match(curr_pred_handle, hsoln);
-		}
-		dbgprt("clause match callback no_match=%d\n", no_match);
-		if (no_match) return false;
-
-		curr_soln_handle = hsoln;
-		clause_grounding[curr_root] = curr_soln_handle;
-		stack_depth++;
-		prtmsg("---------------------\nclause:", curr_root);
-		prtmsg("ground:", curr_soln_handle);
-		dbgprt("--- That's it, now push to stack depth=%d\n\n", stack_depth);
-
-		root_handle_stack.push(curr_root);
-		pred_handle_stack.push(curr_pred_handle);
 		soln_handle_stack.push(curr_soln_handle);
-		pred_solutn_stack.push(clause_grounding);
-		var_solutn_stack.push(var_grounding);
-		issued_stack.push(issued);
-		in_quote_stack.push(in_quote);
-		pmc->push();
+		curr_soln_handle = hsoln;
 
-		get_next_untried_clause();
-
-		// If there are no further predicates to solve,
-		// we are really done! Report the solution via callback.
+		// Move up the predicate, and hunt for a match, again.
+		prtmsg("node has grnd, move up:", hsoln);
+		// IncomingSet iset = get_incoming_set(curr_pred_handle);
+		IncomingSet iset = curr_pred_handle->getIncomingSet();
+		size_t sz = iset.size();
 		bool found = false;
-		if (Handle::UNDEFINED == curr_root)
-		{
-#ifdef DEBUG
-			dbgprt ("==================== FINITO!\n");
-			print_solution(var_grounding, clause_grounding);
-#endif
-			found = pmc->grounding(var_grounding, clause_grounding);
+		for (size_t i = 0; i < sz; i++) {
+			found = pred_up(Handle(iset[i]));
+			if (found) break;
 		}
-		else
-		{
-			prtmsg("next clause is", curr_root);
-			dbgprt("This clause is %s\n", _optionals.count(curr_root)? "optional" : "required");
-			prtmsg("joining handle is", curr_pred_handle);
-
-			// Else, start solving the next unsolved clause. Note: this is
-			// a recursive call, and not a loop. Recursion is halted when
-			// the next unsolved clause has no grounding.
-			//
-			// We continue our search at the atom that "joins" (is shared
-			// in common) between the previous (solved) clause, and this
-			// clause. If the "join" was a variable, look up its grounding;
-			// else the join is a 'real' atom.
-
-			clause_accepted = false;
-			curr_soln_handle = var_grounding[curr_pred_handle];
-			found = soln_up(curr_soln_handle);
-
-			// If we are here, and found is false, then we've exhausted all
-			// of the search possibilities for the current clause. If this
-			// is an optional clause, and no solutions were reported for it,
-			// then report the failure of finding a solution now. If this was
-			// also the final optional clause, then in fact, we've got a
-			// grounding for the whole thing ... report that!
-			//
-			// Note that lack of a match halts recursion; thus, we can't
-			// depend on recursion to find additional unmatched optional
-			// clauses; thus we have to explicitly loop over all optional
-			// clauses that don't have matches.
-			while ((false == found) &&
-			       (false == clause_accepted) &&
-			       (_optionals.count(curr_root)))
-			{
-				Handle undef(Handle::UNDEFINED);
-				no_match = pmc->optional_clause_match(curr_pred_handle, undef);
-				dbgprt ("Exhausted search for optional clause, cb=%d\n", no_match);
-				if (no_match) return false;
-
-				// XXX Maybe should push n pop here? No, maybe not ...
-				clause_grounding[curr_root] = Handle::UNDEFINED;
-				get_next_untried_clause();
-				prtmsg("Next optional clause is", curr_root);
-				if (Handle::UNDEFINED == curr_root)
-				{
-					dbgprt ("==================== FINITO BANDITO!\n");
-#ifdef DEBUG
-					print_solution(var_grounding, clause_grounding);
-#endif
-					found = pmc->grounding(var_grounding, clause_grounding);
-				}
-				else
-				{
-					// Now see if this optional clause has any solutions,
-					// or not. If it does, we'll recurse. If it does not,
-					// we'll loop around back to here again.
-					clause_accepted = false;
-					curr_soln_handle = var_grounding[curr_pred_handle];
-					found = soln_up(curr_soln_handle);
-				}
-			}
-		}
-
-		// If we failed to find anything at this level, we need to
-		// backtrack, i.e. pop the stack, and begin a search for
-		// other possible matches and groundings.
-		pmc->pop();
-		curr_root = root_handle_stack.top();
-		root_handle_stack.pop();
-
-		curr_pred_handle = pred_handle_stack.top();
-		pred_handle_stack.pop();
+		dbgprt("after moving up the clause, found = %d\n", found);
 
 		curr_soln_handle = soln_handle_stack.top();
 		soln_handle_stack.pop();
 
-		// The grounding stacks are handled differently.
-		POPGND(clause_grounding, pred_solutn_stack);
-		POPGND(var_grounding, var_solutn_stack);
-
-		issued = issued_stack.top();
-		issued_stack.pop();
-
-		in_quote = in_quote_stack.top();
-		in_quote_stack.pop();
-		stack_depth --;
-
-		dbgprt("pop to depth %d\n", stack_depth);
-		prtmsg("pop to joiner", curr_pred_handle);
-		prtmsg("pop to clause", curr_root);
-
 		return found;
-	}
+	|
 
-	// If we are here, then we are somewhere in the middle of a clause,
-	// and everything below us matches. So need to move up.
-	soln_handle_stack.push(curr_soln_handle);
+	// If we are here, we've navigated to the top of the clause, and
+	// it is matched, then it is fully grounded, and we're done with it.
+	// Start work on the next unsovled predicate. But first, see what
+	// the callbacks have to say.
+
+	// Is this clause a required clause? If so, then let the callback
+	// make the final decision; if callback rejects, then it's the
+	// same as a mismatch; try the next one.
+	if (_optionals.count(curr_root))
+	{
+		clause_accepted = true;
+		no_match = pmc->optional_clause_match(curr_pred_handle, hsoln);
+	}
+	else
+	{
+		no_match = pmc->clause_match(curr_pred_handle, hsoln);
+	}
+	dbgprt("clause match callback no_match=%d\n", no_match);
+	if (no_match) return false;
+
 	curr_soln_handle = hsoln;
+	clause_grounding[curr_root] = curr_soln_handle;
+	stack_depth++;
+	prtmsg("---------------------\nclause:", curr_root);
+	prtmsg("ground:", curr_soln_handle);
+	dbgprt("--- That's it, now push to stack depth=%d\n\n", stack_depth);
 
-	// Move up the predicate, and hunt for a match, again.
-	prtmsg("node has grnd, move up:", hsoln);
-	// IncomingSet iset = get_incoming_set(curr_pred_handle);
-	IncomingSet iset = curr_pred_handle->getIncomingSet();
-	size_t sz = iset.size();
+	root_handle_stack.push(curr_root);
+	pred_handle_stack.push(curr_pred_handle);
+	soln_handle_stack.push(curr_soln_handle);
+	pred_solutn_stack.push(clause_grounding);
+	var_solutn_stack.push(var_grounding);
+	issued_stack.push(issued);
+	in_quote_stack.push(in_quote);
+	pmc->push();
+
+	get_next_untried_clause();
+
+	// If there are no further predicates to solve,
+	// we are really done! Report the solution via callback.
 	bool found = false;
-	for (size_t i = 0; i < sz; i++) {
-		found = pred_up(Handle(iset[i]));
-		if (found) break;
+	if (Handle::UNDEFINED == curr_root)
+	{
+#ifdef DEBUG
+		dbgprt ("==================== FINITO!\n");
+		print_solution(var_grounding, clause_grounding);
+#endif
+		found = pmc->grounding(var_grounding, clause_grounding);
 	}
-	dbgprt("after moving up the clause, found = %d\n", found);
+	else
+	{
+		prtmsg("next clause is", curr_root);
+		dbgprt("This clause is %s\n", _optionals.count(curr_root)? "optional" : "required");
+		prtmsg("joining handle is", curr_pred_handle);
+
+		// Else, start solving the next unsolved clause. Note: this is
+		// a recursive call, and not a loop. Recursion is halted when
+		// the next unsolved clause has no grounding.
+		//
+		// We continue our search at the atom that "joins" (is shared
+		// in common) between the previous (solved) clause, and this
+		// clause. If the "join" was a variable, look up its grounding;
+		// else the join is a 'real' atom.
+
+		clause_accepted = false;
+		curr_soln_handle = var_grounding[curr_pred_handle];
+		found = soln_up(curr_soln_handle);
+
+		// If we are here, and found is false, then we've exhausted all
+		// of the search possibilities for the current clause. If this
+		// is an optional clause, and no solutions were reported for it,
+		// then report the failure of finding a solution now. If this was
+		// also the final optional clause, then in fact, we've got a
+		// grounding for the whole thing ... report that!
+		//
+		// Note that lack of a match halts recursion; thus, we can't
+		// depend on recursion to find additional unmatched optional
+		// clauses; thus we have to explicitly loop over all optional
+		// clauses that don't have matches.
+		while ((false == found) &&
+		       (false == clause_accepted) &&
+		       (_optionals.count(curr_root)))
+		{
+			Handle undef(Handle::UNDEFINED);
+			no_match = pmc->optional_clause_match(curr_pred_handle, undef);
+			dbgprt ("Exhausted search for optional clause, cb=%d\n", no_match);
+			if (no_match) return false;
+
+			// XXX Maybe should push n pop here? No, maybe not ...
+			clause_grounding[curr_root] = Handle::UNDEFINED;
+			get_next_untried_clause();
+			prtmsg("Next optional clause is", curr_root);
+			if (Handle::UNDEFINED == curr_root)
+			{
+				dbgprt ("==================== FINITO BANDITO!\n");
+#ifdef DEBUG
+				print_solution(var_grounding, clause_grounding);
+#endif
+				found = pmc->grounding(var_grounding, clause_grounding);
+			}
+			else
+			{
+				// Now see if this optional clause has any solutions,
+				// or not. If it does, we'll recurse. If it does not,
+				// we'll loop around back to here again.
+				clause_accepted = false;
+				curr_soln_handle = var_grounding[curr_pred_handle];
+				found = soln_up(curr_soln_handle);
+			}
+		}
+	}
+
+	// If we failed to find anything at this level, we need to
+	// backtrack, i.e. pop the stack, and begin a search for
+	// other possible matches and groundings.
+	pmc->pop();
+	curr_root = root_handle_stack.top();
+	root_handle_stack.pop();
+
+	curr_pred_handle = pred_handle_stack.top();
+	pred_handle_stack.pop();
 
 	curr_soln_handle = soln_handle_stack.top();
 	soln_handle_stack.pop();
+
+	// The grounding stacks are handled differently.
+	POPGND(clause_grounding, pred_solutn_stack);
+	POPGND(var_grounding, var_solutn_stack);
+
+	issued = issued_stack.top();
+	issued_stack.pop();
+
+	in_quote = in_quote_stack.top();
+	in_quote_stack.pop();
+	stack_depth --;
+
+	dbgprt("pop to depth %d\n", stack_depth);
+	prtmsg("pop to joiner", curr_pred_handle);
+	prtmsg("pop to clause", curr_root);
 
 	return found;
 }
