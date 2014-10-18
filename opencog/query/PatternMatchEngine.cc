@@ -388,7 +388,7 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 		soln_handle_stack.pop();
 
 		return found;
-	|
+	}
 
 	// If we are here, we've navigated to the top of the clause, and
 	// it is matched, then it is fully grounded, and we're done with it.
