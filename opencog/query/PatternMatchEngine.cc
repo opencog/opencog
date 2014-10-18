@@ -339,9 +339,21 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 
 bool PatternMatchEngine::soln_up(Handle hsoln)
 {
+	// Let's not stare at our own navel.
+	if (hsoln == curr_root) return false;
+	depth = 1;
+
 	var_solutn_stack.push(var_grounding);
-	bool found = do_soln_up(hsoln);
-	if (found)
+	bool no_match = tree_compare(curr_pred_handle, hsoln);
+	// If no match, then try the next one.
+	if (no_match)
+	{
+		var_solutn_stack.pop();  // pop entry created, but keep current.
+		return false;
+	}
+
+	bool not_found = do_soln_up(hsoln);
+	if (not_found)
 	{
 		var_solutn_stack.pop();  // pop entry created, but keep current.
 	}
@@ -350,20 +362,11 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		POPGND(var_grounding, var_solutn_stack);
 	}
 
-	return found;
+	return not_found;
 }
 
 bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 {
-	// Let's not look at our own navel
-	if (hsoln == curr_root) return false;
-	depth = 1;
-
-	bool no_match = tree_compare(curr_pred_handle, hsoln);
-
-	// If no match, then try the next one.
-	if (no_match) return false;
-
 	// If we are here, then everything below us matches.  If we are
 	// not yet at the top of a clause, i.e. we are in the middle of
 	// a clause, then we need to move up.
@@ -398,6 +401,7 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 	// Is this clause a required clause? If so, then let the callback
 	// make the final decision; if callback rejects, then it's the
 	// same as a mismatch; try the next one.
+	bool no_match;
 	if (_optionals.count(curr_root))
 	{
 		clause_accepted = true;
