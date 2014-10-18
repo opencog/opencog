@@ -261,16 +261,20 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			std::vector<Handle> mutation;
 
 			if (have_more) {
+				dbgprt("tree_comp resume unordered link\n");
 				mutation = mute_stack.top();
 				mute_stack.pop();
+				have_more = more_stack.top();
+				more_stack.pop();
 			} else {
+				dbgprt("tree_comp fresh unordered link\n");
 				mutation = lp->getOutgoingSet();
 				sort(mutation.begin(), mutation.end());
 			}
 
 			do {
 				// The recursion step: traverse down the tree.
-				dbgprt("tree_comp begin down unordered link\n");
+				dbgprt("tree_comp start downwards unordered link\n");
 				var_solutn_stack.push(var_grounding);
 				depth ++;
 
@@ -291,27 +295,38 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 				{
 					var_solutn_stack.pop();
 					var_grounding[hp] = hg;
-#ifdef MUTE
-					// Save the permutation for later.
-					mute_stack.push(mutation);
-					more_stack.push(have_more);	
-					have_more = true;
-#endif
+					// Advance to the next permutation, and save it so
+					// that its the next one explored, when returning
+					// to this function.
+					bool more_perms = std::next_permutation(mutation.begin(), mutation.end());
+					dbgprt("tree_comp unordered link have gnd, more=%d\n", more_perms);
+					if (more_perms)
+					{
+						mute_stack.push(mutation);
+						more_stack.push(have_more);	
+						have_more = true;
+					}
+					else 
+					{
+						// Undo the push immediately above.
+						if (have_more)
+						{
+							have_more = more_stack.top();
+							more_stack.pop();
+						}
+					}
 					return false;
 				}
-
 				POPGND(var_grounding, var_solutn_stack);
 			} while (std::next_permutation(mutation.begin(), mutation.end()));
 
 			dbgprt("tree_comp down unordered exhausted all permuations\n");
-#ifdef MUTE
 			if (have_more)
 			{
-				more_stack.pop();
 				have_more = more_stack.top();
+				more_stack.pop();
 			}
-#endif
-			return mismatch;
+			return false;
 		}
 
 		return mismatch;
@@ -374,6 +389,8 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 			// during the tree-match.
 			POPGND(var_grounding, var_solutn_stack);
 		}
+
+		if (have_more) { dbgprt("Wait ----- theres more!\n"); }
 	} while (have_more);
 
 	return did_find;
