@@ -341,33 +341,45 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 
 /* ======================================================== */
 
+/// Return true if a grounding was found. 
 bool PatternMatchEngine::soln_up(Handle hsoln)
 {
 	// Let's not stare at our own navel.
 	if (hsoln == curr_root) return false;
 
-	var_solutn_stack.push(var_grounding);
-	bool no_match = tree_compare(curr_pred_handle, hsoln);
-	// If no match, then try the next one.
-	if (no_match)
-	{
-		var_solutn_stack.pop();  // pop entry created, but keep current.
-		return false;
-	}
+	bool did_find = false;
+	do {
+		var_solutn_stack.push(var_grounding);
+		bool no_match = tree_compare(curr_pred_handle, hsoln);
+		// If no match, then try the next one.
+		if (no_match)
+		{
+			// Get rid of any grounding that might have been proposed
+			// during the tree-match.
+			POPGND(var_grounding, var_solutn_stack);
+			return false;
+		}
 
-	bool not_found = do_soln_up(hsoln);
-	if (not_found)
-	{
-		var_solutn_stack.pop();  // pop entry created, but keep current.
-	}
-	else
-	{
-		POPGND(var_grounding, var_solutn_stack);
-	}
+		bool found = do_soln_up(hsoln);
+		did_find |= found;
+		if (found)
+		{
+			// pop the entry we created, but do keep the grounding 
+			// that was found.
+			var_solutn_stack.pop();
+		}
+		else
+		{
+			// Get rid of any grounding that might have been propsed
+			// during the tree-match.
+			POPGND(var_grounding, var_solutn_stack);
+		}
+	} while (have_more);
 
-	return not_found;
+	return did_find;
 }
 
+/// Return true if a grounding was found.
 bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 {
 	depth = 1;
