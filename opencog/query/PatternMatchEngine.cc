@@ -326,7 +326,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 				have_more = more_stack.top();
 				more_stack.pop();
 			}
-			return false;
+			return true;
 		}
 
 		return mismatch;
