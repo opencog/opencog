@@ -39,6 +39,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		Handle disordered;
 		Handle disor_more;
 		Handle exhaust;
+		Handle exhaust2;
 
 	public:
 
@@ -113,6 +114,7 @@ void UnorderedUTest::setUp(void)
 	disordered = eval->apply("blinker", Handle::UNDEFINED);
 	disor_more = eval->apply("blank", Handle::UNDEFINED);
 	exhaust = eval->apply("exhaust", Handle::UNDEFINED);
+	exhaust2 = eval->apply("exhaust-2", Handle::UNDEFINED);
 	delete eval;
 }
 
@@ -178,12 +180,19 @@ void UnorderedUTest::test_exhaust(void)
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != exhaust);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != exhaust2);
 
 	// Result should be a ListLink w/ 24 solutions
 	Handle result = bindlink(as, exhaust);
 
 	logger().debug("exhaustive result is %s\n", SchemeSmob::to_string(result).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 24, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 48, getarity(result));
+
+	// Result should be a ListLink w/ 36 solutions
+	result = bindlink(as, exhaust2);
+
+	logger().debug("exhaust-2 result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 36, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
