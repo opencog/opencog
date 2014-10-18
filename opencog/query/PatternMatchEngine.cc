@@ -294,6 +294,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 #ifdef MUTE
 					// Save the permutation for later.
 					mute_stack.push(mutation);
+					more_stack.push(have_more);	
 					have_more = true;
 #endif
 					return false;
@@ -304,8 +305,11 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 
 			dbgprt("tree_comp down unordered exhausted all permuations\n");
 #ifdef MUTE
-			more_stack.pop();
-			have_more = more_stack.top();
+			if (have_more)
+			{
+				more_stack.pop();
+				have_more = more_stack.top();
+			}
 #endif
 			return mismatch;
 		}
@@ -341,7 +345,6 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 {
 	// Let's not stare at our own navel.
 	if (hsoln == curr_root) return false;
-	depth = 1;
 
 	var_solutn_stack.push(var_grounding);
 	bool no_match = tree_compare(curr_pred_handle, hsoln);
@@ -367,6 +370,8 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 
 bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 {
+	depth = 1;
+
 	// If we are here, then everything below us matches.  If we are
 	// not yet at the top of a clause, i.e. we are in the middle of
 	// a clause, then we need to move up.
