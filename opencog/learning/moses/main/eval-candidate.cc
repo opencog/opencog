@@ -160,7 +160,7 @@ int main(int argc, char** argv)
          "Random seed.\n")
 
         ("j,jobs",
-         po::value<unsigned>(&ecp.jobs),
+         po::value<unsigned>(&ecp.jobs)->default_value(1),
          "Number of jobs allocated for evaluation.\n")
 
         // IO
