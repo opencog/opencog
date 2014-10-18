@@ -196,9 +196,9 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 
 		// If the two links are both ordered, its enough to compare
 		// them "side-by-side"; the foreach_atom_pair iterator does
-		// this. If they are un-ordered, then we have to compare (at
-		// most) every possible permutation.
-		//
+		// this. If they are un-ordered, then we have to compare every
+		// possible permutation.  This can be a bit of a combinatoric
+		// explosion.
 		if (classserver().isA(tp, ORDERED_LINK))
 		{
 			LinkPtr lp(LinkCast(hp));
@@ -240,22 +240,33 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		}
 		else
 		{
+			// If we are here, we are dealing with an unordered link.
 			// Enumerate all the permutations of the outgoing set of
-			// the predicate.  We keep trying different permuations
-			// until we find one that works, and just return that, and
-			// ignore the rest.  We have to push/pop the stack as we try
-			// each permutation, so that each permutation has a chance
-			// of finding a grounding.
+			// the predicate.  We have to try all possible permuations
+			// here, as different variable assignments could lead to
+			// very differrent problem solutions.  We have to push/pop
+			// the stack as we try each permutation, so that each
+			// permutation has a chance of finding a grounding.
 			//
-			// We don't try all possible groundings; this is not the place
-			// to do this; this is done elsewhere. Here, its enough to find
-			// any grounding that works (i.e. is consistent with all
-			// groundings up till now).
+			// The problem with exhaustive enumeration is that we can't
+			// do it here, by ourselves: this can only be done at the
+			// clause level. So if we do find a grounding, we have to
+			// report it, and return.  We might get called again, and,
+			// if so, we have to pick up where we left off, and so there
+			// is yet more stack trickery to save and restore that state.
+			//
 			LinkPtr lp(LinkCast(hp));
 			LinkPtr lg(LinkCast(hg));
-			std::vector<Handle> osp = lp->getOutgoingSet();
 			const std::vector<Handle> &osg = lg->getOutgoingSet();
-			sort(osp.begin(), osp.end());
+			std::vector<Handle> mutation;
+
+			if (have_more) {
+				mutation = mute_stack.top();
+				mute_stack.pop();
+			} else {
+				mutation = lp->getOutgoingSet();
+				sort(mutation.begin(), mutation.end());
+			}
 
 			do {
 				// The recursion step: traverse down the tree.
@@ -263,7 +274,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 				var_solutn_stack.push(var_grounding);
 				depth ++;
 
-				mismatch = foreach_atom_pair(osp, osg,
+				mismatch = foreach_atom_pair(mutation, osg,
 				                   &PatternMatchEngine::tree_compare, this);
 				depth --;
 				dbgprt("tree_comp down unordered link mismatch=%d\n", mismatch);
@@ -280,13 +291,22 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 				{
 					var_solutn_stack.pop();
 					var_grounding[hp] = hg;
+#ifdef MUTE
+					// Save the permutation for later.
+					mute_stack.push(mutation);
+					have_more = true;
+#endif
 					return false;
 				}
 
 				POPGND(var_grounding, var_solutn_stack);
-			} while (next_permutation(osp.begin(), osp.end()));
+			} while (std::next_permutation(mutation.begin(), mutation.end()));
 
 			dbgprt("tree_comp down unordered exhausted all permuations\n");
+#ifdef MUTE
+			more_stack.pop();
+			have_more = more_stack.top();
+#endif
 			return mismatch;
 		}
 
@@ -750,6 +770,10 @@ void PatternMatchEngine::clear_state(void)
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
 	while (!in_quote_stack.empty()) in_quote_stack.pop();
+
+	have_more = false;
+	while (!more_stack.empty()) more_stack.pop();
+	while (!mute_stack.empty()) mute_stack.pop();
 }
 
 

@@ -87,6 +87,12 @@ class PatternMatchEngine
 		IssuedSet issued;
 		std::stack<IssuedSet> issued_stack;
 
+		// Stacks used to explore all possible permuations of
+		// unordered links.
+		bool have_more;
+		std::stack<bool> more_stack;
+		typedef std::vector<Handle> Permutation;
+		std::stack<Permutation> mute_stack;
 		// -------------------------------------------
 
 		// Result of solving the predicate
