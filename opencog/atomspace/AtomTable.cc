@@ -736,8 +736,6 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
                 if (other) {
                     AtomPtrSet ex = other->extract(his, true);
                     result.insert(ex.begin(), ex.end());
-                } else {
-                    result.insert(his);
                 }
             }
         }
