@@ -25,9 +25,12 @@
 
 using namespace opencog;
 
-// Test real support for multiple atomspaces.
+// Test support for multiple atomspaces.
 // This is pursuant to github bug #523 -- several users want this
 // ability.
+// Tests for removal of atoms in a multi-atomspace usage case is in
+// the RemoveUTest.cxxtest file.
+//
 class MultiSpaceUTest :  public CxxTest::TestSuite
 {
 private:
