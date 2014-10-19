@@ -75,6 +75,7 @@ class PatternMatchEngine
 		std::stack<Handle> soln_handle_stack;
 		std::stack<Handle> root_handle_stack;
 		std::stack<bool> in_quote_stack;
+		unsigned int stack_depth;
 
 		// Stacks containing partial groundings.
 		typedef std::map<Handle, Handle> SolnMap;
@@ -86,6 +87,13 @@ class PatternMatchEngine
 		IssuedSet issued;
 		std::stack<IssuedSet> issued_stack;
 
+		// Stacks used to explore all possible permuations of
+		// unordered links.
+		bool have_more;
+		size_t more_depth;
+		std::vector<bool> more_stack;
+		typedef std::vector<Handle> Permutation;
+		std::stack<Permutation> mute_stack;
 		// -------------------------------------------
 
 		// Result of solving the predicate

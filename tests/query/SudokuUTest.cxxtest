@@ -1,0 +1,131 @@
+/*
+ * tests/query/SudokuUTest.cxxtest
+ *
+ * Copyright (C) 2009, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/query/BindLink.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class SudokuPuzzle :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpace* as;
+		SchemeEval* eval;
+
+	public:
+
+		SudokuPuzzle(void)
+		{
+			try
+			{
+				config().load("opencog-test.conf");
+			}
+			catch (RuntimeException &e)
+			{
+				std::cerr << e.getMessage() << std::endl;
+			}
+			logger().setFilename(config()["LOG_FILE"]);
+			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+			// logger().setLevel(Logger::DEBUG);
+			// logger().setPrintToStdoutFlag(true);
+
+			server(CogServer::createInstance);
+			as = &cogserver().getAtomSpace();
+			eval = new SchemeEval(as);
+
+			// Load the required data
+			config().set("MODULES", "opencog/query/libQueryModule.so");
+
+			cogserver().loadModules();
+		}
+
+		~SudokuPuzzle()
+		{
+			delete eval;
+
+			// Erase the log file if no assertions failed.
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+
+		void tearDown(void) { }
+
+		void test_puzzle(void);
+};
+
+/*
+ * Clear the atomspace, load various atom types.
+ */
+#define an as->addNode
+#define al as->addLink
+void SudokuPuzzle::setUp(void)
+{
+	as->clear();
+
+	config().set("SCM_PRELOAD",
+		"opencog/atomspace/core_types.scm");
+
+	load_scm_files_from_config(*as);
+}
+
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
+
+/* ========================================================================
+ * Puzzle solver
+ */
+void SudokuPuzzle::test_puzzle(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD",
+		"tests/query/sudoku-rules.scm, "
+		"tests/query/sudoku-puzzle.scm");
+	load_scm_files_from_config(*as);
+
+	// Create an implication link that will be tested.
+	Handle puzzle = eval->eval_h("(ListLink (puzzle))");
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle);
+	logger().debug("puzzle is:\n%s\n", SchemeSmob::to_string(puzzle).c_str());
+
+	// Solve the puzzle
+// XXX Right now this test simply does not work.  There's probably
+// a bug in the pattern matcher.  It is probably not handling a full
+// exploration of the unordered links correctly.  Who knows.
+// A simpler but more extended test of unordered links is needed.
+	Handle puzzle_solution = eval->apply("cog-bind", puzzle);
+	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(puzzle_solution));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
