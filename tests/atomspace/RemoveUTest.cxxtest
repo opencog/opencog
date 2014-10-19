@@ -49,6 +49,7 @@ public:
 	void testReCross();
 	void testRepeat();
 	void testHeads();
+	void testTails();
 };
 
 // Simple test of removal in multiple atomspaces.
@@ -354,6 +355,49 @@ void RemoveUTest::testHeads()
 	TS_ASSERT(li->getArity() == 2);
 	TS_ASSERT(li->getOutgoingAtom(0) == hna);
 	TS_ASSERT(li->getOutgoingAtom(1) == hnb);
+
+	as1.clear();
+	as2.clear();
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test recursive remove across atomspaces.
+void RemoveUTest::testTails()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+	AtomSpace as1;
+	AtomSpace as2(&as1);
+
+	TS_ASSERT(as1.getSize() == 0);
+	TS_ASSERT(as2.getSize() == 0);
+
+	// Create atoms in different atomspaces
+	Handle hna = as1.addNode(CONCEPT_NODE, "node a");
+	Handle hnb = as1.addNode(CONCEPT_NODE, "node b");
+
+	Handle hli = as1.addLink(LIST_LINK, hna, hnb);
+	Handle ho = as2.addLink(LIST_LINK, hna, hnb);
+	TS_ASSERT(ho == hli);
+
+	Handle ha = as1.addLink(LIST_LINK, hna, hnb, hnb);
+	Handle haha = as1.addLink(LIST_LINK, hna, hnb, hnb, hnb);
+	Handle hwa = as1.addLink(LIST_LINK, hli, hnb);
+
+	as2.addLink(LIST_LINK, hna, hna, hnb);
+	as2.addLink(LIST_LINK, hna, hna, hna, hnb);
+	as2.addLink(LIST_LINK, ho, hna, hna);
+	Handle hoo = as2.addLink(LIST_LINK, ho, ho, ho, ho);
+	Handle hoho = as2.addLink(LIST_LINK, ho, hoo, hna, ha);
+	Handle hohox = as2.addLink(LIST_LINK, hoho, ho, hoo, hnb, haha);
+	Handle hohoy = as2.addLink(LIST_LINK, hna, hoho, ho, hoo, hohox, hwa);
+
+	TS_ASSERT(as1.getSize() == 6);
+	TS_ASSERT(as2.getSize() == 7);
+
+	as2.removeAtom(hoo);
+
+	TS_ASSERT(as1.getSize() == 6);
+	TS_ASSERT(as2.getSize() == 3);
 
 	as1.clear();
 	as2.clear();
