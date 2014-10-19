@@ -90,7 +90,8 @@ class PatternMatchEngine
 		// Stacks used to explore all possible permuations of
 		// unordered links.
 		bool have_more;
-		std::stack<bool> more_stack;
+		size_t more_depth;
+		std::vector<bool> more_stack;
 		typedef std::vector<Handle> Permutation;
 		std::stack<Permutation> mute_stack;
 		// -------------------------------------------

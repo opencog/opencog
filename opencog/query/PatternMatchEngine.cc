@@ -123,7 +123,9 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		LinkPtr lp(LinkCast(hp));
 		if (1 != lp->getArity())
 			throw InvalidParamException(TRACE_INFO, "QuoteLink has unexpected arity!");
+		more_depth ++;
 		bool misma = tree_compare(lp->getOutgoingAtom(0), hg);
+		more_depth --;
 		in_quote = false;
 		return misma;
 	}
@@ -220,9 +222,11 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			//
 			// var_solutn_stack.push(var_grounding);
 			depth ++;
+			more_depth ++;
 
 			mismatch = foreach_atom_pair(osp, osg,
 			                   &PatternMatchEngine::tree_compare, this);
+			more_depth --;
 			depth --;
 			dbgprt("tree_comp down link mismatch=%d\n", mismatch);
 
@@ -260,28 +264,36 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			const std::vector<Handle> &osg = lg->getOutgoingSet();
 			std::vector<Handle> mutation;
 
-			if (have_more) {
-				dbgprt("tree_comp resume unordered link\n");
+			if (more_stack.size() <= more_depth) more_stack.push_back(false);
+			if (more_stack[more_depth])
+			{
+				dbgprt("tree_comp resume unordered link at depth %zd\n",
+				       more_depth);
 				mutation = mute_stack.top();
 				mute_stack.pop();
-				have_more = more_stack.top();
-				more_stack.pop();
-			} else {
-				dbgprt("tree_comp fresh unordered link\n");
+			}
+			else
+			{
+				dbgprt("tree_comp fresh unordered link at depth %zd\n",
+				       more_depth);
 				mutation = lp->getOutgoingSet();
 				sort(mutation.begin(), mutation.end());
 			}
 
 			do {
 				// The recursion step: traverse down the tree.
-				dbgprt("tree_comp start downwards unordered link\n");
+				dbgprt("tree_comp start downwards unordered link at depth=%lu\n",
+				       more_depth);
 				var_solutn_stack.push(var_grounding);
 				depth ++;
 
+				more_depth ++;
 				mismatch = foreach_atom_pair(mutation, osg,
 				                   &PatternMatchEngine::tree_compare, this);
+				more_depth --;
 				depth --;
-				dbgprt("tree_comp down unordered link mismatch=%d\n", mismatch);
+				dbgprt("tree_comp down unordered link depth=%lu mismatch=%d\n",
+				       more_depth, mismatch);
 
 				// If we've found a grounding, lets see if the
 				// post-match callback likes this grounding.
@@ -299,21 +311,18 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 					// that its the next one explored, when returning
 					// to this function.
 					bool more_perms = std::next_permutation(mutation.begin(), mutation.end());
-					dbgprt("tree_comp unordered link have gnd, more=%d\n", more_perms);
+					dbgprt("tree_comp unordered link have gnd at depth=%lu, more=%d\n",
+					      more_depth, more_perms);
 					if (more_perms)
 					{
 						mute_stack.push(mutation);
-						more_stack.push(have_more);	
+						more_stack[more_depth] = true;
 						have_more = true;
 					}
-					else 
+					else
 					{
-						// Undo the push immediately above.
-						if (have_more)
-						{
-							have_more = more_stack.top();
-							more_stack.pop();
-						}
+						more_stack[more_depth] = false;
+						have_more = false;
 					}
 					return false;
 				}
@@ -321,11 +330,8 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			} while (std::next_permutation(mutation.begin(), mutation.end()));
 
 			dbgprt("tree_comp down unordered exhausted all permuations\n");
-			if (have_more)
-			{
-				have_more = more_stack.top();
-				more_stack.pop();
-			}
+			more_stack[more_depth] = false;
+			have_more = false;
 			return true;
 		}
 
@@ -356,12 +362,16 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 
 /* ======================================================== */
 
-/// Return true if a grounding was found. 
+/// Return true if a grounding was found.
 bool PatternMatchEngine::soln_up(Handle hsoln)
 {
 	// Let's not stare at our own navel.
 	if (hsoln == curr_root) return false;
 
+	have_more = false;
+	more_depth = 0;
+	more_stack.resize(1);
+	more_stack[0] = false;
 	bool did_find = false;
 	do {
 		var_solutn_stack.push(var_grounding);
@@ -379,7 +389,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		did_find |= found;
 		if (found)
 		{
-			// pop the entry we created, but do keep the grounding 
+			// pop the entry we created, but do keep the grounding
 			// that was found.
 			var_solutn_stack.pop();
 		}
@@ -390,7 +400,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 			POPGND(var_grounding, var_solutn_stack);
 		}
 
-		if (have_more) { dbgprt("Wait ----- theres more!\n"); }
+		if (have_more) { dbgprt("Wait ----- there's more!\n"); }
 	} while (have_more);
 
 	return did_find;
@@ -812,7 +822,8 @@ void PatternMatchEngine::clear_state(void)
 	while (!in_quote_stack.empty()) in_quote_stack.pop();
 
 	have_more = false;
-	while (!more_stack.empty()) more_stack.pop();
+	more_depth = 0;
+	more_stack.clear();
 	while (!mute_stack.empty()) mute_stack.pop();
 }
 
