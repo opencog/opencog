@@ -668,7 +668,7 @@ Handle AtomTable::getRandom(RandGen *rng) const
 
     Handle randy(Handle::UNDEFINED);
 
-    // XXX TODO it would be considerably mor efficient to go into the
+    // XXX TODO it would be considerably more efficient to go into the
     // the type index, and decrement x by the size of the index for
     // each type.  This would speed up the algo by about 100 (by about
     // the number of types that are in use...).
@@ -694,10 +694,10 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // Perhaps the atom is not in any table? Or at least, not in this
     // atom table? Its a user-error if the user is trying to extract
     // atoms that are not in this atomspace, but we're going to be
-    // silent about this error -- it seems pointess to throw.
+    // silent about this error -- it seems pointless to throw.
     if (atom->getAtomTable() != this) return result;
 
-    // lock before fetching the incoming set. Since getting the
+    // Lock before fetching the incoming set. Since getting the
     // incoming set also grabs a lock, we need this mutex to be
     // recursive. We need to lock here to avoid confusion if multiple
     // threads are trying to delete the same atom.
@@ -749,9 +749,9 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
                 // Its OK if the atom being extracted is in a link
                 // that is not currently in any atom space.
                 // Also, a bit of a race can happen: when the unlock
-                // is done beelow, to send the removed signal, another
+                // is done below, to send the removed signal, another
                 // thread can sneak in and get to here, because its
-                // deleting a different atom with a shared incoming
+                // deleting a different atom with a shared incoming set
                 // and since the incoming set hasn't yet been updated
                 // (that happens after re-acquiring the lock) and so
                 // it will look like the incoming set has not yet been
@@ -761,7 +761,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
                 // XXX this might not be exactly thread-safe, if
                 // other atomspaces are involved...
                 if (iset[i]->getAtomTable() != NULL and
-                    (iset[i]->getAtomTable() != this or 
+                    (iset[i]->getAtomTable() != this or
                      iset[i]->isMarkedForRemoval() != true)) {
                     Logger::Level lev = logger().getBackTraceLevel();
                     logger().setBackTraceLevel(Logger::ERROR);
@@ -810,8 +810,9 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     importanceIndex.removeAtom(atom);
 
     // XXX Setting the atom table causes AVChanged signals to be emitted.
-    // We should really do this unlocked, but I'm tooo lazy to fix, and
-    // am hoping no one will notice.
+    // We should really do this unlocked, but I'm too lazy to fix, and
+    // am hoping no one will notice. This will probably need to be fixed
+    // someday.
     atom->setAtomTable(NULL);
 
     result.insert(atom);
