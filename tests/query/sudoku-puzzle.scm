@@ -2,6 +2,11 @@
 ; Definition for a specific puzzle
 ; Hand-typed-in version of 
 ; http://www.theguardian.com/lifeandstyle/2014/oct/17/sudoku-2944-hard
+;
+; XXX As of 18 October 2014, the pattern matcher fails to find a
+; solution.  This is probably due to a bug in the pattern matcher,
+; although it might be due to a bug in the coding below ...
+; XXXXXXXXXXXXXXXXX
 
 ; Certain fixed numbers appear in certain fixed cell locations.
 (EvaluationLink (PredicateNode "fix12") (ConceptNode "eight"))

@@ -1,7 +1,7 @@
 /*
  * tests/query/SudokuUTest.cxxtest
  *
- * Copyright (C) 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -119,6 +119,10 @@ void SudokuPuzzle::test_puzzle(void)
 	logger().debug("puzzle is:\n%s\n", SchemeSmob::to_string(puzzle).c_str());
 
 	// Solve the puzzle
+// XXX Right now this test simply does not work.  There's probably
+// a bug in the pattern matcher.  It is probably not handling a full
+// exploration of the unordered links correctly.  Who knows.
+// A simpler but more extended test of unordered links is needed.
 	Handle puzzle_solution = eval->apply("cog-bind", puzzle);
 	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(puzzle_solution));

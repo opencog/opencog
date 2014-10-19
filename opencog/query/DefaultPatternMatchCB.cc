@@ -28,7 +28,7 @@
 
 using namespace opencog;
 
-#define DEBUG 1
+// #define DEBUG 1
 #if DEBUG
    #define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
