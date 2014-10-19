@@ -287,6 +287,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 				var_solutn_stack.push(var_grounding);
 				depth ++;
 
+				have_more = false;
 				more_depth ++;
 				mismatch = foreach_atom_pair(mutation, osg,
 				                   &PatternMatchEngine::tree_compare, this);
@@ -307,13 +308,15 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 				{
 					var_solutn_stack.pop();
 					var_grounding[hp] = hg;
-					// Advance to the next permutation, and save it so
-					// that its the next one explored, when returning
-					// to this function.
-					bool more_perms = std::next_permutation(mutation.begin(), mutation.end());
-					dbgprt("tree_comp unordered link have gnd at depth=%lu, more=%d\n",
-					      more_depth, more_perms);
-					if (more_perms)
+					dbgprt("tree_comp unordered link have gnd at depth=%lu\n",
+					      more_depth);
+
+					// If a lower part of a tree has more to do, it will have
+					// set the have_more flag.  If it is done, then the
+					// have_more flag is clear.  If its clear, we, have to
+					// advance, so we don't restart in the same place.
+					// Ugh. Seems like there should be a more elegant way.
+					if (have_more)
 					{
 						mute_stack.push(mutation);
 						more_stack[more_depth] = true;
@@ -321,9 +324,21 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 					}
 					else
 					{
-						more_stack[more_depth] = false;
-						have_more = false;
+						// Lower loop is done. Advance.
+						bool more_perms = std::next_permutation(mutation.begin(), mutation.end());
+						if (more_perms)
+						{
+							mute_stack.push(mutation);
+							more_stack[more_depth] = true;
+							have_more = true;
+						}
+						else
+						{
+							more_stack[more_depth] = false;
+							have_more = false;
+						}
 					}
+
 					return false;
 				}
 				POPGND(var_grounding, var_solutn_stack);
