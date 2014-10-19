@@ -32,28 +32,29 @@ class RemoveUTest :  public CxxTest::TestSuite
 {
 private:
 
-	AtomSpace as1;
-	AtomSpace as2;
-	AtomSpace as3;
-
 public:
-	RemoveUTest() {}
+	RemoveUTest()
+	{
+		logger().setPrintToStdoutFlag(true);
+	}
 
 	void setUp() {}
 
 	void tearDown() {}
 
 	void testSimple();
+	void testRecursive();
 };
 
-// Simple test of naive multiple atomspaces.  Create three
-// distinct atomspaces, make sure they behave like atomspaces
-// should.
+// Simple test of removal in multiple atomspaces.
 void RemoveUTest::testSimple()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+	AtomSpace as1;
+	AtomSpace as2(&as1);
+
 	TS_ASSERT(as1.getSize() == 0);
 	TS_ASSERT(as2.getSize() == 0);
-	TS_ASSERT(as3.getSize() == 0);
 
 	// Create atoms in different atomspaces
 	Handle hna = as1.addNode(CONCEPT_NODE, "node a");
@@ -63,6 +64,54 @@ void RemoveUTest::testSimple()
 
 	TS_ASSERT(as1.getSize() == 2);
 	TS_ASSERT(as2.getSize() == 1);
+
+	// Verify the link is sane
+	LinkPtr pli(LinkCast(hli));
+	TS_ASSERT(pli->getArity() == 2);
+	TS_ASSERT(pli->getOutgoingAtom(0) == hna);
+	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
+
+	// Simple removal of hli should leave everything unaffeced.
+	as2.removeAtom(hli);
+
+	TS_ASSERT(as1.getSize() == 2);
+	TS_ASSERT(as2.getSize() == 0);
+
+	// Handle hli should still point to valid atoms
+	LinkPtr li(LinkCast(hli));
+	TS_ASSERT(li->getArity() == 2);
+	TS_ASSERT(li->getOutgoingAtom(0) == hna);
+	TS_ASSERT(li->getOutgoingAtom(1) == hnb);
+
+	as1.clear();
+	as2.clear();
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test recursive delete across atomspaces.
+void RemoveUTest::testRecursive()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+	AtomSpace as1;
+	AtomSpace as2(&as1);
+
+	TS_ASSERT(as1.getSize() == 0);
+	TS_ASSERT(as2.getSize() == 0);
+
+	// Create atoms in different atomspaces
+	Handle hna = as1.addNode(CONCEPT_NODE, "node a");
+	Handle hnb = as1.addNode(CONCEPT_NODE, "node b");
+
+	Handle hli = as2.addLink(LIST_LINK, hna, hnb);
+
+	TS_ASSERT(as1.getSize() == 2);
+	TS_ASSERT(as2.getSize() == 1);
+
+	// Verify the link is sane
+	LinkPtr pli(LinkCast(hli));
+	TS_ASSERT(pli->getArity() == 2);
+	TS_ASSERT(pli->getOutgoingAtom(0) == hna);
+	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
 	// Recursive removal of hna should blow away hli.
 	as1.removeAtom(hna);
@@ -75,5 +124,9 @@ void RemoveUTest::testSimple()
 	TS_ASSERT(li->getArity() == 2);
 	TS_ASSERT(li->getOutgoingAtom(0) == hna);
 	TS_ASSERT(li->getOutgoingAtom(1) == hnb);
+
+	as1.clear();
+	as2.clear();
+	logger().info("END TEST: %s", __FUNCTION__);
 }
 
