@@ -167,18 +167,25 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	}
 
 	// If they're the same atom, then clearly they match.
-	// ... but only if hg is not a subclause of the current clause.
-	if ((hp == hg) and (hg != curr_pred_handle))
+	// ... but only hp is a constant i.e. contains no bound variables)
+	if (hp == hg)
 	{
-		// Bound, quoted variables cannot be solutions to themselves.
-		if (not in_quote or
-		    (in_quote and
-		     (VARIABLE_NODE != tp or
-		       _bound_vars.end() == _bound_vars.find(hp))))
+		if (hg == curr_pred_handle)
 		{
-			var_grounding[hp] = hg;
+			if (any_node_in_tree(hg, _bound_vars)) return true;
 		}
-		return false;
+		else
+		{
+			// Bound, quoted variables cannot be solutions to themselves.
+			if (not in_quote or
+			    (in_quote and
+			     (VARIABLE_NODE != tp or
+			       _bound_vars.end() == _bound_vars.find(hp))))
+			{
+				var_grounding[hp] = hg;
+			}
+			return false;
+		}
 	}
 
 	// If both are links, compare them as such.
@@ -654,16 +661,20 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		RootList *rl = vk.second;
 		pursue = vk.first;
 
+		unsolved = false;
+		solved = false;
+
 		// Pursue will become the joining atom, that is shared in common
 		// with the a full grounded clause, and an as-yet ungrounded
 		// clause. We need it to be grounded as well, as otherwise the
 		// join will fail.  This can happen when a clause is "fully"
 		// grounded, but the grounding contains a subtree that has a
-		// variable in it that has not yet been grounded. 
+		// variable in it that has not yet been grounded.  (Note that
+		// grounding a clause with another clause that has variables in
+		// it will probably be rejected by the default callback; but for
+		// for now, this is a plausible situation, so we have to deal
+		// with it, here, else we will crash.)
 		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
-
-		unsolved = false;
-		solved = false;
 
 		std::vector<Handle>::iterator i = rl->begin();
 		std::vector<Handle>::iterator iend = rl->end();
@@ -734,16 +745,20 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		RootList *rl = vk.second;
 		pursue = vk.first;
 
+		unsolved = false;
+		solved = false;
+
 		// Pursue will become the joining atom, that is shared in common
 		// with the a full grounded clause, and an as-yet ungrounded
 		// clause. We need it to be grounded as well, as otherwise the
 		// join will fail.  This can happen when a clause is "fully"
 		// grounded, but the grounding contains a subtree that has a
-		// variable in it that has not yet been grounded. 
+		// variable in it that has not yet been grounded.  (Note that
+		// grounding a clause with another clause that has variables in
+		// it will probably be rejected by the default callback; but for
+		// for now, this is a plausible situation, so we have to deal
+		// with it, here, else we will crash.)
 		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
-
-		unsolved = false;
-		solved = false;
 
 		std::vector<Handle>::iterator i = rl->begin();
 		std::vector<Handle>::iterator iend = rl->end();
