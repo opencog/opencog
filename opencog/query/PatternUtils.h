@@ -88,8 +88,35 @@ static inline bool is_node_in_tree(const Handle& tree, const Handle& node)
 }
 
 /**
+ * Return true if the indicated node occurs quoted somewhere in the
+ * tree.  That is, it returns true only if the node is inside a
+ * QuoteLink.
+ */
+static inline bool is_quoted_in_tree(const Handle& tree, const Handle& node)
+{
+	if (tree == Handle::UNDEFINED) return false;
+	if (tree == node) return false;  // not quoted, so false.
+	LinkPtr ltree(LinkCast(tree));
+	if (NULL == ltree) return false;
+
+	if (tree->getType() == QUOTE_LINK)
+	{
+		if (is_node_in_tree(tree, node)) return true;
+		return false;
+	}
+
+	// Recurse downwards...
+	const std::vector<Handle> &vh = ltree->getOutgoingSet();
+	size_t sz = vh.size();
+	for (size_t i = 0; i < sz; i++) {
+		if (is_quoted_in_tree(vh[i], node)) return true;
+	}
+	return false;
+}
+
+/**
  * Return true if any of the indicated nodes occurs somewhere in
- * the tree (that is, the treee spanned by the outgoing set.)
+ * the tree (that is, in the tree spanned by the outgoing set.)
  */
 static inline bool any_node_in_tree(const Handle& tree, const std::set<Handle>& nodes)
 {

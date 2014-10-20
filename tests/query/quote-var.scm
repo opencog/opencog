@@ -29,6 +29,7 @@
 	)
 )
 
+; We expect this one to be found by the bindy pattern below.
 (EvaluationLink
 	(PredicateNode "similar")
 	(ListLink
@@ -37,6 +38,7 @@
 	)
 )
 
+; The bindy pattern must not find this one.
 (EvaluationLink
 	(PredicateNode "similar")
 	(ListLink
