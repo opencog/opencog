@@ -688,13 +688,15 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		// clause. We need it to be grounded as well, as otherwise the
 		// join will fail.  This can happen when a clause is "fully"
 		// grounded, but the grounding contains a subtree that has a
-		// variable in it that has not yet been grounded.  (Note that
-		// grounding a clause with another clause that has variables in
-		// it will probably be rejected by the default callback; but for
-		// for now, this is a plausible situation, so we have to deal
-		// with it, here, else we will crash.)
+		// variable in it that has not yet been grounded.  This is
+		// a rather pathological situation (i.e. grounding a clause with
+		// another clause that has bound variables in it), and it will
+		// probably be rejected at some point.  But, for now, this is a
+		// semi-plausible situation.  We have two choices, for now:
+		// continue with the loop, ignoring this join, or abort.
+		//
+		// See also cut-n-paste of this loop below.
 		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
-//xxxxxxx
 
 		std::vector<Handle>::iterator i = rl->begin();
 		std::vector<Handle>::iterator iend = rl->end();
@@ -772,13 +774,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		// Pursue will become the joining atom, that is shared in common
 		// with the a full grounded clause, and an as-yet ungrounded
 		// clause. We need it to be grounded as well, as otherwise the
-		// join will fail.  This can happen when a clause is "fully"
-		// grounded, but the grounding contains a subtree that has a
-		// variable in it that has not yet been grounded.  (Note that
-		// grounding a clause with another clause that has variables in
-		// it will probably be rejected by the default callback; but for
-		// for now, this is a plausible situation, so we have to deal
-		// with it, here, else we will crash.)
+		// join will fail.  See above.
 		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
 
 		std::vector<Handle>::iterator i = rl->begin();
