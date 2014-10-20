@@ -438,28 +438,28 @@ void PatternMiner::ConstructTheFirstGramPatternsBF()
 
     OutPutPatternsToFile(cur_gram);
 
-//    HandleSeq allDumpNodes, allDumpLinks;
-//    originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
+    HandleSeq allDumpNodes, allDumpLinks;
+    atomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
 
-//    // Debug : out put the current dump Atomspace to a file
-//    ofstream dumpFile;
-//    string fileName = "DumpAtomspace" + toString(cur_gram) + "gram.scm";
+    // Debug : out put the current dump Atomspace to a file
+    ofstream dumpFile;
+    string fileName = "DumpAtomspace" + toString(cur_gram) + "gram.scm";
 
-//    dumpFile.open(fileName.c_str());
+    dumpFile.open(fileName.c_str());
 
-//    foreach(Handle h, allDumpNodes)
-//    {
-//        dumpFile << originalAtomSpace->atomAsString(h);
-//    }
+    foreach(Handle h, allDumpNodes)
+    {
+        dumpFile << atomSpace->atomAsString(h);
+    }
 
-//    originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
+    atomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
 
-//    foreach(Handle h, allDumpLinks)
-//    {
-//        dumpFile << originalAtomSpace->atomAsString(h);
-//    }
+    foreach(Handle h, allDumpLinks)
+    {
+        dumpFile << atomSpace->atomAsString(h);
+    }
 
-//    dumpFile.close();
+    dumpFile.close();
 
 }
 
@@ -535,7 +535,7 @@ void PatternMiner::GrowAllPatternsBF()
 
 
         HandleSeq allDumpNodes, allDumpLinks;
-        originalAtomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
+        atomSpace->getHandlesByType(back_inserter(allDumpNodes), (Type) NODE, true );
 
         // Debug : out put the current dump Atomspace to a file
         ofstream dumpFile;
@@ -545,14 +545,14 @@ void PatternMiner::GrowAllPatternsBF()
 
         foreach(Handle h, allDumpNodes)
         {
-            dumpFile << originalAtomSpace->atomAsString(h);
+            dumpFile << atomSpace->atomAsString(h);
         }
 
-        originalAtomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
+        atomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
 
         foreach(Handle h, allDumpLinks)
         {
-            dumpFile << originalAtomSpace->atomAsString(h);
+            dumpFile << atomSpace->atomAsString(h);
         }
 
         dumpFile.close();
