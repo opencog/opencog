@@ -183,6 +183,12 @@ namespace PatternMining
      // Output all the variable nodes in the toAtomSpace BTW
      HandleSeq swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq &outVariableNodes);
 
+
+     void swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings,
+                                                       HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool& containVar );
+
+     HandleSeq swapLinksBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel);
+
      void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, set<Handle>& allVarNodes);
 
      void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, map<Handle, unsigned int>& allVarNodes, unsigned index);
@@ -192,7 +198,8 @@ namespace PatternMining
 
      void extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
 
-     void findAllInstancesForGivenPattern(HTreeNode* HNode);
+
+     void findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* HNode);
 
      void findAllInstancesForGivenPatternBF(HTreeNode* HNode);
 

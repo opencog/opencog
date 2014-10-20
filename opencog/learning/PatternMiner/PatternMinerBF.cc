@@ -281,7 +281,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(vector<Handle>& in
                         newHTreeNode->var_num = var_num;
 
                         // Find All Instances in the original AtomSpace For this Pattern
-                        findAllInstancesForGivenPattern(newHTreeNode);
+                        findAllInstancesForGivenPatternBF(newHTreeNode);
 
                         if (parentNode)
                         {
@@ -559,110 +559,165 @@ void PatternMiner::GrowAllPatternsBF()
     }
 }
 
+void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings,
+                                                  HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool& containVar )
+{
+    containVar = false;
+    HandleSeq outgoingLinks = fromAtomSpace->getOutgoing(fromLink);
+
+    foreach (Handle h, outgoingLinks)
+    {
+        if (fromAtomSpace->isNode(h))
+        {
+           Handle new_node = toAtomSpace->addNode(fromAtomSpace->getType(h), fromAtomSpace->getName(h), fromAtomSpace->getTV(h));
+           outgoings.push_back(new_node);
+           if (fromAtomSpace->getType(h) == VARIABLE_NODE)
+           {
+               containVar = true;
+               if ( ! isInHandleSeq(new_node, outVariableNodes) ) // should not have duplicated variable nodes
+                outVariableNodes.push_back(new_node);
+           }
+        }
+        else
+        {
+             HandleSeq _OutgoingLinks;
+             bool _containVar;
+             swapOneLinkBetweenTwoAtomSpaceBF(fromAtomSpace, toAtomSpace, h, _OutgoingLinks, outVariableNodes,linksWillBeDel,  _containVar);
+             Handle _link = toAtomSpace->addLink(fromAtomSpace->getType(h),_OutgoingLinks,fromAtomSpace->getTV(h));
+             if (_containVar)
+             {
+                 linksWillBeDel.push_back(_link);
+                 containVar = true;
+             }
+             outgoings.push_back(_link);
+        }
+    }
+}
+
+// linksWillBeDel are all the links contain varaibles. Those links need to be deleted after run BindLink
+HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel)
+{
+    HandleSeq outPutLinks;
+
+    foreach (Handle link, fromLinks)
+    {
+        HandleSeq outgoingLinks;
+        bool containVar;
+        swapOneLinkBetweenTwoAtomSpaceBF(fromAtomSpace, toAtomSpace, link, outgoingLinks, outVariableNodes, linksWillBeDel,containVar);
+        Handle toLink = toAtomSpace->addLink(fromAtomSpace->getType(link),outgoingLinks,fromAtomSpace->getTV(link));
+        if (containVar)
+            linksWillBeDel.push_back(toLink);
+        outPutLinks.push_back(toLink);
+    }
+
+    return outPutLinks;
+}
+
 // using PatternMatcher
 void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
 {
 
-////     First, generate the Bindlink for using PatternMatcher to find all the instances for this pattern in the original Atomspace
-////    (BindLink
-////        ;; The variables to be bound
-////        (Listlink)
-////          (VariableNode "$var_1")
-////          (VariableNode "$var_2")
-////          ...
-////        (ImplicationLink
-////          ;; The pattern to be searched for
-////          (pattern)
-////          (Listlink)
-////              ;; The instance to be returned.
-////              (result)
-////              (variable Listlink)
-////        )
-////     )
+//     First, generate the Bindlink for using PatternMatcher to find all the instances for this pattern in the original Atomspace
+//    (BindLink
+//        ;; The variables to be bound
+//        (Listlink)
+//          (VariableNode "$var_1")
+//          (VariableNode "$var_2")
+//          ...
+//        (ImplicationLink
+//          ;; The pattern to be searched for
+//          (pattern)
+//          (Listlink)
+//              ;; The instance to be returned.
+//              (result)
+//              (variable Listlink)
+//        )
+//     )
 
 
-//   HandleSeq implicationLinkOutgoings, bindLinkOutgoings, variableNodes, linksWillBeDel;
+   HandleSeq implicationLinkOutgoings, bindLinkOutgoings, variableNodes, linksWillBeDel;
 
-//   HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpace(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
+   HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpaceBF(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
 
-////   set<Handle> allNodesInPattern;
-////   for (unsigned int i = 0; i < HNode->pattern.size(); ++i)
-////   {
-////       extractAllVariableNodesInLink(HNode->pattern[i],allNodesInPattern, atomSpace);
-////   }
-
-////   HandleSeq variableNodes(allNodesInPattern.begin(), allNodesInPattern.end());
-
-////    if (HNode->pattern.size() == 1) // this pattern only contains one link
-////    {
-////        implicationLinkOutgoings.push_back(patternToMatch[0]); // the pattern to match
-////        implicationLinkOutgoings.push_back(patternToMatch[0]); // the results to return
-
-////        std::cout<<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
-////                << originalAtomSpace->atomAsString(patternToMatch[0]).c_str() << std::endl;
-////    }
-
-//   Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch, TruthValue::TRUE_TV());
-//   Handle hOutPutListLink = originalAtomSpace->addLink(LIST_LINK, patternToMatch, TruthValue::TRUE_TV());
-//   implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
-//   implicationLinkOutgoings.push_back(hOutPutListLink); // the results to return
-
-////    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
-////            << atomSpace->atomAsString(hAndLink).c_str() << std::endl;
-
-
-//   Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
-
-//   // add variable atoms
-//   Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
-
-//   bindLinkOutgoings.push_back(hVariablesListLink);
-//   bindLinkOutgoings.push_back(hImplicationLink);
-//   Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
-
-
-//   string s = originalAtomSpace->atomAsString(hBindLink);
-//   // Run pattern matcher
-//   Handle hResultListLink = bindlink(originalAtomSpace, hBindLink);
-
-//   // Get result
-//   // Note: Don't forget to remove the hResultListLink and BindLink
-//   HandleSeq resultSet = originalAtomSpace->getOutgoing(hResultListLink);
-
-////     std::cout << toString(resultSet.size())  << " instances found!" << std::endl ;
-
-//   //    //debug
-////    std::cout << atomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
-
-//   foreach (Handle listH , resultSet)
+//   set<Handle> allNodesInPattern;
+//   for (unsigned int i = 0; i < HNode->pattern.size(); ++i)
 //   {
-//       HandleSeq instanceLinks = originalAtomSpace->getOutgoing(listH);
-
-//       if (cur_gram == 1)
-//       {
-//           HNode->instances.push_back(instanceLinks);
-//       }
-//       else
-//       {
-//           // instance that contains duplicate links will not be added
-//           if (! containsDuplicateHandle(instanceLinks))
-//               HNode->instances.push_back(instanceLinks);
-//       }
-
-//       originalAtomSpace->removeAtom(listH);
+//       extractAllVariableNodesInLink(HNode->pattern[i],allNodesInPattern, atomSpace);
 //   }
 
-//   originalAtomSpace->removeAtom(hBindLink);
-//   originalAtomSpace->removeAtom(hAndLink);
-//   originalAtomSpace->removeAtom(hResultListLink);
-//   originalAtomSpace->removeAtom(hVariablesListLink);
+//   HandleSeq variableNodes(allNodesInPattern.begin(), allNodesInPattern.end());
+
+//    if (HNode->pattern.size() == 1) // this pattern only contains one link
+//    {
+//        implicationLinkOutgoings.push_back(patternToMatch[0]); // the pattern to match
+//        implicationLinkOutgoings.push_back(patternToMatch[0]); // the results to return
+
+//        std::cout<<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
+//                << originalAtomSpace->atomAsString(patternToMatch[0]).c_str() << std::endl;
+//    }
+
+   Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch, TruthValue::TRUE_TV());
+   Handle hOutPutListLink = originalAtomSpace->addLink(LIST_LINK, patternToMatch, TruthValue::TRUE_TV());
+   implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
+   implicationLinkOutgoings.push_back(hOutPutListLink); // the results to return
+
+//    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
+//            << atomSpace->atomAsString(hAndLink).c_str() << std::endl;
+
+
+   Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
+
+   // add variable atoms
+   Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
+
+   bindLinkOutgoings.push_back(hVariablesListLink);
+   bindLinkOutgoings.push_back(hImplicationLink);
+   Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
+
+
+   string s = originalAtomSpace->atomAsString(hBindLink);
+   // Run pattern matcher
+   Handle hResultListLink = bindlink(originalAtomSpace, hBindLink);
+
+   // Get result
+   // Note: Don't forget to remove the hResultListLink and BindLink
+   HandleSeq resultSet = originalAtomSpace->getOutgoing(hResultListLink);
+
+//     std::cout << toString(resultSet.size())  << " instances found!" << std::endl ;
+
+   //    //debug
+//    std::cout << atomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
+
+   foreach (Handle listH , resultSet)
+   {
+       HandleSeq instanceLinks = originalAtomSpace->getOutgoing(listH);
+
+       if (cur_gram == 1)
+       {
+           HNode->instances.push_back(instanceLinks);
+       }
+       else
+       {
+           // instance that contains duplicate links will not be added
+           if (! containsDuplicateHandle(instanceLinks))
+               HNode->instances.push_back(instanceLinks);
+       }
+
+       originalAtomSpace->removeAtom(listH);
+   }
+
+   originalAtomSpace->removeAtom(hBindLink);
+   originalAtomSpace->removeAtom(hImplicationLink);
+   originalAtomSpace->removeAtom(hAndLink);
+   originalAtomSpace->removeAtom(hResultListLink);
+   originalAtomSpace->removeAtom(hVariablesListLink);
 
 //   foreach (Handle linkToDel , linksWillBeDel)
 //   {
 //       originalAtomSpace->removeAtom(linkToDel);
 //   }
 
-//   HNode->count = HNode->instances.size();
+   HNode->count = HNode->instances.size();
 }
 
 

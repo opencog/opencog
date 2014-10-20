@@ -585,7 +585,7 @@ HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, A
 }
 
  // using PatternMatcher
-void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
+void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* HNode)
 {
 
 //     First, generate the Bindlink for using PatternMatcher to find all the instances for this pattern in the original Atomspace
@@ -665,6 +665,8 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     //    //debug
 //    std::cout << atomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
 
+    atomSpace->removeAtom(hResultListLink);
+
     foreach (Handle listH , resultSet)
     {
         HandleSeq instanceLinks = atomSpace->getOutgoing(listH);
@@ -684,12 +686,15 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
     }
 
     atomSpace->removeAtom(hBindLink);
+    atomSpace->removeAtom(hImplicationLink);
     atomSpace->removeAtom(hAndLink);
-    atomSpace->removeAtom(hResultListLink);
-    atomSpace->removeAtom(hVariablesListLink);
+    atomSpace->removeAtom(hOutPutListLink);
+
+//    atomSpace->removeAtom(hVariablesListLink);
 
     HNode->count = HNode->instances.size();
 }
+
 
 void PatternMiner::removeLinkAndItsAllSubLinks(AtomSpace* _atomspace, Handle link)
 {
@@ -1007,7 +1012,7 @@ double PatternMiner::calculateEntropyOfASubConnectedPattern(string& connectedSub
         newHTreeNode->pattern = connectedSubPattern;
 
         // Find All Instances in the original AtomSpace For this Pattern
-        findAllInstancesForGivenPattern(newHTreeNode);
+        findAllInstancesForGivenPatternInNestedAtomSpace(newHTreeNode);
         // cout << "CalculateEntropy: Not found in H-tree! call pattern matcher again! h = log" << newHTreeNode->count << " ";
 
         return log2(newHTreeNode->count);
@@ -1298,7 +1303,7 @@ unsigned int PatternMiner::getCountOfAConnectedPattern(string& connectedPatternK
         newHTreeNode->pattern = connectedPattern;
 
         // Find All Instances in the original AtomSpace For this Pattern
-        findAllInstancesForGivenPattern(newHTreeNode);
+        findAllInstancesForGivenPatternInNestedAtomSpace(newHTreeNode);
 //        cout << "Not found in H-tree! call pattern matcher again! count = " << newHTreeNode->count << std::endl;
         return newHTreeNode->count;
 
@@ -1603,7 +1608,7 @@ void PatternMiner::generateComponentCombinations(string componentsStr, vector<ve
 PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram): originalAtomSpace(_originalAtomSpace)
 {
     htree = new HTree();
-    atomSpace = new AtomSpace( _originalAtomSpace);
+    atomSpace = new AtomSpace( );
 
     unsigned int system_thread_num  = std::thread::hardware_concurrency();
 
