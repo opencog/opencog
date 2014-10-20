@@ -119,11 +119,11 @@ void eval_output_results(const evalTableParameters& pa,
     unsigned npad = ndigits(trs.size());
     OC_ASSERT(pa.output_files.size() == trs.size() || pa.output_files.size() <= 1);
     for (unsigned i = 0; i < trs.size(); i++) {
-        // evaluated tr over input table
+        // Evaluated tr over input table
         OTable ot_tr(trs[i], table.itable);
         if (!pa.target_feature_str.empty())
             ot_tr.set_label(pa.target_feature_str);
-        // determine output file name
+        // Determine output file name
         stringstream of_ss;
         if (pa.output_files.size() == 1) {
             of_ss << pa.output_files.front();
@@ -132,7 +132,7 @@ void eval_output_results(const evalTableParameters& pa,
         }
         else if (pa.output_files.size() > 1)
             of_ss << pa.output_files[i];
-        // print results
+        // Print results
         output_results(pa, table, ot_tr, of_ss.str());
     }
 }
@@ -163,10 +163,11 @@ void read_eval_output_results(evalTableParameters& pa)
 // XXX FIXME
     vector<string> header = get_header(pa.input_table_file);
 
-    // get (header - all_unique_variables - target feature)
+    // Add to ignore_valuesget (header - all_unique_variables - target feature)
     vector<string> ignore_variables;
     for (string f : header)
         if (f != pa.target_feature_str
+            && f != pa.timestamp_feature_str
             && all_unique_variables.find(f) == all_unique_variables.end())
         {
             ignore_variables += f;
@@ -177,7 +178,9 @@ void read_eval_output_results(evalTableParameters& pa)
     Table table;
     if (pa.target_feature_str.empty()) {
         OC_ASSERT(pa.timestamp_feature_str.empty(),
-                  "Timestamp feature not implemented");
+                  "Timestamp feature not implemented. "
+                  "You may specify a target feature, option -u, "
+                  "as loadTable does support timestamp");
         table.itable = loadITable_optimized(pa.input_table_file,
                                             ignore_variables);
     }

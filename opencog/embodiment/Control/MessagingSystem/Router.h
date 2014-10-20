@@ -112,16 +112,17 @@ static const std::string dummyIP = std::string();
  *
  * (1)
  *
- * Router listens to the port 5005.
+ * Router listens to the port 16312.
  * Open a connection to this port and send the following command:
  *
  * LOGIN <YOUR_ENTITY> <ip> <port>
  *
- * All communication is performed in line-based protocol. So everything
- * should go with an explicit '\\n'. (this is true from every command or
- * data line). YOUR_ENTITY is a literal string used to identify YourEntity in
- * OC network. <ip> and <port> will be used to connect to your entity.
- * Please use ports > 5100 (obviously 5005 is already taken).
+ * All communication is performed in line-based protocol. So
+ * everything should go with an explicit '\\n'. (this is true from
+ * every command or data line). YOUR_ENTITY is a literal string used
+ * to identify YourEntity in OC network. <ip> and <port> will be used
+ * to connect to your entity.  Please use ports > 16326 (obviously
+ * 16312 is already taken).
  *
  * router will answer in the same connection with
  *
@@ -136,15 +137,16 @@ static const std::string dummyIP = std::string();
  *
  * NEW_MESSAGE <from> <to> <type> <no. lines>
  *
- * <from> and <to> are the string id of source/target. <from> will be YOUR_ENTITY
- * <to> may be either SPAWNER or any othe OC element you want to contact
- * <type> is message type, e.g. type = 1 is stringMessage.
- * <no. lines> is the number of lines in your message. All messages are broken into
- * lines and sent line by line (lines should not be larger than 1024 chars).
+ * <from> and <to> are the string id of source/target. <from> will be
+ * YOUR_ENTITY <to> may be either SPAWNER or any othe OC element you
+ * want to contact <type> is message type, e.g. type = 1 is
+ * stringMessage.  <no. lines> is the number of lines in your
+ * message. All messages are broken into lines and sent line by line
+ * (lines should not be larger than 1024 chars).
  *
  * So send each line of message.
  *
- * So router will answer with
+ * So router will answer with (if NO_ACK_MESSAGES isn't set to true)
  *
  * OK
  *
@@ -152,13 +154,14 @@ static const std::string dummyIP = std::string();
  *
  * (3)
  *
- * YourEntity is supposed to be listening to the port passed in handshake. Router will
- * connect to this port and send:
+ * YourEntity is supposed to be listening to the port passed in
+ * handshake. If no_msg_arrival_notification is set to true, then
+ * those steps are skipped and the message is directly send (see
+ * (5)). Otherwise the router will connect to this port and send:
  *
- * cNOTIFY_NEW_MESSAGE
+ * cNOTIFY_NEW_MESSAGE <no. of messages>
  *
  * the prefix 'c' is not a typo :-)
- * routers closes the connection
  *
  * (4) YourEntity decides it want to retrieve unread messages. It will
  * connect to router's port and send:
@@ -176,9 +179,9 @@ static const std::string dummyIP = std::string();
  *
  * cSTART_MESSAGE <from> <to> <type>
  *
- * then routers sends one or more lines of data (the message itself). note
- * that each data line is prefixed with 'd'.
- * Then the router sends either:
+ * then routers sends one or more lines of data (the message itself),
+ * note that each data line is prefixed with 'd'.  Then the router
+ * sends either:
  *
  * cSTART_MESSAGE <from> <to> <type>
  *
@@ -188,12 +191,13 @@ static const std::string dummyIP = std::string();
  *
  * to denote that all messages have been sent already.
  *
- * An important warning is that YourEntity should not request message retrieving if it
- * was not notified first about new messages to it in router. The C++ interface provide
- * this automatically but you must take care of it as you are bypassing
- * the interface.
+ * An important warning is that YourEntity should not request message
+ * retrieving if it was not notified first about new messages to it in
+ * router. The C++ interface provide this automatically but you must
+ * take care of it as you are bypassing the interface.
  *
- * (6) Router connects to YourEntity's port and send:
+ * (6) Router connects to YourEntity's port (creating a second socket
+ * for control) and send:
  *
  * cAVAILABLE_ELEMENT <elementId>
  * or
@@ -428,9 +432,10 @@ public:
     bool controlSocketConnection(const std::string& ne_id);
 
     /**
-    * Estabsish data connection to the network element with the given id, if not
-    * yet connected.
-    * Also updates internal map from network element ids to data sockets.
+    * Establish data connection to the network element with the given
+    * id, if not yet connected.  Also updates internal map from
+    * network element ids to data sockets.
+    *
     * @return true if the connection is established.
     */
     bool dataSocketConnection(const std::string& ne_id);

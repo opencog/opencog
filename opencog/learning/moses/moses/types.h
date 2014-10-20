@@ -220,7 +220,7 @@ struct behavioral_score : public std::vector<score_t>
     {
         size_t sz = rhs.size();
         OC_ASSERT(size() == sz,
-            "Error: Incompatible behavioral_score sizes, this=%z rhs=%z",
+            "Error: Incompatible behavioral_score sizes, this=%zu rhs=%zu",
             size(), sz);
         for (size_t i=0; i<sz; i++) {
             (*this)[i] -= rhs[i];
@@ -234,7 +234,7 @@ static inline behavioral_score operator-(const behavioral_score& lhs,
 {
     size_t sz = rhs.size();
     OC_ASSERT(lhs.size() == sz,
-        "Error: Incompatible behavioral_score sizes, lhs=%z rhs=%z",
+        "Error: Incompatible behavioral_score sizes, lhs=%zu rhs=%zu",
          lhs.size(), sz);
     behavioral_score bs;
     for (size_t i=0; i<sz; i++) {

@@ -42,14 +42,25 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(StackMoreUTest)
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(QuoteUTest)
-	ADD_CXXTEST(EinsteinUTest)
 	ADD_CXXTEST(SingleUTest)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
+# As of 18 Oct 2014 the sudoku test just doesn't work.
+# there's a bug somwhere ... -- Linas
+#	ADD_CXXTEST(SudokuUTest)
+	ADD_CXXTEST(EinsteinUTest)
     
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		cogutil
 	)
 ENDIF (HAVE_GUILE)
+
+# Run only the tests in this subdirectory
+ADD_CUSTOM_TARGET (qtest
+	DEPENDS tests
+	WORKING_DIRECTORY .
+	COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
+	COMMENT "Running pattern-matcher tests..."
+)
 
 # Copy files to the build directory.  We do this so that the
 # scheme files can be found no matter where the source directory
@@ -64,6 +75,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered.scm
     ${PROJECT_BINARY_DIR}/tests/query/unordered.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered-more.scm
     ${PROJECT_BINARY_DIR}/tests/query/unordered-more.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered-exhaust.scm
+    ${PROJECT_BINARY_DIR}/tests/query/unordered-exhaust.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-o-o.scm
     ${PROJECT_BINARY_DIR}/tests/query/stackmore-o-o.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-o-u.scm

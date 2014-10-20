@@ -1,7 +1,7 @@
 /*
  * tests/query/UnorderedUTest.cxxtest
  *
- * Copyright (C) 2009, 2011 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2011, 2014 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -34,9 +34,12 @@ class UnorderedUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
+		Handle pair;
 		Handle disorder;
 		Handle disordered;
 		Handle disor_more;
+		Handle exhaust;
+		Handle exhaust2;
 
 	public:
 
@@ -69,6 +72,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 
 		void tearDown(void) { }
 
+		void test_exhaust(void);
 		void test_un1(void);
 		void test_un2(void);
 };
@@ -96,7 +100,8 @@ void UnorderedUTest::setUp(void)
       "opencog/dynamics/attention/attention_types.scm, "
       "opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
 		"tests/query/unordered.scm, "
-		"tests/query/unordered-more.scm");
+		"tests/query/unordered-more.scm, "
+		"tests/query/unordered-exhaust.scm");
 
 	cogserver().loadModules();
 	load_scm_files_from_config(*as);
@@ -104,9 +109,12 @@ void UnorderedUTest::setUp(void)
 
 	// Create an implication link that will be tested.
 	SchemeEval* eval = new SchemeEval(as);
+	pair = eval->apply("pair", Handle::UNDEFINED);
 	disorder = eval->apply("blink", Handle::UNDEFINED);
 	disordered = eval->apply("blinker", Handle::UNDEFINED);
 	disor_more = eval->apply("blank", Handle::UNDEFINED);
+	exhaust = eval->apply("exhaust", Handle::UNDEFINED);
+	exhaust2 = eval->apply("exhaust-2", Handle::UNDEFINED);
 	delete eval;
 }
 
@@ -125,11 +133,18 @@ void UnorderedUTest::test_un1(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != pair);
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != disorder);
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != disordered);
 
+	// Result should be a ListLink w/ two solutions
+	Handle result = bindlink(as, pair);
+
+	logger().debug("pair result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
+
 	// Result should be a ListLink w/ one solution
-	Handle result = bindlink(as, disorder);
+	result = bindlink(as, disorder);
 
 	logger().debug("first result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
@@ -158,3 +173,27 @@ void UnorderedUTest::test_un2(void)
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
+
+void UnorderedUTest::test_exhaust(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != exhaust);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != exhaust2);
+
+	// Result should be a ListLink w/ 24 solutions
+	Handle result = bindlink(as, exhaust);
+
+	logger().debug("exhaustive result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 48, getarity(result));
+
+	// Result should be a ListLink w/ 36 solutions
+	result = bindlink(as, exhaust2);
+
+	logger().debug("exhaust-2 result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 36, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+

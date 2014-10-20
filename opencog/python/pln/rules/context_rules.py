@@ -8,9 +8,9 @@ from pln.rules.formulas import contextFormula
 Rules to convert certain types of links into ContextLinks
 and to convert these types of links back into ContextLinks.
 Rule explanations can be found in
-    ../../../learning/RuleEngine/rules/pln/contextualize.scm
-    ../../../learning/RuleEngine/rules/pln/decontextualize.scm
-    ../../../learning/RuleEngine/rules/pln/context-free-to-contextualize.scm
+    ../../../reasoning/RuleEngine/rules/pln/contextualize.scm
+    ../../../reasoning/RuleEngine/rules/pln/decontextualize.scm
+    ../../../reasoning/RuleEngine/rules/pln/context-free-to-contextualize.scm
 For further information see also here:
 http://wiki.opencog.org/w/ContextLink
 """

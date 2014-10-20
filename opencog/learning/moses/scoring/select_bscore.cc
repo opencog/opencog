@@ -48,6 +48,21 @@ using namespace combo;
  *
  * If the rows are weighted, then the weighted equivalent of the above
  * boundaries is used.
+ *
+ * As currently implemented, this scorer behaves more-or-less exactly
+ * the same as the plain boolean 'accuracy' scorer applied to the
+ * booleanized version of the data.  That is, this scorer will provide
+ * very similar results, and very similar performance, to what one
+ * would get if one re-processed the contin data, converted the
+ * selection range to an inside-or-outside boolean indicator, and then
+ * used the plain 'it' boolean scorer to measure the accuracy of the
+ * tree.
+ *
+ * The intended generalization, which would differentiate the two,
+ * remains un-implemented.  The generalization would soften the edges
+ * of the selection region, turning it into a trapezoid or a gaussian-
+ * like bump function.  Such a softened-edge selector could not be
+ * mimicked with a pure boolean accuracy scorer.
  */
 select_bscore::select_bscore(const CTable& ctable,
                              double lower_percentile,
@@ -58,6 +73,11 @@ select_bscore::select_bscore(const CTable& ctable,
 {
     OC_ASSERT(id::contin_type == _wrk_ctable.get_output_type(),
         "The selection scorer can only be used with contin-valued tables!");
+
+    // This is needed even if not boosted, as otherwise the
+    // ignore_cols(), ignore_rows() methods strip out rows,
+    // and cause mis-matches during scoring.
+    _return_weighted_score = true;
 
     reset_weights();
 
@@ -167,7 +187,7 @@ behavioral_score select_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
-/// scorer, suitable for use with boosting.
+/// Scorer, suitable for use with boosting.
 behavioral_score select_bscore::operator()(const scored_combo_tree_set& ensemble) const
 {
     // Step 1: accumulate the weighted prediction of each tree in
@@ -292,7 +312,7 @@ score_t select_bscore::get_error(const behavioral_score& bs) const
 }
 
 // XXX This is not quite right, for weighted rows.  A row with a small
-// weight could result in a much smaller min-improv. 
+// weight could result in a much smaller min-improv.
 // (But I think boosting should not affect min-improv, right?)
 score_t select_bscore::min_improv() const
 {

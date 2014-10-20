@@ -437,8 +437,8 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
     return intersection(sets);
 }
 
-/// Return true if the atom is in this atomtable, or in its
-/// environment.
+/// Return true if the atom is in this atomtable, or in the
+/// environment for this atomtable.
 bool AtomTable::inEnviron(AtomPtr atom)
 {
     AtomTable* atab = atom->getAtomTable();
@@ -668,7 +668,7 @@ Handle AtomTable::getRandom(RandGen *rng) const
 
     Handle randy(Handle::UNDEFINED);
 
-    // XXX TODO it would be considerably mor efficient to go into the
+    // XXX TODO it would be considerably more efficient to go into the
     // the type index, and decrement x by the size of the index for
     // each type.  This would speed up the algo by about 100 (by about
     // the number of types that are in use...).
@@ -694,10 +694,10 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // Perhaps the atom is not in any table? Or at least, not in this
     // atom table? Its a user-error if the user is trying to extract
     // atoms that are not in this atomspace, but we're going to be
-    // silent about this error -- it seems pointess to throw.
+    // silent about this error -- it seems pointless to throw.
     if (atom->getAtomTable() != this) return result;
 
-    // lock before fetching the incoming set. Since getting the
+    // Lock before fetching the incoming set. Since getting the
     // incoming set also grabs a lock, we need this mutex to be
     // recursive. We need to lock here to avoid confusion if multiple
     // threads are trying to delete the same atom.
@@ -722,13 +722,21 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
             DPRINTF("[AtomTable::extract] incoming set: %s",
                  (his) ? his->toString().c_str() : "INVALID HANDLE");
 
-            // Note: the below will throw, if the recursion ends
-            // in a child atomspace.  Kind of weird,ugly, but hey...
+            // Something is seriously screwed up if the incoming set
+            // is not in this atomtable, and its not a child of this
+            // atom table.  So flag that as an error; it will assert
+            // a few dozen lines later, below.
+            AtomTable* other = his->getAtomTable();
+            if (other and other != this and not other->inEnviron(handle)) {
+                logger().warn() << "AtomTable::extract() internal error, "
+                                << "non-DAG membership.";
+            }
             if (not his->isMarkedForRemoval()) {
                 DPRINTF("[AtomTable::extract] marked for removal is false");
-
-                AtomPtrSet ex = extract(his, true);
-                result.insert(ex.begin(), ex.end());
+                if (other) {
+                    AtomPtrSet ex = other->extract(his, true);
+                    result.insert(ex.begin(), ex.end());
+                }
             }
         }
     }
@@ -747,13 +755,16 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
             for (size_t i=0; i<ilen; i++)
             {
                 // Its OK if the atom being extracted is in a link
-                // that is not currently in any atom space.
-                // Also, a bit of a race can happen: when the unlock
-                // is done beelow, to send the removed signal, another
-                // thread can sneak in and get to here, because its
-                // deleting a different atom with a shared incoming
-                // and since the incoming set hasn't yet been updated
-                // (that happens after re-acquiring the lock) and so
+                // that is not currently in any atom space, or if that
+                // link is in a child subspace, in which case, we
+                // extract from the child.
+                //
+                // A bit of a race can happen: when the unlock is
+                // done below, to send the removed signal, another
+                // thread can sneak in and get to here, if it is
+                // deleting a different atom with an overlapping incoming
+                // set.  Since the incoming set hasn't yet been updated
+                // (that happens after re-acquiring the lock),
                 // it will look like the incoming set has not yet been
                 // fully cleared.  Well, it hasn't been, but as long as
                 // we are marked for removal, things should end up OK.
@@ -761,14 +772,17 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
                 // XXX this might not be exactly thread-safe, if
                 // other atomspaces are involved...
                 if (iset[i]->getAtomTable() != NULL and
-                    (iset[i]->getAtomTable() != this or 
-                     iset[i]->isMarkedForRemoval() != true)) {
+                    (not iset[i]->getAtomTable()->inEnviron(handle) or
+                     not iset[i]->isMarkedForRemoval()))
+                {
                     Logger::Level lev = logger().getBackTraceLevel();
                     logger().setBackTraceLevel(Logger::ERROR);
+                    logger().warn() << "AtomTable::extract() internal error";
                     logger().warn() << "Non-empty incoming set of size "
                                     << ilen << " First trouble at " << i;
                     logger().warn() << "This atomtable=" << ((void*) this)
-                                    << " non-null atomtale=" << ((void*) iset[i]->getAtomTable());
+                                    << " other atomtale=" << ((void*) iset[i]->getAtomTable())
+                                    << " inEnviron=" << iset[i]->getAtomTable()->inEnviron(handle);
                     logger().warn() << "This atom: " << handle->toString();
                     for (size_t j=0; j<ilen; j++) {
                         logger().warn() << "Atom j=" << j << " " << iset[j]->toString();
@@ -810,8 +824,9 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     importanceIndex.removeAtom(atom);
 
     // XXX Setting the atom table causes AVChanged signals to be emitted.
-    // We should really do this unlocked, but I'm tooo lazy to fix, and
-    // am hoping no one will notice.
+    // We should really do this unlocked, but I'm too lazy to fix, and
+    // am hoping no one will notice. This will probably need to be fixed
+    // someday.
     atom->setAtomTable(NULL);
 
     result.insert(atom);

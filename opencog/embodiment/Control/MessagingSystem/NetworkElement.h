@@ -52,8 +52,8 @@ namespace opencog { namespace messaging {
  * should have a NetworkElement member to participate and exchange information
  * with other units.
  *
- * So a embodiment server should have a loop to check and process all incoming
- * messages of the type it is supposed to receive.
+ * So an embodiment server should have a loop to check and process all
+ * incoming messages of the type it is supposed to receive.
  */
 class NetworkElement
 {
