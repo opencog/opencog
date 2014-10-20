@@ -507,6 +507,7 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 		prtmsg("next clause is", curr_root);
 		dbgprt("This clause is %s\n", _optionals.count(curr_root)? "optional" : "required");
 		prtmsg("joining handle is", curr_pred_handle);
+		prtmsg("join grounding is", var_grounding[curr_pred_handle]);
 
 		// Else, start solving the next unsolved clause. Note: this is
 		// a recursive call, and not a loop. Recursion is halted when
@@ -519,6 +520,8 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 
 		clause_accepted = false;
 		curr_soln_handle = var_grounding[curr_pred_handle];
+		OC_ASSERT(curr_soln_handle != Handle::UNDEFINED,
+			"Error: joining handle has not been grounded yet!");
 		found = soln_up(curr_soln_handle);
 
 		// If we are here, and found is false, then we've exhausted all
@@ -532,8 +535,8 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 		// depend on recursion to find additional unmatched optional
 		// clauses; thus we have to explicitly loop over all optional
 		// clauses that don't have matches.
-		while ((false == found) &&
-		       (false == clause_accepted) &&
+		while ((false == found) and
+		       (false == clause_accepted) and
 		       (_optionals.count(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
@@ -628,6 +631,9 @@ bool PatternMatchEngine::pred_up(Handle h)
  * grounded, and as-yet-ungrounded clauses may be in this set.  The
  * sole reason of this set is to avoid infinite resursion, i.e. of
  * re-identifying the same clause over and over as unsolved.
+ *
+ * The words "solved" and "grounded" are used as synonyms throught the
+ * code.
  */
 void PatternMatchEngine::get_next_untried_clause(void)
 {
@@ -648,6 +654,14 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		RootList *rl = vk.second;
 		pursue = vk.first;
 
+		// Pursue will become the joining atom, that is shared in common
+		// with the a full grounded clause, and an as-yet ungrounded
+		// clause. We need it to be grounded as well, as otherwise the
+		// join will fail.  This can happen when a clause is "fully"
+		// grounded, but the grounding contains a subtree that has a
+		// variable in it that has not yet been grounded. 
+		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
+
 		unsolved = false;
 		solved = false;
 
@@ -660,7 +674,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 			{
 				solved = true;
 			}
-			else if ((issued.end() == issued.find(root)) &&
+			else if ((issued.end() == issued.find(root)) and
 			         (_optionals.end() == _optionals.find(root)))
 			{
 				unsolved_clause = root;
@@ -683,16 +697,15 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		// If there are two ungrounded variables in a clause, then the
 		// "thickness" is the *product* of the sizes of the two incoming
 		// sets. Thus, the fewer ungrounded variables, the better.
-		if (solved && unsolved) break;
+		if (solved and unsolved) break;
 	}
 
-	if (solved && unsolved)
+	if (solved and unsolved)
 	{
-		// Pursue is a pointer to a node that's shared between
-		// several clauses. One of the predicates has been
-		// solved, another has not.  We want to now traverse
-		// upwards from this node, to find the top of the
-		// unsolved clause.
+		// Pursue is a pointer to a (variable) node that's shared between
+		// several clauses. One of the predicates has been grounded,
+		// another has not.  We want to now traverse upwards from this node,
+		// to find the top of the ungrounded clause.
 		curr_root = unsolved_clause;
 		curr_pred_handle = pursue;
 
@@ -703,15 +716,31 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		}
 	}
 
-	unsolved = false;
-	solved = false;
+	// If there are no optional clauses, we are done.
+	if (0 == _optionals.size())
+	{
+		// There are no more ungrounded clauses to consider. We are done.
+		curr_root = Handle::UNDEFINED;
+		curr_pred_handle = Handle::UNDEFINED;
+		return;
+	}
 
 	// Try again, this time, considering the optional clauses.
+	unsolved = false;
+	solved = false;
 	for (k = _root_map.begin(); k != _root_map.end(); k++)
 	{
 		RootPair vk = *k;
 		RootList *rl = vk.second;
 		pursue = vk.first;
+
+		// Pursue will become the joining atom, that is shared in common
+		// with the a full grounded clause, and an as-yet ungrounded
+		// clause. We need it to be grounded as well, as otherwise the
+		// join will fail.  This can happen when a clause is "fully"
+		// grounded, but the grounding contains a subtree that has a
+		// variable in it that has not yet been grounded. 
+		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
 
 		unsolved = false;
 		solved = false;
@@ -732,10 +761,10 @@ void PatternMatchEngine::get_next_untried_clause(void)
 				unsolved = true;
 			}
 		}
-		if (solved && unsolved) break;
+		if (solved and unsolved) break;
 	}
 
-	if (solved && unsolved)
+	if (solved and unsolved)
 	{
 		// Pursue is a pointer to a node that's shared between
 		// several clauses. One of the predicates has been
