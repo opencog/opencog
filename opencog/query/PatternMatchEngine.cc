@@ -663,6 +663,35 @@ bool PatternMatchEngine::pred_up(Handle h)
  */
 void PatternMatchEngine::get_next_untried_clause(void)
 {
+	// First, try to ground all the mandatory clauses, only.
+	// Optional clauses are grounded only after all teh mandatory
+	// ones are done.
+	if (get_next_untried_helper(false)) return;
+
+	// If there are no optional clauses, we are done.
+	if (0 == _optionals.size())
+	{
+		// There are no more ungrounded clauses to consider. We are done.
+		curr_root = Handle::UNDEFINED;
+		curr_pred_handle = Handle::UNDEFINED;
+		return;
+	}
+
+	// Try again, this time, considering the optional clauses.
+	if (get_next_untried_helper(true)) return;
+
+	// If we are here, there are no more unsolved clauses to consider.
+	curr_root = Handle::UNDEFINED;
+	curr_pred_handle = Handle::UNDEFINED;
+}
+
+/// Same as above, but with a boolean flag:  if not set, then only the
+/// list of mandatory clauses is considered, else all clauses (mandatory
+/// and optional) are considered.
+///
+/// Return true if we found the next ungrounded clause.
+bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
+{
 	// Search for an as-yet ungrounded clause. Search for required
 	// clauses first; then, only if none of those are left, move on
 	// to the optional clauses.  We can find ungrounded clauses by
@@ -692,10 +721,8 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		// a rather pathological situation (i.e. grounding a clause with
 		// another clause that has bound variables in it), and it will
 		// probably be rejected at some point.  But, for now, this is a
-		// semi-plausible situation.  We have two choices, for now:
-		// continue with the loop, ignoring this join, or abort.
-		//
-		// See also cut-n-paste of this loop below.
+		// semi-plausible situation.  So we skip this joiner, and look 
+		// for another.
 		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
 
 		std::vector<Handle>::iterator i = rl->begin();
@@ -708,7 +735,8 @@ void PatternMatchEngine::get_next_untried_clause(void)
 				solved = true;
 			}
 			else if ((issued.end() == issued.find(root)) and
-			         (_optionals.end() == _optionals.find(root)))
+			         (search_optionals or 
+			          (_optionals.end() == _optionals.find(root))))
 			{
 				unsolved_clause = root;
 				unsolved = true;
@@ -746,77 +774,11 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		if (Handle::UNDEFINED != unsolved_clause)
 		{
 			issued.insert(unsolved_clause);
-			return;
+			return true;
 		}
 	}
 
-	// If there are no optional clauses, we are done.
-	if (0 == _optionals.size())
-	{
-		// There are no more ungrounded clauses to consider. We are done.
-		curr_root = Handle::UNDEFINED;
-		curr_pred_handle = Handle::UNDEFINED;
-		return;
-	}
-
-	// Try again, this time, considering the optional clauses.
-	unsolved = false;
-	solved = false;
-	for (k = _root_map.begin(); k != _root_map.end(); k++)
-	{
-		RootPair vk = *k;
-		RootList *rl = vk.second;
-		pursue = vk.first;
-
-		unsolved = false;
-		solved = false;
-
-		// Pursue will become the joining atom, that is shared in common
-		// with the a full grounded clause, and an as-yet ungrounded
-		// clause. We need it to be grounded as well, as otherwise the
-		// join will fail.  See above.
-		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
-
-		std::vector<Handle>::iterator i = rl->begin();
-		std::vector<Handle>::iterator iend = rl->end();
-		for (; i != iend; i++)
-		{
-			Handle root(*i);
-			Handle root_gnd(clause_grounding[root]);
-			if (Handle::UNDEFINED != root_gnd)
-			{
-				solved = true;
-			}
-			else if (issued.end() == issued.find(root))
-			{
-				unsolved_clause = root;
-				unsolved = true;
-			}
-			if (solved and unsolved) break;
-		}
-		if (solved and unsolved) break;
-	}
-
-	if (solved and unsolved)
-	{
-		// Pursue is a pointer to a node that's shared between
-		// several clauses. One of the predicates has been
-		// solved, another has not.  We want to now traverse
-		// upwards from this node, to find the top of the
-		// unsolved clause.
-		curr_root = unsolved_clause;
-		curr_pred_handle = pursue;
-
-		if (Handle::UNDEFINED != unsolved_clause)
-		{
-			issued.insert(unsolved_clause);
-			return;
-		}
-	}
-
-	// If we are here, there are no more unsolved clauses to consider.
-	curr_root = Handle::UNDEFINED;
-	curr_pred_handle = Handle::UNDEFINED;
+	return false;
 }
 
 /* ======================================================== */
