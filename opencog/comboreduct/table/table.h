@@ -1023,6 +1023,12 @@ CTable::CTable(const Func& func, arity_t arity, int nsamples)
     *this = table.compressed();
 }
 
+/////////////////////
+// Subsample table //
+/////////////////////
+
+// Remove enough rows randomly so that the table has only nrows
+void subsampleTable(unsigned nrows, Table& table);
 
 ////////////////////////
 // Mutual Information //

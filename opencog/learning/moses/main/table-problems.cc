@@ -119,7 +119,7 @@ void table_problem_base::common_setup(problem_params& pms)
 
         // Possibly subsample the table
         if (pms.nsamples > 0)
-            subsampleTable(table, pms.nsamples);
+            subsampleTable(pms.nsamples, table);
 
         // Compressed table
         _ctables.push_back(table.compressed(_tpp.weighting_feature));

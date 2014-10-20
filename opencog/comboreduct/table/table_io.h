@@ -242,22 +242,6 @@ std::ostream& ostreamCTable(std::ostream& out, const CTable& ct);
 /// timestamp, chronologically ordered.
 std::ostream& ostreamCTableTime(std::ostream& out, const CTableTime& ctt);
 
-/**
- * template to subsample input and output tables, after subsampling
- * the table have size min(nsamples, *table.size())
- */
-void subsampleTable(ITable& it, OTable& ot, unsigned nsamples);
-
-/**
- * Like above on Table instead of ITable and OTable
- */
-void subsampleTable(Table& table, unsigned nsamples);
-
-/**
- * like above but subsample only the input table
- */
-void subsampleTable(ITable& it, unsigned nsamples);
-
 std::ostream& operator<<(std::ostream& out, const ITable& it);
 
 std::ostream& operator<<(std::ostream& out, const OTable& ot);
