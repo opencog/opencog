@@ -190,11 +190,30 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 
 	// If both are links, compare them as such.
 	// Unless pattern link is a QuoteLink, in which case, the quoted
-	// contents is compared.
+	// contents is compared. (well, that was done up above...)
 	LinkPtr lp(LinkCast(hp));
 	LinkPtr lg(LinkCast(hg));
 	if (lp and lg)
 	{
+		// The proposed grounding must NOT contain any bound variables!
+		// .. unless they are quoted in the pattern, in which case they
+		// are allow. The below checks this case. The check is not entirely
+		// correct though; there ar some weird corner cses what a variable
+		// may appear quoted in the pattern, but be in the wrong spot
+		// entirely in the proposed grounding, and so should not be allowed.
+		// For now, we punt on this... a proper fix would be .. hard.
+		if (any_node_in_tree(hg, _bound_vars))
+		{
+			for (Handle vh: _bound_vars)
+			{
+				if (is_node_in_tree(hg, vh))
+				{
+					if (is_quoted_in_tree(hp, vh)) continue;
+					return true;
+				}
+			}
+		}
+
 		// Let the callback perform basic checking.
 		bool mismatch = pmc->link_match(lp, lg);
 		if (mismatch) return true;
@@ -675,6 +694,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		// for now, this is a plausible situation, so we have to deal
 		// with it, here, else we will crash.)
 		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
+//xxxxxxx
 
 		std::vector<Handle>::iterator i = rl->begin();
 		std::vector<Handle>::iterator iend = rl->end();
@@ -691,6 +711,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 				unsolved_clause = root;
 				unsolved = true;
 			}
+			if (solved and unsolved) break;
 		}
 
 		// XXX TODO ... Rather than settling for the first one that we find,
@@ -775,6 +796,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 				unsolved_clause = root;
 				unsolved = true;
 			}
+			if (solved and unsolved) break;
 		}
 		if (solved and unsolved) break;
 	}

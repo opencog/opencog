@@ -145,6 +145,7 @@ void QuoteUTest::test_quoted_variable(void)
     TS_ASSERT_EQUALS(0, strcmp("banana", as->getName(banana).c_str()));
 
     // ----------------------------------------------
+    logger().debug("BEGIN subtest bother: %s", __FUNCTION__);
     bindy = eval->eval_h("bother");
 
     banana = bindlink(as, bindy);
@@ -155,6 +156,7 @@ void QuoteUTest::test_quoted_variable(void)
     TS_ASSERT_EQUALS(0, strcmp("banana", as->getName(banana).c_str()));
 
     // ----------------------------------------------
+    logger().debug("BEGIN subtest bunbound: %s", __FUNCTION__);
     bindy = eval->eval_h("bunbound");
 
     banana = bindlink(as, bindy);
