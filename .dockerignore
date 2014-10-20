@@ -1,4 +1,7 @@
-bin
-build
+bin*/*
+build*/*
 .git
-tags
+tags/*
+.pyc
+*~
+
