@@ -42,6 +42,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(StackMoreUTest)
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(QuoteUTest)
+	ADD_CXXTEST(BuggyLinkUTest)
 	ADD_CXXTEST(SingleUTest)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
 # As of 18 Oct 2014 the sudoku test just doesn't work.
