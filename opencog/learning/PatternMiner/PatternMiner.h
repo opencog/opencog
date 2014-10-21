@@ -164,13 +164,18 @@ namespace PatternMining
 
       // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
      void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap, AtomSpace* _fromAtomSpace);
-     void extractAllNodesInLink(Handle link, set<Handle>& allNodes, AtomSpace *_fromAtomSpace); // just find all the nodes in the original atomspace for this link
+     void extractAllNodesInLink(Handle link, set<Handle>& allNodes, AtomSpace* _fromAtomSpace);
+     void extractAllNodesInLink(Handle link, map<Handle, unsigned int> &allNodes, AtomSpace* _fromAtomSpace, unsigned index); // just find all the nodes in the original atomspace for this link
      void extractAllVariableNodesInLink(Handle link, set<Handle>& allNodes, AtomSpace* _atomSpace);
 
      // if a link contains only variableNodes , no const nodes
      bool onlyContainVariableNodes(Handle link, AtomSpace* _atomSpace);
 
-     void extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, HTreeNode* parentNode, set<Handle> &sharedNodes, AtomSpace *_fromAtomSpace, unsigned int gram = 1);
+     void extractAllPossiblePatternsFromInputLinksBF(vector<Handle>& inputLinks,  HTreeNode* parentNode,set<Handle>& sharedNodes, unsigned int gram);
+
+     // vector<HTreeNode *> &allHTreeNodes is output all the HTreeNodes found
+     void extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& inputLinks,unsigned int sharedLinkIndex, AtomSpace* _fromAtomSpace,
+                                                     vector<HTreeNode*>& allLastGramHTreeNodes, vector<HTreeNode*>& allHTreeNodes, unsigned int gram = 1);
 
      void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings, HandleSeq &outVariableNodes);
 
@@ -178,21 +183,39 @@ namespace PatternMining
      // Output all the variable nodes in the toAtomSpace BTW
      HandleSeq swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq &outVariableNodes);
 
+
+     void swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings,
+                                                       HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool& containVar );
+
+     HandleSeq swapLinksBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel);
+
      void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, set<Handle>& allVarNodes);
 
-     void extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, AtomSpace *_fromAtomSpace, unsigned int gram, vector<set<Handle> > &newExtendedLinks);
+     void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, map<Handle, unsigned int>& allVarNodes, unsigned index);
 
-     void findAllInstancesForGivenPattern(HTreeNode* HNode);
+     void extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance, AtomSpace* _fromAtomSpace, unsigned int gram,
+          vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<set<Handle>>& newConnectedLinksFoundThisGram);
 
-     void growTheFirstGramPatternsTask();
+     void extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
 
-     void ConstructTheFirstGramPatterns();
 
-     void growPatternsTask();
+     void findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* HNode);
 
-     void GrowAllPatterns();
+     void findAllInstancesForGivenPatternBF(HTreeNode* HNode);
+
+     void growTheFirstGramPatternsTaskBF();
+
+     void ConstructTheFirstGramPatternsBF();
+
+     void growPatternsTaskBF();
+
+     void GrowAllPatternsBF();
 
      void growPatternsDepthFirstTask();
+
+     void generateNextCombinationGroup(bool* &indexes, int n_max);
+
+     bool isLastNElementsAllTrue(bool* array, int size, int n);
 
      bool isInHandleSeq(Handle handle, HandleSeq &handles);
 
@@ -230,9 +253,17 @@ namespace PatternMining
 
      void generateComponentCombinations(string componentsStr, vector<vector<vector<unsigned int>>> &componentCombinations);
 
-     unsigned int getCountOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern);
+     unsigned int getCountOfAConnectedPattern(string& connectedPatternKey, HandleSeq& connectedPattern);
 
      void calculateSurprisingness( HTreeNode* HNode);
+
+     void getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtendedLink, Handle& leaf, Handle& varNode,
+                                                                 HandleSeq& outPutExtendedPatternLinks, AtomSpace* _fromAtomSpace);
+
+     bool isALinkOneInstanceOfGivenPattern(Handle &instanceLink, Handle& patternLink, AtomSpace* instanceLinkAtomSpace);
+
+     void reNameNodesForALink(Handle& inputLink, Handle& nodeToBeRenamed, Handle& newNamedNode,HandleSeq& renameOutgoingLinks,
+                                            AtomSpace* _fromAtomSpace, AtomSpace* _toAtomSpace);
 
      void filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, AtomSpace* _atomSpace);
 
