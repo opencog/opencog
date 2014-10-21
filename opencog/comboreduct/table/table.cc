@@ -893,13 +893,15 @@ void subsampleTable(unsigned nrows, ITable& it, OTable& ot, TTable& tt)
 
 void subsampleTable(float ratio, Table& table)
 {
-    OC_ASSERT(0.0 <= ratio and ratio <= 1.0);
+    OC_ASSERT(0.0 <= ratio and ratio <= 1.0,
+              "Ratio must be in [0.0, 1.0], but is %f", ratio);
     subsampleTable(ratio * table.size(), table.itable, table.otable, table.ttable);
 }
 
 void subsampleCTable(float ratio, CTable& ctable)
 {
-    OC_ASSERT(0.0 <= ratio and ratio <= 1.0);
+    OC_ASSERT(0.0 <= ratio and ratio <= 1.0,
+              "Ratio must be in [0.0, 1.0], but is %f", ratio);
     std::set<unsigned> rm_row_idxs;
     unsigned ctable_usize = ctable.uncompressed_size(),
         nremove = (1.0 - ratio) * ctable_usize;
