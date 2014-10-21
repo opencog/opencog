@@ -123,7 +123,7 @@
 	(cond ((string=? subj_concept "_$qVar")
 			(list 
 				(InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj_concept df-node-stv) df-link-stv)
-				(InheritanceLink (ConceptNode "_$qVar" df-node-stv) (VariableNode obj_instance df-node-stv))
+				(InheritanceLink (VariableNode "_$qVar" df-node-stv) (ConceptNode obj_instance df-node-stv))
 			)
 		)	
 		((string=? obj_concept "_$qVar")
@@ -208,7 +208,7 @@
 ;
 ; SVO
 ;
-; Declarative: 			"Computers suck ass."
+; Declarative: 			"Computers can bite me."
 ; Prepositional:		"The book is on the table."
 ; Subject query: 		"What bothers you?" "Who programmed you?" "What is on the table?"
 ; Object query: 		"What did you say?" "Who do you love?"
