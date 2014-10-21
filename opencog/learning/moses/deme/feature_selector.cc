@@ -212,13 +212,7 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const
                 rm_timestamps.insert(randset_erase(timestamps));
             fs_ctable.remove_rows_at_times(rm_timestamps);
         } else {
-            std::set<unsigned> rm_row_idxs;
-            unsigned fs_ctable_usize = fs_ctable.uncompressed_size(),
-                rm_size = (1.0 - params.subsampling_ratio) * fs_ctable_usize;
-            lazy_random_selector rm_selector(fs_ctable_usize);
-            dorepeat(rm_size)
-                rm_row_idxs.insert(rm_selector.select());
-            fs_ctable.remove_rows(rm_row_idxs);
+            subsampleCTable(params.subsampling_ratio, fs_ctable);
         }
     }
 

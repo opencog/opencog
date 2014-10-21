@@ -36,6 +36,7 @@
 
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/lazy_random_selector.h>
 
 #include "../combo/ann.h"
 #include "../combo/simple_nn.h"
@@ -890,9 +891,23 @@ void subsampleTable(unsigned nrows, ITable& it, OTable& ot, TTable& tt)
     }
 }
 
-void subsampleTable(unsigned nrows, Table& table)
+void subsampleTable(float ratio, Table& table)
 {
-    subsampleTable(nrows, table.itable, table.otable, table.ttable);
+    OC_ASSERT(0.0 <= ratio and ratio <= 1.0);
+    subsampleTable(ratio * table.size(), table.itable, table.otable, table.ttable);
+}
+
+void subsampleCTable(float ratio, CTable& ctable)
+{
+    OC_ASSERT(0.0 <= ratio and ratio <= 1.0);
+    std::set<unsigned> rm_row_idxs;
+    unsigned ctable_usize = ctable.uncompressed_size(),
+        nremove = (1.0 - ratio) * ctable_usize;
+    lazy_random_selector rm_selector(ctable_usize);
+    dorepeat(nremove)
+        rm_row_idxs.insert(rm_selector.select());
+    ctable.remove_rows(rm_row_idxs);
+    subsampleCTable(ratio * ctable.uncompressed_size(), ctable);
 }
 
 ////////////////////////

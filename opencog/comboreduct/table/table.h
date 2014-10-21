@@ -1027,8 +1027,9 @@ CTable::CTable(const Func& func, arity_t arity, int nsamples)
 // Subsample table //
 /////////////////////
 
-// Remove enough rows randomly so that the table has only nrows
-void subsampleTable(unsigned nrows, Table& table);
+// Randomly remove rows so that the new size is ratio * table size
+void subsampleTable(float ratio, Table& table);
+void subsampleCTable(float ratio, CTable& ctable);
 
 ////////////////////////
 // Mutual Information //

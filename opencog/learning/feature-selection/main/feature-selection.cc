@@ -70,6 +70,7 @@ vector<double> score_individual_features(const Table& table,
 {
     typedef set<arity_t> FS;
     CTable ctable = table.compressed();
+
     fs_scorer<FS> fs_sc(ctable, fs_params);
     vector<double> res;
     boost::transform(boost::irange(0, table.get_arity()), back_inserter(res),
@@ -185,6 +186,12 @@ feature_set select_features(const Table& table,
                             const feature_selection_parameters& fs_params)
 {
     CTable ctable = table.compressed();
+    if (fs_params.subsampling_ratio < 1.0) {
+        logger().debug() << "Subsample table (size = "
+                         << ctable.uncompressed_size() << ")";
+        subsampleCTable(fs_params.subsampling_ratio, ctable);
+        logger().debug() << "New size = " << ctable.uncompressed_size();
+    }
     return select_features(ctable, fs_params);
 }
 
