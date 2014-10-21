@@ -176,6 +176,17 @@
 	))
 )
 
+(define (imperative-rule verb verb_instance obj_concept obj_instance)
+	(list (ImplicationLink  (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+	(InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj_concept df-node-stv) df-link-stv)
+	(EvaluationLink df-link-stv
+		(PredicateNode verb_instance df-node-stv)
+		(ListLink df-link-stv
+			(ConceptNode "you" df-node-stv)
+			(ConceptNode obj_instance df-node-stv)
+		)
+    ))
+)
 
 ; -----------------------------------------------------------------------
 ; Adjective and adverb rules
