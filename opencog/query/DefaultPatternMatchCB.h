@@ -123,6 +123,8 @@ class DefaultPatternMatchCB :
 		 */
 		virtual bool link_match(LinkPtr& lpat, LinkPtr& lsoln)
 		{
+			// If the pattern is exactly the same link as the proposed
+			// grounding, then its a perfect match. 
 			if (lpat == lsoln) return false;
 
 			if (lpat->getArity() != lsoln->getArity()) return true;

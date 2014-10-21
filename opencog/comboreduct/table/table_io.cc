@@ -1399,37 +1399,6 @@ ostream& ostreamCTableTime(ostream& out, const CTableTime& ctt)
 }
 
 // ===========================================================
-// subsample stuff
-
-void subsampleTable(ITable& it, OTable& ot, unsigned nsamples)
-{
-    OC_ASSERT(it.size() == ot.size());
-    if(nsamples < ot.size()) {
-        unsigned int nremove = ot.size() - nsamples;
-        dorepeat(nremove) {
-            unsigned int ridx = randGen().randint(ot.size());
-            it.erase(it.begin()+ridx);
-            ot.erase(ot.begin()+ridx);
-        }
-    }
-}
-
-void subsampleTable(Table& table, unsigned nsamples)
-{
-    subsampleTable(table.itable, table.otable, nsamples);
-}
-
-void subsampleTable(ITable& it, unsigned nsamples) {
-    if(nsamples < it.size()) {
-        unsigned int nremove = it.size() - nsamples;
-        dorepeat(nremove) {
-            unsigned int ridx = randGen().randint(it.size());
-            it.erase(it.begin()+ridx);
-        }
-    }
-}
-
-// ===========================================================
 // operator<< for the various tables and stuff.
 
 ostream& operator<<(ostream& out, const ITable& it)

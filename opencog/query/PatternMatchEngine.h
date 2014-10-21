@@ -69,6 +69,7 @@ class PatternMatchEngine
 		Handle curr_soln_handle;
 		Handle curr_pred_handle;
 		void get_next_untried_clause(void);
+		bool get_next_untried_helper(bool);
 
 		// Stack used during recursive exploration.
 		std::stack<Handle> pred_handle_stack;

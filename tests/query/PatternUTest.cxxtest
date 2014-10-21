@@ -31,6 +31,7 @@
 
 using namespace opencog;
 
+// This implements the most basic, simplest test of the pattern matcher.
 class PatternUTest: public CxxTest::TestSuite
 {
 	private:
@@ -121,7 +122,7 @@ bool PMCB::node_match(Node *npat, Node *nsoln)
 	Type pattype = npat->getType();
 	Type soltype = nsoln->getType();
 
-	// Reject obvioius misatches
+	// Reject obvioius mismatches
 	if (pattype != soltype) return true;
 
 	Handle ha = npat->getHandle();
@@ -369,6 +370,8 @@ void PatternUTest::test_eval(void)
 	TSM_ASSERT("incorrect pr-node", hprnode == pmcb.vars[hprn]);
 	TSM_ASSERT("incorrect predicate", hoc == pmcb.preds[heval]);
 
+	// ----------------------------------------
+	logger().debug("BEGIN second subtest: %s", __FUNCTION__);
 	// Do it again, but with a truncated list 
 	Handle hls = as->addLink(LIST_LINK, h1, h2);
 
@@ -394,11 +397,14 @@ void PatternUTest::test_eval(void)
 	TSM_ASSERT("incorrect pr-node", hshort_prnode == pmcb.vars[hprns]);
 	TSM_ASSERT("incorrect predicate", hshort_oc == pmcb.preds[hshort_eval]);
 
+	// ----------------------------------------------
+	logger().debug("BEGIN third subtest: %s", __FUNCTION__);
 	// And do it again, now matching two clauses
+	// The first clause was set up above; tack on the second one.
 	preds.push_back(hshort_eval);
 	vars.insert(hprns);
 	pmcb.found = 0; // reset the counter !!
-	pme.match(&pmcb, vars, preds, snegs);
+	pme.match(&pmcb, vars, preds, negs);
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
 	TSM_ASSERT("incorrect solution", hitem_2 == pmcb.vars[h2]);
 	TSM_ASSERT("incorrect pr-node", hprnode == pmcb.vars[hprn]);
