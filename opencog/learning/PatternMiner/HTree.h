@@ -38,9 +38,9 @@ namespace opencog
 
      class  HTreeNode;
 
-     struct ExtendRelation // to store all the super patterns of a pattern
+     struct ExtendRelation // to store a super pattern of a pattern
      {
-         HTreeNode* extendedHTreeNode;
+         HTreeNode* extendedHTreeNode; // the super pattern HTreeNode
          Handle sharedLink; // the link in original pattern that connect to new extended Link
          Handle newExtendedLink; // in super pattern
      };

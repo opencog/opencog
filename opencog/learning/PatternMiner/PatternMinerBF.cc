@@ -281,7 +281,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(vector<Handle>& in
                         newHTreeNode->var_num = var_num;
 
                         // Find All Instances in the original AtomSpace For this Pattern
-                        findAllInstancesForGivenPatternBF(newHTreeNode);
+                        findAllInstancesForGivenPatternInNestedAtomSpace(newHTreeNode);
 
                         if (parentNode)
                         {
@@ -703,14 +703,14 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
                HNode->instances.push_back(instanceLinks);
        }
 
-       originalAtomSpace->removeAtom(listH);
+ //      originalAtomSpace->removeAtom(listH);
    }
 
-   originalAtomSpace->removeAtom(hBindLink);
-   originalAtomSpace->removeAtom(hImplicationLink);
-   originalAtomSpace->removeAtom(hAndLink);
-   originalAtomSpace->removeAtom(hResultListLink);
-   originalAtomSpace->removeAtom(hVariablesListLink);
+//   originalAtomSpace->removeAtom(hBindLink);
+//   originalAtomSpace->removeAtom(hImplicationLink);
+//   originalAtomSpace->removeAtom(hAndLink);
+//   originalAtomSpace->removeAtom(hResultListLink);
+//   originalAtomSpace->removeAtom(hVariablesListLink);
 
 //   foreach (Handle linkToDel , linksWillBeDel)
 //   {

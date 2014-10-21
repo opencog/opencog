@@ -1429,7 +1429,7 @@ void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtended
 // make sure only input 2~4 gram patterns
 void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
 {
-    std::cout << "=================Debug: calculateSurprisingness for pattern: ====================\n";
+    std::cout << "=================Debug: calculate I_Surprisingness for pattern: ====================\n";
     foreach (Handle link, HNode->pattern)
     {
         std::cout << atomSpace->atomAsString(link);
@@ -1608,21 +1608,18 @@ void PatternMiner::generateComponentCombinations(string componentsStr, vector<ve
 PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram): originalAtomSpace(_originalAtomSpace)
 {
     htree = new HTree();
-    atomSpace = new AtomSpace( );
+    atomSpace = new AtomSpace( _originalAtomSpace);
 
     unsigned int system_thread_num  = std::thread::hardware_concurrency();
 
-//    if (system_thread_num > 1)
-//        THREAD_NUM = system_thread_num - 1;
-//    else
-//        THREAD_NUM = 1;
+    if (system_thread_num > 1)
+        THREAD_NUM = system_thread_num - 1;
+    else
+        THREAD_NUM = 1;
 
-    // use all the threads in this machine
-    // THREAD_NUM = system_thread_num;
+     // use all the threads in this machine
+     THREAD_NUM = system_thread_num;
 
-
-//    // test only one tread for now
-    THREAD_NUM = 1;
 
     threads = new thread[THREAD_NUM];
 
