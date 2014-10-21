@@ -1,0 +1,116 @@
+/*
+ * tests/query/BuggyLinkUTest.cxxtest
+ *
+ * Copyright (C) 2014 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/query/BindLink.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class BuggyLinkUTest: public CxxTest::TestSuite
+{
+private:
+        AtomSpace *as;
+        SchemeEval* eval;
+
+public:
+    BuggyLinkUTest(void)
+    {
+        try
+        {
+             config().load("opencog-test.conf");
+        }
+        catch (RuntimeException &e)
+        {
+            std::cerr << e.getMessage() << std::endl;
+        }
+        logger().setFilename(config()["LOG_FILE"]);
+        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+        server(CogServer::createInstance);
+        as = &cogserver().getAtomSpace();
+        eval = new SchemeEval(as);
+
+        config().set("MODULES",
+            "opencog/query/libQueryModule.so");
+
+        cogserver().loadModules();
+    }
+
+    ~BuggyLinkUTest()
+    {
+        delete as;
+        // Erase the log file if no assertions failed.
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+                std::remove(logger().getFilename().c_str());
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_link(void);
+};
+
+void BuggyLinkUTest::tearDown(void)
+{
+    as->clear();
+}
+
+void BuggyLinkUTest::setUp(void)
+{
+    as->clear();
+    config().set("SCM_PRELOAD",
+        "opencog/atomspace/core_types.scm, "
+        "opencog/scm/utilities.scm");
+
+    load_scm_files_from_config(*as);
+}
+
+
+/*
+ * BuggyLink unit test.  Test binding to unquoted links.
+ * This test explicitly tests the bug described in 
+ * https://github.com/opencog/opencog/issues/1025
+ * The old pattern matcher would crash with a null-pointer deref.
+ * The current one works great.
+ */
+void BuggyLinkUTest::test_link(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/buggy-link.scm");
+    load_scm_files_from_config(*as);
+
+    Handle bindy = eval->eval_h("bindy");
+
+    Handle lily = bindlink(as, bindy);
+    logger().debug() << "Result is this:\n" << lily->toString();
+
+    TS_ASSERT_EQUALS(1, as->getArity(lily));
+}
+
