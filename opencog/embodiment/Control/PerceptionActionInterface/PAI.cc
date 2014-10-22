@@ -86,7 +86,7 @@ using namespace opencog::control;
 using namespace opencog;
 
 PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
-        AvatarInterface& _avatarInterface, unsigned long nextPlanID) :
+         AvatarInterface& _avatarInterface, unsigned long nextPlanID) :
     atomSpace(_atomSpace), actionSender(_actionSender),
     avatarInterface(_avatarInterface), nextActionPlanId(nextPlanID)
 {
@@ -224,17 +224,19 @@ void PAI::sendActionPlan(ActionPlanID planId) throw (opencog::RuntimeException, 
     }
 }
 
-void PAI::sendExtractedActionFromPlan(ActionPlanID planId, unsigned int actionSeqNum) throw (opencog::RuntimeException, std::bad_exception)
+void PAI::sendExtractedActionFromPlan(ActionPlanID planId,
+                                      unsigned int actionSeqNum)
+    throw (opencog::RuntimeException, std::bad_exception)
 {
     ActionPlanMap::const_iterator it = inProgressActionPlans.find(planId);
 
-	// send the first action in the plan and mark the plan as a pending one.
+	// Send the first action in the plan and mark the plan as a pending one.
     if (it != inProgressActionPlans.end()) {
         const ActionPlan& plan = it->second;
         if (actionSender.sendSpecificActionFromPlan(plan, actionSeqNum)) {
-            // mark action plan as sent by moving it from inProgress to pending map
-            
-            // must be added first. Otherwise the reference to the plan becomes invalid
+            // Mark action plan as sent by moving it from inProgress
+            // to pending map must be added first. Otherwise the
+            // reference to the plan becomes invalid
             pendingActionPlans[planId] = plan;
             inProgressActionPlans.erase(it);
 

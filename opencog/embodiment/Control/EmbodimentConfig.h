@@ -70,7 +70,8 @@ protected:
             "LS_IP",                        "127.0.0.1",
             "LS_PORT",                      "16314",
 
-            // These 2 parameters define the maximal number of pets monitored by a same spawner
+            // These 2 parameters define the maximal number of pets
+            // monitored by a same spawner
             "MIN_OAC_PORT",                 "16326",
             "MAX_OAC_PORT",                 "16330",
             
@@ -78,8 +79,12 @@ protected:
             "COMBO_SHELL_IP",               "127.0.0.1",
             "COMBO_SHELL_PORT",             "16316",
             
-            // IP and Port are informed by Proxy when it sends a LOGIN message to router.
-            // Anyway, fyi, the mockyProxy uses port 16315 and the real Proxy 8211
+            // IP and Port are informed by Proxy when it sends a LOGIN
+            // message to router.
+            //
+            // Warning: PROXY_ID is actually overwritten by
+            // OACExecutable.cc so that the PROXY ID is defined at run
+            // time by the Unity player when creating an OAC instance
             "PROXY_ID",                     "PROXY",
 
             // OAC settings

@@ -177,11 +177,10 @@ bool NetworkElement::sendMessage(Message &msg)
     std::string messagePayload = msg.getPlainTextRepresentation();
 
     if (logger().isFineEnabled()) {
-        logger().fine("NeworkElement - Preparing to send message:\n%s", messagePayload.c_str() );
-    } // if
-
-    if (logger().isFineEnabled()) {
-        logger().fine("NetworkElement - Sending message to %s.", msg.getTo().c_str() );
+        logger().fine("NeworkElement - Preparing to send message:\n%s",
+                      messagePayload.c_str() );
+        logger().fine("NetworkElement - Sending message to %s.",
+                      msg.getTo().c_str() );
     } // if
 
     int lineCount = 1;
@@ -203,25 +202,20 @@ bool NetworkElement::sendMessage(Message &msg)
     message << lineCount << "\n";
     message << messagePayload << "\n";
 
-    logger().fine(
-                 "NetworkElement - Sending command <%s> (%d lines)", message.str().c_str(), lineCount);
-
     if (logger().isFineEnabled()) {
-        logger().fine(
-                     "NetworkElement - Message: \n%s", messagePayload.c_str());
+        logger().fine("NetworkElement - Sending command <%s> (%d lines)",
+                      message.str().c_str(), lineCount);
     }
 
     std::string msg_to_send = message.str();
     std::string response = sendMessageToRouter( msg_to_send );
 
     if ( response == NetworkElementCommon::OK_MESSAGE ) {
-        logger().debug(
-                     "NetworkElement - sendMessage - response = 'OK'");
+        logger().debug("NetworkElement - sendMessage - response = 'OK'");
         return true;
     } else {
-        logger().error(
-                     "NetworkElement - sendMessage - response = %s. Expected OK.",
-                     response.c_str());
+        logger().error("NetworkElement - sendMessage - response = %s. Expected OK.",
+                       response.c_str());
         return false;
     } 
 }
@@ -528,7 +522,8 @@ std::string NetworkElement::sendMessageToRouter( const std::string& message )
     } // if
 
     boost::system::error_code error;
-    boost::asio::write(*sock, boost::asio::buffer(sentText), boost::asio::transfer_all(), error);
+    boost::asio::write(*sock, boost::asio::buffer(sentText),
+                       boost::asio::transfer_all(), error);
     if (error) {
         logger().debug("NetworkElement - sendMessageToRouter (socket = %p) Error transfering data.", sock);
         return NetworkElementCommon::FAILED_MESSAGE;

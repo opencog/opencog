@@ -280,7 +280,7 @@ public:
 	 * orderly.
 	 */
 	void sendExtractedActionFromPlan(ActionPlanID planId, 
-			unsigned int actionSeqNum = 1) 
+                                     unsigned int actionSeqNum = 1) 
 		throw (opencog::RuntimeException, std::bad_exception); 
 
     HandleSeq getActionSeqFromPlan(ActionPlanID planId);

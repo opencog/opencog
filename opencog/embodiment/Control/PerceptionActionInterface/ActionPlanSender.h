@@ -48,7 +48,8 @@ public:
      */
     virtual bool sendActionPlan(const ActionPlan& actionPlan) = 0;
 
-	virtual bool sendSpecificActionFromPlan(const ActionPlan& actionPlan, unsigned int actionSequenceNum) = 0;
+	virtual bool sendSpecificActionFromPlan(const ActionPlan& actionPlan,
+                                            unsigned int actionSequenceNum) = 0;
 
     /**
      * Sends the emotional feelings meessage to the target Virtual World.
