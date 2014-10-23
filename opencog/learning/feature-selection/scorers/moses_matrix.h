@@ -67,7 +67,15 @@ struct pre_scorer : public fs_scorer_base<FeatureSet>
         // create the scorer
         precision_bscore sc(filtered_ctable, _penalty,
                             _min_activation, _max_activation,
-                            0.0f, 1.0f, _positive);
+                            _positive,
+                            0.0f,                     // dispersion_pressure
+                            1.0f,                     // dispersion_exponent
+                            true,                     // exact_experts
+                            1.0,                      // bias_scale
+                            false,                    // time_bscore
+                            TemporalGranularity::day, // granularity
+                            true                      // disable_debug_log
+                            );
         double precision = boost::accumulate(sc.best_possible_bscore(), 0.0);
         double cfdence = super::confidence(fs.size());
         logger().fine("pre_scorer precision = %g, confidence = %g",
