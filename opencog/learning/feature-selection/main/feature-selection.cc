@@ -150,6 +150,7 @@ feature_set_pop select_feature_sets(const CTable& ctable,
         op_params.set_min_score_improv(min_score_improv);
         hc_parameters hc_params;
         hc_params.widen_search = fs_params.hc_widen_search;
+        hc_params.fraction_of_nn = fs_params.hc_fraction_of_nn;
         hc_params.single_step = false;
         hc_params.crossover = fs_params.hc_crossover;
         hc_params.crossover_pop_size = fs_params.hc_crossover_pop_size;

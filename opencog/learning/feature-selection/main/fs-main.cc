@@ -310,6 +310,9 @@ int main(int argc, char** argv)
         ("hc-widen-search",
          value<bool>(&fs_params.hc_widen_search)->default_value(true),
          "Hillclimber widen_search (see moses --help or man moses for more help)\n")
+        ("hc-fraction-of-nn",
+         value<float>(&fs_params.hc_fraction_of_nn)->default_value(2.0),
+         "Hillclimber fraction of neighbors (see moses --help or man moses for more help)\n")
 
         // ======= Stochastic max dependency params =======
         ("smd-top-size",

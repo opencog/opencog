@@ -64,6 +64,7 @@ struct feature_selection_parameters
         hc_crossover_pop_size(300),
         hc_crossover_min_neighbors(1000),
         hc_widen_search(true),
+        hc_fraction_of_nn(2.0),
         mi_confi(50.0)
     {}
 
@@ -106,6 +107,7 @@ struct feature_selection_parameters
     unsigned hc_crossover_pop_size;
     unsigned hc_crossover_min_neighbors;
     bool hc_widen_search;
+    float hc_fraction_of_nn;
 
     // MI scorer parameters
     double mi_confi; //  confidence intensity
