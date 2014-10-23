@@ -116,7 +116,8 @@ struct precision_bscore : public bscore_ctable_time_dispersion
                      bool exact_experts = true,
                      double bias_scale = 1.0,
                      bool time_bscore = false,
-                     TemporalGranularity granularity = TemporalGranularity::day);
+                     TemporalGranularity granularity = TemporalGranularity::day,
+                     bool disable_debug_log = false);
 
     behavioral_score operator()(const combo_tree& tr) const;
     behavioral_score operator()(const scored_combo_tree_set&) const;
@@ -178,6 +179,12 @@ protected:
 
 private:
     vertex _target, _neg_target; // same as positive
+
+    // Kind of a hack, do not log debug message when calling
+    // best_possible_bscore() because the latter can be used as
+    // feature quality score by feature-selection
+    bool _disable_debug_log;
+
     score_t get_activation_penalty(score_t activation) const;
 
     // function to calculate the total weight of the observations
