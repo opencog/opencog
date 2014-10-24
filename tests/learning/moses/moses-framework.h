@@ -263,23 +263,11 @@ void moses_test_scored_combo_trees(const vector<string>& arguments,
 
     // cout << "scts[0] == exptected_scts[0] = " << (scts[0] == expected_scts[0] ? "true" : "false") << endl;
 
-#if THIS_DOESNT_COMPILE_FOR_ME
-/usr/local/include/cxxtest/TestSuite.h:56:9: error: call of overloaded
-‘equals(std::vector<opencog::moses::scored_combo_tree>&,
-std::vector<opencog::moses::scored_combo_tree>&)’ is ambiguous
-/usr/local/include/cxxtest/TestSuite.h:56:9: note: candidates are:
-/usr/local/include/cxxtest/TestSuite.h:45:10: note: bool
-CxxTest::equals(X, Y) [with X =
-std::vector<opencog::moses::scored_combo_tree>, Y =
-std::vector<opencog::moses::scored_combo_tree>]
-/usr/include/boost/algorithm/string/predicate.hpp:318:21: note: bool
-boost::algorithm::equals(const Range1T&, const Range2T&) [with Range1T =
-std::vector<opencog::moses::scored_combo_tree>, Range2T =
-std::vector<opencog::moses::scored_combo_tree>]
-
-    // check all results match the expected ones
-    TS_ASSERT_EQUALS(scts, expected_scts);
-#endif
+    // Check all results match the expected ones
+    //
+    // Due to some weird ambiguity between CxxTest::equals and
+    // boost::algorithm::equal we avoid using TS_ASSERT_EQUALS
+    TS_ASSERT(scts == expected_scts);
 
     auto t2 = microsec_clock::local_time();
     std::cout << "Wallclock time: " << (t2 - t1) << std::endl;

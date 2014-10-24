@@ -48,7 +48,10 @@ private:
 
         std::cout << "table test =" << std::endl;
         std::cout << table << std::endl;
-        TS_ASSERT_EQUALS(table, expected_table);
+
+        // Due to some weird ambiguity between CxxTest::equals and
+        // boost::algorithm::equals we avoid using TS_ASSERT_EQUALS
+        TS_ASSERT(table == expected_table);
     }
 public:
     
@@ -400,7 +403,9 @@ public:
             dates.push_back(TTable::from_string(ds));
         TTable expected_ttable(dates, "time");
 
-        TS_ASSERT_EQUALS(table.ttable, dates);
+        // Due to some weird ambiguity between CxxTest::equals and
+        // boost::algorithm::equals we avoid using TS_ASSERT_EQUALS
+        TS_ASSERT(table.ttable == dates);
     }
 
     void test_ostream_timestamp_table() {
