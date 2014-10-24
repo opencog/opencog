@@ -154,9 +154,9 @@ struct metapop_printer
                 tree_set = metapop.get_trees();
             }
 
-            int cnt = 0;
+            long cnt = 0;
             for (const scored_combo_tree& sct : tree_set) {
-                if (result_count < ++cnt) break;
+                if (result_count == cnt++) break;
                 if (output_python) {
                     // Python boilerplate
                     ss << "#!/usr/bin/env python\n"
