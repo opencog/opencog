@@ -17,43 +17,26 @@
 ;
 (define (microplanning seq-link utterance-type)
 	(define chunks '())
-
-	; find the preferred sentence forms base on utterance-type
-	; XXX should utterance-type be part of the link instead of passing as parameter
-	(define (get-favored-forms)
-		; initialize the sentence forms as needed
-		(microplanning-init)
-		(cog-outgoing-set (car
-			(cond ((string=? "declarative" utterance-type)
-				(cog-chase-link 'InheritanceLink 'OrLink (ConceptNode "declarative"))
-			      )
-			      ((string=? "interrogative" utterance-type)
-				'()
-			      )
-			      ((string=? "imperative" utterance-type)
-				'()
-			      )
-			      ((string=? "interjective" utterance-type)
-				'()
-			      )
-			)
-		))
-	)
+	(define chunks-utterance-type '())
 	
-	(define favored-forms (get-favored-forms))
-	
-	(define (wrap-setlink atoms)
+	(define (wrap-setlink atoms ut)
+		;;; add additional link base on utterance type
+		
 		(SetLink atoms)
 	)
 
-	(set! chunks (make-sentence-chunks (cog-outgoing-set seq-link) favored-forms))
+	; initialize the sentence forms as needed
+	(microplanning-init)
+	
+	; get the best chunking result, and store the utterance type of each individual chunk
+	(set-values! (chunks-utterance-type chunks) (make-sentence-chunks (cog-outgoing-set seq-link) utterance-type))
 	
 	(cond ((not (null? chunks))
 		; insert anaphora
-		(set! chunks (insert-anaphora chunks favored-forms))
+		(set! chunks (insert-anaphora chunks (map get-sentence-forms chunks-utterance-type)))
 		
 		; wrap SetLink around each chunk for Surface Realization
-		(map wrap-setlink chunks)
+		(map wrap-setlink chunks chunks-utterance-type)
 	      )
 	      (else
 		#f
@@ -66,34 +49,90 @@
 ;
 ; Calls make-sentence repeatedly until all informations have been spoken, or
 ; no longer say-able.  Accepts a list of links 'atoms-set' from within the original
-; SequentialAndLink, and a list of sentence forms for a specific utterance-type.
+; SequentialAndLink, and the utterance-type.
 ;
-(define (make-sentence-chunks atoms-set favored-forms)
-	(define atoms-unused atoms-set)
-	(define sentence-chunks '())
-	(define (recursive-helper)
-		(define new-chunk '())
+(define (make-sentence-chunks atoms-set utterance-type)
+	(define all-comb '())
+	(define all-comb-utterance-type '())
+	(define all-comb-utterance-variation '())
+	(define all-comb-leftover-count '())
 
-		; keep calling make sentence until all atoms are used
-		(cond ((not (null? atoms-unused))
-			(set! new-chunk (make-sentence atoms-unused atoms-set favored-forms))
+	(define (recursive-helper curr-unused curr-chunks curr-uts)
+		(define ut (list utterance-type))
+		
+		; helper function for branching into different utterance type
+		(define (sub-helper ut)
+			(define new-chunk (make-sentence curr-unused atoms-set (get-sentence-forms ut)))
 			; if make-sentence returns empty, it means nothing is 'say-able'
 			(cond ((not (null? new-chunk))
-				(set! sentence-chunks (cons new-chunk sentence-chunks))
 				; TODO keep some of the atoms (those that do not satisfy sentence forms) for later use?
-				(set! atoms-unused (lset-difference equal? atoms-unused new-chunk))
-				(recursive-helper)
+				(recursive-helper
+					(lset-difference equal? curr-unused new-chunk)
+					(cons new-chunk curr-chunks) 
+					(cons ut curr-uts)
+				)
 			      )
-			)
+			      (else
+				; unable to form more chunks, store the created chunks & their corresponding utterance-type
+				(set! all-comb (cons curr-chunks all-comb))
+				(set! all-comb-utterance-type (cons curr-uts all-comb-utterance-type))
+				(set! all-comb-leftover-count (cons (length curr-unused) all-comb-leftover-count))
+			      )
+			)		
+		)
+		
+		; if not the first sentence and has "interrogative" utterance type, allow "declarative"
+		(if (and (not (null? curr-chunks)) (string=? "interrogative" utterance-type))
+			(set! ut (list "interrogative" "declarative"))
+		)
+
+		; use the sub-helper to keep calling make sentence until all atoms are used, on all allowed utterance type
+		(cond ((not (null? curr-unused))
+			(map sub-helper ut)
+		      )
+	      	      (else
+			; finished all atoms, store the created chunks & their corresponding utterance-type
+			(set! all-comb (cons curr-chunks all-comb))
+			(set! all-comb-utterance-type (cons curr-uts all-comb-utterance-type))
+			(set! all-comb-leftover-count (cons 0 all-comb-leftover-count))
 		      )
 		)
 	)
 
 	; loop make-sentence on remaining atoms
-	(recursive-helper)
+	(recursive-helper atoms-set '() '())
 
-	; reverse since we were adding to the front
-	(reverse sentence-chunks)
+	; find which set of chunks is best; a set of chunks is best if:
+	; - least amount of leftover atoms
+	; - least amount of sentences
+	; - least variation in utterance type between sentences
+	(cond ((not (null? all-comb))
+		; count how many times the utterance type changes within a set of chunks
+		(set! all-comb-utterance-variation
+			(map (lambda (x) (count (lambda (a b) (not (string=? a b))) x (cdr x))) all-comb-utterance-type))	
+
+		; gather all information into one variable
+		(set! all-comb (zip all-comb-leftover-count all-comb-utterance-type all-comb-utterance-variation all-comb))
+	
+		; only keeps the sets with least leftover
+		(sort! all-comb (lambda (x y) (< (car x) (car y))))
+		(filter! (lambda (x) (= (car x) (caar all-comb))) all-comb)
+
+		; only keeps the sets with the least sentences
+		(sort! all-comb (lambda (x y) (< (length (cadr x)) (length (cadr y)))))
+		(filter! (lambda (x) (= (length (cadr x)) (length (cadar all-comb)))) all-comb)
+
+		; only keeps the sets with the least changes between utterance type
+		(sort! all-comb (lambda (x y) (< (caddr x) (caddr y))))
+		(set! all-comb (car all-comb))
+
+		; reverse since we were adding to the front
+		(values (reverse (cadr all-comb)) (reverse (cadddr all-comb)))
+	      )
+	      (else
+		(values '() '())
+	      )
+	)
 )
 
 ; -----------------------------------------------------------------------
@@ -266,6 +305,28 @@
 	(reverse chunk)
 )
 
+; -----------------------------------------------------------------------
+; get-sentence-forms -- Get the sentence forms base on utterance type
+;
+; Base on the utterance type, get the sentence forms defined for it.
+;
+(define (get-sentence-forms utterance-type)
+	(cog-outgoing-set (car
+		(cond ((string=? "declarative" utterance-type)
+			(cog-chase-link 'InheritanceLink 'OrLink (ConceptNode "declarative"))
+		      )
+		      ((string=? "interrogative" utterance-type)
+			(cog-chase-link 'InheritanceLink 'OrLink (ConceptNode "interrogative"))
+		      )
+		      ((string=? "imperative" utterance-type)
+			'()
+		      )
+		      ((string=? "interjective" utterance-type)
+			'()
+		      )
+		)
+	))
+)
 
 ; -----------------------------------------------------------------------
 ; check-chunk -- Check if a chunk is "say-able"
@@ -369,5 +430,10 @@
 
 ; some atoms used can be leave out of used to be reused later?
 ; eg. atoms that do not satisfy a sentence form?
+
+
+; for interrogative, need to call SuReal as both declarative and interrogative
+; and then need to store which one is actually used to form a sentence, before inserting anaphora
+
 
 

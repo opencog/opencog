@@ -10,9 +10,9 @@
 ; =========================
 ; More complex knowledge
 ; =========================
-;(r2l "The ugly cat climbs the stairs and enters the house.")
-;(r2l "He takes the cookies and eats them.")
-;(r2l "She collects damaged stamps and categorizes them.")
+(r2l "The ugly cat climbs the stairs and enters the house.")
+(r2l "He takes the cookies and eats them.")
+(r2l "She collects damaged stamps and categorizes them.")
 
 (define test-sal
 	(SequentialAndLink

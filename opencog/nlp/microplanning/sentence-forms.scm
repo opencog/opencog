@@ -29,5 +29,36 @@
 			)
 		)
 	)
+	
+	(InheritanceLink
+		(ConceptNode "interrogative")
+		(OrLink
+			; SVO
+			(EvaluationLink
+				(PredicateNode "verb")
+				(ListLink
+					(ConceptNode "_")
+					(ConceptNode "_")
+				)
+			)
+			; SV
+			(EvaluationLink
+				(PredicateNode "verb")
+				(ListLink
+					(ConceptNode "_")
+				)
+			)
+			; SVIO
+			(EvaluationLink
+				(PredicateNode "verb")
+				(ListLink
+					(ConceptNode "_")
+					(ConceptNode "_")
+					(ConceptNode "_")
+				)
+			)
+		)
+	)
+	
 )
 		

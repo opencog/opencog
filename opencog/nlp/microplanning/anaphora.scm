@@ -9,16 +9,16 @@
 ; -----------------------------------------------------------------------
 ; insert-anaphora -- The main function for inserting anaphora
 ;
-; Accepts a list of 'chunks' from make-sentence-chunks and the current
+; Accepts a list of 'chunks' from make-sentence-chunks and the matching
 ; list of sentence forms from sentences-form.scm (eg. the list from
 ; "declarative").  Returns new chunks with anaphora inserted (as
 ; new atoms).
 ;
-(define (insert-anaphora chunks favored-forms)
+(define (insert-anaphora chunks forms-list)
 	; XXX checking which atom satisfy a sentence form again... is there ways
 	; to store the result from previous check in make-sentence?
 	(define form-check-list
-		(map (lambda (c) (map (lambda (atom) (if (match-sentence-forms atom favored-forms) #t #f)) c)) chunks)
+		(map (lambda (c fs) (map (lambda (atom) (if (match-sentence-forms atom fs) #t #f)) c)) chunks forms-list)
 	)
 	
 	; helper function for 'nouns-list'
@@ -277,19 +277,14 @@
 				(set! start-index (list-index (lambda (n) (= link-index (nouns-list-get-li n))) nouns-subset))
 				(set! end-index (list-index (lambda (n) (< link-index (nouns-list-get-li n))) nouns-subset))
 
+				; makes it so that we will pass an empty subset if a link does not need to be changed
+				(if (not start-index)
+					(set! start-index (length nouns-subset))
+				)
+
 				; if we have reached the end of the subset
 				(if (not end-index)
 					(set! end-index (length nouns-subset))
-				)
-				
-				; makes it so that we will pass in the previous set (from a link that satisfied sentence form)
-				; if this link is not included in nouns-subset
-				; TODO find a better way to do this since a supporting link could be for a link sentence form
-				; link several index back
-				(cond ((not start-index)
-					(set! start-index (nouns-list-get-li (list-ref nouns-subset (- end-index 1))))
-					(set! start-index (list-index (lambda (n) (= start-index (nouns-list-get-li n))) nouns-subset))
-				      )
 				)
 			
 				(cons (clone-link-with-pronoun (list-ref orig-chunk link-index)

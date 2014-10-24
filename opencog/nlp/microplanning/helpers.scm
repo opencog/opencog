@@ -4,6 +4,35 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
+; set-values! -- Helpful macro for storing multiple return values
+;
+; The macro allows binding of multiple return values to several variables,
+; without having to define a subscope like (receive).
+;
+; Can be used like:
+;
+;	(define a)
+;	(define b)
+;	(set-values! (a b) (values 5 7))
+;
+; resulting a = 5, b = 7
+;
+(define-syntax set-values!
+	(syntax-rules ()
+		((_ () exp)
+			(values)
+		)
+		((_ (v1 . rest) exp)
+			(begin
+				(set! v1 (call-with-values (lambda () exp) list))
+				(set-values! rest (apply values (cdr v1)))
+				(set! v1 (car v1))
+			)
+		)
+	)
+)
+
+; -----------------------------------------------------------------------
 ; r2l-get-word-inst -- Retrieve WordInstanceNode given R2L style node
 ;
 ; Given a R2L style node, find the corresponding WordInstanceNode.
