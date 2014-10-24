@@ -85,11 +85,11 @@ void metapopulation::trim_down_deme(deme_t& deme) const
     }
 }
 
-/// Convert the instances in the deme into scored combo_trees.
-/// Return the resulting set of trees. The number of trees returned
-/// is limited to _parms.max_candidates; in order for this limitation
-/// to work, the deme must be presented in score-sorted order (highest
-/// scores first, lowest scores last).
+/// Convert the instances in the deme into scored combo_trees.  Return
+/// the resulting set of trees. The number of trees returned is
+/// limited to _parms.max_candidates_per_deme; in order for this
+/// limitation to work, the deme must be presented in score-sorted
+/// order (highest scores first, lowest scores last).
 ///
 void metapopulation::deme_to_trees(deme_t& deme,
                                    const representation& rep,
@@ -188,9 +188,9 @@ void metapopulation::merge_candidates(scored_combo_tree_set& candidates)
 /// During this merging, assorted cleanup and tuning is performed:
 /// low-scoring instances are discarded, duplicates are discarded,
 /// some diversity work is done.  The number of instances that are
-/// finally merged are limited by the _params.max_candidates value.
-/// (Its wise to set this value to something small-ish, say, a few
-/// thousand, at most, to avoid excess CPU-time consumption, and
+/// finally merged are limited by the _params.max_candidates_per_deme
+/// value.  (Its wise to set this value to something small-ish, say, a
+/// few thousand, at most, to avoid excess CPU-time consumption, and
 /// excess RAM usage.  Some parts of this merger can be very CPU-time
 /// consuming.
 //
@@ -518,8 +518,8 @@ void metapopulation::keep_top_unique_candidates(
             unsigned top_cnd = std::min(deme.n_evals, (unsigned)deme.size());
 
             // If the user have specified to keep only the top candidates
-            if (_params.max_candidates >= 0)
-                top_cnd = std::min(top_cnd, (unsigned)_params.max_candidates);
+            if (_params.max_candidates_per_deme >= 0)
+                top_cnd = std::min(top_cnd, (unsigned)_params.max_candidates_per_deme);
             if (_filter_params.n_subsample_demes > 1)
                 top_cnd = std::min(top_cnd,
                                    _filter_params.n_top_candidates);

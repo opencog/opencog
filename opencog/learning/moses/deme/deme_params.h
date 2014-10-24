@@ -51,7 +51,7 @@ struct deme_parameters
 
     // The max number of candidates considered to be added to the
     // metapopulation, if negative then all candidates are considered.
-    int max_candidates;
+    int max_candidates_per_deme;
 
     // If true then all candidates are reduced before evaluation.
     bool reduce_all;

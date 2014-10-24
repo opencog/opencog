@@ -151,12 +151,12 @@ struct subsample_deme_filter_parameters
  */
 struct metapop_parameters
 {
-    metapop_parameters(int _max_candidates = -1,
+    metapop_parameters(int _max_candidates_per_deme = -1,
                        int _revisit = 0,
                        score_t _complexity_temperature = 6.0f,
                        unsigned _jobs = 1,
                        diversity_parameters _diversity = diversity_parameters()) :
-        max_candidates(_max_candidates),
+        max_candidates_per_deme(_max_candidates_per_deme),
         revisit(_revisit),
         do_boosting(false),
         discard_dominated(false),
@@ -171,7 +171,7 @@ struct metapop_parameters
 
     // The max number of candidates considered to be added to the
     // metapopulation, if negative then all candidates are considered.
-    int max_candidates;
+    int max_candidates_per_deme;
 
     // The number of times the same exemplar can be revisited. If 0
     // then an exemplar can only be visited once. If negative then the

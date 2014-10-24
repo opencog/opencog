@@ -656,8 +656,8 @@ problem_params::add_options(boost::program_options::options_description& desc)
                     " This option is overwritten by %s.\n")
              % log_file_dep_opt_opt.first).c_str())
 
-        (opt_desc_str(max_candidates_opt).c_str(),
-         po::value<int>(&max_candidates)->default_value(-1),
+        (opt_desc_str(max_candidates_per_deme_opt).c_str(),
+         po::value<int>(&max_candidates_per_deme)->default_value(-1),
          "Maximum number of considered candidates to be added to the "
          "metapopulation after optimizing deme.\n")
 
@@ -1330,7 +1330,7 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
     }
 
     // Set metapopulation parameters
-    meta_params.max_candidates = max_candidates;
+    meta_params.max_candidates_per_deme = max_candidates_per_deme;
     meta_params.revisit = revisit;
     meta_params.do_boosting = boosting;
     meta_params.ensemble_params.do_boosting = boosting;

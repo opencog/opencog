@@ -106,7 +106,7 @@ struct problem_params : public option_base
     std::vector<combo_tree> exemplars;
 
     // metapop_param
-    int max_candidates;
+    int max_candidates_per_deme;
     int revisit;
     bool reduce_all;
     bool linear_regression;
