@@ -929,7 +929,7 @@ way: specifying this flag makes it more likely that the metapopulation
 will get trapped in a non-optimal local maximum.
 
 Note that the algorithms to compute domination are quite slow,
-and so keeping doinated individuals has a double benefit: not only
+and so keeping dominated individuals has a double benefit: not only
 is the metapopulation healthier, but metapopulation management
 runs faster.
 
@@ -1074,14 +1074,12 @@ occur if the penalties are high.  The penalties can be too high, if the
 complexity ratio is set too low, or the temperature is set too low.
 
 .TP
-.BI \-C1\fR,\ \fB\-\-output\-dominated=1
-Print all of the final metapopulation, and not just the highest-scoring
-candidates.
+.BI \-C1\fR,\ \fB\-\-output\-only\-best=1
+Print only the highest-scoring candidates.
 .TP
 .BI \-c\  count \fR,\ \fB\-\-result\-count= count
-The number of non-dominated (best) results to return, ordered according
-to score. If negative, then all results are returned, including the
-dominated results.
+The number of results to return, ordered according
+to score. If negative, then all results are returned.
 .TP
 .BI \-f\  filename \fR,\ \fB\-\-log\-file= filename
 Write debug log traces \fIfilename\fR. If not specified, traces
