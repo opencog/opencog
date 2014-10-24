@@ -105,7 +105,11 @@
 ; The atoms added to the atomspace , by the helper functions below must be
 ; returned in a list or should be a single atom so as to simplify
 ; post-processing and NLG tasks.
-
+;
+;
+;
+;
+;
 ; =========================================================================================
 ; Predicate-Argument templates
 ; Major revision October 2014 -- conditional substitution of query variables replaces separate query-rules
@@ -116,14 +120,15 @@
 ; Declarative Examples: "Socrates is a man", "Cats are animals", "Trees are plants"
 ; Question Examples: 	"What is Socrates?" (object query) "Who is the teacher?" (object query) "Who is a man?" (subject query (rare))
 ;
-; (*actually relex processes all of these questions as subject-queries, making the logic of the rule below right only for some of them;
-; my perception is that it is more usual for these questions to be an object-query with subject-verb inversion; requires a semantic algorithm fix*)
+; (*actually relex processes all of these questions as subject-queries, which reverses the logic of inheritance they should have, hence
+; the rule below has the "object" inheriting the variable in order to compensate*since there is no way syntactic way to distinguish subject from 
+; object queries for these sentences, correcting the logic of the rare true subject queries will have to be left to general intelligence*)
 ;
 (define (be-inheritance-rule subj_concept subj_instance obj_concept obj_instance)
 	(cond ((string=? subj_concept "_$qVar")
 			(list 
 				(InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj_concept df-node-stv) df-link-stv)
-				(InheritanceLink (VariableNode "_$qVar" df-node-stv) (ConceptNode obj_instance df-node-stv))
+				(InheritanceLink (ConceptNode obj_instance df-node-stv) (VariableNode "_$qVar" df-node-stv))
 			)
 		)	
 		((string=? obj_concept "_$qVar")
@@ -149,7 +154,8 @@
 ; Questioned object: 		"What did you tell the fuzz?" "What did you give to Mary?" "Who did you give the slavers?" "Who did you sell to the slavers?"
 ; Questioned indirect object: 	"To whom did you sell the children?" "To what do we owe the pleasure?" "Who did you sell the children to?"
 ;
-;	NB: At present (10-14-14) questioned indirect objects are a mess -- working on it . . . 
+;	NB: The first two iobj q-types work, although the relex output for the second one relies on a to(), instead of iobj(); the third one still doesn't work
+;	because the relex output for it is a disaster and requires LG changes that I haven't gotten to work yet (10-22-14 AN)
 ;
 (define (SVIO-rule subj_concept  subj_instance  verb  verb_instance  obj_concept  obj_instance iobj_concept iobj_instance)
 	(cond ((string=? subj_concept "_$qVar")
@@ -721,7 +727,11 @@
 )
 ;
 ;-----------------------------------------------------------------------------------------------
-; CHOICE-TYPE QUESTIONS -- these rules, which are working before now are not getting called . . . .
+; CHOICE-TYPE QUESTIONS 
+;
+; fixed a bug in the semantic algorithms so that these don't get _quantity() relations and now
+; the r2l rules are not calling, for no reason that I can discern.
+;
 ;-----------------------------------------------------------------------------------------------
 ;
 ; Example: "Which girl do you like?"
