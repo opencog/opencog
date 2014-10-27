@@ -83,7 +83,9 @@ void LanguageComprehension::handleCommand(const std::string& name, const std::ve
     } 
 }
 
+#ifdef HAVE_GUILE
 SchemeEval* LanguageComprehension::evaluator = NULL;
+#endif
 
 void LanguageComprehension::init( void )
 {

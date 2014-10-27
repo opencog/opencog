@@ -52,7 +52,7 @@ IF(GUILE_INCLUDE_DIR)
 	SET(GUILE_VERSION_PATCH 0)
 
 	IF(NOT EXISTS "${GUILE_INCLUDE_DIR}/libguile/version.h")
-		MESSAGE(FATAL_ERROR "Found libguile.h but not version.h; check your guile installation!")
+		MESSAGE(FATAL_ERROR "Found ${GUILE_INCLUDE_DIR}/libguile.h but not version.h; check your guile installation!")
 	ENDIF(NOT EXISTS "${GUILE_INCLUDE_DIR}/libguile/version.h")
 
 	# Extract the libguile version from the 'version.h' file

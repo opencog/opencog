@@ -19,8 +19,14 @@ ADD_DEPENDENCIES(query
 TARGET_LINK_LIBRARIES(query 
 	atomspace 
 	execution 
-	smob
 )
+
+IF (HAVE_GUILE)
+	TARGET_LINK_LIBRARIES(query 
+		smob
+	)
+ENDIF (HAVE_GUILE)
+
 
 # Build the query cogserver module
 ADD_LIBRARY(QueryModule SHARED
