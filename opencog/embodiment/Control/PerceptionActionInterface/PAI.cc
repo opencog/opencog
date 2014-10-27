@@ -193,10 +193,8 @@ ActionPlanID PAI::createActionPlan()
         }
     }
 
-    ActionPlan plan(planId, demandName);
-    inProgressActionPlans[planId] = plan;
-    ActionIdMap actionIdMap;
-    planToActionIdsMaps[planId] = actionIdMap;
+    inProgressActionPlans[planId] = ActionPlan(planId, demandName);
+    planToActionIdsMaps[planId] = ActionIdMap();
     return planId;
 }
 
@@ -500,7 +498,8 @@ ActionID PAI::addAction(ActionPlanID planId, const AvatarAction& action) throw (
         // Maps the planID + seqNumber to the actionID for further usage.
         planToActionIdsMaps[planId][seqNumber] = result;
     } else {
-        logger().warn("PAI - No action plan with id = %s in progress\n", planId.c_str());
+        logger().warn("PAI - No action plan with id = %s in progress\n",
+                      planId.c_str());
         // TODO: throw an Exception?
     }
     return result;
@@ -1570,13 +1569,16 @@ void PAI::processAgentActionPlanResult(char* agentID, unsigned long tsValue, con
         }
     }
 
-    logger().warn("PAI - avatar id %s (%s), name: %s, status: %s, statusCode: %d", agentID, internalAgentId.c_str(), name.c_str(), status, statusCode);
+    logger().debug("PAI - avatar id %s (%s), "
+                   "name: %s, status: %s, statusCode: %d",
+                   agentID, internalAgentId.c_str(),
+                   name.c_str(), status, statusCode);
 
     // This is a feedback for a sent action plan
     XMLString::transcode(SEQUENCE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* sequenceStr = XMLString::transcode(signal->getAttribute(tag));
 
-    if (planIdStr && strlen(planIdStr) > 0) {
+    if (planIdStr && strlen(planIdStr)) {
         ActionPlanID planId = planIdStr;
 
         unsigned int sequence;
@@ -1589,9 +1591,9 @@ void PAI::processAgentActionPlanResult(char* agentID, unsigned long tsValue, con
 
         setActionPlanStatus(planId, sequence, statusCode, tsValue);
     } else {
-        logger().error(
-                     "PAI - Got a avatar-signal with action '%s' with status (name" 
-            " = '%s'), but no plan-id attribute!", name.c_str(), status);
+        logger().error("PAI - Got a avatar-signal with action '%s' "
+                       "with status (name = '%s'), but no plan-id attribute!",
+                       name.c_str(), status);
     }
     XMLString::release(&sequenceStr);
     XMLString::release(&status);
@@ -3338,8 +3340,8 @@ void PAI::setPendingActionPlansFailed()
 void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                               ActionStatus statusCode, unsigned long timestamp)
 {
-    // Get the corresponding actions from pending map and add the given perceptions
-    // into AtomSpace
+    // Get the corresponding actions from pending map and add the
+    // given perceptions into AtomSpace
     ActionPlanMap::iterator it = pendingActionPlans.find(planId);
     if (it != pendingActionPlans.end()) {
         ActionPlan& plan = it->second;
@@ -3350,7 +3352,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
             // TODO: Check for string->int conversion failures
 
         } else {
-            // this statusCode is for all actions in the action plan
+            // This statusCode is for all actions in the action plan
             // that were not marked as done or failed yet
             for (unsigned int i = 1; i <= plan.size(); i++) {
                 if (!plan.isDone(i) && !plan.isFailed(i)) {
@@ -3406,10 +3408,12 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                 break;
             }
             ActionID actionHandle = planToActionIdsMaps[planId][seqNumber];
-            //printf("calling addActionPredicate for action with seqNumber = %u\n", seqNumber);
-            //! @todo
-            assert(atomSpace.isValidHandle(actionHandle));
-            addActionPredicate(predicateName, plan.getAction(seqNumber), timestamp, actionHandle);
+            OC_ASSERT(atomSpace.isValidHandle(actionHandle),
+                      "No valid action handle associated with "
+                      "planId = %s, seqNumber = %u",
+                      planId.c_str(), seqNumber);
+            addActionPredicate(predicateName, plan.getAction(seqNumber),
+                               timestamp, actionHandle);
         }
 
         // If there is no pending actions anymore
@@ -3430,9 +3434,8 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
 		} 
 
     } else {
-        logger().warn(
-                     "PAI - No pending action plan with the given id '%s'.",
-                     planId.c_str());
+        logger().warn("PAI - No pending action plan with the given id '%s'.",
+                      planId.c_str());
     }
 }
 
