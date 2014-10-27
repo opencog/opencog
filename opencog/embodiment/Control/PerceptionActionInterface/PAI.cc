@@ -837,7 +837,9 @@ void PAI::processAvatarSignal(DOMElement * element)
         XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
         char* name = XMLString::transcode(signal->getAttribute(tag));
 
-        logger().debug("PAI - Got avatar-signal: avatarId = %s (%s), timestamp = %u\n", agentID, internalAgentId.c_str(), tsValue);
+        logger().debug("PAI - Got avatar-signal: "
+                       "avatarId = %s (%s), timestamp = %u\n",
+                       agentID, internalAgentId.c_str(), tsValue);
 
         char* signalName = XMLString::transcode(signal->getTagName());
         if (strcmp(signalName,ACTION_ELEMENT) == 0) {
@@ -851,15 +853,20 @@ void PAI::processAvatarSignal(DOMElement * element)
             // result without parameters, otherwise it is information about an
             // action by itself.
             if (strlen(planIdStr)) {
-                processAgentActionPlanResult(agentID, tsValue, nameStr, planIdStr, signal);
+                processAgentActionPlanResult(agentID, tsValue,
+                                             nameStr, planIdStr, signal);
                 XMLString::release(&planIdStr);
             } else {
                 // getting action instance name attribute value
-                XMLString::transcode(ACTION_INSTANCE_NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-                char* instanceName = XMLString::transcode(signal->getAttribute(tag));
+                XMLString::transcode(ACTION_INSTANCE_NAME_ATTRIBUTE,
+                                     tag, PAIUtils::MAX_TAG_LENGTH);
+                char* instanceName =
+                    XMLString::transcode(signal->getAttribute(tag));
                 string instanceNameStr(camelCaseToUnderscore(instanceName));
 
-                processAgentActionWithParameters(agentNode, internalAgentId, tsValue, nameStr, instanceNameStr, signal);
+                processAgentActionWithParameters(agentNode, internalAgentId,
+                                                 tsValue, nameStr,
+                                                 instanceNameStr, signal);
                 XMLString::release(&instanceName);
             }
 
@@ -1497,21 +1504,26 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     actionHandles.push_back(evalLink4);
     //-------------------------------End-------the result state actor of the action-------End--------------------------------------------------
 
-    // add this action to timelink
+    // Add this action to timelink
     Handle atTimeLink = timeServer().addTimeInfo(actionInstanceNode, tsValue);
     AtomSpaceUtil::updateLatestAgentActionDone(atomSpace, atTimeLink, agentNode);
     actionConcernedHandles.push_back(atTimeLink);
 
-    // if this is a statechage action, add the new value of this state into the atomspace
+    // If this is a statechage action, add the new value of this state
+    // into the atomspace
     EVENT_TYPE eventTYpe;
     if (nameStr == "state_change")
     {
         OC_ASSERT(changedStateName != "");
         OC_ASSERT(newStateValNode != Handle::UNDEFINED,
-                "PAI:processAgentActionWithParameters: Got an invalid new state value handle when process a state change action. \n");
+                  "PAI:processAgentActionWithParameters: Got an invalid new "
+                  "state value handle when process a state change action. \n");
         TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
 
-        Handle newStateEvalLink = AtomSpaceUtil::addPropertyPredicate(atomSpace, changedStateName, targetNode, newStateValNode,tv,Temporal(tsValue));
+        Handle newStateEvalLink =
+            AtomSpaceUtil::addPropertyPredicate(atomSpace, changedStateName,
+                                                targetNode, newStateValNode,
+                                                tv,Temporal(tsValue));
 
         actionConcernedHandles.push_back(newStateValNode);
         actionConcernedHandles.push_back(newStateEvalLink);
@@ -2764,18 +2776,20 @@ Handle PAI::addActionToAtomSpace(ActionPlanID planId, const AvatarAction& action
         default: {
             // Should never get here, but...
             throw opencog::RuntimeException(TRACE_INFO,
-                                            "PAI - Undefined map from '%s' action param type to Atom representation.",
+                                            "PAI - Undefined map from '%s' "
+                                            "action param type to Atom "
+                                            "representation.",
                                             param.getType().getName().c_str());
             break;
         }
         }
     }
-    Handle schemaListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, schemaListLinkOutgoing);
+    Handle schemaListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK,
+                                                   schemaListLinkOutgoing);
 
-    HandleSeq execLinkOutgoing;
-    execLinkOutgoing.push_back(schemaNode);
-    execLinkOutgoing.push_back(schemaListLink);
-    Handle execLink = AtomSpaceUtil::addLink(atomSpace, EXECUTION_LINK, execLinkOutgoing);
+    HandleSeq execLinkOutgoing = {schemaNode, schemaListLink};
+    Handle execLink = AtomSpaceUtil::addLink(atomSpace, EXECUTION_LINK,
+                                             execLinkOutgoing);
 
     return execLink;
 }
@@ -2787,17 +2801,20 @@ Handle PAI::addActionPredicate(const char* predicateName, const AvatarAction& ac
 
     HandleSeq predicateListLinkOutgoing;
     predicateListLinkOutgoing.push_back(execLink);
-    Handle predicateListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing);
+    Handle predicateListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK,
+                                                      predicateListLinkOutgoing);
 
-    Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, predicateName);
+    Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE,
+                                                  predicateName);
 
-    HandleSeq evalLinkOutgoing;
-    evalLinkOutgoing.push_back(predicateNode);
-    evalLinkOutgoing.push_back(predicateListLink);
-    Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
+    HandleSeq evalLinkOutgoing = {predicateNode, predicateListLink};
+    Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK,
+                                             evalLinkOutgoing);
 
-    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp, TruthValue::TRUE_TV());
-    AtomSpaceUtil::updateLatestAvatarActionPredicate(atomSpace, atTimeLink, predicateNode);
+    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp,
+                                                 TruthValue::TRUE_TV());
+    AtomSpaceUtil::updateLatestAvatarActionPredicate(atomSpace, atTimeLink,
+                                                     predicateNode);
 
     return atTimeLink;
 }
