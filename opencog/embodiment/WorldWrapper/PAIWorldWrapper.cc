@@ -98,9 +98,9 @@ throw (ComboException, AssertionException, std::bad_exception)
                 actionPlanStr += ", ";
         }
         actionPlanStr += "}";
-        logger().debug(
-                     "PAIWorldWrapper - Attempt to send the following sequence of actions: %s",
-                     actionPlanStr.c_str());
+        logger().debug("PAIWorldWrapper - Attempt to send the following "
+                       "sequence of actions: %s",
+                       actionPlanStr.c_str());
     }
     // ~DEBUG log
 
@@ -117,8 +117,9 @@ throw (ComboException, AssertionException, std::bad_exception)
         avatar_builtin_action_enum bae = get_enum(ba);
         switch (bae) {
       case id::goto_obj: {
-            logger().debug("PAIWorldWrapper - Handling goto_obj. # of parameters = %d",
-                         it.number_of_children() );
+            logger().debug("PAIWorldWrapper - Handling goto_obj. "
+                           "# of parameters = %d",
+                           it.number_of_children() );
             OC_ASSERT(it.number_of_children() == 2);
             OC_ASSERT(is_definite_object(*it.begin()));
             OC_ASSERT(is_contin(*++it.begin()));
