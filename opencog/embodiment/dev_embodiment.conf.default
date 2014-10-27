@@ -312,7 +312,7 @@ MASSIF_DETAILED_FREQ            = 10
 #please note that CHECK_OAC_MEMORY_LEAKS, CHECK_OAC_MEMORY_USAGE
 #and RUN_OAC_DEBUGGER are mutually exclusive (only one can be activated at a time)
 RUN_OAC_DEBUGGER                = false
-OAC_DEBUGGER_PATH               = /usr/bin/nemiver
+OAC_DEBUGGER_PATH               = gdb
 # Another debugging possibility. If set to true, the spawner will print the correct command to start each OAC.
 # You can then type this into your debugger (e.g. in Eclipse, you have to run it from within the IDE)
 MANUAL_OAC_LAUNCH		= false
