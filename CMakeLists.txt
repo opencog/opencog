@@ -189,6 +189,11 @@ IF (NOT CURL_FOUND)
 	MESSAGE(STATUS "libcurl missing: needed for ubigraph module.")
 ENDIF (NOT CURL_FOUND)
 
+FIND_PACKAGE(Cxxtest)
+IF (NOT CXXTEST_FOUND)
+	MESSAGE(STATUS "CxxTest missing: needed for unit tests.")
+ENDIF (NOT CXXTEST_FOUND)
+
 # XML parsing library
 # At this time (November 2013) it looks like no one is using this.
 # The old NMXML code needed this, but its broken.
@@ -408,6 +413,15 @@ ELSE (SDLGFX_FOUND)
 	MESSAGE(STATUS "SDL_gfx missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
 ENDIF (SDLGFX_FOUND)
 
+# Threaded Building Blocks (Intel TBB) library
+FIND_PACKAGE(TBB)
+IF (TBB_FOUND)
+        SET(HAVE_TBB 1)
+ELSE (TBB_FOUND)
+        SET(TBB_DIR_MESSAGE "Intel TBB (Threaded Building Blocks) was not found; the AtomSpace Publisher module will not be built. Installation instructions: https://www.threadingbuildingblocks.org/download")
+ENDIF (TBB_FOUND)
+MESSAGE(STATUS "${TBB_DIR_MESSAGE}")
+
 FIND_PACKAGE(TCL)
 
 # /usr/bin/tclsh is expected for some embodiment tests, but is
@@ -490,15 +504,6 @@ ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
 	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; the AtomSpace Publisher module, and the message system used by GUI monitor for OAC will not be built.\nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
 ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
-
-# Threaded Building Blocks (Intel TBB) library
-FIND_PACKAGE(TBB)
-IF (TBB_FOUND)
-        SET(HAVE_TBB 1)
-ELSE (TBB_FOUND)
-        SET(TBB_DIR_MESSAGE "Intel TBB (Threaded Building Blocks) was not found; the AtomSpace Publisher module will not be built. Installation instructions: https://www.threadingbuildingblocks.org/download")
-ENDIF (TBB_FOUND)
-MESSAGE(STATUS "${TBB_DIR_MESSAGE}")
 
 # ==========================================================
 # Decide what to build, based on the packages found.
@@ -599,36 +604,38 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 ADD_SUBDIRECTORY(lib)
 ADD_SUBDIRECTORY(opencog)
 
-ADD_CUSTOM_TARGET(tests)
-ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
-IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-	# doing coverage stuff while running tests if this is the Coverage build
-	ADD_CUSTOM_TARGET(test
-		# TODO lcov should be found by cmake first
-		# TODO set it up so that we can pick to run coverage per test, or
-		# combined across all tests (the latter is MUCH faster). Use a define?
-		# There is coverage specific stuff in AddCxxTest.cmake now...
-		# -
-		# Depends on cogserver because RESTFulTest needs it
-		# and cmake has no way to add non-test dependencies to tests
-		DEPENDS tests cogserver
-		WORKING_DIRECTORY tests
-		COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
-		# This script combines the coverage analysis of each test,
-		# then creates html in tests/lcov
-		# Note: this should now be run separately...
-		#COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
-		COMMENT "Running tests with coverage..."
-	)
-ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-	# If this is a build with coverage enabled then test normally
-	ADD_CUSTOM_TARGET(test
-		DEPENDS tests
-		WORKING_DIRECTORY tests
-		COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
-		COMMENT "Running tests..."
-	)
-ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+IF (CXXTEST_FOUND)
+	ADD_CUSTOM_TARGET(tests)
+	ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
+	IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+		# doing coverage stuff while running tests if this is the Coverage build
+		ADD_CUSTOM_TARGET(test
+			# TODO lcov should be found by cmake first
+			# TODO set it up so that we can pick to run coverage per test, or
+			# combined across all tests (the latter is MUCH faster). Use a define?
+			# There is coverage specific stuff in AddCxxTest.cmake now...
+			# -
+			# Depends on cogserver because RESTFulTest needs it
+			# and cmake has no way to add non-test dependencies to tests
+			DEPENDS tests cogserver
+			WORKING_DIRECTORY tests
+			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
+			# This script combines the coverage analysis of each test,
+			# then creates html in tests/lcov
+			# Note: this should now be run separately...
+			#COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
+			COMMENT "Running tests with coverage..."
+		)
+	ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+		# If this is a build with coverage enabled then test normally
+		ADD_CUSTOM_TARGET(test
+			DEPENDS tests
+			WORKING_DIRECTORY tests
+			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
+			COMMENT "Running tests..."
+		)
+	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+ENDIF (CXXTEST_FOUND)
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
 
@@ -755,6 +762,7 @@ SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)
 SUMMARY_ADD("SQL persistance" "Save/Restore of AtomSpace to database" HAVE_PERSIST)
 SUMMARY_ADD("StackPrint" "Pretty printing of stack traces" HAVE_BFD AND HAVE_IBERTY)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
+SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
 SUMMARY_ADD("ZMQ" "ZMQ-based OAC GUI reports, AtomSpace publisher module" HAVE_ZMQ)
