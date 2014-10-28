@@ -2,6 +2,7 @@
 import Data.List
 import Data.List.Split
 import Data.String.Utils
+import System.IO (isEOF)
 
 -- Parse MOSES log file and generate a CSV file describing for each
 -- deme expansion the selected features.
@@ -19,19 +20,22 @@ main = do
 -- the log file so that it does generate the CSV rows properly
 parseLines :: [String] -> IO ()
 parseLines l = do
-  line <- getLine
-  case line of
-    [] -> return()
-    _ | hasDemeParentID line  -> parseLines [parseDemeParentID line,
-                                             parseXmplrRank line,
-                                             parseVisit line]
-      | hasDemeID line        -> parseLines (l ++ [parseDemeID line])
-      | hasXmplrFeatures line -> parseLines (l ++ [join " " (parseXmplrFeatures line)])
-      | hasNewFeatures line   -> let content = l ++ [join " " (parseNewFeatures line)]
-                                 in do putStrLn (join "," content)
-                                       parseLines (take 3 l)
-      | otherwise             -> return ()
-  parseLines l
+  isEOFRet <- isEOF
+  if isEOFRet then return ()
+  else do
+    line <- getLine
+    case line of
+      [] -> return()
+      _ | hasDemeParentID line  -> parseLines [parseDemeParentID line,
+                                               parseXmplrRank line,
+                                               parseVisit line]
+        | hasDemeID line        -> parseLines (l ++ [parseDemeID line])
+        | hasXmplrFeatures line -> parseLines (l ++ [join " " (parseXmplrFeatures line)])
+        | hasNewFeatures line   -> let content = l ++ [join " " (parseNewFeatures line)]
+                                   in do putStrLn (join "," content)
+                                         parseLines (take 3 l)
+        | otherwise             -> return ()
+    parseLines l
 
 -- Extract the deme's parent ID of the given log line
 hasDemeParentID :: String -> Bool
