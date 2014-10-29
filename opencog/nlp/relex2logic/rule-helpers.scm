@@ -105,10 +105,11 @@
 ; The atoms added to the atomspace , by the helper functions below must be
 ; returned in a list or should be a single atom so as to simplify
 ; post-processing and NLG tasks.
-;
-;
-;
-;
+;==========================================================================================
+
+;This is a test to find the source of a bug!
+(define (imperative-rule sentence_index)
+	(list (cog-prt-atomspace)))
 ;
 ; =========================================================================================
 ; Predicate-Argument templates
@@ -154,8 +155,8 @@
 ; Questioned object: 		"What did you tell the fuzz?" "What did you give to Mary?" "Who did you give the slavers?" "Who did you sell to the slavers?"
 ; Questioned indirect object: 	"To whom did you sell the children?" "To what do we owe the pleasure?" "Who did you sell the children to?"
 ;
-;	NB: The first two iobj q-types work, although the relex output for the second one relies on a to(), instead of iobj(); the third one still doesn't work
-;	because the relex output for it is a disaster and requires LG changes that I haven't gotten to work yet (10-22-14 AN)
+;	NB: The first two iobj q-types work, although the relex output for the second one relies on a to(), instead of iobj()
+;	the third one still doesn't work because the relex output for it is a disaster and requires LG changes that I haven't gotten to work yet (10-22-14 AN)
 ;
 (define (SVIO-rule subj_concept  subj_instance  verb  verb_instance  obj_concept  obj_instance iobj_concept iobj_instance)
 	(cond ((string=? subj_concept "_$qVar")
@@ -727,14 +728,17 @@
 )
 ;
 ;-----------------------------------------------------------------------------------------------
-; CHOICE-TYPE QUESTIONS 
+; CHOICE-TYPE QUESTIONS (also known as question-determiners) -- what and which
 ;
-; fixed a bug in the semantic algorithms so that these don't get _quantity() relations and now
-; the r2l rules are not calling, for no reason that I can discern.
+; NB: I don't think these rules could be made to plug into the setence templates because of the
+; SatisfyingSet logic . . .
+;
+; Therefore still need to write SV, prep, to-do, and to-be versions of these if we want that functionality -- 
+; or do them without the satisfying set logic, so they can just plug into the templates . . .
 ;
 ;-----------------------------------------------------------------------------------------------
 ;
-; Example: "Which girl do you like?"
+; Example: "Which girl do you like?" "What book are you reading?"
 ;
 (define (whichobjQ-rule obj_concept obj_instance verb verb_instance subj_concept subj_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
@@ -753,12 +757,9 @@
 	)
 )
 ;
-; Example: "Which girl likes you?"
+; Example: "Which girl likes you?" "What fool said that?"
 ;
-; May need to write SV, SVIO, prep, to-be versions of these if they cannot be fused with the sentence templates
-;
-;
-(define (whichsubjQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)			
+(define (whichsubjQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
 	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 		(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
 		(ImplicationLink (PredicateNode obj_instance df-node-stv) (PredicateNode obj_concept df-node-stv) df-link-stv)
@@ -768,7 +769,28 @@
 			(EvaluationLink df-link-stv (PredicateNode verb_instance df-node-stv)
 				(ListLink df-link-stv
 					(VariableNode "$qVar" df-node-stv)
-					(PredicateNode obj_instance df-node-stv)
+					(ConceptNode obj_instance df-node-stv)
+				)
+			)
+		)
+	)
+)
+;
+; Example: "To which address did you send the email?"
+;
+(define (whichiobjQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance iobj_concept iobj_instance)
+	(list (ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+		(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
+		(ImplicationLink (PredicateNode obj_instance df-node-stv) (PredicateNode obj_concept df-node-stv) df-link-stv)
+		(InheritanceLink (ConceptNode iobj_instance df-node-stv) (ConceptNode iobj_concept df-node-stv) df-link-stv)
+		(InheritanceLink (VariableNode "$qVar") (ConceptNode iobj_instance df-node-stv) df-link-stv)
+		(SatisfyingSetLink df-link-stv
+			(VariableNode "$qVar")
+			(EvaluationLink df-link-stv (PredicateNode verb_instance df-node-stv)
+				(ListLink df-link-stv
+					(ConceptNode subj_instance df-node-stv)
+					(ConceptNode obj_instance df-node-stv)
+					(VariableNode "$qVar" df-node-stv)
 				)
 			)
 		)
