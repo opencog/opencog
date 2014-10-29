@@ -181,11 +181,9 @@ int main(int argc, char** argv)
 
         // compute the distances between the targets
         vector<score_t> dsts;
-#if DOESNT_COMPILE_FOR_ME
         for (unsigned i = 0; i < targets.size(); ++i)
             for (unsigned j = 0; j < i; ++j)
                 dsts.push_back(diversity_params.dst(targets[i], targets[j]));
-#endif
 
         // write the results
         write_results(edp, dsts);        
