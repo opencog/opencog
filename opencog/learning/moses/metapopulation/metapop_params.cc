@@ -38,18 +38,21 @@ void diversity_parameters::set_dst(diversity_parameters::dst_enum_t de,
 {
     switch(de) {
     case p_norm:
-        dst = [p](const behavioral_score& a, const behavioral_score& b) {
-            return p_norm_distance(a, b, p);
+        dst = [p](const std::vector<score_t>& lhs,
+                  const std::vector<score_t>& rhs) {
+            return p_norm_distance(lhs, rhs, p);
         };
         break;
     case tanimoto:
-        dst = [](const behavioral_score& a, const behavioral_score& b) {
-            return tanimoto_distance<behavioral_score, dp_t>(a, b);
+        dst = [](const std::vector<score_t>& lhs,
+                 const std::vector<score_t>& rhs) {
+            return tanimoto_distance<std::vector<score_t>, dp_t>(lhs, rhs);
         };
         break;
     case angular:
-        dst = [](const behavioral_score& a, const behavioral_score& b) {
-            return angular_distance<behavioral_score, dp_t>(a, b);
+        dst = [](const std::vector<score_t>& lhs,
+                 const std::vector<score_t>& rhs) {
+            return angular_distance<std::vector<score_t>, dp_t>(lhs, rhs);
         };
         break;
     default:

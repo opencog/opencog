@@ -63,7 +63,8 @@ struct diversity_parameters
     // the Tanimoto and the angular distances.
     enum dst_enum_t { p_norm, tanimoto, angular };
     void set_dst(dst_enum_t de, dp_t p = 0.0 /* optional distance parameter */);
-    std::function<dp_t(const behavioral_score&, const behavioral_score&)> dst;
+    std::function<dp_t(const std::vector<score_t>&,
+                       const std::vector<score_t>&)> dst;
 
     // Function to convert the distance into diversity penalty. There
     // are 3 possible functions

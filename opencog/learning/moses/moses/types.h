@@ -214,7 +214,8 @@ struct behavioral_score : public std::vector<score_t>
     behavioral_score() {}
     behavioral_score(size_t sz) : std::vector<score_t>(sz) {}
     behavioral_score(size_t sz, score_t val) : std::vector<score_t>(sz, val) {}
-    behavioral_score(std::initializer_list<score_t> il) : std::vector<score_t>(il) {}
+    behavioral_score(std::initializer_list<score_t> il)
+        : std::vector<score_t>(il) {}
 
     std::vector<score_t> operator-=(const std::vector<score_t>& rhs)
     {
