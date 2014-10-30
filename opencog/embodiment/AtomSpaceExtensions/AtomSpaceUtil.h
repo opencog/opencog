@@ -134,9 +134,10 @@ private:
 public:
 
     /**
-     * Return the RefrenceLink given its first outgoing
+     * Return the ReferenceLink given its first outgoing
      *
-     * @note We assume there should be only one ReferenceLink containing the given atom
+     * @note We assume there should be only one ReferenceLink
+     *       containing the given atom
      *
      * ReferenceLink
      *     firstOutgoing
@@ -145,7 +146,7 @@ public:
     static Handle getReferenceLink(AtomSpace & atomSpace, Handle hFirstOutgoing); 
 
     /**
-     * Return the second outgoing of a RefrenceLink given the first outgoing
+     * Return the second outgoing of a ReferenceLink given the first outgoing
      */
     static Handle getReference(AtomSpace & atomSpace, Handle hFirstOutgoing); 
 
@@ -156,12 +157,13 @@ public:
      *     firstOutgoing
      *     secondOutgoing
      */
-    static std::vector<Handle> getInheritanceLinks(AtomSpace & atomSpace, Handle hFirstOutgoing);
+    static std::vector<Handle> getInheritanceLinks(AtomSpace & atomSpace,
+                                                   Handle hFirstOutgoing);
 
    /**
-     * Returns the current level of the given feeling name.
-     * If the feeling does not exists on AtomSpace or some problem occurs when invoked,
-     * this method will return -1.
+     * Returns the current level of the given feeling name.  If the
+     * feeling does not exists on AtomSpace or some problem occurs
+     * when invoked, this method will return -1.
      *
      * @param atomSpace The atom space
      * @param petId Pet's name(id)
@@ -175,8 +177,9 @@ public:
     /**
      * Returns the current level of the given Modulator.
      *
-     * If the Modulator does not exist on AtomSpace or some problem occurs when invoked,
-     * this method will return a random value in [0, 1]
+     * If the Modulator does not exist on AtomSpace or some problem
+     * occurs when invoked, this method will return a random value in
+     * [0, 1]
      *
      * @param atomSpace      The AtomSpace
      * @param modulatorName  Name of the Modulator wanted
@@ -198,8 +201,9 @@ public:
     /**
      * Returns the current level of the given Demand.
      *
-     * If the Demand does not exist on AtomSpace or some problem occurs when invoked,
-     * this method will return a random value in [0, 1]
+     * If the Demand does not exist on AtomSpace or some problem
+     * occurs when invoked, this method will return a random value in
+     * [0, 1]
      *
      * @param atomSpace The AtomSpace
      * @param demand    Name of the Demand wanted
@@ -215,17 +219,19 @@ public:
      * @param atomSpace The AtomSpace
      * @param demand    Name of the Demand 
      *
-     * @return Handle   The Handle to Demand Goal (EvaluationLink), or Handle::UNDEFINED if fails
+     * @return Handle   The Handle to Demand Goal (EvaluationLink), or
+     *                  Handle::UNDEFINED if fails
      */
     static Handle getDemandGoalEvaluationLink(AtomSpace & atomSpace, 
                                               const std::string & demand 
                                              );
 
     /**
-     * Returns a pointer to the most recent evaluation link. With the given name of the
-     * predicateNode link, this method performs a search on AtomSpace to find the link
-     * marked with the most recent timestamp. If the evaluation link does not exists,
-     * an Handle::UNDEFINED will be returned.
+     * Returns a pointer to the most recent evaluation link. With the
+     * given name of the predicateNode link, this method performs a
+     * search on AtomSpace to find the link marked with the most
+     * recent timestamp. If the evaluation link does not exists, an
+     * Handle::UNDEFINED will be returned.
      *
      * @param atomSpace The atom space
      * @param predicateNodeName The name of the predicate node of the Evaluation link

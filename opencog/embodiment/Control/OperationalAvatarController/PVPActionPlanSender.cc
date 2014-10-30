@@ -37,7 +37,8 @@ using namespace pai;
 using namespace oac;
 using messaging::StringMessage;
 
-PVPActionPlanSender::PVPActionPlanSender(const std::string& petId, NetworkElement * ne)
+PVPActionPlanSender::PVPActionPlanSender(const std::string& petId,
+                                         NetworkElement * ne)
 {
     this->petId = petId;
     this->ne = ne;
@@ -50,18 +51,23 @@ PVPActionPlanSender::~PVPActionPlanSender()
 
 bool PVPActionPlanSender::sendActionPlan(const ActionPlan& actionPlan)
 {
-    StringMessage msg(ne->getID(), config().get("PROXY_ID"), actionPlan.getPVPmessage(petId));
+    StringMessage msg(ne->getID(), config().get("PROXY_ID"),
+                      actionPlan.getPVPmessage(petId));
     if (logPVPMessage) {
-        logger().info("PVPActionPlanSender::sendActionPlan():\n%s\n", msg.getPlainTextRepresentation());
+        logger().info("PVPActionPlanSender::sendActionPlan():\n%s\n",
+                      msg.getPlainTextRepresentation());
     }
     return ne->sendMessage(msg);
 }
 
-bool PVPActionPlanSender::sendSpecificActionFromPlan(const ActionPlan& actionPlan, unsigned int actionSequenceNum)
+bool PVPActionPlanSender::sendSpecificActionFromPlan(const ActionPlan& actionPlan,
+                                                     unsigned int actionSequenceNum)
 {
-	StringMessage msg(ne->getID(), config().get("PROXY_ID"), actionPlan.getPVPmessage(petId, actionSequenceNum));
+	StringMessage msg(ne->getID(), config().get("PROXY_ID"),
+                      actionPlan.getPVPmessage(petId, actionSequenceNum));
     if (logPVPMessage) {
-        logger().info("PVPActionPlanSender::sendActionPlan():\n%s\n", msg.getPlainTextRepresentation());
+        logger().info("PVPActionPlanSender::sendActionPlan():\n%s\n",
+                      msg.getPlainTextRepresentation());
     }
     return ne->sendMessage(msg);
 

@@ -81,10 +81,15 @@ public:
     /**
      * Add an action to this plan
      *
-     * @param action A reference to the action to be added. A new AvatarAction object is created from this argument and
-     *         its sequence number is set, according with its position in this action plan.
+     * @param action A reference to the action to be added. A new
+     *        AvatarAction object is created from this argument and
+     *        its sequence number is set, according with its position
+     *        in this action plan.
+     *
      * @return The position of the added action in this plan.
-     * @throws InvalidParamException if the action contains invalid parameters for its type.
+     *
+     * @throws InvalidParamException if the action contains invalid
+     *         parameters for its type.
      */
     unsigned int addAction(const AvatarAction& action) throw (opencog::InvalidParamException, std::bad_exception);
 
@@ -104,14 +109,16 @@ public:
     const AvatarAction& getAction(unsigned int seqNumber) const throw (opencog::IndexErrorException, std::bad_exception);
 
     /**
-     * Generate the corresponding PVP's message in XML format for this action plan
+     * Generate the corresponding PVP's message in XML format for this
+     * action plan
+     *
      * @param petId the id of the pet for which the PVP message will be sent.
      */
     string getPVPmessage(const std::string& petId) const;
 
     /**
-	 * Generate the corresponding PVP's message in XML format for a given atomic action
-	 * of this action plan.
+	 * Generate the corresponding PVP's message in XML format for a
+	 * given atomic action of this action plan.
 	 *
 	 * @param petId the id of the pet
 	 * @param actionSeqNum the action sequence number to be capsulated in XML.

@@ -67,10 +67,13 @@ public:
     /**
      * Sends the action plan to the target Virtual World.
      *
-     * @param ationPlan a reference to the object that contains the action plan to be sent. Note that
-     *        this reference may not be valid after the call of this method because caller may release the object.
+     * @param actionPlan a reference to the object that contains the
+     *        action plan to be sent. Note that this reference may not
+     *        be valid after the call of this method because caller
+     *        may release the object.
      *
-     * @return a boolean value that indicates the success (true) or failure (false) of this sending operation.
+     * @return a boolean value that indicates the success (true) or
+     *         failure (false) of this sending operation.
      */
     bool sendActionPlan(const pai::ActionPlan& actionPlan);
 

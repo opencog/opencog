@@ -204,14 +204,15 @@ void PAI::sendActionPlan(ActionPlanID planId) throw (opencog::RuntimeException, 
     if (it != inProgressActionPlans.end()) {
         const ActionPlan& plan = it->second;
         if (actionSender.sendActionPlan(plan)) {
-            // mark action plan as sent by moving it from inProgress to pending map
-            
-            // must be added first. Otherwise the reference to the plan becomes invalid
+            // Mark action plan as sent by moving it from inProgress
+            // to pending map. Must be added first. Otherwise the
+            // reference to the plan becomes invalid.
             pendingActionPlans[planId] = plan;
             inProgressActionPlans.erase(it->first);
 
-            // TODO: Add a "ActionTried" predicate for each action in the sent action plan
-            // (i.e., each ExecLink Handle in planToActionIdsMaps[planId])
+            // TODO: Add a "ActionTried" predicate for each action in
+            // the sent action plan (i.e., each ExecLink Handle in
+            // planToActionIdsMaps[planId])
         } else {
             throw opencog::RuntimeException(TRACE_INFO,
                 "PAI - ActionPlanSender could not send the ActionPlan '%s'.", planId.c_str());

@@ -125,11 +125,12 @@ string ActionPlan::getPVPmessage(const std::string& petId) const
 
     DOMDocument* xmlDoc = createEmbodimentXMLDocument();
 
-    DOMElement* actionPlanElem = createActionPlanElement(xmlDoc, xmlDoc->getDocumentElement(), petId);
+    DOMElement* actionPlanElem =
+        createActionPlanElement(xmlDoc, xmlDoc->getDocumentElement(), petId);
 
-    for (vector<AvatarAction>::const_iterator itr = actions.begin(); itr != actions.end(); itr++) {
-        itr->createPVPXmlElement(xmlDoc, actionPlanElem);
-    }
+    for (const AvatarAction& aa : actions)
+        aa.createPVPXmlElement(xmlDoc, actionPlanElem);
+
     string result = PAIUtils::getSerializedXMLString(xmlDoc);
 
     // free memory of the DomDocument
@@ -138,11 +139,13 @@ string ActionPlan::getPVPmessage(const std::string& petId) const
     return result;
 }
 
-string ActionPlan::getPVPmessage(const std::string& petId, unsigned int actionSeqNum) const
+string ActionPlan::getPVPmessage(const std::string& petId,
+                                 unsigned int actionSeqNum) const
 {
     DOMDocument* xmlDoc = createEmbodimentXMLDocument();
 
-    DOMElement* actionPlanElem = createActionPlanElement(xmlDoc, xmlDoc->getDocumentElement(), petId);
+    DOMElement* actionPlanElem =
+        createActionPlanElement(xmlDoc, xmlDoc->getDocumentElement(), petId);
 
 	const AvatarAction& action = getAction(actionSeqNum);
 	action.createPVPXmlElement(xmlDoc, actionPlanElem);
@@ -235,8 +238,10 @@ DOMDocument* ActionPlan::createEmbodimentXMLDocument() const throw (opencog::XML
 {
     XMLCh namespaceURI[PAIUtils::MAX_TAG_LENGTH+1];
     XMLCh qualifiedName[PAIUtils::MAX_TAG_LENGTH+1];
-    XMLString::transcode("http://www.opencog.org/brain", namespaceURI, PAIUtils::MAX_TAG_LENGTH);
-    XMLString::transcode(ACTION_PLAN_ELEMENT, qualifiedName, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode("http://www.opencog.org/brain",
+                         namespaceURI, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(ACTION_PLAN_ELEMENT, qualifiedName,
+                         PAIUtils::MAX_TAG_LENGTH);
     DOMDocument* doc = PAIUtils::getDOMImplementation()->createDocument(
                 namespaceURI,
                 qualifiedName,
@@ -255,8 +260,8 @@ DOMDocument* ActionPlan::createEmbodimentXMLDocument() const throw (opencog::XML
 }
 
 DOMElement* ActionPlan::createActionPlanElement(DOMDocument* doc,
-        DOMElement* parent,
-        const std::string& petId) const
+                                                DOMElement* parent,
+                                                const std::string& petId) const
 {
 
     DOMElement *actionPlan = parent;
