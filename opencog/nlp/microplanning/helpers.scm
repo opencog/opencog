@@ -141,49 +141,81 @@
 ; -----------------------------------------------------------------------
 ; match-sentence-forms -- Helper function to see if an atom matches a sentence form
 ;
-; Check "atom" against a list of sentence forms and returns the first form
-; matched;  returns #f if none matched.
+; Check "atom" and its subgraph against a list of sentence forms and returns
+; the first form matched;  returns #f if none matched.
 ;
 (define (match-sentence-forms atom favored-forms)
-	(find (lambda (form) (form-graph-match? atom form)) favored-forms)
+	; helper function to allow subgraph matching
+	(define (helper atom form)
+		(if (form-graph-match? atom form)
+			#t
+			; check if subgraph match the form
+			(if (cog-link? atom)
+				(find (lambda (subgraph) (helper subgraph form)) (cog-outgoing-set atom))
+				#f
+			)
+		)	
+	)
+
+	(find (lambda (form) (helper atom form)) favored-forms)
 )
 
 ; -----------------------------------------------------------------------
-; is-object? -- Check if 'node' is "(indirect) object" within 'link'
+; cog-pred-is-argN? -- Check if 'node' is argument N within 'link'
 ;
-; Given a link 'link', check if the node 'node' can be considered "object"
-; or "indirect object" as in "subject-verb-object".
+; Given an EvaluationLink 'link', check if the node 'node' is argument N
+; (starts from 0).
 ;
-(define (is-object? link node)
-	; subject-object property must be in EvaluationLink
-	(if (not (equal? 'EvaluationLink (cog-type link)))
+(define (cog-pred-is-argN? link node N)
+	; must be in EvaluationLink, and N >= 0
+	(if (or (< N 0) (not (equal? 'EvaluationLink (cog-type link))))
 		#f
-		; (indirect) object must be in a ListLink with the subject
-		(if (and (equal? 'ListLink (cog-type (gdr link))) (> (cog-arity (gdr link)) 1))
-			; check either "object" or "indirect object"
-			(if (= (cog-arity (gdr link)) 2)
-				(equal? node (gddr link))
-				(equal? node (caddr (cog-outgoing-set (gdr link))))
+		(if (equal? 'ListLink (cog-type (gdr link)))
+			(if (> (cog-arity (gdr link)) N)
+				(equal? node (list-ref (cog-outgoing-set (gdr link)) N))
+				#f
 			)
-			#f
+			(if (= N 0)
+				(equal? node (gdr link))
+				#f
+			)
 		)
 	)
 )
 
 ; -----------------------------------------------------------------------
-; get-subject -- Get the subject of a link
+; cog-pred-get-argN -- Get argument number N of an EvaluationLink
 ;
-; Given a link 'link', get the node that can be considered "subject" as
-; in "subject-verb-object".
+; Given a EvaluationLink 'link', get argument N.  The returned node can
+; be considered "subject" as in "subject-verb-object".
 ;
-(define (get-subject link)
-	; similar to is-object? check, must be in EvaluationLink
-	(if (not (equal? 'EvaluationLink (cog-type link)))
+(define (cog-pred-get-argN link N)
+	; must be in EvaluationLink, and N >= 0
+	(if (or (< N 0) (not (equal? 'EvaluationLink (cog-type link))))
 		#f
 		(if (equal? 'ListLink (cog-type (gdr link)))
-			(gadr link)
-			(gdr link)
+			(if (> (cog-arity (gdr link)) N)
+				(list-ref (cog-outgoing-set (gdr link)) N)
+				#f
+			)
+			(if (= N 0)
+				(gdr link)
+				#f
+			)
 		)
+	)
+)
+
+; -----------------------------------------------------------------------
+; cog-pred-get-pred -- Get the predicate of an EvaluationLink
+;
+; Get the PredicateNode of a specific EvaluationLink 'link'.
+;
+(define (cog-pred-get-pred link)
+	; must be in EvaluationLink
+	(if (not (equal? 'EvaluationLink (cog-type link)))
+		#f
+		(gar link)
 	)
 )
 
