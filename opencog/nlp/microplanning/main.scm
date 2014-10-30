@@ -20,9 +20,8 @@
 	(define chunks-utterance-type '())
 	
 	(define (wrap-setlink atoms ut)
-		;;; add additional link base on utterance type
-		
-		(SetLink atoms)
+		; add additional link base on utterance type
+		(SetLink (get-utterance-link ut) atoms)
 	)
 
 	; initialize the sentence forms as needed
@@ -62,7 +61,7 @@
 		
 		; helper function for branching into different utterance type
 		(define (sub-helper ut)
-			(define new-chunk (make-sentence curr-unused atoms-set (get-sentence-forms ut)))
+			(define new-chunk (make-sentence curr-unused atoms-set ut))
 			; if make-sentence returns empty, it means nothing is 'say-able'
 			(cond ((not (null? new-chunk))
 				; TODO keep some of the atoms (those that do not satisfy sentence forms) for later use?
@@ -139,10 +138,10 @@
 ; make-sentence -- Create a single sentence
 ;
 ; Greedily add new atoms (using some heuristics) to form a new sentence.
-; Accepts a list of un-said links, the complete set, and the utterance-type
-; sentence forms.
+; Accepts a list of un-said links, the complete set, and the utterance type.
 ;
-(define (make-sentence atoms-unused atoms-set favored-forms)
+(define (make-sentence atoms-unused atoms-set utterance-type)
+	(define favored-forms (get-sentence-forms utterance-type))
 	; initialize weight bases on "time ordering"
 	(define time-weights '())
 	; initialize weight (0, 1) bases on whether the atom satisfy a sentence form
@@ -191,7 +190,7 @@
 	; helper function for looping
 	(define (recursive-helper atoms-to-try)
 		(define head (car atoms-to-try))
-		(define result (check-chunk atoms-to-try))
+		(define result (check-chunk atoms-to-try utterance-type))
 		(define atoms-not-tried (lset-difference equal? atoms-unused atoms-to-try))
 
 		(define (give-up-unadded-part)
@@ -329,15 +328,40 @@
 )
 
 ; -----------------------------------------------------------------------
+; get-utterance-link -- Get the additional link required for an utterance type
+;
+; Get the additional link required for SuReal to match to sentence of a
+; specific utterance type.  To be inserted as part of the output SetLink.
+;
+(define (get-utterance-link utterance-type)
+	'()
+#|
+	(cond ((string=? "declarative" utterance-type)
+		(InheritanceLink (InterpretationNode "_") (ConceptNode "declarative"))
+	      )
+	      ((string=? "interrogative" utterance-type)
+		(InheritanceLink (InterpretationNode "_") (ConceptNode "interrogative"))
+	      )
+	      ((string=? "imperative" utterance-type)
+		(InheritanceLink (InterpretationNode "_") (ConceptNode "imperative"))
+	      )
+	      ((string=? "interjective" utterance-type)
+		(InheritanceLink (InterpretationNode "_") (ConceptNode "interjective"))
+	      )
+	)
+|#
+)
+
+; -----------------------------------------------------------------------
 ; check-chunk -- Check if a chunk is "say-able"
 ;
-; Call Surface Realization pipeline to see if a chunk of atoms are
-; "say-able", and if so, determines whether the sentence is too long or
-; complex.
+; Call Surface Realization pipeline to see if a chunk of 'atoms' are
+; "say-able" for a specific 'utterance-type', and if so, determines whether
+; the sentence is too long or complex.
 ;
 ; Returns 0 = not sayable, 1 = sayable, 2 = too long/complex
 ;
-(define (check-chunk atoms)
+(define (check-chunk atoms utterance-type)
 	(define (get-pos n)
 		(define wi (r2l-get-word-inst n))
 		(if (null? wi)
@@ -397,7 +421,7 @@
 
 	(define pos-result (and-l (map pos-checker pos-alist)))
 
-	(define temp-set-link (SetLink atoms))
+	(define temp-set-link (SetLink (get-utterance-link utterance-type) atoms))
 
 	; do something with SuReal to see if it is sayable
 	(define say-able (not (null? (sureal temp-set-link))))
