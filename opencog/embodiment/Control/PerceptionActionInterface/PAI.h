@@ -250,20 +250,39 @@ public:
     LanguageComprehension & getLanguageTool(void);
 
     /**
-     * Creates an Action Plan XML message to be sent to the PVP. Once
-     * this function in called it creates a new DOMDocument and
-     * add the approprieted XML elements.
+     * Creates an action Plan, that is:
      *
-     * @return The ActionPlanID value for the action plan identification.
+     * 1. Create a new planId
+     *
+     * 2. If the conceptNode "plan_selected_demand_goal" exists then
+     * the demand name of the current selected goal is used as
+     * argument to construct the action plan. The demand name if the
+     * name of the demand predicateNode structured as follows:
+     *
+     * ReferenceLink
+     *     ConceptNode: plan_selected_demand_goal
+     *     EvaluationLink
+     *         PredicateNode: demandName
+     *         <ARGS>
+     *
+     * If no such structure exist then the demand name is let empty.
+     *
+     * 3. Once the action plan created it associated to its planId in
+     * the map inProgressActionPlans. A new ActionIdMap is also
+     * associated to its planId in the map planToActionIdsMaps.
+     *
+     * @return The planId for the action plan identification.
      */
     ActionPlanID createActionPlan();
 
     /**
-     * Sends an Action Plan XML message, that is, converted the XML
-     * DOM tree into a string, encapsulates it in a message and send
-     * the message to PVP.
+     * Sends an Action Plan XML message, that is, creates a new
+     * DOMDocument and add the appropriate XML elements, turn it into
+     * a string, encapsulates it in a message and send the message to
+     * PVP.
      *
      * @param planId The identification of the action plan being sent.
+     *
      * @throw RuntimeException in the operation fails for the following
      * reasons:
      * - there is no action plan with the given ID (the plan may have
