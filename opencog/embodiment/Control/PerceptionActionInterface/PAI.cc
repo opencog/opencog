@@ -506,27 +506,21 @@ ActionID PAI::addAction(ActionPlanID planId, const AvatarAction& action) throw (
     return result;
 }
 
-HandleSeq PAI::getActionSeqFromPlan(ActionPlanID planId)
+HandleSeq PAI::getActionSeqFromPlan(ActionPlanID planId) const
 {
     HandleSeq actionHandles;
-    PlanToActionIdsMap::iterator planIt = planToActionIdsMaps.find(planId);
-    if (planIt == planToActionIdsMaps.end())
-        return actionHandles;
+    PlanToActionIdsMap::const_iterator planIt = planToActionIdsMaps.find(planId);
 
-    ActionIdMap::iterator actionIt ;
-
-
-    for (actionIt = planToActionIdsMaps[planId].begin(); actionIt != planToActionIdsMaps[planId].end(); ++ actionIt)
-    {
-        actionHandles.push_back(actionIt->second);
-    }
+    if (planIt != planToActionIdsMaps.end())
+        for (const ActionIdMap::value_type& actionId : planIt->second)
+            actionHandles.push_back(actionId.second);
 
     return actionHandles;
 }
 
-bool PAI::isActionPlanEmpty(const ActionPlanID& planId)
+bool PAI::isActionPlanEmpty(const ActionPlanID& planId) const
 {
-    ActionPlanMap::iterator it = inProgressActionPlans.find(planId);
+    ActionPlanMap::const_iterator it = inProgressActionPlans.find(planId);
 
     if (it != inProgressActionPlans.end()) {
         return it->second.empty();

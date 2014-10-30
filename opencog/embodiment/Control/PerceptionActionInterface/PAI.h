@@ -302,7 +302,12 @@ public:
                                      unsigned int actionSeqNum = 1) 
 		throw (opencog::RuntimeException, std::bad_exception); 
 
-    HandleSeq getActionSeqFromPlan(ActionPlanID planId);
+    /**
+     * Get a sequence of Handles associated with the actions of an
+     * action plan. Return an empty sequence if no such planId exist
+     * (in planToActionIdsMaps).
+     */
+    HandleSeq getActionSeqFromPlan(ActionPlanID planId) const;
 
     /**
      * Sends an Feelings XML message to PVP. Note that not all feelings are
@@ -348,11 +353,11 @@ public:
      *
      * @return true iff planId corresponds to an empty plan or no plan at all
      */
-    bool isActionPlanEmpty(const ActionPlanID& planId);
+    bool isActionPlanEmpty(const ActionPlanID& planId) const;
 
-    // send a single action command to the virtual world
-    // not in a plan
-    void sendSingleActionCommand(std::string& actionName, std::vector<ActionParamStruct> & paraList);
+    // Send a single action command to the virtual world not in a plan
+    void sendSingleActionCommand(std::string& actionName,
+                                 std::vector<ActionParamStruct> & paraList);
 
     /**
      * Process a XML message comming from PVP by adding the corresponding
