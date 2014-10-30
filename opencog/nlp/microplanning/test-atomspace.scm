@@ -6,15 +6,16 @@
 ;(r2l "He swallowed the apple.")
 ;(r2l "The funny man collects interesting stories.")
 ;(r2l "A cat ate the seeds.")
+;(r2l "What damaged the tree?")
 
 ; =========================
 ; More complex knowledge
 ; =========================
-(r2l "The ugly cat climbs the stairs and enters the house.")
-(r2l "He takes the cookies and eats them.")
-(r2l "She collects damaged stamps and categorizes them.")
+;(r2l "The ugly cat climbs the stairs and enters the house.")
+;(r2l "He takes the cookies and eats them.")
+;(r2l "She collects damaged stamps and categorizes them.")
 
-(define test-sal
+(define test-declarative-sal
 	(SequentialAndLink
 		(EvaluationLink (stv 0.99000001 0.99000001)
 			(PredicateNode "climbs@cc237a97-1cde-4939-bf7e-93d607eb3d7d" (stv 0.001 0.99000001))
@@ -68,6 +69,19 @@
 		)
 	)
 )
+
+(define test-interrogative-sal
+	(SequentialAndLink
+		(EvaluationLink (stv 0.99000001 0.99000001)
+			(PredicateNode "climbs@cc237a97-1cde-4939-bf7e-93d607eb3d7d" (stv 0.001 0.99000001))
+			(ListLink (stv 0.99000001 0.99000001)
+		 		(VariableNode "_$qVar" (stv 0.001 0.99000001))
+		 		(ConceptNode "tree@160bc480-942c-4421-b798-04c004c011f5" (stv 0.001 0.99000001))
+			)
+		)		
+	)
+)
+
 
 ;;;;;;;;;;;;;;;;; Some RelEx style output ;;;;;;;;;;;;;;;;;;;;
 
