@@ -525,10 +525,9 @@ bool PAI::isActionPlanEmpty(const ActionPlanID& planId) const
     if (it != inProgressActionPlans.end()) {
         return it->second.empty();
     } else {
-        logger().warn(
-                     "PAI - No action plan with id = %s in progress\n",
-                     planId.c_str());
-        return false;
+        logger().warn("PAI - No action plan with id = %s in progress\n",
+                      planId.c_str());
+        return true;
     }
 }
 
