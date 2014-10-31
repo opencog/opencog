@@ -106,10 +106,31 @@
 ; returned in a list or should be a single atom so as to simplify
 ; post-processing and NLG tasks.
 ;==========================================================================================
-
-;This is a test to find the source of a bug!
-(define (imperative-rule sentence_index)
-	(list (cog-prt-atomspace)))
+;
+; Tag Interpretation Nodes with Speech Act Types
+; (interrogative means question-word questions, while truthquery means yes/no questions)
+;
+; NB: Imperatives are not perfect -- (1) I've got relex to add an implicit subject "you" to imperatives,
+; 	but the "instance" still has to be the Left-Wall -- the Left-Wall inherits the concept "you";
+;	the problem is that if you replace the left-wall with "you" entirely it totally de-rails relex.
+;	(2) Imperatives with subjects, i.e. "You tell me!" are interpreted as declaratives.
+;
+(define (imperative-rule interpretation_index)
+	(list (InheritanceLink interpretation_index df-node-stv (ConceptNode "ImperativeSpeechAct" df-node-stv) df-link-stv)
+	)
+)
+(define (interrogative-rule interpretation_index)
+	(list (InheritanceLink interpretation_index df-node-stv (ConceptNode "InterrogativeSpeechAct" df-node-stv) df-link-stv)
+	)
+)
+(define (truth-query-rule interpretation_index)
+	(list (InheritanceLink interpretation_index df-node-stv (ConceptNode "TruthQuerySpeechAct" df-node-stv) df-link-stv)
+	)
+)
+(define (declarative-rule interpretation_index)
+	(list (InheritanceLink interpretation_index df-node-stv (ConceptNode "DeclarativeSpeechAct" df-node-stv) df-link-stv)
+	)
+)
 ;
 ; =========================================================================================
 ; Predicate-Argument templates
@@ -369,6 +390,17 @@
 	(ImplicationLink  (PredicateNode instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 	)
 )
+
+;(define (prepadvmod-rule verb_concept verb_instance noun_concept noun_instance prep_concept prep_instance)
+;	(list 
+;		(InheritanceLink (ConceptNode noun_instance df-node-stv) (ConceptNode noun_concept df-node-stv) df-link-stv)
+;		(InheritanceLink (ConceptNode prep_instance df-node-stv) (ConceptNode prep_concept df-node-stv) df-link-stv)
+;		
+;		(ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb_concept df-node-stv) df-link-stv)
+;		(InheritanceLink (SatisfyingSetLink (PredicateNode instance df-node-stv) df-link-stv) (ConceptNode adv_instance df-node-stv) df-link-stv)
+;	)
+;)
+
 
 
 ; -----------------------------------------------------------------------
@@ -657,7 +689,7 @@
 ;
 ; Example "Why are you such a fool?" etc.
 ;
-(define (whencop-Q-rule subj_concept subj_instance)
+(define (whycop-Q-rule subj_concept subj_instance)
 	(list (InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
 	(EvaluationLink df-link-stv 
 		(PredicateNode "Because" df-node-stv)
