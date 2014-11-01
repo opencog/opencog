@@ -43,7 +43,7 @@ void load_scm_files_from_config (AtomSpace& as,
 // If there is no guile, then load_scm_file() must always return 
 // an error (i.e. a non-zero return value).
 static inline int load_scm_file (AtomSpace& as, const std::string&) { return 2; }
-static int load_scm_file_relative (AtomSpace& as, const std::string&,
+static inline int load_scm_file_relative (AtomSpace& as, const std::string&,
                                    std::vector<std::string> =
                                    std::vector<std::string>()) { return 2; }
 static inline void load_scm_files_from_config (AtomSpace& as,
