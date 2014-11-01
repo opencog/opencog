@@ -416,9 +416,9 @@ ENDIF (SDLGFX_FOUND)
 # Threaded Building Blocks (Intel TBB) library
 FIND_PACKAGE(TBB)
 IF (TBB_FOUND)
-        SET(HAVE_TBB 1)
+	SET(HAVE_TBB 1)
 ELSE (TBB_FOUND)
-        SET(TBB_DIR_MESSAGE "Intel TBB (Threaded Building Blocks) was not found; the AtomSpace Publisher module will not be built. Installation instructions: https://www.threadingbuildingblocks.org/download")
+	SET(TBB_DIR_MESSAGE "Intel TBB (Threaded Building Blocks) was not found; the AtomSpace Publisher module will not be built. Installation instructions: https://www.threadingbuildingblocks.org/download")
 ENDIF (TBB_FOUND)
 MESSAGE(STATUS "${TBB_DIR_MESSAGE}")
 
