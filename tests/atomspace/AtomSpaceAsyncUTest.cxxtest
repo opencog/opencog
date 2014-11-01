@@ -565,16 +565,20 @@ public:
     // for some atoms and then have threads compete trying to
     // recursively erase this same incoming set, and then trip on
     // one-another.
-    void threadedEvalRemove(int thread_id, HandleSeq& seq)
+    //
+    // argument is a pointer, else a build break. See
+    // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=57716   and 
+    // http://stackoverflow.com/questions/15235885/invalid-initialization-of-non-const-reference-with-c11-thread
+    void threadedEvalRemove(int thread_id, HandleSeq* seq)
     {
         while (spinwait) std::this_thread::yield();
 
-        size_t nc = seq.size();
+        size_t nc = seq->size();
         for (size_t i=0; i<nc; i++) {
             // size_t j = (i+111*thread_id) % nc;
             size_t j = (i+11*thread_id) % nc;
             // size_t j = i;
-            atomSpace->purgeAtom(seq[j]);
+            atomSpace->purgeAtom((*seq)[j]);
         }
     }
 
@@ -609,7 +613,7 @@ public:
         std::vector<std::thread> thread_pool;
         for (int i=0; i < n_threads; i++) {
             thread_pool.push_back(
-                std::thread(&AtomSpaceAsyncUTest::threadedEvalRemove, this, i, hs));
+                std::thread(&AtomSpaceAsyncUTest::threadedEvalRemove, this, i, &hs));
         }
         spinwait = false;
         for (std::thread& t : thread_pool) t.join();
