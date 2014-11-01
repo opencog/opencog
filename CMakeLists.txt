@@ -416,9 +416,9 @@ ENDIF (SDLGFX_FOUND)
 # Threaded Building Blocks (Intel TBB) library
 FIND_PACKAGE(TBB)
 IF (TBB_FOUND)
-        SET(HAVE_TBB 1)
+	SET(HAVE_TBB 1)
 ELSE (TBB_FOUND)
-        SET(TBB_DIR_MESSAGE "Intel TBB (Threaded Building Blocks) was not found; the AtomSpace Publisher module will not be built. Installation instructions: https://www.threadingbuildingblocks.org/download")
+	SET(TBB_DIR_MESSAGE "Intel TBB (Threaded Building Blocks) was not found; the AtomSpace Publisher module will not be built. Installation instructions: https://www.threadingbuildingblocks.org/download")
 ENDIF (TBB_FOUND)
 MESSAGE(STATUS "${TBB_DIR_MESSAGE}")
 
@@ -541,9 +541,9 @@ ENDIF(HAVE_ATOMSPACE AND ODBC_FOUND)
 # Here's the catch: much of embodiment relies on the MessagingSystem,
 # which uses NMXML as the message format.  And NMXML needs expat,
 # so embodiment can't build without expat.
-IF(XERCESC_VERSION_OK AND HAVE_PROTOBUF AND HAVE_XML)
+IF(XERCESC_VERSION_OK AND HAVE_XML)
 	SET(HAVE_EMBODIMENT 1)
-ENDIF(XERCESC_VERSION_OK AND HAVE_PROTOBUF AND HAVE_XML)
+ENDIF(XERCESC_VERSION_OK AND HAVE_XML)
 
 IF (CURL_FOUND AND XMLRPC_FOUND)
 	ADD_DEFINITIONS(-DHAVE_UBIGRAPH)

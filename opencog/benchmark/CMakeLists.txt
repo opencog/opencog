@@ -16,14 +16,17 @@ IF (HAVE_GUILE)
 ENDIF(HAVE_GUILE)
 
 IF (HAVE_CYTHON)
-	TARGET_LINK_LIBRARIES (atomspace_bm PythonModule atomspace_cython)
+	TARGET_LINK_LIBRARIES (atomspace_bm
+		PythonModule
+		atomspace_cython
+		${PYTHON_LIBRARIES}
+	)
 ENDIF(HAVE_CYTHON)
 
 TARGET_LINK_LIBRARIES (atomspace_bm
 	server
 	atomspace
 	cogutil
-	${PYTHON_LIBRARIES}
 )
 
 IF (HAVE_SERVER)
