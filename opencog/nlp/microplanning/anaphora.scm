@@ -137,8 +137,9 @@
 		
 		; the main helper function to check all conditions
 		(define (check-helper)
-			; indices of all occurrences of a noun instance in structure ((i1 n1) (i2 n2) ...)
-			; within 'chunks', excluding occurrences within links that are not sentence-formed
+			; indices of all occurrences of the same noun in structure ((i1 n1) (i2 n2) ...) within
+			; 'chunks', excluding occurrences within links that are not sentence-formed.  i1, i2...
+			; are indices into nouns-list
 			(define all-occurrences 
 				(filter-map 
 					(lambda (n i) 
@@ -194,11 +195,22 @@
 				)
 			)
 			
-			; check if mentioned in last sentence or not
-			; TODO to allow 2 - 3 sentences back
+			; check if mentioned within 2 to 3 sentences back or not
 			(define (get-last-mentioned)
 				(define this-time (list-index (lambda (o) (= index (car o))) all-occurrences))
-				(define last-time (- this-time 1))
+				
+				; helper function to only get noun in sentence-formed link
+				(define (get-last-time ind)
+					(if (< ind 0)
+						-1
+						(if (nouns-list-get-formed (cdr (list-ref all-occurrences ind)))
+							ind
+							(get-last-time (- ind 1))
+						)
+					)
+				)
+				
+				(define last-time (get-last-time (- this-time 1)))
 			
 				(nouns-list-get-ci (cdr (list-ref all-occurrences last-time)))
 			)
@@ -212,7 +224,7 @@
 			(define is-modified (check-modified))
 			; fourth check if mentioned too far back
 			(define is-too-far-back
-				(and (not is-first-occurrence) (not (>= (+ 1 (get-last-mentioned)) (nouns-list-get-ci the-noun))))
+				(and (not is-first-occurrence) (< (+ 3 (get-last-mentioned)) (nouns-list-get-ci the-noun)))
 			)
 			
 			(not (or is-first-occurrence is-ambiguous is-modified is-too-far-back))
@@ -281,6 +293,7 @@
 			(cond ((or (null? eval-link) (not (is-object? eval-link atom)))
 				pronoun
 			      )
+			      ; TODO still need to handle "mine", "hers", "theirs", etc.
 			      ; check possession
 			      ((and (cog-pred-get-pred eval-link) (string=? (cog-name (cog-pred-get-pred eval-link)) "possession"))
 			      	(cond ((string-ci=? "I" pronoun) "my")
