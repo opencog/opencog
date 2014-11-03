@@ -21,7 +21,7 @@
 	
 	(define (wrap-setlink atoms ut)
 		; add additional link base on utterance type
-		(SetLink (get-utterance-link ut) atoms)
+		(SetLink (get-utterance-link ut atoms) atoms)
 	)
 
 	; initialize the sentence forms as needed
@@ -333,20 +333,35 @@
 ; Get the additional link required for SuReal to match to sentence of a
 ; specific utterance type.  To be inserted as part of the output SetLink.
 ;
-(define (get-utterance-link utterance-type)
+(define (get-utterance-link utterance-type atoms)
+	; needs the following to handle utterance type with multiple speech acts
+	; by doing a hacky search for VariableNode in the sentence-form link
+	(define favored-forms (get-sentence-forms utterance-type))
+	(define (search-varnode)
+		(define (helper atom)
+			(and (match-sentence-forms atom favored-forms) (cog-has-atom-type? atom 'VariableNode))
+		)
+		
+		(any helper atoms)
+	)
+	
 	'()
 #|
 	(cond ((string=? "declarative" utterance-type)
-		(InheritanceLink (InterpretationNode "_") (ConceptNode "declarative"))
+		(InheritanceLink (InterpretationNode "_") (ConceptNode "DeclarativeSpeechAct"))
 	      )
 	      ((string=? "interrogative" utterance-type)
-		(InheritanceLink (InterpretationNode "_") (ConceptNode "interrogative"))
+		; TruthQuerySpeechAct will have no VariableNode on the main sentence-form link
+		(if (search-varnode)
+			(InheritanceLink (InterpretationNode "_") (ConceptNode "InterrogativeSpeechAct"))
+			(InheritanceLink (InterpretationNode "_") (ConceptNode "TruthQuerySpeechAct"))
+		)
 	      )
 	      ((string=? "imperative" utterance-type)
-		(InheritanceLink (InterpretationNode "_") (ConceptNode "imperative"))
+		(InheritanceLink (InterpretationNode "_") (ConceptNode "ImperativeSpeechAct"))
 	      )
 	      ((string=? "interjective" utterance-type)
-		(InheritanceLink (InterpretationNode "_") (ConceptNode "interjective"))
+		(InheritanceLink (InterpretationNode "_") (ConceptNode "InterjectiveSpeechAct"))
 	      )
 	)
 |#
@@ -421,7 +436,7 @@
 
 	(define pos-result (and-l (map pos-checker pos-alist)))
 
-	(define temp-set-link (SetLink (get-utterance-link utterance-type) atoms))
+	(define temp-set-link (SetLink (get-utterance-link utterance-type atoms) atoms))
 
 	; do something with SuReal to see if it is sayable
 	(define say-able (not (null? (sureal temp-set-link))))

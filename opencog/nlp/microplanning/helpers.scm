@@ -90,6 +90,32 @@
 )
 
 ; -----------------------------------------------------------------------
+; cog-has-atom-type? -- Check if "atom" contains atom type "type"
+;
+; Return #t or #f depends on whether the hypergraph "atom" contains an
+; atom of type "type".  Basically doing BFS.
+;
+(define (cog-has-atom-type? atom type)
+	(define (recursive-helper queue)
+		(cond ((null? queue)
+			#f
+		      )
+		      ((equal? (cog-type (car queue)) type)
+			#t
+		      )
+		      (else
+			(if (cog-link? (car queue))
+				(set! queue (append queue (cog-outgoing-set (car queue))))
+			)
+			(recursive-helper (cdr queue))
+		      )
+		)
+	)
+
+	(recursive-helper (append (list atom) (cog-outgoing-set atom)))
+)
+
+; -----------------------------------------------------------------------
 ; and-l -- Apply 'and' operator to a list
 ;
 ; Helper function for since we cannot do (apply and ...)
