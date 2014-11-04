@@ -279,26 +279,28 @@
 ; * 'atom' : is the atom for which similar atoms are being searched for.
 ; * 'lst' : is the list of atoms being checked for similarity.
 (define (similar-atoms atom lst)
-    (define (similar-node? node)
-        (and (equal? (cog-type node) (cog-type atom))
-            (cog-name-match (make-regexp (cog-name-clean atom) regexp/icase) node)
+    ; helper function since we cannot do (apply or ...)
+    (define (or-l x)
+        (if (null? x)
+            #f
+            (if (car x) #t (or-l (cdr x)))
         )
     )
-    (define (similar-link? link)
-        (let ((link-out-set (cog-outgoing-set link))
-                (atom-out-set (cog-outgoing-set atom)))
-            (and (equal? (cog-type link) (cog-type atom))
-                (not (null?
-                    (append-map similar-atoms atom-out-set (make-list (length atom-out-set) link-out-set))))
+
+    (define (similar? an-atom an-item)
+       	(if (cog-node? an-atom)
+            (and (equal? (cog-type an-atom) (cog-type an-item))
+                (cog-name-match (make-regexp (cog-name-clean an-atom) regexp/icase) an-item)
+            )
+            (if (and (= (cog-arity an-atom) (cog-arity an-item)) (equal? (cog-type an-atom) (cog-type an-item)))
+                (or-l (map similar? (cog-outgoing-set an-atom) (cog-outgoing-set an-item)))
+                #f
             )
         )
     )
-    (cond
-        ((cog-node? atom) (filter-hypergraph similar-node? lst))
-        ((cog-link? atom) (remove (negate similar-link?) lst))
-    )
-)
 
+    (filter (lambda (item) (similar? atom item)) lst)
+)
 
 ; Returns #t if node1 and node2 are equivalent. The Nodes are equivalent if
 ; they are of the same type and have similar names. A similar name is a name
