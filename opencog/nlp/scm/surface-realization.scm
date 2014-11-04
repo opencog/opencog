@@ -365,7 +365,7 @@
         )
         (delete-duplicates (append-map (lambda (x)
                 (if (assoc-ref a-dict x)
-                    (acons x (delete-duplicates! (append! (assoc-ref a-dict x) (list (car a-pair)))) a-dict)
+                    (assoc-set! a-dict x (delete-duplicates (append (assoc-ref a-dict x) (list (car a-pair)))))
                     (acons x (list (car a-pair)) a-dict)
                 )
             )
@@ -451,6 +451,7 @@
 ; TODO : Figure out an appropirate ranking formula. The ranking should
 ; be across all the outgoing-set of the output SetLink (I think???)
 (define (get-chunks output-set)
+    (define output-set-len (length (remove is-abstraction? (cog-outgoing-set output-set))))
     (define dict (reorder (index output-set) '()))
     (define (get-sntc r2l-set)
         (parse-get-words-in-order (interp-get-parse (logic-get-interp r2l-set)))
@@ -500,7 +501,7 @@
     ; * 'a-pair' : the pair passed as input has to be a mapping sturctured as handles of
     ;               (r2l-SetLink . (output-link1 output-link2))
     (define (chunk a-pair)
-        (if (equal? (car a-pair) "NO_PATTERN")
+        (if (or (equal? (car a-pair) "NO_PATTERN") (not (= (length (cdr a-pair)) output-set-len)))
             '()
             (let ((mapping (get-mapping-pair a-pair)) (sntc (get-sntc (cog-atom (car a-pair)))))
                     (map-in-order (lambda (x) (replace-word sntc x)) mapping)
