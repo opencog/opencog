@@ -337,6 +337,14 @@ void Octree3DMapManager::removeNoneBlockEntity(const Handle &entityNode)
 
 void Octree3DMapManager:: addSolidUnitBlock(BlockVector _pos, const Handle &_unitBlockAtom, std::string _materialType, std::string _color)
 {
+    // First, check if this _pos is inside the map boundary
+    if (! mMapBoundingBox.isUnitBlockInsideMe(_pos))
+    {
+        logger().error("addSolidUnitBlock: You want to add a unit block which outside the boundary of the map: at x = %d, y = %d, z= %d ! /n",
+                      _pos.x,_pos.y,_pos.z);
+        return;
+    }
+
     Block3D* block;
     // First, check is there already a block in this position
     if (mRootOctree->checkIsSolid(_pos, block))
