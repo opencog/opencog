@@ -950,7 +950,7 @@
 ; before he is tired"
 (define (before-after-rule $x_instance $y_instance $y_pos $before_or_after)
     (define y-node
-        (if (string=? $y_pos "verb")
+        (if (or (string=? $y_pos "verb") (string=? $y_pos "adj"))
             (PredicateNode $y_instance df-node-stv)
             (ConceptNode $y_instance df-node-stv)
         )
