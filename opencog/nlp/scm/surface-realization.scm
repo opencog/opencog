@@ -337,7 +337,7 @@
 ; Should one want to define a different criteria for changes can be made here.
 (define (filter-dialogue-sets an-atom)
     (delete '()
-        (par-map (lambda (x) (if (null? (similar-atoms an-atom (cog-outgoing-set x))) '() x)
+        (par-map (lambda (x) (if (null? (similar-atoms an-atom (remove is-abstraction? (cog-outgoing-set x)))) '() x)
                  ) (get-dialogue-sets)
         )
     )
@@ -405,46 +405,12 @@
 ; * 'output-atom' : It is a link we want to surealize
 ; * 'r2l-atom' ; It is a link we are using for extracting relations between words.
 (define (get-mapping output-atom r2l-atom)
-    (if (equal? (cog-type output-atom) (cog-type r2l-atom))
-        (cond
-            ((cog-node? output-atom)
-                (if (eqv-node? output-atom r2l-atom)
-                    (cons (cog-handle r2l-atom) (cog-handle output-atom))
-                    'not-eqv-node
-                )
-            )
-            ((cog-link? output-atom)
-                ; if the arity of the links are equal then assuming that the order
-                ; of the nodes is associated with the property/functionality of
-                ; of the node with in the language, a mapping is made. If the
-                ; arity are not equal then a mapping of equvalent-nodes is only made.
-                (if (equal? (cog-arity output-atom) (cog-arity r2l-atom))
-                        (map
-                            (lambda (x y)
-                                (let ((mapping (get-mapping x y)))
-                                    (if (equal? mapping 'not-eqv-node)
-                                        (cons (cog-handle y) (cog-handle x))
-                                        mapping
-                                    )
-                                )
-                            )
-                            (cog-outgoing-set output-atom) (cog-outgoing-set r2l-atom)
-                        )
-                        (remove null? (map
-                            (lambda (x y)
-                                (let ((mapping (get-mapping x y)))
-                                    (if (equal? mapping 'not-eqv-node)
-                                        '()
-                                        mapping
-                                    )
-                                )
-                            )
-                            (cog-outgoing-set output-atom) (cog-outgoing-set r2l-atom)
-                        ))
-                )
-            )
-        )
+    (define output-nodes (map cog-handle (cog-get-all-nodes output-atom)))
+    (define r2l-nodes (map cog-handle (cog-get-all-nodes r2l-atom)))
+
+    (if (null? (similar-atoms output-atom (list r2l-atom)))
         '()
+        (map cons r2l-nodes output-nodes)
     )
 )
 
