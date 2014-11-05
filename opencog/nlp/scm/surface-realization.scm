@@ -195,8 +195,13 @@
         )
     )
 
-    (let ((output-lst (par-map replace-wins-with-str (get-chunks clean-set))))
-        (map delete (make-list (length output-lst) "###LEFT-WALL###") output-lst)
+    (receive (chunks weights) (get-chunks clean-set)
+        (let ((output-lst (par-map replace-wins-with-str chunks)))
+            (values
+                (map delete (make-list (length output-lst) "###LEFT-WALL###") output-lst)
+                weights
+            )
+        )
     )
 )
 
@@ -365,7 +370,7 @@
         )
         (delete-duplicates (append-map (lambda (x)
                 (if (assoc-ref a-dict x)
-                    (acons x (delete-duplicates! (append! (assoc-ref a-dict x) (list (car a-pair)))) a-dict)
+                    (assoc-set! a-dict x (delete-duplicates (append (assoc-ref a-dict x) (list (car a-pair)))))
                     (acons x (list (car a-pair)) a-dict)
                 )
             )
@@ -446,11 +451,14 @@
     )
 )
 
-; Return chunks of a sentence. It ranks sentences by swaping equivalent structures
-; depending on the name of the constituent Node names.
+; Return chunks of a sentence and its rank. It ranks sentences by swaping equivalent
+; structures depending on the name of the constituent Node names.
 ; TODO : Figure out an appropirate ranking formula. The ranking should
 ; be across all the outgoing-set of the output SetLink (I think???)
+; XXX  : Currently it is ranked by how many links in the output-set get matched.
+;        An addition could be added to rank bases out how many in the r2l-set not matched.
 (define (get-chunks output-set)
+    (define output-set-len (length (remove is-abstraction? (cog-outgoing-set output-set))))
     (define dict (reorder (index output-set) '()))
     (define (get-sntc r2l-set)
         (parse-get-words-in-order (interp-get-parse (logic-get-interp r2l-set)))
@@ -480,7 +488,7 @@
 
     ; Replaces the WordInstanceNodes with names matching the name of the car atom
     ; with the clean name of the cdr of the pair
-    (define (replace-word r2l-sntc a-pair)
+    (define (replace-word! r2l-sntc a-pair)
         (let ((an-index (list-index (lambda (x)
                     (if (cog-atom? x)
                         (equal? (cog-name (cog-atom (car a-pair))) (cog-name x)) #f)) r2l-sntc))
@@ -503,11 +511,11 @@
         (if (equal? (car a-pair) "NO_PATTERN")
             '()
             (let ((mapping (get-mapping-pair a-pair)) (sntc (get-sntc (cog-atom (car a-pair)))))
-                    (map-in-order (lambda (x) (replace-word sntc x)) mapping)
-                 sntc
+                 (map-in-order (lambda (x) (replace-word! sntc x)) mapping)
+                 (list sntc (- (length (cdr a-pair)) output-set-len))
             )
         )
     )
-    (remove null? (map chunk dict))
+    (unzip2 (remove null? (map chunk dict)))
 )
 
