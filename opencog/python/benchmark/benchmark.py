@@ -7,11 +7,11 @@ utilizing the Python bindings that wrap the AtomSpace using Cython
 Results can be compared with the more comprehensive benchmarking code in
 the opencog/benchmark directory.
 
-Results on November 14, 2014:
+Example results on November 4, 2014:
 Add nodes
-  Items per second: 175092
+  Items per second: 166330
 Add nodes and create a complete (fully-connected) graph
-  Items per second: 159187
+  Items per second: 162585
 """
 
 import time
@@ -57,5 +57,5 @@ def do_test(test, name, n):
 tests = [test_1, test_2]
 test_names = ["Add nodes",
               "Add nodes and create a complete (fully-connected) graph"]
-do_test(tests[0], test_names[0], 100000)
+do_test(tests[0], test_names[0], 1000000)
 do_test(tests[1], test_names[1], 1000)
