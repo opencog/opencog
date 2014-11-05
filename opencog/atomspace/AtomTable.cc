@@ -490,7 +490,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
 
     // If this atom is in some other atomspace, then we need to clone
     // it. We cannot insert it into this atomtable as-is.  (We already
-    // know that its not in this atomsapce, or its environ.)
+    // know that its not in this atomspace, or its environ.)
     AtomTable* at = atom->getAtomTable();
     if (at != NULL) {
         NodePtr nnn(NodeCast(atom));

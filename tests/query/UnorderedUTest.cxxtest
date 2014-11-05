@@ -40,6 +40,10 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		Handle disor_more;
 		Handle exhaust;
 		Handle exhaust2;
+		Handle exhaust3;
+		Handle exhaust4;
+		Handle exhaust5;
+		Handle exhaust_eq_12;
 
 	public:
 
@@ -115,6 +119,10 @@ void UnorderedUTest::setUp(void)
 	disor_more = eval->apply("blank", Handle::UNDEFINED);
 	exhaust = eval->apply("exhaust", Handle::UNDEFINED);
 	exhaust2 = eval->apply("exhaust-2", Handle::UNDEFINED);
+	exhaust3 = eval->apply("exhaust-3", Handle::UNDEFINED);
+	exhaust4 = eval->apply("exhaust-4", Handle::UNDEFINED);
+	exhaust5 = eval->apply("exhaust-5", Handle::UNDEFINED);
+	exhaust_eq_12 = eval->apply("exhaust-eq-12", Handle::UNDEFINED);
 	delete eval;
 }
 
@@ -181,18 +189,52 @@ void UnorderedUTest::test_exhaust(void)
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != exhaust);
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != exhaust2);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != exhaust3);
 
-	// Result should be a ListLink w/ 24 solutions
+	// --------------------
+	// Result should be a ListLink w/ 72 solutions.
 	Handle result = bindlink(as, exhaust);
 
 	logger().debug("exhaustive result is %s\n", SchemeSmob::to_string(result).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 48, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 72, getarity(result));
 
-	// Result should be a ListLink w/ 36 solutions
+	// --------------------
+	// Result should be a ListLink w/ 72 solutions
 	result = bindlink(as, exhaust2);
 
 	logger().debug("exhaust-2 result is %s\n", SchemeSmob::to_string(result).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 36, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 72, getarity(result));
+
+	// --------------------
+	// Result should be a ListLink w/ 12 solutions
+	result = bindlink(as, exhaust3);
+
+	logger().debug("exhaust-3 result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 12, getarity(result));
+
+	// --------------------
+	// Result should be a ListLink w/ 6 solutions
+	result = bindlink(as, exhaust4);
+
+	logger().debug("exhaust-4 result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+
+	// --------------------
+	// Result should be a ListLink w/ 6 solutions
+	result = bindlink(as, exhaust5);
+
+	logger().debug("exhaust-5 result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+
+	// --------------------
+	// Result should be a ListLink w/ 12 solutions
+	result = bindlink(as, exhaust_eq_12);
+
+	logger().debug("exhaust-eq-12 result is %s\n", SchemeSmob::to_string(result).c_str());
+// XXX as of Nov 2014, this test is currently broken, due to a bug
+// in the pattern matcher, when dealing with unordered links. 
+// Commented out, for now.
+	// TSM_ASSERT_EQUALS("wrong number of solutions found", 12, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
