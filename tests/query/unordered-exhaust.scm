@@ -11,6 +11,7 @@
 	(ConceptNode "w")
 )
 
+; Another set containing four objects.
 (SetLink
 	(ConceptNode "p")
 	(ConceptNode "q")
@@ -22,8 +23,21 @@
 	)
 )
 
-;; This should match in 4! + 4! = 48 different ways, with 4! for
-;; the xyzw permuations, and another 4! for the pqr-set permuations.
+; Yet another set containing four objects.
+(SetLink
+	(ConceptNode "a")
+	(ConceptNode "b")
+	(ConceptNode "c")
+	(SetLink
+		(ConceptNode "a")
+		(ConceptNode "b")
+		(ConceptNode "c")
+	)
+)
+
+;; This should match in 4! + 4! + 4! = 72 different ways, with 4! for
+;; the xyzw permuations, and another 4! for the pqr-set permuations,
+;; and another 4! for the abc-set.
 (define (exhaust)
    (BindLink
       ;; variable decls
@@ -54,7 +68,15 @@
 )
 
 ;; This should match in 3! * 3! = 36 different ways, viz a combinatorial
-;; explosion.  The embedded SetLink match is unique
+;; explosion.  The embedded SetLink match is unique (which is why its not
+;; 4! as there's no possible ambiguity there).
+;;
+;; Acutally there should be 36+36=72 solutions, 36 for the pqr-set and
+;; another 366 for the abc-set.
+;;
+;; The goal of this test is to check nested unordered links: viz one
+;; unordered link inside another, so that proper state presevation and
+;; backtracking is needed to correctly handle the nesting.
 (define (exhaust-2)
    (BindLink
       ;; variable decls
