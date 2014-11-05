@@ -41,6 +41,8 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		Handle exhaust;
 		Handle exhaust2;
 		Handle exhaust3;
+		Handle exhaust4;
+		Handle exhaust5;
 
 	public:
 
@@ -117,6 +119,8 @@ void UnorderedUTest::setUp(void)
 	exhaust = eval->apply("exhaust", Handle::UNDEFINED);
 	exhaust2 = eval->apply("exhaust-2", Handle::UNDEFINED);
 	exhaust3 = eval->apply("exhaust-3", Handle::UNDEFINED);
+	exhaust4 = eval->apply("exhaust-4", Handle::UNDEFINED);
+	exhaust5 = eval->apply("exhaust-5", Handle::UNDEFINED);
 	delete eval;
 }
 
@@ -205,6 +209,20 @@ void UnorderedUTest::test_exhaust(void)
 
 	logger().debug("exhaust-3 result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 12, getarity(result));
+
+	// --------------------
+	// Result should be a ListLink w/ 6 solutions
+	result = bindlink(as, exhaust4);
+
+	logger().debug("exhaust-4 result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+
+	// --------------------
+	// Result should be a ListLink w/ 6 solutions
+	result = bindlink(as, exhaust5);
+
+	logger().debug("exhaust-5 result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

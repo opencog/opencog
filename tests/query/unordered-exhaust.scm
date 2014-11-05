@@ -158,3 +158,87 @@
 	)
 )
 
+;; This should match in (3! * 3!) / 6 = 6 different ways, viz a 
+;; constrained combinatorial explosion.  That is, since $a $b $c
+;; can have 3! assignments, and $b $c $d can have 3! assignments,
+;; but the first and the second $b must be equal, thus the cosets
+;; are modulo-3 according to this equality constraint. Then, the
+;; first and second $c must also be equal, giving the modulo-2.
+;;
+;; The goal of this test is to check nested unordered links: viz one
+;; unordered link inside another, so that proper state presevation and
+;; backtracking is needed to correctly handle the nesting.
+(define (exhaust-4)
+   (BindLink
+      ;; variable decls
+      (ListLink
+         (VariableNode "$a")
+         (VariableNode "$b")
+         (VariableNode "$c")
+         (VariableNode "$d")
+      )
+		(ImplicationLink
+			(AndLink
+				(SetLink ; sets are inherenetly unordered
+         		(VariableNode "$a")
+         		(VariableNode "$b")
+         		(VariableNode "$c")
+					(SetLink
+         			(VariableNode "$b")
+         			(VariableNode "$c")
+         			(VariableNode "$d")
+					)
+				)
+			)
+			; The result to report
+			(ListLink
+        		(VariableNode "$a")
+        		(VariableNode "$b")
+        		(VariableNode "$c")
+        		(VariableNode "$d")
+			)
+		)
+	)
+)
+
+;; This should match in (3! * 3!) / 6 = 6 different ways, viz a 
+;; constrained combinatorial explosion.  That is, since the first 
+;; $a $b $c can have 3! assignments, and the other $a $b $c can have
+;; 3! assignments, but the order of the first and second must be equal.
+;; As above, there is a modulo-3 and a modulo-2 division, and also a
+;; modulo-1 that changes nothing.
+;;
+;; The goal of this test is to check nested unordered links: viz one
+;; unordered link inside another, so that proper state presevation and
+;; backtracking is needed to correctly handle the nesting.
+(define (exhaust-5)
+   (BindLink
+      ;; variable decls
+      (ListLink
+         (VariableNode "$a")
+         (VariableNode "$b")
+         (VariableNode "$c")
+      )
+		(ImplicationLink
+			(AndLink
+				(SetLink ; sets are inherenetly unordered
+         		(VariableNode "$a")
+         		(VariableNode "$b")
+         		(VariableNode "$c")
+					(SetLink
+         			(VariableNode "$a")
+         			(VariableNode "$b")
+         			(VariableNode "$c")
+					)
+				)
+			)
+			; The result to report
+			(ListLink
+        		(VariableNode "$a")
+        		(VariableNode "$b")
+        		(VariableNode "$c")
+			)
+		)
+	)
+)
+
