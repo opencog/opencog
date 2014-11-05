@@ -242,3 +242,83 @@
 	)
 )
 
+;; This should match in (3! * 3!) / 3 = 12 different ways, viz a 
+;; constrained combinatorial explosion.  That is, since $a $b $c
+;; can have 3! assignments, and $c $d $e can have 3! assignments,
+;; but the first and the second $c must be equal, thus the cosets
+;; are modulo-3 according to this equality constraint.
+;;
+;; The goal of this test is to check nested unordered links: viz one
+;; unordered link inside another, so that proper state presevation and
+;; backtracking is needed to correctly handle the nesting.
+
+(EvaluationLink
+	(PredicateNode "equal")
+	(ListLink
+		(ConceptNode "a")
+		(ConceptNode "a")
+	)
+)
+
+(EvaluationLink
+	(PredicateNode "equal")
+	(ListLink
+		(ConceptNode "b")
+		(ConceptNode "b")
+	)
+)
+
+(EvaluationLink
+	(PredicateNode "equal")
+	(ListLink
+		(ConceptNode "c")
+		(ConceptNode "c")
+	)
+)
+
+(define (exhaust-eq-12)
+   (BindLink
+      ;; variable decls
+      (ListLink
+         (VariableNode "$a")
+         (VariableNode "$b")
+         (VariableNode "$c1")
+         (VariableNode "$c2")
+         (VariableNode "$e")
+         (VariableNode "$f")
+      )
+		(ImplicationLink
+			(AndLink
+				(SetLink ; sets are inherenetly unordered
+         		(VariableNode "$a")
+         		(VariableNode "$b")
+         		(VariableNode "$c1")
+					(SetLink
+         			(VariableNode "$c2")
+         			(VariableNode "$e")
+         			(VariableNode "$f")
+					)
+				)
+
+				; External clause enforcing equality relation
+				(EvaluationLink
+					(PredicateNode "equal")
+					(ListLink
+						(ConceptNode "$c1")
+						(ConceptNode "$c2")
+					)
+				)
+			)
+			; The result to report
+			(ListLink
+        		(VariableNode "$a")
+        		(VariableNode "$b")
+        		(VariableNode "$c1")
+        		(VariableNode "$c2")
+        		(VariableNode "$e")
+        		(VariableNode "$f")
+			)
+		)
+	)
+)
+

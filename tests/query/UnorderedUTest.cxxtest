@@ -43,6 +43,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		Handle exhaust3;
 		Handle exhaust4;
 		Handle exhaust5;
+		Handle exhaust_eq_12;
 
 	public:
 
@@ -121,6 +122,7 @@ void UnorderedUTest::setUp(void)
 	exhaust3 = eval->apply("exhaust-3", Handle::UNDEFINED);
 	exhaust4 = eval->apply("exhaust-4", Handle::UNDEFINED);
 	exhaust5 = eval->apply("exhaust-5", Handle::UNDEFINED);
+	exhaust_eq_12 = eval->apply("exhaust-eq-12", Handle::UNDEFINED);
 	delete eval;
 }
 
@@ -223,6 +225,16 @@ void UnorderedUTest::test_exhaust(void)
 
 	logger().debug("exhaust-5 result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+
+	// --------------------
+	// Result should be a ListLink w/ 12 solutions
+	result = bindlink(as, exhaust_eq_12);
+
+	logger().debug("exhaust-eq-12 result is %s\n", SchemeSmob::to_string(result).c_str());
+// XXX as of Nov 2014, this test is currently broken, due to a bug
+// in the pattern matcher, when dealing with unordered links. 
+// Commented out, for now.
+	// TSM_ASSERT_EQUALS("wrong number of solutions found", 12, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
