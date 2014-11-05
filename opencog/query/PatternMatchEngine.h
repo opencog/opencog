@@ -41,9 +41,6 @@ class PatternMatchEngine
 	typedef std::pair<Handle, RootList *> RootPair;
 
 	private:
-		static bool prt(Handle& h);
-		static void prtmsg(const char *msg, Handle& h);
-
 		// -------------------------------------------
 		// predicate to be solved.
 		std::set<Handle> _bound_vars;
