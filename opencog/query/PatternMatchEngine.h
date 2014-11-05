@@ -101,6 +101,8 @@ class PatternMatchEngine
 		PermuStack mute_stack;
 
 		// Stacks used for unordered links in different clauses.
+		std::stack<bool> have_stack;
+		std::stack<size_t> depth_stack;
 		std::stack<MoreStack> unordered_stack;
 		std::stack<PermuStack> permutation_stack;
 

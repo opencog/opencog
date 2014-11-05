@@ -514,6 +514,8 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 	var_solutn_stack.push(var_grounding);
 	issued_stack.push(issued);
 	in_quote_stack.push(in_quote);
+	have_stack.push(have_more);
+	depth_stack.push(more_depth);
 	unordered_stack.push(more_stack);
 	permutation_stack.push(mute_stack);
 	pmc->push();
@@ -623,6 +625,12 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 	// Handle different unordered links that live in different
 	// clauses. The mute_stack deals with different unordered
 	// links that live in the *same* clause.
+	have_more = have_stack.top();
+	have_stack.pop();
+
+	more_depth = depth_stack.top();
+	depth_stack.pop();
+
 	more_stack = unordered_stack.top();
 	unordered_stack.pop();
 
@@ -877,6 +885,8 @@ void PatternMatchEngine::clear_state(void)
 	more_depth = 0;
 	more_stack.clear();
 	while (!mute_stack.empty()) mute_stack.pop();
+	while (!have_stack.empty()) have_stack.pop();
+	while (!depth_stack.empty()) depth_stack.pop();
 	while (!unordered_stack.empty()) unordered_stack.pop();
 	while (!permutation_stack.empty()) permutation_stack.pop();
 }
