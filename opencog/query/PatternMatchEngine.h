@@ -89,12 +89,21 @@ class PatternMatchEngine
 		std::stack<IssuedSet> issued_stack;
 
 		// Stacks used to explore all possible permuations of
-		// unordered links.
+		// unordered links. 
 		bool have_more;
 		size_t more_depth;
-		std::vector<bool> more_stack;
+
+		// Substacks used for nested unorderered links.
+		typedef std::vector<bool> MoreStack;
+		MoreStack more_stack;
 		typedef std::vector<Handle> Permutation;
-		std::stack<Permutation> mute_stack;
+		typedef std::stack<Permutation> PermuStack;
+		PermuStack mute_stack;
+
+		// Stacks used for unordered links in different clauses.
+		std::stack<MoreStack> unordered_stack;
+		std::stack<PermuStack> permutation_stack;
+
 		// -------------------------------------------
 
 		// Result of solving the predicate

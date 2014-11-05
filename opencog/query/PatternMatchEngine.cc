@@ -514,6 +514,8 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 	var_solutn_stack.push(var_grounding);
 	issued_stack.push(issued);
 	in_quote_stack.push(in_quote);
+	unordered_stack.push(more_stack);
+	permutation_stack.push(mute_stack);
 	pmc->push();
 
 	get_next_untried_clause();
@@ -617,14 +619,17 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 
 	in_quote = in_quote_stack.top();
 	in_quote_stack.pop();
-	stack_depth --;
 
-	// XXX TODO -- need to restore and find the pending unordered link
-	// permutations here  ... the current more_stack and mute_stack
-	// only deal with unordered link permuations, when multiple
-	// unordered links occur within the same clause.  They do not
-	// handle multiple permuations when these are within different
-	// clasues.
+	// Handle different unordered links that live in different
+	// clauses. The mute_stack deals with different unordered
+	// links that live in the *same* clause.
+	more_stack = unordered_stack.top();
+	unordered_stack.pop();
+
+	mute_stack = permutation_stack.top();
+	permutation_stack.pop();
+
+	stack_depth --;
 
 	dbgprt("pop to depth %d\n", stack_depth);
 	prtmsg("pop to joiner", curr_pred_handle);
@@ -872,6 +877,8 @@ void PatternMatchEngine::clear_state(void)
 	more_depth = 0;
 	more_stack.clear();
 	while (!mute_stack.empty()) mute_stack.pop();
+	while (!unordered_stack.empty()) unordered_stack.pop();
+	while (!permutation_stack.empty()) permutation_stack.pop();
 }
 
 
