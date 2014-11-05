@@ -2713,13 +2713,13 @@ Vector PAI::getVelocityData(DOMElement* velocityElement)
 Handle PAI::addActionToAtomSpace(ActionPlanID planId, const AvatarAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
 
-    Handle schemaNode = AtomSpaceUtil::addNode(atomSpace, GROUNDED_SCHEMA_NODE, action.getName().c_str());
+    Handle schemaNode = AtomSpaceUtil::addNode(atomSpace, GROUNDED_SCHEMA_NODE,
+                                               action.getName().c_str());
     const list<ActionParameter>& params = action.getParameters();
     HandleSeq schemaListLinkOutgoing;
-    for (list<ActionParameter>::const_iterator itr = params.begin(); itr != params.end(); itr++) {
-        const ActionParameter& param = *itr;
-
-        // Convert the parameter to the corresponding atom representation, depending on its type
+    for (const ActionParameter& param : params) {
+        // Convert the parameter to the corresponding atom
+        // representation, depending on its type
 
         switch (param.getType().getCode()) {
         case BOOLEAN_CODE: {
