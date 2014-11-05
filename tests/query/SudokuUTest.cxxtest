@@ -79,6 +79,7 @@ class SudokuPuzzle :  public CxxTest::TestSuite
 		void tearDown(void) { }
 
 		void test_2x2_puzzle(void);
+		void test_3x3_puzzle(void);
 		void xxx_borken_test_puzzle(void);
 };
 
@@ -125,6 +126,33 @@ void SudokuPuzzle::test_2x2_puzzle(void)
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
+
+/* ========================================================================
+ * Extremely simple 3x3 puzzle solver
+ */
+void SudokuPuzzle::test_3x3_puzzle(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD",
+		"tests/query/sudoku-simple.scm");
+	load_scm_files_from_config(*as);
+
+	// Create an implication link that will be tested.
+	Handle puzzle = eval->eval_h("(ListLink (x3-puzzle))");
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle);
+	logger().debug("puzzle is:\n%s\n", SchemeSmob::to_string(puzzle).c_str());
+
+	// Solve the puzzle
+	Handle puzzle_solution = eval->apply("cog-bind", puzzle);
+	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(puzzle_solution));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
 /* ========================================================================
  * Full 9x9 Puzzle solver
  * Does not currently work correctly, see below.  (18 October 2014)
