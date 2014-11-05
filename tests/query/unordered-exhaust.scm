@@ -72,7 +72,7 @@
 ;; 4! as there's no possible ambiguity there).
 ;;
 ;; Acutally there should be 36+36=72 solutions, 36 for the pqr-set and
-;; another 366 for the abc-set.
+;; another 36 for the abc-set.
 ;;
 ;; The goal of this test is to check nested unordered links: viz one
 ;; unordered link inside another, so that proper state presevation and
@@ -109,6 +109,50 @@
         		(VariableNode "$d")
         		(VariableNode "$e")
         		(VariableNode "$f")
+			)
+		)
+	)
+)
+
+;; This should match in (3! * 3!) / 3 = 12 different ways, viz a 
+;; constrained combinatorial explosion.  That is, since $a $b $c
+;; can have 3! assignments, and $c $d $e can have 3! assignments,
+;; but the first and the second $c must be equal, thus the cosets
+;; are modulo-3 according to this equality constraint.
+;;
+;; The goal of this test is to check nested unordered links: viz one
+;; unordered link inside another, so that proper state presevation and
+;; backtracking is needed to correctly handle the nesting.
+(define (exhaust-3)
+   (BindLink
+      ;; variable decls
+      (ListLink
+         (VariableNode "$a")
+         (VariableNode "$b")
+         (VariableNode "$c")
+         (VariableNode "$d")
+         (VariableNode "$e")
+      )
+		(ImplicationLink
+			(AndLink
+				(SetLink ; sets are inherenetly unordered
+         		(VariableNode "$a")
+         		(VariableNode "$b")
+         		(VariableNode "$c")
+					(SetLink
+         			(VariableNode "$c")
+         			(VariableNode "$d")
+         			(VariableNode "$e")
+					)
+				)
+			)
+			; The result to report
+			(ListLink
+        		(VariableNode "$a")
+        		(VariableNode "$b")
+        		(VariableNode "$c")
+        		(VariableNode "$d")
+        		(VariableNode "$e")
 			)
 		)
 	)
