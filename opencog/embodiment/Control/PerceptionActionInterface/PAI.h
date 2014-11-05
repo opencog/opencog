@@ -597,7 +597,13 @@ private:
     Vector getVelocityData(DOMElement* velocityElement);
 
     /**
-     * Adds the representation of the given action in the AtomSpace.
+     * Adds the representation of the given action in the AtomSpace:
+     *
+     * ExecutionLink
+     *     GroundedSchemaNode : actionName
+     *     ListLink
+     *         <ACTION PARAMETERS>
+     *
      * @param planId for the given action
      * @param action action to be represented
      * @return the Handle of the action representation.
