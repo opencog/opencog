@@ -442,6 +442,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		}
 
 		if (have_more) { dbgprt("Wait ----- there's more!\n"); }
+		else { dbgprt("No more unordered, more_depth=%zd\n", more_depth); }
 	} while (have_more);
 
 	return did_find;
@@ -617,6 +618,13 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 	in_quote = in_quote_stack.top();
 	in_quote_stack.pop();
 	stack_depth --;
+
+	// XXX TODO -- need to restore and find the pending unordered link
+	// permutations here  ... the current more_stack and mute_stack
+	// only deal with unordered link permuations, when multiple
+	// unordered links occur within the same clause.  They do not
+	// handle multiple permuations when these are within different
+	// clasues.
 
 	dbgprt("pop to depth %d\n", stack_depth);
 	prtmsg("pop to joiner", curr_pred_handle);
