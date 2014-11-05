@@ -45,9 +45,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(BuggyLinkUTest)
 	ADD_CXXTEST(SingleUTest)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
-# As of 18 Oct 2014 the sudoku test just doesn't work.
-# there's a bug somwhere ... -- Linas
-#	ADD_CXXTEST(SudokuUTest)
+	ADD_CXXTEST(SudokuUTest)
 	ADD_CXXTEST(EinsteinUTest)
     
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest

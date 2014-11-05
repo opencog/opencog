@@ -94,4 +94,25 @@
 	)
 )
 
+; ------------------------------------------
 
+; Certain fixed numbers appear in certain fixed cell locations.
+(EvaluationLink (PredicateNode "x2-fix11") (ConceptNode "one"))
+
+(define (x2-puzzle)
+	(BindLink
+		(x2-variable-decls)
+		(ImplicationLink
+			(AndLink
+				; For this puzzle, 1 of the variables is fixed immediately.
+				(EvaluationLink (PredicateNode "x2-fix11") (VariableNode "$cell_11"))
+
+				; Aside from the above constraint, there are another 
+				; 4 constraints.
+				(x2-sudoku-constraints)
+			)
+			; The solution
+			(x2-variable-decls)
+		)
+	)
+)
