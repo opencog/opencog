@@ -304,8 +304,8 @@
 				(EvaluationLink
 					(PredicateNode "equal")
 					(ListLink
-						(ConceptNode "$c1")
-						(ConceptNode "$c2")
+						(VariableNode "$c1")
+						(VariableNode "$c2")
 					)
 				)
 			)
@@ -316,6 +316,59 @@
         		(VariableNode "$c1")
         		(VariableNode "$c2")
         		(VariableNode "$e")
+        		(VariableNode "$f")
+			)
+		)
+	)
+)
+
+(define (exhaust-eq-6)
+   (BindLink
+      ;; variable decls
+      (ListLink
+         (VariableNode "$a")
+         (VariableNode "$b1")
+         (VariableNode "$b2")
+         (VariableNode "$c1")
+         (VariableNode "$c2")
+         (VariableNode "$f")
+      )
+		(ImplicationLink
+			(AndLink
+				(SetLink ; sets are inherenetly unordered
+         		(VariableNode "$a")
+         		(VariableNode "$b1")
+         		(VariableNode "$c1")
+					(SetLink
+         			(VariableNode "$c2")
+         			(VariableNode "$b2")
+         			(VariableNode "$f")
+					)
+				)
+
+				; External clause enforcing equality relation
+				(EvaluationLink
+					(PredicateNode "equal")
+					(ListLink
+						(VariableNode "$b1")
+						(VariableNode "$b2")
+					)
+				)
+				(EvaluationLink
+					(PredicateNode "equal")
+					(ListLink
+						(VariableNode "$c1")
+						(VariableNode "$c2")
+					)
+				)
+			)
+			; The result to report
+			(ListLink
+        		(VariableNode "$a")
+        		(VariableNode "$b1")
+        		(VariableNode "$b2")
+        		(VariableNode "$c1")
+        		(VariableNode "$c2")
         		(VariableNode "$f")
 			)
 		)
