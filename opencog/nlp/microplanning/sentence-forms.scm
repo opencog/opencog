@@ -47,7 +47,7 @@
 				)
 			)
 			(EvaluationLink
-				(ConceptNode "verb")
+				(PredicateNode "verb")
 				(ListLink
 					(VariableNode "_")
 				)
