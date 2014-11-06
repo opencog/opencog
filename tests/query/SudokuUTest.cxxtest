@@ -78,7 +78,7 @@ class SudokuPuzzle :  public CxxTest::TestSuite
 
 		void tearDown(void) { }
 
-		void xtest_2x2_puzzle(void);
+		void test_2x2_puzzle(void);
 		void xtest_2x2_any(void);
 		void test_3x3_puzzle(void);
 		void xxx_borken_test_puzzle(void);
@@ -105,7 +105,7 @@ void SudokuPuzzle::setUp(void)
 /* ========================================================================
  * Extremely simple 2x2 puzzle solver
  */
-void SudokuPuzzle::xtest_2x2_puzzle(void)
+void SudokuPuzzle::test_2x2_puzzle(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -131,6 +131,8 @@ void SudokuPuzzle::xtest_2x2_puzzle(void)
 /* ========================================================================
  * Extremely simple 2x2 puzzle solver
  */
+// XXX FIXME The current unorder set solver is broken on this test :-(
+// XXX this is as of 5 November 2014 
 void SudokuPuzzle::xtest_2x2_any(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
