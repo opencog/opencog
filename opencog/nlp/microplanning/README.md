@@ -77,12 +77,12 @@ The folder contains microplanning code for the NLG pipeline.
 
 Currently these files are not included in the .conf file.  In order to use the microplanner, you need to run the following in OpenCog Scheme shell
 ```
-(load-scm-from-file "../opencog/nlp/microplanning/main.scm"
+(load-scm-from-file "../opencog/nlp/microplanning/main.scm")
 ```
 
 If you want to use the testing atomspace, you also need
 ```
-(load-scm-from-file "../opencog/nlp/microplanning/test-atomspace.scm"
+(load-scm-from-file "../opencog/nlp/microplanning/test-atomspace.scm")
 ```
 
 Before running the example, you need to populate the atomspaces with sample sentences of how you want the final output to looks like.  One basic example samples would be:
@@ -107,10 +107,10 @@ These examples are also in comment form in `test-atomspace.scm`, which you can u
 
 Then you can running microplanning as follow
 ```
-(microplanning test-sal "declarative")
+(microplanning test-declarative-sal "declarative")
 ```
 and a list of SetLink will be returned.  These SetLink's can be passed to Surface Realization as
 ```
-(map sureal (microplanning test-sal "declarative"))
+(map sureal (microplanning test-declarative-sal "declarative"))
 ```
 
