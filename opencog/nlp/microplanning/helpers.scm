@@ -116,18 +116,6 @@
 )
 
 ; -----------------------------------------------------------------------
-; and-l -- Apply 'and' operator to a list
-;
-; Helper function for since we cannot do (apply and ...)
-;
-(define (and-l x)
-	(if (null? x)
-		#t
-		(if (car x) (and-l (cdr x)) #f)
-	)
-)
-
-; -----------------------------------------------------------------------
 ; sublist -- Returns a sublist of a list.
 ;
 ; Returns a sublist from index 'start' (inclusive) to index 'end' (exclusive)
@@ -158,7 +146,7 @@
 		)
 		(if (and (= (cog-arity atom) (cog-arity form)) (equal? (cog-type atom) (cog-type form)))
 			; check the outgoing set recursively
-			(and-l (map form-graph-match? (cog-outgoing-set atom) (cog-outgoing-set form)))
+			(every form-graph-match? (cog-outgoing-set atom) (cog-outgoing-set form))
 			#f
 		)
 	)

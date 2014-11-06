@@ -408,7 +408,7 @@
 	(define all-nodes (delete-duplicates (append-map cog-get-all-nodes atoms)))
 	(define pos-alist (sort-n-count (map get-pos all-nodes)))
 	
-	(define (pos-checker al)
+	(define (pos-check? al)
 		(define pos (car al))
 		(define count (cdr al))
 		
@@ -434,7 +434,7 @@
 		 )
 	)
 
-	(define pos-result (and-l (map pos-checker pos-alist)))
+	(define pos-result (every pos-check? pos-alist))
 
 	(define temp-set-link (SetLink (get-utterance-link utterance-type atoms) atoms))
 
