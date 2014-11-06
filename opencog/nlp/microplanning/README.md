@@ -20,7 +20,7 @@ The folder contains microplanning code for the NLG pipeline.
     
 - test-atomspace.scm
 
-    Populating the atomspace with example atoms.  The main input are defined at the variable `test-sal`, which is a `SequentialAndLink` containing a group of logic atoms, RelEx2Logic style. In addition, each node is supported by the corresponding OpenCog RelEx style output.
+    Populating the atomspace with example atoms.  The main input are defined at the variables `test-declarative-sal` & `test-interrogative-sal`, which are `SequentialAndLink` containing a group of logic atoms, RelEx2Logic style. In addition, each node is supported by the corresponding OpenCog RelEx style output.
     
 
 ## Algorithm
@@ -62,12 +62,13 @@ The folder contains microplanning code for the NLG pipeline.
 
 3. For each noun, check whether it can actually be changed to pronoun:
     - if the noun has never been mentioned before, then no
-    - if the noun is in a non-sentence formed link, then no (since we cannot have "The green it" or "The tall he")
+    - if the noun is in a non-sentence formed link, then no (since we cannot have "The green it" or "The tall he"), unless the corresponding noun in the sentence-form link is changed in the same sentence.
     - check 3 nouns before and 3 nouns after in the noun sequence;  if another noun share the same pronoun, it is ambiguous, then no
-    - if the noun is mentioned more than one chunk back, then it is too far back, so no
+    - if the noun is mentioned more than 3 chunks back, then it is too far back, so no
 
 4. Clone the chunks and replace nouns with pronouns as necessary
     - if a noun is the subject, keep the pronoun as is (ie. "I", "he", "they", etc)
+    - if a noun is in the possession EvaluationLink, then change to "my", "his", "its", etc.
     - if a noun is an object or indirect object
         - if the same noun as the subject, then change to "myself", "himself", "themselves", etc.
         - if the noun is different from the subject, then change to "me", "him", "them", etc
@@ -76,12 +77,12 @@ The folder contains microplanning code for the NLG pipeline.
 
 Currently these files are not included in the .conf file.  In order to use the microplanner, you need to run the following in OpenCog Scheme shell
 ```
-(load-scm-from-file "../opencog/nlp/microplanning/main.scm"
+(load-scm-from-file "../opencog/nlp/microplanning/main.scm")
 ```
 
 If you want to use the testing atomspace, you also need
 ```
-(load-scm-from-file "../opencog/nlp/microplanning/test-atomspace.scm"
+(load-scm-from-file "../opencog/nlp/microplanning/test-atomspace.scm")
 ```
 
 Before running the example, you need to populate the atomspaces with sample sentences of how you want the final output to looks like.  One basic example samples would be:
@@ -106,10 +107,10 @@ These examples are also in comment form in `test-atomspace.scm`, which you can u
 
 Then you can running microplanning as follow
 ```
-(microplanning test-sal "declarative")
+(microplanning test-declarative-sal "declarative")
 ```
 and a list of SetLink will be returned.  These SetLink's can be passed to Surface Realization as
 ```
-(map sureal (microplanning test-sal "declarative"))
+(map sureal (microplanning test-declarative-sal "declarative"))
 ```
 
