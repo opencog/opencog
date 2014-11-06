@@ -47,14 +47,14 @@ using namespace opencog;
 #endif
 #endif
 
-bool PatternMatchEngine::prt(Handle& h)
+static inline bool prt(const Handle& h)
 {
 	std::string str = h->toShortString();
 	printf ("%s\n", str.c_str());
 	return false;
 }
 
-inline void PatternMatchEngine::prtmsg(const char * msg, Handle& h)
+static inline void prtmsg(const char * msg, const Handle& h)
 {
 #ifdef DEBUG
 	if (h == Handle::UNDEFINED) {
@@ -69,11 +69,8 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle& h)
 /* Reset the current variable grounding to the last grounding pushed
  * onto the stack. */
 #define POPGND(soln,stack) {         \
-   if (stack.empty()) {              \
-      printf("ERROR: Unbalanced stack pop!\n"); \
-      soln.clear();                  \
-   }                                 \
-   else soln = stack.top();          \
+   OC_ASSERT(not stack.empty(), "Unbalanced grounding stack"); \
+   soln = stack.top();               \
    stack.pop();                      \
 }
 
@@ -291,19 +288,19 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			std::vector<Handle> mutation;
 
 			if (more_stack.size() <= more_depth) more_stack.push_back(false);
-			if (more_stack[more_depth])
-			{
-				dbgprt("tree_comp resume unordered link at depth %zd\n",
-				       more_depth);
-				mutation = mute_stack.top();
-				mute_stack.pop();
-			}
-			else
+			if (not more_stack[more_depth])
 			{
 				dbgprt("tree_comp fresh unordered link at depth %zd\n",
 				       more_depth);
 				mutation = lp->getOutgoingSet();
 				sort(mutation.begin(), mutation.end());
+			}
+			else
+			{
+				dbgprt("tree_comp resume unordered link at depth %zd\n",
+				       more_depth);
+				mutation = mute_stack.top();
+				mute_stack.pop();
 			}
 
 			do {
@@ -332,6 +329,8 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 				// If we've found a grounding, record it.
 				if (false == mismatch)
 				{
+					// Since we leave the loop, we better go back
+					// to where we found things.
 					var_solutn_stack.pop();
 					var_grounding[hp] = hg;
 					dbgprt("tree_comp unordered link have gnd at depth=%lu\n",
@@ -376,6 +375,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			return true;
 		}
 
+		OC_ASSERT(false, "statement should not be reached");
 		return mismatch;
 	}
 
@@ -408,14 +408,12 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 {
 	// Let's not stare at our own navel.
 	if (hsoln == curr_root) return false;
-
+	have_stack.push(have_more);
 	have_more = false;
-	more_depth = 0;
-	more_stack.resize(1);
-	more_stack[0] = false;
-	bool did_find = false;
+
 	do {
 		var_solutn_stack.push(var_grounding);
+
 		bool no_match = tree_compare(curr_pred_handle, hsoln);
 		// If no match, then try the next one.
 		if (no_match)
@@ -423,29 +421,32 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 			// Get rid of any grounding that might have been proposed
 			// during the tree-match.
 			POPGND(var_grounding, var_solutn_stack);
+			have_more = have_stack.top();
+			have_stack.pop();
 			return false;
 		}
 
 		bool found = do_soln_up(hsoln);
-		did_find |= found;
 		if (found)
 		{
-			// pop the entry we created, but do keep the grounding
-			// that was found.
+			// Keep the grounding that was found. Even up the stack.
 			var_solutn_stack.pop();
+			have_more = have_stack.top();
+			have_stack.pop();
+			return true;
 		}
-		else
-		{
-			// Get rid of any grounding that might have been propsed
-			// during the tree-match.
-			POPGND(var_grounding, var_solutn_stack);
-		}
+
+		// Get rid of any grounding that might have been proposed
+		// during the tree-compare or soln_up.
+		POPGND(var_grounding, var_solutn_stack);
 
 		if (have_more) { dbgprt("Wait ----- there's more!\n"); }
 		else { dbgprt("No more unordered, more_depth=%zd\n", more_depth); }
 	} while (have_more);
 
-	return did_find;
+	have_more = have_stack.top();
+	have_stack.pop();
+	return false;
 }
 
 /// Return true if a grounding was found.
@@ -514,6 +515,17 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 	var_solutn_stack.push(var_grounding);
 	issued_stack.push(issued);
 	in_quote_stack.push(in_quote);
+
+	// Reset the unorded-set stacks with each new clause.
+	have_stack.push(have_more);
+	have_more = false;
+	depth_stack.push(more_depth);
+	more_depth = 0;
+	unordered_stack.push(more_stack);
+	more_stack.resize(1);
+	more_stack[0] = false;
+	permutation_stack.push(mute_stack);
+
 	pmc->push();
 
 	get_next_untried_clause();
@@ -617,14 +629,23 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 
 	in_quote = in_quote_stack.top();
 	in_quote_stack.pop();
-	stack_depth --;
 
-	// XXX TODO -- need to restore and find the pending unordered link
-	// permutations here  ... the current more_stack and mute_stack
-	// only deal with unordered link permuations, when multiple
-	// unordered links occur within the same clause.  They do not
-	// handle multiple permuations when these are within different
-	// clasues.
+	// Handle different unordered links that live in different
+	// clauses. The mute_stack deals with different unordered
+	// links that live in the *same* clause.
+	have_more = have_stack.top();
+	have_stack.pop();
+
+	more_depth = depth_stack.top();
+	depth_stack.pop();
+
+	more_stack = unordered_stack.top();
+	unordered_stack.pop();
+
+	mute_stack = permutation_stack.top();
+	permutation_stack.pop();
+
+	stack_depth --;
 
 	dbgprt("pop to depth %d\n", stack_depth);
 	prtmsg("pop to joiner", curr_pred_handle);
@@ -872,6 +893,10 @@ void PatternMatchEngine::clear_state(void)
 	more_depth = 0;
 	more_stack.clear();
 	while (!mute_stack.empty()) mute_stack.pop();
+	while (!have_stack.empty()) have_stack.pop();
+	while (!depth_stack.empty()) depth_stack.pop();
+	while (!unordered_stack.empty()) unordered_stack.pop();
+	while (!permutation_stack.empty()) permutation_stack.pop();
 }
 
 

@@ -99,7 +99,9 @@
 
 ; Certain fixed numbers appear in certain fixed cell locations.
 (EvaluationLink (PredicateNode "x2-fix11") (ConceptNode "one"))
-
+;
+; This puzzle should have exactly one solution, since fixing the
+; upper-left corner constrains everything else.
 (define (x2-puzzle)
 	(BindLink
 		(x2-variable-decls)
@@ -110,6 +112,27 @@
 
 				; Aside from the above constraint, there are another 
 				; 4 constraints.
+				(x2-sudoku-constraints)
+			)
+			; The solution
+			(x2-variable-decls)
+		)
+	)
+)
+
+; This puzzle should have 2 solutions total: no cells are fixed, and
+; so the constraint rules should explore all two possible solutions.
+; These are:
+;
+;   1 2      2 1
+;   2 1      1 2
+;
+(define (x2-any)
+	(BindLink
+		(x2-variable-decls)
+		(ImplicationLink
+			(AndLink
+				; There are 4 constraints. One is actually redundant...
 				(x2-sudoku-constraints)
 			)
 			; The solution
@@ -234,6 +257,14 @@
 )
 
 ; ------------------------------------------
+;
+; The puzle below is underconstrained, and should have four total
+; solutions: two with permuted columns, and two with permuted rows:
+;
+;  1 2 3
+;  2 3 1   is one, then permute the rightmost 2 cols for another, and
+;  3 1 2   then perumted the bottom two rows for two more solutions, to
+;          get four grand total.  The upper-left 1 is fixed.
 
 ; Certain fixed numbers appear in certain fixed cell locations.
 (EvaluationLink (PredicateNode "x3-fix11") (ConceptNode "one"))

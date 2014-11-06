@@ -79,7 +79,8 @@ class SudokuPuzzle :  public CxxTest::TestSuite
 		void tearDown(void) { }
 
 		void test_2x2_puzzle(void);
-		void xtest_3x3_puzzle(void);
+		void xtest_2x2_any(void);
+		void test_3x3_puzzle(void);
 		void xxx_borken_test_puzzle(void);
 };
 
@@ -128,9 +129,38 @@ void SudokuPuzzle::test_2x2_puzzle(void)
 }
 
 /* ========================================================================
+ * Extremely simple 2x2 puzzle solver
+ */
+// XXX FIXME The current unorder set solver is broken on this test :-(
+// XXX this is as of 5 November 2014 
+void SudokuPuzzle::xtest_2x2_any(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD",
+		"tests/query/sudoku-simple.scm");
+	load_scm_files_from_config(*as);
+
+	// Create an implication link that will be tested.
+	Handle puzzle = eval->eval_h("(ListLink (x2-any))");
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle);
+	logger().debug("puzzle is:\n%s\n", SchemeSmob::to_string(puzzle).c_str());
+
+	// Solve the puzzle. Expect 2 solutions, as there are no
+	// fixed cells here.
+	Handle puzzle_solution = eval->apply("cog-bind", puzzle);
+	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(puzzle_solution));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/* ========================================================================
  * Extremely simple 3x3 puzzle solver -- currently broken
  */
-void SudokuPuzzle::xtest_3x3_puzzle(void)
+void SudokuPuzzle::test_3x3_puzzle(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -148,7 +178,7 @@ void SudokuPuzzle::xtest_3x3_puzzle(void)
 	// Solve the puzzle
 	Handle puzzle_solution = eval->apply("cog-bind", puzzle);
 	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(puzzle_solution));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(puzzle_solution));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
