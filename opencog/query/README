@@ -450,7 +450,10 @@ Currently Implemented Algorithm
    as a whole can be rejected. This kind of pattern-rejection is
    explicitly done with the crisp-boolean-logic callback.
 
-9) Not mentioned above is a new whiz-bang feature: support for
+
+Virtual Links
+-------------
+   Not mentioned above is a new whiz-bang feature: support for
    VirtualLinks, which are links that do not actually exist in the
    AtomSpace, but are evaluated on the fly, as needed.  The
    prototypical such link is GreaterThanLink, which evaluates to
@@ -466,6 +469,75 @@ Currently Implemented Algorithm
    The code to do this is in PatternMatch::recursive_virtual()
    (instead of in the engine proper, where you might expect it to be).
 
+   Note that the preliminary grounding is done by removing all virtual
+   links from the hypegraph. This will typically result in a set of
+   hypergraphs that are no longer connected.  Each connected component
+   is grounded, and then these are offered up to the virtual link,
+   which either virtually (and so there is a match) or does not exist
+   (so there is no match).  Note that having multiple disconnected
+   compoents thus leads to a multiplicatively explosive search space
+   to explore.
+
+Unordered Links
+---------------
+   The use of unordered links within a pattern provides a special
+   challange for the pattern matcher. This is because each possible
+   permuation of an unordered link must be explored.  Consider, for
+   example, the search pattern:
+
+       AndLink
+          SetLink
+             VariableNode $a
+             VariableNode $b
+          ListLink
+             VariableNode $a
+             ConceptNode "fizz"
+
+   If the universe contains the graphs:
+
+       SetLink
+          ConceptNode "dribble"
+          ConceptNode "bubble"
+
+       ListLink
+          ConceptNode "bubble"
+          ConceptNode "fizz"
+
+   then one must consider that $a might be grounded by "bubble" (and
+   so a match is found), or that $a could have been grounded by
+   "dribble" (although this is not consistent with the ListLink, and
+   so no overall match exists).  That is, all possible permutations of
+   the SetLink must be considered when searching for groundings. This
+   can lead to a combinatoric explosion.
+
+   Backtracking through unordered links is a challange. To better
+   understand this challange, there are four distinct scenarios that
+   can occur during pattern matcing.  These are:
+
+   A) One is at the bottom, and is searching upwards, and encounters
+      an unordered link as a parent of the current atom.
+
+   B) One is at the bottom, moving upwards, and during the (downward)
+      tree_compare's that must be performed at each stage, there is
+      an unordered set somwhere in a subtree.
+
+   C) Situations A) and B) can occur in a nested fashion, so that an
+      unordered link may have another unordered link inside of it.
+      All of this is happening within the smae clause.
+
+   D) There may be other unordered links in other clauses (possibly
+      sharing variables with the unordered links in this clause).
+
+   Note that, for situation A), as one continues to move upwards, the
+   downward tree-compare effectively looks like situation B).
+
+   Situation D) is easily dealt with by using the existing
+   backtracking infrastructure, and so presents no new challanges.
+
+   Situations A, B and C are currently (Nov 2014) only paritally
+   handled, and are buggy.  Its all very confusing. See github bug
+   #1091 for details.
+
 
 Open Questions
 --------------
@@ -474,6 +546,14 @@ parser.  However, it does a *lot* of backtracking during its solution
 search. It is throughly unclear as to whether the hypergraph
 pattern-matching problem can be reformulated to resemble an LL(k)
 grammar, so that linear-time predictive parsing techniques can be used.
+
+In many ways, the above algorithm resembles a boolean satsifiability
+problem, exept that, instead of having a two-valued true/false logic,
+it is a many-valued logic (with each variable ranging over the
+universe of allowed values for that variable).  Can any kind of a
+modern boolean-SAT algorithm be applied to solve this problem quickly,
+efficiently?  Is there a way of cribbing ideas from the DPLL algorithm
+to help solve this?  Thisis entirely unclear to me...
 
 
 Summary
