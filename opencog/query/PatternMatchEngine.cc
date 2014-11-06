@@ -409,10 +409,6 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 	// Let's not stare at our own navel.
 	if (hsoln == curr_root) return false;
 
-	have_more = false;
-	more_depth = 0;
-	more_stack.resize(1);
-	more_stack[0] = false;
 	do {
 		var_solutn_stack.push(var_grounding);
 		bool no_match = tree_compare(curr_pred_handle, hsoln);
@@ -510,10 +506,17 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 	var_solutn_stack.push(var_grounding);
 	issued_stack.push(issued);
 	in_quote_stack.push(in_quote);
+
+	// Reset the unorded-set stacks with each new clause.
 	have_stack.push(have_more);
+	have_more = false;
 	depth_stack.push(more_depth);
+	more_depth = 0;
 	unordered_stack.push(more_stack);
+	more_stack.resize(1);
+	more_stack[0] = false;
 	permutation_stack.push(mute_stack);
+
 	pmc->push();
 
 	get_next_untried_clause();
