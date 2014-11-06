@@ -408,9 +408,12 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 {
 	// Let's not stare at our own navel.
 	if (hsoln == curr_root) return false;
+	have_stack.push(have_more);
+	have_more = false;
 
 	do {
 		var_solutn_stack.push(var_grounding);
+
 		bool no_match = tree_compare(curr_pred_handle, hsoln);
 		// If no match, then try the next one.
 		if (no_match)
@@ -418,6 +421,8 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 			// Get rid of any grounding that might have been proposed
 			// during the tree-match.
 			POPGND(var_grounding, var_solutn_stack);
+			have_more = have_stack.top();
+			have_stack.pop();
 			return false;
 		}
 
@@ -426,6 +431,8 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		{
 			// Keep the grounding that was found. Even up the stack.
 			var_solutn_stack.pop();
+			have_more = have_stack.top();
+			have_stack.pop();
 			return true;
 		}
 
@@ -437,6 +444,8 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		else { dbgprt("No more unordered, more_depth=%zd\n", more_depth); }
 	} while (have_more);
 
+	have_more = have_stack.top();
+	have_stack.pop();
 	return false;
 }
 
