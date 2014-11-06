@@ -78,8 +78,8 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void tearDown(void) { }
 
 		void test_exhaust(void);
-		void xtest_un1(void);
-		void xtest_un2(void);
+		void test_un1(void);
+		void test_un2(void);
 };
 
 /*
@@ -138,7 +138,7 @@ void UnorderedUTest::setUp(void)
 #define getlink(hand,pos) as->getOutgoing(hand,pos)
 #define getarity(hand) as->getArity(hand)
 
-void UnorderedUTest::xtest_un1(void)
+void UnorderedUTest::test_un1(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -168,7 +168,7 @@ void UnorderedUTest::xtest_un1(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void UnorderedUTest::xtest_un2(void)
+void UnorderedUTest::test_un2(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
