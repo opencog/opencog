@@ -3,14 +3,15 @@
                           ----------------
                Linas Vepstas <linasvepstas@gmail.com>
                         Created 18 March 2008
-                        Revised on 18 March 2009
+                      Revised on 6 November 2014
+
 
 This directory contains code that implements a subgraph isomorphism
 algorithm, and then uses this algorithm to support several functions,
-including query processing and a first-order-logic forward chainer.
-The first part of the file describes the generic algorithm; the second
-part describes its applications to query processing, foreward chaining
-and so on.
+including query processing, graph-rewriting, and forward/backward
+chaining.  The first part of the file describes the generic algorithm;
+the second part describes some of its applications to query processing,
+and graph-rewriting.
 
 This code does not currently expose a "hypergraph query language" (HQL),
 but doing so should not be hard to add. See the design notes below.
@@ -22,69 +23,207 @@ A simple example of one possible use of this code is shown in the file
 Subgraph Isomorphism Discovery
 ------------------------------
 Given a small (hyper-)graph and a bigger "universe" (hyper-)graph, the
-subgraph isomorphism algorithm finds and returns the corresponding
+subgraph isomorphism problem requires one to find the corresponding
 smaller graph within the universe graph.  The smaller graph may include
 one or more variable nodes or links; these denote variables which will
 be given values (groundings): a variable will match any corresponding
 node or link in the universe, as long as it occurs in the correct
-location.  Thus, subgraph matching can be used to perform query
-processing, to "fill in the blanks".
+location. Thus, subgraph matching defacto performs a kind of "variable
+unification", and can be used to perform query processing, to "fill in
+the blanks".
 
-The subgraph matching algorithm is fairly general, but with an
-important restriction on how the subgraph is specified. Every
-hypergraph has a corresponding incidence graph (or "Levi graph"),
-where the nodes and links of the hypergraph are mapped to vertices
-on the incidence graph, while the edges of the incidence graph
-reflect the connectivity of the hypergraph.  The input to the
-algorithm must be specified as a set of trees in the incidence
-graph, with some nodes shared between the trees, so as to form
-a single, connected graph. General mathematical theorems state
-that every graph can be decomposed into a collection of trees.
-As a practical matter, it is very easy to perform this decomposition
-within OpenCog: all OpenCog hypergraphs are always naturally
-specified as trees (Note: this is true in practice, but the AtomSpace
-doesn't actually enforce this).
+The subgraph matching algorithm implemenmted here is more or less
+completely general.  The API to it provides for user-defined callbacks
+that can be used to modify the search:
 
-An easy example of decomposing a general graph into a collection
-of trees comes from natural language (English) that has been
-parsed to extract relations. So, for example:
+ * define what constitutes a 'match' (for individual nodes, links and
+   clauses),
+ * support for optional clauses (portions of the subgraph, which if
+   found, are also returned; commonly used to reject certain types of
+   patterns),
+ * support for search-order ranking (re-ordering the incoming set,
+   e.g. by priority), or even truncation of the incoming set.
+ * support for the search start location (again, to potentialy limit
+   the total search).
+ * solution acceptance callback, to provide on-the-fly reporting, and
+   limit the total number of groundings reported.
+ * support for a back-tracking callback. During the search, the
+   pattern matcher will typically need to backtrack; this calllback
+   allows user-defined algorithms to push and pop stacks as
+   appropriate, as well.
 
-  _subj(John, throw)
-  _obj(ball, throw)
+An additional very important feature is support for 'virtual'
+hypergraphs: those that are not pre-existing in the fixed universe 
+(i.e. in the atomspace), but are only defined algorithmically, by a
+predicate function that returns a yes/no answer about their existance.
+An example would be a greater-than hypergraph that 'virtually' exists
+only if a right-hand number is greater than a left-hand number.
+Clearly, pre-loading the atomspace with every possible number, and
+every possible number-pair is impossible; thus virtual hypergraphs
+provide these relations on-the-fly, as needed.  The pattern matcher
+is able to correctly find subgraphs that contain such virtual
+hypergraphs.
 
-consists of two trees, with a shared leaf (throw) connecting the
-two trees together to form a single graph.  The tree input keeps
-the algorithm simple, as the subgraph matching is performed recursively,
-one tree at a time.
+Another important and perhaps under-appreciated function is the
+ability to search through unordered links.  When the query subgraph
+contains one or more unordered links, the subgraph isomorphism may
+exist only for certain permutations of the unordered link.  Thus,
+during search, all possible permutations of an unordered link must be
+explored.  This increases the size of the search space by
+combinatorial factors, and requires a significantly more complex
+algorithm to deal with nested unordered links.
 
-The algorithm is kept generic, by means of two callbacks.  One callback
-simply reports a solution, and provides a map between nodes/links in
-the subgraph, and nodes/links in the universe.  The second callback is
-used to determine when two nodes/links are identical.  For example,
-in linguistic matching, two nodes might be considered to be identical
-when they are both instances of the same concept; the details of what
-constitutes "the same concept" are left to the callback.
+The algorithm itself performs an exhaustive search, and can therefore,
+under certain circumstances, encounter a combinatorial explosion of
+the search space, leading to very long run-times.  This is not usually
+the case for most ordinary problems, but can occur for large problems
+containing hundreds of unordered links and/or virtual nodes.
 
-As a concrete example, consider the statement and query: "John threw a
-ball. What did John throw?" The query takes the form:
+The algorithm performs a fair amount of pre-traversal setup and error
+checking, such as finding the common variables that connect different
+clauses together, and initializing and setting up maps to make traversal
+easier.  This setup time is non-trivial.  Thus, for the simplest
+patterns, it might be faster (and probably simpler) for the user to
+obtain the desired graphs directly, instead of using the pattern
+matcher.  The strength of the pattern matcher is its ability to handle
+large, complex graphs with mutiple variables interacting in difficult
+ways (or even graphs with no constant nodes in them at all!)
 
-   link[40 <_obj,link[26 <throw_49,_$qVar_05>]>]
-   link[40 <_subj,link[26 <throw_49,John_51>]>]
+The subgraph isomomorphism algorithm itself does not make use of or
+require the atomspace: it simply traces connections between links by
+traversing the incoming and outgoing sets. The atomspace is required
+in only two places: to find a set of starting points for the search
+(e.g. by finding all nodes of a given type), and as the location into
+which new graphs are inserted (during graph-re-writing).
 
-which is solved by:
-   link[40 <_obj,link[26 <throw_22,ball_79>]>]
-   link[40 <_subj,link[26 <throw_22,John_85>]>]
+Clauses and Groundings
+----------------------
+The OpenCog hypergraph is most easily understood in terms of its
+correspoding incidence graph (or "Levi graph"). This, in turn, is best
+understood as a collection of trees formed by the "outgoing set" of an
+OpenCog Link.  Each internal node of a tree is a link (as only links
+have outgoing sets), and each leaf of a tree being a node (as nodes do
+not have outgoing sets).  Thus, the outgoing set of an OpenCog Link
+forms the downward-branching part of a tree.  The incidence graph is
+then a collection of such trees, sharing common nodes or links.  The
+incidence graph is an ordinary graph, not a hypergraph, and thus is
+perhaps easier to visualize.
 
-with the explicit mapping given by:
-    atom _obj maps to _obj
-    atom _subj maps to _subj
-    atom throw_49 maps to throw_22
-    atom John_51 maps to John_85
-    atom _$qVar_05 maps to ball_79
+The pattern matcher is designed to search only for connected incidence
+graphs.  This simplifies the algorithm without loosing any generality:
+the user can always enumerate disconnnected graphs multiplicatively.
+This is both trivial and rarely desired.
 
-It is up to the callback to determine whether throw_49 and throw_22 both
-refer to the same concept of "throw", and thus to return false or true to
-accept or reject the match.
+Note: At this time, neither the OpenCog AtomSpace, nor the pattern
+matcher support infinite, recursive subtrees.  That is, a given
+incidence graph cannot/must-not have itself as a subtree.  This is
+analogous to well-founded sets in set theory.  The tree formed by
+outgoing sets must be finite.  Specifying a recursive subtree to the
+pattern matcher risks infinite loops (although these could be
+mitigated, if desired), and, likewise, infinite loops if inserted
+into the atomspace.  Thus, the incidence trees must be finite
+(although they do not need to be acyclic: different parts of the tree
+may share common subtrees).
+
+In the discussion below, and in the code, these trees are also called
+"clauses".  More specifically, the input to the pattern matcher is
+given by a list of clauses to be matched.
+
+Consider the following example taken from a dependency parse of the
+English language sentence "John threw a ball":
+
+  _subj(throw, John)
+  _obj(throw, ball)
+
+There are two distinct graphical interpretions of this dependency
+parse: the one commonly used in linguistics, and the one we want to
+use here; they are not the same.  In linguistics, "throw" would be the
+head word, and there would be labelled arrows pointing from the head
+word to the subject and the object (the labels on the arrows being
+_subj and _obj)
+
+As a hypergraph, this consistes of two trees.  The first tree has
+"_subj" as the root, with "throw" and "John" as leaves underneath it.
+Likewise, _obj is a tree. These two trees form the incidence graph of
+the hypergraph. Note that these two trees share a common node:
+"throw", that serves to join them together into one connected graph.
+
+In OpenCog, links cannot have names; only nodes can. Thus, the actual
+representation of the above parse, in OpenCog, will be:
+
+   EvaluationLink
+      PredicateNode "_subj"
+      ListLink
+         WordNode "throw"
+         WordNode "John"
+
+   EvaluationLink
+      PredicateNode "_obj"
+      ListLink
+         WordNode "throw"
+         WordNode "ball"
+
+Here, the intentation level describes the tree structure. The links
+and nodes are indicated by name: the nodes are always leaves of the
+tree. The two trees or clauses above share a single, common node: that
+for "throw".
+
+For the above example, pattern matching can be used to form a simple
+question-answering system, by "filling in the blanks".  The dependency
+parse for the question "What did John throw?" can be written as:
+
+  _subj(throw, John)
+  _obj(throw, _$qVar)
+
+By comparing to the previous graph, it is obvious that the variable
+_$qVar can be directly matched to the word "ball", thus answering the
+question.  This illustrates the simplest use of the system, as a
+kinnd-of fill-in-the-blanks solver, for elementary-school word
+problems: "What did John throw? John threw a ____."
+
+The solution or answer is "ball". This is refered to as a "grounding"
+for the "variable" "_$qVar".   The terminology of "grounding" and
+"variable" is meant to be identical to the terminology commonly used
+in textbooks on model theory, lambda calculus and first-order logic:
+these are the very same ideas, expressed as hypergraphs.  In
+particular, each "clause" or "tree" in the hypergraph incidence graph
+corresponds to an "atomic expression" in a term algebra or in
+first-order logic.  The search pattern or query pattern that the
+pattern matcher matches against is an "expression" or "sentence"
+containing variables.  The act of finding groundings for the variables
+is identical to performing variable "unification".
+
+The pattern matcher uses VariableNodes to represent variables. The
+proper representation for the above query is thus:
+
+   EvaluationLink
+      PredicateNode "_obj"
+      ListLink
+         WordNode "throw"
+         VariableNode "_$qVar"
+
+The query pattern consists of one or more clauses, such as the above.
+The query pattern is essentially a boolean-and of these clauses: all
+of the clauses must be satisfied (with the exception of optional
+clauses; see later discussion for this).  All clauses MUST contain at
+least one variable: if they do not, they are constant clauses, and are
+ignored.  This is because constant clauses are "trivial": the
+groundings for them can only be themselves, trivially, and so nothings
+needs be done.
+
+The set of clauses defining a pattern must be connected by means of
+common, shared variables.  A pair of clauses are connected if they
+share a common variable. A set of clauses is connected if there is a
+transitive path through all of them.  The need for this requirement
+was mentioned before: disconnected graphs are always just a trivial
+product of thier connected components; thus, it is pointless to
+explicitly support disconnected graphs.
+
+At this time, the boolean-or of clauses is not supported. So far,
+there has been no user demand for this feature.  A somewhat-related
+feature, for optional clauses, is supported; however, this is
+typically used to express patterns that should be rejected if they are
+found.
 
 
 Algorithm overview
@@ -121,10 +260,14 @@ one uses a "subgraph isomorphism algorithm" to find the match.
 The input to the algorithm is a set of trees. Because each tree may have
 several groundings, the algorithm maintains a stack to hold intermediate
 groundings, as the universe is explored. A solution is declared when
-every tree has been grounded. If no grounding is found, or if another
-solution is to be searched for, the algorithm will backtrack to the
+every tree has been grounded. If no grounding is found, or if additional
+solutions are to be searched for, the algorithm will backtrack to the
 most recent unexplored part of the universe, poping the stack as it
-backtracks. To this degree, the algorithm resembles a pushdown automaton.
+backtracks. In this sense, the algorithm resembles a pushdown automaton.
+Since pushdown automata are associated with context-free languages,
+the subgraph isomorphism problem is essentially a problem in
+recognizing a context-free language.
+
 
 Currently Implemented Algorithm
 -------------------------------
@@ -149,7 +292,7 @@ Currently Implemented Algorithm
    of a list of subgraphs of the incidence graph that are trees.  Thus,
    by definition, the incidence tree root must be a hypergraph link,
    as hypergraph node cannot, by definition, have a non-trivial
-   incidence tree under it.  Each tree is, by definition, acyclic.
+   incidence tree under it.  Each tree is, by definition, directed.
    These trees are also refered to as "clauses", below [and in the code].
    This is because, in some cases, the tree can play the role of a
    logical clause. In some cases, the tree is also refered to as a
@@ -169,29 +312,34 @@ Currently Implemented Algorithm
    A list of the common, or shared, vertices is made; this list is
    used later in the algorithm, to find all trees connected to a
    specific vertex. [This list is implemented as
-   PatternMatchEngine::root_map]
+   PatternMatchEngine::root_map. The shared vertices are variables.]
 
    The universe graph may have any structure whatsoever; there are no
-   limitations put on it.
+   limitations put on it, othe than that it must be "well-founded",
+   i.e. must not contain any infinite recursive graphs.
 
 2) Input includes a list of the bound variables in the clauses.
-   Thus, for example _obj(row,_$qVar) has _$qVar is the variable
+   Thus, for example _obj(row,_$qVar) has _$qVar as the variable
    to be solved for. The list serves to explicitly identify the
    variables, so that they do not need to be computed or guessed.
-   The designated variables need not be leaf vertices. There may be
-   zero, one or more variables.  They are called "bound" simply
-   because they have been called out; whereas "free variables" are
-   variables that may occur in the clauses, but have not been
-   identified to the algorithm.
+   The designated variables need not be leaf vertices; that is, 
+   variables may match links. There must be at least one variable,
+   as otherwise the graph is constant, and there is nothing to be
+   done.  The variaibles are called "bound" simply because they have
+   been called out; whereas "free variables" are variables that may
+   occur in the clauses, but, because they have not been identified
+   to the algorithm, they will not be grounded, but will instead be
+   treated as if they were constants.
 
 3) Node equivalence is determined by means of a callback; the user
    may implement any notion at all of "equivalence".  In particular,
    the equivalence callback may be used as an alternate way to perform
    variable bindings, with the callback itself determining when a
    node is variable, and what the allowed bindings to it may be.
-   The callback is free to consider node truth values, or anything else,
-   in determining whether to accept or reject a candidate grounding.
-   Link equivalence is likewise governed by a callback.
+   The callback is free to consider node truth values, attention
+   values, or anything else, in determining whether to accept or
+   reject a candidate grounding.  Link equivalence is likewise
+   governed by a callback.
 
    [The node equivalence callback is implemented in
    PatternMatchCallback::node_match(). The link equivalence callback is
@@ -203,7 +351,13 @@ Currently Implemented Algorithm
    The iterator is the next step below (step 5).
 
    [This step is implemented in PatternMatchEngine::match(), which
-   calls PatternMatchEngine::do_candidate() for each candidate root.]
+   calls PatternMatchEngine::do_candidate() for each candidate root.
+   The fetching of the list is provided by a user-defined algorithm.
+   The default callback DefaultPatternMatchCB::peform_search()
+   implements this by querying the atomspace for all atoms of a given
+   type corresponding to some clause, and starting the search there.
+   This default behaviour can be over-ridden with a user-dupplied
+   callback.]
 
 5) Initiate a recursive tree matching algorithm, comparing the
    incidence tree of the first clause to that rooted at the
@@ -214,7 +368,7 @@ Currently Implemented Algorithm
    is considered to be successful. The node-match callback is
    invoked to decide whether this grounding is to be accepted;
    if it is, then the corresponding node in the universe is
-    recorded as a grounding.
+   recorded as a grounding.
 
    If the clause itself is found in the universe, it is rejected.
 
@@ -232,9 +386,9 @@ Currently Implemented Algorithm
 
 6) Assuming a single tree has been successfully matched in the previous
    step, the next step is to find a clause that has not yet been
-   grounded.  This is done by examining the list of all nodes that are
-   shared between the most recently grounded clause, looking for an
-   unsolved clause.
+   grounded.  This is done by examining the list of all (variable)
+   nodes that are shared between the most recently grounded clause,
+   looking for an unsolved clause.
 
    [This is implemented in PatternMatchEngine::get_next_unsolved_clause()]
 
