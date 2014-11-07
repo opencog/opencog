@@ -77,11 +77,7 @@ static void prt_backtrace(std::ostringstream& oss)
 	void *bt_buf[BT_BUFSZ];
 
 	int stack_depth = backtrace(bt_buf, BT_BUFSZ);
-#if defined(HAVE_BFD) && defined(HAVE_IBERTY)
 	char **syms = oc_backtrace_symbols(bt_buf, stack_depth);
-#else
-	char **syms = backtrace_symbols(bt_buf, stack_depth);
-#endif
 
     // Depending on how the dependencies are met, syms could be NULL 
     if (syms == NULL) return;
@@ -93,7 +89,7 @@ static void prt_backtrace(std::ostringstream& oss)
 	{
 		// Most things we'll print are mangled C++ names,
 		// So demangle them, get them to pretty-print.
-#ifdef HAVE_BFD
+#if defined(HAVE_BFD) && defined(HAVE_IBERTY)
 		// The standard and the heck versions differ slightly in layout.
 		char * begin = strstr(syms[i], "_ZN");
 		char * end = strchr(syms[i], '(');
