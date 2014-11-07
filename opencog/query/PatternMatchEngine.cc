@@ -169,7 +169,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	{
 		if (hg == curr_pred_handle)
 		{
-			if (any_node_in_tree(hg, _bound_vars)) return true;
+			if (any_variable_in_tree(hg, _bound_vars)) return true;
 		}
 		else
 		{
