@@ -43,6 +43,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(QuoteUTest)
 	ADD_CXXTEST(BuggyLinkUTest)
+	ADD_CXXTEST(BuggyQuoteUTest)
 	ADD_CXXTEST(SingleUTest)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
 	ADD_CXXTEST(SudokuUTest)
@@ -64,18 +65,18 @@ ADD_CUSTOM_TARGET (qtest
 # Copy files to the build directory.  We do this so that the
 # scheme files can be found no matter where the source directory
 # might be.
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-crime.scm
+    ${PROJECT_BINARY_DIR}/tests/query/buggy-crime.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-link.scm
+    ${PROJECT_BINARY_DIR}/tests/query/buggy-link.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-stack.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-stack.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/var-type-not.scm
-    ${PROJECT_BINARY_DIR}/tests/query/var-type-not.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater_than.scm
+    ${PROJECT_BINARY_DIR}/tests/query/greater_than.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/match-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/match-link.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered.scm
-    ${PROJECT_BINARY_DIR}/tests/query/unordered.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered-more.scm
-    ${PROJECT_BINARY_DIR}/tests/query/unordered-more.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered-exhaust.scm
-    ${PROJECT_BINARY_DIR}/tests/query/unordered-exhaust.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/single.scm
+    ${PROJECT_BINARY_DIR}/tests/query/single.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-o-o.scm
     ${PROJECT_BINARY_DIR}/tests/query/stackmore-o-o.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-o-u.scm
@@ -84,7 +85,11 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-u-o.scm
     ${PROJECT_BINARY_DIR}/tests/query/stackmore-u-o.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-u-u.scm
     ${PROJECT_BINARY_DIR}/tests/query/stackmore-u-u.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/single.scm
-    ${PROJECT_BINARY_DIR}/tests/query/single.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater_than.scm
-    ${PROJECT_BINARY_DIR}/tests/query/greater_than.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered.scm
+    ${PROJECT_BINARY_DIR}/tests/query/unordered.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered-more.scm
+    ${PROJECT_BINARY_DIR}/tests/query/unordered-more.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered-exhaust.scm
+    ${PROJECT_BINARY_DIR}/tests/query/unordered-exhaust.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/var-type-not.scm
+    ${PROJECT_BINARY_DIR}/tests/query/var-type-not.scm)
