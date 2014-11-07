@@ -447,7 +447,7 @@ public:
     /**
      * Return true if the handle belongs to *this* atomspace; else
      * return false.  Note that the handle might still be valid in
-     * some other atomsapce. */
+     * some other atomspace. */
     bool isValidHandle(Handle h) const {
         // The h->getHandle() maneuver below is a trick to get at the
         // UUID of the actual atom, rather than the cached UUID in the
