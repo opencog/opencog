@@ -55,25 +55,16 @@ void Handle::set_resolver(const AtomTable* tab)
 
 void Handle::clear_resolver(const AtomTable* tab)
 {
-    auto end = _resolver.end();
-    for (auto it = _resolver.begin(); it != end; it++)
-    {
-        if (*it == tab)
-        {
-            _resolver.erase(it);
-            break;
-        }
-    }
+    auto it = std::find(_resolver.begin(), _resolver.end(), tab);
+    if (it != _resolver.end())
+        _resolver.erase(it);
 }
 
 // Search several atomspaces, in order.  First one to come up with
 // the atom wins.  Seems to work, for now.
 inline AtomPtr Handle::do_res(const Handle* hp)
 {
-    auto end = _resolver.end();
-    for (auto it = _resolver.begin(); it != end; it++)
-    {
-        const AtomTable* at = *it;
+    for (const AtomTable* at : _resolver) {
         AtomPtr a(at->getHandle((Handle&)(*hp))._ptr);
         if (a.get()) return a;
     }
