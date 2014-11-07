@@ -115,6 +115,31 @@ static inline bool is_quoted_in_tree(const Handle& tree, const Handle& node)
 }
 
 /**
+ * Return true if the indicated node occurs somewhere in the tree
+ * (viz, the tree recursively spanned by the outgoing set of the handle)
+ * but ONLY is it is not quoted!  This is meant to be be used to search
+ * for variables, but onl those variables that have not been quoted, as
+ * the quoted variables are constants (literals).
+ */
+static inline bool is_variable_in_tree(const Handle& tree, const Handle& node)
+{
+	if (tree == Handle::UNDEFINED) return false;
+	if (tree == node) return true;
+	LinkPtr ltree(LinkCast(tree));
+	if (NULL == ltree) return false;
+
+	if (tree->getType() == QUOTE_LINK) return false;
+
+	// Recurse downwards...
+	const std::vector<Handle> &vh = ltree->getOutgoingSet();
+	size_t sz = vh.size();
+	for (size_t i = 0; i < sz; i++) {
+		if (is_variable_in_tree(vh[i], node)) return true;
+	}
+	return false;
+}
+
+/**
  * Return true if any of the indicated nodes occurs somewhere in
  * the tree (that is, in the tree spanned by the outgoing set.)
  */
@@ -123,6 +148,22 @@ static inline bool any_node_in_tree(const Handle& tree, const std::set<Handle>& 
 	for (Handle n: nodes)
 	{
 		if (is_node_in_tree(tree, n)) return true;
+	}
+	return false;
+}
+
+/**
+ * Return true if any of the indicated nodes occurs somewhere in
+ * the tree (that is, in the tree spanned by the outgoing set.)
+ * But ONLY if they are not quoted!  This is intended to be used to
+ * search for variables, which are no longer variables when they
+ * are quoted.
+ */
+static inline bool any_variable_in_tree(const Handle& tree, const std::set<Handle>& nodes)
+{
+	for (Handle n: nodes)
+	{
+		if (is_variable_in_tree(tree, n)) return true;
 	}
 	return false;
 }
@@ -140,8 +181,22 @@ static inline bool is_node_in_any_tree(const std::vector<Handle>& trees, const H
 }
 
 /**
+ * Return true if the indicated node occurs somewhere in any of the trees,
+ * but only if it is not quoted.  This is intended to be used to search
+ * for variables, which cease to be variable when they are quoted.
+ */
+static inline bool is_variable_in_any_tree(const std::vector<Handle>& trees, const Handle& node)
+{
+	for (Handle tree: trees)
+	{
+		if (is_variable_in_tree(tree, node)) return true;
+	}
+	return false;
+}
+
+/**
  * Returns true if the clause contains an atom of type atom_type.
- * ... but only if it is not quoted.  Quoted terms are constants.
+ * ... but only if it is not quoted.  Quoted terms are constants (literals).
  */
 static inline bool contains_atomtype(Handle& clause, Type atom_type)
 {
