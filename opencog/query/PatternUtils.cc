@@ -53,7 +53,7 @@ bool remove_constants(const std::set<Handle> &vars,
 	for (i = clauses.begin(); i != clauses.end(); )
 	{
 		Handle clause(*i);
-		if (any_node_in_tree(clause, vars))
+		if (any_variable_in_tree(clause, vars))
 		{
 			i++;
 		}
@@ -120,7 +120,7 @@ void get_connected_components(
 				std::set<Handle> cur_vars(component_vars[i]);
 				// If clause cl is connected to this component, then add it
 				// to this component.
-				if (any_node_in_tree(cl, cur_vars))
+				if (any_variable_in_tree(cl, cur_vars))
 				{
 					// Extend the component
 					std::vector<Handle> curr_component(components[i]);
