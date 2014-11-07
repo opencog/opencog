@@ -27,6 +27,11 @@
         (VariableNode "$x")
         (ConceptNode "criminal")))
 
+
+; The pattern specified here is buggy: its an invalid pattern
+; because the variable $x never appears unquoted in the pattern.
+; In fact, the pattern has no variables in it at all, since any
+; quoted variable is not a variable, but is a constant.
 (define query_rule
     (BindLink (stv 1 1)
         (ListLink (stv 1 1)
