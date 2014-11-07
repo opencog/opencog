@@ -107,6 +107,7 @@ void BuggyLinkUTest::test_link(void)
     load_scm_files_from_config(*as);
 
     Handle bindy = eval->eval_h("bindy");
+    TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindy);
 
     Handle lily = bindlink(as, bindy);
     logger().debug() << "Result is this:\n" << lily->toString();

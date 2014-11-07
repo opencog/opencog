@@ -96,8 +96,10 @@ void BuggyQuoteUTest::setUp(void)
  * BuggyQuote unit test.  Test binding to unquoted links.
  * This test explicitly tests the bug described in 
  * https://github.com/opencog/opencog/issues/1092
- * The old pattern matcher would crash with a null-pointer deref.
- * The current one works great.
+ * The old pattern matcher would throw a runtime exception in the
+ * atomsapce, since we gave it a link with an undefined handle in it.
+ * The new one throws an invalid parameter exception in the pattern
+ * matcher, because the pattern was crazy.
  */
 void BuggyQuoteUTest::test_quote(void)
 {
@@ -107,10 +109,18 @@ void BuggyQuoteUTest::test_quote(void)
     load_scm_files_from_config(*as);
 
     Handle qrule = eval->eval_h("query_rule");
+    TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != qrule);
 
-    Handle lily = bindlink(as, qrule);
-    logger().debug() << "Result is this:\n" << lily->toString();
+    bool caught = false;
+    try
+    {
+       bindlink(as, qrule);
+    }
+    catch (const InvalidParamException& e)
+    {
+        caught = true;
+    }
 
-    TS_ASSERT_EQUALS(1, as->getArity(lily));
+    TS_ASSERT_EQUALS(true, caught);
 }
 
