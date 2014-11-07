@@ -10,8 +10,11 @@ extern "C" {
 char **oc_backtrace_symbols(void *const *buffer, int size);
 void oc_backtrace_symbols_fd(void *const *buffer, int size, int fd);
 #else
-char **oc_backtrace_symbols(void *const *buffer, int size) { return NULL; }
-void oc_backtrace_symbols_fd(void *const *buffer, int size, int fd) {}
+#include <execinfo.h>
+char **oc_backtrace_symbols(void *const *buffer, int size) {
+	return backtrace_symbols(buffer, size); }
+void oc_backtrace_symbols_fd(void *const *buffer, int size, int fd) {
+	backtrace_symbols_fd(buffer, size, fd); }
 #endif
 
 #ifdef __cplusplus

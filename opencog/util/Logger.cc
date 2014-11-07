@@ -77,7 +77,7 @@ static void prt_backtrace(std::ostringstream& oss)
 	void *bt_buf[BT_BUFSZ];
 
 	int stack_depth = backtrace(bt_buf, BT_BUFSZ);
-#ifdef HAVE_BFD
+#if defined(HAVE_BFD) && defined(HAVE_IBERTY)
 	char **syms = oc_backtrace_symbols(bt_buf, stack_depth);
 #else
 	char **syms = backtrace_symbols(bt_buf, stack_depth);
