@@ -317,13 +317,15 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	// Make sure that each declared variable appears in some clause.
 	// We can't ground variables that aren't attached to something.
+	// Quoted variables are constants, and so don't count.
 	for (Handle v : vars)
 	{
-		if ((not is_node_in_any_tree(clauses, v))
-		     and (not is_node_in_any_tree(negations, v)))
+		if ((not is_variable_in_any_tree(clauses, v))
+		     and (not is_variable_in_any_tree(negations, v)))
 		{
 			std::stringstream ss;
-			ss << "The variable " << v << " does not appear in any clause!";
+			ss << "The variable " << v->toString()
+			   << " does not appear (unquoted) in any clause!";
 			throw InvalidParamException(TRACE_INFO, ss.str().c_str());
 		}
 	}
@@ -432,7 +434,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 		std::set<Handle> cvars;
 		for (Handle v : vars)
 		{
-			if (is_node_in_any_tree(comp, v)) cvars.insert(v);
+			if (is_variable_in_any_tree(comp, v)) cvars.insert(v);
 		}
 
 		// Pass through the callbacks, collect up answers.
