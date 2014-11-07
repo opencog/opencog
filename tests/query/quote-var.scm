@@ -47,6 +47,10 @@
 	)
 )
 
+; The pattern below uses $var-a in a confusing way: both as
+; variable, as as something quoted.  It should behave the same
+; way that "bother" below does: the quoted and unquoted forms
+; are distinct from one-another.
 (define bindy
 	(BindLink
 		(VariableNode "$var-a")
@@ -63,6 +67,8 @@
 	)
 )
 
+; Same as above, but explicitly made non-confusing. This is
+; what the above form must actually behave like ...
 (define bother
 	(BindLink
 		(VariableNode "$other")

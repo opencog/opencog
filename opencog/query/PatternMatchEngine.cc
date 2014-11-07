@@ -194,18 +194,28 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	{
 		// The proposed grounding must NOT contain any bound variables!
 		// .. unless they are quoted in the pattern, in which case they
-		// are allow. The below checks this case. The check is not entirely
-		// correct though; there ar some weird corner cses what a variable
-		// may appear quoted in the pattern, but be in the wrong spot
-		// entirely in the proposed grounding, and so should not be allowed.
-		// For now, we punt on this... a proper fix would be .. hard.
-		if (any_node_in_tree(hg, _bound_vars))
+		// are allowed... well, not just allowed, but give the right
+		// answer. The below checks for this case. The check is not
+		// entirely correct though; there are some weird corner cases
+		// where a variable may appear quoted in the pattern, but then 
+		// be in the wrong spot entirely in the proposed grounding, and
+		// so should not have been allowed.
+		// XXX FIXME For now, we punt on this... a proper fix would be
+		// ... hard, as we would have to line up the location of the
+		// quoted and the unquoted parts.
+		if (any_variable_in_tree(hg, _bound_vars))
 		{
 			for (Handle vh: _bound_vars)
 			{
-				if (is_node_in_tree(hg, vh))
+				// OK, which tree is it in? And is it quoted in the pattern?
+				if (is_variable_in_tree(hg, vh))
 				{
+					prtmsg("found bound variable in grounding tree:", vh);
+					prtmsg("matching  pattern  is:", hp);
+					prtmsg("proposed grounding is:", hg);
+
 					if (is_quoted_in_tree(hp, vh)) continue;
+					dbgprt("miscompare; var is not in pattern, or its not quoted\n");
 					return true;
 				}
 			}
