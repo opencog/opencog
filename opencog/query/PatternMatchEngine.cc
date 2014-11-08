@@ -150,6 +150,16 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		      "ERROR: expected variable to be a node, got this: %s\n",
 				hp->toShortString().c_str());
 
+		// Disalllow matches that contain a bound variable in the
+		// grounding. However, a bound variable can be legitimately
+		// grounded by a free variable (because free variables are
+		// effectively constant literals, during the pattern match.
+		if (VARIABLE_NODE == hg->getType() and
+		    _bound_vars.end() != _bound_vars.find(hg))
+		{
+			return true;
+		}
+
 		// Else, we have a candidate grounding for this variable.
 		// The node_match may implement some tighter variable check,
 		// e.g. making sure that grounding is of some certain type.
@@ -197,7 +207,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		// are allowed... well, not just allowed, but give the right
 		// answer. The below checks for this case. The check is not
 		// entirely correct though; there are some weird corner cases
-		// where a variable may appear quoted in the pattern, but then 
+		// where a variable may appear quoted in the pattern, but then
 		// be in the wrong spot entirely in the proposed grounding, and
 		// so should not have been allowed.
 		// XXX FIXME For now, we punt on this... a proper fix would be
@@ -760,7 +770,7 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 		// a rather pathological situation (i.e. grounding a clause with
 		// another clause that has bound variables in it), and it will
 		// probably be rejected at some point.  But, for now, this is a
-		// semi-plausible situation.  So we skip this joiner, and look 
+		// semi-plausible situation.  So we skip this joiner, and look
 		// for another.
 		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
 
@@ -774,7 +784,7 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 				solved = true;
 			}
 			else if ((issued.end() == issued.find(root)) and
-			         (search_optionals or 
+			         (search_optionals or
 			          (_optionals.end() == _optionals.find(root))))
 			{
 				unsolved_clause = root;

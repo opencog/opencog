@@ -153,17 +153,23 @@ void UnorderedUTest::test_un1(void)
 	logger().debug("pair result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
-	// Result should be a ListLink w/ one solution
+	// Result should be a ListLink w/ one solution. Well, actually, two
+	// solutions.  One should bind the NumberNode, Goournded schema node,
+	// the other should bind to VariableNodes appearing elsewhere in the
+	// atomspace.  We could avoid this by using TypedVariableLinks, but this
+	// potentially confused the test case even more ... so we don't
 	result = bindlink(as, disorder);
+	logger().debug() << "Disorder Result is this:\n" << result->toString();
 
 	logger().debug("first result is %s\n", SchemeSmob::to_string(result).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
-	// Result should be a ListLink w/ one solution
+	// Result should be a ListLink w/ one solution. Well, actually, two as above.
 	result = bindlink(as, disordered);
+	logger().debug() << "DisorderED Result is this:\n" << result->toString();
 
 	logger().debug("next result is %s\n", SchemeSmob::to_string(result).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

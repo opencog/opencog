@@ -32,7 +32,7 @@
 ; because the variable $x never appears unquoted in the pattern.
 ; In fact, the pattern has no variables in it at all, since any
 ; quoted variable is not a variable, but is a constant.
-(define query_rule
+(define query_rule_bad
     (BindLink (stv 1 1)
         (ListLink (stv 1 1)
             (VariableNode "$x")
@@ -46,6 +46,27 @@
             )
             (InheritanceLink
                 (VariableNode "$x")
+                (ConceptNode "criminal")
+            )
+        )
+    )
+)
+
+
+; This is pattern is valid, and should be able to match 
+; two clauses in the above:  $zzz can be grounded by 
+; (VariableNode "$x") and it can be grounded by 
+; (QuoteLink (VariableNode "$x"))
+(define query_rule_good
+    (BindLink (stv 1 1)
+        (VariableNode "$zzz")
+        (ImplicationLink (stv 1 1)
+            (InheritanceLink
+                (VariableNode "$zzz")
+                (ConceptNode "criminal")
+            )
+            (InheritanceLink
+                (VariableNode "$zzz")
                 (ConceptNode "criminal")
             )
         )

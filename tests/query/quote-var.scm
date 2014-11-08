@@ -53,7 +53,10 @@
 ; are distinct from one-another.
 (define bindy
 	(BindLink
-		(VariableNode "$var-a")
+		(TypedVariableLink
+			(VariableNode "$var-a")
+			(VariableTypeNode "ConceptNode")
+		)
 		(ImplicationLink
 			(EvaluationLink
 				(PredicateNode "similar")
