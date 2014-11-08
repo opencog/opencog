@@ -42,8 +42,14 @@
 	(BindLink
 		(ListLink
 			(VariableNode "$who")
-			(VariableNode "$less-wealth")
-			(VariableNode "$more-wealth")
+			(TypedVariableLink
+				(VariableNode "$less-wealth")
+				(VariableTypeNode "NumberNode")
+			)
+			(TypedVariableLink
+				(VariableNode "$more-wealth")
+				(VariableTypeNode "NumberNode")
+			)
 		)
 		(ImplicationLink
 			(AndLink

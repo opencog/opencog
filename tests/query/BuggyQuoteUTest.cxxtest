@@ -73,7 +73,8 @@ public:
     void setUp(void);
     void tearDown(void);
 
-    void test_quote(void);
+    void test_bad_quote(void);
+    void test_good_form(void);
 };
 
 void BuggyQuoteUTest::tearDown(void)
@@ -101,14 +102,14 @@ void BuggyQuoteUTest::setUp(void)
  * The new one throws an invalid parameter exception in the pattern
  * matcher, because the pattern was crazy.
  */
-void BuggyQuoteUTest::test_quote(void)
+void BuggyQuoteUTest::test_bad_quote(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
     config().set("SCM_PRELOAD", "tests/query/buggy-crime.scm");
     load_scm_files_from_config(*as);
 
-    Handle qrule = eval->eval_h("query_rule");
+    Handle qrule = eval->eval_h("query_rule_bad");
     TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != qrule);
 
     bool caught = false;
@@ -122,5 +123,21 @@ void BuggyQuoteUTest::test_quote(void)
     }
 
     TS_ASSERT_EQUALS(true, caught);
+}
+
+void BuggyQuoteUTest::test_good_form(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/buggy-crime.scm");
+    load_scm_files_from_config(*as);
+
+    Handle qrule = eval->eval_h("query_rule_good");
+    TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != qrule);
+
+    Handle rslt = bindlink(as, qrule);
+    logger().debug() << "Result is this:\n" << rslt->toString();
+
+    TS_ASSERT_EQUALS(2, as->getArity(rslt));
 }
 
