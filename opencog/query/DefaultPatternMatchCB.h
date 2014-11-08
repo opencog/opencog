@@ -87,11 +87,6 @@ class DefaultPatternMatchCB :
 			// gets special handling, below.
 			if (pattype != VARIABLE_NODE) return false;
 
-			// If the solution is variable too, reject it out-of-hand,
-			// even if its some variable in some utterly unrelated thing.
-			Type soltype = nsoln_h->getType();
-			if (soltype == VARIABLE_NODE) return true;
-
 			// If the ungrounded term is a variable, then see if there
 			// are any restrictions on the variable type.
 			// If no restrictions, we are good to go.
@@ -103,6 +98,7 @@ class DefaultPatternMatchCB :
 			if (it == _type_restrictions->end()) return false;
 
 			// Is the ground-atom type in our list of allowed types?
+			Type soltype = nsoln_h->getType();
 			const std::set<Type> &tset = it->second;
 			std::set<Type>::const_iterator allow = tset.find(soltype);
 			if (allow != tset.end()) return false;
