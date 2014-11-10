@@ -1,5 +1,5 @@
 import math
-from opencog.atomspace import types, TruthValue
+from opencog.atomspace import types, TruthValue, get_type_name
 from pln.rule import Rule
 
 # Heuristically create boolean links using the TruthValues of their arguments
@@ -61,18 +61,23 @@ class NotCreationRule(BooleanLinkCreationRule):
 #produced
 class AndCreationRule(BooleanLinkCreationRule):
     """
-    Take a set of N atoms and create AndLink(atoms)
+    Take a set of N atoms of link_type and create AndLink(atoms). If no
+    link_type is passed it randomly chooses links.
     """
-    def __init__(self, chainer, N):
-        atoms = chainer.make_n_variables(N)
+    def __init__(self, chainer, N, link_type=None):
+
         self._chainer = chainer
+        if link_type is not None:
+            atoms = [chainer.link(link_type, chainer.make_n_variables(2)) for i in range(N)]
+        else:
+            atoms = chainer.make_n_variables(N)
 
         Rule.__init__(self,
                       formula=formulas.andFormula,
                       outputs=[chainer.link(types.AndLink, atoms)],
                       inputs=atoms,
-                      name = "AndCreationRule<"+str(N)+">")
-
+                      name = "AndCreationRule<"+str(N) +
+                             "%s>"%("" if link_type is None else ", " + get_type_name(link_type)))
 
 class OrCreationRule(BooleanLinkCreationRule):
     '''[A, B...] => Or(A, B...)'''
@@ -312,6 +317,7 @@ class AndBulkEvaluationRule(Rule):
         # variables.
         [and_link_target] = outputs
         and_args = and_link_target.out
+        print (and_args)
         if any(atom.is_a(types.VariableNode) for atom in and_args):
             return [], []
 
