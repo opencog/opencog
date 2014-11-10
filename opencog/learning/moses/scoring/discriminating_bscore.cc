@@ -219,11 +219,14 @@ discriminating_bscore::discriminating_bscore(const CTable& ct,
                   _hardness, _min_threshold, _max_threshold);
 
     // Verify that the thresholds are sane
-    OC_ASSERT((0.0 < hardness) && (0.0 <= min_threshold) && (min_threshold <= max_threshold),
-        "Discriminating scorer, invalid thresholds.  "
-        "The hardness must be positive, the minimum threshold must be "
-        "non-negative, and the maximum threshold must be greater "
-        "than or equal to the minimum threshold.\n");
+    OC_ASSERT(0.0 <= _hardness, "Hardness must be non-negative");
+    if (0.0 < _hardness) {
+        OC_ASSERT((0.0 < min_threshold) && (min_threshold <= max_threshold),
+                  "Discriminating scorer, invalid thresholds.  "
+                  "The minimum threshold must be greater than zero, "
+                  "and the maximum threshold must be greater "
+                  "than or equal to the minimum threshold.\n");
+    }
 
     // For boolean tables, the highest possible output is 1.0 (of course)
     if (_output_type == id::boolean_type) {
@@ -348,16 +351,20 @@ score_t discriminating_bscore::min_improv() const
 // returns a value that is zero or negative.
 score_t discriminating_bscore::get_threshold_penalty(score_t value) const
 {
-    score_t dst = 0.0;
-    if (value < _min_threshold)
-        dst = 1.0 - value / _min_threshold;
+    if (_hardness > 0) {
+        score_t dst = 0.0;
+        if (value < _min_threshold)
+            dst = 1.0 - value / _min_threshold;
 
-    if (_max_threshold < value)
-        dst = (value - _max_threshold) / (1.0 - _max_threshold);
+        if (_max_threshold < value)
+            dst = (value - _max_threshold) / (1.0 - _max_threshold);
 
-    // Attempt to avoid insane values.
-    if (0.99999999 < dst) return -_hardness * 18;
-    return _hardness * log(1.0 - dst);
+        // Attempt to avoid insane values.
+        if (0.99999999 < dst) return -_hardness * 18;
+        return _hardness * log(1.0 - dst);
+    } else {
+        return 0.0;
+    }
 }
 
 void discriminating_bscore::set_complexity_coef(unsigned alphabet_size, float p)
