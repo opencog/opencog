@@ -614,3 +614,8 @@ def invert(n):
 
 def negate(n):
     return 1.0 - n
+
+def implicationAndRuleFormula(tvs):
+    # TODO : drive the formula for this ImplicationAndRule, for which this formula
+    # is intended for.
+    return [TruthValue(1, TruthValue().confidence_to_count(1))]
