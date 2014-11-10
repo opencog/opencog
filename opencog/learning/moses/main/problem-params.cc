@@ -623,8 +623,9 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "problems all require a range of values to be sampled in "
          "order to measure the fitness of a proposed solution. This "
          "option sets the low end of the sampled range. In the case of "
-         "fitness function pre, the range corresponds to the activation "
-         "of the precision.\n")
+         "fitness functions pre, prerec, recall and bep the range "
+         "corresponds to the minimum of the complement variable "
+         "to keep fixed or over that minimum.\n")
 
         (opt_desc_str(max_rand_input_opt).c_str(),
          po::value<double>(&max_rand_input)->default_value(1.0),
@@ -633,8 +634,9 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "problems all require a range of values to be sampled in "
          "order to measure the fitness of a proposed solution. This "
          "option sets the high end of the sampled range. In the case of "
-         "fitness function pre, the range corresponds to the activation "
-         "of the precision.\n")
+         "fitness functions pre, prerec, recall and bep the range "
+         "corresponds to the maximum of the complement variable "
+         "to keep under that maximum.\n")
 
         (opt_desc_str(log_level_opt).c_str(),
          po::value<string>(&log_level)->default_value("INFO"),
