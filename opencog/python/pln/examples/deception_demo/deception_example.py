@@ -1,4 +1,4 @@
-__author__ = 'sebastian'
+__author__ = 'sebastian, amen'
 
 """
 For running the deception_agent
@@ -18,14 +18,22 @@ utilities = "opencog/scm/utilities.scm"
 path = "opencog/python/pln/examples/deception_demo/"
 data = [path + "deception.scm", path + "spatial_information.scm",
         path + "spatial_rules.scm", path + "agent_behavior.scm"]
+#data = [path + "deception.scm"]
+number_of_steps = 50
 
-number_of_steps = 500
-for item in [coreTypes, utilities, embodimentTypes] + data:
-    load_scm(atomspace, item)
+if __name__ == '__main__':
+    mode = raw_input("Enter \"1\" for DECEPTION-INFERENCE, any other number for"
+                     + " DECEPTION-BEHAVIOR: ")
+    print mode
+    if int(mode) != 1:
+        number_of_steps = 500
+        data += [path + "extra_data.scm"]
 
-agent = InteractiveAgent(atomspace=atomspace,
-                         agent=deception_agent.DeceptionAgent(),
-                         num_steps=number_of_steps,
-                         print_starting_contents=True)
+    for item in [coreTypes, utilities, embodimentTypes] + data:
+        load_scm(atomspace, item)
+    agent = InteractiveAgent(atomspace=atomspace,
+                             agent=deception_agent.DeceptionAgent(int(mode)),
+                             num_steps=number_of_steps,
+                             print_starting_contents=False)
 
-agent.run()
+    agent.run()
