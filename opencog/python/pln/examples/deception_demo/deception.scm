@@ -1,4 +1,5 @@
 ; As described at http://wiki.opencog.org/w/Simple_Deception
+; with few simplifications.
 
 (InheritanceLink (stv 1.000000 1.000000)
     (ConceptNode "Me")
@@ -10,28 +11,28 @@
     (ConceptNode "Agent")
 )
 
-; The_Battery is a battery that is the imaginary/Not_real battery that doesn't
-; in the environment exist.
-(InheritanceLink (stv .9 .1)
-    (ConceptNode "The_Battery")
-    (ConceptNode "Battery")
-)
+;; The_Battery is a battery that is the imaginary/Not_real battery that doesn't
+;; in the environment exist.
+;(InheritanceLink (stv .9 .1)
+;    (ConceptNode "The_Battery")
+;    (ConceptNode "Battery")
+;)
 
-(InheritanceLink (stv 1 1)
-    (ConceptNode "The_Battery")
-    (ConceptNode "Not_real")
-)
+;(InheritanceLink (stv 1 1)
+;    (ConceptNode "The_Battery")
+;    (ConceptNode "Not_real")
+;)
 
-(EvaluationLink (stv 1 1)
-    (PredicateNode "Knows")
-    (ListLink
-        (ConceptNode "Me")
-        (InheritanceLink (stv 1 1)
-            (ConceptNode "The_Battery")
-            (ConceptNode "Not_real")
-        )
-    )
-)
+;(EvaluationLink (stv 1 1)
+;    (PredicateNode "Knows")
+;    (ListLink
+;        (ConceptNode "Me")
+;        (InheritanceLink (stv 1 1)
+;            (ConceptNode "The_Battery")
+;            (ConceptNode "Not_real")
+;        )
+;    )
+;)
 
 ; Agents want battery.
 (ImplicationLink (stv 1 1) ; working
@@ -48,41 +49,41 @@
     )
 )
 
-;Knowledge implies belief
-(ImplicationLink (stv 1 1) ; working
-    (EvaluationLink
-        (PredicateNode "Knows")
-        (ListLink
-            (VariableNode "$A@5")
-            (VariableNode "$X@5")
-        )
-    )
-    (EvaluationLink
-        (PredicateNode "Believes")
-        (ListLink
-            (VariableNode "$A@5")
-            (VariableNode "$X@5")
-        )
-    )
-)
+;;Knowledge implies belief
+;(ImplicationLink (stv 1 1) ; working
+;    (EvaluationLink
+;        (PredicateNode "Knows")
+;        (ListLink
+;            (VariableNode "$A@5")
+;            (VariableNode "$X@5")
+;        )
+;    )
+;    (EvaluationLink
+;        (PredicateNode "Believes")
+;        (ListLink
+;            (VariableNode "$A@5")
+;            (VariableNode "$X@5")
+;        )
+;    )
+;)
 
-;Belief approximately involves knowledge
-(ImplicationLink (stv .5 .8) ; working
-    (EvaluationLink
-        (PredicateNode "Believes")
-        (ListLink
-            (VariableNode "$A@6")
-            (VariableNode "$X@6")
-        )
-    )
-    (EvaluationLink
-        (PredicateNode "Knows")
-        (ListLink
-            (VariableNode "$A@6")
-            (VariableNode "$X@6")
-        )
-    )
-)
+;;Belief approximately involves knowledge
+;(ImplicationLink (stv .5 .8) ; working
+;    (EvaluationLink
+;        (PredicateNode "Believes")
+;        (ListLink
+;            (VariableNode "$A@6")
+;            (VariableNode "$X@6")
+;        )
+;    )
+;    (EvaluationLink
+;        (PredicateNode "Knows")
+;        (ListLink
+;            (VariableNode "$A@6")
+;            (VariableNode "$X@6")
+;        )
+;    )
+;)
 
 ;Agents often believe what they're told
 (ImplicationLink (stv .8 .8) ;working
@@ -136,21 +137,6 @@
         )
     )
 )
-
-; For testing purposes
-;(EvaluationLink (stv 0.800000 0.800000)
-;  (PredicateNode "Believes") ; [17]
-;  (ListLink (stv 1.000000 0.000000)
-;    (ConceptNode "Bob") ; [4]
-;    (EvaluationLink (stv 1.000000 0.000000)
-;      (PredicateNode "In") ; [29]
-;      (ListLink (stv 1.000000 0.000000)
-;        (ConceptNode "The_Battery") ; [41]
-;        (ConceptNode "House_2") ; [42]
-;      ) ; [43]
-;    ) ; [44]
-;  ) ; [155]
-;) ; [156]
 
 ; Whatever be the relation between two Concepts such that $X $Wants $Battery and
 ; there is $Y which is $Battery then $X $Wants $Y too. (This is crude in the sense

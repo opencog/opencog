@@ -1,22 +1,22 @@
 ; This describes the general behavior of agents, in the 3D World.
 
 ;An agent must be near something to pick it up
-(ImplicationLink (stv 1.000000 1.000000)
-    (EvaluationLink
-        (PredicateNode "PickUp")
-        (ListLink
-            (VariableNode "$A@1")
-            (VariableNode "$X@1")
-        )
-    )
-    (EvaluationLink
-        (PredicateNode "Near")
-        (ListLink
-            (VariableNode "$A@1")
-            (VariableNode "$X@1")
-        )
-    )
-)
+;(ImplicationLink (stv 1.000000 1.000000)
+;    (EvaluationLink
+;        (PredicateNode "PickUp")
+;        (ListLink
+;            (VariableNode "$A@1")
+;            (VariableNode "$X@1")
+;        )
+;    )
+;    (EvaluationLink
+;        (PredicateNode "Near")
+;        (ListLink
+;            (VariableNode "$A@1")
+;            (VariableNode "$X@1")
+;        )
+;    )
+;)
 
 ; When the distance between Bob & House_1 is greater than the distance between
 ; Me and House_1. MoveTo House_1 and pick Red_Battery. (This is a plan of action)
@@ -66,6 +66,7 @@
         )
     )
 )
+
 ; If agent B and A are equal distances from some object C and if agent A is told
 ; to move to postion L then distance between agent A and C is far (We assume that
 ; the other agent is obedient).
