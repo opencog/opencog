@@ -74,7 +74,10 @@
 ; what the above form must actually behave like ...
 (define bother
 	(BindLink
-		(VariableNode "$other")
+		(TypedVariableLink
+			(VariableNode "$other")
+			(VariableTypeNode "ConceptNode")
+		)
 		(ImplicationLink
 			(EvaluationLink
 				(PredicateNode "similar")
