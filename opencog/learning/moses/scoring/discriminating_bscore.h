@@ -70,7 +70,7 @@ struct discriminator
     std::vector<d_counts> counts(const combo_tree&) const;
 
 protected:
-    CTable _ctable;
+    const CTable& _ctable;
     type_node _output_type;
     score_t _true_total;        // total number of Ts in the ctable
     score_t _false_total;       // total number of Fs in the ctable
