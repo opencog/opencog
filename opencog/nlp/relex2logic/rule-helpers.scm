@@ -925,43 +925,15 @@
 ; -----------------------------------------------------------------------
 ; Example: "I think that dogs can fly.", "He is glad that she won.", "He ran so quickly that he flew."
 ; A that-rule for "object clause", "content clause", "complement clause", etc, but not "adjective clause"
-(define (that-rule main main_instance main_pos sub sub_instance sub_pos)
-	; get the corresponding node
-	(define main-node
-		(if (string=? main_pos "verb")
-			(PredicateNode main_instance df-node-stv)
-			(ConceptNode main_instance df-node-stv)
-		)
-	)
-	(define sub-node
-		(if (string=? sub_pos "verb")
-			(PredicateNode sub_instance df-node-stv)
-			(ConceptNode sub_instance df-node-stv)
-		)
-	)
-
-	; create the link between instance and word just in case
-	(define main-link
-		(if (string=? main_pos "verb")
-			(ImplicationLink (PredicateNode main_instance df-node-stv) (PredicateNode main df-node-stv) df-link-stv)
-			(InheritanceLink (ConceptNode main_instance df-node-stv) (ConceptNode main df-node-stv) df-link-stv)
-		)
-	)
-	(define sub-link
-		(if (string=? sub_pos "verb")
-			(ImplicationLink (PredicateNode sub_instance df-node-stv) (PredicateNode sub df-node-stv) df-link-stv)
-			(InheritanceLink (ConceptNode sub_instance df-node-stv) (ConceptNode sub df-node-stv) df-link-stv)
-		)
-	)
-
+(define (that-rule main main_instance sub sub_instance)
 	(list
-		main-link
-		sub-link
+		(ImplicationLink (PredicateNode main_instance df-node-stv) (PredicateNode main df-node-stv) df-link-stv)
+		(ImplicationLink (PredicateNode sub_instance df-node-stv) (PredicateNode sub df-node-stv) df-link-stv)
 		(EvaluationLink df-link-stv
 			(PredicateNode "that" df-node-stv)
 			(ListLink df-link-stv
-				main-node
-				sub-node
+				(PredicateNode main_instance df-node-stv)
+				(PredicateNode sub_instance df-node-stv)
 			)
 		)
 	)
@@ -978,7 +950,7 @@
 ; before he is tired"
 (define (before-after-rule $x_instance $y_instance $y_pos $before_or_after)
     (define y-node
-        (if (string=? $y_pos "verb")
+        (if (or (string=? $y_pos "verb") (string=? $y_pos "adj"))
             (PredicateNode $y_instance df-node-stv)
             (ConceptNode $y_instance df-node-stv)
         )
