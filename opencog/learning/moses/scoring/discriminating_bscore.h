@@ -92,7 +92,7 @@ protected:
  * senstivity, specificty, F-score, etc. type discriminator scorers.
  * Provides all the generic, common functions such scorer might need.
  */
-struct discriminating_bscore : public bscore_base, discriminator
+struct discriminating_bscore : public bscore_ctable_base, discriminator
 {
     discriminating_bscore(const CTable& _ctable,
                   float min_threshold = 0.5f,

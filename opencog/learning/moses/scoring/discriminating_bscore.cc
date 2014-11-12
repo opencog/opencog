@@ -203,7 +203,7 @@ discriminating_bscore::discriminating_bscore(const CTable& ct,
                                              float min_threshold,
                                              float max_threshold,
                                              float hardness)
-    : discriminator(ct),
+    : bscore_ctable_base(ct), discriminator(_wrk_ctable),
       _ctable_usize(ct.uncompressed_size()),
       _min_threshold(min_threshold),
       _max_threshold(max_threshold),
