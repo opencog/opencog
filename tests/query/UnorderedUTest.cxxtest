@@ -204,11 +204,11 @@ void UnorderedUTest::test_exhaust(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != exhaust_eq_6);
 
 	// --------------------
-	// Result should be a ListLink w/ 72 solutions.
+	// Result should be a ListLink w/ 60 solutions.
 	Handle result = bindlink(as, exhaust);
 
 	logger().debug("exhaustive result is %s\n", SchemeSmob::to_string(result).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 72, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 60, getarity(result));
 
 	// --------------------
 	// Result should be a ListLink w/ 72 solutions
