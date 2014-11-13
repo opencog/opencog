@@ -390,8 +390,18 @@
         )
     )
     
-    (define (similar-1-to-n an-atom many-items)
-    	(any (lambda (an-item) (similar-1-to-1 an-atom an-item)) many-items)
+    (define (similar-n-to-nm many-atoms even-more-items)
+        (any
+            (lambda (many-items)
+                (let ((returned-list (map (lambda (an-atom an-item) (similar-1-to-1 an-atom an-item)) many-atoms many-items)))
+                    (if (every values returned-list)
+                        returned-list
+                        #f
+                    )
+                )
+            )
+            even-more-items
+        )
     )
     
     (define (similar-1-to-1 an-atom an-item)
@@ -413,7 +423,7 @@
                           (an-item-out-set-permute (gen-permutation (cog-outgoing-set an-item))))
                         ; greedily return the 1 premutation pairs that match
                         (any
-                            similar-1-to-n
+                            similar-n-to-nm
                             an-atom-out-set-permute
                             (make-list (length an-atom-out-set-permute) an-item-out-set-permute)
                         )
