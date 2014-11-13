@@ -441,14 +441,21 @@
     )
 
     ; two atoms are similar if their structures are exactly the same
-    (let ((results (similar-1-to-1 output-atom r2l-atom)))
+    (let ((results (similar-1-to-1 output-atom r2l-atom)))     
         ; if results exist
         (if results
-            ; greedily get the first mapping with name matches
-            (let ((name-matched-result (find (lambda (r) (find (lambda (m) (= (car m) 2)) r)) results)))
-                (if name-matched-result
-                    (map (lambda (a-pair) (cons (cog-handle (cddr a-pair)) (cog-handle (cadr a-pair)))) name-matched-result)
+            ; result of 1 node match
+            (if (not (pair? (caar results)))
+                (if (= (caar results) 2)
+                    (cons (cog-handle (cddar results)) (cog-handle (cadar results)))
                     '()
+                )
+                ; greedily get the first mapping with name matches
+                (let ((name-matched-result (find (lambda (r) (find (lambda (m) (= (car m) 2)) r)) results)))
+                    (if name-matched-result
+                        (map (lambda (a-pair) (cons (cog-handle (cddr a-pair)) (cog-handle (cadr a-pair)))) name-matched-result)
+                        '()
+                    )
                 )
             )
             '()
