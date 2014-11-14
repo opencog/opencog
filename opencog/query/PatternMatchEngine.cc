@@ -66,6 +66,14 @@ static inline void prtmsg(const char * msg, const Handle& h)
 #endif
 }
 
+/* ======================================================== */
+
+// At this time, we don't want groundings where variables ground
+// themselves.   However, there is a semi-plausible use-case for
+// this, see https://github.com/opencog/opencog/issues/1092
+// Undefine this to experiment. See also the unit tests.
+#define NO_SELF_GROUNDING 1
+
 /* Reset the current variable grounding to the last grounding pushed
  * onto the stack. */
 #define POPGND(soln,stack) {         \
@@ -131,9 +139,11 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	// of the bound variables. If so, then declare a match.
 	if (not in_quote and _bound_vars.end() != _bound_vars.find(hp))
 	{
+#ifdef NO_SELF_GROUNDING
 		// But... if handle hg happens to also be a bound var,
 		// then its a mismatch.
 		if (_bound_vars.end() != _bound_vars.find(hg)) return true;
+#endif
 
 		// If we already have a grounding for this variable, the new
 		// proposed grounding must match the existing one. Such multiple
@@ -150,6 +160,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		      "ERROR: expected variable to be a node, got this: %s\n",
 				hp->toShortString().c_str());
 
+#ifdef NO_SELF_GROUNDING
 		// Disalllow matches that contain a bound variable in the
 		// grounding. However, a bound variable can be legitimately
 		// grounded by a free variable (because free variables are
@@ -159,6 +170,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		{
 			return true;
 		}
+#endif
 
 		// Else, we have a candidate grounding for this variable.
 		// The node_match may implement some tighter variable check,
@@ -177,6 +189,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	// ... but only hp is a constant i.e. contains no bound variables)
 	if (hp == hg)
 	{
+#ifdef NO_SELF_GROUNDING
 		if (hg == curr_pred_handle)
 		{
 			if (any_variable_in_tree(hg, _bound_vars)) return true;
@@ -193,6 +206,9 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			}
 			return false;
 		}
+#else
+		return false;
+#endif
 	}
 
 	// If both are links, compare them as such.
@@ -202,6 +218,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	LinkPtr lg(LinkCast(hg));
 	if (lp and lg)
 	{
+#ifdef NO_SELF_GROUNDING
 		// The proposed grounding must NOT contain any bound variables!
 		// .. unless they are quoted in the pattern, in which case they
 		// are allowed... well, not just allowed, but give the right
@@ -230,6 +247,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 				}
 			}
 		}
+#endif
 
 		// Let the callback perform basic checking.
 		bool mismatch = pmc->link_match(lp, lg);
