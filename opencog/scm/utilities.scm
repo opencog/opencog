@@ -37,6 +37,7 @@
 ; -- cog-get-pred -- Find all EvaluationLinks of given form.
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
+; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
 ;
 ;
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -916,6 +917,7 @@
 'cog-get-reference
 'filter-hypergraph
 'cartesian-prod
+'cartesian-prod-list-only
 ))
 
 ; Compile 'em all.  This should improve performance a bit.
