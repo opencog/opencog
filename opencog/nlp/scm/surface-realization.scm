@@ -451,6 +451,7 @@
               )
           )
          )
+        (set! results (map flatten results))
         ; if results exist
         (if results
             ; greedily get the first mapping with name matches
