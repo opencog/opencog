@@ -441,7 +441,7 @@
     )
 
     ; two atoms are similar if their structures are exactly the same
-    (letrec ((results (filter (negate not) (similar-1-to-1 output-atom r2l-atom)))
+    (letrec ((results (similar-1-to-1 output-atom r2l-atom))
           (flatten
               (lambda (x)
                   (cond ((null? x) '())
@@ -451,7 +451,11 @@
               )
           )
          )
-        (set! results (map flatten results))
+         
+        (if results
+            (set! results (map flatten (filter (negate not) results)))
+        )
+        
         ; if results exist
         (if results
             ; greedily get the first mapping with name matches
