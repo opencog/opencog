@@ -162,6 +162,7 @@ class PatternMatchCallback
 		 */
 		virtual bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h)
 		{
+			//	if (pattrn_link_h == grnd_link_h) return true;
 			return false;
 		}
 

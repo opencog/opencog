@@ -139,7 +139,12 @@ void MatchLink::test_exec(void)
 	// There are currently four arity-2 associative-links in the atomspace...
 	result = bindlink(as, untyped_any_match);
 	logger().debug("untyped-any-match is: \n%s\n", SchemeSmob::to_string(result).c_str());
+#define NO_SELF_GROUNDING 1
+#ifdef NO_SELF_GROUNDING
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 9, getarity(result));
+#else
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 10, getarity(result));
+#endif
 
 	// There's just one arity-2 associative-link with MemberLink in second place.
 	result = bindlink(as, typed_memb_link_match);

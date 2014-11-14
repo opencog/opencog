@@ -35,14 +35,16 @@
 	)
 )
 
-;; This should match in 4! + 4! + 4! = 72 different ways, with 4! for
-;; the xyzw permuations, and another 4! for the pqr-set permuations,
-;; and another 4! for the abc-set.
+;; This should match in 4! + (6+6+6) + (6+6+6) = 60 different ways,
+;; with 4! for the xyzw permuations, and (6+6+6)=18 for the pqr-set
+;; permuations, and another (6+6+6)=18 for the abc-set.
 (define (exhaust)
    (BindLink
       ;; variable decls
       (ListLink
-         (VariableNode "$a")
+         (TypedVariableLink
+            (VariableNode "$a")
+            (VariableTypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
          (VariableNode "$d")
@@ -81,7 +83,9 @@
    (BindLink
       ;; variable decls
       (ListLink
-         (VariableNode "$a")
+         (TypedVariableLink
+            (VariableNode "$a")
+            (VariableTypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
          (VariableNode "$d")
@@ -127,7 +131,9 @@
    (BindLink
       ;; variable decls
       (ListLink
-         (VariableNode "$a")
+         (TypedVariableLink
+            (VariableNode "$a")
+            (VariableTypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
          (VariableNode "$d")
@@ -172,7 +178,9 @@
    (BindLink
       ;; variable decls
       (ListLink
-         (VariableNode "$a")
+         (TypedVariableLink
+            (VariableNode "$a")
+            (VariableTypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
          (VariableNode "$d")
@@ -215,7 +223,9 @@
    (BindLink
       ;; variable decls
       (ListLink
-         (VariableNode "$a")
+         (TypedVariableLink
+            (VariableNode "$a")
+            (VariableTypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
       )
@@ -280,7 +290,9 @@
    (BindLink
       ;; variable decls
       (ListLink
-         (VariableNode "$a")
+         (TypedVariableLink
+            (VariableNode "$a")
+            (VariableTypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c1")
          (VariableNode "$c2")
@@ -326,7 +338,9 @@
    (BindLink
       ;; variable decls
       (ListLink
-         (VariableNode "$a")
+         (TypedVariableLink
+            (VariableNode "$a")
+            (VariableTypeNode "ConceptNode"))
          (VariableNode "$b1")
          (VariableNode "$b2")
          (VariableNode "$c1")

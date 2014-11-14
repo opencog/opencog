@@ -164,8 +164,14 @@ void LoopPatternUTest::test_prep(void)
 	// Result should be a ListLink
 	Handle result = imply(as, imlink);
 
+#define NO_SELF_GROUNDING 1
+#ifdef NO_SELF_GROUNDING
 	// Expect three answers.
 	TSM_ASSERT_EQUALS("incorrect arity", as->getArity(result), 3);
+#else
+	// Expect five answers.
+	TSM_ASSERT_EQUALS("incorrect arity", as->getArity(result), 5);
+#endif
 
 	// Check that each answer gives the loop in cyclic order.
 	verify (getlink(result, 0));
