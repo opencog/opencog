@@ -374,18 +374,12 @@
 (define (get-mapping output-atom r2l-atom)
     ; helper function to generate permutation
     (define (gen-permutation lst)
-        (cond
-            ((= (length lst) 1)
-             (cons lst '())
-            )
-            (else
-             (apply append 
-                 ; pick each item in lst as head in turn, and generate permutation without the head for the rest
-                 (map
-                     (lambda (head) (map (lambda (rest) (cons head rest)) (gen-permutation (delete head lst))))
-                     lst
-                 )
-             )
+        (if (= (length lst) 1)
+            (cons lst '())
+            ; pick each item in lst as head in turn, and generate permutation without the head for the rest
+            (append-map
+                (lambda (head) (map (lambda (rest) (cons head rest)) (gen-permutation (delete head lst))))
+                lst
             )
         )
     )
@@ -395,9 +389,11 @@
             ; filter away permutation that cannot be matched completely
             (filter-map
                 (lambda (many-items)
-                    (let ((returned-list-of-lists
-                            (cartesian-prod (map (lambda (an-atom an-item) (similar-1-to-1 an-atom an-item)) many-atoms many-items))))
-                        (find-tail (negate null?) (filter (lambda (x) (every values x)) returned-list-of-lists))
+                    (let ((returned-list-of-lists (map (lambda (an-atom an-item) (similar-1-to-1 an-atom an-item)) many-atoms many-items)))
+                        (if (every values returned-list-of-lists)
+                            (cartesian-prod-list-only returned-list-of-lists)
+                            #f
+                        )
                     )
                 )
                 even-more-items
@@ -430,9 +426,13 @@
                             )
                         )
                     )
-                    (let ((returned-list-of-lists
-                            (cartesian-prod (map similar-1-to-1 (cog-outgoing-set an-atom) (cog-outgoing-set an-item)))))
-                        (find-tail (negate null?) (filter (lambda (x) (every values x)) returned-list-of-lists))
+                    (let ((returned-list-of-lists (map similar-1-to-1 (cog-outgoing-set an-atom) (cog-outgoing-set an-item))))
+                        ; if all atoms can be matched
+                        (if (every values returned-list-of-lists)
+                            ; spread all possible ways each atom can be matched in all combination
+                            (cartesian-prod-list-only returned-list-of-lists)
+                            #f
+                        )
                     )
                 )
                 #f
@@ -441,21 +441,23 @@
     )
 
     ; two atoms are similar if their structures are exactly the same
-    (let ((results (similar-1-to-1 output-atom r2l-atom)))     
+    (letrec ((results (filter (negate not) (similar-1-to-1 output-atom r2l-atom)))
+          (flatten
+              (lambda (x)
+                  (cond ((null? x) '())
+                        ((number? (car x)) (list x))
+                        (else (append-map flatten x))
+                  )
+              )
+          )
+         )
         ; if results exist
         (if results
-            ; result of 1 node match
-            (if (not (pair? (caar results)))
-                (if (= (caar results) 2)
-                    (cons (cog-handle (cddar results)) (cog-handle (cadar results)))
+            ; greedily get the first mapping with name matches
+            (let ((name-matched-result (find (lambda (r) (find (lambda (m) (= (car m) 2)) r)) results)))
+                (if name-matched-result
+                    (map (lambda (a-pair) (cons (cog-handle (cddr a-pair)) (cog-handle (cadr a-pair)))) name-matched-result)
                     '()
-                )
-                ; greedily get the first mapping with name matches
-                (let ((name-matched-result (find (lambda (r) (find (lambda (m) (= (car m) 2)) r)) results)))
-                    (if name-matched-result
-                        (map (lambda (a-pair) (cons (cog-handle (cddr a-pair)) (cog-handle (cadr a-pair)))) name-matched-result)
-                        '()
-                    )
                 )
             )
             '()
