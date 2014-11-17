@@ -510,12 +510,18 @@
         )
     )
 
-    ; Replaces the WordInstanceNodes with names matching the name of the car atom
+    ; Replaces the WordInstanceNodes with the corresponding R2L node matching the car atom
     ; with the clean name of the cdr of the pair
     (define (replace-word! r2l-sntc a-pair)
-        (let ((an-index (list-index (lambda (x)
-                    (if (cog-atom? x)
-                        (equal? (cog-name (cog-atom (car a-pair))) (cog-name x)) #f)) r2l-sntc))
+        (let ((an-index (list-index
+                (lambda (x)
+                    (if (and (cog-atom? x) (not (null? (word-get-r2l-node x))))
+                        ; check if the WordInstanceNode corresponds to the R2L node we want to replace
+                        (equal? (cog-handle (word-get-r2l-node x)) (car a-pair))
+                        #f
+                    )
+                )
+                r2l-sntc))
             )
             (if (number? an-index)
                 (begin
