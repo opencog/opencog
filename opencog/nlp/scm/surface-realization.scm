@@ -489,25 +489,35 @@
     )
 
     ; Takes a pair input structured as the handles of (r2l-SetLink . (output-link1 output-link2))
-    ; and returns a list of lists, containing pairs of (r2l-node . output-node)
-    ; handles. This is the function that should be edited to gain multiple possible
-    ; output per r2l-SetLink.
-    ; TODO: 1. have to remove tag atoms while mapping.
-    ;       2. When there is muliple mapping for a r2l-node merge them to a list so as multiple alternative
-    ;        sentences could be generated . OR , make a choice of the most likely pair.
+    ; and returns a list of lists, each list is a complete mapping containing multiple pairs of
+    ; (r2l-node . output-node) handles.
+    ; TODO: have to remove tag atoms while mapping.
     (define (get-mapping-pair a-pair)
-
-        (let
-            ((r2l-set (remove is-abstraction? (cog-outgoing-set (cog-atom (car a-pair)))))
-            )
-            (delete-duplicates (list-squash
-                   (par-map (lambda (x)
-                        (remove null?
-                        (append-map get-mapping (make-list (length r2l-set) (cog-atom x)) r2l-set))
-                        ) (cdr a-pair)
-                    ) '() )
+        (define r2l-set (remove is-abstraction? (cog-outgoing-set (cog-atom (car a-pair)))))
+        (define all-mappings
+            (par-map (lambda (x)
+                (remove null?
+                    (map get-mapping (make-list (length r2l-set) (cog-atom x)) r2l-set))
+                )
+                (cdr a-pair)
             )
         )
+        
+        ; TODO: keep partial mapping by removing the repeated replacement, instead of removing the whole mapping
+        (define (check-mapping a-complete-mapping)
+            ; allow same mapping of nodes (the same node get replaced with the same word) across different link-mapping
+            (define a-complete-mapping-clean (delete-duplicates (apply append a-complete-mapping)))
+            (define all-r2l-nodes (map car a-complete-mapping-clean))
+            (= (length all-r2l-nodes) (length (delete-duplicates all-r2l-nodes))) 
+        )
+        
+        ; for each output-link with multiple mapping, generate all combinations with other output-link's mappings
+        ; and remove any combinations where the same r2l node get replaced more than once by different words
+        (define all-combinations
+            (filter check-mapping (cartesian-prod-list-only all-mappings))
+        )
+
+        (map (lambda (x) (apply append x)) all-combinations)
     )
 
     ; Replaces the WordInstanceNodes with the corresponding R2L node matching the car atom
@@ -532,6 +542,13 @@
             )
         )
     )
+    
+    (define (replace-with-mapping mapping sntc)
+        (define sntc-clone (list-copy sntc))
+        (map-in-order (lambda (x) (replace-word! sntc-clone x)) mapping)
+        sntc-clone
+    )
+    
 
     ; Returns a random merge of possible sentences that can be formed from one r2l SetLink
     ; TODO : Ranking of all possible alternative.
@@ -540,12 +557,15 @@
     (define (chunk a-pair)
         (if (equal? (car a-pair) "NO_PATTERN")
             '()
-            (let ((mapping (get-mapping-pair a-pair)) (sntc (get-sntc (cog-atom (car a-pair)))))
-                 (map-in-order (lambda (x) (replace-word! sntc x)) mapping)
-                 (list sntc (- (length (cdr a-pair)) output-set-len))
+            (let ((mappings (get-mapping-pair a-pair)) (sntc (get-sntc (cog-atom (car a-pair)))))
+                (let ((all-results (map replace-with-mapping mappings (make-list (length mappings) sntc)))
+                      (common-weight (- (length (cdr a-pair)) output-set-len))
+                     )
+                    (map (lambda (r) (list r common-weight)) all-results)
+                )
             )
         )
     )
-    (unzip2 (remove null? (map chunk dict)))
+    (unzip2 (remove null? (append-map chunk dict)))
 )
 
