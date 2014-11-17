@@ -37,6 +37,7 @@
 ; -- cog-get-pred -- Find all EvaluationLinks of given form.
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
+; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
 ;
 ;
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -837,6 +838,38 @@
 )
 
 ; ---------------------------------------------------------------------
+; cartesian-prod-list-only -- Alternative version of cartesian-prod.
+;
+; Similar to cartesian-prod, but everything in 'tuple-of-lists' must be
+; a list.  ie. cannot do (cartesian-prod-list-only (list 'p 'q))
+;
+; The different in this version is that given the input '(((1) (2)) ((3)))
+; the above version returns (((1) 3)) ((2) 3)), but this version returns
+; (((1) (3)) ((2) (3))).
+;
+(define (cartesian-prod-list-only tuple-of-lists)
+	(fold-right
+		; lst1: one of the list in the tuple
+		; lst2: cartesian product of the rest
+        	(lambda (lst1 lst2)
+        		; choose each item in lst1 as 'head', and add it to the cartesian product of lst2
+			(append-map
+				(lambda (head)
+					(if (null? lst2)
+						(list (cons head '()))
+						(map (lambda (rest-in-cart) (cons head rest-in-cart)) lst2)
+					)
+				)
+				lst1
+			)
+        	)
+		'()
+		tuple-of-lists
+	)
+)
+
+
+; ---------------------------------------------------------------------
 
 ; A list of all the public (exported) utilities in this file
 (define cog-utilities (list
@@ -884,6 +917,7 @@
 'cog-get-reference
 'filter-hypergraph
 'cartesian-prod
+'cartesian-prod-list-only
 ))
 
 ; Compile 'em all.  This should improve performance a bit.

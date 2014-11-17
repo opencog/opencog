@@ -276,48 +276,17 @@
 
 ; It will return a list  of atoms that are similar. Similar links are atoms that are of the
 ; same type , have the same subgraph and have part of the node name match for
-; at least one atom. This only work first-order links. Similar nodes are atoms
-; that have similar type and naming. A similar name is a name that matches before
-; UUID or other indexes or index markers. For e.g.,
+; at least one atom. Similar nodes are atoms that have similar type and naming. A similar
+; name is a name that matches before UUID or other indexes or index markers. For e.g.,
 ;   (WordInstanceNode "sentence@1ba8b794-93ba-47d9-93f4-a0db91dfc9d4")
 ;   (WordInstanceNode "sentence")
 ; * 'atom' : is the atom for which similar atoms are being searched for.
 ; * 'lst' : is the list of atoms being checked for similarity.
 (define (similar-atoms atom lst)
-    (define (similar-node? node)
-        (and (equal? (cog-type node) (cog-type atom))
-            (cog-name-match (make-regexp (cog-name-clean atom) regexp/icase) node)
-        )
-    )
-    (define (similar-link? link)
-        (let ((link-out-set (cog-outgoing-set link))
-                (atom-out-set (cog-outgoing-set atom)))
-            (and (equal? (cog-type link) (cog-type atom))
-                (not (null?
-                    (append-map similar-atoms atom-out-set (make-list (length atom-out-set) link-out-set))))
-            )
-        )
-    )
-    (cond
-        ((cog-node? atom) (filter-hypergraph similar-node? lst))
-        ((cog-link? atom) (remove (negate similar-link?) lst))
-    )
-)
-
-
-; Returns #t if node1 and node2 are equivalent. The Nodes are equivalent if
-; they are of the same type and have similar names. A similar name is a name
-; that matches before UUID or other indexes or index markers.
-; * 'node1' : node with a name being used for matching.
-; * 'node2' ; node which is being checked if it has a name which matchs node1's name.
-(define (eqv-node? node1 node2)
-    (if
-        (and (equal? (cog-type node1) (cog-type node2))
-            (cog-name-match (make-regexp (cog-name-clean node1) regexp/icase) node2)
-        )
-        #t
-        #f
-    )
+    (define result (map get-mapping (make-list (length lst) atom) lst))
+    
+    ; if there's a mapping, they are similar
+    (filter-map (lambda (r l) (if (null? r) #f l)) result lst)
 )
 
 ; Returns SetLinks associated with the dialogue system
@@ -340,7 +309,7 @@
 ; Should one want to define a different criteria for changes can be made here.
 (define (filter-dialogue-sets an-atom)
     (delete '()
-        (par-map (lambda (x) (if (null? (similar-atoms an-atom (cog-outgoing-set x))) '() x)
+        (par-map (lambda (x) (if (null? (similar-atoms an-atom (remove is-abstraction? (cog-outgoing-set x)))) '() x)
                  ) (get-dialogue-sets)
         )
     )
@@ -403,51 +372,106 @@
 )
 
 ; Returns a pair of atom handles structured as (r2l-node . output-node) provided
-; they are equivalent as in (eqv-node? arg1 arg2).
+; they are equivalent in structure and contains a node with matching name.
 ; or an empty list other wise.
 ; * 'output-atom' : It is a link we want to surealize
 ; * 'r2l-atom' ; It is a link we are using for extracting relations between words.
 (define (get-mapping output-atom r2l-atom)
-    (if (equal? (cog-type output-atom) (cog-type r2l-atom))
-        (cond
-            ((cog-node? output-atom)
-                (if (eqv-node? output-atom r2l-atom)
-                    (cons (cog-handle r2l-atom) (cog-handle output-atom))
-                    'not-eqv-node
-                )
-            )
-            ((cog-link? output-atom)
-                ; if the arity of the links are equal then assuming that the order
-                ; of the nodes is associated with the property/functionality of
-                ; of the node with in the language, a mapping is made. If the
-                ; arity are not equal then a mapping of equvalent-nodes is only made.
-                (if (equal? (cog-arity output-atom) (cog-arity r2l-atom))
-                        (map
-                            (lambda (x y)
-                                (let ((mapping (get-mapping x y)))
-                                    (if (equal? mapping 'not-eqv-node)
-                                        (cons (cog-handle y) (cog-handle x))
-                                        mapping
-                                    )
-                                )
-                            )
-                            (cog-outgoing-set output-atom) (cog-outgoing-set r2l-atom)
-                        )
-                        (remove null? (map
-                            (lambda (x y)
-                                (let ((mapping (get-mapping x y)))
-                                    (if (equal? mapping 'not-eqv-node)
-                                        '()
-                                        mapping
-                                    )
-                                )
-                            )
-                            (cog-outgoing-set output-atom) (cog-outgoing-set r2l-atom)
-                        ))
-                )
+    ; helper function to generate permutation
+    (define (gen-permutation lst)
+        (if (= (length lst) 1)
+            (cons lst '())
+            ; pick each item in lst as head in turn, and generate permutation without the head for the rest
+            (append-map
+                (lambda (head) (map (lambda (rest) (cons head rest)) (gen-permutation (delete head lst))))
+                lst
             )
         )
-        '()
+    )
+    
+    (define (similar-n-to-nm many-atoms even-more-items)
+        (apply append
+            ; filter away permutation that cannot be matched completely
+            (filter-map
+                (lambda (many-items)
+                    (let ((returned-list-of-lists (map (lambda (an-atom an-item) (similar-1-to-1 an-atom an-item)) many-atoms many-items)))
+                        (if (every values returned-list-of-lists)
+                            (cartesian-prod-list-only returned-list-of-lists)
+                            #f
+                        )
+                    )
+                )
+                even-more-items
+            )
+        )
+    )
+    
+    (define (similar-1-to-1 an-atom an-item)
+        (if (cog-node? an-atom)
+            ; return something here to indicate when a node type is matched + and when the name also matches
+            (if (equal? (cog-type an-atom) (cog-type an-item))
+                (if (cog-name-match (make-regexp (cog-name-clean an-atom) regexp/icase) an-item)
+                    (list (cons 2 (cons an-atom an-item)))  ; type and name matched
+                    (list (cons 1 (cons an-atom an-item)))  ; only type matched
+                )
+                #f
+            )
+            (if (and (= (cog-arity an-atom) (cog-arity an-item)) (equal? (cog-type an-atom) (cog-type an-item)))
+                ; need special handling of unordered-links
+                (if (cog-subtype? 'UnorderedLink (cog-type an-atom))
+                    ; check all possible orders of an-atom's outgoing-set against all possible orders of
+                    ; an-item's outgoing-set, since each atom in the outgoing-set could be of different type
+                    (let ((an-atom-out-set-permute (gen-permutation (cog-outgoing-set an-atom)))
+                          (an-item-out-set-permute (gen-permutation (cog-outgoing-set an-item))))
+                        (apply append
+                            (map
+                                similar-n-to-nm
+                                an-atom-out-set-permute
+                                (make-list (length an-atom-out-set-permute) an-item-out-set-permute)
+                            )
+                        )
+                    )
+                    (let ((returned-list-of-lists (map similar-1-to-1 (cog-outgoing-set an-atom) (cog-outgoing-set an-item))))
+                        ; if all atoms can be matched
+                        (if (every values returned-list-of-lists)
+                            ; spread all possible ways each atom can be matched in all combination
+                            (cartesian-prod-list-only returned-list-of-lists)
+                            #f
+                        )
+                    )
+                )
+                #f
+            )
+        )
+    )
+
+    ; two atoms are similar if their structures are exactly the same
+    (letrec ((results (similar-1-to-1 output-atom r2l-atom))
+          (flatten
+              (lambda (x)
+                  (cond ((null? x) '())
+                        ((number? (car x)) (list x))
+                        (else (append-map flatten x))
+                  )
+              )
+          )
+         )
+         
+        (if results
+            (set! results (map flatten (filter (negate not) results)))
+        )
+        
+        ; if results exist
+        (if results
+            ; greedily get the first mapping with name matches
+            (let ((name-matched-result (find (lambda (r) (find (lambda (m) (= (car m) 2)) r)) results)))
+                (if name-matched-result
+                    (map (lambda (a-pair) (cons (cog-handle (cddr a-pair)) (cog-handle (cadr a-pair)))) name-matched-result)
+                    '()
+                )
+            )
+            '()
+        )
     )
 )
 
