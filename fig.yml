@@ -1,0 +1,28 @@
+# This would be used for building a docker image with all dependencies installed
+# for developement purposes.
+
+# To install fig use the following command `sudo pip install fig`
+
+# Workflow :
+# > fig build # when starting or when there is a dependecy change
+# > fig run opencog
+# > mkdir build
+# > .... # build and do your thing :-)
+# > exit # when finished
+# > fig run opencog # next time you start doing your thing.
+
+# TODO: 1. add relex linking
+#       2. add PostgreSQL linking
+#       3. add visualizer linking
+#       4. add options for using gui tools within Containers
+#       5. test with vagrant's docker provider/provisioner on Mac and Windows
+
+opencog:
+    build: .
+    ports: # syntax is host:container
+    - "5000:5000" # rest api port
+    - "17001:17001"
+    volumes:
+    - .:/home/opencog
+    command: /bin/bash
+
