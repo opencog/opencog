@@ -24,21 +24,27 @@
 		(SetLink (get-utterance-link ut atoms) atoms)
 	)
 
-	; initialize the sentence forms as needed
-	(microplanning-init)
+	(cond ((equal? 'SequentialAndLink (cog-type seq-link))
+		; initialize the sentence forms as needed
+		(microplanning-init)
 	
-	; get the best chunking result, and store the utterance type of each individual chunk
-	(set-values! (chunks-utterance-type chunks) (make-sentence-chunks (cog-outgoing-set seq-link) utterance-type))
+		; get the best chunking result, and store the utterance type of each individual chunk
+		(set-values! (chunks-utterance-type chunks) (make-sentence-chunks (cog-outgoing-set seq-link) utterance-type))
 	
-	(cond ((not (null? chunks))
-		; insert anaphora
-		(set! chunks (insert-anaphora chunks (map get-sentence-forms chunks-utterance-type)))
+		(cond ((not (null? chunks))
+			; insert anaphora
+			(set! chunks (insert-anaphora chunks (map get-sentence-forms chunks-utterance-type)))
 		
-		; wrap SetLink around each chunk for Surface Realization
-		(map wrap-setlink chunks chunks-utterance-type)
+			; wrap SetLink around each chunk for Surface Realization
+			(map wrap-setlink chunks chunks-utterance-type)
+		      )
+		      (else
+			#f
+		      )
+		)
 	      )
 	      (else
-		#f
+		(scm-error 'wrong-type-arg "microplanning" "Wrong type (expecting SequentialAndLink): ~A" (list seq-link) (list seq-link))
 	      )
 	)
 )
@@ -71,7 +77,7 @@
 					(cons ut curr-uts)
 				)
 			      )
-			      (else
+			      ((not (null? curr-chunks))
 				; unable to form more chunks, store the created chunks & their corresponding utterance-type
 				(set! all-comb (cons curr-chunks all-comb))
 				(set! all-comb-utterance-type (cons curr-uts all-comb-utterance-type))
