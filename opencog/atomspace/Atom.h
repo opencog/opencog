@@ -268,8 +268,18 @@ public:
     size_t getIncomingSetSize();
 
     //! Return the incoming set of this atom.
+    //! The resulting incoming set consists of strong pointers,
+    //! that is, to valid, non-null handles that were part of the
+    //! incoming set at the time this call was made.
     IncomingSet getIncomingSet();
 
+    //! Place incoming set into STL container of Handles.
+    //! Example usage:
+    //!     std::vector<Handle> hvect;
+    //!     atom->getIncomingSet(back_inserter(hvect));
+    //! The resulting vector hvect will contain only valid handles
+    //! that were actually part of the incoming set at the time of
+    //! the call to this function.
     template <typename OutputIterator> OutputIterator
     getIncomingSet(OutputIterator result)
     {
