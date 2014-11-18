@@ -8,4 +8,5 @@ COPY scripts/ocpkg scripts/install-dependencies-trusty /tmp/
 RUN chmod +x /tmp/install-dependencies-trusty
 RUN /tmp/install-dependencies-trusty
 
-WORKDIR /home/dev
+WORKDIR /home/opencog
+CMD bash
