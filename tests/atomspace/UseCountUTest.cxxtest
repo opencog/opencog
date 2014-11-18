@@ -1,0 +1,221 @@
+/*
+ * tests/atomspace/UseCountUTest.cxxtest
+ *
+ * Copyright (C) 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * Written by Linas Vepstas <linasvepstas@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <algorithm>
+#include <atomic>
+#include <thread>
+
+#include <math.h>
+#include <string.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/platform.h>
+#include <opencog/util/Config.h>
+
+using namespace opencog;
+using namespace std;
+
+class UseCountUTest :  public CxxTest::TestSuite
+{
+private:
+
+    AtomSpace *atomSpace;
+    Handle anchor;
+
+    // Counters must be atomic; we are incrementing them inside threads
+    std::atomic_int __totalAdded;
+    std::atomic_int __totalRemoved;
+    std::atomic_int __finished;
+
+    int n_threads;
+    int n_removal_threads;
+    int num_atoms;
+    bool spinwait;
+    std::vector<int> rm_cnt;
+    std::vector<int> rm_cycles;
+
+public:
+    UseCountUTest()
+    {
+        // Current atomspace can to 50K or 100K atoms/sec, so the
+        // below should run for at least 2 to 5 seconds each time.
+        n_threads = 20;
+        n_removal_threads = 3;
+        rm_cnt.resize(n_removal_threads, 0);
+        rm_cycles.resize(n_removal_threads, 0);
+        num_atoms = 13000;
+        logger().setLevel(Logger::INFO);
+        logger().setPrintToStdoutFlag(true);
+    }
+
+    void setUp()
+    {
+        atomSpace = new AtomSpace();
+    }
+
+    void tearDown()
+    {
+        delete atomSpace;
+    }
+
+    // =================================================================
+
+    void threadedLinkAdd(int thread_id, int N)
+    {
+        // Create Lots of the following structures:
+        //
+        //    ListLink
+        //        AnchorNode "the anchor"
+        //        ConceptNode "some value"
+        //
+        for (int i = 0; i < N; i++) {
+            std::ostringstream oss;
+            oss << "thread " << thread_id << " node " << i;
+
+            Handle n = atomSpace->addNode(CONCEPT_NODE, oss.str());
+
+            Type t = LIST_LINK;
+            atomSpace->addLink(t, anchor, n);
+            __totalAdded += 2;
+        }
+        __finished ++;
+    }
+
+    void threadedLinkRemove(int thread_id)
+    {
+        // Remove all of the following structures, leaving behind
+        // only the anchor:
+        //
+        //    ListLink
+        //        AnchorNode "the anchor"
+        //        ConceptNode "some value"
+        //
+
+        while (true)
+        {
+            IncomingSet iset = anchor->getIncomingSet();
+            size_t isz = iset.size();
+            // Don't do them all at once; thrash around a bit.
+            // This wastes a lot of CPU, BTW.
+            isz = std::min(isz, 2010UL);  // thrash around
+            for (size_t i = 0; i < isz; i++) {
+                Handle n = iset[i]->getOutgoingAtom(1);
+
+                atomSpace->removeAtom(n);
+                atomSpace->removeAtom(Handle(iset[i]));
+                rm_cnt[thread_id] += 2;
+                __totalRemoved += 2;
+            }
+            if (0 == isz and __finished >= n_threads) break;
+            rm_cycles[thread_id] ++;
+        }
+    }
+
+    // The goal of this test case is to verify that the std c++11x
+    // smart pointers really are working as designed, and that we
+    // are using them correctly. This is done by trying to thrash
+    // the use count on one atom as hard as possible: the 'anchor'
+    // node.  Its going to get half-a-million or more atoms pointing
+    // to it, which are then removed, from lots of different threads.
+    // Despite this, the use count should stay correct.
+    void testUseCount()
+    {
+        // reset the counts
+        __totalAdded = 0;
+        __totalRemoved = 0;
+        __finished = 0;
+
+        anchor = atomSpace->addNode(ANCHOR_NODE, "*** The Anchor ***");
+        __totalAdded++;
+
+        long int initial_use_count = AtomPtr(anchor).use_count();
+        std::cout << std::endl;
+        std::cout << "Initial anchor use count=" << initial_use_count << std::endl;
+        size_t isize = atomSpace->getSize();
+        std::cout << "Initial atomspace size: " << isize << std::endl;
+
+        // Add lotsa links
+        std::vector<std::thread> thread_pool;
+        for (int i=0; i < n_threads; i++) {
+            thread_pool.push_back(
+                std::thread(&UseCountUTest::threadedLinkAdd, this, i, num_atoms));
+        }
+
+        // Remove lotsa links, using only 3 threads
+        for (int i=0; i < n_removal_threads; i++) {
+            thread_pool.push_back(
+                std::thread(&UseCountUTest::threadedLinkRemove, this, i));
+        }
+
+        // Wait for it all to come together.
+        for (std::thread& t : thread_pool) t.join();
+
+        long int final_use_count = AtomPtr(anchor).use_count();
+        std::cout << "Final anchor use count=" << final_use_count << std::endl;
+        size_t fsize = atomSpace->getSize();
+        std::cout << "Final atomspace size: " << fsize << std::endl;
+
+        std::cout << "Total addded: " << __totalAdded << std::endl;
+        std::cout << "Total removed: " << __totalRemoved << std::endl;
+
+        int changed = __totalRemoved - __totalAdded;
+        std::cout << "Total excess remove: " << changed << std::endl;
+
+        int rmtot = 0;
+        for (int i=0; i < n_removal_threads; i++) {
+            std::cout << "Thread " << i << " removed: " << rm_cnt[i]
+                      << " over " << rm_cycles[i] << " cycles" << std::endl;
+            rmtot += rm_cnt[i];
+        }
+
+        // The two different ways of counting should agree.
+        std::cout << "Total removed:" << rmtot << std::endl;
+        TS_ASSERT_EQUALS((int) __totalRemoved, rmtot);
+
+        // We should get only 1 atom, the anchor node itself
+        TS_ASSERT_EQUALS(isize, 1);
+        TS_ASSERT_EQUALS(fsize, 1);
+
+        // Initial and final use counts for the anchor should be identical.
+        TS_ASSERT_EQUALS(initial_use_count, final_use_count);
+
+        // The incoming set for the anchor should be zero...
+        TS_ASSERT_EQUALS(anchor->getIncomingSetSize(), 0);
+
+        // Total number of atoms added should equal n_threads*num_toms+1
+        // since each and every atom should have been unique (given its
+        // node name) 
+        TS_ASSERT_EQUALS((int) __totalAdded, 2*n_threads*num_atoms +1);
+
+        // The number removed should be greater than the number added.
+        // Why? Because multiple threads fetch the incoming set at once,
+        // each fetch could contain atoms that other threads are in the
+        // process of removing.  So, in general, there will be a lot of
+        // overlap in the remove sequences.
+        TS_ASSERT_LESS_THAN_EQUALS((int) __totalAdded, (int)__totalRemoved);
+    }
+
+    // =================================================================
+};
