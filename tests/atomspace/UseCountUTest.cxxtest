@@ -50,6 +50,7 @@ class UseCountUTest :  public CxxTest::TestSuite
 private:
 
     AtomSpace *atomSpace;
+    Handle anchor;
 
     // Counters must be atomic; we are incrementing them inside threads
     std::atomic_size_t __totalAdded;
@@ -83,42 +84,32 @@ public:
 
     void threadedLinkAdd(int thread_id, int N)
     {
-        static int bogus = 0;
-
+        // Create Lots of the following structures:
+        //
+        //    ListLink
+        //        AnchorNode "the anchor"
+        //        ConceptNode "some value"
+        //
         for (int i = 0; i < N; i++) {
             std::ostringstream oss;
-            oss << "thread -1 node " << i;
+            oss << "thread " << thread_id << " node " << i;
 
-            HandleSeq hs;
-            atomSpace->getHandlesByName(back_inserter(hs), oss.str(), NODE);
-            TS_ASSERT_EQUALS(hs.size(), 1); 
-            Handle ha = hs[0];
-
-            std::ostringstream ossb;
-            ossb << "thread -1 node " << (2*i) % N;
-
-            HandleSeq hsb;
-            atomSpace->getHandlesByName(back_inserter(hsb), ossb.str(), NODE);
-            TS_ASSERT_EQUALS(hsb.size(), 1); 
-
-            bogus ++;
-            bogus %= N;
-
-            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
+            Handle n = atomSpace->addNode(CONCEPT_NODE, oss.str());
 
             Type t = LIST_LINK;
-            hs.push_back(ha);
-            atomSpace->addLink(t, hs, tv); 
+            atomSpace->addLink(t, anchor, n); 
         }
     }
 
-    void testLinkAdd()
+    void testUseCount()
     {
-        // Use the earlier test for atomspace setup.
-        // testThreadedSignals();
-
         // reset the counts
         __totalAdded = 0;
+
+        anchor = atomSpace->addNode(ANCHOR_NODE, "*** The Anchor ***");
+        __totalAdded++;
+        long int initial_use_count = AtomPtr(anchor).use_count();
+        std::cout << "Initial anchor use count=" << initial_use_count << std::endl;
 
         // Add lotsa links
         std::vector<std::thread> thread_pool;
