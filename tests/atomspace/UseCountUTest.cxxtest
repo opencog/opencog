@@ -29,14 +29,8 @@
 #include <math.h>
 #include <string.h>
 
-#include <boost/bind.hpp>
-
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/RandGen.h>
-#include <opencog/util/mt19937ar.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/Config.h>
 
@@ -53,18 +47,23 @@ private:
     Handle anchor;
 
     // Counters must be atomic; we are incrementing them inside threads
-    std::atomic_size_t __totalAdded;
+    std::atomic_int __totalAdded;
+    std::atomic_int __finished;
 
     int n_threads;
+    int n_removal_threads;
     int num_atoms;
     bool spinwait;
+    std::vector<int> rm_cnt;
 
 public:
     UseCountUTest()
     {
-        // Current atomspace can to 50K or 100K atoms/sec, so the 
+        // Current atomspace can to 50K or 100K atoms/sec, so the
         // below should run for at least 2 to 5 seconds each time.
         n_threads = 20;
+        n_removal_threads = 3;
+        rm_cnt.resize(n_removal_threads, 0);
         num_atoms = 13000;
         logger().setLevel(Logger::INFO);
         logger().setPrintToStdoutFlag(true);
@@ -97,7 +96,35 @@ public:
             Handle n = atomSpace->addNode(CONCEPT_NODE, oss.str());
 
             Type t = LIST_LINK;
-            atomSpace->addLink(t, anchor, n); 
+            atomSpace->addLink(t, anchor, n);
+            __totalAdded += 2;
+        }
+        __finished ++;
+    }
+
+    void threadedLinkRemove(int thread_id)
+    {
+        // Remove all of the following structures, leaving behind
+        // only the anchor:
+        //
+        //    ListLink
+        //        AnchorNode "the anchor"
+        //        ConceptNode "some value"
+        //
+
+        while (true)
+        {
+            IncomingSet iset = anchor->getIncomingSet();
+            size_t isz = iset.size();
+            for (size_t i = 0; i < isz; i++) {
+                Handle n = iset[i]->getOutgoingAtom(1);
+
+                atomSpace->removeAtom(n);
+                atomSpace->removeAtom(Handle(iset[i]));
+                rm_cnt[thread_id] += 2;
+                __totalAdded -= 2;
+            }
+            if (0 == isz and __finished >= n_threads) break;
         }
     }
 
@@ -105,11 +132,14 @@ public:
     {
         // reset the counts
         __totalAdded = 0;
+        __finished = 0;
 
         anchor = atomSpace->addNode(ANCHOR_NODE, "*** The Anchor ***");
         __totalAdded++;
         long int initial_use_count = AtomPtr(anchor).use_count();
         std::cout << "Initial anchor use count=" << initial_use_count << std::endl;
+        size_t isize = atomSpace->getSize();
+        std::cout << "Initial atomspace size: " << isize << std::endl;
 
         // Add lotsa links
         std::vector<std::thread> thread_pool;
@@ -117,13 +147,32 @@ public:
             thread_pool.push_back(
                 std::thread(&UseCountUTest::threadedLinkAdd, this, i, num_atoms));
         }
-        for (std::thread& t : thread_pool) t.join();
-        size_t size = atomSpace->getSize();
-        std::cout << "Link atomspace size:" << size << std::endl;
 
-        // We should get only 2*num_atoms, because all threads created duplicates.
-        // num_atoms nodes, and num_atoms links.
-        TS_ASSERT_EQUALS(size, 2*num_atoms);
+        // Remove lotsa links, using only 3 threads
+        for (int i=0; i < n_removal_threads; i++) {
+            thread_pool.push_back(
+                std::thread(&UseCountUTest::threadedLinkRemove, this, i));
+        }
+
+        // Wait for it all to come together.
+        for (std::thread& t : thread_pool) t.join();
+
+        long int final_use_count = AtomPtr(anchor).use_count();
+        std::cout << "Final anchor use count=" << final_use_count << std::endl;
+        size_t fsize = atomSpace->getSize();
+        std::cout << "Final atomspace size: " << fsize << std::endl;
+        std::cout << "Total change: " << __totalAdded << std::endl;
+
+        int rmtot = 0;
+        for (int i=0; i < n_removal_threads; i++) {
+            std::cout << "Thread " << i << " removed:" << rm_cnt[i] << std::endl;
+            rmtot += rm_cnt[i];
+        }
+        std::cout << "Total removed:" << rmtot << std::endl;
+
+        // We should get only 1 atom, the anchor node itself
+        TS_ASSERT_EQUALS(isize, 1);
+        TS_ASSERT_EQUALS(fsize, 1);
 
         TS_ASSERT_EQUALS((int) __totalAdded, num_atoms);
     }
