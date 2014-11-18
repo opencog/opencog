@@ -54,6 +54,7 @@ private:
     int num_atoms;
     bool spinwait;
     std::vector<int> rm_cnt;
+    std::vector<int> rm_cycles;
 
 public:
     UseCountUTest()
@@ -63,6 +64,7 @@ public:
         n_threads = 20;
         n_removal_threads = 3;
         rm_cnt.resize(n_removal_threads, 0);
+        rm_cycles.resize(n_removal_threads, 0);
         num_atoms = 13000;
         logger().setLevel(Logger::INFO);
         logger().setPrintToStdoutFlag(true);
@@ -115,6 +117,9 @@ public:
         {
             IncomingSet iset = anchor->getIncomingSet();
             size_t isz = iset.size();
+            // Don't do them all at once; thrash around a bit.
+            // This wastes a lot of CPU, BTW.
+            isz = std::min(isz, 2010UL);  // thrash around
             for (size_t i = 0; i < isz; i++) {
                 Handle n = iset[i]->getOutgoingAtom(1);
 
@@ -124,9 +129,17 @@ public:
                 __totalRemoved += 2;
             }
             if (0 == isz and __finished >= n_threads) break;
+            rm_cycles[thread_id] ++;
         }
     }
 
+    // The goal of this test case is to verify that the std c++11x
+    // smart pointers really are working as designed, and that we
+    // are using them correctly. This is done by trying to thrash
+    // the use count on one atom as hard as possible: the 'anchor'
+    // node.  Its going to get half-a-million or more atoms pointing
+    // to it, which are then removed, from lots of different threads.
+    // Despite this, the use count should stay correct.
     void testUseCount()
     {
         // reset the counts
@@ -172,7 +185,8 @@ public:
 
         int rmtot = 0;
         for (int i=0; i < n_removal_threads; i++) {
-            std::cout << "Thread " << i << " removed:" << rm_cnt[i] << std::endl;
+            std::cout << "Thread " << i << " removed: " << rm_cnt[i]
+                      << " over " << rm_cycles[i] << " cycles" << std::endl;
             rmtot += rm_cnt[i];
         }
 
@@ -196,6 +210,10 @@ public:
         TS_ASSERT_EQUALS((int) __totalAdded, 2*n_threads*num_atoms +1);
 
         // The number removed should be greater than the number added.
+        // Why? Because multiple threads fetch the incoming set at once,
+        // each fetch could contain atoms that other threads are in the
+        // process of removing.  So, in general, there will be a lot of
+        // overlap in the remove sequences.
         TS_ASSERT_LESS_THAN_EQUALS((int) __totalAdded, (int)__totalRemoved);
     }
 
