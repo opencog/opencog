@@ -1,0 +1,141 @@
+/*
+ * tests/atomspace/UseCountUTest.cxxtest
+ *
+ * Copyright (C) 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * Written by Linas Vepstas <linasvepstas@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <algorithm>
+#include <atomic>
+#include <thread>
+
+#include <math.h>
+#include <string.h>
+
+#include <boost/bind.hpp>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/RandGen.h>
+#include <opencog/util/mt19937ar.h>
+#include <opencog/util/platform.h>
+#include <opencog/util/Config.h>
+
+#include "misc-test.h"
+
+using namespace opencog;
+using namespace std;
+
+class UseCountUTest :  public CxxTest::TestSuite
+{
+private:
+
+    AtomSpace *atomSpace;
+
+    // Counters must be atomic; we are incrementing them inside threads
+    std::atomic_size_t __totalAdded;
+
+    int n_threads;
+    int num_atoms;
+    bool spinwait;
+
+public:
+    UseCountUTest()
+    {
+        // Current atomspace can to 50K or 100K atoms/sec, so the 
+        // below should run for at least 2 to 5 seconds each time.
+        n_threads = 20;
+        num_atoms = 13000;
+        logger().setLevel(Logger::INFO);
+        logger().setPrintToStdoutFlag(true);
+    }
+
+    void setUp()
+    {
+        atomSpace = new AtomSpace();
+    }
+
+    void tearDown()
+    {
+        delete atomSpace;
+    }
+
+    // =================================================================
+
+    void threadedLinkAdd(int thread_id, int N)
+    {
+        static int bogus = 0;
+
+        for (int i = 0; i < N; i++) {
+            std::ostringstream oss;
+            oss << "thread -1 node " << i;
+
+            HandleSeq hs;
+            atomSpace->getHandlesByName(back_inserter(hs), oss.str(), NODE);
+            TS_ASSERT_EQUALS(hs.size(), 1); 
+            Handle ha = hs[0];
+
+            std::ostringstream ossb;
+            ossb << "thread -1 node " << (2*i) % N;
+
+            HandleSeq hsb;
+            atomSpace->getHandlesByName(back_inserter(hsb), ossb.str(), NODE);
+            TS_ASSERT_EQUALS(hsb.size(), 1); 
+
+            bogus ++;
+            bogus %= N;
+
+            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
+
+            Type t = LIST_LINK;
+            hs.push_back(ha);
+            atomSpace->addLink(t, hs, tv); 
+        }
+    }
+
+    void testLinkAdd()
+    {
+        // Use the earlier test for atomspace setup.
+        // testThreadedSignals();
+
+        // reset the counts
+        __totalAdded = 0;
+
+        // Add lotsa links
+        std::vector<std::thread> thread_pool;
+        for (int i=0; i < n_threads; i++) {
+            thread_pool.push_back(
+                std::thread(&UseCountUTest::threadedLinkAdd, this, i, num_atoms));
+        }
+        for (std::thread& t : thread_pool) t.join();
+        size_t size = atomSpace->getSize();
+        std::cout << "Link atomspace size:" << size << std::endl;
+
+        // We should get only 2*num_atoms, because all threads created duplicates.
+        // num_atoms nodes, and num_atoms links.
+        TS_ASSERT_EQUALS(size, 2*num_atoms);
+
+        TS_ASSERT_EQUALS((int) __totalAdded, num_atoms);
+    }
+
+    // =================================================================
+};
