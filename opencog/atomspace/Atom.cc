@@ -87,7 +87,7 @@ void Atom::setTruthValue(TruthValuePtr newTV)
 
     // We need to guarantee that the signal goes out with the
     // correct truth value.  That is, another setter could be changing
-    // this, even as we are.  So make a copy, first. 
+    // this, even as we are.  So make a copy, first.
     TruthValuePtr oldTV(getTruthValue());
 
     // ... and we still need to make sure that only one thread is
@@ -243,7 +243,14 @@ void Atom::setAtomTable(AtomTable *tb)
 {
     if (tb == _atomTable) return;
 
+    // Either the existing _atomTable is null, and tb is not, i.e. this
+    // atom is being inserted into tb, or _atomTable is not null, while
+    // tb is null, i.e. atom is being removed from _atomTable.  It is
+    // illegal to just switch membership: one or the other of these two
+    // pointers must be null.
+    OC_ASSERT (NULL == _atomTable or tb == NULL, "Atom table is not null!");
     if (NULL != _atomTable) {
+        // Atom is being removed from the atom table.
         // UUID's belong to the atom table, not the atom. Reclaim it.
         _uuid = Handle::UNDEFINED.value();
     }
