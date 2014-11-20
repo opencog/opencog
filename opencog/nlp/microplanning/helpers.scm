@@ -135,15 +135,24 @@
 ; are the same, and if specified, also check if POS matches.
 ;
 (define (form-graph-match? atom form)
-	; if the form is AnyNode, don't care what it matches to
-	(if (equal? 'AnyNode (cog-type form))
+	; if the form is the wildcard node, don't care what it matches to
+	(if (equal? form (Node "MicroplanningWildcardMarker"))
 		#t
 		(if (cog-node? atom)
 			(if (equal? (cog-type atom) (cog-type form))
 				; check if we need to check POS or not
-				(if (string=? (cog-name form) "_")
+				(if (string=? (cog-name form) "MicroplanningAnyNameMarker")
 					#t
-					(word-inst-match-pos? (r2l-get-word-inst atom) (cog-name form))
+					(let ((pos (cond ((equal? (cog-name form) "MicroplanningVerbMarker")
+							  "verb"
+							 )
+							 (else
+							  "unknown"
+							 )
+						   )
+					     ))
+					     (word-inst-match-pos? (r2l-get-word-inst atom) pos)
+					)
 				)
 				#f
 			)

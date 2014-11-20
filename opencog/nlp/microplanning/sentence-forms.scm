@@ -1,30 +1,29 @@
 ; wrapping into a function so it can be dynamically recreated
 (define (microplanning-init)
 	(InheritanceLink
-		(ConceptNode "declarative")
+		(ConceptNode "DeclarativeUtterance")
 		(OrLink
 			(EvaluationLink
-				(PredicateNode "verb")
-				(AnyNode "_")
+				(PredicateNode "MicroplanningVerbMarker")
+				(Node "MicroplanningWildcardMarker")
 			)
 		)
 	)
 	
 	(InheritanceLink
-		(ConceptNode "interrogative")
+		(ConceptNode "InterrogativeUtterance")
 		(OrLink
 			(EvaluationLink
-				(PredicateNode "verb")
-				(AnyNode "_")
+				(PredicateNode "MicroplanningVerbMarker")
+				(Node "MicroplanningWildcardMarker")
 			)
 			(EvaluationLink
-				(VariableNode "_")
+				(VariableNode "MicroplanningAnyNameMarker")
 				(ListLink
-					(ConceptNode "_")
+					(ConceptNode "MicroplanningAnyNameMarker")
 				)
 			)
 		)
 	)
-	
 )
-		
+
