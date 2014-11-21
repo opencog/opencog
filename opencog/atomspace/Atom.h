@@ -92,6 +92,8 @@ protected:
     AtomTable *_atomTable;
 
     Type _type;
+
+    // Byte of flags (each bit is a flag, see AtomSpaceDefinites.h)
     char _flags;
 
     TruthValuePtr _truthValue;
