@@ -447,6 +447,23 @@ public:
     /**
      * Return true if the handle points to an atom that is in some
      * (any) atomspace; else return false.
+     *
+     * Currently, this code has the side-effect of resolving the handle.
+     * That is, if the handle's atom-pointer was non-null, and the atom
+     * can be located based on its UUID, then the atom will be
+     * instantiated in the appropriate atomspace.  Thus, this method
+     * returns false only if the handles UUID is -1 or if the UUID is
+     * positive, but no atomspace can lay claim to it.
+     *
+     * A UUID can be positive, but not a part of any atomspace, if the
+     * atom was recently removed from some atomspace. In this case, the
+     * handle is still caching its old UUID, although the atom itself
+     * now has a UUID of -1.
+     *
+     * Note also: a handle that is pointing to a recently-created atom
+     * that is not in any atomspace will have a UUID of -1, and thus is
+     * considered "invalid", even though it points to an atom that
+     * exists in RAM (and is thus usable as a naked atom).
      */
     bool isValidHandle(Handle h) const {
         // The h->getHandle() maneuver below is a trick to get at the
