@@ -5,7 +5,7 @@
 		(OrLink
 			(EvaluationLink
 				(PredicateNode "MicroplanningVerbMarker")
-				(Node "MicroplanningWildcardMarker")
+				(VariableNode "MicroplanningWildcardMarker")
 			)
 		)
 	)
@@ -15,7 +15,7 @@
 		(OrLink
 			(EvaluationLink
 				(PredicateNode "MicroplanningVerbMarker")
-				(Node "MicroplanningWildcardMarker")
+				(VariableNode "MicroplanningWildcardMarker")
 			)
 			(EvaluationLink
 				(VariableNode "MicroplanningAnyNameMarker")

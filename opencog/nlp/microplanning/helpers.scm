@@ -136,7 +136,7 @@
 ;
 (define (form-graph-match? atom form)
 	; if the form is the wildcard node, don't care what it matches to
-	(if (equal? form (Node "MicroplanningWildcardMarker"))
+	(if (equal? form (VariableNode "MicroplanningWildcardMarker"))
 		#t
 		(if (cog-node? atom)
 			(if (equal? (cog-type atom) (cog-type form))
