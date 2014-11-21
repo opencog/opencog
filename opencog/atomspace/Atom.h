@@ -93,21 +93,22 @@ protected:
 
     Type _type;
 
-    // Byte of flags (each bit is a flag, see AtomSpaceDefinites.h)
+    // Byte of bitflags (each bit is a flag, see AtomSpaceDefinites.h)
     char _flags;
 
     TruthValuePtr _truthValue;
     AttentionValuePtr _attentionValue;
 
-    // Lock needed to serialize changes.
-    // This costs 40 bytes per atom.
-    // Tried using a single, global lock, but there seemed to be too
-    // much contention for it, so using a lock-per-atom, even though
-    // this makes it kind-of fat.
+    // Lock, used to serialize changes.
+    // This costs 40 bytes per atom.  Tried using a single, global lock,
+    // but there seemed to be too much contention for it, so instead,
+    // we are using a lock-per-atom, even though this makes the atom
+    // kind-of fat.
     std::mutex _mtx;
 
     /**
-     * Constructor for this class.
+     * Constructor for this class. Protected; no user should call this
+     * directly.  Only derived classes (Node, Link) can call this.
      *
      * @param The type of the atom.
      * @param Outgoing set of the atom, that is, the set of atoms this
@@ -120,8 +121,9 @@ protected:
 
     struct InSet
     {
-        // incoming set is not tracked by garbage collector,
-        // to avoid cyclic references.
+        // The incoming set is not tracked by the garbage collector;
+        // this is required, in order to avoid cyclic references.
+        // That is, we use weak pointers here, not strong ones.
         // std::set<ptr> uses 48 bytes (per atom).
         WincomingSet _iset;
 #ifdef INCOMING_SET_SIGNALS
