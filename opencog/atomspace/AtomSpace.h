@@ -445,20 +445,25 @@ public:
     }
 
     /**
-     * Return true if the handle belongs to *this* atomspace; else
-     * return false.  Note that the handle might still be valid in
-     * some other atomspace. */
+     * Return true if the handle points to an atom that is in some
+     * (any) atomspace; else return false.
+     */
     bool isValidHandle(Handle h) const {
         // The h->getHandle() maneuver below is a trick to get at the
         // UUID of the actual atom, rather than the cached UUID in the
-        // handle. Technically, this is not quite right, since perhaps
-        // handles with valid UUID's but unresolved atom pointers are
-        // "valid".  This call is essentially forcing resolution :-(
-        // We should also be confirming that the UUID is OK, by asking
-        // the TLB about it.  Anyway, this check is not entirely technically
-        // correct ... worse, its a potentially performance-critical check,
-        // as its called fairly often (I think).
-        // return (NULL != h) and TLB::isValidHandle(h->getHandle());
+        // handle. Technically, this is not quite right, since, in
+        // principle, a handle could have a valid UUID, but the atom
+        // pointer is null, because the atom is on disk, in a database,
+        // is on a remote server, or has been purged from RAM.  But we
+        // have no way of knowing that the situation really is, so it
+        // seems like the only thing that can be done here is to resolve
+        // the pointer (i.e. make it point to an acutal atom, in RAM,
+        // and then check the actual UUID in the atom.
+        //
+        // The actual resolution is done with the (NULL != h) check,
+        // which causes h.operator!=() to run, which fixes up the atom
+        // pointer, as needed.
+        //
         return (NULL != h) and (h->getHandle() != Handle::UNDEFINED);
     }
 
