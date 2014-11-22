@@ -351,26 +351,23 @@
 		(any helper atoms)
 	)
 	
-	'()
-#|
 	(cond ((string=? "declarative" utterance-type)
-		(InheritanceLink (InterpretationNode "_") (ConceptNode "DeclarativeSpeechAct"))
+		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (ConceptNode "DeclarativeSpeechAct"))
 	      )
 	      ((string=? "interrogative" utterance-type)
 		; TruthQuerySpeechAct will have no VariableNode on the main sentence-form link
 		(if (search-varnode)
-			(InheritanceLink (InterpretationNode "_") (ConceptNode "InterrogativeSpeechAct"))
-			(InheritanceLink (InterpretationNode "_") (ConceptNode "TruthQuerySpeechAct"))
+			(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (ConceptNode "InterrogativeSpeechAct"))
+			(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (ConceptNode "TruthQuerySpeechAct"))
 		)
 	      )
 	      ((string=? "imperative" utterance-type)
-		(InheritanceLink (InterpretationNode "_") (ConceptNode "ImperativeSpeechAct"))
+		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (ConceptNode "ImperativeSpeechAct"))
 	      )
 	      ((string=? "interjective" utterance-type)
-		(InheritanceLink (InterpretationNode "_") (ConceptNode "InterjectiveSpeechAct"))
+		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (ConceptNode "InterjectiveSpeechAct"))
 	      )
 	)
-|#
 )
 
 ; -----------------------------------------------------------------------

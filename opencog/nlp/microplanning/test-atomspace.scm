@@ -1,5 +1,14 @@
 ; =========================
-; Basic knowledge
+; Exact knowledge
+; =========================
+;(r2l "The green cat climbs the stairs and grabs the mouse.")
+;(r2l "The man steals the burger and eats it.")
+;(r2l "The dog collects the tiny bones and plants them.")
+;(r2l "What damaged the tree?")
+;(r2l "John means the tall man.")
+
+; =========================
+; Inexact basic knowledge
 ; =========================
 ;(r2l "The beautiful cat hates the tree.")
 ;(r2l "The ugly cat climbs the stairs.")
@@ -8,13 +17,16 @@
 ;(r2l "A cat ate the seeds.")
 ;(r2l "What damaged the tree?")
 ;(r2l "John means the funny man.")
+;(r2l "Climb the building!")
 
 ; =========================
-; More complex knowledge
+; Inexact complex knowledge
 ; =========================
 ;(r2l "The ugly cat climbs the stairs and enters the house.")
-;(r2l "He takes the cookies and eats them.")
+;(r2l "He grabs the cake and eats it.")
 ;(r2l "She collects damaged stamps and categorizes them.")
+;(r2l "Climb the building and grab the book!")
+
 
 (define test-declarative-sal
 	(SequentialAndLink
