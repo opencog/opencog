@@ -32,6 +32,26 @@
 )
 
 ; -----------------------------------------------------------------------
+; r2l-get-root -- Return all hypergraph R2L roots containing 'atom'
+;
+; Similar to cog-get-root, except that it will stop at the SetLink in case
+; RelEx2Logic is called with the r2l(...) function.
+;
+(define (r2l-get-root atom)
+	(define iset (cog-incoming-set atom))
+	
+	; if reached the SetLink that wrap around R2L outputs (happens when using r2l(...))
+	(if (and (= (length iset) 1) (equal? 'SetLink (cog-type (car iset))))
+		(list atom)
+		; if no incoming set (happens when using relex-parse(...))
+		(if (null? iset)
+			(list atom)
+			(append-map r2l-get-root iset)
+		)
+	)
+)
+
+; -----------------------------------------------------------------------
 ; check-exception -- Check if 'link' should be excluded from markers post-processing
 ;
 ; Given a link, check to see if it should be ignored.  This could be a ReferenceLink
@@ -363,8 +383,8 @@
 				((not triplet) candidate)
 				(else
 					(if (equal? 'PredicateNode (cog-type candidate))
-						(ImplicationLink (cog-new-node (cog-type candidate) (cadr triplet)) (caddr triplet))
-						(InheritanceLink (cog-new-node (cog-type candidate) (cadr triplet)) (caddr triplet))
+						(ImplicationLink df-link-stv (cog-new-node (cog-type candidate) (cadr triplet) (cog-tv candidate)) (caddr triplet))
+						(InheritanceLink df-link-stv (cog-new-node (cog-type candidate) (cadr triplet) (cog-tv candidate)) (caddr triplet))
 					)
 					(cog-node (cog-type candidate) (cadr triplet))
 				)
@@ -374,15 +394,15 @@
 	)
 	(define new-oset (map replace-old old-oset))
 
-	; create a new link with the new node list
-	(apply cog-new-link (cog-type ilink) new-oset)
+	; create a new link with the new node list, using same TV
+	(apply cog-new-link (append (list (cog-type ilink) (cog-tv ilink)) new-oset))
 )
 
 ; -----------------------------------------------------------------------
 ; create-abstract-version -- Create the abstracted representation
 ;
 ; Given a 'parse-node' of a parse, find out which words can be abstracted
-; and call the helper function to create them. Both the partial and
+; and call the above helper function to create them. Both the partial and
 ; fully abstracted version are created.
 ;
 (define (create-abstract-version parse-node)
@@ -395,7 +415,7 @@
 	(define word-assoc-list (zip word-inst-concept-list word-concept-list))
 
 	; for each word instant, find a list of all root links that includes it, and remove unneeded links
-	(define word-involvement-messy-list (map cog-get-root word-inst-concept-list))
+	(define word-involvement-messy-list (map r2l-get-root word-inst-concept-list))
 	(define word-involvement-intersection (lset-pairwise-intersection word-involvement-messy-list))
 	(define word-involvement-cleaned-list  ; removing links with only one word involved
 		(map (lambda (l) (filter-map (lambda (link) (member? link word-involvement-intersection)) l))
