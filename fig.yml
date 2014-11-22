@@ -25,4 +25,5 @@ opencog:
     volumes:
     - .:/home/opencog
     command: /bin/bash
+    user: opencog
 

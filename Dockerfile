@@ -8,5 +8,15 @@ COPY scripts/ocpkg scripts/install-dependencies-trusty /tmp/
 RUN chmod +x /tmp/install-dependencies-trusty
 RUN /tmp/install-dependencies-trusty
 
+# Create and switch user
+RUN adduser --disabled-password --gecos "OpenCog Developer" opencog
+#USER opencog
+
+# Tools
+RUN apt-get -y install git
+RUN apt-get -y install rlwrap
+RUN apt-get -y install telnet
+
+# Environment
 WORKDIR /home/opencog
 CMD bash
