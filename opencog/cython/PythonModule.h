@@ -86,6 +86,8 @@ private:
 
     std::vector<std::string> _agentNames;
     std::vector<std::string> _requestNames;
+    std::vector<PythonAgentFactory*> _agentFactories;
+    std::vector<PythonRequestFactory*> _requestFactories;
 
     // Main thread state only.
     PyThreadState* _mainstate;

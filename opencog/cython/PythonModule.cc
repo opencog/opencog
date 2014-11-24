@@ -90,6 +90,9 @@ PythonModule::~PythonModule()
     unregisterAgentsAndRequests();
     do_load_py_unregister();
 
+    for (PythonAgentFactory* af : _agentFactories) delete af;
+    for (PythonRequestFactory* rf : _requestFactories) delete rf;
+
     // PyFinalize crashes unless we carefully restore stuff...
     PyEval_AcquireLock();
     PyThreadState_Swap(_mainstate);
@@ -233,7 +236,9 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
 
             // register the agent with a custom factory that knows how to
             // instantiate new Python MindAgents
-            _cogserver.registerAgent(dottedName, new PythonAgentFactory(moduleName,s));
+            PythonAgentFactory* afact = new PythonAgentFactory(moduleName,s);
+            _agentFactories.push_back(afact);
+            _cogserver.registerAgent(dottedName, afact);
 
             // save a list of Python agents that we've added to the CogServer
             _agentNames.push_back(dottedName);
@@ -258,8 +263,10 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
             // Register request with cogserver using dotted name: module.RequestName
             std::string dottedName = moduleName + "." + s;
             // register the agent with a custom factory that knows how to
-            _cogserver.registerRequest(dottedName, 
-                new PythonRequestFactory(moduleName, s, short_desc, long_desc, is_shell));
+            PythonRequestFactory* fact =
+                new PythonRequestFactory(moduleName, s, short_desc, long_desc, is_shell);
+            _requestFactories.push_back(fact);
+            _cogserver.registerRequest(dottedName, fact);
             // save a list of Python agents that we've added to the CogServer
             _requestNames.push_back(dottedName);
 
