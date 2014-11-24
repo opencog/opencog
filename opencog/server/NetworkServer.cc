@@ -45,6 +45,8 @@ NetworkServer::~NetworkServer()
     logger().debug("[NetworkServer] enter destructor");
     if (_thread != 0)
         pthread_join(_thread, NULL);
+
+    for (SocketPort* sp : _listeners) delete sp;
     logger().debug("[NetworkServer] all threads joined, exit destructor");
 }
 
