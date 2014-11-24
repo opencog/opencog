@@ -248,6 +248,7 @@ inline SCM SchemeSmob::tv_p (SCM s, TruthValueType wanted)
 
 	TruthValue *tv = (TruthValue *) SCM_SMOB_DATA(s);
 	TruthValueType tvt = tv->getType();
+	scm_remember_upto_here_1(s);
 	if (wanted == tvt) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
@@ -289,7 +290,7 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 {
 	TruthValue *tv = verify_tv(s, "cog-tv->alist");
 	TruthValueType tvt = tv->getType();
-	switch(tvt)
+	switch (tvt)
 	{
 		case SIMPLE_TRUTH_VALUE:
 		{
@@ -305,6 +306,7 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			rc = scm_acons(sconf, conf, rc);
 			rc = scm_acons(smean, mean, rc);
 			rc = scm_acons(scount, count, rc);
+			scm_remember_upto_here_1(s);
 			return rc;
 		}
 		case COUNT_TRUTH_VALUE:
@@ -321,6 +323,7 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			rc = scm_acons(scont, cont, rc), 
 			rc = scm_acons(sconf, conf, rc);
 			rc = scm_acons(smean, mean, rc);
+			scm_remember_upto_here_1(s);
 			return rc;
 		}
 		case INDEFINITE_TRUTH_VALUE:
@@ -337,11 +340,14 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			rc = scm_acons(sconf, conf, rc);
 			rc = scm_acons(supper, upper, rc), 
 			rc = scm_acons(slower, lower, rc);
+			scm_remember_upto_here_1(s);
 			return rc;
 		}
 		default:
+			scm_remember_upto_here_1(s);
 			return SCM_EOL;
 	}
+	scm_remember_upto_here_1(s);
 	return SCM_EOL;
 }
 

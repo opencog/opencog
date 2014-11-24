@@ -94,6 +94,7 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 	TruthValue *tv = verify_tv(stv, "cog-set-tv!", 2);
 
 	h->setTruthValue(tv->clone());
+	scm_remember_upto_here_1(stv);
 	return satom;
 }
 

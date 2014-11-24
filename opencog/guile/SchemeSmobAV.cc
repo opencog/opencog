@@ -144,6 +144,7 @@ SCM SchemeSmob::ss_av_get_value (SCM s)
 	SCM ssti = scm_from_locale_symbol("sti");
 	SCM slti = scm_from_locale_symbol("lti");
 	SCM svlti = scm_from_locale_symbol("vlti");
+	scm_remember_upto_here_1(s);
 
 	SCM rc = SCM_EOL;
 	rc = scm_acons(svlti, vlti, rc);

@@ -137,6 +137,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		{
 			AtomSpace* as = (AtomSpace *) SCM_SMOB_DATA(a);
 			AtomSpace* bs = (AtomSpace *) SCM_SMOB_DATA(b);
+			scm_remember_upto_here_1(a);
+			scm_remember_upto_here_1(b);
 			/* Just a simple pointer comparison */
 			if (as == bs) return SCM_BOOL_T;
 			return SCM_BOOL_F;
@@ -145,6 +147,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		{
 			AttentionValue* av = (AttentionValue *) SCM_SMOB_DATA(a);
 			AttentionValue* bv = (AttentionValue *) SCM_SMOB_DATA(b);
+			scm_remember_upto_here_1(a);
+			scm_remember_upto_here_1(b);
 			if (av == bv) return SCM_BOOL_T;
 			if (*av == *bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
@@ -154,6 +158,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			// We compare pointers here, only.
 			PrimitiveEnviron* av = (PrimitiveEnviron *) SCM_SMOB_DATA(a);
 			PrimitiveEnviron* bv = (PrimitiveEnviron *) SCM_SMOB_DATA(b);
+			scm_remember_upto_here_1(a);
+			scm_remember_upto_here_1(b);
 			if (av == bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
@@ -168,6 +174,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		{
 			TruthValue* av = (TruthValue *) SCM_SMOB_DATA(a);
 			TruthValue* bv = (TruthValue *) SCM_SMOB_DATA(b);
+			scm_remember_upto_here_1(a);
+			scm_remember_upto_here_1(b);
 			if (av == bv) return SCM_BOOL_T;
 			if (*av == *bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;

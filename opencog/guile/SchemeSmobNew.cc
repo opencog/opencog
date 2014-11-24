@@ -180,8 +180,9 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
     if (COG_HANDLE != misctype)
         return Handle::UNDEFINED;
 
-    Handle* hp = (Handle *) SCM_SMOB_DATA(sh);
-    return *hp;
+    Handle h = *((Handle *) SCM_SMOB_DATA(sh));
+    scm_remember_upto_here_1(sh);
+    return h;
 }
 
 /* ============================================================== */
@@ -372,6 +373,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
         h->setAttentionValue(av->clone());
     }
 
+    scm_remember_upto_here_1(kv_pairs);
     return handle_to_scm(h);
 }
 
@@ -406,6 +408,7 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
     if (av) {
         h->setAttentionValue(av->clone());
     }
+    scm_remember_upto_here_1(kv_pairs);
     return handle_to_scm (h);
 }
 
@@ -515,6 +518,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
     if (av) {
         h->setAttentionValue(av->clone());
     }
+    scm_remember_upto_here_1(satom_list);
     return handle_to_scm (h);
 }
 
@@ -546,6 +550,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
     const AttentionValue *av = get_av_from_list(satom_list);
     if (av) h->setAttentionValue(av->clone());
 
+    scm_remember_upto_here_1(satom_list);
     return handle_to_scm (h);
 }
 
