@@ -72,7 +72,8 @@ public:
         logger().debug("SocketListener::SocketListener() ended");
     }
 
-    ~SocketListener()
+    // Needs to be virtual to avoid the memleak.
+    virtual ~SocketListener()
     {
         for (_Socket* so : _accepted_sockets) delete so;
     }

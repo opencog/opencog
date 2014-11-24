@@ -45,7 +45,7 @@ public:
 
     SocketPort(int _port) : port(_port) {}
     const int getPort() { return port; }
-
+    virtual ~SocketPort() {}
 }; // class
 
 /** @}*/
