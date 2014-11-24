@@ -149,6 +149,14 @@
 }
 
 {
+   <new_gc_allocobj>
+   Memcheck:Cond
+   ...
+   fun:GC_allocobj
+   ...
+}
+
+{
    <new_gc_fin>
    Memcheck:Cond
    ...
