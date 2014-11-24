@@ -316,7 +316,7 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
         scm_wrong_type_arg_msg(subrname, pos, sname, msg);
 
     char * cname = scm_to_locale_string(sname);
-    std::string name = cname;
+    std::string name(cname);
     free(cname);
     return name;
 }
@@ -347,8 +347,8 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
         // TODO: if we're given a string, I guess maybe we should check
         // that the string is convertible to a number ??
     }
-    std::string name = verify_string (sname, "cog-new-node", 2,
-        "string name for the node");
+    std::string name(verify_string (sname, "cog-new-node", 2,
+        "string name for the node"));
 
     AtomSpace* atomspace = get_as_from_list(kv_pairs);
     if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-node");

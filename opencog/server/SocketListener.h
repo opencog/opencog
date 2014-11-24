@@ -75,7 +75,12 @@ public:
     // Needs to be virtual to avoid the memleak.
     virtual ~SocketListener()
     {
-        for (_Socket* so : _accepted_sockets) delete so;
+        // XXX FIXME. I don't get it .. fixing this memleak like this
+        // will cause the server shutdown to hang. Something about the
+        // boost asio async shutdown gets tangled.  The only good news
+        // here is that the amount of leaked memopry is miniscule - maybe
+        // a few hundred bytes per socket connection.
+        // for (_Socket* so : _accepted_sockets) delete so;
     }
 
     void handle_accept(_Socket* ss, const boost::system::error_code& error)

@@ -32,7 +32,6 @@ namespace opencog
  *  @{
  */
 
-class Atom;
 class AtomTable;
 
 /**
