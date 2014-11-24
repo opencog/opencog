@@ -1,0 +1,40 @@
+# Invalid read of size 4
+{
+   <py_free>
+   Memcheck:Addr4
+   fun:PyObject_Free
+   ...
+}
+# Use of uninitialised value of size 8
+{
+   <py_free_val8>
+   Memcheck:Value8
+   fun:PyObject_Free
+   ...
+}
+{
+   <py_free_cond>
+   Memcheck:Cond
+   fun:PyObject_Free
+   ...
+}
+# Realloc stuff
+{
+   <py_realloc_addr>
+   Memcheck:Addr4
+   fun:PyObject_Realloc
+   ...
+}
+{
+   <py_realloc>
+   Memcheck:Value8
+   fun:PyObject_Realloc
+   ...
+}
+# Conditional jump or move depends on uninitialised value(s)
+{
+   <py_realloc_cond>
+   Memcheck:Cond
+   fun:PyObject_Realloc
+   ...
+}

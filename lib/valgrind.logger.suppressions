@@ -42,15 +42,3 @@
    fun:start_thread
    fun:clone
 }
-{
-   <log_thread_param>
-   Memcheck:Param
-   ...
-   fun:_ZN7opencog6Logger11writingLoopEv
-   fun:thread_proxy
-   fun:start_thread
-   fun:clone
-}
-
-
-

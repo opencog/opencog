@@ -57,5 +57,114 @@
    ...
 }
 
+# Seems that guile 2.0 uses a new GC ...
+{
+   <new_gc_mark>
+   Memcheck:Cond
+   ...
+   fun:GC_mark_some
+   ...
+}
+
+# Use of uninitialised value of size 8
+{
+   <new_gc_mark_uninit>
+   Memcheck:Value8
+   ...
+   fun:GC_mark_some
+   ...
+}
+
+# Invalid read of size 8
+{
+   <new_gc_mark_uninit>
+   Memcheck:Addr8
+   ...
+   fun:GC_mark_some
+   ...
+}
+
+# Conditional jump or move depends on uninitialised value(s)
+{
+   <new_gc_mark_from>
+   Memcheck:Cond
+   ...
+   fun:GC_mark_from
+   ...
+}
+
+{
+   <new_gc_malloc>
+   Memcheck:Cond
+   ...
+   fun:GC_malloc
+   ...
+}
+
+# Use of uninitialised value of size 8
+{
+   <new_gc_core_malloc_val>
+   Memcheck:Value8
+   ...
+   fun:GC_core_malloc
+   ...
+}
+
+{
+   <new_gc_core_malloc>
+   Memcheck:Cond
+   ...
+   fun:GC_core_malloc
+   ...
+}
+
+{
+   <new_gc_malloc_atomic>
+   Memcheck:Cond
+   ...
+   fun:GC_malloc_atomic
+   ...
+}
+
+{
+   <new_gc_blacklist>
+   Memcheck:Cond
+   fun:GC_is_black_listed
+   ...
+}
+
+{
+   <new_gc_black_value>
+   Memcheck:Value8
+   fun:GC_add_to_black_list_normal
+   ...
+}
+
+{
+   <new_gc_fin>
+   Memcheck:Cond
+   ...
+   fun:GC_finalize
+   ...
+}
+
+{
+   <new_gc_fin>
+   Memcheck:Cond
+   ...
+   fun:GC_gcollect
+   ...
+}
+
+# ------------------------------------------
+# libuistring stuff
+
+{
+   <unistring>
+   Memcheck:Cond
+   fun:libunistring_freea
+   ...
+}
+
 
 
