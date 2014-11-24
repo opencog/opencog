@@ -119,6 +119,14 @@
 }
 
 {
+   <new_gc_generic_malloc>
+   Memcheck:Cond
+   ...
+   fun:GC_generic_malloc
+   ...
+}
+
+{
    <new_gc_malloc_atomic>
    Memcheck:Cond
    ...

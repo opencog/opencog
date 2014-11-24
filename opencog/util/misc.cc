@@ -48,7 +48,8 @@ std::string opencog::demangle(const std::string& mangled)
     char* demangled_name = abi::__cxa_demangle(mangled.c_str(), 0, 0, &status);
     if (status == 0 && demangled_name) {
         std::string s(demangled_name);
-        return demangled_name;
+        free(demangled_name);  // avoid memleak
+        return s;
     } else return "";
 }
 #endif
