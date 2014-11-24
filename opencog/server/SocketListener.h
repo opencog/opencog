@@ -39,16 +39,18 @@ namespace opencog
  */
 
 /**
- * This class defines a socket listener for a given port number 
+ * This class defines a socket listener for a given port number
  */
 template <class _Socket>
 class SocketListener : public SocketPort
 {
-
 private:
 
     boost::asio::io_service& _io_service;
     tcp::acceptor _acceptor;
+
+    // Avoid memory leaks; free the accepted sockets
+    std::vector<_Socket*> _accepted_sockets;
 
 public:
 
@@ -61,7 +63,7 @@ public:
         logger().debug("Acceptor listening.");
 
         // XXX FIXME ... this is leaking memory -- theres no dtor for
-        // this socket !?
+        // this socket !?  Or does tcp::acceptor magically release it?
         _Socket* ss = new _Socket(_io_service);
         _acceptor.async_accept(ss->getSocket(),
              boost::bind(&SocketListener::handle_accept,
@@ -70,7 +72,10 @@ public:
         logger().debug("SocketListener::SocketListener() ended");
     }
 
-    ~SocketListener() {}
+    ~SocketListener()
+    {
+        for (_Socket* so : _accepted_sockets) delete so;
+    }
 
     void handle_accept(_Socket* ss, const boost::system::error_code& error)
     {
@@ -78,8 +83,8 @@ public:
         if (!error)
         {
             ss->start();
-            // Again with the leaking memory ... !?!
             _Socket* nss = new _Socket(_io_service);
+            _accepted_sockets.push_back(nss);
             _acceptor.async_accept(nss->getSocket(),
                   boost::bind(&SocketListener::handle_accept,
                   this, nss,
@@ -95,12 +100,9 @@ public:
         logger().debug("SocketListener::handle_accept() ended");
     }
 
-
 }; // class
 
 /** @}*/
 }  // namespace
 
 #endif // _OPENCOG_SOCKET_LISTENER_H
-
-
