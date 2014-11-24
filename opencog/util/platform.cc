@@ -169,10 +169,12 @@ unsigned long long opencog::atoll(const char *str)
 #endif // WIN32_NOT_UNIX
 
 #include <stdlib.h>
-#include <unistd.h>
+#include <unistd.h>   // for sbrk(), sysconf()
 #include "platform.h"
 
-size_t opencog::getMemUsage() {
+// Return memory usage per sbrk system call.
+size_t opencog::getMemUsage()
+{
     static void *old_sbrk = 0;
     void *p = sbrk(0);
     if (old_sbrk == 0 || old_sbrk > p) 
@@ -181,7 +183,6 @@ size_t opencog::getMemUsage() {
         return 0;
     }
     size_t diff = (size_t)p - (size_t)old_sbrk;
-    old_sbrk = p;
     return diff;
 }
 
@@ -210,11 +211,15 @@ uint64_t opencog::getFreeRAM() {
 #else // __APPLE__
 #include <sys/sysinfo.h>
 
-uint64_t opencog::getTotalRAM() {
-    return getpagesize() * get_phys_pages();
+uint64_t opencog::getTotalRAM()
+{
+    // return getpagesize() * get_phys_pages();
+    return getpagesize() * sysconf(_SC_PHYS_PAGES);
 }
 
-uint64_t opencog::getFreeRAM() {
-    return getpagesize() * get_avphys_pages();
+uint64_t opencog::getFreeRAM()
+{
+    // return getpagesize() * get_avphys_pages();
+    return getpagesize() * sysconf(_SC_AVPHYS_PAGES);
 }
 #endif // __APPLE__

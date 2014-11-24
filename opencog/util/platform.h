@@ -85,15 +85,16 @@ unsigned int       sleep(unsigned seconds);
 
 #endif // ~WIN32_NOT_UNIX
 
+//! Return the total amount of heap allocated (according to sbrk, on unix).
 size_t getMemUsage();
 
-//! return the number of bytes of RAM
+//! Return the total number of bytes of physical RAM installed.
 uint64_t getTotalRAM();
 
-//! return the number of free bytes in RAM (excluding OS caches)
+//! Return the total number of free bytes avaiable in RAM (excluding OS caches)
 uint64_t getFreeRAM();
 
-//! return the OS username
+//! Return the OS username
 const char* getUserName();
 
 /** @}*/

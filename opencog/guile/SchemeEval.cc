@@ -22,6 +22,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/platform.h>
 
 #include "SchemeEval.h"
 #include "SchemePrimitive.h"
@@ -477,6 +478,10 @@ void SchemeEval::do_eval(const std::string &expr)
 	                      SchemeEval::preunwind_handler_wrapper, this);
 
 	atomspace = SchemeSmob::ss_get_env_as("do_eval");
+#if 0
+	logger().debug() << "Guile evaluated: " << expr;
+	logger().debug() << "Mem usage=" << (getMemUsage() / (1024*1024)) << "MB";
+#endif
 	_eval_done = true;
 	_wait_done.notify_all();
 }
