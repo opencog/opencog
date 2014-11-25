@@ -135,19 +135,32 @@
 ; are the same, and if specified, also check if POS matches.
 ;
 (define (form-graph-match? atom form)
-	(if (cog-node? atom)
-		(if (equal? (cog-type atom) (cog-type form))
-			; check if we need to check POS or not
-			(if (string=? (cog-name form) "_")
-				#t
-				(word-inst-match-pos? (r2l-get-word-inst atom) (cog-name form))
+	; if the form is the wildcard node, don't care what it matches to
+	(if (equal? form (VariableNode "MicroplanningWildcardMarker"))
+		#t
+		(if (cog-node? atom)
+			(if (equal? (cog-type atom) (cog-type form))
+				; check if we need to check POS or not
+				(if (string=? (cog-name form) "MicroplanningAnyNameMarker")
+					#t
+					(let ((pos (cond ((equal? (cog-name form) "MicroplanningVerbMarker")
+							  "verb"
+							 )
+							 (else
+							  "unknown"
+							 )
+						   )
+					     ))
+					     (word-inst-match-pos? (r2l-get-word-inst atom) pos)
+					)
+				)
+				#f
 			)
-			#f
-		)
-		(if (and (= (cog-arity atom) (cog-arity form)) (equal? (cog-type atom) (cog-type form)))
-			; check the outgoing set recursively
-			(every form-graph-match? (cog-outgoing-set atom) (cog-outgoing-set form))
-			#f
+			(if (and (= (cog-arity atom) (cog-arity form)) (equal? (cog-type atom) (cog-type form)))
+				; check the outgoing set recursively
+				(every form-graph-match? (cog-outgoing-set atom) (cog-outgoing-set form))
+				#f
+			)
 		)
 	)
 )
