@@ -1,8 +1,8 @@
 ADD_SUBDIRECTORY (file)
 
-IF (ODBC_FOUND)
+IF (HAVE_PERSIST)
    ADD_SUBDIRECTORY (sql)
-ENDIF (ODBC_FOUND)
+ENDIF (HAVE_PERSIST)
 
 # I can't get this stuff to work, and its obsolete anyway
 # IF (HAVE_XML)

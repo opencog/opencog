@@ -23,9 +23,7 @@ IF (CXXTEST_FOUND)
 		ADD_SUBDIRECTORY (atomspace)
 
 		# Persistence is for saving/restoring atomspace to disk.
-		IF(HAVE_PERSIST)
-			ADD_SUBDIRECTORY (persist)
-		ENDIF(HAVE_PERSIST)
+		ADD_SUBDIRECTORY (persist)
 
 		# guile provides scheme bindings for the atomspace.
 		IF (HAVE_GUILE)
