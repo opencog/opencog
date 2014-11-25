@@ -118,13 +118,13 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 
 std::string SchemeSmob::handle_to_string(SCM node)
 {
-    Handle h = scm_to_handle(node);
+    Handle h(scm_to_handle(node));
     return handle_to_string(h, 0) + "\n";
 }
 
 std::string SchemeSmob::uuid_to_string(SCM node)
 {
-    Handle h = scm_uuid_to_handle(node);
+    Handle h(scm_uuid_to_handle(node));
     return handle_to_string(h, 0) + "\n";
 }
 
@@ -146,7 +146,7 @@ SCM SchemeSmob::handle_to_scm (Handle h)
     // Force resolution to occur now, not later.
     hp->operator->();
     scm_gc_register_collectable_memory (hp,
-                    sizeof(*hp), "opencog handle");
+                    sizeof(h), "opencog handle");
 
     SCM smob;
     SCM_NEWSMOB (smob, cog_misc_tag, hp);
@@ -180,7 +180,7 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
     if (COG_HANDLE != misctype)
         return Handle::UNDEFINED;
 
-    Handle h = *((Handle *) SCM_SMOB_DATA(sh));
+    Handle h(*((Handle *) SCM_SMOB_DATA(sh)));
     scm_remember_upto_here_1(sh);
     return h;
 }

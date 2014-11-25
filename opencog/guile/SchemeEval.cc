@@ -70,6 +70,9 @@ void SchemeEval::init(void)
 	pexpr = NULL;
 	_eval_done = false;
 	_poll_done = false;
+
+	_rc = SCM_EOL;
+	_rc = scm_gc_protect_object(_rc);
 }
 
 /// Discard all chars in the outport.
@@ -88,6 +91,8 @@ void * SchemeEval::c_wrap_init(void *p)
 
 void SchemeEval::finish(void)
 {
+	scm_gc_unprotect_object(_rc);
+
 	// Restore the previous outport (if its still alive)
 	if (scm_is_false(scm_port_closed_p(_saved_outport)))
 		scm_set_current_output_port(_saved_outport);
@@ -471,16 +476,19 @@ void SchemeEval::do_eval(const std::string &expr)
 	_caught_error = false;
 	_pending_input = false;
 	set_captured_stack(SCM_BOOL_F);
+	scm_gc_unprotect_object(_rc);
 	_rc = scm_c_catch (SCM_BOOL_T,
 	                      (scm_t_catch_body) scm_c_eval_string,
 	                      (void *) _input_line.c_str(),
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
+	_rc = scm_gc_protect_object(_rc);
 
 	atomspace = SchemeSmob::ss_get_env_as("do_eval");
 #if 0
-	logger().debug() << "Guile evaluated: " << expr;
-	logger().debug() << "Mem usage=" << (getMemUsage() / (1024*1024)) << "MB";
+	scm_gc();
+	logger().info() << "Guile evaluated: " << expr;
+	logger().info() << "Mem usage=" << (getMemUsage() / (1024*1024)) << "MB";
 #endif
 	_eval_done = true;
 	_wait_done.notify_all();
@@ -490,7 +498,9 @@ void SchemeEval::begin_eval()
 {
 	_eval_done = false;
 	_poll_done = false;
+	scm_gc_unprotect_object(_rc);
 	_rc = SCM_EOL;
+	_rc = scm_gc_protect_object(_rc);
 }
 
 /// Read one end of a pipe. The other end of the pipe is attached to
