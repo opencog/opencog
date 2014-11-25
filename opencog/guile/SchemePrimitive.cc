@@ -139,6 +139,7 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 			SCM_EOL);
 		logger().error("Guile caught unknown C++ exception");
 	}
+	scm_remember_upto_here_1(sfe);
 	return rc;
 }
 

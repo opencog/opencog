@@ -70,6 +70,7 @@ size_t SchemeSmob::free_misc(SCM node)
 			                  sizeof(*as), "opencog atomspace");
 				delete as;
 			}
+			scm_remember_upto_here_1(node);
 			return 0;
 		}
 		case COG_AV:
@@ -78,6 +79,7 @@ size_t SchemeSmob::free_misc(SCM node)
 			scm_gc_unregister_collectable_memory (av,
 			                  sizeof(*av), "opencog av");
 			delete av;
+			scm_remember_upto_here_1(node);
 			return 0;
 
 		case COG_HANDLE:
@@ -86,6 +88,7 @@ size_t SchemeSmob::free_misc(SCM node)
 			scm_gc_unregister_collectable_memory (hp,
 			                  sizeof(*hp), "opencog handle");
 			delete hp;
+			scm_remember_upto_here_1(node);
 			return 0;
 
 		case COG_TV:
@@ -94,6 +97,7 @@ size_t SchemeSmob::free_misc(SCM node)
 			scm_gc_unregister_collectable_memory (tv,
 			                  sizeof(*tv), "opencog tv");
 			delete tv;
+			scm_remember_upto_here_1(node);
 			return 0;
 
 		case COG_EXTEND:
@@ -102,6 +106,7 @@ size_t SchemeSmob::free_misc(SCM node)
 			scm_gc_unregister_collectable_memory (pe,
 			                  pe->get_size(), "opencog primitive environ");
 			delete pe;
+			scm_remember_upto_here_1(node);
 			return 0;
 
 		default:
@@ -121,23 +126,34 @@ std::string SchemeSmob::misc_to_string(SCM node)
 	switch (misctype)
 	{
 		case COG_AS:
-			return as_to_string((AtomSpace *) SCM_SMOB_DATA(node));
-
+		{
+			std::string str(as_to_string((AtomSpace *) SCM_SMOB_DATA(node)));
+			scm_remember_upto_here_1(node);
+			return str;
+		}
 		case COG_AV:
-			return av_to_string((AttentionValue *) SCM_SMOB_DATA(node));
-
+		{
+			std::string str(av_to_string((AttentionValue *) SCM_SMOB_DATA(node)));
+			scm_remember_upto_here_1(node);
+			return str;
+		}
 		case COG_HANDLE:
 			return handle_to_string(node);
 
 		case COG_TV:
-			return tv_to_string((TruthValue *) SCM_SMOB_DATA(node));
-
+		{
+			std::string str(tv_to_string((TruthValue *) SCM_SMOB_DATA(node)));
+			scm_remember_upto_here_1(node);
+			return str;
+		}
 		case COG_EXTEND:
 		{
 			// return "#<opencog extension>\n";
 			// Hmm. Is this really the right thing to return ?? I'm not sure ..
 			PrimitiveEnviron * pe = (PrimitiveEnviron *) SCM_SMOB_DATA(node);
-			return pe->get_name();
+			std::string str(pe->get_name());
+			scm_remember_upto_here_1(node);
+			return str;
 		}
 		default:
 			return "#<unknown opencog type>\n";
