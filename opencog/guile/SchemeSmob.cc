@@ -17,30 +17,17 @@
 using namespace opencog;
 
 /**
- * Two scheme smob types are used to implement the interface.
+ * Just one scheme smob type is used to implement the interface.
  *
- * The cog_uuid_tag is used to store atom handles as uuids.
- * The cog_misc_tag is used to store all other structures, such
- * as truth values. It is assumed that these structures are all
- * ephemeral (garbage-collected); this is in contrast to handles,
- * which are never garbage collected. Thus, opencog atoms have a
- * concrete existence outside of the scheme shell. By contrast,
- * truth values created by the scheme shell are garbage collected
- * by the shell.
+ * The cog_misc_tag is used to store all structures, such as atoms
+ * and truth values. It is assumed that these structures are all
+ * ephemeral (garbage-collected), including the Handles.  Note that
+ * atoms in the atomspace have a concrete existence outside of the
+ * scheme shell. By contrast, truth values created by the scheme
+ * shell are garbage collected by the shell.
  *
  * The type of the "misc" structure is stored in the flag bits;
  * thus, handling is dispatched based on these flags.
- *
- * XXX There are currently *two* ways of storing atoms: as UUID's
- * and as Handle-based AtomPtr's. The first is compact, and is great
- * if the atom has not yet been instantiated in RAM.  Unfortunately,
- * any sort of references from it requires resolving the UUID into an
- * AtomPtr, which requires finding it in an RB-tree in the AtomTable,
- * which requires tacking a reader-lock on the table, which can be a
- * serious bottle-neck when running atom-manipulating algorithms in
- * scheme. Thus, the second type of storate: a fully resolved AtomPtr,
- * which can quickly access atom attributes. The UUID form is 'rare'
- * and is not currently needed.
  *
  * XXX TODO:
  * The cog_misc_tag should be replaced by a tag-per-class (i.e. we
@@ -48,7 +35,6 @@ using namespace opencog;
  * simplify that code, and probably improve performance just a bit.
  */
 
-scm_t_bits SchemeSmob::cog_uuid_tag;
 scm_t_bits SchemeSmob::cog_misc_tag;
 bool SchemeSmob::is_inited = false;
 SCM SchemeSmob::_radix_ten;
@@ -76,36 +62,9 @@ SchemeSmob::SchemeSmob()
 
 /* ============================================================== */
 
-int SchemeSmob::print_atom(SCM node, SCM port, scm_print_state * ps)
-{
-	std::string str = uuid_to_string(node);
-	scm_puts (str.c_str(), port);
-	return 1; //non-zero means success
-}
-
-SCM SchemeSmob::equalp_atom(SCM a, SCM b)
-{
-	// Two atoms are equal if their UUIDs are the same.
-	if (SCM_SMOB_OBJECT(a) == SCM_SMOB_OBJECT(b)) return SCM_BOOL_T;
-	return SCM_BOOL_F;
-}
-
-size_t SchemeSmob::free_atom(SCM node)
-{
-	// Nothing to do here; the atom handles are stored as
-	// immediate values in the SMOB's.
-	return 0;
-}
-
 void SchemeSmob::init_smob_type(void)
 {
-	// a SMOB type for atom uuids
-	cog_uuid_tag = scm_make_smob_type ("opencog-uuid", sizeof (scm_t_bits));
-	scm_set_smob_print (cog_uuid_tag, print_atom);
-	scm_set_smob_equalp (cog_uuid_tag, equalp_atom);
-	// scm_set_smob_free (cog_uuid_tag, free_atom);
-
-	// A SMOB type for everything else
+	// A SMOB type for everything, incuding atoms.
 	cog_misc_tag = scm_make_smob_type ("opencog-misc", sizeof (scm_t_bits));
 	scm_set_smob_print (cog_misc_tag, print_misc);
 	scm_set_smob_equalp (cog_misc_tag, equalp_misc);

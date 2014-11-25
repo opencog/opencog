@@ -28,9 +28,6 @@ using namespace opencog;
  */
 std::string SchemeSmob::to_string(SCM node)
 {
-    if (SCM_SMOB_PREDICATE(SchemeSmob::cog_uuid_tag, node))
-        return uuid_to_string(node);
-
     if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, node))
         return misc_to_string(node);
 
@@ -122,23 +119,12 @@ std::string SchemeSmob::handle_to_string(SCM node)
     return handle_to_string(h, 0) + "\n";
 }
 
-std::string SchemeSmob::uuid_to_string(SCM node)
-{
-    Handle h(scm_uuid_to_handle(node));
-    return handle_to_string(h, 0) + "\n";
-}
-
 /* ============================================================== */
 /**
  * Wrapper -- given a handle, return the corresponding scheme object.
  * Note that smobs hold the integer value of the handle, and not the
  * C++ handle object itself.
  */
-SCM SchemeSmob::uuid_to_scm (UUID uuid)
-{
-    SCM suuid = scm_from_ulong(uuid);
-    SCM_RETURN_NEWSMOB (cog_uuid_tag, suuid);
-}
 
 SCM SchemeSmob::handle_to_scm (Handle h)
 {
@@ -154,25 +140,8 @@ SCM SchemeSmob::handle_to_scm (Handle h)
     return smob;
 }
 
-Handle SchemeSmob::scm_uuid_to_handle (SCM sh)
-{
-    if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_uuid_tag, sh))
-        return Handle::UNDEFINED;
-
-    SCM suuid = SCM_SMOB_OBJECT(sh);
-    UUID uuid = scm_to_ulong(suuid);
-    return Handle(uuid);
-}
-
 Handle SchemeSmob::scm_to_handle (SCM sh)
 {
-    if (SCM_SMOB_PREDICATE(SchemeSmob::cog_uuid_tag, sh))
-    {
-        SCM suuid = SCM_SMOB_OBJECT(sh);
-        UUID uuid = scm_to_ulong(suuid);
-        return Handle(uuid);
-    }
-
     if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sh))
         return Handle::UNDEFINED;
 
@@ -193,7 +162,10 @@ SCM SchemeSmob::ss_atom (SCM suuid)
 {
     if (scm_is_false(scm_integer_p(suuid)))
         scm_wrong_type_arg_msg("cog-atom", 1, suuid, "integer opencog uuid");
-    SCM_RETURN_NEWSMOB (cog_uuid_tag, suuid);
+
+    // SCM_RETURN_NEWSMOB (cog_uuid_tag, suuid);
+    UUID uuid = scm_to_ulong(suuid);
+    return handle_to_scm(Handle(uuid));
 }
 
 /* ============================================================== */
@@ -202,10 +174,6 @@ SCM SchemeSmob::ss_atom (SCM suuid)
  */
 SCM SchemeSmob::ss_handle (SCM satom)
 {
-    // If its the uuid, already, just return that.
-    if (SCM_SMOB_PREDICATE(SchemeSmob::cog_uuid_tag, satom))
-        return SCM_SMOB_OBJECT(satom);
-
     Handle h(scm_to_handle(satom));
     if (Handle::UNDEFINED == h)
         scm_wrong_type_arg_msg("cog-handle", 1, satom, "opencog atom");
@@ -227,8 +195,6 @@ SCM SchemeSmob::ss_undefined_handle (void)
 
 SCM SchemeSmob::ss_atom_p (SCM s)
 {
-    if (SCM_SMOB_PREDICATE(SchemeSmob::cog_uuid_tag, s))
-        return SCM_BOOL_T;
     if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
         return SCM_BOOL_F;
 
