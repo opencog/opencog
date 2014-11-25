@@ -89,6 +89,7 @@ class SchemeEval : public GenericEval
 		void drain_output();
 
 		AtomSpace* atomspace;
+		int _gc_ctr;
 
 	public:
 		SchemeEval(AtomSpace*);

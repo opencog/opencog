@@ -73,6 +73,8 @@ void SchemeEval::init(void)
 
 	_rc = SCM_EOL;
 	_rc = scm_gc_protect_object(_rc);
+
+	_gc_ctr = 0;
 }
 
 /// Discard all chars in the outport.
@@ -106,6 +108,9 @@ void SchemeEval::finish(void)
 
 	scm_gc_unprotect_object(error_string);
 	scm_gc_unprotect_object(captured_stack);
+
+	// Force garbage collection
+	scm_gc();
 }
 
 void * SchemeEval::c_wrap_finish(void *p)
@@ -485,6 +490,11 @@ void SchemeEval::do_eval(const std::string &expr)
 	_rc = scm_gc_protect_object(_rc);
 
 	atomspace = SchemeSmob::ss_get_env_as("do_eval");
+
+	// Cleanup every now and then, as otherwise guile gets piggy with
+	// the system RAM, happily splurging many gigabytes. The below does
+	// hurt performance, though -- about 15% for one test case...
+	if (++_gc_ctr%80 == 0) { scm_gc(); _gc_ctr = 0; }
 #if 0
 	scm_gc();
 	logger().info() << "Guile evaluated: " << expr;
