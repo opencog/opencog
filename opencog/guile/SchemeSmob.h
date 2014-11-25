@@ -52,9 +52,6 @@ class SchemeSmob
 		static bool is_inited;
 		static void register_procs(void);
 
-		// The handle tag is for opencog UUIDs, only.
-		static scm_t_bits cog_uuid_tag;
-
 		// The cog_misc_tag are for all other opencog types, such
 		// as truth values, which are ephemeral (garbage-collected)
 		static scm_t_bits cog_misc_tag;
@@ -62,9 +59,6 @@ class SchemeSmob
 		// Initialization functions
 		static void init_smob_type(void);
 
-		static int print_atom(SCM, SCM, scm_print_state *);
-		static SCM equalp_atom(SCM, SCM);
-		static size_t free_atom(SCM);
 		static int print_misc(SCM, SCM, scm_print_state *);
 		static SCM equalp_misc(SCM, SCM);
 		static SCM mark_misc(SCM);
@@ -157,7 +151,6 @@ class SchemeSmob
 		static std::string handle_to_string(SCM);
 		static std::string handle_to_string(Handle, int);
 		static std::string misc_to_string(SCM);
-		static std::string uuid_to_string(SCM);
 		static TruthValue *get_tv_from_list(SCM);
 		static AttentionValue *get_av_from_list(SCM);
 		static AtomSpace *get_as_from_list(SCM);
@@ -189,9 +182,6 @@ class SchemeSmob
 		// The embodiment code should be refactored to not use these.
 		static SCM handle_to_scm(Handle);
 		static Handle scm_to_handle(SCM);
-	private:
-		static SCM uuid_to_scm(UUID);
-		static Handle scm_uuid_to_handle(SCM);
 	public:
 
 		// Utility printing functions
