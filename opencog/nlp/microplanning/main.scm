@@ -15,7 +15,7 @@
 ; "utterance-type" is either 'declarative', 'interrogative', 'imperative'
 ; or 'interjective'
 ;
-(define (microplanning seq-link utterance-type)
+(define (microplanning seq-link utterance-type anaphora)
 	(define chunks '())
 	(define chunks-utterance-type '())
 	
@@ -33,8 +33,11 @@
 	
 		(cond ((not (null? chunks))
 			; insert anaphora
-			(set! chunks (insert-anaphora chunks (map get-sentence-forms chunks-utterance-type)))
-		
+			; XXX after inserting anaphora, a chunk might no longer be say-able
+			(if anaphora
+				(set! chunks (insert-anaphora chunks (map get-sentence-forms chunks-utterance-type)))
+			)
+			
 			; wrap SetLink around each chunk for Surface Realization
 			(map wrap-setlink chunks chunks-utterance-type)
 		      )

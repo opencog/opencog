@@ -107,10 +107,15 @@ These examples are also in comment form in `test-atomspace.scm`, which you can u
 
 Then you can running microplanning as follow
 ```
-(microplanning test-declarative-sal "declarative")
+(microplanning test-declarative-sal "declarative" #t)
 ```
 and a list of SetLink will be returned.  These SetLink's can be passed to Surface Realization as
 ```
-(map sureal (microplanning test-declarative-sal "declarative"))
+(map
+	(lambda (set-link)
+		(receive (sentences weights) (sureal set-link)
+			(filter-map (lambda (s w) (if (>= w 0) s #f)) sentences weights)))
+	(microplanning test-declarative-sal "declarative" #t)
+)
 ```
 
