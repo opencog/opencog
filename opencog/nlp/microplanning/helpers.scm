@@ -169,22 +169,22 @@
 ; match-sentence-forms -- Helper function to see if an atom matches a sentence form
 ;
 ; Check "atom" and its subgraph against a list of sentence forms and returns
-; the first form matched;  returns #f if none matched.
+; the subgraph that got matched;  returns #f if none matched a sentence form.
 ;
 (define (match-sentence-forms atom favored-forms)
 	; helper function to allow subgraph matching
 	(define (helper atom form)
 		(if (form-graph-match? atom form)
-			#t
+			atom
 			; check if subgraph match the form
 			(if (cog-link? atom)
-				(find (lambda (subgraph) (helper subgraph form)) (cog-outgoing-set atom))
+				(any (lambda (subgraph) (helper subgraph form)) (cog-outgoing-set atom))
 				#f
 			)
 		)	
 	)
 
-	(find (lambda (form) (helper atom form)) favored-forms)
+	(any (lambda (form) (helper atom form)) favored-forms)
 )
 
 ; -----------------------------------------------------------------------
