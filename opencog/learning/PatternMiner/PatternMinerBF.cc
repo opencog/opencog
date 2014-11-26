@@ -329,7 +329,7 @@ void PatternMiner::growPatternsTaskBF()
         cout<< "\r" + toString(((float)(cur_index)/last_gram_total_float)*100.0f) + "% completed." ;
         std::cout.flush();
 
-        if (cur_index >= total)
+        if (cur_index >= (int)total)
         {
             patternForLastGramLock.unlock();
             break;
@@ -367,7 +367,7 @@ void PatternMiner::growTheFirstGramPatternsTaskBF()
         cout<< "\r" + toString(((float)(cur_index)/atomspaceSizeFloat)*100.0f) + "% completed." ;
         std::cout.flush();
 
-        if (cur_index >= allLinks.size())
+        if (cur_index >= (int)allLinks.size())
         {
             patternForLastGramLock.unlock();
             break;
