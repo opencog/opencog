@@ -2651,7 +2651,7 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
 
         // Decode the base64 string into binary
         unsigned long length = (unsigned long)msg.size();
-        XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(), &length);
+        XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(),(XMLSize_t*) &length);
 
         MapInfoSeq mapinfoSeq;
         mapinfoSeq.ParseFromArray((void*)binary, length);
@@ -3521,7 +3521,7 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
 
         // Decode the base64 string into binary
         unsigned long length = (unsigned long)msg.size();
-        XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(), &length);
+        XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(),(XMLSize_t*) &length);
 
         Chunk chunk;
         chunk.ParseFromArray((void*)binary, length);
