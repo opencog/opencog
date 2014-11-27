@@ -171,7 +171,21 @@
 ; Check "atom" and its subgraph against a list of sentence forms and returns
 ; the subgraph that got matched;  returns #f if none matched a sentence form.
 ;
+; Also returns the base atom index (in the order returned from cog-get-all-nodes)
+; where the first node in the matched subgraph would start.  The atom index
+; is useful for
+;
+;    (EvaluationLink (PredicateNode "punched") (ListLink (ConceptNode "I") (ConceptNode "I"))
+;
+; where the same (ConceptNode "I") might be changed differently bases on position.
+;
 (define (match-sentence-forms atom favored-forms)
+	(define atom-base-index 0)
+	(define (helper-start atom form)
+		(set! atom-base-index 0)
+		(helper atom form)
+	)
+
 	; helper function to allow subgraph matching
 	(define (helper atom form)
 		(if (form-graph-match? atom form)
@@ -179,12 +193,15 @@
 			; check if subgraph match the form
 			(if (cog-link? atom)
 				(any (lambda (subgraph) (helper subgraph form)) (cog-outgoing-set atom))
-				#f
+				(begin
+					(set! atom-base-index (+ atom-base-index 1))
+					#f
+				)
 			)
-		)	
+		)
 	)
 
-	(any (lambda (form) (helper atom form)) favored-forms)
+	(values (any (lambda (form) (helper-start atom form)) favored-forms) atom-base-index)
 )
 
 ; -----------------------------------------------------------------------
