@@ -2650,8 +2650,8 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
         std::string msg(XMLString::transcode(dataElement->getTextContent()));
 
         // Decode the base64 string into binary
-        unsigned long length = (unsigned long)msg.size();
-        XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(),(XMLSize_t*) &length);
+        XMLSize_t length = (XMLSize_t) msg.size();
+        XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(), &length);
 
         MapInfoSeq mapinfoSeq;
         mapinfoSeq.ParseFromArray((void*)binary, length);
@@ -3520,8 +3520,8 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
         std::string msg(XMLString::transcode(dataElement->getTextContent()));
 
         // Decode the base64 string into binary
-        unsigned long length = (unsigned long)msg.size();
-        XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(),(XMLSize_t*) &length);
+        XMLSize_t length = (XMLSize_t) msg.size();
+        XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(), &length);
 
         Chunk chunk;
         chunk.ParseFromArray((void*)binary, length);
