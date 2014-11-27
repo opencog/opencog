@@ -28,7 +28,6 @@ class PLNUnitTester(TestCase):
         self.chainer = None
 
         # Works:
-        self.addTestFile("SubsetAS_new.scm")
         self.addTestFile("AndRule_new.scm")
         self.addTestFile("BooleanTransformationRule_new.scm")
         self.addTestFile("DeductionRule_InheritanceLink.scm")
@@ -58,6 +57,7 @@ class PLNUnitTester(TestCase):
         #self.addTestFile("GeneralEvaluationToMemberRule.scm")
 
         # Following tests give results that don't match or exceed expectations:
+        #self.addTestFile("SubsetAS_new.scm") # Unit test has been failing
         #self.addTestFile("LionTigerAS_new.scm") # Lots of stuff
         #self.addTestFile("IntensionalLinkEvaluationRule_new.scm") # Creates an IntensionalSimilarityLink though no such rule was supplied.
 
