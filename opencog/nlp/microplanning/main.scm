@@ -150,57 +150,15 @@
 ; Accepts a list of un-said links, the complete set, and the utterance type.
 ;
 (define (make-sentence atoms-unused atoms-set utterance-type)
-	(define favored-forms (get-sentence-forms utterance-type))
-	; initialize weight bases on "time ordering"
-	(define time-weights '())
-	; initialize weight (0, 1) bases on whether the atom satisfy a sentence form
-	(define form-weights '())
-	; initialize weight bases on linkage to other atoms
-	(define link-weights '())
+	; bunch of variables for storing the recursive looping results
+	(define atoms-used (lset-difference equal? atoms-set atoms-unused)) ; the set of both failed and successful atoms
+	(define atoms-failed '())	; the set of failed atoms
+	(define chunk '())		; the set of successful atoms to be returned
 
-	; comb-proc should takes in param "time", "form", "link" in this order
-	(define (calc-weights choices bases comb-proc)
-		(define choices-len (length choices))
-
-		; helper function: get all nodes for a atom, get all nodes in bases, count how many common nodes
-		(define (link-count atom)
-			(define atom-nodes (cog-get-all-nodes atom))
-			; XXX need to optimize performance here?
-			(define used-nodes (delete-duplicates (append-map cog-get-all-nodes bases)))
-			(length (lset-intersection equal? atom-nodes used-nodes))
-		)
-
-		(set! time-weights (list-tabulate choices-len (lambda (i) (- choices-len i))))
-		(set! form-weights (map (lambda (atom) (if (match-sentence-forms atom favored-forms) 1 0)) choices))
-		(set! link-weights (map link-count choices))
-		
-		(display "current weights\n")
-		(display time-weights)
-		(display "\n")
-		(display form-weights)
-		(display "\n")
-		(display link-weights)
-		(display "\nweights done\n")
-
-		; create a combined weight using comb-proc
-		(map comb-proc time-weights form-weights link-weights)
-	)
-
-	(define atoms-used (lset-difference equal? atoms-set atoms-unused))
-	(define atoms-failed '())
-	(define chunk '())
-
-	; helper function to sort the atoms list base on weights and choose the highest one
-	(define (pick-atom a-list weights)
-		(define assoc-list (sort (map cons a-list weights) (lambda (x y) (> (cdr x) (cdr y)))))
-		(caar assoc-list)
-	)
-
-	; helper function for looping
+	; main helper function for looping
 	(define (recursive-helper atoms-to-try)
-		(define head (car atoms-to-try))
-		(define result (check-chunk atoms-to-try utterance-type))
-		(define atoms-not-tried (lset-difference equal? atoms-unused atoms-to-try))
+		(define result (check-chunk atoms-to-try utterance-type)) ; the result of trying to say the atoms in a sentence
+		(define atoms-not-tried (lset-difference equal? atoms-unused atoms-to-try)) ; the set of atoms not yet used
 
 		(define (give-up-unadded-part)
 			; atoms that did not work
@@ -210,15 +168,11 @@
 
 			(set! atoms-failed (append dead-set atoms-failed))
 			(set! atoms-unused (lset-difference equal? atoms-unused dead-set))
-
-			(display "giving up atoms\n")
-			(display atoms-failed)
-			(display "\n")
-
+			
 			; try "saying" the previous working iteration again (if available) and re-choose a new atom
 			(if (null? good-set)
 				(if (not (null? atoms-unused))
-					(recursive-helper (list (pick-atom atoms-unused (calc-weights atoms-unused atoms-used (lambda (t f l) (* (+ t l) f))))))
+					(recursive-helper (list (pick-atom atoms-unused atoms-used (lambda (t f l) (* (+ t l) f)) utterance-type)))
 				)
 				(recursive-helper good-set)
 			)
@@ -227,29 +181,20 @@
 			; add anything that has not been included in the chunk yet
 			(set! chunk (lset-union equal? atoms-to-try chunk))
 			(set! atoms-unused atoms-not-tried)
-			(display "updating chunk\n")
-			(display chunk)
-			(display "\nupdating chunk ended\n")
 		)
 
 		; temporary variables not all conditions needed
 		(define temp-var1 '())
 		(define temp-var2 '())
 		(define temp-differences '())
-
-		(display "trying atoms\n")
-		(display atoms-to-try)
-		(display "\n....\n")
-
+		
 		(cond ; not say-able
 		      ((= result 0)
-			(display "not say-able\n")
 			; could be the atoms cannot be said unless bringing in additional atoms (such as "and/or/that")
 			; try to add more (up to 3 different links)
 			(cond ((<= (length atoms-to-try) 3)
-				; look to see if the newest link has any ConceptNode that is solo
-				; (ie. appear only once in the current set)
-				(set! temp-var1 (cog-get-all-nodes head))
+				; look to see if the newest link has any node that is solo (ie. appear only once in the current set)
+				(set! temp-var1 (cog-get-all-nodes (car atoms-to-try)))
 				(set! temp-var2 (append-map cog-get-all-nodes (cdr atoms-to-try)))
 				(set! temp-differences (filter has-word-inst? (lset-difference equal? temp-var1 temp-var2)))
 
@@ -257,7 +202,7 @@
 					(give-up-unadded-part)
 				      )
 				      (else
-					; find the first link in atoms-leftover that contains one of the solo word
+					; find the first link in atoms-not-tried that contains one of the solo word
 					(set! temp-var1
 						(find (lambda (a)
 							(find (lambda (w) (cog-has-node? a w)) temp-differences)
@@ -282,7 +227,6 @@
 		      )
 		      ; not long/complex enough
 		      ((= result 1)
-			(display "result not long enough\n")
 			; add the currently "say-able" stuff to our chunk
 			(update-chunk)
 
@@ -292,7 +236,7 @@
 					(cons
 						; weight is (time-weights + link-weights) * (2 - form-weights), ie. prefer links that do not
 						; satisify a sentence form, meaning it cannot be "said" on its own.
-						(pick-atom atoms-unused (calc-weights atoms-unused chunk (lambda (t f l) (* (+ t l) (- 2 f)))))
+						(pick-atom atoms-unused chunk (lambda (t f l) (* (+ t l) (- 2 f))) utterance-type)
 						atoms-to-try
 					)
 				)
@@ -300,14 +244,13 @@
 		      )
 		      ; too long/complex
 		      (else
-			(display "result too long\n")
 			(update-chunk)
 		      )
 		)
 	)
 
 	; the initial critera for choosing a starting point would be (time-weights + link-weights) * form-weights
-	(recursive-helper (list (pick-atom atoms-unused (calc-weights atoms-unused atoms-used (lambda (t f l) (* (+ t l) f))))))
+	(recursive-helper (list (pick-atom atoms-unused atoms-used (lambda (t f l) (* (+ t l) f)) utterance-type)))
 
 	; return the sentence chunk (reverse because we've been adding to the front)
 	(reverse chunk)
@@ -371,6 +314,45 @@
 		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (ConceptNode "InterjectiveSpeechAct"))
 	      )
 	)
+)
+
+; -----------------------------------------------------------------------
+; pick-atom -- Pick the best atom using some weighting function
+;
+; Helper function that weights the atoms in 'atoms-list' against 'bases-list'
+; using function 'comb-proc', and choose the one with the highest weight.
+;
+; 'comb-proc' should be a function that takes in param "time", "form", "link"
+; in this order
+;
+(define (pick-atom atoms-list bases-list comb-proc utterance-type)
+	(define favored-forms (get-sentence-forms utterance-type))
+	
+	; helper function that calculate the weights of each atoms in 'choices' using 'comb-proc'
+	(define (calc-weights choices bases comb-proc)
+		(define choices-len (length choices))
+
+		; helper function: get all nodes for a atom, get all nodes in 'bases', count how many common nodes
+		(define (link-count atom)
+			(define atom-nodes (cog-get-all-nodes atom))
+			(define used-nodes (delete-duplicates (append-map cog-get-all-nodes bases)))
+			(length (lset-intersection equal? atom-nodes used-nodes))
+		)
+
+		; initialize weight bases on "time ordering"
+		(define time-weights (list-tabulate choices-len (lambda (i) (- choices-len i))))
+		; initialize weight (0, 1) bases on whether the atom satisfy a sentence form
+		(define form-weights (map (lambda (atom) (if (match-sentence-forms atom favored-forms) 1 0)) choices))
+		; initialize weight bases on linkage to other atoms in 'bases'
+		(define link-weights (map link-count choices))
+		
+		; create a combined weight using comb-proc
+		(map comb-proc time-weights form-weights link-weights)
+	)
+
+	(define weights (calc-weights atoms-list bases-list comb-proc))
+	(define assoc-list (sort (map cons atoms-list weights) (lambda (x y) (> (cdr x) (cdr y)))))
+	(caar assoc-list)
 )
 
 ; -----------------------------------------------------------------------
@@ -451,10 +433,6 @@
 			(set! say-able #t)
 		)
 	)
-
-	(display "\nSuReal output: ")
-	(display (sureal temp-set-link))
-	(display "\n")
 	
 	; remove the temporary SetLink
 	(cog-delete temp-set-link)
@@ -479,11 +457,6 @@
 
 
 ; some atoms used can be leave out of used to be reused later?
-; eg. atoms that do not satisfy a sentence form?
-
-
-; for interrogative, need to call SuReal as both declarative and interrogative
-; and then need to store which one is actually used to form a sentence, before inserting anaphora
-
+; eg. atoms that do not satisfy a sentence form (like adjectives)?
 
 
