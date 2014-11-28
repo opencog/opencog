@@ -33,27 +33,6 @@
 )
 
 ; -----------------------------------------------------------------------
-; r2l-get-word-inst -- Retrieve WordInstanceNode given R2L style node
-;
-; Given a R2L style node, find the corresponding WordInstanceNode.
-;
-(define (r2l-get-word-inst node)
-	(cond ((null? node) '())
-	      ((has-word-inst? node) (cog-node 'WordInstanceNode (cog-name node)))
-	      (else '())
-	)
-)
-
-; -----------------------------------------------------------------------
-; has-word-inst? -- Check if a node has the corresponding WordInstanceNode
-;
-; Return #t or #f depends on whether the node as a WordInstanceNode.
-;
-(define (has-word-inst? node)
-	(not (null? (cog-node 'WordInstanceNode (cog-name node))))
-)
-
-; -----------------------------------------------------------------------
 ; word-inst-has-attr? -- Check if a WordInstanceNode has a particular attribute
 ;
 ; Return #t or #f depends on whether the node has the attribute 'attr-string' or not.
