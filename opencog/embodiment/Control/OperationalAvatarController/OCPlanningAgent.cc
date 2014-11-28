@@ -274,11 +274,9 @@ void OCPlanningAgent::run()
 
         if ( evaluator->eval_error() )
         {
-            logger().error( "OCPlanningAgent::%s -getCurrentDemand() failed '%s'",
-                             __FUNCTION__,
-                             scheme_expression.c_str()
-                          );
-
+            logger().error("OCPlanningAgent::%s -getCurrentDemand() failed '%s'",
+                           __FUNCTION__,
+                           scheme_expression.c_str());
         }
         delete evaluator;
 #endif // HAVE_GUILE
@@ -288,17 +286,17 @@ void OCPlanningAgent::run()
                                                             "plan_selected_demand_goal"));
 
         // Update the pet's previously/ currently Demand Goal
-        PsiRuleUtil::setCurrentDemandGoal(oac->getAtomSpace(), this->hSelectedDemandGoal);
+        PsiRuleUtil::setCurrentDemandGoal(oac->getAtomSpace(),
+                                          this->hSelectedDemandGoal);
 
-        logger().debug( "OCPlanningAgent::%s - do planning for the Demand Goal: %s [cycle = %d]",
-                        __FUNCTION__,
-                        oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str(),
-                        this->cycleCount
-                      );
+        logger().debug("OCPlanningAgent::%s - do planning for the Demand Goal: %s [cycle = %d]",
+                       __FUNCTION__,
+                       oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str(),
+                       this->cycleCount);
 
-        std::cout<<"OCPlanner is doing planning for :"
-                 <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
-                 <<std::endl;
+        std::cout << "OCPlanner is doing planning for :"
+                  << oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
+                  << std::endl;
 
         // the demand goal is something like "EnergyDemandGoal"
         currentOCPlanID = ocplanner->doPlanningForPsiDemandingGoal(this->hSelectedDemandGoal, &_cogserver);

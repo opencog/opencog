@@ -728,11 +728,14 @@ Handle PsiRuleUtil::getCurrentDemandGoal(AtomSpace & atomSpace, Handle & referen
     return hDemandGoalEvaluationLink; 
 }
 
-void PsiRuleUtil::setCurrentDemandGoal(AtomSpace & atomSpace, Handle hCurrentlySelectedDemandGoal)
+void PsiRuleUtil::setCurrentDemandGoal(AtomSpace & atomSpace,
+                                       Handle hCurrentlySelectedDemandGoal)
 {
     // Get Handles to old ReferenceLink and EvaluationLink
-    Handle hCurrentDemandGoalConceptNode = atomSpace.addNode(CONCEPT_NODE, "CurrentDemandGoal"); 
-    Handle hPreviousDemandGoalConceptNode = atomSpace.addNode(CONCEPT_NODE, "PreviousDemandGoal"); 
+    Handle hCurrentDemandGoalConceptNode =
+        atomSpace.addNode(CONCEPT_NODE, "CurrentDemandGoal");
+    Handle hPreviousDemandGoalConceptNode =
+        atomSpace.addNode(CONCEPT_NODE, "PreviousDemandGoal");
 
     Handle hOldCurrentDemandGoalReferenceLink = 
         AtomSpaceUtil::getReferenceLink(atomSpace, hCurrentDemandGoalConceptNode); 

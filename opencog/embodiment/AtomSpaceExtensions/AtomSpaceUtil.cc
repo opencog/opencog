@@ -1038,24 +1038,31 @@ std::vector<Handle> AtomSpaceUtil::getNodesByEvaluationLink(AtomSpace &atomSpace
     return resultSet;
 }
 
-Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace, Handle hFirstOutgoing) 
+Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace,
+                                       Handle hFirstOutgoing)
 {
     // Create BindLink used by pattern matcher
-    std::vector<Handle> referenceLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings; 
+    std::vector<Handle> referenceLinkOutgoings,
+        implicationLinkOutgoings, bindLinkOutgoings;
 
     Handle hVariableNode = atomSpace.addNode(VARIABLE_NODE, "$var_any");
 
     referenceLinkOutgoings.push_back(hFirstOutgoing); 
     referenceLinkOutgoings.push_back(hVariableNode); 
-    Handle hReferenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoings,TruthValue::TRUE_TV());
+    Handle hReferenceLink = atomSpace.addLink(REFERENCE_LINK,
+                                              referenceLinkOutgoings,
+                                              TruthValue::TRUE_TV());
 
     implicationLinkOutgoings.push_back(hReferenceLink); 
     implicationLinkOutgoings.push_back(hReferenceLink); 
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings,TruthValue::TRUE_TV());
+    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK,
+                                                implicationLinkOutgoings,
+                                                TruthValue::TRUE_TV());
 
     bindLinkOutgoings.push_back(hVariableNode);  
     bindLinkOutgoings.push_back(hImplicationLink); 
-    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings,TruthValue::TRUE_TV());
+    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings,
+                                         TruthValue::TRUE_TV());
 
     // Run pattern matcher
     Handle hResultListLink = bindlink(&atomSpace, hBindLink);
@@ -1096,7 +1103,8 @@ Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace, Handle hFirstOutgo
 
 Handle AtomSpaceUtil::getReference(AtomSpace & atomSpace, Handle hFirstOutgoing)
 {
-    Handle hReferenceLink = AtomSpaceUtil::getReferenceLink(atomSpace, hFirstOutgoing); 
+    Handle hReferenceLink = AtomSpaceUtil::getReferenceLink(atomSpace,
+                                                            hFirstOutgoing);
 
     if (hReferenceLink==Handle::UNDEFINED)
         return Handle::UNDEFINED; 
