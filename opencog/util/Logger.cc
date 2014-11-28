@@ -423,6 +423,22 @@ void Logger::log(Logger::Level level, const std::string &txt)
     }
 }
 
+void Logger::backtrace()
+{
+    static const unsigned int max_queue_size_allowed = 1024;
+    std::ostringstream oss;
+    prt_backtrace(oss);
+
+    msg_queue.push(new std::string(oss.str()));
+
+    // If the queue gets too full, block until it's flushed to file or
+    // stdout. This can sometimes happen, if some component is spewing
+    // lots of debugging messages in a tight loop.
+    if (msg_queue.size() > max_queue_size_allowed) {
+        flush();
+    }
+}
+
 void Logger::logva(Logger::Level level, const char *fmt, va_list args)
 {
     if (level <= currentLevel) {

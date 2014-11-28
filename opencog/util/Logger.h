@@ -141,6 +141,9 @@ public:
     // void debug(const std::string &txt);
     // void fine (const std::string &txt);
 
+    // Log the backtrace, and only it
+    void backtrace();
+
     /**
      * Log a message (printf style) into log file (passed in constructor)
      * if and only if passed level is lower than or equals to the current
