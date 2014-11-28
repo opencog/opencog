@@ -1,16 +1,26 @@
+; loading additional dependency
 (use-modules (oop goops))
 (load-scm-from-file "../opencog/nlp/microplanning/helpers.scm")
 
+; -----------------------------------------------------------------------
+; <noun-item> -- A class containing information on a noun
+;
+; An instance of this class will store all the information needed for
+; processing a noun.
+;
 (define-class <noun-item> ()
-	(nn #:init-keyword #:noun-node #:getter get-noun-node)
-	(lk #:init-keyword #:orig-link #:getter get-orig-link)
-	(ai #:init-keyword #:atom-index #:getter get-atom-index)
-	(li #:init-keyword #:link-index #:getter get-link-index)
-	(ci #:init-keyword #:chunk-index #:getter get-chunk-index)
-	(base-pronoun #:init-value "")
-	(pronoun-safe #:init-value #f #:getter is-pronoun-safe? #:setter set-pronoun-safe!)
+	(nn #:init-keyword #:noun-node #:getter get-noun-node)		; the corresponding ConceptNode
+	(lk #:init-keyword #:orig-link #:getter get-orig-link)		; the original link the node is part of
+	(ai #:init-keyword #:atom-index #:getter get-atom-index)	; the node index within the link (named atom-index since node-index's short-hand will cause confusion)
+	(li #:init-keyword #:link-index #:getter get-link-index)	; the index of the link within a chunk
+	(ci #:init-keyword #:chunk-index #:getter get-chunk-index)	; the index of the chunk within a list of chunks
+	(base-pronoun #:init-value "")					; the corresponding pronoun in its basic form
+	(pronoun-safe #:init-value #f #:getter is-pronoun-safe? #:setter set-pronoun-safe!)	; indicate whether this usage can be changed to a pronoun
 )
 
+; -----------------------------------------------------------------------
+; get-base-pronominal -- Get the basic form of the pronoun
+;
 (define-method (get-base-pronominal (ni <noun-item>))
 	(define (determine-pronoun)
 		(define word-inst (r2l-get-word-inst (get-noun-node ni)))
@@ -19,16 +29,27 @@
 		(define is-human (word-inst-has-attr? word-inst "person"))
 		(define is-male (and is-human (word-inst-has-attr? word-inst "masculine")))
 		
+		(define (rebase-pronoun orig)
+			(cond ((regexp-exec (make-regexp "(I|me|my|myself)" regexp/icase) orig) "I")
+			      ((regexp-exec (make-regexp "(you|your|yourself)" regexp/icase) orig) "you")
+			      ((regexp-exec (make-regexp "(he|him|his|himself)" regexp/icase) orig) "he")
+			      ((regexp-exec (make-regexp "(she|her|herself)" regexp/icase) orig) "she")
+			      ((regexp-exec (make-regexp "(it|its|itself)" regexp/icase) orig) "it")
+			      ((regexp-exec (make-regexp "(we|us|our|ourselves)" regexp/icase) orig) "we")
+			      ((regexp-exec (make-regexp "(they|them|their|theirselves)" regexp/icase) orig) "they")
+			)
+		)
+		
 		; TODO check possession for "our", "his", "their", etc. and "ours", "hers", "theirs" etc.
 		;    "our group" -> "we"
 		;    "our cars" -> "they"
-		; XXX "our cars" would likely be two seperate nodes in atomspace "we" and "car", possibly
+		; XXX "our cars" would likely be two seperate nodes in atomspace "us" and "car", possibly
 		;     in EvaluationLink "possession", so instead of replacing "our car", we would be 
 		;     replacing "car" with pronoun, and delete the "possession" link...
 				
-		(cond ; do nothing if already pronoun (such as "I", "you", "we")
+		(cond ; if already a pronoun, change it to the base form
 		      (is-pronoun
-			(word-inst-get-word-str word-inst)
+			(rebase-pronoun (word-inst-get-word-str word-inst))
 		      )
 		      ((and is-human is-male)
 			"he"
@@ -53,7 +74,13 @@
 	(slot-ref ni 'base-pronoun)
 )
 
-; TODO still need to handle "mine", "hers", "theirs", etc.
+; -----------------------------------------------------------------------
+; get-modified-pronominal -- Get the modified form of the pronoun
+;
+; The modified form will be based on the noun's usage (subject/object).
+;
+; XXX how to handle "mine", "hers", "theirs", etc.
+;
 (define-method (get-modified-pronomial (ni <noun-item>) (forms-list <list>))
 	(define the-noun-node (get-noun-node ni))
 	(define the-orig-link (get-orig-link ni))
@@ -102,6 +129,9 @@
 		(cond ; check possession
 		      ((and (cog-pred-get-pred the-orig-link)
 		     	    (string=? (cog-name (cog-pred-get-pred the-orig-link)) "possession"))
+		     	; XXX need additional checks for the possessor and the possessed
+		     	;     the whole possession link can be discarded if the possessed can be a pronoun
+		     	;     meaning an additional step is needed before inserting pronoun, changing the chunk
 		      	(cond ((string-ci=? "I" the-base-pronoun) "my")
 		      	      ((string-ci=? "you" the-base-pronoun) "your")
 		      	      ((string-ci=? "he" the-base-pronoun) "his")
@@ -126,6 +156,13 @@
 	)
 )
 
+; -----------------------------------------------------------------------
+; get-nominal -- Get the nominal anaphora
+;
+; Get some alternative nouns or phrases that represent the same object.
+;
+; TODO possibly ranked bases on size of incoming-set (# of usage)
+;
 (define-method (get-nominal (ni <noun-item>))
 	; return a list of all possible nominal anaphora?
 )

@@ -10,8 +10,8 @@
 ; insert-anaphora -- The main function for inserting anaphora
 ;
 ; Accepts a list of 'chunks' from make-sentence-chunks and the matching
-; list of sentence forms from sentences-form.scm (eg. the list from
-; "declarative").  Returns new chunks with anaphora inserted (as
+; list of sentence forms from sentences-form.scm for each chunk (eg. the
+; list from "declarative").  Returns new chunks with anaphora inserted (as
 ; new atoms).
 ;
 (define (insert-anaphora chunks forms-list)
@@ -37,7 +37,6 @@
 				      	; check if the noun should be replace with pronoun
 				      	(cond ((and result-ni (is-pronoun-safe? result-ni))
 				      		; XXX do we need this new node to inherit from original?
-				      		; XXX do it like anaphora resolution?
 				      		(cog-new-node (cog-type atom)
 			      				(get-modified-pronomial result-ni forms)
 			      				(cog-tv atom))
