@@ -1,3 +1,8 @@
+;
+; utilities.scm
+;
+; Assorted utilties for checking R2L outputs.
+;
 
 ; -----------------------------------------------------------------------
 ; r2l-get-root -- Return all hypergraph R2L roots containing 'atom'
@@ -40,14 +45,30 @@
 	(not (null? (cog-node 'WordInstanceNode (cog-name node))))
 )
 
+; -----------------------------------------------------------------------
+; has-word? -- Check if a node has the corresponding WordNode
+;
+; Return #t or #f depends on whether the node as a WordNode.
+;
 (define (has-word? node)
 	(not (null? (cog-node 'WordNode (cog-name node))))
 )
 
+; -----------------------------------------------------------------------
+; is-r2l-inst? -- Check if a node is a R2L instanced node.
+;
+; Return #t or #f depends on whether the node is instanced.  VariableNode
+; is also instanced node.
+;
 (define (is-r2l-inst? node)
 	(or (equal? 'VariableNode (cog-type node)) (has-word-inst? node))
 )
 
+; -----------------------------------------------------------------------
+; is-r2l-abstract? -- Check if a node is a R2L abstract node.
+;
+; Return #t or #f depends on whether the node is the abstract version.
+;
 (define (is-r2l-abstract? node)
 	(has-word? node)
 )
