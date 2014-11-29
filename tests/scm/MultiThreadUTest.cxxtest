@@ -115,14 +115,20 @@ void MultiThreadUTest::test_three_evals_one_thread(void)
 	Handle h3 = ev3->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
 	CHKEV(ev3);
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h3);
+	delete ev3;
+	ev3 = NULL;
 
 	Handle h4 = ev2->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
 	CHKEV(ev2);
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != h4);
+	delete ev2;
+	ev2 = NULL;
 
 	Handle h5 = ev1->eval_h("(cog-node 'ConceptNode \"stuff\")");
 	CHKEV(ev1);
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h5);
+	delete ev1;
+	ev1 = NULL;
 
 	// We expect the handles to be the same.
 	TSM_ASSERT("Bad handles", h1 == h2);
@@ -132,9 +138,6 @@ void MultiThreadUTest::test_three_evals_one_thread(void)
 
 	printf ("h1 = %lu %p\n", h1.value(), h1.operator->());
 
-	delete ev1;
-	delete ev2;
-	delete ev3;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
