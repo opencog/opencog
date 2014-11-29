@@ -140,7 +140,9 @@ void SchemeEval::set_error_string(SCM newerror)
 static pthread_once_t eval_init_once = PTHREAD_ONCE_INIT;
 static pthread_key_t tid_key = 0;
 
-#define WORK_AROUND_GUILE_185_BUG
+#ifndef HAVE_GUILE2
+	#define WORK_AROUND_GUILE_185_BUG
+#endif
 #ifdef WORK_AROUND_GUILE_185_BUG
 /* There's a bug in guile-1.8.5, where the second and subsequent
  * threads run in guile mode with a bogus/broken current-module.
@@ -160,7 +162,9 @@ static void * do_bogus_scm(void *p)
 }
 #endif /* WORK_AROUND_GUILE_185_BUG */
 
-#define WORK_AROUND_GUILE_THREADING_BUG
+#ifndef HAVE_GUILE2
+	#define WORK_AROUND_GUILE_THREADING_BUG
+#endif
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 /* There are bugs in guile-1.8.6 and earlier that prevent proper
  * multi-threaded operation. Currently, the most serious of these is
@@ -178,6 +182,10 @@ static void * do_bogus_scm(void *p)
  * Its claimed that the bug only happens for top-level defines.
  * Thus, in principle, threading should be OK after all scripts have
  * been loaded.
+ *
+ * FWIW, the unit test MultiThreadUTest tests atom creation in multiple
+ * threads. As of 29 Nov 2014, it passes, for me, using guile-2.0.9
+ * which is the stock version of guile in Mint Qiana 17 aka Ubuntu 14.04
  */
 static pthread_mutex_t serialize_lock;
 static pthread_key_t ser_key = 0;
