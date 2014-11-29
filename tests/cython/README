@@ -1,0 +1,12 @@
+
+
+HOWTO run these tests by hand:
+
+export PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython
+nosetests -vs ${CMAKE_SOURCE_DIR}/tests/cython/moses/
+
+
+also: 
+rm opencog/cython/opencog/pymoses.cpp
+
+DEPENDS 
