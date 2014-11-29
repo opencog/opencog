@@ -103,9 +103,8 @@ void MultiAtomSpace::tearDown(void)
 	TSM_ASSERT("Caught scm error during eval", \
 		(false == evaluator->eval_error()));
 /*
- * Test assorted functions from opencog/scm/utilities.scm
+ * Test two atomspaces, both accessed from one evaluator.
  */
-
 void MultiAtomSpace::test_two_scm(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);

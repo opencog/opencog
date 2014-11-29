@@ -1,7 +1,7 @@
 /*
  * tests/scm/SCMExecutionUTest.cxxtest
  *
- * Copyright (C) 2014 Cosmo Harrigan
+ * Copyright (C) 2014 Cosmo Harrigan, Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -71,6 +71,9 @@ class SCMExecutionUTest :  public CxxTest::TestSuite
 	void tearDown(void);
 
 	void testExecute(void);
+
+	void test_multi_threads(void);
+	void threadedAdd(int thread_id, int N);
 };
 
 void SCMExecutionUTest::setUp(void)
@@ -86,6 +89,9 @@ void SCMExecutionUTest::tearDown(void)
 	eval = NULL;
 }
 
+#define CHKEV(ev) \
+	TSM_ASSERT("Caught scm error during eval", \
+		(false == ev->eval_error()));
 void SCMExecutionUTest::testExecute(void)
 {
         Handle julian = as->addNode(CONCEPT_NODE, "julian");
@@ -97,6 +103,7 @@ void SCMExecutionUTest::testExecute(void)
         // GroundedSchemaNode
         eval->eval("(define (make-king x) (InheritanceLink x "
                    "(ConceptNode \"king\")))");
+        CHKEV(eval);
         
         // There is no king yet
         TS_ASSERT_EQUALS(as->getIncoming(king).size(), 0);
@@ -107,7 +114,101 @@ void SCMExecutionUTest::testExecute(void)
         eval->eval("(cog-execute! (ExecutionLink "
                    "(GroundedSchemaNode \"scm: make-king\") (ListLink "
                    "(ConceptNode \"julian\"))))");
+        CHKEV(eval);
 
         // Now there should be a king
         TS_ASSERT_EQUALS(as->getIncoming(king).size(), 1);
+}
+
+
+// In this thread, Do same as above, esxcept make lots of Julians,
+// and crown them all.
+// Use a unique evaluator for this thread.
+void SCMExecutionUTest::threadedAdd(int thread_id, int N)
+{
+	AtomSpace* as = &cogserver().getAtomSpace();
+	SchemeEval* ev = new SchemeEval(as);
+	int counter = 0;
+
+	// Define a Scheme procedure that will be used in the
+	// GroundedSchemaNode
+	ev->eval("(define (make-king x) (InheritanceLink x "
+	         "(ConceptNode \"king\")))");
+
+	// There is no king yet
+	Handle king = as->addNode(CONCEPT_NODE, "king");
+	TS_ASSERT_EQUALS(as->getIncoming(king).size(), 0);
+
+	for (int i = 0; i < N; i++) {
+		double strength = 0.7 * ((double) i) / ((double) N);
+		double confidence = 0.8 * ((double) N-i) / ((double) N);
+
+		std::ostringstream jules;
+		jules << "\"julian " << thread_id << " node " << counter << "\"";
+		counter ++;
+
+		std::ostringstream oss;
+		oss << "(InheritanceLink (ConceptNode "
+		    << jules.str() << ")"
+		    << "(ConceptNode \"prince\")"
+		    << "(cog-new-stv " << strength << " " << confidence << "))";
+
+		Handle h = ev->eval_h(oss.str());
+		CHKEV(ev);
+		TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h);
+
+		// Use the "cog-execute!" command to fire an ExecutionLink directly
+		// from the Scheme shell, containing a GroundedSchemaNode referring to 
+		// the previously defined procedure
+		std::ostringstream ess;
+		ess << "(cog-execute! (ExecutionLink "
+		       "(GroundedSchemaNode \"scm: make-king\") "
+             "(ListLink (ConceptNode " << jules.str() << "))))";
+		ev->eval(ess.str());
+		CHKEV(eval);
+	}
+	delete ev;
+}
+
+/*
+ * Test multiple evaluators writing to a single atomspace, in multiple threads.
+ * This is the same as testExecute above, except here, we have a zillian
+ * different julians all being crowned king.  We use 8 threads in which to do
+ * the crowning.
+ */
+void SCMExecutionUTest::test_multi_threads(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	AtomSpace* as = &cogserver().getAtomSpace();
+	as->clear();
+
+	std::vector<std::thread> thread_pool;
+
+	int n_threads = 8;
+	int num_atoms = 100;
+	for (int i=0; i < n_threads; i++) {
+		thread_pool.push_back(
+			std::thread(&SCMExecutionUTest::threadedAdd, this, i, num_atoms));
+	}
+	for (std::thread& t : thread_pool) t.join();
+	size_t size = as->getSize();
+	std::cout << "atomspace size:" << size << std::endl;
+
+	// we should get ... a total of ...
+	// 1 prince
+	// 1 grounded schema
+	// 1 king
+	// num_atoms * n_threads  Concept    julians
+	// num_atoms * n_threads  Inheritance  julian prince
+	// num_atoms * n_threads  ListLink  julian
+	// num_atoms * n_threads  ExecutiuonLink
+	// num_atoms * n_threads  Inheritance  julian king
+	// for a total of 3 + 5 * num_atoms * n_threads atoms created, total.
+	TS_ASSERT_EQUALS(size, 5 * num_atoms * n_threads + 3);
+
+	// Everyone gets to be a king!  Yayyyy!
+	Handle king = as->addNode(CONCEPT_NODE, "king");
+	TS_ASSERT_EQUALS(as->getIncoming(king).size(), num_atoms * n_threads);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }

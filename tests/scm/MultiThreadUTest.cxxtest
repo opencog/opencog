@@ -1,0 +1,199 @@
+/*
+ * tests/scm/MultiThreadUTest.cxxtest
+ *
+ * Copyright (C) 2009, 2011, 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class MultiThreadUTest :  public CxxTest::TestSuite
+{
+	public:
+
+		MultiThreadUTest(void)
+		{
+			try
+			{
+				config().load("opencog-test.conf");
+			}
+			catch (RuntimeException &e)
+			{
+				std::cerr << e.getMessage() << std::endl;
+			}
+			logger().setFilename(config()["LOG_FILE"]);
+			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+			// logger().setLevel(Logger::DEBUG);
+			// logger().setPrintToStdoutFlag(true);
+
+			cogserver().loadModules();
+		}
+
+		~MultiThreadUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+		void tearDown(void);
+
+		void test_three_evals_one_thread(void);
+		void test_multi_threads(void);
+		void threadedAdd(int thread_id, int N);
+};
+
+/*
+ * This function sets up .. whatever.
+ */
+#define an as->addNode
+#define al as->addLink
+void MultiThreadUTest::setUp(void)
+{
+	server(CogServer::createInstance);
+
+	config().set("SCM_PRELOAD",
+		"opencog/atomspace/core_types.scm");
+
+	cogserver().loadSCMModules();
+}
+
+void MultiThreadUTest::tearDown(void)
+{
+}
+
+/*
+ * Test three evaluators writing to a single atomspace, in the same thread.
+ */
+
+#define CHKEV(ev) \
+	TSM_ASSERT("Caught scm error during eval", \
+		(false == ev->eval_error()));
+void MultiThreadUTest::test_three_evals_one_thread(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Three evaluators all touching one atomspace.
+	AtomSpace* as = &cogserver().getAtomSpace();
+	SchemeEval* ev1 = new SchemeEval(as);
+	SchemeEval* ev2 = new SchemeEval(as);
+	SchemeEval* ev3 = new SchemeEval(as);
+
+	Handle h1 = ev1->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
+	CHKEV(ev1);
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h1);
+
+	Handle h2 = ev2->eval_h("(cog-node 'ConceptNode \"stuff\")");
+	CHKEV(ev2);
+	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != h2);
+
+	Handle h3 = ev3->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
+	CHKEV(ev3);
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h3);
+	delete ev3;
+	ev3 = NULL;
+
+	Handle h4 = ev2->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
+	CHKEV(ev2);
+	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != h4);
+	delete ev2;
+	ev2 = NULL;
+
+	Handle h5 = ev1->eval_h("(cog-node 'ConceptNode \"stuff\")");
+	CHKEV(ev1);
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h5);
+	delete ev1;
+	ev1 = NULL;
+
+	// We expect the handles to be the same.
+	TSM_ASSERT("Bad handles", h1 == h2);
+	TSM_ASSERT("Bad handles", h1 == h3);
+	TSM_ASSERT("Bad handles", h1 == h4);
+	TSM_ASSERT("Bad handles", h1 == h5);
+
+	printf ("h1 = %lu %p\n", h1.value(), h1.operator->());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+
+// In this thread, create a bunch of atoms.
+// Use same atomsapce as all the other threads.
+// Use a unique evaluator for this thread.
+void MultiThreadUTest::threadedAdd(int thread_id, int N)
+{
+	AtomSpace* as = &cogserver().getAtomSpace();
+	SchemeEval* ev = new SchemeEval(as);
+	int counter = 0;
+	for (int i = 0; i < N; i++) {
+		double strength = 0.7 * ((double) i) / ((double) N);
+		double confidence = 0.8 * ((double) N-i) / ((double) N);
+
+		std::ostringstream oss;
+		oss << "(cog-new-node 'ConceptNode \""
+		    << "thread " << thread_id << " node " << counter
+		    << "\" (cog-new-stv " << strength << " " << confidence << "))";
+		counter ++;
+
+		Handle h = ev->eval_h(oss.str());
+		CHKEV(ev);
+		TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h);
+	}
+	delete ev;
+}
+
+/*
+ * Test multiple evaluators writing to a single atomspace, in multiple threads.
+ */
+void MultiThreadUTest::test_multi_threads(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	AtomSpace* as = &cogserver().getAtomSpace();
+	as->clear();
+
+	std::vector<std::thread> thread_pool;
+
+	// Twelve threads -- 15K atoms -- should be enough to run maybe 15-30
+	// seconds on modern CPUs.
+	int n_threads = 12;
+	int num_atoms = 15225;
+	for (int i=0; i < n_threads; i++) {
+		thread_pool.push_back(
+			std::thread(&MultiThreadUTest::threadedAdd, this, i, num_atoms));
+	}
+	for (std::thread& t : thread_pool) t.join();
+	size_t size = as->getSize();
+	std::cout << "atomspace size:" << size << std::endl;
+
+	// we should get num_atoms * n_threads distinct atoms
+	TS_ASSERT_EQUALS(size, num_atoms * n_threads);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+
