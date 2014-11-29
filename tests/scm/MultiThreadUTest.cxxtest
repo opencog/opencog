@@ -64,7 +64,7 @@ class MultiThreadUTest :  public CxxTest::TestSuite
 		void tearDown(void);
 
 		void test_three_evals_one_thread(void);
-		void test_three_evals_three_threads(void);
+		void test_multi_threads(void);
 		void threadedAdd(int thread_id, int N);
 };
 
@@ -140,6 +140,8 @@ void MultiThreadUTest::test_three_evals_one_thread(void)
 
 
 // In this thread, create a bunch of atoms.
+// Use same atomsapce as all the other threads.
+// Use a unique evaluator for this thread.
 void MultiThreadUTest::threadedAdd(int thread_id, int N)
 {
 	AtomSpace* as = &cogserver().getAtomSpace();
@@ -152,7 +154,7 @@ void MultiThreadUTest::threadedAdd(int thread_id, int N)
 		std::ostringstream oss;
 		oss << "(cog-new-node 'ConceptNode \""
 		    << "thread " << thread_id << " node " << counter
-		    << "\" (stv " << strength << " " << confidence << "))";
+		    << "\" (cog-new-stv " << strength << " " << confidence << "))";
 		counter ++;
 
 		Handle h = ev->eval_h(oss.str());
@@ -163,17 +165,18 @@ void MultiThreadUTest::threadedAdd(int thread_id, int N)
 }
 
 /*
- * Test three evaluators writing to a single atomspace, in three threads.
+ * Test multiple evaluators writing to a single atomspace, in multiple threads.
  */
-void MultiThreadUTest::test_three_evals_three_threads(void)
+void MultiThreadUTest::test_multi_threads(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	AtomSpace* as = &cogserver().getAtomSpace();
+	as->clear();
 
 	std::vector<std::thread> thread_pool;
 
-	int n_threads = 3;
-	int num_atoms = 5;
+	int n_threads = 8;
+	int num_atoms = 5225;
 	for (int i=0; i < n_threads; i++) {
 		thread_pool.push_back(
 			std::thread(&MultiThreadUTest::threadedAdd, this, i, num_atoms));
