@@ -14,4 +14,4 @@ then
 fi
 build_dir=${branch_dir}/${build_dir_name}
 
-${build_dir}/opencog/server/cogserver -c ~/Ubuntu\ One/.opencog.conf
+${build_dir}/opencog/server/cogserver -c ../lib/opencog.conf
