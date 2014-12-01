@@ -78,43 +78,27 @@ unsigned int lazy_selector::operator()()
     OC_ASSERT(!empty(), "lazy_selector - selector is empty.");
 
     unsigned int sel_idx = select();
-
-    uint_one_to_many_map_cit sel_idx_cit = _map.find(sel_idx);
-
-    // if the selected index points to nothing then the result is
-    // itself otherwise it is the pointed index
-    unsigned int res = sel_idx_cit == _map.end()? sel_idx : sel_idx_cit->second;
     
-    // move _l from res so that it is now a free index
+    // If the selected index points to nothing then the result is
+    // itself otherwise it is _l
+    unsigned int res = is_free(sel_idx) ? sel_idx : _l;
+
+    // Move _l from res so that it is now a free index
     if(res == _l) increase_l_till_free();
 
-    // redirect all links pointing to res so they point now to _l
-    modify_target(res, _l);
-
-    // create a link from res to _l
-    _map.insert(make_pair(res, _l));
+    _picked.insert(res);
 
     return res;
 }
 
 bool lazy_selector::is_free(unsigned int idx) const {
-    return _map.find(idx) == _map.end();
+    return _picked.find(idx) == _picked.end();
 }
 
 void lazy_selector::increase_l_till_free() {
     do {
         _l++;
     } while(!is_free(_l));
-}
-
-void lazy_selector::modify_target(unsigned int src_to, unsigned int dst_to) {
-    typedef uint_one_to_many_map::index<to>::type::iterator to_it;
-    std::pair<to_it, to_it> range = get<to>(_map).equal_range(src_to);
-    for(to_it it = range.first; it != range.second;) {
-        unsigned int from_idx = it->first;
-        it = get<to>(_map).erase(it);
-        _map.insert(make_pair(from_idx, dst_to));
-    }
 }
 
 } //~namespace opencog

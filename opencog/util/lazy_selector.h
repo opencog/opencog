@@ -25,18 +25,13 @@
 #ifndef _OPENCOG_LAZY_SELECTOR_H
 #define _OPENCOG_LAZY_SELECTOR_H
 
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/hashed_index.hpp>
+#include <unordered_set>
 
 namespace opencog
 {
 /** \addtogroup grp_cogutil
  *  @{
  */
-
-using boost::multi_index_container;
-using namespace boost::multi_index;
 
 /**
  * That class allows to select integers in [0,n)
@@ -45,41 +40,6 @@ using namespace boost::multi_index;
  */
 class lazy_selector
 {	
-    typedef std::pair<unsigned int, unsigned int> uint_pair;
-
-    //! tags for accessing both sides of a bidirectional map
-    struct from{};
-    //! tags for accessing both sides of a bidirectional map
-    struct to{};
-
-    /** A bidirectional map one-to-many is simulated as a multi_index_container
-     * of pairs of (unsinged int,unsigned int) with first unique index, 
-     * and second non unique index.
-     *
-     * That structure is used to represent what element should be returned when
-     * the selected element has already been chosen.
-     * 
-     * The one-to-many mapping is used because an already chosen element
-     * should only have one possible choice to return instead of itself, 
-     * but on the other hand several already chosen elements can points to the
-     * same alternative. Of course if one of them is chosen and must return
-     * a given alternative all element pointing to it must be updated which
-     * is why we use a multi_index_container to quickly access either the first
-     * or the second element of the pair.
-     */
-
-    typedef multi_index_container<
-        uint_pair,
-        indexed_by<
-            hashed_unique<
-                tag<from>,member<uint_pair, unsigned int, &uint_pair::first> >,
-            hashed_non_unique<
-                tag<to>, member<uint_pair, unsigned int, &uint_pair::second> >
-            >
-        > uint_one_to_many_map;
-    typedef uint_one_to_many_map::iterator uint_one_to_many_map_it;
-    typedef uint_one_to_many_map::const_iterator uint_one_to_many_map_cit;
-
 public:
     lazy_selector(unsigned int n);
     virtual ~lazy_selector() {}
@@ -102,8 +62,10 @@ protected:
 
 private:
     //! lower index
-    unsigned int _l; 
-    uint_one_to_many_map _map;
+    unsigned int _l;
+
+    //! Keep track of all encountered values (to return _l instead of it)
+    std::unordered_set<unsigned int> _picked;
 
     //! an index is free if it has never been chosen before
     //! that is if no links are going out of it
