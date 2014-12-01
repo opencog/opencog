@@ -92,13 +92,13 @@ public:
     unsigned int operator()();
 
     void reset_range(unsigned int new_n);
-    
-    //! a method that choses an int in [0,_n)
-    virtual unsigned int select() = 0; 
 
 protected:
     //! size of the integer list [0,_n)
     unsigned int _n; 
+
+    //! a method that choses an int in [0,_n)
+    virtual unsigned int select() = 0;
 
 private:
     //! lower index

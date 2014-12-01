@@ -187,7 +187,7 @@ bool metapopulation::ss_score_dev_filter(const representation& rep,
             logger().fine() << "Tuple iteration: " << i_tuple;
 
         // Pick up a tuple
-        unsigned rnd_tuple = selector.select();
+        unsigned rnd_tuple = selector();
         // Decompose tuple into tuple_idxs, where each element is a
         // coefficient in the representation of tuple in base
         // n_top_candidates
@@ -263,7 +263,7 @@ float metapopulation::ss_average_agreement(const representation& rep,
             logger().fine() << "Tuple iteration: " << i_tuple;
 
         // Pick up a tuple
-        unsigned rnd_tuple = selector.select();
+        unsigned rnd_tuple = selector();
         // Decompose tuple into tuple_idxs, where each element is a
         // coefficient in the representation of tuple in base
         // n_top_candidates
@@ -397,7 +397,7 @@ void metapopulation::ss_tanimoto_stats(const representation& rep,
             logger().fine() << "Tuple iteration: " << i_tuple;
 
         // Pick up a tuple
-        unsigned rnd_tuple = selector.select();
+        unsigned rnd_tuple = selector();
         // Decompose tuple into tuple_idxs, where each element is a
         // coefficient in the representation of tuple in base
         // n_top_candidates

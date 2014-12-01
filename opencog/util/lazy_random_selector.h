@@ -42,6 +42,7 @@ namespace opencog
 struct lazy_random_selector : public lazy_selector {
     lazy_random_selector(unsigned int n, opencog::RandGen& _rng = randGen())
         : lazy_selector(n), rng(_rng) { }
+protected:
     unsigned int select();
 private:
     opencog::RandGen& rng;

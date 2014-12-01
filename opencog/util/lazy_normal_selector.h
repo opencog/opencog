@@ -35,14 +35,14 @@ namespace opencog
 //! apply lazy_selector but the select method returns always the same
 //! number, created for testing
 struct lazy_normal_selector : public lazy_selector {
-private:
-    unsigned int _s;
-public:
     lazy_normal_selector(unsigned int n, unsigned int s = 0) :
         lazy_selector(n), _s(s) {
         OC_ASSERT(s < n);
     }
+protected:
     unsigned int select();
+private:
+    unsigned int _s;
 };
 
 /** @}*/

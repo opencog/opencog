@@ -144,7 +144,7 @@ int main(int argc, char** argv)
         // add litterals
         dorepeat(cc) {
             arity_t idx =
-                (biased_randbool(repl_prob) ? smp_wr() : smp_wor.select()) + 1;
+                (biased_randbool(repl_prob) ? smp_wr() : smp_wor()) + 1;
             if (biased_randbool(0.5)) // whether the litteral is negative
                 idx *= -1;
             tr.append_child(child, argument(idx));

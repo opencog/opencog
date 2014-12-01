@@ -34,8 +34,8 @@
 
 using namespace opencog;
 
-static const unsigned int n = 10; // selecting in [0,n) 
-static const unsigned int s = 9; // what returns lazy_normal_selector::select
+static const unsigned int n = 10; // selecting in [0,n)
+static const unsigned int s = 1; // what returns lazy_normal_selector::select
 
 class lazy_selectorUTest : public CxxTest::TestSuite
 {

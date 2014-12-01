@@ -907,7 +907,7 @@ void subsampleCTable(float ratio, CTable& ctable)
         nremove = (1.0 - ratio) * ctable_usize;
     lazy_random_selector rm_selector(ctable_usize);
     dorepeat(nremove)
-        rm_row_idxs.insert(rm_selector.select());
+        rm_row_idxs.insert(rm_selector());
     ctable.remove_rows(rm_row_idxs);
     subsampleCTable(ratio * ctable.uncompressed_size(), ctable);
 }

@@ -64,7 +64,7 @@ void lazy_selector::reset_range(unsigned int new_n) {
 /**
  * returns the selected number (never twice the same)
  *
- * It works by creating a maping between already selected indices and
+ * It works by creating a mapping between already selected indices and
  * free indices (never selected yet).
  * 
  * To chose the free indices, we use an index _l, that
