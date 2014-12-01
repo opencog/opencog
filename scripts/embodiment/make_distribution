@@ -1,20 +1,26 @@
 #!/usr/bin/env tclsh
 
 # Usage:
-# make_distribution [<bin dir> [<tag name>] [<type of distribution = "dev" or "user">]]
-# <bin dir> is the directory where the script will try to find the compiled executables, 
-#           relative to petaverse base dir. Default is "bin", Ie, it will try to find binaries
-#           under {petaverse base dir}/bin
-# <tag name> is a tag it will use to name the distribution. Default is <svn revision number>.
-# <type of distribution> select the type of config file that will be copied.
+# make_distribution [<build dir> [<tag name>] [<type of distribution = "dev" or "user">]]
+#
+# <build dir> is the directory where the script will try to find the
+#           compiled executables, relative to petaverse base
+#           dir. Default is "build", Ie, it will try to find binaries
+#           under {opencog base dir}/build
+#
+# <tag name> is a tag it will use to name the distribution. Default is
+# <svn revision number>.
+#
+# <type of distribution> select the type of config file that will be
+# copied.
 # 
-# This script will copy all the relevant files into {petaverse base dir}/dist/<tag name>
+# This script will copy all the relevant files into
+# {opencog base dir}/dist/<tag name>
 
 #pdh stands for "Project Directory from Here"
 set pdh "../.."
 
-# binDir is misnamed, its the build directory, not the binaries directory.
-set binDir "build" 
+set buildDir "build"
 set tag "embodiment"
 
 # typedist = dev | user
@@ -22,7 +28,7 @@ set type_dist "dev"
 
 # get command line arguments
 if {[llength $argv] > 0} {
-    set binDir [lindex $argv 0] 
+    set buildDir [lindex $argv 0]
     if {[llength $argv] > 1} {
         set tag [lindex $argv 1]
     }
@@ -31,24 +37,24 @@ if {[llength $argv] > 0} {
     }
 } 
 
-set binDirH $pdh/$binDir
+set buildDirH $pdh/$buildDir
 
 puts "Project Directory from here = $pdh"
-puts "Build Directory = $binDirH"
+puts "Build Directory = $buildDirH"
 
 set flist [list  \
-$binDirH/opencog/embodiment/Control/MessagingSystem/router \
-$binDirH/opencog/embodiment/Control/MessagingSystem/spawner \
-$binDirH/opencog/embodiment/Control/MessagingSystem/libMessagingSystem.so \
-$binDirH/opencog/embodiment/Control/OperationalAvatarController/oac \
-$binDirH/opencog/embodiment/Control/OperationalAvatarController/opcHcTester \
-$binDirH/opencog/embodiment/Control/Procedure/combo_shell \
-$binDirH/opencog/embodiment/Control/Procedure/combo_shell_stdio \
-$binDirH/opencog/embodiment/Learning/LearningServer/learningServer \
-$binDirH/opencog/query/libQueryModule.so \
-$binDirH/opencog/server/libbuiltinreqs.so \
-$binDirH/opencog/shell/libscheme-shell.so \
-$binDirH/opencog/persist/sql/libpersist.so \
+$buildDirH/opencog/embodiment/Control/MessagingSystem/router \
+$buildDirH/opencog/embodiment/Control/MessagingSystem/spawner \
+$buildDirH/opencog/embodiment/Control/MessagingSystem/libMessagingSystem.so \
+$buildDirH/opencog/embodiment/Control/OperationalAvatarController/oac \
+$buildDirH/opencog/embodiment/Control/OperationalAvatarController/opcHcTester \
+$buildDirH/opencog/embodiment/Control/Procedure/combo_shell \
+$buildDirH/opencog/embodiment/Control/Procedure/combo_shell_stdio \
+$buildDirH/opencog/embodiment/Learning/LearningServer/learningServer \
+$buildDirH/opencog/query/libQueryModule.so \
+$buildDirH/opencog/server/libbuiltinreqs.so \
+$buildDirH/opencog/shell/libscheme-shell.so \
+$buildDirH/opencog/persist/sql/libpersist.so \
 ./cleanup.sh \
 ./stop_embodiment.sh \
 ./start_embodiment.sh \
@@ -79,8 +85,8 @@ $pdh/opencog/embodiment/framesInheritance.list \
 ]
 
 # Python module might not be built if cython is not installed
-if  [file exists $binDirH/opencog/cython/libPythonModule.so] then {
-   lappend flist $binDirH/opencog/cython/libPythonModule.so
+if  [file exists $buildDirH/opencog/cython/libPythonModule.so] then {
+   lappend flist $buildDirH/opencog/cython/libPythonModule.so
 }
 
 set schemeOpencogFiles [list \
@@ -88,11 +94,11 @@ $pdh/opencog/scm/utilities.scm \
 $pdh/opencog/scm/file-utils.scm \
 $pdh/opencog/scm/persistence.scm \
 $pdh/opencog/scm/config.scm \
-$binDirH/opencog/atomspace/core_types.scm \
-$binDirH/opencog/nlp/types/nlp_types.scm \
-$binDirH/opencog/spacetime/spacetime_types.scm \
-$binDirH/opencog/dynamics/attention/attention_types.scm \
-$binDirH/opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm \
+$buildDirH/opencog/atomspace/core_types.scm \
+$buildDirH/opencog/nlp/types/nlp_types.scm \
+$buildDirH/opencog/spacetime/spacetime_types.scm \
+$buildDirH/opencog/dynamics/attention/attention_types.scm \
+$buildDirH/opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm \
 ]
 
 if {$type_dist == "dev"} {
@@ -102,7 +108,7 @@ if {$type_dist == "dev"} {
         set embodimentConf $pdh/opencog/embodiment/dev_embodiment.conf.default
     }
     set flistconfig [list \
-    $binDirH/opencog/embodiment/AutomatedSystemTest/pbTest \
+    $buildDirH/opencog/embodiment/AutomatedSystemTest/pbTest \
     $pdh/opencog/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_0.txt \
     $pdh/opencog/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_1.txt \
     $pdh/opencog/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_2.txt \
@@ -124,7 +130,7 @@ if {$tag == ""} {
 # Must not copy files to any location in the source tree; only
 # copies to the build tree are allowed ...
 # set distDir [format "$pdh/dist/%s" $tag]
-set distDir [format "$binDirH/dist/%s" $tag]
+set distDir [format "$buildDirH/dist/%s" $tag]
 puts "Putting distribution files into $distDir"
 
 exec mkdir -p $distDir
