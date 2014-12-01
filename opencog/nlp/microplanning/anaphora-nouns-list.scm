@@ -181,7 +181,9 @@
 ; update-pronoun-safety -- Update the 'pronoun-safe' flag in a <noun-item>
 ;
 ; Check all <noun-item>s in the <nouns-list> against each other and update
-; the 'pronoun-safe' flag as neccessary.
+; the 'pronoun-safe' flag as neccessary, to indicate whether the noun
+; usage in <noun-item> can be safely changed to a pronoun without causing
+; confusion to the final sentence.
 ;
 (define-method (update-pronoun-safety (nl <nouns-list>))
 	(define (is-safe? ni)
