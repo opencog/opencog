@@ -34,7 +34,7 @@
 
 using namespace opencog;
 
-static const unsigned int n = 10; // selecting in [0,n)
+static const unsigned int n = 100; // selecting in [0,n)
 static const unsigned int s = 1; // what returns lazy_normal_selector::select
 
 class lazy_selectorUTest : public CxxTest::TestSuite
@@ -52,16 +52,16 @@ public:
 
         dorepeat(n) {
             unsigned int selected = lns();
-            std::cout << "Selected number: " << selected << std::endl;
-            //check that the selected number has not been previously selected
+            // std::cout << "Selected number: " << selected << std::endl;
+            // Check that the selected number has not been previously selected
             TS_ASSERT(nset.find(selected) == nset.end());
             nset.insert(selected);
         }
         lns.reset_range(n*2);
         dorepeat(n) {
             unsigned int selected = lns();
-            std::cout << "Selected number: " << selected << std::endl;
-            //check that the selected number has not been previously selected
+            // std::cout << "Selected number: " << selected << std::endl;
+            // Check that the selected number has not been previously selected
             TS_ASSERT(nset.find(selected) == nset.end());
             nset.insert(selected);
         }        
@@ -78,16 +78,16 @@ public:
 
         dorepeat(n) {
             unsigned int selected = lrs();
-            std::cout << "Selected number: " << selected << std::endl;
-            //check that the selected number has not been previously selected
+            // std::cout << "Selected number: " << selected << std::endl;
+            // Check that the selected number has not been previously selected
             TS_ASSERT(nset.find(selected) == nset.end());
             nset.insert(selected);
         }
         lrs.reset_range(n*2);
         dorepeat(n) {
             unsigned int selected = lrs();
-            std::cout << "Selected number: " << selected << std::endl;
-            //check that the selected number has not been previously selected
+            // std::cout << "Selected number: " << selected << std::endl;
+            // Check that the selected number has not been previously selected
             TS_ASSERT(nset.find(selected) == nset.end());
             nset.insert(selected);
         }        
