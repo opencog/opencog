@@ -107,10 +107,21 @@ These examples are also in comment form in `test-atomspace.scm`, which you can u
 
 Then you can running microplanning as follow
 ```
-(microplanning test-declarative-sal "declarative")
+(microplanning test-declarative-sal "declarative" #t)
 ```
 and a list of SetLink will be returned.  These SetLink's can be passed to Surface Realization as
 ```
-(map sureal (microplanning test-declarative-sal "declarative"))
+(map
+	(lambda (set-link)
+		(receive (sentences weights) (sureal set-link)
+			(filter-map (lambda (s w) (if (>= w 0) s #f)) sentences weights)))
+	(microplanning test-declarative-sal "declarative" #t)
+)
 ```
 
+## TODO
+
+1. Anaphora inserting for possession:
+
+    This is kind of weird in that "Our car" will become "Us car" after processed by RelEx.  Also, the whole possession link can be discarded to make "Our car" -> "it".  If we have "John's car" and we found that "John" can be a pronoun and changed the possession link to "his", we ended up with "His's car".
+    
