@@ -169,7 +169,7 @@ struct metapop_printer
                        << "#score: " << sct.get_score() << std::endl
                        << "def moses_eval(i):\n"
                        << "    return ";
-                    ostream_combo_tree (ss, sct.get_tree(), combo::fmt::python);
+                    ostream_combo_tree(ss, sct.get_tree(), combo::fmt::python);
                 } else {
                     ostream_scored_combo_tree(ss, sct, output_score,
                                               output_cscore, output_demeID,
