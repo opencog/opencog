@@ -393,7 +393,8 @@ ostream& ostream_vertex(ostream& out, const vertex& v, format f)
     return out;
 }
 
-std::ostream& ostream_combo_tree(std::ostream& out, const combo_tree ct, format f) {
+std::ostream& ostream_combo_tree(std::ostream& out, const combo_tree& ct,
+                                 format f) {
     for (combo_tree::iterator it=ct.begin(); it!=ct.end(); ++it) {
         ostream_combo_it(out, it, f);
         it.skip_children();
@@ -401,7 +402,7 @@ std::ostream& ostream_combo_tree(std::ostream& out, const combo_tree ct, format 
     }
     return out;
 }
-        
+
 string ph2l(const string& ce, const vector<string>& labels)
 {
     /// @todo the implementation could be done in 2 lines with

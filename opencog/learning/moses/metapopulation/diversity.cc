@@ -130,16 +130,6 @@ void metapopulation::set_diversity()
     };
 
     while (tmp.size()) {
-
-        // // debug
-        // logger().fine("Pool =");
-        // for (scored_combo_tree& pbs_tr : pool) {
-        //     stringstream ss;
-        //     ostream_scored_combo_tree(ss, pbs_tr, true, true, true);
-        //     logger().fine(ss.str());
-        // }
-        // // ~debug
-
         // update all diversity penalties of tmp
         OMP_ALGO::for_each(tmp.begin(), tmp.end(), update_diversity_penalty);
 

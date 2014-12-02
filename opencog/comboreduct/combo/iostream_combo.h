@@ -50,10 +50,14 @@ enum format {
 typedef fmt::format format;
 
 // like operator<< but can choose the output format
-std::ostream& ostream_builtin(std::ostream&, const builtin&, format f = fmt::combo);
-std::ostream& ostream_argument(std::ostream&, const argument&, format f = fmt::combo);
-std::ostream& ostream_vertex(std::ostream&, const vertex&, format f = fmt::combo);
-std::ostream& ostream_combo_tree(std::ostream&, const combo_tree, format f = fmt::combo);
+std::ostream& ostream_builtin(std::ostream&, const builtin&,
+                              format f = fmt::combo);
+std::ostream& ostream_argument(std::ostream&, const argument&,
+                               format f = fmt::combo);
+std::ostream& ostream_vertex(std::ostream&, const vertex&,
+                             format f = fmt::combo);
+std::ostream& ostream_combo_tree(std::ostream&, const combo_tree,
+                                 format f = fmt::combo);
 template<typename Iter>
 std::ostream& ostream_combo_it(std::ostream& out, Iter it, format f = fmt::combo) {
     ostream_vertex(out, *it, f);
