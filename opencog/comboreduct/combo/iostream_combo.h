@@ -22,8 +22,8 @@
  */
 
 
-#ifndef _COMBO_IOSTREAM_PYTHON_H
-#define _COMBO_IOSTREAM_PYTHON_H
+#ifndef _IOSTREAM_COMBO_H
+#define _IOSTREAM_COMBO_H
 
 #include <iostream>
 
@@ -222,4 +222,4 @@ std::ostream& operator<<(std::ostream&, const vertex&);
 
 }} // ~ namespace opencog::combo
 
-#endif // _COMBO_IOSTREAM_PYTHON_H
+#endif // _IOSTREAM_COMBO_H
