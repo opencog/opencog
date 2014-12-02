@@ -43,6 +43,7 @@ namespace fmt {
 enum format {
     combo,
     python,
+    scheme,
     format_count                // to get the number of formats
 };
 }
