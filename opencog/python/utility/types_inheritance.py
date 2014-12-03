@@ -46,7 +46,6 @@ types_graph.add_edge('OrderedLink','BindLink')
 types_graph.add_edge('OrderedLink','SubsetLink')
 types_graph.add_edge('OrderedLink','SequentialAndLink')
 types_graph.add_edge('OrderedLink','IsAcceptableSecondArgLink')
-types_graph.add_edge('OrderedLink','HypotheticalLink')
 types_graph.add_edge('OrderedLink','ExtensionalSimilarityLink')
 types_graph.add_edge('OrderedLink','TailPredictiveImplicationLink')
 types_graph.add_edge('OrderedLink','SimultaneousAndLink')
@@ -197,7 +196,6 @@ name_type_dict["TypedVariableLink"] = t.TypedVariableLink
 name_type_dict["ImplicationLink"] = t.ImplicationLink
 name_type_dict["SimultaneousAndLink"] = t.SimultaneousAndLink
 name_type_dict["ExistsLink"] = t.ExistsLink
-name_type_dict["HypotheticalLink"] = t.HypotheticalLink
 name_type_dict["InheritanceLink"] = t.InheritanceLink
 name_type_dict["PartOfSpeechLink"] = t.PartOfSpeechLink
 name_type_dict["FeatureLink"] = t.FeatureLink
@@ -307,7 +305,6 @@ type_name_dict[t.ListLink] = "ListLink"
 type_name_dict[t.EvaluationLink] = "EvaluationLink"
 type_name_dict[t.DefinedLinguisticRelationshipNode] = "DefinedLinguisticRelationshipNode"
 type_name_dict[t.SimultaneousEquivalenceLink] = "SimultaneousEquivalenceLink"
-type_name_dict[t.HypotheticalLink] = "HypotheticalLink"
 type_name_dict[t.ContextLink] = "ContextLink"
 type_name_dict[t.PredicateNode] = "PredicateNode"
 type_name_dict[t.ExecutionOutputLink] = "ExecutionOutputLink"
