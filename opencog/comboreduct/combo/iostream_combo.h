@@ -48,28 +48,50 @@ enum class output_format {
 
 // like operator<< but can choose the output format
 std::ostream& ostream_builtin(std::ostream&, const builtin&,
-                              output_format f = output_format::combo);
+                              output_format fmt = output_format::combo);
 std::ostream& ostream_argument(std::ostream&, const argument&,
-                               output_format f = output_format::combo);
+                               output_format fmt = output_format::combo);
 std::ostream& ostream_vertex(std::ostream&, const vertex&,
-                             output_format f = output_format::combo);
+                             output_format fmt = output_format::combo);
 std::ostream& ostream_combo_tree(std::ostream&, const combo_tree&,
-                                 output_format f = output_format::combo);
+                                 output_format fmt = output_format::combo);
 template<typename Iter>
 std::ostream& ostream_combo_it(std::ostream& out, Iter it,
-                               output_format f = output_format::combo) {
-    ostream_vertex(out, *it, f);
-    if (it.number_of_children() > 0) {
+                               output_format fmt = output_format::combo) {
+    switch(fmt) {
+    case output_format::combo:
+    case output_format::python:
+        ostream_vertex(out, *it, fmt);
+        if (it.number_of_children() > 0) {
+            out << "(";
+            auto sib = it.begin();
+            ostream_combo_it(out, sib++, fmt);
+            for (; sib != it.end(); ++sib) {
+                out << " ";
+                ostream_combo_it(out, sib, fmt);
+            }
+            out << ")";
+            if (fmt == output_format::python)
+                out << ",";
+        }
+        break;
+    case output_format::scheme:
         out << "(";
-        auto sib = it.begin();
-        ostream_combo_it(out, sib++, f);
-        for (; sib != it.end(); ++sib) {
-            out << " ";
-            ostream_combo_it(out, sib, f);
+        ostream_vertex(out, *it, fmt);
+        if (it.number_of_children() > 0) {
+            for (auto sib = it.begin(); sib != it.end(); ++sib) {
+                out << " ";
+                ostream_combo_it(out, sib, fmt);
+            }
         }
         out << ")";
-        if (f == output_format::python)
-            out << ",";
+        break;
+    default: {
+        std::stringstream ss;
+        ss << "ostream_combo_it: format "
+           << static_cast<unsigned>(fmt) << "unsupported";
+        OC_ASSERT(false, ss.str().c_str());
+    }
     }
     return out;
 }

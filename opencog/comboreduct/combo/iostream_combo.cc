@@ -252,23 +252,6 @@ bool enum_str_to_vertex(const std::string& str, vertex& v)
 ostream& ostream_builtin(ostream& out, const builtin& h, output_format f)
 {
     switch (f) {
-    case output_format::python:
-        switch (h) {
-        case id::null_vertex:
-            return out << "null_vertex";
-        case id::logical_and:
-            return out << "ands";
-        case id::logical_or:
-            return out << "ors";
-        case id::logical_not:
-            return out << "not";
-        case id::logical_true:
-            return out << "True";
-        case id::logical_false:
-            return out << "False";
-        default:
-            return out << "Builtin: " << (unsigned) h << " unknown";
-        }
     case output_format::combo:
         switch (h) {
         case id::null_vertex:
@@ -326,18 +309,48 @@ ostream& ostream_builtin(ostream& out, const builtin& h, output_format f)
         default:
             return out << "Builtin " << (unsigned) h << " unknown";
         }
+    case output_format::python:
+        switch (h) {
+        case id::null_vertex:
+            return out << "null_vertex";
+        case id::logical_and:
+            return out << "ands";
+        case id::logical_or:
+            return out << "ors";
+        case id::logical_not:
+            return out << "not";
+        case id::logical_true:
+            return out << "True";
+        case id::logical_false:
+            return out << "False";
+        default:
+            return out << "Builtin: " << (unsigned) h << " unknown";
+        }
+    case output_format::scheme:
+        switch (h) {
+        case id::null_vertex:
+            return out << "null_vertex";
+        case id::logical_and:
+            return out << "AndLink";
+        case id::logical_or:
+            return out << "OrLink";
+        case id::logical_not:
+            return out << "NotLink";
+        case id::logical_true:
+            return out << "TrueLink";
+        case id::logical_false:
+            return out << "FalseLink";
+        default:
+            return out << "Builtin: " << (unsigned) h << " unknown";
+        }
     default:
         return out << "Format " << static_cast<unsigned>(f) << " unknown";
     }
 }
 
-ostream& ostream_argument(ostream& out, const argument& a, output_format f)
+ostream& ostream_argument(ostream& out, const argument& a, output_format fmt)
 {
-    switch(f) {
-    case output_format::python:
-        if (a.is_negated())        
-            return out << "not(i[" << -a.idx - 1 << "]),";
-        return out << "i[" << a.idx - 1 << "],";
+    switch(fmt) {
     case output_format::combo:
 #ifdef ABBREVIATE_NEGATIVE_LITERAL
         return ostream_abbreviate_literal(out, a);
@@ -346,8 +359,20 @@ ostream& ostream_argument(ostream& out, const argument& a, output_format f)
             return out << "not($" << -a.idx << ")";
         return out << "$" << a.idx << vm;
 #endif
+    case output_format::python:
+        if (a.is_negated())
+            return out << "not(i[" << -a.idx - 1 << "]),";
+        return out << "i[" << a.idx - 1 << "],";
+    case output_format::scheme: {
+        stringstream var_ss;
+        var_ss << "EvaluationLink (PredicateNode \"$" << a.idx << "\") "
+               << "(VariableNode \"$X\")";
+        if (a.is_negated())
+            return out << "NotLink (" << var_ss.str() << ")";
+        return out << var_ss.str();
+    }
     default:
-        return out << "Format " << static_cast<unsigned>(f) << "unknown";
+        return out << "Format " << static_cast<unsigned>(fmt) << "unknown";
     }    
 }
 
