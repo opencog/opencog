@@ -122,11 +122,9 @@ struct metapop_printer
                    << "#score: " << metapop.best_score() << std::endl
                    << "def moses_eval(i):\n"
                    << "    sum = 0.0 \\\n";
-                // XXX this is close to what we want but maybe borken.
-                // FIXME untested.
                 for (const scored_combo_tree& sct : tree_set)
-                    ss << "      + " << sct.get_weight()
-                       << " * " << sct.get_tree() << "\\\n";
+                    ostream_combo_tree(ss << "      + " << sct.get_weight()
+                                       << " * ", sct.get_tree(), fmt) << "\\\n";
                 ss << "\n    return (0.0 < val)\n";
             } else {
 
@@ -170,7 +168,7 @@ struct metapop_printer
                        << "#score: " << sct.get_score() << std::endl
                        << "def moses_eval(i):\n"
                        << "    return ";
-                    ostream_combo_tree(ss, sct.get_tree(), combo::fmt::python);
+                    ostream_combo_tree(ss, sct.get_tree(), fmt);
                 } else {
                     ostream_scored_combo_tree(ss, sct, output_score,
                                               output_cscore, output_demeID,
