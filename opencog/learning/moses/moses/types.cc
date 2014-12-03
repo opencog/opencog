@@ -179,7 +179,7 @@ std::ostream& ostream_scored_combo_tree(std::ostream& out,
 {
     if (output_score)
         out << sct.get_score() << " ";
-    out << sct.get_tree();
+    ostream_combo_tree(out, sct.get_tree(), fmt);
 
     // Is this really used?
     static const bool output_weight = false;
