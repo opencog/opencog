@@ -2,7 +2,7 @@
 (load-scm-from-file "../opencog/nlp/microplanning/sentence-forms.scm")
 (load-scm-from-file "../opencog/nlp/microplanning/helpers.scm")
 (load-scm-from-file "../opencog/nlp/microplanning/anaphora.scm")
-
+(load-scm-from-file "../opencog/nlp/microplanning/chunks-set.scm")
 
 ; =======================================================================
 ; Main microplanning functions
@@ -16,30 +16,31 @@
 ; or 'interjective'
 ;
 (define (microplanning seq-link utterance-type anaphora)
-	(define chunks '())
-	(define chunks-utterance-type '())
+	(define all-sets '())
 	
 	(define (wrap-setlink atoms ut)
 		; add additional link base on utterance type
 		(SetLink (get-utterance-link ut atoms) atoms)
 	)
+	(define (finalize set)
+		(define chunks (get-chunks set))
+
+		; XXX after inserting anaphora, a chunk might no longer be say-able
+		(if anaphora
+			(set! chunks (insert-anaphora chunks (map get-sentence-forms (get-utterance-types set))))
+		)
+		
+		(map wrap-setlink chunks (get-utterance-types set))
+	)
 
 	(cond ((equal? 'SequentialAndLink (cog-type seq-link))
 		; initialize the sentence forms as needed
 		(microplanning-init)
-	
-		; get the best chunking result, and store the utterance type of each individual chunk
-		(set-values! (chunks-utterance-type chunks) (make-sentence-chunks (cog-outgoing-set seq-link) utterance-type))
-	
-		(cond ((not (null? chunks))
-			; insert anaphora
-			; XXX after inserting anaphora, a chunk might no longer be say-able
-			(if anaphora
-				(set! chunks (insert-anaphora chunks (map get-sentence-forms chunks-utterance-type)))
-			)
-			
-			; wrap SetLink around each chunk for Surface Realization
-			(map wrap-setlink chunks chunks-utterance-type)
+
+		(set! all-sets (make-sentence-chunks (cog-outgoing-set seq-link) utterance-type))
+
+		(cond ((not (null? all-sets))
+			(map finalize all-sets)
 		      )
 		      (else
 			#f
@@ -57,13 +58,11 @@
 ;
 ; Calls make-sentence repeatedly until all informations have been spoken, or
 ; no longer say-able.  Accepts a list of links 'atoms-set' from within the original
-; SequentialAndLink, and the utterance-type.
+; SequentialAndLink, and the utterance-type.  Returns a list of different ways
+; chunks can form, each set of chunks contained within an <chunks-set> object.
 ;
 (define (make-sentence-chunks atoms-set utterance-type)
-	(define all-comb '())
-	(define all-comb-utterance-type '())
-	(define all-comb-utterance-variation '())
-	(define all-comb-leftover-count '())
+	(define all-sets '())
 
 	(define (recursive-helper curr-unused curr-chunks curr-uts)
 		(define ut (list utterance-type))
@@ -71,8 +70,8 @@
 		; helper function for branching into different utterance type
 		(define (sub-helper ut)
 			(define new-chunk (make-sentence curr-unused atoms-set ut))
-			; if make-sentence returns empty, it means nothing is 'say-able'
-			(cond ((not (null? new-chunk))
+			(cond ; has a new chunk, continue to make more chunk with the rest of the atoms
+			      ((not (null? new-chunk))
 				; TODO keep some of the atoms (those that do not satisfy sentence forms) for later use?
 				(recursive-helper
 					(lset-difference equal? curr-unused new-chunk)
@@ -80,11 +79,18 @@
 					(cons ut curr-uts)
 				)
 			      )
+			      ; unable to form more chunks, store the created chunks (if any) & their corresponding utterance-type
 			      ((not (null? curr-chunks))
-				; unable to form more chunks, store the created chunks & their corresponding utterance-type
-				(set! all-comb (cons curr-chunks all-comb))
-				(set! all-comb-utterance-type (cons curr-uts all-comb-utterance-type))
-				(set! all-comb-leftover-count (cons (length curr-unused) all-comb-leftover-count))
+				(set! all-sets
+					(cons
+						(make <chunks-set>
+							#:chunks (reverse curr-chunks)
+							#:utterance-types (reverse curr-uts)
+							#:leftover-count (length curr-unused)
+						)
+						all-sets
+					)
+				)
 			      )
 			)		
 		)
@@ -94,15 +100,22 @@
 			(set! ut (list "interrogative" "declarative"))
 		)
 
-		; use the sub-helper to keep calling make sentence until all atoms are used, on all allowed utterance type
-		(cond ((not (null? curr-unused))
-			(map sub-helper ut)
+		(cond ; use the sub-helper to keep calling make sentence until all atoms are used, on all allowed utterance type
+		      ((not (null? curr-unused))
+			(for-each sub-helper ut)
 		      )
-	      	      (else
-			; finished all atoms, store the created chunks & their corresponding utterance-type
-			(set! all-comb (cons curr-chunks all-comb))
-			(set! all-comb-utterance-type (cons curr-uts all-comb-utterance-type))
-			(set! all-comb-leftover-count (cons 0 all-comb-leftover-count))
+		      ; finished all atoms, store the created chunks & their corresponding utterance-type
+		      (else
+			(set! all-sets
+				(cons
+					(make <chunks-set>
+						#:chunks (reverse curr-chunks)
+						#:utterance-types (reverse curr-uts)
+						#:leftover-count 0
+					)
+					all-sets
+				)
+			)
 		      )
 		)
 	)
@@ -110,36 +123,40 @@
 	; loop make-sentence on remaining atoms
 	(recursive-helper atoms-set '() '())
 
-	; find which set of chunks is best; a set of chunks is best if:
-	; - least amount of leftover atoms
-	; - least amount of sentences
-	; - least variation in utterance type between sentences
-	(cond ((not (null? all-comb))
-		; count how many times the utterance type changes within a set of chunks
-		(set! all-comb-utterance-variation
-			(map (lambda (x) (count (lambda (a b) (not (string=? a b))) x (cdr x))) all-comb-utterance-type))	
-
-		; gather all information into one variable
-		(set! all-comb (zip all-comb-leftover-count all-comb-utterance-type all-comb-utterance-variation all-comb))
-	
-		; only keeps the sets with least leftover
-		(sort! all-comb (lambda (x y) (< (car x) (car y))))
-		(filter! (lambda (x) (= (car x) (caar all-comb))) all-comb)
-
-		; only keeps the sets with the least sentences
-		(sort! all-comb (lambda (x y) (< (length (cadr x)) (length (cadr y)))))
-		(filter! (lambda (x) (= (length (cadr x)) (length (cadar all-comb)))) all-comb)
-
-		; only keeps the sets with the least changes between utterance type
-		(sort! all-comb (lambda (x y) (< (caddr x) (caddr y))))
-		(set! all-comb (car all-comb))
-
-		; reverse since we were adding to the front
-		(values (reverse (cadr all-comb)) (reverse (cadddr all-comb)))
+	(cond ((not (null? all-sets))
+		(receive (complete-sets incomplete-sets)
+			(partition (lambda (cs) (= (get-leftover-count cs) 0)) all-sets)
+			
+			; remove sets in incomplete-sets which is a subset of a set in complete-sets
+			(set! incomplete-sets (remove (lambda (is) (any is-subset? (circular-list is) complete-sets)) incomplete-sets))
+			
+			; incomplete chunks set (those which did not say everything) are sorted by how many atoms leftover
+			(sort! incomplete-sets less-leftover?)
+			
+			; sort the complete sets bases on how many chunks (sentences) in the set
+			(sort! complete-sets less-chunks?)
+			
+			; sort sets with same amount of sentences bases on variation
+			(letrec ((sort-by-variation
+					(lambda (sets)
+						(if (null? sets)
+							'()
+							(receive (this next)
+								; split by finding all whose # of sentences is the same as the first in the list
+								(span (lambda (c) (= (get-length c) (get-length (car sets)))) sets)
+								(append
+									(sort this less-variation?)
+									(sort-by-variation next)
+								)
+							)
+						)
+					)
+				))
+				(append (sort-by-variation complete-sets) incomplete-sets)
+			)
+		)
 	      )
-	      (else
-		(values '() '())
-	      )
+	      (else '())
 	)
 )
 
