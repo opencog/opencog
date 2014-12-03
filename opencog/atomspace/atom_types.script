@@ -38,8 +38,6 @@ SUBSET_LINK <- ORDERED_LINK
 AND_LINK <- UNORDERED_LINK
 OR_LINK <- UNORDERED_LINK
 NOT_LINK <- UNORDERED_LINK
-FALSE_LINK <- ORDERED_LINK
-TRUE_LINK <- ORDERED_LINK
 
 // ====================================================================
 // Herbrand/First-order-logic/lambda-calc/model-theory style links
