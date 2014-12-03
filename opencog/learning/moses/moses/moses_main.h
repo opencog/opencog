@@ -70,7 +70,7 @@ struct metapop_printer
                     bool _output_demeID,
                     const std::vector<std::string>& _ilabels,
                     const std::string& _output_file,
-                    bool _output_python,
+                    combo::output_format _fmt,
                     bool _is_mpi) :
         result_count(_result_count),
         output_score(_output_score),
@@ -83,7 +83,7 @@ struct metapop_printer
         output_demeID(_output_demeID),
         ilabels(_ilabels),
         output_file(_output_file),
-        output_python(_output_python),
+        fmt(_fmt),
         is_mpi(_is_mpi) {}
 
     /**
@@ -108,8 +108,9 @@ struct metapop_printer
         // reasonable accuracy, else these tools fail.
         ss << std::setprecision(moses::io_score_precision);
         if (output_ensemble) {
-            const scored_combo_tree_set& tree_set = metapop.get_ensemble().get_ensemble();
-            if (output_python) {
+            const scored_combo_tree_set& tree_set =
+                metapop.get_ensemble().get_ensemble();
+            if (output_format::python == fmt) {
                 // Python boilerplate
                 ss << "#!/usr/bin/env python\n"
                    << "from operator import *\n\n"
@@ -157,7 +158,7 @@ struct metapop_printer
             long cnt = 0;
             for (const scored_combo_tree& sct : tree_set) {
                 if (result_count == cnt++) break;
-                if (output_python) {
+                if (output_format::python == fmt) {
                     // Python boilerplate
                     ss << "#!/usr/bin/env python\n"
                        << "from operator import *\n\n"
@@ -177,7 +178,6 @@ struct metapop_printer
                 }
             }
         }
-
         if (output_eval_number)
             ss << number_of_evals_str << ": " << stats.n_evals << std::endl;;
 
@@ -256,7 +256,7 @@ public:
     std::vector<std::string> ilabels;
 private:
     string output_file;
-    bool output_python;
+    output_format fmt;
     bool is_mpi;
 };
 
