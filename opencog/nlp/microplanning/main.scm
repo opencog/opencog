@@ -33,7 +33,8 @@
 ;
 ; Accepts a SequentialAndLink containing a list of atoms to be spoken.
 ; "utterance-type" is either 'declarative', 'interrogative', 'imperative'
-; or 'interjective'
+; or 'interjective', "option" is an <chunks-option> object, and "anaphora"
+; can be #t or #f.
 ;
 (define (microplanning seq-link utterance-type option anaphora)
 	(define all-sets '())
@@ -78,8 +79,9 @@
 ;
 ; Calls make-sentence repeatedly until all informations have been spoken, or
 ; no longer say-able.  Accepts a list of links 'atoms-set' from within the original
-; SequentialAndLink, and the utterance-type.  Returns a list of different ways
-; chunks can form, each set of chunks contained within an <chunks-set> object.
+; SequentialAndLink, the utterance-type, and the option.  Returns a list of different
+; ways chunks can form by varying utterance-types, each set of chunks contained
+; within an <chunks-set> object.
 ;
 (define (make-sentence-chunks atoms-set utterance-type option)
 	(define all-sets '())
@@ -120,7 +122,7 @@
 			(set! ut (list "interrogative" "declarative"))
 		)
 
-		(cond ; use the sub-helper to keep calling make sentence until all atoms are used, on all allowed utterance type
+		(cond ; use the sub-helper to keep calling make sentence until all atoms are used, branching on all allowed utterance type
 		      ((not (null? curr-unused))
 			(for-each sub-helper ut)
 		      )
@@ -184,7 +186,8 @@
 ; make-sentence -- Create a single sentence
 ;
 ; Greedily add new atoms (using some heuristics) to form a new sentence.
-; Accepts a list of un-said links, the complete set, and the utterance type.
+; Accepts a list of un-said links, the complete set, the utterance type,
+; and the chunking option.
 ;
 (define (make-sentence atoms-unused atoms-set utterance-type option)
 	; bunch of variables for storing the recursive looping results
@@ -240,6 +243,7 @@
 				      )
 				      (else
 					; find the first link in atoms-not-tried that contains one of the solo word
+					; XXX could possibly allow choosing different link to generate multiple chunking result
 					(set! temp-var1
 						(find (lambda (a)
 							(find (lambda (w) (cog-has-node? a w)) temp-differences)
