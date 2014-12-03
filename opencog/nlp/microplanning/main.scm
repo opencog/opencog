@@ -2,7 +2,27 @@
 (load-scm-from-file "../opencog/nlp/microplanning/sentence-forms.scm")
 (load-scm-from-file "../opencog/nlp/microplanning/helpers.scm")
 (load-scm-from-file "../opencog/nlp/microplanning/anaphora.scm")
+(load-scm-from-file "../opencog/nlp/microplanning/chunks-option.scm")
 (load-scm-from-file "../opencog/nlp/microplanning/chunks-set.scm")
+
+; =======================================================================
+; Some contants
+; =======================================================================
+
+(define *microplanning_not_sayable* 0)
+(define *microplanning_sayable* 1)
+(define *microplanning_too_long* 2)
+(define *default_chunks_option*
+	(make <chunks-option>
+		#:main-weight-proc (lambda (t f l) (* (+ t l) f))
+		#:supp-weight-proc (lambda (t f l) (* (+ t l) (- 2 f)))
+		#:verb-limit 2
+		#:noun-limit 3
+		#:adj-limit 5
+		#:adv-limit 3
+	)
+)
+
 
 ; =======================================================================
 ; Main microplanning functions
@@ -15,7 +35,7 @@
 ; "utterance-type" is either 'declarative', 'interrogative', 'imperative'
 ; or 'interjective'
 ;
-(define (microplanning seq-link utterance-type anaphora)
+(define (microplanning seq-link utterance-type option anaphora)
 	(define all-sets '())
 	
 	(define (wrap-setlink atoms ut)
@@ -37,7 +57,7 @@
 		; initialize the sentence forms as needed
 		(microplanning-init)
 
-		(set! all-sets (make-sentence-chunks (cog-outgoing-set seq-link) utterance-type))
+		(set! all-sets (make-sentence-chunks (cog-outgoing-set seq-link) utterance-type option))
 
 		(cond ((not (null? all-sets))
 			(map finalize all-sets)
@@ -61,7 +81,7 @@
 ; SequentialAndLink, and the utterance-type.  Returns a list of different ways
 ; chunks can form, each set of chunks contained within an <chunks-set> object.
 ;
-(define (make-sentence-chunks atoms-set utterance-type)
+(define (make-sentence-chunks atoms-set utterance-type option)
 	(define all-sets '())
 
 	(define (recursive-helper curr-unused curr-chunks curr-uts)
@@ -69,7 +89,7 @@
 		
 		; helper function for branching into different utterance type
 		(define (sub-helper ut)
-			(define new-chunk (make-sentence curr-unused atoms-set ut))
+			(define new-chunk (make-sentence curr-unused atoms-set ut option))
 			(cond ; has a new chunk, continue to make more chunk with the rest of the atoms
 			      ((not (null? new-chunk))
 				; TODO keep some of the atoms (those that do not satisfy sentence forms) for later use?
@@ -166,7 +186,7 @@
 ; Greedily add new atoms (using some heuristics) to form a new sentence.
 ; Accepts a list of un-said links, the complete set, and the utterance type.
 ;
-(define (make-sentence atoms-unused atoms-set utterance-type)
+(define (make-sentence atoms-unused atoms-set utterance-type option)
 	; bunch of variables for storing the recursive looping results
 	(define atoms-used (lset-difference equal? atoms-set atoms-unused)) ; the set of both failed and successful atoms
 	(define atoms-failed '())	; the set of failed atoms
@@ -174,7 +194,7 @@
 
 	; main helper function for looping
 	(define (recursive-helper atoms-to-try)
-		(define result (check-chunk atoms-to-try utterance-type)) ; the result of trying to say the atoms in a sentence
+		(define result (check-chunk atoms-to-try utterance-type option)) ; the result of trying to say the atoms in a sentence
 		(define atoms-not-tried (lset-difference equal? atoms-unused atoms-to-try)) ; the set of atoms not yet used
 
 		(define (give-up-unadded-part)
@@ -186,10 +206,10 @@
 			(set! atoms-failed (append dead-set atoms-failed))
 			(set! atoms-unused (lset-difference equal? atoms-unused dead-set))
 			
-			; try "saying" the previous working iteration again (if available) and re-choose a new atom
+			; try "saying" the previous working iteration again (if available) and re-choose a new atom (using different weight proc)
 			(if (null? good-set)
 				(if (not (null? atoms-unused))
-					(recursive-helper (list (pick-atom atoms-unused atoms-used (lambda (t f l) (* (+ t l) f)) utterance-type)))
+					(recursive-helper (list (pick-atom atoms-unused atoms-used (get-main-weight-proc option) utterance-type)))
 				)
 				(recursive-helper good-set)
 			)
@@ -206,7 +226,7 @@
 		(define temp-differences '())
 		
 		(cond ; not say-able
-		      ((= result 0)
+		      ((= result *microplanning_not_sayable*)
 			; could be the atoms cannot be said unless bringing in additional atoms (such as "and/or/that")
 			; try to add more (up to 3 different links)
 			(cond ((<= (length atoms-to-try) 3)
@@ -243,7 +263,7 @@
 			)
 		      )
 		      ; not long/complex enough
-		      ((= result 1)
+		      ((= result *microplanning_sayable*)
 			; add the currently "say-able" stuff to our chunk
 			(update-chunk)
 
@@ -253,7 +273,7 @@
 					(cons
 						; weight is (time-weights + link-weights) * (2 - form-weights), ie. prefer links that do not
 						; satisify a sentence form, meaning it cannot be "said" on its own.
-						(pick-atom atoms-unused chunk (lambda (t f l) (* (+ t l) (- 2 f))) utterance-type)
+						(pick-atom atoms-unused chunk (get-supp-weight-proc option) utterance-type)
 						atoms-to-try
 					)
 				)
@@ -267,7 +287,7 @@
 	)
 
 	; the initial critera for choosing a starting point would be (time-weights + link-weights) * form-weights
-	(recursive-helper (list (pick-atom atoms-unused atoms-used (lambda (t f l) (* (+ t l) f)) utterance-type)))
+	(recursive-helper (list (pick-atom atoms-unused atoms-used (get-main-weight-proc option) utterance-type)))
 
 	; return the sentence chunk (reverse because we've been adding to the front)
 	(reverse chunk)
@@ -379,9 +399,7 @@
 ; "say-able" for a specific 'utterance-type', and if so, determines whether
 ; the sentence is too long or complex.
 ;
-; Returns 0 = not sayable, 1 = sayable, 2 = too long/complex
-;
-(define (check-chunk atoms utterance-type)
+(define (check-chunk atoms utterance-type option)
 	(define (get-pos n)
 		(define wi (r2l-get-word-inst n))
 		(if (null? wi)
@@ -418,19 +436,19 @@
 		(define count (cdr al))
 		
 		(cond ; prefer max 2 verbs per sentence
-		      ((and (string=? "verb" pos) (>= count 2))
+		      ((and (string=? "verb" pos) (>= count (get-verb-limit option)))
 			#f
 		      )
 		      ; prefer max 3 nouns per sentence
-		      ((and (string=? "noun" pos) (>= count 3))
+		      ((and (string=? "noun" pos) (>= count (get-noun-limit option)))
 			#f
 		      )
 		      ; prefer max 5 adjectives
-		      ((and (string=? "adj" pos) (>= count 5))
+		      ((and (string=? "adj" pos) (>= count (get-adj-limit option)))
 			#f
 		      )
 		      ; prefer max 3 adverbs
-		      ((and (string=? "adv" pos) (>= count 3))
+		      ((and (string=? "adv" pos) (>= count (get-adv-limit option)))
 			#f
 		      )
 		      (else
@@ -456,11 +474,11 @@
 
 	(cond 
 	      ; not long/complex but sayable
-	      ((and pos-result say-able) 1)
+	      ((and pos-result say-able) *microplanning_sayable*)
 	      ; long/complex but sayable
-	      ((and (not pos-result) say-able) 2)
+	      ((and (not pos-result) say-able) *microplanning_too_long*)
 	      ; not sayable
-	      (else 0)
+	      (else *microplanning_not_sayable*)
 	)
 )
 
