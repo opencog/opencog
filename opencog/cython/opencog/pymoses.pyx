@@ -121,7 +121,7 @@ cdef class moses:
         if input is not None:
             _args_list.extend(['-i', input_file.name])
         if python:
-            _args_list.extend(['--python', '1'])
+            _args_list.extend(['--output-format', 'python'])
 
         _args_list.extend(['-o', output_file.name])
         _args_list.extend(shlex.split(args))
