@@ -130,7 +130,7 @@ int main(int argc, char** argv)
     // sampling with replacement
     auto smp_wr = [&]() -> unsigned { return randGen().randint(max_var); };
 
-    auto pos_swap = [&swap](const vertex v) { return swap ? swap_and_or(v) : v; };
+    auto pos_swap = [&swap](const vertex& v) { return swap ? swap_and_or(v) : v; };
     
     // generate tree
     typedef combo_tree::iterator pre_it;
