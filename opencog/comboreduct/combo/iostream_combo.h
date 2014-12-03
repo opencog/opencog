@@ -62,7 +62,7 @@ std::ostream& ostream_combo_it(std::ostream& out, Iter it,
     if (it.number_of_children() > 0) {
         out << "(";
         auto sib = it.begin();
-        ostream_combo_it(out, sib, f);
+        ostream_combo_it(out, sib++, f);
         for (; sib != it.end(); ++sib) {
             out << " ";
             ostream_combo_it(out, sib, f);
