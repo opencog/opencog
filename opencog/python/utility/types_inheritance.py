@@ -30,7 +30,6 @@ types_graph.add_edge('ConceptNode','SemeNode')
 types_graph.add_edge('ConceptNode','FeatureNode')
 types_graph.add_edge('PredicateNode','LinkGrammarDisjunctNode')
 types_graph.add_edge('PredicateNode','DefinedLinguisticRelationshipNode')
-types_graph.add_edge('PredicateNode','DefinedFrameElementNode')
 types_graph.add_edge('PredicateNode','LinkGrammarRelationshipNode')
 types_graph.add_edge('PredicateNode','GroundedPredicateNode')
 types_graph.add_edge('PredicateNode','PrepositionalRelationshipNode')
@@ -62,7 +61,6 @@ types_graph.add_edge('OrderedLink','InverseHebbianLink')
 types_graph.add_edge('OrderedLink','ListLink')
 types_graph.add_edge('OrderedLink','ExecutionLink')
 types_graph.add_edge('OrderedLink','IntensionalSimilarityLink')
-types_graph.add_edge('OrderedLink','FrameElementLink')
 types_graph.add_edge('OrderedLink','IntensionalInheritanceLink')
 types_graph.add_edge('OrderedLink','InheritanceLink')
 types_graph.add_edge('OrderedLink','PredictiveImplicationLink')
@@ -74,7 +72,6 @@ types_graph.add_edge('OrderedLink','EventualSequentialImplication')
 types_graph.add_edge('OrderedLink','ImplicationLink')
 types_graph.add_edge('OrderedLink','TypedVariableLink')
 types_graph.add_edge('OrderedLink','LatestLink')
-types_graph.add_edge('OrderedLink','ScholemLink')
 types_graph.add_edge('OrderedLink','EventualSequentialAND')
 types_graph.add_edge('OrderedLink','CountLink')
 types_graph.add_edge('ObjectNode','AccessoryNode')
@@ -100,7 +97,6 @@ types_graph.add_edge('Node','ProcedureNode')
 types_graph.add_edge('Node','TimeNode')
 types_graph.add_edge('Node','ObjectNode')
 types_graph.add_edge('Node','NumberNode')
-types_graph.add_edge('Node','CWColorNode')
 types_graph.add_edge('Node','WordNode')
 types_graph.add_edge('AssociativeLink','WordSenseLink')
 types_graph.add_edge('AssociativeLink','ParseLink')
@@ -156,10 +152,8 @@ name_type_dict["SentenceNode"] = t.SentenceNode
 name_type_dict["PartOfSpeechNode"] = t.PartOfSpeechNode
 name_type_dict["LemmaNode"] = t.LemmaNode
 name_type_dict["MixedImplicationLink"] = t.MixedImplicationLink
-name_type_dict["ScholemLink"] = t.ScholemLink
 name_type_dict["VariableNode"] = t.VariableNode
 name_type_dict["NotLink"] = t.NotLink
-name_type_dict["CWColorNode"] = t.CWColorNode
 name_type_dict["ForAllLink"] = t.ForAllLink
 name_type_dict["UnknownObjectNode"] = t.UnknownObjectNode
 name_type_dict["DefinedLinguisticConceptNode"] = t.DefinedLinguisticConceptNode
@@ -168,7 +162,6 @@ name_type_dict["SatisfyingSetLink"] = t.SatisfyingSetLink
 name_type_dict["ExtensionalSimilarityLink"] = t.ExtensionalSimilarityLink
 name_type_dict["OrLink"] = t.OrLink
 name_type_dict["ConceptNode"] = t.ConceptNode
-name_type_dict["FrameElementLink"] = t.FrameElementLink
 name_type_dict["ExtensionalImplicationLink"] = t.ExtensionalImplicationLink
 name_type_dict["AndLink"] = t.AndLink
 name_type_dict["OrderedLink"] = t.OrderedLink
@@ -207,7 +200,6 @@ name_type_dict["ExistsLink"] = t.ExistsLink
 name_type_dict["HypotheticalLink"] = t.HypotheticalLink
 name_type_dict["InheritanceLink"] = t.InheritanceLink
 name_type_dict["PartOfSpeechLink"] = t.PartOfSpeechLink
-name_type_dict["DefinedFrameElementNode"] = t.DefinedFrameElementNode
 name_type_dict["FeatureLink"] = t.FeatureLink
 name_type_dict["ParseNode"] = t.ParseNode
 name_type_dict["SemeNode"] = t.SemeNode
@@ -231,7 +223,6 @@ type_name_dict[t.Atom] = "Atom"
 type_name_dict[t.SentenceNode] = "SentenceNode"
 type_name_dict[t.ImplicationLink] = "ImplicationLink"
 type_name_dict[t.SemanticRelationNode] = "SemanticRelationNode"
-type_name_dict[t.DefinedFrameElementNode] = "DefinedFrameElementNode"
 type_name_dict[t.NotLink] = "NotLink"
 type_name_dict[t.PartOfSpeechNode] = "PartOfSpeechNode"
 type_name_dict[t.GroundedPredicateNode] = "GroundedPredicateNode"
@@ -261,7 +252,6 @@ type_name_dict[t.SimultaneousAndLink] = "SimultaneousAndLink"
 type_name_dict[t.OrderedLink] = "OrderedLink"
 type_name_dict[t.ExtensionalImplicationLink] = "ExtensionalImplicationLink"
 type_name_dict[t.DefinedLinguisticConceptNode] = "DefinedLinguisticConceptNode"
-type_name_dict[t.FrameElementLink] = "FrameElementLink"
 type_name_dict[t.AtTimeLink] = "AtTimeLink"
 type_name_dict[t.DefinedFrameNode] = "DefinedFrameNode"
 type_name_dict[t.LatestLink] = "LatestLink"
@@ -271,12 +261,10 @@ type_name_dict[t.NumberNode] = "NumberNode"
 type_name_dict[t.PartOfSpeechLink] = "PartOfSpeechLink"
 type_name_dict[t.SetLink] = "SetLink"
 type_name_dict[t.IntensionalInheritanceLink] = "IntensionalInheritanceLink"
-type_name_dict[t.ScholemLink] = "ScholemLink"
 type_name_dict[t.AndLink] = "AndLink"
 type_name_dict[t.AvatarNode] = "AvatarNode"
 type_name_dict[t.PredictiveImplicationLink] = "PredictiveImplicationLink"
 type_name_dict[t.ParseNode] = "ParseNode"
-type_name_dict[t.CWColorNode] = "CWColorNode"
 type_name_dict[t.TailPredictiveImplicationLink] = "TailPredictiveImplicationLink"
 type_name_dict[t.ForAllLink] = "ForAllLink"
 type_name_dict[t.StructureNode] = "StructureNode"
