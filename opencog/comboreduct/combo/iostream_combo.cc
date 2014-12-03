@@ -249,10 +249,10 @@ bool enum_str_to_vertex(const std::string& str, vertex& v)
     return true;
 }
 
-ostream& ostream_builtin(ostream& out, const builtin& h, format f)
+ostream& ostream_builtin(ostream& out, const builtin& h, output_format f)
 {
     switch (f) {
-    case fmt::python:
+    case output_format::python:
         switch (h) {
         case id::null_vertex:
             return out << "null_vertex";
@@ -269,7 +269,7 @@ ostream& ostream_builtin(ostream& out, const builtin& h, format f)
         default:
             return out << "Builtin: " << (unsigned) h << " unknown";
         }
-    case fmt::combo:
+    case output_format::combo:
         switch (h) {
         case id::null_vertex:
             return out << "null_vertex";
@@ -327,18 +327,18 @@ ostream& ostream_builtin(ostream& out, const builtin& h, format f)
             return out << "Builtin " << (unsigned) h << " unknown";
         }
     default:
-        return out << "Format " << f << " unknown";
+        return out << "Format " << static_cast<unsigned>(f) << " unknown";
     }
 }
 
-ostream& ostream_argument(ostream& out, const argument& a, format f)
+ostream& ostream_argument(ostream& out, const argument& a, output_format f)
 {
     switch(f) {
-    case fmt::python:
+    case output_format::python:
         if (a.is_negated())        
             return out << "not(i[" << -a.idx - 1 << "]),";
         return out << "i[" << a.idx - 1 << "],";
-    case fmt::combo:
+    case output_format::combo:
 #ifdef ABBREVIATE_NEGATIVE_LITERAL
         return ostream_abbreviate_literal(out, a);
 #else
@@ -347,11 +347,11 @@ ostream& ostream_argument(ostream& out, const argument& a, format f)
         return out << "$" << a.idx << vm;
 #endif
     default:
-        return out << "Format " << f << "unknown";
+        return out << "Format " << static_cast<unsigned>(f) << "unknown";
     }    
 }
 
-ostream& ostream_vertex(ostream& out, const vertex& v, format f)
+ostream& ostream_vertex(ostream& out, const vertex& v, output_format f)
 {
     // Handle the most likely types first.
     if (const argument* a = get<argument>(&v))
@@ -394,7 +394,7 @@ ostream& ostream_vertex(ostream& out, const vertex& v, format f)
 }
 
 std::ostream& ostream_combo_tree(std::ostream& out, const combo_tree& ct,
-                                 format f) {
+                                 output_format f) {
     for (combo_tree::iterator it=ct.begin(); it!=ct.end(); ++it) {
         ostream_combo_it(out, it, f);
         it.skip_children();
@@ -518,7 +518,7 @@ ostream& operator<<(ostream& out, const ann_type& h)
 
 ostream& operator<<(ostream& out, const builtin& h)
 {
-    return ostream_builtin(out, h, fmt::combo);
+    return ostream_builtin(out, h, output_format::combo);
 }
 
 ostream& operator<<(ostream& out, const wild_card& w)
@@ -540,12 +540,12 @@ ostream& ostream_abbreviate_literal(ostream& out, const argument& a) {
 
 ostream& operator<<(ostream& out, const argument& a)
 {
-    return ostream_argument(out, a, fmt::combo);
+    return ostream_argument(out, a, output_format::combo);
 }
 
 ostream& operator<<(ostream& out, const vertex& v)
 {
-    return ostream_vertex(out, v, fmt::combo);
+    return ostream_vertex(out, v, output_format::combo);
 }
 
 }} // ~namespaces combo opencog

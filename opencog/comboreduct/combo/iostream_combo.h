@@ -39,27 +39,25 @@
 
 namespace opencog { namespace combo {
 
-namespace fmt {
-enum format {
+enum class output_format {
     combo,
     python,
     scheme,
-    format_count                // to get the number of formats
+    output_format_count                // to get the number of formats
 };
-}
-typedef fmt::format format;
 
 // like operator<< but can choose the output format
 std::ostream& ostream_builtin(std::ostream&, const builtin&,
-                              format f = fmt::combo);
+                              output_format f = output_format::combo);
 std::ostream& ostream_argument(std::ostream&, const argument&,
-                               format f = fmt::combo);
+                               output_format f = output_format::combo);
 std::ostream& ostream_vertex(std::ostream&, const vertex&,
-                             format f = fmt::combo);
-std::ostream& ostream_combo_tree(std::ostream&, const combo_tree,
-                                 format f = fmt::combo);
+                             output_format f = output_format::combo);
+std::ostream& ostream_combo_tree(std::ostream&, const combo_tree&,
+                                 output_format f = output_format::combo);
 template<typename Iter>
-std::ostream& ostream_combo_it(std::ostream& out, Iter it, format f = fmt::combo) {
+std::ostream& ostream_combo_it(std::ostream& out, Iter it,
+                               output_format f = output_format::combo) {
     ostream_vertex(out, *it, f);
     if (it.number_of_children() > 0) {
         out << "(";
@@ -70,7 +68,7 @@ std::ostream& ostream_combo_it(std::ostream& out, Iter it, format f = fmt::combo
             ostream_combo_it(out, sib, f);
         }
         out << ")";
-        if (f == fmt::python)
+        if (f == output_format::python)
             out << ",";
     }
     return out;
