@@ -1442,7 +1442,7 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
     contin_reduct = reduct::contin_reduction(reduct_candidate_effort, ignore_ops).clone();
 
     // Parse output format
-    combo::output_format fmt;
+    combo::output_format fmt = combo::output_format::combo;
     if (output_format_str == "combo")
         fmt = combo::output_format::combo;
     else if (output_format_str == "python")
