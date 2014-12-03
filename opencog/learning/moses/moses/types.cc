@@ -174,7 +174,8 @@ std::ostream& ostream_scored_combo_tree(std::ostream& out,
                                         bool output_score,
                                         bool output_cscore,
                                         bool output_demeID,
-                                        bool output_bscore)
+                                        bool output_bscore,
+                                        combo::output_format fmt)
 {
     if (output_score)
         out << sct.get_score() << " ";
