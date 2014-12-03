@@ -162,7 +162,8 @@ bool composite_score::operator==(const composite_score &r) const
 
 static const std::string behavioral_score_prefix_str = "behavioral score:";
 
-std::ostream& ostream_behavioral_score(std::ostream& out, const behavioral_score& bs)
+std::ostream& ostream_behavioral_score(std::ostream& out,
+                                       const behavioral_score& bs)
 {
     out << behavioral_score_prefix_str << " ";
     return ostreamContainer(out, bs, " ", "[", "]");
@@ -195,7 +196,6 @@ std::ostream& ostream_scored_combo_tree(std::ostream& out,
 
     return out << std::endl;
 }
-
 
 /// Stream in a scored_combo_tree, using the format that resembles
 /// ostream_scored_combo_tree. Score, combo tree and composite score

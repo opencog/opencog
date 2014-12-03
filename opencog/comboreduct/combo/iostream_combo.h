@@ -82,7 +82,8 @@ bool contin_str_to_vertex(const std::string& str, vertex& v);
 bool message_str_to_vertex(const std::string& str, vertex& v);
 bool enum_str_to_vertex(const std::string& str, vertex& v);
 
-template<class BUILTIN_ACTION, class PERCEPTION, class ACTION_SYMBOL, class INDEFINITE_OBJECT>
+template<class BUILTIN_ACTION, class PERCEPTION,
+         class ACTION_SYMBOL, class INDEFINITE_OBJECT>
 void str_to_vertex(const std::string& str, vertex& v)
 {
     OC_ASSERT(!str.empty(), "input to string should not be empty.");
