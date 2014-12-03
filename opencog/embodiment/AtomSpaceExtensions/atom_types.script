@@ -1,10 +1,6 @@
 // ====================================================================
 // Embodiment atoms
 
-// XXX what are these ? Should be removed, I guess ... 
-// CW_PIXEL_PERCEPT_NODE <- NODE "CWPixelPerceptNode"
-// CW_COLOR_NODE <- NODE "CWColorNode"
-
 PET_NODE <- OBJECT_NODE
 AVATAR_NODE <- OBJECT_NODE
 ACCESSORY_NODE <- OBJECT_NODE

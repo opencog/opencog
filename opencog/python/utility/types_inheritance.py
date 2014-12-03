@@ -92,26 +92,16 @@ types_graph.add_edge('HebbianLink','SymmetricInverseHebbianLink')
 types_graph.add_edge('InheritanceLink','SchemaExecutionLink')
 types_graph.add_edge('InheritanceLink','HolonymLink')
 types_graph.add_edge('SchemaExecutionLink','SchemaEvaluationLink')
-types_graph.add_edge('Node','AGISIMObjectPerceptNode')
-types_graph.add_edge('Node','AGISIMTasteNode')
-types_graph.add_edge('Node','AGISIMSelfNode')
 types_graph.add_edge('Node','ConceptNode')
-types_graph.add_edge('Node','AGISIMSmellNode')
 types_graph.add_edge('Node','AnchorNode')
 types_graph.add_edge('Node','VariableNode')
-types_graph.add_edge('Node','AGISIMPixelPerceptNode')
 types_graph.add_edge('Node','VariableTypeNode')
-types_graph.add_edge('Node','AGIMSIMVisualPerceptNode')
 types_graph.add_edge('Node','ProcedureNode')
-types_graph.add_edge('Node','AGISIMSoundNode')
 types_graph.add_edge('Node','TimeNode')
 types_graph.add_edge('Node','ObjectNode')
 types_graph.add_edge('Node','NumberNode')
-types_graph.add_edge('Node','AGISIMPolygonPerceptNode')
 types_graph.add_edge('Node','CWColorNode')
-types_graph.add_edge('Node','AGISIMPerceptNode')
 types_graph.add_edge('Node','WordNode')
-types_graph.add_edge('Node','CWPixelPerceptNode')
 types_graph.add_edge('AssociativeLink','WordSenseLink')
 types_graph.add_edge('AssociativeLink','ParseLink')
 types_graph.add_edge('AssociativeLink','WordInstanceLink')
@@ -146,9 +136,7 @@ name_type_dict["TailPredictiveImplicationLink"] = t.TailPredictiveImplicationLin
 name_type_dict["SequentialAndLink"] = t.SequentialAndLink
 name_type_dict["EventualSequentialAND"] = t.EventualSequentialAND
 name_type_dict["SemanticRelationNode"] = t.SemanticRelationNode
-name_type_dict["AGISIMObjectPerceptNode"] = t.AGISIMObjectPerceptNode
 name_type_dict["StructureNode"] = t.StructureNode
-name_type_dict["CWPixelPerceptNode"] = t.CWPixelPerceptNode
 name_type_dict["Node"] = t.Node
 name_type_dict["ObjectNode"] = t.ObjectNode
 name_type_dict["LatestLink"] = t.LatestLink
@@ -170,11 +158,9 @@ name_type_dict["LemmaNode"] = t.LemmaNode
 name_type_dict["MixedImplicationLink"] = t.MixedImplicationLink
 name_type_dict["ScholemLink"] = t.ScholemLink
 name_type_dict["VariableNode"] = t.VariableNode
-name_type_dict["AGIMSIMVisualPerceptNode"] = t.AGIMSIMVisualPerceptNode
 name_type_dict["NotLink"] = t.NotLink
 name_type_dict["CWColorNode"] = t.CWColorNode
 name_type_dict["ForAllLink"] = t.ForAllLink
-name_type_dict["AGISIMSmellNode"] = t.AGISIMSmellNode
 name_type_dict["UnknownObjectNode"] = t.UnknownObjectNode
 name_type_dict["DefinedLinguisticConceptNode"] = t.DefinedLinguisticConceptNode
 name_type_dict["PredictiveImplicationLink"] = t.PredictiveImplicationLink
@@ -184,7 +170,6 @@ name_type_dict["OrLink"] = t.OrLink
 name_type_dict["ConceptNode"] = t.ConceptNode
 name_type_dict["FrameElementLink"] = t.FrameElementLink
 name_type_dict["ExtensionalImplicationLink"] = t.ExtensionalImplicationLink
-name_type_dict["AGISIMSoundNode"] = t.AGISIMSoundNode
 name_type_dict["AndLink"] = t.AndLink
 name_type_dict["OrderedLink"] = t.OrderedLink
 name_type_dict["SymmetricInverseHebbianLink"] = t.SymmetricInverseHebbianLink
@@ -192,13 +177,11 @@ name_type_dict["GroundedPredicateNode"] = t.GroundedPredicateNode
 name_type_dict["PredicateNode"] = t.PredicateNode
 name_type_dict["WordSenseLink"] = t.WordSenseLink
 name_type_dict["MemberLink"] = t.MemberLink
-name_type_dict["AGISIMPixelPerceptNode"] = t.AGISIMPixelPerceptNode
 name_type_dict["Atom"] = t.Atom
 name_type_dict["IntensionalSimilarityLink"] = t.IntensionalSimilarityLink
 name_type_dict["PrepositionalRelationshipNode"] = t.PrepositionalRelationshipNode
 name_type_dict["ListLink"] = t.ListLink
 name_type_dict["SchemaExecutionLink"] = t.SchemaExecutionLink
-name_type_dict["AGISIMPolygonPerceptNode"] = t.AGISIMPolygonPerceptNode
 name_type_dict["ExecutionOutputLink"] = t.ExecutionOutputLink
 name_type_dict["WordInstanceNode"] = t.WordInstanceNode
 name_type_dict["ExtensionalEquivalenceLink"] = t.ExtensionalEquivalenceLink
@@ -219,7 +202,6 @@ name_type_dict["AvatarNode"] = t.AvatarNode
 name_type_dict["LemmaLink"] = t.LemmaLink
 name_type_dict["TypedVariableLink"] = t.TypedVariableLink
 name_type_dict["ImplicationLink"] = t.ImplicationLink
-name_type_dict["AGISIMTasteNode"] = t.AGISIMTasteNode
 name_type_dict["SimultaneousAndLink"] = t.SimultaneousAndLink
 name_type_dict["ExistsLink"] = t.ExistsLink
 name_type_dict["HypotheticalLink"] = t.HypotheticalLink
@@ -235,8 +217,6 @@ name_type_dict["FeatureNode"] = t.FeatureNode
 name_type_dict["AnchorNode"] = t.AnchorNode
 name_type_dict["ProcedureNode"] = t.ProcedureNode
 name_type_dict["BindLink"] = t.BindLink
-name_type_dict["AGISIMPerceptNode"] = t.AGISIMPerceptNode
-name_type_dict["AGISIMSelfNode"] = t.AGISIMSelfNode
 name_type_dict["SchemaNode"] = t.SchemaNode
 name_type_dict["IntensionalInheritanceLink"] = t.IntensionalInheritanceLink
 name_type_dict["TimeNode"] = t.TimeNode
@@ -257,11 +237,9 @@ type_name_dict[t.PartOfSpeechNode] = "PartOfSpeechNode"
 type_name_dict[t.GroundedPredicateNode] = "GroundedPredicateNode"
 type_name_dict[t.SchemaNode] = "SchemaNode"
 type_name_dict[t.ExtensionalEquivalenceLink] = "ExtensionalEquivalenceLink"
-type_name_dict[t.AGISIMSoundNode] = "AGISIMSoundNode"
 type_name_dict[t.SatisfyingSetLink] = "SatisfyingSetLink"
 type_name_dict[t.AsymmetricHebbianLink] = "AsymmetricHebbianLink"
 type_name_dict[t.ExistsLink] = "ExistsLink"
-type_name_dict[t.AGISIMObjectPerceptNode] = "AGISIMObjectPerceptNode"
 type_name_dict[t.EventualSequentialImplication] = "EventualSequentialImplication"
 type_name_dict[t.ExtensionalSimilarityLink] = "ExtensionalSimilarityLink"
 type_name_dict[t.SemeNode] = "SemeNode"
@@ -285,11 +263,9 @@ type_name_dict[t.ExtensionalImplicationLink] = "ExtensionalImplicationLink"
 type_name_dict[t.DefinedLinguisticConceptNode] = "DefinedLinguisticConceptNode"
 type_name_dict[t.FrameElementLink] = "FrameElementLink"
 type_name_dict[t.AtTimeLink] = "AtTimeLink"
-type_name_dict[t.CWPixelPerceptNode] = "CWPixelPerceptNode"
 type_name_dict[t.DefinedFrameNode] = "DefinedFrameNode"
 type_name_dict[t.LatestLink] = "LatestLink"
 type_name_dict[t.LinkGrammarRelationshipNode] = "LinkGrammarRelationshipNode"
-type_name_dict[t.AGISIMSmellNode] = "AGISIMSmellNode"
 type_name_dict[t.SimilarityLink] = "SimilarityLink"
 type_name_dict[t.NumberNode] = "NumberNode"
 type_name_dict[t.PartOfSpeechLink] = "PartOfSpeechLink"
@@ -302,10 +278,7 @@ type_name_dict[t.PredictiveImplicationLink] = "PredictiveImplicationLink"
 type_name_dict[t.ParseNode] = "ParseNode"
 type_name_dict[t.CWColorNode] = "CWColorNode"
 type_name_dict[t.TailPredictiveImplicationLink] = "TailPredictiveImplicationLink"
-type_name_dict[t.AGIMSIMVisualPerceptNode] = "AGIMSIMVisualPerceptNode"
 type_name_dict[t.ForAllLink] = "ForAllLink"
-type_name_dict[t.AGISIMPixelPerceptNode] = "AGISIMPixelPerceptNode"
-type_name_dict[t.AGISIMPolygonPerceptNode] = "AGISIMPolygonPerceptNode"
 type_name_dict[t.StructureNode] = "StructureNode"
 type_name_dict[t.InheritanceLink] = "InheritanceLink"
 type_name_dict[t.AverageLink] = "AverageLink"
@@ -324,7 +297,6 @@ type_name_dict[t.LemmaLink] = "LemmaLink"
 type_name_dict[t.FeatureNode] = "FeatureNode"
 type_name_dict[t.SymmetricHebbianLink] = "SymmetricHebbianLink"
 type_name_dict[t.ObjectNode] = "ObjectNode"
-type_name_dict[t.AGISIMTasteNode] = "AGISIMTasteNode"
 type_name_dict[t.ExecutionLink] = "ExecutionLink"
 type_name_dict[t.IntensionalSimilarityLink] = "IntensionalSimilarityLink"
 type_name_dict[t.IsAcceptableSecondArgLink] = "IsAcceptableSecondArgLink"
@@ -335,11 +307,9 @@ type_name_dict[t.SymmetricInverseHebbianLink] = "SymmetricInverseHebbianLink"
 type_name_dict[t.WordInstanceNode] = "WordInstanceNode"
 type_name_dict[t.PetNode] = "PetNode"
 type_name_dict[t.SchemaEvaluationLink] = "SchemaEvaluationLink"
-type_name_dict[t.AGISIMPerceptNode] = "AGISIMPerceptNode"
 type_name_dict[t.BindLink] = "BindLink"
 type_name_dict[t.WordSenseLink] = "WordSenseLink"
 type_name_dict[t.DocumentNode] = "DocumentNode"
-type_name_dict[t.AGISIMSelfNode] = "AGISIMSelfNode"
 type_name_dict[t.HolonymLink] = "HolonymLink"
 type_name_dict[t.ReferenceLink] = "ReferenceLink"
 type_name_dict[t.WordSenseNode] = "WordSenseNode"
