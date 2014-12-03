@@ -118,10 +118,6 @@ void AtomTypes::AddSymbol(string typeName)
         symbol="∨";
     if(typeName.compare("NotLink")==0)
         symbol="¬";
-    if(typeName.compare("FalseLink")==0)
-        symbol=".F.";
-    if(typeName.compare("TrueLink")==0)
-        symbol=".T.";
     if(typeName.compare("SetLink")==0)
         symbol="{}";
     if(typeName.compare("MemberLink")==0)
