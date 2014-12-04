@@ -172,7 +172,7 @@ struct metapop_printer
                 } else {
                     ostream_scored_combo_tree(ss, sct, output_score,
                                               output_cscore, output_demeID,
-                                              output_bscore);
+                                              output_bscore, fmt);
                 }
             }
         }
