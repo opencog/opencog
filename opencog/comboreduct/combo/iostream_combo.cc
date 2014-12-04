@@ -361,11 +361,12 @@ ostream& ostream_argument(ostream& out, const argument& a, output_format fmt)
 #endif
     case output_format::python:
         if (a.is_negated())
-            return out << "not(i[" << -a.idx - 1 << "]),";
-        return out << "i[" << a.idx - 1 << "],";
+            return out << "not(i[" << -a.idx - 1 << "])";
+        return out << "i[" << a.idx - 1 << "]";
     case output_format::scheme: {
         stringstream var_ss;
-        var_ss << "EvaluationLink (PredicateNode \"$" << a.idx << "\") "
+        string arg_str = to_string(a.is_negated()? -a.idx : a.idx);
+        var_ss << "EvaluationLink (PredicateNode \"$" << arg_str << "\") "
                << "(VariableNode \"$X\")";
         if (a.is_negated())
             return out << "NotLink (" << var_ss.str() << ")";
