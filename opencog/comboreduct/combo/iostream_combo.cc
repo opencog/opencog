@@ -314,9 +314,9 @@ ostream& ostream_builtin(ostream& out, const builtin& h, output_format f)
         case id::null_vertex:
             return out << "null_vertex";
         case id::logical_and:
-            return out << "ands";
+            return out << "and";
         case id::logical_or:
-            return out << "ors";
+            return out << "or";
         case id::logical_not:
             return out << "not";
         case id::logical_true:

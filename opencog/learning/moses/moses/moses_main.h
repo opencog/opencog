@@ -113,12 +113,6 @@ struct metapop_printer
             if (output_format::python == fmt) {
                 // Python boilerplate
                 ss << "#!/usr/bin/env python\n"
-                   << "from operator import *\n\n"
-                   << "#These functions allow multiple args instead of lists.\n"
-                   << "def ors(*args):\n"
-                   << "    return any(args)\n\n"
-                   << "def ands(*args):\n"
-                   << "    return all(args)\n\n"
                    << "#score: " << metapop.best_score() << std::endl
                    << "def moses_eval(i):\n"
                    << "    sum = 0.0 \\\n";
@@ -159,12 +153,6 @@ struct metapop_printer
                 if (output_format::python == fmt) {
                     // Python boilerplate
                     ss << "#!/usr/bin/env python\n"
-                       << "from operator import *\n\n"
-                       << "#These functions allow multiple args instead of lists.\n"
-                       << "def ors(*args):\n"
-                       << "    return any(args)\n\n"
-                       << "def ands(*args):\n"
-                       << "    return all(args)\n\n"
                        << "#score: " << sct.get_score() << std::endl
                        << "def moses_eval(i):\n"
                        << "    return ";
