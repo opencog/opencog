@@ -337,9 +337,9 @@ ostream& ostream_builtin(ostream& out, const builtin& h, output_format f)
         case id::logical_not:
             return out << "NotLink";
         case id::logical_true:
-            return out << "TrueLink";
+            return out << "EvaluateLink (PredicateNode \"Top\")";
         case id::logical_false:
-            return out << "FalseLink";
+            return out << "EvaluateLink (PredicateNode \"Bottom\")";
         default:
             return out << "Builtin: " << (unsigned) h << " unknown";
         }
