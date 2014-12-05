@@ -50,38 +50,63 @@ enum class output_format {
 std::ostream& ostream_builtin(std::ostream&, const builtin&,
                               output_format fmt = output_format::combo);
 std::ostream& ostream_argument(std::ostream&, const argument&,
+                               const std::vector<std::string>& labels =
+                               std::vector<std::string>(),
                                output_format fmt = output_format::combo);
 std::ostream& ostream_vertex(std::ostream&, const vertex&,
+                             const std::vector<std::string>& labels =
+                             std::vector<std::string>(),
                              output_format fmt = output_format::combo);
 std::ostream& ostream_combo_tree(std::ostream&, const combo_tree&,
+                                 const std::vector<std::string>& labels =
+                                 std::vector<std::string>(),
                                  output_format fmt = output_format::combo);
 template<typename Iter>
 std::ostream& ostream_combo_it(std::ostream& out, Iter it,
+                               const std::vector<std::string>& labels =
+                               std::vector<std::string>(),
                                output_format fmt = output_format::combo) {
-    bool is_infix = (fmt == output_format::python and
-                     (*it == id::logical_and or *it == id::logical_or));
-
-    std::stringstream seperator;
-    if (is_infix) {
-        ostream_vertex(seperator << " ", *it, fmt) << " ";
-    } else {
-        ostream_vertex(out, *it, fmt);
-        if (fmt == output_format::python)
-            seperator << ",";
-        seperator << " ";
-    }
-
-    if (it.number_of_children() > 0) {
-        out << "(";
-        auto sib = it.begin();
-        ostream_combo_it(out, sib++, fmt);
-        for (; sib != it.end(); ++sib) {
-            out << seperator.str();
-            ostream_combo_it(out, sib, fmt);
+    switch(fmt) {
+    case(output_format::combo):
+        ostream_vertex(out, *it, labels, fmt);
+        if (it.number_of_children() > 0) {
+            out << "(";
+            auto sib = it.begin();
+            ostream_combo_it(out, sib++, labels, fmt);
+            for (; sib != it.end(); ++sib)
+                ostream_combo_it(out << " ", sib, labels, fmt);
+            out << ")";
         }
-        out << ")";
+        return out;
+    case(output_format::python): {
+        bool is_infix = *it == id::logical_and or *it == id::logical_or;
+
+        std::stringstream seperator;
+        if (is_infix) {
+            ostream_vertex(seperator << " ", *it, labels, fmt) << " ";
+        } else {
+            ostream_vertex(out, *it, labels, fmt);
+            seperator << ", ";
+        }
+
+        if (it.number_of_children() > 0) {
+            out << "(";
+            auto sib = it.begin();
+            ostream_combo_it(out, sib++, labels, fmt);
+            for (; sib != it.end(); ++sib)
+                ostream_combo_it(out << seperator.str(), sib, labels, fmt);
+            out << ")";
+        }
+        return out;
     }
-    return out;
+    case(output_format::scheme):
+        out << "(";
+        ostream_vertex(out, *it, labels, fmt);
+        for (auto sib = it.begin(); sib != it.end(); ++sib)
+            ostream_combo_it(out << " ", sib, labels, fmt);
+        out << ")";
+        return out;
+    }
 }
 
 // return false if the string has no match
@@ -231,7 +256,9 @@ std::ostream& operator<<(std::ostream&, const builtin&);
 std::ostream& operator<<(std::ostream&, const wild_card&);
 std::ostream& operator<<(std::ostream&, const argument&);
 // output argument $n when positive, !$n when negative 
-std::ostream& ostream_abbreviate_literal(std::ostream&, const argument&);
+std::ostream& ostream_abbreviate_literal(std::ostream&, const argument&,
+                                         const std::vector<std::string>& labels =
+                                         std::vector<std::string>());
 std::ostream& operator<<(std::ostream&, const vertex&);
 
 }} // ~ namespace opencog::combo

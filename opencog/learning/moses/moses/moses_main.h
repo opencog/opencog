@@ -118,7 +118,10 @@ struct metapop_printer
                    << "    sum = 0.0 \\\n";
                 for (const scored_combo_tree& sct : tree_set)
                     ostream_combo_tree(ss << "      + " << sct.get_weight()
-                                       << " * ", sct.get_tree(), fmt) << "\\\n";
+                                       << " * ", sct.get_tree(),
+                                       output_with_labels? ilabels :
+                                       std::vector<std::string>(),
+                                       fmt) << "\\\n";
                 ss << "\n    return (0.0 < val)\n";
             } else {
 
@@ -156,27 +159,29 @@ struct metapop_printer
                        << "#score: " << sct.get_score() << std::endl
                        << "def moses_eval(i):\n"
                        << "    return ";
-                    ostream_combo_tree(ss, sct.get_tree(), fmt) << std::endl;
+                    ostream_combo_tree(ss, sct.get_tree(),
+                                       output_with_labels? ilabels :
+                                       std::vector<std::string>(),
+                                       fmt);
+                    ss << std::endl;
                 } else {
                     ostream_scored_combo_tree(ss, sct, output_score,
                                               output_cscore, output_demeID,
-                                              output_bscore, fmt);
+                                              output_bscore,
+                                              output_with_labels? ilabels :
+                                              std::vector<std::string>(),
+                                              fmt);
                 }
             }
         }
         if (output_eval_number)
             ss << number_of_evals_str << ": " << stats.n_evals << std::endl;;
 
-        // OK, this is kind-of cheesy, but it goes and replaces $1 $2 $3
-        // etc with the strings from the ilabels vector. Its just a pure
-        // string search-n-replace.
-        string res = (output_with_labels && !ilabels.empty()?
-                      ph2l(ss.str(), ilabels) : ss.str());
         if (output_file.empty())
-            std::cout << res;
+            std::cout << ss.str();
         else {
             ofstream of(output_file.c_str());
-            of << res;
+            of << ss.str();
             of.close();
         }
 
@@ -188,23 +193,21 @@ struct metapop_printer
                     ssb << cand.get_weight() << " " << cand.get_tree();
                 }
 
-                string resb = (output_with_labels && !ilabels.empty()?
-                               ph2l(ssb.str(), ilabels) : ssb.str());
-                if (resb.empty())
+                if (ssb.str().empty())
                     logger().warn("Ensemble was empty!");
                 else
                     logger().info("Final ensemble, consisting of %d members:\n%s",
-                        metapop.get_ensemble().get_ensemble().size(), res.c_str());
+                                  metapop.get_ensemble().get_ensemble().size(),
+                                  ssb.str().c_str());
             } else {
                 // Log the single best candidate
                 stringstream ssb;
                 metapop.ostream_metapop(ssb, 1);
-                string resb = (output_with_labels && !ilabels.empty()?
-                               ph2l(ssb.str(), ilabels) : ssb.str());
-                if (resb.empty())
-                    logger().warn("No candidate is good enough to be returned. Yeah that's bad!");
+                if (ssb.str().empty())
+                    logger().warn("No candidate is good enough to be returned. "
+                                  "Yeah that's bad!");
                 else
-                    logger().info("Best candidates:\n%s", res.c_str());
+                    logger().info("Best candidates:\n%s", ssb.str().c_str());
             }
         }
 
