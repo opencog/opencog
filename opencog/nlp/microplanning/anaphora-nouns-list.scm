@@ -11,6 +11,7 @@
 ;
 (define-class <nouns-list> ()
 	(lst #:init-value '())
+	(assoc-table #:init-value '())
 )
 
 ; -----------------------------------------------------------------------
@@ -103,24 +104,105 @@
 )
 
 ; -----------------------------------------------------------------------
-; is-modified -- Check a <noun-item> to see if it is modified
+; construct-associations -- Construct the association table between items
+;
+; Given two <noun-item>, they are associated if they will ended up as
+; the same word in the final sentence.  For example, given input
+;
+;    EvaluationLink eat@123 dog@123 apple@123
+;    InheritanceLink dog@123 big@123
+;    EvaluationLink drink@123 dog@123 water@123
+;
+; we will have a <nouns-list> of
+;
+;    (dog@123, apple@123, dog@123, dog@123, water@123)
+;
+; If the final sentence is
+;
+;    "The big dog eats the apple and drinks the water"
+;
+; then all <noun-item> of "dog@123" are associated.  However, if the final
+; sentence is
+;
+;    "The big dog eats the apple, and the dog then drinks the water"
+;
+; then only the first two <noun-item> of "dog@123" are associated with
+; each other.
+;
+; Normally this would require knowing what the final sentence is like.
+; However, since SuReal will return multiple possible sentences, this is
+; not doable (both associations above could happen).
+;
+; Instead, this algorithm will assume any <noun-item> A is associated with
+; the closest <noun-item> B in a non-InheritanceLink that appears before A's
+; link. It will be up to SuReal to form the first sentence even if
+; one of the "dog@123" is changed to a pronoun or some other noun phrase.
+;
+(define-method (construct-associations (nl <nouns-list>))
+	(define last-chunk-index (get-chunk-index (last (slot-ref nl 'lst))))
+	(define (helper chunk-index)
+		(define sub (slot-ref (get-chunk-sublist nl chunk-index) 'lst))
+		(define rev-sub (reverse sub))
+		
+		; find the closest <noun-item> with same node and not in an InheritanceLink, and update the table
+		(define (update-assoc-table ni)
+			(define target
+				(find
+					(lambda (x)
+						(and 
+							(equal? (get-noun-node x) (get-noun-node ni))
+							(not (equal? (cog-type (get-orig-link x)) 'InheritanceLink))
+						)
+					)
+					(drop-while (lambda (x) (not (equal? x ni))) rev-sub)
+				)
+			)
+			(define ni-old-assoc (assoc-ref (slot-ref nl 'assoc-table) ni))
+			(define target-old-assoc (assoc-ref (slot-ref nl 'assoc-table) target))
+
+			; only associate with something other than itself
+			(if (not (equal? ni target))
+				(begin
+					; add ni & target as each other's association
+					(if ni-old-assoc
+						(assoc-set! (slot-ref nl 'assoc-table) ni (cons target ni-old-assoc))
+						(slot-set! nl 'assoc-table (assoc-set! (slot-ref nl 'assoc-table) ni (list target)))
+					)
+					(if target-old-assoc
+						(assoc-set! (slot-ref nl 'assoc-table) target (cons ni target-old-assoc))
+						(slot-set! nl 'assoc-table (assoc-set! (slot-ref nl 'assoc-table) target (list ni)))
+					)
+				)
+			)		
+		)
+		
+		(for-each update-assoc-table sub)
+		
+		(if (< chunk-index last-chunk-index)
+			(helper (+ 1 chunk-index))
+		)
+	)
+
+	(if (>= last-chunk-index 0)
+		(helper 0)
+	)
+)
+
+; -----------------------------------------------------------------------
+; is-modified? -- Check a <noun-item> to see if it is modified
 ;
 ; Modified means things like adjectives, so it will check the chunk in
 ; which the <noun-item> is in for InheritanceLink which contains the
 ; same noun ConceptNode.
 ;
+; If passed a <noun-item> that is in the modifier itself, will also
+; return #t.
+;
 (define-method (is-modified? (nl <nouns-list>) (ni <noun-item>))
-	; TODO add check where within the same chunk one noun appear multiple times
-	;      and only one of them is modified
-	;      eg.  "Bob collects the tiny seeds and plants seeds."
-	; XXX  might need to call SuReal to do the above check
-	(any (lambda (n) 
-		(and (= (get-chunk-index n) (get-chunk-index ni))		; in the same chunk?
-		     (equal? (get-noun-node n) (get-noun-node ni))		; with the same node?
-		     (equal? 'InheritanceLink (cog-type (get-orig-link n)))	; in InheritanceLink modifying the noun (amod-rule)
-		)
-	     )
-	     (slot-ref nl 'lst)
+	; if there's an association, then the <noun-item> is modified
+	(if (assoc-ref (slot-ref nl 'assoc-table) ni)
+		#t
+		#f
 	)
 )
 
@@ -240,6 +322,9 @@
 		chunks
 		(iota (length chunks)) ; generate chunk-indices
 	)
+
+	; build the association table
+	(construct-associations nl)
 
 	; determine pronoun safety bases on the current set of chunks
 	(update-pronoun-safety nl)
