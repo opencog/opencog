@@ -135,10 +135,6 @@ void SCMExecutionUTest::threadedAdd(int thread_id, int N)
 	ev->eval("(define (make-king x) (InheritanceLink x "
 	         "(ConceptNode \"king\")))");
 
-	// There is no king yet
-	Handle king = as->addNode(CONCEPT_NODE, "king");
-	TS_ASSERT_EQUALS(as->getIncoming(king).size(), 0);
-
 	for (int i = 0; i < N; i++) {
 		double strength = 0.7 * ((double) i) / ((double) N);
 		double confidence = 0.8 * ((double) N-i) / ((double) N);
