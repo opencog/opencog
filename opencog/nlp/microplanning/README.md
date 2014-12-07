@@ -6,17 +6,27 @@ The folder contains microplanning code for the NLG pipeline.
 
     The main scheme file to load into OpenCog.  Other dependencies are loaded automatically.
 
+- chunks-option.scm
+
+    Definition of the `<chunks-option>` class which one can instantiate to create custom chunking behavior.
+
+- chunks-set.scm
+
+    Definition of the `<chunks-set>` class for storing one set of chunking reuslt.
+
 - helpers.scm
 
     Contains more general helper functions that could also be useful for other purposes.
 
 - anaphora.scm
+- anaphora-nouns-list.scm
+- anaphora-noun-item.scm
 
     The code for handling anaphora generation.  Currently only basic pronouns are handled.
     
 - sentence-forms.scm
 
-    Templates for defining the most basic structures for each utterance type.  Utterance type can be **declarative**, **interrogative**, **imperative**, and **interjective**.  OpenCog links that do not satisfy one of the structures are considered not well-formed.
+    Templates for defining the most basic structures for each utterance type.  Utterance type can be **declarative**, **interrogative**, **imperative**, and **interjective**.  OpenCog links that do not satisfy one of the structures are considered not well-formed (ie. not enough information to form a sentence).
     
 - test-atomspace.scm
 
@@ -32,10 +42,10 @@ The folder contains microplanning code for the NLG pipeline.
     - **time-weight** (n..0): the time sequential order within the set
     - **link-weight** (n): the number of nodes in common with what is already said from the current incoming set
     
-   `form-weight * (time-weight + link-weight)`
+   Default weighting formula is `form-weight * (time-weight + link-weight)`
     
 2. Choose the highest weighted link and check if it is 'say-able' from SuReal, and whether it is too complex
-    - a chunk is too complex if there are too many verbs (max 2), nouns (3), adjectives (5), adverbs (3)
+    - a chunk is too complex if there are too many verbs (default 2), nouns (3), adjectives (5), adverbs (3)
     
     If a chunk is say-able but can be longer:
     
@@ -44,7 +54,7 @@ The folder contains microplanning code for the NLG pipeline.
         - **time-weight** (n..0): same as before
         - **link-weight** (n): instead of weighting against what was said, weight against what we are trying to say
         
-       `(time-weights + link-weights) * (2 - form-weights)`
+       Default weighting formula here is `(time-weights + link-weights) * (2 - form-weights)`
         
     2. Add the highest weight one and try saying again
    
@@ -58,13 +68,12 @@ The folder contains microplanning code for the NLG pipeline.
 
 1. Looks through all the chunks and find all the nouns to form a noun sequence.
 
-2. For each noun, determine what would the base pronoun be by looking at OpenCog RelEx style atoms.  If the noun is already a pronoun, leave it as is.  Base pronouns are "he", "she", "it", "they".  Pronouns such as "I", "you", "we" will rarely have (if ever?) a third person non-pronoun alternative.
+2. For each noun, determine what would the base pronoun be by looking at OpenCog RelEx style atoms.  If the noun is already a pronoun, change it to base.  Base pronouns are "he", "she", "it", "they", etc.
 
 3. For each noun, check whether it can actually be changed to pronoun:
-    - if the noun has never been mentioned before, then no
-    - if the noun is in a non-sentence formed link, then no (since we cannot have "The green it" or "The tall he"), unless the corresponding noun in the sentence-form link is changed in the same sentence.
+    - if the noun has never been mentioned before or mentioned too long ago (> 3 chunks back), then no
+    - if the noun is modified by an `InheritanceLink` in the same chunk, then no
     - check 3 nouns before and 3 nouns after in the noun sequence;  if another noun share the same pronoun, it is ambiguous, then no
-    - if the noun is mentioned more than 3 chunks back, then it is too far back, so no
 
 4. Clone the chunks and replace nouns with pronouns as necessary
     - if a noun is the subject, keep the pronoun as is (ie. "I", "he", "they", etc)
@@ -95,33 +104,36 @@ Before running the example, you need to populate the atomspaces with sample sent
 (r2l "A cat ate the seeds.")
 ```
 
-For more complex sentence structure, you could also add
-```
-(r2l "The ugly cat climbs the stairs and enters the house.")
-(r2l "He takes the cookies and eats them.")
-(r2l "She collects damaged stamps and categorizes them.")
-```
-
 These examples are also in comment form in `test-atomspace.scm`, which you can uncomment.
 
 
 Then you can running microplanning as follow
 ```
-(microplanning test-declarative-sal "declarative" #t)
+(microplanning test-declarative-sal "declarative" *default_chunks_option* #t)
 ```
-and a list of SetLink will be returned.  These SetLink's can be passed to Surface Realization as
+and a list will be returned.  Each element of the returned list is one result of the chunking algorithm, returned as a list of `SetLink`s.  These `SetLink`'s can be passed to Surface Realization.  For example, to realize the first chunking result, we do
 ```
 (map
 	(lambda (set-link)
 		(receive (sentences weights) (sureal set-link)
 			(filter-map (lambda (s w) (if (>= w 0) s #f)) sentences weights)))
-	(microplanning test-declarative-sal "declarative" #t)
+	(car (microplanning test-declarative-sal "declarative" *default_chunks_option* #t))
 )
 ```
+
+It is also possible to construct your own test using your own custom `SequentialAndLink`.  As long as each node used in your test set has the corresponding RelEx grammer nodes.
+
+`*default_chunks_option*` containes the default weights and procedures for chunking.  It is possible to create a different `<chunks-option>` object to create different chunking result.
+
+
 
 ## TODO
 
 1. Anaphora inserting for possession:
 
     This is kind of weird in that "Our car" will become "Us car" after processed by RelEx.  Also, the whole possession link can be discarded to make "Our car" -> "it".  If we have "John's car" and we found that "John" can be a pronoun and changed the possession link to "his", we ended up with "His's car".
+    
+2. Nominal anaphora
+
+    Probably check what other nouns a "noun" inherit from and choose one of those most frequently appear in the AtomSpace.
     
