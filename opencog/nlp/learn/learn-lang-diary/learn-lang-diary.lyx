@@ -13305,6 +13305,83 @@ reference "eq:Relation MI"
 \end_layout
 
 \begin_layout Section*
+13 Sept 2014
+\end_layout
+
+\begin_layout Standard
+The Zipfian distribution is typical of a scale-free network.
+ So why is language scale-free? Crudely, because we attempt to recycle existing
+ concepts/words.
+\end_layout
+
+\begin_layout Standard
+Next, from this:
+\end_layout
+
+\begin_layout Itemize
+Christoph Adami 
+\begin_inset Quotes eld
+\end_inset
+
+Information-Theoretic Considerations Concerning the Origin of Life
+\begin_inset Quotes erd
+\end_inset
+
+ http://arxiv.org/pdf/1409.0590v1.pdf
+\end_layout
+
+\begin_layout Standard
+Come the following thoughts:
+\end_layout
+
+\begin_layout Itemize
+Never assume a uniform distribution of parts.
+ This makes it very unlikely that an imprtant assemblage of parts can arise
+ at random.
+ For Adami, this is used to argue that biotic and abiotic strings should
+ have very siilar distributions (or rather, the converse: a non-uniform
+ abotic distribution makes it much more likely to find a replictor with
+ a similar distribution.) 
+\end_layout
+
+\begin_layout Itemize
+The information content of (grammatical sentences of length L is 
+\begin_inset Formula 
+\[
+I_{grammatical}=-\log_{2}(N_{grammatical}/N_{total})
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $N_{total}$
+\end_inset
+
+ is the total number of sentences of length L, assuming a 
+\emph on
+uniform
+\emph default
+ distribution of words picked from a vocabulary of D words.
+ That is, 
+\begin_inset Formula $N_{total}=D^{L}$
+\end_inset
+
+.
+ But this is weird ...
+ because the vocabulary isn't really a constant, and the natural distribution
+ is not uniform, so its not clear what kind of 
+\begin_inset Quotes eld
+\end_inset
+
+information
+\begin_inset Quotes erd
+\end_inset
+
+ the above actualy is ...
+ 
+\end_layout
+
+\begin_layout Section*
 The End 
 \end_layout
 
