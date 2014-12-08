@@ -63,10 +63,11 @@ static const char* DEFAULT_CONFIG_PATHS[] =
 
 static void usage(const char* progname)
 {
-    std::cerr << "Usage: " << progname << " [[-c <config-file>]..] [[-DOPTION=\"VALUE\"]..]\n\n";
-    std::cerr << "Each config file is loaded sequentially, with the values in \n"
-        << " later files overwriting earlier. Then each singular option overrides \n" 
-        << " options in config files. " << std::endl;
+    std::cerr << "Usage: " << progname
+              << " [[-c <config-file>]..] [[-DOPTION=\"VALUE\"]..]\n\n"
+              << "Each config file is loaded sequentially, with the values in\n"
+              << "later files overwriting earlier. Then each singular option overrides\n" 
+              << "options in config files." << std::endl;
 }
 
 // Catch and report sigsegv
@@ -157,7 +158,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     // Each config file sequentially overwrites the next
-    BOOST_FOREACH (string configFile, configFiles) {
+    for (const string& configFile : configFiles) {
         try {
             config().load(configFile.c_str(), false);
             break;
@@ -167,8 +168,7 @@ int main(int argc, char *argv[])
         }
     }
     // Each specific option
-    pair<string,string> optionPair;
-    BOOST_FOREACH (optionPair, configPairs) {
+    for (const auto& optionPair : configPairs) {
         //cerr << optionPair.first << " = " << optionPair.second << endl;
         config().set(optionPair.first, optionPair.second);
     }
@@ -176,7 +176,8 @@ int main(int argc, char *argv[])
     // setup global logger
     logger().setFilename(config()["LOG_FILE"]);
     logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-    logger().setBackTraceLevel(Logger::getLevelFromString(config()["BACK_TRACE_LOG_LEVEL"]));
+    auto level = Logger::getLevelFromString(config()["BACK_TRACE_LOG_LEVEL"]);
+    logger().setBackTraceLevel(level);
     logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
     //logger().setLevel(Logger::DEBUG);
 
