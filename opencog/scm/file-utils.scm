@@ -6,7 +6,7 @@
 ;
 ; -- list-files dir                List files in a directory
 ; -- exec-scm-from-port port       Execute scheme code read from port
-; -- exec-scm-from-cmd cmd-string  Run scheme returend by shell command
+; -- exec-scm-from-cmd cmd-string  Run scheme returned by shell command
 ; -- load-scm-from-file filename   Run scheme code taken from file
 ; -- export-all-atoms filename     Export entire atomsapce into file
 ;
