@@ -3,7 +3,7 @@
 ###########################
 
 # Path of the OpenCog repository
-opencog_repo_path=/home/$USER/OpenCog/opencog
+opencog_repo_path="$(readlink -f .)/../../../.."
 build_dir_name=build
 
 #################################
