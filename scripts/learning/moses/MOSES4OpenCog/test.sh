@@ -51,6 +51,12 @@ hr2i() {
     echo $val
 }
 
+# pad $1 symbol with up to $2 0s
+pad() {
+    pad_expression="%0${2}d"
+    printf "$pad_expression" "$1"
+}
+
 ########
 # Main #
 ########
@@ -91,8 +97,13 @@ moses \
 #     EvaluationLink
 #         ...
 
-(echo "scm"; cat "$moses_output_file") \
-    | "$opencog_repo_path/scripts/run_telnet_cogserver.sh"
+(echo "scm";
+    i=0
+    while read line; do
+        moses_model_name="moses_$(pad $i 3)"
+        echo "(EquivalentLink (EvaluationLink (PredicateNode \"${moses_model_name}\" $line)))"
+    done < "$moses_output_file"
+) | "$opencog_repo_path/scripts/run_telnet_cogserver.sh"
 
 # 5. Use PLN to perform reasoning, etc.
 # TODO
