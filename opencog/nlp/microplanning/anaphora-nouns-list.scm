@@ -129,9 +129,9 @@
 ; then only the first two <noun-item> of "dog@123" are associated with
 ; each other.
 ;
-; Normally this would require knowing what the final sentence is like.
+; Ideally this would require knowing what the final sentence is like.
 ; However, since SuReal will return multiple possible sentences, this is
-; not doable (both associations above could happen).
+; not feasible (both associations above could happen).
 ;
 ; Instead, this algorithm will assume any <noun-item> A is associated with
 ; the closest <noun-item> B in a non-InheritanceLink that appears before A's
@@ -152,28 +152,20 @@
 						(and 
 							(equal? (get-noun-node x) (get-noun-node ni))
 							(not (equal? (cog-type (get-orig-link x)) 'InheritanceLink))
+							; if there are multiples (twins, triplets, etc), only accept the first one
+							; this allows for things like reflexive (eg. The funny man punched himself.)
+							(equal? (car (get-multiples nl x)) x)
 						)
 					)
 					(drop-while (lambda (x) (not (equal? x ni))) rev-sub)
 				)
 			)
-			(define ni-old-assoc (assoc-ref (slot-ref nl 'assoc-table) ni))
-			(define target-old-assoc (assoc-ref (slot-ref nl 'assoc-table) target))
 
-			; only associate with something other than itself
-			(if (not (equal? ni target))
-				(begin
-					; add ni & target as each other's association
-					(if ni-old-assoc
-						(assoc-set! (slot-ref nl 'assoc-table) ni (cons target ni-old-assoc))
-						(slot-set! nl 'assoc-table (assoc-set! (slot-ref nl 'assoc-table) ni (list target)))
-					)
-					(if target-old-assoc
-						(assoc-set! (slot-ref nl 'assoc-table) target (cons ni target-old-assoc))
-						(slot-set! nl 'assoc-table (assoc-set! (slot-ref nl 'assoc-table) target (list ni)))
-					)
-				)
-			)		
+			; only associate if they are in two different links (avoiding reflexive associating with each other)
+			(if (not (equal? (get-orig-link ni) (get-orig-link target)))
+				; add target to ni's association
+				(slot-set! nl 'assoc-table (assoc-set! (slot-ref nl 'assoc-table) ni target))
+			)
 		)
 		
 		(for-each update-assoc-table sub)
@@ -189,6 +181,27 @@
 )
 
 ; -----------------------------------------------------------------------
+; get-association -- Get the list of association to the <noun-item>
+;
+(define-method (get-association (nl <nouns-list>) (ni <noun-item>))
+	(assoc-ref (slot-ref nl 'assoc-table) ni)
+)
+
+; -----------------------------------------------------------------------
+; get-multiples -- Get the identical siblings of <noun-item> in the same link
+;
+; Check if the noun-node of <noun-item> appears multiple times in its
+; link, and if so, return a list of corresponding <noun-item>.  Useful for
+; identifying links that might be a reflexive like "He punched himself."
+;
+(define-method (get-multiples (nl <nouns-list>) (ni <noun-item>))
+	(define sub (get-chunk-link-sublist nl (get-chunk-index ni) (get-link-index ni)))
+	
+	(filter (lambda (n) (equal? (get-noun-node n) (get-noun-node ni))) (slot-ref sub 'lst))
+)
+
+
+; -----------------------------------------------------------------------
 ; is-modified? -- Check a <noun-item> to see if it is modified
 ;
 ; Modified means things like adjectives, so it will check the chunk in
@@ -199,10 +212,14 @@
 ; return #t.
 ;
 (define-method (is-modified? (nl <nouns-list>) (ni <noun-item>))
-	; if there's an association, then the <noun-item> is modified
-	(if (assoc-ref (slot-ref nl 'assoc-table) ni)
-		#t
-		#f
+	(or
+		; if some other <noun-item> is associated with this one, then it is modified
+		(any
+			(lambda (at) (equal? ni at))
+			(slot-ref nl 'assoc-table)
+		)
+		; if there's an association, then the <noun-item> is modified
+		(get-association nl ni)
 	)
 )
 
@@ -260,20 +277,39 @@
 )
 
 ; -----------------------------------------------------------------------
-; update-pronoun-safety -- Update the 'pronoun-safe' flag in a <noun-item>
+; is-first-time? -- Check if <noun-item> was mentioned the first time
+;
+(define-method (is-first-time? (nl <nouns-list>) (ni <noun-item>))
+	(define all-occurrences (filter (lambda (n) (equal? (get-noun-node n) (get-noun-node ni))) (slot-ref nl 'lst)))
+	
+	(or
+		(equal? (car all-occurrences) ni)
+		(equal? (car all-occurrences) (get-association nl ni))
+	)
+)
+
+; -----------------------------------------------------------------------
+; update-anaphora-safety -- Update the safety flags in a <noun-item>
 ;
 ; Check all <noun-item>s in the <nouns-list> against each other and update
-; the 'pronoun-safe' flag as neccessary, to indicate whether the noun
-; usage in <noun-item> can be safely changed to a pronoun without causing
-; confusion to the final sentence.
+; the 'pronoun-safe' & 'lexical-safe" flag as neccessary, to indicate
+; whether the noun usage in <noun-item> can be safely changed to a pronoun
+; or lexical noun phrase without causing confusion to the final sentence.
 ;
-(define-method (update-pronoun-safety (nl <nouns-list>))
-	(define (is-safe? ni)
+(define-method (update-anaphora-safety (nl <nouns-list>))
+	(define (is-pronoun-safe? ni)
 		(not (or (is-ancient? nl ni) (is-ambiguous? nl ni) (is-modified? nl ni)))	
+	)
+	(define (is-lexical-safe? ni)
+		(not (is-first-time? nl ni))	
 	)
 
 	(for-each
-		(lambda (n) (set-pronoun-safe! n (is-safe? n)))
+		(lambda (n) (set-pronoun-safe! n (is-pronoun-safe? n)))
+		(slot-ref nl 'lst)
+	)
+	(for-each
+		(lambda (n) (set-lexical-safe! n (is-lexical-safe? n)))
 		(slot-ref nl 'lst)
 	)
 )
@@ -282,8 +318,8 @@
 ; populate-nouns-list -- Populate the <nouns-list> by extracting from 'chunks'
 ;
 ; Check all the chunk in 'chunks' and extract nouns.  Create the
-; corressponding <noun-item> and add it to the list.  Update the pronoun-safe
-; flag after the list is populated.
+; corressponding <noun-item> and add it to the list.  Update the safety
+; flags after the list is populated.
 ;
 (define-method (populate-nouns-list (nl <nouns-list>) (chunks <list>))
 	(define atom-index 0)
@@ -326,6 +362,6 @@
 	; build the association table
 	(construct-associations nl)
 
-	; determine pronoun safety bases on the current set of chunks
-	(update-pronoun-safety nl)
+	; determine pronoun and lexical safety bases on the current set of chunks
+	(update-anaphora-safety nl)
 )
