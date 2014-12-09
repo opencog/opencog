@@ -107,7 +107,7 @@
 ; construct-associations -- Construct the association table between items
 ;
 ; Given two <noun-item>, they are associated if they will ended up as
-; the same word in the final sentence.  For example, given input
+; the same word in the final sentence.  For example, given a chunk
 ;
 ;    EvaluationLink eat@123 dog@123 apple@123
 ;    InheritanceLink dog@123 big@123
@@ -134,30 +134,30 @@
 ; not feasible (both associations above could happen).
 ;
 ; Instead, this algorithm will assume any <noun-item> A is associated with
-; the closest <noun-item> B in a non-InheritanceLink that appears before A's
-; link. It will be up to SuReal to form the first sentence even if
-; one of the "dog@123" is changed to a pronoun or some other noun phrase.
+; the first <noun-item> B in the chunk that is not in an InheritanceLink,
+; unless A is itself in a non-InheritanceLink.  This pushes all adjectives
+; to be associated with the first instance of the noun in the sentence.
 ;
 (define-method (construct-associations (nl <nouns-list>))
 	(define last-chunk-index (get-chunk-index (last (slot-ref nl 'lst))))
 	(define (helper chunk-index)
 		(define sub (slot-ref (get-chunk-sublist nl chunk-index) 'lst))
-		(define rev-sub (reverse sub))
 		
-		; find the closest <noun-item> with same node and not in an InheritanceLink, and update the table
+		; find the first <noun-item> with same node and not in an InheritanceLink, and update the table
 		(define (update-assoc-table ni)
 			(define target
-				(find
-					(lambda (x)
-						(and 
-							(equal? (get-noun-node x) (get-noun-node ni))
-							(not (equal? (cog-type (get-orig-link x)) 'InheritanceLink))
-							; if there are multiples (twins, triplets, etc), only accept the first one
-							; this allows for things like reflexive (eg. The funny man punched himself.)
-							(equal? (car (get-multiples nl x)) x)
+				; target is itself if 'ni' is already in a non-InheritanceLink
+				(if (not (equal? (cog-type (get-orig-link ni)) 'InheritanceLink))
+					ni
+					(find
+						(lambda (x)
+							(and
+								(equal? (get-noun-node x) (get-noun-node ni))
+								(not (equal? (cog-type (get-orig-link x)) 'InheritanceLink))
+							)
 						)
+						sub
 					)
-					(drop-while (lambda (x) (not (equal? x ni))) rev-sub)
 				)
 			)
 
@@ -186,20 +186,6 @@
 (define-method (get-association (nl <nouns-list>) (ni <noun-item>))
 	(assoc-ref (slot-ref nl 'assoc-table) ni)
 )
-
-; -----------------------------------------------------------------------
-; get-multiples -- Get the identical siblings of <noun-item> in the same link
-;
-; Check if the noun-node of <noun-item> appears multiple times in its
-; link, and if so, return a list of corresponding <noun-item>.  Useful for
-; identifying links that might be a reflexive like "He punched himself."
-;
-(define-method (get-multiples (nl <nouns-list>) (ni <noun-item>))
-	(define sub (get-chunk-link-sublist nl (get-chunk-index ni) (get-link-index ni)))
-	
-	(filter (lambda (n) (equal? (get-noun-node n) (get-noun-node ni))) (slot-ref sub 'lst))
-)
-
 
 ; -----------------------------------------------------------------------
 ; is-modified? -- Check a <noun-item> to see if it is modified
