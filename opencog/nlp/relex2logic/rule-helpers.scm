@@ -980,6 +980,25 @@
 	)
 )
 
+; Example: "The plant was given to me by John."
+(define (passive-rule3 subj subj_instance verb verb_instance obj obj_instance iobj iobj_instance)
+	(list
+		(ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+		(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj df-node-stv) df-link-stv)
+		(InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj df-node-stv) df-link-stv)
+		(InheritanceLink (ConceptNode iobj_instance df-node-stv) (ConceptNode iobj df-node-stv) df-link-stv)
+		(EvaluationLink df-link-stv
+			(PredicateNode verb_instance df-node-stv)
+			(ListLink df-link-stv
+				(ConceptNode subj_instance df-node-stv)
+				(ConceptNode obj_instance df-node-stv)
+				(ConceptNode iobj_instance df-node-stv)
+			)
+		)
+	)
+)
+
+
 ; -----------------------------------------------------------------------
 ;  conjunction rules
 ; -----------------------------------------------------------------------
