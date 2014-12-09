@@ -106,6 +106,9 @@ std::ostream& ostream_combo_it(std::ostream& out, Iter it,
             ostream_combo_it(out << " ", sib, labels, fmt);
         out << ")";
         return out;
+    default:
+        OC_ASSERT(false, "Unsupported case");
+        return out;
     }
 }
 
