@@ -411,7 +411,7 @@
 ; cog-chase-link-chk -- chase a link with checking
 ;
 ; cog-chase-link link-type endpoint-type anchor anchor-type
-'
+;
 ; Same as above, but throws an error if anchor is not an atom of
 ; 'anchor-type'.
 ;
