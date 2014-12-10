@@ -81,6 +81,12 @@ The folder contains microplanning code for the NLG pipeline.
     - if a noun is an object or indirect object
         - if the same noun as the subject, then change to "myself", "himself", "themselves", etc.
         - if the noun is different from the subject, then change to "me", "him", "them", etc
+        
+5. If a noun cannot be changed to a pronoun, consider lexical noun using the following algorithm:
+    - consider all InheritaneLink with noun nodes that inherit from the original noun
+    - weight them by (size of incoming-set of the node) * (strength of the InheritanceLink) * (confidence of the InheritanceLink)
+    - randomly select one from the list with the highest weighted node being most likely
+    
 
 ## Usage
 
