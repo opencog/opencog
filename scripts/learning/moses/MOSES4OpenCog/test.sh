@@ -73,8 +73,8 @@ sleep 5
 
 # 2. Load background knowledge
 
-# (echo "scm"; cat "$scheme_file_path") \
-#     | "$opencog_repo_path/scripts/run_telnet_cogserver.sh"
+(echo "scm"; cat "$scheme_file_path") \
+    | "$opencog_repo_path/scripts/run_telnet_cogserver.sh"
 
 # 3. Run MOSES
 
