@@ -17,7 +17,7 @@
 # 5. Use PLN to perform reasoning, etc.
 
 set -u
-set -x
+# set -x
 
 if [[ $# != 1 ]]; then
     echo "Usage: $0 SETTINGS_FILE"
@@ -91,21 +91,19 @@ moses \
 
 # 4. Parse MOSES output and pipe it in OpenCog
 
-# TODO: wrap the program with an EquivalentLink with model name
-# EquivalentLink<1,1>
-#     EvaluationLink
-#         PredicateNode: "model XX"
-#         VariableNode: "$X"
-#     EvaluationLink
-#         ...
-
 (echo "scm";
     i=0
     while read line; do
         moses_model_name="moses_$(pad $i 3)"
-        echo "(EquivalentLink (EvaluationLink (PredicateNode \"${moses_model_name}\" $line)))"
+        echo "(EquivalenceLink (stv 1.0 1.0) (EvaluationLink (PredicateNode \"${moses_model_name}\") (VariableNode \"\$X\")) $line)"
+        ((++i))
     done < "$moses_output_file"
-) | "$opencog_repo_path/scripts/run_telnet_cogserver.sh"
+) > to_be_piped.txt
+
+
+cat to_be_piped.txt | "$opencog_repo_path/scripts/run_telnet_cogserver.sh"
 
 # 5. Use PLN to perform reasoning, etc.
 # TODO
+
+# 6. Kill cogserver
