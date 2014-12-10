@@ -28,9 +28,6 @@
 #include <opencog/util/foreach.h>
 #include <opencog/util/StringTokenizer.h>
 
-// Arghhh! the NMXML stuff is obsolete, please do not use in new code!
-// #include <opencog/persist/xml/NMXmlExporter.h>
-
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/SpaceTime.h>
 #include <opencog/spacetime/TimeServer.h>

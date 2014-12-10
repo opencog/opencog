@@ -20,8 +20,6 @@ memcache   -- experimental/broken, uses memcached for persistence.
 
 sql        -- works well for most uses -- with caveats
 
-xml        -- Obsolete XML-based file storage; will be removed soon.
-
 zmq        -- ZeroMQ-based atomspace serialization and deserialization.
               Unmaintained.  (Won't compile at this time.)
 

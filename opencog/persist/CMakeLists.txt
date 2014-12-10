@@ -14,8 +14,3 @@ IF (HAVE_ZMQ)
     ADD_SUBDIRECTORY (zmq)
 ENDIF (HAVE_ZMQ)
 
-# I give up. This doesn't work, and I can't debug it.
-# IF (HAVE_XML)
-# 	ADD_SUBDIRECTORY (xml)
-# ENDIF (HAVE_XML)
-

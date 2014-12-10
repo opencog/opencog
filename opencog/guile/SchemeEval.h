@@ -1,7 +1,7 @@
 /*
  * SchemeEval.h
  *
- * Simple scheme expression evaluator
+ * Scheme expression evaluator for OpenCog
  * Copyright (c) 2008, 2014 Linas Vepstas <linas@linas.org>
  */
 
@@ -22,6 +22,39 @@
 namespace opencog {
 /** \addtogroup grp_smob
  *  @{
+ *
+ * The evaluator provides two modes of usage: synchronous and
+ * asynchronous.  The synchronous API is provided by the following
+ * methods: eval(), eval_h(), apply(), and apply_generic(). The last
+ * three are special-purpose wrappers around the first, returning
+ * handles, and applying functions to argument lists.
+ *
+ * The eval() method returns a string, holding any output that was
+ * printed during evaluation. e.g. output printed using the scheme
+ * 'display' function. If the code to be evaluated is long-running,
+ * then nothing can be returned until the evaluation completes. This
+ * presents a problem when the thing to be evaluated is perhaps an
+ * infinite loop.
+ *
+ * Thus, the asynchronous interface is provided. This is implemented
+ * with three methods: begin_eval(), eval_expr(), and poll_result().
+ * If the expression that needs to be evaluated is long-running, or
+ * even if it is an infinite loop, yet which periodically prints, then
+ * it can be run in one thread, and the print output can be collected in
+ * another thread, with poll_result().  The poll_result() method will
+ * block until there is printed output. It can be called repeatedly.
+ * When evaluation is completed, it will return any pending printed
+ * output, and subsequent calls will return the empty string
+ * immediately, without any further blocking.  Be sure to call
+ * begin_eval() first, to set things up.
+ *
+ * The synchronous implementation is built on top of the async one,
+ * and runs entirely within the same thread; see the code below; it
+ * should show that:
+ *
+ *      std::string eval(const std::string& expr)
+ *         { begin_eval(); eval_expr(expr); return poll_result(); }
+ *
  */
 
 class AtomSpace;
