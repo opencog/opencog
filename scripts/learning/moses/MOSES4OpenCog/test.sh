@@ -66,7 +66,9 @@ pad() {
 
 # 1. Launch an OpenCog server
 
-"$opencog_repo_path/scripts/run_cogserver.sh" "$build_dir_name" &
+cd "$opencog_repo_path/scripts/"
+./run_cogserver.sh "$build_dir_name" &
+cd -
 sleep 5
 
 # 2. Load background knowledge
