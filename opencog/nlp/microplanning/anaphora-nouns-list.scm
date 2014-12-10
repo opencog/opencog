@@ -201,8 +201,8 @@
 	(or
 		; if some other <noun-item> is associated with this one, then it is modified
 		(any
-			(lambda (at) (equal? ni at))
-			(slot-ref nl 'assoc-table)
+			(lambda (at) (equal? ni (get-association nl at)))
+			(slot-ref nl 'lst)
 		)
 		; if there's an association, then the <noun-item> is modified
 		(get-association nl ni)

@@ -172,7 +172,8 @@
 	(define (determine-lexical)
 		(define the-noun-node (get-noun-node ni))
 		; XXX also accept links that inherit the abstracted version?
-		(define all-inheritances (cog-get-link 'InheritanceLink 'ConceptNode the-noun-node))
+		; since the anchor is also a ConceptNode, cog-get-link will return each link twice, so need to delete duplicates
+		(define all-inheritances (delete-duplicates (cog-get-link 'InheritanceLink 'ConceptNode the-noun-node)))
 
 		(receive (supersets subsets)
 			 (partition (lambda (l) (equal? the-noun-node (gar l))) all-inheritances)
@@ -193,7 +194,7 @@
 				(if (null? sorted-zip)
 					(list (list 1.0 (get-noun-node ni)))
 					; add the original noun-node to the list with same weight as the head
-					(append (list (caar sorted-zip) (get-noun-node ni)) sorted-zip)
+					(cons (list (caar sorted-zip) (get-noun-node ni)) sorted-zip)
 				))
 			       (cdf-zip
 				; calculate the cumulative density function to allow for weighted random selection
