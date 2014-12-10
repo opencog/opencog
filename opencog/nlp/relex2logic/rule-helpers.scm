@@ -414,7 +414,11 @@
 )
 ; -----------------------------------------------------------------------
 ; Adjective and adverb rules
-; (advmod is also called for adverbials, such as some prepositional phrases 
+; (advmod is also called for adverbials, such as some prepositional phrases)
+;
+; Prepositional adverbial example: "The man sang with a powerful voice."
+; Prepositional adjectival example: "The man with a powerful voice sang."
+;
 ; -----------------------------------------------------------------------
 (define (amod-rule concept instance adj adj_instance)
 	(list (InheritanceLink  (ConceptNode adj_instance df-node-stv) (ConceptNode adj df-node-stv) df-link-stv)
@@ -1106,6 +1110,74 @@
 		)
 	))])
 )
+
+;-----------------------------------------------------------------------
+; complement clauses
+;-----------------------------------------------------------------------
+(define (complement-rule comp_concept comp_instance pred_concept pred_instance)
+	(list 
+		(ImplicationLink (PredicateNode comp_instance df-node-stv) (PredicateNode comp_concept df-node-stv) df-link-stv)
+		(ImplicationLink (PredicateNode pred_instance df-node-stv) (PredicateNode pred_concept df-node-stv) df-link-stv)
+		(EvaluationLink df-link-stv
+			(PredicateNode comp_instance df-node-stv)
+			(ListLink df-link-stv
+				(PredicateNode pred_instance df-node-stv)
+			)
+		)
+	)
+)
+
+(define (compmod-rule comp_concept comp_instance pred_concept pred_instance)
+	(list 
+		(ImplicationLink (PredicateNode comp_instance df-node-stv) (PredicateNode comp_concept df-node-stv) df-link-stv)
+		(ImplicationLink (PredicateNode pred_instance df-node-stv) (PredicateNode pred_concept df-node-stv) df-link-stv)
+		(EvaluationLink df-link-stv
+			(PredicateNode "InManner" df-node-stv)
+			(ListLink df-link-stv
+				(PredicateNode pred_instance df-node-stv)
+				(ConceptNode comp_instance df-node-stv)
+			)
+		)
+	)
+)
+
+(define (because-rule comp_concept comp_instance pred_concept pred_instance)
+	(list 
+		(ImplicationLink (PredicateNode comp_instance df-node-stv) (PredicateNode comp_concept df-node-stv) df-link-stv)
+		(ImplicationLink (PredicateNode pred_instance df-node-stv) (PredicateNode pred_concept df-node-stv) df-link-stv)
+		(EvaluationLink df-link-stv
+			(PredicateNode "Because" df-node-stv)
+			(ListLink df-link-stv
+				(PredicateNode pred_instance df-node-stv)
+				(ConceptNode comp_instance df-node-stv)
+			)
+		)
+	)
+)
+
+(define (attime-rule comp_concept comp_instance pred_concept pred_instance)
+	(list 
+		(ImplicationLink (PredicateNode comp_instance df-node-stv) (PredicateNode comp_concept df-node-stv) df-link-stv)
+		(ImplicationLink (PredicateNode pred_instance df-node-stv) (PredicateNode pred_concept df-node-stv) df-link-stv)
+		(AtTimeLink df-link-stv)
+			(PredicateNode pred_instance df-node-stv)
+			(ConceptNode comp_instance df-node-stv)
+	)
+)
+
+(define (rep-rule comp_concept comp_instance pred_concept pred_instance)
+	(list 
+		(ImplicationLink (PredicateNode comp_instance df-node-stv) (PredicateNode comp_concept df-node-stv) df-link-stv)
+		(ImplicationLink (PredicateNode pred_instance df-node-stv) (PredicateNode pred_concept df-node-stv) df-link-stv)
+		(EvaluationLink df-link-stv
+			(PredicateNode pred_instance df-node-stv)
+			(ListLink df-link-stv
+				(ConceptNode comp_instance df-node-stv)
+			)
+		)
+	)
+)
+
 ; -----------------------------------------------------------------------
 ; that rule for creating thatmarker
 ; -----------------------------------------------------------------------
