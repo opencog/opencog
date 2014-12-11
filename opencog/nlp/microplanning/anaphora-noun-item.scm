@@ -1,6 +1,6 @@
 ; loading additional dependency
 (use-modules (oop goops))
-(load-scm-from-file "../opencog/nlp/microplanning/helpers.scm")
+(load "helpers.scm")
 
 ; -----------------------------------------------------------------------
 ; <noun-item> -- A class containing information on a noun

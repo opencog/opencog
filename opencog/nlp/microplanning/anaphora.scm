@@ -1,6 +1,6 @@
 ; loading additional dependency
-(load-scm-from-file "../opencog/nlp/microplanning/helpers.scm")
-(load-scm-from-file "../opencog/nlp/microplanning/anaphora-nouns-list.scm")
+(load "helpers.scm")
+(load "anaphora-nouns-list.scm")
 
 ; =======================================================================
 ; Main anaphora insertion functions

@@ -1,9 +1,9 @@
 ; loading additional dependency
-(load-scm-from-file "../opencog/nlp/microplanning/sentence-forms.scm")
-(load-scm-from-file "../opencog/nlp/microplanning/helpers.scm")
-(load-scm-from-file "../opencog/nlp/microplanning/anaphora.scm")
-(load-scm-from-file "../opencog/nlp/microplanning/chunks-option.scm")
-(load-scm-from-file "../opencog/nlp/microplanning/chunks-set.scm")
+(load "sentence-forms.scm")
+(load "helpers.scm")
+(load "anaphora.scm")
+(load "chunks-option.scm")
+(load "chunks-set.scm")
 
 ; =======================================================================
 ; Some contants

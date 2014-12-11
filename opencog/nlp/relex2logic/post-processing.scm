@@ -5,7 +5,7 @@
 ;
 
 (use-modules (ice-9 receive))
-(load-scm-from-file "../opencog/nlp/relex2logic/utilities.scm")
+(load "utilities.scm")
 
 ; =======================================================================
 ; Helper utilities for post-processing.
