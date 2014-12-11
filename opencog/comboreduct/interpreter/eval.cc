@@ -30,7 +30,8 @@ namespace opencog { namespace combo {
 
 using namespace std;
 
-combo_tree eval_procedure_tree(const vertex_seq& bmap, combo::combo_tree::iterator it)
+combo_tree eval_procedure_tree(const vertex_seq& bmap,
+                               combo::combo_tree::iterator it)
 {
     // sanity checks
     if (!is_procedure_call(*it)) {
@@ -64,9 +65,10 @@ combo_tree eval_procedure_tree(const vertex_seq& bmap, combo::combo_tree::iterat
     cout << body << endl;
 
     vertex_seq args;
-    //copy(body.begin(), body.end(), back_inserter(args));
+    // copy(body.begin(), body.end(), back_inserter(args));
 
-    // evaluate the arguments to the function (their variables are in the current scope, i.e. bmap)
+    // evaluate the arguments to the function (their variables are in
+    // the current scope, i.e. bmap)
     for (combo_tree::sibling_iterator arg_it = it.begin(); arg_it != it.end(); arg_it++) {
         combo_tree arg_result(eval_throws_tree(bmap, arg_it));
 
@@ -103,8 +105,9 @@ vertex eval_throws_binding(const vertex_seq& bmap,
 
     combo_tree ret(eval_throws_tree(bmap, it));
     // Make sure it has no children.
-    OC_ASSERT(ret.number_of_children(ret.begin()) == 0, "Invalid use of eval_throws_binding:"
-        "expression evaluates to a whole combo_tree, not just one vertex");
+    OC_ASSERT(ret.number_of_children(ret.begin()) == 0,
+              "Invalid use of eval_throws_binding:"
+              "expression evaluates to a whole combo_tree, not just one vertex");
 
     return *ret.begin();
 }

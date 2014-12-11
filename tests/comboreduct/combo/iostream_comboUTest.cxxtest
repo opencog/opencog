@@ -1,0 +1,32 @@
+#include <opencog/comboreduct/combo/iostream_combo.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+
+using namespace ant_combo;
+using namespace opencog;
+using namespace std;
+
+class iostream_comboUTest : public CxxTest::TestSuite {
+    combo_tree _tr;
+public:
+    iostream_comboUTest() {
+        stringstream("and(or($1 $2) not($3))") >> _tr;
+    }
+
+    void test_iostream_default() {
+        stringstream ss;
+        ostream_combo_tree(ss, _tr);
+        TS_ASSERT_EQUALS(ss.str(), string("and(or($1 $2) not($3)) "));
+    }
+
+    void test_iostream_python() {
+        stringstream ss;
+        ostream_combo_tree(ss, _tr, vector<string>(), output_format::python);
+        TS_ASSERT_EQUALS(ss.str(), string("((i[0] or i[1]) and not(i[2])) "));
+    }
+
+    void test_iostream_scheme() {
+        stringstream ss;
+        ostream_combo_tree(ss, _tr, vector<string>(), output_format::scheme);
+        TS_ASSERT_EQUALS(ss.str(), string("(AndLink (OrLink (EvaluationLink (PredicateNode \"$1\") (VariableNode \"$X\")) (EvaluationLink (PredicateNode \"$2\") (VariableNode \"$X\"))) (NotLink (EvaluationLink (PredicateNode \"$3\") (VariableNode \"$X\")))) "));
+    }
+};

@@ -60,12 +60,6 @@ TARGET_LINK_LIBRARIES(procedure_repositoryUTest
 	cogutil
 )
 
-#ADD_CXXTEST(evalUTest)
-#TARGET_LINK_LIBRARIES(evalUTest
-#	comboreduct
-#	cogutil
-#)
-
 ADD_CXXTEST(interpreterUTest)
 TARGET_LINK_LIBRARIES(interpreterUTest
 	comboreduct
@@ -73,3 +67,9 @@ TARGET_LINK_LIBRARIES(interpreterUTest
 	cogutil
 )
 
+ADD_CXXTEST(iostream_comboUTest)
+TARGET_LINK_LIBRARIES(iostream_comboUTest
+	comboreduct
+	comboant
+	cogutil
+)

@@ -249,27 +249,10 @@ bool enum_str_to_vertex(const std::string& str, vertex& v)
     return true;
 }
 
-ostream& ostream_builtin(ostream& out, const builtin& h, format f)
+ostream& ostream_builtin(ostream& out, const builtin& h, output_format f)
 {
     switch (f) {
-    case fmt::python:
-        switch (h) {
-        case id::null_vertex:
-            return out << "null_vertex";
-        case id::logical_and:
-            return out << "ands";
-        case id::logical_or:
-            return out << "ors";
-        case id::logical_not:
-            return out << "not";
-        case id::logical_true:
-            return out << "True";
-        case id::logical_false:
-            return out << "False";
-        default:
-            return out << "Builtin: " << (unsigned) h << " unknown";
-        }
-    case fmt::combo:
+    case output_format::combo:
         switch (h) {
         case id::null_vertex:
             return out << "null_vertex";
@@ -326,36 +309,100 @@ ostream& ostream_builtin(ostream& out, const builtin& h, format f)
         default:
             return out << "Builtin " << (unsigned) h << " unknown";
         }
+    case output_format::python:
+        switch (h) {
+        case id::null_vertex:
+            return out << "null_vertex";
+        case id::logical_and:
+            return out << "and";
+        case id::logical_or:
+            return out << "or";
+        case id::logical_not:
+            return out << "not";
+        case id::logical_true:
+            return out << "True";
+        case id::logical_false:
+            return out << "False";
+        default:
+            return out << "Builtin: " << (unsigned) h << " unknown";
+        }
+    case output_format::scheme:
+        switch (h) {
+        case id::null_vertex:
+            return out << "null_vertex";
+        case id::logical_and:
+            return out << "AndLink";
+        case id::logical_or:
+            return out << "OrLink";
+        case id::logical_not:
+            return out << "NotLink";
+        case id::logical_true:
+            return out << "EvaluateLink (PredicateNode \"Top\")";
+        case id::logical_false:
+            return out << "EvaluateLink (PredicateNode \"Bottom\")";
+        default:
+            return out << "Builtin: " << (unsigned) h << " unknown";
+        }
     default:
-        return out << "Format " << f << " unknown";
+        return out << "Format " << static_cast<unsigned>(f) << " unknown";
     }
 }
 
-ostream& ostream_argument(ostream& out, const argument& a, format f)
+ostream& ostream_argument(ostream& out, const argument& a,
+                          const vector<string>& labels,
+                          output_format fmt)
 {
-    switch(f) {
-    case fmt::python:
-        if (a.is_negated())        
-            return out << "not(i[" << -a.idx - 1 << "]),";
-        return out << "i[" << a.idx - 1 << "],";
-    case fmt::combo:
+    switch(fmt) {
+    case output_format::combo:
 #ifdef ABBREVIATE_NEGATIVE_LITERAL
-        return ostream_abbreviate_literal(out, a);
-#else
-        if (a.is_negated())        
-            return out << "not($" << -a.idx << ")";
-        return out << "$" << a.idx << vm;
+        return ostream_abbreviate_literal(out, a, labels);
+#else       
+        if (a.is_negated())
+            out << "not(";
+        out << "$";
+
+        if (labels.empty())
+            out << a.abs_idx();
+        else
+            out << labels[a.abs_idx_from_zero()];
+
+        if (a.is_negated())
+            out << ")";
+
+        return out;
 #endif
+
+    case output_format::python:
+        if (a.is_negated())
+            return out << "not(i[" << -a.idx - 1 << "])";
+        return out << "i[" << a.idx - 1 << "]";
+
+    case output_format::scheme: {
+        stringstream var_ss;
+        var_ss << "EvaluationLink (PredicateNode \"";
+        if (labels.empty())
+            var_ss << "$" << to_string(a.is_negated()? -a.idx : a.idx);
+        else
+            var_ss << labels[a.abs_idx_from_zero()];
+        var_ss << "\") (VariableNode \"$X\")";
+
+
+        if (a.is_negated())
+            return out << "NotLink (" << var_ss.str() << ")";
+        return out << var_ss.str();
+    }
     default:
-        return out << "Format " << f << "unknown";
+        return out << "Format " << static_cast<unsigned>(fmt) << "unknown";
     }    
 }
 
-ostream& ostream_vertex(ostream& out, const vertex& v, format f)
+ostream& ostream_vertex(ostream& out, const vertex& v,
+                        const vector<string>& labels,
+                        output_format f)
 {
     // Handle the most likely types first.
     if (const argument* a = get<argument>(&v))
-        return ostream_argument(out, *a, f);
+        return ostream_argument(out, *a, labels, f);
     if (const builtin* h = get<builtin>(&v))
         return ostream_builtin(out, *h, f);
     if (const enum_t* m = get<enum_t>(&v))
@@ -393,15 +440,17 @@ ostream& ostream_vertex(ostream& out, const vertex& v, format f)
     return out;
 }
 
-std::ostream& ostream_combo_tree(std::ostream& out, const combo_tree ct, format f) {
+std::ostream& ostream_combo_tree(std::ostream& out, const combo_tree& ct,
+                                 const vector<string>& labels,
+                                 output_format fmt) {
     for (combo_tree::iterator it=ct.begin(); it!=ct.end(); ++it) {
-        ostream_combo_it(out, it, f);
+        ostream_combo_it(out, it, labels, fmt);
         it.skip_children();
         out << " ";
     }
     return out;
 }
-        
+
 string ph2l(const string& ce, const vector<string>& labels)
 {
     /// @todo the implementation could be done in 2 lines with
@@ -517,7 +566,7 @@ ostream& operator<<(ostream& out, const ann_type& h)
 
 ostream& operator<<(ostream& out, const builtin& h)
 {
-    return ostream_builtin(out, h, fmt::combo);
+    return ostream_builtin(out, h, output_format::combo);
 }
 
 ostream& operator<<(ostream& out, const wild_card& w)
@@ -530,21 +579,28 @@ ostream& operator<<(ostream& out, const wild_card& w)
     }
 }
 
-ostream& ostream_abbreviate_literal(ostream& out, const argument& a) {
-    if(a.is_negated()) {
-        return out << "!$" << -a.idx;
-    }
-    return out << "$" << a.idx;
+ostream& ostream_abbreviate_literal(ostream& out, const argument& a,
+                                    const vector<string>& labels) {
+    if (a.is_negated())
+        out << "!";
+    out << "$";
+
+    if (labels.empty())
+        out << a.abs_idx();
+    else
+        out << labels[a.abs_idx_from_zero()];
+
+    return out;
 }
 
 ostream& operator<<(ostream& out, const argument& a)
 {
-    return ostream_argument(out, a, fmt::combo);
+    return ostream_argument(out, a);
 }
 
 ostream& operator<<(ostream& out, const vertex& v)
 {
-    return ostream_vertex(out, v, fmt::combo);
+    return ostream_vertex(out, v);
 }
 
 }} // ~namespaces combo opencog

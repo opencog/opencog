@@ -604,11 +604,9 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "Specifically the ID follows the format "
          "EXPANSION[.BREADTH_FIRST_INDEX[.SUBSAMPLED_INDEX]].\n")
 
-        ("python",
-         po::value<bool>(&output_python)->default_value(false),
-         "If 1, output the program(s) as python code instead of combo. "
-         "Best with -c1 option to return a single python module. Only "
-         "implemented for boolean programs currently.\n")
+        ("output-format",
+         po::value<string>(&output_format_str)->default_value("combo"),
+         "Supported output formats are combo, python and scheme.\n")
 
         (opt_desc_str(output_file_opt).c_str(),
          po::value<string>(&output_file)->default_value(""),
@@ -1443,6 +1441,18 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
     // building.
     contin_reduct = reduct::contin_reduction(reduct_candidate_effort, ignore_ops).clone();
 
+    // Parse output format
+    combo::output_format fmt = combo::output_format::combo;
+    if (output_format_str == "combo")
+        fmt = combo::output_format::combo;
+    else if (output_format_str == "python")
+        fmt = combo::output_format::python;
+    else if (output_format_str == "scheme")
+        fmt = combo::output_format::scheme;
+    else
+        OC_ASSERT(false, "Format %s not supported",
+                  output_format_str.c_str());
+
     // Set metapop printer parameters.
     mmr_pa = metapop_printer(result_count,
                              output_score,
@@ -1455,7 +1465,7 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
                              output_deme_id,
                              col_labels,
                              output_file,
-                             output_python,
+                             fmt,
                              enable_mpi);
 
 }

@@ -194,4 +194,14 @@ public:
         cheap_moses_test_combo({data_file_path, max_evals, output_labels},
                                {tr_str});
     }
+
+    void test_python_output() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
+        string tr_str("and($arg1 $arg2)"),
+            data_file_path("-i" + MOSESUTest_dir + "dataset.csv"),
+            max_evals("-m1000"),
+            output_labels("-W1");
+        cheap_moses_test_combo({data_file_path, max_evals, output_labels},
+                               {tr_str});
+    }
 };
