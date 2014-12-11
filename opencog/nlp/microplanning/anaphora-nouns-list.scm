@@ -1,6 +1,6 @@
 ; loading additional dependency
 (use-modules (oop goops))
-(load-scm-from-file "../opencog/nlp/microplanning/anaphora-noun-item.scm")
+(load "anaphora-noun-item.scm")
 
 ; -----------------------------------------------------------------------
 ; <nouns-list> -- A class containing a list of <noun-item>
