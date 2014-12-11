@@ -7,12 +7,6 @@
 ; remain separate. I'm too lazy to "improve" this right now.
 ;
 ;--------------------------------------------------------------
-; Turn on debugging prints -- this generally makes life easier.
-; This only works for guile-1.8 and has no effect for guile-2.0
-; and should be removed 'any day now'.
-(turn-on-debugging)
-
-;--------------------------------------------------------------
 ; The scheme shell listen port.
 (define shell-port 18001)
 ; A plain simple prompt
