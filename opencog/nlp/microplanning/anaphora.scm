@@ -34,17 +34,29 @@
 				        (set! result-ni (find-by-proc subset (lambda (ni) (= (get-atom-index ni) curr-atom-index))))
 					(set! curr-atom-index (+ 1 curr-atom-index))
 					
-				      	; check if the noun should be replace with pronoun
-				      	(cond ((and result-ni (is-pronoun-safe? result-ni))
-				      		; XXX do we need this new node to inherit from original?
-				      		(cog-new-node (cog-type atom)
-			      				(get-modified-pronomial result-ni forms)
-			      				(cog-tv atom))
-				      	      )
-				      	      (else
-				      		atom
-				      	      )				      	
-				      	)
+					(cond (result-ni
+						; always prefer pronoun
+						; XXX possibly better algorithm for choosing between pronoun vs lexical noun phrase?
+						(if (is-pronoun-safe? result-ni)
+							(cog-new-node (cog-type atom)
+				      					(get-modified-pronomial result-ni forms)
+					 				(cog-tv atom)
+					 		)
+					 		; only attempt to get lexical noun if it is safe
+							(if (not (is-lexical-safe? result-ni))
+								atom
+					 			; check if associations already has lexical choice
+					 			(if (get-association n-lst result-ni)
+					 				(get-lexical-node (get-association n-lst result-ni))
+					 				(get-lexical-node result-ni)
+					 			)
+					 		)
+						)
+					      )
+					      (else
+						atom
+					      )
+					)
 				      )
 				)
 			)
@@ -71,6 +83,6 @@
 	(populate-nouns-list n-lst chunks)
 	(map clone-chunk-with-pronoun (circular-list n-lst) chunks (iota (length chunks)) forms-list)
 
-	; TODO also insert anaphora for missing subjects/objects, nominal anaphora
+	; TODO also insert anaphora for missing subjects/objects
 )
 

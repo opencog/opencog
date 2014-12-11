@@ -16,6 +16,8 @@
 	(ci #:init-keyword #:chunk-index #:getter get-chunk-index)	; the index of the chunk within a list of chunks
 	(base-pronoun #:init-value "")					; the corresponding pronoun in its basic form
 	(pronoun-safe #:init-value #f #:getter is-pronoun-safe? #:setter set-pronoun-safe!)	; indicate whether this usage can be changed to a pronoun
+	(lexical-node #:init-value '())					; the OpenCog node that can be used as a replacement noun
+	(lexical-safe #:init-value #f #:getter is-lexical-safe? #:setter set-lexical-safe!)	; indicate whether this usage can be changed to another lexical noun phrase
 )
 
 ; -----------------------------------------------------------------------
@@ -36,7 +38,7 @@
 			      ((regexp-exec (make-regexp "(she|her|herself)" regexp/icase) orig) "she")
 			      ((regexp-exec (make-regexp "(it|its|itself)" regexp/icase) orig) "it")
 			      ((regexp-exec (make-regexp "(we|us|our|ourselves)" regexp/icase) orig) "we")
-			      ((regexp-exec (make-regexp "(they|them|their|theirselves)" regexp/icase) orig) "they")
+			      ((regexp-exec (make-regexp "(they|them|their|themselves)" regexp/icase) orig) "they")
 			)
 		)
 		
@@ -157,13 +159,71 @@
 )
 
 ; -----------------------------------------------------------------------
-; get-nominal -- Get the nominal anaphora
+; get-lexical-node -- Return one lexical noun phrase's node.
 ;
-; Get some alternative nouns or phrases that represent the same object.
+; Find some alternative nouns or phrases that represent the same object,
+; prefering nodes that inherit from this instance (ie. subset), so the
+; meaning of the original sentence stays true.  Randomly return one with
+; some weights.
 ;
-; TODO possibly ranked bases on size of incoming-set (# of usage)
+; XXX might on some special occassion want the supersets?
 ;
-(define-method (get-nominal (ni <noun-item>))
-	; return a list of all possible nominal anaphora?
+(define-method (get-lexical-node (ni <noun-item>))
+	(define (determine-lexical)
+		(define the-noun-node (get-noun-node ni))
+		; XXX also accept links that inherit the abstracted version?
+		; since the anchor is also a ConceptNode, cog-get-link will return each link twice, so need to delete duplicates
+		(define all-inheritances (delete-duplicates (cog-get-link 'InheritanceLink 'ConceptNode the-noun-node)))
+
+		(receive (supersets subsets)
+			 (partition (lambda (l) (equal? the-noun-node (gar l))) all-inheritances)
+
+			; remove links in subsets that are not about a noun
+			(set! subsets (filter (lambda (l) (word-inst-is-noun? (r2l-get-word-inst (gar l)))) subsets))
+		
+			; remove close to false or low confidence links base on TruthValue
+			(set! subsets (filter (lambda (l) (and (> (tv-mean (cog-tv l)) 0.5) (> (tv-conf (cog-tv l)) 0.5))) subsets))
+
+			(let* ((weights
+				; calculate a weight for each link
+				(map (lambda (l) (length (cog-incoming-set (gar l))) * (tv-mean (cog-tv l)) * (tv-conf (cog-tv l))) subsets))
+			       (sorted-zip
+				; sort bases on the weight
+				(sort (zip weights (map gar subsets)) (lambda (s1 s2) (> (car s1) (car s2)))))
+			       (appended-sorted-zip
+				(if (null? sorted-zip)
+					(list (list 1.0 (get-noun-node ni)))
+					; add the original noun-node to the list with same weight as the head
+					(cons (list (caar sorted-zip) (get-noun-node ni)) sorted-zip)
+				))
+			       (cdf-zip
+				; calculate the cumulative density function to allow for weighted random selection
+				(reverse
+					(fold
+						 (lambda (s lst)
+						 	(if (null? lst)
+						 		(cons s '())
+						 		(cons (list (+ (car s) (caar lst)) (cadr s)) lst)
+						 	)
+						 )
+						'()
+						appended-sorted-zip
+					)
+				))
+			       (r-num (random (* (car (last cdf-zip)) 1.0)))
+			       ; find the first link with weight >= r-num from the CDF list
+			      )
+
+				(cadr (find (lambda (z) (>= (car z) r-num)) cdf-zip))
+			)
+		)
+	)
+	
+	; get & store the lexical choice if not determined before
+	(if (null? (slot-ref ni 'lexical-node))
+		(slot-set! ni 'lexical-node (determine-lexical))
+	)
+	
+	(slot-ref ni 'lexical-node)
 )
 

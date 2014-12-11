@@ -18,11 +18,9 @@ The folder contains microplanning code for the NLG pipeline.
 
     Contains more general helper functions that could also be useful for other purposes.
 
-- anaphora.scm
-- anaphora-nouns-list.scm
-- anaphora-noun-item.scm
+- anaphora.scm, anaphora-nouns-list.scm, anaphora-noun-item.scm
 
-    The code for handling anaphora generation.  Currently only basic pronouns are handled.
+    The code for handling anaphora generation.  Currently basic pronouns (he, she, it, etc) and basic lexical noun choices are handled.
     
 - sentence-forms.scm
 
@@ -81,6 +79,12 @@ The folder contains microplanning code for the NLG pipeline.
     - if a noun is an object or indirect object
         - if the same noun as the subject, then change to "myself", "himself", "themselves", etc.
         - if the noun is different from the subject, then change to "me", "him", "them", etc
+        
+5. If a noun cannot be changed to a pronoun, consider lexical noun using the following algorithm:
+    - consider all InheritaneLink with noun nodes that inherit from the original noun
+    - weight them by (size of incoming-set of the new noun node) * (strength of the InheritanceLink from which we found the new node) * (confidence of the InheritanceLink)
+    - randomly select one from the list with the highest weighted node being most likely
+    
 
 ## Usage
 
@@ -121,7 +125,7 @@ and a list will be returned.  Each element of the returned list is one result of
 )
 ```
 
-It is also possible to construct your own test using your own custom `SequentialAndLink`.  As long as each node used in your test set has the corresponding RelEx grammer nodes.
+It is also possible to construct your own test using your own custom `SequentialAndLink`, as long as each node used in your test set has the corresponding RelEx grammer nodes.
 
 `*default_chunks_option*` containes the default weights and procedures for chunking.  It is possible to create a different `<chunks-option>` object to create different chunking result.
 
@@ -132,8 +136,4 @@ It is also possible to construct your own test using your own custom `Sequential
 1. Anaphora inserting for possession:
 
     This is kind of weird in that "Our car" will become "Us car" after processed by RelEx.  Also, the whole possession link can be discarded to make "Our car" -> "it".  If we have "John's car" and we found that "John" can be a pronoun and changed the possession link to "his", we ended up with "His's car".
-    
-2. Nominal anaphora
 
-    Probably check what other nouns a "noun" inherit from and choose one of those most frequently appear in the AtomSpace.
-    
