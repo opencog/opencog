@@ -16,8 +16,8 @@
 	(ci #:init-keyword #:chunk-index #:getter get-chunk-index)	; the index of the chunk within a list of chunks
 	(base-pronoun #:init-value "")					; the corresponding pronoun in its basic form
 	(pronoun-safe #:init-value #f #:getter is-pronoun-safe? #:setter set-pronoun-safe!)	; indicate whether this usage can be changed to a pronoun
-	(lexical-node #:init-value '())
-	(lexical-safe #:init-value #f #:getter is-lexical-safe? #:setter set-lexical-safe!)
+	(lexical-node #:init-value '())					; the OpenCog node that can be used as a replacement noun
+	(lexical-safe #:init-value #f #:getter is-lexical-safe? #:setter set-lexical-safe!)	; indicate whether this usage can be changed to another lexical noun phrase
 )
 
 ; -----------------------------------------------------------------------
