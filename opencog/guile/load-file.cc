@@ -45,54 +45,21 @@ namespace opencog {
  */
 int load_scm_file (AtomSpace& as, const std::string& filename)
 {
-#define BUFSZ 4120
-	char buff[BUFSZ];
+    SchemeEval evaluator(&as);
 
-	FILE * fh = fopen (filename.c_str(), "r");
-	if (NULL == fh)
-	{
-		int norr = errno;
-		fprintf(stderr, "Error: %d %s: %s\n",
-                norr, strerror(norr), filename.c_str());
-		return norr;
-	}
+    evaluator.begin_eval();
 
-	SchemeEval* evaluator = new SchemeEval(&as);
-	int lineno = 0;
-	int pending_lineno = 0;
+    std::string load_exp("(load \"");
+    load_exp += filename + "\")";
+    evaluator.eval_expr(load_exp.c_str());
 
-	while (1)
-	{
-		char * rc = fgets(buff, BUFSZ, fh);
-		if (NULL == rc) break;
-		evaluator->begin_eval();
-		evaluator->eval_expr(buff);
-		std::string rv = evaluator->poll_result();
+    std::string rv = evaluator.poll_result();
+    if (evaluator.eval_error()) {
+        printf("Error: %s\n", rv.c_str());
+        return 1;
+    }
 
-		if (evaluator->eval_error())
-		{
-			fprintf(stderr, "File: %s line: %d\n", filename.c_str(), lineno);
-			fprintf(stderr, "%s\n", rv.c_str());
-			delete evaluator;
-			return 1;
-		}
-		lineno ++;
-		// Keep a record of where pending input starts
-		if (!evaluator->input_pending()) pending_lineno = lineno;
-	}
-
-	if (evaluator->input_pending())
-	{
-		// Pending input... print error
-		fprintf(stderr, "Warning file %s ended with unterminated "
-		        "input begun at line %d\n", filename.c_str(), pending_lineno);
-		delete evaluator;
-		return 1;
-	}
-
-	fclose(fh);
-	delete evaluator;
-	return 0;
+    return 0;
 }
 
 /**
