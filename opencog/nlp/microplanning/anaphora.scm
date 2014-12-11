@@ -38,10 +38,16 @@
 						; always prefer pronoun
 						; XXX possibly better algorithm for choosing between pronoun vs lexical noun phrase?
 						(if (is-pronoun-safe? result-ni)
-							(cog-new-node (cog-type atom)
-				      					(get-modified-pronomial result-ni forms)
-					 				(cog-tv atom)
-					 		)
+							(let ((pronoun (get-modified-pronomial result-ni forms)))
+								; do not create a new node if the possessed can become a pronoun
+								(if (equal? pronoun 'possessed-link-cancel)
+									'possessed-link-cancel
+									(cog-new-node (cog-type atom)
+						      					(get-modified-pronomial result-ni forms)
+							 				(cog-tv atom)
+							 		)
+							 	)
+							)
 					 		; only attempt to get lexical noun if it is safe
 							(if (not (is-lexical-safe? result-ni))
 								atom
@@ -62,7 +68,11 @@
 			)
 			(define new-oset (map-in-order change-old old-oset))
 			
-			(apply cog-new-link (append (list (cog-type sublink) (cog-tv sublink)) new-oset))
+			; do not create the link if it is a "possessed" link and can be removed
+			(if (any (lambda (at) (equal? at 'possessed-link-cancel)) new-oset)
+				'()
+				(apply cog-new-link (append (list (cog-type sublink) (cog-tv sublink)) new-oset))
+			)
 		)
 		
 		; if subset empty, return original link (ie. the link has no noun)
