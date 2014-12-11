@@ -912,6 +912,8 @@
 ))
 
 ; Compile 'em all.  This should improve performance a bit.
+; XXX FIXME This should be removed when guile-2.2 becomes popular
+; (maybe in 2017?) since it compiles everything anyway.
 (for-each
 	(lambda (symb) (compile symb #:env (current-module)))
 	cog-utilities
