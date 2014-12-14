@@ -51,6 +51,9 @@ Vagrant.configure("2") do |config|
   # Configure port for telnet access to shell
   config.vm.network "forwarded_port", guest: 17001, host: 17001
 
+  # Enable X-Forwarding
+  config.ssh.forward_x11 = true
+
   config.vm.provider :virtualbox do |vb|
       vb.name = "cogbox"
       vb.customize [
