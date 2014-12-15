@@ -114,11 +114,11 @@ public:
         // Reset the seed, so that this, and the next test, give exactly the same result.
         opencog::randGen().seed(1);
         vector<scored_combo_tree> scts;
-        scts.push_back(string_to_scored_combo_tree("-33 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53) and($16 !$36 !$59)) !$105) [score=-33, penalized score=-36.1428565979003906, complexity=11, complexity penalty=3.14285731315612793, diversity penalty=0]"));
-        scts.push_back(string_to_scored_combo_tree("-33 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53) and($16 !$36 !$161)) !$105) [score=-33, penalized score=-36.1428565979003906, complexity=11, complexity penalty=3.14285731315612793, diversity penalty=0]"));
-        scts.push_back(string_to_scored_combo_tree("-33 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53 !$290) and($16 !$36)) !$105) [score=-33, penalized score=-36.1428565979003906, complexity=11, complexity penalty=3.14285731315612793, diversity penalty=0]"));
-        scts.push_back(string_to_scored_combo_tree("-33 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53) and($16 !$36)) or($22 !$290) !$105) [score=-33, penalized score=-36.4285736083984375, complexity=12, complexity penalty=3.42857170104980469, diversity penalty=0]"));
-        scts.push_back(string_to_scored_combo_tree("-33 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53 !$290) and($16 !$36)) or($22 !$290) !$105) [score=-33, penalized score=-36.7142868041992188, complexity=13, complexity penalty=3.71428585052490234, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("-26 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53) and($16 !$36 !$59)) !$105) [score=-33, penalized score=-36.1428565979003906, complexity=11, complexity penalty=3.14285731315612793, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("-26 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53) and($16 !$36 !$161)) !$105) [score=-33, penalized score=-36.1428565979003906, complexity=11, complexity penalty=3.14285731315612793, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("-26 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53 !$290) and($16 !$36)) !$105) [score=-33, penalized score=-36.1428565979003906, complexity=11, complexity penalty=3.14285731315612793, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("-26 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53) and($16 !$36)) or($22 !$290) !$105) [score=-33, penalized score=-36.4285736083984375, complexity=12, complexity penalty=3.42857170104980469, diversity penalty=0]"));
+        scts.push_back(string_to_scored_combo_tree("-26 and(or(and(or($16 !$23) or($16 !$36) !$22 !$30 !$53 !$290) and($16 !$36)) or($22 !$290) !$105) [score=-33, penalized score=-36.7142868041992188, complexity=13, complexity penalty=3.71428585052490234, diversity penalty=0]"));
 
         string data_file_path("-i" + test_dir + "feat-sel.csv");
 
