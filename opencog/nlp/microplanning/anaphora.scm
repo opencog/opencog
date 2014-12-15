@@ -41,7 +41,7 @@
 							(let ((pronoun (get-modified-pronomial result-ni forms)))
 								; do not create a new node if the possessed can become a pronoun
 								(if (equal? pronoun 'possessed-link-cancel)
-									'possessed-link-cancel
+									'()
 									(cog-new-node (cog-type atom)
 						      					(get-modified-pronomial result-ni forms)
 							 				(cog-tv atom)
@@ -69,7 +69,7 @@
 			(define new-oset (map-in-order change-old old-oset))
 			
 			; do not create the link if it is a "possessed" link and can be removed
-			(if (any (lambda (at) (equal? at 'possessed-link-cancel)) new-oset)
+			(if (any null? new-oset)
 				'()
 				(apply cog-new-link (append (list (cog-type sublink) (cog-tv sublink)) new-oset))
 			)
