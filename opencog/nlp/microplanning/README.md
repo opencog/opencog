@@ -43,7 +43,7 @@ The folder contains microplanning code for the NLG pipeline.
    Default weighting formula is `form-weight * (time-weight + link-weight)`
     
 2. Choose the highest weighted link and check if it is 'say-able' from SuReal, and whether it is too complex
-    - a chunk is too complex if there are too many verbs (default 2), nouns (3), adjectives (5), adverbs (3)
+    - A chunk is too complex if there are too sentence-formed links (default: 3).  The idea is to limit the amount of complete "ideas" within a sentence.
     
     If a chunk is say-able but can be longer:
     
