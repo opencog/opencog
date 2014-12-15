@@ -17,10 +17,7 @@
 	(make <chunks-option>
 		#:main-weight-proc (lambda (t f l) (* (+ t l) f))
 		#:supp-weight-proc (lambda (t f l) (* (+ t l) (- 2 f)))
-		#:verb-limit 2
-		#:noun-limit 3
-		#:adj-limit 5
-		#:adv-limit 3
+		#:form-limit 3
 	)
 )
 
@@ -411,59 +408,10 @@
 ; the sentence is too long or complex.
 ;
 (define (check-chunk atoms utterance-type option)
-	(define (get-pos n)
-		(define wi (r2l-get-word-inst n))
-		(if (null? wi)
-			"_"
-			(cog-name (car (word-inst-get-pos wi)))
-		)
+	(define favored-forms (get-sentence-forms utterance-type))
+	(define ok-length
+		(< (length (filter-map (lambda (l) (match-sentence-forms l favored-forms)) atoms)) (get-form-limit option))
 	)
-	(define (sort-n-count l)
-		(define sorted-list (sort l string<?))
-		(define (count-helper curr-subset curr-pos curr-count)
-			(cond ((null? curr-subset)
-				(cons (cons curr-pos curr-count) '())
-			      )
-			      ((not (string=? (car curr-subset) curr-pos))
-				(cons (cons curr-pos curr-count) (count-helper (cdr curr-subset) (car curr-subset) 1))
-			      )
-			      (else
-				(count-helper (cdr curr-subset) curr-pos (+ 1 curr-count))
-			      )
-			)
-		)
-		(if (not (null? sorted-list))
-			(count-helper (cdr sorted-list) (car sorted-list) 1)
-			'()
-		)
-	)
-
-	(define all-nodes (delete-duplicates (append-map cog-get-all-nodes atoms)))
-	(define pos-alist (sort-n-count (map get-pos all-nodes)))
-	
-	(define (pos-check? al)
-		(define pos (car al))
-		(define count (cdr al))
-		
-		(cond ((and (string=? "verb" pos) (>= count (get-verb-limit option)))
-			#f
-		      )
-		      ((and (string=? "noun" pos) (>= count (get-noun-limit option)))
-			#f
-		      )
-		      ((and (string=? "adj" pos) (>= count (get-adj-limit option)))
-			#f
-		      )
-		      ((and (string=? "adv" pos) (>= count (get-adv-limit option)))
-			#f
-		      )
-		      (else
-			#t
-		      )
-		 )
-	)
-
-	(define pos-result (every pos-check? pos-alist))
 
 	(define temp-set-link (SetLink (get-utterance-link utterance-type atoms) atoms))
 
@@ -480,9 +428,9 @@
 
 	(cond 
 	      ; not long/complex but sayable
-	      ((and pos-result say-able) *microplanning_sayable*)
+	      ((and ok-length say-able) *microplanning_sayable*)
 	      ; long/complex but sayable
-	      ((and (not pos-result) say-able) *microplanning_too_long*)
+	      ((and (not ok-length) say-able) *microplanning_too_long*)
 	      ; not sayable
 	      (else *microplanning_not_sayable*)
 	)
