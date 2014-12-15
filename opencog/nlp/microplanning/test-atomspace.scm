@@ -1,8 +1,8 @@
 ; =========================
 ; Exact knowledge
 ; =========================
-(r2l "John's green cat climbs the stairs and grabs the mouse.")
-(r2l "The man steals my burger and eats it.")
+(r2l "The green cat climbs the stairs and grabs the mouse.")
+(r2l "The man steals the burger and eats it.")
 (r2l "The dog collects the tiny bones and plants them.")
 (r2l "The cat hurts the dog.") ; reflexive test
 (r2l "Our dog grows.") ; possession test (relex changed pronoun form)
