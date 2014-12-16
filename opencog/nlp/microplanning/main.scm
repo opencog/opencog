@@ -4,6 +4,7 @@
 (load "anaphora.scm")
 (load "chunks-option.scm")
 (load "chunks-set.scm")
+(load "atomW.scm")
 
 ; =======================================================================
 ; Some contants
@@ -16,10 +17,7 @@
 	(make <chunks-option>
 		#:main-weight-proc (lambda (t f l) (* (+ t l) f))
 		#:supp-weight-proc (lambda (t f l) (* (+ t l) (- 2 f)))
-		#:verb-limit 2
-		#:noun-limit 3
-		#:adj-limit 5
-		#:adv-limit 3
+		#:form-limit 3
 	)
 )
 
@@ -83,34 +81,42 @@
 ; ways chunks can form by varying utterance-types, each set of chunks contained
 ; within an <chunks-set> object.
 ;
-(define (make-sentence-chunks atoms-set utterance-type option)
-	(define all-sets '())
+(define (make-sentence-chunks atoms-list utterance-type option)
+	; wrap each atom in a container to allow repeated atoms, and persistence time weights
+	(define atomW-complete-set
+		(map 
+			(lambda (a t) (make <atomW> #:atom a #:time-weight t))
+			atoms-list
+			(iota (length atoms-list) (length atoms-list) -1)
+		)
+	)
+	(define all-chunks-sets '())
 
-	(define (recursive-helper curr-unused curr-chunks curr-uts)
+	(define (recursive-helper atomW-unused curr-chunks curr-uts)
 		(define ut (list utterance-type))
 		
 		; helper function for branching into different utterance type
 		(define (sub-helper ut)
-			(define new-chunk (make-sentence curr-unused atoms-set ut option))
+			(define new-atomW-chunk (make-sentence atomW-unused atomW-complete-set ut option))
 			(cond ; has a new chunk, continue to make more chunk with the rest of the atoms
-			      ((not (null? new-chunk))
+			      ((not (null? new-atomW-chunk))
 				; TODO keep some of the atoms (those that do not satisfy sentence forms) for later use?
 				(recursive-helper
-					(lset-difference equal? curr-unused new-chunk)
-					(cons new-chunk curr-chunks) 
+					(lset-difference equal? atomW-unused new-atomW-chunk)
+					(cons (map get-atom new-atomW-chunk) curr-chunks) 
 					(cons ut curr-uts)
 				)
 			      )
 			      ; unable to form more chunks, store the created chunks (if any) & their corresponding utterance-type
 			      ((not (null? curr-chunks))
-				(set! all-sets
+				(set! all-chunks-sets
 					(cons
 						(make <chunks-set>
 							#:chunks (reverse curr-chunks)
 							#:utterance-types (reverse curr-uts)
-							#:leftover-count (length curr-unused)
+							#:leftover-count (length atomW-unused)
 						)
-						all-sets
+						all-chunks-sets
 					)
 				)
 			      )
@@ -123,19 +129,19 @@
 		)
 
 		(cond ; use the sub-helper to keep calling make sentence until all atoms are used, branching on all allowed utterance type
-		      ((not (null? curr-unused))
+		      ((not (null? atomW-unused))
 			(for-each sub-helper ut)
 		      )
 		      ; finished all atoms, store the created chunks & their corresponding utterance-type
 		      (else
-			(set! all-sets
+			(set! all-chunks-sets
 				(cons
 					(make <chunks-set>
 						#:chunks (reverse curr-chunks)
 						#:utterance-types (reverse curr-uts)
 						#:leftover-count 0
 					)
-					all-sets
+					all-chunks-sets
 				)
 			)
 		      )
@@ -143,11 +149,11 @@
 	)
 
 	; loop make-sentence on remaining atoms
-	(recursive-helper atoms-set '() '())
+	(recursive-helper atomW-complete-set '() '())
 
-	(cond ((not (null? all-sets))
+	(cond ((not (null? all-chunks-sets))
 		(receive (complete-sets incomplete-sets)
-			(partition (lambda (cs) (= (get-leftover-count cs) 0)) all-sets)
+			(partition (lambda (cs) (= (get-leftover-count cs) 0)) all-chunks-sets)
 			
 			; remove sets in incomplete-sets which is a subset of a set in complete-sets
 			(set! incomplete-sets (remove (lambda (is) (any is-subset? (circular-list is) complete-sets)) incomplete-sets))
@@ -189,38 +195,37 @@
 ; Accepts a list of un-said links, the complete set, the utterance type,
 ; and the chunking option.
 ;
-(define (make-sentence atoms-unused atoms-set utterance-type option)
+(define (make-sentence atomW-unused atomW-complete-set utterance-type option)
 	; bunch of variables for storing the recursive looping results
-	(define atoms-used (lset-difference equal? atoms-set atoms-unused)) ; the set of both failed and successful atoms
-	(define atoms-failed '())	; the set of failed atoms
-	(define chunk '())		; the set of successful atoms to be returned
+	(define atomW-used (lset-difference equal? atomW-complete-set atomW-unused)) ; the set of atoms said in previous sentences
+	(define atomW-chunk '())	; the set of successful atoms to be returned
 
 	; main helper function for looping
-	(define (recursive-helper atoms-to-try)
-		(define result (check-chunk atoms-to-try utterance-type option)) ; the result of trying to say the atoms in a sentence
-		(define atoms-not-tried (lset-difference equal? atoms-unused atoms-to-try)) ; the set of atoms not yet used
+	(define (recursive-helper atomW-to-try)
+		(define result (check-chunk (map get-atom atomW-to-try) utterance-type option)) ; the result of trying to say the atoms in a sentence
+		(define atomW-not-tried (lset-difference equal? atomW-unused atomW-to-try)) ; the set of atoms not yet used
 
 		(define (give-up-unadded-part)
-			; atoms that did not work
-			(define dead-set (lset-difference equal? atoms-to-try chunk))
-			; atoms that worked
-			(define good-set (lset-intersection equal? atoms-to-try chunk))
+			; atoms that did not work (not yet added to the chunk)
+			(define dead-set (lset-difference equal? atomW-to-try atomW-chunk))
+			; atoms that worked (already added to the chunk)
+			(define good-set (lset-intersection equal? atomW-to-try atomW-chunk))
 
-			(set! atoms-failed (append dead-set atoms-failed))
-			(set! atoms-unused (lset-difference equal? atoms-unused dead-set))
+			; remove the stuff in dead-set from consideration
+			(set! atomW-unused (lset-difference equal? atomW-unused dead-set))
 			
-			; try "saying" the previous working iteration again (if available) and re-choose a new atom (using different weight proc)
+			; try "saying" the previous working iteration again (if available)
 			(if (null? good-set)
-				(if (not (null? atoms-unused))
-					(recursive-helper (list (pick-atom atoms-unused atoms-used (get-main-weight-proc option) utterance-type)))
+				(if (not (null? atomW-unused))
+					(recursive-helper (list (pick-atomW atomW-unused atomW-used (get-main-weight-proc option) utterance-type)))
 				)
 				(recursive-helper good-set)
 			)
 		)
 		(define (update-chunk)
 			; add anything that has not been included in the chunk yet
-			(set! chunk (lset-union equal? atoms-to-try chunk))
-			(set! atoms-unused atoms-not-tried)
+			(set! atomW-chunk (lset-union equal? atomW-to-try atomW-chunk))
+			(set! atomW-unused atomW-not-tried)
 		)
 
 		; temporary variables not all conditions needed
@@ -232,29 +237,29 @@
 		      ((= result *microplanning_not_sayable*)
 			; could be the atoms cannot be said unless bringing in additional atoms (such as "and/or/that")
 			; try to add more (up to 3 different links)
-			(cond ((<= (length atoms-to-try) 3)
+			(cond ((<= (length atomW-to-try) 3)
 				; look to see if the newest link has any node that is solo (ie. appear only once in the current set)
-				(set! temp-var1 (cog-get-all-nodes (car atoms-to-try)))
-				(set! temp-var2 (append-map cog-get-all-nodes (cdr atoms-to-try)))
+				(set! temp-var1 (cog-get-all-nodes (get-atom (car atomW-to-try))))
+				(set! temp-var2 (append-map cog-get-all-nodes (map get-atom (cdr atomW-to-try))))
 				(set! temp-differences (filter has-word-inst? (lset-difference equal? temp-var1 temp-var2)))
 
 				(cond ((null? temp-differences)
 					(give-up-unadded-part)
 				      )
 				      (else
-					; find the first link in atoms-not-tried that contains one of the solo word
+					; find the first link in atomW-not-tried that contains one of the solo word
 					; XXX could possibly allow choosing different link to generate multiple chunking result
 					(set! temp-var1
 						(find (lambda (a)
-							(find (lambda (w) (cog-has-node? a w)) temp-differences)
+							(find (lambda (w) (cog-has-node? (get-atom a) w)) temp-differences)
 						     )
-						     atoms-not-tried
+						     atomW-not-tried
 						)
 					)
 
 					; if an atom with the solo word exists
 					(if temp-var1
-						(recursive-helper (cons temp-var1 atoms-to-try))
+						(recursive-helper (cons temp-var1 atomW-to-try))
 						(give-up-unadded-part)
 					)
 				      )
@@ -272,13 +277,11 @@
 			(update-chunk)
 
 			; only continue if there are more to say
-			(if (not (null? atoms-unused))
+			(if (not (null? atomW-unused))
 				(recursive-helper
 					(cons
-						; weight is (time-weights + link-weights) * (2 - form-weights), ie. prefer links that do not
-						; satisify a sentence form, meaning it cannot be "said" on its own.
-						(pick-atom atoms-unused chunk (get-supp-weight-proc option) utterance-type)
-						atoms-to-try
+						(pick-atomW atomW-unused atomW-chunk (get-supp-weight-proc option) utterance-type)
+						atomW-to-try
 					)
 				)
 			)
@@ -291,10 +294,10 @@
 	)
 
 	; the initial critera for choosing a starting point would be (time-weights + link-weights) * form-weights
-	(recursive-helper (list (pick-atom atoms-unused atoms-used (get-main-weight-proc option) utterance-type)))
+	(recursive-helper (list (pick-atomW atomW-unused atomW-used (get-main-weight-proc option) utterance-type)))
 
 	; return the sentence chunk (reverse because we've been adding to the front)
-	(reverse chunk)
+	(reverse atomW-chunk)
 )
 
 ; -----------------------------------------------------------------------
@@ -358,41 +361,42 @@
 )
 
 ; -----------------------------------------------------------------------
-; pick-atom -- Pick the best atom using some weighting function
+; pick-atomW -- Pick the best atom using some weighting function
 ;
-; Helper function that weights the atoms in 'atoms-list' against 'bases-list'
+; Helper function that weights the atomW in 'atomW-list' against bases,
 ; using function 'comb-proc', and choose the one with the highest weight.
 ;
 ; 'comb-proc' should be a function that takes in param "time", "form", "link"
 ; in this order
 ;
-(define (pick-atom atoms-list bases-list comb-proc utterance-type)
+(define (pick-atomW atomW-list base-atomW-list comb-proc utterance-type)
 	(define favored-forms (get-sentence-forms utterance-type))
 	
 	; helper function that calculate the weights of each atoms in 'choices' using 'comb-proc'
 	(define (calc-weights choices bases comb-proc)
-		(define choices-len (length choices))
+		(define unwrapped-choices (map get-atom choices))
+		(define unwrapped-bases (map get-atom bases))
 
 		; helper function: get all nodes for a atom, get all nodes in 'bases', count how many common nodes
 		(define (link-count atom)
 			(define atom-nodes (cog-get-all-nodes atom))
-			(define used-nodes (delete-duplicates (append-map cog-get-all-nodes bases)))
-			(length (lset-intersection equal? atom-nodes used-nodes))
+			(define bases-nodes (delete-duplicates (append-map cog-get-all-nodes unwrapped-bases)))
+			(length (lset-intersection equal? atom-nodes bases-nodes))
 		)
 
 		; initialize weight bases on "time ordering"
-		(define time-weights (list-tabulate choices-len (lambda (i) (- choices-len i))))
+		(define time-weights (map get-time-weight choices))
 		; initialize weight (0, 1) bases on whether the atom satisfy a sentence form
-		(define form-weights (map (lambda (atom) (if (match-sentence-forms atom favored-forms) 1 0)) choices))
+		(define form-weights (map (lambda (atom) (if (match-sentence-forms atom favored-forms) 1 0)) unwrapped-choices))
 		; initialize weight bases on linkage to other atoms in 'bases'
-		(define link-weights (map link-count choices))
+		(define link-weights (map link-count unwrapped-choices))
 		
 		; create a combined weight using comb-proc
 		(map comb-proc time-weights form-weights link-weights)
 	)
 
-	(define weights (calc-weights atoms-list bases-list comb-proc))
-	(define assoc-list (sort (map cons atoms-list weights) (lambda (x y) (> (cdr x) (cdr y)))))
+	(define weights (calc-weights atomW-list base-atomW-list comb-proc))
+	(define assoc-list (sort (map cons atomW-list weights) (lambda (x y) (> (cdr x) (cdr y)))))
 	(caar assoc-list)
 )
 
@@ -404,64 +408,10 @@
 ; the sentence is too long or complex.
 ;
 (define (check-chunk atoms utterance-type option)
-	(define (get-pos n)
-		(define wi (r2l-get-word-inst n))
-		(if (null? wi)
-			"_"
-			(cog-name (car (word-inst-get-pos wi)))
-		)
+	(define favored-forms (get-sentence-forms utterance-type))
+	(define ok-length
+		(< (length (filter-map (lambda (l) (match-sentence-forms l favored-forms)) atoms)) (get-form-limit option))
 	)
-	(define (sort-n-count l)
-		(define sorted-list (sort l string<?))
-		(define (count-helper curr-subset curr-pos curr-count)
-			(cond ((null? curr-subset)
-				(cons (cons curr-pos curr-count) '())
-			      )
-			      ((not (string=? (car curr-subset) curr-pos))
-				(cons (cons curr-pos curr-count) (count-helper (cdr curr-subset) (car curr-subset) 1))
-			      )
-			      (else
-				(count-helper (cdr curr-subset) curr-pos (+ 1 curr-count))
-			      )
-			)
-		)
-		(if (not (null? sorted-list))
-			(count-helper (cdr sorted-list) (car sorted-list) 1)
-			'()
-		)
-	)
-
-	; XXX optimization needed?
-	(define all-nodes (delete-duplicates (append-map cog-get-all-nodes atoms)))
-	(define pos-alist (sort-n-count (map get-pos all-nodes)))
-	
-	(define (pos-check? al)
-		(define pos (car al))
-		(define count (cdr al))
-		
-		(cond ; prefer max 2 verbs per sentence
-		      ((and (string=? "verb" pos) (>= count (get-verb-limit option)))
-			#f
-		      )
-		      ; prefer max 3 nouns per sentence
-		      ((and (string=? "noun" pos) (>= count (get-noun-limit option)))
-			#f
-		      )
-		      ; prefer max 5 adjectives
-		      ((and (string=? "adj" pos) (>= count (get-adj-limit option)))
-			#f
-		      )
-		      ; prefer max 3 adverbs
-		      ((and (string=? "adv" pos) (>= count (get-adv-limit option)))
-			#f
-		      )
-		      (else
-			#t
-		      )
-		 )
-	)
-
-	(define pos-result (every pos-check? pos-alist))
 
 	(define temp-set-link (SetLink (get-utterance-link utterance-type atoms) atoms))
 
@@ -478,9 +428,9 @@
 
 	(cond 
 	      ; not long/complex but sayable
-	      ((and pos-result say-able) *microplanning_sayable*)
+	      ((and ok-length say-able) *microplanning_sayable*)
 	      ; long/complex but sayable
-	      ((and (not pos-result) say-able) *microplanning_too_long*)
+	      ((and (not ok-length) say-able) *microplanning_too_long*)
 	      ; not sayable
 	      (else *microplanning_not_sayable*)
 	)
@@ -491,8 +441,6 @@
 
 ; if not long enough
 ; add external links that share a node? how to determine what to include?
-; add the next highest weight atom?
-;    prefer atoms with low form-weights & high link weights (with the new chunk, not the old stuff said)?
 
 
 ; some atoms used can be leave out of used to be reused later?

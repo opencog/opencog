@@ -5,7 +5,7 @@
 (r2l "The man steals the burger and eats it.")
 (r2l "The dog collects the tiny bones and plants them.")
 (r2l "The cat hurts the dog.") ; reflexive test
-(r2l "Our dog barked.") ; possession test (relex changed pronoun form)
+(r2l "Our dog grows.") ; possession test (relex changed pronoun form)
 (r2l "What damaged the tree?")
 (r2l "John means the tall man.")
 
@@ -80,6 +80,19 @@
 			(ListLink (stv 0.99000001 0.99000001)
 				(ConceptNode "Bob@fd5fb72f-0d3f-4517-8b20-8147df2ee7d3" (stv 0.001 0.99000001))
 				(ConceptNode "seeds@474593d7-5a5c-4ceb-9cbb-173ade98cc59" (stv 0.001 0.99000001))
+			)
+		)
+		(EvaluationLink (stv 0.99000001 0.99000001)
+			(PredicateNode "grows@3fe4efed-5135-408f-bc1b-d02343bb69c1" (stv 0.001 0.99000001))
+			(ListLink (stv 0.99000001 0.99000001)
+				(ConceptNode "seeds@474593d7-5a5c-4ceb-9cbb-173ade98cc59" (stv 0.001 0.99000001))
+			)
+		)		
+		(EvaluationLink (stv 0.99000001 0.99000001)
+			(PredicateNode "possession" (stv 0.001 0.99000001))
+			(ListLink (stv 0.99000001 0.99000001)
+		 		(ConceptNode "seeds@474593d7-5a5c-4ceb-9cbb-173ade98cc59" (stv 0.001 0.99000001))
+		 		(ConceptNode "apple@ca552878-32d4-41e3-aaa3-34239ba98f34" (stv 0.001 0.99000001))
 			)
 		)
 	)
@@ -179,6 +192,10 @@
 	(WordInstanceNode "pine@981c495c-1111-4bb2-8f7f-164a1122cae6")
 	(WordNode "pine")
 )
+(LemmaLink (stv 1 0.99999982)
+	(WordInstanceNode "grows@3fe4efed-5135-408f-bc1b-d02343bb69c1")
+	(WordNode "grow")
+)
 
 (PartOfSpeechLink (stv 1 0.99999982)
 	(WordInstanceNode "tree@160bc480-942c-4421-b798-04c004c011f5")
@@ -247,6 +264,10 @@
 (PartOfSpeechLink (stv 1 0.99999982)
 	(WordInstanceNode "pine@981c495c-1111-4bb2-8f7f-164a1122cae6")
 	(DefinedLinguisticConceptNode "noun")
+)
+(PartOfSpeechLink (stv 1 0.99999982)
+	(WordInstanceNode "grows@3fe4efed-5135-408f-bc1b-d02343bb69c1")
+	(DefinedLinguisticConceptNode "verb")
 )
 
 (ReferenceLink (stv 1 0.99999982)
@@ -316,6 +337,10 @@
 (ReferenceLink (stv 1 0.99999982)
 	(WordInstanceNode "pine@981c495c-1111-4bb2-8f7f-164a1122cae6")
 	(WordNode "pine")
+)
+(ReferenceLink (stv 1 0.99999982)
+	(WordInstanceNode "grows@3fe4efed-5135-408f-bc1b-d02343bb69c1")
+	(WordNode "grows")
 )
 
 (InheritanceLink (stv 1 0.99999982)
@@ -486,7 +511,14 @@
 	(WordInstanceNode "pine@981c495c-1111-4bb2-8f7f-164a1122cae6")
 	(DefinedLinguisticConceptNode "singular")
 )
-
+(InheritanceLink (stv 1 0.99999982)
+	(WordInstanceNode "grows@3fe4efed-5135-408f-bc1b-d02343bb69c1")
+	(DefinedLinguisticConceptNode "present")
+)
+(InheritanceLink (stv 1 0.99999982)
+	(WordInstanceNode "grows@3fe4efed-5135-408f-bc1b-d02343bb69c1")
+	(DefinedLinguisticConceptNode ".v")
+)
 
 ;;;;;;;;;;;;;; Other suppporting R2L output ;;;;;;;;;;;;;;;;;;
 

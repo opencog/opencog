@@ -162,7 +162,7 @@
 			)
 
 			; only associate if they are in two different links (avoiding reflexive associating with each other)
-			(if (not (equal? (get-orig-link ni) (get-orig-link target)))
+			(if (and target (not (equal? (get-orig-link ni) (get-orig-link target))))
 				; add target to ni's association
 				(slot-set! nl 'assoc-table (assoc-set! (slot-ref nl 'assoc-table) ni target))
 			)

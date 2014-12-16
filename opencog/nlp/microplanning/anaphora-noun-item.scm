@@ -42,12 +42,7 @@
 			)
 		)
 		
-		; TODO check possession for "our", "his", "their", etc. and "ours", "hers", "theirs" etc.
-		;    "our group" -> "we"
-		;    "our cars" -> "they"
-		; XXX "our cars" would likely be two seperate nodes in atomspace "us" and "car", possibly
-		;     in EvaluationLink "possession", so instead of replacing "our car", we would be 
-		;     replacing "car" with pronoun, and delete the "possession" link...
+		; TODO recognition of "our group" -> "we" and "our cars" -> "they"
 				
 		(cond ; if already a pronoun, change it to the base form
 		      (is-pronoun
@@ -81,7 +76,9 @@
 ;
 ; The modified form will be based on the noun's usage (subject/object).
 ;
-; XXX how to handle "mine", "hers", "theirs", etc.
+; XXX how to handle "mine", "hers", "theirs", etc?  Seems these will mostly
+; appear within some be-inheritance? (eg.  "That car is her car" becoming
+; "That car is hers")  Can also appear in "That car of hers is yellow."
 ;
 (define-method (get-modified-pronomial (ni <noun-item>) (forms-list <list>))
 	(define the-noun-node (get-noun-node ni))
@@ -131,17 +128,19 @@
 		(cond ; check possession
 		      ((and (cog-pred-get-pred the-orig-link)
 		     	    (string=? (cog-name (cog-pred-get-pred the-orig-link)) "possession"))
-		     	; XXX need additional checks for the possessor and the possessed
-		     	;     the whole possession link can be discarded if the possessed can be a pronoun
-		     	;     meaning an additional step is needed before inserting pronoun, changing the chunk
-		      	(cond ((string-ci=? "I" the-base-pronoun) "my")
-		      	      ((string-ci=? "you" the-base-pronoun) "your")
-		      	      ((string-ci=? "he" the-base-pronoun) "his")
-		      	      ((string-ci=? "she" the-base-pronoun) "her")
-		      	      ((string-ci=? "it" the-base-pronoun) "its")
-		      	      ((string-ci=? "we" the-base-pronoun) "our")
-		      	      ((string-ci=? "they" the-base-pronoun) "their")
-		      	)
+		     	; check if this is the possessor or the possessed
+		     	(if (= the-atom-index 1)
+			      	(cond ((string-ci=? "I" the-base-pronoun) "my")
+			      	      ((string-ci=? "you" the-base-pronoun) "your")
+			      	      ((string-ci=? "he" the-base-pronoun) "his")
+			      	      ((string-ci=? "she" the-base-pronoun) "her")
+			      	      ((string-ci=? "it" the-base-pronoun) "its")
+			      	      ((string-ci=? "we" the-base-pronoun) "our")
+			      	      ((string-ci=? "they" the-base-pronoun) "their")
+			      	)
+			      	; if this is the possessed, then the whole possession link can be removed
+			      	'possessed-link-cancel
+		     	)
 		      )
 		      ; not sentence-formed, not possession (such as about-rule, before-after-rule)
 		      (else

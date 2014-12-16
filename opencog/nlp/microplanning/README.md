@@ -43,7 +43,7 @@ The folder contains microplanning code for the NLG pipeline.
    Default weighting formula is `form-weight * (time-weight + link-weight)`
     
 2. Choose the highest weighted link and check if it is 'say-able' from SuReal, and whether it is too complex
-    - a chunk is too complex if there are too many verbs (default 2), nouns (3), adjectives (5), adverbs (3)
+    - A chunk is too complex if there are too many sentence-formed links (default: 3).  The idea is to limit the amount of complete "ideas" within a sentence.
     
     If a chunk is say-able but can be longer:
     
@@ -90,12 +90,12 @@ The folder contains microplanning code for the NLG pipeline.
 
 Currently these files are not included in the .conf file.  In order to use the microplanner, you need to run the following in OpenCog Scheme shell
 ```
-(load-scm-from-file "../opencog/nlp/microplanning/main.scm")
+(load "../opencog/nlp/microplanning/main.scm")
 ```
 
 If you want to use the testing atomspace, you also need
 ```
-(load-scm-from-file "../opencog/nlp/microplanning/test-atomspace.scm")
+(load "../opencog/nlp/microplanning/test-atomspace.scm")
 ```
 
 Before running the example, you need to populate the atomspaces with sample sentences of how you want the final output to looks like.  One basic example samples would be:
@@ -133,7 +133,7 @@ It is also possible to construct your own test using your own custom `Sequential
 
 ## TODO
 
-1. Anaphora inserting for possession:
+1. Improve anaphora inserting for possession:
 
-    This is kind of weird in that "Our car" will become "Us car" after processed by RelEx.  Also, the whole possession link can be discarded to make "Our car" -> "it".  If we have "John's car" and we found that "John" can be a pronoun and changed the possession link to "his", we ended up with "His's car".
+    This is kind of weird in that "Our car" will become "Us car" after processed by RelEx, so there will be strange word matching for SuReal.  We also have "Our car" -> "it" and "Our group" -> "we".  If we have "John's car" and we found that "John" can be a pronoun but not "car", changing the possession link to "his" will ended up as "His's car".
 
