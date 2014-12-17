@@ -284,15 +284,16 @@ public:
      * last reference goes away.
      *
      * @param h The Handle of the atom to be removed.
-     * @param recursive Recursive-removal flag; the removal will
-     *       fail if this flag is not set, and the atom has incoming
-     *       links (that are in the atomspace).  Set to false only if
-     *       you can guarantee that this atom does not appear in the
-     *       outgoing set of any link in the atomspace.
+     * @param recursive Recursive-removal flag. If the flag is set,
+     *       then this atom, and *everything* that points to it will
+     *       be removed from the atomspace.  This can cause a large
+     *       cascade of removals!  If the flag is not set, then the
+     *       atom will be removed only if its incoming set is empty.
+     *       By default, recursion is disabled.
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool purgeAtom(Handle h, bool recursive = true) {
+    bool purgeAtom(Handle h, bool recursive = false) {
         return getImpl().purgeAtom(h, recursive);
     }
 
@@ -303,15 +304,16 @@ public:
      * goes away.
      *
      * @param h The Handle of the atom to be removed.
-     * @param recursive Recursive-removal flag; the removal will
-     *       fail if this flag is not set, and the atom has incoming
-     *       links (that are in the atomspace).  Set to false only if
-     *       you can guarantee that this atom does not appear in the
-     *       outgoing set of any link in the atomspace.
+     * @param recursive Recursive-removal flag. If the flag is set,
+     *       then this atom, and *everything* that points to it will
+     *       be removed from the atomspace.  This can cause a large
+     *       cascade of removals!  If the flag is not set, then the
+     *       atom will be removed only if its incoming set is empty.
+     *       By default, recursion is disabled.
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool removeAtom(Handle h, bool recursive = true) {
+    bool removeAtom(Handle h, bool recursive = false) {
         return getImpl().removeAtom(h, recursive);
     }
 

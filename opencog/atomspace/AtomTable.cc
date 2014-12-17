@@ -741,8 +741,6 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
         }
     }
 
-    // Check for an invalid condition that should not occur. See:
-    // https://github.com/opencog/opencog/commit/a08534afb4ef7f7e188e677cb322b72956afbd8f#commitcomment-5842682
     // The check is done twice: the call to getIncomingSetSize() can
     // return a non-zero value if the incoming set has weak pointers to
     // deleted atoms. Thus, a second check is made for strong pointers,
@@ -750,7 +748,18 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     if (0 < handle->getIncomingSetSize())
     {
         IncomingSet iset(handle->getIncomingSet());
-        if (0 < iset.size()) {
+        if (0 < iset.size())
+        {
+            if (not recursive)
+            {
+                // User asked for a non-recursive remove, and the
+                // atom is still referenced. So, do nothing.
+                handle->unsetRemovalFlag();
+                return result;
+            }
+
+            // Check for an invalid condition that should not occur. See:
+            // https://github.com/opencog/opencog/commit/a08534afb4ef7f7e188e677cb322b72956afbd8f#commitcomment-5842682
             size_t ilen = iset.size();
             for (size_t i=0; i<ilen; i++)
             {
