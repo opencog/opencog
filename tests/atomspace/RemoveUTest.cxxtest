@@ -117,7 +117,7 @@ void RemoveUTest::testDangling()
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
 	// Recursive removal of hna should blow away hli.
-	as1.removeAtom(hna);
+	as1.removeAtom(hna, true);
 
 	TS_ASSERT(as1.getSize() == 1);
 
@@ -157,7 +157,7 @@ void RemoveUTest::testRecursive()
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
 	// Recursive removal of hna should blow away hli.
-	as1.removeAtom(hna);
+	as1.removeAtom(hna, true);
 
 	TS_ASSERT(as1.getSize() == 1);
 	TS_ASSERT(as2.getSize() == 0);
@@ -199,7 +199,7 @@ void RemoveUTest::testCross()
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
 	// Recursive removal of hna should blow away hli.
-	as1.removeAtom(hna);
+	as1.removeAtom(hna, true);
 
 	TS_ASSERT(as1.getSize() == 0);
 	TS_ASSERT(as2.getSize() == 1);
@@ -241,7 +241,7 @@ void RemoveUTest::testReCross()
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
 	// Recursive removal of hnb should blow away hli.
-	as2.removeAtom(hnb);
+	as2.removeAtom(hnb, true);
 
 	TS_ASSERT(as1.getSize() == 1);
 	TS_ASSERT(as2.getSize() == 0);
@@ -284,7 +284,7 @@ void RemoveUTest::testRepeat()
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
 	// Recursive removal of hna should blow away hli.
-	as1.removeAtom(hna);
+	as1.removeAtom(hna, true);
 
 	TS_ASSERT(as1.getSize() == 1);
 	TS_ASSERT(as2.getSize() == 0);
@@ -345,7 +345,7 @@ void RemoveUTest::testHeads()
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
 	// Recursive removal of hna should blow away hli.
-	as1.removeAtom(hna);
+	as1.removeAtom(hna, true);
 
 	TS_ASSERT(as1.getSize() == 1);
 	TS_ASSERT(as2.getSize() == 0);
@@ -394,7 +394,7 @@ void RemoveUTest::testTails()
 	TS_ASSERT(as1.getSize() == 6);
 	TS_ASSERT(as2.getSize() == 7);
 
-	as2.removeAtom(hoo);
+	as2.removeAtom(hoo, true);
 
 	TS_ASSERT(as1.getSize() == 6);
 	TS_ASSERT(as2.getSize() == 3);
