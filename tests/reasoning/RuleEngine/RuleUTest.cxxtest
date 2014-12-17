@@ -114,7 +114,8 @@ void RuleUTest::test_deduction(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
-    config().set("SCM_PRELOAD", "tests/reasoning/RuleEngine/simple-assertions.scm, "
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/RuleEngine/simple-assertions.scm, "
                  "reasoning/RuleEngine/rules/pln/deduction.scm");
     load_scm_files_from_config(*as);    
     
