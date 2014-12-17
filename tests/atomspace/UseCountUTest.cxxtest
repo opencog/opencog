@@ -123,8 +123,8 @@ public:
             for (size_t i = 0; i < isz; i++) {
                 Handle n = iset[i]->getOutgoingAtom(1);
 
-                atomSpace->removeAtom(n);
-                atomSpace->removeAtom(Handle(iset[i]));
+                atomSpace->removeAtom(n, true);
+                atomSpace->removeAtom(Handle(iset[i]), true);
                 rm_cnt[thread_id] += 2;
                 __totalRemoved += 2;
             }

@@ -172,7 +172,7 @@ public:
         TS_ASSERT(atomSpace->getSize() == 1);
 
         logger().debug("before atom remove, table size = %u", atomSpace->getSize());
-        atomSpace->purgeAtom(wnHandle);
+        atomSpace->purgeAtom(wnHandle, true);
         TS_ASSERT(__testSignalsCounter == 111111);
         TS_ASSERT(atomSpace->getSize() == 0);
 
@@ -184,7 +184,7 @@ public:
         wnHandle = atomSpace->addNode(NUMBER_NODE, "1");
         atomSpace->addNode(NUMBER_NODE, "1");
         TS_ASSERT(__testSignalsCounter == 10);
-        atomSpace->purgeAtom(wnHandle);
+        atomSpace->purgeAtom(wnHandle, true);
         TS_ASSERT(__testSignalsCounter == 100010);
 
         __testSignalsCounter = 0;
@@ -194,7 +194,7 @@ public:
         wnHandle = atomSpace->addNode(NUMBER_NODE, "1");
         atomSpace->addNode(NUMBER_NODE, "1");
         TS_ASSERT(__testSignalsCounter == 0);
-        atomSpace->purgeAtom(wnHandle);
+        atomSpace->purgeAtom(wnHandle, true);
         TS_ASSERT(__testSignalsCounter == 0);
     }
 
@@ -276,7 +276,7 @@ public:
             TS_ASSERT_EQUALS(hs.size(), 1); 
             if (hs.size() != 0) {
                 //std::cout << " handle " << hs[0] << std::endl;
-                atomSpace->purgeAtom(hs[0]);
+                atomSpace->purgeAtom(hs[0], true);
             }
         }
     }
@@ -576,7 +576,7 @@ public:
             // size_t j = (i+111*thread_id) % nc;
             size_t j = (i+11*thread_id) % nc;
             // size_t j = i;
-            atomSpace->purgeAtom((*seq)[j]);
+            atomSpace->purgeAtom((*seq)[j], true);
         }
     }
 
@@ -643,7 +643,7 @@ public:
             TS_ASSERT_EQUALS(hs.size(), 1); 
             if (hs.size() != 0) {
                 //std::cout << " handle " << hs[0] << std::endl;
-                atomSpace->purgeAtom(hs[0]);
+                atomSpace->purgeAtom(hs[0], true);
             }
         }
     }
