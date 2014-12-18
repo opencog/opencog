@@ -147,7 +147,7 @@ namespace PatternMining
      //       )
      //    )
      // Return unified ordered Handle vector
-     vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern);
+     vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern, map<Handle, Handle> &orderedVarNameMap);
 
      string unifiedPatternToKeyString(vector<Handle>& inputPattern , const AtomSpace *atomspace = 0);
 
@@ -198,6 +198,12 @@ namespace PatternMining
 
      void extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
 
+     void extendAllPossiblePatternsTillMaxGramDF(Handle &startLink, AtomSpace* _fromAtomSpace, unsigned int max_gram);
+
+     void extendAPatternForOneMoreGramRecursively(Handle &extendedLink, AtomSpace* _fromAtomSpace, Handle &extendedNode, HandleSeq &lastGramLinks,
+                                                  HTreeNode* parentNode, map<Handle,Handle> &lastGramValueToVarMap, bool isExtendedFromVar);
+
+     HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves, HandleSeq &shouldNotBeVars);
 
      void findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* HNode);
 
@@ -210,6 +216,8 @@ namespace PatternMining
      void growPatternsTaskBF();
 
      void GrowAllPatternsBF();
+
+     void growPatternsDepthFirstTask_old();
 
      void growPatternsDepthFirstTask();
 

@@ -50,7 +50,7 @@ using namespace opencog::PatternMining;
 using namespace opencog;
 
 
-void PatternMiner::growPatternsDepthFirstTask()
+void PatternMiner::growPatternsDepthFirstTask_old()
 {
     while(true)
     {
@@ -107,6 +107,7 @@ void PatternMiner::growPatternsDepthFirstTask()
 
         unsigned int gram;
 
+
         for ( gram = 2; gram <= MAX_GRAM; ++ gram)
         {
             map<HandleSeq, vector<HTreeNode*> > ::iterator it = allLastGramLinksToPatterns.begin();
@@ -125,6 +126,87 @@ void PatternMiner::growPatternsDepthFirstTask()
 
     }
 }
+
+
+void PatternMiner::growPatternsDepthFirstTask()
+{
+    while(true)
+    {
+        readNextLinkLock.lock();
+        cur_index ++;
+
+        if (cur_index < allLinkNumber)
+        {
+            cout<< "\r" << (float)(cur_index)/(float)(allLinkNumber)*100.0f << + "% completed." ;
+            std::cout.flush();
+        }
+        else
+        {
+            if (cur_index == allLinkNumber)
+            {
+                cout<< "\r100% completed." ;
+                std::cout.flush();
+            }
+
+            readNextLinkLock.unlock();
+            break;
+
+        }
+
+        Handle& cur_link = allLinks[cur_index];
+
+        readNextLinkLock.unlock();
+
+        // if this link is listlink, ignore it
+        if (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK)
+        {
+            continue;
+        }
+
+        // Add this link into observingAtomSpace
+        HandleSeq outgoingLinks,outVariableNodes;
+
+        swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
+        Handle newLink = observingAtomSpace->addLink(originalAtomSpace->getType(cur_link),outgoingLinks,originalAtomSpace->getTV(cur_link));
+
+//        HandleSeq observedLinks;
+//        observedLinks.push_back(newLink);
+
+        // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
+
+//        vector<HTreeNode*> _allLastGramHTreeNodes; // it's empty for the 1-gram patterns, because there is no last gram
+
+//        vector<HTreeNode*> _allThisGramHTreeNodes;
+
+        extendAllPossiblePatternsTillMaxGramDF(newLink, observingAtomSpace, this->MAX_GRAM);
+
+        //extractAllPossiblePatternsT(observedLinks, 0, observingAtomSpace, _allLastGramHTreeNodes,_allThisGramHTreeNodes,1);
+
+//        map<HandleSeq, vector<HTreeNode*> > allLastGramLinksToPatterns; // for this cur_link
+//        allLastGramLinksToPatterns.insert(std::pair<HandleSeq, vector<HTreeNode*>>(observedLinks, _allThisGramHTreeNodes));
+
+//        unsigned int gram;
+
+
+//        for ( gram = 2; gram <= MAX_GRAM; ++ gram)
+//        {
+//            map<HandleSeq, vector<HTreeNode*> > ::iterator it = allLastGramLinksToPatterns.begin();
+//            map<HandleSeq, vector<HTreeNode*> > allThisGramLinksToPatterns;
+//            vector<set<Handle>> newConnectedLinksFoundThisGram;
+
+//            for(; it != allLastGramLinksToPatterns.end(); ++ it)
+//            {
+//                // find all the 2~MAX_GRAM gram distance neighbour links of newLink
+//                extendAllPossiblePatternsForOneMoreGramDF((HandleSeq&)(it->first),observingAtomSpace,gram, (vector<HTreeNode*>&)(it->second), allThisGramLinksToPatterns, newConnectedLinksFoundThisGram);
+//            }
+
+//            allLastGramLinksToPatterns = allThisGramLinksToPatterns;
+
+//        }
+
+    }
+}
+
 
 
 void PatternMiner::runPatternMinerDepthFirst()
@@ -149,6 +231,426 @@ void PatternMiner::runPatternMinerDepthFirst()
     (vector<Handle>()).swap(allLinks);
 
     cout << "\nFinished mining 1~" << MAX_GRAM << " gram patterns.\n";
+
+}
+
+
+
+HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves, HandleSeq &shouldNotBeVars)
+{
+    HTreeNode* returnHTreeNode = 0;
+    bool skip = false;
+
+    if (enable_filter_links_should_connect_by_vars)
+    {
+
+        // check if in this combination, if at least one node in each Seq of oneOfEachSeqShouldBeVars is considered as variable
+        bool allSeqContainsVar = true;
+        foreach(HandleSeq& oneSharedSeq, oneOfEachSeqShouldBeVars)
+        {
+            bool thisSeqContainsVar = false;
+            foreach (Handle& toBeSharedNode, oneSharedSeq)
+            {
+                if (patternVarMap.find(toBeSharedNode) != patternVarMap.end())
+                {
+                    thisSeqContainsVar = true;
+                    break;
+                }
+
+            }
+
+            if (! thisSeqContainsVar)
+            {
+                allSeqContainsVar = false;
+                break;
+            }
+        }
+
+        if (! allSeqContainsVar)
+            skip = true;
+    }
+
+
+
+    if ( (! skip) && (enable_filter_leaves_should_not_be_vars) && (gram > 1) ) // for gram > 1, any leaf should not considered as variable
+    {
+        foreach (Handle leaf , leaves)
+        {
+            if (patternVarMap.find(leaf) != patternVarMap.end())
+            {
+                skip = true;
+                break;
+            }
+        }
+    }
+
+    if ( (! skip) && (enable_filter_node_types_should_not_be_vars))
+    {
+        foreach (Handle noTypeNode , shouldNotBeVars)
+        {
+            if (patternVarMap.find(noTypeNode) != patternVarMap.end())
+            {
+                skip = true;
+                break;
+            }
+        }
+    }
+
+
+    if (! skip)
+    {
+
+        HandleSeq pattern, unifiedPattern;
+
+        foreach (Handle link, inputLinks)
+        {
+            HandleSeq outgoingLinks;
+            generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
+            Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),outgoingLinks,TruthValue::TRUE_TV());
+
+            pattern.push_back(rebindedLink);
+        }
+
+        // unify the pattern
+        map<Handle,Handle> orderedVarNameMap;
+        unifiedPattern = UnifyPatternOrder(pattern, orderedVarNameMap);
+
+        string keyString = unifiedPatternToKeyString(unifiedPattern);
+
+        // next, check if this pattern already exist (need lock)
+        HTreeNode* newHTreeNode = 0;
+        uniqueKeyLock.lock();
+
+        map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(keyString);
+
+        if (htreeNodeIter == keyStrToHTreeNodeMap.end())
+        {
+            newHTreeNode = new HTreeNode();
+            returnHTreeNode = newHTreeNode;
+            keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
+
+            cout << "A new pattern Found:\n"<< keyString << std::endl;
+
+            newHTreeNode->count = 1;
+            newHTreeNode->orderedVarNameMap = orderedVarNameMap;
+            allHTreeNodes.push_back(newHTreeNode);
+
+        }
+        else
+        {
+            returnHTreeNode = ((HTreeNode*)(htreeNodeIter->second));
+            ((HTreeNode*)(htreeNodeIter->second))->count ++;
+            allHTreeNodes.push_back((HTreeNode*)(htreeNodeIter->second));
+            cout << "Unique Key already exists. count ++ !\n\n";
+
+        }
+
+        uniqueKeyLock.unlock();
+
+
+        if (newHTreeNode)
+        {
+            newHTreeNode->pattern = unifiedPattern;
+            newHTreeNode->var_num = var_num;
+
+            addNewPatternLock.lock();
+            (patternsForGram[gram-1]).push_back(newHTreeNode);
+            addNewPatternLock.unlock();
+
+        }
+
+    }
+
+    return returnHTreeNode;
+
+}
+
+// when it's the first gram pattern: parentNode = 0, extendedNode = undefined, lastGramLinks is empty, lastGramValueToVarMap is empty
+// extendedNode is the value node in original AtomSpace
+// lastGramLinks is the original links the parentLink is extracted from
+void PatternMiner::extendAPatternForOneMoreGramRecursively(Handle &extendedLink, AtomSpace* _fromAtomSpace, Handle &extendedNode, HandleSeq &lastGramLinks,
+                                                           HTreeNode* parentNode, map<Handle,Handle> &lastGramValueToVarMap, bool isExtendedFromVar)
+{
+    //  vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<set<Handle>>& newConnectedLinksFoundThisGram
+
+
+//    // First, extract all the variable nodes in the instance links
+//    map<Handle, unsigned int> allVarNodes;
+
+//    unsigned int index = 0;
+//    foreach (Handle link, instance)
+//    {
+//        extractAllNodesInLink(link, allVarNodes, _fromAtomSpace, index);
+//        index ++;
+//    }
+
+    // the ground value node in the _fromAtomSpace to the variable handle in pattenmining Atomspace
+    map<Handle,Handle> valueToVarMap = lastGramValueToVarMap;
+
+    // First, extract all the nodes in the input link
+    extractAllNodesInLink(extendedLink, valueToVarMap, _fromAtomSpace);
+
+    map<Handle,Handle> newValueToVarMap; // the new elements added in this gram
+
+    if (parentNode == 0) // this the first gram
+    {
+        newValueToVarMap = valueToVarMap;
+    }
+    else
+    {
+        map<Handle,Handle>::iterator valueToVarIt = valueToVarMap.begin();
+        for(; valueToVarIt != valueToVarMap.end(); valueToVarIt ++)
+        {
+            if (lastGramValueToVarMap.find(valueToVarIt->first) == lastGramValueToVarMap.end())
+                newValueToVarMap.insert( std::pair<Handle,Handle>(valueToVarIt->first,valueToVarIt->second));
+        }
+    }
+
+    // Generate all the possible combinations of all the nodes: all patterns including the 1 ~ n_max variables
+    // If there are too many variables in a pattern, it doesn't make much sense, so we litmit the max number of variables to half of the node number
+
+    unsigned int cur_pattern_gram = 1;
+    unsigned int lastGramTotalNodeNum = 0;
+    unsigned int lastGramTotalVarNum = 0;
+
+
+    if (parentNode)
+    {
+        cur_pattern_gram = parentNode->pattern.size() + 1;
+        lastGramTotalNodeNum = lastGramValueToVarMap.size();
+        lastGramTotalVarNum = parentNode->var_num;
+    }
+
+    int n_max = newValueToVarMap.size();
+    int n_limit= valueToVarMap.size()/2.0f - lastGramTotalVarNum;
+    n_limit ++;
+
+    // sometimes there is only one variable in a link, lik:
+//    (DuringLink
+//      (ConceptNode "dead")
+//      (ConceptNode "dead")
+//    ) ; [44694]
+    if (n_limit == 1)
+        n_limit = 2;
+
+    bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const
+
+    // Get all the shared nodes and leaves
+    HandleSeqSeq oneOfEachSeqShouldBeVars;
+    HandleSeq leaves, shouldNotBeVars;
+
+    HandleSeq inputLinks = lastGramLinks;
+    instance.push_back(extendedLink);
+
+    //    OC_ASSERT( (valueToVarMap.size() > 1),
+    //              "PatternMiner::extractAllPossiblePatternsFromInputLinks: this group of links only has one node: %s!\n",
+    //               atomSpace->atomAsString(inputLinks[0]).c_str() );
+
+    filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace);
+
+
+    unsigned int var_num;
+    // if this gram is extended from a variable of its parent, the new added var_num can start from 0 instead of 1
+    // so the patternVarMap is the same with parentNode
+    // because the extendedNode
+    if (isExtendedFromVar)
+        var_num = 0;
+    else
+        var_num = 1;
+
+    // var_num is the number of variables
+    for (; var_num < n_limit; ++ var_num)
+    {
+        // Use the binary method to generate all combinations:
+
+        // generate the first combination
+        for (int i = 0; i < var_num; ++ i)
+            indexes[i] = true;
+
+        for (int i = var_num; i <n_max; ++ i)
+            indexes[i] = false;
+
+        while (true)
+        {
+            // construct the pattern for this combination in the PatternMining Atomspace
+            // generate the patternVarMap for this pattern of this combination
+            map<Handle,Handle>::iterator iter;
+
+            // the first part is the same with its parent node
+            map<Handle,Handle> patternVarMap = parentNode->orderedVarNameMap;
+
+            // And then add the second part:
+            if (var_num > 0 )
+            {
+                unsigned int index = 0;
+                for (iter = newValueToVarMap.begin(); iter != newValueToVarMap.end(); ++ iter)
+                {
+                    if (indexes[index]) // this is considered as a variable, add it into the variable to value map
+                        patternVarMap.insert(std::pair<Handle,Handle>(iter->first, iter->second));
+
+                    index ++;
+                }
+            }
+
+            HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars);
+
+            if (thisGramHTreeNode)
+            {
+                // This pattern is the super pattern of al its lastGramHTreeNodes (parentNode)
+                // add an ExtendRelation
+
+                ExtendRelation relation;
+                relation.extendedHTreeNode = thisGramHTreeNode;
+                relation.newExtendedLink = thisGramHTreeNode->pattern[pattern.size()-1];
+                relation.sharedLink = extendedLink;
+                relation.extendedNode = extendedNode;
+
+                parentNode->superPatternRelations.push_back(relation);
+
+
+                // Extend one more gram from lastGramHTreeNode to get its superpatterns
+                // There are two different super patterns: extended from a variable, and extended from a const by turning it into a variable:
+                unsigned int nodeIndex = 0;
+                map<Handle,Handle>::iterator niter;
+                for (niter = newValueToVarMap.begin(); niter != newValueToVarMap.end(); ++ niter)
+                {
+
+                    map<Handle,Handle> nextGramPatternVarMap;
+                    nextGramPatternVarMap.insert(std::pair<Handle,Handle>(iter->first, iter->second));
+
+                    // todo: decide what should be in the newConnectedLinksFoundThisGram
+
+                    Handle extendNode = (Handle)(niter->first);
+                    if (enable_filter_node_types_should_not_be_vars)
+                    {
+                        bool isIgnoredType = false;
+                        Type t = _fromAtomSpace->getType(extendNode);
+                        foreach (Type noType, node_types_should_not_be_vars)
+                        {
+                            if (t == noType)
+                            {
+                                isIgnoredType = true;
+                                break;
+                            }
+                        }
+
+                        if (isIgnoredType )
+                            continue;
+                    }
+
+                    bool isNewExtendedFromVar;
+                    if (indexes[nodeIndex]) // this is considered as a variable
+                    {   // Type 1: extended from a variable
+                        isNewExtendedFromVar = true;
+                    }
+                    else
+                    {
+                        // Type 2: extended from a const by turning it into a variable
+                        isNewExtendedFromVar = false;
+                    }
+
+                    // find what are the other links in the original Atomspace contain this variable
+                    HandleSeq incomings = _fromAtomSpace->getIncoming( (extendNode));
+                    // debug
+                    // string curvarstr = _fromAtomSpace->atomAsString(extendNode);
+
+                    foreach(Handle incomingHandle, incomings)
+                    {
+                        Handle extendedHandle;
+                        // if this atom is of igonred type, get its first ancestor that is not in the igonred types
+                        if (isIgnoredType (_fromAtomSpace->getType(incomingHandle)) )
+                        {
+                            extendedHandle = getFirstNonIgnoredIncomingLink(_fromAtomSpace, incomingHandle);
+                            if (extendedHandle == Handle::UNDEFINED)
+                                continue;
+                        }
+                        else
+                            extendedHandle = incomingHandle;
+
+
+                        string extendedHandleStr = _fromAtomSpace->atomAsString(extendedHandle);
+
+                        if (isInHandleSeq(extendedHandle, instance))
+                            continue;
+
+                        // debug
+                        // cout << "Debug: Extended link :" << extendedHandleStr << std::endl;
+
+                        if (extendedHandleStr.find("$var") != std::string::npos)
+                        {
+                           // cout << "Debug: error! The extended link contines variables!" << extendedHandleStr << std::endl;
+                            continue;
+                        }
+
+                        // Add this extendedHandle to the old pattern so as to make a new pattern
+                        HandleSeq originalLinks = instance;
+                        originalLinks.push_back(extendedHandle);
+
+                        // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
+
+                        vector<set<Handle> >::iterator newExtendIt;
+                        set<Handle> originalLinksToSet(originalLinks.begin(),originalLinks.end());
+                        bool alreadyExtracted = false;
+
+                        // check if these links have been extracted
+                        for(newExtendIt = newConnectedLinksFoundThisGram.begin(); newExtendIt != newConnectedLinksFoundThisGram.end(); newExtendIt++)
+                        {
+                            set<Handle>& exitstingLinks = (set<Handle>&)(*newExtendIt);
+                            if (exitstingLinks == originalLinksToSet)
+                            {
+                                alreadyExtracted = true;
+                                // cout<< "Debug: these links have already been extracted! Skip them!"<<std::endl;
+                                break;
+                            }
+
+                        }
+
+                        if (! alreadyExtracted)
+                        {
+                            newConnectedLinksFoundThisGram.push_back(originalLinksToSet);
+            //                set<Handle> sharedNodes; // only the current extending shared node is in sharedNodes for Depth first
+            //                sharedNodes.insert(extendNode);
+                            vector<HTreeNode*> allThisGramHTreeNodes;
+                            extractAllPossiblePatternsFromInputLinksDF(originalLinks, (unsigned int)(varIt->second), _fromAtomSpace, allLastGramHTreeNodes, allThisGramHTreeNodes, gram);
+//                          allFactLinksToPatterns.insert(std::pair<HandleSeq, vector<HTreeNode*>>(originalLinks, allThisGramHTreeNodes));
+
+                        }
+
+                    }
+
+//                    void PatternMiner::extendAPatternForOneMoreGramRecursively(Handle &extendedLink, AtomSpace* _fromAtomSpace, Handle &extendedNode, HandleSeq &lastGramLinks,
+//                                                                               HTreeNode* parentNode, map<Handle,Handle> &lastGramValueToVarMap, bool isExtendedFromVar)
+
+                    nodeIndex ++;
+                }
+
+            }
+
+
+
+
+            if ( (var_num == 0) || (isLastNElementsAllTrue(indexes, n_max, var_num)))
+                break;
+
+            // generate the next combination
+            generateNextCombinationGroup(indexes, n_max);
+        }
+    }
+
+//    HandleSeq instance;
+//    instance.push_back(startLink);
+
+//    // First, extract all the variable nodes in the instance links
+//    // we only extend one more link on the nodes that are considered as varaibles for this pattern
+//    map<Handle, unsigned int> allVarNodes;
+
+//    unsigned int index = 0;
+//    foreach (Handle link, instance)
+//    {
+//        extractAllNodesInLink(link, allVarNodes, _fromAtomSpace, index);
+//        index ++;
+//    }
+
 
 }
 
@@ -198,7 +700,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
         foreach(Handle incomingHandle, incomings)
         {
             Handle extendedHandle;
-            // if this atom is a igonred type, get its first parent that is not in the igonred types
+            // if this atom is of igonred type, get its first ancestor that is not in the igonred types
             if (isIgnoredType (_fromAtomSpace->getType(incomingHandle)) )
             {
                 extendedHandle = getFirstNonIgnoredIncomingLink(_fromAtomSpace, incomingHandle);
@@ -208,12 +710,13 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
             else
                 extendedHandle = incomingHandle;
 
-            // debug
+
             string extendedHandleStr = _fromAtomSpace->atomAsString(extendedHandle);
 
             if (isInHandleSeq(extendedHandle, instance))
                 continue;
 
+            // debug
             // cout << "Debug: Extended link :" << extendedHandleStr << std::endl;
 
             if (extendedHandleStr.find("$var") != std::string::npos)
@@ -248,8 +751,8 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
             if (! alreadyExtracted)
             {
                 newConnectedLinksFoundThisGram.push_back(originalLinksToSet);
-                set<Handle> sharedNodes; // only the current extending shared node is in sharedNodes for Depth first
-                sharedNodes.insert(extendNode);
+//                set<Handle> sharedNodes; // only the current extending shared node is in sharedNodes for Depth first
+//                sharedNodes.insert(extendNode);
                 vector<HTreeNode*> allThisGramHTreeNodes;
                 extractAllPossiblePatternsFromInputLinksDF(originalLinks, (unsigned int)(varIt->second), _fromAtomSpace, allLastGramHTreeNodes, allThisGramHTreeNodes, gram);
                 allFactLinksToPatterns.insert(std::pair<HandleSeq, vector<HTreeNode*>>(originalLinks, allThisGramHTreeNodes));
@@ -430,7 +933,8 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
                 }
 
                 // unify the pattern
-                unifiedPattern = UnifyPatternOrder(pattern);
+                map<Handle,Handle> orderedVarNameMap;
+                unifiedPattern = UnifyPatternOrder(pattern, orderedVarNameMap);
 
                 string keyString = unifiedPatternToKeyString(unifiedPattern);
 

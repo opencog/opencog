@@ -43,15 +43,18 @@ namespace opencog
          HTreeNode* extendedHTreeNode; // the super pattern HTreeNode
          Handle sharedLink; // the link in original pattern that connect to new extended Link
          Handle newExtendedLink; // in super pattern
+         Handle extendedNode; // the node that being extended in the original AtomSpace (the value node, not its variable name node)
      };
 
      class HTreeNode
          {
          public:
             HandleSeq pattern;
-            vector<HandleSeq> instances; // the corresponding instances of this pattern in the original AtomSpace
+            vector<HandleSeq> instances; // the corresponding instances of this pattern in the original AtomSpace, only be used by breadth first mining
             set<HTreeNode*> parentLinks;
             set<HTreeNode*> childLinks;
+            map<Handle,Handle> orderedVarNameMap; // the value to varible name map in this pattern
+
             vector<ExtendRelation> superPatternRelations; // store all the connections to its super patterns
 
             unsigned int count; // instance number

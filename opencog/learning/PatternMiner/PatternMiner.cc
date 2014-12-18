@@ -144,7 +144,10 @@ vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern,
 }
 
 // the input links should be like: only specify the const node, all the variable node name should not be specified:
-vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern)
+// map<Handle,Handle> orderedVarNameMap is output:
+// in this map, the first Handle is the variable node is the original Atomspace,
+// the second Handle is the renamed ordered variable node in the Pattern Mining Atomspace.
+vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern, map<Handle,Handle> &orderedVarNameMap)
 {
 
     // Step 1: take away all the variable names, make the pattern into such format string:
@@ -241,9 +244,7 @@ vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern)
         }
     }
 
-    // in this map, the first Handle is the variable node is the original Atomspace,
-    // the second Handle is the renamed ordered variable node in the Pattern Mining Atomspace.
-    map<Handle,Handle> orderedVarNameMap;
+
     vector<Handle> rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap);
 
     return rebindPattern;
@@ -1078,7 +1079,8 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
                      subPattern.push_back(HNode->pattern[index]);
              }
 
-             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern);
+             map<Handle,Handle> orderedVarNameMap;
+             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, orderedVarNameMap);
              string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
 //             std::cout<< "Subpattern: " << subPatternKey;
@@ -1094,7 +1096,8 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
                  foreach(HandleSeq aConnectedSubPart, splittedSubPattern)
                  {
                      // Unify it again
-                     HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart);
+                     map<Handle,Handle> _orderedVarNameMap;
+                     HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart, _orderedVarNameMap);
                      string connectedSubPatternKey = unifiedPatternToKeyString(unifiedConnectedSubPattern);
 //                     cout << "a splitted part: " << connectedSubPatternKey;
                      double h = calculateEntropyOfASubConnectedPattern(connectedSubPatternKey, unifiedConnectedSubPattern);
@@ -1427,12 +1430,12 @@ void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtended
 }
 
 // make sure only input 2~4 gram patterns
-void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
+void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAtomSpace)
 {
     std::cout << "=================Debug: calculate I_Surprisingness for pattern: ====================\n";
     foreach (Handle link, HNode->pattern)
     {
-        std::cout << atomSpace->atomAsString(link);
+        std::cout << _fromAtomSpace->atomAsString(link);
     }
 //    std::cout << "count of this pattern = " << HNode->count << std::endl;
 //    std::cout << std::endl;
@@ -1459,7 +1462,8 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
                 subPattern.push_back(HNode->pattern[index]);
             }
 
-            HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern);
+            map<Handle,Handle> orderedVarNameMap;
+            HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, orderedVarNameMap);
             string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
 //            std::cout<< "Subpattern: " << subPatternKey;
@@ -1523,52 +1527,60 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
 
     std::cout << "=================Debug: calculate II_Surprisingness for pattern: ====================\n";
 
-//    Handle newVarNode = atomSpace->addNode(VARIABLE_NODE, "$var_" + toString(HNode->var_num));
+    Handle newVarNode = _fromAtomSpace->addNode(VARIABLE_NODE, "$var_" + toString(HNode->var_num));
 
-//    // first , get all its superpatterns
-//    foreach (Handle toBeExtendLink, HNode->pattern)
-//    {
-//        set<Handle> allNodes;
-//        extractAllNodesInLink(toBeExtendLink, allNodes, atomSpace);
+    // first , get all its superpatterns
+    foreach (Handle toBeExtendLink, HNode->pattern)
+    {
+        set<Handle> allNodes;
+        extractAllNodesInLink(toBeExtendLink, allNodes, _fromAtomSpace);
 
-//        HandleSeq extendedPattern;
-//        foreach (Handle link, HNode->pattern)
-//        {
-//            if (link != toBeExtendLink)
-//                extendedPattern.push_back(link);
-//        }
+        HandleSeq extendedPattern;
+        foreach (Handle link, HNode->pattern)
+        {
+            if (link != toBeExtendLink)
+                extendedPattern.push_back(link);
+        }
 
-//        foreach(Handle toBeExtendNode, allNodes)
-//        {
-//            if ( atomSpace->getType(toBeExtendNode) == VARIABLE_NODE)
-//                continue; // only extend leaf
+        foreach(Handle toBeExtendNode, allNodes)
+        {
 
-//            HandleSeq extendedHandles;
-//            if (Pattern_mining_mode == "Breadth_First")
-//                getOneMoreGramExtendedLinksFromGivenLeaf(toBeExtendLink, toBeExtendNode, newVarNode, extendedHandles, originalAtomSpace);
-//            else // (Pattern_mining_mode == "Depth_First")
-//                getOneMoreGramExtendedLinksFromGivenLeaf(toBeExtendLink, toBeExtendNode, newVarNode, extendedHandles, observingAtomSpace);
+            HandleSeq extendedHandles;
 
-//            // reBind the toBeExtendLink too, toBeExtendNode -> newVarNode
-//            HandleSeq reToBeExtendLinkOutgoings;
-//            reNameNodesForALink(toBeExtendLink,toBeExtendNode, newVarNode, reToBeExtendLinkOutgoings, atomSpace, atomSpace);
-//            Handle reToBeExtendLink = atomSpace->addLink(atomSpace->getType(toBeExtendLink), reToBeExtendLinkOutgoings, atomSpace->getTV(toBeExtendLink));
-//            extendedPattern.push_back(reToBeExtendLink);
+            getOneMoreGramExtendedLinksFromGivenLeaf(toBeExtendLink, toBeExtendNode, newVarNode, extendedHandles, _fromAtomSpace);
 
-//            // note that extendedLink has been already added into Pattern Mining Atomspace with new variable node
+            // There are two different super patterns: extended from a variable, and extended from a const by turning it into a variable
 
-//            foreach(Handle extendedLink, extendedHandles)
-//            {
-//                // add this extendedLink into pattern, get an n+1 gram pattern
-//                extendedPattern.push_back(extendedLink);
 
-//                HandleSeq unifiedExtendedPattern = UnifyPatternOrder(extendedPattern);
-//                string keyStr = unifiedPatternToKeyString(unifiedExtendedPattern);
-//                int count = getCountOfAConnectedPattern(keyStr, unifiedExtendedPattern);
-//            }
+            if ( _fromAtomSpace->getType(toBeExtendNode) == VARIABLE_NODE) // Type 1: extended from a variable
+            {
 
-//        }
-//    }
+            }
+            else // Type 2: extended from a const by turning it into a variable
+            {
+
+            }
+
+            // reBind the toBeExtendLink too, toBeExtendNode -> newVarNode
+            HandleSeq reToBeExtendLinkOutgoings;
+            reNameNodesForALink(toBeExtendLink,toBeExtendNode, newVarNode, reToBeExtendLinkOutgoings, atomSpace, atomSpace);
+            Handle reToBeExtendLink = _fromAtomSpace->addLink(_fromAtomSpace->getType(toBeExtendLink), reToBeExtendLinkOutgoings, _fromAtomSpace->getTV(toBeExtendLink));
+            extendedPattern.push_back(reToBeExtendLink);
+
+            // note that extendedLink has been already added into Pattern Mining Atomspace with new variable node
+
+            foreach(Handle extendedLink, extendedHandles)
+            {
+                // add this extendedLink into pattern, get an n+1 gram pattern
+                extendedPattern.push_back(extendedLink);
+                map<Handle,Handle> _orderedVarNameMap;
+                HandleSeq unifiedExtendedPattern = UnifyPatternOrder(extendedPattern, _orderedVarNameMap);
+                string keyStr = unifiedPatternToKeyString(unifiedExtendedPattern);
+                int count = getCountOfAConnectedPattern(keyStr, unifiedExtendedPattern);
+            }
+
+        }
+    }
 
 
 
@@ -1770,6 +1782,7 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
     int end_time = time(NULL);
     printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
+    std::cout<< THREAD_NUM << " threads used. \n";
     std::cout<<"Corpus size: "<< allLinkNumber << " links in total. \n";
 
 //   testPatternMatcher2();
