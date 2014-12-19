@@ -32,7 +32,7 @@ location. Thus, subgraph matching defacto performs a kind of "variable
 unification", and can be used to perform query processing, to "fill in
 the blanks".
 
-The subgraph matching algorithm implemenmted here is more or less
+The subgraph matching algorithm implemented here is more or less
 completely general.  The API to it provides for user-defined callbacks
 that can be used to modify the search:
 
@@ -48,7 +48,7 @@ that can be used to modify the search:
  * solution acceptance callback, to provide on-the-fly reporting, and
    limit the total number of groundings reported.
  * support for a back-tracking callback. During the search, the
-   pattern matcher will typically need to backtrack; this calllback
+   pattern matcher will typically need to backtrack; this callback
    allows user-defined algorithms to push and pop stacks as
    appropriate, as well.
 
@@ -99,7 +99,7 @@ which new graphs are inserted (during graph-re-writing).
 Clauses and Groundings
 ----------------------
 The OpenCog hypergraph is most easily understood in terms of its
-correspoding incidence graph (or "Levi graph"). This, in turn, is best
+corresponding incidence graph (or "Levi graph"). This, in turn, is best
 understood as a collection of trees formed by the "outgoing set" of an
 OpenCog Link.  Each internal node of a tree is a link (as only links
 have outgoing sets), and each leaf of a tree being a node (as nodes do
@@ -163,7 +163,7 @@ representation of the above parse, in OpenCog, will be:
          WordNode "throw"
          WordNode "ball"
 
-Here, the intentation level describes the tree structure. The links
+Here, the indentation level describes the tree structure. The links
 and nodes are indicated by name: the nodes are always leaves of the
 tree. The two trees or clauses above share a single, common node: that
 for "throw".
@@ -178,7 +178,7 @@ parse for the question "What did John throw?" can be written as:
 By comparing to the previous graph, it is obvious that the variable
 _$qVar can be directly matched to the word "ball", thus answering the
 question.  This illustrates the simplest use of the system, as a
-kinnd-of fill-in-the-blanks solver, for elementary-school word
+kind-of fill-in-the-blanks solver, for elementary-school word
 problems: "What did John throw? John threw a ____."
 
 The solution or answer is "ball". This is refered to as a "grounding"
@@ -216,7 +216,7 @@ common, shared variables.  A pair of clauses are connected if they
 share a common variable. A set of clauses is connected if there is a
 transitive path through all of them.  The need for this requirement
 was mentioned before: disconnected graphs are always just a trivial
-product of thier connected components; thus, it is pointless to
+product of their connected components; thus, it is pointless to
 explicitly support disconnected graphs.
 
 At this time, the boolean-or of clauses is not supported. So far,
