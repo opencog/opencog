@@ -17,14 +17,17 @@ To test this module, do the following:
 
 *) Connect to the server: telnet localhost 17001
 
-*) At the cogserver prompt, issue the command:
-   opencog> loadmodule examples/agents/libexample_module.so
+*) Load the module: at the cogserver prompt, issue the command:
+   opencog> loadmodule examples/module/libexample_module.so
    You should see 'done' printed on a line by itself.
 
-*) At the cogserver prompt, issue the command 'listmodules', and verify
-   that the module was loaded. The module will be called
+*) Verify that it has been loaded: at the cogserver prompt, issue the
+   command 'listmodules'. The module will be called 
    opencog::ExampleModule, and so you should see:
    Filename: libexample_module.so, ID: opencog::ExampleModule
+
+*) Unload the module: 
+   opencog> unloadmodule opencog::ExampleModule
 
 That's all folks!  The rest is up to you!
 

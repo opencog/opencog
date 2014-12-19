@@ -26,15 +26,11 @@
 #ifndef _OPENCOG_EXAMPLE_MODULE_H
 #define _OPENCOG_EXAMPLE_MODULE_H
 
-#include <string>
-
 #include <opencog/server/Module.h>
 
 namespace opencog
 {
-
 class CogServer;
-
 
 class ExampleModule : public Module
 {

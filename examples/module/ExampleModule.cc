@@ -24,8 +24,6 @@
  */
 
 
-#include <opencog/server/CogServer.h>
-#include <opencog/server/Factory.h>
 #include <opencog/util/Logger.h>
 
 #include "ExampleModule.h"
@@ -43,7 +41,6 @@ ExampleModule::ExampleModule(CogServer& cs) : Module(cs)
 ExampleModule::~ExampleModule()
 {
     logger().info("[ExampleModule] destructor");
-    _cogserver.destroyAllAgents(ExampleAgent::info().id);
 }
 
 void ExampleModule::init()
