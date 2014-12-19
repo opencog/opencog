@@ -172,7 +172,7 @@ HandleSeq BackwardChainer::filter_grounded_experssions(HandleSeq handles) {
 	for (Handle h : handles)
 		if (commons_->get_nodes(h, vector<Type> { VARIABLE_NODE }).empty())
 			grounded.push_back(h);
-    return grounded;
+	return grounded;
 }
 
 Handle BackwardChainer::get_root_logical_link(Handle himplication_link)
@@ -317,11 +317,12 @@ map<Handle, HandleSeq> BackwardChainer::unify(Handle& htarget, Handle& match,
 map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal) {
 #ifdef DEBUG
 	cout << endl << "DO BC CALLED WITH:" << endl << SchemeSmob::to_string(hgoal)
-			<< endl;
+	<< endl;
 	cout << "QUERY KNOWLEDGE BASE" << endl;
 #endif
 
-	HandleSeq kb_match = filter_grounded_experssions(query_knowledge_base(hgoal)); //TODO filter grounded grounded representations so the next condition would never be fooled
+	HandleSeq kb_match = filter_grounded_experssions(
+			query_knowledge_base(hgoal)); //TODO filter grounded grounded representations so the next condition would never be fooled
 	if (kb_match.empty()) {
 #ifdef DEBUG
 		cout << "QUERYING RULE BASE" << endl;
@@ -333,31 +334,30 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal) {
 #endif
 			return unify_to_empty_set(hgoal);
 		} else {
-				Handle rule = select_rule(rules); //TODO should we iterate from this address for trying with next mathcing rule
-				Handle stadardized_rule = commons_->create_with_unique_var(
-						rule);
-				bc_generated_rules.push_back(stadardized_rule); //for later removal
+			Handle rule = select_rule(rules); //TODO use all rules for found here.
+			Handle stadardized_rule = commons_->create_with_unique_var(rule);
+			bc_generated_rules.push_back(stadardized_rule); //for later removal
 #ifdef DEBUG
-				cout << "RULE FOUND" << SchemeSmob::to_string(stadardized_rule)
-						<< endl;
+					cout << "RULE FOUND" << SchemeSmob::to_string(stadardized_rule)
+					<< endl;
 #endif
-				map<Handle, HandleSeq> out;
-				Handle implicand = as_->getOutgoing(stadardized_rule)[1];
-				inference_list_.push_back(unify(hgoal, implicand, out));
+			map<Handle, HandleSeq> out;
+			Handle implicand = as_->getOutgoing(stadardized_rule)[1];
+			inference_list_.push_back(unify(hgoal, implicand, out));
 #ifdef DEBUG
-				cout << endl << "INFERENCE LIST UPDATE" << endl;
-				print_inference_list();
+			cout << endl << "INFERENCE LIST UPDATE" << endl;
+			print_inference_list();
 #endif
-				map<Handle, HandleSeq> solution = backward_chain(implicand,
-						stadardized_rule);
-				inference_list_.push_back(solution);
+			map<Handle, HandleSeq> solution = backward_chain(implicand,
+					stadardized_rule);
+			inference_list_.push_back(solution);
 #ifdef DEBUG
-				cout << endl << "FINAL INFERENCE LIST" << endl;
-				print_inference_list();
-				cout << endl << "BINDING GOAL: " << SchemeSmob::to_string(hgoal)
-						<< endl;
+			cout << endl << "FINAL INFERENCE LIST" << endl;
+			print_inference_list();
+			cout << endl << "BINDING GOAL: " << SchemeSmob::to_string(hgoal)
+			<< endl;
 #endif
-				return ground_target_vars(hgoal, inference_list_);
+			return ground_target_vars(hgoal, inference_list_);
 		}
 	} else {
 		vector<map<Handle, HandleSeq>> kb_results;
@@ -380,11 +380,11 @@ map<Handle, HandleSeq> BackwardChainer::backward_chain(Handle& htarget,
 	Handle root_logical_link = get_root_logical_link(rule);
 
 	if (root_logical_link == Handle::UNDEFINED) {
-//eg. (ImplicationLink (Inheritance $x "human") (InheritanceLink "$x" "bipedal")) has no logical links
+//eg. ImplicationLink (Inheritance $x "human") (InheritanceLink "$x" "bipedal")) has no logical links
 		Handle implicant = as_->getOutgoing(rule)[0];
 		return do_bc(implicant);
 	}
-
+	//build a tree of the the logical links and premises( premises could by themselves be a logical link) as a map
 	map<Handle, HandleSeq> logical_link_premise_map =
 			get_logical_link_premises_map(rule);
 	map<Handle, map<Handle, HandleSeq>> premise_var_ground_map;
@@ -393,8 +393,8 @@ map<Handle, HandleSeq> BackwardChainer::backward_chain(Handle& htarget,
 	HandleSeq evaluated_premises;
 	visited_logical_link.push_back(root_logical_link); //start from the root
 
-	//go depth until a logical link maps only to set of premises in the logical_link_premise_map object
-	//e.g (and x y) instead of (and (and x y) x) and start backward chaining  from there. i.e bottom up.
+	//go down deep until a logical link maps only to set of premises in the logical_link_premise_map object
+	//e.g start from (and x y) instead of (and (and x y) x) and start backward chaining  from there. i.e bottom up.
 	while (not visited_logical_link.empty()) {
 		Handle logical_link = visited_logical_link.back();
 		visited_logical_link.pop_back();
@@ -423,14 +423,14 @@ map<Handle, HandleSeq> BackwardChainer::backward_chain(Handle& htarget,
 				premise_var_ground_map);
 #ifdef DEBUG
 		cout << endl << "AFTER JOINING WITH "
-				<< (as_->getType(logical_link) == AND_LINK ? "AND" : "OR")
-				<< endl;
+		<< (as_->getType(logical_link) == AND_LINK ? "AND" : "OR")
+		<< endl;
 		print_var_value(v);
 #endif
 		results.push_back(v);		//add to results
 #ifdef DEBUG
-		cout << endl << "INFERENCE LIST UPDATE" << endl;
-		print_inference_list();
+				cout << endl << "INFERENCE LIST UPDATE" << endl;
+				print_inference_list();
 #endif
 		evaluated_premises.push_back(logical_link);
 	}
@@ -464,7 +464,7 @@ void BackwardChainer::print_inference_list() {
 			cout << "[VAR:" << SchemeSmob::to_string(j->first) << endl;
 			HandleSeq hs = j->second;
 			for (Handle h : hs)
-				cout << "\tVAL:" << SchemeSmob::to_string(h) << endl;
+			cout << "\tVAL:" << SchemeSmob::to_string(h) << endl;
 		}
 		cout << "]" << endl;
 	}
@@ -484,7 +484,7 @@ void BackwardChainer::print_var_value(
 		cout << "[VAR:" << SchemeSmob::to_string(j->first) << endl;
 		HandleSeq hs = j->second;
 		for (Handle h : hs)
-			cout << "\tVAL:" << SchemeSmob::to_string(h) << endl;
+		cout << "\tVAL:" << SchemeSmob::to_string(h) << endl;
 	}
 	cout << "]" << endl;
 }

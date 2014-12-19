@@ -14,7 +14,9 @@
 
 using namespace std;
 using namespace opencog;
-
+/**
+ * Reusable functions in the PLN module
+ */
 class PLNCommons {
 public:
 	AtomSpace * as_;

@@ -34,6 +34,10 @@ using namespace std;
 
 class ForwardChainPatternMatchCB;
 class ForwardChainInputMatchCB;
+
+/**
+ * A class that encpasulates all the PLN forward chaining
+ */
 class ForwardChainer: public virtual Chainer {
 private:
 	friend class ForwardChainerUTest;
