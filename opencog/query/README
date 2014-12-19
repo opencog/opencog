@@ -17,7 +17,7 @@ This code does not currently expose a "hypergraph query language" (HQL),
 but doing so should not be hard to add. See the design notes below.
 
 A simple example of one possible use of this code is shown in the file
-"implication-example.scm".
+"/examples/pattern-matcher/simple.scm".
 
 
 Subgraph Isomorphism Discovery
