@@ -22,11 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ExampleAgent.h"
-
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Factory.h>
 #include <opencog/util/Logger.h>
+
+#include "ExampleAgent.h"
 
 using namespace opencog;
 
