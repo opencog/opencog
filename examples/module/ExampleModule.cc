@@ -1,7 +1,8 @@
 /*
- * examples/modules/ExampleAgent.cc
+ * examples/modules/ExampleModule.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2014 Linas Vepstas
  * All Rights Reserved
  *
  * Written by Gustavo Gama <gama@vettalabs.com>
@@ -22,11 +23,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/server/CogServer.h>
-#include <opencog/server/Factory.h>
+
 #include <opencog/util/Logger.h>
 
-#include "ExampleAgent.h"
+#include "ExampleModule.h"
 
 using namespace opencog;
 
@@ -41,29 +41,10 @@ ExampleModule::ExampleModule(CogServer& cs) : Module(cs)
 ExampleModule::~ExampleModule()
 {
     logger().info("[ExampleModule] destructor");
-    _cogserver.destroyAllAgents(ExampleAgent::info().id);
 }
 
 void ExampleModule::init()
 {
     logger().info("[ExampleModule] init");
-    _cogserver.registerAgent(ExampleAgent::info().id, &factory);
-    _cogserver.createAgent(ExampleAgent::info().id, true);
 }
 
-ExampleAgent::ExampleAgent(CogServer& cs) : Agent(cs, 100)
-{
-    logger().info("[ExampleAgent] constructor");
-    thing_a_ma_bob = 0;
-}
-
-ExampleAgent::~ExampleAgent()
-{
-    logger().info("[ExampleAgent] destructor");
-}
-
-void ExampleAgent::run()
-{
-    thing_a_ma_bob++;
-    logger().info("[ExampleAgent] run; thing amabob is now %d", thing_a_ma_bob);
-}

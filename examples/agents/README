@@ -4,7 +4,7 @@
 
 In OpenCog, an "Agent" is a bit of code that is run repeatedly, on a
 regular schedule.  The CogServer maintains a list of active Agents, and
-calls themm on a periodic basis.  This directory provides an example of
+calls them on a periodic basis.  This directory provides an example of
 how an agent can be written in C++.
 
 To test this agent, do the following:

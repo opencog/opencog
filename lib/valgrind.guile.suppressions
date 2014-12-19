@@ -171,6 +171,16 @@
    fun:GC_gcollect
    ...
 }
+# ------------------------------------------
+# guile-2.2 stuff
+
+{
+   <2.2-malloc>
+   Memcheck:Cond
+   ...
+   fun:GC_generic_malloc_many
+   ...
+}
 
 # ------------------------------------------
 # libuistring stuff
