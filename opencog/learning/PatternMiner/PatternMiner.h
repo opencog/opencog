@@ -111,7 +111,7 @@ namespace PatternMining
 
      unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
 
-     std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock, readNextLinkLock;
+     std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock, readNextLinkLock, curDFExtractedLinksLock;
 
      Type ignoredTypes[1];
 
@@ -124,6 +124,10 @@ namespace PatternMining
      float atomspaceSizeFloat;
 
      vector<vector<vector<unsigned int>>> components_ngram[3];
+
+     // [gram], this to avoid different threads happen to work on the same links.
+     // each string is composed the handles of a group of fact links in the observingAtomSpace in the default hash order using std set
+     set<string>  cur_DF_ExtractedLinks[];
 
      // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
      // the input links should be a Pattern in such format:
@@ -198,7 +202,7 @@ namespace PatternMining
 
      void extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
 
-     void extendAllPossiblePatternsTillMaxGramDF(Handle &startLink, AtomSpace* _fromAtomSpace, unsigned int max_gram);
+     //  void extendAllPossiblePatternsTillMaxGramDF(Handle &startLink, AtomSpace* _fromAtomSpace, unsigned int max_gram);
 
      void extendAPatternForOneMoreGramRecursively(Handle &extendedLink, AtomSpace* _fromAtomSpace, Handle &extendedNode, HandleSeq &lastGramLinks,
                                                   HTreeNode* parentNode, map<Handle,Handle> &lastGramValueToVarMap, bool isExtendedFromVar);
@@ -274,6 +278,7 @@ namespace PatternMining
                                             AtomSpace* _fromAtomSpace, AtomSpace* _toAtomSpace);
 
      void filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, AtomSpace* _atomSpace);
+
 
  public:
      PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram = 3);

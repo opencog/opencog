@@ -169,18 +169,11 @@ void PatternMiner::growPatternsDepthFirstTask()
         swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
         Handle newLink = observingAtomSpace->addLink(originalAtomSpace->getType(cur_link),outgoingLinks,originalAtomSpace->getTV(cur_link));
 
-//        HandleSeq observedLinks;
-//        observedLinks.push_back(newLink);
+        // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
+        HandleSeq lastGramLinks;
+        map<Handle,Handle> lastGramValueToVarMap;
+        extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, 0, lastGramLinks, 0, lastGramValueToVarMap, false);
 
-        // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
-
-//        vector<HTreeNode*> _allLastGramHTreeNodes; // it's empty for the 1-gram patterns, because there is no last gram
-
-//        vector<HTreeNode*> _allThisGramHTreeNodes;
-
-        extendAllPossiblePatternsTillMaxGramDF(newLink, observingAtomSpace, this->MAX_GRAM);
-
-        //extractAllPossiblePatternsT(observedLinks, 0, observingAtomSpace, _allLastGramHTreeNodes,_allThisGramHTreeNodes,1);
 
 //        map<HandleSeq, vector<HTreeNode*> > allLastGramLinksToPatterns; // for this cur_link
 //        allLastGramLinksToPatterns.insert(std::pair<HandleSeq, vector<HTreeNode*>>(observedLinks, _allThisGramHTreeNodes));
@@ -213,6 +206,8 @@ void PatternMiner::runPatternMinerDepthFirst()
 {
     // observingAtomSpace is used to copy one link everytime from the originalAtomSpace
     observingAtomSpace = new AtomSpace();
+
+    cur_DF_ExtractedLinks = new set<Handle> [MAX_GRAM];
 
     cur_index = -1;
 
@@ -371,18 +366,6 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 void PatternMiner::extendAPatternForOneMoreGramRecursively(Handle &extendedLink, AtomSpace* _fromAtomSpace, Handle &extendedNode, HandleSeq &lastGramLinks,
                                                            HTreeNode* parentNode, map<Handle,Handle> &lastGramValueToVarMap, bool isExtendedFromVar)
 {
-    //  vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<set<Handle>>& newConnectedLinksFoundThisGram
-
-
-//    // First, extract all the variable nodes in the instance links
-//    map<Handle, unsigned int> allVarNodes;
-
-//    unsigned int index = 0;
-//    foreach (Handle link, instance)
-//    {
-//        extractAllNodesInLink(link, allVarNodes, _fromAtomSpace, index);
-//        index ++;
-//    }
 
     // the ground value node in the _fromAtomSpace to the variable handle in pattenmining Atomspace
     map<Handle,Handle> valueToVarMap = lastGramValueToVarMap;
@@ -440,7 +423,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(Handle &extendedLink,
     HandleSeq leaves, shouldNotBeVars;
 
     HandleSeq inputLinks = lastGramLinks;
-    instance.push_back(extendedLink);
+    inputLinks.push_back(extendedLink);
 
     //    OC_ASSERT( (valueToVarMap.size() > 1),
     //              "PatternMiner::extractAllPossiblePatternsFromInputLinks: this group of links only has one node: %s!\n",
@@ -570,7 +553,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(Handle &extendedLink,
 
                         string extendedHandleStr = _fromAtomSpace->atomAsString(extendedHandle);
 
-                        if (isInHandleSeq(extendedHandle, instance))
+                        if (isInHandleSeq(extendedHandle, inputLinks))
                             continue;
 
                         // debug
@@ -582,39 +565,67 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(Handle &extendedLink,
                             continue;
                         }
 
-                        // Add this extendedHandle to the old pattern so as to make a new pattern
-                        HandleSeq originalLinks = instance;
+                        // check if these fact links already been processed before or by other thread
+                        // Add this extendedHandle to this gram fact links, become the next gram fact links
+                        HandleSeq originalLinks = inputLinks;
                         originalLinks.push_back(extendedHandle);
 
-                        // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
+                        set<Handle> originalLinksSet(originalLinks.begin(), originalLinks.end());
 
-                        vector<set<Handle> >::iterator newExtendIt;
-                        set<Handle> originalLinksToSet(originalLinks.begin(),originalLinks.end());
+                        string keyString = "";
+                        foreach (Handle h , originalLinksSet)
+                        {
+                            keyString +=  toString(oh.value());
+                            keyString += "_";
+                        }
+
                         bool alreadyExtracted = false;
 
-                        // check if these links have been extracted
-                        for(newExtendIt = newConnectedLinksFoundThisGram.begin(); newExtendIt != newConnectedLinksFoundThisGram.end(); newExtendIt++)
-                        {
-                            set<Handle>& exitstingLinks = (set<Handle>&)(*newExtendIt);
-                            if (exitstingLinks == originalLinksToSet)
-                            {
-                                alreadyExtracted = true;
-                                // cout<< "Debug: these links have already been extracted! Skip them!"<<std::endl;
-                                break;
-                            }
+                        curDFExtractedLinksLock.lock();
 
-                        }
+                        if (cur_DF_ExtractedLinks[cur_pattern_gram].find(keyString) == cur_DF_ExtractedLinks[cur_pattern_gram].end())
+                            cur_DF_ExtractedLinks[cur_pattern_gram].insert(keyString);
+                        else
+                            alreadyExtracted = true;
 
-                        if (! alreadyExtracted)
-                        {
-                            newConnectedLinksFoundThisGram.push_back(originalLinksToSet);
-            //                set<Handle> sharedNodes; // only the current extending shared node is in sharedNodes for Depth first
-            //                sharedNodes.insert(extendNode);
-                            vector<HTreeNode*> allThisGramHTreeNodes;
-                            extractAllPossiblePatternsFromInputLinksDF(originalLinks, (unsigned int)(varIt->second), _fromAtomSpace, allLastGramHTreeNodes, allThisGramHTreeNodes, gram);
-//                          allFactLinksToPatterns.insert(std::pair<HandleSeq, vector<HTreeNode*>>(originalLinks, allThisGramHTreeNodes));
+                        curDFExtractedLinksLock.unlock();
 
-                        }
+                        if (alreadyExtracted)
+                            continue;
+
+
+
+
+
+//                        // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
+
+//                        vector<set<Handle> >::iterator newExtendIt;
+//                        set<Handle> originalLinksToSet(originalLinks.begin(),originalLinks.end());
+//                        bool alreadyExtracted = false;
+
+//                        // check if these links have been extracted
+//                        for(newExtendIt = newConnectedLinksFoundThisGram.begin(); newExtendIt != newConnectedLinksFoundThisGram.end(); newExtendIt++)
+//                        {
+//                            set<Handle>& exitstingLinks = (set<Handle>&)(*newExtendIt);
+//                            if (exitstingLinks == originalLinksToSet)
+//                            {
+//                                alreadyExtracted = true;
+//                                // cout<< "Debug: these links have already been extracted! Skip them!"<<std::endl;
+//                                break;
+//                            }
+
+//                        }
+
+//                        if (! alreadyExtracted)
+//                        {
+//                            newConnectedLinksFoundThisGram.push_back(originalLinksToSet);
+//            //                set<Handle> sharedNodes; // only the current extending shared node is in sharedNodes for Depth first
+//            //                sharedNodes.insert(extendNode);
+//                            vector<HTreeNode*> allThisGramHTreeNodes;
+//                            extractAllPossiblePatternsFromInputLinksDF(originalLinks, (unsigned int)(varIt->second), _fromAtomSpace, allLastGramHTreeNodes, allThisGramHTreeNodes, gram);
+////                          allFactLinksToPatterns.insert(std::pair<HandleSeq, vector<HTreeNode*>>(originalLinks, allThisGramHTreeNodes));
+
+//                        }
 
                     }
 
