@@ -1576,7 +1576,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
                 map<Handle,Handle> _orderedVarNameMap;
                 HandleSeq unifiedExtendedPattern = UnifyPatternOrder(extendedPattern, _orderedVarNameMap);
                 string keyStr = unifiedPatternToKeyString(unifiedExtendedPattern);
-                int count = getCountOfAConnectedPattern(keyStr, unifiedExtendedPattern);
+                // int count = getCountOfAConnectedPattern(keyStr, unifiedExtendedPattern); // todo :  this function is not finished yet
             }
 
         }
@@ -1765,7 +1765,7 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                     // calculate surprisingness
                     foreach(HTreeNode* htreeNode, patternsForGram[gram-1])
                     {
-                        calculateSurprisingness(htreeNode);
+                        calculateSurprisingness(htreeNode, observingAtomSpace);
                     }
 
                     // sort by surprisingness

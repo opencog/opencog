@@ -127,7 +127,7 @@ namespace PatternMining
 
      // [gram], this to avoid different threads happen to work on the same links.
      // each string is composed the handles of a group of fact links in the observingAtomSpace in the default hash order using std set
-     set<string>  cur_DF_ExtractedLinks[];
+     set<string>* cur_DF_ExtractedLinks;
 
      // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
      // the input links should be a Pattern in such format:
@@ -204,10 +204,10 @@ namespace PatternMining
 
      //  void extendAllPossiblePatternsTillMaxGramDF(Handle &startLink, AtomSpace* _fromAtomSpace, unsigned int max_gram);
 
-     void extendAPatternForOneMoreGramRecursively(Handle &extendedLink, AtomSpace* _fromAtomSpace, Handle &extendedNode, HandleSeq &lastGramLinks,
-                                                  HTreeNode* parentNode, map<Handle,Handle> &lastGramValueToVarMap, bool isExtendedFromVar);
+     void extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
+                                                  HTreeNode* parentNode, const map<Handle, Handle> &lastGramValueToVarMap, bool isExtendedFromVar);
 
-     HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves, HandleSeq &shouldNotBeVars);
+     HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves, HandleSeq &shouldNotBeVars, AtomSpace *_fromAtomSpace);
 
      void findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* HNode);
 
@@ -267,7 +267,7 @@ namespace PatternMining
 
      unsigned int getCountOfAConnectedPattern(string& connectedPatternKey, HandleSeq& connectedPattern);
 
-     void calculateSurprisingness( HTreeNode* HNode);
+     void calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAtomSpace);
 
      void getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtendedLink, Handle& leaf, Handle& varNode,
                                                                  HandleSeq& outPutExtendedPatternLinks, AtomSpace* _fromAtomSpace);
