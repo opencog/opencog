@@ -60,7 +60,11 @@ DOCUMENT_SEQUENCE_LINK <- SEQUENCE_LINK
 // So we define a bunch of custom link types.
 FEATURE_NODE <- CONCEPT_NODE
 FEATURE_LINK <- ORDERED_LINK
-LINK_GRAMMAR_RELATIONSHIP_NODE <- PREDICATE_NODE   // e.g. "MX+"
+
+// XXX TODO -- below should be replaced by LG_CONNECTOR_NODE
+LINK_GRAMMAR_RELATIONSHIP_NODE <- PREDICATE_NODE   // e.g. "MX"
+
+// XXX TODO -- name should be shortened to LG_DISJUNCT_NODE
 LINK_GRAMMAR_DISJUNCT_NODE <- PREDICATE_NODE       // e.g. "S- O+ "
 
 // ---------------------------------------------------------------
@@ -106,7 +110,7 @@ SPECIFIC_ENTITY_NODE <- NODE
 //
 // Connector: same meaning and syntax as in link-grammar, except that
 // the direction and the multi-connector parts get distinct types.
-LG_CONNECTOR_NODE <- NODE   // e.g. "MX"
+LG_CONNECTOR_NODE <- PREDICATE_NODE   // e.g. "MX"
 LG_CONN_MULTI_NODE <- NODE  // multi-connector "@"
 LG_CONN_DIR_NODE <- NODE    // e.g. "+"
 

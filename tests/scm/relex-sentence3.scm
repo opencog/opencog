@@ -22,14 +22,14 @@
    )
 )
 (EvaluationLink (stv 1.0 1.0)
-   (LinkGrammarRelationshipNode "Ox")
+   (LgConnectorNode "Ox")
    (ListLink
       (WordInstanceNode "drop@55205f02-ab42-4d0f-baaf-f7c225ad8665")
       (WordInstanceNode "it@d605f2e6-98bd-47fa-b3e1-5b7b9dbc570a")
    )
 )
 (EvaluationLink (stv 1.0 1.0)
-   (LinkGrammarRelationshipNode "Wi")
+   (LgConnectorNode "Wi")
    (ListLink
       (WordInstanceNode "LEFT-WALL@sentence@e80cf258-1b7d-4db6-9907-0d569613e83d_parse_0")
       (WordInstanceNode "drop@55205f02-ab42-4d0f-baaf-f7c225ad8665")
