@@ -66,7 +66,7 @@ in order to compile the rules and formulas for better performance.
     Example:
 
     ```
-    (load-scm-from-file "reasoning/RuleEngine/rules/pln/deduction.scm")
+    (load "reasoning/RuleEngine/rules/pln/deduction.scm")
     ```
 
 - Load this file containing the data:
@@ -78,7 +78,7 @@ in order to compile the rules and formulas for better performance.
     Example:
 
     ```
-    (load-scm-from-file "tests/reasoning/RuleEngine/simple-assertions.scm")
+    (load "tests/reasoning/RuleEngine/simple-assertions.scm")
     ```
 
 - Run this command:
@@ -128,7 +128,7 @@ To test the rules, use the following steps.
 - Load the scheme files in this directory and the sub-directories using
 
     ```
-    (load-scm-from-file "../path/to/scheme/files")
+    (load "../path/to/scheme/files")
     ```
 
 - Start the relex server using the --relex flag (don't use the --logic flag)
