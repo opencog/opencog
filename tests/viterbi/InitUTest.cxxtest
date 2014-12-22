@@ -20,8 +20,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <locale.h>
+#include <langinfo.h>
+#include <string.h>
+
 #include <link-grammar/dict-api.h>
 
+#include <opencog/server/CogServer.h>
+#include <opencog/guile/load-file.h>
 #include <opencog/viterbi/atom_types.h>
 #include <opencog/viterbi/parser.h>
 #include <opencog/util/Config.h>
@@ -50,10 +56,23 @@ class InitUTest: public CxxTest::TestSuite
 			logger().setFilename(config()["LOG_FILE"]);
 			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
 			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+                        server(CogServer::createInstance);
+                        as = &cogserver().getAtomSpace();
+
+                        // Load the required data
+                        config().set("MODULES",
+                                "opencog/nlp/types/libnlp-types.so, "
+                                "opencog/query/libQueryModule.so");
+
+                        cogserver().loadModules();
+
 		}
 
 		~InitUTest()
 		{
+                        delete as;
+
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().getFilename().c_str());
@@ -61,21 +80,16 @@ class InitUTest: public CxxTest::TestSuite
 
 		void setUp(void);
 
-		void tearDown(void) { }
+                void tearDown(void) { }
 
-		void test_init(void);
-		void test_hello(void);
+                void test_init(void);
+                void test_hello(void);
 };
+
 
 void InitUTest::setUp(void)
 {
-	server(CogServer::createInstance);
-	as = &cogserver().getAtomSpace();
-
-	// Load the required data
-	config().set("MODULES",
-		"opencog/nlp/types/libnlp-types.so, "
-		"opencog/query/libquery.so");
+    as->clear();
 
 	// XXX TODO these should be loaded by the parser itself,
 	// and not by the test-case.
@@ -85,24 +99,23 @@ void InitUTest::setUp(void)
 		"opencog/viterbi/viterbi_types.scm, "
 		"opencog/viterbi/parse.scm");
 
-	cogserver().loadModules();
-	cogserver().loadSCMModules();
+        load_scm_files_from_config(*as);
 }
 
 void InitUTest::test_init(void)
 {
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+        logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	const char * dict_str =
-		"LEFT-WALL: Wd+;"
-		"Hello: Wd-;";
+        const char * dict_str =
+                "LEFT-WALL: Wd+;"
+                "Hello: Wd-;";
 
-	Dictionary dict = dictionary_create_from_utf8(dict_str);
+        Dictionary dict = dictionary_create_from_utf8(dict_str);
 
-	Parser pars(dict);
+        Parser pars(dict, as);
 
-	dictionary_delete(dict);
-	logger().debug("END TEST: %s", __FUNCTION__);
+        dictionary_delete(dict);
+        logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void InitUTest::test_hello(void)
@@ -113,12 +126,11 @@ void InitUTest::test_hello(void)
 		"LEFT-WALL: Wd+;"
 		"Hello: Wd-;";
 
-	Dictionary dict = dictionary_create_from_utf8(dict_str);
+        Dictionary dict = dictionary_create_from_utf8(dict_str);
 
-	Parser pars(dict);
-	pars.stream_word("Hello");
+        Parser pars(dict, as);
+        pars.stream_word("Hello");
 
 	dictionary_delete(dict);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
-

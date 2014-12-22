@@ -21,6 +21,7 @@ ADD_LIBRARY (viterbi SHARED
 
 ADD_DEPENDENCIES(viterbi opencog_atom_types)
 ADD_DEPENDENCIES(viterbi viterbi_atom_types)
+ADD_DEPENDENCIES(viterbi sureal)
 
 TARGET_LINK_LIBRARIES(viterbi
 	query
