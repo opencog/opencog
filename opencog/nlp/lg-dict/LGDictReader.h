@@ -49,8 +49,8 @@ public:
 private:
     std::string lg_exp_to_scm_string(Exp*);
 
-    Dictionary m_pDictionary;
-    SchemeEval* m_pScmEval;
+    Dictionary _dictionary;
+    SchemeEval* _scm_eval;
 };
 
 }
