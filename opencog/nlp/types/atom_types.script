@@ -31,10 +31,10 @@
 //
 
 WORD_NODE <- NODE
-ANY_NODE <- NODE    // Explicit wildcard node. 
+ANY_NODE <- NODE    // Explicit wildcard node, used for counting.
 REFERENCE_LINK <- ORDERED_LINK
 
-// Custom atoms to identify documents, sentences, word instances
+// Custom atoms to identify documents, sentences, word instances.
 // These are emitted by RelEx and are used to input text into OpenCog.
 DOCUMENT_NODE <- CONCEPT_NODE
 SENTENCE_NODE <- CONCEPT_NODE
@@ -63,13 +63,14 @@ FEATURE_LINK <- ORDERED_LINK
 LINK_GRAMMAR_RELATIONSHIP_NODE <- PREDICATE_NODE   // e.g. "MX+"
 LINK_GRAMMAR_DISJUNCT_NODE <- PREDICATE_NODE       // e.g. "S- O+ "
 
+// ---------------------------------------------------------------
 // Used to represent RelEx dependency relations
 DEFINED_LINGUISTIC_CONCEPT_NODE <- FEATURE_NODE
 DEFINED_LINGUISTIC_RELATIONSHIP_NODE <- PREDICATE_NODE // e.g. _subj, _obj
 PREPOSITIONAL_RELATIONSHIP_NODE <- PREDICATE_NODE  // e.g. of, next, to
 
-// New wordnet-import nodes, added by Linas.
-// These are subject to change, pending review.
+// ---------------------------------------------------------------
+// Wordnet-import nodes.
 // See nlp/wordnet-import/README and nlp/wsd/README for details.
 // LEMMA_NODE appears to be currently unused.
 WORD_SENSE_NODE <- CONCEPT_NODE
@@ -80,35 +81,49 @@ LEMMA_NODE <- CONCEPT_NODE
 LEMMA_LINK <- ORDERED_LINK
 HOLONYM_LINK <- INHERITANCE_LINK
 
-// New word-sense-disambiguation nodes, added by Linas
+// Word-sense-disambiguation nodes.
 // See nlp/wsd/README for details.
 COSENSE_LINK <- UNORDERED_LINK
 
+// ---------------------------------------------------------------
 // Concept-formation anchors.
 // See nlp/seme/README for details.
 SEME_NODE <- CONCEPT_NODE
 SEMANTIC_RELATION_NODE <- SEME_NODE
 // CONTEXT_NODE <- CONCEPT_NODE // apparently useless
 
-// Atoms to identify different interpretation of a single parse.
+// Atoms to identify different interpretations of a single parse.
 // Added for Relex2Logic processing of meanings in sentences.
 INTERPRETATION_NODE <- NODE
 INTERPRETATION_LINK <- LINK
 SPECIFIC_ENTITY_NODE <- NODE
 
-// Link Grammar related atoms
-// Connector: same meaning and syntax as in link-grammar
+// ---------------------------------------------------------------
+// Link Grammar dictionary types.
+// See
+// https://github.com/opencog/link-grammar/blob/master/viterbi/README
+// for details on what these mean.
+//
+// Connector: same meaning and syntax as in link-grammar, except that
+// the direction and the multi-connector parts get distinct types.
 LG_CONNECTOR_NODE <- NODE   // e.g. "MX"
 LG_CONN_MULTI_NODE <- NODE  // multi-connector "@"
 LG_CONN_DIR_NODE <- NODE    // e.g. "+"
 
+// Consists of the connector node, the dirction, and possibly the
+// multi-connector node.
 LG_CONNECTOR <- LINK   // e.g. "MX+"
 
-// So as not to pollute the rest of the atomspace.
+// These vaguely resemble AND_LINK and OR_LINK, but DO NOT BE FOOLED!
+// They are not really the same, as they are not boolean; rather they
+// behave like "linear logic" operators.  In particular, LG_OR is an
+// exclusive-OR disjunction (only one choice can be picked).
+// Thus, we create brand-new types here, to avoid having to re-cycle
+// AND_LINK, OR_LINK with different, conflicting meanings.
+//
 LG_SEQ <- LIST_LINK   // Just an ordered sequence, without other semantics.
 LG_AND <- LG_SEQ      // must be ordered! (like SEQUNTIAL_AND_LINK)
-LG_OR  <- OR_LINK
-
+LG_OR  <- OR_LINK     // Exclusive-OR, completely disjunctive.
 
 // Kind-of-like an EvaluationLink but different.
 // First atom must be a word node.
