@@ -55,7 +55,7 @@ that can be used to modify the search:
 An additional very important feature is support for 'virtual'
 hypergraphs: those that are not pre-existing in the fixed universe 
 (i.e. in the atomspace), but are only defined algorithmically, by a
-predicate function that returns a yes/no answer about their existance.
+predicate function that returns a yes/no answer about their existence.
 An example would be a greater-than hypergraph that 'virtually' exists
 only if a right-hand number is greater than a left-hand number.
 Clearly, pre-loading the atomspace with every possible number, and
@@ -86,7 +86,7 @@ easier.  This setup time is non-trivial.  Thus, for the simplest
 patterns, it might be faster (and probably simpler) for the user to
 obtain the desired graphs directly, instead of using the pattern
 matcher.  The strength of the pattern matcher is its ability to handle
-large, complex graphs with mutiple variables interacting in difficult
+large, complex graphs with multiple variables interacting in difficult
 ways (or even graphs with no constant nodes in them at all!)
 
 The subgraph isomomorphism algorithm itself does not make use of or
@@ -111,7 +111,7 @@ perhaps easier to visualize.
 
 The pattern matcher is designed to search only for connected incidence
 graphs.  This simplifies the algorithm without loosing any generality:
-the user can always enumerate disconnnected graphs multiplicatively.
+the user can always enumerate disconnected graphs multiplicatively.
 This is both trivial and rarely desired.
 
 Note: At this time, neither the OpenCog AtomSpace, nor the pattern
@@ -135,14 +135,14 @@ English language sentence "John threw a ball":
   _subj(throw, John)
   _obj(throw, ball)
 
-There are two distinct graphical interpretions of this dependency
+There are two distinct graphical interpretations of this dependency
 parse: the one commonly used in linguistics, and the one we want to
 use here; they are not the same.  In linguistics, "throw" would be the
 head word, and there would be labelled arrows pointing from the head
 word to the subject and the object (the labels on the arrows being
 _subj and _obj)
 
-As a hypergraph, this consistes of two trees.  The first tree has
+As a hypergraph, this consists of two trees.  The first tree has
 "_subj" as the root, with "throw" and "John" as leaves underneath it.
 Likewise, _obj is a tree. These two trees form the incidence graph of
 the hypergraph. Note that these two trees share a common node:
@@ -315,7 +315,7 @@ Currently Implemented Algorithm
    PatternMatchEngine::root_map. The shared vertices are variables.]
 
    The universe graph may have any structure whatsoever; there are no
-   limitations put on it, othe than that it must be "well-founded",
+   limitations put on it, other than that it must be "well-founded",
    i.e. must not contain any infinite recursive graphs.
 
 2) Input includes a list of the bound variables in the clauses.
@@ -325,7 +325,7 @@ Currently Implemented Algorithm
    The designated variables need not be leaf vertices; that is, 
    variables may match links. There must be at least one variable,
    as otherwise the graph is constant, and there is nothing to be
-   done.  The variaibles are called "bound" simply because they have
+   done.  The variables are called "bound" simply because they have
    been called out; whereas "free variables" are variables that may
    occur in the clauses, but, because they have not been identified
    to the algorithm, they will not be grounded, but will instead be
@@ -459,9 +459,9 @@ Virtual Links
    prototypical such link is GreaterThanLink, which evaluates to
    "exists" if the schema in it returns true; else it "doesn't
    exist".  That is, a GreaterThanLink will match in the pattern
-   when its schema evaluates to true, behaving as it it existed in
+   when its schema evaluates to true, behaving as if it existed in
    the AtomSpace, else it behaves as if it does not exist in the
-   AtomSpace (and thus can't ground/mathc/unify).  This bit of
+   AtomSpace (and thus can't ground/match/unify).  This bit of
    fraudulent trickery requires a bit of work: in short, all other
    parts of the hypergraph are grounded first, leading to a possible
    combinatoric explosion of goundings; these are then passed through
@@ -510,7 +510,7 @@ Unordered Links
    the SetLink must be considered when searching for groundings. This
    can lead to a combinatoric explosion.
 
-   Backtracking through unordered links is a challange. To better
+   Backtracking through unordered links is a challenge. To better
    understand this challange, there are four distinct scenarios that
    can occur during pattern matcing.  These are:
 
@@ -548,12 +548,12 @@ pattern-matching problem can be reformulated to resemble an LL(k)
 grammar, so that linear-time predictive parsing techniques can be used.
 
 In many ways, the above algorithm resembles a boolean satsifiability
-problem, exept that, instead of having a two-valued true/false logic,
+problem, except that, instead of having a two-valued true/false logic,
 it is a many-valued logic (with each variable ranging over the
 universe of allowed values for that variable).  Can any kind of a
 modern boolean-SAT algorithm be applied to solve this problem quickly,
 efficiently?  Is there a way of cribbing ideas from the DPLL algorithm
-to help solve this?  Thisis entirely unclear to me...
+to help solve this?  This is entirely unclear to me...
 
 
 Summary
@@ -581,13 +581,13 @@ matching for hypergraphs that represent crisp logic statements, or those
 that use probalistic logic, or for ranking matches by quality.
 
 Callbacks are provided to accept or reject individual node and link
-groundings, and to accpt of reject the grounding of individual clauses.
+groundings, and to accept of reject the grounding of individual clauses.
 In addition, the "optional clause" mechanism provides a means of
 pattern rejection. This can be done by specifying the pattern to be
 rejected as "optional": thus, if it is not found, a solution is reported;
 but if it is found, then the callback can reject the solution.
 The callback is free to examine truth values, STI/LTI, etc. in
-accpeting or rejecting any given grounding.  Push and pop callbacks
+accepting or rejecting any given grounding.  Push and pop callbacks
 are provided to help maintain state on a stack, to deal with partial
 matches, if needed.
 
@@ -610,7 +610,7 @@ At this time, two generic callbacks are provided:
 *) The CrispLogicPMCB. This callback implements a crisp boolean logic
    matching scheme. If a clause is matched, then the grounding must
    have a truth value of greater than 0.5 to be considered a match.
-   By contrast, optional cluases must have a truth value of less than
+   By contrast, optional clauses must have a truth value of less than
    0.5 to be acceptable; optional clauses are interpreted as negations:
    they can be absent, or, if present, they must be false.
 
