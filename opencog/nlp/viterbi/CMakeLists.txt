@@ -24,6 +24,7 @@ ADD_DEPENDENCIES(viterbi viterbi_atom_types)
 ADD_DEPENDENCIES(viterbi sureal)
 
 TARGET_LINK_LIBRARIES(viterbi
+	lg-dict
 	query
 	atomspace
 	${LINK_GRAMMAR_LIBRARIES}

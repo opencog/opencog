@@ -13,7 +13,6 @@ ADD_SUBDIRECTORY (wsd)
 IF (HAVE_VITERBI)
 	ADD_SUBDIRECTORY (lg-dict)
 
-	# Currently does not build, due to changes in SchemeEval API.
-	# ADD_SUBDIRECTORY (viterbi)
+	ADD_SUBDIRECTORY (viterbi)
 ENDIF (HAVE_VITERBI)
 

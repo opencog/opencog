@@ -18,7 +18,7 @@
 #include <link-grammar/dict-api.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/nlp/sureal/LGDictReader.h>
+#include <opencog/nlp/lg-dict/LGDictReader.h>
 
 #ifdef LATER
 #include "compile.h"

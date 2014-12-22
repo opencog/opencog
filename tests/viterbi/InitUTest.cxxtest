@@ -24,8 +24,8 @@
 
 #include <opencog/server/CogServer.h>
 #include <opencog/guile/load-file.h>
-#include <opencog/viterbi/atom_types.h>
-#include <opencog/viterbi/parser.h>
+#include <opencog/nlp/viterbi/atom_types.h>
+#include <opencog/nlp/viterbi/parser.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -92,8 +92,8 @@ void InitUTest::setUp(void)
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
 		"opencog/nlp/types/nlp_types.scm, "
-		"opencog/viterbi/viterbi_types.scm, "
-		"opencog/viterbi/parse.scm");
+		"opencog/nlp/viterbi/viterbi_types.scm, "
+		"opencog/nlp/viterbi/parse.scm");
 
 	load_scm_files_from_config(*as);
 }

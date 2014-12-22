@@ -10,7 +10,7 @@ LINK_DIRECTORIES(
 
 LINK_LIBRARIES(
 	viterbi
-        sureal
+	lg-dict
 	nlp-types
 	atomspace
 	query
