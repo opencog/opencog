@@ -83,6 +83,9 @@ Misc pln experiments.  Nothing of significance.
 
 question
 --------
+Obsolete; however, the README there is useful for the general
+discussion.
+
 C++ code that implements a basic question-answering algorithm, based on
 matching the NL pattern of a question to the NL pattern of an assertion.
 If the atomspace contains an assertion such as "John threw the ball", 
@@ -108,6 +111,10 @@ implementation of reference resolution. See also the "lexical-attraction"
 directory, which outlines a far more general, and hopefully far more
 effective approach.
 
+relex2logic
+-----------
+Converts RelEx output into a logical form.
+
 scm
 ---
 The scm directory contains miscellaneous scheme scripts of general 
@@ -132,8 +139,15 @@ The similarity directory contains code related to similarity of word
 senses.  Describes plans/code for storing wordnet-derived similarity
 measures within OpenCog.
 
+sureal
+------
+Language generation.
+
 triples
 -------
+Mostly almost obsolete... replaced by the relex2logic scripts. Still
+contains some useful utilities and overall design notes.
+
 The triples directory contains some experimental code for extracting
 prepositional triples from text. So, for example: "Lisbon is the 
 capital of Portugal" would be turned into "capital_of(Portugal,
@@ -150,6 +164,13 @@ should be usable for porting RelEx frames to OpenCog.
 types
 -----
 Scripts, etc. to load NLP-specific atom types.
+
+viterbi
+-------
+A barely-started, mostly abaondoned attempt to create a viterbi parser
+for link-grammar (actually, a port of the partly-implemented viterbi
+parser in the link-grammar code base, which is more functional than
+this one, but is still broken.)
 
 wordnet-import
 --------------
