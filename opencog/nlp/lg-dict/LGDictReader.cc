@@ -1,9 +1,11 @@
 /*
  * LGDictReader.cc
  *
+ * Copyright (c) 2012, 2013 Linas Vepstas <linasvepstas@gmail.com> 
  * Copyright (C) 2014 OpenCog Foundation
  *
- * Author: William Ma <https://github.com/williampma>
+ * Author: Linas Vepstas <linasvepstas@gmail.com>
+ *         William Ma <https://github.com/williampma>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -32,7 +34,7 @@ using namespace opencog;
  * @param pAS     the AtomSpace where atoms will be created
  */
 LGDictReader::LGDictReader(Dictionary pDict, AtomSpace* pAS)
-    : m_pDictionary(pDict), m_pScmEval(new SchemeEval(pAS))
+    : _dictionary(pDict), _scm_eval(new SchemeEval(pAS))
 {
 
 }
@@ -42,7 +44,7 @@ LGDictReader::LGDictReader(Dictionary pDict, AtomSpace* pAS)
  */
 LGDictReader::~LGDictReader()
 {
-    delete m_pScmEval;
+    delete _scm_eval;
 }
 
 /**
@@ -70,7 +72,7 @@ LGDictReader::~LGDictReader()
 Handle LGDictReader::getAtom(const std::string& word)
 {
     // See if we know about this word, or not.
-    Dict_node* dn_head = dictionary_lookup_list(m_pDictionary, word.c_str());
+    Dict_node* dn_head = dictionary_lookup_list(_dictionary, word.c_str());
 
     if (!dn_head)
         return Handle::UNDEFINED;
@@ -96,9 +98,9 @@ Handle LGDictReader::getAtom(const std::string& word)
 
     set += ")\n";
 
-    free_lookup_list(m_pDictionary, dn_head);
+    free_lookup_list(_dictionary, dn_head);
 
-    return m_pScmEval->eval_h(set);
+    return _scm_eval->eval_h(set);
 }
 
 /**
