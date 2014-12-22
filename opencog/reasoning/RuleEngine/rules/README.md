@@ -60,25 +60,25 @@ in order to compile the rules and formulas for better performance.
 - Load the deduction rule definitions:
 
     ```
-    learning/RuleEngine/rules/pln/deduction.scm
+    reasoning/RuleEngine/rules/pln/deduction.scm
     ```
 
     Example:
 
     ```
-    (load-scm-from-file "learning/RuleEngine/rules/pln/deduction.scm")
+    (load-scm-from-file "reasoning/RuleEngine/rules/pln/deduction.scm")
     ```
 
 - Load this file containing the data:
 
     ```
-    tests/learning/RuleEngine/simple-assertions.scm
+    tests/reasoning/RuleEngine/simple-assertions.scm
     ```
 
     Example:
 
     ```
-    (load-scm-from-file "tests/learning/RuleEngine/simple-assertions.scm")
+    (load-scm-from-file "tests/reasoning/RuleEngine/simple-assertions.scm")
     ```
 
 - Run this command:
