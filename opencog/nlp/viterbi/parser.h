@@ -18,7 +18,7 @@
 #include <link-grammar/dict-api.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/guile/SchemeEval.h>
-
+#include <opencog/nlp/sureal/LGDictReader.h>
 
 #ifdef LATER
 #include "compile.h"
@@ -31,7 +31,8 @@ using namespace opencog;
 class Parser
 {
 	public:
-		Parser(Dictionary dict);
+		Parser(Dictionary dict, AtomSpace* as);
+		~Parser();
 
 #if 0
 		void streamin(const std::string&);
@@ -47,11 +48,10 @@ class Parser
 	protected:
 		static const char *alternatives_anchor;
 		void initialize_state();
-		std::string lg_exp_to_scm_string(Exp*);
-		Handle lg_exp_to_atom(Exp*);
 
 		Dictionary _dict;
-		SchemeEval& _scm_eval;
+		SchemeEval* _scm_eval;
+		LGDictReader* _dict_reader;
 	private:
 };
 

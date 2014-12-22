@@ -14,3 +14,7 @@ IF (HAVE_VITERBI)
 	# Currently does not build, due to changes in SchemeEval API.
 	# ADD_SUBDIRECTORY (viterbi)
 ENDIF (HAVE_VITERBI)
+
+IF (HAVE_LINK_GRAMMAR)
+    ADD_SUBDIRECTORY (sureal)
+ENDIF (HAVE_LINK_GRAMMAR)
