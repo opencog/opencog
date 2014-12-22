@@ -570,31 +570,30 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(Handle &extendedLink,
                         HandleSeq originalLinks = inputLinks;
                         originalLinks.push_back(extendedHandle);
 
-                        set<Handle> originalLinksSet(originalLinks.begin(), originalLinks.end());
-
-                        string keyString = "";
-                        foreach (Handle h , originalLinksSet)
+                        if (THREAD_NUM >1)
                         {
-                            keyString +=  toString(oh.value());
-                            keyString += "_";
+                            bool alreadyExtracted = false;
+
+                            set<Handle> originalLinksSet(originalLinks.begin(), originalLinks.end());
+                            string keyString = "";
+                            foreach (Handle h , originalLinksSet)
+                            {
+                                keyString +=  toString(oh.value());
+                                keyString += "_";
+                            }
+
+                            curDFExtractedLinksLock.lock();
+
+                            if (cur_DF_ExtractedLinks[cur_pattern_gram].find(keyString) == cur_DF_ExtractedLinks[cur_pattern_gram].end())
+                                cur_DF_ExtractedLinks[cur_pattern_gram].insert(keyString);
+                            else
+                                alreadyExtracted = true;
+
+                            curDFExtractedLinksLock.unlock();
+
+                            if (alreadyExtracted)
+                                continue;
                         }
-
-                        bool alreadyExtracted = false;
-
-                        curDFExtractedLinksLock.lock();
-
-                        if (cur_DF_ExtractedLinks[cur_pattern_gram].find(keyString) == cur_DF_ExtractedLinks[cur_pattern_gram].end())
-                            cur_DF_ExtractedLinks[cur_pattern_gram].insert(keyString);
-                        else
-                            alreadyExtracted = true;
-
-                        curDFExtractedLinksLock.unlock();
-
-                        if (alreadyExtracted)
-                            continue;
-
-
-
 
 
 //                        // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
