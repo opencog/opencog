@@ -61,7 +61,7 @@ const char* dbg =
 const char * Parser::alternatives_anchor = "(AnchorNode \"# Viterbi Alternatives\")";
 
 Parser::Parser(Dictionary dict, AtomSpace *as)
-    : _dict(dict), _scm_eval(new SchemeEval(as)), _dict_reader(new LGDictReader(dict, as))
+	: _dict(dict), _scm_eval(new SchemeEval(as)), _dict_reader(new LGDictReader(dict, as))
 {
 	DBG(cout << "=============== Parser ctor ===============" << endl);
 	initialize_state();
@@ -73,8 +73,8 @@ Parser::Parser(Dictionary dict, AtomSpace *as)
 
 Parser::~Parser()
 {
-    delete _scm_eval;
-    delete _dict_reader;
+	delete _scm_eval;
+	delete _dict_reader;
 }
 
 // ===================================================================
@@ -85,10 +85,10 @@ void Parser::initialize_state()
 {
 	const char * wall_word = "LEFT-WALL";
 
-    Handle wall_conset_h = _dict_reader->getAtom(wall_word);
+	Handle wall_conset_h = _dict_reader->getAtom(wall_word);
 
 	// We are expecting the initial wall to be unique.
-    //OC_ASSERT(atomspace().getArity(wall_conset_h) == 1, "Unexpected wall structure");
+	//OC_ASSERT(atomspace().getArity(wall_conset_h) == 1, "Unexpected wall structure");
 
 	// Initial state is anchored where it can be found.
 	stringstream pole;
@@ -98,17 +98,17 @@ void Parser::initialize_state()
 	pole << "(LgStatePair (LgSeq (car (cog-outgoing-set (cog-atom "
 	     << wall_conset_h << ")))) (LgSeq)))\n";
 	
-    _scm_eval->eval(pole);
+	_scm_eval->eval(pole);
 
 	// Hmmm.  Some cleanup.  We really don't need the left-wall
 	// connector set any more, so delete it.  It bugs me that we
 	// need to do this .. it should disappear on its own ...
 	stringstream clean;
 	clean << "(cog-delete (cog-atom " << wall_conset_h << "))";
-    _scm_eval->eval(clean);
+	_scm_eval->eval(clean);
 
 	// Print out the atomspace contents
-    DBG(cout << _scm_eval->eval(dbg) << endl);
+	DBG(cout << _scm_eval->eval(dbg) << endl);
 }
 
 // ===================================================================
@@ -117,18 +117,18 @@ void Parser::initialize_state()
  */
 void Parser::stream_word(const string& word)
 {
-    Handle djset = _dict_reader->getAtom(word);
+	Handle djset = _dict_reader->getAtom(word);
 	if (Handle::UNDEFINED == djset)
 	{
 		logger().error() << "Unhandled error; word not in dict: " << word;
 		return;
 	}
 
-    DBG(cout << _scm_eval->eval(dbg) << endl);
-    Handle rule = _scm_eval->eval_h("(cog-bind attach)");
+	DBG(cout << _scm_eval->eval(dbg) << endl);
+	Handle rule = _scm_eval->eval_h("(cog-bind attach)");
 
 	DBG(cout << "---------- post match -------- " << endl);
-    DBG(cout << _scm_eval->eval(dbg) << endl);
+	DBG(cout << _scm_eval->eval(dbg) << endl);
 
 #if LATER
 	// Try to add each dictionary entry to the parse state.
