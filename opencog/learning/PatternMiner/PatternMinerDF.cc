@@ -397,6 +397,10 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //      (ConceptNode "dead")
 //      (ConceptNode "dead")
 //    ) ; [44694]
+
+    if (n_limit > n_max)
+        n_limit = n_max;
+
     if (n_limit == 1)
         n_limit = 2;
 
