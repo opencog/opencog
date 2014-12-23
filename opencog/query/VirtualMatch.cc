@@ -296,7 +296,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	throw (InvalidParamException)
 {
-	// Make sure that the user did not pass in bogus clauses
+	// Make sure that the user did not pass in bogus clauses.
 	// Make sure that every clause contains at least one variable.
 	// The presence of constant clauses will mess up the current
 	// pattern matcher.  Constant clauses are "trivial" to match,
@@ -353,12 +353,12 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 		// them out.
 		std::stringstream ss;
 		ss << "Pattern is not connected! Found "
-			<< components.size() << " components:\n";
+		   << components.size() << " components:\n";
 		int cnt = 0;
 		for (auto comp : components)
 		{
 			ss << "Connected component " << cnt
-				<< " consists of ----------------: \n";
+			   << " consists of ----------------: \n";
 			for (Handle h : comp) ss << h->toString();
 			cnt++;
 		}
@@ -366,7 +366,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	}
 
 	// get_connected_components re-orders the clauses so that adjacent
-	// clauses are connected.  using this will make matching slightly
+	// clauses are connected.  Using this will make matching slightly
 	// faster. But we don't do this if there are negations, because the
 	// above jammed the negations into the thing, which we must keep
 	// separate.
@@ -395,7 +395,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	// For now, the virtual links must be at the top. That's because
 	// I don't understand what the semantics would be if they were
-	// anywhere else... need to ask ben on the mailing list.
+	// anywhere else... need to ask Ben on the mailing list.
 	for (Handle v : virtuals)
 	{
 		Type vt = v->getType();
