@@ -9,94 +9,22 @@
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 
-#include "BindLink.h"
-#include "PatternMatch.h"
 #include "PatternSCM.h"
 
 using namespace opencog;
 
-PatternSCM* PatternSCM::_inst = NULL;
-
-PatternSCM::PatternSCM()
+PatternWrap::PatternWrap(Handle (f)(AtomSpace*, Handle), const char* n)
+	: _func(f), _name(n)
 {
-	if (NULL == _inst) {
-		_inst = this;
-		init();
-	}
+	define_scheme_primitive(_name, &PatternWrap::wrapper, this);
 }
 
-PatternSCM::~PatternSCM()
-{
-	if (_inst == this) _inst = NULL;
-}
-
-void PatternSCM::init(void)
-{
-	_inst = new PatternSCM();
-#ifdef HAVE_GUILE
-	// XXX FIXME .. what we really should do here is to make sure
-	// that SchemeSmob is initialized first ... and, for that, we
-	// would need to get our hands on an atomspace ... Ugh. Yuck.
-	define_scheme_primitive("cog-bind", &PatternSCM::do_bindlink, _inst);
-	define_scheme_primitive("cog-bind-single", &PatternSCM::do_single_bindlink, _inst);
-	define_scheme_primitive("cog-bind-crisp", &PatternSCM::do_crisp_bindlink, _inst);
-	define_scheme_primitive("cog-bind-pln", &PatternSCM::do_pln_bindlink, _inst);
-#endif
-}
-
-/**
- * Run implication, assuming that the argument is a handle to
- * an BindLink containing variables and an ImplicationLink
- */
-Handle PatternSCM::do_bindlink(Handle h)
+Handle PatternWrap::wrapper(Handle h)
 {
 #ifdef HAVE_GUILE
 	// XXX we should also allow opt-args to be a list of handles
-	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bind");
-	Handle grounded_expressions = bindlink(as, h);
-	return grounded_expressions;
-#else
-	return Handle::UNDEFINED;
-#endif
-}
-
-/**
- * Identical to do_bindlink above, except that it only returns the first match
- */
-Handle PatternSCM::do_single_bindlink(Handle h)
-{
-#ifdef HAVE_GUILE
-	// XXX we should also allow opt-args to be a list of handles
-	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bind-single");
-	Handle grounded_expressions = single_bindlink(as, h);
-	return grounded_expressions;
-#else
-	return Handle::UNDEFINED;
-#endif
-}
-
-/**
- * Run implication, assuming that the argument is a handle to
- * an BindLink containing variables and an ImplicationLink
- */
-Handle PatternSCM::do_crisp_bindlink(Handle h)
-{
-#ifdef HAVE_GUILE
-	// XXX we should also allow opt-args to be a list of handles
-	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bind-crisp");
-	Handle grounded_expressions = crisp_logic_bindlink(as, h);
-	return grounded_expressions;
-#else
-	return Handle::UNDEFINED;
-#endif
-}
-
-Handle PatternSCM::do_pln_bindlink(Handle h)
-{
-#ifdef HAVE_GUILE
-	// XXX we should also allow opt-args to be a list of handles
-	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bind-pln");
-	Handle grounded_expressions = pln_bindlink(as, h);
+	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
+	Handle grounded_expressions = _func(as, h);
 	return grounded_expressions;
 #else
 	return Handle::UNDEFINED;
