@@ -175,7 +175,7 @@ void SCMPrimitiveUTest::test_throw(void)
 	// caught.  Which means that thee should be NO error from the
 	// evaluator.
 	std::string out = eval->eval(
-		"(catch #t (lambda () (whoops nnn)) "
+		"(catch 'C++-EXCEPTION (lambda () (whoops nnn)) "
 		"   (lambda (key funcname msg) "
 		"      (display \"caught key=\") "
 		"      (display key) "
