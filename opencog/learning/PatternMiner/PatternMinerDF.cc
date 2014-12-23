@@ -438,7 +438,9 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
             map<Handle,Handle>::iterator iter;
 
             // the first part is the same with its parent node
-            map<Handle,Handle> patternVarMap = parentNode->orderedVarNameMap;
+            map<Handle,Handle> patternVarMap;
+            if (parentNode)
+                patternVarMap = parentNode->orderedVarNameMap;
 
             // And then add the second part:
             if (var_num > 0 )
@@ -466,7 +468,8 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                 relation.sharedLink = extendedLink;
                 relation.extendedNode = extendedNode;
 
-                parentNode->superPatternRelations.push_back(relation);
+                if (parentNode)
+                    parentNode->superPatternRelations.push_back(relation);
 
                 // check if the current gram is already the MAX_GRAM
                 if(cur_pattern_gram >= MAX_GRAM)
