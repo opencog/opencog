@@ -17,8 +17,14 @@
 (define pln-rule-and
   (BindLink
    (ListLink
-         (VariableNode "$A")
-         (VariableNode "$B"))
+    (VariableNode "$A")
+    (VariableNode "$B")
+    (TypedVariableLink
+     (VariableNode "$A")
+     (VariableTypeNode "PredicateNode"))
+    (TypedVariableLink
+     (VariableNode "$B")
+     (VariableTypeNode "PredicateNode")))
    (ImplicationLink
     (AndLink
      (VariableNode "$A")
@@ -45,6 +51,6 @@
 ;; Some test data (to be removed afterwards) ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(ConceptNode "A" (stv 0.2 1))
+(PredicateNode "A" (stv 0.2 1))
 
-(ConceptNode "B" (stv 0.6 1))
+(PredicateNode "B" (stv 0.6 1))
