@@ -2,7 +2,7 @@
  * tests/scm/SCMPrimitiveUTest.cxxtest
  *
  * Make sure the scheme primtive extension code works
- * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2014 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -66,6 +66,7 @@ class SCMPrimitiveUTest :  public CxxTest::TestSuite
 	void tearDown(void);
 
 	void test_H_H(void);
+	void test_throw(void);
 };
 
 // Some example class
@@ -84,7 +85,8 @@ class MyExampleClass
 		{
 			TSM_ASSERT("Failed to get a valid handle", as->isValidHandle(h))
 
-			logger().debug("Info: my_func instance %d received the node: %s\n", id, as->getName(h).c_str());
+			logger().debug("Info: my_func instance %d received the node: %s\n",
+			               id, as->getName(h).c_str());
 			Handle hlist = as->addLink(LIST_LINK, h);
 			return hlist;
 		}
@@ -92,7 +94,8 @@ class MyExampleClass
 		// Throw exception on purpose
 		Handle my_other_func(Handle h)
 		{
-			throw (RuntimeException(TRACE_INFO, "Don't panic!! Threw exception %d on purpose.", id));
+			throw (InvalidParamException(TRACE_INFO,
+			        "Don't panic!! Threw exception %d on purpose.", id));
 			return Handle::UNDEFINED;
 		}
 };
@@ -121,7 +124,7 @@ void SCMPrimitiveUTest::test_H_H(void)
 
 	// Create the example class, and define a scheme function,
 	// named "bingo", that will call one of its methods
-	MyExampleClass *mtc = new MyExampleClass(as,42);
+	MyExampleClass *mtc = new MyExampleClass(as, 42);
 	define_scheme_primitive("bingo", &MyExampleClass::my_func, mtc);
 
 	// Now, call bingo, with a reasonable argument. Since
@@ -146,13 +149,54 @@ void SCMPrimitiveUTest::test_H_H(void)
 
 	TSM_ASSERT ("wrong outgoing set ", nnn == oset[0]);
 
+	Handle hn = as->addNode(CONCEPT_NODE, "Hello World!");
+	TSM_ASSERT ("wrong atom entirely ", hn == nnn);
+
+	delete mtc;
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+void SCMPrimitiveUTest::test_throw(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	// Test the throw of an assertion. This should cause an evaluation
 	// error. (In the shell, stuff would get printed to terminal)
+	MyExampleClass *mtc = new MyExampleClass(as, 42);
 	define_scheme_primitive("whoops", &MyExampleClass::my_other_func, mtc);
-	eval->eval("(whoops nnn)");
-	eval_err = eval->eval_error();
-	TSM_ASSERT ("Failed to catch exception", eval_err);
+	std::string trc = eval->eval("(whoops nnn)");
+	bool eval_err = eval->eval_error();
+	TSM_ASSERT ("Failed to observe exception", eval_err);
+	printf("Exception trace was: >>%s<<\n", trc.c_str());
 
+	// Now, try to catch the exception within guile.  It should be
+	// caught.  Which means that thee should be NO error from the
+	// evaluator.
+	std::string out = eval->eval(
+		"(catch 'C++-EXCEPTION (lambda () (whoops nnn)) "
+		"   (lambda (key funcname msg) "
+		"      (display \"caught key=\") "
+		"      (display key) "
+		"      (newline) "
+		"      (display \"caught funcname=\") "
+		"      (display funcname) "
+		"      (newline) "
+		"      (display \"caught msg=\") "
+		"      (display msg) "
+		"      (newline) "
+		"   ))");
+	eval_err = eval->eval_error();
+	TSM_ASSERT ("Failed to catch exception", not eval_err);
+
+	printf("Catch evaluates to this: >>%s<<\n", out.c_str());
+
+	int msg = strncmp("caught key=C++-EXCEPTION", out.c_str(),
+	                 strlen("caught key=C++-EXCEPTION"));
+	TSM_ASSERT ("Wrong exception message", 0 == msg);
+
+	delete mtc;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 

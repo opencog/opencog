@@ -111,7 +111,9 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 
 	// If the C++ code throws any exceptions, and no one else
 	// has caught them, then we have to catch them, and print 
-	// an error message to the shell.
+	// an error message to the shell. Actually, we'll be
+	// quasi-nice about this, and convert the C++ exception
+	// into a scheme exception.
 	try
 	{
 		rc = fe->invoke(arglist);
@@ -119,14 +121,19 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 	catch (const std::exception& ex)
 	{
 		const char *msg = ex.what();
+
+		// Should we even bother to log this?
+		logger().info("Guile caught C++ exception: %s", msg);
+
 		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
-		scm_error_scm(
-			scm_from_locale_symbol("C++ exception"),
-			scm_from_locale_string(fe->get_name()),
-			scm_from_locale_string(msg),
-			SCM_EOL,
-			SCM_EOL);
-		logger().error("Guile caught C++ exception: %s", msg);
+		scm_throw(
+			scm_from_locale_symbol("C++-EXCEPTION"),
+			scm_cons(
+				scm_from_locale_string(fe->get_name()),
+				scm_cons(
+					scm_from_locale_string(msg),
+					SCM_EOL)));
+		// Hmm. scm_throw never returns.
 	}
 	catch (...)
 	{

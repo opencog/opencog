@@ -12,19 +12,28 @@
 
 namespace opencog {
 
+class AtomSpace;
+
+/// Wrapper class, to invoke pattern matcher from guile.
+class PatternWrap
+{
+	private:
+		Handle wrapper(Handle);
+		Handle (*_func)(AtomSpace*, Handle);
+		const char *_name;  // scheme name of the c++ function.
+	public:
+		PatternWrap(Handle (*)(AtomSpace*, Handle), const char*);
+};
+
 class PatternSCM
 {
 	private:
-		Handle do_bindlink(Handle);
-		Handle do_single_bindlink(Handle);
-		Handle do_crisp_bindlink(Handle);
-		Handle do_pln_bindlink(Handle);
-		static PatternSCM* _inst;
-		void init(void);
+		static std::vector<PatternWrap*> _binders;
 	public:
-		PatternSCM();
+		PatternSCM(void);
 		~PatternSCM();
 };
+
 
 }
 

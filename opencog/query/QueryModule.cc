@@ -12,19 +12,16 @@ using namespace opencog;
 
 DECLARE_MODULE(QueryModule);
 
-QueryModule::QueryModule(CogServer& cs) : Module(cs)
+QueryModule::QueryModule(CogServer& cs) : Module(cs), _pat(NULL)
 {
-	pat = NULL;
 }
 
 QueryModule::~QueryModule()
 {
-	delete pat;
+	delete _pat;
 }
 
 void QueryModule::init(void)
 {
-	// Force the constructor to run, so that the scheme initialization
-	// happens.
-	pat = new PatternSCM();
+	_pat = new PatternSCM();
 }
