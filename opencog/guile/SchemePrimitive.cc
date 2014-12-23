@@ -127,9 +127,9 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 
 		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
 		scm_throw(
-			scm_from_locale_symbol(msg),
+			scm_from_locale_symbol("C++-EXCEPTION"),
 			scm_cons(
-				scm_from_locale_string("C++ exception"),
+				scm_from_locale_string(msg),
 				scm_cons(
 					scm_from_locale_string(fe->get_name()),
 					SCM_EOL)));

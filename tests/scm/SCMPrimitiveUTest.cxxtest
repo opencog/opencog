@@ -84,7 +84,8 @@ class MyExampleClass
 		{
 			TSM_ASSERT("Failed to get a valid handle", as->isValidHandle(h))
 
-			logger().debug("Info: my_func instance %d received the node: %s\n", id, as->getName(h).c_str());
+			logger().debug("Info: my_func instance %d received the node: %s\n",
+			               id, as->getName(h).c_str());
 			Handle hlist = as->addLink(LIST_LINK, h);
 			return hlist;
 		}
@@ -92,7 +93,8 @@ class MyExampleClass
 		// Throw exception on purpose
 		Handle my_other_func(Handle h)
 		{
-			throw (InvalidParamException(TRACE_INFO, "Don't panic!! Threw exception %d on purpose.", id));
+			throw (InvalidParamException(TRACE_INFO,
+			        "Don't panic!! Threw exception %d on purpose.", id));
 			return Handle::UNDEFINED;
 		}
 };
@@ -146,12 +148,42 @@ void SCMPrimitiveUTest::test_H_H(void)
 
 	TSM_ASSERT ("wrong outgoing set ", nnn == oset[0]);
 
+	Handle hn = as->addNode(CONCEPT_NODE, "Hello World!");
+	TSM_ASSERT ("wrong atom entirely ", hn == nnn);
+
+	// ---------------------------------------------------------------
 	// Test the throw of an assertion. This should cause an evaluation
 	// error. (In the shell, stuff would get printed to terminal)
 	define_scheme_primitive("whoops", &MyExampleClass::my_other_func, mtc);
-	eval->eval("(whoops nnn)");
+	std::string trc = eval->eval("(whoops nnn)");
 	eval_err = eval->eval_error();
-	TSM_ASSERT ("Failed to catch exception", eval_err);
+	TSM_ASSERT ("Failed to observe exception", eval_err);
+	printf("Exception trace was: >>%s<<\n", trc.c_str());
+
+	// Now, try to catch the exception within guile.  It should be
+	// caught.  Which means that thee should be NO error from the
+	// evaluator.
+	std::string out = eval->eval(
+		"(catch #t (lambda () (whoops nnn)) "
+		"   (lambda (key msg name) "
+		"      (display \"caught key=\") "
+		"      (display key) "
+		"      (newline) "
+		"      (display \"caught msg=\") "
+		"      (display msg) "
+		"      (newline) "
+		"      (display \"caught name=\") "
+		"      (display name) "
+		"      (newline) "
+		"   ))");
+	eval_err = eval->eval_error();
+	TSM_ASSERT ("Failed to catch exception", not eval_err);
+
+	printf("Catch evaluates to this: >>%s<<\n", out.c_str());
+
+	int msg = strncmp("caught key=C++-EXCEPTION", out.c_str(),
+	                 strlen("caught key=C++-EXCEPTION"));
+	TSM_ASSERT ("Wrong exception message", 0 == msg);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
