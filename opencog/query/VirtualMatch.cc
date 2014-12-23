@@ -23,7 +23,6 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 
 #include "Instantiator.h"
@@ -355,11 +354,11 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 		ss << "Pattern is not connected! Found "
 			<< components.size() << " components:\n";
 		int cnt = 0;
-		foreach (auto comp, components)
+		for (auto comp : components)
 		{
 			ss << "Connected component " << cnt
 				<< " consists of ----------------: \n";
-			foreach (Handle h, comp) ss << h->toString();
+			for (Handle h : comp) ss << h->toString();
 			cnt++;
 		}
 		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
