@@ -7,7 +7,7 @@
  */
 
 #include <opencog/server/Module.h>
-#include "opencog/viterbi/atom_types.definitions"
+#include "opencog/nlp/viterbi/atom_types.definitions"
 
 using namespace opencog;
 
@@ -24,7 +24,7 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
     System::setModuleHandle(hinstDLL);
     switch (fdwReason) {
         case DLL_PROCESS_ATTACH:
-            #include "opencog/viterbi/atom_types.inheritance"
+            #include "opencog/nlp/viterbi/atom_types.inheritance"
             break;
         case DLL_THREAD_ATTACH:
             break;
@@ -38,7 +38,7 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
 #elif __GNUC__
 static __attribute__ ((constructor)) void viterbi_init(void)
 {
-    #include "opencog/viterbi/atom_types.inheritance"
+    #include "opencog/nlp/viterbi/atom_types.inheritance"
 }
 
 static __attribute__ ((destructor)) void viterbi_fini(void)
