@@ -106,13 +106,13 @@ class PMCGroundings : public PatternMatchCallback
 
 /**
  * Recursive evaluator/grounder/unifier of virtual link types.
- * The virtual links are in virtuals, a partial set of groundings
- * are in var_gnds and pred_gnds, and a collection of possible
- * groundings for disconnected graph components are in comp_var_gnds
- * and comp_pred_gnds.
+ * The virtual links are in 'virtuals', a partial set of groundings
+ * are in 'var_gnds' and 'pred_gnds', and a collection of possible
+ * groundings for disconnected graph components are in 'comp_var_gnds'
+ * and 'comp_pred_gnds'.
  *
  * Notes below explain the recursive step: how the various disconnected
- * components are brought together int a candidate grounding. That
+ * components are brought together into a candidate grounding. That
  * candidate is then run through each of the virtual links.  If these
  * accept the grounding, then the callback is called to make the final
  * determination.
@@ -167,7 +167,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			// At last! Actually perform the test!
 			bool match = cb->virtual_link_match(lvirt, gargs);
 
-			// After checking, remove the temporary atoms. 
+			// After checking, remove the temporary atoms.
 			// The most fool-proof way to do this is to blow
 			// away the entire atomspace.
 			// if (0 == gargs->getIncomingSetSize())
@@ -197,7 +197,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 	// ourselves.
 	//
 	// vg and vp will be the collection of groundings for one of the
-	// components (well, for compnent m, in the above notation.)
+	// components (well, for component m, in the above notation.)
 	std::vector<std::map<Handle, Handle>> vg = comp_var_gnds.back();
 	comp_var_gnds.pop_back();
 	std::vector<std::map<Handle, Handle>> pg = comp_pred_gnds.back();
@@ -207,7 +207,8 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 	for (size_t i=0; i<ngnds; i++)
 	{
 		// Given a set of groundings, tack on those for this component,
-		// and recurse, with one less component. We need to make a copy, of course.
+		// and recurse, with one less component. We need to make a copy,
+		// of course.
 		std::map<Handle, Handle> rvg(var_gnds);
 		std::map<Handle, Handle> rpg(pred_gnds);
 
@@ -367,7 +368,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	// get_connected_components re-orders the clauses so that adjacent
 	// clauses are connected.  using this will make matching slightly
 	// faster. But we don't do this if there are negations, because the
-	// above jammed the negations into the thing, which we must keep 
+	// above jammed the negations into the thing, which we must keep
 	// separate.
 	if (0 == negations.size())
 		clauses = *components.begin();
