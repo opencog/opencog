@@ -5,10 +5,13 @@
  * Copyright (c) 2008, 2014 Linas Vepstas <linas@linas.org>
  */
 
+#include <opencog/util/foreach.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 
+#include "BindLink.h"
+#include "PatternMatch.h"
 #include "PatternSCM.h"
 
 using namespace opencog;
@@ -30,3 +33,30 @@ Handle PatternWrap::wrapper(Handle h)
 	return Handle::UNDEFINED;
 #endif
 }
+
+// ========================================================
+
+PatternSCM::PatternSCM(void)
+{
+	// Run implication, assuming that the argument is a handle to
+	// an BindLink containing variables and an ImplicationLink.
+	_binders.push_back(new PatternWrap(bindlink, "cog-bind"));
+
+	// Identical to do_bindlink above, except that it only returns the
+	// first match.
+	_binders.push_back(new PatternWrap(single_bindlink, "cog-bind-single"));
+
+	// Run implication, assuming that the argument is a handle to
+	// an BindLink containing variables and an ImplicationLink
+	_binders.push_back(new PatternWrap(crisp_logic_bindlink, "cog-bind-crisp"));
+
+	// Mystery function
+	_binders.push_back(new PatternWrap(pln_bindlink, "cog-bind-pln"));
+}
+
+PatternSCM::~PatternSCM()
+{
+	foreach (PatternWrap* pw, _binders)
+		delete pw;
+}
+

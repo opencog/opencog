@@ -17,7 +17,7 @@ namespace opencog {
 class QueryModule : public Module
 {
 	private:
-		std::vector<PatternWrap*> _binders;
+		PatternSCM* _pat;
 	public:
 		QueryModule(CogServer&);
 		virtual ~QueryModule();

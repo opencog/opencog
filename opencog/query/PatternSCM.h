@@ -25,6 +25,16 @@ class PatternWrap
 		PatternWrap(Handle (*)(AtomSpace*, Handle), const char*);
 };
 
+class PatternSCM
+{
+	private:
+		std::vector<PatternWrap*> _binders;
+	public:
+		PatternSCM(void);
+		~PatternSCM();
+};
+
+
 }
 
 #endif // _OPENCOG_PATTERN_SCM_H
