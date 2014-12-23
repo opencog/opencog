@@ -92,7 +92,7 @@ class MyExampleClass
 		// Throw exception on purpose
 		Handle my_other_func(Handle h)
 		{
-			throw (RuntimeException(TRACE_INFO, "Don't panic!! Threw exception %d on purpose.", id));
+			throw (InvalidParamException(TRACE_INFO, "Don't panic!! Threw exception %d on purpose.", id));
 			return Handle::UNDEFINED;
 		}
 };
