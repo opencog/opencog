@@ -2,7 +2,7 @@
  * tests/scm/SCMPrimitiveUTest.cxxtest
  *
  * Make sure the scheme primtive extension code works
- * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2014 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -66,6 +66,7 @@ class SCMPrimitiveUTest :  public CxxTest::TestSuite
 	void tearDown(void);
 
 	void test_H_H(void);
+	void test_throw(void);
 };
 
 // Some example class
@@ -123,7 +124,7 @@ void SCMPrimitiveUTest::test_H_H(void)
 
 	// Create the example class, and define a scheme function,
 	// named "bingo", that will call one of its methods
-	MyExampleClass *mtc = new MyExampleClass(as,42);
+	MyExampleClass *mtc = new MyExampleClass(as, 42);
 	define_scheme_primitive("bingo", &MyExampleClass::my_func, mtc);
 
 	// Now, call bingo, with a reasonable argument. Since
@@ -151,12 +152,22 @@ void SCMPrimitiveUTest::test_H_H(void)
 	Handle hn = as->addNode(CONCEPT_NODE, "Hello World!");
 	TSM_ASSERT ("wrong atom entirely ", hn == nnn);
 
-	// ---------------------------------------------------------------
+	delete mtc;
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+void SCMPrimitiveUTest::test_throw(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	// Test the throw of an assertion. This should cause an evaluation
 	// error. (In the shell, stuff would get printed to terminal)
+	MyExampleClass *mtc = new MyExampleClass(as, 42);
 	define_scheme_primitive("whoops", &MyExampleClass::my_other_func, mtc);
 	std::string trc = eval->eval("(whoops nnn)");
-	eval_err = eval->eval_error();
+	bool eval_err = eval->eval_error();
 	TSM_ASSERT ("Failed to observe exception", eval_err);
 	printf("Exception trace was: >>%s<<\n", trc.c_str());
 
@@ -165,15 +176,15 @@ void SCMPrimitiveUTest::test_H_H(void)
 	// evaluator.
 	std::string out = eval->eval(
 		"(catch #t (lambda () (whoops nnn)) "
-		"   (lambda (key msg name) "
+		"   (lambda (key funcname msg) "
 		"      (display \"caught key=\") "
 		"      (display key) "
 		"      (newline) "
+		"      (display \"caught funcname=\") "
+		"      (display funcname) "
+		"      (newline) "
 		"      (display \"caught msg=\") "
 		"      (display msg) "
-		"      (newline) "
-		"      (display \"caught name=\") "
-		"      (display name) "
 		"      (newline) "
 		"   ))");
 	eval_err = eval->eval_error();
@@ -185,6 +196,7 @@ void SCMPrimitiveUTest::test_H_H(void)
 	                 strlen("caught key=C++-EXCEPTION"));
 	TSM_ASSERT ("Wrong exception message", 0 == msg);
 
+	delete mtc;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
