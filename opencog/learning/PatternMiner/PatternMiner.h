@@ -205,7 +205,7 @@ namespace PatternMining
      //  void extendAllPossiblePatternsTillMaxGramDF(Handle &startLink, AtomSpace* _fromAtomSpace, unsigned int max_gram);
 
      void extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
-                                                  HTreeNode* parentNode, const map<Handle, Handle> &lastGramValueToVarMap, bool isExtendedFromVar);
+                                                                HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,bool isExtendedFromVar);
 
      HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves, HandleSeq &shouldNotBeVars, AtomSpace *_fromAtomSpace);
 
