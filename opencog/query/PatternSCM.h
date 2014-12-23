@@ -28,7 +28,7 @@ class PatternWrap
 class PatternSCM
 {
 	private:
-		std::vector<PatternWrap*> _binders;
+		static std::vector<PatternWrap*> _binders;
 	public:
 		PatternSCM(void);
 		~PatternSCM();

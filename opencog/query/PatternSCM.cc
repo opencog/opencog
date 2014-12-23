@@ -36,8 +36,19 @@ Handle PatternWrap::wrapper(Handle h)
 
 // ========================================================
 
+// XXX HACK ALERT This needs to be static, in order for python to
+// work correctly.  The problem is that python keeps creating and
+// destroying this class, but it expects things to stick around.
+// Oh well. I guess that's OK, since the definition is meant to be
+// for the lifetime of the server, anyway.
+std::vector<PatternWrap*> PatternSCM::_binders;
+
 PatternSCM::PatternSCM(void)
 {
+	static bool is_init = false;
+	if (is_init) return;
+	is_init = true;
+
 	// Run implication, assuming that the argument is a handle to
 	// an BindLink containing variables and an ImplicationLink.
 	_binders.push_back(new PatternWrap(bindlink, "cog-bind"));
@@ -56,7 +67,9 @@ PatternSCM::PatternSCM(void)
 
 PatternSCM::~PatternSCM()
 {
+#if PYTHON_BUG_IS_FIXED
 	foreach (PatternWrap* pw, _binders)
 		delete pw;
+#endif
 }
 
