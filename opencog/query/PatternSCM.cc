@@ -27,6 +27,7 @@ PatternSCM::PatternSCM()
 
 PatternSCM::~PatternSCM()
 {
+	if (_inst == this) _inst = NULL;
 }
 
 void PatternSCM::init(void)
