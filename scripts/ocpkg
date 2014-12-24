@@ -164,6 +164,9 @@ PACKAGES_BUILD="
 		libssl-dev \
 		tcl-dev \
 		tcsh \
+        libfreetype6-dev \
+        libatlas-base-dev \
+        gfortran \
 		"
 		#liblua5.1-0-dev \
 		#libxmlrpc-c3-dev \
