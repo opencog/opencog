@@ -35,7 +35,7 @@ void Probability::calculateProbabilities(DataProvider<Metadata>* data)
 
     for (int n = 1; n <= data->n_gram; ++n )
     {
-        for( it = data->mDataMaps[n].begin(); it < data->mDataMaps[n].end(); ++it)
+        for( it = data->mDataMaps[n].begin(); it != data->mDataMaps[n].end(); ++it)
         {
             StatisticData& pieceData = (StatisticData)(it->second);
             pieceData.probability = ((float)(pieceData.count))/((float)(data->mRawDataNumbers[n]));

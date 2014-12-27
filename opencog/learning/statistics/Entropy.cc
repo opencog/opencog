@@ -37,7 +37,7 @@ void Entropy::calculateEntropies(DataProvider<Metadata>* data)
 
     for (int n = 1; n <= data->n_gram; ++n )
     {
-        for( it = data->mDataMaps[n].begin(); it < data->mDataMaps[n].end(); ++it)
+        for( it = data->mDataMaps[n].begin(); it != data->mDataMaps[n].end(); ++it)
         {
             StatisticData& pieceData = (StatisticData)(it->second);
             pieceData.entropy = (-1.0f) * pieceData.probability * log2(pieceData.probability);
@@ -54,7 +54,7 @@ void Entropy::calculateProbabilityAndEntropies(DataProvider<Metadata>* data)
 
     for (int n = 1; n <= data->n_gram; ++n )
     {
-        for( it = data->mDataMaps[n].begin(); it < data->mDataMaps[n].end(); ++it)
+        for( it = data->mDataMaps[n].begin(); it != data->mDataMaps[n].end(); ++it)
         {
             StatisticData& pieceData = (StatisticData)(it->second);
             pieceData.probability = ((float)(pieceData.count))/((float)(data->mRawDataNumbers[n]));

@@ -191,7 +191,7 @@ void InteractionInformation::calculateInteractionInformations(DataProvider<Metad
 
     for (int n = 1; n <= data->n_gram; ++n )
     {
-        for( it = data->mDataMaps[n].begin(); it < data->mDataMaps[n].end(); ++it)
+        for( it = data->mDataMaps[n].begin(); it != data->mDataMaps[n].end(); ++it)
         {
             StatisticData& pieceData = (StatisticData)(it->second);
             pieceData.interactionInformation = calculateInteractionInformation((string)(it->first), data);

@@ -68,7 +68,6 @@ static TruthValue *get_tv_from_kvp(SCM kvp, const char * subrname, int pos)
 		pos ++;
 		if (!scm_is_pair(kvp))
 		{
-			free(key);
 			scm_wrong_type_arg_msg(subrname, pos, kvp, "value following keyword");
 		}
 
