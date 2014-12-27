@@ -150,7 +150,6 @@ int main(int argc, char** argv)
 
     if (!edp.moses_files.empty()) {
         // load the bscores
-        vector<behavioral_score> bscores;
         vector<scored_combo_tree> bcts;
         for (const string& file : edp.moses_files) {
             ifstream in(file);

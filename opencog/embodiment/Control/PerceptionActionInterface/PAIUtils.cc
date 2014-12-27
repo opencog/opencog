@@ -111,8 +111,8 @@ std::string PAIUtils::getSerializedXMLString(XERCES_CPP_NAMESPACE::DOMDocument *
         throw opencog::RuntimeException(TRACE_INFO, "PAIUtils - Out of Memory Exception!");
     } catch (const XERCES_CPP_NAMESPACE::XMLException& toCatch) {
         char* message = XERCES_CPP_NAMESPACE::XMLString::transcode(toCatch.getMessage());
-        throw opencog::RuntimeException(TRACE_INFO, "PAIUtils - Exception message is: %s.",  message);
         XERCES_CPP_NAMESPACE::XMLString::release(&message);
+        throw opencog::RuntimeException(TRACE_INFO, "PAIUtils - Exception message is: %s.",  message);
     }
 
     return result;

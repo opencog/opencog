@@ -283,6 +283,7 @@ void SavingLoading::load(const char *fileName,
     // reads the total number of atoms. Just an idea for now.
     int atomCount = 0;
     if ( fread(&atomCount, sizeof(int), 1, f) != 1 ) {
+        fclose(f);
         throw RuntimeException(TRACE_INFO, "SavingLoading - failed to read.");
     }
 

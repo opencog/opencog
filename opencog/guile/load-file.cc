@@ -106,7 +106,6 @@ void load_scm_files_from_config(AtomSpace& atomSpace,
     std::vector<std::string> scm_modules;
     tokenize(config()["SCM_PRELOAD"], std::back_inserter(scm_modules), ", ");
 
-    std::vector<std::string>::const_iterator it;
     for (const std::string& scm_module : scm_modules)
         load_scm_file_relative(atomSpace, scm_module, search_paths);
 }

@@ -352,7 +352,6 @@ void ImportanceDiffusionAgent::spreadImportance()
     int totalDiffusionAtoms = 0;
 
     std::vector<Handle> links;
-    std::vector<Handle>::iterator hi;
     std::back_insert_iterator< std::vector<Handle> > out_hi(links);
 
     log->debug("Begin diffusive importance spread.");

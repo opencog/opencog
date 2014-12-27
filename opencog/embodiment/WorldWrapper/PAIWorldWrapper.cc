@@ -813,9 +813,6 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
 
     if (config().get_bool("ENABLE_UNITY_CONNECTOR"))
     {
-        std::vector<SpaceServer::SpaceMapPoint> actions;
-
-
         float speed = ( walkSpeed != 0 ) ?
                 walkSpeed : pai.getAvatarInterface().computeWalkingSpeed();
 

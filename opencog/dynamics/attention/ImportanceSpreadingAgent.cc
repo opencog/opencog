@@ -103,7 +103,6 @@ void ImportanceSpreadingAgent::spreadImportance()
 // to avoid retrieving them twice 
 int ImportanceSpreadingAgent::sumTotalDifference(Handle source, HandleSeq& links)
 {
-    std::vector<Handle> targets;
     int totalDifference = 0;
     // sum total difference
     foreach(Handle handle, links) {

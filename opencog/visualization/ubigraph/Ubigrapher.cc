@@ -243,7 +243,7 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
     unsigned char val[3];
     float scaler = 0.0f;
     int j;
-    std::ostringstream ost, ost2;
+    std::ostringstream ost;
     unsigned char diff[3];
     float multiplierForTV = 10.0f;
 
@@ -292,8 +292,6 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
             ubigraph_set_vertex_attribute(h.value(), "color", ost.str().c_str());
     } else {
         ubigraph_set_vertex_attribute(h.value(), "color", ost.str().c_str());
-//            ost2 << 1.0 + 4 * space->getNormalisedZeroToOneSTI(h,false,true);
-//            ubigraph_set_vertex_attribute(h.value(), "size", ost2.str().c_str());
     }
 }
 

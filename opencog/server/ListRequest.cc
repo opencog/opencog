@@ -54,7 +54,6 @@ bool ListRequest::execute()
     Handle handle = Handle::UNDEFINED;
     bool subtypes = false;
     AtomSpace& as = _cogserver.getAtomSpace();
-    std::ostringstream err;
 
     if (0 == _parameters.size()) {
         _error << "Error: option required" << std::endl;
