@@ -1535,6 +1535,7 @@ zutilities_FortranMatrixPrint( utilities_FortranMatrix* mtx,
       fprintf(fp,"%22.14e  %22.14e \n",p->real,p->imag);
     p += jump;
   }
+  fclose(fp);
 
   return 0;
 }
