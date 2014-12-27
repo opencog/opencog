@@ -2493,9 +2493,10 @@ void kcluster (int nclusters, int nrows, int ncolumns,
   if (transpose==0) ok = makedatamask(nclusters, ndata, &cdata, &cmask);
   else ok = makedatamask(ndata, nclusters, &cdata, &cmask);
   if(!ok)
-  { free(counts);
+  {
     if(npass>1)
     { free(tclusterid);
+      free(counts);
       free(mapping);
       return;
     }

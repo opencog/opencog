@@ -3336,8 +3336,6 @@ Handle PAI::addOwnershipRelation(const Handle owner, const Handle owned, bool is
 // This function is called by PsiActionSelectionAgent, when an action is timeout 
 void PAI::setPendingActionPlansFailed()
 {
-    ActionPlanMap::iterator it;
-
     // Note: use empty() rather than iterator directly, since setActionPlanStatus 
     //       will erase action plans in  pendingActionPlans if necessary. 
     while ( !pendingActionPlans.empty() ) {

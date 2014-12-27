@@ -264,9 +264,8 @@ struct hillclimber {
             _current_program = oni->second;
             _used_for_owner.insert(_current_program);
 
-            _ordered_best_estimates.erase(oni);
-
             fitness_t cur_est_fit = oni->first;
+            _ordered_best_estimates.erase(oni);
 
             if (cur_est_fit >= _best_fitness_estimated) {
                 _best_fitness_estimated = cur_est_fit;
