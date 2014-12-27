@@ -216,12 +216,31 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
     bool skip = false;
     unsigned int gram = inputLinks.size();
 
-//    // debug
-//    string inputLinksStr = "";
-//    foreach (Handle h, inputLinks)
-//        inputLinksStr += _fromAtomSpace->atomAsString(h);
+    // debug
+    string inputLinksStr = "";
+    foreach (Handle h, inputLinks)
+        inputLinksStr += _fromAtomSpace->atomAsString(h);
 
-    if (enable_filter_links_should_connect_by_vars)
+    // debug
+    if (gram == 3)
+    {
+        int test =0;
+        test ++;
+    }
+
+    if ( enable_filter_node_types_should_not_be_vars)
+    {
+        foreach (Handle noTypeNode , shouldNotBeVars)
+        {
+            if (patternVarMap.find(noTypeNode) != patternVarMap.end())
+            {
+                skip = true;
+                break;
+            }
+        }
+    }
+
+    if ((! skip) && enable_filter_links_should_connect_by_vars)
     {
 
         // check if in this combination, if at least one node in each Seq of oneOfEachSeqShouldBeVars is considered as variable
@@ -264,17 +283,6 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         }
     }
 
-    if ( (! skip) && (enable_filter_node_types_should_not_be_vars))
-    {
-        foreach (Handle noTypeNode , shouldNotBeVars)
-        {
-            if (patternVarMap.find(noTypeNode) != patternVarMap.end())
-            {
-                skip = true;
-                break;
-            }
-        }
-    }
 
 
     if (! skip)
@@ -419,18 +427,14 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
     filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace);
 
+    // debug
+    string lastGramLinksStr = "";
+    foreach (Handle h, lastGramLinks)
+        lastGramLinksStr += _fromAtomSpace->atomAsString(h);
 
-    unsigned int var_num;
-    // if this gram is extended from a variable of its parent, the new added var_num can start from 0 instead of 1
-    // so the patternVarMap is the same with parentNode
-    // because the extendedNode
-    if (isExtendedFromVar)
-        var_num = 0;
-    else
-        var_num = 1;
 
     // var_num is the number of variables
-    for (; var_num < n_limit; ++ var_num)
+    for (unsigned int var_num = 0; var_num < n_limit; ++ var_num)
     {
         // Use the binary method to generate all combinations:
 
@@ -450,7 +454,20 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
             // the first part is the same with its parent node
             map<Handle,Handle> patternVarMap;
             if (parentNode)
+            {
                 patternVarMap = lastGramPatternVarMap;
+
+                if (! isExtendedFromVar) // need to add the extendedNode into patternVarMap
+                {
+                    map<Handle,Handle>::const_iterator extendedIter = lastGramValueToVarMap.find(extendedNode);
+                    if (extendedIter == lastGramValueToVarMap.end())
+                    {
+                        cout <<"Exception: can't find extendedNode in lastGramValueToVarMap" << std::endl;
+                    }
+
+                    patternVarMap.insert(std::pair<Handle,Handle>(extendedIter->first, extendedIter->second));
+                }
+            }
 
             // And then add the second part:
             if (var_num > 0 )
@@ -482,8 +499,16 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     parentNode->superPatternRelations.push_back(relation);
 
                 // check if the current gram is already the MAX_GRAM
-                if(cur_pattern_gram >= MAX_GRAM)
+                if(cur_pattern_gram >= MAX_GRAM)        
+                {
+                    if ( (var_num == 0) || (isLastNElementsAllTrue(indexes, n_max, var_num)))
+                        break;
+
+                    // generate the next combination
+                    generateNextCombinationGroup(indexes, n_max);
+
                     continue;
+                }
 
 
                 // Extend one more gram from lastGramHTreeNode to get its superpatterns
