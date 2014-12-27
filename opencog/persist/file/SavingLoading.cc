@@ -276,6 +276,7 @@ void SavingLoading::load(const char *fileName,
     size_t rc = fread(&format, sizeof(char), 1, f);
 
     if (! (rc == 1 && format & FULL_NETWORK_DUMP)) {
+        fclose(f);
         throw RuntimeException(TRACE_INFO, "SavingLoading - invalid file format '%c'.", format);
     }
 

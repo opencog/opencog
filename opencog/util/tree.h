@@ -1367,7 +1367,7 @@ typename tree<T, tree_node_allocator>::sibling_iterator tree<T, tree_node_alloca
     // insert all siblings in new_first..new_last before orig_first
     bool first=true;
     pre_order_iterator ret;
-    while(1==1) {
+    while(true) {
         pre_order_iterator tt=insert_subtree(pre_order_iterator(orig_first), pre_order_iterator(new_first));
         if(first) {
             ret=tt;
@@ -1381,7 +1381,7 @@ typename tree<T, tree_node_allocator>::sibling_iterator tree<T, tree_node_alloca
     // erase old range of siblings
     bool last=false;
     tree_node *next=orig_first;
-    while(1==1) {
+    while(true) {
         if(next==orig_last)
             last=true;
         next=next->next_sibling;
@@ -1461,7 +1461,7 @@ iter tree<T, tree_node_allocator>::reparent(iter position, sibling_iterator begi
     last->next_sibling=0;
 
     tree_node *pos=first;
-    while(1==1) {
+    while(true) {
         pos->parent=position.node;
         if(pos==last) break;
         pos=pos->next_sibling;

@@ -306,7 +306,7 @@ void LocalSpaceMap2D::load(FILE* fp)
 
         addObject(std::string(id), metadata, isObstacle );
 
-        delete id;
+        delete [] id;
     }
     CHECK_FREAD;
 }

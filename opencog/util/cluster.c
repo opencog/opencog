@@ -2677,6 +2677,7 @@ double** distancematrix (int nrows, int ncolumns, double** data,
   if (i < n) /* break condition encountered */
   { j = i;
     for (i = 1; i < j; i++) free(matrix[i]);
+    free(matrix);
     return NULL;
   }
 

@@ -823,7 +823,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 int negativeNum,satisfiedPreconNum;
                 checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle,contradictoryOtherGoal,needRollback);
 
-                if (isNegativeGoal || isDiffStateOwnerType || willAddCirle || contradictoryOtherGoal || willAddCirle || preconImpossible)
+                if (isNegativeGoal || isDiffStateOwnerType || willAddCirle || contradictoryOtherGoal || preconImpossible)
                     continue;
 
                 // this rule is positive for this goal, apply it.
@@ -3343,7 +3343,7 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
 
     }
 
-    delete indexes;
+    delete [] indexes;
 
     if (ruleNode->ParamCandidates.size() == 0)
     {

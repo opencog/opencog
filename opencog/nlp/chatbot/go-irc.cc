@@ -196,6 +196,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	else
 	{
 		conn->privmsg (msg_target, "Shell escapes disabled in this chatbot version\n");
+	        free(cmdline);
 		return 0;
 	}
 #endif /* ENABLE_SHELL_ESCAPES */
