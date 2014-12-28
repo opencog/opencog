@@ -305,6 +305,16 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
         string keyString = unifiedPatternToKeyString(unifiedPattern);
 
+        // debug
+       // "(InheritanceLink )\n  (VariableNode $var_1)\n  (ConceptNode human)\n\n(InheritanceLink )  (VariableNode $var_2)\n  (ConceptNode woman)\n";
+
+        if ( (keyString.find("human") != string::npos) && (keyString.find("woman") != string::npos) )
+        {
+            int x = 0;
+            x ++;
+        }
+
+
         // next, check if this pattern already exist (need lock)
         HTreeNode* newHTreeNode = 0;
         uniqueKeyLock.lock();
@@ -328,7 +338,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             returnHTreeNode = ((HTreeNode*)(htreeNodeIter->second));
             ((HTreeNode*)(htreeNodeIter->second))->count ++;
 
-            cout << "Unique Key already exists. count ++ !\n\n";
+            cout << "Unique Key already exists:" << keyString << std::endl;
 
         }
 
@@ -434,7 +444,13 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
 
     // var_num is the number of variables
-    for (unsigned int var_num = 0; var_num < n_limit; ++ var_num)
+    unsigned int var_num;
+    if (parentNode)
+        var_num = 0;
+    else
+        var_num = 1;
+
+    for (; var_num < n_limit; ++ var_num)
     {
         // Use the binary method to generate all combinations:
 
@@ -486,7 +502,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
             if (thisGramHTreeNode)
             {
-                // This pattern is the super pattern of al its lastGramHTreeNodes (parentNode)
+                // This pattern is the super pattern of all its lastGramHTreeNodes (parentNode)
                 // add an ExtendRelation
 
                 ExtendRelation relation;
