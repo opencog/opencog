@@ -994,7 +994,6 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
                 true);
         foreach(Handle learningSessionHandle, learningSessionHandles) {
             if (atomSpace->getArity(learningSessionHandle) > 1)  {
-                std::set<Handle> actionHandles;
                 std::vector<HandleTemporalPair> learningSessionIntervals;
                 // Get temporal info for all the Handles that pertain to this
                 // trick
