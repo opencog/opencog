@@ -222,7 +222,7 @@ vector<spatial::Point3D> AStar3DController::getSolutionPoints()
     } else if (!approxSolution.empty()) {
         std::vector<MapSearchNode>::const_iterator prev_node, node;
         prev_node = node = approxSolution.begin();
-        for (++node; node != approxSolution.end(); node++) {
+        for (++node; node != approxSolution.end(); ++node) {
             gp.first = prev_node->x;
             gp.second = prev_node->y;
 
@@ -273,7 +273,7 @@ vector<spatial::Point3D> AStar3DController::getShortestCalculatedPath()
     vector<spatial::Point3D>::iterator it_point = calculatedPath.begin();
     shortestCalculatedPath.push_back( *it_point );
     double alpha = ( - (it_point + 1)->get<1>()) / (it_point->get<0>() - (it_point + 1)->get<0>());
-    it_point++;
+    ++it_point;
     while ( (it_point + 1) != calculatedPath.end() ) {
         double new_alpha = (it_point->get<1>() - (it_point + 1)->get<1>()) / (it_point->get<0>() - (it_point + 1)->get<0>());
         if (std::abs(it_point->get<2>()) > 0.0) {
@@ -284,7 +284,7 @@ vector<spatial::Point3D> AStar3DController::getShortestCalculatedPath()
             shortestCalculatedPath.push_back( *it_point );
             alpha = new_alpha;
         }
-        it_point++;
+        ++it_point;
     }
     shortestCalculatedPath.push_back( *it_point );
 

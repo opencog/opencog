@@ -66,11 +66,11 @@ void SenseRank::rank_document(const std::deque<Handle> &parse_list)
 {
 	// Iterate over list of parses making up a "document"
 	std::deque<Handle>::const_iterator i;
-	for (i = parse_list.begin(); i != parse_list.end(); i++)
+	for (i = parse_list.begin(); i != parse_list.end(); ++i)
 	{
 		init_parse(*i);
 	}
-	for (i = parse_list.begin(); i != parse_list.end(); i++)
+	for (i = parse_list.begin(); i != parse_list.end(); ++i)
 	{
 #ifdef DEBUG
 	printf ("; SenseRank document sentence parse %x\n", (Handle) *i); 

@@ -64,10 +64,10 @@ Pattern Pattern::binarisePattern(AttentionValue::sti_t vizThreshold)
     Pattern::iterator out_i = out.begin();
     Pattern::iterator i;
 
-    for (i = begin(); i != end(); i++) {
+    for (i = begin(); i != end(); ++i) {
         int val = *i;
         *out_i = (int) (val >= vizThreshold) ;
-        out_i++;
+        ++out_i;
     }
     return out;
 }
@@ -112,7 +112,7 @@ std::vector< Pattern > Pattern::mutatePatterns(std::vector< Pattern > &patterns,
     std::vector< Pattern >::iterator i;
     std::vector< Pattern > mutants;
 
-    for (i = patterns.begin(); i != patterns.end(); i++) {
+    for (i = patterns.begin(); i != patterns.end(); ++i) {
         Pattern p = (*i).mutatePattern(error);
         mutants.push_back(p);
     }
@@ -132,7 +132,7 @@ Pattern Pattern::mutatePattern(float error)
     // nodes are active makes no sense so avoid it.
     int maxToRemove = activity() - 1;
 
-    for (p = begin(); p != end(); p++) {
+    for (p = begin(); p != end(); ++p) {
         int val = *p;
         // Flip bit with error probability
         if (rng->randfloat() < error) {
@@ -145,7 +145,7 @@ Pattern Pattern::mutatePattern(float error)
                 val = !val;
             }
         }
-        *r_i = val; r_i++;
+        *r_i = val; ++r_i;
     }
     return result;
 }

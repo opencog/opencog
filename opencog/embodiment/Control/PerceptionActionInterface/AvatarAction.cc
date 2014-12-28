@@ -147,8 +147,8 @@ std::string AvatarAction::validateParameters(const ActionType& actionType, const
             sprintf(buffer, "validateParameters(): Mandatory parameter type mismatch (param type = '%s', expected type = '%s')", paramItr->getType().getName().c_str(), paramTypeItr->getName().c_str());
             return buffer;
         }
-        paramTypeItr++;
-        paramItr++;
+        ++paramTypeItr;
+        ++paramItr;
     }
 
     // Optional parameters
@@ -158,8 +158,8 @@ std::string AvatarAction::validateParameters(const ActionType& actionType, const
             sprintf(buffer, "AvatarAction::containsValidParameters(): Optional parameter type mismatch (param type = '%s', expected type = '%s')", paramItr->getType().getName().c_str(), paramTypeItr->getName().c_str());
             return buffer;
         }
-        paramTypeItr++;
-        paramItr++;
+        ++paramTypeItr;
+        ++paramItr;
     }
 
     return "";
@@ -185,7 +185,7 @@ XERCES_CPP_NAMESPACE::DOMElement* AvatarAction::createPVPXmlElement(XERCES_CPP_N
 
 
     parent->appendChild(actionElement);
-    for (list<ActionParameter>::const_iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
+    for (list<ActionParameter>::const_iterator itr = parameters.begin(); itr != parameters.end(); ++itr) {
         itr->createPVPXmlElement(doc, actionElement);
     }
     return actionElement;
@@ -284,7 +284,7 @@ std::string AvatarAction::stringRepresentation() const
     answer.append(getName());
     answer.append("(");
     unsigned int count = 1;
-    for (list<ActionParameter>::const_iterator it = parameters.begin(); it != parameters.end(); it++) {
+    for (list<ActionParameter>::const_iterator it = parameters.begin(); it != parameters.end(); ++it) {
         try {
             answer.append(it->stringRepresentation());
             if (count != parameters.size()) {

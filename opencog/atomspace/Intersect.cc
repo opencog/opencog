@@ -139,7 +139,7 @@ opencog::intersection(const std::vector<UnorderedHandleSet>& sets)
         // linked-list linearization
         UnorderedHandleSet::const_iterator it;
         int j = 0;
-        for (it = sets[i].begin(); it != sets[i].end(); it++) {
+        for (it = sets[i].begin(); it != sets[i].end(); ++it) {
             v[i][j++] = *it;
         }
 

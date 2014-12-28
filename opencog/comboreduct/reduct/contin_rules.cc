@@ -465,7 +465,7 @@ void reduce_distribute::operator()(combo_tree& tr,combo_tree::iterator it) const
         if(plus_it != it.end()) {
             unsigned int idx = 0;
             for(sib_it fac_it = it.begin();
-                fac_it != it.end(); fac_it++, ++idx) {
+                fac_it != it.end(); ++fac_it, ++idx) {
                 if(*fac_it != id::plus) { // found a factor to distribute
                     combo_tree tr_copy(it);
                     unsigned int size_before_reduct = tr_copy.size();

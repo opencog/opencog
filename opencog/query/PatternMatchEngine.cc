@@ -770,7 +770,7 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 	bool solved = false;
 
 	RootMap::iterator k;
-	for (k = _root_map.begin(); k != _root_map.end(); k++)
+	for (k = _root_map.begin(); k != _root_map.end(); ++k)
 	{
 		RootPair vk = *k;
 		RootList *rl = vk.second;
@@ -794,7 +794,7 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 
 		std::vector<Handle>::iterator i = rl->begin();
 		std::vector<Handle>::iterator iend = rl->end();
-		for (; i != iend; i++)
+		for (; i != iend; ++i)
 		{
 			Handle root(*i);
 			if (Handle::UNDEFINED != clause_grounding[root])
@@ -1075,7 +1075,7 @@ void PatternMatchEngine::print_solution(
 	// Print out the bindings of solutions to variables.
 	std::map<Handle, Handle>::const_iterator j = vars.begin();
 	std::map<Handle, Handle>::const_iterator jend = vars.end();
-	for (; j != jend; j++)
+	for (; j != jend; ++j)
 	{
 		Handle var(j->first);
 		Handle soln(j->second);
@@ -1099,7 +1099,7 @@ void PatternMatchEngine::print_solution(
 	printf("\nGrounded clauses:\n");
 	std::map<Handle, Handle>::const_iterator m;
 	int i = 0;
-	for (m = clauses.begin(); m != clauses.end(); m++, i++)
+	for (m = clauses.begin(); m != clauses.end(); ++m, ++i)
 	{
 		if (m->second == Handle::UNDEFINED)
 		{

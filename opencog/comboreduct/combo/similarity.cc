@@ -152,7 +152,7 @@ static void tree_flatten_rec(tree_branch_vector& ctr, combo_tree::iterator root)
 	// that approximately captures the general structure of the tree.
 	combo_tree::sibling_iterator first = root.begin();
 	size_t i = 0;
-	for (; i < numch-2; first++, i++)
+	for (; i < numch-2; ++first, ++i)
 	{
 		std::stringstream ss;
 		ss << *root << "(" << *first << " " << *root << ")";

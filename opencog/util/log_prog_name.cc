@@ -61,7 +61,7 @@ string determine_log_name(const string& log_file_prefix,
 
     string log_file = log_file_prefix;
     for(boost::program_options::variables_map::const_iterator it = vm.begin();
-        it != vm.end(); it++)
+        it != vm.end(); ++it)
         // we ignore the options in ignore_opt and any default one
         if(ignore_opt.find(it->first) == ignore_opt.end()
            && !it->second.defaulted()) {

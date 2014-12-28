@@ -415,19 +415,19 @@ Float p_norm_distance(const Vec& a, const Vec& b, Float p=1.0)
     Float sum = 0.0;
     // Special case Manhattan distance.
     if (1.0 == p) {
-        for (; ia != a.end(); ia++, ib++)
+        for (; ia != a.end(); ++ia, ++ib)
             sum += fabs (*ia - *ib);
         return sum;
     }
     // Special case Euclidean distance.
     if (2.0 == p) {
-        for (; ia != a.end(); ia++, ib++)
+        for (; ia != a.end(); ++ia, ++ib)
             sum += sq (*ia - *ib);
         return sqrt(sum);
     }
     // Special case max difference
     if (0.0 >= p) {
-        for (; ia != a.end(); ia++, ib++) {
+        for (; ia != a.end(); ++ia, ++ib) {
             Float diff = fabs (*ia - *ib);
             if (sum < diff) sum = diff;
         }
@@ -435,7 +435,7 @@ Float p_norm_distance(const Vec& a, const Vec& b, Float p=1.0)
     }
 
     // General case.
-    for (; ia != a.end(); ia++, ib++) {
+    for (; ia != a.end(); ++ia, ++ib) {
         Float diff = fabs (*ia - *ib);
         if (0.0 < diff)
             sum += pow(diff, p);

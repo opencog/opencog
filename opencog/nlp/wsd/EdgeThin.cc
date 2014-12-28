@@ -226,7 +226,7 @@ bool EdgeThin::thin_word(Handle word_h)
 
 	// Delete the rest.
 	std::list<Handle>::iterator it;
-	for (it=sense_list.begin(); it != sense_list.end(); it++)
+	for (it=sense_list.begin(); it != sense_list.end(); ++it)
 	{
 		Handle sense_h = *it;
 
@@ -256,7 +256,7 @@ bool EdgeThin::thin_word(Handle word_h)
 	// up with a higher score than the remaining senses, which would be
 	// wrong; it would be an inversion of how scoring is meant to work.
 	// So we get rid of these now.
-	for (it=sense_list.begin(); it != sense_list.end(); it++)
+	for (it=sense_list.begin(); it != sense_list.end(); ++it)
 	{
 		Handle sense_h = *it;
 		atom_space->removeAtom(sense_h, false);

@@ -13,7 +13,7 @@ using namespace opencog;
     void enumerate_program_trees(generation_table& gtable, int depth, combo::type_tree& ttree, population& pop, const reduct::rule& reduction_rule) {
         pop.clear();
         // For each generation node with the right return-type, add it to the pop
-        for (std::vector<generation_node>::iterator it = gtable.begin(); it != gtable.end(); it++) {
+        for (std::vector<generation_node>::iterator it = gtable.begin(); it != gtable.end(); ++it) {
             if (combo::equal_type_tree(it->node, combo::get_signature_output(ttree))) {
                 for (node_list::iterator it2 = it->glist.begin(); it2 != it->glist.end(); it2++)
                     pop.push_back(combo::combo_tree(*it2));
@@ -31,7 +31,7 @@ using namespace opencog;
         }
         for (population::iterator it = pop.begin(); it != pop.end();) {
             bool erased = false;
-            for (combo::combo_tree::leaf_iterator lit = it->begin_leaf(); lit != it->end_leaf(); lit++) {
+            for (combo::combo_tree::leaf_iterator lit = it->begin_leaf(); lit != it->end_leaf(); ++lit) {
                 if (get_arity(*lit) != 0 && !combo::is_argument(*lit)) {
                     erased = true;
                     break;
@@ -43,17 +43,17 @@ using namespace opencog;
             if (erased)
                 it = pop.erase(it);
             else 
-                it++;
+                ++it;
         }
     }
 
     void increase_tree_depth(generation_table& gtable, population& pop, int& from_depth, combo::arity_t& needed_arg_count, int fill_from_arg, const reduct::rule& reduction_rule) {
-        for (population::iterator it = pop.begin(); it != pop.end(); it++) {
+        for (population::iterator it = pop.begin(); it != pop.end(); ++it) {
             int number_of_combinations = 1;
             bool can_have_leaves = false;
             std::vector<generation_table::iterator> assignment;
             std::vector<combo::combo_tree::leaf_iterator> leaves;
-            for (combo::combo_tree::leaf_iterator lit = it->begin_leaf(); lit != it->end_leaf(); lit++) {
+            for (combo::combo_tree::leaf_iterator lit = it->begin_leaf(); lit != it->end_leaf(); ++lit) {
                 if (combo::is_argument(*lit))
                     if (combo::get_argument(*lit).abs_idx() <= needed_arg_count)
                         continue;
@@ -72,10 +72,10 @@ using namespace opencog;
                 combo::combo_tree temp_tree(*it);
                 int ongoing_count = 1;
                 leaves.clear();
-                for (combo::combo_tree::leaf_iterator lit = temp_tree.begin_leaf(); lit != temp_tree.end_leaf(); lit++)
+                for (combo::combo_tree::leaf_iterator lit = temp_tree.begin_leaf(); lit != temp_tree.end_leaf(); ++lit)
                     leaves.push_back(lit);
                 std::vector<generation_table::iterator>::iterator it2 = assignment.begin();
-                for (std::vector<combo::combo_tree::leaf_iterator>::iterator lit = leaves.begin(); lit != leaves.end(); lit++) {                    
+                for (std::vector<combo::combo_tree::leaf_iterator>::iterator lit = leaves.begin(); lit != leaves.end(); ++lit) {
                     if (combo::is_argument(**lit))
                         if (combo::get_argument(**lit).abs_idx() <= needed_arg_count)
                            continue;
@@ -89,7 +89,7 @@ using namespace opencog;
                     it2++;
                 }
                 bool erased = true;
-                for (combo::combo_tree::leaf_iterator lit = temp_tree.begin_leaf(); lit != temp_tree.end_leaf(); lit++) {
+                for (combo::combo_tree::leaf_iterator lit = temp_tree.begin_leaf(); lit != temp_tree.end_leaf(); ++lit) {
                     if (combo::get_arity(*lit) != 0 && !combo::is_argument(*lit)) {
                         erased = false;
                         break;
@@ -109,9 +109,9 @@ using namespace opencog;
     }
     
     void fill_leaves(population& pop, int& from_arg) {
-        for (population::iterator it = pop.begin(); it != pop.end(); it++) {
+        for (population::iterator it = pop.begin(); it != pop.end(); ++it) {
             int local_from_arg = from_arg;
-            for (combo::combo_tree::leaf_iterator lit = it->begin_leaf(); lit != it->end_leaf(); lit++) {
+            for (combo::combo_tree::leaf_iterator lit = it->begin_leaf(); lit != it->end_leaf(); ++lit) {
                 if (!combo::is_argument(*lit)) {
                     combo::arity_t number_of_leaves = combo::get_arity(*lit);
                     if (number_of_leaves < 0) number_of_leaves = -1 * number_of_leaves + 1;
@@ -124,7 +124,7 @@ using namespace opencog;
     }
     
     void fill_leaves_single(combo::combo_tree& new_tree, int from_arg) {
-       for (combo::combo_tree::leaf_iterator lit = new_tree.begin_leaf(); lit != new_tree.end_leaf(); lit++) {
+       for (combo::combo_tree::leaf_iterator lit = new_tree.begin_leaf(); lit != new_tree.end_leaf(); ++lit) {
             if (!combo::is_argument(*lit)) {
                 combo::arity_t number_of_leaves = combo::get_arity(*lit);
                 if (number_of_leaves < 0) number_of_leaves = -1 * number_of_leaves + 1;

@@ -82,7 +82,7 @@ AtomTable::~AtomTable()
     getHandlesByType(back_inserter(all), ATOM, true);
 
     // remove all atoms from AtomTable
-    for (HandleSeq::const_iterator it = all.begin(); it != all.end(); it++)
+    for (HandleSeq::const_iterator it = all.begin(); it != all.end(); ++it)
     {
         DPRINTF("Removing atom %s\n", (*it)->toString().c_str());
         remove(*it, true);

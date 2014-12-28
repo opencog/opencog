@@ -35,7 +35,7 @@ void ActionPlanDispatcher::dispatch()
 {
     try {
         planId = pai.createActionPlan();
-        for (std::list<AvatarAction>::const_iterator itr = actionPlan.begin(); itr != actionPlan.end(); itr++) {
+        for (std::list<AvatarAction>::const_iterator itr = actionPlan.begin(); itr != actionPlan.end(); ++itr) {
             pai.addAction(planId, *itr);
         }
 

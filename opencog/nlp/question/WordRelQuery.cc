@@ -139,7 +139,7 @@ void WordRelQuery::add_to_predicate(Handle ah)
 	/* scan for duplicates, and don't add them */
 	std::vector<Handle>::const_iterator i;
 	for (i = normed_predicate.begin();
-	     i != normed_predicate.end(); i++)
+	     i != normed_predicate.end(); ++i)
 	{
 		Handle h = *i;
 		if (h == ah) return;
@@ -152,7 +152,7 @@ void WordRelQuery::add_to_vars(Handle ah)
 	/* scan for duplicates, and don't add them */
 	std::vector<Handle>::const_iterator i;
 	for (i = bound_vars.begin();
-	     i != bound_vars.end(); i++)
+	     i != bound_vars.end(); ++i)
 	{
 		Handle h = *i;
 		if (h == ah) return;
@@ -346,7 +346,7 @@ bool WordRelQuery::solution(std::map<Handle, Handle> &pred_grounding,
 	// questions in the corpus, and we just happened to
 	// find one of them.)
 	std::map<Handle, Handle>::const_iterator j;
-	for (j=var_grounding.begin(); j != var_grounding.end(); j++)
+	for (j=var_grounding.begin(); j != var_grounding.end(); ++j)
 	{
 		std::pair<Handle, Handle> pv = *j;
 		Handle soln = pv.second;

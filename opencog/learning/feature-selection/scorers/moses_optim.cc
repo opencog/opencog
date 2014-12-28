@@ -29,7 +29,7 @@ std::set<arity_t> get_feature_set(const field_set& fields,
 {
     std::set<arity_t> fs;
     field_set::const_bit_iterator bit = fields.begin_bit(inst);
-    for(arity_t i = 0; bit != fields.end_bit(inst); bit++, i++)
+    for(arity_t i = 0; bit != fields.end_bit(inst); ++bit, ++i)
         if(*bit)
             fs.insert(i);
     return fs;

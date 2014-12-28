@@ -330,7 +330,7 @@ void PsiRelationUpdaterAgent::updateEntityNovelty(opencog::CogServer * server)
 
     for ( iEntityNovelty = this->entityNovelty.begin(); 
            iEntityNovelty != this->entityNovelty.end(); 
-           iEntityNovelty++) {
+           ++iEntityNovelty) {
 
         // Update the novelty levels of the entities
         std::string entityId = iEntityNovelty->first;
@@ -377,7 +377,7 @@ void PsiRelationUpdaterAgent::updateEntityNovelty(opencog::CogServer * server)
 
     for ( iEntityNovelty = this->entityNovelty.begin(); 
            iEntityNovelty != this->entityNovelty.end(); 
-           iEntityNovelty++) {
+           ++iEntityNovelty) {
 
         // Get entitId and novelty instance
         std::string entityId = iEntityNovelty->first;

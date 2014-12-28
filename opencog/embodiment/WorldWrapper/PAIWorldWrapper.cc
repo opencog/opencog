@@ -744,7 +744,7 @@ bool PAIWorldWrapper::createNavigationPlanAction( opencog::pai::PAI& pai,SpaceSe
 
         }
         pai.addAction( _planID, action );
-        it_point++;
+        ++it_point;
 
         if ((!includingLastStep) && (it_point == endPointIter))
             break;

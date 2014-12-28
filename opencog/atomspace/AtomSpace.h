@@ -884,7 +884,7 @@ public:
         // Loop over all handles in the handle set.
         std::list<Handle>::iterator i = handle_set.begin();
         std::list<Handle>::iterator iend = handle_set.end();
-        for (; i != iend; i++) {
+        for (; i != iend; ++i) {
             bool rc = (data->*cb)(*i);
             if (rc) return rc;
         }

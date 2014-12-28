@@ -510,10 +510,10 @@ void Pet::stopLearning(const std::vector<std::string> &commandStatement,
     //      commandStatement.front());
     std::vector<std::string> args;
     std::vector<std::string>::iterator it = learningSchema.begin();
-    it++;
+    ++it;
     while (it != learningSchema.end()) {
         args.push_back(*it);
-        it++;
+        ++it;
     }
 
 //  std::copy(learningSchema.begin()+1, learningSchema.end(), args.begin());
@@ -596,14 +596,14 @@ void Pet::endExemplar(const std::vector<std::string> &commandStatement, unsigned
     std::vector<std::string> args;
 
     std::vector<std::string>::iterator it = learningSchema.begin();
-    it++;
+    ++it;
     while (it != learningSchema.end()) {
         args.push_back(*it);
-        it++;
+        ++it;
     }
 
     for (std::vector<std::string>::iterator it = args.begin();
-            it != args.end(); it++)
+            it != args.end(); ++it)
         logger().debug(" args: %s", (*it).c_str());
     sender->sendExemplar(learningSchema.front(), args, ownerId,
             exemplarAvatarId, *atomSpace);
@@ -709,10 +709,10 @@ void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned
         std::vector<std::string> args;
 
         std::vector<std::string>::iterator it = learningSchema.begin();
-        it++;
+        ++it;
         while (it != learningSchema.end()) {
             args.push_back(*it);
-            it++;
+            ++it;
         }
 
 //    std::copy(learningSchema.begin()+1, learningSchema.end(), args.begin());
@@ -743,10 +743,10 @@ void Pet::reward(unsigned long timestamp)
         // are beging ignored
         std::vector<std::string> args;
         std::vector<std::string>::iterator it = learningSchema.begin();
-        it++;
+        ++it;
         while (it != learningSchema.end()) {
             args.push_back(*it);
-            it++;
+            ++it;
         }
 
 
@@ -779,10 +779,10 @@ void Pet::punish(unsigned long timestamp)
         // are beging ignored
         std::vector<std::string> args;
         std::vector<std::string>::iterator it = learningSchema.begin();
-        it++;
+        ++it;
         while (it != learningSchema.end()) {
             args.push_back(*it);
-            it++;
+            ++it;
         }
 
 //      std::copy(learningSchema.begin()+1, learningSchema.end(), args.begin());
@@ -952,7 +952,7 @@ void Pet::getHighLTIObjects(HandleSeq& highLTIObjects)
         AttentionValuePtr attentionValue = atomSpace->getAV(*it);
         if (attentionValue->getLTI() < AtomSpaceUtil::highLongTermImportance)
             it = highLTIObjects.erase(it);
-        else it++;
+        else ++it;
     }
 }
 
@@ -1045,10 +1045,10 @@ void Pet::restartLearning() throw (RuntimeException, std::bad_exception)
 
     std::vector<std::string> args;
     std::vector<std::string>::iterator it = learningSchema.begin();
-    it++;
+    ++it;
     while (it != learningSchema.end()) {
         args.push_back(*it);
-        it++;
+        ++it;
     }
 
 //  std::copy(learningSchema.begin()+1, learningSchema.end(), args.begin());

@@ -61,7 +61,7 @@ void SpaceServerSavable::saveRepository(FILE * fp) const
     unsigned int mapSize = server->spaceMaps.size();
     fwrite(&mapSize, sizeof(unsigned int), 1, fp);
     std::map<Handle, SpaceServer::SpaceMap*>::iterator itr;
-    for (itr = server->spaceMaps.begin(); itr != server->spaceMaps.end(); itr++) {
+    for (itr = server->spaceMaps.begin(); itr != server->spaceMaps.end(); ++itr) {
         Handle mapHandle = (Handle)(itr->first);
         fwrite(&mapHandle, sizeof(Handle), 1, fp);
         SpaceServer::SpaceMap* map = itr->second;

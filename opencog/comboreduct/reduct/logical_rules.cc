@@ -737,7 +737,7 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                 subtree_set res;
                 if (!is_predicate(child.last_child())) {
                     for (sib_it pit = child.last_child().begin();
-                         pit != child.last_child().end(); pit++)
+                         pit != child.last_child().end(); ++pit)
                     {
                         res.insert(pit);
                     }
@@ -833,7 +833,7 @@ void reduce_remove_subtree_equal_tt::operator()(combo_tree& tr,
     // Cannot construct complete truth tables of expressions containing
     // predicates, since arguments of predicates may range over contin
     // values, and who knows what those might be.
-    for (pre_it pit = tr.begin(); pit != tr.end(); pit++) {
+    for (pre_it pit = tr.begin(); pit != tr.end(); ++pit) {
         if (is_predicate(pit))
             return;
     }
@@ -847,7 +847,7 @@ void reduce_remove_subtree_equal_tt::operator()(combo_tree& tr,
             pit = tr.erase(pit);
         else { // remove only the previously added null_vertex
             pit = tr.erase(tr.flatten(pit));
-            pit++;
+            ++pit;
         }
     }
 }

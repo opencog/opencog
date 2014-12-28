@@ -81,7 +81,7 @@ void ComboInterpreter::run(messaging::NetworkElement *ne)
     delete sel;
 #else
     
-    for (Vec::iterator it = _vec.begin(); it != _vec.end(); it++) {
+    for (Vec::iterator it = _vec.begin(); it != _vec.end(); ++it) {
         RunningComboProcedure& rp = (*it)->second;
         if (rp.isReady()) {
             logger().debug("Running procedure id '%d'.",  ((RunningProcedureId&) (*it)->first).getId());

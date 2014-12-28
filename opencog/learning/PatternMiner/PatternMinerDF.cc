@@ -233,7 +233,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
             bool alreadyExtracted = false;
 
             // check if these links have been extracted
-            for(newExtendIt = newConnectedLinksFoundThisGram.begin(); newExtendIt != newConnectedLinksFoundThisGram.end(); newExtendIt++)
+            for(newExtendIt = newConnectedLinksFoundThisGram.begin(); newExtendIt != newConnectedLinksFoundThisGram.end(); ++newExtendIt)
             {
                 set<Handle>& exitstingLinks = (set<Handle>&)(*newExtendIt);
                 if (exitstingLinks == originalLinksToSet)

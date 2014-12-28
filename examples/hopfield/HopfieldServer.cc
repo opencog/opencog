@@ -534,7 +534,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
         HandleSeq eligibleForRemoval;
         // loop through keyNodes
         for (HandleSeq::iterator i = keyNodes.begin();
-            i != keyNodes.end(); i++) {
+            i != keyNodes.end(); ++i) {
             if (*i == keyHandle) continue;
             HandleSeq out = a.getOutgoing(*i);
             eligibleForRemoval.insert(eligibleForRemoval.end(),
@@ -562,7 +562,7 @@ std::map<Handle,Handle> HopfieldServer::getDestinationsFrom(Handle src, Type lin
     std::map<Handle,Handle> result;
     HandleSeq links = getAtomSpace().getIncoming(src);
     HandleSeq::iterator j;
-    for(j = links.begin(); j != links.end(); j++) {
+    for(j = links.begin(); j != links.end(); ++j) {
         Handle lh = *j;
         if (!classserver().isA(getAtomSpace().getType(lh),linkType))
             continue;
@@ -570,7 +570,7 @@ std::map<Handle,Handle> HopfieldServer::getDestinationsFrom(Handle src, Type lin
         HandleSeq lseq = getAtomSpace().getOutgoing(lh);
         // get handle at other end of the link
         for (HandleSeq::iterator k=lseq.begin();
-                k < lseq.end() && destH == Handle::UNDEFINED; k++) {
+                k < lseq.end() && destH == Handle::UNDEFINED; ++k) {
             if (*k != src) {
                 destH = *k; 
             }
@@ -595,13 +595,13 @@ Handle HopfieldServer::findKeyNode()
         // find closest matching key node (or unused key node)
         HandleSeq::iterator i;
         float maxSim = -1;
-        for(i = keyNodes.begin(); i != keyNodes.end(); i++) {
+        for(i = keyNodes.begin(); i != keyNodes.end(); ++i) {
             float sim = 0.0f;
             Handle iHandle = *i;
             //get all Hebbian links from keyHandle
             HandleSeq links = a.getIncoming(iHandle);
             HandleSeq::iterator j;
-            for(j = links.begin(); j != links.end(); j++) {
+            for(j = links.begin(); j != links.end(); ++j) {
                 Handle lh = *j;
                 Handle patternH;
                 Type lt = a.getType(lh); 
@@ -610,7 +610,7 @@ Handle HopfieldServer::findKeyNode()
                 // TODO: create AtomSpace utility method that returns a map
                 // between link and destination, see getDestinationsFrom
                 for (HandleSeq::iterator k=lseq.begin();
-                        k < lseq.end() && patternH == Handle::UNDEFINED; k++) {
+                        k < lseq.end() && patternH == Handle::UNDEFINED; ++k) {
                     if (*k != iHandle) {
                         patternH = *k; 
                     }
@@ -897,7 +897,7 @@ std::vector<stim_t> HopfieldServer::getGridStimVector()
     std::vector<stim_t> out;
     std::vector<Handle>::iterator i;
 
-    for (i = hGrid.begin(); i != hGrid.end(); i++) {
+    for (i = hGrid.begin(); i != hGrid.end(); ++i) {
         Handle h = *i;
         stim_t val;
         val = imprintAgent->getAtomStimulus(h); // / getAtomSpace()->getRecentMaxSTI();

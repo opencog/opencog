@@ -198,7 +198,7 @@ SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
 	// Call proc on each handle, in turn.
 	// Break out of the loop if proc returns anything other than #f
 	std::list<Handle>::iterator i;
-	for (i = handle_set.begin(); i != handle_set.end(); i++) {
+	for (i = handle_set.begin(); i != handle_set.end(); ++i) {
 		Handle h = *i;
 		SCM smob = handle_to_scm(h);
 		SCM rc = scm_call_1(proc, smob);

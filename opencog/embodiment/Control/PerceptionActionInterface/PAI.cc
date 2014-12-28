@@ -297,7 +297,7 @@ void PAI::sendEmotionalFeelings(const std::string& petId, const std::map<std::st
 
     // adding all feelings
     std::map<std::string, float>::const_iterator it;
-    for (it = feelingsValueMap.begin(); it != feelingsValueMap.end(); it++) {
+    for (it = feelingsValueMap.begin(); it != feelingsValueMap.end(); ++it) {
 
         XMLString::transcode(FEELING_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
         DOMElement *feelingElement = doc->createElement(tag);
@@ -358,7 +358,7 @@ void PAI::sendDemandSatisfactions(const std::string& petId, const std::map<std::
 
     // adding all the demand satisfactions
     std::map<std::string, float>::const_iterator it;
-    for (it = demandsValueMap.begin(); it != demandsValueMap.end(); it++) {
+    for (it = demandsValueMap.begin(); it != demandsValueMap.end(); ++it) {
 
         XMLString::transcode(DEMAND_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
         DOMElement * demandElement = doc->createElement(tag);
@@ -419,7 +419,7 @@ void PAI::sendSingleActionCommand(std::string& actionName, std::vector<ActionPar
     // adding all parameters
     std::vector<ActionParamStruct>::iterator it;
 
-    for (it = paraList.begin(); it != paraList.end(); it++)
+    for (it = paraList.begin(); it != paraList.end(); ++it)
     {
         XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
         DOMElement *paraElement = doc->createElement(tag);

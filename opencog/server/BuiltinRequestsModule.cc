@@ -260,7 +260,7 @@ std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::
 
             // try to find an already started agent with that name
             AgentSeq::const_iterator tmp = agents.begin();
-            for ( ; tmp != agents.end() ; tmp++ ) if ( *it == (*tmp)->classinfo().id ) break;
+            for ( ; tmp != agents.end() ; ++tmp ) if ( *it == (*tmp)->classinfo().id ) break;
 
             AgentPtr agent;
             if (agents.end() == tmp) {

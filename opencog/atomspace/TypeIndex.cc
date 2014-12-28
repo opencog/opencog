@@ -67,7 +67,7 @@ TypeIndex::iterator TypeIndex::begin(Type t, bool sub) const
 			if (it.se != it.s->end()) return it;
 		}
 		it.currtype++;
-		it.s++;
+		++it.s;
 	}
 
 	return it;
@@ -128,12 +128,12 @@ TypeIndex::iterator& TypeIndex::iterator::operator++(int i)
 {
 	if (s == send) return *this;
 
-	se++;
+	++se;
 	if (se == s->end())
 	{
 		do
 		{
-			s++;
+			++s;
 			currtype++;
 
 			// Find the first type which is a subtype, and start iteration there.

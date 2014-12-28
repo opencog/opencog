@@ -500,7 +500,7 @@ namespace opencog
                 }
 
                 UserState *GetOpenListNext( float &f, float &g, float &h ) {
-                    iterDbgOpen++;
+                    ++iterDbgOpen;
                     if ( iterDbgOpen != m_OpenList.end() ) {
                         f = (*iterDbgOpen)->f;
                         g = (*iterDbgOpen)->g;
@@ -535,7 +535,7 @@ namespace opencog
                 }
 
                 UserState *GetClosedListNext( float &f, float &g, float &h ) {
-                    iterDbgClosed++;
+                    ++iterDbgClosed;
                     if ( iterDbgClosed != m_ClosedList.end() ) {
                         f = (*iterDbgClosed)->f;
                         g = (*iterDbgClosed)->g;

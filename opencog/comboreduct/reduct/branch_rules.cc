@@ -41,8 +41,8 @@ void reduce_cond_arg::operator()(combo_tree& tr, combo_tree::iterator it) const
     size_t nc = tr.number_of_children(it);
     for (sib_it sib = it.begin(); 3 <= nc; nc -= 2) {
         logical_reduce(reduct_effort, tr, sib, ignore_ops);
-        sib++;
-        sib++;
+        ++sib;
+        ++sib;
     }
 }
 
@@ -110,7 +110,7 @@ void reduce_cond_adjacent::operator()(combo_tree& tr,
         tr.move_after(por.begin(), q);
 
         sib = x2;
-        sib++;
+        ++sib;
         sz -= 2;
 
         tr.erase(x2);
@@ -149,7 +149,7 @@ void reduce_cond_const::operator()(combo_tree& tr,
             num --;
 
             // Erase everything else that follows.
-            for (; sib != it.end(); sib++) {
+            for (; sib != it.end(); ++sib) {
                 tr.erase(sib);
                 num --;
             }

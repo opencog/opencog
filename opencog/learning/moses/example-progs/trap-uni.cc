@@ -207,7 +207,7 @@ int main(int argc, char** argv)
     // cout << "Final population:\n" << population << endl;
     cout << "The final population was:" << endl;
     instance_set<int>::const_iterator it = population.begin();
-    for(; it != population.end(); it++) {
+    for(; it != population.end(); ++it) {
        cout << "Score: " << it->second
             << "\tindividual: " << population.fields().to_string(it->first)
             << endl;

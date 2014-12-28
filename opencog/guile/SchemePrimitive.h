@@ -211,8 +211,8 @@ class SchemePrimitive : public PrimitiveEnviron
 					HandleSeq::iterator it = rHS.begin();
 					if (it != rHS.end())
 						rc = scm_list_1(SchemeSmob::handle_to_scm(*it));
-					it++;
-					for ( ; it != rHS.end(); it++)
+					++it;
+					for ( ; it != rHS.end(); ++it)
 					{
 						rc = scm_cons(SchemeSmob::handle_to_scm(*it), rc);
 					}
@@ -236,8 +236,8 @@ class SchemePrimitive : public PrimitiveEnviron
 					HandleSeq::iterator it = rHS.begin();
 					if (it != rHS.end())
 						rc = scm_list_1(SchemeSmob::handle_to_scm(*it));
-					it++;
-					for ( ; it != rHS.end(); it++)
+					++it;
+					for ( ; it != rHS.end(); ++it)
 					{
 						rc = scm_cons(SchemeSmob::handle_to_scm(*it), rc);
 					}

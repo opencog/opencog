@@ -95,7 +95,7 @@ void MihalceaEdge::annotate_parse(Handle h)
 	for (f = words.begin(); f != words.end(); ++f)
 	{
 		std::set<Handle>::const_iterator s = f;
-		s++;
+		++s;
 		for (; s != words.end(); ++s)
 		{
 			annotate_word_pair(*f, *s);
@@ -144,10 +144,10 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 	gettimeofday(&start, NULL);
 #endif
 	std::set<Handle>::const_iterator ia;
-	for (ia = pa_words.begin(); ia != pa_words.end(); ia++)
+	for (ia = pa_words.begin(); ia != pa_words.end(); ++ia)
 	{
 		std::set<Handle>::const_iterator ib;
-		for (ib = words.begin(); ib != words.end(); ib++)
+		for (ib = words.begin(); ib != words.end(); ++ib)
 		{
 			annotate_word_pair(*ia, *ib);
 		}
