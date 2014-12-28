@@ -63,7 +63,7 @@ void ReportRank::report_document(const std::deque<Handle> &parse_list)
 
 	// Iterate over all the parses in the document.
 	std::deque<Handle>::const_iterator i;
-	for (i = parse_list.begin(); i != parse_list.end(); i++)
+	for (i = parse_list.begin(); i != parse_list.end(); ++i)
 	{
 		Handle h = *i;
 		foreach_word_instance(h, &ReportRank::count_word, this);
@@ -79,7 +79,7 @@ void ReportRank::report_document(const std::deque<Handle> &parse_list)
 	double average = normalization / sense_count;
 	normalization = 1.0 / average;
 
-	for (i = parse_list.begin(); i != parse_list.end(); i++)
+	for (i = parse_list.begin(); i != parse_list.end(); ++i)
 	{
 		Handle h = *i;
 		foreach_word_instance(h, &ReportRank::renorm_word, this);

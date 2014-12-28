@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 
     pleasure::reduce(pop, reduct::mixed_reduction());
     
-    for (population::iterator it = pop.begin(); it != pop.end(); it++) {
+    for (population::iterator it = pop.begin(); it != pop.end(); ++it) {
         std::cout << *it << std::endl;
     }
     std::cout << "Running time: " << difftime(time(NULL), start_time) << std::endl;

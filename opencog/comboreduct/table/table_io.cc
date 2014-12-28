@@ -576,10 +576,10 @@ istream& istreamSparseITable(istream& in, ITable& tab)
 
         // Infer the types of the fixed features.
         size_t off = 0;
-        for (; off < fixed_arity; off++, pit++) 
+        for (; off < fixed_arity; ++off, ++pit)
             types[off] = infer_type_from_token2(types[off], *pit);
 
-        for (; pit != chunks.end(); pit++) {
+        for (; pit != chunks.end(); ++pit) {
             // Rip out the key-value pairs
             auto key_val = parse_key_val(*pit);
             if (key_val == pair<string, string>())
@@ -641,8 +641,8 @@ vector<type_node> infer_column_types(const ITable& tab)
     // Skip the first line, it might be a header...
     // and that would confuse type inference.
     if (tab.size() > 1)
-        rowit++;
-    for (; rowit != tab.end(); rowit++)
+        ++rowit;
+    for (; rowit != tab.end(); ++rowit)
     {
         const string_seq& tokens = rowit->get_seq<string>();
         for (arity_t i=0; i<arity; i++)

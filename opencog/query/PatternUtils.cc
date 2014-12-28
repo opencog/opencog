@@ -55,7 +55,7 @@ bool remove_constants(const std::set<Handle> &vars,
 		Handle clause(*i);
 		if (any_variable_in_tree(clause, vars))
 		{
-			i++;
+			++i;
 		}
 		else
 		{

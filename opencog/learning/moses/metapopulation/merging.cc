@@ -380,7 +380,7 @@ void metapopulation::resize_metapop()
     while (it != _scored_trees.end()) {
         score_t sc = it->get_penalized_score();
         if (sc < worst_score) break;
-        it++;
+        ++it;
     }
 
     while (it != _scored_trees.end()) {

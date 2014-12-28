@@ -99,7 +99,7 @@ bool less_combo_tree_it( const tree<Vertex> & lhs_t, const tree<Vertex> & rhs_t,
 
     for (tree<Vertex>::sibling_iterator lit = lhs_t.begin(ltop);
             lit != lhs_t.end  (ltop);
-            lit++, rit++)
+            ++lit, ++rit)
         if (less_combo_tree_it(lhs_t, rhs_t, lit, rit))
             return true;
         else if (less_combo_tree_it(lhs_t, rhs_t, rit, lit))

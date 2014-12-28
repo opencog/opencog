@@ -451,7 +451,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
                 perms.push_back(v);
             }
         }
-        arg_type++;
+        ++arg_type;
     }
 
     // Negative one correspnds to no pairs.
@@ -990,7 +990,7 @@ void build_knobs::append_linear_combination(pre_it it)
                     "unsupported argument type.");
             }
         }
-        tit++;
+        ++tit;
     }
 }
 
@@ -1046,9 +1046,9 @@ void build_knobs::enum_canonize(pre_it it)
     sib_it sib = it.begin();
     while(1) {
         sib_it next = sib;
-        next++;
+        ++next;
         if (next == it.end()) break;
-        next++;
+        ++next;
         if (is_logical_operator(*sib) || is_predicate(sib)) {
             logical_canonize(sib);
         }
@@ -1072,9 +1072,9 @@ void build_knobs::build_enum(pre_it it)
     sib_it sib = it.begin();
     while(1) {
         sib_it next = sib;
-        next++;
+        ++next;
         if (next == it.end()) break;
-        next++;
+        ++next;
 
         if (is_logical_operator(*sib) || is_predicate(sib)) {
             // Naively, what one might want to do here is:

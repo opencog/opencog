@@ -1539,8 +1539,8 @@ combo::vertex WorldWrapperUtil::evalPerception(
             sib_it sibling_it = tree_it.begin();
 
             // skip the objects
-            sibling_it++;
-            sibling_it++;
+            ++sibling_it;
+            ++sibling_it;
 
             // get operator and value from the tree and remove them from tree. This is
             // necessary to avoid parsing the tree wrongly.
@@ -1595,7 +1595,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                 }
 
                 std::vector<std::string> arguments;
-                for (sib_it arg = tree_it.begin(); arg != tree_it.end(); arg++) {
+                for (sib_it arg = tree_it.begin(); arg != tree_it.end(); ++arg) {
                     arguments.push_back(get_definite_object(*arg));
                 }
 
@@ -1656,7 +1656,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
                         // next predicate name and the two objects
                         std::vector<std::string> arguments;
-                        for (sib_it arg = tree_it.begin(); arg != tree_it.end(); arg++) {
+                        for (sib_it arg = tree_it.begin(); arg != tree_it.end(); ++arg) {
                             arguments.push_back(get_definite_object(*arg));
                         }
                         Predicate pred(name, arguments);
@@ -1904,7 +1904,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             std::string action_name = get_action_name(get_definite_object(vo2));
 
             std::vector<std::string> parameters;
-            for (++sib_arg; sib_arg != it.end(); sib_arg++) {
+            for (++sib_arg; sib_arg != it.end(); ++sib_arg) {
                 vertex v_temp = *sib_arg;
 
                 if (is_indefinite_object(v_temp)) {
@@ -2058,7 +2058,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             bool has_wild_card = false;
             std::vector<std::vector<combo::definite_object> > parameters;
 
-            for (++sib_arg; sib_arg != it.end(); sib_arg++) {
+            for (++sib_arg; sib_arg != it.end(); ++sib_arg) {
                 vertex v_temp = *sib_arg;
 
                 if (is_wild_card(v_temp) && !has_wild_card) {

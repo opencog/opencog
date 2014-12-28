@@ -690,7 +690,7 @@ void SavingLoading::saveRepositories(FILE *f)
     unsigned int size = repositories.size();
     fwrite(&size, sizeof(unsigned int), 1, f);
 
-    for (RepositoryHash::const_iterator it = repositories.begin(); it != repositories.end(); it++) {
+    for (RepositoryHash::const_iterator it = repositories.begin(); it != repositories.end(); ++it) {
         const std::string& repId = it->first;
         int idSize = repId.length() + 1;
         fwrite(&idSize, sizeof(int), 1, f);
@@ -743,7 +743,7 @@ void SavingLoading::clearRepositories()
 {
     logger().fine("SavingLoading::clearRepositories");
     for (RepositoryHash::const_iterator it = repositories.begin();
-            it != repositories.end(); it++) {
+            it != repositories.end(); ++it) {
 
         it->second->clear();
     }

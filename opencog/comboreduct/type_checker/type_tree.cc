@@ -905,7 +905,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
         // Usually, an arg_list will have only one type in it.
         // However, the cond statement can have a repeated list of two
         // alternating types.
-        for (type_tree_pre_it tit = it.begin(); tit != it.end(); tit++) {
+        for (type_tree_pre_it tit = it.begin(); tit != it.end(); ++tit) {
             reduce_type_tree(tt, tit, arg_types, tr, ct_it, proc_name);
         }
     }

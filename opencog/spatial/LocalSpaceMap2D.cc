@@ -604,7 +604,7 @@ double LocalSpaceMap2D::getProperFreePointAltitude(const spatial::GridPoint& gp,
     double topSurface = _floorHeight;
     std::vector<spatial::Gradient> grads = getObjectGradientsByGridPoint(gp);
     std::vector<spatial::Gradient>::const_iterator it = grads.begin();
-    for (; it != grads.end(); it++) {
+    for (; it != grads.end(); ++it) {
         if (topSurface + _agentHeight > it->first) {
             // The agent is not able to stand on this point because the roof of
             // this point can not cover the agent.
@@ -690,7 +690,7 @@ double LocalSpaceMap2D::getProperDestAltitude(const spatial::GridPoint &src, con
         double topSurface = _floorHeight;
         std::vector<spatial::Gradient> grads = getObjectGradientsByGridPoint(dest);
         std::vector<spatial::Gradient>::const_iterator it = grads.begin();
-        for (; it != grads.end(); it++) {
+        for (; it != grads.end(); ++it) {
             if (srcHeight >= it->first) {
                 // bottom surface is lower than src altitude, then the altitude of
                 // top surface should be no smaller than its opposite surface.
@@ -732,7 +732,7 @@ spatial::ObjectID LocalSpaceMap2D::getTallestObjectInGrid(const GridPoint &gp) c
     spatial::ObjectID id;
     const spatial::ObjectInfoSet& objInfoSet = _grid.at(gp);
     spatial::ObjectInfoSet::const_iterator it = objInfoSet.begin();
-    for (; it != objInfoSet.end(); it++) {
+    for (; it != objInfoSet.end(); ++it) {
         if (it->isExtraBoundary) continue;
         spatial::ObjectID entityId = spatial::ObjectID(it->id);
         const EntityPtr& entityPtr = getEntity(entityId);
@@ -752,7 +752,7 @@ std::vector<spatial::Gradient> LocalSpaceMap2D::getObjectGradientsByGridPoint(co
         return grads;
     const spatial::ObjectInfoSet& objInfoSet = _grid.at(gp);
     spatial::ObjectInfoSet::const_iterator it = objInfoSet.begin();
-    for (; it != objInfoSet.end(); it++) {
+    for (; it != objInfoSet.end(); ++it) {
         if (it->isExtraBoundary) {
             continue;
         }
@@ -1410,7 +1410,7 @@ void rec_find::check_grid()
         spatial::ObjectInfoSet::const_iterator obj_info_it = (it->second).begin();
         while (obj_info_it != (it->second).end()) {
             _out.insert(obj_info_it->id);
-            obj_info_it++;
+            ++obj_info_it;
         }
     }
 }

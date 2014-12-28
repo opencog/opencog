@@ -39,7 +39,7 @@ enum_t enum_t::get_random_enum()
 
     map<string, unsigned>::iterator entry = enum_map.begin();
     while (r) {
-       r--; entry ++;
+       --r; entry ++;
     }
     return enum_t(entry->first, entry->second);
 }

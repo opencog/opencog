@@ -432,7 +432,7 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
             const std::vector<Handle> &oset =
                 verify_handle_list(satom, subrname, pos);
             std::vector<Handle>::const_iterator it;
-            for (it = oset.begin(); it != oset.end(); it++) {
+            for (it = oset.begin(); it != oset.end(); ++it) {
                 outgoing_set.push_back(*it);
             }
         }

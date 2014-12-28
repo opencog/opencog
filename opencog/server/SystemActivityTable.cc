@@ -58,7 +58,7 @@ void SystemActivityTable::setMaxAgentActivityTableSeqSize(size_t n)
     _maxAgentActivityTableSeqSize = n;
 
     for (AgentActivityTable::iterator it  = _agentActivityTable.begin();
-                                      it != _agentActivityTable.end(); it++) {
+                                      it != _agentActivityTable.end(); ++it) {
         ActivitySeq &seq = it->second;
         trimActivitySeq(seq, _maxAgentActivityTableSeqSize);
     }
@@ -77,7 +77,7 @@ void SystemActivityTable::atomRemoved(AtomPtr atom)
 {
     Handle h = atom->getHandle();
     for (AgentActivityTable::iterator it  = _agentActivityTable.begin();
-                                      it != _agentActivityTable.end(); it++) {
+                                      it != _agentActivityTable.end(); ++it) {
         ActivitySeq &seq = it->second;
         for (size_t n = 0; n < seq.size(); n++) {
             Activity *a = seq[n];
@@ -113,7 +113,7 @@ void SystemActivityTable::clearActivity(AgentPtr agent)
 void SystemActivityTable::clearActivity()
 {
     for (AgentActivityTable::iterator it  = _agentActivityTable.begin();
-                                      it != _agentActivityTable.end(); it++) {
+                                      it != _agentActivityTable.end(); ++it) {
         ActivitySeq& seq = it->second;
         for (size_t n = 0; n < seq.size(); n++)
             delete seq[n];

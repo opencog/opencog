@@ -96,7 +96,7 @@ bool Mihalcea::process_sentence(Handle h)
 	// If there are any senses that are not attached to anything,
 	// get rid of them now.
 	std::deque<Handle>::iterator it;
-	for (it = short_list.begin(); it != short_list.end(); it++)
+	for (it = short_list.begin(); it != short_list.end(); ++it)
 	{
 		Handle parse = *it;
 		thinner.prune_parse(parse);

@@ -148,7 +148,7 @@ void does_fit_template::expandHandletree(bool fullVirtual, atom_tree& ret,
 
         if (h_ptr != NULL) {
             HandleSeq _hs = as->getOutgoing(*h_ptr);
-            for (HandleSeq::iterator child_h = _hs.begin(); child_h != _hs.end(); child_h++) {
+            for (HandleSeq::iterator child_h = _hs.begin(); child_h != _hs.end(); ++child_h) {
                 //foreach(Handle child_h, _hs) {
                 atom_tree_it next_i = ret.append_child(ret_top, *child_h);
                 expandHandletree(fullVirtual, ret, next_i, as);

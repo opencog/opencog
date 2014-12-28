@@ -64,7 +64,7 @@ BuiltInProcedureRepository::BuiltInProcedureRepository(PAI& pai)
 
 BuiltInProcedureRepository::~BuiltInProcedureRepository()
 {
-    for (Name2ProcedureMap::iterator itr = _map.begin(); itr != _map.end(); itr++) {
+    for (Name2ProcedureMap::iterator itr = _map.begin(); itr != _map.end(); ++itr) {
 //  std::cout << itr->second->getName() << "\n";
         delete itr->second;
     }

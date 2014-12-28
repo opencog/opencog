@@ -199,7 +199,7 @@ public:
                 ss << std::endl;
                 col = 0;
             }
-            it++;
+            ++it;
         }
         return ss.str();
     }

@@ -315,7 +315,7 @@ HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
     HandleSeq iset;
     h->getIncomingSet(back_inserter(iset));
     for (HandleSeq::iterator it = iset.begin();
-         it != iset.end(); it++)
+         it != iset.end(); ++it)
     {
         LinkPtr link(LinkCast(*it));
         Type linkType = link->getType();

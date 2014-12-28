@@ -275,7 +275,7 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 		_atom_space->getHandlesByType(back_inserter(handle_set), ptype);
 		std::list<Handle>::iterator i = handle_set.begin();
 		std::list<Handle>::iterator iend = handle_set.end();
-		for (; i != iend; i++)
+		for (; i != iend; ++i)
 		{
 			Handle h(*i);
 			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");

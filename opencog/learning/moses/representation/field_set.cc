@@ -222,7 +222,7 @@ std::ostream& field_set::ostream_field_set(std::ostream& out) const
 
     std::vector<term_spec>::const_iterator tit = term().begin();
     std::vector<term_spec>::const_iterator tend = term().end();
-    for (; tit != tend; tit++, idx++)
+    for (; tit != tend; ++tit, ++idx)
     {
         out << "\t{ idx=" << idx
             << "; type=term"
@@ -233,7 +233,7 @@ std::ostream& field_set::ostream_field_set(std::ostream& out) const
 
     std::vector<contin_spec>::const_iterator cit = contin().begin();
     std::vector<contin_spec>::const_iterator cend = contin().end();
-    for (; cit != cend; cit++, idx++)
+    for (; cit != cend; ++cit, ++idx)
     {
         out << "\t{ idx=" << idx
             << "; type=contin"
@@ -246,7 +246,7 @@ std::ostream& field_set::ostream_field_set(std::ostream& out) const
 
     std::vector<disc_spec>::const_iterator dit = disc_and_bit().begin();
     std::vector<disc_spec>::const_iterator dend = disc_and_bit().end();
-    for (; dit != dend; dit++, idx++)
+    for (; dit != dend; ++dit, ++idx)
     {
         if (2 < dit->multy)
         {

@@ -178,7 +178,7 @@ HandleSeq DimEmbedModule::kNearestNeighbors(Handle h, Type l, int k, bool fanin)
     }
     HandleSeq results;
     std::vector<CoverTreePoint>::const_iterator it;
-    for (it=points.begin(); it!=points.end(); it++) {
+    for (it=points.begin(); it!=points.end(); ++it) {
         results.push_back(it->getHandle());
     }
     return results;
@@ -1022,7 +1022,7 @@ void DimEmbedModule::handleAddSignal(Handle h)
         }
     }
     else {//h is a link
-        for (it=atomMaps.begin();it!=atomMaps.end();it++) {
+        for (it=atomMaps.begin();it!=atomMaps.end();++it) {
             //if the new link is a subtype of an existing embedding, add it
             if (classserver().isA(h->getType(), it->first))
                 addLink(h, it->first);
@@ -1040,7 +1040,7 @@ void DimEmbedModule::atomRemoveSignal(AtomPtr atom)
     if (NodeCast(atom)) {
         //for each link type embedding that exists, remove the node
         AtomEmbedMap::iterator it;
-        for (it=atomMaps.begin();it!=atomMaps.end();it++) {
+        for (it=atomMaps.begin();it!=atomMaps.end();++it) {
             removeNode(h,it->first);
         }
         AsymAtomEmbedMap::iterator it2;

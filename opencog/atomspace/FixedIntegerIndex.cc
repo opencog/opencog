@@ -62,7 +62,7 @@ void FixedIntegerIndex::remove(bool (*filter)(Handle))
 		while (i != s->end())
 		{
 			j = i;
-			i++;
+			++i;
 			if (filter(Handle(*j)))
 				s->erase(*j);
 		}

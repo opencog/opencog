@@ -816,7 +816,7 @@ HandleEntry* HandleEntry::fromHandleSet(const UnorderedHandleSet &s)
 {
     HandleEntry *ret = NULL;
     UnorderedHandleSet::const_iterator it = s.cbegin();
-    for (; it != s.cend(); it++)
+    for (; it != s.cend(); ++it)
     {
         HandleEntry *temp = new HandleEntry(*it);
         ret = HandleEntry::concatenation(temp, ret);

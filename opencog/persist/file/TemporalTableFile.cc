@@ -100,7 +100,7 @@ void TemporalTableFile::save(FILE *fp, TemporalTable *tbl)
         while (itr != hs->end()) {
             // writes each associated handle
             Handle handle = *itr;
-            itr++;
+            ++itr;
             UUID uuid = handle.value();
             fwrite(&uuid, sizeof(UUID), 1, fp);
         }

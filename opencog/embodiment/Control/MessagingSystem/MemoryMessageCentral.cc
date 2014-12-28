@@ -36,7 +36,7 @@ MemoryMessageCentral::~MemoryMessageCentral()
             delete msg;
         }
         delete map_itr->second;
-        map_itr++;
+        ++map_itr;
     }
 
 }

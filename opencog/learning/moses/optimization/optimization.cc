@@ -43,7 +43,7 @@ information_theoretic_bits(const field_set& fs)
 
     size_t n_disc_fields = fs.n_disc_fields();
     std::vector<field_set::disc_spec>::const_iterator it = fs.disc_and_bit().begin();
-    for (size_t cnt=0; cnt < n_disc_fields; cnt++, it++) {
+    for (size_t cnt=0; cnt < n_disc_fields; ++cnt, ++it) {
         const field_set::disc_spec& d = *it;
         res += log2<double>(d.multy);
     }

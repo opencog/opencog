@@ -450,7 +450,7 @@ behavioral_score enum_table_bscore::best_possible_bscore() const
                   // the one of which there is the most.
                   unsigned most = 0;
                   CTable::counter_t::const_iterator it = c.begin();
-                  for (; it != c.end(); it++) {
+                  for (; it != c.end(); ++it) {
                       if (most < it->second) most = it->second;
                   }
                   return score_t (most - c.total_count());
@@ -643,7 +643,7 @@ behavioral_score enum_effective_bscore::operator()(const combo_tree& tr) const
     // Are we done yet?
     vector<bool> done(_ctable_usize);
     vector<bool>::iterator dit = done.begin();
-    for (; dit != done.end(); dit++) *dit = false;
+    for (; dit != done.end(); ++dit) *dit = false;
 
     sib_it predicate = it.begin();
     score_t weight = 1.0;
@@ -664,8 +664,8 @@ behavioral_score enum_effective_bscore::operator()(const combo_tree& tr) const
                     sc += c.get(consequent);
                     *bit += weight * sc;
                 }
-                bit++;
-                dit++;
+                ++bit;
+                ++dit;
             }
             break;
         }
@@ -696,8 +696,8 @@ behavioral_score enum_effective_bscore::operator()(const combo_tree& tr) const
                     *dit = true;
                 }
             }
-            bit++;
-            dit++;
+            ++bit;
+            ++dit;
         }
 
         // advance

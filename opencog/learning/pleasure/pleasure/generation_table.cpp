@@ -10,7 +10,7 @@ using namespace opencog;
         std::vector<combo::type_tree> type_node_list;
         std::vector<node_list> type_lists;
         combo::type_tree_seq atlist = combo::get_signature_inputs(ttree);
-        for (std::set<combo::vertex>::iterator it = nlist.begin(); it != nlist.end(); it++) {
+        for (std::set<combo::vertex>::iterator it = nlist.begin(); it != nlist.end(); ++it) {
             generation_node gnode;
             combo::type_tree outttree = combo::get_output_type_tree(*it);
             gnode.node = outttree;
@@ -38,7 +38,7 @@ using namespace opencog;
                 type_lists[temp].insert(arg);
             }
         }
-        for (std::vector<generation_node>::iterator it = gtable.begin(); it != gtable.end(); it++) {
+        for (std::vector<generation_node>::iterator it = gtable.begin(); it != gtable.end(); ++it) {
             for (int it2 = 0; it2 != (int)type_node_list.size(); it2++) {
                 if (combo::equal_type_tree(type_node_list[it2], it->node))
                     it->glist = type_lists[it2];
@@ -47,7 +47,7 @@ using namespace opencog;
     }
     
     bool type_registered(combo::type_tree ttree, generation_table& gtable) {
-        for (generation_table::iterator it = gtable.begin(); it != gtable.end(); it++) {
+        for (generation_table::iterator it = gtable.begin(); it != gtable.end(); ++it) {
             if (combo::equal_type_tree(it->node, ttree))
                 return true;
         }

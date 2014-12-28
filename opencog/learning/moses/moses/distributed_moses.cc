@@ -307,7 +307,7 @@ host_proc_map init(const jobs_t& jobs)
 proc_map::iterator remove_proc(proc_map& pm,  proc_map::iterator it)
 {
     proc_map::iterator next_it(it);
-    next_it++;
+    ++next_it;
     pm.erase(it);
     return next_it;
 }
@@ -413,7 +413,7 @@ void distributed_moses(metapopulation& mp,
                 it != hpmv.second.end(); )
             {
                 if (is_running(*it)) {
-                    it++;
+                    ++it;
                     continue;
                 }
 

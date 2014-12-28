@@ -290,7 +290,7 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle source)
     // Perform diffusion from the source to each atom target
     typedef std::map<Handle, double>::iterator it_type;
     for(it_type iterator = probabilityVector.begin(); 
-        iterator != probabilityVector.end(); iterator++)
+        iterator != probabilityVector.end(); ++iterator)
     {
         DiffusionEventType diffusionEvent;
         
@@ -560,7 +560,7 @@ SimpleImportanceDiffusionAgent::combineIncidentAdjacentVectors(
     // available for allocation to any particular individual atom
     typedef std::map<Handle, double>::iterator it_type;
     for(it_type iterator = adjacentVector.begin(); 
-        iterator != adjacentVector.end(); iterator++)
+        iterator != adjacentVector.end(); ++iterator)
     {
         // iterator->second is the entry in the probability vector for this
         // handle
@@ -586,7 +586,7 @@ SimpleImportanceDiffusionAgent::combineIncidentAdjacentVectors(
     // Allocate the remaining diffusion amount to the incident atoms according
     // to the probability vector for the targets
     for(it_type iterator = incidentVector.begin(); 
-        iterator != incidentVector.end(); iterator++)
+        iterator != incidentVector.end(); ++iterator)
     {
         double diffusionAmount = 
                 diffusionAvailable * iterator->second;

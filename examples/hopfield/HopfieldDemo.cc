@@ -129,7 +129,7 @@ std::vector< Pattern > getCuePatterns(std::vector< Pattern > ps)
     } else {
         // otherwise, just copy imprint patterns.
         for (std::vector< Pattern >::iterator i = ps.begin();
-                i != ps.end(); i++) {
+                i != ps.end(); ++i) {
             // Cue patterns shouldn't be mutated unless cueGenerateOnce is set.
             cs.push_back( (*i) );
         }
@@ -138,7 +138,7 @@ std::vector< Pattern > getCuePatterns(std::vector< Pattern > ps)
     // (they won't be mutated later)
     if (o->cueGenerateOnce) {
         for (std::vector< Pattern >::iterator i = cs.begin();
-            i != cs.end(); i++) {
+            i != cs.end(); ++i) {
             (*i) = (*i).mutatePattern(o->cueErrorRate);
         }
     }

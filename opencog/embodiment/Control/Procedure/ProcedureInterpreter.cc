@@ -44,7 +44,7 @@ void ProcedureInterpreter::run(NetworkElement *ne)
 
     Set toBeRemoved;
     // Runs each pending RunningBuildInProcedure and checks status of any procedure.
-    for (Map::iterator it = _map.begin(); it != _map.end(); it++) {
+    for (Map::iterator it = _map.begin(); it != _map.end(); ++it) {
         RunningBuiltInProcedure* rbp = get<RunningBuiltInProcedure>(&(it->second));
         if (rbp) {
             rbp->run();
@@ -69,7 +69,7 @@ void ProcedureInterpreter::run(NetworkElement *ne)
         }
 
     }
-    for (Set::iterator it = toBeRemoved.begin(); it != toBeRemoved.end(); it++) {
+    for (Set::iterator it = toBeRemoved.begin(); it != toBeRemoved.end(); ++it) {
         _map.erase(*it);
     }
 }

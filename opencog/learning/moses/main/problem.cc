@@ -125,7 +125,7 @@ using namespace combo;
 
 static bool contains_type(const type_tree_pre_it it, id::type_node ty)
 {
-    for (type_tree_sib_it tts = it.begin(); tts != it.end(); tts++)
+    for (type_tree_sib_it tts = it.begin(); tts != it.end(); ++tts)
         if (*tts == ty) return true;
     return false;
 }

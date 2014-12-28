@@ -105,7 +105,7 @@ void Sweep::delete_edges(std::set<Handle> &edges)
 {
 	// Remove all of the senses
 	std::set<Handle>::iterator it;
-	for (it=edges.begin(); it != edges.end(); it++)
+	for (it=edges.begin(); it != edges.end(); ++it)
 	{
 		Handle edge_h = *it;
 		atom_space->removeAtom(edge_h, false);

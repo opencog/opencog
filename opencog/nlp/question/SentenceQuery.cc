@@ -379,7 +379,7 @@ void SentenceQuery::solve(AtomSpace *as, Handle sentence_node)
 	bound_vars.clear();
 	std::vector<Handle>::const_iterator i;
 	for (i = normed_predicate.begin();
-	     i != normed_predicate.end(); i++)
+	     i != normed_predicate.end(); ++i)
 	{
 		Handle h = *i;
 		find_vars(h);

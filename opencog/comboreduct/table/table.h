@@ -308,7 +308,7 @@ struct interpreter_visitor : public boost::static_visitor<vertex>
         mixed = false;
         combo_tree::iterator mit = tr.begin();
         combo_tree::iterator mend = tr.end();
-        for (; mit != mend; mit++ ) {
+        for (; mit != mend; ++mit ) {
             mixed = is_contin_expr(*mit);
             if (mixed) break;
             mixed = (id::greater_than_zero == *mit);

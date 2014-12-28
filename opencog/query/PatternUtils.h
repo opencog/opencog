@@ -210,7 +210,7 @@ static inline bool contains_atomtype(Handle& clause, Type atom_type)
 	const std::vector<Handle> &oset = lc->getOutgoingSet();
 	std::vector<Handle>::const_iterator i = oset.begin();
 	std::vector<Handle>::const_iterator iend = oset.end();
-	for (; i != iend; i++)
+	for (; i != iend; ++i)
 	{
 		Handle subclause(*i);
 		if (contains_atomtype(subclause, atom_type)) return true;

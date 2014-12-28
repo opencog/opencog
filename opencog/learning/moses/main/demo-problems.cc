@@ -348,7 +348,7 @@ static contin_t largest_const_in_tree(const combo_tree &tr)
 {
     contin_t rc = 0.0;
     combo_tree::pre_order_iterator it;
-    for(it = tr.begin(); it != tr.end(); it++) {
+    for(it = tr.begin(); it != tr.end(); ++it) {
         if (is_contin(*it)) {
             contin_t val = get_contin(*it);
             if (rc < val) rc = val;

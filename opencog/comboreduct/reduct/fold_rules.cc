@@ -19,9 +19,9 @@ void fold_unrolling::operator()(combo_tree& tr,combo_tree::iterator it) const {
         tr.erase_children(it);
         sib_it sib = cb_tr.begin().begin();    // *sib = f
         vertex f = *sib;  
-        sib++;    // *sib = v
+        ++sib;    // *sib = v
         vertex v = *sib;
-        sib++;    // *sib = list(a b c)
+        ++sib;    // *sib = list(a b c)
         combo_tree lst_tr(sib);
         sib_it lst = lst_tr.begin();
         sib_it lst_it = lst.end();
@@ -29,7 +29,7 @@ void fold_unrolling::operator()(combo_tree& tr,combo_tree::iterator it) const {
         do{
             *it = f;
             tr.append_child(it, id::null_vertex);
-            lst_it--;
+            --lst_it;
             tr.append_child(it, *lst_it);
             it = it.begin();
         } while(lst_it != lst.begin());
@@ -41,13 +41,13 @@ void fold_unrolling::operator()(combo_tree& tr,combo_tree::iterator it) const {
         tr.erase_children(it);
         sib_it sib = cb_tr.begin().begin();    // *sib = f
         vertex f = *sib; 
-        sib++;    // *sib = v
+        ++sib;    // *sib = v
         vertex v = *sib;
-        sib++;    // *sib = list(a b c)
+        ++sib;    // *sib = list(a b c)
         combo_tree lst_tr(sib);
         sib_it lst = lst_tr.begin();
 
-        for(sib_it lst_it = lst.begin(); lst_it != lst.end(); lst_it++){
+        for(sib_it lst_it = lst.begin(); lst_it != lst.end(); ++lst_it){
             *it = f;
             tr.append_child(it, *lst_it);
             tr.append_child(it, id::null_vertex);

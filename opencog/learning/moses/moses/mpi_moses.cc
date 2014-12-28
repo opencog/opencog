@@ -208,7 +208,7 @@ void moses_mpi_comm::send_deme(const metapopulation& mp, int n_evals)
     sent_bytes += 2*sizeof(int);
 
     scored_combo_tree_ptr_set_cit it;
-    for (it = mp.begin(); it != mp.end(); it++) {
+    for (it = mp.begin(); it != mp.end(); ++it) {
         const scored_combo_tree& btr = *it;
 
         // We are going to send only the composite score, and not the

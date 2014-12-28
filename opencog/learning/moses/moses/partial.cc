@@ -171,9 +171,9 @@ void partial_solver::final_cleanup(const metapopulation& cands)
         sib_it ldr = _leader.begin();
         sib_it cit = cand.begin();
         cit = cit.begin();
-        for (sib_it lit = ldr.begin(); lit != ldr.end(); lit++) {
+        for (sib_it lit = ldr.begin(); lit != ldr.end(); ++lit) {
             cit = cand.insert_subtree(cit, lit);
-            cit++;
+            ++cit;
         }
         _reduct(cand);
         _exemplars.push_back(cand);
@@ -203,7 +203,7 @@ void partial_solver::effective(combo_tree::iterator pred,
     interpreter_visitor iv(predicate);
     auto interpret_predicate = boost::apply_visitor(iv);
     CTable::iterator cend = _ctable.end();
-    for (CTable::iterator cit = _ctable.begin(); cit != cend; cit++) {
+    for (CTable::iterator cit = _ctable.begin(); cit != cend; ++cit) {
         vertex pr = interpret_predicate(cit->first.get_variant());
         const CTable::counter_t& c = cit->second;
         total_count += c.total_count();
@@ -241,7 +241,7 @@ void partial_solver::trim_table(CTable& taby,
             deleted += tc;
             taby.erase(cit++);
         }
-        else cit++;
+        else ++cit;
     }
 }
 
@@ -291,8 +291,8 @@ void partial_solver::eval_candidate (const combo_tree& cand)
         }
 
         predicate = sib;
-        sib++;
-        sib++;
+        ++sib;
+        ++sib;
 
         // Count how many items the first predicate mis-identifies.
         fail_count = 0;

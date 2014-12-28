@@ -216,14 +216,14 @@ vector<spatial::Point> AStarController::getShortestCalculatedPath()
     vector<spatial::Point>::iterator it_point = calculatedPath.begin();
     shortestCalculatedPath.push_back( *it_point );
     double alpha = (it_point->second - (it_point + 1)->second) / (it_point->first - (it_point + 1)->first);
-    it_point++;
+    ++it_point;
     while ( (it_point + 1) != calculatedPath.end() ) {
         double new_alpha = (it_point->second - (it_point + 1)->second) / (it_point->first - (it_point + 1)->first);
         if ( abs(new_alpha - alpha) > 0.002 ) {
             shortestCalculatedPath.push_back( *it_point );
             alpha = new_alpha;
         }
-        it_point++;
+        ++it_point;
     }
     shortestCalculatedPath.push_back( *it_point );
 

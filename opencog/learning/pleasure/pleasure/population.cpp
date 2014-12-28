@@ -8,7 +8,7 @@ using namespace opencog;
     void erase_duplicate(population& pop);
 
     void reduce(population& pop, const reduct::rule& reduction_rule) {
-        for (population::iterator it = pop.begin(); it != pop.end(); it++) {
+        for (population::iterator it = pop.begin(); it != pop.end(); ++it) {
             reduction_rule(*it);
         }
         erase_duplicate(pop);

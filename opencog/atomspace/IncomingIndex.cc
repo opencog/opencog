@@ -41,7 +41,7 @@ void IncomingIndex::insertAtom(AtomPtr a)
 
 	Handle hin = a->getHandle();
 	const std::vector<Handle>& oset = l->getOutgoingSet();
-	for (std::vector<Handle>::const_iterator it = oset.begin(); it != oset.end(); it++)
+	for (std::vector<Handle>::const_iterator it = oset.begin(); it != oset.end(); ++it)
 	{
 		Handle h = *it;
 		
@@ -52,7 +52,7 @@ void IncomingIndex::insertAtom(AtomPtr a)
 		// of a link, in which case we should ignore the second
 		// (and other) instances.
 		UnorderedHandleSet::const_iterator oit = oldset.begin();
-		for (; oit != oldset.end(); oit++)
+		for (; oit != oldset.end(); ++oit)
 		{
 			// OC_ASSERT(*oit != hin, "Same atom seems to be getting inserted twice!");
 			if (*oit == hin) break;
@@ -74,7 +74,7 @@ void IncomingIndex::removeAtom(AtomPtr a)
 
 	Handle hin = a->getHandle();
 	const std::vector<Handle>& oset = l->getOutgoingSet();
-	for (std::vector<Handle>::const_iterator it = oset.begin(); it != oset.end(); it++)
+	for (std::vector<Handle>::const_iterator it = oset.begin(); it != oset.end(); ++it)
 	{
 		Handle h = *it;
 		
@@ -82,7 +82,7 @@ void IncomingIndex::removeAtom(AtomPtr a)
 		UnorderedHandleSet inset = oldset;
 
 		UnorderedHandleSet::iterator oit = inset.begin();
-		for (; oit != inset.end(); oit++)
+		for (; oit != inset.end(); ++oit)
 		{
 			if (*oit == hin) break;
 		}
@@ -175,7 +175,7 @@ IncomingIndex::iterator& IncomingIndex::iterator::operator++()
 
 IncomingIndex::iterator& IncomingIndex::iterator::operator++(int i)
 {
-	while (0 < i and  _s != _e) { _s++; i--; }
+	while (0 < i and  _s != _e) { ++_s; --i; }
 	return *this;
 }
 

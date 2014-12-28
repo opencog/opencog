@@ -103,7 +103,7 @@ void printSolution(vector<spatial::GridPoint> points)
     int stepCount = 0;
     for (iter = points.begin();
             iter != points.end();
-            iter++) {
+            ++iter) {
         cout << "Node " << stepCount << ": (" << (*iter).first << "," << (*iter).second << ")\n";
         stepCount++;
     }
@@ -116,7 +116,7 @@ void printPointsSolution(vector<spatial::Point> points)
     int stepCount = 0;
     for (iter = points.begin();
             iter != points.end();
-            iter++) {
+            ++iter) {
         cout << "Node " << stepCount << ": (" << (*iter).first << "," << (*iter).second << ")\n";
         stepCount++;
     }
