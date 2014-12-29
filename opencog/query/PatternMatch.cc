@@ -29,10 +29,7 @@
 
 using namespace opencog;
 
-PatternMatch::PatternMatch(void) :
-	_himpl(Handle::UNDEFINED)
-{
-}
+PatternMatch::PatternMatch(void) {}
 
 /// See the documentation for do_match() to see what this function does.
 /// This is just a convenience wrapper around do_match().
@@ -173,42 +170,6 @@ void PatternMatch::do_imply (Handle himplication,
 {
 	validate_implication(himplication);
 
-	// The predicate is either an AndList, or a single clause
-	// If its an AndList, then its a list of clauses.
-	// XXX FIXME Perhaps, someday, some sort of embedded OrList should
-	// be supported, allowing several different patterns to be matched
-	// in one go. But not today, this is complex and low priority. See
-	// the README for slighly more detail
-	std::vector<Handle> affirm, negate;
-	Type tclauses = _hclauses->getType();
-	if (AND_LINK == tclauses)
-	{
-		// Input is in conjunctive normal form, consisting of clauses,
-		// or their negations. Split these into two distinct lists.
-		// Any clause that is a NotLink is "negated"; strip off the
-		// negation and put it into its own list.
-		const std::vector<Handle>& cset = _lclauses->getOutgoingSet();
-		size_t clen = cset.size();
-		for (size_t i=0; i<clen; i++)
-		{
-			Handle h(cset[i]);
-			Type t = h->getType();
-			if (NOT_LINK == t)
-			{
-				negate.push_back(LinkCast(h)->getOutgoingAtom(0));
-			}
-			else
-			{
-				affirm.push_back(h);
-			}
-		}
-	}
-	else
-	{
-		// There's just one single clause!
-		affirm.push_back(_hclauses);
-	}
-
 	// Extract the set of variables, if needed.
 	// This is used only by the deprecated imply() function, as the
 	// BindLink will include a list of variables up-front.
@@ -221,7 +182,7 @@ void PatternMatch::do_imply (Handle himplication,
 
 	// Now perform the search.
 	impl.implicand = _implicand;
-	do_match(&impl, varset, affirm, negate);
+	do_match(&impl, varset, _affirm, _negate);
 }
 
 /* ================================================================= */
@@ -449,6 +410,41 @@ void PatternMatch::validate_implication (Handle himplication)
 	if (NULL == _lclauses)
 		throw InvalidParamException(TRACE_INFO,
 			"Expected non-empty set of clauses in the ImplicationLink");
+
+	// The predicate is either an AndList, or a single clause
+	// If its an AndList, then its a list of clauses.
+	// XXX FIXME Perhaps, someday, some sort of embedded OrList should
+	// be supported, allowing several different patterns to be matched
+	// in one go. But not today, this is complex and low priority. See
+	// the README for slighly more detail
+	Type tclauses = _hclauses->getType();
+	if (AND_LINK == tclauses)
+	{
+		// Input is in conjunctive normal form, consisting of clauses,
+		// or their negations. Split these into two distinct lists.
+		// Any clause that is a NotLink is "negated"; strip off the
+		// negation and put it into its own list.
+		const std::vector<Handle>& cset = _lclauses->getOutgoingSet();
+		size_t clen = cset.size();
+		for (size_t i=0; i<clen; i++)
+		{
+			Handle h(cset[i]);
+			Type t = h->getType();
+			if (NOT_LINK == t)
+			{
+				_negate.push_back(LinkCast(h)->getOutgoingAtom(0));
+			}
+			else
+			{
+				_affirm.push_back(h);
+			}
+		}
+	}
+	else
+	{
+		// There's just one single clause!
+		_affirm.push_back(_hclauses);
+	}
 }
 
 void PatternMatch::validate(Handle hbindlink)
@@ -456,6 +452,7 @@ void PatternMatch::validate(Handle hbindlink)
 {
 	validate_bindvars(hbindlink);
 	validate_implication(_himpl);
+	validate_clauses(_varset, _affirm, _negate);
 }
 
 /* ================================================================= */

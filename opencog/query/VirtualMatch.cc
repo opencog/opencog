@@ -226,6 +226,16 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 }
 
 /* ================================================================= */
+
+void PatternMatch::validate_clauses(std::set<Handle>& vars,
+                            std::vector<Handle>& clauses,
+                            std::vector<Handle>& negations)
+
+	throw (InvalidParamException)
+{
+}
+
+/* ================================================================= */
 /**
  * Ground (solve) a pattern; perform unification. That is, find one
  * or more groundings for the variables occuring in a collection of

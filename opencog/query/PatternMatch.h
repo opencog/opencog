@@ -68,10 +68,18 @@ class PatternMatch
 		Handle _implicand;
 		LinkPtr _lclauses;
 
+		std::vector<Handle> _affirm;
+		std::vector<Handle> _negate;
+
 		void validate_bindvars(Handle)
 					throw (InvalidParamException);
 
 		void validate_implication(Handle)
+					throw (InvalidParamException);
+
+		void validate_clauses(std::set<Handle>& vars,
+		                      std::vector<Handle>& clauses,
+		                      std::vector<Handle>& negations)
 					throw (InvalidParamException);
 
 	public:
