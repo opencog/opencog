@@ -736,7 +736,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	if (get_next_untried_helper(false)) return;
 
 	// If there are no optional clauses, we are done.
-	if (0 == _optionals.size())
+	if (_optionals.empty())
 	{
 		// There are no more ungrounded clauses to consider. We are done.
 		curr_root = Handle::UNDEFINED;

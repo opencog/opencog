@@ -54,7 +54,7 @@ class pool
         Resource& borrow()
         {
             std::unique_lock<std::mutex> lock(mu);
-            while (objs.size() == 0) {
+            while (objs.empty()) {
                 cond.wait(lock);
             }
             Resource& rv = objs.front();

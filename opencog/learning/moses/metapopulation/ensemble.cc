@@ -157,7 +157,7 @@ void ensemble::add_adaboost(scored_combo_tree_set& cands)
 		// Are we done yet?
 		promoted ++;
 		if (_params.num_to_promote <= promoted) break;
-		if (0 == cands.size()) break;
+		if (cands.empty()) break;
 	}
 }
 

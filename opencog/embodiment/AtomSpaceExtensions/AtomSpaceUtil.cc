@@ -3309,7 +3309,7 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                 
 
         // check if there are one element value for each Frame element
-        if ( frameElements.size( ) > 0 ) {
+        if (!frameElements.empty()) {
 
             Handle frameInstance = addNode(atomSpace,
                                                  PREDICATE_NODE,
@@ -3406,7 +3406,7 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
 
             } // for
 
-            if ( frameElementsValuesHandles.size( ) == 0 ) {
+            if (frameElementsValuesHandles.empty()) {
                 std::stringstream msg;
                 msg << "AtomSpaceUtil::%s - You created a Frame with Handle::UNDEFINED ";
                 msg << "in all of its elements, what is probably a useless Frame. Frame name '%s' ";

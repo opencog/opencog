@@ -95,7 +95,7 @@ bscore_base::worst_possible_bscore() const
  */
 complexity_t bscore_base::get_complexity(const scored_combo_tree_set& ensemble) const
 {
-    if (0 == ensemble.size()) return 0.0;
+    if (ensemble.empty()) return 0.0;
 
     double cpxy = 0.0;
     double norm = 0.0;

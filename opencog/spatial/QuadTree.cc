@@ -140,7 +140,7 @@ QuadTree::QuadTree( HPASearch::Level* level, const GridPoint& cellPosition, unsi
 
 void QuadTree::connectEdges( )
 {
-    if ( quads.size( ) > 0 ) {
+    if ( !quads.empty()) {
 
         std::map<POSITION, boost::shared_ptr<QuadTree> >::iterator it;
 
@@ -186,12 +186,12 @@ void QuadTree::connectQuads( QuadTree* quad1, QuadTree* quad2, bool vertical )
     } // else
 
     if ( ( quad1->hasFreeCenter && quad2->hasFreeCenter ) ||
-            ( !quad1->hasFreeCenter && quad1->quads.size( ) > 0 && quad2->hasFreeCenter ) ||
-            ( !quad2->hasFreeCenter && quad2->quads.size( ) > 0 && quad1->hasFreeCenter ) ) {
+            ( !quad1->hasFreeCenter && !quad1->quads.empty() && quad2->hasFreeCenter ) ||
+            ( !quad2->hasFreeCenter && !quad2->quads.empty() && quad1->hasFreeCenter ) ) {
         // simple quads
         processVertices( quad1->getVerticesFrom( side1 ),
                          quad2->getVerticesFrom( side2 ) );
-    } else if ( quad1->quads.size( ) > 0 ) {
+    } else if (!quad1->quads.empty()) {
         // complexs quads (many subdivisions)
         connectQuads( quad1->quads[ position1 ].get( ), quad2->quads[ position2 ].get( ), vertical );
         connectQuads( quad1->quads[ position3 ].get( ), quad2->quads[ position4 ].get( ), vertical );

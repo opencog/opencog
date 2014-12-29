@@ -1442,7 +1442,7 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
 
 
             // if this precondition doesn't share any same varaible with the old groups, add a new group for it
-            if (shareSameVarGroups.size() == 0)
+            if (shareSameVarGroups.empty())
             {
                 ConnectedGroup newGroup;
                 newGroup.insert(std::pair<int,UngroundedVariablesInAState&>(index, record));
@@ -1483,7 +1483,7 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
 
     }
 
-    if (splitPreconList.size() < 1) // all the preconditions are able to connect as one BindLink
+    if (splitPreconList.empty()) // all the preconditions are able to connect as one BindLink
     {
         // just generate one BindLink and call pattern matcher once
         return _findCandidatesByPatternMatching(ruleNode, stateIndexes, varNames);

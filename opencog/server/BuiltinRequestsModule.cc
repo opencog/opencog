@@ -181,7 +181,7 @@ std::string BuiltinRequestsModule::do_startAgents(Request *dummy, std::list<std:
 
     std::vector<std::string> agents;
 
-    if (args.size() == 0)
+    if (args.empty())
         return "Error: No agents to start specified\n";
 
     for (std::list<std::string>::const_iterator it = args.begin();
@@ -212,7 +212,7 @@ std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::
 
     std::vector<std::string> agents;
 
-    if (args.size() == 0)
+    if (args.empty())
         return "Error: No agents to stop specified\n";
 
     for (std::list<std::string>::const_iterator it = args.begin();
@@ -244,7 +244,7 @@ std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::
 {
     AgentSeq agents = _cogserver.runningAgents();
 
-    if (args.size() == 0) {
+    if (args.empty()) {
         for (AgentSeq::const_iterator it = agents.begin();
              it != agents.end(); ++it) {
             (*it)->run();

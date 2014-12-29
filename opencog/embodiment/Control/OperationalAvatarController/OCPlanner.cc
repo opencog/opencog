@@ -125,10 +125,10 @@ bool compareRuleNodeDepth (const RuleNode* one, const RuleNode* other)
 
 void RuleNode::updateCurrentAllBindings()
 {
-    if (currentBindingsFromForwardState.size() > 0)
+    if (!currentBindingsFromForwardState.empty())
         currentAllBindings = currentBindingsFromForwardState;
 
-    if (currentBindingsViaSelecting.size() > 0)
+    if (!currentBindingsViaSelecting.empty())
         currentAllBindings.insert(currentBindingsViaSelecting.begin(),currentBindingsViaSelecting.end());
 }
 
@@ -739,7 +739,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     }
 
 
-    if (unsatisfiedStateNodes.size() == 0)
+    if (unsatisfiedStateNodes.empty())
     {
         std::cout << "The goal is already satisfied! There is no need to do planning!" << std::endl;
         return "";
@@ -752,7 +752,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
     long startTime = t1.tv_sec*1000 + t1.tv_usec/1000;
 
-    while(unsatisfiedStateNodes.size() != 0)
+    while(!unsatisfiedStateNodes.empty())
     {
         Rule* selectedRule = 0;
         RuleNode* selectedRuleNode = 0;
@@ -919,7 +919,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                 // if cannot find a proper rule for this goal, continue to next loop;
                 // in fact in next loop,it will go into the else for processing the situation when curStateNode->hasFoundCandidateRules is true;
-                if (curStateNode->candidateRules.size() == 0)
+                if (curStateNode->candidateRules.empty())
                     continue;
 
                 selectedRule = (curStateNode->candidateRules.begin())->second;
@@ -932,7 +932,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         {
 
             // check if there is any rule left not been tried in the candidate rules
-            if (curStateNode->candidateRules.size() != 0)
+            if (!curStateNode->candidateRules.empty())
             {
                 selectedRule = (curStateNode->candidateRules.front()).second;
                 curStateNode->ruleHistory.push_back((curStateNode->candidateRules.front()).second);
@@ -3030,7 +3030,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
 
 void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode)
 {
-    if (ruleNode->curUngroundedVariables.size() != 0)
+    if (!ruleNode->curUngroundedVariables.empty())
         return; // we have find All the Ungounded Variables for this rule before, we don't need to find them again
 
     map<string , vector<paramIndex> >::iterator paraIt = ruleNode->originalRule->paraIndexMap.begin();
@@ -3338,14 +3338,14 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
             ruleNode->ParamCandidates.push_back(((TmpParamCandidate&)(*tmpIt)).aGroupOfParmCandidate);
 
         // test
-        if (tmpcandidates.size() > 0)
+        if (!tmpcandidates.empty())
             break;
 
     }
 
     delete [] indexes;
 
-    if (ruleNode->ParamCandidates.size() == 0)
+    if (ruleNode->ParamCandidates.empty())
     {
         return false;
     }
