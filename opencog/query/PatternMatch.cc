@@ -171,31 +171,7 @@ void PatternMatch::do_imply (Handle himplication,
                              std::set<Handle>& varset)
 	throw (InvalidParamException)
 {
-	// Must be non-empty.
-	LinkPtr limplication(LinkCast(himplication));
-	if (NULL == limplication)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected ImplicationLink");
-
-	// Type must be as expected
-	Type timpl = himplication->getType();
-	if (IMPLICATION_LINK != timpl)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected ImplicationLink");
-
-	const std::vector<Handle>& oset = limplication->getOutgoingSet();
-	if (2 != oset.size())
-		throw InvalidParamException(TRACE_INFO,
-			"ImplicationLink has wrong size: %d", oset.size());
-
-	Handle hclauses(oset[0]);
-	Handle implicand(oset[1]);
-
-	// Must be non-empty.
-	LinkPtr lclauses(LinkCast(hclauses));
-	if (NULL == lclauses)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected non-empty set of clauses in the ImplicationLink");
+	validate_implication(himplication);
 
 	// The predicate is either an AndList, or a single clause
 	// If its an AndList, then its a list of clauses.
@@ -204,14 +180,14 @@ void PatternMatch::do_imply (Handle himplication,
 	// in one go. But not today, this is complex and low priority. See
 	// the README for slighly more detail
 	std::vector<Handle> affirm, negate;
-	Type tclauses = hclauses->getType();
+	Type tclauses = _hclauses->getType();
 	if (AND_LINK == tclauses)
 	{
 		// Input is in conjunctive normal form, consisting of clauses,
 		// or their negations. Split these into two distinct lists.
 		// Any clause that is a NotLink is "negated"; strip off the
 		// negation and put it into its own list.
-		const std::vector<Handle>& cset = lclauses->getOutgoingSet();
+		const std::vector<Handle>& cset = _lclauses->getOutgoingSet();
 		size_t clen = cset.size();
 		for (size_t i=0; i<clen; i++)
 		{
@@ -230,7 +206,7 @@ void PatternMatch::do_imply (Handle himplication,
 	else
 	{
 		// There's just one single clause!
-		affirm.push_back(hclauses);
+		affirm.push_back(_hclauses);
 	}
 
 	// Extract the set of variables, if needed.
@@ -239,12 +215,12 @@ void PatternMatch::do_imply (Handle himplication,
 	if (0 == varset.size())
 	{
 		FindVariables fv;
-		fv.find_vars(hclauses);
+		fv.find_vars(_hclauses);
 		varset = fv.varset;
 	}
 
 	// Now perform the search.
-	impl.implicand = implicand;
+	impl.implicand = _implicand;
 	do_match(&impl, varset, affirm, negate);
 }
 
@@ -373,8 +349,7 @@ int PatternMatch::get_vartype(Handle htypelink,
  * varaibles.
  */
 
-
-void PatternMatch::validate(Handle hbindlink)
+void PatternMatch::validate_bindvars(Handle hbindlink)
 	throw (InvalidParamException)
 {
 	// Must be non-empty.
@@ -446,6 +421,43 @@ void PatternMatch::validate(Handle hbindlink)
 	}
 }
 
+void PatternMatch::validate_implication (Handle himplication)
+	throw (InvalidParamException)
+{
+	// Must be non-empty.
+	LinkPtr limplication(LinkCast(himplication));
+	if (NULL == limplication)
+		throw InvalidParamException(TRACE_INFO,
+			"Expected ImplicationLink");
+
+	// Type must be as expected
+	Type timpl = himplication->getType();
+	if (IMPLICATION_LINK != timpl)
+		throw InvalidParamException(TRACE_INFO,
+			"Expected ImplicationLink");
+
+	const std::vector<Handle>& oset = limplication->getOutgoingSet();
+	if (2 != oset.size())
+		throw InvalidParamException(TRACE_INFO,
+			"ImplicationLink has wrong size: %d", oset.size());
+
+	_hclauses = oset[0];
+	_implicand = oset[1];
+
+	// Must be non-empty.
+	_lclauses = LinkCast(_hclauses);
+	if (NULL == _lclauses)
+		throw InvalidParamException(TRACE_INFO,
+			"Expected non-empty set of clauses in the ImplicationLink");
+}
+
+void PatternMatch::validate(Handle hbindlink)
+	throw (InvalidParamException)
+{
+	validate_bindvars(hbindlink);
+	validate_implication(_himpl);
+}
+
 /* ================================================================= */
 /**
  * Evaluate an ImplicationLink embedded in a BindLink
@@ -473,7 +485,7 @@ void PatternMatch::do_bindlink (Handle hbindlink,
                                 Implicator& implicator)
 	throw (InvalidParamException)
 {
-	validate(hbindlink);
+	validate_bindvars(hbindlink);
 	implicator.set_type_restrictions(_typemap);
 	do_imply(_himpl, implicator, _varset);
 }

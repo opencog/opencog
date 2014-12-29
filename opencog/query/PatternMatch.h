@@ -64,6 +64,15 @@ class PatternMatch
 
 		/// Handle of the ImplicationLink
 		Handle _himpl;
+		Handle _hclauses;
+		Handle _implicand;
+		LinkPtr _lclauses;
+
+		void validate_bindvars(Handle)
+					throw (InvalidParamException);
+
+		void validate_implication(Handle)
+					throw (InvalidParamException);
 
 	public:
 		PatternMatch(void);
