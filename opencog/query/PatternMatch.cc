@@ -29,7 +29,10 @@
 
 using namespace opencog;
 
-PatternMatch::PatternMatch(void) {}
+PatternMatch::PatternMatch(void) :
+	_himpl(Handle::UNDEFINED)
+{
+}
 
 /// See the documentation for do_match() to see what this function does.
 /// This is just a convenience wrapper around do_match().
@@ -350,6 +353,101 @@ int PatternMatch::get_vartype(Handle htypelink,
 
 /* ================================================================= */
 /**
+ * Validate a BindLink for syntax correctness.
+ *
+ * Given a BindLink, this will check to make sure that the variable
+ * declarations are appropriate, that an ImplicationLink can be found
+ * and is appropriate. Thus, for example, a structure similar to the
+ * below is expected.
+ *
+ *    BindLink
+ *       ListLink
+ *          VariableNode "$var0"
+ *          VariableNode "$var1"
+ *       ImplicationLink
+ *          AndList
+ *             etc ...
+ *
+ * The BindLink must indicate the bindings of the variables, and
+ * (optionally) limit the types of acceptable groundings for the
+ * varaibles.
+ */
+
+
+void PatternMatch::validate(Handle hbindlink)
+	throw (InvalidParamException)
+{
+	// Must be non-empty.
+	LinkPtr lbl(LinkCast(hbindlink));
+	if (NULL == lbl)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a BindLink");
+
+	// Type must be as expected
+	Type tscope = hbindlink->getType();
+	if (BIND_LINK != tscope)
+	{
+		const std::string& tname = classserver().getTypeName(tscope);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a BindLink, got %s", tname.c_str());
+	}
+
+	const std::vector<Handle>& oset = lbl->getOutgoingSet();
+	if (2 != oset.size())
+		throw InvalidParamException(TRACE_INFO,
+			"BindLink has wrong size %d", oset.size());
+
+	Handle hdecls(oset[0]);  // VariableNode declarations
+	_himpl = oset[1];   // ImplicationLink
+
+	// Expecting the declaration list to be either a single
+	// variable, or a list of variable declarations
+	Type tdecls = hdecls->getType();
+	if ((VARIABLE_NODE == tdecls) or
+	    NodeCast(hdecls)) // allow *any* node as a variable
+	{
+		_varset.insert(hdecls);
+	}
+	else if (TYPED_VARIABLE_LINK == tdecls)
+	{
+		if (get_vartype(hdecls, _varset, _typemap))
+			throw InvalidParamException(TRACE_INFO,
+				"Cannot understand the typed variable definition");
+	}
+	else if (LIST_LINK == tdecls)
+	{
+		// The list of variable declarations should be .. a list of
+		// variables! Make sure its as expected.
+		const std::vector<Handle>& dset = LinkCast(hdecls)->getOutgoingSet();
+		size_t dlen = dset.size();
+		for (size_t i=0; i<dlen; i++)
+		{
+			Handle h(dset[i]);
+			Type t = h->getType();
+			if (VARIABLE_NODE == t)
+			{
+				_varset.insert(h);
+			}
+			else if (TYPED_VARIABLE_LINK == t)
+			{
+				if (get_vartype(h, _varset, _typemap))
+					throw InvalidParamException(TRACE_INFO,
+						"Don't understand the TypedVariableLink");
+			}
+			else
+				throw InvalidParamException(TRACE_INFO,
+					"Expected a VariableNode or a TypedVariableLink");
+		}
+	}
+  	else
+	{
+		throw InvalidParamException(TRACE_INFO,
+			"Expected a ListLink holding variable declarations");
+	}
+}
+
+/* ================================================================= */
+/**
  * Evaluate an ImplicationLink embedded in a BindLink
  *
  * Given a BindLink containing variable declarations and an
@@ -375,81 +473,9 @@ void PatternMatch::do_bindlink (Handle hbindlink,
                                 Implicator& implicator)
 	throw (InvalidParamException)
 {
-	// Must be non-empty.
-	LinkPtr lbl(LinkCast(hbindlink));
-	if (NULL == lbl)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a BindLink");
-
-	// Type must be as expected
-	Type tscope = hbindlink->getType();
-	if (BIND_LINK != tscope)
-	{
-		const std::string& tname = classserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a BindLink, got %s", tname.c_str());
-	}
-
-	const std::vector<Handle>& oset = lbl->getOutgoingSet();
-	if (2 != oset.size())
-		throw InvalidParamException(TRACE_INFO,
-			"BindLink has wrong size %d", oset.size());
-
-	Handle hdecls(oset[0]);  // VariableNode declarations
-	Handle himpl(oset[1]);   // ImplicationLink
-
-	// vset is the vector of variables.
-	// typemap is the (possibly empty) list of restrictions on atom types.
-	std::set<Handle> vset;
-	VariableTypeMap typemap;
-
-	// Expecting the declaration list to be either a single
-	// variable, or a list of variable declarations
-	Type tdecls = hdecls->getType();
-	if ((VARIABLE_NODE == tdecls) or
-	    NodeCast(hdecls)) // allow *any* node as a variable
-	{
-		vset.insert(hdecls);
-	}
-	else if (TYPED_VARIABLE_LINK == tdecls)
-	{
-		if (get_vartype(hdecls, vset, typemap))
-			throw InvalidParamException(TRACE_INFO,
-				"Cannot understand the typed variable definition");
-	}
-	else if (LIST_LINK == tdecls)
-	{
-		// The list of variable declarations should be .. a list of
-		// variables! Make sure its as expected.
-		const std::vector<Handle>& dset = LinkCast(hdecls)->getOutgoingSet();
-		size_t dlen = dset.size();
-		for (size_t i=0; i<dlen; i++)
-		{
-			Handle h(dset[i]);
-			Type t = h->getType();
-			if (VARIABLE_NODE == t)
-			{
-				vset.insert(h);
-			}
-			else if (TYPED_VARIABLE_LINK == t)
-			{
-				if (get_vartype(h, vset, typemap))
-					throw InvalidParamException(TRACE_INFO,
-						"Don't understand the TypedVariableLink");
-			}
-			else
-				throw InvalidParamException(TRACE_INFO,
-					"Expected a VariableNode or a TypedVariableLink");
-		}
-	}
-  	else
-	{
-		throw InvalidParamException(TRACE_INFO,
-			"Expected a ListLink holding variable declarations");
-	}
-
-	implicator.set_type_restrictions(typemap);
-	do_imply(himpl, implicator, vset);
+	validate(hbindlink);
+	implicator.set_type_restrictions(_typemap);
+	do_imply(_himpl, implicator, _varset);
 }
 
 void PatternMatch::do_imply (Handle himplication,

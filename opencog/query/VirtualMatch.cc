@@ -456,9 +456,4 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	                  comp_var_gnds, comp_pred_gnds);
 }
 
-void PatternMatch::validate(Handle bindlink)
-	throw (InvalidParamException)
-{
-}
-
 /* ===================== END OF FILE ===================== */
