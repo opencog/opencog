@@ -24,41 +24,55 @@
 
 using namespace opencog;
 
-bool AttentionalFocusCB::node_match(Handle& node1, Handle& node2) {
+bool AttentionalFocusCB::node_match(Handle& node1, Handle& node2)
+{
 	if (node1 == node2
 			and node2->getAttentionValue()->getSTI()
-					> _atom_space->getAttentionalFocusBoundary()) {
+					> _atom_space->getAttentionalFocusBoundary())
+	{
 		return false;
-	} else {
+	}
+	else
+	{
 		return true;
 	}
 }
 
-bool AttentionalFocusCB::link_match(LinkPtr& lpat, LinkPtr& lsoln) {
-	if (DefaultPatternMatchCB::link_match(lpat, lsoln)) {
+bool AttentionalFocusCB::link_match(LinkPtr& lpat, LinkPtr& lsoln)
+{
+	if (DefaultPatternMatchCB::link_match(lpat, lsoln))
+	{
 		return true;
 	}
 	if (lsoln->getAttentionValue()->getSTI()
-			> _atom_space->getAttentionalFocusBoundary()) {
+			> _atom_space->getAttentionalFocusBoundary())
+	{
 		return false;
-	} else {
+	}
+	else
+	{
 		return true;
 	}
 }
 
-IncomingSet AttentionalFocusCB::get_incoming_set(Handle h) {
+IncomingSet AttentionalFocusCB::get_incoming_set(Handle h)
+{
 	const IncomingSet &incoming_set = h->getIncomingSet();
 	IncomingSet filtered_set;
 	for (IncomingSet::const_iterator i = incoming_set.begin();
-			i != incoming_set.end(); ++i) {
+			i != incoming_set.end(); ++i)
+	{
 		Handle candidate_handle(*i);
 		if (candidate_handle->getAttentionValue()->getSTI()
-				> _atom_space->getAttentionalFocusBoundary()) {
+				> _atom_space->getAttentionalFocusBoundary())
+		{
 			filtered_set.push_back(LinkCast(candidate_handle));
 		}
 	}
-	// if none is in AF
-	if (filtered_set.empty()) {
+
+	// If nothing is in AF
+	if (filtered_set.empty())
+	{
 		//xxx what shall we do here?, return the default or return empty ?
 		filtered_set = incoming_set;
 	}
@@ -67,3 +81,10 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h) {
 	return filtered_set;
 }
 
+void AttentionalFocusCB::perform_search(PatternMatchEngine *pme,
+                       std::set<Handle> &vars,
+                       std::vector<Handle> &clauses,
+                       std::vector<Handle> &negations)
+{
+	DefaultPatternMatchCB::perform_search(pme, vars, clauses, negations);
+}
