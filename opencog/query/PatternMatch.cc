@@ -406,8 +406,8 @@ void PatternMatch::validate_implication (Handle himplication)
 	_implicand = oset[1];
 
 	// Must be non-empty.
-	_lclauses = LinkCast(_hclauses);
-	if (NULL == _lclauses)
+	LinkPtr lclauses(LinkCast(_hclauses));
+	if (NULL == lclauses)
 		throw InvalidParamException(TRACE_INFO,
 			"Expected non-empty set of clauses in the ImplicationLink");
 
@@ -424,7 +424,7 @@ void PatternMatch::validate_implication (Handle himplication)
 		// or their negations. Split these into two distinct lists.
 		// Any clause that is a NotLink is "negated"; strip off the
 		// negation and put it into its own list.
-		const std::vector<Handle>& cset = _lclauses->getOutgoingSet();
+		const std::vector<Handle>& cset = lclauses->getOutgoingSet();
 		size_t clen = cset.size();
 		for (size_t i=0; i<clen; i++)
 		{

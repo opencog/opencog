@@ -233,6 +233,112 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 
 	throw (InvalidParamException)
 {
+	// Make sure that the user did not pass in bogus clauses.
+	// Make sure that every clause contains at least one variable.
+	// The presence of constant clauses will mess up the current
+	// pattern matcher.  Constant clauses are "trivial" to match,
+	// and so its pointless to even send them through the system.
+	bool bogus = remove_constants(vars, clauses);
+	if (bogus)
+	{
+		logger().warn("%s: Constant clauses removed from pattern matching",
+			__FUNCTION__);
+	}
+
+	bogus = remove_constants(vars, negations);
+	if (bogus)
+	{
+		logger().warn("%s: Constant clauses removed from pattern negation",
+			__FUNCTION__);
+	}
+
+	// Make sure that each declared variable appears in some clause.
+	// We can't ground variables that aren't attached to something.
+	// Quoted variables are constants, and so don't count.
+	for (Handle v : vars)
+	{
+		if ((not is_variable_in_any_tree(clauses, v))
+		     and (not is_variable_in_any_tree(negations, v)))
+		{
+			std::stringstream ss;
+			ss << "The variable " << v->toString()
+			   << " does not appear (unquoted) in any clause!";
+			throw InvalidParamException(TRACE_INFO, ss.str().c_str());
+		}
+	}
+
+	// Make sure that the pattern is connected
+	if (0 < negations.size())
+	{
+		// The negations should be connected to the clauses.
+		std::vector<Handle> all;
+		all.reserve(clauses.size() + negations.size());
+		all.insert(all.end(), clauses.begin(), clauses.end());
+		all.insert(all.end(), negations.begin(), negations.end());
+		get_connected_components(vars, all, _components);
+	}
+	else
+	{
+		get_connected_components(vars, clauses, _components);
+	}
+
+	if (1 != _components.size())
+	{
+		// Users are going to be stumped by this one, so print
+		// out a verbose, user-freindly debug message to help
+		// them out.
+		std::stringstream ss;
+		ss << "Pattern is not connected! Found "
+		   << _components.size() << " components:\n";
+		int cnt = 0;
+		for (auto comp : _components)
+		{
+			ss << "Connected component " << cnt
+			   << " consists of ----------------: \n";
+			for (Handle h : comp) ss << h->toString();
+			cnt++;
+		}
+		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
+	}
+
+	// get_connected_components re-orders the clauses so that adjacent
+	// clauses are connected.  Using this will make matching slightly
+	// faster. But we don't do this if there are negations, because the
+	// above jammed the negations into the thing, which we must keep
+	// separate.
+	if (0 == negations.size())
+		clauses = *_components.begin();
+
+	// Are there any virtual links in the clauses? If so, then we need
+	// to do some special handling.
+	for (Handle clause: clauses)
+	{
+		if (contains_atomtype(clause, GROUNDED_PREDICATE_NODE))
+			_virtuals.push_back(clause);
+		else
+			_nonvirts.push_back(clause);
+	}
+
+	// The simple case -- we are done with the checking.
+	if (0 == _virtuals.size())
+		return;
+
+	// For now, the virtual links must be at the top. That's because
+	// I don't understand what the semantics would be if they were
+	// anywhere else... need to ask Ben on the mailing list.
+	for (Handle v : _virtuals)
+	{
+		Type vt = v->getType();
+		if (not classserver().isA(vt, EVALUATION_LINK))
+			throw InvalidParamException(TRACE_INFO,
+				"Expecting EvaluationLink at the top level!");
+	}
+
+	// I'm too lazy to do the optional/negated clause bit, just right
+	// now. It adds complexity. So just throw, at this time.
+	if (0 < negations.size())
+		throw InvalidParamException(TRACE_INFO,
+			"Patterns with both virtual and optional clauses not yet supported!");
 }
 
 /* ================================================================= */
@@ -306,119 +412,15 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	throw (InvalidParamException)
 {
-	// Make sure that the user did not pass in bogus clauses.
-	// Make sure that every clause contains at least one variable.
-	// The presence of constant clauses will mess up the current
-	// pattern matcher.  Constant clauses are "trivial" to match,
-	// and so its pointless to even send them through the system.
-	bool bogus = remove_constants(vars, clauses);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern matching",
-			__FUNCTION__);
-	}
-
-	bogus = remove_constants(vars, negations);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern negation",
-			__FUNCTION__);
-	}
-
-	// Make sure that each declared variable appears in some clause.
-	// We can't ground variables that aren't attached to something.
-	// Quoted variables are constants, and so don't count.
-	for (Handle v : vars)
-	{
-		if ((not is_variable_in_any_tree(clauses, v))
-		     and (not is_variable_in_any_tree(negations, v)))
-		{
-			std::stringstream ss;
-			ss << "The variable " << v->toString()
-			   << " does not appear (unquoted) in any clause!";
-			throw InvalidParamException(TRACE_INFO, ss.str().c_str());
-		}
-	}
-
-	// Make sure that the pattern is connected
-	std::set<std::vector<Handle>> components;
-
-	if (0 < negations.size())
-	{
-		// The negations should be connected to the clauses.
-		std::vector<Handle> all;
-		all.reserve(clauses.size() + negations.size());
-		all.insert(all.end(), clauses.begin(), clauses.end());
-		all.insert(all.end(), negations.begin(), negations.end());
-		get_connected_components(vars, all, components);
-	}
-	else
-	{
-		get_connected_components(vars, clauses, components);
-	}
-	if (1 != components.size())
-	{
-		// Users are going to be stumped by this one, so print
-		// out a verbose, user-freindly debug message to help
-		// them out.
-		std::stringstream ss;
-		ss << "Pattern is not connected! Found "
-		   << components.size() << " components:\n";
-		int cnt = 0;
-		for (auto comp : components)
-		{
-			ss << "Connected component " << cnt
-			   << " consists of ----------------: \n";
-			for (Handle h : comp) ss << h->toString();
-			cnt++;
-		}
-		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
-	}
-
-	// get_connected_components re-orders the clauses so that adjacent
-	// clauses are connected.  Using this will make matching slightly
-	// faster. But we don't do this if there are negations, because the
-	// above jammed the negations into the thing, which we must keep
-	// separate.
-	if (0 == negations.size())
-		clauses = *components.begin();
-
-	// Are there any virtual links in the clauses? If so, then we need
-	// to do some special handling.
-	std::vector<Handle> virtuals;
-	std::vector<Handle> nonvirts;
-	for (Handle clause: clauses)
-	{
-		if (contains_atomtype(clause, GROUNDED_PREDICATE_NODE))
-			virtuals.push_back(clause);
-		else
-			nonvirts.push_back(clause);
-	}
+	validate_clauses(vars, clauses, negations);
 
 	// The simple case -- unit propagation through all of the clauses.
-	if (0 == virtuals.size())
+	if (0 == _virtuals.size())
 	{
 		PatternMatchEngine pme;
 		pme.match(cb, vars, clauses, negations);
 		return;
 	}
-
-	// For now, the virtual links must be at the top. That's because
-	// I don't understand what the semantics would be if they were
-	// anywhere else... need to ask Ben on the mailing list.
-	for (Handle v : virtuals)
-	{
-		Type vt = v->getType();
-		if (not classserver().isA(vt, EVALUATION_LINK))
-			throw InvalidParamException(TRACE_INFO,
-				"Expecting EvaluationLink at the top level!");
-	}
-
-	// I'm too lazy to do the optional/negated clause bit, just right
-	// now. It adds complexity. So just throw, at this time.
-	if (0 < negations.size())
-		throw InvalidParamException(TRACE_INFO,
-			"Patterns with both virtual and optional clauses not yet supported!");
 
 	// If we are here, then we've got a knot in the center of it all.
 	// Removing the virtual clauses from the hypergraph typically causes
@@ -434,7 +436,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	std::vector<Handle> empty;
 	std::set<std::vector<Handle>> nvcomps;
-	get_connected_components(vars, nonvirts, nvcomps);
+	get_connected_components(vars, _nonvirts, nvcomps);
 
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds;
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
@@ -461,7 +463,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	       comp_var_gnds.size(), virtuals.size());
 	std::map<Handle, Handle> empty_vg;
 	std::map<Handle, Handle> empty_pg;
-	recursive_virtual(cb, virtuals, negations,
+	recursive_virtual(cb, _virtuals, negations,
 	                  empty_vg, empty_pg,
 	                  comp_var_gnds, comp_pred_gnds);
 }

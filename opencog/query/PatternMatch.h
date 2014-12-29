@@ -59,17 +59,23 @@ class PatternMatch
 		/// Unbundled variables and types for them.
 		/// __typemap is the (possibly empty) list of restrictions on
 		/// the variable types.
+		/// Set by validate_bindvars()
 		std::set<Handle> _varset;
 		VariableTypeMap _typemap;
 
 		/// Handle of the ImplicationLink
 		Handle _himpl;
+
+		/// The actual clauses. Set by validate_implication()
 		Handle _hclauses;
 		Handle _implicand;
-		LinkPtr _lclauses;
-
 		std::vector<Handle> _affirm;
 		std::vector<Handle> _negate;
+
+		/// The graph components. Set by validate_clauses()
+		std::set<std::vector<Handle>> _components;
+		std::vector<Handle> _virtuals;
+		std::vector<Handle> _nonvirts;
 
 		void validate_bindvars(Handle)
 					throw (InvalidParamException);
