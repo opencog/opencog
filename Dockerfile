@@ -5,10 +5,10 @@ RUN apt-get -y install software-properties-common python-pip
 
 # ocpkg tool to install repositories and dependencies
 COPY scripts/ocpkg scripts/install-dependencies-trusty\
-    opencog/python/web/api/install_dependencies.sh /tmp/
-RUN chmod +x /tmp/install-dependencies-trusty /tmp/install_dependencies.sh
+    opencog/python/requirements.txt /tmp/
+RUN chmod +x /tmp/install-dependencies-trusty
 RUN /tmp/install-dependencies-trusty
-RUN /tmp/install_dependencies.sh
+RUN pip install -U -r /tmp/requirements.txt
 
 # Create and switch user. The user is privileged with no password required
 RUN adduser --disabled-password --gecos "OpenCog Developer" opencog
