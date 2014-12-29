@@ -197,7 +197,7 @@ void SCMExecutionUTest::test_multi_threads(void)
 	// num_atoms * n_threads  Concept    julians
 	// num_atoms * n_threads  Inheritance  julian prince
 	// num_atoms * n_threads  ListLink  julian
-	// num_atoms * n_threads  ExecutiuonLink
+	// num_atoms * n_threads  ExecutionLink
 	// num_atoms * n_threads  Inheritance  julian king
 	// for a total of 3 + 5 * num_atoms * n_threads atoms created, total.
 	TS_ASSERT_EQUALS(size, 5 * num_atoms * n_threads + 3);

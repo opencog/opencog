@@ -56,8 +56,46 @@ class PatternMatch
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds);
 
+		/// Unbundled variables and types for them.
+		/// __typemap is the (possibly empty) list of restrictions on
+		/// the variable types.
+		/// Set by validate_bindvars()
+		std::set<Handle> _varset;
+		VariableTypeMap _typemap;
+
+		/// Handle of the ImplicationLink
+		Handle _himpl;
+
+		/// The actual clauses. Set by validate_implication()
+		Handle _hclauses;
+		Handle _implicand;
+		std::vector<Handle> _affirm;
+		std::vector<Handle> _negate;
+
+		/// The graph components. Set by validate_clauses()
+		std::set<std::vector<Handle>> _components;
+		std::vector<Handle> _virtuals;
+		std::vector<Handle> _nonvirts;
+
+		// Validate the top-level BindLink only
+		void validate_bindvars(Handle)
+			throw (InvalidParamException);
+
+		// Validate the strcture of the ImplicationLink
+		void validate_implication(Handle)
+			throw (InvalidParamException);
+
+		// Validate the clauses inside the ImplicationLink
+		void validate_clauses(std::set<Handle>& vars,
+		                      std::vector<Handle>& clauses,
+		                      std::vector<Handle>& negations)
+			throw (InvalidParamException);
+
 	public:
 		PatternMatch(void);
+
+		void validate(Handle)
+			throw (InvalidParamException);
 
 		void match(PatternMatchCallback *,
 		           Handle vars,
@@ -66,7 +104,7 @@ class PatternMatch
 			throw (InvalidParamException);
 
 		void do_bindlink(Handle, Implicator&)
-					throw (InvalidParamException);
+			throw (InvalidParamException);
 
 		// Deprecated: used only in the unit-test cases.
 		void do_imply(Handle, Implicator&)

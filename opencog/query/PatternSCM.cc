@@ -63,6 +63,9 @@ PatternSCM::PatternSCM(void)
 
 	// Mystery function
 	_binders.push_back(new PatternWrap(pln_bindlink, "cog-bind-pln"));
+
+	// Validate the bindlink for syntax correctness
+	_binders.push_back(new PatternWrap(validate_bindlink, "cog-validate-bindlink"));
 }
 
 PatternSCM::~PatternSCM()

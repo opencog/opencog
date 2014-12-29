@@ -168,67 +168,7 @@ void PatternMatch::do_imply (Handle himplication,
                              std::set<Handle>& varset)
 	throw (InvalidParamException)
 {
-	// Must be non-empty.
-	LinkPtr limplication(LinkCast(himplication));
-	if (NULL == limplication)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected ImplicationLink");
-
-	// Type must be as expected
-	Type timpl = himplication->getType();
-	if (IMPLICATION_LINK != timpl)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected ImplicationLink");
-
-	const std::vector<Handle>& oset = limplication->getOutgoingSet();
-	if (2 != oset.size())
-		throw InvalidParamException(TRACE_INFO,
-			"ImplicationLink has wrong size: %d", oset.size());
-
-	Handle hclauses(oset[0]);
-	Handle implicand(oset[1]);
-
-	// Must be non-empty.
-	LinkPtr lclauses(LinkCast(hclauses));
-	if (NULL == lclauses)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected non-empty set of clauses in the ImplicationLink");
-
-	// The predicate is either an AndList, or a single clause
-	// If its an AndList, then its a list of clauses.
-	// XXX FIXME Perhaps, someday, some sort of embedded OrList should
-	// be supported, allowing several different patterns to be matched
-	// in one go. But not today, this is complex and low priority. See
-	// the README for slighly more detail
-	std::vector<Handle> affirm, negate;
-	Type tclauses = hclauses->getType();
-	if (AND_LINK == tclauses)
-	{
-		// Input is in conjunctive normal form, consisting of clauses,
-		// or their negations. Split these into two distinct lists.
-		// Any clause that is a NotLink is "negated"; strip off the
-		// negation and put it into its own list.
-		const std::vector<Handle>& cset = lclauses->getOutgoingSet();
-		size_t clen = cset.size();
-		for (size_t i=0; i<clen; i++)
-		{
-			Handle h(cset[i]);
-			Type t = h->getType();
-			if (NOT_LINK == t)
-			{
-				negate.push_back(LinkCast(h)->getOutgoingAtom(0));
-			}
-			else
-			{
-				affirm.push_back(h);
-			}
-		}
-	}
-	else
-	{
-		// There's just one single clause!
-		affirm.push_back(hclauses);
-	}
+	validate_implication(himplication);
 
 	// Extract the set of variables, if needed.
 	// This is used only by the deprecated imply() function, as the
@@ -236,13 +176,13 @@ void PatternMatch::do_imply (Handle himplication,
 	if (0 == varset.size())
 	{
 		FindVariables fv;
-		fv.find_vars(hclauses);
+		fv.find_vars(_hclauses);
 		varset = fv.varset;
 	}
 
 	// Now perform the search.
-	impl.implicand = implicand;
-	do_match(&impl, varset, affirm, negate);
+	impl.implicand = _implicand;
+	do_match(&impl, varset, _affirm, _negate);
 }
 
 /* ================================================================= */
@@ -350,6 +290,197 @@ int PatternMatch::get_vartype(Handle htypelink,
 
 /* ================================================================= */
 /**
+ * Validate a BindLink for syntax correctness.
+ *
+ * Given a BindLink, this will check to make sure that the variable
+ * declarations are appropriate.  Thus, for example, a structure
+ * similar to the below is expected.
+ *
+ *    BindLink
+ *       ListLink
+ *          VariableNode "$var0"
+ *          VariableNode "$var1"
+ *       ImplicationLink
+ *          etc ...
+ *
+ * The BindLink must indicate the bindings of the variables, and
+ * (optionally) limit the types of acceptable groundings for the
+ * varaibles.  The ImplicationLink is not validated here, it is
+ * validated by validate_implication()
+ *
+ * As a side-effect, the variables and type restrictions are unpacked.
+ */
+
+void PatternMatch::validate_bindvars(Handle hbindlink)
+	throw (InvalidParamException)
+{
+	// Must be non-empty.
+	LinkPtr lbl(LinkCast(hbindlink));
+	if (NULL == lbl)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a BindLink");
+
+	// Type must be as expected
+	Type tscope = hbindlink->getType();
+	if (BIND_LINK != tscope)
+	{
+		const std::string& tname = classserver().getTypeName(tscope);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a BindLink, got %s", tname.c_str());
+	}
+
+	const std::vector<Handle>& oset = lbl->getOutgoingSet();
+	if (2 != oset.size())
+		throw InvalidParamException(TRACE_INFO,
+			"BindLink has wrong size %d", oset.size());
+
+	Handle hdecls(oset[0]);  // VariableNode declarations
+	_himpl = oset[1];   // ImplicationLink
+
+	// Expecting the declaration list to be either a single
+	// variable, or a list of variable declarations
+	Type tdecls = hdecls->getType();
+	if ((VARIABLE_NODE == tdecls) or
+	    NodeCast(hdecls)) // allow *any* node as a variable
+	{
+		_varset.insert(hdecls);
+	}
+	else if (TYPED_VARIABLE_LINK == tdecls)
+	{
+		if (get_vartype(hdecls, _varset, _typemap))
+			throw InvalidParamException(TRACE_INFO,
+				"Cannot understand the typed variable definition");
+	}
+	else if (LIST_LINK == tdecls)
+	{
+		// The list of variable declarations should be .. a list of
+		// variables! Make sure its as expected.
+		const std::vector<Handle>& dset = LinkCast(hdecls)->getOutgoingSet();
+		size_t dlen = dset.size();
+		for (size_t i=0; i<dlen; i++)
+		{
+			Handle h(dset[i]);
+			Type t = h->getType();
+			if (VARIABLE_NODE == t)
+			{
+				_varset.insert(h);
+			}
+			else if (TYPED_VARIABLE_LINK == t)
+			{
+				if (get_vartype(h, _varset, _typemap))
+					throw InvalidParamException(TRACE_INFO,
+						"Don't understand the TypedVariableLink");
+			}
+			else
+				throw InvalidParamException(TRACE_INFO,
+					"Expected a VariableNode or a TypedVariableLink");
+		}
+	}
+  	else
+	{
+		throw InvalidParamException(TRACE_INFO,
+			"Expected a ListLink holding variable declarations");
+	}
+}
+
+/* ================================================================= */
+/**
+ * Validate a ImplicationLink for syntax correctness.
+ *
+ * Given an ImplicatioLink, this will check to make sure that
+ * it is of the appropriate structure: that it consists of two
+ * parts: a set of clauses, and an implicand.  That is, it must
+ * have the structure:
+ *
+ *    ImplicationLink
+ *       SomeLink
+ *       AnotherLink
+ *
+ * The conetns of "SomeLink" is not validated here, it is
+ * validated by validate_clauses()
+ *
+ * As a side-effect, if SomeLink is an AndLink, the list of clauses
+ * is unpacked.
+ */
+void PatternMatch::validate_implication (Handle himplication)
+	throw (InvalidParamException)
+{
+	// Must be non-empty.
+	LinkPtr limplication(LinkCast(himplication));
+	if (NULL == limplication)
+		throw InvalidParamException(TRACE_INFO,
+			"Expected ImplicationLink");
+
+	// Type must be as expected
+	Type timpl = himplication->getType();
+	if (IMPLICATION_LINK != timpl)
+		throw InvalidParamException(TRACE_INFO,
+			"Expected ImplicationLink");
+
+	const std::vector<Handle>& oset = limplication->getOutgoingSet();
+	if (2 != oset.size())
+		throw InvalidParamException(TRACE_INFO,
+			"ImplicationLink has wrong size: %d", oset.size());
+
+	_hclauses = oset[0];
+	_implicand = oset[1];
+
+	// Must be non-empty.
+	LinkPtr lclauses(LinkCast(_hclauses));
+	if (NULL == lclauses)
+		throw InvalidParamException(TRACE_INFO,
+			"Expected non-empty set of clauses in the ImplicationLink");
+
+	// The predicate is either an AndList, or a single clause
+	// If its an AndList, then its a list of clauses.
+	// XXX FIXME Perhaps, someday, some sort of embedded OrList should
+	// be supported, allowing several different patterns to be matched
+	// in one go. But not today, this is complex and low priority. See
+	// the README for slighly more detail
+	Type tclauses = _hclauses->getType();
+	if (AND_LINK == tclauses)
+	{
+		// Input is in conjunctive normal form, consisting of clauses,
+		// or their negations. Split these into two distinct lists.
+		// Any clause that is a NotLink is "negated"; strip off the
+		// negation and put it into its own list.
+		const std::vector<Handle>& cset = lclauses->getOutgoingSet();
+		size_t clen = cset.size();
+		for (size_t i=0; i<clen; i++)
+		{
+			Handle h(cset[i]);
+			Type t = h->getType();
+			if (NOT_LINK == t)
+			{
+				_negate.push_back(LinkCast(h)->getOutgoingAtom(0));
+			}
+			else
+			{
+				_affirm.push_back(h);
+			}
+		}
+	}
+	else
+	{
+		// There's just one single clause!
+		_affirm.push_back(_hclauses);
+	}
+}
+
+/* ================================================================= */
+/**
+ * Run the full validation suite.
+ */
+void PatternMatch::validate(Handle hbindlink)
+	throw (InvalidParamException)
+{
+	validate_bindvars(hbindlink);
+	validate_implication(_himpl);
+	validate_clauses(_varset, _affirm, _negate);
+}
+
+/* ================================================================= */
+/**
  * Evaluate an ImplicationLink embedded in a BindLink
  *
  * Given a BindLink containing variable declarations and an
@@ -375,81 +506,9 @@ void PatternMatch::do_bindlink (Handle hbindlink,
                                 Implicator& implicator)
 	throw (InvalidParamException)
 {
-	// Must be non-empty.
-	LinkPtr lbl(LinkCast(hbindlink));
-	if (NULL == lbl)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a BindLink");
-
-	// Type must be as expected
-	Type tscope = hbindlink->getType();
-	if (BIND_LINK != tscope)
-	{
-		const std::string& tname = classserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a BindLink, got %s", tname.c_str());
-	}
-
-	const std::vector<Handle>& oset = lbl->getOutgoingSet();
-	if (2 != oset.size())
-		throw InvalidParamException(TRACE_INFO,
-			"BindLink has wrong size %d", oset.size());
-
-	Handle hdecls(oset[0]);  // VariableNode declarations
-	Handle himpl(oset[1]);   // ImplicationLink
-
-	// vset is the vector of variables.
-	// typemap is the (possibly empty) list of restrictions on atom types.
-	std::set<Handle> vset;
-	VariableTypeMap typemap;
-
-	// Expecting the declaration list to be either a single
-	// variable, or a list of variable declarations
-	Type tdecls = hdecls->getType();
-	if ((VARIABLE_NODE == tdecls) or
-	    NodeCast(hdecls)) // allow *any* node as a variable
-	{
-		vset.insert(hdecls);
-	}
-	else if (TYPED_VARIABLE_LINK == tdecls)
-	{
-		if (get_vartype(hdecls, vset, typemap))
-			throw InvalidParamException(TRACE_INFO,
-				"Cannot understand the typed variable definition");
-	}
-	else if (LIST_LINK == tdecls)
-	{
-		// The list of variable declarations should be .. a list of
-		// variables! Make sure its as expected.
-		const std::vector<Handle>& dset = LinkCast(hdecls)->getOutgoingSet();
-		size_t dlen = dset.size();
-		for (size_t i=0; i<dlen; i++)
-		{
-			Handle h(dset[i]);
-			Type t = h->getType();
-			if (VARIABLE_NODE == t)
-			{
-				vset.insert(h);
-			}
-			else if (TYPED_VARIABLE_LINK == t)
-			{
-				if (get_vartype(h, vset, typemap))
-					throw InvalidParamException(TRACE_INFO,
-						"Don't understand the TypedVariableLink");
-			}
-			else
-				throw InvalidParamException(TRACE_INFO,
-					"Expected a VariableNode or a TypedVariableLink");
-		}
-	}
-  	else
-	{
-		throw InvalidParamException(TRACE_INFO,
-			"Expected a ListLink holding variable declarations");
-	}
-
-	implicator.set_type_restrictions(typemap);
-	do_imply(himpl, implicator, vset);
+	validate_bindvars(hbindlink);
+	implicator.set_type_restrictions(_typemap);
+	do_imply(_himpl, implicator, _varset);
 }
 
 void PatternMatch::do_imply (Handle himplication,
