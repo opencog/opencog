@@ -408,7 +408,7 @@ bool TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship cri
                 UnorderedHandleSet* hs = temporalMap->get(currentTe->time);
                 hs->erase(h);
                 DPRINTF("H removed from handle set!\n");
-                if (hs->size() == 0) {
+                if (hs->empty()) {
                     DPRINTF("Handle set became empty!\n");
                     temporalMap->remove(currentTe->time);
                     delete hs;
@@ -439,7 +439,7 @@ bool TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship cri
         UnorderedHandleSet* hs = temporalMap->get(previousTime);
         hs->erase(h);
         DPRINTF("H removed from handle set!\n");
-        if (hs->size() == 0) {
+        if (hs->empty()) {
             DPRINTF("Handle set became empty!\n");
             temporalMap->remove(previousTime);
             delete hs;

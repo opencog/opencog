@@ -40,7 +40,7 @@ SleepRequest::~SleepRequest()
 bool SleepRequest::execute()
 {
     int seconds = 5;
-    if (_parameters.size() > 0) {
+    if (!_parameters.empty()) {
         seconds = atoi(_parameters.begin()->c_str()); 
     }
 

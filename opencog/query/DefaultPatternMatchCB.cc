@@ -240,7 +240,7 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 
 	if ((Handle::UNDEFINED != best_start) and 
 	    // (Handle::UNDEFINED != _starter_pred) and
-	    (0 != vars.size()))
+	    (!vars.empty()))
 	{
 		_root = clauses[bestclause];
 		dbgprt("Search start node: %s\n", best_start->toShortString().c_str());

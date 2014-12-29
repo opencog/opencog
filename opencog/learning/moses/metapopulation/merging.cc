@@ -322,7 +322,7 @@ bool metapopulation::merge_demes(std::vector<std::vector<deme_t>>& all_demes,
         }
     }
 
-    if (0 == candidates.size()) return false;
+    if (candidates.empty()) return false;
 
     // Update the record of the best-seen score & trees
     update_best_candidates(candidates);

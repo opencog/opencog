@@ -565,7 +565,7 @@ void mpi_moses(metapopulation& mp,
     while (true)
     {
         // Feeder: push work out to each worker.
-        while ((0 < wrkpool.size()) && !done) {
+        while ((!wrkpool.empty()) && !done) {
             scored_combo_tree_ptr_set_cit exemplar = mp.select_exemplar();
             if (exemplar == mp.end()) {
 

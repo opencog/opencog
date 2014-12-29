@@ -281,7 +281,7 @@ void SpatialPredicateUpdater::computeRelationshipsBetweenObjectsAndAvatars(const
                                             unsigned long timestamp)
 {
     // if there is any avatar updated in this frame, then we have to update all the relationships between this avatar and all the other object on the map
-    if (avatars.size() != 0)
+    if (!avatars.empty())
     {
         const map<Handle, Entity3D*> allNoneBlockEntities= spaceMap.getAllNoneBlockEntities();
 

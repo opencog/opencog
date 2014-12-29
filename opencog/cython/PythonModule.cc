@@ -205,7 +205,7 @@ bool PythonModule::preloadModules()
 //
 std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args)
 {
-    if (args.size() == 0) return "Please specify Python module to load.";
+    if (args.empty()) return "Please specify Python module to load.";
     std::string moduleName = args.front();
 
     std::ostringstream oss;

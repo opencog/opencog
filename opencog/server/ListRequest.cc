@@ -55,7 +55,7 @@ bool ListRequest::execute()
     bool subtypes = false;
     AtomSpace& as = _cogserver.getAtomSpace();
 
-    if (0 == _parameters.size()) {
+    if (_parameters.empty()) {
         _error << "Error: option required" << std::endl;
         sendError();
         return false;

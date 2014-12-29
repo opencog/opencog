@@ -65,7 +65,7 @@ std::string SchemeShellModule::shellout(Request *req, std::list<std::string> arg
 	sh->set_socket(s);
 
 	bool hush = false;
-	if (0 < args.size())
+	if (!args.empty())
 	{
 		std::string &arg = args.front();
 		if (arg.compare("quiet") || arg.compare("hush")) hush = true;

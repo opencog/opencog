@@ -2514,7 +2514,7 @@ typename tree<T, tree_node_allocator>::breadth_first_queued_iterator& tree<T, tr
         ++sib;
     }
     traversal_queue.pop();
-    if(traversal_queue.size()>0)
+    if(!traversal_queue.empty())
         this->node=traversal_queue.front();
     else
         this->node=0;

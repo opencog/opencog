@@ -278,7 +278,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
 
         logger().debug("ImitationLearningAgent - ActionFilter, stop processing.");
 
-        if (_atomic_actions.size() > 0) {
+        if (!_atomic_actions.empty()) {
 
             //debug log
             if (logger().isDebugEnabled()) {
