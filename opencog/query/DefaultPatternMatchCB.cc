@@ -245,6 +245,10 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 		_root = clauses[bestclause];
 		dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
 		dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
+
+		// This should be calling the over-loaded virtual method
+		// get_incoming_set(), so that, e.g. it gets sorted by attentional
+		// focus in the AttentionalFocusCB class...
 		IncomingSet iset = get_incoming_set(best_start);
 		size_t sz = iset.size();
 		for (size_t i = 0; i < sz; i++) {
@@ -254,35 +258,41 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 			bool rc = pme->do_candidate(_root, _starter_pred, h);
 			if (rc) break;
 		}
+
+		// If we are here, we are done.
+		return;
 	}
-	else
+
+	// If we are here, then we could not find a clause at which to start,
+	// as, apparently, the clauses consist entirely of variables!! So,
+	// basically, we must search the entire!! atomspace, in this case.
+	// Yes, this hurts.
+	_root = clauses[0];
+	_starter_pred = _root;
+
+	dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
+
+	// Get type of the first item in the predicate list.
+	Type ptype = _root->getType();
+
+	// Plunge into the deep end - start looking at all viable
+	// candidates in the AtomSpace.
+
+	// XXX TODO -- as a performance optimization, we should try all
+	// the different clauses, and find the one with the smallest number
+	// of atoms of that type, or otherwise try to find a small ("thin")
+	// incoming set to search over.
+	std::list<Handle> handle_set;
+	_atom_space->getHandlesByType(back_inserter(handle_set), ptype);
+	std::list<Handle>::iterator i = handle_set.begin();
+	std::list<Handle>::iterator iend = handle_set.end();
+	for (; i != iend; ++i)
 	{
-		_root = clauses[0];
-		_starter_pred = _root;
-
-		dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
-		// Get type of the first item in the predicate list.
-		Type ptype = _root->getType();
-
-		// Plunge into the deep end - start looking at all viable
-		// candidates in the AtomSpace.
-
-		// XXX TODO -- as a performance optimization, we should try all
-		// the different clauses, and find the one with the smallest number
-		// of atoms of that type, or otherwise try to find a small ("thin")
-		// incoming set to search over.
-		std::list<Handle> handle_set;
-		_atom_space->getHandlesByType(back_inserter(handle_set), ptype);
-		std::list<Handle>::iterator i = handle_set.begin();
-		std::list<Handle>::iterator iend = handle_set.end();
-		for (; i != iend; ++i)
-		{
-			Handle h(*i);
-			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-			dbgprt("Loop candidate: %s\n", h->toShortString().c_str());
-			bool rc = pme->do_candidate(_root, _starter_pred, h);
-			if (rc) break;
-		}
+		Handle h(*i);
+		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+		dbgprt("Loop candidate: %s\n", h->toShortString().c_str());
+		bool rc = pme->do_candidate(_root, _starter_pred, h);
+		if (rc) break;
 	}
 }
 
