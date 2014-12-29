@@ -83,9 +83,9 @@ class PMCGroundings : public PatternMatchCallback
 			_cb->set_type_restrictions(tm);
 		}
 		void perform_search(PatternMatchEngine* pme,
-                          std::set<Handle> &vars,
-                          std::vector<Handle> &clauses,
-                          std::vector<Handle> &negations)
+	                       std::set<Handle> &vars,
+	                       std::vector<Handle> &clauses,
+	                       std::vector<Handle> &negations)
 		{
 			_cb->perform_search(pme, vars, clauses, negations);
 		}
@@ -441,7 +441,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	//
 	// There are several solution strategies posible at this point.
 	// The one that we will pursue, for now, is to first ground all of
-   // the distinct components individually, and then run each possible
+	// the distinct components individually, and then run each possible
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
 
