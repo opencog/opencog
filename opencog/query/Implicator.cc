@@ -178,4 +178,16 @@ Handle opencog::pln_bindlink(AtomSpace* as, Handle himplication)
 	return gl;
 }
 
+/**
+ * Verify a BindLink for syntax correctness. This will throw an
+ * error if the syntax is bad.
+ */
+Handle opencog::validate_bindlink(AtomSpace* as, Handle bindlink)
+{
+	PatternMatch pm;
+	pm.validate(bindlink);
+
+	return bindlink;
+}
+
 /* ===================== END OF FILE ===================== */

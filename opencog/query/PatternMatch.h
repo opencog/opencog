@@ -59,6 +59,9 @@ class PatternMatch
 	public:
 		PatternMatch(void);
 
+		void validate(Handle)
+					throw (InvalidParamException);
+
 		void match(PatternMatchCallback *,
 		           Handle vars,
 		           Handle clauses,
