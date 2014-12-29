@@ -227,6 +227,17 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 
 /* ================================================================= */
 
+/**
+ * Validate a collection of of clauses and negations for correctness.
+ *
+ * Every clause should contain at least one variable in it; clauses
+ * that don't are constants and can be trivially discarded.
+ * Furthermore, all clauses should be connected. Two clauses are
+ * connected if they contain a common variable.
+ *
+ * As a side effect, this looks for 'virtual links' and separates
+ * them out into a distinct list.
+ */
 void PatternMatch::validate_clauses(std::set<Handle>& vars,
                             std::vector<Handle>& clauses,
                             std::vector<Handle>& negations)

@@ -77,22 +77,25 @@ class PatternMatch
 		std::vector<Handle> _virtuals;
 		std::vector<Handle> _nonvirts;
 
+		// Validate the top-level BindLink only
 		void validate_bindvars(Handle)
-					throw (InvalidParamException);
+			throw (InvalidParamException);
 
+		// Validate the strcture of the ImplicationLink
 		void validate_implication(Handle)
-					throw (InvalidParamException);
+			throw (InvalidParamException);
 
+		// Validate the clauses inside the ImplicationLink
 		void validate_clauses(std::set<Handle>& vars,
 		                      std::vector<Handle>& clauses,
 		                      std::vector<Handle>& negations)
-					throw (InvalidParamException);
+			throw (InvalidParamException);
 
 	public:
 		PatternMatch(void);
 
 		void validate(Handle)
-					throw (InvalidParamException);
+			throw (InvalidParamException);
 
 		void match(PatternMatchCallback *,
 		           Handle vars,
@@ -101,7 +104,7 @@ class PatternMatch
 			throw (InvalidParamException);
 
 		void do_bindlink(Handle, Implicator&)
-					throw (InvalidParamException);
+			throw (InvalidParamException);
 
 		// Deprecated: used only in the unit-test cases.
 		void do_imply(Handle, Implicator&)

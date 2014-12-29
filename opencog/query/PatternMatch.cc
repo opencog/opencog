@@ -293,21 +293,22 @@ int PatternMatch::get_vartype(Handle htypelink,
  * Validate a BindLink for syntax correctness.
  *
  * Given a BindLink, this will check to make sure that the variable
- * declarations are appropriate, that an ImplicationLink can be found
- * and is appropriate. Thus, for example, a structure similar to the
- * below is expected.
+ * declarations are appropriate.  Thus, for example, a structure
+ * similar to the below is expected.
  *
  *    BindLink
  *       ListLink
  *          VariableNode "$var0"
  *          VariableNode "$var1"
  *       ImplicationLink
- *          AndList
- *             etc ...
+ *          etc ...
  *
  * The BindLink must indicate the bindings of the variables, and
  * (optionally) limit the types of acceptable groundings for the
- * varaibles.
+ * varaibles.  The ImplicationLink is not validated here, it is
+ * validated by validate_implication()
+ *
+ * As a side-effect, the variables and type restrictions are unpacked.
  */
 
 void PatternMatch::validate_bindvars(Handle hbindlink)
@@ -382,6 +383,25 @@ void PatternMatch::validate_bindvars(Handle hbindlink)
 	}
 }
 
+/* ================================================================= */
+/**
+ * Validate a ImplicationLink for syntax correctness.
+ *
+ * Given an ImplicatioLink, this will check to make sure that
+ * it is of the appropriate structure: that it consists of two
+ * parts: a set of clauses, and an implicand.  That is, it must
+ * have the structure:
+ *
+ *    ImplicationLink
+ *       SomeLink
+ *       AnotherLink
+ *
+ * The conetns of "SomeLink" is not validated here, it is
+ * validated by validate_clauses()
+ *
+ * As a side-effect, if SomeLink is an AndLink, the list of clauses
+ * is unpacked.
+ */
 void PatternMatch::validate_implication (Handle himplication)
 	throw (InvalidParamException)
 {
@@ -447,6 +467,10 @@ void PatternMatch::validate_implication (Handle himplication)
 	}
 }
 
+/* ================================================================= */
+/**
+ * Run the full validation suite.
+ */
 void PatternMatch::validate(Handle hbindlink)
 	throw (InvalidParamException)
 {
