@@ -80,11 +80,3 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h)
 
 	return filtered_set;
 }
-
-void AttentionalFocusCB::perform_search(PatternMatchEngine *pme,
-                       std::set<Handle> &vars,
-                       std::vector<Handle> &clauses,
-                       std::vector<Handle> &negations)
-{
-	DefaultPatternMatchCB::perform_search(pme, vars, clauses, negations);
-}

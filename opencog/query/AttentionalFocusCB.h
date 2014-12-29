@@ -42,10 +42,7 @@ public:
 	bool node_match(Handle&, Handle&);
 	bool link_match(LinkPtr&, LinkPtr&);
 	IncomingSet get_incoming_set(Handle h);
-	void perform_search(PatternMatchEngine *,
-	                    std::set<Handle> &vars,
-	                    std::vector<Handle> &clauses,
-	                    std::vector<Handle> &negations);
 };
+
 } //namespace opencog
 #endif /* _ATTENTIONALFOCUSCB_H */
