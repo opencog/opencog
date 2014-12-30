@@ -102,9 +102,27 @@
 )
 
 
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lily")
+    (ConceptNode "apple")
+  )
+)
+
+
 (InheritanceLink (stv 1.000000 1.000000)
   (ConceptNode "pear")
   (ConceptNode "fruit")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Emily")
+    (ConceptNode "pear")
+  )
 )
 
 
@@ -114,9 +132,27 @@
 )
 
 
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lucy")
+    (ConceptNode "orange")
+  )
+)
+
+
 (InheritanceLink (stv 1.000000 1.000000)
   (ConceptNode "Lemon")
   (ConceptNode "fruit")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Sophia")
+    (ConceptNode "Lemon")
+  )
 )
 
 
@@ -126,9 +162,177 @@
 )
 
 
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lily")
+    (ConceptNode "strawberry")
+  )
+)
+
+
 (InheritanceLink (stv 1.000000 1.000000)
   (ConceptNode "banana")
   (ConceptNode "fruit")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Emily")
+    (ConceptNode "banana")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "apricot")
+  (ConceptNode "fruit")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lucy")
+    (ConceptNode "apricot")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "cherry")
+  (ConceptNode "fruit")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Sophia")
+    (ConceptNode "cherry")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "durian")
+  (ConceptNode "fruit")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lily")
+    (ConceptNode "durian")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "grape")
+  (ConceptNode "fruit")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Emily")
+    (ConceptNode "grape")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "kiwi fruit")
+  (ConceptNode "fruit")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lucy")
+    (ConceptNode "kiwi fruit")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "coconut")
+  (ConceptNode "fruit")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Sophia")
+    (ConceptNode "coconut")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "guava")
+  (ConceptNode "fruit")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lily")
+    (ConceptNode "guava")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "dragonfruit")
+  (ConceptNode "fruit")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Emily")
+    (ConceptNode "dragonfruit")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "watermelon")
+  (ConceptNode "fruit")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lucy")
+    (ConceptNode "watermelon")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "mango")
+  (ConceptNode "fruit")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Sophia")
+    (ConceptNode "mango")
+  )
 )
 
 
@@ -138,9 +342,27 @@
 )
 
 
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lily")
+    (ConceptNode "Cabbage")
+  )
+)
+
+
 (InheritanceLink (stv 1.000000 1.000000)
   (ConceptNode "Celery")
   (ConceptNode "vegetable")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Emily")
+    (ConceptNode "Celery")
+  )
 )
 
 
@@ -150,9 +372,27 @@
 )
 
 
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lucy")
+    (ConceptNode "Spinach")
+  )
+)
+
+
 (InheritanceLink (stv 1.000000 1.000000)
   (ConceptNode "Tomato")
   (ConceptNode "vegetable")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Sophia")
+    (ConceptNode "Tomato")
+  )
 )
 
 
@@ -162,9 +402,177 @@
 )
 
 
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lily")
+    (ConceptNode "Pumpkin")
+  )
+)
+
+
 (InheritanceLink (stv 1.000000 1.000000)
   (ConceptNode "Green bean")
   (ConceptNode "vegetable")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Emily")
+    (ConceptNode "Green bean")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "Bell pepper")
+  (ConceptNode "vegetable")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lucy")
+    (ConceptNode "Bell pepper")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "Lettuce")
+  (ConceptNode "vegetable")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Sophia")
+    (ConceptNode "Lettuce")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "Pea")
+  (ConceptNode "vegetable")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lily")
+    (ConceptNode "Pea")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "Onion")
+  (ConceptNode "vegetable")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Emily")
+    (ConceptNode "Onion")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "Bitter melon")
+  (ConceptNode "vegetable")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lucy")
+    (ConceptNode "Bitter melon")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "Leek")
+  (ConceptNode "vegetable")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Sophia")
+    (ConceptNode "Leek")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "Carrot")
+  (ConceptNode "vegetable")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lily")
+    (ConceptNode "Carrot")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "Cucumber")
+  (ConceptNode "vegetable")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Emily")
+    (ConceptNode "Cucumber")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "Cress")
+  (ConceptNode "vegetable")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lucy")
+    (ConceptNode "Cress")
+  )
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "Broccoli")
+  (ConceptNode "vegetable")
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "eat")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Sophia")
+    (ConceptNode "Broccoli")
+  )
 )
 
 
@@ -270,12 +678,81 @@
 )
 
 
-(EvaluationLink (stv 1.000000 1.000000)
-  (PredicateNode "like")
-  (ListLink (stv 1.000000 1.000000)
-    (ConceptNode "Lily")
-    (ConceptNode "apple")
-  )
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "window shopping")
+  (ConceptNode "activity")
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "dancing")
+  (ConceptNode "activity")
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "singing")
+  (ConceptNode "activity")
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "table tennis")
+  (ConceptNode "activity")
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "football")
+  (ConceptNode "activity")
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "basketball")
+  (ConceptNode "activity")
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "tennis")
+  (ConceptNode "activity")
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "boxing")
+  (ConceptNode "activity")
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "football")
+  (ConceptNode "sport")
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "basketball")
+  (ConceptNode "sport")
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "tennis")
+  (ConceptNode "sport")
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "table tennis")
+  (ConceptNode "sport")
+)
+
+
+(InheritanceLink (stv 1.000000 1.000000)
+  (ConceptNode "boxing")
+  (ConceptNode "sport")
 )
 
 
@@ -289,10 +766,10 @@
 
 
 (EvaluationLink (stv 1.000000 1.000000)
-  (PredicateNode "like")
+  (PredicateNode "do")
   (ListLink (stv 1.000000 1.000000)
-    (ConceptNode "Emily")
-    (ConceptNode "pear")
+    (ConceptNode "Lily")
+    (ConceptNode "window shopping")
   )
 )
 
@@ -307,10 +784,10 @@
 
 
 (EvaluationLink (stv 1.000000 1.000000)
-  (PredicateNode "like")
+  (PredicateNode "do")
   (ListLink (stv 1.000000 1.000000)
-    (ConceptNode "Lucy")
-    (ConceptNode "orange")
+    (ConceptNode "Emily")
+    (ConceptNode "dancing")
   )
 )
 
@@ -325,10 +802,10 @@
 
 
 (EvaluationLink (stv 1.000000 1.000000)
-  (PredicateNode "like")
+  (PredicateNode "do")
   (ListLink (stv 1.000000 1.000000)
-    (ConceptNode "Sophia")
-    (ConceptNode "Lemon")
+    (ConceptNode "Lucy")
+    (ConceptNode "singing")
   )
 )
 
@@ -338,6 +815,69 @@
   (ListLink (stv 1.000000 1.000000)
     (ConceptNode "Sophia")
     (ConceptNode "Tomato")
+  )
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "do")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Sophia")
+    (ConceptNode "table tennis")
+  )
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "like")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lily")
+    (ConceptNode "rabbit")
+  )
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "like")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Emily")
+    (ConceptNode "rabbit")
+  )
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "like")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Lucy")
+    (ConceptNode "rabbit")
+  )
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "like")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Bob")
+    (ConceptNode "dog")
+  )
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "like")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Mike")
+    (ConceptNode "dog")
+  )
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "like")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Zac")
+    (ConceptNode "dog")
   )
 )
 
@@ -370,6 +910,15 @@
 
 
 (EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "do")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Rio")
+    (ConceptNode "singing")
+  )
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
   (PredicateNode "eat")
   (ListLink (stv 1.000000 1.000000)
     (ConceptNode "Bob")
@@ -392,6 +941,15 @@
   (ListLink (stv 1.000000 1.000000)
     (ConceptNode "Bob")
     (ConceptNode "Emily")
+  )
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "do")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Bob")
+    (ConceptNode "table tennis")
   )
 )
 
@@ -424,6 +982,15 @@
 
 
 (EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "do")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Mike")
+    (ConceptNode "football")
+  )
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
   (PredicateNode "eat")
   (ListLink (stv 1.000000 1.000000)
     (ConceptNode "Zac")
@@ -446,5 +1013,14 @@
   (ListLink (stv 1.000000 1.000000)
     (ConceptNode "Zac")
     (ConceptNode "Sophia")
+  )
+)
+
+
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "do")
+  (ListLink (stv 1.000000 1.000000)
+    (ConceptNode "Zac")
+    (ConceptNode "basketball")
   )
 )
