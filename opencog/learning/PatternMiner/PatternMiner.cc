@@ -1437,8 +1437,8 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
     {
         std::cout << _fromAtomSpace->atomAsString(link);
     }
-//    std::cout << "count of this pattern = " << HNode->count << std::endl;
-//    std::cout << std::endl;
+    std::cout << "count of this pattern = " << HNode->count << std::endl;
+    std::cout << std::endl;
 
     unsigned int gram = HNode->pattern.size();
     // get the predefined combination:
@@ -1520,68 +1520,30 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
     else
         HNode->nI_Surprisingness = surprisingness_min;
 
-//    cout << "nI_Surprisingness = " << HNode->nI_Surprisingness  << std::endl;
+    cout << "nI_Surprisingness = " << HNode->nI_Surprisingness  << std::endl;
 
     if (gram == MAX_GRAM ) // can't calculate II_Surprisingness for MAX_GRAM patterns, becasue it required gram +1 patterns
         return;
 
     std::cout << "=================Debug: calculate II_Surprisingness for pattern: ====================\n";
 
-    Handle newVarNode = _fromAtomSpace->addNode(VARIABLE_NODE, "$var_" + toString(HNode->var_num));
+//    // II_Surprisingness is to evaluate how easily the frequency of this pattern can be infered from any of  its superpatterns
+//    // for all its super patterns
+//    vector<ExtendRelation>::iterator oneSuperRelationIt;
+//    for(oneSuperRelationIt = HNode->superPatternRelations.begin();  oneSuperRelationIt != HNode->superPatternRelations.end(); ++ oneSuperRelationIt)
+//    {
+//        ExtendRelation& oneSuperRelation = *oneSuperRelationIt;
 
-    // first , get all its superpatterns
-    foreach (Handle toBeExtendLink, HNode->pattern)
-    {
-        set<Handle> allNodes;
-        extractAllNodesInLink(toBeExtendLink, allNodes, _fromAtomSpace);
+//        // There are two types of super patterns: one is extended from a variable, one is extended from a const (turnt into a variable)
+//        if (oneSuperRelation.isExtendedFromVar) // type one : extended from a variable
+//        {
+//            oneSuperRelation.extendedHTreeNode
+//        }
+//        else
+//        {
 
-        HandleSeq extendedPattern;
-        foreach (Handle link, HNode->pattern)
-        {
-            if (link != toBeExtendLink)
-                extendedPattern.push_back(link);
-        }
-
-        foreach(Handle toBeExtendNode, allNodes)
-        {
-
-            HandleSeq extendedHandles;
-
-            getOneMoreGramExtendedLinksFromGivenLeaf(toBeExtendLink, toBeExtendNode, newVarNode, extendedHandles, _fromAtomSpace);
-
-            // There are two different super patterns: extended from a variable, and extended from a const by turning it into a variable
-
-
-            if ( _fromAtomSpace->getType(toBeExtendNode) == VARIABLE_NODE) // Type 1: extended from a variable
-            {
-
-            }
-            else // Type 2: extended from a const by turning it into a variable
-            {
-
-            }
-
-            // reBind the toBeExtendLink too, toBeExtendNode -> newVarNode
-            HandleSeq reToBeExtendLinkOutgoings;
-            reNameNodesForALink(toBeExtendLink,toBeExtendNode, newVarNode, reToBeExtendLinkOutgoings, atomSpace, atomSpace);
-            Handle reToBeExtendLink = _fromAtomSpace->addLink(_fromAtomSpace->getType(toBeExtendLink), reToBeExtendLinkOutgoings, _fromAtomSpace->getTV(toBeExtendLink));
-            extendedPattern.push_back(reToBeExtendLink);
-
-            // note that extendedLink has been already added into Pattern Mining Atomspace with new variable node
-
-            foreach(Handle extendedLink, extendedHandles)
-            {
-                // add this extendedLink into pattern, get an n+1 gram pattern
-                extendedPattern.push_back(extendedLink);
-                map<Handle,Handle> _orderedVarNameMap;
-                HandleSeq unifiedExtendedPattern = UnifyPatternOrder(extendedPattern, _orderedVarNameMap);
-                string keyStr = unifiedPatternToKeyString(unifiedExtendedPattern);
-                // int count = getCountOfAConnectedPattern(keyStr, unifiedExtendedPattern); // todo :  this function is not finished yet
-            }
-
-        }
-    }
-
+//        }
+//    }
 
 
 }
@@ -1622,15 +1584,17 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     htree = new HTree();
     atomSpace = new AtomSpace( _originalAtomSpace);
 
-    unsigned int system_thread_num  = std::thread::hardware_concurrency();
+//    unsigned int system_thread_num  = std::thread::hardware_concurrency();
 
-    if (system_thread_num > 1)
-        THREAD_NUM = system_thread_num - 1;
-    else
-        THREAD_NUM = 1;
+//    if (system_thread_num > 1)
+//        THREAD_NUM = system_thread_num - 1;
+//    else
+//        THREAD_NUM = 1;
 
-     // use all the threads in this machine
-     THREAD_NUM = system_thread_num;
+//     // use all the threads in this machine
+//     THREAD_NUM = system_thread_num;
+
+    THREAD_NUM = 1;
 
 
     threads = new thread[THREAD_NUM];
@@ -1727,15 +1691,19 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
         if (enable_Frequent_Pattern)
         {
+            std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< MAX_GRAM <<"gram patterns!";
+
             for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
             {
                 // sort by frequency
                 std::sort((patternsForGram[gram-1]).begin(), (patternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
 
                 // Finished mining gram patterns; output to file
-                std::cout<<"Debug: PatternMiner:  done (gram = " + toString(gram) + ") frequent pattern mining!" + toString((patternsForGram[gram-1]).size()) + " patterns found! " << std::endl;
+                std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
 
                 OutPutPatternsToFile(gram);
+
+                std::cout<< std::endl;
             }
         }
 
@@ -1773,9 +1741,10 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                 }
 
                 // Finished mining gram patterns; output to file
-                std::cout<<"Debug: PatternMiner:  done (gram = " + toString(gram) + ") interesting pattern mining!" + toString((patternsForGram[gram-1]).size()) + " patterns found! " << std::endl;
+                std::cout<<"Debug: PatternMiner:  done (gram = " + toString(gram) + ") interesting pattern mining!" + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
 
                 OutPutPatternsToFile(gram, true);
+                std::cout<< std::endl;
             }
         }
     }
