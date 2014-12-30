@@ -242,7 +242,8 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(vector<Handle>& in
                 {
 
                     // unify the pattern
-                    unifiedPattern = UnifyPatternOrder(pattern);
+                    map<Handle,Handle> orderedVarNameMap;
+                    unifiedPattern = UnifyPatternOrder(pattern, orderedVarNameMap);
 
                     string keyString = unifiedPatternToKeyString(unifiedPattern);
 
@@ -519,7 +520,7 @@ void PatternMiner::GrowAllPatternsBF()
                 // calculate surprisingness
                 foreach(HTreeNode* htreeNode, patternsForGram[cur_gram-1])
                 {
-                    calculateSurprisingness(htreeNode);
+                    calculateSurprisingness(htreeNode, originalAtomSpace);
                 }
 
                 // sort by surprisingness

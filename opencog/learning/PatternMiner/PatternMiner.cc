@@ -144,7 +144,10 @@ vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern,
 }
 
 // the input links should be like: only specify the const node, all the variable node name should not be specified:
-vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern)
+// map<Handle,Handle> orderedVarNameMap is output:
+// in this map, the first Handle is the variable node is the original Atomspace,
+// the second Handle is the renamed ordered variable node in the Pattern Mining Atomspace.
+vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern, map<Handle,Handle> &orderedVarNameMap)
 {
 
     // Step 1: take away all the variable names, make the pattern into such format string:
@@ -241,9 +244,7 @@ vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern)
         }
     }
 
-    // in this map, the first Handle is the variable node is the original Atomspace,
-    // the second Handle is the renamed ordered variable node in the Pattern Mining Atomspace.
-    map<Handle,Handle> orderedVarNameMap;
+
     vector<Handle> rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap);
 
     return rebindPattern;
@@ -1078,7 +1079,8 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
                      subPattern.push_back(HNode->pattern[index]);
              }
 
-             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern);
+             map<Handle,Handle> orderedVarNameMap;
+             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, orderedVarNameMap);
              string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
 //             std::cout<< "Subpattern: " << subPatternKey;
@@ -1094,7 +1096,8 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
                  foreach(HandleSeq aConnectedSubPart, splittedSubPattern)
                  {
                      // Unify it again
-                     HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart);
+                     map<Handle,Handle> _orderedVarNameMap;
+                     HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart, _orderedVarNameMap);
                      string connectedSubPatternKey = unifiedPatternToKeyString(unifiedConnectedSubPattern);
 //                     cout << "a splitted part: " << connectedSubPatternKey;
                      double h = calculateEntropyOfASubConnectedPattern(connectedSubPatternKey, unifiedConnectedSubPattern);
@@ -1427,15 +1430,15 @@ void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtended
 }
 
 // make sure only input 2~4 gram patterns
-void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
+void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAtomSpace)
 {
     std::cout << "=================Debug: calculate I_Surprisingness for pattern: ====================\n";
     foreach (Handle link, HNode->pattern)
     {
-        std::cout << atomSpace->atomAsString(link);
+        std::cout << _fromAtomSpace->atomAsString(link);
     }
-//    std::cout << "count of this pattern = " << HNode->count << std::endl;
-//    std::cout << std::endl;
+    std::cout << "count of this pattern = " << HNode->count << std::endl;
+    std::cout << std::endl;
 
     unsigned int gram = HNode->pattern.size();
     // get the predefined combination:
@@ -1459,7 +1462,8 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
                 subPattern.push_back(HNode->pattern[index]);
             }
 
-            HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern);
+            map<Handle,Handle> orderedVarNameMap;
+            HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, orderedVarNameMap);
             string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
 //            std::cout<< "Subpattern: " << subPatternKey;
@@ -1516,60 +1520,30 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode)
     else
         HNode->nI_Surprisingness = surprisingness_min;
 
-//    cout << "nI_Surprisingness = " << HNode->nI_Surprisingness  << std::endl;
+    cout << "nI_Surprisingness = " << HNode->nI_Surprisingness  << std::endl;
 
     if (gram == MAX_GRAM ) // can't calculate II_Surprisingness for MAX_GRAM patterns, becasue it required gram +1 patterns
         return;
 
     std::cout << "=================Debug: calculate II_Surprisingness for pattern: ====================\n";
 
-//    Handle newVarNode = atomSpace->addNode(VARIABLE_NODE, "$var_" + toString(HNode->var_num));
-
-//    // first , get all its superpatterns
-//    foreach (Handle toBeExtendLink, HNode->pattern)
+//    // II_Surprisingness is to evaluate how easily the frequency of this pattern can be infered from any of  its superpatterns
+//    // for all its super patterns
+//    vector<ExtendRelation>::iterator oneSuperRelationIt;
+//    for(oneSuperRelationIt = HNode->superPatternRelations.begin();  oneSuperRelationIt != HNode->superPatternRelations.end(); ++ oneSuperRelationIt)
 //    {
-//        set<Handle> allNodes;
-//        extractAllNodesInLink(toBeExtendLink, allNodes, atomSpace);
+//        ExtendRelation& oneSuperRelation = *oneSuperRelationIt;
 
-//        HandleSeq extendedPattern;
-//        foreach (Handle link, HNode->pattern)
+//        // There are two types of super patterns: one is extended from a variable, one is extended from a const (turnt into a variable)
+//        if (oneSuperRelation.isExtendedFromVar) // type one : extended from a variable
 //        {
-//            if (link != toBeExtendLink)
-//                extendedPattern.push_back(link);
+//            oneSuperRelation.extendedHTreeNode
 //        }
-
-//        foreach(Handle toBeExtendNode, allNodes)
+//        else
 //        {
-//            if ( atomSpace->getType(toBeExtendNode) == VARIABLE_NODE)
-//                continue; // only extend leaf
-
-//            HandleSeq extendedHandles;
-//            if (Pattern_mining_mode == "Breadth_First")
-//                getOneMoreGramExtendedLinksFromGivenLeaf(toBeExtendLink, toBeExtendNode, newVarNode, extendedHandles, originalAtomSpace);
-//            else // (Pattern_mining_mode == "Depth_First")
-//                getOneMoreGramExtendedLinksFromGivenLeaf(toBeExtendLink, toBeExtendNode, newVarNode, extendedHandles, observingAtomSpace);
-
-//            // reBind the toBeExtendLink too, toBeExtendNode -> newVarNode
-//            HandleSeq reToBeExtendLinkOutgoings;
-//            reNameNodesForALink(toBeExtendLink,toBeExtendNode, newVarNode, reToBeExtendLinkOutgoings, atomSpace, atomSpace);
-//            Handle reToBeExtendLink = atomSpace->addLink(atomSpace->getType(toBeExtendLink), reToBeExtendLinkOutgoings, atomSpace->getTV(toBeExtendLink));
-//            extendedPattern.push_back(reToBeExtendLink);
-
-//            // note that extendedLink has been already added into Pattern Mining Atomspace with new variable node
-
-//            foreach(Handle extendedLink, extendedHandles)
-//            {
-//                // add this extendedLink into pattern, get an n+1 gram pattern
-//                extendedPattern.push_back(extendedLink);
-
-//                HandleSeq unifiedExtendedPattern = UnifyPatternOrder(extendedPattern);
-//                string keyStr = unifiedPatternToKeyString(unifiedExtendedPattern);
-//                int count = getCountOfAConnectedPattern(keyStr, unifiedExtendedPattern);
-//            }
 
 //        }
 //    }
-
 
 
 }
@@ -1610,15 +1584,17 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     htree = new HTree();
     atomSpace = new AtomSpace( _originalAtomSpace);
 
-    unsigned int system_thread_num  = std::thread::hardware_concurrency();
+//    unsigned int system_thread_num  = std::thread::hardware_concurrency();
 
-    if (system_thread_num > 1)
-        THREAD_NUM = system_thread_num - 1;
-    else
-        THREAD_NUM = 1;
+//    if (system_thread_num > 1)
+//        THREAD_NUM = system_thread_num - 1;
+//    else
+//        THREAD_NUM = 1;
 
-     // use all the threads in this machine
-     THREAD_NUM = system_thread_num;
+//     // use all the threads in this machine
+//     THREAD_NUM = system_thread_num;
+
+    THREAD_NUM = 1;
 
 
     threads = new thread[THREAD_NUM];
@@ -1715,15 +1691,19 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
         if (enable_Frequent_Pattern)
         {
+            std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< MAX_GRAM <<"gram patterns!";
+
             for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
             {
                 // sort by frequency
                 std::sort((patternsForGram[gram-1]).begin(), (patternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
 
                 // Finished mining gram patterns; output to file
-                std::cout<<"Debug: PatternMiner:  done (gram = " + toString(gram) + ") frequent pattern mining!" + toString((patternsForGram[gram-1]).size()) + " patterns found! " << std::endl;
+                std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
 
                 OutPutPatternsToFile(gram);
+
+                std::cout<< std::endl;
             }
         }
 
@@ -1753,7 +1733,7 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                     // calculate surprisingness
                     foreach(HTreeNode* htreeNode, patternsForGram[gram-1])
                     {
-                        calculateSurprisingness(htreeNode);
+                        calculateSurprisingness(htreeNode, observingAtomSpace);
                     }
 
                     // sort by surprisingness
@@ -1761,15 +1741,17 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                 }
 
                 // Finished mining gram patterns; output to file
-                std::cout<<"Debug: PatternMiner:  done (gram = " + toString(gram) + ") interesting pattern mining!" + toString((patternsForGram[gram-1]).size()) + " patterns found! " << std::endl;
+                std::cout<<"Debug: PatternMiner:  done (gram = " + toString(gram) + ") interesting pattern mining!" + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
 
                 OutPutPatternsToFile(gram, true);
+                std::cout<< std::endl;
             }
         }
     }
 
     int end_time = time(NULL);
     printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
+    std::cout<< THREAD_NUM << " threads used. \n";
     std::cout<<"Corpus size: "<< allLinkNumber << " links in total. \n";
 
 //   testPatternMatcher2();
