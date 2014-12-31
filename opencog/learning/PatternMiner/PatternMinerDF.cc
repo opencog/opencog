@@ -507,7 +507,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
                 ExtendRelation relation;
                 relation.extendedHTreeNode = thisGramHTreeNode;
-                relation.newExtendedLink = (thisGramHTreeNode->pattern)[cur_pattern_gram - 1];
+                relation.newExtendedLink = (thisGramHTreeNode->pattern)[cur_pattern_gram - 1]; // todo: this looks wrong, and it needs to be unified
                 relation.sharedLink = extendedLink;
                 relation.extendedNode = extendedNode;
                 relation.isExtendedFromVar = isExtendedFromVar;

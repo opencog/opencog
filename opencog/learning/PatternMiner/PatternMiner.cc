@@ -1520,6 +1520,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
     else
         HNode->nI_Surprisingness = surprisingness_min;
 
+    // debug:
     cout << "nI_Surprisingness = " << HNode->nI_Surprisingness  << std::endl;
 
     if (gram == MAX_GRAM ) // can't calculate II_Surprisingness for MAX_GRAM patterns, becasue it required gram +1 patterns
@@ -1527,24 +1528,76 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
     std::cout << "=================Debug: calculate II_Surprisingness for pattern: ====================\n";
 
-//    // II_Surprisingness is to evaluate how easily the frequency of this pattern can be infered from any of  its superpatterns
-//    // for all its super patterns
-//    vector<ExtendRelation>::iterator oneSuperRelationIt;
-//    for(oneSuperRelationIt = HNode->superPatternRelations.begin();  oneSuperRelationIt != HNode->superPatternRelations.end(); ++ oneSuperRelationIt)
-//    {
-//        ExtendRelation& oneSuperRelation = *oneSuperRelationIt;
+    // II_Surprisingness is to evaluate how easily the frequency of this pattern can be infered from any of  its superpatterns
+    // for all its super patterns
+    float maxSurprisingness_II = 0.00000000f;
+    vector<ExtendRelation>::iterator oneSuperRelationIt;
+    for(oneSuperRelationIt = HNode->superPatternRelations.begin();  oneSuperRelationIt != HNode->superPatternRelations.end(); ++ oneSuperRelationIt)
+    {
+        ExtendRelation& curSuperRelation = *oneSuperRelationIt;
 
-//        // There are two types of super patterns: one is extended from a variable, one is extended from a const (turnt into a variable)
-//        if (oneSuperRelation.isExtendedFromVar) // type one : extended from a variable
-//        {
-//            oneSuperRelation.extendedHTreeNode
-//        }
-//        else
-//        {
+        // There are two types of super patterns: one is extended from a variable, one is extended from a const (turnt into a variable)
+        if (curSuperRelation.isExtendedFromVar) // type one : extended from a variable,  the extended node itself is considered as a variable in the pattern A
+        {
+            // todo
 
-//        }
-//    }
+            // debug
+            cout << "For Super pattern: -------extended from a variable----------------- " << std::endl;
 
+        }
+        else // type two : extended from a const node , the const node is changed into a variable
+        {
+            // Ap is A's one supper pattern, E is the link pattern that extended
+            // e.g.: M is the size of corpus
+            // A:  ( Lily eat var_1 ) && ( var_1 is vegetable ) , P(A) = 4/M
+            // Ap: ( var_2 eat var_1 ) && ( var_1 is vegetable ) && ( var_2 is woman ) , P(Ap) = 20/M
+            // E:  ( var_2 is woman ) , P(E) = 5/M
+            // Surprisingness_II (A from Ap) =  |P(A) - P(Ap)*P(Lily)/P(E)| / P(A)
+            // when the TruthValue of each atom is not taken into account, because every atom is unique, any P(Const atom) = 1/M , so that P(Lily) = 1/M
+            // So: Surprisingness_II (A from Ap) =  |P(A) - P(Ap)/Count(E)| / P(A)
+
+            // Note that becasue of unifying patern, the varible order in A, Ap, E can be different
+            // HandleSeq& patternAp = curSuperRelation.extendedHTreeNode->pattern;
+
+            float p_Ap = ((float )(curSuperRelation.extendedHTreeNode->count))/atomspaceSizeFloat;
+
+            HandleSeq patternE;
+            patternE.push_back(curSuperRelation.newExtendedLink);
+
+            string patternEKey = unifiedPatternToKeyString(patternE, atomSpace);
+            unsigned int patternE_count = getCountOfAConnectedPattern(patternEKey, patternE);
+            float p_ApDivByCountE = p_Ap / (float)(patternE_count);
+
+            float Surprisingness_II;
+            if (p_ApDivByCountE > p)
+                Surprisingness_II = p_ApDivByCountE - p;
+            else
+                Surprisingness_II = p - p_ApDivByCountE;
+
+            if (Surprisingness_II > maxSurprisingness_II)
+                maxSurprisingness_II = Surprisingness_II;
+
+            // debug
+            cout << "For Super pattern: -------extended from a const----------------- " << std::endl;
+            cout << unifiedPatternToKeyString(curSuperRelation.extendedHTreeNode->pattern, atomSpace);
+            cout << "P(Ap) = " << p_Ap << std::endl;
+            cout << "The extended link pattern:  " << std::endl;
+            cout << patternEKey;
+            cout << "Count(E) = " << patternE_count << std::endl;
+            cout << "Surprisingness_II = |P(A) -P(Ap)/Count(E)| = " << Surprisingness_II << std::endl;
+        }
+    }
+
+
+    // debug
+    cout << "Max Surprisingness_II  = " << maxSurprisingness_II;
+
+    HNode->nII_Surprisingness = maxSurprisingness_II/p;
+
+    // debug:
+    cout << "nII_Surprisingness = Max Surprisingness_II / p" << HNode->nII_Surprisingness  << std::endl;
+
+    std::cout << "=================Debug: end calculate II_Surprisingness ====================\n";
 
 }
 
