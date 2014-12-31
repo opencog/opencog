@@ -21,7 +21,26 @@ RUN sudo apt-get -y install git
 RUN sudo apt-get -y install rlwrap
 RUN sudo apt-get -y install telnet
 
-# Environment
+# Environment Variables
+## Set Locale
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+# Defaults
+## cogserver shell ports
+EXPOSE 17001 18001
+
+## REST api
+EXPOSE 5000
+
+## ports on which OpenCog's unity3d game communicates with opencog_embodiment
+### port from opencog's embodiment code
+EXPOSE 16313
+### ports from the unity3d game code
+EXPOSE 16315 16312
+
+# Docker defaults
 WORKDIR /home/opencog
 CMD bash
-EXPOSE 5000
