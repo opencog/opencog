@@ -2,7 +2,7 @@ __author__ = 'Cosmo Harrigan'
 
 import opencog.cogserver
 from web.api.apimain import RESTAPI
-from multiprocessing import Process
+from threading import Thread
 
 # Endpoint configuration
 # To allow public access, set to 0.0.0.0; for local access, set to 127.0.0.1
@@ -40,7 +40,6 @@ class Start(opencog.cogserver.Request):
                   "http://127.0.0.1:5000/api/v1.1/atoms?type=ConceptNode"
 
     def __init__(self):
-        self.process = Process(target=self.invoke)
         self.atomspace = None  # Will be passed as argument in run method
 
     def run(self, args, atomspace):
@@ -57,10 +56,10 @@ class Start(opencog.cogserver.Request):
         parent process exits, it will attempt to terminate the daemonic
         child process (https://docs.python.org/2/library/multiprocessing.html#multiprocessing.Process.daemon)
         '''
-        self.process.daemon = True
-        self.process.start()
-
-        print "REST API is now running in a separate process."
+        thread = Thread(target=self.invoke)
+        thread.start()
+        print "REST API is now running in a separate thread."
+        # @todo: detect Control-C to end the thread
 
     def invoke(self):
         self.api = RESTAPI(self.atomspace)
