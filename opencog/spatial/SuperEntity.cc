@@ -74,7 +74,7 @@ bool SuperEntity::splitEdges( const SubEntityPtr& subEntity1, const SubEntityPtr
                     double distance = it1->distanceTo( *it2, &pointInA, &pointInB);
 
                     if ( distance <= math::LineSegment::TOLERANCE_DISTANCE ) {
-                        // distance lesser than treshold, so two edges intersects each other
+                        // distance lesser than threshold, so two edges intersects each other
 
                         // check if the intersection is just the begin or end points intersection
                         bool needSplitEdge1 = !it1->sharePoint( pointInA );
@@ -122,7 +122,8 @@ bool SuperEntity::splitEdges( const SubEntityPtr& subEntity1, const SubEntityPtr
                             continue;
                         } // if
 
-                    } else if ( subEntity1->rectangle.isInside( it2->getMidPoint( ) ) ) {
+                    } else if ( subEntity1->rectangle.isInside( it2->pointA) &&
+                                subEntity1->rectangle.isInside( it2->pointB) ) {
                         // if the edge of the second entity is inside of the first entity remove it from the list
                         std::list<math::LineSegment>::iterator it3 = it2; ++it3;
                         edges2.erase( it2 );
@@ -137,7 +138,8 @@ bool SuperEntity::splitEdges( const SubEntityPtr& subEntity1, const SubEntityPtr
 
             if ( edgeSplit ) {
                 continue;
-            } else if ( subEntity2->rectangle.isInside( it1->getMidPoint( ) ) ) {
+            } else if ( subEntity2->rectangle.isInside( it1->pointA ) &&
+                        subEntity2->rectangle.isInside( it1->pointB ) ) {
                 // if the edge of the first entity is inside of the second entity remove it from the list
                 std::list<math::LineSegment>::iterator it3 = it1; ++it3;
                 edges1.erase( it1 );
@@ -257,6 +259,7 @@ bool SuperEntity::rebuild( void )
         std::list<math::LineSegment> splitEdges = it1->second->getSplitEdges( );
         std::copy( splitEdges.begin( ), splitEdges.end( ), ii );
     } // for
+
 
     std::map<long, bool>::iterator it;
     for ( it = intersectionMap.begin( ); it != intersectionMap.end( ); ++it ) {
