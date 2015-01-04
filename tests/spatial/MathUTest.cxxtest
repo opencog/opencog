@@ -62,22 +62,14 @@ public:
 
 
 
-        math::Vector3 corners[] = { math::Vector3(  5.0,  0.0, 0.0 ),
-                                    math::Vector3( 10.0,  0.0, 0.0 ),
-                                    math::Vector3( 10.0,  0.0, 0.0 ),
-                                    math::Vector3( 10.0, 10.0, 0.0 ),
-                                    math::Vector3( 10.0, 10.0, 0.0 ),
-                                    math::Vector3(  0.0, 10.0, 0.0 ),
-                                    math::Vector3(  0.0, 10.0, 0.0 ),
-                                    math::Vector3( -0.0,  5.0, 0.0 ),
-                                    math::Vector3( -5.0, -5.0, 0.0 ),
-                                    math::Vector3(  5.0, -5.0, 0.0 ),
-                                    math::Vector3(  5.0, -5.0, 0.0 ),
-                                    math::Vector3(  5.0,  0.0, 0.0 ),
-                                    math::Vector3(  0.0,  5.0, 0.0 ),
-                                    math::Vector3( -5.0,  5.0, 0.0 ),
-                                    math::Vector3( -5.0,  5.0, 0.0 ),
-                                    math::Vector3( -5.0, -5.0, 0.0 ) };
+        std::list<math::LineSegment> expectedEdges = { {math::Vector3(  5.0,  0.0, 0.0 ), math::Vector3( 10.0,  0.0, 0.0 ) },
+                                    { math::Vector3( 10.0,  0.0, 0.0 ), math::Vector3( 10.0, 10.0, 0.0 )},
+                                    { math::Vector3( 10.0, 10.0, 0.0 ), math::Vector3(  0.0, 10.0, 0.0 )},
+                                    { math::Vector3(  0.0, 10.0, 0.0 ), math::Vector3( -0.0,  5.0, 0.0 )},
+                                    { math::Vector3( -5.0, -5.0, 0.0 ), math::Vector3(  5.0, -5.0, 0.0 )},
+                                    { math::Vector3(  5.0, -5.0, 0.0 ), math::Vector3(  5.0,  0.0, 0.0 )},
+                                    { math::Vector3(  0.0,  5.0, 0.0 ), math::Vector3( -5.0,  5.0, 0.0 )},
+                                    { math::Vector3( -5.0,  5.0, 0.0 ), math::Vector3( -5.0, -5.0, 0.0 )} };
 
         EntityPtr petAgent( new PetAgent( 1244094484, "Fido", Vector3(5, 5, 0), Dimension3( 1, 1, 1 ), Quaternion( Vector3::Z_UNIT, 0 ), 0.25 ) );
         EntityPtr humanoidAgent( new HumanoidAgent( 1244094484, "Paul", Vector3(3.5, 3.5, 0), Dimension3( 1, 1, 1 ), Quaternion( Vector3::Z_UNIT, 0 ), 0.25 ) );
@@ -118,25 +110,42 @@ public:
         std::cout << "s1 position: " << s1->getPosition().toString( ) << std::endl;
 
         SuperEntity spe( s1, s2 );
+
         spe.merge( s3 );
+        
+        std::cout << "Edge count after merge: " << spe.getEdges( ).size( )<< std::endl;
+        // Test that we have enough edges to go around the perimeter of three overlapping objects.
+        TS_ASSERT( spe.getEdges( ).size( ) == (3*4) );
 
         spe.removeEntity( s3->getId( ) );
 
-        const std::list<math::LineSegment>& edges = spe.getEdges( );
+        std::list<math::LineSegment> edges = spe.getEdges( );
+        // Test that we have the same number of edges as the expected edges.
+        TS_ASSERT( edges.size( ) == expectedEdges.size( ) );
+
+        // Edges of the SuperEntity are currently subject to the unsorted list "LongSubEntityPtrHashMap subEntities".
+        // Test is considered successful if all edges are present, order is not important.
+        // Sort the lists to align edges for comparison.
+        edges.sort( );
+        expectedEdges.sort( );
 
         unsigned int cornersCounter = 0;
         std::list<math::LineSegment>::const_iterator it;
-        for ( it = edges.begin( ); it != edges.end( ); ++it ) {
+        std::list<math::LineSegment>::const_iterator it2;
+        for ( it = edges.begin( ), it2 = expectedEdges.begin( ); it != edges.end( ); ++it, ++it2 ) {
             std::cout << "edge as string: " << it->toString( ) << std::endl;
             std::printf( "first endpoint of edge: %.12f %.12f %.12f\n"
                          "second endpoint of edge: %.12f %.12f %.12f\n",
                  it->pointA.x, it->pointA.y, it->pointA.z, it->pointB.x, it->pointB.y, it->pointB.z );
-            std::cout << "expected first endpoint: " << corners[cornersCounter].toString( ) << std::endl;
-            std::cout << "expected second endpoint: " << corners[cornersCounter+1].toString( ) << std::endl;
-            std::cout << "distance from expected, A: " << ( corners[cornersCounter] - it->pointA ).length( ) << std::endl;
-            std::cout << "distance from expected, B: " << ( corners[cornersCounter+1] - it->pointB ).length( ) << std::endl;
-            TS_ASSERT( ( corners[cornersCounter++] - it->pointA ).length( ) < math::LineSegment::TOLERANCE_DISTANCE );
-            TS_ASSERT( ( corners[cornersCounter++] - it->pointB ).length( ) < math::LineSegment::TOLERANCE_DISTANCE );
+            std::printf( "expected first endpoint: %.12f %.12f %.12f\n"
+                         "expected second endpoint: %.12f %.12f %.12f\n",
+                 it2->pointA.x, it2->pointA.y, it2->pointA.z, it2->pointB.x, it2->pointB.y, it2->pointB.z );
+            std::cout << "distance from expected, A: " << ( it2->pointA - it->pointA ).length( ) << std::endl;
+            std::cout << "distance from expected, B: " << ( it2->pointB - it->pointB ).length( ) << std::endl;
+
+            TS_ASSERT( ( it2->pointA - it->pointA ).length( ) < math::LineSegment::TOLERANCE_DISTANCE );
+            TS_ASSERT( ( it2->pointB - it->pointB ).length( ) < math::LineSegment::TOLERANCE_DISTANCE );
+
         } // for
 
 
