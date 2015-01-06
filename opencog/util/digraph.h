@@ -97,7 +97,7 @@ Out randomized_topological_sort(digraph g, Out out)
     std::random_shuffle(nodes.begin(), nodes.end());
     std::queue<value_t> q;
 
-    foreach(value_t node, nodes)
+    for (value_t node : nodes)
         if (g.incoming(node).empty())
             q.push(node);
 
@@ -109,7 +109,7 @@ Out randomized_topological_sort(digraph g, Out out)
 
         std::vector<value_t> outgoing(g.outgoing(src).begin(),
                                       g.outgoing(src).end());
-        foreach(value_t dst, outgoing) {
+        for (value_t dst : outgoing) {
             g.erase(src, dst);
             if (g.incoming(dst).empty())
                 q.push(dst);

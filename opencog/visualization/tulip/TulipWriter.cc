@@ -46,10 +46,10 @@ void TulipWriter::writeNodes()
 
     // Output Node numbers/ids
     myfile << "(nodes ";
-    foreach (Handle h, nodeHandles) {
+    for (Handle h : nodeHandles) {
         myfile << h << " ";
     }
-    foreach (Handle h, linkHandles) {
+    for (Handle h : linkHandles) {
         myfile << h << " ";
     }
     myfile << ")" << endl;
@@ -78,13 +78,13 @@ void TulipWriter::writeCluster(Handle setLink)
     std::set<Handle> inSet;
     if (setLink != Handle::UNDEFINED) {
         HandleSeq setLinks = a.getOutgoing(setLink);
-        foreach (Handle h, setLinks) {
+        for (Handle h : setLinks) {
             inSet.insert(h);
         }
     }
     myfile << "(cluster 1 \"In Set\"" << endl;
     myfile << " (nodes ";
-    foreach (Handle h, inSet) {
+    for (Handle h : inSet) {
         myfile << h << " ";
     }
     myfile << ")\n)" << endl;
@@ -92,18 +92,18 @@ void TulipWriter::writeCluster(Handle setLink)
     // Output everything not in setLink as a cluster
     myfile << "(cluster 2 \"Not in set\"" << endl;
     myfile << " (nodes ";
-    foreach (Handle h, nodeHandles) {
+    for (Handle h : nodeHandles) {
         std::set<Handle>::iterator si = inSet.find(h);
         if (si == inSet.end()) myfile << h << " ";
     }
-    foreach (Handle h, linkHandles) {
+    for (Handle h : linkHandles) {
         inSet.find(h);
     }
     myfile << ")" << endl;
 
     // TODO : also output the appropriate fake edges
 //    myfile << " (edges ";
-//    foreach (Handle h, linkHandles) {
+//    for (Handle h : linkHandles) {
 //        std::set<Handle>::iterator si = inSet.find(h);
 //        if (si == inSet.end()) {
 //            myfile << h << " ";
@@ -123,10 +123,10 @@ void TulipWriter::writeEdges()
     a.getHandlesByType(back_inserter(linkHandles), (Type) LINK, true );
 
     // Output Edge numbers/ids, source, and target
-    foreach (Handle l, linkHandles) {
+    for (Handle l : linkHandles) {
         // get outgoing set, for each destination add a link
         HandleSeq out = a.getOutgoing(l);
-        foreach (Handle d, out) {
+        for (Handle d : out) {
             myfile << "(edge " << l << d << " " << l << " " << d;
             myfile << ")" << endl;
         }
@@ -146,11 +146,11 @@ void TulipWriter::writeNodeNames()
     // Output node names
     myfile << "(property  0 string \"viewLabel\" " << endl;
     myfile << "  (default \"\" \"\" )" << endl;
-    foreach (Handle h, nodeHandles) {
+    for (Handle h : nodeHandles) {
         myfile << "  (node " << h << " \"" << a.getName(h) << "\")" << endl;
     }
     // give not nodes the name NOT
-    foreach (Handle h, linkHandles) {
+    for (Handle h : linkHandles) {
         myfile << "(node " << h << " \"" << classserver().getTypeName(a.getType(h)) 
             << "\" )" << endl;
     }
@@ -161,7 +161,7 @@ void TulipWriter::writeDefaultColouring() {
     // Define default colouring
     myfile << "(property  0 color \"viewColor\"" << endl;
     myfile << "(default \"(35,0,235,255)\" \"(0,0,0,128)\" )" << endl;
-    //foreach (Handle h, notLinks) {
+    //for (Handle h : notLinks) {
     //    myfile << "(node " << h << " \"(235,0,35,255)\" )" << endl;
     //    myfile << "(edge " << h + notLinkOffsetIndex << " \"(235,35,35,255)\" )" << endl;
     //}
@@ -178,7 +178,7 @@ void TulipWriter::writeTruthValue()
     // Output strength component of truth value
     myfile << "(property  0 double \"strength\"" << endl;
     myfile << "(default \"0.0\" \"0.0\" )" << endl;
-    foreach (Handle h, handles) {
+    for (Handle h : handles) {
         myfile << "  (node " << h << " \"" << a.getMean(h) << "\")" << endl;
     }
     myfile << ")" << endl;
@@ -191,10 +191,10 @@ void TulipWriter::writeTruthValue()
     // Output distance metric as 1/strength 
     myfile << "(property  0 double \"distance\"" << endl;
     myfile << "(default \"0.0\" \"0.0\" )" << endl;
-    foreach (Handle h, linkHandles) {
+    for (Handle h : linkHandles) {
         // get outgoing set, for each destination add a link
         HandleSeq out = a.getOutgoing(h);
-        foreach (Handle d, out) {
+        for (Handle d : out) {
             myfile << "(edge " << h << d << " \"" << 1.0 / (a.getMean(h)+0.0000001) << "\")" << endl;
         }
     }
@@ -203,7 +203,7 @@ void TulipWriter::writeTruthValue()
     // Output count component of truth value
     myfile << "(property  0 double \"count\"" << endl;
     myfile << "(default \"0.0\" \"0.0\" )" << endl;
-    foreach (Handle h, handles) {
+    for (Handle h : handles) {
         myfile << "  (node " << h << " \"" << a.getConfidence(h) << "\")" << endl;
     }
     myfile << ")" << endl;
@@ -222,7 +222,7 @@ void TulipWriter::writeShapes()
     // Output strength component of truth value
     myfile << "(property  0 int \"viewShape\"" << endl;
     myfile << "(default \"0\" \"1\" )" << endl;
-    foreach (Handle h, linkHandles) {
+    for (Handle h : linkHandles) {
         myfile << " (node " << h << " \"1\" )" << endl;
     }
     myfile << ")" << endl;

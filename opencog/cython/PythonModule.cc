@@ -25,7 +25,6 @@
 
 #include <opencog/util/Config.h>
 #include <opencog/util/misc.h>
-#include <opencog/util/foreach.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 
@@ -104,11 +103,11 @@ PythonModule::~PythonModule()
 bool PythonModule::unregisterAgentsAndRequests()
 {
     // Requires GIL
-    foreach (std::string s, _agentNames) {
+    for (std::string s : _agentNames) {
         DPRINTF("Deleting all instances of %s\n", s.c_str());
         _cogserver.unregisterAgent(s);
     }
-    foreach (std::string s, _requestNames) {
+    for (std::string s : _requestNames) {
         DPRINTF("Unregistering requests of id %s\n", s.c_str());
         _cogserver.unregisterRequest(s);
     }
@@ -224,7 +223,7 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
     if (thingsInModule.agents.size() > 0) {
         bool first = true;
         oss << "Python MindAgents found: ";
-        foreach(std::string s, thingsInModule.agents) {
+        for (std::string s : thingsInModule.agents) {
             if (!first) {
                 oss << ", ";
                 first = false;

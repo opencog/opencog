@@ -170,7 +170,7 @@ swapRelations(SPATIAL_RELATION_VECTOR & relations)
 {
     SPATIAL_RELATION_VECTOR newRelations; 
 
-//    foreach (spatial::SPATIAL_RELATION rel, relations) {
+//    for (spatial::SPATIAL_RELATION rel : relations) {
 //        switch (rel) {
 //            case spatial::LEFT_OF:     newRelations.push_back(spatial::RIGHT_OF);    break;
 //            case spatial::RIGHT_OF:    newRelations.push_back(spatial::LEFT_OF);     break;
@@ -187,7 +187,7 @@ swapRelations(SPATIAL_RELATION_VECTOR & relations)
 //            case spatial::ADJACENT:    newRelations.push_back(spatial::ADJACENT);    break;
 //            default: break;
 //        } // switch (rel)
-//    } // foreach (spatial::SPATIAL_RELATION rel, relations)
+//    } // for (spatial::SPATIAL_RELATION rel : relations)
 
     return newRelations; 
 }
@@ -203,7 +203,7 @@ computeObserverInvolvedSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
     const spatial::EntityPtr & observerEntity = spaceMap.getEntity(observer);
     int numRelations = 0;
 
-    foreach (const std::string & entityID_B, entities) {
+    for (const std::string & entityID_B : entities) {
         const spatial::EntityPtr & entityB = spaceMap.getEntity(entityID_B);
         Handle objectB = getHandle(entityID_B); 
 
@@ -254,7 +254,7 @@ computeObserverInvolvedSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
         this->spatialRelationCache.addRelation(entityID_B, observerName, relationsBO); 
 
         numRelations ++; 
-    } // foreach (const std::string & entityID_B, entities)
+    } // for (const std::string & entityID_B : entities)
 
     logger().debug("%s - Finished evaluating: %d observer involved spatial relations", 
                    __FUNCTION__, numRelations
@@ -388,13 +388,13 @@ compute2SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
         const spatial::EntityPtr & observerEntity = 
             spaceMap.getEntity( atomSpace.getName(observer) );
 
-        foreach (Handle objectA, objects) {
+        for (Handle objectA : objects) {
             int numRelations = 0;
             std::string entityID_A = atomSpace.getName(objectA); 
 
             const spatial::EntityPtr & entityA = spaceMap.getEntity(entityID_A);
 
-            foreach (const std::string & entityID_B, entities) {
+            for (const std::string & entityID_B : entities) {
                 if ( entityID_A == entityID_B ||
                      this->spatialRelationCache.isCached(entityID_A, entityID_B) ) {
                     continue;
@@ -416,13 +416,13 @@ compute2SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
 
                 numRelations += relationsAB.size();
 
-            } // foreach (const std::string & entityID_B, entities)
+            } // for (const std::string & entityID_B : entities)
 
             logger().debug("%s - Finished evaluating: %d 2-size spatial relations related to '%s'", 
                            __FUNCTION__, numRelations, entityID_A.c_str()
                           );
 
-        } // foreach (Handle objectA, objects)
+        } // for (Handle objectA : objects)
     } 
     catch( const opencog::NotFoundException & ex ) {
         // Usually it is ok to just skip the exception, because when the object 
@@ -449,7 +449,7 @@ compute3SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
 
         std::vector <std::string>::iterator iter_entityB, iter_entityC; 
 
-        foreach (Handle objectA, objects)
+        for (Handle objectA : objects)
         {
             std::string entityID_A = atomSpace.getName(objectA); 
             int numRelations = 0;
@@ -488,14 +488,14 @@ compute3SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
 
                     numRelations += relationsABC.size();
 
-                } // foreach (const std::string & entityID_C, entities)
-            } // foreach (const std::string & entityID_B, entities)
+                } // for (const std::string & entityID_C : entities)
+            } // for (const std::string & entityID_B : entities)
 
             logger().debug("%s - Finished evaluating: %d 3-size spatial relations related to '%s'", 
                            __FUNCTION__, numRelations, entityID_A.c_str()
                           );
 
-        } // foreach (Handle objectA, objects)
+        } // for (Handle objectA : objects)
     } 
     catch( const opencog::NotFoundException & ex ) {
         // Usually it is ok to just skip the exception, because when the object 
@@ -525,7 +525,7 @@ bool SpatialPredicateUpdater::isBetween(const SPATIAL_RELATION_VECTOR & relation
          bFrontAC  = false, 
          bBehindAC = false; 
 
-    foreach (spatial::SPATIAL_RELATION relAB, relationsAB) {
+    for (spatial::SPATIAL_RELATION relAB : relationsAB) {
         switch (relAB) {
             case spatial::LEFT_OF:     bLeftAB  = true; break;
             case spatial::RIGHT_OF:    bRightAB = true; break;
@@ -537,7 +537,7 @@ bool SpatialPredicateUpdater::isBetween(const SPATIAL_RELATION_VECTOR & relation
         } 
     } // foreach
 
-    foreach (spatial::SPATIAL_RELATION relAC, relationsAC) {
+    for (spatial::SPATIAL_RELATION relAC : relationsAC) {
         switch (relAC) {
             case spatial::LEFT_OF:     bLeftAC  = true; break;
             case spatial::RIGHT_OF:    bRightAC = true; break;

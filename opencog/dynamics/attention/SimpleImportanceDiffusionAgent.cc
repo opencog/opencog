@@ -200,7 +200,7 @@ void SimpleImportanceDiffusionAgent::spreadImportance()
     
     // Calculate the diffusion for each source atom, and store the diffusion
     // event in a stack
-    foreach (Handle atomSource, diffusionSourceVector) 
+    for (Handle atomSource : diffusionSourceVector)
     {
         // Check the decision function to determine if spreading will occur
         if (spreadDecider->spreadDecision(as->getSTI(atomSource))) {
@@ -457,7 +457,7 @@ SimpleImportanceDiffusionAgent::probabilityVectorIncident(HandleSeq handles)
     // Allocate an equal probability to each incident atom
     double diffusionAmount = 1.0f / handles.size();
     
-    foreach (Handle target, handles)
+    for (Handle target : handles)
     {
         result.insert({target, diffusionAmount});
     }
@@ -492,7 +492,7 @@ SimpleImportanceDiffusionAgent::probabilityVectorHebbianAdjacent(
     // For each hebbian link that will be spread across, discount the 
     // amount that is actually allocated to it, based on certain attributes 
     // of the link
-    foreach (Handle target, targets)
+    for (Handle target : targets)
     {
         // Find the hebbian link that connects the source atom to this target
         HandleSeq searchAtoms(2);

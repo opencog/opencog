@@ -131,7 +131,7 @@ public:
 
         // Confirm that these atoms now have AsymmetricHebbianLinks between
         // them: "Kermit", "Frog", "Animal", "alive"
-        foreach (Handle node, attentionalFocus) {
+        for (Handle node : attentionalFocus) {
             HandleSeq existingAsSource =
                     as->getNeighbors(node, false, true,
                                      ASYMMETRIC_HEBBIAN_LINK, false);

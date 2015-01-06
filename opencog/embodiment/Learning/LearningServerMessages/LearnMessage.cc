@@ -25,7 +25,6 @@
 #include <vector>
 #include <boost/lexical_cast.hpp>
 
-#include <opencog/util/foreach.h>
 #include <opencog/util/StringTokenizer.h>
 
 #include <opencog/spacetime/SpaceServer.h>
@@ -108,12 +107,12 @@ throw (opencog::InvalidParamException, std::bad_exception):
     std::set<Handle> mapsToSend;
 #endif
     const SpaceServer& spacServer = spaceServer();
-    foreach(HandleTemporalPair htp, htp_seq) {
+    for (HandleTemporalPair htp : htp_seq) {
         Temporal t = *htp.getTemporal();
         HandleSeq sm_seq;
         timeServer().getMapHandles(back_inserter(sm_seq), t.getLowerBound(), t.getUpperBound());
 
-        foreach(Handle sm_h, sm_seq) {
+        for (Handle sm_h : sm_seq) {
             try {
                 if (spacServer.containsMap(sm_h)) {
 #ifdef USE_MAP_HANDLE_SET
@@ -142,7 +141,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
     }
 
 #ifdef USE_MAP_HANDLE_SET
-    foreach(Handle sm_h, mapsToSend) {
+    for (Handle sm_h : mapsToSend) {
         logger().debug(
                      "LearnMessage - adding space map (%s) to the message.",
                      atomSpace.atomAsString(sm_h).c_str());
@@ -178,12 +177,12 @@ const char * LearnMessage::getPlainTextRepresentation()
     message.append(END_TOKEN);
     //schema arguments
     message.append(boost::lexical_cast<std::string>(schemaArguments.size()));
-    foreach(std::string s, schemaArguments) {
+    for (std::string s : schemaArguments) {
         message.append(END_TOKEN);
         message.append(s);
     }
     //spaceMaps
-    foreach(std::string s, spaceMaps) {
+    for (std::string s : spaceMaps) {
         message.append(END_TOKEN);
         message.append(s);
     }
@@ -280,7 +279,7 @@ bool LearnMessage::populateAtomSpace(AtomSpace &atomSpace)
         //NMXmlParser::loadXML(reader, &atomSpace, false, false);
 
         // load SpaceMap into AtomSpace
-        foreach(std::string s, spaceMaps) {
+        for (std::string s : spaceMaps) {
             SpaceServer::TimestampMap timestampMap = SpaceServer::mapFromString(s);
             atomSpace.getSpaceServer().addSpaceMap(timestampMap.first, timestampMap.second);
         }

@@ -29,7 +29,6 @@
 #include <boost/operators.hpp>
 #include <boost/range/numeric.hpp>
 #include <boost/range/adaptor/map.hpp>
-#include <opencog/util/foreach.h>
 
 namespace opencog {
 /** \addtogroup grp_cogutil

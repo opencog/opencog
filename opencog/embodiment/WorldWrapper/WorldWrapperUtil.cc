@@ -860,7 +860,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             std::vector<std::string> argument;
 
             bool general_result = false;
-            foreach(combo::definite_object def_obj, definite_objects) {
+            for (combo::definite_object def_obj : definite_objects) {
 
                 argument.clear();
                 argument.push_back(std::string(def_obj));
@@ -916,7 +916,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             std::vector<std::string> argument;
 
             bool general_result = false;
-            foreach(combo::definite_object def_obj, definite_objects) {
+            for (combo::definite_object def_obj : definite_objects) {
 
                 argument.clear();
                 argument.push_back(std::string(def_obj));
@@ -994,7 +994,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             std::vector<std::string> argument;
 
             bool general_result = false;
-            foreach(combo::definite_object def_obj, definite_objects) {
+            for (combo::definite_object def_obj : definite_objects) {
 
                 argument.clear();
                 argument.push_back(std::string(def_obj));
@@ -1057,7 +1057,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             std::vector<std::string> argument;
 
             bool general_result = false;
-            foreach(combo::definite_object def_obj, definite_objects) {
+            for (combo::definite_object def_obj : definite_objects) {
 
                 argument.clear();
                 argument.push_back(std::string(def_obj));
@@ -1133,15 +1133,13 @@ combo::vertex WorldWrapperUtil::evalPerception(
                                                          vu);
 
                 bool general_result = false;
-                foreach(combo::definite_object vo1_def_obj,
-                        vo1_definite_objects) {
+                for (combo::definite_object vo1_def_obj : vo1_definite_objects) {
                     Handle h1 = toHandle(atomSpace, vo1_def_obj, self_id, owner_id);
                     OC_ASSERT(
                                      h1 != Handle::UNDEFINED,
                                      "WWUtil - near - Handle h1 should not be Handle::UNDEFINED.");
 
-                    foreach(combo::definite_object vo2_def_obj,
-                            vo2_definite_objects) {
+                    for (combo::definite_object vo2_def_obj : vo2_definite_objects) {
 
                         Handle h2 = toHandle(atomSpace, vo2_def_obj,
                                              self_id, owner_id);
@@ -1211,7 +1209,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         std::vector<std::string> argument;
 
         bool general_result = false;
-        foreach(definite_object def_obj, definite_objects) {
+        for (definite_object def_obj : definite_objects) {
 
             argument.clear();
             argument.push_back(std::string(def_obj));
@@ -1650,7 +1648,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                     if (it->second) {
                         combo::definite_object def_obj = (*it).first;
 
-                        foreach(sib_it arg, wild_card_it) {
+                        for (sib_it arg : wild_card_it) {
                             *arg = def_obj;
                         }
 
@@ -1763,7 +1761,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             std::vector<std::string> argument;
             bool general_result = false;
 
-            foreach(combo::definite_object def_obj, agent_definite_objects) {
+            for (combo::definite_object def_obj : agent_definite_objects) {
                 if ( AtomSpaceUtil::getAgentHandle( atomSpace, def_obj ) == Handle::UNDEFINED ) {
                     // ignore non-agent objects
                     continue;
@@ -1824,12 +1822,12 @@ combo::vertex WorldWrapperUtil::evalPerception(
                     std::string actionParamName = atomSpace.getName( groupCommandParametersLink );
                     boost::split( actionParams, actionParamName, boost::is_any_of( ";" ) );
                     unsigned int i;
-                    foreach(std::string param, actionParams) {
+                    for (std::string param : actionParams) {
                         boost::trim(param);
                         if ( param.length( ) == 0 ) {
                             throw opencog::InvalidParamException(TRACE_INFO, "WWUtil - is_last_group_command invalid empty parameter" );
                         } // if
-                    } // foreach
+                    } // for
 
                     if ( parameters.size( ) != actionParams.size( ) ) {
                         throw opencog::InvalidParamException(TRACE_INFO, "WWUtil - is_last_group_command you must inform the same number of parameters used on group_command calling" );
@@ -1871,7 +1869,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                     WorldWrapperUtil::cache.add(time, pred, 1.0f);
                     general_result = true;
                 } // else
-            } // foreach
+            } // for
 
             if (is_wild_card(vo1)) {
                 vu.setUpdated(true);
@@ -1923,7 +1921,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             std::vector<std::string> arguments;
 
             bool general_result = false;
-            foreach(combo::definite_object def_obj, agent_definite_objects) {
+            for (combo::definite_object def_obj : agent_definite_objects) {
 
 
 
@@ -1986,7 +1984,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
                         std::vector<std::string> actionParams;
                         boost::split( actionParams, actionParamsStr, boost::is_any_of( ";" ) );
-                        foreach(std::string param, actionParams) {
+                        for (std::string param : actionParams) {
                             boost::trim(param);
                         }
 
@@ -2126,7 +2124,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
                 std::vector<std::string> actionParams;
                 boost::split( actionParams, actionParamsStr, boost::is_any_of( "," ) );
-                foreach(std::string param, actionParams) {
+                for (std::string param : actionParams) {
                     boost::trim(param);
                 }
 
@@ -2145,7 +2143,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
                         // wild card
                     } else {
-                        foreach(combo::definite_object def_obj, p) {
+                        for (combo::definite_object def_obj : p) {
                             if (definite_object_equal(def_obj,
                                                       actionParams[i],
                                                       self_id, owner_id)) {
@@ -2555,7 +2553,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             if (it->second) {
                 combo::definite_object def_obj = it->first;
 
-                foreach(sib_it arg, wild_card_it) {
+                for (sib_it arg : wild_card_it) {
                     *arg = def_obj;
                 }
 

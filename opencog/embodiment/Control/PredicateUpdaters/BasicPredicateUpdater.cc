@@ -22,7 +22,6 @@
  */
 
 
-#include <opencog/util/foreach.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/spacetime/atom_types.h>
 
@@ -116,7 +115,7 @@ void BasicPredicateUpdater::update(Handle object, Handle pet, unsigned long time
 
 void BasicPredicateUpdater::update(std::vector<Handle> & objects, Handle pet, unsigned long timestamp)
 {
-    foreach (Handle object, objects) {
+    for (Handle object : objects) {
         this->update(object, pet, timestamp); 
     }
 }    

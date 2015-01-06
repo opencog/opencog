@@ -31,7 +31,7 @@ using namespace opencog;
 std::string StringManipulator::toUpper(const std::string& str) {
     std::string result;
 
-    foreach(char _c, str) {
+    for (char _c : str) {
         result.push_back(toupper(_c));
     }
 
@@ -41,7 +41,7 @@ std::string StringManipulator::toUpper(const std::string& str) {
 std::string StringManipulator::toLower(const std::string& str) {
     std::string result;
 
-    foreach(char _c, str) {
+    for (char _c : str) {
         result.push_back(tolower(_c));
     }
 
@@ -52,7 +52,7 @@ std::string StringManipulator::clean(const std::string& str) {
     std::string result;
     bool started = false;
 
-    foreach(char _c, str) {
+    for (char _c : str) {
         if (isalpha(_c) || isdigit(_c) ||
                 isvalidtoken(_c) ||  _c == '_' || _c == char(39) ||
                 (started && _c == ' ')) {

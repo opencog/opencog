@@ -249,7 +249,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
         //input arguments
         combo::arity_t abs_min_arity = combo::abs_min_arity(arity);
 
-        foreach( std::string argument, arguments ) {
+        for ( std::string argument : arguments ) {
             logger().debug(
                          "SchemaRunner - Adding argument '%s' to Procedure '%s'.",
                          argument.c_str(), procedure.getName().c_str());

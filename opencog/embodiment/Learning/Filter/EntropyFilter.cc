@@ -194,7 +194,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
         //compute isMoving for all object, if the object does not
         //belong to the map yet it goes with true, because we don't
         //have previous value of the predicate at this point
-        foreach(const definite_object& obj, _dos)
+        for (const definite_object& obj : _dos)
             setIsMoving(obj, pre_sm, sm);
         //eval each perception
         for (combo_tree_bool_time_map_it vti = _perceptToBoolTime.begin();

@@ -311,7 +311,7 @@ public:
      * Example of usage:
      *     HandleSeq result;
      *     spaceServer.getMapHandles(back_inserter(result),start,end);
-     *     foreach(Handle h, result) {
+     *     for (Handle h : result) {
      *         const SpaceMap& map = spaceServer().getMap(h);
      *         ...
      *     }

@@ -224,7 +224,7 @@ void PsiDemandUpdaterAgent::sendUpdatedValues()
     // Prepare the data to be sent
     std::map <std::string, float> demandValueMap;
 
-    foreach (Demand & demand, this->demandList) {
+    for (Demand & demand : this->demandList) {
         if ( demand.getDemandName() != "Energy" &&   // these demand values are
              demand.getDemandName() != "Integrity")  // updated by virtual world
             demandValueMap[ demand.getDemandName() ] = demand.getDemandValue();
@@ -268,7 +268,7 @@ void PsiDemandUpdaterAgent::publishUpdatedValue(Plaza & plaza,
     Object jsonObj; // json_spirit::Object is of type std::vector< Pair >
     jsonObj.push_back( Pair("timestamp", (uint64_t) timeStamp) );
 
-    foreach (Demand & demand, this->demandList) {
+    for (Demand & demand : this->demandList) {
         jsonObj.push_back( Pair( demand.getDemandName()+"TruthValue", demand.getDemandTruthValue() ) );
     }
 
@@ -367,7 +367,7 @@ void PsiDemandUpdaterAgent::run()
         this->init();
 
     // Update demand values
-    foreach (Demand & demand, this->demandList) {
+    for (Demand & demand : this->demandList) {
         logger().debug("PsiDemandUpdaterAgent::%s - Going to run updaters for demand '%s' [cycle = %d]",
                        __FUNCTION__, demand.getDemandName().c_str(), this->cycleCount);
 
@@ -375,7 +375,7 @@ void PsiDemandUpdaterAgent::run()
     }
 
     // Update Demand Goals
-    foreach (Demand & demand, this->demandList) {
+    for (Demand & demand : this->demandList) {
         logger().debug("PsiDemandUpdaterAgent::%s - Going to set the updated value to AtomSpace for demand '%s' [cycle = %d]",
                        __FUNCTION__, demand.getDemandName().c_str(), this->cycleCount);
 
@@ -397,7 +397,7 @@ void PsiDemandUpdaterAgent::run()
 
 double PsiDemandUpdaterAgent::getDemandValue(string demanName) const
 {
-    foreach (const Demand & demand, this->demandList) {
+    for (const Demand & demand : this->demandList) {
         if ( demand.getDemandName() == demanName)
             return demand.getDemandValue();
     }

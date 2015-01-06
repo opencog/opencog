@@ -5,7 +5,6 @@
  * Copyright (c) 2008, 2014 Linas Vepstas <linas@linas.org>
  */
 
-#include <opencog/util/foreach.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
@@ -71,7 +70,7 @@ PatternSCM::PatternSCM(void)
 PatternSCM::~PatternSCM()
 {
 #if PYTHON_BUG_IS_FIXED
-	foreach (PatternWrap* pw, _binders)
+	for (PatternWrap* pw : _binders)
 		delete pw;
 #endif
 }

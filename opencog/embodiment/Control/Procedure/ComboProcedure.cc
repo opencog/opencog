@@ -22,7 +22,6 @@
  */
 
 #include "ComboProcedure.h"
-#include <opencog/util/foreach.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 

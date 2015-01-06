@@ -1105,7 +1105,7 @@ type_tree infer_vertex_type(const combo_tree& tr, combo_tree::iterator it,
 arity_set get_argument_abs_idx_set(const combo_tree& tr)
 {
     arity_set res;
-    foreach(const vertex& v, make_pair(tr.begin_leaf(), tr.end_leaf()))
+    foreach (const vertex& v, make_pair(tr.begin_leaf(), tr.end_leaf()))
         if (const argument* ap = boost::get<argument>(&v))
             res.insert(ap->abs_idx());
     return res;
@@ -1114,7 +1114,7 @@ arity_set get_argument_abs_idx_set(const combo_tree& tr)
 arity_set get_argument_abs_idx_from_zero_set(const combo_tree& tr)
 {
     arity_set res;
-    foreach(const vertex& v, make_pair(tr.begin_leaf(), tr.end_leaf()))
+    foreach (const vertex& v, make_pair(tr.begin_leaf(), tr.end_leaf()))
         if (const argument* ap = boost::get<argument>(&v))
             res.insert(ap->abs_idx_from_zero());
     return res;

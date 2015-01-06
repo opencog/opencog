@@ -50,7 +50,7 @@ int countEvLinks(AtomSpace* as, string s)
     int ret = 0;
     vector<Handle> es;
     as->getHandleSet(back_inserter(es), EVALUATION_LINK, true);
-    foreach(Handle ha, es) {
+    for (Handle ha : es) {
         string name = as->getName(as->getOutgoing(ha, 0));
         if (name == s) {
             printf("countEvLinks got a matching link:\n%s\n", as->atomAsString(ha).c_str());
@@ -68,7 +68,7 @@ void printLinks(AtomSpace* as, Type linkType)
 
     vector<Handle> es;
     as->getHandleSet(back_inserter(es), linkType, true);
-    foreach(Handle ha, es)
+    for (Handle ha : es)
     printf("%s\n", ha->toString().c_str());
 }
 
@@ -79,12 +79,12 @@ void printEvLinks(AtomSpace* as)
 
     vector<Handle> es;
     as->getHandleSet(back_inserter(es), EVALUATION_LINK, true);
-    foreach(Handle ha, es) {
+    for (Handle ha : es) {
         vector<HandleTemporalPair> hhh;
         as->getTimeInfo(back_inserter(hhh), ha);
 
         //    printf("%s \n", ha->toString().c_str());
-        foreach(HandleTemporalPair htp, hhh)
+        for (HandleTemporalPair htp : hhh)
         printf("%s \n", htp.toString().c_str());
     }
     //NMPrinter(NMP_ALL)(ha);

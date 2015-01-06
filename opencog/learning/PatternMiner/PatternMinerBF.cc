@@ -40,7 +40,6 @@
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/query/BindLink.h>
 #include <opencog/util/Config.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/StringManipulator.h>
 
 #include "HTree.h"
@@ -64,7 +63,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
     set<Handle> allVarNodes;
 
     HandleSeq::iterator patternLinkIt = curHTreeNode->pattern.begin();
-    foreach (Handle link, instance)
+    for (Handle link : instance)
     {
         extractAllVariableNodesInAnInstanceLink(link, *(patternLinkIt), allVarNodes);
         patternLinkIt ++;
@@ -79,7 +78,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
         // debug
         string curvarstr = originalAtomSpace->atomAsString((Handle)(*varIt));
 
-        foreach(Handle incomingHandle, incomings)
+        for (Handle incomingHandle : incomings)
         {
             Handle extendedHandle;
             // if this atom is a igonred type, get its first parent that is not in the igonred types
@@ -122,13 +121,13 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(vector<Handle>& in
 
 //    // Debug
 //    cout << "Extract patterns from these links: \n";
-//    foreach (Handle ih, inputLinks)
+//    for (Handle ih : inputLinks)
 //    {
 //        cout << originalAtomSpace->atomAsString(ih) << std::endl;
 //    }
 
     // First, extract all the nodes in the input links
-    foreach (Handle link, inputLinks)
+    for (Handle link : inputLinks)
         extractAllNodesInLink(link, valueToVarMap, originalAtomSpace);
 
     // Generate all the possible combinations of all the nodes: all patterns including the 1 ~ n_max variables
@@ -158,7 +157,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(vector<Handle>& in
 
     int sharedCout = 0;
 
-    foreach (Handle shardNode, sharedNodes)
+    for (Handle shardNode : sharedNodes)
     {
         sharedNodesIndexes[sharedCout] = -1;
         map<Handle,Handle>::iterator varIt;
@@ -225,7 +224,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(vector<Handle>& in
                 HandleSeq pattern, unifiedPattern;
                 bool hasLinkContainsOnlyVars = false;
 
-                foreach (Handle link, inputLinks)
+                for (Handle link : inputLinks)
                 {
                     HandleSeq outgoingLinks;
                     generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, originalAtomSpace);
@@ -343,7 +342,7 @@ void PatternMiner::growPatternsTaskBF()
         if(cur_growing_pattern->count < thresholdFrequency)
             continue;
 
-        foreach (HandleSeq instance , cur_growing_pattern->instances)
+        for (HandleSeq instance  : cur_growing_pattern->instances)
         {
             extendAllPossiblePatternsForOneMoreGramBF(instance, cur_growing_pattern, cur_gram);
         }
@@ -448,14 +447,14 @@ void PatternMiner::ConstructTheFirstGramPatternsBF()
 
     dumpFile.open(fileName.c_str());
 
-    foreach(Handle h, allDumpNodes)
+    for (Handle h : allDumpNodes)
     {
         dumpFile << atomSpace->atomAsString(h);
     }
 
     atomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
 
-    foreach(Handle h, allDumpLinks)
+    for (Handle h : allDumpLinks)
     {
         dumpFile << atomSpace->atomAsString(h);
     }
@@ -506,7 +505,7 @@ void PatternMiner::GrowAllPatternsBF()
             {
                 cout << "by evaluating Interaction_Information ...\n";
                // calculate interaction information
-               foreach(HTreeNode* htreeNode, patternsForGram[cur_gram-1])
+               for (HTreeNode* htreeNode : patternsForGram[cur_gram-1])
                {
                    calculateInteractionInformation(htreeNode);
                }
@@ -518,7 +517,7 @@ void PatternMiner::GrowAllPatternsBF()
             {
                 cout << "by evaluating surprisingness ...\n";
                 // calculate surprisingness
-                foreach(HTreeNode* htreeNode, patternsForGram[cur_gram-1])
+                for (HTreeNode* htreeNode : patternsForGram[cur_gram-1])
                 {
                     calculateSurprisingness(htreeNode, originalAtomSpace);
                 }
@@ -544,14 +543,14 @@ void PatternMiner::GrowAllPatternsBF()
 
         dumpFile.open(fileName.c_str());
 
-        foreach(Handle h, allDumpNodes)
+        for (Handle h : allDumpNodes)
         {
             dumpFile << atomSpace->atomAsString(h);
         }
 
         atomSpace->getHandlesByType(back_inserter(allDumpLinks), (Type) LINK, true );
 
-        foreach(Handle h, allDumpLinks)
+        for (Handle h : allDumpLinks)
         {
             dumpFile << atomSpace->atomAsString(h);
         }
@@ -566,7 +565,7 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, At
     containVar = false;
     HandleSeq outgoingLinks = fromAtomSpace->getOutgoing(fromLink);
 
-    foreach (Handle h, outgoingLinks)
+    for (Handle h : outgoingLinks)
     {
         if (fromAtomSpace->isNode(h))
         {
@@ -600,7 +599,7 @@ HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace,
 {
     HandleSeq outPutLinks;
 
-    foreach (Handle link, fromLinks)
+    for (Handle link : fromLinks)
     {
         HandleSeq outgoingLinks;
         bool containVar;
@@ -689,7 +688,7 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
    //    //debug
 //    std::cout << atomSpace->atomAsString(hResultListLink) << std::endl  << std::endl;
 
-   foreach (Handle listH , resultSet)
+   for (Handle listH  : resultSet)
    {
        HandleSeq instanceLinks = originalAtomSpace->getOutgoing(listH);
 
@@ -713,7 +712,7 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
 //   originalAtomSpace->removeAtom(hResultListLink);
 //   originalAtomSpace->removeAtom(hVariablesListLink);
 
-//   foreach (Handle linkToDel , linksWillBeDel)
+//   for (Handle linkToDel  : linksWillBeDel)
 //   {
 //       originalAtomSpace->removeAtom(linkToDel);
 //   }

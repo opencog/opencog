@@ -349,7 +349,7 @@ public:
         ef.generateFilteredPerceptions(filteredPerceptions, ENTROPY_THRESHOLD);
 
         std::cout << std::endl;
-        foreach(combo_tree tr, filteredPerceptions) {
+        for (combo_tree tr : filteredPerceptions) {
             std::cout << "ENTROPY FILTER TEST TR : " << tr << std::endl;
         }
 

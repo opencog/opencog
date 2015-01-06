@@ -564,7 +564,7 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
             _hasPlanFailed = !search.processPath( spatial::math::Vector2( begin.first, begin.second ), spatial::math::Vector2( end.first, end.second ) );
             std::vector<spatial::math::Vector2> pathPoints = search.getProcessedPath( 1 );
             if ( !_hasPlanFailed ) {
-                foreach( spatial::math::Vector2 pathPoint, pathPoints ) {
+                for ( spatial::math::Vector2 pathPoint : pathPoints ) {
                     actions.push_back( spatial::Point( pathPoint.x, pathPoint.y ) );
                 }
             }
@@ -636,7 +636,7 @@ bool PAIWorldWrapper::createWalkPlanAction( std::vector<spatial::Point>& actions
         planID = pai.createActionPlan( );
     } // if
 
-    foreach(const spatial::Point& it_action, actions ) {
+    for (const spatial::Point& it_action : actions ) {
         AvatarAction action;
 
         if (toNudge != Handle::UNDEFINED) {

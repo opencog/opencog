@@ -29,7 +29,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/StringTokenizer.h>
 #include <opencog/util/StringManipulator.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -740,7 +739,7 @@ void SpaceServer::addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity*
     {
         opencog::spatial::Block3D* b = (opencog::spatial::Block3D*)(*it);
         HandleSeq unitBlockNodes = curMap->getAllUnitBlockHandlesOfABlock(*b);
-        foreach(Handle blockNode, unitBlockNodes)
+        for (Handle blockNode : unitBlockNodes)
         {
             TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
             Handle evalLink =  addPropertyPredicate("part-of", blockNode, _entity->mEntityNode, tv);

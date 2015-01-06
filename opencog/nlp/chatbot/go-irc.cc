@@ -33,9 +33,6 @@
 #include <vector>
 #include <set>
 
-#include <boost/foreach.hpp>
-#define foreach BOOST_FOREACH
-
 #include "IRC.h"
 #include "CogitaConfig.h"
 
@@ -117,7 +114,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 		start = params+5; cmd = SCM_CMD;
 	} else {
 		// Check for alternative nick/attention strings
-		foreach (string it, cc.attn) {
+		for (string it :  cc.attn) {
 			if (! it.compare(0,it.size(),&params[1]) ) {
 				start = params + it.size();
 				start = strchr(start, ':');

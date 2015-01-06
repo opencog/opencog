@@ -165,7 +165,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
 //        petFieldOfView = createFieldOfViewTriangle(pet);
 //    } // if
 //    
-//    foreach( std::string entity, entities ) {
+//    for ( std::string entity : entities ) {
 //        logger().debug("PetPsychePredicatesUpdater - inspecting entity %s", entity.c_str( ) );
 //        Handle entityHandle = getHandle(entity);
 //        if ( entityHandle == Handle::UNDEFINED ) {
@@ -284,7 +284,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
 //            //spatial::Vector3 futurePosition targetPath( targetCenter, (velocity * distance * 2 ) + petCenter );
 
 //            
-//            foreach( const spatial::math::LineSegment& segment, petObject.borderSegments ) {
+//            for ( const spatial::math::LineSegment& segment : petObject.borderSegments ) {
 //            if ( spatial::getDistanceBetweenSegments( segment, targetPath ) < 0.00000001 ) {
 //              isMovingToward = true;
 //             } // if

@@ -22,7 +22,6 @@
  */
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/util/foreach.h>
 #include <opencog/atomspace/Foreach.h>
 #include <opencog/atomspace/ForeachTwo.h>
 
@@ -1010,7 +1009,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 
 	// Copy the negates into the clause list
 	// Copy the negates into a set.
-	foreach (Handle h, negations)
+	for (Handle h : negations)
 	{
 		_cnf_clauses.push_back(h);
 		_optionals.insert(h);
@@ -1021,7 +1020,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	// Preparation prior to search.
 	// Create a table of the nodes that appear in the clauses, and
 	// a list of the clauses that each node participates in.
-	foreach (Handle h, _cnf_clauses)
+	for (Handle h : _cnf_clauses)
 	{
 		curr_root = h;
 		note_root(h);
@@ -1032,7 +1031,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	// Print out the predicate ...
 	printf("\nPredicate consists of the following clauses:\n");
 	int cl = 0;
-	foreach (Handle h, _cnf_clauses)
+	for (Handle h : _cnf_clauses)
 	{
 		printf("Clause %d: ", cl);
 		prt(h);
@@ -1040,7 +1039,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	}
 
 	// Print out the bound variables in the predicate.
-	foreach (Handle h, _bound_vars)
+	for (Handle h : _bound_vars)
 	{
 		if (NodeCast(h))
 		{
@@ -1121,10 +1120,10 @@ void PatternMatchEngine::print_predicate(
                   const std::vector<Handle> &clauses)
 {
 	printf("\nClauses:\n");
-	foreach (Handle h, clauses) prt(h);
+	for (Handle h : clauses) prt(h);
 
 	printf("\nVars:\n");
-	foreach (Handle h, vars) prt(h);
+	for (Handle h : vars) prt(h);
 }
 
 /* ===================== END OF FILE ===================== */

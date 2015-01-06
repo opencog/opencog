@@ -44,7 +44,7 @@ std::vector<const typename Container::value_type*>
 random_access_view(const Container& c) {
     typedef typename Container::value_type value_type;
     std::vector<const value_type*> res;
-    foreach(const value_type& v, c)
+    for (const value_type& v : c)
         res.push_back(&v);
     return res;
 }

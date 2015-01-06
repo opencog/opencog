@@ -137,7 +137,7 @@ int main(int argc, char** argv)
     // create disjunction (or conjunction if swapped)
     combo_tree tr(pos_swap(id::logical_or));
     pre_it head = tr.begin();
-    foreach(unsigned cc, actual_conj_children) {
+    for (unsigned cc : actual_conj_children) {
         // create conjunctions (or disjunctions if swapped)
         pre_it child = cc ?
             tr.append_child(head, pos_swap(id::logical_and)) : pre_it();

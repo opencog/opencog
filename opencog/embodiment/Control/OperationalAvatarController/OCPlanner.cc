@@ -3281,7 +3281,7 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
             if (candidateListHandles.size() != 0)
             {
 
-                foreach (Handle listH, candidateListHandles)
+                for (Handle listH : candidateListHandles)
                 {
                     HandleSeq candidateHandlesInOneGroup = atomSpace->getOutgoing(listH);
                     ParamGroundedMapInARule oneGroupCandidate;
@@ -3289,7 +3289,7 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
 
                     string outputVarStr;
 
-                    foreach (Handle h, candidateHandlesInOneGroup)
+                    for (Handle h : candidateHandlesInOneGroup)
                     {
                         ParamValue v = Inquery::getParamValueFromHandle(varNames[index],h);
                         oneGroupCandidate.insert(std::pair<string, ParamValue>(varNames[index],v));

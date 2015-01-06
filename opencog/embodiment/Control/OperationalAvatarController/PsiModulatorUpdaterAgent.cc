@@ -170,7 +170,7 @@ void PsiModulatorUpdaterAgent::publishUpdatedValue(Plaza & plaza,
     Object jsonObj; // json_spirit::Object is of type std::vector< Pair >
     jsonObj.push_back( Pair("timestamp", (uint64_t) timeStamp) );
 
-    foreach (Modulator & modulator, this->modulatorList) {
+    for (Modulator & modulator : this->modulatorList) {
         jsonObj.push_back( Pair( modulator.getModulatorName(), modulator.getModulatorLevel() ) );
     }
 
@@ -259,12 +259,12 @@ void PsiModulatorUpdaterAgent::run()
         this->init();
 
     // Run modulator updaters
-    foreach (Modulator & modulator, this->modulatorList) {
+    for (Modulator & modulator : this->modulatorList) {
         modulator.runUpdater(atomSpace);
     }
 
     // Set the updated value to AtomSpace
-    foreach (Modulator & modulator, this->modulatorList) {
+    for (Modulator & modulator : this->modulatorList) {
         modulator.updateModulator(atomSpace, timeStamp);
     }
 

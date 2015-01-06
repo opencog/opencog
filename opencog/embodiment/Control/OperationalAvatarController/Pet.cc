@@ -878,7 +878,7 @@ void Pet::updatePersistentSpaceMaps() throw (RuntimeException, std::bad_exceptio
 
     logger().fine("Pet - %d candidate maps to be checked.", pairs.size());
 
-    foreach(HandleTemporalPair pair, pairs) {
+    for (HandleTemporalPair pair : pairs) {
         // mark any still existing spaceMap in this period as persistent
         Handle mapHandle = atomSpace->getTimeServer().getAtTimeLink(pair);
         if (atomSpace->getSpaceServer().containsMap(mapHandle)) {
@@ -928,7 +928,7 @@ bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
     }
 
     // get the handle for each entity
-    foreach(string entity, entitiesInVicinity) {
+    for (string entity : entitiesInVicinity) {
         HandleSeq objHandle;
         atomSpace->getHandlesByName(back_inserter(objHandle), entity, OBJECT_NODE, true);
         if (objHandle.size() == 1) {
@@ -964,7 +964,7 @@ void Pet::getAllObservedActionsDoneAtTime(const Temporal& time, HandleSeq& actio
     std::vector<HandleTemporalPair> everyEventThatHappened;
     timeServer().getTimeInfo(back_inserter(everyEventThatHappened),
             Handle::UNDEFINED, time, TemporalTable::OVERLAPS);
-    foreach(HandleTemporalPair event, everyEventThatHappened) {
+    for (HandleTemporalPair event : everyEventThatHappened) {
         Handle eventAtTime = timeServer().getAtTimeLink(event);
         if (atomSpace->getArity(eventAtTime) >= 2) {
             Handle evaluationLink = atomSpace->getOutgoing(eventAtTime, 1);
@@ -992,7 +992,7 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
         atomSpace->getHandlesByOutgoing(back_inserter(learningSessionHandles),
                 patternToSearchLearningSession, NULL, NULL, 2, INHERITANCE_LINK,
                 true);
-        foreach(Handle learningSessionHandle, learningSessionHandles) {
+        for (Handle learningSessionHandle : learningSessionHandles) {
             if (atomSpace->getArity(learningSessionHandle) > 1)  {
                 std::vector<HandleTemporalPair> learningSessionIntervals;
                 // Get temporal info for all the Handles that pertain to this
@@ -1000,7 +1000,7 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
                 timeServer().getTimeInfo(back_inserter(learningSessionIntervals),
                         learningSessionHandle, time, TemporalTable::OVERLAPS);
                 // get all action that occurred during each interval
-                foreach(HandleTemporalPair learningSessionInterval,
+                for (HandleTemporalPair learningSessionInterval :
                         learningSessionIntervals) {
                     Temporal *learningSessionIntervalTemporal =
                         learningSessionInterval.getTemporal();
@@ -1012,8 +1012,7 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
                             *learningSessionIntervalTemporal,
                             TemporalTable::OVERLAPS);
 
-                    foreach(HandleTemporalPair action,
-                            actionsInLearningSession) {
+                    for (HandleTemporalPair action : actionsInLearningSession) {
                         Handle evaluationLink = timeServer().getAtTimeLink(action);
                         Handle predicateNode =
                             atomSpace->getOutgoing(evaluationLink)[1];

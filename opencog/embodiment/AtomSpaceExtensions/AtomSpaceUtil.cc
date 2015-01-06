@@ -496,7 +496,7 @@ Handle AtomSpaceUtil::getLatestHandle(const AtomSpace &atomSpace,HandleSeq& hand
 
     std::vector<HandleTemporalPair> handleTemporalPairs;
 
-    foreach(Handle h, handles)
+    for (Handle h : handles)
     {
         timeServer().getTimeInfo( back_inserter(handleTemporalPairs), h);
     }
@@ -597,7 +597,7 @@ throw(opencog::NotFoundException)
 
     //  try to get the EvaluationLink with truth value >= 0.5 if any, if not, return the one < 0.5. vice versa
     HandleSeq handleset;
-    foreach (Handle eh, evalLinkHandleset)
+    for (Handle eh : evalLinkHandleset)
     {
         if ( atomSpace.getMean(eh) >= 0.5)
         {
@@ -732,7 +732,7 @@ bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
     atomSpace.getHandleSet(back_inserter(allHandles),
                            seq, NULL, NULL, 2, EVALUATION_LINK, false);
 
-    foreach(Handle evalLink, allHandles) {
+    for (Handle evalLink : allHandles) {
         // getting data from evalLink
         Handle listLink = atomSpace.getOutgoing(evalLink, 1);
         if (atomSpace.getType(listLink) == LIST_LINK
@@ -752,7 +752,7 @@ bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
     }
 #else
     HandleSeq incomingSet = atomSpace.getIncoming(sizePredicate);
-    foreach(Handle incomingHandle, incomingSet) {
+    for (Handle incomingHandle : incomingSet) {
         AtomPtr a(incomingHandle);
         LinkPtr incomingLink(LinkCast(a));
         if (incomingLink->getType() == EVALUATION_LINK &&  incomingLink->getArity() == 2 && 
@@ -945,7 +945,7 @@ std::vector<Handle> AtomSpaceUtil::getEvaluationLinks(AtomSpace &atomSpace, stri
 
     HandleSeq predicateListLinkOutgoings;
 
-    foreach (Handle h, hfirstOutgoings)
+    for (Handle h : hfirstOutgoings)
     {
         predicateListLinkOutgoings.push_back(h);
     }
@@ -999,7 +999,7 @@ std::vector<Handle> AtomSpaceUtil::getNodesByEvaluationLink(AtomSpace &atomSpace
     HandleSeq predicateListLinkOutgoings;
     predicateListLinkOutgoings.push_back(hVariableNode);
 
-    foreach (Handle h, hNonFirstOutgoings)
+    for (Handle h : hNonFirstOutgoings)
     {
         predicateListLinkOutgoings.push_back(h);
     }
@@ -1076,11 +1076,11 @@ Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace,
     atomSpace.removeAtom(hResultListLink); 
 
     // Check and return the result
-//    foreach(Handle hResult, resultSet) {
+//    for (Handle hResult : resultSet) {
 //        std::cout<<"Found a ReferenceLink: "<<atomSpace.atomAsString(hResult)<<std::endl; 
 //
 //        std::vector<Handle> incomingSet = atomSpace.getIncoming(hResult);
-//        foreach(Handle hIncoming, incomingSet) {
+//        for (Handle hIncoming : incomingSet) {
 //            std::cout<<"An incoming: "<< atomSpace.atomAsString(hIncoming)<<std::endl;
 //        }
 //
@@ -1228,7 +1228,7 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
     // Get all the HandleTemporalPairs of SimilarityLink
     std::vector<HandleTemporalPair> handleTemporalPairs;
 
-    foreach(Handle hSimilarityLink, similarityLinkSet) {
+    for (Handle hSimilarityLink : similarityLinkSet) {
         timeServer().getTimeInfo( back_inserter(handleTemporalPairs),
                                                hSimilarityLink
                                              );
@@ -1383,7 +1383,7 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
     // Get all the HandleTemporalPairs of SimilarityLink
     std::vector<HandleTemporalPair> handleTemporalPairs;
 
-    foreach(Handle hSimilarityLink, similarityLinkSet) {
+    for (Handle hSimilarityLink : similarityLinkSet) {
         timeServer().getTimeInfo( back_inserter(handleTemporalPairs),
                                                hSimilarityLink
                                              );
@@ -2329,7 +2329,7 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
 #else
     std::vector<Handle> handles;
     HandleSeq incomingSet = atomSpace.getIncoming(agentHandle);
-    foreach(Handle incomingHandle, incomingSet) {
+    for (Handle incomingHandle : incomingSet) {
         AtomPtr a(incomingHandle);
         LinkPtr incomingLink(LinkCast(a));
         if (incomingLink->getType() == LIST_LINK &&
@@ -2684,7 +2684,7 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
     atomSpace.removeAtom(hResultListLink);
 
     // Check and return the result
-//    foreach(Handle hResult, resultSet) {
+//    for (Handle hResult : resultSet) {
 //        std::cout<<atomSpace.atomAsString(hResult)<<std::endl; 
 //    }
 
@@ -3216,7 +3216,7 @@ Handle AtomSpaceUtil::getFrameElements( AtomSpace& atomSpace, const std::string&
         atomSpace.getHandleSet(back_inserter(frameElementLinkHandles),
                                frameElementLink, NULL, NULL, 2, FRAME_ELEMENT_LINK, false);
         
-        foreach (Handle frameElementLink, frameElementLinkHandles ) {
+        for (Handle frameElementLink : frameElementLinkHandles ) {
             frameElementsHandles.push_back( atomSpace.getOutgoing( frameElementLink, 1 ) );
         } 
 
@@ -3228,7 +3228,7 @@ Handle AtomSpaceUtil::getFrameElements( AtomSpace& atomSpace, const std::string&
         atomSpace.getHandleSet(back_inserter(parentFrames),
                                inheritenceLinks, NULL, NULL, 2, INHERITANCE_LINK, false);            
 
-        foreach (Handle inheritenceLink, inheritenceLinks) {
+        for (Handle inheritenceLink : inheritenceLinks) {
             Handle parentFrameHandle = atomSpace.getOutgoing( inheritenceLink, 1 );
 
             // get the frame elements of the parent frame recursively
@@ -3240,7 +3240,7 @@ Handle AtomSpaceUtil::getFrameElements( AtomSpace& atomSpace, const std::string&
         HandleSeq parentFrames;
         HandleSeq incomingSet = atomSpace.getIncoming(frameNode);
 
-        foreach(Handle incomingHandle, incomingSet) {
+        for (Handle incomingHandle : incomingSet) {
             AtomPtr a(incomingHandle);
             LinkPtr incomingLink(LinkCast(a));
 
@@ -3256,7 +3256,7 @@ Handle AtomSpaceUtil::getFrameElements( AtomSpace& atomSpace, const std::string&
             }
         }
 
-        foreach(Handle parentFrameHandle, parentFrames) {
+        for (Handle parentFrameHandle : parentFrames) {
             if ( atomSpace.getType( parentFrameHandle ) == DEFINED_FRAME_NODE ) {
                 getFrameElements( atomSpace, atomSpace.getName( parentFrameHandle ), frameElementsHandles );
             } 
@@ -3346,7 +3346,7 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
 
                 // Remove any old value
                 HandleSeq incomingSet = atomSpace.getIncoming(frameElementInstance);
-                foreach(Handle incomingHandle, incomingSet) {
+                for (Handle incomingHandle : incomingSet) {
                     AtomPtr a(incomingHandle);
                     LinkPtr incomingLink(LinkCast(a));
                     if (incomingLink->getType() == EVALUATION_LINK &&  
@@ -3390,7 +3390,7 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                     // Remove any other atoms for representing this element, since it's not
                     // present anymore
                     HandleSeq incomingSet = atomSpace.getIncoming(frameElementInstance);
-                    foreach(Handle incomingHandle, incomingSet) {
+                    for (Handle incomingHandle : incomingSet) {
                         AtomPtr a(incomingHandle);
                         LinkPtr incomingLink(LinkCast(a));
                         if (incomingLink->getArity() == 2 && 
@@ -3486,7 +3486,7 @@ std::map<std::string, Handle> AtomSpaceUtil::getFrameElementInstanceNameValues( 
     HandleSeq frameElementsHandles;
     Handle frame = getFrameElements( atomSpace, frameName, frameElementsHandles );
 
-    foreach ( Handle frameElement, frameElementsHandles ) {
+    for ( Handle frameElement : frameElementsHandles ) {
         // Get frame element name (such as #Color:Entity)
         std::string frameElementName = atomSpace.getName(frameElement);  
 
@@ -3659,7 +3659,7 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
 #else 
         bool found = false;
         HandleSeq incomingSet = atomSpace.getIncoming(frameInstance);
-        foreach(Handle incomingHandle, incomingSet) { 
+        for (Handle incomingHandle : incomingSet) {
             AtomPtr a(incomingHandle);
             LinkPtr incomingLink(LinkCast(a));
             if (incomingLink->getType() == INHERITANCE_LINK) {
@@ -3696,7 +3696,7 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
 #else
     HandleSeq frameElements;
     HandleSeq incomingSet = atomSpace.getIncoming(frameInstance);
-    foreach(Handle incomingHandle, incomingSet) {
+    for (Handle incomingHandle : incomingSet) {
         AtomPtr a(incomingHandle);
         LinkPtr incomingLink(LinkCast(a));
         if (incomingLink->getType() == FRAME_ELEMENT_LINK) {
@@ -3731,7 +3731,7 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
 #else
         Handle inheritanceLink = Handle::UNDEFINED;
         HandleSeq elemIncomingSet = atomSpace.getIncoming(elementPredicate);
-        foreach (Handle elemIncomingHandle, elemIncomingSet) {
+        for (Handle elemIncomingHandle : elemIncomingSet) {
             AtomPtr a(elemIncomingHandle);
             LinkPtr elemIncomingLink(LinkCast(a));
             if (elemIncomingLink->getType() == INHERITANCE_LINK) {
@@ -3769,7 +3769,7 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
         }
 #else
         Handle valueHandle = Handle::UNDEFINED;
-        foreach (Handle elemIncomingHandle, elemIncomingSet) {
+        for (Handle elemIncomingHandle : elemIncomingSet) {
             AtomPtr a(elemIncomingHandle);
             LinkPtr elemIncomingLink(LinkCast(a));
             if (elemIncomingLink->getType() == EVALUATION_LINK) {

@@ -210,12 +210,12 @@ namespace opencog {
 
     //! used by istreamContainer
     inline bool exists_white_space(const std::string& str) {
-        foreach(const char& c, str) if(isspace(c)) return true;
+        for (const char& c : str) if(isspace(c)) return true;
         return false;
     }
     //! used by istreamContainer
     inline bool all_white_space(const std::string& str) {
-        foreach(const char& c, str) if(!isspace(c)) return false;
+        for (const char& c : str) if(!isspace(c)) return false;
         return true;
     }
 

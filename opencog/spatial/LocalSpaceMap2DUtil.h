@@ -25,7 +25,6 @@
 #define _SPATIAL__LOCAL_SPACE_MAP2D_UTIL_H_
 
 #include <opencog/util/RandGen.h>
-#include <opencog/util/foreach.h>
 
 #include <iostream>
 #include <string>

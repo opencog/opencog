@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 
         tree_branch_vector btv = tree_flatten(tr);
 
-        foreach(auto pr, btv) {
+        for (auto pr : btv) {
            cout << "Vect: " << pr.first << " count: " << pr.second << endl;
         }
         exit(0);

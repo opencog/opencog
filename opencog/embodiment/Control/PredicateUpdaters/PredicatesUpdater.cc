@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/foreach.h>
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
@@ -62,7 +61,7 @@ PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_
 
 PredicatesUpdater::~PredicatesUpdater()
 {
-    foreach(BasicPredicateUpdater* updater, updaters) {
+    for (BasicPredicateUpdater* updater : updaters) {
         delete updater;
     }
     updaters.clear();
@@ -77,7 +76,7 @@ void PredicatesUpdater::update(std::vector<Handle> & objects, unsigned long time
         petHandle = atomSpace.getHandle(HUMANOID_NODE, petId);
     } 
 
-    foreach (BasicPredicateUpdater * updater, updaters)
+    for (BasicPredicateUpdater * updater : updaters)
         updater->update(objects, petHandle, timestamp);
 
     if (objects.size() > 0) {

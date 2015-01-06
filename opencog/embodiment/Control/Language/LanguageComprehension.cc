@@ -31,7 +31,6 @@
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
-#include <opencog/util/foreach.h>
 
 #include <opencog/embodiment/Control/Language/LanguageComprehension.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
@@ -269,7 +268,7 @@ std::string LanguageComprehension::resolveFrames2Sentence(void)
         return "";
     } 
 
-    foreach (Handle frameInstance, answerFrameInstances) {
+    for (Handle frameInstance : answerFrameInstances) {
         // try to get InheritanceLinks holding both the given frame instance
         // (a PredicateNode) and an DefinedFrameNode. 
         //
@@ -340,7 +339,7 @@ std::string LanguageComprehension::resolveFrames2Sentence(void)
                 frame_elements_count[frameElementName] = 1; 
         }// for
 
-    }// foreach (Handle frameInstance, answerFrameInstances)
+    }// for (Handle frameInstance : answerFrameInstances)
   
     // iterate the frame_elements_count to get the preconditions appended with
     // the element count, like: #Color:Color$2, #Entity:Entity$1, and so on
@@ -364,7 +363,7 @@ std::string LanguageComprehension::resolveFrames2Sentence(void)
     // frames to relex or relex to sentence fails
     std::string answerFrameInstancesStr; 
 
-    foreach (Handle frameInstance, answerFrameInstances) {
+    for (Handle frameInstance : answerFrameInstances) {
         answerFrameInstancesStr += as.atomAsString(frameInstance) + "    "; 
     }
 
@@ -465,7 +464,7 @@ HandleSeq LanguageComprehension::getHeardSentencePredicates( void )
 
     HandleSeq incomingSet = atomSpace.getIncoming(node);
 
-    foreach (Handle incoming, incomingSet) {
+    for (Handle incoming : incomingSet) {
         if ( atomSpace.getType(incoming) != EVALUATION_LINK ||
              atomSpace.getTV(incoming)->isNullTv() || 
              atomSpace.getMean(incoming) == 0 ||
@@ -550,7 +549,7 @@ void LanguageComprehension::answerQuestion()
         return; 
     } 
 
-    foreach (Handle hEvalSentence, heardSentences) {
+    for (Handle hEvalSentence : heardSentences) {
         logger().debug("LanguageComprehension::%s - Cached heard sentence: %s", 
                        __FUNCTION__, 
                        atomSpace.atomAsString(hEvalSentence).c_str()

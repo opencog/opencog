@@ -114,7 +114,7 @@ Handle BDTracker::CreateBD(Handle perception, Handle obj, const Temporal& t_now,
     // TODO: check if the updateLatest bellow is really needed
     //AtomSpaceUtil::updateLatestBDInterval(atomSpace, atTimeLink, perception, obj?);
 
-    foreach(BDCreationListener* listener, BDCreationListeners)
+    for (BDCreationListener* listener : BDCreationListeners)
     listener->onBD(ret, atTimeLink);
 
 //puts("Added a BD:\n");

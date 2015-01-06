@@ -351,7 +351,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
     // Store incoming set
     HandleSeq hs = as->getIncoming(h);
     std::stringstream ss;
-    foreach (Handle handle, hs) {
+    for (Handle handle : hs) {
         ss << ',';
         ss << handle;
     }

@@ -32,7 +32,6 @@
 #else
 #include <sys/select.h>
 #include <sys/time.h>
-#include <opencog/util/foreach.h>
 #endif
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -144,12 +143,12 @@ public:
                  signalingObjects.size(),newObjects.size(), trackedObjects.size(),
                  disappearedObjects.size());
          */
-        foreach(Handle obj, disappearedObjects) {
+        for (Handle obj : disappearedObjects) {
             trackedObjects.erase(obj);
             obj2lastBD.erase(obj);
         }
 
-        foreach(Handle obj, trackedObjects) {
+        for (Handle obj : trackedObjects) {
             for (IterT perception_of_obj = perceptions_begin;
                     perception_of_obj != perceptions_end;
                 )
@@ -163,7 +162,7 @@ public:
 
         //printf("%d new objects\n", newObjects.size());
 
-        foreach(Handle obj, newObjects) {
+        for (Handle obj : newObjects) {
             for (IterT perception_of_obj = perceptions_begin;
                     perception_of_obj != perceptions_end;
                 ) {

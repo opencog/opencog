@@ -24,7 +24,6 @@
 #include <set>
 #include <boost/variant.hpp>
 
-#include <opencog/util/foreach.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/StringManipulator.h>
 #include <opencog/spacetime/SpaceTime.h>
@@ -1363,7 +1362,7 @@ HandleSeq Inquery::_findCandidatesByPatternMatching(RuleNode *ruleNode, vector<i
     if (allVariables.size() > 1)
     {
         HandleSeq nonDuplicatedResultSet;
-        foreach (Handle listH , resultSet)
+        for (Handle listH  : resultSet)
         {
             HandleSeq oneGroup = atomSpace->getOutgoing(listH);
             sort(oneGroup.begin(),oneGroup.end());
@@ -1519,9 +1518,9 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
         if (fail)
         {
             // remove all the list links
-            foreach (HandleSeq hs,resultSets)
+            for (HandleSeq hs : resultSets)
             {
-                foreach (Handle listH, hs)
+                for (Handle listH : hs)
                 {
                     atomSpace->removeAtom(listH);
                 }
@@ -1534,7 +1533,7 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
             second = ++ resultSets.begin();
 
             HandleSeqSeq tmpResult; // every element is a vector of outgoings for a list link
-            foreach (Handle listH, resultSets.front())
+            for (Handle listH : resultSets.front())
             {
                 HandleSeq candidateHandlesInOneGroup = atomSpace->getOutgoing(listH);
                 tmpResult.push_back(candidateHandlesInOneGroup);
@@ -1546,9 +1545,9 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
                 HandleSeq& addToSeq = *ssi;
                 HandleSeqSeq tmptmpResult;
 
-                foreach (HandleSeq sq, tmpResult)
+                for (HandleSeq sq : tmpResult)
                 {
-                    foreach (Handle listH, addToSeq)
+                    for (Handle listH : addToSeq)
                     {
                         HandleSeq handlesInOneGroup = atomSpace->getOutgoing(listH);
                         HandleSeq combination = sq;
@@ -1563,14 +1562,14 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
             }
 
             HandleSeq tmpResultSet;
-            foreach (HandleSeq hs,tmpResult)
+            for (HandleSeq hs : tmpResult)
             {
                 Handle listLink = atomSpace->addLink(LIST_LINK, hs);
                 tmpResultSet.push_back(listLink);
             }
 
             // loop through all the result groups, remove the groups that bind the same variables to different variables
-            foreach (Handle listH , tmpResultSet)
+            for (Handle listH : tmpResultSet)
             {
                 HandleSeq oneGroup = atomSpace->getOutgoing(listH);
                 sort(oneGroup.begin(),oneGroup.end());

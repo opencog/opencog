@@ -24,7 +24,6 @@
 
 #include "Router.h"
 
-#include <opencog/util/foreach.h>
 
 #include <opencog/embodiment/Control/LoggerFactory.h>
 #include <fstream>

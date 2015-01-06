@@ -32,7 +32,6 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
@@ -329,7 +328,7 @@ IncomingSet Atom::getIncomingSet()
     // Prevent update of set while a copy is being made.
     std::lock_guard<std::mutex> lck (_mtx);
     IncomingSet iset;
-    foreach (WinkPtr w, _incoming_set->_iset)
+    for (WinkPtr w : _incoming_set->_iset)
     {
         LinkPtr l(w.lock());
         if (l) iset.push_back(l);

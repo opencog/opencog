@@ -33,7 +33,6 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/foreach.h>
 
 #include "DottyModule.h"
 
@@ -113,7 +112,7 @@ public:
         if (withIncoming) {
             HandleSeq hs = space->getIncoming(h);
             int i = 0;
-            foreach (Handle h, hs) {
+            for (Handle h : hs) {
                 ost << h << "->" << h << " [style=\"dotted\" label=\"" << i << "\"];\n";
                 i++;
             }

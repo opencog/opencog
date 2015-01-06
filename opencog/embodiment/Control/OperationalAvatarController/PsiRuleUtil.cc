@@ -215,7 +215,7 @@ bool PsiRuleUtil::getSchemaArguments(const AtomSpace & atomSpace,
     schemaArguments.clear(); 
 
     // Process the arguments according to its type
-    foreach( Handle  hArgument, atomSpace.getOutgoing(hListLink) ) {
+    for ( Handle  hArgument : atomSpace.getOutgoing(hListLink) ) {
 
         Type argumentType = atomSpace.getType(hArgument);
 
@@ -265,7 +265,7 @@ void PsiRuleUtil::initUnifier(variable_unifier & unifier,
 {
     unifier.clear(); 
 
-    foreach(const std::string & varBind, varBindCandidates) {
+    for (const std::string & varBind : varBindCandidates) {
         unifier.insert(varBind, 
                        true  // Each variable binding is considered as valid initially. 
                              // Then the combo procedure would update its state (valid/invalid)
@@ -497,7 +497,7 @@ bool PsiRuleUtil::allPreconditionsSatisfied(const AtomSpace & atomSpace,
     // Check all the  Preconditions one by one
     bool bAllPreconditionsSatisfied = true;
 
-    foreach( Handle hPrecondition, hPreconditionEvalutaionLinks ) {
+    for ( Handle hPrecondition : hPreconditionEvalutaionLinks ) {
         logger().debug( "PsiRuleUtil::%s - Going to check the Precondition: %s", 
                         __FUNCTION__, 
                         atomSpace.atomAsString(hPrecondition).c_str()

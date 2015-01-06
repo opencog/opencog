@@ -42,7 +42,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/bind.hpp>
 
-#include <opencog/util/foreach.h>
 #include <opencog/embodiment/Control/LoggerFactory.h>
 
 #include "Message.h"
@@ -77,7 +76,7 @@ NetworkElement::~NetworkElement()
         delete this->sock;
     }
 
-    foreach(ServerSocket* ss, serverSockets) {
+    for (ServerSocket* ss : serverSockets) {
         delete ss;
     }
 

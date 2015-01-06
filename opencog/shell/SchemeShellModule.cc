@@ -25,7 +25,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/server/ConsoleSocket.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/foreach.h>
 
 #include "SchemeShellModule.h"
 
@@ -88,7 +87,7 @@ std::string SchemeShellModule::do_eval(Request *req, std::list<std::string> args
 	std::string out;
 
 	// Adds an extra space on the end, but that doesn't matter.
-	foreach(std::string arg, args)
+	for (std::string arg : args)
 	{
 		expr += arg + " ";
 	}

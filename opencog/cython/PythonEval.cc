@@ -27,7 +27,6 @@
 #include <boost/filesystem/operations.hpp>
 
 #include <opencog/util/exceptions.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>

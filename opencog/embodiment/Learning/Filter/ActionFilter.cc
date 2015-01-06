@@ -362,15 +362,15 @@ void ActionFilter::completePrefixOperands(std::set< std::vector<vertex> >& prefi
         generatePossibleOperands(opra_set, operand, al, smh, time);
         //base case
         if (prefix_opras.empty()) {
-            foreach(const vertex& v, opra_set) {
+            for (const vertex& v : opra_set) {
                 std::vector<vertex> vv(1, v);
                 prefix_opras.insert(vv);
             }
         } else {
             std::set< std::vector<vertex> > prefix_opras_copy = prefix_opras;
             prefix_opras.clear();
-            foreach(std::vector<vertex> vv, prefix_opras_copy) {
-                foreach(const vertex& v, opra_set) {
+            for (std::vector<vertex> vv : prefix_opras_copy) {
+                for (const vertex& v : opra_set) {
                     vv.push_back(v);
                     prefix_opras.insert(vv);
                 }

@@ -46,7 +46,6 @@
 #include <xercesc/sax2/XMLReaderFactory.hpp>
 
 #include <opencog/util/exceptions.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/macros.h>
 #include <opencog/util/Logger.h>
@@ -3107,7 +3106,7 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
             outgoing.push_back(predNode);
             outgoing.push_back(Handle::UNDEFINED);
             atomSpace.getHandleSet(back_inserter(sizeEvalLinks), outgoing, NULL, NULL, 2, EVALUATION_LINK, false);
-            foreach(Handle evalLink, sizeEvalLinks) {
+            for (Handle evalLink : sizeEvalLinks) {
                 Handle listLink = atomSpace.getOutgoing(evalLink, 1);
                 if (atomSpace.getType(listLink) == LIST_LINK && atomSpace.getArity(listLink) == 4) {
                     if (atomSpace.getOutgoing(listLink, 0) == objectNode) {
@@ -3382,7 +3381,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                     if (action.getType() == ActionType::GRAB()) {
                         const std::list<ActionParameter>& params = action.getParameters();
 
-                        foreach(ActionParameter param, params) {
+                        for (ActionParameter param : params) {
                             if (param.getName() == "target") {
                                 const Entity& entity = param.getEntityValue();
                                 AtomSpaceUtil::setupHoldingObject(  atomSpace,
@@ -3728,7 +3727,7 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
             outgoing.push_back(predNode);
             outgoing.push_back(Handle::UNDEFINED);
             atomSpace.getHandlesByOutgoing(back_inserter(sizeEvalLinks), outgoing, NULL, NULL, 2, EVALUATION_LINK, false);
-            foreach(Handle evalLink, sizeEvalLinks) {
+            for (Handle evalLink : sizeEvalLinks) {
                 Handle listLink = atomSpace.getOutgoing(evalLink, 1);
                 if (atomSpace.getType(listLink) == LIST_LINK && atomSpace.getArity(listLink) == 4) {
                     if (atomSpace.getOutgoing(listLink, 0) == objectNode) {
@@ -4095,7 +4094,7 @@ double PAI::getAvatarWeight(Handle avatarNode)
 
     // Check and return the result
     // currently, the weight of avatar is const, so there should be only one result
-    foreach(Handle hResult, resultSet)
+    for (Handle hResult : resultSet)
     {
         std::string weightStr = atomSpace.getName(hResult);
         return atof(weightStr.c_str()); // return the first one

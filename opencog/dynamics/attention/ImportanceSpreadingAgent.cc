@@ -28,7 +28,6 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/platform.h>
-#include <opencog/util/foreach.h>
 
 using namespace opencog;
 
@@ -105,7 +104,7 @@ int ImportanceSpreadingAgent::sumTotalDifference(Handle source, HandleSeq& links
 {
     int totalDifference = 0;
     // sum total difference
-    foreach(Handle handle, links) {
+    for (Handle handle : links) {
         totalDifference += sumDifference(source,handle);
     }
     return totalDifference;

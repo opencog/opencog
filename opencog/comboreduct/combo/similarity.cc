@@ -206,7 +206,7 @@ size_t tree_similarity(const tree_branch_vector& av,
 	size_t dist = 0;
 	// At the end, diff will hold anything in bv that is not in av
 	tree_branch_vector diff = bv;
-	foreach (auto pr, av)
+	for (auto pr : av)
 	{
 		size_t acnt = pr.second;
 		size_t bcnt = 0;
@@ -221,7 +221,7 @@ size_t tree_similarity(const tree_branch_vector& av,
 	}
 
 	// Add anything in bv that was not in av.
-	foreach (auto p, diff)
+	for (auto p : diff)
 	{
 		dist += p.second;
 	}
@@ -245,7 +245,7 @@ size_t tree_similarity(const std::string& a, const std::string& b)
 std::ostream& operator<<(std::ostream& os, const tree_branch_vector& btv)
 {
 	bool nf = false;
-	foreach(auto pr, btv) {
+	for (auto pr : btv) {
 		if (nf) os << ", "; else nf = true;
 		os << pr.first << " : " << pr.second;
 	}

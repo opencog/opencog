@@ -34,7 +34,6 @@
 #include <opencog/cython/PythonEval.h>
 #include <opencog/server/ConsoleSocket.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/platform.h>
 #include "PythonShellModule.h"
 
@@ -92,7 +91,7 @@ std::string PythonShellModule::do_eval(Request *req, std::list<std::string> args
     std::string out = "test";
 
     // Adds an extra space on the end, but that doesn't matter.
-    foreach(std::string arg, args)
+    for (std::string arg : args)
     {
         expr += arg + " ";
     }

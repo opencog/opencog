@@ -176,7 +176,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 
     AtomSpace& as = wp->getAtomSpace();
 
-    foreach(const VFpair& vf, factories) {
+    for (const VFpair& vf : factories) {
         vector<HandleTemporalPair> temps;
         as.getTimeServer().getTimeInfo(inserter(temps, temps.begin()),
                        Handle::UNDEFINED,
@@ -515,11 +515,11 @@ void BehaviorEncoder::updateRec(Temporal exemplarInterval)
                                        *ti,
                                        TemporalTable::STARTS_WITHIN);
 
-        foreach(HandleTemporalPair htp, new_temps) {
+        for (HandleTemporalPair htp : new_temps) {
             new_perceptions.insert(htp.getHandle());
         }
 
-        foreach(const VFpair& vf, factories) {
+        for (const VFpair& vf : factories) {
             set<Handle> f_perceptions;
             copy_if(new_perceptions.begin(),
                              new_perceptions.end(),
@@ -563,14 +563,14 @@ bool BehaviorEncoder::update(Temporal start_moment)
                                    t_grab_range,
                                    TemporalTable::STARTS_WITHIN);
 
-    foreach(HandleTemporalPair htp, new_temps) {
+    for (HandleTemporalPair htp : new_temps) {
         //printf("new perc %s\n", htp.toString().c_str());
         new_perceptions.insert(htp.getHandle());
     }
     bprintf("Found %zu TOTAL perceptions\n", new_perceptions.size());
     bprintf("%zu factories\n", factories.size());
 
-    foreach(const VFpair& vf, factories) {
+    for (const VFpair& vf : factories) {
         set<Handle> f_perceptions;
         copy_if(new_perceptions.begin(),
                          new_perceptions.end(),

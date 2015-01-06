@@ -99,7 +99,7 @@ combo::vertex AvatarActionSchema::execute(const std::vector<combo::vertex>& argu
     unsigned int argIndex = 0;
     // std::vector<combo::vertex>::const_iterator argItr = arguments.begin();
 
-    foreach(const ActionParamType& paramType, mandatoryParamTypes) {
+    for (const ActionParamType& paramType : mandatoryParamTypes) {
         bool validArg = false;
 
         switch (paramType.getCode()) {
@@ -172,7 +172,7 @@ combo::vertex AvatarActionSchema::execute(const std::vector<combo::vertex>& argu
                 if (!hs.empty()) {
                     if (hs.size() > 1) {
                         std::string atomTypes;
-                        foreach(Handle h, hs) {
+                        for (Handle h : hs) {
                             atomTypes += classserver().getTypeName(atomSpace.getType(h));
                             atomTypes += " ";
                         }

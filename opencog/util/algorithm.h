@@ -304,7 +304,7 @@ template<typename Set> std::set<Set> powerset(const Set& s)
 template<typename Indices, typename Seq>
 Seq seq_filtered(const Seq& seq, const Indices& indices) {
     Seq res;
-    foreach(const auto& idx, indices)
+    for (const auto& idx : indices)
         res.push_back(seq[idx]);
     return res;
 }

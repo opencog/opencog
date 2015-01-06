@@ -49,7 +49,7 @@ FloatT MannWhitneyU(const Counter<Key, FloatT>& c1,
     counter_t c = c1 + c2;
     counter_t r = ranking(c);
     FloatT sum2 = 0;
-    foreach(const auto& v, c2)
+    for (const auto& v : c2)
         sum2 += r[v.first];
     if (n2 < 0)
         n2 = boost::accumulate(c2 | map_values, 0);

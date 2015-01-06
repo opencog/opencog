@@ -35,7 +35,6 @@
 #include <memory>
 #include <thread>
 
-#include <opencog/util/foreach.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>
@@ -175,7 +174,7 @@ class AtomStorage::Response
 			if (link)
 			{
 				const HandleSeq& oset = link->getOutgoingSet();
-				foreach(Handle h, oset)
+				for (Handle h : oset)
 				{
 					if (table->holds(h)) continue;
 					AtomPtr a(store->getAtom(h));

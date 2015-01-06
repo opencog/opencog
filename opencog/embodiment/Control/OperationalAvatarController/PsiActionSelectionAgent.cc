@@ -128,7 +128,7 @@ void PsiActionSelectionAgent::getActions(AtomSpace & atomSpace, Handle hStep,
     }
     else if (atomType == AND_LINK ||
             atomType == SEQUENTIAL_AND_LINK) {
-        foreach( Handle hOutgoing, atomSpace.getOutgoing(hStep) ) {
+        for ( Handle hOutgoing : atomSpace.getOutgoing(hStep) ) {
             this->getActions(atomSpace, hOutgoing, actions);
         }
     }
@@ -200,7 +200,7 @@ void PsiActionSelectionAgent::printPlan(AtomSpace & atomSpace)
 
     int i = 1;
 
-    foreach( const Handle hAction, this->plan_action_list ) {
+    for ( const Handle hAction : this->plan_action_list ) {
         std::cout<<std::endl<<"Step No."<<i
                  <<std::endl<<atomSpace.atomAsString(hAction);
 
@@ -212,13 +212,13 @@ void PsiActionSelectionAgent::printPlan(AtomSpace & atomSpace)
 
 void PsiActionSelectionAgent::stimulateAtoms()
 {
-    foreach (Handle h, this->plan_rule_list)
+    for (Handle h : this->plan_rule_list)
         this->stimulateAtom(h, 10); // 10 is the same as noiseUnit in ImportanceUpdatingAgent
 
-    foreach (Handle h, this->plan_context_list)
+    for (Handle h : this->plan_context_list)
         this->stimulateAtom(h, 10);
 
-    foreach (Handle h, this->plan_action_list)
+    for (Handle h : this->plan_action_list)
         this->stimulateAtom(h, 10);
 
     logger().warn("PsiActionSelectionAgent::%s - Stimulate plan related atoms [cycle = %d]",
@@ -298,7 +298,7 @@ std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_
             Handle hListLink = atomSpace.getOutgoing(hActionExecutionLink, 1); // Handle to ListLink containing arguments
 
             // Process the arguments according to its type
-            foreach( Handle  hArgument, atomSpace.getOutgoing(hListLink) ) {
+            for (Handle hArgument : atomSpace.getOutgoing(hListLink)) {
                 Type argumentType = atomSpace.getType(hArgument);
                 if (argumentType == NUMBER_NODE) {
                     scheme_expression += " " + atomSpace.getName(hArgument);
@@ -306,7 +306,7 @@ std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_
                 else {
                     scheme_expression += " \"" + atomSpace.getName(hArgument) + "\"";
                 }
-            }// foreach
+            }// for
         }// if
 
         // TODO: A better approach is implementing 'answer_question' in 'unity_speech_act_schema.scm'.
@@ -348,7 +348,7 @@ std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_
             Handle hListLink = atomSpace.getOutgoing(hActionExecutionLink, 1); // Handle to ListLink containing arguments
 
             // Process the arguments according to its type
-            foreach( Handle  hArgument, atomSpace.getOutgoing(hListLink) ) {
+            for (Handle  hArgument : atomSpace.getOutgoing(hListLink)) {
 
                 Type argumentType = atomSpace.getType(hArgument);
 
@@ -362,7 +362,7 @@ std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_
                 else {
                     schemaArguments.push_back( atomSpace.getName(hArgument) );
                 }
-            }// foreach
+            }// for
         }// if
 
         // Run the Procedure of the Action
@@ -409,7 +409,7 @@ std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_
                                                            )
                                        );
 
-        foreach(Handle hSentenceNode, atomSpace.getOutgoing(hUtteranceSentencesList) ) {
+        for (Handle hSentenceNode : atomSpace.getOutgoing(hUtteranceSentencesList) ) {
             sentenceNodeName = atomSpace.getName(hSentenceNode);
 
             // get listener and content of the sentence
@@ -454,7 +454,7 @@ std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_
 std::cout<<std::endl<<"Generate say action " <<atomSpace.atomAsString(hSpeakAction)
          << " [cycle = " << this->cycleCount <<"]"<<std::endl;
 
-        } // foreach
+        } // for
 
 #if HAVE_GUILE
         scheme_expression = "( reset_utterance_node \"utterance_sentences\" )";

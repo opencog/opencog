@@ -28,7 +28,6 @@
 #include <time.h>
 
 #include <opencog/util/Config.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/mt19937ar.h>
 
 #define DEBUG
@@ -204,7 +203,7 @@ void ImportanceUpdatingAgent::run()
     /* Calculate STI/LTI atom wages for each agent */
     calculateAtomWages(a, agents);
 
-    foreach(Handle handle, hs) {
+    for (Handle handle : hs) {
         updateAtomSTI(a, agents, handle);
         updateAtomLTI(a, agents, handle);
 
@@ -316,7 +315,7 @@ void ImportanceUpdatingAgent::randomStimulation(AtomSpace *a, AgentPtr agent)
     getHandlesToUpdate(a,hs);
     expectedNum = (int) (noiseOdds * hs.size());
 
-    foreach( Handle h, hs) {
+    for ( Handle h : hs) {
         double r;
         r = rng->randdouble();
         if (r < noiseOdds) {
@@ -342,7 +341,7 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
     getHandlesToUpdate(a,hs);
     taxAmount = (double) diff / (double) hs.size();
 
-    foreach(Handle handle, hs) {
+    for (Handle handle : hs) {
         int actualTax;
         actualTax = getTaxAmount(taxAmount);
         beforeTax = a->getSTI(handle);
@@ -381,7 +380,7 @@ void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
 
     taxAmount = (double) diff / (double) hs.size();
 
-    foreach(Handle handle, hs) {
+    for (Handle handle : hs) {
         afterTax = a->getLTI(handle) - getTaxAmount(taxAmount);
         a->setLTI(handle, afterTax);
     }
@@ -501,7 +500,7 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
     log->fine("attentionalFocusSize = %d, recent = %f",
               attentionalFocusSize.val, attentionalFocusSize.recent);
 
-    foreach(Handle h, inFocus) {
+    for (Handle h : inFocus) {
         if (a->isNode(h)) n += 1;
     }
     attentionalFocusNodesSize.update(n);

@@ -24,7 +24,6 @@
 
 #include "HTree.h"
 #include <iterator>
-#include <opencog/util/foreach.h>
 
 
 using namespace opencog::PatternMining;

@@ -44,7 +44,7 @@ using namespace std;
 std::string initials(std::string s)
 {
     std::string ret;
-    foreach (char c,  s) {
+    for (char c :  s) {
         if (/*isUpperCase(c)*/ toupper(c) == c) {
             ret += c;
         }
@@ -240,7 +240,7 @@ void BITUbigrapher::drawBITNode ( BITNode* node, int ruleNumber)
     drawArgSlots(node);
 
     // Attach this BITNode to its parent(s).
-    foreach(parent_link<BITNode> p, node->parents) {
+    for (parent_link<BITNode> p : node->parents) {
         //drawArgSlots(p.link); // Gets called too many times, but means you don't have to see the slots until necessary
         drawBITLink(findBITNodeID(p.link), node_id, p.parent_arg_i);
     }
@@ -318,7 +318,7 @@ void BITUbigrapher::foundResult(BITNode* node) {
 
     ubigraph_set_vertex_attribute(node_id, "color", "#ff0000");
 
-    foreach(parent_link<BITNode> p, node->parents) {
+    for (parent_link<BITNode> p : node->parents) {
         unsigned int arg_id = findBITNodeID(p.link) + p.parent_arg_i + 1;
         //ubigraph_set_vertex_attribute(arg_id, "color", "#884400");
         ubigraph_set_vertex_attribute(arg_id, "color", "#880000");

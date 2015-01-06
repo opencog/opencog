@@ -184,7 +184,7 @@ void StimulusUpdaterAgent::publishUpdatedValue(Plaza & plaza,
     Object jsonObj; // json_spirit::Object is of type std::vector< Pair >
     jsonObj.push_back( Pair("timestamp", (uint64_t) timeStamp) );
 
-    foreach (Stimulus & stimulus, this->stimulusList) {
+    for (Stimulus & stimulus : this->stimulusList) {
         jsonObj.push_back( Pair( stimulus.getStimulusName(), stimulus.getStimulusLevel() ) );
     }
 
@@ -237,7 +237,7 @@ void StimulusUpdaterAgent::init()
     unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();
 
     // Init stimulus
-    foreach (Stimulus & stimulus, this->stimulusList) {
+    for (Stimulus & stimulus : this->stimulusList) {
         stimulus.initStimulus(oac->getAtomSpace(), timeStamp);
     }
 
@@ -280,12 +280,12 @@ void StimulusUpdaterAgent::run()
         this->init();
 
     // Run stimulus updaters
-    foreach (Stimulus & stimulus, this->stimulusList) {
+    for (Stimulus & stimulus : this->stimulusList) {
         stimulus.runUpdater(atomSpace);
     }
 
     // Set the updated value to AtomSpace
-    foreach (Stimulus & stimulus, this->stimulusList) {
+    for (Stimulus & stimulus : this->stimulusList) {
         stimulus.updateStimulus(atomSpace, timeStamp);
     }
 

@@ -24,7 +24,6 @@
 
 #include <vector>
 
-#include <opencog/util/foreach.h>
 #include <opencog/util/StringTokenizer.h>
 
 #include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
@@ -89,7 +88,7 @@ const char * StopLearningMessage::getPlainTextRepresentation()
 
     message.append(schema);
     message.append(END_TOKEN);
-    foreach(std::string s, schemaArguments) {
+    for (std::string s : schemaArguments) {
         message.append(s);
         message.append(END_TOKEN);
     }

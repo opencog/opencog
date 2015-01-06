@@ -40,7 +40,6 @@
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/query/BindLink.h>
 #include <opencog/util/Config.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/StringManipulator.h>
 
 #include "HTree.h"
@@ -218,7 +217,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
     // debug
     string inputLinksStr = "";
-    foreach (Handle h, inputLinks)
+    for (Handle h : inputLinks)
         inputLinksStr += _fromAtomSpace->atomAsString(h);
 
     // debug
@@ -230,7 +229,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
     if ( enable_filter_node_types_should_not_be_vars)
     {
-        foreach (Handle noTypeNode , shouldNotBeVars)
+        for (Handle noTypeNode  : shouldNotBeVars)
         {
             if (patternVarMap.find(noTypeNode) != patternVarMap.end())
             {
@@ -245,10 +244,10 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
         // check if in this combination, if at least one node in each Seq of oneOfEachSeqShouldBeVars is considered as variable
         bool allSeqContainsVar = true;
-        foreach(HandleSeq& oneSharedSeq, oneOfEachSeqShouldBeVars)
+        for (HandleSeq& oneSharedSeq : oneOfEachSeqShouldBeVars)
         {
             bool thisSeqContainsVar = false;
-            foreach (Handle& toBeSharedNode, oneSharedSeq)
+            for (Handle& toBeSharedNode : oneSharedSeq)
             {
                 if (patternVarMap.find(toBeSharedNode) != patternVarMap.end())
                 {
@@ -273,7 +272,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
     if ( (! skip) && (enable_filter_leaves_should_not_be_vars) && (gram > 1) ) // for gram > 1, any leaf should not considered as variable
     {
-        foreach (Handle leaf , leaves)
+        for (Handle leaf  : leaves)
         {
             if (patternVarMap.find(leaf) != patternVarMap.end())
             {
@@ -290,7 +289,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
         HandleSeq pattern, unifiedPattern;
 
-        foreach (Handle link, inputLinks)
+        for (Handle link : inputLinks)
         {
             HandleSeq outgoingLinks;
             generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
@@ -439,7 +438,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
     // debug
     string lastGramLinksStr = "";
-    foreach (Handle h, lastGramLinks)
+    for (Handle h : lastGramLinks)
         lastGramLinksStr += _fromAtomSpace->atomAsString(h);
 
 
@@ -540,7 +539,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     {
                         bool isIgnoredType = false;
                         Type t = _fromAtomSpace->getType(extendNode);
-                        foreach (Type noType, node_types_should_not_be_vars)
+                        for (Type noType : node_types_should_not_be_vars)
                         {
                             if (t == noType)
                             {
@@ -569,7 +568,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     // debug
                     // string curvarstr = _fromAtomSpace->atomAsString(extendNode);
 
-                    foreach(Handle incomingHandle, incomings)
+                    for (Handle incomingHandle : incomings)
                     {
                         Handle extendedHandle;
                         // if this atom is of igonred type, get its first ancestor that is not in the igonred types
@@ -609,7 +608,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
                             set<Handle> originalLinksSet(originalLinks.begin(), originalLinks.end());
                             string keyString = "";
-                            foreach (Handle h , originalLinksSet)
+                            for (Handle h  : originalLinksSet)
                             {
                                 keyString +=  toString(h.value());
                                 keyString += "_";
@@ -656,7 +655,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //    map<Handle, unsigned int> allVarNodes;
 
 //    unsigned int index = 0;
-//    foreach (Handle link, instance)
+//    for (Handle link : instance)
 //    {
 //        extractAllNodesInLink(link, allVarNodes, _fromAtomSpace, index);
 //        index ++;
@@ -675,7 +674,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
     map<Handle, unsigned int> allVarNodes;
 
     unsigned int index = 0;
-    foreach (Handle link, instance)
+    for (Handle link : instance)
     {
         extractAllNodesInLink(link, allVarNodes, _fromAtomSpace, index);
         index ++;
@@ -690,7 +689,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
         {
             bool isIgnoredType = false;
             Type t = _fromAtomSpace->getType(extendNode);
-            foreach (Type noType, node_types_should_not_be_vars)
+            for (Type noType : node_types_should_not_be_vars)
             {
                 if (t == noType)
                 {
@@ -708,7 +707,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
         // debug
         // string curvarstr = _fromAtomSpace->atomAsString((Handle)(*varIt));
 
-        foreach(Handle incomingHandle, incomings)
+        for (Handle incomingHandle : incomings)
         {
             Handle extendedHandle;
             // if this atom is of igonred type, get its first ancestor that is not in the igonred types
@@ -806,13 +805,13 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
 
 //    // Debug
 //    cout << "Extract patterns from these links: \n";
-//    foreach (Handle ih, inputLinks)
+//    for (Handle ih : inputLinks)
 //    {
 //        cout << _fromAtomSpace->atomAsString(ih) << std::endl;
 //    }
 
     // First, extract all the nodes in the input links
-    foreach (Handle link, inputLinks)
+    for (Handle link : inputLinks)
         extractAllNodesInLink(link, valueToVarMap, _fromAtomSpace);
 
     // Generate all the possible combinations of all the nodes: all patterns including the 1 ~ n_max variables
@@ -878,10 +877,10 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
 
                 // check if in this combination, if at least one node in each Seq of oneOfEachSeqShouldBeVars is considered as variable
                 bool allSeqContainsVar = true;
-                foreach(HandleSeq& oneSharedSeq, oneOfEachSeqShouldBeVars)
+                for (HandleSeq& oneSharedSeq : oneOfEachSeqShouldBeVars)
                 {
                     bool thisSeqContainsVar = false;
-                    foreach (Handle& toBeSharedNode, oneSharedSeq)
+                    for (Handle& toBeSharedNode : oneSharedSeq)
                     {
                         if (patternVarMap.find(toBeSharedNode) != patternVarMap.end())
                         {
@@ -906,7 +905,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
 
             if ( (! skip) && (enable_filter_leaves_should_not_be_vars) && (gram > 1) ) // for gram > 1, any leaf should not considered as variable
             {
-                foreach (Handle leaf , leaves)
+                for (Handle leaf  : leaves)
                 {
                     if (patternVarMap.find(leaf) != patternVarMap.end())
                     {
@@ -918,7 +917,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
 
             if ( (! skip) && (enable_filter_node_types_should_not_be_vars))
             {
-                foreach (Handle noTypeNode , shouldNotBeVars)
+                for (Handle noTypeNode  : shouldNotBeVars)
                 {
                     if (patternVarMap.find(noTypeNode) != patternVarMap.end())
                     {
@@ -934,7 +933,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
 
                 HandleSeq pattern, unifiedPattern;
 
-                foreach (Handle link, inputLinks)
+                for (Handle link : inputLinks)
                 {
                     HandleSeq outgoingLinks;
                     generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
@@ -988,7 +987,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
                     else
                         superPatternNode = (HTreeNode*)(htreeNodeIter->second);
 
-                    foreach (HTreeNode* lastGramHTreeNode, allLastGramHTreeNodes)
+                    for (HTreeNode* lastGramHTreeNode : allLastGramHTreeNodes)
                     {
                         ExtendRelation relation;
                         relation.extendedHTreeNode = superPatternNode;

@@ -50,7 +50,7 @@ void option_manager::init_options()
     _desc.add_options()
         ("help,h", "Produce help message.\n");
 
-    foreach(auto ob, _option_set) {
+    for (auto ob : _option_set) {
         ob->add_options(_desc);
     }
 }
@@ -72,7 +72,7 @@ void option_manager::parse_options(int argc, char* argv[])
         exit(1);
     }
 
-    foreach(auto ob, _option_set) {
+    for (auto ob : _option_set) {
         ob->parse_options(vm);
     }
 
@@ -106,7 +106,7 @@ problem_base* problem_manager::find_problem(const std::string& name)
 
 problem_manager::~problem_manager()
 {
-    foreach(auto pr, _problem_set) {
+    for (auto pr : _problem_set) {
         delete pr.second;
     }
 }

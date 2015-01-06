@@ -26,7 +26,6 @@
 
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
-#include <opencog/util/foreach.h>
 
 #define DEBUG
 
@@ -145,7 +144,7 @@ stim_t Agent::stimulateAtom(HandleSeq hs, stim_t amount)
     // how much to give each atom
     split = amount / hs.size();
 
-    foreach(Handle handle, hs) {
+    for (Handle handle : hs) {
         stimulateAtom(handle, split);
     }
     // return unused stimulus

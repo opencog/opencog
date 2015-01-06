@@ -130,7 +130,7 @@ void EventDetectionAgent::run()
 bool Skeleton::isSameSkeletonToMe(HandleSeq _rootLinks)
 {
     //TODO:
-    foreach(Handle rh , _rootLinks)
+    for (Handle rh  : _rootLinks)
     {
 
     }
@@ -188,7 +188,7 @@ void EventDetectionAgent::_processOneInputLink(Handle rootLink,std::map<Handle,H
 
     map<Handle, int>::iterator varit;
 
-    foreach(Handle h , outGoings)
+    for (Handle h  : outGoings)
     {
         if (atomSpace.isLink(h))
         {

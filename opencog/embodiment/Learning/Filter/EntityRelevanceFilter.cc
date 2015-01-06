@@ -97,7 +97,7 @@ const definite_object_set EntityRelevanceFilter::getEntities(const WorldProvider
         Temporal temp = *(ip->getTemporal());
         HandleSeq resmh;
         timeServer().getMapHandles(back_inserter(resmh), temp.getLowerBound(), temp.getUpperBound());
-        foreach(Handle h, resmh) {
+        for (Handle h : resmh) {
             const SpaceServer::SpaceMap& spacemap = spaceServer().getMap(h);
             //then make union of the object of that map with the result
             EntityRelevanceFilter erf(spacemap, selfID, ownerID);

@@ -186,10 +186,10 @@ float BehaviorDescriptionMatcher::computeHandleSetSimilarity(const PredicateHand
     unsigned s1 = ps1.getSize();
     unsigned s2 = ps2.getSize();
     //print for debug
-    //foreach(Handle h, ps1.getSet()) {
+    //for (Handle h : ps1.getSet()) {
     //  std::cout << "PS1 H : " << h->toString() << std::endl;
     //}
-    //foreach(Handle h, ps2.getSet()) {
+    //for (Handle h : ps2.getSet()) {
     //  std::cout << "PS2 H : " << h->toString() << std::endl;
     //}
     OC_ASSERT(s1 == 0 || s1 == 1,

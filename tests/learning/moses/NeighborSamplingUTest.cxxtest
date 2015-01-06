@@ -84,7 +84,7 @@ public:
         std::cout << "fs.pack_width = " << fs.packed_width()
                   << " bpp = " << bits_per_packed_t << std::endl;
 
-        foreach (const instance& inst, deme) {             
+        for (const instance& inst : deme) {
             unsigned int distance = fs.hamming_distance(center_inst, inst);
             if (distance > 0) {
                 if (distance > max_distance)

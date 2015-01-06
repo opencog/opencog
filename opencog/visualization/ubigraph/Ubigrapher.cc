@@ -33,7 +33,6 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 
 using namespace std;
@@ -52,7 +51,7 @@ namespace opencog
 std::string initials(std::string s)
 {
     std::string ret;
-    foreach (char c,  s) {
+    for (char c :  s) {
         if (toupper(c) == c) {
             ret += c;
         }
@@ -230,7 +229,7 @@ void Ubigrapher::updateSizeOfType(Type t, property_t p, float multiplier, float 
     // Get all atoms (and subtypes) of type t
     space.getHandlesByType(out_hi, t, true);
     // For each, get prop, scale... and 
-    foreach (Handle h, hs) {
+    for (Handle h : hs) {
         updateSizeOfHandle(h, p, multiplier, baseline);
     }
 
@@ -308,7 +307,7 @@ void Ubigrapher::updateColourOfType(Type t, property_t p, unsigned char startRGB
     // Get all atoms (and subtypes) of type t
     space.getHandlesByType(out_hi, t, true);
     // For each, get prop, scale... and 
-    foreach (Handle h, hs) {
+    for (Handle h : hs) {
         updateColourOfHandle(h, p, startRGB, endRGB, hard);
     }
 
@@ -333,7 +332,7 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
     // Get all atoms (and subtypes) of type t
     space.getHandlesByType(out_hi, t, true);
     // For each, get prop, scale... and 
-    foreach (Handle h, hs) {
+    for (Handle h : hs) {
         bool okToApply = true;
         switch (p) {
         case NONE:
@@ -362,7 +361,7 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
 {
     if (!isConnected()) return;
     // For each, get prop, scale... and 
-    foreach (Handle h, hs) {
+    for (Handle h : hs) {
         LinkPtr l(LinkCast(h));
         if (l) {
             const std::vector<Handle> &out = l->getOutgoingSet();

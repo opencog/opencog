@@ -180,7 +180,7 @@ private:
     //! replace the occurence count in p_pdf by delta_p
     void precompute_delta_p() {
         FloatT p_x_pre(x_very_first);
-        foreach(typename pdf_t::value_type& v, p_pdf) {
+        for (typename pdf_t::value_type& v : p_pdf) {
             FloatT p_x = v.first,
                 delta_p_x = p_x - p_x_pre,
                 delta_p = v.second / delta_p_x;

@@ -104,7 +104,7 @@ void PsiRelationUpdaterAgent::init()
         }
 
         // Process EvaluationLinks one by one
-        foreach(Handle hRelationEvaluationLink, relationEvaluationLinkSet) {
+        for (Handle hRelationEvaluationLink : relationEvaluationLinkSet) {
 
             // Get all the ImplicatonLinks containing hRelationEvaluationLink
             std::vector<Handle> relationImplicationLinkSet; 
@@ -117,7 +117,7 @@ void PsiRelationUpdaterAgent::init()
 
             // Process ImplicatonLinks one by one
             // If it is a Psi Rule with NULL_ACTION, append it to instantRelationRules
-            foreach(Handle hImplicationLink, relationImplicationLinkSet) {
+            for (Handle hImplicationLink : relationImplicationLinkSet) {
 
                 // Split the Psi Rule into Goal, Action and Preconditions
                 Handle hGoalEvaluationLink, hActionExecutionLink, hPreconditionAndLink; 
@@ -285,7 +285,7 @@ void PsiRelationUpdaterAgent::updateEntityNovelty(opencog::CogServer * server)
     // Get all the entities that next to the pet
     std::vector<std::string> entitiesNextToPet;
 
-    foreach(std::string & entityId, entities) {
+    for (std::string & entityId : entities) {
         // Get handle to entity
         Handle entityHandle = this->getEntityHandle(atomSpace, entityId);
 
@@ -305,7 +305,7 @@ void PsiRelationUpdaterAgent::updateEntityNovelty(opencog::CogServer * server)
     }// foreach
 
     // Create (entityId, novelty level) pairs if necessary 
-    foreach(std::string & entityId, entitiesNextToPet) {
+    for (std::string & entityId : entitiesNextToPet) {
         if ( entityNovelty.find(entityId) == entityNovelty.end() ) {
 
             // Create a new (entityId, novelty level) pair
@@ -368,7 +368,7 @@ void PsiRelationUpdaterAgent::updateEntityNovelty(opencog::CogServer * server)
     }// foreach
 
     // Remove (entityId, novelty level) pairs if necessary
-    foreach(std::string & entityIdRemoved, entitiesCanBeRemoved) {
+    for (std::string & entityIdRemoved : entitiesCanBeRemoved) {
         this->entityNovelty.erase(entityIdRemoved);
     }
 
@@ -461,7 +461,7 @@ void PsiRelationUpdaterAgent::updateEntityRelation(AtomSpace & atomSpace,
     std::vector<std::string> varBindCandidates;
 
     // Process instant relation rules one by one 
-    foreach(Handle hInstantRelationRule, this->instantRelationRules) {
+    for (Handle hInstantRelationRule : this->instantRelationRules) {
 
         logger().debug("PsiRelationUpdaterAgent::%s - Going to check the preconditions of instant relation rule: %s [cycle = %d]", 
                        __FUNCTION__, 
@@ -493,7 +493,7 @@ void PsiRelationUpdaterAgent::updateEntityRelation(AtomSpace & atomSpace,
             std::string relationName = atomSpace.getName(hRelationPredicateNode);
 
             // Set all the truth value of all the EvaluationLinks containing this relation to true
-            foreach(std::string & entityId, varBindCandidates) {
+            for (std::string & entityId : varBindCandidates) {
                 // Get handle to entity
                 Handle entityHandle = this->getEntityHandle(atomSpace, entityId);
 
