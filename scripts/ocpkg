@@ -119,7 +119,7 @@ PACKAGES_ADMIN="
 		"
 
 PACKAGES_BUILD="	
-                build-essential \
+		build-essential \
 		cmake \
 		cxxtest \
 		rlwrap \
@@ -136,13 +136,14 @@ PACKAGES_BUILD="
 		python-scipy \
 		python-mock \
 		python-simplejson \
-                python-pyparsing \
-                python-dateutil \
-                python-six \
-                python-tornado \
-                python-wsgiref \
+		python-pyparsing \
+		python-dateutil \
+		python-six \
+		python-tornado \
+		python-wsgiref \
 		libboost-date-time1.54-dev \
 		libboost-filesystem1.54-dev \
+		libboost-math1.54-dev \
 		libboost-program-options1.54-dev \
 		libboost-regex1.54-dev \
 		libboost-serialization1.54-dev \
@@ -164,9 +165,9 @@ PACKAGES_BUILD="
 		libssl-dev \
 		tcl-dev \
 		tcsh \
-        libfreetype6-dev \
-        libatlas-base-dev \
-        gfortran \
+		libfreetype6-dev \
+		libatlas-base-dev \
+		gfortran \
 		"
 		#liblua5.1-0-dev \
 		#libxmlrpc-c3-dev \
