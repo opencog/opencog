@@ -159,6 +159,8 @@ void ServerSocket::handle_connection(ServerSocket* ss)
                 break;
             } else if (e.code() == boost::asio::error::eof) {
                 break;
+            } else if (e.code() == boost::asio::error::connection_reset) {
+                break;
             } else {
                 logger().error("ServerSocket::handle_connection(): Error reading data. Message: %s", e.what());
             }
