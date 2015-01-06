@@ -22,13 +22,6 @@ class ShellAPI(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('command', type=str, location='args')
-        
-        # Setup socket to communicate with OpenCog CogServer
-        try:
-            self.oc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.oc.connect(('localhost', COGSERVER_PORT))
-        except socket.error as msg:
-            print msg
 
         super(ShellAPI, self).__init__()
 
@@ -65,12 +58,22 @@ in a field named "command"
         Send a shell command to the cogserver
         """
 
+        # Setup socket to communicate with OpenCog CogServer
+        try:
+            connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            connection.connect(('localhost', COGSERVER_PORT))
+        except socket.error as msg:
+            print msg
+
         # Validate, parse and send the command
         data = reqparse.request.get_json()
         if 'command' in data:
-            self.oc.send(data['command'])
+            connection.send(data['command'])
         else:
+            connection.close()
             abort(400,
                   'Invalid request: required parameter command is missing')
+
+        connection.close()
 
         return jsonify({'status': 'success'})
