@@ -42,24 +42,15 @@ class Start(opencog.cogserver.Request):
     def __init__(self):
         self.atomspace = None  # Will be passed as argument in run method
 
-    def run(self, args, atomspace):
-        """
-        Loads the REST API into a separate process and invokes it, so that it
-        will continue serving requests in the background after the Request
-        that loads it has returned control to the CogServer
-        """
+    def run(self, args, atomspace):        
         self.atomspace = atomspace
-
         '''
-        By using multiprocessing and setting the daemon attribute of the
-        process serving background REST API requests to True, when the
-        parent process exits, it will attempt to terminate the daemonic
-        child process (https://docs.python.org/2/library/multiprocessing.html#multiprocessing.Process.daemon)
+        make a daemon thread so that it can be interrupted
         '''
         thread = Thread(target=self.invoke)
+        thread.setDaemon(True)
         thread.start()
-        print "REST API is now running in a separate thread."
-        # @todo: detect Control-C to end the thread
+        print "REST API is now running in a separate daemon thread."        
 
     def invoke(self):
         self.api = RESTAPI(self.atomspace)
