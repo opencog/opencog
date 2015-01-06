@@ -24,6 +24,7 @@
  */
 
 #include <boost/range/irange.hpp>
+#include <boost/range/adaptor/reversed.hpp>
 
 #include <opencog/comboreduct/table/table_io.h>
 
@@ -558,7 +559,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
     score_t best_activation = 0.0;
     score_t best_activation_penalty = 0.0;
 
-    reverse_foreach (const auto& mpv, max_precisions) {
+    for (const auto& mpv : boost::adaptors::reverse(max_precisions)) {
         sao += mpv.second.first;
         active += mpv.second.second;
 
@@ -676,7 +677,7 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
     count_t active = 0.0;
     combo_tree tr;
     auto head = tr.set_head(id::logical_or);
-    reverse_foreach (const auto& v, ptc) {
+    for (const auto& v : boost::adaptors::reverse(ptc)) {
         active += v.second.second;
 
         // build the disjunctive clause
