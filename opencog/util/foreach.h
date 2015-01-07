@@ -54,10 +54,6 @@ struct range_const_iterator<std::pair<int,int> > {
 
 } // namespace boost
 
-namespace opencog {
-    inline std::pair<int,int> from_one(int i) { return std::pair<int,int>(1,i+1); }
-} //~namespace opencog
-
 #define foreach BOOST_FOREACH
 #define reverse_foreach BOOST_REVERSE_FOREACH
 

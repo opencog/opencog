@@ -24,6 +24,8 @@
  */
 #include <future>
 
+#include <boost/range/irange.hpp>
+
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/lazy_random_selector.h>
 #include <opencog/util/exceptions.h>
@@ -332,7 +334,7 @@ bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
 
     vector<int> to_disallow;
 
-    foreach (int idx, from_one(kb.multiplicity() - 1)) {
+    for (int idx : boost::irange(1, kb.multiplicity())) {
         kb.turn(idx);
 
         /// @todo could use kb.complexity_bound() to be faster, but
@@ -435,7 +437,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     // If its a contin, then wrap it with "greater_than_zero".
     type_tree_sib_it arg_type = _signature.begin(_signature.begin());  // first child
 
-    foreach (int i, from_one(_arity))
+    for (int i : boost::irange(1, _arity + 1))
     {
         vertex arg = argument(i);
         if (permitted_op(arg))
@@ -971,7 +973,7 @@ void build_knobs::append_linear_combination(pre_it it)
     // i.e. it looks like ->(type type type ... otype)
     // The two begin's skip over the lambda "->"
     type_tree_sib_it tit = _signature.begin().begin();
-    foreach (int idx, from_one(_arity))
+    for (int idx : boost::irange(1, _arity + 1))
     {
         vertex arg = argument(idx);
         if (permitted_op(arg)) {
