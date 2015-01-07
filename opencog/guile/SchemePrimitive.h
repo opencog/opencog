@@ -73,6 +73,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			// h == handle
 			// i == int
 			// q == HandleSeq
+			// qq == HandleSeqSeq
 			// s == string
 			// t == Type
 			// v == void
@@ -87,8 +88,10 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
 			Handle (T::*h_sqq)(const std::string&, const HandleSeq&, const HandleSeq&);
+			HandleSeq (T::*q_h)(Handle);
 			HandleSeq (T::*q_hti)(Handle, Type, int);
 			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
+			HandleSeqSeq (T::*qq_h)(Handle);
 			const std::string& (T::*s_s)(const std::string&);
 			void (T::*v_h)(Handle);
 			void (T::*v_t)(Type);
@@ -107,8 +110,10 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_HI,  // return handle, take handle and int
 			H_SQ,  // return handle, take string and HandleSeq
 			H_SQQ, // return handle, take string, HandleSeq and HandleSeq
+			Q_H,   // return HandleSeq, take handle
 			Q_HTI, // return HandleSeq, take handle, type, and int
 			Q_HTIB,// return HandleSeq, take handle, type, and bool
+			QQ_H,  // return HandleSeqSeq, take handle
 			S_S,   // return string, take string
 			V_H,   // return void, take Handle
 			V_T,   // return void, take Type
@@ -196,6 +201,20 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
+				case Q_H:
+				{
+					// the only argument is a handle
+					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					HandleSeq rHS = (that->*method.q_h)(h);
+
+					rc = SCM_EOL;
+
+                    // reverse iteration to preserve order when doing cons
+					for (HandleSeq::reverse_iterator rit = rHS.rbegin(); rit != rHS.rend(); ++rit)
+						rc = scm_cons(SchemeSmob::handle_to_scm(*rit), rc);
+
+					break;
+				}
 				case Q_HTI:
 				{
 					// First arg is a handle
@@ -241,6 +260,28 @@ class SchemePrimitive : public PrimitiveEnviron
 					{
 						rc = scm_cons(SchemeSmob::handle_to_scm(*it), rc);
 					}
+					break;
+				}
+				case QQ_H:
+				{
+					// the only argument is a handle
+					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					HandleSeqSeq rHSS = (that->*method.qq_h)(h);
+
+					rc = SCM_EOL;
+
+                    // reverse iteration to preserve order when doing cons
+					for (HandleSeqSeq::reverse_iterator rit = rHSS.rbegin(); rit != rHSS.rend(); ++rit)
+					{
+						HandleSeq rHS = *rit;
+						SCM rcTemp = SCM_EOL;
+
+						for (HandleSeq::reverse_iterator rrit = rHS.rbegin(); rrit != rHS.rend(); ++rrit)
+							rcTemp = scm_cons(SchemeSmob::handle_to_scm(*rrit), rcTemp);
+
+						rc = scm_cons(rcTemp, rc);
+					}
+
 					break;
 				}
 				case S_S:
@@ -363,8 +404,10 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_2(H_HI, h_hi, Handle, Handle, int)
 		DECLARE_CONSTR_2(H_SQ, h_sq, Handle, const std::string&, const HandleSeq&)
 		DECLARE_CONSTR_3(H_SQQ, h_sqq, Handle, const std::string&, const HandleSeq&, const HandleSeq&)
+		DECLARE_CONSTR_1(Q_H, q_h, HandleSeq, Handle)
 		DECLARE_CONSTR_3(Q_HTI, q_hti, HandleSeq, Handle, Type, int)
 		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
+		DECLARE_CONSTR_1(QQ_H, qq_h, HandleSeqSeq, Handle)
 		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
 		DECLARE_CONSTR_1(V_H, v_h, void, Handle)
 		DECLARE_CONSTR_1(V_T, v_t, void, Type)
@@ -418,6 +461,8 @@ inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG
 }
 
 DECLARE_DECLARE_1(Handle, Handle)
+DECLARE_DECLARE_1(HandleSeq, Handle)
+DECLARE_DECLARE_1(HandleSeqSeq, Handle)
 DECLARE_DECLARE_1(const std::string&, const std::string&)
 DECLARE_DECLARE_1(void, Handle)
 DECLARE_DECLARE_1(void, Type)
