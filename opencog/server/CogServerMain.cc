@@ -36,7 +36,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/foreach.hpp>
 
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>

@@ -22,7 +22,6 @@
 
 #include <cctype>
 #include <boost/regex.hpp>
-#include "foreach.h"
 #include "StringManipulator.h"
 using namespace opencog;
 

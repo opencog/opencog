@@ -14,8 +14,6 @@
 
 #include <ext/functional>
 
-#include "foreach.h"
-
 namespace opencog
 {
 /** \addtogroup grp_cogutil

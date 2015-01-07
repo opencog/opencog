@@ -24,7 +24,6 @@
 #include <vector>
 #include <cassert>
 #include "util/digraph.h"
-#include "util/foreach.h"
 
 using namespace std;
 using namespace opencog;

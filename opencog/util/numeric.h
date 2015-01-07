@@ -35,7 +35,6 @@
 
 #include "exceptions.h"
 #include "oc_assert.h"
-#include "foreach.h"
 
 #include "iostreamContainer.h"
 

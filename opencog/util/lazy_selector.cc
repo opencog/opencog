@@ -25,7 +25,6 @@
 #include "lazy_selector.h"
 #include "exceptions.h"
 #include "oc_assert.h"
-#include "foreach.h"
 #include <iostream>
 #include <iterator>
 #include <algorithm>

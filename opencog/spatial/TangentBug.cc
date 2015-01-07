@@ -439,7 +439,7 @@ double TangentBug::closest_distance_on_obstacle_to_goal(TBRay dir_to_object)
         best_distance = (best_point - goal).length();
     }
 
-    BOOST_FOREACH(double delta, deltas) {
+    for (double delta : deltas) {
         look_info prev_glance = look_along_ray(curr_pos,
                                                 dir_to_object,
                                                 SIGHT_DISTANCE);
@@ -491,7 +491,7 @@ std::vector<look_info> TangentBug::get_obstacle_endpoints()
     // first and the first shall be last:
 
     // Can I safely use reference (e.g., look_info& this_look) if I am aggregating them in a container:
-    BOOST_FOREACH(look_info this_look, look_dests) {
+    for (look_info this_look : look_dests) {
         if (! this_look.collided) {
             if (prev_look.collided) {
                 endpoints.push_back(prev_look);
@@ -672,12 +672,12 @@ bool TangentBug::reeval_subgoal(look_info &new_subgoal)
     }
 
     endpoints.erase(new_end, endpoints.end());
-    BOOST_FOREACH(look_info &look, endpoints) {
+    for (look_info &look : endpoints) {
         aux_map[look.last_point_before_hit].insert(TRACE_CYAN);
     }
 
     print(); //getch();
-    BOOST_FOREACH(look_info &look, endpoints) {
+    for(look_info &look : endpoints) {
         aux_map[look.last_point_before_hit].erase(TRACE_CYAN);
     }
 
@@ -698,7 +698,7 @@ bool TangentBug::reeval_subgoal(look_info &new_subgoal)
 
     look_info best_point;
     double heuristic_distance;
-    BOOST_FOREACH(look_info& look, endpoints) {
+    for (look_info& look : endpoints) {
         TBPoint * pt = &look.last_point_before_hit;
         heuristic_distance = (curr_pos - *pt).length() + (*pt - goal).length();
         if (heuristic_distance < best_distance) {
@@ -1213,7 +1213,7 @@ void TangentBug::print() const
                     vap(OCCUPIED_VIRTUALLY, 'O' | green),
                 };
                 vap value_action_pair;
-                BOOST_FOREACH(vap& value_action_pair, vaps) {
+                for (vap& value_action_pair : vaps) {
                     if (s.find(value_action_pair.first) != s.end()) {
                         mvaddch(screen_y, screen_x, value_action_pair.second);
                         break;

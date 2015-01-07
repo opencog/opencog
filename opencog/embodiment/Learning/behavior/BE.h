@@ -35,10 +35,6 @@
 
 #define BEHAVED_PREDICATE_NAME "behaved"
 
-#ifdef WIN32
-#define foreach BOOST_FOREACH
-#endif
-
 using namespace opencog;
 
 namespace behavior

@@ -243,7 +243,7 @@ void ProtocolBufferSerializer::serializeIndefiniteTruthValue(
     singleTruthValue->set_mean(tv.mean);
     singleTruthValue->set_count(tv.count);
     singleTruthValue->set_confidence(tv.confidence);
-    BOOST_FOREACH(float *f, tv.firstOrderDistribution)
+    for (float *f : tv.firstOrderDistribution)
     {
         singleTruthValue->add_firstorderdistribution(*f);
     }
@@ -275,7 +275,7 @@ void ProtocolBufferSerializer::serializeLink(
 
     atomMessage->set_atomtype(ZMQAtomTypeLink);
 
-    BOOST_FOREACH(Handle h, link.outgoing)
+    for (Handle h : link.outgoing)
         atomMessage->add_outgoing(h.value());
 
     if(link.trail)
@@ -342,7 +342,7 @@ void ProtocolBufferSerializer::deserializeTrail(
 void ProtocolBufferSerializer::serializeTrail(Trail& t, ZMQTrailMessage* trailMessage)
 {
     trailMessage->set_maxsize(t.maxSize);
-    BOOST_FOREACH(Handle h, *(t.trail))
+    for (Handle h : *(t.trail))
         trailMessage->add_trail(h.value());
 }
 

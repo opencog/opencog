@@ -31,7 +31,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "foreach.h"
 #include "oc_assert.h"
 
 namespace opencog {

@@ -22,14 +22,11 @@
 #include <CogServer.h>
 #include <AtomSpace.h>
 
-#include <boost/foreach.hpp>
 
 #include <time.h>
 #include <sstream>
 
 using std::endl;
-
-#define foreach BOOST_FOREACH
 
 namespace opencog {
 

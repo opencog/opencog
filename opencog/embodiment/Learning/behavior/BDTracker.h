@@ -27,12 +27,8 @@
 #include <algorithm>
 #include <map>
 
-#ifdef WIN32
-#include <boost/foreach.hpp>
-#else
 #include <sys/select.h>
 #include <sys/time.h>
-#endif
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/Temporal.h>
