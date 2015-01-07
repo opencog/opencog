@@ -108,17 +108,17 @@ ITable::ITable(const type_tree& tt, int nsamples,
         size_t bidx = 0;        // counter used to enumerate all
                                 // booleans
         vertex_seq vs;
-        foreach (type_node n, make_pair(root.begin(), root.last_child()))
-            if (n == id::boolean_type)
+        for (auto it = root.begin(); it != root.last_child(); ++it)
+            if (*it == id::boolean_type)
                 vs.push_back(bool_to_vertex(comp_tt?
                                             i & (1 << bidx++)
                                             : randGen().randint(2)));
-            else if (n == id::contin_type)
+            else if (*it == id::contin_type)
                 vs.push_back((max_contin - min_contin)
                              * randGen().randdouble() + min_contin);
-            else if (n == id::enum_type)
+            else if (*it == id::enum_type)
                 vs.push_back(enum_t::get_random_enum());
-            else if (n == id::unknown_type)
+            else if (*it == id::unknown_type)
                 vs.push_back(vertex()); // push default vertex
             else
                 OC_ASSERT(false, "Not implemented yet");
