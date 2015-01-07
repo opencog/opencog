@@ -14,6 +14,7 @@
 #include <string>
 #include <sstream>
 #include <pthread.h>
+#include <cstddef>
 #include <libguile.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/shell/GenericEval.h>

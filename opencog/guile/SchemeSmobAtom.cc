@@ -10,6 +10,7 @@
 
 #include <vector>
 
+#include <cstddef>
 #include <libguile.h>
 
 #include <opencog/atomspace/ClassServer.h>
