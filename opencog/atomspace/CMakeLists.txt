@@ -16,6 +16,7 @@ ADD_LIBRARY (atomspace SHARED
     AtomSpace.cc
     AtomSpaceImpl.cc
     AtomSpaceInit.cc
+    AtomSpaceUtils.cc
     AtomTable.cc
     AttentionValue.cc
     AttentionBank.cc
@@ -69,6 +70,7 @@ INSTALL (FILES
     AtomSpaceDefinitions.h
     AtomSpace.h
     AtomSpaceImpl.h
+    AtomSpaceUtils.h
     AtomTable.h
     ${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
     AttentionValue.h
