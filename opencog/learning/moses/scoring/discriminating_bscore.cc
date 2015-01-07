@@ -307,7 +307,7 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
 
     logger().fine() << "Disc: min_thresh=" << _min_threshold;
 
-    foreach (const pos_neg_cnt& pnc, max_vary | map_values | reversed) {
+    for (const pos_neg_cnt& pnc : max_vary | map_values | reversed) {
         acc_pos += std::get<0>(pnc);
         acc_neg += std::get<1>(pnc);
         acc_cnt += std::get<2>(pnc);
