@@ -83,8 +83,6 @@ Handle LGDictReader::getAtom(const std::string& word)
     {
         Exp* exp = dn->exp;
 
-        print_expression(exp);
-
         // First atom at the front of the outgoing set is the word itself.
         // Second atom is the first disjuct that must be fulfilled.
         std::string word_cset = " (LgWordCset (WordNode \"";
