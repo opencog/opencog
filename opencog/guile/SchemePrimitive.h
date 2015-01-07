@@ -209,7 +209,7 @@ class SchemePrimitive : public PrimitiveEnviron
 
 					rc = SCM_EOL;
 
-                    // reverse iteration to preserve order when doing cons
+					// reverse iteration to preserve order when doing cons
 					for (HandleSeq::reverse_iterator rit = rHS.rbegin(); rit != rHS.rend(); ++rit)
 						rc = scm_cons(SchemeSmob::handle_to_scm(*rit), rc);
 
@@ -270,7 +270,7 @@ class SchemePrimitive : public PrimitiveEnviron
 
 					rc = SCM_EOL;
 
-                    // reverse iteration to preserve order when doing cons
+					// reverse iteration to preserve order when doing cons
 					for (HandleSeqSeq::reverse_iterator rit = rHSS.rbegin(); rit != rHSS.rend(); ++rit)
 					{
 						HandleSeq rHS = *rit;
