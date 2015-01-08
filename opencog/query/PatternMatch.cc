@@ -240,9 +240,8 @@ int PatternMatch::get_vartype(Handle htypelink,
 			return 4;
 		}
 
-		std::set<Type> ts;
-		ts.insert(vt);
-		typemap.insert(ATPair(varname,ts));
+		std::set<Type> ts = {vt};
+		typemap.insert(ATPair(varname, ts));
 		vset.insert(varname);
 	}
 	else if (LIST_LINK == t)
