@@ -36,7 +36,6 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/platform.h>
@@ -401,7 +400,7 @@ void HopfieldServer::reset()
 
     // Remove all links and replace
     atomSpace.getHandlesByType(back_inserter(toRemove), HEBBIAN_LINK, true);
-    foreach (Handle handle, toRemove) {
+    for (Handle handle: toRemove) {
         atomSpace.removeAtom(handle);
     }
     resetNodes();
@@ -470,7 +469,7 @@ void HopfieldServer::resetNodes(bool toDefault)
     a.getHandlesByType(back_inserter(nodes), NODE, true);
 
 	if (toDefault) {
-        foreach (Handle handle, nodes) {
+        for (Handle handle: nodes) {
 			// Set all nodes to default STI and default LTI
 			a.setSTI(handle, AttentionValue::DEFAULTATOMSTI);
 			a.setLTI(handle, AttentionValue::DEFAULTATOMLTI);
@@ -483,7 +482,7 @@ void HopfieldServer::resetNodes(bool toDefault)
 			(patternStimulus * importUpdateAgent->getSTIAtomWage())/hGrid.size();
 		startLTI = getAtomSpace().getAttentionalFocusBoundary() -
 			(patternStimulus * importUpdateAgent->getLTIAtomWage())/hGrid.size();
-        foreach (Handle handle, nodes) {
+        for (Handle handle: nodes) {
 			a.setSTI(handle, startSTI);
 			a.setLTI(handle, startLTI);
 		}
@@ -1045,7 +1044,7 @@ void HopfieldServer::printLinks()
     // Get all atoms (and subtypes) of type t
     getAtomSpace().getHandlesByType(out_hi, LINK, true);
     // For each, get prop, scale... and 
-//    foreach (Handle h, hs) {
+//    for (Handle h: hs) {
 //        cout << getAtomSpace->atomAsString(h) << endl;
 //    }
 

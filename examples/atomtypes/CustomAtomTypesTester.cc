@@ -30,7 +30,6 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/foreach.h>
 
 #include "examples/atomtypes/atom_types.h"
 
@@ -68,7 +67,7 @@ void CustomAtomTypesTester::createAtoms()
 
 static void dumpHandleSeq(HandleSeq& hs, const char *id)
 {
-    foreach( Handle handle, hs) {
+    for( Handle handle: hs) {
         logger().info("[CustomAtomTypesTester] %s: %s",
                 id, server().getAtomSpace().atomAsString(handle).c_str());
     }
