@@ -26,7 +26,6 @@
 #include <queue>
 #include <vector>
 #include <set>
-#include "foreach.h"
 #include "algorithm.h"
 #include "exceptions.h"
 #include "oc_assert.h"
