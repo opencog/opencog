@@ -47,7 +47,7 @@ public:
     Handle getAtom(const std::string word);
     Handle getAtom(const Handle& h);
 
-private: 
+private:
     Handle getAtomHelper(const std::string word, const std::string node_string);
     std::string lg_exp_to_scm_string(Exp*);
 
