@@ -70,6 +70,9 @@ void SuRealModule::init(void)
 HandleSeq SuRealModule::do_sureal_match(Handle h)
 {
 #ifdef HAVE_GUILE
+    // clear the old results on new "sureal-match" to sync with "sureal-get-mapping"
+    m_results.clear();
+
     // only accept SetLink
     if (h->getType() != SET_LINK)
         return HandleSeq();
