@@ -27,8 +27,8 @@ using namespace opencog;
 bool AttentionalFocusCB::node_match(Handle& node1, Handle& node2)
 {
 	if (node1 == node2
-			and node2->getAttentionValue()->getSTI()
-					> _atom_space->getAttentionalFocusBoundary())
+	    and node2->getAttentionValue()->getSTI()
+	    > _as->getAttentionalFocusBoundary())
 	{
 		return false;
 	}
@@ -45,7 +45,7 @@ bool AttentionalFocusCB::link_match(LinkPtr& lpat, LinkPtr& lsoln)
 		return true;
 	}
 	if (lsoln->getAttentionValue()->getSTI()
-			> _atom_space->getAttentionalFocusBoundary())
+	    > _as->getAttentionalFocusBoundary())
 	{
 		return false;
 	}
@@ -65,11 +65,11 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h)
 	// parts of the hypergraph.
 	IncomingSet filtered_set;
 	for (IncomingSet::const_iterator i = incoming_set.begin();
-			i != incoming_set.end(); ++i)
+	     i != incoming_set.end(); ++i)
 	{
 		Handle candidate_handle(*i);
 		if (candidate_handle->getAttentionValue()->getSTI()
-				> _atom_space->getAttentionalFocusBoundary())
+		    > _as->getAttentionalFocusBoundary())
 		{
 			filtered_set.push_back(LinkCast(candidate_handle));
 		}

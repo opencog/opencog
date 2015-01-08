@@ -46,7 +46,7 @@ class DefaultPatternMatchCB :
 	public:
 		DefaultPatternMatchCB(AtomSpace* as) :
 			_type_restrictions(NULL),
-			_atom_space(as)
+			_as(as)
 		{}
 
 		/**
@@ -164,7 +164,7 @@ class DefaultPatternMatchCB :
 	protected:
 		virtual Handle find_starter(Handle, size_t&, Handle&, size_t&);
 		virtual Handle find_thinnest(std::vector<Handle>&, Handle&, size_t&);
-		AtomSpace *_atom_space;
+		AtomSpace *_as;
 };
 
 } // namespace opencog
