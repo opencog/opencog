@@ -130,6 +130,39 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
 	return hdeepest;
 }
 
+// Look at all the clauses, to find the "thinnest" one.
+Handle DefaultPatternMatchCB::find_thinnest(std::vector<Handle>& clauses,
+                                            Handle& starter_pred,
+                                            size_t& bestclause)
+{
+	size_t thinnest = SIZE_MAX;
+	size_t deepest = 0;
+	bestclause = 0;
+	Handle best_start(Handle::UNDEFINED);
+	starter_pred = Handle::UNDEFINED;
+
+	size_t nc = clauses.size();
+	for (size_t i=0; i < nc; i++) {
+		Handle h(clauses[i]);
+		size_t depth = 0;
+		size_t width = SIZE_MAX;
+		Handle pred(Handle::UNDEFINED);
+		Handle start(find_starter(h, depth, pred, width));
+		if (start != Handle::UNDEFINED
+		    and (width < thinnest
+		         or (width == thinnest and depth > deepest)))
+		{
+			thinnest = width;
+			deepest = depth;
+			bestclause = i;
+			best_start = start;
+			starter_pred = pred;
+		}
+	}
+
+    return best_start;
+}
+
 /**
  * Search for solutions/groundings over all of the AtomSpace, using
  * some "reasonable" assumptions for what might be searched for. Or,
@@ -213,30 +246,8 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 	// no constants in them at all.  In this case, the search is
 	// performed by looping over all links of the given types.
 
-	size_t thinnest = SIZE_MAX;
-	size_t deepest = 0;
-	size_t bestclause = 0;
-	Handle best_start(Handle::UNDEFINED);
-	_starter_pred = Handle::UNDEFINED;
-
-	size_t nc = clauses.size();
-	for (size_t i=0; i < nc; i++) {
-		Handle h(clauses[i]);
-		size_t depth = 0;
-		size_t width = SIZE_MAX;
-		Handle pred(Handle::UNDEFINED);
-		Handle start(find_starter(h, depth, pred, width));
-		if (start != Handle::UNDEFINED
-		    and (width < thinnest
-		         or (width == thinnest and depth > deepest)))
-		{
-			thinnest = width;
-			deepest = depth;
-			bestclause = i;
-			best_start = start;
-			_starter_pred = pred;
-		}
-	}
+	size_t bestclause;
+	Handle best_start = find_thinnest(clauses, _starter_pred, bestclause);
 
 	if ((Handle::UNDEFINED != best_start) and 
 	    // (Handle::UNDEFINED != _starter_pred) and
