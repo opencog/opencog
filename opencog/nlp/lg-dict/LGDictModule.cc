@@ -77,11 +77,11 @@ Handle LGDictModule::do_lg_get_dict_entry(Handle h)
 #ifdef HAVE_GUILE
     AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-get-dict-entry");
 
-    if (pAS->isNode(h) && pAS->getType(h) == WORD_NODE)
+    if (pAS->isNode(h) && (pAS->getType(h) == WORD_NODE || pAS->getType(h) == NUMBER_NODE))
     {
         LGDictReader reader(m_pDictionary, pAS);
 
-        return reader.getAtom(pAS->getName(h));
+        return reader.getAtom(h);
     }
 
     return Handle::UNDEFINED;

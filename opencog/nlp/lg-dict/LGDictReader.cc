@@ -23,6 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/guile/SchemeSmob.h>
+
 #include "LGDictReader.h"
 
 using namespace opencog;
@@ -69,7 +71,36 @@ LGDictReader::~LGDictReader()
  * @param word   the input word string
  * @return       the handle to the newly created atom
  */
-Handle LGDictReader::getAtom(const std::string& word)
+Handle LGDictReader::getAtom(const std::string word)
+{
+    return getAtomHelper(word, "(WordNode \"" + word + "\")");
+}
+
+/**
+ * Method to construct LG dictionary atom.
+ *
+ * Similar to the version that accept a string as input, but accept a
+ * Handle to the node instead.  This allows both WordNode and
+ * NumberNode to be accepted.
+ *
+ * @param h   handle to the WordNode or NumberNode
+ * @return    the handle to the newly created atom
+ */
+Handle LGDictReader::getAtom(const Handle& h)
+{
+    return getAtomHelper(NodeCast(h)->getName(), SchemeSmob::to_string(h));
+}
+
+/**
+ * Helper method for getAtom.
+ *
+ * Do the main implementation for constructing the LG dictionary's entry.
+ *
+ * @param word           the word string itself
+ * @param node_string    a scheme expression for the node as string
+ * @return               the handle to the newly created atom
+ */
+Handle LGDictReader::getAtomHelper(const std::string word, const std::string node_string)
 {
     // See if we know about this word, or not.
     Dict_node* dn_head = dictionary_lookup_list(_dictionary, word.c_str());
@@ -85,9 +116,9 @@ Handle LGDictReader::getAtom(const std::string& word)
 
         // First atom at the front of the outgoing set is the word itself.
         // Second atom is the first disjuct that must be fulfilled.
-        std::string word_cset = " (LgWordCset (WordNode \"";
-        word_cset += word;
-        word_cset += "\")\n";
+        std::string word_cset = " (LgWordCset ";
+        word_cset += node_string;
+        word_cset += "\n";
         word_cset += lg_exp_to_scm_string(exp);
         word_cset += ")\n";
 
@@ -113,8 +144,8 @@ std::string LGDictReader::lg_exp_to_scm_string(Exp* exp)
     {
         std::stringstream ss;
         ss << "(LgConnector (LgConnectorNode ";
-        ss << "\"" << exp->u.string << "\")";
-        ss << "(LgConnDirNode \"" << exp->dir << "\")";
+        ss << "\"" << exp->u.string << "\") ";
+        ss << "(LgConnDirNode \"" << exp->dir << "\") ";
 
         if (exp->multi)
             ss << "(LgConnMultiNode \"@\")";

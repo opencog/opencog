@@ -109,11 +109,18 @@ HandleSeq SuRealModule::do_sureal_match(Handle h)
         }
 
         std::string sName = pAS->getName(n);
-        Handle hWordNode = pAS->getHandle(WORD_NODE, sName.substr(0, sName.find_first_of('@')));
+        std::string sWord = sName.substr(0, sName.find_first_of('@'));
+        Handle hWordNode = pAS->getHandle(WORD_NODE, sWord);
 
-        // if no WordNode exists
+        // try NumberNode if no WordNode found
         if (hWordNode == Handle::UNDEFINED)
-            continue;
+        {
+            hWordNode = pAS->getHandle(NUMBER_NODE, sWord);
+
+            // if there's no NumberNode neither
+            if (hWordNode == Handle::UNDEFINED)
+                continue;
+        }
 
         // if no LG dictionary entry
         if (pAS->getNeighbors(hWordNode, false, true, LG_WORD_CSET, false).empty())

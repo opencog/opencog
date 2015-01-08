@@ -71,14 +71,24 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
         return true;
 
     std::string sPat = _atom_space->getName(hPat);
+    std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
     std::string sSoln = _atom_space->getName(hSoln);
+    std::string sSolnWord = sSoln.substr(0, sSoln.find_first_of('@'));
 
     // get the WordNode associated with the word (extracted from "word@1234" convention)
-    Handle hPatWordNode = _atom_space->getHandle(WORD_NODE, sPat.substr(0, sPat.find_first_of('@')));
-    Handle hSolnWordNode = _atom_space->getHandle(WORD_NODE, sSoln.substr(0, sSoln.find_first_of('@')));
+    Handle hPatWordNode = _atom_space->getHandle(WORD_NODE, sPatWord);
+    Handle hSolnWordNode = _atom_space->getHandle(WORD_NODE, sSolnWord);
 
+    // no WordNode? try NumberNode
     if (hSolnWordNode == Handle::UNDEFINED)
-        return true;
+    {
+        hPatWordNode = _atom_space->getHandle(NUMBER_NODE, sPatWord);
+        hSolnWordNode = _atom_space->getHandle(NUMBER_NODE, sSolnWord);
+
+        // no NumberNode neither
+        if (hSolnWordNode == Handle::UNDEFINED)
+            return true;
+    }
 
     // get the neighbor of each WordNode within LgWordCset
     HandleSeq qPatSet =_atom_space->getNeighbors(hPatWordNode, false, true, LG_WORD_CSET, false);

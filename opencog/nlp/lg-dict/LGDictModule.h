@@ -39,16 +39,16 @@ namespace opencog {
  */
 class LGDictModule : public Module
 {
-    private:
-        Handle do_lg_get_dict_entry(Handle);
+private:
+    Handle do_lg_get_dict_entry(Handle);
 
-        Dictionary m_pDictionary;
+    Dictionary m_pDictionary;
 
-    public:
-        LGDictModule(CogServer&);
-        virtual ~LGDictModule();
-        const char * id(void);
-        virtual void init(void);
+public:
+    LGDictModule(CogServer&);
+    virtual ~LGDictModule();
+    const char * id(void);
+    virtual void init(void);
 };
 
 }
