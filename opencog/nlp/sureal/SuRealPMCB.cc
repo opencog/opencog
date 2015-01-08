@@ -211,6 +211,83 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 }
 
 /**
+ * Implement the perform_search method.
+ *
+ * Similar to DefaultPatternMatcherCB::perform_search, in which we start search
+ * by looking at the thinnest clause with constants.  However, since most clauses
+ * for SuReal will have 0 constants, most searches will require looking at all
+ * the links.  This implementation improves that by looking at links within a
+ * SetLink within a ReferenceLink with a InterpretationNode neightbor, thus
+ * limiting the search space.
+ *
+ * @param pPME       pointer to the PatternMatchEngine
+ * @param vars       a set of nodes that are variables
+ * @param clauses    the clauses for the query
+ * @param negations  the negative clauses
+ */
+void SuRealPMCB::perform_search(PatternMatchEngine* pPME, std::set<Handle>& vars, HandleSeq& clauses, HandleSeq& negations)
+{
+    size_t bestClauseIndex;
+    Handle bestClause, bestSubClause, bestSubNode;
+
+    // find the thinnest clause with constants
+    bestSubNode = find_thinnest(clauses, bestSubClause, bestClauseIndex);
+
+    if (bestSubNode != Handle::UNDEFINED && !vars.empty())
+    {
+        bestClause = clauses[bestClauseIndex];
+
+        logger().debug("[SuReal] Search start node: %s", bestSubNode->toShortString().c_str());
+        logger().debug("[SuReal] Start pred is: %s", bestSubClause->toShortString().c_str());
+
+        IncomingSet iset = get_incoming_set(bestSubNode);
+
+        for (auto& l : iset)
+        {
+            Handle h(l);
+            logger().debug("[SuReal] Loop candidate: %s", h->toShortString().c_str());
+
+            if (pPME->do_candidate(bestClause, bestSubClause, h))
+                break;
+        }
+
+        return;
+    }
+
+    bestClause = clauses[0];
+
+    logger().debug("[SuReal] Start pred is: %s", bestClause->toShortString().c_str());
+
+    // helper for checking for InterpretationNode
+    auto hasNoInterpretation = [this](Handle& h)
+    {
+        HandleSeq qISet = _atom_space->getIncoming(h);
+        qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& hl) { return hl->getType() != SET_LINK; }), qISet.end());
+
+        auto hasNode = [this](Handle& hl)
+        {
+            HandleSeq qN = _atom_space->getNeighbors(hl, true, false, REFERENCE_LINK, false);
+            return std::any_of(qN.begin(), qN.end(), [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
+        };
+
+        return not std::any_of(qISet.begin(), qISet.end(), hasNode);
+    };
+
+    // keep only links of the same type as bestClause and have linkage to InterpretationNode
+    HandleSeq qCandidate;
+    _atom_space->getHandlesByType(std::back_inserter(qCandidate), bestClause->getType());
+    qCandidate.erase(std::remove_if(qCandidate.begin(), qCandidate.end(), hasNoInterpretation), qCandidate.end());
+
+    for (auto& c : qCandidate)
+    {
+        logger().debug("[SuReal] Loop candidate: %s", c->toShortString().c_str());
+
+        if (pPME->do_candidate(bestClause, bestClause, c))
+            break;
+    }
+}
+
+/**
  * Override the find_starter method in DefaultPatternMatchCB.
  *
  * Override find_starter so that it will not treat VariableNode variables,
