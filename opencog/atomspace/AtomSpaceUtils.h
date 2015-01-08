@@ -1,5 +1,5 @@
 /*
- * LGDictMoudle.h
+ * AtomSpaceUtils.h
  *
  * Copyright (C) 2014 OpenCog Foundation
  *
@@ -21,36 +21,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LG_DICT_MODULE_H
-#define _OPENCOG_LG_DICT_MODULE_H
+#ifndef _OPENCOG_ATOMSPACE_UTILS_H
+#define _OPENCOG_ATOMSPACE_UTILS_H
 
-#include <link-grammar/dict-api.h>
+#include "AtomSpace.h"
 
-#include <opencog/server/Module.h>
-#include <opencog/atomspace/Handle.h>
-
-namespace opencog {
+namespace opencog
+{
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
- * An OpenCog module for reading LG dictionary.
+ * General purpose utilities for processing atoms in the AtomSpace.
  *
- * This module creates the necessary scheme bindings for accessing the
- * Link Grammar dictionary.
+ * Contains methods and algorithms which might be useful to other processes.
  */
-class LGDictModule : public Module
+class AtomSpaceUtils
 {
-private:
-    Handle do_lg_get_dict_entry(Handle);
-
-    Dictionary m_pDictionary;
 
 public:
-    LGDictModule(CogServer&);
-    virtual ~LGDictModule();
-    const char * id(void);
-    virtual void init(void);
+    static HandleSeq getAllNodes(AtomSpace* pAS, Handle h);
+
+    static UnorderedHandleSet getAllUniqueNodes(AtomSpace* pAS, Handle h);
+
 };
 
+/** @}*/
 }
 
-#endif // _OPENCOG_LG_DICT_MODULE_H
+#endif // _OPENCOG_ATOMSPACE_UTILS_H

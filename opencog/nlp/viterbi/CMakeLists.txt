@@ -12,8 +12,6 @@ INCLUDE_DIRECTORIES (
 	${LINK_GRAMMAR_INCLUDE_DIRS}
 )
 
-LINK_LIBRARIES (viterbi)
-
 ADD_LIBRARY (viterbi SHARED
 	atom_types_init.cc
 	parser.cc

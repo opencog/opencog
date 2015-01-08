@@ -1,5 +1,5 @@
 /*
- * LGDictMoudle.h
+ * SuRealModule.h
  *
  * Copyright (C) 2014 OpenCog Foundation
  *
@@ -21,36 +21,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LG_DICT_MODULE_H
-#define _OPENCOG_LG_DICT_MODULE_H
+#ifndef _OPENCOG_SUREAL_MODULE_H
+#define _OPENCOG_SUREAL_MODULE_H
 
-#include <link-grammar/dict-api.h>
 
 #include <opencog/server/Module.h>
-#include <opencog/atomspace/Handle.h>
+#include <opencog/query/PatternMatchEngine.h>
 
-namespace opencog {
+
+namespace opencog
+{
+namespace nlp
+{
 
 /**
- * An OpenCog module for reading LG dictionary.
+ * An OpenCog module for supporting Surface Realization.
  *
- * This module creates the necessary scheme bindings for accessing the
- * Link Grammar dictionary.
+ * This module creates the necessary scheme bindings doing pattern matching
+ * and getting the corresponding mapping.
  */
-class LGDictModule : public Module
+class SuRealModule : public Module
 {
-private:
-    Handle do_lg_get_dict_entry(Handle);
-
-    Dictionary m_pDictionary;
-
 public:
-    LGDictModule(CogServer&);
-    virtual ~LGDictModule();
+    SuRealModule(CogServer&);
+    virtual ~SuRealModule() {}
+
     const char * id(void);
     virtual void init(void);
+
+private:
+    HandleSeq do_sureal_match(Handle);
+    HandleSeqSeq do_sureal_get_mapping(Handle);
+
+    PatternMatchEngine m_pme;
+    std::map<Handle, std::map<Handle, Handle> > m_results;
 };
 
 }
+}
 
-#endif // _OPENCOG_LG_DICT_MODULE_H
+#endif // _OPENCOG_SUREAL_MODULE_H
