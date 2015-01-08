@@ -7,6 +7,7 @@
 
 #ifdef HAVE_GUILE
 
+#include <cstddef>
 #include <libguile.h>
 #include <opencog/execution/ExecutionLink.h>
 

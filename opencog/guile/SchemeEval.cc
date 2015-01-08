@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <cstddef>
 #include <libguile.h>
 #include <libguile/backtrace.h>
 #include <libguile/debug.h>

@@ -24,6 +24,7 @@
 
 #ifdef HAVE_GUILE
 
+#include <cstddef>
 #include <libguile.h>
 
 #include <opencog/guile/SchemeSmob.h>
