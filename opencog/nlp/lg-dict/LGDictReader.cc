@@ -71,7 +71,7 @@ LGDictReader::~LGDictReader()
  * @param word   the input word string
  * @return       the handle to the newly created atom
  */
-Handle LGDictReader::getAtom(const std::string word)
+Handle LGDictReader::getAtom(const std::string& word)
 {
     return getAtomHelper(word, "(WordNode \"" + word + "\")");
 }
@@ -100,7 +100,7 @@ Handle LGDictReader::getAtom(const Handle& h)
  * @param node_string    a scheme expression for the node as string
  * @return               the handle to the newly created atom
  */
-Handle LGDictReader::getAtomHelper(const std::string word, const std::string node_string)
+Handle LGDictReader::getAtomHelper(const std::string& word, const std::string& node_string)
 {
     // See if we know about this word, or not.
     Dict_node* dn_head = dictionary_lookup_list(_dictionary, word.c_str());

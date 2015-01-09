@@ -182,7 +182,6 @@ HandleSeq SuRealModule::do_sureal_match(Handle h)
  */
 HandleSeqSeq SuRealModule::do_sureal_get_mapping(Handle h)
 {
-#ifdef HAVE_GUILE
     // no pattern matcher result or no result mapping to the Handle h
     if (m_results.empty() || m_results.count(h) == 0)
         return HandleSeqSeq();
@@ -203,9 +202,5 @@ HandleSeqSeq SuRealModule::do_sureal_get_mapping(Handle h)
     results.push_back(qVars);
 
     return results;
-
-#else
-    return HandleSeqSeq();
-#endif
 }
 
