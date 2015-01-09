@@ -51,7 +51,10 @@
 ; Return #t or #f depends on whether the node as a WordNode.
 ;
 (define (has-word? node)
-	(not (null? (cog-node 'WordNode (cog-name node))))
+	(not (and
+		(null? (cog-node 'WordNode (cog-name node)))
+		(null? (cog-node 'NumberNode (cog-name node)))
+	))
 )
 
 ; -----------------------------------------------------------------------
