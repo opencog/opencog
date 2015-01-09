@@ -100,32 +100,41 @@
     (define (eval-list a-list)
         (if (= 1 (length a-list))
             (begin (eval-string (list-ref a-list 0)) '())
-            (begin (eval-string (list-ref a-list 0))
-            (let ((parse-name (parse-str (list-ref a-list 0))))
-                (ReferenceLink 
-                    (InterpretationNode (string-append parse-name "_interpretation_$X"))
-                    ; The function in the SetLink returns a list of outputs that
-                    ; are the results of the evaluation of the relex-to-logic functions,
-                    ; on the relex-opencog-outputs.
-                    (SetLink
-                        (filter-map pruner
-                            (delete-duplicates 
-                                (apply append 
-                                    (map-in-order eval-string
-                                        (filter (lambda (x) (not (string=? "" x)))
-                                            (split-string "\n" (list-ref a-list 1))
+            (begin
+                (eval-string (list-ref a-list 0))
+                (let* ((parse-name (parse-str (list-ref a-list 0)))
+                       (parse-node (ParseNode parse-name)))
+                    ; generate the LG dictionary entries for each word
+                    (let ((words (parse-get-words parse-node)))
+                        (map-word-instances
+                            (lambda (word-inst) (map-word-node lg-get-dict-entry word-inst))
+                            parse-node
+                        )
+                    )
+                    (ReferenceLink 
+                        (InterpretationNode (string-append parse-name "_interpretation_$X"))
+                        ; The function in the SetLink returns a list of outputs that
+                        ; are the results of the evaluation of the relex-to-logic functions,
+                        ; on the relex-opencog-outputs.
+                        (SetLink
+                            (filter-map pruner
+                                (delete-duplicates 
+                                    (apply append 
+                                        (map-in-order eval-string
+                                            (filter (lambda (x) (not (string=? "" x)))
+                                                (split-string "\n" (list-ref a-list 1))
+                                            )
                                         )
                                     )
                                 )
                             )
                         )
                     )
-                )
-                (InterpretationLink
-                    (InterpretationNode (string-append parse-name "_interpretation_$X"))
-                    (ParseNode parse-name)
-                )
-            ))
+                    (InterpretationLink
+                        (InterpretationNode (string-append parse-name "_interpretation_$X"))
+                        parse-node
+                    )
+                ))
         )
     )
 
