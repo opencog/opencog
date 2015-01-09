@@ -66,8 +66,8 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
     if (hPat->getType() != hSoln->getType())
         return true;
 
-    // VariableNode can be matched to any VariableNode
-    if (hPat->getType() == VARIABLE_NODE)
+    // VariableNode can be matched to any VariableNode, similarly for InterpretationNode
+    if (hPat->getType() == VARIABLE_NODE || hPat->getType() == INTERPRETATION_NODE)
         return true;
 
     std::string sPat = _as->getName(hPat);
@@ -155,6 +155,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 {
     logger().debug("[SuReal] grounding a solution");
 
+    // helper to get the InterpretationNode
     auto getInterpretation = [this](const Handle& h)
     {
         HandleSeq qISet = _as->getIncoming(h);
@@ -176,6 +177,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     HandleSeq qItprNode = getInterpretation(pred_soln.begin()->second);
     std::sort(qItprNode.begin(), qItprNode.end());
 
+    // try to find a common InterpretationNode to the solutions
     for (std::map<Handle, Handle>::const_iterator it = ++pred_soln.begin(); it != pred_soln.end(); ++it)
     {
         HandleSeq thisSeq = getInterpretation(it->second);
@@ -254,6 +256,7 @@ void SuRealPMCB::perform_search(PatternMatchEngine* pPME, std::set<Handle>& vars
         return;
     }
 
+    // reaching here means no contants, so do some search space reduction here
     bestClause = clauses[0];
 
     logger().debug("[SuReal] Start pred is: %s", bestClause->toShortString().c_str());
