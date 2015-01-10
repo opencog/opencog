@@ -18,6 +18,7 @@ ADD_DEFINITIONS(
 ADD_LIBRARY(cogutil SHARED
 	ansi
 	algorithm
+	async_writer
 	backtrace-symbols
 	based_variant
 	cluster
@@ -71,6 +72,7 @@ ENDIF (HAVE_BFD AND HAVE_IBERTY)
 INSTALL(FILES
 	ansi.h
 	algorithm.h
+	async_writer.h
 	backtrace-symbols.h
 	based_variant.h
 	cluster.h
