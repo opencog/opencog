@@ -39,15 +39,16 @@ using namespace opencog;
 /* ================================================================ */
 // Constructors
 
-AsyncUpdate::AsyncUpdate(void)
+AsyncUpdate::AsyncUpdate(int nthreads)
 {
 	stopping_writers = false;
 	thread_count = 0;
 	busy_writers = 0;
-	startWriterThread();
-	startWriterThread();
-	startWriterThread();
-	startWriterThread();
+
+	for (int i=0; i<nthreads; i++)
+	{
+		startWriterThread();
+	}
 }
 
 AsyncUpdate::~AsyncUpdate()
@@ -146,5 +147,53 @@ void AsyncUpdate::flushStoreQueue()
 }
 
 /* ================================================================ */
+/**
+ * Recursively store the indicated atom, and all that it points to.
+ * Store its truth values too. The recursive store is unconditional;
+ * its assumed that all sorts of underlying truuth values have changed, 
+ * so that the whole thing needs to be stored.
+ *
+ * By default, the actual store is done asynchronously (in a different
+ * thread); this routine merely queues up the atom. If the synchronous
+ * flag is set, then the store is done in this thread.
+ */
+void AsyncUpdate::enqueue(AtomPtr& atom, bool synchronous)
+{
+	// If a synchronous store, avoid the queues entirely.
+	if (synchronous)
+	{
+		// do_store_atom(atom);
+		return;
+	}
+
+	// Sanity checks.
+	if (stopping_writers)
+		throw RuntimeException(TRACE_INFO,
+			"Cannot store; AtomStorage writer threads are being stopped!");
+	if (0 == thread_count)
+		throw RuntimeException(TRACE_INFO,
+			"Cannot store; No writer threads are running!");
+
+	store_queue.push(atom);
+
+	// If the writer threads are falling behind, mitigate.
+	// Right now, this will be real simple: just spin and wait
+	// for things to catch up.  Maybe we should launch more threads!?
+#define HIGH_WATER_MARK 100
+#define LOW_WATER_MARK 10
+
+	if (HIGH_WATER_MARK < store_queue.size())
+	{
+		unsigned long cnt = 0;
+		do
+		{
+			// std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			usleep(1000);
+			cnt++;
+		}
+		while (LOW_WATER_MARK < store_queue.size());
+		logger().debug("AtomStorage overfull queue; had to sleep %d millisecs to drain!", cnt);
+	}
+}
 
 /* ============================= END OF FILE ================= */

@@ -57,8 +57,9 @@ class AsyncUpdate
 		void writeLoop();
 
 	public:
-		AsyncUpdate(void);
+		AsyncUpdate(int nthreads);
 		~AsyncUpdate();
+		void enqueue(AtomPtr&, bool);
 		void flushStoreQueue();
 };
 
