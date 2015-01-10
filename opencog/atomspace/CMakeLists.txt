@@ -12,6 +12,7 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 ADD_LIBRARY (atomspace SHARED
     atom_types.h
+    AsyncUpdate.cc
     Atom.cc
     AtomSpace.cc
     AtomSpaceImpl.cc
