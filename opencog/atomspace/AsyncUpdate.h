@@ -27,12 +27,14 @@
 
 #include <atomic>
 #include <mutex>
-#include <set>
 #include <thread>
 #include <vector>
 
 #include <opencog/util/concurrent_queue.h>
+#include <opencog/util/concurrent_queue.h>
 #include <opencog/util/concurrent_stack.h>
+
+#include "Handle.h"
 
 namespace opencog
 {

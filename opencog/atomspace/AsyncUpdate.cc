@@ -28,6 +28,7 @@
 #include <memory>
 #include <thread>
 
+#include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 
 #include "AsyncUpdate.h"
@@ -101,7 +102,7 @@ void AsyncUpdate::stopWriterThreads()
 	while (not store_queue.is_empty())
 	{
 		AtomPtr atom = store_queue.pop();
-		do_store_atom(atom);
+		// do_store_atom(atom);
 	}
 	
 	// Its now OK to start new threads, if desired ...(!)
@@ -117,7 +118,7 @@ void AsyncUpdate::writeLoop()
 		{
 			AtomPtr atom = store_queue.pop();
 			busy_writers ++; // Bad -- window after pop returns, before increment!
-			do_store_atom(atom);
+			// do_store_atom(atom);
 			busy_writers --;
 		}
 	}
