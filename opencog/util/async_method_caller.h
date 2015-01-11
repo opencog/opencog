@@ -98,7 +98,7 @@ class async_caller
 		async_caller(Writer*, void (Writer::*)(Element&), int nthreads=4);
 		~async_caller();
 		void enqueue(Element&);
-		void flush_store_queue();
+		void flush_queue();
 };
 
 
@@ -190,13 +190,13 @@ void async_caller<Writer, Element>::stop_writer_threads()
 }
 
 
-/// Drain the pending store queue.
+/// Drain the pending queue.
 /// Caution: this is slightly racy; a writer could still be busy
 /// even though this returns. (There's a window in write_loop, between
 /// the dequeue, and the busy_writer increment. I guess we should fix
 /// this...
 template<typename Writer, typename Element>
-void async_caller<Writer, Element>::flush_store_queue()
+void async_caller<Writer, Element>::flush_queue()
 {
 	// std::this_thread::sleep_for(std::chrono::microseconds(10));
 	usleep(10);
@@ -207,7 +207,7 @@ void async_caller<Writer, Element>::flush_store_queue()
 	}
 }
 
-/// A single write thread. Reads elements from queue, and invokes the 
+/// A single write thread. Reads elements from queue, and invokes the
 /// method on them.
 template<typename Writer, typename Element>
 void async_caller<Writer, Element>::write_loop()

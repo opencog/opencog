@@ -415,16 +415,24 @@ public:
     }
 
     /**
-     * Adds an atom to the table, checking for duplicates and merging
-     * when necessary. When an atom is added, the atom table takes over
-     * the memory management for that atom. In other words, no other
-     * code should ever attempt to delete the pointer that is passed
-     * into this method.
+     * Adds an atom to the table. If the atom already is in the
+     * atomtable, then the truth values and attention values of the
+     * two are merged (how, exactly? Is this doe corrrectly!?)
+     *
+     * The atom addition is asynchronous; the atom might not be
+     * fully added until *after* the barrier() method is called.
      *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
     Handle add(AtomPtr) throw (RuntimeException);
+
+    /**
+     * Read-write synchronization barrier fence.  When called, this
+     * will not return until all the atoms previously added to the
+     * atomspace have been fully inserted.
+     */
+    void barrier(void);
 
     /**
      * Return true if the atom table holds this handle, else return false.

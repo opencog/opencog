@@ -669,7 +669,7 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
 /// this...
 void AtomStorage::flushStoreQueue()
 {
-	_write_queue.flush_store_queue();
+	_write_queue.flush_queue();
 }
 
 /* ================================================================ */

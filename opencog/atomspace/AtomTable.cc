@@ -635,6 +635,11 @@ void AtomTable::put_atom_into_index(AtomPtr& atom)
     importanceIndex.insertAtom(atom);
 }
 
+void AtomTable::barrier()
+{
+    _index_queue.flush_queue();
+}
+
 size_t AtomTable::getSize() const
 {
     return size;
