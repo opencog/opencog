@@ -31,8 +31,7 @@
 #include <thread>
 #include <vector>
 
-#include <opencog/util/concurrent_queue.h>
-#include <opencog/util/concurrent_stack.h>
+#include <opencog/util/async_writer.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
@@ -117,6 +116,8 @@ class AtomStorage
 		int  TVID(const TruthValue &);
 		TruthValue * getTV(int);
 #endif /* OUT_OF_LINE_TVS */
+
+		async_writer<AtomPtr> _write_queue;
 
 		// Stuff to support asynchronous store of atoms.
 		concurrent_queue<AtomPtr> store_queue;

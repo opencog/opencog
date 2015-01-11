@@ -67,7 +67,8 @@ class async_writer
 /* ================================================================ */
 // Constructors
 
-async_writer::async_writer(int nthreads)
+template<typename Element>
+async_writer<Element>::async_writer(int nthreads)
 {
 	_stopping_writers = false;
 	_thread_count = 0;
@@ -79,7 +80,8 @@ async_writer::async_writer(int nthreads)
 	}
 }
 
-async_writer::~async_writer()
+template<typename Element>
+async_writer<Element>::~async_writer()
 {
 	stop_writer_threads();
 }
@@ -88,7 +90,8 @@ async_writer::~async_writer()
 
 /// Start a single writer thread.
 /// May be called multiple times.
-void async_writer::start_writer_thread()
+template<typename Element>
+void async_writer<Element>::start_writer_thread()
 {
 	logger().info("async_writer: starting a writer thread");
 	std::unique_lock<std::mutex> lock(write_mutex);
@@ -101,7 +104,8 @@ void async_writer::start_writer_thread()
 }
 
 /// Stop all writer threads, but only after they are done wroting.
-void async_writer::stop_writer_threads()
+template<typename Element>
+void async_writer<Element>::stop_writer_threads()
 {
 	logger().info("async_writer: stopping all writer threads");
 	std::unique_lock<std::mutex> lock(write_mutex);
@@ -145,7 +149,8 @@ void async_writer::stop_writer_threads()
 /// Caution: this is slightly racy; a writer could still be busy
 /// even though this returns. (There's a window in writeLoop, between
 /// the dequeue, and the busy_writer increment. I guess we should fix
-// this...
+/// this...
+template<typename Element>
 void async_writer::flush_store_queue()
 {
 	// std::this_thread::sleep_for(std::chrono::microseconds(10));
@@ -190,8 +195,8 @@ void async_writer<Element>::write_loop()
  * thread); this routine merely queues up the atom. If the synchronous
  * flag is set, then the store is done in this thread.
  */
-#if XXX
-void async_writer::enqueue(AtomPtr& atom, bool synchronous)
+template<typename Element>
+void async_writer<Element>::enqueue(Element& elt, bool synchronous)
 {
 	// If a synchronous store, avoid the queues entirely.
 	if (synchronous)
@@ -201,14 +206,14 @@ void async_writer::enqueue(AtomPtr& atom, bool synchronous)
 	}
 
 	// Sanity checks.
-	if (stopping_writers)
+	if (_stopping_writers)
 		throw RuntimeException(TRACE_INFO,
-			"Cannot store; AtomStorage writer threads are being stopped!");
-	if (0 == thread_count)
+			"Cannot store; async_writer writer threads are being stopped!");
+	if (0 == _thread_count)
 		throw RuntimeException(TRACE_INFO,
 			"Cannot store; No writer threads are running!");
 
-	_store_queue.push(atom);
+	_store_queue.push(elt);
 
 	// If the writer threads are falling behind, mitigate.
 	// Right now, this will be real simple: just spin and wait
@@ -226,10 +231,9 @@ void async_writer::enqueue(AtomPtr& atom, bool synchronous)
 			cnt++;
 		}
 		while (LOW_WATER_MARK < _store_queue.size());
-		logger().debug("AtomStorage overfull queue; had to sleep %d millisecs to drain!", cnt);
+		logger().debug("async_writer overfull queue; had to sleep %d millisecs to drain!", cnt);
 	}
 }
-#endif
 
 /* ============================= END OF FILE ================= */
 /** @}*/
