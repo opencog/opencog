@@ -177,6 +177,7 @@ PACKAGES_BUILD="
 PACKAGES_RUNTIME="	
 		unixodbc \
 		odbc-postgresql \
+		postgresql-client \
 		"
 
 PACKAGES_DOC="		
