@@ -18,8 +18,7 @@ USER opencog
 
 # Tools
 RUN sudo apt-get -y install git
-RUN sudo apt-get -y install rlwrap
-RUN sudo apt-get -y install telnet
+RUN sudo apt-get -y install rlwrap telnet netcat-openbsd
 
 # Environment Variables
 ## Set Locale
