@@ -40,7 +40,7 @@ namespace opencog
  *  @{
  */
 
-template<typename Element>
+template<typename Writer, typename Element>
 class async_writer
 {
 	private:
@@ -50,13 +50,17 @@ class async_writer
 		std::mutex _write_mutex;
 		unsigned int _thread_count;
 		std::atomic<unsigned long> _busy_writers;
+		bool _stopping_writers;
+
+		Writer* _writer;
+		void (Writer::*_do_write)(Element&);
+
 		void start_writer_thread();
 		void stop_writer_threads();
-		bool stopping_writers;
 		void write_loop();
 
 	public:
-		async_writer(int nthreads);
+		async_writer(Writer*, void (Writer::*)(Element&), int nthreads=4);
 		~async_writer();
 		void enqueue(Element&, bool);
 		void flush_store_queue();
@@ -67,9 +71,13 @@ class async_writer
 /* ================================================================ */
 // Constructors
 
-template<typename Element>
-async_writer<Element>::async_writer(int nthreads)
+template<typename Writer, typename Element>
+async_writer<Writer, Element>::async_writer(Writer* wr,
+                                            void (Writer::*cb)(Element&),
+                                            int nthreads)
 {
+	_writer = wr;
+	_do_write = cb;
 	_stopping_writers = false;
 	_thread_count = 0;
 	_busy_writers = 0;
@@ -80,8 +88,8 @@ async_writer<Element>::async_writer(int nthreads)
 	}
 }
 
-template<typename Element>
-async_writer<Element>::~async_writer()
+template<typename Writer, typename Element>
+async_writer<Writer, Element>::~async_writer()
 {
 	stop_writer_threads();
 }
@@ -90,25 +98,25 @@ async_writer<Element>::~async_writer()
 
 /// Start a single writer thread.
 /// May be called multiple times.
-template<typename Element>
-void async_writer<Element>::start_writer_thread()
+template<typename Writer, typename Element>
+void async_writer<Writer, Element>::start_writer_thread()
 {
 	logger().info("async_writer: starting a writer thread");
-	std::unique_lock<std::mutex> lock(write_mutex);
+	std::unique_lock<std::mutex> lock(_write_mutex);
 	if (_stopping_writers)
 		throw RuntimeException(TRACE_INFO,
 			"Cannot start; async_writer writer threads are being stopped!");
 
-	_write_threads.push_back(std::thread(&async_writer::write_oop, this));
+	_write_threads.push_back(std::thread(&async_writer::write_loop, this));
 	_thread_count ++;
 }
 
 /// Stop all writer threads, but only after they are done wroting.
-template<typename Element>
-void async_writer<Element>::stop_writer_threads()
+template<typename Writer, typename Element>
+void async_writer<Writer, Element>::stop_writer_threads()
 {
 	logger().info("async_writer: stopping all writer threads");
-	std::unique_lock<std::mutex> lock(write_mutex);
+	std::unique_lock<std::mutex> lock(_write_mutex);
 	_stopping_writers = true;
 
 	// Spin a while, until the writeer threads are (mostly) done.
@@ -134,10 +142,8 @@ void async_writer<Element>::stop_writer_threads()
 	_store_queue.cancel_reset();
 	while (not _store_queue.is_empty())
 	{
-#if XXX
-		// AtomPtr atom = _store_queue.pop();
-		// do_store_atom(atom);
-#endif
+		Element elt = _store_queue.pop();
+		(_writer->*_do_write)(elt);
 	}
 	
 	// Its now OK to start new threads, if desired ...(!)
@@ -150,8 +156,8 @@ void async_writer<Element>::stop_writer_threads()
 /// even though this returns. (There's a window in writeLoop, between
 /// the dequeue, and the busy_writer increment. I guess we should fix
 /// this...
-template<typename Element>
-void async_writer::flush_store_queue()
+template<typename Writer, typename Element>
+void async_writer<Writer, Element>::flush_store_queue()
 {
 	// std::this_thread::sleep_for(std::chrono::microseconds(10));
 	usleep(10);
@@ -163,8 +169,8 @@ void async_writer::flush_store_queue()
 }
 
 /// A Single write thread. Reds atoms from queue, and stores them.
-template<typename Element>
-void async_writer<Element>::write_loop()
+template<typename Writer, typename Element>
+void async_writer<Writer, Element>::write_loop()
 {
 	try
 	{
@@ -172,7 +178,7 @@ void async_writer<Element>::write_loop()
 		{
 			Element elt = _store_queue.pop();
 			_busy_writers ++; // Bad -- window after pop returns, before increment!
-			elt.store(elt);
+			(_writer->*_do_write)(elt);
 			_busy_writers --;
 		}
 	}
@@ -195,13 +201,13 @@ void async_writer<Element>::write_loop()
  * thread); this routine merely queues up the atom. If the synchronous
  * flag is set, then the store is done in this thread.
  */
-template<typename Element>
-void async_writer<Element>::enqueue(Element& elt, bool synchronous)
+template<typename Writer, typename Element>
+void async_writer<Writer, Element>::enqueue(Element& elt, bool synchronous)
 {
 	// If a synchronous store, avoid the queues entirely.
 	if (synchronous)
 	{
-		// do_store_atom(atom);
+		(_writer->*_do_write)(elt);
 		return;
 	}
 
@@ -235,7 +241,6 @@ void async_writer<Element>::enqueue(Element& elt, bool synchronous)
 	}
 }
 
-/* ============================= END OF FILE ================= */
 /** @}*/
 } // namespace opencog
 

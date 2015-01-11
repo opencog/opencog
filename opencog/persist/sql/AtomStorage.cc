@@ -439,6 +439,7 @@ void AtomStorage::init(const char * dbname,
 AtomStorage::AtomStorage(const char * dbname,
                          const char * username,
                          const char * authentication)
+	: _write_queue(this, &AtomStorage::vdo_store_atom)
 {
 	init(dbname, username, authentication);
 }
@@ -446,6 +447,7 @@ AtomStorage::AtomStorage(const char * dbname,
 AtomStorage::AtomStorage(const std::string& dbname,
                          const std::string& username,
                          const std::string& authentication)
+	: _write_queue(this, &AtomStorage::vdo_store_atom)
 {
 	init(dbname.c_str(), username.c_str(), authentication.c_str());
 }
@@ -839,6 +841,11 @@ int AtomStorage::do_store_atom(AtomPtr atom)
 	lheight ++;
 	do_store_single_atom(atom, lheight);
 	return lheight;
+}
+
+void AtomStorage::vdo_store_atom(AtomPtr& atom)
+{
+	do_store_atom(atom);
 }
 
 /* ================================================================ */

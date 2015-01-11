@@ -67,6 +67,7 @@ class AtomStorage
 		int getMaxHeight(void);
 
 		int do_store_atom(AtomPtr);
+		void vdo_store_atom(AtomPtr&);
 		void do_store_single_atom(AtomPtr, int);
 
 		std::string oset_to_string(const HandleSeq&, int);
@@ -117,7 +118,7 @@ class AtomStorage
 		TruthValue * getTV(int);
 #endif /* OUT_OF_LINE_TVS */
 
-		async_writer<AtomPtr> _write_queue;
+		async_writer<AtomStorage, AtomPtr> _write_queue;
 
 		// Stuff to support asynchronous store of atoms.
 		concurrent_queue<AtomPtr> store_queue;
