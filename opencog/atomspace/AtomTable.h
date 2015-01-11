@@ -429,7 +429,7 @@ public:
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(AtomPtr, bool async=false) throw (RuntimeException);
+    Handle add(AtomPtr, bool async) throw (RuntimeException);
 
     /**
      * Read-write synchronization barrier fence.  When called, this

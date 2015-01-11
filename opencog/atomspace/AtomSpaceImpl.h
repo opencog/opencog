@@ -136,7 +136,9 @@ public:
      *  @param tvn   Optional TruthValue of the node. If not provided, uses the
      *  DEFAULT_TV (see TruthValue.h)
      */
-    Handle addNode(Type t, const std::string& name = "", TruthValuePtr tvn = TruthValue::DEFAULT_TV());
+    Handle addNode(Type t, const std::string& name = "",
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV(),
+                   bool async = false);
 
     /**
      * Get a node from the AtomTable, if it's in there. If its not found
@@ -160,7 +162,8 @@ public:
      *                  provided, uses the DEFAULT_TV (see TruthValue.h)
      */
     Handle addLink(Type t, const HandleSeq& outgoing,
-                   TruthValuePtr tvn = TruthValue::DEFAULT_TV());
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV(),
+                   bool async = false);
 
     /**
      * Get a link from the AtomTable, if it's in there. If its not found

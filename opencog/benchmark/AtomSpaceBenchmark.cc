@@ -437,7 +437,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
     switch (testKind) {
     case BENCH_TABLE: {
         clock_t t_begin = clock();
-        atab->add(createNode(t, scp));
+        atab->add(createNode(t, scp), false);
         return clock() - t_begin;
     }
     case BENCH_AS: {
@@ -570,7 +570,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
 #endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         clock_t tAddLinkStart = clock();
-        atab->add(createLink(t, outgoing));
+        atab->add(createLink(t, outgoing), false);
         return clock() - tAddLinkStart;
     }
     case BENCH_AS: {

@@ -91,7 +91,8 @@ AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other)
             "AtomSpaceImpl - Cannot copy an object of this class");
 }
 
-Handle AtomSpaceImpl::addNode(Type t, const string& name, TruthValuePtr tvn)
+Handle AtomSpaceImpl::addNode(Type t, const string& name,
+                              TruthValuePtr tvn, bool async)
 {
     // Is this atom already in the atom table? 
     Handle hexist = atomTable.getHandle(t, name);
@@ -106,7 +107,7 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, TruthValuePtr tvn)
         hexist->merge(tvn);  // Update the truth value.
         return hexist;
 #else
-        return atomTable.add(createNode(t, name, tvn));
+        return atomTable.add(createNode(t, name, tvn), async);
 #endif
     }
 
@@ -116,7 +117,7 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, TruthValuePtr tvn)
 
         NodePtr n(backing_store->getNode(t, name.c_str()));
         if (n) {
-            Handle result = atomTable.add(n);
+            Handle result = atomTable.add(n, async);
             result->merge(tvn);
             return result;
         }
@@ -124,7 +125,7 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, TruthValuePtr tvn)
 
     // If we are here, neither the AtomTable nor backing store know about
     // this atom. Just add it.
-    return atomTable.add(createNode(t, name, tvn));
+    return atomTable.add(createNode(t, name, tvn), async);
 }
 
 Handle AtomSpaceImpl::getNode(Type t, const string& name)
@@ -139,7 +140,7 @@ Handle AtomSpaceImpl::getNode(Type t, const string& name)
     {
         NodePtr n(backing_store->getNode(t, name.c_str()));
         if (n) {
-            return atomTable.add(n);
+            return atomTable.add(n, false);
         }
     }
 
@@ -148,7 +149,7 @@ Handle AtomSpaceImpl::getNode(Type t, const string& name)
 }
 
 Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
-                              TruthValuePtr tvn)
+                              TruthValuePtr tvn, bool async)
 {
     // Is this atom already in the atom table?
     Handle hexist = atomTable.getHandle(t, outgoing);
@@ -171,7 +172,7 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
             if (l) {
                 // Put the atom into the atomtable, so it gets placed
                 // in indices, so we can find it quickly next time.
-                Handle result = atomTable.add(l);
+                Handle result = atomTable.add(l, async);
                 result->merge(tvn);
                 return result;
             }
@@ -180,7 +181,7 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
 
     // If we are here, neither the AtomTable nor backing store know about
     // this atom. Just add it.
-    return atomTable.add(createLink(t, outgoing, tvn));
+    return atomTable.add(createLink(t, outgoing, tvn), async);
 }
 
 Handle AtomSpaceImpl::getLink(Type t, const HandleSeq& outgoing)
@@ -202,7 +203,7 @@ Handle AtomSpaceImpl::getLink(Type t, const HandleSeq& outgoing)
             if (l) {
                 // Register the atom with the atomtable (so it gets placed in
                 // indices)
-                return atomTable.add(l);
+                return atomTable.add(l, false);
             }
         }
     }
@@ -272,7 +273,7 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
        }
     }
 
-    return atomTable.add(h);
+    return atomTable.add(h, false);
 }
 
 Handle AtomSpaceImpl::getAtom(Handle h)
