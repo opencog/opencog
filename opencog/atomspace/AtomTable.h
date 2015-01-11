@@ -426,6 +426,12 @@ public:
      * lots of parallel adds.  The barrier() method can be used to
      * force synchronization.
      *
+     * XXX The async code path doesn't really do anything yet, since
+     * it also uses the big global lock, at the moment.  This needs
+     * fixing, mostly be creating a second mutex for the atom insertion,
+     * and also giving each index its own uique mutex, to avoid
+     * collsions.  So teh API is here, but more work is stil needed.
+     *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */

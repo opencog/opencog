@@ -632,6 +632,7 @@ Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
 
 void AtomTable::put_atom_into_index(AtomPtr& atom)
 {
+    std::unique_lock<std::recursive_mutex> lck(_mtx);
     nodeIndex.insertAtom(atom);
     linkIndex.insertAtom(atom);
     typeIndex.insertAtom(atom);
