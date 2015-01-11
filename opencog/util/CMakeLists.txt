@@ -71,7 +71,7 @@ ENDIF (HAVE_BFD AND HAVE_IBERTY)
 INSTALL(FILES
 	ansi.h
 	algorithm.h
-	async_writer.h
+	async_method_caller.h
 	backtrace-symbols.h
 	based_variant.h
 	cluster.h

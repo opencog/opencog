@@ -40,11 +40,39 @@ namespace opencog
  *  @{
  */
 
+/**
+ * Thread-safe, multi-threaded asynchronous write queue.
+ *
+ * This class provides a simple way to call a method on a class,
+ * asynchronously. That is, the method is called in a *different*
+ * thread, at some later time. This can be very handy if the method
+ * takes a long time to run, or if it blocks waiting on I/O.  By
+ * running in a different thread, it allows the current thread to
+ * return immediately.  It also enables concurrency: a large number of
+ * threads can handle the time-consuming work in parallel, while the
+ * master thread can zip along.
+ *
+ * You'd think that there would be some BOOST function for this, but
+ * there doesn't seem to be ...
+ *
+ * This class allows a simple implmentation of a thread-safe, multi-
+ * threaded write queue. It is currently used by the persistant storage
+ * class, to write atoms out to disk.
+ *
+ * What actually happens is this: The given elements are placed on a
+ * queue (in a thread-safe manner -- thie enqueue function can be safely
+ * called from multiple threads.) This queue is then serviced and
+ * drained by a pool of active threads, which dequeue the elements, and
+ * call the method on each one.
+ *
+ * The implementation is very simple: it uses a fixed-size thread pool.
+ * It uses hi/lo watermarks to stall and drain the queue, if it gets too
+ * long. This could probably be made spiffier.
+ */
 template<typename Writer, typename Element>
-class async_writer
+class async_caller
 {
 	private:
-		// Stuff to support asynchronous writes
 		concurrent_queue<Element> _store_queue;
 		std::vector<std::thread> _write_threads;
 		std::mutex _write_mutex;
@@ -60,8 +88,8 @@ class async_writer
 		void write_loop();
 
 	public:
-		async_writer(Writer*, void (Writer::*)(Element&), int nthreads=4);
-		~async_writer();
+		async_caller(Writer*, void (Writer::*)(Element&), int nthreads=4);
+		~async_caller();
 		void enqueue(Element&);
 		void flush_store_queue();
 };
@@ -71,8 +99,12 @@ class async_writer
 /* ================================================================ */
 // Constructors
 
+/// Writer: the class whose method will be called.
+/// cb: the method that will be called.
+/// nthreads: the number of threads in the writer pool to use. Defaults
+/// to 4 if not specified.
 template<typename Writer, typename Element>
-async_writer<Writer, Element>::async_writer(Writer* wr,
+async_caller<Writer, Element>::async_caller(Writer* wr,
                                             void (Writer::*cb)(Element&),
                                             int nthreads)
 {
@@ -89,7 +121,7 @@ async_writer<Writer, Element>::async_writer(Writer* wr,
 }
 
 template<typename Writer, typename Element>
-async_writer<Writer, Element>::~async_writer()
+async_caller<Writer, Element>::~async_caller()
 {
 	stop_writer_threads();
 }
@@ -99,23 +131,23 @@ async_writer<Writer, Element>::~async_writer()
 /// Start a single writer thread.
 /// May be called multiple times.
 template<typename Writer, typename Element>
-void async_writer<Writer, Element>::start_writer_thread()
+void async_caller<Writer, Element>::start_writer_thread()
 {
-	logger().info("async_writer: starting a writer thread");
+	logger().info("async_caller: starting a writer thread");
 	std::unique_lock<std::mutex> lock(_write_mutex);
 	if (_stopping_writers)
 		throw RuntimeException(TRACE_INFO,
-			"Cannot start; async_writer writer threads are being stopped!");
+			"Cannot start; async_caller writer threads are being stopped!");
 
-	_write_threads.push_back(std::thread(&async_writer::write_loop, this));
+	_write_threads.push_back(std::thread(&async_caller::write_loop, this));
 	_thread_count ++;
 }
 
-/// Stop all writer threads, but only after they are done wroting.
+/// Stop all writer threads, but only after they are done writing.
 template<typename Writer, typename Element>
-void async_writer<Writer, Element>::stop_writer_threads()
+void async_caller<Writer, Element>::stop_writer_threads()
 {
-	logger().info("async_writer: stopping all writer threads");
+	logger().info("async_caller: stopping all writer threads");
 	std::unique_lock<std::mutex> lock(_write_mutex);
 	_stopping_writers = true;
 
@@ -153,11 +185,11 @@ void async_writer<Writer, Element>::stop_writer_threads()
 
 /// Drain the pending store queue.
 /// Caution: this is slightly racy; a writer could still be busy
-/// even though this returns. (There's a window in writeLoop, between
+/// even though this returns. (There's a window in write_loop, between
 /// the dequeue, and the busy_writer increment. I guess we should fix
 /// this...
 template<typename Writer, typename Element>
-void async_writer<Writer, Element>::flush_store_queue()
+void async_caller<Writer, Element>::flush_store_queue()
 {
 	// std::this_thread::sleep_for(std::chrono::microseconds(10));
 	usleep(10);
@@ -168,9 +200,10 @@ void async_writer<Writer, Element>::flush_store_queue()
 	}
 }
 
-/// A Single write thread. Reds atoms from queue, and stores them.
+/// A single write thread. Reads elements from queue, and invokes the 
+/// method on them.
 template<typename Writer, typename Element>
-void async_writer<Writer, Element>::write_loop()
+void async_caller<Writer, Element>::write_loop()
 {
 	try
 	{
@@ -192,22 +225,16 @@ void async_writer<Writer, Element>::write_loop()
 
 /* ================================================================ */
 /**
- * Recursively store the indicated atom, and all that it points to.
- * Store its truth values too. The recursive store is unconditional;
- * its assumed that all sorts of underlying truuth values have changed, 
- * so that the whole thing needs to be stored.
- *
- * By default, the actual store is done asynchronously (in a different
- * thread); this routine merely queues up the atom. If the synchronous
- * flag is set, then the store is done in this thread.
+ * Enqueue the given element.  Returns immediately after enqueueing.
+ * Thread-safe: this my be called concurrently from multiple threads.
  */
 template<typename Writer, typename Element>
-void async_writer<Writer, Element>::enqueue(Element& elt)
+void async_caller<Writer, Element>::enqueue(Element& elt)
 {
 	// Sanity checks.
 	if (_stopping_writers)
 		throw RuntimeException(TRACE_INFO,
-			"Cannot store; async_writer writer threads are being stopped!");
+			"Cannot store; async_caller writer threads are being stopped!");
 	if (0 == _thread_count)
 		throw RuntimeException(TRACE_INFO,
 			"Cannot store; No writer threads are running!");
@@ -230,7 +257,7 @@ void async_writer<Writer, Element>::enqueue(Element& elt)
 			cnt++;
 		}
 		while (LOW_WATER_MARK < _store_queue.size());
-		logger().debug("async_writer overfull queue; had to sleep %d millisecs to drain!", cnt);
+		logger().debug("async_caller overfull queue; had to sleep %d millisecs to drain!", cnt);
 	}
 }
 

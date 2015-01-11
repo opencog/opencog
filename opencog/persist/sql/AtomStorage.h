@@ -31,7 +31,7 @@
 #include <thread>
 #include <vector>
 
-#include <opencog/util/async_writer.h>
+#include <opencog/util/async_method_caller.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
@@ -119,7 +119,7 @@ class AtomStorage
 #endif /* OUT_OF_LINE_TVS */
 
 		// Provider of asynchronous store of atoms.
-		async_writer<AtomStorage, AtomPtr> _write_queue;
+		async_caller<AtomStorage, AtomPtr> _write_queue;
 
 	public:
 		AtomStorage(const std::string& dbname, 
