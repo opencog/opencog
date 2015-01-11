@@ -185,7 +185,7 @@ Device Driver Setup
 -------------------
 Configure the ODBC driver. After install, edit (as root) /etc/odbcinst.ini
 and put the stanza below into it. Notice that it uses the Unicode drivers,
-and NOT the ANSI (ASCII) drivers.  Opencog uses unicode!.
+and NOT the ANSI (ASCII) drivers.  Opencog uses unicode!
 
     [PostgreSQL]
     Description = PostgreSQL ODBC driver (Unicode version)
@@ -195,11 +195,17 @@ and NOT the ANSI (ASCII) drivers.  Opencog uses unicode!.
     CommLog     = 0
 
 The above stanza associates the name 'PostgreSQL' with a particular
-driver; this name is needed below.  MySQL users need the stanza below;
-a file can safely contain may stanzas defining many different drivers.
+driver; this name is needed below.  NOTE: the default install of the
+`odbc-postgresql` package on Ubuntu creates the `/etc/odbcinst.ini`
+file automatically. You can leave it as is, or you can add the above.
+If you leave it as-is, you must make sure you use teh correct stanza
+name in `~/.odbc.ini`, below!
 
-WARNING: MySQL is currently not supported. Anyway, if you wanted to mess
-with it, then add the below:
+MySQL users need the stanza below; the /etc/odbcinst.ini file can
+safely contain other stanzas defining other drivers.
+
+WARNING: MySQL is currently not supported. Anyway, if you wanted to
+mess with it, then add the below:
 
     [MySQL]
     Description = MySQL driver
@@ -233,7 +239,7 @@ http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
 
 A large value for wal_buffers is needed because much of the database
 traffic consists of updates.  Enabling vacuum is very important, for
-the same reason; performance degrades substantially (by factors of 
+the same reason; performance degrades substantially (by factors of
 3x-10x) without regular vacuuming.
 
 
@@ -247,7 +253,7 @@ usage has been exceeded. This can be fixed by telling the kernel to use
 save file contents, then:
 
    sysctl -p /etc/sysctl.conf
-   
+
 If you continue to get errors after that, read this for help fixing them:
 
    http://stackoverflow.com/questions/12616935/postgresql-shared-memory-settings
@@ -321,12 +327,28 @@ If the above doesn't work, go back, and try again.
 
 ODBC Setup, Part the Second
 ---------------------------
-Edit ~/.odbc.ini in your home directory to add a stanza of the form
+Edit `~/.odbc.ini` in your home directory to add a stanza of the form
 below. You MUST create one of these for EACH repository you plan to
 use! The name of the stanza, and of the database, can be whatever you
-wish.  Pay special attention to the username, the password, and the
-name of the database to connect to.
+wish. The name given for `Driver`, here `PostgreSQL`, **must** match
+a stanza name in `/etc/odbcinst.ini`.  Failure to have it match will
+cause an error message:
 
+```
+Can't perform SQLConnect rc=-1(0) [unixODBC][Driver Manager]Data source name not found, and no default driver specified
+```
+
+Note that below specifies a username and a password. These should NOT
+be your regular unix username or password!  Make up something else,
+something completely different! These two will be the username and the
+password that you use when connecting from the cogserver, with the
+`sql-open` command (below).
+
+Pay special attention to the name given for the `Database`.  This should
+correspond to a database created with postgres. In the examples above,
+it was `mycogdata`.
+
+```
    [mycogdata]
    Description       = My Favorite Database
    Driver            = PostgreSQL
@@ -343,29 +365,47 @@ name of the database to connect to.
    ShowOidColumn     = Yes
    FakeOidIndex      = Yes
    ConnSettings      =
-
-Be sure to adjust the username and passwd appropriately.
-
+```
 
 Opencog Setup
 -------------
 Edit lib/opencog.conf and set the STORAGE, STORAGE_USERNAME and
-STORAGE_PASSWD there to the same values as in ~/.odbc.ini.  Better yet, 
-copy lib/opencog.conf to your build directory, edit the copy, and 
+STORAGE_PASSWD there to the same values as in ~/.odbc.ini.  Better yet,
+copy lib/opencog.conf to your build directory, edit the copy, and
 start the opencog server as:
 
+```
    $ ./opencog/server/cogserver -c my.conf
+```
 
 Verify that everything works. Start the cogserver, and bulk-save:
 
+```
    $ telnet localhost 17001
    opencog> sql-store
-   
-Some output should be printed in the cogserver window: 
+```
+
+Some output should be printed in the cogserver window:
+
+```
    Max UUID is 278
    Finished storing 277 atoms total.
+```
 
 The typical nuber of atoms stored will differ from this.
+
+You don't have to put the database credentials into the `opencog.conf`
+file.  In this case, the database would need to be opened manually,
+using the `sql-open` command:
+
+```
+   $ telnet localhost 17001
+   `opencog> sql-open mycogdata opencog_user cheese
+```
+
+Notice that the user-name and the password are the same as that given
+in the `~/.odbc.ini` file.  These are NOT (and should not be) your unix
+username and password!
 
 
 How To Pass the Unit Test
@@ -515,7 +555,7 @@ Using SQL Persistence from Scheme
 ---------------------------------
 SQL fetch from storage is not fully automatic at this time. This is to
 allay performance concerns: we don't want to be constantly querying the
-database every time some atom is needed. In particular: NOTE THIS IS 
+database every time some atom is needed. In particular: NOTE THIS IS
 IMPORTANT: the incoming set of an atom is not automatically fecthed from
 storage.  This must be done manually, using either C++:
 
@@ -555,7 +595,7 @@ Threading
 =========
 The AtomStorage class sould be completely thread-safe (I think ... only
 lightly tested). By default, the class maintains a pool of four database
-connections, which can be used to drive the database. (The number of 
+connections, which can be used to drive the database. (The number of
 connections can be raised by editing the AtomStorage constructor, and
 recompiling).  Every thread using this class will temporarily make use
 of one of these connections; if all connections are in use, the calling
