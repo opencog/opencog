@@ -10,15 +10,9 @@ RUN chmod +x /tmp/install-dependencies-trusty
 RUN /tmp/install-dependencies-trusty
 RUN pip install -U -r /tmp/requirements.txt
 
-# Create and switch user. The user is privileged with no password required
-RUN adduser --disabled-password --gecos "OpenCog Developer" opencog
-RUN adduser opencog sudo
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-USER opencog
-
 # Tools
-RUN sudo apt-get -y install git
-RUN sudo apt-get -y install rlwrap telnet netcat-openbsd
+RUN apt-get -y install git
+RUN apt-get -y install rlwrap telnet netcat-openbsd
 
 # Environment Variables
 ## Set Locale
@@ -26,6 +20,12 @@ RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
+
+# Create and switch user. The user is privileged with no password required
+RUN adduser --disabled-password --gecos "OpenCog Developer" opencog
+RUN adduser opencog sudo
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+USER opencog
 
 # Defaults
 ## cogserver shell ports
