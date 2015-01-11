@@ -51,6 +51,7 @@ using namespace opencog;
 std::recursive_mutex AtomTable::_mtx;
 
 AtomTable::AtomTable(AtomTable* parent)
+    :_index_queue(this, &AtomTable::put_atom_into_index)
 {
     _environ = parent;
     size = 0;
@@ -112,6 +113,7 @@ AtomTable& AtomTable::operator=(const AtomTable& other)
 }
 
 AtomTable::AtomTable(const AtomTable& other)
+    :_index_queue(this, &AtomTable::put_atom_into_index)
 {
     throw opencog::RuntimeException(TRACE_INFO,
             "AtomTable - Cannot copy an object of this class");
@@ -606,13 +608,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     size++;
     _atom_set.insert(h);
 
-    nodeIndex.insertAtom(atom);
-    linkIndex.insertAtom(atom);
-    typeIndex.insertAtom(atom);
     atom->keep_incoming_set();
-    targetTypeIndex.insertAtom(atom);
-    importanceIndex.insertAtom(atom);
-
     atom->setAtomTable(this);
 
     // We can now unlock, since we are done. In particular, the signals
@@ -620,11 +616,23 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     // additions.
     lck.unlock();
 
+    // Update the indexes asynchronously
+    _index_queue.enqueue(atom);
+
     // Now that we are completely done, emit the added signal.
     _addAtomSignal(h);
 
     DPRINTF("Atom added: %ld => %s\n", atom->_uuid, atom->toString().c_str());
     return h;
+}
+
+void AtomTable::put_atom_into_index(AtomPtr& atom)
+{
+    nodeIndex.insertAtom(atom);
+    linkIndex.insertAtom(atom);
+    typeIndex.insertAtom(atom);
+    targetTypeIndex.insertAtom(atom);
+    importanceIndex.insertAtom(atom);
 }
 
 size_t AtomTable::getSize() const

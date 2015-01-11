@@ -32,7 +32,9 @@
 
 #include <opencog/util/concurrent_queue.h>
 #include <opencog/util/concurrent_stack.h>
+#include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/macros.h>
 
 namespace opencog
 {
@@ -68,6 +70,11 @@ namespace opencog
  * The implementation is very simple: it uses a fixed-size thread pool.
  * It uses hi/lo watermarks to stall and drain the queue, if it gets too
  * long. This could probably be made spiffier.
+ *
+ * It would also be clearer to the user, if we placed the method to call
+ * onto the queue, along with the element, instead of specifying the
+ * method in the ctor. This would really drive home the point that this
+ * really is just an async method call.
  */
 template<typename Writer, typename Element>
 class async_caller

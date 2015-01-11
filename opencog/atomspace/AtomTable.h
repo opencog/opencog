@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
- * Copyright (C) 2013 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2013,2015 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,11 @@
 
 #include <boost/signals2.hpp>
 
+#include <opencog/util/async_method_caller.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/RandGen.h>
+
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
@@ -43,9 +48,6 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/TypeIndex.h>
 #include <opencog/atomspace/TargetTypeIndex.h>
-#include <opencog/util/Logger.h>
-#include <opencog/util/RandGen.h>
-#include <opencog/util/exceptions.h>
 
 class AtomTableUTest;
 
@@ -100,6 +102,9 @@ private:
     LinkIndex linkIndex;
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
+
+    async_caller<AtomTable, AtomPtr> _index_queue;
+    void put_atom_into_index(AtomPtr&);
     //!@}
 
     /**
