@@ -62,7 +62,7 @@ class async_writer
 	public:
 		async_writer(Writer*, void (Writer::*)(Element&), int nthreads=4);
 		~async_writer();
-		void enqueue(Element&, bool);
+		void enqueue(Element&);
 		void flush_store_queue();
 };
 
@@ -202,15 +202,8 @@ void async_writer<Writer, Element>::write_loop()
  * flag is set, then the store is done in this thread.
  */
 template<typename Writer, typename Element>
-void async_writer<Writer, Element>::enqueue(Element& elt, bool synchronous)
+void async_writer<Writer, Element>::enqueue(Element& elt)
 {
-	// If a synchronous store, avoid the queues entirely.
-	if (synchronous)
-	{
-		(_writer->*_do_write)(elt);
-		return;
-	}
-
 	// Sanity checks.
 	if (_stopping_writers)
 		throw RuntimeException(TRACE_INFO,

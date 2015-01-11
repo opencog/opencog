@@ -118,18 +118,8 @@ class AtomStorage
 		TruthValue * getTV(int);
 #endif /* OUT_OF_LINE_TVS */
 
+		// Provider of asynchronous store of atoms.
 		async_writer<AtomStorage, AtomPtr> _write_queue;
-
-		// Stuff to support asynchronous store of atoms.
-		concurrent_queue<AtomPtr> store_queue;
-		std::vector<std::thread> write_threads;
-		std::mutex write_mutex;
-		unsigned int thread_count;
-		std::atomic<unsigned long> busy_writers;
-		void startWriterThread();
-		void stopWriterThreads();
-		bool stopping_writers;
-		void writeLoop();
 
 	public:
 		AtomStorage(const std::string& dbname, 
