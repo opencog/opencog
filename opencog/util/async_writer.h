@@ -1,6 +1,6 @@
 /*
  * FUNCTION:
- * Base class for asynchrnouous index maintenance.
+ * Multi-threaded asynchronous write queue.
  *
  * HISTORY:
  * Copyright (c) 2013, 2015 Linas Vepstas <linasvepstas@gmail.com>
@@ -22,8 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_ASYNC_UPDATE_H
-#define _OPENCOG_ASYNC_UPDATE_H
+#ifndef _OC_ASYNC_WRITER_H
+#define _OC_ASYNC_WRITER_H
 
 #include <atomic>
 #include <mutex>
@@ -31,39 +31,37 @@
 #include <vector>
 
 #include <opencog/util/concurrent_queue.h>
-#include <opencog/util/concurrent_queue.h>
 #include <opencog/util/concurrent_stack.h>
-
-#include "Handle.h"
 
 namespace opencog
 {
-/** \addtogroup grp_atomspace
+/** \addtogroup grp_cogutil
  *  @{
  */
 
-class AsyncUpdate
+template<typename Element>
+class async_writer
 {
 	private:
-		// Stuff to support asynchronous update of the indexes
-		concurrent_queue<AtomPtr> store_queue;
-		std::vector<std::thread> write_threads;
-		std::mutex write_mutex;
-		unsigned int thread_count;
-		std::atomic<unsigned long> busy_writers;
-		void startWriterThread();
-		void stopWriterThreads();
+		// Stuff to support asynchronous writes
+		concurrent_queue<Element> _store_queue;
+		std::vector<std::thread> _write_threads;
+		std::mutex _write_mutex;
+		unsigned int _thread_count;
+		std::atomic<unsigned long> _busy_writers;
+		void start_writer_thread();
+		void stop_writer_threads();
 		bool stopping_writers;
-		void writeLoop();
+		void write_loop();
 
 	public:
-		AsyncUpdate(int nthreads);
-		~AsyncUpdate();
-		void enqueue(AtomPtr&, bool);
-		void flushStoreQueue();
+		async_update(int nthreads);
+		~async_update();
+		void enqueue(Element&, bool);
+		void flush_store_queue();
 };
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_ASYNC_UPDATE_H
+#endif // _OC_ASYNC_WRITER_H
