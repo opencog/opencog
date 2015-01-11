@@ -426,19 +426,12 @@ void AtomStorage::init(const char * dbname,
 	if (!connected()) return;
 
 	reserve();
-
-	stopping_writers = false;
-	thread_count = 0;
-	busy_writers = 0;
-	startWriterThread();
-	startWriterThread();
-	startWriterThread();
-	startWriterThread();
 }
 
 AtomStorage::AtomStorage(const char * dbname,
                          const char * username,
                          const char * authentication)
+	: _write_queue(this, &AtomStorage::vdo_store_atom)
 {
 	init(dbname, username, authentication);
 }
@@ -446,6 +439,7 @@ AtomStorage::AtomStorage(const char * dbname,
 AtomStorage::AtomStorage(const std::string& dbname,
                          const std::string& username,
                          const std::string& authentication)
+	: _write_queue(this, &AtomStorage::vdo_store_atom)
 {
 	init(dbname.c_str(), username.c_str(), authentication.c_str());
 }
@@ -454,8 +448,6 @@ AtomStorage::~AtomStorage()
 {
 	if (connected())
 		setMaxHeight(getMaxObservedHeight());
-
-	stopWriterThreads();
 
 	while (not conn_pool.is_empty())
 	{
@@ -670,92 +662,14 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
 
 /* ================================================================ */
 
-/// Start a single writer thread.
-/// May be called multiple times.
-void AtomStorage::startWriterThread()
-{
-	logger().info("AtomStorage: starting a writer thread");
-	std::unique_lock<std::mutex> lock(write_mutex);
-	if (stopping_writers)
-		throw RuntimeException(TRACE_INFO,
-			"Cannot start; AtomsStorage writer threads are being stopped!");
-
-	write_threads.push_back(std::thread(&AtomStorage::writeLoop, this));
-	thread_count ++;
-}
-
-/// Stop all writer threads, but only after they are done wroting.
-void AtomStorage::stopWriterThreads()
-{
-	logger().info("AtomStorage: stopping all writer threads");
-	std::unique_lock<std::mutex> lock(write_mutex);
-	stopping_writers = true;
-
-	// Spin a while, until the writeer threads are (mostly) done.
-	while (not store_queue.is_empty())
-	{
-		// std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		usleep(1000);
-	}
-
-	// Now tell all the threads that they are done.
-	// I.e. cancel all the threads.
-	store_queue.cancel();
-	while (0 < write_threads.size())
-	{
-		write_threads.back().join();
-		write_threads.pop_back();
-		thread_count --;
-	}
-
-	// OK, so we've joined all the threads, but the queue
-	// might not be totally empty; some dregs might remain.
-	// Drain it now, single-threadedly.
-	store_queue.cancel_reset();
-	while (not store_queue.is_empty())
-	{
-		AtomPtr atom = store_queue.pop();
-		do_store_atom(atom);
-	}
-	
-	// Its now OK to start new threads, if desired ...(!)
-	stopping_writers = false;
-}
-
-/// A Single write thread. Reds atoms from queue, and stores them.
-void AtomStorage::writeLoop()
-{
-	try
-	{
-		while (true)
-		{
-			AtomPtr atom = store_queue.pop();
-			busy_writers ++; // Bad -- window after pop returns, before increment!
-			do_store_atom(atom);
-			busy_writers --;
-		}
-	}
-	catch (concurrent_queue<AtomPtr>::Canceled& e)
-	{
-		// We are so out of here. Nothing to do, just exit this thread.
-		return;
-	}
-}
-
 /// Drain the pending store queue.
 /// Caution: this is slightly racy; a writer could still be busy
 /// even though this returns. (There's a window in writeLoop, between
 /// the dequeue, and the busy_writer increment. I guess we should fix
-// this...
+/// this...
 void AtomStorage::flushStoreQueue()
 {
-	// std::this_thread::sleep_for(std::chrono::microseconds(10));
-	usleep(10);
-	while (0 < store_queue.size() or 0 < busy_writers);
-	{
-		// std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		usleep(1000);
-	}
+	_write_queue.flush_store_queue();
 }
 
 /* ================================================================ */
@@ -779,35 +693,7 @@ void AtomStorage::storeAtom(AtomPtr atom, bool synchronous)
 		do_store_atom(atom);
 		return;
 	}
-
-	// Sanity checks.
-	if (stopping_writers)
-		throw RuntimeException(TRACE_INFO,
-			"Cannot store; AtomStorage writer threads are being stopped!");
-	if (0 == thread_count)
-		throw RuntimeException(TRACE_INFO,
-			"Cannot store; No writer threads are running!");
-
-	store_queue.push(atom);
-
-	// If the writer threads are falling behind, mitigate.
-	// Right now, this will be real simple: just spin and wait
-	// for things to catch up.  Maybe we should launch more threads!?
-#define HIGH_WATER_MARK 100
-#define LOW_WATER_MARK 10
-
-	if (HIGH_WATER_MARK < store_queue.size())
-	{
-		unsigned long cnt = 0;
-		do
-		{
-			// std::this_thread::sleep_for(std::chrono::milliseconds(1));
-			usleep(1000);
-			cnt++;
-		}
-		while (LOW_WATER_MARK < store_queue.size());
-		logger().debug("AtomStorage overfull queue; had to sleep %d millisecs to drain!", cnt);
-	}
+	_write_queue.enqueue(atom);
 }
 
 /**
@@ -839,6 +725,11 @@ int AtomStorage::do_store_atom(AtomPtr atom)
 	lheight ++;
 	do_store_single_atom(atom, lheight);
 	return lheight;
+}
+
+void AtomStorage::vdo_store_atom(AtomPtr& atom)
+{
+	do_store_atom(atom);
 }
 
 /* ================================================================ */

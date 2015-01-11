@@ -31,8 +31,7 @@
 #include <thread>
 #include <vector>
 
-#include <opencog/util/concurrent_queue.h>
-#include <opencog/util/concurrent_stack.h>
+#include <opencog/util/async_method_caller.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
@@ -68,6 +67,7 @@ class AtomStorage
 		int getMaxHeight(void);
 
 		int do_store_atom(AtomPtr);
+		void vdo_store_atom(AtomPtr&);
 		void do_store_single_atom(AtomPtr, int);
 
 		std::string oset_to_string(const HandleSeq&, int);
@@ -118,16 +118,8 @@ class AtomStorage
 		TruthValue * getTV(int);
 #endif /* OUT_OF_LINE_TVS */
 
-		// Stuff to support asynchronous store of atoms.
-		concurrent_queue<AtomPtr> store_queue;
-		std::vector<std::thread> write_threads;
-		std::mutex write_mutex;
-		unsigned int thread_count;
-		std::atomic<unsigned long> busy_writers;
-		void startWriterThread();
-		void stopWriterThreads();
-		bool stopping_writers;
-		void writeLoop();
+		// Provider of asynchronous store of atoms.
+		async_caller<AtomStorage, AtomPtr> _write_queue;
 
 	public:
 		AtomStorage(const std::string& dbname, 

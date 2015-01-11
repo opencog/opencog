@@ -71,6 +71,7 @@ ENDIF (HAVE_BFD AND HAVE_IBERTY)
 INSTALL(FILES
 	ansi.h
 	algorithm.h
+	async_method_caller.h
 	backtrace-symbols.h
 	based_variant.h
 	cluster.h
@@ -99,7 +100,7 @@ INSTALL(FILES
 	misc.h
 	mt19937ar.h
 	numeric.h
-    	jaccard_index.h
+	jaccard_index.h
 	oc_assert.h
 	oc_omp.h
 	octime.h
