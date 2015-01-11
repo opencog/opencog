@@ -22,8 +22,8 @@
 ; -- parse-get-words        Get all words occuring in a parse.
 ; -- parse-get-words-in-order  Get all words occuring in a parse in order.
 ; -- parse-get-relations    Get all RelEx relations in a parse.
-; -- word-inst-get-number   Return the NumberNode associated with word-inst. 
-; -- word-inst-get-word   Return the WordNode associated with word-inst.
+; -- word-inst-get-sequence   Return the sequence NumberNode associated with word-inst. 
+; -- word-inst-get-word   Return the WordNode/NumberNode associated with word-inst.
 ; -- word-inst-get-word-str  Return the word string assoc with word-inst.
 ; -- word-inst-get-lemma  Return the lemma of word instance.
 ; -- word-inst-get-attr   Return attributes of word instance.
@@ -113,8 +113,12 @@
 ; to the actual word node.
 ;
 (define (map-word-node proc word-inst) 
-	(cog-map-chase-links-chk 'ReferenceLink 'WordNode
-		proc word-inst 'WordInstanceNode)
+	(append
+		(cog-map-chase-links-chk 'ReferenceLink 'WordNode
+			proc word-inst 'WordInstanceNode)
+		(cog-map-chase-links-chk 'ReferenceLink 'NumberNode
+			proc word-inst 'WordInstanceNode)
+	)
 )
 
 ; ---------------------------------------------------------------------
@@ -175,7 +179,7 @@
 ;
 (define (parse-get-words-in-order parse-node)
 	(define word-inst-list (cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node))
-	(define number-list (map word-inst-get-number word-inst-list))
+	(define number-list (map word-inst-get-sequence word-inst-list))
 	(define (less-than word-inst-1 word-inst-2)
 		(define index-1 (list-index (lambda (a-node) (equal? word-inst-1 a-node)) word-inst-list))
 		(define index-2 (list-index (lambda (a-node) (equal? word-inst-2 a-node)) word-inst-list))
@@ -203,21 +207,24 @@
 )
 
 ; ---------------------------------------------------------------------
-; word-inst-get-number   Return the NumberNode associated with word-inst
+; word-inst-get-sequence   Return the sequence NumberNode associated
 ;
-; Return the NumberNode associated with 'word-inst'
+; Return the sequence NumberNode associated with 'word-inst'
 ;
-(define (word-inst-get-number word-inst)
+(define (word-inst-get-sequence word-inst)
 	(car (cog-chase-link 'WordSequenceLink 'NumberNode word-inst))
 )
 
 ; ---------------------------------------------------------------------
-; word-inst-get-word   Return the WordNode associated with word-inst
+; word-inst-get-word   Return the WordNode/NumberNode associated
 ;
-; Return the WordNode associated with 'word-inst'
+; Return the WordNode/NumberNode associated with 'word-inst'
 ;
 (define (word-inst-get-word word-inst)
-	(cog-chase-link 'ReferenceLink 'WordNode word-inst)
+	(append
+		(cog-chase-link 'ReferenceLink 'WordNode word-inst)
+		(cog-chase-link 'ReferenceLink 'NumberNode word-inst)
+	)
 )
 
 ; ---------------------------------------------------------------------
@@ -234,7 +241,11 @@
 ; Given a word instance, return the lemma for of the word.
 ; Also works if the word-inst is actually a seme.
 (define (word-inst-get-lemma word-inst)
-	(let ((wlist (cog-chase-link 'LemmaLink 'WordNode word-inst)))
+	(let ((wlist
+		(append
+			(cog-chase-link 'LemmaLink 'WordNode word-inst)
+			(cog-chase-link 'LemmaLink 'NumberNode word-inst)
+		)))
 		(if (null? wlist)
 			'()
 			(car wlist)
