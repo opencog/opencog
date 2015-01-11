@@ -41,6 +41,9 @@ EXPOSE 16313
 ### ports from the unity3d game code
 EXPOSE 16315 16312
 
+## Default postgresql port
+EXPOSE 5432
+
 # Docker defaults
 WORKDIR /home/opencog
 CMD bash
