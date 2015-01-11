@@ -90,19 +90,20 @@ public:
     }
 
     void testSimple() {
-        Handle time = table->add(createNode(TIME_NODE, "1"));
-        Handle word = table->add(createNode(NUMBER_NODE, "1"));
-        Handle sense = table->add(createNode(CONCEPT_NODE, "28675194"));
+        Handle time = table->add(createNode(TIME_NODE, "1"), true);
+        Handle word = table->add(createNode(NUMBER_NODE, "1"), true);
+        Handle sense = table->add(createNode(CONCEPT_NODE, "28675194"), true);
         std::vector<Handle> os;
         os.push_back(time);
         os.push_back(word);
         os.push_back(sense);
-        table->add(createLink(INHERITANCE_LINK, os));
+        table->add(createLink(INHERITANCE_LINK, os), true);
+        table->barrier();
     }
 
     void testHolds() {
         Handle h(100101);
-        Handle word = table->add(createNode(NUMBER_NODE, "1"));
+        Handle word = table->add(createNode(NUMBER_NODE, "1"), false);
         TS_ASSERT(table->holds(word));
         TS_ASSERT(!table->holds(h));
     }
@@ -110,7 +111,7 @@ public:
     void testIsCleared() {
         atomSpace->clear();
         TS_ASSERT(table->isCleared());
-        Handle word = table->add(createNode(NUMBER_NODE, "1"));
+        Handle word = table->add(createNode(NUMBER_NODE, "1"), false);
         TS_ASSERT(!table->isCleared());
     }
 
@@ -120,8 +121,10 @@ public:
         for (unsigned i=0; i < numBuckets + 10; i++){
             oss.clear();
             oss << i;
-            table->add(createNode(NUMBER_NODE, oss.str()));
+            table->add(createNode(NUMBER_NODE, oss.str()), true);
         }
+        table->barrier();
+
         RandGen* rng = new opencog::MT19937RandGen(0);
         Handle h1 = table->getRandom(rng);
         Handle h2 = table->getRandom(rng);
@@ -269,7 +272,7 @@ public:
         result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, true));
         TS_ASSERT(!result);
         LinkPtr link = createLink(LIST_LINK, emptyOutgoing);
-        Handle h = table->add(link);
+        Handle h = table->add(link, false);
         // if (link->getHandle() != h) delete link;
         result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, false));
         TS_ASSERT(result);
@@ -305,25 +308,25 @@ public:
     void testDoubleLink() {
         NodePtr n1(createNode(NUMBER_NODE, "1"));
         NodePtr n2(createNode(NUMBER_NODE, "2"));
-        Handle hn1 = table->add(n1);
-        Handle hn2 = table->add(n2);
+        Handle hn1 = table->add(n1, false);
+        Handle hn2 = table->add(n2, false);
 
         std::vector<Handle> os; os.push_back(hn1); os.push_back(hn1); os.push_back(hn2);
         LinkPtr l1(createLink(LIST_LINK, os));
-        Handle hl1 = table->add(l1);
+        Handle hl1 = table->add(l1, false);
 
         table->extract(hn1, true);
     }
 
     void testMerge() {
         NodePtr n1(createNode(NUMBER_NODE, "1", SimpleTruthValue::createTV(0.1f, 0.2f)));
-        Handle hn1 = table->add(n1);
+        Handle hn1 = table->add(n1, false);
 
         NodePtr n2(createNode(NUMBER_NODE, "1", SimpleTruthValue::createTV(0.3f, 0.4f)));
-        TS_ASSERT_THROWS_NOTHING(table->add(n2));
+        TS_ASSERT_THROWS_NOTHING(table->add(n2, false));
 
         NodePtr n3(createNode(NUMBER_NODE, "1", SimpleTruthValue::createTV(0.8f, 0.3f)));
-        TS_ASSERT_THROWS_NOTHING(table->add(n3));
+        TS_ASSERT_THROWS_NOTHING(table->add(n3, false));
 
         Handle h = table->getHandlex("1", NUMBER_NODE);
         TS_ASSERT(h == hn1);
@@ -337,14 +340,14 @@ public:
         Type MY_INHERITANCE_LINK = classserver().addType(INHERITANCE_LINK, "MyInheritanceLink");
         logger().debug("MY_NUMBER_NODE = %u, MY_CONCEPT_NODE = %u, MY_INHERITANCE_LINK = %u\n", MY_NUMBER_NODE, MY_CONCEPT_NODE, MY_INHERITANCE_LINK);
         NodePtr wp = createNode(MY_NUMBER_NODE, "1");
-        Handle word = table->add(wp);
+        Handle word = table->add(wp, false);
         NodePtr sp = createNode(MY_CONCEPT_NODE, "28675194");
-        Handle sense = table->add(sp);
+        Handle sense = table->add(sp, false);
         std::vector<Handle> os;
         os.push_back(word);
         os.push_back(sense);
         LinkPtr lp = createLink(MY_INHERITANCE_LINK, os);
-        Handle lh = table->add(lp);
+        Handle lh = table->add(lp, false);
 
         TS_ASSERT(table->getHandlex("1", MY_NUMBER_NODE) != Handle::UNDEFINED);
         TS_ASSERT(table->getHandlex("28675194", MY_CONCEPT_NODE) != Handle::UNDEFINED);

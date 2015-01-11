@@ -32,7 +32,9 @@
 
 #include <opencog/util/concurrent_queue.h>
 #include <opencog/util/concurrent_stack.h>
+#include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/macros.h>
 
 namespace opencog
 {
@@ -68,6 +70,11 @@ namespace opencog
  * The implementation is very simple: it uses a fixed-size thread pool.
  * It uses hi/lo watermarks to stall and drain the queue, if it gets too
  * long. This could probably be made spiffier.
+ *
+ * It would also be clearer to the user, if we placed the method to call
+ * onto the queue, along with the element, instead of specifying the
+ * method in the ctor. This would really drive home the point that this
+ * really is just an async method call.
  */
 template<typename Writer, typename Element>
 class async_caller
@@ -91,7 +98,7 @@ class async_caller
 		async_caller(Writer*, void (Writer::*)(Element&), int nthreads=4);
 		~async_caller();
 		void enqueue(Element&);
-		void flush_store_queue();
+		void flush_queue();
 };
 
 
@@ -183,13 +190,13 @@ void async_caller<Writer, Element>::stop_writer_threads()
 }
 
 
-/// Drain the pending store queue.
+/// Drain the pending queue.
 /// Caution: this is slightly racy; a writer could still be busy
 /// even though this returns. (There's a window in write_loop, between
 /// the dequeue, and the busy_writer increment. I guess we should fix
 /// this...
 template<typename Writer, typename Element>
-void async_caller<Writer, Element>::flush_store_queue()
+void async_caller<Writer, Element>::flush_queue()
 {
 	// std::this_thread::sleep_for(std::chrono::microseconds(10));
 	usleep(10);
@@ -200,7 +207,7 @@ void async_caller<Writer, Element>::flush_store_queue()
 	}
 }
 
-/// A single write thread. Reads elements from queue, and invokes the 
+/// A single write thread. Reads elements from queue, and invokes the
 /// method on them.
 template<typename Writer, typename Element>
 void async_caller<Writer, Element>::write_loop()

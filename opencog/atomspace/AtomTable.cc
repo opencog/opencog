@@ -51,6 +51,7 @@ using namespace opencog;
 std::recursive_mutex AtomTable::_mtx;
 
 AtomTable::AtomTable(AtomTable* parent)
+    :_index_queue(this, &AtomTable::put_atom_into_index)
 {
     _environ = parent;
     size = 0;
@@ -112,6 +113,7 @@ AtomTable& AtomTable::operator=(const AtomTable& other)
 }
 
 AtomTable::AtomTable(const AtomTable& other)
+    :_index_queue(this, &AtomTable::put_atom_into_index)
 {
     throw opencog::RuntimeException(TRACE_INFO,
             "AtomTable - Cannot copy an object of this class");
@@ -450,7 +452,7 @@ bool AtomTable::inEnviron(AtomPtr atom)
     return false;
 }
 
-Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
+Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
 {
     // Is the atom already in this table, or one of its environments?
     if (inEnviron(atom))
@@ -509,7 +511,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
             const HandleSeq ogset(lll->getOutgoingSet());
             size_t arity = ogset.size();
             for (size_t i = 0; i < arity; i++) {
-                add(ogset[i]);
+                add(ogset[i], async);
             }
         }
     }
@@ -583,7 +585,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
             // Make sure all children are in the atom table.
             Handle ho(llc->_outgoing[i]);
             if (not inEnviron(ho)) {
-                llc->_outgoing[i] = add(ho);
+                llc->_outgoing[i] = add(ho, async);
             }
 
             // Build the incoming set of outgoing atom h.
@@ -606,25 +608,41 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     size++;
     _atom_set.insert(h);
 
-    nodeIndex.insertAtom(atom);
-    linkIndex.insertAtom(atom);
-    typeIndex.insertAtom(atom);
     atom->keep_incoming_set();
-    targetTypeIndex.insertAtom(atom);
-    importanceIndex.insertAtom(atom);
-
     atom->setAtomTable(this);
+
+    if (not async)
+        put_atom_into_index(atom);
 
     // We can now unlock, since we are done. In particular, the signals
     // need to run unlocked, since they may result in more atom table
     // additions.
     lck.unlock();
 
+    // Update the indexes asynchronously
+    if (async)
+        _index_queue.enqueue(atom);
+
     // Now that we are completely done, emit the added signal.
     _addAtomSignal(h);
 
     DPRINTF("Atom added: %ld => %s\n", atom->_uuid, atom->toString().c_str());
     return h;
+}
+
+void AtomTable::put_atom_into_index(AtomPtr& atom)
+{
+    std::unique_lock<std::recursive_mutex> lck(_mtx);
+    nodeIndex.insertAtom(atom);
+    linkIndex.insertAtom(atom);
+    typeIndex.insertAtom(atom);
+    targetTypeIndex.insertAtom(atom);
+    importanceIndex.insertAtom(atom);
+}
+
+void AtomTable::barrier()
+{
+    _index_queue.flush_queue();
 }
 
 size_t AtomTable::getSize() const

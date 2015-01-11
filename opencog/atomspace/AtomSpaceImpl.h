@@ -47,7 +47,7 @@ namespace opencog
  *  @{
  */
 
-/** 
+/**
  * \warning The AtomSpaceImpl class contains methods that are only to be called by
  * the AtomSpace
  */
@@ -69,14 +69,17 @@ public:
     void unregisterBackingStore(BackingStore *);
 
     /**
-     * Read-write synchronization barrier.
+     * Read-write synchronization barrier (fence).
      * If there is a backing store, then make sure all writes have
      * been completed.
-     * NB: at this time,we don't distinguish barrier and flush.
+     * NB: at this time, we don't distinguish barrier and flush.
      * Although this is named 'barrier', its actually implemented
      * as a flush.  This may change in the future.
      */
-    void barrier(void) { if (backing_store) backing_store->barrier(); }
+    void barrier(void) {
+        atomTable.barrier();
+        if (backing_store) backing_store->barrier();
+    }
 
     /**
      * Recursively store the atom to the backing store.
@@ -87,7 +90,7 @@ public:
 
     /**
      * Load *all* atoms of the given type, but only if they are not
-     * already in the AtomTable. 
+     * already in the AtomTable.
      */
     void loadType(Type t) {
         if (backing_store) backing_store->loadType(atomTable, t);
@@ -104,7 +107,7 @@ public:
      * The fetch is 'unconditional', in that it is fetched, even if it
      * already is in the atomspace.  Also, the ignored-types of the
      * backing store are not used.
-     * 
+     *
      * To avoid a fetch if the atom already is in the atomtable, use the
      * getAtom() method instead.
      */
@@ -119,8 +122,8 @@ public:
 
     /**
      * Use the backing store to load the entire incoming set of the atom.
-     * If the flag is true, then the load is done recursively. 
-     * This method queries the backing store to obtain all atoms that 
+     * If the flag is true, then the load is done recursively.
+     * This method queries the backing store to obtain all atoms that
      * contain this one in their outgoing sets. All of these atoms are
      * then loaded into this atomtable/atomspace.
      */
@@ -133,7 +136,9 @@ public:
      *  @param tvn   Optional TruthValue of the node. If not provided, uses the
      *  DEFAULT_TV (see TruthValue.h)
      */
-    Handle addNode(Type t, const std::string& name = "", TruthValuePtr tvn = TruthValue::DEFAULT_TV());
+    Handle addNode(Type t, const std::string& name = "",
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV(),
+                   bool async = false);
 
     /**
      * Get a node from the AtomTable, if it's in there. If its not found
@@ -157,7 +162,8 @@ public:
      *                  provided, uses the DEFAULT_TV (see TruthValue.h)
      */
     Handle addLink(Type t, const HandleSeq& outgoing,
-                   TruthValuePtr tvn = TruthValue::DEFAULT_TV());
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV(),
+                   bool async = false);
 
     /**
      * Get a link from the AtomTable, if it's in there. If its not found

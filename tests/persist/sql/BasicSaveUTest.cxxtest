@@ -268,19 +268,19 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
 	n1[idx]->setTruthValue(stv);
 	a1[idx] = n1[idx];
-	table->add(a1[idx]);
+	table->add(a1[idx], false);
 
 	n2[idx] = createNode(WORD_NODE, id + "toNode");
 	TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 200+idx));
 	n2[idx]->setTruthValue(stv2);
 	a2[idx] = n2[idx];
-	table->add(a2[idx]);
+	table->add(a2[idx], false);
 
 	n3[idx] = createNode(WORD_NODE, id + "third wheel");
 	TruthValuePtr stv3(SimpleTruthValue::createTV(0.33, 300+idx));
 	n3[idx]->setTruthValue(stv3);
 	a3[idx] = n3[idx];
-	table->add(a3[idx]);
+	table->add(a3[idx], false);
 
 	std::vector<Handle> hvec;
 	hvec.push_back(a1[idx]->getHandle());
@@ -289,7 +289,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 
 	l[idx] = createLink(PARSE_LINK, hvec);
 	al[idx] = l[idx];
-	table->add(l[idx]);
+	table->add(l[idx], false);
 }
 
 void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)

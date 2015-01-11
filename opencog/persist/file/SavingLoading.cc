@@ -380,7 +380,7 @@ void SavingLoading::loadNodes(FILE *f, HandMapPtr handles, AtomTable& atomTable,
         Type newtype = dumpToCore[oldType];
         NodePtr node(readNode(f, newtype, handles));
 
-        atomTable.add( node );
+        atomTable.add( node, false );
         printProgress("load", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
         fflush(stdout);
     }
@@ -414,7 +414,7 @@ void SavingLoading::loadLinks(FILE* f, HandMapPtr handles,
         }
         Type t = dumpToCore[oldType];
         LinkPtr link(readLink(f, t, handles));
-        atomTable.add(link);
+        atomTable.add(link, false);
     }
     CHECK_FREAD;
 }

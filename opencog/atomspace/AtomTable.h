@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
- * Copyright (C) 2013 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2013,2015 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,11 @@
 
 #include <boost/signals2.hpp>
 
+#include <opencog/util/async_method_caller.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/RandGen.h>
+
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
@@ -43,9 +48,6 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/TypeIndex.h>
 #include <opencog/atomspace/TargetTypeIndex.h>
-#include <opencog/util/Logger.h>
-#include <opencog/util/RandGen.h>
-#include <opencog/util/exceptions.h>
 
 class AtomTableUTest;
 
@@ -100,6 +102,9 @@ private:
     LinkIndex linkIndex;
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
+
+    async_caller<AtomTable, AtomPtr> _index_queue;
+    void put_atom_into_index(AtomPtr&);
     //!@}
 
     /**
@@ -410,16 +415,34 @@ public:
     }
 
     /**
-     * Adds an atom to the table, checking for duplicates and merging
-     * when necessary. When an atom is added, the atom table takes over
-     * the memory management for that atom. In other words, no other
-     * code should ever attempt to delete the pointer that is passed
-     * into this method.
+     * Adds an atom to the table. If the atom already is in the
+     * atomtable, then the truth values and attention values of the
+     * two are merged (how, exactly? Is this doe corrrectly!?)
+     *
+     * If the async flag is set, then the atom addition is performed
+     * asynchronously; the atom might not be fully added by the time
+     * this method returns, although it will get added eventually.
+     * Async addition can improve the multi-threaded performance of
+     * lots of parallel adds.  The barrier() method can be used to
+     * force synchronization.
+     *
+     * XXX The async code path doesn't really do anything yet, since
+     * it also uses the big global lock, at the moment.  This needs
+     * fixing, mostly be creating a second mutex for the atom insertion,
+     * and also giving each index its own uique mutex, to avoid
+     * collsions.  So teh API is here, but more work is stil needed.
      *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(AtomPtr) throw (RuntimeException);
+    Handle add(AtomPtr, bool async) throw (RuntimeException);
+
+    /**
+     * Read-write synchronization barrier fence.  When called, this
+     * will not return until all the atoms previously added to the
+     * atomspace have been fully inserted.
+     */
+    void barrier(void);
 
     /**
      * Return true if the atom table holds this handle, else return false.

@@ -142,7 +142,7 @@ class AtomStorage::Response
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
 			AtomPtr atom(store->makeAtom(*this, handle));
-			table->add(atom);
+			table->add(atom, true);
 			return false;
 		}
 
@@ -181,7 +181,7 @@ class AtomStorage::Response
 					load_recursive_if_not_exists(a);
 				}
 			}
-			table->add(atom);
+			table->add(atom, true);
 		}
 
 		std::vector<Handle> *hvec;
@@ -669,7 +669,7 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
 /// this...
 void AtomStorage::flushStoreQueue()
 {
-	_write_queue.flush_store_queue();
+	_write_queue.flush_queue();
 }
 
 /* ================================================================ */
@@ -1432,6 +1432,9 @@ void AtomStorage::load(AtomTable &table)
 	put_conn(db_conn);
 	fprintf(stderr, "Finished loading %lu atoms in total\n",
 		(unsigned long) load_count);
+
+	// synchrnonize!
+	table.barrier();
 }
 
 void AtomStorage::loadType(AtomTable &table, Type atom_type)
@@ -1498,6 +1501,9 @@ void AtomStorage::loadType(AtomTable &table, Type atom_type)
 	put_conn(db_conn);
 	logger().debug("AtomStorage::loadType: Finished loading %lu atoms in total\n",
 		(unsigned long) load_count);
+
+	// Synchronize!
+	table.barrier();
 }
 
 bool AtomStorage::store_cb(AtomPtr atom)
