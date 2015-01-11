@@ -452,7 +452,7 @@ bool AtomTable::inEnviron(AtomPtr atom)
     return false;
 }
 
-Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
+Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
 {
     // Is the atom already in this table, or one of its environments?
     if (inEnviron(atom))
@@ -511,7 +511,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
             const HandleSeq ogset(lll->getOutgoingSet());
             size_t arity = ogset.size();
             for (size_t i = 0; i < arity; i++) {
-                add(ogset[i]);
+                add(ogset[i], async);
             }
         }
     }
@@ -585,7 +585,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
             // Make sure all children are in the atom table.
             Handle ho(llc->_outgoing[i]);
             if (not inEnviron(ho)) {
-                llc->_outgoing[i] = add(ho);
+                llc->_outgoing[i] = add(ho, async);
             }
 
             // Build the incoming set of outgoing atom h.
@@ -611,13 +611,17 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     atom->keep_incoming_set();
     atom->setAtomTable(this);
 
+    if (not async)
+        put_atom_into_index(atom);
+
     // We can now unlock, since we are done. In particular, the signals
     // need to run unlocked, since they may result in more atom table
     // additions.
     lck.unlock();
 
     // Update the indexes asynchronously
-    _index_queue.enqueue(atom);
+    if (async)
+        _index_queue.enqueue(atom);
 
     // Now that we are completely done, emit the added signal.
     _addAtomSignal(h);

@@ -419,13 +419,17 @@ public:
      * atomtable, then the truth values and attention values of the
      * two are merged (how, exactly? Is this doe corrrectly!?)
      *
-     * The atom addition is asynchronous; the atom might not be
-     * fully added until *after* the barrier() method is called.
+     * If the async flag is set, then the atom addition is performed
+     * asynchronously; the atom might not be fully added by the time
+     * this method returns, although it will get added eventually.
+     * Async addition can improve the multi-threaded performance of
+     * lots of parallel adds.  The barrier() method can be used to
+     * force synchronization.
      *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(AtomPtr) throw (RuntimeException);
+    Handle add(AtomPtr, bool async=false) throw (RuntimeException);
 
     /**
      * Read-write synchronization barrier fence.  When called, this
