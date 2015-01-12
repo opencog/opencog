@@ -302,7 +302,7 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 		ss << "Pattern is not connected! Found "
 		   << _components.size() << " components:\n";
 		int cnt = 0;
-		for (auto comp : _components)
+		for (const auto& comp : _components)
 		{
 			ss << "Connected component " << cnt
 			   << " consists of ----------------: \n";
