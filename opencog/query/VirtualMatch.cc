@@ -228,10 +228,10 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 /* ================================================================= */
 
 /**
- * Validate a collection of of clauses and negations for correctness.
+ * Validate a collection of clauses and negations for correctness.
  *
  * Every clause should contain at least one variable in it; clauses
- * that don't are constants and can be trivially discarded.
+ * that are constants and can be trivially discarded.
  * Furthermore, all clauses should be connected. Two clauses are
  * connected if they contain a common variable.
  *
@@ -253,14 +253,14 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern matching",
-			__FUNCTION__);
+		              __FUNCTION__);
 	}
 
 	bogus = remove_constants(vars, negations);
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern negation",
-			__FUNCTION__);
+		              __FUNCTION__);
 	}
 
 	// Make sure that each declared variable appears in some clause.

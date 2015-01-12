@@ -44,11 +44,11 @@ namespace opencog {
  * Returns true if the list of clauses was modified, else returns false.
  */
 bool remove_constants(const std::set<Handle> &vars,
-                         std::vector<Handle> &clauses)
+                      std::vector<Handle> &clauses)
 {
 	bool modified = false;
 
-	// Caustion: this loop modifies the clauses list!
+	// Caution: this loop modifies the clauses list!
 	std::vector<Handle>::iterator i;
 	for (i = clauses.begin(); i != clauses.end(); )
 	{
@@ -92,10 +92,9 @@ bool remove_constants(const std::set<Handle> &vars,
  * specify clauses in such an order, and traversal and matching is just
  * a bit faster when pursued in order.
  */
-void get_connected_components(
-                    const std::set<Handle> &vars,
-                    const std::vector<Handle> &clauses,
-                    std::set<std::vector<Handle>> &compset)
+void get_connected_components(const std::set<Handle> &vars,
+                              const std::vector<Handle> &clauses,
+                              std::set<std::vector<Handle>> &compset)
 {
 	std::vector<std::vector<Handle>> components;
 	std::vector<std::set<Handle>> component_vars; // cache of vars in component

@@ -225,10 +225,9 @@ bool remove_constants(const std::set<Handle> &vars,
 
 
 // See C file for description
-void get_connected_components(
-                    const std::set<Handle> &vars,
-                    const std::vector<Handle> &clauses,
-                    std::set<std::vector<Handle>> &compset);
+void get_connected_components(const std::set<Handle> &vars,
+                              const std::vector<Handle> &clauses,
+                              std::set<std::vector<Handle>> &compset);
 
 } // namespace opencog
 
