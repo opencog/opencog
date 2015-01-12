@@ -239,8 +239,8 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
  * them out into a distinct list.
  */
 void PatternMatch::validate_clauses(std::set<Handle>& vars,
-                            std::vector<Handle>& clauses,
-                            std::vector<Handle>& negations)
+                                    std::vector<Handle>& clauses,
+                                    std::vector<Handle>& negations)
 
 	throw (InvalidParamException)
 {
@@ -376,7 +376,7 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
  *        VariableNode "another variable"
  *
  * The predicate hypergraph is assumed to be a list of "clauses", where
- * each "clause" should be thought of as the tree defined by the outging
+ * each "clause" should be thought of as the tree defined by the outgoing
  * sets in it.  The below assumes that the list of clauses is specified
  * by means of an AndLink, so, for example:
  *
@@ -426,7 +426,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	validate_clauses(vars, clauses, negations);
 
 	// The simple case -- unit propagation through all of the clauses.
-	if (0 == _virtuals.size())
+	if (_virtuals.empty())
 	{
 		PatternMatchEngine pme;
 		pme.match(cb, vars, clauses, negations);
@@ -436,10 +436,10 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	// If we are here, then we've got a knot in the center of it all.
 	// Removing the virtual clauses from the hypergraph typically causes
 	// the hypergraph to fall apart into multiple components, (i.e. none
-	// are connected to one another). Teh virtual clauses tie all of
+	// are connected to one another). The virtual clauses tie all of
 	// these back together into a single connected graph.
 	//
-	// There are several solution strategies posible at this point.
+	// There are several solution strategies possible at this point.
 	// The one that we will pursue, for now, is to first ground all of
 	// the distinct components individually, and then run each possible
 	// grounding combination through the virtual link, for the final

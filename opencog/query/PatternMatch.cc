@@ -173,7 +173,7 @@ void PatternMatch::do_imply (Handle himplication,
 	// Extract the set of variables, if needed.
 	// This is used only by the deprecated imply() function, as the
 	// BindLink will include a list of variables up-front.
-	if (0 == varset.size())
+	if (varset.empty())
 	{
 		FindVariables fv;
 		fv.find_vars(_hclauses);
