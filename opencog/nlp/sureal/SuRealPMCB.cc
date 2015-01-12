@@ -79,16 +79,9 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
     Handle hPatWordNode = _as->getHandle(WORD_NODE, sPatWord);
     Handle hSolnWordNode = _as->getHandle(WORD_NODE, sSolnWord);
 
-    // no WordNode? try NumberNode
+    // no WordNode? reject!
     if (hSolnWordNode == Handle::UNDEFINED)
-    {
-        hPatWordNode = _as->getHandle(NUMBER_NODE, sPatWord);
-        hSolnWordNode = _as->getHandle(NUMBER_NODE, sSolnWord);
-
-        // no NumberNode neither
-        if (hSolnWordNode == Handle::UNDEFINED)
-            return true;
-    }
+        return true;
 
     // get the neighbor of each WordNode within LgWordCset
     HandleSeq qPatSet =_as->getNeighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
