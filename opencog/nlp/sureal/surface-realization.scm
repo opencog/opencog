@@ -190,9 +190,74 @@
     )
 )
 
+
+(define (create-sentence a-set-link)
+    (define matched-interpretations (sureal-match a-set-link))
+    (define (construct-sntc itpr)
+        ; get the words, skipping ###LEFT-WALL###
+        (define words-seq (cdr (parse-get-words-in-order (interp-get-parse itpr))))
+        ; get the new query to old interpretation mapping
+        (define mapping (sureal-get-mapping itpr))
+        
+        ; modify words-seq with new words
+        (for-each
+            (lambda (old-logic-node new-logic-node)
+                ; old node must have a WordInstanceNode since we matched to an existing interpretation
+                ; new node can have no WordInstanceNode if microplanning is skipped
+                (let ((old-word-inst (r2l-get-word-inst old-logic-node))
+                      (new-word-inst (r2l-get-word-inst new-logic-node))
+                      (new-word (r2l-get-word new-logic-node))
+                      )
+                    ; find all locations in the words-seq this word-inst appear
+                    (for-each
+                        (lambda (x idx)
+                            (if (equal? x old-word-inst)
+                                (if (null? new-word-inst)
+                                    (list-set! words-seq idx new-word)
+                                    (list-set! words-seq idx new-word-inst)
+                                )
+                            )
+                        )
+                        words-seq
+                        (list-tabulate (length words-seq) values)
+                    )
+                )
+            )
+            (cadr mapping)
+            (car mapping)
+        )
+        (map
+            (lambda (w)
+                (if (equal? (cog-type w) 'WordInstanceNode)
+                    (word-inst-get-word-str w)
+                    (cog-name w)
+                )
+            )
+            words-seq
+        )
+    )
+
+    ; add LG dictionary on each word if not already in the atomspace
+    (map
+        lg-get-dict-entry
+        (map
+            (lambda (n)
+                (if (null? (r2l-get-word-inst n))
+                    (r2l-get-word n)
+                    (word-inst-get-word (r2l-get-word-inst n))
+                )
+            )
+            (cog-get-all-nodes a-set-link)
+        )
+    )
+
+    (map construct-sntc matched-interpretations)
+)
+
+
 ; Returns a possible set of SuReals from an output SetLink
 ; * 'a-set-link' : A SetLink which is to be SuRealed
-(define (create-sentence a-set-link)
+(define (old-create-sentence a-set-link)
     (define clean-set (SetLink (remove is-abstraction? (cog-outgoing-set a-set-link))))
     (define (replace-wins-with-str a-list)
         (map (lambda (x)

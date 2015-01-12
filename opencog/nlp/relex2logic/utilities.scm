@@ -37,6 +37,19 @@
 )
 
 ; -----------------------------------------------------------------------
+; r2l-get-word -- Retrieve WordNode given R2L style node
+;
+; Given a R2L style node, find the corresponding WordNode.  Skipping
+; WordInstanceNode since maybe it is not an instanced word.
+;
+(define (r2l-get-word node)
+	(cond ((null? node) '())
+	      ((has-word? node) (cog-node 'WordNode (cog-name node)))
+	      (else '())
+	)
+)
+
+; -----------------------------------------------------------------------
 ; has-word-inst? -- Check if a node has the corresponding WordInstanceNode
 ;
 ; Return #t or #f depends on whether the node as a WordInstanceNode.
