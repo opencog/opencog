@@ -1036,7 +1036,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		}
 	}
 
-	if (0 == _bound_vars.size())
+	if (_bound_vars.empty())
 	{
 		printf("There are no bound vars in this pattern\n");
 	}
