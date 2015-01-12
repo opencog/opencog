@@ -730,7 +730,7 @@ bool PatternMatchEngine::pred_up(Handle h)
 void PatternMatchEngine::get_next_untried_clause(void)
 {
 	// First, try to ground all the mandatory clauses, only.
-	// Optional clauses are grounded only after all teh mandatory
+	// Optional clauses are grounded only after all the mandatory
 	// ones are done.
 	if (get_next_untried_helper(false)) return;
 
@@ -1074,13 +1074,13 @@ void PatternMatchEngine::print_solution(
 		if (soln == Handle::UNDEFINED)
 		{
 			printf("ERROR: ungrounded variable %s\n",
-				var->toShortString().c_str());
+			       var->toShortString().c_str());
 			continue;
 		}
 
 		printf("\t%s maps to %s\n",
-			var->toShortString().c_str(),
-			soln->toShortString().c_str());
+		       var->toShortString().c_str(),
+		       soln->toShortString().c_str());
 	}
 
 	// Print out the full binding to all of the clauses.
