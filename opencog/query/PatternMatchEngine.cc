@@ -1015,7 +1015,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		_optionals.insert(h);
 	}
 
-	if (_cnf_clauses.size() == 0) return;
+	if (_cnf_clauses.empty()) return;
 
 	// Preparation prior to search.
 	// Create a table of the nodes that appear in the clauses, and

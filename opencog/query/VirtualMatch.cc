@@ -317,7 +317,7 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 	// faster. But we don't do this if there are negations, because the
 	// above jammed the negations into the thing, which we must keep
 	// separate.
-	if (0 == negations.size())
+	if (negations.empty())
 		clauses = *_components.begin();
 
 	// Are there any virtual links in the clauses? If so, then we need
@@ -331,7 +331,7 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 	}
 
 	// The simple case -- we are done with the checking.
-	if (0 == _virtuals.size())
+	if (_virtuals.empty())
 		return;
 
 	// For now, the virtual links must be at the top. That's because
