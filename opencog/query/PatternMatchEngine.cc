@@ -997,9 +997,9 @@ void PatternMatchEngine::clear(void)
  * if it determines that these are irrelevant to the search.
  */
 void PatternMatchEngine::match(PatternMatchCallback *cb,
-                         std::set<Handle> &vars,
-                         std::vector<Handle> &clauses,
-                         std::vector<Handle> &negations)
+                               std::set<Handle> &vars,
+                               std::vector<Handle> &clauses,
+                               std::vector<Handle> &negations)
 {
 	// Clear all state.
 	clear();
