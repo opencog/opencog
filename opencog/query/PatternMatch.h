@@ -36,13 +36,13 @@ class PatternMatch
 {
 	private:
 		static int get_vartype(Handle,
-		                std::set<Handle>&,
-		                VariableTypeMap&);
+		                       std::set<Handle>&,
+		                       VariableTypeMap&);
 
 		void do_match(PatternMatchCallback *,
-		                std::set<Handle>& vars,
-		                std::vector<Handle>& clauses,
-		                std::vector<Handle>& negations)
+		              std::set<Handle>& vars,
+		              std::vector<Handle>& clauses,
+		              std::vector<Handle>& negations)
 			throw (InvalidParamException);
 
 		void do_imply(Handle, Implicator&, std::set<Handle>&)

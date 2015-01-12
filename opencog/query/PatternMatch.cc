@@ -219,7 +219,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 	if (2 != oset.size())
 	{
 		logger().warn("%s: TypedVariableLink has wrong size",
-		       __FUNCTION__);
+		              __FUNCTION__);
 		return 1;
 	}
 
