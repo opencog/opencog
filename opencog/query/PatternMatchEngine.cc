@@ -768,11 +768,9 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 	bool unsolved = false;
 	bool solved = false;
 
-	RootMap::iterator k;
-	for (k = _root_map.begin(); k != _root_map.end(); ++k)
+	for (const RootPair& vk : _root_map)
 	{
-		RootPair vk = *k;
-		RootList *rl = vk.second;
+		const RootList& rl = vk.second;
 		pursue = vk.first;
 
 		unsolved = false;
@@ -791,11 +789,8 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 		// for another.
 		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
 
-		std::vector<Handle>::iterator i = rl->begin();
-		std::vector<Handle>::iterator iend = rl->end();
-		for (; i != iend; ++i)
+		for (Handle root : rl)
 		{
-			Handle root(*i);
 			if (Handle::UNDEFINED != clause_grounding[root])
 			{
 				solved = true;
@@ -887,13 +882,7 @@ bool PatternMatchEngine::do_candidate(Handle& do_clause, Handle& starter, Handle
  */
 bool PatternMatchEngine::note_root(Handle h)
 {
-	RootList *rl = _root_map[h];
-	if (NULL == rl)
-	{
-		rl = new RootList();
-		_root_map[h] = rl;
-	}
-	rl->push_back(curr_root);
+	_root_map[h].push_back(curr_root);
 
 	LinkPtr l(LinkCast(h));
 	if (l) foreach_outgoing_handle(l, &PatternMatchEngine::note_root, this);

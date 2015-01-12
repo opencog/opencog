@@ -37,8 +37,8 @@ class PatternMatchEngine
 {
 	// Private, locally scoped typedefs, not used outside of this class.
 	typedef std::vector<Handle> RootList;
-	typedef std::map<Handle, RootList *> RootMap;
-	typedef std::pair<Handle, RootList *> RootPair;
+	typedef std::map<Handle, RootList> RootMap;
+	typedef std::pair<Handle, RootList> RootPair;
 
 	private:
 		// -------------------------------------------
