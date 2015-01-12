@@ -68,7 +68,7 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
 
     // VariableNode can be matched to any VariableNode, similarly for InterpretationNode
     if (hPat->getType() == VARIABLE_NODE || hPat->getType() == INTERPRETATION_NODE)
-        return true;
+        return false;
 
     std::string sPat = _as->getName(hPat);
     std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
@@ -191,6 +191,8 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
     for (const auto& kv : var_soln)
     {
+        logger().debug("[SuReal] checking grounding for %s", kv.first->toShortString().c_str());
+
         if (m_vars.count(kv.first) == 0)
             continue;
 
