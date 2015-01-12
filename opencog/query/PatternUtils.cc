@@ -167,10 +167,7 @@ void get_connected_components(const std::set<Handle> &vars,
 	}
 
 	// We are done. Copy the components over.
-	for (auto comp : components)
-	{
-		compset.insert(comp);
-	}
+	compset.insert(components.bengin(), components.end());
 }
 
 } // namespace opencog
