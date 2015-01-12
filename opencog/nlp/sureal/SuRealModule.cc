@@ -23,6 +23,7 @@
 
 #include <opencog/atomspace/AtomSpaceUtils.h>
 #include <opencog/guile/SchemePrimitive.h>
+#include <opencog/query/PatternUtils.h>
 #include <opencog/nlp/types/atom_types.h>
 
 #include "SuRealModule.h"
@@ -123,13 +124,86 @@ HandleSeq SuRealModule::do_sureal_match(Handle h)
         sVars.insert(n);
     }
 
-    logger().debug("[SuReal] starting pattern matcher");
+    // separate the disconnected clauses (this will happen often)
+    std::set<HandleSeq> connectedClauses;
+    get_connected_components(sVars, qClauses, connectedClauses);
 
-    SuRealPMCB pmcb(pAS, sVars);
-    m_pme.match(&pmcb, sVars, qClauses, qNegs);
+    std::map<Handle, std::map<Handle, Handle> > collector;
+
+    for (auto& c : connectedClauses)
+    {
+        logger().debug("[SuReal] starting pattern matcher");
+
+        HandleSeq qClause = c;
+
+        SuRealPMCB pmcb(pAS, sVars);
+        m_pme.match(&pmcb, sVars, qClause, qNegs);
+
+        // no pattern matcher result
+        if (pmcb.m_results.empty())
+            return HandleSeq();
+
+        // first result? add it all
+        if (collector.empty())
+        {
+            collector = pmcb.m_results;
+            continue;
+        }
+
+        // if there's stuff stored in results already, only keep those with
+        // common InterpretationNode & no overlap
+        for (auto it = collector.begin(); it != collector.end(); )
+        {
+            // no common Interpretation
+            if (pmcb.m_results.count(it->first) == 0)
+            {
+                it = collector.erase(it);
+                continue;
+            }
+
+            const std::map<Handle, Handle>& existingMap = it->second;
+            const std::map<Handle, Handle>& newMap = pmcb.m_results[it->first];
+            bool flag = false;
+
+            // check for overlapping mapping where two different variables
+            // from two disconnected components mapped to the same node
+            for (const auto& ve : existingMap)
+            {
+                for (const auto& vn : newMap)
+                {
+                    // two different variables mapped to the same node
+                    if (ve.second == vn.second)
+                    {
+                        it = collector.erase(it);
+                        flag = true;
+                        break;
+                    }
+                }
+
+                if (flag)
+                    break;
+            }
+
+            if (flag)
+                continue;
+
+            ++it;
+        }
+
+        // if there's no way to connect the disconnected components
+        if (collector.empty())
+            return HandleSeq();
+
+        // add the new results
+        for (auto& r : collector)
+        {
+            std::map<Handle, Handle>& newMap = pmcb.m_results[r.first];
+            r.second.insert(newMap.begin(), newMap.end());
+        }
+    }
 
     // get the results out of pmcb
-    m_results = pmcb.m_results;
+    m_results = collector;
 
     HandleSeq results;
 
