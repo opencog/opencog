@@ -122,9 +122,7 @@ void get_connected_components(const std::set<Handle> &vars,
 				if (any_variable_in_tree(cl, cur_vars))
 				{
 					// Extend the component
-					std::vector<Handle> curr_component(components[i]);
-					curr_component.push_back(cl);
-					components[i] = curr_component;
+					components[i].push_back(cl);
 
 					// Add to the varset cache for that component.
 					FindVariables fv;
@@ -156,9 +154,7 @@ void get_connected_components(const std::set<Handle> &vars,
 
 		// If we are here, we found a disconnected clause.
 		// Start a new component
-		std::vector<Handle> new_component;
-		new_component.push_back(ncl);
-		components.push_back(new_component);
+		components.push_back({ncl});
 
 		FindVariables fv;
 		fv.find_vars(ncl);
