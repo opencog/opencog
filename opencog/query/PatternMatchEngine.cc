@@ -860,7 +860,9 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
  * from the atom space. That atom is assumed to anchor some part of
  * a graph that hopefully will match the predicate.
  */
-bool PatternMatchEngine::do_candidate(Handle& do_clause, Handle& starter, Handle& ah)
+bool PatternMatchEngine::do_candidate(const Handle& do_clause,
+                                      const Handle& starter,
+                                      const Handle& ah)
 {
 	// Cleanup
 	clear_state();

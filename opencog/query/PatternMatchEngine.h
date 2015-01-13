@@ -121,7 +121,7 @@ class PatternMatchEngine
 		void clear(void);
 
 		// Examine each candidate for a match, in turn.
-		bool do_candidate(Handle&, Handle&, Handle&);
+		bool do_candidate(const Handle&, const Handle&, const Handle&);
 
 		// Do the actual pattern search.
 		void match(PatternMatchCallback *,
