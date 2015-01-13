@@ -124,17 +124,19 @@ HandleSeq SuRealModule::do_sureal_match(Handle h)
         sVars.insert(n);
     }
 
-    // separate the disconnected clauses (this will happen often)
+    // separate the disconnected clauses (this will happen often with SuReal)
     std::set<HandleSeq> connectedClauses;
     get_connected_components(sVars, qClauses, connectedClauses);
 
-    std::map<Handle, std::map<Handle, Handle> > collector;
+    std::map<Handle, std::vector<std::map<Handle, Handle> > > collector;
 
+    // call the pattern matcher on each set of disconnected commponents
     for (auto& c : connectedClauses)
     {
         logger().debug("[SuReal] starting pattern matcher");
 
-        HandleSeq qClause = c;
+        // copy the clause for passing const stuff to non-const argument list
+        HandleSeq qClause(c);
 
         SuRealPMCB pmcb(pAS, sVars);
         m_pme.match(&pmcb, sVars, qClause, qNegs);
@@ -143,63 +145,79 @@ HandleSeq SuRealModule::do_sureal_match(Handle h)
         if (pmcb.m_results.empty())
             return HandleSeq();
 
-        // first result? add it all
+        // first disconnected component & result? add it all
         if (collector.empty())
         {
             collector = pmcb.m_results;
             continue;
         }
 
-        // if there's stuff stored in results already, only keep those with
-        // common InterpretationNode & no overlap
+        // if we are checking subsequent disconnected components, we want to
+        // make sure the new results can be merged with results from previously
+        // checked components; ie. only keep those with common
+        // InterpretationNode & no overlapping mappings
         for (auto it = collector.begin(); it != collector.end(); )
         {
-            // no common Interpretation
+            // no common Interpretation, erase the old results as it can no
+            // longer be satisfied
             if (pmcb.m_results.count(it->first) == 0)
             {
+                logger().debug("[SuReal] Discarding a result for %s", it->first->toShortString().c_str());
+
                 it = collector.erase(it);
                 continue;
             }
 
-            const std::map<Handle, Handle>& existingMap = it->second;
-            const std::map<Handle, Handle>& newMap = pmcb.m_results[it->first];
-            bool flag = false;
+            auto& existingMaps = it->second;                // a vector of previous mappings
+            auto& appendMaps = pmcb.m_results[it->first];   // a vector of unmerged mappings
+            std::vector<std::map<Handle, Handle> > newMaps;
 
-            // check for overlapping mapping where two different variables
-            // from two disconnected components mapped to the same node
-            for (const auto& ve : existingMap)
+            // check all combinations of all the old mappings to the new
+            for (auto& em : existingMaps)
             {
-                for (const auto& vn : newMap)
+                for (auto& am: appendMaps)
                 {
-                    // two different variables mapped to the same node
-                    if (ve.second == vn.second)
+                    // at this point, we would know nothing in em & am would
+                    // map the same variable because they are from two
+                    // disconnected clauses.  Instead, we want to check to make
+                    // sure no two variables get mapping to the same node.
+                    auto checker = [&](const std::pair<Handle, Handle>& ekv)
                     {
-                        it = collector.erase(it);
-                        flag = true;
-                        break;
-                    }
-                }
+                        return std::any_of(am.begin(), am.end(),
+                                           [&](const std::pair<Handle, Handle>& akv) { return ekv.second == akv.second; });
+                    };
 
-                if (flag)
-                    break;
+                    if (std::any_of(em.begin(), em.end(), checker))
+                        continue;
+
+                    // clone the old mapping and append the new
+                    std::map<Handle, Handle> newMap(em);
+                    newMap.insert(am.begin(), am.end());
+
+                    // add as one mapping of one InterpretationNode
+                    newMaps.push_back(newMap);
+                }
             }
 
-            if (flag)
-                continue;
+            // if none of the mappings can be merged, the interpretation is bad
+            if (newMaps.empty())
+            {
+                logger().debug("[SuReal] Discarding a result for %s", it->first->toShortString().c_str());
 
+                it = collector.erase(it);
+                continue;
+            }
+
+            // replace the old results with the new appended ones
+            it->second = newMaps;
+
+            // go to the next InterpretationNode
             ++it;
         }
 
         // if there's no way to connect the disconnected components
         if (collector.empty())
             return HandleSeq();
-
-        // add the new results
-        for (auto& r : collector)
-        {
-            std::map<Handle, Handle>& newMap = pmcb.m_results[r.first];
-            r.second.insert(newMap.begin(), newMap.end());
-        }
     }
 
     // get the results out of pmcb
@@ -244,8 +262,8 @@ HandleSeq SuRealModule::do_sureal_match(Handle h)
  * by "sureal-match" as input, and returns the complete node-to-node mapping.
  *
  * @param h   an InterpretationNode returned by "sureal-match"
- * @return    a list of two lists; the first list will be the nodes extracted
- *            from the original query, the second list will the the
+ * @return    a list of lists; the first list will be the nodes extracted
+ *            from the original query, the subsequent lists will the the
  *            corresponding mapping for each node.
  */
 HandleSeqSeq SuRealModule::do_sureal_get_mapping(Handle h)
@@ -255,11 +273,13 @@ HandleSeqSeq SuRealModule::do_sureal_get_mapping(Handle h)
         return HandleSeqSeq();
 
     // construct the result
-    std::map<Handle, Handle>& mapping = m_results[h];
+    std::vector<std::map<Handle, Handle> >& mappings = m_results[h];
+
+    logger().debug("[SuReal] # of mappings for %s is %d", h->toShortString().c_str(), mappings.size());
 
     HandleSeq qKeys, qVars;
 
-    for (auto& kv : mapping)
+    for (auto& kv : mappings[0])
     {
         qKeys.push_back(kv.first);
         qVars.push_back(kv.second);
@@ -268,6 +288,20 @@ HandleSeqSeq SuRealModule::do_sureal_get_mapping(Handle h)
     HandleSeqSeq results;
     results.push_back(qKeys);
     results.push_back(qVars);
+
+    // if there are more than one mapping, loop thru them
+    for (unsigned i = 1; i < mappings.size(); ++i)
+    {
+        std::map<Handle, Handle>& mapping = mappings[i];
+
+        qVars.clear();
+
+        // making sure to use the same ordering of keys as the first mapping
+        for (auto& key : qKeys)
+            qVars.push_back(mapping[key]);
+
+        results.push_back(qVars);
+    }
 
     return results;
 }

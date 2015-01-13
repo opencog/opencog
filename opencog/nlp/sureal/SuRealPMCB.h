@@ -53,7 +53,7 @@ public:
                                 HandleSeq& clauses,
                                 HandleSeq& negations);
 
-    std::map<Handle, std::map<Handle, Handle> > m_results;   // store the PM results
+    std::map<Handle, std::vector<std::map<Handle, Handle> > > m_results;   // store the PM results
 
 private:
     virtual Handle find_starter(Handle, size_t&, Handle&, size_t&);

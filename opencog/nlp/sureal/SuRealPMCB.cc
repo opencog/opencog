@@ -202,7 +202,14 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     // store the solution; all common InterpretationNode are solutions for this
     // grounding, so store the solution for each InterpretationNode
     for (auto n : qItprNode)
-        m_results[n] = shrinked_soln;
+    {
+        // there could also be multiple solutions for one InterpretationNode,
+        // so store them in a vector
+        if (m_results.count(n) == 0)
+            m_results[n] = std::vector<std::map<Handle, Handle> >();
+
+        m_results[n].push_back(shrinked_soln);
+    }
 
     return false;
 }
