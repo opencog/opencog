@@ -128,6 +128,8 @@ HandleSeq SuRealModule::do_sureal_match(Handle h)
     std::set<HandleSeq> connectedClauses;
     get_connected_components(sVars, qClauses, connectedClauses);
 
+    logger().debug("[SuReal] Found %d disconnected components", connectedClauses.size());
+
     std::map<Handle, std::vector<std::map<Handle, Handle> > > collector;
 
     // call the pattern matcher on each set of disconnected commponents

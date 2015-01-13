@@ -192,66 +192,74 @@
 
 
 (define (create-sentence a-set-link)
-    (define matched-interpretations (sureal-match a-set-link))
     (define (construct-sntc itpr)
         ; get the words, skipping ###LEFT-WALL###
         (define words-seq (cdr (parse-get-words-in-order (interp-get-parse itpr))))
-        ; get the new query to old interpretation mapping
-        (define mapping (sureal-get-mapping itpr))
-        
-        ; modify words-seq with new words
-        (for-each
-            (lambda (old-logic-node new-logic-node)
-                ; old node must have a WordInstanceNode since we matched to an existing interpretation
-                ; new node can have no WordInstanceNode if microplanning is skipped
-                (let ((old-word-inst (r2l-get-word-inst old-logic-node))
-                      (new-word-inst (r2l-get-word-inst new-logic-node))
-                      (new-word (r2l-get-word new-logic-node))
-                      )
-                    ; find all locations in the words-seq this word-inst appear
-                    (for-each
-                        (lambda (x idx)
-                            (if (equal? x old-word-inst)
-                                (if (null? new-word-inst)
-                                    (list-set! words-seq idx new-word)
-                                    (list-set! words-seq idx new-word-inst)
+        ; get the new query to old interpretation mappings (multiple)
+        (define mappings (sureal-get-mapping itpr))
+        ; helper to generate sentence using one mapping
+        (define (construct-sntc-mapping w-seq vars mapping)
+            (for-each
+                (lambda (old-logic-node new-logic-node)
+                    (let ((old-word-inst (r2l-get-word-inst old-logic-node))
+                          (new-word-inst (r2l-get-word-inst new-logic-node))
+                          (new-word (r2l-get-word new-logic-node))
+                          )
+                        ; if old-logic-node is actually a word (could be not for VariableNode or InterpretationNode)
+                        (if (not (null? old-word-inst))
+                            ; find all locations in the w-seq this word-inst appear
+                            (for-each
+                                (lambda (x idx)
+                                    (if (equal? x old-word-inst)
+                                        (if (null? new-word-inst)
+                                            (list-set! w-seq idx new-word)
+                                            (list-set! w-seq idx new-word-inst)
+                                        )
+                                    )
                                 )
+                                w-seq
+                                (list-tabulate (length w-seq) values)
                             )
                         )
-                        words-seq
-                        (list-tabulate (length words-seq) values)
                     )
                 )
+                mapping
+                vars
             )
-            (cadr mapping)
-            (car mapping)
-        )
-        (map
-            (lambda (w)
-                (if (equal? (cog-type w) 'WordInstanceNode)
-                    (word-inst-get-word-str w)
-                    (cog-name w)
+            (map
+                (lambda (w)
+                    (if (equal? (cog-type w) 'WordInstanceNode)
+                        (word-inst-get-word-str w)
+                        (cog-name w)
+                    )
                 )
+                w-seq
             )
-            words-seq
         )
+                
+        (display mappings)
+        (newline)
+        (map construct-sntc-mapping (circular-list words-seq) (circular-list (car mappings)) (cdr mappings))
     )
 
     ; add LG dictionary on each word if not already in the atomspace
     (map
         lg-get-dict-entry
-        (map
+        (filter-map
             (lambda (n)
                 (if (null? (r2l-get-word-inst n))
-                    (r2l-get-word n)
-                    (word-inst-get-word (r2l-get-word-inst n))
+                    (if (null? (r2l-get-word n))
+                        #f
+                        (r2l-get-word n)
+                    )
+                    (car (word-inst-get-word (r2l-get-word-inst n)))
                 )
             )
             (cog-get-all-nodes a-set-link)
         )
     )
 
-    (map construct-sntc matched-interpretations)
+    (append-map construct-sntc (sureal-match a-set-link))
 )
 
 ; Returns a number that could be used to compare atoms of the same type. For eg.

@@ -191,9 +191,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
     for (const auto& kv : var_soln)
     {
-        logger().debug("[SuReal] checking grounding for %s", kv.first->toShortString().c_str());
-
-        if (m_vars.count(kv.first) == 0)
+         if (m_vars.count(kv.first) == 0)
             continue;
 
         shrinked_soln[kv.first] = kv.second;
