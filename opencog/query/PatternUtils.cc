@@ -116,7 +116,7 @@ void get_connected_components(const std::set<Handle> &vars,
 			size_t nc = components.size();
 			for (size_t i = 0; i<nc; i++)
 			{
-				std::set<Handle> cur_vars(component_vars[i]);
+				std::set<Handle>& cur_vars = component_vars[i];
 				// If clause cl is connected to this component, then add it
 				// to this component.
 				if (any_variable_in_tree(cl, cur_vars))
@@ -128,7 +128,6 @@ void get_connected_components(const std::set<Handle> &vars,
 					FindVariables fv;
 					fv.find_vars(cl);
 					for (Handle v : fv.varset) cur_vars.insert(v);
-					component_vars[i] = cur_vars;
 
 					extended = true;
 					did_at_least_one = true;
@@ -158,8 +157,7 @@ void get_connected_components(const std::set<Handle> &vars,
 
 		FindVariables fv;
 		fv.find_vars(ncl);
-		std::set<Handle> new_varcache(fv.varset);
-		component_vars.push_back(new_varcache);
+		component_vars.push_back(fv.varset);
 	}
 
 	// We are done. Copy the components over.
