@@ -141,14 +141,14 @@ PACKAGES_BUILD="
 		python-six \
 		python-tornado \
 		python-wsgiref \
-		libboost-date-time1.54-dev \
-		libboost-filesystem1.54-dev \
-		libboost-math1.54-dev \
-		libboost-program-options1.54-dev \
-		libboost-regex1.54-dev \
-		libboost-serialization1.54-dev \
-		libboost-thread1.54-dev \
-		libboost-system1.54-dev \
+		libboost-date-time-dev \
+		libboost-filesystem-dev \
+		libboost-math-dev \
+		libboost-program-options-dev \
+		libboost-regex-dev \
+		libboost-serialization-dev \
+		libboost-thread-dev \
+		libboost-system-dev \
 		libjson-spirit-dev \
 		libzmq3-dev \
 		libtbb-dev \
