@@ -451,6 +451,10 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds;
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
+	// Note: range loop by copy because PatternMatchEngine::match
+	// allows non-const clauses, and as they come from std::set they
+	// are const. I don't see why PatternMatchEngine::match wouldn't
+	// take in const clauses. To be studied...
 	for (std::vector<Handle> comp : nvcomps)
 	{
 		// Find the variables in each component.
