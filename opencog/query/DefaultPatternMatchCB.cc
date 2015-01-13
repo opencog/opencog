@@ -229,9 +229,9 @@ Handle DefaultPatternMatchCB::find_thinnest(std::vector<Handle>& clauses,
  * "normal" case.
  */
 void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
-                         std::set<Handle> &vars,
-                         std::vector<Handle> &clauses,
-                         std::vector<Handle> &negations)
+                                           std::set<Handle> &vars,
+                                           std::vector<Handle> &clauses,
+                                           std::vector<Handle> &negations)
 {
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by

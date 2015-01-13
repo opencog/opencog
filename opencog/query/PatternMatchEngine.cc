@@ -30,7 +30,7 @@
 
 using namespace opencog;
 
-// #define DEBUG 1
+#define DEBUG 1
 #ifdef WIN32
 #if DEBUG
 	#define dbgprt printf
@@ -958,7 +958,7 @@ void PatternMatchEngine::clear(void)
  * The list of "bound vars" are to be solved for ("grounded", or
  * "evaluated") during pattern matching. That is, if the subgraph
  * defined by the clauses is located, then the vars are given the
- * corresponding values associated to that match. Becuase these
+ * corresponding values associated to that match. Because these
  * variables can be shared across multiple clauses, this can be
  * understood to be a unification problem; the pattern matcher is thus
  * a unifier.
