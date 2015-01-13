@@ -44,6 +44,9 @@ class FindVariables
 	public:
 		std::set<Handle> varset;
 
+		inline FindVariables() {}
+		inline FindVariables(const std::set<Handle>& input) : input_varset(input) {}
+
 		/**
 		 * Create a set of all of the VariableNodes that lie in the
 		 * outgoing set of the handle (recursively).
@@ -53,7 +56,9 @@ class FindVariables
 			Type t = h->getType();
 			if (classserver().isNode(t))
 			{
-				if (t == VARIABLE_NODE) varset.insert(h);
+				if ((input_varset.empty() && t == VARIABLE_NODE) || input_varset.count(h) == 1)
+					varset.insert(h);
+
 				return;
 			}
 
@@ -65,6 +70,8 @@ class FindVariables
 		{
 			for (Handle h : hlist) find_vars(h);
 		}
+	private:
+		std::set<Handle> input_varset;
 };
 
 /**
