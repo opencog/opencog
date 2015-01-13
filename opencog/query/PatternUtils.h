@@ -38,14 +38,26 @@
 
 namespace opencog {
 
-///  Find all of the variable nodes occuring in a clause.
+/// Find all of the variables occuring in a clause.
+///
+/// A "variable" is defined in one of two ways: It is either a specified
+/// type, or it is a member of the given domain.  When only the type is
+/// given, it will typically be just VARIABLE_NODE, and so this just
+/// finds all the VARIABLE_NODES in the clause.  Alternately, if a set
+/// of handles is given, then this finds the subset of that set that
+/// actually occurs in the given clause.  That is, it computes the
+/// intersection between the set of given handles, and the set of all
+/// handles that occur in the clauses.
+///
 class FindVariables
 {
 	public:
 		std::set<Handle> varset;
 
-		inline FindVariables() {}
-		inline FindVariables(const std::set<Handle>& input) : input_varset(input) {}
+		inline FindVariables(Type t)
+			: _var_type(t) {}
+		inline FindVariables(const std::set<Handle>& selection)
+			: _var_type(NOTYPE), _var_domain(selection) {}
 
 		/**
 		 * Create a set of all of the VariableNodes that lie in the
@@ -54,16 +66,17 @@ class FindVariables
 		inline void find_vars(Handle h)
 		{
 			Type t = h->getType();
-			if (classserver().isNode(t))
+			if ((t == _var_type) || _var_domain.count(h) == 1)
 			{
-				if ((input_varset.empty() && t == VARIABLE_NODE) || input_varset.count(h) == 1)
-					varset.insert(h);
-
-				return;
+				varset.insert(h);
+				return; //! Don't explore link-typed vars!
 			}
 
 			LinkPtr l(LinkCast(h));
-			for (Handle oh : l->getOutgoingSet()) find_vars(oh);
+			if (l)
+			{
+				for (Handle oh : l->getOutgoingSet()) find_vars(oh);
+			}
 		}
 
 		inline void find_vars(std::vector<Handle> hlist)
@@ -71,7 +84,8 @@ class FindVariables
 			for (Handle h : hlist) find_vars(h);
 		}
 	private:
-		std::set<Handle> input_varset;
+		Type _var_type;
+		std::set<Handle> _var_domain;
 };
 
 /**
@@ -124,8 +138,8 @@ static inline bool is_quoted_in_tree(const Handle& tree, const Handle& node)
 /**
  * Return true if the indicated node occurs somewhere in the tree
  * (viz, the tree recursively spanned by the outgoing set of the handle)
- * but ONLY is it is not quoted!  This is meant to be be used to search
- * for variables, but onl those variables that have not been quoted, as
+ * but ONLY if it is not quoted!  This is meant to be be used to search
+ * for variables, but only those variables that have not been quoted, as
  * the quoted variables are constants (literals).
  */
 static inline bool is_variable_in_tree(const Handle& tree, const Handle& node)

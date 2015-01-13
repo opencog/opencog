@@ -175,7 +175,7 @@ void PatternMatch::do_imply (Handle himplication,
 	// BindLink will include a list of variables up-front.
 	if (0 == varset.size())
 	{
-		FindVariables fv;
+		FindVariables fv(VARIABLE_NODE);
 		fv.find_vars(_hclauses);
 		varset = fv.varset;
 	}
