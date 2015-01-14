@@ -18,7 +18,9 @@ using namespace opencog;
 PatternWrap::PatternWrap(Handle (f)(AtomSpace*, Handle), const char* n)
 	: _func(f), _name(n)
 {
+#ifdef HAVE_GUILE
 	define_scheme_primitive(_name, &PatternWrap::wrapper, this);
+#endif
 }
 
 Handle PatternWrap::wrapper(Handle h)
