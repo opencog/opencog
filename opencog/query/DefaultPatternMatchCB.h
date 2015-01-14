@@ -64,8 +64,7 @@ class DefaultPatternMatchCB :
 		virtual bool node_match(Handle& npat_h, Handle& nsoln_h)
 		{
 			// If equality, then a match.
-			if (npat_h == nsoln_h) return false;
-			return true;
+			return npat_h != nsoln_h;
 		}
 
 		/**
