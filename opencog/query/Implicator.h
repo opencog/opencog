@@ -40,7 +40,7 @@ namespace opencog {
  * This class is meant to be used with the pattern matcher. When the
  * pattern matcher calls the callback, it will do so with a particular
  * grounding of the search pattern. If this class is holding an ungrounded
- * implicand, and will create a grounded version of the implicand. If
+ * implicand, it will create a grounded version of the implicand. If
  * the implicand is already grounded, then it's a no-op -- this class
  * alone will *NOT* change its truth value.  Use a derived class for
  * this.
@@ -59,6 +59,12 @@ class Implicator :
 		Implicator(AtomSpace* as) : _as(as), inst(as) {}
 		Handle implicand;
 		std::vector<Handle> result_list;
+
+		// Return true if a satisfactory grounding has been
+		// found. Note that in case where you want all possible
+		// groundings, this will usually return false, so the
+		// patternMatchEngine can keep looking for ever more
+		// groundings.
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 		                       const std::map<Handle, Handle> &pred_soln);
 };

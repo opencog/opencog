@@ -35,16 +35,19 @@ namespace opencog {
 class PatternMatch
 {
 	private:
+		// See PatternMatch.cc for comments
 		static int get_vartype(Handle,
-		                std::set<Handle>&,
-		                VariableTypeMap&);
+		                       std::set<Handle>&,
+		                       VariableTypeMap&);
 
+		// See PatternMatch.cc for comments
 		void do_match(PatternMatchCallback *,
-		                std::set<Handle>& vars,
-		                std::vector<Handle>& clauses,
-		                std::vector<Handle>& negations)
+		              std::set<Handle>& vars,
+		              std::vector<Handle>& clauses,
+		              std::vector<Handle>& negations)
 			throw (InvalidParamException);
 
+		// See PatternMatch.cc for comments
 		void do_imply(Handle, Implicator&, std::set<Handle>&)
 			throw (InvalidParamException);
 
@@ -94,6 +97,7 @@ class PatternMatch
 	public:
 		PatternMatch(void);
 
+		// See PatternMatch.cc for comments
 		void validate(Handle)
 			throw (InvalidParamException);
 
@@ -103,6 +107,7 @@ class PatternMatch
 		           Handle negations = Handle::UNDEFINED)
 			throw (InvalidParamException);
 
+		// See PatternMatch.cc for comments
 		void do_bindlink(Handle, Implicator&)
 			throw (InvalidParamException);
 

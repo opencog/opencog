@@ -44,11 +44,11 @@ namespace opencog {
  * Returns true if the list of clauses was modified, else returns false.
  */
 bool remove_constants(const std::set<Handle> &vars,
-                         std::vector<Handle> &clauses)
+                      std::vector<Handle> &clauses)
 {
 	bool modified = false;
 
-	// Caustion: this loop modifies the clauses list!
+	// Caution: this loop modifies the clauses list!
 	std::vector<Handle>::iterator i;
 	for (i = clauses.begin(); i != clauses.end(); )
 	{
@@ -92,10 +92,9 @@ bool remove_constants(const std::set<Handle> &vars,
  * specify clauses in such an order, and traversal and matching is just
  * a bit faster when pursued in order.
  */
-void get_connected_components(
-                    const std::set<Handle> &vars,
-                    const std::vector<Handle> &clauses,
-                    std::set<std::vector<Handle>> &compset)
+void get_connected_components(const std::set<Handle> &vars,
+                              const std::vector<Handle> &clauses,
+                              std::set<std::vector<Handle>> &compset)
 {
 	std::vector<std::vector<Handle>> components;
 	std::vector<std::set<Handle>> component_vars; // cache of vars in component
@@ -117,21 +116,18 @@ void get_connected_components(
 			size_t nc = components.size();
 			for (size_t i = 0; i<nc; i++)
 			{
-				std::set<Handle> cur_vars(component_vars[i]);
+				std::set<Handle>& cur_vars = component_vars[i];
 				// If clause cl is connected to this component, then add it
 				// to this component.
 				if (any_variable_in_tree(cl, cur_vars))
 				{
 					// Extend the component
-					std::vector<Handle> curr_component(components[i]);
-					curr_component.push_back(cl);
-					components[i] = curr_component;
+					components[i].push_back(cl);
 
 					// Add to the varset cache for that component.
 					FindVariables fv(vars);
 					fv.find_vars(cl);
 					for (Handle v : fv.varset) cur_vars.insert(v);
-					component_vars[i] = cur_vars;
 
 					extended = true;
 					did_at_least_one = true;
@@ -157,21 +153,15 @@ void get_connected_components(
 
 		// If we are here, we found a disconnected clause.
 		// Start a new component
-		std::vector<Handle> new_component;
-		new_component.push_back(ncl);
-		components.push_back(new_component);
+		components.push_back({ncl});
 
 		FindVariables fv(vars);
 		fv.find_vars(ncl);
-		std::set<Handle> new_varcache(fv.varset);
-		component_vars.push_back(new_varcache);
+		component_vars.push_back(fv.varset);
 	}
 
 	// We are done. Copy the components over.
-	for (auto comp : components)
-	{
-		compset.insert(comp);
-	}
+	compset.insert(components.begin(), components.end());
 }
 
 } // namespace opencog

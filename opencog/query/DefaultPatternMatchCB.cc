@@ -229,9 +229,9 @@ Handle DefaultPatternMatchCB::find_thinnest(std::vector<Handle>& clauses,
  * "normal" case.
  */
 void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
-                         std::set<Handle> &vars,
-                         std::vector<Handle> &clauses,
-                         std::vector<Handle> &negations)
+                                           std::set<Handle> &vars,
+                                           std::vector<Handle> &clauses,
+                                           std::vector<Handle> &negations)
 {
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -294,7 +294,7 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 	// of atoms of that type, or otherwise try to find a small ("thin")
 	// incoming set to search over.
 	std::list<Handle> handle_set;
-	_atom_space->getHandlesByType(back_inserter(handle_set), ptype);
+	_as->getHandlesByType(back_inserter(handle_set), ptype);
 	std::list<Handle>::iterator i = handle_set.begin();
 	std::list<Handle>::iterator iend = handle_set.end();
 	for (; i != iend; ++i)
@@ -334,7 +334,7 @@ bool DefaultPatternMatchCB::virtual_link_match(LinkPtr& lvirt, Handle& gargs)
 	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
 
 	Handle schema(lvirt->getOutgoingAtom(0));
-	bool relation_holds = EvaluationLink::do_evaluate(_atom_space, schema, gargs);
+	bool relation_holds = EvaluationLink::do_evaluate(_as, schema, gargs);
 
 	return not relation_holds;
 }

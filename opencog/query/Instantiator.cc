@@ -107,7 +107,8 @@ bool Instantiator::walk_tree(Handle expr)
  * with their values, creating a new expression. The new expression is
  * added to the atomspace, and its handle is returned.
  */
-Handle Instantiator::instantiate(Handle& expr, const std::map<Handle, Handle> &vars)
+Handle Instantiator::instantiate(Handle& expr,
+                                 const std::map<Handle, Handle> &vars)
 	throw (InvalidParamException)
 {
 	// throw, not assert, because this is a user error ...
