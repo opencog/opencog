@@ -3,7 +3,7 @@
 #
 # Copyright 2009 - Joel Pitt
 #
-# Script launches a gnome-terminal with three tabs:
+# Script launches a mate-terminal with three tabs:
 # - CogServer
 # - RelEx server
 # - Cogita chatbot
@@ -14,15 +14,16 @@
 # Note: path to src and build directory and path to relex distribution need to
 # be updated (RelEx script opencog-server.sh must also be properly configured).
 
-branch_dir=/home/joel/src/opencog/trunk
-build_dir=${branch_dir}/bin
+branch_dir=/home/buck/Code/opencog
+build_dir=${branch_dir}/build
 
-relex_path=/home/joel/src/relex
+relex_path=/home/buck/Code/relex
 bot_name=cogita-$RANDOM
 
 old_dir=`pwd`
 cd ${build_dir}
-gnome-terminal \
+mate-terminal \
+  --maximize \
   --hide-menubar \
   --tab --title "CogServer" \ #--working-directory= \
   --command="./opencog/server/cogserver -c ../lib/opencog-chatbot.conf -DLOG_TO_STDOUT=TRUE" \
@@ -34,7 +35,8 @@ gnome-terminal \
 
 sleep 2
 # load axioms for chatting into cogserver
-cd ${build_dir}/opencog/nlp/triples/
+cd ${branch_dir}/opencog/nlp/chatbot
+pwd
 ./load-chatbot.sh
 cd ${old_dir}
 
