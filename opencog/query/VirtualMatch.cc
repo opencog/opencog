@@ -228,10 +228,10 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 /* ================================================================= */
 
 /**
- * Validate a collection of of clauses and negations for correctness.
+ * Validate a collection of clauses and negations for correctness.
  *
  * Every clause should contain at least one variable in it; clauses
- * that don't are constants and can be trivially discarded.
+ * that are constants and can be trivially discarded.
  * Furthermore, all clauses should be connected. Two clauses are
  * connected if they contain a common variable.
  *
@@ -239,8 +239,8 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
  * them out into a distinct list.
  */
 void PatternMatch::validate_clauses(std::set<Handle>& vars,
-                            std::vector<Handle>& clauses,
-                            std::vector<Handle>& negations)
+                                    std::vector<Handle>& clauses,
+                                    std::vector<Handle>& negations)
 
 	throw (InvalidParamException)
 {
@@ -253,14 +253,14 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern matching",
-			__FUNCTION__);
+		              __FUNCTION__);
 	}
 
 	bogus = remove_constants(vars, negations);
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern negation",
-			__FUNCTION__);
+		              __FUNCTION__);
 	}
 
 	// Make sure that each declared variable appears in some clause.
@@ -302,7 +302,7 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 		ss << "Pattern is not connected! Found "
 		   << _components.size() << " components:\n";
 		int cnt = 0;
-		for (auto comp : _components)
+		for (const auto& comp : _components)
 		{
 			ss << "Connected component " << cnt
 			   << " consists of ----------------: \n";
@@ -317,7 +317,7 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 	// faster. But we don't do this if there are negations, because the
 	// above jammed the negations into the thing, which we must keep
 	// separate.
-	if (0 == negations.size())
+	if (negations.empty())
 		clauses = *_components.begin();
 
 	// Are there any virtual links in the clauses? If so, then we need
@@ -331,7 +331,7 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 	}
 
 	// The simple case -- we are done with the checking.
-	if (0 == _virtuals.size())
+	if (_virtuals.empty())
 		return;
 
 	// For now, the virtual links must be at the top. That's because
@@ -376,7 +376,7 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
  *        VariableNode "another variable"
  *
  * The predicate hypergraph is assumed to be a list of "clauses", where
- * each "clause" should be thought of as the tree defined by the outging
+ * each "clause" should be thought of as the tree defined by the outgoing
  * sets in it.  The below assumes that the list of clauses is specified
  * by means of an AndLink, so, for example:
  *
@@ -426,7 +426,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	validate_clauses(vars, clauses, negations);
 
 	// The simple case -- unit propagation through all of the clauses.
-	if (0 == _virtuals.size())
+	if (_virtuals.empty())
 	{
 		PatternMatchEngine pme;
 		pme.match(cb, vars, clauses, negations);
@@ -436,10 +436,10 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	// If we are here, then we've got a knot in the center of it all.
 	// Removing the virtual clauses from the hypergraph typically causes
 	// the hypergraph to fall apart into multiple components, (i.e. none
-	// are connected to one another). Teh virtual clauses tie all of
+	// are connected to one another). The virtual clauses tie all of
 	// these back together into a single connected graph.
 	//
-	// There are several solution strategies posible at this point.
+	// There are several solution strategies possible at this point.
 	// The one that we will pursue, for now, is to first ground all of
 	// the distinct components individually, and then run each possible
 	// grounding combination through the virtual link, for the final
@@ -451,6 +451,10 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds;
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
+	// Note: range loop by copy because PatternMatchEngine::match
+	// allows non-const clauses, and as they come from std::set they
+	// are const. I don't see why PatternMatchEngine::match wouldn't
+	// take in const clauses. To be studied...
 	for (std::vector<Handle> comp : nvcomps)
 	{
 		// Find the variables in each component.

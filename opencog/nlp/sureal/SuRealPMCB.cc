@@ -70,20 +70,20 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
     if (hPat->getType() == VARIABLE_NODE)
         return true;
 
-    std::string sPat = _atom_space->getName(hPat);
+    std::string sPat = _as->getName(hPat);
     std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
-    std::string sSoln = _atom_space->getName(hSoln);
+    std::string sSoln = _as->getName(hSoln);
     std::string sSolnWord = sSoln.substr(0, sSoln.find_first_of('@'));
 
     // get the WordNode associated with the word (extracted from "word@1234" convention)
-    Handle hPatWordNode = _atom_space->getHandle(WORD_NODE, sPatWord);
-    Handle hSolnWordNode = _atom_space->getHandle(WORD_NODE, sSolnWord);
+    Handle hPatWordNode = _as->getHandle(WORD_NODE, sPatWord);
+    Handle hSolnWordNode = _as->getHandle(WORD_NODE, sSolnWord);
 
     // no WordNode? try NumberNode
     if (hSolnWordNode == Handle::UNDEFINED)
     {
-        hPatWordNode = _atom_space->getHandle(NUMBER_NODE, sPatWord);
-        hSolnWordNode = _atom_space->getHandle(NUMBER_NODE, sSolnWord);
+        hPatWordNode = _as->getHandle(NUMBER_NODE, sPatWord);
+        hSolnWordNode = _as->getHandle(NUMBER_NODE, sSolnWord);
 
         // no NumberNode neither
         if (hSolnWordNode == Handle::UNDEFINED)
@@ -91,8 +91,8 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
     }
 
     // get the neighbor of each WordNode within LgWordCset
-    HandleSeq qPatSet =_atom_space->getNeighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
-    HandleSeq qSolnSet = _atom_space->getNeighbors(hSolnWordNode, false, true, LG_WORD_CSET, false);
+    HandleSeq qPatSet =_as->getNeighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
+    HandleSeq qSolnSet = _as->getNeighbors(hSolnWordNode, false, true, LG_WORD_CSET, false);
 
     // check the HandleSeq to see if there is any pair that is equal (common LG entry)
     std::sort(qPatSet.begin(), qPatSet.end());
@@ -124,7 +124,7 @@ bool SuRealPMCB::clause_match(Handle &pattrn_link_h, Handle &grnd_link_h)
 {
     logger().debug("[SuReal] In clause_match, looking at %s", grnd_link_h->toShortString().c_str());
 
-    HandleSeq qISet = _atom_space->getIncoming(grnd_link_h);
+    HandleSeq qISet = _as->getIncoming(grnd_link_h);
 
     // keep only SetLink, and check if any of the SetLink has an InterpretationNode as neightbor
     qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
@@ -132,7 +132,7 @@ bool SuRealPMCB::clause_match(Handle &pattrn_link_h, Handle &grnd_link_h)
     // helper lambda function to check for linkage to an InterpretationNode, given SetLink
     auto hasInterpretation = [this](Handle& h)
     {
-        HandleSeq qN = _atom_space->getNeighbors(h, true, false, REFERENCE_LINK, false);
+        HandleSeq qN = _as->getNeighbors(h, true, false, REFERENCE_LINK, false);
         return std::any_of(qN.begin(), qN.end(), [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
     };
 
@@ -157,14 +157,14 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
     auto getInterpretation = [this](const Handle& h)
     {
-        HandleSeq qISet = _atom_space->getIncoming(h);
+        HandleSeq qISet = _as->getIncoming(h);
         qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
 
         HandleSeq results;
 
         for (auto& hSetLink : qISet)
         {
-            HandleSeq qN  = _atom_space->getNeighbors(hSetLink, true, false, REFERENCE_LINK, false);
+            HandleSeq qN  = _as->getNeighbors(hSetLink, true, false, REFERENCE_LINK, false);
             qN.erase(std::remove_if(qN.begin(), qN.end(), [](Handle& h) { return h->getType() != INTERPRETATION_NODE; }), qN.end());
 
             results.insert(results.end(), qN.begin(), qN.end());
@@ -261,12 +261,12 @@ void SuRealPMCB::perform_search(PatternMatchEngine* pPME, std::set<Handle>& vars
     // helper for checking for InterpretationNode
     auto hasNoInterpretation = [this](Handle& h)
     {
-        HandleSeq qISet = _atom_space->getIncoming(h);
+        HandleSeq qISet = _as->getIncoming(h);
         qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& hl) { return hl->getType() != SET_LINK; }), qISet.end());
 
         auto hasNode = [this](Handle& hl)
         {
-            HandleSeq qN = _atom_space->getNeighbors(hl, true, false, REFERENCE_LINK, false);
+            HandleSeq qN = _as->getNeighbors(hl, true, false, REFERENCE_LINK, false);
             return std::any_of(qN.begin(), qN.end(), [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
         };
 
@@ -275,7 +275,7 @@ void SuRealPMCB::perform_search(PatternMatchEngine* pPME, std::set<Handle>& vars
 
     // keep only links of the same type as bestClause and have linkage to InterpretationNode
     HandleSeq qCandidate;
-    _atom_space->getHandlesByType(std::back_inserter(qCandidate), bestClause->getType());
+    _as->getHandlesByType(std::back_inserter(qCandidate), bestClause->getType());
     qCandidate.erase(std::remove_if(qCandidate.begin(), qCandidate.end(), hasNoInterpretation), qCandidate.end());
 
     for (auto& c : qCandidate)

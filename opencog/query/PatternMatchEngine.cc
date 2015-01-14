@@ -730,7 +730,7 @@ bool PatternMatchEngine::pred_up(Handle h)
 void PatternMatchEngine::get_next_untried_clause(void)
 {
 	// First, try to ground all the mandatory clauses, only.
-	// Optional clauses are grounded only after all teh mandatory
+	// Optional clauses are grounded only after all the mandatory
 	// ones are done.
 	if (get_next_untried_helper(false)) return;
 
@@ -768,11 +768,9 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 	bool unsolved = false;
 	bool solved = false;
 
-	RootMap::iterator k;
-	for (k = _root_map.begin(); k != _root_map.end(); ++k)
+	for (const RootPair& vk : _root_map)
 	{
-		RootPair vk = *k;
-		RootList *rl = vk.second;
+		const RootList& rl = vk.second;
 		pursue = vk.first;
 
 		unsolved = false;
@@ -791,11 +789,8 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 		// for another.
 		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
 
-		std::vector<Handle>::iterator i = rl->begin();
-		std::vector<Handle>::iterator iend = rl->end();
-		for (; i != iend; ++i)
+		for (Handle root : rl)
 		{
-			Handle root(*i);
 			if (Handle::UNDEFINED != clause_grounding[root])
 			{
 				solved = true;
@@ -865,7 +860,9 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
  * from the atom space. That atom is assumed to anchor some part of
  * a graph that hopefully will match the predicate.
  */
-bool PatternMatchEngine::do_candidate(Handle& do_clause, Handle& starter, Handle& ah)
+bool PatternMatchEngine::do_candidate(const Handle& do_clause,
+                                      const Handle& starter,
+                                      const Handle& ah)
 {
 	// Cleanup
 	clear_state();
@@ -887,13 +884,7 @@ bool PatternMatchEngine::do_candidate(Handle& do_clause, Handle& starter, Handle
  */
 bool PatternMatchEngine::note_root(Handle h)
 {
-	RootList *rl = _root_map[h];
-	if (NULL == rl)
-	{
-		rl = new RootList();
-		_root_map[h] = rl;
-	}
-	rl->push_back(curr_root);
+	_root_map[h].push_back(curr_root);
 
 	LinkPtr l(LinkCast(h));
 	if (l) foreach_outgoing_handle(l, &PatternMatchEngine::note_root, this);
@@ -969,7 +960,7 @@ void PatternMatchEngine::clear(void)
  * The list of "bound vars" are to be solved for ("grounded", or
  * "evaluated") during pattern matching. That is, if the subgraph
  * defined by the clauses is located, then the vars are given the
- * corresponding values associated to that match. Becuase these
+ * corresponding values associated to that match. Because these
  * variables can be shared across multiple clauses, this can be
  * understood to be a unification problem; the pattern matcher is thus
  * a unifier.
@@ -997,9 +988,9 @@ void PatternMatchEngine::clear(void)
  * if it determines that these are irrelevant to the search.
  */
 void PatternMatchEngine::match(PatternMatchCallback *cb,
-                         std::set<Handle> &vars,
-                         std::vector<Handle> &clauses,
-                         std::vector<Handle> &negations)
+                               std::set<Handle> &vars,
+                               std::vector<Handle> &clauses,
+                               std::vector<Handle> &negations)
 {
 	// Clear all state.
 	clear();
@@ -1015,7 +1006,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		_optionals.insert(h);
 	}
 
-	if (_cnf_clauses.size() == 0) return;
+	if (_cnf_clauses.empty()) return;
 
 	// Preparation prior to search.
 	// Create a table of the nodes that appear in the clauses, and
@@ -1047,7 +1038,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		}
 	}
 
-	if (0 == _bound_vars.size())
+	if (_bound_vars.empty())
 	{
 		printf("There are no bound vars in this pattern\n");
 	}
@@ -1085,13 +1076,13 @@ void PatternMatchEngine::print_solution(
 		if (soln == Handle::UNDEFINED)
 		{
 			printf("ERROR: ungrounded variable %s\n",
-				var->toShortString().c_str());
+			       var->toShortString().c_str());
 			continue;
 		}
 
 		printf("\t%s maps to %s\n",
-			var->toShortString().c_str(),
-			soln->toShortString().c_str());
+		       var->toShortString().c_str(),
+		       soln->toShortString().c_str());
 	}
 
 	// Print out the full binding to all of the clauses.

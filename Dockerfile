@@ -1,25 +1,26 @@
+#
+# Primary OpenCog Dockerfile
+#
+# Usage:  docker build -t $USER/opencog .
+#         docker run -it $USER/opencog
+#
 FROM ubuntu:14.04
+MAINTAINER David Hart "dhart@opencog.org"
+MAINTAINER Linas Vepstas "linasvepstas@gmail.com"
 
 RUN apt-get update 
 RUN apt-get -y install software-properties-common python-pip
 
-# ocpkg tool to install repositories and dependencies
-COPY scripts/ocpkg scripts/install-dependencies-trusty\
-    opencog/python/requirements.txt /tmp/
+# Use the ocpkg tool to install repositories and dependencies
+COPY scripts/ocpkg /tmp/install-dependencies-trusty
+COPY opencog/python/requirements.txt /tmp/
 RUN chmod +x /tmp/install-dependencies-trusty
 RUN /tmp/install-dependencies-trusty
 RUN pip install -U -r /tmp/requirements.txt
 
-# Create and switch user. The user is privileged with no password required
-RUN adduser --disabled-password --gecos "OpenCog Developer" opencog
-RUN adduser opencog sudo
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-USER opencog
-
 # Tools
-RUN sudo apt-get -y install git
-RUN sudo apt-get -y install rlwrap
-RUN sudo apt-get -y install telnet
+RUN apt-get -y install git wget
+RUN apt-get -y install rlwrap telnet netcat-openbsd
 
 # Environment Variables
 ## Set Locale
@@ -27,6 +28,28 @@ RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
+
+# Create and switch user. The user is privileged with no password required
+RUN adduser --disabled-password --gecos "OpenCog Developer" opencog
+RUN adduser opencog sudo
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+USER opencog
+
+# Get the things that ockpg didn't get.
+# First, sureal needs link-grammar...
+RUN mkdir /home/opencog/src
+WORKDIR /home/opencog/src
+
+# Link Parser -- changes often
+# Download the current released version of link-grammar.
+# The wget gets the latest version w/ wildcard
+RUN wget -r --no-parent -nH --cut-dirs=2 http://www.abisource.com/downloads/link-grammar/current/
+RUN tar -zxf current/link-grammar-5*.tar.gz
+RUN rm -r current
+RUN (cd link-grammar-5.*/; mkdir build; cd build; ../configure; make -j6; sudo make install; sudo ldconfig)
+
+RUN git clone https://github.com/opencog/opencog
+RUN (cd opencog; mkdir build; cd build; cmake ..; make -j6)
 
 # Defaults
 ## cogserver shell ports
@@ -41,6 +64,8 @@ EXPOSE 16313
 ### ports from the unity3d game code
 EXPOSE 16315 16312
 
+## Default postgresql port
+EXPOSE 5432
+
 # Docker defaults
-WORKDIR /home/opencog
 CMD bash

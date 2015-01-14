@@ -173,9 +173,9 @@ void PatternMatch::do_imply (Handle himplication,
 	// Extract the set of variables, if needed.
 	// This is used only by the deprecated imply() function, as the
 	// BindLink will include a list of variables up-front.
-	if (0 == varset.size())
+	if (varset.empty())
 	{
-		FindVariables fv;
+		FindVariables fv(VARIABLE_NODE);
 		fv.find_vars(_hclauses);
 		varset = fv.varset;
 	}
@@ -219,7 +219,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 	if (2 != oset.size())
 	{
 		logger().warn("%s: TypedVariableLink has wrong size",
-		       __FUNCTION__);
+		              __FUNCTION__);
 		return 1;
 	}
 
@@ -240,9 +240,8 @@ int PatternMatch::get_vartype(Handle htypelink,
 			return 4;
 		}
 
-		std::set<Type> ts;
-		ts.insert(vt);
-		typemap.insert(ATPair(varname,ts));
+		std::set<Type> ts = {vt};
+		typemap.insert(ATPair(varname, ts));
 		vset.insert(varname);
 	}
 	else if (LIST_LINK == t)

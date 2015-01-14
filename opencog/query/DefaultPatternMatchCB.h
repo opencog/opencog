@@ -46,7 +46,7 @@ class DefaultPatternMatchCB :
 	public:
 		DefaultPatternMatchCB(AtomSpace* as) :
 			_type_restrictions(NULL),
-			_atom_space(as)
+			_as(as)
 		{}
 
 		/**
@@ -64,8 +64,7 @@ class DefaultPatternMatchCB :
 		virtual bool node_match(Handle& npat_h, Handle& nsoln_h)
 		{
 			// If equality, then a match.
-			if (npat_h == nsoln_h) return false;
-			return true;
+			return npat_h != nsoln_h;
 		}
 
 		/**
@@ -164,7 +163,7 @@ class DefaultPatternMatchCB :
 	protected:
 		virtual Handle find_starter(Handle, size_t&, Handle&, size_t&);
 		virtual Handle find_thinnest(std::vector<Handle>&, Handle&, size_t&);
-		AtomSpace *_atom_space;
+		AtomSpace *_as;
 };
 
 } // namespace opencog

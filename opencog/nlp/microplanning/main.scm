@@ -204,15 +204,14 @@
 	(define (recursive-helper atomW-to-try)
 		(define result (check-chunk (map get-atom atomW-to-try) utterance-type option)) ; the result of trying to say the atoms in a sentence
 		(define atomW-not-tried (lset-difference equal? atomW-unused atomW-to-try)) ; the set of atoms not yet used
+		(define atomW-not-chunked (lset-difference equal? atomW-to-try atomW-chunk)) ; the set of atoms not yet added to the chunk
 
 		(define (give-up-unadded-part)
-			; atoms that did not work (not yet added to the chunk)
-			(define dead-set (lset-difference equal? atomW-to-try atomW-chunk))
 			; atoms that worked (already added to the chunk)
 			(define good-set (lset-intersection equal? atomW-to-try atomW-chunk))
 
 			; remove the stuff in dead-set from consideration
-			(set! atomW-unused (lset-difference equal? atomW-unused dead-set))
+			(set! atomW-unused (lset-difference equal? atomW-unused atomW-not-chunked))
 			
 			; try "saying" the previous working iteration again (if available)
 			(if (null? good-set)
@@ -237,7 +236,7 @@
 		      ((= result *microplanning_not_sayable*)
 			; could be the atoms cannot be said unless bringing in additional atoms (such as "and/or/that")
 			; try to add more (up to 3 different links)
-			(cond ((<= (length atomW-to-try) 3)
+			(cond ((<= (length atomW-not-chunked) 3)
 				; look to see if the newest link has any node that is solo (ie. appear only once in the current set)
 				(set! temp-var1 (cog-get-all-nodes (get-atom (car atomW-to-try))))
 				(set! temp-var2 (append-map cog-get-all-nodes (map get-atom (cdr atomW-to-try))))

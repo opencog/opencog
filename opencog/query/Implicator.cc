@@ -119,12 +119,12 @@ Handle opencog::bindlink(AtomSpace* as, Handle himplication)
  *
  * See the do_bindlink function documentation for details.
  */
-Handle opencog::single_bindlink (AtomSpace* as, Handle himplication)
+Handle opencog::single_bindlink (AtomSpace* as, Handle hbindlink)
 {
 	// Now perform the search.
 	SingleImplicator impl(as);
 	PatternMatch pm;
-	pm.do_bindlink(himplication, impl);
+	pm.do_bindlink(hbindlink, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -149,12 +149,12 @@ Handle opencog::single_bindlink (AtomSpace* as, Handle himplication)
  *
  * See the do_bindlink function documentation for details.
  */
-Handle opencog::crisp_logic_bindlink(AtomSpace* as, Handle himplication)
+Handle opencog::crisp_logic_bindlink(AtomSpace* as, Handle hbindlink)
 {
 	// Now perform the search.
 	CrispImplicator impl(as);
 	PatternMatch pm;
-	pm.do_bindlink(himplication, impl);
+	pm.do_bindlink(hbindlink, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -165,12 +165,12 @@ Handle opencog::crisp_logic_bindlink(AtomSpace* as, Handle himplication)
 /**
  * PLN specific PatternMatchCallback implementation
  */
-Handle opencog::pln_bindlink(AtomSpace* as, Handle himplication)
+Handle opencog::pln_bindlink(AtomSpace* as, Handle hbindlink)
 {
 	// Now perform the search.
 	PLNImplicator impl(as);
 	PatternMatch pm;
-	pm.do_bindlink(himplication, impl);
+	pm.do_bindlink(hbindlink, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.

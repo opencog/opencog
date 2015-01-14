@@ -37,8 +37,8 @@ class PatternMatchEngine
 {
 	// Private, locally scoped typedefs, not used outside of this class.
 	typedef std::vector<Handle> RootList;
-	typedef std::map<Handle, RootList *> RootMap;
-	typedef std::pair<Handle, RootList *> RootPair;
+	typedef std::map<Handle, RootList> RootMap;
+	typedef std::pair<Handle, RootList> RootPair;
 
 	private:
 		// -------------------------------------------
@@ -121,7 +121,7 @@ class PatternMatchEngine
 		void clear(void);
 
 		// Examine each candidate for a match, in turn.
-		bool do_candidate(Handle&, Handle&, Handle&);
+		bool do_candidate(const Handle&, const Handle&, const Handle&);
 
 		// Do the actual pattern search.
 		void match(PatternMatchCallback *,
