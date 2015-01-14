@@ -277,7 +277,7 @@ HandleSeqSeq SuRealModule::do_sureal_get_mapping(Handle h)
     // construct the result
     std::vector<std::map<Handle, Handle> >& mappings = m_results[h];
 
-    logger().debug("[SuReal] # of mappings for %s is %d", h->toShortString().c_str(), mappings.size());
+    logger().debug("[SuReal] %d mapping(s) for %s", mappings.size(), h->toShortString().c_str());
 
     HandleSeq qKeys, qVars;
 

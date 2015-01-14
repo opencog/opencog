@@ -191,7 +191,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
     for (const auto& kv : var_soln)
     {
-         if (m_vars.count(kv.first) == 0)
+        if (m_vars.count(kv.first) == 0)
             continue;
 
         shrinked_soln[kv.first] = kv.second;
