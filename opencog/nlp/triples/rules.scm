@@ -333,7 +333,8 @@
 			(r-rlx "_subj" "$var0" "$var1")
 			(r-rlx "_obj" "$var0" "$var2")
 			(r-rlx-flag "polyword" "$var0") ; check for polyword flag
-			(r-decl-vartype "PrepositionalRelationshipNode" "$polyword")
+			; wtf ... perhaps below should be $var0 and not $polyword? ??
+			; (r-decl-vartype "PrepositionalRelationshipNode" "$polyword")
 			(r-decl-lemma "$var0" "$pw")
 			(r-rlx "$pwrel" "$pw" "$pwrel") ; promote to define relation
 		)
