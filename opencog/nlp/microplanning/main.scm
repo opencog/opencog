@@ -201,8 +201,15 @@
 	(define atomW-chunk '())	; the set of successful atoms to be returned
 
 	; main helper function for looping
-	(define (recursive-helper atomW-to-try)
-		(define result (check-chunk (map get-atom atomW-to-try) utterance-type option)) ; the result of trying to say the atoms in a sentence
+	(define (recursive-helper atomW-to-try do-check)
+		 ; the result of trying to say the atoms in a sentence
+		(define result
+			; just return *microplanning_sayable* if no need to check
+			(if do-check
+				(check-chunk (map get-atom atomW-to-try) utterance-type option)
+				*microplanning_sayable*
+			)
+		)
 		(define atomW-not-tried (lset-difference equal? atomW-unused atomW-to-try)) ; the set of atoms not yet used
 		(define atomW-not-chunked (lset-difference equal? atomW-to-try atomW-chunk)) ; the set of atoms not yet added to the chunk
 
@@ -216,9 +223,9 @@
 			; try "saying" the previous working iteration again (if available)
 			(if (null? good-set)
 				(if (not (null? atomW-unused))
-					(recursive-helper (list (pick-atomW atomW-unused atomW-used (get-main-weight-proc option) utterance-type)))
+					(recursive-helper (list (pick-atomW atomW-unused atomW-used (get-main-weight-proc option) utterance-type)) #t)
 				)
-				(recursive-helper good-set)
+				(recursive-helper good-set #f)
 			)
 		)
 		(define (update-chunk)
@@ -258,7 +265,7 @@
 
 					; if an atom with the solo word exists
 					(if temp-var1
-						(recursive-helper (cons temp-var1 atomW-to-try))
+						(recursive-helper (cons temp-var1 atomW-to-try) #t)
 						(give-up-unadded-part)
 					)
 				      )
@@ -282,6 +289,7 @@
 						(pick-atomW atomW-unused atomW-chunk (get-supp-weight-proc option) utterance-type)
 						atomW-to-try
 					)
+					#t
 				)
 			)
 		      )
@@ -293,7 +301,7 @@
 	)
 
 	; the initial critera for choosing a starting point would be (time-weights + link-weights) * form-weights
-	(recursive-helper (list (pick-atomW atomW-unused atomW-used (get-main-weight-proc option) utterance-type)))
+	(recursive-helper (list (pick-atomW atomW-unused atomW-used (get-main-weight-proc option) utterance-type)) #t)
 
 	; return the sentence chunk (reverse because we've been adding to the front)
 	(reverse atomW-chunk)
