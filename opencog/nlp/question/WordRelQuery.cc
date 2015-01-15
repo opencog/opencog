@@ -319,8 +319,7 @@ printf("duude compare %s to %s\n", sa, sb);
 			s[len] = 0x0;
 			sb = s;
 		}
-		if (!strcmp(sa, sb)) return true;
-		return false;
+		return !strcmp(sa, sb);
 	}
 
 	fprintf(stderr, "Error: unexpected ground node type %d %s\n", soltype,
