@@ -299,8 +299,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         }
 
         // unify the pattern
-        map<Handle,Handle> orderedVarNameMap;
-        unifiedPattern = UnifyPatternOrder(pattern, orderedVarNameMap);
+        unifiedPattern = UnifyPatternOrder(pattern);
 
         string keyString = unifiedPatternToKeyString(unifiedPattern);
 
@@ -329,7 +328,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             cout << "A new pattern Found:\n"<< keyString << std::endl;
 
             newHTreeNode->count = 1;
-            newHTreeNode->orderedVarNameMap = orderedVarNameMap;
+
 
         }
         else
@@ -943,8 +942,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
                 }
 
                 // unify the pattern
-                map<Handle,Handle> orderedVarNameMap;
-                unifiedPattern = UnifyPatternOrder(pattern, orderedVarNameMap);
+                unifiedPattern = UnifyPatternOrder(pattern);
 
                 string keyString = unifiedPatternToKeyString(unifiedPattern);
 

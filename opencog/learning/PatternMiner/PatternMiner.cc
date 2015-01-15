@@ -143,10 +143,7 @@ vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern,
 }
 
 // the input links should be like: only specify the const node, all the variable node name should not be specified:
-// map<Handle,Handle> orderedVarNameMap is output:
-// in this map, the first Handle is the variable node is the original Atomspace,
-// the second Handle is the renamed ordered variable node in the Pattern Mining Atomspace.
-vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern, map<Handle,Handle> &orderedVarNameMap)
+vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern)
 {
 
     // Step 1: take away all the variable names, make the pattern into such format string:
@@ -243,7 +240,9 @@ vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern, map
         }
     }
 
-
+    // in this map, the first Handle is the variable node is the original Atomspace,
+    // the second Handle is the renamed ordered variable node in the Pattern Mining Atomspace.
+    map<Handle,Handle> orderedVarNameMap;
     vector<Handle> rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap);
 
     return rebindPattern;
@@ -1078,8 +1077,8 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
                      subPattern.push_back(HNode->pattern[index]);
              }
 
-             map<Handle,Handle> orderedVarNameMap;
-             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, orderedVarNameMap);
+
+             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern);
              string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
 //             std::cout<< "Subpattern: " << subPatternKey;
@@ -1095,8 +1094,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
                  for (HandleSeq aConnectedSubPart : splittedSubPattern)
                  {
                      // Unify it again
-                     map<Handle,Handle> _orderedVarNameMap;
-                     HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart, _orderedVarNameMap);
+                     HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart);
                      string connectedSubPatternKey = unifiedPatternToKeyString(unifiedConnectedSubPattern);
 //                     cout << "a splitted part: " << connectedSubPatternKey;
                      double h = calculateEntropyOfASubConnectedPattern(connectedSubPatternKey, unifiedConnectedSubPattern);
@@ -1461,8 +1459,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
                 subPattern.push_back(HNode->pattern[index]);
             }
 
-            map<Handle,Handle> orderedVarNameMap;
-            HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, orderedVarNameMap);
+            HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern);
             string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
 //            std::cout<< "Subpattern: " << subPatternKey;
@@ -1632,13 +1629,11 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
 
                      // get the count of P_AiE and P_Ai
-                     map<Handle,Handle> orderedVarNameMap1;
-                     HandleSeq unifiedPatternAiE = UnifyPatternOrder(component_extend, orderedVarNameMap1);
+                     HandleSeq unifiedPatternAiE = UnifyPatternOrder(component_extend);
                      string patternAiEKey = unifiedPatternToKeyString(unifiedPatternAiE, atomSpace);
                      unsigned int patternAiE_count = getCountOfAConnectedPattern(patternAiEKey, unifiedPatternAiE);
 
-                     map<Handle,Handle> orderedVarNameMap2;
-                     HandleSeq unifiedPatternAi = UnifyPatternOrder(component, orderedVarNameMap2);
+                     HandleSeq unifiedPatternAi = UnifyPatternOrder(component);
                      string patternAiKey = unifiedPatternToKeyString(unifiedPatternAi, atomSpace);
                      unsigned int patternAi_count = getCountOfAConnectedPattern(patternAiKey, unifiedPatternAi);
 
@@ -1696,8 +1691,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             HandleSeq patternE;
             patternE.push_back(curSuperRelation.newExtendedLink);
             // unify patternE
-            map<Handle,Handle> orderedVarNameMap;
-            HandleSeq unifiedPatternE = UnifyPatternOrder(patternE, orderedVarNameMap);
+            HandleSeq unifiedPatternE = UnifyPatternOrder(patternE);
             string patternEKey = unifiedPatternToKeyString(unifiedPatternE, atomSpace);
 
             unsigned int patternE_count = getCountOfAConnectedPattern(patternEKey, unifiedPatternE);

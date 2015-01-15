@@ -54,7 +54,6 @@ namespace opencog
             vector<HandleSeq> instances; // the corresponding instances of this pattern in the original AtomSpace, only be used by breadth first mining
             set<HTreeNode*> parentLinks;
             set<HTreeNode*> childLinks;
-            map<Handle,Handle> orderedVarNameMap; // the value to varible name map in this pattern
 
             vector<ExtendRelation> superPatternRelations; // store all the connections to its super patterns
 
