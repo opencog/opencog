@@ -60,7 +60,7 @@ class CrispLogicPMCB :
 		{
 			TruthValuePtr tv(grnd->getTruthValue());
 			// printf (">>>>>>>> clause match tv=%f\n", tv.getMean());
-			reutn tv->getMean() >= 0.5;
+			return tv->getMean() >= 0.5;
 		}
 
 		/**
