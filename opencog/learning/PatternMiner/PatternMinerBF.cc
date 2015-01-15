@@ -241,7 +241,8 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(vector<Handle>& in
                 {
 
                     // unify the pattern
-                    unifiedPattern = UnifyPatternOrder(pattern);
+                    unsigned int unifiedLastLinkIndex;
+                    unifiedPattern = UnifyPatternOrder(pattern, unifiedLastLinkIndex);
 
                     string keyString = unifiedPatternToKeyString(unifiedPattern);
 

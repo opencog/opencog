@@ -151,7 +151,7 @@ namespace PatternMining
      //       )
      //    )
      // Return unified ordered Handle vector
-     vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern);
+     vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern, unsigned int &unifiedLastLinkIndex);
 
      string unifiedPatternToKeyString(vector<Handle>& inputPattern , const AtomSpace *atomspace = 0);
 
@@ -207,7 +207,7 @@ namespace PatternMining
      void extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
                                                                 HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,bool isExtendedFromVar);
 
-     HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves, HandleSeq &shouldNotBeVars, AtomSpace *_fromAtomSpace);
+     HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves, HandleSeq &shouldNotBeVars, AtomSpace *_fromAtomSpace, unsigned int &extendedLinkIndex);
 
      void findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* HNode);
 

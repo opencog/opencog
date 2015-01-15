@@ -143,7 +143,9 @@ vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern,
 }
 
 // the input links should be like: only specify the const node, all the variable node name should not be specified:
-vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern)
+// unifiedLastLinkIndex is to return where the last link in the input pattern is now in the ordered pattern
+// because the last link in input pattern is the externed link from last gram pattern
+vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern, unsigned int& unifiedLastLinkIndex)
 {
 
     // Step 1: take away all the variable names, make the pattern into such format string:
@@ -240,9 +242,25 @@ vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern)
         }
     }
 
+    // find out where the last link in the input pattern is now in the ordered pattern
+    Handle lastLink = inputPattern[inputPattern.size()-1];
+    unsigned int lastLinkIndex = 0;
+    for (Handle h : orderedHandles)
+    {
+        if (h == lastLink)
+        {
+            unifiedLastLinkIndex = lastLinkIndex;
+            break;
+        }
+
+        ++ lastLinkIndex;
+
+    }
+
     // in this map, the first Handle is the variable node is the original Atomspace,
     // the second Handle is the renamed ordered variable node in the Pattern Mining Atomspace.
     map<Handle,Handle> orderedVarNameMap;
+
     vector<Handle> rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap);
 
     return rebindPattern;
@@ -1077,8 +1095,8 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
                      subPattern.push_back(HNode->pattern[index]);
              }
 
-
-             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern);
+             unsigned int unifiedLastLinkIndex;
+             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex);
              string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
 //             std::cout<< "Subpattern: " << subPatternKey;
@@ -1094,7 +1112,8 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
                  for (HandleSeq aConnectedSubPart : splittedSubPattern)
                  {
                      // Unify it again
-                     HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart);
+                     unsigned int _unifiedLastLinkIndex;
+                     HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart, _unifiedLastLinkIndex);
                      string connectedSubPatternKey = unifiedPatternToKeyString(unifiedConnectedSubPattern);
 //                     cout << "a splitted part: " << connectedSubPatternKey;
                      double h = calculateEntropyOfASubConnectedPattern(connectedSubPatternKey, unifiedConnectedSubPattern);
@@ -1459,7 +1478,8 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
                 subPattern.push_back(HNode->pattern[index]);
             }
 
-            HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern);
+            unsigned int unifiedLastLinkIndex;
+            HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex);
             string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
 //            std::cout<< "Subpattern: " << subPatternKey;
@@ -1629,11 +1649,13 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
 
                      // get the count of P_AiE and P_Ai
-                     HandleSeq unifiedPatternAiE = UnifyPatternOrder(component_extend);
+                     unsigned int unifiedLastLinkIndex1;
+                     HandleSeq unifiedPatternAiE = UnifyPatternOrder(component_extend, unifiedLastLinkIndex1);
                      string patternAiEKey = unifiedPatternToKeyString(unifiedPatternAiE, atomSpace);
                      unsigned int patternAiE_count = getCountOfAConnectedPattern(patternAiEKey, unifiedPatternAiE);
 
-                     HandleSeq unifiedPatternAi = UnifyPatternOrder(component);
+                     unsigned int unifiedLastLinkIndex2;
+                     HandleSeq unifiedPatternAi = UnifyPatternOrder(component, unifiedLastLinkIndex2);
                      string patternAiKey = unifiedPatternToKeyString(unifiedPatternAi, atomSpace);
                      unsigned int patternAi_count = getCountOfAConnectedPattern(patternAiKey, unifiedPatternAi);
 
@@ -1691,7 +1713,8 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             HandleSeq patternE;
             patternE.push_back(curSuperRelation.newExtendedLink);
             // unify patternE
-            HandleSeq unifiedPatternE = UnifyPatternOrder(patternE);
+            unsigned int unifiedLastLinkIndex;
+            HandleSeq unifiedPatternE = UnifyPatternOrder(patternE, unifiedLastLinkIndex);
             string patternEKey = unifiedPatternToKeyString(unifiedPatternE, atomSpace);
 
             unsigned int patternE_count = getCountOfAConnectedPattern(patternEKey, unifiedPatternE);

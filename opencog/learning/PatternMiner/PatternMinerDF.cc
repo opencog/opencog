@@ -208,8 +208,9 @@ void PatternMiner::runPatternMinerDepthFirst()
 }
 
 
-
-HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves, HandleSeq &shouldNotBeVars, AtomSpace* _fromAtomSpace)
+// extendedLinkIndex is to return the index of extendedLink's patternlink in the unified pattern so as to identify where is the extended link in this pattern
+HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars,
+                                                                HandleSeq &leaves, HandleSeq &shouldNotBeVars, AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex)
 {
     HTreeNode* returnHTreeNode = 0;
     bool skip = false;
@@ -299,7 +300,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         }
 
         // unify the pattern
-        unifiedPattern = UnifyPatternOrder(pattern);
+        unifiedPattern = UnifyPatternOrder(pattern, extendedLinkIndex);
 
         string keyString = unifiedPatternToKeyString(unifiedPattern);
 
@@ -496,7 +497,8 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                 }
             }
 
-            HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace);
+            unsigned int extendedLinkIndex;
+            HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace, extendedLinkIndex);
 
             if (thisGramHTreeNode)
             {
@@ -505,7 +507,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
                 ExtendRelation relation;
                 relation.extendedHTreeNode = thisGramHTreeNode;
-                relation.newExtendedLink = (thisGramHTreeNode->pattern)[cur_pattern_gram - 1]; // todo: this looks wrong
+                relation.newExtendedLink = (thisGramHTreeNode->pattern)[extendedLinkIndex];
                 relation.sharedLink = extendedLink;
                 relation.extendedNode = extendedNode;
                 relation.isExtendedFromVar = isExtendedFromVar;
@@ -942,7 +944,8 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
                 }
 
                 // unify the pattern
-                unifiedPattern = UnifyPatternOrder(pattern);
+                unsigned int unifiedLastLinkIndex;
+                unifiedPattern = UnifyPatternOrder(pattern, unifiedLastLinkIndex);
 
                 string keyString = unifiedPatternToKeyString(unifiedPattern);
 
