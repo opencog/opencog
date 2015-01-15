@@ -309,7 +309,8 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 
 /* ======================================================== */
 
-bool DefaultPatternMatchCB::virtual_link_match(LinkPtr& lvirt, Handle& gargs)
+bool DefaultPatternMatchCB::virtual_link_match(const LinkPtr& lvirt,
+                                               const Handle& gargs) const
 {
 	// At this time, we expect all virutal links to be
 	// EvaluationLinks having the structure

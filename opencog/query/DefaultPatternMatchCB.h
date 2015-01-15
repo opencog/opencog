@@ -61,7 +61,8 @@ class DefaultPatternMatchCB :
 		 *
 		 * By default, the nodes must be identical.
 		 */
-		virtual bool node_match(Handle& npat_h, Handle& nsoln_h)
+		virtual bool node_match(const Handle& npat_h,
+		                        const Handle& nsoln_h) const
 		{
 			// If equality, then a match.
 			return npat_h != nsoln_h;
@@ -76,7 +77,8 @@ class DefaultPatternMatchCB :
 		 * Return false if the nodes match, else return
 		 * true. (i.e. return true if mis-match).
 		 */
-		virtual bool variable_match(Handle& npat_h, Handle& nsoln_h)
+		virtual bool variable_match(const Handle& npat_h,
+		                            const Handle& nsoln_h) const
 		{
 			Type pattype = npat_h->getType();
 
@@ -116,7 +118,8 @@ class DefaultPatternMatchCB :
 		 * By default, the link arity and the
 		 * link types must match.
 		 */
-		virtual bool link_match(LinkPtr& lpat, LinkPtr& lsoln)
+		virtual bool link_match(const LinkPtr& lpat,
+		                        const LinkPtr& lsoln) const
 		{
 			// If the pattern is exactly the same link as the proposed
 			// grounding, then its a perfect match. 
@@ -135,7 +138,8 @@ class DefaultPatternMatchCB :
 		 * Called when a virtual link is encountered. Returns true
 		 * to reject the match.
 		 */
-		virtual bool virtual_link_match(LinkPtr& lpat, Handle& args);
+		virtual bool virtual_link_match(const LinkPtr& lpat,
+		                                const Handle& args) const;
 
 		/**
 		 * Called to perform the actual search. This makes some default

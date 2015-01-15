@@ -39,8 +39,8 @@ public:
 	AttentionalFocusCB(AtomSpace * as) :
 			DefaultPatternMatchCB(as)
 	{}
-	bool node_match(Handle&, Handle&);
-	bool link_match(LinkPtr&, LinkPtr&);
+	bool node_match(const Handle&, const Handle&) const;
+	bool link_match(const LinkPtr&, const LinkPtr&) const;
 	IncomingSet get_incoming_set(Handle h);
 };
 

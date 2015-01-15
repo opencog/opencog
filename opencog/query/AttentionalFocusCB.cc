@@ -24,13 +24,15 @@
 
 using namespace opencog;
 
-bool AttentionalFocusCB::node_match(Handle& node1, Handle& node2)
+bool AttentionalFocusCB::node_match(const Handle& node1,
+                                    const Handle& node2) const
 {
 	return node1 != node2 or
 		node2->getSTI() <= _as->getAttentionalFocusBoundary();
 }
 
-bool AttentionalFocusCB::link_match(LinkPtr& lpat, LinkPtr& lsoln)
+bool AttentionalFocusCB::link_match(const LinkPtr& lpat,
+                                    const LinkPtr& lsoln) const
 {
 	if (DefaultPatternMatchCB::link_match(lpat, lsoln))
 	{
