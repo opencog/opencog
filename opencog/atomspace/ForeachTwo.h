@@ -21,6 +21,8 @@ namespace opencog
  * Invoke the callback on each pair of corresponding atoms in the
  * vectors va and vb. This iterator is typically useful for making
  * comparisons between atoms.
+ *
+ * Returns true if all calls return true, return false otherwise.
  */
 template<class T>
 inline bool foreach_atom_pair(const std::vector<Handle> &va,
@@ -33,18 +35,18 @@ inline bool foreach_atom_pair(const std::vector<Handle> &va,
 
     for (size_t i = 0; i < minsz; i++) {
         bool rc = (data->*cb)(va[i], vb[i]);
-        if (rc) return rc;
+        if (not rc) return false;
     }
 
     for (size_t i = vasz; i < vbsz; i++) {
         bool rc = (data->*cb)(Handle::UNDEFINED, vb[i]);
-        if (rc) return rc;
+        if (not rc) return false;
     }
     for (size_t i = vbsz; i < vasz; i++) {
         bool rc = (data->*cb)(va[i], Handle::UNDEFINED);
-        if (rc) return rc;
+        if (not rc) return false;
     }
-    return false;
+    return true;
 }
 
 /** @}*/

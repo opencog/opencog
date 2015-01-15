@@ -173,7 +173,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			// if (0 == gargs->getIncomingSetSize())
 				// _atom_space->purgeAtom(gargs, false);
 
-			if (match) return false;
+			if (not match) return false;
 
 			// FYI ... if the virtual_link_match() accepts the match, we
 			// still don't instantiate the grounded form in the atomspace,

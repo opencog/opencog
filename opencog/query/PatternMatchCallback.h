@@ -48,8 +48,8 @@ class PatternMatchCallback
 		 * node in the atomspace. The first argument
 		 * is a node from the pattern, and the second
 		 * is a possible solution node from the atomspace.
-		 * Return false if the nodes match, else return
-		 * true. (i.e. return true if mis-match).
+		 * Return true if the nodes match, else return
+		 * false. (i.e. return false if mis-match).
 		 *
 		 * Note: those handles are not supposed to be
 		 * modified. Ideally they should be const but it turns out
@@ -65,8 +65,8 @@ class PatternMatchCallback
 		 * node in the atomspace. The first argument
 		 * is a variable from the pattern, and the second
 		 * is a possible solution node from the atomspace.
-		 * Return false if the grouding is acceptable, else
-		 * return true. (i.e. return true if mis-match).
+		 * Return true if the grouding is acceptable, else
+		 * return false. (i.e. return false if mis-match).
 		 */
 		virtual bool variable_match(Handle& node1, Handle& node2) = 0;
 
@@ -75,11 +75,11 @@ class PatternMatchCallback
 		 * is to be compared to a possibly matching link in
 		 * the atomspace. The first argument is a link from
 		 * the pattern, and the second is a possible
-		 * grounding link from the atomspace. Return false
+		 * grounding link from the atomspace. Return true
 		 * if the link contents should be compared, else
-		 * return true. (i.e. return true if mis-match).
+		 * return false. (i.e. return false if mis-match).
 		 *
-		 * If false is returned, then the pattern matcher
+		 * If true is returned, then the pattern matcher
 		 * will proceed, and will compare the outgoing sets
 		 * of the two links.  Thus, this callback should not
 		 * bother with looking at the outgoing sets.  Indeed,
@@ -112,7 +112,7 @@ class PatternMatchCallback
 		 */
 		virtual bool post_link_match(LinkPtr& link1, LinkPtr& link2)
 		{
-			return false; // Accept the match, by default.
+			return true; // Accept the match, by default.
 		}
 
 		/**
@@ -122,9 +122,9 @@ class PatternMatchCallback
 		 * 'virtual' sense, in that it is instead considered to exist if
 		 * a GroundedPredicateNode evaluates to true or not.  When such
 		 * a virtual link is encountered, this callback is called to make
-		 * this decision. This should return true to reject the match.
-		 * That is, a return value of "true" denotes that the virtual
-		 * atom does not exist; while "false" implies that it does exist.
+		 * this decision. This should return false to reject the match.
+		 * That is, a return value of "false" denotes that the virtual
+		 * atom does not exist; while "true" implies that it does exist.
 		 * This is the same convention as link_match() and post_link_match().
 		 *
 		 * Unlike the other callbacks, this takes arguments in s slightly
@@ -152,7 +152,7 @@ class PatternMatchCallback
 		 * true to terminate search.
 		 */
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-                             const std::map<Handle, Handle> &pred_soln) = 0;
+		                       const std::map<Handle, Handle> &pred_soln) = 0;
 
 		/**
 		 * Called when a top-level clause has been fully grounded.
@@ -161,15 +161,15 @@ class PatternMatchCallback
 		 * the overall truth value of a solution (grounding).
 		 *
 		 * A clause match has occured if all calls to node_match()
-		 * and link_match() in that clause have returned false.
+		 * and link_match() in that clause have returned true.
 		 *
-		 * Return true to discard the use of this clause as a possible
-		 * grounding, return false to use this grounding.
+		 * Return false to discard the use of this clause as a possible
+		 * grounding, return true to use this grounding.
 		 */
 		virtual bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h)
 		{
 			//	if (pattrn_link_h == grnd_link_h) return true;
-			return false;
+			return true;
 		}
 
 		/**
@@ -178,17 +178,17 @@ class PatternMatchCallback
 		 * grounded as a result of the search. If it has been grounded,
 		 * then grnd will be non-null.
 		 *
-		 * Return true to terminate further searches from this point
+		 * Return false to terminate further searches from this point
 		 * on; the result of termination will be backtracking to search
 		 * for other possible groundings of the required clauses.
-		 * Return false to examine the next optional clause (if any).
+		 * Return true to examine the next optional clause (if any).
 		 *
 		 * Note that all required clauses will have been grounded before
 		 * any optional clauses are examined.
 		 */
 		virtual bool optional_clause_match(Handle& pattrn, Handle& grnd)
 		{
-			return false;
+			return true;
 		}
 
 		/**

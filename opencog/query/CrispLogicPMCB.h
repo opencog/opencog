@@ -48,20 +48,19 @@ class CrispLogicPMCB :
 		CrispLogicPMCB(AtomSpace* as) : DefaultPatternMatchCB(as) {}
 
 		/**
- 		 * This callback is called whenever a match has beeen identified
+ 		 * This callback is called whenever a match has been identified
  		 * for a required assertion. Here, we check the truth value; if
- 		 * it is >0.5, its taken to be true, and accepted, else, its 
+ 		 * it is >= 0.5, its taken to be true, and accepted, else, its 
  		 * taken to be false. 
  		 *
- 		 * Note the inverted return value: return "false" to accept 
- 		 * a clause, and return "true" to reject it. 
+ 		 * Return "true" to accept a clause, and return "false" to
+ 		 * reject it.
  		 */
 		virtual bool clause_match(Handle& pattrn, Handle& grnd)
 		{
 			TruthValuePtr tv(grnd->getTruthValue());
 			// printf (">>>>>>>> clause match tv=%f\n", tv.getMean());
-			if (tv->getMean() < 0.5) return true;
-			return false;
+			reutn tv->getMean() >= 0.5;
 		}
 
 		/**
@@ -70,20 +69,18 @@ class CrispLogicPMCB :
  		 * in the sense that, if its absent, its taken to be false, and
  		 * the pattern match is taken to be full-filled (because the pattern
  		 * was not found).  If the clause is found, then it is accepted only
- 		 * if its truth value is *less* than 0.5. (i.e. it must be false to 
- 		 * be accepted .. ergo, its a negation).
+ 		 * if its truth value is *less* than 0.5.
  		 *
- 		 * As usual, return "false" to accept a clause, and return "true" to
+ 		 * As usual, return "true" to accept a clause, and return "false" to
  		 * reject it. 
  		 */
 		virtual bool optional_clause_match(Handle& pattrn, Handle& grnd)
 		{
 			// printf (">>>>>>>>>> hello optional term!! %p\n", grnd);
-			if (Handle::UNDEFINED == grnd) return false;
+			if (Handle::UNDEFINED == grnd) return true;
 			TruthValuePtr tv(grnd->getTruthValue());
 			// printf (">>>> optional tv=%f\n", tv.getMean());
-			if (tv->getMean() > 0.5) return true;
-			return false;
+			return tv->getMean() < 0.5;
 		}
 };
 
