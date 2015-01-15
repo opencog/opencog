@@ -37,23 +37,14 @@ HandleSeq& ForwardChainPatternMatchCB::get_results() {
 	return result_list;
 }
 bool ForwardChainPatternMatchCB::node_match(Handle& node1, Handle& node2) {
-	if (not AttentionalFocusCB::node_match(node1, node2) or not fc_->search_in_af) {
-		//force inference to be made only in the target list
-		bool result = not fc_->is_in_target_list(node1);
-		return result;
-
-	} else {
-		return true;
-	}
+	return (AttentionalFocusCB::node_match(node1, node2) or not fc_->search_in_af)
+		// force inference to be made only in the target list
+		and fc_->is_in_target_list(node1);
 }
 bool ForwardChainPatternMatchCB::link_match(LinkPtr& lpat, LinkPtr& lsoln) {
-	if (not AttentionalFocusCB::link_match(lpat, lsoln) or not fc_->search_in_af) {
-		//force inference to be made only in the target list
-		bool result = not fc_->is_in_target_list(Handle(lsoln));
-		return result;
-	} else {
-		return true;
-	}
+	return (AttentionalFocusCB::link_match(lpat, lsoln) or not fc_->search_in_af)
+		// force inference to be made only in the target list
+		and fc_->is_in_target_list(Handle(lsoln));
 }
 bool ForwardChainPatternMatchCB::grounding(
 		const std::map<Handle, Handle> &var_soln,
