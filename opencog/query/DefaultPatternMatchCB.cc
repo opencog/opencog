@@ -336,7 +336,7 @@ bool DefaultPatternMatchCB::virtual_link_match(LinkPtr& lvirt, Handle& gargs)
 	Handle schema(lvirt->getOutgoingAtom(0));
 	bool relation_holds = EvaluationLink::do_evaluate(_as, schema, gargs);
 
-	return not relation_holds;
+	return relation_holds;
 }
 
 /* ===================== END OF FILE ===================== */

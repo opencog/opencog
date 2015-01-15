@@ -70,8 +70,7 @@ class TestPMCB :
 	{
 		lcnt ++;
 		// match the initial anchor clause, but reject the rest.
-		if (anch == grnd) return false;
-		return true;
+		return anch == grnd;
 	}
 
 	virtual bool grounding(const std::map<Handle, Handle> &var_soln,

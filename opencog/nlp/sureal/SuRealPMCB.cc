@@ -56,7 +56,7 @@ SuRealPMCB::SuRealPMCB(AtomSpace* pAS, std::set<Handle> vars) : DefaultPatternMa
  *
  * @param hPat    the variable, a node extracted from the original query
  * @param hSoln   the potential mapping
- * @return        true if solution is rejected, false if accepted
+ * @return        false if solution is rejected, true if accepted
  */
 bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
 {
@@ -64,11 +64,11 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
 
     // reject if the solution is not of the same type
     if (hPat->getType() != hSoln->getType())
-        return true;
+        return false;
 
     // VariableNode can be matched to any VariableNode, similarly for InterpretationNode
     if (hPat->getType() == VARIABLE_NODE || hPat->getType() == INTERPRETATION_NODE)
-        return false;
+        return true;
 
     std::string sPat = _as->getName(hPat);
     std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
@@ -81,7 +81,7 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
 
     // no WordNode? reject!
     if (hSolnWordNode == Handle::UNDEFINED)
-        return true;
+        return false;
 
     // get the neighbor of each WordNode within LgWordCset
     HandleSeq qPatSet =_as->getNeighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
@@ -96,9 +96,9 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
 
     // if there's no common LG dictionary rules, then the two words do not match
     if (qItrsect.empty())
-        return true;
+        return false;
 
-    return false;
+    return true;
 }
 
 /**
@@ -111,7 +111,7 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
  *
  * @param pattrn_link_h   the matched clause, extracted from the input SetLink
  * @param grnd_link_h     the corresponding grounding to be checked
- * @return                true if rejected, false if accepted
+ * @return                false if rejected, true if accepted
  */
 bool SuRealPMCB::clause_match(Handle &pattrn_link_h, Handle &grnd_link_h)
 {
@@ -129,8 +129,8 @@ bool SuRealPMCB::clause_match(Handle &pattrn_link_h, Handle &grnd_link_h)
         return std::any_of(qN.begin(), qN.end(), [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
     };
 
-    // reject match (ie. return true) if there is no InterpretationNode
-    return not std::any_of(qISet.begin(), qISet.end(), hasInterpretation);
+    // reject match (ie. return false) if there is no InterpretationNode
+    return std::any_of(qISet.begin(), qISet.end(), hasInterpretation);
 }
 
 /**

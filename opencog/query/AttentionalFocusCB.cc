@@ -26,17 +26,14 @@ using namespace opencog;
 
 bool AttentionalFocusCB::node_match(Handle& node1, Handle& node2)
 {
-	return node1 != node2 or
-		node2->getSTI() <= _as->getAttentionalFocusBoundary();
+	return node1 == node2 and
+		node2->getSTI() > _as->getAttentionalFocusBoundary();
 }
 
 bool AttentionalFocusCB::link_match(LinkPtr& lpat, LinkPtr& lsoln)
 {
-	if (DefaultPatternMatchCB::link_match(lpat, lsoln))
-	{
-		return true;
-	}
-	return lsoln->getSTI() <= _as->getAttentionalFocusBoundary();
+	return DefaultPatternMatchCB::link_match(lpat, lsoln)
+		and lsoln->getSTI() > _as->getAttentionalFocusBoundary();
 }
 
 IncomingSet AttentionalFocusCB::get_incoming_set(Handle h)

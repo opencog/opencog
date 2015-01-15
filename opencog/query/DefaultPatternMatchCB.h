@@ -56,15 +56,15 @@ class DefaultPatternMatchCB :
 		 * second is a possible solution (grounding) node from the
 		 * atomspace.
 		 *
-		 * Return false if the nodes match, else return
-		 * true. (i.e. return true if mis-match).
+		 * Return true if the nodes match, else return
+		 * false. (i.e. return false if mis-match).
 		 *
 		 * By default, the nodes must be identical.
 		 */
 		virtual bool node_match(Handle& npat_h, Handle& nsoln_h)
 		{
 			// If equality, then a match.
-			return npat_h != nsoln_h;
+			return npat_h == nsoln_h;
 		}
 
 		/**
@@ -73,8 +73,8 @@ class DefaultPatternMatchCB :
 		 * node in the atomspace. The first argument
 		 * is a variable from the pattern, and the second
 		 * is a possible grounding node from the atomspace.
-		 * Return false if the nodes match, else return
-		 * true. (i.e. return true if mis-match).
+		 * Return true if the nodes match, else return
+		 * false. (i.e. return false if mis-match).
 		 */
 		virtual bool variable_match(Handle& npat_h, Handle& nsoln_h)
 		{
@@ -84,24 +84,23 @@ class DefaultPatternMatchCB :
 			// accept the match. This allows any kind of node types to be
 			// explicitly bound as variables.  However, the type VariableNode
 			// gets special handling, below.
-			if (pattype != VARIABLE_NODE) return false;
+			if (pattype != VARIABLE_NODE) return true;
 
 			// If the ungrounded term is a variable, then see if there
 			// are any restrictions on the variable type.
 			// If no restrictions, we are good to go.
-			if (NULL == _type_restrictions) return false;
+			if (NULL == _type_restrictions) return true;
 
 			// If we are here, there's a restriction on the grounding type.
 			// Validate the node type, if needed.
 			VariableTypeMap::const_iterator it = _type_restrictions->find(npat_h);
-			if (it == _type_restrictions->end()) return false;
+			if (it == _type_restrictions->end()) return true;
 
 			// Is the ground-atom type in our list of allowed types?
 			Type soltype = nsoln_h->getType();
 			const std::set<Type> &tset = it->second;
 			std::set<Type>::const_iterator allow = tset.find(soltype);
-			if (allow != tset.end()) return false;
-			return true;
+			return allow != tset.end();
 		}
 
 		/**
@@ -110,8 +109,8 @@ class DefaultPatternMatchCB :
 		 * link in the atomspace. The first argument
 		 * is a link from the pattern, and the second
 		 * is a possible solution link from the atomspace.
-		 * Return false if the links match, else return
-		 * true. (i.e. return true if mis-match).
+		 * Return true if the links match, else return
+		 * false. (i.e. return false if mis-match).
 		 *
 		 * By default, the link arity and the
 		 * link types must match.
@@ -120,19 +119,18 @@ class DefaultPatternMatchCB :
 		{
 			// If the pattern is exactly the same link as the proposed
 			// grounding, then its a perfect match. 
-			if (lpat == lsoln) return false;
+			if (lpat == lsoln) return true;
 
-			if (lpat->getArity() != lsoln->getArity()) return true;
+			if (lpat->getArity() != lsoln->getArity()) return false;
 			Type pattype = lpat->getType();
 			Type soltype = lsoln->getType();
 
-			// If types differ, no match,
-			if (pattype != soltype) return true;
-			return false;
+			// If types differ, no match
+			return pattype == soltype;
 		}
 
 		/**
-		 * Called when a virtual link is encountered. Returns true
+		 * Called when a virtual link is encountered. Returns false
 		 * to reject the match.
 		 */
 		virtual bool virtual_link_match(LinkPtr& lpat, Handle& args);

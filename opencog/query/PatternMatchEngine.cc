@@ -98,9 +98,9 @@ static inline void prtmsg(const char * msg, const Handle& h)
  * subtree of the predicate clause, performing comparisions until a
  * match is found (or not found).
  *
- * Return true if there's a mis-match. The goal here is to walk over
- * the entire tree, without mismatches.  Since a return value of true
- * stops the iteration, true is used to signal a mismatch.
+ * Return false if there's a mis-match. The goal here is to walk over
+ * the entire tree, without mismatches.  Since a return value of false
+ * stops the iteration, false is used to signal a mismatch.
  *
  * The pattern clause may contain quotes (QuoteLinks), which signify
  * that what follows must be treated as a literal (constant), rather
@@ -128,10 +128,10 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		if (1 != lp->getArity())
 			throw InvalidParamException(TRACE_INFO, "QuoteLink has unexpected arity!");
 		more_depth ++;
-		bool misma = tree_compare(lp->getOutgoingAtom(0), hg);
+		bool ma = tree_compare(lp->getOutgoingAtom(0), hg);
 		more_depth --;
 		in_quote = false;
-		return misma;
+		return ma;
 	}
 
 	// Handle hp is from the pattern clause, and it might be one
@@ -149,15 +149,15 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		// groundings can occur when traversing graphs with loops in them.
 		Handle gnd(var_grounding[hp]);
 		if (Handle::UNDEFINED != gnd) {
-			return (gnd != hg);
+			return (gnd == hg);
 		}
 
 		// VariableNode had better be an actual node!
 		// If it's not then we are very very confused ...
 		NodePtr np(NodeCast(hp));
 		OC_ASSERT (NULL != np,
-		      "ERROR: expected variable to be a node, got this: %s\n",
-				hp->toShortString().c_str());
+		           "ERROR: expected variable to be a node, got this: %s\n",
+		           hp->toShortString().c_str());
 
 #ifdef NO_SELF_GROUNDING
 		// Disalllow matches that contain a bound variable in the
@@ -167,21 +167,21 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		if (VARIABLE_NODE == hg->getType() and
 		    _bound_vars.end() != _bound_vars.find(hg))
 		{
-			return true;
+			return false;
 		}
 #endif
 
 		// Else, we have a candidate grounding for this variable.
 		// The node_match may implement some tighter variable check,
 		// e.g. making sure that grounding is of some certain type.
-		if (pmc->variable_match (hp,hg)) return true;
+		if (not pmc->variable_match (hp,hg)) return false;
 
 		// Make a record of it.
 		dbgprt("Found grounding of variable:\n");
 		prtmsg("$$ variable:    ", hp);
 		prtmsg("$$ ground term: ", hg);
 		var_grounding[hp] = hg;
-		return false;
+		return true;
 	}
 
 	// If they're the same atom, then clearly they match.
@@ -191,7 +191,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 #ifdef NO_SELF_GROUNDING
 		if (hg == curr_pred_handle)
 		{
-			if (any_variable_in_tree(hg, _bound_vars)) return true;
+			if (any_variable_in_tree(hg, _bound_vars)) return false;
 		}
 		else
 		{
@@ -203,10 +203,10 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			{
 				var_grounding[hp] = hg;
 			}
-			return false;
+			return true;
 		}
 #else
-		return false;
+		return true;
 #endif
 	}
 
@@ -242,15 +242,15 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 
 					if (is_quoted_in_tree(hp, vh)) continue;
 					dbgprt("miscompare; var is not in pattern, or its not quoted\n");
-					return true;
+					return false;
 				}
 			}
 		}
 #endif
 
 		// Let the callback perform basic checking.
-		bool mismatch = pmc->link_match(lp, lg);
-		if (mismatch) return true;
+		bool match = pmc->link_match(lp, lg);
+		if (not match) return false;
 
 		dbgprt("depth=%d\n", depth);
 		prtmsg("> tree_compare", hp);
@@ -284,23 +284,23 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			depth ++;
 			more_depth ++;
 
-			mismatch = foreach_atom_pair(osp, osg,
+			match = foreach_atom_pair(osp, osg,
 			                   &PatternMatchEngine::tree_compare, this);
 			more_depth --;
 			depth --;
 			dbgprt("tree_comp down link mismatch=%d\n", mismatch);
 
-			if (mismatch) return true;
+			if (not match) return false;
 
 			// If we've found a grounding, lets see if the
 			// post-match callback likes this grounding.
-			mismatch = pmc->post_link_match(lp, lg);
-			if (mismatch) return true;
+			match = pmc->post_link_match(lp, lg);
+			if (not match) return false;
 
 			// If we've found a grounding, record it.
 			var_grounding[hp] = hg;
 
-			return false;
+			return true;
 		}
 		else
 		{
@@ -349,22 +349,22 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 
 				have_more = false;
 				more_depth ++;
-				mismatch = foreach_atom_pair(mutation, osg,
+				match = foreach_atom_pair(mutation, osg,
 				                   &PatternMatchEngine::tree_compare, this);
 				more_depth --;
 				depth --;
 				dbgprt("tree_comp down unordered link depth=%lu mismatch=%d\n",
-				       more_depth, mismatch);
+				       more_depth, match);
 
 				// If we've found a grounding, lets see if the
 				// post-match callback likes this grounding.
-				if (false == mismatch)
+				if (match)
 				{
-					mismatch = pmc->post_link_match(lp, lg);
+					match = pmc->post_link_match(lp, lg);
 				}
 
 				// If we've found a grounding, record it.
-				if (false == mismatch)
+				if (match)
 				{
 					// Since we leave the loop, we better go back
 					// to where we found things.
@@ -401,7 +401,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 						}
 					}
 
-					return false;
+					return true;
 				}
 				POPGND(var_grounding, var_solutn_stack);
 			} while (std::next_permutation(mutation.begin(), mutation.end()));
@@ -409,11 +409,11 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			dbgprt("tree_comp down unordered exhausted all permuations\n");
 			more_stack[more_depth] = false;
 			have_more = false;
-			return true;
+			return false;
 		}
 
 		OC_ASSERT(false, "statement should not be reached");
-		return mismatch;
+		return match;
 	}
 
 	// If both are nodes, compare them as such.
@@ -422,20 +422,20 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	if (np and ng)
 	{
 		// Call the callback to make the final determination.
-		bool mismatch = pmc->node_match(hp, hg);
-		if (false == mismatch)
+		bool match = pmc->node_match(hp, hg);
+		if (match)
 		{
 			dbgprt("Found matching nodes\n");
 			prtmsg("# pattern: ", hp);
 			prtmsg("# match:   ", hg);
 			var_grounding[hp] = hg;
 		}
-		return mismatch;
+		return match;
 	}
 
 	// If we got to here, there is a clear mismatch, probably because
 	// one is a node, and the other a link.
-	return true;
+	return false;
 }
 
 /* ======================================================== */
@@ -451,9 +451,9 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 	do {
 		var_solutn_stack.push(var_grounding);
 
-		bool no_match = tree_compare(curr_pred_handle, hsoln);
+		bool match = tree_compare(curr_pred_handle, hsoln);
 		// If no match, then try the next one.
-		if (no_match)
+		if (not match)
 		{
 			// Get rid of any grounding that might have been proposed
 			// during the tree-match.
@@ -525,18 +525,18 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 	// Is this clause a required clause? If so, then let the callback
 	// make the final decision; if callback rejects, then it's the
 	// same as a mismatch; try the next one.
-	bool no_match;
+	bool match;
 	if (_optionals.count(curr_root))
 	{
 		clause_accepted = true;
-		no_match = pmc->optional_clause_match(curr_pred_handle, hsoln);
+		match = pmc->optional_clause_match(curr_pred_handle, hsoln);
 	}
 	else
 	{
-		no_match = pmc->clause_match(curr_pred_handle, hsoln);
+		match = pmc->clause_match(curr_pred_handle, hsoln);
 	}
-	dbgprt("clause match callback no_match=%d\n", no_match);
-	if (no_match) return false;
+	dbgprt("clause match callback match=%d\n", match);
+	if (not match) return false;
 
 	curr_soln_handle = hsoln;
 	clause_grounding[curr_root] = curr_soln_handle;
@@ -616,9 +616,9 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 		       (_optionals.count(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
-			no_match = pmc->optional_clause_match(curr_pred_handle, undef);
-			dbgprt ("Exhausted search for optional clause, cb=%d\n", no_match);
-			if (no_match) return false;
+			match = pmc->optional_clause_match(curr_pred_handle, undef);
+			dbgprt ("Exhausted search for optional clause, cb=%d\n", match);
+			if (not match) return false;
 
 			// XXX Maybe should push n pop here? No, maybe not ...
 			clause_grounding[curr_root] = Handle::UNDEFINED;

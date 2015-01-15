@@ -49,7 +49,7 @@ public:
 	 * A callback handler of the Pattern matcher used to store references to new conclusion the target list
 	 */
 	bool grounding(const std::map<Handle, Handle> &var_soln,
-				const std::map<Handle, Handle> &pred_soln);
+	               const std::map<Handle, Handle> &pred_soln);
 };
 
 #endif /* FORWARDCHAINPATTERNMATCHCB_H_ */

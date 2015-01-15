@@ -123,7 +123,7 @@ bool PMCB::node_match(Node *npat, Node *nsoln)
 	Type soltype = nsoln->getType();
 
 	// Reject obvioius mismatches
-	if (pattype != soltype) return true;
+	if (pattype != soltype) return false;
 
 	Handle ha = npat->getHandle();
 	Handle hb = nsoln->getHandle();
@@ -131,8 +131,7 @@ bool PMCB::node_match(Node *npat, Node *nsoln)
 		ha.value(), npat->getName().c_str(),
 		hb.value(), nsoln->getName().c_str());
 
-	if (npat == nsoln) return false;
-	return true;
+	return npat == nsoln;
 }
 
 bool PMCB::grounding(const std::map<Handle, Handle> &var_soln,
