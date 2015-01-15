@@ -180,8 +180,7 @@ bool WordRelQuery::find_vars(Handle word_instance)
 
 /**
  * Do two word instances have the same word lemma (word root form)?
- * Return true if they are are NOT (that is, if they
- * are mismatched). 
+ * Return true if they are (that is, if they match).
  *
  * Current NLP structure relating word-instances to lemmas is:
  * (LemmaLink (stv 1.0 1.0)
@@ -199,7 +198,7 @@ bool WordRelQuery::word_instance_match(Atom *aa, Atom *ab)
 	dbgprt("   to wrd inst "); prt(ab);
 
 	// If they're the same atom, then clearly they match.
-	if (aa == ab) return false;
+	if (aa == ab) return true;
 
 	// Look for incoming links that are LemmaLinks.
 	// The word lemma should be at the far end.
@@ -209,8 +208,7 @@ bool WordRelQuery::word_instance_match(Atom *aa, Atom *ab)
 	dbgprt("gen comp %d ", ca==cb); prt(ca);
 	dbgprt("        to "); prt(cb);
 
-	if (ca == cb) return false;
-	return true;
+	return ca == cb;
 }
 
 #ifdef DEAD_CODE_BUT_DONT_DELETE_JUST_YET
@@ -251,8 +249,8 @@ const char * WordRelQuery::get_word_instance(Atom *atom)
  * Are two nodes "equivalent", as far as the opencog representation
  * of RelEx expressions are concerned?
  *
- * Return true to signify a mismatch,
- * Return false to signify equivalence.
+ * Return false to signify a mismatch,
+ * Return true to signify equivalence.
  */
 bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 {
@@ -264,7 +262,7 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 	if ((pattype != soltype) && 
 	    (WORD_NODE != soltype) && 
 	    (SEME_NODE != soltype) && 
-	    (WORD_INSTANCE_NODE != soltype)) return true;
+	    (WORD_INSTANCE_NODE != soltype)) return false;
 
 	// DefinedLinguisticRelation nodes must usually match exactly;
 	// so if we are here, there's probably already a mismatch.
@@ -272,13 +270,13 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 	    (PREPOSITIONAL_RELATIONSHIP_NODE == soltype))
 	{
 		const char *spat = npat->getName().c_str();
-		if (strcmp("isa", spat) && strcmp("hypothetical_isa", spat)) return true;
+		if (strcmp("isa", spat) && strcmp("hypothetical_isa", spat)) return false;
 		const char *ssol = npat->getName().c_str();
-		if (strcmp("isa", ssol) && strcmp("hypothetical_isa", ssol)) return true;
+		if (strcmp("isa", ssol) && strcmp("hypothetical_isa", ssol)) return false;
 
 		// If we got to here then we matched isa to isa or hypothetical_isa,
 		// and that's all good.  Err.. XXX bad if not a question, but whatever.
-		return false;
+		return true;
 	}
 
 	// Word instances match only if they have the same word lemma.
@@ -286,9 +284,9 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 	    (WORD_NODE == soltype) || // XXX get rid of WordNode here, someday.
 	    (SEME_NODE == soltype))
 	{
-		bool mismatch = word_instance_match(npat, nsoln);
-		dbgprt("word instance mismatch=%d\n", mismatch);
-		return mismatch;
+		bool match = word_instance_match(npat, nsoln);
+		dbgprt("word instance match=%d\n", mismatch);
+		return match;
 	}
 
 	// XXX This code is never reached !!!??? 
@@ -321,8 +319,8 @@ printf("duude compare %s to %s\n", sa, sb);
 			s[len] = 0x0;
 			sb = s;
 		}
-		if (!strcmp(sa, sb)) return false;
-		return true;
+		if (!strcmp(sa, sb)) return true;
+		return false;
 	}
 
 	fprintf(stderr, "Error: unexpected ground node type %d %s\n", soltype,
@@ -333,7 +331,7 @@ printf("duude compare %s to %s\n", sa, sb);
 	fprintf (stderr, "unexpected comp %s\n"
 	                 "             to %s\n", sa.c_str(), sb.c_str());
 
-	return true;
+	return false;
 }
 
 /* ======================================================== */
