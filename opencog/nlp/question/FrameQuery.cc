@@ -216,8 +216,8 @@ bool FrameQuery::assemble_predicate(Atom *atom)
  * Are two nodes "equivalent", as far as the opencog representation 
  * of RelEx expressions are concerned? 
  *
- * Return true to signify a mismatch,
- * Return false to signify equivalence.
+ * Return false to signify a mismatch,
+ * Return true to signify equivalence.
  */
 bool FrameQuery::node_match(Node *aa, Node *ab)
 {
@@ -228,17 +228,17 @@ bool FrameQuery::node_match(Node *aa, Node *ab)
 
 	// DefinedLinguisticConcept nodes must match exactly;
 	// so if we are here, there's already a mismatch.
-	if (DEFINED_LINGUISTIC_CONCEPT_NODE == ntype) return true;
-	if (DEFINED_FRAME_NODE == ntype) return true;
-	if (DEFINED_FRAME_ELEMENT_NODE == ntype) return true;
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE == ntype) return false;
+	if (DEFINED_FRAME_NODE == ntype) return false;
+	if (DEFINED_FRAME_ELEMENT_NODE == ntype) return false;
 
 #if BORKEN_STUFF
 	// Concept nodes can match if they inherit from the same concept.
 	if (CONCEPT_NODE == ntype)
 	{
-		bool mismatch = concept_match(aa, ab);
+		bool match = concept_match(aa, ab);
 		// printf("tree_comp concept mismatch=%d\n", mismatch);
-		return mismatch;
+		return match;
 	}
 #endif
 
@@ -250,7 +250,7 @@ bool FrameQuery::node_match(Node *aa, Node *ab)
 	fprintf (stderr, "unexpected comp %s\n"
 	                 "             to %s\n", sa.c_str(), sb.c_str());
 
-	return true;
+	return false;
 }
 
 /* ===================== END OF FILE ===================== */
