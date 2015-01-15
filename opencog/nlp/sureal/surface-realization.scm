@@ -17,6 +17,21 @@
 (define pattern2 "; ##### START OF R2L #####")
 
 ; ---------------------------------------------------------------------
+; Handy function to quickly check if two words' LG entries intersect
+(define (lg-similar? word1 word2)
+    (define (get-set w)
+        (define roots (filter (lambda (l) (equal? (cog-type l) 'LgWordCset)) (cog-incoming-set w)))
+        (map cog-get-partner roots (circular-list w))
+    )
+
+    ; create the dictionary entry as needed
+    (lg-get-dict-entry word1)
+    (lg-get-dict-entry word2)
+    ; check if the two word has common LG dict entry
+    (not (null? (lset-intersection equal? (get-set word1) (get-set word2))))
+)
+
+; ---------------------------------------------------------------------
 ; Splits a string into substring delimited by the a pattern and returns a list
 ; of the substrings.
 ; TODO: make tail recursive, for efficency
@@ -100,32 +115,41 @@
     (define (eval-list a-list)
         (if (= 1 (length a-list))
             (begin (eval-string (list-ref a-list 0)) '())
-            (begin (eval-string (list-ref a-list 0))
-            (let ((parse-name (parse-str (list-ref a-list 0))))
-                (ReferenceLink 
-                    (InterpretationNode (string-append parse-name "_interpretation_$X"))
-                    ; The function in the SetLink returns a list of outputs that
-                    ; are the results of the evaluation of the relex-to-logic functions,
-                    ; on the relex-opencog-outputs.
-                    (SetLink
-                        (filter-map pruner
-                            (delete-duplicates 
-                                (apply append 
-                                    (map-in-order eval-string
-                                        (filter (lambda (x) (not (string=? "" x)))
-                                            (split-string "\n" (list-ref a-list 1))
+            (begin
+                (eval-string (list-ref a-list 0))
+                (let* ((parse-name (parse-str (list-ref a-list 0)))
+                       (parse-node (ParseNode parse-name)))
+                    ; generate the LG dictionary entries for each word
+                    (let ((words (parse-get-words parse-node)))
+                        (map-word-instances
+                            (lambda (word-inst) (map-word-node lg-get-dict-entry word-inst))
+                            parse-node
+                        )
+                    )
+                    (ReferenceLink 
+                        (InterpretationNode (string-append parse-name "_interpretation_$X"))
+                        ; The function in the SetLink returns a list of outputs that
+                        ; are the results of the evaluation of the relex-to-logic functions,
+                        ; on the relex-opencog-outputs.
+                        (SetLink
+                            (filter-map pruner
+                                (delete-duplicates 
+                                    (apply append 
+                                        (map-in-order eval-string
+                                            (filter (lambda (x) (not (string=? "" x)))
+                                                (split-string "\n" (list-ref a-list 1))
+                                            )
                                         )
                                     )
                                 )
                             )
                         )
                     )
-                )
-                (InterpretationLink
-                    (InterpretationNode (string-append parse-name "_interpretation_$X"))
-                    (ParseNode parse-name)
-                )
-            ))
+                    (InterpretationLink
+                        (InterpretationNode (string-append parse-name "_interpretation_$X"))
+                        parse-node
+                    )
+                ))
         )
     )
 
@@ -181,28 +205,76 @@
     )
 )
 
-; Returns a possible set of SuReals from an output SetLink
+; Returns a possible set of SuReals from an input SetLink
 ; * 'a-set-link' : A SetLink which is to be SuRealed
 (define (create-sentence a-set-link)
-    (define clean-set (SetLink (remove is-abstraction? (cog-outgoing-set a-set-link))))
-    (define (replace-wins-with-str a-list)
-        (map (lambda (x)
-                (if (and (cog-atom? x) (equal? 'WordInstanceNode (cog-type x)))
-                    (word-inst-get-word-str x)
-                    x
-                ))
-            a-list
+    (define (construct-sntc itpr)
+        ; get the words, skipping ###LEFT-WALL###
+        (define words-seq (cdr (parse-get-words-in-order (interp-get-parse itpr))))
+        ; get the new query to old interpretation mappings (multiple)
+        (define mappings (sureal-get-mapping itpr))
+        ; helper to generate sentence using one mapping
+        (define (construct-sntc-mapping w-seq vars mapping)
+            (for-each
+                (lambda (old-logic-node new-logic-node)
+                    (let ((old-word-inst (r2l-get-word-inst old-logic-node))
+                          (new-word-inst (r2l-get-word-inst new-logic-node))
+                          (new-word (r2l-get-word new-logic-node))
+                          )
+                        ; if old-logic-node is actually a word (could be not for VariableNode or InterpretationNode)
+                        (if (not (null? old-word-inst))
+                            ; find all locations in the w-seq this word-inst appear
+                            (for-each
+                                (lambda (x idx)
+                                    (if (equal? x old-word-inst)
+                                        (if (null? new-word-inst)
+                                            (list-set! w-seq idx new-word)
+                                            (list-set! w-seq idx new-word-inst)
+                                        )
+                                    )
+                                )
+                                w-seq
+                                (list-tabulate (length w-seq) values)
+                            )
+                        )
+                    )
+                )
+                mapping
+                vars
+            )
+            ; change from node to word string
+            (map
+                (lambda (w)
+                    (if (equal? (cog-type w) 'WordInstanceNode)
+                        (word-inst-get-word-str w)
+                        (cog-name w)
+                    )
+                )
+                w-seq
+            )
+        )
+
+        (map construct-sntc-mapping (circular-list words-seq) (circular-list (car mappings)) (cdr mappings))
+    )
+
+    ; add LG dictionary on each word if not already in the atomspace
+    (map
+        lg-get-dict-entry
+        (filter-map
+            (lambda (n)
+                (if (null? (r2l-get-word-inst n))
+                    (if (null? (r2l-get-word n))
+                        #f
+                        (r2l-get-word n)
+                    )
+                    (car (word-inst-get-word (r2l-get-word-inst n)))
+                )
+            )
+            (cog-get-all-nodes a-set-link)
         )
     )
 
-    (receive (chunks weights) (get-chunks clean-set)
-        (let ((output-lst (par-map replace-wins-with-str chunks)))
-            (values
-                (map delete (make-list (length output-lst) "###LEFT-WALL###") output-lst)
-                weights
-            )
-        )
-    )
+    (append-map construct-sntc (sureal-match a-set-link))
 )
 
 ; Returns a number that could be used to compare atoms of the same type. For eg.
@@ -274,91 +346,6 @@
     (if has-match (match:prefix has-match) (cog-name node))
 )
 
-; It will return a list  of atoms that are similar. Similar links are atoms that are of the
-; same type , have the same subgraph and have part of the node name match for
-; at least one atom. Similar nodes are atoms that have similar type and naming. A similar
-; name is a name that matches before UUID or other indexes or index markers. For e.g.,
-;   (WordInstanceNode "sentence@1ba8b794-93ba-47d9-93f4-a0db91dfc9d4")
-;   (WordInstanceNode "sentence")
-; * 'atom' : is the atom for which similar atoms are being searched for.
-; * 'lst' : is the list of atoms being checked for similarity.
-(define (similar-atoms atom lst)
-    (define result (map get-mapping (make-list (length lst) atom) lst))
-    
-    ; if there's a mapping, they are similar
-    (filter-map (lambda (r l) (if (null? r) #f l)) result lst)
-)
-
-; Returns SetLinks associated with the dialogue system
-(define (get-dialogue-sets)
-    (delete '()
-        (par-map (lambda (x)
-                    (if (or (not (null? (cog-chase-link 'ReferenceLink 'InterpretationNode x)))
-                            (not (null? (cog-chase-link 'ReferenceLink 'SentenceNode x)))
-                        )
-                        x
-                        '()
-                    )
-                 ) (cog-get-atoms 'SetLink)
-         )
-     )
-)
-
-; Check if any of the atoms in the outgoing set of SetLinks, relevant for dialogue,
-; are similar to 'an-atom', and return a list containing those which do.
-; Should one want to define a different criteria for changes can be made here.
-(define (filter-dialogue-sets an-atom)
-    (delete '()
-        (par-map (lambda (x) (if (null? (similar-atoms an-atom (remove is-abstraction? (cog-outgoing-set x)))) '() x)
-                 ) (get-dialogue-sets)
-        )
-    )
-)
-
-; Returns a alist in which the keys are the handles of the outgoing-set of
-; the SuRealizable SetLink and the values are a list of handles of the SetLinks
-; which have atoms similar to the keys.
-; * 'output-set' is the SetLink to be surealed.
-(define (index output-set)
-    (define out-set (remove is-abstraction? (cog-outgoing-set output-set)))
-    (define dict '())
-        (append-map
-            (lambda (x) (acons (cog-handle x) (par-map cog-handle (filter-dialogue-sets x)) dict))
-            out-set
-        )
-)
-
-; creates value to key alist of key-value pair, where the cdr of a-pair is a list.
-; It has a weired side-effect in that it both modifies 'a-dict' as well as
-; returning a new alist which is equal (as in #t for equal? and #f for eq?)
-(define (alist-inverse a-pair a-dict)
-    (if (null? (cdr a-pair))
-        (if (assoc-ref a-dict "NO_PATTERN")
-            (assoc-set! a-dict "NO_PATTERN" (delete-duplicates (append (assoc-ref a-dict "NO_PATTERN") (list (car a-pair)))))
-            (acons "NO_PATTERN" (list (car a-pair)) a-dict)
-        )
-        (delete-duplicates (append-map (lambda (x)
-                (if (assoc-ref a-dict x)
-                    (assoc-set! a-dict x (delete-duplicates (append (assoc-ref a-dict x) (list (car a-pair)))))
-                    (acons x (list (car a-pair)) a-dict)
-                )
-            )
-            (delete-duplicates (cdr a-pair)))
-        )
-    )
-)
-
-; Returns an alist of key-value pairs structured as handles of
-; (r2l-SetLink . (output-link1 output-link2 ...))
-; * 'old-dict' : It is an alist of key-value pairs structured as
-;                (output-link1 . (r2l-SetLink1 .... r2l-SetLinkn))
-; * 'new-dict' : It could be an empty list or an existing index to be updated.
-(define (reorder old-dict new-dict)
-    (if (null? (cdr old-dict))
-        (alist-inverse (car old-dict) new-dict)
-        (reorder (cdr old-dict) (alist-inverse (car old-dict) new-dict))
-    )
-)
 ; Checks if the outgoing set of an InheritanceLink or an ImplicationLink are similar
 ; and returns #t if they are or #f if they are not. An abstraction is the linking of an
 ; instance verison of an atom with it full abstracted version.
@@ -371,201 +358,4 @@
     )
 )
 
-; Returns a pair of atom handles structured as (r2l-node . output-node) provided
-; they are equivalent in structure and contains a node with matching name.
-; or an empty list other wise.
-; * 'output-atom' : It is a link we want to surealize
-; * 'r2l-atom' ; It is a link we are using for extracting relations between words.
-(define (get-mapping output-atom r2l-atom)
-    ; helper function to generate permutation
-    (define (gen-permutation lst)
-        (if (= (length lst) 1)
-            (cons lst '())
-            ; pick each item in lst as head in turn, and generate permutation without the head for the rest
-            (append-map
-                (lambda (head) (map (lambda (rest) (cons head rest)) (gen-permutation (delete head lst))))
-                lst
-            )
-        )
-    )
-    
-    (define (similar-n-to-nm many-atoms even-more-items)
-        (apply append
-            ; filter away permutation that cannot be matched completely
-            (filter-map
-                (lambda (many-items)
-                    (let ((returned-list-of-lists (map (lambda (an-atom an-item) (similar-1-to-1 an-atom an-item)) many-atoms many-items)))
-                        (if (every values returned-list-of-lists)
-                            (cartesian-prod-list-only returned-list-of-lists)
-                            #f
-                        )
-                    )
-                )
-                even-more-items
-            )
-        )
-    )
-    
-    (define (similar-1-to-1 an-atom an-item)
-        (if (cog-node? an-atom)
-            ; return something here to indicate when a node type is matched + and when the name also matches
-            (if (equal? (cog-type an-atom) (cog-type an-item))
-                (if (cog-name-match (make-regexp (cog-name-clean an-atom) regexp/icase) an-item)
-                    (list (cons 2 (cons an-atom an-item)))  ; type and name matched
-                    (list (cons 1 (cons an-atom an-item)))  ; only type matched
-                )
-                #f
-            )
-            (if (and (= (cog-arity an-atom) (cog-arity an-item)) (equal? (cog-type an-atom) (cog-type an-item)))
-                ; need special handling of unordered-links
-                (if (cog-subtype? 'UnorderedLink (cog-type an-atom))
-                    ; check all possible orders of an-atom's outgoing-set against all possible orders of
-                    ; an-item's outgoing-set, since each atom in the outgoing-set could be of different type
-                    (let ((an-atom-out-set-permute (gen-permutation (cog-outgoing-set an-atom)))
-                          (an-item-out-set-permute (gen-permutation (cog-outgoing-set an-item))))
-                        (apply append
-                            (map
-                                similar-n-to-nm
-                                an-atom-out-set-permute
-                                (make-list (length an-atom-out-set-permute) an-item-out-set-permute)
-                            )
-                        )
-                    )
-                    (let ((returned-list-of-lists (map similar-1-to-1 (cog-outgoing-set an-atom) (cog-outgoing-set an-item))))
-                        ; if all atoms can be matched
-                        (if (every values returned-list-of-lists)
-                            ; spread all possible ways each atom can be matched in all combination
-                            (cartesian-prod-list-only returned-list-of-lists)
-                            #f
-                        )
-                    )
-                )
-                #f
-            )
-        )
-    )
-
-    ; two atoms are similar if their structures are exactly the same
-    (letrec ((results (similar-1-to-1 output-atom r2l-atom))
-          (flatten
-              (lambda (x)
-                  (cond ((null? x) '())
-                        ((number? (car x)) (list x))
-                        (else (append-map flatten x))
-                  )
-              )
-          )
-         )
-         
-        (if results
-            (set! results (map flatten (filter (negate not) results)))
-        )
-        
-        ; if results exist
-        (if results
-            ; greedily get the first mapping with name matches
-            (let ((name-matched-result (find (lambda (r) (find (lambda (m) (= (car m) 2)) r)) results)))
-                (if name-matched-result
-                    (map (lambda (a-pair) (cons (cog-handle (cddr a-pair)) (cog-handle (cadr a-pair)))) name-matched-result)
-                    '()
-                )
-            )
-            '()
-        )
-    )
-)
-
-; Return chunks of a sentence and its rank. It ranks sentences by swaping equivalent
-; structures depending on the name of the constituent Node names.
-; TODO : Figure out an appropirate ranking formula. The ranking should
-; be across all the outgoing-set of the output SetLink (I think???)
-; XXX  : Currently it is ranked by how many links in the output-set get matched.
-;        An addition could be added to rank bases out how many in the r2l-set not matched.
-(define (get-chunks output-set)
-    (define output-set-len (length (remove is-abstraction? (cog-outgoing-set output-set))))
-    (define dict (reorder (index output-set) '()))
-    (define (get-sntc r2l-set)
-        (parse-get-words-in-order (interp-get-parse (logic-get-interp r2l-set)))
-    )
-
-    ; Takes a pair input structured as the handles of (r2l-SetLink . (output-link1 output-link2))
-    ; and returns a list of lists, each list is a complete mapping containing multiple pairs of
-    ; (r2l-node . output-node) handles.
-    ; TODO: have to remove tag atoms while mapping.
-    (define (get-mapping-pair a-pair)
-        (define r2l-set (remove is-abstraction? (cog-outgoing-set (cog-atom (car a-pair)))))
-        (define all-mappings
-            (par-map (lambda (x)
-                (remove null?
-                    (map get-mapping (make-list (length r2l-set) (cog-atom x)) r2l-set))
-                )
-                (cdr a-pair)
-            )
-        )
-        
-        ; TODO: keep partial mapping by removing the repeated replacement, instead of removing the whole mapping
-        (define (check-mapping a-complete-mapping)
-            ; allow same mapping of nodes (the same node get replaced with the same word) across different link-mapping
-            (define a-complete-mapping-clean (delete-duplicates (apply append a-complete-mapping)))
-            (define all-r2l-nodes (map car a-complete-mapping-clean))
-            (= (length all-r2l-nodes) (length (delete-duplicates all-r2l-nodes))) 
-        )
-        
-        ; for each output-link with multiple mapping, generate all combinations with other output-link's mappings
-        ; and remove any combinations where the same r2l node get replaced more than once by different words
-        (define all-combinations
-            (filter check-mapping (cartesian-prod-list-only all-mappings))
-        )
-
-        (map (lambda (x) (apply append x)) all-combinations)
-    )
-
-    ; Replaces the WordInstanceNodes with the corresponding R2L node matching the car atom
-    ; with the clean name of the cdr of the pair
-    (define (replace-word! r2l-sntc a-pair)
-        (let ((an-index (list-index
-                (lambda (x)
-                    (if (and (cog-atom? x) (not (null? (word-get-r2l-node x))))
-                        ; check if the WordInstanceNode corresponds to the R2L node we want to replace
-                        (equal? (cog-handle (word-get-r2l-node x)) (car a-pair))
-                        #f
-                    )
-                )
-                r2l-sntc))
-            )
-            (if (number? an-index)
-                (begin
-                    (list-set! r2l-sntc an-index (cog-name-clean (cog-atom (cdr a-pair))))
-                    #t
-                )
-                #f
-            )
-        )
-    )
-    
-    (define (replace-with-mapping mapping sntc)
-        (define sntc-clone (list-copy sntc))
-        (map-in-order (lambda (x) (replace-word! sntc-clone x)) mapping)
-        sntc-clone
-    )
-    
-
-    ; Returns a random merge of possible sentences that can be formed from one r2l SetLink
-    ; TODO : Ranking of all possible alternative.
-    ; * 'a-pair' : the pair passed as input has to be a mapping sturctured as handles of
-    ;               (r2l-SetLink . (output-link1 output-link2))
-    (define (chunk a-pair)
-        (if (equal? (car a-pair) "NO_PATTERN")
-            '()
-            (let ((mappings (get-mapping-pair a-pair)) (sntc (get-sntc (cog-atom (car a-pair)))))
-                (let ((all-results (map replace-with-mapping mappings (make-list (length mappings) sntc)))
-                      (common-weight (- (length (cdr a-pair)) output-set-len))
-                     )
-                    (map (lambda (r) (list r common-weight)) all-results)
-                )
-            )
-        )
-    )
-    (unzip2 (remove null? (append-map chunk dict)))
-)
 

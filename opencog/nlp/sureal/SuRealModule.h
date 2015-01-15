@@ -54,7 +54,7 @@ private:
     HandleSeqSeq do_sureal_get_mapping(Handle);
 
     PatternMatchEngine m_pme;
-    std::map<Handle, std::map<Handle, Handle> > m_results;
+    std::map<Handle, std::vector<std::map<Handle, Handle> > > m_results;
 };
 
 }

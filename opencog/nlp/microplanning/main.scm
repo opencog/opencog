@@ -415,13 +415,8 @@
 	(define temp-set-link (SetLink (get-utterance-link utterance-type atoms) atoms))
 
 	; do something with SuReal to see if all atoms can be included in a sentence
-	(define say-able #f)
-	(receive (sentences weights) (sureal temp-set-link)
-		(if (any (lambda (x) (>= x 0)) weights)
-			(set! say-able #t)
-		)
-	)
-	
+	(define say-able (not (null? (sureal temp-set-link))))
+
 	; remove the temporary SetLink
 	(cog-delete temp-set-link)
 
