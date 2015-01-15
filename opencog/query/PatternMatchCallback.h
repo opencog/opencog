@@ -50,6 +50,12 @@ class PatternMatchCallback
 		 * is a possible solution node from the atomspace.
 		 * Return false if the nodes match, else return
 		 * true. (i.e. return true if mis-match).
+		 *
+		 * Note: those handles are not supposed to be
+		 * modified. Ideally they should be const but it turns out
+		 * constifying Handles because the atomspace API is not prone
+		 * to it. The same remark holds for most of the *_match
+		 * methods.
 		 */
 		virtual bool node_match(Handle& node1, Handle& node2) = 0;
 
