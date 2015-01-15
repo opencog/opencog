@@ -284,7 +284,6 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
     }
 
 
-
     if (! skip)
     {
 
@@ -299,20 +298,16 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             pattern.push_back(rebindedLink);
         }
 
+        if ( gram > 2)
+        {
+            if (containsLoopVariable(pattern))
+            return returnHTreeNode;
+        }
+
         // unify the pattern
         unifiedPattern = UnifyPatternOrder(pattern, extendedLinkIndex);
 
         string keyString = unifiedPatternToKeyString(unifiedPattern);
-
-        // debug
-       // "(InheritanceLink )\n  (VariableNode $var_1)\n  (ConceptNode human)\n\n(InheritanceLink )  (VariableNode $var_2)\n  (ConceptNode woman)\n";
-
-        if ( (keyString.find("human") != string::npos) && (keyString.find("woman") != string::npos) )
-        {
-            int x = 0;
-            x ++;
-        }
-
 
         // next, check if this pattern already exist (need lock)
         HTreeNode* newHTreeNode = 0;

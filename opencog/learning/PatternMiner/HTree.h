@@ -69,6 +69,13 @@ namespace opencog
             {
                 parentLinks.clear();
                 childLinks.clear();
+                instances.clear();
+                superPatternRelations.clear();
+                count = 0;
+                var_num = 0;
+                interactionInformation = 0.0;
+                nI_Surprisingness = 0.0f;
+                nII_Surprisingness = 0.0f;
 
             }
 

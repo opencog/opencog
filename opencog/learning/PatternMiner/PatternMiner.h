@@ -207,6 +207,8 @@ namespace PatternMining
      void extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
                                                                 HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,bool isExtendedFromVar);
 
+     bool containsLoopVariable(HandleSeq& inputPattern);
+
      HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves, HandleSeq &shouldNotBeVars, AtomSpace *_fromAtomSpace, unsigned int &extendedLinkIndex);
 
      void findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* HNode);
