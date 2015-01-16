@@ -907,6 +907,18 @@ bool PatternMiner::containsLoopVariable(HandleSeq& inputPattern)
     if (inputPattern.size() < 3)
         return false;
 
+    // debug
+    if (inputPattern.size() == 4)
+    {
+        string keystring = unifiedPatternToKeyString(inputPattern);
+        if ( (keystring.find("love") != string::npos) && (keystring.find("woman") != string::npos))
+        {
+            int test = 0;
+            test ++;
+        }
+    }
+
+
     // First find those links that only contains variables, without any const
     map<string, VariableInLinks> varInLinksMap;
 
@@ -922,15 +934,20 @@ bool PatternMiner::containsLoopVariable(HandleSeq& inputPattern)
 
         while(std::getline(stream, oneLine,'\n'))
         {
-            if (oneLine.find("VariableNode") == std::string::npos)
+            if (oneLine.find("Node") == std::string::npos) // this line is a link, contains no nodes
+                continue;
+
+            std::size_t pos_var = oneLine.find("VariableNode");
+            if (pos_var == std::string::npos)
             {
                 // this node is a const node
                 containsOnlyVars = false;
             }
             else
             {
+                string keyVarStr = oneLine.substr(pos_var);
                 // this node is a VariableNode
-                allVarsInThisLink.push_back(oneLine);
+                allVarsInThisLink.push_back(keyVarStr);
             }
         }
 
@@ -1855,19 +1872,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
                 cout << "Count(E) = " << patternE_count << std::endl;
                 cout << "Surprisingness_II = |P(A) -P(Ap)/Count(E)| = " << Surprisingness_II << std::endl;
 
-                // debug
-                if (gram == 3)
-                {
-                    if (HNode->count == 2)
-                    {
-                        string keystring = unifiedPatternToKeyString(HNode->pattern);
-                        if ( (keystring.find("dragonfruit") != string::npos) && (keystring.find("vegetable") != string::npos))
-                        {
-                            int test = 0;
-                            test ++;
-                        }
-                    }
-                }
+
 
             }
         }
