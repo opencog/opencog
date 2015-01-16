@@ -50,7 +50,7 @@
                     )
                 )
             )
-            (ExecutionLink
+            (ExecutionOutputLink
                 (GroundedSchemaNode "scm: pre-svo-rule")
                 (ListLink
                     (VariableNode "$X")
