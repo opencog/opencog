@@ -1,7 +1,7 @@
 /*
  * SchemeExec.cc
  *
- * Execute ExecutionLink's
+ * Execute ExecutionOutputLink's
  * Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
  */
 
@@ -9,7 +9,7 @@
 
 #include <cstddef>
 #include <libguile.h>
-#include <opencog/execution/ExecutionLink.h>
+#include <opencog/execution/ExecutionOutputLink.h>
 
 #include "SchemeEval.h"
 #include "SchemeSmob.h"
@@ -58,7 +58,7 @@ SCM SchemeEval::do_apply_scm( const std::string& func, Handle varargs )
 }
 
 /**
- * Executes an ExecutionLink
+ * Executes an ExecutionOutputLink
  */
 SCM SchemeSmob::ss_execute (SCM satom)
 {
@@ -66,13 +66,13 @@ SCM SchemeSmob::ss_execute (SCM satom)
     
 	Handle h = verify_handle(satom, "cog-execute");
 	
-	if (h->getType() != EXECUTION_LINK)
+	if (h->getType() != EXECUTION_OUTPUT_LINK)
 	{
 		scm_wrong_type_arg_msg("cog-execute", 1, satom,
-			"ExecutionLink opencog cog-execute");
+			"ExecutionOutputLink opencog cog-execute");
 	}
 
-	return handle_to_scm(ExecutionLink::do_execute(atomspace, h));
+	return handle_to_scm(ExecutionOutputLink::do_execute(atomspace, h));
 }
 
 #endif

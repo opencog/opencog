@@ -662,8 +662,8 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	{
 		char * str = scm_to_locale_string(error_string);
 		// Don't blank out the error string yet.... we need it later.
-		// (probably because someone called cog-bind with an ExecutionLink
-		// in it with a bad scheme schema node.)
+		// (probably because someone called cog-bind with an
+		// ExecutionOutputLink in it with a bad scheme schema node.)
 		// error_string = SCM_EOL;
 		set_captured_stack(SCM_BOOL_F);
 
@@ -697,10 +697,10 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	}
 
 	// If we are not in a shell context, truncate the output, because
-	// it will never ever be displayed. (i.e. don't overflow the output
-	// buffers.) If we are in_shell, then we are here probably because
-	// user typed something that caused some ExecutionLink to call some
-	// scheme snippet.  Display that.
+	// it will never ever be displayed. (i.e. don't overflow the
+	// output buffers.) If we are in_shell, then we are here probably
+	// because user typed something that caused some
+	// ExecutionOutputLink to call some scheme snippet.  Display that.
 	if (not _in_shell)
 		drain_output();
 

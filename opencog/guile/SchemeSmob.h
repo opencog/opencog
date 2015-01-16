@@ -140,7 +140,7 @@ class SchemeSmob
 		static SCM ss_set_af_boundary(SCM);
 		static SCM ss_af(void);
         
-		// ExecutionLinks
+		// ExecutionOutputLinks
 		static SCM ss_execute(SCM);
 
 		// Callback into misc C++ code.
