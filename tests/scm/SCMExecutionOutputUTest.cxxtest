@@ -1,5 +1,5 @@
 /*
- * tests/scm/SCMExecutionUTest.cxxtest
+ * tests/scm/SCMExecutionOutputUTest.cxxtest
  *
  * Copyright (C) 2014 Cosmo Harrigan, Linas Vepstas
  * All Rights Reserved
@@ -29,11 +29,11 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
-#include <opencog/execution/ExecutionLink.h>
+#include <opencog/execution/ExecutionOutputLink.h>
 
 using namespace opencog;
 
-class SCMExecutionUTest :  public CxxTest::TestSuite
+class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
@@ -41,7 +41,7 @@ class SCMExecutionUTest :  public CxxTest::TestSuite
 
 	public:
 
-	SCMExecutionUTest(void)
+	SCMExecutionOutputUTest(void)
 	{
 		try
 		{
@@ -60,7 +60,7 @@ class SCMExecutionUTest :  public CxxTest::TestSuite
         cogserver().loadSCMModules();
 	}
 
-	~SCMExecutionUTest()
+	~SCMExecutionOutputUTest()
 	{
 		// erase the log file if no assertions failed
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -76,14 +76,14 @@ class SCMExecutionUTest :  public CxxTest::TestSuite
 	void threadedAdd(int thread_id, int N);
 };
 
-void SCMExecutionUTest::setUp(void)
+void SCMExecutionOutputUTest::setUp(void)
 {
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
 	eval = new SchemeEval(as);
 }
 
-void SCMExecutionUTest::tearDown(void)
+void SCMExecutionOutputUTest::tearDown(void)
 {
 	delete eval;
 	eval = NULL;
@@ -92,7 +92,7 @@ void SCMExecutionUTest::tearDown(void)
 #define CHKEV(ev) \
 	TSM_ASSERT("Caught scm error during eval", \
 		(false == ev->eval_error()));
-void SCMExecutionUTest::testExecute(void)
+void SCMExecutionOutputUTest::testExecute(void)
 {
         Handle julian = as->addNode(CONCEPT_NODE, "julian");
         Handle prince = as->addNode(CONCEPT_NODE, "prince");
@@ -108,10 +108,10 @@ void SCMExecutionUTest::testExecute(void)
         // There is no king yet
         TS_ASSERT_EQUALS(as->getIncoming(king).size(), 0);
 
-        // Use the "cog-execute!" command to fire an ExecutionLink directly
+        // Use the "cog-execute!" command to fire an ExecutionOutputLink directly
         // from the Scheme shell, containing a GroundedSchemaNode referring to 
         // the previously defined procedure
-        eval->eval("(cog-execute! (ExecutionLink "
+        eval->eval("(cog-execute! (ExecutionOutputLink "
                    "(GroundedSchemaNode \"scm: make-king\") (ListLink "
                    "(ConceptNode \"julian\"))))");
         CHKEV(eval);
@@ -124,7 +124,7 @@ void SCMExecutionUTest::testExecute(void)
 // In this thread, Do same as above, esxcept make lots of Julians,
 // and crown them all.
 // Use a unique evaluator for this thread.
-void SCMExecutionUTest::threadedAdd(int thread_id, int N)
+void SCMExecutionOutputUTest::threadedAdd(int thread_id, int N)
 {
 	AtomSpace* as = &cogserver().getAtomSpace();
 	SchemeEval* ev = new SchemeEval(as);
@@ -153,11 +153,11 @@ void SCMExecutionUTest::threadedAdd(int thread_id, int N)
 		CHKEV(ev);
 		TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h);
 
-		// Use the "cog-execute!" command to fire an ExecutionLink directly
+		// Use the "cog-execute!" command to fire an ExecutionOutputLink directly
 		// from the Scheme shell, containing a GroundedSchemaNode referring to 
 		// the previously defined procedure
 		std::ostringstream ess;
-		ess << "(cog-execute! (ExecutionLink "
+		ess << "(cog-execute! (ExecutionOutputLink "
 		       "(GroundedSchemaNode \"scm: make-king\") "
              "(ListLink (ConceptNode " << jules.str() << "))))";
 		ev->eval(ess.str());
@@ -172,7 +172,7 @@ void SCMExecutionUTest::threadedAdd(int thread_id, int N)
  * different julians all being crowned king.  We use 8 threads in which to do
  * the crowning.
  */
-void SCMExecutionUTest::test_multi_threads(void)
+void SCMExecutionOutputUTest::test_multi_threads(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	AtomSpace* as = &cogserver().getAtomSpace();
@@ -184,7 +184,7 @@ void SCMExecutionUTest::test_multi_threads(void)
 	int num_atoms = 100;
 	for (int i=0; i < n_threads; i++) {
 		thread_pool.push_back(
-			std::thread(&SCMExecutionUTest::threadedAdd, this, i, num_atoms));
+			std::thread(&SCMExecutionOutputUTest::threadedAdd, this, i, num_atoms));
 	}
 	for (std::thread& t : thread_pool) t.join();
 	size_t size = as->getSize();
@@ -197,7 +197,7 @@ void SCMExecutionUTest::test_multi_threads(void)
 	// num_atoms * n_threads  Concept    julians
 	// num_atoms * n_threads  Inheritance  julian prince
 	// num_atoms * n_threads  ListLink  julian
-	// num_atoms * n_threads  ExecutionLink
+	// num_atoms * n_threads  ExecutionOutputLink
 	// num_atoms * n_threads  Inheritance  julian king
 	// for a total of 3 + 5 * num_atoms * n_threads atoms created, total.
 	TS_ASSERT_EQUALS(size, 5 * num_atoms * n_threads + 3);
