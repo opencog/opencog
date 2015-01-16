@@ -18,7 +18,7 @@
                 (InheritanceLink
                     (VariableNode "$B")
                     (VariableNode "$C")))
-            (ExecutionLink
+            (ExecutionOutputLink
                 (GroundedSchemaNode "scm: pln-formula-simple-deduction")
                 (ListLink
                     (InheritanceLink

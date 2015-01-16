@@ -19,7 +19,7 @@
             (AndLink
                 (VariableNode "$C")
                 (VariableNode "$A"))
-            (ExecutionLink
+            (ExecutionOutputLink
                 (GroundedSchemaNode "scm: pln-formula-context-free-to-sensitive")
                 (ListLink
                     (ContextLink

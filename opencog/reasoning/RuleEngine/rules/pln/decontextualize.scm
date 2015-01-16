@@ -27,7 +27,7 @@
                 (InheritanceLink
                     (VariableNode "$A")
                     (VariableNode "$B")))
-            (ExecutionLink
+            (ExecutionOutputLink
                 (GroundedSchemaNode "scm: pln-formula-context")
                 (ListLink
                     (InheritanceLink
@@ -61,7 +61,7 @@
                     (VariableNode "$A")
                     (ListLink
                         (VariableNode "$B"))))
-            (ExecutionLink
+            (ExecutionOutputLink
                 (GroundedSchemaNode "scm: pln-formula-context")
                 (ListLink
                     (EvaluationLink
@@ -98,7 +98,7 @@
             (ContextLink
                 (VariableNode "$C")
                 (VariableNode "$A"))
-            (ExecutionLink
+            (ExecutionOutputLink
                 (GroundedSchemaNode "scm: pln-formula-context")
                 (ListLink
                     (SubsetLink
