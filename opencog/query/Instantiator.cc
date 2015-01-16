@@ -21,21 +21,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/execution/ExecutionLink.h>
+#include <opencog/execution/ExecutionOutputLink.h>
 
 #include "Instantiator.h"
 
 using namespace opencog;
 
-Handle Instantiator::execution_link()
+Handle Instantiator::execution_output_link()
 {
 	// This throws if it can't figure out the schema ...
 	// should we try and catch here ?
-	return ExecutionLink::do_execute(_as, _oset);
+	return ExecutionOutputLink::do_execute(_as, _oset);
 
 	// Unkown proceedure type.  Return it, maybe some other
 	// execution-link handler will be able to process it.
-	// return as->addLink(EXECUTION_LINK, oset, TruthValue::TRUE_TV());
+	// return as->addLink(EXECUTION_OUTPUT_LINK, oset, TruthValue::TRUE_TV());
 }
 
 bool Instantiator::walk_tree(Handle expr)
@@ -71,10 +71,10 @@ bool Instantiator::walk_tree(Handle expr)
 
 	// Fire execution links, if found.
 	_did_exec = false;  // set flag on top-level only
-	if (t == EXECUTION_LINK)
+	if (t == EXECUTION_OUTPUT_LINK)
 	{
 		_did_exec = true;
-		Handle sh(execution_link());
+		Handle sh(execution_output_link());
 		_oset = save_oset;
 		if (Handle::UNDEFINED != sh)
 		{
