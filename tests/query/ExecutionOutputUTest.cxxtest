@@ -1,5 +1,5 @@
 /*
- * tests/query/ExecutionUTest.cxxtest
+ * tests/query/ExecutionOutputUTest.cxxtest
  *
  * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -29,7 +29,7 @@
 
 using namespace opencog;
 
-class ExecutionUTest :  public CxxTest::TestSuite
+class ExecutionOutputUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
@@ -38,7 +38,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
 
 	public:
 
-		ExecutionUTest(void)
+		ExecutionOutputUTest(void)
 		{
 			try
 			{
@@ -56,7 +56,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
 			// logger().setPrintToStdoutFlag(true);
 		}
 
-		~ExecutionUTest()
+		~ExecutionOutputUTest()
 		{
 			// erase the log file if no assertions failed
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -73,15 +73,15 @@ class ExecutionUTest :  public CxxTest::TestSuite
  * This function sets up the following structures:
  *  # IF _obj(be, $var1) ^ 
  *       $prep($var1, $var2) 
- *      THEN %ExecutionLink("make-it", $var1, $prep)
+ *      THEN %ExecutionOutputLink("make-it", $var1, $prep)
  */
 #define an as->addNode
 #define al as->addLink
-void ExecutionUTest::tearDown(void)
+void ExecutionOutputUTest::tearDown(void)
 {
 	delete as;
 }
-void ExecutionUTest::setUp(void)
+void ExecutionOutputUTest::setUp(void)
 {
 	as = new AtomSpace();
 
@@ -104,7 +104,7 @@ void ExecutionUTest::setUp(void)
 				)
 			)
 		),
-		al(EXECUTION_LINK,
+		al(EXECUTION_OUTPUT_LINK,
 			an(GROUNDED_SCHEMA_NODE, "scm:make-verb-prep"),
 			al(LIST_LINK,
 				an(VARIABLE_NODE, "$var1"),
@@ -165,7 +165,7 @@ void ExecutionUTest::setUp(void)
 #define getlink(hand,pos) as->getOutgoing(hand,pos)
 #define getarity(hand) as->getArity(hand)
 
-void ExecutionUTest::test_exec(void)
+void ExecutionOutputUTest::test_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 

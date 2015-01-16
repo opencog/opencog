@@ -29,7 +29,7 @@
     (AndLink
      (VariableNode "$A")
      (VariableNode "$B"))
-    (ExecutionLink
+    (ExecutionOutputLink
      (GroundedSchemaNode "scm: pln-formula-and")
      (ListLink
       (VariableNode "$A")

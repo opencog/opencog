@@ -746,8 +746,8 @@ Then you can call it from C++ as follows:
 If <tt>do-stuff</tt> doesn't take any arguments, then set <tt>hlink</tt>
 to <tt>Handle::UNDEFINED</tt>, or pass an empty [[ListLink]].
 
-The above form is used by the [[ExecutionLink]] to embed scheme callouts
-into hypergraphs.
+The above form is used by the [[ExecutionOutputLink]] to embed scheme
+callouts into hypergraphs.
 
 === Calling C++ from scheme ===
 The C++ programmer may define new scheme primitive functions by using 
@@ -759,9 +759,9 @@ extending SchemePrimitive.h, but this should not be hard.
 The example program PrimitiveExample.cc shows how.
 
 ===Calling scheme from Hypergraphs===
-The [[ExecutionLink]], whem used with the [[GroundedSchemaNode]], allows
-scheme code to be invoked when the given ExecutionLink is evaluated.
-See that page for details.
+The [[ExecutionOutputLink]], whem used with the
+[[GroundedSchemaNode]], allows scheme code to be invoked when the
+given ExecutionOutputLink is evaluated.  See that page for details.
 
 ===Multi-threading===
 Guile is multi-threading-capable, and can be used with multiple threads

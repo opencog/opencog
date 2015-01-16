@@ -44,7 +44,7 @@ class Instantiator
 
 		std::vector<Handle> _oset;
 		bool walk_tree(Handle tree);
-		Handle execution_link(void);
+		Handle execution_output_link(void);
 		bool _did_exec;
 
 	public:

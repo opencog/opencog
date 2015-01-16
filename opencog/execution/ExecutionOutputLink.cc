@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/ExecutionLink.cc
+ * opencog/execution/ExecutionOutputLink.cc
  *
  * Copyright (C) 2009, 2013 Linas Vepstas
  * All Rights Reserved
@@ -24,38 +24,38 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
-#include "ExecutionLink.h"
+#include "ExecutionOutputLink.h"
 
 using namespace opencog;
 
-ExecutionLink::ExecutionLink(const HandleSeq& oset,
-                             TruthValuePtr tv,
-                             AttentionValuePtr av)
-    : Link(EXECUTION_LINK, oset, tv, av)
+ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
+                                         TruthValuePtr tv,
+                                         AttentionValuePtr av)
+    : Link(EXECUTION_OUTPUT_LINK, oset, tv, av)
 {
     if ((2 != oset.size()) or
        (LIST_LINK != oset[1]->getType()))
     {
-        throw RuntimeException(TRACE_INFO, "ExecutionLink must have schema and args!");
+        throw RuntimeException(TRACE_INFO, "ExecutionOutputLink must have schema and args!");
     }
 }
 
-ExecutionLink::ExecutionLink(Handle schema, Handle args,
-                             TruthValuePtr tv,
-                             AttentionValuePtr av)
-    : Link(EXECUTION_LINK, schema, args, tv, av)
+ExecutionOutputLink::ExecutionOutputLink(Handle schema, Handle args,
+                                         TruthValuePtr tv,
+                                         AttentionValuePtr av)
+    : Link(EXECUTION_OUTPUT_LINK, schema, args, tv, av)
 {
     if (LIST_LINK != args->getType()) {
-        throw RuntimeException(TRACE_INFO, "ExecutionLink must have schema and args!");
+        throw RuntimeException(TRACE_INFO, "ExecutionOutputLink must have schema and args!");
     }
 }
 
-/// do_execute -- execute the GroundedSchemaNode of the ExecutionLink
+/// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
 ///
-/// Expects the argument to be an ExecutionLink, which should have the
+/// Expects the argument to be an ExecutionOutputLink, which should have the
 /// following structure:
 ///
-///     ExecutionLink
+///     ExecutionOutputLink
 ///         GroundedSchemaNode "lang: func_name"
 ///         ListLink
 ///             SomeAtom
@@ -65,45 +65,45 @@ ExecutionLink::ExecutionLink(Handle schema, Handle args,
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-Handle ExecutionLink::do_execute(AtomSpace* as, Handle execlnk)
+Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle execlnk)
 {
-    if (EXECUTION_LINK != execlnk->getType()) {
-        throw RuntimeException(TRACE_INFO, "Expecting to get an ExecutionLink!");
+    if (EXECUTION_OUTPUT_LINK != execlnk->getType()) {
+        throw RuntimeException(TRACE_INFO, "Expecting to get an ExecutionOutputLink!");
     }
     LinkPtr l(LinkCast(execlnk));
     return do_execute(as, l->getOutgoingSet());
 }
 
-/// do_execute -- execute the GroundedSchemaNode of the ExecutionLink
+/// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
 ///
 /// Expects the sequence to be exactly two atoms long.
 /// Expects the first handle of the sequence to be a GroundedSchemaNode
 /// Expects the second handle of the sequence to be a ListLink
 /// Executes the GroundedSchemaNode, supplying the second handle as argument
 ///
-Handle ExecutionLink::do_execute(AtomSpace* as, const HandleSeq& sna)
+Handle ExecutionOutputLink::do_execute(AtomSpace* as, const HandleSeq& sna)
 {
     if (2 != sna.size())
     {
-        throw RuntimeException(TRACE_INFO, "Incorrect arity for an ExecutionLink!");
+        throw RuntimeException(TRACE_INFO, "Incorrect arity for an ExecutionOutputLink!");
     }
     return do_execute(as, sna[0], sna[1]);
 }
 
-/// do_execute -- execute the GroundedSchemaNode of the ExecutionLink
+/// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
 ///
 /// Expects "gsn" to be a GroundedSchemaNode
 /// Expects "args" to be a ListLink
 /// Executes the GroundedSchemaNode, supplying the args as argument
 ///
-Handle ExecutionLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
+Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
 {
     if (GROUNDED_SCHEMA_NODE != gsn->getType()) {
         throw RuntimeException(TRACE_INFO, "Expecting GroundedSchemaNode!");
     }
     if (LIST_LINK != args->getType())
     {
-        throw RuntimeException(TRACE_INFO, "Expecting arguments to ExecutionLink!");
+        throw RuntimeException(TRACE_INFO, "Expecting arguments to ExecutionOutputLink!");
     }
 
     // Get the schema name.

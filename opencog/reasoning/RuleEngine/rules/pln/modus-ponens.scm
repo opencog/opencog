@@ -15,7 +15,7 @@
                     (VariableNode "$A")
                     (VariableNode "$B")))
             (ListLink
-                (ExecutionLink
+                (ExecutionOutputLink
                     (GroundedSchemaNode "scm: pln-formula-simple-modus-ponens")
                     (ListLink
                         (ImplicationLink

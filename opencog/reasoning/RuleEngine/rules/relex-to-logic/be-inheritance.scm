@@ -51,7 +51,7 @@
                     (WordNode "be")
                 )
             )
-            (ExecutionLink
+            (ExecutionOutputLink
                 (GroundedSchemaNode "scm: pre-be-inheritance-rule")
                 (ListLink
                     (VariableNode "$X")

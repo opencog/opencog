@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/ExectuionLink.h
+ * opencog/execution/ExecutionOutputLink.h
  *
  * Copyright (C) 2013 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_EXECUTION_LINK_H
-#define _OPENCOG_EXECUTION_LINK_H
+#ifndef _OPENCOG_EXECUTION_OUTPUT_LINK_H
+#define _OPENCOG_EXECUTION_OUTPUT_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
@@ -32,14 +32,14 @@ namespace opencog
  *  @{
  */
 
-class ExecutionLink : public Link
+class ExecutionOutputLink : public Link
 {
 public:
-    ExecutionLink(const HandleSeq& oset,
+    ExecutionOutputLink(const HandleSeq& oset,
          TruthValuePtr tv = TruthValue::NULL_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-    ExecutionLink(Handle schema, Handle args,
+    ExecutionOutputLink(Handle schema, Handle args,
          TruthValuePtr tv = TruthValue::NULL_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
@@ -55,4 +55,4 @@ public:
 /** @}*/
 }
 
-#endif // _OPENCOG_EXECUTION_LINK_H
+#endif // _OPENCOG_EXECUTION_OUTPUT_LINK_H
