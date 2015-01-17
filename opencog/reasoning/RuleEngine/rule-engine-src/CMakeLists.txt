@@ -1,7 +1,10 @@
 #rule engine lib build
 ADD_LIBRARY(ruleengine SHARED
+pln/BackwardChainer.cc
+pln/PLNCommons.cc
 pln/ForwardChainer.cc
 pln/Chainer.cc
+pln/BCPatternMatch.cc
 pln/ForwardChainInputMatchCB.cc
 pln/ForwardChainPatternMatchCB.cc
 RuleEngineModule.cc
@@ -34,6 +37,7 @@ ENDIF (WIN32)
 INSTALL (FILES
 pln/ForwardChainer.h
 pln/Chainer.h
+pln/BCPatternMatch.h
 pln/ForwardChainInputMatchCB.h
 pln/ForwardChainPatternMatchCB.h
 DESTINATION "include/${PROJECT_NAME}/reasoning/RuleEngine/rule-engine-src"

@@ -25,13 +25,17 @@
 
 #include <opencog/atomspace/Handle.h>
 
-namespace opencog{
+namespace opencog {
 
 class InferenceSCM {
 private:
 	static InferenceSCM* _inst;
 	void init(void);
 	Handle do_forward_chaining(Handle h);
+	/**
+	 * @return a handle to a ListLink  of ListLinks holding a variable followed by all grounding nodes.
+	 */
+	Handle do_backward_chaining(Handle h);
 public:
 	InferenceSCM();
 	virtual ~InferenceSCM();

@@ -25,9 +25,7 @@
 #include <opencog/guile/load-file.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/Config.h>
-#include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/Logger.h>
-#include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
 
@@ -36,6 +34,7 @@ ForwardChainer::ForwardChainer(AtomSpace * as) :
 {
 	search_in_af = true;
 	hcurrent_choosen_rule_ = Handle::UNDEFINED;
+	commons_ = new PLNCommons(as);
 	scm_eval_ = new SchemeEval(as);
 	fcim_ = new ForwardChainInputMatchCB(main_atom_space,
 			target_list_atom_space, this); //fetching from main and copying it to target_list_atom_space
@@ -46,6 +45,7 @@ ForwardChainer::ForwardChainer(AtomSpace * as) :
 
 ForwardChainer::~ForwardChainer()
 {
+	delete commons_;
 	delete scm_eval_;
 	delete fcim_;
 	delete fcpm_;
@@ -131,29 +131,6 @@ void ForwardChainer::do_chain(Handle htarget)
 
 }
 
-Handle ForwardChainer::create_bindLink(Handle himplicant)
-		throw (opencog::InvalidParamException)
-{
-	if (!LinkCast(himplicant))
-		throw opencog::InvalidParamException(TRACE_INFO,
-				"Input must be a link type ");
-	HandleSeq listLink_elem = get_nodes(himplicant,
-			vector<Type> { VARIABLE_NODE });
-	Handle var_listLink = main_atom_space->addLink(LIST_LINK, listLink_elem,
-			TruthValue::TRUE_TV());
-
-	Handle implicand = himplicant; // the output should be the query result.
-	HandleSeq implicationLink_elem { himplicant, implicand };
-	Handle implicatoinLink = main_atom_space->addLink(IMPLICATION_LINK,
-			implicationLink_elem, TruthValue::TRUE_TV());
-
-	HandleSeq binkLink_elements { var_listLink, implicatoinLink };
-	Handle bindLink = main_atom_space->addLink(BIND_LINK, binkLink_elements,
-			TruthValue::TRUE_TV());
-
-	return bindLink;
-}
-
 void ForwardChainer::choose_input(Handle htarget)
 {
 	if (NodeCast(htarget)) {
@@ -164,7 +141,7 @@ void ForwardChainer::choose_input(Handle htarget)
 	if (LinkCast(htarget)) {
 		map<Handle, string> hnode_vname_map = choose_variable(htarget);
 		Handle implicant = target_to_pmimplicant(htarget, hnode_vname_map);
-		Handle bindLink = create_bindLink(implicant);
+		Handle bindLink = commons_->create_bindLink(implicant);
 		//match all in main_atom_space using the above bindLink and add them to target list
 		chaining_pm.do_bindlink(bindLink, *fcim_); //result is added to target_list in fcim_'s grounding call back handler
 	}
@@ -173,7 +150,7 @@ void ForwardChainer::choose_input(Handle htarget)
 map<Handle, string> ForwardChainer::choose_variable(Handle htarget)
 {
 	map<Handle, string> hnode_vname_map;
-	vector<Handle> candidates = get_nodes(htarget, vector<Type>());
+	vector<Handle> candidates =commons_->get_nodes(htarget, vector<Type>());
 	map<Handle, HandleSeq> node_iset_map;
 	//xxx don't choose two or more nodes linked by identical reference( i.e choose only one whenever
 	//there are more than one nodes linked by the same link)
@@ -205,40 +182,6 @@ map<Handle, string> ForwardChainer::choose_variable(Handle htarget)
 		hnode_vname_map[h] = ("$var-" + NodeCast((h))->getName());
 	}
 	return hnode_vname_map;
-}
-
-HandleSeq ForwardChainer::get_nodes(Handle hinput,
-		vector<Type> required_nodes)
-{
-	HandleSeq found_nodes;
-	if (LinkCast(hinput)) {
-		HandleSeq hsoutgoing = main_atom_space->getOutgoing(hinput);
-
-		for (auto it = hsoutgoing.begin(); it != hsoutgoing.end(); ++it) {
-			HandleSeq tmp = get_nodes(*it, required_nodes);
-			for (Handle h : tmp) {
-				if (!exists(found_nodes, h))
-					found_nodes.push_back(h);
-			}
-		}
-		return found_nodes;
-	} else {
-		if (NodeCast(hinput)) {
-			Type t = NodeCast(hinput)->getType();
-			if (required_nodes.empty()) { //empty means all kinds of nodes
-				if (!exists(found_nodes, hinput))
-					found_nodes.push_back(hinput);
-			} else {
-				auto it = find(required_nodes.begin(), required_nodes.end(), t); //check if this node is in our wish list
-				if (it != required_nodes.end()) {
-					if (!exists(found_nodes, hinput))
-						found_nodes.push_back(hinput);
-				}
-			}
-			return found_nodes;
-		}
-	}
-	return found_nodes;
 }
 
 Handle ForwardChainer::target_to_pmimplicant(Handle htarget,

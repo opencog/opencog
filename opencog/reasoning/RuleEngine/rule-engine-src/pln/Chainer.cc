@@ -42,6 +42,7 @@ float Chainer::target_tv_fitness(Handle h)
 	TruthValuePtr ptv = target_list_atom_space->getTV(h);
 	confidence_t c = ptv->getConfidence();
 	strength_t s = ptv->getMean();
+
 	return (pow((1 - s), ctv_fitnes) * (pow(c, (2 - ctv_fitnes))));
 }
 

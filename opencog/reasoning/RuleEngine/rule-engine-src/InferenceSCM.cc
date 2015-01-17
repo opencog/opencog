@@ -25,6 +25,7 @@
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/reasoning/RuleEngine/rule-engine-src/pln/ForwardChainer.h>
+#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/BackwardChainer.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
@@ -45,8 +46,11 @@ InferenceSCM::~InferenceSCM() {
 void InferenceSCM::init(void) {
 	_inst = new InferenceSCM();
 #ifdef HAVE_GUILE
-    //all commands for invoking the rule engine from scm shell should be declared here
-	define_scheme_primitive("cog-fc", &InferenceSCM::do_forward_chaining, _inst); //eg. from scm shell (cog-fc (InheritanceLink (ConceptNode "cat")(ConceptNode "animal"))
+	//all commands for invoking the rule engine from scm shell should be declared here
+	define_scheme_primitive("cog-fc", &InferenceSCM::do_forward_chaining,
+			_inst); //eg. from scm shell (cog-fc (InheritanceLink (ConceptNode "cat")(ConceptNode "animal"))
+	define_scheme_primitive("cog-bc", &InferenceSCM::do_backward_chaining,
+			_inst); //backward chaining
 #endif
 }
 
@@ -55,8 +59,28 @@ Handle InferenceSCM::do_forward_chaining(Handle h) {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
 	ForwardChainer fc(as);
 	fc.do_chain(h); //START FORWARD CHAINING
-    HandleSeq result = fc.get_chaining_result();
-    return as->addLink(LIST_LINK,result,TruthValue::DEFAULT_TV());
+	HandleSeq result = fc.get_chaining_result();
+	return as->addLink(LIST_LINK, result, TruthValue::DEFAULT_TV());
+#else
+	return Handle::UNDEFINED;
+#endif
+}
+
+Handle InferenceSCM::do_backward_chaining(Handle h) {
+#ifdef HAVE_GUILE
+	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
+	BackwardChainer bc(as);
+	bc.do_chain(h);
+	map<Handle, HandleSeq> soln = bc.get_chaining_result();
+	HandleSeq soln_list_link;
+	for (auto it = soln.begin(); it != soln.end(); ++it) {
+		HandleSeq hs;
+		hs.push_back(it->first);
+		hs.insert(hs.end(), it->second.begin(), it->second.end());
+		soln_list_link.push_back(
+				as->addLink(LIST_LINK, hs, TruthValue::DEFAULT_TV()));
+	}
+	return as->addLink(LIST_LINK, soln_list_link, TruthValue::DEFAULT_TV());
 #else
 	return Handle::UNDEFINED;
 #endif

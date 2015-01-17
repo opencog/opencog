@@ -1,0 +1,354 @@
+/*
+ * BackwardChainerUTest.cxxtest
+ *
+ *  Created on: Oct 20, 2014
+ *      Author: misgana
+ */
+#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/BackwardChainer.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/guile/load-file.h>
+
+using namespace opencog;
+//#define DEBUG 1
+class BackwardChainerUTest: public CxxTest::TestSuite {
+private:
+	AtomSpace *as_;
+	SchemeEval* eval_;
+	BackwardChainer * bc_;
+public:
+	BackwardChainerUTest() {
+		server(CogServer::createInstance);
+		as_ = &cogserver().getAtomSpace();
+		eval_ = new SchemeEval(as_);
+		bc_ = new BackwardChainer(as_);
+
+		cogserver().loadModules();
+		cogserver().loadSCMModules();
+		config().set("MODULES", "opencog/query/libQueryModule.so");
+
+	}
+	~BackwardChainerUTest() {
+		delete bc_;
+		delete eval_;
+	}
+	void setUp();
+	void tearDown();
+
+	void test_query_rule_base();
+
+	void test_query_knowledge_base();
+	void test_get_grounded();
+	void test_filter_rules();
+	void test_chase_var_values();
+	void test_target_var_groundings();
+	void test_get_root_logical_link();
+	void test_get_unvisited_logical_link();
+	void test_get_logical_link_premise_map();
+	void test_join_vgrounding_maps();
+	void test_unify();
+	void test_bakcward_chain();
+	void test_do_bc();
+
+};
+
+void BackwardChainerUTest::setUp() {
+	config().set("SCM_PRELOAD",
+			"opencog/atomspace/core_types.scm, "
+					"opencog/scm/utilities.scm, "
+					"opencog/python/pln/examples/backward_chaining/criminal.scm,tests/reasoning/RuleEngine/bc-test/bc-example.scm");
+	load_scm_files_from_config(*as_);
+}
+
+void BackwardChainerUTest::tearDown() {
+	as_->clear();
+}
+
+void BackwardChainerUTest::test_query_rule_base() {
+	string query =
+			"(InheritanceLink(VariableNode \"$x\")(ConceptNode \"criminal\"))";
+	Handle h = eval_->eval_h(query);
+	HandleSeq hs = bc_->query_rule_base(h);
+	TS_ASSERT_EQUALS(hs.size(), 1);
+}
+
+void BackwardChainerUTest::test_query_knowledge_base() {
+	string query =
+			"(InheritanceLink(VariableNode \"$x\")(ConceptNode \"criminal\"))";
+	Handle h = eval_->eval_h(query);
+	HandleSeq hs = bc_->query_knowledge_base(h);
+	for (Handle h : hs)
+		TS_ASSERT_EQUALS(hs.size(), 1);
+}
+
+void BackwardChainerUTest::test_get_grounded() {
+	string r1 = "(InheritanceLink(VariableNode \"$x\")(ConceptNode \"animal\"))";
+	Handle h1 = eval_->eval_h(r1);
+	string r2 = "(InheritanceLink(ConceptNode \"cat\")(ConceptNode \"animal\"))";
+	Handle h2 = eval_->eval_h(r2);
+	string r3 = "(InheritanceLink(ConceptNode \"dog\")(ConceptNode \"animal\"))";
+	Handle h3 = eval_->eval_h(r3);
+	HandleSeq hs = { h1, h2, h3 };
+	HandleSeq hstest = bc_->get_grounded(hs);
+	TS_ASSERT_EQUALS(hstest.size(), 2);
+}
+
+void BackwardChainerUTest::test_filter_rules() {
+	string bl1 =
+			"(BindLink (ListLink  (VariableNode \"$A\") (VariableNode \"$B\")) "
+					"(ImplicationLink (AndLink (ImplicationLink (VariableNode \"$A\") "
+					"(VariableNode \"$B\"))) (ListLink (ExecutionLink "
+					" (GroundedSchemaNode \"scm: pln-formula-simple-modus-ponens\") "
+					"(ListLink (ImplicationLink (VariableNode \"$A\")  (VariableNode \"$B\")))))))";
+	Handle hb1 = eval_->eval_h(bl1);
+	string bl2 =
+			"(ImplicationLink (stv .99 .99)  (AndLink (InheritanceLink (VariableNode \"$x\") "
+					"(ConceptNode \"American\")) (InheritanceLink (VariableNode \"$y\") (ConceptNode \"weapon\")) "
+					"(EvaluationLink (PredicateNode \"sell\") (ListLink (VariableNode \"$x\")  (VariableNode \"$y\")"
+					"  (VariableNode \"$z\"))) (InheritanceLink (VariableNode \"$z\")   (ConceptNode \"hostile\")))"
+					" (InheritanceLink  (VariableNode \"$x\")   (ConceptNode \"criminal\")))";
+	Handle hb2 = eval_->eval_h(bl2);
+	Handle hb1_il = eval_->eval_h(
+			"(ImplicationLink (VariableNode \"$A\")  (VariableNode \"$B\"))");
+	Handle hb2_il =
+			eval_->eval_h(
+					"(InheritanceLink  (VariableNode \"$x\")   (ConceptNode \"criminal\"))");
+
+	HandleSeq hsresult = { hb1_il, hb2_il };
+	HandleSeq hsrules = bc_->filter_rules(hsresult);
+	TS_ASSERT_EQUALS(hsrules.size(), 1);
+}
+
+void BackwardChainerUTest::test_chase_var_values() {
+	vector<map<Handle, HandleSeq>> inference_list;
+	Handle h1 = eval_->eval_h("(VariableNode \"$aa\")");
+	Handle h2 = eval_->eval_h("(VariableNode \"$a\")");
+	HandleSeq hs1 = { h2 };
+	Handle h3 = eval_->eval_h("(ConceptNode \"$missile@123\")");
+	HandleSeq hs2 = { h3 };
+	map<Handle, HandleSeq> inference1 = { { h1, hs1 } };
+	map<Handle, HandleSeq> inference2 = { { h2, hs2 } };
+	inference_list.push_back(inference1);
+	inference_list.push_back(inference2);
+	HandleSeq result;
+	result = bc_->chase_var_values(h1, inference_list, result);
+	TS_ASSERT_EQUALS(result.size(), 1);
+	TS_ASSERT_EQUALS(result[0], h3);
+}
+
+void BackwardChainerUTest::test_target_var_groundings() {
+	string query =
+			"(InheritanceLink(VariableNode \"$x\")(ConceptNode \"criminal\"))";
+	Handle hgoal = eval_->eval_h(query);
+	Handle hvar_1 = eval_->eval_h("(VariableNode \"$x\")");
+	TS_ASSERT_EQUALS(hvar_1.value(), as_->getOutgoing(hgoal)[0].value()); //just out of curiosity
+	map<Handle, HandleSeq> var_sol;
+	Handle v1 = eval_->eval_h("(ConceptNode \"a\")");
+	Handle v2 = eval_->eval_h("(ConceptNode \"b\")");
+	Handle v3 = eval_->eval_h("(ConceptNode \"c\")");
+	HandleSeq hs = { v1, v2, v3 };
+	var_sol[hvar_1] = hs;
+	vector<map<Handle, HandleSeq>> var_soln_list = { var_sol };
+	auto var_val_map = bc_->ground_target_vars(hgoal, var_soln_list);
+	auto it = var_val_map.begin();
+
+	string query2 =
+			"(EvaluationLink (PredicateNode \"enemy_of\") (ListLink  (VariableNode \"$b\")(ConceptNode \"America\") ))";
+	Handle hgoal2 = eval_->eval_h(query2);
+	Handle hvar_2 = eval_->eval_h("(VariableNode \"$b\")");
+	map<Handle, HandleSeq> var_sol2;
+	Handle v11 = eval_->eval_h("(ConceptNode \"Nono\")");
+	Handle v22 = eval_->eval_h("(VariableNode \"$v\")");
+	HandleSeq hs2 = { v11, v22 };
+	var_sol2[hvar_2] = hs2;
+	vector<map<Handle, HandleSeq>> var_soln_list2 = { var_sol2 };
+	var_val_map = bc_->ground_target_vars(hgoal2, var_soln_list2);
+	it = var_val_map.begin();
+
+}
+
+void BackwardChainerUTest::test_get_root_logical_link() {
+	string tc1 =
+			"(ImplicationLink (stv .99 .99)  (AndLink (InheritanceLink (VariableNode \"$x\") "
+					"(ConceptNode \"American\")) (InheritanceLink (VariableNode \"$y\") (ConceptNode \"weapon\")) "
+					"(EvaluationLink (PredicateNode \"sell\") (ListLink (VariableNode \"$x\")  (VariableNode \"$y\")"
+					"  (VariableNode \"$z\"))) (InheritanceLink (VariableNode \"$z\")   (ConceptNode \"hostile\")))"
+					" (InheritanceLink  (VariableNode \"$x\")   (ConceptNode \"criminal\")))";
+	Handle htc1 = bc_->get_root_logical_link(eval_->eval_h(tc1));
+	TS_ASSERT_EQUALS(as_->getType(htc1), AND_LINK);
+	Handle htc2 =
+			bc_->get_root_logical_link(
+					eval_->eval_h(
+							"(ImplicationLink (VariableNode \"$A\")  (VariableNode \"$B\"))"));
+	TS_ASSERT_EQUALS(htc2, Handle::UNDEFINED);
+}
+
+void BackwardChainerUTest::test_get_unvisited_logical_link() {
+
+}
+
+void BackwardChainerUTest::test_get_logical_link_premise_map() {
+	string tc1 =
+			"(ImplicationLink (stv .99 .99)  (AndLink (InheritanceLink (VariableNode \"$x\") "
+					"(ConceptNode \"American\")) (InheritanceLink (VariableNode \"$y\") (ConceptNode \"weapon\")) "
+					"(EvaluationLink (PredicateNode \"sell\") (ListLink (VariableNode \"$x\")  (VariableNode \"$y\")"
+					"  (VariableNode \"$z\"))) (InheritanceLink (VariableNode \"$z\")   (ConceptNode \"hostile\")))"
+					" (InheritanceLink  (VariableNode \"$x\")   (ConceptNode \"criminal\")))";
+	Handle htc1 = eval_->eval_h(tc1);
+	Handle htc2 = eval_->eval_h(
+			"(ImplicationLink (VariableNode \"$A\")  (VariableNode \"$B\"))");
+	map<Handle, HandleSeq> result = bc_->get_logical_link_premises_map(htc1);
+	TS_ASSERT_EQUALS(result.size(), 1);
+	auto it = result.begin();
+	TS_ASSERT_EQUALS(it->second.size(), 4);
+	result = bc_->get_logical_link_premises_map(htc2);
+	TS_ASSERT_EQUALS(result.size(), 1);
+	it = result.begin();
+	TS_ASSERT_EQUALS(it->first, Handle::UNDEFINED);
+	TS_ASSERT_EQUALS(it->second.size(), 1);
+}
+
+void BackwardChainerUTest::test_join_vgrounding_maps() {
+	Handle hvar = eval_->eval_h("(VariableNode \"$x\")");
+	string p1 =
+			"(InheritanceLink(VariableNode \"$x\") (ConceptNode \"American\"))";
+	Handle hp1 = eval_->eval_h(p1);
+	string p1g1 =
+			"(InheritanceLink (ConceptNode \"West\") (ConceptNode \"American\"))";
+	Handle hp1g1 = eval_->eval_h(p1g1);
+	string p2 =
+			"(InheritanceLink(VariableNode \"$x\") (ConceptNode \"Psychotic\"))";
+	Handle hp2 = eval_->eval_h(p2);
+	string p2g1 =
+			"(InheritanceLink (ConceptNode \"West\") (ConceptNode \"Psychotic\"))";
+	Handle hp2g1 = eval_->eval_h(p2g1);
+	string p2g2 =
+			"(InheritanceLink (ConceptNode \"South\") (ConceptNode \"Psychotic\"))";
+	Handle hp2g2 = eval_->eval_h(p2g2);
+	Handle hvar_val1 = eval_->eval_h("(ConceptNode \"West\")");
+	Handle hvar_val2 = eval_->eval_h("(ConceptNode \"South\")");
+	Handle llink1 = as_->addLink(AND_LINK, HandleSeq { hp1, hp2 });
+	Handle llink2 = as_->addLink(OR_LINK, HandleSeq { hp1, hp2 });
+	map<Handle, HandleSeq> var_grounding1 =
+			{ { hvar, HandleSeq { hvar_val1 } } };
+	map<Handle, HandleSeq> var_grounding2 = { { hvar, HandleSeq { hvar_val1,
+			hvar_val2 } } };
+	map<Handle, map<Handle, HandleSeq>> premise_var_grounding = { { hp1,
+			var_grounding1 }, { hp2, var_grounding2 } };
+	map<Handle, HandleSeq> result1 = bc_->join_premise_vgrounding_maps(llink1,
+			premise_var_grounding);
+	map<Handle, HandleSeq> result2 = bc_->join_premise_vgrounding_maps(llink2,
+			premise_var_grounding);
+	TS_ASSERT_EQUALS(result1.size(), 1);
+	TS_ASSERT_EQUALS(result1[hvar].size(), 1);
+	TS_ASSERT_EQUALS(result1[hvar][0], hvar_val1);
+	TS_ASSERT_EQUALS(result2.size(), 1);
+	TS_ASSERT_EQUALS(result2[hvar].size(), 2);
+}
+
+void BackwardChainerUTest::test_unify() {
+	string target =
+			"(EvaluationLink (PredicateNode \"sell\") (ListLink (VariableNode \"$x\")(VariableNode \"$y\")(VariableNode \"$z\")))";
+	Handle htarget = eval_->eval_h(target);
+	string match =
+			"(EvaluationLink (PredicateNode \"sell\") (ListLink (ConceptNode \"west\")(VariableNode \"$a\")(ConceptNode \"nono\")))";
+	Handle hmatch = eval_->eval_h(match);
+	map<Handle, HandleSeq> result;
+	result = bc_->unify(htarget, hmatch, result);
+	TS_ASSERT_EQUALS(result.size(), 3);
+}
+void BackwardChainerUTest::test_bakcward_chain() {
+
+}
+void BackwardChainerUTest::test_do_bc() {
+	Handle htarget =
+			eval_->eval_h(
+					"(InheritanceLink (VariableNode \"$isCriminal\")   (ConceptNode \"criminal\"))");
+	Handle htarget2 =
+			eval_->eval_h(
+					"(EvaluationLink(PredicateNode \"sell\")(ListLink (ConceptNode \"West\")(VariableNode \"$a\") (ConceptNode \"Nono\")))");
+	Handle htarget3 =
+			eval_->eval_h(
+					"(EvaluationLink(PredicateNode \"sell\") (ListLink  (VariableNode \"$x\")(VariableNode \"$y\")(VariableNode \"$z\")))");
+	Handle htarget4 =
+			eval_->eval_h(
+					"(InheritanceLink (VariableNode \"$isAmerican\")   (ConceptNode \"American\"))");
+	Handle htarget5 =
+			eval_->eval_h(
+					"(InheritanceLink (VariableNode \"$whosFrog\")(ConceptNode \"Frog\"))");
+	Handle htarget6 =
+			eval_->eval_h(
+					"(InheritanceLink (VariableNode \"$whosGreen\")(ConceptNode \"green\"))");
+	Handle htarget7 =
+			eval_->eval_h(
+					"(InheritanceLink (VariableNode \"$whosCanary\")(ConceptNode \"Canary\"))");
+
+	map<Handle, HandleSeq> result = bc_->do_bc(htarget);
+	TS_ASSERT_EQUALS(result.size(), 1);
+	auto it = result.begin();
+	TS_ASSERT_EQUALS(it->second.size(), 1);
+	TS_ASSERT_EQUALS(it->second[0].value(),
+			eval_->eval_h("(ConceptNode \"West\")").value());
+
+	result = bc_->do_bc(htarget6);
+	TS_ASSERT_EQUALS(result.size(), 1);
+	it = result.begin();
+	TS_ASSERT_EQUALS(it->second.size(), 1);
+	TS_ASSERT_EQUALS(it->second[0].value(),
+			eval_->eval_h("(ConceptNode \"Fritz\")").value());
+
+	result = bc_->do_bc(htarget5);
+	TS_ASSERT_EQUALS(result.size(), 1);
+	it = result.begin();
+	TS_ASSERT_EQUALS(it->second.size(), 1);
+	TS_ASSERT_EQUALS(it->second[0].value(),
+			eval_->eval_h("(ConceptNode \"Fritz\")").value());
+
+	result = bc_->do_bc(htarget7);
+	TS_ASSERT_EQUALS(result.size(), 1);
+	it = result.begin();
+	TS_ASSERT_EQUALS(it->second.size(), 0);
+
+	result = bc_->do_bc(htarget4);
+	TS_ASSERT_EQUALS(result.size(), 1);
+	it = result.begin();
+	TS_ASSERT_EQUALS(it->second.size(), 1);
+	TS_ASSERT_EQUALS(it->second[0].value(),
+			eval_->eval_h("(ConceptNode \"West\")").value());
+
+	result = bc_->do_bc(htarget3);
+	TS_ASSERT_EQUALS(result.size(), 3);
+	it = result.begin();
+	TS_ASSERT_EQUALS(it->second.size(), 1);
+	TS_ASSERT_EQUALS(it->second[0].value(),
+			eval_->eval_h("(ConceptNode \"West\")").value());
+	++it;
+	TS_ASSERT_EQUALS(it->second.size(), 1);
+	TS_ASSERT_EQUALS(it->second[0].value(),
+			eval_->eval_h("(ConceptNode \"missile@123\")").value());
+	++it;
+	TS_ASSERT_EQUALS(it->second.size(), 1);
+	TS_ASSERT_EQUALS(it->second[0].value(),
+			eval_->eval_h("(ConceptNode \"Nono\")").value());
+
+	result = bc_->do_bc(htarget2);
+	TS_ASSERT_EQUALS(result.size(), 1);
+	it = result.begin();
+	TS_ASSERT_EQUALS(it->second.size(), 1);
+	TS_ASSERT_EQUALS(it->second[0].value(),
+			eval_->eval_h("(ConceptNode \"missile@123\")").value());
+
+	/*if (result.empty())
+	 cout << "EMPTY RESULT RETURNED" << endl;
+	 cout << "RESULT RETURNED" << endl;
+	 for (auto it = result.begin(); it != result.end(); ++it) {
+	 cout << endl << "VAR:" << SchemeSmob::to_string(it->first) << endl;
+	 HandleSeq values = it->second;
+	 for (Handle h : values)
+	 cout << "\t\tVALUE:" << SchemeSmob::to_string(h) << endl;
+	 }*/
+
+}
