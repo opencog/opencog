@@ -8,6 +8,7 @@ __author__ = 'Amen Belayneh'
 from opencog.atomspace import TruthValue, types, get_type, AtomSpace
 import reader
 import term
+import sys
 
 corpus_path = ""
 corpus_dict = {}
@@ -117,9 +118,19 @@ def from_file(atomspace, cn_path, scm_name):
             scm_file.write(temp + '\n' * 2)
 
 if __name__ == '__main__':
-    cn_url = raw_input("Enter ConceptNet csv file address: ")
-    corpus_path = raw_input("Enter corpus address: ")
-    name_of_scm_file = raw_input("Enter name for the Scheme Output file: ")
+    # If the script was called with no command line arguments
+    if len(sys.argv) == 1:
+        cn_url = raw_input("Enter ConceptNet csv file address: ")
+        corpus_path = raw_input("Enter corpus address: ")
+        name_of_scm_file = raw_input("Enter name for the Scheme Output file: ")
+    elif len(sys.argv) == 4:
+        cn_url = sys.argv[1]
+        corpus_path = sys.argv[2]
+        name_of_scm_file = sys.argv[3]
+    else:
+        print "\n\n\tUsage: " + sys.argv[0] + " input.csv corpus_freqs.csv outputfile.scm\n\n"
+        sys.exit(1)
+
     atomspace = AtomSpace()
     from_file(atomspace, cn_url, name_of_scm_file)
     print ("Scheme file is created successfully")
