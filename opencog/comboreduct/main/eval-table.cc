@@ -161,7 +161,7 @@ void read_eval_output_results(evalTableParameters& pa)
 // XXX FIXME
     vector<string> header = get_header(pa.input_table_file);
 
-    // Add to ignore_valuesget (header - all_unique_variables - target feature)
+    // Add to ignore_values (header - all_unique_variables - target feature)
     vector<string> ignore_variables;
     for (string f : header)
         if (f != pa.target_feature_str
@@ -189,8 +189,6 @@ void read_eval_output_results(evalTableParameters& pa)
     logger().debug() << "Done loading table from " << pa.input_table_file;
 
     ITable& it = table.itable;
-
-    
 
     // Get variables missing from the table
     vector<string> ilabels(it.get_labels());
