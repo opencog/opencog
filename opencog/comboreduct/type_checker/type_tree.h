@@ -50,7 +50,10 @@ inline type_node type_node_of<bool>() { return id::boolean_type; }
 template<>
 inline type_node type_node_of<contin_t>() { return id::contin_type; }
 
-// returns the arity of builtin b
+// Given the type create a vertex with the default value of that type
+vertex default_vertex_value(type_node tn);
+
+// Returns the arity of builtin b
 char get_arity(builtin b);
 
 // returns the type tree of builtin b
