@@ -155,12 +155,10 @@ def blocksworld_rules(atomspace):
     atom.tv = TruthValue(1, TruthValue().confidence_to_count(1))
 
 def blocksworld_test(atomspace):
-    import blocksworld
     atomspace.clear()
     blocksworld.blocksworld_rules(atomspace)
 
     import logic
-    import tree
 
     target_tr = T('SimultaneousAndLink',
         #parse_conditions_list(blocks, 'on A B | on B C')
