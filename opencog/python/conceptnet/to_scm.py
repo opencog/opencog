@@ -9,6 +9,7 @@ from opencog.atomspace import TruthValue, types, get_type, AtomSpace
 import reader
 import term
 import sys
+import math
 
 corpus_path = ""
 corpus_dict = {}
@@ -75,14 +76,28 @@ def set_TV(word):
 
 
 def write_atoms(atomspace, cn_assertion, template_no, link_type=''):
-    # Assertion is a list. 0.5 confidence is used(for links)because that is
-    # the weight given to most of the assertions on ConceptNet
-    TV = TruthValue(1, .5)
 
     cn_argument1=cn_assertion[1][6:]
     cn_argument2=cn_assertion[2][6:]
     cn_arg1_stv=set_TV(cn_argument1)
     cn_arg2_stv=set_TV(cn_argument2)
+    cn_confidence=float(cn_assertion[4])
+    if(cn_confidence > 0.0):
+        # For true statements we give a strength of 0.5 to 1.0, ramping up
+        # quickly towards 1.0 as the cn_confidence grows.
+        confidence_value = 1.0 - math.pow(0.2, cn_confidence)/2.0
+    else:
+        # For any false statement we currently just set a strength of 0.0, basically
+        # ignoring the conceptnet confidence value other than to note that it was false.
+        #TODO: This could probably be improved, but not sure how.
+        confidence_value = 0.0
+
+    # For the STV we use the computed confidence from conceptnet as the 'strength'.
+    # Currently just using a 'confidence' of ~0.9 indicating that whatever
+    # conceptnet thinks the truth value is, we agree strongly with this
+    # analysis.  Maybe something better could be done, hard to say for sure
+    # though.  The 10000 gets converted to the confidence of ~0.9 by the constructor.
+    TV = TruthValue(confidence_value, 10000)
 
     cn1 = atomspace.add_node(types.ConceptNode, cn_argument1, tv=cn_arg1_stv)
     cn2 = atomspace.add_node(types.ConceptNode, cn_argument2, tv=cn_arg2_stv)
@@ -93,8 +108,7 @@ def write_atoms(atomspace, cn_assertion, template_no, link_type=''):
         return repr(link)
     elif template_no == 2:
         cn_relation=cn_assertion[0][3:]
-        cn_rel_stv=set_TV(cn_assertion[0][3:])
-        pn = atomspace.add_node(types.PredicateNode, cn_relation, tv=cn_rel_stv)
+        pn = atomspace.add_node(types.PredicateNode, cn_relation, tv=TV)
 
         listlink = atomspace.add_link(types.ListLink, [cn1, cn2])
         evallink = atomspace.add_link(types.EvaluationLink, [pn, listlink], tv=TV)
