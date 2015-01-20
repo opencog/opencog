@@ -141,7 +141,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 #ifdef NO_SELF_GROUNDING
 		// But... if handle hg happens to also be a bound var,
 		// then its a mismatch.
-		if (_bound_vars.end() != _bound_vars.find(hg)) return true;
+		if (_bound_vars.end() != _bound_vars.find(hg)) return false;
 #endif
 
 		// If we already have a grounding for this variable, the new
@@ -288,7 +288,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			                   &PatternMatchEngine::tree_compare, this);
 			more_depth --;
 			depth --;
-			dbgprt("tree_comp down link mismatch=%d\n", mismatch);
+			dbgprt("tree_comp down link match=%d\n", match);
 
 			if (not match) return false;
 
