@@ -317,8 +317,11 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 	// faster. But we don't do this if there are negations, because the
 	// above jammed the negations into the thing, which we must keep
 	// separate.
-	if (negations.empty())
-		clauses = *_components.begin();
+	if (negations.empty()) {
+		clauses.clear();
+		for (const auto& component : _components)
+			clauses.insert(clauses.begin(), component.begin(), component.end());
+	}
 
 	// Are there any virtual links in the clauses? If so, then we need
 	// to do some special handling.
