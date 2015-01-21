@@ -50,7 +50,8 @@ class SchemeSmob
 		};
 
 		static bool is_inited;
-		static void register_procs(void);
+		static void register_procs(void*);
+		static void register_proc(const char*, int, int, int, scm_t_subr);
 
 		// The cog_misc_tag are for all other opencog types, such
 		// as truth values, which are ephemeral (garbage-collected)

@@ -31,6 +31,7 @@ class PrimitiveEnviron
 	private:
 		static bool is_inited;
 		static void init(void);
+		static void init_helper(void*);
 
 		static void * c_wrap_register(void *);
 		void really_do_register(const char *, int);
