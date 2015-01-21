@@ -293,24 +293,24 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 		get_connected_components(vars, clauses, _components);
 	}
 
-	if (1 != _components.size())
-	{
-		// Users are going to be stumped by this one, so print
-		// out a verbose, user-freindly debug message to help
-		// them out.
-		std::stringstream ss;
-		ss << "Pattern is not connected! Found "
-		   << _components.size() << " components:\n";
-		int cnt = 0;
-		for (const auto& comp : _components)
-		{
-			ss << "Connected component " << cnt
-			   << " consists of ----------------: \n";
-			for (Handle h : comp) ss << h->toString();
-			cnt++;
-		}
-		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
-	}
+	// if (1 != _components.size())
+	// {
+	// 	// Users are going to be stumped by this one, so print
+	// 	// out a verbose, user-freindly debug message to help
+	// 	// them out.
+	// 	std::stringstream ss;
+	// 	ss << "Pattern is not connected! Found "
+	// 	   << _components.size() << " components:\n";
+	// 	int cnt = 0;
+	// 	for (const auto& comp : _components)
+	// 	{
+	// 		ss << "Connected component " << cnt
+	// 		   << " consists of ----------------: \n";
+	// 		for (Handle h : comp) ss << h->toString();
+	// 		cnt++;
+	// 	}
+	// 	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
+	// }
 
 	// get_connected_components re-orders the clauses so that adjacent
 	// clauses are connected.  Using this will make matching slightly
