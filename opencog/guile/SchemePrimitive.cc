@@ -32,6 +32,12 @@ void PrimitiveEnviron::init(void)
 {
 	if (is_inited) return;
 	is_inited = true;
+	scm_c_define_module("opencog extension", init_helper, NULL);
+	scm_c_use_module("opencog extension");
+}
+
+void PrimitiveEnviron::init_helper(void*)
+{
 	scm_c_define_gsubr("opencog-extension", 2,0,0, C(do_call));
 }
 
@@ -73,14 +79,17 @@ void PrimitiveEnviron::really_do_register(const char *name, int nargs)
 	SCM_NEWSMOB (smob, SchemeSmob::cog_misc_tag, this);
 	SCM_SET_SMOB_FLAGS(smob, SchemeSmob::COG_EXTEND);
 
+	// The (opencog extension) module
+	SCM module = scm_c_resolve_module("opencog extension");
+
 	// We need to give the smob a unique name. Using addr of this is 
 	// sufficient for this purpose.
 #define BUFLEN 40
 	char buff[BUFLEN];
 	snprintf(buff, BUFLEN, "cog-prim-%p", this);
-	scm_c_define (buff, smob);
+	scm_c_module_define(module, buff, smob);
 
-	std::string wrapper = "(define (";
+	std::string wrapper = "(define-public (";
 	wrapper += name;
 	for (int i=0; i<nargs; i++)
 	{
@@ -98,7 +107,7 @@ void PrimitiveEnviron::really_do_register(const char *name, int nargs)
 		wrapper += arg;
 	}
 	wrapper += ")))";
-	scm_c_eval_string(wrapper.c_str());
+	scm_c_eval_string_in_module(wrapper.c_str(), module);
 	// printf("Debug: do_regsiter %s\n", wrapper.c_str());
 }
 
