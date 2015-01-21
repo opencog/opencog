@@ -294,7 +294,7 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 	// of atoms of that type, or otherwise try to find a small ("thin")
 	// incoming set to search over.
 	std::list<Handle> handle_set;
-	_as->getHandlesByType(back_inserter(handle_set), ptype);
+	_as->getHandlesByType(back_inserter(handle_set), ATOM, true);
 	std::list<Handle>::iterator i = handle_set.begin();
 	std::list<Handle>::iterator iend = handle_set.end();
 	for (; i != iend; ++i)
