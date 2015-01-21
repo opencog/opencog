@@ -558,14 +558,14 @@ public:
      * call to this method, which would return all entries in AtomSpace:
      * @code
      *      std::list<Handle> ret;
-     *      atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     *      atomSpace.getHandlesByName(back_inserter(ret), ATOM, true);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
     getHandlesByName(OutputIterator result,
-                 const std::string& name,
-                 Type type = ATOM,
-                 bool subclass = true) const
+                     const std::string& name,
+                     Type type = ATOM,
+                     bool subclass = true) const
     {
         return getAtomTable().getHandlesByName(result, name, type, subclass);
     }
@@ -594,13 +594,13 @@ public:
      *          Example of call to this method, which would return all entries in AtomSpace:
      * @code
      *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     *         atomSpace.getHandlesByType(back_inserter(ret), ATOM, true);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
     getHandlesByType(OutputIterator result,
-                 Type type,
-                 bool subclass = false) const
+                     Type type,
+                     bool subclass = false) const
     {
         return getAtomTable().getHandlesByType(result, type, subclass);
     }

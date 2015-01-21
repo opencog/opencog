@@ -160,7 +160,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		           hp->toShortString().c_str());
 
 #ifdef NO_SELF_GROUNDING
-		// Disalllow matches that contain a bound variable in the
+		// Disallow matches that contain a bound variable in the
 		// grounding. However, a bound variable can be legitimately
 		// grounded by a free variable (because free variables are
 		// effectively constant literals, during the pattern match.
