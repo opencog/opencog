@@ -100,6 +100,18 @@ utilities can be pulled up at the scheme shell prompt, by saying
 have to consult the individual scm files for more info.
 
 
+== Modules ==
+-------------
+Currently OpenCog's scheme functions are broken into 3 different scheme
+modules: (opencog), (opencog extension), and (opencog atomtypes).  Each
+one can be listed with the following code:
+
+(module-for-each (lambda (symbol value) (display symbol) (newline))
+(resolve-interface '(opencog)))
+
+Replace '(opencog) with the corresponding module name.
+
+
 == Core Functions ==
 --------------------
 The following are the "core" functions, implemented in the guile-to-C++
@@ -791,9 +803,3 @@ ToDo
    data corruption. However, guile needs to be fixed to change this 
    behaviour.
 
-
--- list all proceedures in a module:
-   (module-for-each (lambda (symbol value) (display symbol) (newline))
-   (resolve-interface '(guile)))
-
-   Make the above easier for users.
