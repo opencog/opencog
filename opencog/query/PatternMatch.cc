@@ -437,7 +437,7 @@ void PatternMatch::validate_implication (Handle himplication)
 		// or their negations. Split these into two distinct lists.
 		// Any clause that is a NotLink is "negated"; strip off the
 		// negation and put it into its own list.
-		const std::vector<Handle>& cset = lclauses->getOutgoingSet();
+		const std::vector<Handle>& cset = LinkCast(_hclauses)->getOutgoingSet();
 		size_t clen = cset.size();
 		for (size_t i=0; i<clen; i++)
 		{
