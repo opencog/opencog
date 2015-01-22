@@ -50,13 +50,13 @@ static SchemeEval* get_evaluator(AtomSpace* as)
 static void check_err(SchemeEval* evaluator, const std::string &s)
 {
 	if (evaluator->eval_error()) {
-		logger().error( "%s - Failed to execute '%s'",
-		               __FUNCTION__, s.c_str());
+		throw RuntimeException(TRACE_INFO,
+		       "Failed to execute '%s'", s.c_str());
 	}
 
 	if (evaluator->input_pending()) {
-		logger().error( "%s - Scheme syntax error in input: '%s'",
-		               __FUNCTION__, s.c_str());
+		throw RuntimeException(TRACE_INFO,
+		      "Scheme syntax error in input: '%s'", s.c_str());
 	}
 }
 #endif // HAVE_GUILE
