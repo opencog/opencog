@@ -824,6 +824,26 @@ bool compareHTreeNodeBySurprisingness(HTreeNode* node1, HTreeNode* node2)
     return (node1->var_num < node2->var_num);
 }
 
+bool compareHTreeNodeBySurprisingness_I(HTreeNode* node1, HTreeNode* node2)
+{
+    if ( node1->nI_Surprisingness - node2->nI_Surprisingness  > FLOAT_MIN_DIFF)
+        return true;
+    else if (node2->nI_Surprisingness - node1->nI_Surprisingness > FLOAT_MIN_DIFF)
+        return false;
+
+    return (node1->var_num < node2->var_num);
+}
+
+bool compareHTreeNodeBySurprisingness_II(HTreeNode* node1, HTreeNode* node2)
+{
+    if ( node1->nII_Surprisingness - node2->nII_Surprisingness > FLOAT_MIN_DIFF)
+        return true;
+    else if ( node2->nII_Surprisingness - node1->nII_Surprisingness > FLOAT_MIN_DIFF)
+        return false;
+
+    return (node1->var_num < node2->var_num);
+}
+
 void PatternMiner::OutPutPatternsToFile(unsigned int n_gram, bool is_interesting_pattern)
 {
 
