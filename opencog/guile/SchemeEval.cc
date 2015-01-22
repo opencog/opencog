@@ -138,7 +138,7 @@ void SchemeEval::set_error_string(SCM newerror)
 	scm_gc_unprotect_object(olderror);
 }
 
-static pthread_once_t eval_init_once = PTHREAD_ONCE_INIT;
+static std::atomic_flag eval_is_inited = ATOMIC_FLAG_INIT;
 static thread_local bool thread_is_inited = false;
 
 #ifndef HAVE_GUILE2
@@ -192,8 +192,12 @@ static pthread_mutex_t serialize_lock;
 static pthread_key_t ser_key = 0;
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-static void first_time_only(void)
+// Initialization that needs to be performed only once, for the entire
+// process.
+static void init_only_once(void)
 {
+	if (eval_is_inited.test_and_set()) return;
+
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	pthread_mutex_init(&serialize_lock, NULL);
 	pthread_key_create(&ser_key, NULL);
@@ -236,7 +240,7 @@ void SchemeEval::thread_unlock(void)
 
 SchemeEval::SchemeEval(AtomSpace* as)
 {
-	pthread_once(&eval_init_once, first_time_only);
+	init_only_once();
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_lock();
