@@ -208,8 +208,9 @@ void PatternMiner::runPatternMinerDepthFirst()
 }
 
 
-
-HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves, HandleSeq &shouldNotBeVars, AtomSpace* _fromAtomSpace)
+// extendedLinkIndex is to return the index of extendedLink's patternlink in the unified pattern so as to identify where is the extended link in this pattern
+HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars,
+                                                                HandleSeq &leaves, HandleSeq &shouldNotBeVars, AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex)
 {
     HTreeNode* returnHTreeNode = 0;
     bool skip = false;
@@ -283,7 +284,6 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
     }
 
 
-
     if (! skip)
     {
 
@@ -298,21 +298,16 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             pattern.push_back(rebindedLink);
         }
 
-        // unify the pattern
-        map<Handle,Handle> orderedVarNameMap;
-        unifiedPattern = UnifyPatternOrder(pattern, orderedVarNameMap);
-
-        string keyString = unifiedPatternToKeyString(unifiedPattern);
-
-        // debug
-       // "(InheritanceLink )\n  (VariableNode $var_1)\n  (ConceptNode human)\n\n(InheritanceLink )  (VariableNode $var_2)\n  (ConceptNode woman)\n";
-
-        if ( (keyString.find("human") != string::npos) && (keyString.find("woman") != string::npos) )
+        if ( gram > 2)
         {
-            int x = 0;
-            x ++;
+            if (containsLoopVariable(pattern))
+            return returnHTreeNode;
         }
 
+        // unify the pattern
+        unifiedPattern = UnifyPatternOrder(pattern, extendedLinkIndex);
+
+        string keyString = unifiedPatternToKeyString(unifiedPattern);
 
         // next, check if this pattern already exist (need lock)
         HTreeNode* newHTreeNode = 0;
@@ -329,7 +324,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             cout << "A new pattern Found:\n"<< keyString << std::endl;
 
             newHTreeNode->count = 1;
-            newHTreeNode->orderedVarNameMap = orderedVarNameMap;
+
 
         }
         else
@@ -497,7 +492,8 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                 }
             }
 
-            HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace);
+            unsigned int extendedLinkIndex;
+            HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace, extendedLinkIndex);
 
             if (thisGramHTreeNode)
             {
@@ -506,7 +502,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
                 ExtendRelation relation;
                 relation.extendedHTreeNode = thisGramHTreeNode;
-                relation.newExtendedLink = (thisGramHTreeNode->pattern)[cur_pattern_gram - 1]; // todo: this looks wrong
+                relation.newExtendedLink = (thisGramHTreeNode->pattern)[extendedLinkIndex];
                 relation.sharedLink = extendedLink;
                 relation.extendedNode = extendedNode;
                 relation.isExtendedFromVar = isExtendedFromVar;
@@ -943,8 +939,8 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
                 }
 
                 // unify the pattern
-                map<Handle,Handle> orderedVarNameMap;
-                unifiedPattern = UnifyPatternOrder(pattern, orderedVarNameMap);
+                unsigned int unifiedLastLinkIndex;
+                unifiedPattern = UnifyPatternOrder(pattern, unifiedLastLinkIndex);
 
                 string keyString = unifiedPatternToKeyString(unifiedPattern);
 
