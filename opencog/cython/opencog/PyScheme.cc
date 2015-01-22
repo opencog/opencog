@@ -51,12 +51,12 @@ static void check_err(SchemeEval* evaluator, const std::string &s)
 {
 	if (evaluator->eval_error()) {
 		throw RuntimeException(TRACE_INFO,
-		       "Failed to execute '%s'", s.c_str());
+		       "Scheme: Failed to execute '%s'", s.c_str());
 	}
 
 	if (evaluator->input_pending()) {
 		throw RuntimeException(TRACE_INFO,
-		      "Scheme syntax error in input: '%s'", s.c_str());
+		      "Scheme: Syntax error in input: '%s'", s.c_str());
 	}
 }
 #endif // HAVE_GUILE
