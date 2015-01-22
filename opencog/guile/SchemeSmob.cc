@@ -37,28 +37,25 @@ using namespace opencog;
  */
 
 scm_t_bits SchemeSmob::cog_misc_tag;
-bool SchemeSmob::is_inited = false;
+std::atomic_flag SchemeSmob::is_inited = ATOMIC_FLAG_INIT;
 SCM SchemeSmob::_radix_ten;
 
 void SchemeSmob::init()
 {
-	// XXX It would be ever so slightly more correct to use
-	// pthread_once() here, but that currently seems like overkill.
-	if (!is_inited)
-	{
-		is_inited = true;
-		init_smob_type();
-		scm_c_define_module("opencog", register_procs, NULL);
-		scm_c_use_module("opencog");
+	if (is_inited.test_and_set()) return;
 
-		// define the empty (opencog atomtypes) for adding types externally
-		scm_c_define_module("opencog atomtypes", NULL, NULL);
-		scm_c_use_module("opencog atomtypes");
+	init_smob_type();
+	scm_c_define_module("opencog", register_procs, NULL);
+	scm_c_use_module("opencog");
 
-		atomspace_fluid = scm_make_fluid();
-		atomspace_fluid = scm_permanent_object(atomspace_fluid);
-		_radix_ten = scm_from_int8(10);
-	}
+	// Define the empty (opencog atomtypes) module; types will be added
+	// externally.
+	scm_c_define_module("opencog atomtypes", NULL, NULL);
+	scm_c_use_module("opencog atomtypes");
+
+	atomspace_fluid = scm_make_fluid();
+	atomspace_fluid = scm_permanent_object(atomspace_fluid);
+	_radix_ten = scm_from_int8(10);
 }
 
 SchemeSmob::SchemeSmob()
