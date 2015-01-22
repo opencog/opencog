@@ -13,7 +13,6 @@
 #include <mutex>
 #include <string>
 #include <sstream>
-#include <pthread.h>
 #include <cstddef>
 #include <libguile.h>
 #include <opencog/atomspace/Handle.h>

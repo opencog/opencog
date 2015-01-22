@@ -13,6 +13,7 @@
 #ifndef _OPENCOG_SCHEME_SMOB_H
 #define _OPENCOG_SCHEME_SMOB_H
 
+#include <atomic>
 #include <set>
 #include <string>
 #include <vector>
@@ -49,7 +50,7 @@ class SchemeSmob
 			COG_EXTEND    // callbacks into C++ code.
 		};
 
-		static bool is_inited;
+		static std::atomic_flag is_inited;
 		static void register_procs(void*);
 		static void register_proc(const char*, int, int, int, scm_t_subr);
 
