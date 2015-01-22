@@ -139,7 +139,7 @@ void SchemeEval::set_error_string(SCM newerror)
 }
 
 static pthread_once_t eval_init_once = PTHREAD_ONCE_INIT;
-static pthread_key_t tid_key = 0;
+static thread_local bool thread_is_inited = false;
 
 #ifndef HAVE_GUILE2
 	#define WORK_AROUND_GUILE_185_BUG
@@ -194,8 +194,6 @@ static pthread_key_t ser_key = 0;
 
 static void first_time_only(void)
 {
-	pthread_key_create(&tid_key, NULL);
-	pthread_setspecific(tid_key, (const void *) 0x42);
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	pthread_mutex_init(&serialize_lock, NULL);
 	pthread_key_create(&ser_key, NULL);
@@ -257,8 +255,8 @@ SchemeEval::SchemeEval(AtomSpace* as)
 void SchemeEval::per_thread_init(void)
 {
 	/* Avoid more than one call per thread. */
-	if (((void *) 0x2) == pthread_getspecific(tid_key)) return;
-	pthread_setspecific(tid_key, (const void *) 0x2);
+	if (thread_is_inited) return;
+	thread_is_inited = true;
 
 #ifdef WORK_AROUND_GUILE_185_BUG
 	scm_set_current_module(guile_user_module);
@@ -499,6 +497,7 @@ void SchemeEval::do_eval(const std::string &expr)
 	// Cleanup every now and then, as otherwise guile gets piggy with
 	// the system RAM, happily splurging many gigabytes. The below does
 	// hurt performance, though -- about 15% for one test case...
+//XXX fixme need something better here.
 	if (++_gc_ctr%80 == 0) { scm_gc(); _gc_ctr = 0; }
 #if 0
 	scm_gc();
