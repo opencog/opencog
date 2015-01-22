@@ -469,6 +469,21 @@ void* SchemeEval::c_wrap_eval(void* p)
 	return self;
 }
 
+/// Ad hoc hack to try to limit guile memory consumption, while still
+/// providing decent performance.  The problem addressed here is that
+/// guile can get piggy with the system RAM, happily gobbling up RAM
+/// instead of garbage-collecting it.  Users have noticed. See github
+/// issue #1116. This improves on the original pull request #1117.
+static void do_gc(void)
+{
+	scm_gc();
+#if 0
+	scm_gc();
+	logger().info() << "Guile evaluated: " << expr;
+	logger().info() << "Mem usage=" << (getMemUsage() / (1024*1024)) << "MB";
+#endif
+}
+
 /**
  * do_eval -- evaluate a scheme expression string.
  * This implements the working guts of the shell-freindly evaluator.
@@ -498,16 +513,8 @@ void SchemeEval::do_eval(const std::string &expr)
 
 	atomspace = SchemeSmob::ss_get_env_as("do_eval");
 
-	// Cleanup every now and then, as otherwise guile gets piggy with
-	// the system RAM, happily splurging many gigabytes. The below does
-	// hurt performance, though -- about 15% for one test case...
-//XXX fixme need something better here.
-	if (++_gc_ctr%80 == 0) { scm_gc(); _gc_ctr = 0; }
-#if 0
-	scm_gc();
-	logger().info() << "Guile evaluated: " << expr;
-	logger().info() << "Mem usage=" << (getMemUsage() / (1024*1024)) << "MB";
-#endif
+	if (++_gc_ctr%80 == 0) { do_gc(); _gc_ctr = 0; }
+
 	_eval_done = true;
 	_wait_done.notify_all();
 }
