@@ -424,12 +424,6 @@ void PatternMatch::validate_implication (Handle himplication)
 	_hclauses = oset[0];
 	_implicand = oset[1];
 
-	// Must be non-empty.
-	LinkPtr lclauses(LinkCast(_hclauses));
-	if (NULL == lclauses)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected non-empty set of clauses in the ImplicationLink");
-
 	// The predicate is either an AndList, or a single clause
 	// If its an AndList, then its a list of clauses.
 	// XXX FIXME Perhaps, someday, some sort of embedded OrList should
