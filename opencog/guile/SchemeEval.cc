@@ -476,8 +476,23 @@ void* SchemeEval::c_wrap_eval(void* p)
 /// issue #1116. This improves on the original pull request #1117.
 static void do_gc(void)
 {
-	scm_gc();
+	static size_t prev_usage = 0;
+
+	size_t curr_usage = getMemUsage();
+	// Yes, this is 10MBytes. Which seems nutty. But it does the trick...
+	if (10 * 1024 * 1024 < curr_usage - prev_usage)
+	{
+		prev_usage = curr_usage;
+		scm_gc();
+	}
+
 #if 0
+	static SCM since = scm_from_utf8_symbol("heap-allocated-since-gc");
+	SCM stats = scm_gc_stats();
+	size_t allo = scm_to_size_t(scm_assoc_ref(stats, since));
+
+	int times = scm_to_int(scm_assoc_ref(stats, scm_from_utf8_symbol("gc-times")));
+	printf("allo=%lu  mem=%lu time=%d\n", allo/1024, (getMemUsage() / (1024)), times);
 	scm_gc();
 	logger().info() << "Guile evaluated: " << expr;
 	logger().info() << "Mem usage=" << (getMemUsage() / (1024*1024)) << "MB";
