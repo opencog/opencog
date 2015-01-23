@@ -95,7 +95,7 @@ static inline void prtmsg(const char * msg, const Handle& h)
  * returning true if there is a mis-match.
  *
  * The comparison is recursive, so this method calls itself on each
- * subtree of the predicate clause, performing comparisions until a
+ * subtree of the predicate clause, performing comparisons until a
  * match is found (or not found).
  *
  * Return false if there's a mis-match. The goal here is to walk over
@@ -113,6 +113,10 @@ static inline void prtmsg(const char * msg, const Handle& h)
  * and so quotes can be used to search for expressions containing
  * quotes.  It is assumed that the QuoteLink has an arity of one, as
  * its quite unclear what an arity of more than one could ever mean.
+ *
+ * That method have side effects. One of them is to insert variable
+ * groundings in var_grounding when encountering variables in the
+ * pattern.
  */
 bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 {
@@ -855,6 +859,8 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
  *            That is, this must be one of the outgoing atoms of the
  *            "starter" link, it must be a node, and it must not be
  *            a variable node.
+ *
+ * Return true if a match is found
  *
  * This routine is meant to be invoked on every candidate atom taken
  * from the atom space. That atom is assumed to anchor some part of
