@@ -51,6 +51,7 @@ using namespace opencog;
 
 void PatternMiner::growPatternsDepthFirstTask_old()
 {
+    float sq_allLinkNumber = ((float)(allLinkNumber)) * ((float)(allLinkNumber));
     while(true)
     {
         readNextLinkLock.lock();
@@ -58,7 +59,7 @@ void PatternMiner::growPatternsDepthFirstTask_old()
 
         if (cur_index < allLinkNumber)
         {
-            cout<< "\r" << (float)(cur_index)/(float)(allLinkNumber)*100.0f << + "% completed." ;
+            cout<< "\r" << ((float)(cur_index))*((float)(cur_index))/sq_allLinkNumber*100.0f << + "% completed." ; // it's not liner
             std::cout.flush();
         }
         else
@@ -129,6 +130,7 @@ void PatternMiner::growPatternsDepthFirstTask_old()
 
 void PatternMiner::growPatternsDepthFirstTask()
 {
+    float sq_allLinkNumber = ((float)(allLinkNumber)) * ((float)(allLinkNumber));
     while(true)
     {
         readNextLinkLock.lock();
@@ -136,7 +138,7 @@ void PatternMiner::growPatternsDepthFirstTask()
 
         if (cur_index < allLinkNumber)
         {
-            cout<< "\r" << (float)(cur_index)/(float)(allLinkNumber)*100.0f << + "% completed." ;
+            cout<< "\r" << ((float)(cur_index))*((float)(cur_index))/sq_allLinkNumber*100.0f << + "% completed." ; // it's not liner
             std::cout.flush();
         }
         else
@@ -205,6 +207,9 @@ void PatternMiner::runPatternMinerDepthFirst()
     allLinks.clear();
     (vector<Handle>()).swap(allLinks);
 
+    delete [] cur_DF_ExtractedLinks;
+    delete [] threads;
+
     cout << "\nFinished mining 1~" << MAX_GRAM << " gram patterns.\n";
 
 }
@@ -218,17 +223,11 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
     bool skip = false;
     unsigned int gram = inputLinks.size();
 
-    // debug
-    string inputLinksStr = "";
-    for (Handle h : inputLinks)
-        inputLinksStr += _fromAtomSpace->atomAsString(h);
+//    // debug
+//    string inputLinksStr = "";
+//    for (Handle h : inputLinks)
+//        inputLinksStr += _fromAtomSpace->atomAsString(h);
 
-    // debug
-    if (gram == 3)
-    {
-        int test =0;
-        test ++;
-    }
 
     if ( enable_filter_node_types_should_not_be_vars)
     {
@@ -323,7 +322,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             returnHTreeNode = newHTreeNode;
             keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
 
-            cout << "A new pattern Found:\n"<< keyString << std::endl;
+//            cout << "A new pattern Found:\n"<< keyString << std::endl;
 
             newHTreeNode->count = 1;
 
@@ -334,7 +333,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             returnHTreeNode = ((HTreeNode*)(htreeNodeIter->second));
             ((HTreeNode*)(htreeNodeIter->second))->count ++;
 
-            cout << "Unique Key already exists:" << keyString << std::endl;
+//            cout << "Unique Key already exists:" << keyString << std::endl;
 
         }
 
@@ -433,10 +432,10 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
     filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace);
 
-    // debug
-    string lastGramLinksStr = "";
-    for (Handle h : lastGramLinks)
-        lastGramLinksStr += _fromAtomSpace->atomAsString(h);
+//    // debug
+//    string lastGramLinksStr = "";
+//    for (Handle h : lastGramLinks)
+//        lastGramLinksStr += _fromAtomSpace->atomAsString(h);
 
 
     // var_num is the number of variables

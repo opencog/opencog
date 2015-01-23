@@ -111,7 +111,7 @@ namespace PatternMining
 
      unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
 
-     std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock, readNextLinkLock, curDFExtractedLinksLock;
+     std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock, readNextLinkLock, curDFExtractedLinksLock, readNextPatternLock;
 
      Type ignoredTypes[1];
 
@@ -227,6 +227,8 @@ namespace PatternMining
      void growPatternsDepthFirstTask_old();
 
      void growPatternsDepthFirstTask();
+
+     void evaluateInterestingnessTask();
 
      void generateNextCombinationGroup(bool* &indexes, int n_max);
 
