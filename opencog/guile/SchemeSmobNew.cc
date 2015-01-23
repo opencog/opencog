@@ -272,9 +272,10 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
 	if (scm_is_false(scm_string_p(sname)))
 		scm_wrong_type_arg_msg(subrname, pos, sname, msg);
 
-	char * cname = scm_to_locale_string(sname);
+	// char * cname = scm_to_utf8_string(sname);
+	const char * cname = scm_i_string_chars(sname);
 	std::string name(cname);
-	free(cname);
+	// free(cname);
 	return name;
 }
 
