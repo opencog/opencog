@@ -102,6 +102,8 @@ namespace PatternMining
 
      int allLinkNumber;
 
+     unsigned int linksPerThread;
+
      float last_gram_total_float;
 
      bool enable_filter_leaves_should_not_be_vars;
@@ -111,7 +113,8 @@ namespace PatternMining
 
      unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
 
-     std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock, readNextLinkLock, curDFExtractedLinksLock, readNextPatternLock;
+     std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock,
+                readNextLinkLock, curDFExtractedLinksLock, readNextPatternLock;
 
      Type ignoredTypes[1];
 
@@ -123,11 +126,14 @@ namespace PatternMining
 
      float atomspaceSizeFloat;
 
+     //debug
+     unsigned int processedLinkNum;
+
      vector<vector<vector<unsigned int>>> components_ngram[3];
 
-     // [gram], this to avoid different threads happen to work on the same links.
-     // each string is composed the handles of a group of fact links in the observingAtomSpace in the default hash order using std set
-     set<string>* cur_DF_ExtractedLinks;
+//     // [gram], this to avoid different threads happen to work on the same links.
+//     // each string is composed the handles of a group of fact links in the observingAtomSpace in the default hash order using std set
+//     set<string>* cur_DF_ExtractedLinks;
 
      // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
      // the input links should be a Pattern in such format:
@@ -205,7 +211,7 @@ namespace PatternMining
      //  void extendAllPossiblePatternsTillMaxGramDF(Handle &startLink, AtomSpace* _fromAtomSpace, unsigned int max_gram);
 
      void extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
-                                     HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap, set<string>* cur_task_ExtractedLinks, bool isExtendedFromVar);
+                                     HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap, bool isExtendedFromVar);
 
      bool containsLoopVariable(HandleSeq& inputPattern);
 
@@ -226,7 +232,7 @@ namespace PatternMining
 
      void growPatternsDepthFirstTask_old();
 
-     void growPatternsDepthFirstTask();
+     void growPatternsDepthFirstTask(unsigned int thread_index);
 
      void evaluateInterestingnessTask();
 

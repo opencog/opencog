@@ -1582,6 +1582,11 @@ void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtended
 // make sure only input 2~4 gram patterns, calculate nSurprisingness_I and nSurprisingness_II
 void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAtomSpace)
 {
+
+    // debug
+    if (HNode->nI_Surprisingness != 0 || HNode->nII_Surprisingness != 0)
+        std::cout << "Exception: This pattern has been calculateSurprisingness before!\n";
+
     // std::cout << "=================Debug: calculate I_Surprisingness for pattern: ====================\n";
 //    for (Handle link : HNode->pattern)
 //    {
@@ -1938,15 +1943,17 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     htree = new HTree();
     atomSpace = new AtomSpace( _originalAtomSpace);
 
-    unsigned int system_thread_num  = std::thread::hardware_concurrency();
+//    unsigned int system_thread_num  = std::thread::hardware_concurrency();
 
-    if (system_thread_num > 1)
-        THREAD_NUM = system_thread_num - 1;
-    else
-        THREAD_NUM = 1;
+//    if (system_thread_num > 1)
+//        THREAD_NUM = system_thread_num - 1;
+//    else
+//        THREAD_NUM = 1;
 
-     // use all the threads in this machine
-     THREAD_NUM = system_thread_num;
+//     // use all the threads in this machine
+//     THREAD_NUM = system_thread_num;
+
+    THREAD_NUM = 4;
 
 
     threads = new thread[THREAD_NUM];
@@ -2041,7 +2048,7 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
         if (enable_Frequent_Pattern)
         {
-            std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< MAX_GRAM <<"gram patterns!";
+            std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< MAX_GRAM <<"gram patterns!\n";
 
             for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
             {
