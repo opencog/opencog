@@ -314,8 +314,14 @@ class SchemePrimitive : public PrimitiveEnviron
 					if (scm_is_true(scm_symbol_p(input)))
 						input = scm_symbol_to_string(input);
 
-					const char *lstr = scm_i_string_chars(input);
-					Type t = classserver().getType(lstr);
+					Type t = NOTYPE;
+					if (scm_is_integer(input))
+						t = scm_to_ushort(input);
+					else
+					{
+						const char *lstr = scm_i_string_chars(input);
+						t = classserver().getType(lstr);
+					}
 
 					int i = scm_to_int(scm_cadr(args));
 
@@ -330,8 +336,14 @@ class SchemePrimitive : public PrimitiveEnviron
 					if (scm_is_true(scm_symbol_p(input)))
 						input = scm_symbol_to_string(input);
 
-					const char *lstr = scm_i_string_chars(input);
-					Type t = classserver().getType(lstr);
+					Type t = NOTYPE;
+					if (scm_is_integer(input))
+						t = scm_to_ushort(input);
+					else
+					{
+						const char *lstr = scm_i_string_chars(input);
+						t = classserver().getType(lstr);
+					}
 
 					int i = scm_to_int(scm_cadr(args));
 					double d = scm_to_double(scm_caddr(args));
