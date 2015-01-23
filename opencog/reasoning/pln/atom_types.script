@@ -1,5 +1,7 @@
-// =====================================================================
-// Additional link types from Probabilistic Logic Networks
+//
+// Assorted atom types that are used by PLN.
+// TODO XXX: Review, and see if these are acutally being used.
+//
 PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
 TAIL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
 
