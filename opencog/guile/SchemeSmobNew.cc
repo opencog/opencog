@@ -261,20 +261,6 @@ Type SchemeSmob::verify_atom_type (SCM stype, const char *subrname, int pos)
 	return t;
 }
 
-/**
- * Check that the argument is the string or symbol name of a node,
- * else throw errors.
- * Return the node type.
- */
-Type SchemeSmob::verify_node_type (SCM stype, const char *subrname, int pos)
-{
-	Type t = verify_atom_type(stype, subrname, pos);
-
-	if (false == classserver().isA(t, NODE))
-		scm_wrong_type_arg_msg(subrname, pos, stype, "name of opencog node type");
-
-	return t;
-}
 
 /**
  * Check that the argument is a string, else throw errors.
@@ -310,7 +296,7 @@ int SchemeSmob::verify_int (SCM sint, const char *subrname,
  */
 SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 {
-	Type t = verify_node_type(stype, "cog-new-node", 1);
+	Type t = verify_atom_type(stype, "cog-new-node", 1);
 
 	// Special case handling for NumberNode
 	if (NUMBER_NODE == t and scm_is_number(sname)) {
@@ -325,22 +311,30 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-node");
 
 	Handle h;
-	// Now, create the actual node... in the actual atom space.
-	// tv->clone is called here, because, for the atomspace, we want
-	// to use a use-counted std:shared_ptr, whereas in guile, we are
-	// using a garbage-collected raw pointer.  So clone makes up the
-	// difference.
-	const TruthValue *tv = get_tv_from_list(kv_pairs);
-	if (tv)
-		h = atomspace->addNode(t, name, tv->clone());
-	else
-		h = atomspace->addNode(t, name);
 
-	// Was an attention value explicitly specified?
-	// If so, then we've got to set it.
-	AttentionValue *av = get_av_from_list(kv_pairs);
-	if (av) {
-		h->setAttentionValue(av->clone());
+	try
+	{
+		// Now, create the actual node... in the actual atom space.
+		// tv->clone is called here, because, for the atomspace, we want
+		// to use a use-counted std:shared_ptr, whereas in guile, we are
+		// using a garbage-collected raw pointer.  So clone makes up the
+		// difference.
+		const TruthValue *tv = get_tv_from_list(kv_pairs);
+		if (tv)
+			h = atomspace->addNode(t, name, tv->clone());
+		else
+			h = atomspace->addNode(t, name);
+
+		// Was an attention value explicitly specified?
+		// If so, then we've got to set it.
+		AttentionValue *av = get_av_from_list(kv_pairs);
+		if (av) {
+			h->setAttentionValue(av->clone());
+		}
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex.what(), "cog-new-node");
 	}
 
 	scm_remember_upto_here_1(kv_pairs);
@@ -355,7 +349,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
  */
 SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 {
-	Type t = verify_node_type(stype, "cog-node", 1);
+	Type t = verify_atom_type(stype, "cog-node", 1);
 	std::string name = verify_string (sname, "cog-node", 2,
 									"string name for the node");
 
@@ -383,18 +377,6 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 }
 
 /* ============================================================== */
-/**
- * Verify that the arguments are appropriate for a link
- */
-Type SchemeSmob::verify_link_type (SCM stype, const char * subrname, int pos)
-{
-	Type t = verify_atom_type(stype, subrname, pos);
-
-	if (false == classserver().isA(t, LINK))
-		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog link type");
-
-	return t;
-}
 
 /**
  * Convert argument into a list of handles.
@@ -456,7 +438,7 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 {
 	Handle h;
-	Type t = verify_link_type(stype, "cog-new-link", 1);
+	Type t = verify_atom_type(stype, "cog-new-link", 1);
 
 	std::vector<Handle> outgoing_set;
 	outgoing_set = verify_handle_list(satom_list, "cog-new-link", 2);
@@ -464,20 +446,27 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	AtomSpace* atomspace = get_as_from_list(satom_list);
 	if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-link");
 
-	// Fish out a truth value, if its there.
-	const TruthValue *tv = get_tv_from_list(satom_list);
-	if (tv) {
-		h = atomspace->addLink(t, outgoing_set, tv->clone());
-	} else {
-		// Now, create the actual link... in the actual atom space.
-		h = atomspace->addLink(t, outgoing_set);
-	}
+	try
+	{
+		// Fish out a truth value, if its there.
+		const TruthValue *tv = get_tv_from_list(satom_list);
+		if (tv) {
+			h = atomspace->addLink(t, outgoing_set, tv->clone());
+		} else {
+			// Now, create the actual link... in the actual atom space.
+			h = atomspace->addLink(t, outgoing_set);
+		}
 
-	// Was an attention value explicitly specified?
-	// If so, then we've got to set it.
-	const AttentionValue *av = get_av_from_list(satom_list);
-	if (av) {
-		h->setAttentionValue(av->clone());
+		// Was an attention value explicitly specified?
+		// If so, then we've got to set it.
+		const AttentionValue *av = get_av_from_list(satom_list);
+		if (av) {
+			h->setAttentionValue(av->clone());
+		}
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex.what(), "cog-new-link");
 	}
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);
@@ -490,7 +479,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
  */
 SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 {
-	Type t = verify_link_type(stype, "cog-link", 1);
+	Type t = verify_atom_type(stype, "cog-link", 1);
 
 	std::vector<Handle> outgoing_set;
 	outgoing_set = verify_handle_list (satom_list, "cog-link", 2);
