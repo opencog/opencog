@@ -386,18 +386,9 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 /**
  * Verify that the arguments are appropriate for a link
  */
-static Type verify_link (SCM stype, const char * subrname)
+Type SchemeSmob::verify_link_type (SCM stype, const char * subrname, int pos)
 {
-	if (scm_is_true(scm_symbol_p(stype)))
-		stype = scm_symbol_to_string(stype);
-
-	char * ct = scm_to_locale_string(stype);
-	Type t = classserver().getType(ct);
-	free(ct);
-
-	// Make sure that the type is good
-	if (NOTYPE == t)
-		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog atom type");
+	Type t = verify_atom_type(stype, subrname, pos);
 
 	if (false == classserver().isA(t, LINK))
 		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog link type");
@@ -465,10 +456,10 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 {
 	Handle h;
-	Type t = verify_link (stype, "cog-new-link");
+	Type t = verify_link_type(stype, "cog-new-link", 1);
 
 	std::vector<Handle> outgoing_set;
-	outgoing_set = verify_handle_list (satom_list, "cog-new-link", 2);
+	outgoing_set = verify_handle_list(satom_list, "cog-new-link", 2);
 
 	AtomSpace* atomspace = get_as_from_list(satom_list);
 	if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-link");
@@ -499,7 +490,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
  */
 SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 {
-	Type t = verify_link (stype, "cog-link");
+	Type t = verify_link_type(stype, "cog-link", 1);
 
 	std::vector<Handle> outgoing_set;
 	outgoing_set = verify_handle_list (satom_list, "cog-link", 2);

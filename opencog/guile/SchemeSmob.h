@@ -163,6 +163,7 @@ class SchemeSmob
 		// validate arguments coming from scheme passing into C++
 		static Type verify_atom_type(SCM, const char *, int pos = 1);
 		static Type verify_node_type(SCM, const char *, int pos = 1);
+		static Type verify_link_type(SCM, const char *, int pos = 1);
 		static Handle verify_handle(SCM, const char *, int pos = 1);
 		static TruthValue * verify_tv(SCM, const char *, int pos = 1);
 		static AttentionValue * verify_av(SCM, const char *, int pos = 1);
