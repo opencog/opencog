@@ -63,7 +63,7 @@ static TruthValue *get_tv_from_kvp(SCM kvp, const char * subrname, int pos)
 
 		skey = scm_keyword_to_symbol(skey);
 		skey = scm_symbol_to_string(skey);
-		char * key = scm_to_locale_string(skey);
+		char * key = scm_to_utf8_string(skey);
 
 		kvp = SCM_CDR(kvp);
 		pos ++;

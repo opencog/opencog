@@ -294,7 +294,7 @@ std::string SchemeEval::prt(SCM node)
 		SCM port = scm_open_output_string();
 		scm_display (node, port);
 		SCM rc = scm_get_output_string(port);
-		char * str = scm_to_locale_string(rc);
+		char * str = scm_to_utf8_string(rc);
 		std::string rv = str;
 		free(str);
 		scm_close_port(port);
@@ -331,7 +331,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 {
 	// Check for read error. If a read error, then wait for user to correct it.
 	SCM re = scm_symbol_to_string(tag);
-	char * restr = scm_to_locale_string(re);
+	char * restr = scm_to_utf8_string(re);
 	_pending_input = false;
 
 	if (0 == strcmp(restr, "read-error"))
@@ -626,7 +626,7 @@ std::string SchemeEval::do_poll_result()
 	{
 		std::string rv = poll_port();
 
-		char * str = scm_to_locale_string(error_string);
+		char * str = scm_to_utf8_string(error_string);
 		rv += str;
 		free(str);
 		set_error_string(SCM_EOL);
@@ -685,7 +685,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	_eval_done = true;
 	if (_caught_error)
 	{
-		char * str = scm_to_locale_string(error_string);
+		char * str = scm_to_utf8_string(error_string);
 		// Don't blank out the error string yet.... we need it later.
 		// (probably because someone called cog-bind with an
 		// ExecutionOutputLink in it with a bad scheme schema node.)
@@ -795,7 +795,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 	_eval_done = true;
 	if (_caught_error)
 	{
-		char * str = scm_to_locale_string(error_string);
+		char * str = scm_to_utf8_string(error_string);
 		set_error_string(SCM_EOL);
 		set_captured_stack(SCM_BOOL_F);
 

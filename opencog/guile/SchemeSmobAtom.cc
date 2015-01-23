@@ -264,9 +264,8 @@ SCM SchemeSmob::ss_get_type (SCM stype)
 	if (scm_is_false(scm_string_p(stype)))
 		return scm_from_ushort(NOTYPE);
 
-	char * ct = scm_to_locale_string(stype);
+	const char * ct = scm_i_string_chars(stype);
 	Type t = classserver().getType(ct);
-	free(ct);
 
 	return scm_from_ushort(t);
 }
@@ -289,9 +288,8 @@ SCM SchemeSmob::ss_type_p (SCM stype)
 	if (scm_is_false(scm_string_p(stype)))
 		return SCM_BOOL_F;
 
-	char * ct = scm_to_locale_string(stype);
+	const char * ct = scm_i_string_chars(stype);
 	Type t = classserver().getType(ct);
-	free(ct);
 
 	if (NOTYPE == t) return SCM_BOOL_F;
 
@@ -316,9 +314,8 @@ SCM SchemeSmob::ss_node_type_p (SCM stype)
 	if (scm_is_false(scm_string_p(stype)))
 		return SCM_BOOL_F;
 
-	char * ct = scm_to_locale_string(stype);
+	const char * ct = scm_i_string_chars(stype);
 	Type t = classserver().getType(ct);
-	free(ct);
 
 	if (NOTYPE == t) return SCM_BOOL_F;
 	if (false == classserver().isA(t, NODE)) return SCM_BOOL_F;
@@ -344,9 +341,8 @@ SCM SchemeSmob::ss_link_type_p (SCM stype)
 	if (scm_is_false(scm_string_p(stype)))
 		return SCM_BOOL_F;
 
-	char * ct = scm_to_locale_string(stype);
+	const char * ct = scm_i_string_chars(stype);
 	Type t = classserver().getType(ct);
-	free(ct);
 
 	if (NOTYPE == t) return SCM_BOOL_F;
 	if (false == classserver().isA(t, LINK)) return SCM_BOOL_F;
@@ -365,9 +361,8 @@ SCM SchemeSmob::ss_subtype_p (SCM stype, SCM schild)
 	if (scm_is_false(scm_string_p(stype)))
 		return SCM_BOOL_F;
 
-	char * ct = scm_to_locale_string(stype);
+	const char * ct = scm_i_string_chars(stype);
 	Type parent = classserver().getType(ct);
-	free(ct);
 
 	if (NOTYPE == parent) return SCM_BOOL_F;
 
@@ -378,9 +373,8 @@ SCM SchemeSmob::ss_subtype_p (SCM stype, SCM schild)
 	if (scm_is_false(scm_string_p(schild)))
 		return SCM_BOOL_F;
 
-	ct = scm_to_locale_string(schild);
-	Type child = classserver().getType(ct);
-	free(ct);
+	const char * cht = scm_i_string_chars(schild);
+	Type child = classserver().getType(cht);
 
 	if (NOTYPE == child) return SCM_BOOL_F;
 
