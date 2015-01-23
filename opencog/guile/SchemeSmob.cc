@@ -3,7 +3,7 @@
  *
  * Scheme small objects (SMOBS) for opencog -- core functions.
  *
- * Copyright (c) 2008, 2013, 2014 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2013, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
 #ifdef HAVE_GUILE
@@ -147,6 +147,37 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 
 /* ============================================================== */
 
+void SchemeSmob::throw_exception(const char *msg, const char * func)
+{
+	if (msg) {
+		// Should we even bother to log this?
+		logger().info("Guile caught C++ exception: %s", msg);
+
+		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
+		scm_throw(
+			scm_from_utf8_symbol("C++-EXCEPTION"),
+			scm_cons(
+				scm_from_utf8_string(func),
+				scm_cons(
+					scm_from_utf8_string(msg),
+					SCM_EOL)));
+		// Hmm. scm_throw never returns.
+	}
+	else
+	{
+		// scm_misc_error(fe->get_name(), "unknown C++ exception", SCM_EOL);
+		scm_error_scm(
+			scm_from_utf8_symbol("C++ exception"),
+			scm_from_utf8_string(func),
+			scm_from_utf8_string("unknown C++ exception"),
+			SCM_EOL,
+			SCM_EOL);
+		logger().error("Guile caught unknown C++ exception");
+	}
+}
+
+/* ============================================================== */
+
 #ifdef HAVE_GUILE2
  #define C(X) ((scm_t_subr) X)
 #else
@@ -216,7 +247,10 @@ void SchemeSmob::register_procs(void*)
 
 	// Atom types
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));
+	register_proc("cog-type->int",         1, 0, 0, C(ss_get_type));
 	register_proc("cog-type?",             1, 0, 0, C(ss_type_p));
+	register_proc("cog-node-type?",        1, 0, 0, C(ss_node_type_p));
+	register_proc("cog-link-type?",        1, 0, 0, C(ss_link_type_p));
 	register_proc("cog-get-subtypes",      1, 0, 0, C(ss_get_subtypes));
 	register_proc("cog-subtype?",          2, 0, 0, C(ss_subtype_p));
 

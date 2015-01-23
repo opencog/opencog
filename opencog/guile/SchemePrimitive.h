@@ -1,7 +1,7 @@
 /*
  * SchemePrimitive.h
  *
- * Allow C++ code to be invoked from scheme -- 
+ * Allow C++ code to be invoked from scheme --
  * by creating a new scheme primitive function.
  *
  * Copyright (C) 2009 Linas Vepstas
@@ -102,7 +102,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		} method;
 		T* that;
 		const char *scheme_name;
-		enum 
+		enum
 		{
 			B_HI,  // return boolean, take handle and int
 			D_HHT, // return double, take handle, handle, and type
@@ -141,7 +141,7 @@ class SchemePrimitive : public PrimitiveEnviron
 					Handle h1 = SchemeSmob::verify_handle(scm_car(args), scheme_name, 1);
 					Handle h2 = SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2);
 					Type t = SchemeSmob::verify_atom_type(scm_caddr(args), scheme_name, 3);
-					
+
 					double d = (that->*method.d_hht)(h1,h2,t);
 					rc = scm_from_double(d);
 					break;
@@ -152,7 +152,7 @@ class SchemePrimitive : public PrimitiveEnviron
 					Handle h2 = SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2);
 					Type t = SchemeSmob::verify_atom_type(scm_caddr(args), scheme_name, 3);
 					bool b = scm_to_bool(scm_cadddr(args));
-					
+
 					double d = (that->*method.d_hhtb)(h1,h2,t,b);
 					rc = scm_from_double(d);
 					break;
@@ -220,7 +220,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				{
 					// First arg is a handle
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name, 1);
-					
+
 					// Second arg is a type
 					Type t = SchemeSmob::verify_atom_type(scm_cadr(args), scheme_name, 2);
 
@@ -242,13 +242,13 @@ class SchemePrimitive : public PrimitiveEnviron
 				{
 					// First arg is a handle
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name, 1);
-					
+
 					// Second arg is a type
 					Type t = SchemeSmob::verify_atom_type(scm_cadr(args), scheme_name, 2);
 
 					// Third arg is an int
 					int i = SchemeSmob::verify_int(scm_caddr(args), scheme_name, 3);
-					
+
 					//Fourth arg is a bool
 					bool b = scm_to_bool(scm_cadddr(args));
 
@@ -291,7 +291,7 @@ class SchemePrimitive : public PrimitiveEnviron
 					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
 
 					const std::string &rs = (that->*method.s_s)(str);
-					rc = scm_from_locale_string(rs.c_str());
+					rc = scm_from_utf8_string(rs.c_str());
 					break;
 				}
 				case V_H:
@@ -313,13 +313,18 @@ class SchemePrimitive : public PrimitiveEnviron
 					//(f 'SimilarityLink) or (f "SimilarityLink")
 					if (scm_is_true(scm_symbol_p(input)))
 						input = scm_symbol_to_string(input);
-					
-					char *lstr = scm_to_locale_string(input);
-					Type t = classserver().getType(lstr);
-					free(lstr);
-					
+
+					Type t = NOTYPE;
+					if (scm_is_integer(input))
+						t = scm_to_ushort(input);
+					else
+					{
+						const char *lstr = scm_i_string_chars(input);
+						t = classserver().getType(lstr);
+					}
+
 					int i = scm_to_int(scm_cadr(args));
-					
+
 					(that->*method.v_ti)(t, i);
 					break;
 				}
@@ -330,15 +335,20 @@ class SchemePrimitive : public PrimitiveEnviron
 					//(f 'SimilarityLink) or (f "SimilarityLink")
 					if (scm_is_true(scm_symbol_p(input)))
 						input = scm_symbol_to_string(input);
-					
-					char *lstr = scm_to_locale_string(input);
-					Type t = classserver().getType(lstr);
-					free(lstr);
-					
+
+					Type t = NOTYPE;
+					if (scm_is_integer(input))
+						t = scm_to_ushort(input);
+					else
+					{
+						const char *lstr = scm_i_string_chars(input);
+						t = classserver().getType(lstr);
+					}
+
 					int i = scm_to_int(scm_cadr(args));
 					double d = scm_to_double(scm_caddr(args));
 					int i2 = scm_to_int(scm_cadddr(args));
-					
+
 					(that->*method.v_tidi)(t, i, d, i2);
 					break;
 				}
@@ -376,7 +386,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		signature = SIG; \
 		do_register(name, 2); /* cb has 2 args */ \
 	}
-	
+
 #define DECLARE_CONSTR_3(SIG, LSIG, RET_TYPE, ARG1_TYPE, ARG2_TYPE, ARG3_TYPE) \
 	SchemePrimitive(const char *name, RET_TYPE (T::*cb)(ARG1_TYPE, ARG2_TYPE, ARG3_TYPE), T *data) \
 	{ \

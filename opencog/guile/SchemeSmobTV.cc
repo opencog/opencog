@@ -63,7 +63,7 @@ static TruthValue *get_tv_from_kvp(SCM kvp, const char * subrname, int pos)
 
 		skey = scm_keyword_to_symbol(skey);
 		skey = scm_symbol_to_string(skey);
-		char * key = scm_to_locale_string(skey);
+		char * key = scm_to_utf8_string(skey);
 
 		kvp = SCM_CDR(kvp);
 		pos ++;
@@ -298,9 +298,9 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			SCM mean = scm_from_double(stv->getMean());
 			SCM conf = scm_from_double(stv->getConfidence());
 			SCM count = scm_from_double(stv->getCount());
-			SCM smean = scm_from_locale_symbol("mean");
-			SCM sconf = scm_from_locale_symbol("confidence");
-			SCM scount = scm_from_locale_symbol("count");
+			SCM smean = scm_from_utf8_symbol("mean");
+			SCM sconf = scm_from_utf8_symbol("confidence");
+			SCM scount = scm_from_utf8_symbol("count");
 	
 			SCM rc = SCM_EOL;
 			rc = scm_acons(sconf, conf, rc);
@@ -315,9 +315,9 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			SCM mean = scm_from_double(ctv->getMean());
 			SCM conf = scm_from_double(ctv->getConfidence());
 			SCM cont = scm_from_double(ctv->getCount());
-			SCM smean = scm_from_locale_symbol("mean");
-			SCM sconf = scm_from_locale_symbol("confidence");
-			SCM scont = scm_from_locale_symbol("count");
+			SCM smean = scm_from_utf8_symbol("mean");
+			SCM sconf = scm_from_utf8_symbol("confidence");
+			SCM scont = scm_from_utf8_symbol("count");
 	
 			SCM rc = SCM_EOL;
 			rc = scm_acons(scont, cont, rc), 
@@ -332,9 +332,9 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			SCM lower = scm_from_double(itv->getL());
 			SCM upper = scm_from_double(itv->getU());
 			SCM conf = scm_from_double(itv->getConfidence());
-			SCM slower = scm_from_locale_symbol("lower");
-			SCM supper = scm_from_locale_symbol("upper");
-			SCM sconf = scm_from_locale_symbol("confidence");
+			SCM slower = scm_from_utf8_symbol("lower");
+			SCM supper = scm_from_utf8_symbol("upper");
+			SCM sconf = scm_from_utf8_symbol("confidence");
 	
 			SCM rc = SCM_EOL;
 			rc = scm_acons(sconf, conf, rc);

@@ -745,3 +745,45 @@ incoming string, decide what to do with it, and then call the smob
 handler.  Yes, we are nickel-n-dimed in other places, but that one
 is 2/3rds of the total time, and its essentially not tunable within
 opencog.
+
+=====================================================================
+23 January 2015:
+Above measurements partly invalidated; ss_new_node is now about 20%
+faster after some rework.
+
+Where is the time being spent?
+Consider the program:
+	(define (lop n)
+		(begin
+			(ConceptNode (number->string n))
+			(if (< 0 n) (lop (- n 1)) #f) ))
+
+and then perform timing measurements on:
+	(lop 50000)
+
+Find that 61% of total time is spent in ss_new_node and 39% is spent
+in guile itself.  The above is effectively memoized. If it is compiled,
+viz.
+	(compile `(define (lop n) ...) #:env (current-module))
+
+then find that 69% of time in ss_new_node 31% of time in guile.
+----
+Of the time spent in ss_new_node, about 48% is spent in
+AtomSpace::addNode() and the rest is in preparing to call it ...
+
+breakdown:
+	43% in verify
+	1% in get atomspace
+	48% in AtomSpace::addNode()
+	1% in get tv, av
+	9.5% in handle_to_scm()
+
+Breakdon of verify:
+	1%  verify_atom_type()
+	43% in verify_string()   ouuuuuch
+
+of verify_string():
+	41% in scm_to_locale_string() ouch ... 
+
+Wow... scm_to_utf8_string() is 10x faster than scm_to_locale_string()
+and scm_i_string_chars() is another 4x faster.  Yowwww
