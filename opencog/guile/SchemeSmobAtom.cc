@@ -276,7 +276,7 @@ SCM SchemeSmob::ss_get_type (SCM stype)
  */
 SCM SchemeSmob::ss_type_p (SCM stype)
 {
-	if (scm_integer_p(stype)) {
+	if (scm_is_integer(stype)) {
 		Type t = scm_to_ushort(stype);
 		if (classserver().isValid(t))
 			return SCM_BOOL_T;
@@ -303,7 +303,7 @@ SCM SchemeSmob::ss_type_p (SCM stype)
  */
 SCM SchemeSmob::ss_node_type_p (SCM stype)
 {
-	if (scm_integer_p(stype)) {
+	if (scm_is_integer(stype)) {
 		Type t = scm_to_ushort(stype);
 		if (classserver().isNode(t))
 			return SCM_BOOL_T;
@@ -331,7 +331,7 @@ SCM SchemeSmob::ss_node_type_p (SCM stype)
  */
 SCM SchemeSmob::ss_link_type_p (SCM stype)
 {
-	if (scm_integer_p(stype)) {
+	if (scm_is_integer(stype)) {
 		Type t = scm_to_ushort(stype);
 		if (classserver().isLink(t))
 			return SCM_BOOL_T;

@@ -241,6 +241,9 @@ SCM SchemeSmob::ss_link_p (SCM s)
  */
 Type SchemeSmob::verify_atom_type (SCM stype, const char *subrname, int pos)
 {
+	if (scm_is_integer(stype))
+		return scm_to_ushort(stype);
+
 	if (scm_is_true(scm_symbol_p(stype)))
 		stype = scm_symbol_to_string(stype);
 
