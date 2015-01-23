@@ -61,7 +61,7 @@ class PatternMatchEngine
 
 		bool pred_up(Handle);
 		bool soln_up(Handle);
-		bool do_soln_up(Handle&);
+		bool do_soln_up(Handle&); // See PatternMatchEngine.cc for comment
 		bool clause_accepted;
 		Handle curr_soln_handle;
 		Handle curr_pred_handle;

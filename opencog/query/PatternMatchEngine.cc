@@ -490,7 +490,9 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 	return false;
 }
 
-/// Return true if a grounding was found.
+/// Return true if a grounding was found.  It also has the side effect
+/// of updating clause_grounding map when the current clause is being
+/// grounded.
 bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 {
 	depth = 1;
