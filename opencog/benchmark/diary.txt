@@ -121,7 +121,7 @@ Commentary and Analysis
 The "raw AtomTable" numbers are what one gets if one uses just the
 AtomTable, and naked pointers.  The AtomTable offers some indexes for
 quick lookup of atoms by name, type, etc.  Getting atom attributes is
-fast, as the atom table provides a direct pointer to the atom. 
+fast, as the atom table provides a direct pointer to the atom.
 
 The AtomSpaceImpl interface is another "native" interface, but it hides
 all raw pointers, and conducts all business by using handles.  Performance
@@ -130,7 +130,7 @@ comparing performance figures to the raw AtomTable results.
 
 The AtomSpace interface attempts to provide thread safety by creating an
 atomspace server, and communicating with it via request/response messages.
-The server side itself uses the AtomSpaceImpl to do its work.  Again, 
+The server side itself uses the AtomSpaceImpl to do its work.  Again,
 performance is slower.  Comparing to the AtomSpaceImpl numbers gives
 a hint of the overhead of the request/response architecture.
 
@@ -176,7 +176,7 @@ The AtomSpaceImpl adds an aprox 30 usec overhead to addNode/addLink and
 the client/server interface adds another 2 usecs
 
 Its not clear why AtomSpaceImpl does NOT add an overhead to getType and
-get/setTV ... instead, there seems to be a very hefty communications 
+get/setTV ... instead, there seems to be a very hefty communications
 overhead for this?  This doesn't make sense when compared to addNode/Link
 
 It appears that both the AtomSpaceImpl, and the client/server design
@@ -201,7 +201,7 @@ not realistic.
 Provided a new implementation for the getHandleSet that doubled
 the performance. A major bottleneck was the generation of HandleEntry's
 and then the copying of them into an std::vector.  Eliminating this
-step saved a lot. See the template getHandleSet<OutputIterator> in 
+step saved a lot. See the template getHandleSet<OutputIterator> in
 AtomTable.h for the right way to do these.
 
 In fact, *all* HandleEntry things should be eliminated and replaced
@@ -215,8 +215,8 @@ by iterators, and should use std::copy_if instead of filterSet.
 
 
 Basically, much/most of the overhead that AtomSpaceImpl adds to
-the AtomTable is due to the copying of HandleSets into vectors 
-and such.  
+the AtomTable is due to the copying of HandleSets into vectors
+and such.
 
 
 29 March 2013
@@ -256,7 +256,7 @@ near-noop speeds.
 
 Added scheme tests. The scheme tests create strings, and pass them to
 the scheme interpreter.  The scheme interpreter is currently built on
-top of the AtomSpace.  The scheme API does not currently expose the 
+top of the AtomSpace.  The scheme API does not currently expose the
 getHandleSet and getNodeHandles API, so no measurements made for those.
 
 New results:
@@ -282,8 +282,8 @@ misleading.  This is because the rate-limiting factor is the time it
 takes to enter and exit the scheme interpreter.  Specifically, it seems
 to take about 30 microseconds to call scm_with_guile() and about 110
 microseconds to move from outside of scm_c_catch() to the inside, where
-the C code for the atomspace is being called.  Thus, these two steps 
-alone rate-limit the measurement to 7K-ops/sec max. 
+the C code for the atomspace is being called.  Thus, these two steps
+alone rate-limit the measurement to 7K-ops/sec max.
 
 In 'real life', both of these steps would be infrequent, as normally,
 one would enter the interpeter, do a wholw lot of stuff, and then exit.
@@ -293,7 +293,7 @@ bindings would be to create maybe 10 or 100 atoms, once one is 'inside'.
 The above can be tested: grep for ONE_SHOT in the code.  It defines the
 following loop, and then calls (crea 100)
 
-(define (crea n) 
+(define (crea n)
   (if (not (eq? n 0))
     (let ()
       (cog-new-node 'ParseNode
@@ -420,7 +420,7 @@ Removed a single line of code:
       */
      bool holds(Handle h) const {
 -        h = getHandle(h);
-         return (NULL != h) and h->getAtomTable() == this; 
+         return (NULL != h) and h->getAtomTable() == this;
      }
 
 This was previously needed to resolve the shared_ptr for the handle.
@@ -449,10 +449,10 @@ AtomSpaceImpl perf changes are neutral. Some things got faster, some got
 slower. There's a huge amount of measurement noise; these numbers can be
 hard to repeat (everything in this diary shows best of three).
 
-AtomSpace perf: Wow! Huge improvement!  
+AtomSpace perf: Wow! Huge improvement!
 
 XXX FIXME: There seems to be a benchmark bug somewhere ... the AtomSpace
-figures are high ONLY if I'm doing something else CPU intensive at the 
+figures are high ONLY if I'm doing something else CPU intensive at the
 same tie (e.g. compiling).  Even watching youtube helps a little, but not
 as much. This alone reslts in a 2x or 3x performance improvement.
 Theorize:
@@ -503,7 +503,7 @@ Summary: pretty much everything got faster for every layer.
  -- The AtomTable API is mostly 2x-3x slower than it was in March 2013
     Essentially all of this slow-down is attributable to the use of
     std::shared_ptr for memory management.  Perhaps someday, BoehmGC
-    should be explored ... 
+    should be explored ...
 
                    -A -X         -A -x            -A          -A -g
    test           AtomTable    AtomSpaceImpl    AtomSpace    Scheme
@@ -529,7 +529,7 @@ still some differences and minor additinal layers, but they're mosty the
 same).  There is no AtomSpaceImpl any more, so not measured.
 
 Summary:
- -- AtomTable is not as good as the April 1 results; which are 2x to 2.5x 
+ -- AtomTable is not as good as the April 1 results; which are 2x to 2.5x
     faster than below.  The primary reason for this is the use of
     std::shared_ptr for all pointers.  Clearly, moving to garbage collection
     seems to be the right thing to do, long-run.
@@ -540,10 +540,10 @@ Summary:
 
  -- We are not measuring threaded performance here, but that should also
     much much better, maybe in the 20x-50x range, since the AtomSpaceAsync
-    had a single lock and thus huge lock contention.  Now, most lock 
+    had a single lock and thus huge lock contention.  Now, most lock
     contention is gone, except for atomtable operations (all getHandleSet
     calls require index lookups and so will contend).
- 
+
                    -A -X         -A          -A -g
    test           AtomTable    AtomSpace    Scheme
    name           K-ops/sec    K-ops/sec   K-ops/sec
@@ -571,7 +571,7 @@ Significant improvements in getIncoming/OutgoingSet ... not sure why.
 
 Big drop in getNodesHandles, don't know why.
 
- 
+
                    -A -X         -A          -A -g
    test           AtomTable    AtomSpace    Scheme
    name           K-ops/sec    K-ops/sec   K-ops/sec
@@ -638,9 +638,9 @@ Again.  New flags:
        is run outside the timing loop).
  -g -C run scheme, and compile (compilation is done outside of timing loop)
  -g run scheme, raw, straight up interpretation: no memo, not compile.
- 
-                  previous     -g -M       -g         -g -C   
-   test           memoize     memoize     interp     compile  
+
+                  previous     -g -M       -g         -g -C
+   test           memoize     memoize     interp     compile
    name          K-ops/sec   K-ops/sec   K-ops/sec  K-ops/sec
    ----          ---------   ---------   ---------  ---------
   noop               inf         inf       inf         inf
@@ -698,14 +698,50 @@ To summarize:
  3) There's a huge overhead to enter and exit the scheme subsystem.
 
 
-So: there are two distinct costs: 
+So: there are two distinct costs:
  A) Cost of calling a C++ smob function, from scheme.  The above numbers
-    suggest that the ballpark cost of this is about 2uS or 3uS 
+    suggest that the ballpark cost of this is about 2uS or 3uS
     (getOutgoingSet, getTV) but sometimes much worse: 7uS for getType,
     and 15 uS for addNode. This suggests severe cache-contention issues.
 
  B) Cost of calling scheme from C++. This seems to take about 175uS and
     sometimes much worse: 300uS to 400uS.  Perhaps this could be worked
     around by having another thread on standby:  linux thread-context
-    switching should run abt about 5uS per switch ...
+    switching should run about about 5uS per switch ...
 
+Caution: some of the above conclusions are either misleading, or the
+entire performance profile changed radically for guile-2.2.  Based on
+direct instrumented measurements (see immediately below) it looks like
+61% of the total time is spent getting from scm_c_catch, getting through
+the evaluator, and finally calling SchemeSmob::ss_new_node(). Then the
+SchemeSmob::ss_new_node() code takes another 28%, and so everything
+else, viz, getting from C++ to scm_c_catch(), and then returning back to
+c++ only takes 11% of the total CPU time.  Thus, at least for guile-2.2,
+the primary bottleneck is really scm_c_eval().  Ergo, compiled code
+really does look like the only viable solution....
+
+
+=================================================================
+
+22 Jan 2015: measurements on fanny.  fanny is a differnt machine than
+the above.  Also: measurements are done with guile-2.2 from a December
+2014 git pull.  So these numbers are not directly comparable to the
+above.
+
+enter scm_with_guile() takes 1.3 uSec
+(viz, get from c++, and pass through scm_with_guile() takes 1.3 uSec)
+return from scm_with_guile() takes 0.43 uSec
+SchemeSmob::scm_to_handle() takes 0.20 uSec
+
+do_scm_eval_str("(ConceptNode \"object_42\")") takes 66.5 uSec
+scm_c_catch of above takes 65uSec
+
+from scm_c_catch to ss_new_node: 41.2 uSec
+ss_new_node(): 18.7 uSec
+return from ss_new_node to scm_c_catch: 4.0 uSec
+
+Conclude: the bottleneck is currently having guile interpret the
+incoming string, decide what to do with it, and then call the smob
+handler.  Yes, we are nickel-n-dimed in other places, but that one
+is 2/3rds of the total time, and its essentially not tunable within
+opencog.
