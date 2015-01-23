@@ -291,7 +291,7 @@ class SchemePrimitive : public PrimitiveEnviron
 					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
 
 					const std::string &rs = (that->*method.s_s)(str);
-					rc = scm_from_locale_string(rs.c_str());
+					rc = scm_from_utf8_string(rs.c_str());
 					break;
 				}
 				case V_H:

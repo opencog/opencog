@@ -155,11 +155,11 @@ void SchemeSmob::throw_exception(const char *msg, const char * func)
 
 		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
 		scm_throw(
-			scm_from_locale_symbol("C++-EXCEPTION"),
+			scm_from_utf8_symbol("C++-EXCEPTION"),
 			scm_cons(
-				scm_from_locale_string(func),
+				scm_from_utf8_string(func),
 				scm_cons(
-					scm_from_locale_string(msg),
+					scm_from_utf8_string(msg),
 					SCM_EOL)));
 		// Hmm. scm_throw never returns.
 	}
@@ -167,9 +167,9 @@ void SchemeSmob::throw_exception(const char *msg, const char * func)
 	{
 		// scm_misc_error(fe->get_name(), "unknown C++ exception", SCM_EOL);
 		scm_error_scm(
-			scm_from_locale_symbol("C++ exception"),
-			scm_from_locale_string(func),
-			scm_from_locale_string("unknown C++ exception"),
+			scm_from_utf8_symbol("C++ exception"),
+			scm_from_utf8_string(func),
+			scm_from_utf8_string("unknown C++ exception"),
 			SCM_EOL,
 			SCM_EOL);
 		logger().error("Guile caught unknown C++ exception");

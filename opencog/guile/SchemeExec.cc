@@ -40,7 +40,7 @@ Handle SchemeEval::do_apply(const std::string &func, Handle varargs)
  */
 SCM SchemeEval::do_apply_scm( const std::string& func, Handle varargs )
 {
-	SCM sfunc = scm_from_locale_symbol(func.c_str());
+	SCM sfunc = scm_from_utf8_symbol(func.c_str());
 	SCM expr = SCM_EOL;
 	
 	// If there were args, pass the args to the function.

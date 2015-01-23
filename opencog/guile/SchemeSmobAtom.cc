@@ -54,7 +54,7 @@ SCM SchemeSmob::ss_name (SCM satom)
 	Handle h = verify_handle(satom, "cog-name");
 	NodePtr nnn(NodeCast(h));
 	if (nnn) name = nnn->getName();
-	SCM str = scm_from_locale_string(name.c_str());
+	SCM str = scm_from_utf8_string(name.c_str());
 	return str;
 }
 
@@ -63,7 +63,7 @@ SCM SchemeSmob::ss_type (SCM satom)
 	Handle h = verify_handle(satom, "cog-type");
 	Type t = h->getType();
 	const std::string &tname = classserver().getTypeName(t);
-	SCM str = scm_from_locale_string(tname.c_str());
+	SCM str = scm_from_utf8_string(tname.c_str());
 	SCM sym = scm_string_to_symbol(str);
 
 	return sym;
@@ -222,7 +222,7 @@ SCM SchemeSmob::ss_get_types (void)
 	while (1) {
 		t--;
 		const std::string &tname = classserver().getTypeName(t);
-		SCM str = scm_from_locale_string(tname.c_str());
+		SCM str = scm_from_utf8_string(tname.c_str());
 		SCM sym = scm_string_to_symbol(str);
 		list = scm_cons(sym, list);
 		if (0 == t) break;
@@ -245,7 +245,7 @@ SCM SchemeSmob::ss_get_subtypes (SCM stype)
 	for (unsigned int i=0; i<ns; i++) {
 		t = subl[i];
 		const std::string &tname = classserver().getTypeName(t);
-		SCM str = scm_from_locale_string(tname.c_str());
+		SCM str = scm_from_utf8_string(tname.c_str());
 		SCM sym = scm_string_to_symbol(str);
 		list = scm_cons(sym, list);
 	}
