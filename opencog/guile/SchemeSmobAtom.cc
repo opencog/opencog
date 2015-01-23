@@ -254,6 +254,24 @@ SCM SchemeSmob::ss_get_subtypes (SCM stype)
 }
 
 /**
+ * Return integer value corresponding to the string type name.
+ */
+SCM SchemeSmob::ss_get_type (SCM stype)
+{
+	if (scm_is_true(scm_symbol_p(stype)))
+		stype = scm_symbol_to_string(stype);
+
+	if (scm_is_false(scm_string_p(stype)))
+		return scm_from_ushort(NOTYPE);
+
+	char * ct = scm_to_locale_string(stype);
+	Type t = classserver().getType(ct);
+	free(ct);
+
+	return scm_from_ushort(t);
+}
+
+/**
  * Return true if stype is an atom type
  */
 SCM SchemeSmob::ss_type_p (SCM stype)

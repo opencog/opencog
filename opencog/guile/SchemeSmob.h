@@ -105,6 +105,7 @@ class SchemeSmob
 		// AtomSpace query functions
 		static SCM ss_map_type(SCM, SCM);
 		static SCM ss_get_types(void);
+		static SCM ss_get_type(SCM);
 		static SCM ss_type_p(SCM);
 		static SCM ss_node_type_p(SCM);
 		static SCM ss_link_type_p(SCM);
