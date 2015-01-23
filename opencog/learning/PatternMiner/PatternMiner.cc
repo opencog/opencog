@@ -1948,17 +1948,15 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     htree = new HTree();
     atomSpace = new AtomSpace( _originalAtomSpace);
 
-//    unsigned int system_thread_num  = std::thread::hardware_concurrency();
+    unsigned int system_thread_num  = std::thread::hardware_concurrency();
 
-//    if (system_thread_num > 1)
-//        THREAD_NUM = system_thread_num - 1;
-//    else
-//        THREAD_NUM = 1;
+    if (system_thread_num > 1)
+        THREAD_NUM = system_thread_num - 1;
+    else
+        THREAD_NUM = 1;
 
-//     // use all the threads in this machine
-//     THREAD_NUM = system_thread_num;
-
-    THREAD_NUM = 1;
+     // use all the threads in this machine
+     THREAD_NUM = system_thread_num;
 
 
     threads = new thread[THREAD_NUM];

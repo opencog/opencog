@@ -172,7 +172,9 @@ void PatternMiner::growPatternsDepthFirstTask()
         HandleSeq lastGramLinks;
         map<Handle,Handle> lastGramValueToVarMap;
         map<Handle,Handle> patternVarMap;
-        extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, false);
+        set<string> cur_task_ExtractedLinks[MAX_GRAM];
+        extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, cur_task_ExtractedLinks, false);
+
 
 
     }
@@ -360,7 +362,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 // extendedNode is the value node in original AtomSpace
 // lastGramLinks is the original links the parentLink is extracted from
 void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
-                                                           HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,bool isExtendedFromVar)
+                 HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap, set<string> *cur_task_ExtractedLinks, bool isExtendedFromVar)
 {
 
     // the ground value node in the _fromAtomSpace to the variable handle in pattenmining Atomspace
@@ -610,21 +612,28 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                                 keyString += "_";
                             }
 
-                            curDFExtractedLinksLock.lock();
+                            // if it is a handleseq that extracted in current thread task, not need to check it in the cur_DF_ExtractedLinks. Keep it, it won't duplicate the result
+                            if (cur_task_ExtractedLinks[cur_pattern_gram].find(keyString) == cur_task_ExtractedLinks[cur_pattern_gram].end())
+                            {
 
-                            if (cur_DF_ExtractedLinks[cur_pattern_gram].find(keyString) == cur_DF_ExtractedLinks[cur_pattern_gram].end())
-                                cur_DF_ExtractedLinks[cur_pattern_gram].insert(keyString);
-                            else
-                                alreadyExtracted = true;
+                                curDFExtractedLinksLock.lock(); // cur_DF_ExtractedLinks is shared by all threads, needs to be locked.
 
-                            curDFExtractedLinksLock.unlock();
+                                if (cur_DF_ExtractedLinks[cur_pattern_gram].find(keyString) == cur_DF_ExtractedLinks[cur_pattern_gram].end())
+                                    cur_DF_ExtractedLinks[cur_pattern_gram].insert(keyString);
+                                else
+                                    alreadyExtracted = true;
 
-                            if (alreadyExtracted)
-                                continue;
+                                curDFExtractedLinksLock.unlock();
+
+                                if (alreadyExtracted)
+                                    continue;
+                                else
+                                    cur_task_ExtractedLinks[cur_pattern_gram].insert(keyString);
+                            }
                         }
 
                         // extract patterns from these child
-                        extendAPatternForOneMoreGramRecursively(extendedHandle,  _fromAtomSpace, extendNode, inputLinks, thisGramHTreeNode, valueToVarMap,patternVarMap, isNewExtendedFromVar);
+                        extendAPatternForOneMoreGramRecursively(extendedHandle,  _fromAtomSpace, extendNode, inputLinks, thisGramHTreeNode, valueToVarMap,patternVarMap, cur_task_ExtractedLinks,isNewExtendedFromVar);
                     }
 
                     nodeIndex ++;
