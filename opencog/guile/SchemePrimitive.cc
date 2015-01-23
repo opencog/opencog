@@ -4,7 +4,7 @@
  * Allow C++ code to be invoked from scheme -- 
  * by defining a scheme primitive function.
  *
- * Copyright (C) 2009 Linas Vepstas
+ * Copyright (C) 2009, 2014 Linas Vepstas
  */
 
 #include <exception>
@@ -129,31 +129,11 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 	}
 	catch (const std::exception& ex)
 	{
-		const char *msg = ex.what();
-
-		// Should we even bother to log this?
-		logger().info("Guile caught C++ exception: %s", msg);
-
-		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
-		scm_throw(
-			scm_from_locale_symbol("C++-EXCEPTION"),
-			scm_cons(
-				scm_from_locale_string(fe->get_name()),
-				scm_cons(
-					scm_from_locale_string(msg),
-					SCM_EOL)));
-		// Hmm. scm_throw never returns.
+		SchemeSmob::throw_exception(ex.what(), fe->get_name());
 	}
 	catch (...)
 	{
-		// scm_misc_error(fe->get_name(), "unknown C++ exception", SCM_EOL);
-		scm_error_scm(
-			scm_from_locale_symbol("C++ exception"),
-			scm_from_locale_string(fe->get_name()),
-			scm_from_locale_string("unknown C++ exception"),
-			SCM_EOL,
-			SCM_EOL);
-		logger().error("Guile caught unknown C++ exception");
+		SchemeSmob::throw_exception(NULL, fe->get_name());
 	}
 	scm_remember_upto_here_1(sfe);
 	return rc;

@@ -3,7 +3,7 @@
  *
  * Scheme small objects (SMOBS) for opencog -- core functions.
  *
- * Copyright (c) 2008, 2013, 2014 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2013, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
 #ifdef HAVE_GUILE
@@ -142,6 +142,37 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			if (*av == *bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
+	}
+}
+
+/* ============================================================== */
+
+void SchemeSmob::throw_exception(const char *msg, const char * func)
+{
+	if (msg) {
+		// Should we even bother to log this?
+		logger().info("Guile caught C++ exception: %s", msg);
+
+		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
+		scm_throw(
+			scm_from_locale_symbol("C++-EXCEPTION"),
+			scm_cons(
+				scm_from_locale_string(func),
+				scm_cons(
+					scm_from_locale_string(msg),
+					SCM_EOL)));
+		// Hmm. scm_throw never returns.
+	}
+	else
+	{
+		// scm_misc_error(fe->get_name(), "unknown C++ exception", SCM_EOL);
+		scm_error_scm(
+			scm_from_locale_symbol("C++ exception"),
+			scm_from_locale_string(func),
+			scm_from_locale_string("unknown C++ exception"),
+			SCM_EOL,
+			SCM_EOL);
+		logger().error("Guile caught unknown C++ exception");
 	}
 }
 

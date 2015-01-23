@@ -161,6 +161,7 @@ class SchemeSmob
 		static AtomSpace *get_as_from_list(SCM);
 
 		// validate arguments coming from scheme passing into C++
+		static void throw_exception(const char *, const char *);
 		static Type verify_atom_type(SCM, const char *, int pos = 1);
 		static Type verify_node_type(SCM, const char *, int pos = 1);
 		static Type verify_link_type(SCM, const char *, int pos = 1);
