@@ -254,7 +254,7 @@ SCM SchemeSmob::ss_get_subtypes (SCM stype)
 }
 
 /**
- * Return true if a type
+ * Return true if stype is an atom type
  */
 SCM SchemeSmob::ss_type_p (SCM stype)
 {
@@ -269,6 +269,48 @@ SCM SchemeSmob::ss_type_p (SCM stype)
 	free(ct);
 
 	if (NOTYPE == t) return SCM_BOOL_F;
+
+	return SCM_BOOL_T;
+}
+
+/**
+ * Return true if stype is a node type
+ */
+SCM SchemeSmob::ss_node_type_p (SCM stype)
+{
+	if (scm_is_true(scm_symbol_p(stype)))
+		stype = scm_symbol_to_string(stype);
+
+	if (scm_is_false(scm_string_p(stype)))
+		return SCM_BOOL_F;
+
+	char * ct = scm_to_locale_string(stype);
+	Type t = classserver().getType(ct);
+	free(ct);
+
+	if (NOTYPE == t) return SCM_BOOL_F;
+	if (false == classserver().isA(t, NODE)) return SCM_BOOL_F;
+
+	return SCM_BOOL_T;
+}
+
+/**
+ * Return true if stype is a link type
+ */
+SCM SchemeSmob::ss_link_type_p (SCM stype)
+{
+	if (scm_is_true(scm_symbol_p(stype)))
+		stype = scm_symbol_to_string(stype);
+
+	if (scm_is_false(scm_string_p(stype)))
+		return SCM_BOOL_F;
+
+	char * ct = scm_to_locale_string(stype);
+	Type t = classserver().getType(ct);
+	free(ct);
+
+	if (NOTYPE == t) return SCM_BOOL_F;
+	if (false == classserver().isA(t, LINK)) return SCM_BOOL_F;
 
 	return SCM_BOOL_T;
 }

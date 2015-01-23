@@ -217,6 +217,8 @@ void SchemeSmob::register_procs(void*)
 	// Atom types
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));
 	register_proc("cog-type?",             1, 0, 0, C(ss_type_p));
+	register_proc("cog-node-type?",        1, 0, 0, C(ss_node_type_p));
+	register_proc("cog-link-type?",        1, 0, 0, C(ss_link_type_p));
 	register_proc("cog-get-subtypes",      1, 0, 0, C(ss_get_subtypes));
 	register_proc("cog-subtype?",          2, 0, 0, C(ss_subtype_p));
 
