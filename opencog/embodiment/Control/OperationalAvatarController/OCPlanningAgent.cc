@@ -262,7 +262,7 @@ void OCPlanningAgent::run()
 
 #ifdef HAVE_GUILE
         // Select the most important demand for now, by scm
-        SchemeEval* evaluator = new SchemeEval(&oac->getAtomSpace());
+        SchemeEval evaluator1(&oac->getAtomSpace());
         std::string scheme_expression;
 
         scheme_expression = "( update_selected_demand_goal )";
@@ -270,15 +270,15 @@ void OCPlanningAgent::run()
         //scheme_expression = "( get_most_critical_demand_goal )";
 
         // Run the Procedure that do planning
-        evaluator->eval(scheme_expression);
+        evaluator1.eval(scheme_expression);
 
-        if ( evaluator->eval_error() )
+        if ( evaluator1.eval_error() )
         {
             logger().error("OCPlanningAgent::%s -getCurrentDemand() failed '%s'",
                            __FUNCTION__,
                            scheme_expression.c_str());
         }
-        delete evaluator;
+
 #endif // HAVE_GUILE
 
         hSelectedDemandGoal =  AtomSpaceUtil::getReference(oac->getAtomSpace(),
