@@ -783,7 +783,31 @@ Breakdon of verify:
 	43% in verify_string()   ouuuuuch
 
 of verify_string():
-	41% in scm_to_locale_string() ouch ... 
+	41% in scm_to_locale_string() ouch ...
 
 Wow... scm_to_utf8_string() is 10x faster than scm_to_locale_string()
 and scm_i_string_chars() is another 4x faster.  Yowwww
+
+==================================================================
+24 January 2015:
+Revised numbers:
+On "fanny", Linux Mint Rebecca (Ubuntu 14.04) gcc 4.8.2 guile-2.2
+
+                -g -M -r100    -g -r100   -g -C -r100    -A
+   test           memoize       interp      compile    AtomSpace
+   name          K-ops/sec     K-ops/sec   K-ops/sec   K-ops/sec
+   ----          ---------     ---------   ---------   ---------
+  noop               inf         inf          inf       1915
+  addNode          101          17.7         97.2        144.4
+  addLink          155           5.83       161           93.3
+  getType          213          22.9        207          626
+  getTV            230          23.6        243          582
+  setTV            165          13.2        201          530
+  getOutgoingSet   252          24.4        242          596
+  getIncomingSet   220          23.8        222          487
+  removeAtom        90.2        20.1         77.7        147
+
+Observations:
+
+-- addLink is faster for the scheme, than the native C++.  ... why?
+   some bizarre cache contention ???
