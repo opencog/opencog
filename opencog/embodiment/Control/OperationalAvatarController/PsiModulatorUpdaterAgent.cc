@@ -40,9 +40,7 @@ bool PsiModulatorUpdaterAgent::Modulator::runUpdater (AtomSpace & atomSpace)
 #if HAVE_GUILE    
 
     // Initialize scheme evaluator
-    // SchemeEval* evaluator = new SchemeEval(&atomSpace);
     SchemeEval evaluator1(&atomSpace);
-    // cout << "PsiModulatorUpdater 44:" << evaluator << "; ";
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression = "( " + modulatorUpdater + " )";

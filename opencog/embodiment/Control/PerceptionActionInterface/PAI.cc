@@ -873,10 +873,9 @@ void PAI::processAvatarSignal(DOMElement * element)
             XMLString::release(&levelString);
 
             logger().fine("physiology level %s at value %.3f", name, level);
-// error with bilogical_urge?
-#if 0
+
             addPhysiologicalFeeling(internalAgentId, name, tsValue, level);
-#endif
+
         } else if (strcmp(signalName, ACTION_AVAILABILITY_ELEMENT) == 0) {
             // Store action availability state in atomspace. 
             processActionAvailability(signal);
@@ -1824,15 +1823,14 @@ void PAI::processInstruction(DOMElement * element)
 
 #ifdef HAVE_GUILE
     if (parsedSentenceText != NULL){
-        SchemeEval evaluator1(&atomSpace);
-        // cout << "PAI 44:" << evaluator << "; ";
+        SchemeEval* evaluator = new SchemeEval(&atomSpace); 
         std::string scheme_expression, scheme_return_value; 
 
         // Clean up all the information of previous sentence, such as detach 
         // the AnchorNode of previous sentence if it has not been processed. 
         scheme_expression = "( reset_dialog_system )";
-        scheme_return_value = evaluator1.eval(scheme_expression);
-        if ( evaluator1.eval_error() ) {
+        scheme_return_value = evaluator->eval(scheme_expression); 
+        if ( evaluator->eval_error() ) {
             logger().error("PAI::%s - Failed to execute '%s'", 
                             __FUNCTION__, 
                            scheme_expression.c_str()
@@ -1841,13 +1839,13 @@ void PAI::processInstruction(DOMElement * element)
 
         // Put the newly parsed sentence into AtomSpace, then PsiActionSelectionAgent 
         // and dialog_system.scm will continue processing it. 
-        scheme_return_value = evaluator1.eval(parsedSentenceText);
-        if ( evaluator1.eval_error() ) {
+        scheme_return_value = evaluator->eval(parsedSentenceText); 
+        if ( evaluator->eval_error() ) {
             logger().error("PAI::%s - Failed to put the parsed result from RelexServer to AtomSpace", 
                            __FUNCTION__
                           ); 
         }
-        // delete evaluator;
+        delete evaluator;
     }
 #endif
 

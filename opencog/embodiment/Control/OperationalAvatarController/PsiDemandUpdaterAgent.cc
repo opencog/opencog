@@ -42,9 +42,7 @@ bool PsiDemandUpdaterAgent::Demand::runUpdater(AtomSpace & atomSpace)
 #if HAVE_GUILE
 
     // Initialize scheme evaluator
-    // SchemeEval* evaluator = new SchemeEval(&atomSpace);
     SchemeEval evaluator1(&atomSpace);
-    // cout << "PsiDemandUpdaterAge 46 :" << evaluator << "; ";
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression = "( " + demandUpdater + " )";
@@ -57,7 +55,6 @@ bool PsiDemandUpdaterAgent::Demand::runUpdater(AtomSpace & atomSpace)
                          __FUNCTION__, scheme_expression.c_str());
         return false;
     }
-
 
     // Store the updated demand value (result)
     this->currentDemandValue = atof( scheme_return_value.c_str() );
@@ -112,9 +109,7 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
 #if HAVE_GUILE
 
     // Initialize scheme evaluator
-    // SchemeEval* evaluator = new SchemeEval(&atomSpace);
     SchemeEval evaluator1(&atomSpace);
-    // cout << "PsiDemandUpdaterAge 115 :" << evaluator << "; ";
     std::string scheme_expression, scheme_return_value;
 
     // Store the updated Demand levels to AtomSpace
@@ -135,7 +130,6 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
         logger().error( "PsiDemandUpdaterAgent::Demand::%s - Failed to execute '%s'",
                          __FUNCTION__, scheme_expression.c_str());
 
-        // delete evaluator;
         return false;
     }
 
@@ -163,10 +157,8 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
         logger().error( "PsiDemandUpdaterAgent::Demand::%s - Failed to execute '%s' for demand '%s'",
                          __FUNCTION__, scheme_expression.c_str(), this->demandName.c_str());
 
-        // delete evaluator;
         return false;
     }
-    // delete evaluator;
 
     // Store the result and update TruthValue of EvaluationLinkDemandGoal and EvaluationLinkFuzzyWithin
     // TODO: Use PLN forward chainer to handle this?

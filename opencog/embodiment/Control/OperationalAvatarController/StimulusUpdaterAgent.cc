@@ -42,7 +42,7 @@ bool StimulusUpdaterAgent::Stimulus::runUpdater (AtomSpace & atomSpace)
 
     // Initialize scheme evaluator
     SchemeEval evaluator1(&atomSpace);
-    // cout << "StimulusUpdaterAgent 45:" << evaluator << "; ";
+
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression = "( " + stimulusUpdater + " )";
@@ -54,7 +54,6 @@ bool StimulusUpdaterAgent::Stimulus::runUpdater (AtomSpace & atomSpace)
         logger().error( "StimulusUpdaterAgent::Stimulus::%s - Failed to execute '%s'",
                          __FUNCTION__, scheme_expression.c_str());
 
-        // delete evaluator;
         return false;
     }
 

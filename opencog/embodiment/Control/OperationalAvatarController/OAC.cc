@@ -53,16 +53,10 @@ namespace opencog
 namespace oac
 {
 
-
-
 using namespace Procedure;
 using namespace AvatarCombo;
 using namespace pai;
 using learningserver::messages::SchemaMessage;
-
-
-
-
 
 BaseServer* OAC::createInstance()
 {
@@ -478,11 +472,8 @@ void OAC::attention_allocation(OAC * oac)
     }
 }
 
-
-
 int OAC::addRulesToAtomSpace()
 {
-
     // Load core file
     //
     // There are two ways to load "rules_core.scm", 
@@ -507,13 +498,9 @@ int OAC::addRulesToAtomSpace()
      );
 
      */
-
-
 #ifdef HAVE_GUILE
     // Set PET_HANDLE and OWNER_HANDLE for the Scheme shell before loading rules file
-    // SchemeEval* evaluator = new SchemeEval(atomSpace);
     SchemeEval evaluator1(atomSpace);
-    // cout << "OAC::addRulesToAtomSpace :" << evaluator << "; ";
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression = "(set! PET_HANDLE (get_agent_handle \"" +
@@ -538,9 +525,6 @@ int OAC::addRulesToAtomSpace()
     logger().info("OAC::%s - Set PET_HANDLE and OWNER_HANDLE for Scheme shell",
             __FUNCTION__
     );
-
-    // delete evaluator;
-    // evaluator = NULL;
 
     // Load the psi rules file, including Modulators, DemandGoals and Rules 
     std::string psi_rules_file_name;
@@ -632,7 +616,6 @@ int OAC::addRulesToAtomSpace()
         }
     }
 #endif /* HAVE_GUILE */
-
 
     return 0;
 }
