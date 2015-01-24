@@ -1,5 +1,6 @@
-
-        
+//
+// Atom type definitions for the varouts space & time server types.
+//
 // ====================================================================
 // SpaceServer atoms
 SPACE_MAP_NODE <- NODE

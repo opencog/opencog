@@ -3,7 +3,7 @@
  *
  * Scheme small objects (SMOBS) for opencog -- core functions.
  *
- * Copyright (c) 2008, 2013, 2014 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2013, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
 #ifdef HAVE_GUILE
@@ -37,23 +37,25 @@ using namespace opencog;
  */
 
 scm_t_bits SchemeSmob::cog_misc_tag;
-bool SchemeSmob::is_inited = false;
+std::atomic_flag SchemeSmob::is_inited = ATOMIC_FLAG_INIT;
 SCM SchemeSmob::_radix_ten;
 
 void SchemeSmob::init()
 {
-	// XXX It would be ever so slightly more correct to use
-	// pthread_once() here, but that currently seems like overkill.
-	if (!is_inited)
-	{
-		is_inited = true;
-		init_smob_type();
-		register_procs();
+	if (is_inited.test_and_set()) return;
 
-		atomspace_fluid = scm_make_fluid();
-		atomspace_fluid = scm_permanent_object(atomspace_fluid);
-		_radix_ten = scm_from_int8(10);
-	}
+	init_smob_type();
+	scm_c_define_module("opencog", register_procs, NULL);
+	scm_c_use_module("opencog");
+
+	// Define the empty (opencog atomtypes) module; types will be added
+	// externally.
+	scm_c_define_module("opencog atomtypes", NULL, NULL);
+	scm_c_use_module("opencog atomtypes");
+
+	atomspace_fluid = scm_make_fluid();
+	atomspace_fluid = scm_permanent_object(atomspace_fluid);
+	_radix_ten = scm_from_int8(10);
 }
 
 SchemeSmob::SchemeSmob()
@@ -145,81 +147,121 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 
 /* ============================================================== */
 
+void SchemeSmob::throw_exception(const char *msg, const char * func)
+{
+	if (msg) {
+		// Should we even bother to log this?
+		logger().info("Guile caught C++ exception: %s", msg);
+
+		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
+		scm_throw(
+			scm_from_utf8_symbol("C++-EXCEPTION"),
+			scm_cons(
+				scm_from_utf8_string(func),
+				scm_cons(
+					scm_from_utf8_string(msg),
+					SCM_EOL)));
+		// Hmm. scm_throw never returns.
+	}
+	else
+	{
+		// scm_misc_error(fe->get_name(), "unknown C++ exception", SCM_EOL);
+		scm_error_scm(
+			scm_from_utf8_symbol("C++ exception"),
+			scm_from_utf8_string(func),
+			scm_from_utf8_string("unknown C++ exception"),
+			SCM_EOL,
+			SCM_EOL);
+		logger().error("Guile caught unknown C++ exception");
+	}
+}
+
+/* ============================================================== */
+
 #ifdef HAVE_GUILE2
  #define C(X) ((scm_t_subr) X)
 #else
  #define C(X) ((SCM (*) ()) X)
 #endif
 
-void SchemeSmob::register_procs(void)
+void SchemeSmob::register_procs(void*)
 {
-	scm_c_define_gsubr("cog-atom",              1, 0, 0, C(ss_atom));
-	scm_c_define_gsubr("cog-handle",            1, 0, 0, C(ss_handle));
-	scm_c_define_gsubr("cog-undefined-handle",  0, 0, 0, C(ss_undefined_handle));
-	scm_c_define_gsubr("cog-new-node",          2, 0, 1, C(ss_new_node));
-	scm_c_define_gsubr("cog-new-link",          1, 0, 1, C(ss_new_link));
-	scm_c_define_gsubr("cog-node",              2, 0, 1, C(ss_node));
-	scm_c_define_gsubr("cog-link",              1, 0, 1, C(ss_link));
-	scm_c_define_gsubr("cog-delete",            1, 0, 1, C(ss_delete));
-	scm_c_define_gsubr("cog-delete-recursive",  1, 0, 1, C(ss_delete_recursive));
-	scm_c_define_gsubr("cog-purge",             1, 0, 1, C(ss_purge));
-	scm_c_define_gsubr("cog-purge-recursive",   1, 0, 1, C(ss_purge_recursive));
-	scm_c_define_gsubr("cog-atom?",             1, 0, 1, C(ss_atom_p));
-	scm_c_define_gsubr("cog-node?",             1, 0, 1, C(ss_node_p));
-	scm_c_define_gsubr("cog-link?",             1, 0, 1, C(ss_link_p));
+	register_proc("cog-atom",              1, 0, 0, C(ss_atom));
+	register_proc("cog-handle",            1, 0, 0, C(ss_handle));
+	register_proc("cog-undefined-handle",  0, 0, 0, C(ss_undefined_handle));
+	register_proc("cog-new-node",          2, 0, 1, C(ss_new_node));
+	register_proc("cog-new-link",          1, 0, 1, C(ss_new_link));
+	register_proc("cog-node",              2, 0, 1, C(ss_node));
+	register_proc("cog-link",              1, 0, 1, C(ss_link));
+	register_proc("cog-delete",            1, 0, 1, C(ss_delete));
+	register_proc("cog-delete-recursive",  1, 0, 1, C(ss_delete_recursive));
+	register_proc("cog-purge",             1, 0, 1, C(ss_purge));
+	register_proc("cog-purge-recursive",   1, 0, 1, C(ss_purge_recursive));
+	register_proc("cog-atom?",             1, 0, 1, C(ss_atom_p));
+	register_proc("cog-node?",             1, 0, 1, C(ss_node_p));
+	register_proc("cog-link?",             1, 0, 1, C(ss_link_p));
 
 	// property setters on atoms
-	scm_c_define_gsubr("cog-set-av!",           2, 0, 0, C(ss_set_av));
-	scm_c_define_gsubr("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
-	scm_c_define_gsubr("cog-inc-vlti!",         1, 0, 0, C(ss_inc_vlti));
-	scm_c_define_gsubr("cog-dec-vlti!",         1, 0, 0, C(ss_dec_vlti));
+	register_proc("cog-set-av!",           2, 0, 0, C(ss_set_av));
+	register_proc("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
+	register_proc("cog-inc-vlti!",         1, 0, 0, C(ss_inc_vlti));
+	register_proc("cog-dec-vlti!",         1, 0, 0, C(ss_dec_vlti));
 
 	// property getters on atoms
-	scm_c_define_gsubr("cog-name",              1, 0, 0, C(ss_name));
-	scm_c_define_gsubr("cog-type",              1, 0, 0, C(ss_type));
-	scm_c_define_gsubr("cog-arity",             1, 0, 0, C(ss_arity));
-	scm_c_define_gsubr("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
-	scm_c_define_gsubr("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
-	scm_c_define_gsubr("cog-tv",                1, 0, 0, C(ss_tv));
-	scm_c_define_gsubr("cog-av",                1, 0, 0, C(ss_av));
+	register_proc("cog-name",              1, 0, 0, C(ss_name));
+	register_proc("cog-type",              1, 0, 0, C(ss_type));
+	register_proc("cog-arity",             1, 0, 0, C(ss_arity));
+	register_proc("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
+	register_proc("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
+	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
+	register_proc("cog-av",                1, 0, 0, C(ss_av));
 
 	// Truth-values
-	scm_c_define_gsubr("cog-new-stv",           2, 0, 0, C(ss_new_stv));
-	scm_c_define_gsubr("cog-new-ctv",           3, 0, 0, C(ss_new_ctv));
-	scm_c_define_gsubr("cog-new-itv",           3, 0, 0, C(ss_new_itv));
-	scm_c_define_gsubr("cog-tv?",               1, 0, 0, C(ss_tv_p));
-	scm_c_define_gsubr("cog-stv?",              1, 0, 0, C(ss_stv_p));
-	scm_c_define_gsubr("cog-ctv?",              1, 0, 0, C(ss_ctv_p));
-	scm_c_define_gsubr("cog-itv?",              1, 0, 0, C(ss_itv_p));
-	scm_c_define_gsubr("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
+	register_proc("cog-new-stv",           2, 0, 0, C(ss_new_stv));
+	register_proc("cog-new-ctv",           3, 0, 0, C(ss_new_ctv));
+	register_proc("cog-new-itv",           3, 0, 0, C(ss_new_itv));
+	register_proc("cog-tv?",               1, 0, 0, C(ss_tv_p));
+	register_proc("cog-stv?",              1, 0, 0, C(ss_stv_p));
+	register_proc("cog-ctv?",              1, 0, 0, C(ss_ctv_p));
+	register_proc("cog-itv?",              1, 0, 0, C(ss_itv_p));
+	register_proc("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
 
 	// Atom Spaces
-	scm_c_define_gsubr("cog-new-atomspace",     0, 1, 0, C(ss_new_as));
-	scm_c_define_gsubr("cog-atomspace?",        1, 0, 0, C(ss_as_p));
-	scm_c_define_gsubr("cog-atomspace",         0, 0, 0, C(ss_get_as));
-	scm_c_define_gsubr("cog-set-atomspace!",    1, 0, 0, C(ss_set_as));
+	register_proc("cog-new-atomspace",     0, 1, 0, C(ss_new_as));
+	register_proc("cog-atomspace?",        1, 0, 0, C(ss_as_p));
+	register_proc("cog-atomspace",         0, 0, 0, C(ss_get_as));
+	register_proc("cog-set-atomspace!",    1, 0, 0, C(ss_set_as));
 
 	// Attention values
-	scm_c_define_gsubr("cog-new-av",            3, 0, 0, C(ss_new_av));
-	scm_c_define_gsubr("cog-av?",               1, 0, 0, C(ss_av_p));
-	scm_c_define_gsubr("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
+	register_proc("cog-new-av",            3, 0, 0, C(ss_new_av));
+	register_proc("cog-av?",               1, 0, 0, C(ss_av_p));
+	register_proc("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
 
 	// AttentionalFocus
-	scm_c_define_gsubr("cog-af-boundary",       0, 0, 0, C(ss_af_boundary));
-	scm_c_define_gsubr("cog-set-af-boundary!",  1, 0, 0, C(ss_set_af_boundary));
-	scm_c_define_gsubr("cog-af",                0, 0, 0, C(ss_af));
+	register_proc("cog-af-boundary",       0, 0, 0, C(ss_af_boundary));
+	register_proc("cog-set-af-boundary!",  1, 0, 0, C(ss_set_af_boundary));
+	register_proc("cog-af",                0, 0, 0, C(ss_af));
     
 	// ExecutionOutputLinks
-	scm_c_define_gsubr("cog-execute!",          1, 0, 0, C(ss_execute));
+	register_proc("cog-execute!",          1, 0, 0, C(ss_execute));
 
 	// Atom types
-	scm_c_define_gsubr("cog-get-types",         0, 0, 0, C(ss_get_types));
-	scm_c_define_gsubr("cog-type?",             1, 0, 0, C(ss_type_p));
-	scm_c_define_gsubr("cog-get-subtypes",      1, 0, 0, C(ss_get_subtypes));
-	scm_c_define_gsubr("cog-subtype?",          2, 0, 0, C(ss_subtype_p));
+	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));
+	register_proc("cog-type->int",         1, 0, 0, C(ss_get_type));
+	register_proc("cog-type?",             1, 0, 0, C(ss_type_p));
+	register_proc("cog-node-type?",        1, 0, 0, C(ss_node_type_p));
+	register_proc("cog-link-type?",        1, 0, 0, C(ss_link_type_p));
+	register_proc("cog-get-subtypes",      1, 0, 0, C(ss_get_subtypes));
+	register_proc("cog-subtype?",          2, 0, 0, C(ss_subtype_p));
 
 	// Iterators
-	scm_c_define_gsubr("cog-map-type",          2, 0, 0, C(ss_map_type));
+	register_proc("cog-map-type",          2, 0, 0, C(ss_map_type));
+}
+
+void SchemeSmob::register_proc(const char* name, int req, int opt, int rst, scm_t_subr fcn)
+{
+	scm_c_define_gsubr(name, req, opt, rst, fcn);
+	scm_c_export(name, NULL);
 }
 
 #endif

@@ -29,27 +29,48 @@ using std::string;
 
 using namespace opencog;
 
+#ifdef HAVE_GUILE
+
+// Use thread-local storage (TLS) in order to avoid repeatedly
+// creating and destroying the evaluator.
+static SchemeEval* get_evaluator(AtomSpace* as)
+{
+	static thread_local AtomSpace* current_as = NULL;
+	static thread_local SchemeEval* evaluator = NULL;
+
+	if (current_as != as) {
+		current_as = as;
+		if (evaluator) delete evaluator;
+		evaluator = new SchemeEval(as);
+	}
+
+	return evaluator;
+}
+
+static void check_err(SchemeEval* evaluator, const std::string &s)
+{
+	if (evaluator->eval_error()) {
+		throw RuntimeException(TRACE_INFO,
+		       "Scheme: Failed to execute '%s'", s.c_str());
+	}
+
+	if (evaluator->input_pending()) {
+		throw RuntimeException(TRACE_INFO,
+		      "Scheme: Syntax error in input: '%s'", s.c_str());
+	}
+}
+#endif // HAVE_GUILE
+
 // Convenience wrapper, for stand-alone usage.
 std::string opencog::eval_scheme(AtomSpace& as, const std::string &s)
 {
 #ifdef HAVE_GUILE
-   SchemeEval* evaluator = new SchemeEval(&as);
-   std::string scheme_return_value = evaluator->eval(s);
-
-   if (evaluator->eval_error()) {
-      logger().error( "%s - Failed to execute '%s'",
-                     __FUNCTION__, s.c_str());
-   }
-
-   if (evaluator->input_pending()) {
-      logger().error( "%s - Scheme syntax error in input: '%s'",
-                     __FUNCTION__, s.c_str());
-   }
-   delete evaluator;
-
-   return scheme_return_value;
+	SchemeEval* evaluator = get_evaluator(&as);
+	std::string scheme_return_value = evaluator->eval(s);
+	check_err(evaluator, s);
+	return scheme_return_value;
 #else // HAVE_GUILE
-   return "Error: Compiled without Guile support";
+	return "Error: Compiled without Guile support";
 #endif // HAVE_GUILE
 }
 
@@ -57,22 +78,11 @@ std::string opencog::eval_scheme(AtomSpace& as, const std::string &s)
 Handle opencog::eval_scheme_h(AtomSpace& as, const std::string &s)
 {
 #ifdef HAVE_GUILE
-   SchemeEval* evaluator = new SchemeEval(&as);
-   Handle scheme_return_value = evaluator->eval_h(s);
-
-   if (evaluator->eval_error()) {
-      logger().error( "%s - Failed to execute '%s'",
-                     __FUNCTION__, s.c_str());
-   }
-
-   if (evaluator->input_pending()) {
-      logger().error( "%s - Scheme syntax error in input: '%s'",
-                     __FUNCTION__, s.c_str());
-   }
-   delete evaluator;
-
-   return scheme_return_value;
+	SchemeEval* evaluator = get_evaluator(&as);
+	Handle scheme_return_value = evaluator->eval_h(s);
+	check_err(evaluator, s);
+	return scheme_return_value;
 #else // HAVE_GUILE
-   return "Error: Compiled without Guile support";
+	return "Error: Compiled without Guile support";
 #endif // HAVE_GUILE
 }

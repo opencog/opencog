@@ -38,14 +38,14 @@ CogServer. Oh, and it helps to know a bit of Python too!
 === Setting up ===
 
 Go through the normal process of [[building OpenCog]]. Then ensure that
-the OpenCog data directory is in your Python <tt>sys.path</tt>. By
+the OpenCog data directory is in your Python `sys.path`. By
 default, the opencog python module lives at
-<tt>/usr/local/share/opencog/python</tt> when you do
-"<tt>make install</tt>", and you can modify your <tt>PYTHONPATH</tt>
+`/usr/local/share/opencog/python` when you do
+`make install`, and you can modify your `PYTHONPATH`
 environment variable to ensure Python checks that location. If you
 just want to use your build dir you can use something like:
 
- $ export PYTHONPATH=/home/joel/src/opencog/bin/opencog/cython
+ $ export PYTHONPATH=$PYTHONPATH:~/src/opencog/build/opencog/cython
 
 === AtomSpace API ===
 
@@ -165,7 +165,7 @@ node[Node:I am the one true Node]
 </source>
 
 There are other queries by type, outgoing set, name etc. See
-<tt>tests/opencog/cython/test_atomspace.py</tt> for the complete picture.
+`tests/opencog/cython/test_atomspace.py` for the complete picture.
 
 Note: You can also now use the AtomSpace.add() method which automatically
 determines and checks the required arguments for the type:
@@ -275,5 +275,5 @@ available to cython code.
   (Why? ZMQ messgng is about 50x-200x slower than boost::signals ... )
 
 * It'd also be nice to somehow import types using
-  "<tt>from opencog.atomspace.types import ConceptNode</tt>"
+  `from opencog.atomspace.types import ConceptNode`
   (or use a * import)

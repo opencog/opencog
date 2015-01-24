@@ -54,7 +54,7 @@ SCM SchemeSmob::ss_name (SCM satom)
 	Handle h = verify_handle(satom, "cog-name");
 	NodePtr nnn(NodeCast(h));
 	if (nnn) name = nnn->getName();
-	SCM str = scm_from_locale_string(name.c_str());
+	SCM str = scm_from_utf8_string(name.c_str());
 	return str;
 }
 
@@ -63,7 +63,7 @@ SCM SchemeSmob::ss_type (SCM satom)
 	Handle h = verify_handle(satom, "cog-type");
 	Type t = h->getType();
 	const std::string &tname = classserver().getTypeName(t);
-	SCM str = scm_from_locale_string(tname.c_str());
+	SCM str = scm_from_utf8_string(tname.c_str());
 	SCM sym = scm_string_to_symbol(str);
 
 	return sym;
@@ -222,7 +222,7 @@ SCM SchemeSmob::ss_get_types (void)
 	while (1) {
 		t--;
 		const std::string &tname = classserver().getTypeName(t);
-		SCM str = scm_from_locale_string(tname.c_str());
+		SCM str = scm_from_utf8_string(tname.c_str());
 		SCM sym = scm_string_to_symbol(str);
 		list = scm_cons(sym, list);
 		if (0 == t) break;
@@ -245,7 +245,7 @@ SCM SchemeSmob::ss_get_subtypes (SCM stype)
 	for (unsigned int i=0; i<ns; i++) {
 		t = subl[i];
 		const std::string &tname = classserver().getTypeName(t);
-		SCM str = scm_from_locale_string(tname.c_str());
+		SCM str = scm_from_utf8_string(tname.c_str());
 		SCM sym = scm_string_to_symbol(str);
 		list = scm_cons(sym, list);
 	}
@@ -254,21 +254,98 @@ SCM SchemeSmob::ss_get_subtypes (SCM stype)
 }
 
 /**
- * Return true if a type
+ * Return integer value corresponding to the string type name.
+ */
+SCM SchemeSmob::ss_get_type (SCM stype)
+{
+	if (scm_is_true(scm_symbol_p(stype)))
+		stype = scm_symbol_to_string(stype);
+
+	if (scm_is_false(scm_string_p(stype)))
+		return scm_from_ushort(NOTYPE);
+
+	const char * ct = scm_i_string_chars(stype);
+	Type t = classserver().getType(ct);
+
+	return scm_from_ushort(t);
+}
+
+/**
+ * Return true if stype is an atom type
  */
 SCM SchemeSmob::ss_type_p (SCM stype)
 {
+	if (scm_is_integer(stype)) {
+		Type t = scm_to_ushort(stype);
+		if (classserver().isValid(t))
+			return SCM_BOOL_T;
+		return SCM_BOOL_F;
+	}
+
 	if (scm_is_true(scm_symbol_p(stype)))
 		stype = scm_symbol_to_string(stype);
 
 	if (scm_is_false(scm_string_p(stype)))
 		return SCM_BOOL_F;
 
-	char * ct = scm_to_locale_string(stype);
+	const char * ct = scm_i_string_chars(stype);
 	Type t = classserver().getType(ct);
-	free(ct);
 
 	if (NOTYPE == t) return SCM_BOOL_F;
+
+	return SCM_BOOL_T;
+}
+
+/**
+ * Return true if stype is a node type
+ */
+SCM SchemeSmob::ss_node_type_p (SCM stype)
+{
+	if (scm_is_integer(stype)) {
+		Type t = scm_to_ushort(stype);
+		if (classserver().isNode(t))
+			return SCM_BOOL_T;
+		return SCM_BOOL_F;
+	}
+
+	if (scm_is_true(scm_symbol_p(stype)))
+		stype = scm_symbol_to_string(stype);
+
+	if (scm_is_false(scm_string_p(stype)))
+		return SCM_BOOL_F;
+
+	const char * ct = scm_i_string_chars(stype);
+	Type t = classserver().getType(ct);
+
+	if (NOTYPE == t) return SCM_BOOL_F;
+	if (false == classserver().isA(t, NODE)) return SCM_BOOL_F;
+
+	return SCM_BOOL_T;
+}
+
+/**
+ * Return true if stype is a link type
+ */
+SCM SchemeSmob::ss_link_type_p (SCM stype)
+{
+	if (scm_is_integer(stype)) {
+		Type t = scm_to_ushort(stype);
+		if (classserver().isLink(t))
+			return SCM_BOOL_T;
+		return SCM_BOOL_F;
+	}
+
+	if (scm_is_true(scm_symbol_p(stype)))
+		stype = scm_symbol_to_string(stype);
+
+	if (scm_is_false(scm_string_p(stype)))
+		return SCM_BOOL_F;
+
+	const char * ct = scm_i_string_chars(stype);
+	Type t = classserver().getType(ct);
+
+	if (NOTYPE == t) return SCM_BOOL_F;
+	if (false == classserver().isA(t, LINK)) return SCM_BOOL_F;
 
 	return SCM_BOOL_T;
 }
@@ -284,9 +361,8 @@ SCM SchemeSmob::ss_subtype_p (SCM stype, SCM schild)
 	if (scm_is_false(scm_string_p(stype)))
 		return SCM_BOOL_F;
 
-	char * ct = scm_to_locale_string(stype);
+	const char * ct = scm_i_string_chars(stype);
 	Type parent = classserver().getType(ct);
-	free(ct);
 
 	if (NOTYPE == parent) return SCM_BOOL_F;
 
@@ -297,9 +373,8 @@ SCM SchemeSmob::ss_subtype_p (SCM stype, SCM schild)
 	if (scm_is_false(scm_string_p(schild)))
 		return SCM_BOOL_F;
 
-	ct = scm_to_locale_string(schild);
-	Type child = classserver().getType(ct);
-	free(ct);
+	const char * cht = scm_i_string_chars(schild);
+	Type child = classserver().getType(cht);
 
 	if (NOTYPE == child) return SCM_BOOL_F;
 

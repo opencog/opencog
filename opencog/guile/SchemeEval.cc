@@ -138,8 +138,8 @@ void SchemeEval::set_error_string(SCM newerror)
 	scm_gc_unprotect_object(olderror);
 }
 
-static pthread_once_t eval_init_once = PTHREAD_ONCE_INIT;
-static pthread_key_t tid_key = 0;
+static std::atomic_flag eval_is_inited = ATOMIC_FLAG_INIT;
+static thread_local bool thread_is_inited = false;
 
 #ifndef HAVE_GUILE2
 	#define WORK_AROUND_GUILE_185_BUG
@@ -192,10 +192,12 @@ static pthread_mutex_t serialize_lock;
 static pthread_key_t ser_key = 0;
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-static void first_time_only(void)
+// Initialization that needs to be performed only once, for the entire
+// process.
+static void init_only_once(void)
 {
-	pthread_key_create(&tid_key, NULL);
-	pthread_setspecific(tid_key, (const void *) 0x42);
+	if (eval_is_inited.test_and_set()) return;
+
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	pthread_mutex_init(&serialize_lock, NULL);
 	pthread_key_create(&ser_key, NULL);
@@ -238,7 +240,7 @@ void SchemeEval::thread_unlock(void)
 
 SchemeEval::SchemeEval(AtomSpace* as)
 {
-	pthread_once(&eval_init_once, first_time_only);
+	init_only_once();
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_lock();
@@ -257,8 +259,8 @@ SchemeEval::SchemeEval(AtomSpace* as)
 void SchemeEval::per_thread_init(void)
 {
 	/* Avoid more than one call per thread. */
-	if (((void *) 0x2) == pthread_getspecific(tid_key)) return;
-	pthread_setspecific(tid_key, (const void *) 0x2);
+	if (thread_is_inited) return;
+	thread_is_inited = true;
 
 #ifdef WORK_AROUND_GUILE_185_BUG
 	scm_set_current_module(guile_user_module);
@@ -292,7 +294,7 @@ std::string SchemeEval::prt(SCM node)
 		SCM port = scm_open_output_string();
 		scm_display (node, port);
 		SCM rc = scm_get_output_string(port);
-		char * str = scm_to_locale_string(rc);
+		char * str = scm_to_utf8_string(rc);
 		std::string rv = str;
 		free(str);
 		scm_close_port(port);
@@ -329,7 +331,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 {
 	// Check for read error. If a read error, then wait for user to correct it.
 	SCM re = scm_symbol_to_string(tag);
-	char * restr = scm_to_locale_string(re);
+	char * restr = scm_to_utf8_string(re);
 	_pending_input = false;
 
 	if (0 == strcmp(restr, "read-error"))
@@ -467,6 +469,36 @@ void* SchemeEval::c_wrap_eval(void* p)
 	return self;
 }
 
+/// Ad hoc hack to try to limit guile memory consumption, while still
+/// providing decent performance.  The problem addressed here is that
+/// guile can get piggy with the system RAM, happily gobbling up RAM
+/// instead of garbage-collecting it.  Users have noticed. See github
+/// issue #1116. This improves on the original pull request #1117.
+static void do_gc(void)
+{
+	static size_t prev_usage = 0;
+
+	size_t curr_usage = getMemUsage();
+	// Yes, this is 10MBytes. Which seems nutty. But it does the trick...
+	if (10 * 1024 * 1024 < curr_usage - prev_usage)
+	{
+		prev_usage = curr_usage;
+		scm_gc();
+	}
+
+#if 0
+	static SCM since = scm_from_utf8_symbol("heap-allocated-since-gc");
+	SCM stats = scm_gc_stats();
+	size_t allo = scm_to_size_t(scm_assoc_ref(stats, since));
+
+	int times = scm_to_int(scm_assoc_ref(stats, scm_from_utf8_symbol("gc-times")));
+	printf("allo=%lu  mem=%lu time=%d\n", allo/1024, (getMemUsage() / (1024)), times);
+	scm_gc();
+	logger().info() << "Guile evaluated: " << expr;
+	logger().info() << "Mem usage=" << (getMemUsage() / (1024*1024)) << "MB";
+#endif
+}
+
 /**
  * do_eval -- evaluate a scheme expression string.
  * This implements the working guts of the shell-freindly evaluator.
@@ -496,15 +528,8 @@ void SchemeEval::do_eval(const std::string &expr)
 
 	atomspace = SchemeSmob::ss_get_env_as("do_eval");
 
-	// Cleanup every now and then, as otherwise guile gets piggy with
-	// the system RAM, happily splurging many gigabytes. The below does
-	// hurt performance, though -- about 15% for one test case...
-	if (++_gc_ctr%80 == 0) { scm_gc(); _gc_ctr = 0; }
-#if 0
-	scm_gc();
-	logger().info() << "Guile evaluated: " << expr;
-	logger().info() << "Mem usage=" << (getMemUsage() / (1024*1024)) << "MB";
-#endif
+	if (++_gc_ctr%80 == 0) { do_gc(); _gc_ctr = 0; }
+
 	_eval_done = true;
 	_wait_done.notify_all();
 }
@@ -601,7 +626,7 @@ std::string SchemeEval::do_poll_result()
 	{
 		std::string rv = poll_port();
 
-		char * str = scm_to_locale_string(error_string);
+		char * str = scm_to_utf8_string(error_string);
 		rv += str;
 		free(str);
 		set_error_string(SCM_EOL);
@@ -660,7 +685,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	_eval_done = true;
 	if (_caught_error)
 	{
-		char * str = scm_to_locale_string(error_string);
+		char * str = scm_to_utf8_string(error_string);
 		// Don't blank out the error string yet.... we need it later.
 		// (probably because someone called cog-bind with an
 		// ExecutionOutputLink in it with a bad scheme schema node.)
@@ -770,7 +795,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 	_eval_done = true;
 	if (_caught_error)
 	{
-		char * str = scm_to_locale_string(error_string);
+		char * str = scm_to_utf8_string(error_string);
 		set_error_string(SCM_EOL);
 		set_captured_stack(SCM_BOOL_F);
 

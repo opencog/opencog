@@ -60,6 +60,7 @@ FILE(APPEND "${SCM_FILE}" "; generated from atom definitions in types.script by 
 FILE(APPEND "${SCM_FILE}" ";\n")
 FILE(APPEND "${SCM_FILE}" "; This file contains basic scheme wrappers for atom creation.\n")
 FILE(APPEND "${SCM_FILE}" ";\n")
+FILE(APPEND "${SCM_FILE}" "(define-module (opencog atomtypes) #:use-module (opencog))\n")
 
 FILE(STRINGS "${SCRIPT_FILE}" TYPE_SCRIPT_CONTENTS)
 FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
@@ -126,20 +127,21 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         STRING(REGEX MATCH "LINK$" ISLINK ${TYPE})
 
         # Print out the scheme definitions
+        FILE(APPEND "${SCM_FILE}" "(define-public ${TYPE_NAME}Type (cog-type->int '${TYPE_NAME}))\n")
         IF (ISNODE STREQUAL "NODE")
-            FILE(APPEND "${SCM_FILE}" "(define (${TYPE_NAME} . x)\n")
-            FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-node (append (list '${TYPE_NAME}) x)))\n")
+            FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
+            FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-node (append (list ${TYPE_NAME}Type) x)))\n")
         ENDIF (ISNODE STREQUAL "NODE")
         IF (ISLINK STREQUAL "LINK")
-            FILE(APPEND "${SCM_FILE}" "(define (${TYPE_NAME} . x)\n")
-            FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-link (append (list '${TYPE_NAME}) x)))\n")
+            FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
+            FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-link (append (list ${TYPE_NAME}Type) x)))\n")
         ENDIF (ISLINK STREQUAL "LINK")
 
         # If not named as a node or a link, assume its a link
         # This is kind of hacky, but I don't know what else to do ... 
         IF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
-            FILE(APPEND "${SCM_FILE}" "(define (${TYPE_NAME} . x)\n")
-            FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-link (append (list '${TYPE_NAME}) x)))\n")
+            FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
+            FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-link (append (list ${TYPE_NAME}Type) x)))\n")
         ENDIF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
 
         IF (PARENT_TYPES)

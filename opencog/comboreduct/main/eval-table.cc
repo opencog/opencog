@@ -67,7 +67,7 @@ static const string default_log_file = default_log_file_prefix + "." + default_l
 combo_tree str2combo_tree_label(const std::string& combo_prog_str,
                                 bool has_labels,
                                 const std::vector<std::string>& labels) {
-    // combo pogram with place holders
+    // Combo program with place holders
     std::string combo_prog_ph_str =
         has_labels? l2ph(combo_prog_str, labels) : combo_prog_str;
     std::stringstream ss(combo_prog_ph_str);
@@ -151,30 +151,28 @@ void read_eval_output_results(evalTableParameters& pa)
     // get all combo tree strings (from command line and file)
     vector<string> all_combo_tree_str = get_all_combo_tree_str(pa);
 
-    // parse all variables from all combo tree strings
-    vector<string> all_variables;
-    for (string combo_tree_str : all_combo_tree_str) {
-        vector<string> vars = parse_combo_variables(combo_tree_str);
-        all_variables.insert(all_variables.end(), vars.begin(), vars.end());
+    set<string> all_variables;
+    for (const string& tr_str : all_combo_tree_str) {
+        vector<string> tr_vars = parse_combo_variables(tr_str);
+        all_variables.insert(tr_vars.begin(), tr_vars.end());
     }
-    set<string> all_unique_variables(all_variables.begin(), all_variables.end());
 
     // HERE WE ARE ASSUMING THAT THE INPUT FILE HAS A HEADER!!!
 // XXX FIXME
     vector<string> header = get_header(pa.input_table_file);
 
-    // Add to ignore_valuesget (header - all_unique_variables - target feature)
+    // Add to ignore_values (header - all_unique_variables - target feature)
     vector<string> ignore_variables;
     for (string f : header)
         if (f != pa.target_feature_str
             && f != pa.timestamp_feature_str
-            && all_unique_variables.find(f) == all_unique_variables.end())
+            && all_variables.find(f) == all_variables.end())
         {
             ignore_variables += f;
             logger().debug() << "Table variable not in combo tree: " << f;
         }
 
-    // read data ITable (using ignore_variables)
+    // Read data ITable (using ignore_variables)
     Table table;
     if (pa.target_feature_str.empty()) {
         OC_ASSERT(pa.timestamp_feature_str.empty(),
@@ -192,13 +190,41 @@ void read_eval_output_results(evalTableParameters& pa)
 
     ITable& it = table.itable;
 
-    // parse combo programs
+    // Get variables missing from the table
+    vector<string> ilabels(it.get_labels());
+    set<string> all_missing_variables = set_difference(all_variables,
+                                                       set<string>(ilabels.begin(),
+                                                                   ilabels.end()));
+
+    // Append the missing variables
+    ilabels.insert(ilabels.end(),
+                   all_missing_variables.begin(), all_missing_variables.end());
+
+    // Parse combo programs
     vector<combo_tree> trs;
     for (const string& tr_str : all_combo_tree_str) {
-        combo_tree tr = str2combo_tree_label(tr_str, pa.has_labels, it.get_labels());
+        combo_tree tr = str2combo_tree_label(tr_str, pa.has_labels, ilabels);
         logger().fine() << "Combo str: " << tr_str << "\n";
         logger().debug() << "Parsed combo: " << tr;
         trs += tr;
+    }
+
+    // Determine the type of the missing variables, if any, and insert
+    // columns of defaults
+    if (!all_missing_variables.empty()) {
+        type_tree_seq arg_types;
+        for (const combo_tree& tr : trs)
+            infer_arg_type_tree(tr, arg_types);
+        for (unsigned i = it.get_labels().size(); i < ilabels.size(); ++i) {
+            // Determine type
+            vertex dv = default_vertex_value(get_type_node(arg_types[i]));
+            // Insert default column
+            vertex_seq vs(it.size(), dv);
+            it.insert_col(ilabels[i], vs);
+            logger().info() << "Insert default column of type " << arg_types[i]
+                            << " of value " << dv << " for feature "
+                            << ilabels[i];
+        }
     }
 
     // eval and output the results

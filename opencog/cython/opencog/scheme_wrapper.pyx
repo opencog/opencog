@@ -33,7 +33,7 @@ def __init__(AtomSpace a):
 
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
-    string eval_scheme(cAtomSpace& as, const string& s)
+    string eval_scheme(cAtomSpace& as, const string& s) except +
 
 def scheme_eval(AtomSpace a, char* s):
     """
@@ -46,7 +46,7 @@ def scheme_eval(AtomSpace a, char* s):
     return ret.c_str()
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
-    cHandle eval_scheme_h(cAtomSpace& as, const string& s)
+    cHandle eval_scheme_h(cAtomSpace& as, const string& s) except +
 
 def scheme_eval_h(AtomSpace a, char* s):
     """
@@ -59,7 +59,7 @@ def scheme_eval_h(AtomSpace a, char* s):
     return Handle(ret.value())
 
 cdef extern from "opencog/guile/load-file.h" namespace "opencog":
-    int load_scm_file_relative (cAtomSpace& as, char* filename)
+    int load_scm_file_relative (cAtomSpace& as, char* filename) except +
 
 def load_scm(AtomSpace a, char* fname):
     status = load_scm_file_relative(deref(a.atomspace), fname)

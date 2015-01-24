@@ -20,10 +20,10 @@
 ; -- cog-report-counts -- Return an association list of counts.
 ; -- cog-get-root -- Return all hypergraph roots containing 'atom'
 ; -- cog-get-all-nodes -- Get all the nodes within a link and its sublinks
-; -- cog-get-partner -- Return other atom of a link conecting two atoms.
+; -- cog-get-partner -- Return other atom of a link connecting two atoms.
 ; -- cog-pred-get-partner -- Get the partner in an EvaluationLink.
 ; -- cog-filter -- return a list of atoms of given type.
-; -- cog-chase-link -- Return other atom of a link conecting two atoms.
+; -- cog-chase-link -- Return other atom of a link connecting two atoms.
 ; -- cog-chase-link-chk -- chase a link, with checking
 ; -- cog-map-chase-link -- Invoke proc on atoms connected through type.
 ; -- cog-par-chase-link -- call proc on atom connected via type. (parallel)
@@ -308,7 +308,7 @@
 )
 
 ; -----------------------------------------------------------------------
-; cog-get-partner -- Return other atom of a link conecting two atoms
+; cog-get-partner -- Return other atom of a link connecting two atoms
 ; cog-get-partner pair atom
 ;
 ; If 'pare' is a link containing two atoms, and 'atom' is one of the
@@ -360,7 +360,7 @@
 )
 
 ; -----------------------------------------------------------------------
-; cog-chase-link -- Return other atom of a link conecting two atoms.
+; cog-chase-link -- Return other atom of a link connecting two atoms.
 ;
 ; cog-chase-link link-type endpoint-type anchor
 ;

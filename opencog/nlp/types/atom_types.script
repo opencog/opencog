@@ -1,11 +1,12 @@
 //
-// Script for automatic "atom type" generation. For more more information,
-// consult  the documentation in the opencog/atomspace/README file.
+// Script for automatic "atom type" generation. For more more
+// information, consult the opencog/atomspace/README file.
 //
-// Please note: some of the types below are used only via the scheme bindings.
-// Thus, just because you can comment some of these out, and the code still
-// compiles, that does not mean that these types are unused!  Be sure to grep
-// for the CamelCase names, to see if they show up elsewhere!
+// Please note: some of the types below are used only via the scheme
+// bindings. Thus, just because you can comment some of these out, and
+// the code still compiles, that does not mean that these types are
+// unused!  Be sure to grep for the CamelCase names, to see if they
+// show up elsewhere!
 //
 // ====================================================================
 // Older parsing and language handling nodes;
