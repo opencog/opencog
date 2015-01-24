@@ -258,7 +258,9 @@ std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_
     }
 
     // Initialize scheme evaluator
-    SchemeEval* evaluator = new SchemeEval(&atomSpace);
+    // SchemeEval* evaluator = new SchemeEval(&atomSpace);
+    SchemeEval evaluator1(&atomSpace);
+    // cout << "PsiActionSelectionAgent::executeAction :" << evaluator << "; ";
     std::string scheme_expression, scheme_return_value;
 
     // If it is a SPEECH_ACT_SCHEMA_NODE, run the corresponding scheme function,
@@ -274,9 +276,9 @@ std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_
         scheme_expression = "( " + actionName + " )";
 
         // Run the speech act schema to generate answers
-        scheme_return_value = evaluator->eval(scheme_expression);
+        scheme_return_value = evaluator1.eval(scheme_expression);
 
-        if ( evaluator->eval_error() ) {
+        if ( evaluator1.eval_error() ) {
             logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'",
                              __FUNCTION__,
                              scheme_expression.c_str()
@@ -324,9 +326,9 @@ std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_
             scheme_expression = "( " + scheme_expression + " )";
 
             // Run scheme function
-            scheme_return_value = evaluator->eval(scheme_expression);
+            scheme_return_value = evaluator1.eval(scheme_expression);
 
-            if ( evaluator->eval_error() ) {
+            if ( evaluator1.eval_error() ) {
                 logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'",
                                  __FUNCTION__,
                                  scheme_expression.c_str()
@@ -461,9 +463,9 @@ std::cout<<std::endl<<"Generate say action " <<atomSpace.atomAsString(hSpeakActi
 
         // Move sentences from UtteranceNode to DialogNode, then these sentences
         // will not be said again.
-        scheme_return_value = evaluator->eval(scheme_expression);
+        scheme_return_value = evaluator1.eval(scheme_expression);
 
-        if ( evaluator->eval_error() ) {
+        if ( evaluator1.eval_error() ) {
             logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'",
                              __FUNCTION__,
                              scheme_expression.c_str()
@@ -688,7 +690,9 @@ std::cout<<"Current action is still running [SchemaId = "
     // If we've used up the current plan, do a new planning
     if ( this->temp_action_list.empty() && this->current_actions.empty() ) {
         // Initialize scheme evaluator
-        SchemeEval* evaluator = new SchemeEval(&atomSpace);
+        // SchemeEval* evaluator = new SchemeEval(&atomSpace);
+        SchemeEval evaluator1(&atomSpace);
+        // cout << "PsiActionSelectionAgent::run :" << evaluator << "; ";
         std::string scheme_expression, scheme_return_value;
 
         // test: skip for some circles before beginning next planning
@@ -703,19 +707,19 @@ std::cout<<"Current action is still running [SchemaId = "
         scheme_expression = "( do_planning )";
 
         // Run the Procedure that do planning
-        scheme_return_value = evaluator->eval(scheme_expression);
+        scheme_return_value = evaluator1.eval(scheme_expression);
 
-        if ( evaluator->eval_error() ) {
+        if ( evaluator1.eval_error() ) {
             logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'",
                              __FUNCTION__,
                              scheme_expression.c_str()
                           );
 
-            delete evaluator;
+            //delete evaluator;
             return;
         }
-        delete evaluator;
-        evaluator = NULL;
+        //delete evaluator;
+        //evaluator = NULL;
 
         // Try to get the plan stored in AtomSpace
         if ( !this->getPlan(atomSpace) ) {
