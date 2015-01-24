@@ -80,7 +80,6 @@ void EventResponder::response(std::string actionName, Handle instanceNode, Handl
 
     // Initialize scheme evaluator
     SchemeEval evaluator1(&atomSpace);
-    // cout << "EventResponder 83:" << evaluator << "; ";
     std::string scheme_expression, scheme_return_value;
 
     unsigned long handleInt = instanceNode.value();
@@ -113,7 +112,6 @@ void EventResponder::response(std::string actionName, Handle instanceNode, Handl
                          scheme_expression.c_str()
                       );
     }
-    // delete evaluator;
 
 #endif // HAVE_GUILE
 }

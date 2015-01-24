@@ -93,9 +93,7 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace
 #if HAVE_GUILE    
 
     // Initialize scheme evaluator
-    // SchemeEval* evaluator = new SchemeEval(&atomSpace);
     SchemeEval evaluator1(&atomSpace);
-    // cout << "PsiModulatorUpdater 98:" << evaluator << "; ";
     std::string scheme_expression, scheme_return_value;
 
     // Store the updated Modulator levels to AtomSpace
@@ -118,7 +116,6 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace
                          scheme_expression.c_str() 
                       );
 
-        // delete evaluator;
         return false; 
     }
 
@@ -128,7 +125,6 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace
                    this->currentModulatorValue
                   );
 
-    // delete evaluator;
     return true; 
 
 #else // HAVE_GUILE    
@@ -274,7 +270,6 @@ void PsiModulatorUpdaterAgent::run()
     // Initialize scheme evaluator
     SchemeEval evaluator1(&atomSpace);
 
-    // cout << "PsiModulatorUpdater 276:" << evaluator << "; ";
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression = "( get_pleasure_value )";
@@ -290,7 +285,6 @@ void PsiModulatorUpdaterAgent::run()
     }
 
     this->pleasure = atof( scheme_return_value.c_str() ); 
-    //delete evaluator;
 #endif // HAVE_GUILE    
 
 

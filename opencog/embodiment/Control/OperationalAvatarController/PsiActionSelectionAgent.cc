@@ -258,7 +258,6 @@ std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_
     }
 
     // Initialize scheme evaluator
-    // SchemeEval* evaluator = new SchemeEval(&atomSpace);
     SchemeEval evaluator1(&atomSpace);
     std::string scheme_expression, scheme_return_value;
 

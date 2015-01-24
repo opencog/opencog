@@ -42,7 +42,6 @@ bool StimulusUpdaterAgent::Stimulus::runUpdater (AtomSpace & atomSpace)
 
     // Initialize scheme evaluator
     SchemeEval evaluator1(&atomSpace);
-
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression = "( " + stimulusUpdater + " )";
@@ -63,7 +62,6 @@ bool StimulusUpdaterAgent::Stimulus::runUpdater (AtomSpace & atomSpace)
     logger().debug("StimulusUpdaterAgent::Stimulus::%s - The level of stimulus '%s' will be set to '%f'",
                    __FUNCTION__, this->stimulusName.c_str(), this->currentStimulusValue);
 
-    // delete evaluator;
 #endif // HAVE_GUILE
 
     return true;

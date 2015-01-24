@@ -275,7 +275,6 @@ void PsiFeelingUpdaterAgent::runUpdaters()
                          __FUNCTION__, feeling.c_str(), iFeeling->second.updatedValue);
     }// for
 
-    // delete evaluator;
 #endif // HAVE_GUILE
 
 }
