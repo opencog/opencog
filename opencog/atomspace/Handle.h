@@ -67,6 +67,10 @@ private:
     Atom* cresolve() const;
     static AtomPtr do_res(const Handle*);
     static std::vector<const AtomTable*> _resolver;
+
+    AtomPtr resolve_ptr();
+    static void set_resolver(const AtomTable*);
+    static void clear_resolver(const AtomTable*);
 public:
 
     static const Handle UNDEFINED;
@@ -160,10 +164,6 @@ public:
         if (h1 > h2) return 1;
         return 0;
     }
-
-    AtomPtr resolve_ptr();
-    static void set_resolver(const AtomTable*);
-    static void clear_resolver(const AtomTable*);
 
     operator AtomPtr() const {
         if (_ptr.get()) return _ptr;
