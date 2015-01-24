@@ -492,6 +492,11 @@ Looks like the python bottleneck, whatever it is, dominates everything else.
 Again: a 1.7x perf improvement when running a concurrent compile on other
 CPU; without that, the python numbers would be in the 3.8-4.3 range.
 
+Update: January 2015: Turns out the scheme bindings used a terrible
+strategy for atom types, and for strings. Fixing this improved the
+addNode performance by almost 2x and addLink by about 1.5x, with smaller
+but significant improvements to the other methods.
+
 
 
 27 October 2013
