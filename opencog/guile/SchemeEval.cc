@@ -17,7 +17,7 @@
 #include <libguile/backtrace.h>
 #include <libguile/debug.h>
 #ifndef HAVE_GUILE2
-#include <libguile/lang.h>
+  #include <libguile/lang.h>
 #endif
 #include <pthread.h>
 
@@ -30,87 +30,6 @@
 #include "SchemeSmob.h"
 
 using namespace opencog;
-using namespace std;
-
-void showFDInfo1(int fd)
-{
-    char buf[256];
-
-    int fd_flags = fcntl(fd, F_GETFD);
-    if (fd_flags == -1)
-        return;
-
-    int fl_flags = fcntl(fd, F_GETFL);
-    if (fl_flags == -1)
-        return;
-
-    char path[256];
-    sprintf(path, "/proc/self/fd/%d", fd);
-
-    memset(&buf[0], 0, 256);
-    ssize_t s = readlink(path, &buf[0], 256);
-    if (s == -1)
-    {
-        cerr << " (" << path << "): " << "not available";
-        return;
-    }
-    cerr << fd << " (" << buf << "): ";
-
-    if (fd_flags & FD_CLOEXEC)
-        cerr << "cloexec ";
-
-    // file status
-    if (fl_flags & O_APPEND)
-        cerr << "append ";
-    if (fl_flags & O_NONBLOCK)
-        cerr << "nonblock ";
-
-    // acc mode
-    if (fl_flags & O_RDONLY)
-        cerr << "read-only ";
-    if (fl_flags & O_RDWR)
-        cerr << "read-write ";
-    if (fl_flags & O_WRONLY)
-        cerr << "write-only ";
-
-    if (fl_flags & O_DSYNC)
-        cerr << "dsync ";
-    if (fl_flags & O_RSYNC)
-        cerr << "rsync ";
-    if (fl_flags & O_SYNC)
-        cerr << "sync ";
-
-    struct flock fl;
-    fl.l_type = F_WRLCK;
-    fl.l_whence = 0;
-    fl.l_start = 0;
-    fl.l_len = 0;
-    fcntl(fd, F_GETLK, &fl);
-    if (fl.l_type != F_UNLCK)
-    {
-        if (fl.l_type == F_WRLCK)
-            cerr << "write-locked";
-        else
-            cerr << "read-locked";
-        cerr << "(pid:" << fl.l_pid << ") ";
-    }
-}
-
-void showFDInfo()
-{
-#if 0
-    int numHandles = getdtablesize();
-
-    for ( int i = 0; i < numHandles; i++ )
-    {
-        int fd_flags = fcntl( i, F_GETFD );
-        if ( fd_flags == -1 ) continue;
-
-        showFDInfo1( i );
-    }
-#endif
-
-}
 
 /**
  * This init is called once for every time that this class
@@ -118,141 +37,112 @@ void showFDInfo()
  */
 void SchemeEval::init(void)
 {
-    SchemeSmob::init();
-    PrimitiveEnviron::init();
+	SchemeSmob::init();
+	PrimitiveEnviron::init();
 
-    // Output ports for side-effects.
-    _saved_outport = scm_current_output_port();
-    _saved_outport = scm_gc_protect_object(_saved_outport);
+	// Output ports for side-effects.
+	_saved_outport = scm_current_output_port();
+	_saved_outport = scm_gc_protect_object(_saved_outport);
 
-    SCM pair = scm_pipe();
-    _pipe = scm_car(pair);
-    _pipe = scm_gc_protect_object(_pipe);
-    _pipeno = scm_to_int(scm_fileno(_pipe));
-    _outport = scm_cdr(pair);
-    _outport = scm_gc_protect_object(_outport);
-    scm_setvbuf(_outport, scm_from_int(_IONBF), SCM_UNDEFINED);
+	SCM pair = scm_pipe();
+	_pipe = scm_car(pair);
+	_pipe = scm_gc_protect_object(_pipe);
+	_pipeno = scm_to_int(scm_fileno(_pipe));
+	_outport = scm_cdr(pair);
+	_outport = scm_gc_protect_object(_outport);
+	scm_setvbuf(_outport, scm_from_int (_IONBF), SCM_UNDEFINED);
 
-    // We want non-blocking reads.
-    int flags = fcntl(_pipeno, F_GETFL, 0);
-    if (flags < 0)
-        flags = 0;
-    fcntl(_pipeno, F_SETFL, flags | O_NONBLOCK);
+	// We want non-blocking reads.
+	int flags = fcntl(_pipeno, F_GETFL, 0);
+	if (flags < 0) flags = 0;
+	fcntl(_pipeno, F_SETFL, flags | O_NONBLOCK);
 
-    scm_set_current_output_port(_outport);
+	scm_set_current_output_port(_outport);
 
-    _in_shell = false;
+	_in_shell = false;
 
-    // User error and crash management
-    error_string = SCM_EOL;
-    error_string = scm_gc_protect_object(error_string);
+	// User error and crash management
+	error_string = SCM_EOL;
+	error_string = scm_gc_protect_object(error_string);
 
-    captured_stack = SCM_BOOL_F;
-    captured_stack = scm_gc_protect_object(captured_stack);
+	captured_stack = SCM_BOOL_F;
+	captured_stack = scm_gc_protect_object(captured_stack);
 
-    pexpr = NULL;
-    _eval_done = false;
-    _poll_done = false;
+	pexpr = NULL;
+	_eval_done = false;
+	_poll_done = false;
 
-    _rc = SCM_EOL;
-    _rc = scm_gc_protect_object(_rc);
+	_rc = SCM_EOL;
+	_rc = scm_gc_protect_object(_rc);
 
-    _gc_ctr = 0;
-
-    printf("SchemeEval::init: %d,%d ;", _pipeno, scm_to_int(scm_fileno(_outport)));
+	_gc_ctr = 0;
 }
 
 /// Discard all chars in the outport.
 void SchemeEval::drain_output(void)
 {
-    // read and discard.
-    poll_port();
+	// read and discard.
+	poll_port();
 }
 
 void * SchemeEval::c_wrap_init(void *p)
 {
-    SchemeEval *self = (SchemeEval *) p;
-    self->init();
-    return self;
+	SchemeEval *self = (SchemeEval *) p;
+	self->init();
+	return self;
 }
 
 void SchemeEval::finish(void)
 {
-    scm_gc_unprotect_object(_rc);
+	scm_gc_unprotect_object(_rc);
 
-    printf("SchemeEval::finish pipeno: %d,%d; ", _pipeno, scm_to_int(scm_fileno(_outport)));
+	// Restore the previous outport (if its still alive)
+	if (scm_is_false(scm_port_closed_p(_saved_outport)))
+		scm_set_current_output_port(_saved_outport);
+	scm_gc_unprotect_object(_saved_outport);
 
-    // Restore the previous outport (if its still alive)
-    if (scm_is_false(scm_port_closed_p(_saved_outport)))
-        scm_set_current_output_port(_saved_outport);
-    scm_gc_unprotect_object(_saved_outport);
+	scm_close_port(_outport);
+	scm_gc_unprotect_object(_outport);
 
-    // std::cerr << __FUNCTION__ << ":Closing _output:" << _outport;
-    scm_close_port(_outport);
-#if 0
-    if(scm_is_false(scm_port_closed_p(_outport)))
-    {
-        std::cerr << " Fail!" << endl;
-    }
-    else
-    {
-        std::cerr << " Pass." << endl;
-    }
-#endif
-    scm_gc_unprotect_object(_outport);
+	scm_close_port(_pipe);
+	scm_gc_unprotect_object(_pipe);
 
-    //std::cerr << __FUNCTION__ << ":Close _pipe:" << _pipe;
-    scm_close_port(_pipe);
+	scm_gc_unprotect_object(error_string);
+	scm_gc_unprotect_object(captured_stack);
 
-#if 0
-    if(scm_is_false(scm_port_closed_p(_pipe)))
-    {
-        std::cerr << " Fail!" << endl;
-    }
-    else
-    {
-        std::cerr << " Pass." << endl;
-    }
-#endif
-
-    scm_gc_unprotect_object(_pipe);
-
-    scm_gc_unprotect_object(error_string);
-    scm_gc_unprotect_object(captured_stack);
-
-    // Force garbage collection
-    scm_gc();
+	// Force garbage collection
+	scm_gc();
 }
 
 void * SchemeEval::c_wrap_finish(void *p)
 {
-    SchemeEval *self = (SchemeEval *) p;
-    self->finish();
-    return self;
+	SchemeEval *self = (SchemeEval *) p;
+	self->finish();
+	return self;
 }
 
 // The following two routines are needed to avoid bad garbage collection
 // of anything we've kept in the object.
 void SchemeEval::set_captured_stack(SCM newstack)
 {
-    // protect before unprotecting, to avoid multi-threaded races.
-    SCM oldstack = captured_stack;
-    captured_stack = scm_gc_protect_object(newstack);
-    scm_gc_unprotect_object(oldstack);
+	// protect before unprotecting, to avoid multi-threaded races.
+	SCM oldstack = captured_stack;
+	captured_stack = scm_gc_protect_object(newstack);
+	scm_gc_unprotect_object(oldstack);
 }
 
 void SchemeEval::set_error_string(SCM newerror)
 {
-    SCM olderror = error_string;
-    error_string = scm_gc_protect_object(newerror);
-    scm_gc_unprotect_object(olderror);
+	SCM olderror = error_string;
+	error_string = scm_gc_protect_object(newerror);
+	scm_gc_unprotect_object(olderror);
 }
 
 static pthread_once_t eval_init_once = PTHREAD_ONCE_INIT;
 static pthread_key_t tid_key = 0;
 
 #ifndef HAVE_GUILE2
-#define WORK_AROUND_GUILE_185_BUG
+	#define WORK_AROUND_GUILE_185_BUG
 #endif
 #ifdef WORK_AROUND_GUILE_185_BUG
 /* There's a bug in guile-1.8.5, where the second and subsequent
@@ -268,14 +158,14 @@ static SCM guile_user_module;
 
 static void * do_bogus_scm(void *p)
 {
-    scm_c_eval_string("(+ 2 2)\n");
-    return p;
+	scm_c_eval_string ("(+ 2 2)\n");
+	return p;
 }
 #endif /* WORK_AROUND_GUILE_185_BUG */
 
-//#ifndef HAVE_GUILE2
-#define WORK_AROUND_GUILE_THREADING_BUG
-//#endif
+#ifndef HAVE_GUILE2
+	#define WORK_AROUND_GUILE_THREADING_BUG
+#endif
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 /* There are bugs in guile-1.8.6 and earlier that prevent proper
  * multi-threaded operation. Currently, the most serious of these is
@@ -304,16 +194,16 @@ static pthread_key_t ser_key = 0;
 
 static void first_time_only(void)
 {
-    pthread_key_create(&tid_key, NULL);
-    pthread_setspecific(tid_key, (const void *) 0x42);
+	pthread_key_create(&tid_key, NULL);
+	pthread_setspecific(tid_key, (const void *) 0x42);
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-    pthread_mutex_init(&serialize_lock, NULL);
-    pthread_key_create(&ser_key, NULL);
-    pthread_setspecific(ser_key, (const void *) 0x0);
+	pthread_mutex_init(&serialize_lock, NULL);
+	pthread_key_create(&ser_key, NULL);
+	pthread_setspecific(ser_key, (const void *) 0x0);
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 #ifdef WORK_AROUND_GUILE_185_BUG
-    scm_with_guile(do_bogus_scm, NULL);
-    guile_user_module = scm_current_module();
+	scm_with_guile(do_bogus_scm, NULL);
+	guile_user_module = scm_current_module();
 #endif /* WORK_AROUND_GUILE_185_BUG */
 }
 
@@ -325,42 +215,40 @@ static void first_time_only(void)
  */
 void SchemeEval::thread_lock(void)
 {
-    long cnt = (long) pthread_getspecific(ser_key);
-    if (0 >= cnt)
-    {
-        pthread_mutex_lock(&serialize_lock);
-    }
-    cnt++;
-    pthread_setspecific(ser_key, (const void *) cnt);
+	long cnt = (long) pthread_getspecific(ser_key);
+	if (0 >= cnt)
+	{
+		pthread_mutex_lock(&serialize_lock);
+	}
+	cnt ++;
+	pthread_setspecific(ser_key, (const void *) cnt);
 }
 
 void SchemeEval::thread_unlock(void)
 {
-    long cnt = (long) pthread_getspecific(ser_key);
-    cnt--;
-    pthread_setspecific(ser_key, (const void *) cnt);
-    if (0 >= cnt)
-    {
-        pthread_mutex_unlock(&serialize_lock);
-    }
+	long cnt = (long) pthread_getspecific(ser_key);
+	cnt --;
+	pthread_setspecific(ser_key, (const void *) cnt);
+	if (0 >= cnt)
+	{
+		pthread_mutex_unlock(&serialize_lock);
+	}
 }
 #endif
 
 SchemeEval::SchemeEval(AtomSpace* as)
 {
-    pthread_once(&eval_init_once, first_time_only);
+	pthread_once(&eval_init_once, first_time_only);
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-    thread_lock();
+	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
-    atomspace = as;
+	atomspace = as;
 
-    scm_with_guile(c_wrap_init, this);
-
-    std::cout << "SchemeEval::SchemeEval: this:" << this << "; ";
+	scm_with_guile(c_wrap_init, this);
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-    thread_unlock();
+	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
 }
@@ -368,152 +256,151 @@ SchemeEval::SchemeEval(AtomSpace* as)
 /* This should be called once for every new thread. */
 void SchemeEval::per_thread_init(void)
 {
-    /* Avoid more than one call per thread. */
-    if (((void *) 0x2) == pthread_getspecific(tid_key))
-        return;
-    pthread_setspecific(tid_key, (const void *) 0x2);
+	/* Avoid more than one call per thread. */
+	if (((void *) 0x2) == pthread_getspecific(tid_key)) return;
+	pthread_setspecific(tid_key, (const void *) 0x2);
 
 #ifdef WORK_AROUND_GUILE_185_BUG
-    scm_set_current_module(guile_user_module);
+	scm_set_current_module(guile_user_module);
 #endif /* WORK_AROUND_GUILE_185_BUG */
 
-    // Guile implements the current port as a fluid on each thread.
-    // So, for every new thread, we need to set this.
-    scm_set_current_output_port(_outport);
+	// Guile implements the current port as a fluid on each thread.
+	// So, for every new thread, we need to set this.
+	scm_set_current_output_port(_outport);
 }
 
 SchemeEval::~SchemeEval()
 {
-    scm_with_guile(c_wrap_finish, this);
-   // showFDInfo();
-    std::cout << "SchemeEval::~SchemeEval: this:" << this << " " << endl;
+	scm_with_guile(c_wrap_finish, this);
 }
 
 /* ============================================================== */
 
 std::string SchemeEval::prt(SCM node)
 {
-    if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, node))
-    {
-        return SchemeSmob::misc_to_string(node);
-    }
-    else if (scm_is_eq(node, SCM_UNSPECIFIED))
-    {
-        return "";
-    }
-    else
-    {
-        // Let SCM display do the rest of the work.
-        SCM port = scm_open_output_string();
-        scm_display(node, port);
-        SCM rc = scm_get_output_string(port);
-        char * str = scm_to_locale_string(rc);
-        std::string rv = str;
-        free(str);
-        scm_close_port(port);
-        return rv;
-    }
+	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, node))
+	{
+		return SchemeSmob::misc_to_string(node);
+	}
+	else if (scm_is_eq(node, SCM_UNSPECIFIED))
+	{
+		return "";
+	}
+	else
+	{
+		// Let SCM display do the rest of the work.
+		SCM port = scm_open_output_string();
+		scm_display (node, port);
+		SCM rc = scm_get_output_string(port);
+		char * str = scm_to_locale_string(rc);
+		std::string rv = str;
+		free(str);
+		scm_close_port(port);
+		return rv;
+	}
 
-    return "";
+	return "";
 }
 
 /* ============================================================== */
 
-SCM SchemeEval::preunwind_handler_wrapper(void *data, SCM tag, SCM throw_args)
+SCM SchemeEval::preunwind_handler_wrapper (void *data, SCM tag, SCM throw_args)
 {
-    SchemeEval *ss = (SchemeEval *) data;
-    return ss->preunwind_handler(tag, throw_args);
+	SchemeEval *ss = (SchemeEval *) data;
+	return ss->preunwind_handler(tag, throw_args);
 }
 
-SCM SchemeEval::catch_handler_wrapper(void *data, SCM tag, SCM throw_args)
+SCM SchemeEval::catch_handler_wrapper (void *data, SCM tag, SCM throw_args)
 {
-    SchemeEval *ss = (SchemeEval *) data;
-    return ss->catch_handler(tag, throw_args);
+	SchemeEval *ss = (SchemeEval *) data;
+	return ss->catch_handler(tag, throw_args);
 }
 
-SCM SchemeEval::preunwind_handler(SCM tag, SCM throw_args)
+SCM SchemeEval::preunwind_handler (SCM tag, SCM throw_args)
 {
-    // We can only record the stack before it is unwound.
-    // The normal catch handler body runs only *after* the stack
-    // has been unwound.
-    set_captured_stack (scm_make_stack(SCM_BOOL_T, SCM_EOL));return SCM_EOL;
+	// We can only record the stack before it is unwound.
+	// The normal catch handler body runs only *after* the stack
+	// has been unwound.
+	set_captured_stack(scm_make_stack(SCM_BOOL_T, SCM_EOL));
+	return SCM_EOL;
 }
 
-SCM SchemeEval::catch_handler(SCM tag, SCM throw_args)
+SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 {
-    // Check for read error. If a read error, then wait for user to correct it.
-    SCM re = scm_symbol_to_string(tag);
-    char * restr = scm_to_locale_string(re);
-    _pending_input = false;
+	// Check for read error. If a read error, then wait for user to correct it.
+	SCM re = scm_symbol_to_string(tag);
+	char * restr = scm_to_locale_string(re);
+	_pending_input = false;
 
-    if (0 == strcmp(restr, "read-error"))
-    {
-        _pending_input = true;
-        free(restr);
-        return SCM_EOL;
-    }
+	if (0 == strcmp(restr, "read-error"))
+	{
+		_pending_input = true;
+		free(restr);
+		return SCM_EOL;
+	}
 
-    // Check for a simple flow-control directive: i.e. just return to
-    // the C code from anywhere within the scheme code.
-    if (0 == strcmp(restr, "cog-yield"))
-    {
-        free(restr);
-        return SCM_CAR(throw_args);
-    }
+	// Check for a simple flow-control directive: i.e. just return to
+	// the C code from anywhere within the scheme code.
+	if (0 == strcmp(restr, "cog-yield"))
+	{
+		free(restr);
+		return SCM_CAR(throw_args);
+	}
 
-    // If it's not a read error, and it's not flow-control,
-    // then its a regular error; report it.
-    _caught_error = true;
+	// If it's not a read error, and it's not flow-control,
+	// then its a regular error; report it.
+	_caught_error = true;
 
-    /* get string port into which we write the error message and stack. */
-    SCM port = scm_open_output_string();
+	/* get string port into which we write the error message and stack. */
+	SCM port = scm_open_output_string();
 
-    if (scm_is_true(scm_list_p(throw_args)) && (scm_ilength(throw_args) >= 1))
-    {
-        long nargs = scm_ilength(throw_args);
-        SCM subr = SCM_CAR(throw_args);
-        SCM message = SCM_EOL;
-        if (nargs >= 2)
-            message = SCM_CADR(throw_args);
-        SCM parts = SCM_EOL;
-        if (nargs >= 3)
-            parts = SCM_CADDR(throw_args);
-        SCM rest = SCM_EOL;
-        if (nargs >= 4)
-            rest = SCM_CADDDR(throw_args);
+	if (scm_is_true(scm_list_p(throw_args)) && (scm_ilength(throw_args) >= 1))
+	{
+		long nargs = scm_ilength(throw_args);
+		SCM subr	= SCM_CAR (throw_args);
+		SCM message = SCM_EOL;
+		if (nargs >= 2)
+			message = SCM_CADR (throw_args);
+		SCM parts   = SCM_EOL;
+		if (nargs >= 3)
+			parts   = SCM_CADDR (throw_args);
+		SCM rest	= SCM_EOL;
+		if (nargs >= 4)
+			rest	= SCM_CADDDR (throw_args);
 
-        if (scm_is_true(captured_stack))
-        {
-            SCM highlights;
+		if (scm_is_true (captured_stack))
+		{
+			SCM highlights;
 
-            if (scm_is_eq(tag, scm_arg_type_key)
-                    || scm_is_eq(tag, scm_out_of_range_key))
-                highlights = rest;
-            else
-                highlights = SCM_EOL;
+			if (scm_is_eq (tag, scm_arg_type_key) ||
+				scm_is_eq (tag, scm_out_of_range_key))
+				highlights = rest;
+			else
+				highlights = SCM_EOL;
 
-            scm_puts("Backtrace:\n", port);
-            scm_display_backtrace_with_highlights(captured_stack, port,
-                    SCM_BOOL_F, SCM_BOOL_F, highlights);
-            scm_newline(port);
-        }
+			scm_puts ("Backtrace:\n", port);
+			scm_display_backtrace_with_highlights (captured_stack, port,
+			                                       SCM_BOOL_F, SCM_BOOL_F,
+			                                       highlights);
+			scm_newline (port);
+		}
 #ifdef HAVE_GUILE2
-        if (SCM_STACK_LENGTH (captured_stack))
-        set_captured_stack(scm_stack_ref (captured_stack, SCM_INUM0));
+		if (SCM_STACK_LENGTH (captured_stack))
+			set_captured_stack(scm_stack_ref (captured_stack, SCM_INUM0));
 #endif
-        scm_display_error(captured_stack, port, subr, message, parts, rest);
-    }
-    else
-    {
-        scm_puts("ERROR: throw args are unexpectedly short!\n", port);
-    }
-    scm_puts("ABORT: ", port);
-    scm_puts(restr, port);
-    free(restr);
+		scm_display_error (captured_stack, port, subr, message, parts, rest);
+	}
+	else
+	{
+		scm_puts ("ERROR: throw args are unexpectedly short!\n", port);
+	}
+	scm_puts("ABORT: ", port);
+	scm_puts(restr, port);
+	free(restr);
 
-    set_error_string(scm_get_output_string(port));
-    scm_close_port(port);
-    return SCM_BOOL_F;
+	set_error_string(scm_get_output_string(port));
+	scm_close_port(port);
+	return SCM_BOOL_F;
 }
 
 /* ============================================================== */
@@ -538,46 +425,46 @@ SCM SchemeEval::catch_handler(SCM tag, SCM throw_args)
  */
 void SchemeEval::eval_expr(const std::string &expr)
 {
-    pexpr = &expr;
+	pexpr = &expr;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-    thread_lock();
+	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-    _in_shell = true;
-    scm_with_guile(c_wrap_eval, this);
-    _in_shell = false;
+	_in_shell = true;
+	scm_with_guile(c_wrap_eval, this);
+	_in_shell = false;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-    thread_unlock();
+	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 }
 
 void* SchemeEval::c_wrap_poll(void* p)
 {
-    SchemeEval* self = (SchemeEval*) p;
-    self->answer = self->do_poll_result();
-    return p;
+	SchemeEval* self = (SchemeEval*) p;
+	self->answer = self->do_poll_result();
+	return p;
 }
 
 std::string SchemeEval::poll_result()
 {
-    scm_with_guile(c_wrap_poll, this);
-    return answer;
+	scm_with_guile(c_wrap_poll, this);
+	return answer;
 }
 
 void* SchemeEval::c_wrap_eval(void* p)
 {
-    SchemeEval* self = (SchemeEval*) p;
+	SchemeEval* self = (SchemeEval*) p;
 
-    // Normally, neither of these are ever null.
-    // But sometimes, a heavily loaded server can crash here.
-    // Trying to figure out why ...
-    OC_ASSERT(self, "c_wrap_eval got null pointer!");
-    OC_ASSERT(self->pexpr, "c_wrap_eval got null expression!");
+	// Normally, neither of these are ever null.
+	// But sometimes, a heavily loaded server can crash here.
+	// Trying to figure out why ...
+	OC_ASSERT(self, "c_wrap_eval got null pointer!");
+	OC_ASSERT(self->pexpr, "c_wrap_eval got null expression!");
 
-    self->do_eval(*(self->pexpr));
-    return self;
+	self->do_eval(*(self->pexpr));
+	return self;
 }
 
 /**
@@ -589,48 +476,46 @@ void* SchemeEval::c_wrap_eval(void* p)
  */
 void SchemeEval::do_eval(const std::string &expr)
 {
-    per_thread_init();
+	per_thread_init();
 
-    // Set global atomspace variable in the execution environment.
-    SchemeSmob::ss_set_env_as(atomspace);
+	// Set global atomspace variable in the execution environment.
+	SchemeSmob::ss_set_env_as(atomspace);
 
-    _input_line += expr;
+	_input_line += expr;
 
-    _caught_error = false;
-    _pending_input = false;
-    set_captured_stack (SCM_BOOL_F);
-    scm_gc_unprotect_object(_rc);
-    _rc = scm_c_catch(SCM_BOOL_T, (scm_t_catch_body) scm_c_eval_string,
-            (void *) _input_line.c_str(), SchemeEval::catch_handler_wrapper,
-            this, SchemeEval::preunwind_handler_wrapper, this);
-    _rc = scm_gc_protect_object(_rc);
+	_caught_error = false;
+	_pending_input = false;
+	set_captured_stack(SCM_BOOL_F);
+	scm_gc_unprotect_object(_rc);
+	_rc = scm_c_catch (SCM_BOOL_T,
+	                      (scm_t_catch_body) scm_c_eval_string,
+	                      (void *) _input_line.c_str(),
+	                      SchemeEval::catch_handler_wrapper, this,
+	                      SchemeEval::preunwind_handler_wrapper, this);
+	_rc = scm_gc_protect_object(_rc);
 
-    atomspace = SchemeSmob::ss_get_env_as("do_eval");
+	atomspace = SchemeSmob::ss_get_env_as("do_eval");
 
-    // Cleanup every now and then, as otherwise guile gets piggy with
-    // the system RAM, happily splurging many gigabytes. The below does
-    // hurt performance, though -- about 15% for one test case...
-    if (++_gc_ctr % 80 == 0)
-    {
-        scm_gc();
-        _gc_ctr = 0;
-    }
+	// Cleanup every now and then, as otherwise guile gets piggy with
+	// the system RAM, happily splurging many gigabytes. The below does
+	// hurt performance, though -- about 15% for one test case...
+	if (++_gc_ctr%80 == 0) { scm_gc(); _gc_ctr = 0; }
 #if 0
-    scm_gc();
-    logger().info() << "Guile evaluated: " << expr;
-    logger().info() << "Mem usage=" << (getMemUsage() / (1024*1024)) << "MB";
+	scm_gc();
+	logger().info() << "Guile evaluated: " << expr;
+	logger().info() << "Mem usage=" << (getMemUsage() / (1024*1024)) << "MB";
 #endif
-    _eval_done = true;
-    _wait_done.notify_all();
+	_eval_done = true;
+	_wait_done.notify_all();
 }
 
 void SchemeEval::begin_eval()
 {
-    _eval_done = false;
-    _poll_done = false;
-    scm_gc_unprotect_object(_rc);
-    _rc = SCM_EOL;
-    _rc = scm_gc_protect_object(_rc);
+	_eval_done = false;
+	_poll_done = false;
+	scm_gc_unprotect_object(_rc);
+	_rc = SCM_EOL;
+	_rc = scm_gc_protect_object(_rc);
 }
 
 /// Read one end of a pipe. The other end of the pipe is attached to
@@ -642,18 +527,17 @@ void SchemeEval::begin_eval()
 /// that simplicity is just fine, here.
 std::string SchemeEval::poll_port()
 {
-    std::string rv;
+	std::string rv;
 #define BUFSZ 1000
-    char buff[BUFSZ];
-    while (1)
-    {
-        int nr = read(_pipeno, buff, BUFSZ - 1);
-        if (-1 == nr)
-            return rv;
-        buff[nr] = 0x0;
-        rv += buff;
-    }
-    return rv;
+	char buff[BUFSZ];
+	while (1)
+	{
+		int nr = read(_pipeno, buff, BUFSZ-1);
+		if (-1 == nr) return rv;
+		buff[nr] = 0x0;
+		rv += buff;
+	}
+	return rv;
 }
 
 /// Get output from evaluator, if any; block otherwise.
@@ -676,78 +560,76 @@ std::string SchemeEval::poll_port()
 /// it is, to print it to stdout.
 std::string SchemeEval::do_poll_result()
 {
-    per_thread_init();
-    if (_poll_done)
-        return "";
+	per_thread_init();
+	if (_poll_done) return "";
 
-    if (not _eval_done)
-    {
-        // We don't have a real need to lock anything here; we're just
-        // using this as a hack, so that the condition variable will
-        // wake us up periodically.  The goal here is to block when
-        // there's no output to be reported.
-        //
-        // Hmmm. I guess we could just block on reading the pipe...
-        // unless the eval did not produce any output, in which case
-        // I guess we could ... close and re-open the pipe? Somehow
-        // unblock it?  I dunno. The below curently works, and I'm
-        // loosing interest just right now.
-        std::unique_lock < std::mutex > lck(_poll_mtx);
-        while (not _eval_done)
-        {
-            _wait_done.wait_for(lck, std::chrono::milliseconds(300));
-            std::string rv = poll_port();
-            if (0 < rv.size())
-                return rv;
-        }
-    }
-    // If we are here, then evaluation is done. Check the various
-    // evalution result flags, etc.
-    _poll_done = true;
+	if (not _eval_done)
+	{
+		// We don't have a real need to lock anything here; we're just
+		// using this as a hack, so that the condition variable will
+		// wake us up periodically.  The goal here is to block when
+		// there's no output to be reported.
+		//
+		// Hmmm. I guess we could just block on reading the pipe...
+		// unless the eval did not produce any output, in which case
+		// I guess we could ... close and re-open the pipe? Somehow
+		// unblock it?  I dunno. The below curently works, and I'm
+		// loosing interest just right now.
+		std::unique_lock<std::mutex> lck(_poll_mtx);
+		while (not _eval_done)
+		{
+			_wait_done.wait_for(lck, std::chrono::milliseconds(300));
+			std::string rv = poll_port();
+			if (0 < rv.size()) return rv;
+		}
+	}
+	// If we are here, then evaluation is done. Check the various
+	// evalution result flags, etc.
+	_poll_done = true;
 
-    /* An error is thrown if the input expression is incomplete,
-     * in which case the error handler sets the _pending_input flag
-     * to true. */
-    if (_pending_input)
-    {
-        return "";
-    }
-    _pending_input = false;
-    _input_line = "";
+	/* An error is thrown if the input expression is incomplete,
+	 * in which case the error handler sets the _pending_input flag
+	 * to true. */
+	if (_pending_input)
+	{
+		return "";
+	}
+	_pending_input = false;
+	_input_line = "";
 
-    if (_caught_error)
-    {
-        std::string rv = poll_port();
+	if (_caught_error)
+	{
+		std::string rv = poll_port();
 
-        char * str = scm_to_locale_string(error_string);
-        rv += str;
-        free(str);
-        set_error_string (SCM_EOL);
-        set_captured_stack (SCM_BOOL_F);
+		char * str = scm_to_locale_string(error_string);
+		rv += str;
+		free(str);
+		set_error_string(SCM_EOL);
+		set_captured_stack(SCM_BOOL_F);
 
-        rv += "\n";
-        return rv;
-    }
-    else
-    {
-        // First, we get the contents of the output port,
-        // and pass that on.
-        std::string rv = poll_port();
+		rv += "\n";
+		return rv;
+	}
+	else
+	{
+		// First, we get the contents of the output port,
+		// and pass that on.
+		std::string rv = poll_port();
 
-        // Next, we append the "interpreter" output
-        rv += prt(_rc);
-        rv += "\n";
-        return rv;
-    }
-    return "#<Error: Unreachable statement reached>";
+		// Next, we append the "interpreter" output
+		rv += prt(_rc);
+		rv += "\n";
+		return rv;
+	}
+	return "#<Error: Unreachable statement reached>";
 }
 
 /* ============================================================== */
 
 SCM SchemeEval::thunk_scm_eval(void* expr)
 {
-    SCM sexpr = (SCM) expr;
-    return scm_eval(sexpr, scm_interaction_environment());
+	SCM sexpr = (SCM) expr;
+	return scm_eval(sexpr, scm_interaction_environment());
 }
 
 /**
@@ -763,65 +645,66 @@ SCM SchemeEval::thunk_scm_eval(void* expr)
  */
 SCM SchemeEval::do_scm_eval(SCM sexpr)
 {
-    per_thread_init();
+	per_thread_init();
 
-    // Set global atomspace variable in the execution environment.
-    SchemeSmob::ss_set_env_as(atomspace);
+	// Set global atomspace variable in the execution environment.
+	SchemeSmob::ss_set_env_as(atomspace);
 
-    _caught_error = false;
-    set_captured_stack (SCM_BOOL_F);
-    SCM rc = scm_c_catch(SCM_BOOL_T, SchemeEval::thunk_scm_eval, (void *) sexpr,
-            SchemeEval::catch_handler_wrapper, this,
-            SchemeEval::preunwind_handler_wrapper, this);
+	_caught_error = false;
+	set_captured_stack(SCM_BOOL_F);
+	SCM rc = scm_c_catch (SCM_BOOL_T,
+	                 SchemeEval::thunk_scm_eval, (void *) sexpr,
+	                 SchemeEval::catch_handler_wrapper, this,
+	                 SchemeEval::preunwind_handler_wrapper, this);
 
-    _eval_done = true;
-    if (_caught_error)
-    {
-        char * str = scm_to_locale_string(error_string);
-        // Don't blank out the error string yet.... we need it later.
-        // (probably because someone called cog-bind with an
-        // ExecutionOutputLink in it with a bad scheme schema node.)
-        // error_string = SCM_EOL;
-        set_captured_stack(SCM_BOOL_F);
+	_eval_done = true;
+	if (_caught_error)
+	{
+		char * str = scm_to_locale_string(error_string);
+		// Don't blank out the error string yet.... we need it later.
+		// (probably because someone called cog-bind with an
+		// ExecutionOutputLink in it with a bad scheme schema node.)
+		// error_string = SCM_EOL;
+		set_captured_stack(SCM_BOOL_F);
 
-        drain_output();
+		drain_output();
 
-        // Unlike errors seen on the interpreter, log these to the logger.
-        // That's because these errors will be predominantly script
-        // errors that are otherwise invisible to the user/developer.
-        Logger::Level save = logger().getBackTraceLevel();
-        logger().setBackTraceLevel(Logger::NONE);
-        logger().error("%s: guile error was: %s\nFailing expression was %s",
-                __FUNCTION__, str, prt(sexpr).c_str());
-        logger().setBackTraceLevel(save);
+		// Unlike errors seen on the interpreter, log these to the logger.
+		// That's because these errors will be predominantly script
+		// errors that are otherwise invisible to the user/developer.
+		Logger::Level save = logger().getBackTraceLevel();
+		logger().setBackTraceLevel(Logger::NONE);
+		logger().error("%s: guile error was: %s\nFailing expression was %s",
+		               __FUNCTION__, str, prt(sexpr).c_str());
+		logger().setBackTraceLevel(save);
 
-        free(str);
-        return SCM_EOL;
-    }
+		free(str);
+		return SCM_EOL;
+	}
 
-    atomspace = SchemeSmob::ss_get_env_as("do_scm_eval");
+	atomspace = SchemeSmob::ss_get_env_as("do_scm_eval");
 
-    // Get the contents of the output port, and log it
-    if (logger().isInfoEnabled())
-    {
-        std::string str(poll_port());
-        if (0 < str.size())
-        {
-            logger().info("%s: Output: %s\n"
-                    "Was generated by expr: %s\n", __FUNCTION__, str.c_str(),
-                    prt(sexpr).c_str());
-        }
-    }
+	// Get the contents of the output port, and log it
+	if (logger().isInfoEnabled())
+	{
+		std::string str(poll_port());
+		if (0 < str.size())
+		{
+			logger().info("%s: Output: %s\n"
+			              "Was generated by expr: %s\n",
+			              __FUNCTION__, str.c_str(), prt(sexpr).c_str());
+		}
+	}
 
-    // If we are not in a shell context, truncate the output, because
-    // it will never ever be displayed. (i.e. don't overflow the
-    // output buffers.) If we are in_shell, then we are here probably
-    // because user typed something that caused some
-    // ExecutionOutputLink to call some scheme snippet.  Display that.
-    if (not _in_shell)
-        drain_output();
+	// If we are not in a shell context, truncate the output, because
+	// it will never ever be displayed. (i.e. don't overflow the
+	// output buffers.) If we are in_shell, then we are here probably
+	// because user typed something that caused some
+	// ExecutionOutputLink to call some scheme snippet.  Display that.
+	if (not _in_shell)
+		drain_output();
 
-    return rc;
+	return rc;
 }
 
 /* ============================================================== */
@@ -835,27 +718,27 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
  */
 Handle SchemeEval::eval_h(const std::string &expr)
 {
-    pexpr = &expr;
+	pexpr = &expr;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-    thread_lock();
+	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-    scm_with_guile(c_wrap_eval_h, this);
+	scm_with_guile(c_wrap_eval_h, this);
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-    thread_unlock();
+	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-    return hargs;
+	return hargs;
 }
 
 void * SchemeEval::c_wrap_eval_h(void * p)
 {
-    SchemeEval *self = (SchemeEval *) p;
-    SCM rc = self->do_scm_eval_str(*(self->pexpr));
-    self->hargs = SchemeSmob::scm_to_handle(rc);
-    return self;
+	SchemeEval *self = (SchemeEval *) p;
+	SCM rc = self->do_scm_eval_str(*(self->pexpr));
+	self->hargs = SchemeSmob::scm_to_handle(rc);
+	return self;
 }
 
 /**
@@ -871,57 +754,57 @@ void * SchemeEval::c_wrap_eval_h(void * p)
  */
 SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 {
-    per_thread_init();
+	per_thread_init();
 
-    // Set global atomspace variable in the execution environment.
-    SchemeSmob::ss_set_env_as(atomspace);
+	// Set global atomspace variable in the execution environment.
+	SchemeSmob::ss_set_env_as(atomspace);
 
-    _caught_error = false;
-    set_captured_stack (SCM_BOOL_F);
-    SCM rc = scm_c_catch(SCM_BOOL_T, (scm_t_catch_body) scm_c_eval_string,
-            (void *) expr.c_str(), SchemeEval::catch_handler_wrapper, this,
-            SchemeEval::preunwind_handler_wrapper, this);
+	_caught_error = false;
+	set_captured_stack(SCM_BOOL_F);
+	SCM rc = scm_c_catch (SCM_BOOL_T,
+	                      (scm_t_catch_body) scm_c_eval_string,
+	                      (void *) expr.c_str(),
+	                      SchemeEval::catch_handler_wrapper, this,
+	                      SchemeEval::preunwind_handler_wrapper, this);
 
-    _eval_done = true;
-    if (_caught_error)
-    {
-        char * str = scm_to_locale_string(error_string);
-        set_error_string (SCM_EOL);
-        set_captured_stack(SCM_BOOL_F);
+	_eval_done = true;
+	if (_caught_error)
+	{
+		char * str = scm_to_locale_string(error_string);
+		set_error_string(SCM_EOL);
+		set_captured_stack(SCM_BOOL_F);
 
-        drain_output();
+		drain_output();
 
-        // Unlike errors seen on the interpreter, log these to the logger.
-        // That's because these errors will be predominantly script
-        // errors that are otherwise invisible to the user/developer.
-        Logger::Level save = logger().getBackTraceLevel();
-        logger().setBackTraceLevel(Logger::NONE);
-        logger().error("%s: guile error was: %s\nFailing expression was %s",
-                __FUNCTION__, str, expr.c_str());
-        logger().setBackTraceLevel(save);
+		// Unlike errors seen on the interpreter, log these to the logger.
+		// That's because these errors will be predominantly script
+		// errors that are otherwise invisible to the user/developer.
+		Logger::Level save = logger().getBackTraceLevel();
+		logger().setBackTraceLevel(Logger::NONE);
+		logger().error("%s: guile error was: %s\nFailing expression was %s",
+		               __FUNCTION__, str, expr.c_str());
+		logger().setBackTraceLevel(save);
 
-        free(str);
-        return SCM_EOL;
-    }
+		free(str);
+		return SCM_EOL;
+	}
 
-    atomspace = SchemeSmob::ss_get_env_as("do_scm_eval_str");
+	atomspace = SchemeSmob::ss_get_env_as("do_scm_eval_str");
 
-    // Get the contents of the output port, and log it
-    if (logger().isInfoEnabled())
-    {
-        std::string str(poll_port());
-        if (0 < str.size())
-        {
-            logger().info("%s: Output: %s\nWas generated by expr: %s\n",
-                    __FUNCTION__, str.c_str(), expr.c_str());
-        }
-    }
-    drain_output();
+	// Get the contents of the output port, and log it
+	if (logger().isInfoEnabled())
+	{
+		std::string str(poll_port());
+		if (0 < str.size())
+		{
+			logger().info("%s: Output: %s\nWas generated by expr: %s\n",
+			              __FUNCTION__, str.c_str(), expr.c_str());
+		}
+	}
+	drain_output();
 
-    return rc;
+	return rc;
 }
-
-
 
 /* ============================================================== */
 /**
@@ -936,27 +819,27 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
  */
 Handle SchemeEval::apply(const std::string &func, Handle varargs)
 {
-    pexpr = &func;
-    hargs = varargs;
+	pexpr = &func;
+	hargs = varargs;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-    thread_lock();
+	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-    scm_with_guile(c_wrap_apply, this);
+	scm_with_guile(c_wrap_apply, this);
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-    thread_unlock();
+	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-    return hargs;
+	return hargs;
 }
 
 void * SchemeEval::c_wrap_apply(void * p)
 {
-    SchemeEval *self = (SchemeEval *) p;
-    self->hargs = self->do_apply(*self->pexpr, self->hargs);
-    return self;
+	SchemeEval *self = (SchemeEval *) p;
+	self->hargs = self->do_apply(*self->pexpr, self->hargs);
+	return self;
 }
 
 /* ============================================================== */
@@ -974,33 +857,33 @@ void * SchemeEval::c_wrap_apply(void * p)
  */
 std::string SchemeEval::apply_generic(const std::string &func, Handle varargs)
 {
-    pexpr = &func;
-    hargs = varargs;
+	pexpr = &func;
+	hargs = varargs;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-    thread_lock();
+	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-    scm_with_guile(c_wrap_apply_scm, this);
+	scm_with_guile(c_wrap_apply_scm, this);
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-    thread_unlock();
+	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-    return answer;
+	return answer;
 }
 
 void * SchemeEval::c_wrap_apply_scm(void * p)
 {
-    logger().debug("%s: calling wrap", __FUNCTION__);
+	logger().debug( "%s: calling wrap", __FUNCTION__);
 
-    SchemeEval *self = (SchemeEval *) p;
-    SCM genericAnswer = self->do_apply_scm(*self->pexpr, self->hargs);
-    logger().debug("%s: done", __FUNCTION__);
-    self->answer = SchemeSmob::to_string(genericAnswer);
-    logger().debug("%s: answer: %s", __FUNCTION__, self->answer.c_str());
+	SchemeEval *self = (SchemeEval *) p;
+	SCM genericAnswer = self->do_apply_scm(*self->pexpr, self->hargs);
+	logger().debug( "%s: done", __FUNCTION__);
+	self->answer = SchemeSmob::to_string(genericAnswer);
+	logger().debug( "%s: answer: %s", __FUNCTION__, self->answer.c_str());
 
-    return self;
+	return self;
 }
 
 #endif
