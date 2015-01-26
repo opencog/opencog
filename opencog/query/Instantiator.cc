@@ -40,6 +40,8 @@ Handle Instantiator::execution_output_link(const HandleSeq& oset)
 
 Handle Instantiator::walk_tree(Handle expr)
 {
+	std::cout << "walk_tree: expr = " << expr->toString() << std::endl;
+
 	Type t = expr->getType();
 	NodePtr nexpr(NodeCast(expr));
 	if (nexpr)
