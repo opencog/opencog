@@ -50,6 +50,25 @@ ExecutionOutputLink::ExecutionOutputLink(Handle schema, Handle args,
     }
 }
 
+#ifdef HAVE_GUILE
+// Use thread-local storage (TLS) in order to avoid repeatedly
+// creating and destroying the evaluator.
+static SchemeEval* get_evaluator(AtomSpace* as)
+{
+    // TODO: write an atexit handler to delete on exit.
+    static thread_local AtomSpace* current_as = NULL;
+    static thread_local SchemeEval* evaluator = NULL;
+
+    if (current_as != as) {
+        current_as = as;
+        if (evaluator) delete evaluator;
+        evaluator = new SchemeEval(as);
+    }
+
+    return evaluator;
+}
+#endif /* HAVE_GUILE */
+
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
 ///
 /// Expects the argument to be an ExecutionOutputLink, which should have the
@@ -103,7 +122,8 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
     }
     if (LIST_LINK != args->getType())
     {
-        throw RuntimeException(TRACE_INFO, "Expecting arguments to ExecutionOutputLink!");
+        throw RuntimeException(TRACE_INFO,
+            "Expecting arguments to ExecutionOutputLink!");
     }
 
     // Get the schema name.
@@ -118,12 +138,11 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
         size_t pos = 4;
         while (' ' == schema[pos]) pos++;
 
-        SchemeEval* applier = new SchemeEval(as);
-        Handle h = applier->apply(schema.substr(pos), args);
-        delete applier;
-        return h;
+        SchemeEval* applier = get_evaluator(as);
+        return applier->apply(schema.substr(pos), args);
 #else
-        throw RuntimeException(TRACE_INFO, "Cannot evaluate scheme GroundedSchemaNode!");
+        throw RuntimeException(TRACE_INFO,
+            "Cannot evaluate scheme GroundedSchemaNode!");
 #endif /* HAVE_GUILE */
     }
 
@@ -141,11 +160,13 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
         // Return the handle
         return h;
 #else
-        throw RuntimeException(TRACE_INFO, "Cannot evaluate python GroundedSchemaNode!");
+        throw RuntimeException(TRACE_INFO,
+            "Cannot evaluate python GroundedSchemaNode!");
 #endif /* HAVE_CYTHON */
     }
 
     // Unkown proceedure type.
-    throw RuntimeException(TRACE_INFO, "Cannot evaluate unknown GroundedSchemaNode!");
+    throw RuntimeException(TRACE_INFO,
+        "Cannot evaluate unknown GroundedSchemaNode!");
 }
 
