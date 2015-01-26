@@ -44,6 +44,10 @@ private:
 
 	std::vector<Handle> _oset;
 
+	// Recursively walk a tree starting with the root of the
+	// hypergraph to instantiate (typically an
+	// ExecutionOutputLink). It returns always false. If an
+	// execution did occur then _did_exec is set to true
 	bool walk_tree(Handle tree);
 	Handle execution_output_link(void);
 	bool _did_exec;
