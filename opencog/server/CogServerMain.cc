@@ -173,6 +173,10 @@ int main(int argc, char *argv[])
     }
 
     // setup global logger
+    if (logger().getFilename() != config()["LOG_FILE"]) {
+	    logger().info() << "Subsequent logging will be redirected to file: "
+	                    << config()["LOG_FILE"];
+    }
     logger().setFilename(config()["LOG_FILE"]);
     logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
     auto level = Logger::getLevelFromString(config()["BACK_TRACE_LOG_LEVEL"]);
