@@ -924,6 +924,31 @@ void * SchemeEval::c_wrap_apply_scm(void * p)
 
 /* ============================================================== */
 
+// A pool of scheme evaluators, sitting hot and ready to go.
+// This is used to implement get_evaluator(), below.  The only
+// reason this is done with a pool, instead of simply new() and
+// delete() is because calling delete() from TLS conflicts with
+// the guile garbage collector, when the thread is destroyed. See
+// the note below.
+static std::map<AtomSpace*, concurrent_stack<SchemeEval*> > pool;
+static std::mutex pool_mtx;
+
+static SchemeEval* get_from_pool(AtomSpace* as)
+{
+	std::lock_guard<std::mutex> lock(pool_mtx);
+	concurrent_stack<SchemeEval*> &stk = pool[as];
+	SchemeEval* ev = NULL;
+	if (stk.try_pop(ev)) return ev;
+	return new SchemeEval(as);
+}
+
+static void return_to_pool(AtomSpace* as, SchemeEval* ev)
+{
+	std::lock_guard<std::mutex> lock(pool_mtx);
+	concurrent_stack<SchemeEval*> &stk = pool[as];
+	stk.push(ev);
+}
+
 /// Return singleton evaluator, for this thread.
 ///
 /// Use thread-local storage (TLS) in order to avoid repeatedly
@@ -945,16 +970,24 @@ SchemeEval* opencog::get_evaluator(AtomSpace* as)
 		public:
 		~eval_dtor() {
 			if (evaluator) {
-				delete evaluator; evaluator = NULL; current_as = NULL;
+				// It would have been easier to just call delete evaluator
+				// instead of return_to_pool.  Unfortunately, the delete
+				// won't work, because the STL destructor has already run
+				// the guile GC at this point, for this thread, and so
+				// calling delete will lead to a crash in c_wrap_finish().
+				// It would be nice if we got called before guile did, but
+				// there is no way in TLS to control execution order...
+				return_to_pool(current_as, evaluator);
+				evaluator = NULL; current_as = NULL;
 			}
 		}
 	};
 	static thread_local eval_dtor killer;
 
 	if (current_as != as) {
+		if (evaluator) return_to_pool(current_as, evaluator);
 		current_as = as;
-		if (evaluator) delete evaluator;
-		evaluator = new SchemeEval(as);
+		evaluator = get_from_pool(as);
 	}
 
 	if (evaluator->recursing())

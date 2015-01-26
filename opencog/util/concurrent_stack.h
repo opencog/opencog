@@ -95,7 +95,9 @@ public:
         return the_stack.size();
     }
 
-    bool try_get(Element& value)
+    /// Try to pop an element off the stack. Return true if success,
+    /// else return false.
+    bool try_pop(Element& value)
     {
         std::lock_guard<std::mutex> lock(the_mutex);
         if (is_canceled) throw Canceled();
@@ -104,7 +106,8 @@ public:
             return false;
         }
 
-        value = the_stack.front();
+        value = the_stack.top();
+        the_stack.pop();
         return true;
     }
 
@@ -130,6 +133,7 @@ public:
         the_stack.pop();
     }
 
+    // XXX DO NOT USE, NOT SAFE IN ANY WAY!
     Element pop()
     {
         Element value;
