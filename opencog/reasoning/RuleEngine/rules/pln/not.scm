@@ -32,10 +32,12 @@
    (pln-formula-not-side-effect-free A))
 )
 
+(define (negate x)
+  (- 1 x))
+
 (define (pln-formula-not-side-effect-free A)
-  (let 
-      ((sA (cog-stv-strength A)))
-    (stv (- SA 1) 1)))
+  (let ((sA (cog-stv-strength A)))
+    (stv (negate sA) 1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Some test data (to be removed afterwards) ;;
