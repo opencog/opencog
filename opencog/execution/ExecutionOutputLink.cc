@@ -118,9 +118,8 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
         size_t pos = 4;
         while (' ' == schema[pos]) pos++;
 
-        SchemeEval* applier = new SchemeEval(as);
-        Handle h = applier->apply(schema.substr(pos), args);
-        delete applier;
+        SchemeEval applier(as);
+        Handle h = applier.apply(schema.substr(pos), args);
         return h;
 #else
         throw RuntimeException(TRACE_INFO, "Cannot evaluate scheme GroundedSchemaNode!");
