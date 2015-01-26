@@ -60,6 +60,7 @@ void SchemeEval::init(void)
 	scm_set_current_output_port(_outport);
 
 	_in_shell = false;
+	_in_eval = false;
 
 	// User error and crash management
 	error_string = SCM_EOL;
@@ -363,12 +364,12 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 		SCM message = SCM_EOL;
 		if (nargs >= 2)
 			message = SCM_CADR (throw_args);
-		SCM parts   = SCM_EOL;
+		SCM parts = SCM_EOL;
 		if (nargs >= 3)
-			parts   = SCM_CADDR (throw_args);
+			parts = SCM_CADDR (throw_args);
 		SCM rest	= SCM_EOL;
 		if (nargs >= 4)
-			rest	= SCM_CADDDR (throw_args);
+			rest = SCM_CADDDR (throw_args);
 
 		if (scm_is_true (captured_stack))
 		{
@@ -434,7 +435,9 @@ void SchemeEval::eval_expr(const std::string &expr)
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
 	_in_shell = true;
+	_in_eval = true;
 	scm_with_guile(c_wrap_eval, this);
+	_in_eval = false;
 	_in_shell = false;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
@@ -749,7 +752,9 @@ Handle SchemeEval::eval_h(const std::string &expr)
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	_in_eval = true;
 	scm_with_guile(c_wrap_eval_h, this);
+	_in_eval = false;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_unlock();
@@ -851,7 +856,9 @@ Handle SchemeEval::apply(const std::string &func, Handle varargs)
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	_in_eval = true;
 	scm_with_guile(c_wrap_apply, this);
+	_in_eval = false;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_unlock();
@@ -891,7 +898,9 @@ std::string SchemeEval::apply_generic(const std::string &func, Handle varargs)
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	_in_eval = true;
 	scm_with_guile(c_wrap_apply_scm, this);
+	_in_eval = false;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_unlock();
@@ -920,12 +929,12 @@ void * SchemeEval::c_wrap_apply_scm(void * p)
 /// Use thread-local storage (TLS) in order to avoid repeatedly
 /// creating and destroying the evaluator.
 ///
-/// XXX TODO: this will break when used recursively. Viz, if the
-/// evaluator evaluates something that cuases another evaluator
+/// This will throw an error if used recursively.  Viz, if the
+/// evaluator evaluates something that causes another evaluator
 /// to be needed for this thread (e.g. an ExecutionOutputLink),
-/// then this very same evaluator will be re-entered, corrupting
-/// its own internal state.  I can tell right now that this will be
-/// a hard-to-find & fix bug, when it happens.
+/// then this very same evaluator would be re-entered, corrupting
+/// its own internal state.  If that happened, the result would be
+/// a hard-to-find & fix bug. So instead, we throw.
 SchemeEval* opencog::get_evaluator(AtomSpace* as)
 {
 	static thread_local AtomSpace* current_as = NULL;
@@ -947,6 +956,10 @@ SchemeEval* opencog::get_evaluator(AtomSpace* as)
 		if (evaluator) delete evaluator;
 		evaluator = new SchemeEval(as);
 	}
+
+	if (evaluator->recursing())
+		throw RuntimeException(TRACE_INFO,
+			"Evaluator thread singleton used recursively!");
 
 	return evaluator;
 }

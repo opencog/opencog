@@ -123,6 +123,7 @@ class SchemeEval : public GenericEval
 
 		AtomSpace* atomspace;
 		int _gc_ctr;
+		bool _in_eval;
 
 	public:
 		SchemeEval(AtomSpace*);
@@ -144,6 +145,8 @@ class SchemeEval : public GenericEval
 
 		Handle apply(const std::string& func, Handle varargs);
 		std::string apply_generic(const std::string& func, Handle varargs);
+
+		bool recursing(void) { return _in_eval; }
 };
 
 // Return per-thread singleton
