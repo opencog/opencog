@@ -38,20 +38,21 @@ namespace opencog {
 
 class Instantiator
 {
-	private:
-		AtomSpace *_as;
-		const std::map<Handle, Handle> *_vmap;
+private:
+	AtomSpace *_as;
+	const std::map<Handle, Handle> *_vmap;
 
-		std::vector<Handle> _oset;
-		bool walk_tree(Handle tree);
-		Handle execution_output_link(void);
-		bool _did_exec;
+	std::vector<Handle> _oset;
 
-	public:
-		Instantiator(AtomSpace* as) : _as(as) {}
+	bool walk_tree(Handle tree);
+	Handle execution_output_link(void);
+	bool _did_exec;
 
-		Handle instantiate(Handle& expr, const std::map<Handle, Handle> &vars)
-			throw (InvalidParamException);
+public:
+	Instantiator(AtomSpace* as) : _as(as) {}
+
+	Handle instantiate(Handle& expr, const std::map<Handle, Handle> &vars)
+		throw (InvalidParamException);
 };
 
 } // namespace opencog
