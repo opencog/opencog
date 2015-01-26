@@ -146,6 +146,9 @@ class SchemeEval : public GenericEval
 		std::string apply_generic(const std::string& func, Handle varargs);
 };
 
+// Return per-thread singleton
+SchemeEval* get_evaluator(AtomSpace* as);
+
 /** @}*/
 }
 

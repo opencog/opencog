@@ -31,22 +31,6 @@ using namespace opencog;
 
 #ifdef HAVE_GUILE
 
-// Use thread-local storage (TLS) in order to avoid repeatedly
-// creating and destroying the evaluator.
-static SchemeEval* get_evaluator(AtomSpace* as)
-{
-	static thread_local AtomSpace* current_as = NULL;
-	static thread_local SchemeEval* evaluator = NULL;
-
-	if (current_as != as) {
-		current_as = as;
-		if (evaluator) delete evaluator;
-		evaluator = new SchemeEval(as);
-	}
-
-	return evaluator;
-}
-
 static void check_err(SchemeEval* evaluator, const std::string &s)
 {
 	if (evaluator->eval_error()) {

@@ -4,7 +4,7 @@
  * Scheme evaluator.  Given strings in scheme, evaluates them with
  * the appropriate Atomspace, etc.
  *
- * Copyright (c) 2008, 2014 Linas Vepstas
+ * Copyright (c) 2008, 2014, 2015 Linas Vepstas
  */
 
 #ifdef HAVE_GUILE
@@ -879,6 +879,8 @@ void * SchemeEval::c_wrap_apply(void * p)
  * Isn't there some other, better way of accomplishing this?  My
  * gut instinct is the say "this should be reviewed and possibly
  * deprecated/removed". XXX
+ *
+ * XXX Yes, this should be replaced by ExecutionOutputLink
  */
 std::string SchemeEval::apply_generic(const std::string &func, Handle varargs)
 {
@@ -910,6 +912,45 @@ void * SchemeEval::c_wrap_apply_scm(void * p)
 
 	return self;
 }
+
+/* ============================================================== */
+
+/// Return singleton evaluator, for this thread.
+///
+/// Use thread-local storage (TLS) in order to avoid repeatedly
+/// creating and destroying the evaluator.
+///
+/// XXX TODO: this will break when used recursively. Viz, if the
+/// evaluator evaluates something that cuases another evaluator
+/// to be needed for this thread (e.g. an ExecutionOutputLink),
+/// then this very same evaluator will be re-entered, corrupting
+/// its own internal state.  I can tell right now that this will be
+/// a hard-to-find & fix bug, when it happens.
+SchemeEval* opencog::get_evaluator(AtomSpace* as)
+{
+	static thread_local AtomSpace* current_as = NULL;
+	static thread_local SchemeEval* evaluator = NULL;
+
+	// The eval_dtor runs when this thread is destroyed.
+	class eval_dtor {
+		public:
+		~eval_dtor() {
+			if (evaluator) {
+				delete evaluator; evaluator = NULL; current_as = NULL;
+			}
+		}
+	};
+	static thread_local eval_dtor killer;
+
+	if (current_as != as) {
+		current_as = as;
+		if (evaluator) delete evaluator;
+		evaluator = new SchemeEval(as);
+	}
+
+	return evaluator;
+}
+
 
 #endif
 

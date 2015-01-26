@@ -50,25 +50,6 @@ ExecutionOutputLink::ExecutionOutputLink(Handle schema, Handle args,
     }
 }
 
-#ifdef HAVE_GUILE
-// Use thread-local storage (TLS) in order to avoid repeatedly
-// creating and destroying the evaluator.
-static SchemeEval* get_evaluator(AtomSpace* as)
-{
-    // TODO: write an atexit handler to delete on exit.
-    static thread_local AtomSpace* current_as = NULL;
-    static thread_local SchemeEval* evaluator = NULL;
-
-    if (current_as != as) {
-        current_as = as;
-        if (evaluator) delete evaluator;
-        evaluator = new SchemeEval(as);
-    }
-
-    return evaluator;
-}
-#endif /* HAVE_GUILE */
-
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
 ///
 /// Expects the argument to be an ExecutionOutputLink, which should have the
