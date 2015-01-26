@@ -24,8 +24,6 @@
 #ifndef _OPENCOG_INSTANTIATOR_H
 #define _OPENCOG_INSTANTIATOR_H
 
-#include <vector>
-
 #include <opencog/atomspace/AtomSpace.h>
 
 /**
@@ -42,14 +40,21 @@ private:
 	AtomSpace *_as;
 	const std::map<Handle, Handle> *_vmap;
 
-	std::vector<Handle> _oset;
-
-	// Recursively walk a tree starting with the root of the
-	// hypergraph to instantiate (typically an
-	// ExecutionOutputLink). It returns always false. If an
-	// execution did occur then _did_exec is set to true
-	bool walk_tree(Handle tree);
-	Handle execution_output_link(void);
+	/**
+	 * Recursively walk a tree starting with the root of the
+	 * hypergraph to instantiate (typically an
+	 * ExecutionOutputLink).
+	 *
+	 * Return the current result of the execution. If the node is an
+	 * ExecutionOutputLink then it returns the final result. If the
+	 * node is another list (typically a ListLink) it returns a copy
+	 * of it, replacing the variables in its outgoing by their
+	 * respective groundings.
+	 *
+	 * If an execution occur then _did_exec is set to true.
+	 */
+	Handle walk_tree(Handle tree);
+	Handle execution_output_link(const HandleSeq&);
 	bool _did_exec;
 
 public:
