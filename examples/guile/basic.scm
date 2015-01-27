@@ -2,7 +2,8 @@
 ; Basic guile usage example
 ;
 
-(load-extension "build/opencog/guile/libsmob" "_ZN7opencog10SchemeSmob4initEv")
+; Hack right now; load the dynamic library from the build directory.
+(load-extension "build/opencog/guile/libsmob" "opencog_guile_init")
 
 ; Creating an atom without an atomspace to put it in is an error.
 ; Try it!  An error message will be printed.
@@ -21,3 +22,8 @@
 ; Access an atom that does not exist.
 (cog-node 'ConceptNode "qwerty")
 
+; Using opencog is easier if we load some additional modules
+(use-modules (opencog atomtypes))
+
+; XXX this won't work until we load a bunch of scm files...
+(ConceptNode "foobar")

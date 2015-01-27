@@ -63,6 +63,11 @@ SchemeSmob::SchemeSmob()
 	init();
 }
 
+void opencog_guile_init(void)
+{
+	SchemeSmob::init();
+}
+
 /* ============================================================== */
 
 void SchemeSmob::init_smob_type(void)

@@ -201,6 +201,12 @@ class SchemeSmob
 /** @}*/
 } // namespace opencog
 
+extern "C" {
+
+void opencog_guile_init(void);
+
+};
+
 #endif // _OPENCOG_SCHEME_SMOB_H
 
 #endif // HAVE_GUILE

@@ -3,30 +3,23 @@
                    -------------
 
 Below follow some examples for using scheme to input data into Opencog.
-The scheme shell itself is reachable through the opencog shell.
-Thus:
--- start the opencog server
--- telnet localhost 17001   # to get to the opencog shell
--- opencog> scm     # to enter the scheme shell
+The scheme shell is reachable in one of two ways: as a shell on the
+opencog server, or, directly from the guile REPL.
+
+From the cogserver:
+   $ opencog/server/cogserver  # Start the cogserver
+   $ rlwrap telnet localhost 17001   # to get to the opencog shell
+   opencog> scm     # to enter the scheme shell
+
+From the guile REPL:
+   $ guile
+   scheme@(guile-user)> (load-extension "build/opencog/guile/libsmob" "opencog_guile_init")
+
 
 At this point, generic scheme expressions can be entered.
 
 Example: Importing Data
 -----------------------
-Consider the following OpenCog XML:
-
-<InheritanceLink strength=".98" confidence=".99">
-       <Element class="ConceptNode" name="famous"/>
-       <Element class="ConceptNode" name="artist"/>
-</InheritanceLink>
-<ExtensionalImplicationLink strength=".99" confidence=".99">
-       <Element class="ConceptNode" name="Muhammad"/>
-       <Element class="ConceptNode" name="artist"/>
-</ExtensionalImplicationLink>
-<ExtensionalImplicationLink strength=".99" confidence=".99">
-      <Element class="ConceptNode" name="Britney"/>
-      <Element class="ConceptNode" name="artist"/>
-</ExtensionalImplicationLink>
 
 This can be represented in scheme several different ways.
 The most direct (but not the prettiest) way is as follows:
