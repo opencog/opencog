@@ -149,7 +149,7 @@ AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
 	SCM ref = scm_fluid_ref(atomspace_fluid);
 	AtomSpace* as = ss_to_atomspace(ref);
 	if (NULL == as)
-		scm_out_of_range(subr, atomspace_fluid);
+		scm_misc_error(subr, "No atomspace was specified!", SCM_BOOL_F);
 	return as;
 }
 
