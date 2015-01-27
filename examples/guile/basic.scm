@@ -2,6 +2,9 @@
 ; Basic guile usage example
 ; Unfinished ...
 ;
+; See opencog/guile/README or http://wiki.opencog.org/w/Scheme
+; for additional documentation.
+;
 ; guile -L build/opencog/guile/
 ; or add it to your ~/.guile file
 ; -x ext ...
