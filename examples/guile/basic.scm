@@ -1,6 +1,14 @@
 ;
 ; Basic guile usage example
+; Unfinished ...
 ;
+; guile -L build/opencog/guile/
+; or add it to your ~/.guile file
+; -x ext ...
+; -l file ...
+; LTDL_LIBRARY_PATH
+;
+; (%search-load-path "build/opencog/scm")
 
 ; Hack right now; load the dynamic library from the build directory.
 (load-extension "build/opencog/guile/libsmob" "opencog_guile_init")
