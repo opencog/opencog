@@ -45,15 +45,9 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h)
 	// this callback returns; thus we avoid searching the low-AF
 	// parts of the hypergraph.
 	IncomingSet filtered_set;
-	for (IncomingSet::const_iterator i = incoming_set.begin();
-	     i != incoming_set.end(); ++i)
-	{
-		Handle candidate_handle(*i);
-		if (candidate_handle->getSTI() > _as->getAttentionalFocusBoundary())
-		{
-			filtered_set.push_back(LinkCast(candidate_handle));
-		}
-	}
+	for (const auto& l : incoming_set)
+		if (l->getSTI() > _as->getAttentionalFocusBoundary())
+			filtered_set.push_back(l);
 
 	// If nothing is in AF
 	if (filtered_set.empty())
