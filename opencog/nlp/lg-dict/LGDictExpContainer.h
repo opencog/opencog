@@ -26,6 +26,8 @@
 
 #include <link-grammar/dict-api.h>
 
+#include <opencog/atomspace/AtomSpace.h>
+
 
 namespace opencog
 {

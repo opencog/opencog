@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/nlp/types/atom_types.h>
 
 #include "LGDictExpContainer.h"
