@@ -114,8 +114,9 @@ static inline void prtmsg(const char * msg, const Handle& h)
  * quotes.  It is assumed that the QuoteLink has an arity of one, as
  * its quite unclear what an arity of more than one could ever mean.
  *
- * That method have side effects. One of them is to insert variable
- * groundings in var_grounding when encountering variables in the
+ * That method have side effects. The main one is to insert variable
+ * groundings (and in fact sub-clauses grounding as well) in
+ * var_grounding when encountering variables (and sub-clauses) in the
  * pattern.
  */
 bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)

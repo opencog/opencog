@@ -106,7 +106,9 @@ class PatternMatchEngine
 		// -------------------------------------------
 
 		// Result of solving the predicate
+		// Map variables (and sub-clauses as well) to their groundings
 		std::map<Handle, Handle> var_grounding;
+		// Map clauses to their groundings
 		std::map<Handle, Handle> clause_grounding;
 
 		void clear_state(void);
