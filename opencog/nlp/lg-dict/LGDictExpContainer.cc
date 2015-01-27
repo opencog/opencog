@@ -73,7 +73,7 @@ LGDictExpContainer::LGDictExpContainer(Exp_type t, std::vector<LGDictExpContaine
     // need flattening again after changing to dnf
     basic_flatten();
 
-    // convert to normal order (- before +) and also delete repeated stuff in AND
+    // convert to normal order (- before +)
     basic_normal_order();
 }
 
@@ -174,10 +174,8 @@ void LGDictExpContainer::basic_dnf()
 /**
  * Convert to normal order.
  *
- * Putting connectors with - direction before those with + direction.  Also
- * remove duplicates from within AND.
- *
- * Assume everything already in DNF.
+ * Putting connectors with - direction before those with + direction. Assume
+ * everything already in DNF.
  */
 void LGDictExpContainer::basic_normal_order()
 {
@@ -195,20 +193,6 @@ void LGDictExpContainer::basic_normal_order()
         else
             new_rightexps.push_back(exp);
     }
-
-    auto sorter = [](const LGDictExpContainer& a, const LGDictExpContainer& b) { return a.m_string < b.m_string; };
-    auto uniq = [](const LGDictExpContainer& a, const LGDictExpContainer& b)
-    {
-        return a.m_string == b.m_string && a.m_direction == b.m_direction && a.m_multi == b.m_multi;
-    };
-
-    // in addition to putting "-" before "+", also sort the expression bases on the name;
-    // this allows the same conjunction of connectors to end up as the same OpenCog atom
-    // (since LgAnd is ordered, small differences in ordering will create new atoms)
-    std::sort(new_leftexps.begin(), new_leftexps.end(), sorter);
-    new_leftexps.erase(std::unique(new_leftexps.begin(), new_leftexps.end(), uniq), new_leftexps.end());
-    std::sort(new_rightexps.begin(), new_rightexps.end(), sorter);
-    new_rightexps.erase(std::unique(new_rightexps.begin(), new_rightexps.end(), uniq), new_rightexps.end());
 
     m_subexps = new_leftexps;
     m_subexps.insert(m_subexps.end(), new_rightexps.begin(), new_rightexps.end());
@@ -285,8 +269,7 @@ Handle LGDictExpContainer::to_handle(AtomSpace *as)
     if (m_type == AND_type)
         return as->addLink(LG_AND, outgoing);
 
-    // we will always be in DNF here, so AND will have been cleaned of repeated
-    // items, but OR still need to be cleaned, so do it
+    // remove repeated atoms from OR
     if (m_type == OR_type)
     {
         std::sort(outgoing.begin(), outgoing.end());
