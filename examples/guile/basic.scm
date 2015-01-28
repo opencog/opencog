@@ -5,24 +5,13 @@
 ; See opencog/guile/README or http://wiki.opencog.org/w/Scheme
 ; for additional documentation.
 ;
-; guile -L build/opencog/guile/
+; export LTDL_LIBRARY_PATH=build/opencog/guile
+; guile -L opencog/scm
 ; or add it to your ~/.guile file
-; -x ext ...
-; -l file ...
-; LTDL_LIBRARY_PATH
 ;
 ; (%search-load-path "build/opencog/scm")
 
-; Hack right now; load the dynamic library from the build directory.
-(load-extension "build/opencog/guile/libsmob" "opencog_guile_init")
-
-; Creating an atom without an atomspace to put it in is an error.
-; Try it!  An error message will be printed.
-(cog-new-node 'ConceptNode "asdf")
-
-; Create a new atomspace and declare it to be the default atomspace
-; for all subsequent calls.
-(cog-set-atomspace! (cog-new-atomspace))
+(use-modules (opencog))
 
 ; Create an atom and place it in the default atomspace.
 (cog-new-node 'ConceptNode "asdf")
