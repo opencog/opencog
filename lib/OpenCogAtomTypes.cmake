@@ -60,7 +60,6 @@ FILE(APPEND "${SCM_FILE}" "; generated from atom definitions in types.script by 
 FILE(APPEND "${SCM_FILE}" ";\n")
 FILE(APPEND "${SCM_FILE}" "; This file contains basic scheme wrappers for atom creation.\n")
 FILE(APPEND "${SCM_FILE}" ";\n")
-FILE(APPEND "${SCM_FILE}" "(define-module (opencog atomtypes) #:use-module (opencog))\n")
 
 FILE(STRINGS "${SCRIPT_FILE}" TYPE_SCRIPT_CONTENTS)
 FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
