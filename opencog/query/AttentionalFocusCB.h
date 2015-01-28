@@ -1,5 +1,5 @@
 /*
- * AttentionalFocusCB.cc
+ * AttentionalFocusCB.h
  *
  * Copyright (C) 2014 Misgana Bayetta
  *

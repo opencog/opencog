@@ -190,7 +190,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	}
 
 	// If they're the same atom, then clearly they match.
-	// ... but only hp is a constant i.e. contains no bound variables)
+	// ... but only if hp is a constant i.e. contains no bound variables)
 	if (hp == hg)
 	{
 #ifdef NO_SELF_GROUNDING
