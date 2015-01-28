@@ -97,7 +97,7 @@ public:
         delete p_message; 
 
         OAC & oac = oacMock.getOAC(); 
-        oac.psiFeelingUpdaterAgent->init(&oac);  
+        oac.psiFeelingUpdaterAgent->init();
     }
 
     ~PsiFeelingUpdaterAgentUTest() {
