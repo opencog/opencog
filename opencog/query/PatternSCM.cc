@@ -77,3 +77,8 @@ PatternSCM::~PatternSCM()
 #endif
 }
 
+
+void opencog_query_init(void)
+{
+	static PatternSCM patty;
+}

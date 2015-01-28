@@ -1,5 +1,15 @@
+;
 ; Define a hypergraphs using BindLink. These are the queries and
 ; the action to be taken on the result of the query
+;
+; The run this, you probably need to do this:
+;
+; export LTDL_LIBRARY_PATH=build/opencog/guile:build/opencog/query
+; guile -L build -L opencog/scm
+;
+
+(use-modules (opencog))
+(use-modules (opencog query))
 
 
 (define human
