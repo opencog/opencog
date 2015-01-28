@@ -105,6 +105,7 @@
 )
 
 ; ---------------------------------------------------------------------
+; XXX this duplicates (load-from-path) which is a built-in in guile...
 (define (load-scm-from-file filename)
 "
  load-scm-from-file filename   Run scheme code taken from file

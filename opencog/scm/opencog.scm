@@ -5,6 +5,8 @@
 (define-module (opencog))
 (load-extension "libsmob" "opencog_guile_init")
 
+(use-modules (system base compile))
+
 ; Initialze a default atomspace, just to keep things sane...
 (cog-set-atomspace! (cog-new-atomspace))
 
@@ -21,4 +23,13 @@
 (load-from-path "./opencog/reasoning/pln/pln_types.scm")
 (load-from-path "./opencog/dynamics/attention/attention_types.scm")
 (load-from-path "./opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm")
+
+; Load other grunge too
+; Lots of these things should probably be modules ...
+(load-from-path "config.scm")
+(load-from-path "utilities.scm")
+(load-from-path "apply.scm")
+(load-from-path "av-tv.scm")
+(load-from-path "file-utils.scm")
+(load-from-path "persistence.scm")
 
