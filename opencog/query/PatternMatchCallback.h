@@ -225,6 +225,16 @@ public:
 	virtual void set_type_restrictions(VariableTypeMap &tm) {}
 
 	/**
+	 * Called by PatternMatch::validate_clauses before calling
+	 * perform_search for refining clause validation. For instance
+	 * disconnected clause may not be allowed by default but may be
+	 * allowed for PLN.
+	 */
+	virtual void validate_clauses(std::set<Handle>& vars,
+	                              std::vector<Handle>& clauses,
+	                              std::vector<Handle>& negations) = 0;
+
+	/**
 	 * Called to initiate the search. This callback is responsible
 	 * for performing the top-most, outer loop of the search. That is,
 	 * it gets to pick the starting points for the search, thereby
