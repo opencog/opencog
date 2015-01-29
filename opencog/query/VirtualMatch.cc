@@ -134,8 +134,9 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 	if (0 == comp_var_gnds.size())
 	{
 #ifdef DEBUG
-		dbgprt("Explore combinatoric grounding %zd clauses:\n",
-		       var_gnds.size(), pred_gnds.size());
+		dbgprt("Explore combinatoric grounding clauses "
+		       "(var_gnds.size() = %u, pred_gnds.size() = %u):\n",
+			   var_gnds.size(), pred_gnds.size());
 		PatternMatchEngine::print_solution(var_gnds, pred_gnds);
 #endif
 
@@ -478,7 +479,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	// And now, try grounding each of the virtual clauses.
 	dbgprt("BEGIN component recursion: ====================== num comp=%zd num virts=%zd\n",
-	       comp_var_gnds.size(), virtuals.size());
+	       comp_var_gnds.size(), _virtuals.size());
 	std::map<Handle, Handle> empty_vg;
 	std::map<Handle, Handle> empty_pg;
 	recursive_virtual(cb, _virtuals, negations,
