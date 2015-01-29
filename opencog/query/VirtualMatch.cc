@@ -218,7 +218,8 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 		rvg.insert(cand_vg.begin(), cand_vg.end());
 		rpg.insert(cand_pg.begin(), cand_pg.end());
 
-		bool accept = recursive_virtual(cb, virtuals, negations, rvg, rpg, comp_var_gnds, comp_pred_gnds);
+		bool accept = recursive_virtual(cb, virtuals, negations, rvg, rpg,
+		                                comp_var_gnds, comp_pred_gnds);
 
 		// Halt recursion immeditately if match is accepted.
 		if (accept) return true;
@@ -237,7 +238,10 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
  * connected if they contain a common variable.
  *
  * As a side effect, this looks for 'virtual links' and separates
- * them out into a distinct list.
+ * them out into a distinct list, _virtuals and _nonvirts.
+ *
+ * It also partition the clauses into a set of connected components,
+ * _components.
  */
 void PatternMatch::validate_clauses(std::set<Handle>& vars,
                                     std::vector<Handle>& clauses,
