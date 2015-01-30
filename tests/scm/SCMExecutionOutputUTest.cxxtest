@@ -212,4 +212,43 @@ void SCMExecutionOutputUTest::test_multi_threads(void)
 
 void SCMExecutionOutputUTest::test_recursive(void)
 {
+	// Define a Scheme procedure that will be used in the
+	// GroundedSchemaNode
+	eval->eval(
+		"(define (make-king x)"
+		"   (InheritanceLink x (ConceptNode \"king\")))"
+		"(define (stv mean conf) (cog-new-stv mean conf))"
+		"(define (tv-mean tv) (assoc-ref (cog-tv->alist tv) 'mean))"
+		"(define (tv-conf tv) (assoc-ref (cog-tv->alist tv) 'confidence))"
+	);
+	CHKEV(eval);
+
+	eval->eval(
+		"(define (royal-incr atom cnt)"
+		"   (cog-set-tv! atom"
+		"       (stv (+ (tv-mean (cog-tv atom)) cnt)"
+		"           (tv-conf (cog-tv atom)))))"
+	);
+	CHKEV(eval);
+
+	eval->eval(
+		"(define (royalize x)"
+		"   (if (gt? (tv-mean (cog-tv x)) 0.9)"
+		"      (make-king x)"
+		"      (royal-incr x 0.1)))"
+	);
+	CHKEV(eval);
+
+	eval->eval(
+		"(ConceptNode \"julian\" (stv 0 0))"
+	);
+	CHKEV(eval);
+
+	eval->eval(
+		"(cog-execute! (ExecutionOutputLink "
+		"   (GroundedSchemaNode \"scm: royalize\")"
+		"   (ListLink (ConceptNode \"julian\"))))"
+	);
+	CHKEV(eval);
+
 }
