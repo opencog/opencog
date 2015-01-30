@@ -289,51 +289,6 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 		}
 	}
 
-	// Make sure that the pattern is connected
-	if (0 < negations.size())
-	{
-		// The negations should be connected to the clauses.
-		std::vector<Handle> all;
-		all.reserve(clauses.size() + negations.size());
-		all.insert(all.end(), clauses.begin(), clauses.end());
-		all.insert(all.end(), negations.begin(), negations.end());
-		get_connected_components(vars, all, _components);
-	}
-	else
-	{
-		get_connected_components(vars, clauses, _components);
-	}
-
-	// if (1 != _components.size())
-	// {
-	// 	// Users are going to be stumped by this one, so print
-	// 	// out a verbose, user-freindly debug message to help
-	// 	// them out.
-	// 	std::stringstream ss;
-	// 	ss << "Pattern is not connected! Found "
-	// 	   << _components.size() << " components:\n";
-	// 	int cnt = 0;
-	// 	for (const auto& comp : _components)
-	// 	{
-	// 		ss << "Connected component " << cnt
-	// 		   << " consists of ----------------: \n";
-	// 		for (Handle h : comp) ss << h->toString();
-	// 		cnt++;
-	// 	}
-	// 	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
-	// }
-
-	// get_connected_components re-orders the clauses so that adjacent
-	// clauses are connected.  Using this will make matching slightly
-	// faster. But we don't do this if there are negations, because the
-	// above jammed the negations into the thing, which we must keep
-	// separate.
-	if (negations.empty()) {
-		clauses.clear();
-		for (const auto& component : _components)
-			clauses.insert(clauses.begin(), component.begin(), component.end());
-	}
-
 	// Are there any virtual links in the clauses? If so, then we need
 	// to do some special handling.
 	for (Handle clause: clauses)
