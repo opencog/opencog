@@ -242,7 +242,8 @@ void SCMExecutionOutputUTest::test_recursive(void)
 
 	// If the atom's tv-mean is greater than 0.9, the atom is crowned
 	// king.  Otherwise, the mean is incremented by 0.1.
-	// Note that this is recursive.
+	// Note that this is (tail-)recursive, for about 9 steps:
+	// That is, 0.9/0.1 = 9.
 	eval->eval(
 		"(define (royalize x)"
 		"   (if (> (tv-mean (cog-tv x)) 0.9)"
@@ -252,12 +253,17 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	CHKEV(eval);
 
 	// Same as above, except that the recursion is done by execution
-	// link
+	// link. The incr is 0.01, which will cause a total of about 90
+	// recursive calls before Barbie marries the prince.  That is,
+	// 0.9 / 0.01 = 90.  Although this is tail-recursive from the
+	// scheme point of view, the C++ stack will grow, because each
+	// invocation of cog-execute! pushes a stack frame for
+	// ExecutionOutputLink::do_execute() onto the stack.
 	eval->eval(
 		"(define (promote x)"
 		"   (if (> (tv-mean (cog-tv x)) 0.9)"
 		"      (make-queen x)"
-		"      (exe-royalize (royal-incr x 0.1))))"
+		"      (exe-royalize (royal-incr x 0.01))))"
 	);
 	CHKEV(eval);
 
