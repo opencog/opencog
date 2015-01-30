@@ -351,9 +351,9 @@ ostream& ostream_builtin(ostream& out, const builtin& h, output_format f)
         case id::logical_not:
             return out << "NotLink";
         case id::logical_true:
-            return out << "EvaluateLink (PredicateNode \"Top\")";
+            return out << "PredicateNode \"Top\"";
         case id::logical_false:
-            return out << "EvaluateLink (PredicateNode \"Bottom\")";
+            return out << "PredicateNode \"Bottom\"";
         default:
             return out << "Builtin: " << (unsigned) h << " unknown";
         }
@@ -393,13 +393,12 @@ ostream& ostream_argument(ostream& out, const argument& a,
 
     case output_format::scheme: {
         stringstream var_ss;
-        var_ss << "EvaluationLink (PredicateNode \"";
+        var_ss << "PredicateNode \"";
         if (labels.empty())
             var_ss << "$" << to_string(a.is_negated()? -a.idx : a.idx);
         else
             var_ss << labels[a.abs_idx_from_zero()];
-        var_ss << "\") (VariableNode \"$X\")";
-
+        var_ss << "\"";
 
         if (a.is_negated())
             return out << "NotLink (" << var_ss.str() << ")";
