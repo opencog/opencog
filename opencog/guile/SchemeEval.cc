@@ -428,12 +428,19 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
  */
 void SchemeEval::eval_expr(const std::string &expr)
 {
-	pexpr = &expr;
+	// If we are recursing, then we already are in the guile
+	// environment, and don't need to do any additional setup.
+	// Just go.
+	if (_in_eval) {
+	   do_eval(expr);
+		return;
+	}
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	pexpr = &expr;
 	_in_shell = true;
 	_in_eval = true;
 	scm_with_guile(c_wrap_eval, this);
@@ -746,12 +753,19 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
  */
 Handle SchemeEval::eval_h(const std::string &expr)
 {
-	pexpr = &expr;
+	// If we are recursing, then we already are in the guile
+	// environment, and don't need to do any additional setup.
+	// Just go.
+	if (_in_eval) {
+		SCM rc = do_scm_eval_str(expr);
+		return SchemeSmob::scm_to_handle(rc);
+	}
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	pexpr = &expr;
 	_in_eval = true;
 	scm_with_guile(c_wrap_eval_h, this);
 	_in_eval = false;
@@ -849,13 +863,19 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
  */
 Handle SchemeEval::apply(const std::string &func, Handle varargs)
 {
-	pexpr = &func;
-	hargs = varargs;
+	// If we are recursing, then we already are in the guile
+	// environment, and don't need to do any additional setup.
+	// Just go.
+	if (_in_eval) {
+		return do_apply(func, varargs);
+	}
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	pexpr = &func;
+	hargs = varargs;
 	_in_eval = true;
 	scm_with_guile(c_wrap_apply, this);
 	_in_eval = false;
@@ -891,13 +911,20 @@ void * SchemeEval::c_wrap_apply(void * p)
  */
 std::string SchemeEval::apply_generic(const std::string &func, Handle varargs)
 {
-	pexpr = &func;
-	hargs = varargs;
+	// If we are recursing, then we already are in the guile
+	// environment, and don't need to do any additional setup.
+	// Just go.
+	if (_in_eval) {
+		SCM genericAnswer = do_apply_scm(func, varargs);
+		return SchemeSmob::to_string(genericAnswer);
+	}
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	pexpr = &func;
+	hargs = varargs;
 	_in_eval = true;
 	scm_with_guile(c_wrap_apply_scm, this);
 	_in_eval = false;
@@ -911,14 +938,9 @@ std::string SchemeEval::apply_generic(const std::string &func, Handle varargs)
 
 void * SchemeEval::c_wrap_apply_scm(void * p)
 {
-	logger().debug( "%s: calling wrap", __FUNCTION__);
-
 	SchemeEval *self = (SchemeEval *) p;
 	SCM genericAnswer = self->do_apply_scm(*self->pexpr, self->hargs);
-	logger().debug( "%s: done", __FUNCTION__);
 	self->answer = SchemeSmob::to_string(genericAnswer);
-	logger().debug( "%s: answer: %s", __FUNCTION__, self->answer.c_str());
-
 	return self;
 }
 
@@ -990,9 +1012,11 @@ SchemeEval* opencog::get_evaluator(AtomSpace* as)
 		evaluator = get_from_pool(as);
 	}
 
+#if 0
 	if (evaluator->recursing())
 		throw RuntimeException(TRACE_INFO,
 			"Evaluator thread singleton used recursively!");
+#endif
 
 	return evaluator;
 }
