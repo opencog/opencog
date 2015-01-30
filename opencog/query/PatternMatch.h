@@ -76,7 +76,6 @@ class PatternMatch
 		std::vector<Handle> _negate;
 
 		/// The graph components. Set by validate_clauses()
-		std::set<std::vector<Handle>> _components;
 		std::vector<Handle> _virtuals;
 		std::vector<Handle> _nonvirts;
 
