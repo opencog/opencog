@@ -25,6 +25,7 @@
 
 #include "DefaultPatternMatchCB.h"
 #include "PatternMatchEngine.h"
+#include "PatternUtils.h"
 
 using namespace opencog;
 
@@ -164,6 +165,61 @@ Handle DefaultPatternMatchCB::find_thinnest(std::vector<Handle>& clauses,
 }
 
 /**
+ * Check that all clauses are connected
+ */
+void DefaultPatternMatchCB::validate_clauses(std::set<Handle>& vars,
+                                             std::vector<Handle>& clauses,
+                                             std::vector<Handle>& negations)
+{
+	std::set<std::vector<Handle>> components;
+
+	// Make sure that the pattern is connected
+	if (0 < negations.size())
+	{
+		// The negations should be connected to the clauses.
+		std::vector<Handle> all;
+		all.reserve(clauses.size() + negations.size());
+		all.insert(all.end(), clauses.begin(), clauses.end());
+		all.insert(all.end(), negations.begin(), negations.end());
+		get_connected_components(vars, all, components);
+	}
+	else
+	{
+		get_connected_components(vars, clauses, components);
+	}
+
+	if (1 != components.size())
+	{
+		// Users are going to be stumped by this one, so print
+		// out a verbose, user-freindly debug message to help
+		// them out.
+		std::stringstream ss;
+		ss << "Pattern is not connected! Found "
+		   << components.size() << " components:\n";
+		int cnt = 0;
+		for (const auto& comp : components)
+		{
+			ss << "Connected component " << cnt
+			   << " consists of ----------------: \n";
+			for (Handle h : comp) ss << h->toString();
+			cnt++;
+		}
+		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
+	}
+
+	// get_connected_components re-orders the clauses so that adjacent
+	// clauses are connected.  Using this will make matching slightly
+	// faster. But we don't do this if there are negations, because the
+	// above jammed the negations into the thing, which we must keep
+	// separate.
+	if (negations.empty()) {
+		clauses.clear();
+		for (const auto& component : components)
+			clauses.insert(clauses.begin(), component.begin(), component.end());
+	}
+}
+
+/**
  * Search for solutions/groundings over all of the AtomSpace, using
  * some "reasonable" assumptions for what might be searched for. Or,
  * to put it bluntly, this search method *might* miss some possible
@@ -294,8 +350,8 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 	// of atoms of that type, or otherwise try to find a small ("thin")
 	// incoming set to search over.
 	std::list<Handle> handle_set;
-	_as->getHandlesByType(back_inserter(handle_set), ptype);
-	// _as->getHandlesByType(back_inserter(handle_set), ATOM, true);
+	// _as->getHandlesByType(back_inserter(handle_set), ptype);
+	_as->getHandlesByType(back_inserter(handle_set), ATOM, true);
 	std::list<Handle>::iterator i = handle_set.begin();
 	std::list<Handle>::iterator iend = handle_set.end();
 	for (; i != iend; ++i)
