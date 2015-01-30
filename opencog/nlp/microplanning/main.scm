@@ -42,14 +42,13 @@
 		(SetLink (get-utterance-link ut atoms) atoms)
 	)
 	(define (finalize set)
-		(define chunks (get-chunks set))
+		(define new-set set)
 
-		; XXX after inserting anaphora, a chunk might no longer be say-able
 		(if anaphora
-			(set! chunks (insert-anaphora chunks (map get-sentence-forms (get-utterance-types set))))
+			(set! new-set (insert-anaphora set))
 		)
 		
-		(map wrap-setlink chunks (get-utterance-types set))
+		(map wrap-setlink (get-chunks new-set) (get-utterance-types new-set))
 	)
 
 	(cond ((equal? 'SequentialAndLink (cog-type seq-link))

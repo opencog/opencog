@@ -14,6 +14,17 @@
 )
 
 ; -----------------------------------------------------------------------
+; clone-set -- Special copy function to make sure the lists are copied
+;
+(define-method (clone-set (cs <chunks-set>))
+	(make <chunks-set>
+		#:chunks (list-copy (slot-ref cs 'chunks))
+		#:utterance-types (list-copy (slot-ref cs 'uts))
+		#:leftover-count (slot-ref cs 'lo)
+	)
+)
+
+; -----------------------------------------------------------------------
 ; get-variation -- Calculate how many times the utterance type changed
 ;
 (define-method (get-variation (cs <chunks-set>))
@@ -25,6 +36,41 @@
 ;
 (define-method (get-length (cs <chunks-set>))
 	(length (get-chunks cs))
+)
+
+; -----------------------------------------------------------------------
+; get-chunk -- Get a chunk at "chunk-index"
+;
+(define-method (get-chunk (cs <chunks-set>) (chunk-index <integer>))
+	(list-ref (get-chunks cs) chunk-index)
+)
+
+; -----------------------------------------------------------------------
+; mod-chunk -- Modify a chunk at "chunk-index"
+;
+(define-method (mod-chunk (cs <chunks-set>) (chunk-index <integer>) (new-chunk <list>))
+	(list-set! (get-chunks cs) chunk-index new-chunk)
+)
+
+; -----------------------------------------------------------------------
+; get-utterance-type -- Get the utterance type at index
+;
+(define-method (get-utterance-type (cs <chunks-set>) (index <integer>))
+	(list-ref (get-utterance-types cs) index)
+)
+
+; -----------------------------------------------------------------------
+; get-link -- Get a link at "link-index" of the chunk at "chunk-index"
+;
+(define-method (get-link (cs <chunks-set>) (chunk-index <integer>) (link-index <integer>))
+	(list-ref (get-chunk cs chunk-index) link-index)
+)
+
+; -----------------------------------------------------------------------
+; mod-link -- Modify a link at "link-index" of the chunk at "chunk-index"
+;
+(define-method (mod-link (cs <chunks-set>) (chunk-index <integer>) (link-index <integer>) new-link)
+	(list-set! (get-chunk cs chunk-index) link-index new-link)
 )
 
 ; -----------------------------------------------------------------------

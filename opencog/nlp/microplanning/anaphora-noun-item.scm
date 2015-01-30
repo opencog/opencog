@@ -170,7 +170,8 @@
 (define-method (get-lexical-node (ni <noun-item>))
 	(define (determine-lexical)
 		(define the-noun-node (get-noun-node ni))
-		; XXX also accept links that inherit the abstracted version?
+		(define the-noun-word-node (car (word-inst-get-word (r2l-get-word-inst the-noun-node))))
+		; XXX also accept links that inherit the abstracted version? currently not doing that
 		; since the anchor is also a ConceptNode, cog-get-link will return each link twice, so need to delete duplicates
 		(define all-inheritances (delete-duplicates (cog-get-link 'InheritanceLink 'ConceptNode the-noun-node)))
 
@@ -179,6 +180,10 @@
 
 			; remove links in subsets that are not about a noun
 			(set! subsets (filter (lambda (l) (word-inst-is-noun? (r2l-get-word-inst (gar l)))) subsets))
+			
+			; remove links to words with incompatible LG dictionary entry
+			; TODO probably need more advanced checking here
+			(set! subsets (filter (lambda (l) (lg-similar? (car (word-inst-get-word (r2l-get-word-inst (gar l)))) the-noun-word-node)) subsets))
 		
 			; remove close to false or low confidence links base on TruthValue
 			(set! subsets (filter (lambda (l) (and (> (tv-mean (cog-tv l)) 0.5) (> (tv-conf (cog-tv l)) 0.5))) subsets))
