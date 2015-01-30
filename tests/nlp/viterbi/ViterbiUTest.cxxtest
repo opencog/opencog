@@ -32,14 +32,14 @@
 using namespace opencog;
 using namespace viterbi;
 
-class InitUTest: public CxxTest::TestSuite
+class ViterbiUTest: public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
 
 
 	public:
-		InitUTest(void)
+		ViterbiUTest(void)
 		{
 			try
 			{
@@ -65,7 +65,7 @@ class InitUTest: public CxxTest::TestSuite
 
 		}
 
-		~InitUTest()
+		~ViterbiUTest()
 		{
 			delete as;
 
@@ -83,7 +83,7 @@ class InitUTest: public CxxTest::TestSuite
 };
 
 
-void InitUTest::setUp(void)
+void ViterbiUTest::setUp(void)
 {
 	as->clear();
 
@@ -98,7 +98,7 @@ void InitUTest::setUp(void)
 	load_scm_files_from_config(*as);
 }
 
-void InitUTest::test_init(void)
+void ViterbiUTest::test_init(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -114,7 +114,7 @@ void InitUTest::test_init(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void InitUTest::test_hello(void)
+void ViterbiUTest::test_hello(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 

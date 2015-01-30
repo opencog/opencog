@@ -21,6 +21,6 @@ LINK_LIBRARIES(
 # We want to run the tests in the order below;
 # Each test gets progressively more complex, and exercises
 # features that the later tests depend on.
-ADD_CXXTEST(InitUTest)
+ADD_CXXTEST(ViterbiUTest)
 
 
