@@ -82,6 +82,12 @@ class PMCGroundings : public PatternMatchCallback
 		void set_type_restrictions(VariableTypeMap &tm) {
 			_cb->set_type_restrictions(tm);
 		}
+
+		void validate_clauses(std::set<Handle>& vars,
+			                      std::vector<Handle>& clauses,
+			                      std::vector<Handle>& negations) {
+			_cb->validate_clauses(vars, clauses, negations);
+		}
 		void perform_search(PatternMatchEngine* pme,
 	                       std::set<Handle> &vars,
 	                       std::vector<Handle> &clauses,
