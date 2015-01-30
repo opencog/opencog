@@ -141,7 +141,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 	{
 #ifdef DEBUG
 		dbgprt("Explore combinatoric grounding clauses "
-		       "(var_gnds.size() = %u, pred_gnds.size() = %u):\n",
+		       "(var_gnds.size() = %zu, pred_gnds.size() = %zu):\n",
 			   var_gnds.size(), pred_gnds.size());
 		PatternMatchEngine::print_solution(var_gnds, pred_gnds);
 #endif
