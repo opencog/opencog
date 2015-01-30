@@ -46,6 +46,10 @@ enum class output_format {
     output_format_count                // to get the number of formats
 };
 
+// Take a string "combo", "python" or "scheme" and return the
+// corresponding format
+output_format parse_output_format(const std::string& fmt_str);
+
 // like operator<< but can choose the output format
 std::ostream& ostream_builtin(std::ostream&, const builtin&,
                               output_format fmt = output_format::combo);

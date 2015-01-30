@@ -249,6 +249,20 @@ bool enum_str_to_vertex(const std::string& str, vertex& v)
     return true;
 }
 
+output_format parse_output_format(const std::string& fmt_str) {
+    combo::output_format fmt = combo::output_format::combo;
+    if (fmt_str == "combo")
+        fmt = combo::output_format::combo;
+    else if (fmt_str == "python")
+        fmt = combo::output_format::python;
+    else if (fmt_str == "scheme")
+        fmt = combo::output_format::scheme;
+    else
+        OC_ASSERT(false, "Format %s not supported",
+                  fmt_str.c_str());
+    return fmt;
+}
+
 ostream& ostream_builtin(ostream& out, const builtin& h, output_format f)
 {
     switch (f) {
