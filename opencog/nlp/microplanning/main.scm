@@ -1,3 +1,8 @@
+;(define-module (opencog nlp microplanning))
+
+;(use-modules (opencog))
+;(use-modules (srfi srfi-1))
+
 ; loading additional dependency
 (load "sentence-forms.scm")
 (load "helpers.scm")
@@ -5,6 +10,26 @@
 (load "chunks-option.scm")
 (load "chunks-set.scm")
 (load "atomW.scm")
+
+
+; =======================================================================
+; Main interface
+; =======================================================================
+
+; -----------------------------------------------------------------------
+; microplanning -- The main microplanning interface
+;
+; A shortcut for calling microplanning without specifying all the
+; arguments.  This will the function to declare-public when scheme
+; modules are bug free.
+;
+(define microplanning 
+	(case-lambda
+		((sl ut) (microplanning-main sl ut *default_chunks_option* #t))
+		((sl ut opt a) (microplanning-main sl ut opt a))
+	)
+)
+
 
 ; =======================================================================
 ; Some contants
@@ -27,14 +52,14 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-; microplanning -- The main microplanning function call
+; microplanning-main -- The main microplanning function call
 ;
 ; Accepts a SequentialAndLink containing a list of atoms to be spoken.
 ; "utterance-type" is either 'declarative', 'interrogative', 'imperative'
 ; or 'interjective', "option" is an <chunks-option> object, and "anaphora"
 ; can be #t or #f.
 ;
-(define (microplanning seq-link utterance-type option anaphora)
+(define (microplanning-main seq-link utterance-type option anaphora)
 	(define all-sets '())
 	
 	(define (wrap-setlink atoms ut)
@@ -436,15 +461,5 @@
 	      (else *microplanning_not_sayable*)
 	)
 )
-
-
-;;;;;;;; brain organizing stuff 
-
-; if not long enough
-; add external links that share a node? how to determine what to include?
-
-
-; some atoms used can be leave out of used to be reused later?
-; eg. atoms that do not satisfy a sentence form (like adjectives)?
 
 

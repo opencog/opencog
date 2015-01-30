@@ -1,5 +1,7 @@
 ; loading additional dependency
 (use-modules (oop goops))
+(use-modules (ice-9 receive))
+
 (load "helpers.scm")
 
 ; -----------------------------------------------------------------------
