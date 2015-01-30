@@ -54,28 +54,6 @@ static const string default_log_file_prefix = "eval-table";
 static const string default_log_file_suffix = "log";
 static const string default_log_file = default_log_file_prefix + "." + default_log_file_suffix;
 
-
-/**
- * Convert a string representing a combo program in a combo_tree.
- *
- * @param combo_prog_str   the string containing the combo program
- * @param has_labels       true if the combo program has labels instead of
- * place holders (like and($start $up) instead of and($23 $134)
- * @param labels           a vector of labels
- * @return                 the combo_tree
- */
-combo_tree str2combo_tree_label(const std::string& combo_prog_str,
-                                bool has_labels,
-                                const std::vector<std::string>& labels) {
-    // Combo program with place holders
-    std::string combo_prog_ph_str =
-        has_labels? l2ph(combo_prog_str, labels) : combo_prog_str;
-    std::stringstream ss(combo_prog_ph_str);
-    combo_tree tr;
-    ss >> tr;
-    return tr;
-}
-
 vector<string> get_all_combo_tree_str(const evalTableParameters& pa)
 {
     vector<string> res(pa.combo_programs);     // from command line
@@ -203,7 +181,8 @@ void read_eval_output_results(evalTableParameters& pa)
     // Parse combo programs
     vector<combo_tree> trs;
     for (const string& tr_str : all_combo_tree_str) {
-        combo_tree tr = str2combo_tree_label(tr_str, pa.has_labels, ilabels);
+	    combo_tree tr = str2combo_tree(tr_str, pa.has_labels ?
+	                                   ilabels : vector<string>());
         logger().fine() << "Combo str: " << tr_str << "\n";
         logger().debug() << "Parsed combo: " << tr;
         trs += tr;
