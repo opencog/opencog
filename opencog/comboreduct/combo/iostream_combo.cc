@@ -465,6 +465,17 @@ std::ostream& ostream_combo_tree(std::ostream& out, const combo_tree& ct,
     return out;
 }
 
+combo_tree str2combo_tree(const std::string& combo_tree_str,
+                          const std::vector<std::string>& labels) {
+    // Combo program with place holders
+    std::string combo_tree_ph_str =
+        labels.empty() ? combo_tree_str : l2ph(combo_tree_str, labels);
+    std::stringstream ss(combo_tree_ph_str);
+    combo_tree tr;
+    ss >> tr;
+    return tr;
+}
+
 string ph2l(const string& ce, const vector<string>& labels)
 {
     /// @todo the implementation could be done in 2 lines with

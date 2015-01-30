@@ -223,6 +223,18 @@ std::istream& stream_to_combo_tree(std::istream& in, combo_tree& tr)
 }
 
 /**
+ * Convert a string representing a combo program in a combo_tree.
+ *
+ * @param combo_prog_str   the string containing the combo program
+ * @param labels           a vector of labels (in case the combo tree has
+ *                         variable name instead of place holder). If empty then
+ *                         it is assumed the combo tree has place holders.
+ * @return                 the combo_tree
+ */
+combo_tree str2combo_tree(const std::string& combo_prog_str,
+                          const std::vector<std::string>& labels);
+
+/**
  * ph2l where ph == "place holder" and l == "label"
  *
  * This method replaces place holders by labels in a string
