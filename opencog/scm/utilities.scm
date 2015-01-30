@@ -381,6 +381,9 @@
 ; then this method will return the two WantedNodes's, given the
 ; GivenNode as anchor, and the link-type 'SomeLink.
 ;
+; viz: (cog-chase-link 'SomeLink 'WantedNode (GivenNode "a")) will
+; return ((WantedNode "p") (WantedNode "q"))
+;
 ; It is presumed that 'anchor' points to some atom (typically a node),
 ; and that it has many links in its incoming set. So, loop over all of
 ; the links of 'link-type' in this set. They presumably link to all
