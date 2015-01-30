@@ -1,13 +1,23 @@
-; 
+;
 ; disjunct-list.scm
 ;
 ; Build lists of link-grammar disjuncts (sets of word connectors).
-; Given a parsed sentence, the routines here will determine the 
+; Given a parsed sentence, the routines here will determine the
 ; disjuncts that were used by link-grammar to perform the parse.
 ; The net result is a string containing the disjunct.  The string
 ; will be a simple, space-separated list of connectors. A "connector"
 ; is a link-grammar link relations, with an appended + or - indicating
 ; whether the connection is to the right or left.
+;
+; XXX This code is deprecated and/or obsolete. Why?
+; 1) Because disjuncts can now be obtained directly from relex and LG.
+;    They use the ConnectorNode, LgAndLink and LgDisjunct to specifiy
+;    them. Grep the viterbi code for details; see also the sureal code.
+; 2) This code does not use the new structures above, so its not
+;    compatible.
+; 3) This code returns only the intersected connectors. In most cases,
+;    you probably want the un-intersected connnectors from 1).
+; 4) This uses some inefficient algos; see below.  They should be fixed.
 ;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
@@ -16,14 +26,14 @@
 ; =====================================================================
 ; ---------------------------------------------------------------------
 ; Given a list of relations, sort the relations in "sentence order"
-; (or "parse order"). The "sent-node" argument provides the 
+; (or "parse order"). The "sent-node" argument provides the
 ; sentence by which to sort the relations, and the "word" argument
 ; gives the word relative to which the sort should be done.
-; So, for example, given 
+; So, for example, given
 ;
 ;        +---Os---+
 ;        |    +-Ds+
-;        |    |   | 
+;        |    |   |
 ;     heard.v a dog.
 ;
 ; and the word "dog" and the relations "Ds Os", this will return "Os Ds"
@@ -35,7 +45,7 @@
 	(let ((snt-wrds (parse-get-words-in-order parse-node)))
 
 		; Compare two link-grammar relations, and determine thier sentence
-		; word order. XXX FIXME -- instead of doig teh below, it would be
+		; word order. XXX FIXME -- instead of doing the below, it would be
 		; better and easier to use WordSequenceLink to get the correct
 		; word sequence.
 		(define (wless? rel-a rel-b)
@@ -58,8 +68,8 @@
 )
 
 ; ---------------------------------------------------------------------
-; Given a list of link-grammar relation hypergraphs, return a string 
-; listing all of the link-grammar connectors. A "connector" is a 
+; Given a list of link-grammar relation hypergraphs, return a string
+; listing all of the link-grammar connectors. A "connector" is a
 ; link-grammar link (relation), together with a direction (to the left,
 ; or to the right) which specifies which direction the connector plugs
 ; in.
@@ -72,7 +82,7 @@
 ;            WordInstanceNode
 ;            WordInstanceNode
 ;
-; this routine will return a string holding the names of the 
+; this routine will return a string holding the names of the
 ; LinkGrammarRelationshipNode's, appended with a + or - to indicate
 ; which direction the relation went in.
 ;
@@ -124,7 +134,7 @@
 ;
 (define (ldj-get-connectors word parse-node)
 
-	(ldj-sort-rels word parse-node 
+	(ldj-sort-rels word parse-node
 		(ldj-get-lg-rels word)
 	)
 )

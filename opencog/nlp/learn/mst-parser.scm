@@ -402,7 +402,7 @@
 
 	; Which word of the pair is in the word-list?
 	(define (get-fresh cost-pair word-list)
-		(define word-pair (cadr cost-pair)) ; thorw away MI
+		(define word-pair (cadr cost-pair)) ; throw away MI
 		(define left-word (car word-pair))
 		(define right-word (cadr word-pair))
 		(if (any (lambda (word) (equal? word left-word)) word-list)
