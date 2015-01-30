@@ -119,15 +119,8 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
         size_t pos = 4;
         while (' ' == schema[pos]) pos++;
 
-        // XXX We really need to not do the new/delete below.
-        // It hurts performance real bad. FIXME later
-        // However, schemeeval needs to be made re-entrant for
-        // this to work.
-        // SchemeEval* applier = get_evaluator(as);
-        SchemeEval* applier = new SchemeEval(as);
-        Handle h(applier->apply(schema.substr(pos), args));
-        delete applier;
-        return h;
+        SchemeEval* applier = get_evaluator(as);
+        return applier->apply(schema.substr(pos), args);
 #else
         throw RuntimeException(TRACE_INFO,
             "Cannot evaluate scheme GroundedSchemaNode!");
