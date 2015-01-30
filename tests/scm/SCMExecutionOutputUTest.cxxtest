@@ -2,6 +2,7 @@
  * tests/scm/SCMExecutionOutputUTest.cxxtest
  *
  * Copyright (C) 2014 Cosmo Harrigan, Linas Vepstas
+ * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -212,8 +213,12 @@ void SCMExecutionOutputUTest::test_multi_threads(void)
 
 void SCMExecutionOutputUTest::test_recursive(void)
 {
-	// Define a Scheme procedure that will be used in the
-	// GroundedSchemaNode
+	// Empty out the atomspace
+	as->clear();
+	size_t size = as->getSize();
+	TS_ASSERT_EQUALS(size, 0);
+
+	// Define various generic utilities
 	eval->eval(
 		"(define (make-king x)"
 		"   (InheritanceLink x (ConceptNode \"king\")))"
@@ -223,6 +228,8 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	);
 	CHKEV(eval);
 
+	// Every time this is called, atom x becomes more royal.
+	// viz the atom TV mean is incremented by cnt
 	eval->eval(
 		"(define (royal-incr atom cnt)"
 		"   (cog-set-tv! atom"
@@ -231,24 +238,39 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	);
 	CHKEV(eval);
 
+	// If the atoms tv-mean is greater than 0.9, the atom is crowned
+	// king.  Otherwise, the mean is incremented by 0.1.
 	eval->eval(
 		"(define (royalize x)"
-		"   (if (gt? (tv-mean (cog-tv x)) 0.9)"
+		"   (if (> (tv-mean (cog-tv x)) 0.9)"
 		"      (make-king x)"
 		"      (royal-incr x 0.1)))"
 	);
 	CHKEV(eval);
 
+	// Start out with Julian a newborn prince.
 	eval->eval(
 		"(ConceptNode \"julian\" (stv 0 0))"
 	);
 	CHKEV(eval);
 
+	// The execution link
 	eval->eval(
-		"(cog-execute! (ExecutionOutputLink "
-		"   (GroundedSchemaNode \"scm: royalize\")"
-		"   (ListLink (ConceptNode \"julian\"))))"
+		"(define exelink"
+		"   (ExecutionOutputLink "
+		"     (GroundedSchemaNode \"scm: royalize\")"
+		"     (ListLink (ConceptNode \"julian\"))))"
+	);
+
+	size = as->getSize();
+	TS_ASSERT_EQUALS(size, 4);
+	std::cout << "recursive atomspace size:" << size << std::endl;
+
+	eval->eval(
+		"(cog-execute! exelink)"
 	);
 	CHKEV(eval);
 
+	size = as->getSize();
+	std::cout << "after recursive atomspace size:" << size << std::endl;
 }
