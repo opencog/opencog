@@ -222,6 +222,8 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	eval->eval(
 		"(define (make-king x)"
 		"   (InheritanceLink x (ConceptNode \"king\")))"
+		"(define (make-queen x)"
+		"   (InheritanceLink x (ConceptNode \"queen\")))"
 		"(define (stv mean conf) (cog-new-stv mean conf))"
 		"(define (tv-mean tv) (assoc-ref (cog-tv->alist tv) 'mean))"
 		"(define (tv-conf tv) (assoc-ref (cog-tv->alist tv) 'confidence))"
@@ -238,39 +240,74 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	);
 	CHKEV(eval);
 
-	// If the atoms tv-mean is greater than 0.9, the atom is crowned
+	// If the atom's tv-mean is greater than 0.9, the atom is crowned
 	// king.  Otherwise, the mean is incremented by 0.1.
+	// Note that this is recursive.
 	eval->eval(
 		"(define (royalize x)"
 		"   (if (> (tv-mean (cog-tv x)) 0.9)"
 		"      (make-king x)"
-		"      (royal-incr x 0.1)))"
+		"      (royalize (royal-incr x 0.1))))"
 	);
 	CHKEV(eval);
+
+	// Same as above, except that the recursion is done by execution
+	// link
+	eval->eval(
+		"(define (promote x)"
+		"   (if (> (tv-mean (cog-tv x)) 0.9)"
+		"      (make-queen x)"
+		"      (exe-royalize (royal-incr x 0.1))))"
+	);
+	CHKEV(eval);
+
+	// Wrap royalize with an execution link
+	eval->eval(
+		"(define (exe-royalize princess)"
+		"   (cog-execute! "
+		"      (ExecutionOutputLink "
+		"         (GroundedSchemaNode \"scm: promote\")"
+		"         (ListLink princess))))"
+	);
 
 	// Start out with Julian a newborn prince.
 	eval->eval(
-		"(ConceptNode \"julian\" (stv 0 0))"
+		"(define julian (ConceptNode \"julian\" (stv 0 0)))"
 	);
 	CHKEV(eval);
 
-	// The execution link
-	eval->eval(
-		"(define exelink"
-		"   (ExecutionOutputLink "
-		"     (GroundedSchemaNode \"scm: royalize\")"
-		"     (ListLink (ConceptNode \"julian\"))))"
-	);
+	// Initially, atomspace has one atom: just julian
+	size = as->getSize();
+	TS_ASSERT_EQUALS(size, 1);
 
+	eval->eval(
+		"(royalize julian)"
+	);
+	CHKEV(eval);
+
+	// Now, the atomspace has three atoms (Inheritance julian king)
+	size = as->getSize();
+	TS_ASSERT_EQUALS(size, 3);
+
+	// Start out with Anneliese a newborn princess.
+	eval->eval(
+		"(define anne (ConceptNode \"Anneliese\" (stv 0 0)))"
+	);
+	CHKEV(eval);
 	size = as->getSize();
 	TS_ASSERT_EQUALS(size, 4);
-	std::cout << "recursive atomspace size:" << size << std::endl;
 
 	eval->eval(
-		"(cog-execute! exelink)"
+		"(exe-royalize anne)"
 	);
 	CHKEV(eval);
 
+	// Now, the atomspace has nine atoms
+	// 3:  (Inheritance julian king)
+	// 3:  (Inheritance anne queen)
+	// 3:  (ExecutionLink (GroundedSchemeNode) (ListLink anne))
 	size = as->getSize();
-	std::cout << "after recursive atomspace size:" << size << std::endl;
+	TS_ASSERT_EQUALS(size, 9);
+
+	size = as->getSize();
 }
