@@ -394,13 +394,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 {
 	validate_clauses(vars, clauses, negations);
 
-	// The simple case -- unit propagation through all of the clauses.
-	if (_virtuals.empty())
-	{
-		PatternMatchEngine pme;
-		pme.match(cb, vars, clauses, negations);
-		return;
-	}
+	cb->validate_clauses(vars, clauses, negations);
 
 	// If we are here, then we've got a knot in the center of it all.
 	// Removing the virtual clauses from the hypergraph typically causes
