@@ -96,8 +96,8 @@ class SchemeEval : public GenericEval
 		static void * c_wrap_eval_h(void *);
 
 		// Handle apply
-		Handle do_apply(const std::string& func, Handle varargs);
-		SCM do_apply_scm(const std::string& func, Handle varargs);
+		Handle do_apply(const std::string& func, Handle& varargs);
+		SCM do_apply_scm(const std::string& func, Handle& varargs);
 		Handle hargs;
 		static void * c_wrap_apply(void *);
 		static void * c_wrap_apply_scm(void *);
@@ -143,8 +143,8 @@ class SchemeEval : public GenericEval
 		Handle eval_h(const std::string&);
 		Handle eval_h(const std::stringstream& ss) { return eval_h(ss.str()); }
 
-		Handle apply(const std::string& func, Handle varargs);
-		std::string apply_generic(const std::string& func, Handle varargs);
+		Handle apply(const std::string& func, Handle& varargs);
+		std::string apply_generic(const std::string& func, Handle& varargs);
 
 		bool recursing(void) { return _in_eval; }
 };

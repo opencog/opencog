@@ -23,7 +23,7 @@ using namespace opencog;
  * is applied to them. If the function returns an atom handle, then
  * this is returned.
  */
-Handle SchemeEval::do_apply(const std::string &func, Handle varargs)
+Handle SchemeEval::do_apply(const std::string &func, Handle& varargs)
 {
 	// Apply the function to the args
 	SCM sresult = do_apply_scm (func, varargs);
@@ -38,7 +38,7 @@ Handle SchemeEval::do_apply(const std::string &func, Handle varargs)
  * atom handles. This list is unpacked, and then the fuction func
  * is applied to them. The SCM value returned by the function is returned.
  */
-SCM SchemeEval::do_apply_scm( const std::string& func, Handle varargs )
+SCM SchemeEval::do_apply_scm(const std::string& func, Handle& varargs )
 {
 	SCM sfunc = scm_from_utf8_symbol(func.c_str());
 	SCM expr = SCM_EOL;
