@@ -101,7 +101,7 @@ TARGET_LINK_LIBRARIES(combo-fmt-converter
 )
 
 # install eval-table
-INSTALL(TARGETS eval-table gen-table gen-disj-conj RUNTIME DESTINATION bin)
+INSTALL(TARGETS eval-table gen-table gen-disj-conj combo-fmt-converter RUNTIME DESTINATION bin)
 
 INSTALL(FILES
 
