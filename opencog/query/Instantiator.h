@@ -37,31 +37,31 @@ namespace opencog {
 class Instantiator
 {
 private:
-	AtomSpace *_as;
-	const std::map<Handle, Handle> *_vmap;
+		AtomSpace *_as;
+		const std::map<Handle, Handle> *_vmap;
 
-	/**
-	 * Recursively walk a tree starting with the root of the
-	 * hypergraph to instantiate (typically an
-	 * ExecutionOutputLink).
-	 *
-	 * Return the current result of the execution. If the node is an
-	 * ExecutionOutputLink then it returns the final result. If the
-	 * node is another list (typically a ListLink) it returns a copy
-	 * of it, replacing the variables in its outgoing by their
-	 * respective groundings.
-	 *
-	 * If an execution occur then _did_exec is set to true.
-	 */
-	Handle walk_tree(Handle tree);
-	Handle execution_output_link(const HandleSeq&);
-	bool _did_exec;
+		/**
+		 * Recursively walk a tree starting with the root of the
+		 * hypergraph to instantiate (typically an
+		 * ExecutionOutputLink).
+		 *
+		 * Return the current result of the execution. If the node is an
+		 * ExecutionOutputLink then it returns the final result. If the
+		 * node is another list (typically a ListLink) it returns a copy
+		 * of it, replacing the variables in its outgoing by their
+		 * respective groundings.
+		 *
+		 * If an execution occur then _did_exec is set to true.
+		 */
+		Handle walk_tree(Handle tree);
+		Handle execution_output_link(const HandleSeq&);
+		bool _did_exec;
 
-public:
-	Instantiator(AtomSpace* as) : _as(as) {}
+	public:
+		Instantiator(AtomSpace* as) : _as(as) {}
 
-	Handle instantiate(Handle& expr, const std::map<Handle, Handle> &vars)
-		throw (InvalidParamException);
+		Handle instantiate(Handle& expr, const std::map<Handle, Handle> &vars)
+			throw (InvalidParamException);
 };
 
 } // namespace opencog
