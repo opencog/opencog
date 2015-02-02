@@ -32,6 +32,11 @@ Handle SchemeEval::do_apply(const std::string &func, Handle& varargs)
 	return SchemeSmob::scm_to_handle(sresult);
 }
 
+static SCM thunk_scm_eval(void * expr)
+{
+	return scm_eval((SCM)expr, scm_interaction_environment());
+}
+
 /**
  * do_apply_scm -- apply named function func to arguments in ListLink
  * It is assumed that varargs is a ListLink, containing a list of
@@ -54,7 +59,7 @@ SCM SchemeEval::do_apply_scm(const std::string& func, Handle& varargs )
 		expr = scm_cons(sh, expr);
 	}
 	expr = scm_cons(sfunc, expr);
-	return do_scm_eval(expr);
+	return do_scm_eval(expr, thunk_scm_eval);
 }
 
 /**

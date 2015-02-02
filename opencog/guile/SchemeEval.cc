@@ -662,24 +662,19 @@ std::string SchemeEval::do_poll_result()
 
 /* ============================================================== */
 
-SCM SchemeEval::thunk_scm_eval(void* expr)
-{
-	SCM sexpr = (SCM) expr;
-	return scm_eval(sexpr, scm_interaction_environment());
-}
-
 /**
  * do_scm_eval -- evaluate a scheme expression
  *
  * Similar to do_eval(), with several important differences:
  * 1) The argument must be an SCM expression.
- * 2) No shell-friendly string and output management is performed.
- * 3) Evaluation errors are logged to the log file.
+ * 2) The expression is evaluated by "evo"
+ * 3) No shell-friendly string and output management is performed.
+ * 4) Evaluation errors are logged to the log file.
  *
  * This method *must* be called in guile mode, in order for garbage
  * collection, etc. to work correctly!
  */
-SCM SchemeEval::do_scm_eval(SCM sexpr)
+SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 {
 	per_thread_init();
 
@@ -689,7 +684,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	_caught_error = false;
 	set_captured_stack(SCM_BOOL_F);
 	SCM rc = scm_c_catch (SCM_BOOL_T,
-	                 SchemeEval::thunk_scm_eval, (void *) sexpr,
+	                 evo, (void *) sexpr,
 	                 SchemeEval::catch_handler_wrapper, this,
 	                 SchemeEval::preunwind_handler_wrapper, this);
 
@@ -744,6 +739,12 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 }
 
 /* ============================================================== */
+
+SCM recast_scm_eval_string(void * expr)
+{
+	return scm_eval_string((SCM)expr);
+}
+
 /**
  * Evaluate a string containing a scheme expression, returning a Handle.
  * If an evaluation error occurs, then the error is logged to the log
@@ -760,7 +761,7 @@ Handle SchemeEval::eval_h(const std::string &expr)
 	if (_in_eval) {
 		// scm_from_utf8_string is lots faster than scm_from_locale_string
 		SCM expr_str = scm_from_utf8_string(expr.c_str());
-		SCM rc = do_scm_eval(expr_str);
+		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
 		return SchemeSmob::scm_to_handle(rc);
 	}
 
@@ -785,7 +786,7 @@ void * SchemeEval::c_wrap_eval_h(void * p)
 	SchemeEval *self = (SchemeEval *) p;
 	// scm_from_utf8_string is lots faster than scm_from_locale_string
 	SCM expr_str = scm_from_utf8_string(self->pexpr->c_str());
-	SCM rc = self->do_scm_eval(expr_str);
+	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
 	self->hargs = SchemeSmob::scm_to_handle(rc);
 	return self;
 }

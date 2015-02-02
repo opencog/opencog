@@ -90,8 +90,7 @@ class SchemeEval : public GenericEval
 		int _pipeno;
 
 		// Straight-up evaluation
-		static SCM thunk_scm_eval(void *);
-		SCM do_scm_eval(SCM);
+		SCM do_scm_eval(SCM, SCM (*)(void *));
 		static void * c_wrap_eval_h(void *);
 
 		// Handle apply
