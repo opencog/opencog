@@ -805,9 +805,12 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 
 	_caught_error = false;
 	set_captured_stack(SCM_BOOL_F);
+
+	// scm_from_utf8_string is lots faster than scm_from_locale_string
+	SCM expr_str = scm_from_utf8_string(expr.c_str());
 	SCM rc = scm_c_catch (SCM_BOOL_T,
-	                      (scm_t_catch_body) scm_c_eval_string,
-	                      (void *) expr.c_str(),
+	                      (scm_t_catch_body) scm_eval_string,
+	                      (void *) expr_str,
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
 
