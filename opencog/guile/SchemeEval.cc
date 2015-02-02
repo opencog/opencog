@@ -529,9 +529,10 @@ void SchemeEval::do_eval(const std::string &expr)
 	_pending_input = false;
 	set_captured_stack(SCM_BOOL_F);
 	scm_gc_unprotect_object(_rc);
+	SCM eval_str = scm_from_utf8_string(_input_line.c_str());
 	_rc = scm_c_catch (SCM_BOOL_T,
-	                      (scm_t_catch_body) scm_c_eval_string,
-	                      (void *) _input_line.c_str(),
+	                      (scm_t_catch_body) scm_eval_string,
+	                      (void *) eval_str,
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
 	_rc = scm_gc_protect_object(_rc);
