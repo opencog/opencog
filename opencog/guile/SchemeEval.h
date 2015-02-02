@@ -143,7 +143,7 @@ class SchemeEval : public GenericEval
 		Handle eval_h(const std::string&);
 		Handle eval_h(const std::stringstream& ss) { return eval_h(ss.str()); }
 
-		Handle apply(const std::string& func, Handle& varargs);
+		Handle apply(const std::string& func, Handle varargs);
 		std::string apply_generic(const std::string& func, Handle& varargs);
 
 		bool recursing(void) { return _in_eval; }

@@ -814,7 +814,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
  * then a guile stack trace is logged in the OpenCog error log file,
  * and Handle::UNDEFINED is returned.
  */
-Handle SchemeEval::apply(const std::string &func, Handle& varargs)
+Handle SchemeEval::apply(const std::string &func, Handle varargs)
 {
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
