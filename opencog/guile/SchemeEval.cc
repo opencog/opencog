@@ -757,7 +757,9 @@ Handle SchemeEval::eval_h(const std::string &expr)
 	// environment, and don't need to do any additional setup.
 	// Just go.
 	if (_in_eval) {
-		SCM rc = do_scm_eval_str(expr);
+		// scm_from_utf8_string is lots faster than scm_from_locale_string
+		SCM expr_str = scm_from_utf8_string(expr.c_str());
+		SCM rc = do_scm_eval(expr_str);
 		return SchemeSmob::scm_to_handle(rc);
 	}
 
@@ -780,27 +782,11 @@ Handle SchemeEval::eval_h(const std::string &expr)
 void * SchemeEval::c_wrap_eval_h(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
-	SCM rc = self->do_scm_eval_str(*(self->pexpr));
+	// scm_from_utf8_string is lots faster than scm_from_locale_string
+	SCM expr_str = scm_from_utf8_string(self->pexpr->c_str());
+	SCM rc = self->do_scm_eval(expr_str);
 	self->hargs = SchemeSmob::scm_to_handle(rc);
 	return self;
-}
-
-/**
- * do_scm_eval_str -- evaluate a scheme expression
- *
- * Similar to do_scm_eval(), but several important differences:
- * 1) The arugment must be a string containing valid scheme,
- * 2) No shell-friendly string and output management is performed,
- * 3) Evaluation errors are logged to the log file.
- *
- * This method *must* be called in guile mode, in order for garbage
- * collection, etc. to work correctly!
- */
-SCM SchemeEval::do_scm_eval_str(const std::string &expr)
-{
-	// scm_from_utf8_string is lots faster than scm_from_locale_string
-	SCM expr_str = scm_from_utf8_string(expr.c_str());
-	return do_scm_eval(expr_str);
 }
 
 /* ============================================================== */
