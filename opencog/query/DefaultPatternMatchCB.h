@@ -160,11 +160,10 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		{
 			_type_restrictions = &tm;
 		}
-	private:
+	protected:
 		Handle _root;
 		Handle _starter_pred;
 		VariableTypeMap *_type_restrictions;
-	protected:
 		virtual Handle find_starter(Handle, size_t&, Handle&, size_t&);
 		virtual Handle find_thinnest(std::vector<Handle>&, Handle&, size_t&);
 		AtomSpace *_as;
