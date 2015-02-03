@@ -1,3 +1,8 @@
+;(define-module (opencog nlp microplanning))
+
+;(use-modules (opencog))
+;(use-modules (srfi srfi-1))
+
 ; loading additional dependency
 (load "sentence-forms.scm")
 (load "helpers.scm")
@@ -5,6 +10,26 @@
 (load "chunks-option.scm")
 (load "chunks-set.scm")
 (load "atomW.scm")
+
+
+; =======================================================================
+; Main interface
+; =======================================================================
+
+; -----------------------------------------------------------------------
+; microplanning -- The main microplanning interface
+;
+; A shortcut for calling microplanning without specifying all the
+; arguments.  This will the function to declare-public when scheme
+; modules are bug free.
+;
+(define microplanning 
+	(case-lambda
+		((sl ut) (microplanning-main sl ut *default_chunks_option* #t))
+		((sl ut opt a) (microplanning-main sl ut opt a))
+	)
+)
+
 
 ; =======================================================================
 ; Some contants
@@ -27,14 +52,14 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-; microplanning -- The main microplanning function call
+; microplanning-main -- The main microplanning function call
 ;
 ; Accepts a SequentialAndLink containing a list of atoms to be spoken.
 ; "utterance-type" is either 'declarative', 'interrogative', 'imperative'
 ; or 'interjective', "option" is an <chunks-option> object, and "anaphora"
 ; can be #t or #f.
 ;
-(define (microplanning seq-link utterance-type option anaphora)
+(define (microplanning-main seq-link utterance-type option anaphora)
 	(define all-sets '())
 	
 	(define (wrap-setlink atoms ut)
@@ -42,14 +67,13 @@
 		(SetLink (get-utterance-link ut atoms) atoms)
 	)
 	(define (finalize set)
-		(define chunks (get-chunks set))
+		(define new-set set)
 
-		; XXX after inserting anaphora, a chunk might no longer be say-able
 		(if anaphora
-			(set! chunks (insert-anaphora chunks (map get-sentence-forms (get-utterance-types set))))
+			(set! new-set (insert-anaphora set))
 		)
 		
-		(map wrap-setlink chunks (get-utterance-types set))
+		(map wrap-setlink (get-chunks new-set) (get-utterance-types new-set))
 	)
 
 	(cond ((equal? 'SequentialAndLink (cog-type seq-link))
@@ -201,8 +225,15 @@
 	(define atomW-chunk '())	; the set of successful atoms to be returned
 
 	; main helper function for looping
-	(define (recursive-helper atomW-to-try)
-		(define result (check-chunk (map get-atom atomW-to-try) utterance-type option)) ; the result of trying to say the atoms in a sentence
+	(define (recursive-helper atomW-to-try do-check)
+		 ; the result of trying to say the atoms in a sentence
+		(define result
+			; just return *microplanning_sayable* if no need to check
+			(if do-check
+				(check-chunk (map get-atom atomW-to-try) utterance-type option)
+				*microplanning_sayable*
+			)
+		)
 		(define atomW-not-tried (lset-difference equal? atomW-unused atomW-to-try)) ; the set of atoms not yet used
 		(define atomW-not-chunked (lset-difference equal? atomW-to-try atomW-chunk)) ; the set of atoms not yet added to the chunk
 
@@ -216,9 +247,9 @@
 			; try "saying" the previous working iteration again (if available)
 			(if (null? good-set)
 				(if (not (null? atomW-unused))
-					(recursive-helper (list (pick-atomW atomW-unused atomW-used (get-main-weight-proc option) utterance-type)))
+					(recursive-helper (list (pick-atomW atomW-unused atomW-used (get-main-weight-proc option) utterance-type)) #t)
 				)
-				(recursive-helper good-set)
+				(recursive-helper good-set #f)
 			)
 		)
 		(define (update-chunk)
@@ -258,7 +289,7 @@
 
 					; if an atom with the solo word exists
 					(if temp-var1
-						(recursive-helper (cons temp-var1 atomW-to-try))
+						(recursive-helper (cons temp-var1 atomW-to-try) #t)
 						(give-up-unadded-part)
 					)
 				      )
@@ -282,6 +313,7 @@
 						(pick-atomW atomW-unused atomW-chunk (get-supp-weight-proc option) utterance-type)
 						atomW-to-try
 					)
+					#t
 				)
 			)
 		      )
@@ -293,7 +325,7 @@
 	)
 
 	; the initial critera for choosing a starting point would be (time-weights + link-weights) * form-weights
-	(recursive-helper (list (pick-atomW atomW-unused atomW-used (get-main-weight-proc option) utterance-type)))
+	(recursive-helper (list (pick-atomW atomW-unused atomW-used (get-main-weight-proc option) utterance-type)) #t)
 
 	; return the sentence chunk (reverse because we've been adding to the front)
 	(reverse atomW-chunk)
@@ -429,15 +461,5 @@
 	      (else *microplanning_not_sayable*)
 	)
 )
-
-
-;;;;;;;; brain organizing stuff 
-
-; if not long enough
-; add external links that share a node? how to determine what to include?
-
-
-; some atoms used can be leave out of used to be reused later?
-; eg. atoms that do not satisfy a sentence form (like adjectives)?
 
 
