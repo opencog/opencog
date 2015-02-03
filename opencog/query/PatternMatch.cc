@@ -438,20 +438,7 @@ void PatternMatch::validate_implication (Handle himplication)
 		// Any clause that is a NotLink is "negated"; strip off the
 		// negation and put it into its own list.
 		const std::vector<Handle>& cset = LinkCast(_hclauses)->getOutgoingSet();
-		size_t clen = cset.size();
-		for (size_t i=0; i<clen; i++)
-		{
-			Handle h(cset[i]);
-			Type t = h->getType();
-			if (NOT_LINK == t)
-			{
-				_negate.push_back(LinkCast(h)->getOutgoingAtom(0));
-			}
-			else
-			{
-				_affirm.push_back(h);
-			}
-		}
+		split_clauses_pos_neg(cset, _affirm, _negate);
 	}
 	else
 	{
