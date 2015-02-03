@@ -5,21 +5,25 @@
                          Status update May 2009
                          Status update Dec 2013
 
-A simple implementation of atom persistence into SQL.
+A simple implementation of atom persistence into SQL.  This allows not
+only saving and restoring of the atomspace, but it also allows multiple
+cogservers to share a common set of data.  That is, it implements a
+basic form of a distributed atomspace.
 
 Status
 ======
-Functional, but somewhat incomplete.  It works and has been used with
-databases containing millions of atoms, accessed by cogservers that ran
-for months to perform computations.
+It works and has been used with databases containing millions of atoms,
+accessed by cogservers that ran for months to perform computations. It
+has scaled trouble-free, without any slowdown, up to four cogserrvers.
+No one has tried anything larger than that, yet.
 
 Features
 --------
 -- Save and restore of atoms, and several kinds of truth values.
 -- Bulk save-and-restore of entire AtomSpace contents.
 -- Incremental save/restore (i.e. updates the SQL contents as AtomSpace
-   changes).  This is *not* fully automatic; see below.
--- Generic API, useful for inter-server communications
+   changes).
+-- Generic API, useful for inter-server communications.
 
 Missing features/ToDo items
 ---------------------------
@@ -32,22 +36,23 @@ Performance status
 ------------------
 In March 2014, 10.3M atoms were loaded in about 20 minutes wall-clock
 time, 10 minutes of opencog-server CPU time.  This works out to about
-500K atoms/minute, or 9K atoms/second.  The reuslting cogserver required
+500K atoms/minute, or 9K atoms/second.  The resulting cogserver required
 about 10GBytes of RAM, which works out to about 1KByte/atom average.
 The loaded hypergraphs were all EvaluationLinks, viz:
 
    EvaluationLink  (w/non-trivial TV)
       SomeNode
       ListLink
-         WordNode  (w/ non-triovial TV)
+         WordNode  (w/ non-trivial TV)
          WordNode  (w/ non-trivial TV)
 
 
 The above measurements were made on a busy server that was doing many
 other CPU & RAM intensive things; there was no performance tuning of
 the postgress server.  A section below explains how to performance tune
-the postgres server for better results.
-
+the postgres server for better results.  The above was also done through
+the scheme interface; since then, garbage collection has been tuned a
+little bit, and so RAM usage should drop a bit.
 
 
 Design Goals
@@ -55,39 +60,32 @@ Design Goals
 The goal of this implementation is to:
 
 1) Provide OpenCog with a working memory, so that the Cogsever could
-   be stopped and restarted without having to dump/reload all data
-   using some slow save/restore interfaces.  By using a database,
-   we don't have to worry about disk layout.  By using incremental
-   access, we don't have to fill the atomspace with atoms that are not
-   immediately needed.
+   be stopped and restarted without requiring a data dump.  That is,
+   checkpointing should be possible: if the cogserver crashes, data is
+   not lost.  By using a database, a file format does not need to be
+   invented. By using a database, data integrity is assured.
+   By using incremental access, only those atoms that are needed get
+   loaded into the atomspace; one does NOT have to do a bulk restore
+   if one doesn't want to.
 
 2) Provide an API for inter-server communications and atom exchange.
-   Saving and fetching atoms from storage is conceptually similar, if
-   not identical, to sending and receiving atoms from another opencog
-   instance.  This opens the door to distributed OpenCog.
+   Multiple cogservers can share data simply by sending atoms to,
+   and retreiving atoms from the database.  Although this may not be
+   the fastest way to send just single atoms, most algorithms do not
+   need to send just single atoms: they just need to share some atoms,
+   but its not clear which ones need to be shared.  Since all atoms are
+   in the database, only the ones that are needed can be retreived.
 
-3) Make sure that the opencog core design is amenable to incremental,
-   just-in-time data persistence; that is, the fetching of data
-   as it is needed, and saving it away when its not needed. This
-   requires an infrastructure for attention allocation (atoms
-   that don't get attention can be saved away to disk, while those
-   that are needed are fetched on demand.) This will also require
-   infrastructure for locks, use counts, etc. that are typical
-   of multi-threaded programming.  This prototype should lay the
-   foundations for more sophisticated schemes (non-SQL-based)
-   to take its place.  This architectural work is inherently difficult,
-   and is ongoing.
-
-4) Provide a baseline/reference implementation by which other
+3) Provide a baseline/reference implementation by which other
    persistence designs can be measured. It is hoped that other systems
    would be at least as fast and as scalable as this one is: this is
    meant to provide a minimal function and performance level. The
    strength of the current design is supposed to be simplicity, not
    scalability or raw performance.
 
-5) A non-design-goal (at this time) is to build a system that can scale
+4) A non-design-goal (at this time) is to build a system that can scale
    to more than 100 cogserver instances.  The current design might be
-   able to scale to this many, but almost surely not more.  Scaling
+   able to scale to this many, but probably not much more.  Scaling
    larger than this would probably require a fundamental redesign of
    all of opencog, starting with the atomspace.
 
