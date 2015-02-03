@@ -555,7 +555,7 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom, SCM kv_pairs)
 
 /* ============================================================== */
 /**
- * Purgee the atom from the atomspace, but only if it has no incoming links.
+ * Purge the atom from the atomspace, but only if it has no incoming links.
  * Return SCM_BOOL_T if the atom was deleted, else return SCM_BOOL_F
  * This does NOT remove the atom from any attached backing store, only
  * from the atomspace.

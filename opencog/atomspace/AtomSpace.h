@@ -280,7 +280,7 @@ public:
      * from the AtomSpace; it may still remain in persistent storage.
      * To also delete from persistant storage, use the removeAtom()
      * method.  The atom remains valid as long as there are Handles
-     * or AtomPptr's that reference it; it is deleted only when the
+     * or AtomPtr's that reference it; it is deleted only when the
      * last reference goes away.
      *
      * @param h The Handle of the atom to be removed.

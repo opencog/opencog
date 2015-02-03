@@ -27,6 +27,7 @@ Features
 
 Missing features/ToDo items
 ---------------------------
+ * Add support for multiple atom spaces.
  * Add full support for attention values. (??)
  * Provide optimized table layout for EvaluationLinks.
  * Add support for Space/TimeServer data.
@@ -125,6 +126,9 @@ the current, minimalistic, low-function API for this.
 
 Features
 --------
+ * The AtomStorage class should be completely thread-safe (I think ...
+only lightly tested).
+
  * This implementation avoids UUID collisions, and automatically thunks
 UUID's as needed if an accidental collision with the database occurs.
 In order to avoid excess thunking, it is strongly recommended that
@@ -156,12 +160,20 @@ store at a later time. Meanwhile, the store request returns to the user
 immediately, so that the user can continue without blocking.  The only
 time that an atom store request blocks is if the queue is completely
 full; in that case, the user will be blocked until the queue drains
-below the low watermark.
+below the low watermark. The number of connections can be raised by
+editing the AtomStorage constructor, and recompiling.
+
+The fire-n-forget algo is implemented in the C++
+`AtomStorage::storeAtom()` method.  If the backlog of unwritten atoms
+gets too large, the storeAtom() method may stall. Its currently designed
+to stall if there's a backlog of 100 or more unwritten atoms.  This can
+be changed by searching for `HIGH_WATER_MARK`, changing it and recompiling.
 
  * Reading always blocks: if the user asks for an atom, the call will
 not return to the user until the atom is available.  At this time,
 pre-fetch has not been implemented.  But that's because pre-fetch is
 easy: the user can do it in thier own thread :-)
+
 
 Issues
 ------
@@ -219,14 +231,14 @@ contains the stanza below (or something similar).  If it is missing,
 then edit this file (as root) and add the stanza.  Notice that it uses
 the Unicode drivers, and NOT the ANSI (ASCII) drivers.  Opencog uses
 unicode!
-
+```
     [PostgreSQL]
     Description = PostgreSQL ODBC driver (Unicode version)
     Driver      = psqlodbcw.so
     Setup       = libodbcpsqlS.so
     Debug       = 0
     CommLog     = 0
-
+```
 The above stanza associates the name `PostgreSQL ODBC driver (Unicode
 version)`  with a particular driver. This name is needed for later
 steps.  Notice that this is a really long name, with spaces!  You can
@@ -239,14 +251,14 @@ safely contain multiple stanzas defining other drivers.
 
 WARNING: MySQL is currently not supported. Anyway, if you wanted to
 mess with it, then add the below:
-
+```
     [MySQL]
     Description = MySQL driver
     Driver      = libmyodbc.so
     Setup       = libodbcmyS.so
     CPTimeout   =
     CPReuse     =
-
+```
 
 Performance tweaks
 ------------------
@@ -575,7 +587,7 @@ be slow.
 Once stored, the atom may be deleted from the AtomSpace; it will
 remain in storage, and can be recreated at will:
 ```
-    guile> (cog-delete y)
+    guile> (cog-purge y)
     #t
     guile> y
     #<Invalid handle>
@@ -583,7 +595,11 @@ remain in storage, and can be recreated at will:
     guile> y
     (ConceptNode "asdfasdf" (stv 0.123 0.78899997))
 ```
-The UUID associated with the atom will NOT change between deletions
+Notice, in the above, that the truth value is the same as it was before.
+That is because the truth value was fetched from the database when the
+atom is recreated.
+
+The UUID associated with the atom will NOT change between purges
 and server restarts. This can be verified with the cog-handle command,
 which returns the UUID:
 ```
@@ -591,72 +607,77 @@ which returns the UUID:
     2
 ```
 
+Purging vs. Deletion
+--------------------
+There are four related but distinct concepts of atom deletion: purge and
+delete, each of which may also be done recursively. "Purge" with remove
+the atom from the atomspace; it will NOT remove it from the database!
+"Delete" will remove the atom from both the atomspace, and from the
+database; thus, deletion is permanent!  (Well, if there are two
+cogservers attached to one database, and one cogserver deletes the atom
+from the database, it will still not be deleted from the second
+cogserver, and so that second cogserver could still save that atom.
+There is currently no way to broadcast a distributed system-wide
+delete message. Its not even obvious that such a broadcast is evn a good
+idea.)
+
+Atoms can also be deleted or purged recusrively. Thus, normally, a
+purge/delete will succeed only if the atom has no incoming set.
+The recursive forms, `cog-purge-recursive` and `cog-delete-recursive`
+purge/delete the atom and avery link that contains that atom, and so
+on.
+
+
 Using SQL Persistence from Scheme
 ---------------------------------
-SQL fetch from storage is not fully automatic at this time. This is to
-allay performance concerns: we don't want to be constantly querying the
-database every time some atom is needed. In particular: NOTE THIS IS
-IMPORTANT: the incoming set of an atom is not automatically fecthed from
-storage.  This must be done manually, using either C++:
+SQL fetch from store is not automatic!  That is because this layer 
+cannot guess the user's intentions. There is no way for this layer
+to guess which atoms might be deleted in a few milliseconds from now,
+or to guess which atoms need to loaded into RAM (do you really want ALL
+of them to be loaded ??)  Some higher level management and policy thread
+will need to make the fetch and store decisions. This layer only
+implements the raw capability: it does not implement the policy. 
 
+There is one thing that is automatic: when a new atom is added to the
+atomspace, then the database is automatically searched, to see if this
+atom already exists.  If it does, then its truth value is restored.
+However, **AND THIS IS IMPRTANT**, the incoming set of the atom is not
+automatically fecthed from storage.  This must be done manually, using
+either C++:
+```
    AtomSpace::getImpl()->fetchIncomingSet(h, true);
-
+```
 or the scheme call
-
+```
   (fetch-incoming-set atom)
+```
 
-If the numeric uuid for an atom is known, but the atom itsself is not,
-then the scheme call
-
-   (fetch-atom atom)
-
+Since UUID's are assigned uniquely, they can be used for out-of-band
+communication of atoms between cogservers.  Thus, if by some magic, the
+numeric uuid for an atom is known, but the atom itself is not, then the
+scheme call
+```
+   (fetch-atom (cog-atom uuid))
+```
 can be used to pull an atom into the AtomSpace from the database server.
+(You can also do this from C++, by creating a `Handle` with that UUID in
+it, and then forcing resolution of the handle).
 
 To force an atom to be saved, call:
-
+```
    (store-atom atom)
-
-XXX TODO: there is currently no way to delete an atom from the database,
-once its in there. This needs fixing ...
-
+```
 
 Copying Databases
 -----------------
 Sooner or later you will want to make a copy of your database, for
 backup purposes, or sharing. Here's the current 'best practices' for
 that:
-
+```
    $ pg_dump mycogdata -f filename.sql
-
+```
 That's all!
 
-
-Threading
-=========
-The AtomStorage class sould be completely thread-safe (I think ... only
-lightly tested). By default, the class maintains a pool of four database
-connections, which can be used to drive the database. (The number of
-connections can be raised by editing the AtomStorage constructor, and
-recompiling).  Every thread using this class will temporarily make use
-of one of these connections; if all connections are in use, the calling
-thread will block until one is free.
-
-
-Asynchronous Writing
-====================
-The AtomStorage::storeAtom() method is implemented using a fire-n-forget
-algo: the atom to be stored is queued up, and stored at some later time
-by another concurrently running thread.  If the backlog of unwritten atoms
-gets too large, the storeAtom() method may stall. Its currently designed
-to stall if there's a backlog of 100 or more unwritten atoms.  This can
-be changed by searching for HIGH_WATER_MARK, changing it and recompiling.
-
-Currently, there is only one writer thread.  Perhaps this is not enough;
-more writer threads can be started, just call the startWriterThread()
-method to have additional ones.  Note that multiple writer threads may
-end up storing atoms out of order; hopefully, this shouldn't matter (?)
-
-Anyway, the above two settings might need tweaking, depending on the job.
 
 
 Experimental Diary & Results
