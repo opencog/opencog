@@ -28,7 +28,6 @@ Features
 Missing features/ToDo items
 ---------------------------
  * Add full support for attention values. (??)
- * Add full support for Atom deletion.
  * Provide optimized table layout for EvaluationLinks.
  * Add support for Space/TimeServer data.
 
@@ -196,17 +195,16 @@ Do NOT use IODBC, it fails to support UTF-8.
 
 Database Setup
 --------------
-There are four basic database setup: installation, device driver setup,
-user and password setup, and table initialization.  Each step discussed
-below.
+There are four basic steps needed to setup the database: installation,
+device driver setup, user and password setup, and table initialization.
+Each step discussed below.
 
 
 Database Install
 ----------------
 Download and install Postgres version 8.3 or newer.  The current design
-simply won't work with older versions of postgres (because of a lack of
-array membership support) or MySQL (because of a lack of array support,
-in general). Same holds true for SQLite.  There is some work in the
+simply won't work with MySQL, because of a lack of array support.
+Same holds true for SQLite.  Sorry. There is some work in the
 code-base to support these other databases, but the work-arounds for
 the missing features are kind-of complicated, and likely to be slow.
 
@@ -216,9 +214,11 @@ odbc-postgresql device driver.
 
 Device Driver Setup
 -------------------
-Configure the ODBC driver. After install, edit (as root) /etc/odbcinst.ini
-and put the stanza below into it. Notice that it uses the Unicode drivers,
-and NOT the ANSI (ASCII) drivers.  Opencog uses unicode!
+Configure the ODBC driver. After install, verify that /etc/odbcinst.ini
+contains the stanza below (or something similar).  If it is missing,
+then edit this file (as root) and add the stanza.  Notice that it uses
+the Unicode drivers, and NOT the ANSI (ASCII) drivers.  Opencog uses
+unicode!
 
     [PostgreSQL]
     Description = PostgreSQL ODBC driver (Unicode version)
@@ -227,15 +227,15 @@ and NOT the ANSI (ASCII) drivers.  Opencog uses unicode!
     Debug       = 0
     CommLog     = 0
 
-The above stanza associates the name 'PostgreSQL' with a particular
-driver; this name is needed below.  NOTE: the default install of the
-`odbc-postgresql` package on Ubuntu creates the `/etc/odbcinst.ini`
-file automatically. You can leave it as is, or you can add the above.
-If you leave it as-is, you must make sure you use teh correct stanza
-name in `~/.odbc.ini`, below!
+The above stanza associates the name `PostgreSQL ODBC driver (Unicode
+version)`  with a particular driver. This name is needed for later
+steps.  Notice that this is a really long name, with spaces!  You can
+change the name, (e.g. to shorten it) if you wish, however, it **MUST**
+be consistent with the name given in the `.odbc.ini` file (explained
+below).
 
-MySQL users need the stanza below; the /etc/odbcinst.ini file can
-safely contain other stanzas defining other drivers.
+MySQL users need the stanza below; the `/etc/odbcinst.ini` file can
+safely contain multiple stanzas defining other drivers.
 
 WARNING: MySQL is currently not supported. Anyway, if you wanted to
 mess with it, then add the below:
@@ -250,14 +250,15 @@ mess with it, then add the below:
 
 Performance tweaks
 ------------------
-The Postgres default configuration needs to be tweaked for performance.
-Failure to do this will result in disastrous load and store times.
+The Postgres default configuration can be/should be tweaked for
+performance.  Newer version of Postgress seem to be OK (??) but in
+some cases, performance will be a disaster if the database is not tuned.
 
-Edit postgresql.conf (a typical location is
-/etc/postgresql/8.4/main/postgresql.conf) and make the changes below.
+Edit `postgresql.conf` (a typical location is
+`/etc/postgresql/8.4/main/postgresql.conf`) and make the changes below.
 The first two changes are recommended by
 http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
-
+```
    shared_buffers = default was 32MB, change to 25% of install RAM
    work_mem = default was 1MB change to 32MB
    effective_cache_size = default was 128MB, change to 50%-75% of installed RAM
@@ -269,24 +270,24 @@ http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
    ssl = off
    autovacuum = on
    track_counts = on
-
-A large value for wal_buffers is needed because much of the database
+```
+A large value for `wal_buffers` is needed because much of the database
 traffic consists of updates.  Enabling vacuum is very important, for
 the same reason; performance degrades substantially (by factors of
-3x-10x) without regular vacuuming.
-
+3x-10x) without regular vacuuming. (Newer versions of postrgres vacuum
+automatically. YMMV.)
 
 Restarting the server might lead to errors stating that max shared mem
 usage has been exceeded. This can be fixed by telling the kernel to use
 6.4 gigabytes (for example):
-
+```
    vi /etc/sysctl.conf
    kernel.shmmax = 6440100100
-
+```
 save file contents, then:
-
+```
    sysctl -p /etc/sysctl.conf
-
+```
 If you continue to get errors after that, read this for help fixing them:
 
    http://stackoverflow.com/questions/12616935/postgresql-shared-memory-settings
@@ -303,38 +304,38 @@ Multiple databases can be created.  In this example, the daatabase
 name will be "mycogdata".  Change this as desired.
 
 So, at the Unix command line:
-
+```
    $ createdb mycogdata
-
-If you get an error message "FATAL:  role "<user>" does not exist", then
+```
+If you get an error message `FATAL:  role "<user>" does not exist`, then
 try doing this:
-
+```
    $ su - postgres; createuser <your-unix-username>
-
-Answer the question (yes, you want to be superuser) and exit.
-Under rare circumstances, you may need to edit pg_hba.conf. Google for
+```
+Answer the question (yes, you want to be superuser) and exit. Under
+rare circumstances, you may need to edit `pg_hba.conf`. Google for
 additional help.
 
-Next, create a database user named opencog_user with password 'cheese'.
+Next, create a database user named `opencog_user` with password `cheese`.
 You can pick a different username and password, but it must be consistent
-with the ~/.odbc.ini file. Do NOT use your login password!  Pick something
-else! Create the user at the shell prompt:
-
+with the `~/.odbc.ini` file. Do NOT use your unix login password!  Pick
+something else! Create the user at the shell prompt:
+```
    $ psql -c "CREATE USER opencog_user WITH PASSWORD 'cheese'" -d mycogdata
-
+```
 Check that the above worked, by manually logging in:
-
+```
    $  psql mycogdata -U opencog_user -W -h localhost
-
+```
 If you can't login, something up above failed.
 
 Next, create the database tables:
-
+```
    $ cat opencog/persist/sql/atom.sql | psql mycogdata -U opencog_user -W -h localhost
-
-Verify that the tables were created. Login as before, then enter \d
+```
+Verify that the tables were created. Login as before, then enter `\d`
 at the postgres prompt.  You should see this:
-
+```
     mycogdata=> \d
                   List of relations
      Schema |   Name    | Type  |     Owner
@@ -343,18 +344,18 @@ at the postgres prompt.  You should see this:
      public | global    | table | opencog_user
      public | typecodes | table | opencog_user
     (3 rows)
-
+```
 If the above doesn't work, go back, and try again.
 
-Verify that opencog_user has write permissions to the tables. Do this
+Verify that `opencog_user` has write permissions to the tables. Do this
 entering the below.
-
+```
     mycogdata=> INSERT INTO TypeCodes (type, typename) VALUES (97, 'SemanticRelationNode');
-
+```
 You should see the appropriate respone:
-
+```
     INSERT 0 1
-
+```
 If the above doesn't work, go back, and try again.
 
 
@@ -402,9 +403,9 @@ it was `mycogdata`.
 
 Opencog Setup
 -------------
-Edit lib/opencog.conf and set the STORAGE, STORAGE_USERNAME and
-STORAGE_PASSWD there to the same values as in ~/.odbc.ini.  Better yet,
-copy lib/opencog.conf to your build directory, edit the copy, and
+Edit `lib/opencog.conf` and set the `STORAGE`, `STORAGE_USERNAME` and
+`STORAGE_PASSWD` there to the same values as in `~/.odbc.ini`.  Better
+yet, copy lib/opencog.conf to your build directory, edit the copy, and
 start the opencog server as:
 
 ```
@@ -448,34 +449,35 @@ PersistUTest.  The CMakefile will not run compile or run these tests
 unless postgres is configured just-so.  To run and past these tests,
 you should:
 
- -- Read tests/persist/sql/README and follow the instructions there.
-    They are almost identical to the instructions above, except that
-    they call for a test user to be set up. You can do that, or you
-    can use your current DB user.
- -- To compile and run:
+ * Read tests/persist/sql/README and follow the instructions there.
+   They are almost identical to the instructions above, except that
+   they call for a test user to be set up. You can do that, or you
+   can use your current DB user.
+ * To compile and run:
+```
     $ make test
+```
 
 So here's a super-short recap:
 
- -- Create a user 'opencog_tester' with password 'cheese'.
- -- Create a new database: e.g.
-        $ createdb test-persist
- -- Create the tables:
-        $ cat atom.sql | psql test-persist
- -- Create an entry in ~/.odbc.ini, as explained above.  The entry
-    should be called opencot_test, and use opencog_tester as the user.
- -- The file lib/opencog-test.conf already has the above as the default
-    default username and database names.  Stick to these.
+ * Create a user 'opencog_tester' with password 'cheese'.
+ * Create a new database: e.g.  `$ createdb test-persist`
+ * Create the tables: `$ cat atom.sql | psql test-persist`
+ * Create an entry in `~/.odbc.ini`, as explained above.  The entry
+   should be called `opencot_test`, and use `opencog_tester` as the user.
+ * The file `lib/opencog-test.conf` already has the above as the default
+   username and database names.  Stick to these.
 
 
-After the above steps, BasicSaveUTest and PersistUTest should run and pass.
+After the above steps, `BasicSaveUTest` and `PersistUTest` should run
+and pass.
 
 
 Unit Test Status
 ----------------
-As of 2011-04-29 bzr revision 5314, BasicSaveUTest (still) passes.
-As of 2013-11-26 BasicSaveUTest works and passes, again.
-As of 2014-06-19 both unit tests work and pass.
+* As of 2011-04-29 bzr revision 5314, BasicSaveUTest (still) passes.
+* As of 2013-11-26 BasicSaveUTest works and passes, again.
+* As of 2014-06-19 both unit tests work and pass.
 
 
 Using the System
@@ -485,9 +487,9 @@ Some example walkthroughs of some typical usage scenarios.
 Bulk Save and Restore
 ---------------------
 At last! bulk save of atoms that were previous created is done by
-getting to the opencog prompt (telnet localhost 17001) and issuing the
+getting to the opencog prompt (`telnet localhost 17001`) and issuing the
 commands:
-
+```
     opencog> ?
     Available commands:
       exit help list scm shutdown sql-open sql-close sql-store sql-load
@@ -500,24 +502,24 @@ commands:
 
     opencog> sql-store
     SQL data store thread started
-
+```
 At this point, a progres indicator will be printed by the opencog
 server, on the OpenCog server's stdout. It  will say something like:
 Stored 236000 atoms. When finished, its nice to say:
-
+```
     opencog> sql-close
-
+```
 At this point, the cogserver can be stopped and restarted.  After a
 restart, load the data with:
-
+```
     opencog> sql-open mycogdata opencog_user cheese
     opencog> sql-load
     SQL loader thread started
-
+```
 The completion message will be on the server output, for example:
-
+```
     Finished loading 973300 atoms in total
-
+```
 
 Individual-atom save and restore
 --------------------------------
@@ -525,9 +527,11 @@ There is an interface to save and restore individual atoms. It may be
 used as follows:
 
 Start the server:
+```
     $ opencog/server/cogserver -c ../lib/opencog.conf
-
+```
 Open a shell:
+```
     $ telnet localhost 17001
     Trying 127.0.0.1...
     opencog> sql-open mycogdata opencog_user cheese
@@ -537,10 +541,10 @@ Open a shell:
     guile> (define x (ConceptNode "asdfasdf" (stv 0.123 0.789)))
     guile> (store-atom x)
     (ConceptNode "asdfasdf" (stv 0.123 0.78899997))
-
+```
 The above will have caused a single atom to be stored in the database.
 It's presence can be verified by examining the database directly:
-
+```
     $ psql mycogdata
     Welcome to psql 8.3.6, the PostgreSQL interactive terminal.
     mycogdata=# select * from atoms;
@@ -548,27 +552,29 @@ It's presence can be verified by examining the database directly:
     ------+------+---------+----------+----------------+-----------+--------+----------+----------
         2 |    3 |       1 |    0.123 |     0.78899997 | 2991.4688 |      0 | asdfasdf |
     (1 row)
-
+```
 The backing-store mechanism can now automatically retrieve this atom at
 a later time.  Thus, for example, shut down the server, restart it,
 re-open the database, and enter the scheme shell again. Then,
-
+```
     guile> (define y (ConceptNode "asdfasdf"))
     guile> y
     (ConceptNode "asdfasdf" (stv 0.123 0.78899997))
-
+```
 Note that, this time, when the node was created, the database was
 searched for a ConceptNode with the same string name. If it was found
 in the database, then it is automatically loaded into the AtomSpace,
 with the appropriate truth value taken from the database.
 
 If the truth value is modified, the atom is *not* automatically saved
-to the database (not at this time; this may change someday).  The
-modified atom would need to be explicitly saved again.
+to the database.  The modified atom would need to be explicitly saved
+again. If you need this to happen, you probably should design a thread
+whose only job it is is to handle truth-value changes. Note: this could
+be slow.
 
 Once stored, the atom may be deleted from the AtomSpace; it will
 remain in storage, and can be recreated at will:
-
+```
     guile> (cog-delete y)
     #t
     guile> y
@@ -576,13 +582,14 @@ remain in storage, and can be recreated at will:
     guile> (define y (ConceptNode "asdfasdf"))
     guile> y
     (ConceptNode "asdfasdf" (stv 0.123 0.78899997))
-
+```
 The UUID associated with the atom will NOT change between deletions
 and server restarts. This can be verified with the cog-handle command,
 which returns the UUID:
-
+```
     guile> (cog-handle y)
     2
+```
 
 Using SQL Persistence from Scheme
 ---------------------------------
