@@ -30,16 +30,16 @@
 
 using namespace opencog;
 
-#define DEBUG 1
+#define DEBUG
 #ifdef WIN32
-#if DEBUG
+#ifdef DEBUG
 	#define dbgprt printf
 #else
 	// something better?
 	#define dbgprt
 #endif
 #else
-#if DEBUG
+#ifdef DEBUG
 	#define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
 	#define dbgprt(f, varargs...)
