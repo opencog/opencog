@@ -30,7 +30,7 @@
 
 using namespace opencog;
 
-#define DEBUG
+// #define DEBUG
 #ifdef WIN32
 #ifdef DEBUG
 	#define dbgprt printf
