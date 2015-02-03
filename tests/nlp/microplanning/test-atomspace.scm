@@ -1,3 +1,10 @@
+#|
+These are the sentences that will be used to fill the atomspace.
+They are commented out for now because the RelEx server needs to
+be running to execute them.
+
+For now, the results are in r2l-atomspace.scm
+
 ; =========================
 ; Exact knowledge
 ; =========================
@@ -31,7 +38,12 @@
 
 (r2l "What burns the tree?")
 (r2l "I mean the tall man.")
+|#
 
+
+; =========================
+; Inputs for microplanning
+; =========================
 
 (define test-declarative-sal
 	(SequentialAndLink

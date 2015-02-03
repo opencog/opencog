@@ -1,0 +1,156 @@
+/*
+ * tests/scm/SuRealUTest.cxxtest
+ *
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Author: William Ma <https://github.com/williampma>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class SuRealUTest :  public CxxTest::TestSuite
+{
+private:
+    SchemeEval* _evaluator;
+
+public:
+
+    SuRealUTest(void)
+    {
+        try
+        {
+            config().load("opencog-test.conf");
+        }
+        catch (RuntimeException &e)
+        {
+            std::cerr << e.getMessage() << std::endl;
+        }
+        logger().setFilename(config()["LOG_FILE"]);
+        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+    }
+
+    ~SuRealUTest()
+    {
+        // erase the log file if no assertions failed
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+            std::remove(logger().getFilename().c_str());
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_basic(void);
+};
+
+void SuRealUTest::setUp(void)
+{
+    server(CogServer::createInstance);
+    _evaluator = new SchemeEval(&cogserver().getAtomSpace());
+
+    // need this for loading LG dictionary
+    _evaluator->eval("(setlocale LC_CTYPE \"\")");
+    _evaluator->clear_pending();
+
+    // Load the required data
+    config().set("MODULES",
+                 "opencog/nlp/types/libnlp-types.so,"
+                 "opencog/nlp/lg-dict/libLGDictModule.so,"
+                 "opencog/nlp/sureal/libSuRealModule.so");
+
+    config().set("SCM_PRELOAD",
+                 "opencog/atomspace/core_types.scm,"
+                 "opencog/scm/utilities.scm,"
+                 "opencog/nlp/types/nlp_types.scm,"
+                 "opencog/nlp/scm/nlp-utils.scm,"
+                 "opencog/nlp/relex2logic/utilities.scm,"
+                 "opencog/nlp/sureal/surface-realization.scm,"
+                 "tests/nlp/sureal/r2l-atomspace.scm");
+
+    cogserver().loadModules();
+    cogserver().loadSCMModules();
+}
+
+void SuRealUTest::tearDown(void)
+{
+    delete _evaluator;
+    _evaluator = NULL;
+}
+
+void SuRealUTest::test_basic(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    // add the needed WordNode not yet in the testing atomspace
+    _evaluator->eval(R"( (WordNode "she") )");
+    _evaluator->eval(R"( (WordNode "feeds") )");
+    _evaluator->eval(R"( (WordNode "walks") )");
+    _evaluator->eval(R"( (WordNode "green") )");
+    _evaluator->eval(R"( (WordNode "loves") )");
+
+    // test sureal with short sentence
+    _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "feeds") (ListLink (ConceptNode "she")))))) )");
+    bool eval_err = _evaluator->eval_error();
+    _evaluator->clear_pending();
+    TSM_ASSERT("Failed to run sureal!", !eval_err);
+
+    std::string result = _evaluator->eval(R"( (equal? s-result (list (list "she" "feeds" "."))) )");
+    TSM_ASSERT("Failed on basic short sentence sureal!", result != "#t");
+
+    // test multiple matches
+    _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "walks") (ListLink (ConceptNode "she")))))) )");
+    result = _evaluator->eval(R"( (equal? s-result (list (list "she" "walks" ".") (list "she" "walks" "quickly" "."))) )");
+    TSM_ASSERT("Failed on sureal with multiple matches!", result != "#t");
+
+    // test more complex sentence
+    _evaluator->eval(R"(
+                     (define s-result
+                        (sureal
+                           (SetLink
+                             (EvaluationLink
+                                (PredicateNode "loves")
+                                (ListLink (ConceptNode "cat") (ConceptNode "dog")))
+                             (InheritanceLink (ConceptNode "cat") (ConceptNode "green")))))
+                     )");
+    result = _evaluator->eval(R"( (equal? s-result (list (list "the" "green" "cat" "loves" "the" "dog" "."))) )");
+    TSM_ASSERT("Failed to sureal complex sentence!", result != "#t");
+
+    // test with disconnected components
+    _evaluator->eval(R"(
+                     (define s-result
+                        (sureal
+                           (SetLink
+                             (EvaluationLink
+                                (PredicateNode "ran")
+                                (ListLink (ConceptNode "she")))
+                             (EvaluationLink
+                                (PredicateNode "walked")
+                                (ListLink (ConceptNode "he"))))))
+                     )");
+    result = _evaluator->eval(R"( (equal? s-result (list (list "she" "ran" "slowly" "and" "he" "walked" "quickly" "."))) )");
+    TSM_ASSERT("Failed to sureal on disconnected clauses!", result != "#t");
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
