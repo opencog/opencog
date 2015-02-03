@@ -155,9 +155,8 @@ bool EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args)
         size_t pos = 4;
         while (' ' == schema[pos]) pos++;
 
-        SchemeEval* applier = new SchemeEval(as);
+        SchemeEval* applier = get_evaluator(as);
         std::string rc = applier->apply_generic(schema.substr(pos), args);
-        delete applier;
 
         // If its false or nil, then false; everything else is true.
         if (rc.compare("#f") or rc.compare("()")) return false;
