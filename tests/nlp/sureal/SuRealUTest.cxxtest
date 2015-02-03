@@ -34,7 +34,6 @@ class SuRealUTest :  public CxxTest::TestSuite
 {
 private:
     SchemeEval* _evaluator;
-    AtomSpace* _as;
 
 public:
 
@@ -118,12 +117,12 @@ void SuRealUTest::test_basic(void)
     TSM_ASSERT("Failed to run sureal!", !eval_err);
 
     std::string result = _evaluator->eval(R"( (equal? s-result (list (list "she" "feeds" "."))) )");
-    TSM_ASSERT("Failed to generate the correct sureal result!", result != "#t");
+    TSM_ASSERT("Failed on basic short sentence sureal!", result != "#t");
 
     // test multiple matches
     _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "walks") (ListLink (ConceptNode "she")))))) )");
     result = _evaluator->eval(R"( (equal? s-result (list (list "she" "walks" ".") (list "she" "walks" "quickly" "."))) )");
-    TSM_ASSERT("Failed to generate the correct sureal result!", result != "#t");
+    TSM_ASSERT("Failed on sureal with multiple matches!", result != "#t");
 
     // test more complex sentence
     _evaluator->eval(R"(
@@ -136,7 +135,7 @@ void SuRealUTest::test_basic(void)
                              (InheritanceLink (ConceptNode "cat") (ConceptNode "green")))))
                      )");
     result = _evaluator->eval(R"( (equal? s-result (list (list "the" "green" "cat" "loves" "the" "dog" "."))) )");
-    TSM_ASSERT("Failed to generate the correct sureal result!", result != "#t");
+    TSM_ASSERT("Failed to sureal complex sentence!", result != "#t");
 
     // test with disconnected components
     _evaluator->eval(R"(
@@ -151,7 +150,7 @@ void SuRealUTest::test_basic(void)
                                 (ListLink (ConceptNode "he"))))))
                      )");
     result = _evaluator->eval(R"( (equal? s-result (list (list "she" "ran" "slowly" "and" "he" "walked" "quickly" "."))) )");
-    TSM_ASSERT("Failed to generate the correct sureal result!", result != "#t");
+    TSM_ASSERT("Failed to sureal on disconnected clauses!", result != "#t");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
