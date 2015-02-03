@@ -19,18 +19,18 @@ No one has tried anything larger than that, yet.
 
 Features
 --------
--- Save and restore of atoms, and several kinds of truth values.
--- Bulk save-and-restore of entire AtomSpace contents.
--- Incremental save/restore (i.e. updates the SQL contents as AtomSpace
+ * Save and restore of atoms, and several kinds of truth values.
+ * Bulk save-and-restore of entire AtomSpace contents.
+ * Incremental save/restore (i.e. updates the SQL contents as AtomSpace
    changes).
--- Generic API, useful for inter-server communications.
+ * Generic API, useful for inter-server communications.
 
 Missing features/ToDo items
 ---------------------------
--- Add full support for attention values. (??)
--- Add full support for Atom deletion.
--- Provide optimized table layout for EvaluationLinks.
--- Add support for Space/TimeServer data.
+ * Add full support for attention values. (??)
+ * Add full support for Atom deletion.
+ * Provide optimized table layout for EvaluationLinks.
+ * Add support for Space/TimeServer data.
 
 Performance status
 ------------------
@@ -39,13 +39,13 @@ time, 10 minutes of opencog-server CPU time.  This works out to about
 500K atoms/minute, or 9K atoms/second.  The resulting cogserver required
 about 10GBytes of RAM, which works out to about 1KByte/atom average.
 The loaded hypergraphs were all EvaluationLinks, viz:
-
+```
    EvaluationLink  (w/non-trivial TV)
       SomeNode
       ListLink
          WordNode  (w/ non-trivial TV)
          WordNode  (w/ non-trivial TV)
-
+```
 
 The above measurements were made on a busy server that was doing many
 other CPU & RAM intensive things; there was no performance tuning of
@@ -89,6 +89,19 @@ The goal of this implementation is to:
    larger than this would probably require a fundamental redesign of
    all of opencog, starting with the atomspace.
 
+5) A non-design-goal is fully automatic save-restore of atoms.  Both
+   the save and restore of atoms must be triggered by calls to the
+   atomspace API.  The reason for this design point is that the
+   atomspace is at too low a level to be fully automatic.  It cannot
+   guess what the user really wants to do.  If it did guess, it would
+   probably guess wrong: saving atoms before the user is done with them,
+   saving atoms that get deleted microseconds later, fetching atoms
+   that the user is completely disinterested in, clogging up RAM and
+   wasting CPU time.  Some other layer, a higher level layer, needs to
+   implement a policy for save/restore.  This layer only provides a
+   mechanism.  It would be very very wrong to implement an automatic
+   policy at this layer.
+
 
 Current Design
 ==============
@@ -111,22 +124,9 @@ to save away atoms that are not needed in RAM (e.g. atoms with
 low/non-existent attention values). The AtomSpace BackingStore provides
 the current, minimalistic, low-function API for this.
 
-There are architectural issues that remain to be resolved before fully
-automatic incremental save/restore can be implemented.  For example,
-the current AtomSpace design assumes that the incoming set of an atom is
-fully populated; this makes it hard to leave some atoms on disk while
-others are in RAM.  These issues need to be resolved for *any* persistent
-back-end, and are not specific to this one.
-
-It is not entirely clear that a fully-automatic incremental save/restore
-is a good idea. Forcing the server to guess when an atom should be saved
-can lead to inefficiendies. If an atom is going to have a short life, it
-would be pointless to save it to disk. Fetching atoms only when they are
-needed, instead of fetching them earlier, can lead to bottlenecks and
-stalls.  All this remains an open problem.  Proposal is to auto-fetch
-and write-back only when the AV VLTI is positive.
-
-The current design avoids UUID collisions, and automatically thunks
+Features
+--------
+ * This implementation avoids UUID collisions, and automatically thunks
 UUID's as needed if an accidental collision with the database occurs.
 In order to avoid excess thunking, it is strongly recommended that
 the SQL database should be opened immediately on cogserver start, before
@@ -134,19 +134,54 @@ any atoms are created.  This will automatically reserve the range of
 UUID's that are stored in the DB, and thus avoid collisions as new atoms
 are created.
 
+ * UUID's are reseved in blocks, or ranges. That is, UUID's are issued
+in blocks of a million each.  This way, multiple different cogservers
+can have some reasonable chance of using UUID's that do not collide with
+one-another.  That is, UUID's can be "malloced" in ranges.  XXX Caution:
+this mechanism may be broken or incomplete.  Ask Linas for the current
+status.
+
+ * This implementation automatically handles clashing atom types.  That
+is, if the database is written with one set of atom types, and then the
+cogserver is stopped, the atomtypes are all changed (with some added,
+some deleted), then pulling from the database will automatically
+translate and use the new atom types. (The deleted atom types will not
+be removed from the database.  Restoring atoms with deleted atomtypes
+will cause an exception to be thrown.)
+
+ * Non-blocking atom store requests are implemented.  Four asynchronous
+write-back threads are used, with hi/lo watermarks for queue management.
+That is, if a user asks that an atom be stored, then the atom will be
+queued for storage, and one of these threads will perform the actual
+store at a later time. Meanwhile, the store request returns to the user
+immediately, so that the user can continue without blocking.  The only
+time that an atom store request blocks is if the queue is completely
+full; in that case, the user will be blocked until the queue drains
+below the low watermark.
+
+ * Reading always blocks: if the user asks for an atom, the call will
+not return to the user until the atom is available.  At this time,
+pre-fetch has not been implemented.  But that's because pre-fetch is
+easy: the user can do it in thier own thread :-)
+
+Issues
+------
  * The TV merge issue. Right now, the AtomSpace/AtomTable is designed to
 merge truth values between an atom that is added to the table, and any
 atom that is already present in the table.  This can lead to unexpected
 truth-value changes when atoms are being fetched from the backend.  The
 correct solution is probably to change the table to not auto-merge. This
-still leaves the question of what to do with the two TV's, since users
-doing add may want merge, but users fetching from backend may not ...
+still leaves the question of what to do with the two TV's, since
+different users are likely to want different behaviors.
 
  * The AV issue.  Two issues, here.  First, if the AV changes to a non
-zero VLTI, the atom should be auto-saved to the backend.  Second, if the
-VLTI is positive, and the TV changes, should this trigger an auto-save?
-Conceptually, it probably should; practically, it may hurt performance.
-Thus, these kinds of writebacks should be carefully managed.
+zero VLTI, the atom should be auto-saved to the backend.  This has not
+been implemented.  Second, if the VLTI is positive, and the TV changes,
+should this trigger an auto-save?  Conceptually, it probably should;
+practically, it may hurt performance. At any rate, this can be handled
+in a "policy" thread (a thread that implements some sort of policy) that
+is independent of the storage mechanism here.  Again: we implement
+mechanism, here, not policy.
 
 
 Install, Setup and Usage HOWTO
