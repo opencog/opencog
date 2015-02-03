@@ -693,16 +693,17 @@ Intel desktop that was new in 2004. Viz. under two GhZ, and 4GB RAM.
 First run with a large data set (save of 1564K atoms to the database)
 was a disaster.  Huge CPU usage, with 75% of CPU usage occurring in the
 kernel block i/o layer, and 12% each for the opencog and postgres times:
+```
    112:00 [md4_raid1] or 4.3 millisecs per atom
    17 minutes for postgres, and opencog, each. or 0.66 millisecs per atom
    1937576 - 1088032 kB = 850MBytes disk use
-
+```
 Experiment: is this due to the bad design for trying to figure whether
 "INSERT" or "UPDATE" should be used? A local client-side cache of the
 keys in the DB seems to change little:
-
+```
    CPU usage for postgres 11:04  and opencog 10:40 and 112:30 for md
-
+```
 So this change drops postgres server and opencog CPU usage
 significantly, but the insane kernel CPU usage remains.
 
@@ -710,7 +711,7 @@ The above disaster can be attributed to bad defaults for the postgres
 server. In particular, sync to disk, while critical for commercial
 database use, is pointless for current use. Also, buffer sizes are much
 too small. Edit postgresql.conf and make the following changes:
-
+```
    shared_buffers = default was 24MB, change to 384MB
    work_mem = default was 1MB change to 32MB
    fsync = default on  change to off
@@ -718,68 +719,75 @@ too small. Edit postgresql.conf and make the following changes:
    wal_buffers = default 64kB change to 512kB
    commit_delay = default 0 change to 10000 (10K) microseconds
    ssl = default true change to false
-
+```
 Restarting the server might lead to errors stating that max shared mem
 usage has been exceeded. This can be fixed by:
-
+```
    vi /etc/sysctl.conf
    kernel.shmmax = 440100100
 (save file contents, then)
    sysctl -p /etc/sysctl.conf
-
+```
 After tuning, save of data to empty DB gives result:
+```
    cogserver = 10:45 mins = 0.41  millisecs/atom (2.42K atoms/sec)
    postgres  =  7:32 mins = 0.29  millisecs/atom (2.65K atoms/sec)
    md        =  0:42 mins = 0.026 millisecs/atom (37K atoms/sec)
-
+```
 Try again, dropping the indexes on the atom and edge tables. Then,
 after loading all atoms, rebuild the index. This time, get
+```
    cogserver = 5:49 mins = 0.227 millisecs/atom (4.40K atoms/sec)
    postgres  = 4:50 mins = 0.189 millisecs/atom (5.30K atoms/sec)
-
+```
 Try again, this time with in-line outgoing sets. This improves
 performance even further:
-
+```
    cogserver = 2:54 mm:ss = 0.113 millisecs/atom (8.83K atoms/sec)
    postgres  = 2:22 mm:ss = 0.092 millisecs/atom (10.82K atoms/sec)
-
+```
 Try again, compiled with -O3, storing to an empty table, with
 no indexes on it (and with in-line outgoing sets):
+```
    cogserver = 2:40 mm:ss
    postgres  = 2:16 mm:ss
-
+```
 Try again, compiled with -O3, storing to empty table, while holding
 the index on tables (and with in-line outgoing sets).
-
+```
    cogserver = 2:51 mm:ss
    postgres  = 2:06 mm:ss
-
+```
 Apparently, the problem with the indexes has to do with holding them
 for the edge table; when there's no edge table, then there's no index
 issue!?
 
 Try again, compiled with -O3, saving to (updating) a *full* database.
 (i.e. database already has the data, so we are doing UPDATE not INSERT)
+```
    cogserver = 2:19 mm:ss
    postgres  = 4:35 mm:ss
-
+```
 Try again, using UnixODBC instead of iODBC, to empty table, withOUT
 index tables (and -O3 and in-lined outgoing):
+```
    cogserver = 2:36 mm:ss
    postgres  = 2:13 mm:ss
-
+```
 It appears that UnixODBC is essentially identical to iODBC performance
-
+```
 begin; commit;
 use analyze;
 use prepare;
+```
 
 XML loading performance
 -----------------------
 Loading the dataset from XML files takes:
-
+```
    cogserver 2:34 mm:ss when compiled without optimization
    cogserver 1:19 mm:ss when compiled with -O3 optimization
+```
 
 Loading performance
 -------------------
@@ -796,16 +804,17 @@ that opencog is strictly hierarchically structured. (no "crazy loops")
 After implementing height-structured restore, get following, loading
 from a "hot" postgres instance (had not been stopped since previous
 use, i.e. data should have been hot in RAM):
+```
   cogserver = 2:36 mm:ss = 0.101 millisecs/atom (9.85K atoms/sec)
   postgres  = 1:59 mm:ss = 0.077 millisecs/atom (12.91K atoms/sec)
-
+```
 The dataset had 357162 Nodes, 1206544 Links at height 1
 
 After a cold start, have
-
+```
   cogserver = 2:32 mm:ss
   postgres  = 1:55 mm:ss
-
+```
 Appears that there is no performance degradation for cold-starts.
 
 Note also: cogServer CPU usage is *identical* to its CPU usage when
@@ -814,45 +823,30 @@ reduced; apparently, the reading of XML results in very bad memory
 fragmentation.
 
 Implement in-line edges, instead of storing edges in an outboard table.
-
+```
   cogserver = 41 seconds = 26.7 microsecs/atom (37.5K atoms/sec)
   postgres  =  7 seconds =  4.56 microsecs/atom (219K atoms/sec)
-
+```
 Turn on -O3 optimization during compile ... all previous figures
 were without *any* optimization. Now get
-
+```
   cogserver = 24 seconds = 15.6 microsecs/atom (64.0K atoms/sec)
   postgres  = 11 seconds
-
+```
 Much much better!
-
+```
 10.78
 23.15
-
-
-Evidence of severe memory fragmentation
----------------------------------------
-loading 1536K Atoms from XML results in cogserver using 1210 MBytes ram.
-loading 1536K Atoms from SQL results in cogserver using 633 MBytes ram.
-loading 1536K Atoms from SQL (with new record management) results in
-cogserver using 442 MBytes ram.
-
-Almost one-third the ram !!
-
-The fragmentation occurs when the XML is piped to cogserver much faster
-than the cogserver can process it; the fragmentation is between data
-buffered from the sockets, and the cogserver itself.  The fragmentation
-does *not* occur when the data is piped in more slowly,i.e. at the same
-rate that opencog processes it. Alternately, the problem may be a memory
-leak in CSockets; I think this is the true culprit, but that's not yet
-clear.
+```
 
 
 TODO
 ====
--- Store attention values. (??) maybe ??
+ * See also to-do list way up top.
 
--- Create custom table, tailored for EvaluationLink triples.
+ * Store attention values. (??) maybe ??
+
+ * Create custom table, tailored for EvaluationLink triples.
    Since majority of nodes/links in the DB will be in the form of
    EvaluationLink triples, a significant performance gain can be gotten
    by creating a custom table, and shunting queries to that.  This would
@@ -860,3 +854,4 @@ TODO
    by factors of 2x-3x.  Another table, designed just for simple pairs,
    might help a lot, too.
 
+ * Add support for multiple atomspaces.
