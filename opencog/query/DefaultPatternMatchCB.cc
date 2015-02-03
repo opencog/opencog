@@ -31,9 +31,9 @@ using namespace opencog;
 
 #define DEBUG 1
 #if DEBUG
-   #define dbgprt(f, varargs...) printf(f, ##varargs)
+#define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
-   #define dbgprt(f, varargs...)
+#define dbgprt(f, varargs...)
 #endif
 
 /* ======================================================== */
@@ -79,7 +79,6 @@ Handle
 DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
                                     Handle& start, size_t& width)
 {
-
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
 	Type t = h->getType();
@@ -168,25 +167,11 @@ Handle DefaultPatternMatchCB::find_thinnest(std::vector<Handle>& clauses,
  * Check that all clauses are connected
  */
 void DefaultPatternMatchCB::validate_clauses(std::set<Handle>& vars,
-                                             std::vector<Handle>& clauses,
-                                             std::vector<Handle>& negations)
+                                             std::vector<Handle>& clauses)
 {
 	std::set<std::vector<Handle>> components;
 
-	// Make sure that the pattern is connected
-	if (0 < negations.size())
-	{
-		// The negations should be connected to the clauses.
-		std::vector<Handle> all;
-		all.reserve(clauses.size() + negations.size());
-		all.insert(all.end(), clauses.begin(), clauses.end());
-		all.insert(all.end(), negations.begin(), negations.end());
-		get_connected_components(vars, all, components);
-	}
-	else
-	{
-		get_connected_components(vars, clauses, components);
-	}
+	get_connected_components(vars, clauses, components);
 
 	if (1 != components.size())
 	{
@@ -205,17 +190,6 @@ void DefaultPatternMatchCB::validate_clauses(std::set<Handle>& vars,
 			cnt++;
 		}
 		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
-	}
-
-	// get_connected_components re-orders the clauses so that adjacent
-	// clauses are connected.  Using this will make matching slightly
-	// faster. But we don't do this if there are negations, because the
-	// above jammed the negations into the thing, which we must keep
-	// separate.
-	if (negations.empty()) {
-		clauses.clear();
-		for (const auto& component : components)
-			clauses.insert(clauses.begin(), component.begin(), component.end());
 	}
 }
 

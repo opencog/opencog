@@ -231,8 +231,7 @@ class PatternMatchCallback
 		 * allowed for PLN.
 		 */
 		virtual void validate_clauses(std::set<Handle>& vars,
-		                              std::vector<Handle>& clauses,
-		                              std::vector<Handle>& negations) = 0;
+		                              std::vector<Handle>& clauses) = 0;
 
 		/**
 		 * Called to initiate the search. This callback is responsible

@@ -49,8 +49,7 @@ public:
 
 	// Does nothing, disconnected clauses are allowed
 	void validate_clauses(std::set<Handle>& vars,
-	                      std::vector<Handle>& clauses,
-	                      std::vector<Handle>& negations);
+	                      std::vector<Handle>& clauses);
 
 	// Starts from atoms in the attentional focus, with the right types
 	void perform_search(PatternMatchEngine *pme,

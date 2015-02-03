@@ -138,8 +138,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * Check that all clauses are connected
 		 */
 		virtual void validate_clauses(std::set<Handle>& vars,
-		                              std::vector<Handle>& clauses,
-		                              std::vector<Handle>& negations);
+		                              std::vector<Handle>& clauses);
 
 		/**
 		 * Called to perform the actual search. This makes some default

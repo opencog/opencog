@@ -77,8 +77,7 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h)
 }
 
 void AttentionalFocusCB::validate_clauses(std::set<Handle>& vars,
-                                          std::vector<Handle>& clauses,
-                                          std::vector<Handle>& negations)
+                                          std::vector<Handle>& clauses)
 {
 }
 
