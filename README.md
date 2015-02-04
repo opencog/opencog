@@ -98,7 +98,7 @@ the build, will be more precise as to which parts will not be built.
 ###### xercesc
 > Apache Xerces-C++ XML Parser
 > Required for embodiment
-> http://xerces.apache.org/xerces-c/ | libxerces-c2-dev
+> http://xerces.apache.org/xerces-c/ | libxerces-c-dev
 
 ###### xmlrpc
 > XML-RPC support
