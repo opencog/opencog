@@ -603,7 +603,7 @@ Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
        // to issue a valid uuid.  And then memorize it.
        TLB::addAtom(atom);
     } else {
-       TLB::reserve_range(0, atom->_uuid);
+       TLB::reserve_upto(atom->_uuid);
     }
     Handle h(atom->getHandle());
     size++;

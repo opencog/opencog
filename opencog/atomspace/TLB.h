@@ -116,6 +116,16 @@ private:
     {
         return _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
     }
+
+    /// Make sure that all UUID's up to at least 'hi' have been
+    /// reserved.  No error checks are made; its OK if 'hi' has
+    /// already been issued.
+    static inline void reserve_upto(UUID hi)
+    {
+        if (hi < _brk_uuid) return;
+        UUID extent = hi - _brk_uuid + 1;
+        _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
+    }
 };
 
 inline bool TLB::isInvalidHandle(const Handle& h)

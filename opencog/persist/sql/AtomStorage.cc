@@ -1386,7 +1386,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 void AtomStorage::load(AtomTable &table)
 {
 	unsigned long max_nrec = getMaxObservedUUID();
-	TLB::reserve_range(0, max_nrec);
+	TLB::reserve_upto(max_nrec);
 	fprintf(stderr, "Max observed UUID is %lu\n", max_nrec);
 	load_count = 0;
 	max_height = getMaxObservedHeight();
@@ -1445,7 +1445,7 @@ void AtomStorage::load(AtomTable &table)
 void AtomStorage::loadType(AtomTable &table, Type atom_type)
 {
 	unsigned long max_nrec = getMaxObservedUUID();
-	TLB::reserve_range(0, max_nrec);
+	TLB::reserve_upto(max_nrec);
 	logger().debug("AtomStorage::loadType: Max observed UUID is %lu\n", max_nrec);
 	load_count = 0;
 
@@ -1714,7 +1714,7 @@ void AtomStorage::reserve(void)
 {
 	UUID max_observed_id = getMaxObservedUUID();
 	fprintf(stderr, "Reserving UUID up to %lu\n", max_observed_id);
-	TLB::reserve_range(0, max_observed_id);
+	TLB::reserve_upto(max_observed_id);
 }
 
 #endif /* HAVE_SQL_STORAGE */
