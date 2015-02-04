@@ -25,14 +25,17 @@
 #include <fstream>
 
 #include <boost/program_options.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include "../combo/iostream_combo.h"
 #include "../type_checker/type_tree.h"
 
 using namespace boost::program_options;
+using namespace boost::algorithm;
 using namespace std;
 using namespace opencog;
 using namespace combo;
+
 // using namespace ant_combo;
 
 // Structure containing the options for the combo-fmt-converter program
@@ -146,6 +149,10 @@ istream& convert(istream& in, const pgrParameters& pa,
 	getline(in, line);
 	if (line.empty())
 		return in;
+
+	// Remove useless wrapping double quotes
+	if (starts_with(line, "\"") and ends_with(line, "\""))
+		line = line.substr(1, line.size() - 2);
 
 	vector<string> variables = parse_combo_variables(line);
 	combo_tree tr = str2combo_tree(line, variables);
