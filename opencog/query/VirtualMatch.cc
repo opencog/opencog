@@ -376,6 +376,21 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	cb->validate_clauses(vars, clauses);
 
+	// Split the non virtual clauses into stronly connected components
+	std::set<std::vector<Handle>> nvcomps;
+	get_connected_components(vars, _nonvirts, nvcomps);
+
+	// If there's only 1 component and there is no virtual clause then
+	// we can directly match the component using the callback cb
+	if (nvcomps.size() == 1 and _virtuals.empty()) {
+		// Split in positive and negative clauses
+		std::vector<Handle> affirm, negate;
+		split_clauses_pos_neg(*nvcomps.begin(), affirm, negate);
+		PatternMatchEngine pme;
+		pme.match(cb, vars, affirm, negate);
+		return;
+	}
+
 	// If we are here, then we've got a knot in the center of it all.
 	// Removing the virtual clauses from the hypergraph typically causes
 	// the hypergraph to fall apart into multiple components, (i.e. none
@@ -387,9 +402,6 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	// the distinct components individually, and then run each possible
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
-
-	std::set<std::vector<Handle>> nvcomps;
-	get_connected_components(vars, _nonvirts, nvcomps);
 
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds;
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
