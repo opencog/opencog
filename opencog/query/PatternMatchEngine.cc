@@ -30,6 +30,7 @@
 
 using namespace opencog;
 
+// Uncomment below to enable debug print
 // #define DEBUG
 #ifdef WIN32
 #ifdef DEBUG
