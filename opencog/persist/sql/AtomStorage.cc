@@ -789,7 +789,10 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	if (false == update)
 	{
 		// Store the atomspace UUID
-		UUID asuid = atom->getAtomTable()->get_uuid();
+		UUID asuid = 0;
+		AtomTable * at = atom->getAtomTable();
+		// We allow storage of atoms that don't belong to an atomspace.
+		if (at) asuid = at->get_uuid();
 		snprintf(uuidbuff, BUFSZ, "%lu", asuid);
 		STMT("space", uuidbuff);
 
