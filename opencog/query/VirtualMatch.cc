@@ -423,6 +423,13 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	throw (InvalidParamException)
 {
+	// Its cheaper to run ctor and dtor than it is to clear the
+	// internal variables, and use this instance more than once.
+	if (_used)
+		throw InvalidParamException(TRACE_INFO,
+			"A PatternMatch instance cannot be used more than once!");
+	_used = true;
+
 	validate_clauses(vars, clauses, negations);
 
 	// The simple case -- unit propagation through all of the clauses.

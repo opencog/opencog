@@ -80,6 +80,8 @@ class PatternMatch
 		std::vector<Handle> _virtuals;
 		std::vector<Handle> _nonvirts;
 
+		bool _used;
+
 		// Validate the top-level BindLink only
 		void validate_bindvars(Handle)
 			throw (InvalidParamException);
