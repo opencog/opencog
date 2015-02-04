@@ -2,7 +2,7 @@
  * opencog/atomspace/AtomTable.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
- * Copyright (C) 2013 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2013-2015 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * Written by Thiago Maia <thiago@vettatech.com>
@@ -51,9 +51,10 @@ using namespace opencog;
 std::recursive_mutex AtomTable::_mtx;
 
 AtomTable::AtomTable(AtomTable* parent)
-    :_index_queue(this, &AtomTable::put_atom_into_index)
+    : _index_queue(this, &AtomTable::put_atom_into_index)
 {
     _environ = parent;
+    _uuid = TLB::reserve_extent(1);
     size = 0;
 
     // Set resolver before doing anything else, such as getting

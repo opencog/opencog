@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2014, 2015 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -41,11 +42,22 @@ class AtomStorage;
 class AtomTable;
 
 /**
- * Each atom stored on OpenCog will have an immutable UUID, which will be used
- * to refer to that atom when a reference to that atom needs to be kept.
- * Each proxy must have a look-up mechanism or table (TLB) to map from
- * this ID to the actual memory address for the atom in the local process
- * address space.
+ * Each atom stored in the AtomSpace will have an immutable UUID, which
+ * may be used to refer to that atom when a reference to that atom needs
+ * to be kept.  This allows atoms to be shared between different
+ * atomspaces running in different memory spaces (on different machines
+ * in a network cluster): a given atom will have a unique UUID by which
+ * it is refered to.
+ *
+ * Atomspaces are also issued UUID's. This allows atomspaces to be
+ * uniquely identified as well.
+ *
+ * Reserving UUID's is kind of like mallocing them, except that
+ * (currently) there is no way to free them.  Use reserve_range()
+ * and reserve_extent() to malloc them.
+ *
+ * Everything in this class is private, mostly because we don't want
+ * anyone to mess with it, except our closest friends.
  */
 class TLB
 {

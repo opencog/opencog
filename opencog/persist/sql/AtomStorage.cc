@@ -788,6 +788,11 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	// change.
 	if (false == update)
 	{
+		// Store the atomspace UUID
+		UUID asuid = atom->getAtomTable()->get_uuid();
+		snprintf(uuidbuff, BUFSZ, "%lu", asuid);
+		STMT("space", uuidbuff);
+
 		// Store the atom UUID
 		Type t = atom->getType();
 		int dbtype = storing_typemap[t];

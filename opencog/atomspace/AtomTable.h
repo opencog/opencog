@@ -132,8 +132,12 @@ private:
     /// Parent environment for this table.  Null if top-level.
     /// This allows atomspaces to be nested; atoms in this atomspace
     /// can reference those in the parent environment.
+    /// The UUID is used to uniquely identify it, for distributed
+    /// operation. Viz, other computers on the network may have a copy
+    /// of this atomtable, and so need to have its UUID to sync up.
     AtomTable* _environ;
     bool inEnviron(AtomPtr);
+    UUID _uuid;
 
     /**
      * Override and declare copy constructor and equals operator as
@@ -149,6 +153,7 @@ public:
      */
     AtomTable(AtomTable* parent=NULL);
     ~AtomTable();
+    UUID get_uuid(void) { return _uuid; }
 
     /**
      * Prints atoms of this AtomTable to the given output stream.

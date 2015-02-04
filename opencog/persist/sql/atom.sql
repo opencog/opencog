@@ -83,7 +83,7 @@ CREATE TABLE TypeCodes (
 
 CREATE TABLE Spaces (
 	space  BIGINT,
-	parent BIGINT,
+	parent BIGINT
 );
 
 -- -----------------------------------------------------------
