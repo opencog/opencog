@@ -129,7 +129,6 @@ public:
         edges.sort( );
         expectedEdges.sort( );
 
-        unsigned int cornersCounter = 0;
         std::list<math::LineSegment>::const_iterator it;
         std::list<math::LineSegment>::const_iterator it2;
         for ( it = edges.begin( ), it2 = expectedEdges.begin( ); it != edges.end( ); ++it, ++it2 ) {
