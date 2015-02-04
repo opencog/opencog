@@ -1591,16 +1591,17 @@ void AtomStorage::create_tables(void)
 	Response rp;
 
 	// See the file "atom.sql" for detailed documentation as to the 
-	// structure of teh SQL tables.
+	// structure of the SQL tables.
 	rp.rs = db_conn->exec("CREATE TABLE Atoms ("
-	                      "uuid	BIGINT PRIMARY KEY,"
-	                      "type  SMALLINT,"
-	                      "type_tv SMALLINT,"
+	                      "uuid     BIGINT PRIMARY KEY,"
+	                      "space    BIGINT,"
+	                      "type     SMALLINT,"
+	                      "type_tv  SMALLINT,"
 	                      "stv_mean FLOAT,"
 	                      "stv_confidence FLOAT,"
 	                      "stv_count FLOAT,"
-	                      "height SMALLINT,"
-	                      "name    TEXT,"
+	                      "height   SMALLINT,"
+	                      "name     TEXT,"
 	                      "outgoing BIGINT[]);");
 	rp.rs->release();
 
@@ -1617,6 +1618,11 @@ void AtomStorage::create_tables(void)
 	                      "typename TEXT UNIQUE);");
 	rp.rs->release();
 	type_map_was_loaded = false;
+
+	rp.rs = db_conn->exec("CREATE TABLE Spaces ("
+	                      "space     BIGINT,"
+	                      "parent    BIGINT);");
+	rp.rs->release();
 
 	rp.rs = db_conn->exec("CREATE TABLE Global ("
 	                      "max_height INT);");

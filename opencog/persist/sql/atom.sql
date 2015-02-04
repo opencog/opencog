@@ -4,10 +4,13 @@
 --
 
 CREATE TABLE Atoms (
-	-- the uuid maps to the atom handle
-	-- must be unique, and must be non-null. ergo, primary key.
+	-- The uuid maps to the atom handle.
+	-- Must be unique, and must be non-null. Ergo, primary key.
 	-- Use 64-bit int to match the C++ range.
 	uuid	BIGINT PRIMARY KEY,
+
+	-- The atomspace that this atom belongs to.
+	space BIGINT,
 
 	-- Atom type, e.g. Link, Node, etc.
 	type  SMALLINT,
@@ -30,7 +33,7 @@ CREATE TABLE Atoms (
 	-- The node name, non-empty only for nodes
 	name    TEXT,
 
-	-- An array of the ougoing edges; non-empty only for links
+	-- An array of the outgoing edges; non-empty only for links
 	outgoing BIGINT[]
 );
 
@@ -39,9 +42,10 @@ CREATE INDEX nodeidx ON Atoms(type, name);
 CREATE INDEX linkidx ON Atoms(type, outgoing);
 
 -- -----------------------------------------------------------
--- Edge table is not used by the postgres driver.
--- COuld be useful for a mysql driver, though, or any DB
--- that does not support edge arrays.
+-- Edge table is not used by the postgres driver.  That is because
+-- the array of outgoing edges, above is enough to describe a Link.
+-- However, neither MySQL nor SQLite3 support arrays, and so maybe
+-- this could be useful for a port to those DB's.
 --
 -- Table of the edges of the Levi craph corresponding 
 -- to the hypergraph. An edge is a (src,dst) pair. The
@@ -63,13 +67,25 @@ CREATE INDEX linkidx ON Atoms(type, outgoing);
 -- -----------------------------------------------------------
 -- Table associating type names to stored integer values. The list of
 -- type names and numbers may differ from one version of the opencog
--- server to another; thus, we do not want to store numerical type 
--- values in the datase.
+-- server to another; thus, we need to convert from type names, to
+-- numbers.
 
 CREATE TABLE TypeCodes (
 	type SMALLINT UNIQUE,
 	typename TEXT UNIQUE
 );
+
+-- -----------------------------------------------------------
+-- Table showing inheritance relationship between atomspaces.
+-- Atomspaces have UUID's identifying them. Top-level atomspaces have
+-- a UUID of zero.  Otherwise, all atomspaces have some (other)
+-- atomspace as a parent.
+
+CREATE TABLE Spaces (
+	space  BIGINT,
+	parent BIGINT,
+);
+
 -- -----------------------------------------------------------
 -- Global state
 
