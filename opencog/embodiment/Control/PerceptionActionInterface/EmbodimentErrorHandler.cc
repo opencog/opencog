@@ -25,69 +25,73 @@
 #include <opencog/util/Logger.h>
 
 using namespace opencog::pai;
+using namespace XERCES_CPP_NAMESPACE;
 
-void EmbodimentErrorHandler::warning(const XERCES_CPP_NAMESPACE::SAXParseException& exc)
+void EmbodimentErrorHandler::warning(const SAXParseException& exc)
 {
-    char* errorMsg = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getMessage());
-    char* publicIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getPublicId());
-    char* systemIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getSystemId());
-    logger().warn("EmbodimentErrorHandling - Got a warning while parsing XML: %s\n"
-                 "Line: %d\n"
-                 "Column: %d\n"
-                 //"PublicId: %s\n"
-                 "SystemId: %s\n"
-                 , errorMsg
-                 , exc.getLineNumber()
-                 , exc.getColumnNumber()
-                 //, publicIdStr
-                 , systemIdStr
-                );
-    XERCES_CPP_NAMESPACE::XMLString::release(&errorMsg);
-    XERCES_CPP_NAMESPACE::XMLString::release(&publicIdStr);
-    XERCES_CPP_NAMESPACE::XMLString::release(&systemIdStr);
+    char* errorMsg = XMLString::transcode(exc.getMessage());
+    char* publicIdStr = XMLString::transcode(exc.getPublicId());
+    char* systemIdStr = XMLString::transcode(exc.getSystemId());
+    logger().warn("EmbodimentErrorHandling - "
+                  "Got a warning while parsing XML: %s\n"
+                  "Line: %d\n"
+                  "Column: %d\n"
+                  //"PublicId: %s\n"
+                  "SystemId: %s\n"
+                  , errorMsg
+                  , exc.getLineNumber()
+                  , exc.getColumnNumber()
+                  //, publicIdStr
+                  , systemIdStr
+                  );
+    XMLString::release(&errorMsg);
+    XMLString::release(&publicIdStr);
+    XMLString::release(&systemIdStr);
 }
 
-void EmbodimentErrorHandler::error(const XERCES_CPP_NAMESPACE::SAXParseException& exc)
+void EmbodimentErrorHandler::error(const SAXParseException& exc)
 {
-    char* errorMsg = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getMessage());
-    char* publicIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getPublicId());
-    char* systemIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getSystemId());
-    logger().error("EmbodimentErrorHandling - Got an error while parsing XML: %s\n"
-                 "Line: %d\n"
-                 "Column: %d\n"
-                 //"PublicId: %s\n"
-                 "SystemId: %s\n"
-                 , errorMsg
-                 , exc.getLineNumber()
-                 , exc.getColumnNumber()
-                 //, publicIdStr
-                 , systemIdStr
-                );
-    XERCES_CPP_NAMESPACE::XMLString::release(&errorMsg);
-    XERCES_CPP_NAMESPACE::XMLString::release(&publicIdStr);
-    XERCES_CPP_NAMESPACE::XMLString::release(&systemIdStr);
+    char* errorMsg = XMLString::transcode(exc.getMessage());
+    char* publicIdStr = XMLString::transcode(exc.getPublicId());
+    char* systemIdStr = XMLString::transcode(exc.getSystemId());
+    logger().error("EmbodimentErrorHandling - "
+                   "Got an error while parsing XML: %s\n"
+                   "Line: %d\n"
+                   "Column: %d\n"
+                   //"PublicId: %s\n"
+                   "SystemId: %s\n"
+                   , errorMsg
+                   , exc.getLineNumber()
+                   , exc.getColumnNumber()
+                   //, publicIdStr
+                   , systemIdStr
+                   );
+    XMLString::release(&errorMsg);
+    XMLString::release(&publicIdStr);
+    XMLString::release(&systemIdStr);
     throw exc;
 }
 
-void EmbodimentErrorHandler::fatalError(const XERCES_CPP_NAMESPACE::SAXParseException& exc)
+void EmbodimentErrorHandler::fatalError(const SAXParseException& exc)
 {
-    char* errorMsg = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getMessage());
-    char* publicIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getPublicId());
-    char* systemIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getSystemId());
-    logger().error("EmbodimentErrorHandling - Got a fatal error while parsing XML: %s\n"
-                 "Line: %d\n"
-                 "Column: %d\n"
-                 //"PublicId: %s\n"
-                 "SystemId: %s\n"
-                 , errorMsg
-                 , exc.getLineNumber()
-                 , exc.getColumnNumber()
-                 //, publicIdStr
-                 , systemIdStr
-                );
-    XERCES_CPP_NAMESPACE::XMLString::release(&errorMsg);
-    XERCES_CPP_NAMESPACE::XMLString::release(&publicIdStr);
-    XERCES_CPP_NAMESPACE::XMLString::release(&systemIdStr);
+    char* errorMsg = XMLString::transcode(exc.getMessage());
+    char* publicIdStr = XMLString::transcode(exc.getPublicId());
+    char* systemIdStr = XMLString::transcode(exc.getSystemId());
+    logger().error("EmbodimentErrorHandling - "
+                   "Got a fatal error while parsing XML: %s\n"
+                   "Line: %d\n"
+                   "Column: %d\n"
+                   //"PublicId: %s\n"
+                   "SystemId: %s\n"
+                   , errorMsg
+                   , exc.getLineNumber()
+                   , exc.getColumnNumber()
+                   //, publicIdStr
+                   , systemIdStr
+                   );
+    XMLString::release(&errorMsg);
+    XMLString::release(&publicIdStr);
+    XMLString::release(&systemIdStr);
     throw exc;
 }
 

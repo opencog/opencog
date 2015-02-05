@@ -34,7 +34,8 @@ using XERCES_CPP_NAMESPACE::ErrorHandler;
 using XERCES_CPP_NAMESPACE::SAXParseException;
 
 /**
- * This is an extension of ErrorHandler to log the parse errors according with OpenCog log policy.
+ * This is an extension of ErrorHandler to log the parse errors
+ * according with OpenCog log policy.
  */
 class EmbodimentErrorHandler : public ErrorHandler
 {
