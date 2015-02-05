@@ -774,7 +774,8 @@ bool OAC::processNextMessage(messaging::Message *msg)
 
     // message not for the OAC
     if (msg->getTo() != getID()) {
-        logger().warn("OAC::%s - This message is not for OAC. Its destination is %s. Message content: %s",
+        logger().warn("OAC::%s - This message is not for OAC. "
+                      "Its destination is %s. Message content: %s",
                        __FUNCTION__, 
                        msg->getTo().c_str(), 
                        msg->getPlainTextRepresentation()
@@ -785,15 +786,19 @@ bool OAC::processNextMessage(messaging::Message *msg)
     // message that has been parsed by RelEx server
     if(msg->getFrom() == config().get("RELEX_SERVER_ID")) {
         HandleSeq toUpdateHandles;
-        result = pai->processPVPMessage(msg->getPlainTextRepresentation(), toUpdateHandles);
+        result = pai->processPVPMessage(msg->getPlainTextRepresentation(),
+                                        toUpdateHandles);
 
         if (!result) {
-            logger().error("OAC::%s - Unable to process XML message.", __FUNCTION__);
+            logger().error("OAC::%s - Unable to process XML message.",
+                           __FUNCTION__);
         } else {
             // PVP message processed, update predicates for the
             // added/updated atoms
-            predicatesUpdater->update(toUpdateHandles, pai->getLatestSimWorldTimestamp());
-            logger().debug("OAC::%s - Message successfully  processed.", __FUNCTION__);
+            predicatesUpdater->update(toUpdateHandles,
+                                      pai->getLatestSimWorldTimestamp());
+            logger().debug("OAC::%s - Message successfully  processed.",
+                           __FUNCTION__);
         }
         return false;
     }
@@ -812,13 +817,15 @@ bool OAC::processNextMessage(messaging::Message *msg)
 
 
             if ( !sendMessage(rawMessage) ) {
-                logger().error("OAC::%s - Failed to forward raw message to RelEx server. Message content: %s", 
+                logger().error("OAC::%s - Failed to forward raw message to "
+                               "RelEx server. Message content: %s",
                                 __FUNCTION__, 
                                 msg->getPlainTextRepresentation()
                               );
             }
             else {
-                logger().debug("OAC::%s - Forward raw message to RelEx server successfully. Message content: %s", 
+                logger().debug("OAC::%s - Forward raw message to RelEx "
+                               "server successfully. Message content: %s",
                                __FUNCTION__, 
                                msg->getPlainTextRepresentation()
                               );
@@ -826,16 +833,20 @@ bool OAC::processNextMessage(messaging::Message *msg)
         } 
         else {
             HandleSeq toUpdateHandles;
-            result = pai->processPVPMessage(msg->getPlainTextRepresentation(), toUpdateHandles);
+            result = pai->processPVPMessage(msg->getPlainTextRepresentation(),
+                                            toUpdateHandles);
 
             if (!result) {
-                logger().error("OAC::%s - Unable to process XML message.", __FUNCTION__);
+                logger().error("OAC::%s - Unable to process XML message.",
+                               __FUNCTION__);
             } else {
                 // PVP message processed, update predicates for the
                 // added/updated atoms
-                predicatesUpdater->update(toUpdateHandles, pai->getLatestSimWorldTimestamp());
+                predicatesUpdater->update(toUpdateHandles,
+                                          pai->getLatestSimWorldTimestamp());
 
-                logger().debug("OAC::%s - Message successfully  processed.", __FUNCTION__);
+                logger().debug("OAC::%s - Message successfully  processed.",
+                               __FUNCTION__);
             }
         }
         return false;
@@ -856,7 +867,8 @@ bool OAC::processNextMessage(messaging::Message *msg)
     // message from the combo shell to execute a schema
     if (msg->getFrom() == config().get("COMBO_SHELL_ID")) {
         std::string str(msg->getPlainTextRepresentation());
-        logger().info("OAC::%s - Got combo shell msg: '%s'", __FUNCTION__, str.c_str());
+        logger().info("OAC::%s - Got combo shell msg: '%s'",
+                      __FUNCTION__, str.c_str());
 
         if (str.empty())
             return false; //a timing error, maybe?
@@ -874,14 +886,15 @@ bool OAC::processNextMessage(messaging::Message *msg)
     if (msg->getFrom() == config().get("LS_ID")) {
         SchemaMessage * sm = dynamic_cast<SchemaMessage*>(msg);
 
-        logger().debug("OAC::%s - Got msg from LS: '%s'", __FUNCTION__, msg->getPlainTextRepresentation());
+        logger().debug("OAC::%s - Got msg from LS: '%s'",
+                       __FUNCTION__, msg->getPlainTextRepresentation());
 
         // sanity check to see if LS does not return an empty
         // ComboSchema
         if (sm->getComboSchema().empty()) {
 
-            logger().warn(
-                         "OAC - Received an empty ComboSchema fom LS. Discarding it.");
+            logger().warn("OAC - Received an empty ComboSchema fom LS. "
+                          "Discarding it.");
             return false;
 
         } else {
@@ -926,8 +939,7 @@ bool OAC::processNextMessage(messaging::Message *msg)
 
         }
         else {
-            logger().error(
-                         "Not a SCHEMA or CANDIDATE_SCHEMA message!!!");
+            logger().error("Not a SCHEMA or CANDIDATE_SCHEMA message!!!");
         }
     }
     return false;
@@ -944,7 +956,8 @@ void OAC::schemaSelection()
 //  } // if
 }
 
-const std::string OAC::getPath(const std::string& petId, const std::string& filename)
+const std::string OAC::getPath(const std::string& petId,
+                               const std::string& filename)
 {
     std::string path;
 

@@ -279,11 +279,21 @@ public:
 #endif // HAVE_ZMQ
 
 
-    const PsiModulatorUpdaterAgentPtr getPsiModulatorUpdaterAgent() {return psiModulatorUpdaterAgent; }
-    const PsiDemandUpdaterAgentPtr getPsiDemandUpdaterAgent() {return psiDemandUpdaterAgent; }
-    const PsiActionSelectionAgentPtr getPsiActionSelectionAgent() {return psiActionSelectionAgent ; }
-    const PsiRelationUpdaterAgentPtr getPsiRelationUpdaterAgent() {return psiRelationUpdaterAgent; }
-    const PsiFeelingUpdaterAgentPtr getPsiFeelingUpdaterAgent() {return psiFeelingUpdaterAgent; }
+    const PsiModulatorUpdaterAgentPtr getPsiModulatorUpdaterAgent() {
+        return psiModulatorUpdaterAgent;
+    }
+    const PsiDemandUpdaterAgentPtr getPsiDemandUpdaterAgent() {
+        return psiDemandUpdaterAgent;
+    }
+    const PsiActionSelectionAgentPtr getPsiActionSelectionAgent() {
+        return psiActionSelectionAgent;
+    }
+    const PsiRelationUpdaterAgentPtr getPsiRelationUpdaterAgent() {
+        return psiRelationUpdaterAgent;
+    }
+    const PsiFeelingUpdaterAgentPtr getPsiFeelingUpdaterAgent() {
+        return psiFeelingUpdaterAgent;
+    }
 
     /* Get the Procedure Interpreter associated with the OAC.
      *
@@ -329,7 +339,8 @@ public:
      *
      * @return The string representing the path to the given file
      */
-    const std::string getPath(const std::string & petId, const std::string & filename = "");
+    const std::string getPath(const std::string & petId,
+                              const std::string & filename = "");
 
     SingletonFactory<ProcedureInterpreterAgent, Agent> procedureInterpreterAgentFactory;
 //    SingletonFactory<ImportanceDecayAgent, Agent> importanceDecayAgentFactory;
