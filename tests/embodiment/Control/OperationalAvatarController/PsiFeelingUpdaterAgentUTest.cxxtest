@@ -27,7 +27,7 @@ class PsiFeelingUpdaterAgentUTest: public CxxTest::TestSuite {
 
 private:
     
-    OACMock oacMock; 
+    OACMock oacMock;
 
 public:
 

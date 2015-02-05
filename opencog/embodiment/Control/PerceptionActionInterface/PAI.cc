@@ -532,7 +532,8 @@ bool PAI::isActionPlanEmpty(const ActionPlanID& planId) const
 
 bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
 {
-    logger().debug("PAI - processPVPMessage atomSpace.size=%d", atomSpace.getSize() );
+    logger().debug("PAI - processPVPMessage atomSpace.size=%d",
+                   atomSpace.getSize() );
 
     if (logPVPMessage) {
         logger().info(" PAI - Processing PVP message:\n%s\n", pvpMsg.c_str());
@@ -541,7 +542,8 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
     static const char* bufID = "pvp message";
     const XMLByte* xmlBuf = reinterpret_cast<const XMLByte*>(pvpMsg.c_str());
     XERCES_CPP_NAMESPACE::MemBufInputSource * memBufIS =
-        new XERCES_CPP_NAMESPACE::MemBufInputSource((const XMLByte *) xmlBuf, pvpMsg.size(), bufID);
+        new XERCES_CPP_NAMESPACE::MemBufInputSource((const XMLByte *) xmlBuf,
+                                                    pvpMsg.size(), bufID);
 
     parser->resetDocumentPool();
 
@@ -774,7 +776,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         logger().debug("PAI - Processing %d state-info done", list->getLength());
 
     // getting <block-structure-signal> elements from the XML message
-    XMLString::transcode(BLOCK_STRUCTURE_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(BLOCK_STRUCTURE_SIGNAL_ELEMENT, tag,
+                         PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
@@ -784,11 +787,13 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         logger().debug("PAI - Processing %d block-structure-signal done", list->getLength());
 
     // getting <finished-first-time-percept-terrian-signal> elements from the XML message
-    XMLString::transcode(FINISHED_FIRST_TIME_PERCEPT_TERRIAN_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(FINISHED_FIRST_TIME_PERCEPT_TERRIAN_SIGNAL_ELEMENT,
+                         tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processFinishedFirstTimePerceptTerrianSignal((DOMElement *)list->item(i), toUpdateHandles);
+        processFinishedFirstTimePerceptTerrianSignal((DOMElement *)list->item(i),
+                                                     toUpdateHandles);
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d finished-first-time-percept-terrian-signal done", list->getLength());
@@ -839,7 +844,8 @@ void PAI::processAvatarSignal(DOMElement * element)
             string nameStr(camelCaseToUnderscore(name));
 
             // get the plan-id, if any
-            XMLString::transcode(ACTION_PLAN_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            XMLString::transcode(ACTION_PLAN_ID_ATTRIBUTE, tag,
+                                 PAIUtils::MAX_TAG_LENGTH);
             const XMLCh* planID_xml = signal->getAttribute(tag);
             char* planIdStr = XMLString::transcode(planID_xml);
             // if there is a plan-id, this mean the action is a summary of the
@@ -888,7 +894,12 @@ void PAI::processAvatarSignal(DOMElement * element)
     XMLString::release(&agentType);
 }
 
-Handle PAI::processAgentActionParameter(DOMElement* paramElement,const std::string& actionNameStr, Handle& actionInstancenode, std::string&changedStateName,  Handle& newStateValNode, std::vector<Handle> &actionConcernedHandles)
+Handle PAI::processAgentActionParameter(DOMElement* paramElement,
+                                        const std::string& actionNameStr,
+                                        Handle& actionInstancenode,
+                                        std::string&changedStateName,
+                                        Handle& newStateValNode,
+                                        std::vector<Handle> &actionConcernedHandles)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
     Handle resultHandle;
@@ -903,7 +914,8 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement,const std::stri
     XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* paramValue = XMLString::transcode(paramElement->getAttribute(tag));
 
-    logger().debug("PAI - Got param: name = %s, type = %s, value = %s", paramName, paramType, paramValue);
+    logger().debug("PAI - Got param: name = %s, type = %s, value = %s",
+                   paramName, paramType, paramValue);
 
     // This function can throw an InvalidParamException
     const ActionParamType& actionParamType = ActionParamType::getFromName(paramType);
@@ -949,7 +961,8 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement,const std::stri
         char* yStr = XMLString::transcode(vectorElement->getAttribute(tag));
         XMLString::transcode(Z_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
         char* zStr = XMLString::transcode(vectorElement->getAttribute(tag));
-        logger().debug("PAI - Got vector: x = %s, y = %s, z = %s\n", xStr, yStr, zStr);
+        logger().debug("PAI - Got vector: x = %s, y = %s, z = %s\n",
+                       xStr, yStr, zStr);
         HandleSeq rotationListLink;
 
         Handle numNode;
@@ -965,7 +978,8 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement,const std::stri
         rotationListLink.push_back(numNode);
         actionConcernedHandles.push_back(numNode);
 
-        resultHandle = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, rotationListLink);
+        resultHandle = AtomSpaceUtil::addLink(atomSpace, LIST_LINK,
+                                              rotationListLink);
 
         XMLString::release(&xStr);
         XMLString::release(&yStr);
@@ -986,7 +1000,8 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement,const std::stri
         char* rollStr = XMLString::transcode(rotationElement->getAttribute(tag));
         XMLString::transcode(YAW_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
         char* yawStr = XMLString::transcode(rotationElement->getAttribute(tag));
-        logger().debug("PAI - Got rotaion: pitch = %s, roll = %s, yaw = %s\n", pitchStr, rollStr, yawStr);
+        logger().debug("PAI - Got rotaion: pitch = %s, roll = %s, yaw = %s\n",
+                       pitchStr, rollStr, yawStr);
 
         HandleSeq rotationListLink;
 
@@ -1003,7 +1018,8 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement,const std::stri
         rotationListLink.push_back(numNode);
         actionConcernedHandles.push_back(numNode);
 
-        resultHandle = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, rotationListLink);
+        resultHandle = AtomSpaceUtil::addLink(atomSpace, LIST_LINK,
+                                              rotationListLink);
 
         XMLString::release(&pitchStr);
         XMLString::release(&rollStr);
@@ -1034,14 +1050,20 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement,const std::stri
         XMLString::transcode(OWNER_NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
         char* entityOwnerName = XMLString::transcode(entityElement->getAttribute(tag));
         */
-        logger().debug("PAI - Got Entity: id = %s (%s), type = %s", entityId, internalEntityId.c_str(), entityType);
+        logger().debug("PAI - Got Entity: id = %s (%s), type = %s",
+                       entityId, internalEntityId.c_str(), entityType);
 
-        resultHandle = AtomSpaceUtil::addNode(atomSpace, getSLObjectNodeType(entityType), internalEntityId.c_str());
+        resultHandle = AtomSpaceUtil::addNode(atomSpace,
+                                              getSLObjectNodeType(entityType),
+                                              internalEntityId.c_str());
         if (atomSpace.getType(resultHandle) == OBJECT_NODE)
         {
-            std::vector<Handle> inheritanceResults = AtomSpaceUtil::getInheritanceLinks(atomSpace,resultHandle);
+            std::vector<Handle> inheritanceResults =
+                AtomSpaceUtil::getInheritanceLinks(atomSpace,resultHandle);
             if (inheritanceResults.size() != 0)
-                actionConcernedHandles.insert(actionConcernedHandles.end(),inheritanceResults.begin(),inheritanceResults.end());
+                actionConcernedHandles.insert(actionConcernedHandles.end(),
+                                              inheritanceResults.begin(),
+                                              inheritanceResults.end());
         }
         XMLString::release(&entityId);
         XMLString::release(&entityType);
@@ -1053,7 +1075,8 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement,const std::stri
          {
         // Should never get here, but...
         throw opencog::RuntimeException(TRACE_INFO,
-                                        "PAI - Undefined map from '%s' type to an Atom type.", paramType);
+                                        "PAI - Undefined map from '%s' type "
+                                        "to an Atom type.", paramType);
         return resultHandle;
          }
 
@@ -1068,11 +1091,16 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement,const std::stri
     // Add this parameter node into AtomSpace
     // the predicate node name is ActionName:PamaterName, e.g.: kick:Force
 
-    Handle paraPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, paramName, true);
+    Handle paraPredicateNode = AtomSpaceUtil::addNode(atomSpace,
+                                                      PREDICATE_NODE,
+                                                      paramName, true);
     actionConcernedHandles.push_back(paraPredicateNode);
 
     std::string thisParaPredStr = actionNameStr + ":" + paramName;
-    Handle thisParaPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, thisParaPredStr.c_str() , true);
+    Handle thisParaPredicateNode = AtomSpaceUtil::addNode(atomSpace,
+                                                          PREDICATE_NODE,
+                                                          thisParaPredStr.c_str(),
+                                                          true);
     actionConcernedHandles.push_back(thisParaPredicateNode);
 
 
@@ -1080,19 +1108,25 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement,const std::stri
     HandleSeq inheritanceLinkOutgoing;
     inheritanceLinkOutgoing.push_back(thisParaPredicateNode);
     inheritanceLinkOutgoing.push_back(paraPredicateNode);
-    Handle inherLink =  AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, inheritanceLinkOutgoing);
+    Handle inherLink =  AtomSpaceUtil::addLink(atomSpace,
+                                               INHERITANCE_LINK,
+                                               inheritanceLinkOutgoing);
     actionConcernedHandles.push_back(inherLink);
 
     // e.g.: the kick:Force of kick2454 is 300.0
     HandleSeq predicateListLinkOutgoing;
     predicateListLinkOutgoing.push_back(actionInstancenode);
     predicateListLinkOutgoing.push_back(resultHandle);
-    Handle predicateListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing);
+    Handle predicateListLink = AtomSpaceUtil::addLink(atomSpace,
+                                                      LIST_LINK,
+                                                      predicateListLinkOutgoing);
     actionConcernedHandles.push_back(predicateListLink);
     HandleSeq evalLinkOutgoing;
     evalLinkOutgoing.push_back(thisParaPredicateNode);
     evalLinkOutgoing.push_back(predicateListLink);
-    Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
+    Handle evalLink = AtomSpaceUtil::addLink(atomSpace,
+                                             EVALUATION_LINK,
+                                             evalLinkOutgoing);
     actionConcernedHandles.push_back(evalLink);
 
     XMLString::release(&paramName);
@@ -1102,18 +1136,23 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement,const std::stri
 
 }
 
-Handle PAI::processAgentType(const string& agentTypeStr, const string& internalAgentId)
+Handle PAI::processAgentType(const string& agentTypeStr,
+                             const string& internalAgentId)
 {
     Handle agentNode;
     if ( agentTypeStr == AVATAR_OBJECT_TYPE ) {
-        agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalAgentId.c_str());
+        agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE,
+                                           internalAgentId.c_str());
         logger().debug("PAI - agent %s is an avatar.\n", internalAgentId.c_str() );
     } else if ( agentTypeStr == "" || agentTypeStr == PET_OBJECT_TYPE ) {
-        agentNode = AtomSpaceUtil::addNode(atomSpace, PET_NODE, internalAgentId.c_str());
+        agentNode = AtomSpaceUtil::addNode(atomSpace, PET_NODE,
+                                           internalAgentId.c_str());
         logger().debug("PAI - agent %s is a pet.\n", internalAgentId.c_str() );
     } else if ( agentTypeStr == HUMANOID_OBJECT_TYPE ) {
-        agentNode = AtomSpaceUtil::addNode(atomSpace, HUMANOID_NODE, internalAgentId.c_str());
-        logger().debug("PAI - agent %s is an humanoid.\n", internalAgentId.c_str() );
+        agentNode = AtomSpaceUtil::addNode(atomSpace, HUMANOID_NODE,
+                                           internalAgentId.c_str());
+        logger().debug("PAI - agent %s is an humanoid.\n",
+                       internalAgentId.c_str());
     } else {
         throw opencog::InvalidParamException(TRACE_INFO,
                      "PAI - Invalid value for agent type: '%s'", agentTypeStr.c_str( ) );
@@ -1130,11 +1169,14 @@ Handle PAI::processActionAvailability(DOMElement* signal)
     char* actionName = XMLString::transcode(signal->getAttribute(tag));
 
     // Add the action node into AtomSpace
-    Handle actionNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, actionName);
+    Handle actionNode = AtomSpaceUtil::addNode(atomSpace,
+                                               CONCEPT_NODE,
+                                               actionName);
 
     if (actionNode == Handle::UNDEFINED)
     {
-        logger().error("PAI - processActionAvailability: unable to add available status for action[%s].",
+        logger().error("PAI - processActionAvailability: unable "
+                       "to add available status for action[%s].",
                        actionName);
 
         XMLString::release(&actionName);
@@ -1179,7 +1221,8 @@ Handle PAI::processActionAvailability(DOMElement* signal)
 
 
         // Add the target of this action into AtomSpace
-        targetNode = AtomSpaceUtil::addNode(atomSpace, targetTypeCode, internalTargetId.c_str());
+        targetNode = AtomSpaceUtil::addNode(atomSpace, targetTypeCode,
+                                            internalTargetId.c_str());
 
         XMLString::release(&targetType);
     }
@@ -1193,7 +1236,8 @@ Handle PAI::processActionAvailability(DOMElement* signal)
     available = (strcmp(availablePred, "true") == 0) ? true : false;
  
     // Get self handle.
-    Handle selfNode = AtomSpaceUtil::getAgentHandle( atomSpace, avatarInterface.getPetId());
+    Handle selfNode = AtomSpaceUtil::getAgentHandle(atomSpace,
+                                                    avatarInterface.getPetId());
 
     Handle evalLinkHandle = Handle::UNDEFINED;
 
@@ -1269,23 +1313,32 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 
     if (atomSpace.getType(agentNode) == OBJECT_NODE)
     {
-        std::vector<Handle> inheritanceResults = AtomSpaceUtil::getInheritanceLinks(atomSpace,agentNode);
+        std::vector<Handle> inheritanceResults =
+            AtomSpaceUtil::getInheritanceLinks(atomSpace,agentNode);
         if (inheritanceResults.size() != 0)
-            actionConcernedHandles.insert(actionConcernedHandles.end(),inheritanceResults.begin(),inheritanceResults.end());
+            actionConcernedHandles.insert(actionConcernedHandles.end(),
+                                          inheritanceResults.begin(),
+                                          inheritanceResults.end());
     }
     // Add the action node into AtomSpace
-    Handle actionNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, nameStr.c_str());
+    Handle actionNode = AtomSpaceUtil::addNode(atomSpace,
+                                               CONCEPT_NODE,
+                                               nameStr.c_str());
     actionConcernedHandles.push_back(actionNode);
 
     // Add the action instance node into AtomSpace
-    Handle actionInstanceNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, instanceNameStr.c_str());
+    Handle actionInstanceNode = AtomSpaceUtil::addNode(atomSpace,
+                                                       CONCEPT_NODE,
+                                                       instanceNameStr.c_str());
     actionConcernedHandles.push_back(actionInstanceNode);
 
     // And the action instance node is a kind of action node, such as "Kick2454" is a "kick"
     HandleSeq inheritanceLinkOutgoing;
     inheritanceLinkOutgoing.push_back(actionInstanceNode);
     inheritanceLinkOutgoing.push_back(actionNode);
-    Handle inherLink = AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, inheritanceLinkOutgoing);
+    Handle inherLink = AtomSpaceUtil::addLink(atomSpace,
+                                              INHERITANCE_LINK,
+                                              inheritanceLinkOutgoing);
     actionConcernedHandles.push_back(inherLink);
     //actionFrameElements.push_back(inherLink);
 
@@ -1295,19 +1348,26 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 
     //-------------------------------Begin-------the actor of the action-----Begin------------------------------------------------
     // Add the conceptnode: actor of action into AtomSpace
-    Handle actionActorPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_ACTOR_NAME, true);
+    Handle actionActorPredicateNode = AtomSpaceUtil::addNode(atomSpace,
+                                                             PREDICATE_NODE,
+                                                             ACTION_ACTOR_NAME,
+                                                             true);
     actionConcernedHandles.push_back(actionActorPredicateNode);
 
     // the predicate node name is ActionName:PamaterName, e.g.: kick:Actor
     std::string actorStr = nameStr + ":" + ACTION_ACTOR_NAME;
-    Handle actorPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, actorStr.c_str() , true);
+    Handle actorPredicateNode = AtomSpaceUtil::addNode(atomSpace,
+                                                       PREDICATE_NODE,
+                                                       actorStr.c_str() , true);
     actionConcernedHandles.push_back(actorPredicateNode);
 
     // e.g.: "kick:Actor" is a kind of  "Actor"
     HandleSeq ActorInheritanceLinkOutgoing;
     ActorInheritanceLinkOutgoing.push_back(actorPredicateNode);
     ActorInheritanceLinkOutgoing.push_back(actionActorPredicateNode);
-    Handle inherLink2 = AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, ActorInheritanceLinkOutgoing);
+    Handle inherLink2 = AtomSpaceUtil::addLink(atomSpace,
+                                               INHERITANCE_LINK,
+                                               ActorInheritanceLinkOutgoing);
     actionConcernedHandles.push_back(inherLink2);
     //actionFrameElements.push_back(inherLink2);
 
@@ -1315,12 +1375,16 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     HandleSeq predicateListLinkOutgoing;
     predicateListLinkOutgoing.push_back(actionInstanceNode);
     predicateListLinkOutgoing.push_back(agentNode);
-    Handle predicateListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing);
+    Handle predicateListLink = AtomSpaceUtil::addLink(atomSpace,
+                                                      LIST_LINK,
+                                                      predicateListLinkOutgoing);
     actionConcernedHandles.push_back(predicateListLink);
     HandleSeq evalLinkOutgoing;
     evalLinkOutgoing.push_back(actorPredicateNode);
     evalLinkOutgoing.push_back(predicateListLink);
-    Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
+    Handle evalLink = AtomSpaceUtil::addLink(atomSpace,
+                                             EVALUATION_LINK,
+                                             evalLinkOutgoing);
     actionConcernedHandles.push_back(evalLink);
     actionHandles.push_back(evalLink);
     //-------------------------------End-------the actor of the action-------End--------------------------------------------------
@@ -1443,7 +1507,11 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     for (unsigned int i = 0; i < list->getLength(); i++)
     {
         DOMElement* paramElement = (DOMElement*) list->item(i);
-        Handle ph = processAgentActionParameter(paramElement, nameStr, actionInstanceNode,changedStateName, newStateValNode, actionConcernedHandles);
+        Handle ph = processAgentActionParameter(paramElement, nameStr,
+                                                actionInstanceNode,
+                                                changedStateName,
+                                                newStateValNode,
+                                                actionConcernedHandles);
 
         if (ph != Handle::UNDEFINED)
             actionHandles.push_back(ph);
@@ -1455,12 +1523,18 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     //-------------------------------Begin-------the result state of the action-----Begin------------------------------------------------
 
       // Add the conceptnode: resultstate of action into AtomSpace
-    Handle resultPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_RESULT_STATE, true);
+    Handle resultPredicateNode = AtomSpaceUtil::addNode(atomSpace,
+                                                        PREDICATE_NODE,
+                                                        ACTION_RESULT_STATE,
+                                                        true);
     actionConcernedHandles.push_back(resultPredicateNode);
 
     // the predicate node name is ActionName:PamaterName, e.g.: kick:result-state
     std::string restultStr = nameStr + ":" + ACTION_RESULT_STATE;
-    Handle thisResultPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, restultStr.c_str() , true);
+    Handle thisResultPredicateNode = AtomSpaceUtil::addNode(atomSpace,
+                                                            PREDICATE_NODE,
+                                                            restultStr.c_str(),
+                                                            true);
     actionConcernedHandles.push_back(thisResultPredicateNode);
 
     // getting result state attribute value
@@ -1469,9 +1543,11 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     // Add the action result state node into AtomSpace
     Handle resultNode;
     if (resultState)
-        resultNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, ACTION_DONE_PREDICATE_NAME );
+        resultNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE,
+                                            ACTION_DONE_PREDICATE_NAME);
     else
-        resultNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, ACTION_FAILED_PREDICATE_NAME );
+        resultNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE,
+                                            ACTION_FAILED_PREDICATE_NAME);
 
     actionConcernedHandles.push_back(resultNode);
 
@@ -1479,20 +1555,23 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     HandleSeq resultInheritanceLinkOutgoing;
     resultInheritanceLinkOutgoing.push_back(thisResultPredicateNode);
     resultInheritanceLinkOutgoing.push_back(resultPredicateNode);
-    Handle inherLink4 = AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, resultInheritanceLinkOutgoing);
+    Handle inherLink4 = AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK,
+                                               resultInheritanceLinkOutgoing);
     actionConcernedHandles.push_back(inherLink4);
 
     // e.g.: the kick:result-state of kick2454 is true
     HandleSeq predicateListLinkOutgoing4;
     predicateListLinkOutgoing4.push_back(actionInstanceNode);
     predicateListLinkOutgoing4.push_back(resultNode);
-    Handle predicateListLink4 = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing4);
+    Handle predicateListLink4 = AtomSpaceUtil::addLink(atomSpace, LIST_LINK,
+                                                       predicateListLinkOutgoing4);
     actionConcernedHandles.push_back(predicateListLink4);
 
     HandleSeq evalLinkOutgoing4;
     evalLinkOutgoing4.push_back(thisResultPredicateNode);
     evalLinkOutgoing4.push_back(predicateListLink4);
-    Handle evalLink4 = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing4);
+    Handle evalLink4 = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK,
+                                              evalLinkOutgoing4);
     actionConcernedHandles.push_back(evalLink4);
     actionHandles.push_back(evalLink4);
     //-------------------------------End-------the result state actor of the action-------End--------------------------------------------------
@@ -1546,13 +1625,19 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     }
 
     // call the event responser
-    EventResponder::getInstance()->response(nameStr,actionInstanceNode,agentNode,targetNode, actionHandles, tsValue);
+    EventResponder::getInstance()->response(nameStr,actionInstanceNode,
+                                            agentNode,targetNode,
+                                            actionHandles, tsValue);
 
     XMLString::release(&targetName);
 
 }
 
-void PAI::processAgentActionPlanResult(char* agentID, unsigned long tsValue, const string& name, char* planIdStr, DOMElement* signal)
+void PAI::processAgentActionPlanResult(char* agentID,
+                                       unsigned long tsValue,
+                                       const string& name,
+                                       char* planIdStr,
+                                       DOMElement* signal)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
     string internalAgentId = PAIUtils::getInternalId(agentID);
@@ -1612,12 +1697,13 @@ unsigned long PAI::getLatestSimWorldTimestamp()
 bool PAI::setLatestSimWorldTimestamp(unsigned long timestamp)
 {
     if (timestamp > latestSimWorldTimestamp) {
-        logger().debug("PAI - setLatestSimWorldTimestamp(%lu).", timestamp, latestSimWorldTimestamp);
+        logger().debug("PAI - setLatestSimWorldTimestamp(%lu).",
+                       timestamp, latestSimWorldTimestamp);
         latestSimWorldTimestamp = timestamp;
     } else if (timestamp < latestSimWorldTimestamp) {
-        logger().warn("PAI - setLatestSimWorldTimestamp(%lu): Got a timestamp smaller than the latest received timestamp (%lu)!", 
-                      timestamp, latestSimWorldTimestamp
-                     );
+        logger().warn("PAI - setLatestSimWorldTimestamp(%lu): Got a timestamp "
+                      "smaller than the latest received timestamp (%lu)!", 
+                      timestamp, latestSimWorldTimestamp);
         return false;
     }
     return true;
@@ -1656,7 +1742,7 @@ unsigned long PAI::getTimestampFromXsdDateTimeStr(const char* xsdDateTimeStr) th
     //
 
     logger().fine("PAI - getTimestampFromXsdDateTimeStr(%s)",
-                 xsdDateTimeStr);
+                  xsdDateTimeStr);
 
     boost::cmatch matches;
     boost::regex regularExpression;
@@ -1681,9 +1767,8 @@ unsigned long PAI::getTimestampFromXsdDateTimeStr(const char* xsdDateTimeStr) th
     }
 
     if (matches.size() != REGEX_OUTPUT_SIZE) {
-        logger().warn(
-                     "PAI - RegEx result size (%d) differs from predifined one (%d).",
-                     matches.size(), REGEX_OUTPUT_SIZE);
+        logger().warn("PAI - RegEx result size (%d) differs from predifined one (%d).",
+                      matches.size(), REGEX_OUTPUT_SIZE);
         // return what???
     }
 
