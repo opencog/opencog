@@ -285,14 +285,14 @@ void ImplicationUTest::test_exec(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle result = crisp_logic_imply(as, implication);
+	Handle result = imply(as, implication);
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
 
 	// There should be two solutions: 
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	// Result should be a ListLink w/ two solutions
-	result = crisp_logic_imply(as, implication2);
+	result = imply(as, implication2);
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 

@@ -70,7 +70,7 @@ class BooleanUTest :  public CxxTest::TestSuite
 
 /*
  * This function sets up the following structures:
- *  # IF _subj(be, $var1) ^ 
+ *  # IF _subj(be, $var1) ^
  *       _obj(be, $var2) ^
  *        !DEFINITE-FLAG($var2)
  *      THEN ^3_isa($var1, $var2)
@@ -87,7 +87,7 @@ void BooleanUTest::setUp(void)
 	as = new AtomSpace();
 
 	// Create an implication link that will be tested.
-	implication = 
+	implication =
 	al(IMPLICATION_LINK,
 		al(AND_LINK,
 			al(EVALUATION_LINK,
@@ -104,7 +104,7 @@ void BooleanUTest::setUp(void)
 					an(VARIABLE_NODE, "$var2")
 				)
 			),
-			// used to gaurentee that both are in the same "sentence"
+			// Used to gaurantee that both are in the same "sentence"
 			al(MEMBER_LINK,
 				an(VARIABLE_NODE, "$var1"),
 				an(VARIABLE_NODE, "$sent")
@@ -113,7 +113,7 @@ void BooleanUTest::setUp(void)
 				an(VARIABLE_NODE, "$var2"),
 				an(VARIABLE_NODE, "$sent")
 			),
-			al(NOT_LINK,
+			al(ABSENT_LINK,
 				al(INHERITANCE_LINK,
 					an(VARIABLE_NODE, "$var2"),
 					an(CONCEPT_NODE, "definite")
@@ -233,11 +233,12 @@ void BooleanUTest::test_isa(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle result = crisp_logic_imply(as, implication);
+	Handle result = imply(as, implication);
 
 	// There should be only one solution: the Berlin one.
-	// The Madrid graph should be rejected because of the 
-	// NOT definite link.
+	// The Madrid graph should be rejected because of the
+	// captial is marked 'definite' and the ABSENT_LINK
+	// should reject that.
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	// Then, evaluationLink, as above.

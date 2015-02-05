@@ -169,7 +169,8 @@ void split_clauses_pos_neg(const std::vector<Handle>& clauses,
                            std::vector<Handle>& negate)
 {
 	for (Handle h : clauses) {
-		if (NOT_LINK == h->getType()) {
+		Type t = h->getType();
+		if (NOT_LINK == t or ABSENT_LINK == t) {
 			negate.push_back(LinkCast(h)->getOutgoingAtom(0));
 		}
 		else {

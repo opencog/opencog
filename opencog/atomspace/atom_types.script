@@ -41,6 +41,14 @@ AND_LINK <- UNORDERED_LINK
 OR_LINK <- UNORDERED_LINK
 NOT_LINK <- UNORDERED_LINK
 
+// The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
+// In 'intuitionist logic', the opposite of "true" is not "false",
+// the opposite is "don't know".  ABSENT_LINK is the effective
+// don't-know link.  Currently, it is used during pattern matching
+// to find clauses that may or may not be present: clauses that are
+// optionally present.
+ABSENT_LINK <- UNORDERED_LINK
+
 // ====================================================================
 // Herbrand/First-order-logic/lambda-calc/model-theory style links
 // and nodes.  This are used to implement the pattern matcher, and

@@ -170,7 +170,7 @@ void ExecutionOutputUTest::test_exec(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle result = crisp_logic_imply(as, implication);
+	Handle result = imply(as, implication);
 
 	// There should be only one solution: the Berlin one.
 	// The Madrid graph should be rejected because of the 

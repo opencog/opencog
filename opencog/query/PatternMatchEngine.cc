@@ -1039,6 +1039,15 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		cl++;
 	}
 
+	printf("\nPredicate includes the following optinoal clauses:\n");
+	cl = 0;
+	for (Handle h : _optionals)
+	{
+		printf("Optional clause %d: ", cl);
+		prt(h);
+		cl++;
+	}
+
 	// Print out the bound variables in the predicate.
 	for (Handle h : _bound_vars)
 	{
