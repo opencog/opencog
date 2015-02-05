@@ -35,8 +35,7 @@ PatternMatch::PatternMatch(void) : _used(false) {}
 /// This is just a convenience wrapper around do_match().
 void PatternMatch::match(PatternMatchCallback *cb,
                          Handle hvarbles,
-                         Handle hclauses,
-                         Handle hnegates)
+                         Handle hclauses)
 	throw (InvalidParamException)
 {
 	// Both must be non-empty.
@@ -55,23 +54,12 @@ void PatternMatch::match(PatternMatchCallback *cb,
 		throw InvalidParamException(TRACE_INFO,
 			"Expected AndLink for clause list.");
 
-	// negation clauses are optionally present
-	std::vector<Handle> negs;
-	LinkPtr lnegates(LinkCast(hnegates));
-	if (lnegates)
-	{
-		if (AND_LINK != lnegates->getType())
-			throw InvalidParamException(TRACE_INFO,
-				"Expected AndLink holding negated/otional clauses.");
-		negs = lnegates->getOutgoingSet();
-	}
-
 	std::set<Handle> vars;
 	for (Handle v: lvarbles->getOutgoingSet()) vars.insert(v);
 
 	std::vector<Handle> clauses(lclauses->getOutgoingSet());
 
-	do_match(cb, vars, clauses, negs);
+	do_match(cb, vars, clauses);
 }
 
 /* ================================================================= */
@@ -182,7 +170,7 @@ void PatternMatch::do_imply (Handle himplication,
 
 	// Now perform the search.
 	impl.implicand = _implicand;
-	do_match(&impl, varset, _affirm, _negate);
+	do_match(&impl, varset, _clauses);
 }
 
 /* ================================================================= */
@@ -424,12 +412,6 @@ void PatternMatch::validate_implication (Handle himplication)
 	_hclauses = oset[0];
 	_implicand = oset[1];
 
-	// Must be non-empty.
-	LinkPtr lclauses(LinkCast(_hclauses));
-	if (NULL == lclauses)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected non-empty set of clauses in the ImplicationLink");
-
 	// The predicate is either an AndList, or a single clause
 	// If its an AndList, then its a list of clauses.
 	// XXX FIXME Perhaps, someday, some sort of embedded OrList should
@@ -439,30 +421,12 @@ void PatternMatch::validate_implication (Handle himplication)
 	Type tclauses = _hclauses->getType();
 	if (AND_LINK == tclauses)
 	{
-		// Input is in conjunctive normal form, consisting of clauses,
-		// or their negations. Split these into two distinct lists.
-		// Any clause that is a NotLink is "negated"; strip off the
-		// negation and put it into its own list.
-		const std::vector<Handle>& cset = lclauses->getOutgoingSet();
-		size_t clen = cset.size();
-		for (size_t i=0; i<clen; i++)
-		{
-			Handle h(cset[i]);
-			Type t = h->getType();
-			if (NOT_LINK == t)
-			{
-				_negate.push_back(LinkCast(h)->getOutgoingAtom(0));
-			}
-			else
-			{
-				_affirm.push_back(h);
-			}
-		}
+		_clauses = LinkCast(_hclauses)->getOutgoingSet();
 	}
 	else
 	{
 		// There's just one single clause!
-		_affirm.push_back(_hclauses);
+		_clauses.push_back(_hclauses);
 	}
 }
 
@@ -475,7 +439,7 @@ void PatternMatch::validate(Handle hbindlink)
 {
 	validate_bindvars(hbindlink);
 	validate_implication(_himpl);
-	validate_clauses(_varset, _affirm, _negate);
+	validate_clauses(_varset, _clauses);
 }
 
 /* ================================================================= */

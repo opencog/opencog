@@ -61,7 +61,7 @@ class PatternMatchEngine
 
 		bool pred_up(Handle);
 		bool soln_up(Handle);
-		bool do_soln_up(Handle&);
+		bool do_soln_up(Handle&); // See PatternMatchEngine.cc for comment
 		bool clause_accepted;
 		Handle curr_soln_handle;
 		Handle curr_pred_handle;
@@ -106,7 +106,9 @@ class PatternMatchEngine
 		// -------------------------------------------
 
 		// Result of solving the predicate
+		// Map variables (and sub-clauses as well) to their groundings
 		std::map<Handle, Handle> var_grounding;
+		// Map clauses to their groundings
 		std::map<Handle, Handle> clause_grounding;
 
 		void clear_state(void);

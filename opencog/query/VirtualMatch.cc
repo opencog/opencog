@@ -33,8 +33,9 @@
 
 using namespace opencog;
 
-// #define DEBUG 1
-#if DEBUG
+// Uncomment below to enable debug print
+// #define DEBUG
+#ifdef DEBUG
 	#define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
 	#define dbgprt(f, varargs...)
@@ -81,6 +82,11 @@ class PMCGroundings : public PatternMatchCallback
 		void pop(void) { _cb->pop(); }
 		void set_type_restrictions(VariableTypeMap &tm) {
 			_cb->set_type_restrictions(tm);
+		}
+
+		void validate_clauses(std::set<Handle>& vars,
+		                      std::vector<Handle>& clauses) {
+			_cb->validate_clauses(vars, clauses);
 		}
 		void perform_search(PatternMatchEngine* pme,
 	                       std::set<Handle> &vars,
@@ -134,8 +140,9 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 	if (0 == comp_var_gnds.size())
 	{
 #ifdef DEBUG
-		dbgprt("Explore combinatoric grounding %zd clauses:\n",
-		       var_gnds.size(), pred_gnds.size());
+		dbgprt("Explore combinatoric grounding clauses "
+		       "(var_gnds.size() = %zu, pred_gnds.size() = %zu):\n",
+			   var_gnds.size(), pred_gnds.size());
 		PatternMatchEngine::print_solution(var_gnds, pred_gnds);
 #endif
 
@@ -217,7 +224,8 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 		rvg.insert(cand_vg.begin(), cand_vg.end());
 		rpg.insert(cand_pg.begin(), cand_pg.end());
 
-		bool accept = recursive_virtual(cb, virtuals, negations, rvg, rpg, comp_var_gnds, comp_pred_gnds);
+		bool accept = recursive_virtual(cb, virtuals, negations, rvg, rpg,
+		                                comp_var_gnds, comp_pred_gnds);
 
 		// Halt recursion immeditately if match is accepted.
 		if (accept) return true;
@@ -236,11 +244,13 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
  * connected if they contain a common variable.
  *
  * As a side effect, this looks for 'virtual links' and separates
- * them out into a distinct list.
+ * them out into a distinct list, _virtuals and _nonvirts.
+ *
+ * It also partition the clauses into a set of connected components,
+ * _components.
  */
 void PatternMatch::validate_clauses(std::set<Handle>& vars,
-                                    std::vector<Handle>& clauses,
-                                    std::vector<Handle>& negations)
+                                    std::vector<Handle>& clauses)
 
 	throw (InvalidParamException)
 {
@@ -256,20 +266,12 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 		              __FUNCTION__);
 	}
 
-	bogus = remove_constants(vars, negations);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern negation",
-		              __FUNCTION__);
-	}
-
 	// Make sure that each declared variable appears in some clause.
 	// We can't ground variables that aren't attached to something.
 	// Quoted variables are constants, and so don't count.
 	for (Handle v : vars)
 	{
-		if ((not is_variable_in_any_tree(clauses, v))
-		     and (not is_variable_in_any_tree(negations, v)))
+		if (not is_variable_in_any_tree(clauses, v))
 		{
 			std::stringstream ss;
 			ss << "The variable " << v->toString()
@@ -277,48 +279,6 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 			throw InvalidParamException(TRACE_INFO, ss.str().c_str());
 		}
 	}
-
-	// Make sure that the pattern is connected
-	if (0 < negations.size())
-	{
-		// The negations should be connected to the clauses.
-		std::vector<Handle> all;
-		all.reserve(clauses.size() + negations.size());
-		all.insert(all.end(), clauses.begin(), clauses.end());
-		all.insert(all.end(), negations.begin(), negations.end());
-		get_connected_components(vars, all, _components);
-	}
-	else
-	{
-		get_connected_components(vars, clauses, _components);
-	}
-
-	if (1 != _components.size())
-	{
-		// Users are going to be stumped by this one, so print
-		// out a verbose, user-freindly debug message to help
-		// them out.
-		std::stringstream ss;
-		ss << "Pattern is not connected! Found "
-		   << _components.size() << " components:\n";
-		int cnt = 0;
-		for (const auto& comp : _components)
-		{
-			ss << "Connected component " << cnt
-			   << " consists of ----------------: \n";
-			for (Handle h : comp) ss << h->toString();
-			cnt++;
-		}
-		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
-	}
-
-	// get_connected_components re-orders the clauses so that adjacent
-	// clauses are connected.  Using this will make matching slightly
-	// faster. But we don't do this if there are negations, because the
-	// above jammed the negations into the thing, which we must keep
-	// separate.
-	if (negations.empty())
-		clauses = *_components.begin();
 
 	// Are there any virtual links in the clauses? If so, then we need
 	// to do some special handling.
@@ -330,10 +290,6 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 			_nonvirts.push_back(clause);
 	}
 
-	// The simple case -- we are done with the checking.
-	if (_virtuals.empty())
-		return;
-
 	// For now, the virtual links must be at the top. That's because
 	// I don't understand what the semantics would be if they were
 	// anywhere else... need to ask Ben on the mailing list.
@@ -344,12 +300,6 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 			throw InvalidParamException(TRACE_INFO,
 				"Expecting EvaluationLink at the top level!");
 	}
-
-	// I'm too lazy to do the optional/negated clause bit, just right
-	// now. It adds complexity. So just throw, at this time.
-	if (0 < negations.size())
-		throw InvalidParamException(TRACE_INFO,
-			"Patterns with both virtual and optional clauses not yet supported!");
 }
 
 /* ================================================================= */
@@ -418,8 +368,7 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
  */
 void PatternMatch::do_match(PatternMatchCallback *cb,
                             std::set<Handle>& vars,
-                            std::vector<Handle>& clauses,
-                            std::vector<Handle>& negations)
+                            std::vector<Handle>& clauses)
 
 	throw (InvalidParamException)
 {
@@ -430,13 +379,22 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 			"A PatternMatch instance cannot be used more than once!");
 	_used = true;
 
-	validate_clauses(vars, clauses, negations);
+	validate_clauses(vars, clauses);
 
-	// The simple case -- unit propagation through all of the clauses.
-	if (_virtuals.empty())
-	{
+	cb->validate_clauses(vars, clauses);
+
+	// Split the non virtual clauses into stronly connected components
+	std::set<std::vector<Handle>> nvcomps;
+	get_connected_components(vars, _nonvirts, nvcomps);
+
+	// If there's only 1 component and there is no virtual clause then
+	// we can directly match the component using the callback cb
+	if (nvcomps.size() == 1 and _virtuals.empty()) {
+		// Split in positive and negative clauses
+		std::vector<Handle> affirm, negate;
+		split_clauses_pos_neg(*nvcomps.begin(), affirm, negate);
 		PatternMatchEngine pme;
-		pme.match(cb, vars, clauses, negations);
+		pme.match(cb, vars, affirm, negate);
 		return;
 	}
 
@@ -452,17 +410,13 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
 
-	std::vector<Handle> empty;
-	std::set<std::vector<Handle>> nvcomps;
-	get_connected_components(vars, _nonvirts, nvcomps);
-
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds;
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
 	// Note: range loop by copy because PatternMatchEngine::match
 	// allows non-const clauses, and as they come from std::set they
 	// are const. I don't see why PatternMatchEngine::match wouldn't
 	// take in const clauses. To be studied...
-	for (std::vector<Handle> comp : nvcomps)
+	for (const std::vector<Handle>& comp : nvcomps)
 	{
 		// Find the variables in each component.
 		std::set<Handle> cvars;
@@ -471,20 +425,26 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 			if (is_variable_in_any_tree(comp, v)) cvars.insert(v);
 		}
 
+		// Split in positive and negative clauses
+		std::vector<Handle> affirm, negate;
+		split_clauses_pos_neg(comp, affirm, negate);
+
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(cb);
 		PatternMatchEngine pme;
-		pme.match(&gcb, cvars, comp, empty);
+		pme.match(&gcb, cvars, affirm, negate);
 
 		comp_var_gnds.push_back(gcb._var_groundings);
 		comp_pred_gnds.push_back(gcb._pred_groundings);
 	}
 
 	// And now, try grounding each of the virtual clauses.
-	dbgprt("BEGIN component recursion: ====================== num comp=%zd num virts=%zd\n",
-	       comp_var_gnds.size(), virtuals.size());
+	dbgprt("BEGIN component recursion: ====================== "
+	       "num comp=%zd num virts=%zd\n",
+	       comp_var_gnds.size(), _virtuals.size());
 	std::map<Handle, Handle> empty_vg;
 	std::map<Handle, Handle> empty_pg;
+	std::vector<Handle> negations; // currently ignored
 	recursive_virtual(cb, _virtuals, negations,
 	                  empty_vg, empty_pg,
 	                  comp_var_gnds, comp_pred_gnds);

@@ -40,8 +40,7 @@ namespace opencog {
  * The *only* thing it provides is node and link matching; it does
  * not consider any truth values in establishing a match.
  */
-class DefaultPatternMatchCB :
-	public virtual PatternMatchCallback
+class DefaultPatternMatchCB : public virtual PatternMatchCallback
 {
 	public:
 		DefaultPatternMatchCB(AtomSpace* as) :
@@ -136,6 +135,12 @@ class DefaultPatternMatchCB :
 		virtual bool virtual_link_match(LinkPtr& lpat, Handle& args);
 
 		/**
+		 * Check that all clauses are connected
+		 */
+		virtual void validate_clauses(std::set<Handle>& vars,
+		                              std::vector<Handle>& clauses);
+
+		/**
 		 * Called to perform the actual search. This makes some default
 		 * assumptions about the kind of things that might be matched,
 		 * in order to drive a reasonably-fast search.
@@ -154,11 +159,10 @@ class DefaultPatternMatchCB :
 		{
 			_type_restrictions = &tm;
 		}
-	private:
+	protected:
 		Handle _root;
 		Handle _starter_pred;
 		VariableTypeMap *_type_restrictions;
-	protected:
 		virtual Handle find_starter(Handle, size_t&, Handle&, size_t&);
 		virtual Handle find_thinnest(std::vector<Handle>&, Handle&, size_t&);
 		AtomSpace *_as;

@@ -98,12 +98,12 @@ bool SingleImplicator::grounding(const std::map<Handle, Handle> &var_soln,
  *
  * See the do_bindlink function documentation for details.
  */
-Handle opencog::bindlink(AtomSpace* as, Handle himplication)
+Handle opencog::bindlink(AtomSpace* as, Handle hbindlink)
 {
 	// Now perform the search.
 	DefaultImplicator impl(as);
 	PatternMatch pm;
-	pm.do_bindlink(himplication, impl);
+	pm.do_bindlink(hbindlink, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.

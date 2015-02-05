@@ -25,14 +25,16 @@
 
 #include "DefaultPatternMatchCB.h"
 #include "PatternMatchEngine.h"
+#include "PatternUtils.h"
 
 using namespace opencog;
 
-// #define DEBUG 1
-#if DEBUG
-   #define dbgprt(f, varargs...) printf(f, ##varargs)
+// Uncomment below to enable debug print
+// #define DEBUG
+#ifdef DEBUG
+#define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
-   #define dbgprt(f, varargs...)
+#define dbgprt(f, varargs...)
 #endif
 
 /* ======================================================== */
@@ -78,8 +80,7 @@ Handle
 DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
                                     Handle& start, size_t& width)
 {
-
-	// If its a node, then we are done. Don't modiy either depth or
+	// If its a node, then we are done. Don't modify either depth or
 	// start.
 	Type t = h->getType();
 	if (classserver().isNode(t)) {
@@ -161,6 +162,36 @@ Handle DefaultPatternMatchCB::find_thinnest(std::vector<Handle>& clauses,
 	}
 
     return best_start;
+}
+
+/**
+ * Check that all clauses are connected
+ */
+void DefaultPatternMatchCB::validate_clauses(std::set<Handle>& vars,
+                                             std::vector<Handle>& clauses)
+{
+	std::set<std::vector<Handle>> components;
+
+	get_connected_components(vars, clauses, components);
+
+	if (1 != components.size())
+	{
+		// Users are going to be stumped by this one, so print
+		// out a verbose, user-freindly debug message to help
+		// them out.
+		std::stringstream ss;
+		ss << "Pattern is not connected! Found "
+		   << components.size() << " components:\n";
+		int cnt = 0;
+		for (const auto& comp : components)
+		{
+			ss << "Connected component " << cnt
+			   << " consists of ----------------: \n";
+			for (Handle h : comp) ss << h->toString();
+			cnt++;
+		}
+		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
+	}
 }
 
 /**

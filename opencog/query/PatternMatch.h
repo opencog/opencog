@@ -43,8 +43,7 @@ class PatternMatch
 		// See PatternMatch.cc for comments
 		void do_match(PatternMatchCallback *,
 		              std::set<Handle>& vars,
-		              std::vector<Handle>& clauses,
-		              std::vector<Handle>& negations)
+		              std::vector<Handle>& clauses)
 			throw (InvalidParamException);
 
 		// See PatternMatch.cc for comments
@@ -72,11 +71,9 @@ class PatternMatch
 		/// The actual clauses. Set by validate_implication()
 		Handle _hclauses;
 		Handle _implicand;
-		std::vector<Handle> _affirm;
-		std::vector<Handle> _negate;
+		std::vector<Handle> _clauses;
 
 		/// The graph components. Set by validate_clauses()
-		std::set<std::vector<Handle>> _components;
 		std::vector<Handle> _virtuals;
 		std::vector<Handle> _nonvirts;
 
@@ -92,8 +89,7 @@ class PatternMatch
 
 		// Validate the clauses inside the ImplicationLink
 		void validate_clauses(std::set<Handle>& vars,
-		                      std::vector<Handle>& clauses,
-		                      std::vector<Handle>& negations)
+		                      std::vector<Handle>& clauses)
 			throw (InvalidParamException);
 
 	public:
@@ -105,8 +101,7 @@ class PatternMatch
 
 		void match(PatternMatchCallback *,
 		           Handle vars,
-		           Handle clauses,
-		           Handle negations = Handle::UNDEFINED)
+		           Handle clauses)
 			throw (InvalidParamException);
 
 		// See PatternMatch.cc for comments

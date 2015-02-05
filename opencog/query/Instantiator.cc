@@ -27,71 +27,53 @@
 
 using namespace opencog;
 
-Handle Instantiator::execution_output_link()
+Handle Instantiator::execution_output_link(const HandleSeq& oset)
 {
 	// This throws if it can't figure out the schema ...
 	// should we try and catch here ?
-	return ExecutionOutputLink::do_execute(_as, _oset);
+	return ExecutionOutputLink::do_execute(_as, oset);
 
 	// Unkown proceedure type.  Return it, maybe some other
 	// execution-link handler will be able to process it.
 	// return as->addLink(EXECUTION_OUTPUT_LINK, oset, TruthValue::TRUE_TV());
 }
 
-bool Instantiator::walk_tree(Handle expr)
+Handle Instantiator::walk_tree(Handle expr)
 {
 	Type t = expr->getType();
 	NodePtr nexpr(NodeCast(expr));
 	if (nexpr)
 	{
-		if (VARIABLE_NODE != t) {
-			_oset.push_back(expr);
-			return false;
-		}
+		if (VARIABLE_NODE != t)
+			return expr;
 
-		// If we are here, we found a variable. Look it up.
+		// If we are here, we found a variable. Look it up. Return a
+		// grounding if it has one, otherwise return the variable
+		// itself
 		std::map<Handle,Handle>::const_iterator it = _vmap->find(expr);
-		if (_vmap->end() != it) {
-			Handle soln = it->second;
-			_oset.push_back(soln);
-		} else {
-			_oset.push_back(expr);
-		}
-		return false;
+		return _vmap->end() != it ? it->second : expr;
 	}
 
 	// If we are here, then we have a link. Walk it.
-	std::vector<Handle> save_oset = _oset;
-	_oset.clear();
 
 	// Walk the subtree, substituting values for variables.
 	LinkPtr lexpr(LinkCast(expr));
+	HandleSeq oset_results;
 	for (Handle h : lexpr->getOutgoingSet())
-		walk_tree(h);
+		oset_results.push_back(walk_tree(h));
 
 	// Fire execution links, if found.
 	_did_exec = false;  // set flag on top-level only
 	if (t == EXECUTION_OUTPUT_LINK)
 	{
 		_did_exec = true;
-		Handle sh(execution_output_link());
-		_oset = save_oset;
-		if (Handle::UNDEFINED != sh)
-		{
-			_oset.push_back(sh);
-		}
-		return false;
+		return execution_output_link(oset_results);
 	}
 
 	// Now create a duplicate link, but with an outgoing set where
 	// the variables have been substituted by their values.
 	TruthValuePtr tv(expr->getTruthValue());
-	Handle sh(_as->addLink(t, _oset, tv));
-
-	_oset = save_oset;
-	_oset.push_back(sh);
-
-	return false;
+	return _as->addLink(t, oset_results, tv);
 }
 
 /**
@@ -117,19 +99,16 @@ Handle Instantiator::instantiate(Handle& expr,
 			"Asked to ground a null expression");
 
 	_vmap = &vars;
-	_oset.clear();
 	_did_exec = false;
 
-	walk_tree(expr);
-	if ((false == _did_exec) && (_oset.size() != 1))
+	Handle result = walk_tree(expr);
+	if ((false == _did_exec) && (result == Handle::UNDEFINED))
 		throw InvalidParamException(TRACE_INFO,
-			"Failure to ground expression (found %d groundings)\n"
+			"Failure to ground expression\n"
 			"Ungrounded expr is %s\n",
-			_oset.size(), expr->toShortString().c_str());
+			expr->toShortString().c_str());
 
-	if (_oset.size() >= 1)
-		return _oset[0];
-	return Handle::UNDEFINED;
+	return result;
 }
 
 /* ===================== END OF FILE ===================== */

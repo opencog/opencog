@@ -30,16 +30,17 @@
 
 using namespace opencog;
 
-// #define DEBUG 1
+// Uncomment below to enable debug print
+// #define DEBUG
 #ifdef WIN32
-#if DEBUG
+#ifdef DEBUG
 	#define dbgprt printf
 #else
 	// something better?
 	#define dbgprt
 #endif
 #else
-#if DEBUG
+#ifdef DEBUG
 	#define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
 	#define dbgprt(f, varargs...)
@@ -95,7 +96,7 @@ static inline void prtmsg(const char * msg, const Handle& h)
  * returning true if there is a mis-match.
  *
  * The comparison is recursive, so this method calls itself on each
- * subtree of the predicate clause, performing comparisions until a
+ * subtree of the predicate clause, performing comparisons until a
  * match is found (or not found).
  *
  * Return false if there's a mis-match. The goal here is to walk over
@@ -113,6 +114,11 @@ static inline void prtmsg(const char * msg, const Handle& h)
  * and so quotes can be used to search for expressions containing
  * quotes.  It is assumed that the QuoteLink has an arity of one, as
  * its quite unclear what an arity of more than one could ever mean.
+ *
+ * That method have side effects. The main one is to insert variable
+ * groundings (and in fact sub-clauses grounding as well) in
+ * var_grounding when encountering variables (and sub-clauses) in the
+ * pattern.
  */
 bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 {
@@ -141,7 +147,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 #ifdef NO_SELF_GROUNDING
 		// But... if handle hg happens to also be a bound var,
 		// then its a mismatch.
-		if (_bound_vars.end() != _bound_vars.find(hg)) return true;
+		if (_bound_vars.end() != _bound_vars.find(hg)) return false;
 #endif
 
 		// If we already have a grounding for this variable, the new
@@ -160,7 +166,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		           hp->toShortString().c_str());
 
 #ifdef NO_SELF_GROUNDING
-		// Disalllow matches that contain a bound variable in the
+		// Disallow matches that contain a bound variable in the
 		// grounding. However, a bound variable can be legitimately
 		// grounded by a free variable (because free variables are
 		// effectively constant literals, during the pattern match.
@@ -185,7 +191,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	}
 
 	// If they're the same atom, then clearly they match.
-	// ... but only hp is a constant i.e. contains no bound variables)
+	// ... but only if hp is a constant i.e. contains no bound variables)
 	if (hp == hg)
 	{
 #ifdef NO_SELF_GROUNDING
@@ -288,7 +294,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			                   &PatternMatchEngine::tree_compare, this);
 			more_depth --;
 			depth --;
-			dbgprt("tree_comp down link mismatch=%d\n", mismatch);
+			dbgprt("tree_comp down link match=%d\n", match);
 
 			if (not match) return false;
 
@@ -486,7 +492,9 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 	return false;
 }
 
-/// Return true if a grounding was found.
+/// Return true if a grounding was found.  It also has the side effect
+/// of updating clause_grounding map when the current clause is being
+/// grounded.
 bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 {
 	depth = 1;
@@ -855,6 +863,8 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
  *            That is, this must be one of the outgoing atoms of the
  *            "starter" link, it must be a node, and it must not be
  *            a variable node.
+ *
+ * Return true if a match is found
  *
  * This routine is meant to be invoked on every candidate atom taken
  * from the atom space. That atom is assumed to anchor some part of

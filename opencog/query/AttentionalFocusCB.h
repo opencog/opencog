@@ -1,5 +1,5 @@
 /*
- * AttentionalFocusCB.cc
+ * AttentionalFocusCB.h
  *
  * Copyright (C) 2014 Misgana Bayetta
  *
@@ -36,11 +36,26 @@ private:
 	}
 public:
 	AttentionalFocusCB(AtomSpace * as) :
-			DefaultPatternMatchCB(as)
-	{}
+		DefaultPatternMatchCB(as) {}
+
+	// Only match nodes if they are in the attentional focus
 	bool node_match(Handle&, Handle&);
+
+	// Only match links if they are in the attentional focus
 	bool link_match(LinkPtr&, LinkPtr&);
+
+	// Only get incomming sets that are in the attentional focus
 	IncomingSet get_incoming_set(Handle h);
+
+	// Does nothing, disconnected clauses are allowed
+	void validate_clauses(std::set<Handle>& vars,
+	                      std::vector<Handle>& clauses);
+
+	// Starts from atoms in the attentional focus, with the right types
+	void perform_search(PatternMatchEngine *pme,
+	                    std::set<Handle> &vars,
+	                    std::vector<Handle> &clauses,
+	                    std::vector<Handle> &negations);
 };
 
 } //namespace opencog
