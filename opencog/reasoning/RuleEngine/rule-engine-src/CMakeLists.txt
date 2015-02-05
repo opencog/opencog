@@ -11,6 +11,7 @@ RuleEngineModule.cc
 InferenceSCM.cc
 Rule.cc
 ControlPolicyParamLoader.cc
+JsonicControlPolicyParamLoader.cc
 )
 
 ADD_DEPENDENCIES(ruleengine
