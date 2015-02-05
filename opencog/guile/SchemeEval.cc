@@ -4,7 +4,7 @@
  * Scheme evaluator.  Given strings in scheme, evaluates them with
  * the appropriate Atomspace, etc.
  *
- * Copyright (c) 2008, 2014 Linas Vepstas
+ * Copyright (c) 2008, 2014, 2015 Linas Vepstas
  */
 
 #ifdef HAVE_GUILE
@@ -60,6 +60,7 @@ void SchemeEval::init(void)
 	scm_set_current_output_port(_outport);
 
 	_in_shell = false;
+	_in_eval = false;
 
 	// User error and crash management
 	error_string = SCM_EOL;
@@ -138,8 +139,8 @@ void SchemeEval::set_error_string(SCM newerror)
 	scm_gc_unprotect_object(olderror);
 }
 
-static pthread_once_t eval_init_once = PTHREAD_ONCE_INIT;
-static pthread_key_t tid_key = 0;
+static std::atomic_flag eval_is_inited = ATOMIC_FLAG_INIT;
+static thread_local bool thread_is_inited = false;
 
 #ifndef HAVE_GUILE2
 	#define WORK_AROUND_GUILE_185_BUG
@@ -192,10 +193,12 @@ static pthread_mutex_t serialize_lock;
 static pthread_key_t ser_key = 0;
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-static void first_time_only(void)
+// Initialization that needs to be performed only once, for the entire
+// process.
+static void init_only_once(void)
 {
-	pthread_key_create(&tid_key, NULL);
-	pthread_setspecific(tid_key, (const void *) 0x42);
+	if (eval_is_inited.test_and_set()) return;
+
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	pthread_mutex_init(&serialize_lock, NULL);
 	pthread_key_create(&ser_key, NULL);
@@ -238,7 +241,7 @@ void SchemeEval::thread_unlock(void)
 
 SchemeEval::SchemeEval(AtomSpace* as)
 {
-	pthread_once(&eval_init_once, first_time_only);
+	init_only_once();
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_lock();
@@ -257,8 +260,8 @@ SchemeEval::SchemeEval(AtomSpace* as)
 void SchemeEval::per_thread_init(void)
 {
 	/* Avoid more than one call per thread. */
-	if (((void *) 0x2) == pthread_getspecific(tid_key)) return;
-	pthread_setspecific(tid_key, (const void *) 0x2);
+	if (thread_is_inited) return;
+	thread_is_inited = true;
 
 #ifdef WORK_AROUND_GUILE_185_BUG
 	scm_set_current_module(guile_user_module);
@@ -292,7 +295,7 @@ std::string SchemeEval::prt(SCM node)
 		SCM port = scm_open_output_string();
 		scm_display (node, port);
 		SCM rc = scm_get_output_string(port);
-		char * str = scm_to_locale_string(rc);
+		char * str = scm_to_utf8_string(rc);
 		std::string rv = str;
 		free(str);
 		scm_close_port(port);
@@ -329,7 +332,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 {
 	// Check for read error. If a read error, then wait for user to correct it.
 	SCM re = scm_symbol_to_string(tag);
-	char * restr = scm_to_locale_string(re);
+	char * restr = scm_to_utf8_string(re);
 	_pending_input = false;
 
 	if (0 == strcmp(restr, "read-error"))
@@ -361,12 +364,12 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 		SCM message = SCM_EOL;
 		if (nargs >= 2)
 			message = SCM_CADR (throw_args);
-		SCM parts   = SCM_EOL;
+		SCM parts = SCM_EOL;
 		if (nargs >= 3)
-			parts   = SCM_CADDR (throw_args);
+			parts = SCM_CADDR (throw_args);
 		SCM rest	= SCM_EOL;
 		if (nargs >= 4)
-			rest	= SCM_CADDDR (throw_args);
+			rest = SCM_CADDDR (throw_args);
 
 		if (scm_is_true (captured_stack))
 		{
@@ -425,14 +428,23 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
  */
 void SchemeEval::eval_expr(const std::string &expr)
 {
-	pexpr = &expr;
+	// If we are recursing, then we already are in the guile
+	// environment, and don't need to do any additional setup.
+	// Just go.
+	if (_in_eval) {
+	   do_eval(expr);
+		return;
+	}
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	pexpr = &expr;
 	_in_shell = true;
+	_in_eval = true;
 	scm_with_guile(c_wrap_eval, this);
+	_in_eval = false;
 	_in_shell = false;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
@@ -467,9 +479,39 @@ void* SchemeEval::c_wrap_eval(void* p)
 	return self;
 }
 
+/// Ad hoc hack to try to limit guile memory consumption, while still
+/// providing decent performance.  The problem addressed here is that
+/// guile can get piggy with the system RAM, happily gobbling up RAM
+/// instead of garbage-collecting it.  Users have noticed. See github
+/// issue #1116. This improves on the original pull request #1117.
+static void do_gc(void)
+{
+	static size_t prev_usage = 0;
+
+	size_t curr_usage = getMemUsage();
+	// Yes, this is 10MBytes. Which seems nutty. But it does the trick...
+	if (10 * 1024 * 1024 < curr_usage - prev_usage)
+	{
+		prev_usage = curr_usage;
+		scm_gc();
+	}
+
+#if 0
+	static SCM since = scm_from_utf8_symbol("heap-allocated-since-gc");
+	SCM stats = scm_gc_stats();
+	size_t allo = scm_to_size_t(scm_assoc_ref(stats, since));
+
+	int times = scm_to_int(scm_assoc_ref(stats, scm_from_utf8_symbol("gc-times")));
+	printf("allo=%lu  mem=%lu time=%d\n", allo/1024, (getMemUsage() / (1024)), times);
+	scm_gc();
+	logger().info() << "Guile evaluated: " << expr;
+	logger().info() << "Mem usage=" << (getMemUsage() / (1024*1024)) << "MB";
+#endif
+}
+
 /**
  * do_eval -- evaluate a scheme expression string.
- * This implements the working guts of the shell-freindly evaluator.
+ * This implements the working guts of the shell-friendly evaluator.
  *
  * This method *must* be called in guile mode, in order for garbage
  * collection, etc. to work correctly!
@@ -487,24 +529,18 @@ void SchemeEval::do_eval(const std::string &expr)
 	_pending_input = false;
 	set_captured_stack(SCM_BOOL_F);
 	scm_gc_unprotect_object(_rc);
+	SCM eval_str = scm_from_utf8_string(_input_line.c_str());
 	_rc = scm_c_catch (SCM_BOOL_T,
-	                      (scm_t_catch_body) scm_c_eval_string,
-	                      (void *) _input_line.c_str(),
+	                      (scm_t_catch_body) scm_eval_string,
+	                      (void *) eval_str,
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
 	_rc = scm_gc_protect_object(_rc);
 
 	atomspace = SchemeSmob::ss_get_env_as("do_eval");
 
-	// Cleanup every now and then, as otherwise guile gets piggy with
-	// the system RAM, happily splurging many gigabytes. The below does
-	// hurt performance, though -- about 15% for one test case...
-	if (++_gc_ctr%80 == 0) { scm_gc(); _gc_ctr = 0; }
-#if 0
-	scm_gc();
-	logger().info() << "Guile evaluated: " << expr;
-	logger().info() << "Mem usage=" << (getMemUsage() / (1024*1024)) << "MB";
-#endif
+	if (++_gc_ctr%80 == 0) { do_gc(); _gc_ctr = 0; }
+
 	_eval_done = true;
 	_wait_done.notify_all();
 }
@@ -601,7 +637,7 @@ std::string SchemeEval::do_poll_result()
 	{
 		std::string rv = poll_port();
 
-		char * str = scm_to_locale_string(error_string);
+		char * str = scm_to_utf8_string(error_string);
 		rv += str;
 		free(str);
 		set_error_string(SCM_EOL);
@@ -626,24 +662,19 @@ std::string SchemeEval::do_poll_result()
 
 /* ============================================================== */
 
-SCM SchemeEval::thunk_scm_eval(void* expr)
-{
-	SCM sexpr = (SCM) expr;
-	return scm_eval(sexpr, scm_interaction_environment());
-}
-
 /**
  * do_scm_eval -- evaluate a scheme expression
  *
  * Similar to do_eval(), with several important differences:
  * 1) The argument must be an SCM expression.
- * 2) No shell-freindly string and output management is performed.
- * 3) Evaluation errors are logged to the log file.
+ * 2) The expression is evaluated by "evo"
+ * 3) No shell-friendly string and output management is performed.
+ * 4) Evaluation errors are logged to the log file.
  *
  * This method *must* be called in guile mode, in order for garbage
  * collection, etc. to work correctly!
  */
-SCM SchemeEval::do_scm_eval(SCM sexpr)
+SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 {
 	per_thread_init();
 
@@ -653,18 +684,18 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	_caught_error = false;
 	set_captured_stack(SCM_BOOL_F);
 	SCM rc = scm_c_catch (SCM_BOOL_T,
-	                 SchemeEval::thunk_scm_eval, (void *) sexpr,
+	                 evo, (void *) sexpr,
 	                 SchemeEval::catch_handler_wrapper, this,
 	                 SchemeEval::preunwind_handler_wrapper, this);
 
 	_eval_done = true;
 	if (_caught_error)
 	{
-		char * str = scm_to_locale_string(error_string);
+		char * str = scm_to_utf8_string(error_string);
 		// Don't blank out the error string yet.... we need it later.
 		// (probably because someone called cog-bind with an
 		// ExecutionOutputLink in it with a bad scheme schema node.)
-		// error_string = SCM_EOL;
+		// set_error_string(SCM_EOL);
 		set_captured_stack(SCM_BOOL_F);
 
 		drain_output();
@@ -708,6 +739,12 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 }
 
 /* ============================================================== */
+
+SCM recast_scm_eval_string(void * expr)
+{
+	return scm_eval_string((SCM)expr);
+}
+
 /**
  * Evaluate a string containing a scheme expression, returning a Handle.
  * If an evaluation error occurs, then the error is logged to the log
@@ -718,13 +755,24 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
  */
 Handle SchemeEval::eval_h(const std::string &expr)
 {
-	pexpr = &expr;
+	// If we are recursing, then we already are in the guile
+	// environment, and don't need to do any additional setup.
+	// Just go.
+	if (_in_eval) {
+		// scm_from_utf8_string is lots faster than scm_from_locale_string
+		SCM expr_str = scm_from_utf8_string(expr.c_str());
+		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
+		return SchemeSmob::scm_to_handle(rc);
+	}
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	pexpr = &expr;
+	_in_eval = true;
 	scm_with_guile(c_wrap_eval_h, this);
+	_in_eval = false;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_unlock();
@@ -736,74 +784,11 @@ Handle SchemeEval::eval_h(const std::string &expr)
 void * SchemeEval::c_wrap_eval_h(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
-	SCM rc = self->do_scm_eval_str(*(self->pexpr));
+	// scm_from_utf8_string is lots faster than scm_from_locale_string
+	SCM expr_str = scm_from_utf8_string(self->pexpr->c_str());
+	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
 	self->hargs = SchemeSmob::scm_to_handle(rc);
 	return self;
-}
-
-/**
- * do_scm_eval_str -- evaluate a scheme expression
- *
- * Similar to do_scm_eval(), but several important differences:
- * 1) The arugment must be a string containing valid scheme,
- * 2) No shell-freindly string and output management is performed,
- * 3) Evaluation errors are logged to the log file.
- *
- * This method *must* be called in guile mode, in order for garbage
- * collection, etc. to work correctly!
- */
-SCM SchemeEval::do_scm_eval_str(const std::string &expr)
-{
-	per_thread_init();
-
-	// Set global atomspace variable in the execution environment.
-	SchemeSmob::ss_set_env_as(atomspace);
-
-	_caught_error = false;
-	set_captured_stack(SCM_BOOL_F);
-	SCM rc = scm_c_catch (SCM_BOOL_T,
-	                      (scm_t_catch_body) scm_c_eval_string,
-	                      (void *) expr.c_str(),
-	                      SchemeEval::catch_handler_wrapper, this,
-	                      SchemeEval::preunwind_handler_wrapper, this);
-
-	_eval_done = true;
-	if (_caught_error)
-	{
-		char * str = scm_to_locale_string(error_string);
-		set_error_string(SCM_EOL);
-		set_captured_stack(SCM_BOOL_F);
-
-		drain_output();
-
-		// Unlike errors seen on the interpreter, log these to the logger.
-		// That's because these errors will be predominantly script
-		// errors that are otherwise invisible to the user/developer.
-		Logger::Level save = logger().getBackTraceLevel();
-		logger().setBackTraceLevel(Logger::NONE);
-		logger().error("%s: guile error was: %s\nFailing expression was %s",
-		               __FUNCTION__, str, expr.c_str());
-		logger().setBackTraceLevel(save);
-
-		free(str);
-		return SCM_EOL;
-	}
-
-	atomspace = SchemeSmob::ss_get_env_as("do_scm_eval_str");
-
-	// Get the contents of the output port, and log it
-	if (logger().isInfoEnabled())
-	{
-		std::string str(poll_port());
-		if (0 < str.size())
-		{
-			logger().info("%s: Output: %s\nWas generated by expr: %s\n",
-			              __FUNCTION__, str.c_str(), expr.c_str());
-		}
-	}
-	drain_output();
-
-	return rc;
 }
 
 /* ============================================================== */
@@ -819,14 +804,22 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
  */
 Handle SchemeEval::apply(const std::string &func, Handle varargs)
 {
-	pexpr = &func;
-	hargs = varargs;
+	// If we are recursing, then we already are in the guile
+	// environment, and don't need to do any additional setup.
+	// Just go.
+	if (_in_eval) {
+		return do_apply(func, varargs);
+	}
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	pexpr = &func;
+	hargs = varargs;
+	_in_eval = true;
 	scm_with_guile(c_wrap_apply, this);
+	_in_eval = false;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_unlock();
@@ -854,17 +847,28 @@ void * SchemeEval::c_wrap_apply(void * p)
  * Isn't there some other, better way of accomplishing this?  My
  * gut instinct is the say "this should be reviewed and possibly
  * deprecated/removed". XXX
+ *
+ * XXX Yes, this should be replaced by ExecutionOutputLink
  */
-std::string SchemeEval::apply_generic(const std::string &func, Handle varargs)
+std::string SchemeEval::apply_generic(const std::string &func, Handle& varargs)
 {
-	pexpr = &func;
-	hargs = varargs;
+	// If we are recursing, then we already are in the guile
+	// environment, and don't need to do any additional setup.
+	// Just go.
+	if (_in_eval) {
+		SCM genericAnswer = do_apply_scm(func, varargs);
+		return SchemeSmob::to_string(genericAnswer);
+	}
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	pexpr = &func;
+	hargs = varargs;
+	_in_eval = true;
 	scm_with_guile(c_wrap_apply_scm, this);
+	_in_eval = false;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_unlock();
@@ -875,16 +879,89 @@ std::string SchemeEval::apply_generic(const std::string &func, Handle varargs)
 
 void * SchemeEval::c_wrap_apply_scm(void * p)
 {
-	logger().debug( "%s: calling wrap", __FUNCTION__);
-
 	SchemeEval *self = (SchemeEval *) p;
 	SCM genericAnswer = self->do_apply_scm(*self->pexpr, self->hargs);
-	logger().debug( "%s: done", __FUNCTION__);
 	self->answer = SchemeSmob::to_string(genericAnswer);
-	logger().debug( "%s: answer: %s", __FUNCTION__, self->answer.c_str());
-
 	return self;
 }
+
+/* ============================================================== */
+
+// A pool of scheme evaluators, sitting hot and ready to go.
+// This is used to implement get_evaluator(), below.  The only
+// reason this is done with a pool, instead of simply new() and
+// delete() is because calling delete() from TLS conflicts with
+// the guile garbage collector, when the thread is destroyed. See
+// the note below.
+static std::map<AtomSpace*, concurrent_stack<SchemeEval*> > pool;
+static std::mutex pool_mtx;
+
+static SchemeEval* get_from_pool(AtomSpace* as)
+{
+	std::lock_guard<std::mutex> lock(pool_mtx);
+	concurrent_stack<SchemeEval*> &stk = pool[as];
+	SchemeEval* ev = NULL;
+	if (stk.try_pop(ev)) return ev;
+	return new SchemeEval(as);
+}
+
+static void return_to_pool(AtomSpace* as, SchemeEval* ev)
+{
+	std::lock_guard<std::mutex> lock(pool_mtx);
+	concurrent_stack<SchemeEval*> &stk = pool[as];
+	stk.push(ev);
+}
+
+/// Return singleton evaluator, for this thread.
+///
+/// Use thread-local storage (TLS) in order to avoid repeatedly
+/// creating and destroying the evaluator.
+///
+/// This will throw an error if used recursively.  Viz, if the
+/// evaluator evaluates something that causes another evaluator
+/// to be needed for this thread (e.g. an ExecutionOutputLink),
+/// then this very same evaluator would be re-entered, corrupting
+/// its own internal state.  If that happened, the result would be
+/// a hard-to-find & fix bug. So instead, we throw.
+SchemeEval* opencog::get_evaluator(AtomSpace* as)
+{
+	static thread_local AtomSpace* current_as = NULL;
+	static thread_local SchemeEval* evaluator = NULL;
+
+	// The eval_dtor runs when this thread is destroyed.
+	class eval_dtor {
+		public:
+		~eval_dtor() {
+			if (evaluator) {
+				// It would have been easier to just call delete evaluator
+				// instead of return_to_pool.  Unfortunately, the delete
+				// won't work, because the STL destructor has already run
+				// the guile GC at this point, for this thread, and so
+				// calling delete will lead to a crash in c_wrap_finish().
+				// It would be nice if we got called before guile did, but
+				// there is no way in TLS to control execution order...
+				return_to_pool(current_as, evaluator);
+				evaluator = NULL; current_as = NULL;
+			}
+		}
+	};
+	static thread_local eval_dtor killer;
+
+	if (current_as != as) {
+		if (evaluator) return_to_pool(current_as, evaluator);
+		current_as = as;
+		evaluator = get_from_pool(as);
+	}
+
+#if 0
+	if (evaluator->recursing())
+		throw RuntimeException(TRACE_INFO,
+			"Evaluator thread singleton used recursively!");
+#endif
+
+	return evaluator;
+}
+
 
 #endif
 

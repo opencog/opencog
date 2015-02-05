@@ -24,7 +24,4 @@
 
 using namespace opencog;
 
-UUID TLB::_brk_uuid = 1;
-
-std::mutex TLB::_mtx;
-
+std::atomic<UUID> TLB::_brk_uuid(1);

@@ -194,6 +194,16 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         if (m_vars.count(kv.first) == 0)
             continue;
 
+        auto checker = [&](const std::pair<Handle, Handle>& nkv)
+        {
+            return kv.second == nkv.second;
+        };
+
+        // if another variable already map to the same solution, discard this grounding
+        // because each variable should map to its own unique solution
+        if (std::any_of(shrinked_soln.begin(), shrinked_soln.end(), checker))
+            return false;
+
         shrinked_soln[kv.first] = kv.second;
     }
 

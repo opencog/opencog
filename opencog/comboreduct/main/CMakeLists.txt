@@ -92,8 +92,16 @@ TARGET_LINK_LIBRARIES(gen-disj-conj
 	${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
 
+ADD_EXECUTABLE (combo-fmt-converter combo-fmt-converter.cc)
+TARGET_LINK_LIBRARIES(combo-fmt-converter
+	comboreduct
+	comboant
+	cogutil
+	${Boost_PROGRAM_OPTIONS_LIBRARY}
+)
+
 # install eval-table
-INSTALL(TARGETS eval-table gen-table gen-disj-conj RUNTIME DESTINATION bin)
+INSTALL(TARGETS eval-table gen-table gen-disj-conj combo-fmt-converter RUNTIME DESTINATION bin)
 
 INSTALL(FILES
 

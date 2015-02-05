@@ -477,7 +477,7 @@ int OAC::addRulesToAtomSpace()
 */
 #ifdef HAVE_GUILE
     // Set PET_HANDLE and OWNER_HANDLE for the Scheme shell before loading rules file
-    SchemeEval* evaluator = new SchemeEval(atomSpace);
+    SchemeEval evaluator1(atomSpace);
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression =  "(set! PET_HANDLE (get_agent_handle \"" + 
@@ -492,9 +492,9 @@ int OAC::addRulesToAtomSpace()
                                               this->getPet().getOwnerId() + 
                                              "\") )";
 
-    scheme_return_value = evaluator->eval(scheme_expression);
+    scheme_return_value = evaluator1.eval(scheme_expression);
 
-    if ( evaluator->eval_error() ) 
+    if ( evaluator1.eval_error() )
         logger().error("OAC::%s - Failed to set PET_HANDLE and OWNER_HANDLE",
                        __FUNCTION__
                       );
@@ -502,8 +502,7 @@ int OAC::addRulesToAtomSpace()
         logger().info("OAC::%s - Set PET_HANDLE and OWNER_HANDLE for Scheme shell",
                       __FUNCTION__
                      );
-    delete evaluator;
-    evaluator = NULL;
+
             
     // Load the psi rules file, including Modulators, DemandGoals and Rules 
     std::string psi_rules_file_name; 

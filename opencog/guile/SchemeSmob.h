@@ -13,6 +13,7 @@
 #ifndef _OPENCOG_SCHEME_SMOB_H
 #define _OPENCOG_SCHEME_SMOB_H
 
+#include <atomic>
 #include <set>
 #include <string>
 #include <vector>
@@ -49,8 +50,9 @@ class SchemeSmob
 			COG_EXTEND    // callbacks into C++ code.
 		};
 
-		static bool is_inited;
-		static void register_procs(void);
+		static std::atomic_flag is_inited;
+		static void register_procs();
+		static void register_proc(const char*, int, int, int, scm_t_subr);
 
 		// The cog_misc_tag are for all other opencog types, such
 		// as truth values, which are ephemeral (garbage-collected)
@@ -103,7 +105,10 @@ class SchemeSmob
 		// AtomSpace query functions
 		static SCM ss_map_type(SCM, SCM);
 		static SCM ss_get_types(void);
+		static SCM ss_get_type(SCM);
 		static SCM ss_type_p(SCM);
+		static SCM ss_node_type_p(SCM);
+		static SCM ss_link_type_p(SCM);
 		static SCM ss_get_subtypes(SCM);
 		static SCM ss_subtype_p(SCM, SCM);
 
@@ -156,8 +161,8 @@ class SchemeSmob
 		static AtomSpace *get_as_from_list(SCM);
 
 		// validate arguments coming from scheme passing into C++
+		static void throw_exception(const char *, const char *);
 		static Type verify_atom_type(SCM, const char *, int pos = 1);
-		static Type verify_node_type(SCM, const char *, int pos = 1);
 		static Handle verify_handle(SCM, const char *, int pos = 1);
 		static TruthValue * verify_tv(SCM, const char *, int pos = 1);
 		static AttentionValue * verify_av(SCM, const char *, int pos = 1);
@@ -170,9 +175,11 @@ class SchemeSmob
 
 		static SCM atomspace_fluid;
 		static void ss_set_env_as(AtomSpace *);
-		static void init();
 		SchemeSmob();
 	public:
+		// This makes init publicly visible; needed for the guile module.
+		static void init();
+
 		// This allows other users to get the atomspace that scheme is
 		// using.
 		static AtomSpace* ss_get_env_as(const char *);
@@ -193,6 +200,12 @@ class SchemeSmob
 
 /** @}*/
 } // namespace opencog
+
+extern "C" {
+
+void opencog_guile_init(void);
+
+};
 
 #endif // _OPENCOG_SCHEME_SMOB_H
 

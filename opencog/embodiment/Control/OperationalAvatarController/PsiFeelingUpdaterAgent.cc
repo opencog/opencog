@@ -228,7 +228,7 @@ void PsiFeelingUpdaterAgent::runUpdaters()
     OC_ASSERT(oac, "Did not get an OAC server");
 
     // Initialize scheme evaluator
-    SchemeEval* evaluator = new SchemeEval(&oac->getAtomSpace());
+    SchemeEval evaluator1(&oac->getAtomSpace());
     std::string scheme_expression, scheme_return_value;
 
     // Process feelings one by one
@@ -246,9 +246,9 @@ void PsiFeelingUpdaterAgent::runUpdaters()
         scheme_expression = "( " + feelingUpdater + " )";
 
         // Run the Procedure that update feeling and get the updated value
-        scheme_return_value = evaluator->eval(scheme_expression);
+        scheme_return_value = evaluator1.eval(scheme_expression);
 
-        if ( evaluator->eval_error() ) {
+        if ( evaluator1.eval_error() ) {
             logger().error( "PsiFeelingUpdaterAgent::%s - Failed to execute '%s'",
                              __FUNCTION__, scheme_expression.c_str());
 
@@ -275,7 +275,6 @@ void PsiFeelingUpdaterAgent::runUpdaters()
                          __FUNCTION__, feeling.c_str(), iFeeling->second.updatedValue);
     }// for
 
-    delete evaluator;
 #endif // HAVE_GUILE
 
 }

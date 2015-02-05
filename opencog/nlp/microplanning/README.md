@@ -71,7 +71,7 @@ The folder contains microplanning code for the NLG pipeline.
 3. For each noun, check whether it can actually be changed to pronoun:
     - if the noun has never been mentioned before or mentioned too long ago (> 3 chunks back), then no
     - if the noun is modified by an `InheritanceLink` in the same chunk, then no
-    - check 3 nouns before and 3 nouns after in the noun sequence;  if another noun share the same pronoun, it is ambiguous, then no
+    - check 3 nouns before in the noun sequence;  if another noun share the same pronoun, it is ambiguous, then no
 
 4. Clone the chunks and replace nouns with pronouns as necessary
     - if a noun is the subject, keep the pronoun as is (ie. "I", "he", "they", etc)
@@ -98,42 +98,40 @@ If you want to use the testing atomspace, you also need
 (load "../opencog/nlp/microplanning/test-atomspace.scm")
 ```
 
-Before running the example, you need to populate the atomspaces with sample sentences of how you want the final output to looks like.  One basic example samples would be:
+Before running the example, you need to populate the atomspaces with sample sentences of how you want the final output to looks like. Some examples would be those in `test-atomspace.scm`.
 
+
+Then you can running microplanning as either
 ```
-(r2l "The beautiful cat hates the tree.")
-(r2l "The ugly cat climbs the stairs.")
-(r2l "He swallowed the apple.")
-(r2l "The funny man collects interesting stories.")
-(r2l "A cat ate the seeds.")
+(microplanning test-declarative-sal "declarative")
 ```
-
-These examples are also in comment form in `test-atomspace.scm`, which you can uncomment.
-
-
-Then you can running microplanning as follow
+or
 ```
 (microplanning test-declarative-sal "declarative" *default_chunks_option* #t)
 ```
-and a list will be returned.  Each element of the returned list is one result of the chunking algorithm, returned as a list of `SetLink`s.  These `SetLink`'s can be passed to Surface Realization.  For example, to realize the first chunking result, we do
+where `*default_chunks_option*` contains the default weights and procedures for chunking, and `#t` indicates you want anaphora generation.  It is possible to create a different `<chunks-option>` object to create different chunking result.
+
+After calling microplanning, a list will be returned.  Each element of the returned list is one result of the chunking algorithm, returned as a list of `SetLink`.  These `SetLink` can be passed to Surface Realization.  For example, to realize the first chunking result, we do
 ```
 (map
-	(lambda (set-link)
-		(receive (sentences weights) (sureal set-link)
-			(filter-map (lambda (s w) (if (>= w 0) s #f)) sentences weights)))
+	(lambda (set-link) (sureal set-link))
 	(car (microplanning test-declarative-sal "declarative" *default_chunks_option* #t))
 )
 ```
 
 It is also possible to construct your own test using your own custom `SequentialAndLink`, as long as each node used in your test set has the corresponding RelEx grammer nodes.
 
-`*default_chunks_option*` containes the default weights and procedures for chunking.  It is possible to create a different `<chunks-option>` object to create different chunking result.
 
-
-
-## TODO
+## TODO / Ideas
 
 1. Improve anaphora inserting for possession:
 
     This is kind of weird in that "Our car" will become "Us car" after processed by RelEx, so there will be strange word matching for SuReal.  We also have "Our car" -> "it" and "Our group" -> "we".  If we have "John's car" and we found that "John" can be a pronoun but not "car", changing the possession link to "his" will ended up as "His's car".
+    
+    
+2. Use external links that share a node to say extra stuff? how to determine what to include?
+
+
+3. Some atoms that are "said" can be be reused later? eg. atoms that do not satisfy a sentence form (like adjectives)?
+
 

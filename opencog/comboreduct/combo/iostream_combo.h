@@ -46,6 +46,10 @@ enum class output_format {
     output_format_count                // to get the number of formats
 };
 
+// Take a string "combo", "python" or "scheme" and return the
+// corresponding format
+output_format parse_output_format(const std::string& fmt_str);
+
 // like operator<< but can choose the output format
 std::ostream& ostream_builtin(std::ostream&, const builtin&,
                               output_format fmt = output_format::combo);
@@ -217,6 +221,18 @@ std::istream& stream_to_combo_tree(std::istream& in, combo_tree& tr)
     strtree_to_combo_tree<BUILTIN_ACTION, PERCEPTION, ACTION_SYMBOL, INDEFINITE_OBJECT>(tmp, tr);
     return  in;
 }
+
+/**
+ * Convert a string representing a combo program in a combo_tree.
+ *
+ * @param combo_prog_str   the string containing the combo program
+ * @param labels           a vector of labels (in case the combo tree has
+ *                         variable name instead of place holder). If empty then
+ *                         it is assumed the combo tree has place holders.
+ * @return                 the combo_tree
+ */
+combo_tree str2combo_tree(const std::string& combo_prog_str,
+                          const std::vector<std::string>& labels);
 
 /**
  * ph2l where ph == "place holder" and l == "label"

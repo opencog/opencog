@@ -30,7 +30,11 @@ def csv(csv_file_path):
             if (temp[2].startswith('/c/en/') and
              temp[1:6] not in container):
                 container.append(temp[1:6])
-    del container[0]
+
+    # This line was presumably here to remove the header line from the file,
+    # but the latest version of conceptnet no longer appears to have it.
+    #TODO: Make some kind of a check or commandline switch to enable this if necessary.
+    #del container[0]
     return container   # container is a list of lists
 
 if __name__ == "__main__":

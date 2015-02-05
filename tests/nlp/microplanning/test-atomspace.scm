@@ -1,34 +1,49 @@
+#|
+These are the sentences that will be used to fill the atomspace.
+They are commented out for now because the RelEx server needs to
+be running to execute them.
+
+For now, the results are in r2l-atomspace.scm
+
 ; =========================
 ; Exact knowledge
 ; =========================
-(r2l "The green cat climbs the stairs and grabs the mouse.")
-(r2l "The man steals the burger and eats it.")
-(r2l "The dog collects the tiny bones and plants them.")
-(r2l "The cat hurts the dog.") ; reflexive test
-(r2l "Our dog grows.") ; possession test (relex changed pronoun form)
-(r2l "What damaged the tree?")
-(r2l "John means the tall man.")
+(r2l "The brown cat climbs the table and grabs the orange.")
+
+;(r2l "John steals the orange and eats it.")          ; need support for the next sentence (the same sentendce w/ and w/o anaphora)
+;(r2l "John steals and eats the orange.")             ; need R2L/RelEx to add proper support for this type of sentence
+;(r2l "John steals the orange and eats the orange.")  ; unless R2L puts the two orange to one instance, will never match this sentence
+
+(r2l "John steals the orange.")
+(r2l "John steals it.")
+(r2l "He steals the orange.")
+(r2l "He steals it.")
+(r2l "John eats the orange.")
+(r2l "John eats it.")
+(r2l "He eats the orange.")
+(r2l "He eats it.")
+
+;(r2l "Sam collects the tiny bones and plants them.")
+;(r2l "Sam collects and plants the tiny bones.")      ; same thing, need R2L/RelEx support
+
+(r2l "Sam collects the tiny bones.")
+(r2l "Sam collects them.")
+(r2l "He collects the tiny bones.")
+(r2l "He collects them.")
+
+;(r2l "The cat hurts the dog.")                       ; reflexive test
+
+(r2l "They grow.")
+(r2l "Apple's dogs grow.")                            ; possession test
+
+(r2l "What burns the tree?")
+(r2l "I mean the tall man.")
+|#
+
 
 ; =========================
-; Inexact basic knowledge
+; Inputs for microplanning
 ; =========================
-;(r2l "The beautiful cat hates the tree.")
-;(r2l "The ugly cat climbs the stairs.")
-;(r2l "He swallowed the apple.")
-;(r2l "The funny man collects interesting stories.")
-;(r2l "A cat ate the seeds.")
-;(r2l "What damaged the tree?")
-;(r2l "John means the funny man.")
-;(r2l "Climb the building!")
-
-; =========================
-; Inexact complex knowledge
-; =========================
-;(r2l "The ugly cat climbs the stairs and enters the house.")
-;(r2l "He grabs the cake and eats it.")
-;(r2l "She collects damaged stamps and categorizes them.")
-;(r2l "Climb the building and grab the book!")
-
 
 (define test-declarative-sal
 	(SequentialAndLink
@@ -83,7 +98,7 @@
 			)
 		)
 		(EvaluationLink (stv 0.99000001 0.99000001)
-			(PredicateNode "grows@3fe4efed-5135-408f-bc1b-d02343bb69c1" (stv 0.001 0.99000001))
+			(PredicateNode "grow@3fe4efed-5135-408f-bc1b-d02343bb69c1" (stv 0.001 0.99000001))
 			(ListLink (stv 0.99000001 0.99000001)
 				(ConceptNode "seeds@474593d7-5a5c-4ceb-9cbb-173ade98cc59" (stv 0.001 0.99000001))
 			)
@@ -193,7 +208,7 @@
 	(WordNode "pine")
 )
 (LemmaLink (stv 1 0.99999982)
-	(WordInstanceNode "grows@3fe4efed-5135-408f-bc1b-d02343bb69c1")
+	(WordInstanceNode "grow@3fe4efed-5135-408f-bc1b-d02343bb69c1")
 	(WordNode "grow")
 )
 
@@ -266,7 +281,7 @@
 	(DefinedLinguisticConceptNode "noun")
 )
 (PartOfSpeechLink (stv 1 0.99999982)
-	(WordInstanceNode "grows@3fe4efed-5135-408f-bc1b-d02343bb69c1")
+	(WordInstanceNode "grow@3fe4efed-5135-408f-bc1b-d02343bb69c1")
 	(DefinedLinguisticConceptNode "verb")
 )
 
@@ -339,8 +354,8 @@
 	(WordNode "pine")
 )
 (ReferenceLink (stv 1 0.99999982)
-	(WordInstanceNode "grows@3fe4efed-5135-408f-bc1b-d02343bb69c1")
-	(WordNode "grows")
+	(WordInstanceNode "grow@3fe4efed-5135-408f-bc1b-d02343bb69c1")
+	(WordNode "grow")
 )
 
 (InheritanceLink (stv 1 0.99999982)
@@ -512,11 +527,11 @@
 	(DefinedLinguisticConceptNode "singular")
 )
 (InheritanceLink (stv 1 0.99999982)
-	(WordInstanceNode "grows@3fe4efed-5135-408f-bc1b-d02343bb69c1")
+	(WordInstanceNode "grow@3fe4efed-5135-408f-bc1b-d02343bb69c1")
 	(DefinedLinguisticConceptNode "present")
 )
 (InheritanceLink (stv 1 0.99999982)
-	(WordInstanceNode "grows@3fe4efed-5135-408f-bc1b-d02343bb69c1")
+	(WordInstanceNode "grow@3fe4efed-5135-408f-bc1b-d02343bb69c1")
 	(DefinedLinguisticConceptNode ".v")
 )
 

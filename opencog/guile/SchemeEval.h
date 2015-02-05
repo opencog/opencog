@@ -13,7 +13,6 @@
 #include <mutex>
 #include <string>
 #include <sstream>
-#include <pthread.h>
 #include <cstddef>
 #include <libguile.h>
 #include <opencog/atomspace/Handle.h>
@@ -91,14 +90,12 @@ class SchemeEval : public GenericEval
 		int _pipeno;
 
 		// Straight-up evaluation
-		static SCM thunk_scm_eval(void *);
-		SCM do_scm_eval(SCM);
-		SCM do_scm_eval_str(const std::string &);
+		SCM do_scm_eval(SCM, SCM (*)(void *));
 		static void * c_wrap_eval_h(void *);
 
 		// Handle apply
-		Handle do_apply(const std::string& func, Handle varargs);
-		SCM do_apply_scm(const std::string& func, Handle varargs);
+		Handle do_apply(const std::string& func, Handle& varargs);
+		SCM do_apply_scm(const std::string& func, Handle& varargs);
 		Handle hargs;
 		static void * c_wrap_apply(void *);
 		static void * c_wrap_apply_scm(void *);
@@ -124,6 +121,7 @@ class SchemeEval : public GenericEval
 
 		AtomSpace* atomspace;
 		int _gc_ctr;
+		bool _in_eval;
 
 	public:
 		SchemeEval(AtomSpace*);
@@ -144,8 +142,13 @@ class SchemeEval : public GenericEval
 		Handle eval_h(const std::stringstream& ss) { return eval_h(ss.str()); }
 
 		Handle apply(const std::string& func, Handle varargs);
-		std::string apply_generic(const std::string& func, Handle varargs);
+		std::string apply_generic(const std::string& func, Handle& varargs);
+
+		bool recursing(void) { return _in_eval; }
 };
+
+// Return per-thread singleton
+SchemeEval* get_evaluator(AtomSpace* as);
 
 /** @}*/
 }

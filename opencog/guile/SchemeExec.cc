@@ -23,7 +23,7 @@ using namespace opencog;
  * is applied to them. If the function returns an atom handle, then
  * this is returned.
  */
-Handle SchemeEval::do_apply(const std::string &func, Handle varargs)
+Handle SchemeEval::do_apply(const std::string &func, Handle& varargs)
 {
 	// Apply the function to the args
 	SCM sresult = do_apply_scm (func, varargs);
@@ -32,15 +32,20 @@ Handle SchemeEval::do_apply(const std::string &func, Handle varargs)
 	return SchemeSmob::scm_to_handle(sresult);
 }
 
+static SCM thunk_scm_eval(void * expr)
+{
+	return scm_eval((SCM)expr, scm_interaction_environment());
+}
+
 /**
  * do_apply_scm -- apply named function func to arguments in ListLink
  * It is assumed that varargs is a ListLink, containing a list of
  * atom handles. This list is unpacked, and then the fuction func
  * is applied to them. The SCM value returned by the function is returned.
  */
-SCM SchemeEval::do_apply_scm( const std::string& func, Handle varargs )
+SCM SchemeEval::do_apply_scm(const std::string& func, Handle& varargs )
 {
-	SCM sfunc = scm_from_locale_symbol(func.c_str());
+	SCM sfunc = scm_from_utf8_symbol(func.c_str());
 	SCM expr = SCM_EOL;
 	
 	// If there were args, pass the args to the function.
@@ -54,7 +59,7 @@ SCM SchemeEval::do_apply_scm( const std::string& func, Handle varargs )
 		expr = scm_cons(sh, expr);
 	}
 	expr = scm_cons(sfunc, expr);
-	return do_scm_eval(expr);
+	return do_scm_eval(expr, thunk_scm_eval);
 }
 
 /**

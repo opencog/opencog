@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2014, 2015 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,8 +25,7 @@
 #ifndef _OPENCOG_TLB_H
 #define _OPENCOG_TLB_H
 
-#include <mutex>
-#include <unordered_map>
+#include <atomic>
 
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/Atom.h>
@@ -42,11 +42,22 @@ class AtomStorage;
 class AtomTable;
 
 /**
- * Each atom stored on OpenCog will have an immutable UUID, which will be used
- * to refer to that atom when a reference to that atom needs to be kept.
- * Each proxy must have a look-up mechanism or table (TLB) to map from
- * this ID to the actual memory address for the atom in the local process
- * address space.
+ * Each atom stored in the AtomSpace will have an immutable UUID, which
+ * may be used to refer to that atom when a reference to that atom needs
+ * to be kept.  This allows atoms to be shared between different
+ * atomspaces running in different memory spaces (on different machines
+ * in a network cluster): a given atom will have a unique UUID by which
+ * it is refered to.
+ *
+ * Atomspaces are also issued UUID's. This allows atomspaces to be
+ * uniquely identified as well.
+ *
+ * Reserving UUID's is kind of like mallocing them, except that
+ * (currently) there is no way to free them.  Use reserve_range()
+ * and reserve_extent() to malloc them.
+ *
+ * Everything in this class is private, mostly because we don't want
+ * anyone to mess with it, except our closest friends.
  */
 class TLB
 {
@@ -59,15 +70,13 @@ class TLB
 
 private:
 
-    // Single, global mutex for locking the TLB.
-    static std::mutex _mtx;
-
     /**
      * Private default constructor for this class to make it abstract.
      */
     TLB() {}
 
-    static UUID _brk_uuid;
+    // Thread-safe atomic
+    static std::atomic<UUID> _brk_uuid;
 
     /** Adds a new atom to the TLB.
      * If the atom has already be added then an exception is thrown.
@@ -82,20 +91,47 @@ private:
     static inline bool isValidHandle(const Handle& h);
 
     static UUID getMaxUUID(void) { return _brk_uuid; }
+
+    /// Reserve a range of UUID's.  The range is inclusive; both lo and
+    /// hi are reserved.  The range must NOT intersect with the
+    /// currently issued UUID's.
     static inline void reserve_range(UUID lo, UUID hi)
     {
-        std::lock_guard<std::mutex> lck(_mtx);
-        if (_brk_uuid <= hi) _brk_uuid = hi+1;
+        if (hi <= lo)
+            throw InvalidParamException(TRACE_INFO,
+                "Bad argument order.");
+        UUID extent = hi - lo + 1;
+
+        UUID oldlo = _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
+
+        if (lo < oldlo)
+            throw InvalidParamException(TRACE_INFO,
+                "Bad range reserve.");
+    }
+
+    /// Reserve an extent of UUID's. The lowest reserved ID is returned.
+    /// That is, after this call, no one else will be issued UUID's in
+    /// the range of [retval, retval+extent-1].
+    static inline UUID reserve_extent(UUID extent)
+    {
+        return _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
+    }
+
+    /// Make sure that all UUID's up to at least 'hi' have been
+    /// reserved.  No error checks are made; its OK if 'hi' has
+    /// already been issued.
+    static inline void reserve_upto(UUID hi)
+    {
+        if (hi < _brk_uuid) return;
+        UUID extent = hi - _brk_uuid + 1;
+        _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
     }
 };
 
 inline bool TLB::isInvalidHandle(const Handle& h)
 {
     return (h == Handle::UNDEFINED) ||
-           (h.value() >= _brk_uuid) || 
-           (NULL == h);  // Hmmm this is not right. XXX
-           // We could have a non-zero uuid, but the pointer is null,
-           // because the atom is in storage or a remote server.
+           (h.value() >= _brk_uuid);
 }
 
 inline bool TLB::isValidHandle(const Handle& h)
@@ -105,15 +141,11 @@ inline bool TLB::isValidHandle(const Handle& h)
 
 inline void TLB::addAtom(AtomPtr atom)
 {
-    std::lock_guard<std::mutex> lck(_mtx);
-
-    if (atom->_uuid != Handle::UNDEFINED.value()) {
+    if (atom->_uuid != Handle::UNDEFINED.value())
         throw InvalidParamException(TRACE_INFO,
-        "Atom is already in the TLB!");
-    }
+                "Atom is already in the TLB!");
 
-    atom->_uuid = _brk_uuid;
-    _brk_uuid++;
+    atom->_uuid = _brk_uuid.fetch_add(1, std::memory_order_relaxed);
 }
 
 } // namespace opencog

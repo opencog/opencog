@@ -788,6 +788,14 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	// change.
 	if (false == update)
 	{
+		// Store the atomspace UUID
+		UUID asuid = 0;
+		AtomTable * at = atom->getAtomTable();
+		// We allow storage of atoms that don't belong to an atomspace.
+		if (at) asuid = at->get_uuid();
+		snprintf(uuidbuff, BUFSZ, "%lu", asuid);
+		STMT("space", uuidbuff);
+
 		// Store the atom UUID
 		Type t = atom->getType();
 		int dbtype = storing_typemap[t];
@@ -1381,7 +1389,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 void AtomStorage::load(AtomTable &table)
 {
 	unsigned long max_nrec = getMaxObservedUUID();
-	TLB::reserve_range(0,max_nrec);
+	TLB::reserve_upto(max_nrec);
 	fprintf(stderr, "Max observed UUID is %lu\n", max_nrec);
 	load_count = 0;
 	max_height = getMaxObservedHeight();
@@ -1440,7 +1448,7 @@ void AtomStorage::load(AtomTable &table)
 void AtomStorage::loadType(AtomTable &table, Type atom_type)
 {
 	unsigned long max_nrec = getMaxObservedUUID();
-	TLB::reserve_range(0,max_nrec);
+	TLB::reserve_upto(max_nrec);
 	logger().debug("AtomStorage::loadType: Max observed UUID is %lu\n", max_nrec);
 	load_count = 0;
 
@@ -1591,16 +1599,17 @@ void AtomStorage::create_tables(void)
 	Response rp;
 
 	// See the file "atom.sql" for detailed documentation as to the 
-	// structure of teh SQL tables.
+	// structure of the SQL tables.
 	rp.rs = db_conn->exec("CREATE TABLE Atoms ("
-	                      "uuid	BIGINT PRIMARY KEY,"
-	                      "type  SMALLINT,"
-	                      "type_tv SMALLINT,"
+	                      "uuid     BIGINT PRIMARY KEY,"
+	                      "space    BIGINT,"
+	                      "type     SMALLINT,"
+	                      "type_tv  SMALLINT,"
 	                      "stv_mean FLOAT,"
 	                      "stv_confidence FLOAT,"
 	                      "stv_count FLOAT,"
-	                      "height SMALLINT,"
-	                      "name    TEXT,"
+	                      "height   SMALLINT,"
+	                      "name     TEXT,"
 	                      "outgoing BIGINT[]);");
 	rp.rs->release();
 
@@ -1617,6 +1626,11 @@ void AtomStorage::create_tables(void)
 	                      "typename TEXT UNIQUE);");
 	rp.rs->release();
 	type_map_was_loaded = false;
+
+	rp.rs = db_conn->exec("CREATE TABLE Spaces ("
+	                      "space     BIGINT,"
+	                      "parent    BIGINT);");
+	rp.rs->release();
 
 	rp.rs = db_conn->exec("CREATE TABLE Global ("
 	                      "max_height INT);");
@@ -1703,7 +1717,7 @@ void AtomStorage::reserve(void)
 {
 	UUID max_observed_id = getMaxObservedUUID();
 	fprintf(stderr, "Reserving UUID up to %lu\n", max_observed_id);
-	TLB::reserve_range(0, max_observed_id);
+	TLB::reserve_upto(max_observed_id);
 }
 
 #endif /* HAVE_SQL_STORAGE */

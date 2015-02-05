@@ -45,7 +45,7 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
 
     // Create an atomspace with a quarter-million atoms
     // This is quasi-realistic for an atomspace doing language processing.
-    // Maybe a bit on the small side ... 
+    // Maybe a bit on the small side ...
     atomCount = (1 << 18);
     defaultNodeType = CONCEPT_NODE;
     chanceOfNonDefaultNode = 0.4f;
@@ -216,7 +216,7 @@ void AtomSpaceBenchmark::setMethod(std::string _methodName)
     methodNames.push_back( _methodName);
 }
 
-#define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember)) 
+#define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
                                      BMFn methodToCall)
 {
@@ -228,7 +228,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
         case BENCH_AS:  cout << "AtomSpace's "; break;
         case BENCH_TABLE:  cout << "AtomTable's "; break;
 #if HAVE_GUILE
-        case BENCH_SCM:  cout << "Scheme's "; 
+        case BENCH_SCM:  cout << "Scheme's ";
         if (memoize) cout << "memoized ";
         else if (compile) cout << "compiled ";
         else cout << "interpreted ";
@@ -320,7 +320,6 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
         UUID_end = TLB::getMaxUUID();
         if (testKind == BENCH_TABLE) {
             atab = new AtomTable();
-            Handle::set_resolver(atab);
         }
         else {
 #if HAVE_CYTHON
@@ -343,7 +342,6 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 #else
             asp = new AtomSpace();
 #endif
-            Handle::set_resolver(&asp->getAtomTable());
 #if HAVE_GUILE
             scm = new SchemeEval(asp);
 #endif
@@ -412,12 +410,12 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
     // Some faction of the time, we create atoms with non-default
     // truth values.  XXX implement this for making of links too...
     bool useDefaultTV = (rng->randfloat() < chanceUseDefaultTV);
-    SimpleTruthValue stv(TruthValue::DEFAULT_TV()); 
+    SimpleTruthValue stv(TruthValue::DEFAULT_TV());
 
     if (not useDefaultTV) {
         float strength = rng->randfloat();
         float conf = rng->randfloat();
-        stv = SimpleTruthValue(strength, conf); 
+        stv = SimpleTruthValue(strength, conf);
     }
 #endif
 
@@ -442,7 +440,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
     }
     case BENCH_AS: {
         clock_t t_begin = clock();
-        asp->addNode(t, scp); 
+        asp->addNode(t, scp);
         return clock() - t_begin;
     }
 #if HAVE_GUILE
@@ -450,7 +448,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
         std::ostringstream ss;
         for (unsigned int i=0; i<Nloops; i++) {
             ss << "(cog-new-node '"
-               << classserver().getTypeName(t) 
+               << classserver().getTypeName(t)
                << " \"" << scp << "\")\n";
 
             p = rng->randdouble();
@@ -467,7 +465,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
             }
         }
         std::string gs = memoize_or_compile(ss.str());
-     
+
         clock_t t_begin = clock();
         scm->eval_h(gs);
         return clock() - t_begin;
@@ -503,7 +501,9 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
 
     HandleSeq outgoing;
     for (size_t j=0; j < arity; j++) {
-        outgoing.push_back(getRandomHandle());
+        Handle h = getRandomHandle();
+        h.operator->();  // Force uuid resolution (outside of timing loop)
+        outgoing.push_back(h);
     }
 
     switch (testKind) {
@@ -535,7 +535,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
             if (25 < arity) arity = 25;
             for (size_t j = 0; j < arity; j++) {
                 char c = 'a' + j;
-                ss << "(define h" << c 
+                ss << "(define h" << c
                    << " (cog-atom " << outgoing[j].value() << "))\n";
             }
             ss << "(cog-new-link '"
@@ -598,7 +598,7 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks,
         cout << "Building atomspace with " << atomspaceSize << " atoms (" <<
             _percentLinks*100.0 << "\% links)" << endl;
     }
-    
+
     // Add nodes
     long nodeCount = atomspaceSize * (1.0f - _percentLinks);
     int i;
@@ -710,7 +710,7 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
     }
     case BENCH_AS: {
         t_begin = clock();
-        asp->removeAtom(h); 
+        asp->removeAtom(h);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}
@@ -764,7 +764,7 @@ timepair_t AtomSpaceBenchmark::bm_getType()
     }
     case BENCH_AS: {
         t_begin = clock();
-        asp->getType(h); 
+        asp->getType(h);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}
@@ -822,7 +822,7 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValueZmq()
 {
     Handle h = getRandomHandle();
     clock_t t_begin = clock();
-    asp->getTVZmq(h); 
+    asp->getTVZmq(h);
     return clock() - t_begin;
 }
 #endif
@@ -900,7 +900,7 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.get_atoms_by_name(types.Node, \"" << oss.str() << "\", True)\n"; 
+        dss << "aspace.get_atoms_by_name(types.Node, \"" << oss.str() << "\", True)\n";
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);
@@ -935,7 +935,7 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.get_atoms_by_type(" << t << ", True)\n"; 
+        dss << "aspace.get_atoms_by_type(" << t << ", True)\n";
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);
@@ -974,7 +974,7 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.get_outgoing(Handle(" << h.value() << "))\n"; 
+        dss << "aspace.get_outgoing(Handle(" << h.value() << "))\n";
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);
@@ -1021,7 +1021,7 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.get_incoming(Handle(" << h.value() << "))\n"; 
+        dss << "aspace.get_incoming(Handle(" << h.value() << "))\n";
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);

@@ -42,18 +42,17 @@ bool PsiDemandUpdaterAgent::Demand::runUpdater(AtomSpace & atomSpace)
 #if HAVE_GUILE
 
     // Initialize scheme evaluator
-    SchemeEval* evaluator = new SchemeEval(&atomSpace);
+    SchemeEval evaluator1(&atomSpace);
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression = "( " + demandUpdater + " )";
 
     // Run the Procedure that update Demands and get the updated value
-    scheme_return_value = evaluator->eval(scheme_expression);
+    scheme_return_value = evaluator1.eval(scheme_expression);
 
-    if ( evaluator->eval_error() ) {
+    if ( evaluator1.eval_error() ) {
         logger().error( "PsiDemandUpdaterAgent::Demand::%s - Failed to execute '%s'",
                          __FUNCTION__, scheme_expression.c_str());
-
         return false;
     }
 
@@ -110,7 +109,7 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
 #if HAVE_GUILE
 
     // Initialize scheme evaluator
-    SchemeEval* evaluator = new SchemeEval(&atomSpace);
+    SchemeEval evaluator1(&atomSpace);
     std::string scheme_expression, scheme_return_value;
 
     // Store the updated Demand levels to AtomSpace
@@ -125,13 +124,12 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
                         ")";
 
     // Run the scheme procedure
-    scheme_return_value = evaluator->eval(scheme_expression);
+    scheme_return_value = evaluator1.eval(scheme_expression);
 
-    if ( evaluator->eval_error() ) {
+    if ( evaluator1.eval_error() ) {
         logger().error( "PsiDemandUpdaterAgent::Demand::%s - Failed to execute '%s'",
                          __FUNCTION__, scheme_expression.c_str());
 
-        delete evaluator;
         return false;
     }
 
@@ -153,16 +151,14 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
                          ")";
 
     // Run the scheme procedure
-    scheme_return_value = evaluator->eval(scheme_expression);
+    scheme_return_value = evaluator1.eval(scheme_expression);
 
-    if ( evaluator->eval_error() ) {
+    if ( evaluator1.eval_error() ) {
         logger().error( "PsiDemandUpdaterAgent::Demand::%s - Failed to execute '%s' for demand '%s'",
                          __FUNCTION__, scheme_expression.c_str(), this->demandName.c_str());
 
-        delete evaluator;
         return false;
     }
-    delete evaluator;
 
     // Store the result and update TruthValue of EvaluationLinkDemandGoal and EvaluationLinkFuzzyWithin
     // TODO: Use PLN forward chainer to handle this?

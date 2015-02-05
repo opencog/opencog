@@ -33,18 +33,10 @@ BCPatternMatch::~BCPatternMatch() {
 }
 
 bool BCPatternMatch::node_match(Handle& node1, Handle& node2) {
-	if (AttentionalFocusCB::node_match(node1, node2))
-		return false;
-	else
-		return true;
-
+	return AttentionalFocusCB::node_match(node1, node2);
 }
 bool BCPatternMatch::link_match(LinkPtr& lpat, LinkPtr& lsoln) {
-	if (AttentionalFocusCB::link_match(lpat, lsoln))
-		return false;
-	else
-		return true;
-
+	return AttentionalFocusCB::link_match(lpat, lsoln);
 }
 
 bool BCPatternMatch::grounding(const std::map<Handle, Handle> &var_soln,

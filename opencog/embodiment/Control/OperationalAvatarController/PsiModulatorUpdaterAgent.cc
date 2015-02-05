@@ -40,15 +40,15 @@ bool PsiModulatorUpdaterAgent::Modulator::runUpdater (AtomSpace & atomSpace)
 #if HAVE_GUILE    
 
     // Initialize scheme evaluator
-    SchemeEval* evaluator = new SchemeEval(&atomSpace);
+    SchemeEval evaluator1(&atomSpace);
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression = "( " + modulatorUpdater + " )";
 
     // Run the Procedure that update Modulators and get the updated value
-    scheme_return_value = evaluator->eval(scheme_expression);
+    scheme_return_value = evaluator1.eval(scheme_expression);
 
-    if ( evaluator->eval_error() ) {
+    if ( evaluator1.eval_error() ) {
         logger().error( "PsiModulatorUpdaterAgent::Modulator::%s - Failed to execute '%s'", 
                          __FUNCTION__, 
                          scheme_expression.c_str() 
@@ -93,7 +93,7 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace
 #if HAVE_GUILE    
 
     // Initialize scheme evaluator
-    SchemeEval* evaluator = new SchemeEval(&atomSpace);
+    SchemeEval evaluator1(&atomSpace);
     std::string scheme_expression, scheme_return_value;
 
     // Store the updated Modulator levels to AtomSpace
@@ -108,15 +108,14 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace
                          ")";   
 
     // Run the scheme procedure
-    scheme_return_value = evaluator->eval(scheme_expression);
+    scheme_return_value = evaluator1.eval(scheme_expression);
 
-    if ( evaluator->eval_error() ) {
+    if ( evaluator1.eval_error() ) {
         logger().error( "PsiModulatorUpdaterAgent::Modulator::%s - Failed to execute '%s'", 
                          __FUNCTION__, 
                          scheme_expression.c_str() 
                       );
 
-        delete evaluator;
         return false; 
     }
 
@@ -126,7 +125,6 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace
                    this->currentModulatorValue
                   );
 
-    delete evaluator;
     return true; 
 
 #else // HAVE_GUILE    
@@ -270,15 +268,16 @@ void PsiModulatorUpdaterAgent::run()
 
 #if HAVE_GUILE    
     // Initialize scheme evaluator
-    SchemeEval* evaluator = new SchemeEval(&atomSpace);
+    SchemeEval evaluator1(&atomSpace);
+
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression = "( get_pleasure_value )";
 
     // Run the scheme procedure
-    scheme_return_value = evaluator->eval(scheme_expression);
+    scheme_return_value = evaluator1.eval(scheme_expression);
 
-    if ( evaluator->eval_error() ) {
+    if ( evaluator1.eval_error() ) {
         logger().error( "PsiModulatorUpdaterAgent::Modulator::%s - Failed to execute '%s'", 
                          __FUNCTION__, 
                          scheme_expression.c_str() 
@@ -286,7 +285,6 @@ void PsiModulatorUpdaterAgent::run()
     }
 
     this->pleasure = atof( scheme_return_value.c_str() ); 
-    delete evaluator;
 #endif // HAVE_GUILE    
 
 

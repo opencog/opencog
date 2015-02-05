@@ -103,7 +103,8 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
     }
     if (LIST_LINK != args->getType())
     {
-        throw RuntimeException(TRACE_INFO, "Expecting arguments to ExecutionOutputLink!");
+        throw RuntimeException(TRACE_INFO,
+            "Expecting arguments to ExecutionOutputLink!");
     }
 
     // Get the schema name.
@@ -118,11 +119,11 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
         size_t pos = 4;
         while (' ' == schema[pos]) pos++;
 
-        SchemeEval applier(as);
-        Handle h = applier.apply(schema.substr(pos), args);
-        return h;
+        SchemeEval* applier = get_evaluator(as);
+        return applier->apply(schema.substr(pos), args);
 #else
-        throw RuntimeException(TRACE_INFO, "Cannot evaluate scheme GroundedSchemaNode!");
+        throw RuntimeException(TRACE_INFO,
+            "Cannot evaluate scheme GroundedSchemaNode!");
 #endif /* HAVE_GUILE */
     }
 
@@ -140,11 +141,13 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
         // Return the handle
         return h;
 #else
-        throw RuntimeException(TRACE_INFO, "Cannot evaluate python GroundedSchemaNode!");
+        throw RuntimeException(TRACE_INFO,
+            "Cannot evaluate python GroundedSchemaNode!");
 #endif /* HAVE_CYTHON */
     }
 
     // Unkown proceedure type.
-    throw RuntimeException(TRACE_INFO, "Cannot evaluate unknown GroundedSchemaNode!");
+    throw RuntimeException(TRACE_INFO,
+        "Cannot evaluate unknown GroundedSchemaNode!");
 }
 

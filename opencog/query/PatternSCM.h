@@ -34,8 +34,11 @@ class PatternSCM
 		~PatternSCM();
 };
 
-
 }
+
+extern "C" {
+void opencog_query_init(void);
+};
 
 #endif // _OPENCOG_PATTERN_SCM_H
 

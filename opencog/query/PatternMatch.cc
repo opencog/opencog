@@ -29,7 +29,7 @@
 
 using namespace opencog;
 
-PatternMatch::PatternMatch(void) {}
+PatternMatch::PatternMatch(void) : _used(false) {}
 
 /// See the documentation for do_match() to see what this function does.
 /// This is just a convenience wrapper around do_match().

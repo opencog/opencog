@@ -9,10 +9,12 @@ the same directory as this README.
 Docker image structure:
 
     ├─opencog-deps
-      ├─opencog-dev (for a dev environment)
+      ├─opencog-dev:cli (for a dev environment)
+      ├─opencog-dev:ide
       ├─opencog-buildslave
       ├─opencog-distcc
       ├─opencog-embodiment
+      ├─cogserver
 
 Using bind mounts (some containers currently use them) is a hacky solution
 to passing the opencog source tree to each docker build. Run bindmounts.sh

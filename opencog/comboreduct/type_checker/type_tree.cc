@@ -31,7 +31,17 @@
 namespace opencog { namespace combo {
 
 using namespace std;
-        
+
+vertex default_vertex_value(type_node tn) {
+    switch(tn) {
+    case id::contin_type: return 0.0;
+    case id::boolean_type: return id::logical_false;
+    default:
+        logger().error() << "default value for " << tn << " not implemented";
+        return vertex();
+    }
+}
+
 // ------------ support for builtins --------------------------
 
 char get_arity(builtin b)

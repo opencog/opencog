@@ -100,6 +100,18 @@ utilities can be pulled up at the scheme shell prompt, by saying
 have to consult the individual scm files for more info.
 
 
+== Modules ==
+-------------
+Currently OpenCog's scheme functions are broken into 3 different scheme
+modules: (opencog), (opencog extension), and (opencog atomtypes).  Each
+one can be listed with the following code:
+
+(module-for-each (lambda (symbol value) (display symbol) (newline))
+(resolve-interface '(opencog)))
+
+Replace '(opencog) with the corresponding module name.
+
+
 == Core Functions ==
 --------------------
 The following are the "core" functions, implemented in the guile-to-C++
@@ -584,6 +596,36 @@ interface.
           guile> (cog-type? 'FlorgleBarf)
           #f
 
+=== cog-node-type? ===
+      Return #t if the symbol names an node type, else return #f
+
+      Example:
+          guile> (cog-node-type? 'ConceptNode)
+          #t
+          guile> (cog-node-type? 'ListLink)
+          #f
+          guile> (cog-node-type? 'FlorgleBarf)
+          #f
+
+
+=== cog-link-type? ===
+      Return #t if the symbol names a link type, else return #f
+
+      Example:
+          guile> (cog-link-type? 'ConceptNode)
+          #f
+          guile> (cog-link-type? 'ListLink)
+          #t
+          guile> (cog-link-type? 'FlorgleBarf)
+          #f
+
+=== cog-type->int ===
+      Return the integer value corresponding to an atom type.
+
+      Example:
+          guile> (cog-type->int 'ListLink)
+          8
+
 === cog-get-subtypes type ===
       Return a list of the subtypes of the given type.  Only the 
       immediate subtypes are returned; to obtain all subtypes, this
@@ -791,9 +833,3 @@ ToDo
    data corruption. However, guile needs to be fixed to change this 
    behaviour.
 
-
--- list all proceedures in a module:
-   (module-for-each (lambda (symbol value) (display symbol) (newline))
-   (resolve-interface '(guile)))
-
-   Make the above easier for users.

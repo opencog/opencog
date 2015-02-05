@@ -97,7 +97,7 @@ public:
         delete p_message; 
 
         OAC & oac = oacMock.getOAC(); 
-        oac.psiModulatorUpdaterAgent->init(&oac);  
+        oac.psiModulatorUpdaterAgent->init();
     }
 
     ~PsiModulatorUpdaterAgentUTest() {
