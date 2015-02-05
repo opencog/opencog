@@ -119,14 +119,16 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
 #define XSD_NAMESPACE "http://www.opencog.org/brain"
 #define XSD_FILE_NAME "BrainProxyAxon.xsd"
 
-    if (fileExists(XSD_FILE_NAME))  {
+    if (fileExists(XSD_FILE_NAME)) {
         schemaLocation += XSD_NAMESPACE " " XSD_FILE_NAME;
     } else if (fileExists(PVP_XSD_FILE_PATH)) {
         schemaLocation += XSD_NAMESPACE " " PVP_XSD_FILE_PATH;
     }
     if (schemaLocation.size() > 0) {
-        logger().info("PAI - Setting the schemaLocation to: %s\n", schemaLocation.c_str());
-        // The line bellow replace the path for the XSD file so that it does not need to be in the current directory...
+        logger().info("PAI - Setting the schemaLocation to: %s\n",
+                      schemaLocation.c_str());
+        // The line bellow replace the path for the XSD file so that
+        // it does not need to be in the current directory...
         parser->setExternalSchemaLocation(schemaLocation.c_str());
     }
 #endif
@@ -1923,24 +1925,30 @@ void PAI::processInstruction(DOMElement * element)
                           );
         }
 
-        // Put the newly parsed sentence into AtomSpace, then PsiActionSelectionAgent
-        // and dialog_system.scm will continue processing it.
-        scheme_return_value = evaluator->eval(parsedSentenceText);
+        // Put the newly parsed sentence into AtomSpace, then
+        // PsiActionSelectionAgent and dialog_system.scm will continue
+        // processing it.
+        scheme_return_value = evaluator->eval(parsedSentenceText); 
         if ( evaluator->eval_error() ) {
-            logger().error("PAI::%s - Failed to put the parsed result from RelexServer to AtomSpace",
-                           __FUNCTION__
-                          );
+            logger().error("PAI::%s - Failed to put the parsed result from"
+                           " RelexServer to AtomSpace", 
+                           __FUNCTION__);
         }
         delete evaluator;
     }
 #endif
 
     // Add the perceptions into AtomSpace
-    Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME, true);
-    Handle saySchemaNode = AtomSpaceUtil::addNode(atomSpace, GROUNDED_SCHEMA_NODE, SAY_SCHEMA_NAME, true);
+    Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE,
+                                                  ACTION_DONE_PREDICATE_NAME,
+                                                  true);
+    Handle saySchemaNode = AtomSpaceUtil::addNode(atomSpace,
+                                                  GROUNDED_SCHEMA_NODE,
+                                                  SAY_SCHEMA_NAME, true);
     Handle agentNode = AtomSpaceUtil::getAgentHandle(atomSpace, internalAvatarId);
     if (agentNode == Handle::UNDEFINED) {
-        agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalAvatarId);
+        agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE,
+                                           internalAvatarId);
     }
 
     string sentence = "to:";
@@ -1949,7 +1957,8 @@ void PAI::processInstruction(DOMElement * element)
     sentence += sentenceText;
     //logger().debug("sentence = '%s'\n", sentence.c_str());
 
-    Handle sentenceNode = AtomSpaceUtil::addNode( atomSpace, SENTENCE_NODE, sentence.c_str() );
+    Handle sentenceNode = AtomSpaceUtil::addNode(atomSpace, SENTENCE_NODE,
+                                                 sentence.c_str());
 
     if ( avatarInterface.getPetId( ) == internalPetId ) {
         AtomSpaceUtil::setPredicateValue( atomSpace,
@@ -2694,7 +2703,8 @@ void PAI::addSpaceMap(DOMElement* element,unsigned long timestamp)
     spaceServer().addOrGetSpaceMap(timestamp, mapName, xMin, yMin, zMin, offsetx, offsety, offsetz, floorHeight);
 }
 
-void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool useProtoBuf)
+void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles,
+                         bool useProtoBuf)
 {
     if (!useProtoBuf) {
         // Use the old parser to handle XML document.
@@ -2713,7 +2723,8 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
         return;
     }
 
-    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag,
+                         PAIUtils::MAX_TAG_LENGTH);
     char* isFirstPercept = XMLString::transcode(element->getAttribute(tag));
     string isFirstPerceptStr(isFirstPercept);
     bool isFirstPerceptWorld;
@@ -2740,8 +2751,9 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
 
         MapInfoSeq mapinfoSeq;
         mapinfoSeq.ParseFromArray((void*)binary, length);
-        logger().debug("PAI - processMapInfo recieved mapinfos information: %s", mapinfoSeq.DebugString().c_str());
-
+        logger().debug("PAI - processMapInfo recieved mapinfos information: %s",
+                       mapinfoSeq.DebugString().c_str());
+        
         for (int j = 0; j < mapinfoSeq.mapinfos_size(); j++)
         {
             const MapInfo& mapinfo = mapinfoSeq.mapinfos(j);
@@ -3574,7 +3586,8 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
     XMLString::transcode(TERRAIN_DATA_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     DOMNodeList* dataList = element->getElementsByTagName(tag);
 
-    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag,
+                         PAIUtils::MAX_TAG_LENGTH);
     char* isFirstPercept = XMLString::transcode(element->getAttribute(tag));
     string isFirstPerceptStr(isFirstPercept);
 
