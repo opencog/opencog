@@ -26,6 +26,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include "../combo/iostream_combo.h"
 #include "../type_checker/type_tree.h"
@@ -35,6 +36,7 @@ using namespace boost::algorithm;
 using namespace std;
 using namespace opencog;
 using namespace combo;
+using boost::trim;
 
 // using namespace ant_combo;
 
@@ -43,6 +45,7 @@ struct pgrParameters
 {
 	vector<string> combo_programs;
 	vector<string> combo_programs_files;
+	string log_level;
 	string output_file;
 	string output_format_str;
 };
@@ -72,6 +75,11 @@ pgrParameters parse_program_args(int argc, char** argv)
 		 "This option may be "
 		 "used several times to convert several programs.\n")
 
+		("log-level,l",
+         value<string>(&pa.log_level)->default_value("INFO"),
+         "Log level, possible levels are NONE, ERROR, WARN, INFO, "
+         "DEBUG, FINE. Case does not matter.\n")
+
 		("combo-programs-file,C",
 		 value<vector<string>>(&pa.combo_programs_files),
 		 "Other alternative way (disables stdin). "
@@ -99,6 +107,22 @@ pgrParameters parse_program_args(int argc, char** argv)
 		cout << desc << "\n";
 		exit(1);
 	}
+
+	// Remove old log_file before setting the new one.
+	const string log_filename = "combo-fmt-converter.log";
+	remove(log_filename.c_str());
+	logger().setFilename(log_filename);
+	trim(pa.log_level);
+	Logger::Level level = logger().getLevelFromString(pa.log_level);
+	if (level != Logger::BAD_LEVEL)
+		logger().setLevel(level);
+	else {
+		cerr << "Error: Log level " << pa.log_level
+		     << " is incorrect (see --help)." << endl;
+		exit(1);
+	}
+	logger().setBackTraceLevel(Logger::ERROR);
+	logger().setPrintErrorLevelStdout();
 
 	return pa;
 }
@@ -128,27 +152,15 @@ vector<string> get_all_combo_tree_str(const pgrParameters& pa)
     return res;
 }
 
-void output_tree(const pgrParameters& pa,
-                 const combo_tree& tr,
-                 const vector<string>& vars,
-                 combo::output_format fmt)
-{
-    if(pa.output_file.empty())
-	    ostream_combo_tree(cout, tr, vars, fmt) << std::endl;
-    else {
-        ofstream of(pa.output_file.c_str());
-	    ostream_combo_tree(of, tr, vars, fmt) << std::endl;
-    }
-}
-
 // Convert a single combo program gotten from istream
-istream& convert(istream& in, const pgrParameters& pa,
-                 combo::output_format fmt) {
+void convert(istream& in, ostream& out,
+             const pgrParameters& pa,
+             combo::output_format fmt) {
 	// Parse combo tree
 	string line;
 	getline(in, line);
 	if (line.empty())
-		return in;
+		return;
 
 	// Remove useless wrapping double quotes
 	if (starts_with(line, "\"") and ends_with(line, "\""))
@@ -159,15 +171,14 @@ istream& convert(istream& in, const pgrParameters& pa,
 	type_tree tt = infer_type_tree(tr);
 
 	// Write to the right format
-	output_tree(pa, tr, variables, fmt);
-
-	return in;
+	ostream_combo_tree(out, tr, variables, fmt) << std::endl;
 }
 
 int main(int argc, char** argv)
 {
+	// Parse program options
 	pgrParameters pa = parse_program_args(argc, argv);
-
+	
 	// Parse output format
 	combo::output_format fmt = parse_output_format(pa.output_format_str);
 
@@ -175,17 +186,23 @@ int main(int argc, char** argv)
 	// stdin
 	vector<string> combo_trees_str = get_all_combo_tree_str(pa);
 
+	ostream* out = pa.output_file.empty()?
+		&cout :	new ofstream(pa.output_file.c_str());
+
 	if (combo_trees_str.empty()) {
 		// If empty then use stdin
 		while (cin.good())
-			convert(cin, pa, fmt);
+			convert(cin, *out, pa, fmt);
 	} else {
 		// Don't use stdin
 		for (const string& str : combo_trees_str) {
 			stringstream ss(str);
-			convert(ss, pa, fmt);
+			convert(ss, *out, pa, fmt);
 		}
 	}
-	
-	return 0;	
+
+	if (not pa.output_file.empty())
+		delete out;
+
+	return 0;
 }
