@@ -187,6 +187,7 @@ class PatternMatchCallback
 		 */
 		virtual bool optional_clause_match(Handle& pattrn, Handle& grnd)
 		{
+			if (Handle::UNDEFINED == grnd) return true;
 			return false;
 		}
 
