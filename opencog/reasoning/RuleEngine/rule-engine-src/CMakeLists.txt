@@ -7,6 +7,7 @@ pln/Chainer.cc
 pln/BCPatternMatch.cc
 pln/ForwardChainInputMatchCB.cc
 pln/ForwardChainPatternMatchCB.cc
+pln/FCMemory.cc
 RuleEngineModule.cc
 InferenceSCM.cc
 Rule.cc
