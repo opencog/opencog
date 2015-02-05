@@ -10,6 +10,7 @@ pln/ForwardChainPatternMatchCB.cc
 RuleEngineModule.cc
 InferenceSCM.cc
 Rule.cc
+ControlPolicyParamLoader.cc
 )
 
 ADD_DEPENDENCIES(ruleengine
