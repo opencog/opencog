@@ -2,7 +2,7 @@
 (define (stv mean conf) (cog-new-stv mean conf))
 
 ; SENTENCE: [The color of the sky is blue.]
-; _predadj (<<color>>, <<blue>>) 
+; _predadj (<<color>>, <<blue>>)
 (EvaluationLink (stv 1.0 1.0)
    (DefinedLinguisticRelationshipNode "_predadj")
    (ListLink
@@ -10,7 +10,7 @@
       (WordInstanceNode "blue@cf040834-cf7a-42ae-bd42-83a001d3c3e3")
    )
 )
-; of (<<color>>, <<sky>>) 
+; of (<<color>>, <<sky>>)
 (EvaluationLink (stv 1.0 1.0)
    (PrepositionalRelationshipNode "of")
    (ListLink
@@ -20,14 +20,14 @@
 )
 
 
-; The whole point here is that the NotLink means that no match at all
-; should be found. i.e. $prep can match "of" and should thus be
+; The whole point here is that the AbsentLink means that no match at
+; all should be found. i.e. $prep can match "of" and should thus be
 ; rejected.
 ;
 
 (define (rule-good)
    (BindLink
-      (ListLink 
+      (ListLink
          (TypedVariableLink
             (VariableNode "$var2")
             (VariableTypeNode "WordInstanceNode")
@@ -46,15 +46,15 @@
          (AndLink
             (EvaluationLink (stv 1 0.99999988)
                (DefinedLinguisticRelationshipNode "_predadj")
-               (ListLink 
+               (ListLink
                   (VariableNode "$var2")
                   (VariableNode "$var1")
                )
             )
-            (NotLink 
-               (EvaluationLink (stv 1 0.99999988) 
+            (AbsentLink
+               (EvaluationLink (stv 1 0.99999988)
                   (VariableNode "$prep")
-                  (ListLink 
+                  (ListLink
                      (VariableNode "$var2")
                      (VariableNode "$var3")
                   )
@@ -72,12 +72,12 @@
 )
 
 
-; This rule has an explicitly bad VariableTypeNode -- 
+; This rule has an explicitly bad VariableTypeNode --
 ; PreposxitionalRelationshipNode is misspelled (on purpose,
 ; since we want to test for the mis-spelled case).
 (define (rule-bad)
    (BindLink
-      (ListLink 
+      (ListLink
          (TypedVariableLink
             (VariableNode "$var2")
             (VariableTypeNode "WordInstanceNode")
@@ -96,15 +96,15 @@
          (AndLink
             (EvaluationLink (stv 1 0.99999988)
                (DefinedLinguisticRelationshipNode "_predadj")
-               (ListLink 
+               (ListLink
                   (VariableNode "$var2")
                   (VariableNode "$var1")
                )
             )
-            (NotLink 
-               (EvaluationLink (stv 1 0.99999988) 
+            (AbsentLink
+               (EvaluationLink (stv 1 0.99999988)
                   (VariableNode "$prep")
-                  (ListLink 
+                  (ListLink
                      (VariableNode "$var2")
                      (VariableNode "$var3")
                   )
