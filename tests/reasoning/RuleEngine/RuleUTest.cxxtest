@@ -149,7 +149,7 @@ void RuleUTest::test_and(void)
     load_scm_files_from_config(*as);
 
     // Apply the and rule
-    Handle results = eval->eval_h("(cog-bind pln-rule-deduction)");
+    Handle results = eval->eval_h("(cog-bind-pln pln-rule-and)");
 
     // It should contain 4 groundings, (A, A), (A, B), (B, A), (B, B)
     TS_ASSERT_EQUALS(4, as->getArity(results));
