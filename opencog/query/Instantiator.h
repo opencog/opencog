@@ -54,7 +54,6 @@ private:
 		 * If an execution occur then _did_exec is set to true.
 		 */
 		Handle walk_tree(Handle tree);
-		Handle execution_output_link(const HandleSeq&);
 		bool _did_exec;
 
 	public:

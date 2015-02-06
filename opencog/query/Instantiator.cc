@@ -27,22 +27,11 @@
 
 using namespace opencog;
 
-Handle Instantiator::execution_output_link(const HandleSeq& oset)
-{
-	// This throws if it can't figure out the schema ...
-	// should we try and catch here ?
-	return ExecutionOutputLink::do_execute(_as, oset);
-
-	// Unkown proceedure type.  Return it, maybe some other
-	// execution-link handler will be able to process it.
-	// return as->addLink(EXECUTION_OUTPUT_LINK, oset, TruthValue::TRUE_TV());
-}
-
 Handle Instantiator::walk_tree(Handle expr)
 {
 	Type t = expr->getType();
-	NodePtr nexpr(NodeCast(expr));
-	if (nexpr)
+	LinkPtr lexpr(LinkCast(expr));
+	if (not lexpr)
 	{
 		if (VARIABLE_NODE != t)
 			return expr;
@@ -57,7 +46,6 @@ Handle Instantiator::walk_tree(Handle expr)
 	// If we are here, then we have a link. Walk it.
 
 	// Walk the subtree, substituting values for variables.
-	LinkPtr lexpr(LinkCast(expr));
 	HandleSeq oset_results;
 	for (Handle h : lexpr->getOutgoingSet())
 		oset_results.push_back(walk_tree(h));
@@ -67,13 +55,14 @@ Handle Instantiator::walk_tree(Handle expr)
 	if (t == EXECUTION_OUTPUT_LINK)
 	{
 		_did_exec = true;
-		return execution_output_link(oset_results);
+		// This throws if it can't figure out the schema ...
+		// Let the throw pass right on up the stack.
+		return ExecutionOutputLink::do_execute(_as, oset_results);
 	}
 
 	// Now create a duplicate link, but with an outgoing set where
 	// the variables have been substituted by their values.
-	TruthValuePtr tv(expr->getTruthValue());
-	return _as->addLink(t, oset_results, tv);
+	return _as->addLink(t, oset_results, expr->getTruthValue());
 }
 
 /**
