@@ -54,7 +54,7 @@ private:
         SchemeEval* eval;
 
 public:
-    RuleUTest(void)
+    RuleUTest()
     {
         try
         {
@@ -81,17 +81,19 @@ public:
                 std::remove(logger().getFilename().c_str());
     }
 
-    void setUp(void);
-    void tearDown(void);
+    void setUp();
+    void tearDown();
 
-    void test_deduction(void);
+    void test_deduction();
+	void test_and();
+	void test_not();
 };
 
-void RuleUTest::tearDown(void)
+void RuleUTest::tearDown()
 {
 }
 
-void RuleUTest::setUp(void)
+void RuleUTest::setUp()
 {
     config().set("SCM_PRELOAD",
         "opencog/atomspace/core_types.scm, "
@@ -110,7 +112,7 @@ void RuleUTest::setUp(void)
  * Tests the deduction rule (pln-rule-deduction) defined in:
  * opencog/reasoning/RuleEngine/rules/pln/deduction.scm
  */
-void RuleUTest::test_deduction(void)
+void RuleUTest::test_deduction()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
@@ -132,4 +134,44 @@ void RuleUTest::test_deduction(void)
     // instances of men are also humans (Socrates, Einstein, and Peirce)
     results = eval->eval_h("(cog-bind find-humans)");
     TS_ASSERT_EQUALS(4, as->getArity(results));
+}
+
+/*
+ * Tests the and rule (pln-rule-and) defined in:
+ * opencog/reasoning/RuleEngine/rules/pln/and.scm
+ */
+void RuleUTest::test_and()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/RuleEngine/simple-predicates.scm, "
+                 "reasoning/RuleEngine/rules/pln/and.scm");
+    load_scm_files_from_config(*as);
+
+    // Apply the and rule
+    Handle results = eval->eval_h("(cog-bind-pln pln-rule-and)");
+
+    // It should contain 4 groundings, (A, A), (A, B), (B, A), (B, B)
+    TS_ASSERT_EQUALS(4, as->getArity(results));
+}
+
+/*
+ * Tests the not rule (pln-rule-not) defined in:
+ * opencog/reasoning/RuleEngine/rules/pln/not.scm
+ */
+void RuleUTest::test_not()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/RuleEngine/simple-predicates.scm, "
+                 "reasoning/RuleEngine/rules/pln/not.scm");
+    load_scm_files_from_config(*as);
+
+    // Apply the and rule
+    Handle results = eval->eval_h("(cog-bind-pln pln-rule-not)");
+
+    // It should contain 2 groundings, not(A), not(B)
+    TS_ASSERT_EQUALS(2, as->getArity(results));
 }
