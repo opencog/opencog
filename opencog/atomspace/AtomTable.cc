@@ -559,7 +559,9 @@ Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
                     // thread is performing an atom-table add.  I'm pretty
                     // sure its a user error if the user fails to serialize
                     // atom table adds appropriately for their app.
+                    lll->_outgoing[i]->remove_atom(lll);
                     lll->_outgoing[i] = h;
+                    lll->_outgoing[i]->insert_atom(lll);
                 } else {
                     // XXX Perhaps we could find the atom in the
                     // environment ?? Not sure how we can ever get
@@ -586,9 +588,9 @@ Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
             // Make sure all children are in the atom table.
             Handle ho(llc->_outgoing[i]);
             if (not inEnviron(ho)) {
+                ho->remove_atom(llc);
                 llc->_outgoing[i] = add(ho, async);
             }
-
             // Build the incoming set of outgoing atom h.
             llc->_outgoing[i]->insert_atom(llc);
         }
