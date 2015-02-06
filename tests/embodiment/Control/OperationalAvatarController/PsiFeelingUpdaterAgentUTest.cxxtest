@@ -29,7 +29,7 @@ private:
     
     OACMock oacMock;
 	const string PsiUTest_dir = string(PROJECT_SOURCE_DIR)
-		+ "/tests/embodiment/Control/OperationalAvatarController/Scaffold";
+		+ "/tests/embodiment/Control/OperationalAvatarController/Scaffold/";
 	const string physiological_state_xml = PsiUTest_dir
 		+ "physiological_state.xml";
 	const string dog_park_map_xml = PsiUTest_dir
@@ -132,7 +132,10 @@ public:
         OAC & oac = oacMock.getOAC(); 
 
         std::string feeling_names = config().get("PSI_FEELINGS");
-        int feeling_num = std::count(feeling_names.begin(), feeling_names.end(), ',') + 1;  
-        TS_ASSERT_EQUALS(oac.psiFeelingUpdaterAgent->feelingMetaMap.size(), feeling_num);  
+        unsigned feeling_num = std::count(feeling_names.begin(),
+                                          feeling_names.end(),
+                                          ',') + 1;
+        TS_ASSERT_EQUALS(oac.psiFeelingUpdaterAgent->feelingMetaMap.size(),
+                         feeling_num);
     }
 };

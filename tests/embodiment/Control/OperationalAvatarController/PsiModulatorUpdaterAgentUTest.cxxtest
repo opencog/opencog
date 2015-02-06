@@ -30,7 +30,7 @@ private:
     
     OACMock oacMock; 
 	const string PsiUTest_dir = string(PROJECT_SOURCE_DIR)
-		+ "/tests/embodiment/Control/OperationalAvatarController/Scaffold";
+		+ "/tests/embodiment/Control/OperationalAvatarController/Scaffold/";
 	const string physiological_state_xml = PsiUTest_dir
 		+ "physiological_state.xml";
 	const string dog_park_map_xml = PsiUTest_dir
