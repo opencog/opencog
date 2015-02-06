@@ -140,7 +140,7 @@ async_caller<Writer, Element>::~async_caller()
 template<typename Writer, typename Element>
 void async_caller<Writer, Element>::start_writer_thread()
 {
-	logger().info("async_caller: starting a writer thread");
+	// logger().info("async_caller: starting a writer thread");
 	std::unique_lock<std::mutex> lock(_write_mutex);
 	if (_stopping_writers)
 		throw RuntimeException(TRACE_INFO,
@@ -154,7 +154,7 @@ void async_caller<Writer, Element>::start_writer_thread()
 template<typename Writer, typename Element>
 void async_caller<Writer, Element>::stop_writer_threads()
 {
-	logger().info("async_caller: stopping all writer threads");
+	// logger().info("async_caller: stopping all writer threads");
 	std::unique_lock<std::mutex> lock(_write_mutex);
 	_stopping_writers = true;
 

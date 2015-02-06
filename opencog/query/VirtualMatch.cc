@@ -150,6 +150,12 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 		// Everything in here will go poof and disappear when this class
 		// is destructed. And that's OK, that's exactly what we want for
 		// these temporaries.  The atomspace is blown away when we finish.
+		//
+		// XXX FIXME ... I suspect the atomspace initialzation is pretty
+		// heavyweight.  Most recently, the AtomTable create async write
+		// queues and forks 4 threads. So we init and destroy 4 threads
+		// every time we hit this.  Will need to explore a more
+		// lightweight approach someday ...
 		AtomSpace aspace;
 		Instantiator instor(&aspace);
 
