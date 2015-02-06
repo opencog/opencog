@@ -54,7 +54,7 @@ private:
         SchemeEval* eval;
 
 public:
-    RuleUTest(void)
+    RuleUTest()
     {
         try
         {
@@ -81,19 +81,19 @@ public:
                 std::remove(logger().getFilename().c_str());
     }
 
-    void setUp(void);
-    void tearDown(void);
+    void setUp();
+    void tearDown();
 
-    void test_deduction(void);
-	void test_and(void);
-	void test_not(void);
+    void test_deduction();
+	void test_and();
+	void test_not();
 };
 
-void RuleUTest::tearDown(void)
+void RuleUTest::tearDown()
 {
 }
 
-void RuleUTest::setUp(void)
+void RuleUTest::setUp()
 {
     config().set("SCM_PRELOAD",
         "opencog/atomspace/core_types.scm, "
@@ -112,7 +112,7 @@ void RuleUTest::setUp(void)
  * Tests the deduction rule (pln-rule-deduction) defined in:
  * opencog/reasoning/RuleEngine/rules/pln/deduction.scm
  */
-void RuleUTest::test_deduction(void)
+void RuleUTest::test_deduction()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
@@ -140,7 +140,7 @@ void RuleUTest::test_deduction(void)
  * Tests the and rule (pln-rule-and) defined in:
  * opencog/reasoning/RuleEngine/rules/pln/and.scm
  */
-void RuleUTest::test_and(void)
+void RuleUTest::test_and()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
@@ -160,7 +160,7 @@ void RuleUTest::test_and(void)
  * Tests the not rule (pln-rule-not) defined in:
  * opencog/reasoning/RuleEngine/rules/pln/not.scm
  */
-void RuleUTest::test_not(void)
+void RuleUTest::test_not()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
