@@ -693,10 +693,15 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
     DOMNodeList * list;
 
-    // TODO: Check if there is a specific order of XML elements that should be followed
-    // For now, MapInfo is processed first since it's supposed to inform SL object types.
-    // And Instructions are processed later so that all relevant perceptions
-    // are already processed when the owner asks for anything...
+    // TODO: Check if there is a specific order of XML elements that
+    // should be followed
+    //
+    // For now, MapInfo is processed first since it's supposed to
+    // inform SL object types.
+    //
+    // And Instructions are processed later so that all relevant
+    // perceptions are already processed when the owner asks for
+    // anything...
 
     // getting <map-info> elements from the XML message
     XMLString::transcode(MAP_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -711,10 +716,12 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
 #endif
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processMapInfo((DOMElement *)list->item(i), toUpdateHandles, useProtoBuf);
+        processMapInfo((DOMElement *)list->item(i), toUpdateHandles,
+                       useProtoBuf);
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d map-infos done", list->getLength());
+        logger().debug("PAI - Processing %d map-infos done",
+                       list->getLength());
 
 #ifdef HAVE_PROTOBUF
     // getting <terrain-info> elements from the XML message
@@ -725,7 +732,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processTerrainInfo((DOMElement *)list->item(i), toUpdateHandles);
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d terrain-infos done", list->getLength());
+        logger().debug("PAI - Processing %d terrain-infos done",
+                       list->getLength());
 #endif
 
     // getting <avatar-signal> elements from the XML message
@@ -736,7 +744,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processAvatarSignal((DOMElement *)list->item(i));
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d avatar-signals done", list->getLength());
+        logger().debug("PAI - Processing %d avatar-signals done",
+                       list->getLength());
 
     // getting <agent-signal> elements from the XML message
     XMLString::transcode(AGENT_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -746,7 +755,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processAgentSignal((DOMElement *)list->item(i));
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d agent-signal done", list->getLength());
+        logger().debug("PAI - Processing %d agent-signal done",
+                       list->getLength());
 
     // getting <instructions> elements from the XML message
     XMLString::transcode(INSTRUCTION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -756,17 +766,20 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processInstruction((DOMElement *)list->item(i));
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d instructions done", list->getLength());
+        logger().debug("PAI - Processing %d instructions done",
+                       list->getLength());
 
     // getting <agent-sensor-info> elements from the XML message
-    XMLString::transcode(AGENT_SENSOR_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(AGENT_SENSOR_INFO_ELEMENT, tag,
+                         PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processAgentSensorInfo((DOMElement *)list->item(i));
     } // for
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d agent-sensor-infos done", list->getLength());
+        logger().debug("PAI - Processing %d agent-sensor-infos done",
+                       list->getLength());
 
     // getting <state-info> elements from the XML message
     XMLString::transcode(STATE_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
