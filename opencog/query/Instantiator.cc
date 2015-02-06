@@ -60,7 +60,12 @@ Handle Instantiator::walk_tree(Handle expr)
 
 	// Now create a duplicate link, but with an outgoing set where
 	// the variables have been substituted by their values.
+// #define FAST_VERSION 1 // XXX see the note below.
+#ifdef FAST_VERSION
 	return Handle(createLink(t, oset_results, expr->getTruthValue()));
+#else
+	return _as->addLink(t, oset_results, expr->getTruthValue());
+#endif
 }
 
 /**
@@ -86,6 +91,37 @@ Handle Instantiator::instantiate(Handle& expr,
 			"Asked to ground a null expression");
 
 	_vmap = &vars;
+
+// XXX FIXME -- there is a bug somewhere.  The FAST_VERSION should behave
+// exactly the same way as the slow version, except that it should be
+// faster.  It should be faster by avoiding excess atomspace calls.
+// However, the fast version causes EinsteinUTest to fail.  I can't tell
+// why. I conclude:
+//
+// 1) Either the AtomTable add() is buggy
+// 2) Pattern matcher is buggy
+// 3) Something is goofy about EinsteinUTest
+// 4) Handles are misbehaving.
+//
+// Outcomes 1&2&4 are very disturbing, so this needs looking at.
+// While trying to debug, it seems that the pattern matcher traverses
+// atoms in a different order  for the fast and slow versions.  This
+// shouldn't happen. The only way this might happen is if the pattern
+// matcher is hitting the temporary atoms being made in the fast path.
+// But this should not be possible, because in single-threaded mode,
+// these temporary atoms should disappear when this method returns
+// (since thier use count should drop to zero.)  So maybe thier use
+// count isn't droipping? Very unlikely? So what explains the
+// inconsistent pattern matcher behavior?
+//
+// Perhaps AtomTable::add() is mis-handling incoming set pointers,
+// so that the temporary atoms remain in incoming sets. But even if
+// that happened, the incoming pointers are weak, and would be pointing
+// at the now-destroyed temporaries. And so would be discard when
+// made strong ...
+#ifndef FAST_VERSION
+	return walk_tree(expr);
+#else
 	Handle hinst(walk_tree(expr));
 
 	// The returned handle is not yet in the atomspace. Add it now.
@@ -108,6 +144,7 @@ Handle Instantiator::instantiate(Handle& expr,
 	// If the top-level links was an ExecutionLink, and it returned
 	// undefined .. whatver. Pass that right on through.
 	return Handle::UNDEFINED;
+#endif
 }
 
 /* ===================== END OF FILE ===================== */
