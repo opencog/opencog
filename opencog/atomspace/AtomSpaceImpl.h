@@ -129,8 +129,15 @@ public:
      */
     Handle fetchIncomingSet(Handle, bool);
 
-    /** Add a new node to the Atom Table,
-     * if the atom already exists then the old and the new truth value is merged
+    /**
+     * Add an atom to the Atom Table. If the atom already exists in the
+     * Atom Table, then the old and the new truth value are merged.
+     */
+    Handle addAtom(AtomPtr, bool async = false);
+
+    /**
+     * Add a node to the Atom Table. If the node already exists in the
+     * Atom Table, then the old and the new truth value are merged.
      *  @param t     Type of the node
      *  @param name  Name of the node
      *  @param tvn   Optional TruthValue of the node. If not provided, uses the
@@ -152,9 +159,8 @@ public:
     Handle getNode(Type t, const std::string& name = "");
 
     /**
-     * Add a new link to the AtomTable.
-     * If the atom already exists in the AtomTable, then the old and
-     * the new truth values are merged.
+     * Add a link to the AtomTable. If the atom already exists in the
+     * AtomTable, then the old and the new truth values are merged.
      * @param t         Type of the link
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link

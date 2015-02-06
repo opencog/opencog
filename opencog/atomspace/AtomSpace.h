@@ -110,7 +110,16 @@ public:
     }
 
     /**
-     * Add a new node to the Atom Table.  If the atom already exists
+     * Add an atom to the Atom Table.  If the atom already exists
+     * then the old and the new truth value is merged.
+     */
+    inline Handle addAtom(AtomPtr atom)
+    {
+        return getImpl().addAtom(atom);
+    }
+
+    /**
+     * Add a node to the Atom Table.  If the atom already exists
      * then the old and the new truth value is merged.
      *
      * \param t     Type of the node
@@ -135,9 +144,8 @@ public:
                        TruthValuePtr tvn = TruthValue::DEFAULT_TV());
 
     /**
-     * Add a new link to the Atom Table.
-     * If the atom already exists, then the old and the new truth value
-     * is merged.
+     * Add a link to the Atom Table. If the atom already exists, then
+     * the old and the new truth value are merged.
      *
      * @param t         Type of the link
      * @param outgoing  a const reference to a HandleSeq containing
@@ -148,7 +156,7 @@ public:
     inline Handle addLink(Type t, const HandleSeq& outgoing,
                    TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
-        return getImpl().addLink(t,outgoing,tvn);
+        return getImpl().addLink(t, outgoing, tvn);
     }
 
     inline Handle addLink(Type t, Handle h,

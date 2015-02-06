@@ -91,17 +91,53 @@ AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other)
             "AtomSpaceImpl - Cannot copy an object of this class");
 }
 
-Handle AtomSpaceImpl::addNode(Type t, const string& name,
-                              TruthValuePtr tvn, bool async)
+Handle AtomSpaceImpl::addAtom(AtomPtr atom, bool async)
 {
-    // Is this atom already in the atom table? 
-    Handle hexist = atomTable.getHandle(t, name);
+    // Is this atom already in the atom table?
+    Handle hexist(atomTable.getHandle(atom));
     if (hexist)
     {
         // XXX FIXME The AtomSpaceAsyncUTest tries to do somethig weird,
         // that is causing the below to fail. The atomtable add does the
         // same thing under a lock. I don't understand why it matters.
-        // It would be slight faster to just merge here, but wtf ... 
+        // It would be slight faster to just merge here, but wtf ...
+        // So anyway, ifdef it out, for now ...
+#ifdef DO_UNLOCKED_UPDATE
+        hexist->merge(atom->getTruthValue());  // Update the truth value.
+        return hexist;
+#else
+        return atomTable.add(atom, async);
+#endif
+    }
+
+    // If we are here, the AtomTable does not yet know about this atom.
+    // Maybe the backing store knows about this atom.
+    Type t = atom->getType();
+    if (backing_store and not backing_store->ignoreType(t)) {
+
+        Handle ha(atom);
+        Handle hb(backing_store->getAtom(ha));
+        if (hb.value() != Handle::UNDEFINED.value()) {
+            return atomTable.add(hb, async);
+        }
+    }
+
+    // If we are here, neither the AtomTable nor backing store know about
+    // this atom. Just add it.
+    return atomTable.add(atom, async);
+}
+
+Handle AtomSpaceImpl::addNode(Type t, const string& name,
+                              TruthValuePtr tvn, bool async)
+{
+    // Is this atom already in the atom table?
+    Handle hexist(atomTable.getHandle(t, name));
+    if (hexist)
+    {
+        // XXX FIXME The AtomSpaceAsyncUTest tries to do somethig weird,
+        // that is causing the below to fail. The atomtable add does the
+        // same thing under a lock. I don't understand why it matters.
+        // It would be slight faster to just merge here, but wtf ...
         // So anyway, ifdef it out, for now ...
 #ifdef DO_UNLOCKED_UPDATE
         hexist->merge(tvn);  // Update the truth value.
@@ -117,7 +153,7 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name,
 
         NodePtr n(backing_store->getNode(t, name.c_str()));
         if (n) {
-            Handle result = atomTable.add(n, async);
+            Handle result(atomTable.add(n, async));
             result->merge(tvn);
             return result;
         }
@@ -130,7 +166,7 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name,
 
 Handle AtomSpaceImpl::getNode(Type t, const string& name)
 {
-    // Is this atom already in the atom table? 
+    // Is this atom already in the atom table?
     Handle hexist = atomTable.getHandle(t, name);
     if (hexist) return hexist;
 
@@ -227,7 +263,7 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
     //    this function returns the atom-table's version of the atom.
     //    In particular, no attempt is made to reconcile the possibly
     //    differing truth values in the atomtable vs. backing store.
-    // 2) If the handle h holds a UUID but no atom pointer, then get 
+    // 2) If the handle h holds a UUID but no atom pointer, then get
     //    the corresponding atom from storage, and add it to the atom
     //    table.
     // 3) If the handle h contains a pointer to an atom (that is not
@@ -356,7 +392,7 @@ HandleSeq AtomSpaceImpl::getIncoming(Handle h)
 bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
 {
     if (backing_store) {
-// Under construction .... 
+// Under construction ....
         throw RuntimeException(TRACE_INFO, "Not Implemented!!!");
     }
     return 0 < atomTable.extract(h, recursive).size();

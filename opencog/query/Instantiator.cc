@@ -122,28 +122,12 @@ Handle Instantiator::instantiate(Handle& expr,
 #ifndef FAST_VERSION
 	return walk_tree(expr);
 #else
-	Handle hinst(walk_tree(expr));
 
 	// The returned handle is not yet in the atomspace. Add it now.
 	// We do this here, instead of in walk_tree(), because adding
 	// atoms to the atomspace is an expensive process.  We can save
 	// some time by doing it just once, right here, in one big batch.
-	LinkPtr linst(LinkCast(hinst));
-	if (linst)
-	{
-		return _as->addLink(hinst->getType(), linst->getOutgoingSet(),
-		                    hinst->getTruthValue());
-	}
-	NodePtr ninst(NodeCast(hinst));
-	if (ninst)
-	{
-		return _as->addNode(hinst->getType(), ninst->getName(),
-		                    hinst->getTruthValue());
-	}
-
-	// If the top-level links was an ExecutionLink, and it returned
-	// undefined .. whatver. Pass that right on through.
-	return Handle::UNDEFINED;
+	return _as->addAtom(walk_tree(expr));
 #endif
 }
 
