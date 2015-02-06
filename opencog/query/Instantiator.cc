@@ -60,7 +60,7 @@ Handle Instantiator::walk_tree(Handle expr)
 
 	// Now create a duplicate link, but with an outgoing set where
 	// the variables have been substituted by their values.
-	return _as->addLink(t, oset_results, expr->getTruthValue());
+	return Handle(createLink(t, oset_results, expr->getTruthValue()));
 }
 
 /**
@@ -86,7 +86,28 @@ Handle Instantiator::instantiate(Handle& expr,
 			"Asked to ground a null expression");
 
 	_vmap = &vars;
-	return walk_tree(expr);
+	Handle hinst(walk_tree(expr));
+
+	// The returned handle is not yet in the atomspace. Add it now.
+	// We do this here, instead of in walk_tree(), because adding
+	// atoms to the atomspace is an expensive process.  We can save
+	// some time by doing it just once, right here, in one big batch.
+	LinkPtr linst(LinkCast(hinst));
+	if (linst)
+	{
+		return _as->addLink(hinst->getType(), linst->getOutgoingSet(),
+		                    hinst->getTruthValue());
+	}
+	NodePtr ninst(NodeCast(hinst));
+	if (ninst)
+	{
+		return _as->addNode(hinst->getType(), ninst->getName(),
+		                    hinst->getTruthValue());
+	}
+
+	// If the top-level links was an ExecutionLink, and it returned
+	// undefined .. whatver. Pass that right on through.
+	return Handle::UNDEFINED;
 }
 
 /* ===================== END OF FILE ===================== */
