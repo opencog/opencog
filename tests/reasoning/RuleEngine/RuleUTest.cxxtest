@@ -85,6 +85,7 @@ public:
     void tearDown(void);
 
     void test_deduction(void);
+	void test_and(void);
 };
 
 void RuleUTest::tearDown(void)
@@ -131,5 +132,25 @@ void RuleUTest::test_deduction(void)
     // After applying the deduction rule, it should know that all 3 of the
     // instances of men are also humans (Socrates, Einstein, and Peirce)
     results = eval->eval_h("(cog-bind find-humans)");
+    TS_ASSERT_EQUALS(4, as->getArity(results));
+}
+
+/*
+ * Tests the and rule (pln-rule-and) defined in:
+ * opencog/reasoning/RuleEngine/rules/pln/and.scm
+ */
+void RuleUTest::test_and(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/RuleEngine/simple-predicates.scm, "
+                 "reasoning/RuleEngine/rules/pln/and.scm");
+    load_scm_files_from_config(*as);
+
+    // Apply the and rule
+    Handle results = eval->eval_h("(cog-bind pln-rule-deduction)");
+
+    // It should contain 4 groundings, (A, A), (A, B), (B, A), (B, B)
     TS_ASSERT_EQUALS(4, as->getArity(results));
 }
