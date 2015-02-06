@@ -46,11 +46,3 @@
       ((sA (cog-stv-strength A))
        (sB (cog-stv-strength B)))
     (stv (min sA sB) 1)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Some test data (to be removed afterwards) ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(PredicateNode "A" (stv 0.2 1))
-
-(PredicateNode "B" (stv 0.6 1))
