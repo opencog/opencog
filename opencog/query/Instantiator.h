@@ -54,7 +54,6 @@ private:
 		 * If an execution occur then _did_exec is set to true.
 		 */
 		Handle walk_tree(Handle tree);
-		bool _did_exec;
 
 	public:
 		Instantiator(AtomSpace* as) : _as(as) {}

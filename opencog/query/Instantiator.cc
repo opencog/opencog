@@ -51,10 +51,8 @@ Handle Instantiator::walk_tree(Handle expr)
 		oset_results.push_back(walk_tree(h));
 
 	// Fire execution links, if found.
-	_did_exec = false;  // set flag on top-level only
 	if (t == EXECUTION_OUTPUT_LINK)
 	{
-		_did_exec = true;
 		// This throws if it can't figure out the schema ...
 		// Let the throw pass right on up the stack.
 		return ExecutionOutputLink::do_execute(_as, oset_results);
@@ -88,16 +86,7 @@ Handle Instantiator::instantiate(Handle& expr,
 			"Asked to ground a null expression");
 
 	_vmap = &vars;
-	_did_exec = false;
-
-	Handle result = walk_tree(expr);
-	if ((false == _did_exec) && (result == Handle::UNDEFINED))
-		throw InvalidParamException(TRACE_INFO,
-			"Failure to ground expression\n"
-			"Ungrounded expr is %s\n",
-			expr->toShortString().c_str());
-
-	return result;
+	return walk_tree(expr);
 }
 
 /* ===================== END OF FILE ===================== */
