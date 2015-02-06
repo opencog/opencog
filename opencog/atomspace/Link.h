@@ -53,6 +53,7 @@ class Link : public Atom
 
 private:
     void init(const HandleSeq&) throw (InvalidParamException);
+    void resort(void);
 
     Link(const Link &l) : Atom(0)
     { OC_ASSERT(false, "Link: bad use of copy ctor"); }

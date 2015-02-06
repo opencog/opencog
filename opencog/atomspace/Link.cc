@@ -43,6 +43,11 @@ struct HandleComparison
     }
 };
 
+void Link::resort(void)
+{
+    std::sort(_outgoing.begin(), _outgoing.end(), HandleComparison());
+}
+
 void Link::init(const std::vector<Handle>& outgoingVector)
 	throw (InvalidParamException)
 {
@@ -53,10 +58,10 @@ void Link::init(const std::vector<Handle>& outgoingVector)
     }
 
     _outgoing = outgoingVector;
-    // if the link is unordered, it will be normalized by sorting the
+    // If the link is unordered, it will be normalized by sorting the
     // elements in the outgoing list.
     if (classserver().isA(_type, UNORDERED_LINK)) {
-        std::sort(_outgoing.begin(), _outgoing.end(), HandleComparison());
+        resort();
     }
 }
 
