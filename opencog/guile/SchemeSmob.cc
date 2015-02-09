@@ -45,7 +45,8 @@ void SchemeSmob::init()
 	if (is_inited.test_and_set()) return;
 
 	init_smob_type();
-	register_procs();
+	scm_c_define_module("opencog", register_procs, NULL);
+	scm_c_use_module("opencog");
 
 	atomspace_fluid = scm_make_fluid();
 	atomspace_fluid = scm_permanent_object(atomspace_fluid);
@@ -183,7 +184,7 @@ void SchemeSmob::throw_exception(const char *msg, const char * func)
  #define C(X) ((SCM (*) ()) X)
 #endif
 
-void SchemeSmob::register_procs()
+void SchemeSmob::register_procs(void*)
 {
 	register_proc("cog-atom",              1, 0, 0, C(ss_atom));
 	register_proc("cog-handle",            1, 0, 0, C(ss_handle));
