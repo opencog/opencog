@@ -17,17 +17,17 @@
 #include <opencog/util/Config.h>
 #include <opencog/guile/SchemeEval.h>
 
-JsonicControlPolicyLoader::JsonicControlPolicyLoader(AtomSpace * as,
+JsonicControlPolicyParamLoader::JsonicControlPolicyParamLoader(AtomSpace * as,
 		string conf_path) :
 		ControlPolicyParamLoader(as, conf_path) {
 	cur_read_rule_ = NULL;
 }
 
-JsonicControlPolicyLoader::~JsonicControlPolicyLoader() {
+JsonicControlPolicyParamLoader::~JsonicControlPolicyParamLoader() {
 
 }
 
-void JsonicControlPolicyLoader::set_mutex_rules(void) {
+void JsonicControlPolicyParamLoader::set_mutex_rules(void) {
 	for (auto i = rule_mutex_map_.begin(); i != rule_mutex_map_.end(); ++i) {
 		auto mset = i->second;
 		auto cur_rule = i->first;
@@ -41,7 +41,7 @@ void JsonicControlPolicyLoader::set_mutex_rules(void) {
 	}
 }
 
-Rule* JsonicControlPolicyLoader::get_rule(string& name) {
+Rule* JsonicControlPolicyParamLoader::get_rule(string& name) {
 	for (Rule* r : rules_) {
 		if (r->get_name() == name)
 			return r;
@@ -49,8 +49,8 @@ Rule* JsonicControlPolicyLoader::get_rule(string& name) {
 	return NULL;
 }
 
-void JsonicControlPolicyLoader::load_config() {
-	ifstream is("lib/"+conf_path_); //assumes json files are always installed in build/lib dir
+void JsonicControlPolicyParamLoader::load_config() {
+	ifstream is("reasoning/RuleEngine/rules/pln/"+conf_path_);
 	Stream_reader<ifstream, Value> reader(is);
 	Value value;
 	while (reader.read_next(value))
@@ -58,13 +58,13 @@ void JsonicControlPolicyLoader::load_config() {
 	set_mutex_rules();
 }
 
-void JsonicControlPolicyLoader::read_array(const Value &v, int lev) {
+void JsonicControlPolicyParamLoader::read_array(const Value &v, int lev) {
 	const Array& a = v.get_array();
 	for (Array::size_type i = 0; i < a.size(); ++i)
 		read_json(a[i], lev + 1);
 }
 
-void JsonicControlPolicyLoader::read_obj(const Value &v, int lev) {
+void JsonicControlPolicyParamLoader::read_obj(const Value &v, int lev) {
 	const Object& o = v.get_obj();
 	for (Object::size_type i = 0; i < o.size(); ++i) {
 		const Pair& p = o[i];
@@ -115,7 +115,7 @@ void JsonicControlPolicyLoader::read_obj(const Value &v, int lev) {
 	}
 }
 
-void JsonicControlPolicyLoader::read_json(const Value &v, int level /* = -1*/) {
+void JsonicControlPolicyParamLoader::read_json(const Value &v, int level /* = -1*/) {
 	switch (v.type()) {
 	case obj_type:
 		read_obj(v, level + 1);
@@ -138,11 +138,11 @@ void JsonicControlPolicyLoader::read_json(const Value &v, int level /* = -1*/) {
 	}
 }
 
-void JsonicControlPolicyLoader::read_null(const Value &v, int lev) {
+void JsonicControlPolicyParamLoader::read_null(const Value &v, int lev) {
 
 }
 
-template<typename > void JsonicControlPolicyLoader::read_primitive(
+template<typename > void JsonicControlPolicyParamLoader::read_primitive(
 		const Value &v, int lev) {
 
 }

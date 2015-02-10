@@ -16,7 +16,7 @@
 using namespace opencog;
 using namespace json_spirit;
 
-class JsonicControlPolicyLoader:public virtual ControlPolicyParamLoader {
+class JsonicControlPolicyParamLoader:public virtual ControlPolicyParamLoader {
 private:
 	Rule* cur_read_rule_ = NULL;
 	map<Rule*,vector<string>> rule_mutex_map_;
@@ -31,8 +31,8 @@ private:
 	void set_mutex_rules(void);
 	Rule* get_rule(string& name);
 public:
-	JsonicControlPolicyLoader(AtomSpace* as, string conf_path);
-	virtual ~JsonicControlPolicyLoader();
+	JsonicControlPolicyParamLoader(AtomSpace* as, string conf_path);
+	virtual ~JsonicControlPolicyParamLoader();
 	virtual void load_config();
 };
 
