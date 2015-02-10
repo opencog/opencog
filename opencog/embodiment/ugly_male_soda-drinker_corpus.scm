@@ -1,4 +1,4 @@
-
+(setlocale LC_CTYPE "")
 
 (InheritanceLink (stv 1.000000 1.000000)
   (ConceptNode "Allen")
