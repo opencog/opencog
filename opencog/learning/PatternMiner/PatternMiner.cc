@@ -1953,7 +1953,7 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
 //     // use all the threads in this machine
 //     THREAD_NUM = system_thread_num;
 
-    THREAD_NUM = 4;
+    THREAD_NUM = 1;
 
 
     threads = new thread[THREAD_NUM];

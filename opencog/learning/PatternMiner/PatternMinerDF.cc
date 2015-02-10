@@ -142,11 +142,11 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 
     cout<< "Start thread " << thread_index << " from " << start_index << " to " << end_index-1 << std::endl;
 
-    float sq_allLinkNumber = ((float)(linksPerThread)) * ((float)(linksPerThread));
+    float allLinkNumberfloat = ((float)(end_index - start_index));
     for(unsigned int t_cur_index = start_index; t_cur_index < end_index; ++ t_cur_index)
     {
         readNextLinkLock.lock();
-        cout<< "\r" << ((float)(t_cur_index - start_index))*((float)(t_cur_index - start_index))/sq_allLinkNumber*100.0f << "% completed in Thread " + toString(thread_index) + "."; // it's not liner
+        cout<< "\r" << ((float)(t_cur_index - start_index))/allLinkNumberfloat*100.0f << "% completed in Thread " + toString(thread_index) + "."; // it's not liner
         std::cout.flush();
 
         processedLinkNum ++;
