@@ -62,6 +62,7 @@ void OACMock::setConfig()
     // XXX FIXME: at this time, we need to specify explicit paths to
     // to the modules that need to be loaded. I don't know why.
     config().set("MODULES", "opencog/query/libquery.so, "
+                            "opencog/query/libQueryModule.so, "
                             "opencog/server/libbuiltinreqs.so, "
                             "opencog/shell/libscheme-shell.so, "
                             "opencog/persist/sql/libpersist.so");
