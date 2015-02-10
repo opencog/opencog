@@ -55,6 +55,7 @@ public:
 	HandleSeq get_target_list(void);
 	bool is_search_in_af(void);
 	Rule* get_cur_rule(void);
+	void add_rules_product(int iteration,HandleSeq product);
 	void set_cur_rule(Rule* r) ;
 	void add_inference(int iteration,HandleSeq product,HandleSeq matched_nodes);
 	Handle get_cur_target(void) ;
