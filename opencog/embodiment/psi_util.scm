@@ -85,11 +85,11 @@
 
 ; Return the scheme list of querying result given the ListLink containing it, 
 ; this function will delete the ListLink once return
-(define (unpack_query_result query_rusult_list_link)
-    (let* ( (query_result_list (cog-outgoing-set query_rusult_list_link) )
+(define (unpack_query_result query_result_list_link)
+    (let* ( (query_result_list (cog-outgoing-set query_result_list_link) )
           )
 
-          (cog-delete query_rusult_list_link) 
+          (cog-delete query_result_list_link)
 
           query_result_list 
     ) 
@@ -98,20 +98,24 @@
 ; Return the scheme list of querying result given BindLink (using cog-bind), 
 ; return an empty list if fails
 (define (query_atom_space bind_link)
-    (let* ( (query_rusult_list_link (cog-bind bind_link) )
+    (let* ( (query_result_list_link (cog-bind bind_link) )
           )
           
-          (unpack_query_result query_rusult_list_link)
+          (unpack_query_result query_result_list_link)
     ) 
 )
 
 ; Same as above. Return the scheme list of querying result given
 ; BindLink (using cog-bind-crisp),  return an empty list if fails
 (define (query_atom_space_crisp bind_link)
+<<<<<<< HEAD
     (let* ( (query_rusult_list_link (cog-bind bind_link) )
+=======
+    (let* ( (query_result_list_link (cog-bind-crisp bind_link) )
+>>>>>>> Rename rusult -> result in variable name
           )
           
-          (unpack_query_result query_rusult_list_link)
+          (unpack_query_result query_result_list_link)
     ) 
 )
 
