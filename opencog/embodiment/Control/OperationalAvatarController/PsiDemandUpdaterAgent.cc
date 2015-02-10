@@ -51,16 +51,19 @@ bool PsiDemandUpdaterAgent::Demand::runUpdater(AtomSpace & atomSpace)
     scheme_return_value = evaluator1.eval(scheme_expression);
 
     if ( evaluator1.eval_error() ) {
-        logger().error( "PsiDemandUpdaterAgent::Demand::%s - Failed to execute '%s'",
-                         __FUNCTION__, scheme_expression.c_str());
+        logger().error("PsiDemandUpdaterAgent::Demand::%s - "
+                       "Failed to execute '%s'",
+                       __FUNCTION__, scheme_expression.c_str());
         return false;
     }
 
     // Store the updated demand value (result)
     this->currentDemandValue = atof( scheme_return_value.c_str() );
 
-    logger().debug("PsiDemandUpdaterAgent::Demand::%s - The level of demand '%s' will be set to '%f'",
-                   __FUNCTION__, this->demandName.c_str(), this->currentDemandValue);
+    logger().debug("PsiDemandUpdaterAgent::Demand::%s - "
+                   "The level of demand '%s' will be set to '%f'",
+                   __FUNCTION__, this->demandName.c_str(),
+                   this->currentDemandValue);
 
 #endif // HAVE_GUILE
 
