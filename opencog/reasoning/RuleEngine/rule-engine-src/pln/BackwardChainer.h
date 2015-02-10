@@ -25,7 +25,6 @@
 
 #include "PLNCommons.h"
 #include "BCPatternMatch.h"
-#include "Chainer.h"
 
 //#define DEBUG 1
 using namespace opencog;
@@ -54,7 +53,7 @@ using namespace opencog;
  *  4.In addition to retaining this ExecutionLink in the Atomspace.also save the copy of it in the InferenceRepository(
  *  this is not needed for the very first implementation,but will be very useful once PLN is in regular use.)
  */
-class BackwardChainer: public virtual Chainer {
+class BackwardChainer {
 private:
 	friend class BackwardChainerUTest;
 	PLNCommons * commons_;
