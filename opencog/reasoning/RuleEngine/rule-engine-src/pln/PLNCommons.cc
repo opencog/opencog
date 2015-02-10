@@ -40,7 +40,7 @@ Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
 	} //xxx why?
 
 	//if(vnode_is_typedv)
-	himplicant = create_with_unique_var(himplicant);
+	himplicant = replace_nodes_with_varnode(himplicant);
 
 	HandleSeq variable_nodes = get_nodes(himplicant, vector<Type> {
 			VARIABLE_NODE });
@@ -156,39 +156,27 @@ string PLNCommons::get_unique_name(Handle& h) {
 	return name;
 }
 
-Handle PLNCommons::create_with_unique_var(Handle& handle) {
-	HandleSeq hvars = get_nodes(handle, vector<Type> { VARIABLE_NODE });
-	map<Handle, Handle> var_unique_var_map;
+Handle PLNCommons::replace_nodes_with_varnode(Handle& handle,Type t /*=VARIABLE_NODE*/) {
+	HandleSeq hvars;
+	if(t == NODE) hvars=get_nodes(handle, vector<Type> { }); //get every node
+	else hvars=get_nodes(handle, vector<Type> {t});
+	map<Handle, Handle> node_unique_var_map;
 	for (Handle h : hvars)
-		var_unique_var_map[h] = as_->addNode(VARIABLE_NODE, get_unique_name(h)); //TODO get_uuid is not implemented
-	return replace_vars(handle, var_unique_var_map);
+		node_unique_var_map[h] = as_->addNode(VARIABLE_NODE, get_unique_name(h)); //TODO get_uuid is not implemented
+	return change_node_types(handle, node_unique_var_map,t);
 }
 
-Handle PLNCommons::replace_vars(Handle& h,
-		map<Handle, Handle>& var_uniq_var_map) {
-	Handle hcpy;
-	if (LinkCast(h)) {
-		HandleSeq hs = as_->getOutgoing(h);
-		HandleSeq hs_cpy;
-		for (Handle hi : hs) {
-			if (NodeCast(hi)) {
-				if (as_->getType(hi) == VARIABLE_NODE)
-					hs_cpy.push_back(var_uniq_var_map[hi]);
-				else
-					hs_cpy.push_back(hi);
-			} else if (LinkCast(hi)) {
-				hs_cpy.push_back(
-						replace_vars(hi, var_uniq_var_map));
-			}
-
+void PLNCommons::get_top_level_parent(Handle h,HandleSeq parents){
+	auto incoming = as_->getIncoming(h);
+	if(incoming.empty())
+		return;
+	else{
+		for(Handle hi: incoming){
+			auto i = as_->getIncoming(hi);
+			if(i.empty())
+				parents.push_back(hi);
+			else
+				get_top_level_parent(hi,parents);
 		}
-		hcpy = as_->addLink(as_->getType(h), hs_cpy, as_->getTV(h));
-
-	} else if (NodeCast(h)) {
-		if (as_->getType(h) == VARIABLE_NODE)
-			hcpy = var_uniq_var_map[h];
-		else
-			hcpy = h;
 	}
-	return hcpy;
 }
