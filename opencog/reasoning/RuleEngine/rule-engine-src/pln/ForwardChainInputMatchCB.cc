@@ -25,31 +25,29 @@
 
 #include <opencog/guile/SchemeSmob.h>
 
-ForwardChainInputMatchCB::ForwardChainInputMatchCB(AtomSpace * as,
-		AtomSpace * target_list_as, ForwardChainer * fc) :
+ForwardChainInputMatchCB::ForwardChainInputMatchCB(AtomSpace * as
+) :
 		Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as), PLNImplicator(
-				as), as_(as), fc_(fc) {
-	set_instantiators_atom_space(target_list_as);
+				as), _as(as) {
+
 }
 
 ForwardChainInputMatchCB::~ForwardChainInputMatchCB() {
 
-}
-void ForwardChainInputMatchCB::set_instantiators_atom_space(AtomSpace *as) {
-	inst = Instantiator(as);
-}
-
-HandleSeq ForwardChainInputMatchCB::get_result_list(void) {
-	return result_list;
 }
 
 bool ForwardChainInputMatchCB::grounding(
 		const std::map<Handle, Handle> &var_soln,
 		const std::map<Handle, Handle> &pred_soln) {
 	Handle h = inst.instantiate(implicand, var_soln);
-	if (Handle::UNDEFINED != h) {
-		result_list.push_back(h);
-		fc_->add_to_target_list(h); //add to potential target list
-	}
+	if (Handle::UNDEFINED != h)
+		_input_match.push_back(h);
 	return false;
+}
+void ForwardChainInputMatchCB::set_instantiators_atom_space(AtomSpace *as) {
+	inst = Instantiator(as);
+}
+
+HandleSeq ForwardChainInputMatchCB::get_input_matches(void) {
+	return _input_match;
 }

@@ -25,7 +25,7 @@
 #include "ForwardChainerCallBack.h"
 
 #include <opencog/query/PatternMatch.h>
-#include <opencog/reasoning/RuleEngine/rule-engine-src/JsonicControlPolicyLoader.h>
+#include <opencog/reasoning/RuleEngine/rule-engine-src/JsonicControlPolicyParamLoader.h>
 
 ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :
 		as_(as) {
@@ -41,11 +41,11 @@ ForwardChainer::~ForwardChainer() {
 }
 
 void ForwardChainer::init() {
-	_cpolicy_loader = new JsonicControlPolicyLoader(as_, _conf_path);
+	_cpolicy_loader = new JsonicControlPolicyParamLoader(as_, _conf_path);
 	_cpolicy_loader->load_config();
-	_fcmem->_search_in_af = _cpolicy_loader->get_attention_alloc();
-	_fcmem->_rules = _cpolicy_loader->get_rules();
-	_fcmem->_cur_rule = nullptr;
+	_fcmem->search_in_af_ = _cpolicy_loader->get_attention_alloc();
+	_fcmem->rules_ = _cpolicy_loader->get_rules();
+	_fcmem->cur_rule_ = nullptr;
 }
 
 void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
@@ -61,7 +61,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
 		Rule* r = fcb.choose_rule(*_fcmem);
 		if (not r)
 			return;
-		_fcmem->_cur_rule = r;
+		_fcmem->cur_rule_ = r;
 		//apply rule
 		HandleSeq product = fcb.apply_rule(*_fcmem);
 		_fcmem->add_rules_product(iteration, product);
