@@ -237,8 +237,11 @@ void StateNode::calculateNodesDepth()
 
 SpaceServer::SpaceMap* OCPlanner::getClosestBackwardSpaceMap(StateNode* stateNode)
 {
-    // sort all the rule nodes in current planning network, in the order of from left to right (from starting to goal / from backward to forward)
-    sort(allRuleNodeInThisPlan.begin(), allRuleNodeInThisPlan.end(),compareRuleNodeDepth );
+    // Sort all the rule nodes in current planning network, in the
+    // order of from left to right (from starting to goal / from
+    // backward to forward)
+    sort(allRuleNodeInThisPlan.begin(), allRuleNodeInThisPlan.end(),
+         compareRuleNodeDepth);
     RuleNode* clostestRuleNode = 0;
 
     if (stateNode->backwardRuleNode)
@@ -247,22 +250,21 @@ SpaceServer::SpaceMap* OCPlanner::getClosestBackwardSpaceMap(StateNode* stateNod
     }
     else
     {
-        // get the most closest rule node to the input stateNode in its backward side,
-        // because only the back ward node will affect the input state node
+        // Get the closest rule node to the input stateNode in its
+        // backward side, because only the backward node will affect
+        // the input state node
 
-        vector<RuleNode*>::const_iterator it = allRuleNodeInThisPlan.begin();
-
-        for (; it != allRuleNodeInThisPlan.end(); ++ it)
+        for (RuleNode* rnode : allRuleNodeInThisPlan)
         {
-            RuleNode* rnode = (RuleNode*)(*it);
-
             StateNode* snode = rnode->getLastForwardStateNode();
 
             if (snode == stateNode)
                 continue;
 
             if ((*snode) < (*stateNode))
-                break; // the node with a lower depth is more closed to the goal, so it won't affect the input state node
+                break; // the node with a lower depth is more closed
+                       // to the goal, so it won't affect the input
+                       // state node
 
             clostestRuleNode = rnode;
         }
@@ -273,14 +275,11 @@ SpaceServer::SpaceMap* OCPlanner::getClosestBackwardSpaceMap(StateNode* stateNod
 
     SpaceServer::SpaceMap *iSpaceMap = curMap->clone();
 
-    // execute the all the actions in current planning network to change the imaginary space map in the order in allRuleNodeInThisPlan,
-    // till the clostestRuleNode
-    vector<RuleNode*>::const_iterator it = allRuleNodeInThisPlan.begin();
-
-    for (; it != allRuleNodeInThisPlan.end(); ++ it)
+    // Execute the all the actions in current planning network to
+    // change the imaginary space map in the order in
+    // allRuleNodeInThisPlan, till the clostestRuleNode
+    for (RuleNode* rnode : allRuleNodeInThisPlan)
     {
-        RuleNode* rnode = (RuleNode*)(*it);
-
         executeActionInImaginarySpaceMap(rnode,iSpaceMap);
 
         if (rnode == clostestRuleNode)
@@ -294,8 +293,12 @@ SpaceServer::SpaceMap* OCPlanner::getClosestBackwardSpaceMap(StateNode* stateNod
 // @ bool &found: return if this same state is found in temporaryStateNodes
 // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
 // @ ifCheckSameRuleNode: if avoid finding the state node generate by same rule node
-bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode *&satstateNode,RuleNode *forwardRuleNode,
-                                                       bool ifCheckSameRuleNode, StateNode* curSNode)
+bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState,
+                                                       bool &found,
+                                                       StateNode *&satstateNode,
+                                                       RuleNode *forwardRuleNode,
+                                                       bool ifCheckSameRuleNode,
+                                                       StateNode* curSNode)
 {
     //   if curSNode is 0, it means it has no backward links yet, so only check in startStateNodes.
     //   if curSNode is not 0, check temporaryStateNodes first , if cannot find in temporaryStateNodes, check in startStateNodes.
@@ -1726,12 +1729,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 void OCPlanner::cleanUpEverythingAfterPlanning()
 {
     // delete all rule nodes
-    vector<RuleNode*>::iterator planRuleNodeIt;
-    for (planRuleNodeIt = allRuleNodeInThisPlan.begin(); planRuleNodeIt != allRuleNodeInThisPlan.end(); ++ planRuleNodeIt)
+    for (RuleNode* rn : allRuleNodeInThisPlan)
     {
-         RuleNode* rn = *planRuleNodeIt;
-         if (rn)
-             delete rn;
+        if (rn)
+            delete rn;
     }
 
     // delete all the state nodes, remove their hypotheticalLinks from Atomspace at the same time if any
