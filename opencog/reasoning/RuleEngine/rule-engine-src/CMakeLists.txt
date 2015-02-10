@@ -8,6 +8,7 @@ pln/BCPatternMatch.cc
 pln/ForwardChainInputMatchCB.cc
 pln/ForwardChainPatternMatchCB.cc
 pln/ForwardChainerCallBack.h
+pln/DefaultForwardChainerCB.cc
 pln/FCMemory.cc
 RuleEngineModule.cc
 InferenceSCM.cc
