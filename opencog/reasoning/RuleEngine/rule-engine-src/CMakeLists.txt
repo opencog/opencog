@@ -3,7 +3,6 @@ ADD_LIBRARY(ruleengine SHARED
 pln/BackwardChainer.cc
 pln/PLNCommons.cc
 pln/ForwardChainer.cc
-pln/Chainer.cc
 pln/BCPatternMatch.cc
 pln/ForwardChainInputMatchCB.cc
 pln/ForwardChainPatternMatchCB.cc
