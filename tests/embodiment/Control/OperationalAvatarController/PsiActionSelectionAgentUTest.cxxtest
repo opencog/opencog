@@ -86,6 +86,7 @@ public:
         config().set("IMPORTANCE_SPREADING_ENABLED", "false");
         config().set("IMPORTANCE_UPDATING_ENABLED", "false");
         config().set("IMPORTANCE_SPREADING_ENABLED", "false");
+        config().set("ENABLE_UNITY_CONNECTOR", "true");
 
         oacMock.createOAC(); 
 
