@@ -81,6 +81,7 @@ public:
         config().set("ENTITY_EXPERIENCE_ENABLED", "false"); 
         config().set("FISHGRAM_ENABLED", "false");
         config().set("MONITOR_CHANGES_ENABLED", "false"); 
+        config().set("ENABLE_UNITY_CONNECTOR", "true");
 
         oacMock.createOAC(); 
 
