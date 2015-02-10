@@ -115,7 +115,7 @@ LG_CONNECTOR_NODE <- PREDICATE_NODE   // e.g. "MX"
 LG_CONN_MULTI_NODE <- NODE  // multi-connector "@"
 LG_CONN_DIR_NODE <- NODE    // e.g. "+"
 
-// Consists of the connector node, the dirction, and possibly the
+// Consists of the connector node, the direction, and possibly the
 // multi-connector node.
 LG_CONNECTOR <- LINK   // e.g. "MX+"
 
@@ -131,8 +131,16 @@ LG_AND <- LG_SEQ      // must be ordered! (like SEQUNTIAL_AND_LINK)
 LG_OR  <- OR_LINK     // Exclusive-OR, completely disjunctive.
 
 // Kind-of-like an EvaluationLink but different.
-// First atom must be a word node.
+// First atom must be a WordNode or WordInstanceNode.
 // Second atom must be a "connector set": that is, a collection of
-// LgConnectors, joined with LgOrLink, LgAndLink.
+// LgConnectors, joined with LgOr, LgAnd links.
 // Ideally, these are fully disjoined before use.
+// In the case of WordInstanceNode, it should always be a
+// LgAnd disjunct used in the corresponding sentence.
 LG_WORD_CSET <- LIST_LINK
+
+// For LG link instance of a specific parse of a sentence
+// LgLinkInstanceNode will be an instance of LinkGrammarRelationshipNode
+// and LgLinkInstanceLink will link the node to the original connectors
+LG_LINK_INSTANCE_NODE <- PREDICATE_NODE
+LG_LINK_INSTANCE_LINK <- LIST_LINK
