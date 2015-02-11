@@ -102,6 +102,7 @@ void SchemeEval::finish(void)
 {
 	scm_gc_unprotect_object(_rc);
 
+	std::lock_guard<std::mutex> lck(init_mtx);
 	// Restore the previous outport (if its still alive)
 	if (scm_is_false(scm_port_closed_p(_saved_outport)))
 		scm_set_current_output_port(_saved_outport);
@@ -283,6 +284,7 @@ void SchemeEval::per_thread_init(void)
 	// thread), we are left with this thread now pointing at a port
 	// that does not exist.  So this is all very fubarred. It will
 	// work as long as the threading is fairly simple. XXX FIXME
+	std::lock_guard<std::mutex> lck(init_mtx);
 	scm_set_current_output_port(_outport);
 }
 
