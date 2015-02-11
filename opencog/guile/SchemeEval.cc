@@ -31,6 +31,8 @@
 
 using namespace opencog;
 
+std::mutex init_mtx;
+
 /**
  * This init is called once for every time that this class
  * is instantiated -- i.e. it is a per-instance initializer.
@@ -39,6 +41,9 @@ void SchemeEval::init(void)
 {
 	SchemeSmob::init();
 	PrimitiveEnviron::init();
+
+	// Lock to prevent racey setting of the output port.
+	std::lock_guard<std::mutex> lck(init_mtx);
 
 	// Output ports for side-effects.
 	_saved_outport = scm_current_output_port();
@@ -269,6 +274,15 @@ void SchemeEval::per_thread_init(void)
 
 	// Guile implements the current port as a fluid on each thread.
 	// So, for every new thread, we need to set this.
+	//
+	// XXX this is not really right.  This is OK if one instance
+	// SchemeEval is touching multiple threads, but this breaks if
+	// two instances are touching one thread: the second instance
+	// won't have its output port set up in this thread!!. Then it
+	// gets worse: if the first instance is destroyed (in a different
+	// thread), we are left with this thread now pointing at a port
+	// that does not exist.  So this is all very fubarred. It will
+	// work as long as the threading is fairly simple. XXX FIXME
 	scm_set_current_output_port(_outport);
 }
 
