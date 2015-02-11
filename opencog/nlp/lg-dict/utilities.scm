@@ -34,13 +34,6 @@
 )
 
 ; ---------------------------------------------------------------------
-; lg-inst-get-disjunct - Given WordInstanceNode, get the disjunct (LgAnd) used
-;
-(define (lg-inst-get-disjunct word-inst)
-	(car (cog-chase-link 'LgWordCset 'LgAnd word-inst))
-)
-
-; ---------------------------------------------------------------------
 ; lg-conn-type-match? - Check if two connectors type match
 ;
 (define (lg-conn-type-match? lconn rconn)
