@@ -27,8 +27,6 @@
 
 #include <string>
 
-#include <opencog/guile/SchemeEval.h>
-#include <opencog/shell/SchemeShell.h>
 #include <opencog/server/Request.h>
 #include <opencog/server/CogServer.h>
 

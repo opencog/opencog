@@ -26,6 +26,7 @@
 #include <opencog/server/ConsoleSocket.h>
 #include <opencog/util/Logger.h>
 
+#include "SchemeShell.h"
 #include "SchemeShellModule.h"
 
 using namespace opencog;
