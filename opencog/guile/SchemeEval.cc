@@ -565,9 +565,6 @@ void SchemeEval::begin_eval()
 {
 	_eval_done = false;
 	_poll_done = false;
-	scm_gc_unprotect_object(_rc);
-	_rc = SCM_EOL;
-	_rc = scm_gc_protect_object(_rc);
 }
 
 /// Read one end of a pipe. The other end of the pipe is attached to
@@ -639,6 +636,14 @@ std::string SchemeEval::do_poll_result()
 	// evalution result flags, etc.
 	_poll_done = true;
 
+	// Save the result of evaluation, and clear it. Recall that _rc is
+	// typically set in a different thread.  We want it cleared before
+	// we ever get here again, on later evals.
+	SCM tmp_rc = _rc;
+	scm_gc_unprotect_object(_rc);
+	_rc = SCM_EOL;
+	_rc = scm_gc_protect_object(_rc);
+
 	/* An error is thrown if the input expression is incomplete,
 	 * in which case the error handler sets the _pending_input flag
 	 * to true. */
@@ -669,8 +674,9 @@ std::string SchemeEval::do_poll_result()
 		std::string rv = poll_port();
 
 		// Next, we append the "interpreter" output
-		rv += prt(_rc);
+		rv += prt(tmp_rc);
 		rv += "\n";
+		scm_remember_upto_here_1(tmp_rc);
 		return rv;
 	}
 	return "#<Error: Unreachable statement reached>";
