@@ -24,6 +24,7 @@
 #define _OPENCOG_GENERIC_SHELL_H
 
 #include <string>
+#include <thread>
 
 /**
  * The GenericShell class implements an "escape" from the default cogserver
@@ -62,6 +63,7 @@ class GenericShell
 
 		ConsoleSocket* socket;
 		GenericEval* evaluator;
+		std::thread* evalthr;
 
 		virtual void set_socket(ConsoleSocket *);
 		virtual const std::string& get_prompt(void);

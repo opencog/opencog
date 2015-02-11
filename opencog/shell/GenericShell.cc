@@ -60,12 +60,20 @@ GenericShell::GenericShell(void)
 
 	evaluator = NULL;
 	socket = NULL;
+	evalthr = NULL;
 	self_destruct = false;
 	do_async_output = false;
 }
 
 GenericShell::~GenericShell()
 {
+	if (evalthr)
+	{
+		evalthr->join();
+		delete evalthr;
+		evalthr = NULL;
+	}
+
 	if (socket)
 	{
 		socket->SetShell(NULL);
@@ -267,8 +275,16 @@ void GenericShell::do_eval(const std::string &expr)
 			p->evaluator->eval_expr(in.c_str());
 		};
 
-		std::thread evalth(async_wrapper, this, input);
-		evalth.detach();
+		// We cannot use one evaluator in two different threads.
+		// If we do, then bad things will happen.  So always wait
+		// for teh previous thread to finish, before we got at it
+		// again.
+		if (evalthr)
+		{
+			evalthr->join();
+			delete evalthr;
+		}
+		evalthr = new std::thread(async_wrapper, this, input);
 	}
 	else
 	{
