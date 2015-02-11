@@ -1,5 +1,6 @@
 // ====================================================================
 // Embodiment atoms
+//
 
 PET_NODE <- OBJECT_NODE
 AVATAR_NODE <- OBJECT_NODE

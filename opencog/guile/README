@@ -102,14 +102,17 @@ have to consult the individual scm files for more info.
 
 == Modules ==
 -------------
-Currently OpenCog's scheme functions are broken into 3 different scheme
-modules: (opencog), (opencog extension), and (opencog atomtypes).  Each
-one can be listed with the following code:
+Currently OpenCog's scheme functions are broken into 2 different scheme
+modules: (opencog), and (opencog extension).  Each one can be listed
+with the following code:
 
 (module-for-each (lambda (symbol value) (display symbol) (newline))
 (resolve-interface '(opencog)))
 
 Replace '(opencog) with the corresponding module name.
+
+Currently only the (opencog) module can be used in standalone guile (see
+examples/guile/basic.scm).
 
 
 == Core Functions ==

@@ -1,6 +1,7 @@
 //
 // Atom type definitions for the varouts space & time server types.
 //
+
 // ====================================================================
 // SpaceServer atoms
 SPACE_MAP_NODE <- NODE
@@ -9,7 +10,7 @@ BLOCK_ENTITY_NODE <- OBJECT_NODE
 STRUCTURE_NODE <- OBJECT_NODE
 IMAGINARY_STRUCTURE_NODE <- OBJECT_NODE
 
-// Time-related atoms:
+// Time-related atoms
 TIME_NODE <- NODE
 AT_TIME_LINK <- ORDERED_LINK
 LATEST_LINK <- ORDERED_LINK

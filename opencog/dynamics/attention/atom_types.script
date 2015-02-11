@@ -1,5 +1,5 @@
 //
-// Script for automatic "atom type" generation. For more more information,
+// Script for automatic "atom type" generation. For more information,
 // consult  the documentation in the opencog/atomspace/README file.
 //
 // Please note: some of the types below are used only via the scheme bindings.
