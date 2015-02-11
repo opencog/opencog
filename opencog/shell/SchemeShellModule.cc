@@ -34,20 +34,16 @@ DECLARE_MODULE(SchemeShellModule);
 
 SchemeShellModule::SchemeShellModule(CogServer& cs) : Module(cs)
 {
-	evaluator = new SchemeEval(&cs.getAtomSpace());
 }
 
 void SchemeShellModule::init(void)
 {
 	shellout_register();
-	do_eval_register();
 }
 
 SchemeShellModule::~SchemeShellModule()
 {
 	shellout_unregister();
-	do_eval_unregister();
-	delete evaluator;
 }
 
 /**
@@ -78,33 +74,6 @@ std::string SchemeShellModule::shellout(Request *req, std::list<std::string> arg
 		"Entering scheme shell; use ^D or a single . on a "
 		"line by itself to exit.\n" + sh->get_prompt();
 	return rv;
-}
-
-std::string SchemeShellModule::do_eval(Request *req, std::list<std::string> args)
-{
-	// Needs to join the args back up into one string.
-	std::string expr;
-	std::string out;
-
-	// Adds an extra space on the end, but that doesn't matter.
-	for (std::string arg : args)
-	{
-		expr += arg + " ";
-	}
-
-	evaluator->begin_eval();
-	evaluator->eval_expr(expr);
-	out = evaluator->poll_result();
-	// May not be necessary since an error message and backtrace are provided.
-	if (evaluator->eval_error()) {
-		out += "An error occurred\n";
-	}
-	if (evaluator->input_pending()) {
-		out += "Invalid Scheme expression: missing something";
-	}
-	evaluator->clear_pending();
-
-	return out;
 }
 
 #endif

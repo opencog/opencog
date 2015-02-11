@@ -52,14 +52,6 @@ class SchemeShellModule : public Module
 			"netcat, as it avoids printing garbage when the scripts work well.\n",
 			true, false)
 
-		DECLARE_CMD_REQUEST(SchemeShellModule, "scm-eval", do_eval,
-			"Run some scheme code",
-			"Usage: scm-eval <scheme code>\n\n"
-			"Evaluate the specified Scheme code. It does not need to be quoted.",
-			false, false)
-
-		SchemeEval* evaluator;
-
 	public:
 		SchemeShellModule(CogServer&);
 		virtual ~SchemeShellModule();
