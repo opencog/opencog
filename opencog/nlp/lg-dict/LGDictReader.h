@@ -27,7 +27,6 @@
 #include <link-grammar/dict-api.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/guile/SchemeEval.h>
 
 #include "LGDictExpContainer.h"
 
@@ -53,7 +52,6 @@ private:
 
     Dictionary _dictionary;
     AtomSpace* _as;
-    SchemeEval* _scm_eval;
 };
 
 }

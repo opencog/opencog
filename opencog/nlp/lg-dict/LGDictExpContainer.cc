@@ -199,47 +199,6 @@ void LGDictExpContainer::basic_normal_order()
 }
 
 /**
- * Output the scm representation of the LG dictionary entry.
- *
- * @return the scm string
- */
-std::string LGDictExpContainer::to_scm_string()
-{
-    if (m_type == CONNECTOR_type)
-    {
-        if (m_string == "OPTIONAL")
-            return "(LgConnector (LgConnectorNode \"0\"))\n";
-
-        std::stringstream ss;
-        ss << "(LgConnector (LgConnectorNode ";
-        ss << "\"" << m_string << "\") ";
-        ss << "(LgConnDirNode \"" << m_direction << "\") ";
-
-        if (m_multi)
-            ss << "(LgConnMultiNode \"@\")";
-
-        ss << ")\n";
-
-        return ss.str();
-    }
-
-    std::string alist;
-
-    if (m_type == AND_type)
-        alist = "(LgAnd ";
-
-    if (m_type == OR_type)
-        alist = "(LgOr ";
-
-    for (auto& exp : m_subexps)
-        alist += exp.to_scm_string();
-
-    alist.append(")\n");
-
-    return alist;
-}
-
-/**
  * Create the OpenCog atom for the LG dictionary expression.
  *
  * @param as   pointer to the AtomSpace
