@@ -22,6 +22,7 @@
 ; -- parse-get-words        Get all words occuring in a parse.
 ; -- parse-get-words-in-order  Get all words occuring in a parse in order.
 ; -- parse-get-relations    Get all RelEx relations in a parse.
+; -- word-inst-get-parse    Return the ParseNode associated with word-inst.
 ; -- word-inst-get-number   Return the NumberNode associated with word-inst. 
 ; -- word-inst-get-word   Return the WordNode associated with word-inst.
 ; -- word-inst-get-word-str  Return the word string assoc with word-inst.
@@ -42,6 +43,8 @@
 ; -- word-inst-get-subscripted-word-str Get LG subscripted word string.
 ; -- word-inst-get-senses   Get word senses associated with word.
 ; -- word-inst-sense-score  Get ranking score for word-inst & word-sense.
+; -- word-inst-get-disjunct Get the disjunct (LgAnd) used for a word-inst.
+; -- word-inst-get-source-conn     Get the set of connectors word-inst linked to.
 ; -- relation-get-dependent Get dependent part of a relation.
 ; -- delete-sentence        Delete all atoms associated with sentence.
 ; -- delete-sentences       Delete all atoms that occur in sentences.
@@ -58,6 +61,9 @@
 ; 
 ; Copyright (c) 2008, 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
 ;
+
+(use-modules (ice-9 receive))
+
 ; ---------------------------------------------------------------------
 ; map-parses   Call proceedure on every parse of the sentence.
 ;
@@ -200,6 +206,15 @@
 			)
 		)
 	)
+)
+
+; ---------------------------------------------------------------------
+; word-inst-get-parse   Return the ParseNode associated with word-inst
+;
+; Return the ParseNode associated with 'word-inst'
+;
+(define (word-inst-get-parse word-inst)
+	(car (cog-chase-link 'WordInstanceLink 'ParseNode word-inst))
 )
 
 ; ---------------------------------------------------------------------
@@ -520,6 +535,54 @@
 	)
 ) 
 
+; ---------------------------------------------------------------------
+; word-inst-get-disjunct -- Get the disjunct (LgAnd) used for a word-inst.
+;
+(define (word-inst-get-disjunct word-inst)
+	(car (cog-chase-link 'LgWordCset 'LgAnd word-inst))
+)
+
+; ---------------------------------------------------------------------
+; word-inst-get-source-conn -- Get the set of connectors word-inst linked to.
+;
+; The returned set will be a list instead of as a disjunct, because
+; such a set is not really a disjunct (the order of - & + are reversed)
+; but instead is a 1-to-1 matching of the connectors in the disjunct
+; word-inst used.
+;
+(define (word-inst-get-source-conn word-inst)
+	(define (great-helper l1 l2)
+		(define w1-seq (word-inst-get-number (gadr l1)))
+		(define w2-seq (word-inst-get-number (gadr l2)))
+		(> (string->number (cog-name w1-seq)) (string->number (cog-name w2-seq)))
+	)
+	(define (less-helper l1 l2)
+		(define w1-seq (word-inst-get-number (gddr l1)))
+		(define w2-seq (word-inst-get-number (gddr l2)))
+		(< (string->number (cog-name w1-seq)) (string->number (cog-name w2-seq)))
+	)
+	; get the left & right LgLinkInstanceNode predicates
+	(receive (lg-insts-left lg-insts-right)
+	         (partition (lambda (l) (equal? (gddr l) word-inst))
+	                    (cog-get-pred word-inst 'LgLinkInstanceNode))
+
+		; sort links on the left in reverse word sequence order, so
+		; closer words will be ordered first
+		(sort! lg-insts-left great-helper)
+		
+		; sort links on the right in word sequence order, so closer
+		; words will be ordered first
+		(sort! lg-insts-right less-helper)
+		
+		(let ((get-inst-link (lambda (l) (car (cog-filter 'LgLinkInstanceLink (cog-incoming-set (gar l)))))))
+			(append
+				(map (lambda (l) (cadr (cog-outgoing-set (get-inst-link l)))) lg-insts-left)
+				(map (lambda (l) (caddr (cog-outgoing-set (get-inst-link l)))) lg-insts-right)					
+			)
+		)
+	)
+)
+
 ; --------------------------------------------------------------------
 ; relation-get-dependent Get dependent part of a relation.
 ;
@@ -594,6 +657,10 @@
 ; XXX TODO: In principle, this could be accomplished by lowering the
 ; AttentionValue for the atoms, and letting the ForgettingAgent do its
 ; work. In practice, this is too complicated, for now.
+;
+; XXX: Some of these nodes & links are needed by the language generation
+; pipeline for matching to old sentences, so maybe they cannot be
+; removed.
 ;
 (define (delete-sentences)
 	(let ((n 0))
