@@ -91,14 +91,14 @@
 ; ---------------------------------------------------------------------
 ; lg-conn-linkable? - Check if two connectors can be linked
 ;
-(define (lg-conn-linkable? leftconn rightconn)
+; The two connectors must have different directions, but does not matter
+; which one is + and which one is -.
+;
+(define (lg-conn-linkable? conn1 conn2)
 	; check if the two connectors type match
-	(if (lg-conn-type-match? leftconn rightconn)
+	(if (lg-conn-type-match? conn1 conn2)
 		; check if the directions are correct
-		(if (and (equal? (lg-conn-get-dir leftconn) (LgConnDirNode "+")) (equal? (lg-conn-get-dir rightconn) (LgConnDirNode "-")))
-			#t
-			#f
-		)
+		(not (equal? (lg-conn-get-dir conn1) (lg-conn-get-dir conn2)))
 		#f
 	)
 )
