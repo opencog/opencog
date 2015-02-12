@@ -179,10 +179,10 @@ HandleSeq SuRealModule::do_sureal_match(Handle h)
             {
                 for (auto& am: appendMaps)
                 {
-                    // at this point, we would know nothing in em & am would
-                    // map the same variable because they are from two
-                    // disconnected clauses.  Instead, we want to check to make
-                    // sure no two variables get mapping to the same node.
+                    // at this point, we know nothing in em & am would map the
+                    // same variable because they are from two disconnected
+                    // clauses.  Instead, we want to check to make sure no two
+                    // variables get mapping to the same node.
                     auto checker = [&](const std::pair<Handle, Handle>& ekv)
                     {
                         return std::any_of(am.begin(), am.end(),

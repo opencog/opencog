@@ -22,6 +22,7 @@
  */
 
 #include <opencog/nlp/types/atom_types.h>
+#include <opencog/guile/SchemeSmob.h>
 
 #include "SuRealPMCB.h"
 
@@ -36,9 +37,15 @@ using namespace opencog;
  * @param pAS    the corresponding AtomSpace
  * @param vars   the set of nodes that should be treated as variables
  */
-SuRealPMCB::SuRealPMCB(AtomSpace* pAS, std::set<Handle> vars) : DefaultPatternMatchCB(pAS), m_vars(vars)
+SuRealPMCB::SuRealPMCB(AtomSpace* pAS, std::set<Handle> vars)
+    : DefaultPatternMatchCB(pAS), m_vars(vars), m_eval(new SchemeEval(pAS))
 {
 
+}
+
+SuRealPMCB::~SuRealPMCB()
+{
+    delete m_eval;
 }
 
 /**
@@ -73,32 +80,52 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
     std::string sPat = _as->getName(hPat);
     std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
     std::string sSoln = _as->getName(hSoln);
-    std::string sSolnWord = sSoln.substr(0, sSoln.find_first_of('@'));
 
     // get the WordNode associated with the word (extracted from "word@1234" convention)
     Handle hPatWordNode = _as->getHandle(WORD_NODE, sPatWord);
-    Handle hSolnWordNode = _as->getHandle(WORD_NODE, sSolnWord);
 
-    // no WordNode? reject!
-    if (hSolnWordNode == Handle::UNDEFINED)
+    // get the corresponding WordInstanceNode for hSoln
+    Handle hSolnWordInst = _as->getHandle(WORD_INSTANCE_NODE, sSoln);
+
+    // no WordInstanceNode? reject!
+    if (hSolnWordInst == Handle::UNDEFINED)
         return false;
 
-    // get the neighbor of each WordNode within LgWordCset
-    HandleSeq qPatSet =_as->getNeighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
-    HandleSeq qSolnSet = _as->getNeighbors(hSolnWordNode, false, true, LG_WORD_CSET, false);
+    // get the source connectors for the solution
+    std::string scmCode = "(word-inst-get-source-conn " + SchemeSmob::to_string(hSolnWordInst) + ")";
+    HandleSeq qTargetConns = m_eval->eval_q(scmCode);
 
-    // check the HandleSeq to see if there is any pair that is equal (common LG entry)
-    std::sort(qPatSet.begin(), qPatSet.end());
-    std::sort(qSolnSet.begin(), qSolnSet.end());
+    HandleSeq qOr = _as->getNeighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
+    HandleSeq qDisjuncts;
 
-    HandleSeq qItrsect;
-    std::set_intersection(qPatSet.begin(), qPatSet.end(), qSolnSet.begin(), qSolnSet.end(), std::back_inserter(qItrsect));
+    auto insertHelper = [&](const Handle& h)
+    {
+        HandleSeq q = _as->getOutgoing(h);
+        qDisjuncts.insert(qDisjuncts.end(), q.begin(), q.end());
+    };
 
-    // if there's no common LG dictionary rules, then the two words do not match
-    if (qItrsect.empty())
-        return false;
+    std::for_each(qOr.begin(), qOr.end(), insertHelper);
 
-    return true;
+    // for each disjunct, get its outgoing set, and match 1-to-1 with qConns
+    auto matchHelper = [&](const Handle& hDisjunct)
+    {
+        HandleSeq qSourceConns = _as->getOutgoing(hDisjunct);
+
+        if (qSourceConns.size() != qTargetConns.size())
+            return false;
+
+        for (uint i = 0; i < qSourceConns.size(); i++)
+        {
+            scmCode = "(lg-conn-linkable? " + SchemeSmob::to_string(qSourceConns[i]) + " " + SchemeSmob::to_string(qTargetConns[i]) + ")";
+
+            if (m_eval->eval(scmCode) == "#f")
+                return false;
+        }
+
+        return true;
+    };
+
+    return std::any_of(qDisjuncts.begin(), qDisjuncts.end(), matchHelper);
 }
 
 /**
