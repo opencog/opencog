@@ -79,6 +79,14 @@ Handle LGDictModule::do_lg_get_dict_entry(Handle h)
 
     if (pAS->isNode(h) && pAS->getType(h) == WORD_NODE)
     {
+		// check if the dictionary entry is already in the atomspace
+		HandleSeq qExisting;
+		pAS->getHandleSet(std::back_inserter(qExisting), h, LG_WORD_CSET, false);
+
+		// avoid the disjuncts building if entries exist
+		if (not qExisting.empty())
+			return pAS->addLink(SET_LINK, qExisting);
+
         LGDictReader reader(m_pDictionary, pAS);
 
         return reader.getAtom(pAS->getName(h));

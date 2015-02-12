@@ -23,9 +23,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/nlp/types/atom_types.h>
+
 #include "LGDictReader.h"
 
 using namespace opencog;
+
 
 /**
  * Constructor of the LGDictReader class.
@@ -34,7 +37,7 @@ using namespace opencog;
  * @param pAS     the AtomSpace where atoms will be created
  */
 LGDictReader::LGDictReader(Dictionary pDict, AtomSpace* pAS)
-    : _dictionary(pDict), _scm_eval(new SchemeEval(pAS))
+    : _dictionary(pDict), _as(pAS), _scm_eval(new SchemeEval(pAS))
 {
 
 }
@@ -77,6 +80,22 @@ Handle LGDictReader::getAtom(const std::string& word)
     if (!dn_head)
         return Handle::UNDEFINED;
 
+    HandleSeq outgoing;
+    Handle hWord = _as->addNode(WORD_NODE, word);
+
+    for (Dict_node* dn = dn_head; dn; dn = dn->right)
+    {
+        Exp* exp = dn->exp;
+        Handle hLG = lg_exp_to_container(exp).to_handle(_as);
+
+        outgoing.push_back(_as->addLink(LG_WORD_CSET, hWord, hLG));
+    }
+
+    free_lookup_list(_dictionary, dn_head);
+
+    return _as->addLink(SET_LINK, outgoing);
+
+#ifdef LG_OLD_SCM_METHOD
     std::string set = "(SetLink\n";
 
     for (Dict_node* dn = dn_head; dn; dn = dn->right)
@@ -88,7 +107,7 @@ Handle LGDictReader::getAtom(const std::string& word)
         std::string word_cset = " (LgWordCset (WordNode \"";
         word_cset += word;
         word_cset += "\")\n";
-        word_cset += lg_exp_to_scm_string(exp);
+        word_cset += lg_exp_to_container(exp).to_scm_string();
         word_cset += ")\n";
 
         set += word_cset;
@@ -99,30 +118,19 @@ Handle LGDictReader::getAtom(const std::string& word)
     free_lookup_list(_dictionary, dn_head);
 
     return _scm_eval->eval_h(set);
+#endif
 }
 
 /**
- * Helper method for converting LG expression trees to scheme code.
+ * Helper method for storing LG expression trees in custom container.
  *
  * @param exp   the input expression trees
- * @return      the scheme output
+ * @return      the flatten container
  */
-std::string LGDictReader::lg_exp_to_scm_string(Exp* exp)
+LGDictExpContainer LGDictReader::lg_exp_to_container(Exp* exp)
 {
     if (CONNECTOR_type == exp->type)
-    {
-        std::stringstream ss;
-        ss << "(LgConnector (LgConnectorNode ";
-        ss << "\"" << exp->u.string << "\") ";
-        ss << "(LgConnDirNode \"" << exp->dir << "\") ";
-
-        if (exp->multi)
-            ss << "(LgConnMultiNode \"@\")";
-
-        ss << ")\n";
-
-        return ss.str();
-    }
+        return LGDictExpContainer(CONNECTOR_type, exp);
 
     // Whenever a null appears in an OR-list, it means the
     // entire OR-list is optional.  A null can never appear
@@ -130,7 +138,7 @@ std::string LGDictReader::lg_exp_to_scm_string(Exp* exp)
     E_list* el = exp->u.l;
 
     if (NULL == el)
-        return "(LgConnector (LgConnectorNode \"0\"))\n";
+        return LGDictExpContainer(CONNECTOR_type, NULL);
 
     // The C data structure that link-grammar uses for connector
     // expressions is totally insane, as witnessed by the loop below.
@@ -138,28 +146,19 @@ std::string LGDictReader::lg_exp_to_scm_string(Exp* exp)
     // with exp->u.l->e being the left hand side, and
     //      exp->u.l->next->e being the right hand side.
     // This means that exp->u.l->next->next is always null.
-    std::string alist;
-
-    if (AND_type == exp->type)
-        alist = "(LgAnd ";
-
-    if (OR_type == exp->type)
-        alist = "(LgOr ";
-
-    alist += lg_exp_to_scm_string(el->e);
+    std::vector<LGDictExpContainer> subcontainers;
+    subcontainers.push_back(lg_exp_to_container(el->e));
     el = el->next;
 
     while (el && exp->type == el->e->type)
     {
         el = el->e->u.l;
-        alist += lg_exp_to_scm_string(el->e);
+        subcontainers.push_back(lg_exp_to_container(el->e));
         el = el->next;
     }
 
     if (el)
-        alist += lg_exp_to_scm_string(el->e);
+        subcontainers.push_back(lg_exp_to_container(el->e));
 
-    alist.append (")\n");
-
-    return alist;
+    return LGDictExpContainer(exp->type, subcontainers);
 }

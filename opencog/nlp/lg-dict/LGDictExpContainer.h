@@ -1,7 +1,7 @@
 /*
- * LGDictReader.h
+ * LGDictExpContainer.h
  *
- * Copyright (C) 2014 OpenCog Foundation
+ * Copyright (C) 2015 OpenCog Foundation
  *
  * Author: William Ma <https://github.com/williampma>
  *
@@ -21,41 +21,46 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LG_DICT_READER_H
-#define _OPENCOG_LG_DICT_READER_H
+#ifndef _OPENCOG_LG_DICT_EXP_H
+#define _OPENCOG_LG_DICT_EXP_H
 
 #include <link-grammar/dict-api.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/guile/SchemeEval.h>
 
-#include "LGDictExpContainer.h"
 
 namespace opencog
 {
 
+
 /**
- * Link Grammar dictionary reader.
+ * Link Grammar expression container.
  *
- * A helper class for reading the LG dictionary's entry for a specific
- * word, and for creating the corresponding atom.
+ * A helper class for doing operations on LG expression.
  */
-class LGDictReader
+class LGDictExpContainer
 {
 public:
-    LGDictReader(Dictionary, AtomSpace*);
-    ~LGDictReader();
+    LGDictExpContainer(Exp_type t, Exp* exp) throw (InvalidParamException);
+    LGDictExpContainer(Exp_type t, std::vector<LGDictExpContainer> s) throw (InvalidParamException);
 
-    Handle getAtom(const std::string& word);
+    std::string to_scm_string();
+    Handle to_handle(AtomSpace* as);
 
 private:
-    LGDictExpContainer lg_exp_to_container(Exp*);
+    void basic_flatten();
+    void basic_dnf();
+    void basic_normal_order();
 
-    Dictionary _dictionary;
-    AtomSpace* _as;
-    SchemeEval* _scm_eval;
+    Exp_type m_type;
+
+    std::string m_string;
+    char m_direction;
+    bool m_multi;
+
+    std::vector<LGDictExpContainer> m_subexps;
 };
 
 }
 
-#endif // _OPENCOG_LG_DICT_READER_H
+#endif // _OPENCOG_LG_DICT_EXP_H
