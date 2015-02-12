@@ -106,10 +106,18 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
 
     std::for_each(qOr.begin(), qOr.end(), insertHelper);
 
+    logger().debug("[SuReal] Looking at %d disjuncts of %s", qDisjuncts.size(), hPat->toShortString().c_str());
+
     // for each disjunct, get its outgoing set, and match 1-to-1 with qConns
     auto matchHelper = [&](const Handle& hDisjunct)
     {
-        HandleSeq qSourceConns = _as->getOutgoing(hDisjunct);
+        HandleSeq qSourceConns;
+
+        // check if hDisjunct is LgAnd or just a lone connector
+        if (hDisjunct->getType() == LG_AND)
+            qSourceConns = _as->getOutgoing(hDisjunct);
+        else
+            qSourceConns.push_back(hDisjunct);
 
         if (qSourceConns.size() != qTargetConns.size())
             return false;
