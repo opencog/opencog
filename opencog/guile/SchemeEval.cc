@@ -813,6 +813,90 @@ void * SchemeEval::c_wrap_eval_h(void * p)
 	return self;
 }
 
+/**
+ * Evaluate a string containing a scheme expression, returning a HandleSeq.
+ * If an evaluation error occurs, then the error is logged to the log
+ * file, and an empty HandleSeq is returned.  If the result of evaluation
+ * is not a list, no error is logged, but an empty HandleSeq is still
+ * returned. If any item in the list is not a Handle, still no error is
+ * returned, but an empty HandleSeq is still returned. Otherwise, if the
+ * result of evaluation is a list of Handle, a HandleSeq is returned.
+ */
+HandleSeq SchemeEval::eval_q(const std::string& expr)
+{
+	if (_in_eval) {
+		SCM expr_str = scm_from_utf8_string(expr.c_str());
+		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
+
+		if (!scm_list_p(rc))
+			return HandleSeq();
+
+		HandleSeq result;
+
+		while (rc != SCM_EOL)
+		{
+			Handle h = SchemeSmob::scm_to_handle(scm_car(rc));
+
+			if (h == Handle::UNDEFINED)
+				return HandleSeq();
+
+			result.push_back(h);
+			rc = scm_cdr(rc);
+		}
+
+		return result;
+	}
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	thread_lock();
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
+	pexpr = &expr;
+	_in_eval = true;
+	scm_with_guile(c_wrap_eval_q, this);
+	_in_eval = false;
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	thread_unlock();
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
+	return qanswer;
+}
+
+void * SchemeEval::c_wrap_eval_q(void * p)
+{
+	SchemeEval *self = (SchemeEval *) p;
+	// scm_from_utf8_string is lots faster than scm_from_locale_string
+	SCM expr_str = scm_from_utf8_string(self->pexpr->c_str());
+	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
+
+	if (!scm_list_p(rc))
+	{
+		self->qanswer = HandleSeq();
+		return self;
+	}
+
+	HandleSeq result;
+
+	while (rc != SCM_EOL)
+	{
+		Handle h = SchemeSmob::scm_to_handle(scm_car(rc));
+
+		if (h == Handle::UNDEFINED)
+		{
+			self->qanswer = HandleSeq();
+			return self;
+		}
+
+		result.push_back(h);
+		rc = scm_cdr(rc);
+	}
+
+	self->qanswer = result;
+
+	return self;
+}
+
 /* ============================================================== */
 /**
  * apply -- apply named function func to arguments in ListLink

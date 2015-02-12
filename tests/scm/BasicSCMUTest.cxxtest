@@ -307,20 +307,6 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	eval->clear_pending();
 	TSM_ASSERT("Failed to create a link", !eval_err);
 
-	HandleSeq links;
-	as->getHandlesByType(back_inserter(links), type, true);
-	//printf("Number of links found: %d\n",links.size());
-	HandleSeq::const_iterator i;
-	for (i = links.begin(); i != links.end(); ++i)
-	{
-		TruthValuePtr tv = as->getTV(*i);
-		float m = tv->getMean();
-		float c = tv->getConfidence();
-		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
-		TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
-		//printf("Link TruthValue: %f -- %f\n", m, c);
-	}
-
 	Type t1 = classserver().getType(nodename1);
 	Handle h1 = as->getHandle(t1, value1);
 	TSM_ASSERT("Failed to find handle", h1 != NULL);
@@ -334,6 +320,30 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 
 	NodePtr n2 = NodeCast(h2);
 	TSM_ASSERT("Failed to find node", n2 != NULL);
+
+	HandleSeq links;
+	as->getHandlesByType(back_inserter(links), type, true);
+	//printf("Number of links found: %d\n",links.size());
+	HandleSeq::const_iterator i;
+	for (i = links.begin(); i != links.end(); ++i)
+	{
+		TruthValuePtr tv = as->getTV(*i);
+		float m = tv->getMean();
+		float c = tv->getConfidence();
+		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
+		TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
+		//printf("Link TruthValue: %f -- %f\n", m, c);
+
+		// Test the eval_q function also -- it returns a HandleSeq.
+		snprintf(buff, 500, "(cog-outgoing-set (cog-atom %lu))", (*i).value());
+		HandleSeq q = eval->eval_q(buff);
+
+		eval_err = eval->eval_error();
+		eval->clear_pending();
+		TSM_ASSERT("Failed to eval_q", !eval_err);
+		TSM_ASSERT("Failed to get correct link's outgoing set size", q.size() == 2);
+		TSM_ASSERT("Failed to get the correct link's outgoing set", q[0] == h1 && q[1] == h2);
+	}
 }
 
 // ============================================================
