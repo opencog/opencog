@@ -200,6 +200,8 @@
         (define mappings (sureal-get-mapping itpr))
         ; helper to generate sentence using one mapping
         (define (construct-sntc-mapping w-seq vars mapping)
+        	; make a clone of the w-seq to avoid changing when list-set!
+        	(define w-seq-copy (list-copy w-seq))
             (for-each
                 (lambda (old-logic-node new-logic-node)
                     (let ((old-word-inst (r2l-get-word-inst old-logic-node))
@@ -213,8 +215,8 @@
                                 (lambda (x idx)
                                     (if (equal? x old-word-inst)
                                         (if (null? new-word-inst)
-                                            (list-set! w-seq idx new-word)
-                                            (list-set! w-seq idx new-word-inst)
+                                            (list-set! w-seq-copy idx new-word)
+                                            (list-set! w-seq-copy idx new-word-inst)
                                         )
                                     )
                                 )
@@ -235,7 +237,7 @@
                         (cog-name w)
                     )
                 )
-                w-seq
+                w-seq-copy
             )
         )
 
