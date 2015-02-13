@@ -104,13 +104,19 @@
                 (eval-string (list-ref a-list 0))
                 (let* ((parse-name (parse-str (list-ref a-list 0)))
                        (parse-node (ParseNode parse-name)))
-                    ; generate the LG dictionary entries for each word
-                    (let ((words (parse-get-words parse-node)))
-                        (map-word-instances
-                            (lambda (word-inst) (map-word-node lg-get-dict-entry word-inst))
-                            parse-node
-                        )
-                    )
+;
+; XXX not really necessary at this point since we will only need the LG
+; entries for the word-inst, which is emitted by the RelEx server already.
+; The full LG disjuncts entries are needed only by SuReal, which already
+; calls (lg-get-dict-entry ...) on its node.
+;
+;                    ; generate the LG dictionary entries for each word
+;                    (let ((words (parse-get-words parse-node)))
+;                        (map-word-instances
+;                            (lambda (word-inst) (map-word-node lg-get-dict-entry word-inst))
+;                            parse-node
+;                        )
+;                    )
                     (ReferenceLink 
                         (InterpretationNode (string-append parse-name "_interpretation_$X"))
                         ; The function in the SetLink returns a list of outputs that
@@ -200,6 +206,8 @@
         (define mappings (sureal-get-mapping itpr))
         ; helper to generate sentence using one mapping
         (define (construct-sntc-mapping w-seq vars mapping)
+            ; make a clone of the w-seq to avoid changing when list-set!
+            (define w-seq-copy (list-copy w-seq))
             (for-each
                 (lambda (old-logic-node new-logic-node)
                     (let ((old-word-inst (r2l-get-word-inst old-logic-node))
@@ -213,8 +221,8 @@
                                 (lambda (x idx)
                                     (if (equal? x old-word-inst)
                                         (if (null? new-word-inst)
-                                            (list-set! w-seq idx new-word)
-                                            (list-set! w-seq idx new-word-inst)
+                                            (list-set! w-seq-copy idx new-word)
+                                            (list-set! w-seq-copy idx new-word-inst)
                                         )
                                     )
                                 )
@@ -235,7 +243,7 @@
                         (cog-name w)
                     )
                 )
-                w-seq
+                w-seq-copy
             )
         )
 

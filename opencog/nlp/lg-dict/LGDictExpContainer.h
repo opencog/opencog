@@ -44,7 +44,6 @@ public:
     LGDictExpContainer(Exp_type t, Exp* exp) throw (InvalidParamException);
     LGDictExpContainer(Exp_type t, std::vector<LGDictExpContainer> s) throw (InvalidParamException);
 
-    std::string to_scm_string();
     Handle to_handle(AtomSpace* as);
 
 private:

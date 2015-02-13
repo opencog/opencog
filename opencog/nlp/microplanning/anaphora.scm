@@ -81,9 +81,7 @@
 				       (temp-set-link (SetLink (get-utterance-link ut chunk) chunk)))
 					; failed to SuReal? bring back the old chunk
 					(if (null? (sureal temp-set-link))
-						(being (display "Reverting change")(newline)
 						(mod-chunk results-set index (get-chunk inputs-set index))
-						)
 					)
 				
 					(cog-delete temp-set-link)

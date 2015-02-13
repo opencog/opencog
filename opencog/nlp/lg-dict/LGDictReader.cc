@@ -37,7 +37,7 @@ using namespace opencog;
  * @param pAS     the AtomSpace where atoms will be created
  */
 LGDictReader::LGDictReader(Dictionary pDict, AtomSpace* pAS)
-    : _dictionary(pDict), _as(pAS), _scm_eval(new SchemeEval(pAS))
+    : _dictionary(pDict), _as(pAS)
 {
 
 }
@@ -47,7 +47,7 @@ LGDictReader::LGDictReader(Dictionary pDict, AtomSpace* pAS)
  */
 LGDictReader::~LGDictReader()
 {
-    delete _scm_eval;
+
 }
 
 /**
@@ -94,31 +94,6 @@ Handle LGDictReader::getAtom(const std::string& word)
     free_lookup_list(_dictionary, dn_head);
 
     return _as->addLink(SET_LINK, outgoing);
-
-#ifdef LG_OLD_SCM_METHOD
-    std::string set = "(SetLink\n";
-
-    for (Dict_node* dn = dn_head; dn; dn = dn->right)
-    {
-        Exp* exp = dn->exp;
-
-        // First atom at the front of the outgoing set is the word itself.
-        // Second atom is the first disjuct that must be fulfilled.
-        std::string word_cset = " (LgWordCset (WordNode \"";
-        word_cset += word;
-        word_cset += "\")\n";
-        word_cset += lg_exp_to_container(exp).to_scm_string();
-        word_cset += ")\n";
-
-        set += word_cset;
-    }
-
-    set += ")\n";
-
-    free_lookup_list(_dictionary, dn_head);
-
-    return _scm_eval->eval_h(set);
-#endif
 }
 
 /**

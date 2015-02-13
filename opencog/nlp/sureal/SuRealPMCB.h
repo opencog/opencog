@@ -26,6 +26,7 @@
 
 
 #include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/guile/SchemeEval.h>
 
 
 namespace opencog
@@ -43,6 +44,7 @@ class SuRealPMCB : public DefaultPatternMatchCB
 {
 public:
     SuRealPMCB(AtomSpace* as, std::set<Handle> vars);
+    ~SuRealPMCB();
 
     virtual bool variable_match(Handle& hPat, Handle& hSoln);
     virtual bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h);
@@ -59,6 +61,8 @@ private:
     virtual Handle find_starter(Handle, size_t&, Handle&, size_t&);
 
     std::set<Handle> m_vars;   // store nodes that are variables
+
+    SchemeEval* m_eval;
 };
 
 }
