@@ -51,6 +51,7 @@ public:
 	FCMemory(AtomSpace* as);
 	~FCMemory();
 	vector<Rule*> get_rules(void) ;
+	void set_rules(vector<Rule*> rules);
 	void set_target(Handle target);
 	HandleSeq get_target_list(void);
 	bool is_search_in_af(void);
@@ -63,6 +64,7 @@ public:
 	HandleSeq get_result(void);
 	vector<Inference>& get_inf_history(void);
 	vector<Rule*> get_applied_rules(void);
+
 };
 
 #endif /* FCMEMORY_H_ */
