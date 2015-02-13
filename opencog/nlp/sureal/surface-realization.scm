@@ -104,13 +104,19 @@
                 (eval-string (list-ref a-list 0))
                 (let* ((parse-name (parse-str (list-ref a-list 0)))
                        (parse-node (ParseNode parse-name)))
-                    ; generate the LG dictionary entries for each word
-                    (let ((words (parse-get-words parse-node)))
-                        (map-word-instances
-                            (lambda (word-inst) (map-word-node lg-get-dict-entry word-inst))
-                            parse-node
-                        )
-                    )
+;
+; XXX not really necessary at this point since we will only need the LG
+; entries for the word-inst, which is emitted by the RelEx server already.
+; The full LG disjuncts entries are needed only by SuReal, which already
+; calls (lg-get-dict-entry ...) on its node.
+;
+;                    ; generate the LG dictionary entries for each word
+;                    (let ((words (parse-get-words parse-node)))
+;                        (map-word-instances
+;                            (lambda (word-inst) (map-word-node lg-get-dict-entry word-inst))
+;                            parse-node
+;                        )
+;                    )
                     (ReferenceLink 
                         (InterpretationNode (string-append parse-name "_interpretation_$X"))
                         ; The function in the SetLink returns a list of outputs that
