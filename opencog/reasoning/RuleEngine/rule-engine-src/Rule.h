@@ -38,8 +38,8 @@ private:
 	Handle rule_handle_;
 	string name_;
 	string category_;
-	int priority_ = -1;
-	vector<Rule*> mutex_rules_;
+	int cost_ = -1;
+	vector<Rule*> disjunct_rules_;
 public:
 	Handle get_handle();
 	Rule(Handle rule);
@@ -50,20 +50,20 @@ public:
 		return !(r.rule_handle_ == rule_handle_);
 	}
 	inline bool operator >(const Rule& r) {
-		return priority_ > r.priority_;
+		return cost_ > r.cost_;
 	}
 	inline bool operator <(const Rule& r) {
-		return priority_ < r.priority_;
+		return cost_ < r.cost_;
 	}
 	void set_rule_handle(Handle h) throw (exception);
 	void set_name(string name);
 	string get_name();
 	void set_category(string name);
 	string& get_category();
-	void set_priority(int p);
-	int get_priority();
-	void add_mutex_rule(Rule* r);
-	vector<Rule*> get_mutex_rules(void);
+	void set_cost(int p);
+	int get_cost();
+	void add_disjunct_rule(Rule* r);
+	vector<Rule*> get_disjunct_rules(void);
 	virtual ~Rule();
 };
 #endif /* RULE_H_ */

@@ -36,8 +36,8 @@ Handle Rule::get_handle() {
 	return rule_handle_;
 }
 
-int Rule::get_priority() {
-	return priority_;
+int Rule::get_cost() {
+	return cost_;
 }
 
 void Rule::set_category(string name) {
@@ -59,14 +59,14 @@ void Rule::set_rule_handle(Handle h) throw (exception) {
 	rule_handle_ = h;
 }
 
-void Rule::set_priority(int p) {
-	priority_ = p;
+void Rule::set_cost(int p) {
+	cost_ = p;
 }
 
-void Rule::add_mutex_rule(Rule* r) {
-	mutex_rules_.push_back(r);
+void Rule::add_disjunct_rule(Rule* r) {
+	disjunct_rules_.push_back(r);
 }
 
-vector<Rule*> Rule::get_mutex_rules(void) {
-	return mutex_rules_;
+vector<Rule*> Rule::get_disjunct_rules(void) {
+	return disjunct_rules_;
 }
