@@ -24,7 +24,6 @@
 #ifndef FORWARDCHAINERX_H_
 #define FORWARDCHAINERX_H_
 
-#include "PLNCommons.h"
 #include "FCMemory.h"
 #include <opencog/reasoning/RuleEngine/rule-engine-src/ControlPolicyParamLoader.h>
 
@@ -33,10 +32,10 @@ using namespace opencog;
 class ForwardChainerCallBack;
 class ForwardChainer {
 private:
-	ControlPolicyParamLoader* _cpolicy_loader;
-	string _conf_path ="default_cpolicy.json";
+	ControlPolicyParamLoader* cpolicy_loader_;
+	string _conf_path ="reasoning/RuleEngine/rules/pln/default_cpolicy.json";
 	AtomSpace * as_;
-	FCMemory* _fcmem;
+	FCMemory* fcmem_;
 	/**
 	 * initialize config methods
 	 */

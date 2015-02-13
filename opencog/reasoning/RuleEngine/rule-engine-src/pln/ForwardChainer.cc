@@ -23,66 +23,74 @@
 
 #include "ForwardChainer.h"
 #include "ForwardChainerCallBack.h"
+#include "PLNCommons.h"
 
 #include <opencog/query/PatternMatch.h>
 #include <opencog/reasoning/RuleEngine/rule-engine-src/JsonicControlPolicyParamLoader.h>
+#include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
 
 ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :
 		as_(as) {
-	_fcmem = new FCMemory(as_);
+	fcmem_ = new FCMemory(as_);
 	if (conf_path != "")
 		_conf_path = conf_path;
 	init();
 }
 
 ForwardChainer::~ForwardChainer() {
-	delete _cpolicy_loader;
-	delete _fcmem;
+	delete cpolicy_loader_;
+	delete fcmem_;
 }
 
 void ForwardChainer::init() {
-	_cpolicy_loader = new JsonicControlPolicyParamLoader(as_, _conf_path);
-	_cpolicy_loader->load_config();
-	_fcmem->search_in_af_ = _cpolicy_loader->get_attention_alloc();
-	_fcmem->rules_ = _cpolicy_loader->get_rules();
-	_fcmem->cur_rule_ = nullptr;
+	cpolicy_loader_ = new JsonicControlPolicyParamLoader(as_, _conf_path);
+	cpolicy_loader_->load_config();
+	fcmem_->search_in_af_ = cpolicy_loader_->get_attention_alloc();
+	fcmem_->rules_ = cpolicy_loader_->get_rules();
+	fcmem_->cur_rule_ = nullptr;
 }
 
 void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
 		Handle htarget/*=Handle::UNDEFINED*/) {
 	int iteration = 0;
-	auto max_iter = _cpolicy_loader->get_max_iter();
+	auto max_iter = cpolicy_loader_->get_max_iter();
 	init_target(htarget);
 	while (iteration < max_iter /*OR other termination criteria*/) {
 		//add more premise to hcurrent_target by pattern matching
-		HandleSeq input = fcb.choose_input(*_fcmem);
-		_fcmem->update_target_list(input);
+		HandleSeq input = fcb.choose_input(*fcmem_);
+		fcmem_->update_target_list(input);
 		//choose the best rule to apply
-		Rule* r = fcb.choose_rule(*_fcmem);
+		vector<Rule*> rules = fcb.choose_rule(*fcmem_);
+		map<Rule*, float> rule_weight;
+		for (Rule* r : rules)
+			rule_weight[r] = r->get_cost();
+		PLNCommons pc(as_);
+		auto r = pc.tournament_select(rule_weight);
+		//if no rules matches the pattern of the target,choose another target if there is, else end forward chaining.
 		if (not r)
 			return;
-		_fcmem->cur_rule_ = r;
+		fcmem_->cur_rule_ = r;
 		//apply rule
-		HandleSeq product = fcb.apply_rule(*_fcmem);
-		_fcmem->add_rules_product(iteration, product);
-		_fcmem->update_target_list(product);
+		HandleSeq product = fcb.apply_rule(*fcmem_);
+		fcmem_->add_rules_product(iteration, product);
+		fcmem_->update_target_list(product);
 		//next target
-		_fcmem->set_target(fcb.choose_next_target(*_fcmem));
+		fcmem_->set_target(fcb.choose_next_target(*fcmem_));
 		iteration++;
 	}
 }
 
 void ForwardChainer::init_target(Handle htarget) {
 	if (htarget == Handle::UNDEFINED)
-		_fcmem->set_target(choose_random_target(as_));//start FC on a random target
+		fcmem_->set_target(choose_random_target(as_)); //start FC on a random target
 	else
-		_fcmem->set_target(htarget);
+		fcmem_->set_target(htarget);
 }
 
 Handle ForwardChainer::choose_random_target(AtomSpace * as) {
 	//choose a random atoms to start forward chaining with
 	HandleSeq hs;
-	if (_cpolicy_loader->get_attention_alloc())
+	if (cpolicy_loader_->get_attention_alloc())
 		as->getHandleSetInAttentionalFocus(back_inserter(hs));
 	else
 		as->getHandlesByType(back_inserter(hs), ATOM, true);
@@ -99,5 +107,5 @@ Handle ForwardChainer::choose_random_target(AtomSpace * as) {
 }
 
 HandleSeq ForwardChainer::get_chaining_result() {
-	return _fcmem->get_result();
+	return fcmem_->get_result();
 }
