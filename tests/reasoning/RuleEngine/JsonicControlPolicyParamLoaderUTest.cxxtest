@@ -1,0 +1,47 @@
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+#include <opencog/reasoning/RuleEngine/rule-engine-src/JsonicControlPolicyParamLoader.h>
+
+using namespace opencog;
+//#define DEBUG 1
+class JsonicControlPolicyParamLoaderUTest: public CxxTest::TestSuite {
+private:
+	AtomSpace * as_;
+	SchemeEval* eval_;
+public:
+	JsonicControlPolicyParamLoaderUTest() {
+		server(CogServer::createInstance);
+		as_ = &cogserver().getAtomSpace();
+		eval_ = new SchemeEval(as_);
+		config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
+				"opencog/scm/utilities.scm, ");
+		load_scm_files_from_config (*as_);
+	}
+	void setUp();
+	void tearDown();
+	void test_load_config();
+
+};
+
+void JsonicControlPolicyParamLoaderUTest::setUp() {
+}
+void JsonicControlPolicyParamLoaderUTest::tearDown() {
+}
+void JsonicControlPolicyParamLoaderUTest::test_load_config() {
+	JsonicControlPolicyParamLoader jcpl(as_, "rules/pln/test_cpolicy.json");
+	jcpl.load_config();
+	vector<Rule*> rules = jcpl.get_rules();
+	TS_ASSERT_EQUALS(1, rules.size());
+	for (Rule * r : rules) {
+		if (r->get_name() == "pln-rule-deduction")
+			TS_ASSERT(r->get_disjunct_rules().empty());
+	}
+	TS_ASSERT_EQUALS(false, jcpl.get_attention_alloc());
+	TS_ASSERT_EQUALS(20, jcpl.get_max_iter());
+}
