@@ -13,7 +13,6 @@ RuleEngineModule.cc
 InferenceSCM.cc
 Rule.cc
 ControlPolicyParamLoader.cc
-ControlPolicyLoader.cc
 JsonicControlPolicyParamLoader.cc
 )
 
