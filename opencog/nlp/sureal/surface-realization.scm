@@ -200,8 +200,8 @@
         (define mappings (sureal-get-mapping itpr))
         ; helper to generate sentence using one mapping
         (define (construct-sntc-mapping w-seq vars mapping)
-        	; make a clone of the w-seq to avoid changing when list-set!
-        	(define w-seq-copy (list-copy w-seq))
+            ; make a clone of the w-seq to avoid changing when list-set!
+            (define w-seq-copy (list-copy w-seq))
             (for-each
                 (lambda (old-logic-node new-logic-node)
                     (let ((old-word-inst (r2l-get-word-inst old-logic-node))
