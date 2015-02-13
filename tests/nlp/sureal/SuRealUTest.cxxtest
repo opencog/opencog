@@ -111,11 +111,6 @@ void SuRealUTest::test_basic(void)
     // Sentences in r2l-atomspace1.scm
     // - He runs.
 
-    // refill some lg dict entry because they are deleted from the .scm file
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "he")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "runs")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode ".")) )");
-
     // add the needed WordNode not yet in the testing atomspace
     _evaluator->eval(R"( (WordNode "she") )");
     _evaluator->eval(R"( (WordNode "feeds") )");
@@ -150,11 +145,6 @@ void SuRealUTest::test_multiple(void)
     // - He runs.
     // - He runs quickly.
 
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "he")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "runs")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "quickly")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode ".")) )");
-
     _evaluator->eval(R"( (WordNode "she") )");
     _evaluator->eval(R"( (WordNode "walks") )");
 
@@ -182,13 +172,6 @@ void SuRealUTest::test_complex(void)
 
     // Sentences in r2l-atomspace3.scm
     // - The yellow dog hates the cat.
-
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "the")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "yellow")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "dog")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "hates")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "cat")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode ".")) )");
 
     _evaluator->eval(R"( (WordNode "green") )");
     _evaluator->eval(R"( (WordNode "loves") )");
@@ -225,15 +208,6 @@ void SuRealUTest::test_disconnected(void)
 
     // Sentences in r2l-atomspace4.scm
     // - He walked slowly and she ran quickly.
-
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "he")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "walked")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "slowly")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "and")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "she")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "ran")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode "quickly")) )");
-    _evaluator->eval(R"( (lg-get-dict-entry (WordNode ".")) )");
 
     // test with disconnected components
     _evaluator->eval(R"(
