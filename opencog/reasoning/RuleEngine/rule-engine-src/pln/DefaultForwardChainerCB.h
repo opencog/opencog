@@ -27,37 +27,25 @@
 #include "ForwardChainerCallBack.h"
 #include "ForwardChainInputMatchCB.h"
 #include "ForwardChainPatternMatchCB.h"
-#include "PLNCommons.h"
-
 
 class FCMemory;
+class Rule;
 class DefaultForwardChainerCB: public virtual ForwardChainerCallBack {
 private:
-	const float _ctv_fitnes = 0.9; // from the PLN book
-
-	PLNCommons * pcommon_;
 	AtomSpace * as_;
-	ForwardChainInputMatchCB*  fcim_;
-	ForwardChainPatternMatchCB*  fcpm_;
+	ForwardChainInputMatchCB* fcim_;
+	ForwardChainPatternMatchCB* fcpm_;
 
 	map<Handle, string> choose_variable(Handle h);
 	Handle target_to_pmimplicant(Handle htarget,
 			map<Handle, string> hnode_vname_map);
 	void add_to_target_list(Handle h);
-	template<class Type> Type tournament_select(map<Type, float> tfitnes_map);
-	/**
-	 * calculates fitness values in target_list_atom_space using the formula F = s^x * c^(2-x)
-	 * where s is strength,c is confidence and x is some fixed value
-	 * @param h - a handle
-	 * @return a fitness value
-	 */
-	float target_tv_fitness(Handle h);
 public:
 	DefaultForwardChainerCB(AtomSpace* as);
 	virtual ~DefaultForwardChainerCB();
 
-//callbacks
-	virtual Rule* choose_rule(FCMemory& fcmem);
+	//callbacks
+	virtual vector<Rule*> choose_rule(FCMemory& fcmem);
 	virtual HandleSeq choose_input(FCMemory& fcmem);
 	virtual Handle choose_next_target(FCMemory& fcmem);
 	virtual HandleSeq apply_rule(FCMemory& fcmem);
