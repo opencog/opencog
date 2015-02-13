@@ -27,7 +27,7 @@ JsonicControlPolicyParamLoader::~JsonicControlPolicyParamLoader() {
 
 }
 
-void JsonicControlPolicyParamLoader::set_mutex_rules(void) {
+void JsonicControlPolicyParamLoader::set_disjunct_rules(void) {
 	for (auto i = rule_mutex_map_.begin(); i != rule_mutex_map_.end(); ++i) {
 		auto mset = i->second;
 		auto cur_rule = i->first;
@@ -36,7 +36,7 @@ void JsonicControlPolicyParamLoader::set_mutex_rules(void) {
 			if (!r)
 				throw invalid_argument(
 						"A rule by name " + name + " doesn't exist"); //TODO throw appropriate exception
-			cur_rule->add_mutex_rule(r);
+			cur_rule->add_disjunct_rule(r);
 		}
 	}
 }
@@ -50,12 +50,16 @@ Rule* JsonicControlPolicyParamLoader::get_rule(string& name) {
 }
 
 void JsonicControlPolicyParamLoader::load_config() {
-	ifstream is("reasoning/RuleEngine/rules/pln/"+conf_path_);
-	Stream_reader<ifstream, Value> reader(is);
-	Value value;
-	while (reader.read_next(value))
-		read_json(value);
-	set_mutex_rules();
+	try {
+		ifstream is(conf_path_);
+		Stream_reader<ifstream, Value> reader(is);
+		Value value;
+		while (reader.read_next(value))
+			read_json(value);
+		set_disjunct_rules();
+	} catch (std::ios_base::failure& e) {
+		std::cerr << e.what() << '\n';
+	}
 }
 
 void JsonicControlPolicyParamLoader::read_array(const Value &v, int lev) {
@@ -84,7 +88,7 @@ void JsonicControlPolicyParamLoader::read_obj(const Value &v, int lev) {
 			cur_read_rule_->set_rule_handle(rule_handle);
 
 		} else if (key == PRIORITY) {
-			cur_read_rule_->set_priority(value.get_value<int>());
+			cur_read_rule_->set_cost(value.get_value<int>());
 
 		} else if (key == CATEGORY) {
 			cur_read_rule_->set_category(value.get_value<string>());
@@ -115,7 +119,8 @@ void JsonicControlPolicyParamLoader::read_obj(const Value &v, int lev) {
 	}
 }
 
-void JsonicControlPolicyParamLoader::read_json(const Value &v, int level /* = -1*/) {
+void JsonicControlPolicyParamLoader::read_json(const Value &v,
+		int level /* = -1*/) {
 	switch (v.type()) {
 	case obj_type:
 		read_obj(v, level + 1);

@@ -26,9 +26,9 @@ private:
 	void read_null(const Value &v, int level);
 	template <typename T> void read_primitive(const Value &v,int level);
 	/**
-	 * sets the mutually exclusive rules
+	 * sets the disjunct rules
 	 */
-	void set_mutex_rules(void);
+	void set_disjunct_rules(void);
 	Rule* get_rule(string& name);
 public:
 	JsonicControlPolicyParamLoader(AtomSpace* as, string conf_path);
