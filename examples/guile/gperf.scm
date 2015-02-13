@@ -1,9 +1,15 @@
-#!/usr/bin/env guile
-!#
-;
-; The below hangs; it should not. See
-; https://bugs.launchpad.net/ubuntu/+source/coreutils/+bug/1421760
-; #!/usr/bin/env LTDL_LIBRARY_PATH=../../build/opencog/guile guile
+#!/usr/bin/env sh
+export LTDL_LIBRARY_PATH=../../build/opencog/guile
+cat - << XXX | /usr/bin/env guile
+;;;
+;;; The above is a hacky work-around to a weird linux bug.  The below
+;;; works, but does not set the library search path.
+;;; #!/usr/bin/env guile
+;;; !#
+;;;
+;;; The below hangs; it should not. See
+;;; https://bugs.launchpad.net/ubuntu/+source/coreutils/+bug/1421760
+;;; #!/usr/bin/env LTDL_LIBRARY_PATH=../../build/opencog/guile guile
 ;
 ; Basic guile atom creation benchmark.
 ;
