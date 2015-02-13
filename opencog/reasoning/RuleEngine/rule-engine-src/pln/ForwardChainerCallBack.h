@@ -24,30 +24,26 @@
 #ifndef FORWARDCHAINERCALLBACK_H_
 #define FORWARDCHAINERCALLBACK_H_
 
-#include "PLNCommons.h"
-#include "FCMemory.h"
-#include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Handle.h>
 
-#include <opencog/query/PatternMatch.h>
-
+using namespace opencog;
+class Rule;
+class FCMemory;
 class ForwardChainerCallBack {
-protected:
-	AtomSpace* _as;
-	PLNCommons* _commons;
-	PatternMatch _pattern_matcher;
+private:
+	AtomSpace* as_;
 public:
 	ForwardChainerCallBack(AtomSpace* as) :
-			_as(as) {
-		_commons = new PLNCommons(_as);
+			as_(as) {
 	}
 	virtual ~ForwardChainerCallBack() {
-		delete _commons;
 	}
 	/**
 	 * given a set of rules,choose next rule to be applied based on
-	 * target,fitness evaluation,weight of rule in the current context...etc
+	 * target matching rule premises,fitness evaluation,weight of rule in the current context...etc
 	 */
-	virtual Rule* choose_rule(FCMemory& fcmem) = 0;
+	virtual std::vector<Rule*> choose_rule(FCMemory& fcmem) = 0;
 	/**
 	 * Choose additional premises to the chainer based on fitness
 	 * evaluation in the focus set.
