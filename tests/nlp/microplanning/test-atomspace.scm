@@ -3,7 +3,7 @@ These are the sentences that will be used to fill the atomspace.
 They are commented out for now because the RelEx server needs to
 be running to execute them.
 
-For now, the results are in r2l-atomspace.scm
+For now, most of the results are in r2l-atomspace.scm
 
 ; =========================
 ; Exact knowledge
@@ -38,6 +38,43 @@ For now, the results are in r2l-atomspace.scm
 
 (r2l "What burns the tree?")
 (r2l "I mean the tall man.")
+
+
+; =========================
+; LG Dictionary
+; =========================
+(lg-get-dict-entry (WordNode "LEFT-WALL"))
+(lg-get-dict-entry (WordNode "the"))
+(lg-get-dict-entry (WordNode "brown"))
+(lg-get-dict-entry (WordNode "cat"))
+(lg-get-dict-entry (WordNode "climbs"))
+(lg-get-dict-entry (WordNode "table"))
+(lg-get-dict-entry (WordNode "and"))
+(lg-get-dict-entry (WordNode "grabs"))
+(lg-get-dict-entry (WordNode "orange"))
+(lg-get-dict-entry (WordNode "John"))
+(lg-get-dict-entry (WordNode "steals"))
+(lg-get-dict-entry (WordNode "it"))
+(lg-get-dict-entry (WordNode "he"))
+(lg-get-dict-entry (WordNode "eats"))
+(lg-get-dict-entry (WordNode "Sam"))
+(lg-get-dict-entry (WordNode "collects"))
+(lg-get-dict-entry (WordNode "tiny"))
+(lg-get-dict-entry (WordNode "bones"))
+(lg-get-dict-entry (WordNode "them"))
+(lg-get-dict-entry (WordNode "they"))
+(lg-get-dict-entry (WordNode "grow"))
+(lg-get-dict-entry (WordNode "apple"))
+(lg-get-dict-entry (WordNode "dogs"))
+(lg-get-dict-entry (WordNode "what"))
+(lg-get-dict-entry (WordNode "burns"))
+(lg-get-dict-entry (WordNode "tree"))
+(lg-get-dict-entry (WordNode "I"))
+(lg-get-dict-entry (WordNode "mean"))
+(lg-get-dict-entry (WordNode "tall"))
+(lg-get-dict-entry (WordNode "man"))
+(lg-get-dict-entry (WordNode "."))
+(lg-get-dict-entry (WordNode "?"))
 |#
 
 
