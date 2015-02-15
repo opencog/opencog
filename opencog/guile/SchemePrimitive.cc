@@ -32,13 +32,20 @@ void PrimitiveEnviron::init(void)
 {
 	if (is_inited) return;
 	is_inited = true;
-	scm_c_define_module("opencog extension", init_helper, NULL);
+	scm_c_define_module("opencog extension", init_in_module, NULL);
+
+	// Use, immediately after define. Kind of hacky-ish, but assorted
+	// C++ code will fail if they forget to use: so we use it, for them.
 	scm_c_use_module("opencog extension");
 }
 
-void PrimitiveEnviron::init_helper(void*)
+/// This is called while (opencog extension) is the current module.
+/// Thus, opencog-extension is only defined in that module.
+void PrimitiveEnviron::init_in_module(void*)
 {
 	scm_c_define_gsubr("opencog-extension", 2,0,0, C(do_call));
+
+	// Export, because other modules will nee to call this directly.
 	scm_c_export("opencog-extension", NULL);
 }
 
