@@ -4,7 +4,7 @@
  * Allow C++ code to be invoked from scheme --
  * by creating a new scheme primitive function.
  *
- * Copyright (C) 2009 Linas Vepstas
+ * Copyright (C) 2009,2015 Linas Vepstas
  */
 
 #ifdef HAVE_GUILE
@@ -91,13 +91,25 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
-			Handle (T::*h_sqq)(const std::string&, const HandleSeq&, const HandleSeq&);
+			Handle (T::*h_sqq)(const std::string&,
+			                   const HandleSeq&, const HandleSeq&);
 			HandleSeq (T::*q_h)(Handle);
 			HandleSeq (T::*q_hti)(Handle, Type, int);
 			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
 			HandleSeqSeq (T::*qq_h)(Handle);
 			const std::string& (T::*s_s)(const std::string&);
+			const std::string& (T::*s_ss)(const std::string&,
+			                              const std::string&);
+			const std::string& (T::*s_sss)(const std::string&,
+			                               const std::string&,
+			                               const std::string&);
 			void (T::*v_h)(Handle);
+			void (T::*v_s)(const std::string&);
+			void (T::*v_ss)(const std::string&,
+			                const std::string&);
+			void (T::*v_sss)(const std::string&,
+			                 const std::string&,
+			                 const std::string&);
 			void (T::*v_t)(Type);
 			void (T::*v_ti)(Type, int);
 			void (T::*v_tidi)(Type, int, double, int);
@@ -120,7 +132,12 @@ class SchemePrimitive : public PrimitiveEnviron
 			Q_HTIB,// return HandleSeq, take handle, type, and bool
 			QQ_H,  // return HandleSeqSeq, take handle
 			S_S,   // return string, take string
+			S_SS,  // return string, take two strings
+			S_SSS, // return string, take three strings
 			V_H,   // return void, take Handle
+			V_S,   // return void, take string
+			V_SS,  // return void, take two strings
+			V_SSS, // return void, take three strings
 			V_T,   // return void, take Type
 			V_TI,  // return void, take Type and int
 			V_TIDI,// return void, take Type, int, double, and int
@@ -298,10 +315,58 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = scm_from_utf8_string(rs.c_str());
 					break;
 				}
+				case S_SS:
+				{
+					// All args are strings
+					std::string str1 = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
+					std::string str2 = SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2);
+
+					const std::string &rs = (that->*method.s_ss)(str1, str2);
+					rc = scm_from_utf8_string(rs.c_str());
+					break;
+				}
+				case S_SSS:
+				{
+					// All args are strings
+					std::string str1 = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
+					std::string str2 = SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2);
+					std::string str3 = SchemeSmob::verify_string(scm_caddr(args), scheme_name, 3);
+
+					const std::string &rs = (that->*method.s_sss)(str1, str2, str3);
+					rc = scm_from_utf8_string(rs.c_str());
+					break;
+				}
 				case V_H:
 				{
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
 					(that->*method.h_h)(h);
+					break;
+				}
+				case V_S:
+				{
+					// First argument is a string
+					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
+
+					(that->*method.s_s)(str);
+					break;
+				}
+				case V_SS:
+				{
+					// All args are strings
+					std::string str1 = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
+					std::string str2 = SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2);
+
+					(that->*method.s_ss)(str1, str2);
+					break;
+				}
+				case V_SSS:
+				{
+					// All args are strings
+					std::string str1 = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
+					std::string str2 = SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2);
+					std::string str3 = SchemeSmob::verify_string(scm_caddr(args), scheme_name, 3);
+
+					(that->*method.s_sss)(str1, str2, str3);
 					break;
 				}
 				case V_T:
@@ -433,8 +498,17 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
 		DECLARE_CONSTR_1(QQ_H, qq_h, HandleSeqSeq, Handle)
 		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
-		DECLARE_CONSTR_1(V_H, v_h, void, Handle)
-		DECLARE_CONSTR_1(V_T, v_t, void, Type)
+		DECLARE_CONSTR_2(S_SS, s_ss, const std::string&, const std::string&,
+		                             const std::string&)
+		DECLARE_CONSTR_3(S_SSS,s_sss,const std::string&, const std::string&,
+		                             const std::string&, const std::string&)
+		DECLARE_CONSTR_1(V_H,  v_h,  void, Handle)
+		DECLARE_CONSTR_1(V_S,  v_s,  void, const std::string&)
+		DECLARE_CONSTR_2(V_SS, v_ss, void, const std::string&,
+		                             const std::string&)
+		DECLARE_CONSTR_3(V_SSS,v_sss,void, const std::string&,
+		                             const std::string&, const std::string&)
+		DECLARE_CONSTR_1(V_T,  v_t,  void, Type)
 		DECLARE_CONSTR_2(V_TI, v_ti, void, Type, int)
 		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, Type, int, double, int)
 
@@ -491,15 +565,22 @@ DECLARE_DECLARE_1(HandleSeq, Handle)
 DECLARE_DECLARE_1(HandleSeqSeq, Handle)
 DECLARE_DECLARE_1(const std::string&, const std::string&)
 DECLARE_DECLARE_1(void, Handle)
+DECLARE_DECLARE_1(void, const std::string&)
 DECLARE_DECLARE_1(void, Type)
 DECLARE_DECLARE_1(void, void)
 DECLARE_DECLARE_2(bool, Handle, int)
 DECLARE_DECLARE_2(Handle, Handle, int)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
+DECLARE_DECLARE_2(const std::string&, const std::string&, const std::string&)
+DECLARE_DECLARE_2(void, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, Type, int)
 DECLARE_DECLARE_3(double, Handle, Handle, Type)
 DECLARE_DECLARE_3(Handle, const std::string&, const HandleSeq&, const HandleSeq&)
 DECLARE_DECLARE_3(HandleSeq, Handle, Type, int)
+DECLARE_DECLARE_3(const std::string&, const std::string&,
+                  const std::string&, const std::string&)
+DECLARE_DECLARE_3(void, const std::string&,
+                  const std::string&, const std::string&)
 DECLARE_DECLARE_4(double, Handle, Handle, Type, bool)
 DECLARE_DECLARE_4(void, Type, int, double, int)
 DECLARE_DECLARE_4(HandleSeq, Handle, Type, int, bool)

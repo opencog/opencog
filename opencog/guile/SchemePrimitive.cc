@@ -4,7 +4,7 @@
  * Allow C++ code to be invoked from scheme --
  * by defining a scheme primitive function.
  *
- * Copyright (C) 2009, 2014 Linas Vepstas
+ * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  */
 
 #include <exception>

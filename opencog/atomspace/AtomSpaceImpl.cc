@@ -250,13 +250,16 @@ Handle AtomSpaceImpl::getLink(Type t, const HandleSeq& outgoing)
 
 void AtomSpaceImpl::storeAtom(Handle h)
 {
-    if (backing_store) backing_store->storeAtom(h);
+    if (NULL == backing_store)
+        throw RuntimeException(TRACE_INFO, "No backing store");
+
+    backing_store->storeAtom(h);
 }
 
 Handle AtomSpaceImpl::fetchAtom(Handle h)
 {
     if (NULL == backing_store)
-        return Handle::UNDEFINED;
+        throw RuntimeException(TRACE_INFO, "No backing store");
 
     // OK, we have to handle three distinct cases.
     // 1) If atom table already knows about this uuid or atom, then
@@ -320,21 +323,22 @@ Handle AtomSpaceImpl::getAtom(Handle h)
 
 Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
 {
+    if (NULL == backing_store)
+        throw RuntimeException(TRACE_INFO, "No backing store");
+
     h = getAtom(h);
 
     if (Handle::UNDEFINED == h) return Handle::UNDEFINED;
 
     // Get everything from the backing store.
-    if (backing_store) {
-        HandleSeq iset = backing_store->getIncomingSet(h);
-        size_t isz = iset.size();
-        for (size_t i=0; i<isz; i++) {
-            Handle hi(iset[i]);
-            if (recursive) {
-                fetchIncomingSet(hi, true);
-            } else {
-                getAtom(hi);
-            }
+    HandleSeq iset = backing_store->getIncomingSet(h);
+    size_t isz = iset.size();
+    for (size_t i=0; i<isz; i++) {
+        Handle hi(iset[i]);
+        if (recursive) {
+            fetchIncomingSet(hi, true);
+        } else {
+            getAtom(hi);
         }
     }
     return h;
@@ -422,4 +426,3 @@ void AtomSpaceImpl::clear()
 
     logger().setLevel(save);
 }
-

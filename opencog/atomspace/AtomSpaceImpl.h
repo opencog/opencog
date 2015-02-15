@@ -93,7 +93,9 @@ public:
      * already in the AtomTable.
      */
     void loadType(Type t) {
-        if (backing_store) backing_store->loadType(atomTable, t);
+        if (NULL == backing_store)
+            throw RuntimeException(TRACE_INFO, "No backing store");
+        backing_store->loadType(atomTable, t);
     }
 
     /**
