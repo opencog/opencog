@@ -25,6 +25,7 @@ Then say:
 (use-modules (ice-9 readline))
 (activate-readline)
 (use-modules (opencog))
+(use-modules (opencog query))
 ```
 
 After this, you can create atoms "as usual" e.g.
@@ -48,7 +49,7 @@ Additional help by saying
 ```
 ,apropos cog
 ```
-and more gnerally
+and more generally
 ```
 ,help
 ```
