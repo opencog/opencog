@@ -7,16 +7,19 @@ for additional documentation.
 If you have installed opencog, then start guile simply by saying
 "guile" at the bash prompt $.  Otherwise, you will need to do this:
 ```
-$ export LTDL_LIBRARY_PATH=build/opencog/guile
+$ export LTDL_LIBRARY_PATH=build/opencog/guile:build/opencog/query
 $ guile -L opencog/scm -L build
 ```
-where "build" is where-ever you built opencog.
+where "build" is where-ever you built opencog. Alternately, just
+start plain guile, without the -L flags, and then say:
 
-Another possibility: add stuff to your `~/.guile` file, for example:
 ```
 (add-to-load-path "/home/yourname/opencog/build")
 (add-to-load-path "/home/yourname/opencog/opencog/scm")
 ```
+Another possibility: add the above to your `~/.guile` file.  That way,
+they'll be run every time you start.
+
 Then say:
 ```
 (use-modules (opencog))
