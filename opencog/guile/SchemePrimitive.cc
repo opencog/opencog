@@ -39,6 +39,7 @@ void PrimitiveEnviron::init(void)
 void PrimitiveEnviron::init_helper(void*)
 {
 	scm_c_define_gsubr("opencog-extension", 2,0,0, C(do_call));
+	scm_c_export("opencog-extension", NULL);
 }
 
 PrimitiveEnviron::~PrimitiveEnviron() {}
