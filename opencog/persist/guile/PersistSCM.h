@@ -49,11 +49,11 @@ public:
 	PersistSCM(void);
 }; // class
 
+/** @}*/
+}  // namespace
+
 extern "C" {
 void opencog_persist_init(void);
 };
-
-/** @}*/
-}  // namespace
 
 #endif // _OPENCOG_PERSIST_SCM_H

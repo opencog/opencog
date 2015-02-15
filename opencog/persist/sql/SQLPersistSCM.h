@@ -59,12 +59,11 @@ public:
 
 }; // class
 
+/** @}*/
+}  // namespace
+
 extern "C" {
 void opencog_persist_sql_init(void);
 };
-
-
-/** @}*/
-}  // namespace
 
 #endif // _OPENCOG_PERSIST_SCM_H

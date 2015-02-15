@@ -1,5 +1,5 @@
 ;
-; implication-example.scm
+; cog-bind-example.scm
 ;
 ; Linas Vepstas January 2009
 ;
