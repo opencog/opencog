@@ -8,8 +8,21 @@
 ; interfaces.  The below defines a single BindLink and two chunks of
 ; data, and then calls the pattern matcher.
 ;
-; This example can be loaded by cut-n-paste, or by issuing:
+; This example can be run in two different ways.  The first way requires
+; that the cogserver be running. Then either cut-n-paste, or cat the file:
 ;    cat cog-bind-example.scm | telnet localhost 17001
+;
+; To see the results, telnet to either port 17001 or 18001
+;    telnet localhost 17001
+; and then run the final step:
+;    (cog-bind x)
+;
+; The second way of running this is to run it without the cogserver,
+; using only guile:
+;
+;    export LTDL_LIBRARY_PATH=build/opencog/guile:build/opencog/query
+;    cd ../..
+;    cat opencog/query/cog-bind-example.scm | guile -L build -L opencog/scm
 ;
 ; The expected result, after running the below, is that the following
 ; should be printed:

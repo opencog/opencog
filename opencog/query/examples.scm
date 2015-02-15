@@ -3,8 +3,12 @@
 ; These examples make extensive use of the code in this directory,
 ; and can be used for ad-hoc command-line testing.
 ;
-;
-;
+
+(use-modules (opencog))
+(use-modules (opencog query))
+(load-from-path "utilities.scm")
+
+
 (define human-implies-animal
 	(BindLink
 		(VariableNode "$H")
