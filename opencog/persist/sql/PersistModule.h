@@ -24,9 +24,6 @@
 #ifndef _OPENCOG_PERSIST_MODULE_H
 #define _OPENCOG_PERSIST_MODULE_H
 
-#include <vector>
-#include <string>
-
 #include <opencog/atomspace/Handle.h>
 #include <opencog/persist/sql/SQLPersistSCM.h>
 #include <opencog/server/CogServer.h>

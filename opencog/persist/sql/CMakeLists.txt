@@ -32,6 +32,7 @@ IF (HAVE_GUILE)
 ENDIF (HAVE_GUILE)
 
 TARGET_LINK_LIBRARIES(PersistModule
+	persist
 	persist-sql
 )
 

@@ -21,13 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/BackingStore.h>
-#include <opencog/guile/SchemePrimitive.h>
-#include <opencog/nlp/types/atom_types.h>
+#include <opencog/persist/guile/PersistSCM.h>
 
 #include "PersistModule.h"
-#include "AtomStorage.h"
 
 using namespace opencog;
 
@@ -37,6 +33,8 @@ DECLARE_MODULE(PersistModule);
 
 PersistModule::PersistModule(CogServer& cs) : Module(cs)
 {
+	opencog_persist_init();
+
 	_api = new SQLPersistSCM(&_cogserver.getAtomSpace());
 
 	do_close_register();

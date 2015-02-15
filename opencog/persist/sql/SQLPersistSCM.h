@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PERSIST_SCM_H
-#define _OPENCOG_PERSIST_SCM_H
+#ifndef _OPENCOG_SQL_PERSIST_SCM_H
+#define _OPENCOG_SQL_PERSIST_SCM_H
 
 #include <vector>
 #include <string>
@@ -66,4 +66,4 @@ extern "C" {
 void opencog_persist_sql_init(void);
 };
 
-#endif // _OPENCOG_PERSIST_SCM_H
+#endif // _OPENCOG_SQL_PERSIST_SCM_H
