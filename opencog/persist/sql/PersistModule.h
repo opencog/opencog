@@ -28,7 +28,7 @@
 #include <string>
 
 #include <opencog/atomspace/Handle.h>
-#include <opencog/persist/sql/AtomStorage.h>
+#include <opencog/persist/sql/PersistSCM.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Module.h>
 #include <opencog/server/Request.h>
@@ -39,13 +39,10 @@ namespace opencog
  *  @{
  */
 
-class SQLBackingStore;
 class PersistModule : public Module
 {
 private:
-    AtomStorage *_store;
-
-    SQLBackingStore *_backing;
+    PersistSCM *_api;
 
     DECLARE_CMD_REQUEST(PersistModule, "sql-close", do_close, 
        "Close the SQL database", 
@@ -80,12 +77,6 @@ private:
        "database.  This is a bulk-save -- all atoms will be saved. They can\n"
        "be loaded at a later time with the sql-load command.",
        false, false)
-
-    Handle fetch_atom(Handle);
-    Handle fetch_incoming_set(Handle);
-    Handle store_atom(Handle);
-    void load_type(Type);
-    void barrier(void);
 
 public:
     const char* id(void);

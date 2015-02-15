@@ -9,6 +9,7 @@ INCLUDE_DIRECTORIES (
 ADD_LIBRARY (persist SHARED
 	odbcxx.cc
 	AtomStorage.cc
+	PersistSCM.cc
 	PersistModule.cc
 )
 
