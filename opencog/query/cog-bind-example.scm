@@ -33,21 +33,22 @@
 		(ListLink
 			(VariableNode "$var0")
 			(VariableNode "$var1")
+			(VariableNode "$verb")
 		)
 		(ImplicationLink 
 			(AndLink
 				(EvaluationLink
 					(PredicateNode "_obj")
 					(ListLink
-						(ConceptNode "make")
-						(VariableNode "$var0")
+						(VariableNode "$verb") ; (ConceptNode "make")
+						(VariableNode "$var0") ; (ConceptNode "pottery")
 					)
 				)
 				(EvaluationLink
 					(PredicateNode "from")
 					(ListLink
-						(ConceptNode "make")
-						(VariableNode "$var1")
+						(VariableNode "$verb") ; (ConceptNode "make")
+						(VariableNode "$var1") ; (ConceptNode "clay")
 					)
 				)
 			)
