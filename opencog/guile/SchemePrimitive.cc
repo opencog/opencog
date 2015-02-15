@@ -74,6 +74,8 @@ void
 PrimitiveEnviron::really_do_register(const char * module_name,
                                      const char *name, int nargs)
 {
+	init();
+
 	// Scheme garbage collection will be managing the lifecycle
 	scm_gc_register_collectable_memory (this, get_size(),
 	                                    "opencog primitive environ");
