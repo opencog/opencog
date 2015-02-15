@@ -33,7 +33,7 @@ void PrimitiveEnviron::init(void)
 	if (is_inited) return;
 	is_inited = true;
 	scm_c_define_module("opencog extension", init_helper, NULL);
-	// scm_c_use_module("opencog extension");
+	scm_c_use_module("opencog extension");
 }
 
 void PrimitiveEnviron::init_helper(void*)
