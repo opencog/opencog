@@ -34,7 +34,9 @@ class PrimitiveEnviron
 		static void init_helper(void*);
 
 		static void * c_wrap_register(void *);
-		void really_do_register(const char *, int);
+		void really_do_register(const char*, const char*, int);
+
+		const char *tmp_module;
 		const char *tmp_name;
 		int tmp_nargs;
 
@@ -42,8 +44,9 @@ class PrimitiveEnviron
 		static PrimitiveEnviron *verify_pe(SCM, const char *);
 
 	protected:
-		void do_register(const char *, int);
+		void do_register(const char*, const char*, int);
 		virtual SCM invoke (SCM) = 0;
+		virtual const char *get_module(void) = 0;
 		virtual const char *get_name(void) = 0;
 		virtual size_t get_size(void) = 0;
 		virtual ~PrimitiveEnviron();
@@ -101,6 +104,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			void (T::*v_v)(void);
 		} method;
 		T* that;
+		const char *scheme_module;
 		const char *scheme_name;
 		enum
 		{
@@ -364,46 +368,55 @@ class SchemePrimitive : public PrimitiveEnviron
 		}
 	protected:
 		virtual const char *get_name(void) { return scheme_name; }
+		virtual const char *get_module(void) { return scheme_module; }
 		virtual size_t get_size(void) { return sizeof (*this); }
 	public:
 
 #define DECLARE_CONSTR_1(SIG, LSIG, RET_TYPE, ARG_TYPE) \
-	SchemePrimitive(const char *name, RET_TYPE (T::*cb)(ARG_TYPE), T *data) \
+	SchemePrimitive(const char* module, const char* name, \
+		 RET_TYPE (T::*cb)(ARG_TYPE), T *data) \
 	{ \
 		that = data; \
 		method.LSIG = cb; \
+		scheme_module = module; \
 		scheme_name = name; \
 		signature = SIG; \
-		do_register(name, 1); /* cb has 1 arg */ \
+		do_register(module, name, 1); /* cb has 1 arg */ \
 	}
 
 #define DECLARE_CONSTR_2(SIG, LSIG, RET_TYPE, ARG1_TYPE, ARG2_TYPE) \
-	SchemePrimitive(const char *name, RET_TYPE (T::*cb)(ARG1_TYPE, ARG2_TYPE), T *data) \
+	SchemePrimitive(const char* module, const char* name, \
+		RET_TYPE (T::*cb)(ARG1_TYPE, ARG2_TYPE), T *data) \
 	{ \
 		that = data; \
 		method.LSIG = cb; \
+		scheme_module = module; \
 		scheme_name = name; \
 		signature = SIG; \
-		do_register(name, 2); /* cb has 2 args */ \
+		do_register(module, name, 2); /* cb has 2 args */ \
 	}
 
 #define DECLARE_CONSTR_3(SIG, LSIG, RET_TYPE, ARG1_TYPE, ARG2_TYPE, ARG3_TYPE) \
-	SchemePrimitive(const char *name, RET_TYPE (T::*cb)(ARG1_TYPE, ARG2_TYPE, ARG3_TYPE), T *data) \
+	SchemePrimitive(const char* module, const char* name, \
+		 RET_TYPE (T::*cb)(ARG1_TYPE, ARG2_TYPE, ARG3_TYPE), T *data) \
 	{ \
 		that = data; \
 		method.LSIG = cb; \
+		scheme_module = module; \
 		scheme_name = name; \
 		signature = SIG; \
-		do_register(name, 3); /* cb has 3 args */ \
+		do_register(module, name, 3); /* cb has 3 args */ \
 	}
 #define DECLARE_CONSTR_4(SIG, LSIG, RET_TYPE, ARG1_TYPE, ARG2_TYPE, ARG3_TYPE, ARG4_TYPE) \
-	SchemePrimitive(const char *name, RET_TYPE (T::*cb)(ARG1_TYPE, ARG2_TYPE, ARG3_TYPE, ARG4_TYPE), T *data) \
+	SchemePrimitive(const char* module, const char* name, \
+		RET_TYPE (T::*cb)(ARG1_TYPE, ARG2_TYPE, ARG3_TYPE, ARG4_TYPE), T *data) \
 	{ \
 		that = data; \
 		method.LSIG = cb; \
+		scheme_module = module; \
 		scheme_name = name; \
 		signature = SIG; \
-		do_register(name, 4); /* cb has 4 args */ \
+		do_register(module, name, 4); /* cb has 4 args */ \
 	}
 
 		// Declare and define the constructors for this class. They all have
@@ -426,49 +439,51 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, Type, int, double, int)
 
 		// Below is DECLARE_CONSTR_0(V_V, v_v, void*, void);
-		SchemePrimitive(const char *name, void (T::*cb)(void), T *data)
+		SchemePrimitive(const char *module, const char *name,
+		                void (T::*cb)(void), T *data)
 		{
 			that = data;
 			method.v_v = cb;
+			scheme_module = module;
 			scheme_name = name;
 			signature = V_V;
-			do_register(name, 0); // cb has 0 args
+			do_register(module, name, 0); // cb has 0 args
 		}
 };
 
 #define DECLARE_DECLARE_1(RET,ARG) \
 template<class T> \
-inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG), T *data) \
+inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG), T *data, const char* module = "extension") \
 { \
 	/* Note: this is freed automatically by scheme garbage collection */ \
 	/* when it is no longer needed. */ \
-	new SchemePrimitive<T>(name, cb, data); \
+	new SchemePrimitive<T>(module, name, cb, data); \
 }
 
 #define DECLARE_DECLARE_2(RET,ARG1,ARG2) \
 template<class T> \
-inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2), T *data) \
+inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2), T *data, const char* module = "extension") \
 { \
 	/* Note: this is freed automatically by scheme garbage collection */ \
 	/* when it is no longer needed. */ \
-	new SchemePrimitive<T>(name, cb, data); \
+	new SchemePrimitive<T>(module, name, cb, data); \
 }
 
 #define DECLARE_DECLARE_3(RET,ARG1,ARG2,ARG3) \
 template<class T> \
-inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG3), T *data) \
+inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG3), T *data, const char* module = "extension") \
 { \
 	/* Note: this is freed automatically by scheme garbage collection */ \
 	/* when it is no longer needed. */ \
-	new SchemePrimitive<T>(name, cb, data); \
+	new SchemePrimitive<T>(module, name, cb, data); \
 }
 #define DECLARE_DECLARE_4(RET,ARG1,ARG2,ARG3,ARG4) \
 template<class T> \
-inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG3,ARG4), T *data) \
+inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG3,ARG4), T *data, const char* module = "extension") \
 { \
 	/* Note: this is freed automatically by scheme garbage collection */ \
 	/* when it is no longer needed. */ \
-	new SchemePrimitive<T>(name, cb, data); \
+	new SchemePrimitive<T>(module, name, cb, data); \
 }
 
 DECLARE_DECLARE_1(Handle, Handle)

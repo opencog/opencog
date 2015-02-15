@@ -23,6 +23,11 @@
 ; possible results from the implication; in this case, there is only one
 ; possible result.
 ;
+
+(use-modules (opencog))
+(use-modules (opencog query))
+(load-from-path "utilities.scm")
+
 (define x
 	(BindLink
 		(ListLink

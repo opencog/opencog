@@ -1,7 +1,7 @@
 /*
  * SchemePrimitive.cc
  *
- * Allow C++ code to be invoked from scheme -- 
+ * Allow C++ code to be invoked from scheme --
  * by defining a scheme primitive function.
  *
  * Copyright (C) 2009, 2014 Linas Vepstas
@@ -25,7 +25,7 @@ bool PrimitiveEnviron::is_inited = false;
 
 
 /**
- * initialization code -- This is currently called under a 
+ * initialization code -- This is currently called under a
  * lock, from SchemeEval::init()
  */
 void PrimitiveEnviron::init(void)
@@ -33,7 +33,7 @@ void PrimitiveEnviron::init(void)
 	if (is_inited) return;
 	is_inited = true;
 	scm_c_define_module("opencog extension", init_helper, NULL);
-	scm_c_use_module("opencog extension");
+	// scm_c_use_module("opencog extension");
 }
 
 void PrimitiveEnviron::init_helper(void*)
@@ -43,9 +43,11 @@ void PrimitiveEnviron::init_helper(void*)
 
 PrimitiveEnviron::~PrimitiveEnviron() {}
 
-void PrimitiveEnviron::do_register(const char *name, int nargs)
+void PrimitiveEnviron::do_register(const char * module,
+                                   const char *name, int nargs)
 {
 	// Now enter guile mode, and do the actual work there.
+	tmp_module = module;
 	tmp_name = name;
 	tmp_nargs = nargs;
 	scm_with_guile(c_wrap_register, this);
@@ -54,12 +56,12 @@ void PrimitiveEnviron::do_register(const char *name, int nargs)
 void *PrimitiveEnviron::c_wrap_register(void *p)
 {
 	PrimitiveEnviron *self = (PrimitiveEnviron *) p;
-	self->really_do_register(self->tmp_name, self->tmp_nargs);
+	self->really_do_register(self->tmp_module, self->tmp_name, self->tmp_nargs);
 	return NULL;
 }
 
 /**
- * Create a new smob that will store a pointer to "this", which, in 
+ * Create a new smob that will store a pointer to "this", which, in
  * turn, holds a pointer to the C++ instance and the C++ method to be
  * invoked, when its called from scheme.  The evaluation of the scheme
  * function will actually end up calling "opencog-extension", which
@@ -68,9 +70,11 @@ void *PrimitiveEnviron::c_wrap_register(void *p)
  *
  * Note that this method must be called in "guile mode".
  */
-void PrimitiveEnviron::really_do_register(const char *name, int nargs)
+void
+PrimitiveEnviron::really_do_register(const char * module_name,
+                                     const char *name, int nargs)
 {
-	// Scheme garbage collection will be managing the lifecycle 
+	// Scheme garbage collection will be managing the lifecycle
 	scm_gc_register_collectable_memory (this, get_size(),
 	                                    "opencog primitive environ");
 
@@ -80,9 +84,11 @@ void PrimitiveEnviron::really_do_register(const char *name, int nargs)
 	SCM_SET_SMOB_FLAGS(smob, SchemeSmob::COG_EXTEND);
 
 	// The (opencog extension) module
-	SCM module = scm_c_resolve_module("opencog extension");
+	std::string modn = "opencog ";
+	modn += module_name;
+	SCM module = scm_c_resolve_module(modn.c_str());
 
-	// We need to give the smob a unique name. Using addr of this is 
+	// We need to give the smob a unique name. Using addr of this is
 	// sufficient for this purpose.
 #define BUFLEN 40
 	char buff[BUFLEN];
@@ -119,7 +125,7 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 	SCM rc = SCM_EOL;
 
 	// If the C++ code throws any exceptions, and no one else
-	// has caught them, then we have to catch them, and print 
+	// has caught them, then we have to catch them, and print
 	// an error message to the shell. Actually, we'll be
 	// quasi-nice about this, and convert the C++ exception
 	// into a scheme exception.
