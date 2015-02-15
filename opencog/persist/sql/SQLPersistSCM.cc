@@ -148,10 +148,10 @@ void SQLPersistSCM::init_in_module(void* data)
 void SQLPersistSCM::init(void)
 {
 #ifdef HAVE_GUILE
-	define_scheme_primitive("sql-open", &SQLPersistSCM::do_open, this);
-	define_scheme_primitive("sql-close", &SQLPersistSCM::do_close, this);
-	define_scheme_primitive("sql-load", &SQLPersistSCM::do_load, this);
-	define_scheme_primitive("sql-store", &SQLPersistSCM::do_store, this);
+	define_scheme_primitive("sql-open", &SQLPersistSCM::do_open, this, "persist-sql");
+	define_scheme_primitive("sql-close", &SQLPersistSCM::do_close, this, "persist-sql");
+	define_scheme_primitive("sql-load", &SQLPersistSCM::do_load, this, "persist-sql");
+	define_scheme_primitive("sql-store", &SQLPersistSCM::do_store, this, "persist-sql");
 #endif
 }
 
