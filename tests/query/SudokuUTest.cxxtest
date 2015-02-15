@@ -122,7 +122,8 @@ void SudokuPuzzle::test_2x2_puzzle(void)
 	logger().debug("puzzle is:\n%s\n", SchemeSmob::to_string(puzzle).c_str());
 
 	// Solve the puzzle
-	Handle puzzle_solution = bindlink(as, puzzle);
+	// Handle puzzle_solution = bindlink(as, puzzle);
+	Handle puzzle_solution = eval->eval_h("(cog-bind (x2-puzzle))");
 	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(puzzle_solution));
 
@@ -132,7 +133,7 @@ void SudokuPuzzle::test_2x2_puzzle(void)
 /* ========================================================================
  * Extremely simple 2x2 puzzle solver
  */
-// XXX FIXME The current unorder set solver is broken on this test :-(
+// XXX FIXME The current unordered set solver is broken on this test :-(
 // XXX this is as of 5 November 2014 
 void SudokuPuzzle::xtest_2x2_any(void)
 {
@@ -177,7 +178,8 @@ void SudokuPuzzle::test_3x3_puzzle(void)
 	logger().debug("puzzle is:\n%s\n", SchemeSmob::to_string(puzzle).c_str());
 
 	// Solve the puzzle
-	Handle puzzle_solution = bindlink(as, puzzle);
+	// Handle puzzle_solution = bindlink(as, puzzle);
+	Handle puzzle_solution = eval->eval_h("(cog-bind (x3-puzzle))");
 	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(puzzle_solution));
 

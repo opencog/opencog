@@ -19,7 +19,8 @@ PatternWrap::PatternWrap(Handle (f)(AtomSpace*, Handle), const char* n)
 	: _func(f), _name(n)
 {
 #ifdef HAVE_GUILE
-	define_scheme_primitive(_name, &PatternWrap::wrapper, this);
+	// define_scheme_primitive(_name, &PatternWrap::wrapper, this);
+	define_scheme_primitive(_name, &PatternWrap::wrapper, this, "query");
 #endif
 }
 
@@ -50,6 +51,15 @@ PatternSCM::PatternSCM(void)
 	if (is_init) return;
 	is_init = true;
 
+	// init_in_module(NULL);
+	scm_c_define_module("opencog query", init_in_module, NULL);
+	scm_c_use_module("opencog query");
+}
+
+/// This is called while (opencog query) is the current module.
+/// Thus, all the definitions below happen in that module.
+void PatternSCM::init_in_module(void*)
+{
 	// Run implication, assuming that the argument is a handle to
 	// an BindLink containing variables and an ImplicationLink.
 	_binders.push_back(new PatternWrap(bindlink, "cog-bind"));
