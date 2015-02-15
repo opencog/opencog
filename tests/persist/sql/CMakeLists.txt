@@ -13,6 +13,7 @@ LINK_DIRECTORIES(
 
 LINK_LIBRARIES(
 	atomspace
+	PersistModule
 	persist
 	server
 )

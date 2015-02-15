@@ -413,7 +413,7 @@ SERVER_PORT           = 17001
 MODULES               = query/libQueryModule.so,
                         server/libbuiltinreqs.so,
                         shell/libscheme-shell.so,
-                        persist/sql/libpersist.so,
+                        persist/sql/libPersistModule.so,
                         cython/libPythonModule.so
 
 # scheme script files that will be loaded during the system startup

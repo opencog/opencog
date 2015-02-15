@@ -705,7 +705,7 @@ void CogServer::openDatabase(void)
 
     // Do this all very politely, by loading the required module,
     // and then calling methods on it, as needed.
-    loadModule("libpersist.so");
+    loadModule("libPersistModule.so");
 
     Module *mod = getModule("opencog::PersistModule");
     if (NULL == mod)

@@ -54,7 +54,7 @@ $buildDirH/opencog/embodiment/Learning/LearningServer/learningServer \
 $buildDirH/opencog/query/libQueryModule.so \
 $buildDirH/opencog/server/libbuiltinreqs.so \
 $buildDirH/opencog/shell/libscheme-shell.so \
-$buildDirH/opencog/persist/sql/libpersist.so \
+$buildDirH/opencog/persist/sql/libPersistModule.so \
 ./cleanup.sh \
 ./stop_embodiment.sh \
 ./start_embodiment.sh \

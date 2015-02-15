@@ -9,8 +9,11 @@ INCLUDE_DIRECTORIES (
 ADD_LIBRARY (persist-sql SHARED
 	odbcxx.cc
 	AtomStorage.cc
-	PersistModule.cc
 	SQLPersistSCM.cc
+)
+
+ADD_LIBRARY (PersistModule SHARED
+	PersistModule.cc
 )
 
 # XXX FIXME We've added a depedency on the NLP atom types.
@@ -28,6 +31,10 @@ IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(persist-sql smob)
 ENDIF (HAVE_GUILE)
 
+TARGET_LINK_LIBRARIES(PersistModule
+	persist-sql
+)
+
 ADD_EXECUTABLE(sniff
 	sniff.cc
 )
@@ -40,5 +47,8 @@ TARGET_LINK_LIBRARIES(sniff
 )
 
 INSTALL (TARGETS persist-sql
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
+INSTALL (TARGETS PersistModule
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
