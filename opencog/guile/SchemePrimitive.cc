@@ -105,7 +105,8 @@ PrimitiveEnviron::really_do_register(const char * module_name,
 	snprintf(buff, BUFLEN, "cog-prim-%p", this);
 	scm_c_module_define(module, buff, smob);
 
-	std::string wrapper = "(define-public (";
+	std::string wrapper = "(use-modules (opencog extension))";
+	wrapper += "(define-public (";
 	wrapper += name;
 	for (int i=0; i<nargs; i++)
 	{
