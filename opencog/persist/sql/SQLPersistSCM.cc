@@ -95,6 +95,8 @@ void SQLBackingStore::barrier()
 	_store->flushStoreQueue();
 }
 
+// =================================================================
+
 SQLPersistSCM::SQLPersistSCM(AtomSpace *as)
 {
 	_as = as;
@@ -128,6 +130,24 @@ SQLPersistSCM::SQLPersistSCM(AtomSpace *as)
 #endif // NLP_HACK
 
 #ifdef HAVE_GUILE
+	static bool is_init = false;
+	if (is_init) return;
+	is_init = true;
+
+	scm_c_define_module("opencog persist-sql", init_in_module, this);
+	scm_c_use_module("opencog persist-sql");
+#endif
+}
+
+void SQLPersistSCM::init_in_module(void* data)
+{
+   SQLPersistSCM* self = (SQLPersistSCM*) data;
+   self->init();
+}
+
+void SQLPersistSCM::init(void)
+{
+#ifdef HAVE_GUILE
 	define_scheme_primitive("sql-open", &SQLPersistSCM::do_open, this);
 	define_scheme_primitive("sql-close", &SQLPersistSCM::do_close, this);
 	define_scheme_primitive("sql-load", &SQLPersistSCM::do_load, this);
@@ -160,7 +180,12 @@ void SQLPersistSCM::do_open(const std::string& dbname,
 	// reserve() is critical here, to reserve UUID range.
 	_store->reserve();
 	_backing->set_store(_store);
-	_as->getImpl().registerBackingStore(_backing);
+	AtomSpace *as = _as;
+#ifdef HAVE_GUILE
+	if (NULL == as)
+		as = SchemeSmob::ss_get_env_as("sql-open");
+#endif
+	as->getImpl().registerBackingStore(_backing);
 }
 
 void SQLPersistSCM::do_close(void)
@@ -169,7 +194,12 @@ void SQLPersistSCM::do_close(void)
 		throw RuntimeException(TRACE_INFO,
 			 "sql-close: Error: Database not open");
 
-	_as->getImpl().unregisterBackingStore(_backing);
+	AtomSpace *as = _as;
+#ifdef HAVE_GUILE
+	if (NULL == as)
+		as = SchemeSmob::ss_get_env_as("sql-close");
+#endif
+	as->getImpl().unregisterBackingStore(_backing);
 
 	_backing->set_store(NULL);
 	delete _store;
@@ -182,8 +212,13 @@ void SQLPersistSCM::do_load(void)
 		throw RuntimeException(TRACE_INFO,
 			"sql-load: Error: Database not open");
 
+	AtomSpace *as = _as;
+#ifdef HAVE_GUILE
+	if (NULL == as)
+		as = SchemeSmob::ss_get_env_as("sql-load");
+#endif
 	// XXX TODO: this should probably be done in a separate thread.
-	_store->load(const_cast<AtomTable&>(_as->getAtomTable()));
+	_store->load(const_cast<AtomTable&>(as->getAtomTable()));
 }
 
 
@@ -193,6 +228,16 @@ void SQLPersistSCM::do_store(void)
 		throw RuntimeException(TRACE_INFO,
 			"sql-store: Error: Database not open");
 
+	AtomSpace *as = _as;
+#ifdef HAVE_GUILE
+	if (NULL == as)
+		as = SchemeSmob::ss_get_env_as("sql-store");
+#endif
 	// XXX TODO This should really be started in a new thread ...
-	_store->store(const_cast<AtomTable&>(_as->getAtomTable()));
+	_store->store(const_cast<AtomTable&>(as->getAtomTable()));
+}
+
+void opencog_persist_sql_init(void)
+{
+   static SQLPersistSCM patty(NULL);
 }

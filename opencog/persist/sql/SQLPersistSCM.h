@@ -41,6 +41,8 @@ class SQLBackingStore;
 class SQLPersistSCM
 {
 private:
+	static void init_in_module(void*);
+	void init(void);
 
 	SQLBackingStore *_backing;
 	AtomStorage *_store;
@@ -56,6 +58,11 @@ public:
 	void do_store(void);
 
 }; // class
+
+extern "C" {
+void opencog_persist_sql_init(void);
+};
+
 
 /** @}*/
 }  // namespace

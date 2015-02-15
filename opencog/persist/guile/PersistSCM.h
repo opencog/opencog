@@ -36,6 +36,8 @@ namespace opencog
 class PersistSCM
 {
 private:
+	static void init_in_module(void*);
+	void init(void);
 
 	Handle fetch_atom(Handle);
 	Handle fetch_incoming_set(Handle);
@@ -46,6 +48,10 @@ private:
 public:
 	PersistSCM(void);
 }; // class
+
+extern "C" {
+void opencog_persist_init(void);
+};
 
 /** @}*/
 }  // namespace

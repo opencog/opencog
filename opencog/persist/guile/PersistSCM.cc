@@ -28,15 +28,34 @@
 
 using namespace opencog;
 
-namespace opencog {
-
 PersistSCM::PersistSCM(void)
 {
-	define_scheme_primitive("fetch-atom", &PersistSCM::fetch_atom, this);
-	define_scheme_primitive("fetch-incoming-set", &PersistSCM::fetch_incoming_set, this);
-	define_scheme_primitive("store-atom", &PersistSCM::store_atom, this);
-	define_scheme_primitive("load-atoms-of-type", &PersistSCM::load_type, this);
-	define_scheme_primitive("barrier", &PersistSCM::barrier, this);
+	static bool is_init = false;
+	if (is_init) return;
+	is_init = true;
+
+	scm_c_define_module("opencog persist", init_in_module, this);
+	scm_c_use_module("opencog persist");
+}
+
+void PersistSCM::init_in_module(void* data)
+{
+	PersistSCM* self = (PersistSCM*) data;
+	self->init();
+}
+
+void PersistSCM::init(void)
+{
+	define_scheme_primitive("fetch-atom",
+	             &PersistSCM::fetch_atom, this, "persist");
+	define_scheme_primitive("fetch-incoming-set",
+	             &PersistSCM::fetch_incoming_set, this, "persist");
+	define_scheme_primitive("store-atom",
+	             &PersistSCM::store_atom, this, "persist");
+	define_scheme_primitive("load-atoms-of-type",
+	             &PersistSCM::load_type, this, "persist");
+	define_scheme_primitive("barrier",
+	             &PersistSCM::barrier, this, "persist");
 }
 
 // =====================================================================
@@ -79,4 +98,7 @@ void PersistSCM::barrier(void)
 	as->getImpl().barrier();
 }
 
+void opencog_persist_init(void)
+{
+   static PersistSCM patty;
 }
