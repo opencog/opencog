@@ -64,7 +64,7 @@ public:
 
     ~QuoteUTest()
     {
-        delete as;
+        delete eval;
         // Erase the log file if no assertions failed.
         if (!CxxTest::TestTracker::tracker().suiteFailed())
                 std::remove(logger().getFilename().c_str());
