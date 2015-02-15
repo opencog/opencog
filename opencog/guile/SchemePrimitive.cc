@@ -45,7 +45,7 @@ void PrimitiveEnviron::init_in_module(void*)
 {
 	scm_c_define_gsubr("opencog-extension", 2,0,0, C(do_call));
 
-	// Export, because other modules will nee to call this directly.
+	// Export, because other modules will need to call this directly.
 	scm_c_export("opencog-extension", NULL);
 }
 
@@ -88,15 +88,15 @@ PrimitiveEnviron::really_do_register(const char * module_name,
 	scm_gc_register_collectable_memory (this, get_size(),
 	                                    "opencog primitive environ");
 
+	// The (opencog extension) module
+	std::string modn = "opencog ";
+	modn += module_name;
+	SCM module = scm_c_define_module(modn.c_str(), NULL, NULL);
+
 	// The smob will hold a pointer to "this" -- the PrimitiveEnviron
 	SCM smob;
 	SCM_NEWSMOB (smob, SchemeSmob::cog_misc_tag, this);
 	SCM_SET_SMOB_FLAGS(smob, SchemeSmob::COG_EXTEND);
-
-	// The (opencog extension) module
-	std::string modn = "opencog ";
-	modn += module_name;
-	SCM module = scm_c_resolve_module(modn.c_str());
 
 	// We need to give the smob a unique name. Using addr of this is
 	// sufficient for this purpose.
