@@ -60,28 +60,77 @@ void PersistModule::init(void)
 
 std::string PersistModule::do_close(Request *dummy, std::list<std::string> args)
 {
-	return _api->do_close(args);
-	// return "Database closed\n";
+	if (!args.empty())
+		return "sql-close: Error: Unexpected argument\n";
+
+	try
+	{
+		_api->do_close();
+	}
+	catch (const std::exception& ex)
+	{
+		return std::string(ex.what()) + "\n";
+	}
+
+	return "Database closed\n";
 }
 
 std::string PersistModule::do_load(Request *dummy, std::list<std::string> args)
 {
-	return _api->do_load(args);
-	// return "Database load completed\n";
+	if (!args.empty())
+		return "sql-load: Error: Unexpected argument\n";
+
+	try
+	{
+		_api->do_load();
+	}
+	catch (const std::exception& ex)
+	{
+		return std::string(ex.what()) + "\n";
+	}
+
+	return "Database load completed\n";
 }
 
 
 std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 {
-	return _api->do_open(args);
+	if (args.size() != 3)
+		return "sql-open: Error: invalid command syntax\n"
+		       "Usage: sql-open <dbname> <username> <auth>\n";
 
-	// std::string rc = "Opened \"" + dbname + "\" as user \"" + username + "\"\n"; 
-	// return rc;
+	std::string dbname   = args.front(); args.pop_front();
+	std::string username = args.front(); args.pop_front();
+	std::string auth     = args.front(); args.pop_front();
+
+	try
+	{
+		_api->do_open(dbname, username, auth);
+	}
+	catch (const std::exception& ex)
+	{
+		return std::string(ex.what()) + "\n";
+	}
+
+	std::string rc = "Opened \"" + dbname + "\" as user \"" + username + "\"\n"; 
+	return rc;
 }
 
 std::string PersistModule::do_store(Request *dummy, std::list<std::string> args)
 {
-	return _api->do_store(args);
-	// return "Database store completed\n";
+	if (!args.empty())
+		return "sql-store: Error: Unexpected argument\n";
+
+	try
+	{
+		_api->do_store();
+	}
+	catch (const std::exception& ex)
+	{
+		return std::string(ex.what()) + "\n";
+	}
+
+	return "Database store completed\n";
 }
+
 }

@@ -56,10 +56,10 @@ public:
 	PersistSCM(AtomSpace*);
 	~PersistSCM();
 
-	std::string do_close(std::list<std::string>);
-	std::string do_load(std::list<std::string>);
-	std::string do_open(std::list<std::string>);
-	std::string do_store(std::list<std::string>);
+	void do_open(const std::string&, const std::string&, const std::string&);
+	void do_close(void);
+	void do_load(void);
+	void do_store(void);
 
 }; // class
 
