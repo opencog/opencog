@@ -1,5 +1,5 @@
 /*
- * opencog/persist/sql/PersistSCM.cc
+ * opencog/persist/sql/SQLPersistSCM.cc
  *
  * Copyright (c) 2008 by OpenCog Foundation
  * Copyright (c) 2008, 2009, 2013, 2015 Linas Vepstas <linasvepstas@gmail.com>
@@ -26,7 +26,7 @@
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/nlp/types/atom_types.h>
 
-#include "PersistModule.h"
+#include "SQLPersistSCM.h"
 #include "AtomStorage.h"
 
 using namespace opencog;
@@ -95,7 +95,7 @@ void SQLBackingStore::barrier()
 	_store->flushStoreQueue();
 }
 
-PersistSCM::PersistSCM(AtomSpace *as)
+SQLPersistSCM::SQLPersistSCM(AtomSpace *as)
 {
 	_as = as;
 	_store = NULL;
@@ -128,28 +128,19 @@ PersistSCM::PersistSCM(AtomSpace *as)
 #endif // NLP_HACK
 
 #ifdef HAVE_GUILE
-	define_scheme_primitive("sql-open", &PersistSCM::do_open, this);
-	define_scheme_primitive("sql-close", &PersistSCM::do_close, this);
-	define_scheme_primitive("sql-load", &PersistSCM::do_load, this);
-	define_scheme_primitive("sql-store", &PersistSCM::do_store, this);
-
-	// XXX These should be declared in some generic persistance module,
-	// as they are not specific to the SQL backend only.  But I guess
-	// this is an OK home for now, because there are no other backends.
-	define_scheme_primitive("fetch-atom", &PersistSCM::fetch_atom, this);
-	define_scheme_primitive("fetch-incoming-set", &PersistSCM::fetch_incoming_set, this);
-	define_scheme_primitive("store-atom", &PersistSCM::store_atom, this);
-	define_scheme_primitive("load-atoms-of-type", &PersistSCM::load_type, this);
-	define_scheme_primitive("barrier", &PersistSCM::barrier, this);
+	define_scheme_primitive("sql-open", &SQLPersistSCM::do_open, this);
+	define_scheme_primitive("sql-close", &SQLPersistSCM::do_close, this);
+	define_scheme_primitive("sql-load", &SQLPersistSCM::do_load, this);
+	define_scheme_primitive("sql-store", &SQLPersistSCM::do_store, this);
 #endif
 }
 
-PersistSCM::~PersistSCM()
+SQLPersistSCM::~SQLPersistSCM()
 {
 	delete _backing;
 }
 
-void PersistSCM::do_open(const std::string& dbname,
+void SQLPersistSCM::do_open(const std::string& dbname,
                          const std::string& username,
                          const std::string& auth)
 {
@@ -172,7 +163,7 @@ void PersistSCM::do_open(const std::string& dbname,
 	_as->getImpl().registerBackingStore(_backing);
 }
 
-void PersistSCM::do_close(void)
+void SQLPersistSCM::do_close(void)
 {
 	if (_store == NULL)
 		throw RuntimeException(TRACE_INFO,
@@ -185,7 +176,7 @@ void PersistSCM::do_close(void)
 	_store = NULL;
 }
 
-void PersistSCM::do_load(void)
+void SQLPersistSCM::do_load(void)
 {
 	if (_store == NULL)
 		throw RuntimeException(TRACE_INFO,
@@ -196,7 +187,7 @@ void PersistSCM::do_load(void)
 }
 
 
-void PersistSCM::do_store(void)
+void SQLPersistSCM::do_store(void)
 {
 	if (_store == NULL)
 		throw RuntimeException(TRACE_INFO,
@@ -204,47 +195,4 @@ void PersistSCM::do_store(void)
 
 	// XXX TODO This should really be started in a new thread ...
 	_store->store(const_cast<AtomTable&>(_as->getAtomTable()));
-}
-
-// =====================================================================
-// XXX TODO: the methods  below really belong in their own module,
-// independent of this SQL module; they would be applicable for
-// any backend, not just the SQL backend.
-
-Handle PersistSCM::fetch_atom(Handle h)
-{
-	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-atom");
-	h = as->getImpl().fetchAtom(h);
-	return h;
-}
-
-Handle PersistSCM::fetch_incoming_set(Handle h)
-{
-	// The "false" flag here means that the fetch is NOT recursive.
-	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-incoming-set");
-	h = as->getImpl().fetchIncomingSet(h, false);
-	return h;
-}
-
-/**
- * Store the single atom to the backing store hanging off the
-  atom-space
- */
-Handle PersistSCM::store_atom(Handle h)
-{
-	AtomSpace *as = SchemeSmob::ss_get_env_as("store-atom");
-	as->getImpl().storeAtom(h);
-	return h;
-}
-
-void PersistSCM::load_type(Type t)
-{
-	AtomSpace *as = SchemeSmob::ss_get_env_as("load-atoms-of-type");
-	as->getImpl().loadType(t);
-}
-
-void PersistSCM::barrier(void)
-{
-	AtomSpace *as = SchemeSmob::ss_get_env_as("barrier");
-	as->getImpl().barrier();
 }

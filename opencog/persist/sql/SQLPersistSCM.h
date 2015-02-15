@@ -1,5 +1,5 @@
 /*
- * opencog/persist/sql/PersistSCM.h
+ * opencog/persist/sql/SQLPersistSCM.h
  *
  * Copyright (c) 2008 by OpenCog Foundation
  * Copyright (c) 2008, 2009, 2013, 2015 Linas Vepstas <linasvepstas@gmail.com>
@@ -38,7 +38,7 @@ namespace opencog
  */
 
 class SQLBackingStore;
-class PersistSCM
+class SQLPersistSCM
 {
 private:
 
@@ -46,15 +46,9 @@ private:
 	AtomStorage *_store;
 	AtomSpace *_as;
 
-	Handle fetch_atom(Handle);
-	Handle fetch_incoming_set(Handle);
-	Handle store_atom(Handle);
-	void load_type(Type);
-	void barrier(void);
-
 public:
-	PersistSCM(AtomSpace*);
-	~PersistSCM();
+	SQLPersistSCM(AtomSpace*);
+	~SQLPersistSCM();
 
 	void do_open(const std::string&, const std::string&, const std::string&);
 	void do_close(void);

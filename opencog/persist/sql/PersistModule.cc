@@ -37,7 +37,7 @@ DECLARE_MODULE(PersistModule);
 
 PersistModule::PersistModule(CogServer& cs) : Module(cs)
 {
-	_api = new PersistSCM(&_cogserver.getAtomSpace());
+	_api = new SQLPersistSCM(&_cogserver.getAtomSpace());
 
 	do_close_register();
 	do_load_register();

@@ -28,7 +28,7 @@
 #include <string>
 
 #include <opencog/atomspace/Handle.h>
-#include <opencog/persist/sql/PersistSCM.h>
+#include <opencog/persist/sql/SQLPersistSCM.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Module.h>
 #include <opencog/server/Request.h>
@@ -42,7 +42,7 @@ namespace opencog
 class PersistModule : public Module
 {
 private:
-    PersistSCM *_api;
+    SQLPersistSCM *_api;
 
     DECLARE_CMD_REQUEST(PersistModule, "sql-close", do_close, 
        "Close the SQL database", 
