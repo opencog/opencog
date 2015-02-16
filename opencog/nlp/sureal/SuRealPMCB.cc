@@ -111,24 +111,58 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
     // for each disjunct, get its outgoing set, and match 1-to-1 with qConns
     auto matchHelper = [&](const Handle& hDisjunct)
     {
-        HandleSeq qSourceConns;
+        std::list<Handle> sourceConns;
+        std::list<Handle> targetConns(qTargetConns.begin(), qTargetConns.end());
 
         // check if hDisjunct is LgAnd or just a lone connector
         if (hDisjunct->getType() == LG_AND)
-            qSourceConns = _as->getOutgoing(hDisjunct);
+        {
+            HandleSeq q = _as->getOutgoing(hDisjunct);
+            sourceConns = std::list<Handle>(q.begin(), q.end());
+        }
         else
-            qSourceConns.push_back(hDisjunct);
+        {
+            sourceConns.push_back(hDisjunct);
+        }
 
-        if (qSourceConns.size() != qTargetConns.size())
+        Handle hMultiConn = Handle::UNDEFINED;
+
+        while (not sourceConns.empty() && not targetConns.empty())
+        {
+            if (hMultiConn != Handle::UNDEFINED)
+                scmCode = "(lg-conn-linkable? " + SchemeSmob::to_string(hMultiConn) + " " + SchemeSmob::to_string(targetConns.front()) + ")";
+            else
+                scmCode = "(lg-conn-linkable? " + SchemeSmob::to_string(sourceConns.front()) + " " + SchemeSmob::to_string(targetConns.front()) + ")";
+
+            if (m_eval->eval(scmCode) == "#f\n")
+            {
+                if (hMultiConn != Handle::UNDEFINED)
+                {
+                    hMultiConn = Handle::UNDEFINED;
+                    continue;
+                }
+
+                return false;
+            }
+
+            if (hMultiConn != Handle::UNDEFINED)
+            {
+                targetConns.pop_front();
+                continue;
+            }
+
+            if (_as->getOutgoing(sourceConns.front()).size() == 3)
+                hMultiConn = sourceConns.front();
+
+            sourceConns.pop_front();
+            targetConns.pop_front();
+        }
+
+        // check if both source and target are used up
+        if (not sourceConns.empty() or not targetConns.empty())
             return false;
 
-        for (uint i = 0; i < qSourceConns.size(); i++)
-        {
-            scmCode = "(lg-conn-linkable? " + SchemeSmob::to_string(qSourceConns[i]) + " " + SchemeSmob::to_string(qTargetConns[i]) + ")";
-
-            if (m_eval->eval(scmCode) == "#f")
-                return false;
-        }
+        logger().info(hDisjunct->toShortString() + " passed!");
 
         return true;
     };
