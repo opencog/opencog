@@ -25,6 +25,7 @@
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/reasoning/RuleEngine/rule-engine-src/pln/ForwardChainer.h>
+#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/DefaultForwardChainerCB.h>
 #include <opencog/reasoning/RuleEngine/rule-engine-src/pln/BackwardChainer.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -57,8 +58,9 @@ void InferenceSCM::init(void) {
 Handle InferenceSCM::do_forward_chaining(Handle h) {
 #ifdef HAVE_GUILE
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
+	DefaultForwardChainerCB dfc(as);
 	ForwardChainer fc(as);
-	fc.do_chain(h); //START FORWARD CHAINING
+	fc.do_chain(dfc,h); //START FORWARD CHAINING
 	HandleSeq result = fc.get_chaining_result();
 	return as->addLink(LIST_LINK, result, TruthValue::DEFAULT_TV());
 #else

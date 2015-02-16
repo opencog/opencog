@@ -23,28 +23,32 @@
 
 #include "ForwardChainPatternMatchCB.h"
 
-ForwardChainPatternMatchCB::ForwardChainPatternMatchCB(AtomSpace * as,
-		ForwardChainer * fc) :
+ForwardChainPatternMatchCB::ForwardChainPatternMatchCB(AtomSpace * as) :
 		Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as), PLNImplicator(
-				as), as_(as), fc_(fc) {
-
+				as), _as(as) {
+	_fcmem = nullptr;
 }
 
 ForwardChainPatternMatchCB::~ForwardChainPatternMatchCB() {
 }
 
-HandleSeq& ForwardChainPatternMatchCB::get_results() {
-	return result_list;
-}
 bool ForwardChainPatternMatchCB::node_match(Handle& node1, Handle& node2) {
-	return (AttentionalFocusCB::node_match(node1, node2) or fc_->search_in_af)
-		// force inference to be made only in the target list
-		and not fc_->is_in_target_list(node1);
+	//constrain search within target list
+	if (_fcmem->is_search_in_af())
+		return (AttentionalFocusCB::node_match(node1, node2)
+				/*and _fcmem->isin_target_list(node2)*/);
+	else
+		return (DefaultPatternMatchCB::node_match(node1, node2)
+				/*and _fcmem->isin_target_list(node2)*/);
 }
 bool ForwardChainPatternMatchCB::link_match(LinkPtr& lpat, LinkPtr& lsoln) {
-	return (AttentionalFocusCB::link_match(lpat, lsoln) or fc_->search_in_af)
-		// force inference to be made only in the target list
-		and not fc_->is_in_target_list(Handle(lsoln));
+	//constrain search within target list
+	if (_fcmem->is_search_in_af())
+		return (AttentionalFocusCB::link_match(lpat, lsoln)
+				/*and _fcmem->isin_target_list(Handle(lsoln))*/);
+	else
+		return (DefaultPatternMatchCB::link_match(lpat, lsoln)
+				/*and _fcmem->isin_target_list(Handle(lsoln))*/);
 }
 bool ForwardChainPatternMatchCB::grounding(
 		const std::map<Handle, Handle> &var_soln,
@@ -52,15 +56,15 @@ bool ForwardChainPatternMatchCB::grounding(
 	Handle h = inst.instantiate(implicand, var_soln);
 	if (Handle::UNDEFINED != h) {
 		result_list.push_back(h);
-		fc_->add_to_target_list(h); //add to potential target list
-
-		//add to chaining result
-		HandleSeq hs = fc_->chaining_results;
-		auto it = find_if(hs.begin(), hs.end(),[h](Handle hi) {return h.value() == hi.value();});
-		if (it == hs.end())
-			fc_->chaining_results.push_back(h);
-
 	}
 	return false;
 }
 
+void ForwardChainPatternMatchCB::set_fcmem(FCMemory *fcmem) {
+	_fcmem = fcmem;
+}
+HandleSeq ForwardChainPatternMatchCB::get_products() {
+	auto product = result_list;
+	result_list.clear();
+	return product;
+}

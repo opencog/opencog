@@ -1,9 +1,9 @@
 /*
- * Chainer.cc
+ * PolicyParam.h
  *
  * Copyright (C) 2014 Misgana Bayetta
  *
- * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  Sept 2014
+ * Author: Misgana Bayetta <misgana.bayetta@gmail.com>   2015
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -20,29 +20,22 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "Chainer.h"
 
-Chainer::Chainer(AtomSpace * atom_space)
-	: ctv_fitnes(0.9), conf_path("rule-engine.conf")
-{
-	main_atom_space = atom_space;
-	//target_list_atom_space = new AtomSpace(); //xxx a rejected idea about using separate atomspace.maybe later.
-	target_list_atom_space = atom_space;
-}
-void Chainer::set_htarget(Handle& h) {
+#ifndef POLICYPARAMS_H_
+#define POLICYPARAMS_H_
 
-}
-Chainer::~Chainer()
-{
-	//delete target_list_atom_space;
-}
+#include <string>
+using namespace std;
 
-float Chainer::target_tv_fitness(Handle h)
-{
-	TruthValuePtr ptv = target_list_atom_space->getTV(h);
-	confidence_t c = ptv->getConfidence();
-	strength_t s = ptv->getMean();
+//json object key names
+const string RULES = "rules";
+const string FILE_PATH = "file_path";
+const string RULE_NAME = "name";
+const string PRIORITY = "priority";
+const string CATEGORY = "category";
+const string ATTENTION_ALLOC = "attention_allocation";
+const string LOG_LEVEL = "log_level";
+const string MUTEX_RULES = "mutex";
+const string MAX_ITER = "max_iter";
 
-	return (pow((1 - s), ctv_fitnes) * (pow(c, (2 - ctv_fitnes))));
-}
-
+#endif /* POLICYPARAMS_H_ */

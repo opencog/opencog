@@ -3,12 +3,17 @@ ADD_LIBRARY(ruleengine SHARED
 pln/BackwardChainer.cc
 pln/PLNCommons.cc
 pln/ForwardChainer.cc
-pln/Chainer.cc
 pln/BCPatternMatch.cc
 pln/ForwardChainInputMatchCB.cc
 pln/ForwardChainPatternMatchCB.cc
+pln/ForwardChainerCallBack.h
+pln/DefaultForwardChainerCB.cc
+pln/FCMemory.cc
 RuleEngineModule.cc
 InferenceSCM.cc
+Rule.cc
+ControlPolicyParamLoader.cc
+JsonicControlPolicyParamLoader.cc
 )
 
 ADD_DEPENDENCIES(ruleengine

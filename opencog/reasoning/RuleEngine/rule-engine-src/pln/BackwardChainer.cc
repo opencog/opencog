@@ -22,10 +22,11 @@
  */
 #include "BackwardChainer.h"
 
+#include <opencog/query/PatternMatch.h>
 #include <opencog/guile/SchemeSmob.h>
 
 BackwardChainer::BackwardChainer(AtomSpace * as) :
-		Chainer(as), as_(as) {
+		 as_(as) {
 	commons_ = new PLNCommons(as_);
 	bcpm_ = new BCPatternMatch(as_);
 }
@@ -52,9 +53,13 @@ HandleSeq BackwardChainer::query_rule_base(Handle htarget) {
 #if DEBUG
 	cout << "QUERY-RB:" << endl << SchemeSmob::to_string(hbind_link) << endl;
 #endif
-	chaining_pm.do_bindlink(hbind_link, *bcpm_);
+	PatternMatch pm;
+	try {
+		pm.do_bindlink(hbind_link, *bcpm_);
+	} catch (InvalidParamException& e) {
+		cout << "VALIDATION FAILED:" << endl << e.what() << endl;
+	}
 	commons_->clean_up_bind_link(hbind_link);
-
 	auto result = bcpm_->get_result_list();
 	bcpm_->clear_result_list(); //makes sure on each query only new results are returned
 	return result;
@@ -65,7 +70,12 @@ HandleSeq BackwardChainer::query_knowledge_base(Handle htarget) {
 #if DEBUG
 	cout << "QUERY-KB:" << endl << SchemeSmob::to_string(hbind_link) << endl;
 #endif
-	chaining_pm.do_bindlink(hbind_link, *bcpm_);
+	PatternMatch pm;
+	try {
+		pm.do_bindlink(hbind_link, *bcpm_);
+	} catch (InvalidParamException& e) {
+		cout << "VALIDATION FAILED:" << endl << e.what() << endl;
+	}
 	commons_->clean_up_bind_link(hbind_link);
 
 	auto result = bcpm_->get_result_list();
@@ -335,7 +345,8 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal) {
 			return unify_to_empty_set(hgoal);
 		} else {
 			Handle rule = select_rule(rules); //TODO use all rules for found here.
-			Handle stadardized_rule = commons_->create_with_unique_var(rule);
+			Handle stadardized_rule = commons_->replace_nodes_with_varnode(
+					rule);
 			bc_generated_rules.push_back(stadardized_rule); //for later removal
 #ifdef DEBUG
 					cout << "RULE FOUND" << SchemeSmob::to_string(stadardized_rule)

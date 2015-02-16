@@ -4,3 +4,5 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/opencog/reasoning/RuleEngine/rules/pln/modus-
     ${PROJECT_BINARY_DIR}/reasoning/RuleEngine/rules/pln/modus-ponens.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/opencog/reasoning/RuleEngine/rules/compile-rules.scm
     ${PROJECT_BINARY_DIR}/reasoning/RuleEngine/rules/compile-rules.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/opencog/reasoning/RuleEngine/rules/pln/default_cpolicy.json
+	${PROJECT_BINARY_DIR}/reasoning/RuleEngine/rules/pln/default_cpolicy.json)

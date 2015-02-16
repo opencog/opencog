@@ -1,0 +1,66 @@
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+#include <opencog/reasoning/RuleEngine/rule-engine-src/JsonicControlPolicyParamLoader.h>
+#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/FCMemory.h>
+#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/DefaultForwardChainerCB.h>
+
+using namespace opencog;
+
+class DefaultForwardChainerCBUTest: public CxxTest::TestSuite {
+private:
+	AtomSpace* as;
+	SchemeEval* eval;
+
+public:
+	DefaultForwardChainerCBUTest(void) {
+		server(CogServer::createInstance);
+		as = &cogserver().getAtomSpace();
+		eval = new SchemeEval(as);
+		config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
+				"opencog/scm/utilities.scm, ");
+		load_scm_files_from_config(*as);
+	}
+
+	~DefaultForwardChainerCBUTest() {
+		delete as;
+		delete eval;
+	}
+
+	void setUp(void);
+	void tearDown(void);
+	void test_choose_rule(void);
+};
+
+void DefaultForwardChainerCBUTest::setUp() {
+
+}
+
+void DefaultForwardChainerCBUTest::tearDown() {
+
+}
+
+void DefaultForwardChainerCBUTest::test_choose_rule(void) {
+	 JsonicControlPolicyParamLoader jscp(as, "rules/pln/test_cpolicy.json");
+	 jscp.load_config();
+	 FCMemory fcmem(as);
+	 fcmem.set_rules(jscp.get_rules());
+	 TS_ASSERT_EQUALS(1, fcmem.get_rules().size());
+	 Handle h =
+	 eval->eval_h(
+	 "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
+	 TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
+	 fcmem.set_target(h);
+	 DefaultForwardChainerCB dfcb(as);
+	 vector<Rule*> rule = dfcb.choose_rule(fcmem);
+	 TS_ASSERT_EQUALS(1,rule.size());
+	 HandleSeq bindlinks;
+	 as->getHandlesByType(back_inserter(bindlinks),BIND_LINK);
+	 auto it =  find(bindlinks.begin(),bindlinks.end(),rule[0]->get_handle());
+	 TS_ASSERT_DIFFERS(it,bindlinks.end());
+	 as->print();
+}

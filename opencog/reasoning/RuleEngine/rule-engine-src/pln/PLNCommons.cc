@@ -1,10 +1,25 @@
 /*
- * Commons.cc
+ * PLNCommons.h
  *
- *  Created on: 9 Oct, 2014
- *      Author: misgana
+ * Copyright (C) 2014 Misgana Bayetta
+ *
+ * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  Oct 2014
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 #include "PLNCommons.h"
 
 #include <opencog/util/macros.h>
@@ -40,7 +55,7 @@ Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
 	} //xxx why?
 
 	//if(vnode_is_typedv)
-	himplicant = create_with_unique_var(himplicant);
+	himplicant = replace_nodes_with_varnode(himplicant);
 
 	HandleSeq variable_nodes = get_nodes(himplicant, vector<Type> {
 			VARIABLE_NODE });
@@ -76,13 +91,14 @@ Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
 HandleSeq PLNCommons::get_nodes(const Handle& hinput,
 		vector<Type> required_nodes) {
 	HandleSeq found_nodes;
+	auto exists =
+			[&found_nodes](Handle h) {return (find(found_nodes.begin(),found_nodes.end(),h)!= found_nodes.end()?true:false);};
 	if (LinkCast(hinput)) {
 		HandleSeq hsoutgoing = as_->getOutgoing(hinput);
-
 		for (auto it = hsoutgoing.begin(); it != hsoutgoing.end(); ++it) {
 			HandleSeq tmp = get_nodes(*it, required_nodes);
 			for (Handle h : tmp) {
-				if (!exists(found_nodes, h))
+				if (not exists(h))
 					found_nodes.push_back(h);
 			}
 		}
@@ -91,12 +107,12 @@ HandleSeq PLNCommons::get_nodes(const Handle& hinput,
 		if (NodeCast(hinput)) {
 			Type t = NodeCast(hinput)->getType();
 			if (required_nodes.empty()) { //empty means all kinds of nodes
-				if (!exists(found_nodes, hinput))
+				if (not exists(hinput))
 					found_nodes.push_back(hinput);
 			} else {
 				auto it = find(required_nodes.begin(), required_nodes.end(), t); //check if this node is in our wish list
 				if (it != required_nodes.end()) {
-					if (!exists(found_nodes, hinput))
+					if (not exists(hinput))
 						found_nodes.push_back(hinput);
 				}
 			}
@@ -106,10 +122,17 @@ HandleSeq PLNCommons::get_nodes(const Handle& hinput,
 	return found_nodes;
 }
 
-bool PLNCommons::exists(HandleSeq hseq, Handle h) {
-	for (Handle hi : hseq) {
-		if (hi.value() == h.value())
-			return true;
+bool PLNCommons::exists_in(Handle& hlink, Handle& h) {
+	if (not LinkCast(hlink))
+		throw InvalidParamException(TRACE_INFO, "Need a LINK type to look in");
+	auto outg = as_->getOutgoing(hlink);
+	if (find(outg.begin(), outg.end(), h) != outg.end())
+		return true;
+	else {
+		for (Handle hi : outg) {
+			if (LinkCast(hi) and exists_in(hi, h))
+				return true;
+		}
 	}
 	return false;
 }
@@ -156,39 +179,66 @@ string PLNCommons::get_unique_name(Handle& h) {
 	return name;
 }
 
-Handle PLNCommons::create_with_unique_var(Handle& handle) {
-	HandleSeq hvars = get_nodes(handle, vector<Type> { VARIABLE_NODE });
-	map<Handle, Handle> var_unique_var_map;
+Handle PLNCommons::replace_nodes_with_varnode(Handle& handle,
+		Type t /*=VARIABLE_NODE*/) {
+	HandleSeq hvars;
+	if (t == NODE)
+		hvars = get_nodes(handle, vector<Type> { }); //get every node
+	else
+		hvars = get_nodes(handle, vector<Type> { t });
+	map<Handle, Handle> node_unique_var_map;
 	for (Handle h : hvars)
-		var_unique_var_map[h] = as_->addNode(VARIABLE_NODE, get_unique_name(h)); //TODO get_uuid is not implemented
-	return replace_vars(handle, var_unique_var_map);
+		node_unique_var_map[h] = as_->addNode(VARIABLE_NODE,
+				get_unique_name(h)); //TODO get_uuid is not implemented
+	return change_node_types(handle, node_unique_var_map);
 }
 
-Handle PLNCommons::replace_vars(Handle& h,
-		map<Handle, Handle>& var_uniq_var_map) {
+Handle PLNCommons::change_node_types(Handle& h,
+		map<Handle, Handle>& replacement_map) {
 	Handle hcpy;
 	if (LinkCast(h)) {
-		HandleSeq hs = as_->getOutgoing(h);
 		HandleSeq hs_cpy;
+		HandleSeq hs = as_->getOutgoing(h);
 		for (Handle hi : hs) {
 			if (NodeCast(hi)) {
-				if (as_->getType(hi) == VARIABLE_NODE)
-					hs_cpy.push_back(var_uniq_var_map[hi]);
+				if (replacement_map.find(hi) != replacement_map.end())
+					hs_cpy.push_back(replacement_map[hi]);
 				else
 					hs_cpy.push_back(hi);
 			} else if (LinkCast(hi)) {
-				hs_cpy.push_back(
-						replace_vars(hi, var_uniq_var_map));
+				hs_cpy.push_back(change_node_types(hi, replacement_map));
 			}
-
 		}
 		hcpy = as_->addLink(as_->getType(h), hs_cpy, as_->getTV(h));
-
 	} else if (NodeCast(h)) {
-		if (as_->getType(h) == VARIABLE_NODE)
-			hcpy = var_uniq_var_map[h];
+		if (replacement_map.find(h) != replacement_map.end())
+			hcpy = replacement_map[h];
 		else
 			hcpy = h;
 	}
+
 	return hcpy;
 }
+
+void PLNCommons::get_top_level_parent(Handle h, HandleSeq& parents) {
+	auto incoming = as_->getIncoming(h);
+	if (incoming.empty())
+		return;
+	else {
+		for (Handle hi : incoming) {
+			auto i = as_->getIncoming(hi);
+			if (i.empty())
+				parents.push_back(hi);
+			else
+				get_top_level_parent(hi, parents);
+		}
+	}
+}
+
+float PLNCommons::target_tv_fitness(Handle h) {
+	TruthValuePtr ptv = as_->getTV(h);
+	confidence_t c = ptv->getConfidence();
+	strength_t s = ptv->getMean();
+	return (pow((1 - s), FITNESS_PARAM) * (pow(c, (2 - FITNESS_PARAM))));
+}
+

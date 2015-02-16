@@ -1,0 +1,92 @@
+{
+	"rules": 
+	[
+		{
+			"name": "pln-rule-deduction",
+			"file_path": "reasoning/RuleEngine/rules/pln/deduction.scm",
+			"priority": 1,
+			"mutex": 
+			[
+				
+			],
+
+			"category": "PLN"
+		},
+
+		{
+			"name": "pln-rule-modus-ponens",
+			"file_path": "reasoning/RuleEngine/rules/pln/modus-ponens.scm",
+			"priority": 1,
+			"mutex": 
+			[
+				
+			],
+
+			"category": "PLN"
+		},
+
+		{
+			"name": "pln-rule-contextualize-inheritance",
+			"file_path": "reasoning/RuleEngine/rules/pln/contextualize.scm",
+			"priority": 1,
+			"mutex": 
+			[
+				
+			],
+
+			"category": "PLN"
+		},
+
+		{
+			"name": "pln-rule-contextualize-evaluation",
+			"file_path": "reasoning/RuleEngine/rules/pln/contextualize.scm",
+			"priority": 1,
+			"mutex": 
+			[
+				
+			],
+
+			"category": "PLN"
+		},
+
+		{
+			"name": "pln-rule-contextualize-subset",
+			"file_path": "reasoning/RuleEngine/rules/pln/contextualize.scm",
+			"priority": 1,
+			"mutex": 
+			[
+				
+			],
+
+			"category": "PLN"
+		},
+
+		{
+			"name": "pln-rule-create-and-as-1st-arg-of-inheritance",
+			"file_path": "reasoning/RuleEngine/rules/pln/contextualize.scm",
+			"priority": 1,
+			"mutex": 
+			[
+				
+			],
+
+			"category": "PLN"
+		},
+
+		{
+			"name": "pln-rule-create-and-as-2nd-arg-of-inheritance",
+			"file_path": "reasoning/RuleEngine/rules/pln/contextualize.scm",
+			"priority": 1,
+			"mutex": 
+			[
+				
+			],
+
+			"category": "PLN"
+		}
+	],
+
+	"attention_allocation": false,
+	"max_iter": 20,
+	"log_level": "debug"
+}
