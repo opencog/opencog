@@ -8,7 +8,9 @@ For now, most of the results are in r2l-atomspace.scm
 ; =========================
 ; Exact knowledge
 ; =========================
-(r2l "The brown cat climbs the table and grabs the orange.")
+;(r2l "The brown cat climbs the table and grabs the orange.")  ; disable conjunction for now
+
+(r2l "The brown cat climbs the table.")
 
 ;(r2l "John steals the orange and eats it.")          ; need support for the next sentence (the same sentendce w/ and w/o anaphora)
 ;(r2l "John steals and eats the orange.")             ; need R2L/RelEx to add proper support for this type of sentence
@@ -16,20 +18,11 @@ For now, most of the results are in r2l-atomspace.scm
 
 (r2l "John steals the orange.")
 (r2l "John steals it.")
-(r2l "He steals the orange.")
-(r2l "He steals it.")
-(r2l "John eats the orange.")
-(r2l "John eats it.")
-(r2l "He eats the orange.")
-(r2l "He eats it.")
 
 ;(r2l "Sam collects the tiny bones and plants them.")
 ;(r2l "Sam collects and plants the tiny bones.")      ; same thing, need R2L/RelEx support
 
 (r2l "Sam collects the tiny bones.")
-(r2l "Sam collects them.")
-(r2l "He collects the tiny bones.")
-(r2l "He collects them.")
 
 ;(r2l "The cat hurts the dog.")                       ; reflexive test
 
