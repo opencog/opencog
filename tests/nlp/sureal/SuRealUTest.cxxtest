@@ -122,7 +122,7 @@ void SuRealUTest::test_basic(void)
     TSM_ASSERT("Failed to run sureal!", !eval_err);
 
     std::string result = _evaluator->eval(R"( (equal? s-result (list (list "she" "feeds" "."))) )");
-    TSM_ASSERT("Failed on basic short sentence sureal!", result != "#t");
+    TSM_ASSERT("Failed on basic short sentence sureal!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -151,7 +151,7 @@ void SuRealUTest::test_multiple(void)
     // test multiple matches
     _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "walks") (ListLink (ConceptNode "she")))))) )");
     std::string result = _evaluator->eval(R"( (equal? s-result (list (list "she" "walks" ".") (list "she" "walks" "quickly" "."))) )");
-    TSM_ASSERT("Failed on sureal with multiple matches!", result != "#t");
+    TSM_ASSERT("Failed on sureal with multiple matches!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -187,7 +187,7 @@ void SuRealUTest::test_complex(void)
                         (InheritanceLink (ConceptNode "cat") (ConceptNode "green")))))
                      )");
     std::string result = _evaluator->eval(R"( (equal? s-result (list (list "the" "green" "cat" "loves" "the" "dog" "."))) )");
-    TSM_ASSERT("Failed to sureal complex sentence!", result != "#t");
+    TSM_ASSERT("Failed to sureal complex sentence!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -226,7 +226,7 @@ void SuRealUTest::test_disconnected(void)
                                                   (list (list "he" "ran" "slowly" "and" "she" "walked" "quickly" ".")
                                                    (list "she" "walked" "slowly" "and" "he" "ran" "quickly" ".")))
                                           )");
-    TSM_ASSERT("Failed to sureal on disconnected clauses!", result != "#t");
+    TSM_ASSERT("Failed to sureal on disconnected clauses!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
