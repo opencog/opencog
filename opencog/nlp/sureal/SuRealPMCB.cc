@@ -21,8 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/nlp/types/atom_types.h>
 #include <opencog/guile/SchemeSmob.h>
+#include <opencog/nlp/types/atom_types.h>
+#include <opencog/nlp/lg-dict/LGDictUtils.h>
 
 #include "SuRealPMCB.h"
 
@@ -130,14 +131,15 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
         // loop thru all connectors on both list
         while (not sourceConns.empty() && not targetConns.empty())
         {
-            // if we are repeating a multi-connector from source list
+            bool bResult;
+
             if (hMultiConn != Handle::UNDEFINED)
-                scmCode = "(lg-conn-linkable? " + SchemeSmob::to_string(hMultiConn) + " " + SchemeSmob::to_string(targetConns.front()) + ")";
+                bResult = lg_conn_linkable(hMultiConn, targetConns.front());
             else
-                scmCode = "(lg-conn-linkable? " + SchemeSmob::to_string(sourceConns.front()) + " " + SchemeSmob::to_string(targetConns.front()) + ")";
+                bResult = lg_conn_linkable(sourceConns.front(), targetConns.front());
 
             // if the two connectors cannot be linked
-            if (m_eval->eval(scmCode) == "#f\n")
+            if (not bResult)
             {
                 // don't pop anything if we were retrying a multi-connector
                 if (hMultiConn != Handle::UNDEFINED)

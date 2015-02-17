@@ -18,6 +18,13 @@ Handle lg_conn_get_dir(const Handle& hConn)
     return LinkCast(hConn)->getOutgoingSet()[1];
 }
 
+/**
+ * Check if two connectors' type matches.
+ *
+ * @param hConn1   the first LGConnector
+ * @param hConn2   the second LGConnector
+ * @return         true if the type matches
+ */
 bool lg_conn_type_match(const Handle& hConn1, const Handle& hConn2)
 {
     if (hConn1->getType() != LG_CONNECTOR || hConn2->getType() != LG_CONNECTOR)
@@ -60,6 +67,16 @@ bool lg_conn_type_match(const Handle& hConn1, const Handle& hConn2)
     return true;
 }
 
+/**
+ * Check if two connectors can be linked.
+ *
+ * The two connectors must have different directions, but does not matter
+ * which one is + and which one is -.
+ *
+ * @param hConn1   the first LGConnector
+ * @param hConn2   the second LGConnector
+ * @return         true if linkable
+ */
 bool lg_conn_linkable(const Handle& hConn1, const Handle& hConn2)
 {
     return lg_conn_type_match(hConn1, hConn2) && lg_conn_get_dir(hConn1) != lg_conn_get_dir(hConn2);
