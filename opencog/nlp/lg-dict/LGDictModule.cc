@@ -28,6 +28,7 @@
 
 #include "LGDictModule.h"
 #include "LGDictReader.h"
+#include "LGDictUtils.h"
 
 using namespace opencog;
 
@@ -60,6 +61,8 @@ void LGDictModule::init(void)
 
 #ifdef HAVE_GUILE
     define_scheme_primitive("lg-get-dict-entry", &LGDictModule::do_lg_get_dict_entry, this);
+    define_scheme_primitive("lg-conn-type-match?", &LGDictModule::do_lg_conn_type_match, this);
+    define_scheme_primitive("lg-conn-linkable?", &LGDictModule::do_lg_conn_linkable, this);
 #endif
 }
 
@@ -96,5 +99,24 @@ Handle LGDictModule::do_lg_get_dict_entry(Handle h)
 
 #else
     return Handle::UNDEFINED;
+#endif
+}
+
+
+bool LGDictModule::do_lg_conn_type_match(Handle h1, Handle h2)
+{
+#ifdef HAVE_GUILE
+    return lg_conn_type_match(h1, h2);
+#else
+    return false;
+#endif
+}
+
+bool LGDictModule::do_lg_conn_linkable(Handle h1, Handle h2)
+{
+#ifdef HAVE_GUILE
+    return lg_conn_linkable(h1, h2);
+#else
+    return false;
 #endif
 }
