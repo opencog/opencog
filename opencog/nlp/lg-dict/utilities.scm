@@ -55,7 +55,7 @@
 				(match-subscript lconn-list (cdr rconn-list))
 			)
 			(else
-				(match-subscript (cdr lconn-list) (cdr rconn-list))
+				(match-subscript lconn-list rconn-list)
 			)
 		)
 	)

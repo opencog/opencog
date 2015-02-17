@@ -565,19 +565,16 @@
 	(receive (lg-insts-left lg-insts-right)
 	         (partition (lambda (l) (equal? (gddr l) word-inst))
 	                    (cog-get-pred word-inst 'LgLinkInstanceNode))
-
 		; sort links on the left in reverse word sequence order, so
 		; closer words will be ordered first
-		(sort! lg-insts-left great-helper)
-		
 		; sort links on the right in word sequence order, so closer
 		; words will be ordered first
-		(sort! lg-insts-right less-helper)
-		
-		(let ((get-inst-link (lambda (l) (car (cog-filter 'LgLinkInstanceLink (cog-incoming-set (gar l)))))))
+		(let ((lg-insts-left-sort (sort lg-insts-left great-helper))
+		      (lg-insts-right-sort (sort lg-insts-right less-helper))
+		      (get-inst-link (lambda (l) (car (cog-filter 'LgLinkInstanceLink (cog-incoming-set (gar l)))))))
 			(append
-				(map (lambda (l) (cadr (cog-outgoing-set (get-inst-link l)))) lg-insts-left)
-				(map (lambda (l) (caddr (cog-outgoing-set (get-inst-link l)))) lg-insts-right)					
+				(map (lambda (l) (cadr (cog-outgoing-set (get-inst-link l)))) lg-insts-left-sort)
+				(map (lambda (l) (caddr (cog-outgoing-set (get-inst-link l)))) lg-insts-right-sort)				
 			)
 		)
 	)
