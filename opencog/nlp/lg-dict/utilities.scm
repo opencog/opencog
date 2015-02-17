@@ -1,7 +1,8 @@
+; XXX cannot become a module yet unless scm/utilities.scm becomes a module
+
 ;(define-module (opencog nlp lg-dict))
 
 ;(use-modules (opencog))
-;(use-modules (opencog extension))
 
 ; ---------------------------------------------------------------------
 ; lg-similar? - Handy function to quickly check if two words' LG entries intersect
@@ -22,14 +23,14 @@
 ; ---------------------------------------------------------------------
 ; lg-conn-get-type - Get the LgConnectorNode out of LgConnector link
 ;
-(define (lg-conn-get-type conn)
-	(gar conn)
+(define-public (lg-conn-get-type conn)
+	(car (cog-outgoing-set conn))
 )
 
 ; ---------------------------------------------------------------------
 ; lg-conn-get-dir - Get the LgConnDirNode out of LgConnector link
 ;
-(define (lg-conn-get-dir conn)
-	(gdr conn)
+(define-public (lg-conn-get-dir conn)
+	(cadr (cog-outgoing-set conn))
 )
 

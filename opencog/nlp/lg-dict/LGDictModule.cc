@@ -60,9 +60,9 @@ void LGDictModule::init(void)
     m_pDictionary = dictionary_create_default_lang();
 
 #ifdef HAVE_GUILE
-    define_scheme_primitive("lg-get-dict-entry", &LGDictModule::do_lg_get_dict_entry, this);
-    define_scheme_primitive("lg-conn-type-match?", &LGDictModule::do_lg_conn_type_match, this);
-    define_scheme_primitive("lg-conn-linkable?", &LGDictModule::do_lg_conn_linkable, this);
+    define_scheme_primitive("lg-get-dict-entry", &LGDictModule::do_lg_get_dict_entry, this, "nlp lg-dict");
+    define_scheme_primitive("lg-conn-type-match?", &LGDictModule::do_lg_conn_type_match, this, "nlp lg-dict");
+    define_scheme_primitive("lg-conn-linkable?", &LGDictModule::do_lg_conn_linkable, this, "nlp lg-dict");
 #endif
 }
 
@@ -102,7 +102,13 @@ Handle LGDictModule::do_lg_get_dict_entry(Handle h)
 #endif
 }
 
-
+/**
+ * Implementation of the "lg-conn-type-match?" scheme primitive.
+ *
+ * @param h1    the first LGConnector
+ * @param h2    the second LGConnector
+ * @return      true if the type matches
+ */
 bool LGDictModule::do_lg_conn_type_match(Handle h1, Handle h2)
 {
 #ifdef HAVE_GUILE
@@ -112,6 +118,13 @@ bool LGDictModule::do_lg_conn_type_match(Handle h1, Handle h2)
 #endif
 }
 
+/**
+ * Implementation of the "lg-conn-linkable?" scheme primitive.
+ *
+ * @param h1    the first LGConnector
+ * @param h2    the second LGConnector
+ * @return      true if linkable
+ */
 bool LGDictModule::do_lg_conn_linkable(Handle h1, Handle h2)
 {
 #ifdef HAVE_GUILE
