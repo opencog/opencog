@@ -671,7 +671,8 @@
   cog-get-pred -- Find all EvaluationLinks of given form.
 
   Return a list of predicates, of the given type, that an instance
-  participates in.  That is, given a \"predicate\" of the form:
+  participates in.  'inst' must be an atom, and 'pred-type' must be
+  an atom type.  That is, given a \"predicate\" of the form:
 
      EvaluationLink
         SomeAtom
