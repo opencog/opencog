@@ -1,5 +1,6 @@
 INSTALL (FILES
 	apply.scm
+	core-docs.scm
 	file-utils.scm
 	example-dbi.scm
 	persistence.scm

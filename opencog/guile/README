@@ -6,23 +6,23 @@
 
 This directory contains an implementation of the Scheme shell for the
 OpenCog server.  Scheme is a dialect of Lisp; the shell allows scheme
-code to manipulate the contents of an OpenCog AtomSpace.  
+code to manipulate the contents of an OpenCog AtomSpace.
 
 This binding is intended to be used for day-to-day maintenance
 activities, experimentation, and MindAgent development.  The shell is
-implemented in [http://www.gnu.org/software/guile/guile.html guile]; 
+implemented in [http://www.gnu.org/software/guile/guile.html guile];
 the [http://www.gnu.org/software/guile/manual/ guile reference manual
 is here]. The best book on the Scheme programming language (never-mind
 the language, it's one of the best books written on programming, no
-matter what language you like to use) is 
-"[http://mitpress.mit.edu/sicp/full-text/book/book.html Structure and 
+matter what language you like to use) is
+"[http://mitpress.mit.edu/sicp/full-text/book/book.html Structure and
 Interpretation of Computer Programs"] by Abelson and Sussman. It is now
 available online for free from MIT Press.
 
 Documented below are the core interface functions implemented by the
 guile binding -- these provide for the creation and deletion of OpenCog
-Nodes, Links, TruthValues, as well as ways to get 
-properties (such as the names of Nodes, or the outgoing sets of Links).  
+Nodes, Links, TruthValues, as well as ways to get
+properties (such as the names of Nodes, or the outgoing sets of Links).
 Although the core interface is documented below, it is important to notice
 that scheme makes "syntactic sugar" very easy to use.  Some default sugar
 is provided in order to make the creation of typed atoms extremely easy.
@@ -37,7 +37,7 @@ a simple truth value. Any valid node or link name can be used in this way.
 A number of utilities and handy functions can be found in the directory
 ''opencog/scm''. These should be automatically loaded during cog-server
 startup, as they are enumerated in lib/opencog.conf.  Additional
-NLP-related utilities and MindAgents are located in ''opencog/nlp/scm''; 
+NLP-related utilities and MindAgents are located in ''opencog/nlp/scm'';
 not all of these are automatically loaded, but can be manually loaded by
 running ''opencog/nlp/scm/load-nlp.sh''.
 
@@ -45,13 +45,13 @@ Much of this README is reproduced at http://opencog.org/wiki/Scheme
 
 == Running ==
 --------------
-There are '''two''' scheme shells available for opencog. One is the 
+There are '''two''' scheme shells available for opencog. One is the
 low-level, built-in shell, the other is a high-level, bells-n-whistles
-shell that is a bit easier to use, since it provides the standard 
+shell that is a bit easier to use, since it provides the standard
 guile REPL.
 
 The shells are available only if the [[cogserver]] was compiled with
-guile support, and the guile module was loaded. The guile module should 
+guile support, and the guile module was loaded. The guile module should
 be loaded automatically; it is specified in <tt>lib/opencog.conf</tt>.
 
 === The high-level shell ===
@@ -71,13 +71,13 @@ This second form will provide an editable command-line history.
 To leave the shell, type ,q on a line all by itself.
 
 Scheme scripts can be loaded by using netcat or socat; it is recommended
-that the low-level shell be used for this. The high-level shell is 
+that the low-level shell be used for this. The high-level shell is
 implemented in <tt>opencog/scm/repl-shell.scm</tt>.
 
 === The low-level shell ===
 ---------------------------
 The low-level shell may be invoked by typing "scm" at the opencog prompt.
-To get to the opencog shell, say 
+To get to the opencog shell, say
 
    telnet localhost 17001
 
@@ -96,23 +96,19 @@ Alternately, hit ^D.
 
 Documentation for some (a small number, but growing) routines and
 utilities can be pulled up at the scheme shell prompt, by saying
-<tt>(procedure-documentation name-of-proc)</tt>.  Otherwise, you'll
+<tt>(display (procedure-documentation name-of-proc))</tt>.  Otherwise, you'll
 have to consult the individual scm files for more info.
 
 
 == Modules ==
 -------------
-Currently OpenCog's scheme functions are broken into 2 different scheme
-modules: (opencog), and (opencog extension).  Each one can be listed
-with the following code:
+Currently OpenCog's scheme functions are broken into four different
+scheme modules: (opencog), (opencog query), (opencog persist) and
+(opencog extension).  The contents of the query module (fo example)
+can be listed with the following code:
 
 (module-for-each (lambda (symbol value) (display symbol) (newline))
-(resolve-interface '(opencog)))
-
-Replace '(opencog) with the corresponding module name.
-
-Currently only the (opencog) module can be used in standalone guile (see
-examples/guile/basic.scm).
+(resolve-interface '(opencog query)))
 
 
 == Core Functions ==
@@ -132,12 +128,12 @@ interface.
       Example:
           ; Create a new node, and prints its value:
           guile> (cog-new-node 'ConceptNode "some node name")
-          #<node[3:some node name] sti:(0,0) tv:(0.000000,0.000000)>
+          (ConceptNode "some node name")
 
           ; Creates a new node, with a truth value:
           guile> (cog-new-node 'ConceptNode "another node"
                         (cog-new-stv 0.8 0.9))
-          #<node[3:another node] sti:(0,0) tv:(0.800000,0.900000)>
+          (ConceptNode "another node" (stv 0.8 0.9))
 
 
 === cog-node node-type node-name ===
@@ -145,30 +141,30 @@ interface.
       returns null.
 
       Optionally, a truth value and/or attention value can follow the
-      node name. If the node exists, then the truth value and/or 
+      node name. If the node exists, then the truth value and/or
       attention value is modified.
 
       Throws errors if node-type is not a valid atom type for a node,
       and if node-name is not a string.
 
       Example:
-          ; Check to see if a node exists: 
+          ; Check to see if a node exists:
           guile> (cog-node 'ConceptNode "asdf")
           ()
 
           ; Verify that the return value is actually a true null:
           guile> (null? (cog-node 'ConceptNode "asdf"))
-          #t 
+          #t
 
           ; Now, create the node, and see if it exists:
           guile> (cog-new-node 'ConceptNode "asdf")
-          #<node[3:asdf] sti:(0,0) tv:(0.000000,0.000000)>
+          (ConceptNode "asdf")
           guile> (null? (cog-node 'ConceptNode "asdf"))
           #f
 
           ; Change the truth value of an existing node:
           guile> (cog-node 'ConceptNode "asdf" (cog-new-stv 0.8 0.9))
-          #<node[3:some node name] sti:(0,0) tv:(0.800000,0.900000)>
+          (ConceptNode "asdf" (stv 0.8 0.9))
 
 
 === cog-new-link link-type atom ... atom ===
@@ -186,18 +182,25 @@ interface.
           guile> (define x (cog-new-node 'ConceptNode "abc"))
           guile> (define y (cog-new-node 'ConceptNode "def"))
           guile> (cog-new-link 'Link x y)
-          #<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>
+          (Link
+             (ConceptNode "abc")
+             (ConceptNode "def")
+          )
 
           ; Create a new link with a truth value:
           guile> (cog-new-link 'Link x y (cog-new-stv 0.7 0.8))
-          #<link[2 sti:(0,0) tv:(0.700000,0.800000) <[3 abc],[3 def]>]>
+          (Link (stv 0.7 0.8)
+             (ConceptNode "abc")
+             (ConceptNode "def")
+          )
+
 
 === cog-link link-type atom ... atom ===
       Returns the link of the given type and list of atoms, if it
       exists, else returns null.
 
-      Optionally, a truth value or attention value can be included 
-      in the list of atoms. If the link exists, then the truth value 
+      Optionally, a truth value or attention value can be included
+      in the list of atoms. If the link exists, then the truth value
       and/or attention value is modified.
 
       Throws errors if the link type is not a valid opencog link type,
@@ -215,15 +218,24 @@ interface.
 
           ; Now, create such a link
           guile> (cog-new-link 'Link x y)
-          #<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>
+          (Link
+             (ConceptNode "abc")
+             (ConceptNode "def")
+          )
 
           ; Check again for existence:
           guile> (cog-link 'Link x y)
-          #<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>
+          (Link
+             (ConceptNode "abc")
+             (ConceptNode "def")
+          )
 
           ; Change the truth value of an existing node:
           guile> (cog-link 'Link x y (cog-new-stv 0.7 0.8))
-          #<link[2 sti:(0,0) tv:(0.700000,0.800000) <[3 abc],[3 def]>]>
+          (Link (stv 0.7 0.8)
+             (ConceptNode "abc")
+             (ConceptNode "def")
+          )
 
 
 === cog-delete atom ===
@@ -245,10 +257,13 @@ interface.
 
          ; Verify that there's an atom called x:
          guile> x
-         #<node[3:abc] sti:(0,0) tv:(0.000000,0.000000)>
+         (Link
+            (ConceptNode "abc")
+            (ConceptNode "def")
+         )
 
          ; Try to delete x. This should fail, since there's a link
-         ; containing x. 
+         ; containing x.
          guile> (cog-delete x)
          #f
 
@@ -267,7 +282,7 @@ interface.
 
          ; Verify that the node y still exists:
          guile> y
-         #<node[3:def] sti:(0,0) tv:(0.000000,0.000000)>
+         (ConceptNode "def")
 
 
 === cog-atom? exp ===
@@ -316,7 +331,7 @@ interface.
 
 
 === cog-name atom ===
-      Return the name of the node. If the atom is not a node, 
+      Return the name of the node. If the atom is not a node,
       returns NIL.
 
       Example:
@@ -327,7 +342,7 @@ interface.
 
 
 === cog-type atom ===
-      Return the type of the atom. 
+      Return the type of the atom.
 
       Example:
          ; Define a node
@@ -387,7 +402,7 @@ interface.
       Return the handle (which is an integer) of the atom
 
       It may be useful to remember that scheme indicates hexadecimal
-      numbers by preceeding them with #x, and so, for example, 
+      numbers by preceeding them with #x, and so, for example,
       (cog-atom #x2c949b) gets the handle associated with hex 2c949b.
 
       Example:
@@ -465,12 +480,12 @@ interface.
       Return #t if exp is a IndefiniteTruthValue, else return #f
 
 === cog-tv atom ===
-      Return the truth-value of the atom. 
+      Return the truth-value of the atom.
 
       Example:
          ; Define a node
-         guile> (define x 
-                   (cog-new-node 'ConceptNode "abc" 
+         guile> (define x
+                   (cog-new-node 'ConceptNode "abc"
                       (cog-new-stv 0.2 0.5)))
          guile> (cog-tv x)
          (stv 0.2 0.5)
@@ -478,7 +493,7 @@ interface.
          #t
 
 === cog-set-tv! atom tv ===
-      Set the truth-value of the atom. 
+      Set the truth-value of the atom.
 
       Example:
          ; Define a node
@@ -521,12 +536,12 @@ interface.
          #f
 
 === cog-av atom ===
-      Return the attention value of the atom. 
+      Return the attention value of the atom.
 
       Example:
          ; Define a node
-         guile> (define x 
-                   (cog-new-node 'ConceptNode "abc" 
+         guile> (define x
+                   (cog-new-node 'ConceptNode "abc"
                       (cog-new-av 11 21 0)))
          guile> (cog-av x)
          (av 11 21 0)
@@ -534,7 +549,7 @@ interface.
          #t
 
 === cog-set-av! atom av ===
-      Set the attention value of the atom. 
+      Set the attention value of the atom.
 
       Example:
          ; Define a node
@@ -548,11 +563,11 @@ interface.
 
 === cog-inc-vlti! atom av ===
       Increase the vlti of the atom by 1.
-      
+
       Example:
          ; Define a node
-         guile> (define x 
-                   (cog-new-node 'ConceptNode "abc" 
+         guile> (define x
+                   (cog-new-node 'ConceptNode "abc"
                       (cog-new-av 11 21 0)))
          guile> (cog-inc-vlti! x)
          (ConceptNode "abc" (av 11 21 1))
@@ -565,17 +580,17 @@ interface.
 
 === cog-dec-vlti! atom av ===
       Decrease the vlti of the atom by 1.
-      
+
       Example:
          ; Define a node
-         guile> (define x 
-                   (cog-new-node 'ConceptNode "abc" 
+         guile> (define x
+                   (cog-new-node 'ConceptNode "abc"
                       (cog-new-av 11 21 1)))
          guile> (cog-dec-vlti! x)
          (ConceptNode "abc" (av 11 21 0))
          guile> (cog-av x)
          (av 11 21 0)
-         
+
 === cog-av->alist ===
       Convert an attention value to an association list (alist).
 
@@ -630,7 +645,7 @@ interface.
           8
 
 === cog-get-subtypes type ===
-      Return a list of the subtypes of the given type.  Only the 
+      Return a list of the subtypes of the given type.  Only the
       immediate subtypes are returned; to obtain all subtypes, this
       function should be called recursively.
 
@@ -651,8 +666,8 @@ interface.
           #t
 
 === cog-map-type proc type ===
-      Call proceedure proc for each atom in the atomspace that is of 
-      type type. If proc returns any value other than #f, then the 
+      Call proceedure proc for each atom in the atomspace that is of
+      type type. If proc returns any value other than #f, then the
       iteration is terminated.  Note that this iterates only over the
       given type, and not its sub-types. Thus (cog-map-type proc 'Atom)
       will never call proc, because no atoms in the atomspace can have
@@ -682,11 +697,11 @@ interface.
 
       Available when the PersistModule is loaded, and connected to a
       database:
-      fetch-atom handle     -- fetch indicated atom from SQL/persistent 
+      fetch-atom handle     -- fetch indicated atom from SQL/persistent
                                storage.
-      fetch-incoming-set    -- fetch the incoming set of the atom from 
+      fetch-incoming-set    -- fetch the incoming set of the atom from
                                SQL storage. The fetch is recursive.
-      store-atom handle     -- store indicated atom to SQL/persistent 
+      store-atom handle     -- store indicated atom to SQL/persistent
                                storage.
       load-atoms-of-type type -- fetch atoms of the given type from
                                SQL/persistent storage.
@@ -702,7 +717,7 @@ interface.
 The implementation uses a simple exception mechanism to allow scheme
 code to return to the opencog server from anywhere. To use this, simply
 throw 'cog-yield from anywhere.  The catch handler will promptly return
-to the cogserver.  This can be used with continuations to implement 
+to the cogserver.  This can be used with continuations to implement
 some simple multi-threading.
 
       Example:
@@ -727,13 +742,13 @@ The [[cogserver]] is then started with the -c flag:
    cogserver -c ../lib/opencog.conf
 
 To manually load scheme code, simply make sure the first 3 characters
-of the file are "scm" followed by a carraige return. Then, at the shell 
-prompt, simply execute the command: 
- 
-   cat filename | telnet localhost 17001 
- 
-This assumes the scheme code is in "filename", that the cogserver is 
-running on "localhost", and is listening on port 17001 (which is the 
+of the file are "scm" followed by a carraige return. Then, at the shell
+prompt, simply execute the command:
+
+   cat filename | telnet localhost 17001
+
+This assumes the scheme code is in "filename", that the cogserver is
+running on "localhost", and is listening on port 17001 (which is the
 default port for the cogserver).
 
 === Utilities ===
@@ -748,10 +763,10 @@ atom types, and so on.
 Below is a simple example of scheme code for deleting all of the atoms
 in a list.
 
-  (define (killall lst) 
-     (if (null? lst) 
-         '() 
-         (cons (cog-delete (car lst)) 
+  (define (killall lst)
+     (if (null? lst)
+         '()
+         (cons (cog-delete (car lst))
                (killall (cdr lst)))))
 
 
@@ -783,7 +798,7 @@ Then you can call it from C++ as follows:
   Handle arg1 = ...;
   Handle arg2 = ...;
   hlnk = getAtomSpace.addLink(LIST_LINK, arg1, arg2, ...);
-  
+
   // Call the "do-stuff" function
   SchemeEval evaluator;
   Handle answer = evaluator.apply("do-stuff", hlnk);
@@ -795,8 +810,8 @@ The above form is used by the [[ExecutionOutputLink]] to embed scheme
 callouts into hypergraphs.
 
 === Calling C++ from scheme ===
-The C++ programmer may define new scheme primitive functions by using 
-the "define_scheme_primitive" function in "opencog/guile/SchemePrimitive.h".  
+The C++ programmer may define new scheme primitive functions by using
+the "define_scheme_primitive" function in "opencog/guile/SchemePrimitive.h".
 This function expects a string that will be the scheme name, a C++ method,
 and a pointer to a C++ object instance.  Unusual C++ signatures may require
 extending SchemePrimitive.h, but this should not be hard.
@@ -812,7 +827,7 @@ given ExecutionOutputLink is evaluated.  See that page for details.
 Guile is multi-threading-capable, and can be used with multiple threads
 just fine, with just a few caveats: it must be initialized in *each*
 thread in which it is to be used. The method SchemeEval::thread_init()
-initializes guile only in the *current* thread: therefore, one must 
+initializes guile only in the *current* thread: therefore, one must
 call this method in every thread in which scheme is meant to be used.
 Note that OpenCog has a way of creating threads unexpectedly, in
 particular, in the server socket connection handling. Caveat Emptor.
@@ -826,13 +841,13 @@ ToDo
 -- support readline/editline (uparrows, etc.) on input.
    Note, however, 'rlwrap telnet localhost 17001' does the trick...
 
--- change cog-delete to also accept a list of atoms 
+-- change cog-delete to also accept a list of atoms
 -- change cog-delete to return null, not #t (?why?)
 
 -- It would be nice to be able to use continuations; however, the
    scm_with_guile() call has a continuation barrier in it.  I beleive
-   that this continuation barrier is far too pessimistic -- it can 
+   that this continuation barrier is far too pessimistic -- it can
    make some fairly simple checks on the C stack in order to avoid
-   data corruption. However, guile needs to be fixed to change this 
+   data corruption. However, guile needs to be fixed to change this
    behaviour.
 

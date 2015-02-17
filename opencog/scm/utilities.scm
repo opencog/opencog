@@ -1,6 +1,8 @@
 ;
 ; utilities.scm
 ;
+;;; Commentary:
+;
 ; Miscellaneous handy utilities for working with atoms.
 ; The most useful utilities in here are probably 'cog-chase-link'
 ; for finding atoms connected by a given link type, and 'cog-get-pred'
@@ -39,7 +41,7 @@
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
 ;
-;
+;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
 ;
 
