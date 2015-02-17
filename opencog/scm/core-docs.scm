@@ -592,9 +592,9 @@
     100
 ")
 
-(set-procedure-property! cog-set-af-boundary! int 'documentation
+(set-procedure-property! cog-set-af-boundary! 'documentation
 "
- cog-set-af-boundary!
+ cog-set-af-boundary! int
     Set the AttentionalFocus Boundary of the AtomSpace (which is a
     short integer STI value). Returns the new AttentionalFocus boundary
     (which is a short integer STI value).
