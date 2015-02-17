@@ -92,8 +92,8 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
         return false;
 
     // get the source connectors for the solution
-    std::string scmCode = "(word-inst-get-source-conn " + SchemeSmob::to_string(hSolnWordInst) + ")";
-    HandleSeq qTargetConns = m_eval->eval_q(scmCode);
+    std::string scmCode = "(ListLink (word-inst-get-source-conn " + SchemeSmob::to_string(hSolnWordInst) + "))";
+    HandleSeq qTargetConns = _as->getOutgoing(m_eval->eval_h(scmCode));
 
     HandleSeq qOr = _as->getNeighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
     HandleSeq qDisjuncts;
@@ -162,7 +162,7 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
         if (not sourceConns.empty() or not targetConns.empty())
             return false;
 
-        logger().info(hDisjunct->toShortString() + " passed!");
+        logger().debug(hDisjunct->toShortString() + " passed!");
 
         return true;
     };
