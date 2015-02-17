@@ -92,6 +92,7 @@ PrimitiveEnviron::really_do_register(const char * module_name,
 	std::string modn = "opencog ";
 	modn += module_name;
 	SCM module = scm_c_define_module(modn.c_str(), NULL, NULL);
+	scm_c_use_module(modn.c_str());
 
 	// The smob will hold a pointer to "this" -- the PrimitiveEnviron
 	SCM smob;
