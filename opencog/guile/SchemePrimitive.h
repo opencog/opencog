@@ -86,6 +86,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			// Below is the list of currently supported signatures.
 			// Extend as needed.
 			bool (T::*b_hi)(Handle, int);
+			bool (T::*b_hh)(Handle, Handle);
 			double (T::*d_hht)(Handle, Handle, Type);
 			double (T::*d_hhtb)(Handle, Handle, Type, bool);
 			Handle (T::*h_h)(Handle);
@@ -121,6 +122,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		enum
 		{
 			B_HI,  // return boolean, take handle and int
+			B_HH,  // return boolean, take handle and handle
 			D_HHT, // return double, take handle, handle, and type
 			D_HHTB,// return double, take handle, handle, and type
 			H_H,   // return handle, take handle
@@ -155,6 +157,19 @@ class SchemePrimitive : public PrimitiveEnviron
 					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
 					bool b = (that->*method.b_hi)(h, i);
 					if (b) { rc = SCM_BOOL_T; } else { rc = SCM_BOOL_F; }
+					break;
+				}
+				case B_HH:
+				{
+					Handle h1 = SchemeSmob::verify_handle(scm_car(args), scheme_name, 1);
+					Handle h2 = SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2);
+					bool b = (that->*method.b_hh)(h1, h2);
+
+					if (b)
+						rc = SCM_BOOL_T;
+					else
+						rc = SCM_BOOL_F;
+
 					break;
 				}
 				case D_HHT:
@@ -487,6 +502,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		// Declare and define the constructors for this class. They all have
 		// the same basic form, except for the types.
 		DECLARE_CONSTR_2(B_HI, b_hi, bool, Handle, int)
+		DECLARE_CONSTR_2(B_HH, b_hh, bool, Handle, Handle)
 		DECLARE_CONSTR_3(D_HHT, d_hht, double, Handle, Handle, Type)
 		DECLARE_CONSTR_4(D_HHTB, d_hhtb, double, Handle, Handle, Type, bool)
 		DECLARE_CONSTR_1(H_H,  h_h,  Handle, Handle)
@@ -569,6 +585,7 @@ DECLARE_DECLARE_1(void, const std::string&)
 DECLARE_DECLARE_1(void, Type)
 DECLARE_DECLARE_1(void, void)
 DECLARE_DECLARE_2(bool, Handle, int)
+DECLARE_DECLARE_2(bool, Handle, Handle)
 DECLARE_DECLARE_2(Handle, Handle, int)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
 DECLARE_DECLARE_2(const std::string&, const std::string&, const std::string&)
