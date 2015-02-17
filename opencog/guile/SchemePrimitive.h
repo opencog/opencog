@@ -77,7 +77,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			// h == handle
 			// i == int
 			// q == HandleSeq
-			// qq == HandleSeqSeq
+			// k == HandleSeqSeq
 			// s == string
 			// t == Type
 			// v == void
@@ -96,7 +96,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			HandleSeq (T::*q_h)(Handle);
 			HandleSeq (T::*q_hti)(Handle, Type, int);
 			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
-			HandleSeqSeq (T::*qq_h)(Handle);
+			HandleSeqSeq (T::*k_h)(Handle);
 			const std::string& (T::*s_s)(const std::string&);
 			const std::string& (T::*s_ss)(const std::string&,
 			                              const std::string&);
@@ -130,7 +130,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Q_H,   // return HandleSeq, take handle
 			Q_HTI, // return HandleSeq, take handle, type, and int
 			Q_HTIB,// return HandleSeq, take handle, type, and bool
-			QQ_H,  // return HandleSeqSeq, take handle
+			K_H,  // return HandleSeqSeq, take handle
 			S_S,   // return string, take string
 			S_SS,  // return string, take two strings
 			S_SSS, // return string, take three strings
@@ -284,11 +284,11 @@ class SchemePrimitive : public PrimitiveEnviron
 					}
 					break;
 				}
-				case QQ_H:
+				case K_H:
 				{
 					// the only argument is a handle
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
-					HandleSeqSeq rHSS = (that->*method.qq_h)(h);
+					HandleSeqSeq rHSS = (that->*method.k_h)(h);
 
 					rc = SCM_EOL;
 
@@ -496,7 +496,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(Q_H, q_h, HandleSeq, Handle)
 		DECLARE_CONSTR_3(Q_HTI, q_hti, HandleSeq, Handle, Type, int)
 		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
-		DECLARE_CONSTR_1(QQ_H, qq_h, HandleSeqSeq, Handle)
+		DECLARE_CONSTR_1(K_H, k_h, HandleSeqSeq, Handle)
 		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
 		DECLARE_CONSTR_2(S_SS, s_ss, const std::string&, const std::string&,
 		                             const std::string&)
