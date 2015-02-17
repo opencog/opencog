@@ -1,5 +1,14 @@
 Python Examples
-====
+===============
+
+To run these examples, you must first set the `PYTHONPATH` to the
+opencog cython build directory.  In most cases, the following will
+suffice:
+
+```
+export PYTHONPATH=$PYTHONPATH:../../build/opencog/cython
+```
+
 
 ## bindlink 
 

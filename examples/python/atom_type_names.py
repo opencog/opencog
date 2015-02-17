@@ -1,3 +1,7 @@
+#! /usr/bin/env python
+#
+# atom_type_names.py
+#
 """
 Example of how to obtain atom type names and atom type IDs in Python
 """

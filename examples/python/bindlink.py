@@ -1,3 +1,7 @@
+#! /usr/bin/env python
+#
+# bindlink.py
+#
 """
 Example of how to use the pattern matcher BindLink functionality from Python
 Based on the following example in the wiki:

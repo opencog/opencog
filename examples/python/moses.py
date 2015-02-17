@@ -1,3 +1,7 @@
+#! /usr/bin/env python
+#
+# moses.py
+#
 """
 Example usage of the Python wrapper for the MOSES evolutionary program
 learning system
