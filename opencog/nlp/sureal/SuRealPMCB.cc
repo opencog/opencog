@@ -127,15 +127,19 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
 
         Handle hMultiConn = Handle::UNDEFINED;
 
+        // loop thru all connectors on both list
         while (not sourceConns.empty() && not targetConns.empty())
         {
+            // if we are repeating a multi-connector from source list
             if (hMultiConn != Handle::UNDEFINED)
                 scmCode = "(lg-conn-linkable? " + SchemeSmob::to_string(hMultiConn) + " " + SchemeSmob::to_string(targetConns.front()) + ")";
             else
                 scmCode = "(lg-conn-linkable? " + SchemeSmob::to_string(sourceConns.front()) + " " + SchemeSmob::to_string(targetConns.front()) + ")";
 
+            // if the two connectors cannot be linked
             if (m_eval->eval(scmCode) == "#f\n")
             {
+                // don't pop anything if we were retrying a multi-connector
                 if (hMultiConn != Handle::UNDEFINED)
                 {
                     hMultiConn = Handle::UNDEFINED;
@@ -145,12 +149,14 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
                 return false;
             }
 
+            // pop only the target connector if we were repeating a multi-conn
             if (hMultiConn != Handle::UNDEFINED)
             {
                 targetConns.pop_front();
                 continue;
             }
 
+            // dumb hacky way of checking of the connector is a multi-connector
             if (_as->getOutgoing(sourceConns.front()).size() == 3)
                 hMultiConn = sourceConns.front();
 
@@ -162,7 +168,7 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
         if (not sourceConns.empty() or not targetConns.empty())
             return false;
 
-        logger().debug(hDisjunct->toShortString() + " passed!");
+        logger().debug("[SuReal] " + hDisjunct->toShortString() + " passed!");
 
         return true;
     };
