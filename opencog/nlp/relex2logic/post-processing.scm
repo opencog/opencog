@@ -17,6 +17,10 @@
 ; Given a WordInstanceNode/WordNode created by RelEx, retrieve the corresponding
 ; ConceptNode or PredicateNode or NumberNode created by R2L helper
 ;
+; XXX FIXME this method is really bad because for each new type of node R2L
+; uses, it need to be added here.  It needs some different way for linking
+; R2L nodes to WordInstanceNodes other than node name!
+;
 (define (word-get-r2l-node node)
 	(define name
 		(if (not (null? node))
@@ -38,7 +42,7 @@
 ; Given a link, check if it only contains one instanced node.  Used to
 ; ignore links that do not need to be post-processed.
 ;
-; XXX except that we can have (EvaluationLink "not" "run@1234") which
+; XXX FIXME except that we can have (EvaluationLink "not" "run@1234") which
 ;     appears unary but should be post-processed.  A more long term
 ;     solution is needed.
 ;
@@ -336,6 +340,8 @@
 ; is an a-list whose keys are nodes that should be cloned with new instance
 ; name, and whose data values are the new instance name.
 ;
+; XXX FIXME using the hacky word-get-r2l-node, bad idea!
+;
 (define (rebuild ilink lone-nodes non-lone-alist)
 	; get all the nodes linked by this link
 	(define old-oset (cog-outgoing-set ilink))
@@ -390,7 +396,12 @@
 ;
 ; Given an 'interpretation-node', find out which words can be abstracted
 ; and call the above helper function to create them. Both the partial and
-; fully abstracted version are created.
+; fully abstracted version are created.  The new partially abstracted
+; version will have new UUID for each non-abstract node.
+;
+; XXX FIXME the usage of this function is poorly defined.  It needs a new
+; R2L's structure redesign, and a clearer idea of what it is trying to
+; achieve.
 ;
 (define (create-abstract-version interpretation-node)
 	(define r2l-set (cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'SetLink interpretation-node))))
