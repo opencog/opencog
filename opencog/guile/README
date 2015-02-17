@@ -377,9 +377,18 @@ interface.
 
          ; Get the incoming sets of nodes x and y (which is the link l):
          guile> (cog-incoming-set x)
-         (#<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>)
+         ((Link
+            (ConceptNode "abc")
+            (ConceptNode "def")
+         )
+         )
+
          guile> (cog-incoming-set y)
-         (#<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>)
+         ((Link
+            (ConceptNode "abc")
+            (ConceptNode "def")
+         )
+         )
 
          ; Verify that the both incoming sets are really one and the
          ; same link:
@@ -398,6 +407,7 @@ interface.
 
 === cog-atom handle ===
       Reference the atom identified by the integer-valued handle
+
 === cog-handle atom ===
       Return the handle (which is an integer) of the atom
 
@@ -416,7 +426,7 @@ interface.
 
          ; Get the atom corresponding to handle number 114
          guile> (cog-atom 114)
-         #<node[3:def] sti:(0,0) tv:(0.000000,0.000000)>
+         (ConceptNode "abc")
 
          ; Verify that handles are truly integers
          guile> (integer? x)
@@ -591,7 +601,7 @@ interface.
          guile> (cog-av x)
          (av 11 21 0)
 
-=== cog-av->alist ===
+=== cog-av->alist av ===
       Convert an attention value to an association list (alist).
 
       Example:
@@ -605,7 +615,7 @@ interface.
       Example:
           guile> (cog-get-types)
 
-=== cog-type? ===
+=== cog-type? symbol ===
       Return #t if the symbol names an atom type, else return #f
 
       Example:
@@ -614,7 +624,7 @@ interface.
           guile> (cog-type? 'FlorgleBarf)
           #f
 
-=== cog-node-type? ===
+=== cog-node-type? symbol ===
       Return #t if the symbol names an node type, else return #f
 
       Example:
