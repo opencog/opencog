@@ -95,9 +95,6 @@ void HebbianUpdatingAgent::run()
 
 void HebbianUpdatingAgent::hebbianUpdatingUpdate()
 {
-    std::vector<Handle> links;
-    std::back_insert_iterator< std::vector<Handle> > link_output(links);
-    std::vector<Handle>::const_iterator current_l;
 
     // tc affects the truthvalue
     float tc, old_tc, new_tc;
@@ -107,19 +104,17 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                    "(convert links = %d)", convertLinks);
 
     // get links again to include the new ones
+    HandleSeq links;
+    std::back_insert_iterator<HandleSeq> link_output(links);
     a->getHandlesByType(link_output, HEBBIAN_LINK, true);
 
-    for (current_l = links.begin(); current_l != links.end(); ++current_l) {
+    for(Handle h:links){
         // for each hebbian link, find targets, work out conjunction and convert
         // that into truthvalue change. the change should be based on existing TV.
-        Handle h;
-        std::vector<Handle> outgoing;
 		bool isDifferent = false;
 
-        h = *current_l;
-
         // get out going set
-        outgoing = a->getOutgoing(h);
+        HandleSeq outgoing = a->getOutgoing(h);
         new_tc = targetConjunction(outgoing);
         // old link strength decays
         old_tc = a->getMean(h);
@@ -209,13 +204,12 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
 }
 
 
-std::vector<Handle>& HebbianUpdatingAgent::moveSourceToFront(std::vector<Handle> &outgoing)
+HandleSeq& HebbianUpdatingAgent::moveSourceToFront(HandleSeq &outgoing)
 {
     // find source, atom with positive norm_sti, and make first in outgoing
-    std::vector<Handle>::iterator outgoing_i;
     Handle theSource;
     bool foundTheSource = false;
-    for (outgoing_i = outgoing.begin(); outgoing_i < outgoing.end();) {
+    for (auto outgoing_i = outgoing.begin();outgoing_i != outgoing.end();) {
         float normsti;
         Handle oh = *outgoing_i;
         normsti = a->getNormalisedSTI(oh);
@@ -234,15 +228,13 @@ std::vector<Handle>& HebbianUpdatingAgent::moveSourceToFront(std::vector<Handle>
     return outgoing;
 
 }
-float HebbianUpdatingAgent::targetConjunction(std::vector<Handle> handles)
+float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
 {
     // TODO: this won't work for Hebbian Links with arity > 2
 
     // indicates whether at least one of the source/target are
     // in the attentional focus
     bool inAttention = false;
-    std::vector<Handle>::iterator h_i;
-    Handle h;
     AttentionValue::sti_t sti;
     float tc = 0.0f, normsti;
     std::vector<float> normsti_v;
@@ -250,8 +242,7 @@ float HebbianUpdatingAgent::targetConjunction(std::vector<Handle> handles)
 
 	log->fine("HebbianUpdatingAgent::targetConjunction");
 
-    for (h_i = handles.begin(); h_i != handles.end(); ++h_i) {
-        h = *h_i;
+    for (Handle h: handles) {
         sti = a->getSTI(h);
 
         // if none in attention return 0 at end
