@@ -80,7 +80,6 @@ class SchemeEval : public GenericEval
 		static void * c_wrap_poll(void *);
 		const std::string *pexpr;
 		std::string answer;
-		HandleSeq qanswer;
 		SCM _rc;
 		bool _eval_done;
 		bool _poll_done;
@@ -93,7 +92,6 @@ class SchemeEval : public GenericEval
 		// Straight-up evaluation
 		SCM do_scm_eval(SCM, SCM (*)(void *));
 		static void * c_wrap_eval_h(void *);
-		static void * c_wrap_eval_q(void *);
 
 		// Handle apply
 		Handle do_apply(const std::string& func, Handle& varargs);
@@ -142,7 +140,6 @@ class SchemeEval : public GenericEval
 
 		Handle eval_h(const std::string&);
 		Handle eval_h(const std::stringstream& ss) { return eval_h(ss.str()); }
-		HandleSeq eval_q(const std::string&);
 
 		Handle apply(const std::string& func, Handle varargs);
 		std::string apply_generic(const std::string& func, Handle& varargs);
