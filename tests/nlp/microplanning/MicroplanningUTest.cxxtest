@@ -116,7 +116,7 @@ void MicroplanningUTest::test_declarative(void)
     TSM_ASSERT("Failed to run microplanning without anaphora!", !eval_err);
 
     std::string result = _evaluator->eval("(equal? m-result (declarative-without-anaphora))");
-    TSM_ASSERT("Failed to generate the correct result without anaphora!", result != "#t");
+    TSM_ASSERT("Failed to generate the correct result without anaphora!", result == "#t\n");
 
     _evaluator->eval("(define m-result (microplanning test-declarative-sal \"declarative\"))");
     eval_err = _evaluator->eval_error();
@@ -124,7 +124,7 @@ void MicroplanningUTest::test_declarative(void)
     TSM_ASSERT("Failed to run microplanning with anaphora!", !eval_err);
 
     result = _evaluator->eval("(equal? m-result (declarative-with-anaphora))");
-    TSM_ASSERT("Failed to generate the correct result with anaphora!", result != "#t");
+    TSM_ASSERT("Failed to generate the correct result with anaphora!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -139,7 +139,7 @@ void MicroplanningUTest::test_interrogative(void)
     TSM_ASSERT("Failed to run microplanning on interrogative!", !eval_err);
 
     std::string result = _evaluator->eval("(equal? m-result (interrogative-v1))");
-    TSM_ASSERT("Failed to generate the correct result on interrogative!", result != "#t");
+    TSM_ASSERT("Failed to generate the correct result on interrogative!", result == "#t\n");
 
     _evaluator->eval("(define m-result (microplanning test-interrogative-sal \"interrogative\"))");
     eval_err = _evaluator->eval_error();
@@ -147,7 +147,7 @@ void MicroplanningUTest::test_interrogative(void)
     TSM_ASSERT("Failed to run microplanning with lexical noun alternative!", !eval_err);
 
     result = _evaluator->eval("(or (equal? m-result (interrogative-v1)) (equal? m-result (interrogative-v2)))");
-    TSM_ASSERT("Failed to generate the correct result with lexical noun alternative!", result != "#t");
+    TSM_ASSERT("Failed to generate the correct result with lexical noun alternative!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
