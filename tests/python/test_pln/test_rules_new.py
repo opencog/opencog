@@ -32,7 +32,10 @@ class PLNUnitTester(TestCase):
         self.addTestFile("BooleanTransformationRule_new.scm")
         self.addTestFile("DeductionRule_InheritanceLink.scm")
         self.addTestFile("InheritanceRule.scm")
-        self.addTestFile("InductionRule_InheritanceLink.scm")
+
+        # Unit test disabled, see: https://github.com/opencog/opencog/issues/1280
+        # self.addTestFile("InductionRule_InheritanceLink.scm")
+
         self.addTestFile("AbductionRule_InheritanceLink.scm") # Under investigation
         self.addTestFile("InversionRule_InheritanceLink.scm")
         self.addTestFile("OrCreationRule.scm")
