@@ -66,6 +66,8 @@ public:
     void test_multiple(void);
     void test_complex(void);
     void test_disconnected(void);
+    void test_multiconn(void);
+    void test_negative(void);
 };
 
 void SuRealUTest::setUp(void)
@@ -227,6 +229,76 @@ void SuRealUTest::test_disconnected(void)
                                                    (list "she" "walked" "slowly" "and" "he" "ran" "quickly" ".")))
                                           )");
     TSM_ASSERT("Failed to sureal on disconnected clauses!", result == "#t\n");
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+
+void SuRealUTest::test_multiconn(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD",
+                 "opencog/atomspace/core_types.scm,"
+                 "opencog/scm/utilities.scm,"
+                 "opencog/nlp/types/nlp_types.scm,"
+                 "opencog/nlp/scm/nlp-utils.scm,"
+                 "opencog/nlp/relex2logic/utilities.scm,"
+                 "opencog/nlp/sureal/surface-realization.scm,"
+                 "tests/nlp/sureal/r2l-atomspace5.scm");
+    cogserver().loadSCMModules();
+
+    // Sentences in r2l-atomspace5.scm
+    // - He ate a big round olive.
+
+    _evaluator->eval(R"( (WordNode "apple") )");
+
+    // test with disconnected components
+    _evaluator->eval(R"(
+                     (define s-result
+                      (sureal
+                       (SetLink
+                        (EvaluationLink
+                         (PredicateNode "ate")
+                         (ListLink (ConceptNode "he") (ConceptNode "apple"))))))
+                     )");
+    std::string result = _evaluator->eval(R"(
+                                          (equal? s-result
+                                                  (list (list "he" "ate" "a" "big" "round" "apple" ".")))
+                                          )");
+    TSM_ASSERT("Failed to sureal on multi-connectors!", result == "#t\n");
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void SuRealUTest::test_negative(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD",
+                 "opencog/atomspace/core_types.scm,"
+                 "opencog/scm/utilities.scm,"
+                 "opencog/nlp/types/nlp_types.scm,"
+                 "opencog/nlp/scm/nlp-utils.scm,"
+                 "opencog/nlp/relex2logic/utilities.scm,"
+                 "opencog/nlp/sureal/surface-realization.scm");
+    cogserver().loadSCMModules();
+
+    _evaluator->eval(R"( (WordNode "he") )");
+    _evaluator->eval(R"( (WordNode "ate") )");
+    _evaluator->eval(R"( (WordNode "apples") )");
+
+    // test with disconnected components
+    _evaluator->eval(R"(
+                     (define s-result
+                      (sureal
+                       (SetLink
+                        (EvaluationLink
+                         (PredicateNode "ate")
+                         (ListLink (ConceptNode "he") (ConceptNode "apples"))))))
+                     )");
+    std::string result = _evaluator->eval(R"( (null? s-result) )");
+    TSM_ASSERT("Failed to have sureal return '() on bad matches!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
