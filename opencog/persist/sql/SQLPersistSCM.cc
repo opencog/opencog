@@ -133,10 +133,17 @@ SQLPersistSCM::SQLPersistSCM(AtomSpace *as)
 	static bool is_init = false;
 	if (is_init) return;
 	is_init = true;
+	scm_with_guile(init_in_guile, this);
+#endif
+}
 
-	scm_c_define_module("opencog persist-sql", init_in_module, this);
+void* SQLPersistSCM::init_in_guile(void* self)
+{
+#ifdef HAVE_GUILE
+	scm_c_define_module("opencog persist-sql", init_in_module, self);
 	scm_c_use_module("opencog persist-sql");
 #endif
+	return NULL;
 }
 
 void SQLPersistSCM::init_in_module(void* data)

@@ -41,6 +41,7 @@ class SQLBackingStore;
 class SQLPersistSCM
 {
 private:
+	static void* init_in_guile(void*);
 	static void init_in_module(void*);
 	void init(void);
 
