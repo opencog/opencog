@@ -13,6 +13,7 @@ MAINTAINER Linas Vepstas "linasvepstas@gmail.com"
 ENV LAST_OS_UPDATE 2015-02-18
 
 RUN apt-get update
+RUN apt-get -y upgrade
 RUN apt-get -y install software-properties-common python-pip
 
 # Use the ocpkg tool to install repositories and dependencies.
