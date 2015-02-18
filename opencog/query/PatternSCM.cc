@@ -50,10 +50,16 @@ PatternSCM::PatternSCM(void)
 	static bool is_init = false;
 	if (is_init) return;
 	is_init = true;
+	scm_with_guile(init_in_guile, NULL);
+}
 
+void* PatternSCM::init_in_guile(void*)
+{
 	// init_in_module(NULL);
 	scm_c_define_module("opencog query", init_in_module, NULL);
 	scm_c_use_module("opencog query");
+
+	return NULL;
 }
 
 /// This is called while (opencog query) is the current module.

@@ -28,6 +28,7 @@ class PatternWrap
 class PatternSCM
 {
 	private:
+		static void* init_in_guile(void*);
 		static void init_in_module(void*);
 		static std::vector<PatternWrap*> _binders;
 	public:
