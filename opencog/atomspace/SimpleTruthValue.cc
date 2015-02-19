@@ -24,12 +24,13 @@
  *
  */
 
-#include "SimpleTruthValue.h"
-
 #include <math.h>
+#include <typeinfo>
 
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
+
+#include "SimpleTruthValue.h"
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -73,6 +74,12 @@ confidence_t SimpleTruthValue::getConfidence() const
 // This is the merge formula appropriate for PLN.
 TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other) const
 {
+    if (other->getType() != SIMPLE_TRUTH_VALUE) {
+        throw RuntimeException(TRACE_INFO,
+           "Don't know how to merge %s into a SimpleTruthValue",
+           typeid(*other).name());
+    }
+
     if (other->getConfidence() > getConfidence()) {
         return other->clone();
     }
