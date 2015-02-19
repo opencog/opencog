@@ -9,6 +9,7 @@ IF (CXXTEST_FOUND)
 			COMMAND
 				${CXXTEST_GEN}
 				--runner=ErrorPrinter
+				--have-eh
 				-o ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.cxxtest
 			DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.cxxtest ${ARGN}
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -39,6 +40,7 @@ IF (CXXTEST_FOUND)
 				COMMAND
 					${CXXTEST_GEN}
 					--part
+					--have-eh
 					-o ${_NAME_WE}.cpp
 					${_NAME}
 				DEPENDS ${_PART}
@@ -52,6 +54,7 @@ IF (CXXTEST_FOUND)
 			COMMAND
 				${CXXTEST_GEN}
 				--runner=ErrorPrinter --root
+				--have-eh
 				-o ${NAME}_runner.cpp
 			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		)
