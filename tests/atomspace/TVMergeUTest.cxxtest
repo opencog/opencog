@@ -1,5 +1,5 @@
 /*
- * tests/atomspace/TruthValueUTest.cxxtest
+ * tests/atomspace/TVMergeUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -54,7 +54,7 @@ using namespace opencog;
 // comparison tests can only be accurate to about 0.000188 or thereabouts.
 #define FLOAT_ACCEPTABLE_ERROR 0.0002
 
-class TruthValueUTest :  public CxxTest::TestSuite
+class TVMergeUTest :  public CxxTest::TestSuite
 {
 private:
 
@@ -64,7 +64,7 @@ private:
     float confidences[NUM_TVS];
 
 public:
-    TruthValueUTest()
+    TVMergeUTest()
     {
         means[0] = TV1_MEAN;
         counts[0] = TV1_COUNT;
