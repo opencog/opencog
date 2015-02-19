@@ -124,11 +124,6 @@ public:
      */
     static TruthValuePtr TRIVIAL_TV();
 
-    /**
-     * Gets the name of a TruthValue type
-     */
-    static const char* getTVTypeName(TruthValueType);
-
 // PURE VIRTUAL METHODS:
 
     virtual strength_t getMean()  const = 0;
