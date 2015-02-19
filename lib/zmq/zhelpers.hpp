@@ -62,7 +62,7 @@
 #endif
 
 //  Receive 0MQ string from socket and convert into string
-static std::string
+inline std::string
 s_recv (zmq::socket_t & socket) {
 
     zmq::message_t message;
@@ -72,7 +72,7 @@ s_recv (zmq::socket_t & socket) {
 }
 
 //  Convert string to 0MQ string and send to socket
-static bool
+inline bool
 s_send (zmq::socket_t & socket, const std::string & string) {
 
     zmq::message_t message(string.size());
@@ -83,7 +83,7 @@ s_send (zmq::socket_t & socket, const std::string & string) {
 }
 
 //  Sends string as 0MQ string, as multipart non-terminal
-static bool
+inline bool
 s_sendmore (zmq::socket_t & socket, const std::string & string) {
 
     zmq::message_t message(string.size());
@@ -95,7 +95,7 @@ s_sendmore (zmq::socket_t & socket, const std::string & string) {
 
 //  Receives all message parts from socket, prints neatly
 //
-static void
+inline void
 s_dump (zmq::socket_t & socket)
 {
     std::cout << "----------------------------------------" << std::endl;
@@ -151,7 +151,7 @@ s_set_id (zmq::socket_t & socket)
 
 //  Report 0MQ version number
 //
-static void
+inline void
 s_version (void)
 {
     int major, minor, patch;
@@ -159,7 +159,7 @@ s_version (void)
     std::cout << "Current 0MQ version is " << major << "." << minor << "." << patch << std::endl;
 }
 
-static void
+inline void
 s_version_assert (int want_major, int want_minor)
 {
     int major, minor, patch;
@@ -174,7 +174,7 @@ s_version_assert (int want_major, int want_minor)
 }
 
 //  Return current system clock as milliseconds
-static int64_t
+inline int64_t
 s_clock (void)
 {
 #if (defined (__WINDOWS__))
@@ -189,7 +189,7 @@ s_clock (void)
 }
 
 //  Sleep for a number of milliseconds
-static void
+inline void
 s_sleep (int msecs)
 {
 #if (defined (__WINDOWS__))
@@ -202,7 +202,7 @@ s_sleep (int msecs)
 #endif
 }
 
-static void
+inline void
 s_console (const char *format, ...)
 {
     time_t curtime = time (NULL);
@@ -227,12 +227,12 @@ s_console (const char *format, ...)
 //  zmq_poll.
 
 static int s_interrupted = 0;
-static void s_signal_handler (int signal_value)
+inline void s_signal_handler (int signal_value)
 {
     s_interrupted = 1;
 }
 
-static void s_catch_signals ()
+inline void s_catch_signals ()
 {
 #if (!defined(__WINDOWS__))
     struct sigaction action;
