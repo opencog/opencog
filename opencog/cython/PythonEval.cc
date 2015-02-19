@@ -74,6 +74,7 @@ void PythonEval::init(void)
     eval_already_inited = true;
 
     global_python_init();
+    import_opencog__atomspace();
 
     logger().info("PythonEval::%s Initialising python evaluator.",
         __FUNCTION__);
