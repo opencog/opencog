@@ -140,8 +140,7 @@ public:
      * @todo: Later on, the names can include server/time info to decrease
      * the probability of collisions and be more informative.
      **/
-    Handle addPrefixedNode(Type t, const std::string& prefix = "",
-                       TruthValuePtr tvn = TruthValue::DEFAULT_TV());
+    Handle addPrefixedNode(Type t, const std::string& prefix = "");
 
     /**
      * Add a link to the Atom Table. If the atom already exists, then

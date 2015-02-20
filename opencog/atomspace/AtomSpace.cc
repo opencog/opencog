@@ -60,7 +60,7 @@ AtomSpace::AtomSpace(const AtomSpace& other)
 }
 
 
-Handle AtomSpace::addPrefixedNode(Type t, const std::string& prefix, TruthValuePtr tvn)
+Handle AtomSpace::addPrefixedNode(Type t, const std::string& prefix)
 {
     static const char alphanum[] =
         "0123456789"
@@ -79,6 +79,6 @@ Handle AtomSpace::addPrefixedNode(Type t, const std::string& prefix, TruthValueP
         }
         result = getHandle(t, name);
     } while (isValidHandle(result)); // If the name already exists, try again
-    return addNode(t, name, tvn);
+    return addNode(t, name);
 }
 

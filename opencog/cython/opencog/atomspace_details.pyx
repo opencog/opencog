@@ -169,21 +169,17 @@ cdef class AtomSpace:
         if prefixed:
             # prefixed nodes ALWAYS generate a new atom using atom_name
             # as the prefix
-            if tv is None:
-                # get handle
-                result = self.atomspace.addPrefixedNode(t,deref(name))
-            else:
-                result = self.atomspace.addPrefixedNode(t,deref(name), deref(<tv_ptr*>(tv._tvptr())))
+            result = self.atomspace.addPrefixedNode(t,deref(name))
         else:
-            if tv is None:
-                # get handle
-                result = self.atomspace.addNode(t,deref(name))
-            else:
-                result = self.atomspace.addNode(t,deref(name), deref(<tv_ptr*>(tv._tvptr())))
+            result = self.atomspace.addNode(t,deref(name))
+
         # delete temporary string
         del name
         if result == result.UNDEFINED: return None
-        return Atom(Handle(result.value()), self);
+        atom = Atom(Handle(result.value()), self);
+        if tv :
+            self.set_tv(atom, tv)
+        return atom
 
     def add_link(self,Type t,outgoing,TruthValue tv=None):
         """ Add Link to AtomSpace
