@@ -501,8 +501,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
 
     HandleSeq outgoing;
     for (size_t j=0; j < arity; j++) {
-        Handle h = getRandomHandle();
-        h.operator->();  // Force uuid resolution (outside of timing loop)
+        Handle h(getRandomHandle());
         outgoing.push_back(h);
     }
 
@@ -656,9 +655,10 @@ timepair_t AtomSpaceBenchmark::bm_addLink()
 timepair_t AtomSpaceBenchmark::bm_rmAtom()
 {
     Handle h = getRandomHandle();
-    // operator->() can return NULL when there's no atom for the uuid,
-    // because the atom was deleted in a previous pass! Dohh!
-    while (NULL == h.operator->() or 0 < h->getIncomingSetSize()) {
+
+    // Can't remove something that has incoming links, so find something
+    // that doesn't.
+    while (0 < h->getIncomingSetSize()) {
         h = getRandomHandle();
     }
     clock_t t_begin;
@@ -672,7 +672,7 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
             h = getRandomHandle();
             // XXX FIXME --- this may have trouble finding anything if
             // Nloops is bigger than the number of links in the atomspace !
-            while (NULL == h.operator->() or 0 < h->getIncomingSetSize()) {
+            while (0 < h->getIncomingSetSize()) {
                 h = getRandomHandle();
             }
         }
@@ -690,7 +690,7 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
             h = getRandomHandle();
             // XXX FIXME --- this may have trouble finding anything if
             // Nloops is bigger than the number of links in the atomspace !
-            while (NULL == h.operator->() or 0 < h->getIncomingSetSize()) {
+            while (0 < h->getIncomingSetSize()) {
                 h = getRandomHandle();
             }
         }
@@ -719,7 +719,13 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
 
 Handle AtomSpaceBenchmark::getRandomHandle()
 {
-    return Handle(UUID_begin + rng->randint(UUID_end-1-UUID_begin));
+    Handle h(UUID_begin + rng->randint(UUID_end-1-UUID_begin));
+    // operator->() can return NULL when there's no atom for the uuid,
+    // because the atom was deleted in a previous pass! Dohh!
+    while (NULL == h.operator->()) {
+        h = getRandomHandle();
+    }
+    return h;
 }
 
 timepair_t AtomSpaceBenchmark::bm_getType()
