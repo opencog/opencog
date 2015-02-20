@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by OpenCog Foundation
+ * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
  *
  * Written by Welter Silva <welter@vettalabs.com>
@@ -118,18 +119,30 @@ public:
         TS_ASSERT(!table->isCleared());
     }
 
-    void testRecursiveAdd()
+    void doRecursiveAdd(Type list_type)
     {
         Handle hn1(createNode(NUMBER_NODE, "1"));
         Handle hn2(createNode(NUMBER_NODE, "2"));
+        Handle hn3(createNode(NUMBER_NODE, "3"));
+        Handle hn4(createNode(NUMBER_NODE, "4"));
         Handle hnp(createNode(PREDICATE_NODE, "diequalized"));
 
-        Handle hll(createLink(LIST_LINK, hn1, hn2));
+        // The unordered link will get tested second,
+        // and will get a scrambled set of UUID's.
+        Handle hll;
+        if (list_type == LIST_LINK)
+            hll = createLink(list_type, hn1, hn2, hn3, hn4);
+        else if (list_type == SET_LINK)
+            hll = createLink(list_type, hn4, hn1, hn2, hn3);
+        else
+            hll = createLink(list_type, hn4, hn2, hn3, hn1);
         Handle hle(createLink(EVALUATION_LINK, hnp, hll));
 
         // No UUID should be assigned yet.
         TS_ASSERT_EQUALS(hn1.value(), Handle::UNDEFINED.value());
         TS_ASSERT_EQUALS(hn2.value(), Handle::UNDEFINED.value());
+        TS_ASSERT_EQUALS(hn3.value(), Handle::UNDEFINED.value());
+        TS_ASSERT_EQUALS(hn4.value(), Handle::UNDEFINED.value());
         TS_ASSERT_EQUALS(hnp.value(), Handle::UNDEFINED.value());
         TS_ASSERT_EQUALS(hll.value(), Handle::UNDEFINED.value());
         TS_ASSERT_EQUALS(hle.value(), Handle::UNDEFINED.value());
@@ -146,6 +159,8 @@ public:
         const HandleSeq& hsl = llt->getOutgoingSet();
         TS_ASSERT(hsl[0].value() != Handle::UNDEFINED.value());
         TS_ASSERT(hsl[1].value() != Handle::UNDEFINED.value());
+        TS_ASSERT(hsl[2].value() != Handle::UNDEFINED.value());
+        TS_ASSERT(hsl[3].value() != Handle::UNDEFINED.value());
 
         // Now test resolution.  Given the version of the atom that is
         // not yet in the atomspace, we should be able to find the one
@@ -164,6 +179,22 @@ public:
 
         Handle hn2_resolved(table->getHandle(hn2));
         TS_ASSERT_EQUALS(hsl[1].value(), hn2_resolved.value());
+
+        Handle hn3_resolved(table->getHandle(hn3));
+        TS_ASSERT_EQUALS(hsl[2].value(), hn3_resolved.value());
+
+        Handle hn4_resolved(table->getHandle(hn4));
+        TS_ASSERT_EQUALS(hsl[3].value(), hn4_resolved.value());
+    }
+
+    void testRecursiveAdd()
+    {
+        // Once for an ordered link type, and again for an unordered
+        // type.   Unordered links get spcial handling.
+        doRecursiveAdd(LIST_LINK);
+        doRecursiveAdd(SET_LINK);
+        doRecursiveAdd(OR_LINK);
+        doRecursiveAdd(LIST_LINK);
     }
 
     void testGetRandom()
