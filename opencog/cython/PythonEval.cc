@@ -85,6 +85,10 @@ void PythonEval::init(void)
     // Get a reference to the PyInterpreterState
     this->mainInterpreterState = this->mainThreadState->interp;
 
+    // Grab the GIL
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
     // Getting the __main__ module
     this->pyRootModule = PyImport_AddModule("__main__");
     PyModule_AddStringConstant(this->pyRootModule, "__file__", "");
@@ -127,6 +131,9 @@ void PythonEval::init(void)
 
     // Getting sys.path and keeping the refrence, used in this->addSysPath()
     sys_path = PySys_GetObject((char*)"path");
+
+    // Release the GIL. No Python API allowed beyond this point.
+    PyGILState_Release(gstate);
 
     logger().info("PythonEval::%s Finished initialising python evaluator.",
         __FUNCTION__);
@@ -227,8 +234,10 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
         funcName = func.substr(index+1);
     }
 
+    // Grab the GIL
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
 
-    //    PyGILState_STATE _state = PyGILState_Ensure();
     // Get a refrence to the function
     pFunc = PyDict_GetItem(PyModule_GetDict(pyModule),
                            PyBytes_FromString(funcName.c_str()));
@@ -271,7 +280,8 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     Py_DECREF(pFunc);
     Py_DECREF(pExecFunc);
 
-    //    PyGILState_Release(_state);
+    // Release the GIL. No Python API allowed beyond this point.
+    PyGILState_Release(gstate);
 
     return Handle(uuid);
 }
@@ -281,15 +291,17 @@ std::string PythonEval::apply_script(const std::string& script)
     init();
 
     std::string result;
-//    PyObject* pError;
-    //    PyGILState_STATE _state = PyGILState_Ensure();
+
+    // Grab the GIL
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
     PyRun_SimpleString("_opencog_output_stream = StringIO.StringIO()\n"
                        "_python_output_stream = sys.stdout\n"
                        "sys.stdout = _opencog_output_stream\n"
                        "sys.stderr = _opencog_output_stream\n");
 
     PyRun_SimpleString(script.c_str());
-
 
     PyObject *catcher = PyObject_GetAttrString(this->pyRootModule,"_opencog_output_stream");
     PyObject *output = PyObject_CallMethod(catcher, (char*)"getvalue", NULL);
@@ -308,7 +320,9 @@ std::string PythonEval::apply_script(const std::string& script)
     PyRun_SimpleString("sys.stdout = _python_output_stream\n"
                        "sys.stderr = _python_output_stream\n"
                        "_opencog_output_stream.close()\n");
-    //    PyGILState_Release(_state);
+ 
+    // Release the GIL. No Python API allowed beyond this point.
+    PyGILState_Release(gstate);
 
     // XXX TODO FIXME: we should check for error, and throw.  Without
     // this, python scripts can silently fail, and you'd never now it.
