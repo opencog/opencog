@@ -539,6 +539,10 @@ Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
     atom->unsetRemovalFlag();
 
     // Check for bad outgoing set members; fix them up if needed.
+    // "bad" here means outgoing set members that have UUID's but
+    // no pointers to actual atoms.  We want to have the actual atoms,
+    // because later steps need the pointers to do stuff, in particular,
+    // to make sure the child atoms are in an atomtable, too.
     LinkPtr lll(LinkCast(atom));
     if (lll) {
         const HandleSeq& ogs(lll->getOutgoingSet());
@@ -554,8 +558,9 @@ Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
             // is NULL. In that case, we should at least know about this
             // uuid.  We explicitly test h._ptr.get() so as not to
             // accidentally call resolve() during the test.
-            // XXX ??? How? How can this happen ??? Some persistance
-            // scenario ???
+            // XXX ??? How? How can this happen ??? How could we have a
+            // UUID but no pointer? Some persistance scenario ???
+            // Please explain ...
             if (NULL == h._ptr.get()) {
                 if (Handle::UNDEFINED == h) {
                     throw RuntimeException(TRACE_INFO,
@@ -580,9 +585,29 @@ Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
                     lll->_outgoing[i] = h;
                     lll->_outgoing[i]->insert_atom(lll);
                 } else {
-                    // XXX Perhaps we could find the atom in the
-                    // environment ?? Not sure how we can ever get
-                    // here anyway.
+                    // XXX FIXME. This can trigger when external code
+                    // removes atoms from the atomspace, but retains
+                    // copies of the (now defunct, because deleted)
+                    // UUID's.  That is, when an atom is removed from
+                    // the atomtable, it's UUID is no longer valid, and
+                    // So that external code should not have saved the
+                    // UUID's.  However, if it did, and then created a
+                    // handle out of them, then the handle would have
+                    // a null atom pointer and a positive UUID, and we
+                    // end up here.  This is a user error.  Note: the
+                    // atomspace benchmark has been known to do this.
+                    //
+                    // Perhaps there are other weird secenarios, an we
+                    // should search the environmnet first, before
+                    // throwing... (we did not search environmnet,
+                    // above ... this may need fixing...)
+                    logger().info() << "Failing index i=" << i
+                                    << " and arity=" << arity;
+                    logger().info() << "Failing outset is this:";
+                    for (unsigned int fk=0; fk<arity; fk++)
+                        logger().info() << "outset i=" << fk
+                                        << " uuid=" << ogs[fk].value();
+
                     throw RuntimeException(TRACE_INFO,
                         "AtomTable - Atom in outgoing set isn't known!");
                 }
