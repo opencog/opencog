@@ -142,10 +142,27 @@ Handle AtomTable::getHandle(const NodePtr n) const
 
 Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 {
+    // Make sure all the atoms in the outgoing set are resolved :-)
+    HandleSeq resolved_seq;
+    for (Handle ho : seq) {
+        resolved_seq.push_back(getHandle(ho));
+    }
+
+    // Aiieee! unordered link!
+    if (classserver().isA(t, UNORDERED_LINK)) {
+        struct HandleComparison
+        {
+            bool operator()(const Handle& h1, const Handle& h2) const {
+                return (Handle::compare(h1, h2) < 0);
+            }
+        };
+        std::sort(resolved_seq.begin(), resolved_seq.end(), HandleComparison());
+    }
+
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    Handle h(linkIndex.getHandle(t, seq));
+    Handle h(linkIndex.getHandle(t, resolved_seq));
     if (_environ and Handle::UNDEFINED == h)
-        return _environ->getHandle(t, seq);
+        return _environ->getHandle(t, resolved_seq);
     return h;
 }
 

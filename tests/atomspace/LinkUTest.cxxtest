@@ -41,7 +41,8 @@ public:
 
     void tearDown() {}
 
-    void testEquals() {
+    void testEquals()
+    {
         NodePtr n1(createNode(CONCEPT_NODE, "TEST"));
         NodePtr n2(createNode(CONCEPT_NODE, "TEST"));
         std::vector<Handle> out1;

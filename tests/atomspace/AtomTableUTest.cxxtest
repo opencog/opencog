@@ -89,7 +89,8 @@ public:
         atomSpace->clear();
     }
 
-    void testSimple() {
+    void testSimple()
+    {
         Handle time = table->add(createNode(TIME_NODE, "1"), true);
         Handle word = table->add(createNode(NUMBER_NODE, "1"), true);
         Handle sense = table->add(createNode(CONCEPT_NODE, "28675194"), true);
@@ -101,21 +102,72 @@ public:
         table->barrier();
     }
 
-    void testHolds() {
+    void testHolds()
+    {
         Handle h(100101);
         Handle word = table->add(createNode(NUMBER_NODE, "1"), false);
         TS_ASSERT(table->holds(word));
         TS_ASSERT(!table->holds(h));
     }
 
-    void testIsCleared() {
+    void testIsCleared()
+    {
         atomSpace->clear();
         TS_ASSERT(table->isCleared());
         Handle word = table->add(createNode(NUMBER_NODE, "1"), false);
         TS_ASSERT(!table->isCleared());
     }
 
-    void testGetRandom() {
+    void testRecursiveAdd()
+    {
+        Handle hn1(createNode(NUMBER_NODE, "1"));
+        Handle hn2(createNode(NUMBER_NODE, "2"));
+        Handle hnp(createNode(PREDICATE_NODE, "diequalized"));
+
+        Handle hll(createLink(LIST_LINK, hn1, hn2));
+        Handle hle(createLink(EVALUATION_LINK, hnp, hll));
+
+        // No UUID should be assigned yet.
+        TS_ASSERT_EQUALS(hn1.value(), Handle::UNDEFINED.value());
+        TS_ASSERT_EQUALS(hn2.value(), Handle::UNDEFINED.value());
+        TS_ASSERT_EQUALS(hnp.value(), Handle::UNDEFINED.value());
+        TS_ASSERT_EQUALS(hll.value(), Handle::UNDEFINED.value());
+        TS_ASSERT_EQUALS(hle.value(), Handle::UNDEFINED.value());
+
+        // Add the link.  All the outgoing atoms should get added too.
+        Handle hlet = table->add(hle, false);
+        TS_ASSERT(hlet.value() != Handle::UNDEFINED.value());
+        LinkPtr let(LinkCast(hlet));
+        const HandleSeq& hs = let->getOutgoingSet();
+        TS_ASSERT(hs[0].value() != Handle::UNDEFINED.value());
+        TS_ASSERT(hs[1].value() != Handle::UNDEFINED.value());
+
+        LinkPtr llt(LinkCast(hs[1]));
+        const HandleSeq& hsl = llt->getOutgoingSet();
+        TS_ASSERT(hsl[0].value() != Handle::UNDEFINED.value());
+        TS_ASSERT(hsl[1].value() != Handle::UNDEFINED.value());
+
+        // Now test resolution.  Given the version of the atom that is
+        // not yet in the atomspace, we should be able to find the one
+        // that is in the atomspace.
+        Handle hle_resolved(table->getHandle(hle));
+        TS_ASSERT_EQUALS(hlet.value(), hle_resolved.value());
+
+        Handle hnp_resolved(table->getHandle(hnp));
+        TS_ASSERT_EQUALS(hs[0].value(), hnp_resolved.value());
+
+        Handle hll_resolved(table->getHandle(hll));
+        TS_ASSERT_EQUALS(hs[1].value(), hll_resolved.value());
+
+        Handle hn1_resolved(table->getHandle(hn1));
+        TS_ASSERT_EQUALS(hsl[0].value(), hn1_resolved.value());
+
+        Handle hn2_resolved(table->getHandle(hn2));
+        TS_ASSERT_EQUALS(hsl[1].value(), hn2_resolved.value());
+    }
+
+    void testGetRandom()
+    {
         ostringstream oss;
         size_t numBuckets = table->getSize() / 10;
         for (unsigned i=0; i < numBuckets + 10; i++){
@@ -265,7 +317,8 @@ public:
         TS_ASSERT(!result);
     }
 
-    void testGetHandleSet_bugfix1() {
+    void testGetHandleSet_bugfix1()
+    {
         HandleSeq emptyOutgoing;
         HandleEntry* result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, false));
         TS_ASSERT(!result);
@@ -282,7 +335,8 @@ public:
         delete result;
     }
 
-    void testPrint() {
+    void testPrint()
+    {
         const char *filename = PROJECT_BINARY_DIR"/tests/atomspace/AtomTableUTest.log";
         std::ofstream out(filename);
 
@@ -305,7 +359,8 @@ public:
 
     /* test the fix for the bug triggered whenever we had a link pointing to the
      * same atom twice (or more) */
-    void testDoubleLink() {
+    void testDoubleLink()
+    {
         NodePtr n1(createNode(NUMBER_NODE, "1"));
         NodePtr n2(createNode(NUMBER_NODE, "2"));
         Handle hn1 = table->add(n1, false);
@@ -318,7 +373,8 @@ public:
         table->extract(hn1, true);
     }
 
-    void testMerge() {
+    void testMerge()
+    {
         NodePtr n1(createNode(NUMBER_NODE, "1", SimpleTruthValue::createTV(0.1f, 0.2f)));
         Handle hn1 = table->add(n1, false);
 
@@ -334,7 +390,8 @@ public:
         TS_ASSERT_DELTA(h->getTruthValue()->getCount(), 0.4f, 0.000001);
     }
 
-    void testSimpleWithCustomAtomTypes() {
+    void testSimpleWithCustomAtomTypes()
+    {
         Type MY_NUMBER_NODE = classserver().addType(NUMBER_NODE, "MyNumberNode");
         Type MY_CONCEPT_NODE = classserver().addType(CONCEPT_NODE, "MyConceptNode");
         Type MY_INHERITANCE_LINK = classserver().addType(INHERITANCE_LINK, "MyInheritanceLink");
