@@ -128,40 +128,23 @@ Handle AtomSpaceImpl::addAtom(AtomPtr atom, bool async)
 }
 
 Handle AtomSpaceImpl::addNode(Type t, const string& name,
-                              TruthValuePtr tvn, bool async)
+                              bool async)
 {
     // Is this atom already in the atom table?
     Handle hexist(atomTable.getHandle(t, name));
-    if (hexist)
-    {
-        // XXX FIXME The AtomSpaceAsyncUTest tries to do somethig weird,
-        // that is causing the below to fail. The atomtable add does the
-        // same thing under a lock. I don't understand why it matters.
-        // It would be slight faster to just merge here, but wtf ...
-        // So anyway, ifdef it out, for now ...
-#ifdef DO_UNLOCKED_UPDATE
-        hexist->merge(tvn);  // Update the truth value.
-        return hexist;
-#else
-        return atomTable.add(createNode(t, name, tvn), async);
-#endif
-    }
+    if (hexist) return hexist;
 
     // If we are here, the AtomTable does not yet know about this atom.
     // Maybe the backing store knows about this atom.
-    if (backing_store and not backing_store->ignoreType(t)) {
-
+    if (backing_store and not backing_store->ignoreType(t))
+    {
         NodePtr n(backing_store->getNode(t, name.c_str()));
-        if (n) {
-            Handle result(atomTable.add(n, async));
-            result->merge(tvn);
-            return result;
-        }
+        if (n) return atomTable.add(n, async);
     }
 
     // If we are here, neither the AtomTable nor backing store know about
     // this atom. Just add it.
-    return atomTable.add(createNode(t, name, tvn), async);
+    return atomTable.add(createNode(t, name), async);
 }
 
 Handle AtomSpaceImpl::getNode(Type t, const string& name)

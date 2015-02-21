@@ -129,8 +129,7 @@ public:
      */
     inline Handle addNode(Type t, const std::string& name = "")
     {
-        TruthValuePtr tvn = TruthValue::DEFAULT_TV();
-        return getImpl().addNode(t, name, tvn);
+        return getImpl().addNode(t, name);
     }
 
     /**
