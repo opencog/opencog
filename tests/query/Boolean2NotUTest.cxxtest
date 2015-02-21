@@ -149,44 +149,37 @@ void Boolean2NotUTest::setUp(void)
 	// This is an assertion "Berlin is a city"
 	al(INHERITANCE_LINK,
 		an(CONCEPT_NODE, "Berlin"),
-		an(CONCEPT_NODE, "definite"),
-		TruthValue::TRUE_TV()
+		an(CONCEPT_NODE, "definite")
 	);
 	al(EVALUATION_LINK,
 		an(PREDICATE_NODE, "_subj"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "be@1111"),
 			hberlin = an(CONCEPT_NODE, "Berlin")
-		),
-		TruthValue::TRUE_TV()
+		)
 	);
 	al(EVALUATION_LINK,
 		an(PREDICATE_NODE, "_obj"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "be@1111"),
 			hcity = an(CONCEPT_NODE, "city")
-		),
-		TruthValue::TRUE_TV()
+		)
 	);
 	al(MEMBER_LINK,
 		an(CONCEPT_NODE, "Berlin"),
-		an(CONCEPT_NODE, "sentence-AAA"),
-		TruthValue::TRUE_TV()
+		an(CONCEPT_NODE, "sentence-AAA")
 	);
 	al(MEMBER_LINK,
 		an(CONCEPT_NODE, "city"),
-		an(CONCEPT_NODE, "sentence-AAA"),
-		TruthValue::TRUE_TV()
+		an(CONCEPT_NODE, "sentence-AAA")
 	);
 	al(MEMBER_LINK,
 		an(CONCEPT_NODE, "be@1111"),
-		an(CONCEPT_NODE, "sentence-AAA"),
-		TruthValue::TRUE_TV()
+		an(CONCEPT_NODE, "sentence-AAA")
 	);
 	al(CONTEXT_LINK,
 		an(CONCEPT_NODE, "be@1111"),
-		an(CONCEPT_NODE, "be"),
-		TruthValue::TRUE_TV()
+		an(CONCEPT_NODE, "be")
 	);
 
 	// Create data on which the above pattern should fail
@@ -195,54 +188,45 @@ void Boolean2NotUTest::setUp(void)
 	// of this "hyp" clause.
 	al(INHERITANCE_LINK,
 		an(CONCEPT_NODE, "Madrid"),
-		an(CONCEPT_NODE, "definite"),
-		TruthValue::TRUE_TV()
+		an(CONCEPT_NODE, "definite")
 	);
 	al(INHERITANCE_LINK,
 		an(CONCEPT_NODE, "be@2222"),
-		an(CONCEPT_NODE, "hyp"),
-		TruthValue::TRUE_TV()
+		an(CONCEPT_NODE, "hyp")
 	);
 	al(INHERITANCE_LINK,
 		an(CONCEPT_NODE, "be@2222"),
-		an(CONCEPT_NODE, "truth-query"),
-		TruthValue::TRUE_TV()
+		an(CONCEPT_NODE, "truth-query")
 	);
 	al(EVALUATION_LINK,
 		an(PREDICATE_NODE, "_subj"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "be@2222"),
 			an(CONCEPT_NODE, "Madrid")
-		),
-		TruthValue::TRUE_TV()
+		)
 	);
 	al(EVALUATION_LINK,
 		an(PREDICATE_NODE, "_obj"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "be@2222"),
 			an(CONCEPT_NODE, "city")
-		),
-		TruthValue::TRUE_TV()
+		)
 	);
 	al(MEMBER_LINK,
 		an(CONCEPT_NODE, "Madrid"),
-		an(CONCEPT_NODE, "sentence-BBB"),
-		TruthValue::TRUE_TV()
+		an(CONCEPT_NODE, "sentence-BBB")
 	);
 	al(MEMBER_LINK,
 		an(CONCEPT_NODE, "city"),
-		an(CONCEPT_NODE, "sentence-BBB"),
-		TruthValue::TRUE_TV()
+		an(CONCEPT_NODE, "sentence-BBB")
 	);
 	al(MEMBER_LINK,
 		an(CONCEPT_NODE, "be@2222"),
-		an(CONCEPT_NODE, "sentence-BBB"),
-		TruthValue::TRUE_TV()
+		an(CONCEPT_NODE, "sentence-BBB")
 	);
 	al(CONTEXT_LINK,
 		an(CONCEPT_NODE, "be@2222"),
-		an(CONCEPT_NODE, "be"),
-		TruthValue::TRUE_TV()
+		an(CONCEPT_NODE, "be")
 	);
 }
 

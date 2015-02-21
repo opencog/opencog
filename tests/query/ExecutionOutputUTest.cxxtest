@@ -119,18 +119,16 @@ void ExecutionOutputUTest::setUp(void)
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "be"),
 			hcapital = an(CONCEPT_NODE, "capital")
-		),
-		TruthValue::TRUE_TV()
-	);
+		)
+	)->setTruthValue(TruthValue::TRUE_TV());
 
 	al(EVALUATION_LINK,
 		hprep = an(PREDICATE_NODE, "of"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "capital"),
 			an(CONCEPT_NODE, "Spain")
-		),
-		TruthValue::TRUE_TV()
-	);
+		)
+	)->setTruthValue(TruthValue::TRUE_TV());
 
 #ifdef HAVE_GUILE
 	const char * str = 

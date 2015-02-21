@@ -99,16 +99,14 @@ std::vector<Handle> createCase(bool srcInAF, int srcSTI, bool targInAF,
         bank.updateMinSTI(targSTI);
     testAtoms.push_back(h2);
 
-    HandleSeq outgoing1;
-    TruthValuePtr linkTV = SimpleTruthValue::createTV(linkStr, 0.99f);
     Handle l;
-    outgoing1.push_back(testAtoms[0]);
-    outgoing1.push_back(testAtoms[1]);
     if (inverse) {
-        l = a->addLink(INVERSE_HEBBIAN_LINK, outgoing1, linkTV);
+        l = a->addLink(INVERSE_HEBBIAN_LINK, testAtoms[0], testAtoms[1]);
     } else {
-        l = a->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing1, linkTV);
+        l = a->addLink(SYMMETRIC_HEBBIAN_LINK, testAtoms[0], testAtoms[1]);
     }
+    TruthValuePtr linkTV = SimpleTruthValue::createTV(linkStr, 0.99f);
+    l->setTruthValue(linkTV);
     testAtoms.push_back(l);
 
     return testAtoms;
