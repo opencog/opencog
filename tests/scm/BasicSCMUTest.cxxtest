@@ -416,23 +416,8 @@ void BasicSCMUTest::test_link_tv_setting(void)
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.25), 1.0e-6);
 
 	// Add it again, but with stronger confidence.
-	// Make sure the new values grab hold (because tv merge should use
-	// the stronger confidence value).
+	// Make sure the new values grab hold
 	inh = eval->eval_h("(ListLink (stv 0.6 0.42) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
-	eval_err = eval->eval_error();
-	eval->clear_pending();
-	TSM_ASSERT("Failed to update a link", !eval_err);
-
-	tv = as->getTV(inh);
-	m = tv->getMean();
-	c = tv->getConfidence();
-	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.6), 1.0e-6);
-	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.42), 1.0e-6);
-
-	// Add it again, but with weaker confidence.
-	// Make sure the new values DO NOT grab hold (because tv merge
-	// should use the stronger confidence value).
-	inh = eval->eval_h("(ListLink (stv 0.9 0.16) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
 	eval_err = eval->eval_error();
 	eval->clear_pending();
 	TSM_ASSERT("Failed to update a link", !eval_err);
