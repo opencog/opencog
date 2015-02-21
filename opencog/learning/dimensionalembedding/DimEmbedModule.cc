@@ -53,6 +53,8 @@ DimEmbedModule::DimEmbedModule(CogServer& cs) : Module(cs)
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal, this, _1));
     removedAtomConnection = as->
         removeAtomSignal(boost::bind(&DimEmbedModule::atomRemoveSignal, this, _1));
+    tvChangedConnection = as->
+        TVChangedSignal(boost::bind(&DimEmbedModule::TVChangedSignal, this, _1, _2, _3));
 }
 
 DimEmbedModule::~DimEmbedModule()
@@ -60,6 +62,7 @@ DimEmbedModule::~DimEmbedModule()
     logger().info("[DimEmbedModule] destructor");
     addedAtomConnection.disconnect();   
     removedAtomConnection.disconnect();
+    tvChangedConnection.disconnect();
 }
 
 void DimEmbedModule::init()
@@ -70,6 +73,8 @@ void DimEmbedModule::init()
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal, this, _1));
     removedAtomConnection = as->
         removeAtomSignal(boost::bind(&DimEmbedModule::atomRemoveSignal, this, _1));
+    tvChangedConnection = as->
+        TVChangedSignal(boost::bind(&DimEmbedModule::TVChangedSignal, this, _1, _2, _3));
 #ifdef HAVE_GUILE
     //Functions available to scheme shell
     define_scheme_primitive("embedSpace",
@@ -1048,4 +1053,10 @@ void DimEmbedModule::atomRemoveSignal(AtomPtr atom)
             removeNode(h, it2->first);
         }
     }
+}
+
+void DimEmbedModule::TVChangedSignal(Handle h, TruthValuePtr a, TruthValuePtr b)
+{
+	atomRemoveSignal(h);
+	handleAddSignal(h);
 }
