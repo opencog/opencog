@@ -111,7 +111,8 @@ public:
 
     /**
      * Add an atom to the Atom Table.  If the atom already exists
-     * then the old and the new truth value is merged.
+     * then new truth value is ignored, and the existing atom is
+     * returned.
      */
     inline Handle addAtom(AtomPtr atom)
     {
@@ -120,17 +121,14 @@ public:
 
     /**
      * Add a node to the Atom Table.  If the atom already exists
-     * then the old and the new truth value is merged.
+     * then that is returned.
      *
      * \param t     Type of the node
      * \param name  Name of the node
-     * \param tvn   Optional TruthValue of the node. If not provided,
-     *              uses the DEFAULT_TV (see TruthValue.h)
      */
-    inline Handle addNode(Type t, const std::string& name = "",
-                          TruthValuePtr tvn = TruthValue::DEFAULT_TV())
+    inline Handle addNode(Type t, const std::string& name = "")
     {
-        return getImpl().addNode(t, name, tvn);
+        return getImpl().addNode(t, name);
     }
 
     /**
@@ -140,65 +138,57 @@ public:
      * @todo: Later on, the names can include server/time info to decrease
      * the probability of collisions and be more informative.
      **/
-    Handle addPrefixedNode(Type t, const std::string& prefix = "",
-                       TruthValuePtr tvn = TruthValue::DEFAULT_TV());
+    Handle addPrefixedNode(Type t, const std::string& prefix = "");
 
     /**
      * Add a link to the Atom Table. If the atom already exists, then
-     * the old and the new truth value are merged.
+     * that is returned.
      *
      * @param t         Type of the link
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
-     * @param tvn       Optional TruthValue of the node. If not
-     *                  provided, uses the DEFAULT_TV (see TruthValue.h)
      */
-    inline Handle addLink(Type t, const HandleSeq& outgoing,
-                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
+    inline Handle addLink(Type t, const HandleSeq& outgoing)
     {
-        return getImpl().addLink(t, outgoing, tvn);
+        return getImpl().addLink(t, outgoing);
     }
 
-    inline Handle addLink(Type t, Handle h,
-                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
+    inline Handle addLink(Type t, Handle h)
     {
         HandleSeq oset;
         oset.push_back(h);
-        return addLink(t, oset, tvn);
+        return addLink(t, oset);
     }
 
-    inline Handle addLink(Type t, Handle ha, Handle hb,
-                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
+    inline Handle addLink(Type t, Handle ha, Handle hb)
     {
         HandleSeq oset;
         oset.push_back(ha);
         oset.push_back(hb);
-        return addLink(t, oset, tvn);
+        return addLink(t, oset);
     }
 
-    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
-                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
+    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc)
     {
         HandleSeq oset;
         oset.push_back(ha);
         oset.push_back(hb);
         oset.push_back(hc);
-        return addLink(t, oset, tvn);
+        return addLink(t, oset);
     }
 
-    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc, Handle hd,
-                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
+    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc, Handle hd)
     {
         HandleSeq oset;
         oset.push_back(ha);
         oset.push_back(hb);
         oset.push_back(hc);
         oset.push_back(hd);
-        return addLink(t, oset, tvn);
+        return addLink(t, oset);
     }
 
-    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc, Handle hd, Handle he,
-                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
+    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
+                          Handle hd, Handle he)
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -206,12 +196,11 @@ public:
         oset.push_back(hc);
         oset.push_back(hd);
         oset.push_back(he);
-        return addLink(t, oset, tvn);
+        return addLink(t, oset);
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
-                          Handle hd, Handle he, Handle hf,
-                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
+                          Handle hd, Handle he, Handle hf)
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -220,12 +209,11 @@ public:
         oset.push_back(hd);
         oset.push_back(he);
         oset.push_back(hf);
-        return addLink(t, oset, tvn);
+        return addLink(t, oset);
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
-                          Handle hd, Handle he, Handle hf, Handle hg,
-                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
+                          Handle hd, Handle he, Handle hf, Handle hg)
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -235,13 +223,12 @@ public:
         oset.push_back(he);
         oset.push_back(hf);
         oset.push_back(hg);
-        return addLink(t, oset, tvn);
+        return addLink(t, oset);
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
                           Handle hd, Handle he, Handle hf, Handle hg,
-                          Handle hh,
-                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
+                          Handle hh)
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -252,13 +239,12 @@ public:
         oset.push_back(hf);
         oset.push_back(hg);
         oset.push_back(hh);
-        return addLink(t, oset, tvn);
+        return addLink(t, oset);
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
                           Handle hd, Handle he, Handle hf, Handle hg,
-                          Handle hh, Handle hi,
-                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
+                          Handle hh, Handle hi)
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -270,7 +256,7 @@ public:
         oset.push_back(hg);
         oset.push_back(hh);
         oset.push_back(hi);
-        return addLink(t, oset, tvn);
+        return addLink(t, oset);
     }
 
     /**

@@ -92,8 +92,7 @@ int BenchmarkModule::fullyConnectedTestConcurrent(int numAtoms)
         for_each(atoms.begin(), atoms.end(),
             [&handleSource, this](Handle handleTarget)
         {
-            as->addLink(ASYMMETRIC_HEBBIAN_LINK, handleSource, handleTarget, 
-                        SimpleTruthValue::createTV(0, 1));
+            as->addLink(ASYMMETRIC_HEBBIAN_LINK, handleSource, handleTarget)->setTruthValue(SimpleTruthValue::createTV(0, 1));
         });
     });
 

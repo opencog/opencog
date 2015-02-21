@@ -102,7 +102,9 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
                else
                {
                    string var_name = "$var_"  + toString(varNameMap.size() + 1);
-                   Handle var_node = atomSpace->addNode(opencog::VARIABLE_NODE, var_name, TruthValue::TRUE_TV());
+                   Handle var_node = atomSpace->addNode(opencog::VARIABLE_NODE, var_name);
+                   // XXX why do we need to set the TV ???
+                   var_node->merge(TruthValue::TRUE_TV());
                    varNameMap.insert(std::pair<Handle,Handle>(h,var_node));
                    renameOutgoingLinks.push_back(var_node);
                }
@@ -118,7 +120,9 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
         {
              HandleSeq _renameOutgoingLinks;
              findAndRenameVariablesForOneLink(h, varNameMap, _renameOutgoingLinks);
-             Handle reLink = atomSpace->addLink(atomSpace->getType(h),_renameOutgoingLinks,TruthValue::TRUE_TV());
+             Handle reLink = atomSpace->addLink(atomSpace->getType(h),_renameOutgoingLinks);
+             // XXX why do we need to set the TV ???
+             reLink->merge(TruthValue::TRUE_TV());
              renameOutgoingLinks.push_back(reLink);
         }
 
@@ -135,7 +139,9 @@ vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern,
     {
         HandleSeq renameOutgoingLinks;
         findAndRenameVariablesForOneLink(link, orderedVarNameMap, renameOutgoingLinks);
-        Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),renameOutgoingLinks,TruthValue::TRUE_TV());
+        Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),renameOutgoingLinks);
+        // XXX why do we need to set the TV ???
+        rebindedLink->merge(TruthValue::TRUE_TV());
         rebindedPattern.push_back(rebindedLink);
     }
 
@@ -364,7 +370,9 @@ void PatternMiner::generateALinkByChosenVariables(Handle& originalLink, map<Hand
            else
            {
                // this node is considered not a variable, so add its bound value node into the Pattern mining Atomspace
-               Handle value_node = atomSpace->addNode(_fromAtomSpace->getType(h), _fromAtomSpace->getName(h), TruthValue::TRUE_TV());
+               Handle value_node = atomSpace->addNode(_fromAtomSpace->getType(h), _fromAtomSpace->getName(h));
+               // XXX why do we need to set the TV ???
+               value_node->merge(TruthValue::TRUE_TV());
                outputOutgoings.push_back(value_node);
            }
         }
@@ -372,7 +380,9 @@ void PatternMiner::generateALinkByChosenVariables(Handle& originalLink, map<Hand
         {
              HandleSeq _outputOutgoings;
              generateALinkByChosenVariables(h, valueToVarMap, _outputOutgoings, _fromAtomSpace);
-             Handle reLink = atomSpace->addLink(_fromAtomSpace->getType(h),_outputOutgoings,TruthValue::TRUE_TV());
+             Handle reLink = atomSpace->addLink(_fromAtomSpace->getType(h),_outputOutgoings);
+             // XXX why do we need to set the TV ???
+             reLink->merge(TruthValue::TRUE_TV());
              outputOutgoings.push_back(reLink);
         }
     }
@@ -563,7 +573,8 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, Atom
     {
         if (fromAtomSpace->isNode(h))
         {
-           Handle new_node = toAtomSpace->addNode(fromAtomSpace->getType(h), fromAtomSpace->getName(h), fromAtomSpace->getTV(h));
+           Handle new_node = toAtomSpace->addNode(fromAtomSpace->getType(h), fromAtomSpace->getName(h));
+           new_node->merge(fromAtomSpace->getTV(h));
            outgoings.push_back(new_node);
            if (fromAtomSpace->getType(h) == VARIABLE_NODE)
            {
@@ -576,7 +587,8 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, Atom
              HandleSeq _OutgoingLinks;
 
              swapOneLinkBetweenTwoAtomSpace(fromAtomSpace, toAtomSpace, h, _OutgoingLinks, outVariableNodes);
-             Handle _link = toAtomSpace->addLink(fromAtomSpace->getType(h),_OutgoingLinks,fromAtomSpace->getTV(h));
+             Handle _link = toAtomSpace->addLink(fromAtomSpace->getType(h), _OutgoingLinks);
+             _link->merge(fromAtomSpace->getTV(h));
 
              outgoings.push_back(_link);
         }
@@ -593,7 +605,8 @@ HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, A
         HandleSeq outgoingLinks;
 
         swapOneLinkBetweenTwoAtomSpace(fromAtomSpace, toAtomSpace, link, outgoingLinks, outVariableNodes);
-        Handle toLink = toAtomSpace->addLink(fromAtomSpace->getType(link),outgoingLinks,fromAtomSpace->getTV(link));
+        Handle toLink = toAtomSpace->addLink(fromAtomSpace->getType(link), outgoingLinks);
+        toLink->merge(fromAtomSpace->getTV(link));
 
         outPutLinks.push_back(toLink);
     }
@@ -635,8 +648,12 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 //                << originalAtomSpace->atomAsString(patternToMatch[0]).c_str() << std::endl;
 //    }
 
-    Handle hAndLink = atomSpace->addLink(AND_LINK, HNode->pattern, TruthValue::TRUE_TV());
-    Handle hOutPutListLink = atomSpace->addLink(LIST_LINK, HNode->pattern, TruthValue::TRUE_TV());
+    Handle hAndLink = atomSpace->addLink(AND_LINK, HNode->pattern);
+    // XXX why do we need to set the TV ???
+    hAndLink->merge(TruthValue::TRUE_TV());
+    Handle hOutPutListLink = atomSpace->addLink(LIST_LINK, HNode->pattern);
+    // XXX why do we need to set the TV ???
+    hOutPutListLink->merge(TruthValue::TRUE_TV());
     implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
     implicationLinkOutgoings.push_back(hOutPutListLink); // the results to return
 
@@ -644,7 +661,8 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 //            << atomSpace->atomAsString(hAndLink).c_str() << std::endl;
 
 
-    Handle hImplicationLink = atomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
+    Handle hImplicationLink = atomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+    hImplicationLink->merge(TruthValue::TRUE_TV());
 
     // add variable atoms
     set<Handle> allVariableNodesInPattern;
@@ -660,11 +678,15 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
         variableNodes.push_back(v);
     }
 
-    Handle hVariablesListLink = atomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
+    Handle hVariablesListLink = atomSpace->addLink(LIST_LINK, variableNodes);
+    // XXX why do we need to set the TV ???
+    hVariablesListLink->merge(TruthValue::TRUE_TV());
 
     bindLinkOutgoings.push_back(hVariablesListLink);
     bindLinkOutgoings.push_back(hImplicationLink);
-    Handle hBindLink = atomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
+    Handle hBindLink = atomSpace->addLink(BIND_LINK, bindLinkOutgoings);
+    // XXX why do we need to set the TV ???
+    hBindLink->merge(TruthValue::TRUE_TV());
 
 
     string s = atomSpace->atomAsString(hBindLink);
@@ -1537,7 +1559,8 @@ void PatternMiner::reNameNodesForALink(Handle& inputLink, Handle& nodeToBeRename
         {
              HandleSeq _renameOutgoingLinks;
              reNameNodesForALink(h, nodeToBeRenamed, newNamedNode, _renameOutgoingLinks, _fromAtomSpace, _toAtomSpace);
-             Handle reLink = _toAtomSpace->addLink(_fromAtomSpace->getType(h),_renameOutgoingLinks,_fromAtomSpace->getTV(h));
+             Handle reLink = _toAtomSpace->addLink(_fromAtomSpace->getType(h), _renameOutgoingLinks);
+             reLink->merge(_fromAtomSpace->getTV(h));
              renameOutgoingLinks.push_back(reLink);
         }
 
@@ -1573,7 +1596,8 @@ void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtended
         // Rebind this extendedHandle into Pattern Mining Atomspace
         HandleSeq renameOutgoingLinks;
         reNameNodesForALink(extendedHandle, leaf, varNode, renameOutgoingLinks, _fromAtomSpace, atomSpace);
-        Handle reLink = atomSpace->addLink(_fromAtomSpace->getType(extendedHandle),renameOutgoingLinks,_fromAtomSpace->getTV(extendedHandle));
+        Handle reLink = atomSpace->addLink(_fromAtomSpace->getType(extendedHandle), renameOutgoingLinks);
+        reLink->merge(_fromAtomSpace->getTV(extendedHandle));
         outPutExtendedPatternLinks.push_back(reLink);
     }
 
@@ -2245,43 +2269,61 @@ void PatternMiner::testPatternMatcher1()
     Handle bobNode = originalAtomSpace->addNode(opencog::OBJECT_NODE, "Bob" );
     listlinkOutgoings1.push_back(bobNode);
     listlinkOutgoings1.push_back(varHandle2);
-    Handle listlink1 = originalAtomSpace->addLink(LIST_LINK, listlinkOutgoings1, TruthValue::TRUE_TV());
+    Handle listlink1 = originalAtomSpace->addLink(LIST_LINK, listlinkOutgoings1);
+    // XXX why do we need to set the TV ???
+    listlink1->merge(TruthValue::TRUE_TV());
     evalLinkOutgoings1.push_back(varHandle1);
     evalLinkOutgoings1.push_back(listlink1);
-    Handle evalLink1 = originalAtomSpace->addLink(EVALUATION_LINK, evalLinkOutgoings1, TruthValue::TRUE_TV());
+    Handle evalLink1 = originalAtomSpace->addLink(EVALUATION_LINK, evalLinkOutgoings1);
+    // XXX why do we need to set the TV ???
+    evalLink1->merge(TruthValue::TRUE_TV());
 
     // The second EvaluationLink
     HandleSeq listlinkOutgoings2, evalLinkOutgoings2;
     listlinkOutgoings2.push_back(varHandle3);
     listlinkOutgoings2.push_back(varHandle2);
-    Handle listlink2 = originalAtomSpace->addLink(LIST_LINK, listlinkOutgoings2, TruthValue::TRUE_TV());
+    Handle listlink2 = originalAtomSpace->addLink(LIST_LINK, listlinkOutgoings2);
+    // XXX why do we need to set the TV ???
+    listlink2->merge(TruthValue::TRUE_TV());
     evalLinkOutgoings2.push_back(varHandle1);
     evalLinkOutgoings2.push_back(listlink2);
-    Handle evalLink2 = originalAtomSpace->addLink(EVALUATION_LINK, evalLinkOutgoings2, TruthValue::TRUE_TV());
+    Handle evalLink2 = originalAtomSpace->addLink(EVALUATION_LINK, evalLinkOutgoings2);
+    // XXX why do we need to set the TV ???
+    evalLink2->merge(TruthValue::TRUE_TV());
 
     // The InheritanceLink
     HandleSeq inherOutgoings;
     inherOutgoings.push_back(varHandle3);
     inherOutgoings.push_back(varHandle4);
-    Handle inherLink = originalAtomSpace->addLink(INHERITANCE_LINK, inherOutgoings, TruthValue::TRUE_TV());
+    Handle inherLink = originalAtomSpace->addLink(INHERITANCE_LINK, inherOutgoings);
+    // XXX why do we need to set the TV ???
+    inherLink->merge(TruthValue::TRUE_TV());
 
     patternToMatch.push_back(evalLink1);
     patternToMatch.push_back(evalLink2);
     patternToMatch.push_back(inherLink);
 
-    Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch, TruthValue::TRUE_TV());
+    Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch);
+    // XXX why do we need to set the TV ???
+    hAndLink->merge(TruthValue::TRUE_TV());
 
     implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
     implicationLinkOutgoings.push_back(hAndLink); // the results to return
 
-    Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
+    Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+    // XXX why do we need to set the TV ???
+    hImplicationLink->merge(TruthValue::TRUE_TV());
 
     // add variable atoms
-    Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
+    Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes);
+    // XXX why do we need to set the TV ???
+    hVariablesListLink->merge(TruthValue::TRUE_TV());
 
     bindLinkOutgoings.push_back(hVariablesListLink);
     bindLinkOutgoings.push_back(hImplicationLink);
-    Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
+    Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings);
+    // XXX why do we need to set the TV ???
+    hBindLink->merge(TruthValue::TRUE_TV());
 
     std::cout <<"Debug: PatternMiner::testPatternMatcher for pattern:" << std::endl
               << originalAtomSpace->atomAsString(hBindLink).c_str() << std::endl;
@@ -2356,50 +2398,70 @@ void PatternMiner::testPatternMatcher2()
     listlinkOutgoings1.push_back(LiMingNode);
     Handle teaNode = originalAtomSpace->addNode(opencog::CONCEPT_NODE, "tea" );
     listlinkOutgoings1.push_back(teaNode);
-    Handle listlink1 = originalAtomSpace->addLink(LIST_LINK, listlinkOutgoings1, TruthValue::TRUE_TV());
+    Handle listlink1 = originalAtomSpace->addLink(LIST_LINK, listlinkOutgoings1);
+    // XXX why do we need to set the TV ???
+    listlink1->merge(TruthValue::TRUE_TV());
     evalLinkOutgoings1.push_back(varHandle1);
     evalLinkOutgoings1.push_back(listlink1);
-    Handle evalLink1 = originalAtomSpace->addLink(EVALUATION_LINK, evalLinkOutgoings1, TruthValue::TRUE_TV());
+    Handle evalLink1 = originalAtomSpace->addLink(EVALUATION_LINK, evalLinkOutgoings1);
+    // XXX why do we need to set the TV ???
+    evalLink1->merge(TruthValue::TRUE_TV());
 
     // The second EvaluationLink
     HandleSeq listlinkOutgoings2, evalLinkOutgoings2;
     listlinkOutgoings2.push_back(varHandle2);
     listlinkOutgoings2.push_back(varHandle3);
-    Handle listlink2 = originalAtomSpace->addLink(LIST_LINK, listlinkOutgoings2, TruthValue::TRUE_TV());
+    Handle listlink2 = originalAtomSpace->addLink(LIST_LINK, listlinkOutgoings2);
+    // XXX why do we need to set the TV ???
+    listlink2->merge(TruthValue::TRUE_TV());
     evalLinkOutgoings2.push_back(varHandle1);
     evalLinkOutgoings2.push_back(listlink2);
-    Handle evalLink2 = originalAtomSpace->addLink(EVALUATION_LINK, evalLinkOutgoings2, TruthValue::TRUE_TV());
+    Handle evalLink2 = originalAtomSpace->addLink(EVALUATION_LINK, evalLinkOutgoings2);
+    // XXX why do we need to set the TV ???
+    evalLink2->merge(TruthValue::TRUE_TV());
 
     // The InheritanceLink
     HandleSeq inherOutgoings;
     Handle humanNode = originalAtomSpace->addNode(opencog::CONCEPT_NODE, "human" );
     inherOutgoings.push_back(varHandle2);
     inherOutgoings.push_back(humanNode);
-    Handle inherLink = originalAtomSpace->addLink(INHERITANCE_LINK, inherOutgoings, TruthValue::TRUE_TV());
+    Handle inherLink = originalAtomSpace->addLink(INHERITANCE_LINK, inherOutgoings);
+    // XXX why do we need to set the TV ???
+    inherLink->merge(TruthValue::TRUE_TV());
 
     patternToMatch.push_back(evalLink1);
     patternToMatch.push_back(evalLink2);
     patternToMatch.push_back(inherLink);
 
-    Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch, TruthValue::TRUE_TV());
+    Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch);
+    // XXX why do we need to set the TV ???
+    hAndLink->merge(TruthValue::TRUE_TV());
 
     // add variable atoms
-    Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
+    Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes);
+    // XXX why do we need to set the TV ???
+    hVariablesListLink->merge(TruthValue::TRUE_TV());
 
     resultOutgoings.push_back(hVariablesListLink);
     resultOutgoings.push_back(hAndLink);
 
-    Handle hListLinkResult = originalAtomSpace->addLink(LIST_LINK, resultOutgoings, TruthValue::TRUE_TV());
+    Handle hListLinkResult = originalAtomSpace->addLink(LIST_LINK, resultOutgoings);
+    // XXX why do we need to set the TV ???
+    hListLinkResult->merge(TruthValue::TRUE_TV());
 
     implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
     implicationLinkOutgoings.push_back(hListLinkResult); // the results to return
 
-    Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
+    Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+    // XXX why do we need to set the TV ???
+    hImplicationLink->merge(TruthValue::TRUE_TV());
 
 
     bindLinkOutgoings.push_back(hVariablesListLink);
     bindLinkOutgoings.push_back(hImplicationLink);
-    Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
+    Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings);
+    // XXX why do we need to set the TV ???
+    hBindLink->merge(TruthValue::TRUE_TV());
 
     std::cout <<"Debug: PatternMiner::testPatternMatcher for pattern:" << std::endl
               << originalAtomSpace->atomAsString(hBindLink).c_str() << std::endl;

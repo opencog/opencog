@@ -59,7 +59,7 @@ public:
      * @param Node truthvalue A reference to a TruthValue object.
      */
     Node(Type t, const std::string& s,
-         TruthValuePtr tv = TruthValue::NULL_TV(),
+         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t,tv,av) {
         init(s);

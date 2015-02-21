@@ -139,7 +139,8 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                         AttentionValuePtr backupAV = a->getAV(h);
                         a->removeAtom(h);
                         outgoing = moveSourceToFront(outgoing);
-                        h = a->addLink(INVERSE_HEBBIAN_LINK, outgoing, SimpleTruthValue::createTV(-tc, 0));
+                        h = a->addLink(INVERSE_HEBBIAN_LINK, outgoing);
+                        h->setTruthValue(SimpleTruthValue::createTV(-tc, 0));
                         // restore STI/LTI
                         a->setAV(h,backupAV);
                     }
@@ -156,7 +157,8 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                         // save STI/LTI
                         AttentionValuePtr backupAV = a->getAV(h);
                         a->removeAtom(h);
-                        h = a->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing, SimpleTruthValue::createTV(-tc, 1));
+                        h = a->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing);
+                        h->setTruthValue(SimpleTruthValue::createTV(-tc, 1));
                         // restore STI/LTI
                         a->setAV(h,backupAV);
                     } else {
@@ -174,7 +176,8 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                     AttentionValuePtr backupAV = a->getAV(h);
                     a->removeAtom(h);
                     outgoing = moveSourceToFront(outgoing);
-                    h = a->addLink(INVERSE_HEBBIAN_LINK, outgoing, SimpleTruthValue::createTV(-tc, 0));
+                    h = a->addLink(INVERSE_HEBBIAN_LINK, outgoing);
+                    h->setTruthValue(SimpleTruthValue::createTV(-tc, 0));
                     // restore STI/LTI
                     a->setAV(h,backupAV);
                 } else {

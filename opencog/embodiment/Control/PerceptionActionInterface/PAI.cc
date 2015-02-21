@@ -114,7 +114,7 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
     parser->setDoNamespaces(true);
 //    parser->setDoNamespaces(false);
     parser->setDoSchema(true);
-#if 1 // Add the XSD file to be used for xml validation   
+#if 1 // Add the XSD file to be used for xml validation
 #define XSD_NAMESPACE "http://www.opencog.org/brain"
 #define XSD_FILE_NAME "BrainProxyAxon.xsd"
 
@@ -144,7 +144,7 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
 PAI::~PAI()
 {
     delete parser;
-    delete languageTool; 
+    delete languageTool;
     // TODO: Cannot terminate here because other PAI objects may be using it...
     //PAIUtils::terminateXMLPlatform();
 }
@@ -161,7 +161,7 @@ AvatarInterface& PAI::getAvatarInterface()
 
 LanguageComprehension & PAI::getLanguageTool(void)
 {
-    return *(this->languageTool); 
+    return *(this->languageTool);
 }
 
 ActionPlanID PAI::createActionPlan()
@@ -176,7 +176,7 @@ ActionPlanID PAI::createActionPlan()
     pthread_mutex_unlock(&plock);
 #endif
     // Get the planning result
-    std::string demandName; 
+    std::string demandName;
 
     Handle hPlanSelDemGoal = atomSpace.getHandle(CONCEPT_NODE,
                                                  "plan_selected_demand_goal");
@@ -465,7 +465,7 @@ void PAI::sendSingleActionCommand(std::string& actionName, std::vector<ActionPar
         case ENTITY_CODE:
             break;
         default:
-			// TODO: TNick: is this the right way of handling other values? 
+			// TODO: TNick: is this the right way of handling other values?
 			// FUZZY_INTERVAL_INT_CODE
 			// FUZZY_INTERVAL_FLOAT_CODE
 			// NUMBER_OF_ACTION_PARAM_TYPES
@@ -830,7 +830,7 @@ void PAI::processAvatarSignal(DOMElement * element)
         // We only deal with actual XML elements
         if (n->getNodeType() != DOMNode::ELEMENT_NODE) continue;
         DOMElement* signal = (DOMElement*) n;
-        
+
         // Both physiological signals and actions have the name attribute
         XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
         char* name = XMLString::transcode(signal->getAttribute(tag));
@@ -883,7 +883,7 @@ void PAI::processAvatarSignal(DOMElement * element)
             addPhysiologicalFeeling(internalAgentId, name, tsValue, level);
 
         } else if (strcmp(signalName, ACTION_AVAILABILITY_ELEMENT) == 0) {
-            // Store action availability state in atomspace. 
+            // Store action availability state in atomspace.
             processActionAvailability(signal);
         }
         XMLString::release(&signalName);
@@ -1198,11 +1198,11 @@ Handle PAI::processActionAvailability(DOMElement* signal)
 
         opencog::Type targetTypeCode;
         OC_ASSERT(strlen(targetType) > 0);
-        
+
         string targetTypeStr(targetType);
-        
+
         internalTargetId = PAIUtils::getInternalId(targetName);
-        
+
         if (targetTypeStr == "avatar")
         {
             if (internalTargetId == avatarInterface.getPetId())
@@ -1234,7 +1234,7 @@ Handle PAI::processActionAvailability(DOMElement* signal)
     char* availablePred = XMLString::transcode(signal->getAttribute(tag));
 
     available = (strcmp(availablePred, "true") == 0) ? true : false;
- 
+
     // Get self handle.
     Handle selfNode = AtomSpaceUtil::getAgentHandle(atomSpace,
                                                     avatarInterface.getPetId());
@@ -1243,11 +1243,11 @@ Handle PAI::processActionAvailability(DOMElement* signal)
 
     // Set "can_do" predicate of the action according to its availability
     // state.
-    evalLinkHandle = AtomSpaceUtil::setPredicateValue(atomSpace, "can_do", 
+    evalLinkHandle = AtomSpaceUtil::setPredicateValue(atomSpace, "can_do",
                                          available ? TruthValue::TRUE_TV() : TruthValue::FALSE_TV(),
                                          actionNode,
                                          selfNode,
-                                         targetNode); 
+                                         targetNode);
 
     // Print debug info in console, to be commented.
     printf("PAI - Action availability: action[%s] is %savailable for avatar%s.\n",
@@ -1606,17 +1606,17 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
         eventTYpe = oac::EVENT_TYPE_ACTION;
 	OC_UNUSED(eventTYpe);
 	
-    // Jared    
+    // Jared
     // Make an AndLink with the relevant Handles (or just the links). Fishgram likes having them all in one place,
     // while PLN may find it useful to have them together or separate.
     Handle andLink = AtomSpaceUtil::addLink(atomSpace, AND_LINK, actionHandles);
     // The event detector will record the AndLink in a scheme file, and its elements separately
-    actionConcernedHandles.push_back(andLink);    
+    actionConcernedHandles.push_back(andLink);
     // Add an AtTimeLink around the AndLink, because Fishgram will ignore the Action ID ConceptNode,
     // and so it won't notice the AtTimeLink created above (which is only connected by having the same ActionID).
     Handle atTimeLink2 = timeServer().addTimeInfo(andLink, tsValue);
     actionConcernedHandles.push_back(atTimeLink2);
-    
+
     // call the event detector
     if (enableCollectActions)
     {
@@ -1646,16 +1646,16 @@ void PAI::processAgentActionPlanResult(char* agentID,
     XMLString::transcode(STATUS_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* status = XMLString::transcode(signal->getAttribute(tag));
 
-//std::cout<<"timestamp = "<<timestamp<<" status = "<<status<<" action-plan-id = "<<planIdStr<<" name = "<<name<<std::endl; 
+//std::cout<<"timestamp = "<<timestamp<<" status = "<<status<<" action-plan-id = "<<planIdStr<<" name = "<<name<<std::endl;
 
     ActionStatus statusCode = opencog::pai::NONE;
     if (planIdStr && strlen(planIdStr)) {
         if (!strcmp(status, DONE_ACTION_STATUS)) {
             statusCode = opencog::pai::DONE;
-//std::cout<<"ActionStatus: Done"<<std::endl; 
+//std::cout<<"ActionStatus: Done"<<std::endl;
         } else if (!strcmp(status, ERROR_ACTION_STATUS)) {
             statusCode = opencog::pai::ERROR;
-//std::cout<<"ActionStatus: ERROR"<<std::endl; 
+//std::cout<<"ActionStatus: ERROR"<<std::endl;
         }
     }
 
@@ -1702,7 +1702,7 @@ bool PAI::setLatestSimWorldTimestamp(unsigned long timestamp)
         latestSimWorldTimestamp = timestamp;
     } else if (timestamp < latestSimWorldTimestamp) {
         logger().warn("PAI - setLatestSimWorldTimestamp(%lu): Got a timestamp "
-                      "smaller than the latest received timestamp (%lu)!", 
+                      "smaller than the latest received timestamp (%lu)!",
                       timestamp, latestSimWorldTimestamp);
         return false;
     }
@@ -1848,7 +1848,7 @@ void PAI::processInstruction(DOMElement * element)
     // it was originally sent by this OAC, so the result of this call is
     // safe to ignore.
     setLatestSimWorldTimestamp(tsValue);
-    
+
     // get id of destination agent for instruction
     XMLString::transcode(INSTRUCTION_TO_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* petID = XMLString::transcode(element->getAttribute(tag));
@@ -1868,7 +1868,7 @@ void PAI::processInstruction(DOMElement * element)
     // get target-mode attribute value
     XMLString::transcode(TARGET_MODE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* targetMode = XMLString::transcode(element->getAttribute(tag));
-    
+
     OC_ASSERT(strlen(contentType) > 0 );
     OC_ASSERT(strlen(targetMode) > 0 );
 
@@ -1880,7 +1880,7 @@ void PAI::processInstruction(DOMElement * element)
     char* sentenceText = XMLString::transcode(sentenceElement->getTextContent());
     // get the sentence length
     XMLString::transcode(LENGTH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* length = XMLString::transcode(sentenceElement->getAttribute(tag));    
+    char* length = XMLString::transcode(sentenceElement->getAttribute(tag));
     int sentenceLength = atoi( length );
     XMLString::release(&length);
     OC_ASSERT(static_cast<int>( strlen( sentenceText) ) == sentenceLength );
@@ -1908,27 +1908,27 @@ void PAI::processInstruction(DOMElement * element)
 
 #ifdef HAVE_GUILE
     if (parsedSentenceText != NULL){
-        SchemeEval* evaluator = new SchemeEval(&atomSpace); 
-        std::string scheme_expression, scheme_return_value; 
+        SchemeEval* evaluator = new SchemeEval(&atomSpace);
+        std::string scheme_expression, scheme_return_value;
 
-        // Clean up all the information of previous sentence, such as detach 
-        // the AnchorNode of previous sentence if it has not been processed. 
+        // Clean up all the information of previous sentence, such as detach
+        // the AnchorNode of previous sentence if it has not been processed.
         scheme_expression = "( reset_dialog_system )";
-        scheme_return_value = evaluator->eval(scheme_expression); 
+        scheme_return_value = evaluator->eval(scheme_expression);
         if ( evaluator->eval_error() ) {
-            logger().error("PAI::%s - Failed to execute '%s'", 
-                            __FUNCTION__, 
+            logger().error("PAI::%s - Failed to execute '%s'",
+                            __FUNCTION__,
                            scheme_expression.c_str()
-                          ); 
+                          );
         }
 
-        // Put the newly parsed sentence into AtomSpace, then PsiActionSelectionAgent 
-        // and dialog_system.scm will continue processing it. 
-        scheme_return_value = evaluator->eval(parsedSentenceText); 
+        // Put the newly parsed sentence into AtomSpace, then PsiActionSelectionAgent
+        // and dialog_system.scm will continue processing it.
+        scheme_return_value = evaluator->eval(parsedSentenceText);
         if ( evaluator->eval_error() ) {
-            logger().error("PAI::%s - Failed to put the parsed result from RelexServer to AtomSpace", 
+            logger().error("PAI::%s - Failed to put the parsed result from RelexServer to AtomSpace",
                            __FUNCTION__
-                          ); 
+                          );
         }
         delete evaluator;
     }
@@ -1940,7 +1940,7 @@ void PAI::processInstruction(DOMElement * element)
     Handle agentNode = AtomSpaceUtil::getAgentHandle(atomSpace, internalAvatarId);
     if (agentNode == Handle::UNDEFINED) {
         agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalAvatarId);
-    } 
+    }
 
     string sentence = "to:";
     sentence += internalPetId;
@@ -1951,10 +1951,10 @@ void PAI::processInstruction(DOMElement * element)
     Handle sentenceNode = AtomSpaceUtil::addNode( atomSpace, SENTENCE_NODE, sentence.c_str() );
 
     if ( avatarInterface.getPetId( ) == internalPetId ) {
-        AtomSpaceUtil::setPredicateValue( atomSpace, 
+        AtomSpaceUtil::setPredicateValue( atomSpace,
                                           "heard_sentence",
                                           TruthValue::TRUE_TV(),
-                                          sentenceNode 
+                                          sentenceNode
                                         );
     }
 
@@ -1967,14 +1967,14 @@ void PAI::processInstruction(DOMElement * element)
         // ok there is an incoming parsed (by relex sentece)
         // so, connect the author of the Relex sentences to each sentence
         // it will be useful to identify which agent says each sentence
-        logger().debug("PAI::%s - Processing parsed sentence: \n %s", __FUNCTION__, parsedSentenceText); 
+        logger().debug("PAI::%s - Processing parsed sentence: \n %s", __FUNCTION__, parsedSentenceText);
 
         HandleSeq sentenceOwner(2);
         sentenceOwner[0] = agentNode;
 
         logger().debug( "PAI::%s - Connecting sentences to its respective owners",
                         __FUNCTION__ );
-                        
+
         Handle anchorNode = atomSpace.getHandle( ANCHOR_NODE, "# New Parsed Sentence");
         HandleSeq incomingSet = atomSpace.getIncoming(anchorNode);
         unsigned int i;
@@ -1995,13 +1995,13 @@ void PAI::processInstruction(DOMElement * element)
                 for( j = 1; j < outgoingSet.size( ); ++j ) {
                     if ( atomSpace.getType( outgoingSet[j] ) == SENTENCE_NODE ) {
                         sentenceOwner[1] = outgoingSet[j];
-                        Handle sentenceOwnerLink = 
+                        Handle sentenceOwnerLink =
                             AtomSpaceUtil::addLink(atomSpace, LIST_LINK, sentenceOwner );
                         atomSpace.setTV( sentenceOwnerLink, TruthValue::TRUE_TV( ) );
                         logger().debug( "PAI::%s - Sentence found. now connecting[%s]",
                                         __FUNCTION__, atomSpace.getName( sentenceOwner[1] ).c_str( ) );
 
-                    } // if                    
+                    } // if
                 } // for
             } // if
         } // for
@@ -2028,26 +2028,26 @@ void PAI::processInstruction(DOMElement * element)
     arguments.push_back( sentenceText );
 
     if ( std::string(contentType) == "FACT" ) {
-        this->languageTool->resolveLatestSentenceReference(); 
-        this->languageTool->updateFact(); 
-    } 
+        this->languageTool->resolveLatestSentenceReference();
+        this->languageTool->updateFact();
+    }
     else if ( std::string(contentType) == "COMMAND" ) {
         this->languageTool->resolveLatestSentenceReference();
-        this->languageTool->resolveLatestSentenceCommand(); 
-    } 
+        this->languageTool->resolveLatestSentenceCommand();
+    }
     else if ( std::string(contentType) == "QUESTION" ) {
-        // Affiliation demand will increase when there's a pending question. 
-        // Once Affiliation demand is selected, a suitable rule (defined in 
-        // 'unity_rules.scm') will be invoked, which will eventually call 
-        // 'answer_question' function. The 'answer_question' is designed to be 
-        // a scheme function, but it is currently handled by c++ code within 
-        // PsiActionSelectionAgent::executeAction. 
-        AtomSpaceUtil::setPredicateValue( atomSpace, 
-                                          "has_unanswered_question", 
+        // Affiliation demand will increase when there's a pending question.
+        // Once Affiliation demand is selected, a suitable rule (defined in
+        // 'unity_rules.scm') will be invoked, which will eventually call
+        // 'answer_question' function. The 'answer_question' is designed to be
+        // a scheme function, but it is currently handled by c++ code within
+        // PsiActionSelectionAgent::executeAction.
+        AtomSpaceUtil::setPredicateValue( atomSpace,
+                                          "has_unanswered_question",
                                           TruthValue::TRUE_TV()
-                                        ); 
+                                        );
 
-        AtomSpaceUtil::setPredicateValue( atomSpace, 
+        AtomSpaceUtil::setPredicateValue( atomSpace,
                                           "is_question",
                                           TruthValue::TRUE_TV(),
                                           sentenceNode
@@ -2063,20 +2063,20 @@ void PAI::processInstruction(DOMElement * element)
         if ( std::string( targetMode ) == avatarInterface.getCurrentModeHandler( ).getModeName( ) ) {
 
             // ATTENTION: a sentence must be upper case to be handled by the agent mode handlers
-            boost::to_upper(arguments[0]);            
+            boost::to_upper(arguments[0]);
             arguments.push_back( boost::lexical_cast<std::string>( tsValue ) );
             arguments.push_back( internalAvatarId );
             avatarInterface.getCurrentModeHandler().handleCommand("instruction", arguments);
-        } 
+        }
         else {
             logger().debug( "PAI::%s - A specific command of another mode was sent. Ignoring it. "
-                            "Current Mode: %s, Target Mode: %s, Command: %s", 
-                            __FUNCTION__, 
+                            "Current Mode: %s, Target Mode: %s, Command: %s",
+                            __FUNCTION__,
                             avatarInterface.getCurrentModeHandler().getModeName().c_str(),
                             targetMode,
-                            sentenceText 
+                            sentenceText
                           );
-        } 
+        }
     } // if
 
     XMLString::release(&petID);
@@ -2152,7 +2152,7 @@ void PAI::processAgentSignal(DOMElement * element) throw (opencog::RuntimeExcept
         if (n->getNodeType() != DOMNode::ELEMENT_NODE)
             continue;
         DOMElement* signal = (DOMElement*) n;
-        
+
         // getting action name attribute value
         XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
         char* name = XMLString::transcode(signal->getAttribute(tag));
@@ -2310,17 +2310,17 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 
         for (unsigned int j = 0; j < propertiesList->getLength(); j++) {
 
-            DOMElement* propertiesElement = 
+            DOMElement* propertiesElement =
                      (DOMElement*) propertiesList->item(j);
 
             XMLString::transcode(PROPERTY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
             DOMNodeList * propertyList = propertiesElement->getElementsByTagName(tag);
 
             //printf("Property List: %d\n",propertyList->getLength());
-            
+
             for (unsigned int p = 0; p < propertyList->getLength(); p++) {
 
-                DOMElement* propertyElement = 
+                DOMElement* propertyElement =
                          (DOMElement*) propertyList->item(p);
 
 
@@ -2330,52 +2330,52 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                 XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
                 char* value =  XMLString::transcode(propertyElement->getAttribute(tag));
 
-        
+
                 // Note from Tristan: All objects (toys, pets, and pet-owners) report map updates, usually on themselves,
                 // but sometimes on other avatars or objects (such as structures).
-                // The detector boolean simply means that the blip indicated was the one that the object reported on itself.     
+                // The detector boolean simply means that the blip indicated was the one that the object reported on itself.
                 if( strcmp(name, DETECTOR_ATTRIBUTE) == 0 ){
                     detector = value;
                 } else if( strcmp(name, REMOVE_ATTRIBUTE) == 0 ){
                     //objRemoval = !strcmp(value, "true");
                     objRemoval = (strcmp(value, "true") == 0 ? true : false);
-                } 
+                }
                 // visibility-status
                 else if( strcmp(name, VISIBILITY_STATUS_ATTRIBUTE) == 0 ){
                    isObjectInsidePetFov = !strcmp(value, "visible" );
-                } 
+                }
                 // length
                 else if( strcmp(name, LENGTH_ATTRIBUTE) == 0 ){
                    length = atof(value);
-                } 
+                }
                 // width
                 else if( strcmp(name, WIDTH_ATTRIBUTE) == 0 ){
                    width = atof(value);
-                } 
+                }
                 // height
                 else if( strcmp(name, HEIGHT_ATTRIBUTE) == 0 ){
                    height = atof(value);
-                } 
+                }
                 // edible
                 else if( strcmp(name, EDIBLE_ATTRIBUTE) == 0 ){
                     edible = (strcmp(value, "true") == 0 ? true : false);
-                } 
+                }
                 // drinkable
                 else if( strcmp(name, DRINKABLE_ATTRIBUTE) == 0 ){
                     drinkable = (strcmp(value, "true") == 0 ? true : false);
-                } 
+                }
                 // pet home
                 else if( strcmp(name, PET_HOME_ATTRIBUTE) == 0 ){
                     petHome = (strcmp(value, "true") == 0 ? true : false);
-                } 
+                }
                 // food bowl
                 else if( strcmp(name, FOOD_BOWL_ATTRIBUTE) == 0 ){
                     foodBowl = (strcmp(value, "true") == 0 ? true : false);
-                } 
+                }
                 // water bowl
                 else if( strcmp(name, WATER_BOWL_ATTRIBUTE) == 0 ){
                     waterBowl = (strcmp(value, "true") == 0 ? true : false);
-                } 
+                }
                 //entity class
                 else if( strcmp(name, ENTITY_CLASS_ATTRIBUTE) == 0 ){
                     entityClass = value;
@@ -2383,7 +2383,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                     // Check if this entity is a terrain object(a.k.a a block)
                     if (entityClass == "block")
                         isTerrainObject = true;
-                } 
+                }
                 //color
                 else if( strncmp(name, COLOR_ATTRIBUTE, strlen(COLOR_ATTRIBUTE)) == 0 ){
                     // color properties in the following format:
@@ -2396,15 +2396,15 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                     } else {
                         logger().error("Got an invalid value for color attribute in blip element");
                     }
-                } 
+                }
                 // is toy
                 else if( strcmp(name, IS_TOY_ATTRIBUTE) == 0 ){
                    isToy = (strcmp(value, "true") == 0 ? true : false);
-                } 
+                }
                 //material
                 else if( strcmp(name, MATERIAL_ATTRIBUTE) == 0 ){
                     material = value;
-                } 
+                }
                 //texture
                 else if( strcmp(name, TEXTURE_ATTRIBUTE) == 0 ){
                     texture = value;
@@ -2416,7 +2416,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 
           }// for property
         } // for properties
-        
+
         // processing entity element of blip
         XMLString::transcode(ENTITY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
         DOMElement* entityElement =
@@ -2490,7 +2490,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
             toUpdateHandles.push_back(objectNode);
         }
 
-        // Update existance predicate 
+        // Update existance predicate
         addPropertyPredicate(std::string("exist"), objectNode, !objRemoval, false);
 
         if (objRemoval) {
@@ -2540,11 +2540,11 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                            (timer_end.tv_usec - timer_start.tv_usec);
             // If this entity is a terrain object, then following code can be skipped.
             // Because properties such as edible, drinkable are nonsense to a terrain object.
-            
+
             //material property
             if ( material.length() > 0 ){
                 printf("Material found: %s\n",material.c_str());
-                
+
                 Handle materialWordNode = atomSpace.addNode( WORD_NODE, material );
                 Handle materialConceptNode = atomSpace.addNode( CONCEPT_NODE, material );
 
@@ -2577,7 +2577,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                 AtomSpaceUtil::setPredicateValue( atomSpace, "texture",
                                                   SimpleTruthValue::createTV( 1.0f, 1.0f ), objectNode, textureConceptNode );
             }
-            
+
             //color properties
             std::map<std::string, float>::const_iterator it;
             for (it = colors.begin(); it != colors.end(); it++) {
@@ -2591,7 +2591,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                     Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
                     atomSpace.setLTI( referenceLink, 1 );
                 }
-                    
+
                 SimpleTruthValue tv( it->second, 1.0 );
                 AtomSpaceUtil::setPredicateValue( atomSpace, "color",
                                                   tv, objectNode, colorConceptNode );
@@ -2599,7 +2599,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                 std::map<std::string, Handle> elements;
                 //elements["Color"] = colorConceptNode;
                 //elements["Entity"] = objSemeNode;
-                //AtomSpaceUtil::setPredicateFrameFromHandles( 
+                //AtomSpaceUtil::setPredicateFrameFromHandles(
                 //    atomSpace, "#Color", internalEntityId + "_" + it->first + "_color",
                 //        elements, tv );
 
@@ -2740,7 +2740,7 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
         MapInfoSeq mapinfoSeq;
         mapinfoSeq.ParseFromArray((void*)binary, length);
         logger().debug("PAI - processMapInfo recieved mapinfos information: %s", mapinfoSeq.DebugString().c_str());
-        
+
         for (int j = 0; j < mapinfoSeq.mapinfos_size(); j++)
         {
             const MapInfo& mapinfo = mapinfoSeq.mapinfos(j);
@@ -2761,7 +2761,7 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
             }
 
         }
-        
+
         delete(binary);
     }
 /*
@@ -2940,7 +2940,7 @@ Vector PAI::addVectorPredicate(Handle objectNode, const std::string& predicateNa
     return result;
 }
 
-Handle PAI::addVectorPredicate(Handle objectNode, const std::string& predicateName, 
+Handle PAI::addVectorPredicate(Handle objectNode, const std::string& predicateName,
         const Vector& vec)
 {
     Handle predNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, predicateName, true);
@@ -2964,7 +2964,7 @@ Handle PAI::addVectorPredicate(Handle objectNode, const std::string& predicateNa
     return evalLink;
 }
 
-void PAI::addVectorPredicate(Handle objectNode, const std::string& predicateName, 
+void PAI::addVectorPredicate(Handle objectNode, const std::string& predicateName,
         const Vector& vec, unsigned long timestamp)
 {
     Handle evalLink = addVectorPredicate(objectNode, predicateName, vec);
@@ -3100,7 +3100,7 @@ void PAI::addSpaceMapBoundary(DOMElement * element)
     // TODO change the data wrapper once XML is completely replaced.
 
     // The incoming XML DOM element should contain following attributes:
-    //  <element-tag global-position-x="24" global-position-y="24" 
+    //  <element-tag global-position-x="24" global-position-y="24"
     //              global-position-offset="96" global-floor-height="99">
     //  </element-tag>
 
@@ -3238,8 +3238,8 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
                                                    (int)length, (int)width, (int)height, rotation.yaw, isObstacle, entityClass, isFirstTimePercept);
 }
 */
-void PAI::addSemanticStructure(Handle objectNode, 
-        const std::string& entityId, 
+void PAI::addSemanticStructure(Handle objectNode,
+        const std::string& entityId,
         const std::string& entityClass,
         const std::string& entityType)
 {
@@ -3251,24 +3251,23 @@ void PAI::addSemanticStructure(Handle objectNode,
     typeName[0] = std::toupper(typeName[0]);
 
     // Add semantic structure into atomspace, used for language comprehension.
-    Handle objSemeNode = atomSpace.addNode(SEME_NODE, entityId , SimpleTruthValue::createTV(1, 1));
+    Handle objSemeNode = atomSpace.addNode(SEME_NODE, entityId);
+    objSemeNode->setTruthValue(SimpleTruthValue::createTV(1, 1));
     Handle objWordNode = atomSpace.addNode(WORD_NODE, entityClass);
-    Handle objClassNode = atomSpace.addNode(CONCEPT_NODE, entityClass, SimpleTruthValue::createTV(1, 1));
-        
+    Handle objClassNode = atomSpace.addNode(CONCEPT_NODE, entityClass);
+    objClassNode->setTruthValue(SimpleTruthValue::createTV(1, 1));
+
     // Create the inheritance link
-    Handle objectType = atomSpace.addNode(CONCEPT_NODE, typeName, SimpleTruthValue::createTV(1, 1));
-    HandleSeq inheritance(2);
-    inheritance[0] = objSemeNode;
-    inheritance[1] = objectType;
-    Handle link = atomSpace.addLink(INHERITANCE_LINK, inheritance, SimpleTruthValue::createTV(1, 1));
+    Handle objectType = atomSpace.addNode(CONCEPT_NODE, typeName);
+    objectType->setTruthValue(SimpleTruthValue::createTV(1, 1));
+    Handle link = atomSpace.addLink(INHERITANCE_LINK,
+        objSemeNode, objectType);
+    link->setTruthValue(SimpleTruthValue::createTV(1, 1));
     atomSpace.setLTI(link, 1);
 
-    HandleSeq classReference(2);
-    classReference[0] = objClassNode;
-    classReference[1] = objSemeNode;
-
-    Handle referenceLink = 
-        atomSpace.addLink(REFERENCE_LINK, classReference, TruthValue::TRUE_TV());
+    Handle referenceLink =
+        atomSpace.addLink(REFERENCE_LINK, objClassNode, objSemeNode);
+    referenceLink->setTruthValue(TruthValue::TRUE_TV());
     atomSpace.setLTI(referenceLink, 1);
 
     // Create a frame for representing this object
@@ -3276,7 +3275,7 @@ void PAI::addSemanticStructure(Handle objectNode,
     elements["Entity"] = objSemeNode;
     elements["Name"] = objClassNode;
     elements["Type"] = objectType;
-    AtomSpaceUtil::setPredicateFrameFromHandles(atomSpace, "#Entity", 
+    AtomSpaceUtil::setPredicateFrameFromHandles(atomSpace, "#Entity",
             entityId + "_entity", elements, TruthValue::TRUE_TV());
 
     // JaredW: connect the AccessoryNode[etc] directly to the ConceptNode.
@@ -3284,42 +3283,33 @@ void PAI::addSemanticStructure(Handle objectNode,
     // It should use the (ConceptNode "Accessory"), as defined above (and only that).
     // Useful for inference and frequent subgraph mining
     {
-        HandleSeq inheritance(2);
-        inheritance[0] = objectNode;
-        inheritance[1] = objectType;
-
-        Handle link = atomSpace.addLink(INHERITANCE_LINK, inheritance, 
-                SimpleTruthValue::createTV(1, 1));
+        Handle link = atomSpace.addLink(INHERITANCE_LINK,
+               objectNode, objectType);
+        link->setTruthValue(SimpleTruthValue::createTV(1, 1));
         atomSpace.setLTI(link, 1);
     }
 
     // JaredW: Add e.g. (InheritanceLink (AccessoryNode "id_315840") (ConceptNode "ball"))
     {
-        HandleSeq inheritance(2);
-        inheritance[0] = objectNode;
-        inheritance[1] = objClassNode;
-
-        Handle link = atomSpace.addLink(INHERITANCE_LINK, inheritance, 
-                SimpleTruthValue::createTV(1, 1));
+        Handle link = atomSpace.addLink(INHERITANCE_LINK,
+                objectNode, objClassNode);
+        link->setTruthValue(SimpleTruthValue::createTV(1, 1));
         atomSpace.setLTI(link, 1);
     }
-    
-    //connect the acessory node to the seme node
-    HandleSeq referenceLinkOutgoing1;
 
-    referenceLinkOutgoing1.push_back(objectNode);
-    referenceLinkOutgoing1.push_back(objSemeNode);
+    // connect the acessory node to the seme node
     {
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing1, TruthValue::TRUE_TV());
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+          objectNode, objSemeNode);
+        referenceLink->setTruthValue(TruthValue::TRUE_TV());
         atomSpace.setLTI(referenceLink, 1);
     }
 
-    //connect the seme node to the word node
-    HandleSeq referenceLinkOutgoing2;
-    referenceLinkOutgoing2.push_back(objSemeNode);
-    referenceLinkOutgoing2.push_back(objWordNode);
+    // connect the seme node to the word node
     {
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing2, TruthValue::TRUE_TV());
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+           objSemeNode, objWordNode);
+        referenceLink->setTruthValue(TruthValue::TRUE_TV());
         atomSpace.setLTI(referenceLink, 1);
     }
 }
@@ -3344,7 +3334,7 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
     HandleSeq dummy;dummy.push_back(agentNode);
     evalLinkOutgoing.push_back(AtomSpaceUtil::addLink(atomSpace, LIST_LINK, dummy));
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
-    atomSpace.setSTI(evalLink, sti); 
+    atomSpace.setSTI(evalLink, sti);
 
     // Time stamp the EvaluationLink
     //
@@ -3356,10 +3346,10 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
 
     // count=1, i.e. one observation of this biological urge
     atomSpace.setTV(atTimeLink,SimpleTruthValue::createTV((strength_t)level, 1));
-    atomSpace.setSTI(atTimeLink, sti); 
+    atomSpace.setSTI(atTimeLink, sti);
 
     AtomSpaceUtil::updateLatestPhysiologicalFeeling(atomSpace, atTimeLink, feelingNode);
-    
+
     // setup the frame for the given physiological feeling
 
     // Create the name for the frame
@@ -3371,7 +3361,7 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
         std::string degree = (level >= 0.7) ?
                                  "High" :
                                  (level >= 0.3) ?
-                                     "Medium" : 
+                                     "Medium" :
                                      "Low";
 
         std::map<std::string, Handle> elements;
@@ -3381,9 +3371,9 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
         elements["Value"] = atomSpace.addNode( NUMBER_NODE, boost::lexical_cast<std::string>( level ) );
 
         AtomSpaceUtil::setPredicateFrameFromHandles( atomSpace,
-                                                     "#Biological_urge", 
+                                                     "#Biological_urge",
                                                      frameInstanceName,
-                                                     elements, 
+                                                     elements,
                                                      SimpleTruthValue::createTV( (level < 0.5) ? 0.0 : level, 1.0 )
                                                     );
     } else {
@@ -3392,7 +3382,7 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
             AtomSpaceUtil::deleteFrameInstance(atomSpace, feelingNode);
         } // if
     } // else
-    
+
     return evalLink;
 }
 
@@ -3417,13 +3407,13 @@ Handle PAI::addOwnershipRelation(const Handle owner, const Handle owned, bool is
     return evalLink;
 }
 
-// This function is called by PsiActionSelectionAgent, when an action is timeout 
+// This function is called by PsiActionSelectionAgent, when an action is timeout
 void PAI::setPendingActionPlansFailed()
 {
-    // Note: use empty() rather than iterator directly, since setActionPlanStatus 
-    //       will erase action plans in  pendingActionPlans if necessary. 
+    // Note: use empty() rather than iterator directly, since setActionPlanStatus
+    //       will erase action plans in  pendingActionPlans if necessary.
     while ( !pendingActionPlans.empty() ) {
-        ActionPlanID planId = pendingActionPlans.begin()->first; 
+        ActionPlanID planId = pendingActionPlans.begin()->first;
 
         setActionPlanStatus(planId, 0, opencog::pai::ERROR,
                             getLatestSimWorldTimestamp());
@@ -3524,7 +3514,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
 					sendExtractedActionFromPlan(planId, nextActionSeqNum);
 				}
 			}
-		} 
+		}
 
     } else {
         logger().warn("PAI - No pending action plan with the given id '%s'.",
@@ -3560,7 +3550,7 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
 {
 
     // XML is to be replaced by protobuf, but currently, we use it to wrap a
-    // base64 string that can be interpreted into binary and then be deserialized 
+    // base64 string that can be interpreted into binary and then be deserialized
     // by protobuf.
     // The XML format of terrain info is:
     //      <?xml version="1.0" encoding="UTF-8"?>
@@ -3633,7 +3623,7 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
             if (isFirstPerceptTerrian)
                 blockNum ++;
         }
-        
+
         delete(binary);
     }
 
@@ -3681,7 +3671,7 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
     std::string internalEntityId = PAIUtils::getInternalId(mapinfo.id().c_str());
     std::string entityType = mapinfo.type();
     std::string entityName = mapinfo.name();
-    
+
     bool isSelfObject = (internalEntityId == avatarInterface.getPetId());
     bool isOwnerObject = (internalEntityId == avatarInterface.getOwnerId());
 
@@ -3692,7 +3682,7 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
         objectNode = AtomSpaceUtil::addNode(atomSpace, getSLObjectNodeType(entityType.c_str()), internalEntityId.c_str());
         // add an inheritance link
         Handle typeNode = AtomSpaceUtil::addNode(atomSpace, NODE, entityType.c_str());
-        addInheritanceLink(typeNode, objectNode);   
+        addInheritanceLink(typeNode, objectNode);
     } else {
         objectNode = AtomSpaceUtil::addNode(atomSpace, OBJECT_NODE, internalEntityId.c_str());
     }
@@ -3717,7 +3707,7 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
     addSpacePredicates(objectNode, mapinfo, isSelfObject, timestamp,isFirstTimePercept);
 
     //addPropertyPredicate(std::string("is_moving"), objectNode, moving);
-    
+
     // Add semantic structure of this map-info to be used in language comprehension
     addSemanticStructure(objectNode, mapinfo);
 
@@ -3735,7 +3725,7 @@ Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long time
 
     spaceServer().removeSpaceInfo(objectNode, timestamp);
 
-    addPropertyPredicate(std::string("exist"), objectNode, false, false); //! Update existance predicate 
+    addPropertyPredicate(std::string("exist"), objectNode, false, false); //! Update existance predicate
 
     // check if the object to be removed is marked as grabbed in
     // AvatarInterface. If so grabbed status should be unset.
@@ -3910,7 +3900,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     AtomSpaceUtil::addPropertyPredicate(atomSpace, ENTITY_CLASS_ATTRIBUTE, objectNode,classHandle, tv, true);
 
     // Add the property predicates in atomspace
-    addPropertyPredicate(std::string("exist"), objectNode, true, false); //! Update existance predicate 
+    addPropertyPredicate(std::string("exist"), objectNode, true, false); //! Update existance predicate
     addPropertyPredicate(std::string("is_edible"), objectNode, isEdible, true);
     addPropertyPredicate(std::string("is_drinkable"), objectNode, isDrinkable, true);
     addPropertyPredicate(std::string("is_toy"), objectNode, isToy, true);
@@ -3935,22 +3925,20 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     Handle agentNode = AtomSpaceUtil::getAgentHandle(atomSpace, avatarInterface.getPetId());
     if (agentNode != objectNode) { // an agent cannot see itself
         AtomSpaceUtil::setPredicateValue(atomSpace, "inside_pet_fov",
-                                        SimpleTruthValue::createTV((isVisible ? 1.0f : 0.0f), 1.0f), 
+                                        SimpleTruthValue::createTV((isVisible ? 1.0f : 0.0f), 1.0f),
                                         agentNode, objectNode);
     } // if
 
     // Add holder property predicate
     if (holder != NULL_ATTRIBUTE)
     {
-        Handle holderWordNode = atomSpace.addNode(WORD_NODE, holder);
-        Handle holderConceptNode = atomSpace.addNode(AVATAR_NODE, holder);
-
-        HandleSeq referenceLinkOutgoing;
-        referenceLinkOutgoing.push_back(holderConceptNode);
-        referenceLinkOutgoing.push_back(holderWordNode);
-
         // Add a reference link
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
+        Handle holderConceptNode = atomSpace.addNode(AVATAR_NODE, holder);
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+            holderConceptNode,
+            atomSpace.addNode(WORD_NODE, holder));
+
+        referenceLink->setTruthValue(TruthValue::TRUE_TV());
         atomSpace.setLTI(referenceLink, 1);
 
         AtomSpaceUtil::setPredicateValue(atomSpace, "holder",
@@ -3960,7 +3948,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     // Add material property predicate
     if (material != NULL_ATTRIBUTE){
        // printf("Material found: %s\n",material.c_str());
-        
+
         Handle materialWordNode = atomSpace.addNode(WORD_NODE, material);
         Handle materialConceptNode = atomSpace.addNode(CONCEPT_NODE, material);
 
@@ -3969,7 +3957,8 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
         referenceLinkOutgoing.push_back(materialWordNode);
 
         // Add a reference link
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing);
+        referenceLink->setTruthValue(TruthValue::TRUE_TV());
         atomSpace.setLTI(referenceLink, 1);
 
         AtomSpaceUtil::setPredicateValue(atomSpace, "material",
@@ -3983,12 +3972,10 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
         Handle colorNameWordNode = atomSpace.addNode(WORD_NODE, color_name);
         Handle colorNameConceptNode = atomSpace.addNode(CONCEPT_NODE, color_name);
 
-        HandleSeq referenceLinkOutgoing;
-        referenceLinkOutgoing.push_back(colorNameConceptNode);
-        referenceLinkOutgoing.push_back(colorNameWordNode);
-
         // Add a reference link
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+            colorNameConceptNode, colorNameWordNode);
+        referenceLink->setTruthValue(TruthValue::TRUE_TV());
         atomSpace.setLTI(referenceLink, 1);
 
         AtomSpaceUtil::setPredicateValue(atomSpace, "color_name",
@@ -4000,12 +3987,11 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
         printf("Texture found: %s\n", texture.c_str());
         Handle textureWordNode = atomSpace.addNode(WORD_NODE, texture);
         Handle textureConceptNode = atomSpace.addNode(CONCEPT_NODE, texture);
-        HandleSeq referenceLinkOutgoing;
-        referenceLinkOutgoing.push_back(textureConceptNode);
-        referenceLinkOutgoing.push_back(textureWordNode);
 
         // Add a reference link
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+            textureConceptNode, textureWordNode);
+        referenceLink->setTruthValue(TruthValue::TRUE_TV());
         atomSpace.setLTI(referenceLink, 1);
 
         AtomSpaceUtil::setPredicateValue(atomSpace, "texture",
@@ -4026,7 +4012,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
             Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
             atomSpace.setLTI(referenceLink, 1);
         }
-            
+
         SimpleTruthValue tv(it->second, 1.0);
         AtomSpaceUtil::setPredicateValue(atomSpace, "color",
                                           tv, objectNode, colorConceptNode);
@@ -4034,7 +4020,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
         std::map<std::string, Handle> elements;
         elements["Color"] = colorConceptNode;
         elements["Entity"] = objSemeNode;
-        AtomSpaceUtil::setPredicateFrameFromHandles( 
+        AtomSpaceUtil::setPredicateFrameFromHandles(
             atomSpace, "#Color", internalEntityId + "_" + it->first + "_color",
                 elements, tv);
 
