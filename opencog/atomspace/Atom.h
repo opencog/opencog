@@ -268,6 +268,16 @@ public:
     /** merge truth value into this */
     void merge(TruthValuePtr);
 
+    /**
+     * Merge truth value, return Handle for this.
+     * This allows oneliners such as:
+     *   Handle h = atomSpace->addNode(FOO_NODE, "foo")->hmerge(tv);
+     */
+    inline Handle hmerge(TruthValuePtr tv) {
+        merge(tv);
+        return Handle(shared_from_this());
+    }
+
     //! Get the size of the incoming set.
     size_t getIncomingSetSize();
 
