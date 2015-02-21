@@ -97,14 +97,19 @@ public:
         SavingLoading savingLoading;
 
         // Insert 3 basic concept nodes with the already declared names and tvs.
-        Handle h1 = atomSpace.addNode(CONCEPT_NODE, (string)NODE1_NAME, tvs[0]);
-        Handle h2 = atomSpace.addNode(CONCEPT_NODE, (string)NODE2_NAME, tvs[1]);
-        Handle h3 = atomSpace.addNode(CONCEPT_NODE, (string)NODE3_NAME, tvs[2]);
+        Handle h1 = atomSpace.addNode(CONCEPT_NODE, (string)NODE1_NAME);
+        h1->setTruthValue(tvs[0]);
+        Handle h2 = atomSpace.addNode(CONCEPT_NODE, (string)NODE2_NAME);
+        h2->setTruthValue(tvs[1]);
+        Handle h3 = atomSpace.addNode(CONCEPT_NODE, (string)NODE3_NAME);
+        h3->setTruthValue(tvs[2]);
         //logger().debug("runSaving() 1");
 
         //logger().debug("runSaving() 2");
-        Handle h4 = atomSpace.addNode(CONCEPT_NODE, (string)NODE4_NAME, tvs[3]);
-        Handle h5 = atomSpace.addNode(CONCEPT_NODE, (string)NODE5_NAME, tvs[4]);
+        Handle h4 = atomSpace.addNode(CONCEPT_NODE, (string)NODE4_NAME);
+        h4->setTruthValue(tvs[3]);
+        Handle h5 = atomSpace.addNode(CONCEPT_NODE, (string)NODE5_NAME);
+        h5->setTruthValue(tvs[4]);
         //logger().debug("runSaving() 3");
 
         // Insert some links
@@ -278,7 +283,6 @@ public:
 
     void testSavingLoading()
     {
-        
         AtomSpace *atomSpace1 = new AtomSpace();
         ss = new SpaceServer(*atomSpace1);
         ts = new TimeServer(*atomSpace1, ss);

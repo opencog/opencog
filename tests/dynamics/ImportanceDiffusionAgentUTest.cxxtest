@@ -46,7 +46,8 @@ vector<Handle> createHebbianGraph(AtomSpace* atomSpace, std::string baseName)
         std::ostringstream buf;
         TruthValuePtr tv1 = SimpleTruthValue::createTV(0.5f, 0.99f);
         buf << baseName << i;
-        Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf.str().c_str(), tv1);
+        Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf.str().c_str());
+        h1->setTruthValue(tv1);
         //printf("add atom %d: %s\n", i, buf.str().c_str());
         testAtoms.push_back(h1);
     }
@@ -56,12 +57,14 @@ vector<Handle> createHebbianGraph(AtomSpace* atomSpace, std::string baseName)
     HandleSeq outgoing1;
     outgoing1.push_back(testAtoms[0]);
     outgoing1.push_back(testAtoms[1]);
-    Handle l1 = atomSpace->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing1, tv2);
+    Handle l1 = atomSpace->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing1);
+    l1->setTruthValue(tv2);
 
     HandleSeq outgoing2;
     outgoing2.push_back(testAtoms[2]);
     outgoing2.push_back(testAtoms[3]);
-    Handle l2 = atomSpace->addLink(INVERSE_HEBBIAN_LINK, outgoing2, tv2);
+    Handle l2 = atomSpace->addLink(INVERSE_HEBBIAN_LINK, outgoing2);
+    l2->setTruthValue(tv2);
 
     testAtoms.push_back(l1);
     testAtoms.push_back(l2);

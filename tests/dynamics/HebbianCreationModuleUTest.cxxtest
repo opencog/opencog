@@ -82,38 +82,50 @@ public:
 
         // Populate the AtomSpace with the example atoms
         Handle kermit = as->addNode(
-            CONCEPT_NODE, "Kermit", SimpleTruthValue::createTV(0.001, conf90));
+            CONCEPT_NODE, "Kermit");
+        kermit->setTruthValue( SimpleTruthValue::createTV(0.001, conf90));
         Handle frog = as->addNode(
-            CONCEPT_NODE, "Frog", SimpleTruthValue::createTV(0.01, conf90));
+            CONCEPT_NODE, "Frog");
+        frog->setTruthValue( SimpleTruthValue::createTV(0.01, conf90));
         Handle animal = as->addNode(
-            CONCEPT_NODE, "Animal", SimpleTruthValue::createTV(0.1, conf90));
+            CONCEPT_NODE, "Animal");
+        animal->setTruthValue( SimpleTruthValue::createTV(0.1, conf90));
         Handle alive = as->addNode(
-            PREDICATE_NODE, "alive", SimpleTruthValue::createTV(0.01, conf90));
+            PREDICATE_NODE, "alive");
+        alive->setTruthValue( SimpleTruthValue::createTV(0.01, conf90));
         Handle slimy = as->addNode(
-            PREDICATE_NODE, "slimy", SimpleTruthValue::createTV(0.01, conf90));
+            PREDICATE_NODE, "slimy");
+        slimy->setTruthValue( SimpleTruthValue::createTV(0.01, conf90));
 
         Handle kermitFrog = as->addLink(
-                    INHERITANCE_LINK, kermit, frog,
+                    INHERITANCE_LINK, kermit, frog);
+        kermitFrog->setTruthValue(
                     SimpleTruthValue::createTV(0.9, conf90));
         Handle frogAnimal = as->addLink(
-                    INHERITANCE_LINK, frog, animal,
+                    INHERITANCE_LINK, frog, animal);
+        frogAnimal->setTruthValue(
                     SimpleTruthValue::createTV(0.9, conf90));
         Handle frogAlive = as->addLink(
-                    EVALUATION_LINK, frog, alive,
+                    EVALUATION_LINK, frog, alive);
+        frogAlive->setTruthValue(
                     SimpleTruthValue::createTV(0.9, conf90));
         Handle frogSlimy = as->addLink(
-                    EVALUATION_LINK, frog, slimy,
+                    EVALUATION_LINK, frog, slimy);
+        frogSlimy->setTruthValue(
                     SimpleTruthValue::createTV(0.9, conf90));
 
         // Populate the AtomSpace with some additional dummy atoms
         Handle dummy1 = as->addNode(
-                    CONCEPT_NODE, "Dummy1",
+                    CONCEPT_NODE, "Dummy1");
+        dummy1->setTruthValue(
                     SimpleTruthValue::createTV(0.001, conf90));
         Handle dummy2 = as->addNode(
-                    CONCEPT_NODE, "Dummy1",
+                    CONCEPT_NODE, "Dummy2");
+        dummy2->setTruthValue(
                     SimpleTruthValue::createTV(0.001, conf90));
         Handle dummyLink = as->addLink(
-                    INHERITANCE_LINK, dummy1, dummy2,
+                    INHERITANCE_LINK, dummy1, dummy2);
+        dummyLink->setTruthValue(
                     SimpleTruthValue::createTV(0.9, conf90));
 
         // Put these atoms in the AttentionalFocus:
