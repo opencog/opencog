@@ -98,11 +98,13 @@ const std::vector<double>& DimEmbedModule::getEmbedVector(Handle h,
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(l).c_str());
+
     if (!isEmbedded(l)) {
         const char* tName = classserver().getTypeName(l).c_str();
         logger().error("No embedding exists for type %s", tName);
         throw std::string("No embedding exists for type %s", tName);
     }
+
     bool symmetric = classserver().isA(l,UNORDERED_LINK);
     if (symmetric) {
         const AtomEmbedding& aE = (atomMaps.find(l))->second;
@@ -844,7 +846,8 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             double strength = sqrt(std::pow(2.0, -dist));
             TruthValuePtr tv(SimpleTruthValue::createTV(strength,
                                 SimpleTruthValue::confidenceToCount(strength)));
-            as->addLink(INHERITANCE_LINK, *it2, newNode)->setTruthValue(tv);
+            Handle hi = as->addLink(INHERITANCE_LINK, *it2, newNode);
+            hi->getTruthValue()->merge(tv);
             for (int i=0; i<numDims; ++i) {
                 strNumer[i]+=strength*embedVec[i];
                 strDenom[i]+=strength;
@@ -856,7 +859,8 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             double attrStrength = sqrt(strNumer[i]/strDenom[i]);
             TruthValuePtr tv(SimpleTruthValue::createTV(attrStrength,
                                 SimpleTruthValue::confidenceToCount(attrStrength)));
-            as->addLink(l, newNode, pivots[i])->setTruthValue( tv);
+            Handle hi = as->addLink(l, newNode, pivots[i]);
+            hi->getTruthValue()->merge(tv);
         }
     }
 }
@@ -965,7 +969,8 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         double strength = sqrt(newVec[i]);
         TruthValuePtr tv(SimpleTruthValue::createTV(strength,
                             SimpleTruthValue::confidenceToCount(strength)));
-        as->addLink(l, newNode, pivots[i])->setTruthValue( tv);
+        Handle hi = as->addLink(l, newNode, pivots[i]);
+        hi->getTruthValue()->merge(tv);
     }
     return newNode;
 }
@@ -974,9 +979,9 @@ double DimEmbedModule::euclidDist(double v1[], double v2[], int size)
 {
     double dist=0;
     for (int i=0; i<size;++i) {
-        dist+=std::pow((v1[i]-v2[i]), 2);
+        dist += std::pow((v1[i]-v2[i]), 2);
     }
-    dist=sqrt(dist);
+    dist = sqrt(dist);
     return dist;
 }
 
@@ -989,8 +994,8 @@ double DimEmbedModule::euclidDist(Handle h1,
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(l).c_str());
-    return euclidDist(getEmbedVector(h1,l,fanin),
-                      getEmbedVector(h2,l,fanin));
+    return euclidDist(getEmbedVector(h1, l, fanin),
+                      getEmbedVector(h2, l, fanin));
 }
 
 double DimEmbedModule::euclidDist(const std::vector<double>& v1,
