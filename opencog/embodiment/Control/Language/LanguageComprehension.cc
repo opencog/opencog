@@ -672,7 +672,7 @@ void LanguageComprehension::answerQuestion()
     HandleSeq sentences; 
     sentences.push_back( atomSpace.addNode( ANCHOR_NODE, "# Possible Sentences" ) );
     sentences.push_back( atomSpace.addNode( SENTENCE_NODE, answer_sentence) ); 
-    atomSpace.addLink( LIST_LINK, sentences, SimpleTruthValue::createTV( 1, 1 ) );
+    atomSpace.addLink( LIST_LINK, sentences)->setTruthValue(SimpleTruthValue::createTV( 1, 1 ) );
 
     answer = evaluator->eval( "(choose-sentence)");
     logger().debug( "LanguageComprehension::%s - (choose-sentence) answer: %s",

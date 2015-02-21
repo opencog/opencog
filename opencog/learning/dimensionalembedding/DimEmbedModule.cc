@@ -844,7 +844,7 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             double strength = sqrt(std::pow(2.0, -dist));
             TruthValuePtr tv(SimpleTruthValue::createTV(strength,
                                 SimpleTruthValue::confidenceToCount(strength)));
-            as->addLink(INHERITANCE_LINK, *it2, newNode, tv);
+            as->addLink(INHERITANCE_LINK, *it2, newNode)->setTruthValue(tv);
             for (int i=0; i<numDims; ++i) {
                 strNumer[i]+=strength*embedVec[i];
                 strDenom[i]+=strength;
@@ -856,7 +856,7 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             double attrStrength = sqrt(strNumer[i]/strDenom[i]);
             TruthValuePtr tv(SimpleTruthValue::createTV(attrStrength,
                                 SimpleTruthValue::confidenceToCount(attrStrength)));
-            as->addLink(l, newNode, pivots[i], tv);
+            as->addLink(l, newNode, pivots[i])->setTruthValue( tv);
         }
     }
 }
@@ -965,7 +965,7 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         double strength = sqrt(newVec[i]);
         TruthValuePtr tv(SimpleTruthValue::createTV(strength,
                             SimpleTruthValue::confidenceToCount(strength)));
-        as->addLink(l, newNode, pivots[i], tv);
+        as->addLink(l, newNode, pivots[i])->setTruthValue( tv);
     }
     return newNode;
 }

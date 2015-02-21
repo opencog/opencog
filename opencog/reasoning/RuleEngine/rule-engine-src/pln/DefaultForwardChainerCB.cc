@@ -191,19 +191,20 @@ map<Handle, string> DefaultForwardChainerCB::choose_variable(Handle htarget) {
 }
 
 Handle DefaultForwardChainerCB::target_to_pmimplicant(Handle htarget,
-		map<Handle, string> hnode_vname_map) {
-	Type link_type;
-	HandleSeq hsvariablized;
-
+		map<Handle, string> hnode_vname_map)
+{
 	if (LinkCast(htarget)) {
+	   HandleSeq hsvariablized;
 		LinkPtr p_htarget = LinkCast(htarget);
-		link_type = p_htarget->getType();
+		Type link_type = p_htarget->getType();
 		HandleSeq hsoutgoing = as_->getOutgoing(htarget);
 		for (auto i = hsoutgoing.begin(); i != hsoutgoing.end(); ++i) {
 			Handle htmp = target_to_pmimplicant(*i, hnode_vname_map);
 			hsvariablized.push_back(htmp);
 		}
-		return as_->addLink(link_type, hsvariablized, TruthValue::TRUE_TV());
+		Handle h(as_->addLink(link_type, hsvariablized));
+		h->setTruthValue(TruthValue::TRUE_TV());
+		return h;
 	} else {
 		if (NodeCast(htarget)) {
 			auto it_var = hnode_vname_map.find(htarget); //TODO replace by find-if for linear complexity
@@ -211,6 +212,7 @@ Handle DefaultForwardChainerCB::target_to_pmimplicant(Handle htarget,
 			if (it_var != hnode_vname_map.end()) {
 				Handle h = as_->addNode(VARIABLE_NODE, it_var->second);
 				h->setTruthValue(TruthValue::TRUE_TV());
+            return h;
          }
 			else
 				return htarget;

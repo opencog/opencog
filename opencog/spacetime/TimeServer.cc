@@ -135,7 +135,8 @@ Handle TimeServer::addTimeInfo(Handle h, const std::string& timeNodeName, TruthV
     HandleSeq atTimeLinkOutgoing;
     atTimeLinkOutgoing.push_back(timeNode);
     atTimeLinkOutgoing.push_back(h);
-    Handle atTimeLink = atomspace->addLink(AT_TIME_LINK, atTimeLinkOutgoing, tv);
+    Handle atTimeLink = atomspace->addLink(AT_TIME_LINK, atTimeLinkOutgoing);
+    atTimeLink->setTruthValue(tv);
     DPRINTF("TimeServer::addTimeInfo - atTimeLink was %lu\n", atTimeLink.value());
     DPRINTF("TimeServer::addTimeInfo - temp end\n");
     return atTimeLink;

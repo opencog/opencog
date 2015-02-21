@@ -228,7 +228,8 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(vector<Handle>& in
                 {
                     HandleSeq outgoingLinks;
                     generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, originalAtomSpace);
-                    Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),outgoingLinks,TruthValue::TRUE_TV());
+                    Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link), outgoingLinks);
+                    rebindedLink->setTruthValue(TruthValue::TRUE_TV());
                     if (onlyContainVariableNodes(rebindedLink, atomSpace))
                     {
                         hasLinkContainsOnlyVars = true;
@@ -584,7 +585,8 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, At
              HandleSeq _OutgoingLinks;
              bool _containVar;
              swapOneLinkBetweenTwoAtomSpaceBF(fromAtomSpace, toAtomSpace, h, _OutgoingLinks, outVariableNodes,linksWillBeDel,  _containVar);
-             Handle _link = toAtomSpace->addLink(fromAtomSpace->getType(h),_OutgoingLinks,fromAtomSpace->getTV(h));
+             Handle _link = toAtomSpace->addLink(fromAtomSpace->getType(h), _OutgoingLinks);
+             _link->setTruthValue(fromAtomSpace->getTV(h));
              if (_containVar)
              {
                  linksWillBeDel.push_back(_link);
@@ -605,7 +607,8 @@ HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace,
         HandleSeq outgoingLinks;
         bool containVar;
         swapOneLinkBetweenTwoAtomSpaceBF(fromAtomSpace, toAtomSpace, link, outgoingLinks, outVariableNodes, linksWillBeDel,containVar);
-        Handle toLink = toAtomSpace->addLink(fromAtomSpace->getType(link),outgoingLinks,fromAtomSpace->getTV(link));
+        Handle toLink = toAtomSpace->addLink(fromAtomSpace->getType(link), outgoingLinks);
+        toLink->setTruthValue(fromAtomSpace->getTV(link));
         if (containVar)
             linksWillBeDel.push_back(toLink);
         outPutLinks.push_back(toLink);
@@ -657,8 +660,10 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
 //                << originalAtomSpace->atomAsString(patternToMatch[0]).c_str() << std::endl;
 //    }
 
-   Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch, TruthValue::TRUE_TV());
-   Handle hOutPutListLink = originalAtomSpace->addLink(LIST_LINK, patternToMatch, TruthValue::TRUE_TV());
+   Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch);
+   hAndLink->setTruthValue(TruthValue::TRUE_TV());
+   Handle hOutPutListLink = originalAtomSpace->addLink(LIST_LINK, patternToMatch);
+   hOutPutListLink->setTruthValue(TruthValue::TRUE_TV());
    implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
    implicationLinkOutgoings.push_back(hOutPutListLink); // the results to return
 
@@ -666,14 +671,17 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
 //            << atomSpace->atomAsString(hAndLink).c_str() << std::endl;
 
 
-   Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
+   Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+   hImplicationLink->setTruthValue(TruthValue::TRUE_TV());
 
    // add variable atoms
-   Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
+   Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes);
+   hVariablesListLink->setTruthValue(TruthValue::TRUE_TV());
 
    bindLinkOutgoings.push_back(hVariablesListLink);
    bindLinkOutgoings.push_back(hImplicationLink);
-   Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
+   Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings);
+   hBindLink->setTruthValue(TruthValue::TRUE_TV());
 
 
    string s = originalAtomSpace->atomAsString(hBindLink);

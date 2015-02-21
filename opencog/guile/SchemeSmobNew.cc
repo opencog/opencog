@@ -447,13 +447,13 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 
 	try
 	{
+		// Now, create the actual link... in the actual atom space.
+		h = atomspace->addLink(t, outgoing_set);
+
 		// Fish out a truth value, if its there.
 		const TruthValue *tv = get_tv_from_list(satom_list);
 		if (tv) {
-			h = atomspace->addLink(t, outgoing_set, tv->clone());
-		} else {
-			// Now, create the actual link... in the actual atom space.
-			h = atomspace->addLink(t, outgoing_set);
+			h->setTruthValue(tv->clone());
 		}
 
 		// Was an attention value explicitly specified?

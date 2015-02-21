@@ -30,10 +30,12 @@ PLNCommons::PLNCommons(AtomSpace * as) :
 
 }
 
-PLNCommons::~PLNCommons() {
-
+PLNCommons::~PLNCommons()
+{
 }
-Handle PLNCommons::create_quoted(Handle himplicant) {
+
+Handle PLNCommons::create_quoted(Handle himplicant)
+{
 	Handle hquoted;
 	if (LinkCast(himplicant)) {
 		HandleSeq hs = as_->getOutgoing(himplicant);
@@ -49,7 +51,8 @@ Handle PLNCommons::create_quoted(Handle himplicant) {
 }
 
 Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
-		throw (opencog::InvalidParamException) {
+		throw (opencog::InvalidParamException)
+{
 	if (!LinkCast(himplicant)) {
 		throw InvalidParamException(TRACE_INFO, "Input must be a link type ");
 	} //xxx why?
@@ -65,31 +68,22 @@ Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
 	if (vnode_is_typedv) {
 		Handle h = as_->addNode(VARIABLE_TYPE_NODE, "VariableNode");
 		for (Handle hvn : variable_nodes) {
-			Handle hi = as_->addLink(TYPED_VARIABLE_LINK, HandleSeq { hvn, h });
+			Handle hi = as_->addLink(TYPED_VARIABLE_LINK, hvn, h);
 			list_link_elem.push_back(hi);
 		}
 	} else
 		list_link_elem = variable_nodes;
 
-	Handle var_listLink = as_->addLink(LIST_LINK, list_link_elem,
-			TruthValue::TRUE_TV());
+	Handle var_listLink = as_->addLink(LIST_LINK, list_link_elem);
 
-	Handle implicant = himplicant;
-	Handle implicand = himplicant; // the output should be the query result.
-	assert(implicand == himplicant);
-	HandleSeq implicationLink_elem { implicant, implicand };
-	Handle implicatoinLink = as_->addLink(IMPLICATION_LINK,
-			implicationLink_elem, TruthValue::TRUE_TV());
+	Handle implicationLink = as_->addLink(IMPLICATION_LINK, himplicant, himplicant);
 
-	HandleSeq binkLink_elements { var_listLink, implicatoinLink };
-	Handle bindLink = as_->addLink(BIND_LINK, binkLink_elements,
-			TruthValue::TRUE_TV());
-
-	return bindLink;
+	return as_->addLink(BIND_LINK, var_listLink, implicationLink);
 }
 
 HandleSeq PLNCommons::get_nodes(const Handle& hinput,
-		vector<Type> required_nodes) {
+		vector<Type> required_nodes)
+{
 	HandleSeq found_nodes;
 	auto exists =
 			[&found_nodes](Handle h) {return (find(found_nodes.begin(),found_nodes.end(),h)!= found_nodes.end()?true:false);};
@@ -122,7 +116,8 @@ HandleSeq PLNCommons::get_nodes(const Handle& hinput,
 	return found_nodes;
 }
 
-bool PLNCommons::exists_in(Handle& hlink, Handle& h) {
+bool PLNCommons::exists_in(Handle& hlink, Handle& h)
+{
 	if (not LinkCast(hlink))
 		throw InvalidParamException(TRACE_INFO, "Need a LINK type to look in");
 	auto outg = as_->getOutgoing(hlink);
@@ -138,7 +133,8 @@ bool PLNCommons::exists_in(Handle& hlink, Handle& h) {
 }
 
 void PLNCommons::clean_up_bind_link(Handle& hbind_link)
-		throw (opencog::InvalidParamException) {
+		throw (opencog::InvalidParamException)
+{
 	if (as_->getType(hbind_link) != BIND_LINK) {
 		throw InvalidParamException(TRACE_INFO,
 				"Input must be a BIND_LINK type");
@@ -146,7 +142,8 @@ void PLNCommons::clean_up_bind_link(Handle& hbind_link)
 	remove_vnode_containing_links(hbind_link);
 }
 
-void PLNCommons::remove_vnode_containing_links(Handle& h) {
+void PLNCommons::remove_vnode_containing_links(Handle& h)
+{
 	if (LinkCast(h)) {
 		auto vnodes = get_nodes(h, vector<Type> { VARIABLE_NODE });
 		if (not vnodes.empty()) {
@@ -162,14 +159,16 @@ void PLNCommons::remove_vnode_containing_links(Handle& h) {
 }
 
 void PLNCommons::clean_up_implication_link(Handle& himplication_link)
-		throw (opencog::InvalidParamException) {
+		throw (opencog::InvalidParamException)
+{
 	if (as_->getType(himplication_link) != IMPLICATION_LINK)
 		throw InvalidParamException(TRACE_INFO,
 				"Input must be an ImplicationLink type ");
 	remove_vnode_containing_links(himplication_link);
 }
 
-string PLNCommons::get_unique_name(Handle& h) {
+string PLNCommons::get_unique_name(Handle& h)
+{
 //xxx temporary implementation. need to be replaced by uuid generation for making sure name is always unique
 	string name = as_->getName(h);
 	HandleSeq hs = as_->getIncoming(h);
@@ -180,7 +179,8 @@ string PLNCommons::get_unique_name(Handle& h) {
 }
 
 Handle PLNCommons::replace_nodes_with_varnode(Handle& handle,
-		Type t /*=VARIABLE_NODE*/) {
+		Type t /*=VARIABLE_NODE*/)
+{
 	HandleSeq hvars;
 	if (t == NODE)
 		hvars = get_nodes(handle, vector<Type> { }); //get every node
@@ -194,7 +194,8 @@ Handle PLNCommons::replace_nodes_with_varnode(Handle& handle,
 }
 
 Handle PLNCommons::change_node_types(Handle& h,
-		map<Handle, Handle>& replacement_map) {
+		map<Handle, Handle>& replacement_map)
+{
 	Handle hcpy;
 	if (LinkCast(h)) {
 		HandleSeq hs_cpy;
@@ -209,7 +210,8 @@ Handle PLNCommons::change_node_types(Handle& h,
 				hs_cpy.push_back(change_node_types(hi, replacement_map));
 			}
 		}
-		hcpy = as_->addLink(as_->getType(h), hs_cpy, as_->getTV(h));
+		hcpy = as_->addLink(as_->getType(h), hs_cpy);
+      hcpy->setTruthValue(as_->getTV(h));
 	} else if (NodeCast(h)) {
 		if (replacement_map.find(h) != replacement_map.end())
 			hcpy = replacement_map[h];
@@ -220,7 +222,8 @@ Handle PLNCommons::change_node_types(Handle& h,
 	return hcpy;
 }
 
-void PLNCommons::get_top_level_parent(Handle h, HandleSeq& parents) {
+void PLNCommons::get_top_level_parent(Handle h, HandleSeq& parents)
+{
 	auto incoming = as_->getIncoming(h);
 	if (incoming.empty())
 		return;
@@ -235,10 +238,10 @@ void PLNCommons::get_top_level_parent(Handle h, HandleSeq& parents) {
 	}
 }
 
-float PLNCommons::target_tv_fitness(Handle h) {
+float PLNCommons::target_tv_fitness(Handle h)
+{
 	TruthValuePtr ptv = as_->getTV(h);
 	confidence_t c = ptv->getConfidence();
 	strength_t s = ptv->getMean();
 	return (pow((1 - s), FITNESS_PARAM) * (pow(c, (2 - FITNESS_PARAM))));
 }
-

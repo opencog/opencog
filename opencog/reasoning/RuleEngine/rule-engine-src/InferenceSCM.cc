@@ -62,7 +62,7 @@ Handle InferenceSCM::do_forward_chaining(Handle h) {
 	ForwardChainer fc(as);
 	fc.do_chain(dfc,h); //START FORWARD CHAINING
 	HandleSeq result = fc.get_chaining_result();
-	return as->addLink(LIST_LINK, result, TruthValue::DEFAULT_TV());
+	return as->addLink(LIST_LINK, result);
 #else
 	return Handle::UNDEFINED;
 #endif
@@ -80,9 +80,9 @@ Handle InferenceSCM::do_backward_chaining(Handle h) {
 		hs.push_back(it->first);
 		hs.insert(hs.end(), it->second.begin(), it->second.end());
 		soln_list_link.push_back(
-				as->addLink(LIST_LINK, hs, TruthValue::DEFAULT_TV()));
+				as->addLink(LIST_LINK, hs));
 	}
-	return as->addLink(LIST_LINK, soln_list_link, TruthValue::DEFAULT_TV());
+	return as->addLink(LIST_LINK, soln_list_link);
 #else
 	return Handle::UNDEFINED;
 #endif
