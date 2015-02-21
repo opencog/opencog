@@ -271,9 +271,9 @@ public:
     /**
      * Merge truth value, return Handle for this.
      * This allows oneliners such as:
-     *   Handle h = atomSpace->addNode(FOO_NODE, "foo")->hmerge(tv);
+     *   Handle h = atomSpace->addNode(FOO_NODE, "foo")->tvmerge(tv);
      */
-    inline Handle hmerge(TruthValuePtr tv) {
+    inline Handle tvmerge(TruthValuePtr tv) {
         merge(tv);
         return Handle(shared_from_this());
     }
