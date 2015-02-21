@@ -847,10 +847,11 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             TruthValuePtr tv(SimpleTruthValue::createTV(strength,
                                 SimpleTruthValue::confidenceToCount(strength)));
             Handle hi = as->addLink(INHERITANCE_LINK, *it2, newNode);
-            hi->getTruthValue()->merge(tv);
+            hi->merge(tv);
+
             for (int i=0; i<numDims; ++i) {
-                strNumer[i]+=strength*embedVec[i];
-                strDenom[i]+=strength;
+                strNumer[i] += strength * embedVec[i];
+                strDenom[i] += strength;
             }
         }
         for (int i=0; i<numDims; ++i) {
@@ -860,7 +861,7 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             TruthValuePtr tv(SimpleTruthValue::createTV(attrStrength,
                                 SimpleTruthValue::confidenceToCount(attrStrength)));
             Handle hi = as->addLink(l, newNode, pivots[i]);
-            hi->getTruthValue()->merge(tv);
+            hi->merge(tv);
         }
     }
 }
@@ -970,7 +971,7 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         TruthValuePtr tv(SimpleTruthValue::createTV(strength,
                             SimpleTruthValue::confidenceToCount(strength)));
         Handle hi = as->addLink(l, newNode, pivots[i]);
-        hi->getTruthValue()->merge(tv);
+        hi->merge(tv);
     }
     return newNode;
 }
