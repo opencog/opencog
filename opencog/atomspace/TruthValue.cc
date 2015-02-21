@@ -51,24 +51,28 @@ TruthValuePtr TruthValue::NULL_TV()
 
 TruthValuePtr TruthValue::DEFAULT_TV()
 {
+    // True, but no confidence.
     static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0));
     return instance;
 }
 
 TruthValuePtr TruthValue::TRUE_TV()
 {
+    // True, with maximum confidence.
     static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 1.0e35));
     return instance;
 }
 
 TruthValuePtr TruthValue::FALSE_TV()
 {
+    // False, with maximum confidence.
     static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0f, 1.0e35));
     return instance;
 }
 
 TruthValuePtr TruthValue::TRIVIAL_TV()
 {
+    // False, with no confidence.
     static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0, 0.0));
     return instance;
 }

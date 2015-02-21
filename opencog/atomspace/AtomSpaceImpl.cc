@@ -95,20 +95,7 @@ Handle AtomSpaceImpl::addAtom(AtomPtr atom, bool async)
 {
     // Is this atom already in the atom table?
     Handle hexist(atomTable.getHandle(atom));
-    if (hexist)
-    {
-        // XXX FIXME The AtomSpaceAsyncUTest tries to do somethig weird,
-        // that is causing the below to fail. The atomtable add does the
-        // same thing under a lock. I don't understand why it matters.
-        // It would be slight faster to just merge here, but wtf ...
-        // So anyway, ifdef it out, for now ...
-#ifdef DO_UNLOCKED_UPDATE
-        hexist->merge(atom->getTruthValue());  // Update the truth value.
-        return hexist;
-#else
-        return atomTable.add(atom, async);
-#endif
-    }
+    if (hexist) return hexist;
 
     // If we are here, the AtomTable does not yet know about this atom.
     // Maybe the backing store knows about this atom.
@@ -168,15 +155,11 @@ Handle AtomSpaceImpl::getNode(Type t, const string& name)
 }
 
 Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
-                              TruthValuePtr tvn, bool async)
+                              bool async)
 {
     // Is this atom already in the atom table?
     Handle hexist = atomTable.getHandle(t, outgoing);
-    if (hexist)
-    {
-        hexist->merge(tvn);  // Update the truth value.
-        return hexist;
-    }
+    if (hexist) return hexist;
 
     // If we are here, the AtomTable does not yet know about this atom.
     // Maybe the backing store knows about this atom.
@@ -191,16 +174,14 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
             if (l) {
                 // Put the atom into the atomtable, so it gets placed
                 // in indices, so we can find it quickly next time.
-                Handle result = atomTable.add(l, async);
-                result->merge(tvn);
-                return result;
+                return atomTable.add(l, async);
             }
         }
     }
 
     // If we are here, neither the AtomTable nor backing store know about
     // this atom. Just add it.
-    return atomTable.add(createLink(t, outgoing, tvn), async);
+    return atomTable.add(createLink(t, outgoing), async);
 }
 
 Handle AtomSpaceImpl::getLink(Type t, const HandleSeq& outgoing)

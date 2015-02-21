@@ -497,16 +497,11 @@ Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
         return atom->getHandle();
 
     // Is the equivalent of this atom already in the table?
-    // If so, then we merge the truth values.  (Note that this 'existing'
+    // If so, then return the existing atom.  (Note that this 'existing'
     // atom might be in another atomspace, or might not be in any
     // atomspace yet.)
     Handle hexist(getHandle(atom));
-    if (hexist) {
-        DPRINTF("Merging existing Atom with the Atom being added ...\n");
-        hexist->merge(atom->getTruthValue());
-        // XXX TODO -- should merge attention value too, right ???
-        return hexist;
-    }
+    if (hexist) return hexist;
 
     // If this atom is in some other atomspace, then we need to clone
     // it. We cannot insert it into this atomtable as-is.  (We already
