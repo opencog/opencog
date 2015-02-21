@@ -146,6 +146,10 @@ public:
         TS_ASSERT_DELTA(ptAtom.get<count_t>
                         ("truthvalue.details.count", 0), 3.1, precision);
 
+        // Receive the event
+        address = s_recv (subscriberTVChanged);
+        contents = s_recv (subscriberTVChanged);
+
         // Modify the atom's TruthValue
         TruthValuePtr newTV = SimpleTruthValue::createTV(5.1, 7.1);
         as->setTV(h, newTV);
