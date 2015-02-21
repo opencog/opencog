@@ -67,6 +67,7 @@ namespace opencog
         AtomSpace* as;
         boost::signals2::connection removedAtomConnection;
         boost::signals2::connection addedAtomConnection;
+        boost::signals2::connection tvChangedConnection;
 
         AtomEmbedMap atomMaps;
         AsymAtomEmbedMap asymAtomMaps;
@@ -317,6 +318,8 @@ namespace opencog
          * atom is a link.
          */
         void atomRemoveSignal(AtomPtr h);
+
+        void TVChangedSignal(Handle, TruthValuePtr, TruthValuePtr);
     }; // class
 } //namespace
 
