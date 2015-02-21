@@ -40,15 +40,15 @@ public:
     void link(AtomSpace* as, Handle h1, Handle h2,
               double strength, double confidence)
     {
-        as->addLink(SIMILARITY_LINK, h1, h2,
-                    SimpleTruthValue::createTV(strength, SimpleTruthValue::confidenceToCount(confidence)));
+        Handle h = as->addLink(SIMILARITY_LINK, h1, h2);
+        h->merge(SimpleTruthValue::createTV(strength, SimpleTruthValue::confidenceToCount(confidence)));
     }
 
     void inhLink(AtomSpace* as, Handle h1, Handle h2,
                  double strength, double confidence)
     {
-        as->addLink(INHERITANCE_LINK, h1, h2,
-                    SimpleTruthValue::createTV(strength, SimpleTruthValue::confidenceToCount(confidence)));
+        Handle h = as->addLink(INHERITANCE_LINK, h1, h2);
+        h->merge(SimpleTruthValue::createTV(strength, SimpleTruthValue::confidenceToCount(confidence)));
     }
 
     void testMisc()
