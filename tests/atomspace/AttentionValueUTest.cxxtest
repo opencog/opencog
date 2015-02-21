@@ -268,19 +268,23 @@ public:
         TruthValuePtr tv3 = SimpleTruthValue::createTV(0.05f, 0.005f);
         TruthValuePtr tv4 = SimpleTruthValue::createTV(0.5f, 0.05f);
         buf[baseNameLength] = '1';
-        Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
+        Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf);
+        h1->setTruthValue(tv1);
         setSTI(h1, 0);
         setLTI(h1, 300);
         buf[baseNameLength] = '2';
-        Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf, tv2);
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf);
+        h2->setTruthValue(tv2);
         setSTI(h2, 500);
         setLTI(h2, 7000);
         buf[baseNameLength] = '3';
-        Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf, tv3);
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf);
+        h3->setTruthValue(tv3);
         setSTI(h3, 500);
         setLTI(h3, 7000);
         buf[baseNameLength] = '4';
-        Handle h4 = atomSpace->addNode(CONCEPT_NODE, buf, tv4);
+        Handle h4 = atomSpace->addNode(CONCEPT_NODE, buf);
+        h4->setTruthValue(tv4);
         setSTI(h4, 500);
         setLTI(h4, 20000);
 
@@ -292,7 +296,8 @@ public:
         return testAtoms;
     }
 
-    void testgetDefault() {
+    void testgetDefault()
+    {
         AttentionValuePtr av = AttentionValue::DEFAULT_AV();
 
         TS_ASSERT(av->getSTI() == sti[0]);

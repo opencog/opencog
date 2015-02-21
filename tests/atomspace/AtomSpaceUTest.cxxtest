@@ -76,13 +76,17 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
     if (node) {
         result = as.getHandle(node->getType(), node->getName());
         if (result == Handle::UNDEFINED) {
-            return as.addNode(node->getType(), node->getName(), newTV);
+            result = as.addNode(node->getType(), node->getName());
+            result->setTruthValue(newTV);
+            return result;
         }
     } else {
         LinkPtr link(LinkCast(atom));
         result = as.getHandle(link->getType(), link->getOutgoingSet());
         if (result == Handle::UNDEFINED) {
-            return as.addLink(link->getType(), link->getOutgoingSet(), newTV);
+            result = as.addLink(link->getType(), link->getOutgoingSet());
+            result->setTruthValue(newTV);
+            return result;
         }
     }
     const TruthValuePtr currentTV = as.getTV(result);
@@ -127,7 +131,9 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
         }
     }
 
-    return as.addLink(*head_type_ptr, handles, tvn);
+    Handle hh = as.addLink(*head_type_ptr, handles);
+    hh->setTruthValue(tvn);
+    return hh;
 }
 
 static inline Handle addAtom(AtomSpace& as, tree<Vertex>& a, TruthValuePtr tvn)
@@ -155,26 +161,31 @@ HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
     TruthValuePtr tv3 = SimpleTruthValue::createTV(0.5f, 0.99f);
     buf[baseNameLength] = '1';
-    Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
+    Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf);
+    h1->setTruthValue(tv1);
     atomSpace->setSTI(h1, AV1_STI);
     atomSpace->setLTI(h1, AV1_LTI);
     buf[baseNameLength] = '2';
-    Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf, tv2);
+    Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf);
+    h2->setTruthValue(tv2);
     atomSpace->setSTI(h2, AV2_STI);
     atomSpace->setLTI(h2, AV2_LTI);
     buf[baseNameLength] = '3';
-    Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf, tv3);
+    Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf);
+    h3->setTruthValue(tv3);
     atomSpace->setSTI(h3, AV3_STI);
     atomSpace->setLTI(h3, AV3_LTI);
 
     HandleSeq outgoing1;
     outgoing1.push_back(h2);
     outgoing1.push_back(h3);
-    Handle l1 = atomSpace->addLink(LIST_LINK, outgoing1, tv1);
+    Handle l1 = atomSpace->addLink(LIST_LINK, outgoing1);
+    l1->setTruthValue(tv1);
     HandleSeq outgoing2;
     outgoing2.push_back(h1);
     outgoing2.push_back(l1);
-    Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2);
+    Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2);
+    l2->setTruthValue(tv2);
 
     testAtoms.push_back(h1);
     testAtoms.push_back(h2);
@@ -356,7 +367,8 @@ public:
         };
         Handle h[NUM_NODES];
         for (int i = 0; i < NUM_NODES; i++) {
-            h[i] = atomSpace->addNode (CONCEPT_NODE, nodeNames[i], SimpleTruthValue::createTV(0.001f, SimpleTruthValue::confidenceToCount(0.99f)));
+            h[i] = atomSpace->addNode(CONCEPT_NODE, nodeNames[i]);
+            h[i]->setTruthValue(SimpleTruthValue::createTV(0.001f, SimpleTruthValue::confidenceToCount(0.99f)));
         }
         //logger().debug("Nodes created\n");
 
@@ -366,7 +378,8 @@ public:
             HandleSeq temp(2);
             temp[0] = h[i];
             temp[1] = h[4];
-            FU[i] = atomSpace->addLink(SCHEMA_EXECUTION_LINK, temp, SimpleTruthValue::createTV(ForceUser[i], SimpleTruthValue::confidenceToCount(0.99f)));
+            FU[i] = atomSpace->addLink(SCHEMA_EXECUTION_LINK, temp);
+            FU[i]->setTruthValue(SimpleTruthValue::createTV(ForceUser[i], SimpleTruthValue::confidenceToCount(0.99f)));
         }
         //logger().debug("ForceUser links created\n");
 
@@ -376,7 +389,8 @@ public:
         for (int i = 0; i < 4; i++) {
             out[i].push_back(h[i]);
             out[i].push_back(h[5]);
-            H[i] = atomSpace->addLink(INHERITANCE_LINK, out[i], SimpleTruthValue::createTV(Human[i], SimpleTruthValue::confidenceToCount(0.99f)));
+            H[i] = atomSpace->addLink(INHERITANCE_LINK, out[i]);
+            H[i]->setTruthValue(SimpleTruthValue::createTV(Human[i], SimpleTruthValue::confidenceToCount(0.99f)));
         }
         //logger().debug("Human links created\n");
 
@@ -540,9 +554,12 @@ public:
      */
 #define mva makeVirtualAtom
     void testAddAtomVtreeTruthValueBool() {
-        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue::createTV(0.001f, 0.00001f));
-        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue::createTV(0.001f, 0.00001f));
-        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue::createTV(0.5f, 0.99f));
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt");
+        h1->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1");
+        h2->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree");
+        h3->setTruthValue(SimpleTruthValue::createTV(0.5f, 0.99f));
 
 
         tree<Vertex>* tr = mva(EVALUATION_LINK,
@@ -570,6 +587,7 @@ public:
         Handle hn = atomSpace->addNode(PREDICATE_NODE, "barkingAt");
         tr = mva(hn, NULL);
         Handle h1_ = addAtom(*atomSpace, *tr, SimpleTruthValue::createTV(0.5f, 0.5f));
+        h1_->setTruthValue(SimpleTruthValue::createTV(0.5f, 0.5f));
         TS_ASSERT(h1_ != Handle::UNDEFINED);
         // In this case, the expected behavior is to perform a merge and return the
         // handle was inserted previously.
@@ -602,16 +620,25 @@ public:
         TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
         TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
         TruthValuePtr tv3 = SimpleTruthValue::createTV(0.5f, 0.99f);
-        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", tv1);
-        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", tv2);
-        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", tv3);
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt");
+        h1->setTruthValue(tv1);
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1");
+        h2->setTruthValue(tv2);
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree");
+        h3->setTruthValue(tv3);
 
         TruthValuePtr tv1_ = SimpleTruthValue::createTV(0.002f, 0.00002f);
         TruthValuePtr tv2_ = SimpleTruthValue::createTV(0.1f, 0.0f);
         TruthValuePtr tv3_ = SimpleTruthValue::createTV(0.6f, 0.90f);
-        Handle h1_ = atomSpace->addNode(PREDICATE_NODE, "barkingAt", tv1_);
-        Handle h2_ = atomSpace->addNode(CONCEPT_NODE, "dog1", tv2_);
-        Handle h3_ = atomSpace->addNode(CONCEPT_NODE, "tree", tv3_);
+        tv1->merge(tv1_);
+        tv2->merge(tv2_);
+        tv3->merge(tv3_);
+        h1->setTruthValue(tv1);
+        h2->setTruthValue(tv2);
+        h3->setTruthValue(tv3);
+        Handle h1_ = atomSpace->addNode(PREDICATE_NODE, "barkingAt");
+        Handle h2_ = atomSpace->addNode(CONCEPT_NODE, "dog1");
+        Handle h3_ = atomSpace->addNode(CONCEPT_NODE, "tree");
 
         TS_ASSERT(h1 == h1_);
         TruthValuePtr h1tv = h1->getTruthValue();
@@ -672,25 +699,35 @@ public:
      *
      * virtual Handle addLink(Type t,const HandleSeq& outgoing,TruthValuePtr tvn)=0;
      */
-    void testAddLink() {
-        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue::createTV(0.001f, 0.00001f));
-        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue::createTV(0.001f, 0.00001f));
-        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue::createTV(0.5f, 0.99f));
+    void testAddLink()
+    {
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt");
+        h1->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1");
+        h2->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree");
+        h3->setTruthValue(SimpleTruthValue::createTV(0.5f, 0.99f));
         TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
         TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
         HandleSeq outgoing1;
         outgoing1.push_back(h2);
         outgoing1.push_back(h3);
-        Handle l1 = atomSpace->addLink(LIST_LINK, outgoing1, tv1);
+        Handle l1 = atomSpace->addLink(LIST_LINK, outgoing1);
+        l1->setTruthValue(tv1);
         HandleSeq outgoing2;
         outgoing2.push_back(h1);
         outgoing2.push_back(l1);
-        Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2);
+        Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2);
+        l2->setTruthValue(tv2);
 
         TruthValuePtr tv1_ = SimpleTruthValue::createTV(0.002f, 0.00002f);
-        Handle l1_ = atomSpace->addLink(LIST_LINK, outgoing1, tv1_);
+        tv1->merge(tv1_);
+        l1->setTruthValue(tv1);
+        Handle l1_ = atomSpace->addLink(LIST_LINK, outgoing1);
         TruthValuePtr tv2_ = SimpleTruthValue::createTV(0.1f, 0.0f);
-        Handle l2_ = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2_);
+        tv2->merge(tv2_);
+        l2->setTruthValue(tv2);
+        Handle l2_ = atomSpace->addLink(EVALUATION_LINK, outgoing2);
 
         TS_ASSERT(l1 == l1_);
         TruthValuePtr l1tv = l1->getTruthValue();
@@ -703,7 +740,8 @@ public:
 
     }
 
-    void testGetHandle_bugfix1() {
+    void testGetHandle_bugfix1()
+    {
         HandleSeq emptyOutgoing;
         Handle result = atomSpace->getHandle(LIST_LINK, emptyOutgoing);
         TS_ASSERT(result == Handle::UNDEFINED);
@@ -874,9 +912,12 @@ public:
 
     void testGetHandleSetByName()
     {
-        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "dog1", SimpleTruthValue::createTV(0.001f, 0.00001f));
-        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue::createTV(0.001f, 0.00001f));
-        Handle h3 = atomSpace->addNode(NODE, "dog1", SimpleTruthValue::createTV(0.5f, 0.99f));
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "dog1");
+        h1->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1");
+        h2->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(NODE, "dog1");
+        h3->setTruthValue(SimpleTruthValue::createTV(0.5f, 0.99f));
 
         HandleSeq namedAtoms;
         atomSpace->getHandlesByType(back_inserter(namedAtoms), NODE, true);

@@ -220,15 +220,18 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 {
 	// Create an atom ... 
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
-	h1[idx] = as->addNode(WORD_NODE, id + "fromNode", stv);
+	h1[idx] = as->addNode(WORD_NODE, id + "fromNode");
+	h1[idx]->setTruthValue(stv);
 	n1[idx] = NodeCast(h1[idx]);
 
 	TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 200+idx));
-	h2[idx] = as->addNode(WORD_NODE, id + "toNode", stv2);
+	h2[idx] = as->addNode(WORD_NODE, id + "toNode");
+	h2[idx]->setTruthValue(stv2);
 	n2[idx] = NodeCast(h2[idx]);
 
 	TruthValuePtr stv3(SimpleTruthValue::createTV(0.33, 300+idx));
-	h3[idx] = as->addNode(WORD_NODE, id + "third wheel", stv3);
+	h3[idx] = as->addNode(WORD_NODE, id + "third wheel");
+	h3[idx]->setTruthValue(stv3);
 	n3[idx] = NodeCast(h3[idx]);
 
 	std::vector<Handle> hvec;

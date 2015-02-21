@@ -76,7 +76,7 @@ private:
 public:
     AtomSpaceAsyncUTest()
     {
-        // Current atomspace can to 50K or 100K atoms/sec, so the 
+        // Current atomspace can to 50K or 100K atoms/sec, so the
         // below should run for at least 2 to 5 seconds each time.
         n_threads = 20;
         num_atoms = 13000;
@@ -167,7 +167,7 @@ public:
         /* Since we're adding *exactly* the same atom, we should get a tv-merged signal */
         logger().debug("before second atom add");
         TruthValuePtr tv(SimpleTruthValue::createTV(0.5, 1.0));
-        atomSpace->addNode(NUMBER_NODE, "1", tv);
+        atomSpace->addNode(NUMBER_NODE, "1")->setTruthValue(tv);
         TS_ASSERT(__testSignalsCounter == 1111);
         TS_ASSERT(atomSpace->getSize() == 1);
 
@@ -228,7 +228,7 @@ public:
             counter++;
 
             TruthValuePtr tv(SimpleTruthValue::createTV(((double) i) / ((double) N), i));
-            atomSpace->addNode(t, oss.str(), tv); 
+            atomSpace->addNode(t, oss.str())->setTruthValue(tv);
         }
     }
 
@@ -273,7 +273,7 @@ public:
             //std::cout << "removing " << oss.str() << std::endl;
             HandleSeq hs;
             atomSpace->getHandlesByName(back_inserter(hs), oss.str(), NODE);
-            TS_ASSERT_EQUALS(hs.size(), 1); 
+            TS_ASSERT_EQUALS(hs.size(), 1);
             if (hs.size() != 0) {
                 //std::cout << " handle " << hs[0] << std::endl;
                 atomSpace->purgeAtom(hs[0], true);
@@ -295,7 +295,7 @@ public:
         TS_ASSERT_EQUALS(size, 0);
         size = atomSpace->getSize();
     }
-    
+
 
     // =================================================================
     // when signals issued in multi-threaded env, make sure all of them arrive.
@@ -328,7 +328,7 @@ public:
         TS_ASSERT_EQUALS((int) __totalAdded, num_atoms);
         // subtract 1, because first time through, there is no change signal,
         // only an add signal.
-        TS_ASSERT_EQUALS((int) __totalChanged, num_atoms * (n_threads-1));
+        TS_ASSERT_EQUALS((int) __totalChanged, num_atoms * n_threads);
     }
 
     // =================================================================
@@ -343,14 +343,14 @@ public:
 
             HandleSeq hs;
             atomSpace->getHandlesByName(back_inserter(hs), oss.str(), NODE);
-            TS_ASSERT_EQUALS(hs.size(), 1); 
+            TS_ASSERT_EQUALS(hs.size(), 1);
             Handle h = hs[0];
 
             bogus ++;
             bogus %= N;
 
             TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
-            h->setTruthValue(tv); 
+            h->setTruthValue(tv);
         }
     }
 
@@ -407,7 +407,7 @@ public:
 
             HandleSeq hs;
             atomSpace->getHandlesByName(back_inserter(hs), oss.str(), NODE);
-            TS_ASSERT_EQUALS(hs.size(), 1); 
+            TS_ASSERT_EQUALS(hs.size(), 1);
             Handle ha = hs[0];
 
             std::ostringstream ossb;
@@ -415,7 +415,7 @@ public:
 
             HandleSeq hsb;
             atomSpace->getHandlesByName(back_inserter(hsb), ossb.str(), NODE);
-            TS_ASSERT_EQUALS(hsb.size(), 1); 
+            TS_ASSERT_EQUALS(hsb.size(), 1);
 
             bogus ++;
             bogus %= N;
@@ -424,7 +424,7 @@ public:
 
             Type t = LIST_LINK;
             hs.push_back(ha);
-            atomSpace->addLink(t, hs, tv); 
+            atomSpace->addLink(t, hs)->setTruthValue(tv);
         }
     }
 
@@ -452,7 +452,7 @@ public:
         TS_ASSERT_EQUALS(size, 2*num_atoms);
 
         TS_ASSERT_EQUALS((int) __totalAdded, num_atoms);
-        TS_ASSERT_EQUALS((int) __totalChanged, num_atoms * (n_threads-1)); // lots!
+        TS_ASSERT_EQUALS((int) __totalChanged, num_atoms * n_threads); // lots!
     }
 
     // =================================================================
@@ -491,9 +491,9 @@ public:
 
         // Add a node to the AttentionalFocus
         Handle h = atomSpace->addNode(CONCEPT_NODE,
-                                      "test",
-                                      SimpleTruthValue::createTV(0.01,
-                                      SimpleTruthValue::confidenceToCount(1)));
+                                      "test");
+        h->setTruthValue(SimpleTruthValue::createTV(0.01,
+                         SimpleTruthValue::confidenceToCount(1)));
         atomSpace->setSTI(h, 200);
         TS_ASSERT(__testAFSignalsCounter == 1);
 
@@ -523,7 +523,7 @@ public:
 
             Handle hb = atomSpace->addNode(CONCEPT_NODE, ossb.str());
 
-            Handle hl = atomSpace->addLink(LIST_LINK, ha, hb); 
+            Handle hl = atomSpace->addLink(LIST_LINK, ha, hb);
 
             // The goal here is that each ListLink will have an
             // incoming set of size n_threads.  This should make a
@@ -535,7 +535,7 @@ public:
             bogus ++;
             bogus %= N;
             TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
-            atomSpace->addLink(EVALUATION_LINK, hp, hl, tv); 
+            atomSpace->addLink(EVALUATION_LINK, hp, hl)->setTruthValue(tv);
         }
     }
 
@@ -565,7 +565,7 @@ public:
     // one-another.
     //
     // argument is a pointer, else a build break. See
-    // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=57716   and 
+    // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=57716   and
     // http://stackoverflow.com/questions/15235885/invalid-initialization-of-non-const-reference-with-c11-thread
     void threadedEvalRemove(int thread_id, HandleSeq* seq)
     {
@@ -585,7 +585,7 @@ public:
         //logger().debug("atomPurged: %s", h->toString().c_str());
         __totalPurged += 1;
 
-        // A lock is released, to call this signal handler, and is 
+        // A lock is released, to call this signal handler, and is
         // then re-acquired. Perhaps a yield can help scramble things
         // up a bit. So try to stall.
         for (int i=0; i<3*n_threads; i++)
@@ -640,7 +640,7 @@ public:
             //std::cout << "removing " << oss.str() << std::endl;
             HandleSeq hs;
             atomSpace->getHandlesByName(back_inserter(hs), oss.str(), CONCEPT_NODE);
-            TS_ASSERT_EQUALS(hs.size(), 1); 
+            TS_ASSERT_EQUALS(hs.size(), 1);
             if (hs.size() != 0) {
                 //std::cout << " handle " << hs[0] << std::endl;
                 atomSpace->purgeAtom(hs[0], true);
@@ -672,7 +672,7 @@ public:
             // trying to erase the links below.
 #define NEST 16
             for (int k=0; k<NEST; k++) {
-                Handle hl = atomSpace->addLink(LIST_LINK, hs); 
+                Handle hl = atomSpace->addLink(LIST_LINK, hs);
                 hs.push_back(hl);
             }
         }
@@ -683,7 +683,7 @@ public:
         std::cout << "Total created:" << size << std::endl;
         TS_ASSERT_EQUALS(size, (n_threads+NEST)*num_atoms);
 
-        // Now start removing ... 
+        // Now start removing ...
         __totalPurged = 0;
         __altTotalPurged = 0;
 

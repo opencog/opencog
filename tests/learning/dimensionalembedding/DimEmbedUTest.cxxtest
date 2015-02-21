@@ -57,10 +57,14 @@ public:
         AtomSpace* atomSpace = &cs.getAtomSpace();
         atomSpace->clear();
         DimEmbedModule dimEmbed = DimEmbedModule(cs);
-        Handle h1 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue::createTV(0.001f, 0.00001f));
-        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog2", SimpleTruthValue::createTV(0.001f, 0.00001f));
-        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "dog3", SimpleTruthValue::createTV(0.001f, 0.00001f));
-        Handle h4 = atomSpace->addNode(CONCEPT_NODE, "dog4", SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h1 = atomSpace->addNode(CONCEPT_NODE, "dog1");
+        h1->merge(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog2");
+        h2->merge(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "dog3");
+        h3->merge(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h4 = atomSpace->addNode(CONCEPT_NODE, "dog4");
+        h4->merge(SimpleTruthValue::createTV(0.001f, 0.00001f));
 
         link(atomSpace, h1, h2, 0.5, 1.0);
         link(atomSpace, h1, h3, 0.7, 1.0);
@@ -74,8 +78,10 @@ public:
 
         //add some more atoms after embedding in such a way that they should
         //not affect the tests we do later...
-        Handle d1 = atomSpace->addNode(CONCEPT_NODE, "distraction1", SimpleTruthValue::createTV(0.001f, 0.00001f));
-        Handle d2 = atomSpace->addNode(CONCEPT_NODE, "distraction2", SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle d1 = atomSpace->addNode(CONCEPT_NODE, "distraction1");
+        d1->merge(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle d2 = atomSpace->addNode(CONCEPT_NODE, "distraction2");
+        d2->merge(SimpleTruthValue::createTV(0.001f, 0.00001f));
         link(atomSpace, d1, d2, 0.7, 0.9);
         link(atomSpace, d1, h1, 1.0, 0.9);
         inhLink(atomSpace, h1, h3, .9, .9);

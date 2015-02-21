@@ -50,20 +50,25 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
     TruthValuePtr tv3 = SimpleTruthValue::createTV(0.5f, 0.99f);
     buf[baseNameLength] = '1';
-    Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
+    Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf);
+    h1->setTruthValue(tv1);
     buf[baseNameLength] = '2';
-    Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf, tv2);
+    Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf);
+    h2->setTruthValue(tv2);
     buf[baseNameLength] = '3';
-    Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf, tv3);
+    Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf);
+    h3->setTruthValue(tv3);
 
     HandleSeq outgoing1;
     outgoing1.push_back(h2);
     outgoing1.push_back(h3);
-    Handle l1 = atomSpace->addLink(LIST_LINK, outgoing1, tv1);
+    Handle l1 = atomSpace->addLink(LIST_LINK, outgoing1);
+    l1->setTruthValue(tv1);
     HandleSeq outgoing2;
     outgoing2.push_back(h1);
     outgoing2.push_back(l1);
-    Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2);
+    Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2);
+    l2->setTruthValue(tv2);
 
     testAtoms.push_back(h1);
     testAtoms.push_back(h2);
