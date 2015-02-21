@@ -142,11 +142,8 @@ public:
      * Atom Table, then the old and the new truth value are merged.
      *  @param t     Type of the node
      *  @param name  Name of the node
-     *  @param tvn   Optional TruthValue of the node. If not provided, uses the
-     *  DEFAULT_TV (see TruthValue.h)
      */
     Handle addNode(Type t, const std::string& name = "",
-                   TruthValuePtr tvn = TruthValue::DEFAULT_TV(),
                    bool async = false);
 
     /**
@@ -166,11 +163,8 @@ public:
      * @param t         Type of the link
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
-     * @param tvn       Optional TruthValue of the node. If not
-     *                  provided, uses the DEFAULT_TV (see TruthValue.h)
      */
     Handle addLink(Type t, const HandleSeq& outgoing,
-                   TruthValuePtr tvn = TruthValue::DEFAULT_TV(),
                    bool async = false);
 
     /**

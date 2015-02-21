@@ -116,7 +116,7 @@ protected:
      * @param The truthValue of the atom. note: This is not cloned as
      *        in setTruthValue.
      */
-    Atom(Type, TruthValuePtr = TruthValue::NULL_TV(),
+    Atom(Type, TruthValuePtr = TruthValue::DEFAULT_TV(),
             AttentionValuePtr = AttentionValue::DEFAULT_AV());
 
     struct InSet

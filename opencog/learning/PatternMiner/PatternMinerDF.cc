@@ -89,7 +89,8 @@ void PatternMiner::growPatternsDepthFirstTask_old()
         HandleSeq outgoingLinks,outVariableNodes;
 
         swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
-        Handle newLink = observingAtomSpace->addLink(originalAtomSpace->getType(cur_link),outgoingLinks,originalAtomSpace->getTV(cur_link));
+        Handle newLink = observingAtomSpace->addLink(originalAtomSpace->getType(cur_link), outgoingLinks);
+        newLink->merge(originalAtomSpace->getTV(cur_link));
 
         HandleSeq observedLinks;
         observedLinks.push_back(newLink);
@@ -164,7 +165,8 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         HandleSeq outgoingLinks,outVariableNodes;
 
         swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
-        Handle newLink = observingAtomSpace->addLink(originalAtomSpace->getType(cur_link),outgoingLinks,originalAtomSpace->getTV(cur_link));
+        Handle newLink = observingAtomSpace->addLink(originalAtomSpace->getType(cur_link), outgoingLinks);
+        newLink->merge(originalAtomSpace->getTV(cur_link));
 
 
         // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
@@ -350,7 +352,8 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         {
             HandleSeq outgoingLinks;
             generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
-            Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),outgoingLinks,TruthValue::TRUE_TV());
+            Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link), outgoingLinks);
+            rebindedLink->merge(TruthValue::TRUE_TV());
 
             pattern.push_back(rebindedLink);
         }
@@ -1000,7 +1003,8 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
                 {
                     HandleSeq outgoingLinks;
                     generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
-                    Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),outgoingLinks,TruthValue::TRUE_TV());
+                    Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link), outgoingLinks);
+                    rebindedLink->merge(TruthValue::TRUE_TV());
 
                     pattern.push_back(rebindedLink);
                 }

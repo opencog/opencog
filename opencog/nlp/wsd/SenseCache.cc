@@ -73,7 +73,7 @@ bool SenseCache::find_sense(Handle sense, Handle link)
 void SenseCache::set_similarity(Handle sense_a, Handle sense_b, TruthValuePtr tv)
 {
 	// Create a link connecting the two senses.
-	atom_space->addLink(SIMILARITY_LINK, sense_a, sense_b, tv);
+	atom_space->addLink(SIMILARITY_LINK, sense_a, sense_b)->setTruthValue(tv);
 }
 
 /* ============================== END OF FILE ====================== */

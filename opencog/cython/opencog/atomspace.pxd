@@ -116,7 +116,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         cHandle addNode(Type t, string s, tv_ptr tvn) except +
 
         cHandle addPrefixedNode(Type t, string s) except +
-        cHandle addPrefixedNode(Type t, string s, tv_ptr tvn) except +
 
         cHandle addLink(Type t, vector[cHandle]) except +
         cHandle addLink(Type t, vector[cHandle], tv_ptr tvn) except +

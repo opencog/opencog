@@ -8,7 +8,7 @@ from atomspace cimport *
 
 cdef class Handle:
     def __cinit__(self, h):
-        self.h=new cHandle(h)
+        self.h = new cHandle(h)
     def __dealloc__(self):
         del self.h
     def value(self):
@@ -109,7 +109,7 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomsp
     while iter != handles.end():
         i = deref(iter)
         temphandle = Handle(i.value())
-        result.append(Atom(temphandle,atomspace))
+        result.append(Atom(temphandle, atomspace))
         inc(iter)
     return result
 
@@ -149,10 +149,10 @@ cdef class AtomSpace:
         """ add method that determines exact method to call from type """
         if is_a(t,types.Node):
             assert out is None, "Nodes can't have outgoing sets"
-            atom = self.add_node(t,name,tv,prefixed)
+            atom = self.add_node(t, name, tv, prefixed)
         else:
             assert name is None, "Links can't have names"
-            atom = self.add_link(t,out,tv)
+            atom = self.add_link(t, out, tv)
         return atom
 
     def add_node(self, Type t, atom_name, TruthValue tv=None, prefixed=False):
@@ -169,21 +169,17 @@ cdef class AtomSpace:
         if prefixed:
             # prefixed nodes ALWAYS generate a new atom using atom_name
             # as the prefix
-            if tv is None:
-                # get handle
-                result = self.atomspace.addPrefixedNode(t,deref(name))
-            else:
-                result = self.atomspace.addPrefixedNode(t,deref(name), deref(<tv_ptr*>(tv._tvptr())))
+            result = self.atomspace.addPrefixedNode(t, deref(name))
         else:
-            if tv is None:
-                # get handle
-                result = self.atomspace.addNode(t,deref(name))
-            else:
-                result = self.atomspace.addNode(t,deref(name), deref(<tv_ptr*>(tv._tvptr())))
+            result = self.atomspace.addNode(t, deref(name))
+
         # delete temporary string
         del name
         if result == result.UNDEFINED: return None
-        return Atom(Handle(result.value()), self);
+        atom = Atom(Handle(result.value()), self);
+        if tv :
+            self.set_tv(atom.h, tv)
+        return atom
 
     def add_link(self,Type t,outgoing,TruthValue tv=None):
         """ Add Link to AtomSpace
@@ -194,19 +190,18 @@ cdef class AtomSpace:
         # create temporary cpp vector
         cdef vector[cHandle] o_vect
         for h in outgoing:
-            if isinstance(h,Handle):
+            if isinstance(h, Handle):
                 o_vect.push_back(deref((<Handle>h).h))
-            elif isinstance(h,Atom):
+            elif isinstance(h, Atom):
                 o_vect.push_back(deref((<Handle>(h.h)).h))
         cdef cHandle result
-        if tv is None:
-            # get handle
-            result = self.atomspace.addLink(t, o_vect)
-        else:
-            result = self.atomspace.addLink(t, o_vect, deref(<tv_ptr*>(tv._tvptr())))
+        result = self.atomspace.addLink(t, o_vect)
         if result == result.UNDEFINED: return None
         #return Handle(result.value());
-        return Atom(Handle(result.value()), self);
+        atom = Atom(Handle(result.value()), self);
+        if tv :
+            self.set_tv(atom.h, tv)
+        return atom
 
     def is_valid(self,h):
         """ Check whether the passed handle refers to an actual handle
@@ -246,18 +241,18 @@ cdef class AtomSpace:
     # Methods to make the atomspace act more like a standard Python container
     def __contains__(self,o):
         """ Custom checker to see if object is in AtomSpace """
-        if isinstance(o,Handle):
+        if isinstance(o, Handle):
             return self.is_valid(o)
-        elif isinstance(o,Atom):
+        elif isinstance(o, Atom):
             return self.is_valid((<Atom>o).handle)
 
     def __len__(self):
         """ Return the number of atoms in the AtomSpace """
         return self.size()
 
-    def __getitem__(self,key):
+    def __getitem__(self, key):
         """ Support self[handle] lookup to get an atom """
-        if not isinstance(key,Handle):
+        if not isinstance(key, Handle):
             raise KeyError("Lookup only supported by opencog.atomspace.Handle")
         if key in self:
             return Atom(key,self)
@@ -271,7 +266,7 @@ cdef class AtomSpace:
         """ Return the number of atoms in the AtomSpace """
         return self.atomspace.getSize()
 
-    def get_tv(self,Handle h):
+    def get_tv(self, Handle h):
         """ Return the TruthValue of an Atom in the AtomSpace """
         cdef tv_ptr tv
         tv = self.atomspace.getTV(deref(h.h))
@@ -281,27 +276,27 @@ cdef class AtomSpace:
             return pytv
         return TruthValue(tv.get().getMean(),tv.get().getCount())
 
-    def set_tv(self,Handle h, TruthValue tv):
+    def set_tv(self, Handle h, TruthValue tv):
         """ Set the TruthValue of an Atom in the AtomSpace """
         self.atomspace.setTV(deref(h.h), deref(<tv_ptr*>(tv._tvptr())))
 
-    def get_type(self,Handle h):
+    def get_type(self, Handle h):
         """ Get the Type of an Atom in the AtomSpace """
         return self.atomspace.getType(deref(h.h))
 
-    def get_name(self,Handle h):
+    def get_name(self, Handle h):
         """ Get the Name of a Node in the AtomSpace """
         cdef string name
         name = self.atomspace.getName(deref(h.h))
         return name.c_str()[:name.size()].decode('UTF-8')
 
-    def get_outgoing(self,Handle handle):
+    def get_outgoing(self, Handle handle):
         """ Get the outgoing set for a Link in the AtomSpace """
         cdef vector[cHandle] o_vect
         o_vect = self.atomspace.getOutgoing(deref(handle.h))
         return convert_handle_seq_to_python_list(o_vect,self)
 
-    def get_incoming(self,Handle handle):
+    def get_incoming(self, Handle handle):
         """ Get the incoming set for an Atom in the AtomSpace """
         cdef vector[cHandle] o_vect
         o_vect = self.atomspace.getIncoming(deref(handle.h))
@@ -312,7 +307,7 @@ cdef class AtomSpace:
         # keep it all in the C++ code for now
         return self.atomspace.isSource(deref(source.h),deref(h.h))
 
-    def get_av(self,Handle h):
+    def get_av(self, Handle h):
         # @todo this is the slow way. quicker way is to support the
         # AttentionValue object and get all values with one atomspace call
         sti = self.atomspace.getSTI(deref(h.h))
@@ -320,7 +315,7 @@ cdef class AtomSpace:
         vlti = self.atomspace.getVLTI(deref(h.h))
         return { "sti": sti, "lti": lti, "vlti": vlti }
 
-    def set_av(self,Handle h,sti=None,lti=None,vlti=None,av_dict=None):
+    def set_av(self, Handle h,sti=None,lti=None,vlti=None,av_dict=None):
         # @todo this is the slow way. quicker way is to support the
         # AttentionValue object and get all values with one atomspace call
         if av_dict:
