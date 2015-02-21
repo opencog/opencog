@@ -208,9 +208,10 @@ Handle DefaultForwardChainerCB::target_to_pmimplicant(Handle htarget,
 		if (NodeCast(htarget)) {
 			auto it_var = hnode_vname_map.find(htarget); //TODO replace by find-if for linear complexity
 			NodePtr p_htarget = NodeCast(htarget);
-			if (it_var != hnode_vname_map.end())
-				return as_->addNode(VARIABLE_NODE, it_var->second,
-						TruthValue::TRUE_TV());
+			if (it_var != hnode_vname_map.end()) {
+				Handle h = as_->addNode(VARIABLE_NODE, it_var->second);
+				h->setTruthValue(TruthValue::TRUE_TV());
+         }
 			else
 				return htarget;
 		}

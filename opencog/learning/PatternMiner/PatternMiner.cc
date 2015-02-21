@@ -102,7 +102,9 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
                else
                {
                    string var_name = "$var_"  + toString(varNameMap.size() + 1);
-                   Handle var_node = atomSpace->addNode(opencog::VARIABLE_NODE, var_name, TruthValue::TRUE_TV());
+                   Handle var_node = atomSpace->addNode(opencog::VARIABLE_NODE, var_name);
+                   // XXX why do we need to set the TV ???
+                   var_node->setTruthValue(TruthValue::TRUE_TV());
                    varNameMap.insert(std::pair<Handle,Handle>(h,var_node));
                    renameOutgoingLinks.push_back(var_node);
                }
@@ -364,7 +366,8 @@ void PatternMiner::generateALinkByChosenVariables(Handle& originalLink, map<Hand
            else
            {
                // this node is considered not a variable, so add its bound value node into the Pattern mining Atomspace
-               Handle value_node = atomSpace->addNode(_fromAtomSpace->getType(h), _fromAtomSpace->getName(h), TruthValue::TRUE_TV());
+               Handle value_node = atomSpace->addNode(_fromAtomSpace->getType(h), _fromAtomSpace->getName(h));
+               value_node->setTruthValue(TruthValue::TRUE_TV());
                outputOutgoings.push_back(value_node);
            }
         }
@@ -563,7 +566,8 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, Atom
     {
         if (fromAtomSpace->isNode(h))
         {
-           Handle new_node = toAtomSpace->addNode(fromAtomSpace->getType(h), fromAtomSpace->getName(h), fromAtomSpace->getTV(h));
+           Handle new_node = toAtomSpace->addNode(fromAtomSpace->getType(h), fromAtomSpace->getName(h));
+           new_node->setTruthValue(fromAtomSpace->getTV(h));
            outgoings.push_back(new_node);
            if (fromAtomSpace->getType(h) == VARIABLE_NODE)
            {

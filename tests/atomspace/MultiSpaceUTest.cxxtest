@@ -57,9 +57,12 @@ public:
 		TruthValuePtr tv3(SimpleTruthValue::createTV(0.5, 3.0));
 
 		// Create three atoms in three different atomspaces
-		Handle h1 = as1.addNode(CONCEPT_NODE, "1", tv1);
-		Handle h2 = as2.addNode(NUMBER_NODE, "2", tv2);
-		Handle h3 = as3.addNode(VARIABLE_NODE, "3", tv3);
+		Handle h1 = as1.addNode(CONCEPT_NODE, "1");
+		h1->setTruthValue(tv1);
+		Handle h2 = as2.addNode(NUMBER_NODE, "2");
+		h2->setTruthValue(tv2);
+		Handle h3 = as3.addNode(VARIABLE_NODE, "3");
+		h3->setTruthValue(tv3);
 
 		// Forget about the atoms, remember thier UUID's only
 		// UUID's are just long ints ...
@@ -120,9 +123,12 @@ public:
 		TruthValuePtr tv3(SimpleTruthValue::createTV(0.4, 3.0));
 
 		// Create three nodes
-		NodePtr n1(createNode(CONCEPT_NODE, "uni-1", tv1));
-		NodePtr n2(createNode(NUMBER_NODE, "uni-2", tv2));
-		NodePtr n3(createNode(VARIABLE_NODE, "uni-3", tv3));
+		NodePtr n1(createNode(CONCEPT_NODE, "uni-1"));
+		n1->setTruthValue(tv1);
+		NodePtr n2(createNode(NUMBER_NODE, "uni-2"));
+		n2->setTruthValue(tv2);
+		NodePtr n3(createNode(VARIABLE_NODE, "uni-3"));
+		n3->setTruthValue(tv3);
 
 		Handle hnd1(n1);
 		Handle hnd2(n2);
@@ -132,9 +138,12 @@ public:
 		TruthValuePtr tv(SimpleTruthValue::createTV(0.33, 3.0));
 
 		// Create three copies of this link in three atomspaces
-		Handle h1 = as1.addLink(LIST_LINK, hnd1, hnd2, hnd3, tv);
-		Handle h2 = as2.addLink(LIST_LINK, hnd1, hnd2, hnd3, tv);
-		Handle h3 = as3.addLink(LIST_LINK, hnd1, hnd2, hnd3, tv);
+		Handle h1 = as1.addLink(LIST_LINK, hnd1, hnd2, hnd3);
+		h1->setTruthValue(tv);
+		Handle h2 = as2.addLink(LIST_LINK, hnd1, hnd2, hnd3);
+		h2->setTruthValue(tv);
+		Handle h3 = as3.addLink(LIST_LINK, hnd1, hnd2, hnd3);
+		h3->setTruthValue(tv);
 
 		// Forget about the link atoms, remember thier UUID's only
 		// UUID's are just long ints ...
@@ -224,18 +233,23 @@ public:
 		TruthValuePtr tv3(SimpleTruthValue::createTV(0.4, 3.0));
 
 		// Create three nodes in the base atomspace
-		Handle hnd1 = nas1.addNode(CONCEPT_NODE, "nest-1", tv1);
-		Handle hnd2 = nas1.addNode(NUMBER_NODE, "nest-2", tv2);
-		Handle hnd3 = nas1.addNode(VARIABLE_NODE, "nest-3", tv3);
+		Handle hnd1 = nas1.addNode(CONCEPT_NODE, "nest-1");
+		hnd1->setTruthValue(tv1);
+		Handle hnd2 = nas1.addNode(NUMBER_NODE, "nest-2");
+		hnd2->setTruthValue(tv2);
+		Handle hnd3 = nas1.addNode(VARIABLE_NODE, "nest-3");
+		hnd3->setTruthValue(tv3);
 
 		// Create three links holding these three
 		TruthValuePtr tv(SimpleTruthValue::createTV(0.33, 3.0));
 
 		// Create a link in the middle atomspace
-		Handle h2 = nas2.addLink(LIST_LINK, hnd1, hnd2, hnd3, tv);
+		Handle h2 = nas2.addLink(LIST_LINK, hnd1, hnd2, hnd3);
+		h2->setTruthValue(tv);
 
 		// Try to create a link in the grandchild atomspace
-		Handle h3 = nas3.addLink(LIST_LINK, hnd1, hnd2, hnd3, tv);
+		Handle h3 = nas3.addLink(LIST_LINK, hnd1, hnd2, hnd3);
+		h3->setTruthValue(tv);
 
 		// The middle and grand-child links should be one and the same.
 		TS_ASSERT(h2 == h3);

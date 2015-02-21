@@ -127,9 +127,9 @@ public:
      * \param tvn   Optional TruthValue of the node. If not provided,
      *              uses the DEFAULT_TV (see TruthValue.h)
      */
-    inline Handle addNode(Type t, const std::string& name = "",
-                          TruthValuePtr tvn = TruthValue::DEFAULT_TV())
+    inline Handle addNode(Type t, const std::string& name = "")
     {
+        TruthValuePtr tvn = TruthValue::DEFAULT_TV();
         return getImpl().addNode(t, name, tvn);
     }
 

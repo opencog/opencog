@@ -569,7 +569,8 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, At
     {
         if (fromAtomSpace->isNode(h))
         {
-           Handle new_node = toAtomSpace->addNode(fromAtomSpace->getType(h), fromAtomSpace->getName(h), fromAtomSpace->getTV(h));
+           Handle new_node = toAtomSpace->addNode(fromAtomSpace->getType(h), fromAtomSpace->getName(h));
+           new_node->setTruthValue(fromAtomSpace->getTV(h));
            outgoings.push_back(new_node);
            if (fromAtomSpace->getType(h) == VARIABLE_NODE)
            {

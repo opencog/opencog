@@ -179,7 +179,7 @@ cdef class AtomSpace:
         atom = Atom(Handle(result.value()), self);
         if tv :
             self.set_tv(atom, tv)
-        return atom
+        return Handle(atom)
 
     def add_link(self,Type t,outgoing,TruthValue tv=None):
         """ Add Link to AtomSpace

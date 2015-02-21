@@ -3251,12 +3251,15 @@ void PAI::addSemanticStructure(Handle objectNode,
     typeName[0] = std::toupper(typeName[0]);
 
     // Add semantic structure into atomspace, used for language comprehension.
-    Handle objSemeNode = atomSpace.addNode(SEME_NODE, entityId , SimpleTruthValue::createTV(1, 1));
+    Handle objSemeNode = atomSpace.addNode(SEME_NODE, entityId);
+    objSemeNode->setTruthValue(SimpleTruthValue::createTV(1, 1));
     Handle objWordNode = atomSpace.addNode(WORD_NODE, entityClass);
-    Handle objClassNode = atomSpace.addNode(CONCEPT_NODE, entityClass, SimpleTruthValue::createTV(1, 1));
+    Handle objClassNode = atomSpace.addNode(CONCEPT_NODE, entityClass);
+    objClassNode->setTruthValue(SimpleTruthValue::createTV(1, 1));
         
     // Create the inheritance link
-    Handle objectType = atomSpace.addNode(CONCEPT_NODE, typeName, SimpleTruthValue::createTV(1, 1));
+    Handle objectType = atomSpace.addNode(CONCEPT_NODE, typeName);
+    objectType->setTruthValue(SimpleTruthValue::createTV(1, 1));
     HandleSeq inheritance(2);
     inheritance[0] = objSemeNode;
     inheritance[1] = objectType;
