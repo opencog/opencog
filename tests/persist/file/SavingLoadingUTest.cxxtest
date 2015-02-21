@@ -283,7 +283,6 @@ public:
 
     void testSavingLoading()
     {
-        
         AtomSpace *atomSpace1 = new AtomSpace();
         ss = new SpaceServer(*atomSpace1);
         ts = new TimeServer(*atomSpace1, ss);

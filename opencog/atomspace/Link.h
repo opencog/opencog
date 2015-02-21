@@ -75,7 +75,7 @@ public:
      *        stored in this Link.
      */
     Link(Type t, const HandleSeq& oset,
-         TruthValuePtr tv = TruthValue::NULL_TV(),
+         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
     {
@@ -83,7 +83,7 @@ public:
     }
 
     Link(Type t, Handle& h,
-         TruthValuePtr tv = TruthValue::NULL_TV(),
+         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
     {
@@ -93,7 +93,7 @@ public:
     }
 
     Link(Type t, Handle& ha, Handle &hb,
-         TruthValuePtr tv = TruthValue::NULL_TV(),
+         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
     {
@@ -104,7 +104,7 @@ public:
     }
 
     Link(Type t, Handle& ha, Handle &hb, Handle &hc,
-         TruthValuePtr tv = TruthValue::NULL_TV(),
+         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
     {
@@ -115,7 +115,7 @@ public:
         init(oset);
     }
     Link(Type t, Handle& ha, Handle &hb, Handle &hc, Handle &hd,
-         TruthValuePtr tv = TruthValue::NULL_TV(),
+         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
     {
