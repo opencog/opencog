@@ -615,6 +615,7 @@ public:
         h2->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
         Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree");
         h3->setTruthValue(SimpleTruthValue::createTV(0.5f, 0.99f));
+
         TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
         TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
         HandleSeq outgoing1;
@@ -622,6 +623,7 @@ public:
         outgoing1.push_back(h3);
         Handle l1 = atomSpace->addLink(LIST_LINK, outgoing1);
         l1->setTruthValue(tv1);
+
         HandleSeq outgoing2;
         outgoing2.push_back(h1);
         outgoing2.push_back(l1);
@@ -635,10 +637,13 @@ public:
 
         TruthValuePtr tv1_ = SimpleTruthValue::createTV(0.002f, 0.00002f);
         Handle l1_ = atomSpace->addLink(LIST_LINK, outgoing1);
-        l1_->setTruthValue(tv1_);
+        tv1->merge(tv1_);
+        l1_->setTruthValue(tv1);
+
         TruthValuePtr tv2_ = SimpleTruthValue::createTV(0.1f, 0.0f);
         Handle l2_ = atomSpace->addLink(EVALUATION_LINK, outgoing2);
-        l2_->setTruthValue(tv2_);
+        tv2->merge(tv2_);
+        l2_->setTruthValue(tv2);
 
         TS_ASSERT(l1 == l1_);
         TruthValuePtr l1tv = l1->getTruthValue();
