@@ -53,6 +53,8 @@ DimEmbedModule::DimEmbedModule(CogServer& cs) : Module(cs)
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal, this, _1));
     removedAtomConnection = as->
         removeAtomSignal(boost::bind(&DimEmbedModule::atomRemoveSignal, this, _1));
+    tvChangedConnection = as->
+        TVChangedSignal(boost::bind(&DimEmbedModule::TVChangedSignal, this, _1, _2, _3));
 }
 
 DimEmbedModule::~DimEmbedModule()
@@ -60,6 +62,7 @@ DimEmbedModule::~DimEmbedModule()
     logger().info("[DimEmbedModule] destructor");
     addedAtomConnection.disconnect();   
     removedAtomConnection.disconnect();
+    tvChangedConnection.disconnect();
 }
 
 void DimEmbedModule::init()
@@ -70,6 +73,8 @@ void DimEmbedModule::init()
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal, this, _1));
     removedAtomConnection = as->
         removeAtomSignal(boost::bind(&DimEmbedModule::atomRemoveSignal, this, _1));
+    tvChangedConnection = as->
+        TVChangedSignal(boost::bind(&DimEmbedModule::TVChangedSignal, this, _1, _2, _3));
 #ifdef HAVE_GUILE
     //Functions available to scheme shell
     define_scheme_primitive("embedSpace",
@@ -486,9 +491,9 @@ void DimEmbedModule::addLink(Handle h,
         logger().error("No embedding exists for type %s", tName);
         throw std::string("No embedding exists for type %s", tName);
     }
-    bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
-    if (symmetric) symAddLink(h,linkType);
-    else asymAddLink(h,linkType);
+    bool symmetric = classserver().isA(linkType, UNORDERED_LINK);
+    if (symmetric) symAddLink(h, linkType);
+    else asymAddLink(h, linkType);
 }
 
 void DimEmbedModule::symAddLink(Handle h, Type linkType)
@@ -1014,20 +1019,20 @@ void DimEmbedModule::handleAddSignal(Handle h)
     AsymAtomEmbedMap::iterator it2;
     if (NodeCast(h)) {
         //for each link type embedding that exists, add the node
-        for (it=atomMaps.begin();it!=atomMaps.end();++it) {
+        for (it = atomMaps.begin(); it != atomMaps.end(); ++it) {
             addNode(h, it->first);
         }
-        for (it2=asymAtomMaps.begin();it2!=asymAtomMaps.end();++it2) {
+        for (it2 = asymAtomMaps.begin(); it2 != asymAtomMaps.end(); ++it2) {
             addNode(h, it2->first);
         }
     }
     else {//h is a link
-        for (it=atomMaps.begin();it!=atomMaps.end();++it) {
+        for (it = atomMaps.begin(); it != atomMaps.end(); ++it) {
             //if the new link is a subtype of an existing embedding, add it
             if (classserver().isA(h->getType(), it->first))
                 addLink(h, it->first);
         }
-        for (it2=asymAtomMaps.begin();it2!=asymAtomMaps.end();++it2) {
+        for (it2 = asymAtomMaps.begin(); it2 !=asymAtomMaps.end(); ++it2) {
             if (classserver().isA(h->getType(), it2->first))
                 addLink(h, it2->first);
         }
@@ -1040,12 +1045,18 @@ void DimEmbedModule::atomRemoveSignal(AtomPtr atom)
     if (NodeCast(atom)) {
         //for each link type embedding that exists, remove the node
         AtomEmbedMap::iterator it;
-        for (it=atomMaps.begin();it!=atomMaps.end();++it) {
-            removeNode(h,it->first);
+        for (it = atomMaps.begin(); it != atomMaps.end(); ++it) {
+            removeNode(h, it->first);
         }
         AsymAtomEmbedMap::iterator it2;
-        for (it2=asymAtomMaps.begin();it2!=asymAtomMaps.end();++it2) {
-            removeNode(h,it2->first);
+        for (it2 = asymAtomMaps.begin(); it2 != asymAtomMaps.end(); ++it2) {
+            removeNode(h, it2->first);
         }
     }
+}
+
+void DimEmbedModule::TVChangedSignal(Handle h, TruthValuePtr a, TruthValuePtr b)
+{
+	atomRemoveSignal(h);
+	handleAddSignal(h);
 }
