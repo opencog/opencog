@@ -72,6 +72,7 @@ public:
         config().set("PSI_ACTION_SELECTION_ENABLED", "true"); 
         config().set("PSI_RELATION_UPDATER_ENABLED", "false"); 
         config().set("PSI_FEELING_UPDATER_ENABLED", "false"); 
+        config().set("OCPLANNING_AGENT_ENABLED", "false");
         config().set("IMPORTANCE_DECAY_ENABLED", "false"); 
         config().set("ACTION_SELECTION_ENABLED", "false"); 
         config().set("COMBO_INTERPRETER_ENABLED", "false"); 
@@ -171,8 +172,7 @@ public:
         OAC & oac = oacMock.getOAC(); 
         AtomSpace & atomSpace = oac.getAtomSpace();
 
-        /*
-        SchemeEval & evaluator = SchemeEval::instance();    
+        SchemeEval evaluator(&atomSpace);
         std::string scheme_expression, scheme_return_value;
 
         scheme_expression = "( do_planning )";
@@ -180,7 +180,6 @@ public:
         // Run the Procedure that do planning
         scheme_return_value = evaluator.eval(scheme_expression);
         TS_ASSERT( !evaluator.eval_error() ); 
-        */
 
         // give it an agent first.
         //oac.
