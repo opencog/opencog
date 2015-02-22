@@ -141,7 +141,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
         size_t pos = 3;
         while (' ' == schema[pos]) pos++;
 
-        PythonEval &applier = PythonEval::instance();
+        PythonEval &applier = PythonEval::instance(as);
 
         Handle h = applier.apply(schema.substr(pos), args);
 

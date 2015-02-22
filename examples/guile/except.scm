@@ -1,6 +1,7 @@
 ;
-; Guile excpetion handling example.
-; The cog-execute! function is demonstrated.
+; Guile exception handling example.  This demonstrates how to catch
+; exceptions, and also how what happens when a bad ExecutionOutputLink
+; is used.  See execute.scm for more cog-execute! examples.
 ;
 
 (use-modules (opencog))
@@ -26,9 +27,9 @@
                (ConceptNode "2")))))
    (lambda (key . args)
       (display "Ohhh noooo Mr. Bill!!! ") (display key)
-		(newline)
-		(display "Sluggo says to ... ") (display args)
-		(newline) (newline)
+      (newline)
+      (display "Sluggo says to ... ") (display args)
+      (newline) (newline)
    ))
 
 
