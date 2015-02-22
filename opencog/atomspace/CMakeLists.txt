@@ -24,6 +24,7 @@ ADD_LIBRARY (atomspace SHARED
     ClassServer.cc
     CountTruthValue.cc
     FixedIntegerIndex.cc
+    FuzzyTruthValue.cc
     Handle.cc
     HandleSeqIndex.cc
     HandleSetIndex.cc
@@ -83,6 +84,7 @@ INSTALL (FILES
     ForeachChaseLink.h
     Foreach.h
     ForeachTwo.h
+    FuzzyTruthValue.h
     Handle.h
     HandleMap.h
     HandleSeqIndex.h
