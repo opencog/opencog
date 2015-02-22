@@ -22,6 +22,22 @@ IF (HAVE_SERVER)
 ENDIF (HAVE_SERVER)
 
 
+# The PythonEvalUTest is derived from the CogServer class, and so 
+# cannot be tested unless the cogserver is actually being built!
+IF (HAVE_SERVER)
+	ADD_CXXTEST(PythonEvalUTest)
+	CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/cython/pyeval.conf
+		${PROJECT_BINARY_DIR}/tests/cython/pyeval.conf)
+
+	TARGET_LINK_LIBRARIES(PythonEvalUTest
+		server
+		cogutil
+	)
+	SET_TESTS_PROPERTIES(PythonEvalUTest
+		PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
+ENDIF (HAVE_SERVER)
+
+
 IF (HAVE_NOSETESTS)
 
 	# Basic test, just does the cython wrapper for opencog/util

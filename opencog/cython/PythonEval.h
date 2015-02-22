@@ -111,7 +111,7 @@ class PythonEval : public GenericEval
         PyObject* pyLocal;
         PyObject* pyRootModule;
 
-        PyObject* sys_path;
+        PyObject* pySysPath;
 
         std::map <std::string, PyObject*> modules;
 

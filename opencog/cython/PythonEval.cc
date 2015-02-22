@@ -129,8 +129,8 @@ void PythonEval::init(void)
     pyGlobal = PyDict_New();
     pyLocal = PyDict_New();
 
-    // Getting sys.path and keeping the refrence, used in this->addSysPath()
-    sys_path = PySys_GetObject((char*)"path");
+    // Getting sys.path and keeping the reference, used in this->addSysPath()
+    pySysPath = PySys_GetObject((char*)"path");
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
@@ -142,14 +142,14 @@ void PythonEval::init(void)
 PyObject* PythonEval::getPyAtomspace(AtomSpace* atomspace)
 {
     init();
-    PyObject * pAtomSpace;
+    PyObject * pyAtomSpace;
 
     if (atomspace)
-        pAtomSpace = py_atomspace(atomspace);
+        pyAtomSpace = py_atomspace(atomspace);
     else
-        pAtomSpace = py_atomspace(this->_atomspace);
+        pyAtomSpace = py_atomspace(this->_atomspace);
 
-    if (pAtomSpace != NULL)
+    if (pyAtomSpace != NULL)
         logger().debug("PythonEval::%s Get atomspace wrapped with python object",
                        __FUNCTION__);
     else {
@@ -160,7 +160,7 @@ PyObject* PythonEval::getPyAtomspace(AtomSpace* atomspace)
                        "wrapped with python object", __FUNCTION__);
     }
 
-    return pAtomSpace;
+    return pyAtomSpace;
 }
 
 void PythonEval::printDict(PyObject* obj)
@@ -168,25 +168,37 @@ void PythonEval::printDict(PyObject* obj)
     if (!PyDict_Check(obj))
         return;
 
-    PyObject *k, *keys;
-    keys = PyDict_Keys(obj);
-    for (int i = 0; i < PyList_GET_SIZE(keys); i++) {
-        k = PyList_GET_ITEM(keys, i);
-        char* c_name = PyBytes_AsString(k);
+    PyObject *pyKey, *pyKeys;
+
+    // Get the keys from the dictionary and print them.
+    pyKeys = PyDict_Keys(obj);
+    for (int i = 0; i < PyList_GET_SIZE(pyKeys); i++) {
+
+        // Get and print one key.
+        pyKey = PyList_GET_ITEM(pyKeys, i);
+        char* c_name = PyBytes_AsString(pyKey);
         printf("%s\n", c_name);
+ 
+        // Cleanup the Python reference count for this key.
+        Py_DECREF(pyKey);
     }
+
+    // Cleanup the Python reference count for the keys list.
+    Py_DECREF(pyKeys);
 }
 
 PythonEval::~PythonEval()
 {
     logger().info("PythonEval::%s destructor", __FUNCTION__);
+
+    // Decrement reference counts for the instance Python object references.
+    Py_DECREF(pyRootModule);
+    Py_DECREF(pyGlobal);
+    Py_DECREF(pyLocal);
+    Py_DECREF(pySysPath);
+
+    // Cleanup Python. 
     Py_Finalize();
-
-    delete pyLocal;
-    delete pyRootModule;
-
-    delete sys_path;
-    delete pyGlobal;
 }
 
 /**
@@ -214,16 +226,20 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
 
 Handle PythonEval::apply(const std::string& func, Handle varargs)
 {
-    PyObject *pError, *pyModule, *pFunc, *pExecFunc;
-    PyObject *pArgs, *pUUID, *pValue = NULL;
+    PyObject *pyError, *pyModule, *pyFunc, *pyExecFunc;
+    PyObject *pyArgs, *pyUUID, *pyValue = NULL;
+    PyObject *pyErrorMessage, *pyDict, *pyBytes;
     string moduleName;
     string funcName;
+    bool errorCallingFunction;
+    string errorString;
+    UUID uuid = 0;
 
     init();
 
-    // Get the correct module and extract the function name
+    // Get the correct module and extract the function name.
     int index = func.find_first_of('.');
-    if(index < 0){
+    if (index < 0){
         pyModule = this->pyRootModule;
         funcName = func;
         moduleName = "__main__";
@@ -234,54 +250,93 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
         funcName = func.substr(index+1);
     }
 
-    // Grab the GIL
+    // Grab the GIL.
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
 
-    // Get a refrence to the function
-    pFunc = PyDict_GetItem(PyModule_GetDict(pyModule),
-                           PyBytes_FromString(funcName.c_str()));
+    // Get a reference to the function. NOTE: We have to call the functions
+    // which return Python separately so we can save the references
+    // and decrement the reference counts or they' won't get cleaned up. We
+    // decrement them right here to cleanup in case of an error.
+    pyDict = PyModule_GetDict(pyModule);
+    pyBytes = PyBytes_FromString(funcName.c_str());
+    pyFunc = PyDict_GetItem(pyDict, pyBytes);
+    Py_DECREF(pyDict);
+    Py_DECREF(pyBytes);
 
-    OC_ASSERT(pFunc != NULL);
-    if(!PyCallable_Check(pFunc))
+    // If we can't find that function then throw an exception.
+    if (!pyFunc)
     {
+        PyGILState_Release(gstate);
+        throw (RuntimeException(TRACE_INFO, "Python function '%s' not found!", funcName.c_str()));
+    }
+        
+    // Make sure the function is callable.
+    if (!PyCallable_Check(pyFunc))
+    {
+        Py_DECREF(pyFunc);
+        PyGILState_Release(gstate);
         logger().error() << "Member " << func << " is not callable.";
         return Handle::UNDEFINED;
     }
 
-    // Get a refrence to our executer function
-    pExecFunc = PyDict_GetItem(PyModule_GetDict(this->pyRootModule),
-                    PyBytes_FromString("execute_user_defined_function"));
-    OC_ASSERT(pExecFunc != NULL);
+    // Get a reference to our executer function. NOTE: Same as above,
+    // we must get separate references for later decrement of the
+    // Python reference counts.
+    pyDict = PyModule_GetDict(this->pyRootModule);
+    pyBytes = PyBytes_FromString("execute_user_defined_function");
+    pyExecFunc = PyDict_GetItem(pyDict, pyBytes);
+    Py_DECREF(pyDict);
+    Py_DECREF(pyBytes);
+    OC_ASSERT(pyExecFunc != NULL);
 
-    // Create the argument list
-    pArgs = PyTuple_New(2);
-    pUUID = PyLong_FromLong(varargs.value());
-    OC_ASSERT(pUUID != NULL);
+    // Create the argument list.
+    pyArgs = PyTuple_New(2);
+    pyUUID = PyLong_FromLong(varargs.value());
+    OC_ASSERT(pyUUID != NULL);
+    PyTuple_SetItem(pyArgs, 0, pyFunc);
+    PyTuple_SetItem(pyArgs, 1, pyUUID);
 
-    PyTuple_SetItem(pArgs, 0, pFunc);
-    PyTuple_SetItem(pArgs, 1, pUUID);
+    // Call the executer function and store its return value.
+    pyValue = PyObject_CallObject(pyExecFunc, pyArgs);
 
-    // Call the executer function and store its return value
-    pValue = PyObject_CallObject(pExecFunc, pArgs);
-    pError = PyErr_Occurred();
-
-    if (pError) {
-        PyErr_Print();
-        logger().error() << PyBytes_AsString(PyObject_GetAttrString(pError, "message"));
-        return Handle::UNDEFINED;
+    // Check for errors.
+    pyError = PyErr_Occurred();
+    if (!pyError)
+    {
+        // Success - get the return value.
+        errorCallingFunction = false;
+        uuid = static_cast<unsigned long>(PyLong_AsLong(pyValue));
     }
+    else
+    {
+        // Error - save the message.
+        errorCallingFunction = true;
+        pyErrorMessage = PyObject_GetAttrString(pyError, "message");
+        errorString = PyBytes_AsString(pyErrorMessage);
+        PyErr_Print();
 
-    UUID uuid = static_cast<unsigned long>(PyLong_AsLong(pValue));
-
-    // Cleaning up
-    Py_DECREF(pArgs);
-    Py_DECREF(pUUID);
-    Py_DECREF(pFunc);
-    Py_DECREF(pExecFunc);
+        // Cleanup the reference count for pyError and pyErrorMessage
+        Py_DECREF(pyError);
+        Py_DECREF(pyErrorMessage);
+    }
+    
+    // Cleanup the reference counts for Python objects we no longer reference.
+    Py_DECREF(pyFunc);
+    Py_DECREF(pyExecFunc);
+    Py_DECREF(pyArgs);
+    Py_DECREF(pyUUID);
+    Py_DECREF(pyValue);
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
+
+    // Return UNDEFINED on error.
+    if (errorCallingFunction)
+    {
+        logger().error() << errorString;
+        return Handle::UNDEFINED;
+    }
 
     return Handle(uuid);
 }
@@ -290,7 +345,12 @@ std::string PythonEval::apply_script(const std::string& script)
 {
     init();
 
+    PyObject* pyError = NULL;
+    PyObject *pyCatcher = NULL;
+    PyObject *pyOutput = NULL;
     std::string result;
+    bool errorCallingFunction;
+    std::string errorString;
 
     // Grab the GIL
     PyGILState_STATE gstate;
@@ -301,22 +361,35 @@ std::string PythonEval::apply_script(const std::string& script)
                        "sys.stdout = _opencog_output_stream\n"
                        "sys.stderr = _opencog_output_stream\n");
 
+    // Run the script.
     PyRun_SimpleString(script.c_str());
 
-    PyObject *catcher = PyObject_GetAttrString(this->pyRootModule,"_opencog_output_stream");
-    PyObject *output = PyObject_CallMethod(catcher, (char*)"getvalue", NULL);
+    // Check for errors in the script.
+    pyError = PyErr_Occurred();
+    if (!pyError)
+    {
+        // Script succeeded, get the output stream as a string so we can return it.
+        errorCallingFunction = false;
+        pyCatcher = PyObject_GetAttrString(this->pyRootModule,"_opencog_output_stream");
+        pyOutput = PyObject_CallMethod(pyCatcher, (char*)"getvalue", NULL);
+        result = PyBytes_AsString(pyOutput);
 
-//    pError = PyErr_Occurred();
+        // Cleanup the reference counts for Python objects we no longer reference.
+        Py_DECREF(pyCatcher);
+        Py_DECREF(pyOutput);
+    }
+    else
+    {
+        // Remember the error and get the error string for the throw below.
+        errorCallingFunction = true;
+        errorString = PyBytes_AsString(PyObject_GetAttrString(pyError, "message"));
+        PyErr_Print();
 
-//    if(pError){
-//        logger().error() << PyString_AsString(PyObject_GetAttrString(pError, "message")) << std::endl;
-//        result = PyString_AsString(PyObject_GetAttrString(pError, "message"));
-//    }
-//    else
-//    {
-        result = PyBytes_AsString(output);
-//    }
+        // Cleanup the reference count for the pyError Python object.
+        Py_DECREF(pyError);
+     }
 
+    // Close the output stream.
     PyRun_SimpleString("sys.stdout = _python_output_stream\n"
                        "sys.stderr = _python_output_stream\n"
                        "_opencog_output_stream.close()\n");
@@ -324,8 +397,12 @@ std::string PythonEval::apply_script(const std::string& script)
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
 
-    // XXX TODO FIXME: we should check for error, and throw.  Without
-    // this, python scripts can silently fail, and you'd never now it.
+    // If there was an error throw an exception so the user knows script had a problem.
+    if (errorCallingFunction)
+    {
+        logger().error() << errorString;
+        throw (RuntimeException(TRACE_INFO, "Python error: %s", errorString.c_str()));
+    }
 
     // printf("Python says that: %s\n", result.c_str());
     return result;
@@ -335,7 +412,7 @@ void PythonEval::addSysPath(std::string path)
 {
     init();
 
-    PyList_Append(this->sys_path, PyBytes_FromString(path.c_str()));
+    PyList_Append(this->pySysPath, PyBytes_FromString(path.c_str()));
     //    PyRun_SimpleString(("sys.path += ['" + path + "']").c_str());
 }
 
