@@ -208,19 +208,19 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                              &ocPlanningAgentAgentFactory);
         ocPlanningAgent = createAgent<OCPlanningAgent>();
 
-        psiActionSelectionAgent = 0;
+        psiActionSelectionAgent = nullptr;
     }
     else if (config().get_bool("PSI_ACTION_SELECTION_ENABLED"))
     {
         registerAgent(PsiActionSelectionAgent::info().id,
                              &psiActionSelectionAgentFactory);
         psiActionSelectionAgent = createAgent<PsiActionSelectionAgent>();
-        ocPlanningAgent = 0;
+        ocPlanningAgent = nullptr;
     }
     else
     {
-        psiActionSelectionAgent = 0;
-        ocPlanningAgent = 0;
+        psiActionSelectionAgent = nullptr;
+        ocPlanningAgent = nullptr;
     }
 
     registerAgent(ProcedureInterpreterAgent::info().id, &procedureInterpreterAgentFactory);
@@ -362,7 +362,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         this->startAgent(this->fishgramAgent); 
     }
     else 
-        this->fishgramAgent = NULL; 
+        this->fishgramAgent = nullptr; 
 
     if ( config().get_bool("MONITOR_CHANGES_ENABLED") ) {
         this->monitorChangesAgent = PyMindAgentPtr(new PyMindAgent(*this, "monitor_changes", "MonitorChangesMindAgent"));
@@ -370,7 +370,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         this->startAgent(this->monitorChangesAgent); 
     }
     else
-        this->monitorChangesAgent = NULL; 
+        this->monitorChangesAgent = nullptr; 
 #endif
 
     if ( config().get_bool("ENABLE_PATTERN_MINER"))
@@ -379,7 +379,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         this->startAgent(this->patternMiningAgent);
     }
     else
-        this->patternMiningAgent = NULL;
+        this->patternMiningAgent = nullptr;
 
     // TODO: This should be done only after NetworkElement is initialized
     // (i.e., handshake with router is done)
@@ -650,9 +650,9 @@ OAC::~OAC()
 #endif
     logger().debug("OAC - Starting AtomSpace removal.");
     printf("OAC - Starting AtomSpace removal.\n");
-    int t1 = time(NULL);
+    int t1 = time(nullptr);
     delete (atomSpace);
-    int t2 = time(NULL);
+    int t2 = time(nullptr);
     logger().debug("OAC - Finished AtomSpace removal. t1 = %d, t2=%d, elapsed time =%d seconds", t1, t2, t2-t1);
     printf("OAC - Finished AtomSpace removal. t1 = %d, t2=%d, diff=%d\n", t1, t2, t2-t1);
 #ifndef DELETE_ATOMSPACE 
