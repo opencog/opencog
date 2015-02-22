@@ -62,6 +62,9 @@ AtomSpaceImpl::AtomSpaceImpl(AtomSpaceImpl* parent) :
 
 AtomSpaceImpl::~AtomSpaceImpl()
 {
+    // Be sure to disconnect the attention bank signals before the
+    // atom table destructor runs. XXX FIXME yes this is an ugly hack.
+    bank.shutdown();
 }
 
 // ====================================================================

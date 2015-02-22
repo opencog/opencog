@@ -81,6 +81,7 @@ public:
     /** The table notifies us about AV changes */
     AttentionBank(AtomTable*);
     ~AttentionBank();
+    void shutdown(void);
 
     /**
      * Provide ability for others to find out about atoms that cross in or

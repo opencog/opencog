@@ -41,11 +41,14 @@ AttentionBank::AttentionBank(AtomTable* atab)
             boost::bind(&AttentionBank::AVChanged, this, _1, _2, _3));
 }
 
-AttentionBank::~AttentionBank()
+/// This must be called before the destrubtor is, and before the
+/// the AtomTble is destroyed. XXX FIXME yes this is hacky.
+void AttentionBank::shutdown(void)
 {
     AVChangedConnection.disconnect();
-    fundsSTI = config().get_int("STARTING_STI_FUNDS");
 }
+
+AttentionBank::~AttentionBank() {}
 
 
 void AttentionBank::AVChanged(Handle h, AttentionValuePtr old_av,
