@@ -41,8 +41,10 @@ AttentionBank::AttentionBank(AtomTable& atab)
             boost::bind(&AttentionBank::AVChanged, this, _1, _2, _3));
 }
 
-/// This must be called before the destrubtor is, and before the
-/// the AtomTble is destroyed. XXX FIXME yes this is hacky.
+/// This must be called before the AtomTable is destroyed. Which
+/// means that it cannot be in the destructor (since the AtomTable
+/// is probably gone by then, leading to a crash.  XXX FIXME yes this
+/// is a tacky hack to fix a design bug.
 void AttentionBank::shutdown(void)
 {
     AVChangedConnection.disconnect();
@@ -64,17 +66,17 @@ void AttentionBank::AVChanged(Handle h, AttentionValuePtr old_av,
 
     // Check if the atom crossed into or out of the AttentionalFocus
     // and notify any interested parties
-    if (old_av->getSTI() < attentionalFocusBoundary &&
+    if (old_av->getSTI() < attentionalFocusBoundary and
         new_av->getSTI() >= attentionalFocusBoundary)
     {
-        AFCHSigl& avch = AddAFSignal();
-        avch(h, old_av, new_av);
+        AFCHSigl& afch = AddAFSignal();
+        afch(h, old_av, new_av);
     }
-    else if (new_av->getSTI() < attentionalFocusBoundary &&
+    else if (new_av->getSTI() < attentionalFocusBoundary and
              old_av->getSTI() >= attentionalFocusBoundary)
     {
-        AFCHSigl& avch = RemoveAFSignal();
-        avch(h, old_av, new_av);
+        AFCHSigl& afch = RemoveAFSignal();
+        afch(h, old_av, new_av);
     }
 }
 
