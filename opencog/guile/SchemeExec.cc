@@ -2,7 +2,7 @@
  * SchemeExec.cc
  *
  * Execute ExecutionOutputLink's
- * Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (c) 2009,2015 Linas Vepstas <linasvepstas@gmail.com>
  */
 
 #ifdef HAVE_GUILE
@@ -68,7 +68,7 @@ SCM SchemeEval::do_apply_scm(const std::string& func, Handle& varargs )
 SCM SchemeSmob::ss_execute (SCM satom)
 {
 	AtomSpace* atomspace = ss_get_env_as("cog-execute");
-    
+
 	Handle h = verify_handle(satom, "cog-execute");
 	
 	if (h->getType() != EXECUTION_OUTPUT_LINK)
@@ -77,7 +77,24 @@ SCM SchemeSmob::ss_execute (SCM satom)
 			"ExecutionOutputLink opencog cog-execute");
 	}
 
-	return handle_to_scm(ExecutionOutputLink::do_execute(atomspace, h));
+	// do_execute() may throw a C++ exception in various cases:
+	// e.g. if the code to execute is python, and its names a
+	// non-existant function ... or even if its scheme code with
+	// a bug in it.
+	try
+	{
+		return handle_to_scm(ExecutionOutputLink::do_execute(atomspace, h));
+	}
+	catch (const std::exception& ex)
+	{
+		SchemeSmob::throw_exception(ex.what(), "cog-execute");
+	}
+	catch (...)
+	{
+		SchemeSmob::throw_exception(NULL, "cog-execute");
+	}
+	scm_remember_upto_here_1(satom);
+	return SCM_EOL;
 }
 
 #endif
