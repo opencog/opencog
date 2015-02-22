@@ -79,7 +79,7 @@ class AttentionBank
 
 public:
     /** The table notifies us about AV changes */
-    AttentionBank(AtomTable*);
+    AttentionBank(AtomTable&);
     ~AttentionBank();
     void shutdown(void);
 

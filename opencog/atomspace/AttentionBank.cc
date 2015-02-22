@@ -30,14 +30,14 @@
 
 using namespace opencog;
 
-AttentionBank::AttentionBank(AtomTable* atab)
+AttentionBank::AttentionBank(AtomTable& atab)
 {
     startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS");
     startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS");
     attentionalFocusBoundary = 1;
 
     AVChangedConnection = 
-        atab->AVChangedSignal().connect(
+        atab.AVChangedSignal().connect(
             boost::bind(&AttentionBank::AVChanged, this, _1, _2, _3));
 }
 

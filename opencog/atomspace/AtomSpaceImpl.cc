@@ -54,7 +54,7 @@ using namespace opencog;
 
 AtomSpaceImpl::AtomSpaceImpl(AtomSpaceImpl* parent) :
     atomTable(parent? &parent->atomTable : NULL),
-    bank(&atomTable)
+    bank(atomTable)
 {
     backing_store = NULL;
     DPRINTF("AtomSpaceImpl::Constructor AtomTable address: %p\n", &atomTable);
@@ -88,7 +88,7 @@ AtomSpaceImpl& AtomSpaceImpl::operator=(const AtomSpaceImpl& other)
 }
 
 AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other)
-    : bank(&atomTable)
+    : bank(atomTable)
 {
     throw opencog::RuntimeException(TRACE_INFO,
             "AtomSpaceImpl - Cannot copy an object of this class");
