@@ -45,6 +45,7 @@ AtomSpace::AtomSpace(AtomSpace* parent)
 AtomSpace::~AtomSpace()
 {
     delete _atomSpaceImpl;
+    _atomSpaceImpl = NULL;
 }
 
 AtomSpace& AtomSpace::operator=(const AtomSpace& other)

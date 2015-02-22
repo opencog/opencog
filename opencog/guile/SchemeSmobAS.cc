@@ -71,6 +71,9 @@ SCM SchemeSmob::ss_new_as (SCM s)
 	AtomSpace *parent = ss_to_atomspace(s);
 
 	AtomSpace *as = new AtomSpace(parent);
+
+	// Only the internally-created atomspaces are trackable.
+	deleteable_as[as] = 0;
 	return take_as(as);
 }
 
@@ -121,6 +124,32 @@ SCM SchemeSmob::ss_get_as (void)
 	return scm_fluid_ref(atomspace_fluid);
 }
 
+/// The current atomspace for the current thread must not be deleted
+/// under any circumstances. Thus each thread increments a use-count
+/// on the atomspace (stored in deleteable_as).  Atomspaces that are
+/// not current in any thread, and also have no SCM mobs pointing
+/// at them may be deleted by the gc.  This will cause atoms to
+/// disappear, if the user is not careful ...
+///
+/// Oh, wait: only atomspaces that were interanlly creted (i.e.
+/// created by a scheme call) are eligible for deletion.  We may
+/// also be given atomspaces that magically appeared from the outside
+/// world --- we do NOT track those for deletion.
+///
+void SchemeSmob::as_ref_count(SCM old_as, AtomSpace *nas)
+{
+	AtomSpace* oas = ss_to_atomspace(old_as);
+	if (oas != nas)
+	{
+		std::lock_guard<std::mutex> lck(as_mtx);
+		if (deleteable_as.end() != deleteable_as.find(nas))
+			deleteable_as[nas]++;
+		if (oas and deleteable_as.end() != deleteable_as.find(oas))
+			deleteable_as[oas] --;
+	}
+
+}
+
 /**
  * Set the current atomspace for this dynamic state.
  * Return the previous atomspace.
@@ -133,23 +162,8 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
 	if (COG_AS != SCM_SMOB_FLAGS(new_as))
 		return SCM_BOOL_F;
 
-	// The current atomspace for the current thread must not be deleted
-	// under any circumstances. Thus each thread increments a use-count
-	// on the atomspace (stored in deleteable_as).  Atomspaces that are
-	// not current in any thread, and also have no SCM mobs pointing
-	// at them may be deleted by the gc.  This will cause atoms to
-	// disappear, if the user is not careful ...
-
 	SCM old_as = ss_get_as();
-	AtomSpace* oas = ss_to_atomspace(old_as);
-	AtomSpace* nas = ss_to_atomspace(new_as);
-	if (oas != nas)
-	{
-		std::lock_guard<std::mutex> lck(as_mtx);
-		deleteable_as[nas]++;
-		if (oas and deleteable_as.end() != deleteable_as.find(oas))
-			deleteable_as[oas] --;
-	}
+	as_ref_count(old_as, ss_to_atomspace(new_as));
 
 	scm_fluid_set_x(atomspace_fluid, new_as);
 
@@ -166,15 +180,7 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
 
 void SchemeSmob::ss_set_env_as(AtomSpace *nas)
 {
-	// See comments above for deleteable_as.
-	AtomSpace* oas = ss_to_atomspace(ss_get_as());
-	if (oas != nas)
-	{
-		std::lock_guard<std::mutex> lck(as_mtx);
-		deleteable_as[nas]++;
-		if (oas and deleteable_as.end() != deleteable_as.find(oas))
-			deleteable_as[oas] --;
-	}
+	as_ref_count(ss_get_as(), nas);
 
 	scm_fluid_set_x(atomspace_fluid, make_as(nas));
 }

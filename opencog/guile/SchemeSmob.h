@@ -134,6 +134,7 @@ class SchemeSmob
 		static AtomSpace* ss_to_atomspace(SCM);
 		static std::mutex as_mtx;
 		static std::map<AtomSpace*, int> deleteable_as;
+		static void as_ref_count(SCM, AtomSpace *);
 
 		// Attention values
 		static SCM ss_new_av(SCM, SCM, SCM);
