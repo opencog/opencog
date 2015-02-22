@@ -204,7 +204,7 @@ void StorkeyAgent::setCurrentWeights(w_t& w)
             if (heb != Handle::UNDEFINED) {
                 if (w[i][j] < 0.0f) {
                     a.removeAtom(heb, true);
-                    a.addLink(SYMMETRIC_INVERSE_HEBBIAN_LINK, outgoing,
+                    a.addLink(SYMMETRIC_INVERSE_HEBBIAN_LINK, outgoing)->merge(
                             SimpleTruthValue::createTV(-w[i][j],100));
                 } else {
                     setMean(heb, w[i][j]);
@@ -214,7 +214,7 @@ void StorkeyAgent::setCurrentWeights(w_t& w)
                 if (heb != Handle::UNDEFINED) {
                     if (w[i][j] > 0.0f) {
                         a.removeAtom(heb, true);
-                        a.addLink(SYMMETRIC_HEBBIAN_LINK, outgoing,
+                        a.addLink(SYMMETRIC_HEBBIAN_LINK, outgoing)->merge(
                                 SimpleTruthValue::createTV(w[i][j],100));
                     } else {
                         setMean(heb, -w[i][j]);
