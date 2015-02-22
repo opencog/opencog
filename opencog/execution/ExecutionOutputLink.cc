@@ -120,7 +120,14 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
         while (' ' == schema[pos]) pos++;
 
         SchemeEval* applier = get_evaluator(as);
-        return applier->apply(schema.substr(pos), args);
+        Handle h(applier->apply(schema.substr(pos), args));
+
+        // Exceptions were already caught, before leaving guile mode,
+        // so we can't rethrow.  Just throw a new exception.
+        if (applier->eval_error())
+            throw RuntimeException(TRACE_INFO,
+                "Failed evaluation; see logfile for stack trace.");
+        return h;
 #else
         throw RuntimeException(TRACE_INFO,
             "Cannot evaluate scheme GroundedSchemaNode!");
