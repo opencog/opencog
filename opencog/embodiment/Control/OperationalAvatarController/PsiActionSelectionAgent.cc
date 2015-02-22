@@ -89,7 +89,7 @@ void PsiActionSelectionAgent::initDemandGoalList(AtomSpace & atomSpace)
     boost::tokenizer<> demandNamesTok (demandNames);
 
     std::string demandPredicateName;
-    std::vector<Handle> outgoings;
+    HandleSeq outgoings;
 
     outgoings.clear();
 
@@ -119,7 +119,7 @@ void PsiActionSelectionAgent::initDemandGoalList(AtomSpace & atomSpace)
 }
 
 void PsiActionSelectionAgent::getActions(AtomSpace & atomSpace, Handle hStep,
-                                         std::vector<Handle> & actions)
+                                         HandleSeq & actions)
 {
     opencog::Type atomType = atomSpace.getType(hStep);
 
@@ -133,7 +133,7 @@ void PsiActionSelectionAgent::getActions(AtomSpace & atomSpace, Handle hStep,
         }
     }
     else if (atomType == OR_LINK ) {
-        const std::vector<Handle> & outgoings = atomSpace.getOutgoing(hStep);
+        const HandleSeq & outgoings = atomSpace.getOutgoing(hStep);
         int randomIndex = (int) (1.0*rand()/RAND_MAX * outgoings.size() - 0.5);
         Handle hRandomSelected = outgoings[randomIndex];
         this->getActions(atomSpace, hRandomSelected, actions);
@@ -143,11 +143,12 @@ void PsiActionSelectionAgent::getActions(AtomSpace & atomSpace, Handle hStep,
 bool PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
 {
     // Check the state of latest planning
-    std::vector<Handle> tempOutgoingSet, emptyOutgoingSet;
-    tempOutgoingSet.push_back( atomSpace.addNode(PREDICATE_NODE, "plan_success") );
-    tempOutgoingSet.push_back( atomSpace.addLink(LIST_LINK, emptyOutgoingSet) );
+    HandleSeq tempOutgoingSet =
+        { atomSpace.addNode(PREDICATE_NODE, "plan_success"),
+          atomSpace.addLink(LIST_LINK, HandleSeq()) };
 
-    Handle hPlanSuccessEvaluationLink = atomSpace.addLink(EVALUATION_LINK, tempOutgoingSet);
+    Handle hPlanSuccessEvaluationLink = atomSpace.addLink(EVALUATION_LINK,
+                                                          tempOutgoingSet);
     if ( atomSpace.getTV(hPlanSuccessEvaluationLink)->getMean() < 0.9 )
         return false;
 
@@ -400,7 +401,7 @@ std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_
         boost::smatch what;
 
         Handle hSpeakAction, hSpeakActionArgument;
-        std::vector<Handle> tempOutgoingSet;
+        HandleSeq tempOutgoingSet;
 
         Handle hUtteranceSentencesList =
             AtomSpaceUtil::getReference(atomSpace,
