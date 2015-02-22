@@ -38,6 +38,7 @@ ADD_LIBRARY (atomspace SHARED
     Node.cc
     NodeIndex.cc
     NullTruthValue.cc
+    ProbabilisticTruthValue.cc
     SimpleTruthValue.cc
     StringIndex.cc
     TargetTypeIndex.cc
@@ -99,6 +100,7 @@ INSTALL (FILES
     Node.h
     NodeIndex.h
     NullTruthValue.h
+    ProbabilisticTruthValue.h
     SimpleTruthValue.h
     StringIndex.h
     TargetTypeIndex.h
