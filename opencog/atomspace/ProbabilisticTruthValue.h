@@ -56,7 +56,6 @@ public:
     virtual bool operator==(const TruthValue& rhs) const;
 
     std::string toString() const;
-    TruthValueType getType() const;
 
     strength_t getMean() const;
     count_t getCount() const;

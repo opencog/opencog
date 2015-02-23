@@ -108,18 +108,18 @@ void IndefiniteTruthValue::copy(const IndefiniteTruthValue& source)
     symmetric = source.symmetric;
 }
 
-IndefiniteTruthValue::IndefiniteTruthValue()
+IndefiniteTruthValue::IndefiniteTruthValue():TruthValue(INDEFINITE_TRUTH_VALUE)
 {
     init();
 }
 
 IndefiniteTruthValue::IndefiniteTruthValue(strength_t l, strength_t u,
-                                           confidence_t c)
+                                           confidence_t c):TruthValue(INDEFINITE_TRUTH_VALUE)
 {
     init(l, u, c);
 }
 
-IndefiniteTruthValue::IndefiniteTruthValue(IndefiniteTruthValue const& source)
+IndefiniteTruthValue::IndefiniteTruthValue(IndefiniteTruthValue const& source):TruthValue(INDEFINITE_TRUTH_VALUE)
 {
     copy(source);
 }
@@ -255,11 +255,6 @@ void IndefiniteTruthValue::setDiff(strength_t diff)
 void IndefiniteTruthValue::setFirstOrderDistribution(const std::vector<strength_t*>& v)
 {
     this->firstOrderDistribution = v;
-}
-
-TruthValueType IndefiniteTruthValue::getType() const
-{
-    return INDEFINITE_TRUTH_VALUE;
 }
 
 void IndefiniteTruthValue::setMean(strength_t m)

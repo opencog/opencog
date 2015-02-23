@@ -39,18 +39,18 @@ using namespace opencog;
 
 #define KKK 800.0f
 
-SimpleTruthValue::SimpleTruthValue(strength_t m, count_t c)
+SimpleTruthValue::SimpleTruthValue(strength_t m, count_t c):TruthValue(SIMPLE_TRUTH_VALUE)
 {
     mean = m;
     count = c;
 }
 
-SimpleTruthValue::SimpleTruthValue(const TruthValue& source)
+SimpleTruthValue::SimpleTruthValue(const TruthValue& source):TruthValue(SIMPLE_TRUTH_VALUE)
 {
     mean = source.getMean();
     count = source.getCount();
 }
-SimpleTruthValue::SimpleTruthValue(SimpleTruthValue const& source)
+SimpleTruthValue::SimpleTruthValue(SimpleTruthValue const& source):TruthValue(SIMPLE_TRUTH_VALUE)
 {
     mean = source.mean;
     count = source.count;
@@ -112,11 +112,6 @@ bool SimpleTruthValue::operator==(const TruthValue& rhs) const
 
     if (FLOAT_ACCEPTABLE_COUNT_ERROR < fabs(1.0 - (stv->count/count))) return false;
     return true;
-}
-
-TruthValueType SimpleTruthValue::getType() const
-{
-    return SIMPLE_TRUTH_VALUE;
 }
 
 count_t SimpleTruthValue::confidenceToCount(confidence_t cf)

@@ -117,7 +117,6 @@ public:
     TruthValuePtr merge(TruthValuePtr) const;
 
     std::string toString() const;
-    TruthValueType getType() const;
 
     // clone method
     static IndefiniteTruthValuePtr createITV(TruthValuePtr tv)

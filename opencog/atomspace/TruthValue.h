@@ -133,7 +133,8 @@ public:
     virtual count_t getCount()  const = 0;
 
     virtual std::string toString() const  = 0;
-    virtual TruthValueType getType() const  = 0;
+    virtual TruthValueType getType() const;
+    virtual void setType(TruthValueType t);
     virtual TruthValuePtr clone() const  = 0;
     virtual TruthValue* rawclone() const  = 0;
 

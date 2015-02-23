@@ -72,7 +72,6 @@ public:
     static confidence_t countToConfidence(count_t);
 
     std::string toString() const;
-    TruthValueType getType() const;
 
     strength_t getMean() const;
     count_t getCount() const;
