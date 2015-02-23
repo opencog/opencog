@@ -56,13 +56,12 @@ public:
     virtual bool operator==(const TruthValue& rhs) const;
 
     std::string toString() const;
-    TruthValueType getType() const;
 
     strength_t getMean() const;
     count_t getCount() const;
     confidence_t getConfidence() const;
 
-    virtual TruthValuePtr merge(TruthValuePtr) const;
+    virtual TruthValuePtr merge(TruthValuePtr,MergeOption mo=DEFAULT) const;
 
     static TruthValuePtr createTV(strength_t s, confidence_t f, count_t c)
     {

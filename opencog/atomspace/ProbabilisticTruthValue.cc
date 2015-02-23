@@ -34,20 +34,20 @@
 
 using namespace opencog;
 
-ProbabilisticTruthValue::ProbabilisticTruthValue(strength_t m, confidence_t n, count_t c)
+ProbabilisticTruthValue::ProbabilisticTruthValue(strength_t m, confidence_t n, count_t c):TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
     mean = m;
     confidence = n;
     count = c;
 }
 
-ProbabilisticTruthValue::ProbabilisticTruthValue(const TruthValue& source)
+ProbabilisticTruthValue::ProbabilisticTruthValue(const TruthValue& source):TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
     mean = source.getMean();
     confidence = source.getConfidence();
     count = source.getCount();
 }
-ProbabilisticTruthValue::ProbabilisticTruthValue(ProbabilisticTruthValue const& source)
+ProbabilisticTruthValue::ProbabilisticTruthValue(ProbabilisticTruthValue const& source):TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
     mean = source.mean;
     confidence = source.confidence;
@@ -93,15 +93,10 @@ bool ProbabilisticTruthValue::operator==(const TruthValue& rhs) const
     return true;
 }
 
-TruthValueType ProbabilisticTruthValue::getType() const
-{
-    return PROBABILISTIC_TRUTH_VALUE;
-}
-
 // Note: this is NOT the merge formula used by PLN.  This is
 // because the ProbabilisticTruthValue usally stores an integer count,
 // and a log-probability or entropy, instead of a confidence.
-TruthValuePtr ProbabilisticTruthValue::merge(TruthValuePtr other) const
+TruthValuePtr ProbabilisticTruthValue::merge(TruthValuePtr other,MergeOption mo/*=DEFAULT*/) const
 {
     ProbabilisticTruthValuePtr oc =
         std::dynamic_pointer_cast<ProbabilisticTruthValue>(other);

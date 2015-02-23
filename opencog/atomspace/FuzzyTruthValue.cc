@@ -39,18 +39,18 @@ using namespace opencog;
 
 #define KKK 800.0f
 
-FuzzyTruthValue::FuzzyTruthValue(strength_t m, count_t c)
+FuzzyTruthValue::FuzzyTruthValue(strength_t m, count_t c):TruthValue(FUZZY_TRUTH_VALUE)
 {
     mean = m;
     count = c;
 }
 
-FuzzyTruthValue::FuzzyTruthValue(const TruthValue& source)
+FuzzyTruthValue::FuzzyTruthValue(const TruthValue& source):TruthValue(FUZZY_TRUTH_VALUE)
 {
     mean = source.getMean();
     count = source.getCount();
 }
-FuzzyTruthValue::FuzzyTruthValue(FuzzyTruthValue const& source)
+FuzzyTruthValue::FuzzyTruthValue(FuzzyTruthValue const& source):TruthValue(FUZZY_TRUTH_VALUE)
 {
     mean = source.mean;
     count = source.count;
@@ -72,7 +72,7 @@ confidence_t FuzzyTruthValue::getConfidence() const
 }
 
 // This is the merge formula appropriate for PLN.
-TruthValuePtr FuzzyTruthValue::merge(TruthValuePtr other) const
+TruthValuePtr FuzzyTruthValue::merge(TruthValuePtr other,MergeOption mo /*=DEFAULT*/) const
 {
     if (other->getType() != SIMPLE_TRUTH_VALUE) {
         throw RuntimeException(TRACE_INFO,
@@ -112,11 +112,6 @@ bool FuzzyTruthValue::operator==(const TruthValue& rhs) const
 
     if (FLOAT_ACCEPTABLE_COUNT_ERROR < fabs(1.0 - (stv->count/count))) return false;
     return true;
-}
-
-TruthValueType FuzzyTruthValue::getType() const
-{
-    return FUZZY_TRUTH_VALUE;
 }
 
 count_t FuzzyTruthValue::confidenceToCount(confidence_t cf)

@@ -28,7 +28,7 @@
 
 using namespace opencog;
 
-NullTruthValue::NullTruthValue() {};
+NullTruthValue::NullTruthValue():TruthValue(NULL_TRUTH_VALUE) {};
 
 bool NullTruthValue::isNullTv() const
 {
@@ -62,12 +62,7 @@ confidence_t NullTruthValue::getConfidence() const throw (RuntimeException)
     throw RuntimeException(TRACE_INFO, "Cannot call getConfidence() method of a NullTruthvalue");
 }
 
-TruthValueType NullTruthValue::getType() const
-{
-    return NULL_TRUTH_VALUE;
-}
-
-TruthValuePtr NullTruthValue::merge(TruthValuePtr) const throw (RuntimeException)
+TruthValuePtr NullTruthValue::merge(TruthValuePtr,MergeOption mo/*=DEFAULT*/) const throw (RuntimeException)
 {
     throw RuntimeException(TRACE_INFO, "Cannot call merge() method of a NullTruthvalue");
 }

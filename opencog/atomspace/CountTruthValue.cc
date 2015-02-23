@@ -34,20 +34,20 @@
 
 using namespace opencog;
 
-CountTruthValue::CountTruthValue(strength_t m, confidence_t n, count_t c)
+CountTruthValue::CountTruthValue(strength_t m, confidence_t n, count_t c):TruthValue(COUNT_TRUTH_VALUE)
 {
     mean = m;
     confidence = n;
     count = c;
 }
 
-CountTruthValue::CountTruthValue(const TruthValue& source)
+CountTruthValue::CountTruthValue(const TruthValue& source):TruthValue(COUNT_TRUTH_VALUE)
 {
     mean = source.getMean();
     confidence = source.getConfidence();
     count = source.getCount();
 }
-CountTruthValue::CountTruthValue(CountTruthValue const& source)
+CountTruthValue::CountTruthValue(CountTruthValue const& source):TruthValue(COUNT_TRUTH_VALUE)
 {
     mean = source.mean;
     confidence = source.confidence;
@@ -93,15 +93,10 @@ bool CountTruthValue::operator==(const TruthValue& rhs) const
     return true;
 }
 
-TruthValueType CountTruthValue::getType() const
-{
-    return COUNT_TRUTH_VALUE;
-}
-
 // Note: this is NOT the merge formula used by PLN.  This is
 // because the CountTruthValue usally stores an integer count,
 // and a log-probability or entropy, instead of a confidence.
-TruthValuePtr CountTruthValue::merge(TruthValuePtr other) const
+TruthValuePtr CountTruthValue::merge(TruthValuePtr other,MergeOption mo/*=DEFAULT*/) const
 {
     CountTruthValuePtr oc =
         std::dynamic_pointer_cast<CountTruthValue>(other);

@@ -45,14 +45,13 @@ public:
     count_t getCount() const throw (RuntimeException);
     confidence_t getConfidence() const  throw (RuntimeException);
     std::string toString() const;
-    TruthValueType getType() const;
     TruthValuePtr clone() const;
     TruthValue* rawclone() const;
 
     virtual bool operator==(const TruthValue& rhs) const;
 
 protected:
-    TruthValuePtr merge(TruthValuePtr) const throw (RuntimeException);
+    TruthValuePtr merge(TruthValuePtr,MergeOption mo=DEFAULT) const throw (RuntimeException);
 };
 
 /** @}*/

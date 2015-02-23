@@ -94,3 +94,13 @@ bool TruthValue::isDefaultTV() const
     }
     return false;
 }
+
+TruthValueType TruthValue::getType() const
+{
+	return tv_type_;
+}
+
+void TruthValue::setType(TruthValueType t)
+{
+	tv_type_ = t;
+}

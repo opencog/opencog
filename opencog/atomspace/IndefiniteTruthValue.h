@@ -114,10 +114,9 @@ public:
     strength_t getL_() const;
     bool isSymmetric() const;
 
-    TruthValuePtr merge(TruthValuePtr) const;
+    TruthValuePtr merge(TruthValuePtr,MergeOption mo=DEFAULT) const;
 
     std::string toString() const;
-    TruthValueType getType() const;
 
     // clone method
     static IndefiniteTruthValuePtr createITV(TruthValuePtr tv)

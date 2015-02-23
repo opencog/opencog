@@ -72,7 +72,6 @@ public:
     static confidence_t countToConfidence(count_t);
 
     std::string toString() const;
-    TruthValueType getType() const;
 
     strength_t getMean() const;
     count_t getCount() const;
@@ -85,7 +84,7 @@ public:
      * the resulting TV is either tv1 or tv2, the result being the one
      * with the highest confidence.
      */
-    TruthValuePtr merge(TruthValuePtr) const;
+    TruthValuePtr merge(TruthValuePtr,MergeOption mo/*=DEFAULT*/) const;
 
     static SimpleTruthValuePtr createSTV(strength_t mean, count_t count)
     {

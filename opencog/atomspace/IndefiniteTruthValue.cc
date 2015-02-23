@@ -108,18 +108,18 @@ void IndefiniteTruthValue::copy(const IndefiniteTruthValue& source)
     symmetric = source.symmetric;
 }
 
-IndefiniteTruthValue::IndefiniteTruthValue()
+IndefiniteTruthValue::IndefiniteTruthValue():TruthValue(INDEFINITE_TRUTH_VALUE)
 {
     init();
 }
 
 IndefiniteTruthValue::IndefiniteTruthValue(strength_t l, strength_t u,
-                                           confidence_t c)
+                                           confidence_t c):TruthValue(INDEFINITE_TRUTH_VALUE)
 {
     init(l, u, c);
 }
 
-IndefiniteTruthValue::IndefiniteTruthValue(IndefiniteTruthValue const& source)
+IndefiniteTruthValue::IndefiniteTruthValue(IndefiniteTruthValue const& source):TruthValue(INDEFINITE_TRUTH_VALUE)
 {
     copy(source);
 }
@@ -257,11 +257,6 @@ void IndefiniteTruthValue::setFirstOrderDistribution(const std::vector<strength_
     this->firstOrderDistribution = v;
 }
 
-TruthValueType IndefiniteTruthValue::getType() const
-{
-    return INDEFINITE_TRUTH_VALUE;
-}
-
 void IndefiniteTruthValue::setMean(strength_t m)
 {
     mean = m;
@@ -301,7 +296,7 @@ bool IndefiniteTruthValue::isSymmetric() const
 }
 
 // Merge formula, as specified by PLN.
-TruthValuePtr IndefiniteTruthValue::merge(TruthValuePtr other) const
+TruthValuePtr IndefiniteTruthValue::merge(TruthValuePtr other,MergeOption mo/*=DEFAULT*/) const
 {
     if (other->getConfidence() > getConfidence()) {
         return other->clone();
