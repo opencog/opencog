@@ -62,7 +62,7 @@ confidence_t NullTruthValue::getConfidence() const throw (RuntimeException)
     throw RuntimeException(TRACE_INFO, "Cannot call getConfidence() method of a NullTruthvalue");
 }
 
-TruthValuePtr NullTruthValue::merge(TruthValuePtr) const throw (RuntimeException)
+TruthValuePtr NullTruthValue::merge(TruthValuePtr,MergeOption mo/*=DEFAULT*/) const throw (RuntimeException)
 {
     throw RuntimeException(TRACE_INFO, "Cannot call merge() method of a NullTruthvalue");
 }

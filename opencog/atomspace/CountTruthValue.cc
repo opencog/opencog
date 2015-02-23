@@ -96,7 +96,7 @@ bool CountTruthValue::operator==(const TruthValue& rhs) const
 // Note: this is NOT the merge formula used by PLN.  This is
 // because the CountTruthValue usally stores an integer count,
 // and a log-probability or entropy, instead of a confidence.
-TruthValuePtr CountTruthValue::merge(TruthValuePtr other) const
+TruthValuePtr CountTruthValue::merge(TruthValuePtr other,MergeOption mo/*=DEFAULT*/) const
 {
     CountTruthValuePtr oc =
         std::dynamic_pointer_cast<CountTruthValue>(other);
