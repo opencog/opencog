@@ -50,9 +50,18 @@
 )
 
 ; -----------------------------------------------------------------------
+; r2l-get-interp -- Retrieve the InterpretationNode given SetLink.
+;
+; Returns the InterpretationNode associated with the SetLink.
+;
+(define (r2l-get-interp a-set-link)
+	(car (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link))
+)
+
+; -----------------------------------------------------------------------
 ; has-word-inst? -- Check if a node has the corresponding WordInstanceNode
 ;
-; Return #t or #f depends on whether the node as a WordInstanceNode.
+; Return #t or #f depends on whether the node has a WordInstanceNode.
 ;
 (define (has-word-inst? node)
 	(not (null? (cog-node 'WordInstanceNode (cog-name node))))
@@ -61,7 +70,7 @@
 ; -----------------------------------------------------------------------
 ; has-word? -- Check if a node has the corresponding WordNode
 ;
-; Return #t or #f depends on whether the node as a WordNode.
+; Return #t or #f depends on whether the node has a WordNode.
 ;
 (define (has-word? node)
 	(not (null? (cog-node 'WordNode (cog-name node))))

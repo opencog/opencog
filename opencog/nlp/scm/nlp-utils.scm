@@ -22,6 +22,9 @@
 ; -- parse-get-words        Get all words occuring in a parse.
 ; -- parse-get-words-in-order  Get all words occuring in a parse in order.
 ; -- parse-get-relations    Get all RelEx relations in a parse.
+; -- parse-get-r2l-outputs  Get all R2L outputs in a parse.
+; -- interp-get-r2l-outputs Get all R2L outputs in an Interpretation.
+; -- interp-get-parse       Get the Interpretation of a Parse.
 ; -- word-inst-get-parse    Return the ParseNode associated with word-inst.
 ; -- word-inst-get-number   Return the NumberNode associated with word-inst. 
 ; -- word-inst-get-word   Return the WordNode associated with word-inst.
@@ -60,6 +63,7 @@
 ; become obsolete.
 ; 
 ; Copyright (c) 2008, 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
+; Copyright (c) 2015 OpenCog Foundation
 ;
 
 (use-modules (ice-9 receive))
@@ -206,6 +210,37 @@
 			)
 		)
 	)
+)
+
+; --------------------------------------------------------------------
+; parse-get-r2l-outputs    Get all R2L outputs in a parse.
+;
+; Given a parse, returns a list of the r2l logic outputs associated
+; with the ParseNode.
+;
+(define (parse-get-r2l-outputs parse-node)
+	(let ((inter (car (cog-chase-link 'InterpretationLink 'InterpretationNode parse-node))))
+		(interp-get-r2l-outputs inter)
+	)
+)
+
+; --------------------------------------------------------------------
+; interp-get-r2l-outputs    Get all R2L outputs in an Interpretation.
+;
+; Given an interpretation, returns a list of the r2l logic outputs
+; associated with the InterpretationNode.
+;
+(define (interp-get-r2l-outputs interp-node)
+	(cog-outgoing-set (list-ref (cog-chase-link 'ReferenceLink 'SetLink interp-node) 0))
+)
+
+; --------------------------------------------------------------------
+; interp-get-parse    Get the Interpretation of a Parse.
+;
+; Returns the ParseNode associated with an InterpretationNode.
+;
+(define (interp-get-parse interp)
+	(car (cog-chase-link 'InterpretationLink 'ParseNode interp))
 )
 
 ; ---------------------------------------------------------------------
