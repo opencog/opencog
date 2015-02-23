@@ -290,3 +290,37 @@
 	)
 )
 
+; -----------------------------------------------------------------------
+; nlp-parse -- Wrap the whole NLP pipeline in one function.
+; 
+; Call the necessary functions for the full NLP pipeline.
+;
+(define (nlp-parse plain-text)
+	(define sent-nodes)
+
+	(r2l plain-text)
+	
+	; store the SentenceNode
+	(set! sent-nodes (get-new-parsed-sentences))
+	
+	; increment the WordNode's count value
+	(parallel-map-parses
+		(lambda (p)
+			(map-word-instances
+				(lambda (wi)
+					(map-word-node
+						(lambda (w) (cog-atom-incr w 1))
+						wi
+					)
+				)
+				p
+			)
+		)
+		sent-nodes
+	)
+	(release-new-parsed-sents)
+	
+	; return the list of SentenceNode
+	sent-nodes
+)
+
