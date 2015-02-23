@@ -52,7 +52,7 @@ public:
     virtual bool operator==(const TruthValue& rhs) const;
 
 protected:
-    TruthValuePtr merge(TruthValuePtr) const throw (RuntimeException);
+    TruthValuePtr merge(TruthValuePtr,TVMergeStyle ms=DEFAULT) const throw (RuntimeException);
 };
 
 /** @}*/
