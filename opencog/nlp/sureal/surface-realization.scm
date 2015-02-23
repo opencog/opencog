@@ -138,35 +138,6 @@
 
 
 ; ---------------------------------------------------------------------
-; Some Utilities : These are likely to be moved to a separate file.
-
-
-; Returns a list of the r2l logic outputs associated with the InterpretationNode.
-(define (interp-get-logic-outputs interp-node)
-    (cog-outgoing-set (list-ref (cog-chase-link 'ReferenceLink 'SetLink interp-node) 0))
-)
-
-; Returns a list of the r2l logic outputs associated with the ParseNode.
-(define (parse-get-logic-outputs parse-node)
-    (let ((inter (car (cog-chase-link 'InterpretationLink 'InterpretationNode parse-node))))
-        (interp-get-logic-outputs inter)
-    )
-)
-
-; Returns the InterpretationNode associated with the SetLink.
-(define (logic-get-interp a-set-link)
-    (car (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link))
-)
-
-; Returns the ParseNode associated with an InterpretationNode
-; * 'interp' : An InterpretationNode
-(define (interp-get-parse interp)
-    (car (cog-chase-link 'InterpretationLink 'ParseNode interp))
-)
-
-; ---------------------------------------------------------------------
-; The functions below are used for the pattern/knowledgebase based approach to
-; SuReal.
 
 ; Return a match structure describing the results of the match on the node's name,
 ; for the given pattern or #f if no match could be found.
