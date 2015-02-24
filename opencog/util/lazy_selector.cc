@@ -41,23 +41,24 @@ using std::count_if;
 using boost::counting_iterator;
 using boost::bind;
 
-lazy_selector::lazy_selector(unsigned int n) 
-    : _n(n), _l(0) {
-    OC_ASSERT(n>0, "you cannot select any thing from an empty list");
+lazy_selector::lazy_selector(unsigned int u, unsigned int l)
+    : _u(u), _l(l) {
+    OC_ASSERT(u - l > 0, "you cannot select any thing from an empty list");
 }
 
 bool lazy_selector::empty() const {
-    return _l >= _n;
+    return _l >= _u;
 }
 
 unsigned int lazy_selector::count_n_free() const {
-    return count_if(counting_iterator<unsigned int>(0),
-                    counting_iterator<unsigned int>(_n), 
+    return count_if(counting_iterator<unsigned int>(_l),
+                    counting_iterator<unsigned int>(_u),
                     bind(&lazy_selector::is_free, this, _1));
 }
 
-void lazy_selector::reset_range(unsigned int new_n) {
-    _n = new_n;
+void lazy_selector::reset_range(unsigned int new_u, unsigned int new_l) {
+    _u = new_u;
+    _l = new_l;
 }
 
 /**

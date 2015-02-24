@@ -1046,9 +1046,9 @@ public:
             return _fs->disc_and_bit()[spec_idx].multy;
         }
 
-        void randomize()
+        void randomize(opencog::RandGen& rng = randGen())
         {
-            _fs->set_raw(*_inst, _idx, randGen().randint(multy()));
+            _fs->set_raw(*_inst, _idx, rng.randint(multy()));
         }
 
     protected:

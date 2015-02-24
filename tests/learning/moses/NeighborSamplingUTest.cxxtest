@@ -2,6 +2,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <opencog/util/mt19937ar.h>
+#include <opencog/util/dorepeat.h>
 #include <opencog/learning/moses/representation/field_set.h>
 #include <opencog/learning/moses/representation/instance_set.h>
 #include <opencog/learning/moses/moses/types.h>
@@ -13,12 +14,17 @@ using namespace moses;
 using namespace std;
 
 class NeighborSamplingUTest : public CxxTest::TestSuite {
+    opencog::RandGen& rng;
 public:
-    NeighborSamplingUTest() {
+    NeighborSamplingUTest() : rng(randGen()) {
         logger().setPrintToStdoutFlag(true);
         logger().setLevel(Logger::DEBUG);
+
+        int rand_seed = clock();
+        rng.seed(rand_seed);
     }
 
+private:
     /**
      * Sample 'sample_size' instances from the neighborhood of the zero
      * instance, at a distance 'dist' from zero.  That is, sample
@@ -111,35 +117,51 @@ public:
        
     }
 
-    void test_generate_contin_neighbor()
+    void test_generate_contin_neighbor(unsigned distance,
+                                       unsigned depth,
+                                       unsigned num_fields)
     {
-        int distance = 3;
-        int depth = 8;
-        int num_fields = 4;
-        int rand_seed = clock();
-        opencog::MT19937RandGen rng(rand_seed);
-        field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, depth), num_fields);
+        field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, depth),
+                     num_fields);
         instance inst(fs.packed_width());
-        randomize(fs, inst);
-        
+        randomize(fs, inst, rng);
+
         instance new_inst(inst);
-        
+
         // choose randomly a contin among the num_fields ones
-        int rnd_idx = randGen().randint(num_fields);
+        int rnd_idx = rng.randint(num_fields);
+        cout << "rnd_idx = " << rnd_idx << endl;
         field_set::contin_iterator it = fs.begin_contin(inst) + rnd_idx;
-        cout << "before generate:" << fs.to_string_raw(inst) << endl;
+        contin_t old_c = fs.get_contin(inst, rnd_idx);
+        cout << "before generate: " << fs.to_string_raw(inst)
+             << ", contin = " << old_c << endl;
         generate_contin_neighbor(fs, new_inst, it, distance);
-        cout << "after generate:" << fs.to_string_raw(new_inst) << endl;
+        contin_t new_c = fs.get_contin(new_inst, rnd_idx);
+        cout << "after  generate: " << fs.to_string_raw(new_inst)
+             << ", contin = " << new_c << endl;
         
         int new_dist = fs.hamming_distance(inst, new_inst);
         cout << "new distance: " << new_dist << endl;
-        
-        // The new contin may differ from the old one by any hamming
-        // distance of between 0 and 3.  Basically, tweeaking the 
-        // least signficant bits can add/remove stop bits, etc.
-        // And there is a one in 4^3 ==  1-in-64 chance
-        // that the new routine will fail to generate a new contin.
-        TS_ASSERT((0 <= new_dist) && (new_dist <= distance));   
+
+        // The new contin may differ from the old one by hamming
+        // distance of 1.
+        TS_ASSERT_EQUALS(new_dist, distance);
+
+        // The new contin must be different than the old
+        TS_ASSERT_DIFFERS(new_c, old_c);
+    }
+
+public:
+    void test_generate_small_contin_neighbor()
+    {
+        dorepeat(1000)
+            test_generate_contin_neighbor(1, 2, 2);
+    }
+
+    void test_generate_large_contin_neighbor()
+    {
+        dorepeat(1000)
+            test_generate_contin_neighbor(3, 8, 4);
     }
 
     void test_sample_from_neighborhood() 
@@ -176,9 +198,9 @@ public:
                  << " max_distance: " << sampled_max_distance
                  << " min_distance:" << sampled_min_distance
                  << endl;
-            TS_ASSERT(sample_size == sampled_size);
-            TS_ASSERT(distance == sampled_max_distance);
-            TS_ASSERT(distance == sampled_min_distance);
+            TS_ASSERT_EQUALS(sample_size, sampled_size);
+            TS_ASSERT_EQUALS(distance, sampled_max_distance);
+            TS_ASSERT_EQUALS(distance, sampled_min_distance);
         }
         
         // 2. test, the exemplar is given randomizely
@@ -209,18 +231,18 @@ public:
             //  cout << endl << "sample_size:" << sampled_size << "  max_distance:" << 
             //   sampled_max_distance <<" min_distance :"<< sampled_min_distance <<endl;
 
-            TS_ASSERT(sample_size == sampled_size);
-            TS_ASSERT(distance == sampled_max_distance);
-            TS_ASSERT(distance == sampled_min_distance);
+            TS_ASSERT_EQUALS(sample_size, sampled_size);
+            TS_ASSERT_EQUALS(distance, sampled_max_distance);
+            TS_ASSERT_EQUALS(distance, sampled_min_distance);
         }
                
         // 3. test the contin_spec
         {
             distance = 2;
             sample_size = 10;
-            num_fields = 5;
+            num_fields = 2;
             
-            field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, 4), num_fields);
+            field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, 2), num_fields);
             instance center_inst(fs.packed_width());
             randomize(fs, center_inst);
             instance_set<composite_score> deme(100, center_inst, fs);
@@ -250,9 +272,7 @@ public:
             // and put it back: viz. no change at all, aka a zero-distance
             // change.  So tolerate this possibility ...
             //
-            TS_ASSERT((sample_size == sampled_size) ||
-                      (sample_size-1 == sampled_size) ||
-                      (sample_size-2 == sampled_size));
+            TS_ASSERT_EQUALS(sample_size, sampled_size);
             TS_ASSERT(sampled_min_distance <= sampled_max_distance);
             TS_ASSERT((1 <= sampled_min_distance) &&
                       (sampled_min_distance <= distance));
