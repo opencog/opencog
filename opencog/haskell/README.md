@@ -18,4 +18,10 @@ https://github.com/kvanberendonck/cmake-haskell
 The github version claims to be a better rewrite of the bitbucket
 version.
 
-Maybe should not use Cabal at first ...
+Maybe should not use Cabal at first ... but, on the other hand, I cannot
+get CMake to figure out what the .hs extension means ...
+
+Random quotes from the net:
+"Cabal is currently the only tool that can realistically be used to
+properly build and install Haskell packages due to the great complexity
+involved with getting all the details right"
