@@ -71,6 +71,17 @@ enum TruthValueType
     NUMBER_OF_TRUTH_VALUE_TYPES
 };
 
+//Flags for alternative ways of merging two different truth value types
+//as described in https://github.com/opencog/opencog/issues/1295
+enum TVMergeStyle
+{
+    USE_OLDER_TV_TYPE,
+    USE_NEWER_TV_TYPE,
+    USE_STRONGER_TV_TYPE,
+    USE_WEAKER_TV_TYPE,
+    DEFAULT
+};
+
 class TruthValue;
 typedef std::shared_ptr<TruthValue> TruthValuePtr;
 
@@ -88,7 +99,6 @@ class TruthValue
     TruthValue& operator=(const TruthValue& rhs) {
         throw RuntimeException(TRACE_INFO, "Cannot modify truth values!");
     }
-
 public:
     virtual ~TruthValue() {}
 
@@ -152,8 +162,9 @@ public:
      * Merge this TV object with the given TV object argument.
      * It always returns a new TV object with the result of the merge,
      * even if it is equal to one of the merged TV objects.
+     * @param ms the merge style as described in https://github.com/opencog/opencog/issues/1295
      */
-    virtual TruthValuePtr merge(TruthValuePtr) const = 0;
+    virtual TruthValuePtr merge(TruthValuePtr,TVMergeStyle ms=DEFAULT) const = 0;
 
     /**
      * Check if this TV is a null TV.

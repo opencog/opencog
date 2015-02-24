@@ -85,7 +85,7 @@ public:
      * the resulting TV is either tv1 or tv2, the result being the one
      * with the highest confidence.
      */
-    TruthValuePtr merge(TruthValuePtr) const;
+    TruthValuePtr merge(TruthValuePtr,TVMergeStyle ms/*=DEFAULT*/) const;
 
     static SimpleTruthValuePtr createSTV(strength_t mean, count_t count)
     {
