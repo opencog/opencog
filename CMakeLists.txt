@@ -194,19 +194,15 @@ IF (NOT CXXTEST_FOUND)
 	MESSAGE(STATUS "CxxTest missing: needed for unit tests.")
 ENDIF (NOT CXXTEST_FOUND)
 
-# XML parsing library
-# At this time (November 2013) it looks like no one is using this.
-# The old NMXML code needed this, but its broken.
-# The old C++ PLN needed this, but that's broken too.
-# This check shoud probably be removed someday ...
-FIND_PACKAGE(EXPAT)
-IF (EXPAT_FOUND)
-	MESSAGE(STATUS "Expat XML parser found.")
-	ADD_DEFINITIONS(-DHAVE_EXPAT)
-	SET(HAVE_EXPAT 1)
-ELSE (EXPAT_FOUND)
-	MESSAGE(STATUS "Expat XML parser missing: but no one needs it anyway.")
-ENDIF (EXPAT_FOUND)
+# Glasgow Haskell compiler
+FIND_PACKAGE(GHC)
+IF (GHC_FOUND)
+	ADD_DEFINITIONS(-DHAVE_GHC)
+	SET(HAVE_GHC 1)
+ELSE (GHC_FOUND)
+	SET(GHC_DIR_MESSAGE "GHC was not found; Haskell bindings will not be built.")
+	MESSAGE(STATUS "${GHC_DIR_MESSAGE}")
+ENDIF (GHC_FOUND)
 
 # Gnu Scientific Library
 FIND_PACKAGE(GSL)
