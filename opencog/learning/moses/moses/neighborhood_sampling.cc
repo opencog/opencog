@@ -24,77 +24,65 @@
 
 namespace opencog { namespace moses {
 
-// See header for comment
-void twiddle_contin_bit(field_set::disc_iterator itr)
-{
-	OC_ASSERT(*itr != field_set::contin_spec::Stop);
+// See the header for the function comments
 
-	if (randGen().randbool())
-    {
-        *itr = field_set::contin_spec::Stop;
-    }
-    else
-    {
-        // Switch left and right.
-        bool is_left = (*itr == field_set::contin_spec::Left);
-        *itr = is_left ?
-            field_set::contin_spec::Right:
-            field_set::contin_spec::Left;
-    }
+// See header for comment
+void flip_LR(field_set::disc_iterator itr) {
+    bool is_left = (*itr == field_set::contin_spec::Left);
+    *itr = is_left ?
+        field_set::contin_spec::Right:
+        field_set::contin_spec::Left;
+}
+
+// See header for comment
+void twiddle_contin_bit(field_set::disc_iterator itr,
+                        field_set::disc_iterator next_itr,
+                        opencog::RandGen& rng)
+{
+    if (*itr == field_set::contin_spec::Stop) {
+        *itr = rng.randbool() ?
+            field_set::contin_spec::Left
+            : field_set::contin_spec::Right;
+    } else if (itr + 1 != next_itr // next_itr is invalid
+               or *next_itr == field_set::contin_spec::Stop) {
+        if (rng.randbool())
+            *itr = field_set::contin_spec::Stop;
+        else flip_LR(itr);
+    } else flip_LR(itr);
 }
 
 // See header for comment
 void generate_contin_neighbor(const field_set& fs,
                               instance& inst,
                               field_set::contin_iterator it,
-                              unsigned dist)
+                              unsigned dist,
+                              opencog::RandGen& rng)
 {
-    size_t begin = fs.contin_to_raw_idx(it.idx());
-    size_t length = fs.contin_length(inst, it.idx());
-    size_t depth = fs.contin()[it.idx()].depth;
+    size_t begin = fs.contin_to_raw_idx(it.idx()),
+        depth = fs.contin()[it.idx()].depth,
+        length = fs.contin_length(inst, it.idx()),
+        lowest_low = std::max((int)length - (int)dist, 0),
+        uppest_low = std::min((int)length + 1, (int)depth + 1 - (int)dist);
 
-    // If length is depth, then no unused pseudo-bits; twiddle the
-    // last bit only.
-    if (depth == length)
-    {
-        field_set::disc_iterator itr = fs.begin_raw(inst);
-        itr += begin + length;
-        twiddle_contin_bit(itr);
-    }
-    else
-    {
-        // If length is not equal to depth, then its less than depth,
-        // and there is room at the end of the contin to change a less
-        // significant bit.
-        field_set::disc_iterator itr = fs.begin_raw(inst);
-        if (randGen().randbool())
-        {
-            itr += begin + length;
-            twiddle_contin_bit(itr);
-        }
-        else
-        {
-            // There is a stop bit here. Change it to L or R.
-            itr += begin + length + 1;
-            if (randGen().randbool())
-            {
-               *itr = field_set::contin_spec::Right;
-            }
-            else
-            {
-               *itr = field_set::contin_spec::Left;
-            }
-        }
-    }
+    if (dist == 0)
+        return;
 
-    // Recurse, if need be.
-    // Note that there is some risk that the old instance will be
-    // re-created by this, and so there will be no effective change.
-    // However, the extra cpu cycles needed to avoid this does not
-    // seem to be worth the effort, right?
-    if (1 < dist)
+    OC_ASSERT(dist <= depth);
+
+    // Randomly choose the interval to modify, the intervals can be
+    // [length - dist, length) to [length, length + dist), as long as
+    // it is within [0, depth).
+    size_t low = lazy_random_selector(uppest_low, lowest_low, rng)(),
+        up = low + dist;
+
+    // Twiddle all pseudo bits in the selected interval
+    for(field_set::disc_iterator itr = fs.begin_raw(inst) + begin + up - 1,
+            next_itr = up == depth ? fs.end_raw(inst) : itr + 1,
+            low_itr = fs.begin_raw(inst) + begin + low;
+        next_itr != low_itr; --itr)
     {
-        generate_contin_neighbor(fs, inst, it, dist-1);
+        twiddle_contin_bit(itr, next_itr, rng);
+        next_itr = itr;
     }
 }
 

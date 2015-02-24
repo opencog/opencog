@@ -73,10 +73,20 @@ void generate_initial_sample(const field_set& fs, int n, Out out, Out end)
     }
 }
 
-// Twiddle one contin bit only, assuming it's not Stop.
-// Only two choices available: change it to stop, or flip it.
-// @itr points to a (pseudo-) bit in the contin (as a raw field).
-void twiddle_contin_bit(field_set::disc_iterator itr);
+// Flip Left and Right
+void flip_LR(field_set::disc_iterator itr);
+
+// Twiddle one contin bit only, according to the following rules
+//
+// 1. If it is Stop then select Left or Right
+//
+// 2. Otherwise if the next one is Stop (or invalid) then select Stop
+// or flip
+//
+// 3. Otherwise just flip
+void twiddle_contin_bit(field_set::disc_iterator itr,
+                        field_set::disc_iterator next_itr,
+                        opencog::RandGen& rng = randGen());
 
 /**
  * This routine modifies the instance 'inst' so that the new instance
@@ -100,7 +110,8 @@ void twiddle_contin_bit(field_set::disc_iterator itr);
 void generate_contin_neighbor(const field_set& fs,
                               instance& inst,
                               field_set::contin_iterator it,
-                              unsigned dist);
+                              unsigned dist,
+                              opencog::RandGen& rng = randGen());
 
 /**
  * Sample (with replacement) 'sample_size' instances from the
