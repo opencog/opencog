@@ -34,14 +34,14 @@ namespace opencog
  */
 
 /**
- * That class allows to select integers in [0,n)
- * but never select twice the same
- * When the operator is called more than n times an assertion is raised
+ * That class allows to select integers in [l,u) but never select
+ * twice the same.  When the operator is called more than u-l times an
+ * assertion is raised.
  */
 class lazy_selector
 {	
 public:
-    lazy_selector(unsigned int n);
+    lazy_selector(unsigned int u, unsigned int l = 0);
     virtual ~lazy_selector() {}
     bool empty() const;
 
@@ -51,19 +51,19 @@ public:
     //! returns the selected number (never twice the same)
     unsigned int operator()();
 
-    void reset_range(unsigned int new_n);
+	void reset_range(unsigned int new_u, unsigned int new_l = 0);
 
 protected:
-    //! size of the integer list [0,_n)
-    unsigned int _n; 
+    //! upper index if the list [_l,_u)
+    unsigned int _u;
 
-    //! a method that choses an int in [0,_n)
-    virtual unsigned int select() = 0;
-
-private:
     //! lower index
     unsigned int _l;
 
+    //! a method that choses an int in [_l,_u)
+    virtual unsigned int select() = 0;
+
+private:
     //! Keep track of all encountered values (to return _l instead of it)
     std::unordered_set<unsigned int> _picked;
 
