@@ -51,7 +51,12 @@ public:
     //! returns the selected number (never twice the same)
     unsigned int operator()();
 
-	void reset_range(unsigned int new_u, unsigned int new_l = 0);
+    //! reset upper or lower bound. Note that given the way the
+    //! algorithm works (by increasing the lower bound to never get
+    //! the twice the same number), you can never reset the lower
+    //! bound by a lower number
+	void reset_range(unsigned int new_u);
+	void reset_range(unsigned int new_u, unsigned int new_l);
 
 protected:
     //! upper index if the list [_l,_u)

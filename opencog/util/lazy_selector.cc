@@ -56,7 +56,13 @@ unsigned int lazy_selector::count_n_free() const {
                     bind(&lazy_selector::is_free, this, _1));
 }
 
+void lazy_selector::reset_range(unsigned int new_u) {
+    _u = new_u;
+}
 void lazy_selector::reset_range(unsigned int new_u, unsigned int new_l) {
+	OC_ASSERT(new_l >= _l,
+	          "You cannot reset the lower bound by a lower number, "
+	          "due to the workings of the algorithm.");
     _u = new_u;
     _l = new_l;
 }
