@@ -170,14 +170,16 @@ bool EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args)
     {
 #ifdef HAVE_CYTHON
         // Be friendly, and strip leading white-space, if any.
-        // size_t pos = 3;
-        // while (' ' == schema[pos]) pos++;
+        size_t pos = 3;
+        while (' ' == schema[pos]) pos++;
 
-        // PythonEval &applier = PythonEval::instance();
-        // ???? applier.apply(schema.substr(pos), args);
-        throw RuntimeException(TRACE_INFO, "Python support not implemented!");
+        PythonEval &applier = PythonEval::instance();
+        // std::string rc = applier.apply(schema.substr(pos), args);
+        // if (rc.compare("None") or rc.compare("False")) return false;
+        Handle h = applier.apply(schema.substr(pos), args);
+        if (h == Handle::UNDEFINED) return false;
 
-        return false;
+        return true;
 #else
         throw RuntimeException(TRACE_INFO, "Cannot evaluate python GroundedPredicateNode!");
 #endif /* HAVE_CYTHON */
