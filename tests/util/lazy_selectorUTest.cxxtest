@@ -57,7 +57,17 @@ public:
             TS_ASSERT(nset.find(selected) == nset.end());
             nset.insert(selected);
         }
+        // Reset upper bound
         lns.reset_range(n*2);
+        dorepeat(n) {
+            unsigned int selected = lns();
+            // std::cout << "Selected number: " << selected << std::endl;
+            // Check that the selected number has not been previously selected
+            TS_ASSERT(nset.find(selected) == nset.end());
+            nset.insert(selected);
+        }
+        // Reset both upper and lower bounds
+        lns.reset_range(n*4, n*3);
         dorepeat(n) {
             unsigned int selected = lns();
             // std::cout << "Selected number: " << selected << std::endl;
@@ -83,7 +93,17 @@ public:
             TS_ASSERT(nset.find(selected) == nset.end());
             nset.insert(selected);
         }
+        // Reset upper bound
         lrs.reset_range(n*2);
+        dorepeat(n) {
+            unsigned int selected = lrs();
+            // std::cout << "Selected number: " << selected << std::endl;
+            // Check that the selected number has not been previously selected
+            TS_ASSERT(nset.find(selected) == nset.end());
+            nset.insert(selected);
+        }        
+        // Reset both upper and lower bounds
+        lrs.reset_range(n*4, n*3);
         dorepeat(n) {
             unsigned int selected = lrs();
             // std::cout << "Selected number: " << selected << std::endl;
