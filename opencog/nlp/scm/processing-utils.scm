@@ -56,7 +56,8 @@
 ; The relex-server-host and port are set in config.scm, and default to
 ; localhost 127.0.0.1 and port 4444
 ;
-; This version will not wrap R2L atoms inside ReferenceLink.  See "r2l" below.
+; This version will not wrap R2L atoms inside ReferenceLink.  Using
+; (r2l-parse ...) is preferred.
 ;
 (define (relex-parse plain-txt)
 
@@ -135,12 +136,12 @@
 ; -----------------------------------------------------------------------
 
 ; -----------------------------------------------------------------------
-; A copy of relex-parse funtion modified for relex-to-logic(r2l) purposes.
+; r2l-parse -- A copy of relex-parse funtion modified for R2L purposes.
 ;
 ; This version will assume R2L atoms are emitted by the RelEx server, and
 ; wrap the R2L atoms inside a ReferenceLink with an InterpretationNode.
 ;
-(define (r2l plain-txt)
+(define (r2l-parse plain-txt)
 	; ---------------------------------------------------------------------
 	; Patterns used for spliting the string passed from relex server
 	(define pattern1 "; ##### END OF A PARSE #####")
@@ -296,31 +297,68 @@
 ; Call the necessary functions for the full NLP pipeline.
 ;
 (define (nlp-parse plain-text)
-	(define sent-nodes)
-
-	(r2l plain-text)
+	; call the RelEx server
+	(r2l-parse plain-text)
 	
-	; store the SentenceNode
-	(set! sent-nodes (get-new-parsed-sentences))
-	
-	; increment the WordNode's count value
-	(parallel-map-parses
-		(lambda (p)
-			(map-word-instances
-				(lambda (wi)
-					(map-word-node
-						(lambda (w) (cog-atom-incr w 1))
-						wi
+	(let ((sent-nodes (get-new-parsed-sentences)))
+		; increment the WordNode's count value
+		(parallel-map-parses
+			(lambda (p)
+				(map-word-instances
+					(lambda (wi)
+						(map-word-node
+							(lambda (w) (cog-atom-incr w 1))
+							wi
+						)
+					)
+					p
+				)
+			)
+			sent-nodes
+		)
+		; increment the R2L's node count value
+		(parallel-map-parses
+			(lambda (p)
+				; The preferred algorithm is
+				; (1) get all non-abstract nodes
+				; (2) delete duplicates
+				; (3) get the corresponding abstract nodes
+				; (4) update count
+				(let* ((all-nodes (append-map cog-get-all-nodes (parse-get-r2l-outputs p)))
+				       ; XXX FIXME this is undercounting since each abstract node can have
+				       ; multiple instances in a sentence.  Since there is no clean way
+				       ; to get to the abstracted node from an instanced node yet, such
+				       ; repeatition are ignored for now
+				       ; XXX FIXME R2L's rule-helpers are reseting the TV to stv everytime,
+				       ; that need to be removed before this code work
+				       (abst-nodes (delete-duplicates (filter is-r2l-abstract? all-nodes))))
+					(par-map
+						(lambda (n)
+							(let* ((atv (cog-tv->alist (cog-tv n)))
+							       (mean (assoc-ref atv 'mean))
+							       (conf (assoc-ref atv 'confidence))
+							       (count (assoc-ref atv 'count))
+							       ; STV will have count value as well, so checking type
+							       ; to see whether we want that count value
+							       (ntv
+							       	(if (cog-ptv? (cog-tv n))
+								 		(cog-new-ptv mean conf (+ count 1))
+								 		(cog-new-ptv mean conf 1)
+								 	)
+							       ))
+								(cog-set-tv! n ntv)
+							)
+						)
+						abst-nodes
 					)
 				)
-				p
 			)
+			sent-nodes
 		)
+		(release-new-parsed-sents)
+	
+		; return the list of SentenceNode
 		sent-nodes
 	)
-	(release-new-parsed-sents)
-	
-	; return the list of SentenceNode
-	sent-nodes
 )
 
