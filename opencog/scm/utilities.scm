@@ -54,6 +54,8 @@
 (define (stv mean conf) (cog-new-stv mean conf))
 (define (itv lower upper conf) (cog-new-itv lower upper conf))
 (define (ctv mean conf count) (cog-new-ctv mean conf count))
+(define (ptv mean conf count) (cog-new-ptv mean conf count))
+(define (ftv mean conf) (cog-new-ftv mean conf))
 
 ; Fetch the mean, confidence and count of a TV.
 (define (tv-mean tv) (assoc-ref (cog-tv->alist tv) 'mean))
