@@ -398,6 +398,34 @@
         guile> (cog-new-itv 0.7 0.9 0.6)
 ")
 
+(set-procedure-property! cog-new-ptv 'documentation
+"
+ cog-new-ptv mean confidence count
+    Create a ProbabilisticTruthValue with the given mean, confidence and count.
+    Unlike atoms, truth values are ephemeral: they are automatically
+    garbage-collected when no longer needed.
+
+    Throws errors if mean, confidence and count are not floating-point
+    values.
+    Example:
+        ; Create a new probabilistic truth value:
+        guile> (cog-new-ptv 0.7 0.9 44.0)
+")
+
+(set-procedure-property! cog-new-ftv 'documentation
+"
+ cog-new-ftv mean confidence
+    Create a FuzzyTruthValue with the given mean and confidence.
+    Unlike atoms, truth values are ephemeral: they are automatically
+    garbage-collected when no longer needed.
+
+    Throws errors if mean and confidence are not floating-point
+    values.
+    Example:
+        ; Create a new fuzzy truth value:
+        guile> (cog-new-ftv 0.7 0.9)
+")
+
 (set-procedure-property! cog-tv? 'documentation
 "
  cog-tv? exp
@@ -429,6 +457,18 @@
 "
  cog-itv? exp
     Return #t if exp is a IndefiniteTruthValue, else return #f
+")
+
+(set-procedure-property! cog-ptv? 'documentation
+"
+ cog-ptv? exp
+    Return #t if exp is a ProbablisticTruthValue, else return #f
+")
+
+(set-procedure-property! cog-ftv? 'documentation
+"
+ cog-ftv? exp
+    Return #t if exp is a FuzzyTruthValue, else return #f
 ")
 
 (set-procedure-property! cog-tv 'documentation
