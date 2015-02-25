@@ -29,7 +29,6 @@
 - [ ] try adaptive reduct effort in moses-exec
 - [ ] in moses-exec replace boolean program options by flags (like
   with-blah or without-blah)
-- [ ] refactor test_sample_from_neighborhood in NeighborSamplingUTest
 - [ ] there are possibly confusions between eda::field_set::width_t,
   multiplicity_t and combo::arity_t
 - [ ] there is a big mess between score_t and contin_t, fix
