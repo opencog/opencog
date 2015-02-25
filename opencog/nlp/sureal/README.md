@@ -14,8 +14,8 @@ or `WordInstanceNode` before calling `sureal`.
 For example, you can do
 
 ```
-(r2l "He eats.")
-(r2l "He eats quickly.")
+(nlp-parse "He eats.")
+(nlp-parse "He eats quickly.")
 (WordNode "she")
 (WordNode "drinks")
 (sureal (SetLink (EvaluationLink (PredicateNode "drinks") (ListLink (ConceptNode "she")))))
@@ -29,8 +29,9 @@ which will return all possible sentence is words list, like
 ## Algorithm
 
 SuReal does pattern matching on existing sentences in the atomspace.  Existing
-sentences mean those that were inputed with `(r2l ...)` calls.  The `r2l` call
-will uses LG, RelEx, and RelEx2Logic to generate the necessary atoms.
+sentences mean those that were inputed with `(nlp-parse ...)` calls.  The
+`nlp-parse` call will uses LG, RelEx, and RelEx2Logic to generate the necessary
+atoms.
 
 Especially important is the LG outputs.  For each sentence, a bunch of links of
 the style

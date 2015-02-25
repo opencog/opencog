@@ -8,29 +8,29 @@ For now, most of the results are in r2l-atomspace.scm
 ; =========================
 ; Exact knowledge
 ; =========================
-;(r2l "The brown cat climbs the table and grabs the orange.")  ; disable conjunction for now
+;(nlp-parse "The brown cat climbs the table and grabs the orange.")  ; disable conjunction for now
 
-(r2l "The brown cat climbs the table.")
+(nlp-parse "The brown cat climbs the table.")
 
-;(r2l "John steals the orange and eats it.")          ; need support for the next sentence (the same sentendce w/ and w/o anaphora)
-;(r2l "John steals and eats the orange.")             ; need R2L/RelEx to add proper support for this type of sentence
-;(r2l "John steals the orange and eats the orange.")  ; unless R2L puts the two orange to one instance, will never match this sentence
+;(nlp-parse "John steals the orange and eats it.")          ; need support for the next sentence (the same sentendce w/ and w/o anaphora)
+;(nlp-parse "John steals and eats the orange.")             ; need R2L/RelEx to add proper support for this type of sentence
+;(nlp-parse "John steals the orange and eats the orange.")  ; unless R2L puts the two orange to one instance, will never match this sentence
 
-(r2l "John steals the orange.")
-(r2l "John steals it.")
+(nlp-parse "John steals the orange.")
+(nlp-parse "John steals it.")
 
-;(r2l "Sam collects the tiny bones and plants them.")
-;(r2l "Sam collects and plants the tiny bones.")      ; same thing, need R2L/RelEx support
+;(nlp-parse "Sam collects the tiny bones and plants them.")
+;(nlp-parse "Sam collects and plants the tiny bones.")      ; same thing, need R2L/RelEx support
 
-(r2l "Sam collects the tiny bones.")
+(nlp-parse "Sam collects the tiny bones.")
 
-;(r2l "The cat hurts the dog.")                       ; reflexive test
+;(nlp-parse "The cat hurts the dog.")                       ; reflexive test
 
-(r2l "They grow.")
-(r2l "Apple's dogs grow.")                            ; possession test
+(nlp-parse "They grow.")
+(nlp-parse "Apple's dogs grow.")                            ; possession test
 
-(r2l "What burns the tree?")
-(r2l "I mean the tall man.")
+(nlp-parse "What burns the tree?")
+(nlp-parse "I mean the tall man.")
 
 
 ; =========================

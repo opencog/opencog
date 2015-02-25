@@ -128,12 +128,7 @@
 ; it parsed, and then updates the counts for the observed words and word
 ; pairs.
 (define (observe-text plain-text)
-	(begin
-		(relex-parse plain-text)  ;; send plain-text to server
-		(update-link-counts (get-new-parsed-sentences))
-		(release-new-parsed-sents)
-		(delete-sentences)
-	)
+	(update-link-counts (nlp-parse plain-text))
 )
 
 ; ---------------------------------------------------------------------

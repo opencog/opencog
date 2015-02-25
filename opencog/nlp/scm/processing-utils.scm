@@ -21,26 +21,20 @@
    )
 )
 
-; -----------------------------------------------------------------------
-; global vars:
-; new-sent anchor points at the node to which all new sentences are connected
-;
-(define *new-parsed-sent-anchor* (AnchorNode "# New Parsed Sentence" (stv 1 1)))
-
 ; Return the list of SentenceNodes that are attached to the 
 ; freshly-parsed anchor.  This list will be non-empty if relex-parse
 ; has been recently run. This list can be emptied with the call
 ; release-new-parsed-sent below.
 ;
 (define (get-new-parsed-sentences)
-	(cog-chase-link 'ListLink 'SentenceNode *new-parsed-sent-anchor*)
+	(cog-chase-link 'ListLink 'SentenceNode (AnchorNode "# New Parsed Sentence"))
 )
 
 ; release-new-parsed-sents deletes the links that anchor sentences to 
 ; to new-parsed-sent anchor.
 ;
 (define (release-new-parsed-sents)
-	(release-from-anchor *new-parsed-sent-anchor*)
+	(release-from-anchor (AnchorNode "# New Parsed Sentence"))
 )
 
 ; -----------------------------------------------------------------------
@@ -56,7 +50,8 @@
 ; The relex-server-host and port are set in config.scm, and default to
 ; localhost 127.0.0.1 and port 4444
 ;
-; This version will not wrap R2L atoms inside ReferenceLink.  See "r2l" below.
+; This version will not wrap R2L atoms inside ReferenceLink.  Using
+; (r2l-parse ...) is preferred.
 ;
 (define (relex-parse plain-txt)
 
@@ -135,12 +130,12 @@
 ; -----------------------------------------------------------------------
 
 ; -----------------------------------------------------------------------
-; A copy of relex-parse funtion modified for relex-to-logic(r2l) purposes.
+; r2l-parse -- A copy of relex-parse funtion modified for R2L purposes.
 ;
 ; This version will assume R2L atoms are emitted by the RelEx server, and
 ; wrap the R2L atoms inside a ReferenceLink with an InterpretationNode.
 ;
-(define (r2l plain-txt)
+(define (r2l-parse plain-txt)
 	; ---------------------------------------------------------------------
 	; Patterns used for spliting the string passed from relex server
 	(define pattern1 "; ##### END OF A PARSE #####")
@@ -287,6 +282,62 @@
 	(if (string=? plain-txt "")
 		(display "Please enter a valid sentence.")
 		(do-sock-io plain-txt)
+	)
+)
+
+; -----------------------------------------------------------------------
+; nlp-parse -- Wrap the whole NLP pipeline in one function.
+; 
+; Call the necessary functions for the full NLP pipeline.
+;
+(define (nlp-parse plain-text)
+	; call the RelEx server
+	(r2l-parse plain-text)
+	
+	(let ((sent-nodes (get-new-parsed-sentences)))
+		; increment the R2L's node count value
+		(parallel-map-parses
+			(lambda (p)
+				; The preferred algorithm is
+				; (1) get all non-abstract nodes
+				; (2) delete duplicates
+				; (3) get the corresponding abstract nodes
+				; (4) update count
+				(let* ((all-nodes (append-map cog-get-all-nodes (parse-get-r2l-outputs p)))
+				       ; XXX FIXME this is undercounting since each abstract node can have
+				       ; multiple instances in a sentence.  Since there is no clean way
+				       ; to get to the abstracted node from an instanced node yet, such
+				       ; repeatition are ignored for now
+				       ; XXX FIXME R2L's rule-helpers are reseting the TV to stv everytime,
+				       ; that need to be removed before this code work
+				       (abst-nodes (delete-duplicates (filter is-r2l-abstract? all-nodes))))
+					(par-map
+						(lambda (n)
+							(let* ((atv (cog-tv->alist (cog-tv n)))
+							       (mean (assoc-ref atv 'mean))
+							       (conf (assoc-ref atv 'confidence))
+							       (count (assoc-ref atv 'count))
+							       ; STV will have count value as well, so checking type
+							       ; to see whether we want that count value
+							       (ntv
+							       	(if (cog-ptv? (cog-tv n))
+								 		(cog-new-ptv mean conf (+ count 1))
+								 		(cog-new-ptv mean conf 1)
+								 	)
+							       ))
+								(cog-set-tv! n ntv)
+							)
+						)
+						abst-nodes
+					)
+				)
+			)
+			sent-nodes
+		)
+		(release-new-parsed-sents)
+	
+		; return the list of SentenceNode
+		sent-nodes
 	)
 )
 
