@@ -116,11 +116,15 @@ class SchemeSmob
 		static SCM ss_new_stv(SCM, SCM);
 		static SCM ss_new_ctv(SCM, SCM, SCM);
 		static SCM ss_new_itv(SCM, SCM, SCM);
+		static SCM ss_new_ptv(SCM, SCM, SCM);
+		static SCM ss_new_ftv(SCM, SCM);
 		static SCM ss_tv_p(SCM);
 		static SCM tv_p(SCM, TruthValueType);
 		static SCM ss_stv_p(SCM);
 		static SCM ss_ctv_p(SCM);
 		static SCM ss_itv_p(SCM);
+		static SCM ss_ptv_p(SCM);
+		static SCM ss_ftv_p(SCM);
 		static SCM take_tv(TruthValue *);
 		static SCM ss_tv_get_value(SCM);
 

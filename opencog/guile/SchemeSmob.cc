@@ -220,10 +220,14 @@ void SchemeSmob::register_procs(void*)
 	register_proc("cog-new-stv",           2, 0, 0, C(ss_new_stv));
 	register_proc("cog-new-ctv",           3, 0, 0, C(ss_new_ctv));
 	register_proc("cog-new-itv",           3, 0, 0, C(ss_new_itv));
+	register_proc("cog-new-ptv",           3, 0, 0, C(ss_new_ptv));
+	register_proc("cog-new-ftv",           2, 0, 0, C(ss_new_ftv));
 	register_proc("cog-tv?",               1, 0, 0, C(ss_tv_p));
 	register_proc("cog-stv?",              1, 0, 0, C(ss_stv_p));
 	register_proc("cog-ctv?",              1, 0, 0, C(ss_ctv_p));
 	register_proc("cog-itv?",              1, 0, 0, C(ss_itv_p));
+	register_proc("cog-ptv?",              1, 0, 0, C(ss_ptv_p));
+	register_proc("cog-ftv?",              1, 0, 0, C(ss_ftv_p));
 	register_proc("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
 
 	// Atom Spaces

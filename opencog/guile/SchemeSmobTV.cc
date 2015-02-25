@@ -26,6 +26,8 @@
 #include <cstddef>
 #include <libguile.h>
 
+#include <opencog/atomspace/FuzzyTruthValue.h>
+#include <opencog/atomspace/ProbabilisticTruthValue.h>
 #include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -164,6 +166,26 @@ std::string SchemeSmob::tv_to_string(const TruthValue *tv)
 			ret += buff;
 			return ret;
 		}
+		case PROBABILISTIC_TRUTH_VALUE:
+		{
+			const ProbabilisticTruthValue *ptv = static_cast<const ProbabilisticTruthValue *>(tv);
+			snprintf(buff, BUFLEN, "(ptv %.8g ", ptv->getMean());
+			ret += buff;
+			snprintf(buff, BUFLEN, "%.8g ", ptv->getConfidence());
+			ret += buff;
+			snprintf(buff, BUFLEN, "%.8g)", ptv->getCount());
+			ret += buff;
+			return ret;
+		}
+		case FUZZY_TRUTH_VALUE:
+		{
+			const FuzzyTruthValue *ftv = static_cast<const FuzzyTruthValue *>(tv);
+			snprintf(buff, BUFLEN, "(ftv %.8g ", ftv->getMean());
+			ret += buff;
+			snprintf(buff, BUFLEN, "%.8g)", ftv->getConfidence());
+			ret += buff;
+			return ret;
+		}
 		default:
 			return ret;
 	}
@@ -218,6 +240,26 @@ SCM SchemeSmob::ss_new_itv (SCM slower, SCM supper, SCM sconfidence)
 	return take_tv(tv);
 }
 
+SCM SchemeSmob::ss_new_ptv (SCM smean, SCM sconfidence, SCM scount)
+{
+	double mean = scm_to_double(smean);
+	double confidence = scm_to_double(sconfidence);
+	double count = scm_to_double(scount);
+
+	TruthValue *tv = new ProbabilisticTruthValue(mean, confidence, count);
+	return take_tv(tv);
+}
+
+SCM SchemeSmob::ss_new_ftv (SCM smean, SCM sconfidence)
+{
+	double mean = scm_to_double(smean);
+	double confidence = scm_to_double(sconfidence);
+
+	float cnt = FuzzyTruthValue::confidenceToCount(confidence);
+	TruthValue *tv = new FuzzyTruthValue(mean, cnt);
+	return take_tv(tv);
+}
+
 /* ============================================================== */
 /**
  * Return true if the scm is a truth value
@@ -266,6 +308,16 @@ SCM SchemeSmob::ss_ctv_p (SCM s)
 SCM SchemeSmob::ss_itv_p (SCM s)
 {
 	return tv_p(s, INDEFINITE_TRUTH_VALUE);
+}
+
+SCM SchemeSmob::ss_ptv_p (SCM s)
+{
+	return tv_p(s, PROBABILISTIC_TRUTH_VALUE);
+}
+
+SCM SchemeSmob::ss_ftv_p (SCM s)
+{
+	return tv_p(s, FUZZY_TRUTH_VALUE);
 }
 
 /* ============================================================== */
@@ -340,6 +392,40 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			rc = scm_acons(sconf, conf, rc);
 			rc = scm_acons(supper, upper, rc), 
 			rc = scm_acons(slower, lower, rc);
+			scm_remember_upto_here_1(s);
+			return rc;
+		}
+		case PROBABILISTIC_TRUTH_VALUE:
+		{
+			ProbabilisticTruthValue *ptv = static_cast<ProbabilisticTruthValue *>(tv);
+			SCM mean = scm_from_double(ptv->getMean());
+			SCM conf = scm_from_double(ptv->getConfidence());
+			SCM cont = scm_from_double(ptv->getCount());
+			SCM smean = scm_from_utf8_symbol("mean");
+			SCM sconf = scm_from_utf8_symbol("confidence");
+			SCM scont = scm_from_utf8_symbol("count");
+
+			SCM rc = SCM_EOL;
+			rc = scm_acons(scont, cont, rc),
+			rc = scm_acons(sconf, conf, rc);
+			rc = scm_acons(smean, mean, rc);
+			scm_remember_upto_here_1(s);
+			return rc;
+		}
+		case FUZZY_TRUTH_VALUE:
+		{
+			FuzzyTruthValue *ftv = static_cast<FuzzyTruthValue *>(tv);
+			SCM mean = scm_from_double(ftv->getMean());
+			SCM conf = scm_from_double(ftv->getConfidence());
+			SCM count = scm_from_double(ftv->getCount());
+			SCM smean = scm_from_utf8_symbol("mean");
+			SCM sconf = scm_from_utf8_symbol("confidence");
+			SCM scount = scm_from_utf8_symbol("count");
+
+			SCM rc = SCM_EOL;
+			rc = scm_acons(sconf, conf, rc);
+			rc = scm_acons(smean, mean, rc);
+			rc = scm_acons(scount, count, rc);
 			scm_remember_upto_here_1(s);
 			return rc;
 		}
