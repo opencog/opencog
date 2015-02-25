@@ -24,20 +24,22 @@
 #ifndef _OPENCOG_EVAL_FEATURES_H
 #define _OPENCOG_EVAL_FEATURES_H
 
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
-#include <opencog/comboreduct/table/table.h>
-#include <opencog/util/algorithm.h>
-#include <opencog/util/numeric.h>
-
 #include <boost/assign/std/vector.hpp>
 #include <boost/range/algorithm/find.hpp>
+
+#include <opencog/util/algorithm.h>
+#include <opencog/util/iostreamContainer.h>
+#include <opencog/util/numeric.h>
+
+#include <opencog/comboreduct/combo/combo.h>
+#include <opencog/comboreduct/table/table.h>
 
 #include "../scorers/mutual_info.h"
 
 using namespace std;
 using namespace boost::assign;
-using namespace ant_combo;
 using namespace opencog;
+using namespace opencog::combo;
 
 static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> scorer_opt("scorer", "H");

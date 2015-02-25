@@ -27,13 +27,14 @@
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/numeric.h>
+#include <opencog/util/RandGen.h>
 
 #include <opencog/comboreduct/table/table_io.h>
 
 #include "eval-features.h"
 
 using namespace boost::program_options;
-using boost::lexical_cast;
+using namespace opencog;
 
 /**
  * Program to output the feature quality of a feature set given a data
