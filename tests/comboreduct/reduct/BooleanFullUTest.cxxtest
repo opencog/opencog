@@ -6,7 +6,7 @@
 #include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/table/table_io.h>
 #include <opencog/comboreduct/reduct/reduct.h>
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <opencog/comboreduct/combo/combo.h>
 
 // This is almost, but not quite, a verbatim copy of the FullReductUTest
 // test case.  Two big differences: we start by calling bool_reduce and
@@ -16,9 +16,8 @@
 // The other big difference is the big, gnarly cond expression at the end.
 
 using namespace std;
-using namespace opencog;
-using namespace reduct;
-using namespace ant_combo;
+using namespace opencog::combo;
+using namespace opencog::reduct;
 
 class BooleanFullUTest : public CxxTest::TestSuite
 {

@@ -5,12 +5,11 @@
 #include <opencog/comboreduct/interpreter/eval.h>
 #include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/reduct/reduct.h>
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <opencog/comboreduct/combo/combo.h>
 
 using namespace std;
-using namespace opencog;
-using namespace reduct;
-using namespace ant_combo;
+using namespace opencog::combo;
+using namespace opencog::reduct;
 
 class FullReductUTest : public CxxTest::TestSuite
 {
