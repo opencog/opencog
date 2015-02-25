@@ -301,21 +301,6 @@
 	(r2l-parse plain-text)
 	
 	(let ((sent-nodes (get-new-parsed-sentences)))
-		; increment the WordNode's count value
-		(parallel-map-parses
-			(lambda (p)
-				(map-word-instances
-					(lambda (wi)
-						(map-word-node
-							(lambda (w) (cog-atom-incr w 1))
-							wi
-						)
-					)
-					p
-				)
-			)
-			sent-nodes
-		)
 		; increment the R2L's node count value
 		(parallel-map-parses
 			(lambda (p)
