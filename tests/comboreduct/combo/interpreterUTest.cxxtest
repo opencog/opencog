@@ -1,9 +1,9 @@
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/comboreduct/interpreter/interpreter.h>
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <opencog/comboreduct/combo/combo.h>
 
-using namespace ant_combo;
 using namespace opencog;
+using namespace opencog::combo;
 using namespace std;
 
 class interpreterUTest :  public CxxTest::TestSuite {

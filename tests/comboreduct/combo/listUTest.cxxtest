@@ -1,8 +1,7 @@
 #include <opencog/comboreduct/interpreter/eval.h>
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <opencog/comboreduct/combo/combo.h>
 
-using namespace ant_combo;
-using namespace opencog;
+using namespace opencog::combo;
 using namespace std;
 
 string teval(string input)

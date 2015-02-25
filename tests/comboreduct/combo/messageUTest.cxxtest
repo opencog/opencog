@@ -1,9 +1,6 @@
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/util/tree.h>
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <opencog/comboreduct/combo/combo.h>
 
-using namespace ant_combo;
-using namespace opencog;
+using namespace opencog::combo;
 using namespace std;
 
 #define TEST_MESSAGE "yo  man"
