@@ -25,11 +25,7 @@ The folder contains microplanning code for the NLG pipeline.
 - sentence-forms.scm
 
     Templates for defining the most basic structures for each utterance type.  Utterance type can be **declarative**, **interrogative**, **imperative**, and **interjective**.  OpenCog links that do not satisfy one of the structures are considered not well-formed (ie. not enough information to form a sentence).
-    
-- test-atomspace.scm
-
-    Populating the atomspace with example atoms.  The main input are defined at the variables `test-declarative-sal` & `test-interrogative-sal`, which are `SequentialAndLink` containing a group of logic atoms, RelEx2Logic style. In addition, each node is supported by the corresponding OpenCog RelEx style output.
-    
+  
 
 ## Algorithm
 
@@ -76,6 +72,7 @@ The folder contains microplanning code for the NLG pipeline.
 4. Clone the chunks and replace nouns with pronouns as necessary
     - if a noun is the subject, keep the pronoun as is (ie. "I", "he", "they", etc)
     - if a noun is in the possession EvaluationLink, then change to "my", "his", "its", etc.
+        - unless the noun is the possessed, then indicate the whole possession link can be deleted
     - if a noun is an object or indirect object
         - if the same noun as the subject, then change to "myself", "himself", "themselves", etc.
         - if the noun is different from the subject, then change to "me", "him", "them", etc
