@@ -35,6 +35,9 @@ set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 # uncomment to build in profile mode
 # SET(CMAKE_BUILD_TYPE Profile)
 
+# uncomment to build in release mode with debug information
+# SET(CMAKE_BUILD_TYPE RelWithDebInfo)
+
 # default build type
 IF (CMAKE_BUILD_TYPE STREQUAL "")
 	SET(CMAKE_BUILD_TYPE Release)
@@ -628,6 +631,12 @@ IF (CXXTEST_FOUND)
 			COMMENT "Running tests..."
 		)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+	ADD_CUSTOM_TARGET(test_python
+		DEPENDS PythonModuleUTest PythonEvalUTest CogServerUTest
+		WORKING_DIRECTORY tests/cython
+		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
+		COMMENT "Running Python and Cython tests..."
+	)
 ENDIF (CXXTEST_FOUND)
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
