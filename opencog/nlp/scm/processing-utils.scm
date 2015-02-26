@@ -291,6 +291,9 @@
 ; Call the necessary functions for the full NLP pipeline.
 ;
 (define (nlp-parse plain-text)
+	; making sure  we emptied previous sentences as fail-safe
+	(release-new-parsed-sents)
+
 	; call the RelEx server
 	(r2l-parse plain-text)
 	
