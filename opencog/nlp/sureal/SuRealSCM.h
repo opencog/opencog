@@ -1,7 +1,7 @@
 /*
- * SuRealModule.cc
+ * SuRealSCM.h
  *
- * Copyright (C) 2014 OpenCog Foundation
+ * Copyright (C) 2015 OpenCog Foundation
  *
  * Author: William Ma <https://github.com/williampma>
  *
@@ -21,37 +21,46 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SuRealModule.h"
+#ifndef _OPENCOG_SUREAL_SCM_H
+#define _OPENCOG_SUREAL_SCM_H
 
 
-using namespace opencog::nlp;
-using namespace opencog;
+#include <opencog/query/PatternMatchEngine.h>
 
-DECLARE_MODULE(SuRealModule);
 
+namespace opencog
+{
+namespace nlp
+{
 
 /**
- * The constructor for SuRealModule.
+ * A class for defining the SuReal scheme bindings.
  *
- * @param cs   the OpenCog server
+ * Creates the necessary scheme bindings doing pattern matching and getting the
+ * corresponding mapping.
  */
-SuRealModule::SuRealModule(CogServer& cs) : Module(cs)
+class SuRealSCM
 {
+private:
+    static void* init_in_guile(void*);
+    static void init_in_module(void*);
+    void init(void);
+
+    HandleSeq do_sureal_match(Handle);
+    HandleSeqSeq do_sureal_get_mapping(Handle);
+
+    PatternMatchEngine m_pme;
+    std::map<Handle, std::vector<std::map<Handle, Handle> > > m_results;
+
+public:
+    SuRealSCM();
+};
 
 }
-
-/**
- * The destructor for SuRealModule.
- */
-SuRealModule::~SuRealModule()
-{
-    delete m_scm;
 }
 
-/**
- * The required implementation for the pure virtual init method.
- */
-void SuRealModule::init(void)
-{
-    m_scm = new SuRealSCM();
-}
+extern "C" {
+void opencog_nlp_sureal_init(void);
+};
+
+#endif // _OPENCOG_SUREAL_SCM_H

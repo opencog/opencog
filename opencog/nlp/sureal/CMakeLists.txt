@@ -3,6 +3,7 @@ INCLUDE_DIRECTORIES (
 )
 
 ADD_LIBRARY (sureal SHARED
+    SuRealSCM
     SuRealPMCB
 )
 
