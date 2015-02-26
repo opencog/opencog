@@ -219,8 +219,11 @@
 ; with the ParseNode.
 ;
 (define (parse-get-r2l-outputs parse-node)
-	(let ((inter (car (cog-chase-link 'InterpretationLink 'InterpretationNode parse-node))))
-		(interp-get-r2l-outputs inter)
+	(let ((inters (cog-chase-link 'InterpretationLink 'InterpretationNode parse-node)))
+		(if (null? inters)
+			'()
+			(interp-get-r2l-outputs (car inters))
+		)
 	)
 )
 
