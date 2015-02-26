@@ -43,8 +43,6 @@ NetworkServer::NetworkServer()
 NetworkServer::~NetworkServer()
 {
     logger().debug("[NetworkServer] enter destructor");
-    if (_thread != 0)
-        pthread_join(_thread, NULL);
 
     for (SocketPort* sp : _listeners) delete sp;
     logger().debug("[NetworkServer] all threads joined, exit destructor");
@@ -90,7 +88,8 @@ void NetworkServer::stop()
     logger().debug("[NetworkServer] stop");
     _running = false;
     io_service.stop();
-    while (_started) { usleep(10000); }
+    if (_thread != 0)
+        pthread_join(_thread, NULL);
 } 
 
 void NetworkServer::run()
