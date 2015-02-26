@@ -46,9 +46,9 @@ namespace moses {
  * likely that the two will hold similar contents. The ensemble is
  * intended for inference; the metapopulation for breeding.
  *
- * In particular (depending on paramters) the ensemble is designed to
+ * In particular (depending on parameters), the ensemble is designed to
  * hold a boosted collection of combo trees.  A boosted set of trees
- * only makes sense when the set was generated using a consisten
+ * only makes sense when the set was generated using a consistent
  * algorithm, admitting only certain specific members. This differs
  * from the metapopulation, which has no particular admission criteria.
  *
