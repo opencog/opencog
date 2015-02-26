@@ -55,12 +55,9 @@ the style
       (LgConnDirNode "-")
    )
 )
-(EvaluationLink
-   (PredicateNode "LgLinkInstanceType"
-   (ListLink
-      (LgLinkInstanceNode "Ds**c@4432ef3-3c4e-42a9-8072-9975d168a12c")
-      (LinkGrammarRelaationshipNode "Ds**c")
-   )
+(ReferenceLink
+   (LgLinkInstanceNode "Ds**c@4432ef3-3c4e-42a9-8072-9975d168a12c")
+   (LinkGrammarRelaationshipNode "Ds**c")
 )
 
 ```
