@@ -90,7 +90,7 @@ public:
 	    // erase the log file if no assertions failed
 	    if (!CxxTest::TestTracker::tracker().suiteFailed())
             std::remove(logger().getFilename().c_str());
-        cogserver.unloadModule("opencog::PythonEval");
+        cogserver.unloadModule("opencog::py-shell");
     }
 
     void setUp() {
