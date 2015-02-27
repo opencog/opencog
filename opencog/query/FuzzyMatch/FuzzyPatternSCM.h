@@ -27,7 +27,7 @@
 namespace opencog
 {
     /**
-     * Define a scheme primitive (cog-fuzzy), which finds hypergraphs that
+     * Define a scheme primitive (cog-fuzzy-match), which finds hypergraphs that
      * are similar to the query hypergraph.
      */
     class FuzzyPatternSCM

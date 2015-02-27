@@ -30,7 +30,7 @@ using namespace opencog;
 FuzzyPatternSCM::FuzzyPatternSCM()
 {
 #ifdef HAVE_GUILE
-    define_scheme_primitive("cog-fuzzy",
+    define_scheme_primitive("cog-fuzzy-match",
                             &FuzzyPatternMatch::find_approximate_matches,
                             new FuzzyPatternMatch);
 #endif

@@ -16,7 +16,7 @@
             ; Use SuReal to generate sentences from their corresponding SetLinks
             (generate-sentences
                 ; Search for any similar SetLinks in the atomspace
-                (cog-fuzzy
+                (cog-fuzzy-match
                     ; Get the R2L SetLink of the input sentence
                     (car (cog-chase-link 'ReferenceLink 'SetLink
                         (car (cog-chase-link 'InterpretationLink 'InterpretationNode

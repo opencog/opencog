@@ -34,7 +34,7 @@ FuzzyPatternMatch::FuzzyPatternMatch()
 }
 
 /**
- * Implement the "cog-fuzzy" scheme primitive.
+ * Implement the "cog-fuzzy-match" scheme primitive.
  *
  * Use Pattern Matcher to find the candidates, estimate the similarity by
  * computing the edit distance for each of the candidate, eventually return one
@@ -46,7 +46,7 @@ FuzzyPatternMatch::FuzzyPatternMatch()
 HandleSeq FuzzyPatternMatch::find_approximate_matches(Handle hg)
 {
 #ifdef HAVE_GUILE
-    AtomSpace* as = SchemeSmob::ss_get_env_as("cog-fuzzy");
+    AtomSpace* as = SchemeSmob::ss_get_env_as("cog-fuzzy-match");
 
     FuzzyPatternMatchCB fpmcb(as);
 
