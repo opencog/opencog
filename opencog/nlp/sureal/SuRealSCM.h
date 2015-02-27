@@ -1,7 +1,7 @@
 /*
- * LGDictMoudle.h
+ * SuRealSCM.h
  *
- * Copyright (C) 2014 OpenCog Foundation
+ * Copyright (C) 2015 OpenCog Foundation
  *
  * Author: William Ma <https://github.com/williampma>
  *
@@ -21,14 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LG_DICT_MODULE_H
-#define _OPENCOG_LG_DICT_MODULE_H
+#ifndef _OPENCOG_SUREAL_SCM_H
+#define _OPENCOG_SUREAL_SCM_H
 
-#include <link-grammar/dict-api.h>
-#include <opencog/server/Module.h>
-#include <opencog/atomspace/Handle.h>
 
-#include "LGDictSCM.h"
+#include <opencog/query/PatternMatchEngine.h>
 
 
 namespace opencog
@@ -36,27 +33,34 @@ namespace opencog
 namespace nlp
 {
 
-
 /**
- * An OpenCog module for reading LG dictionary.
+ * A class for defining the SuReal scheme bindings.
  *
- * This module links to the necessary scheme bindings code for accessing the
- * Link Grammar dictionary.
+ * Creates the necessary scheme bindings doing pattern matching and getting the
+ * corresponding mapping.
  */
-class LGDictModule : public Module
+class SuRealSCM
 {
-public:
-    LGDictModule(CogServer&);
-    virtual ~LGDictModule();
-    const char * id(void);
-    virtual void init(void);
-
 private:
-    LGDictSCM* m_scm;
+    static void* init_in_guile(void*);
+    static void init_in_module(void*);
+    void init(void);
+
+    HandleSeq do_sureal_match(Handle);
+    HandleSeqSeq do_sureal_get_mapping(Handle);
+
+    PatternMatchEngine m_pme;
+    std::map<Handle, std::vector<std::map<Handle, Handle> > > m_results;
+
+public:
+    SuRealSCM();
 };
 
-
 }
 }
 
-#endif // _OPENCOG_LG_DICT_MODULE_H
+extern "C" {
+void opencog_nlp_sureal_init(void);
+};
+
+#endif // _OPENCOG_SUREAL_SCM_H

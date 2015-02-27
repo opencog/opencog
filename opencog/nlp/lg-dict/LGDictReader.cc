@@ -27,6 +27,8 @@
 
 #include "LGDictReader.h"
 
+
+using namespace opencog::nlp;
 using namespace opencog;
 
 

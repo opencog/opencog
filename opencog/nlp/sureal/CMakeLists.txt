@@ -3,11 +3,18 @@ INCLUDE_DIRECTORIES (
 )
 
 ADD_LIBRARY (sureal SHARED
+    SuRealSCM
     SuRealPMCB
 )
 
 ADD_DEPENDENCIES (sureal
     nlp_atom_types            # also include the default types by dependencies
+)
+
+TARGET_LINK_LIBRARIES(sureal
+    atomspace
+    query
+    smob
 )
 
 ADD_LIBRARY (SuRealModule SHARED
@@ -19,8 +26,5 @@ ADD_DEPENDENCIES (SuRealModule
 )
 
 TARGET_LINK_LIBRARIES(SuRealModule
-    atomspace
-    query
-    smob
     sureal
 )

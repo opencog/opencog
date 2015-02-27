@@ -31,6 +31,8 @@
 
 namespace opencog
 {
+namespace nlp
+{
 
 
 /**
@@ -60,6 +62,8 @@ private:
     std::vector<LGDictExpContainer> m_subexps;
 };
 
+
+}
 }
 
 #endif // _OPENCOG_LG_DICT_EXP_H

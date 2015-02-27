@@ -26,6 +26,7 @@
 
 namespace viterbi {
 
+using namespace opencog::nlp;
 using namespace opencog;
 
 class Parser

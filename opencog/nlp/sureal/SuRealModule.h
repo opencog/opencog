@@ -26,7 +26,8 @@
 
 
 #include <opencog/server/Module.h>
-#include <opencog/query/PatternMatchEngine.h>
+
+#include "SuRealSCM.h"
 
 
 namespace opencog
@@ -37,24 +38,20 @@ namespace nlp
 /**
  * An OpenCog module for supporting Surface Realization.
  *
- * This module creates the necessary scheme bindings doing pattern matching
- * and getting the corresponding mapping.
+ * A module linked to the Surface Realization pattern matching code
+ * and scheme bindings.
  */
 class SuRealModule : public Module
 {
 public:
     SuRealModule(CogServer&);
-    virtual ~SuRealModule() {}
+    virtual ~SuRealModule();
 
     const char * id(void);
     virtual void init(void);
 
 private:
-    HandleSeq do_sureal_match(Handle);
-    HandleSeqSeq do_sureal_get_mapping(Handle);
-
-    PatternMatchEngine m_pme;
-    std::map<Handle, std::vector<std::map<Handle, Handle> > > m_results;
+    SuRealSCM* m_scm;
 };
 
 }

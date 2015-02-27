@@ -5,6 +5,7 @@ INCLUDE_DIRECTORIES (
 )
 
 ADD_LIBRARY (lg-dict SHARED
+	LGDictSCM
 	LGDictReader
 	LGDictUtils
 	LGDictExpContainer

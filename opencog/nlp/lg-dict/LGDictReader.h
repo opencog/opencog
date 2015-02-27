@@ -32,6 +32,9 @@
 
 namespace opencog
 {
+namespace nlp
+{
+
 
 /**
  * Link Grammar dictionary reader.
@@ -54,6 +57,8 @@ private:
     AtomSpace* _as;
 };
 
+
+}
 }
 
 #endif // _OPENCOG_LG_DICT_READER_H
