@@ -26,6 +26,8 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
+#include <opencog/atomspace/ProbabilisticTruthValue.h>
+#include <opencog/atomspace/FuzzyTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <lib/zmq/zhelpers.hpp>
 #include <lib/json_spirit/json_spirit.h>
@@ -361,6 +363,24 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
             jsonDetails.push_back(Pair("confidence", itv->getConfidenceLevel()));
             jsonDetails.push_back(Pair("diff", itv->getDiff()));
             jsonDetails.push_back(Pair("symmetric", itv->isSymmetric()));
+            json.push_back(Pair("details", jsonDetails));
+            break;
+        }
+
+        case PROBABILISTIC_TRUTH_VALUE: {
+            json.push_back(Pair("type", "probabilistic"));
+            jsonDetails.push_back(Pair("strength", tvp->getMean()));
+            jsonDetails.push_back(Pair("count", tvp->getCount()));
+            jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+            json.push_back(Pair("details", jsonDetails));
+            break;
+        }
+
+        case FUZZY_TRUTH_VALUE: {
+            json.push_back(Pair("type", "fuzzy"));
+            jsonDetails.push_back(Pair("strength", tvp->getMean()));
+            jsonDetails.push_back(Pair("count", tvp->getCount()));
+            jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
             json.push_back(Pair("details", jsonDetails));
             break;
         }
