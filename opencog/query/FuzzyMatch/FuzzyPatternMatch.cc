@@ -41,7 +41,7 @@ FuzzyPatternMatch::FuzzyPatternMatch()
  * or more of the candidates that are the most similar to the query hypergraph.
  *
  * @param hg  The query hypergraph
- * @return    One or more hypergraphs that are similar to the query hypergraph (hg)
+ * @return    One or more similar hypergraphs
  */
 HandleSeq FuzzyPatternMatch::find_approximate_matches(Handle hg)
 {

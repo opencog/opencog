@@ -19,7 +19,7 @@ class QueryModule : public Module
 {
 	private:
 		PatternSCM* _pat;
-        FuzzyPatternSCM* _fpat;
+		FuzzyPatternSCM* _fpat;
 	public:
 		QueryModule(CogServer&);
 		virtual ~QueryModule();

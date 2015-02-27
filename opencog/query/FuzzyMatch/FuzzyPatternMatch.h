@@ -30,8 +30,7 @@
 namespace opencog
 {
     /**
-     * Find hypergraphs by using Pattern Matcher that are fairly similar to
-     * the query hypergraph.
+     * Find hypergraphs that are structurally similar to the one in the query.
      */
     class FuzzyPatternMatch
     {
@@ -41,7 +40,6 @@ namespace opencog
 
         private:
             PatternMatchEngine pme;
-            HandleSeq start_fuzzy_matching(AtomSpace* as, const Handle& hg);
     };
 }
 

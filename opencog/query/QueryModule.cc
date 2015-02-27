@@ -19,11 +19,11 @@ QueryModule::QueryModule(CogServer& cs) : Module(cs), _pat(NULL), _fpat(NULL)
 QueryModule::~QueryModule()
 {
 	delete _pat;
-    delete _fpat;
+	delete _fpat;
 }
 
 void QueryModule::init(void)
 {
-    _pat = new PatternSCM();
-    _fpat = new FuzzyPatternSCM();
+	_pat = new PatternSCM();
+	_fpat = new FuzzyPatternSCM();
 }
