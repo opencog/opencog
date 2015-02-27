@@ -169,16 +169,16 @@ void FuzzyPatternUTest::test_basic_link(void)
 
 	FuzzyPatternMatchCB fpmcb(as);
 
-    std::set<Handle> vars;
+	std::set<Handle> vars;
 
-    HandleSeq preds;
-    preds.push_back(query);
+	HandleSeq preds;
+	preds.push_back(query);
 
-    HandleSeq negs;
+	HandleSeq negs;
 
-    pme.match(&fpmcb, vars, preds, negs);
+	pme.match(&fpmcb, vars, preds, negs);
 
-    TSM_ASSERT_EQUALS("Wrong number of solutions", fpmcb.solns.size(), 1);
+	TSM_ASSERT_EQUALS("Wrong number of solutions", fpmcb.solns.size(), 1);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -192,16 +192,16 @@ void FuzzyPatternUTest::test_basic_node(void)
 
 	FuzzyPatternMatchCB fpmcb(as);
 
-    std::set<Handle> vars;
+	std::set<Handle> vars;
 
-    HandleSeq preds;
-    preds.push_back(query);
+	HandleSeq preds;
+	preds.push_back(query);
 
-    HandleSeq negs;
+	HandleSeq negs;
 
-    pme.match(&fpmcb, vars, preds, negs);
+	pme.match(&fpmcb, vars, preds, negs);
 
-    TSM_ASSERT_EQUALS("Wrong number of solutions", fpmcb.solns.size(), 1);
+	TSM_ASSERT_EQUALS("Wrong number of solutions", fpmcb.solns.size(), 1);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
