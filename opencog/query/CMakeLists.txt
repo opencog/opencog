@@ -10,6 +10,10 @@ ADD_LIBRARY(query SHARED
 	PatternUtils.cc
 	VirtualMatch.cc
 	AttentionalFocusCB.cc
+	FuzzyMatch/FuzzyPatternMatch.cc
+	FuzzyMatch/FuzzyPatternMatchCB.cc
+	FuzzyMatch/FuzzyPatternSCM.cc
+	FuzzyMatch/GraphEditDist.cc
 )
 
 ADD_DEPENDENCIES(query
