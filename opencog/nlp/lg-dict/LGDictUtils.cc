@@ -26,10 +26,14 @@
 
 #include "LGDictUtils.h"
 
+using namespace opencog::nlp;
 using namespace opencog;
 
-namespace opencog {
 
+namespace opencog
+{
+namespace nlp
+{
 
 Handle lg_conn_get_type(const Handle& hConn)
 {
@@ -105,5 +109,5 @@ bool lg_conn_linkable(const Handle& hConn1, const Handle& hConn2)
     return lg_conn_type_match(hConn1, hConn2) && lg_conn_get_dir(hConn1) != lg_conn_get_dir(hConn2);
 }
 
-
+}
 }

@@ -77,8 +77,8 @@ void SuRealSCM::init_in_module(void* data)
 void SuRealSCM::init()
 {
 #ifdef HAVE_GUILE
-    define_scheme_primitive("sureal-match", &SuRealSCM::do_sureal_match, this);
-    define_scheme_primitive("sureal-get-mapping", &SuRealSCM::do_sureal_get_mapping, this);
+    define_scheme_primitive("sureal-match", &SuRealSCM::do_sureal_match, this, "nlp sureal");
+    define_scheme_primitive("sureal-get-mapping", &SuRealSCM::do_sureal_get_mapping, this, "nlp sureal");
 #endif
 }
 

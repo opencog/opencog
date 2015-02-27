@@ -25,6 +25,8 @@
 
 #include "LGDictExpContainer.h"
 
+
+using namespace opencog::nlp;
 using namespace opencog;
 
 

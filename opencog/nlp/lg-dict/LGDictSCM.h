@@ -1,7 +1,7 @@
 /*
- * LGDictMoudle.h
+ * LGDictSCM.h
  *
- * Copyright (C) 2014 OpenCog Foundation
+ * Copyright (C) 2015 OpenCog Foundation
  *
  * Author: William Ma <https://github.com/williampma>
  *
@@ -21,14 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LG_DICT_MODULE_H
-#define _OPENCOG_LG_DICT_MODULE_H
+#ifndef _OPENCOG_LG_DICT_SCM_H
+#define _OPENCOG_LG_DICT_SCM_H
+
 
 #include <link-grammar/dict-api.h>
-#include <opencog/server/Module.h>
 #include <opencog/atomspace/Handle.h>
-
-#include "LGDictSCM.h"
 
 
 namespace opencog
@@ -37,26 +35,31 @@ namespace nlp
 {
 
 
-/**
- * An OpenCog module for reading LG dictionary.
- *
- * This module links to the necessary scheme bindings code for accessing the
- * Link Grammar dictionary.
- */
-class LGDictModule : public Module
+class LGDictSCM
 {
-public:
-    LGDictModule(CogServer&);
-    virtual ~LGDictModule();
-    const char * id(void);
-    virtual void init(void);
-
 private:
-    LGDictSCM* m_scm;
+    static void* init_in_guile(void*);
+    static void init_in_module(void*);
+    void init(void);
+
+    Handle do_lg_get_dict_entry(Handle);
+    bool do_lg_conn_type_match(Handle, Handle);
+    bool do_lg_conn_linkable(Handle, Handle);
+
+    Dictionary m_pDictionary;
+
+public:
+    LGDictSCM();
+    ~LGDictSCM();
 };
 
 
 }
 }
 
-#endif // _OPENCOG_LG_DICT_MODULE_H
+extern "C" {
+void opencog_nlp_lgdict_init(void);
+};
+
+
+#endif // _OPENCOG_LG_DICT_SCM_H
