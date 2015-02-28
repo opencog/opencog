@@ -12,7 +12,6 @@ ADD_LIBRARY(query SHARED
 	AttentionalFocusCB.cc
 	FuzzyMatch/FuzzyPatternMatch.cc
 	FuzzyMatch/FuzzyPatternMatchCB.cc
-	FuzzyMatch/FuzzyPatternSCM.cc
 	FuzzyMatch/GraphEditDist.cc
 )
 

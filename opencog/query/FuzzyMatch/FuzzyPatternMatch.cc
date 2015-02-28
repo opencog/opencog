@@ -22,16 +22,11 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/guile/SchemeSmob.h>
+#include <opencog/query/PatternMatchEngine.h>
 #include "FuzzyPatternMatchCB.h"
 #include "FuzzyPatternMatch.h"
 
 using namespace opencog;
-
-FuzzyPatternMatch::FuzzyPatternMatch()
-{
-
-}
 
 /**
  * Implement the "cog-fuzzy-match" scheme primitive.
@@ -43,11 +38,9 @@ FuzzyPatternMatch::FuzzyPatternMatch()
  * @param hg  The query hypergraph
  * @return    One or more similar hypergraphs
  */
-HandleSeq FuzzyPatternMatch::find_approximate_matches(Handle hg)
+Handle opencog::find_approximate_match(AtomSpace* as, Handle hg)
 {
 #ifdef HAVE_GUILE
-    AtomSpace* as = SchemeSmob::ss_get_env_as("cog-fuzzy-match");
-
     FuzzyPatternMatchCB fpmcb(as);
 
     std::set<Handle> vars;
@@ -57,9 +50,13 @@ HandleSeq FuzzyPatternMatch::find_approximate_matches(Handle hg)
 
     HandleSeq negs;
 
+    PatternMatchEngine pme;
     pme.match(&fpmcb, vars, preds, negs);
 
-    return fpmcb.solns;
+    // The result_list contains a list of the grounded expressions.
+    // Turn it into a true list, and return it.
+    Handle gl = as->addLink(LIST_LINK,  fpmcb.solns);
+    return gl;
 #else
     return Handle::UNDEFINED;
 #endif
