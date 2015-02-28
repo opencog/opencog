@@ -15,7 +15,11 @@ ADD_DEPENDENCIES (lg-dict
 	nlp_atom_types
 )
 
-TARGET_LINK_LIBRARIES (lg-dict smob ${LINK_GRAMMAR_LIBRARY})
+TARGET_LINK_LIBRARIES (lg-dict
+	nlp-types
+	smob
+	${LINK_GRAMMAR_LIBRARY}
+)
 
 ADD_LIBRARY (LGDictModule SHARED
 	LGDictModule

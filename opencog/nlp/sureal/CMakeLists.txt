@@ -12,9 +12,10 @@ ADD_DEPENDENCIES (sureal
 )
 
 TARGET_LINK_LIBRARIES(sureal
-    atomspace
+    nlp-types
     query
     smob
+    atomspace
 )
 
 ADD_LIBRARY (SuRealModule SHARED

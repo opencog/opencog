@@ -7,7 +7,7 @@ for additional documentation.
 If you have installed opencog, then start guile simply by saying
 "guile" at the bash prompt $.  Otherwise, you will need to do this:
 ```
-$ export LTDL_LIBRARY_PATH=build/opencog/guile:build/opencog/query
+$ export LTDL_LIBRARY_PATH=build/opencog/guile:build/opencog/query:build/opencog/nlp/lg-dict:build/opencog/nlp/sureal
 $ guile -L opencog/scm -L build
 ```
 where "build" is where-ever you built opencog. Alternately, just
