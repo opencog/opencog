@@ -22,6 +22,7 @@ LINK_LIBRARIES (
 # Each test gets progressively more complex, and exercises
 # features that the later tests depend on.
 ADD_CXXTEST(PatternUTest)
+ADD_CXXTEST(FuzzyPatternUTest)
 ADD_CXXTEST(StackUTest)
 ADD_CXXTEST(BigPatternUTest)
 ADD_CXXTEST(BiggerPatternUTest)
