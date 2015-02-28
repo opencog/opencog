@@ -179,7 +179,7 @@ IF (HAVE_SERVER)
 		${Boost_SYSTEM_LIBRARY}
 	)
 
-	ADD_DEPENDENCIES(agent_finder cogserver_cython atomspace_cython)
+	ADD_DEPENDENCIES(agent_finder atomspace_cython)
 
 	SET_TARGET_PROPERTIES(agent_finder PROPERTIES
 		PREFIX ""
