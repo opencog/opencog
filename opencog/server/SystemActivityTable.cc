@@ -41,7 +41,6 @@ SystemActivityTable::~SystemActivityTable()
 {
     logger().debug("[SystemActivityTable] enter destructor");
     _conn.disconnect();
-    clearActivity();
     logger().debug("[SystemActivityTable] exit destructor");
 }
 

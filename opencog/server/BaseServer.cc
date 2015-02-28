@@ -30,6 +30,9 @@ using namespace opencog;
 
 AtomSpace* BaseServer::atomSpace = NULL;
 
+
+static BaseServer* serverInstance = NULL;
+
 BaseServer* BaseServer::createInstance()
 {
     OC_ASSERT(0,
@@ -46,12 +49,17 @@ BaseServer* BaseServer::createInstance()
     return NULL;
 }
 
+
 BaseServer::BaseServer()
 {
+    // Set this server as the current server.
+    set_current_server(this);
 }
 
 BaseServer::~BaseServer()
 {
+    // We are no longer the current server.
+    set_current_server(NULL);
 }
 
 AtomSpace& BaseServer::getAtomSpace()
@@ -59,9 +67,31 @@ AtomSpace& BaseServer::getAtomSpace()
     return *atomSpace;
 }
 
-// create and return static singleton instance
 BaseServer& opencog::server(BaseServer* (*factoryFunction)())
 {
-    static std::unique_ptr<BaseServer> instance((*factoryFunction)());
-    return *instance;
+    // Create a new instance using the factory function if we don't
+    // already have one.
+    if (!serverInstance)
+        serverInstance = (*factoryFunction)();
+    
+    // Return a reference to our server instance.
+    return *serverInstance;
+}
+
+void opencog::set_current_server(BaseServer* currentServer)
+{
+    // Normally used for stack-based server instantiation.
+
+    // Nothing to do if we've already done this.
+    if (serverInstance == currentServer)
+        return;
+
+    // Should not call this on more than one server at a time.
+    if (serverInstance && currentServer != serverInstance) {
+        throw (RuntimeException(TRACE_INFO,
+                "Can't create more than one server singleton instance!"));
+    }
+
+    // Set the current server. 
+    serverInstance = currentServer;
 }

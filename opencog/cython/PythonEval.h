@@ -3,8 +3,10 @@
  *
  * Simple python expression evaluator.
  *
- * @author Zhenhua Cai <czhedu@gmail.com> Ramin Barati <rekino@gmail.com>
+ * @author Zhenhua Cai <czhedu@gmail.com>
+ *         Ramin Barati <rekino@gmail.com>
  *         Keyvan Mir Mohammad Sadeghi <keyvan@opencog.org>
+ *         Curtis Faith <curtis.m.faith@gmail.com>
  * @date   2011-09-20
  *
  * @Note
@@ -88,24 +90,14 @@ class PythonThreadLocker
 class PythonEval : public GenericEval
 {
     private:
-        void init(void);
+        void initialize_python_objects_and_imports(void);
         void add_module_directory(const boost::filesystem::path &p);
         void add_module_file(const boost::filesystem::path &p);
 
-        // Make constructor, destructor private; force everyone to use the
-        // singleton instance
-        PythonEval(AtomSpace * atomspace) {
-            this->_atomspace = atomspace;
-        }
+        static PythonEval* singletonInstance;
+        static AtomSpace* singletonAtomSpace;
 
-        ~PythonEval();
-
-        static PythonEval * singletonInstance;
-
-        AtomSpace *_atomspace;
-
-        PyThreadState * mainThreadState;
-        PyInterpreterState * mainInterpreterState;
+        AtomSpace* _atomspace;
 
         PyObject* pyGlobal;
         PyObject* pyLocal;
@@ -116,7 +108,26 @@ class PythonEval : public GenericEval
         std::map <std::string, PyObject*> modules;
 
         std::string _result;
+
     public:
+        PythonEval(AtomSpace* atomspace);
+        ~PythonEval();
+
+        /**
+         * Create the singleton instance with the supplied atomspace.
+         */
+        static void create_singleton_instance(AtomSpace * atomspace);
+
+        /**
+         * Delete the singleton instance.
+         */
+        static void delete_singleton_instance();
+
+          /**
+         * Get a reference to the singleton instance.
+         */
+        static PythonEval & instance(AtomSpace * atomspace = NULL);
+
         void addModuleFromPath(std::string path);
         void addSysPath(std::string path);
 
@@ -128,14 +139,6 @@ class PythonEval : public GenericEval
         // The synchronous-output interface.
         std::string eval(const std::string& expr)
             { begin_eval(); eval_expr(expr); return poll_result(); }
-
-        PyThreadState * getMainThreadState() {
-            return this->mainThreadState;
-        }
-
-        PyInterpreterState * getMainInterpreterState() {
-            return this->mainInterpreterState;
-        }
 
         /**
          * Return a new reference of python AtomSpace, which holds c++ pointer
@@ -149,12 +152,20 @@ class PythonEval : public GenericEval
          */
         void printDict(PyObject* obj);
 
-        // Use a singleton instance to avoid initializing python interpreter twice.
-        static PythonEval & instance(AtomSpace * atomspace = NULL);
-
         std::string apply_script(const std::string& script);
         Handle apply(const std::string& func, Handle varargs);
 };
+
+/**
+ * Initialize Python. Must be called before any Python dependent modules
+ * are loaded.
+ */ 
+void global_python_initialize();
+
+/**
+ * Finalize Python. Call to cleanup memory used by Python interpreters.
+ */
+void global_python_finalize();
 
 } /* namespace opencog */
 
