@@ -206,7 +206,7 @@ PythonEval::~PythonEval()
     Py_DECREF(this->pyLocal);
 
     // NOTE: The following come from Python C api calls that return borrowed
-    // references. However, we have called Py_DECREF( x ) to promote them
+    // references. However, we have called Py_INCREF( x ) to promote them
     // to full references so we can and must decrement them here.
     Py_DECREF(this->pySysPath);
     Py_DECREF(this->pyRootModule);
