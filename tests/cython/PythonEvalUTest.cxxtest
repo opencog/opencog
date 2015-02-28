@@ -1,55 +1,16 @@
 #include <string>
 #include <cstdio>
 
-#include <opencog/server/CogServer.h>
-#include <opencog/server/RequestResult.h>
 #include <opencog/util/Config.h>
-#include <opencog/cython/PyMindAgent.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/cython/PythonEval.h>
 
 using std::string;
 
 using namespace opencog;
 
-class StringRequestResult : public RequestResult
-{
-public:
-    string result;
-    StringRequestResult(): RequestResult ("text/plain"){};
-    ~StringRequestResult(){};
-    virtual void SendResult(const std::string& res) {
-        result = res;
-    }
-    virtual void OnRequestComplete() {
-    }
-};
+const int NO_SIGNAL_HANDLERS = 0;
 
-class TestCogServer : public CogServer
-{
-    int tickCount;
-    bool tickBased;
-    int maxCount;
-    public: 
-
-        static BaseServer* createInstance() {
-            return new TestCogServer();
-        }
-
-        TestCogServer() : tickCount(1), tickBased(false), maxCount(1000) {}
-
-        void setTickBased(bool _tickBased) {
-            tickBased = _tickBased;
-        }
-
-        void setMaxCount(int _maxCount) {
-            maxCount = _maxCount;
-        }
-
-        bool customLoopRun() {
-            bool runCycle  = tickBased?(tickCount % 100 == 0):true; 
-            if (++tickCount > maxCount) stop();
-            return runCycle;
-        }
-};
 
 class PythonEvalUTest :  public CxxTest::TestSuite
 {
@@ -60,37 +21,26 @@ private:
 public:
 
     PythonEvalUTest() {
-        logger().setLevel(Logger::DEBUG);
-        logger().setPrintToStdoutFlag(true);
 
         // Load special config file for the test
-        string configFile = PROJECT_BINARY_DIR"/tests/cython/pyeval.conf";
+        string configFile = PROJECT_BINARY_DIR"/tests/cython/pythoneval.conf";
         try {
             config().load(configFile.c_str(), false);
         } catch (RuntimeException &e) {
             std::cerr << e.getMessage() << std::endl;
             exit(1);
         }
+
+        logger().setPrintToStdoutFlag(true);
+
         // setup global logger
         logger().setFilename(config()["LOG_FILE"]);
         logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
         logger().setBackTraceLevel(Logger::getLevelFromString(config()["BACK_TRACE_LOG_LEVEL"]));
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
-
-        // set cycle duration to a smaller value so that this test do not take too long.
-        config().set("SERVER_CYCLE_DURATION", "10");  // in milliseconds
-        TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
-
-        config().set("MODULES", "opencog/shell/libpy-shell.so");
-        cogserver.loadModules();
     }
 
     ~PythonEvalUTest() {
-        TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
-	    // erase the log file if no assertions failed
-	    if (!CxxTest::TestTracker::tracker().suiteFailed())
-            std::remove(logger().getFilename().c_str());
-        cogserver.unloadModule("opencog::py-shell");
     }
 
     void setUp() {
@@ -99,24 +49,179 @@ public:
     void tearDown() {
     }
 
+    void testRawPythonInitialization() {
+
+        logger().debug("[PythonEvalUTest] testRawPythonInitialization()");
+
+        // Start up Python.
+        Py_InitializeEx(NO_SIGNAL_HANDLERS);
+        PyEval_InitThreads();
+
+        // Release the GIL.
+        PyEval_ReleaseLock();
+
+        // Stop Python.
+        Py_Finalize();
+
+
+        // Try it again to make sure the Python library cleans up properly.
+     
+        // Start up Python.
+        Py_InitializeEx(NO_SIGNAL_HANDLERS);
+        PyEval_InitThreads();
+
+        // Release the GIL.
+        PyEval_ReleaseLock();
+
+        // Stop Python.
+        Py_Finalize();
+
+
+        // And again...
+     
+        // Start up Python.
+        Py_InitializeEx(NO_SIGNAL_HANDLERS);
+        PyEval_InitThreads();
+
+        // Release the GIL.
+        PyEval_ReleaseLock();
+
+        // Stop Python.
+        Py_Finalize();
+ 
+         logger().debug("[PythonEvalUTest] testRawPythonInitialization() DONE");
+   }
+
+    void testRawPythonInitializeWithGetSys(){
+
+        logger().debug("[PythonEvalUTest] testRawPythonInitializeWithGetSys()");
+
+        PyObject* pySysPath = NULL;
+
+        // Get the system path object.
+        Py_InitializeEx(NO_SIGNAL_HANDLERS);
+        PyEval_InitThreads();
+
+        PyRun_SimpleString(
+                    "import sys\n"
+                    "import StringIO\n"
+                    );
+        pySysPath = PySys_GetObject((char*)"path");
+
+        Py_ssize_t pathSize = PyList_Size(pySysPath);
+        for (int pathIndex = 0; pathIndex < pathSize; pathIndex++) {
+            PyObject* pySysPathLine = PyList_GetItem(pySysPath, pathIndex);
+            logger().info("        %2d > %s", pathIndex, PyString_AsString(pySysPathLine));
+            // NOTE: PyList_GetItem returns a borrowed reference so don't do this:
+            // Py_DECREF(pySysPathLine);
+        }
+
+        // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
+        // Py_DECREF(pySysPath);
+
+        PyEval_ReleaseLock();
+        Py_Finalize();
+
+        // Get it again
+        Py_InitializeEx(NO_SIGNAL_HANDLERS);
+        PyEval_InitThreads();
+
+        PyRun_SimpleString(
+                    "import sys\n"
+                    "import StringIO\n"
+                    );
+        pySysPath = PySys_GetObject((char*)"path");
+
+        // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
+        // Py_DECREF(pySysPath);
+
+        PyEval_ReleaseLock();
+        Py_Finalize();
+
+        logger().debug("[PythonEvalUTest] testRawPythonInitializeWithGetSys() DONE");
+    }
+
+    void testCogServerPythonInitialization() {
+
+        logger().debug("[PythonEvalUTest] testCogServerPythonInitialization()");
+
+         // Initialize and finalize Python.
+        global_python_initialize();
+        global_python_finalize();
+
+         // Initialize and finalize Python.
+        global_python_initialize();
+        global_python_finalize();
+
+        logger().debug("[PythonEvalUTest] testCogServerPythonInitialization() DONE");
+    }
+
     void testPythonEvalScript() {
-        TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance));
 
-        //  Create the py-eval request.
-        Request* pythonEvalRequest = cogserver.createRequest("py-eval");
-        TS_ASSERT(pythonEvalRequest != NULL);
-        pythonEvalRequest->addParameter("print 'Hello'");
-        StringRequestResult *pythonEvalRequestResult = new StringRequestResult();
-        pythonEvalRequest->setRequestResult(pythonEvalRequestResult);
+        logger().debug("[PythonEvalUTest] testPythonEvalScript()");
 
-        // Add request to queue.
-        cogserver.pushRequest(pythonEvalRequest);
+        AtomSpace* atomSpace = NULL;
 
-        // Process this request.
-        cogserver.runLoopStep();
+        // Initialize Python.
+        global_python_initialize();
 
-        // Make sure we get a "Hello" back.
-        TS_ASSERT_DIFFERS(pythonEvalRequestResult->result.find("Hello"), std::string::npos)
+        // Tell the python evaluator to create its singleton instance.
+        PythonEval::create_singleton_instance(NULL);
+
+        // Delete the singleton instance of the PythonEval.
+        PythonEval::delete_singleton_instance();
+
+        // Cleanup Python.
+        global_python_finalize();
+
+
+        // Now do it again with a non-NULL atomspace object.
+
+        // Initialize Python.
+        global_python_initialize();
+
+        // Create an atomspace.
+        atomSpace = new AtomSpace();
+
+        // Tell the python evaluator to create its singleton instance
+        // with this atomspace.
+        PythonEval::create_singleton_instance(atomSpace);
+
+        // Delete the singleton instance of the PythonEval.
+        PythonEval::delete_singleton_instance();
+
+        // Delete the atomspace.
+        delete atomSpace;
+        atomSpace = NULL;
+
+        // Cleanup Python.
+        global_python_finalize();
+
+
+        // Now do it again to make sure we cleaned up properly.
+
+
+        // Initialize Python.
+        global_python_initialize();
+
+        // Create an atomspace.
+        atomSpace = new AtomSpace();
+
+        // Tell the python evaluator to create its singleton instance
+        // with this atomspace.
+        PythonEval::create_singleton_instance(atomSpace);
+
+        // Delete the singleton instance of the PythonEval.
+        PythonEval::delete_singleton_instance();
+
+        // Delete the atomspace.
+        delete atomSpace;
+        atomSpace = NULL;
+
+        // Cleanup Python.
+        global_python_finalize();
+
+        logger().debug("[PythonEvalUTest] testPythonEvalScript() DONE");
     }
 
 };

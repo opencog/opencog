@@ -22,20 +22,35 @@ IF (HAVE_SERVER)
 ENDIF (HAVE_SERVER)
 
 
-# The PythonEvalUTest is derived from the CogServer class, and so 
+# The PyEvalUTest is derived from the CogServer class, and so 
 # cannot be tested unless the cogserver is actually being built!
 IF (HAVE_SERVER)
-	ADD_CXXTEST(PythonEvalUTest)
+	ADD_CXXTEST(PyEvalUTest)
 	CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/cython/pyeval.conf
 		${PROJECT_BINARY_DIR}/tests/cython/pyeval.conf)
 
-	TARGET_LINK_LIBRARIES(PythonEvalUTest
+	TARGET_LINK_LIBRARIES(PyEvalUTest
+		py-shell
 		server
 		cogutil
 	)
-	SET_TESTS_PROPERTIES(PythonEvalUTest
+	SET_TESTS_PROPERTIES(PyEvalUTest
 		PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
 ENDIF (HAVE_SERVER)
+
+
+# The PythonEvalUTest tests PythonEval independent of the CogServer.
+ADD_CXXTEST(PythonEvalUTest)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/cython/pythoneval.conf
+	${PROJECT_BINARY_DIR}/tests/cython/pythoneval.conf)
+
+TARGET_LINK_LIBRARIES(PythonEvalUTest
+	atomspace
+	PythonEval
+	cogutil
+)
+SET_TESTS_PROPERTIES(PythonEvalUTest
+	PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
 
 
 IF (HAVE_NOSETESTS)

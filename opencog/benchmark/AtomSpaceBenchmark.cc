@@ -327,9 +327,9 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
             if (pymo == NULL) pymo = new PythonModule(*cogs);
             pymo->init();
             asp = &cogs->getAtomSpace();
-            pyev = &PythonEval::instance(asp);
+            pyev = &PythonEval::instance();
 
-            // And now ... create an instance of the atomspace.
+            // And now ... create a Python instance of the atomspace.
             // Pass in the raw C++ atomspace address into cython.
             // Kind-of tacky, but I don't see any better way.
             // (We must do this because otherwise, the benchmark would

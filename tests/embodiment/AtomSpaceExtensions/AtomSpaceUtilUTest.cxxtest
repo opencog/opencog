@@ -77,7 +77,6 @@ public:
     }
 
     void testAddRewardPredicate() {
-        server(SpaceTimeCogServer::createInstance);
         SpaceTimeCogServer srv;
         AtomSpace& atomSpace = srv.getAtomSpace();
         Handle evalLink = AtomSpaceUtil::addRewardPredicate(atomSpace, "1", 1000);
@@ -101,7 +100,6 @@ public:
     }
 
     void testAddPunishmentPredicate() {
-        server(SpaceTimeCogServer::createInstance);
         SpaceTimeCogServer srv;
         AtomSpace& atomSpace = srv.getAtomSpace();
         Handle evalLink = AtomSpaceUtil::addPunishmentPredicate(atomSpace, "1", 1000);
@@ -125,7 +123,6 @@ public:
     }
 
     void testIsActionPredicatePresent() {
-        server(SpaceTimeCogServer::createInstance);
         SpaceTimeCogServer srv;
         AtomSpace& atomSpace(srv.getAtomSpace());
         TimeServer& timeServer = srv.getTimeServer();

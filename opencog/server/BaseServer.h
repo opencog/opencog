@@ -65,8 +65,41 @@ public:
     virtual ~BaseServer(void);
 }; // class
 
-// singleton instance (following meyer's design pattern)
+// Singleton instance (following meyer's design pattern) NOTE: There are
+// problems with the way this is being used, in some cases, as it is confusing
+// that there are examples of both stack based and factory function singleton
+// server creation in the tests and examples. For example, I saw some code
+// that did this:
+//
+// 	  void testAddPunishmentPredicate() {
+//        server(SpaceTimeCogServer::createInstance);  << creates one instance
+//        SpaceTimeCogServer srv;                      << creates another
+//        AtomSpace& atomSpace = srv.getAtomSpace();
+//
+//        ... other code goes here
+//     }
+//
+// This meant that all the calls to server() in the code would be referring
+// to a different server instance than the SpaceTimeCogServer on the stack
+// since the only place that the singleton instance variable was set was in
+// the code for server(BaseServer* (*)() = BaseServer::createInstance).
+//
+// So I added a call to set_current_server(this) in the constructor for
+// BaseServer so you can use stack-based servers and count on the singleton
+// reference calls like:
+//
+//     server().someServerFuntion(); 
+//
+// operating on the stack-based server. It also generates a runtime error 
+// if you call set_current_server(some_server) with a different server when
+// one is already set (whether via server() or otherwise), so the developer
+// knows there is a problem like the above example, so developers don't create
+// more than one server instance like above by accident.
+//
+// - Curtis Faith <curtis.m.faith@gmail.com>
+//
 BaseServer& server(BaseServer* (*)() = BaseServer::createInstance);
+void set_current_server(BaseServer* currentServer);
 
 inline AtomSpace& atomspace(void)
 {

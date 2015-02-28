@@ -13,14 +13,17 @@ PyMindAgent::PyMindAgent(CogServer& cs,
                          const std::string& _className) :
     Agent(cs)
 {
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure(); 
-    import_opencog__agent_finder();
     moduleName = _moduleName;
     className = _className;
-    // call out to our helper module written in cython
+
+    // NOTE: You need to call the import functions in each separate
+    // shared library that accesses Cython defined api. If you don't
+    // then you get a crash when you call an api function.
+    import_opencog__agent_finder();
+
+    // Call out to our helper module written in cython. NOTE: Cython api calls
+    // defined "with gil" can be called without grabbing the GIL manually.
     pyagent = instantiate_agent(moduleName, className, this);
-    PyGILState_Release(gstate); 
     if (pyagent == Py_None)
         throw RuntimeException(TRACE_INFO, "Error creating Python MindAgent");
 }
@@ -50,7 +53,7 @@ PyMindAgent::~PyMindAgent()
     // Maybe we can ask python if its been finalized?
     return;
 
-    // decrement python object reference counter
+    // Decrement python object reference counter
     PyGILState_STATE gstate = PyGILState_Ensure(); 
     Py_DECREF(pyagent);
     PyGILState_Release(gstate); 

@@ -141,6 +141,10 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
         size_t pos = 3;
         while (' ' == schema[pos]) pos++;
 
+        // Get a reference to the python evaluator. NOTE: We are
+        // passing in a reference to our atom space to invoke
+        // the safety checking to make sure the singleton instance
+        // is using the same atom space.
         PythonEval &applier = PythonEval::instance(as);
 
         Handle h = applier.apply(schema.substr(pos), args);

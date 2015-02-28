@@ -46,19 +46,6 @@ using namespace opencog;
 
 DECLARE_MODULE(PythonModule);
 
-static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
-{
-    PROJECT_BINARY_DIR"/opencog/cython", // bindings
-    PROJECT_SOURCE_DIR"/opencog/python", // opencog modules written in python
-    PROJECT_SOURCE_DIR"/tests/cython",   // for testing
-    DATADIR"/python",                    // install directory
-    #ifndef WIN32
-    "/usr/local/share/opencog/python",
-    "/usr/share/opencog/python",
-    #endif // !WIN32
-    NULL
-};
-
 // Factories
 
 Agent* PythonAgentFactory::create(CogServer& cs) const
@@ -92,11 +79,6 @@ PythonModule::~PythonModule()
     for (PythonAgentFactory* af : _agentFactories) delete af;
     for (PythonRequestFactory* rf : _requestFactories) delete rf;
 
-    // PyFinalize crashes unless we carefully restore stuff...
-    PyEval_AcquireLock();
-    PyThreadState_Swap(_mainstate);
-    PyErr_Clear();
-    Py_Finalize();
     already_loaded = false;
 }
 
@@ -123,55 +105,17 @@ void PythonModule::init()
 
     logger().info("[PythonModule] Initialising Python CogServer module.");
 
-    // Start up Python (this init method skips registering signal handlers)
-    if (not Py_IsInitialized())
-        Py_InitializeEx(0);
-    if (not PyEval_ThreadsInitialized()) {
-        PyEval_InitThreads();
-        // Without this, pyFinalize() crashes
-        _mainstate = PyThreadState_Get();
-        // Without this, pyshell hangs and does nothing.
-        PyEval_ReleaseLock();
+    // Make sure that Python has been properly initialized.
+    if (not Py_IsInitialized() || not PyEval_ThreadsInitialized()) {
+            throw opencog::RuntimeException(TRACE_INFO,
+                    "Python not initialized, missing global_python_init()");
     }
 
-    // Add our module directories to the Python interprator's path
-    const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
-
-    PyObject* sysPath = PySys_GetObject((char*)"path");
-
-    // Default paths for python modules
-    for (int i = 0; config_paths[i] != NULL; ++i) {
-        boost::filesystem::path modulePath(config_paths[i]);
-        if (boost::filesystem::exists(modulePath))
-            PyList_Append(sysPath, PyBytes_FromString(modulePath.string().c_str()));
-    }
-
-    // Add custom paths for python modules from the config file if available
-    if (config().has("PYTHON_EXTENSION_DIRS")) {
-        std::vector<std::string> pythonpaths;
-        // For debugging current path
-        tokenize(config()["PYTHON_EXTENSION_DIRS"], std::back_inserter(pythonpaths), ", ");
-        for (std::vector<std::string>::const_iterator it = pythonpaths.begin();
-             it != pythonpaths.end(); ++it) {
-            boost::filesystem::path modulePath(*it);
-            if (boost::filesystem::exists(modulePath)) {
-                PyList_Append(sysPath, PyBytes_FromString(modulePath.string().c_str()));
-            } else {
-                logger().warn("PythonEval::%s Could not find custom python extension directory: %s ",
-                               __FUNCTION__,
-                               (*it).c_str()
-                               );
-            }
-        }
-    }
-
-    // XXX FIXME this should get loaded from opencog.conf, right!?
-    if (import_opencog__agent_finder() == -1) {
-        PyErr_Print();
-        logger().error() << "[PythonModule] Failed to load helper python module";
-        return;
-    }
-    logger().debug("Python sys.path is: " + get_path_as_string());
+    // NOTE: Even though the Cython docs do not say that you need to call this
+    // more than once, you need to call the import functions in each separate
+    // shared library that accesses Cython defined api. If you don't then you
+    // get a crash when you call an api function. 
+    import_opencog__agent_finder();
 
     if (config().has("PYTHON_PRELOAD")) preloadModules();
     do_load_py_register();
