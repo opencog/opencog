@@ -35,7 +35,6 @@ class FuzzyPatternUTest : public CxxTest::TestSuite
 {
 	private:
 		PatternMatchEngine pme;
-		FuzzyPatternMatch fpm;
 		AtomSpace* as;
 
 		Handle hwn1;

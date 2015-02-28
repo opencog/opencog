@@ -12,6 +12,8 @@
 #include "BindLink.h"
 #include "PatternMatch.h"
 #include "PatternSCM.h"
+#include "FuzzyMatch/FuzzyPatternMatch.h"
+
 
 using namespace opencog;
 
@@ -80,6 +82,9 @@ void PatternSCM::init_in_module(void*)
 
 	// Mystery function
 	_binders.push_back(new PatternWrap(pln_bindlink, "cog-bind-pln"));
+
+   // Fuzzy matching.
+	_binders.push_back(new PatternWrap(find_approximate_match, "cog-fuzzy-match"));
 
 	// Validate the bindlink for syntax correctness
 	_binders.push_back(new PatternWrap(validate_bindlink, "cog-validate-bindlink"));

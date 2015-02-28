@@ -22,13 +22,13 @@ LINK_LIBRARIES (
 # Each test gets progressively more complex, and exercises
 # features that the later tests depend on.
 ADD_CXXTEST(PatternUTest)
-ADD_CXXTEST(FuzzyPatternUTest)
 ADD_CXXTEST(StackUTest)
 ADD_CXXTEST(BigPatternUTest)
 ADD_CXXTEST(BiggerPatternUTest)
 ADD_CXXTEST(LoopPatternUTest)
 ADD_CXXTEST(BooleanUTest)
 ADD_CXXTEST(Boolean2NotUTest)
+ADD_CXXTEST(FuzzyPatternUTest)
 
 # Its a *lot* easier to write scheme, than to write C++ code!
 IF (HAVE_GUILE)

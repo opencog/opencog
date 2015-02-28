@@ -25,22 +25,11 @@
 #define FUZZYPATTERNMATCH_H
 
 #include <opencog/atomspace/Handle.h>
-#include <opencog/query/PatternMatchEngine.h>
 
 namespace opencog
 {
-    /**
-     * Find hypergraphs that are structurally similar to the one in the query.
-     */
-    class FuzzyPatternMatch
-    {
-        public:
-            FuzzyPatternMatch();
-            HandleSeq find_approximate_matches(Handle hg);
-
-        private:
-            PatternMatchEngine pme;
-    };
-}
+    class AtomSpace;
+    Handle find_approximate_match(AtomSpace*, Handle);
+};
 
 #endif // FUZZYPATTERNMATCH_H
