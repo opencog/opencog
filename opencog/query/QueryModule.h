@@ -11,7 +11,6 @@
 #include <vector>
 #include <opencog/server/Module.h>
 #include <opencog/query/PatternSCM.h>
-#include <opencog/query/FuzzyMatch/FuzzyPatternSCM.h>
 
 namespace opencog {
 
@@ -19,7 +18,6 @@ class QueryModule : public Module
 {
 	private:
 		PatternSCM* _pat;
-		FuzzyPatternSCM* _fpat;
 	public:
 		QueryModule(CogServer&);
 		virtual ~QueryModule();
