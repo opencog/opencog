@@ -25,7 +25,6 @@ Then say:
 (use-modules (ice-9 readline))
 (activate-readline)
 (use-modules (opencog))
-(use-modules (opencog query))
 ```
 
 After this, you can create atoms "as usual" e.g.
@@ -52,4 +51,13 @@ Additional help by saying
 and more generally
 ```
 ,help
+```
+
+#List of modules
+The current list of modules that wrap C++ code includes:
+```
+(use-modules (opencog))
+(use-modules (opencog query))
+(use-modules (opencog nlp lg-dict))
+(use-modules (opencog nlp sureal))
 ```
