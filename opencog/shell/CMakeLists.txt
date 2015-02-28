@@ -16,6 +16,7 @@ TARGET_LINK_LIBRARIES(py-shell
 	server
 	atomspace
 	cogutil
+	PythonEval
 	${Boost_SYSTEM_LIBRARY}
 	${PYTHON_LIBRARIES}
 )

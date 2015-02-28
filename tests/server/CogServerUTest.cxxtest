@@ -130,7 +130,7 @@ public:
         // set cycle duration to a smaller value so that this test do not take too long.
         config().set("SERVER_CYCLE_DURATION", "10");  // in milliseconds
         Factory<MyAgent, Agent> factory;
-        CustomCogServer& cogserver = static_cast<CustomCogServer&>(server(CustomCogServer::createInstance)); 
+        CustomCogServer cogserver;
         cogserver.setTickBased(false);
         cogserver.setMaxCount(50);
         cogserver.registerAgent(MyAgent::info().id, &factory);
@@ -190,10 +190,16 @@ public:
         TS_ASSERT(aat[a[2]].size() == 13);
         TS_ASSERT(aat[a[3]].size() == 12);
         TS_ASSERT(aat[a[4]].size() == 10);
-    }
 
-    /* test custom server, like required by virtual agents (embodiment) */
-    void testCustomCogServer() {
+        // Destroy all the agents.
+        for (int i = 0; i < 5; ++i) {
+            cogserver.destroyAgent(a[i]);
+        }
+
+    } // testProcessAgents
+
+    /* test tick-based server */
+    void testTickBasedCogServer() {
         // Make it use external tick so that it does not call sleep inside serverLoop
         config().set("EXTERNAL_TICK_MODE", "true");
         CustomCogServer cogserver;

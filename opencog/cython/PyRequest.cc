@@ -15,15 +15,17 @@ PyRequest::PyRequest(CogServer& cs,
 {
     _cci = cci;
 
-    PyGILState_STATE gstate = PyGILState_Ensure(); 
-
-    import_opencog__agent_finder();
     _moduleName = moduleName;
     _className = className;
-    // call out to our helper module written in cython
-    _pyrequest = instantiate_request(moduleName, className, this);
 
-    PyGILState_Release(gstate); 
+    // NOTE: You need to call the import functions in each separate
+    // shared library that accesses Cython defined api. If you don't
+    // then you get a crash when you call an api function.
+    import_opencog__agent_finder();
+
+    // Call out to our helper module written in cython  NOTE: Cython api calls
+    // defined "with gil" can be called without grabbing the GIL manually.
+    _pyrequest = instantiate_request(moduleName, className, this);
 
     if (_pyrequest == Py_None)
         logger().error() << "Error creating python request "

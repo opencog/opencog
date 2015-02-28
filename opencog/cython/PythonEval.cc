@@ -1,8 +1,12 @@
 /*
  * @file opencog/cython/PythonEval.cc
- * @author Zhenhua Cai <czhedu@gmail.com> Ramin Barati <rekino@gmail.com>
+ * @author Zhenhua Cai <czhedu@gmail.com>
+ *         Ramin Barati <rekino@gmail.com>
  *         Keyvan Mir Mohammad Sadeghi <keyvan@opencog.org>
+ *         Curtis Faith <curtis.m.faith@gmail.com>
  * @date 2011-09-20
+ *
+ * @todo When can we remove the singleton instance?
  *
  * Reference:
  *   http://www.linuxjournal.com/article/3641?page=0,2
@@ -26,6 +30,7 @@
 
 #include <boost/filesystem/operations.hpp>
 
+#include <opencog/util/Config.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/misc.h>
@@ -34,7 +39,10 @@
 #include <opencog/server/CogServer.h>
 
 #include "PythonEval.h"
+
 #include "opencog/atomspace_api.h"
+#include "opencog/agent_finder_types.h"
+#include "opencog/agent_finder_api.h"
 
 using std::string;
 using std::vector;
@@ -44,59 +52,238 @@ using namespace opencog;
 //#define DPRINTF printf
 #define DPRINTF(...)
 
-PythonEval* PythonEval::singletonInstance = NULL;
 
-static void global_python_init()
+static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 {
-    static bool already_inited = false;
+    PROJECT_BINARY_DIR"/opencog/cython", // bindings
+    PROJECT_SOURCE_DIR"/opencog/python", // opencog modules written in python
+    PROJECT_SOURCE_DIR"/tests/cython",   // for testing
+    DATADIR"/python",                    // install directory
+    #ifndef WIN32
+    "/usr/local/share/opencog/python",
+    "/usr/share/opencog/python",
+    #endif // !WIN32
+    NULL
+};
 
-    // Avoid hard crash if already inited.
-    if (already_inited) return;
-    already_inited = true;
 
-    // Start up Python (this init method skips registering signal
-    // handlers)
-    if (not Py_IsInitialized())
-        Py_InitializeEx(0);
-    if (not PyEval_ThreadsInitialized()) {
-        PyEval_InitThreads();
-        // Without this, pyshell hangs and does nothing.
-        PyEval_ReleaseLock();
+PythonEval* PythonEval::singletonInstance = NULL;
+AtomSpace* PythonEval::singletonAtomSpace = NULL;
+
+const int NO_SIGNAL_HANDLERS = 0;
+
+static bool already_initialized = false;
+
+void opencog::global_python_initialize()
+{
+    logger().debug("[global_python_initialize] Start");
+
+    // Throw an exception if this is called more than once.
+    if (already_initialized) {
+        throw opencog::RuntimeException(TRACE_INFO,
+                "Python initializer global_python_init() called twice.");
     }
+
+    // Remember this initialization.
+    already_initialized = true;
+
+    // Start up Python. (InitThreads grabs GIL implicitly)
+    Py_InitializeEx(NO_SIGNAL_HANDLERS);
+    PyEval_InitThreads();
+
+    logger().debug("[global_python_initialize] Adding OpenCog sys.path "
+            "directories");
+
+    // Get starting "sys.path".
+    PyRun_SimpleString(
+                "import sys\n"
+                "import StringIO\n"
+                );
+    PyObject* pySysPath = PySys_GetObject((char*)"path");
+
+    // Add default OpenCog module directories to the Python interprator's path.
+    const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
+    for (int i = 0; config_paths[i] != NULL; ++i) {
+        boost::filesystem::path modulePath(config_paths[i]);
+        if (boost::filesystem::exists(modulePath)) {
+            const char* modulePathCString = modulePath.string().c_str();
+            PyObject* pyModulePath = PyBytes_FromString(modulePathCString);
+            PyList_Append(pySysPath, pyModulePath);
+            Py_DECREF(pyModulePath);
+        }
+    }
+
+    // Add custom paths for python modules from the config file.
+    if (config().has("PYTHON_EXTENSION_DIRS")) {
+        std::vector<std::string> pythonpaths;
+        // For debugging current path
+        tokenize(config()["PYTHON_EXTENSION_DIRS"], 
+                std::back_inserter(pythonpaths), ", ");
+        for (std::vector<std::string>::const_iterator it = pythonpaths.begin();
+             it != pythonpaths.end(); ++it) {
+            boost::filesystem::path modulePath(*it);
+            if (boost::filesystem::exists(modulePath)) {
+                const char* modulePathCString = modulePath.string().c_str();
+                PyObject* pyModulePath = PyBytes_FromString(modulePathCString);
+                PyList_Append(pySysPath, pyModulePath);
+                Py_DECREF(pyModulePath);
+            } else {
+                logger().warn("PythonEval::%s Could not find custom python"
+                        " extension directory: %s ",
+                        __FUNCTION__, (*it).c_str() );
+            }
+        }
+    }
+
+    // NOTE: Can't use get_path_as_string() yet because it is defined in a
+    // Cython api which we can't import unless the sys.path is correct. So
+    // we'll write it out before the imports below to aid in debugging.
+    if (logger().isDebugEnabled()) {
+        logger().debug("Python 'sys.path' after OpenCog config adds is:");
+        Py_ssize_t pathSize = PyList_Size(pySysPath);
+        for (int pathIndex = 0; pathIndex < pathSize; pathIndex++) {
+            PyObject* pySysPathLine = PyList_GetItem(pySysPath, pathIndex);
+            const char* sysPathCString = PyString_AsString(pySysPathLine);
+            logger().debug("    %2d > %s", pathIndex, sysPathCString);
+            // NOTE: PyList_GetItem returns borrowed reference so don't do this:
+            // Py_DECREF(pySysPathLine);
+        } 
+    }
+
+    // Initialize the auto-generated Cython api. Do this AFTER the python
+    // sys.path is updated so the imports can find the cython modules.
+    import_opencog__atomspace();
+    import_opencog__agent_finder();
+
+    // Now we can use get_path_as_string() to get 'sys.path'
+    logger().info("Python 'sys.path' after OpenCog config adds is: " +
+            get_path_as_string());
+
+    // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
+    // Py_DECREF(pySysPath);
+
+    // Release the GIL. Otherwise the Python shell hangs on startup.
+    PyEval_ReleaseLock();
+
+    logger().debug("[global_python_initialize] Finish");
 }
 
-void PythonEval::init(void)
+void opencog::global_python_finalize()
 {
-    static bool eval_already_inited = false;
+    logger().debug("[global_python_finalize] Start");
 
-    // Avoid hard crash if already inited.
-    if (eval_already_inited) return;
-    eval_already_inited = true;
+    // Cleanup Python. 
+    Py_Finalize();
 
-    global_python_init();
-    import_opencog__atomspace();
+    // No longer initialized.
+    already_initialized = false;
 
-    logger().info("PythonEval::%s Initialising python evaluator.",
-        __FUNCTION__);
+    logger().debug("[global_python_finalize] Finish");
+}
 
-    // Save a pointer to the main PyThreadState object
-    this->mainThreadState = PyThreadState_Get();
+PythonEval::PythonEval(AtomSpace* atomspace)
+{
+    // Check that this is the first and only PythonEval object.
+    if (singletonInstance) {
+        throw (RuntimeException(TRACE_INFO,
+                "Can't create more than one PythonEval singleton instance!"));
+    }
 
-    // Get a reference to the PyInterpreterState
-    this->mainInterpreterState = this->mainThreadState->interp;
+    // Initialize Python objects and imports.
+    this->initialize_python_objects_and_imports();
+}
+
+PythonEval::~PythonEval()
+{
+    logger().info("PythonEval::%s destructor", __FUNCTION__);
 
     // Grab the GIL
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
 
-    // Getting the __main__ module
-    this->pyRootModule = PyImport_AddModule("__main__");
-    PyModule_AddStringConstant(this->pyRootModule, "__file__", "");
+    // Decrement reference counts for instance Python object references.
+    Py_DECREF(this->pyGlobal);
+    Py_DECREF(this->pyLocal);
 
-    PyRun_SimpleString(
-                "import sys\n"
-                "import StringIO\n"
-                );
+    // NOTE: The following come from Python C api calls that return borrowed
+    // references. However, we have called Py_DECREF( x ) to promote them
+    // to full references so we can and must decrement them here.
+    Py_DECREF(this->pySysPath);
+    Py_DECREF(this->pyRootModule);
+
+    // Release the GIL. No Python API allowed beyond this point.
+    PyGILState_Release(gstate);
+}
+
+/**
+* Use a singleton instance to avoid initializing python interpreter twice.
+*/
+void PythonEval::create_singleton_instance(AtomSpace* atomspace)
+{
+    // Remember which atomspace is used for the singleton for
+    // later sanity checks.
+    singletonAtomSpace = atomspace;
+    
+    // Create the single instance of a PythonEval object.
+    singletonInstance = new PythonEval(atomspace);
+    singletonInstance->_atomspace = atomspace;
+}
+
+void PythonEval::delete_singleton_instance()
+{
+    // This should only be called once after having created one.
+    if (!singletonInstance) {
+        throw (RuntimeException(TRACE_INFO, 
+                "Null singletonInstance in delete_singleton_instance()"));
+    }
+
+    // Delete the singleton PythonEval instance.
+    delete singletonInstance;
+    singletonInstance = NULL;
+
+    // Clear the reference to the atomspace. We do not own it so we
+    // won't delete it.
+    singletonAtomSpace = NULL;
+}
+
+PythonEval& PythonEval::instance(AtomSpace* atomspace)
+{
+    // Make sure we have a singleton.
+    if (!singletonInstance) {
+        throw (RuntimeException(TRACE_INFO, 
+                "Null singletonInstance! Did you create a CogServer?"));
+    }
+
+    // Make sure the atom space is the same as the one in the singleton.
+    if (atomspace and singletonInstance->_atomspace != atomspace) {
+
+        // Someone is trying to initialize the Python interpreter on a
+        // different AtomSpace.  Because of the singleton design of the
+        // the CosgServer+AtomSpace, there is no easy way to support this...
+        throw RuntimeException(TRACE_INFO, "Trying to re-initialize"
+                " python interpreter with different AtomSpace ptr!");
+    }
+    return *singletonInstance;
+}
+
+void PythonEval::initialize_python_objects_and_imports(void)
+{
+    // Grab the GIL
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+ 
+    // Get sys.path and keep the reference, used in this->addSysPath()
+    // NOTE: We have to promote the reference here with Py_INCREF because
+    // PySys_GetObject returns a borrowed reference and we don't want it to
+    // go away behind the scenes.
+    this->pySysPath = PySys_GetObject((char*)"path");
+    Py_INCREF(this->pySysPath);
+
+    // Get the __main__ module. NOTE: As above, PyImport_AddModule returns 
+    // a borrowed reference so we must promote it with an increment.
+    this->pyRootModule = PyImport_AddModule("__main__");
+    Py_INCREF(this->pyRootModule);
+    PyModule_AddStringConstant(this->pyRootModule, "__file__", "");
 
     // Define the user function executer
     // XXX FIXME ... this should probably be defined in some py file
@@ -119,18 +306,17 @@ void PythonEval::init(void)
         "    assert(type(atom) == Atom)\n"
         "    return atom.h.value()\n\n");
 
-    // Add ATOMSPACE to __main__ module
-    PyDict_SetItem(PyModule_GetDict(this->pyRootModule),
-                   PyBytes_FromString("ATOMSPACE"),
-                   this->getPyAtomspace());
-
+    // Add ATOMSPACE to __main__ module.
+    PyObject* pyRootDictionary = PyModule_GetDict(this->pyRootModule);
+    PyObject* pyAtomSpaceObject = this->getPyAtomspace();
+    PyDict_SetItemString(pyRootDictionary, "ATOMSPACE", pyAtomSpaceObject);
+    Py_DECREF(pyRootDictionary);
+    Py_DECREF(pyAtomSpaceObject);
+    
     // These are needed for calling Python/C API functions, define 
-    // them once and for all
-    pyGlobal = PyDict_New();
-    pyLocal = PyDict_New();
-
-    // Getting sys.path and keeping the reference, used in this->addSysPath()
-    pySysPath = PySys_GetObject((char*)"path");
+    // them once here so we can reuse them.
+    this->pyGlobal = PyDict_New();
+    this->pyLocal = PyDict_New();
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
@@ -141,7 +327,6 @@ void PythonEval::init(void)
 
 PyObject* PythonEval::getPyAtomspace(AtomSpace* atomspace)
 {
-    init();
     PyObject * pyAtomSpace;
 
     if (atomspace)
@@ -149,10 +334,7 @@ PyObject* PythonEval::getPyAtomspace(AtomSpace* atomspace)
     else
         pyAtomSpace = py_atomspace(this->_atomspace);
 
-    if (pyAtomSpace != NULL)
-        logger().debug("PythonEval::%s Get atomspace wrapped with python object",
-                       __FUNCTION__);
-    else {
+    if (!pyAtomSpace) {
         if (PyErr_Occurred())
             PyErr_Print();
 
@@ -187,43 +369,6 @@ void PythonEval::printDict(PyObject* obj)
     Py_DECREF(pyKeys);
 }
 
-PythonEval::~PythonEval()
-{
-    logger().info("PythonEval::%s destructor", __FUNCTION__);
-
-    // Decrement reference counts for the instance Python object references.
-    Py_DECREF(pyRootModule);
-    Py_DECREF(pyGlobal);
-    Py_DECREF(pyLocal);
-    Py_DECREF(pySysPath);
-
-    // Cleanup Python. 
-    Py_Finalize();
-}
-
-/**
-* Use a singleton instance to avoid initializing python interpreter
-* twice.
-*/
-PythonEval& PythonEval::instance(AtomSpace* atomspace)
-{
-    if (!singletonInstance)
-    {
-        if (!atomspace)
-            throw (RuntimeException(TRACE_INFO, "Null Atomspace!"));
-        singletonInstance = new PythonEval(atomspace);
-    }
-    else if (atomspace and singletonInstance->_atomspace != atomspace)
-    {
-        // Someone is trying to initialize the Python interpreter on a
-        // different AtomSpace.  Because of the singleton design of the
-        // the CosgServer+AtomSpace, there is no easy way to support this...
-        throw RuntimeException(TRACE_INFO, "Trying to re-initialize"
-                " python interpreter with different AtomSpace ptr!");
-    }
-    return *singletonInstance;
-}
-
 Handle PythonEval::apply(const std::string& func, Handle varargs)
 {
     PyObject *pyError, *pyModule, *pyFunc, *pyExecFunc;
@@ -234,8 +379,6 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     bool errorCallingFunction;
     string errorString;
     UUID uuid = 0;
-
-    init();
 
     // Get the correct module and extract the function name.
     int index = func.find_first_of('.');
@@ -268,7 +411,8 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     if (!pyFunc)
     {
         PyGILState_Release(gstate);
-        throw (RuntimeException(TRACE_INFO, "Python function '%s' not found!", funcName.c_str()));
+        throw (RuntimeException(TRACE_INFO, "Python function '%s' not found!",
+                funcName.c_str()));
     }
         
     // Make sure the function is callable.
@@ -343,8 +487,6 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
 
 std::string PythonEval::apply_script(const std::string& script)
 {
-    init();
-
     PyObject* pyError = NULL;
     PyObject *pyCatcher = NULL;
     PyObject *pyOutput = NULL;
@@ -368,13 +510,15 @@ std::string PythonEval::apply_script(const std::string& script)
     pyError = PyErr_Occurred();
     if (!pyError)
     {
-        // Script succeeded, get the output stream as a string so we can return it.
+        // Script succeeded, get the output stream as a string
+        // so we can return it.
         errorCallingFunction = false;
-        pyCatcher = PyObject_GetAttrString(this->pyRootModule,"_opencog_output_stream");
+        pyCatcher = PyObject_GetAttrString(this->pyRootModule,
+                "_opencog_output_stream");
         pyOutput = PyObject_CallMethod(pyCatcher, (char*)"getvalue", NULL);
         result = PyBytes_AsString(pyOutput);
 
-        // Cleanup the reference counts for Python objects we no longer reference.
+        // Cleanup reference counts for Python objects we no longer reference.
         Py_DECREF(pyCatcher);
         Py_DECREF(pyOutput);
     }
@@ -382,11 +526,14 @@ std::string PythonEval::apply_script(const std::string& script)
     {
         // Remember the error and get the error string for the throw below.
         errorCallingFunction = true;
-        errorString = PyBytes_AsString(PyObject_GetAttrString(pyError, "message"));
+        PyObject* pyErrorString = PyObject_GetAttrString(pyError, "message");
+        errorString = PyBytes_AsString(pyErrorString);
         PyErr_Print();
 
-        // Cleanup the reference count for the pyError Python object.
+        // Cleanup the reference count for the Python objects.
         Py_DECREF(pyError);
+        Py_DECREF(pyErrorString);
+
      }
 
     // Close the output stream.
@@ -397,11 +544,13 @@ std::string PythonEval::apply_script(const std::string& script)
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
 
-    // If there was an error throw an exception so the user knows script had a problem.
+    // If there was an error throw an exception so the user knows the
+    // script had a problem.
     if (errorCallingFunction)
     {
         logger().error() << errorString;
-        throw (RuntimeException(TRACE_INFO, "Python error: %s", errorString.c_str()));
+        throw (RuntimeException(TRACE_INFO, "Python error: %s",
+                errorString.c_str()));
     }
 
     // printf("Python says that: %s\n", result.c_str());
@@ -410,26 +559,24 @@ std::string PythonEval::apply_script(const std::string& script)
 
 void PythonEval::addSysPath(std::string path)
 {
-    init();
-
     PyList_Append(this->pySysPath, PyBytes_FromString(path.c_str()));
     //    PyRun_SimpleString(("sys.path += ['" + path + "']").c_str());
 }
 
 /**
-* Add all the .py files in the given directory as modules to __main__ and keeping the refrences
-* in a dictionary (this->modules)
+* Add all the .py files in the given directory as modules to __main__ and
+* keep the references in a dictionary (this->modules)
 */
 void PythonEval::add_module_directory(const boost::filesystem::path &p)
 {
-    init();
-
     vector<boost::filesystem::path> files;
     vector<boost::filesystem::path> pyFiles;
 
-    copy(boost::filesystem::directory_iterator(p), boost::filesystem::directory_iterator(), back_inserter(files));
+    copy(boost::filesystem::directory_iterator(p),
+            boost::filesystem::directory_iterator(), back_inserter(files));
 
-    for(vector<boost::filesystem::path>::const_iterator it(files.begin()); it != files.end(); ++it){
+    for(vector<boost::filesystem::path>::const_iterator it(files.begin());
+            it != files.end(); ++it) {
         if(it->extension() == boost::filesystem::path(".py"))
             pyFiles.push_back(*it);
     }
@@ -439,33 +586,35 @@ void PythonEval::add_module_directory(const boost::filesystem::path &p)
     string name;
     PyObject* mod;
     PyObject* pyList = PyList_New(0);
-    for(vector<boost::filesystem::path>::const_iterator it(pyFiles.begin()); it != pyFiles.end(); ++it){
+    for(vector<boost::filesystem::path>::const_iterator it(pyFiles.begin());
+            it != pyFiles.end(); ++it) {
         name = it->filename().c_str();
         name = name.substr(0, name.length()-3);
-        mod = PyImport_ImportModuleLevel((char *)name.c_str(), pyGlobal, pyLocal, pyList, 0);
+        mod = PyImport_ImportModuleLevel((char *)name.c_str(), this->pyGlobal,
+                this->pyLocal, pyList, 0);
 
         if(mod){
-            PyDict_SetItem(PyModule_GetDict(mod), PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
+            PyDict_SetItem(PyModule_GetDict(mod),
+                PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
             PyModule_AddObject(this->pyRootModule, name.c_str(), mod);
             this->modules[name] = mod;
         }
         else{
             if(PyErr_Occurred())
                 PyErr_Print();
-            logger().warn() << "Couldn't import " << name << " module from folder " << p.c_str();
+            logger().warn() << "Couldn't import " << name << 
+                    " module from folder " << p.c_str();
         }
     }
     Py_DECREF(pyList);
 }
 
 /**
-* Add the .py file in the given path as a module to __main__ and keeping the refrences
-* in a dictionary (this->modules)
+* Add the .py file in the given path as a module to __main__ and keep the
+* references in a dictionary (this->modules)
 */
 void PythonEval::add_module_file(const boost::filesystem::path &p)
 {
-    init();
-
     this->addSysPath(p.parent_path().c_str());
 
     string name;
@@ -474,11 +623,14 @@ void PythonEval::add_module_file(const boost::filesystem::path &p)
 
     name = p.filename().c_str();
     name = name.substr(0, name.length()-3);
-    mod = PyImport_ImportModuleLevel((char *)name.c_str(), pyGlobal, pyLocal, pyList, 0);
+    mod = PyImport_ImportModuleLevel((char *)name.c_str(), this->pyGlobal,
+            this->pyLocal, pyList, 0);
 
-    PyDict_SetItem(PyModule_GetDict(mod), PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
+    PyDict_SetItem(PyModule_GetDict(mod), PyBytes_FromString("ATOMSPACE"),
+            this->getPyAtomspace());
     if(mod){
-        PyDict_SetItem(PyModule_GetDict(mod), PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
+        PyDict_SetItem(PyModule_GetDict(mod), PyBytes_FromString("ATOMSPACE"),
+                this->getPyAtomspace());
         PyModule_AddObject(this->pyRootModule, name.c_str(), mod);
         this->modules[name] = mod;
     }
@@ -491,7 +643,8 @@ void PythonEval::add_module_file(const boost::filesystem::path &p)
 }
 
 /**
-* Get a path from the user and call the coresponding function for directories and files
+* Get a path from the user and call the corresponding function for
+* directories and files
 */
 void PythonEval::addModuleFromPath(std::string path)
 {
@@ -511,8 +664,6 @@ void PythonEval::addModuleFromPath(std::string path)
 
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
-    init();
-
     _result = "";
     if (partial_expr == "\n")
     {

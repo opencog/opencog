@@ -106,12 +106,35 @@ CogServer::~CogServer()
         }
     }
 
+    // Delete the singleton instance of the PythonEval.
+    PythonEval::delete_singleton_instance();
+
+    // Cleanup Python.
+    global_python_finalize();
+
+    // Clear the system activity table here because it relies on the 
+    // atom table's existence.
+    _systemActivityTable.clearActivity();
+
+    // Delete the static atomSpace instance (defined in BaseServer.h)
+    if (atomSpace) {
+        delete atomSpace;
+        atomSpace = NULL;
+    }
+
     logger().debug("[CogServer] exit destructor");
 }
 
 CogServer::CogServer() : cycleCount(1)
 {
-    if (atomSpace) delete atomSpace;  // global static, declared in BaseServer.
+    // We shouldn't get called with a non-NULL atomSpace static global as
+    // that's indicative of a missing call to CogServer::~CogServer.
+    if (atomSpace) {
+        throw (RuntimeException(TRACE_INFO,
+                "Found non-NULL atomSpace. CogServer::~CogServer not called!"));
+    }
+
+    // Create the new atomspace.
     atomSpace = new AtomSpace();
 #ifdef HAVE_GUILE
     // Tell scheme which atomspace to use.
@@ -119,8 +142,12 @@ CogServer::CogServer() : cycleCount(1)
     delete se;
 #endif // HAVE_GUILE
 #ifdef HAVE_CYTHON
-    // Tell python which atomspace to use.
-    PythonEval::instance(atomSpace);
+    // Initialize Python.
+    global_python_initialize();
+
+    // Tell the python evaluator to create its singleton instance
+    // with our atomspace.
+    PythonEval::create_singleton_instance(atomSpace);
 #endif // HAVE_CYTHON
 
     _systemActivityTable.init(this);
