@@ -375,9 +375,9 @@ void PythonEval::printDict(PyObject* obj)
 
 Handle PythonEval::apply(const std::string& func, Handle varargs)
 {
-    PyObject *pyError, *pyModule, *pyFunc, *pyExecFunc;
-    PyObject *pyArgs, *pyUUID, *pyValue = NULL;
-    PyObject *pyErrorMessage, *pyDict, *pyBytes;
+    PyObject *pyError, *pyModule, *pyUserFunc, *pyExecuteUserFunc;
+    PyObject *pyArgs, *pyUUID, *pyReturnValue = NULL;
+    PyObject *pyErrorMessage, *pyDict;
     string moduleName;
     string funcName;
     bool errorCallingFunction;
@@ -401,30 +401,29 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
 
-    // Get a reference to the function. NOTE: We have to call the functions
-    // which return Python separately so we can save the references
-    // and decrement the reference counts or they' won't get cleaned up. We
-    // decrement them right here to cleanup in case of an error.
+    // Get a reference to the user function.
     pyDict = PyModule_GetDict(pyModule);
-    pyBytes = PyBytes_FromString(funcName.c_str());
-    pyFunc = PyDict_GetItem(pyDict, pyBytes);
-    Py_DECREF(pyBytes);
+    pyUserFunc = PyDict_GetItemString(pyDict, funcName.c_str());
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
     // Py_DECREF(pyDict);
 
     // If we can't find that function then throw an exception.
-    if (!pyFunc)
+    if (!pyUserFunc)
     {
         PyGILState_Release(gstate);
         throw (RuntimeException(TRACE_INFO, "Python function '%s' not found!",
                 funcName.c_str()));
     }
         
+    // Promote the borrowed reference for pyUserFunc since it will
+    // be passed to a Python C API function later that "steals" it.
+    Py_INCREF(pyUserFunc);
+
     // Make sure the function is callable.
-    if (!PyCallable_Check(pyFunc))
+    if (!PyCallable_Check(pyUserFunc))
     {
-        Py_DECREF(pyFunc);
+        Py_DECREF(pyUserFunc);
         PyGILState_Release(gstate);
         logger().error() << "Member " << func << " is not callable.";
         return Handle::UNDEFINED;
@@ -432,25 +431,28 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
 
     // Get a reference to our executer function. NOTE: Same as above,
     // we must get separate references for later decrement of the
-    // Python reference counts.
+    // Python reference counts and promotion of borrowed references.
     pyDict = PyModule_GetDict(this->pyRootModule);
-    pyBytes = PyBytes_FromString("execute_user_defined_function");
-    pyExecFunc = PyDict_GetItem(pyDict, pyBytes);
-    Py_DECREF(pyBytes);
-    OC_ASSERT(pyExecFunc != NULL);
+    pyExecuteUserFunc = PyDict_GetItemString(pyDict,
+            "execute_user_defined_function");
+    OC_ASSERT(pyExecuteUserFunc != NULL);
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
     // Py_DECREF(pyDict);
+
+    // Promote the pyExecuteUserFunc reference since it is only borrowed
+    // and we don't want it to go away behind the scenes.
+    Py_INCREF(pyExecuteUserFunc);
 
     // Create the argument list.
     pyArgs = PyTuple_New(2);
     pyUUID = PyLong_FromLong(varargs.value());
     OC_ASSERT(pyUUID != NULL);
-    PyTuple_SetItem(pyArgs, 0, pyFunc);
+    PyTuple_SetItem(pyArgs, 0, pyUserFunc);
     PyTuple_SetItem(pyArgs, 1, pyUUID);
 
-    // Call the executer function and store its return value.
-    pyValue = PyObject_CallObject(pyExecFunc, pyArgs);
+    // Execute the user function and store its return value.
+    pyReturnValue = PyObject_CallObject(pyExecuteUserFunc, pyArgs);
 
     // Check for errors.
     pyError = PyErr_Occurred();
@@ -458,7 +460,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     {
         // Success - get the return value.
         errorCallingFunction = false;
-        uuid = static_cast<unsigned long>(PyLong_AsLong(pyValue));
+        uuid = static_cast<unsigned long>(PyLong_AsLong(pyReturnValue));
     }
     else
     {
@@ -474,11 +476,17 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     }
     
     // Cleanup the reference counts for Python objects we no longer reference.
-    Py_DECREF(pyFunc);
-    Py_DECREF(pyExecFunc);
+    // Since we promoted the borrowed pyExecuteUserFunc reference, we need to
+    // decrement it here.
+    Py_DECREF(pyExecuteUserFunc);
     Py_DECREF(pyArgs);
-    Py_DECREF(pyUUID);
-    Py_DECREF(pyValue);
+    Py_DECREF(pyReturnValue);
+
+    // NOTE: PyTuple_SetItem "steals" the reference to the object that
+    // is set for the list item. That means that the list assumes it
+    // owns the references after the call. So don't do this:
+    // Py_DECREF(pyUserFunc);
+    // Py_DECREF(pyUUID);
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
