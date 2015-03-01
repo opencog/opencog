@@ -8,7 +8,7 @@
 ;
 ;--------------------------------------------------------------
 ; The scheme shell listen port.
-(define shell-port 18001)
+(define shell-port 17003)
 ; A plain simple prompt
 ; (define shell-prompt "opencog-scheme> ")
 ; An ANSI-terminal colorized prompt!  This one is blue.
