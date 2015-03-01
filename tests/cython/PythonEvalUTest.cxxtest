@@ -108,12 +108,16 @@ public:
                     );
         pySysPath = PySys_GetObject((char*)"path");
 
-        Py_ssize_t pathSize = PyList_Size(pySysPath);
-        for (int pathIndex = 0; pathIndex < pathSize; pathIndex++) {
-            PyObject* pySysPathLine = PyList_GetItem(pySysPath, pathIndex);
-            logger().info("        %2d > %s", pathIndex, PyString_AsString(pySysPathLine));
-            // NOTE: PyList_GetItem returns a borrowed reference so don't do this:
-            // Py_DECREF(pySysPathLine);
+        if (logger().isDebugEnabled()) {
+            logger().debug("    Python 'sys.path' after OpenCog config adds is:");
+            Py_ssize_t pathSize = PyList_Size(pySysPath);
+            for (int pathIndex = 0; pathIndex < pathSize; pathIndex++) {
+                PyObject* pySysPathLine = PyList_GetItem(pySysPath, pathIndex);
+                const char* sysPathCString = PyString_AsString(pySysPathLine);
+                logger().debug("        %2d > %s", pathIndex, sysPathCString);
+                // NOTE: PyList_GetItem returns borrowed reference so don't do this:
+                // Py_DECREF(pySysPathLine);
+            } 
         }
 
         // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
@@ -141,24 +145,24 @@ public:
         logger().debug("[PythonEvalUTest] testRawPythonInitializeWithGetSys() DONE");
     }
 
-    void testCogServerPythonInitialization() {
+    void testGlobalPythonInitializationFinalization() {
 
-        logger().debug("[PythonEvalUTest] testCogServerPythonInitialization()");
-
-         // Initialize and finalize Python.
-        global_python_initialize();
-        global_python_finalize();
+        logger().debug("[PythonEvalUTest] testGlobalPythonInitializationFinalization()");
 
          // Initialize and finalize Python.
         global_python_initialize();
         global_python_finalize();
 
-        logger().debug("[PythonEvalUTest] testCogServerPythonInitialization() DONE");
+         // Initialize and finalize Python.
+        global_python_initialize();
+        global_python_finalize();
+
+        logger().debug("[PythonEvalUTest] testGlobalPythonInitializationFinalization() DONE");
     }
 
-    void testPythonEvalScript() {
+    void testPythonEvalSingletonCreationDeletion() {
 
-        logger().debug("[PythonEvalUTest] testPythonEvalScript()");
+        logger().debug("[PythonEvalUTest] testPythonEvalSingletonCreationDeletion()");
 
         AtomSpace* atomSpace = NULL;
 
@@ -221,7 +225,37 @@ public:
         // Cleanup Python.
         global_python_finalize();
 
-        logger().debug("[PythonEvalUTest] testPythonEvalScript() DONE");
+        logger().debug("[PythonEvalUTest] testPythonEvalSingletonCreationDeletion() DONE");
+    }
+
+    void testPythonEvalEvalExpr() {
+
+        logger().debug("[PythonEvalUTest] testPythonEvalEvalExpr()");
+
+        AtomSpace* atomSpace = NULL;
+
+        // Initialize Python.
+        global_python_initialize();
+
+        // Create an atomspace and singleton instance to use it.
+        atomSpace = new AtomSpace();
+        PythonEval::create_singleton_instance(atomSpace);
+        PythonEval* evaluator = &PythonEval::instance();
+
+        // Check that our atom space global is visible and can add a node.
+        evaluator->eval_expr("from opencog.atomspace import *");
+        evaluator->eval_expr("ATOMSPACE.add_node(types.ConceptNode,'test')");
+        evaluator->eval_expr("print 'Total atoms = ', ATOMSPACE.size(), '\n'");
+
+        // Delete the singleton instance and atomspace.
+        PythonEval::delete_singleton_instance();
+        delete atomSpace;
+        atomSpace = NULL;
+
+        // Cleanup Python.
+        global_python_finalize();
+
+        logger().debug("[PythonEvalUTest] testPythonEvalEvalExpr() DONE");
     }
 
 };
