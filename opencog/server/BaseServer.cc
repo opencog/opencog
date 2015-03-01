@@ -87,7 +87,9 @@ void opencog::set_current_server(BaseServer* currentServer)
         return;
 
     // Should not call this on more than one server at a time.
-    if (serverInstance && currentServer != serverInstance) {
+    if (serverInstance &&
+        currentServer != serverInstance &&
+        currentServer != NULL ) {
         throw (RuntimeException(TRACE_INFO,
                 "Can't create more than one server singleton instance!"));
     }
