@@ -2,7 +2,7 @@
 opencog.log
 opencog-python.log
 .vagrant
-
+storage/
 # misc binaries
 bin
 bin-debug
