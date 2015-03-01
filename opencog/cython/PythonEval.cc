@@ -189,6 +189,9 @@ PythonEval::PythonEval(AtomSpace* atomspace)
                 "Can't create more than one PythonEval singleton instance!"));
     }
 
+    // Remember our atomspace.
+    _atomspace = atomspace;
+
     // Initialize Python objects and imports.
     this->initialize_python_objects_and_imports();
 }
@@ -226,7 +229,6 @@ void PythonEval::create_singleton_instance(AtomSpace* atomspace)
     
     // Create the single instance of a PythonEval object.
     singletonInstance = new PythonEval(atomspace);
-    singletonInstance->_atomspace = atomspace;
 }
 
 void PythonEval::delete_singleton_instance()
@@ -310,8 +312,10 @@ void PythonEval::initialize_python_objects_and_imports(void)
     PyObject* pyRootDictionary = PyModule_GetDict(this->pyRootModule);
     PyObject* pyAtomSpaceObject = this->getPyAtomspace();
     PyDict_SetItemString(pyRootDictionary, "ATOMSPACE", pyAtomSpaceObject);
-    Py_DECREF(pyRootDictionary);
     Py_DECREF(pyAtomSpaceObject);
+
+    // PyModule_GetDict returns a borrowed reference, so don't do this:
+    // Py_DECREF(pyRootDictionary);
     
     // These are needed for calling Python/C API functions, define 
     // them once here so we can reuse them.
@@ -404,8 +408,10 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     pyDict = PyModule_GetDict(pyModule);
     pyBytes = PyBytes_FromString(funcName.c_str());
     pyFunc = PyDict_GetItem(pyDict, pyBytes);
-    Py_DECREF(pyDict);
     Py_DECREF(pyBytes);
+
+    // PyModule_GetDict returns a borrowed reference, so don't do this:
+    // Py_DECREF(pyDict);
 
     // If we can't find that function then throw an exception.
     if (!pyFunc)
@@ -430,9 +436,11 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     pyDict = PyModule_GetDict(this->pyRootModule);
     pyBytes = PyBytes_FromString("execute_user_defined_function");
     pyExecFunc = PyDict_GetItem(pyDict, pyBytes);
-    Py_DECREF(pyDict);
     Py_DECREF(pyBytes);
     OC_ASSERT(pyExecFunc != NULL);
+
+    // PyModule_GetDict returns a borrowed reference, so don't do this:
+    // Py_DECREF(pyDict);
 
     // Create the argument list.
     pyArgs = PyTuple_New(2);
