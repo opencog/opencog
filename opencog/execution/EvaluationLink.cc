@@ -160,11 +160,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args
         while (' ' == schema[pos]) pos++;
 
         SchemeEval* applier = get_evaluator(as);
-        std::string rc = applier->apply_generic(schema.substr(pos), args);
-
-        // If its false or nil, then false; everything else is true.
-        if (rc.compare("#f") or rc.compare("()")) return TruthValue::FALSE_TV();
-        return TruthValue::TRUE_TV();
+        return applier->apply_tv(schema.substr(pos), args);
 #else
         throw RuntimeException(TRACE_INFO, "Cannot evaluate scheme GroundedPredicateNode!");
 #endif /* HAVE_GUILE */

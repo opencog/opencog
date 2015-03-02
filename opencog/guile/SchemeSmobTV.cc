@@ -193,6 +193,21 @@ std::string SchemeSmob::tv_to_string(const TruthValue *tv)
 
 /* ============================================================== */
 /**
+ * Return a fresh copy of truth value.
+ */
+TruthValuePtr SchemeSmob::to_tv(SCM s)
+{
+	TruthValue *tv = verify_tv(s, "to_tv, called by apply");
+
+	// the memory for the TV is managed internally, by guile. So
+	// we have to clone the TV, and hand the clone to the user.
+	TruthValuePtr tvp = tv->clone();
+	scm_remember_upto_here_1(s);
+	return tvp;
+}
+
+/* ============================================================== */
+/**
  * Take over memory management of a truth value
  */
 SCM SchemeSmob::take_tv (TruthValue *tv)

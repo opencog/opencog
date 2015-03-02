@@ -859,27 +859,21 @@ void * SchemeEval::c_wrap_apply(void * p)
 
 /* ============================================================== */
 /**
- * apply_generic -- apply named function func to arguments in ListLink
+ * apply_tv -- apply named function func to arguments in ListLink.
+ * Return an OpenCog TruthValuePtr.
  * It is assumed that varargs is a ListLink, containing a list of
  * atom handles. This list is unpacked, and then the fuction func
- * is applied to them. The function is presumed to return some generic
- * scheme code, which is converted to a string and returned.
- *
- * XXX This seems awfully hacky to me -- is this really a good idea?
- * Isn't there some other, better way of accomplishing this?  My
- * gut instinct is the say "this should be reviewed and possibly
- * deprecated/removed". XXX
- *
- * XXX Yes, this should be replaced by ExecutionOutputLink
+ * is applied to them. The function is presumed to return pointer
+ * to a TruthValue object.
  */
-std::string SchemeEval::apply_generic(const std::string &func, Handle& varargs)
+TruthValuePtr SchemeEval::apply_tv(const std::string &func, Handle varargs)
 {
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
 	// Just go.
 	if (_in_eval) {
-		SCM genericAnswer = do_apply_scm(func, varargs);
-		return SchemeSmob::to_string(genericAnswer);
+		SCM tv_smob = do_apply_scm(func, varargs);
+		return SchemeSmob::to_tv(tv_smob);
 	}
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
@@ -889,21 +883,25 @@ std::string SchemeEval::apply_generic(const std::string &func, Handle& varargs)
 	pexpr = &func;
 	hargs = varargs;
 	_in_eval = true;
-	scm_with_guile(c_wrap_apply_scm, this);
+	scm_with_guile(c_wrap_apply_tv, this);
 	_in_eval = false;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-	return answer;
+	// We do not want this->tvp to point at anything after we return.
+	// This is so that we do not hold a long-term reference to the TV.
+	TruthValuePtr rtv;
+	swap(rtv, tvp);
+	return rtv;
 }
 
-void * SchemeEval::c_wrap_apply_scm(void * p)
+void * SchemeEval::c_wrap_apply_tv(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
-	SCM genericAnswer = self->do_apply_scm(*self->pexpr, self->hargs);
-	self->answer = SchemeSmob::to_string(genericAnswer);
+	SCM tv_smob = self->do_apply_scm(*self->pexpr, self->hargs);
+	self->tvp = SchemeSmob::to_tv(tv_smob);
 	return self;
 }
 
