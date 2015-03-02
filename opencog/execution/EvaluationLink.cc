@@ -162,7 +162,8 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args
         SchemeEval* applier = get_evaluator(as);
         return applier->apply_tv(schema.substr(pos), args);
 #else
-        throw RuntimeException(TRACE_INFO, "Cannot evaluate scheme GroundedPredicateNode!");
+        throw RuntimeException(TRACE_INFO,
+             "Cannot evaluate scheme GroundedPredicateNode!");
 #endif /* HAVE_GUILE */
     }
 
@@ -176,15 +177,14 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args
         PythonEval &applier = PythonEval::instance();
         // std::string rc = applier.apply(schema.substr(pos), args);
         // if (rc.compare("None") or rc.compare("False")) return false;
-        Handle h = applier.apply(schema.substr(pos), args);
-        if (h == Handle::UNDEFINED) return TruthValue::FALSE_TV();
-
-        return h->getTruthValue();
+        return applier.apply_tv(schema.substr(pos), args);
 #else
-        throw RuntimeException(TRACE_INFO, "Cannot evaluate python GroundedPredicateNode!");
+        throw RuntimeException(TRACE_INFO,
+             "Cannot evaluate python GroundedPredicateNode!");
 #endif /* HAVE_CYTHON */
     }
 
     // Unkown proceedure type.
-    throw RuntimeException(TRACE_INFO, "Cannot evaluate unknown GroundedPredicateNode!");
+    throw RuntimeException(TRACE_INFO,
+        "Cannot evaluate unknown GroundedPredicateNode!");
 }

@@ -491,14 +491,19 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
 
-    // Return UNDEFINED on error.
+    // Throw on error.
     if (errorCallingFunction)
-    {
-        logger().error() << errorString;
-        return Handle::UNDEFINED;
-    }
+        throw RuntimeException(TRACE_INFO, errorString.c_str());
 
     return Handle(uuid);
+}
+
+// Should be exactly like above, except that it returns a TV, not a
+// handle.
+TruthValuePtr PythonEval::apply_tv(const std::string& func, Handle varargs)
+{
+	throw RuntimeException(TRACE_INFO, "Not yet implmeneted!");
+	return TruthValue::NULL_TV();
 }
 
 std::string PythonEval::apply_script(const std::string& script)
