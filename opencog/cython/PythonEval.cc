@@ -115,11 +115,11 @@ void opencog::global_python_initialize()
 
     // Add custom paths for python modules from the config file.
     if (config().has("PYTHON_EXTENSION_DIRS")) {
-        std::vector<std::string> pythonpaths;
+        std::vector<string> pythonpaths;
         // For debugging current path
         tokenize(config()["PYTHON_EXTENSION_DIRS"], 
                 std::back_inserter(pythonpaths), ", ");
-        for (std::vector<std::string>::const_iterator it = pythonpaths.begin();
+        for (std::vector<string>::const_iterator it = pythonpaths.begin();
              it != pythonpaths.end(); ++it) {
             boost::filesystem::path modulePath(*it);
             if (boost::filesystem::exists(modulePath)) {
@@ -194,6 +194,12 @@ PythonEval::PythonEval(AtomSpace* atomspace)
 
     // Initialize Python objects and imports.
     this->initialize_python_objects_and_imports();
+
+    // Add the preload functions
+    if (config().has("PYTHON_PRELOAD_FUNCTIONS")) {
+        string preloadDirectory = config()["PYTHON_PRELOAD_FUNCTIONS"];
+        this->addModuleFromPath(preloadDirectory);
+    }
 }
 
 PythonEval::~PythonEval()
@@ -579,50 +585,87 @@ void PythonEval::addSysPath(std::string path)
     //    PyRun_SimpleString(("sys.path += ['" + path + "']").c_str());
 }
 
+
+const int ABSOLUTE_IMPORTS_ONLY = 0;
+
 /**
 * Add all the .py files in the given directory as modules to __main__ and
 * keep the references in a dictionary (this->modules)
 */
-void PythonEval::add_module_directory(const boost::filesystem::path &p)
+void PythonEval::add_module_directory(const boost::filesystem::path &directory)
 {
     vector<boost::filesystem::path> files;
     vector<boost::filesystem::path> pyFiles;
+    string fileName, moduleName;
 
-    copy(boost::filesystem::directory_iterator(p),
+    // Loop over the files in the directory looking for Python files.
+    copy(boost::filesystem::directory_iterator(directory),
             boost::filesystem::directory_iterator(), back_inserter(files));
-
     for(vector<boost::filesystem::path>::const_iterator it(files.begin());
             it != files.end(); ++it) {
         if(it->extension() == boost::filesystem::path(".py"))
             pyFiles.push_back(*it);
     }
 
-    this->addSysPath(p.c_str());
+    // Add the directory we are adding to Python's sys.path
+    this->addSysPath(directory.c_str());
 
-    string name;
-    PyObject* mod;
-    PyObject* pyList = PyList_New(0);
+    // The pyFromList variable corresponds to what would appear in an
+    // import statement after the import:
+    //
+    // from <module> import <from list>
+    //
+    // When this list is empty, as below, this corresponds to an import of the
+    // entire module as is done in the simple import statement:
+    //
+    // import <module>
+    //
+    PyObject* pyModule = NULL;
+    PyObject* pyFromList = PyList_New(0);
+
+    // Import each of the ".py" files as a Python module.
     for(vector<boost::filesystem::path>::const_iterator it(pyFiles.begin());
             it != pyFiles.end(); ++it) {
-        name = it->filename().c_str();
-        name = name.substr(0, name.length()-3);
-        mod = PyImport_ImportModuleLevel((char *)name.c_str(), this->pyGlobal,
-                this->pyLocal, pyList, 0);
 
-        if(mod){
-            PyDict_SetItem(PyModule_GetDict(mod),
-                PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
-            PyModule_AddObject(this->pyRootModule, name.c_str(), mod);
-            this->modules[name] = mod;
-        }
-        else{
+        // Get the module name from the Python file name by removing the ".py"
+        fileName = it->filename().c_str();
+        moduleName = fileName.substr(0, fileName.length()-3);
+
+        logger().info("    importing Python module: " + moduleName);
+
+        // Import the entire module into the current Python environment.
+        pyModule = PyImport_ImportModuleLevel((char*) moduleName.c_str(),
+                this->pyGlobal, this->pyLocal, pyFromList,
+                ABSOLUTE_IMPORTS_ONLY);
+
+        // If the import succeeded...
+        if (pyModule) {
+            PyObject* pyModuleDictionary = PyModule_GetDict(pyModule);
+            
+            // Add the ATOMSPACE object to this module
+            PyObject* pyAtomSpaceObject = this->getPyAtomspace();
+            PyDict_SetItemString(pyModuleDictionary,"ATOMSPACE",
+                    pyAtomSpaceObject);
+            Py_DECREF(pyAtomSpaceObject);
+
+            // Add the module name to the root module.
+            PyModule_AddObject(this->pyRootModule, moduleName.c_str(), pyModule);
+
+            // Add the module to our modules list. So don't decrement the
+            // Python reference in this function.
+            this->modules[moduleName] = pyModule;
+
+        // otherwise, handle the error.
+        } else {
             if(PyErr_Occurred())
                 PyErr_Print();
-            logger().warn() << "Couldn't import " << name << 
-                    " module from folder " << p.c_str();
+            logger().warn() << "Couldn't import " << moduleName << 
+                    " module from directory " << directory.c_str();
         }
     }
-    Py_DECREF(pyList);
+
+    // Cleanup the reference count for the Python objects.
+    Py_DECREF(pyFromList);
 }
 
 /**
@@ -662,18 +705,20 @@ void PythonEval::add_module_file(const boost::filesystem::path &p)
 * Get a path from the user and call the corresponding function for
 * directories and files
 */
-void PythonEval::addModuleFromPath(std::string path)
+void PythonEval::addModuleFromPath(std::string pathString)
 {
-    boost::filesystem::path p(path);
+    boost::filesystem::path modulePath(pathString);
 
-    if(boost::filesystem::exists(p)){
-        if(boost::filesystem::is_directory(p))
-            this->add_module_directory(p);
+    logger().info("Adding Python module (or directory): " + modulePath.string());
+
+    if(boost::filesystem::exists(modulePath)){
+        if(boost::filesystem::is_directory(modulePath))
+            this->add_module_directory(modulePath);
         else
-            this->add_module_file(p);
+            this->add_module_file(modulePath);
     }
     else{
-        logger().error() << path << " doesn't exists";
+        logger().error() << modulePath << " doesn't exists";
     }
 
 }
