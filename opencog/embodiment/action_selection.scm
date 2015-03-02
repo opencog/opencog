@@ -1,4 +1,4 @@
-;
+s;
 ; Action planner
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
@@ -467,7 +467,7 @@
 ;
 ;       If there's no food nearby now, this function will only return the action 
 ;       RandomSearchAction. Since the world is always changing and there's chance
-;       that the agent failes to get the food after it randomly search for a
+;       that the agent fails to get the food after it randomly searches for a
 ;       while, it will not return EatFoodAction. 
 ;
 ; @todo Currently you should use the same variables in different rules if they 
