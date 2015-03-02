@@ -106,11 +106,13 @@ CogServer::~CogServer()
         }
     }
 
+#ifdef HAVE_CYTHON
     // Delete the singleton instance of the PythonEval.
     PythonEval::delete_singleton_instance();
 
     // Cleanup Python.
     global_python_finalize();
+#endif /* HAVE_CYTHON */
 
     // Clear the system activity table here because it relies on the 
     // atom table's existence.
