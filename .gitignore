@@ -2,6 +2,7 @@
 opencog.log
 opencog-python.log
 .vagrant
+.DS_Store
 
 # misc binaries
 bin
