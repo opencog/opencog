@@ -25,7 +25,8 @@
 #define _OPENCOG_SUREAL_SCM_H
 
 
-#include <opencog/query/PatternMatchEngine.h>
+#include <map>
+#include <opencog/atomspace/Handle.h>
 
 
 namespace opencog
@@ -49,7 +50,6 @@ private:
     HandleSeq do_sureal_match(Handle);
     HandleSeqSeq do_sureal_get_mapping(Handle);
 
-    PatternMatchEngine m_pme;
     std::map<Handle, std::vector<std::map<Handle, Handle> > > m_results;
 
 public:

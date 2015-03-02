@@ -23,6 +23,7 @@
 
 #include <opencog/atomspace/AtomSpaceUtils.h>
 #include <opencog/guile/SchemePrimitive.h>
+#include <opencog/query/PatternMatchEngine.h>
 #include <opencog/query/PatternUtils.h>
 #include <opencog/nlp/types/atom_types.h>
 
@@ -166,7 +167,8 @@ HandleSeq SuRealSCM::do_sureal_match(Handle h)
         HandleSeq qClause(c);
 
         SuRealPMCB pmcb(pAS, sVars);
-        m_pme.match(&pmcb, sVars, qClause, qNegs);
+        PatternMatchEngine pme;
+        pme.match(&pmcb, sVars, qClause, qNegs);
 
         // no pattern matcher result
         if (pmcb.m_results.empty())
