@@ -417,8 +417,10 @@ public:
 
         Handle h = table->getHandlex("1", NUMBER_NODE);
         TS_ASSERT(h == hn1);
-        TS_ASSERT_DELTA(h->getTruthValue()->getMean(), 0.3f, 0.000001);
-        TS_ASSERT_DELTA(h->getTruthValue()->getCount(), 0.4f, 0.000001);
+        // mean = (0.3 * 0.4 + 0.8 * 0.3)/(0.3+0.4) = 0.36/0.7=0.51428
+        //count = 0.4 + 0.3 - min(0.3,0.4)*0.2 = 0.64
+        TS_ASSERT_DELTA(h->getTruthValue()->getMean(), 0.51429f, 0.00001);
+        TS_ASSERT_DELTA(h->getTruthValue()->getCount(), 0.64f, 0.01);
     }
 
     void testSimpleWithCustomAtomTypes()

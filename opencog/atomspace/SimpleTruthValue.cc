@@ -38,6 +38,7 @@
 using namespace opencog;
 
 #define KKK 800.0f
+#define CVAL  0.2f
 
 SimpleTruthValue::SimpleTruthValue(strength_t m, count_t c)
 {
@@ -74,16 +75,22 @@ confidence_t SimpleTruthValue::getConfidence() const
 // This is the merge formula appropriate for PLN.
 TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,TVMergeStyle ms/*=DEFAULT*/) const
 {
-    if (other->getType() != SIMPLE_TRUTH_VALUE) {
-        throw RuntimeException(TRACE_INFO,
-           "Don't know how to merge %s into a SimpleTruthValue",
-           typeid(*other).name());
-    }
-
-    if (other->getConfidence() > getConfidence()) {
-        return other->clone();
-    }
-    return clone();
+	switch(ms){
+	case DEFAULT:
+	{
+		if (other->getType() != SIMPLE_TRUTH_VALUE)
+		        throw RuntimeException(TRACE_INFO,
+		           "Don't know how to merge %s into a SimpleTruthValue using the default style",
+		           typeid(*other).name());
+		auto count2 = other->getCount();
+		auto count_new = count+ count2  - std::min(count,count2)*CVAL;
+		auto mean_new = (mean*count + other->getMean()*count2)/(count+count2);
+		return std::make_shared<SimpleTruthValue>(mean_new,count_new);
+	}
+	default:
+			throw RuntimeException(TRACE_INFO,
+			           "Unknown or not yet implemented merge strategy");
+             }
 }
 
 std::string SimpleTruthValue::toString() const
