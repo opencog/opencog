@@ -91,7 +91,7 @@ class PythonEval : public GenericEval
 {
     private:
         void initialize_python_objects_and_imports(void);
-        void add_module_directory(const boost::filesystem::path &p);
+        void add_module_directory(const boost::filesystem::path &directory);
         void add_module_file(const boost::filesystem::path &p);
 
         static PythonEval* singletonInstance;
