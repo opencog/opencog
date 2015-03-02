@@ -67,7 +67,7 @@ EvaluationLink::EvaluationLink(Handle schema, Handle args,
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-bool EvaluationLink::do_evaluate(AtomSpace* as, Handle execlnk)
+TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle execlnk)
 {
     if (EVALUATION_LINK != execlnk->getType()) {
         throw RuntimeException(TRACE_INFO, "Expecting to get an EvaluationLink!");
@@ -83,7 +83,7 @@ bool EvaluationLink::do_evaluate(AtomSpace* as, Handle execlnk)
 /// Expects the second handle of the sequence to be a ListLink
 /// Executes the GroundedPredicateNode, supplying the second handle as argument
 ///
-bool EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
+TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
 {
     if (2 != sna.size())
     {
@@ -98,9 +98,10 @@ bool EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
 /// Expects "args" to be a ListLink
 /// Executes the GroundedPredicateNode, supplying the args as argument
 ///
-bool EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args)
+TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args)
 {
-    if (GROUNDED_PREDICATE_NODE != gsn->getType()) {
+    if (GROUNDED_PREDICATE_NODE != gsn->getType())
+    {
         throw RuntimeException(TRACE_INFO, "Expecting GroundedPredicateNode!");
     }
     if (LIST_LINK != args->getType())
@@ -127,7 +128,10 @@ bool EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args)
         const std::string& s2 = NodeCast(h2)->getName();
         double v1 = atof(s1.c_str());
         double v2 = atof(s2.c_str());
-        return v1 > v2;
+        if (v1 > v2)
+            return TruthValue::TRUE_TV();
+        else
+            return TruthValue::FALSE_TV();
     }
 
     // A very special-case C++ comparison.
@@ -141,10 +145,10 @@ bool EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args)
             Handle h1(ll->getOutgoingAtom(i));
             for (Arity j=i+1; j<sz; j++) {
                 Handle h2(ll->getOutgoingAtom(j));
-                if (h1 == h2) return false;
+                if (h1 == h2) return TruthValue::FALSE_TV();
             }
         }
-        return true;
+        return TruthValue::TRUE_TV();
     }
 
     // At this point, we only run scheme and python schemas.
@@ -159,8 +163,8 @@ bool EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args)
         std::string rc = applier->apply_generic(schema.substr(pos), args);
 
         // If its false or nil, then false; everything else is true.
-        if (rc.compare("#f") or rc.compare("()")) return false;
-        return true;
+        if (rc.compare("#f") or rc.compare("()")) return TruthValue::FALSE_TV();
+        return TruthValue::TRUE_TV();
 #else
         throw RuntimeException(TRACE_INFO, "Cannot evaluate scheme GroundedPredicateNode!");
 #endif /* HAVE_GUILE */
@@ -177,9 +181,9 @@ bool EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args)
         // std::string rc = applier.apply(schema.substr(pos), args);
         // if (rc.compare("None") or rc.compare("False")) return false;
         Handle h = applier.apply(schema.substr(pos), args);
-        if (h == Handle::UNDEFINED) return false;
+        if (h == Handle::UNDEFINED) return TruthValue::FALSE_TV();
 
-        return true;
+        return h->getTruthValue();
 #else
         throw RuntimeException(TRACE_INFO, "Cannot evaluate python GroundedPredicateNode!");
 #endif /* HAVE_CYTHON */
@@ -188,4 +192,3 @@ bool EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args)
     // Unkown proceedure type.
     throw RuntimeException(TRACE_INFO, "Cannot evaluate unknown GroundedPredicateNode!");
 }
-
