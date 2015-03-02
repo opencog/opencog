@@ -365,8 +365,12 @@ bool DefaultPatternMatchCB::virtual_link_match(LinkPtr& lvirt, Handle& gargs)
 	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
 
 	Handle schema(lvirt->getOutgoingAtom(0));
-	bool relation_holds = EvaluationLink::do_evaluate(_as, schema, gargs);
+	TruthValuePtr tvp = EvaluationLink::do_evaluate(_as, schema, gargs);
 
+	// XXX FIXME: we are making a crsip-logic go/no-go decision
+	// based on the TV strength. Perhaps something more subtle might be
+	// wanted, here.
+	bool relation_holds = tvp->getMean() > 0.5;
 	return relation_holds;
 }
 

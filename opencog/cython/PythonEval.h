@@ -57,6 +57,7 @@
 #include <boost/filesystem/operations.hpp>
 
 #include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/TruthValue.h>
 #include <opencog/shell/GenericEval.h>
 
 
@@ -123,7 +124,7 @@ class PythonEval : public GenericEval
          */
         static void delete_singleton_instance();
 
-          /**
+        /**
          * Get a reference to the singleton instance.
          */
         static PythonEval & instance(AtomSpace * atomspace = NULL);
@@ -153,7 +154,10 @@ class PythonEval : public GenericEval
         void printDict(PyObject* obj);
 
         std::string apply_script(const std::string& script);
+
+        // Apply expression to args, returning Handle or TV
         Handle apply(const std::string& func, Handle varargs);
+        TruthValuePtr apply_tv(const std::string& func, Handle varargs);
 };
 
 /**

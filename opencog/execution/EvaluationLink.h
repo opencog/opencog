@@ -43,13 +43,13 @@ public:
          TruthValuePtr tv = TruthValue::NULL_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-    bool evaluate(AtomSpace* as) {
+    TruthValuePtr evaluate(AtomSpace* as) {
         return do_evaluate(as, Handle(shared_from_this()));
     }
 
-    static bool do_evaluate(AtomSpace*, Handle);
-    static bool do_evaluate(AtomSpace*, const HandleSeq& schema_and_args);
-    static bool do_evaluate(AtomSpace*, Handle schema, Handle args);
+    static TruthValuePtr do_evaluate(AtomSpace*, Handle);
+    static TruthValuePtr do_evaluate(AtomSpace*, const HandleSeq& schema_and_args);
+    static TruthValuePtr do_evaluate(AtomSpace*, Handle schema, Handle args);
 };
 
 /** @}*/

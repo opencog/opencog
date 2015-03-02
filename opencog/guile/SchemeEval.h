@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <libguile.h>
 #include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/TruthValue.h>
 #include <opencog/shell/GenericEval.h>
 #include <opencog/util/exceptions.h>
 
@@ -93,14 +94,15 @@ class SchemeEval : public GenericEval
 		SCM do_scm_eval(SCM, SCM (*)(void *));
 		static void * c_wrap_eval_h(void *);
 
-		// Handle apply
+		// Apply function to arguments, returning Handle or TV
 		Handle do_apply(const std::string& func, Handle& varargs);
 		SCM do_apply_scm(const std::string& func, Handle& varargs);
 		Handle hargs;
+		TruthValuePtr tvp;
 		static void * c_wrap_apply(void *);
-		static void * c_wrap_apply_scm(void *);
+		static void * c_wrap_apply_tv(void *);
 
-		// Error handling stuff
+		// Exception and error handling stuff
 		SCM error_string;
 		void set_error_string(SCM);
 		SCM captured_stack;
@@ -113,7 +115,7 @@ class SchemeEval : public GenericEval
 		// Printing of basic types
 		static std::string prt(SCM);
 
-		// Output port
+		// Output port, for any printing done by scheme code.
 		SCM _outport;
 		SCM _saved_outport;
 		bool _in_shell;
@@ -138,12 +140,15 @@ class SchemeEval : public GenericEval
 		std::string eval(const std::stringstream& ss)
 			{ return eval(ss.str()); }
 
+		// Evaluate expression, returning handle.
 		Handle eval_h(const std::string&);
 		Handle eval_h(const std::stringstream& ss) { return eval_h(ss.str()); }
 
+		// Apply expression to args, returning Handle or TV
 		Handle apply(const std::string& func, Handle varargs);
-		std::string apply_generic(const std::string& func, Handle& varargs);
+		TruthValuePtr apply_tv(const std::string& func, Handle varargs);
 
+		// Nested invocations
 		bool recursing(void) { return _in_eval; }
 };
 
