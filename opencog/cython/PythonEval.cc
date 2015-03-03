@@ -765,8 +765,9 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     if (partial_expr == "\n")
     {
         _pending_input = false;
-
-    } else {
+    }
+    else
+    {
         // XXX FIXME TODO: Need to check if there was an open
         // parenthesis, and no close parentheis.
 
@@ -782,7 +783,8 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     }
 
     // Process the evaluation buffer if more input is not pending.
-    if (not _pending_input) {
+    if (not _pending_input)
+    {
         _result = this->apply_script(_input_line);
         _input_line = "";
     }
