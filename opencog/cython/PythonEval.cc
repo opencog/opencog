@@ -753,32 +753,38 @@ void PythonEval::addModuleFromPath(std::string pathString)
 
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
+    if (partial_expr == "\n")
+        logger().info("[PythonEval] eval_expr: '\\n'");
+    else
+        logger().info("[PythonEval] eval_expr: '%s\\n'", 
+                partial_expr.substr(0,partial_expr.size()-1).c_str());
+
     _result = "";
+
+    // If we get a newline by itself, then we are finished.
     if (partial_expr == "\n")
     {
         _pending_input = false;
-        _result = this->apply_script(_input_line);
-        _input_line = "";
-    }
-    else
-    {
+
+    } else {
+        // XXX FIXME TODO: Need to check if there was an open
+        // parenthesis, and no close parentheis.
+
         // If the line ends with a colon, its not a complete expression,
-        // and we must wait for more input.
-        // XXX FIXME TODO: the same might be true if there was an open
-        // parenthesis, and no close parentheis.  This neds to be
-        // scanned for and fixed.
-        size_t size = partial_expr.size();
-        size_t colun = partial_expr.find_last_of(':');
-        if (size-2 == colun)
+        // and we must wait for more input, i.e. more input is pending.
+        size_t expression_size = partial_expr.size();
+        size_t colon_position = partial_expr.find_last_of(':');
+        if (colon_position == (expression_size - 2))
             _pending_input = true;
 
+        // Add this expression to our evaluation buffer.
         _input_line += partial_expr;
+    }
 
-        if (not _pending_input)
-        {
-            _result = this->apply_script(_input_line);
-            _input_line = "";
-        }
+    // Process the evaluation buffer if more input is not pending.
+    if (not _pending_input) {
+        _result = this->apply_script(_input_line);
+        _input_line = "";
     }
 }
 
