@@ -97,3 +97,4 @@
 	(if (= -1000 (get-mutual-information wp))
 		#f
 		#t))
+
