@@ -189,70 +189,72 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 void GenericShell::do_eval(const std::string &expr)
 {
 	size_t len = expr.length();
-	if (0 == len)
-	{
-		put_output(get_prompt());
-		return;
-	}
 
-	// Handle Telnet RFC 854 IAC format
-	// Basically, we're looking for telnet-encoded abort or interrupt
-	// characters, starting at the end of the input string. If they
-	// are there, then don't process input, and clear out the evaluator.
-	// Also, be sure to send telnet IAC WILL TIMING-MARK so that telnet
-	// doesn't sit there flushing output forever.
-	//
-	// Search for IAC to at most 20 chars from the end of the string.
-	int i = len-2;
-	int m = len - 20;
-	if (m < 0) m = 0;
-	while (m <= i)
+    logger().debug("[GenericShell] do_eval: expr, len of %zd ='%s'", len, expr.c_str());
+
+	// Make sure there is at least one character if we are checking
+	// for abort, interrrupt, escape, etc.
+	if (0 != len)
 	{
-		unsigned char c = expr[i];
-		if (IAC == c)
+		// Handle Telnet RFC 854 IAC format
+		// Basically, we're looking for telnet-encoded abort or interrupt
+		// characters, starting at the end of the input string. If they
+		// are there, then don't process input, and clear out the evaluator.
+		// Also, be sure to send telnet IAC WILL TIMING-MARK so that telnet
+		// doesn't sit there flushing output forever.
+		//
+		// Search for IAC to at most 20 chars from the end of the string.
+		int i = len-2;
+		int m = len - 20;
+		if (m < 0) m = 0;
+		while (m <= i)
 		{
-			c = expr[i+1];
-			if ((IP == c) || (AO == c))
+			unsigned char c = expr[i];
+			if (IAC == c)
 			{
-				evaluator->clear_pending();
-				put_output(abort_prompt);
-				return;
-			}
+				c = expr[i+1];
+				if ((IP == c) || (AO == c))
+				{
+					evaluator->clear_pending();
+					put_output(abort_prompt);
+					return;
+				}
 
-			// Erase line -- just ignore this line.
-			if (EL == c)
-			{
-				put_output(get_prompt());
-				return;
+				// Erase line -- just ignore this line.
+				if (EL == c)
+				{
+					put_output(get_prompt());
+					return;
+				}
 			}
+			i--;
 		}
-		i--;
-	}
 
-	// Don't evaluate if the line is terminated by
-	// escape (^[), cancel (^X) or quit (^C)
-	// These would typically be sent by netcat, and not telnet.
-	unsigned char c = expr[len-1];
-	if ((SYN == c) || (CAN == c) || (ESC == c))
-	{
-		evaluator->clear_pending();
-		put_output("\n");
-		put_output(normal_prompt);
-		return;
-	}
+		// Don't evaluate if the line is terminated by
+		// escape (^[), cancel (^X) or quit (^C)
+		// These would typically be sent by netcat, and not telnet.
+		unsigned char c = expr[len-1];
+		if ((SYN == c) || (CAN == c) || (ESC == c))
+		{
+			evaluator->clear_pending();
+			put_output("\n");
+			put_output(normal_prompt);
+			return;
+		}
 
-	// Look for either an isolated control-D, or a single period on a line
-	// by itself. This means "leave the shell". We leave the shell by
-	// unsetting the shell pointer in the ConsoleSocket.
-	// 0x4 is ASCII EOT, which is what ctrl-D at keybd becomes.
-	if ((false == evaluator->input_pending()) &&
-	    ((EOT == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
-	{
-		self_destruct = true;
-		put_output("");
-		if (show_prompt)
-			put_output("Exiting the shell\n");
-		return;
+		// Look for either an isolated control-D, or a single period on a line
+		// by itself. This means "leave the shell". We leave the shell by
+		// unsetting the shell pointer in the ConsoleSocket.
+		// 0x4 is ASCII EOT, which is what ctrl-D at keybd becomes.
+		if ((false == evaluator->input_pending()) &&
+		    ((EOT == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
+		{
+			self_destruct = true;
+			put_output("");
+			if (show_prompt)
+				put_output("Exiting the shell\n");
+			return;
+		}
 	}
 
 	/* 
@@ -277,7 +279,7 @@ void GenericShell::do_eval(const std::string &expr)
 
 		// We cannot use one evaluator in two different threads.
 		// If we do, then bad things will happen.  So always wait
-		// for teh previous thread to finish, before we got at it
+		// for the previous thread to finish, before we go at it
 		// again.
 		if (evalthr)
 		{
