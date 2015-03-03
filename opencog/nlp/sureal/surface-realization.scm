@@ -47,11 +47,9 @@
 ; Returns a possible set of SuReals from an input SetLink
 ; * 'a-set-link' : A SetLink which is to be SuRealed
 (define (create-sentence a-set-link)
-    (define (construct-sntc itpr)
+    (define (construct-sntc mappings)
         ; get the words, skipping ###LEFT-WALL###
-        (define words-seq (cdr (parse-get-words-in-order (interp-get-parse itpr))))
-        ; get the new query to old interpretation mappings (multiple)
-        (define mappings (sureal-get-mapping itpr))
+        (define words-seq (cdr (parse-get-words-in-order (interp-get-parse (caar mappings)))))
         ; helper to generate sentence using one mapping
         (define (construct-sntc-mapping w-seq vars mapping)
             ; make a clone of the w-seq to avoid changing when list-set!
@@ -95,11 +93,11 @@
             )
         )
 
-        (map construct-sntc-mapping (circular-list words-seq) (circular-list (car mappings)) (cdr mappings))
+        (map construct-sntc-mapping (circular-list words-seq) (circular-list (cdar mappings)) (map cdr (cdr mappings)))
     )
 
     ; add LG dictionary on each word if not already in the atomspace
-    (map
+    (par-map
         lg-get-dict-entry
         (filter-map
             (lambda (n)
@@ -115,7 +113,10 @@
         )
     )
 
-    (append-map construct-sntc (sureal-match a-set-link))
+    (let* ((results (sureal-match a-set-link))
+           (interps (delete-duplicates (map car results))))
+        (append-map construct-sntc (map (lambda (i) (filter (lambda (r) (equal? (car r) i)) results)) interps))
+    )
 )
 
 ; Returns a number that could be used to compare atoms of the same type. For eg.

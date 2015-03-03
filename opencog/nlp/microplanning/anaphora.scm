@@ -22,7 +22,7 @@
 	(populate-nouns-list n-lst (get-chunks inputs-set))
 
 	; go through each noun-item in the noun-list
-	(for-each-by-proc n-lst
+	(par-for-each-by-proc n-lst
 		(lambda (ni)
 			(let* ((forms (get-sentence-forms (get-utterance-type inputs-set (get-chunk-index ni))))
 			       (old-noun-node (get-noun-node ni))
@@ -73,7 +73,7 @@
 	)
 
 	; Try to SuReal changed chunk again.  If any chunk failed, return the original chunk without the anaphora.
-	(for-each 
+	(par-for-each 
 		(lambda (changed index)
 			(if changed
 				(let* ((chunk (get-chunk results-set index))
