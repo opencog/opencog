@@ -79,7 +79,6 @@ void SuRealSCM::init()
 {
 #ifdef HAVE_GUILE
     define_scheme_primitive("sureal-match", &SuRealSCM::do_sureal_match, this, "nlp sureal");
-    define_scheme_primitive("sureal-get-mapping", &SuRealSCM::do_sureal_get_mapping, this, "nlp sureal");
 #endif
 }
 
@@ -89,20 +88,19 @@ void SuRealSCM::init()
  * Uses the pattern matcher to find all InterpretationNodes whoses
  * corresponding SetLink contains a structure similar to the input,
  * taking into accounting each ConceptNode/PredicateNode's corresponding
- * WordNode and their LG dictionary entry.
+ * WordNode and their LG dictionary entry.  Then construct a compact
+ * structure indicating the mappings for each InterpretationNode.
  *
  * @param h   a SetLink contains the atoms which will become the clauses
- * @return    a sequence of InterpretationNodes ranked with best result first
+ * @return    a list of the form returned by sureal_get_mapping, but spanning
+ *            multiple InterpretationNode
  */
-HandleSeq SuRealSCM::do_sureal_match(Handle h)
+HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
 {
 #ifdef HAVE_GUILE
-    // clear the old results on new "sureal-match" to sync with "sureal-get-mapping"
-    m_results.clear();
-
     // only accept SetLink
     if (h->getType() != SET_LINK)
-        return HandleSeq();
+        return HandleSeqSeq();
 
     AtomSpace* pAS = SchemeSmob::ss_get_env_as("sureal-match");
 
@@ -172,7 +170,7 @@ HandleSeq SuRealSCM::do_sureal_match(Handle h)
 
         // no pattern matcher result
         if (pmcb.m_results.empty())
-            return HandleSeq();
+            return HandleSeqSeq();
 
         // first disconnected component & result? add it all
         if (collector.empty())
@@ -246,17 +244,14 @@ HandleSeq SuRealSCM::do_sureal_match(Handle h)
 
         // if there's no way to connect the disconnected components
         if (collector.empty())
-            return HandleSeq();
+            return HandleSeqSeq();
     }
 
-    // get the results out of pmcb
-    m_results = collector;
-
-    HandleSeq results;
+    HandleSeq keys;
 
     // construct the list of InterpretationNode to be returned
-    for (auto& r : m_results)
-        results.push_back(r.first);
+    for (auto& r : collector)
+        keys.push_back(r.first);
 
     // sort the InterpretationNode bases on the size of the corresponding
     // SetLink; the idea is that the larger the size, the more stuff in
@@ -274,36 +269,50 @@ HandleSeq SuRealSCM::do_sureal_match(Handle h)
         return pAS->getArity(qi[0]) < pAS->getArity(qj[0]);
     };
 
-    std::sort(results.begin(), results.end(), itprComp);
+    std::sort(keys.begin(), keys.end(), itprComp);
+
+    HandleSeqSeq results;
+
+    for (auto& k : keys)
+    {
+        HandleSeqSeq mappings = sureal_get_mapping(k, collector[k]);
+        results.insert(results.end(), mappings.begin(), mappings.end());
+    }
 
     return results;
 
 #else
-    return HandleSeq();
+    return HandleSeqSeq();
 #endif
 }
 
 /**
- * Get the corresponding node mapping for a matched InterpretationNode.
+ * Construct the proper structure for an InterpretationNode's mapping.
  *
- * Defines a "sureal-get-mapping" primitive that could be called after a
- * successful run of "sureal-match".  Takes an InterpretationNode returned
- * by "sureal-match" as input, and returns the complete node-to-node mapping.
+ * Takes an InterpretationNode and its mappings, and return the node-to-node
+ * mapping in a list-of-list of the form:
  *
- * @param h   an InterpretationNode returned by "sureal-match"
- * @return    a list of lists; the first list will be the nodes extracted
- *            from the original query, the subsequent lists will the the
- *            corresponding mapping for each node.
+ * (
+ *  ((InterpretationNode "sentence@1234") nodes from original query)
+ *  ((InterpretationNode "sentence@1234") 1st mapping of the corresponding nodes)
+ *  ((InterpretationNode "sentence@1234") 2nd mapping of the corresponding nodes)
+ * )
+ *
+ * For example, it could be
+ *
+ * (
+ *  ((InterpretationNode "sentence@1234") (ConceptNode "she") (PredicateNode "runs"))
+ *  ((InterpretationNode "sentence@1234") (ConceptNode "he@1234") (PredicateNode "walks@1234"))
+ * )
+ *
+ * if there is only one mapping for a sentence.
+ *
+ * @param h          an InterpretationNode with the mapping
+ * @param mappings   the node-to-node mapping
+ * @return           a list-of-list of the above structure
  */
-HandleSeqSeq SuRealSCM::do_sureal_get_mapping(Handle h)
+HandleSeqSeq SuRealSCM::sureal_get_mapping(Handle& h, std::vector<std::map<Handle, Handle> >& mappings)
 {
-    // no pattern matcher result or no result mapping to the Handle h
-    if (m_results.empty() || m_results.count(h) == 0)
-        return HandleSeqSeq();
-
-    // construct the result
-    std::vector<std::map<Handle, Handle> >& mappings = m_results[h];
-
     logger().debug("[SuReal] %d mapping(s) for %s", mappings.size(), h->toShortString().c_str());
 
     HandleSeq qKeys, qVars;
@@ -331,6 +340,10 @@ HandleSeqSeq SuRealSCM::do_sureal_get_mapping(Handle h)
 
         results.push_back(qVars);
     }
+
+    // insert the InterpretationNode to the start of each list
+    for (auto& v : results)
+        v.insert(v.begin(), h);
 
     return results;
 }

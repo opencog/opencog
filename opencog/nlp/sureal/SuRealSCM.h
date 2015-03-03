@@ -47,10 +47,9 @@ private:
     static void init_in_module(void*);
     void init(void);
 
-    HandleSeq do_sureal_match(Handle);
-    HandleSeqSeq do_sureal_get_mapping(Handle);
+    HandleSeqSeq do_sureal_match(Handle);
 
-    std::map<Handle, std::vector<std::map<Handle, Handle> > > m_results;
+    HandleSeqSeq sureal_get_mapping(Handle&, std::vector<std::map<Handle, Handle> >&);
 
 public:
     SuRealSCM();
