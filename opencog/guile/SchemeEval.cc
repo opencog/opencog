@@ -808,6 +808,10 @@ Handle SchemeEval::eval_h(const std::string &expr)
 	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	// Convert evaluation errors into C++ exceptions.
+	if (eval_error())
+		throw RuntimeException(TRACE_INFO, error_msg.c_str());
+
 	return hargs;
 }
 
