@@ -881,6 +881,8 @@ TruthValuePtr SchemeEval::apply_tv(const std::string &func, Handle varargs)
 	// Just go.
 	if (_in_eval) {
 		SCM tv_smob = do_apply_scm(func, varargs);
+		if (eval_error())
+			return TruthValue::NULL_TV();
 		return SchemeSmob::to_tv(tv_smob);
 	}
 
@@ -911,6 +913,7 @@ void * SchemeEval::c_wrap_apply_tv(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
 	SCM tv_smob = self->do_apply_scm(*self->pexpr, self->hargs);
+	if (self->eval_error()) return self;
 	self->tvp = SchemeSmob::to_tv(tv_smob);
 	return self;
 }

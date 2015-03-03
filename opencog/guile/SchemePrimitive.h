@@ -74,7 +74,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			// signature naming convention:
 			// b == bool
 			// d == double
-			// h == handle
+			// h == Handle
 			// i == int
 			// q == HandleSeq
 			// k == HandleSeqSeq
@@ -132,7 +132,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Q_H,   // return HandleSeq, take handle
 			Q_HTI, // return HandleSeq, take handle, type, and int
 			Q_HTIB,// return HandleSeq, take handle, type, and bool
-			K_H,  // return HandleSeqSeq, take handle
+			K_H,   // return HandleSeqSeq, take Handle
 			S_S,   // return string, take string
 			S_SS,  // return string, take two strings
 			S_SSS, // return string, take three strings
@@ -442,7 +442,8 @@ class SchemePrimitive : public PrimitiveEnviron
 					break;
 				}
 				default:
-					printf ("Error! Unsupported signature: %d\n", signature);
+					throw RuntimeException(TRACE_INFO,
+						 "Unsupported signature: %d\n", signature);
 			}
 			return rc;
 		}
