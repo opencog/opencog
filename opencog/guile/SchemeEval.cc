@@ -543,6 +543,7 @@ void SchemeEval::do_eval(const std::string &expr)
 
 	_caught_error = false;
 	_pending_input = false;
+	error_msg.clear();
 	set_captured_stack(SCM_BOOL_F);
 	scm_gc_unprotect_object(_rc);
 	SCM eval_str = scm_from_utf8_string(_input_line.c_str());
@@ -704,6 +705,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	SchemeSmob::ss_set_env_as(atomspace);
 
 	_caught_error = false;
+	error_msg.clear();
 	set_captured_stack(SCM_BOOL_F);
 	SCM rc = scm_c_catch (SCM_BOOL_T,
 	                 evo, (void *) sexpr,
