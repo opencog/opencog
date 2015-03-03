@@ -383,7 +383,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
 {
     PyObject *pyError, *pyModule, *pyUserFunc, *pyExecuteUserFunc;
     PyObject *pyArgs, *pyUUID, *pyReturnValue = NULL;
-    PyObject *pyErrorMessage, *pyDict;
+    PyObject *pyDict;
     string moduleName;
     string funcName;
     bool errorCallingFunction;
@@ -396,8 +396,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
         pyModule = this->pyRootModule;
         funcName = func;
         moduleName = "__main__";
-    }
-    else{
+    } else {
         moduleName = func.substr(0,index);
         pyModule = this->modules[moduleName];
         funcName = func.substr(index+1);
@@ -415,8 +414,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     // Py_DECREF(pyDict);
 
     // If we can't find that function then throw an exception.
-    if (!pyUserFunc)
-    {
+    if (!pyUserFunc) {
         PyGILState_Release(gstate);
         throw (RuntimeException(TRACE_INFO, "Python function '%s' not found!",
                 funcName.c_str()));
@@ -427,8 +425,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     Py_INCREF(pyUserFunc);
 
     // Make sure the function is callable.
-    if (!PyCallable_Check(pyUserFunc))
-    {
+    if (!PyCallable_Check(pyUserFunc)) {
         Py_DECREF(pyUserFunc);
         PyGILState_Release(gstate);
         logger().error() << "Member " << func << " is not callable.";
@@ -462,23 +459,36 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
 
     // Check for errors.
     pyError = PyErr_Occurred();
-    if (!pyError)
-    {
+    if (!pyError) {
         // Success - get the return value.
         errorCallingFunction = false;
         uuid = static_cast<unsigned long>(PyLong_AsLong(pyReturnValue));
-    }
-    else
-    {
+
+    } else {
         // Error - save the message.
         errorCallingFunction = true;
-        pyErrorMessage = PyObject_GetAttrString(pyError, "message");
-        errorString = PyBytes_AsString(pyErrorMessage);
-        PyErr_Print();
 
-        // Cleanup the reference count for pyError and pyErrorMessage
+        // Construct the error message.
+        PyObject *pyErrorType, *pyErrorMessage, *pyTraceback;
+        PyErr_Fetch(&pyErrorType, &pyErrorMessage, &pyTraceback);
+        std::stringstream errorStringStream;
+        errorStringStream << "Python error in " << func.c_str();
+        if (pyErrorMessage) {
+            char* errorMessage = PyString_AsString(pyErrorMessage);
+            if (errorMessage) {
+                errorStringStream << ": " << errorMessage << ".";
+            }
+            
+            // NOTE: The traceback can be NULL even when the others aren't.
+            Py_DECREF(pyErrorType);
+            Py_DECREF(pyErrorMessage);
+            if (pyTraceback)
+                Py_DECREF(pyTraceback);
+        }
+        errorString = errorStringStream.str();
+
+        // Cleanup the reference count for pyError
         Py_DECREF(pyError);
-        Py_DECREF(pyErrorMessage);
     }
     
     // Cleanup the reference counts for Python objects we no longer reference.
@@ -486,7 +496,10 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     // decrement it here.
     Py_DECREF(pyExecuteUserFunc);
     Py_DECREF(pyArgs);
-    Py_DECREF(pyReturnValue);
+
+    // In case PyObject_CallObject returns an error, we need to check for NULL.
+    if (pyReturnValue)
+        Py_DECREF(pyReturnValue);
 
     // NOTE: PyTuple_SetItem "steals" the reference to the object that
     // is set for the list item. That means that the list assumes it
@@ -518,7 +531,7 @@ std::string PythonEval::apply_script(const std::string& script)
     PyObject *pyCatcher = NULL;
     PyObject *pyOutput = NULL;
     std::string result;
-    bool errorCallingFunction;
+    bool errorRunningScript;
     std::string errorString;
 
     // Grab the GIL
@@ -535,11 +548,10 @@ std::string PythonEval::apply_script(const std::string& script)
 
     // Check for errors in the script.
     pyError = PyErr_Occurred();
-    if (!pyError)
-    {
+    if (!pyError) {
         // Script succeeded, get the output stream as a string
         // so we can return it.
-        errorCallingFunction = false;
+        errorRunningScript = false;
         pyCatcher = PyObject_GetAttrString(this->pyRootModule,
                 "_opencog_output_stream");
         pyOutput = PyObject_CallMethod(pyCatcher, (char*)"getvalue", NULL);
@@ -548,19 +560,32 @@ std::string PythonEval::apply_script(const std::string& script)
         // Cleanup reference counts for Python objects we no longer reference.
         Py_DECREF(pyCatcher);
         Py_DECREF(pyOutput);
-    }
-    else
-    {
+
+    } else {
         // Remember the error and get the error string for the throw below.
-        errorCallingFunction = true;
-        PyObject* pyErrorString = PyObject_GetAttrString(pyError, "message");
-        errorString = PyBytes_AsString(pyErrorString);
-        PyErr_Print();
+        errorRunningScript = true;
+
+        // Construct the error message.
+        PyObject *pyErrorType, *pyErrorMessage, *pyTraceback;
+        PyErr_Fetch(&pyErrorType, &pyErrorMessage, &pyTraceback);
+        std::stringstream errorStringStream;
+        errorStringStream << "Python error";
+        if (pyErrorMessage) {
+            char* errorMessage = PyString_AsString(pyErrorMessage);
+            if (errorMessage) {
+                errorStringStream << ": " << errorMessage << ".";
+            }
+            
+            // NOTE: The traceback can be NULL even when the others aren't.
+            Py_DECREF(pyErrorType);
+            Py_DECREF(pyErrorMessage);
+            if (pyTraceback)
+                Py_DECREF(pyTraceback);
+        }
+        errorString = errorStringStream.str();
 
         // Cleanup the reference count for the Python objects.
         Py_DECREF(pyError);
-        Py_DECREF(pyErrorString);
-
      }
 
     // Close the output stream.
@@ -573,11 +598,9 @@ std::string PythonEval::apply_script(const std::string& script)
 
     // If there was an error throw an exception so the user knows the
     // script had a problem.
-    if (errorCallingFunction)
-    {
+    if (errorRunningScript) {
         logger().error() << errorString;
-        throw (RuntimeException(TRACE_INFO, "Python error: %s",
-                errorString.c_str()));
+        throw (RuntimeException(TRACE_INFO, errorString.c_str()));
     }
 
     // printf("Python says that: %s\n", result.c_str());
