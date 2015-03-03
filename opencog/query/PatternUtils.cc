@@ -41,6 +41,10 @@ namespace opencog {
  * pattern matching. Thus, the routine below can be used to validate
  * the input.
  *
+ * Terms that contain GroundedSchema or GroundedPrecdicate nodes can
+ * have side-effects, and are thus not really constants. They must be
+ * evaluated during the pattern search.
+ *
  * Returns true if the list of clauses was modified, else returns false.
  */
 bool remove_constants(const std::set<Handle> &vars,
@@ -53,7 +57,9 @@ bool remove_constants(const std::set<Handle> &vars,
 	for (i = clauses.begin(); i != clauses.end(); )
 	{
 		Handle clause(*i);
-		if (any_variable_in_tree(clause, vars))
+		if (any_variable_in_tree(clause, vars)
+		    or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
+		    or contains_atomtype(clause, GROUNDED_SCHEMA_NODE))
 		{
 			++i;
 		}
@@ -142,7 +148,7 @@ void get_connected_components(const std::set<Handle> &vars,
 		if (did_at_least_one)
 		{
 			todo = no_con_yet;
-			continue; 
+			continue;
 		}
 
 		// Grab the first clause that failed to attach to something,

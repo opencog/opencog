@@ -178,8 +178,8 @@ static inline bool any_node_in_tree(const Handle& tree,
  * Return true if any of the indicated nodes occurs somewhere in
  * the tree (that is, in the tree spanned by the outgoing set.)
  * But ONLY if they are not quoted!  This is intended to be used to
- * search for variables, which are no longer variables when they
- * are quoted.
+ * search for variables; but when a variable is quoted, it is no
+ * longer a variable.
  */
 static inline bool any_variable_in_tree(const Handle& tree,
                                         const std::set<Handle>& nodes)
