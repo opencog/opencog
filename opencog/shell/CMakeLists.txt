@@ -13,7 +13,6 @@ ADD_LIBRARY (py-shell SHARED
 
 TARGET_LINK_LIBRARIES(py-shell
 	smob
-	server
 	atomspace
 	cogutil
 	PythonEval
