@@ -100,14 +100,17 @@ private:
     // unless you call 'forceInitNextCycle' method. 
     bool bInitialized; 
 
-    Procedure::RunningProcedureID currentSchemaId;  // Scheme Id of current running Action (a combo script)
+	// Scheme Id of current running Action (a combo script)
+    Procedure::RunningProcedureID currentSchemaId;
 
-    // Time out for executing Action (combo script) defined by PROCEDURE_EXECUTION_TIMEOUT
+    // Time out for executing Action (combo script) defined by
+    // PROCEDURE_EXECUTION_TIMEOUT
     long procedureExecutionTimeout; 
 
     time_t timeStartCurrentAction; // When the current action was executed 
 
-    std::vector<Handle> psi_demand_goal_list; // Handles to all the demand goals (EvaluationLink)
+	// Handles to all the demand goals (EvaluationLink)
+    std::vector<Handle> psi_demand_goal_list;
 
     // Planning result
     Handle plan_selected_demand_goal; 
@@ -115,7 +118,8 @@ private:
     std::vector<Handle> plan_context_list; 
     std::vector<Handle> plan_action_list;
 
-    // A copy of plan_action_list, each time pop up and execute one of the action
+    // A copy of plan_action_list, each time pop up and execute one of
+    // the action
     std::vector<Handle> temp_action_list;     
 
     // Each action(or step) in plan_action_list (or temp_action_list) may actually 
@@ -125,7 +129,9 @@ private:
     // actions can be considered as just one action, while in OAC side they are 
     // two actions. 
     //
-    // Currently our solution is that firstly we copy both actions to current_actions,
+    // Currently our solution is that firstly we copy both actions to
+    // current_actions,
+	//
     // then make OAC execute actions in current_actions one by one. When all the
     // actions in current_actions have been done, we ask temp_action_list for more 
     // actions. 
@@ -133,7 +139,8 @@ private:
     Handle current_action; 
 
     // Return actions given one step in plan_action_list (or temp_action_list)
-    void getActions(AtomSpace & atomSpace, Handle hStep, std::vector<Handle> & actions); 
+    void getActions(AtomSpace & atomSpace, Handle hStep,
+                    std::vector<Handle> & actions);
 
     // Initialize demandGoalList etc.
     void init();
@@ -210,8 +217,8 @@ public:
     // Entry of the Agent, CogServer will invoke this function during its cycle
     virtual void run();
 
-    // After calling this function, the Agent will invoke its "init" method firstly 
-    // in "run" function during its next cycle
+    // After calling this function, the Agent will invoke its "init"
+    // method firstly in "run" function during its next cycle
     void forceInitNextCycle() {
         this->bInitialized = false;
     }
