@@ -78,6 +78,7 @@ TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,TVMergeStyle ms/*=DEFA
 	switch(ms){
 	case DEFAULT:
 	{
+		//Based on section 5.10.2(A heuristic revision rule for STV) of the PLN book
 		if (other->getType() != SIMPLE_TRUTH_VALUE)
 		        throw RuntimeException(TRACE_INFO,
 		           "Don't know how to merge %s into a SimpleTruthValue using the default style",
