@@ -22,25 +22,27 @@
 		(ListLink)
 		(ImplicationLink
 			(AndLink
-				(EvaluationLink
-					(GroundedPredicateNode "scm: stop-go")
-					(ListLink green-light)
-				)
+				(SequentialAndLink
+					(EvaluationLink
+						(GroundedPredicateNode "scm: stop-go")
+						(ListLink green-light)
+					)
 
-				(EvaluationLink
-					(GroundedPredicateNode "scm: stop-go")
-					(ListLink green-light)
-				)
+					(EvaluationLink
+						(GroundedPredicateNode "scm: stop-go")
+						(ListLink green-light)
+					)
 
-				(EvaluationLink
-					(GroundedPredicateNode "scm: stop-go")
-					(ListLink red-light)
-				)
+					(EvaluationLink
+						(GroundedPredicateNode "scm: stop-go")
+						(ListLink red-light)
+					)
 
-				(EvaluationLink
-					(GroundedPredicateNode "scm: stop-go")
-					(ListLink
-						(ConceptNode "traffic ticket")
+					(EvaluationLink
+						(GroundedPredicateNode "scm: stop-go")
+						(ListLink
+							(ConceptNode "traffic ticket")
+						)
 					)
 				)
 			)

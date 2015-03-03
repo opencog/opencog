@@ -40,6 +40,7 @@ SUBSET_LINK <- ORDERED_LINK
 AND_LINK <- UNORDERED_LINK
 OR_LINK <- UNORDERED_LINK
 NOT_LINK <- UNORDERED_LINK
+SEQUENTIAL_AND_LINK <- ORDERED_LINK
 
 // The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
 // In 'intuitionist logic', the opposite of "true" is not "false",
