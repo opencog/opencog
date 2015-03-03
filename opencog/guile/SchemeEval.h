@@ -104,6 +104,7 @@ class SchemeEval : public GenericEval
 
 		// Exception and error handling stuff
 		SCM error_string;
+		std::string error_msg;
 		void set_error_string(SCM);
 		SCM captured_stack;
 		void set_captured_stack(SCM);

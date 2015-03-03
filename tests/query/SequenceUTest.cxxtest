@@ -100,7 +100,16 @@ void SequenceUTest::test_sequence(void)
     load_scm_files_from_config(*as);
 
     // This should throw an exception from scheme.
-    eval->eval_h("(cog-bind-crisp (off-road))");
+    bool caught_exception = false;
+    try
+    {
+        eval->eval_h("(cog-bind-crisp (off-road))");
+    }
+    catch (const RuntimeException &e)
+    {
+        caught_exception = true;
+    }
+    TS_ASSERT_EQUALS(true, caught_exception);
 
     Handle ans = eval->eval_h("(cog-bind-crisp (traffic-lights))");
 

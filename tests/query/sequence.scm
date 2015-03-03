@@ -15,7 +15,7 @@
 	(cond
 		((eq? atom green-light) (begin (display "go\n") (stv 1 1)))
 		((eq? atom red-light) (begin (display "stop\n") (stv 0 1)))
-		(else (begin (display "busted\n") (throw 'not-a-stoplight)))
+		(else (begin (display "busted\n") (throw 'not-a-stoplight "stop-go" "you're busted")))
 	)
 )
 
