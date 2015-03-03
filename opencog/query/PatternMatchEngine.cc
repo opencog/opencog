@@ -195,13 +195,16 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	if (hp == hg)
 	{
 #ifdef NO_SELF_GROUNDING
+		prtmsg("Compare atom to itself:\n", hp);
 		if (hg == curr_pred_handle)
 		{
+			// Mismatch, if hg contains bound vars in it.
 			if (any_variable_in_tree(hg, _bound_vars)) return false;
 		}
 		else
 		{
-			// Bound, quoted variables cannot be solutions to themselves.
+			// Bound but quoted variables cannot be solutions to themselves.
+			// huh? whaaaat?
 			if (not in_quote or
 			    (in_quote and
 			     (VARIABLE_NODE != tp or
@@ -209,7 +212,10 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			{
 				var_grounding[hp] = hg;
 			}
-			return true;
+
+			// We still need to call the callback, in case the pattern
+			// is a GroundedPredicateNode (for example).
+			return pmc->node_match(hp, hg);
 		}
 #else
 		return true;
@@ -508,7 +514,7 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 		curr_soln_handle = hsoln;
 
 		// Move up the predicate, and hunt for a match, again.
-		prtmsg("node has grnd, move up:", hsoln);
+		dbgprt("Term has ground, move up.");
 		// IncomingSet iset = get_incoming_set(curr_pred_handle);
 		IncomingSet iset = curr_pred_handle->getIncomingSet();
 		size_t sz = iset.size();
@@ -517,7 +523,7 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 			found = pred_up(Handle(iset[i]));
 			if (found) break;
 		}
-		dbgprt("after moving up the clause, found = %d\n", found);
+		dbgprt("After moving up the clause, found = %d\n", found);
 
 		curr_soln_handle = soln_handle_stack.top();
 		soln_handle_stack.pop();
@@ -1039,7 +1045,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		cl++;
 	}
 
-	printf("\nPredicate includes the following optinoal clauses:\n");
+	printf("\nPredicate includes the following optional clauses:\n");
 	cl = 0;
 	for (Handle h : _optionals)
 	{

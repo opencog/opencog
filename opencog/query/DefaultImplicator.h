@@ -38,7 +38,8 @@ class DefaultImplicator:
 	public virtual DefaultPatternMatchCB
 {
 	public:
-		DefaultImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp) {}
+		DefaultImplicator(AtomSpace* asp) :
+			Implicator(asp), DefaultPatternMatchCB(asp) {}
 };
 
 class CrispImplicator:
@@ -58,7 +59,8 @@ class SingleImplicator:
 	public virtual DefaultPatternMatchCB
 {
 	public:
-		SingleImplicator(AtomSpace* asp) : Implicator(asp), DefaultPatternMatchCB(asp) {}
+		SingleImplicator(AtomSpace* asp) :
+			Implicator(asp), DefaultPatternMatchCB(asp) {}
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 		                       const std::map<Handle, Handle> &pred_soln);
 };
