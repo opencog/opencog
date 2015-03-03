@@ -600,8 +600,7 @@ std::string PythonEval::apply_script(const std::string& script)
     // script had a problem.
     if (errorRunningScript) {
         logger().error() << errorString;
-        throw (RuntimeException(TRACE_INFO, "Python error: %s",
-                errorString.c_str()));
+        throw (RuntimeException(TRACE_INFO, errorString.c_str()));
     }
 
     // printf("Python says that: %s\n", result.c_str());
