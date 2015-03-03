@@ -386,8 +386,6 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 void PatternMatch::do_match(PatternMatchCallback *cb,
                             std::set<Handle>& vars,
                             std::vector<Handle>& clauses)
-
-	throw (InvalidParamException)
 {
 	// Its cheaper to run ctor and dtor than it is to clear the
 	// internal variables, and use this instance more than once.

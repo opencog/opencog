@@ -43,12 +43,10 @@ class PatternMatch
 		// See PatternMatch.cc for comments
 		void do_match(PatternMatchCallback *,
 		              std::set<Handle>& vars,
-		              std::vector<Handle>& clauses)
-			throw (InvalidParamException);
+		              std::vector<Handle>& clauses);
 
 		// See PatternMatch.cc for comments
-		void do_imply(Handle, Implicator&, std::set<Handle>&)
-			throw (InvalidParamException);
+		void do_imply(Handle, Implicator&, std::set<Handle>&);
 
 		bool recursive_virtual(PatternMatchCallback *cb,
 		            const std::vector<Handle>& virtuals,
@@ -101,16 +99,13 @@ class PatternMatch
 
 		void match(PatternMatchCallback *,
 		           Handle vars,
-		           Handle clauses)
-			throw (InvalidParamException);
+		           Handle clauses);
 
 		// See PatternMatch.cc for comments
-		void do_bindlink(Handle, Implicator&)
-			throw (InvalidParamException);
+		void do_bindlink(Handle, Implicator&);
 
 		// Deprecated: used only in the unit-test cases.
-		void do_imply(Handle, Implicator&)
-			throw (InvalidParamException);
+		void do_imply(Handle, Implicator&);
 };
 
 } // namespace opencog
