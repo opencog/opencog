@@ -18,6 +18,12 @@ __VERBOSE__ = False
 __DEV_MODE__ = False
 
 
+# Get the current directory for this test so this test works no matter
+# which directory is the current directory when nosetests is run. The
+# other paths will be relative to the directory for this.
+test_pln_directory = os.path.abspath(os.path.dirname(__file__))
+
+
 class PLNUnitTester(TestCase):
     def setUp(self):
         self.atomSpaceFileData = AtomSpace()
@@ -94,7 +100,7 @@ class PLNUnitTester(TestCase):
         ruleFolder = str(os.getcwd()) + "/new_scm_tests/"
 
         if not __DEV_MODE__:
-            ruleFolder = os.getenv("PROJECT_SOURCE_DIR") + "/tests/python/test_pln/new_scm_tests/"
+            ruleFolder = test_pln_directory + "/new_scm_tests/"
 
         fullTestFile = ruleFolder + testFile
 
@@ -137,12 +143,15 @@ class PLNUnitTester(TestCase):
         plnTypes = "learning/pln/pln_types.scm"
 
         if not __DEV_MODE__:
-            sourceFolder = os.getenv("PROJECT_SOURCE_DIR")
-            binFolder = os.getenv("PROJECT_BINARY_DIR")
+            coreTypes = os.path.join(test_pln_directory, '../../../build/opencog/atomspace/core_types.scm')
+            utilities = os.path.join(test_pln_directory, '../../../scm/utilities.scm')
+            plnTypes = os.path.join(test_pln_directory, '../../../build/opencog/reasoning/pln/pln_types.scm')
 
-            coreTypes = binFolder + "/opencog/atomspace/core_types.scm"
-            utilities = sourceFolder + "/opencog/scm/utilities.scm"
-            plnTypes = binFolder + "/opencog/reasoning/pln/pln_types.scm"
+            # Guile can't handle paths with relative '../..' etc., so
+            # normalize to a full path for guile.
+            coreTypes = os.path.normpath(coreTypes)
+            utilities = os.path.normpath(utilities)
+            plnTypes = os.path.normpath(plnTypes)
 
         self.load_file_into_atomspace(coreTypes, atomspaceToReset)
         self.load_file_into_atomspace(utilities, atomspaceToReset)
