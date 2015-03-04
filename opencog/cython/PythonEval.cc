@@ -207,7 +207,7 @@ PythonEval::PythonEval(AtomSpace* atomspace)
     // Add the preload functions
     if (config().has("PYTHON_PRELOAD_FUNCTIONS")) {
         string preloadDirectory = config()["PYTHON_PRELOAD_FUNCTIONS"];
-        this->add_module_from_path(preloadDirectory);
+        this->add_modules_from_path(preloadDirectory);
     }
 }
 
