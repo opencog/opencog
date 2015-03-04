@@ -14,15 +14,9 @@
  *            by Joel. I also borrowed some ideas from SchemeEval.h|cc
  *
  *   Ramin: This class is completely revised by me and Keyvan. The new code is inspired
- *          by Linas' SchemeEval and borrowed some ideas from Joel's PythonModule
+ *          by Linas' SchemeEval and borrowed some ideas from Joel's PythonModule.
  *
  *  @todo
- *   Zhenhua: PythonEval can not work together with PythonModule. That is you should
- *            disable PythonModule ('MODULES' in config file) before enabling C++ Fishgram
- *            mind agent.
- *
- *   Ramin: PythonEval is fully functional as of the date of this writing (2 July 2013).
- *          It also NEEDs the PythonModule to function, so don't disable it.
  *
  * Reference:
  *   http://www.linuxjournal.com/article/3641?page=0,2
