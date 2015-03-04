@@ -154,7 +154,7 @@
 
 		(cond ; use the sub-helper to keep calling make sentence until all atoms are used, branching on all allowed utterance type
 		      ((not (null? atomW-unused))
-			(for-each sub-helper ut)
+			(par-for-each sub-helper ut)
 		      )
 		      ; finished all atoms, store the created chunks & their corresponding utterance-type
 		      (else

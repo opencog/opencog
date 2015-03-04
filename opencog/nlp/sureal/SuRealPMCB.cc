@@ -293,6 +293,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         if (m_results.count(n) == 0)
             m_results[n] = std::vector<std::map<Handle, Handle> >();
 
+        logger().debug("[SuReal] grounding Interpreation: %s", n->toShortString().c_str());
         m_results[n].push_back(shrinked_soln);
     }
 

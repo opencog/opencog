@@ -102,31 +102,22 @@ public:
         simpleCounts[0] = TV1_COUNT;
         simpleCounts[1] = TV2_COUNT;
         simpleCounts[2] = TV3_COUNT;
-        float simpleConfidences[NUM_TVS];
         for (int i = 0; i < NUM_TVS; i++) {
             simpleTvs[i] = SimpleTruthValue::createTV(simpleMeans[i], simpleCounts[i]);
-            simpleConfidences[i] = SimpleTruthValue::countToConfidence(simpleCounts[i]);
         }
 
         // Merge between SimpleTruthValue objects
-        for (int i = 0; i < NUM_TVS; i++) {
-            for (int j = 0; j < NUM_TVS; j++) {
-                mergedTv = simpleTvs[i]->merge(simpleTvs[j]);
-                if (i < j) {
-                    TS_ASSERT(mergedTv != simpleTvs[i]);
-                    TS_ASSERT(mergedTv != simpleTvs[j]);
-                    TS_ASSERT(fabs(mergedTv->getMean()  - simpleMeans[j]) <= FLOAT_ACCEPTABLE_ERROR);
-                    //logger().debug("mergedTv->getCount() = %f, simpleCounts[j] = %f", mergedTv->getCount(), simpleCounts[j]);
-                    TS_ASSERT(fabs(mergedTv->getCount()  - simpleCounts[j]) <= FLOAT_ACCEPTABLE_ERROR);
-                    TS_ASSERT(fabs(mergedTv->getConfidence() - simpleConfidences[j] ) <= FLOAT_ACCEPTABLE_ERROR);
-                } else {
-                    TS_ASSERT(fabs(mergedTv->getMean()  - simpleMeans[i]) <= FLOAT_ACCEPTABLE_ERROR);
-                    //logger().debug("mergedTv->getCount() = %f, simpleCounts[i] = %f", mergedTv->getCount(), simpleCounts[i]);
-                    TS_ASSERT(fabs(mergedTv->getCount()  - simpleCounts[i]) <= FLOAT_ACCEPTABLE_ERROR);
-                    TS_ASSERT(fabs(mergedTv->getConfidence() - simpleConfidences[i] ) <= FLOAT_ACCEPTABLE_ERROR);
-                }
-            }
-        }
+        //mean=(0.25*0.0 +0.5*1.0)/(0.0+1.0)=0.5 count=0.0+1.0-0.0*0.2=1.0
+        mergedTv = simpleTvs[0]->merge(simpleTvs[1]);
+        TS_ASSERT(mergedTv != simpleTvs[0]);
+        TS_ASSERT(mergedTv->getMean()==0.5f);
+        TS_ASSERT(mergedTv->getCount()==1.0f);
+        mergedTv = simpleTvs[1]->merge(simpleTvs[2]);
+        TS_ASSERT(mergedTv != simpleTvs[1]);
+        //mean=(0.5*1.0 +0.75*2.0)/(1.0+2.0)=0.6667 count=2.0+1.0-1.0*0.2=2.8
+        TS_ASSERT_DELTA(mergedTv->getMean(), 0.6667f,0.0001f);
+        TS_ASSERT_DELTA(mergedTv->getCount(),2.8f,0.01f);
+
     }
 
     void testIndefiniteMerge()
