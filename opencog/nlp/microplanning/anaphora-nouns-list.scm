@@ -99,8 +99,8 @@
 ; 'proc' needs to be a normal Scheme procedure (not <generic>) but must
 ; accept a <noun-item> as the parameter.
 ;
-(define-method (par-for-each-by-proc (nl <nouns-list>) (proc <procedure>))
-	(par-for-each proc (slot-ref nl 'lst))
+(define-method (for-each-by-proc (nl <nouns-list>) (proc <procedure>))
+	(for-each proc (slot-ref nl 'lst))
 )
 
 ; -----------------------------------------------------------------------

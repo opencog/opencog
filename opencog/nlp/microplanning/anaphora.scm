@@ -22,7 +22,7 @@
 	(populate-nouns-list n-lst (get-chunks inputs-set))
 
 	; go through each noun-item in the noun-list
-	(par-for-each-by-proc n-lst
+	(for-each-by-proc n-lst
 		(lambda (ni)
 			(let* ((forms (get-sentence-forms (get-utterance-type inputs-set (get-chunk-index ni))))
 			       (old-noun-node (get-noun-node ni))
