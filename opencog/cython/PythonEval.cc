@@ -12,6 +12,19 @@
  *   http://www.linuxjournal.com/article/3641?page=0,2
  *   http://www.codeproject.com/KB/cpp/embedpython_1.aspx
  *
+ * NOTE: The Python C API reference counting is very tricky and the
+ * API inconsistently handles PyObject* object ownership.
+ * DO NOT change the reference count calls below using Py_INCREF
+ * and the corresponding Py_DECREF until you completely understand
+ * the Python API concepts of "borrowed" and "stolen" references.
+ * Make absolutely NO assumptions about the type of reference the API 
+ * will return. Instead, verify if it returns a "new" or "borrowed"
+ * reference. When you pass PyObject* objects to the API, don't assume 
+ * you still need to decrement the reference count until you verify
+ * that the exact API call you are making does not "steal" the
+ * reference: SEE: https://docs.python.org/2/c-api/intro.html?highlight=steals#reference-count-details
+ * Remember to look to verify the behavior of each and every Py_ API call.
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
@@ -364,15 +377,15 @@ void PythonEval::printDict(PyObject* obj)
 
     // Get the keys from the dictionary and print them.
     pyKeys = PyDict_Keys(obj);
-    for (int i = 0; i < PyList_GET_SIZE(pyKeys); i++) {
+    for (int i = 0; i < PyList_Size(pyKeys); i++) {
 
         // Get and print one key.
-        pyKey = PyList_GET_ITEM(pyKeys, i);
+        pyKey = PyList_GetItem(pyKeys, i);
         char* c_name = PyBytes_AsString(pyKey);
         printf("%s\n", c_name);
  
-        // Cleanup the Python reference count for this key.
-        Py_DECREF(pyKey);
+        // PyList_GetItem returns a borrowed reference, so don't do this:
+        // Py_DECREF(pyKey);
     }
 
     // Cleanup the Python reference count for the keys list.
@@ -476,8 +489,10 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
         errorString = PyBytes_AsString(pyErrorMessage);
         PyErr_Print();
 
+        // PyErr_Occurred returns a borrowed reference, so don't do 
+        // Py_DECREF(pyError);
+
         // Cleanup the reference count for pyError and pyErrorMessage
-        Py_DECREF(pyError);
         Py_DECREF(pyErrorMessage);
     }
     
@@ -557,8 +572,10 @@ std::string PythonEval::apply_script(const std::string& script)
         errorString = PyBytes_AsString(pyErrorString);
         PyErr_Print();
 
+        // PyErr_Occurred returns a borrowed reference, so don't do this:
+        // Py_DECREF(pyError);
+
         // Cleanup the reference count for the Python objects.
-        Py_DECREF(pyError);
         Py_DECREF(pyErrorString);
 
      }
@@ -586,12 +603,82 @@ std::string PythonEval::apply_script(const std::string& script)
 
 void PythonEval::addSysPath(std::string path)
 {
-    PyList_Append(this->pySysPath, PyBytes_FromString(path.c_str()));
-    //    PyRun_SimpleString(("sys.path += ['" + path + "']").c_str());
+    PyObject* pyPathString = PyBytes_FromString(path.c_str());
+    PyList_Append(this->pySysPath, pyPathString);
+
+    // We must decrement because, unlike PyList_SetItem, PyList_Append does
+    // not "steal" the reference we pass to it. So this:
+    //
+    // PyList_Append(this->pySysPath, PyBytes_FromString(path.c_str()));
+    // 
+    // leaks memory. So we need to save the reference as above and
+    // decrement it, as below.
+    //
+    Py_DECREF(pyPathString);
 }
 
 
 const int ABSOLUTE_IMPORTS_ONLY = 0;
+
+void PythonEval::import_module( const boost::filesystem::path &file,
+                                PyObject* pyFromList)
+{
+    // The pyFromList parameter corresponds to what would appear in an
+    // import statement after the import:
+    //
+    // from <module> import <from list>
+    //
+    // When this list is empty, this corresponds to an import of the
+    // entire module as is done in the simple import statement:
+    //
+    // import <module>
+    //
+    string fileName, moduleName;
+
+    // Get the module name from the Python file name by removing the ".py"
+    fileName = file.filename().c_str();
+    moduleName = fileName.substr(0, fileName.length()-3);
+
+    logger().info("    importing Python module: " + moduleName);
+
+    // Import the entire module into the current Python environment.
+    PyObject* pyModule = PyImport_ImportModuleLevel((char*) moduleName.c_str(),
+            this->pyGlobal, this->pyLocal, pyFromList,
+            ABSOLUTE_IMPORTS_ONLY);
+
+    // If the import succeeded...
+    if (pyModule) {
+        PyObject* pyModuleDictionary = PyModule_GetDict(pyModule);
+        
+        // Add the ATOMSPACE object to this module
+        PyObject* pyAtomSpaceObject = this->getPyAtomspace();
+        PyDict_SetItemString(pyModuleDictionary,"ATOMSPACE",
+                pyAtomSpaceObject);
+
+        // This decrement is needed because PyDict_SetItemString does
+        // not "steal" the reference, unlike PyList_SetItem.
+        Py_DECREF(pyAtomSpaceObject);
+
+        // We need to increment the pyModule reference because
+        // PyModule_AddObject "steals" it and we're keeping a copy
+        // in our modules list.
+        Py_INCREF(pyModule);
+
+        // Add the module name to the root module.
+        PyModule_AddObject(this->pyRootModule, moduleName.c_str(), pyModule);
+
+        // Add the module to our modules list. So don't decrement the
+        // Python reference in this function.
+        this->modules[moduleName] = pyModule;
+
+    // otherwise, handle the error.
+    } else {
+        if(PyErr_Occurred())
+            PyErr_Print();
+        logger().warn() << "Couldn't import '" << moduleName << "' module";
+    }
+
+}
 
 /**
 * Add all the .py files in the given directory as modules to __main__ and
@@ -601,7 +688,6 @@ void PythonEval::add_module_directory(const boost::filesystem::path &directory)
 {
     vector<boost::filesystem::path> files;
     vector<boost::filesystem::path> pyFiles;
-    string fileName, moduleName;
 
     // Loop over the files in the directory looking for Python files.
     copy(boost::filesystem::directory_iterator(directory),
@@ -625,85 +711,42 @@ void PythonEval::add_module_directory(const boost::filesystem::path &directory)
     //
     // import <module>
     //
-    PyObject* pyModule = NULL;
     PyObject* pyFromList = PyList_New(0);
 
     // Import each of the ".py" files as a Python module.
     for(vector<boost::filesystem::path>::const_iterator it(pyFiles.begin());
-            it != pyFiles.end(); ++it) {
+            it != pyFiles.end(); ++it)
+        this->import_module(*it, pyFromList);
 
-        // Get the module name from the Python file name by removing the ".py"
-        fileName = it->filename().c_str();
-        moduleName = fileName.substr(0, fileName.length()-3);
-
-        logger().info("    importing Python module: " + moduleName);
-
-        // Import the entire module into the current Python environment.
-        pyModule = PyImport_ImportModuleLevel((char*) moduleName.c_str(),
-                this->pyGlobal, this->pyLocal, pyFromList,
-                ABSOLUTE_IMPORTS_ONLY);
-
-        // If the import succeeded...
-        if (pyModule) {
-            PyObject* pyModuleDictionary = PyModule_GetDict(pyModule);
-            
-            // Add the ATOMSPACE object to this module
-            PyObject* pyAtomSpaceObject = this->getPyAtomspace();
-            PyDict_SetItemString(pyModuleDictionary,"ATOMSPACE",
-                    pyAtomSpaceObject);
-            Py_DECREF(pyAtomSpaceObject);
-
-            // Add the module name to the root module.
-            PyModule_AddObject(this->pyRootModule, moduleName.c_str(), pyModule);
-
-            // Add the module to our modules list. So don't decrement the
-            // Python reference in this function.
-            this->modules[moduleName] = pyModule;
-
-        // otherwise, handle the error.
-        } else {
-            if(PyErr_Occurred())
-                PyErr_Print();
-            logger().warn() << "Couldn't import " << moduleName << 
-                    " module from directory " << directory.c_str();
-        }
-    }
-
-    // Cleanup the reference count for the Python objects.
+    // Cleanup the reference count for the from list.
     Py_DECREF(pyFromList);
 }
 
 /**
-* Add the .py file in the given path as a module to __main__ and keep the
-* references in a dictionary (this->modules)
+* Add the .py file in the given path as a module to __main__ and add the
+* reference to the dictionary (this->modules)
 */
-void PythonEval::add_module_file(const boost::filesystem::path &p)
+void PythonEval::add_module_file(const boost::filesystem::path &file)
 {
-    this->addSysPath(p.parent_path().c_str());
+    // Add this file's parent path to sys.path so Python imports
+    // can find it.
+    this->addSysPath(file.parent_path().c_str());
 
-    string name;
-    PyObject* mod;
-    PyObject* pyList = PyList_New(0);
+    // The pyFromList variable corresponds to what would appear in an
+    // import statement after the import:
+    //
+    // from <module> import <from list>
+    //
+    // When this list is empty, as below, this corresponds to an import of the
+    // entire module as is done in the simple import statement:
+    //
+    // import <module>
+    //
 
-    name = p.filename().c_str();
-    name = name.substr(0, name.length()-3);
-    mod = PyImport_ImportModuleLevel((char *)name.c_str(), this->pyGlobal,
-            this->pyLocal, pyList, 0);
-
-    PyDict_SetItem(PyModule_GetDict(mod), PyBytes_FromString("ATOMSPACE"),
-            this->getPyAtomspace());
-    if(mod){
-        PyDict_SetItem(PyModule_GetDict(mod), PyBytes_FromString("ATOMSPACE"),
-                this->getPyAtomspace());
-        PyModule_AddObject(this->pyRootModule, name.c_str(), mod);
-        this->modules[name] = mod;
-    }
-    else{
-        if(PyErr_Occurred())
-            PyErr_Print();
-        logger().warn() << "Couldn't import " << name << " module";
-    }
-    Py_DECREF(pyList);
+    // Import this file as a module.
+    PyObject* pyFromList = PyList_New(0);
+    this->import_module(file, pyFromList);
+    Py_DECREF(pyFromList);
 }
 
 /**
@@ -716,6 +759,10 @@ void PythonEval::addModuleFromPath(std::string pathString)
 
     logger().info("Adding Python module (or directory): " + modulePath.string());
 
+    // Grab the GIL
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
     if(boost::filesystem::exists(modulePath)){
         if(boost::filesystem::is_directory(modulePath))
             this->add_module_directory(modulePath);
@@ -726,6 +773,8 @@ void PythonEval::addModuleFromPath(std::string pathString)
         logger().error() << modulePath << " doesn't exists";
     }
 
+    // Release the GIL. No Python API allowed beyond this point.
+    PyGILState_Release(gstate);
 }
 
 void PythonEval::eval_expr(const std::string& partial_expr)
