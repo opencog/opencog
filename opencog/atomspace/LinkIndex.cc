@@ -36,15 +36,13 @@ LinkIndex::LinkIndex(void)
 
 void LinkIndex::resize()
 {
-    DPRINTF("Resizing link index (%p) to size %d\n", this, classserver().getNumberOfClasses());
 	idx.resize(classserver().getNumberOfClasses());
 }
 
 size_t LinkIndex::size() const
 {
 	size_t cnt = 0;
-	size_t vsz = idx.size();
-	for (size_t i=0; i<vsz; i++) cnt += idx[i].size();
+	for (HandleSeqIndex hsi: idx) cnt += hsi.size();
 	return cnt;
 }
 
@@ -73,17 +71,15 @@ void LinkIndex::removeAtom(AtomPtr a)
 Handle LinkIndex::getHandle(Type t, const HandleSeq &seq) const
 {
 	if (t >= idx.size()) throw RuntimeException(TRACE_INFO,
-            "Index out of bounds for atom type (t = %lu)", t);
+	            "Index out of bounds for atom type (t = %lu)", t);
 	const HandleSeqIndex &hsi = idx[t];
 	return hsi.get(seq);
 }
 
 void LinkIndex::remove(bool (*filter)(Handle))
 {
-	std::vector<HandleSeqIndex>::iterator s;
-	for (s = idx.begin(); s != idx.end(); ++s) {
-		s->remove(filter);
-	}
+	for (HandleSeqIndex s : idx)
+		s.remove(filter);
 }
 
 UnorderedHandleSet LinkIndex::getHandleSet(Type type, const HandleSeq& seq, bool subclass) const
@@ -98,7 +94,7 @@ UnorderedHandleSet LinkIndex::getHandleSet(Type type, const HandleSeq& seq, bool
 			if (classserver().isA(s, type))
 			{
 				if (s >= idx.size()) throw RuntimeException(TRACE_INFO,
-                        "Index out of bounds for atom type (s = %lu)", s);
+				           "Index out of bounds for atom type (s = %lu)", s);
 				const HandleSeqIndex &hsi = idx[s];
 				Handle h = hsi.get(seq);
 				if (Handle::UNDEFINED != h)
