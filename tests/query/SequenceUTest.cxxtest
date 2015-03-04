@@ -119,13 +119,13 @@ void SequenceUTest::test_sequence(void)
 
     // Check the number of green lights and red lights that were
     // evaluated. The pattern has two green lights and one red
-    // light...
-
+    // light... The GPN's count how many times these are hit, and
+    // the counts should be correct.
     std::string sngreen = eval->eval("num-green");
     std::string snred = eval->eval("num-red");
     int ngreen = atoi(sngreen.c_str());
     int nred = atoi(snred.c_str());
-    TS_ASSERT_EQUALS(3, ngreen);
+    TS_ASSERT_EQUALS(2, ngreen);
     TS_ASSERT_EQUALS(1, nred);
 
     TS_ASSERT_EQUALS(0, as->getArity(ans));
