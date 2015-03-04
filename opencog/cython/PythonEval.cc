@@ -8,10 +8,6 @@
  *
  * @todo When can we remove the singleton instance?
  *
- * Reference:
- *   http://www.linuxjournal.com/article/3641?page=0,2
- *   http://www.codeproject.com/KB/cpp/embedpython_1.aspx
- *
  * NOTE: The Python C API reference counting is very tricky and the
  * API inconsistently handles PyObject* object ownership.
  * DO NOT change the reference count calls below using Py_INCREF
@@ -211,7 +207,7 @@ PythonEval::PythonEval(AtomSpace* atomspace)
     // Add the preload functions
     if (config().has("PYTHON_PRELOAD_FUNCTIONS")) {
         string preloadDirectory = config()["PYTHON_PRELOAD_FUNCTIONS"];
-        this->addModuleFromPath(preloadDirectory);
+        this->add_module_from_path(preloadDirectory);
     }
 }
 
@@ -293,7 +289,7 @@ void PythonEval::initialize_python_objects_and_imports(void)
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
  
-    // Get sys.path and keep the reference, used in this->addSysPath()
+    // Get sys.path and keep the reference, used in this->add_to_sys_path()
     // NOTE: We have to promote the reference here with Py_INCREF because
     // PySys_GetObject returns a borrowed reference and we don't want it to
     // go away behind the scenes.
@@ -329,7 +325,7 @@ void PythonEval::initialize_python_objects_and_imports(void)
 
     // Add ATOMSPACE to __main__ module.
     PyObject* pyRootDictionary = PyModule_GetDict(this->pyRootModule);
-    PyObject* pyAtomSpaceObject = this->getPyAtomspace();
+    PyObject* pyAtomSpaceObject = this->atomspace_py_object();
     PyDict_SetItemString(pyRootDictionary, "ATOMSPACE", pyAtomSpaceObject);
     Py_DECREF(pyAtomSpaceObject);
 
@@ -348,7 +344,7 @@ void PythonEval::initialize_python_objects_and_imports(void)
         __FUNCTION__);
 }
 
-PyObject* PythonEval::getPyAtomspace(AtomSpace* atomspace)
+PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
 {
     PyObject * pyAtomSpace;
 
@@ -368,7 +364,7 @@ PyObject* PythonEval::getPyAtomspace(AtomSpace* atomspace)
     return pyAtomSpace;
 }
 
-void PythonEval::printDict(PyObject* obj)
+void PythonEval::print_dictionary(PyObject* obj)
 {
     if (!PyDict_Check(obj))
         return;
@@ -620,7 +616,7 @@ std::string PythonEval::apply_script(const std::string& script)
     return result;
 }
 
-void PythonEval::addSysPath(std::string path)
+void PythonEval::add_to_sys_path(std::string path)
 {
     PyObject* pyPathString = PyBytes_FromString(path.c_str());
     PyList_Append(this->pySysPath, pyPathString);
@@ -670,7 +666,7 @@ void PythonEval::import_module( const boost::filesystem::path &file,
         PyObject* pyModuleDictionary = PyModule_GetDict(pyModule);
         
         // Add the ATOMSPACE object to this module
-        PyObject* pyAtomSpaceObject = this->getPyAtomspace();
+        PyObject* pyAtomSpaceObject = this->atomspace_py_object();
         PyDict_SetItemString(pyModuleDictionary,"ATOMSPACE",
                 pyAtomSpaceObject);
 
@@ -718,7 +714,7 @@ void PythonEval::add_module_directory(const boost::filesystem::path &directory)
     }
 
     // Add the directory we are adding to Python's sys.path
-    this->addSysPath(directory.c_str());
+    this->add_to_sys_path(directory.c_str());
 
     // The pyFromList variable corresponds to what would appear in an
     // import statement after the import:
@@ -749,7 +745,7 @@ void PythonEval::add_module_file(const boost::filesystem::path &file)
 {
     // Add this file's parent path to sys.path so Python imports
     // can find it.
-    this->addSysPath(file.parent_path().c_str());
+    this->add_to_sys_path(file.parent_path().c_str());
 
     // The pyFromList variable corresponds to what would appear in an
     // import statement after the import:
@@ -769,10 +765,10 @@ void PythonEval::add_module_file(const boost::filesystem::path &file)
 }
 
 /**
-* Get a path from the user and call the corresponding function for
-* directories and files
+* Get a path and determine if it is a file or directory, then call the
+* corresponding function specific to directories and files.
 */
-void PythonEval::addModuleFromPath(std::string pathString)
+void PythonEval::add_modules_from_path(std::string pathString)
 {
     boost::filesystem::path modulePath(pathString);
 
