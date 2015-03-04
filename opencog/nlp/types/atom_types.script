@@ -144,3 +144,9 @@ LG_WORD_CSET <- LIST_LINK
 // and LgLinkInstanceLink will link the node to the original connectors
 LG_LINK_INSTANCE_NODE <- PREDICATE_NODE
 LG_LINK_INSTANCE_LINK <- LIST_LINK
+
+//MST parser node.
+//This comes from the MST parse
+MST_LINK_NODE <- PREDICATE_NODE "MSTLinkNode"
+MST_DISJUNCT_NODE <- PREDICATE_NODE "MSTDisjunctNode"
+
