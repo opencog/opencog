@@ -143,9 +143,12 @@ class PLNUnitTester(TestCase):
         plnTypes = "learning/pln/pln_types.scm"
 
         if not __DEV_MODE__:
-            coreTypes = os.path.join(test_pln_directory, '../../../build/opencog/atomspace/core_types.scm')
-            utilities = os.path.join(test_pln_directory, '../../../scm/utilities.scm')
-            plnTypes = os.path.join(test_pln_directory, '../../../build/opencog/reasoning/pln/pln_types.scm')
+            coreTypes = os.path.join(test_pln_directory, 
+                    '../../../build/opencog/atomspace/core_types.scm')
+            utilities = os.path.join(test_pln_directory, 
+                    '../../../scm/utilities.scm')
+            plnTypes = os.path.join(test_pln_directory, 
+                    '../../../build/opencog/reasoning/pln/pln_types.scm')
 
             # Guile can't handle paths with relative '../..' etc., so
             # normalize to a full path for guile.
