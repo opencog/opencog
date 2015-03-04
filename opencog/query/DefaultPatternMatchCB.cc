@@ -266,6 +266,12 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
                                            std::vector<Handle> &clauses,
                                            std::vector<Handle> &negations)
 {
+	// Extract the GPN's. We will need these during the search.
+	FindVariables fv(GROUNDED_PREDICATE_NODE, false);
+	fv.find_vars(clauses);
+	fv.find_vars(negations);
+	_dyns = fv.holders;
+
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
 	// iterating over the incoming set of the node, and so, if it is

@@ -26,7 +26,6 @@
 #define _OPENCOG_CRISP_LOGIC_PATTERN_MATCH_H
 
 #include <opencog/atomspace/types.h>
-#include <opencog/execution/EvaluationLink.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 
@@ -47,31 +46,7 @@ class CrispLogicPMCB :
 {
 	public:
 		CrispLogicPMCB(AtomSpace* as)
-			: DefaultPatternMatchCB(as), _do_gpn(false) {}
-
-		virtual bool node_match(Handle& npat_h, Handle& nsoln_h)
-		{
-			// If equality, then a match.
-			if (npat_h != nsoln_h) return false;
-
-			if (not _do_gpn)
-				_do_gpn = (npat_h->getType() == GROUNDED_PREDICATE_NODE);
-			return true;
-		}
-
-		virtual bool post_link_match(LinkPtr& pat_link, LinkPtr& gnd_link)
-		{
-			if (not _do_gpn) return true;
-			_do_gpn = false;  // reset right away.
-
-			// We will findoutselves here whenever the link contains
-			// a GroundedPredicateNode. In such a case, execute the
-			// node, and declare a match, or no match, depending
-			// one how the evaluation turned out.  Its "crisp logic"
-			// because we use a greater-than-half for the TV.
-			TruthValuePtr tv(EvaluationLink::do_evaluate(_as, gnd_link->getHandle()));
-			return tv->getMean() >= 0.5;
-		}
+			: DefaultPatternMatchCB(as) {}
 
 		/**
  		 * This callback is called whenever a match has been identified
@@ -108,8 +83,6 @@ class CrispLogicPMCB :
 			// printf (">>>> optional tv=%f\n", tv.getMean());
 			return tv->getMean() < 0.5;
 		}
-	private:
-		bool _do_gpn;
 };
 
 } // namespace opencog

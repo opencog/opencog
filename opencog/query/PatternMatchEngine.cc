@@ -1,7 +1,7 @@
 /*
  * PatternMatchEngine.cc
  *
- * Copyright (C) 2008,2009,2011,2014 Linas Vepstas
+ * Copyright (C) 2008,2009,2011,2014,2015 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  February 2008
  *
@@ -194,8 +194,9 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	// ... but only if hp is a constant i.e. contains no bound variables)
 	if (hp == hg)
 	{
-#ifdef NO_SELF_GROUNDING
 		prtmsg("Compare atom to itself:\n", hp);
+
+#ifdef NO_SELF_GROUNDING
 		if (hg == curr_pred_handle)
 		{
 			// Mismatch, if hg contains bound vars in it.
@@ -213,13 +214,12 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 				var_grounding[hp] = hg;
 			}
 
-			// We still need to call the callback, in case the pattern
-			// is a GroundedPredicateNode (for example).
-			return pmc->node_match(hp, hg);
 		}
-#else
-		return true;
 #endif
+		// If the pattern contains atoms that are evaluatable i.e. GPN's
+		// then we must fall through, and let the tree comp mechanism
+		// find and evaluate them.
+		if (_evaluatable.find(hp) == _evaluatable.end()) return true;
 	}
 
 	// If both are links, compare them as such.
@@ -455,8 +455,13 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 /// Return true if a grounding was found.
 bool PatternMatchEngine::soln_up(Handle hsoln)
 {
-	// Let's not stare at our own navel.
-	if (hsoln == curr_root) return false;
+	// Let's not stare at our own navel. ... Unless the current
+	// clause has GroundedPredicateNodes in it. In that case, we
+	// have to make sure that they get evaluated.
+	if ((hsoln == curr_root)
+	    and _evaluatable.find(curr_root) == _evaluatable.end())
+		return false;
+
 	have_stack.push(have_more);
 	have_more = false;
 
@@ -514,8 +519,8 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 		curr_soln_handle = hsoln;
 
 		// Move up the predicate, and hunt for a match, again.
-		dbgprt("Term has ground, move up.");
-		// IncomingSet iset = get_incoming_set(curr_pred_handle);
+		dbgprt("Term has ground, move up.\n");
+		// Do not use the callback get_incoming_set on the pattern!
 		IncomingSet iset = curr_pred_handle->getIncomingSet();
 		size_t sz = iset.size();
 		bool found = false;
@@ -1025,6 +1030,11 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	if (_cnf_clauses.empty()) return;
 
 	// Preparation prior to search.
+	// Find everything that contains GPN's or GSN's.
+	FindVariables fv(GROUNDED_PREDICATE_NODE);
+	fv.find_vars(_cnf_clauses);
+	_evaluatable = fv.holders;
+
 	// Create a table of the nodes that appear in the clauses, and
 	// a list of the clauses that each node participates in.
 	for (Handle h : _cnf_clauses)

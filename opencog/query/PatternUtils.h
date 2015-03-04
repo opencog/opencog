@@ -3,7 +3,7 @@
  *
  * Utilities for navigating a tree of outgoing edges.
  *
- * Copyright (C) 2009, 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2014, 2015 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -65,10 +65,11 @@ class FindVariables
 		std::set<Handle> varset;
 		std::set<Handle> holders;
 
-		inline FindVariables(Type t)
-			: _var_type(t) {}
+		inline FindVariables(Type t, bool recurs_hold=true)
+			: _recursive_hold(recurs_hold), _var_type(t) {}
 		inline FindVariables(const std::set<Handle>& selection)
-			: _var_type(NOTYPE), _var_domain(selection) {}
+			: _recursive_hold(true), _var_type(NOTYPE),
+			 _var_domain(selection) {}
 
 		/**
 		 * Create a set of all of the VariableNodes that lie in the
@@ -94,7 +95,7 @@ class FindVariables
 					if (find_vars(oh)) held = true;
 				}
 				if (held) holders.insert(h);
-				return held;
+				return _recursive_hold and held;
 			}
 			return false;
 		}
@@ -104,6 +105,7 @@ class FindVariables
 			for (Handle h : hlist) find_vars(h);
 		}
 	private:
+		bool _recursive_hold;
 		Type _var_type;
 		std::set<Handle> _var_domain;
 };

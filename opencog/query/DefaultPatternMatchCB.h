@@ -1,7 +1,7 @@
 /*
  * DefaultPatternMatchCB.h
  *
- * Copyright (C) 2009, 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2014, 2015 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/execution/EvaluationLink.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 
@@ -125,6 +126,25 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 			return pattype == soltype;
 		}
 
+		virtual bool post_link_match(LinkPtr& pat_link, LinkPtr& gnd_link)
+		{
+			Handle hp(pat_link);
+			if (_dyns.find(hp) == _dyns.end()) return true;
+
+			// We will find ourselves here whenever the link contains
+			// a GroundedPredicateNode. In this case, execute the
+			// node, and declare a match, or no match, depending
+			// one how the evaluation turned out.  Its "crisp logic"
+			// because we use a greater-than-half for the TV.
+			//
+			// This is similar to virtual_link_match(), except that,
+			// in the current design, this one will get called instead
+			// of that one, when, the pattern has no variables in it.
+			// Perhaps this is wrong .. XXX FIXME
+			TruthValuePtr tv(EvaluationLink::do_evaluate(_as, gnd_link->getHandle()));
+			return tv->getMean() >= 0.5;
+		}
+
 		/**
 		 * Called when a virtual link is encountered. Returns false
 		 * to reject the match.
@@ -163,6 +183,9 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual Handle find_starter(Handle, size_t&, Handle&, size_t&);
 		virtual Handle find_thinnest(std::vector<Handle>&, Handle&, size_t&);
 		AtomSpace *_as;
+
+		// Info about GPN's
+		std::set<Handle> _dyns;
 };
 
 } // namespace opencog
