@@ -18,10 +18,6 @@
  *
  *  @todo
  *
- * Reference:
- *   http://www.linuxjournal.com/article/3641?page=0,2
- *   http://www.codeproject.com/KB/cpp/embedpython_1.aspx
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
@@ -86,10 +82,18 @@ class PythonEval : public GenericEval
 {
     private:
         void initialize_python_objects_and_imports(void);
+
         void import_module( const boost::filesystem::path &file,
                             PyObject* pyFromList);
         void add_module_directory(const boost::filesystem::path &directory);
         void add_module_file(const boost::filesystem::path &file);
+        void add_modules_from_path(std::string path);
+
+        void add_to_sys_path(std::string path);
+
+        PyObject * atomspace_py_object(AtomSpace * atomspace = NULL);
+
+        void print_dictionary(PyObject* obj);
 
         static PythonEval* singletonInstance;
         static AtomSpace* singletonAtomSpace;
@@ -125,9 +129,6 @@ class PythonEval : public GenericEval
          */
         static PythonEval & instance(AtomSpace * atomspace = NULL);
 
-        void addModuleFromPath(std::string path);
-        void addSysPath(std::string path);
-
         // The async-output interface.
         virtual void begin_eval() {}
         virtual void eval_expr(const std::string&);
@@ -138,21 +139,18 @@ class PythonEval : public GenericEval
             { begin_eval(); eval_expr(expr); return poll_result(); }
 
         /**
-         * Return a new reference of python AtomSpace, which holds c++ pointer
-         * of the given c++ AtomSpace. Then you can pass this python AtomSpace
-         * to python functions within c++.
+         * Runs the Python code contained in 'script'.
          */
-        PyObject * getPyAtomspace(AtomSpace * atomspace = NULL);
-
-        /**
-         * Display python dict in c++.
-         */
-        void printDict(PyObject* obj);
-
         std::string apply_script(const std::string& script);
 
-        // Apply expression to args, returning Handle or TV
+        /**
+         * Calls the Python function passed in 'func' returning a Handle.
+         */
         Handle apply(const std::string& func, Handle varargs);
+
+        /**
+         * Calls the Python function passed in 'func' returning a TruthValuePtr.
+         */
         TruthValuePtr apply_tv(const std::string& func, Handle varargs);
 };
 
