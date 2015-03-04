@@ -161,7 +161,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 
 		for (Handle virt : virtuals)
 		{
-			// At this time, we expect all virutal links to be
+			// At this time, we expect all virtual links to be
 			// EvaluationLinks having the structure
 			//
 			//   EvaluationLink
@@ -170,6 +170,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			//           Arg1Atom
 			//           Arg2Atom
 			//
+			// with one or more VariableNodes appearing in the Arg atoms.
 			// So, we ground the ListLink, and pass that to the callback.
 			LinkPtr lvirt(LinkCast(virt));
 			Handle arglist(lvirt->getOutgoingAtom(1));
@@ -287,10 +288,20 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 	}
 
 	// Are there any virtual links in the clauses? If so, then we need
-	// to do some special handling.
+	// to do some special handling.  BTW: a clause is virtual only if
+	// it contains a GroundedPredicate, and the GroundedPredicate takes
+	// an argument that contains a variable. Otherwise, its not really
+	// virtual.
+	//
+	// XXX FIXME, the check blow is not quite correct; for example,
+	// it would tag the following as virtual, although it is not:
+	// (BlahLink (VariableNode "$var") (EvaluationLink (GPN "scm:duh")
+	// (ListLink (ConceptNode "Stuff"))))  -- the var is there but not
+	// in the GPN.
 	for (Handle clause: clauses)
 	{
-		if (contains_atomtype(clause, GROUNDED_PREDICATE_NODE))
+		if (contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
+		    and any_variable_in_tree(clause, vars))
 			_virtuals.push_back(clause);
 		else
 			_nonvirts.push_back(clause);
@@ -375,8 +386,6 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 void PatternMatch::do_match(PatternMatchCallback *cb,
                             std::set<Handle>& vars,
                             std::vector<Handle>& clauses)
-
-	throw (InvalidParamException)
 {
 	// Its cheaper to run ctor and dtor than it is to clear the
 	// internal variables, and use this instance more than once.

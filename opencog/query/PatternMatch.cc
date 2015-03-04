@@ -36,7 +36,6 @@ PatternMatch::PatternMatch(void) : _used(false) {}
 void PatternMatch::match(PatternMatchCallback *cb,
                          Handle hvarbles,
                          Handle hclauses)
-	throw (InvalidParamException)
 {
 	// Both must be non-empty.
 	LinkPtr lclauses(LinkCast(hclauses));
@@ -154,7 +153,6 @@ void PatternMatch::match(PatternMatchCallback *cb,
 void PatternMatch::do_imply (Handle himplication,
                              Implicator &impl,
                              std::set<Handle>& varset)
-	throw (InvalidParamException)
 {
 	validate_implication(himplication);
 
@@ -467,7 +465,6 @@ void PatternMatch::validate(Handle hbindlink)
 
 void PatternMatch::do_bindlink (Handle hbindlink,
                                 Implicator& implicator)
-	throw (InvalidParamException)
 {
 	validate_bindvars(hbindlink);
 	implicator.set_type_restrictions(_typemap);
@@ -476,7 +473,6 @@ void PatternMatch::do_bindlink (Handle hbindlink,
 
 void PatternMatch::do_imply (Handle himplication,
                              Implicator &impl)
-	throw (InvalidParamException)
 {
 	std::set<Handle> varset;
 	do_imply(himplication, impl, varset);

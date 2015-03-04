@@ -38,21 +38,32 @@
 
 namespace opencog {
 
-/// Find all of the variables occuring in a clause.
+/// Find all of the variables, and all of the links holding a variable,
+/// occuring in a clause.
+///
+/// After find_vars() is called, the set of variables that were found
+/// can be retreived from the public member `varset`.  The set of links
+/// that had a variable occuring somewhere within them is in the public
+/// member `holders`.
 ///
 /// A "variable" is defined in one of two ways: It is either a specified
 /// type, or it is a member of the given domain.  When only the type is
-/// given, it will typically be just VARIABLE_NODE, and so this just
-/// finds all the VARIABLE_NODES in the clause.  Alternately, if a set
-/// of handles is given, then this finds the subset of that set that
-/// actually occurs in the given clause.  That is, it computes the
-/// intersection between the set of given handles, and the set of all
-/// handles that occur in the clauses.
+/// given, it will typically be VARIABLE_NODE, GROUNDED_PREDICATE_NODE
+/// or GROUNDED_SCHEMA_NODE, and so this just finds these atom types in
+/// the clause(s).  Alternately, if a set of handles is given, then this
+/// finds the subset of that set that actually occurs in the given
+/// clause(s).  That is, it computes the intersection between the set of
+/// given handles, and the set of all handles that occur in the clauses.
+///
+/// However, QUOTED variables are NOT reported. If a variable (atom
+/// type or set) occurs under a QUOTE_LINK, then it is ignored. That is,
+/// QUOTE_LINK halt the recursive search.
 ///
 class FindVariables
 {
 	public:
 		std::set<Handle> varset;
+		std::set<Handle> holders;
 
 		inline FindVariables(Type t)
 			: _var_type(t) {}
@@ -63,20 +74,29 @@ class FindVariables
 		 * Create a set of all of the VariableNodes that lie in the
 		 * outgoing set of the handle (recursively).
 		 */
-		inline void find_vars(Handle h)
+		inline bool find_vars(Handle h)
 		{
 			Type t = h->getType();
-			if ((t == _var_type) || _var_domain.count(h) == 1)
+			if ((t == _var_type) or _var_domain.count(h) == 1)
 			{
 				varset.insert(h);
-				return; //! Don't explore link-typed vars!
+				return true; //! Don't explore link-typed vars!
 			}
+
+			if (QUOTE_LINK == t) return false;
 
 			LinkPtr l(LinkCast(h));
 			if (l)
 			{
-				for (Handle oh : l->getOutgoingSet()) find_vars(oh);
+				bool held = false;
+				for (Handle oh : l->getOutgoingSet())
+				{
+					if (find_vars(oh)) held = true;
+				}
+				if (held) holders.insert(h);
+				return held;
 			}
+			return false;
 		}
 
 		inline void find_vars(std::vector<Handle> hlist)
@@ -178,8 +198,8 @@ static inline bool any_node_in_tree(const Handle& tree,
  * Return true if any of the indicated nodes occurs somewhere in
  * the tree (that is, in the tree spanned by the outgoing set.)
  * But ONLY if they are not quoted!  This is intended to be used to
- * search for variables, which are no longer variables when they
- * are quoted.
+ * search for variables; but when a variable is quoted, it is no
+ * longer a variable.
  */
 static inline bool any_variable_in_tree(const Handle& tree,
                                         const std::set<Handle>& nodes)

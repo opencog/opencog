@@ -27,7 +27,7 @@ Handle SchemeEval::do_apply(const std::string &func, Handle& varargs)
 {
 	// Apply the function to the args
 	SCM sresult = do_apply_scm (func, varargs);
-	
+
 	// If the result is a handle, return the handle.
 	return SchemeSmob::scm_to_handle(sresult);
 }
@@ -47,10 +47,10 @@ SCM SchemeEval::do_apply_scm(const std::string& func, Handle& varargs )
 {
 	SCM sfunc = scm_from_utf8_symbol(func.c_str());
 	SCM expr = SCM_EOL;
-	
+
 	// If there were args, pass the args to the function.
 	const std::vector<Handle> &oset = atomspace->getOutgoing(varargs);
-		
+
 	size_t sz = oset.size();
 	for (int i=sz-1; i>=0; i--)
 	{
@@ -70,7 +70,7 @@ SCM SchemeSmob::ss_execute (SCM satom)
 	AtomSpace* atomspace = ss_get_env_as("cog-execute");
 
 	Handle h = verify_handle(satom, "cog-execute");
-	
+
 	if (h->getType() != EXECUTION_OUTPUT_LINK)
 	{
 		scm_wrong_type_arg_msg("cog-execute", 1, satom,

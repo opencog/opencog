@@ -138,9 +138,9 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 
 	// If the C++ code throws any exceptions, and no one else
 	// has caught them, then we have to catch them, and print
-	// an error message to the shell. Actually, we'll be
-	// quasi-nice about this, and convert the C++ exception
-	// into a scheme exception.
+	// an error message to the shell. Actually, we'll be nice
+	// nice about this, and convert the C++ exception into a
+	// scheme exception.
 	try
 	{
 		rc = fe->invoke(arglist);

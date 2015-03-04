@@ -42,6 +42,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(UnorderedUTest)
 	ADD_CXXTEST(StackMoreUTest)
 	ADD_CXXTEST(GreaterThanUTest)
+	ADD_CXXTEST(SequenceUTest)
 	ADD_CXXTEST(QuoteUTest)
 	ADD_CXXTEST(BuggyLinkUTest)
 	ADD_CXXTEST(BuggyQuoteUTest)
@@ -76,6 +77,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater_than.scm
     ${PROJECT_BINARY_DIR}/tests/query/greater_than.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/match-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/match-link.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/sequence.scm
+    ${PROJECT_BINARY_DIR}/tests/query/sequence.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/single.scm
     ${PROJECT_BINARY_DIR}/tests/query/single.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-o-o.scm

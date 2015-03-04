@@ -222,15 +222,16 @@ void DefaultPatternMatchCB::validate_clauses(std::set<Handle>& vars,
  *    for virtual atoms is more important than support for unusual
  *    link_match() callbacks.
  *
- * 2) Search will begin at the first non-variable node in the "smallest"
- *    clause.  The smallest clause is chosen, so as to improve performance;
- *    but this has no effect on the throughness of the search.  The search
+ * 2) Search will begin at the first non-variable node in the "thinnest"
+ *    clause.  The thinnest clause is chosen, so as to improve performance;
+ *    but this has no effect on the thoroughness of the search.  The search
  *    will proceed by exploring the entire incoming-set for this node.
  *    The search will NOT examine other non-variable node types.
  *    If the node_match() callback is willing to accept a broader range
  *    of node matches, esp. for this initial node, then many possible
  *    solutions will be missed.  This seems like a reasonable limitation:
  *    if you really want a very lenient node_match(), then use variables.
+ *    Or you can implement your own perform_search() callback.
  *
  * 3) If the clauses consist entirely of variables, then the search
  *    will start by looking for all links that are of the same type as
@@ -238,7 +239,8 @@ void DefaultPatternMatchCB::validate_clauses(std::set<Handle>& vars,
  *    matches, if the link_match() callback is willing to accept a larger
  *    set of types.  This is a reasonable limitation: anything looser
  *    would very seriously degrade performance; if you really need a
- *    very lenient link_match(), then use variables.
+ *    very lenient link_match(), then use variables. Or you can
+ *    implement your own perform_search() callback.
  *
  * The above describes the limits to the "typical" search that this
  * algo can do well. In particular, if the constraint of 2) can be met,
@@ -280,9 +282,10 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 	size_t bestclause;
 	Handle best_start = find_thinnest(clauses, _starter_pred, bestclause);
 
-	if ((Handle::UNDEFINED != best_start) and 
-	    // (Handle::UNDEFINED != _starter_pred) and
-	    (!vars.empty()))
+	if ((Handle::UNDEFINED != best_start)
+	    // and (Handle::UNDEFINED != _starter_pred)
+	    // and (not vars.empty()))
+	    )
 	{
 		_root = clauses[bestclause];
 		dbgprt("Search start node: %s\n", best_start->toShortString().c_str());

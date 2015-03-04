@@ -543,6 +543,7 @@ void SchemeEval::do_eval(const std::string &expr)
 
 	_caught_error = false;
 	_pending_input = false;
+	error_msg.clear();
 	set_captured_stack(SCM_BOOL_F);
 	scm_gc_unprotect_object(_rc);
 	SCM eval_str = scm_from_utf8_string(_input_line.c_str());
@@ -704,6 +705,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	SchemeSmob::ss_set_env_as(atomspace);
 
 	_caught_error = false;
+	error_msg.clear();
 	set_captured_stack(SCM_BOOL_F);
 	SCM rc = scm_c_catch (SCM_BOOL_T,
 	                 evo, (void *) sexpr,
@@ -722,6 +724,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 
 		drain_output();
 
+#if 0 // NO_DONT_DO_THIS_ANY_LONGER
 		// Unlike errors seen on the interpreter, log these to the logger.
 		// That's because these errors will be predominantly script
 		// errors that are otherwise invisible to the user/developer.
@@ -730,6 +733,13 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 		logger().error("%s: guile error was: %s\nFailing expression was %s",
 		               __FUNCTION__, str, prt(sexpr).c_str());
 		logger().setBackTraceLevel(save);
+#endif
+
+		// Stick the guile stack trace into a string. Anyone who called
+		// us is responsible for checking for an error, and handling
+		// it as needed.
+		error_msg = str;
+		error_msg += "\n";
 
 		free(str);
 		return SCM_EOL;
@@ -800,6 +810,10 @@ Handle SchemeEval::eval_h(const std::string &expr)
 	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	// Convert evaluation errors into C++ exceptions.
+	if (eval_error())
+		throw RuntimeException(TRACE_INFO, error_msg.c_str());
+
 	return hargs;
 }
 
@@ -819,10 +833,8 @@ void * SchemeEval::c_wrap_eval_h(void * p)
  * It is assumed that varargs is a ListLink, containing a list of
  * atom handles. This list is unpacked, and then the function func
  * is applied to them. If the function returns an atom handle, then
- * this is returned. If the function does not return a handle, then
- * Handle::UNDEFINED is returned. If an error occurs during evaluation,
- * then a guile stack trace is logged in the OpenCog error log file,
- * and Handle::UNDEFINED is returned.
+ * this is returned. If the function does not return a handle, or if
+ * an error ocurred during evaluation, then a C++ exception is thrown.
  */
 Handle SchemeEval::apply(const std::string &func, Handle varargs)
 {
@@ -846,6 +858,8 @@ Handle SchemeEval::apply(const std::string &func, Handle varargs)
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
+	if (eval_error())
+		throw RuntimeException(TRACE_INFO, error_msg.c_str());
 
 	return hargs;
 }
@@ -873,6 +887,8 @@ TruthValuePtr SchemeEval::apply_tv(const std::string &func, Handle varargs)
 	// Just go.
 	if (_in_eval) {
 		SCM tv_smob = do_apply_scm(func, varargs);
+		if (eval_error())
+			return TruthValue::NULL_TV();
 		return SchemeSmob::to_tv(tv_smob);
 	}
 
@@ -889,6 +905,8 @@ TruthValuePtr SchemeEval::apply_tv(const std::string &func, Handle varargs)
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
+	if (eval_error())
+		throw RuntimeException(TRACE_INFO, error_msg.c_str());
 
 	// We do not want this->tvp to point at anything after we return.
 	// This is so that we do not hold a long-term reference to the TV.
@@ -901,6 +919,7 @@ void * SchemeEval::c_wrap_apply_tv(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
 	SCM tv_smob = self->do_apply_scm(*self->pexpr, self->hargs);
+	if (self->eval_error()) return self;
 	self->tvp = SchemeSmob::to_tv(tv_smob);
 	return self;
 }
