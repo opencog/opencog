@@ -114,7 +114,19 @@ void SequenceUTest::test_sequence(void)
     TS_ASSERT_EQUALS(true, caught_exception);
     logger().setLevel(Logger::INFO);
 
+    // This should not throw any exceptions.
     Handle ans = eval->eval_h("(cog-bind-crisp (traffic-lights))");
+
+    // Check the number of green lights and red lights that were
+    // evaluated. The pattern has two green lights and one red
+    // light...
+
+    std::string sngreen = eval->eval("num-green");
+    std::string snred = eval->eval("num-red");
+    int ngreen = atoi(sngreen.c_str());
+    int nred = atoi(snred.c_str());
+    TS_ASSERT_EQUALS(3, ngreen);
+    TS_ASSERT_EQUALS(1, nred);
 
     TS_ASSERT_EQUALS(0, as->getArity(ans));
 }
