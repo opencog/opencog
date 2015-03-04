@@ -6,7 +6,7 @@
 ;
 ;--------------------------------------------------------------
 ; The scheme shell listen port.
-(define shell-port 18002)
+(define shell-port 17001)
 (define shell-prompt "[0;34mscheme-fr[1;34m> [0m")
 
 ;--------------------------------------------------------------

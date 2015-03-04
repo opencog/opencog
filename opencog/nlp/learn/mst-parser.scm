@@ -30,7 +30,6 @@
 ;
 (use-modules (srfi srfi-1))
 (use-modules (srfi srfi-11))
-
 ; ---------------------------------------------------------------------
 ;
 ; Tokenize the text: take the input sentence, and return a list of the
