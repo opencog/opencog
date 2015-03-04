@@ -55,6 +55,10 @@ SCM SchemeEval::do_apply_scm(const std::string& func, Handle& varargs )
 	for (int i=sz-1; i>=0; i--)
 	{
 		Handle h = oset[i];
+		if (h->getType() == EXECUTION_OUTPUT_LINK)
+		{
+			h = ExecutionOutputLink::do_execute(atomspace, h);
+		}
 		SCM sh = SchemeSmob::handle_to_scm(h);
 		expr = scm_cons(sh, expr);
 	}
