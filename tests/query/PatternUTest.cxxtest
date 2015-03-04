@@ -424,7 +424,7 @@ void PatternUTest::test_eval(void)
  *       ParseLink
  *           VariableNode "concept variable"
  *
- * After evaluation, it is expected tht the atom-space will
+ * After evaluation, it is expected that the atom-space will
  * contain the following:
  *
  *    ParseLink

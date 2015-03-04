@@ -47,6 +47,8 @@ class PatternMatchEngine
 		std::vector<Handle> _cnf_clauses;
 		std::set<Handle> _optionals;
 
+		std::set<Handle> _evaluatable;
+
 		// -------------------------------------------
 		// Traversal utilities
 		RootMap _root_map;

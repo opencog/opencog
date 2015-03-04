@@ -1,7 +1,7 @@
 /*
  * DefaultPatternMatchCB.h
  *
- * Copyright (C) 2009, 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2014, 2015 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/execution/EvaluationLink.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 

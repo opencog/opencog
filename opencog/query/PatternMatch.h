@@ -57,7 +57,7 @@ class PatternMatch
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds);
 
 		/// Unbundled variables and types for them.
-		/// __typemap is the (possibly empty) list of restrictions on
+		/// _typemap is the (possibly empty) list of restrictions on
 		/// the variable types.
 		/// Set by validate_bindvars()
 		std::set<Handle> _varset;

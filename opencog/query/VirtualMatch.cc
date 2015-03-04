@@ -293,7 +293,7 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 	// an argument that contains a variable. Otherwise, its not really
 	// virtual.
 	//
-	// XXX FIXME, the check blow is not quite correct; for example,
+	// XXX FIXME, the check below is not quite correct; for example,
 	// it would tag the following as virtual, although it is not:
 	// (BlahLink (VariableNode "$var") (EvaluationLink (GPN "scm:duh")
 	// (ListLink (ConceptNode "Stuff"))))  -- the var is there but not
@@ -310,6 +310,7 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 	// For now, the virtual links must be at the top. That's because
 	// I don't understand what the semantics would be if they were
 	// anywhere else... need to ask Ben on the mailing list.
+	// Wait .. what?  Aren't the semantics obvious?
 	for (Handle v : _virtuals)
 	{
 		Type vt = v->getType();

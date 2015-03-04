@@ -33,14 +33,13 @@ NodeIndex::NodeIndex()
 
 void NodeIndex::resize()
 {
-	this->idx.resize(classserver().getNumberOfClasses());
+	idx.resize(classserver().getNumberOfClasses());
 }
 
 size_t NodeIndex::size() const
 {
 	size_t cnt = 0;
-	size_t vsz = idx.size();
-	for (size_t i=0; i<vsz; i++) cnt += idx[i].size();
+	for (NameIndex ni : idx) cnt += ni.size();
 	return cnt;
 }
 
@@ -68,10 +67,7 @@ Handle NodeIndex::getHandle(Type t, const char *name) const
 
 void NodeIndex::remove(bool (*filter)(Handle))
 {
-	std::vector<NameIndex>::iterator s;
-	for (s = idx.begin(); s != idx.end(); ++s) {
-		s->remove(filter);
-	}
+	for (NameIndex ni : idx) ni.remove(filter);
 }
 
 UnorderedHandleSet NodeIndex::getHandleSet(Type type, const char *name,
@@ -79,7 +75,7 @@ UnorderedHandleSet NodeIndex::getHandleSet(Type type, const char *name,
 {
 	UnorderedHandleSet hs;
 	if (subclass) {
-		
+
 		int max = classserver().getNumberOfClasses();
 		for (Type s = 0; s < max; s++) {
 			// The 'AssignableFrom' direction is unit-tested in
