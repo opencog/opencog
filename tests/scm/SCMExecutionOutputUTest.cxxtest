@@ -72,12 +72,14 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 	void tearDown(void);
 
 	void test_execute(void);
+	void test_evaluate(void);
 
 	void test_multi_threads(void);
 	void threadedAdd(int thread_id, int N);
 
 	void test_recursive(void);
 	void test_nested(void);
+
 };
 
 void SCMExecutionOutputUTest::setUp(void)
@@ -125,7 +127,7 @@ void SCMExecutionOutputUTest::test_execute(void)
 }
 
 
-// In this thread, do same as above, esxcept make lots of Julians,
+// In this thread, do same as above, except make lots of Julians,
 // and crown them all.
 // Use a unique evaluator for this thread.
 void SCMExecutionOutputUTest::threadedAdd(int thread_id, int N)
@@ -375,4 +377,35 @@ void SCMExecutionOutputUTest::test_nested(void)
 	Handle nine = eval->eval_h("(NumberNode \"9\")");
 
 	TS_ASSERT_EQUALS(nine, enine);
+}
+
+void SCMExecutionOutputUTest::test_evaluate(void)
+{
+	// Define a Scheme procedure that return a TV
+	eval->eval("(define (grab-tv x) (cog-tv x))");
+	CHKEV(eval);
+
+	// Wrap the proceedure, returning a TV
+	eval->eval(
+		"(define (evl-tv x) "
+		"   (cog-evaluate! "
+		"      (EvaluationLink "
+		"          (GroundedPredicateNode \"scm: grab-tv\") "
+		"          (ListLink x))))"
+	);
+	CHKEV(eval);
+
+	// Compare the TV's that were obtained in two different ways.
+	eval->eval(
+		"(define (chk-tv x) "
+		"  (if (not (equal? (cog-tv x) (evl-tv x))) "
+		"     (throw 'bad-tv-compate \"chk-tv\" \"test case failed\")))"
+	);
+	CHKEV(eval);
+
+	// Perform the actual checks
+	eval->eval("(chk-tv (ConceptNode \"bogus\" (cog-new-stv 0.3 0.42)))");
+	CHKEV(eval);
+	eval->eval("(chk-tv (ConceptNode \"glurg\" (cog-new-ctv 0.123 0.456 789)))");
+	CHKEV(eval);
 }
