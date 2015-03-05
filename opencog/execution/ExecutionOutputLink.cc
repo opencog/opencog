@@ -36,7 +36,8 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
     if ((2 != oset.size()) or
        (LIST_LINK != oset[1]->getType()))
     {
-        throw RuntimeException(TRACE_INFO, "ExecutionOutputLink must have schema and args!");
+        throw RuntimeException(TRACE_INFO,
+            "ExecutionOutputLink must have schema and args!");
     }
 }
 
@@ -45,8 +46,10 @@ ExecutionOutputLink::ExecutionOutputLink(Handle schema, Handle args,
                                          AttentionValuePtr av)
     : Link(EXECUTION_OUTPUT_LINK, schema, args, tv, av)
 {
-    if (LIST_LINK != args->getType()) {
-        throw RuntimeException(TRACE_INFO, "ExecutionOutputLink must have schema and args!");
+    if (LIST_LINK != args->getType())
+    {
+        throw RuntimeException(TRACE_INFO,
+            "ExecutionOutputLink must have schema and args!");
     }
 }
 
@@ -67,11 +70,39 @@ ExecutionOutputLink::ExecutionOutputLink(Handle schema, Handle args,
 ///
 Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle execlnk)
 {
-    if (EXECUTION_OUTPUT_LINK != execlnk->getType()) {
-        throw RuntimeException(TRACE_INFO, "Expecting to get an ExecutionOutputLink!");
+    if (EXECUTION_OUTPUT_LINK != execlnk->getType())
+    {
+        throw RuntimeException(TRACE_INFO,
+            "Expecting to get an ExecutionOutputLink!");
     }
     LinkPtr l(LinkCast(execlnk));
     return do_execute(as, l->getOutgoingSet());
+}
+
+/// Non-throwing, recursive version.
+Handle ExecutionOutputLink::recurse(AtomSpace* as, Handle h)
+{
+    LinkPtr lll(LinkCast(h));
+    if (NULL == lll) return h;
+
+    // If its an execution link, execute it.
+    Type t = lll->getType();
+    if (EXECUTION_OUTPUT_LINK == t)
+        return do_execute(as, lll->getOutgoingSet());
+
+    // Search for additional execution links, and execute them too.
+    // We will know that happend if the returned handle differs from
+    // the input handle.
+    std::vector<Handle> new_oset;
+    bool changed = false;
+    for (Handle ho : lll->getOutgoingSet())
+    {
+        Handle nh(recurse(as, ho));
+        new_oset.push_back(nh);
+        if (nh != ho) changed = true;
+    }
+    if (not changed) return h;
+    return as->addLink(t, new_oset);
 }
 
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
@@ -85,7 +116,8 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, const HandleSeq& sna)
 {
     if (2 != sna.size())
     {
-        throw RuntimeException(TRACE_INFO, "Incorrect arity for an ExecutionOutputLink!");
+        throw RuntimeException(TRACE_INFO,
+           "Incorrect arity for an ExecutionOutputLink!");
     }
     return do_execute(as, sna[0], sna[1]);
 }
@@ -98,13 +130,33 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, const HandleSeq& sna)
 ///
 Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
 {
-    if (GROUNDED_SCHEMA_NODE != gsn->getType()) {
+    if (GROUNDED_SCHEMA_NODE != gsn->getType())
+    {
         throw RuntimeException(TRACE_INFO, "Expecting GroundedSchemaNode!");
     }
+
     if (LIST_LINK != args->getType())
     {
         throw RuntimeException(TRACE_INFO,
             "Expecting arguments to ExecutionOutputLink!");
+    }
+
+    // Search for additional execution links, and execute them too.
+    // We will know that happend if the returned handle differs from
+    // the input handle.
+    LinkPtr largs(LinkCast(args));
+    if (largs)
+    {
+        std::vector<Handle> new_oset;
+        bool changed = false;
+        for (Handle ho : largs->getOutgoingSet())
+        {
+            Handle nh(recurse(as, ho));
+            new_oset.push_back(nh);
+            if (nh != ho) changed = true;
+        }
+        if (changed)
+            args = as->addLink(LIST_LINK, new_oset);
     }
 
     // Get the schema name.
