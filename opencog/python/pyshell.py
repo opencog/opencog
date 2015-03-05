@@ -1,9 +1,6 @@
 import opencog.cogserver
 from opencog.atomspace import types
 
-# Have a module-global ipshell, which means that variables will remain. It doesn't work yet for some reason.
-ipshell = None
-
 # A nice IPython shell that runs within the CogServer.
 # NOTE: it uses the CogServer input/output, not the telnet shell
 
@@ -24,19 +21,31 @@ class shell(opencog.cogserver.Request):
         self.run_shell(atomspace)
 
     def run_shell(self,  atomspace):
-        global ipshell
-        
         from opencog.atomspace import types, Atom, Handle, TruthValue
         namespace = locals().copy()
-        doc = """OpenCog Python Shell. Access the main AtomSpace as 'atomspace'."""
-        print doc
         try: 
-            import sys; sys.argv = ['', '-noconfirm_exit', '-p', 'sh']
-            from IPython import embed
-            if ipshell == None:
-                ipshell = embed(user_ns = namespace)
-            ipshell()
+            import threading
+            import IPython
+            from IPython.config.loader import Config
+
+            # Configure the prompts.
+            cfg = Config()
+            cfg.PromptManager.in_template = "py[\\#]> "
+            cfg.PromptManager.out_template = "py[\\#]: "
+
+            # Create an instance of the embeddable shell. 
+            from IPython.terminal.embed import InteractiveShellEmbed
+            banner = "OpenCog IPython Shell. Access the main AtomSpace as 'atomspace'."
+            exit_message = "Leaving Interpreter, back to program."
+            ipython_shell = InteractiveShellEmbed(
+                    config=cfg,
+                    user_ns=namespace, banner1 = banner, 
+                    exit_msg = exit_message)                
+
+            # Launch the shell in a new thread so the request doesn't hang
+            # the shell that launched this shell.
+            shell_thread = threading.Thread(None, ipython_shell, "ipython",())
+            shell_thread.start()
         except Exception,  e:
             print e
-    #        import code
-    #        code.interact(doc, None, namespace)
+
