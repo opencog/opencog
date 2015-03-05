@@ -33,6 +33,24 @@ FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as) : DefaultPatternMatchCB(
 }
 
 /**
+ * Implement the perform_search calllback.
+ *
+ * For a fuzzy match, it starts with a full atomspace search to find candidates.
+ *
+ * @param pme        The pointer of the PatternMatchEngine
+ * @param vars       A set of nodes that are considered as variables
+ * @param clauses    The clauses for the query
+ * @param negations  The negative clauses
+ */
+void FuzzyPatternMatchCB::perform_search(PatternMatchEngine* pme,
+                                         std::set<Handle>& vars,
+                                         std::vector<Handle>& clauses,
+                                         std::vector<Handle>& negations)
+{
+    perform_full_atomspace_search(pme, clauses);
+}
+
+/**
  * Override the link_match callback.
  *
  * This is for finding similar links/hypergraphs in the atomspace. The possible
