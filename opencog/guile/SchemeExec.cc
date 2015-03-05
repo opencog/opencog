@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <libguile.h>
 #include <opencog/execution/ExecutionOutputLink.h>
+#include <opencog/execution/EvaluationLink.h>
 
 #include "SchemeEval.h"
 #include "SchemeSmob.h"
@@ -67,31 +68,63 @@ SCM SchemeEval::do_apply_scm(const std::string& func, Handle& varargs )
  */
 SCM SchemeSmob::ss_execute (SCM satom)
 {
-	AtomSpace* atomspace = ss_get_env_as("cog-execute");
-
-	Handle h = verify_handle(satom, "cog-execute");
+	Handle h = verify_handle(satom, "cog-execute!");
 
 	if (h->getType() != EXECUTION_OUTPUT_LINK)
 	{
-		scm_wrong_type_arg_msg("cog-execute", 1, satom,
-			"ExecutionOutputLink opencog cog-execute");
+		scm_wrong_type_arg_msg("cog-execute!", 1, satom,
+			"ExecutionOutputLink opencog cog-execute!!");
 	}
 
+	AtomSpace* atomspace = ss_get_env_as("cog-execute!");
 	// do_execute() may throw a C++ exception in various cases:
-	// e.g. if the code to execute is python, and its names a
-	// non-existant function ... or even if its scheme code with
-	// a bug in it.
+	// e.g. if it names a non-existant function, or a function
+	// with syntax errors.
 	try
 	{
 		return handle_to_scm(ExecutionOutputLink::do_execute(atomspace, h));
 	}
 	catch (const std::exception& ex)
 	{
-		SchemeSmob::throw_exception(ex.what(), "cog-execute");
+		SchemeSmob::throw_exception(ex.what(), "cog-execute!");
 	}
 	catch (...)
 	{
-		SchemeSmob::throw_exception(NULL, "cog-execute");
+		SchemeSmob::throw_exception(NULL, "cog-execute!");
+	}
+	scm_remember_upto_here_1(satom);
+	return SCM_EOL;
+}
+
+/**
+ * Executes an EevaluationLink with a GPN in it.
+ */
+SCM SchemeSmob::ss_evaluate (SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-evaluate!");
+
+	if (h->getType() != EVALUATION_LINK)
+	{
+		scm_wrong_type_arg_msg("cog-evaluate!", 1, satom,
+			"EvaluationLink opencog cog-evaluate!");
+	}
+
+	AtomSpace* atomspace = ss_get_env_as("cog-evaluate!");
+	// do_evaluate() may throw a C++ exception in various cases:
+	// e.g. if it names a non-existant function, or a function
+	// with syntax errors.
+	try
+	{
+		TruthValuePtr tvp = EvaluationLink::do_evaluate(atomspace, h);
+		return take_tv(tvp->rawclone());
+	}
+	catch (const std::exception& ex)
+	{
+		SchemeSmob::throw_exception(ex.what(), "cog-evaluate!");
+	}
+	catch (...)
+	{
+		SchemeSmob::throw_exception(NULL, "cog-evaluate!");
 	}
 	scm_remember_upto_here_1(satom);
 	return SCM_EOL;

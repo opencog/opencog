@@ -248,6 +248,7 @@ void SchemeSmob::register_procs(void*)
     
 	// ExecutionOutputLinks
 	register_proc("cog-execute!",          1, 0, 0, C(ss_execute));
+	register_proc("cog-evaluate!",         1, 0, 0, C(ss_evaluate));
 
 	// Atom types
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));
