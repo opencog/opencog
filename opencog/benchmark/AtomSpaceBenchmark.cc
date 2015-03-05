@@ -84,48 +84,50 @@ AtomSpaceBenchmark::~AtomSpaceBenchmark()
     delete rng;
 }
 
-// This is wrong, because it failes to also count the amount of RAM
+// This is wrong, because it fails to also count the amount of RAM
 // used by the AtomTable to store indexes.
 size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
 {
     size_t total = 0;
-    if (asp->isNode(h)) {
-        NodePtr n(NodeCast(h));
-        total = sizeof(Node);
-        if (n->getTruthValue() != TruthValue::DEFAULT_TV()) {
-            switch (n->getTruthValue()->getType()) {
-            case SIMPLE_TRUTH_VALUE:
-                total += sizeof(SimpleTruthValue);
-                break;
-            case COUNT_TRUTH_VALUE:
-                total += sizeof(CountTruthValue);
-                break;
-            case INDEFINITE_TRUTH_VALUE:
-                total += sizeof(IndefiniteTruthValue);
-                break;
-            default:
-                break;
-            }
-        }
-    } else {
-        LinkPtr l(LinkCast(h));
-        total = sizeof(Link);
-        if (l->getTruthValue() != TruthValue::DEFAULT_TV()) {
-            switch (l->getTruthValue()->getType()) {
-            case SIMPLE_TRUTH_VALUE:
-                total += sizeof(SimpleTruthValue);
-                break;
-            case COUNT_TRUTH_VALUE:
-                total += sizeof(CountTruthValue);
-                break;
-            case INDEFINITE_TRUTH_VALUE:
-                total += sizeof(IndefiniteTruthValue);
-                break;
-            default:
-                break;
-            }
+    if (h->getTruthValue() != TruthValue::DEFAULT_TV())
+    {
+        switch (h->getTruthValue()->getType()) {
+        case SIMPLE_TRUTH_VALUE:
+            total += sizeof(SimpleTruthValue);
+            break;
+        case COUNT_TRUTH_VALUE:
+            total += sizeof(CountTruthValue);
+            break;
+        case INDEFINITE_TRUTH_VALUE:
+            total += sizeof(IndefiniteTruthValue);
+            break;
+        default:
+            break;
         }
     }
+
+    if (h->getAttentionValue() != AttentionValue::DEFAULT_AV())
+    {
+        total += sizeof(AttentionValue);
+    }
+
+    if (asp->isNode(h))
+    {
+        NodePtr n(NodeCast(h));
+        total = sizeof(Node);
+        total += n->getName().capacity();
+    }
+    else
+    {
+        LinkPtr l(LinkCast(h));
+        total = sizeof(Link);
+        total += l->getOutgoingSet().capacity() * sizeof(Handle);
+        for (Handle ho: l->getOutgoingSet())
+        {
+            total += estimateOfAtomSize(ho);
+        }
+    }
+
     return total;
 
 }
@@ -165,6 +167,27 @@ void AtomSpaceBenchmark::printTypeSizes()
     cout << "AtomSignal = " << sizeof(AtomSignal) << endl;
     cout << "AtomPairSignal = " << sizeof(AtomPairSignal) << endl;
     cout << DIVIDER_LINE << endl;
+
+#define ND(T,S) ({Handle n(createNode(T,S)); n;})
+#define LK(T,A,B) ({Handle l(createLink(T,A,B)); l;})
+    Handle h = ND(CONCEPT_NODE, "this is a test");
+    cout << "ConceptNode \"this is a test\" = "
+         << estimateOfAtomSize(h) << endl;
+
+    HandleSeq empty;
+    h = Handle(createLink(LIST_LINK, empty));
+    cout << "Empty ListLink = " << estimateOfAtomSize(h) << endl;
+
+    Handle na = ND(CONCEPT_NODE, "first atom");
+    Handle nb = ND(CONCEPT_NODE, "second atom");
+    Handle ll = LK(LIST_LINK, na, nb);
+    cout << "ListLink with two ConceptNodes = "
+         << estimateOfAtomSize(ll) << endl;
+
+    Handle np = ND(PREDICATE_NODE, "some predicate");
+    Handle el = LK(EVALUATION_LINK, np, ll);
+    cout << "EvaluationLink with two ConceptNodes = "
+         << estimateOfAtomSize(el) << endl;
 }
 
 void AtomSpaceBenchmark::showMethods() {
