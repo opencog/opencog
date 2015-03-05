@@ -205,8 +205,11 @@ class AllRules(object):
         self.chainer.add_rule(
             IntensionalSimilarityEvaluationRule(self.chainer))
 
-        self.member_rules = [GeneralEvaluationToMemberRule(self.chainer),
-            MemberToEvaluationRule(self.chainer)]
+        self.chainer.add_rule(GeneralEvaluationToMemberRule(self.chainer, 0, 1))
+        self.chainer.add_rule(GeneralEvaluationToMemberRule(self.chainer, 0, 2))
+        self.chainer.add_rule(GeneralEvaluationToMemberRule(self.chainer, 0, 3))
+        self.chainer.add_rule(MemberToEvaluationRule(self.chainer))
+        self.member_rules = [MemberToEvaluationRule(self.chainer)]
         self.member_rules += \
             create_general_evaluation_to_member_rules(self.chainer)
         for rule in self.member_rules:

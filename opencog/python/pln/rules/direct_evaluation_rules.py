@@ -290,11 +290,11 @@ class MemberToEvaluationRule(Rule):
 def create_general_evaluation_to_member_rules(chainer):
     rules = []
     # Todo: What needs to be done to the following constants?
-    for argument_count in xrange(2, 3):  # Bizarbitrary constant!
+    for argument_count in xrange(2, 3):
+    # Bizarbitrary constant! This seems to assume the number of maximum arguments
+    # that a ListLink of an EvaluationLink takes maximum of 2 Nodes. Which seems
+    # to be ok for most cases in the context of predicates in English.
         for index in xrange(0, argument_count):
-            rules.append(GeneralEvaluationToMemberRule(chainer,
-                                                       index,
-                                                       argument_count))
             rules.append(GeneralAtTimeEvaluationToMemberRule(chainer,
                                                              index,
                                                              argument_count))
@@ -315,6 +315,10 @@ class GeneralEvaluationToMemberRule(Rule):
       (MemberLink $thing sat_set)
     """
     def __init__(self, chainer, index, arg_count):
+        # The index paramater is relic from the initial implementation, so what
+        # ever integer value you give it doesn't matter. The arg_count paramater
+        # gives the number of arguments of the PredicateNode in the ListLink of
+        # an EvaluationLink.
         self.index = index
         self.arg_count= arg_count
         self.chainer = chainer
@@ -425,7 +429,7 @@ class GeneralAtTimeEvaluationToMemberRule(Rule):
         parameter_names[self.index] = '_'
         parameter_names = ' '.join(parameter_names)
         concept_name = 'SatisfyingSet(sometimes %s %s)' % \
-                       (predicate.name, parameter_names)
+                       (predicate.name, parameter_names) # why ???
 
         set_node = self.chainer.node(types.ConceptNode, concept_name)
 
