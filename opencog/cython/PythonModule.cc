@@ -30,7 +30,6 @@
 
 #include "PyMindAgent.h"
 #include "PyRequest.h"
-#include "PythonEval.h"
 #include "PythonModule.h"
 
 #include "opencog/agent_finder_types.h"
@@ -216,7 +215,7 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
             if (!first) { oss << ", "; first = false; }
             oss << s;
         }
-        oss << ".";
+        oss << ".\n";
     } else {
         oss << "No subclasses of opencog.cogserver.Request found.\n";
     }
