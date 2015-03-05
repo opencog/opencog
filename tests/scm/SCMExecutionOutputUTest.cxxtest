@@ -77,6 +77,7 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 	void threadedAdd(int thread_id, int N);
 
 	void test_recursive(void);
+	void test_nested(void);
 };
 
 void SCMExecutionOutputUTest::setUp(void)
@@ -211,6 +212,9 @@ void SCMExecutionOutputUTest::test_multi_threads(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+// This tests a tail-recursive invocation of nested
+// ExectutionOutputLinks, with an intervening cog-execute! at each step.
+// Thus, this winds up the C++ stack for the recursion.
 void SCMExecutionOutputUTest::test_recursive(void)
 {
 	// Empty out the atomspace
@@ -311,9 +315,64 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	// Now, the atomspace has nine atoms
 	// 3:  (Inheritance julian king)
 	// 3:  (Inheritance anne queen)
-	// 3:  (ExecutionLink (GroundedSchemeNode) (ListLink anne))
+	// 3:  (ExecutionLink (GroundedSchemaNode) (ListLink anne))
 	size = as->getSize();
 	TS_ASSERT_EQUALS(size, 9);
 
 	size = as->getSize();
+}
+
+// Test nested execution links. github issue #1340
+//
+// The following should work:
+//   ExecutionOutputLink
+//       "scm: *"
+//       ListLink
+//            ExecutionOutputLink
+//                 "scm: +"
+//                 ListLink
+//                     NumberNode 1
+//                     NumberNode 2
+//            NumberNode 3
+//
+// is a representation of (1 + 2) * 3
+//
+void SCMExecutionOutputUTest::test_nested(void)
+{
+	// Empty out the atomspace
+	as->clear();
+	size_t size = as->getSize();
+	TS_ASSERT_EQUALS(size, 0);
+
+	// Define various generic utilities
+	eval->eval(
+		"(define (oc-plus x y)"
+		"   (NumberNode (number->string (+ "
+		"      (string->number (cog-name x)) "
+		"      (string->number (cog-name y))))))"
+		"(define (oc-times x y)"
+		"   (NumberNode (number->string (* "
+		"      (string->number (cog-name x)) "
+		"      (string->number (cog-name y))))))"
+	);
+	CHKEV(eval);
+
+	eval->eval(
+		"(define nestor"
+		"   (ExecutionOutputLink "
+		"      (GroundedSchemaNode \"scm: oc-times\")"
+		"      (ListLink "
+		"         (ExecutionOutputLink "
+		"            (GroundedSchemaNode \"scm: oc-plus\")"
+		"            (ListLink "
+		"               (NumberNode \"1\")"
+		"               (NumberNode \"2\")))"
+		"         (NumberNode \"3\"))))"
+	);
+	CHKEV(eval);
+
+	Handle enine = eval->eval_h("(cog-execute! nestor)");
+	Handle nine = eval->eval_h("(NumberNode \"9\")");
+
+	TS_ASSERT_EQUALS(nine, enine);
 }

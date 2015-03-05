@@ -137,7 +137,7 @@ SCM SchemeSmob::ss_dec_vlti (SCM satom)
  */
 SCM SchemeSmob::ss_outgoing_set (SCM satom)
 {
-	Handle h = verify_handle(satom, "cog-outgoping-set");
+	Handle h = verify_handle(satom, "cog-outgoing-set");
 
 	LinkPtr lll(LinkCast(h));
 	if (NULL == lll) return SCM_EOL;
