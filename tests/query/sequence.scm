@@ -27,20 +27,17 @@
 ; corn fields.
 (define (off-road)
 	(BindLink
-		(ListLink)
+		(ListLink)  ; no variables
 		(ImplicationLink
-			(AndLink
-				(SequentialAndLink
-					(EvaluationLink
-						(GroundedPredicateNode "scm: stop-go")
-						(ListLink
-							(ConceptNode "corn field")
-						)
+			(SequentialAndLink
+				(EvaluationLink
+					(GroundedPredicateNode "scm: stop-go")
+					(ListLink
+						(ConceptNode "corn field")
 					)
 				)
 			)
-
-			(ListLink)
+			(ListLink)  ; no returned value
 		)
 	)
 )
@@ -50,35 +47,32 @@
 ;; errors when evaluating this.
 (define (traffic-lights)
 	(BindLink
-		(ListLink)
+		(ListLink)  ; no variables
 		(ImplicationLink
-			(AndLink
-				(SequentialAndLink
-					(EvaluationLink
-						(GroundedPredicateNode "scm: stop-go")
-						(ListLink green-light)
-					)
+			(SequentialAndLink
+				(EvaluationLink
+					(GroundedPredicateNode "scm: stop-go")
+					(ListLink green-light)
+				)
 
-					(EvaluationLink
-						(GroundedPredicateNode "scm: stop-go")
-						(ListLink green-light)
-					)
+				(EvaluationLink
+					(GroundedPredicateNode "scm: stop-go")
+					(ListLink green-light)
+				)
 
-					(EvaluationLink
-						(GroundedPredicateNode "scm: stop-go")
-						(ListLink red-light)
-					)
+				(EvaluationLink
+					(GroundedPredicateNode "scm: stop-go")
+					(ListLink red-light)
+				)
 
-					(EvaluationLink
-						(GroundedPredicateNode "scm: stop-go")
-						(ListLink
-							(ConceptNode "traffic ticket")
-						)
+				(EvaluationLink
+					(GroundedPredicateNode "scm: stop-go")
+					(ListLink
+						(ConceptNode "traffic ticket")
 					)
 				)
 			)
-
-			(ListLink)
+			(ListLink) ; no returned value
 		)
 	)
 )
