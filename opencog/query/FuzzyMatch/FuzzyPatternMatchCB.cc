@@ -45,6 +45,9 @@ FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as) : DefaultPatternMatchCB(
  */
 bool FuzzyPatternMatchCB::link_match(LinkPtr& pLink, LinkPtr& gLink)
 {
+    // If two links are identical, skip it
+    if (pLink == gLink) return false;
+
     // Check if the types of the links are the same before going further into
     // the similarity estimation.
     // This is mainly for reducing the amount of hypergraphs being processed
@@ -70,6 +73,9 @@ bool FuzzyPatternMatchCB::link_match(LinkPtr& pLink, LinkPtr& gLink)
  */
 bool FuzzyPatternMatchCB::node_match(Handle& pNode, Handle& gNode)
 {
+    // If two handles are identical, skip it
+    if (pNode == gNode) return false;
+
     check_if_accept(pNode, gNode);
 
     return false;
