@@ -129,7 +129,7 @@ void SavingLoading::saveClassServerInfo(FILE *f)
     logger().fine("SavingLoading::saveClassServerInfo");
     Type numTypes = classserver().getNumberOfClasses();
 
-    fwrite(&numTypes, sizeof(int), 1, f);
+    fwrite(&numTypes, sizeof(Type), 1, f);
 
     for (Type i = 0; i < numTypes; i++) {
         int classNameLength = classserver().getTypeName(i).length();
@@ -332,13 +332,13 @@ void SavingLoading::loadClassServerInfo(FILE *f, std::vector<Type>& dumpToCore)
 {
     logger().fine("SavingLoading::loadClassServerInfo");
     char buffer[1 << 16];
-    int numTypes = classserver().getNumberOfClasses();
-    int numTypesDump;
+    Type numTypes = classserver().getNumberOfClasses();
+    Type numTypesDump;
     bool b_read = true;
-    FREAD_CK(&numTypesDump, sizeof(int), 1, f);
+    FREAD_CK(&numTypesDump, sizeof(Type), 1, f);
 
     dumpToCore.resize(numTypesDump);
-    for (int i = 0; i < numTypesDump; i++) {
+    for (Type i = 0; i < numTypesDump; i++) {
         int classNameLength;
         FREAD_CK(&classNameLength, sizeof(int), 1, f);
         FREAD_CK(buffer, sizeof(char), classNameLength, f);
