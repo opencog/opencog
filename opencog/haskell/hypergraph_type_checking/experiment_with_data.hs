@@ -12,16 +12,9 @@ data TV = NullTV
         | TVEvaluationLink EvaluationLink
         | TVGetTVLink Atom
 
-data Atom = ANode Node | ALink Link
-
-data Node = NPredicate Predicate
-          | NConcept Concept
-          | NNumber Float
-
-data Link = LAndLink AndLink
-          | LOrLink OrLink
-          | LEvaluationLink EvaluationLink
-          | LSchemaLink SchemaLink
+data Atom = APredicate Predicate
+          | AConcept Concept
+          | ANumber Float
 
 data Concept = Concept String
              | CAndLink Concept Concept
@@ -30,14 +23,6 @@ data Concept = Concept String
 data Predicate = Predicate ([Atom] -> TV)
                | PAndLink Predicate Predicate
                | POrLink Predicate Predicate
-
-data AndLink = AndLinkConcept Concept Concept
-             | AndLinkPredicate Predicate Predicate
-             | AndLinkTV TV TV
-
-data OrLink = OrLinkConcept Concept Concept
-            | OrLinkPredicate Predicate Predicate
-            | OrLinkTV TV TV
 
 data EvaluationLink = EvaluationLink Predicate [Atom]
 
@@ -55,8 +40,8 @@ is_bottom _ = SimpleTV 0 0.9
 is_top :: [Atom] -> TV
 is_top _ = SimpleTV 1 0.9
 is_car :: [Atom] -> TV
-is_car [ANode (NConcept (Concept "BMW"))] = SimpleTV 1 0.9
-is_car [ANode (NConcept (Concept "Camel"))] = SimpleTV 0.1 0.9
+is_car [AConcept (Concept "BMW")] = SimpleTV 1 0.9
+is_car [AConcept (Concept "Camel")] = SimpleTV 0.1 0.9
 is_car _ = SimpleTV 0 0.9
 
 -- And/Or hypergraph of concepts
@@ -66,17 +51,17 @@ h1 = COrLink (CAndLink (Concept "A") (Concept "B")) (Concept "C")
 h2 = POrLink (PAndLink (Predicate is_top) (Predicate is_car)) (Predicate is_bottom)
 
 -- Apply EvaluationLink to predicate h2
-tv3 = TVEvaluationLink (EvaluationLink h2 [ANode (NConcept (Concept "BMW"))])
+tv3 = TVEvaluationLink (EvaluationLink h2 [AConcept (Concept "BMW")])
 
 -- Build a SchemaLink
 add :: [Atom] -> Atom
-add [ANode (NNumber x), ANode (NNumber y)] = ANode (NNumber (x + y))
-add _ = ANode (NConcept (Concept "undefined"))
+add [ANumber x, ANumber y] = ANumber (x + y)
+add _ = AConcept (Concept "undefined")
 h4 = SchemaLink add
 
 -- Test GetTVLink
-tv1 = TVGetTVLink (ANode (NConcept h1))
-tv2 = TVGetTVLink (ANode (NPredicate h2))
+tv1 = TVGetTVLink (AConcept h1)
+tv2 = TVGetTVLink (APredicate h2)
 
 -- Test AndLink with TV
 tv4 = TVAndLink tv1 tv3
