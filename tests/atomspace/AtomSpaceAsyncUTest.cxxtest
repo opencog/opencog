@@ -203,7 +203,7 @@ public:
 
     Type randomType(Type t)
     {
-        int numberOfTypes = classserver().getNumberOfClasses();
+        Type numberOfTypes = classserver().getNumberOfClasses();
         OC_ASSERT(t < numberOfTypes);
         Type randomType = NOTYPE;
         while (!classserver().isA(randomType, t))

@@ -121,7 +121,7 @@ boost::signals2::signal<void (Type)>& ClassServer::addTypeSignal()
     return _addTypeSignal;
 }
 
-unsigned int ClassServer::getNumberOfClasses()
+Type ClassServer::getNumberOfClasses()
 {
     return nTypes;
 }

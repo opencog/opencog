@@ -127,7 +127,7 @@ void SavingLoading::save(const char *fileName,
 void SavingLoading::saveClassServerInfo(FILE *f)
 {
     logger().fine("SavingLoading::saveClassServerInfo");
-    int numTypes = classserver().getNumberOfClasses();
+    Type numTypes = classserver().getNumberOfClasses();
 
     fwrite(&numTypes, sizeof(int), 1, f);
 

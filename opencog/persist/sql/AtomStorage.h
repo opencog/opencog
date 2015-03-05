@@ -99,10 +99,12 @@ class AtomStorage
 		// the database type numbers.  Initially, they match up, but
 		// might get askew if new types are added or deleted.
 
-		// TYPEMAP_SZ is defined as the maximum number of possible opencog Types
-		// (65536 as Type is a short int)
+		// TYPEMAP_SZ is defined as the maximum number of possible
+		// OpenCog Types (65536 as Type is currently a short int)
+		static_assert(2 == sizeof(Type),
+			 "*** Typemap needs to be redesigned to handle larger types! ***");
 		#define TYPEMAP_SZ (1 << (8 * sizeof(Type)))
-		int  storing_typemap[TYPEMAP_SZ];
+		int storing_typemap[TYPEMAP_SZ];
 		Type loading_typemap[TYPEMAP_SZ];
 		char * db_typename[TYPEMAP_SZ];
 

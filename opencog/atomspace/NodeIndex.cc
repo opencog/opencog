@@ -76,7 +76,7 @@ UnorderedHandleSet NodeIndex::getHandleSet(Type type, const char *name,
 	UnorderedHandleSet hs;
 	if (subclass) {
 
-		int max = classserver().getNumberOfClasses();
+		Type max = classserver().getNumberOfClasses();
 		for (Type s = 0; s < max; s++) {
 			// The 'AssignableFrom' direction is unit-tested in
 			// AtomSpaceUTest.cxxtest

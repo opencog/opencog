@@ -261,6 +261,9 @@ SCM SchemeSmob::ss_get_type (SCM stype)
 	if (scm_is_true(scm_symbol_p(stype)))
 		stype = scm_symbol_to_string(stype);
 
+	static_assert(2 == sizeof(Type),
+		"*** Code currently assumes types are shorts!  ***");
+
 	if (scm_is_false(scm_string_p(stype)))
 		return scm_from_ushort(NOTYPE);
 

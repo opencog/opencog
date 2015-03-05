@@ -60,7 +60,7 @@ cdef extern from "opencog/atomspace/SimpleTruthValue.h" namespace "opencog":
 
 # Basic OpenCog types
 # ClassServer
-ctypedef int Type
+ctypedef short Type
 
 cdef extern from "opencog/atomspace/ClassServer.h" namespace "opencog":
     cdef cppclass cClassServer "opencog::ClassServer":
@@ -71,7 +71,7 @@ cdef extern from "opencog/atomspace/ClassServer.h" namespace "opencog":
         bint isDefined(string typename)
         Type getType(string typename)
         string getTypeName(Type t)
-        int getNumberOfClasses()
+        Type getNumberOfClasses()
     cdef cClassServer classserver()
 
 cdef extern from "opencog/atomspace/atom_types.h" namespace "opencog":

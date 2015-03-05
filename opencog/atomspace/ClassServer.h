@@ -88,9 +88,9 @@ public:
      * number of children types.
      */
     template<typename OutputIterator>
-    unsigned int getChildren(Type type, OutputIterator result)
+    unsigned long getChildren(Type type, OutputIterator result)
     {
-        unsigned int n_children = 0;
+        unsigned long n_children = 0;
         for (Type i = 0; i < nTypes; ++i) {
             if (inheritanceMap[type][i] && (type != i)) {
                 *(result++) = i;
@@ -101,9 +101,9 @@ public:
     }
 
     template<typename OutputIterator>
-    unsigned int getChildrenRecursive(Type type, OutputIterator result)
+    unsigned long getChildrenRecursive(Type type, OutputIterator result)
     {
-        unsigned int n_children = 0;
+        unsigned long n_children = 0;
         for (Type i = 0; i < nTypes; ++i) {
             if (recursiveMap[type][i] && (type != i)) {
                 *(result++) = i;
@@ -118,7 +118,7 @@ public:
      *
      * @return The total number of classes in the system.
      */
-    unsigned int getNumberOfClasses();
+    Type getNumberOfClasses();
 
     /**
      * Returns whether a given class is assignable from another.

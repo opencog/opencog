@@ -69,7 +69,7 @@ class AtomSpaceBenchmark
     std::poisson_distribution<unsigned> *prg;
 
     Type randomType(Type t);
-    int numberOfTypes;
+    Type numberOfTypes;
 
     clock_t makeRandomNode(const std::string& s);
     clock_t makeRandomLink();

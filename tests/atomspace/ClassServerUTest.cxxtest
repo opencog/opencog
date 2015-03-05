@@ -35,20 +35,19 @@ class ClassServerUTest :  public CxxTest::TestSuite
 private:
 
 public:
-    ClassServerUTest() {
-    }
+    ClassServerUTest() {}
 
-    void setUp() {
-    }
+    void setUp() {}
 
-    void tearDown() {
-    }
+    void tearDown() {}
 
-    void testIsAssignableFrom() {
-        int numClasses = classserver().getNumberOfClasses();
+    void testIsAssignableFrom()
+    {
+        Type numClasses = classserver().getNumberOfClasses();
         for (Type t = 0; t < numClasses; t++) {
             TS_ASSERT(classserver().isA(t, t));
-            if (t > 0) TS_ASSERT(classserver().isA(t, NODE) || classserver().isA(t, LINK));
+            if (t > 0) TS_ASSERT(classserver().isA(t, NODE)
+                              or classserver().isA(t, LINK));
         }
 
         TS_ASSERT( classserver().isA(NODE, ATOM));
@@ -64,7 +63,8 @@ public:
         TS_ASSERT(!classserver().isA(ATOM, LIST_LINK));
     }
 
-    void testNames() {
+    void testNames()
+    {
         TS_ASSERT(classserver().getTypeName(ATOM)      == "Atom");
         TS_ASSERT(classserver().getTypeName(LINK)      == "Link");
         TS_ASSERT(classserver().getTypeName(NODE)      == "Node");
@@ -72,13 +72,15 @@ public:
         TS_ASSERT(classserver().getTypeName(LIST_LINK) == "ListLink");
     }
 
-    void testCodes() {
+    void testCodes()
+    {
         TS_ASSERT(classserver().getType("Atom") == 0);
         TS_ASSERT(classserver().getType("Node") <= 2);
         TS_ASSERT(classserver().getType("Link") <= 2);
     }
 
-    void testCustomTypes() {
+    void testCustomTypes()
+    {
         Type ntypes = classserver().getNumberOfClasses();
 
         Type CS_UTEST_NODE   = classserver().addType(NODE, "CsUtestNode");
@@ -125,7 +127,8 @@ public:
         TS_ASSERT(!classserver().isA(CS_UTEST_LINK,   NUMBER_NODE));
     }
 
-    void testIteratorMethods() {
+    void testIteratorMethods()
+    {
         vector<Type> types;
         back_insert_iterator< vector<Type> > back_it (types);
         classserver().getChildren(NODE, back_it);
