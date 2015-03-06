@@ -517,10 +517,7 @@ Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
 
             // Well, if the link was in some other atomspace, then
             // the outgoing set will be too. So we recursively clone
-            // that too. Cautionary note: this could result in TV
-            // merging, if equivalent atoms already exist in this
-            // atomspace.  This might catch some users by surprise.
-            // Not sure what to do about that.
+            // that too.
             const HandleSeq ogset(lll->getOutgoingSet());
             size_t arity = ogset.size();
             for (size_t i = 0; i < arity; i++) {
