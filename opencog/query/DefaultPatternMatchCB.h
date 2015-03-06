@@ -148,12 +148,11 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		                            std::vector<Handle> &clauses,
 		                            std::vector<Handle> &negations);
 
-        /**
-         * Perform a full atomspace search. The default assumption here is that
-         * the possible solutions should be of the same type as the query pattern.
-         */
-        virtual void perform_full_atomspace_search(PatternMatchEngine *,
-                                                   std::vector<Handle> &clauses);
+		/**
+		 * Perform a full atomspace search.
+		 */
+		virtual void full_search(PatternMatchEngine *,
+		                         std::vector<Handle> &clauses);
 
 		/**
 		 * Indicate a set of restrictions on the types of the ground atoms.
