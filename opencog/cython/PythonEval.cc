@@ -53,6 +53,8 @@
 #include "opencog/agent_finder_types.h"
 #include "opencog/agent_finder_api.h"
 
+#include <csignal>
+
 using std::string;
 using std::vector;
 
@@ -308,7 +310,7 @@ void PythonEval::initialize_python_objects_and_imports(void)
     PyRun_SimpleString(
         "from opencog.atomspace import Handle, Atom\n"
         "import inspect\n"
-        "def execute_user_defined_function(func, handle_uuid):\n"
+        "def execute_apply_function(func, handle_uuid):\n"
         "    handle = Handle(handle_uuid)\n"
         "    args_list_link = ATOMSPACE[handle]\n"
         "    no_of_arguments_in_pattern = len(args_list_link.out)\n"
@@ -320,8 +322,24 @@ void PythonEval::initialize_python_objects_and_imports(void)
         "    atom = func(*args_list_link.out)\n"
         "    if atom is None:\n"
         "        return\n"
-        "    assert(type(atom) == Atom)\n"
         "    return atom.h.value()\n\n");
+
+    PyRun_SimpleString(
+        "from opencog.atomspace import Handle\n"
+        "import inspect\n"
+        "def execute_apply_tv_function(func, handle_uuid):\n"
+        "    handle = Handle(handle_uuid)\n"
+        "    args_list_link = ATOMSPACE[handle]\n"
+        "    no_of_arguments_in_pattern = len(args_list_link.out)\n"
+        "    no_of_arguments_in_user_fn = len(inspect.getargspec(func).args)\n"
+        "    if no_of_arguments_in_pattern != no_of_arguments_in_user_fn:\n"
+        "        raise Exception('Number of arguments in the function (' + "
+        "str(no_of_arguments_in_user_fn) + ') does not match that of the "
+        "corresponding pattern (' + str(no_of_arguments_in_pattern) + ').')\n"
+        "    truth_value = func(*args_list_link.out)\n"
+        "    if truth_value is None:\n"
+        "        return\n"
+        "    return truth_value\n\n");
 
     // Add ATOMSPACE to __main__ module.
     PyObject* pyRootDictionary = PyModule_GetDict(this->pyRootModule);
@@ -390,7 +408,7 @@ void PythonEval::print_dictionary(PyObject* obj)
 
 Handle PythonEval::apply(const std::string& func, Handle varargs)
 {
-    PyObject *pyError, *pyModule, *pyUserFunc, *pyExecuteUserFunc;
+    PyObject *pyError, *pyModule, *pyUserFunc, *pyExecuteApplyFunc;
     PyObject *pyArgs, *pyUUID, *pyReturnValue = NULL;
     PyObject *pyDict;
     string moduleName;
@@ -445,16 +463,16 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     // we must get separate references for later decrement of the
     // Python reference counts and promotion of borrowed references.
     pyDict = PyModule_GetDict(this->pyRootModule);
-    pyExecuteUserFunc = PyDict_GetItemString(pyDict,
-            "execute_user_defined_function");
-    OC_ASSERT(pyExecuteUserFunc != NULL);
+    pyExecuteApplyFunc = PyDict_GetItemString(pyDict,
+            "execute_apply_function");
+    OC_ASSERT(pyExecuteApplyFunc != NULL);
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
     // Py_DECREF(pyDict);
 
-    // Promote the pyExecuteUserFunc reference since it is only borrowed
+    // Promote the pyExecuteApplyFunc reference since it is only borrowed
     // and we don't want it to go away behind the scenes.
-    Py_INCREF(pyExecuteUserFunc);
+    Py_INCREF(pyExecuteApplyFunc);
 
     // Create the argument list.
     pyArgs = PyTuple_New(2);
@@ -464,7 +482,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     PyTuple_SetItem(pyArgs, 1, pyUUID);
 
     // Execute the user function and store its return value.
-    pyReturnValue = PyObject_CallObject(pyExecuteUserFunc, pyArgs);
+    pyReturnValue = PyObject_CallObject(pyExecuteApplyFunc, pyArgs);
 
     // Check for errors.
     pyError = PyErr_Occurred();
@@ -501,9 +519,9 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     }
     
     // Cleanup the reference counts for Python objects we no longer reference.
-    // Since we promoted the borrowed pyExecuteUserFunc reference, we need to
+    // Since we promoted the borrowed pyExecuteApplyFunc reference, we need to
     // decrement it here.
-    Py_DECREF(pyExecuteUserFunc);
+    Py_DECREF(pyExecuteApplyFunc);
     Py_DECREF(pyArgs);
 
     // In case PyObject_CallObject returns an error, we need to check for NULL.
@@ -528,10 +546,182 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
 
 // Should be exactly like above, except that it returns a TV, not a
 // handle.
+//
+// TODO: Need to remove the python functions that unwrap the
+// parameters from the atoms and just do that in C++ and create a common
+// routine that calls the function and differs only in the way it
+// handles the return values from the pyReturnValue Python object.
+// The extra layer of python code executed on startup is ugly.
+//
 TruthValuePtr PythonEval::apply_tv(const std::string& func, Handle varargs)
 {
-	throw RuntimeException(TRACE_INFO, "Not yet implmeneted!");
-	return TruthValue::NULL_TV();
+    PyObject *pyError, *pyModule, *pyUserFunc, *pyExecuteApplyTVFunc;
+    PyObject *pyArgs, *pyUUID, *pyTruthValue = NULL;
+    PyObject *pyDict, *pyTruthValuePtrPtr = NULL;
+
+    string moduleName;
+    string funcName;
+    bool errorCallingFunction;
+    string errorString;
+    TruthValuePtr* tvpPtr;
+    TruthValuePtr tvp;
+
+    // Get the correct module and extract the function name.
+    int index = func.find_first_of('.');
+    if (index < 0){
+        pyModule = this->pyRootModule;
+        funcName = func;
+        moduleName = "__main__";
+    } else {
+        moduleName = func.substr(0,index);
+        pyModule = this->modules[moduleName];
+        funcName = func.substr(index+1);
+    }
+
+    // Grab the GIL.
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
+    // Get a reference to the user function.
+    pyDict = PyModule_GetDict(pyModule);
+    pyUserFunc = PyDict_GetItemString(pyDict, funcName.c_str());
+
+    // PyModule_GetDict returns a borrowed reference, so don't do this:
+    // Py_DECREF(pyDict);
+
+    // If we can't find that function then throw an exception.
+    if (!pyUserFunc) {
+        PyGILState_Release(gstate);
+        throw (RuntimeException(TRACE_INFO, "Python function '%s' not found!",
+                funcName.c_str()));
+    }
+        
+    // Promote the borrowed reference for pyUserFunc since it will
+    // be passed to a Python C API function later that "steals" it.
+    Py_INCREF(pyUserFunc);
+
+    // Make sure the function is callable.
+    if (!PyCallable_Check(pyUserFunc)) {
+        Py_DECREF(pyUserFunc);
+        PyGILState_Release(gstate);
+        logger().error() << "Member " << func << " is not callable.";
+        return NULL;
+    }
+
+    // Get a reference to our executer function. NOTE: Same as above,
+    // we must get separate references for later decrement of the
+    // Python reference counts and promotion of borrowed references.
+    pyDict = PyModule_GetDict(this->pyRootModule);
+    pyExecuteApplyTVFunc = PyDict_GetItemString(pyDict,
+            "execute_apply_tv_function");
+    OC_ASSERT(pyExecuteApplyTVFunc != NULL);
+
+    // PyModule_GetDict returns a borrowed reference, so don't do this:
+    // Py_DECREF(pyDict);
+
+    // Promote the pyExecuteApplyTVFunc reference since it is only borrowed
+    // and we don't want it to go away behind the scenes.
+    Py_INCREF(pyExecuteApplyTVFunc);
+
+    // Create the argument list.
+    pyArgs = PyTuple_New(2);
+    pyUUID = PyLong_FromLong(varargs.value());
+    OC_ASSERT(pyUUID != NULL);
+    PyTuple_SetItem(pyArgs, 0, pyUserFunc);
+    PyTuple_SetItem(pyArgs, 1, pyUUID);
+
+    // Execute the user function and store its return value.
+    pyTruthValue = PyObject_CallObject(pyExecuteApplyTVFunc, pyArgs);
+
+    // Check for errors.
+    pyError = PyErr_Occurred();
+    if (!pyError) {
+
+        // Success - get the return value.
+        errorCallingFunction = false;
+
+        // Get the truth value pointer from the object (will be encoded
+        // as a long by PyVoidPtr_asLong)
+        pyTruthValuePtrPtr = PyObject_CallMethod(pyTruthValue, 
+                (char*) "truth_value_ptr_object", NULL);
+
+        // Make sure we got a truth value pointer.
+        pyError = PyErr_Occurred();
+        if (pyError) {
+            throw RuntimeException(TRACE_INFO, 
+                "Python function '%s' did not return TruthValue!",
+                funcName.c_str());
+        }
+
+        // Get the pointer to the truth value pointer. Yes, it does
+        // contain a pointer to the shared_ptr not the underlying.
+        tvpPtr = static_cast<TruthValuePtr*>
+                (PyLong_AsVoidPtr(pyTruthValuePtrPtr));
+
+        // Assign the truth value pointer using this pointer before
+        // we decrement the reference to pyTruthValue since that
+        // will delete this pointer.
+        tvp = *tvpPtr;
+
+        logger().info() << "TruthValue from : " + moduleName << " is " <<
+                tvp->toString();
+
+        // Cleanup the reference count.
+        Py_DECREF(pyTruthValuePtrPtr);
+    } 
+
+    if (pyError) {
+        // Error - save the message.
+        errorCallingFunction = true;
+
+        // Construct the error message.
+        PyObject *pyErrorType, *pyErrorMessage, *pyTraceback;
+        PyErr_Fetch(&pyErrorType, &pyErrorMessage, &pyTraceback);
+        std::stringstream errorStringStream;
+        errorStringStream << "Python error in " << func.c_str();
+        if (pyErrorMessage) {
+            char* errorMessage = PyString_AsString(pyErrorMessage);
+            if (errorMessage) {
+                errorStringStream << ": " << errorMessage << ".";
+            }
+            
+            // NOTE: The traceback can be NULL even when the others aren't.
+            Py_DECREF(pyErrorType);
+            Py_DECREF(pyErrorMessage);
+            if (pyTraceback)
+                Py_DECREF(pyTraceback);
+        }
+        errorString = errorStringStream.str();
+
+        // PyErr_Occurred returns a borrowed reference, so don't do this:
+        // Py_DECREF(pyError);
+    }
+    
+    // Cleanup the reference counts for Python objects we no longer reference.
+    // Since we promoted the borrowed pyExecuteApplyTVFunc reference, we need to
+    // decrement it here.
+    Py_DECREF(pyExecuteApplyTVFunc);
+    Py_DECREF(pyArgs);
+
+    // In case PyObject_CallObject returns an error, we need to check for NULL.
+    if (pyTruthValue)
+        Py_DECREF(pyTruthValue);
+
+    // NOTE: PyTuple_SetItem "steals" the reference to the object that
+    // is set for the list item. That means that the list assumes it
+    // owns the references after the call. So don't do this:
+    // Py_DECREF(pyUserFunc);
+    // Py_DECREF(pyUUID);
+
+    // Release the GIL. No Python API allowed beyond this point.
+    PyGILState_Release(gstate);
+
+    // Throw on error.
+    if (errorCallingFunction)
+        throw RuntimeException(TRACE_INFO, errorString.c_str());
+
+    // Return the truth value pointer from the function call.
+    return tvp;
 }
 
 std::string PythonEval::apply_script(const std::string& script)
