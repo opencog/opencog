@@ -53,6 +53,16 @@ Handle Instantiator::walk_tree(Handle expr)
 	// Fire execution links, if found.
 	if (t == EXECUTION_OUTPUT_LINK)
 	{
+		// The atoms being created above might not all be in the
+		// atomspace, just yet. Because we have no clue what the
+		// ExecutionOutputLink might do, we had best put them
+		// there now. Just as well, because it seems the scheme
+		// (and python) bindings get tripped up by the UUID==-1
+		// of uninserted atoms.
+		size_t sz = oset_results.size();
+		for (size_t i=0; i< sz; i++)
+			oset_results[i] = _as->addAtom(oset_results[i]);
+
 		// This throws if it can't figure out the schema ...
 		// Let the throw pass right on up the stack.
 		return ExecutionOutputLink::do_execute(_as, oset_results);
