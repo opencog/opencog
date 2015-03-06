@@ -1,9 +1,13 @@
 from libcpp.vector cimport vector
 from libcpp.list cimport list as cpplist
 
-# Tacky hack to pass atomspace pointer to AtomSpace ctor.
+
 cdef extern from "Python.h":
+    # Tacky hack to pass atomspace pointer to AtomSpace ctor.
     cdef void* PyLong_AsVoidPtr(object)
+
+    # Needed to return truth value pointers to C++ callers.
+    cdef object PyLong_FromVoidPtr(void *p)
 
 
 # Basic wrapping for std::string conversion.

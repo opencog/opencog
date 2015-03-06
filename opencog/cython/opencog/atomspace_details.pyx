@@ -90,6 +90,9 @@ cdef class TruthValue:
     cdef tv_ptr* _tvptr(self):
         return self.cobj
 
+    def truth_value_ptr_object(self):
+        return PyLong_FromVoidPtr(<void*>self.cobj)
+
     def __str__(self):
         return self._ptr().toString().c_str()
 
