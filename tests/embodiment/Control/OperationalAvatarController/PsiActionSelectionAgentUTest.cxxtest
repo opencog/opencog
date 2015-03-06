@@ -188,7 +188,7 @@ public:
         oac.psiActionSelectionAgent->plan_action_list.clear(); 
         oac.psiActionSelectionAgent->temp_action_list.clear(); 
 
-        oac.psiActionSelectionAgent->getPlan(atomSpace); 
+        oac.psiActionSelectionAgent->getPlan(); 
         TS_ASSERT_DIFFERS(oac.psiActionSelectionAgent->plan_selected_demand_goal,
                           opencog::Handle::UNDEFINED);
         TS_ASSERT_DIFFERS(oac.psiActionSelectionAgent->plan_action_list.size(), 0);  
