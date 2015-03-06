@@ -31,26 +31,26 @@ using namespace opencog;
 ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
                                          TruthValuePtr tv,
                                          AttentionValuePtr av)
-    : Link(EXECUTION_OUTPUT_LINK, oset, tv, av)
+	: Link(EXECUTION_OUTPUT_LINK, oset, tv, av)
 {
-    if ((2 != oset.size()) or
-       (LIST_LINK != oset[1]->getType()))
-    {
-        throw RuntimeException(TRACE_INFO,
-            "ExecutionOutputLink must have schema and args!");
-    }
+	if ((2 != oset.size()) or
+	   (LIST_LINK != oset[1]->getType()))
+	{
+		throw RuntimeException(TRACE_INFO,
+			"ExecutionOutputLink must have schema and args!");
+	}
 }
 
 ExecutionOutputLink::ExecutionOutputLink(Handle schema, Handle args,
                                          TruthValuePtr tv,
                                          AttentionValuePtr av)
-    : Link(EXECUTION_OUTPUT_LINK, schema, args, tv, av)
+	: Link(EXECUTION_OUTPUT_LINK, schema, args, tv, av)
 {
-    if (LIST_LINK != args->getType())
-    {
-        throw RuntimeException(TRACE_INFO,
-            "ExecutionOutputLink must have schema and args!");
-    }
+	if (LIST_LINK != args->getType())
+	{
+		throw RuntimeException(TRACE_INFO,
+			"ExecutionOutputLink must have schema and args!");
+	}
 }
 
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
@@ -70,39 +70,39 @@ ExecutionOutputLink::ExecutionOutputLink(Handle schema, Handle args,
 ///
 Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle execlnk)
 {
-    if (EXECUTION_OUTPUT_LINK != execlnk->getType())
-    {
-        throw RuntimeException(TRACE_INFO,
-            "Expecting to get an ExecutionOutputLink!");
-    }
-    LinkPtr l(LinkCast(execlnk));
-    return do_execute(as, l->getOutgoingSet());
+	if (EXECUTION_OUTPUT_LINK != execlnk->getType())
+	{
+		throw RuntimeException(TRACE_INFO,
+		      "Expecting to get an ExecutionOutputLink!");
+	}
+	LinkPtr l(LinkCast(execlnk));
+	return do_execute(as, l->getOutgoingSet());
 }
 
 /// Non-throwing, recursive version.
 Handle ExecutionOutputLink::recurse(AtomSpace* as, Handle h)
 {
-    LinkPtr lll(LinkCast(h));
-    if (NULL == lll) return h;
+	LinkPtr lll(LinkCast(h));
+	if (NULL == lll) return h;
 
-    // If its an execution link, execute it.
-    Type t = lll->getType();
-    if (EXECUTION_OUTPUT_LINK == t)
-        return do_execute(as, lll->getOutgoingSet());
+	// If its an execution link, execute it.
+	Type t = lll->getType();
+	if (EXECUTION_OUTPUT_LINK == t)
+		return do_execute(as, lll->getOutgoingSet());
 
-    // Search for additional execution links, and execute them too.
-    // We will know that happend if the returned handle differs from
-    // the input handle.
-    std::vector<Handle> new_oset;
-    bool changed = false;
-    for (Handle ho : lll->getOutgoingSet())
-    {
-        Handle nh(recurse(as, ho));
-        new_oset.push_back(nh);
-        if (nh != ho) changed = true;
-    }
-    if (not changed) return h;
-    return as->addLink(t, new_oset);
+	// Search for additional execution links, and execute them too.
+	// We will know that happend if the returned handle differs from
+	// the input handle.
+	std::vector<Handle> new_oset;
+	bool changed = false;
+	for (Handle ho : lll->getOutgoingSet())
+	{
+		Handle nh(recurse(as, ho));
+		new_oset.push_back(nh);
+		if (nh != ho) changed = true;
+	}
+	if (not changed) return h;
+	return as->addLink(t, new_oset);
 }
 
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
@@ -114,12 +114,12 @@ Handle ExecutionOutputLink::recurse(AtomSpace* as, Handle h)
 ///
 Handle ExecutionOutputLink::do_execute(AtomSpace* as, const HandleSeq& sna)
 {
-    if (2 != sna.size())
-    {
-        throw RuntimeException(TRACE_INFO,
-           "Incorrect arity for an ExecutionOutputLink!");
-    }
-    return do_execute(as, sna[0], sna[1]);
+	if (2 != sna.size())
+	{
+		throw RuntimeException(TRACE_INFO,
+		     "Incorrect arity for an ExecutionOutputLink!");
+	}
+	return do_execute(as, sna[0], sna[1]);
 }
 
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
@@ -130,87 +130,86 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, const HandleSeq& sna)
 ///
 Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
 {
-    if (GROUNDED_SCHEMA_NODE != gsn->getType())
-    {
-        throw RuntimeException(TRACE_INFO, "Expecting GroundedSchemaNode!");
-    }
+	if (GROUNDED_SCHEMA_NODE != gsn->getType())
+	{
+		throw RuntimeException(TRACE_INFO, "Expecting GroundedSchemaNode!");
+	}
 
-    if (LIST_LINK != args->getType())
-    {
-        throw RuntimeException(TRACE_INFO,
-            "Expecting arguments to ExecutionOutputLink!");
-    }
+	if (LIST_LINK != args->getType())
+	{
+		throw RuntimeException(TRACE_INFO,
+		     "Expecting arguments to ExecutionOutputLink!");
+	}
 
-    // Search for additional execution links, and execute them too.
-    // We will know that happend if the returned handle differs from
-    // the input handle.
-    LinkPtr largs(LinkCast(args));
-    if (largs)
-    {
-        std::vector<Handle> new_oset;
-        bool changed = false;
-        for (Handle ho : largs->getOutgoingSet())
-        {
-            Handle nh(recurse(as, ho));
-            new_oset.push_back(nh);
-            if (nh != ho) changed = true;
-        }
-        if (changed)
-            args = as->addLink(LIST_LINK, new_oset);
-    }
+	// Search for additional execution links, and execute them too.
+	// We will know that happend if the returned handle differs from
+	// the input handle.
+	LinkPtr largs(LinkCast(args));
+	if (largs)
+	{
+		std::vector<Handle> new_oset;
+		bool changed = false;
+		for (Handle ho : largs->getOutgoingSet())
+		{
+			Handle nh(recurse(as, ho));
+			new_oset.push_back(nh);
+			if (nh != ho) changed = true;
+		}
+		if (changed)
+			args = as->addLink(LIST_LINK, new_oset);
+	}
 
-    // Get the schema name.
-    const std::string& schema = NodeCast(gsn)->getName();
-    // printf ("Grounded schema name: %s\n", schema.c_str());
+	// Get the schema name.
+	const std::string& schema = NodeCast(gsn)->getName();
+	// printf ("Grounded schema name: %s\n", schema.c_str());
 
-    // At this point, we only run scheme and python schemas.
-    if (0 == schema.compare(0,4,"scm:", 4))
-    {
+	// At this point, we only run scheme and python schemas.
+	if (0 == schema.compare(0,4,"scm:", 4))
+	{
 #ifdef HAVE_GUILE
-        // Be friendly, and strip leading white-space, if any.
-        size_t pos = 4;
-        while (' ' == schema[pos]) pos++;
+		// Be friendly, and strip leading white-space, if any.
+		size_t pos = 4;
+		while (' ' == schema[pos]) pos++;
 
-        SchemeEval* applier = get_evaluator(as);
-        Handle h(applier->apply(schema.substr(pos), args));
+		SchemeEval* applier = get_evaluator(as);
+		Handle h(applier->apply(schema.substr(pos), args));
 
-        // Exceptions were already caught, before leaving guile mode,
-        // so we can't rethrow.  Just throw a new exception.
-        if (applier->eval_error())
-            throw RuntimeException(TRACE_INFO,
-                "Failed evaluation; see logfile for stack trace.");
-        return h;
+		// Exceptions were already caught, before leaving guile mode,
+		// so we can't rethrow.  Just throw a new exception.
+		if (applier->eval_error())
+			throw RuntimeException(TRACE_INFO,
+			    "Failed evaluation; see logfile for stack trace.");
+		return h;
 #else
-        throw RuntimeException(TRACE_INFO,
-            "Cannot evaluate scheme GroundedSchemaNode!");
+		throw RuntimeException(TRACE_INFO,
+		    "Cannot evaluate scheme GroundedSchemaNode!");
 #endif /* HAVE_GUILE */
-    }
+	}
 
-    if (0 == schema.compare(0, 3,"py:", 3))
-    {
+	if (0 == schema.compare(0, 3,"py:", 3))
+	{
 #ifdef HAVE_CYTHON
-        // Be friendly, and strip leading white-space, if any.
-        size_t pos = 3;
-        while (' ' == schema[pos]) pos++;
+		// Be friendly, and strip leading white-space, if any.
+		size_t pos = 3;
+		while (' ' == schema[pos]) pos++;
 
-        // Get a reference to the python evaluator. NOTE: We are
-        // passing in a reference to our atom space to invoke
-        // the safety checking to make sure the singleton instance
-        // is using the same atom space.
-        PythonEval &applier = PythonEval::instance(as);
+		// Get a reference to the python evaluator. NOTE: We are
+		// passing in a reference to our atom space to invoke
+		// the safety checking to make sure the singleton instance
+		// is using the same atom space.
+		PythonEval &applier = PythonEval::instance(as);
 
-        Handle h = applier.apply(schema.substr(pos), args);
+		Handle h = applier.apply(schema.substr(pos), args);
 
-        // Return the handle
-        return h;
+		// Return the handle
+		return h;
 #else
-        throw RuntimeException(TRACE_INFO,
-            "Cannot evaluate python GroundedSchemaNode!");
+		throw RuntimeException(TRACE_INFO,
+		    "Cannot evaluate python GroundedSchemaNode!");
 #endif /* HAVE_CYTHON */
-    }
+	}
 
-    // Unkown proceedure type.
-    throw RuntimeException(TRACE_INFO,
-        "Cannot evaluate unknown GroundedSchemaNode!");
+	// Unkown proceedure type.
+	throw RuntimeException(TRACE_INFO,
+	    "Cannot evaluate unknown GroundedSchemaNode!");
 }
-
