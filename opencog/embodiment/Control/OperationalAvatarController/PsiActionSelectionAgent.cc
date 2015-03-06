@@ -189,20 +189,21 @@ bool PsiActionSelectionAgent::getPlan()
 
 void PsiActionSelectionAgent::printPlan()
 {
-    std::cout<<std::endl<<"Selected Demand Goal [cycle = "<<this->cycleCount<<"]:"
-             <<std::endl<<atomspace.atomAsString(this->plan_selected_demand_goal)
-             <<std::endl;
+    std::cout << std::endl << "Selected Demand Goal [cycle = "
+              << this->cycleCount << "]:" << std::endl
+              << atomspace.atomAsString(this->plan_selected_demand_goal)
+              << std::endl;
 
     int i = 1;
 
     for ( const Handle hAction : this->plan_action_list ) {
-        std::cout<<std::endl<<"Step No."<<i
-                 <<std::endl<<atomspace.atomAsString(hAction);
+        std::cout << std::endl << "Step No."<< i
+                  << std::endl << atomspace.atomAsString(hAction);
 
         ++i;
     }
 
-    std::cout<<std::endl<<std::endl;
+    std::cout << std::endl << std::endl;
 }
 
 void PsiActionSelectionAgent::stimulateAtoms()
@@ -231,7 +232,7 @@ void PsiActionSelectionAgent::executeAction(LanguageComprehension & languageTool
 
 #if HAVE_GUILE
     // Variables used by combo interpreter
-    std::vector <combo::vertex> schemaArguments;
+    std::vector<combo::vertex> schemaArguments;
 
     // Get Action type
     Type actionType =
@@ -242,6 +243,7 @@ void PsiActionSelectionAgent::executeAction(LanguageComprehension & languageTool
         atomspace.getName(atomspace.getOutgoing(hActionExecutionLink, 0));
 
     // Get scheme function name if any
+    // @todo replace by opencog/execute call
     bool bSchemeFunction = false;
     size_t scm_prefix_index = actionName.find("scm:");
 
@@ -264,6 +266,7 @@ void PsiActionSelectionAgent::executeAction(LanguageComprehension & languageTool
     //         SentenceNode ...
     //         ...
     // TODO: this is unnecessary, remove it later.
+    // Why???
     if (actionType == SPEECH_ACT_SCHEMA_NODE) {
         scheme_expression = "( " + actionName + " )";
 
@@ -288,6 +291,7 @@ void PsiActionSelectionAgent::executeAction(LanguageComprehension & languageTool
         // Get arguments for the scheme function
         scheme_expression = actionName;
 
+        // @todo replace by opencog/execute call
         if ( atomspace.getArity(hActionExecutionLink) == 2 ) {
             // Handle to ListLink containing arguments
             Handle hListLink = atomspace.getOutgoing(hActionExecutionLink, 1);
@@ -393,7 +397,7 @@ void PsiActionSelectionAgent::executeAction(LanguageComprehension & languageTool
 
     // If the agent has something to say, generate a bunch of say
     // actions (one for each sentence node) which would be executed
-    // from next cognitive cycle
+    // from the next cognitive cycle
     {
         std::string sentenceNodeName, listerner, content;
 
@@ -459,6 +463,7 @@ void PsiActionSelectionAgent::executeAction(LanguageComprehension & languageTool
         } // for
 
 #if HAVE_GUILE
+        // @todo this could be replaced by a GSN call (with opencog/execute)
         scheme_expression = "( reset_utterance_node \"utterance_sentences\" )";
 
         // Move sentences from UtteranceNode to DialogNode, then these sentences
@@ -720,6 +725,10 @@ void PsiActionSelectionAgent::run()
 
         std::cout<<"Doing planning ... "<<std::endl;
 
+        // @todo this could probably be reformulate the information
+        // that do_planning updates are directly output, then call to
+        // opencog/execute would return a Handle pointing the plan
+        // information
         scheme_expression = "( do_planning )";
 
         // Run the Procedure that do planning
