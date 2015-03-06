@@ -70,6 +70,9 @@ cdef class Atom(object):
         def __get__(self):
             return self.type
 
+    def handle_uuid(self):
+        return self.handle.value()
+
     def is_source(self,Atom a):
         return self.atomspace.is_source(a.h,self.handle)
 

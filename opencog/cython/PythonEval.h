@@ -83,16 +83,20 @@ class PythonEval : public GenericEval
     private:
         void initialize_python_objects_and_imports(void);
 
+        // Module utility functions
         void import_module( const boost::filesystem::path &file,
                             PyObject* pyFromList);
         void add_module_directory(const boost::filesystem::path &directory);
         void add_module_file(const boost::filesystem::path &file);
         void add_modules_from_path(std::string path);
 
+        // Python utility functions
+        PyObject* call_user_function(   const std::string& func,
+                                        Handle varargs);
+        void build_python_error_message(    const char* function_name,
+                                            std::string& errorMessage);
         void add_to_sys_path(std::string path);
-
         PyObject * atomspace_py_object(AtomSpace * atomspace = NULL);
-
         void print_dictionary(PyObject* obj);
 
         static PythonEval* singletonInstance;
