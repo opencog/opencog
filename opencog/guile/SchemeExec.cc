@@ -1,7 +1,7 @@
 /*
  * SchemeExec.cc
  *
- * Execute ExecutionOutputLink's
+ * Execute ExecutionOutputLinks, EvaluationLinks with GPN's.
  * Copyright (c) 2009,2015 Linas Vepstas <linasvepstas@gmail.com>
  */
 
@@ -97,7 +97,7 @@ SCM SchemeSmob::ss_execute (SCM satom)
 }
 
 /**
- * Executes an EevaluationLink with a GPN in it.
+ * Executes an EvaluationLink with a GPN in it.
  */
 SCM SchemeSmob::ss_evaluate (SCM satom)
 {
