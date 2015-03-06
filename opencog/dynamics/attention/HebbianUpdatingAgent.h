@@ -48,7 +48,7 @@ class CogServer;
 class HebbianUpdatingAgent : public Agent
 {
 
-private:
+protected:
     AtomSpace* a;
 
 	/** Work out the conjunction between a series of handles.
@@ -88,6 +88,8 @@ private:
      * @param l The logger to associate with the agent.
      */
     void setLogger(Logger* l);
+
+    void setMean(Handle h, float tc);
 
     Logger *log; //!< Logger object for Agent
 

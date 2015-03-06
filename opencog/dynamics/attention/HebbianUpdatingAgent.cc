@@ -32,7 +32,7 @@
 
 using namespace opencog;
 
-static void setMean(Handle h, float tc)
+void HebbianUpdatingAgent::setMean(Handle h, float tc)
 {
 	TruthValuePtr oldtv(h->getTruthValue());
 	switch (oldtv->getType())
