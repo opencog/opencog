@@ -312,33 +312,39 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 	// as, apparently, the clauses consist entirely of variables!! So,
 	// basically, we must search the entire!! atomspace, in this case.
 	// Yes, this hurts.
-	_root = clauses[0];
-	_starter_pred = _root;
+    perform_full_atomspace_search(pme, clauses);
+}
 
-	dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
+void DefaultPatternMatchCB::perform_full_atomspace_search(PatternMatchEngine *pme,
+                                                          std::vector<Handle> &clauses)
+{
+    _root = clauses[0];
+    _starter_pred = _root;
 
-	// Get type of the first item in the predicate list.
-	Type ptype = _root->getType();
+    dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
 
-	// Plunge into the deep end - start looking at all viable
-	// candidates in the AtomSpace.
+    // Get type of the first item in the predicate list.
+    Type ptype = _root->getType();
 
-	// XXX TODO -- as a performance optimization, we should try all
-	// the different clauses, and find the one with the smallest number
-	// of atoms of that type, or otherwise try to find a small ("thin")
-	// incoming set to search over.
-	std::list<Handle> handle_set;
-	_as->getHandlesByType(back_inserter(handle_set), ptype);
-	std::list<Handle>::iterator i = handle_set.begin();
-	std::list<Handle>::iterator iend = handle_set.end();
-	for (; i != iend; ++i)
-	{
-		Handle h(*i);
-		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-		dbgprt("Loop candidate: %s\n", h->toShortString().c_str());
-		bool rc = pme->do_candidate(_root, _starter_pred, h);
-		if (rc) break;
-	}
+    // Plunge into the deep end - start looking at all viable
+    // candidates in the AtomSpace.
+
+    // XXX TODO -- as a performance optimization, we should try all
+    // the different clauses, and find the one with the smallest number
+    // of atoms of that type, or otherwise try to find a small ("thin")
+    // incoming set to search over.
+    std::list<Handle> handle_set;
+    _as->getHandlesByType(back_inserter(handle_set), ptype);
+    std::list<Handle>::iterator i = handle_set.begin();
+    std::list<Handle>::iterator iend = handle_set.end();
+    for (; i != iend; ++i)
+    {
+        Handle h(*i);
+        dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+        dbgprt("Loop candidate: %s\n", h->toShortString().c_str());
+        bool rc = pme->do_candidate(_root, _starter_pred, h);
+        if (rc) break;
+    }
 }
 
 /* ======================================================== */
