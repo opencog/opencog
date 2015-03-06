@@ -32,20 +32,20 @@
 
 using namespace opencog;
 
-static void setMean(Handle h, float tc)
+void HebbianUpdatingAgent::setMean(Handle h, float tc)
 {
 	TruthValuePtr oldtv(h->getTruthValue());
 	switch (oldtv->getType())
 	{
 		case SIMPLE_TRUTH_VALUE: {
 			TruthValuePtr newtv(SimpleTruthValue::createTV(tc, oldtv->getCount()));
-			h->setTruthValue(newtv);
+			h->merge(newtv);
 			break;
 		}
 		case INDEFINITE_TRUTH_VALUE: {
 			IndefiniteTruthValuePtr newtv(IndefiniteTruthValue::createITV(oldtv));
 			newtv->setMean(tc);
-			h->setTruthValue(newtv);
+			h->merge(newtv);
 			break;
 		}
 		default:

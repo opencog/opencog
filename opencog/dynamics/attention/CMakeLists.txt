@@ -35,6 +35,7 @@ ADD_LIBRARY(attention SHARED
 	AttentionModule
 	ForgettingAgent
 	HebbianUpdatingAgent
+	SimpleHebbianUpdatingAgent
 	ImportanceSpreadingAgent
 	ImportanceDiffusionAgent
 	SimpleImportanceDiffusionAgent        
