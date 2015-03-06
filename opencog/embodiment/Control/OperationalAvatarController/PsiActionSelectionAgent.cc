@@ -28,6 +28,7 @@
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/util/platform.h>
+#include <opencog/util/random.h>
 
 #include "OAC.h"
 #include "PsiActionSelectionAgent.h"
@@ -87,8 +88,6 @@ void PsiActionSelectionAgent::initDemandGoalList()
     std::string demandPredicateName;
     HandleSeq outgoings;
 
-    outgoings.clear();
-
     for ( boost::tokenizer<>::iterator iDemandName = demandNamesTok.begin();
           iDemandName != demandNamesTok.end();
           ++ iDemandName ) {
@@ -130,8 +129,7 @@ void PsiActionSelectionAgent::getActions(Handle hStep, HandleSeq & actions)
     }
     else if (atomType == OR_LINK ) {
         const HandleSeq & outgoings = atomspace.getOutgoing(hStep);
-        int randomIndex = (int) (1.0*rand()/RAND_MAX * outgoings.size() - 0.5);
-        Handle hRandomSelected = outgoings[randomIndex];
+        Handle hRandomSelected = select_rand_element(outgoings);
         this->getActions(hRandomSelected, actions);
     }
 }
