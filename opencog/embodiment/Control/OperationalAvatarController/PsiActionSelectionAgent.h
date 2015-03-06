@@ -30,6 +30,8 @@ class PsiActionSelectionAgentUTest;
 
 namespace opencog { namespace oac {
 
+class OAC;
+
 /**
  * @class
  *
@@ -91,6 +93,8 @@ class PsiActionSelectionAgent : public opencog::Agent
     friend class::PsiActionSelectionAgentUTest;
 
 private:
+	OAC& oac;
+	AtomSpace& atomspace;
 
     unsigned long cycleCount;  // Indicate how many times this mind
                                // agent has been executed
@@ -123,7 +127,7 @@ private:
     std::vector<Handle> temp_action_list;     
 
     // Each action(or step) in plan_action_list (or temp_action_list) may actually 
-    // contains multiple actions. For example in plan_action_list there might
+    // contain multiple actions. For example in plan_action_list there might
     // be an SequentialAndLink containing goto_obj(food) and eat(food) actions. 
     // However, OAC can not do both actions all at once. So in planner side both
     // actions can be considered as just one action, while in OAC side they are 
@@ -139,8 +143,7 @@ private:
     Handle current_action; 
 
     // Return actions given one step in plan_action_list (or temp_action_list)
-    void getActions(AtomSpace & atomSpace, Handle hStep,
-                    std::vector<Handle> & actions);
+    void getActions(Handle hStep, std::vector<Handle> & actions);
 
     // Initialize demandGoalList etc.
     void init();
@@ -161,19 +164,19 @@ private:
     //             ListLink
     //         ...
     //
-    void initDemandGoalList(AtomSpace & atomSpace);
+    void initDemandGoalList();
 
     /**
      * Get the plan stored in AtomSpace
      *
      * @return true if get the plan successfully, false otherwise 
      */
-    bool getPlan(AtomSpace & atomSpace);
+    bool getPlan();
 
     /**
      * Print the plan to the screen, only used for debugging
      */
-    void printPlan(AtomSpace & atomSpace);
+    void printPlan();
 
     /**
      * Stimulate atoms related to the plan, ImportanceUpdatingAgent will then 
@@ -194,8 +197,7 @@ private:
      *         SentenceNode ...
      *         ...
      */
-    void executeAction(AtomSpace & atomSpace, 
-                       LanguageComprehension & languageTool,
+    void executeAction(LanguageComprehension & languageTool,
                        Procedure::ProcedureInterpreter & procedureInterpreter, 
                        const Procedure::ProcedureRepository & procedureRepository, 
                        Handle hActionExecutionLink); 
