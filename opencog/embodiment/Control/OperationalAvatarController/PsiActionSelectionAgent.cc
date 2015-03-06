@@ -723,7 +723,7 @@ void PsiActionSelectionAgent::run()
             return;
         count = 0;
 
-        std::cout<<"Doing planning ... "<<std::endl;
+        std::cout << "Doing planning ... " << std::endl;
 
         // @todo this could probably be reformulate the information
         // that do_planning updates are directly output, then call to
