@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/EvaluationLink.h
+ * opencog/execution/EvaluationLink.h
  *
  * Copyright (C) 2013,2014 Linas Vepstas
  * All Rights Reserved
