@@ -53,8 +53,6 @@
 #include "opencog/agent_finder_types.h"
 #include "opencog/agent_finder_api.h"
 
-#include <csignal>
-
 using std::string;
 using std::vector;
 
