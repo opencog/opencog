@@ -98,6 +98,7 @@ class PythonEval : public GenericEval
         void add_to_sys_path(std::string path);
         PyObject * atomspace_py_object(AtomSpace * atomspace = NULL);
         void print_dictionary(PyObject* obj);
+        void execute_string(const char* command);
 
         static PythonEval* singletonInstance;
         static AtomSpace* singletonAtomSpace;
@@ -156,6 +157,13 @@ class PythonEval : public GenericEval
          * Calls the Python function passed in 'func' returning a TruthValuePtr.
          */
         TruthValuePtr apply_tv(const std::string& func, Handle varargs);
+
+        /**
+         *
+         */
+        void print_root_dictionary()
+            { this->print_dictionary(PyModule_GetDict(this->pyRootModule)); }
+
 };
 
 /**

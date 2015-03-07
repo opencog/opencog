@@ -81,6 +81,11 @@ AtomSpace* PythonEval::singletonAtomSpace = NULL;
 
 const int NO_SIGNAL_HANDLERS = 0;
 const char* NO_FUNCTION_NAME = NULL;
+const int SIMPLE_STRING_SUCCESS = 0;
+const int SIMPLE_STRING_FAILURE = -1;
+
+// The Python functions can't take const flags.
+#define NO_COMPILER_FLAGS NULL
 
 static bool already_initialized = false;
 
@@ -396,30 +401,56 @@ void PythonEval::print_dictionary(PyObject* obj)
 void PythonEval::build_python_error_message(    const char* function_name,
                                                 std::string& errorMessage)
 {
-    // Construct the error message.
-    PyObject *pyErrorType, *pyErrorMessage, *pyTraceback;
+    PyObject *pyErrorType, *pyError, *pyTraceback, *pyErrorString;
     std::stringstream errorStringStream;
 
-    // Get the error message from Python.
-    PyErr_Fetch(&pyErrorType, &pyErrorMessage, &pyTraceback);
+    // Get the error from Python.
+    PyErr_Fetch(&pyErrorType, &pyError, &pyTraceback);
     
+    // Construct the error message string.
     errorStringStream << "Python error ";
     if (function_name != NO_FUNCTION_NAME)
         errorStringStream << "in " << function_name;
-
-    if (pyErrorMessage) {
-        char* pythonErrorString = PyString_AsString(pyErrorMessage);
+    if (pyError) {
+        pyErrorString = PyObject_Str(pyError);
+        char* pythonErrorString = PyString_AsString(pyErrorString);
         if (pythonErrorString) {
             errorStringStream << ": " << pythonErrorString << ".";
+        } else {
+            errorStringStream << ": Undefined Error";
         }
         
-        // NOTE: The traceback can be NULL even when the others aren't.
+        // Cleanup the references. NOTE: The traceback can be NULL even
+        // when the others aren't.
         Py_DECREF(pyErrorType);
-        Py_DECREF(pyErrorMessage);
+        Py_DECREF(pyError);
+        Py_DECREF(pyErrorString);
         if (pyTraceback)
             Py_DECREF(pyTraceback);
+
+    } else {
+        errorStringStream << ": Undefined Error";
     }
     errorMessage = errorStringStream.str();
+}
+
+/**
+ * Execute the python string at the __main__ module context. 
+ *
+ * This replaces a call to PyRun_SimpleString which clears errors so
+ * that a subsequent call to Py_Error() returns false. This version
+ * does everything that PyRun_SimpleString does except it does not
+ * call PyErr_Print() and PyErr_Clear().
+ */
+void PythonEval::execute_string(const char* command)
+{
+    PyObject *pyRootDictionary, *pyResult;
+    pyRootDictionary = PyModule_GetDict(this->pyRootModule);
+    pyResult = PyRun_StringFlags(command, Py_file_input, pyRootDictionary,
+            pyRootDictionary, NO_COMPILER_FLAGS);
+    if (pyResult)
+        Py_DECREF(pyResult);
+    Py_FlushLine();
 }
 
 /**
@@ -662,14 +693,18 @@ std::string PythonEval::apply_script(const std::string& script)
                        "sys.stdout = _opencog_output_stream\n"
                        "sys.stderr = _opencog_output_stream\n");
 
-    // Run the script.
-    PyRun_SimpleString(script.c_str());
+    // Execute the script. NOTE: This call replaces PyRun_SimpleString 
+    // which was masking errors because it calls PyErr_Clear() so the
+    // call to PyErr_Occurred below was returning false even when there 
+    // was an error.
+    this->execute_string(script.c_str());
 
     // Check for errors in the script.
     pyError = PyErr_Occurred();
+
+    // If the script executed without error...
     if (!pyError) {
-        // Script succeeded, get the output stream as a string
-        // so we can return it.
+        // Get the output stream as a string so we can return it.
         errorRunningScript = false;
         pyCatcher = PyObject_GetAttrString(this->pyRootModule,
                 "_opencog_output_stream");
@@ -683,8 +718,6 @@ std::string PythonEval::apply_script(const std::string& script)
     } else {
         // Remember the error and get the error string for the throw below.
         errorRunningScript = true;
-
-        // Construct the error message.
         this->build_python_error_message(NO_FUNCTION_NAME, errorString);
 
         // PyErr_Occurred returns a borrowed reference, so don't do this:
@@ -891,8 +924,7 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     if (partial_expr == "\n")
         logger().info("[PythonEval] eval_expr: '\\n'");
     else
-        logger().info("[PythonEval] eval_expr: '%s\\n'", 
-                partial_expr.substr(0,partial_expr.size()-1).c_str());
+        logger().info("[PythonEval] eval_expr:\n%s\n", partial_expr.c_str());
 
     _result = "";
 
