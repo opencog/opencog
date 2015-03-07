@@ -4,6 +4,9 @@
 #include <opencog/util/Config.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/server/CogServer.h>
 
 using std::string;
 
@@ -243,9 +246,10 @@ public:
         PythonEval* evaluator = &PythonEval::instance();
 
         // Check that our atom space global is visible and can add a node.
+        evaluator->clear_pending();
         evaluator->eval_expr("from opencog.atomspace import *");
         evaluator->eval_expr("ATOMSPACE.add_node(types.ConceptNode,'test')");
-        evaluator->eval_expr("print 'Total atoms = ', ATOMSPACE.size(), '\n'");
+        evaluator->eval_expr("print 'Total atoms = ', ATOMSPACE.size(), '\\n'");
 
         // Delete the singleton instance and atomspace.
         PythonEval::delete_singleton_instance();
@@ -256,6 +260,66 @@ public:
         global_python_finalize();
 
         logger().debug("[PythonEvalUTest] testPythonEvalEvalExpr() DONE");
+    }
+
+    void testApplyAndApplyTV() {
+
+        CogServer cogServer;
+        bool error;
+
+        config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm");
+        cogServer.loadSCMModules();
+
+        // Get the python eval instance which the CogServer will have created.
+        PythonEval* python = &PythonEval::instance();
+
+        // Define python functions for use by scheme.
+        python->eval(
+            "from opencog.atomspace import types, Atom, TruthValue\n"
+            "def add_link(atom1, atom2):\n"
+            "    link = ATOMSPACE.add_link(types.ListLink, [atom1, atom2])\n"
+            "    print 'add_linklink(',atom1,',',atom2,') = ', link\n"
+            "    return link\n\n"
+
+            "def return_truth(atom1, atom2):\n"
+            "    print 'return_truth TruthValue(0.75, 100.0)'\n"
+            "    return TruthValue(0.75, 100.0)\n"
+            );
+
+        // Create a scheme evaluator to trigger cog-evaluate and cog-execute.
+        SchemeEval* scheme = new SchemeEval(&cogServer.getAtomSpace());
+       
+        // Test execute -> PythonEval::apply
+        scheme->eval(
+                "(cog-execute! "
+                "   (ExecutionOutputLink"
+                "       (GroundedSchemaNode \"py: add_link\")"
+                "       (ListLink"
+                "           (ConceptNode \"one\")"
+                "           (ConceptNode \"two\")"
+                "       )"
+                "   )"
+                ")"
+                );
+        error = scheme->eval_error();
+        scheme->clear_pending();
+        TSM_ASSERT("Failed cog-execute!", !error);
+
+        // Test cog-evaluate -> PythonEval::apply_tv
+        scheme->eval(
+                "(cog-evaluate! "
+                "   (EvaluationLink"
+                "       (GroundedPredicateNode \"py: return_truth\")"
+                "       (ListLink"
+                "           (ConceptNode \"one\")"
+                "           (ConceptNode \"two\")"
+                "       )"
+                "   )"
+                ")"
+                );
+        error = scheme->eval_error();
+        scheme->clear_pending();
+        TSM_ASSERT("Failed cog-evaluate!", !error);
     }
 
 };

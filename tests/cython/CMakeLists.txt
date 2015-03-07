@@ -39,13 +39,18 @@ IF (HAVE_SERVER)
 ENDIF (HAVE_SERVER)
 
 
-# The PythonEvalUTest tests PythonEval independent of the CogServer.
+# The PythonEvalUTest tests PythonEval independent of the CogServer. It depends
+# on the server being around for the Scheme code but it does not message
+# through a "py-eval" server request.
+#
 ADD_CXXTEST(PythonEvalUTest)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/cython/pythoneval.conf
 	${PROJECT_BINARY_DIR}/tests/cython/pythoneval.conf)
 
 TARGET_LINK_LIBRARIES(PythonEvalUTest
 	atomspace
+	smob
+	server
 	PythonEval
 	cogutil
 )
