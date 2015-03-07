@@ -278,7 +278,7 @@ public:
             "from opencog.atomspace import types, Atom, TruthValue\n"
             "def add_link(atom1, atom2):\n"
             "    link = ATOMSPACE.add_link(types.ListLink, [atom1, atom2])\n"
-            "    print 'add_linklink(',atom1,',',atom2,') = ', link\n"
+            "    print 'add_link(',atom1,',',atom2,') = ', link\n"
             "    return link\n\n"
 
             "def return_truth(atom1, atom2):\n"
