@@ -462,39 +462,55 @@ int PythonEval::argument_count(PyObject* pyFunction)
 }
 
 /**
+ * Get the Python module and stripped function name given the identifer of
+ * the form 'module.function'.
+ * 
+ */
+PyObject* PythonEval::module_for_function(  const std::string& moduleFunction,
+                                            std::string& functionName)
+{
+    PyObject* pyModule;
+    std::string moduleName;
+
+    // Get the correct module and extract the function name.
+    int index = moduleFunction.find_first_of('.');
+    if (index < 0){
+        pyModule = this->pyRootModule;
+        functionName = moduleFunction;
+        moduleName = "__main__";
+    } else {
+        moduleName = moduleFunction.substr(0, index);
+        pyModule = this->modules[moduleName];
+        functionName = moduleFunction.substr(index+1);
+    }
+
+    return pyModule;
+}
+
+/**
  * Call the user defined function with the arguments passed in the
  * ListLink handle 'arguments'.
  * 
  * On error throws an exception.
  */
-PyObject* PythonEval::call_user_function(   const std::string& func, 
+PyObject* PythonEval::call_user_function(   const std::string& moduleFunction, 
                                             Handle arguments)
 {
     PyObject *pyError, *pyModule, *pyUserFunc, *pyReturnValue = NULL;
     PyObject *pyDict;
-    std::string moduleName;
-    std::string funcName;
+    std::string functionName;
     std::string errorString;
 
     // Grab the GIL.
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
 
-    // Get the correct module and extract the function name.
-    int index = func.find_first_of('.');
-    if (index < 0){
-        pyModule = this->pyRootModule;
-        funcName = func;
-        moduleName = "__main__";
-    } else {
-        moduleName = func.substr(0,index);
-        pyModule = this->modules[moduleName];
-        funcName = func.substr(index+1);
-    }
+    // Get the module and stripped function name.
+    pyModule = this->module_for_function(moduleFunction, functionName);
 
     // Get a reference to the user function.
     pyDict = PyModule_GetDict(pyModule);
-    pyUserFunc = PyDict_GetItemString(pyDict, funcName.c_str());
+    pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
     // Py_DECREF(pyDict);
@@ -502,9 +518,9 @@ PyObject* PythonEval::call_user_function(   const std::string& func,
     // If we can't find that function then throw an exception.
     if (!pyUserFunc) {
         PyGILState_Release(gstate);
-        logger().error("Python function '%s' not found!", funcName.c_str());
+        logger().error("Python function '%s' not found!", moduleFunction.c_str());
         throw (RuntimeException(TRACE_INFO, "Python function '%s' not found!",
-                funcName.c_str()));
+                moduleFunction.c_str()));
     }
         
     // Promote the borrowed reference for pyUserFunc since it will
@@ -516,9 +532,9 @@ PyObject* PythonEval::call_user_function(   const std::string& func,
         Py_DECREF(pyUserFunc);
         PyGILState_Release(gstate);
         logger().error("Python user function '%s' not callable!",
-                funcName.c_str());
+                moduleFunction.c_str());
         throw (RuntimeException(TRACE_INFO,
-            "Python function '%s' not callable!", funcName.c_str()));
+            "Python function '%s' not callable!", moduleFunction.c_str()));
     }
 
     // Get the expected argument count.
@@ -527,7 +543,7 @@ PyObject* PythonEval::call_user_function(   const std::string& func,
         PyGILState_Release(gstate);
         throw (RuntimeException(TRACE_INFO,
             "Python function '%s' error missing 'func_code'!",
-            funcName.c_str()));
+            moduleFunction.c_str()));
     }
 
     // Get the actual argument count, passed in the ListLink.
@@ -544,7 +560,7 @@ PyObject* PythonEval::call_user_function(   const std::string& func,
         PyGILState_Release(gstate);
         throw (RuntimeException(TRACE_INFO,
             "Python function '%s' which expects '%d arguments,"
-            " called with %d arguments!", funcName.c_str(),
+            " called with %d arguments!", moduleFunction.c_str(),
             expectedArgumentCount, actualArgumentCount
             ));
     }
@@ -584,7 +600,7 @@ PyObject* PythonEval::call_user_function(   const std::string& func,
     if (pyError) {
 
         // Construct the error message and throw an exception.
-        this->build_python_error_message(func.c_str(), errorString);
+        this->build_python_error_message(moduleFunction.c_str(), errorString);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO, errorString.c_str());
 
