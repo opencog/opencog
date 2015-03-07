@@ -99,6 +99,7 @@ class PythonEval : public GenericEval
         PyObject * atomspace_py_object(AtomSpace * atomspace = NULL);
         void print_dictionary(PyObject* obj);
         void execute_string(const char* command);
+        int argument_count(PyObject* pyFunction);
 
         static PythonEval* singletonInstance;
         static AtomSpace* singletonAtomSpace;

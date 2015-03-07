@@ -83,6 +83,7 @@ const int NO_SIGNAL_HANDLERS = 0;
 const char* NO_FUNCTION_NAME = NULL;
 const int SIMPLE_STRING_SUCCESS = 0;
 const int SIMPLE_STRING_FAILURE = -1;
+const int MISSING_FUNC_CODE = -1;
 
 // The Python functions can't take const flags.
 #define NO_COMPILER_FLAGS NULL
@@ -308,26 +309,6 @@ void PythonEval::initialize_python_objects_and_imports(void)
     Py_INCREF(this->pyRootModule);
     PyModule_AddStringConstant(this->pyRootModule, "__file__", "");
 
-    // Define the user function executer
-    // XXX FIXME ... this should probably be defined in some py file
-    // that is loaded up by opencog.conf
-    PyRun_SimpleString(
-        "from opencog.atomspace import Handle\n"
-        "import inspect\n"
-        "def execute_user_function(func, handle_uuid):\n"
-        "    handle = Handle(handle_uuid)\n"
-        "    args_list_link = ATOMSPACE[handle]\n"
-        "    no_of_arguments_in_pattern = len(args_list_link.out)\n"
-        "    no_of_arguments_in_user_fn = len(inspect.getargspec(func).args)\n"
-        "    if no_of_arguments_in_pattern != no_of_arguments_in_user_fn:\n"
-        "        raise Exception('Number of arguments in the function (' + "
-        "str(no_of_arguments_in_user_fn) + ') does not match that of the "
-        "corresponding pattern (' + str(no_of_arguments_in_pattern) + ').')\n"
-        "    atom = func(*args_list_link.out)\n"
-        "    if atom is None:\n"
-        "        return\n"
-        "    return atom\n\n"); 
-
     // Add ATOMSPACE to __main__ module.
     PyObject* pyRootDictionary = PyModule_GetDict(this->pyRootModule);
     PyObject* pyAtomSpaceObject = this->atomspace_py_object();
@@ -453,17 +434,43 @@ void PythonEval::execute_string(const char* command)
     Py_FlushLine();
 }
 
+int PythonEval::argument_count(PyObject* pyFunction)
+{
+    PyObject* pyFunctionCode;
+    PyObject* pyArgumentCount;
+    int argumentCount;
+
+    // Get the 'function.func_code.co_argcount' Python internal attribute.
+    pyFunctionCode = PyObject_GetAttrString(pyFunction, "func_code");
+    if (pyFunctionCode) {
+        pyArgumentCount = PyObject_GetAttrString(pyFunctionCode, "co_argcount");
+        if (pyArgumentCount) {
+            argumentCount = PyInt_AsLong(pyArgumentCount);
+        }  else {
+            Py_DECREF(pyFunctionCode);
+            return MISSING_FUNC_CODE;
+        }
+    } else {
+        return MISSING_FUNC_CODE;
+    }
+
+    // Cleanup the reference counts.
+    Py_DECREF(pyFunctionCode);
+    Py_DECREF(pyArgumentCount);
+
+    return argumentCount;
+}
+
 /**
  * Call the user defined function with the arguments passed in the
- * ListLink handle varargs.
+ * ListLink handle 'arguments'.
  * 
  * On error throws an exception.
  */
 PyObject* PythonEval::call_user_function(   const std::string& func, 
-                                            Handle varargs)
+                                            Handle arguments)
 {
-    PyObject *pyError, *pyModule, *pyUserFunc, *pyExecuteUserFunc;
-    PyObject *pyArgs, *pyUUID, *pyReturnValue = NULL;
+    PyObject *pyError, *pyModule, *pyUserFunc, *pyReturnValue = NULL;
     PyObject *pyDict;
     std::string moduleName;
     std::string funcName;
@@ -514,27 +521,63 @@ PyObject* PythonEval::call_user_function(   const std::string& func,
             "Python function '%s' not callable!", funcName.c_str()));
     }
 
-    // Get a reference to our executer function.
-    pyDict = PyModule_GetDict(this->pyRootModule);
-    pyExecuteUserFunc = PyDict_GetItemString(pyDict, "execute_user_function");
-    OC_ASSERT(pyExecuteUserFunc != NULL);
+    // Get the expected argument count.
+    int expectedArgumentCount = this->argument_count(pyUserFunc);
+    if (expectedArgumentCount == MISSING_FUNC_CODE) {
+        PyGILState_Release(gstate);
+        throw (RuntimeException(TRACE_INFO,
+            "Python function '%s' error missing 'func_code'!",
+            funcName.c_str()));
+    }
 
-    // PyModule_GetDict returns a borrowed reference, so don't do this:
-    // Py_DECREF(pyDict);
+    // Get the actual argument count, passed in the ListLink.
+    if (arguments->getType() != LIST_LINK) {
+        PyGILState_Release(gstate);
+        throw RuntimeException(TRACE_INFO,
+            "Expecting arguments to be a ListLink!");
+    }
+    LinkPtr linkArguments(LinkCast(arguments));
+    int actualArgumentCount = linkArguments->getArity();
 
-    // Promote the pyExecuteUserFunc reference since it is only borrowed
-    // and we don't want it to go away behind the scenes.
-    Py_INCREF(pyExecuteUserFunc);
+    // Now make sure the expected count matches the actual argument count.
+    if (expectedArgumentCount != actualArgumentCount) {
+        PyGILState_Release(gstate);
+        throw (RuntimeException(TRACE_INFO,
+            "Python function '%s' which expects '%d arguments,"
+            " called with %d arguments!", funcName.c_str(),
+            expectedArgumentCount, actualArgumentCount
+            ));
+    }
 
-    // Create the argument list.
-    pyArgs = PyTuple_New(2);
-    pyUUID = PyLong_FromLong(varargs.value());
-    OC_ASSERT(pyUUID != NULL);
-    PyTuple_SetItem(pyArgs, 0, pyUserFunc);
-    PyTuple_SetItem(pyArgs, 1, pyUUID);
+    // Create the Python tuple for the function call with python
+    // atoms for each of the atoms in the link arguments.
+    PyObject* pyArguments = PyTuple_New(actualArgumentCount);
+    PyObject* pyAtomSpace = this->atomspace_py_object();
+    const HandleSeq& argumentHandles = linkArguments->getOutgoingSet();
+    int tupleItem = 0;
+    for (HandleSeq::const_iterator it = argumentHandles.begin();
+        it != argumentHandles.end(); ++it) {
+
+        // Place a Python atom object for this handle into the tuple.
+        PyObject* pyAtom = py_atom(it->value(), pyAtomSpace);
+        PyTuple_SetItem(pyArguments, tupleItem, pyAtom);
+
+        // PyTuple_SetItem steals it's item so don't do this:
+        // Py_DECREF(pyAtom)
+
+        ++tupleItem;
+    }
+    Py_DECREF(pyAtomSpace);
 
     // Execute the user function and store its return value.
-    pyReturnValue = PyObject_CallObject(pyExecuteUserFunc, pyArgs);
+    pyReturnValue = PyObject_CallObject(pyUserFunc, pyArguments);
+    
+    // Cleanup the reference counts for Python objects we no longer reference.
+    // Since we promoted the borrowed pyExecuteUserFunc reference, we need
+    // to decrement it here. Do this before error checking below since we'll
+    // need to decrement these references even if there is an error.
+    Py_DECREF(pyUserFunc);
+    Py_DECREF(pyArguments);
 
     // Check for errors.
     pyError = PyErr_Occurred();
@@ -542,23 +585,12 @@ PyObject* PythonEval::call_user_function(   const std::string& func,
 
         // Construct the error message and throw an exception.
         this->build_python_error_message(func.c_str(), errorString);
+        PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO, errorString.c_str());
 
         // PyErr_Occurred returns a borrowed reference, so don't do this:
         // Py_DECREF(pyError);
     }
-    
-    // Cleanup the reference counts for Python objects we no longer reference.
-    // Since we promoted the borrowed pyExecuteUserFunc reference, we need
-    // to decrement it here.
-    Py_DECREF(pyExecuteUserFunc);
-    Py_DECREF(pyArgs);
-
-    // NOTE: PyTuple_SetItem "steals" the reference to the object that
-    // is set for the list item. That means that the list assumes it
-    // owns the references after the call. So don't do this:
-    // Py_DECREF(pyUserFunc);
-    // Py_DECREF(pyUUID);
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
