@@ -82,7 +82,7 @@ cdef extern from "opencog/atomspace/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
 # Handle
-ctypedef long UUID
+ctypedef public long UUID
 
 cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
     cdef cppclass cHandle "opencog::Handle":
