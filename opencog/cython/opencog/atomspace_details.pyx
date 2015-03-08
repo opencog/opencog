@@ -19,7 +19,7 @@ cdef class Handle:
     # explicitly test for a None value to indicate which of the C++
     # Handle initializers to call.
     #
-    # The seemingly unnecessary assignments to uuid and voidStar are
+    # The seemingly unnecessary assignments to uuid and void_star are
     # required to distinguish the types for the C++ Handle constructors.
     #
     def __cinit__(self, h, atom_ptr_long = None):
