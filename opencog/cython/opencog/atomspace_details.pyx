@@ -7,8 +7,32 @@ from atomspace cimport *
 # http://wiki.cython.org/PackageHierarchy
 
 cdef class Handle:
-    def __cinit__(self, h):
-        self.h = new cHandle(h)
+
+    # This really ugly code is the here to allow instantiation of Atom
+    # objects using only an AtomPtr* which needs to be cast to a void* and
+    # passed internally in Cython as a long to this Python Handle class
+    # initalizer which converts it to a void* for passing into the
+    # C++ Handle constructor.
+    #
+    # Since the Python/Cython initializer mechanism can't call different
+    # initializers based on types or even argument count, we need to 
+    # explicitly test for a None value to indicate which of the C++
+    # Handle initializers to call.
+    #
+    # The seemingly unnecessary assignments to uuid and void_star are
+    # required to distinguish the types for the C++ Handle constructors.
+    #
+    def __cinit__(self, h, atom_ptr_long = None):
+        cdef void* void_star
+        cdef UUID uuid
+        if (atom_ptr_long == None):
+            uuid = h
+            handle = new cHandle(uuid)
+        else:
+            void_star = PyLong_AsVoidPtr(atom_ptr_long)
+            handle = new cHandle(void_star)
+        self.h = handle
+
     def __dealloc__(self):
         del self.h
     def value(self):
@@ -411,8 +435,10 @@ cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
     return atomspace
 
-cdef api object py_atom(UUID uuid, object atomspace):
-    cdef Handle temphandle = Handle(uuid)
-    cdef Atom atom = Atom(temphandle, atomspace)
+cdef api object py_atom(void* atom_ptr, object atomspace):
+    cdef atom_ptr_long = PyLong_FromVoidPtr(atom_ptr)
+    cdef Handle temp_handle = Handle(None, atom_ptr_long)
+    cdef Atom atom = Atom(temp_handle, atomspace)
     return atom
+
 

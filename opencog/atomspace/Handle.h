@@ -76,6 +76,7 @@ public:
     static const Handle UNDEFINED;
 
     explicit Handle(AtomPtr atom);
+    explicit Handle(void* atom_ptr);
     explicit Handle(const UUID u) : _uuid(u) {}
     explicit Handle() : _uuid(ULONG_MAX) {}
     Handle(const Handle& h) : _uuid(h._uuid), _ptr(h._ptr) {}
@@ -84,6 +85,8 @@ public:
     inline UUID value(void) const {
         return _uuid;
     }
+
+    inline const AtomPtr* atom_ptr_ptr() const { return &_ptr; }
 
     inline Handle& operator=(const Handle& h) {
         if (this->_uuid == h._uuid) {

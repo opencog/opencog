@@ -575,7 +575,7 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
         it != argumentHandles.end(); ++it) {
 
         // Place a Python atom object for this handle into the tuple.
-        PyObject* pyAtom = py_atom(it->value(), pyAtomSpace);
+        PyObject* pyAtom = py_atom((void*) it->atom_ptr_ptr(), pyAtomSpace);
         PyTuple_SetItem(pyArguments, tupleItem, pyAtom);
 
         // PyTuple_SetItem steals it's item so don't do this:
