@@ -411,3 +411,8 @@ cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
     return atomspace
 
+cdef api object py_atom(UUID uuid, object atomspace):
+    cdef Handle temphandle = Handle(uuid)
+    cdef Atom atom = Atom(temphandle, atomspace)
+    return atom
+

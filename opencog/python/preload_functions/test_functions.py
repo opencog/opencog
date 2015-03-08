@@ -13,7 +13,7 @@ def print_arguments(argOne, argTwo):
 def add_link(atom_one, atom_two):
     print "atom_one = ", atom_one
     print "atom_two = ", atom_two
-    link_atom = ATOMSPACE.add_link(types.ListLink, [atom_two, atom_two])
+    link_atom = ATOMSPACE.add_link(types.ListLink, [atom_one, atom_two])
     print "link_atom = ", link_atom
     return link_atom
 
