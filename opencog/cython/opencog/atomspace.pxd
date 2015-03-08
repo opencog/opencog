@@ -88,6 +88,7 @@ cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
     cdef cppclass cHandle "opencog::Handle":
         cHandle()
         cHandle(UUID)
+        cHandle(void*)
         UUID value()
         bint operator==(cHandle h)
         bint operator!=(cHandle h)
