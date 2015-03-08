@@ -435,8 +435,8 @@ cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
     return atomspace
 
-cdef api object py_atom(void* atomPtr, object atomspace):
-    cdef atom_ptr_long = PyLong_FromVoidPtr(atomPtr)
+cdef api object py_atom(void* atom_ptr, object atomspace):
+    cdef atom_ptr_long = PyLong_FromVoidPtr(atom_ptr)
     cdef Handle temp_handle = Handle(None, atom_ptr_long)
     cdef Atom atom = Atom(temp_handle, atomspace)
     return atom
