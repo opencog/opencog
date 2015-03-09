@@ -93,8 +93,6 @@
 		#f
 		#t))
 
-<<<<<<< HEAD
-=======
 ;Applies the map function to create MST nodes for all the word pairs. It 
 ;creates nodes for only those word pairs which have a mutual information not 
 ;equal to -1000
