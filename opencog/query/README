@@ -792,11 +792,12 @@ TODO
    should be reported. In particular, this is needed for the
    random-choice or-link, used to trigger actions.
 
-   Status: work started. See OrLinkUTest. Problems: pred_up or soln_up
-   neeeds to be modified to deal with the upward movement, skipping the
-   OrLink, as appropriate.  Also, a "resume where we left off" mechanism
-   is needed. Finally, a callback is needed, to allow random-choice
-   to pick one.
+   Status: work started. See OrLinkUTest. Problems: Search start points
+   that are inside an OrLink will fail to cover all possibilities. Thus
+   the perform-search loop needs modification.  Also, a "resume where we
+   left off" mechanism is needed (perhaps the have_more mechanism can be
+   used for this?) . Finally, a callback is needed, to
+   allow random-choice to pick one.
 
  * Enhancement: Add support for IfLink, which would have the semantics
    'if (some-condition-during-search) then match-this else match-that'
