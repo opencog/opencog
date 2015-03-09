@@ -1,6 +1,7 @@
 ;
-; unit testing for OrLinks
+; Unit testing for OrLinks in the pattern matcher.
 ;
+;;; Populate the atomspace with three small trees.
 (EvaluationLink
 	(PredicateNode "this way")
 	(ListLink
@@ -25,6 +26,8 @@
 	)
 )
 
+;;; A very basic pattern using OrLink.  Should find two of the three
+;;; trees given above.
 (define (basic)
 	(BindLink
 		(VariableNode "$x")
