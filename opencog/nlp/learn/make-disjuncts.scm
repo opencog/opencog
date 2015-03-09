@@ -34,12 +34,6 @@
 ;make-counter is defined as counter to make its purpose clear.
 (define counter (make-counter))
 
-;The parse of any given sentence.
-(define (parse text) (mst-parse-text text))
-
-;Get the mutual information of the word pair.
-(define (get-mutual-information wp) (car wp))
-
 ;The word pair has mutual information also embedded in it. This function strips
 ;that away and keeps only the two wordnodes.
 (define (actual-wp wp) (car (cdr wp)))
@@ -85,63 +79,51 @@
 		(EvaluationLink (MSTLinkNode (number->tag (counter))) (ListLink x y))
 		(cog-atom-incr mstnode 1)))
 
-;This function is used by the higher-order-function filter to selectively apply
-;the create-evaluation-link function to only those word pairs which do not 
-;have a mutual information of -1000.
-(define (criteria? wp)
-	(if (= -1000 (get-mutual-information wp))
-		#f
-		#t))
-
 ;Applies the map function to create MST nodes for all the word pairs. It 
 ;creates nodes for only those word pairs which have a mutual information not 
 ;equal to -1000
 (define (create-MST-nodes text)
+	;The parse of any given sentence.
+	(define (parse text) (mst-parse-text text))
+
+	;Get the mutual information of the word pair.
+	(define (get-mutual-information wp) (car wp))
+	;This function is used by the higher-order-function filter to selectively apply
+	;the create-evaluation-link function to only those word pairs which do not 
+	;have a mutual information of -1000.
+	(define (criteria? wp)
+		(if (= -1000 (get-mutual-information wp))
+			#f
+			#t))
 	(map create-evaluation-link (filter criteria? (parse text)) ))
-
-;This function will give the name of the MSTNode which exists in a given 
-;Evaluation Link.
-(define (get-MST-name outset)
-	(cog-name (car outset)))
-
-;This function will return the first word present in the ListLink component of 
-;an EvaluationLink.
-(define (get-first-evaluation-word outset)
-	(cog-name (car (cog-outgoing-set (car (cdr outset))))))
-
-;This function will return the second word present in the ListLink component of  
-;an EvaluationLink.
-(define (get-second-evaluation-word outset)
-	(cog-name (car (cdr (cog-outgoing-set (car (cdr outset)))))))
-
-;This function will get all the unique words that were present in the sentence
-;for which the MST nodes were created.
-(define (get-sentence-words sentence)
-	(string-split sentence #\ ))
 
 ;The extract-disjunct function returns a list of disjuncts for that particular 
 ;word. However, that list contains many null lists also. These lists need to 
 ;be eliminated before they can be processed further.
 (define (filter-disjunct disjuncts)
+	;This is the criteria for the filter function which cleans up the disjuncts 
+	;list for a list which does not contain any null lists.
+	(define (filter-disjunct-criteria? x)
+		(not (null? x)))
 	(filter filter-disjunct-criteria? disjuncts))
-
-;This is the criteria for the filter function which cleans up the disjuncts 
-;list for a list which does not contain any null lists.
-(define (filter-disjunct-criteria? x)
-	(not (null? x)))
-
-;This function returns the connector of the disjunct. Eg:- "MC+" will return MC
-(define (get-disjunct-connector disjunct)
-	(substring disjunct 0 (- (string-length disjunct) 1)))
-
-;This function returns the sign of the disjunct. Eg:- "MC+" will return +
-(define (get-disjunct-sign disjunct)
-	(substring disjunct (- (string-length disjunct) 1)))
 
 ;This function takes as input a word and a list of MST nodes created by the 
 ;create-MST-nodes function. For the given word, it gives the disjuncts of that 
 ;word as found in the list of nodes give to it as input.
 (define (extract-disjunct word nodes)
+	;This function will return the first word present in the ListLink component of 
+	;an EvaluationLink.
+	(define (get-first-evaluation-word outset)
+		(cog-name (car (cog-outgoing-set (car (cdr outset))))))
+	;This function will return the second word present in the ListLink component of  
+	;an EvaluationLink.
+	(define (get-second-evaluation-word outset)
+		(cog-name (car (cdr (cog-outgoing-set (car (cdr outset)))))))
+	;This function will give the name of the MSTNode which exists in a given 
+	;Evaluation Link.
+	(define (get-MST-name outset)
+		(cog-name (car outset)))
+
 	(if (not (null? nodes))
 		(let* (
 				[node (car nodes)]
@@ -166,6 +148,12 @@
 ;of such atoms. This is useful because it is difficult otherwise to create 
 ;atoms for LgWordCset. 
 (define (create-connector-atoms disjuncts)
+	;This function returns the connector of the disjunct. Eg:- "MC+" will return MC
+	(define (get-disjunct-connector disjunct)
+		(substring disjunct 0 (- (string-length disjunct) 1)))
+	;This function returns the sign of the disjunct. Eg:- "MC+" will return +
+	(define (get-disjunct-sign disjunct)
+		(substring disjunct (- (string-length disjunct) 1)))
 	(if (not (null? disjuncts))
 		(let* (
 				[disjunct (car disjuncts)])
@@ -210,6 +198,10 @@
 ;procedures described above. It takes as input any text, and creates
 ;the LgWordCset atoms along with the appropriate MSTConnector atoms.
 (define (make-disjuncts text)
+	;This function will get all the unique words that were present in the sentence
+	;for which the MST nodes were created.
+	(define (get-sentence-words sentence)
+		(string-split sentence #\ ))
 	(define nodes (create-MST-nodes text))
 	(define words (get-sentence-words text))
 	(define disjunctslist (loop-over-words words nodes))
