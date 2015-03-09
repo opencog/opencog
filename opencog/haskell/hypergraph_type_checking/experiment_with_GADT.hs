@@ -59,10 +59,10 @@ tv3 = Evaluation h2 (List [Concept "BMW"])
 add :: (Atom [Atom Float]) -> Atom Float
 add (List [Number x, Number y]) = Number (x + y)
 add _ = undefined
-h4 = Schema add
+h4 = Schema add -- :: Atom (Atom [Atom Float] -> Atom Float)
 
 -- Apply a Schema
-h5 = ExecutionOutput h4 (List [Number 3, Number 4])
+h5 = ExecutionOutput h4 (List [Number 3, Number 4]) -- h5 :: Atom Float
 
 -- Test GetTVLink
 tv1 = TVGetTV h1
