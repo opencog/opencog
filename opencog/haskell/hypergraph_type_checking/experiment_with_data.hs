@@ -7,61 +7,66 @@
 
 data TV = NullTV
         | SimpleTV Float Float
-        | TVAndLink TV TV
-        | TVOrLink TV TV
-        | TVEvaluationLink EvaluationLink
-        | TVGetTVLink Atom
+        | TVAnd TV TV
+        | TVOr TV TV
+        | TVEvaluation Evaluation
+        | TVMember Member
+        | TVGetTV Atom
 
-data Atom = APredicate Predicate
-          | AConcept Concept
-          | ANumber Float
+data Atom = AtomPredicate Predicate
+          | AtomConcept Concept
+          | AtomNumber Float
+          | AtomMember Member
+          | AtomList List
+          | AtomSchema Schema
 
 data Concept = Concept String
-             | CAndLink Concept Concept
-             | COrLink Concept Concept
+             | ConceptAnd Concept Concept
+             | ConceptOr Concept Concept
 
-data Predicate = Predicate ([Atom] -> TV)
-               | PAndLink Predicate Predicate
-               | POrLink Predicate Predicate
+data Member = Member Atom Concept
 
-data EvaluationLink = EvaluationLink Predicate [Atom]
+data Predicate = Predicate (Atom -> TV)
+               | PredicateAnd Predicate Predicate
+               | PredicateOr Predicate Predicate
 
-data SchemaLink = SchemaLink ([Atom] -> Atom)
+data Evaluation = Evaluation Predicate Atom
 
-data GetTVLink = GetTVLink Atom
+data Schema = Schema (Atom -> Atom)
+data ExecutionOutput = ExecutionOutput Schema Atom
+
+data List = List [Atom]
 
 -------------
 -- Example --
 -------------
 
 -- Functions from [Atom] to TV to build predicates
-is_bottom :: [Atom] -> TV
-is_bottom _ = SimpleTV 0 0.9
-is_top :: [Atom] -> TV
-is_top _ = SimpleTV 1 0.9
-is_car :: [Atom] -> TV
-is_car [AConcept (Concept "BMW")] = SimpleTV 1 0.9
-is_car [AConcept (Concept "Camel")] = SimpleTV 0.1 0.9
-is_car _ = SimpleTV 0 0.9
+is_bottom :: Atom -> TV
+is_bottom = undefined
+is_top :: Atom -> TV
+is_top = undefined
+is_car :: Atom -> TV
+is_car = undefined
 
 -- And/Or hypergraph of concepts
-h1 = COrLink (CAndLink (Concept "A") (Concept "B")) (Concept "C")
+h1 = ConceptOr (ConceptAnd (Concept "A") (Concept "B")) (Concept "C")
 
 -- And/Or hypergraph of predicates
-h2 = POrLink (PAndLink (Predicate is_top) (Predicate is_car)) (Predicate is_bottom)
+h2 = PredicateOr (PredicateAnd (Predicate is_top) (Predicate is_car)) (Predicate is_bottom)
 
 -- Apply EvaluationLink to predicate h2
-tv3 = TVEvaluationLink (EvaluationLink h2 [AConcept (Concept "BMW")])
+tv3 = TVEvaluation (Evaluation h2 (AtomConcept (Concept "BMW")))
 
 -- Build a SchemaLink
-add :: [Atom] -> Atom
-add [ANumber x, ANumber y] = ANumber (x + y)
-add _ = AConcept (Concept "undefined")
-h4 = SchemaLink add
+add :: Atom -> Atom
+add (AtomList (List [AtomNumber x, AtomNumber y])) = AtomNumber (x + y)
+add _ = undefined
+h4 = Schema add
 
 -- Test GetTVLink
-tv1 = TVGetTVLink (AConcept h1)
-tv2 = TVGetTVLink (APredicate h2)
+tv1 = TVGetTV (AtomConcept h1)
+tv2 = TVGetTV (AtomPredicate h2)
 
 -- Test AndLink with TV
-tv4 = TVAndLink tv1 tv3
+tv4 = TVAnd tv1 tv3
