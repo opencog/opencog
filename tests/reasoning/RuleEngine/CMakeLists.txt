@@ -29,12 +29,6 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(DefaultForwardChainerCBUTest)
 ENDIF (HAVE_GUILE)
 
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/reasoning/RuleEngine/simple-assertions.scm
-    ${PROJECT_BINARY_DIR}/tests/reasoning/RuleEngine/simple-assertions.scm)
- 
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/reasoning/RuleEngine/bc-test/bc-example.scm
-    ${PROJECT_BINARY_DIR}/tests/reasoning/RuleEngine/bc-test/bc-example.scm)   
-    
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/reasoning/RuleEngine/test_cpolicy.json
-    ${PROJECT_BINARY_DIR}/tests/reasoning/RuleEngine/rules/pln/test_cpolicy.json)     
+    ${PROJECT_BINARY_DIR}/tests/reasoning/RuleEngine/test_cpolicy.json)
     

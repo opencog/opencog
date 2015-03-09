@@ -45,7 +45,7 @@ void DefaultForwardChainerCBUTest::tearDown() {
 }
 
 void DefaultForwardChainerCBUTest::test_choose_rule(void) {
-	 JsonicControlPolicyParamLoader jscp(as, "rules/pln/test_cpolicy.json");
+	 JsonicControlPolicyParamLoader jscp(as, "test_cpolicy.json");
 	 jscp.load_config();
 	 FCMemory fcmem(as);
 	 fcmem.set_rules(jscp.get_rules());
