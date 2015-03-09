@@ -118,7 +118,7 @@ LG_CONN_DIR_NODE <- NODE    // e.g. "+"
 // Consists of the connector node, the direction, and possibly the
 // multi-connector node.
 LG_CONNECTOR <- LINK   // e.g. "MX+"
-MST_Connector <- "MSTConnector"
+MST_Connector <- LINK "MSTConnector"
 
 // These vaguely resemble AND_LINK and OR_LINK, but DO NOT BE FOOLED!
 // They are not really the same, as they are not boolean; rather they
