@@ -1,7 +1,8 @@
 ;This is the MST module for creating MSTLinkNodes.
 (use-modules (srfi srfi-1))
 
-;Defines letters of the alphabet to be used in constructing a name for the node.
+;Defines letters of the alphabet to be used in constructing a name for the 
+;node.
 (define letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 ;The function which actually constructs a name for the node.
@@ -84,17 +85,133 @@
 		(EvaluationLink (MSTLinkNode (number->tag (counter))) (ListLink x y))
 		(cog-atom-incr mstnode 1)))
 
-;Applies the map function to create MST nodes for all the word pairs. It creates
-;nodes for only those word pairs which have a mutual information not equal to
-;-1000
-(define (create-MST-nodes text)
-	(map create-evaluation-link (filter criteria? (parse text)) ))
-
 ;This function is used by the higher-order-function filter to selectively apply
-;the create-evaluation-link function to only those word pairs which do not have 
-;a mutual information of -1000
+;the create-evaluation-link function to only those word pairs which do not 
+;have a mutual information of -1000.
 (define (criteria? wp)
 	(if (= -1000 (get-mutual-information wp))
 		#f
 		#t))
+
+;Applies the map function to create MST nodes for all the word pairs. It 
+;creates nodes for only those word pairs which have a mutual information not 
+;equal to -1000
+(define (create-MST-nodes text)
+	(map create-evaluation-link (filter criteria? (parse text)) ))
+
+;This function will give the name of the MSTNode which exists in a given 
+;Evaluation Link.
+(define (get-MST-name outset)
+	(cog-name (car outset)))
+
+;This function will return the first word present in the ListLink component of 
+;an EvaluationLink.
+(define (get-first-evaluation-word outset)
+	(cog-name (car (cog-outgoing-set (car (cdr outset))))))
+
+;This function will return the second word present in the ListLink component of  
+;an EvaluationLink.
+(define (get-second-evaluation-word outset)
+	(cog-name (car (cdr (cog-outgoing-set (car (cdr outset)))))))
+
+;This function will get all the unique words that were present in the sentence
+;for which the MST nodes were created.
+(define (get-sentence-words sentence)
+	(string-split sentence #\ ))
+
+;The extract-disjunct function returns a list of disjuncts for that particular 
+;word. However, that list contains many null lists also. These lists need to 
+;be eliminated before they can be processed further.
+(define (filter-disjunct disjuncts)
+	(filter filter-disjunct-criteria? disjuncts))
+
+;This is the criteria for the filter function which cleans up the disjuncts 
+;list for a list which does not contain any null lists.
+(define (filter-disjunct-criteria? x)
+	(not (null? x)))
+
+;This function returns the connector of the disjunct. Eg:- "MC+" will return MC
+(define (get-disjunct-connector disjunct)
+	(substring disjunct 0 (- (string-length disjunct) 1)))
+
+;This function returns the sign of the disjunct. Eg:- "MC+" will return +
+(define (get-disjunct-sign disjunct)
+	(substring disjunct (- (string-length disjunct) 1)))
+
+;This function takes as input a word and a list of MST nodes created by the 
+;create-MST-nodes function. For the given word, it gives the disjuncts of that 
+;word as found in the list of nodes give to it as input.
+(define (extract-disjunct word nodes)
+	(if (not (null? nodes))
+		(let* (
+				[node (car nodes)]
+				[outset (cog-outgoing-set node)]
+				[linkname (get-MST-name outset)]
+				[firstword (get-first-evaluation-word outset)]
+				[secondword (get-second-evaluation-word outset)])
+		(if (equal? word firstword)
+			(if (null? nodes)
+				'()
+				(cons (string-append linkname "+") (extract-disjunct word (cdr nodes))))
+			(if (equal? word secondword)
+				(if (null? nodes)
+					'()
+					(cons (string-append linkname "-") (extract-disjunct word (cdr nodes))))
+				(if (null? nodes)
+					'()
+					(cons '() (extract-disjunct word (cdr nodes)))))))
+		'()))
+
+;Given a list of disjuncts, it will create MSTConnector atoms and return a list
+;of such atoms. This is useful because it is difficult otherwise to create 
+;atoms for LgWordCset. 
+(define (create-connector-atoms disjuncts)
+	(if (not (null? disjuncts))
+		(let* (
+				[disjunct (car disjuncts)])
+			(cons
+				(MSTConnector
+					(LgConnectorNode (get-disjunct-connector disjunct))
+					(LgConnDirNode (get-disjunct-sign disjunct))) (create-connector-atoms (cdr disjuncts))))
+		'()))
+
+;This function will create the LgWordCset atom which will have a WordNode and 
+;also the disjuncts for that given WordNode.
+(define (create-disjunct word disjuncts)
+	(if (not (null? (create-connector-atoms disjuncts)))
+		(LgWordCset
+			(WordNode word)
+			(LgAnd
+				(create-connector-atoms disjuncts)))
+		'()))
+
+;This function extracts the disjuncts for the given sentence for each and every
+;word present in the sentence. It returns a list of disjuncts for a sentence. 
+;Each disjunct in the disjunctslist is a list itself. It corresponds to a word
+;in the input sentence.
+(define (loop-over-words words nodes)
+	(if (not (null? words))
+		(cons (extract-disjunct (car words) nodes) (loop-over-words (cdr words) nodes))
+		'()))
+
+;This procedure is called by the make-disjuncts procedure. It is mainly written
+;so that I can recursively call this procedure itself to make new LgWordCset
+;atoms.
+(define (pseudo-make-disjuncts words disjunctslist)
+	(if (not (null? words))
+		(let (
+			[word (car words)]
+			[disjuncts (car disjunctslist)])
+			(create-disjunct word (filter-disjunct disjuncts))
+			(pseudo-make-disjuncts (cdr words) (cdr disjunctslist)))
+		))
+
+;This is the final procedure which (directly or indirectly) uses all the
+;procedures described above. It takes as input any text, and creates
+;the LgWordCset atoms along with the appropriate MSTConnector atoms.
+(define (make-disjuncts text)
+	(define nodes (create-MST-nodes text))
+	(define words (get-sentence-words text))
+	(define disjunctslist (loop-over-words words nodes))
+	(pseudo-make-disjuncts words disjunctslist))
 
