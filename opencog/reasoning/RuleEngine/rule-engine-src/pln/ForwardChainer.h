@@ -33,7 +33,7 @@ class ForwardChainerCallBack;
 class ForwardChainer {
 private:
 	ControlPolicyParamLoader* cpolicy_loader_;
-	string _conf_path ="reasoning/RuleEngine/rules/pln/default_cpolicy.json";
+	string _conf_path = "reasoning/RuleEngine/default_cpolicy.json";
 	AtomSpace * as_;
 	FCMemory* fcmem_;
 	/**
