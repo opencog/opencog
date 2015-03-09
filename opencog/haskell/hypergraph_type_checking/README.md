@@ -41,7 +41,28 @@ SchemaLink of type (Number, Number) -> Number, for that I'd have to
 define another SchemaLink constructor specially for that
 signature.
 
-## Experiment with type classes (TODO)
+## Experiment with GADT
 
-The idea would be to represent the type hierarchy using type classes
-(a type class per atom type I guess).
+GADT https://en.wikibooks.org/wiki/Haskell/GADT provides a richer data
+type structure allowing to declare the type of the data constructors.
+
+You may load it in the Haskell interpreter
+
+```
+ghci experiment_with_GADT.hs
+```
+
+and check the types of a few constructs
+
+```
+*Main> :t h1
+h1 :: Atom String
+*Main> :t h2
+h2 :: Atom (Atom b -> TV)
+*Main> :t tv3
+tv3 :: Atom TV
+*Main> :t h4
+h4 :: Atom (Atom [Atom Float] -> Atom Float)
+*Main> :t h5
+h5 :: Atom Float
+```
