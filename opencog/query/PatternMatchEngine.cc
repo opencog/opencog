@@ -565,7 +565,24 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 		size_t sz = iset.size();
 		bool found = false;
 		for (size_t i = 0; i < sz; i++) {
-			found = pred_up(Handle(iset[i]));
+			Handle hi(iset[i]);
+
+			// Is this link even a part of the predicate we
+			// are considering?   If not, try the next atom.
+			bool valid = is_node_in_tree(curr_root, hi);
+			if (not valid) continue;
+
+			// Ugh. If the next step up the predicate is an OrLink,
+			// we consider it to be solved already.  So re-enter, and
+			// try again.
+			if (OR_LINK == hi->getType())
+			{
+				curr_pred_handle = hi;
+				found = do_soln_up(hsoln);
+				break;
+			}
+
+			found = pred_up(hi);
 			if (found) break;
 		}
 		dbgprt("After moving up the clause, found = %d\n", found);
@@ -752,11 +769,6 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 
 bool PatternMatchEngine::pred_up(Handle h)
 {
-	// Is this link even a part of the predicate we are considering?
-	// If not, try the next atom.
-	bool valid = is_node_in_tree(curr_root, h);
-	if (!valid) return false;
-
 	// Move up the solution outgoing set, looking for a match.
 	Handle curr_pred_save(curr_pred_handle);
 	curr_pred_handle = h;
@@ -770,7 +782,7 @@ bool PatternMatchEngine::pred_up(Handle h)
 	}
 
 	curr_pred_handle = curr_pred_save;
-	dbgprt("found upward soln = %d\n", found);
+	dbgprt("Found upward soln = %d\n", found);
 	return found;
 }
 
