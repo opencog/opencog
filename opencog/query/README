@@ -788,12 +788,15 @@ TODO
  * Enhancement: Add support for OrLink's in the pattern: viz: having
    partly matched some fraction of the pattern, allow the OrLink to
    specify several different sub-parts that are acceptable matches.
-   That is, the pattern has 'fixed' regions, and 'variable' regions,
-   or, 'required' regions and 'alternatively-required' regions.  It
-   seems like these should be nestable.  This would have to behave
-   like an exclusive-or: one MUST match one-and-only-one of the
-   sub-parts.  Berhaps this could be done by extending the 'optional'
-   part of the matcher?
+   Any one of the subparts could be matched; all possible matches
+   should be reported. In particular, this is needed for the
+   random-choice or-link, used to trigger actions.
+
+   Status: work started. See OrLinkUTest. Problems: pred_up or soln_up
+   neeeds to be modified to deal with the upward movement, skipping the
+   OrLink, as appropriate.  Also, a "resume where we left off" mechanism
+   is needed. Finally, a callback is needed, to allow random-choice
+   to pick one.
 
  * Enhancement: Add support for IfLink, which would have the semantics
    'if (some-condition-during-search) then match-this else match-that'
@@ -803,7 +806,7 @@ TODO
 
  * Enhancement: allow user to bind a handle name to a subset of the
    match. This would be handy to reduce the verbosity of writing down
-   the consequenct part (e.g. if we matched clauses a,b,c, then the
+   the consequent part (e.g. if we matched clauses a,b,c, then the
    output could be just clause b only, and it would be nice to just say
    'clause b' instead of spelling it out.)
 

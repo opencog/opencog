@@ -222,6 +222,48 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		if (_evaluatable.find(hp) == _evaluatable.end()) return true;
 	}
 
+	// OR_LINK's are multiple-choice links. As long as we can
+	// can match one of the sub-expressions of the OrLink, then
+	// the OrLink as a whole can be considered to be grounded.
+	if (classserver().isA(tp, OR_LINK))
+	{
+		// XXX TODO: the below finds the first possible match,
+		// and then calls it quits. In fact, we need to find all
+		// of them.
+		LinkPtr lp(LinkCast(hp));
+		bool match = false;
+		const std::vector<Handle> &osp = lp->getOutgoingSet();
+		for (Handle hop : osp)
+		{
+			prtmsg("tree_comp or_link choice: ", hop);
+			var_solutn_stack.push(var_grounding);
+
+			match = tree_compare(hop, hg);
+			// If no match, then try the next one.
+			if (not match)
+			{
+				// Get rid of any grounding that might have been proposed
+				// during the tree-match.
+				POPGND(var_grounding, var_solutn_stack);
+			}
+			else
+			{
+				// Keep the grounding that was found. Even up the stack.
+				var_solutn_stack.pop();
+
+				// If we've found a grounding, record it.
+				// Note we record the grounding for both the OrLink,
+				// and for the specific clause that was picked.
+				var_grounding[hop] = hg;
+				var_grounding[hp] = hg;
+				break;
+			}
+		}
+		if (not match) return false;
+
+		return true;
+	}
+
 	// If both are links, compare them as such.
 	// Unless pattern link is a QuoteLink, in which case, the quoted
 	// contents is compared. (well, that was done up above...)
@@ -331,8 +373,6 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			// if so, we have to pick up where we left off, and so there
 			// is yet more stack trickery to save and restore that state.
 			//
-			LinkPtr lp(LinkCast(hp));
-			LinkPtr lg(LinkCast(hg));
 			const std::vector<Handle> &osg = lg->getOutgoingSet();
 			std::vector<Handle> mutation;
 

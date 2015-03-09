@@ -46,6 +46,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(QuoteUTest)
 	ADD_CXXTEST(BuggyLinkUTest)
 	ADD_CXXTEST(BuggyQuoteUTest)
+	ADD_CXXTEST(OrLinkUTest)
 	ADD_CXXTEST(SingleUTest)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
 	ADD_CXXTEST(SudokuUTest)
@@ -77,6 +78,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater_than.scm
     ${PROJECT_BINARY_DIR}/tests/query/greater_than.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/match-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/match-link.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-link.scm
+    ${PROJECT_BINARY_DIR}/tests/query/or-link.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/sequence.scm
     ${PROJECT_BINARY_DIR}/tests/query/sequence.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/single.scm
