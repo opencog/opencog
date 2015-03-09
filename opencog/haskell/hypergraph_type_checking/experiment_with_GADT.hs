@@ -6,26 +6,32 @@
 data TV -- TODO = (Weight Float, Confidence Float)
 
 data Atom a where
+    -- TV
     TV :: TV -> (Atom TV)
-    GetTV :: (Atom a) -> (Atom TV)
+    TVAnd :: (Atom TV) -> (Atom TV) -> (Atom TV)
+    TVOr :: (Atom TV) -> (Atom TV) -> (Atom TV)
+    TVGetTV :: (Atom a) -> (Atom TV)
+
+    -- Predicate
     Predicate :: (Atom a -> TV) -> (Atom (Atom a -> TV))
-    Concept :: String -> Atom String
-    Number :: (Num a) => a -> Atom a
-    PredicateAnd :: (Atom (Atom a -> TV)) -> (Atom (Atom a -> TV))
-                 -> (Atom (Atom a -> TV))
-    ConceptAnd :: (Atom String) -> (Atom String)
-               -> (Atom String)
-    TVAnd :: (Atom TV) -> (Atom TV)
-          -> (Atom TV)
-    PredicateOr :: (Atom (Atom a -> TV)) -> (Atom (Atom a -> TV))
-                -> (Atom (Atom a -> TV))
-    ConceptOr :: (Atom String) -> (Atom String)
-              -> (Atom String)
-    TVOr :: (Atom TV) -> (Atom TV)
-          -> (Atom TV)
+    PredicateAnd :: (a ~ (Atom b -> TV)) => Atom a -> Atom a -> Atom a
+    PredicateOr :: (a ~ (Atom b -> TV)) => Atom a -> Atom a -> Atom a
     Evaluation :: (Atom (Atom a -> TV)) -> (Atom a) -> Atom TV
-    ExecutionOutput :: (Atom (Atom a -> TV)) -> (Atom a) -> (Atom a)
-    Schema :: (Atom a -> Atom a) -> (Atom (Atom a -> Atom a))
+
+    -- Concept
+    Concept :: String -> Atom String
+    ConceptAnd :: (Atom String) -> (Atom String) -> (Atom String)
+    ConceptOr :: (Atom String) -> (Atom String) -> (Atom String)
+    Member :: (Atom a) -> (Atom String) -> Atom TV
+
+    -- Number
+    Number :: (Num a) => a -> Atom a
+
+    -- Schema
+    Schema :: (a ~ (Atom b -> Atom c)) => a -> (Atom a)
+    ExecutionOutput :: (a ~ (Atom b -> Atom c)) => (Atom a) -> (Atom b) -> (Atom c)
+
+    -- List
     List :: [Atom a] -> (Atom [Atom a])
 
 -------------
@@ -46,18 +52,28 @@ h1 = ConceptOr (ConceptAnd (Concept "A") (Concept "B")) (Concept "C")
 -- And/Or hypergraph of predicates
 h2 = PredicateOr (PredicateAnd (Predicate is_top) (Predicate is_car)) (Predicate is_bottom)
 
--- Apply EvaluationLink to predicate h2
+-- Apply Evaluation to predicate h2
 tv3 = Evaluation h2 (List [Concept "BMW"])
 
--- Build a SchemaLink
-add :: Atom a -> Atom a
+-- Build a Schema
+add :: (Atom [Atom Float]) -> Atom Float
 add (List [Number x, Number y]) = Number (x + y)
 add _ = undefined
 h4 = Schema add
 
+-- Apply a Schema
+h5 = ExecutionOutput h4 (List [Number 3, Number 4])
+
 -- Test GetTVLink
-tv1 = GetTV h1
-tv2 = GetTV h2
+tv1 = TVGetTV h1
+tv2 = TVGetTV h2
 
 -- Test AndLink with TV
 tv4 = TVAnd tv1 tv3
+
+----------------
+-- Dummy main --
+----------------
+
+main :: IO ()
+main = undefined
