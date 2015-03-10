@@ -107,6 +107,19 @@ h7 = Bind (List [x, y]) (TVGetTV h6)
 -- Quantifier
 h8 = ForAll (List [x, y]) (TVGetTV h6)
 
+-- More complex free variable body. In the following the type checker
+-- has no problem with that, this is wrong because x is actually a
+-- concept variable being used in a TVOr, it cannot be Atom TV and
+-- Atom ConceptName at the same time
+h9 = TVOr (TVGetTV h6) x
+
+-- In order to work around that one can use explicitely
+-- the type constructor ConceptVariable
+xc = ConceptVariable (VariableName "X")
+yc = ConceptVariable (VariableName "Y")
+h6b = ConceptOr (ConceptAnd a xc) yc
+-- h9b = TVOr (TVGetTV h6) xc -- The type checker raises an error
+
 ----------------
 -- Dummy main --
 ----------------
