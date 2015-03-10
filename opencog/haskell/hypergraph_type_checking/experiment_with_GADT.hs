@@ -1,4 +1,4 @@
--- Attempt at using Haskell compiler to type check hypergraphs, using
+-- Attempt to using Haskell compiler to type check hypergraphs, using
 -- an extension of data call Generalized Algebraic Data Type
 
 {-#LANGUAGE GADTs #-}
@@ -7,32 +7,32 @@ data TV -- TODO = (Weight Float, Confidence Float)
 
 data Atom a where
     -- TV
-    TV :: TV -> (Atom TV)
-    TVAnd :: (Atom TV) -> (Atom TV) -> (Atom TV)
-    TVOr :: (Atom TV) -> (Atom TV) -> (Atom TV)
-    TVGetTV :: (Atom a) -> (Atom TV)
+    TV :: TV -> Atom TV
+    TVAnd :: Atom TV -> Atom TV -> Atom TV
+    TVOr :: Atom TV -> Atom TV -> Atom TV
+    TVGetTV :: Atom a -> Atom TV
 
     -- Predicate
-    Predicate :: (Atom a -> TV) -> (Atom (Atom a -> TV))
+    Predicate :: (Atom a -> TV) -> Atom (Atom a -> TV)
     PredicateAnd :: (a ~ (Atom b -> TV)) => Atom a -> Atom a -> Atom a
     PredicateOr :: (a ~ (Atom b -> TV)) => Atom a -> Atom a -> Atom a
-    Evaluation :: (Atom (Atom a -> TV)) -> (Atom a) -> Atom TV
+    Evaluation :: (Atom (Atom a -> TV)) -> Atom a -> Atom TV
 
     -- Concept
     Concept :: String -> Atom String
-    ConceptAnd :: (Atom String) -> (Atom String) -> (Atom String)
-    ConceptOr :: (Atom String) -> (Atom String) -> (Atom String)
-    Member :: (Atom a) -> (Atom String) -> Atom TV
+    ConceptAnd :: Atom String -> Atom String -> Atom String
+    ConceptOr :: Atom String -> Atom String -> Atom String
+    Member :: Atom a -> Atom String -> Atom TV
 
     -- Number
     Number :: (Num a) => a -> Atom a
 
     -- Schema
-    Schema :: (a ~ (Atom b -> Atom c)) => a -> (Atom a)
-    ExecutionOutput :: (a ~ (Atom b -> Atom c)) => (Atom a) -> (Atom b) -> (Atom c)
+    Schema :: (a ~ (Atom b -> Atom c)) => a -> Atom a
+    ExecutionOutput :: (a ~ (Atom b -> Atom c)) => Atom a -> Atom b -> Atom c
 
     -- List
-    List :: [Atom a] -> (Atom [Atom a])
+    List :: [Atom a] -> Atom [Atom a]
 
 -------------
 -- Example --
