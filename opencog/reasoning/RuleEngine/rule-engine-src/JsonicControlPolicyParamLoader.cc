@@ -13,6 +13,7 @@
 #include <lib/json_spirit/json_spirit_stream_reader.h>
 
 #include <opencog/guile/load-file.h>
+#include <opencog/util/files.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/Config.h>
 #include <opencog/guile/SchemeEval.h>
@@ -83,7 +84,7 @@ void JsonicControlPolicyParamLoader::read_obj(const Value &v, int lev) {
 			rules_.push_back(cur_read_rule_); //xxx take care of pointers
 		} else if (key == FILE_PATH) {
 			load_scm_file_relative(*as_, value.get_value<string>(),
-					vector<string>(0));
+					DEFAULT_MODULE_PATHS);
 			Handle rule_handle = scm_eval_->eval_h(cur_read_rule_->get_name());
 			cur_read_rule_->set_rule_handle(rule_handle);
 
