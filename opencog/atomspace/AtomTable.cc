@@ -357,8 +357,7 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                                      bool* subclasses,
                                      Arity arity,
                                      Type type,
-                                     bool subclass)
-    const throw (RuntimeException)
+                                     bool subclass) const
 {
     std::vector<UnorderedHandleSet> sets(arity);
 
@@ -471,7 +470,7 @@ bool AtomTable::inEnviron(AtomPtr atom)
     return false;
 }
 
-Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
+Handle AtomTable::add(AtomPtr atom, bool async)
 {
     // Is the atom already in this table, or one of its environments?
     if (inEnviron(atom))
