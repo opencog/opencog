@@ -45,7 +45,8 @@ public:
 	NumberNode(const std::string& s,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-		: Node(NUMBER_NODE, s, tv, av),
+		// Convert to number and back to string to avoid miscompares.
+		: Node(NUMBER_NODE, std::to_string(std::stod(s)), tv, av),
 		  value(std::stod(s))
 	{}
 
@@ -57,7 +58,8 @@ public:
 	{}
 
 	NumberNode(Node &n)
-		: Node(NUMBER_NODE, n.getName(), n.getTruthValue(), n.getAttentionValue()),
+		: Node(NUMBER_NODE, std::to_string(std::stod(n.getName())),
+		       n.getTruthValue(), n.getAttentionValue()),
 		  value(std::stod(n.getName()))
 	{
 		OC_ASSERT(NUMBER_NODE == n.getType(), "Bad NumberNode consructor!");
