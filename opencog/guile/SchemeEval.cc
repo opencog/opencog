@@ -779,11 +779,8 @@ SCM recast_scm_eval_string(void * expr)
 
 /**
  * Evaluate a string containing a scheme expression, returning a Handle.
- * If an evaluation error occurs, then the error is logged to the log
- * file, and Handle::UNDEFINED is returned.  If the result of evaluation
- * is not a handle, no error is logged, but Handle::UNDEFINED is still
- * returned. Otherwise, if the result of evaluation is a handle, that
- * handle is returned.
+ * If an evaluation error occurs, an exception is thrown, and the stack
+ * trace is logged to the log file.
  */
 Handle SchemeEval::eval_h(const std::string &expr)
 {
@@ -824,6 +821,53 @@ void * SchemeEval::c_wrap_eval_h(void * p)
 	SCM expr_str = scm_from_utf8_string(self->pexpr->c_str());
 	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
 	self->hargs = SchemeSmob::scm_to_handle(rc);
+	return self;
+}
+
+/**
+ * Evaluate a string containing a scheme expression, returning a TV.
+ * If an evaluation error occurs, an exception is thrown, and the stack
+ * trace is logged to the log file.
+ */
+TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
+{
+	// If we are recursing, then we already are in the guile
+	// environment, and don't need to do any additional setup.
+	// Just go.
+	if (_in_eval) {
+		// scm_from_utf8_string is lots faster than scm_from_locale_string
+		SCM expr_str = scm_from_utf8_string(expr.c_str());
+		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
+		return SchemeSmob::to_tv(rc);
+	}
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	thread_lock();
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
+	pexpr = &expr;
+	_in_eval = true;
+	scm_with_guile(c_wrap_eval_tv, this);
+	_in_eval = false;
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	thread_unlock();
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
+	// Convert evaluation errors into C++ exceptions.
+	if (eval_error())
+		throw RuntimeException(TRACE_INFO, error_msg.c_str());
+
+	return tvp;
+}
+
+void * SchemeEval::c_wrap_eval_tv(void * p)
+{
+	SchemeEval *self = (SchemeEval *) p;
+	// scm_from_utf8_string is lots faster than scm_from_locale_string
+	SCM expr_str = scm_from_utf8_string(self->pexpr->c_str());
+	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
+	self->tvp = SchemeSmob::to_tv(rc);
 	return self;
 }
 
