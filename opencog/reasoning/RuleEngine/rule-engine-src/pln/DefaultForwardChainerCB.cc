@@ -40,8 +40,6 @@ DefaultForwardChainerCB::~DefaultForwardChainerCB() {
 	delete fcpm_;
 }
 
-//-----------------callbacks-------------------------------------------------------------------------------//
-
 //choose rule based on premises of rule matching the target
 //uses temporary atomspace to limit the search space and avoid
 vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem) {
@@ -135,72 +133,4 @@ HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem) {
 		cout << "VALIDATION FAILED:" << endl << e.what() << endl;
 	}
 	return fcpm_->get_products();
-}
-
-//-------------------private helper methods------------------------------------------------------------------------------//
-
-map<Handle, string> DefaultForwardChainerCB::choose_variable(Handle htarget) {
-	PLNCommons pc(as_);
-	vector<Handle> candidates = pc.get_nodes(htarget, vector<Type>());
-	map<Handle, HandleSeq> node_iset_map;
-	//enforce not choosing two or more variables in the same Link
-	for (auto it = candidates.begin(); it != candidates.end(); ++it) {
-		HandleSeq hs = as_->getIncoming(*it);
-		if (distance(candidates.begin(), it) == 0) {
-			node_iset_map[*it] = hs;
-		} else {
-			bool has_same_link = false;
-			for (auto i = node_iset_map.begin(); i != node_iset_map.end();
-					++i) {
-				HandleSeq tmp;
-				sort(hs.begin(), hs.end());
-				sort(i->second.begin(), i->second.end());
-				set_intersection(hs.begin(), hs.end(), i->second.begin(),
-						i->second.end(), back_inserter((tmp)));
-				if (tmp.size() > 0) {
-					has_same_link = true;
-					break;
-				}
-			}
-			if (!has_same_link)
-				node_iset_map[*it] = hs;
-		}
-	}
-	map<Handle, string> hnode_vname_map;
-	for (auto it = node_iset_map.begin(); it != node_iset_map.end(); ++it) {
-		Handle h = it->first;
-		hnode_vname_map[h] = ("$var-" + NodeCast((h))->getName());
-	}
-	return hnode_vname_map;
-}
-
-Handle DefaultForwardChainerCB::target_to_pmimplicant(Handle htarget,
-		map<Handle, string> hnode_vname_map)
-{
-	if (LinkCast(htarget)) {
-	   HandleSeq hsvariablized;
-		LinkPtr p_htarget = LinkCast(htarget);
-		Type link_type = p_htarget->getType();
-		HandleSeq hsoutgoing = as_->getOutgoing(htarget);
-		for (auto i = hsoutgoing.begin(); i != hsoutgoing.end(); ++i) {
-			Handle htmp = target_to_pmimplicant(*i, hnode_vname_map);
-			hsvariablized.push_back(htmp);
-		}
-		Handle h(as_->addLink(link_type, hsvariablized));
-		h->setTruthValue(TruthValue::TRUE_TV());
-		return h;
-	} else {
-		if (NodeCast(htarget)) {
-			auto it_var = hnode_vname_map.find(htarget); //TODO replace by find-if for linear complexity
-			NodePtr p_htarget = NodeCast(htarget);
-			if (it_var != hnode_vname_map.end()) {
-				Handle h = as_->addNode(VARIABLE_NODE, it_var->second);
-				h->setTruthValue(TruthValue::TRUE_TV());
-            return h;
-         }
-			else
-				return htarget;
-		}
-	}
-	return Handle::UNDEFINED; //unreachable?
 }
