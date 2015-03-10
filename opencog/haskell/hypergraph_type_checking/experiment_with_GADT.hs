@@ -17,14 +17,24 @@ data Atom a where
     PredicateAnd :: (a ~ (Atom b -> TV)) => Atom a -> Atom a -> Atom a
     PredicateOr :: (a ~ (Atom b -> TV)) => Atom a -> Atom a -> Atom a
     Evaluation :: (Atom (Atom a -> TV)) -> Atom a -> Atom TV
+    Implication :: (a ~ (Atom b -> TV)) => Atom a -> Atom a -> Atom TV
+    Equivalence :: (a ~ (Atom b -> TV)) => Atom a -> Atom a -> Atom TV
 
     -- Concept
     Concept :: String -> Atom String
     ConceptAnd :: Atom String -> Atom String -> Atom String
     ConceptOr :: Atom String -> Atom String -> Atom String
     Member :: Atom a -> Atom String -> Atom TV
+    Inheritance :: Atom String -> Atom String -> Atom TV
+    Similarity :: Atom String -> Atom String -> Atom TV
+    SatisfyingSet :: Atom (Atom a -> TV) -> Atom String
 
-    -- Number
+    -- -- Variable
+    -- Variable :: Atom 
+    
+    -- Bind :: List Atom (Atom a -> TV)
+
+    -- number
     Number :: (Num a) => a -> Atom a
 
     -- Schema
