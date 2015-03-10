@@ -105,10 +105,12 @@ SCM SchemeSmob::ss_evaluate (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-evaluate!");
 
-	if (h->getType() != EVALUATION_LINK)
+	Type t = h->getType();
+	if ((EVALUATION_LINK != t)
+	    and (GREATER_THAN_LINK != t))
 	{
 		scm_wrong_type_arg_msg("cog-evaluate!", 1, satom,
-			"EvaluationLink opencog cog-evaluate!");
+			"EvaluationLink or GreaterThanLink");
 	}
 
 	AtomSpace* atomspace = ss_get_env_as("cog-evaluate!");

@@ -94,3 +94,9 @@ Some other expressions:
   (cog-execute! (TimesLink (NumberNode 3) (NumberNode 2)))
   (cog-execute! (TimesLink (NumberNode 4) (PlusLink (NumberNode 5) (NumberNode 1))))
 ```
+Inequalities:
+```
+  (define g (GreaterThanLink (NumberNode 3) (NumberNode 2)))
+  (cog-evaluate! g)
+  (cog-evaluate! (GreaterThanLink (NumberNode 3) (NumberNode 42)))
+```

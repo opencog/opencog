@@ -52,6 +52,24 @@ EvaluationLink::EvaluationLink(Handle schema, Handle args,
 	}
 }
 
+// Perform a GreaterThan check
+TruthValuePtr greater(LinkPtr ll)
+{
+	Handle h1(ll->getOutgoingAtom(0));
+	Handle h2(ll->getOutgoingAtom(1));
+	if (NUMBER_NODE != h1->getType() or NUMBER_NODE != h2->getType())
+		throw RuntimeException(TRACE_INFO,
+		     "Expecting c++:greater arguments to be NumberNode's!");
+	const std::string& s1 = NodeCast(h1)->getName();
+	const std::string& s2 = NodeCast(h2)->getName();
+	double v1 = atof(s1.c_str());
+	double v2 = atof(s2.c_str());
+	if (v1 > v2)
+		return TruthValue::TRUE_TV();
+	else
+		return TruthValue::FALSE_TV();
+}
+
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
 ///
 /// Expects the argument to be an EvaluationLink, which should have the
@@ -69,11 +87,17 @@ EvaluationLink::EvaluationLink(Handle schema, Handle args,
 ///
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle execlnk)
 {
-	if (EVALUATION_LINK != execlnk->getType()) {
-		throw RuntimeException(TRACE_INFO, "Expecting to get an EvaluationLink!");
+	Type t = execlnk->getType();
+	if (EVALUATION_LINK == t)
+	{
+		LinkPtr l(LinkCast(execlnk));
+		return do_evaluate(as, l->getOutgoingSet());
 	}
-	LinkPtr l(LinkCast(execlnk));
-	return do_evaluate(as, l->getOutgoingSet());
+	else if (GREATER_THAN_LINK == t)
+	{
+		return greater(LinkCast(execlnk));
+	}
+	throw RuntimeException(TRACE_INFO, "Expecting to get an EvaluationLink!");
 }
 
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
@@ -87,7 +111,8 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
 {
 	if (2 != sna.size())
 	{
-		throw RuntimeException(TRACE_INFO, "Incorrect arity for an EvaluationLink!");
+		throw RuntimeException(TRACE_INFO,
+		     "Incorrect arity for an EvaluationLink!");
 	}
 	return do_evaluate(as, sna[0], sna[1]);
 }
@@ -118,20 +143,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args
 	// Hard-coded in C++ for speed. (well, and for convenience ...)
 	if (0 == schema.compare("c++:greater"))
 	{
-		LinkPtr ll(LinkCast(args));
-		Handle h1(ll->getOutgoingAtom(0));
-		Handle h2(ll->getOutgoingAtom(1));
-		if (NUMBER_NODE != h1->getType() or NUMBER_NODE != h2->getType())
-			throw RuntimeException(TRACE_INFO,
-			     "Expecting c++:greater arguments to be NumberNode's!");
-		const std::string& s1 = NodeCast(h1)->getName();
-		const std::string& s2 = NodeCast(h2)->getName();
-		double v1 = atof(s1.c_str());
-		double v2 = atof(s2.c_str());
-		if (v1 > v2)
-			return TruthValue::TRUE_TV();
-		else
-			return TruthValue::FALSE_TV();
+		return greater(LinkCast(args));
 	}
 
 	// A very special-case C++ comparison.
