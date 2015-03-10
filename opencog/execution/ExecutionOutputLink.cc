@@ -140,7 +140,7 @@ static inline double get_double(Handle& h)
 Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
                                        const HandleSeq& sna)
 {
-	if (EXECUTION_OUTPUT_LINK)
+	if (EXECUTION_OUTPUT_LINK == t)
 	{
 		if (2 != sna.size())
 		{
@@ -149,7 +149,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
 		}
 		return do_execute(as, sna[0], sna[1]);
 	}
-	else if (TIMES_LINK)
+	else if (TIMES_LINK == t)
 	{
 		double prod = 1.0;
 		for (Handle h: sna)
@@ -158,7 +158,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
 		}
 		return as->addAtom(createNumberNode(prod));
 	}
-	else if (PLUS_LINK)
+	else if (PLUS_LINK == t)
 	{
 		double sum = 0.0;
 		for (Handle h: sna)

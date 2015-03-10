@@ -79,3 +79,12 @@ that ExecutionOutputLink can have side effects, and thus, it needs
 to be run ever time that it is encountered.  This is a poor choice
 for good performance; we need to define a side-effect-free execution
 link, and we need to define a monad when the side effects are needed.
+
+Demo
+----
+Example:
+```
+  (define two (NumberNode 2))
+  (define plu (PlusLink two two))
+  (cog-execute! plu)
+```
