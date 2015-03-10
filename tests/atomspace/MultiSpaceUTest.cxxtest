@@ -125,7 +125,7 @@ public:
 		// Create three nodes
 		NodePtr n1(createNode(CONCEPT_NODE, "uni-1"));
 		n1->setTruthValue(tv1);
-		NodePtr n2(createNode(NUMBER_NODE, "uni-2"));
+		NodePtr n2(createNode(NUMBER_NODE, "2.2222"));
 		n2->setTruthValue(tv2);
 		NodePtr n3(createNode(VARIABLE_NODE, "uni-3"));
 		n3->setTruthValue(tv3);
@@ -174,15 +174,15 @@ public:
 
 		// Fetch three atoms in three different atomspaces
 		Handle h1n1 = as1.addNode(CONCEPT_NODE, "uni-1");
-		Handle h1n2 = as1.addNode(NUMBER_NODE, "uni-2");
+		Handle h1n2 = as1.addNode(NUMBER_NODE, "2.2222");
 		Handle h1n3 = as1.addNode(VARIABLE_NODE, "uni-3");
 
 		Handle h2n1 = as2.addNode(CONCEPT_NODE, "uni-1");
-		Handle h2n2 = as2.addNode(NUMBER_NODE, "uni-2");
+		Handle h2n2 = as2.addNode(NUMBER_NODE, "2.2222");
 		Handle h2n3 = as2.addNode(VARIABLE_NODE, "uni-3");
 
 		Handle h3n1 = as3.addNode(CONCEPT_NODE, "uni-1");
-		Handle h3n2 = as3.addNode(NUMBER_NODE, "uni-2");
+		Handle h3n2 = as3.addNode(NUMBER_NODE, "2.2222");
 		Handle h3n3 = as3.addNode(VARIABLE_NODE, "uni-3");
 
 		// They should NOT match one-another
@@ -235,7 +235,7 @@ public:
 		// Create three nodes in the base atomspace
 		Handle hnd1 = nas1.addNode(CONCEPT_NODE, "nest-1");
 		hnd1->setTruthValue(tv1);
-		Handle hnd2 = nas1.addNode(NUMBER_NODE, "nest-2");
+		Handle hnd2 = nas1.addNode(NUMBER_NODE, "2.34");
 		hnd2->setTruthValue(tv2);
 		Handle hnd3 = nas1.addNode(VARIABLE_NODE, "nest-3");
 		hnd3->setTruthValue(tv3);
@@ -274,15 +274,15 @@ public:
 
 		// Fetch three atoms in three different atomspaces
 		Handle h1n1 = nas1.addNode(CONCEPT_NODE, "nest-1");
-		Handle h1n2 = nas1.addNode(NUMBER_NODE, "nest-2");
+		Handle h1n2 = nas1.addNode(NUMBER_NODE, "2.34");
 		Handle h1n3 = nas1.addNode(VARIABLE_NODE, "nest-3");
 
 		Handle h2n1 = nas2.addNode(CONCEPT_NODE, "nest-1");
-		Handle h2n2 = nas2.addNode(NUMBER_NODE, "nest-2");
+		Handle h2n2 = nas2.addNode(NUMBER_NODE, "2.34");
 		Handle h2n3 = nas2.addNode(VARIABLE_NODE, "nest-3");
 
 		Handle h3n1 = nas3.addNode(CONCEPT_NODE, "nest-1");
-		Handle h3n2 = nas3.addNode(NUMBER_NODE, "nest-2");
+		Handle h3n2 = nas3.addNode(NUMBER_NODE, "2.34");
 		Handle h3n3 = nas3.addNode(VARIABLE_NODE, "nest-3");
 
 		// They should be identical

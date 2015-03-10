@@ -75,7 +75,7 @@ public:
     static ClassServer* createInstance(void);
 
     /** Adds a new atom type with the given name and parent type */
-    Type addType(Type parent, const std::string& name);
+    Type addType(const Type parent, const std::string& name);
 
     /** Provides ability to get type-added signals.
      * @warning methods connected to this signal must not call ClassServer::addType or

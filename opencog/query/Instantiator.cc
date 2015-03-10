@@ -51,7 +51,9 @@ Handle Instantiator::walk_tree(Handle expr)
 		oset_results.push_back(walk_tree(h));
 
 	// Fire execution links, if found.
-	if (t == EXECUTION_OUTPUT_LINK)
+	if ((EXECUTION_OUTPUT_LINK == t)
+	   or (PLUS_LINK == t)
+	   or (TIMES_LINK == t))
 	{
 		// The atoms being created above might not all be in the
 		// atomspace, just yet. Because we have no clue what the
@@ -65,7 +67,7 @@ Handle Instantiator::walk_tree(Handle expr)
 
 		// This throws if it can't figure out the schema ...
 		// Let the throw pass right on up the stack.
-		return ExecutionOutputLink::do_execute(_as, oset_results);
+		return ExecutionOutputLink::do_execute(_as, t, oset_results);
 	}
 
 	// Now create a duplicate link, but with an outgoing set where

@@ -41,7 +41,7 @@ namespace opencog
  */
 class Node : public Atom
 {
-private:
+protected:
     // properties
     std::string name;
     void init(const std::string&) throw (InvalidParamException, AssertionException);
@@ -61,7 +61,8 @@ public:
     Node(Type t, const std::string& s,
          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-        : Atom(t,tv,av) {
+        : Atom(t,tv,av)
+    {
         init(s);
     }
 
@@ -71,7 +72,8 @@ public:
      * because thread-safe locking required in the gets.
      */
     Node(Node &n)
-        : Atom(n.getType(), n.getTruthValue(), n.getAttentionValue()) {
+        : Atom(n.getType(), n.getTruthValue(), n.getAttentionValue())
+    {
         init(n.name);
     }
 
@@ -108,7 +110,8 @@ public:
 typedef std::shared_ptr<Node> NodePtr;
 static inline NodePtr NodeCast(const Handle& h)
     { AtomPtr a(h); return std::dynamic_pointer_cast<Node>(a); }
-static inline NodePtr NodeCast(AtomPtr a) { return std::dynamic_pointer_cast<Node>(a); }
+static inline NodePtr NodeCast(AtomPtr a)
+    { return std::dynamic_pointer_cast<Node>(a); }
 
 // XXX temporary hack ...
 #define createNode std::make_shared<Node>

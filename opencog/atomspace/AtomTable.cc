@@ -38,6 +38,7 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TLB.h>
+#include <opencog/execution/NumberNode.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -356,8 +357,7 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                                      bool* subclasses,
                                      Arity arity,
                                      Type type,
-                                     bool subclass)
-    const throw (RuntimeException)
+                                     bool subclass) const
 {
     std::vector<UnorderedHandleSet> sets(arity);
 
@@ -470,7 +470,7 @@ bool AtomTable::inEnviron(AtomPtr atom)
     return false;
 }
 
-Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
+Handle AtomTable::add(AtomPtr atom, bool async)
 {
     // Is the atom already in this table, or one of its environments?
     if (inEnviron(atom))
@@ -510,7 +510,11 @@ Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
     if (at != NULL) {
         NodePtr nnn(NodeCast(atom));
         if (nnn) {
-            atom = createNode(*nnn);
+            // Experimental support for NumberNodes
+            if (NUMBER_NODE == nnn->getType())
+                atom = createNumberNode(*nnn);
+            else
+                atom = createNode(*nnn);
         } else {
             LinkPtr lll(LinkCast(atom));
             atom = createLink(*lll);
@@ -639,10 +643,20 @@ Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
         }
     }
 
+    // Experimental NumberNode support code
+    if (atom->getType() == NUMBER_NODE) {
+        NumberNodePtr nnp(NumberNodeCast(atom));
+        if (NULL == nnp) {
+           nnp = createNumberNode(*NodeCast(atom));
+           nnp->_uuid = atom->_uuid;
+           atom = nnp;
+        }
+    }
+
     // Its possible that the atom already has a UUID assigned,
     // e.g. if it was fetched from persistent storage; this
     // was done to preserve handle consistency. SavingLoading does
-    // this too.  XXX Review SavingLoading for corrrectness...
+    // this too.  XXX Review SavingLoading for correctness...
     if (atom->_uuid == Handle::UNDEFINED.value()) {
        // Atom doesn't yet have a valid uuid assigned to it. Ask the TLB
        // to issue a valid uuid.  And then memorize it.

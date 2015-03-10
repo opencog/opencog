@@ -69,11 +69,13 @@ SCM SchemeEval::do_apply_scm(const std::string& func, Handle& varargs )
 SCM SchemeSmob::ss_execute (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-execute!");
-
-	if (h->getType() != EXECUTION_OUTPUT_LINK)
+	Type t = h->getType();
+	if ((EXECUTION_OUTPUT_LINK != t)
+	    and (PLUS_LINK != t)
+	    and (TIMES_LINK != t))
 	{
 		scm_wrong_type_arg_msg("cog-execute!", 1, satom,
-			"ExecutionOutputLink opencog cog-execute!!");
+			"ExecutionOutputLink, PlusLink or TimesLink");
 	}
 
 	AtomSpace* atomspace = ss_get_env_as("cog-execute!");
@@ -103,10 +105,13 @@ SCM SchemeSmob::ss_evaluate (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-evaluate!");
 
-	if (h->getType() != EVALUATION_LINK)
+	Type t = h->getType();
+	if ((EVALUATION_LINK != t)
+	    and (GREATER_THAN_LINK != t)
+	    and (NOT_LINK != t))
 	{
 		scm_wrong_type_arg_msg("cog-evaluate!", 1, satom,
-			"EvaluationLink opencog cog-evaluate!");
+			"EvaluationLink or GreaterThanLink or NotLink");
 	}
 
 	AtomSpace* atomspace = ss_get_env_as("cog-evaluate!");

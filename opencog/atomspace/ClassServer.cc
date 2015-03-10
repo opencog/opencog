@@ -57,7 +57,7 @@ ClassServer* ClassServer::createInstance(void)
     return new ClassServer();
 }
 
-Type ClassServer::addType(Type parent, const std::string& name)
+Type ClassServer::addType(const Type parent, const std::string& name)
 {
     // Check if a type with this name already exists. If it does, then
     // the second and subsequent calls are to be interpreted as defining

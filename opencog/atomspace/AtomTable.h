@@ -366,8 +366,7 @@ public:
      * criteria in their outgoing set.
      */
     UnorderedHandleSet getHandlesByNames(const char**, Type*, bool*, Arity,
-                              Type type = ATOM, bool subclass = true) const
-    throw (RuntimeException);
+                              Type type = ATOM, bool subclass = true) const;
 
     /**
      * Returns the set of atoms with the given target names and/or types
@@ -440,7 +439,7 @@ public:
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(AtomPtr, bool async) throw (RuntimeException);
+    Handle add(AtomPtr, bool async);
 
     /**
      * Read-write synchronization barrier fence.  When called, this
