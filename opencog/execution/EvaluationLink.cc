@@ -25,6 +25,8 @@
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 #include "EvaluationLink.h"
+#include "ExecutionOutputLink.h"
+#include "NumberNode.h"
 
 using namespace opencog;
 
@@ -53,18 +55,24 @@ EvaluationLink::EvaluationLink(Handle schema, Handle args,
 }
 
 // Perform a GreaterThan check
-TruthValuePtr greater(LinkPtr ll)
+TruthValuePtr greater(AtomSpace* as, LinkPtr ll)
 {
 	Handle h1(ll->getOutgoingAtom(0));
 	Handle h2(ll->getOutgoingAtom(1));
-	if (NUMBER_NODE != h1->getType() or NUMBER_NODE != h2->getType())
+	if (NUMBER_NODE != h1->getType())
+		h1 = ExecutionOutputLink::do_execute(as, h1);
+
+	if (NUMBER_NODE != h2->getType())
+		h2 = ExecutionOutputLink::do_execute(as, h2);
+
+	NumberNodePtr n1(NumberNodeCast(h1));
+	NumberNodePtr n2(NumberNodeCast(h2));
+
+	if (NULL == n1 or NULL == n2)
 		throw RuntimeException(TRACE_INFO,
 		     "Expecting c++:greater arguments to be NumberNode's!");
-	const std::string& s1 = NodeCast(h1)->getName();
-	const std::string& s2 = NodeCast(h2)->getName();
-	double v1 = atof(s1.c_str());
-	double v2 = atof(s2.c_str());
-	if (v1 > v2)
+
+	if (n1->getValue() > n2->getValue())
 		return TruthValue::TRUE_TV();
 	else
 		return TruthValue::FALSE_TV();
@@ -95,7 +103,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle execlnk)
 	}
 	else if (GREATER_THAN_LINK == t)
 	{
-		return greater(LinkCast(execlnk));
+		return greater(as, LinkCast(execlnk));
 	}
 	throw RuntimeException(TRACE_INFO, "Expecting to get an EvaluationLink!");
 }
@@ -143,7 +151,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args
 	// Hard-coded in C++ for speed. (well, and for convenience ...)
 	if (0 == schema.compare("c++:greater"))
 	{
-		return greater(LinkCast(args));
+		return greater(as, LinkCast(args));
 	}
 
 	// A very special-case C++ comparison.
