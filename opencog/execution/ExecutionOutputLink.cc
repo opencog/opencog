@@ -117,14 +117,17 @@ Handle ExecutionOutputLink::recurse(AtomSpace* as, Handle h)
 }
 
 // handle->double conversion
-static double get_double(Handle& h)
+static inline double get_double(Handle& h)
 {
 	if (NUMBER_NODE != h->getType())
 		throw RuntimeException(TRACE_INFO,
 		     "Not a number!");
 
-	NodePtr nnn(NodeCast(h));
-	return atof(nnn->getName().c_str());
+	NumberNodePtr nnn(NumberNodeCast(h));
+	OC_ASSERT (nnn != NULL,
+		"This should never happen; there's a bug in the code!");
+
+	return nnn->getValue();
 }
 
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink

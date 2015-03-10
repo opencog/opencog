@@ -56,6 +56,13 @@ public:
 		  value(vvv)
 	{}
 
+	NumberNode(Node &n)
+		: Node(NUMBER_NODE, n.getName(), n.getTruthValue(), n.getAttentionValue()),
+		  value(std::stod(n.getName()))
+	{
+		OC_ASSERT(NUMBER_NODE == n.getType(), "Bad NumberNode consructor!");
+	}
+
 	double getValue(void) { return value; }
 };
 
