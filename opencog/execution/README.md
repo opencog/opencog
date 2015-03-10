@@ -25,11 +25,11 @@ place seems to be the Atom itself.  The memoized function should be
 stored in the GSN/GPN atom.
 
 The problem is that this makes the Atom fatter still (every Atom would
-need to have an SCM in it, a PyObject in it, an hl for Haskell...)
-The alternative would be to use a map to store only the afftecte atoms.
+need to have an SCM in it, a PyObject in it, an Hs for Haskell...)
+The alternative would be to use a map to store only the affected atoms.
 The map should live in the atomspace, because deleted atoms would have
 to be removed from the map, as well.  Thus, there would need to be a
-calls
+calls such as this:
 
 ```
 SCM AtomSpace::getSCM(Handle);
