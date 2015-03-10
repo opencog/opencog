@@ -3,7 +3,11 @@
 
 {-#LANGUAGE GADTs #-}
 
-data TV -- TODO = (Weight Float, Confidence Float)
+data TV = SimpleTV Float Float
+
+data ConceptName = ConceptName String
+
+data VariableName = VariableName String
 
 data Atom a where
     -- TV
@@ -16,23 +20,31 @@ data Atom a where
     Predicate :: (Atom a -> TV) -> Atom (Atom a -> TV)
     PredicateAnd :: (a ~ (Atom b -> TV)) => Atom a -> Atom a -> Atom a
     PredicateOr :: (a ~ (Atom b -> TV)) => Atom a -> Atom a -> Atom a
-    Evaluation :: (Atom (Atom a -> TV)) -> Atom a -> Atom TV
     Implication :: (a ~ (Atom b -> TV)) => Atom a -> Atom a -> Atom TV
     Equivalence :: (a ~ (Atom b -> TV)) => Atom a -> Atom a -> Atom TV
+    Evaluation :: (Atom (Atom a -> TV)) -> Atom a -> Atom TV
 
     -- Concept
-    Concept :: String -> Atom String
-    ConceptAnd :: Atom String -> Atom String -> Atom String
-    ConceptOr :: Atom String -> Atom String -> Atom String
-    Member :: Atom a -> Atom String -> Atom TV
-    Inheritance :: Atom String -> Atom String -> Atom TV
-    Similarity :: Atom String -> Atom String -> Atom TV
-    SatisfyingSet :: Atom (Atom a -> TV) -> Atom String
+    Concept :: ConceptName -> Atom ConceptName
+    ConceptAnd :: Atom ConceptName -> Atom ConceptName -> Atom ConceptName
+    ConceptOr :: Atom ConceptName -> Atom ConceptName -> Atom ConceptName
+    Inheritance :: Atom ConceptName -> Atom ConceptName -> Atom TV
+    Similarity :: Atom ConceptName -> Atom ConceptName -> Atom TV
+    Member :: Atom a -> Atom ConceptName -> Atom TV
+    SatisfyingSet :: Atom (Atom a -> TV) -> Atom ConceptName
 
-    -- -- Variable
-    -- Variable :: Atom 
-    
-    -- Bind :: List Atom (Atom a -> TV)
+    -- Variable
+    PredicateVariable :: VariableName -> Atom (Atom a -> TV)
+    ConceptVariable :: VariableName -> Atom ConceptName
+    TVVariable :: VariableName -> Atom TV
+    Variable :: VariableName -> Atom a
+
+    -- Binding
+    Bind :: Atom a -> Atom TV -> Atom (Atom a -> TV)
+
+    -- Quantifier
+    ForAll :: Atom a -> Atom TV -> Atom TV
+    Exists :: Atom a -> Atom TV -> Atom TV
 
     -- number
     Number :: (Num a) => a -> Atom a
@@ -57,13 +69,16 @@ is_car :: Atom a -> TV
 is_car = undefined
 
 -- And/Or hypergraph of concepts
-h1 = ConceptOr (ConceptAnd (Concept "A") (Concept "B")) (Concept "C")
+a = Concept (ConceptName "A")
+b = Concept (ConceptName "B")
+c = Concept (ConceptName "C")
+h1 = ConceptOr (ConceptAnd a b) c
 
 -- And/Or hypergraph of predicates
 h2 = PredicateOr (PredicateAnd (Predicate is_top) (Predicate is_car)) (Predicate is_bottom)
 
 -- Apply Evaluation to predicate h2
-tv3 = Evaluation h2 (List [Concept "BMW"])
+tv3 = Evaluation h2 (List [Concept (ConceptName "BMW")])
 
 -- Build a Schema
 add :: (Atom [Atom Float]) -> Atom Float
@@ -80,6 +95,17 @@ tv2 = TVGetTV h2
 
 -- Test AndLink with TV
 tv4 = TVAnd tv1 tv3
+
+-- And/Or hypergraph of concepts involving a variable
+x = Variable (VariableName "X")
+y = Variable (VariableName "Y")
+h6 = ConceptOr (ConceptAnd a x) y
+
+-- Define a predicate with Bind
+h7 = Bind (List [x, y]) (TVGetTV h6)
+
+-- Quantifier
+h8 = ForAll (List [x, y]) (TVGetTV h6)
 
 ----------------
 -- Dummy main --
