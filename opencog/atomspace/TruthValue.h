@@ -162,9 +162,10 @@ public:
      * Merge this TV object with the given TV object argument.
      * It always returns a new TV object with the result of the merge,
      * even if it is equal to one of the merged TV objects.
-     * @param ms the merge style as described in https://github.com/opencog/opencog/issues/1295
+     * @param ms the merge style as described in
+     *        https://github.com/opencog/opencog/issues/1295
      */
-    virtual TruthValuePtr merge(TruthValuePtr,TVMergeStyle ms=DEFAULT) const = 0;
+    virtual TruthValuePtr merge(TruthValuePtr, TVMergeStyle ms=DEFAULT) const = 0;
 
     /**
      * Check if this TV is a null TV.
@@ -182,7 +183,8 @@ public:
 // overload of operator<< to print TruthValue
 namespace std {
     template<typename Out>
-    Out& operator<<(Out& out, const opencog::TruthValue& tv) {
+    Out& operator<<(Out& out, const opencog::TruthValue& tv)
+    {
         out << tv.toString();
         return out;
     }

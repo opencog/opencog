@@ -104,4 +104,7 @@ Inequalities:
 
   (cog-evaluate! (GreaterThanLink (NumberNode 3)
      (PlusLink (NumberNode 6) (NumberNode 7))))
+
+  (cog-evaluate! (NotLink (GreaterThanLink (NumberNode 3)
+     (PlusLink (NumberNode 6) (NumberNode 7)))))
 ```

@@ -22,6 +22,7 @@
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 #include "EvaluationLink.h"
@@ -104,6 +105,13 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle execlnk)
 	else if (GREATER_THAN_LINK == t)
 	{
 		return greater(as, LinkCast(execlnk));
+	}
+	else if (NOT_LINK == t)
+	{
+		LinkPtr l(LinkCast(execlnk));
+		TruthValuePtr tv(do_evaluate(as, l->getOutgoingAtom(0)));
+		return SimpleTruthValue::createTV(
+		              1.0 - tv->getMean(), tv->getCount());
 	}
 	throw RuntimeException(TRACE_INFO, "Expecting to get an EvaluationLink!");
 }
