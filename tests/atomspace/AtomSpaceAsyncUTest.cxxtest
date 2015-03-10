@@ -160,14 +160,14 @@ public:
         /* Add and remove a simple node */
         __testSignalsCounter = 0;
         logger().debug("before first atom add");
-        Handle wnHandle = atomSpace->addNode(NUMBER_NODE, "1");
+        Handle wnHandle = atomSpace->addNode(NUMBER_NODE, "1.41421356");
         TS_ASSERT(__testSignalsCounter == 11);
         TS_ASSERT(atomSpace->getSize() == 1);
 
         /* Since we're adding *exactly* the same atom, we should get a tv-merged signal */
         logger().debug("before second atom add");
         TruthValuePtr tv(SimpleTruthValue::createTV(0.5, 1.0));
-        atomSpace->addNode(NUMBER_NODE, "1")->setTruthValue(tv);
+        atomSpace->addNode(NUMBER_NODE, "1.41421356")->setTruthValue(tv);
         TS_ASSERT(__testSignalsCounter == 1111);
         TS_ASSERT(atomSpace->getSize() == 1);
 
@@ -181,8 +181,8 @@ public:
         add1.disconnect();
         merge1.disconnect();
         remove1.disconnect();
-        wnHandle = atomSpace->addNode(NUMBER_NODE, "1");
-        atomSpace->addNode(NUMBER_NODE, "1");
+        wnHandle = atomSpace->addNode(NUMBER_NODE, "1.41421356");
+        atomSpace->addNode(NUMBER_NODE, "1.41421356");
         TS_ASSERT(__testSignalsCounter == 10);
         atomSpace->purgeAtom(wnHandle, true);
         TS_ASSERT(__testSignalsCounter == 100010);
@@ -191,8 +191,8 @@ public:
         add2.disconnect();
         merge2.disconnect();
         remove2.disconnect();
-        wnHandle = atomSpace->addNode(NUMBER_NODE, "1");
-        atomSpace->addNode(NUMBER_NODE, "1");
+        wnHandle = atomSpace->addNode(NUMBER_NODE, "1.41421356");
+        atomSpace->addNode(NUMBER_NODE, "1.41421356");
         TS_ASSERT(__testSignalsCounter == 0);
         atomSpace->purgeAtom(wnHandle, true);
         TS_ASSERT(__testSignalsCounter == 0);
@@ -206,7 +206,8 @@ public:
         Type numberOfTypes = classserver().getNumberOfClasses();
         OC_ASSERT(t < numberOfTypes);
         Type randomType = NOTYPE;
-        while (!classserver().isA(randomType, t))
+        while (!classserver().isA(randomType, t)
+               or NUMBER_NODE == randomType)
             randomType = ATOM + rng->randint(numberOfTypes-1);
         return randomType;
     }
