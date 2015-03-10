@@ -90,9 +90,6 @@ EQUIVALENCE_LINK <- AVERAGE_LINK
 // To be used with PredicateNode
 EVALUATION_LINK <- ORDERED_LINK
 
-// ??? symbol link not used anywhere. What is it's semantics?
-// SYMBOL_LINK <- ORDERED_LINK
-
 // Generic association
 ASSOCIATIVE_LINK <- ORDERED_LINK
 
@@ -128,5 +125,11 @@ EXECUTION_OUTPUT_LINK <- ORDERED_LINK
 // processing.
 ANCHOR_NODE <- NODE
 
-// Link for mathematics. (???)
+// ====================================================================
+// Link for mathematics. (???) Huh? What is this? What does it do?
 QUANTITY_LINK <- ORDERED_LINK
+
+// Basic arithmetic operators
+PLUS_LINK <- UNORDERED_LINK
+TIMES_LINK <- UNORDERED_LINK
+GREATER_THAN_LINK <- ORDERED_LINK

@@ -1,7 +1,7 @@
 /*
  * opencog/execution/ExecutionOutputLink.cc
  *
- * Copyright (C) 2009, 2013 Linas Vepstas
+ * Copyright (C) 2009, 2013, 2015 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,6 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <stdlib.h>
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -70,13 +72,16 @@ ExecutionOutputLink::ExecutionOutputLink(Handle schema, Handle args,
 ///
 Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle execlnk)
 {
-	if (EXECUTION_OUTPUT_LINK != execlnk->getType())
+	Type t = execlnk->getType();
+	if ((EXECUTION_OUTPUT_LINK == t)
+	   or (PLUS_LINK == t)
+	   or (TIMES_LINK == t))
 	{
+		LinkPtr l(LinkCast(execlnk));
+		return do_execute(as, t, l->getOutgoingSet());
+	}
 		throw RuntimeException(TRACE_INFO,
 		      "Expecting to get an ExecutionOutputLink!");
-	}
-	LinkPtr l(LinkCast(execlnk));
-	return do_execute(as, l->getOutgoingSet());
 }
 
 /// Non-throwing, recursive version.
@@ -87,8 +92,12 @@ Handle ExecutionOutputLink::recurse(AtomSpace* as, Handle h)
 
 	// If its an execution link, execute it.
 	Type t = lll->getType();
-	if (EXECUTION_OUTPUT_LINK == t)
-		return do_execute(as, lll->getOutgoingSet());
+	if ((EXECUTION_OUTPUT_LINK == t)
+	   or (PLUS_LINK == t)
+	   or (TIMES_LINK == t))
+	{
+		return do_execute(as, t, lll->getOutgoingSet());
+	}
 
 	// Search for additional execution links, and execute them too.
 	// We will know that happend if the returned handle differs from
@@ -105,6 +114,17 @@ Handle ExecutionOutputLink::recurse(AtomSpace* as, Handle h)
 	return as->addLink(t, new_oset);
 }
 
+// handle->double conversion
+static double get_double(Handle& h)
+{
+	if (NUMBER_NODE != h->getType())
+		throw RuntimeException(TRACE_INFO,
+		     "Not a number!");
+
+	NodePtr nnn(NodeCast(h));
+	return atof(nnn->getName().c_str());
+}
+
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
 ///
 /// Expects the sequence to be exactly two atoms long.
@@ -112,14 +132,39 @@ Handle ExecutionOutputLink::recurse(AtomSpace* as, Handle h)
 /// Expects the second handle of the sequence to be a ListLink
 /// Executes the GroundedSchemaNode, supplying the second handle as argument
 ///
-Handle ExecutionOutputLink::do_execute(AtomSpace* as, const HandleSeq& sna)
+Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
+                                       const HandleSeq& sna)
 {
-	if (2 != sna.size())
+	if (EXECUTION_OUTPUT_LINK)
 	{
-		throw RuntimeException(TRACE_INFO,
-		     "Incorrect arity for an ExecutionOutputLink!");
+		if (2 != sna.size())
+		{
+			throw RuntimeException(TRACE_INFO,
+			     "Incorrect arity for an ExecutionOutputLink!");
+		}
+		return do_execute(as, sna[0], sna[1]);
 	}
-	return do_execute(as, sna[0], sna[1]);
+	else if (TIMES_LINK)
+	{
+		double prod = 1.0;
+		for (Handle h: sna)
+		{
+			prod *= get_double(h);
+		}
+		return as->addNode(NUMBER_NODE, std::to_string(prod));
+	}
+	else if (PLUS_LINK)
+	{
+		double sum = 0.0;
+		for (Handle h: sna)
+		{
+			sum += get_double(h);
+		}
+		return as->addNode(NUMBER_NODE, std::to_string(sum));
+	}
+
+	throw RuntimeException(TRACE_INFO,
+	      "Expecting to get an ExecutionOutputLink!");
 }
 
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
