@@ -117,8 +117,12 @@ Handle ExecutionOutputLink::recurse(AtomSpace* as, Handle h)
 }
 
 // handle->double conversion
-static inline double get_double(Handle& h)
+static inline double get_double(AtomSpace *as, Handle h)
 {
+	// Recurse, if needed: handle may be another numeric operator.
+	if (NUMBER_NODE != h->getType())
+		h = ExecutionOutputLink::do_execute(as, h);
+
 	if (NUMBER_NODE != h->getType())
 		throw RuntimeException(TRACE_INFO,
 		     "Not a number!");
@@ -132,10 +136,15 @@ static inline double get_double(Handle& h)
 
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
 ///
+/// If the type t is an EXECUTION_OUTPUTLINK, then:
 /// Expects the sequence to be exactly two atoms long.
 /// Expects the first handle of the sequence to be a GroundedSchemaNode
 /// Expects the second handle of the sequence to be a ListLink
 /// Executes the GroundedSchemaNode, supplying the second handle as argument
+///
+/// If the type t is either PLUS_LINK or TIMES_LINK, then:
+/// Exepects the atoms to be either NumberNodes, or executable links
+/// that end up being valued as NumberNodes.
 ///
 Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
                                        const HandleSeq& sna)
@@ -154,7 +163,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
 		double prod = 1.0;
 		for (Handle h: sna)
 		{
-			prod *= get_double(h);
+			prod *= get_double(as, h);
 		}
 		return as->addAtom(createNumberNode(prod));
 	}
@@ -163,7 +172,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
 		double sum = 0.0;
 		for (Handle h: sna)
 		{
-			sum += get_double(h);
+			sum += get_double(as, h);
 		}
 		return as->addAtom(createNumberNode(sum));
 	}
