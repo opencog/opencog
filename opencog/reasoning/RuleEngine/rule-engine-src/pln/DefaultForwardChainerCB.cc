@@ -108,24 +108,8 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem) {
 
 HandleSeq DefaultForwardChainerCB::choose_input(FCMemory& fcmem) {
 	Handle htarget = fcmem.get_cur_target();
-	HandleSeq inputs;
-	if (NodeCast(htarget)) {
-		inputs = as_->getIncoming(htarget);
-	}
-	if (LinkCast(htarget)) {
-		map<Handle, string> hnode_vname_map = choose_variable(htarget);
-		Handle implicant = target_to_pmimplicant(htarget, hnode_vname_map);
-		PLNCommons pc(as_);
-		Handle bindLink = pc.create_bindLink(implicant);
-		//find inputs by pattern matching with custom callback fcim_
-		PatternMatch pm;
-		try {
-			pm.do_bindlink(bindLink, *fcim_);
-		} catch (InvalidParamException& e) {
-			cout << "VALIDATION FAILED:" << endl << e.what() << endl;
-		}
-		inputs = fcim_->get_input_matches();
-	}
+	//get everything associated with the target handle
+	HandleSeq inputs = as_->getNeighbors(htarget,true,true,LINK,true);
 	return inputs;
 }
 
