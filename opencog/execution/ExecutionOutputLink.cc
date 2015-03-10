@@ -26,7 +26,9 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
+
 #include "ExecutionOutputLink.h"
+#include "NumberNode.h"
 
 using namespace opencog;
 
@@ -151,7 +153,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
 		{
 			prod *= get_double(h);
 		}
-		return as->addNode(NUMBER_NODE, std::to_string(prod));
+		return as->addAtom(createNumberNode(prod));
 	}
 	else if (PLUS_LINK)
 	{
@@ -160,7 +162,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
 		{
 			sum += get_double(h);
 		}
-		return as->addNode(NUMBER_NODE, std::to_string(sum));
+		return as->addAtom(createNumberNode(sum));
 	}
 
 	throw RuntimeException(TRACE_INFO,

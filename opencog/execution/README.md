@@ -20,18 +20,21 @@ SCM symbol, or the PyObject that the string name refers to.  Likewise,
 the arguments: currently, just handles, could also be memoized (again,
 as SCM's or PyObjects).
 
-Where should these cached values be stored? Well, obviously, in the
-Atom itself.  Either that, or the Handle, but the Atom makes more sense.
-The memoized function should be stored in the GSN/GPN atom.
+Where should these cached values be stored? Well, obviously, the best
+place seems to be the Atom itself.  The memoized function should be
+stored in the GSN/GPN atom.
 
-At this time, (March 2015) we don't have a good way of caching the
-PyObject or the SCM in an atom.  Note that a partial work-around is to
-store the SCM and PyObject caches in the C++ class ExecutionOutputLink,
-and implement some resolution mechanism so that the AtomSpace stores
-a pointer to the C++ ExecutionOutputLink class, instead of just a plain
-C++ Link class.  However, in the long run, storing the memoized SCM or
-PyObject with the Atom, in general, seems like a better idea.
+The problem is that this makes the Atom fatter still (every Atom would
+need to have an SCM in it, a PyObject in it, an hl for Haskell...)
+The alternative would be to use a map to store only the afftecte atoms.
+The map should live in the atomspace, because deleted atoms would have
+to be removed from the map, as well.  Thus, there would need to be a
+calls
 
+```
+SCM AtomSpace::getSCM(Handle);
+PyObject* AtomSpace::getPy(Handle);
+```
 
 Side effects
 ------------
