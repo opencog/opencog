@@ -88,3 +88,9 @@ Example:
   (define plu (PlusLink two two))
   (cog-execute! plu)
 ```
+Some other expressions:
+```
+  (cog-execute! (PlusLink (NumberNode 3) (NumberNode 2)))
+  (cog-execute! (TimesLink (NumberNode 3) (NumberNode 2)))
+  (cog-execute! (TimesLink (NumberNode 4) (PlusLink (NumberNode 5) (NumberNode 1))))
+```

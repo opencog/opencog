@@ -644,10 +644,20 @@ Handle AtomTable::add(AtomPtr atom, bool async) throw (RuntimeException)
         }
     }
 
+    // Experimental NumberNode support code
+    if (atom->getType() == NUMBER_NODE) {
+        NumberNodePtr nnp(NumberNodeCast(atom));
+        if (NULL == nnp) {
+           nnp = createNumberNode(*NodeCast(atom));
+           nnp->_uuid = atom->_uuid;
+           atom = nnp;
+        }
+    }
+
     // Its possible that the atom already has a UUID assigned,
     // e.g. if it was fetched from persistent storage; this
     // was done to preserve handle consistency. SavingLoading does
-    // this too.  XXX Review SavingLoading for corrrectness...
+    // this too.  XXX Review SavingLoading for correctness...
     if (atom->_uuid == Handle::UNDEFINED.value()) {
        // Atom doesn't yet have a valid uuid assigned to it. Ask the TLB
        // to issue a valid uuid.  And then memorize it.
