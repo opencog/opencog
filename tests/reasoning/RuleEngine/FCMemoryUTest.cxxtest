@@ -1,0 +1,57 @@
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+#include <opencog/reasoning/RuleEngine/rule-engine-src/JsonicControlPolicyParamLoader.h>
+#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/FCMemory.h>
+#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/DefaultForwardChainerCB.h>
+
+using namespace opencog;
+
+class FCMemoryUTest: public CxxTest::TestSuite {
+private:
+	AtomSpace* as;
+	SchemeEval* eval;
+
+public:
+	FCMemoryUTest(void) {
+		server(CogServer::createInstance);
+		as = &cogserver().getAtomSpace();
+		eval = new SchemeEval(as);
+		config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
+				"opencog/scm/utilities.scm, ");
+		load_scm_files_from_config(*as);
+	}
+
+	~FCMemoryUTest() {
+		delete as;
+		delete eval;
+	}
+
+	void setUp(void);
+	void tearDown(void);
+	void test_isin_target_list(void);
+};
+
+void FCMemoryUTest::setUp() {
+
+}
+
+void FCMemoryUTest::tearDown() {
+
+}
+
+void FCMemoryUTest::test_isin_target_list(void) {
+	FCMemory fcmem(as);
+	Handle target_list = eval->eval_h("(AndLink (InheritanceLink(VariableNode \"$A\")(VariableNode \"$B\"))"
+			     "(InheritanceLink(VariableNode \"$B\")(VariableNode \"$C\")))");
+	fcmem.set_target(target_list);
+	Handle h = eval->eval_h("(VariableNode \"$B\")");
+	TS_ASSERT(fcmem.isin_target_list(h));
+    h= eval->eval_h("(VariableNode \"$D\")");
+    TS_ASSERT(not fcmem.isin_target_list(h));
+}
+

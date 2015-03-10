@@ -27,6 +27,7 @@ IF (HAVE_GUILE)
 	#ADD_CXXTEST(PLNCommonsUTest)
 	ADD_CXXTEST(JsonicControlPolicyParamLoaderUTest)
 	ADD_CXXTEST(DefaultForwardChainerCBUTest)
+	ADD_CXXTEST(FCMemoryUTest)
 ENDIF (HAVE_GUILE)
 
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/reasoning/RuleEngine/test_cpolicy.json
