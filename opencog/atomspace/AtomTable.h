@@ -193,7 +193,7 @@ public:
      * @param The type of the desired atom.
      * @return The handle of the desired atom if found.
      */
-    Handle getHandle(Type, const std::string&) const;
+    Handle getHandle(Type, std::string) const;
     Handle getHandle(NodePtr) const;
 
     Handle getHandle(Type, const HandleSeq&) const;

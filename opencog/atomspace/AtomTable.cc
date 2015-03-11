@@ -121,8 +121,12 @@ AtomTable::AtomTable(const AtomTable& other)
             "AtomTable - Cannot copy an object of this class");
 }
 
-Handle AtomTable::getHandle(Type t, const std::string& name) const
+Handle AtomTable::getHandle(Type t, std::string name) const
 {
+    // NumberNodes need to have a uniformly-agreed-upon name.
+    if (NUMBER_NODE == t)
+        name = std::to_string(std::stod(name));
+
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     Handle h(nodeIndex.getHandle(t, name.c_str()));
     if (_environ and Handle::UNDEFINED == h)
