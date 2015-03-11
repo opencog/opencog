@@ -379,7 +379,7 @@ void SCMExecutionOutputUTest::test_nested(void)
 
 	Handle enine = eval->eval_h("(cog-execute! nestor)");
 	Handle nine = eval->eval_h("(NumberNode \"9\")");
-	// TS_ASSERT_EQUALS(nine, enine);
+	TS_ASSERT_EQUALS(nine, enine);
 
 	NumberNodePtr ne(NumberNodeCast(enine));
 	NumberNodePtr ni(NumberNodeCast(nine));
@@ -436,7 +436,7 @@ void SCMExecutionOutputUTest::test_numeric(void)
 	Handle twntyfour = eval->eval_h("(NumberNode 24)");
 	std::cout << "Expression is " << nexp->toString() << std::endl;
 	std::cout << "Number is " << twntyfour->toString() << std::endl;
-	// TS_ASSERT_EQUALS(nexp, twntyfour);
+	TS_ASSERT_EQUALS(nexp, twntyfour);
 
 	NumberNodePtr ne(NumberNodeCast(nexp));
 	NumberNodePtr nt(NumberNodeCast(twntyfour));

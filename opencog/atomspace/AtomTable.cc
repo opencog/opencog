@@ -121,8 +121,12 @@ AtomTable::AtomTable(const AtomTable& other)
             "AtomTable - Cannot copy an object of this class");
 }
 
-Handle AtomTable::getHandle(Type t, const std::string& name) const
+Handle AtomTable::getHandle(Type t, std::string name) const
 {
+    // NumberNodes need to have a uniformly-agreed-upon name.
+    if (NUMBER_NODE == t)
+        name = std::to_string(std::stod(name));
+
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     Handle h(nodeIndex.getHandle(t, name.c_str()));
     if (_environ and Handle::UNDEFINED == h)
@@ -352,111 +356,6 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
     return set;
 }
 
-UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
-                                     Type* types,
-                                     bool* subclasses,
-                                     Arity arity,
-                                     Type type,
-                                     bool subclass) const
-{
-    std::vector<UnorderedHandleSet> sets(arity);
-
-    int countdown = 0;
-    // A list for each array of names is built. Then, it's filtered by
-    // the name (to avoid hash conflicts) and by the correspondent type
-    // in the array of types.
-    for (int i = 0; i < arity; i++) {
-        DPRINTF("getHandleSet: arity %d\n", i);
-        bool sub = subclasses == NULL ? false : subclasses[i];
-        if ((names != NULL) && (names[i] != NULL)) {
-            if ((types != NULL) && (types[i] != NOTYPE)) {
-                Handle targh(getHandle(types[i], names[i]));
-                targh->getIncomingSetByType(inserter(sets[i]), type, subclass);
-                if (sub) {
-                    // If subclasses are accepted, the subclasses are
-                    // returned in the array types.
-                    std::vector<Type> subTypes;
-
-                    classserver().getChildrenRecursive(types[i],
-                                           std::back_inserter(subTypes));
-
-                    // For all subclasses found, a set is concatenated
-                    // to the answer set
-                    for (unsigned int j = 0; j < subTypes.size(); j++) {
-                        UnorderedHandleSet subSet;
-                        Handle targh(getHandle(subTypes[j], names[i]));
-                        targh->getIncomingSetByType(inserter(subSet), type, subclass);
-                        // XXX wait .. why are we copying, again?
-                        sets[i].insert(subSet.begin(), subSet.end());
-                    }
-                }
-                // sets[i] = HandleEntry::filterSet(sets[i], names[i], types[i], sub, i, arity);
-                UnorderedHandleSet filt;
-                std::copy_if(sets[i].begin(), sets[i].end(), inserter(filt),
-                    [&](Handle h)->bool {
-                        LinkPtr l(LinkCast(h));
-                        if (l->getArity() != arity) return false;
-                        Handle oh(l->getOutgoingSet()[i]);
-                        if (not oh->isType(types[i], sub)) return false;
-                        AtomPtr oa = l->getOutgoingAtom(i);
-                        if (LinkCast(oa))
-                            return (NULL == names[i]) or (0 == names[i][0]);
-                        NodePtr on(NodeCast(oa));
-                        return on->getName() == names[i];
-                    });
-                sets[i] = filt;
-
-            } else {
-                throw RuntimeException(TRACE_INFO,
-                    "Cannot make this search using only target name!\n");
-            }
-        } else if ((types != NULL) && (types[i] != NOTYPE)) {
-            UnorderedHandleSet hs;
-            getHandlesByTargetType(inserter(hs), type, types[i], subclass, sub);
-            // sets[i] = HandleEntry::filterSet(sets[i], types[i], sub, i, arity);
-            std::copy_if(hs.begin(), hs.end(), inserter(sets[i]),
-                [&](Handle h)->bool {
-                    LinkPtr l(LinkCast(h));
-                    if (l->getArity() != arity) return false;
-                    Handle oh(l->getOutgoingSet()[i]);
-                    return oh->isType(types[i], sub);
-                });
-        } else {
-            countdown++;
-        }
-    }
-
-    // If the empty set counter is not zero, removes them by shrinking
-    // the list of sets
-    if (countdown > 0) {
-        DPRINTF("newset allocated size = %d\n", (arity - countdown));
-        // TODO: Perhaps it's better to simply erase the NULL entries of the sets
-        std::vector<UnorderedHandleSet> newset;
-        for (int i = 0; i < arity; i++) {
-            if (sets[i].size() != 0) {
-                newset.push_back(sets[i]);
-            }
-        }
-        sets = newset;
-    }
-
-#ifdef DEBUG
-    for (int i = 0; i < arity; i++) {
-        DPRINTF("arity %d\n:", i);
-        UnorderedHandleSet::const_iterator it;
-        for (it = sets[i].begin(); it != sets[i].end(); it++) {
-            DPRINTF("\t%ld: %s\n", it->value(), (*it)->toString().c_str());
-        }
-        DPRINTF("\n");
-    }
-#endif
-    // The intersection is made for all non-empty sets, and then is
-    // filtered by the optional specified type. Also, if subclasses are
-    // not accepted, it will not pass the filter.
-    DPRINTF("AtomTable::getHandleSet: about to call intersection\n");
-    return intersection(sets);
-}
-
 /// Return true if the atom is in this atomtable, or in the
 /// environment for this atomtable.
 bool AtomTable::inEnviron(AtomPtr atom)
@@ -495,6 +394,14 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // Check again, under the lock this time.
     if (inEnviron(atom))
         return atom->getHandle();
+
+    // Experimental NumberNode support code
+    if (atom->getType() == NUMBER_NODE) {
+        NumberNodePtr nnp(NumberNodeCast(atom));
+        if (NULL == nnp) {
+           atom = createNumberNode(*NodeCast(atom));
+        }
+    }
 
     // Is the equivalent of this atom already in the table?
     // If so, then return the existing atom.  (Note that this 'existing'
@@ -640,16 +547,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         // now changed.
         if (classserver().isA(llc->getType(), UNORDERED_LINK)) {
             llc->resort();
-        }
-    }
-
-    // Experimental NumberNode support code
-    if (atom->getType() == NUMBER_NODE) {
-        NumberNodePtr nnp(NumberNodeCast(atom));
-        if (NULL == nnp) {
-           nnp = createNumberNode(*NodeCast(atom));
-           nnp->_uuid = atom->_uuid;
-           atom = nnp;
         }
     }
 

@@ -229,52 +229,13 @@ public:
     //      </ListLink>
     void testGetHandleSet()
     {
-        //== getHandleSet(const char**, Type*, bool*, Arity, Type = ATOM, bool = true) ==/
-        const char* names1[] = {"00065349", "12"};
-        Type types1[] = {CONCEPT_NODE, NUMBER_NODE};
-        HandleEntry* result = HandleEntry::fromHandleSet(table->getHandlesByNames(names1, types1, NULL, 2, LIST_LINK, false));
-        TS_ASSERT(result != NULL);
-        //logger().debug("result = %s", result->toString().c_str());
-        delete (result);
-
-        const char* names2[] = {"12", "00065349"};
-        Type types2[] = {NUMBER_NODE, CONCEPT_NODE};
-        result = HandleEntry::fromHandleSet(table->getHandlesByNames(names2, types2, NULL, 2, LIST_LINK, false));
-        TS_ASSERT(result == NULL);
-
-        const char* names3[] = {NULL, "12"};
-        Type types3[] = {NOTYPE, NUMBER_NODE};
-        result = HandleEntry::fromHandleSet(table->getHandlesByNames(names3, types3, NULL, 2, LIST_LINK, false));
-        TS_ASSERT(result != NULL);
-        //logger().debug("result = %s", result->toString().c_str());
-        delete(result);
-
-        const char* names4[] = {NULL, "00065349"};
-        Type types4[] = {NOTYPE, CONCEPT_NODE};
-        result = HandleEntry::fromHandleSet(table->getHandlesByNames(names4, types4, NULL, 2, LIST_LINK, false));
-        //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
-        TS_ASSERT(result == NULL);
-
-        result = HandleEntry::fromHandleSet(table->getHandlesByNames((const char**) NULL, types1, NULL, 2, LIST_LINK, false));
-        TS_ASSERT(result != NULL);
-        //logger().debug("result = %s", result->toString().c_str());
-        delete(result);
-
-        result = HandleEntry::fromHandleSet(table->getHandlesByNames((const char**) NULL, types2, NULL, 2, LIST_LINK, false));
-        //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
-        TS_ASSERT(result == NULL);
-
-        TS_ASSERT_THROWS(table->getHandlesByNames(names1, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
-        TS_ASSERT_THROWS(table->getHandlesByNames(names2, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
-        TS_ASSERT_THROWS(table->getHandlesByNames(names3, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
-        TS_ASSERT_THROWS(table->getHandlesByNames(names4, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
-
         //== getHandleSet(Handle*, Type*, bool*, Arity, Type = ATOM, bool = true) ==/
         std::vector<Handle> handles1(2);
 #define getHandlex(N,T) getHandle(T,N)
         handles1[0] = table->getHandlex("00065349", CONCEPT_NODE);
         handles1[1] = table->getHandlex("12", NUMBER_NODE);
-        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles1, types1, NULL, 2, LIST_LINK, false));
+        Type types1[] = {CONCEPT_NODE, NUMBER_NODE};
+        HandleEntry* result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles1, types1, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
@@ -282,6 +243,7 @@ public:
         std::vector<Handle> handles2(2);
         handles2[0] = table->getHandlex("12", NUMBER_NODE);
         handles2[1] = table->getHandlex("00065349", CONCEPT_NODE);
+        Type types2[] = {NUMBER_NODE, CONCEPT_NODE};
         result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles2, types2, NULL, 2, LIST_LINK, false));
         TS_ASSERT(!result);
         //logger().debug("result = %s", result->toString().c_str());
@@ -289,6 +251,7 @@ public:
         std::vector<Handle> handles3(2);
         handles3[0] = Handle::UNDEFINED;
         handles3[1] = table->getHandlex("12", NUMBER_NODE);
+        Type types3[] = {NOTYPE, NUMBER_NODE};
         result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles3, types3, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
@@ -297,6 +260,7 @@ public:
         std::vector<Handle> handles4(2);
         handles4[0] = table->getHandlex("12", NUMBER_NODE);
         handles4[1] = Handle::UNDEFINED;
+        Type types4[] = {NOTYPE, CONCEPT_NODE};
         result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles4, types4, NULL, 2, LIST_LINK, false));
         TS_ASSERT(!result);
         //logger().debug("result = %s", result->toString().c_str());
@@ -325,25 +289,6 @@ public:
         delete(result);
 
         result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles4, NULL, NULL, 2, LIST_LINK, false));
-        //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
-        TS_ASSERT(!result);
-
-        //== getHandleSet(Type*, bool*, Arity, Type = ATOM, bool = true) ==/
-
-        result = HandleEntry::fromHandleSet(table->getHandlesByTypes(types1, NULL, 2, LIST_LINK, false));
-        TS_ASSERT(result);
-        //logger().debug("result = %s", result->toString().c_str());
-        delete(result);
-
-        result = HandleEntry::fromHandleSet(table->getHandlesByTypes(types2, NULL, 2, LIST_LINK, false));
-        TS_ASSERT(!result);
-
-        result = HandleEntry::fromHandleSet(table->getHandlesByTypes(types3, NULL, 2, LIST_LINK, false));
-        TS_ASSERT(result);
-        //logger().debug("result = %s", result->toString().c_str());
-        delete(result);
-
-        result = HandleEntry::fromHandleSet(table->getHandlesByTypes(types4, NULL, 2, LIST_LINK, false));
         //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(!result);
     }
@@ -402,25 +347,6 @@ public:
         Handle hl1 = table->add(l1, false);
 
         table->extract(hn1, true);
-    }
-
-    void testMerge()
-    {
-        NodePtr n1(createNode(NUMBER_NODE, "1", SimpleTruthValue::createTV(0.1f, 0.2f)));
-        Handle hn1 = table->add(n1, false);
-
-        NodePtr n2(createNode(NUMBER_NODE, "1"));
-        TS_ASSERT_THROWS_NOTHING(table->add(n2, false)->merge(SimpleTruthValue::createTV(0.3f, 0.4f)));
-
-        NodePtr n3(createNode(NUMBER_NODE, "1"));
-        TS_ASSERT_THROWS_NOTHING(table->add(n3, false)->merge(SimpleTruthValue::createTV(0.8f, 0.3f)));
-
-        Handle h = table->getHandlex("1", NUMBER_NODE);
-        TS_ASSERT(h == hn1);
-        // mean = (0.3 * 0.4 + 0.8 * 0.3)/(0.3+0.4) = 0.36/0.7=0.51428
-        //count = 0.4 + 0.3 - min(0.3,0.4)*0.2 = 0.64
-        TS_ASSERT_DELTA(h->getTruthValue()->getMean(), 0.51429f, 0.00001);
-        TS_ASSERT_DELTA(h->getTruthValue()->getCount(), 0.64f, 0.01);
     }
 
     void testSimpleWithCustomAtomTypes()
