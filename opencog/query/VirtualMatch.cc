@@ -293,6 +293,10 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 	// an argument that contains a variable. Otherwise, its not really
 	// virtual.
 	//
+	// The GreaterThanLink is a link type that implicitly contains
+	// a GroundedPredicate for numeric greater-than relations. So
+	// we search for that too.
+	//
 	// XXX FIXME, the check below is not quite correct; for example,
 	// it would tag the following as virtual, although it is not:
 	// (BlahLink (VariableNode "$var") (EvaluationLink (GPN "scm:duh")
@@ -300,24 +304,29 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 	// in the GPN.
 	for (Handle clause: clauses)
 	{
-		if (contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
+		if ((contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
+		    or contains_atomtype(clause, GREATER_THAN_LINK))
 		    and any_variable_in_tree(clause, vars))
 			_virtuals.push_back(clause);
 		else
 			_nonvirts.push_back(clause);
 	}
 
-	// For now, the virtual links must be at the top. That's because
-	// I don't understand what the semantics would be if they were
-	// anywhere else... need to ask Ben on the mailing list.
-	// Wait .. what?  Aren't the semantics obvious?
+#ifdef I_DONT_THINK_THIS_CHECK_IS_NEEDED
+	// For now, the virtual links must be at the top. Not sure
+	// what code breaks if this isn't the case.  Why are we checking
+	// this???
 	for (Handle v : _virtuals)
 	{
 		Type vt = v->getType();
-		if (not classserver().isA(vt, EVALUATION_LINK))
+		if ((not classserver().isA(vt, EVALUATION_LINK))
+		    and (not classserver().isA(vt, GREATER_THAN_LINK)))
+		{
 			throw InvalidParamException(TRACE_INFO,
 				"Expecting EvaluationLink at the top level!");
+		}
 	}
+#endif
 }
 
 /* ================================================================= */
