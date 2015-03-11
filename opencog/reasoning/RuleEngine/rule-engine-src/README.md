@@ -25,7 +25,7 @@ Unified rule engine
   6.Use pattern matcher for finding groundings and implement the callbacks if the need arises.
     
   further reading  
-  [http://wiki.opencog.org/w/Unified_Rule_Engin](http://wiki.opencog.org/w/Unified_Rule_Engin)  
+  [http://wiki.opencog.org/w/Unified_Rule_Engine](http://wiki.opencog.org/w/Unified_Rule_Engine)  
   [http://wiki.opencog.org/w/Control_policy](http://wiki.opencog.org/w/Control_policy)   
   [http://wiki.opencog.org/w/Pattern_Matcher](http://wiki.opencog.org/w/Pattern_Matcher)
    
