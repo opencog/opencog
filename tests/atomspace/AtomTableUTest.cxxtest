@@ -351,16 +351,16 @@ public:
 
     void testMerge()
     {
-        NodePtr n1(createNode(NUMBER_NODE, "1", SimpleTruthValue::createTV(0.1f, 0.2f)));
+        NodePtr n1(createNode(CONCEPT_NODE, "1", SimpleTruthValue::createTV(0.1f, 0.2f)));
         Handle hn1 = table->add(n1, false);
 
-        NodePtr n2(createNode(NUMBER_NODE, "1"));
+        NodePtr n2(createNode(CONCEPT_NODE, "1"));
         TS_ASSERT_THROWS_NOTHING(table->add(n2, false)->merge(SimpleTruthValue::createTV(0.3f, 0.4f)));
 
-        NodePtr n3(createNode(NUMBER_NODE, "1"));
+        NodePtr n3(createNode(CONCEPT_NODE, "1"));
         TS_ASSERT_THROWS_NOTHING(table->add(n3, false)->merge(SimpleTruthValue::createTV(0.8f, 0.3f)));
 
-        Handle h = table->getHandlex("1", NUMBER_NODE);
+        Handle h = table->getHandlex("1", CONCEPT_NODE);
         TS_ASSERT(h == hn1);
         // mean = (0.3 * 0.4 + 0.8 * 0.3)/(0.3+0.4) = 0.36/0.7=0.51428
         //count = 0.4 + 0.3 - min(0.3,0.4)*0.2 = 0.64
