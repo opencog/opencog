@@ -77,7 +77,6 @@
 				;; true: 142 < (1.4 * 10 * 10) + sqrt(10)
 				;; false: 142 < (1.4 * 8 * 8) + sqrt(8)
 				(GreaterThanLink
-					(NumberNode 142)
 					(PlusLink
 						(TimesLink
 							(NumberNode 1.4)
@@ -91,6 +90,7 @@
 							)
 						)
 					)
+					(NumberNode 142)
 				)
 			)
 			(ExecutionOutputLink
