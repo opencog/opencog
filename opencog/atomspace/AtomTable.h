@@ -342,56 +342,6 @@ public:
     }
 
     /**
-     * Returns the set of atoms with the given target names and/or types
-     * (order is considered) in their outgoing sets, where the type
-     * and subclasses arguments of the searched atoms are optional.
-     *
-     * @param An array of names to match the outgoing sets of the searched
-     * atoms. This array (or each of its elements) can be null, if
-     * the names do not matter or if do not apply to the specific search.
-     * Note that if this array is not null, it must contain "arity" elements.
-     * @param An array of target types to match the types of the atoms in
-     * the outgoing set of searched atoms. If array of names is not null,
-     * this parameter *cannot* be null as well. Besides, if an element in a
-     * specific position in the array of names is not null, the corresponding
-     * type element in this array *cannot* be NOTYPE as well.
-     * @param An array of boolean values indicating whether each of the
-     * above types must also consider subclasses. This array can be null,
-     * what means that subclasses will not be considered. Not that if this
-     * array is not null, it must contains "arity" elements.
-     * @param The length of the outgoing set of the atoms being searched.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the matching
-     * criteria in their outgoing set.
-     */
-    UnorderedHandleSet getHandlesByNames(const char**, Type*, bool*, Arity,
-                              Type type = ATOM, bool subclass = true) const;
-
-    /**
-     * Returns the set of atoms with the given target names and/or types
-     * (order is considered) in their outgoing sets, where the type
-     * and subclasses arguments of the searched atoms are optional.
-     *
-     * @param An array of target types to match the types of the atoms in
-     * the outgoing set of searched atoms. This parameter (as well as any of
-     * its elements can be NOTYPE), what means that the type doesnt matter.
-     * Not that if this array is not null, it must contains "arity" elements.
-     * @param An array of boolean values indicating whether each of the
-     * above types must also consider subclasses. This array can be null,
-     * what means that subclasses will not be considered. Not that if this
-     * array is not null, it must contains "arity" elements.
-     * @param The length of the outgoing set of the atoms being searched.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the matching
-     * criteria in their outgoing set.
-     */
-    UnorderedHandleSet getHandlesByTypes(Type* types, bool* subclasses, Arity arity,
-                              Type type = ATOM, bool subclass = true) const
-    { return getHandlesByNames((const char**) NULL, types, subclasses, arity, type, subclass); }
-
-    /**
      * Returns the set of atoms within the given importance range.
      *
      * @param Importance range lower bound (inclusive).
