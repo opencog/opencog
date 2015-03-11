@@ -51,7 +51,7 @@
 		(PredicateNode "power")
 		(ListLink
 			who
-			(TimesLink quant quant quant)
+			(cog-execute! (TimesLink quant quant quant))
 		)
 	)
 )
