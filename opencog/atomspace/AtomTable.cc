@@ -496,6 +496,14 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (inEnviron(atom))
         return atom->getHandle();
 
+    // Experimental NumberNode support code
+    if (atom->getType() == NUMBER_NODE) {
+        NumberNodePtr nnp(NumberNodeCast(atom));
+        if (NULL == nnp) {
+           atom = createNumberNode(*NodeCast(atom));
+        }
+    }
+
     // Is the equivalent of this atom already in the table?
     // If so, then return the existing atom.  (Note that this 'existing'
     // atom might be in another atomspace, or might not be in any
@@ -640,16 +648,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         // now changed.
         if (classserver().isA(llc->getType(), UNORDERED_LINK)) {
             llc->resort();
-        }
-    }
-
-    // Experimental NumberNode support code
-    if (atom->getType() == NUMBER_NODE) {
-        NumberNodePtr nnp(NumberNodeCast(atom));
-        if (NULL == nnp) {
-           nnp = createNumberNode(*NodeCast(atom));
-           nnp->_uuid = atom->_uuid;
-           atom = nnp;
         }
     }
 
