@@ -36,10 +36,6 @@ private:
 	ForwardChainInputMatchCB* fcim_;
 	ForwardChainPatternMatchCB* fcpm_;
 
-	map<Handle, string> choose_variable(Handle h);
-	Handle target_to_pmimplicant(Handle htarget,
-			map<Handle, string> hnode_vname_map);
-	void add_to_target_list(Handle h);
 public:
 	DefaultForwardChainerCB(AtomSpace* as);
 	virtual ~DefaultForwardChainerCB();

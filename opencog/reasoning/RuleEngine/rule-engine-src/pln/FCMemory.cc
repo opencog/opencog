@@ -40,7 +40,7 @@ void FCMemory::update_target_list(HandleSeq input) {
 vector<Rule*> FCMemory::get_rules(void) {
 	return rules_;
 }
-void FCMemory::set_rules(vector<Rule*> rules){
+void FCMemory::set_rules(vector<Rule*> rules) {
 	rules_ = rules;
 }
 void FCMemory::set_target(Handle target) {
@@ -85,9 +85,23 @@ Handle FCMemory::get_cur_target(void) {
 
 bool FCMemory::isin_target_list(Handle h) {
 	for (Handle hi : target_list_) {
-		//TODO recursive search might be the right way
 		if (hi.value() == h.value())
 			return true;
+		//recursive lookup
+		else if (LinkCast(hi)) {
+			HandleSeqSeq hseqs;
+			hseqs.push_back(as_->getOutgoing(hi));
+			do {
+				HandleSeq iset = hseqs[hseqs.size() - 1];
+				hseqs.pop_back();
+				for (Handle i : iset) {
+					if (i.value() == h.value())
+						return true;
+					else if (LinkCast(i))
+						hseqs.push_back(as_->getOutgoing(i));
+				}
+			} while (not hseqs.empty());
+		}
 	}
 	return false;
 }

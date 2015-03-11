@@ -39,7 +39,7 @@ public:
 	ForwardChainPatternMatchCB(AtomSpace * as);
 	virtual ~ForwardChainPatternMatchCB();
 	HandleSeq get_products(void);
-    void set_fcmem(FCMemory *fcmem);
+	void set_fcmem(FCMemory *fcmem);
 	//the follwing callbacks are used for guiding the PM to look only the target list
 	bool node_match(Handle& node1, Handle& node2);
 	bool link_match(LinkPtr& lpat, LinkPtr& lsoln);

@@ -35,20 +35,20 @@ ForwardChainPatternMatchCB::~ForwardChainPatternMatchCB() {
 bool ForwardChainPatternMatchCB::node_match(Handle& node1, Handle& node2) {
 	//constrain search within target list
 	if (_fcmem->is_search_in_af())
-		return (AttentionalFocusCB::node_match(node1, node2)
-				/*and _fcmem->isin_target_list(node2)*/);
+		return (_fcmem->isin_target_list(node2)
+				and AttentionalFocusCB::node_match(node1, node2));
 	else
-		return (DefaultPatternMatchCB::node_match(node1, node2)
-				/*and _fcmem->isin_target_list(node2)*/);
+		return (_fcmem->isin_target_list(node2)
+				and DefaultPatternMatchCB::node_match(node1, node2));
 }
 bool ForwardChainPatternMatchCB::link_match(LinkPtr& lpat, LinkPtr& lsoln) {
 	//constrain search within target list
 	if (_fcmem->is_search_in_af())
-		return (AttentionalFocusCB::link_match(lpat, lsoln)
-				/*and _fcmem->isin_target_list(Handle(lsoln))*/);
+		return (_fcmem->isin_target_list(Handle(lsoln))
+				and AttentionalFocusCB::link_match(lpat, lsoln));
 	else
-		return (DefaultPatternMatchCB::link_match(lpat, lsoln)
-				/*and _fcmem->isin_target_list(Handle(lsoln))*/);
+		return (_fcmem->isin_target_list(Handle(lsoln))
+				and DefaultPatternMatchCB::link_match(lpat, lsoln));
 }
 bool ForwardChainPatternMatchCB::grounding(
 		const std::map<Handle, Handle> &var_soln,
