@@ -106,4 +106,15 @@ void GreaterComputeUTest::test_computation(void)
 
     std::cout << "Answer: " << crash_b->toString() << std::endl;
     TS_ASSERT_EQUALS(1, as->getArity(crash_b));
+
+    // Create the expected answer, and compare
+    Handle expected = eval->eval_h(
+    "(ListLink "
+    "   (EvaluationLink "
+    "      (PredicateNode \"power\")"
+    "      (ListLink "
+    "         (ConceptNode \"Ken\")"
+    "         (NumberNode 1000))))");
+
+    TS_ASSERT_EQUALS(crash_b, expected);
 }
