@@ -66,7 +66,7 @@ class PMCGroundings : public PatternMatchCallback
 		bool post_link_match(LinkPtr& link1, LinkPtr& link2) {
 			return _cb->post_link_match(link1, link2);
 		}
-		bool virtual_link_match(LinkPtr& link1, Handle& args) {
+		bool virtual_link_match(Handle& link1, Handle& args) {
 			throw InvalidParamException(TRACE_INFO, "Not expecting a virtual link here!");
 		}
 		bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h) {
@@ -161,8 +161,10 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 
 		for (Handle virt : virtuals)
 		{
-			// At this time, we expect all virtual links to be
-			// EvaluationLinks having the structure
+			// At this time, we expect all virtual links to be in
+			// one of two forms: either EvaluationLink's or
+			// GreaterThanLink's. The EvaluationLinks should have
+			// the structure
 			//
 			//   EvaluationLink
 			//       GroundedPredicateNode "scm:blah"
@@ -170,16 +172,19 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			//           Arg1Atom
 			//           Arg2Atom
 			//
-			// with one or more VariableNodes appearing in the Arg atoms.
-			// So, we ground the ListLink, and pass that to the callback.
-			LinkPtr lvirt(LinkCast(virt));
-			Handle arglist(lvirt->getOutgoingAtom(1));
-
-			// Ground the args that the virtual node needs.
-			Handle gargs(instor.instantiate(arglist, var_gnds));
+			// The GreaterThanLink's should have the "obvious" structure
+			//
+			//   GreaterThanLink
+			//       Arg1Atom
+			//       Arg2Atom
+			//
+			// In either case, one or more VariableNodes should appear
+			// in the Arg atoms. So, we ground the args, and pass that
+			// to the callback.
 
 			// At last! Actually perform the test!
-			bool match = cb->virtual_link_match(lvirt, gargs);
+			Handle gargs(instor.instantiate(virt, var_gnds));
+			bool match = cb->virtual_link_match(virt, gargs);
 
 			// After checking, remove the temporary atoms.
 			// The most fool-proof way to do this is to blow

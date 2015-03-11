@@ -130,7 +130,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * Called when a virtual link is encountered. Returns false
 		 * to reject the match.
 		 */
-		virtual bool virtual_link_match(LinkPtr& lpat, Handle& args);
+		virtual bool virtual_link_match(Handle& pat, Handle& args);
 
 		/**
 		 * Check that all clauses are connected
