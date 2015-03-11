@@ -158,7 +158,8 @@ class HobbsAgent(MindAgent):
         Converts a string to an integer.
         '''
 
-        return int(str)
+        # Add 0.1 to avoid float-point rounding error.
+        return int(float(str) + 0.1)
 
     def getWordNumber(self,node):
 
