@@ -57,10 +57,10 @@ SuRealPMCB::~SuRealPMCB()
  * (eg. (PredicateNode "runs"), (ConceptNode "dog@1324-12213"), etc).
  *
  * For each variable and its potential solution, the corresponding WordNode
- * will be located.  Then we following the WordNode to find LgWordCset to get
- * the LG dictionary entries.  If the two words have identical LG entries,
- * then the two words matches.  Just one pair of LG entries need to match even
- * if a word has multiple entries.
+ * will be located.  Then we find the source LG connectors used to match to the
+ * the solution WordNode, and check each disjuncts of the variable WordNode to
+ * see if any of them can match the source.  If so, then the solution WordNode
+ * can be replaced by the variable WordNode.
  *
  * @param hPat    the variable, a node extracted from the original query
  * @param hSoln   the potential mapping
@@ -109,7 +109,7 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
 
     logger().debug("[SuReal] Looking at %d disjuncts of %s", qDisjuncts.size(), hPat->toShortString().c_str());
 
-    // for each disjunct, get its outgoing set, and match 1-to-1 with qConns
+    // for each disjunct, get its outgoing set, and match 1-to-1 with qTargetConns
     auto matchHelper = [&](const Handle& hDisjunct)
     {
         std::list<Handle> sourceConns;

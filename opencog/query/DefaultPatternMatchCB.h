@@ -149,12 +149,6 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		                            std::vector<Handle> &negations);
 
 		/**
-		 * Perform a full atomspace search.
-		 */
-		virtual void full_search(PatternMatchEngine *,
-		                         std::vector<Handle> &clauses);
-
-		/**
 		 * Indicate a set of restrictions on the types of the ground atoms.
 		 * The typemap contains a map from variables to a set of types
 		 * that the groundings for the variable are allowed to have.
@@ -169,6 +163,13 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		VariableTypeMap *_type_restrictions;
 		virtual Handle find_starter(Handle, size_t&, Handle&, size_t&);
 		virtual Handle find_thinnest(std::vector<Handle>&, Handle&, size_t&);
+
+		/**
+		 * Perform a full atomspace search.
+		 */
+		virtual void full_search(PatternMatchEngine *,
+		                         std::vector<Handle> &clauses);
+
 		AtomSpace *_as;
 };
 
