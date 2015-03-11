@@ -138,7 +138,7 @@ class PatternMatchCallback
 		 * main AtomSpace (it is held in a temporary AtomSpace that is
 		 * deleted upon return from this callback).
 		 */
-		virtual bool virtual_link_match(LinkPtr& virt, Handle& args) = 0;
+		virtual bool virtual_link_match(Handle& virt, Handle& args) = 0;
 
 		/**
 		 * Called when a complete grounding to all clauses is found.

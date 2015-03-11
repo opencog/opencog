@@ -82,8 +82,8 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle execlnk)
 		LinkPtr l(LinkCast(execlnk));
 		return do_execute(as, t, l->getOutgoingSet());
 	}
-		throw RuntimeException(TRACE_INFO,
-		      "Expecting to get an ExecutionOutputLink!");
+	throw RuntimeException(TRACE_INFO,
+	      "Expecting to get an ExecutionOutputLink!");
 }
 
 /// Non-throwing, recursive version.

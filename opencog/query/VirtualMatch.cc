@@ -66,7 +66,7 @@ class PMCGroundings : public PatternMatchCallback
 		bool post_link_match(LinkPtr& link1, LinkPtr& link2) {
 			return _cb->post_link_match(link1, link2);
 		}
-		bool virtual_link_match(LinkPtr& link1, Handle& args) {
+		bool virtual_link_match(Handle& link1, Handle& args) {
 			throw InvalidParamException(TRACE_INFO, "Not expecting a virtual link here!");
 		}
 		bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h) {
@@ -161,8 +161,10 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 
 		for (Handle virt : virtuals)
 		{
-			// At this time, we expect all virtual links to be
-			// EvaluationLinks having the structure
+			// At this time, we expect all virtual links to be in
+			// one of two forms: either EvaluationLink's or
+			// GreaterThanLink's. The EvaluationLinks should have
+			// the structure
 			//
 			//   EvaluationLink
 			//       GroundedPredicateNode "scm:blah"
@@ -170,16 +172,19 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			//           Arg1Atom
 			//           Arg2Atom
 			//
-			// with one or more VariableNodes appearing in the Arg atoms.
-			// So, we ground the ListLink, and pass that to the callback.
-			LinkPtr lvirt(LinkCast(virt));
-			Handle arglist(lvirt->getOutgoingAtom(1));
-
-			// Ground the args that the virtual node needs.
-			Handle gargs(instor.instantiate(arglist, var_gnds));
+			// The GreaterThanLink's should have the "obvious" structure
+			//
+			//   GreaterThanLink
+			//       Arg1Atom
+			//       Arg2Atom
+			//
+			// In either case, one or more VariableNodes should appear
+			// in the Arg atoms. So, we ground the args, and pass that
+			// to the callback.
 
 			// At last! Actually perform the test!
-			bool match = cb->virtual_link_match(lvirt, gargs);
+			Handle gargs(instor.instantiate(virt, var_gnds));
+			bool match = cb->virtual_link_match(virt, gargs);
 
 			// After checking, remove the temporary atoms.
 			// The most fool-proof way to do this is to blow
@@ -293,6 +298,10 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 	// an argument that contains a variable. Otherwise, its not really
 	// virtual.
 	//
+	// The GreaterThanLink is a link type that implicitly contains
+	// a GroundedPredicate for numeric greater-than relations. So
+	// we search for that too.
+	//
 	// XXX FIXME, the check below is not quite correct; for example,
 	// it would tag the following as virtual, although it is not:
 	// (BlahLink (VariableNode "$var") (EvaluationLink (GPN "scm:duh")
@@ -300,24 +309,29 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
 	// in the GPN.
 	for (Handle clause: clauses)
 	{
-		if (contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
+		if ((contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
+		    or contains_atomtype(clause, GREATER_THAN_LINK))
 		    and any_variable_in_tree(clause, vars))
 			_virtuals.push_back(clause);
 		else
 			_nonvirts.push_back(clause);
 	}
 
-	// For now, the virtual links must be at the top. That's because
-	// I don't understand what the semantics would be if they were
-	// anywhere else... need to ask Ben on the mailing list.
-	// Wait .. what?  Aren't the semantics obvious?
+#ifdef I_DONT_THINK_THIS_CHECK_IS_NEEDED
+	// For now, the virtual links must be at the top. Not sure
+	// what code breaks if this isn't the case.  Why are we checking
+	// this???
 	for (Handle v : _virtuals)
 	{
 		Type vt = v->getType();
-		if (not classserver().isA(vt, EVALUATION_LINK))
+		if ((not classserver().isA(vt, EVALUATION_LINK))
+		    and (not classserver().isA(vt, GREATER_THAN_LINK)))
+		{
 			throw InvalidParamException(TRACE_INFO,
 				"Expecting EvaluationLink at the top level!");
+		}
 	}
+#endif
 }
 
 /* ================================================================= */

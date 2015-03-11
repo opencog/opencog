@@ -354,16 +354,23 @@ void DefaultPatternMatchCB::full_search(PatternMatchEngine *pme,
 
 /* ======================================================== */
 
-bool DefaultPatternMatchCB::virtual_link_match(LinkPtr& lvirt, Handle& gargs)
+bool DefaultPatternMatchCB::virtual_link_match(Handle& virt, Handle& gargs)
 {
-	// At this time, we expect all virutal links to be
-	// EvaluationLinks having the structure
+	// At this time, we expect all virutal links to be in one of two
+	// forms: either EvaluationLink's or GreaterThanLink's.  The
+	// EvaluationLinks should have the structure
 	//
 	//   EvaluationLink
 	//       GroundedPredicateNode "scm:blah"
 	//       ListLink
 	//           Arg1Atom
 	//           Arg2Atom
+	//
+	// The GreaterThanLink's should have the "obvious" structure
+	//
+	//   GreaterThanLink
+	//       Arg1Atom
+	//       Arg2Atom
 	//
 	// XXX TODO as discussed on the mailing list, we should perhaps first
 	// see if the following can be found in the atomspace:
@@ -378,8 +385,7 @@ bool DefaultPatternMatchCB::virtual_link_match(LinkPtr& lvirt, Handle& gargs)
 	// do_evaluate callback.  Alternately, perhaps the 
 	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
 
-	Handle schema(lvirt->getOutgoingAtom(0));
-	TruthValuePtr tvp = EvaluationLink::do_evaluate(_as, schema, gargs);
+	TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, gargs));
 
 	// XXX FIXME: we are making a crsip-logic go/no-go decision
 	// based on the TV strength. Perhaps something more subtle might be
