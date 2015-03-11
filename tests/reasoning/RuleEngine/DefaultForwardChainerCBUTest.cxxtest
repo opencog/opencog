@@ -66,7 +66,9 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void) {
 }
 
 void DefaultForwardChainerCBUTest::test_choose_target(void) {
-     load_scm_file(*as, "simple-assertions.scm");
+     config().set("SCM_PRELOAD", "tests/reasoning/RuleEngine/simple-assertions.scm");
+     load_scm_files_from_config(*as);
+
      Handle target = eval->eval_h("(ConceptNode \"Einstein\")");
      FCMemory fcmem(as);
      fcmem.set_target(target);
