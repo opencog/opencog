@@ -6,6 +6,10 @@
 ;
 
 ; Raw data to populate the search space
+;
+; TRC rower Ken Gates set a world record in 2015--
+; an under-3-minute 1K time at the Erg Rodeo
+; a week before a 1st place finish at the CRASH-B's
 (EvaluationLink
 	(PredicateNode "ergs")
 	(ListLink
