@@ -74,3 +74,26 @@ memory measurement via max RSS isn't useful when running multiple methods).
 A better way might be to record the number of mallocs:
 http://www.gnu.org/s/libc/manual/html_node/Hooks-for-Malloc.html
 
+
+
+== Python benchmark.py ==
+
+This tool was developed by Cosmo Harrigan and updated by Curtis Faith to
+test the performance of the Python bindings and to compare new bindings
+against the Scheme scheme_eval and scheme_eval_h which were previously the
+only way to access certain OpenCog functionality which has been replaced by
+new Cython bindings.
+
+To use the python benchmark, make sure you have your PYTHONPATH set to include
+the cython directory:
+
+ $ export PYTHONPATH="${PYTHONPATH}:${HOME}/src/opencog/build/opencog/cython:${HOME}/src/opencog/opencog/python::${HOME}/src/opencog/opencog/nlp"
+
+and then run:
+
+ $ python ./opencog/benchmark/benchmark.py
+
+The test will run and produce its output automatically. There are 
+no command line options at the moment as running all the tests with significant
+iterations takes less than a minute on most hardware.
+
