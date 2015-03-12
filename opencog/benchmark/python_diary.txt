@@ -1,0 +1,231 @@
+
+                    Python Benchmarking Diary
+                    -------------------------
+
+This file contains assorted benchmark results.  This is meant to be a
+historical log: as changes to the python bindings are made, we can see how
+performance changes over time. This file is a supplement to and modeled after
+diary.txt which uses the C++ benchmark atomspace_bm.
+
+
+12 March 2014
+-------------
+Benchamrks performed on 2014 MacBook Air:
+   Intel Core i5
+   1.4 GHz
+   256 KB L2 cache
+   3 MB L3 cache
+   4GB 1600 Mhz DDR3 RAM
+
+
+--- OpenCog Python Benchmark -  2015-03-12 16:32:33.421348 ---
+
+Per-op loop adjustment: 0.017µs
+
+-- Testing Node Adds --
+
+Add nodes - Cython
+  Total:          0.569s
+  Ops:          100,000
+  Op time:        5.689µs
+  Ops/sec:      175,772
+
+Add nodes - Cython (500K)
+  Total:          2.790s
+  Ops:          500,000
+  Op time:        5.580µs
+  Ops/sec:      179,214
+
+Add fully connected nodes
+  Total:          4.785s
+  Ops:          500,500
+  Op time:        9.560µs
+  Ops/sec:      104,603
+
+-- Testing Bind --
+
+Bind stub_bindlink - Cython
+  Total:          0.027s
+  Ops:          100,000
+  Op time:        0.272µs
+  Ops/sec:    3,677,294
+
+Bind bindlink - Cython
+  Total:          2.467s
+  Ops:          100,000
+  Op time:       24.674µs
+  Ops/sec:       40,528
+
+Bind validate_bindlink - Cython
+  Total:          0.170s
+  Ops:          100,000
+  Op time:        1.698µs
+  Ops/sec:      589,008
+
+-- Testing Scheme Eval --
+
+Test scheme_eval_h(+ 2 2)
+  Total:          8.458s
+  Ops:          100,000
+  Op time:       84.582µs
+  Ops/sec:       11,822
+
+Bind - cog-bind
+  Total:         12.489s
+  Ops:          100,000
+  Op time:      124.894µs
+  Ops/sec:        8,006
+
+Add nodes - Scheme cog-new-node
+  Total:         13.735s
+  Ops:          100,000
+  Op time:      137.354µs
+  Ops/sec:        7,280
+
+Add nodes - Scheme ConceptNode sugar
+  Total:         12.341s
+  Ops:          100,000
+  Op time:      123.408µs
+  Ops/sec:        8,103
+
+Some notes:
+
+Here are the timing differences on my machine (details below):
+
+Bind with Python bindings:  24.19µs
+Bind with scheme_eval_h and cog-bind: 120.98µs 
+
+The overhead isn't so much the fact that you're calling from Python as it 
+is just plain guile interpreter overhead, it appears. Even minor changes in
+the parsing requirement has a significant measurable effect on the execution
+timing. For example,
+
+scheme_eval_h(atomspace, 'cog-new-node \'ConceptNode "1" (cog-new-stv 0.5 0.5)')
+
+takes 137.354µs per eval, while using:
+
+scheme_eval_h(atomspace, '\'ConceptNode "1" (cog-new-stv 0.5 0.5)')
+
+takes 123.408µs per eval. I tried reversing the order of the tests to see if
+there was something else going on and the timing stayed consistent.
+
+The atomspace is very lightly loaded for the bind link test so this test is
+measuring overhead differences mostly and spending minimal time in the
+execution internals of bindlink itself. Each test starts with a clean new
+atomspace and runs the test prep on this fresh atomspace.
+
+The prep for the bind tests is:
+
+    scheme_preload = [ "opencog/atomspace/core_types.scm",
+                    "opencog/scm/utilities.scm"]
+
+
+    def prep_bind(atomspace):
+        __init__(atomspace)
+        for scheme_file in scheme_preload:
+            load_scm(atomspace, scheme_file)
+
+        # Define several animals and something of a different type as well
+        scheme_animals = \
+            '''
+            (InheritanceLink (ConceptNode "Frog") (ConceptNode "animal"))
+            (InheritanceLink (ConceptNode "Zebra") (ConceptNode "animal"))
+            (InheritanceLink (ConceptNode "Deer") (ConceptNode "animal"))
+            (InheritanceLink (ConceptNode "Spaceship") (ConceptNode "machine"))
+            '''
+        scheme_eval_h(atomspace, scheme_animals)
+
+
+    def prep_bind_python(atomspace):
+        prep_bind(atomspace)
+
+        # Define a graph search query
+        bind_link_query = \
+            '''
+            (BindLink
+                ;; The variable to be bound
+                (VariableNode "$var")
+                (ImplicationLink
+                    ;; The pattern to be searched for
+                    (InheritanceLink
+                        (VariableNode "$var")
+                        (ConceptNode "animal")
+                    )
+                    ;; The value to be returned.
+                    (VariableNode "$var")
+                )
+            )
+            '''
+        return scheme_eval_h(atomspace, bind_link_query)
+
+
+    def prep_bind_scheme(atomspace):
+        prep_bind(atomspace)
+
+
+       # Define a graph search query
+        scheme_query = \
+            '''
+            (define find-animals
+              (BindLink
+                ;; The variable to be bound
+                (VariableNode "$var")
+                (ImplicationLink
+                  ;; The pattern to be searched for
+                  (InheritanceLink
+                     (VariableNode "$var")
+                     (ConceptNode "animal")
+                  )
+
+
+                  ;; The value to be returned.
+                  (VariableNode "$var")
+                )
+              )
+            )
+            '''
+        scheme_eval_h(atomspace, scheme_query)
+
+The tests run loops of:
+
+For Python bindings:
+
+    result = bindlink(atomspace, bindlink_handle)
+
+which does the bare minimum before passing off to the C++ bindlink function
+of the same name and signature.
+
+
+The Scheme tests use:
+
+    result = scheme_eval_h(atomspace, '(cog-bind find-animals)')
+
+In both cases, this is about the fastest way you can do a bind using the 
+respective mechanisms since the BindLink node is already created and referenced
+in the test setup, in the case of scheme via find-animals, and for Python the
+test prep creates an atom for bindlink_handle which has been prepopulated in
+the test atomspace.
+
+In order to determine how much time was spend in the bindings themselves, I 
+created a stub that had the same signature as the C++:
+
+Handle bindlink(AtomSpace*, Handle)
+
+and had it just return the handle that was passed in. This was done to test the
+round-trip creation of Python objects to be passed to the function and the
+return of Python objects that were created inside the binding Cython code.
+
+The test reports for:
+
+Bind stub_bindlink - Cython
+  Total:          0.027s
+  Ops:          100,000
+  Op time:        0.272µs
+  Ops/sec:    3,677,294
+
+At this resolution there is a lot of variance in the tests, I've seen it range
+from 0.175µs to 0.311µs, so the important thing to note is that the vast
+majority of the time is being spent in the code for bind and very little time,
+0.272µs in the above test, is spent converting from Python to C++ and back
+again in the bindings. In the above test, about 1% of the time for the bindlink
+is spent in the Cython bindings and 99% is spent in compiled C++ bindlink code.
