@@ -116,8 +116,15 @@ protected:
      * @param The truthValue of the atom. note: This is not cloned as
      *        in setTruthValue.
      */
-    Atom(Type, TruthValuePtr = TruthValue::DEFAULT_TV(),
-            AttentionValuePtr = AttentionValue::DEFAULT_AV());
+    Atom(Type t, TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+            AttentionValuePtr av = AttentionValue::DEFAULT_AV())
+      : _uuid(Handle::UNDEFINED.value()),
+        _atomTable(NULL),
+        _type(t),
+        _flags(0),
+        _truthValue(tv),
+        _attentionValue(av)
+    {}
 
     struct InSet
     {

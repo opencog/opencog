@@ -43,7 +43,7 @@ class Node : public Atom
 {
 protected:
     // properties
-    std::string name;
+    std::string _name;
     void init(const std::string&) throw (InvalidParamException, AssertionException);
 
     Node(const Node &l) : Atom(0)
@@ -74,7 +74,7 @@ public:
     Node(Node &n)
         : Atom(n.getType(), n.getTruthValue(), n.getAttentionValue())
     {
-        init(n.name);
+        init(n._name);
     }
 
     /**
@@ -82,7 +82,7 @@ public:
      *
      * @return The name of the node.
      */
-    const std::string& getName() const;
+    inline const std::string& getName() const { return _name; }
 
     /**
      * Returns a string representation of the node.

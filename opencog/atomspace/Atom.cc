@@ -52,15 +52,6 @@ using namespace opencog;
 
 #define _avmtx _mtx
 
-Atom::Atom(Type t, TruthValuePtr tv, AttentionValuePtr av)
-  : _uuid(Handle::UNDEFINED.value()),
-    _atomTable(NULL),
-    _type(t),
-    _flags(0),
-    _truthValue(tv),
-    _attentionValue(av)
-{}
-
 Atom::~Atom()
 {
     _atomTable = NULL;

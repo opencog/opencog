@@ -205,7 +205,7 @@ public:
      * @return Whether the element in a given position in the
      *         outgoing set of this link is a source.
      */
-    bool isSource(size_t) throw (IndexErrorException, InvalidParamException);
+    bool isSource(size_t) const throw (IndexErrorException, InvalidParamException);
 
     /**
      * Returns whether a given handle is a target of this link.
@@ -213,7 +213,7 @@ public:
      * @param Handle to be checked for being a link target.
      * @return Whether a given handle is a target of this link.
      */
-    bool isTarget(Handle) throw (InvalidParamException);
+    bool isTarget(Handle) const throw (InvalidParamException);
 
     /**
      * Returns whether the element in a given position in the
@@ -223,7 +223,7 @@ public:
      * @return Whether the element in a given position in the
      *         outgoing set of this link is a target.
      */
-    bool isTarget(size_t) throw (IndexErrorException, InvalidParamException);
+    bool isTarget(size_t) const throw (IndexErrorException, InvalidParamException);
 
     /**
      * Returns whether a given atom is equal to the current link.

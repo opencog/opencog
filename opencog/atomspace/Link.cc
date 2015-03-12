@@ -85,7 +85,7 @@ std::string Link::toShortString(std::string indent)
         AtomPtr a(_outgoing[i]);
         answer << a->toShortString(more_indent);
     }
-    answer << indent << ") ; [" << getHandle().value() << "]\n";
+    answer << indent << ") ; [" << _uuid << "]\n";
     return answer.str();
 }
 
@@ -110,7 +110,7 @@ std::string Link::toString(std::string indent)
         answer += a->toString(more_indent);
     }
     answer += indent + ") ; [" + 
-            std::to_string(getHandle().value()).c_str() + "]\n";
+            std::to_string(_uuid).c_str() + "]\n";
     return answer;
 }
 
@@ -137,7 +137,7 @@ bool Link::isSource(Handle handle) const throw (InvalidParamException)
     return false;
 }
 
-bool Link::isSource(size_t i) throw (IndexErrorException, InvalidParamException)
+bool Link::isSource(size_t i) const throw (IndexErrorException, InvalidParamException)
 {
     // tests if the int given is valid.
     if (i > getArity()) {
@@ -157,7 +157,7 @@ bool Link::isSource(size_t i) throw (IndexErrorException, InvalidParamException)
     }
 }
 
-bool Link::isTarget(Handle handle) throw (InvalidParamException)
+bool Link::isTarget(Handle handle) const throw (InvalidParamException)
 {
     // on ordered links, the first position of the outgoing set defines the
     // source of the link. The other positions are targets. So, it scans the
@@ -185,7 +185,7 @@ bool Link::isTarget(Handle handle) throw (InvalidParamException)
     return false;
 }
 
-bool Link::isTarget(size_t i) throw (IndexErrorException, InvalidParamException)
+bool Link::isTarget(size_t i) const throw (IndexErrorException, InvalidParamException)
 {
     // tests if the int given is valid.
     if (i > getArity()) {
