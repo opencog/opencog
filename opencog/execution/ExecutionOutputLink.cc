@@ -26,7 +26,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/query/PatternUtils.h>
 
 #include "ExecutionOutputLink.h"
 #include "NumberNode.h"
