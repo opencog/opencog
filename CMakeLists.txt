@@ -633,6 +633,8 @@ IF (CXXTEST_FOUND)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 	ADD_CUSTOM_TARGET(test_python
 		DEPENDS PythonModuleUTest PyEvalUTest PythonEvalUTest CogServerUTest
+				bindlink_cython cogserver_cython atomspace_cython
+				moses_cython scheme_wrapper logger_cython
 		WORKING_DIRECTORY tests/cython
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Python and Cython tests..."
