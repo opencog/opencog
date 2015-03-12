@@ -76,21 +76,13 @@ AtomTable::~AtomTable()
     addedTypeConnection.disconnect();
     Handle::clear_resolver(this);
 
-#if DONT_BOTHER_WITH_THIS
-    // WTF!? XXX TODO why are we removing these one by one? Lets
-    // just blow away all the indexes. That would be more efficeient,
-    // right!?
-    // Make a copy.
-    HandleSeq all;
-    getHandlesByType(back_inserter(all), ATOM, true);
-
-    // remove all atoms from AtomTable
-    for (HandleSeq::const_iterator it = all.begin(); it != all.end(); ++it)
-    {
-        DPRINTF("Removing atom %s\n", (*it)->toString().c_str());
-        remove(*it, true);
+    // No one who shall look at these atoms ahall ever again
+    // find a reference to this atomtable.
+    UUID undef = Handle::UNDEFINED.value();
+    for (Handle h : _atom_set) {
+        h->_atomTable = NULL;
+        h->_uuid = undef;
     }
-#endif
 }
 
 bool AtomTable::isCleared(void) const
