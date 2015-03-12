@@ -50,9 +50,6 @@ public:
     static Handle do_execute(AtomSpace*, Handle);
     static Handle do_execute(AtomSpace*, Type, const HandleSeq& schema_and_args);
     static Handle do_execute(AtomSpace*, Handle schema, Handle args);
-
-private:
-    static Handle recurse(AtomSpace*, Handle);
 };
 
 /** @}*/

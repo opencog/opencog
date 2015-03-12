@@ -26,6 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/query/PatternUtils.h>
 
 #include "ExecutionOutputLink.h"
 #include "NumberNode.h"
@@ -57,10 +58,14 @@ ExecutionOutputLink::ExecutionOutputLink(Handle schema, Handle args,
 	}
 }
 
-/// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
+/// do_execute -- Find all occurances of ExecutionOutputLink or
+/// PlusLink or TimesLink, or etc... and execute them. Then create
+/// a new atom, where all occurances of ExecutionOutputLink have been
+/// replaced by the returned value -- by the atom that was returned
+/// by the execution.  The execution is recursive: such links can be
+/// nested arbitrarily.
 ///
-/// Expects the argument to be an ExecutionOutputLink, which should have the
-/// following structure:
+/// Each ExecutionOutputLink should have the form:
 ///
 ///     ExecutionOutputLink
 ///         GroundedSchemaNode "lang: func_name"
@@ -72,22 +77,7 @@ ExecutionOutputLink::ExecutionOutputLink(Handle schema, Handle args,
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle execlnk)
-{
-	Type t = execlnk->getType();
-	if ((EXECUTION_OUTPUT_LINK == t)
-	   or (PLUS_LINK == t)
-	   or (TIMES_LINK == t))
-	{
-		LinkPtr l(LinkCast(execlnk));
-		return do_execute(as, t, l->getOutgoingSet());
-	}
-	throw RuntimeException(TRACE_INFO,
-	      "Expecting to get an ExecutionOutputLink!");
-}
-
-/// Non-throwing, recursive version.
-Handle ExecutionOutputLink::recurse(AtomSpace* as, Handle h)
+Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle h)
 {
 	LinkPtr lll(LinkCast(h));
 	if (NULL == lll) return h;
@@ -108,7 +98,7 @@ Handle ExecutionOutputLink::recurse(AtomSpace* as, Handle h)
 	bool changed = false;
 	for (Handle ho : lll->getOutgoingSet())
 	{
-		Handle nh(recurse(as, ho));
+		Handle nh(do_execute(as, ho));
 		new_oset.push_back(nh);
 		if (nh != ho) changed = true;
 	}
@@ -210,7 +200,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
 		bool changed = false;
 		for (Handle ho : largs->getOutgoingSet())
 		{
-			Handle nh(recurse(as, ho));
+			Handle nh(do_execute(as, ho));
 			new_oset.push_back(nh);
 			if (nh != ho) changed = true;
 		}

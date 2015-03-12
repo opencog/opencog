@@ -69,15 +69,6 @@ SCM SchemeEval::do_apply_scm(const std::string& func, Handle& varargs )
 SCM SchemeSmob::ss_execute (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-execute!");
-	Type t = h->getType();
-	if ((EXECUTION_OUTPUT_LINK != t)
-	    and (PLUS_LINK != t)
-	    and (TIMES_LINK != t))
-	{
-		scm_wrong_type_arg_msg("cog-execute!", 1, satom,
-			"ExecutionOutputLink, PlusLink or TimesLink");
-	}
-
 	AtomSpace* atomspace = ss_get_env_as("cog-execute!");
 	// do_execute() may throw a C++ exception in various cases:
 	// e.g. if it names a non-existant function, or a function
