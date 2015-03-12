@@ -44,15 +44,15 @@ DefaultForwardChainerCB::~DefaultForwardChainerCB() {
 //uses temporary atomspace to limit the search space and avoid
 vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem) {
 	//create temporary atomspace and copy target
-	AtomSpace rule_atomspace;
-	SchemeEval sc(&rule_atomspace);
+	AtomSpace *rule_atomspace = new AtomSpace();
+	SchemeEval sc(rule_atomspace);
 	Handle target = fcmem.get_cur_target();
 	if (target == Handle::UNDEFINED or NodeCast(target))
 		throw InvalidParamException(TRACE_INFO,
 				"Needs a target atom of type LINK");
 	sc.eval(SchemeSmob::to_string(target));
 	//create bindlink with target as an implicant
-	PLNCommons pc(&rule_atomspace);
+	PLNCommons pc(rule_atomspace);
 	Handle target_cpy = pc.replace_nodes_with_varnode(target, NODE);
 	Handle bind_link = pc.create_bindLink(target_cpy, false);
 	//copy rules to the temporary atomspace
@@ -60,7 +60,7 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem) {
 	for (Rule* r : rules)
 		sc.eval_h(SchemeSmob::to_string(r->get_handle()));
 	//pattern match
-	DefaultImplicator imp(&rule_atomspace);
+	DefaultImplicator imp(rule_atomspace);
 	PatternMatch pm;
 	try {
 		pm.do_bindlink(bind_link, imp);
@@ -77,14 +77,14 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem) {
 		HandleSeq parents;
 		pc.get_top_level_parent(hm, parents);
 		for (Handle hp : parents) {
-			if (as_->getType(hp) == BIND_LINK
+			if (rule_atomspace->getType(hp) == BIND_LINK
 					and find(bindlinks.begin(), bindlinks.end(), hp)
 							== bindlinks.end())
 				check_bindlink.push_back(hp);
 		}
 		//make sure matches are actually part of the premise list rather than the output of the bindLink
 		for (Handle hb : check_bindlink) {
-			auto outgoing = [this](Handle h) {return as_->getOutgoing(h);};
+			auto outgoing = [&rule_atomspace](Handle h) {return rule_atomspace->getOutgoing(h);};
 			Handle hpremise = outgoing(outgoing(hb)[1])[0]; //extracting premise from (BindLink((ListLinK..)(ImpLink (premise) (..))))
 			if (pc.exists_in(hpremise, hm))
 				bindlinks.push_back(hb);
