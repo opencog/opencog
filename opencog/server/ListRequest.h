@@ -57,12 +57,13 @@ public:
         static const RequestClassInfo _cci(
             "list",
             "List atoms in the atomtable",
-            "Usage: list [[-h <handle>] | [-n <name>] [[-t|-T] <type>]]\n\n"
+            "Usage: list [[-h <handle>] | [-n <name>] [[-t|-T] <type>]] [-m <num>] \n\n"
             "List atoms in the atomtable. Optional flags are:\n"
             "   -h <handle>: list the atom identified by the specified handle\n"
             "   -n <name>:   list the nodes identified by the specified name\n"
-            "   -t <name>:   list the nodes of the specified type\n"
-            "   -T <name>:   list the nodes of the specified type (including subtypes)"
+            "   -t <name>:   list the atoms of the specified type\n"
+            "   -T <name>:   list the atoms of the specified type (including subtypes)\n"
+            "   -m <num>:    list the nodes up to the specified size"
         );
         return _cci;
     }
