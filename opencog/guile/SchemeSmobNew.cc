@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <libguile.h>
 
+#include <iostream>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/guile/SchemeSmob.h>
@@ -511,7 +512,48 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
  * backing store; thus deletion is permanent!
  */
 SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
-{
+{	
+	// In case satom is a list of atoms, delete each one.
+	// A successful deletion of every atom in the list will
+	// return the empty list.
+	if (scm_is_pair(satom)) 
+	{
+		SCM atom, atomlist = scm_list_copy(satom);
+
+		// First, check that every member of the list is an atom.
+		// If not every member is an atom, throw error without
+		// deleting any atoms.
+		while (!scm_is_null(atomlist)) 
+		{
+			atom = SCM_CAR(atomlist);
+
+			if (ss_atom_p(atom) == SCM_BOOL_F) 
+			{
+				SchemeSmob::ss_delete(atom, kv_pairs);
+			}
+
+			atomlist = SCM_CDR(atomlist);
+		}
+
+		// Then, proceed to delete every atom in the list.
+		int len = scm_to_int(scm_length(satom));
+
+		while (!scm_is_null(satom)) 
+		{
+			atom = SCM_CAR(satom);
+			if (SchemeSmob::ss_delete(atom, kv_pairs) 
+				== scm_list_n(SCM_UNDEFINED)) 
+			{
+				len--;
+			}
+			satom = SCM_CDR(satom);
+		}
+
+		// len should == 0 at this point..
+		if (!len) return scm_list_n(SCM_UNDEFINED);
+		return SCM_BOOL_F;
+	}
+
 	Handle h = verify_handle(satom, "cog-delete");
 
 	// It can happen that the atom has already been deleted, but we're
@@ -530,7 +572,8 @@ SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
 	bool rc = atomspace->removeAtom(h, false);
 
 	// rc should always be true at this point ...
-	if (rc) return SCM_BOOL_T;
+	// a successful deletion will return the empty list
+	if (rc) return scm_list_n(SCM_UNDEFINED);
 	return SCM_BOOL_F;
 }
 
