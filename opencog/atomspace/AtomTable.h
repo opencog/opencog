@@ -93,7 +93,7 @@ private:
     // handle uuid and the actual atom pointer (since they are stored
     // together).  To some degree, this info is duplicated in the Node
     // and LinkIndex below; we have this here for convenience.
-    std::set<Handle, handle_less> _atom_set;
+    std::unordered_set<Handle, handle_hash> _atom_set;
 
     //!@{
     //! Index for quick retreival of certain kinds of atoms.
