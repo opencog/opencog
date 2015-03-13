@@ -12,9 +12,10 @@
 
 (ConceptNode "Being" (av 0 0 0) (stv 0.100000 0.111111))
 
-(InheritanceLink (av 0 0 0) (stv 0.900000 0.111111)
-  (ConceptNode "Animal" (av 0 0 0) (stv 0.100000 0.111111))
+(EvaluationLink (av 0 0 0) (stv 0.900000 0.111111)
   (PredicateNode "Moves" (av 0 0 0) (stv 0.100000 0.111111))
+  (ListLink
+  (ConceptNode "Animal" (av 0 0 0) (stv 0.100000 0.111111)))    
 )
 
 (InheritanceLink (av 0 0 0) (stv 0.900000 0.111111)
