@@ -60,4 +60,6 @@ The current list of modules that wrap C++ code includes:
 (use-modules (opencog query))
 (use-modules (opencog nlp lg-dict))
 (use-modules (opencog nlp sureal))
+(use-modules (opencog persist))
+(use-modules (opencog persist-sql))
 ```
