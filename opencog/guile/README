@@ -845,14 +845,9 @@ particular, in the server socket connection handling. Caveat Emptor.
 
 ToDo
 ----
--- Change cog-tv, cog-av to use values and let-values
-	because the alist interface is klunky.
-
--- support readline/editline (uparrows, etc.) on input.
-   Note, however, 'rlwrap telnet localhost 17001' does the trick...
-
--- change cog-delete to also accept a list of atoms
--- change cog-delete to return null, not #t (?why?)
+-- Possibly change cog-tv, cog-av to use values and let-values,
+	mostly because the alist interface is klunky.  But values/
+   let-values is clunky in a different kind of way, so what to do?
 
 -- It would be nice to be able to use continuations; however, the
    scm_with_guile() call has a continuation barrier in it.  I beleive
@@ -861,3 +856,6 @@ ToDo
    data corruption. However, guile needs to be fixed to change this
    behaviour.
 
+-- Finish the modularization work for scheme, so that most or all
+   parts no longer require the cogserver to be rrunning, and can
+   be accessed directly from th guile REPL.
