@@ -1,5 +1,5 @@
 /*
- * SchemeSmobNew.cc
+ * SchemeSmobNew.cc 
  *
  * Scheme small objects (SMOBS) --creating new atoms -- for opencog.
  *
