@@ -43,4 +43,3 @@
   (ConceptNode "Being" (av 0 0 0) (stv 0.100000 0.111111))
 )
 
-(PredicateNode "Moves" (av 0 0 0) (stv 0.100000 0.111111))
