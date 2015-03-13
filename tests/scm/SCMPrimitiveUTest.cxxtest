@@ -67,6 +67,7 @@ class SCMPrimitiveUTest :  public CxxTest::TestSuite
 
 	void test_H_H(void);
 	void test_throw(void);
+	void test_parallel(void);
 };
 
 // Some example class
@@ -97,6 +98,30 @@ class MyExampleClass
 			throw (InvalidParamException(TRACE_INFO,
 			        "Don't panic!! Threw exception %d on purpose.", id));
 			return Handle::UNDEFINED;
+		}
+
+		Handle my_more_func_1(Handle h)
+		{
+			// if handle invalid, it just mean the same atom might have been deleted by another thread
+			if (not as->isValidHandle(h))
+			{
+				logger().debug("Info: my_more_func_1 got invalid handle %s", h->toShortString().c_str());
+				return Handle::UNDEFINED;
+			}
+
+			Handle hlist = as->addLink(LIST_LINK, h);
+			return hlist;
+		}
+
+		void my_more_func_2(Handle h)
+		{
+			if (not as->isValidHandle(h))
+			{
+				logger().debug("Info: my_more_func_2 got invalid handle %s", h->toShortString().c_str());
+				return;
+			}
+
+			as->removeAtom(h, false);
 		}
 };
 
@@ -195,6 +220,38 @@ void SCMPrimitiveUTest::test_throw(void)
 	int msg = strncmp("caught key=C++-EXCEPTION", out.c_str(),
 	                 strlen("caught key=C++-EXCEPTION"));
 	TSM_ASSERT ("Wrong exception message", 0 == msg);
+
+	delete mtc;
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void SCMPrimitiveUTest::test_parallel(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+
+	// Create "mango" for creating, and "tango" for deleting
+	MyExampleClass *mtc = new MyExampleClass(as, 42);
+	define_scheme_primitive("mango", &MyExampleClass::my_more_func_1, mtc);
+	define_scheme_primitive("tango", &MyExampleClass::my_more_func_2, mtc);
+
+	eval->eval("(use-modules (ice-9 threads))");
+	eval->eval_h(R"(
+	             (n-par-for-each
+	                 12
+	                 (lambda (n)
+	                     (tango (mango (cog-new-node 'ConceptNode (number->string n))))
+	                     (tango (mango (cog-new-node 'ConceptNode (number->string (+ n 1)))))
+	                 )
+	                 (iota 30000)
+	             )
+	            )");
+
+	bool eval_err = eval->eval_error();
+	TSM_ASSERT("Evaluation error", !eval_err);
+
+	TSM_ASSERT("Atomspace size incorrect!", as->getSize() == 30001);
 
 	delete mtc;
 	logger().debug("END TEST: %s", __FUNCTION__);
