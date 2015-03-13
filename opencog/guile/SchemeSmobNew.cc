@@ -13,7 +13,6 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <iostream>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/guile/SchemeSmob.h>
