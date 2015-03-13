@@ -158,6 +158,7 @@ void ListRequest::sendError()
     _error << "-n name     List all atoms with name" << std::endl;
     _error << "-t type     List all atoms of type" << std::endl;
     _error << "-T type     List all atoms with type or subtype" << std::endl;
+    _error << "-m type     List all atoms up to a specified size" << std::endl;
     _error << "Options may be combined" << std::endl;
     send(_error.str());
 }
