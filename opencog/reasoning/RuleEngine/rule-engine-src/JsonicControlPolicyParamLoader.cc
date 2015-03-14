@@ -19,15 +19,18 @@
 
 JsonicControlPolicyParamLoader::JsonicControlPolicyParamLoader(AtomSpace * as,
 		string conf_path) :
-		ControlPolicyParamLoader(as, conf_path) {
+		ControlPolicyParamLoader(as, conf_path)
+{
 	cur_read_rule_ = NULL;
 }
 
-JsonicControlPolicyParamLoader::~JsonicControlPolicyParamLoader() {
+JsonicControlPolicyParamLoader::~JsonicControlPolicyParamLoader()
+{
 
 }
 
-void JsonicControlPolicyParamLoader::set_disjunct_rules(void) {
+void JsonicControlPolicyParamLoader::set_disjunct_rules(void)
+{
 	for (auto i = rule_mutex_map_.begin(); i != rule_mutex_map_.end(); ++i) {
 		auto mset = i->second;
 		auto cur_rule = i->first;
@@ -41,7 +44,8 @@ void JsonicControlPolicyParamLoader::set_disjunct_rules(void) {
 	}
 }
 
-Rule* JsonicControlPolicyParamLoader::get_rule(string& name) {
+Rule* JsonicControlPolicyParamLoader::get_rule(string& name)
+{
 	for (Rule* r : rules_) {
 		if (r->get_name() == name)
 			return r;
@@ -49,7 +53,8 @@ Rule* JsonicControlPolicyParamLoader::get_rule(string& name) {
 	return NULL;
 }
 
-void JsonicControlPolicyParamLoader::load_config() {
+void JsonicControlPolicyParamLoader::load_config()
+{
 	try {
 		ifstream is(conf_path_);
 		Stream_reader<ifstream, Value> reader(is);
@@ -62,13 +67,15 @@ void JsonicControlPolicyParamLoader::load_config() {
 	}
 }
 
-void JsonicControlPolicyParamLoader::read_array(const Value &v, int lev) {
+void JsonicControlPolicyParamLoader::read_array(const Value &v, int lev)
+{
 	const Array& a = v.get_array();
 	for (Array::size_type i = 0; i < a.size(); ++i)
 		read_json(a[i], lev + 1);
 }
 
-void JsonicControlPolicyParamLoader::read_obj(const Value &v, int lev) {
+void JsonicControlPolicyParamLoader::read_obj(const Value &v, int lev)
+{
 	const Object& o = v.get_obj();
 	for (Object::size_type i = 0; i < o.size(); ++i) {
 		const Pair& p = o[i];
@@ -120,7 +127,8 @@ void JsonicControlPolicyParamLoader::read_obj(const Value &v, int lev) {
 }
 
 void JsonicControlPolicyParamLoader::read_json(const Value &v,
-		int level /* = -1*/) {
+                                               int level /* = -1*/)
+{
 	switch (v.type()) {
 	case obj_type:
 		read_obj(v, level + 1);
@@ -143,11 +151,11 @@ void JsonicControlPolicyParamLoader::read_json(const Value &v,
 	}
 }
 
-void JsonicControlPolicyParamLoader::read_null(const Value &v, int lev) {
-
+void JsonicControlPolicyParamLoader::read_null(const Value &v, int lev)
+{
 }
 
 template<typename > void JsonicControlPolicyParamLoader::read_primitive(
-		const Value &v, int lev) {
-
+		const Value &v, int lev)
+{
 }

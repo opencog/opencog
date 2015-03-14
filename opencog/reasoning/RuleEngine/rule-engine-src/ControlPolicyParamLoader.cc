@@ -40,7 +40,8 @@ ControlPolicyParamLoader::~ControlPolicyParamLoader()
 		delete r;
 }
 
-void ControlPolicyParamLoader::load_chaining_rules() {
+void ControlPolicyParamLoader::load_chaining_rules()
+{
 	vector<string> str_tokens;
 	//FCHAIN_RULES= "[blink-var1,blink-var1,...]:rule_path1","[blink-var2]:rule_path2",...
 	tokenize(config()["FCHAIN_RULES"], back_inserter(str_tokens), ", ");
@@ -58,6 +59,9 @@ void ControlPolicyParamLoader::load_chaining_rules() {
 		istringstream is(rule_names[0]);
 		string var_name;
 		while (getline(is, var_name, ',')) {
+			// I think this is what you want, right????  Don't use
+			// scheme... for something this simple?
+			// Rule *r = new Rule(as_->addNode(VARIABLE_NODE, var_name);
 			Rule *r = new Rule(scm_eval_->eval_h(var_name));
 			rules_.push_back(r);
 			strname_rule_map_[var_name] = r;
@@ -66,7 +70,8 @@ void ControlPolicyParamLoader::load_chaining_rules() {
 	}
 }
 
-void ControlPolicyParamLoader::load_mutexes() {
+void ControlPolicyParamLoader::load_mutexes()
+{
 	vector<string> str_tokens;
 
 	//MUTEX = "nameA,nameB,...","namex,namey,..."
@@ -87,12 +92,15 @@ void ControlPolicyParamLoader::load_mutexes() {
 	}
 
 }
-void ControlPolicyParamLoader::load_single_val_params() {
+
+void ControlPolicyParamLoader::load_single_val_params()
+{
 	max_iter_ = config().get_int("ITERATION_SIZE");
 	attention_alloc_ = config().get_bool("ATTENTION_ALLOCATION_ENABLED"); //informs the callbacks to look for atoms only on the attentional focus
 }
 
-void ControlPolicyParamLoader::load_config() {
+void ControlPolicyParamLoader::load_config()
+{
 	try {
 		config().load(conf_path_.c_str());
 	} catch (RuntimeException &e) {
@@ -103,18 +111,22 @@ void ControlPolicyParamLoader::load_config() {
 	load_single_val_params();
 }
 
-int ControlPolicyParamLoader::get_max_iter() {
+int ControlPolicyParamLoader::get_max_iter()
+{
 	return max_iter_;
 }
 
-bool ControlPolicyParamLoader::get_attention_alloc() {
+bool ControlPolicyParamLoader::get_attention_alloc()
+{
 	return attention_alloc_;
 }
 
-vector<Rule*>& ControlPolicyParamLoader::get_rules() {
+vector<Rule*>& ControlPolicyParamLoader::get_rules()
+{
 	return rules_;
 }
 
-vector<vector<Rule*>> ControlPolicyParamLoader::get_mutex_sets() {
+vector<vector<Rule*>> ControlPolicyParamLoader::get_mutex_sets()
+{
 	return mutex_sets_;
 }

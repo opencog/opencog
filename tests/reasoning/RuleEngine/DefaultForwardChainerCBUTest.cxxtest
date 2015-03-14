@@ -11,22 +11,26 @@
 
 using namespace opencog;
 
-class DefaultForwardChainerCBUTest: public CxxTest::TestSuite {
+class DefaultForwardChainerCBUTest: public CxxTest::TestSuite
+{
 private:
 	AtomSpace* as;
 	SchemeEval* eval;
 
 public:
-	DefaultForwardChainerCBUTest(void) {
+	DefaultForwardChainerCBUTest(void)
+	{
 		server(CogServer::createInstance);
 		as = &cogserver().getAtomSpace();
 		eval = new SchemeEval(as);
-		config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
-				"opencog/scm/utilities.scm, ");
+		config().set("SCM_PRELOAD",
+		      "opencog/atomspace/core_types.scm,"
+		      "opencog/scm/utilities.scm");
 		load_scm_files_from_config(*as);
 	}
 
-	~DefaultForwardChainerCBUTest() {
+	~DefaultForwardChainerCBUTest()
+	{
 		delete as;
 		delete eval;
 	}
@@ -37,43 +41,44 @@ public:
 	void test_choose_target(void);
 };
 
-void DefaultForwardChainerCBUTest::setUp() {
+void DefaultForwardChainerCBUTest::setUp() {}
 
+void DefaultForwardChainerCBUTest::tearDown() {}
+
+void DefaultForwardChainerCBUTest::test_choose_rule(void)
+{
+	logger().setPrintToStdoutFlag(true);
+	logger().setLevel(Logger::DEBUG);
+
+	JsonicControlPolicyParamLoader jscp(as, "test_cpolicy.json");
+	jscp.load_config();
+	FCMemory fcmem(as);
+	fcmem.set_rules(jscp.get_rules());
+	TS_ASSERT_EQUALS(1, fcmem.get_rules().size());
+	Handle h =
+	eval->eval_h(
+		"(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
+	TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
+	fcmem.set_target(h);
+	DefaultForwardChainerCB dfcb(as);
+	vector<Rule*> rule = dfcb.choose_rule(fcmem);
+	TS_ASSERT_EQUALS(1, rule.size());
+	HandleSeq bindlinks;
+	as->getHandlesByType(back_inserter(bindlinks), BIND_LINK);
+	auto it = find(bindlinks.begin(), bindlinks.end(), rule[0]->get_handle());
+	TS_ASSERT_DIFFERS(it, bindlinks.end());
 }
 
-void DefaultForwardChainerCBUTest::tearDown() {
+void DefaultForwardChainerCBUTest::test_choose_target(void)
+{
+	 config().set("SCM_PRELOAD",
+		"tests/reasoning/RuleEngine/simple-assertions.scm");
+	 load_scm_files_from_config(*as);
 
-}
-
-void DefaultForwardChainerCBUTest::test_choose_rule(void) {
-	 JsonicControlPolicyParamLoader jscp(as, "test_cpolicy.json");
-	 jscp.load_config();
+	 Handle target = eval->eval_h("(ConceptNode \"Einstein\")");
 	 FCMemory fcmem(as);
-	 fcmem.set_rules(jscp.get_rules());
-	 TS_ASSERT_EQUALS(1, fcmem.get_rules().size());
-	 Handle h =
-	 eval->eval_h(
-	 "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
-	 TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
-	 fcmem.set_target(h);
+	 fcmem.set_target(target);
 	 DefaultForwardChainerCB dfcb(as);
-	 vector<Rule*> rule = dfcb.choose_rule(fcmem);
-	 TS_ASSERT_EQUALS(1,rule.size());
-	 HandleSeq bindlinks;
-	 as->getHandlesByType(back_inserter(bindlinks),BIND_LINK);
-	 auto it =  find(bindlinks.begin(),bindlinks.end(),rule[0]->get_handle());
-	 TS_ASSERT_DIFFERS(it,bindlinks.end());
+	 HandleSeq hs = dfcb.choose_input(fcmem);
+	 TS_ASSERT(2 == hs.size());
 }
-
-void DefaultForwardChainerCBUTest::test_choose_target(void) {
-     config().set("SCM_PRELOAD", "tests/reasoning/RuleEngine/simple-assertions.scm");
-     load_scm_files_from_config(*as);
-
-     Handle target = eval->eval_h("(ConceptNode \"Einstein\")");
-     FCMemory fcmem(as);
-     fcmem.set_target(target);
-     DefaultForwardChainerCB dfcb(as);
-     HandleSeq hs = dfcb.choose_input(fcmem);
-     TS_ASSERT(2 == hs.size());
-}
-
