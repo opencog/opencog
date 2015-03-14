@@ -87,9 +87,9 @@ QUIET="" 				#for apt-get
 
 LIVE_DESKTOP_SOURCE="OpenCog Source Code"
 
-REPOSITORIES="		
-		ppa:opencog-dev/ppa \
-		"
+REPOSITORIES="	"	
+		#ppa:opencog-dev/ppa \
+		
 		#opencog-dev: cxxtest
 		#gandelman: python-flask-restful
 #               ppa:chris-lea/zeromq \
