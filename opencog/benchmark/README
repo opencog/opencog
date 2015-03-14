@@ -93,7 +93,31 @@ and then run:
 
  $ python ./opencog/benchmark/benchmark.py
 
-The test will run and produce its output automatically. There are 
-no command line options at the moment as running all the tests with significant
-iterations takes less than a minute on most hardware.
+or execute directly with:
+
+ $ ./opencog/benchmark/benchmark.py
+
+The test will run and produce its output automatically if no options are
+specified. The options are available with -h or --help.
+
+$ python benchmark.py -h
+usage: benchmark.py [-h] [-v | -c]
+                    [-a | -t {spread,node,bindlink,traverse,scheme}] [-i N]
+
+OpenCog Python Benchmark
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --verbose         verbose output
+  -c, --columns         columnar output (default)
+  -a, --all             run all tests
+  -t {spread,node,bindlink,traverse,scheme}, --test {spread,node,bindlink,traverse,scheme}
+                        Test to benchmark, where:
+                          spread    - a spread of tests across areas (default)
+                          node      - atomspace node operations 
+                          bindlink  - all the bindlink forms
+                          traverse  - traversal of atomspace lists
+                          scheme    - scheme evaluation functions
+  -i N, --iterations N  iterations to average (default=10)
+
 

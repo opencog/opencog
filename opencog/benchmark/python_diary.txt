@@ -229,3 +229,127 @@ majority of the time is being spent in the code for bind and very little time,
 0.272µs in the above test, is spent converting from Python to C++ and back
 again in the bindings. In the above test, about 1% of the time for the bindlink
 is spent in the Cython bindings and 99% is spent in compiled C++ bindlink code.
+
+
+13 March 2014
+-------------
+Benchamrks performed on 2014 MacBook Air:
+   Intel Core i5
+   1.4 GHz
+   256 KB L2 cache
+   3 MB L3 cache
+   4GB 1600 Mhz DDR3 RAM
+
+Changing AtomTable to use std:unordered_set changes the resolution time from
+UUID to AtomPtr by quite a bit, especially for large numbers of nodes.
+See below.
+
+Here are some timings using new additions to the python benchmark.py before
+the change, i.e with AtomTable using std::set:
+
+--- OpenCog Python Benchmark -  2015-03-13 20:45:36.178418 ---
+
+Test times averaged over 10 iterations
+Per-op loop adjustment: 0.013µs
+
+-- Testing Atom Traversal --
+
+Bare atom traversal 100K - by type
+  Op time:        0.026µs
+  Ops/sec:   38,474,205
+
+Resolve handle 10K - by type
+  Op time:        0.552µs
+  Ops/sec:    1,811,790
+
+Resolve handle 100K - by type
+  Op time:        0.575µs
+  Ops/sec:    1,739,487
+
+Resolve handle 1M - by type
+  Op time:        0.667µs
+  Ops/sec:    1,498,673
+
+The "Bare atom traversal" test is just iterating over the Handle list without
+doing anything which requires a resolution. It's just a pass in Python in the
+loop so it is timing iteration over a Python list. The "Resolve handle traversal" 
+tests call atomspace.isValidHandle(Handle) which requires a resolve from the
+UUID to the actual AtomPtr. Notice that the resolve takes 0.552µs for a 10K
+atomspace, 0.575µs for 100K, and 0.667µs for a 1 million node atomspace.
+
+Here are the timings for the std::unordered_set implementation which just
+substitutes:
+
+    std::unordered_set<Handle,handle_hash> _atom_set;
+
+and makes no other changes to the code.
+
+--- OpenCog Python Benchmark -  2015-03-13 20:39:17.045882 ---
+
+Test times averaged over 10 iterations
+Per-op loop adjustment: 0.012µs
+
+-- Testing Atom Traversal --
+
+Bare atom traversal 100K - by type
+  Total:          0.003s
+  Ops:          100,000
+  Op time:        0.027µs
+  Ops/sec:   37,130,549
+
+Resolve handle 10K - by type
+  Total:          0.005s
+  Ops:           10,000
+  Op time:        0.470µs
+  Ops/sec:    2,125,937
+
+Resolve handle 100K - by type
+  Total:          0.033s
+  Ops:          100,000
+  Op time:        0.334µs
+  Ops/sec:    2,990,124
+
+Resolve handle 1M - by type
+  Total:          0.312s
+  Ops:        1,000,000
+  Op time:        0.312µs
+  Ops/sec:    3,209,804
+
+The resolve time drops from 0.552µs to 0.470µs at 10K nodes in the atomspace, 
+0.575µs to 0.334µs at 100K nodes, and 0.667µs to 0.312µs at 1M nodes. The times 
+actually drop for large traversals using std::unordered_set, probably because
+the processor caches are hitting for almost all the accesses and accesses for
+hash table entries don't take more time as the tables get bigger, unlike binary
+trees which slow down order log N. For really large atomspaces this difference
+will be even greater.
+
+
+13 March 2014
+-------------
+
+Changed benchmark to support columnar output and added several test options:
+
+opencog@36bcd804e00e:~/src/opencog/opencog/benchmark$ python benchmark.py -a
+
+--- OpenCog Python Benchmark -  2015-03-14 00:57:06.467325 ---
+
+Test                                        Time per op  Ops per second
+----                                        -----------  --------------
+Add nodes - Cython                              4.971µs         201,155
+Add nodes - Cython (500K)                       4.943µs         202,302
+Add fully connected nodes                       8.102µs         123,426
+Bare atom traversal 100K - by type              0.026µs      37,953,037
+Resolve Handle 10K - by type                    0.495µs       2,019,088
+Resolve Handle 100K - by type                   0.321µs       3,112,198
+Resolve Handle 1M - by type                     0.298µs       3,357,394
+Bind - stub_bindlink - Cython                   0.189µs       5,300,342
+Bind - bindlink - Cython                       25.146µs          39,767
+Bind - validate_bindlink - Cython               2.365µs         422,890
+Test scheme_eval_h(+ 2 2)                      81.464µs          12,275
+Bind - cog-bind - Scheme                      124.154µs           8,054
+Add nodes - cog-new-node - Scheme             132.907µs           7,524
+Add nodes - ConceptNode sugar - Scheme        118.237µs           8,457
+
+
+
+
