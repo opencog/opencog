@@ -1,23 +1,9 @@
-INCLUDE_DIRECTORIES (
-	${PROJECT_SOURCE_DIR}/opencog/atomspace
-	${PROJECT_SOURCE_DIR}/opencog/query
-	${PROJECT_SOURCE_DIR}/opencog/util	
-	${PROJECT_SOURCE_DIR}/opencog/reasoning/RuleEngine/rule-engine-src
-	${PROJECT_SOURCE_DIR}/opencog/reasoning/RuleEngine/rule-engine-src/pln
-)
-
-LINK_DIRECTORIES(
-	${PROJECT_BINARY_DIR}/opencog/atomspace
-	${PROJECT_BINARY_DIR}/opencog/query
-	${PROJECT_BINARY_DIR}/opencog/util
-	${PROJECT_BINARY_DIR}/opencog/reasoning/RuleEngine/rule-engine-src
-)
 
 LINK_LIBRARIES(
-	atomspace
+	ruleengine
 	query
 	server
-	ruleengine
+	atomspace
 )
 
 IF (HAVE_GUILE)
@@ -31,5 +17,4 @@ IF (HAVE_GUILE)
 ENDIF (HAVE_GUILE)
 
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/reasoning/RuleEngine/test_cpolicy.json
-    ${PROJECT_BINARY_DIR}/tests/reasoning/RuleEngine/test_cpolicy.json)
-    
+               ${PROJECT_BINARY_DIR}/tests/reasoning/RuleEngine/test_cpolicy.json)
