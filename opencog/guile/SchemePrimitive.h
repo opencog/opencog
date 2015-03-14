@@ -354,7 +354,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				case V_H:
 				{
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
-					(that->*method.h_h)(h);
+					(that->*method.v_h)(h);
 					break;
 				}
 				case V_S:
@@ -362,7 +362,7 @@ class SchemePrimitive : public PrimitiveEnviron
 					// First argument is a string
 					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
 
-					(that->*method.s_s)(str);
+					(that->*method.v_s)(str);
 					break;
 				}
 				case V_SS:
@@ -371,7 +371,7 @@ class SchemePrimitive : public PrimitiveEnviron
 					std::string str1 = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
 					std::string str2 = SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2);
 
-					(that->*method.s_ss)(str1, str2);
+					(that->*method.v_ss)(str1, str2);
 					break;
 				}
 				case V_SSS:
@@ -381,7 +381,7 @@ class SchemePrimitive : public PrimitiveEnviron
 					std::string str2 = SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2);
 					std::string str3 = SchemeSmob::verify_string(scm_caddr(args), scheme_name, 3);
 
-					(that->*method.s_sss)(str1, str2, str3);
+					(that->*method.v_sss)(str1, str2, str3);
 					break;
 				}
 				case V_T:
