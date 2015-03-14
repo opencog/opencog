@@ -16,7 +16,6 @@
 #include <opencog/util/files.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/Config.h>
-#include <opencog/guile/SchemeEval.h>
 
 JsonicControlPolicyParamLoader::JsonicControlPolicyParamLoader(AtomSpace * as,
 		string conf_path) :
