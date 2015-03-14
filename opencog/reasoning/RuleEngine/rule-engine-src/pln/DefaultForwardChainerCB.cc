@@ -42,15 +42,16 @@ DefaultForwardChainerCB::~DefaultForwardChainerCB() {
 
 //choose rule based on premises of rule matching the target
 //uses temporary atomspace to limit the search space and avoid
-vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem) {
+vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
+{
 	//create temporary atomspace and copy target
 	AtomSpace rule_atomspace;
-	SchemeEval sc(&rule_atomspace);
+	SchemeEval *sc = get_evaluator(&rule_atomspace);
 	Handle target = fcmem.get_cur_target();
 	if (target == Handle::UNDEFINED or NodeCast(target))
 		throw InvalidParamException(TRACE_INFO,
 				"Needs a target atom of type LINK");
-	sc.eval(SchemeSmob::to_string(target));
+	sc->eval(SchemeSmob::to_string(target));
 	//create bindlink with target as an implicant
 	PLNCommons pc(&rule_atomspace);
 	Handle target_cpy = pc.replace_nodes_with_varnode(target, NODE);
@@ -58,7 +59,7 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem) {
 	//copy rules to the temporary atomspace
 	vector<Rule*> rules = fcmem.get_rules();
 	for (Rule* r : rules)
-		sc.eval_h(SchemeSmob::to_string(r->get_handle()));
+		sc->eval(SchemeSmob::to_string(r->get_handle()));
 	//pattern match
 	DefaultImplicator imp(&rule_atomspace);
 	PatternMatch pm;
@@ -91,10 +92,10 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem) {
 		}
 	}
 	//transfer back bindlinks to main atomspace and  get their handle
-	SchemeEval scm(as_);
+	SchemeEval *scm = get_evaluator(as_);
 	HandleSeq copied_back;
 	for (Handle h : bindlinks)
-		copied_back.push_back(scm.eval_h(SchemeSmob::to_string(h)));
+		copied_back.push_back(scm->eval_h(SchemeSmob::to_string(h)));
 	//find the rules containing the bindLink in copied_back
 	vector<Rule*> matched_rules;
 	for (Rule* r : rules)

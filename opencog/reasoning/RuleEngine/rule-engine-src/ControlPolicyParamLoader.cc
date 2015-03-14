@@ -28,13 +28,14 @@
 #include <opencog/guile/SchemeEval.h>
 
 ControlPolicyParamLoader::ControlPolicyParamLoader(AtomSpace * as, string conf_path) :
-		as_(as){
+		as_(as)
+{
 	conf_path_ = conf_path;
-	scm_eval_ = new SchemeEval(as_);
+	scm_eval_ = get_evaluator(as_);
 }
 
-ControlPolicyParamLoader::~ControlPolicyParamLoader() {
-	delete scm_eval_;
+ControlPolicyParamLoader::~ControlPolicyParamLoader()
+{
 	for (Rule *r : rules_)
 		delete r;
 }
