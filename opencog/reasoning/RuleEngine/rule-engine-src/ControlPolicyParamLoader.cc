@@ -59,6 +59,9 @@ void ControlPolicyParamLoader::load_chaining_rules()
 		istringstream is(rule_names[0]);
 		string var_name;
 		while (getline(is, var_name, ',')) {
+			// I think this is what you want, right????  Don't use
+			// scheme... for something this simple?
+			// Rule *r = new Rule(as_->addNode(VARIABLE_NODE, var_name);
 			Rule *r = new Rule(scm_eval_->eval_h(var_name));
 			rules_.push_back(r);
 			strname_rule_map_[var_name] = r;
