@@ -354,20 +354,20 @@ tests = [
 
 (['all'],                   None,               None,                   "-- Testing Atom Traversal --"),
 (['traverse'],              prep_traverse_100K, test_bare_traversal,    "Bare atom traversal 100K - by type"),
-(['traverse'],              prep_traverse_10K,  test_resolve_traversal, "Resolve handle 10K - by type"),
-(['traverse','spread'],     prep_traverse_100K, test_resolve_traversal, "Resolve handle 100K - by type"),
-(['traverse'],              prep_traverse_1M,   test_resolve_traversal, "Resolve handle 1M - by type"),
+(['traverse'],              prep_traverse_10K,  test_resolve_traversal, "Resolve Handle 10K - by type"),
+(['traverse','spread'],     prep_traverse_100K, test_resolve_traversal, "Resolve Handle 100K - by type"),
+(['traverse'],              prep_traverse_1M,   test_resolve_traversal, "Resolve Handle 1M - by type"),
 
 (['all'],                   None,               None,                   "-- Testing Bind --"),
-(['bindlink'],              prep_none,          test_stub_bindlink,     "Bind stub_bindlink - Cython"),
-(['bindlink','spread'],     prep_bind_python,   test_bind,              "Bind bindlink - Cython"),
-(['bindlink'],              prep_bind_python,   test_validate_bindlink, "Bind validate_bindlink - Cython"),
+(['bindlink'],              prep_none,          test_stub_bindlink,     "Bind - stub_bindlink - Cython"),
+(['bindlink','spread'],     prep_bind_python,   test_bind,              "Bind - bindlink - Cython"),
+(['bindlink'],              prep_bind_python,   test_validate_bindlink, "Bind - validate_bindlink - Cython"),
 
 (['all'],                   None,               None,                   "-- Testing Scheme Eval --"),
 (['scheme','spread'],       prep_scheme,        test_scheme_eval,       "Test scheme_eval_h(+ 2 2)"),
-(['scheme'],                prep_bind_scheme,   test_bind_scheme,       "Bind - cog-bind"),
-(['scheme'],                prep_scheme,        test_add_nodes_scheme,  "Add nodes - Scheme cog-new-node"),
-(['scheme'],                prep_scheme,        test_add_nodes_sugar,   "Add nodes - Scheme ConceptNode sugar"),
+(['scheme'],                prep_bind_scheme,   test_bind_scheme,       "Bind - cog-bind - Scheme"),
+(['scheme'],                prep_scheme,        test_add_nodes_scheme,  "Add nodes - cog-new-node - Scheme"),
+(['scheme'],                prep_scheme,        test_add_nodes_sugar,   "Add nodes - ConceptNode sugar - Scheme"),
 ]
 
 
@@ -382,8 +382,7 @@ if args.verbose or args.iterations != 10:
         print "Test times averaged over {0:d} iterations.".format(test_iterations)
     else:
         print "Test times averaged over 1 iteration."
-
-if not args.verbose:
+if not args.verbose and args.iterations != 10:
     print
 
 if args.verbose:
