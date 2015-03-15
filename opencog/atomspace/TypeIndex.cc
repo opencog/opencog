@@ -100,10 +100,10 @@ TypeIndex::iterator& TypeIndex::iterator::operator=(iterator v)
 	return *this;
 }
 
-Handle TypeIndex::iterator::operator*(void)
+UUID TypeIndex::iterator::operator*(void)
 {
-	if (s == send) return Handle::UNDEFINED;
-	return Handle(*se);
+	if (s == send) return UNDEFINED_UUID;
+	return *se;
 }
 
 bool TypeIndex::iterator::operator==(iterator v)

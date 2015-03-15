@@ -219,10 +219,20 @@ public:
                        bool subclass = false) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(typeIndex.begin(type, subclass),
-                            typeIndex.end(),
-                            result,
-                            isDefined);
+
+        // We're going to use this one handle so we don't construct/destruct
+        // googles of temporaries in the process of doing the copies.
+        Handle temp_handle;
+        std::for_each(typeIndex.begin(type, subclass),
+                      typeIndex.end(),
+            [&](UUID uuid)->void {
+                if (UNDEFINED_UUID == uuid) return;
+
+                // Just set the UUID since we know it won't be resolved.
+                temp_handle.set_uuid(uuid);
+                *result = temp_handle;
+            });
+        return result;
     }
 
     /** Calls function 'func' on all atoms */
@@ -232,12 +242,26 @@ public:
                         bool subclass = false) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
+
+        // We're going to use this one handle so we don't construct/destruct
+        // googles of temporaries in the process of doing the copies.
+        Handle temp_handle;
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
-             [&](Handle h)->void {
-                  if (not isDefined(h)) return;
-                  (func)(h);
-             });
+            [&](UUID uuid)->void {
+                if (UNDEFINED_UUID == uuid) return;
+                
+                // Since the function could and probably will resolve the
+                // AtomPtr, we need to reset the handle since we are going to
+                // bypass the normal shared_ptr semantics here to avoid
+                // a copy per handle which is much more expensive than
+                // resetting and setting a new UUID.
+                temp_handle.reset_atom_ptr();
+                temp_handle.set_uuid(uuid);
+
+                // Call the function. Will probably resolve the AtomPtr.
+                (func)(temp_handle);
+            });
     }
 
     /**
@@ -250,12 +274,29 @@ public:
                          AtomPredicate* pred) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(typeIndex.begin(type, subclass),
-                            typeIndex.end(),
-                            result,
-             [&](Handle h)->bool {
-                  return isDefined(h) and (*pred)(h);
+
+        // We're going to use this one handle so we don't construct/destruct
+        // googles of temporaries in the process of doing the copies.
+        Handle temp_handle;
+        std::for_each(typeIndex.begin(type, subclass),
+                      typeIndex.end(),
+            [&](UUID uuid)->void {
+                if (UNDEFINED_UUID == uuid) return;
+                
+                // Since the predicate function probably will resolve the
+                // AtomPtr, we need to reset the handle since we are going to
+                // bypass the normal shared_ptr semantics here to avoid
+                // a copy per handle which is much more expensive than
+                // resetting and setting a new UUID.
+                temp_handle.reset_atom_ptr();
+                temp_handle.set_uuid(uuid);
+
+                // If the predicate function returns true, then copy this
+                // handle into the result. Will probably resolve the AtomPtr.
+                if ((*pred)(temp_handle))
+                    *result = temp_handle;
              });
+        return result;
     }
 
     /**
@@ -271,18 +312,32 @@ public:
      */
     template <typename OutputIterator> OutputIterator
     getHandlesByTargetType(OutputIterator result,
-                             Type type,
+                             Type resultAtomType,
                              Type targetType,
-                             bool subclass,
+                             bool resultAtomSubclass,
                              bool targetSubclass) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(targetTypeIndex.begin(targetType, targetSubclass),
-                            targetTypeIndex.end(),
-                            result,
-             [&](Handle h)->bool{
-                 return isDefined(h) and h->isType(type, subclass);
+
+        // We're going to use this one handle so we don't construct/destruct
+        // googles of temporaries in the process of doing the copies.
+        Handle temp_handle;
+        std::for_each(targetTypeIndex.begin(targetType, targetSubclass),
+                      targetTypeIndex.end(),
+            [&](UUID uuid)->void {
+                if (UNDEFINED_UUID == uuid) return;
+                
+                // Since we resolve the pointer below, we need to reset
+                // the temp here so set_uuid doesnt' create a mismatch.
+                temp_handle.reset_atom_ptr();
+                temp_handle.set_uuid(uuid);
+
+                // If the predicate function returns true, then copy this
+                // handle into the result. The -> resolves the AtomPtr.
+                if (temp_handle->isType(resultAtomType, resultAtomSubclass))
+                    *result = temp_handle;
              });
+        return result;
     }
 
     /**

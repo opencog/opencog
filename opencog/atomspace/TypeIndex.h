@@ -41,7 +41,7 @@ namespace opencog
  *
  * The primary interface for this is an iterator, and that is because
  * the index will typically contain millions of atoms, and this is far
- * to much to try to return in some temporary array.  Iterating is much
+ * too much to try to return in some temporary array.  Iterating is much
  * safer.
  *
  * @todo The iterator is NOT thread-safe against the insertion or
@@ -60,7 +60,7 @@ class TypeIndex:
 		void resize(void);
 
 		class iterator
-			: public std::iterator<std::forward_iterator_tag, Handle>
+			: public std::iterator<std::forward_iterator_tag, UUID>
 		{
 			friend class TypeIndex;
 			public:
@@ -70,7 +70,7 @@ class TypeIndex:
 				iterator& operator=(iterator);
 				bool operator==(iterator);
 				bool operator!=(iterator);
-				Handle operator*(void);
+				UUID operator*(void);
 			private:
 				Type type;
 				bool subclass;
