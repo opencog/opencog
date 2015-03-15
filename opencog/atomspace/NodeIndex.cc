@@ -59,17 +59,14 @@ UnorderedHandleSet NodeIndex::getHandleSet(Type type, const std::string& name,
 			// The 'AssignableFrom' direction is unit-tested in
 			// AtomSpaceUTest.cxxtest
 			if (classserver().isA(s, type)) {
-				if (s >= idx.size()) throw RuntimeException(TRACE_INFO,
-						  "Index out of bounds for atom type (s = %lu)", s);
-				const NameIndex &ni(idx.at(s));
-				AtomPtr atom = ni.get(name);
+				AtomPtr atom(getAtom(type, name));
 				if (atom)
 					hs.insert(atom->getHandle());
 			}
 		}
 	} else {
-		Handle h = getHandle(type, name);
-		if (Handle::UNDEFINED != h) hs.insert(h);
+		AtomPtr atom(getAtom(type, name));
+		if (atom) hs.insert(atom->getHandle());
 	}
 
 	return hs;

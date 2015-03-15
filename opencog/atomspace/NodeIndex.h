@@ -61,10 +61,10 @@ class NodeIndex
 		void resize();
 		size_t size() const;
 
-		Handle getHandle(Type type, const std::string& str) const
+		AtomPtr getAtom(Type type, const std::string& str) const
 		{
 			const NameIndex &ni(idx.at(type));
-			return ni.get(str)->getHandle();
+			return ni.get(str);
 		}
 
 		UnorderedHandleSet getHandleSet(Type type, const std::string&, bool subclass) const;
@@ -75,16 +75,15 @@ class NodeIndex
 		{
 			if (not subclass)
 			{
-				Handle h(getHandle(type, name));
-				if (Handle::UNDEFINED != h) *result++ = h;
+				Handle h(getAtom(type, name));
+				if (h.operator->()) *result++ = h;
 			}
 			else
 			{
 				Type max = classserver().getNumberOfClasses();
 				for (Type s = 0; s < max; s++) {
 					if (classserver().isA(s, type)) {
-						const NameIndex &ni(idx.at(s));
-						AtomPtr atom(ni.get(name));
+						AtomPtr atom(getAtom(type, name));
 						if (atom) *result++ = atom->getHandle();
 					}
 				}
