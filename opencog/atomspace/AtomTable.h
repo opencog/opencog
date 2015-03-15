@@ -229,7 +229,7 @@ public:
                 if (UNDEFINED_UUID == uuid) return;
 
                 // Just set the UUID since we know it won't be resolved.
-                temp_handle.set_uuid(uuid);
+                temp_handle.set_uuid_no_clear_ptr(uuid);
                 *result = temp_handle;
             });
         return result;
@@ -255,8 +255,8 @@ public:
                 // AtomPtr, we need to reset the handle since we are going to
                 // bypass the normal shared_ptr semantics here to avoid
                 // a copy per handle which is much more expensive than
-                // resetting and setting a new UUID.
-                temp_handle.reset_atom_ptr();
+                // resetting and setting a new UUID. So we call the safe
+                // version which takes a bit longer.
                 temp_handle.set_uuid(uuid);
 
                 // Call the function. Will probably resolve the AtomPtr.
@@ -287,8 +287,8 @@ public:
                 // AtomPtr, we need to reset the handle since we are going to
                 // bypass the normal shared_ptr semantics here to avoid
                 // a copy per handle which is much more expensive than
-                // resetting and setting a new UUID.
-                temp_handle.reset_atom_ptr();
+                // resetting and setting a new UUID. So we call the safe
+                // version which takes a bit longer.
                 temp_handle.set_uuid(uuid);
 
                 // If the predicate function returns true, then copy this
@@ -327,9 +327,8 @@ public:
             [&](UUID uuid)->void {
                 if (UNDEFINED_UUID == uuid) return;
                 
-                // Since we resolve the pointer below, we need to reset
-                // the temp here so set_uuid doesnt' create a mismatch.
-                temp_handle.reset_atom_ptr();
+                // Since we resolve the pointer below, we call the safe
+                // version of set_uuid which clears the AtomPtr reference.
                 temp_handle.set_uuid(uuid);
 
                 // If the predicate function returns true, then copy this
