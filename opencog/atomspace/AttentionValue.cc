@@ -45,13 +45,13 @@ std::string AttentionValue::toString() const
     return buffer;
 }
 
-bool AttentionValue::STISort::test(AtomPtr h1, AtomPtr h2)
+bool AttentionValue::STISort::test(const AtomPtr& h1, const AtomPtr& h2) const
 {
     return h1->getAttentionValue()->getSTI() >
            h2->getAttentionValue()->getSTI();
 }
 
-bool AttentionValue::LTIAndTVAscendingSort::test(AtomPtr h1, AtomPtr h2)
+bool AttentionValue::LTIAndTVAscendingSort::test(const AtomPtr& h1, const AtomPtr& h2) const
 {
     lti_t lti1, lti2;
     float tv1, tv2;
@@ -75,7 +75,7 @@ bool AttentionValue::LTIAndTVAscendingSort::test(AtomPtr h1, AtomPtr h2)
     return tv1 < tv2;
 }
 
-bool AttentionValue::LTIThenTVAscendingSort::test(AtomPtr h1, AtomPtr h2)
+bool AttentionValue::LTIThenTVAscendingSort::test(const AtomPtr& h1, const AtomPtr& h2) const
 {
     lti_t lti1, lti2;
     lti1 = h1->getAttentionValue()->getLTI();

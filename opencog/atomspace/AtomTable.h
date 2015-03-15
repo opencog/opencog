@@ -201,10 +201,6 @@ public:
     Handle getHandle(AtomPtr) const;
     Handle getHandle(Handle&) const;
 
-protected:
-    /* A basic predicates */
-    static bool isDefined(Handle h) { return h != Handle::UNDEFINED; }
-
 public:
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
@@ -219,10 +215,9 @@ public:
                        bool subclass = false) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(typeIndex.begin(type, subclass),
-                            typeIndex.end(),
-                            result,
-                            isDefined);
+        return std::copy(typeIndex.begin(type, subclass),
+                         typeIndex.end(),
+                         result);
     }
 
     /** Calls function 'func' on all atoms */
@@ -235,7 +230,6 @@ public:
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
              [&](Handle h)->void {
-                  if (not isDefined(h)) return;
                   (func)(h);
              });
     }
@@ -247,15 +241,14 @@ public:
     getHandlesByTypePred(OutputIterator result,
                          Type type,
                          bool subclass,
-                         AtomPredicate* pred) const
+                         HandlePredicate& pred) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(typeIndex.begin(type, subclass),
-                            typeIndex.end(),
-                            result,
-             [&](Handle h)->bool {
-                  return isDefined(h) and (*pred)(h);
-             });
+        std::for_each(typeIndex.begin(type, subclass),
+                      typeIndex.end(),
+                      [&](const Handle &h)->void
+                      { if (pred(h)) *result = h; });
+        return result;
     }
 
     /**
@@ -281,7 +274,7 @@ public:
                             targetTypeIndex.end(),
                             result,
              [&](Handle h)->bool{
-                 return isDefined(h) and h->isType(type, subclass);
+                 return h->isType(type, subclass);
              });
     }
 
