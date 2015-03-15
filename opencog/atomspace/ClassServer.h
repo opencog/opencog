@@ -57,7 +57,7 @@ private:
 
     /* Use boost, because we need a reader-writer implementation, which
      * is not offered by C++11 ... but expected in C++14 ?? */
-    mutable boost::shared_mutex type_mutex;
+    mutable boost::mutex type_mutex;
     mutable boost::mutex signal_mutex;
 
     Type nTypes;
@@ -130,14 +130,19 @@ public:
      */
     bool isA(Type sub, Type super)
     {
-        /* Because this metod is called extremely often, we want
-         * the best-case fast-path for it.  Since updates are extremely
-         * unlikely after initialization, we use a multi-reader lock,
-         * and don't care at all about writer starvation, since there
-         * will almost never be writers. */
-        boost::shared_lock<boost::shared_mutex> l(type_mutex);
+        /* Because this method is called extremely often, we want
+         * the best-case fast-path for it.  We once used a multi-reader lock,
+         * but the overhead of the lock was so high that it was worse for
+         * performance in all cases. A shared_mutex lock is only useful
+         * when the resource is being held for a long time. In this case,
+         * we are looking at two vector lookups which are very fast. */
         if ((sub >= nTypes) || (super >= nTypes)) return false;
-        return recursiveMap[super][sub];
+
+        // Use a scope to reduce the time the lock is held.
+        {
+            boost::unique_lock<boost::mutex> l(type_mutex);
+            return recursiveMap[super][sub];
+        }
     }
 
     bool isA_non_recursive(Type sub, Type super);
