@@ -45,11 +45,13 @@ namespace opencog
 typedef unsigned long UUID;
 typedef std::unordered_set<UUID> UnorderedUUIDSet;
 
+const UUID UNDEFINED_UUID = ULONG_MAX;
+
 
 class Atom;
 typedef std::shared_ptr<Atom> AtomPtr;
 
-//! contains an unique identificator
+//! contains a unique identificator
 class AtomTable;
 class Handle
 {
@@ -71,13 +73,22 @@ private:
     AtomPtr resolve_ptr();
     static void set_resolver(const AtomTable*);
     static void clear_resolver(const AtomTable*);
+
+    // NOTE: Only call this if you can guarantee that _ptr has never been
+    // resolved. Used as an optimization in AtomTable.
+    void set_uuid(const UUID uuid) { _uuid = uuid; }
+
+    // This used by AtomTable (in conjunction with set_uuid) to avoid having
+    // to construct temporaries while iterating when the iteration itself
+    // can resolve the AtomPtr.
+    void reset_atom_ptr() { _ptr.reset(); }
 public:
 
     static const Handle UNDEFINED;
 
     explicit Handle(AtomPtr atom);
     explicit Handle(const UUID u) : _uuid(u) {}
-    explicit Handle() : _uuid(ULONG_MAX) {}
+    explicit Handle() : _uuid(UNDEFINED_UUID) {}
     Handle(const Handle& h) : _uuid(h._uuid), _ptr(h._ptr) {}
     ~Handle() {}
 
