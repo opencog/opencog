@@ -39,38 +39,16 @@ void NodeIndex::resize()
 size_t NodeIndex::size() const
 {
 	size_t cnt = 0;
-	for (NameIndex ni : idx) cnt += ni.size();
+	for (const NameIndex& ni : idx) cnt += ni.size();
 	return cnt;
 }
 
-void NodeIndex::insertAtom(AtomPtr a)
-{
-	Type t = a->getType();
-	NameIndex &ni = idx[t];
-	ni.insertAtom(a);
-}
-
-void NodeIndex::removeAtom(AtomPtr a)
-{
-	Type t = a->getType();
-	NameIndex &ni = idx[t];
-	ni.removeAtom(a);
-}
-
-Handle NodeIndex::getHandle(Type t, const char *name) const
-{
-	if (t >= idx.size()) throw RuntimeException(TRACE_INFO,
-		   "Index out of bounds for atom type (t = %lu)", t);
-	const NameIndex &ni = idx[t];
-	return ni.get(name);
-}
-
-void NodeIndex::remove(bool (*filter)(Handle))
+void NodeIndex::remove(bool (*filter)(AtomPtr))
 {
 	for (NameIndex ni : idx) ni.remove(filter);
 }
 
-UnorderedHandleSet NodeIndex::getHandleSet(Type type, const char *name,
+UnorderedHandleSet NodeIndex::getHandleSet(Type type, const std::string& name,
 		bool subclass) const
 {
 	UnorderedHandleSet hs;
@@ -83,10 +61,10 @@ UnorderedHandleSet NodeIndex::getHandleSet(Type type, const char *name,
 			if (classserver().isA(s, type)) {
 				if (s >= idx.size()) throw RuntimeException(TRACE_INFO,
 						  "Index out of bounds for atom type (s = %lu)", s);
-				const NameIndex &ni = idx[s];
-				Handle h = ni.get(name);
-				if (Handle::UNDEFINED != h)
-					hs.insert(h);
+				const NameIndex &ni(idx.at(s));
+				AtomPtr atom = ni.get(name);
+				if (atom)
+					hs.insert(atom->getHandle());
 			}
 		}
 	} else {

@@ -1,7 +1,7 @@
 /*
  * opencog/atomspace/NameIndex.h
  *
- * Copyright (C) 2008 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2008,2015 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,25 +22,37 @@
 #ifndef _OPENCOG_NAMEINDEX_H
 #define _OPENCOG_NAMEINDEX_H
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/StringIndex.h>
+#include <opencog/atomspace/types.h>
 
 namespace opencog
 {
 
 /**
  * Implements an atom name index as an RB-tree (C++ map)
- * That is, given an atom name, this returns a Handle to that atom.
- * This class can only hold *one* handle for a given name. For a
- * multi-name storage, use the NodeIndex, which kys by name and 
+ * That is, given an atom name, this returns an AtomPtr to that atom.
+ * This class can only hold *one* AtomPtr for a given name. For a
+ * multi-name storage, use the NodeIndex, which keys by name and
  * atom type.
  */
 class NameIndex:
-    public StringIndex
+	public StringIndex
 {
-    public:
-        void insertAtom(AtomPtr a);
-        void removeAtom(AtomPtr a);
+	public:
+		void insertAtom(AtomPtr a)
+		{
+			NodePtr n(NodeCast(a));
+			if (NULL == n) return;
+			insert(n->getName(), a);
+		}
+		void removeAtom(AtomPtr a)
+		{
+			NodePtr n(NodeCast(a));
+			if (NULL == n) return;
+			remove(n->getName());
+		}
 };
 
 /** @}*/

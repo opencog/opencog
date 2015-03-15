@@ -1,7 +1,7 @@
 /*
  * opencog/atomspace/NodeIndex.h
  *
- * Copyright (C) 2008 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2008,2015 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -47,14 +47,27 @@ class NodeIndex
 	public:
 		NodeIndex();
 
-		void insertAtom(AtomPtr a);
-		void removeAtom(AtomPtr a);
-		void remove(bool (*)(Handle));
+		void insertAtom(const AtomPtr& a)
+		{
+			NameIndex &ni(idx[a->getType()]);
+			ni.insertAtom(a);
+		}
+		void removeAtom(const AtomPtr& a)
+		{
+			NameIndex &ni(idx.at(a->getType()));
+			ni.removeAtom(a);
+		}
+		void remove(bool (*)(AtomPtr));
 		void resize();
 		size_t size() const;
 
-		Handle getHandle(Type type, const char *) const;
-		UnorderedHandleSet getHandleSet(Type type, const char *, bool subclass) const;
+		Handle getHandle(Type type, const std::string& str) const
+		{
+			const NameIndex &ni(idx.at(type));
+			return ni.get(str)->getHandle();
+		}
+
+		UnorderedHandleSet getHandleSet(Type type, const std::string&, bool subclass) const;
 };
 
 /** @}*/

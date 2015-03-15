@@ -34,7 +34,6 @@ ADD_LIBRARY (atomspace SHARED
     Intersect.cc
     Link.cc
     LinkIndex.cc
-    NameIndex.cc
     Node.cc
     NodeIndex.cc
     NullTruthValue.cc

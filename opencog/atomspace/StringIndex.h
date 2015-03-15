@@ -34,19 +34,35 @@ namespace opencog
  */
 
 /**
- * Implements a string index as an RB-tree (C++ map)
+ * Implements map from string to atom pointers. Used to implement
+ * the lookup of atoms according to thier name.
  */
 class StringIndex
 {
 	private:
-		std::map<std::string, Handle> idx;
+		std::map<std::string, AtomPtr> idx;
 
 	public:
-		void insert(const char *, Handle);
-		Handle get(const char *) const;
-		void remove(const char *, Handle);
-		size_t size(void) const;
-		void remove(bool (*)(Handle));
+		void insert(const std::string& str, AtomPtr a)
+		{
+			idx.insert(std::pair<std::string, AtomPtr>(str,a));
+		}
+		AtomPtr get(const std::string& str) const
+		{
+			std::map<std::string, AtomPtr>::const_iterator it;
+			it = idx.find(str);
+			if (it != idx.end()) return it->second;
+			return AtomPtr();
+		}
+		void remove(const std::string& str)
+		{
+			idx.erase(str);
+		}
+		size_t size(void) const
+		{
+			return idx.size();
+		}
+		void remove(bool (*)(AtomPtr));
 };
 
 /** @}*/
