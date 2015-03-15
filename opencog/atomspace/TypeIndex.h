@@ -74,10 +74,10 @@ class TypeIndex:
 			private:
 				Type type;
 				bool subclass;
-				std::vector<UnorderedUUIDSet>::const_iterator s;
-				std::vector<UnorderedUUIDSet>::const_iterator send;
+				std::vector<UnorderedIntSet>::const_iterator s;
+				std::vector<UnorderedIntSet>::const_iterator send;
 				Type currtype;
-				UnorderedUUIDSet::const_iterator se;
+				UnorderedIntSet::const_iterator se;
 		};
 
 		iterator begin(Type, bool) const;

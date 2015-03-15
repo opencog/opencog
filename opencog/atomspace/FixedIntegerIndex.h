@@ -34,6 +34,8 @@ namespace opencog
  *  @{
  */
 
+typedef std::unordered_set<int> UnorderedIntSet;
+
 /**
  * Implements an integer index as an RB-tree (C++ map)
  */
@@ -41,7 +43,7 @@ class FixedIntegerIndex
 	: public AtomIndex<int, Handle>
 {
 	protected:
-		std::vector<UnorderedUUIDSet> idx; 
+		std::vector<UnorderedIntSet> idx;
 		void resize(size_t);
 
 	public:

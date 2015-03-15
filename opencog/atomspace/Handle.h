@@ -43,8 +43,6 @@ namespace opencog
 
 //! UUID == Universally Unique Identifier
 typedef unsigned long UUID;
-typedef std::unordered_set<UUID> UnorderedUUIDSet;
-
 
 class Atom;
 typedef std::shared_ptr<Atom> AtomPtr;
