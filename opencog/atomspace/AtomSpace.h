@@ -541,7 +541,6 @@ public:
      * @param result An output iterator.
      * @param type the type of the atoms to be searched
      * @param name the name of the atoms to be searched.
-     *        For searching only links, use "" or a search by type.
      * @param subclass if sub types of the given type are accepted
      *        in this search
      *
@@ -558,18 +557,8 @@ public:
     template <typename OutputIterator> OutputIterator
     getHandlesByName(OutputIterator result,
                      const std::string& name,
-                     Type type = ATOM,
+                     Type type = NODE,
                      bool subclass = true) const
-    {
-        return getAtomTable().getHandlesByName(result, name, type, subclass);
-    }
-
-    /** Identical to above. Do not use in new code.  */
-    template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
-                 const char* name,
-                 Type type,
-                 bool subclass = true) const
     {
         return getAtomTable().getHandlesByName(result, name, type, subclass);
     }

@@ -323,7 +323,7 @@ public:
     template <typename OutputIterator> OutputIterator
     getHandlesByName(OutputIterator result,
                      const std::string& name,
-                     Type type = ATOM,
+                     Type type = NODE,
                      bool subclass = true) const
     {
         if (name.c_str()[0] == 0)
