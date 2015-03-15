@@ -68,7 +68,6 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
     Atom.h
-    AtomIndex.h
     AtomSpaceDefinitions.h
     AtomSpace.h
     AtomSpaceImpl.h

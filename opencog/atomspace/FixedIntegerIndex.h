@@ -25,7 +25,6 @@
 #include <cstddef>
 #include <vector>
 
-#include <opencog/atomspace/AtomIndex.h>
 #include <opencog/atomspace/Handle.h>
 
 namespace opencog
@@ -40,19 +39,24 @@ typedef std::unordered_set<int> UnorderedIntSet;
  * Implements an integer index as an RB-tree (C++ map)
  */
 class FixedIntegerIndex
-	: public AtomIndex<int, Handle>
 {
 	protected:
 		std::vector<UnorderedIntSet> idx;
 		void resize(size_t);
 
 	public:
-		virtual ~FixedIntegerIndex() {}
-		virtual void insert(int, Handle);
-		virtual Handle get(int) const;
-		virtual void remove(int, Handle);
-		virtual size_t size(void) const;
-		virtual void remove(bool (*)(Handle));
+		~FixedIntegerIndex() {}
+		void insert(int, Handle);
+		Handle get(int) const;
+		void remove(int, Handle);
+		size_t size(void) const;
+		void remove(bool (*)(Handle));
+
+		size_t size(int i) const
+		{
+			const UnorderedIntSet &s = idx.at(i);
+			return s.size();
+		}
 };
 
 /** @}*/

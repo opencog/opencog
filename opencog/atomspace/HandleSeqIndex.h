@@ -25,7 +25,6 @@
 #include <cstddef>
 #include <map>
 
-#include <opencog/atomspace/AtomIndex.h>
 #include <opencog/atomspace/Handle.h>
 
 namespace opencog
@@ -48,18 +47,17 @@ namespace opencog
  * HandleSeq per system...
  * XXX FixMe! 
  */
-class HandleSeqIndex:
-	public AtomIndex<const HandleSeq &,Handle>
+class HandleSeqIndex
 {
 	private:
 		std::map<const HandleSeq, Handle> idx;
 
 	public:
-		virtual void insert(const HandleSeq &, Handle);
-		virtual Handle get(const HandleSeq &) const;
-		virtual void remove(const HandleSeq &, Handle);
-		virtual size_t size(void) const;
-		virtual void remove(bool (*)(Handle));
+		void insert(const HandleSeq &, Handle);
+		Handle get(const HandleSeq &) const;
+		void remove(const HandleSeq &, Handle);
+		size_t size(void) const;
+		void remove(bool (*)(Handle));
 };
 
 /** @}*/
