@@ -11,7 +11,7 @@ diary.txt which uses the C++ benchmark atomspace_bm.
 12 March 2014
 -------------
 Benchamrks performed on 2014 MacBook Air:
-   Intel Dual-Core i5
+   Intel Core i5
    1.4 GHz
    256 KB L2 cache
    3 MB L3 cache
