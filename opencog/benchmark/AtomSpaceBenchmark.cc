@@ -451,7 +451,14 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
     if (csi.size() ==  0) {
         std::ostringstream oss;
         counter++;
-        oss << "node " << counter;
+
+        // std::strtod in AtomTable::getHandle(Type t, std::string name) const
+        // crashes if we pass in non-numeric values for the node name for
+        // NUMBER_NODE types.
+        if (NUMBER_NODE == t)
+            oss << counter;
+        else
+            oss << "node " << counter;
         scp = oss.str();
     }
 
@@ -985,7 +992,9 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
         return timepair_t(time_taken,0);
     }
     case BENCH_AS: {
+        size_t max_atoms = asp->getNumAtomsOfType(t,true);
         HandleSeq results;
+        results.reserve(max_atoms);
         clock_t t_begin = clock();
         asp->getHandlesByType(back_inserter(results), t, true);
         clock_t time_taken = clock() - t_begin;
