@@ -75,7 +75,7 @@ private:
     static void clear_resolver(const AtomTable*);
 
     // NOTE: Only call this if you can guarantee that _ptr has never been
-    // resolved, or after a call the reset_atom_ptr() below if it has been
+    // resolved, or after a call to reset_atom_ptr() below if it has been
     // resolved. Otherwise, the Handle will contain an AtomPtr in _ptr that
     // does not match it's UUID. That would be very very bad. 
     // Used as an optimization in AtomTable.
