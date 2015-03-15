@@ -66,7 +66,7 @@ Type ClassServer::addType(const Type parent, const std::string& name)
     Type type = getType(name);
     if (type != NOTYPE) {
         /* unique_lock here upgrades the shared mutex to a writer lock */
-        boost::unique_lock<boost::shared_mutex> l(type_mutex);
+        boost::unique_lock<boost::mutex> l(type_mutex);
         DPRINTF("Type \"%s\" has already been added (%d)\n", name.c_str(), type);
         inheritanceMap[parent][type] = true;
         setParentRecursively(parent, type);
@@ -74,7 +74,7 @@ Type ClassServer::addType(const Type parent, const std::string& name)
     }
 
     /* unique_lock here upgrades the shared mutex to a writer lock */
-    std::unique_lock<boost::shared_mutex> l(type_mutex);
+    boost::unique_lock<boost::mutex> l(type_mutex);
     // Assign type code and increment type counter.
     type = nTypes++;
 
@@ -128,20 +128,20 @@ Type ClassServer::getNumberOfClasses()
 
 bool ClassServer::isA_non_recursive(Type type, Type parent)
 {
-    boost::shared_lock<boost::shared_mutex> l(type_mutex);
+    boost::unique_lock<boost::mutex> l(type_mutex);
     if ((type >= nTypes) || (parent >= nTypes)) return false;
     return inheritanceMap[parent][type];
 }
 
 bool ClassServer::isDefined(const std::string& typeName)
 {
-    boost::shared_lock<boost::shared_mutex> l(type_mutex);
+    boost::unique_lock<boost::mutex> l(type_mutex);
     return name2CodeMap.find(typeName) != name2CodeMap.end();
 }
 
 Type ClassServer::getType(const std::string& typeName)
 {
-    boost::shared_lock<boost::shared_mutex> l(type_mutex);
+    boost::unique_lock<boost::mutex> l(type_mutex);
     std::unordered_map<std::string, Type>::iterator it = name2CodeMap.find(typeName);
     if (it == name2CodeMap.end()) {
         return NOTYPE;
@@ -153,7 +153,7 @@ const std::string& ClassServer::getTypeName(Type type)
 {
     static std::string nullString = "*** Unknown Type! ***";
 
-    boost::shared_lock<boost::shared_mutex> l(type_mutex);
+    boost::unique_lock<boost::mutex> l(type_mutex);
     std::unordered_map<Type, const std::string*>::iterator it;
     if ((it = code2NameMap.find(type)) != code2NameMap.end())
         return *(it->second);
