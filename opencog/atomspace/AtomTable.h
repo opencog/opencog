@@ -36,6 +36,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 
+#include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
