@@ -42,21 +42,33 @@ class FixedIntegerIndex
 {
 	protected:
 		std::vector<UnorderedIntSet> idx;
-		void resize(size_t);
+		void resize(size_t sz)
+		{
+			idx.resize(sz);
+		}
 
 	public:
 		~FixedIntegerIndex() {}
-		void insert(int, Handle);
-		Handle get(int) const;
-		void remove(int, Handle);
-		size_t size(void) const;
-		void remove(bool (*)(Handle));
+		void insert(int i, Handle h)
+		{
+			UnorderedIntSet &s = idx.at(i);
+			s.insert(h.value());
+		}
+
+		void remove(int i, Handle h)
+		{
+			UnorderedIntSet &s = idx.at(i);
+			s.erase(h.value());
+		}
 
 		size_t size(int i) const
 		{
 			const UnorderedIntSet &s = idx.at(i);
 			return s.size();
 		}
+
+		size_t size(void) const;
+		void remove(bool (*)(Handle));
 };
 
 /** @}*/

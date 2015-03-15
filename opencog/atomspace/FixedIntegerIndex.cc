@@ -23,23 +23,6 @@
 
 using namespace opencog;
 
-void FixedIntegerIndex::insert(int i, Handle h)
-{
-	UnorderedIntSet &s = idx.at(i);
-	s.insert(h.value());
-}
-
-Handle FixedIntegerIndex::get(int i) const
-{
-	return Handle::UNDEFINED;
-}
-
-void FixedIntegerIndex::remove(int i, Handle h)
-{
-	UnorderedIntSet &s = idx.at(i);
-	s.erase(h.value());
-}
-
 size_t FixedIntegerIndex::size(void) const
 {
 	size_t cnt = 0;
@@ -67,11 +50,6 @@ void FixedIntegerIndex::remove(bool (*filter)(Handle))
 				s->erase(*j);
 		}
 	}
-}
-
-void FixedIntegerIndex::resize(size_t sz)
-{
-	idx.resize(sz);
 }
 
 // ================================================================
