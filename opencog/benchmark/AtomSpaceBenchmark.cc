@@ -26,7 +26,7 @@
 
 #include "AtomSpaceBenchmark.h"
 
-const char* VERSION = "Version 1.0.1";
+const char* VERSION_STRING = "Version 1.0.1";
 
 namespace opencog {
 
@@ -335,7 +335,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
 
 void AtomSpaceBenchmark::startBenchmark(int numThreads)
 {
-    cout << "OpenCog Atomspace Benchmark - Version " << VERSION << "\n";
+    cout << "OpenCog Atomspace Benchmark - " << VERSION_STRING << "\n";
     cout << "\nRandom generator: MT19937\n";
     cout << "Random seed: " << randomseed << "\n\n";
 
