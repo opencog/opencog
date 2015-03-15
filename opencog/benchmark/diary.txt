@@ -816,3 +816,117 @@ Observations:
 
 -- addLink is faster for the scheme, than the native C++.  ... why?
    some bizarre cache contention ???
+
+==================================================================
+15 March 2015:
+
+by Curtis Faith
+
+Baseline test before change from boost::shared_mutext to boost::mutex 
+in ClassServer::isA(Type sub, Type super) which I tested after doing
+research, including this insightful post:
+
+http://permalink.gmane.org/gmane.comp.lib.boost.devel/211180
+
+by:
+
+http://www.boost.org/users/people/anthony_williams.html
+
+Benchamrks performed on 2014 MacBook Air:
+   Intel Dual-Core i5
+   1.4 GHz
+   256 KB L2 cache
+   3 MB L3 cache
+   4GB 1600 Mhz DDR3 RAM
+
+Benchmarking AtomSpace's getHandleSet method 100000 times ..........
+122.537761 seconds elapsed (816.07 per second)
+Sum clock() time for all requests: 116957317 (116.957 seconds, 855.013 requests
+per second)
+
+after change to boost::mutex
+
+Benchmarking AtomSpace's getHandleSet method 100000 times ..........
+116.396391 seconds elapsed (859.13 per second)
+Sum clock() time for all requests: 110356511 (110.357 seconds, 906.154 requests
+per second)
+------------------------------
+
+This results in a 6.5% increase in throughput.
+
+==================================================================
+15 March 2015:
+
+by Curtis Faith
+
+Noticed that the result set which is being back_inserted did not do a reserve
+for the size ahead of the insertions and most of the time is being spent
+copying and initializing. So I added a getNumAtomsOfType function to TypeIndex
+so that the getHandleSet test could call reserve on the result handle before
+doing the push_backs via the back_inserter. This greatly reduces the calls
+to resize the underlying vector storage which also requires copies for the
+existing vector memory each time the reserved size is exceeded.
+
+Before the change:
+
+Benchmarking AtomSpace's getHandleSet method 100000 times ..........
+116.396391 seconds elapsed (859.13 per second)
+Sum clock() time for all requests: 110356511 (110.357 seconds, 906.154 requests
+per second)
+------------------------------
+
+After the change:
+
+Benchmarking AtomSpace's getHandleSet method 100000 times ..........
+102.249313 seconds elapsed (978.00 per second)
+Sum clock() time for all requests: 97223707 (97.2237 seconds, 1028.56 requests
+per second)
+------------------------------
+
+The requests per second increase by 122 or 13.5% better speed.
+
+
+==================================================================
+15 March 2015:
+
+by Curtis Faith
+
+Noticed that Handle constructors were getting called about three times for
+each handle returned in the Handle list in getHandlesByType. The code
+already was carefully using iterators, however, TypeIndex was returning
+a new Handle object on the stack constructed in 
+
+Handle TypeIndex::iterator::operator*(void)
+
+since TypeIndex only holds UUID's, there is no need to actually create a
+handle until one is placed in the output iterator. So I changed the
+TypeIndex iterator to return a UUID and just use one Handle in the iterator
+over TypeIndex that places output into the output iterator in
+AtomTable::getHandlesByType
+
+The code now just sets the UUID directly into the temporary handle. This saved
+a copy on the stack and constructor and destructor calls for each Handle.
+
+Before the change:
+
+Benchmarking AtomSpace's getHandleSet method 100000 times ..........
+102.249313 seconds elapsed (978.00 per second)
+Sum clock() time for all requests: 97223707 (97.2237 seconds, 1028.56 requests
+per second)
+------------------------------
+
+After the change:
+
+Benchmarking AtomSpace's getHandleSet method 100000 times ..........
+94.604688 seconds elapsed (1057.03 per second)
+Sum clock() time for all requests: 89731801 (89.7318 seconds, 1114.43 requests
+per second)
+------------------------------
+
+This change increases requests per second by 86, or 8.4%.
+
+SUMMARY for 15 March 2015
+-------------------------
+Ops / second increased from 855 to 1114 - 30% more ops / second
+Time decresed from 117 to 90 - 77% of the original time
+

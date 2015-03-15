@@ -45,11 +45,13 @@ namespace opencog
 typedef unsigned long UUID;
 typedef std::unordered_set<UUID> UnorderedUUIDSet;
 
+const UUID UNDEFINED_UUID = ULONG_MAX;
+
 
 class Atom;
 typedef std::shared_ptr<Atom> AtomPtr;
 
-//! contains an unique identificator
+//! contains a unique identificator
 class AtomTable;
 class Handle
 {
@@ -71,13 +73,33 @@ private:
     AtomPtr resolve_ptr();
     static void set_resolver(const AtomTable*);
     static void clear_resolver(const AtomTable*);
+
+    // Set the UUID in a handle. This is the safe version. Use  this version
+    // if you have any doubts at all about the possibility that the handle
+    // may have been resolved. This sets the new UUID and also calls 
+    // resets the shared_ptr AtomPtr so it doesn't point to anything,
+    // the reference is decremented, and the object deleted if this is the
+    // last one. This is used by AtomTable to avoid having to construct
+    // temporaries while iterating when the iteration itself can resolve the
+    // AtomPtr in order to clear the AtomPtr reference so it won't be pointing
+    // to an atom that has a UUID that is different than the UUID passed
+    // to set_uuid.    
+    void set_uuid(const UUID uuid) { _ptr.reset(); _uuid = uuid; }
+
+    // NOTE: Only call this if you can guarantee that _ptr has never been
+    // resolved. Otherwise, the Handle may contain an AtomPtr in _ptr that
+    // does not match it's UUID. That would be very very bad. 
+    // Used as an optimization in AtomTable to avoid having to create
+    // temporaries for every single handle during iteration over indices.
+    void set_uuid_no_clear_ptr(const UUID uuid) { _uuid = uuid; }
+
 public:
 
     static const Handle UNDEFINED;
 
     explicit Handle(AtomPtr atom);
     explicit Handle(const UUID u) : _uuid(u) {}
-    explicit Handle() : _uuid(ULONG_MAX) {}
+    explicit Handle() : _uuid(UNDEFINED_UUID) {}
     Handle(const Handle& h) : _uuid(h._uuid), _ptr(h._ptr) {}
     ~Handle() {}
 

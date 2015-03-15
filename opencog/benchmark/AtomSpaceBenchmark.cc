@@ -451,7 +451,14 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
     if (csi.size() ==  0) {
         std::ostringstream oss;
         counter++;
-        oss << "node " << counter;
+
+        // std::strtod in AtomTable::getHandle(Type t, std::string name) const
+        // crashes if we pass in non-numeric values for the node name for
+        // NUMBER_NODE types.
+        if (NUMBER_NODE == t)
+            oss << counter;
+        else
+            oss << "node " << counter;
         scp = oss.str();
     }
 
