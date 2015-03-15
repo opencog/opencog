@@ -26,28 +26,24 @@ using namespace opencog;
 size_t FixedIntegerIndex::size(void) const
 {
 	size_t cnt = 0;
-	std::vector<UnorderedIntSet >::const_iterator s;
-	for (s = idx.begin(); s != idx.end(); ++s)
-	{
-		cnt += s->size();
-	}
+	for (const UnorderedAtomSet& s : idx)
+		cnt += s.size();
 	return cnt;
 }
 
 void FixedIntegerIndex::remove(bool (*filter)(Handle))
 {
-	std::vector<UnorderedIntSet >::iterator s;
-	for (s = idx.begin(); s != idx.end(); ++s)
+	for (UnorderedAtomSet& s : idx)
 	{
-		UnorderedIntSet::iterator i, j;
+		UnorderedAtomSet::iterator i, j;
 	
-		i = s->begin();
-		while (i != s->end())
+		i = s.begin();
+		while (i != s.end())
 		{
 			j = i;
 			++i;
 			if (filter(Handle(*j)))
-				s->erase(*j);
+				s.erase(*j);
 		}
 	}
 }

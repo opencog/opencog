@@ -25,6 +25,7 @@
 #include <set>
 #include <vector>
 
+#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/types.h>
@@ -48,16 +49,21 @@ namespace opencog
  * removal of atoms!  Either inserting or removing an atom will cause
  * the iterator references to be freed, leading to mystery crashes!
  */
-class TypeIndex:
-	public FixedIntegerIndex
+class TypeIndex : public FixedIntegerIndex
 {
 	private:
 		size_t num_types;
 	public:
 		TypeIndex(void);
-		void insertAtom(AtomPtr);
-		void removeAtom(AtomPtr);
 		void resize(void);
+		void insertAtom(AtomPtr a)
+		{
+			insert(a->getType(), a);
+		}
+		void removeAtom(AtomPtr a)
+		{
+			remove(a->getType(), a);
+		}
 
 		class iterator
 			: public std::iterator<std::forward_iterator_tag, Handle>
@@ -74,10 +80,10 @@ class TypeIndex:
 			private:
 				Type type;
 				bool subclass;
-				std::vector<UnorderedIntSet>::const_iterator s;
-				std::vector<UnorderedIntSet>::const_iterator send;
+				std::vector<UnorderedAtomSet>::const_iterator s;
+				std::vector<UnorderedAtomSet>::const_iterator send;
 				Type currtype;
-				UnorderedIntSet::const_iterator se;
+				UnorderedAtomSet::const_iterator se;
 		};
 
 		iterator begin(Type, bool) const;
