@@ -53,10 +53,25 @@ class HandleSeqIndex
 		std::map<const HandleSeq, Handle> idx;
 
 	public:
-		void insert(const HandleSeq &, Handle);
-		Handle get(const HandleSeq &) const;
-		void remove(const HandleSeq &, Handle);
-		size_t size(void) const;
+		void insert(const HandleSeq& seq, Handle h)
+		{
+			idx.insert(std::pair<const HandleSeq,Handle>(seq,h));
+		}
+		Handle get(const HandleSeq& seq) const
+		{
+			std::map<const HandleSeq,Handle>::const_iterator it;
+			it = idx.find(seq);
+			if (it != idx.end()) return it->second;
+			return Handle::UNDEFINED;
+		}
+		void remove(const HandleSeq& seq)
+		{
+			idx.erase(seq);
+		}
+		size_t size(void) const
+		{
+			return idx.size();
+		}
 		void remove(bool (*)(Handle));
 };
 

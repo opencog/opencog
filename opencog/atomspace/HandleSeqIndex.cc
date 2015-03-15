@@ -23,31 +23,6 @@
 
 using namespace opencog;
 
-void HandleSeqIndex::insert(const HandleSeq &seq, Handle h)
-{
-	idx.insert(std::pair<const HandleSeq,Handle>(seq,h));
-}
-
-Handle HandleSeqIndex::get(const HandleSeq &seq) const
-{
-	std::map<const HandleSeq,Handle>::const_iterator it;
-
-	it = idx.find(seq);
-	if (it != idx.end()) return it->second;
-
-	return Handle::UNDEFINED;
-}
-
-void HandleSeqIndex::remove(const HandleSeq &seq, Handle h)
-{
-	idx.erase(seq);
-}
-
-size_t HandleSeqIndex::size(void) const
-{
-	return idx.size();
-}
-
 void HandleSeqIndex::remove(bool (*filter)(Handle))
 {
 	std::map<const HandleSeq,Handle>::iterator i, j;
@@ -61,4 +36,3 @@ void HandleSeqIndex::remove(bool (*filter)(Handle))
 			idx.erase(j->first);
 	}
 }
-

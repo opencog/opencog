@@ -45,10 +45,26 @@ class HandleSetIndex
 		std::map<Handle, const UnorderedHandleSet> idx;
 
 	public:
-		void insert(Handle, const UnorderedHandleSet&);
-		const UnorderedHandleSet& get(Handle) const;
-		void remove(Handle, const UnorderedHandleSet&);
-		size_t size(void) const;
+		void insert(Handle h, const UnorderedHandleSet& uset)
+		{
+			idx.insert(std::pair<Handle, const UnorderedHandleSet>(h, uset));
+		}
+		const UnorderedHandleSet& get(Handle h) const
+		{
+			std::map<Handle, const UnorderedHandleSet>::const_iterator it;
+			it = idx.find(h);
+			if (it != idx.end()) return it->second;
+			static UnorderedHandleSet empty;
+			return empty;
+		}
+		void remove(Handle h)
+		{
+			idx.erase(h);
+		}
+		size_t size(void) const
+		{
+			return idx.size();
+		}
 		void remove(bool (*)(const UnorderedHandleSet&));
 		void remove(bool (*)(Handle));
 };
