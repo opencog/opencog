@@ -39,7 +39,7 @@ namespace opencog
  * important for choosing a RAM/CPU performance profile customized for
  * the index.
  *
- * Typically, Value will be Handle, possibly PredicateEvaluator*.
+ * Typically, Value will be Handle.
  * The Key will typically be an int, string, etc.
  */
 

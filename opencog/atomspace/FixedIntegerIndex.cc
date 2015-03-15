@@ -25,7 +25,7 @@ using namespace opencog;
 
 void FixedIntegerIndex::insert(int i, Handle h)
 {
-	UnorderedUUIDSet &s = idx.at(i);
+	UnorderedIntSet &s = idx.at(i);
 	s.insert(h.value());
 }
 
@@ -36,14 +36,14 @@ Handle FixedIntegerIndex::get(int i) const
 
 void FixedIntegerIndex::remove(int i, Handle h)
 {
-	UnorderedUUIDSet &s = idx.at(i);
+	UnorderedIntSet &s = idx.at(i);
 	s.erase(h.value());
 }
 
 size_t FixedIntegerIndex::size(void) const
 {
 	size_t cnt = 0;
-	std::vector<UnorderedUUIDSet >::const_iterator s;
+	std::vector<UnorderedIntSet >::const_iterator s;
 	for (s = idx.begin(); s != idx.end(); ++s)
 	{
 		cnt += s->size();
@@ -53,10 +53,10 @@ size_t FixedIntegerIndex::size(void) const
 
 void FixedIntegerIndex::remove(bool (*filter)(Handle))
 {
-	std::vector<UnorderedUUIDSet >::iterator s;
+	std::vector<UnorderedIntSet >::iterator s;
 	for (s = idx.begin(); s != idx.end(); ++s)
 	{
-		UnorderedUUIDSet::iterator i, j;
+		UnorderedIntSet::iterator i, j;
 	
 		i = s->begin();
 		while (i != s->end())

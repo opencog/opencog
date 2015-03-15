@@ -29,6 +29,7 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/lru_cache.h>
 
+#include <opencog/atomspace/atom_types.h>
 #include <opencog/comboreduct/type_checker/type_tree.h>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/TimeServer.h>
