@@ -68,6 +68,29 @@ class NodeIndex
 		}
 
 		UnorderedHandleSet getHandleSet(Type type, const std::string&, bool subclass) const;
+
+		template <typename OutputIterator> OutputIterator
+		getHandleSet(OutputIterator result,
+		             Type type, const std::string& name, bool subclass) const
+		{
+			if (not subclass)
+			{
+				Handle h(getHandle(type, name));
+				if (Handle::UNDEFINED != h) *result++ = h;
+			}
+			else
+			{
+				Type max = classserver().getNumberOfClasses();
+				for (Type s = 0; s < max; s++) {
+					if (classserver().isA(s, type)) {
+						const NameIndex &ni(idx.at(s));
+						AtomPtr atom(ni.get(name));
+						if (atom) *result++ = atom->getHandle();
+					}
+				}
+			}
+			return result;
+		}
 };
 
 /** @}*/
