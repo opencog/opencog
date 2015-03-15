@@ -81,9 +81,9 @@ private:
     // Used as an optimization in AtomTable.
     void set_uuid(const UUID uuid) { _uuid = uuid; }
 
-    // Resets the shared_ptr AtomPtr so it doesn't point to anything and
-    // the reference is decremented and the object deleted if this is the
-    // last one. This used by AtomTable (in conjunction with set_uuid) to
+    // Resets the shared_ptr AtomPtr so it doesn't point to anything,
+    // the reference is decremented, and the object deleted if this is the
+    // last one. This is used by AtomTable (in conjunction with set_uuid) to
     // avoid having to construct temporaries while iterating when the
     // iteration itself can resolve the AtomPtr in order to clear the
     // AtomPtr reference so it won't be pointing to an atom that has a
