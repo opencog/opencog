@@ -95,6 +95,8 @@ public:
     inline int getSize() const { return getAtomTable().getSize(); }
     inline int getNumNodes() const { return getAtomTable().getNumNodes(); }
     inline int getNumLinks() const { return getAtomTable().getNumLinks(); }
+    inline int getNumAtomsOfType(Type type = ATOM, bool subclass = true) const
+        { return getAtomTable().getNumAtomsOfType(type, subclass); }
 
     /**
      * Prints atoms of this AtomSpace to the given output stream.

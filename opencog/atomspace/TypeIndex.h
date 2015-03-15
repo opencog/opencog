@@ -59,6 +59,8 @@ class TypeIndex:
 		void removeAtom(AtomPtr);
 		void resize(void);
 
+		size_t getNumAtomsOfType(Type t, bool subclasses) const;
+
 		class iterator
 			: public std::iterator<std::forward_iterator_tag, UUID>
 		{
