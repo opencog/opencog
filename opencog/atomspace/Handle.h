@@ -75,12 +75,19 @@ private:
     static void clear_resolver(const AtomTable*);
 
     // NOTE: Only call this if you can guarantee that _ptr has never been
-    // resolved. Used as an optimization in AtomTable.
+    // resolved, or after a call the reset_atom_ptr() below if it has been
+    // resolved. Otherwise, the Handle will contain an AtomPtr in _ptr that
+    // does not match it's UUID. That would be very very bad. 
+    // Used as an optimization in AtomTable.
     void set_uuid(const UUID uuid) { _uuid = uuid; }
 
-    // This used by AtomTable (in conjunction with set_uuid) to avoid having
-    // to construct temporaries while iterating when the iteration itself
-    // can resolve the AtomPtr.
+    // Resets the shared_ptr AtomPtr so it doesn't point to anything and
+    // the reference is decremented and the object deleted if this is the
+    // last one. This used by AtomTable (in conjunction with set_uuid) to
+    // avoid having to construct temporaries while iterating when the
+    // iteration itself can resolve the AtomPtr in order to clear the
+    // AtomPtr reference so it won't be pointing to an atom that has a
+    // UUID that is different than the UUID passed to set_uuid.
     void reset_atom_ptr() { _ptr.reset(); }
 public:
 
