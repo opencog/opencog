@@ -236,6 +236,60 @@ public:
         return result;
     }
 
+    /**
+     * Appends a set of handles that matches with the given type
+     * (subclasses of type optionally). Same functionality as above but with
+     * a reference to a HandleSeq as the first parameter rather than
+     * an output iterator. This version is less flexible but faster.
+     *
+     * @param the HandleSeq to which the results will be appended.
+     * @param atomsOfType The desired type.
+     * @param includeSubclasses Whether subclasses of atomsOfType should be appended.
+     *
+     * @note Matched entries are appended to HandleSeq passed as first parameter.
+     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @code
+     *         HandleSeq all_atoms;
+     *         atomSpace.getHandlesByType(all_atoms, ATOM, true);
+     * @endcode
+     */
+    void getHandlesByType(HandleSeq& appendToHandles,
+                          Type atomsOfType,
+                          bool includeSubclasses = false) const
+    {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
+
+        // Get the initial size of the handles vector.
+        size_t initial_size = appendToHandles.size();
+
+        // Determine the number of atoms we'll be adding. NOTE: This is a
+        // bit pessimistic as there may be undefined handles which will
+        // get filtered. Question: How do undefined handles get into
+        // the typeIndex???
+        size_t size_of_append = typeIndex.getNumAtomsOfType(atomsOfType,
+                                                            includeSubclasses);
+
+        // Now reserve size for the addition. This is much faster for large
+        // append iterations since appends to the list won't require new
+        // allocations and copies whenever the allocated size is exceeded.
+        appendToHandles.reserve(initial_size + size_of_append);
+
+        // Loop over the atoms of the desired type (optionally subclasses).
+        std::for_each(typeIndex.begin(atomsOfType, includeSubclasses),
+                      typeIndex.end(),
+            [&](UUID uuid)->void {
+                if (UNDEFINED_UUID == uuid) return;
+
+                // Emplace the Handle(uuid). This constructs the handle in
+                // place where it won't have to be moved eliminating the
+                // temporary and copy required by .push_back(Handle). The
+                // emplace_back call takes the same variants as Handle
+                // constructors since it forwards to the same underlying
+                // C++ mechanisms.
+                appendToHandles.emplace_back(uuid);
+            });
+    }
+
     /** Calls function 'func' on all atoms */
     template <typename Function> void
     foreachHandleByType(Function func,

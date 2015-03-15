@@ -602,6 +602,33 @@ public:
     }
 
     /**
+     * Appends a set of handles that matches with the given type
+     * (subclasses of type optionally) to the passed HandleSeq. Same
+     * functionality as above but with a reference to a HandleSeq as the
+     * first parameter rather than an output iterator. This version is less
+     * flexible but faster.
+     *
+     * @param the HandleSeq to which the results will be appended.
+     * @param atomsOfType The desired type.
+     * @param includeSubclasses Whether subclasses of atomsOfType should be appended.
+     *
+     * @note Matched entries are appended to HandleSeq passed as first parameter.
+     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @code
+     *         HandleSeq all_atoms;
+     *         atomSpace.getHandlesByType(all_atoms, ATOM, true);
+     * @endcode
+     */
+    void getHandlesByType(HandleSeq& appendToHandles,
+                          Type atomsOfType,
+                          bool includeSubclasses = false) const
+    {
+        getAtomTable().getHandlesByType(appendToHandles, atomsOfType, 
+                                        includeSubclasses);
+    }
+
+
+    /**
      * Returns the set of atoms of a given type which have atoms of a
      * given target type in their outgoing set (subclasses optionally).
      *
