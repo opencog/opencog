@@ -24,6 +24,7 @@
 
 #include <opencog/guile/load-file.h>
 #include <opencog/util/misc.h>
+#include <opencog/util/files.h>
 #include <opencog/util/Config.h>
 #include <opencog/guile/SchemeEval.h>
 
@@ -40,28 +41,42 @@ ControlPolicyParamLoader::~ControlPolicyParamLoader()
 		delete r;
 }
 
+/**
+ * Helper function for loading chaining rules.
+ *
+ * The rules are in .conf file specified in the format:
+ *
+ * FCHAIN_RULES = "[blink-var1,blink-var1,...]:rule/path/1.scm",
+ *                "[blink-var2]:rule/path/2.scm",
+ *                ...
+ *
+ * where each blink-var# is a scheme variable of the same name in the scm file,
+ * linked to a BindLink.
+ */
 void ControlPolicyParamLoader::load_chaining_rules()
 {
 	vector<string> str_tokens;
-	//FCHAIN_RULES= "[blink-var1,blink-var1,...]:rule_path1","[blink-var2]:rule_path2",...
 	tokenize(config()["FCHAIN_RULES"], back_inserter(str_tokens), ", ");
 
 	if (!str_tokens.empty())
 		throw std::invalid_argument("no rules specified"); //xxx what type of exception?
+
 	for (string rule : str_tokens) {
 		auto it = remove_if(rule.begin(), rule.end(),
-				[](char c) {return (c==']' or c=='[' or c=='"');});
+		                    [](char c) { return (c==']' or c=='[' or c=='"'); });
 		rule.erase(it, rule.end());
+
 		vector<string> rule_names;
 		tokenize(rule, back_inserter(rule_names), ":");
 		assert(rule_names.size() == 2);
-		load_scm_file_relative(*as_, rule_names[1], vector<string>(0)); // load rules to the chaining processor atomspace (i.e target_list_atom_space)
+
+		// load rules to the chaining processor atomspace (i.e target_list_atom_space)
+		load_scm_file_relative(*as_, rule_names[1], DEFAULT_MODULE_PATHS);
+
 		istringstream is(rule_names[0]);
 		string var_name;
 		while (getline(is, var_name, ',')) {
-			// I think this is what you want, right????  Don't use
-			// scheme... for something this simple?
-			// Rule *r = new Rule(as_->addNode(VARIABLE_NODE, var_name);
+			// resolve the scheme variable to get the BindLink
 			Rule *r = new Rule(scm_eval_->eval_h(var_name));
 			rules_.push_back(r);
 			strname_rule_map_[var_name] = r;

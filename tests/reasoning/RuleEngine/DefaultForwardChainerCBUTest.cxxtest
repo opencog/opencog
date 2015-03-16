@@ -50,7 +50,7 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void)
 	logger().setPrintToStdoutFlag(true);
 	logger().setLevel(Logger::DEBUG);
 
-	JsonicControlPolicyParamLoader jscp(as, "test_cpolicy.json");
+	JsonicControlPolicyParamLoader jscp(as, "tests/reasoning/RuleEngine/test_cpolicy.json");
 	jscp.load_config();
 	FCMemory fcmem(as);
 	fcmem.set_rules(jscp.get_rules());

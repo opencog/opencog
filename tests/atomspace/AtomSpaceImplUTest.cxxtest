@@ -230,19 +230,21 @@ getSortedHandleSet(AtomSpace*as,
     return std::copy(hs.begin(), hs.end(), result);
 }
 
-struct STIAboveThreshold : public AtomPredicate {
+struct STIAboveThreshold : public HandlePredicate
+{
     STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
 
-    virtual bool test(AtomPtr atom) {
+    virtual bool test(const Handle& atom) const {
         return atom->getAttentionValue()->getSTI() > threshold;
     }
     AttentionValue::sti_t threshold;
 };
 
-struct LTIAboveThreshold : public AtomPredicate {
+struct LTIAboveThreshold : public HandlePredicate
+{
     LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
 
-    virtual bool test(AtomPtr atom) {
+    virtual bool test(const Handle& atom) const {
         return atom->getAttentionValue()->getLTI() > threshold;
     }
     AttentionValue::lti_t threshold;
@@ -811,7 +813,7 @@ public:
 
         HandleSeq highSTI;
         STIAboveThreshold stiAbove(1000);
-        atomSpace->atomTable.getHandlesByTypePred(back_inserter(highSTI), NODE, true, &stiAbove);
+        atomSpace->atomTable.getHandlesByTypePred(back_inserter(highSTI), NODE, true, stiAbove);
         for (unsigned int i = 0; i < highSTI.size(); i++) {
             TS_ASSERT(stiAbove (highSTI[i]) );
         }
@@ -822,7 +824,7 @@ public:
         
         HandleSeq highLTI;
         LTIAboveThreshold ltiAbove(800);
-        atomSpace->atomTable.getHandlesByTypePred(back_inserter(highLTI), NODE, true, &ltiAbove);
+        atomSpace->atomTable.getHandlesByTypePred(back_inserter(highLTI), NODE, true, ltiAbove);
         for (unsigned int i = 0; i < highLTI.size(); i++) {
             TS_ASSERT(ltiAbove (highLTI[i]) );
         }

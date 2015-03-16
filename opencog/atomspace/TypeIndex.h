@@ -25,6 +25,7 @@
 #include <set>
 #include <vector>
 
+#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/types.h>
@@ -41,23 +42,28 @@ namespace opencog
  *
  * The primary interface for this is an iterator, and that is because
  * the index will typically contain millions of atoms, and this is far
- * to much to try to return in some temporary array.  Iterating is much
+ * too much to try to return in some temporary array.  Iterating is much
  * safer.
  *
  * @todo The iterator is NOT thread-safe against the insertion or
  * removal of atoms!  Either inserting or removing an atom will cause
  * the iterator references to be freed, leading to mystery crashes!
  */
-class TypeIndex:
-	public FixedIntegerIndex
+class TypeIndex : public FixedIntegerIndex
 {
 	private:
 		size_t num_types;
 	public:
 		TypeIndex(void);
-		void insertAtom(AtomPtr);
-		void removeAtom(AtomPtr);
 		void resize(void);
+		void insertAtom(AtomPtr a)
+		{
+			insert(a->getType(), a);
+		}
+		void removeAtom(AtomPtr a)
+		{
+			remove(a->getType(), a);
+		}
 
 		class iterator
 			: public std::iterator<std::forward_iterator_tag, Handle>
@@ -74,10 +80,10 @@ class TypeIndex:
 			private:
 				Type type;
 				bool subclass;
-				std::vector<UnorderedUUIDSet>::const_iterator s;
-				std::vector<UnorderedUUIDSet>::const_iterator send;
+				std::vector<UnorderedAtomSet>::const_iterator s;
+				std::vector<UnorderedAtomSet>::const_iterator send;
 				Type currtype;
-				UnorderedUUIDSet::const_iterator se;
+				UnorderedAtomSet::const_iterator se;
 		};
 
 		iterator begin(Type, bool) const;

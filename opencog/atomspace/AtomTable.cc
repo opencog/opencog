@@ -120,10 +120,11 @@ Handle AtomTable::getHandle(Type t, std::string name) const
         name = std::to_string(std::stod(name));
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    Handle h(nodeIndex.getHandle(t, name.c_str()));
-    if (_environ and Handle::UNDEFINED == h)
+    AtomPtr atom(nodeIndex.getAtom(t, name));
+    if (atom) return Handle(atom);
+    if (_environ and NULL == atom)
         return _environ->getHandle(t, name);
-    return h;
+    return Handle::UNDEFINED;
 }
 
 /// Find an equivalent atom that has exactly the same name and type.

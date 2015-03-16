@@ -24,6 +24,7 @@
 
 #include <opencog/util/exceptions.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>

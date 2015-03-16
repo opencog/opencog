@@ -43,8 +43,6 @@ namespace opencog
 
 //! UUID == Universally Unique Identifier
 typedef unsigned long UUID;
-typedef std::unordered_set<UUID> UnorderedUUIDSet;
-
 
 class Atom;
 typedef std::shared_ptr<Atom> AtomPtr;
@@ -186,18 +184,19 @@ static inline bool operator!= (std::nullptr_t, const Handle& rhs) noexcept
 
 class HandlePredicate {
 public:
-    inline bool operator()(const Handle& h) { return this->test(h); }
-    virtual bool test(const Handle& h) { return true; }
+    inline bool operator()(const Handle& h) const { return this->test(h); }
+    virtual bool test(const Handle&) const = 0;
 };
 class AtomPredicate {
 public:
-    inline bool operator()(AtomPtr a) { return this->test(a); }
-    virtual bool test(AtomPtr) { return true; }
+    inline bool operator()(const AtomPtr& a) const { return this->test(a); }
+    virtual bool test(const AtomPtr&) const = 0;
 };
 class AtomComparator {
 public:
-    inline bool operator()(AtomPtr a, AtomPtr b) { return this->test(a,b); }
-    virtual bool test(AtomPtr, const AtomPtr) { return true; }
+    inline bool operator()(const AtomPtr& a, const AtomPtr& b) const
+        { return this->test(a,b); }
+    virtual bool test(const AtomPtr&, const AtomPtr&) const = 0;
 };
 
 

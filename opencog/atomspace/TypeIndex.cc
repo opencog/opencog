@@ -36,18 +36,6 @@ void TypeIndex::resize(void)
 	FixedIntegerIndex::resize(num_types + 1);
 }
 
-void TypeIndex::insertAtom(AtomPtr a)
-{
-	Type t = a->getType();
-	insert(t, a->getHandle());
-}
-
-void TypeIndex::removeAtom(AtomPtr a)
-{
-	Type t = a->getType();
-	remove(t, a->getHandle());
-}
-
 // ================================================================
 
 TypeIndex::iterator TypeIndex::begin(Type t, bool sub) const

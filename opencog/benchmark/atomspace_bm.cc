@@ -19,9 +19,9 @@ int main(int argc, char** argv)
      "-M        \tMemoize Scheme expressions\n"
      "-C        \tCompile Scheme expressions\n"
      "-c        \tTest the Python API\n"
-     "-m <methodname>\tMethod to benchmark\n" 
+     "-m <methodname>\tMethod to benchmark\n"
      "-l        \tList valid method names to benchmark\n"
-     "-n <int>  \tHow many times to call the method in the measurement loop\n" 
+     "-n <int>  \tHow many times to call the method in the measurement loop\n"
      "          \t(default: 100000)\n"
      "-r <int>  \tLooping count; how many times a python/scheme operation is looped\n"
      "          \t(default: 1)\n"
@@ -139,28 +139,42 @@ int main(int argc, char** argv)
        }
     }
 
+    if (true
 #ifdef HAVE_GUILE
-    if (opencog::AtomSpaceBenchmark::BENCH_SCM != benchmarker.testKind)
+        and (opencog::AtomSpaceBenchmark::BENCH_SCM != benchmarker.testKind)
 #endif // HAVE_GUILE
+#ifdef HAVE_CYTHON
+        and (opencog::AtomSpaceBenchmark::BENCH_PYTHON != benchmarker.testKind)
+#endif // HAVE_CYTHON
+    )
     {
         if (1 != benchmarker.Nloops)
         {
-            cerr << "Error: the python and atomspace tests currently do not support looping\n";
-            benchmarker.Nloops = 1;
+            cerr << "Fatal Error: the atomspace tests do not support looping\n";
+            exit(-1);
         }
-        if (true == benchmarker.memoize or true == benchmarker.compile)
+        if (true == benchmarker.memoize)
         {
-            cerr << "Fatal Error: Compiling and memoization supported only for the scheme tests\n";
-            exit(1);
+            cerr << "Fatal Error: memoization not supported for atomspace tests\n";
+            exit(-1);
         }
     }
+
+#ifdef HAVE_CYTHON
+    if ((true == benchmarker.compile)
+         and (opencog::AtomSpaceBenchmark::BENCH_PYTHON == benchmarker.testKind))
+    {
+        cerr << "Fatal Error: Python does not have a compiler\n";
+        exit(-1);
+     }
+#endif
 
 #ifdef HAVE_GUILE
     if (opencog::AtomSpaceBenchmark::BENCH_SCM == benchmarker.testKind)
     {
         if (true == benchmarker.memoize and true == benchmarker.compile)
         {
-            cerr << "Fatal Error: Can compile of memoize, but not both!\n";
+            cerr << "Fatal Error: Can compile or memoize, but not both!\n";
             exit(-1);
         }
     }

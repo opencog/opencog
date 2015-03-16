@@ -62,7 +62,7 @@ void IncomingIndex::insertAtom(AtomPtr a)
 		// Add hin to the incoming set of h.
 		UnorderedHandleSet inset = oldset;
 		inset.insert(hin);
-		idx.remove(h, oldset);
+		idx.remove(h);
 		idx.insert(h, inset);
 	}
 }
@@ -95,7 +95,7 @@ void IncomingIndex::removeAtom(AtomPtr a)
 		{
 			// Remove hin from the incoming set of h.
 			inset.erase(oit);
-			idx.remove(h, oldset);
+			idx.remove(h);
 			idx.insert(h, inset);
 		}
 	}

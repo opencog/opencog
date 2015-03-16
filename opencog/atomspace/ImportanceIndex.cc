@@ -50,26 +50,25 @@ unsigned int ImportanceIndex::importanceBin(short importance)
 
 void ImportanceIndex::updateImportance(AtomPtr atom, int bin)
 {
-	Handle h = atom->getHandle();
 	int newbin = importanceBin(atom->getAttentionValue()->getSTI());
 	if (bin == newbin) return;
 
-	remove(bin, h);
-	insert(newbin, h);
+	remove(bin, atom);
+	insert(newbin, atom);
 }
 
 void ImportanceIndex::insertAtom(AtomPtr& atom)
 {
 	int sti = atom->getAttentionValue()->getSTI();
 	int bin = importanceBin(sti);
-	insert(bin, atom->getHandle());
+	insert(bin, atom);
 }
 
 void ImportanceIndex::removeAtom(AtomPtr& atom)
 {
 	int sti = atom->getAttentionValue()->getSTI();
 	int bin = importanceBin(sti);
-	remove(bin, atom->getHandle());
+	remove(bin, atom);
 }
 
 UnorderedHandleSet ImportanceIndex::getHandleSet(
@@ -77,55 +76,51 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
         AttentionValue::sti_t lowerBound,
         AttentionValue::sti_t upperBound) const
 {
-	UnorderedUUIDSet set;
+	UnorderedAtomSet set;
 
 	// The indexes for the lower bound and upper bound lists is returned.
 	int lowerBin = importanceBin(lowerBound);
 	int upperBin = importanceBin(upperBound);
 
 	// Build a list of atoms whose importance is equal to the lower bound.
-	const UnorderedUUIDSet &sl = idx[lowerBin];
-
 	// For the lower bound and upper bound index, the list is filtered,
 	// because there may be atoms that have the same importanceIndex
 	// and whose importance is lower than lowerBound or bigger than
 	// upperBound.
+	const UnorderedAtomSet &sl = idx[lowerBin];
 	std::copy_if(sl.begin(), sl.end(), inserter(set),
-		[&](UUID uuid)->bool {
-			Handle h(uuid);
+		[&](const AtomPtr& atom)->bool {
 			AttentionValue::sti_t sti =
-				h->getAttentionValue()->getSTI();
+				atom->getAttentionValue()->getSTI();
 			return (lowerBound <= sti and sti <= upperBound);
 		});
 
+	// If both lower and upper bounds are in the same bin,
+	// Then we are done.
 	if (lowerBin == upperBin) {
-		// If both lower and upper bounds are in the same bin,
-		// Then we are done.
 		UnorderedHandleSet ret;
 		std::transform(set.begin(), set.end(), inserter(ret),
-			[](UUID uuid)->Handle { return Handle(uuid); });
+		               [](const AtomPtr& atom)->Handle { return atom->getHandle(); });
 		return ret;
 	}
 
 	// For every index within lowerBound and upperBound,
 	// add to the list.
 	while (++lowerBin < upperBin) {
-		const UnorderedUUIDSet &ss = idx[lowerBin];
+		const UnorderedAtomSet &ss = idx[lowerBin];
 		set.insert(ss.begin(), ss.end());
 	}
 
 	// The two lists are concatenated.
-	const UnorderedUUIDSet &uset = idx[upperBin];
+	const UnorderedAtomSet &uset = idx[upperBin];
 	std::copy_if(uset.begin(), uset.end(), inserter(set),
-		[&](UUID uuid)->bool {
-			Handle h(uuid);
-			AttentionValue::sti_t sti = h->getAttentionValue()->getSTI();
+		[&](const AtomPtr& atom)->bool {
+			AttentionValue::sti_t sti = atom->getAttentionValue()->getSTI();
 			return (lowerBound <= sti and sti <= upperBound);
 		});
 
 	UnorderedHandleSet ret;
 	std::transform(set.begin(), set.end(), inserter(ret),
-		[](UUID uuid)->Handle { return Handle(uuid); });
+	               [](const AtomPtr& atom)->Handle { return atom->getHandle(); });
 	return ret;
 }
-
