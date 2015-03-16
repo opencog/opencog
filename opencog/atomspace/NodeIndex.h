@@ -75,15 +75,15 @@ class NodeIndex
 		{
 			if (not subclass)
 			{
-				Handle h(getAtom(type, name));
-				if (h.operator->()) *result++ = h;
+				AtomPtr atom(getAtom(type, name));
+				if (atom) *result++ = Handle(atom);
 			}
 			else
 			{
-				Type max = classserver().getNumberOfClasses();
+				Type max = idx.size();
 				for (Type s = 0; s < max; s++) {
 					if (classserver().isA(s, type)) {
-						AtomPtr atom(getAtom(type, name));
+						AtomPtr atom(getAtom(s, name));
 						if (atom) *result++ = atom->getHandle();
 					}
 				}

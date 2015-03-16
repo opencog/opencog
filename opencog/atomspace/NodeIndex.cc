@@ -54,12 +54,10 @@ UnorderedHandleSet NodeIndex::getHandleSet(Type type, const std::string& name,
 	UnorderedHandleSet hs;
 	if (subclass) {
 
-		Type max = classserver().getNumberOfClasses();
+		Type max = idx.size();
 		for (Type s = 0; s < max; s++) {
-			// The 'AssignableFrom' direction is unit-tested in
-			// AtomSpaceUTest.cxxtest
 			if (classserver().isA(s, type)) {
-				AtomPtr atom(getAtom(type, name));
+				AtomPtr atom(getAtom(s, name));
 				if (atom)
 					hs.insert(atom->getHandle());
 			}
