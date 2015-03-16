@@ -34,7 +34,7 @@ void JsonicControlPolicyParamLoaderUTest::setUp() {
 void JsonicControlPolicyParamLoaderUTest::tearDown() {
 }
 void JsonicControlPolicyParamLoaderUTest::test_load_config() {
-	JsonicControlPolicyParamLoader jcpl(as_, "test_cpolicy.json");
+	JsonicControlPolicyParamLoader jcpl(as_, "tests/reasoning/RuleEngine/test_cpolicy.json");
 	jcpl.load_config();
 	vector<Rule*> rules = jcpl.get_rules();
 	TS_ASSERT_EQUALS(1, rules.size());
