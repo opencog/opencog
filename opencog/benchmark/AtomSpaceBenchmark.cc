@@ -418,9 +418,9 @@ AtomSpaceBenchmark::memoize_or_compile(std::string exp)
     if (memoize)
     {
         std::ostringstream dss;
-        dss << "def mk():\n" << exp << "\n";
+        dss << "def mk():\n" << exp << "\n\n";
         pyev->eval(dss.str());
-        return "mk()\n";
+        return "mk()\n\n";
     }
 #endif /* HAVE_CYTHON */
 

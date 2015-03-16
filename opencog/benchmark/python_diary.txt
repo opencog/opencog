@@ -233,7 +233,7 @@ is spent in the Cython bindings and 99% is spent in compiled C++ bindlink code.
 
 13 March 2014
 -------------
-Benchamrks performed on 2014 MacBook Air:
+Benchmarks performed on 2014 MacBook Air:
    Intel Core i5
    1.4 GHz
    256 KB L2 cache
@@ -329,6 +329,7 @@ will be even greater.
 
 Changed benchmark to support columnar output and added several test options:
 
+export PYTHONPATH=../../opencog/python/opencog:../../build/opencog/cython
 opencog@36bcd804e00e:~/src/opencog/opencog/benchmark$ python benchmark.py -a
 
 --- OpenCog Python Benchmark -  2015-03-14 00:57:06.467325 ---
@@ -345,6 +346,10 @@ Resolve Handle 1M - by type                     0.298µs       3,357,394
 Bind - stub_bindlink - Cython                   0.189µs       5,300,342
 Bind - bindlink - Cython                       25.146µs          39,767
 Bind - validate_bindlink - Cython               2.365µs         422,890
+
+FYI, the scheme numbers are dominated by entry into and exit from the
+scheme interpreter; normally, scheme is 2x to 3x faster than python.
+
 Test scheme_eval_h(+ 2 2)                      81.464µs          12,275
 Bind - cog-bind - Scheme                      124.154µs           8,054
 Add nodes - cog-new-node - Scheme             132.907µs           7,524
@@ -352,4 +357,26 @@ Add nodes - ConceptNode sugar - Scheme        118.237µs           8,457
 
 
 
+15 March 2015
+-------------
+Table below is as measured by Linas on "fanny", a vintage AMD 12-core server.
+python --version  Python 2.7.6
+gcc --version     gcc (Ubuntu 4.8.2-19ubuntu1) 4.8.2
+guile version     2.1.0.305-e7097-dirty
 
+Test                                        Time per op  Ops per second
+----                                        -----------  --------------
+Add nodes - Cython                              8.904µs         112,312
+Add nodes - Cython (500K)                       9.109µs         109,776
+Add fully connected nodes                      13.744µs          72,761
+Bare atom traversal 100K - by type              0.027µs      37,164,436
+Resolve Handle 10K - by type                    0.564µs       1,774,362
+Resolve Handle 100K - by type                   0.566µs       1,766,524
+Resolve Handle 1M - by type                     0.554µs       1,804,951
+Bind - stub_bindlink - Cython                   0.246µs       4,060,608
+Bind - bindlink - Cython                       39.586µs          25,261
+Bind - validate_bindlink - Cython               2.615µs         382,460
+Test scheme_eval_h(+ 2 2)                      44.901µs          22,271
+Bind - cog-bind - Scheme                       88.626µs          11,283
+Add nodes - cog-new-node - Scheme              97.150µs          10,293
+Add nodes - ConceptNode sugar - Scheme         84.870µs          11,782

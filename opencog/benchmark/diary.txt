@@ -821,6 +821,7 @@ Observations:
 15 March 2015:
 Revised numbers:
 On "fanny", Linux Mint Rebecca (Ubuntu 14.04) gcc 4.8.2 guile-2.2
+guile (GNU Guile) 2.1.0.305-e7097-dirty
 This is after re-working the rather old Index design, so as to store
 AtomPtr's instead of UUID's. Expecting this to improve addNode and
 addLink. The improvements to the atom getters are a fallout of previous
@@ -847,6 +848,10 @@ interpreters: i.e. this measures the cost of entering the interpreter,
 doing exactly one atom operation, and then exiting the interpreter.
 By comparison, the figures above measure 100 ops after entering the
 interpreter (or VM, in case of guile).
+
+Also: some prelim results for looped python. The test case needs to be
+hacked to get additional numbers out of it... memoization does not work
+for python, either, can't tell why...
 
                  guile -g      python -c   python -c -r100
    test           interp        interp       interp
