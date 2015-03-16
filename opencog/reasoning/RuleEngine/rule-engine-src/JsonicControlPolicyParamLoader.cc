@@ -11,6 +11,7 @@
 #include <fstream>
 #include <lib/json_spirit/json_spirit.h>
 #include <lib/json_spirit/json_spirit_stream_reader.h>
+#include <boost/filesystem.hpp>
 
 #include <opencog/guile/load-file.h>
 #include <opencog/util/files.h>
@@ -56,7 +57,7 @@ Rule* JsonicControlPolicyParamLoader::get_rule(string& name)
 void JsonicControlPolicyParamLoader::load_config()
 {
 	try {
-		ifstream is(conf_path_);
+	    ifstream is(load_json_file_relative(conf_path_));
 		Stream_reader<ifstream, Value> reader(is);
 		Value value;
 		while (reader.read_next(value))
@@ -159,3 +160,22 @@ template<typename > void JsonicControlPolicyParamLoader::read_primitive(
 		const Value &v, int lev)
 {
 }
+
+const string JsonicControlPolicyParamLoader::load_json_file_relative(
+        const string& filename, vector<string> search_paths)
+{
+    if (search_paths.empty())
+        search_paths = DEFAULT_MODULE_PATHS;
+
+    for (auto search_path : search_paths) {
+        boost::filesystem::path modulePath(search_path);
+        modulePath /= filename;
+        logger().debug("Searching path %s", modulePath.string().c_str());
+        if (boost::filesystem::exists(modulePath))
+            return modulePath.string();
+    }
+
+    throw RuntimeException(TRACE_INFO, "%s could not be found",
+            filename.c_str());
+}
+
