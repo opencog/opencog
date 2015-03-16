@@ -816,3 +816,26 @@ Observations:
 
 -- addLink is faster for the scheme, than the native C++.  ... why?
    some bizarre cache contention ???
+
+==================================================================
+15 March 2015:
+Revised numbers:
+On "fanny", Linux Mint Rebecca (Ubuntu 14.04) gcc 4.8.2 guile-2.2
+This is after re-working the rather old Index design, so as to store
+AtomPtr's instead of UUID's. Expecting this to improve addNode and
+addLink, but oddly, this improves get and set as well !?
+
+                -g -M -r100    -g -r100   -g -C -r100    -A
+   test           memoize       interp      compile    AtomSpace
+   name          K-ops/sec     K-ops/sec   K-ops/sec   K-ops/sec
+   ----          ---------     ---------   ---------   ---------
+  noop               inf         inf          inf       1915
+  addNode          121          19.3        104          183
+  addLink          232           6.08       262           95.1
+  getType          243          25.3        383         1720
+  getTV            441          25.5        477         1486
+  setTV            249          13.1        249          863
+  getOutgoingSet   514          24.6        443         1532
+  getIncomingSet   418          24.8        447         1117
+  removeAtom       107          21.4        114          161
+  getNodeHandles                                          34.3
