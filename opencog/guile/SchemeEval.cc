@@ -500,6 +500,9 @@ void* SchemeEval::c_wrap_eval(void* p)
 /// guile can get piggy with the system RAM, happily gobbling up RAM
 /// instead of garbage-collecting it.  Users have noticed. See github
 /// issue #1116. This improves on the original pull request #1117.
+/// Clue: bug report #1419 suggests the problem is related to the
+/// do_async_output flag-- setting it to false avoids the blow-up.
+/// Is there an i/o-related leak or weird reserve bug?
 static void do_gc(void)
 {
 	static size_t prev_usage = 0;
