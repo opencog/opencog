@@ -414,6 +414,15 @@ AtomSpaceBenchmark::memoize_or_compile(std::string exp)
         return "(mk)\n";
     }
 #endif /* HAVE_GUILE */
+#if HAVE_CYTHON
+    if (memoize)
+    {
+        std::ostringstream dss;
+        dss << "def mk():\n" << exp << "\n";
+        pyev->eval(dss.str());
+        return "mk()\n";
+    }
+#endif /* HAVE_CYTHON */
 
     return exp;
 }
@@ -504,8 +513,27 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.add_node (" << t << ", \"" << scp << "\")\n";
-        std::string ps = dss.str();
+        for (unsigned int i=0; i<Nloops; i++) {
+            if (memoize) dss << "    ";   // indentation
+            dss << "aspace.add_node (" << t << ", \"" << scp << "\")\n";
+
+            p = rng->randdouble();
+            t = defaultNodeType;
+            if (p < chanceOfNonDefaultNode)
+                t = randomType(NODE);
+
+            scp = csi;
+            if (csi.size() ==  0) {
+                std::ostringstream oss;
+                counter++;
+                if (NUMBER_NODE == t)
+                    oss << counter;  // number nodes must actually be numbers.
+                else
+                    oss << "node " << counter;
+                scp = oss.str();
+            }
+        }
+        std::string ps = memoize_or_compile(dss.str());
         clock_t t_begin = clock();
         pyev->eval(ps);
         return clock() - t_begin;
@@ -537,6 +565,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.add_link (" << t << ", [";
         for (size_t j=0; j < arity; j++) {
@@ -695,6 +724,7 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         for (unsigned int i=0; i<Nloops; i++) {
             dss << "aspace.remove(Handle(" << h.value() << "))\n";
@@ -765,6 +795,7 @@ timepair_t AtomSpaceBenchmark::bm_getType()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         for (unsigned int i=0; i<Nloops; i++) {
             dss << "aspace.get_type(Handle(" << h.value() << "))\n";
@@ -814,6 +845,7 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.get_tv(Handle(" << h.value() << "))\n";
         std::string ps = dss.str();
@@ -874,6 +906,7 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.set_tv(Handle(" << h.value()
             << "), TruthValue(" << strength << ", " << conf << "))\n";
@@ -934,6 +967,7 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.get_atoms_by_name(types.Node, \"" << oss.str() << "\", True)\n";
         std::string ps = dss.str();
@@ -969,6 +1003,7 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.get_atoms_by_type(" << t << ", True)\n";
         std::string ps = dss.str();
@@ -1008,6 +1043,7 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.get_outgoing(Handle(" << h.value() << "))\n";
         std::string ps = dss.str();
@@ -1055,6 +1091,7 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.get_incoming(Handle(" << h.value() << "))\n";
         std::string ps = dss.str();

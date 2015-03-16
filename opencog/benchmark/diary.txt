@@ -848,12 +848,12 @@ doing exactly one atom operation, and then exiting the interpreter.
 By comparison, the figures above measure 100 ops after entering the
 interpreter (or VM, in case of guile).
 
-                 guile -g      python -c
-   test           interp        interp
-   name          K-ops/sec     K-ops/sec
-   ----          ---------     ---------
+                 guile -g      python -c   python -c -r100
+   test           interp        interp       interp
+   name          K-ops/sec     K-ops/sec    K-ops/sec
+   ----          ---------     ---------    ---------
   noop             inf          inf
-  addNode           15.0          7.03
+  addNode           15.0          7.03        47.7
   addLink            5.58         6.14
   getType           17.4          7.73
   getTV             17.6          7.80
