@@ -45,8 +45,8 @@ private:
      */
     void set_disjunct_rules(void);
     Rule* get_rule(string& name);
-    const string load_json_file_relative(const string& filename,
-            vector<string> search_paths = { });
+    const string get_absolute_path(const string& filename,
+                                   vector<string> search_paths = { });
 public:
     JsonicControlPolicyParamLoader(AtomSpace* as, string conf_path);
     virtual ~JsonicControlPolicyParamLoader();

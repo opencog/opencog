@@ -34,7 +34,7 @@
 #include <opencog/util/Config.h>
 
 JsonicControlPolicyParamLoader::JsonicControlPolicyParamLoader(AtomSpace * as,
-        string conf_path) :
+                                                               string conf_path) :
         ControlPolicyParamLoader(as, conf_path)
 {
     cur_read_rule_ = NULL;
@@ -72,7 +72,7 @@ Rule* JsonicControlPolicyParamLoader::get_rule(string& name)
 void JsonicControlPolicyParamLoader::load_config()
 {
     try {
-        ifstream is(load_json_file_relative(conf_path_));
+        ifstream is(get_absolute_path(conf_path_));
         Stream_reader<ifstream, Value> reader(is);
         Value value;
         while (reader.read_next(value))
@@ -106,7 +106,7 @@ void JsonicControlPolicyParamLoader::read_obj(const Value &v, int lev)
             rules_.push_back(cur_read_rule_); //xxx take care of pointers
         } else if (key == FILE_PATH) {
             load_scm_file_relative(*as_, value.get_value<string>(),
-                    DEFAULT_MODULE_PATHS);
+                                   DEFAULT_MODULE_PATHS);
             Handle rule_handle = scm_eval_->eval_h(cur_read_rule_->get_name());
             cur_read_rule_->set_rule_handle(rule_handle);
 
@@ -143,7 +143,7 @@ void JsonicControlPolicyParamLoader::read_obj(const Value &v, int lev)
 }
 
 void JsonicControlPolicyParamLoader::read_json(const Value &v,
-        int level /* = -1*/)
+                                               int level /* = -1*/)
 {
     switch (v.type()) {
     case obj_type:
@@ -176,7 +176,7 @@ template<typename > void JsonicControlPolicyParamLoader::read_primitive(
 {
 }
 
-const string JsonicControlPolicyParamLoader::load_json_file_relative(
+const string JsonicControlPolicyParamLoader::get_absolute_path(
         const string& filename, vector<string> search_paths)
 {
     if (search_paths.empty())
@@ -191,6 +191,6 @@ const string JsonicControlPolicyParamLoader::load_json_file_relative(
     }
 
     throw RuntimeException(TRACE_INFO, "%s could not be found",
-            filename.c_str());
+                           filename.c_str());
 }
 
