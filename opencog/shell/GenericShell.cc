@@ -115,6 +115,11 @@ void GenericShell::hush_prompt(bool hush)
 	show_prompt = !hush;
 }
 
+void GenericShell::sync_output(bool sync)
+{
+	do_async_output = !sync;
+}
+
 const std::string& GenericShell::get_prompt(void)
 {
 	static const std::string empty_prompt = "";

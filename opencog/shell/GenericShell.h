@@ -85,6 +85,7 @@ class GenericShell
 
 		virtual void hush_output(bool);
 		virtual void hush_prompt(bool);
+		virtual void sync_output(bool);
 };
 
 /** @}*/
