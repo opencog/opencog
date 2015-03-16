@@ -823,7 +823,8 @@ Revised numbers:
 On "fanny", Linux Mint Rebecca (Ubuntu 14.04) gcc 4.8.2 guile-2.2
 This is after re-working the rather old Index design, so as to store
 AtomPtr's instead of UUID's. Expecting this to improve addNode and
-addLink, but oddly, this improves get and set as well !?
+addLink. The improvements to the atom getters are a fallout of previous
+work for the last several months.
 
                 -g -M -r100    -g -r100   -g -C -r100    -A
    test           memoize       interp      compile    AtomSpace
@@ -839,3 +840,24 @@ addLink, but oddly, this improves get and set as well !?
   getIncomingSet   418          24.8        447         1117
   removeAtom       107          21.4        114          161
   getNodeHandles                                          34.3
+
+Interpreter entry/exit overhead, guile vs. python:
+The below measures mostly the cost of entering and existing the
+interpreters: i.e. this measures the cost of entering the interpreter,
+doing exactly one atom operation, and then exiting the interpreter.
+By comparison, the figures above measure 100 ops after entering the
+interpreter (or VM, in case of guile).
+
+                 guile -g      python -c
+   test           interp        interp
+   name          K-ops/sec     K-ops/sec
+   ----          ---------     ---------
+  noop             inf          inf
+  addNode           15.0          7.03
+  addLink            5.58         6.14
+  getType           17.4          7.73
+  getTV             17.6          7.80
+  setTV             10.1          6.58
+  getOutgoingSet    17.2          7.04
+  getIncomingSet    16.1          7.15
+  removeAtom        15.1         crash
