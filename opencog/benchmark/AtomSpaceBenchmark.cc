@@ -486,7 +486,10 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
             if (csi.size() ==  0) {
                 std::ostringstream oss;
                 counter++;
-                oss << "node " << counter;
+                if (NUMBER_NODE == t)
+                    oss << counter;  // number nodes must actually be numbers.
+                else
+                    oss << "node " << counter;
                 scp = oss.str();
             }
         }
