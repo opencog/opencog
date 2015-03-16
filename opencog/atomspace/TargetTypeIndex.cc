@@ -46,7 +46,7 @@ void TargetTypeIndex::insertAtom(AtomPtr a)
 		Type type = Handle(oset[i])->getType();
 		if (done_already.find(type) == done_already.end())
 		{
-			insert(type, a->getHandle());
+			insert(type, a);
 			done_already.insert(type);
 		}
 	}
@@ -64,10 +64,10 @@ void TargetTypeIndex::removeAtom(AtomPtr a)
 	std::set<Type> done_already;
 	for (Arity i = 0; i < arity; i++)
 	{
-		Type type = Handle(oset[i])->getType();
+		Type type = oset[i]->getType();
 		if (done_already.find(type) == done_already.end())
 		{
-			remove(type, a->getHandle());
+			remove(type, a);
 			done_already.insert(type);
 		}
 	}

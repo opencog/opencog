@@ -65,7 +65,7 @@ void LinkIndex::removeAtom(AtomPtr a)
 	LinkPtr l(LinkCast(a));
 	if (NULL == l) return;
 
-	hsi.remove(l->getOutgoingSet(), a->getHandle());
+	hsi.remove(l->getOutgoingSet());
 }
 
 Handle LinkIndex::getHandle(Type t, const HandleSeq &seq) const

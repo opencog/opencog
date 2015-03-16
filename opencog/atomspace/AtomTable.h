@@ -331,8 +331,12 @@ public:
             return getHandlesByType(result, type, subclass);
 
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        UnorderedHandleSet hs = nodeIndex.getHandleSet(type, name.c_str(), subclass);
+#if MAKIN_COPIES
+        UnorderedHandleSet hs = nodeIndex.getHandleSet(type, name, subclass);
         return std::copy(hs.begin(), hs.end(), result);
+#else
+        return nodeIndex.getHandleSet(result, type, name, subclass);
+#endif
     }
 
     /**

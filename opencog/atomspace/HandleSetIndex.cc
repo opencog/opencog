@@ -24,32 +24,6 @@
 
 using namespace opencog;
 
-void HandleSetIndex::insert(Handle h, const UnorderedHandleSet &uset)
-{
-	idx.insert(std::pair<Handle, const UnorderedHandleSet>(h, uset));
-}
-
-const UnorderedHandleSet& HandleSetIndex::get(Handle h) const
-{
-	std::map<Handle, const UnorderedHandleSet>::const_iterator it;
-
-	it = idx.find(h);
-	if (it != idx.end()) return it->second;
-
-	static UnorderedHandleSet empty;
-	return empty;
-}
-
-void HandleSetIndex::remove(Handle h, const UnorderedHandleSet &uset)
-{
-	idx.erase(h);
-}
-
-size_t HandleSetIndex::size(void) const
-{
-	return idx.size();
-}
-
 void HandleSetIndex::remove(bool (*filter)(const UnorderedHandleSet&))
 {
 	OC_ASSERT(0, "Unexpected call to unimplemented function!");
@@ -69,4 +43,3 @@ void HandleSetIndex::remove(bool (*filter)(Handle))
 			idx.erase(h);
 	}
 }
-

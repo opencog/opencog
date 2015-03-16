@@ -34,7 +34,6 @@ ADD_LIBRARY (atomspace SHARED
     Intersect.cc
     Link.cc
     LinkIndex.cc
-    NameIndex.cc
     Node.cc
     NodeIndex.cc
     NullTruthValue.cc
@@ -68,7 +67,6 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
     Atom.h
-    AtomIndex.h
     AtomSpaceDefinitions.h
     AtomSpace.h
     AtomSpaceImpl.h

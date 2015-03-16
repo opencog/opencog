@@ -25,7 +25,7 @@
 #include <cstddef>
 #include <vector>
 
-#include <opencog/atomspace/AtomIndex.h>
+#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Handle.h>
 
 namespace opencog
@@ -34,25 +34,43 @@ namespace opencog
  *  @{
  */
 
-typedef std::unordered_set<int> UnorderedIntSet;
+typedef std::unordered_set<AtomPtr> UnorderedAtomSet;
 
 /**
- * Implements an integer index as an RB-tree (C++ map)
+ * Implements a vector of atom sets; each set can be found via an
+ * integer index.
  */
 class FixedIntegerIndex
-	: public AtomIndex<int, Handle>
 {
 	protected:
-		std::vector<UnorderedIntSet> idx;
-		void resize(size_t);
+		std::vector<UnorderedAtomSet> idx;
+		void resize(size_t sz)
+		{
+			idx.resize(sz);
+		}
 
 	public:
-		virtual ~FixedIntegerIndex() {}
-		virtual void insert(int, Handle);
-		virtual Handle get(int) const;
-		virtual void remove(int, Handle);
-		virtual size_t size(void) const;
-		virtual void remove(bool (*)(Handle));
+		~FixedIntegerIndex() {}
+		void insert(size_t i, AtomPtr a)
+		{
+			UnorderedAtomSet &s(idx.at(i));
+			s.insert(a);
+		}
+
+		void remove(size_t i, AtomPtr a)
+		{
+			UnorderedAtomSet &s = idx.at(i);
+			s.erase(a);
+		}
+
+		size_t size(size_t i) const
+		{
+			const UnorderedAtomSet &s(idx.at(i));
+			return s.size();
+		}
+
+		size_t size(void) const;
+		void remove(bool (*)(Handle));
 };
 
 /** @}*/

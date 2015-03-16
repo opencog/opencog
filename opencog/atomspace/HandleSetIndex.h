@@ -25,7 +25,6 @@
 #include <cstddef>
 #include <map>
 
-#include <opencog/atomspace/AtomIndex.h>
 #include <opencog/atomspace/Handle.h>
 
 namespace opencog
@@ -40,18 +39,33 @@ namespace opencog
  * associated with that Handle.  This index is the "opposite" to the 
  * HandleSeqIndex; the map goes in the opposite direction.
  */
-class HandleSetIndex:
-	public AtomIndex<Handle, const UnorderedHandleSet&>
+class HandleSetIndex
 {
 	private:
 		std::map<Handle, const UnorderedHandleSet> idx;
 
 	public:
-		virtual void insert(Handle, const UnorderedHandleSet&);
-		virtual const UnorderedHandleSet& get(Handle) const;
-		virtual void remove(Handle, const UnorderedHandleSet&);
-		virtual size_t size(void) const;
-		virtual void remove(bool (*)(const UnorderedHandleSet&));
+		void insert(Handle h, const UnorderedHandleSet& uset)
+		{
+			idx.insert(std::pair<Handle, const UnorderedHandleSet>(h, uset));
+		}
+		const UnorderedHandleSet& get(Handle h) const
+		{
+			std::map<Handle, const UnorderedHandleSet>::const_iterator it;
+			it = idx.find(h);
+			if (it != idx.end()) return it->second;
+			static UnorderedHandleSet empty;
+			return empty;
+		}
+		void remove(Handle h)
+		{
+			idx.erase(h);
+		}
+		size_t size(void) const
+		{
+			return idx.size();
+		}
+		void remove(bool (*)(const UnorderedHandleSet&));
 		void remove(bool (*)(Handle));
 };
 
