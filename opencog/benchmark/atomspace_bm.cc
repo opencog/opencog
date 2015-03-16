@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <cstdlib>
+
 #include "AtomSpaceBenchmark.h"
 
 using namespace std;
@@ -25,6 +27,8 @@ int main(int argc, char** argv)
      "          \t(default: 100000)\n"
      "-r <int>  \tLooping count; how many times a python/scheme operation is looped\n"
      "          \t(default: 1)\n"
+     "-R <int>  \tUse specific randomseed; useful for benchmark comparisons\n"
+     "          \t(default: time(NULL))\n"
      "-S <int>  \tHow many random atoms to add after each measurement\n"
      "          \t(default: 0)\n"
      "-- Build test data --\n"
@@ -49,7 +53,7 @@ int main(int argc, char** argv)
     opterr = 0;
     benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_AS;
 
-    while ((c = getopt (argc, argv, "tAXgMCcm:ln:r:S:p:s:d:kfi:")) != -1) {
+    while ((c = getopt (argc, argv, "tAXgMCcm:ln:r:R:S:p:s:d:kfi:")) != -1) {
        switch (c)
        {
            case 't':
@@ -108,6 +112,11 @@ int main(int argc, char** argv)
              break;
            case 'r':
              benchmarker.Nloops = (unsigned int) atoi(optarg);
+             break;
+           case 'R': {
+             char* last_arg_char = optarg + strlen(optarg);
+             benchmarker.randomseed = (unsigned long) std::strtoul(optarg,
+                    &last_arg_char, 10); }                    
              break;
            case 'S':
              benchmarker.sizeIncrease = atoi(optarg);
