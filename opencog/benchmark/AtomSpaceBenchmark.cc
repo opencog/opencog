@@ -26,6 +26,8 @@
 
 #include "AtomSpaceBenchmark.h"
 
+const char* VERSION_STRING = "Version 1.0.1";
+
 namespace opencog {
 
 using namespace boost;
@@ -68,14 +70,16 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     doStats = false;
     testKind = BENCH_AS;
 
+    randomseed = (unsigned long) time(NULL);
+
+
     asp = NULL;
     atab = NULL;
 #if HAVE_CYTHON
     cogs = NULL;
     pymo = NULL;
 #endif
-
-    rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
+    rng = NULL;
 }
 
 AtomSpaceBenchmark::~AtomSpaceBenchmark()
@@ -331,6 +335,16 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
 
 void AtomSpaceBenchmark::startBenchmark(int numThreads)
 {
+    cout << "OpenCog Atomspace Benchmark - " << VERSION_STRING << "\n";
+    cout << "\nRandom generator: MT19937\n";
+    cout << "Random seed: " << randomseed << "\n\n";
+
+    // Initialize the random number generator with the seed which might
+    // have been passed in on the command line.
+    if (rng)
+        delete rng;
+    rng = new opencog::MT19937RandGen(randomseed);
+
     // Make sure we are using the correct link mean!
     if (prg) delete prg;
     prg = new std::poisson_distribution<unsigned>(linkSize_mean);

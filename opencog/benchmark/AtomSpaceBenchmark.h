@@ -90,7 +90,7 @@ public:
     int saveInterval;
     bool doStats;
     bool buildTestData;
-
+    unsigned long randomseed;
 
     enum BenchType { BENCH_AS = 1, BENCH_TABLE,
 #ifdef HAVE_GUILE
