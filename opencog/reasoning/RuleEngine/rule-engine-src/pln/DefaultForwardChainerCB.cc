@@ -44,15 +44,18 @@ DefaultForwardChainerCB::~DefaultForwardChainerCB()
 
 /**
  * choose rule based on premises of rule matching the target
- * uses temporary atomspace to limit the search space and avoid
+ * uses temporary atomspace to limit the search space
  *
+ * xxx this method uses SchemeEval and SchemeSmob for transferring handles
+ * from main atomspace to temporary atomspace.I tried to use AddAtom but
+ * it was not working.Handles were not being passed.So I ended up using SchemeEval
+ * with a hack (delete previously created SchemEval instance in order to use SchemeEval
+ * with another atomspace)
+
+ * @param fcmem forward chainer's working memory
  * @return a vector of chosen rules
- **/
-//xxx this method uses SchemeEval and SchemeSmob for transferring handles
-//from main atomspace to temporary atomspace.I tried to use AddAtom but
-//it was not working.Handles were not being passed.So I ended up using SchemeEval
-//with a hack (delete previously created SchemEval instance in order to use SchemeEval
-//with another atomspace)
+ */
+
 vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
 {
     Handle target = fcmem.get_cur_target();
@@ -90,7 +93,6 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
 
         //get matched bindLinks
         HandleSeq matches = imp.result_list;
-
         if (matches.empty()) {
             logger().debug(
                     "No matching BindLink was found.Returning empty vector");
@@ -99,6 +101,7 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
 
         HandleSeq bindlinks;
         for (Handle hm : matches) {
+            //get all BindLinks whose part of their premise matches with hm
             HandleSeq hs = get_rootlinks(hm, &rule_atomspace, BIND_LINK);
             for (Handle hi : hs) {
                 if (find(bindlinks.begin(), bindlinks.end(), hi) == bindlinks.end()) {
@@ -137,6 +140,14 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
     return matched_rules;
 }
 
+/**
+ * Gets all top level links of certain types and subclasses that contain @param htarget
+ *
+ * @param htarget handle whose top level links are to be searched
+ * @param as the atomspace in which search is to be done
+ * @param link_type the root link types to be searched
+ * @param subclasses a flag that tells to look subclasses of @link_type
+ */
 HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle htarget, AtomSpace* as,
                                                  Type link_type,
                                                  bool subclasses)
