@@ -40,14 +40,16 @@ class SchemeShellModule : public Module
 	private:
 		DECLARE_CMD_REQUEST(SchemeShellModule, "scm", shellout,
 			"Enter the scheme shell",
-			"Usage: scm [hush|quiet]\n\n"
+			"Usage: scm [hush|quiet|sync]\n\n"
 			"Enter the scheme interpreter shell. This shell provides a rich\n"
 			"and easy-to-use environment for creating, deleting and manipulating\n"
 			"OpenCog atoms and truth values. It provides a full R5RS-compliant\n"
 			"interactive scheme shell, based on the GNU Guile extension language.\n\n"
 			"If 'hush' or 'quiet' is specified after the command, then the prompt\n"
 			"will not be returned.  This is nice when catting large scripts using\n"
-			"netcat, as it avoids printing garbage when the scripts work well.\n",
+			"netcat, as it avoids printing garbage when the scripts work well.\n"
+			"If 'sync' is specified after the command, then the output is sync, "
+			"instead of async.\n",
 			true, false)
 
 	public:
