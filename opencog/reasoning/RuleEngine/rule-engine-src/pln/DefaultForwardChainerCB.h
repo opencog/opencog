@@ -32,19 +32,21 @@ class FCMemory;
 class Rule;
 class DefaultForwardChainerCB: public virtual ForwardChainerCallBack {
 private:
-	AtomSpace * as_;
-	ForwardChainInputMatchCB* fcim_;
-	ForwardChainPatternMatchCB* fcpm_;
+    AtomSpace * as_;
+    ForwardChainInputMatchCB* fcim_;
+    ForwardChainPatternMatchCB* fcpm_;
 
+    HandleSeq get_rootlinks(Handle htarget, AtomSpace* as, Type link_type,
+    bool subclasses = false);
 public:
-	DefaultForwardChainerCB(AtomSpace* as);
-	virtual ~DefaultForwardChainerCB();
+    DefaultForwardChainerCB(AtomSpace* as);
+    virtual ~DefaultForwardChainerCB();
 
-	//callbacks
-	virtual vector<Rule*> choose_rule(FCMemory& fcmem);
-	virtual HandleSeq choose_input(FCMemory& fcmem);
-	virtual Handle choose_next_target(FCMemory& fcmem);
-	virtual HandleSeq apply_rule(FCMemory& fcmem);
+    //callbacks
+    virtual vector<Rule*> choose_rule(FCMemory& fcmem);
+    virtual HandleSeq choose_input(FCMemory& fcmem);
+    virtual Handle choose_next_target(FCMemory& fcmem);
+    virtual HandleSeq apply_rule(FCMemory& fcmem);
 };
 
 #endif /* DEFAULTFORWARDCHAINERCB_H_ */
