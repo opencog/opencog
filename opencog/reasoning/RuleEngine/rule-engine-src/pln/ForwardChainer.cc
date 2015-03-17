@@ -26,7 +26,6 @@
 #include "PLNCommons.h"
 
 #include <opencog/query/PatternMatch.h>
-#include <opencog/reasoning/RuleEngine/rule-engine-src/JsonicControlPolicyParamLoader.h>
 #include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
 
 ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :

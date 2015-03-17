@@ -20,37 +20,69 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #ifndef JSONICCONTROLPOLICYLOADER_H_
 #define JSONICCONTROLPOLICYLOADER_H_
 
-#include "ControlPolicyParamLoader.h"
-#include "Rule.h"
-
 #include <lib/json_spirit/json_spirit.h>
+#include <opencog/guile/SchemeEval.h>
+
+#include "Rule.h"
 
 using namespace opencog;
 using namespace json_spirit;
 
-class JsonicControlPolicyParamLoader: public virtual ControlPolicyParamLoader {
+/**
+ * The JsonicControlPolicyParamLoader class for loading rules.
+ *
+ * Loading the control policy from a .json file for setting what rules are
+ * available and how they should be applied.
+ */
+class JsonicControlPolicyParamLoader
+{
+public:
+    JsonicControlPolicyParamLoader(AtomSpace* as, string conf_path);
+    virtual ~JsonicControlPolicyParamLoader();
+    virtual void load_config();
+
+    int get_max_iter(void);
+    bool get_attention_alloc(void);
+    vector<Rule*>& get_rules(void);
+
 private:
-    Rule* cur_read_rule_ = NULL;
+    Rule* cur_read_rule_;
+
+    AtomSpace* as_;
+    SchemeEval* scm_eval_;
+
+    vector<Rule*> rules_;
+
+    // XXX what is these two variables?
+    // Writing rule exclusion this way will fall in the same trap as RelEx2Logic...
+    // As it gives the illusion that rules are exclusive to each other no matter the input, which is incorrect.
     map<Rule*, vector<string>> rule_mutex_map_;
+    vector<vector<Rule*>> mutex_sets_; //mutually exclusive rules
+
+    // XXX FIXME unused member variable
+    map<string, Rule*> strname_rule_map_; //a map of name of the rule as represented in the scheme file and associated c++ rule object
+
+    int max_iter_;
+    bool attention_alloc_;
+    string conf_path_;
+    string log_level_;
+
     void read_json(const Value &v, int level = -1);
     void read_array(const Value &v, int level);
     void read_obj(const Value &v, int level);
     void read_null(const Value &v, int level);
     template<typename T> void read_primitive(const Value &v, int level);
-    /**
-     * sets the disjunct rules
-     */
+
     void set_disjunct_rules(void);
+
     Rule* get_rule(string& name);
-    const string get_absolute_path(const string& filename,
+    const string get_working_path(const string& filename,
                                    vector<string> search_paths = { });
-public:
-    JsonicControlPolicyParamLoader(AtomSpace* as, string conf_path);
-    virtual ~JsonicControlPolicyParamLoader();
-    virtual void load_config();
+    vector<vector<Rule*>> get_mutex_sets(void);
 };
 
 #endif /* JSONICCONTROLPOLICYLOADER_H_ */

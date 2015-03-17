@@ -24,15 +24,16 @@
 #ifndef FORWARDCHAINERX_H_
 #define FORWARDCHAINERX_H_
 
+#include <opencog/reasoning/RuleEngine/rule-engine-src/JsonicControlPolicyParamLoader.h>
+
 #include "FCMemory.h"
-#include <opencog/reasoning/RuleEngine/rule-engine-src/ControlPolicyParamLoader.h>
 
 using namespace opencog;
 
 class ForwardChainerCallBack;
 class ForwardChainer {
 private:
-	ControlPolicyParamLoader* cpolicy_loader_;
+	JsonicControlPolicyParamLoader* cpolicy_loader_;
 	string _conf_path = "reasoning/RuleEngine/default_cpolicy.json";
 	AtomSpace * as_;
 	FCMemory* fcmem_;
