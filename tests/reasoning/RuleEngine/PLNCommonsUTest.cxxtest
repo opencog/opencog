@@ -129,44 +129,44 @@ void PLNCommonsUTest::test_get_root_links(void)
 {
     string bindlink =
             "(BindLink"
-            "(ListLink"
-            "(VariableNode \"$A\")"
-            "(VariableNode \"$B\")"
-            "(VariableNode \"$C\"))"
-            "(ImplicationLink"
-            "(AndLink"
-            "(InheritanceLink"
-            "(VariableNode \"$A\")"
-            "(VariableNode \"$B\"))"
-            "(InheritanceLink"
-            "(VariableNode \"$B\")"
-            "(VariableNode \"$C\")))"
-            "(ExecutionOutputLink"
-            "(GroundedSchemaNode \"scm: pln-formula-simple-deduction\")"
-            "(ListLink"
-            "(InheritanceLink"
-            "(VariableNode \"$A\")"
-            "(VariableNode \"$B\"))"
-            "(InheritanceLink"
-            "(VariableNode \"$B\")"
-            "(VariableNode \"$C\"))"
-            "(InheritanceLink"
-            "(VariableNode \"$A\")"
-            "(VariableNode \"$C\"))))))";
+            "   (ListLink"
+            "       (VariableNode \"$A\")"
+            "       (VariableNode \"$B\")"
+            "       (VariableNode \"$C\"))"
+            "   (ImplicationLink"
+            "       (AndLink"
+            "           (InheritanceLink"
+            "               (VariableNode \"$A\")"
+            "               (VariableNode \"$B\"))"
+            "           (InheritanceLink"
+            "               (VariableNode \"$B\")"
+            "               (VariableNode \"$C\")))"
+            "       (ExecutionOutputLink"
+            "           (GroundedSchemaNode \"scm: pln-formula-simple-deduction\")"
+            "               (ListLink"
+            "                   (InheritanceLink"
+            "                       (VariableNode \"$A\")"
+            "                       (VariableNode \"$B\"))"
+            "                   (InheritanceLink"
+            "                       (VariableNode \"$B\")"
+            "                       (VariableNode \"$C\"))"
+            "                   (InheritanceLink"
+            "                       (VariableNode \"$A\")"
+            "                       (VariableNode \"$C\"))))))";
     string target = "(InheritanceLink"
-                    "(VariableNode \"$A\")"
-                    "(VariableNode \"$B\"))";
+                    "   (VariableNode \"$A\")"
+                    "   (VariableNode \"$B\"))";
     Handle hb = eval_->eval_h(bindlink);
     Handle ht = eval_->eval_h(target);
     HandleSeq roots;
     commons_->get_root_links(ht, roots);
     TS_ASSERT_EQUALS(1, roots.size());
 
-    //checking multiple atomspace
+    //checking with multiple atomspace
     AtomSpace temp;
     SchemeEval sceval(&temp);
     sceval.eval_h(bindlink);
-    auto ht_cpy=sceval.eval_h(target);
+    auto ht_cpy = sceval.eval_h(target);
     PLNCommons pc(&temp);
     HandleSeq rootsx;
     pc.get_root_links(ht_cpy, rootsx);
