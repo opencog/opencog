@@ -32,6 +32,12 @@
 using namespace opencog;
 using namespace json_spirit;
 
+/**
+ * The JsonicControlPolicyParamLoader class for loading rules.
+ *
+ * Loading the control policy from a .json file for setting what rules are
+ * available and how they should be applied.
+ */
 class JsonicControlPolicyParamLoader
 {
 public:
@@ -50,13 +56,18 @@ private:
     SchemeEval* scm_eval_;
 
     vector<Rule*> rules_;
-    map<Rule*, vector<string>> rule_mutex_map_;
 
+    // XXX what is these two variables?
+    // Writing rule exclusion this way will fall in the same trap as RelEx2Logic...
+    // As it gives the illusion that rules are exclusive to each other no matter the input, which is incorrect.
+    map<Rule*, vector<string>> rule_mutex_map_;
     vector<vector<Rule*>> mutex_sets_; //mutually exclusive rules
+
+    // XXX FIXME unused member variable
     map<string, Rule*> strname_rule_map_; //a map of name of the rule as represented in the scheme file and associated c++ rule object
 
     int max_iter_;
-    bool attention_alloc_ = false;
+    bool attention_alloc_;
     string conf_path_;
     string log_level_;
 
@@ -69,9 +80,9 @@ private:
     void set_disjunct_rules(void);
 
     Rule* get_rule(string& name);
-    const string get_absolute_path(const string& filename,
+    const string get_working_path(const string& filename,
                                    vector<string> search_paths = { });
-	vector<vector<Rule*>> get_mutex_sets(void);
+    vector<vector<Rule*>> get_mutex_sets(void);
 };
 
 #endif /* JSONICCONTROLPOLICYLOADER_H_ */
