@@ -25,111 +25,186 @@
 #include "PLNCommons.h"
 
 #include <opencog/query/PatternMatch.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/guile/SchemeEval.h>
 
 DefaultForwardChainerCB::DefaultForwardChainerCB(AtomSpace* as) :
-		ForwardChainerCallBack(as)
+        ForwardChainerCallBack(as)
 {
-	as_ = as;
-	fcim_ = new ForwardChainInputMatchCB(as);
-	fcpm_ = new ForwardChainPatternMatchCB(as);
+    as_ = as;
+    fcim_ = new ForwardChainInputMatchCB(as);
+    fcpm_ = new ForwardChainPatternMatchCB(as);
 }
 
 DefaultForwardChainerCB::~DefaultForwardChainerCB()
 {
-	delete fcim_;
-	delete fcpm_;
+    delete fcim_;
+    delete fcpm_;
 }
 
-//choose rule based on premises of rule matching the target
-//uses temporary atomspace to limit the search space and avoid
+/**
+ * choose rule based on premises of rule matching the target
+ * uses temporary atomspace to limit the search space
+ *
+ * xxx this method uses SchemeEval and SchemeSmob for transferring handles
+ * from main atomspace to temporary atomspace.I tried to use AddAtom but
+ * it was not working.Handles were not being passed.So I ended up using SchemeEval
+ * with a hack (delete previously created SchemEval instance in order to use SchemeEval
+ * with another atomspace)
+
+ * @param fcmem forward chainer's working memory
+ * @return a vector of chosen rules
+ */
+
 vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
 {
-	//create temporary atomspace and copy target
-	AtomSpace rule_atomspace;
-	Handle target = fcmem.get_cur_target();
-	if (target == Handle::UNDEFINED or NodeCast(target))
-		throw InvalidParamException(TRACE_INFO,
-				"Needs a target atom of type LINK");
-	as_->addAtom(target);
-	//create bindlink with target as an implicant
-	PLNCommons pc(&rule_atomspace);
-	Handle target_cpy = pc.replace_nodes_with_varnode(target, NODE);
-	Handle bind_link = pc.create_bindLink(target_cpy, false);
-	//copy rules to the temporary atomspace
-	vector<Rule*> rules = fcmem.get_rules();
-	for (Rule* r : rules)
-		as_->addAtom(r->get_handle());
-	//pattern match
-	DefaultImplicator imp(&rule_atomspace);
-	PatternMatch pm;
-	try {
-		pm.do_bindlink(bind_link, imp);
-	} catch (InvalidParamException& e) {
-		cout << "VALIDATION FAILED:" << endl << e.what() << endl;
-	}
-	//get matched bindLinks
-	auto matchings = imp.result_list;
-	if (matchings.empty())
-		return vector<Rule*> { };
-	HandleSeq bindlinks;
-	for (Handle hm : matchings) {
-		HandleSeq check_bindlink;
-		HandleSeq parents;
-		pc.get_top_level_parent(hm, parents);
-		for (Handle hp : parents) {
-			if (as_->getType(hp) == BIND_LINK
-					and find(bindlinks.begin(), bindlinks.end(), hp)
-							== bindlinks.end())
-				check_bindlink.push_back(hp);
-		}
-		//make sure matches are actually part of the premise list rather than the output of the bindLink
-		for (Handle hb : check_bindlink) {
-			auto outgoing = [this](Handle h) {return as_->getOutgoing(h);};
-			Handle hpremise = outgoing(outgoing(hb)[1])[0]; //extracting premise from (BindLink((ListLinK..)(ImpLink (premise) (..))))
-			if (pc.exists_in(hpremise, hm))
-				bindlinks.push_back(hb);
-		}
-	}
-	//transfer back bindlinks to main atomspace and  get their handle
-	HandleSeq copied_back;
-	for (Handle h : bindlinks)
-		copied_back.push_back(as_->addAtom(h));
-	//find the rules containing the bindLink in copied_back
-	vector<Rule*> matched_rules;
-	for (Rule* r : rules)
-		if (find(copied_back.begin(), copied_back.end(), r->get_handle())
-				!= copied_back.end())
-			matched_rules.push_back(r);
-	return matched_rules;
+    Handle target = fcmem.get_cur_target();
+    if (target == Handle::UNDEFINED or NodeCast(target))
+        throw InvalidParamException(TRACE_INFO,
+                                    "Needs a target atom of type LINK");
+    HandleSeq chosen_bindlinks;
+
+    if (LinkCast(target)) {
+        AtomSpace rule_atomspace;
+        SchemeEval* sceval = new SchemeEval(&rule_atomspace);
+        //Handle target_cpy=rule_atomspace.addAtom(target); xxx this doesn't work
+        Handle target_cpy = sceval->eval_h(SchemeSmob::to_string(target)); //xxx this works
+
+        //copy rules to the temporary atomspace
+        vector<Rule*> rules = fcmem.get_rules();
+        for (Rule* r : rules) {
+            //rule_atomspace.addAtom(r->get_handle()); xxx this doesn't work
+            sceval->eval_h(SchemeSmob::to_string(r->get_handle())); //xxx this works
+        }
+
+        //create bindlink with target as an implicant
+        PLNCommons pc(&rule_atomspace);
+        Handle copy = pc.replace_nodes_with_varnode(target_cpy, NODE);
+        Handle bind_link = pc.create_bindLink(copy, false);
+
+        //pattern match
+        DefaultImplicator imp(&rule_atomspace);
+        try {
+            PatternMatch pm;
+            pm.do_bindlink(bind_link, imp);
+        } catch (InvalidParamException& e) {
+            cout << "VALIDATION FAILED:" << endl << e.what() << endl;
+        }
+
+        //get matched bindLinks
+        HandleSeq matches = imp.result_list;
+        if (matches.empty()) {
+            logger().debug(
+                    "No matching BindLink was found.Returning empty vector");
+            return vector<Rule*> { };
+        }
+
+        HandleSeq bindlinks;
+        for (Handle hm : matches) {
+            //get all BindLinks whose part of their premise matches with hm
+            HandleSeq hs = get_rootlinks(hm, &rule_atomspace, BIND_LINK);
+            for (Handle hi : hs) {
+                if (find(bindlinks.begin(), bindlinks.end(), hi) == bindlinks.end()) {
+                    bindlinks.push_back(hi);
+                }
+            }
+        }
+        delete sceval; //delete to use SchemeEval with another atomspace.this might be a hack.
+
+        //push back handles to main atomspace
+        for (Handle h : bindlinks) {
+            //auto bindlink = as_->addAtom(h);
+            SchemeEval *sc = new SchemeEval(as_);
+            auto bindlink = sc->eval_h(SchemeSmob::to_string(h));
+            chosen_bindlinks.push_back(bindlink);
+        }
+    }
+
+    //trying to find specialized rules that contain the target node
+    if (NodeCast(target)) {
+        chosen_bindlinks = get_rootlinks(target, as_, BIND_LINK);
+    }
+
+    //find the rules containing the bindLink in copied_back
+    vector<Rule*> matched_rules;
+    vector<Rule*> rules = fcmem.get_rules();
+    for (Rule* r : rules) {
+        auto it = find(chosen_bindlinks.begin(), chosen_bindlinks.end(),
+                       r->get_handle()); //xxx not matching
+        if (it != chosen_bindlinks.end()) {
+            cout << "RULE FOUND" << endl;
+            matched_rules.push_back(r);
+        }
+    }
+
+    return matched_rules;
 }
 
-HandleSeq DefaultForwardChainerCB::choose_input(FCMemory& fcmem) {
-	Handle htarget = fcmem.get_cur_target();
-	//get everything associated with the target handle
-	HandleSeq inputs = as_->getNeighbors(htarget,true,true,LINK,true);
-	return inputs;
+/**
+ * Gets all top level links of certain types and subclasses that contain @param htarget
+ *
+ * @param htarget handle whose top level links are to be searched
+ * @param as the atomspace in which search is to be done
+ * @param link_type the root link types to be searched
+ * @param subclasses a flag that tells to look subclasses of @link_type
+ */
+HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle htarget, AtomSpace* as,
+                                                 Type link_type,
+                                                 bool subclasses)
+{
+    auto outgoing = [as](Handle h) {return as->getOutgoing(h);};
+    PLNCommons pc(as);
+    HandleSeq chosen_roots;
+    HandleSeq candidates_roots;
+    pc.get_root_links(htarget, candidates_roots);
+
+    for (Handle hr : candidates_roots) {
+        bool notexist = find(chosen_roots.begin(), chosen_roots.end(), hr)
+                == chosen_roots.end();
+        auto type = as->getType(hr);
+        bool subtype = (subclasses and classserver().isA(type, link_type));
+        if (((type == link_type) or subtype) and notexist) {
+            //make sure matches are actually part of the premise list rather than the output of the bindLink
+            Handle hpremise = outgoing(outgoing(hr)[1])[0]; //extracting premise from (BindLink((ListLinK..)(ImpLink (premise) (..))))
+            if (pc.exists_in(hpremise, htarget)) {
+                chosen_roots.push_back(hr);
+            }
+        }
+
+    }
+
+    return chosen_roots;
+}
+HandleSeq DefaultForwardChainerCB::choose_input(FCMemory& fcmem)
+{
+    Handle htarget = fcmem.get_cur_target();
+    //get everything associated with the target handle
+    HandleSeq inputs = as_->getNeighbors(htarget, true, true, LINK, true);
+    return inputs;
 }
 
-Handle DefaultForwardChainerCB::choose_next_target(FCMemory& fcmem) {
-	HandleSeq tlist = fcmem.get_target_list();
-	map<Handle, float> tournament_elem;
-	PLNCommons pc(as_);
-	for (Handle t : tlist) {
-		float fitness = pc.target_tv_fitness(t);
-		tournament_elem[t] = fitness;
-	}
-	return pc.tournament_select(tournament_elem);
+Handle DefaultForwardChainerCB::choose_next_target(FCMemory& fcmem)
+{
+    HandleSeq tlist = fcmem.get_target_list();
+    map<Handle, float> tournament_elem;
+    PLNCommons pc(as_);
+    for (Handle t : tlist) {
+        float fitness = pc.target_tv_fitness(t);
+        tournament_elem[t] = fitness;
+    }
+    return pc.tournament_select(tournament_elem);
 }
 
 //TODO applier should check on atoms (Inference.matched_atoms when Inference.Rule =Cur_Rule), for mutex rules
-HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem) {
-	Rule * cur_rule = fcmem.get_cur_rule();
-	fcpm_->set_fcmem(&fcmem);
-	PatternMatch pm;
-	try {
-		pm.do_bindlink(cur_rule->get_handle(), *fcpm_);
-	} catch (InvalidParamException& e) {
-		cout << "VALIDATION FAILED:" << endl << e.what() << endl;
-	}
-	return fcpm_->get_products();
+HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
+{
+    Rule * cur_rule = fcmem.get_cur_rule();
+    fcpm_->set_fcmem(&fcmem);
+    PatternMatch pm;
+    try {
+        pm.do_bindlink(cur_rule->get_handle(), *fcpm_);
+    } catch (InvalidParamException& e) {
+        cout << "VALIDATION FAILED:" << endl << e.what() << endl;
+    }
+    return fcpm_->get_products();
 }

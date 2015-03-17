@@ -96,7 +96,7 @@ public:
 	 * Get top level parent of the handle
 	 * @return a Link or Handle::UNDEFINED if there is no
 	 */
-	void get_top_level_parent(Handle h, HandleSeq& parents);
+	void get_root_links(Handle h, HandleSeq& parents);
 	template<class Type> Type tournament_select(map<Type, float> tfitnes_map) {
 		if (tfitnes_map.size() == 1) {
 			return tfitnes_map.begin()->first;
