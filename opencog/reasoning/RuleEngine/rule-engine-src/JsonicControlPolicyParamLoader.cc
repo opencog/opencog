@@ -20,6 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include "JsonicControlPolicyParamLoader.h"
 #include "PolicyParams.h"
 
@@ -34,41 +35,22 @@
 #include <opencog/util/Config.h>
 
 JsonicControlPolicyParamLoader::JsonicControlPolicyParamLoader(AtomSpace * as,
-                                                               string conf_path) :
-        ControlPolicyParamLoader(as, conf_path)
+                                                               string conf_path)
+    : as_(as), conf_path_(conf_path)
 {
     cur_read_rule_ = NULL;
+    scm_eval_ = get_evaluator(as_);
 }
 
 JsonicControlPolicyParamLoader::~JsonicControlPolicyParamLoader()
 {
-
+    for (Rule *r : rules_)
+		delete r;
 }
 
-void JsonicControlPolicyParamLoader::set_disjunct_rules(void)
-{
-    for (auto i = rule_mutex_map_.begin(); i != rule_mutex_map_.end(); ++i) {
-        auto mset = i->second;
-        auto cur_rule = i->first;
-        for (string name : mset) {
-            Rule* r = get_rule(name);
-            if (!r)
-                throw invalid_argument(
-                        "A rule by name " + name + " doesn't exist"); //TODO throw appropriate exception
-            cur_rule->add_disjunct_rule(r);
-        }
-    }
-}
-
-Rule* JsonicControlPolicyParamLoader::get_rule(string& name)
-{
-    for (Rule* r : rules_) {
-        if (r->get_name() == name)
-            return r;
-    }
-    return NULL;
-}
-
+/**
+ * loads the configuration file that contains control policy and other params
+ */
 void JsonicControlPolicyParamLoader::load_config()
 {
     try {
@@ -82,6 +64,31 @@ void JsonicControlPolicyParamLoader::load_config()
         std::cerr << e.what() << '\n';
     }
 }
+
+/**
+ * @return the maximum iteration size
+ */
+int JsonicControlPolicyParamLoader::get_max_iter()
+{
+    return max_iter_;
+}
+
+/**
+ * @return get all rules defined in the control policy config
+ */
+vector<Rule *> &JsonicControlPolicyParamLoader::get_rules()
+{
+    return rules_;
+}
+
+/**
+ * @return a boolean flag that tells whether to look only for atoms in the attentional focus or an entire atomspace
+ */
+bool JsonicControlPolicyParamLoader::get_attention_alloc()
+{
+	return attention_alloc_;
+}
+
 
 void JsonicControlPolicyParamLoader::read_array(const Value &v, int lev)
 {
@@ -176,6 +183,33 @@ template<typename > void JsonicControlPolicyParamLoader::read_primitive(
 {
 }
 
+/**
+ * sets the disjunct rules
+ */
+void JsonicControlPolicyParamLoader::set_disjunct_rules(void)
+{
+    for (auto i = rule_mutex_map_.begin(); i != rule_mutex_map_.end(); ++i) {
+        auto mset = i->second;
+        auto cur_rule = i->first;
+        for (string name : mset) {
+            Rule* r = get_rule(name);
+            if (!r)
+                throw invalid_argument(
+                        "A rule by name " + name + " doesn't exist"); //TODO throw appropriate exception
+            cur_rule->add_disjunct_rule(r);
+        }
+    }
+}
+
+Rule* JsonicControlPolicyParamLoader::get_rule(string& name)
+{
+    for (Rule* r : rules_) {
+        if (r->get_name() == name)
+            return r;
+    }
+    return NULL;
+}
+
 const string JsonicControlPolicyParamLoader::get_absolute_path(
         const string& filename, vector<string> search_paths)
 {
@@ -192,5 +226,13 @@ const string JsonicControlPolicyParamLoader::get_absolute_path(
 
     throw RuntimeException(TRACE_INFO, "%s could not be found",
                            filename.c_str());
+}
+
+/**
+ * @return a set of mutually exclusive rules defined in the control policy file
+ */
+vector<vector<Rule *> > JsonicControlPolicyParamLoader::get_mutex_sets()
+{
+    return mutex_sets_;
 }
 
