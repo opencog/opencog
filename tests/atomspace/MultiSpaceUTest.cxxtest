@@ -1,7 +1,7 @@
 /*
  * tests/atomspace/MultiSpaceUTest.cxxtest
  *
- * Copyright (C) 2014 Linas Vepstas
+ * Copyright (C) 2014,2015 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -216,6 +216,28 @@ public:
 		// have been copied on atom insertion.
 		// XXX this is currently broken :-(  and should be fixed ... 
 //		TS_ASSERT(h1n1->getTruthValue() != h2n1->getTruthValue());
+	}
+
+	// Test copying back and forth.
+	void testCopyBack()
+	{
+		// Create a node, copy it back and forth.
+		Handle n1 = as1.addNode(CONCEPT_NODE, "backer");
+		Handle n2 = as2.addAtom(n1);
+		Handle n1copy = as1.addAtom(n2);
+		Handle n2copy = as2.addAtom(n1copy);
+
+		TS_ASSERT(n1 == n1copy);
+		TS_ASSERT(n2 == n2copy);
+
+		// Create a link, copy it back and forth.
+		Handle h1 = as1.addLink(LIST_LINK, n1);
+		Handle h2 = as2.addAtom(h1);
+		Handle h1copy = as1.addAtom(h2);
+		Handle h2copy = as2.addAtom(h1copy);
+
+		TS_ASSERT(h1 == h1copy);
+		TS_ASSERT(h2 == h2copy);
 	}
 
 	// Test multiple nested (hierarchical) atomspaces.  They should 
