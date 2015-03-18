@@ -11,7 +11,6 @@
 		(ListLink
 			(VariableNode "$B")
 			(VariableNode "$C")
-			(VariableNode "$D")
 			(TypedVariableLink
 				(VariableNode "$D")
 				(VariableTypeNode "PredicateNode")))

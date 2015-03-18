@@ -1,52 +1,28 @@
 ; =============================================================================
 ; InheritanceToMemberRule
-;	InheritanceLink( B (SatisfyingSetLink (Variable $X
-; 		(EvaluationLink (pred D (ListLink X C))))))
+;	InheritanceLink( B C )
 ;			becomes
-;	MemberLink( B (SatisfyingSetLink ( Variable $X 
-;		(EvaluationLink (pred D (ListLink X C))))))
+;	MemberLink( B C )
 ; -----------------------------------------------------------------------------
 
 (define pln-rule-inheritance-to-member
 	(BindLink
 		(ListLink
 			(VariableNode "$B")
-			(VariableNode "$C")
-			(VariableNode "$D")
-			(TypedVariableLink
-				(VariableNode "$D")
-				(VariableTypeNode "PredicateNode")))
+			(VariableNode "$C"))
 		(ImplicationLink
 			(InheritanceLink
 				(VariableNode "$B")
-				(SatisfyingSetLink
-					(VariableNode "$X")
-					(EvaluationLink
-						(VariableNode "$D")
-						(ListLink
-							(VariableNode "$X")
-							(VariableNode "$C")))))
+				(VariableNode "$C"))
 			(ExecutionOutputLink
 				(GroundedSchemaNode "scm:pln-formula-inheritance-to-member")
 				(ListLink
 					(MemberLink
 						(VariableNode "$B")
-						(SatisfyingSetLink
-							(VariableNode "$X")
-							(EvaluationLink
-								(VariableNode "$D")
-								(ListLink
-									(VariableNode "$X")
-									(VariableNode "$C")))))
+						(VariableNode "$C"))
 					(InheritanceLink
 						(VariableNode "$B")
-						(SatisfyingSetLink
-							(VariableNode "$X")
-							(EvaluationLink
-								(VariableNode "$D")
-								(ListLink
-									(VariableNode "$X")
-									(VariableNode "$C"))))))))))
+						(VariableNode "$C")))))))
 
 ; -----------------------------------------------------------------------------
 ; Inheritance To Member Formula
@@ -56,20 +32,20 @@
 ; Side-effect: TruthValue of the new link stays the same
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-inheritance-to-member BXDXC IBXDXC)
+(define (pln-formula-inheritance-to-member MBC IBC)
 	(cog-set-tv!
-		BXDXC
+		MBC
 		(pln-formula-member-to-inheritance-side-effect-free
-			BXDXC
-			IBXDXC)))
+			MBC
+			IBC)))
 
 ; -----------------------------------------------------------------------------
 ; This version has no side effects and simply returns a TruthValue
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-inheritance-to-member-side-effect-free BXDXC IBXDXC)
+(define (pln-formula-inheritance-to-member-side-effect-free MBC IBC)
 	(stv
-		(cog-stv-strength IBXDXC)
-		(cog-stv-confidence IBXDXC)))
+		(cog-stv-strength IBC)
+		(cog-stv-confidence IBC)))
 
 ; =============================================================================
