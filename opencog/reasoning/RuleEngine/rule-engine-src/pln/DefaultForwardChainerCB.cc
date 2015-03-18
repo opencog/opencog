@@ -117,6 +117,7 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
             SchemeEval *sc = new SchemeEval(as_);
             auto bindlink = sc->eval_h(SchemeSmob::to_string(h));
             chosen_bindlinks.push_back(bindlink);
+            delete sc;
         }
     }
 
