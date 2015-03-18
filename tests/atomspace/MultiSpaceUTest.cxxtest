@@ -238,6 +238,29 @@ public:
 
 		TS_ASSERT(h1 == h1copy);
 		TS_ASSERT(h2 == h2copy);
+
+		Handle h3 = as3.addAtom(h1);
+		Handle h3copy = as3.addAtom(h2);
+
+		TS_ASSERT(h3 == h3copy);
+
+		// Do it again, this time with unordered links.
+		Handle ma = as1.addNode(CONCEPT_NODE, "hacker");
+		Handle mb = as1.addNode(CONCEPT_NODE, "cracker");
+		Handle mc = as1.addNode(CONCEPT_NODE, "jacker");
+
+		h1 = as1.addLink(UNORDERED_LINK, n1, mc, mb, n1, mc, ma);
+		h2 = as2.addAtom(h1);
+		h1copy = as1.addAtom(h2);
+		h2copy = as2.addAtom(h1copy);
+
+		TS_ASSERT(h1 == h1copy);
+		TS_ASSERT(h2 == h2copy);
+
+		h3 = as3.addAtom(h1);
+		h3copy = as3.addAtom(h2);
+
+		TS_ASSERT(h3 == h3copy);
 	}
 
 	// Test multiple nested (hierarchical) atomspaces.  They should 
