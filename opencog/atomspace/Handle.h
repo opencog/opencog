@@ -233,6 +233,22 @@ typedef std::vector<HandleSeq> HandleSeqSeq;
 //! a hash that associates the handle to its unique identificator
 typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 
+struct handle_seq_less
+{
+   bool operator()(const HandleSeq& hsl, const HandleSeq& hsr) const
+   {
+       size_t sl = hsl.size();
+       size_t sr = hsr.size();
+       if (sl != sr) return sl < sr;
+       for (size_t i=0; i<sl; i++) {
+           UUID ul = hsl[i].value();
+           UUID ur = hsr[i].value();
+           if (ul != ur) return ul < ur;
+       }
+       return false;
+   }
+};
+
 //! append string representation of the Hash to the string
 static inline std::string operator+ (const char *lhs, Handle h)
 {
