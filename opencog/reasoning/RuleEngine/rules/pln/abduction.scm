@@ -3,7 +3,7 @@
 ;
 ; AND(Inheritance A C, Inheritance B C) entails Inheritance A B
 ;------------------------------------------------------------------------------
-
+(include "formulas.scm")
 (define pln-rule-abduction
 	(BindLink
 		(ListLink
@@ -17,10 +17,7 @@
 					(VariableNode "$C"))
 				(InheritanceLink
 					(VariableNode "$B")
-					(VariableNode "$C"))
-				(VariableNode "$A")
-				(VariableNode "$B")
-				(VariableNode "$C"))
+					(VariableNode "$C")))
 			(ExecutionOutputLink
 				(GroundedSchemaNode "scm: pln-formula-abduction")
 				(ListLink
@@ -61,39 +58,18 @@
 (define (pln-formula-abduction-side-effect-free AB AC BC A B C)
 	(let
 		(
-			(sCB 
-				(/ 
-					(* 
-						(cog-stv-strength BC) 
-						(cog-stv-strength C)
-					) 
-					(cog-stv-strength B)
-				)
-			)
+			(sCB (inversion-formula 
+				(cog-stv-strength BC)
+				(cog-stv-strength B) 
+				(cog-stv-strength C)))
 			(sAC (cog-stv-strength AC))
 			(sC (cog-stv-strength C))
-		)
-			(stv
-				(if (eq? 0 (- 1 sAC))
-					0 ; Set Strength to 0 if sNotB equals 0 to avoid
-					  ; division by zero
-					(+                         ; Strength
-						(* sAC sCB)
-						(/
-							(*
-								(-
-									1
-                                    sAC)
-                                (-
-                                    sCB
-                                    (*
-                                        sAC
-                                        sCB)))
-                            (-
-                                1
-                                sAC))))
-                (min
-                    (cog-stv-confidence AC)
-                    (cog-stv-confidence BC))))) ; Confidence
+			(sB (cog-stv-strength B))
+			(sA (cog-stv-strength A)))
+		(stv 
+			(simple-deduction-formula sA sC sB sAC sCB) ;Strength
+                	(min
+                    		(cog-stv-confidence AB)
+                    		(cog-stv-confidence BC))))) ; Confidence
 
 ; =============================================================================
