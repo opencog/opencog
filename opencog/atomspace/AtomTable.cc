@@ -197,10 +197,20 @@ Handle AtomTable::getHandle(Handle& h) const
     if (Handle::UNDEFINED.value() == h.value())
         return getHandle(AtomPtr(h));
 
-    // If we have both a uuid and pointer, there's nothing to do.
+    // If we have both a uuid and pointer, AND the pointer is
+    // pointing to an atom that is in this table (not some other
+    // table), then there's nothing to do.  Otherwise, we have to
+    // find the equivalent atom in this atomspace.
     // Note: we access the naked pointer itself; that's because
     // Handle itself calls this method to resolve null pointers.
-    if (h._ptr) return h;
+    if (h._ptr) {
+        if (this == h._ptr->_atomTable)
+            return h;
+        else if (_environ)
+            return _environ->getHandle(h);
+        else
+            return getHandle(AtomPtr(h));
+    }
 
     // Read-lock for the _atom_set.
     std::lock_guard<std::recursive_mutex> lck(_mtx);
