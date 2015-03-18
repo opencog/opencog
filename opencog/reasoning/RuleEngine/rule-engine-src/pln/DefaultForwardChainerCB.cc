@@ -118,7 +118,6 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
         auto it = find(chosen_bindlinks.begin(), chosen_bindlinks.end(),
                        r->get_handle()); //xxx not matching
         if (it != chosen_bindlinks.end()) {
-            cout << "RULE FOUND" << endl;
             matched_rules.push_back(r);
         }
     }
