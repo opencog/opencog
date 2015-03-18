@@ -26,7 +26,6 @@
 
 #include <opencog/query/PatternMatch.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/guile/SchemeEval.h>
 
 DefaultForwardChainerCB::DefaultForwardChainerCB(AtomSpace* as) :
         ForwardChainerCallBack(as)
@@ -46,12 +45,6 @@ DefaultForwardChainerCB::~DefaultForwardChainerCB()
  * choose rule based on premises of rule matching the target
  * uses temporary atomspace to limit the search space
  *
- * xxx this method uses SchemeEval and SchemeSmob for transferring handles
- * from main atomspace to temporary atomspace.I tried to use AddAtom but
- * it was not working.Handles were not being passed.So I ended up using SchemeEval
- * with a hack (delete previously created SchemEval instance in order to use SchemeEval
- * with another atomspace)
-
  * @param fcmem forward chainer's working memory
  * @return a vector of chosen rules
  */
@@ -66,23 +59,20 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
 
     if (LinkCast(target)) {
         AtomSpace rule_atomspace;
-        SchemeEval* sceval = new SchemeEval(&rule_atomspace);
-        //Handle target_cpy=rule_atomspace.addAtom(target); xxx this doesn't work
-        Handle target_cpy = sceval->eval_h(SchemeSmob::to_string(target)); //xxx this works
+        Handle target_cpy = rule_atomspace.addAtom(target);
 
-        //copy rules to the temporary atomspace
+        // Copy rules to the temporary atomspace.
         vector<Rule*> rules = fcmem.get_rules();
         for (Rule* r : rules) {
-            //rule_atomspace.addAtom(r->get_handle()); xxx this doesn't work
-            sceval->eval_h(SchemeSmob::to_string(r->get_handle())); //xxx this works
+            rule_atomspace.addAtom(r->get_handle());
         }
 
-        //create bindlink with target as an implicant
+        // Create bindlink with target as an implicant.
         PLNCommons pc(&rule_atomspace);
         Handle copy = pc.replace_nodes_with_varnode(target_cpy, NODE);
         Handle bind_link = pc.create_bindLink(copy, false);
 
-        //pattern match
+        // Pattern match.
         DefaultImplicator imp(&rule_atomspace);
         try {
             PatternMatch pm;
@@ -91,7 +81,7 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
             cout << "VALIDATION FAILED:" << endl << e.what() << endl;
         }
 
-        //get matched bindLinks
+        // Get matched bindLinks.
         HandleSeq matches = imp.result_list;
         if (matches.empty()) {
             logger().debug(
@@ -109,24 +99,19 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
                 }
             }
         }
-        delete sceval; //delete to use SchemeEval with another atomspace.this might be a hack.
 
-        //push back handles to main atomspace
+        // Copy handles to main atomspace.
         for (Handle h : bindlinks) {
-            //auto bindlink = as_->addAtom(h);
-            SchemeEval *sc = new SchemeEval(as_);
-            auto bindlink = sc->eval_h(SchemeSmob::to_string(h));
-            chosen_bindlinks.push_back(bindlink);
-            delete sc;
+            chosen_bindlinks.push_back(as_->addAtom(h));
         }
     }
 
-    //trying to find specialized rules that contain the target node
+    // Try to find specialized rules that contain the target node.
     if (NodeCast(target)) {
         chosen_bindlinks = get_rootlinks(target, as_, BIND_LINK);
     }
 
-    //find the rules containing the bindLink in copied_back
+    // Find the rules containing the bindLink in copied_back.
     vector<Rule*> matched_rules;
     vector<Rule*> rules = fcmem.get_rules();
     for (Rule* r : rules) {

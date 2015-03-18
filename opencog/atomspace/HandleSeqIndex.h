@@ -50,7 +50,7 @@ namespace opencog
 class HandleSeqIndex
 {
 	private:
-		std::map<const HandleSeq, Handle> idx;
+		std::map<const HandleSeq, Handle, handle_seq_less> idx;
 
 	public:
 		void insert(const HandleSeq& seq, Handle h)
