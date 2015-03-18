@@ -162,9 +162,23 @@ HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle htarget, AtomSpace* as,
 }
 HandleSeq DefaultForwardChainerCB::choose_input(FCMemory& fcmem)
 {
+    HandleSeq inputs;
+    PLNCommons pc(as_);
     Handle htarget = fcmem.get_cur_target();
-    //get everything associated with the target handle
-    HandleSeq inputs = as_->getNeighbors(htarget, true, true, LINK, true);
+
+    //Get everything associated with the target handle.
+    HandleSeq neighbors = as_->getNeighbors(htarget, true, true, LINK, true);
+
+    //Add all root links of atoms in @param neighbors.
+    for (auto hn : neighbors) {
+        HandleSeq roots;
+        pc.get_root_links(hn, roots);
+        for (auto r : roots) {
+            if (find(inputs.begin(), inputs.end(), r) == inputs.end())
+                inputs.push_back(r);
+        }
+    }
+
     return inputs;
 }
 
