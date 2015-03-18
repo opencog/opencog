@@ -252,7 +252,7 @@
 
 ; TODO define formula appropriately (see comment in inheritance_rules.py
 ; AndCreationInsideLinkRule) 
-(define pln-formula-create-and-inside-inheritance outInh outAnd inAnd inEmbedInh1 inEmbedInh2
+(define (pln-formula-create-and-inside-inheritance outInh outAnd inAnd inEmbedInh1 inEmbedInh2)
     (cog-set-tv! outInh (cog-tv inAnd)))                  
 
 (define (pln-formula-context Context Relation)
