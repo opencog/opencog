@@ -176,6 +176,13 @@ public:
         if (ULONG_MAX == _uuid) return NULL_POINTER;
         return resolve_ptr();
     }
+/***
+    operator const AtomPtr&() {
+        if (_ptr.get()) return _ptr;
+        if (ULONG_MAX == _uuid) return NULL_POINTER;
+        return resolve_ptr();
+    }
+***/
 };
 
 static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept

@@ -43,7 +43,7 @@ size_t NodeIndex::size() const
 	return cnt;
 }
 
-void NodeIndex::remove(bool (*filter)(AtomPtr))
+void NodeIndex::remove(bool (*filter)(const AtomPtr&))
 {
 	for (NameIndex ni : idx) ni.remove(filter);
 }
