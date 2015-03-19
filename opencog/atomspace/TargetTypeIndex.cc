@@ -31,7 +31,7 @@ TargetTypeIndex::TargetTypeIndex(void)
     resize();
 }
 
-void TargetTypeIndex::insertAtom(AtomPtr a)
+void TargetTypeIndex::insertAtom(const AtomPtr& a)
 {
 	LinkPtr l(LinkCast(a));
 	if (!l) return;
@@ -52,7 +52,7 @@ void TargetTypeIndex::insertAtom(AtomPtr a)
 	}
 }
 
-void TargetTypeIndex::removeAtom(AtomPtr a)
+void TargetTypeIndex::removeAtom(const AtomPtr& a)
 {
 	LinkPtr l(LinkCast(a));
 	if (!l) return;

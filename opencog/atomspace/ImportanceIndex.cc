@@ -48,7 +48,7 @@ unsigned int ImportanceIndex::importanceBin(short importance)
 	return (importance + 32768) / IMPORTANCE_INDEX_SIZE;
 }
 
-void ImportanceIndex::updateImportance(AtomPtr atom, int bin)
+void ImportanceIndex::updateImportance(const AtomPtr& atom, int bin)
 {
 	int newbin = importanceBin(atom->getAttentionValue()->getSTI());
 	if (bin == newbin) return;
@@ -57,14 +57,14 @@ void ImportanceIndex::updateImportance(AtomPtr atom, int bin)
 	insert(newbin, atom);
 }
 
-void ImportanceIndex::insertAtom(AtomPtr& atom)
+void ImportanceIndex::insertAtom(const AtomPtr& atom)
 {
 	int sti = atom->getAttentionValue()->getSTI();
 	int bin = importanceBin(sti);
 	insert(bin, atom);
 }
 
-void ImportanceIndex::removeAtom(AtomPtr& atom)
+void ImportanceIndex::removeAtom(const AtomPtr& atom)
 {
 	int sti = atom->getAttentionValue()->getSTI();
 	int bin = importanceBin(sti);

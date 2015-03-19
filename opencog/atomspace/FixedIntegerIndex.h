@@ -51,13 +51,13 @@ class FixedIntegerIndex
 
 	public:
 		~FixedIntegerIndex() {}
-		void insert(size_t i, AtomPtr a)
+		void insert(size_t i, const AtomPtr& a)
 		{
 			UnorderedAtomSet &s(idx.at(i));
 			s.insert(a);
 		}
 
-		void remove(size_t i, AtomPtr a)
+		void remove(size_t i, const AtomPtr& a)
 		{
 			UnorderedAtomSet &s = idx.at(i);
 			s.erase(a);
@@ -70,7 +70,6 @@ class FixedIntegerIndex
 		}
 
 		size_t size(void) const;
-		void remove(bool (*)(Handle));
 };
 
 /** @}*/
