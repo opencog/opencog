@@ -33,18 +33,21 @@ using namespace opencog;
 
 InferenceSCM* InferenceSCM::_inst = NULL;
 
-InferenceSCM::InferenceSCM() {
+InferenceSCM::InferenceSCM()
+{
 	if (NULL == _inst) {
 		_inst = this;
 		init();
 	}
 }
 
-InferenceSCM::~InferenceSCM() {
+InferenceSCM::~InferenceSCM()
+{
 
 }
 
-void InferenceSCM::init(void) {
+void InferenceSCM::init(void)
+{
 	_inst = new InferenceSCM();
 #ifdef HAVE_GUILE
 	//all commands for invoking the rule engine from scm shell should be declared here
@@ -55,7 +58,8 @@ void InferenceSCM::init(void) {
 #endif
 }
 
-Handle InferenceSCM::do_forward_chaining(Handle h) {
+Handle InferenceSCM::do_forward_chaining(Handle h)
+{
 #ifdef HAVE_GUILE
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
 	DefaultForwardChainerCB dfc(as);
@@ -68,20 +72,26 @@ Handle InferenceSCM::do_forward_chaining(Handle h) {
 #endif
 }
 
-Handle InferenceSCM::do_backward_chaining(Handle h) {
+Handle InferenceSCM::do_backward_chaining(Handle h)
+{
 #ifdef HAVE_GUILE
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
+
 	BackwardChainer bc(as);
+
 	bc.do_chain(h);
 	map<Handle, HandleSeq> soln = bc.get_chaining_result();
+
 	HandleSeq soln_list_link;
 	for (auto it = soln.begin(); it != soln.end(); ++it) {
 		HandleSeq hs;
 		hs.push_back(it->first);
 		hs.insert(hs.end(), it->second.begin(), it->second.end());
-		soln_list_link.push_back(
-				as->addLink(LIST_LINK, hs));
+
+		if (hs[1] != Handle::UNDEFINED)
+			soln_list_link.push_back(as->addLink(LIST_LINK, hs));
 	}
+
 	return as->addLink(LIST_LINK, soln_list_link);
 #else
 	return Handle::UNDEFINED;
