@@ -89,7 +89,7 @@ public:
         config().set("IMPORTANCE_SPREADING_ENABLED", "false");
         config().set("ENABLE_UNITY_CONNECTOR", "true");
 
-        oacMock.createOAC(); 
+        oacMock.createOAC();
 
         Message * p_message; 
 
@@ -175,7 +175,13 @@ public:
         SchemeEval evaluator(&atomSpace);
         std::string scheme_expression, scheme_return_value;
 
+        std::cout << "AtomSpace before planning" << std::endl;
+        atomSpace.print();
+
         scheme_expression = "( do_planning )";
+
+        std::cout << "AtomSpace after planning" << std::endl;
+        atomSpace.print();
 
         // Run the Procedure that do planning
         scheme_return_value = evaluator.eval(scheme_expression);
