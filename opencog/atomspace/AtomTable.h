@@ -94,6 +94,12 @@ private:
     // handle uuid and the actual atom pointer (since they are stored
     // together).  To some degree, this info is duplicated in the Node
     // and LinkIndex below; we have this here for convenience.
+    //
+    // This also plays a critical role for memory management: this is
+    // the only index that actually holds the atom shared_ptr, and thus
+    // increments the atom use count in a guaranteed fashion.  This is
+    // the one true guaranteee that the atom will not be deleted while
+    // it s in the atom table.
     std::unordered_set<Handle, handle_hash> _atom_set;
 
     //!@{
