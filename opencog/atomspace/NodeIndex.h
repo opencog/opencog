@@ -47,21 +47,20 @@ class NodeIndex
 	public:
 		NodeIndex();
 
-		void insertAtom(const AtomPtr& a)
+		void insertAtom(Atom* a)
 		{
 			NameIndex &ni(idx[a->getType()]);
 			ni.insertAtom(a);
 		}
-		void removeAtom(const AtomPtr& a)
+		void removeAtom(Atom* a)
 		{
 			NameIndex &ni(idx.at(a->getType()));
 			ni.removeAtom(a);
 		}
-		void remove(bool (*)(const AtomPtr&));
 		void resize();
 		size_t size() const;
 
-		const AtomPtr& getAtom(Type type, const std::string& str) const
+		Atom* getAtom(Type type, const std::string& str) const
 		{
 			const NameIndex &ni(idx.at(type));
 			return ni.get(str);
@@ -75,15 +74,15 @@ class NodeIndex
 		{
 			if (not subclass)
 			{
-				AtomPtr atom(getAtom(type, name));
-				if (atom) *result++ = Handle(atom);
+				Atom* atom = getAtom(type, name);
+				if (atom) *result++ = atom->getHandle();
 			}
 			else
 			{
 				Type max = idx.size();
 				for (Type s = 0; s < max; s++) {
 					if (classserver().isA(s, type)) {
-						AtomPtr atom(getAtom(s, name));
+						Atom* atom = getAtom(s, name);
 						if (atom) *result++ = atom->getHandle();
 					}
 				}

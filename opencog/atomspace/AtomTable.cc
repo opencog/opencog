@@ -120,8 +120,8 @@ Handle AtomTable::getHandle(Type t, std::string name) const
         name = std::to_string(std::stod(name));
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    const AtomPtr& atom = nodeIndex.getAtom(t, name);
-    if (atom) return Handle(atom);
+    Atom* atom = nodeIndex.getAtom(t, name);
+    if (atom) return atom->getHandle();
     if (_environ and NULL == atom)
         return _environ->getHandle(t, name);
     return Handle::UNDEFINED;
@@ -599,11 +599,12 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 void AtomTable::put_atom_into_index(AtomPtr& atom)
 {
     std::unique_lock<std::recursive_mutex> lck(_mtx);
-    nodeIndex.insertAtom(atom);
+    Atom* pat = atom.operator->();
+    nodeIndex.insertAtom(pat);
     linkIndex.insertAtom(atom);
-    typeIndex.insertAtom(atom);
-    targetTypeIndex.insertAtom(atom);
-    importanceIndex.insertAtom(atom);
+    typeIndex.insertAtom(pat);
+    targetTypeIndex.insertAtom(pat);
+    importanceIndex.insertAtom(pat);
 }
 
 void AtomTable::barrier()
@@ -804,17 +805,18 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     size--;
     _atom_set.erase(handle);
 
-    nodeIndex.removeAtom(atom);
+    Atom* pat = atom.operator->();
+    nodeIndex.removeAtom(pat);
     linkIndex.removeAtom(atom);
-    typeIndex.removeAtom(atom);
+    typeIndex.removeAtom(pat);
     LinkPtr lll(LinkCast(atom));
     if (lll) {
         for (AtomPtr a : lll->_outgoing) {
             a->remove_atom(lll);
         }
     }
-    targetTypeIndex.removeAtom(atom);
-    importanceIndex.removeAtom(atom);
+    targetTypeIndex.removeAtom(pat);
+    importanceIndex.removeAtom(pat);
 
     // XXX Setting the atom table causes AVChanged signals to be emitted.
     // We should really do this unlocked, but I'm too lazy to fix, and

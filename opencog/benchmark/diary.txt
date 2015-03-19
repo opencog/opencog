@@ -866,3 +866,18 @@ for python, either, can't tell why...
   getOutgoingSet    17.2          7.04
   getIncomingSet    16.1          7.15
   removeAtom        15.1         crash
+
+======================================================================
+19 March 2015:
+
+Replaced AtomPtr in the AtomTable indexes with Atom*.  This should
+improve atom insert and remove performance. It does seem to, but not very
+much.
+
+                   -A
+   test          AtomSpace
+   name          K-ops/sec
+   ----          ---------
+  addNode          195
+  addLink          101
+  removeAtom       170

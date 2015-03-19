@@ -39,7 +39,6 @@ ADD_LIBRARY (atomspace SHARED
     NullTruthValue.cc
     ProbabilisticTruthValue.cc
     SimpleTruthValue.cc
-    StringIndex.cc
     TargetTypeIndex.cc
     TLB.cc
     TruthValue.cc

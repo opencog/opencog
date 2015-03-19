@@ -31,21 +31,4 @@ size_t FixedIntegerIndex::size(void) const
 	return cnt;
 }
 
-void FixedIntegerIndex::remove(bool (*filter)(Handle))
-{
-	for (UnorderedAtomSet& s : idx)
-	{
-		UnorderedAtomSet::iterator i, j;
-	
-		i = s.begin();
-		while (i != s.end())
-		{
-			j = i;
-			++i;
-			if (filter(Handle(*j)))
-				s.erase(*j);
-		}
-	}
-}
-
 // ================================================================

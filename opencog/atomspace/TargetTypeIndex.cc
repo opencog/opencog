@@ -31,9 +31,9 @@ TargetTypeIndex::TargetTypeIndex(void)
     resize();
 }
 
-void TargetTypeIndex::insertAtom(AtomPtr a)
+void TargetTypeIndex::insertAtom(Atom* a)
 {
-	LinkPtr l(LinkCast(a));
+	Link* l = dynamic_cast<Link*>(a);
 	if (!l) return;
 
 	Arity arity = l->getArity();
@@ -52,9 +52,9 @@ void TargetTypeIndex::insertAtom(AtomPtr a)
 	}
 }
 
-void TargetTypeIndex::removeAtom(AtomPtr a)
+void TargetTypeIndex::removeAtom(Atom* a)
 {
-	LinkPtr l(LinkCast(a));
+	Link* l = dynamic_cast<Link*>(a);
 	if (!l) return;
 
 	Arity arity = l->getArity();
