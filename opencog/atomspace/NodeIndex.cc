@@ -43,11 +43,6 @@ size_t NodeIndex::size() const
 	return cnt;
 }
 
-void NodeIndex::remove(bool (*filter)(const AtomPtr&))
-{
-	for (NameIndex ni : idx) ni.remove(filter);
-}
-
 UnorderedHandleSet NodeIndex::getHandleSet(Type type, const std::string& name,
 		bool subclass) const
 {
@@ -57,13 +52,13 @@ UnorderedHandleSet NodeIndex::getHandleSet(Type type, const std::string& name,
 		Type max = idx.size();
 		for (Type s = 0; s < max; s++) {
 			if (classserver().isA(s, type)) {
-				AtomPtr atom(getAtom(s, name));
+				Atom* atom = getAtom(s, name);
 				if (atom)
 					hs.insert(atom->getHandle());
 			}
 		}
 	} else {
-		AtomPtr atom(getAtom(type, name));
+		Atom* atom = getAtom(type, name);
 		if (atom) hs.insert(atom->getHandle());
 	}
 

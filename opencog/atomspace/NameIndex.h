@@ -41,15 +41,15 @@ class NameIndex:
 	public StringIndex
 {
 	public:
-		void insertAtom(AtomPtr a)
+		void insertAtom(Atom* a)
 		{
-			NodePtr n(NodeCast(a));
+			Node * n = dynamic_cast<Node*>(a);
 			if (NULL == n) return;
 			insert(n->getName(), a);
 		}
-		void removeAtom(AtomPtr a)
+		void removeAtom(Atom* a)
 		{
-			NodePtr n(NodeCast(a));
+			Node * n = dynamic_cast<Node*>(a);
 			if (NULL == n) return;
 			remove(n->getName());
 		}

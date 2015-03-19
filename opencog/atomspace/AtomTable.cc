@@ -120,8 +120,8 @@ Handle AtomTable::getHandle(Type t, std::string name) const
         name = std::to_string(std::stod(name));
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    const AtomPtr& atom = nodeIndex.getAtom(t, name);
-    if (atom) return Handle(atom);
+    Atom* atom = nodeIndex.getAtom(t, name);
+    if (atom) return atom->getHandle();
     if (_environ and NULL == atom)
         return _environ->getHandle(t, name);
     return Handle::UNDEFINED;
@@ -599,7 +599,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 void AtomTable::put_atom_into_index(AtomPtr& atom)
 {
     std::unique_lock<std::recursive_mutex> lck(_mtx);
-    nodeIndex.insertAtom(atom);
+    nodeIndex.insertAtom(atom.operator->());
     linkIndex.insertAtom(atom);
     typeIndex.insertAtom(atom);
     targetTypeIndex.insertAtom(atom);
@@ -804,7 +804,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     size--;
     _atom_set.erase(handle);
 
-    nodeIndex.removeAtom(atom);
+    nodeIndex.removeAtom(atom.operator->());
     linkIndex.removeAtom(atom);
     typeIndex.removeAtom(atom);
     LinkPtr lll(LinkCast(atom));
