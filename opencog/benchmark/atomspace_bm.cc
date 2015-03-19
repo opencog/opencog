@@ -15,7 +15,6 @@ int main(int argc, char** argv)
      "Usage: atomspace_bm [-m <method>] [options]\n"
      "-t        \tPrint information on type sizes\n"
      "-A        \tBenchmark all methods\n"
-     "-x        \tTest the AtomSpaceImpl API\n"
      "-X        \tTest the AtomTable API\n"
      "-g        \tTest the Scheme API\n"
      "-M        \tMemoize Scheme expressions\n"
@@ -66,7 +65,6 @@ int main(int argc, char** argv)
              benchmarker.setMethod("addLink");
              benchmarker.setMethod("getType");
              benchmarker.setMethod("getTV");
-//             benchmarker.setMethod("getTVZmq");
              benchmarker.setMethod("setTV");
              benchmarker.setMethod("getNodeHandles");
              benchmarker.setMethod("getOutgoingSet");
