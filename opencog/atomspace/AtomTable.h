@@ -147,7 +147,6 @@ private:
     AtomTable& operator=(const AtomTable&);
     AtomTable(const AtomTable&);
 
-    static const AtomPtr NULL_ATOM;
 public:
 
     /**
@@ -196,7 +195,6 @@ public:
      * @return The handle of the desired atom if found.
      */
     Handle getHandle(Type, std::string) const;
-    const AtomPtr& getAtom(Type, std::string) const;
     Handle getHandle(const NodePtr&) const;
 
     Handle getHandle(Type, const HandleSeq&) const;

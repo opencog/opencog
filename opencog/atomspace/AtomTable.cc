@@ -113,9 +113,7 @@ AtomTable::AtomTable(const AtomTable& other)
             "AtomTable - Cannot copy an object of this class");
 }
 
-const AtomPtr AtomTable::NULL_ATOM;
-
-const AtomPtr& AtomTable::getAtom(Type t, std::string name) const
+Handle AtomTable::getHandle(Type t, std::string name) const
 {
     // NumberNodes need to have a uniformly-agreed-upon name.
     if (NUMBER_NODE == t)
@@ -123,16 +121,9 @@ const AtomPtr& AtomTable::getAtom(Type t, std::string name) const
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     const AtomPtr& atom = nodeIndex.getAtom(t, name);
-    if (atom) return atom;
-    if (_environ and NULL == atom)
-        return _environ->getAtom(t, name);
-    return NULL_ATOM;
-}
-
-Handle AtomTable::getHandle(Type t, std::string name) const
-{
-    const AtomPtr& atom = getAtom(t, name);
     if (atom) return Handle(atom);
+    if (_environ and NULL == atom)
+        return _environ->getHandle(t, name);
     return Handle::UNDEFINED;
 }
 
@@ -141,10 +132,13 @@ Handle AtomTable::getHandle(Type t, std::string name) const
 /// the table, then return that; else return undefined.
 Handle AtomTable::getHandle(const NodePtr& n) const
 {
-    Handle h(getHandle(n->getType(), n->getName()));
-    if (_environ and Handle::UNDEFINED == h)
-        _environ->getHandle(n);
-    return h;
+    const AtomTable *env = this;
+    do {
+        if (n->_atomTable == env) return Handle(n);
+        env = env->_environ;
+    } while (env);
+
+    return getHandle(n->getType(), n->getName());
 }
 
 Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
@@ -178,10 +172,13 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 /// in the table, then return that; else return undefined.
 Handle AtomTable::getHandle(const LinkPtr& l) const
 {
-    Handle h(getHandle(l->getType(), l->getOutgoingSet()));
-    if (_environ and Handle::UNDEFINED == h)
-        return _environ->getHandle(l);
-    return h;
+    const AtomTable *env = this;
+    do {
+        if (l->_atomTable == env) return Handle(l);
+        env = env->_environ;
+    } while (env);
+
+    return getHandle(l->getType(), l->getOutgoingSet());
 }
 
 /// Find an equivalent atom that is exactly the same as the arg. If
