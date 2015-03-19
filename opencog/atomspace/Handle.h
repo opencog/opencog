@@ -69,11 +69,13 @@ private:
     AtomPtr resolve_ptr();
     static void set_resolver(const AtomTable*);
     static void clear_resolver(const AtomTable*);
+
+    static const AtomPtr NULL_POINTER;
 public:
 
     static const Handle UNDEFINED;
 
-    explicit Handle(AtomPtr atom);
+    explicit Handle(const AtomPtr& atom);
     explicit Handle(const UUID u) : _uuid(u) {}
     explicit Handle() : _uuid(ULONG_MAX) {}
     Handle(const Handle& h) : _uuid(h._uuid), _ptr(h._ptr) {}
@@ -165,13 +167,13 @@ public:
 
     operator AtomPtr() const {
         if (_ptr.get()) return _ptr;
-        if (ULONG_MAX == _uuid) return AtomPtr();
+        if (ULONG_MAX == _uuid) return NULL_POINTER;
         Handle h(*this);
         return h.resolve_ptr();
     }
     operator AtomPtr() {
         if (_ptr.get()) return _ptr;
-        if (ULONG_MAX == _uuid) return AtomPtr();
+        if (ULONG_MAX == _uuid) return NULL_POINTER;
         return resolve_ptr();
     }
 };
