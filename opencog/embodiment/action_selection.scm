@@ -1,4 +1,4 @@
-s;
+;
 ; Action planner
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
