@@ -113,24 +113,33 @@ AtomTable::AtomTable(const AtomTable& other)
             "AtomTable - Cannot copy an object of this class");
 }
 
-Handle AtomTable::getHandle(Type t, std::string name) const
+const AtomPtr AtomTable::NULL_ATOM;
+
+const AtomPtr& AtomTable::getAtom(Type t, std::string name) const
 {
     // NumberNodes need to have a uniformly-agreed-upon name.
     if (NUMBER_NODE == t)
         name = std::to_string(std::stod(name));
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    AtomPtr atom(nodeIndex.getAtom(t, name));
-    if (atom) return Handle(atom);
+    const AtomPtr& atom = nodeIndex.getAtom(t, name);
+    if (atom) return atom;
     if (_environ and NULL == atom)
-        return _environ->getHandle(t, name);
+        return _environ->getAtom(t, name);
+    return NULL_ATOM;
+}
+
+Handle AtomTable::getHandle(Type t, std::string name) const
+{
+    const AtomPtr& atom = getAtom(t, name);
+    if (atom) return Handle(atom);
     return Handle::UNDEFINED;
 }
 
 /// Find an equivalent atom that has exactly the same name and type.
 /// That is, if there is an atom with this name and type already in
 /// the table, then return that; else return undefined.
-Handle AtomTable::getHandle(const NodePtr n) const
+Handle AtomTable::getHandle(const NodePtr& n) const
 {
     Handle h(getHandle(n->getType(), n->getName()));
     if (_environ and Handle::UNDEFINED == h)
@@ -167,7 +176,7 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 /// Find an equivalent atom that has exactly the same type and outgoing
 /// set.  That is, if there is an atom with this ype and outset already
 /// in the table, then return that; else return undefined.
-Handle AtomTable::getHandle(LinkPtr l) const
+Handle AtomTable::getHandle(const LinkPtr& l) const
 {
     Handle h(getHandle(l->getType(), l->getOutgoingSet()));
     if (_environ and Handle::UNDEFINED == h)
@@ -178,7 +187,7 @@ Handle AtomTable::getHandle(LinkPtr l) const
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else the return
 /// is the bad handle.
-Handle AtomTable::getHandle(AtomPtr a) const
+Handle AtomTable::getHandle(const AtomPtr& a) const
 {
     NodePtr nnn(NodeCast(a));
     if (nnn)

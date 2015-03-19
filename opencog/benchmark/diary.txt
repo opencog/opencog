@@ -371,7 +371,7 @@ more complex form that Handle now has, resulting in more copying.
 
 
 The second column replaces Handle by UUID in the TypeIndex. This improves
-performance by avoiding excess copying during ahndle manipulations.
+performance by avoiding excess copying during handle manipulations.
 
 Column III shows the profile after two significant changes: rejiggering
 the way the AtomPtr is held by the handle, and by adding locks to the

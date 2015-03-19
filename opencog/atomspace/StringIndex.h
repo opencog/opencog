@@ -40,6 +40,7 @@ namespace opencog
 class StringIndex
 {
 	private:
+		static const AtomPtr NULL_ATOM;
 		std::map<std::string, AtomPtr> idx;
 
 	public:
@@ -47,12 +48,12 @@ class StringIndex
 		{
 			idx.insert(std::pair<std::string, AtomPtr>(str,a));
 		}
-		AtomPtr get(const std::string& str) const
+		const AtomPtr& get(const std::string& str) const
 		{
 			std::map<std::string, AtomPtr>::const_iterator it;
 			it = idx.find(str);
 			if (it != idx.end()) return it->second;
-			return AtomPtr();
+			return NULL_ATOM;
 		}
 		void remove(const std::string& str)
 		{
@@ -62,7 +63,7 @@ class StringIndex
 		{
 			return idx.size();
 		}
-		void remove(bool (*)(AtomPtr));
+		void remove(bool (*)(const AtomPtr&));
 };
 
 /** @}*/

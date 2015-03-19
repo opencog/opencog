@@ -23,7 +23,9 @@
 
 using namespace opencog;
 
-void StringIndex::remove(bool (*filter)(AtomPtr))
+const AtomPtr StringIndex::NULL_ATOM;
+
+void StringIndex::remove(bool (*filter)(const AtomPtr&))
 {
 	std::map<std::string, AtomPtr>::iterator i, j;
 	
@@ -36,4 +38,3 @@ void StringIndex::remove(bool (*filter)(AtomPtr))
 			idx.erase(j->first);
 	}
 }
-
