@@ -56,11 +56,11 @@ class TypeIndex : public FixedIntegerIndex
 	public:
 		TypeIndex(void);
 		void resize(void);
-		void insertAtom(const AtomPtr& a)
+		void insertAtom(Atom* a)
 		{
 			insert(a->getType(), a);
 		}
-		void removeAtom(const AtomPtr& a)
+		void removeAtom(Atom* a)
 		{
 			remove(a->getType(), a);
 		}

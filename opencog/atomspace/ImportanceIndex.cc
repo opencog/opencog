@@ -48,7 +48,7 @@ unsigned int ImportanceIndex::importanceBin(short importance)
 	return (importance + 32768) / IMPORTANCE_INDEX_SIZE;
 }
 
-void ImportanceIndex::updateImportance(const AtomPtr& atom, int bin)
+void ImportanceIndex::updateImportance(Atom* atom, int bin)
 {
 	int newbin = importanceBin(atom->getAttentionValue()->getSTI());
 	if (bin == newbin) return;
@@ -57,14 +57,14 @@ void ImportanceIndex::updateImportance(const AtomPtr& atom, int bin)
 	insert(newbin, atom);
 }
 
-void ImportanceIndex::insertAtom(const AtomPtr& atom)
+void ImportanceIndex::insertAtom(Atom* atom)
 {
 	int sti = atom->getAttentionValue()->getSTI();
 	int bin = importanceBin(sti);
 	insert(bin, atom);
 }
 
-void ImportanceIndex::removeAtom(const AtomPtr& atom)
+void ImportanceIndex::removeAtom(Atom* atom)
 {
 	int sti = atom->getAttentionValue()->getSTI();
 	int bin = importanceBin(sti);
@@ -89,7 +89,7 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
 	// upperBound.
 	const UnorderedAtomSet &sl = idx[lowerBin];
 	std::copy_if(sl.begin(), sl.end(), inserter(set),
-		[&](const AtomPtr& atom)->bool {
+		[&](Atom* atom)->bool {
 			AttentionValue::sti_t sti =
 				atom->getAttentionValue()->getSTI();
 			return (lowerBound <= sti and sti <= upperBound);
@@ -100,7 +100,7 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
 	if (lowerBin == upperBin) {
 		UnorderedHandleSet ret;
 		std::transform(set.begin(), set.end(), inserter(ret),
-		               [](const AtomPtr& atom)->Handle { return atom->getHandle(); });
+		               [](Atom* atom)->Handle { return atom->getHandle(); });
 		return ret;
 	}
 
@@ -114,13 +114,13 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
 	// The two lists are concatenated.
 	const UnorderedAtomSet &uset = idx[upperBin];
 	std::copy_if(uset.begin(), uset.end(), inserter(set),
-		[&](const AtomPtr& atom)->bool {
+		[&](Atom* atom)->bool {
 			AttentionValue::sti_t sti = atom->getAttentionValue()->getSTI();
 			return (lowerBound <= sti and sti <= upperBound);
 		});
 
 	UnorderedHandleSet ret;
 	std::transform(set.begin(), set.end(), inserter(ret),
-	               [](const AtomPtr& atom)->Handle { return atom->getHandle(); });
+	               [](Atom* atom)->Handle { return atom->getHandle(); });
 	return ret;
 }

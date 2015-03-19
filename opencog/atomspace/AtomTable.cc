@@ -599,11 +599,12 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 void AtomTable::put_atom_into_index(AtomPtr& atom)
 {
     std::unique_lock<std::recursive_mutex> lck(_mtx);
-    nodeIndex.insertAtom(atom.operator->());
+    Atom* pat = atom.operator->();
+    nodeIndex.insertAtom(pat);
     linkIndex.insertAtom(atom);
-    typeIndex.insertAtom(atom);
-    targetTypeIndex.insertAtom(atom);
-    importanceIndex.insertAtom(atom);
+    typeIndex.insertAtom(pat);
+    targetTypeIndex.insertAtom(pat);
+    importanceIndex.insertAtom(pat);
 }
 
 void AtomTable::barrier()
@@ -804,17 +805,18 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     size--;
     _atom_set.erase(handle);
 
-    nodeIndex.removeAtom(atom.operator->());
+    Atom* pat = atom.operator->();
+    nodeIndex.removeAtom(pat);
     linkIndex.removeAtom(atom);
-    typeIndex.removeAtom(atom);
+    typeIndex.removeAtom(pat);
     LinkPtr lll(LinkCast(atom));
     if (lll) {
         for (AtomPtr a : lll->_outgoing) {
             a->remove_atom(lll);
         }
     }
-    targetTypeIndex.removeAtom(atom);
-    importanceIndex.removeAtom(atom);
+    targetTypeIndex.removeAtom(pat);
+    importanceIndex.removeAtom(pat);
 
     // XXX Setting the atom table causes AVChanged signals to be emitted.
     // We should really do this unlocked, but I'm too lazy to fix, and

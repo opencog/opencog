@@ -362,8 +362,9 @@ public:
      */
     void updateImportanceIndex(AtomPtr a, int bin)
     {
+        if (a->_atomTable != this) return;
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        importanceIndex.updateImportance(a, bin);
+        importanceIndex.updateImportance(a.operator->(), bin);
     }
 
     /**

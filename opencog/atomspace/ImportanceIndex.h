@@ -43,8 +43,8 @@ class ImportanceIndex: public FixedIntegerIndex
 {
 public:
     ImportanceIndex(void);
-    void insertAtom(const AtomPtr&);
-    void removeAtom(const AtomPtr&);
+    void insertAtom(Atom*);
+    void removeAtom(Atom*);
 
     /** Updates the importance index for the given atom.
      * According to the new importance of the atom, it may change importance
@@ -53,7 +53,7 @@ public:
      * @param The atom whose importance index will be updated.
      * @param The old importance bin where the atom originally was.
      */
-    void updateImportance(const AtomPtr&, int);
+    void updateImportance(Atom*, int);
     
     UnorderedHandleSet getHandleSet(const AtomTable*,
                               AttentionValue::sti_t,
