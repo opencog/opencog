@@ -1,5 +1,7 @@
 ; ============================================================================= 
-; GeneralEvaluationToMemberRule
+; GeneralEvaluationToMemberRule 
+;	Takes EvaluationLinks with >=2 Arguments and creates a Member Link
+;
 ;	EvaluationLink (pred D (ListLink B C))
 ;		becomes
 ;	MemberLink( B (SatisfyingSetLink( Variable $X 
@@ -9,34 +11,22 @@
 (define pln-rule-evaluation-to-member
 	(BindLink
 		(ListLink
-			(VariableNode "$B")
-			(VariableNode "$C")
+			(VariableNode "$A")
 			(TypedVariableLink
 				(VariableNode "$D")
 				(VariableTypeNode "PredicateNode")))
-		(ImplicationLink
-			(EvaluationLink
-				(VariableNode "$D")
-				(ListLink
-					(VariableNode "$B")
-					(VariableNode "$C")))
-			(ExecutionOutputLink
-				(GroundedSchemaNode "scm:pln-formula-evaluation-to-member")
-				(ListLink
-					(MemberLink
-						(VariableNode "$B")
-						(SatisfyingSetLink
-							(VariableNode "$X")
-							(EvaluationLink
-								(VariableNode "$D")
-								(ListLink
-									(VariableNode "$X")
-									(VariableNode "$C")))))
-					(EvaluationLink
-						(VariableNode "$D")
-						(ListLink
-							(VariableNode "$B")
-							(VariableNode "$C"))))))))
+        (ImplicationLink
+            (EvaluationLink
+                (VariableNode "$D")
+                (VariableNode "$A"))
+            (ExecutionOutputLink
+                (GroundedSchemaNode "scm:pln-formula-evaluation-to-member")
+                (ListLink
+                    (EvaluationLink
+                        (VariableNode "$D")
+                        (VariableNode "$A")))))))
+
+
 ; -----------------------------------------------------------------------------
 ; Evaluation To Member Formula
 ; -----------------------------------------------------------------------------
@@ -45,19 +35,16 @@
 ; Side-effect: TruthValue of the new link stays the same
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-evaluation-to-member BXDXC DBC)
-	(cog-set-tv!
-		BXDXC
-		(pln-formula-evaluation-to-member-side-effect-free
-			BXDXC
-			DBC)))
-; -----------------------------------------------------------------------------
-; This version has no side effects and simply returns a TruthValue
-; -----------------------------------------------------------------------------
-
-(define (pln-formula-evaluation-to-member-side-effect-free BXDXC DBC)
-	(stv
-		(cog-stv-strength DBC)
-		(cog-stv-confidence DBC)))
+(define (pln-formula-evaluation-to-member DBC)
+	(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
+		(car (cdr (cog-get-all-nodes DBC)))
+		(SatisfyingSetLink
+			(VariableNode "$X")
+			(EvaluationLink
+				(car (cog-get-all-nodes DBC))
+				(ListLink
+					(cons
+						(VariableNode "$X")
+						(cdr (cdr (cog-get-all-nodes DBC)))))))))
 
 ; =============================================================================
