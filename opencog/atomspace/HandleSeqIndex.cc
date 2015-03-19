@@ -23,7 +23,7 @@
 
 using namespace opencog;
 
-void HandleSeqIndex::remove(bool (*filter)(Handle))
+void HandleSeqIndex::remove(bool (*filter)(const Handle&))
 {
 	std::map<const HandleSeq,Handle>::iterator i, j;
 	

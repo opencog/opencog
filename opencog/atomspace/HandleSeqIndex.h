@@ -53,13 +53,13 @@ class HandleSeqIndex
 		std::map<const HandleSeq, Handle, handle_seq_less> idx;
 
 	public:
-		void insert(const HandleSeq& seq, Handle h)
+		void insert(const HandleSeq& seq, const Handle& h)
 		{
-			idx.insert(std::pair<const HandleSeq,Handle>(seq,h));
+			idx.insert(std::pair<const HandleSeq,Handle>(seq, h));
 		}
-		Handle get(const HandleSeq& seq) const
+		const Handle& get(const HandleSeq& seq) const
 		{
-			std::map<const HandleSeq,Handle>::const_iterator it;
+			std::map<const HandleSeq, Handle>::const_iterator it;
 			it = idx.find(seq);
 			if (it != idx.end()) return it->second;
 			return Handle::UNDEFINED;
@@ -72,7 +72,7 @@ class HandleSeqIndex
 		{
 			return idx.size();
 		}
-		void remove(bool (*)(Handle));
+		void remove(bool (*)(const Handle&));
 };
 
 /** @}*/
