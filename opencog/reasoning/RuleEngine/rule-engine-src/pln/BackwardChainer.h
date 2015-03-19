@@ -26,7 +26,7 @@
 #include "PLNCommons.h"
 #include "BCPatternMatch.h"
 
-//#define DEBUG 1
+#define DEBUG 1
 using namespace opencog;
 
 /**
@@ -57,7 +57,54 @@ using namespace opencog;
 
 class BackwardChainer
 {
+public:
+	BackwardChainer(AtomSpace* as);
+	~BackwardChainer();
+
+	void do_chain(Handle init_target);
+	map<Handle, HandleSeq>& get_chaining_result();
+
+	void choose_rule();
+
+	AtomSpace* _as;
+	HandleSeq _rule_set; //set of matching rules
+	std::map<int, HandleSeq> _step_inference_map; //for holding inference history
+
 private:
+	map<Handle, HandleSeq> do_bc(Handle& htarget);
+
+	map<Handle, HandleSeq> apply_rule( Handle& htarget, Handle& rule);
+
+	HandleSeq query_rule_base(Handle hpremise);
+	HandleSeq query_knowledge_base(Handle hpremise);
+
+	HandleSeq filter_rules(HandleSeq handles);
+	HandleSeq filter_grounded_experssions(HandleSeq handles);
+
+	map<Handle, HandleSeq> unify(Handle& htarget, Handle& match, map<Handle, HandleSeq>& output);
+	map<Handle, HandleSeq> unify_to_empty_set(Handle& htarget);
+
+	Handle get_unvisited_logical_link(HandleSeq& connectors, HandleSeq& visited);
+	Handle get_root_logical_link(Handle hrule) throw (opencog::InvalidParamException);
+	HandleSeq get_grounded(HandleSeq handles);
+	map<Handle, HandleSeq> get_logical_link_premises_map(Handle& himplication_link) throw (opencog::InvalidParamException);
+
+	map<Handle, HandleSeq> join_premise_vgrounding_maps(const Handle& connector,
+			const map<Handle, map<Handle, HandleSeq> >& premise_var_grounding_map);
+
+	Handle select_rule(HandleSeq& hseq_rule);
+	HandleSeq chase_var_values(Handle& hvar, vector<map<Handle, HandleSeq>>& inference_list, HandleSeq& results);
+
+	map<Handle, HandleSeq> ground_target_vars(Handle& hgoal, vector<map<Handle, HandleSeq>>& var_grounding_map);
+
+	void remove_generated_rules();
+
+#if DEBUG
+	void print_inference_list();
+	void print_premise_var_ground_mapping(const map<Handle,map<Handle,HandleSeq>>&);
+	void print_var_value(const map<Handle,HandleSeq>&);
+#endif
+
 	PLNCommons* _commons;
 	BCPatternMatch* _bcpm;
 	map<Handle, HandleSeq> _chaining_result;
@@ -69,54 +116,5 @@ private:
 	// XXX any additional link should be reflected in @method join_premise_vgrounding_maps
 	vector<Type> _logical_link_types = { AND_LINK, OR_LINK };
 
-	map<Handle, HandleSeq> ground_target_vars(Handle& hgoal, vector<map<Handle, HandleSeq>>& var_grounding_map);
-
-	map<Handle, HandleSeq> do_bc(Handle& htarget);
-
-	map<Handle, HandleSeq> backward_chain( Handle& htarget, Handle& rule);
-
-	Handle get_unvisited_logical_link(HandleSeq& connectors, HandleSeq& visited);
-	Handle get_root_logical_link(Handle hrule) throw (opencog::InvalidParamException);
-	HandleSeq get_grounded(HandleSeq handles);
-	map<Handle, HandleSeq> get_logical_link_premises_map(Handle& himplication_link) throw (opencog::InvalidParamException);
-
-	HandleSeq filter_rules(HandleSeq handles);
-	HandleSeq filter_grounded_experssions(HandleSeq handles);
-
-	HandleSeq query_rule_base(Handle hpremise);
-	HandleSeq query_knowledge_base(Handle hpremise);
-
-	map<Handle, HandleSeq> join_premise_vgrounding_maps(const Handle& connector,
-			const map<Handle, map<Handle, HandleSeq> >& premise_var_grounding_map);
-
-	map<Handle, HandleSeq> unify(Handle& htarget, Handle& match, map<Handle, HandleSeq>& output);
-	map<Handle, HandleSeq> unify_to_empty_set(Handle& htarget);
-
-	Handle select_rule(HandleSeq& hseq_rule);
-
-	HandleSeq chase_var_values(Handle& hvar, vector<map<Handle, HandleSeq>>& inference_list, HandleSeq& results);
-
-	void remove_generated_rules();
-
-#if DEBUG
-	void print_inference_list();
-	void print_premise_var_ground_mapping(const map<Handle,map<Handle,HandleSeq>>&);
-	void print_var_value(const map<Handle,HandleSeq>&);
-#endif
-
-public:
-
-	BackwardChainer(AtomSpace* as);
-	~BackwardChainer();
-
-	AtomSpace* _as;
-
-	HandleSeq _rule_set; //set of matching rules
-	std::map<int, HandleSeq> _step_inference_map; //for holding inference history
-
-	void do_chain(Handle init_target);
-	map<Handle, HandleSeq>& get_chaining_result();
-
-	void choose_rule();
 };
 #endif /* BACKWARDCHAINER_H_ */
