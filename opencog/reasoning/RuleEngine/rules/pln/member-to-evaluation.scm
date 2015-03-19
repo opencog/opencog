@@ -21,26 +21,17 @@
 					(VariableNode "$X")
 					(EvaluationLink
 						(VariableNode "$D")
-						(ListLink
-							(VariableNode "$X")
-							(VariableNode "$C")))))
+						(VariableNode "$C"))))
 			(ExecutionOutputLink
 				(GroundedSchemaNode "scm:pln-formula-member-to-evaluation")
 				(ListLink
-					(EvaluationLink
-						(VariableNode "$D")
-						(ListLink
-							(VariableNode "$B")
-							(VariableNode "$C")))
 					(MemberLink
 						(VariableNode "$B")
 						(SatisfyingSetLink
 							(VariableNode "$X")
 							(EvaluationLink
 								(VariableNode "$D")
-								(ListLink
-									(VariableNode "$X")
-									(VariableNode "$C"))))))))))
+								(VariableNode "$C")))))))))
 
 ; -----------------------------------------------------------------------------
 ; Member To Evaluation Formula
@@ -50,20 +41,12 @@
 ; Side-effect: TruthValue of the new link stays the same
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-member-to-evaluation DBC BXDXC)
-	(cog-set-tv!
-		DBC
-		(pln-formula-member-to-evaluation-side-effect-free
-			DBC
-			BXDXC)))
-
-; -----------------------------------------------------------------------------
-; This version has no side effects and simply returns a TruthValue
-; -----------------------------------------------------------------------------
-
-(define (pln-formula-member-to-evaluation-side-effect-free DBC BXDXC)
-	(stv
-		(cog-stv-strength BXDXC)
-		(cog-stv-confidence BXDXC)))
+(define (pln-formula-member-to-evaluation BXDC)
+	(EvaluationLink (stv (cog-stv-strength BXDC) (cog-stv-confidence BXDC))
+		(car (cdr (cdr (cog-get-all-nodes BXDC))))
+		(ListLink
+			(cons
+				(car (cog-get-all-nodes BXDC))
+				(cdr (cdr (cdr (cdr (cog-get-all-nodes BXDC)))))))))
 
 ; =============================================================================
