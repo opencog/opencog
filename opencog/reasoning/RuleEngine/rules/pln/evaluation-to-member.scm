@@ -36,15 +36,23 @@
 ; -----------------------------------------------------------------------------
 
 (define (pln-formula-evaluation-to-member DBC)
-	(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
-		(car (cdr (cog-get-all-nodes DBC)))
-		(SatisfyingSetLink
-			(VariableNode "$X")
-			(EvaluationLink
-				(car (cog-get-all-nodes DBC))
-				(ListLink
-					(cons
-						(VariableNode "$X")
-						(cdr (cdr (cog-get-all-nodes DBC)))))))))
+	(if (= (cog-arity (gdr DBC)) 0)
+		(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
+			(gdr DBC)
+			(SatisfyingSetLink
+				(VariableNode "$X")
+				(EvaluationLink
+					(gar DBC)
+					(VariableNode "$X"))))
+		(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
+			(gadr DBC)
+			(SatisfyingSetLink
+				(VariableNode "$X")
+				(EvaluationLink
+					(gar DBC)
+					(ListLink
+						(cons
+							(VariableNode "$X")
+							(cdr (cog-get-all-nodes (gdr DBC))))))))))
 
 ; =============================================================================

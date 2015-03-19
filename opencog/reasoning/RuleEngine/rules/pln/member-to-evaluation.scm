@@ -42,11 +42,15 @@
 ; -----------------------------------------------------------------------------
 
 (define (pln-formula-member-to-evaluation BXDC)
-	(EvaluationLink (stv (cog-stv-strength BXDC) (cog-stv-confidence BXDC))
-		(car (cdr (cdr (cog-get-all-nodes BXDC))))
-		(ListLink
-			(cons
-				(car (cog-get-all-nodes BXDC))
-				(cdr (cdr (cdr (cdr (cog-get-all-nodes BXDC)))))))))
+	(if (= (cog-arity (gdddr BXDC)) 0)
+		(EvaluationLink (stv (cog-stv-strength BXDC) (cog-stv-confidence BXDC))
+			(gaddr BXDC)
+			(gar BXDC))
+		(EvaluationLink (stv (cog-stv-strength BXDC) (cog-stv-confidence BXDC))
+			(gaddr BXDC)
+			(ListLink
+				(cons
+					(gar BXDC)
+					(cdr (cog-outgoing-set (gdddr BXDC))))))))
 
 ; =============================================================================
