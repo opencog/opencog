@@ -69,16 +69,13 @@ INSTALL (FILES
     Atom.h
     AtomSpaceDefinitions.h
     AtomSpace.h
-    AtomSpaceImpl.h
     AtomSpaceUtils.h
-    AtomTable.h
     ${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
     AttentionValue.h
     AttentionBank.h
     BackingStore.h
     ClassServer.h
     CountTruthValue.h
-    FixedIntegerIndex.h
     FollowLink.h
     ForeachChaseLink.h
     Foreach.h
@@ -86,26 +83,14 @@ INSTALL (FILES
     FuzzyTruthValue.h
     Handle.h
     HandleMap.h
-    HandleSeqIndex.h
-    HandleSetIndex.h
-    ImportanceIndex.h
-    IncomingIndex.h
     IndefiniteTruthValue.h
-    Intersect.h
     Link.h
-    LinkIndex.h
-    NameIndex.h
     Node.h
-    NodeIndex.h
     NullTruthValue.h
     ProbabilisticTruthValue.h
     SimpleTruthValue.h
-    StringIndex.h
-    TargetTypeIndex.h
     TLB.h
     TruthValue.h
-    TypeIndex.h
     types.h
     DESTINATION "include/${PROJECT_NAME}/atomspace"
 )
-

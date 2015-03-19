@@ -46,7 +46,7 @@ size_t LinkIndex::size() const
 	return cnt;
 }
 
-void LinkIndex::insertAtom(AtomPtr a)
+void LinkIndex::insertAtom(const AtomPtr& a)
 {
 	Type t = a->getType();
 	HandleSeqIndex &hsi = idx[t];
@@ -57,7 +57,7 @@ void LinkIndex::insertAtom(AtomPtr a)
 	hsi.insert(l->getOutgoingSet(), a->getHandle());
 }
 
-void LinkIndex::removeAtom(AtomPtr a)
+void LinkIndex::removeAtom(const AtomPtr& a)
 {
 	Type t = a->getType();
 	HandleSeqIndex &hsi = idx[t];
@@ -76,7 +76,7 @@ Handle LinkIndex::getHandle(Type t, const HandleSeq &seq) const
 	return hsi.get(seq);
 }
 
-void LinkIndex::remove(bool (*filter)(Handle))
+void LinkIndex::remove(bool (*filter)(const Handle&))
 {
 	for (HandleSeqIndex s : idx)
 		s.remove(filter);

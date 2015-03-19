@@ -130,12 +130,15 @@ Handle AtomTable::getHandle(Type t, std::string name) const
 /// Find an equivalent atom that has exactly the same name and type.
 /// That is, if there is an atom with this name and type already in
 /// the table, then return that; else return undefined.
-Handle AtomTable::getHandle(const NodePtr n) const
+Handle AtomTable::getHandle(const NodePtr& n) const
 {
-    Handle h(getHandle(n->getType(), n->getName()));
-    if (_environ and Handle::UNDEFINED == h)
-        _environ->getHandle(n);
-    return h;
+    const AtomTable *env = this;
+    do {
+        if (n->_atomTable == env) return Handle(n);
+        env = env->_environ;
+    } while (env);
+
+    return getHandle(n->getType(), n->getName());
 }
 
 Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
@@ -167,18 +170,21 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 /// Find an equivalent atom that has exactly the same type and outgoing
 /// set.  That is, if there is an atom with this ype and outset already
 /// in the table, then return that; else return undefined.
-Handle AtomTable::getHandle(LinkPtr l) const
+Handle AtomTable::getHandle(const LinkPtr& l) const
 {
-    Handle h(getHandle(l->getType(), l->getOutgoingSet()));
-    if (_environ and Handle::UNDEFINED == h)
-        return _environ->getHandle(l);
-    return h;
+    const AtomTable *env = this;
+    do {
+        if (l->_atomTable == env) return Handle(l);
+        env = env->_environ;
+    } while (env);
+
+    return getHandle(l->getType(), l->getOutgoingSet());
 }
 
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else the return
 /// is the bad handle.
-Handle AtomTable::getHandle(AtomPtr a) const
+Handle AtomTable::getHandle(const AtomPtr& a) const
 {
     NodePtr nnn(NodeCast(a));
     if (nnn)

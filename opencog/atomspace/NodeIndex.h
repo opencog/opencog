@@ -57,11 +57,11 @@ class NodeIndex
 			NameIndex &ni(idx.at(a->getType()));
 			ni.removeAtom(a);
 		}
-		void remove(bool (*)(AtomPtr));
+		void remove(bool (*)(const AtomPtr&));
 		void resize();
 		size_t size() const;
 
-		AtomPtr getAtom(Type type, const std::string& str) const
+		const AtomPtr& getAtom(Type type, const std::string& str) const
 		{
 			const NameIndex &ni(idx.at(type));
 			return ni.get(str);
