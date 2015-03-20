@@ -252,6 +252,10 @@ class MemberToEvaluationRule(Rule):
               $X
               EvaluationLink($X)
     to EvaluationLink ($Y).
+
+    Nil: this is wrong, SatisfyingSetLink does not have this usage
+    see http://wiki.opencog.org/w/SatisfyingSetLink
+
     Can handle multiple argument EvaluationLinks.
     """
     def __init__(self, chainer):
