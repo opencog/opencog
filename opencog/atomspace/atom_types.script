@@ -76,6 +76,9 @@ EXISTS_LINK <- BIND_LINK
 AVERAGE_LINK <- FORALL_LINK
 SATISFYING_SET_LINK <- BIND_LINK
 
+// Function constructor (predicate and schema)
+LAMBDA_LINK <- BIND_LINK
+
 SCHOLEM_LINK <- ORDERED_LINK
 
 // Basic first-order logic operations
