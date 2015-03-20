@@ -97,20 +97,7 @@
 			#t))
 	(map create-evaluation-link (filter criteria? (parse text)) ))
 
-;The extract-disjunct function returns a list of disjuncts for that particular 
-;word. However, that list contains many null lists also. These lists need to 
-;be eliminated before they can be processed further.
-(define (filter-disjunct disjuncts)
-	;This is the criteria for the filter function which cleans up the disjuncts 
-	;list for a list which does not contain any null lists.
-	(define (filter-disjunct-criteria? x)
-		(not (null? x)))
-	(filter filter-disjunct-criteria? disjuncts))
-
-;This function takes as input a word and a list of MST nodes created by the 
-;create-MST-nodes function. For the given word, it gives the disjuncts of that 
-;word as found in the list of nodes give to it as input.
-(define (extract-disjunct word nodes)
+(define (get-related-words-disjuncts word nodes)
 	;This function will return the first word present in the ListLink component of 
 	;an EvaluationLink.
 	(define (get-first-evaluation-word outset)
@@ -134,14 +121,29 @@
 		(if (equal? word firstword)
 			(if (null? nodes)
 				'()
-				(cons (string-append linkname "+") (extract-disjunct word (cdr nodes))))
+				(cons (cons secondword (string-append linkname "+")) (get-related-words-disjuncts word (cdr nodes))))
 			(if (equal? word secondword)
 				(if (null? nodes)
 					'()
-					(cons (string-append linkname "-") (extract-disjunct word (cdr nodes))))
+					(cons (cons firstword (string-append linkname "-")) (get-related-words-disjuncts word (cdr nodes))))
 				(if (null? nodes)
 					'()
-					(cons '() (extract-disjunct word (cdr nodes)))))))
+					(get-related-words-disjuncts word (cdr nodes))))))
+		'()))
+
+(define (arrange-disjuncts-in-order listofdisjuncts sentence)
+	(if (not (null? sentence))
+		(let ([firstw (car sentence)])
+			(cons (get-disjunct-from-list listofdisjuncts firstw) (arrange-disjuncts-in-order listofdisjuncts (cdr sentence))))
+		'()))
+
+(define (get-disjunct-from-list listofdisjuncts firstw)
+	(if (not (null? listofdisjuncts))
+		(let* ([firstdisjunct (car listofdisjuncts)]
+			   [firstdisjunctword (car firstdisjunct)])
+			(if (equal? firstw firstdisjunctword)
+				firstdisjunct
+				(get-disjunct-from-list (cdr listofdisjuncts) firstw)))
 		'()))
 
 ;Given a list of disjuncts, it will create MSTConnector atoms and return a list
@@ -179,7 +181,7 @@
 ;in the input sentence.
 (define (loop-over-words words nodes)
 	(if (not (null? words))
-		(cons (extract-disjunct (car words) nodes) (loop-over-words (cdr words) nodes))
+		(cons (get-related-words-disjuncts (car words) nodes) (loop-over-words (cdr words) nodes))
 		'()))
 
 ;This procedure is called by the make-disjuncts procedure. It is mainly written
@@ -190,20 +192,36 @@
 		(let (
 			[word (car words)]
 			[disjuncts (car disjunctslist)])
-			(create-disjunct word (filter-disjunct disjuncts))
-			(pseudo-make-disjuncts (cdr words) (cdr disjunctslist)))
-		))
+			(if (not (null? disjuncts))
+				(create-disjunct word (get-only-disjuncts disjuncts)))
+			(pseudo-make-disjuncts (cdr words) (cdr disjunctslist)))))
+
+;The disjuncts are in the following form: ((the . MB+) (played. MC-))
+;This function will give the output: (MB+ MC-)
+(define (get-only-disjuncts disjuncts)
+	(if (not (null? disjuncts))
+		(let ([disjunct (car disjuncts)])
+			(cons (cdr disjunct) (get-only-disjuncts (cdr disjuncts))))
+		'()))
+
+;This function takes as input the list of disjuncts for each word and arrangs them in order.
+(define (arrange-all-disjuncts-in-order dl sentence)
+	(define (notnull? x)
+		(if (not (null? x))
+			#t
+			#f))
+	(if (not (null? dl))
+		(cons (filter  notnull? (arrange-disjuncts-in-order (car dl) sentence)) (arrange-all-disjuncts-in-order (cdr dl) sentence))
+		'()))
 
 ;This is the final procedure which (directly or indirectly) uses all the
 ;procedures described above. It takes as input any text, and creates
 ;the LgWordCset atoms along with the appropriate MSTConnector atoms.
-(define (make-disjuncts text)
-	;This function will get all the unique words that were present in the sentence
-	;for which the MST nodes were created.
+(define (make-disjuncts sentence)
 	(define (get-sentence-words sentence)
 		(string-split sentence #\ ))
-	(define nodes (create-MST-nodes text))
-	(define words (get-sentence-words text))
-	(define disjunctslist (loop-over-words words nodes))
-	(pseudo-make-disjuncts words disjunctslist))
+	(define nodes (create-MST-nodes sentence))
+	(define words (get-sentence-words sentence))
+	(define listofdisjuncts (loop-over-words words nodes))
+	(pseudo-make-disjuncts words (arrange-all-disjuncts-in-order listofdisjuncts words)))
 
