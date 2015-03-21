@@ -127,7 +127,7 @@ public:
     /**
      * Get the timestamp of the more recent upper bound of Temporal object already inserted into this TimeServer.
      */
-    unsigned long getLatestTimestamp() const;
+    octime_t getLatestTimestamp() const;
 
     void clear();
 
@@ -141,7 +141,7 @@ public:
      *
      * @return the Handle of the AtTimeLink added into AtomSpace.
      */
-    Handle addTimeInfo(Handle atom, unsigned long timestamp,
+    Handle addTimeInfo(Handle atom, octime_t timestamp,
                        TruthValuePtr tv = TruthValue::TRUE_TV());
 
     /**
@@ -211,7 +211,7 @@ public:
      *        mathing pair or any of them were not removed)
      */
     bool removeTimeInfo(Handle atom,
-                        unsigned long timestamp,
+                        octime_t timestamp,
                         TemporalTable::TemporalRelationship = TemporalTable::EXACT,
                         bool removeDisconnectedTimeNodes = true,
                         bool recursive = true);
@@ -318,7 +318,7 @@ public:
      */
     template<typename OutputIterator>
     OutputIterator getMapHandles(   OutputIterator outIt,
-                                    unsigned long startMoment, unsigned long endMoment) const
+                                    octime_t startMoment, octime_t endMoment) const
     {
         Temporal t(startMoment, endMoment);
         std::vector<HandleTemporalPair> pairs;
@@ -354,7 +354,7 @@ private:
     /**
      * The timestamp of the more recent upper bound of Temporal object already inserted into this TimeServer
      */
-    unsigned long latestTimestamp;
+    octime_t latestTimestamp;
 
     /**
      * Overrides and declares copy constructor and equals operator as private 

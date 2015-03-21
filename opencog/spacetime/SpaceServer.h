@@ -52,6 +52,7 @@
 #include <opencog/spatial/3DSpaceMap/BlockEntity.h>
 
 #include "SpaceServerContainer.h"
+#include "Temporal.h"
 
 namespace opencog
 {
@@ -126,14 +127,14 @@ public:
 
     // add create a new spaceMap for a new scene (it will create a new Octree3DMapMananger)
     // if there is already a spaceMap of this _mapName, just get it and set it to be the current map, not to created a new spaceMap
-    Handle addOrGetSpaceMap(unsigned long timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight);
+    Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight);
 
-    bool addSpaceInfo(Handle objectNode, bool isSelfObject, unsigned long timestamp,
+    bool addSpaceInfo(Handle objectNode, bool isSelfObject, octime_t timestamp,
                       int objX, int objY, int objZ,
                       int objLength, int objWidth, int objHeight,
                       double objYaw, bool isObstacle,  std::string entityClass, std::string objectName, std::string material = "");
 
-    void removeSpaceInfo(Handle objectNode, unsigned long timestamp = 0);
+    void removeSpaceInfo(Handle objectNode, octime_t timestamp = 0);
 
     // SpaceServerContainer virtual methods:
     void mapRemoved(Handle mapId);
@@ -196,13 +197,13 @@ public:
     void addBlockEntityNodes(HandleSeq &toUpdateHandles);
 
     // add blocklist to an entity
-    void addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity* _entity, const unsigned long timeStamp);
+    void addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity* _entity, const octime_t timeStamp);
 
     // add properties predicate link to an entity node when there is a change
     // this including addBlocksLisitPredicateToEntity
-    void updateBlockEntityProperties(opencog::spatial::BlockEntity* entity, unsigned long timestamp);
+    void updateBlockEntityProperties(opencog::spatial::BlockEntity* entity, octime_t timestamp);
 
-    void updateBlockEntitiesProperties(unsigned long timestamp, HandleSeq &toUpdateHandles);
+    void updateBlockEntitiesProperties(octime_t timestamp, HandleSeq &toUpdateHandles);
 
     // input raw data to the learning server for blockEntities identification learning
     void sendRawAdjancentBlocksDataToLS();
@@ -311,7 +312,7 @@ private:
 //    typedef spatial::LocalSpaceMap2D SpaceMap;
 //    typedef spatial::ObjectMetaData ObjectMetadata;
 //    typedef std::map<Handle, SpaceMap*> HandleToSpaceMap;
-//    typedef std::pair<unsigned long, SpaceMap*> TimestampMap;
+//    typedef std::pair<octime_t, SpaceMap*> TimestampMap;
 
 //    typedef spatial::Octree3DMapManager SpaceMap3D;
 
@@ -455,7 +456,7 @@ private:
 //     * @param the remaining arguments are related to object's spatial information
 //     * @return true if any property of the object has changed (or it's a new object). False, otherwise.
 //     */
-//    bool addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
+//    bool addSpaceInfo(bool keepPreviousMap, Handle objectNode, octime_t timestamp,
 //                              double objX, double objY, double objZ,
 //                              double objLength, double objWidth, double objHeight,
 //                              double objYaw, bool isObstacle = true, const std::string& entityClass = "common");
@@ -464,7 +465,7 @@ private:
 //     * NOTE: This is just used when a whole space map is received
 //     * from a remote SpaceServer (in LearningServer, for instance).
 //     */
-//    Handle addSpaceMap(unsigned long timestamp, SpaceServer::SpaceMap * spaceMap);
+//    Handle addSpaceMap(octime_t timestamp, SpaceServer::SpaceMap * spaceMap);
 
 //    Handle getSpaceMapNode();
 
@@ -477,7 +478,7 @@ private:
 //     * @return handle of the atom that represents the SpaceMap (at the given
 //     * timestamp) where the object was removed
 //     */
-//    Handle removeSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp);
+//    Handle removeSpaceInfo(bool keepPreviousMap, Handle objectNode, octime_t timestamp);
 
 //    /**
 //     * Remove old maps from SpaceServer in order to save memory. SpaceMaps

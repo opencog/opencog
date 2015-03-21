@@ -51,7 +51,7 @@ std::ostream& operator<<(std::ostream& out, const Temporal& t)
 // USED TO SEEK MEMORY LEAK
 //int Temporal::numTemporals = 0;
 
-void Temporal::init(unsigned long a, unsigned long b, bool normal) throw (InvalidParamException)
+void Temporal::init(octime_t a, octime_t b, bool normal) throw (InvalidParamException)
 {
 
     // USED TO SEEK MEMORY LEAK
@@ -64,8 +64,8 @@ void Temporal::init(unsigned long a, unsigned long b, bool normal) throw (Invali
             throw InvalidParamException(TRACE_INFO,
                                         "Cannot create a Temporal (normal-distribution) with the variance (%lu) greater than the mean (%lu). This causes negative lower bound.", b,  a);
         }
-        unsigned long long sum = (unsigned long long) a + b;
-        if (sum > (unsigned long long) UINT_MAX) {
+        octime_t long sum = (octime_t long) a + b;
+        if (sum > (octime_t long) UINT_MAX) {
             throw InvalidParamException(TRACE_INFO,
                                         "Temporal - Upper bound reached when creating a Temporal (normal-distribution): %lu.", sum);
         }
@@ -96,12 +96,12 @@ const Temporal& Temporal::undefined_temporal()
     return instance;
 }
 
-Temporal::Temporal(unsigned long a, unsigned long b, bool normal)
+Temporal::Temporal(octime_t a, octime_t b, bool normal)
 {
     init(a, b, normal);
 }
 
-Temporal::Temporal(unsigned long timestamp)
+Temporal::Temporal(octime_t timestamp)
 {
     init(timestamp, timestamp, false);
 }
@@ -115,17 +115,17 @@ bool Temporal::isNormal() const
     return normal;
 }
 
-unsigned long Temporal::getA() const
+octime_t Temporal::getA() const
 {
     return a;
 }
 
-unsigned long Temporal::getB() const
+octime_t Temporal::getB() const
 {
     return b;
 }
 
-unsigned long Temporal::getLowerBound() const
+octime_t Temporal::getLowerBound() const
 {
     if (normal) {
         return (a - b);
@@ -134,7 +134,7 @@ unsigned long Temporal::getLowerBound() const
     }
 }
 
-unsigned long Temporal::getUpperBound() const
+octime_t Temporal::getUpperBound() const
 {
     if (normal) {
         return (a + b);
@@ -165,7 +165,7 @@ std::string Temporal::getTimeNodeName() const
     return buffer;
 }
 
-std::string Temporal::getTimeNodeName(unsigned long timestamp)
+std::string Temporal::getTimeNodeName(octime_t timestamp)
 {
     // NOTE: The strictly correct way to implement this would be like follows:
     //   return Temporal(timestamp).getTimeNodeName();
@@ -178,9 +178,9 @@ std::string Temporal::getTimeNodeName(unsigned long timestamp)
 Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
 {
     const char* nextToken = timeNodeName;
-    unsigned long a = (unsigned long) strtoul(nextToken,NULL,10);
+    octime_t a = (octime_t) strtoul(nextToken,NULL,10);
 
-    DPRINTF("Temporal::getFromTimeNodeName: %ld %lu %lu / %s\n", a, a, (unsigned long)atof(timeNodeName), timeNodeName);
+    DPRINTF("Temporal::getFromTimeNodeName: %ld %lu %lu / %s\n", a, a, (octime_t)atof(timeNodeName), timeNodeName);
 
     while (*nextToken && *nextToken != ':') {
         nextToken++;
@@ -188,7 +188,7 @@ Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
     if (!(*nextToken)) {
         return Temporal(a);
     }
-    unsigned long b = (unsigned long)strtoul(++nextToken,NULL,10);
+    octime_t b = (octime_t)strtoul(++nextToken,NULL,10);
 
     DPRINTF("Temporal::getFromTimeNodeName: %ld %lu / %s\n", b, b, nextToken);
 
@@ -204,14 +204,14 @@ Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
 
 int Temporal::compareTo(const Temporal* other) const
 {
-    unsigned long low1 = this->getLowerBound();
-    unsigned long low2 = other->getLowerBound();
+    octime_t low1 = this->getLowerBound();
+    octime_t low2 = other->getLowerBound();
     if(low1 < low2)
         return -1;
     else if(low2 < low1)
         return 1;
-    unsigned long up1 = this->getUpperBound();
-    unsigned long up2 = other->getUpperBound();
+    octime_t up1 = this->getUpperBound();
+    octime_t up2 = other->getUpperBound();
     if(up1 < up2)
         return -1;
     else if(up2 < up1)
