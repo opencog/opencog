@@ -26,6 +26,10 @@ RUN pip install -U -r /tmp/requirements.txt
 # Tools
 RUN apt-get -y install git wget
 RUN apt-get -y install rlwrap telnet netcat-openbsd
+RUN apt-get -y install gdb python2.7-dbg
+
+# Copy the .gdbinit file so we can debug the CogServer
+COPY scripts/.gdbinit ~/.gdbinit
 
 # Environment Variables
 ## Set Locale
@@ -55,11 +59,11 @@ ENV LAST_SOFTWARE_UPDATE 2015-02-18
 RUN wget -r --no-parent -nH --cut-dirs=2 http://www.abisource.com/downloads/link-grammar/current/
 RUN tar -zxf current/link-grammar-5*.tar.gz
 RUN rm -r current
-RUN (cd link-grammar-5.*/; mkdir build; cd build; ../configure; make -j12; sudo make install; sudo ldconfig)
+RUN (cd link-grammar-5.*/; mkdir build; cd build; ../configure; make -j4; sudo make install; sudo ldconfig)
 
 # Now, OpenCog itself.
 RUN git clone https://github.com/opencog/opencog
-RUN (cd opencog; mkdir build; cd build; cmake ..; make -j12)
+RUN (cd opencog; mkdir build; cd build; cmake ..; make -j4)
 
 # Defaults
 ## cogserver shell ports
