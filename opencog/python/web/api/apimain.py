@@ -2,6 +2,7 @@ __author__ = 'Cosmo Harrigan'
 
 from flask import Flask
 from flask.ext.restful import Api
+from flask.ext.cors import CORS
 from apiatomcollection import *
 from apitypes import *
 from apishell import *
@@ -37,6 +38,10 @@ class RESTAPI(object):
         # Initialize the web server and set the routing
         self.app = Flask(__name__, static_url_path="")
         self.api = swagger.docs(Api(self.app), apiVersion='1.1', api_spec_url='/api/v1.1/spec')
+
+        # Allow Cross Origin Resource Sharing (CORS) so that javascript apps
+        # can use this API from other domains, ports and protocols. 
+        self.cors = CORS(self.app)
 
         # Create and add each resource
         atom_collection_api = AtomCollectionAPI.new(self.atomspace)
