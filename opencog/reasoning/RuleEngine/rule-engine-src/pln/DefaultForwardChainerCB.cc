@@ -189,6 +189,8 @@ Handle DefaultForwardChainerCB::choose_next_target(FCMemory& fcmem)
     HandleSeq tlist = fcmem.get_premise_list();
     map<Handle, float> tournament_elem;
     PLNCommons pc(as_);
+    Handle hchosen = Handle::UNDEFINED;
+
     for (Handle t : tlist) {
         switch (ts_mode_) {
         case TV_FITNESS_BASED: {
@@ -205,7 +207,21 @@ Handle DefaultForwardChainerCB::choose_next_target(FCMemory& fcmem)
             break;
         }
     }
-    return pc.tournament_select(tournament_elem);
+
+    //!Choose a new target that has never been chosen before.
+    //!xxx FIXME since same handle might be chosen multiple times the following
+    //!code doesn't guarantee all targets have been exhaustively looked.
+    for (size_t i = 0; i < tournament_elem.size(); i++) {
+        Handle hselected = pc.tournament_select(tournament_elem);
+        if (fcmem.isin_target_list(hselected)) {
+            continue;
+        } else {
+            hchosen = hselected;
+            break;
+        }
+    }
+
+    return hchosen;
 }
 
 //TODO applier should check on atoms (Inference.matched_atoms when Inference.Rule =Cur_Rule), for mutex rules
