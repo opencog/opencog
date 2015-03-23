@@ -29,11 +29,11 @@ FCMemory::FCMemory(AtomSpace* as) {
 FCMemory::~FCMemory() {
 }
 
-void FCMemory::update_target_list(HandleSeq input) {
+void FCMemory::update_premise_list(HandleSeq input) {
 	for (Handle i : input) {
-		if (find(target_list_.begin(), target_list_.end(), i)
-				== target_list_.end())
-			target_list_.push_back(i);
+		if (find(premise_list_.begin(), premise_list_.end(), i)
+				== premise_list_.end())
+		    premise_list_.push_back(i);
 	}
 }
 

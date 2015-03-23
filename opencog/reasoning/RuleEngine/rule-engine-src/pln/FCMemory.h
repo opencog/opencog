@@ -42,11 +42,12 @@ private:
 	bool search_in_af_;
 	vector<Rule*> rules_; /*<loaded rules*/
 	HandleSeq target_list_; /*<selected targets on each forward chaining steps*/
+	HandleSeq premise_list_; /*<list of premises*/
 	Rule* cur_rule_;
 	Handle cur_target_;
 	vector<Inference> inf_history_; /*<inference history*/
 	AtomSpace* as_;
-	void update_target_list(HandleSeq input);
+	void update_premise_list(HandleSeq input);
 public:
 	FCMemory(AtomSpace* as);
 	~FCMemory();

@@ -83,7 +83,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
 
         //Add more premise to hcurrent_target by pattern matching.
         HandleSeq input = fcb.choose_input(*fcmem_);
-        fcmem_->update_target_list(input);
+        fcmem_->update_premise_list(input);
 
         //Choose the best rule to apply.
         vector<Rule*> rules = fcb.choose_rule(*fcmem_);
@@ -108,7 +108,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         for (auto p : product)
             log_->info("%s",SchemeSmob::to_string(p).c_str());
         fcmem_->add_rules_product(iteration, product);
-        fcmem_->update_target_list(product);
+        fcmem_->update_premise_list(product);
 
         //!Choose next target.
         auto target = fcb.choose_next_target(*fcmem_);
