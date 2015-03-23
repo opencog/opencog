@@ -186,7 +186,7 @@ HandleSeq DefaultForwardChainerCB::choose_input(FCMemory& fcmem)
 
 Handle DefaultForwardChainerCB::choose_next_target(FCMemory& fcmem)
 {
-    HandleSeq tlist = fcmem.get_target_list();
+    HandleSeq tlist = fcmem.get_premise_list();
     map<Handle, float> tournament_elem;
     PLNCommons pc(as_);
     for (Handle t : tlist) {
