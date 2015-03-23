@@ -29,11 +29,15 @@ PACKAGES_FETCH="
 		git \
 			"
 
-PACKAGES_PATTERN_BUILD="
-			devel_C_C++ \
+PACKAGE_GROUPS_BUILD="
+			
 			"
 
 PACKAGES_BUILD="	
+		make \
+		automake \
+		gcc \
+		gcc-c++ \
 		cmake \
 		cxxtest \
 		rlwrap \
@@ -167,7 +171,6 @@ make test
 }
 
 # SECTION 5: Main Program (MAIN main)
-yum install -t pattern $PACKAGE_GROUPS_BUILD
 install_dependencies
 update_opencog_source
 build_opencog
