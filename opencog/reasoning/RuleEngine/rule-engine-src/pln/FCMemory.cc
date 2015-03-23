@@ -56,6 +56,10 @@ HandleSeq FCMemory::get_target_list(void)
 {
     return target_list_;
 }
+HandleSeq FCMemory::get_premise_list(void)
+{
+    return premise_list_;
+}
 bool FCMemory::is_search_in_af(void)
 {
     return search_in_af_;
