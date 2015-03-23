@@ -172,6 +172,13 @@ fi
 
 }
 # SECTION 5: Main Program (MAIN main)
+
+# For Intel's Threading Block Library (TBB)
+
+# source install 
+zypper si tbb
+tar -xvzf "/usr/src/packages/SOURCES/tbb*.tar.gz" 
+make target=linux $MAKE_JOBS
 pattern_install
 add_repositories
 install_dependencies
