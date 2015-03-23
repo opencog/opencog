@@ -30,7 +30,7 @@ PACKAGES_FETCH="
 			"
 
 PACKAGES_PATTERN_BUILD="
-			devel_C_C++
+			devel_C_C++ \
 			"
 
 PACKAGES_BUILD="	
