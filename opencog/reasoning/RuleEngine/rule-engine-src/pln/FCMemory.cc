@@ -98,7 +98,10 @@ Handle FCMemory::get_cur_target(void)
 {
     return cur_target_;
 }
-
+bool FCMemory::isin_target_list(Handle h)
+{
+    return (find(target_list_.begin(), target_list_.end(), h) != target_list_.end());
+}
 bool FCMemory::isin_premise_list(Handle h)
 {
     for (Handle hi : premise_list_) {

@@ -62,7 +62,9 @@ public:
     void set_cur_rule(Rule* r);
     void add_inference(int iteration, HandleSeq product,
                        HandleSeq matched_nodes);
-    Handle get_cur_target(void);bool isin_premise_list(Handle h);
+    Handle get_cur_target(void);
+    bool isin_target_list(Handle h);
+    bool isin_premise_list(Handle h);
     HandleSeq get_result(void);
     vector<Inference>& get_inf_history(void);
     vector<Rule*> get_applied_rules(void);
