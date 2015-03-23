@@ -173,11 +173,14 @@ HandleSeq DefaultForwardChainerCB::choose_input(FCMemory& fcmem)
 
     //Add all root links of atoms in @param neighbors.
     for (auto hn : neighbors) {
-        HandleSeq roots;
-        pc.get_root_links(hn, roots);
-        for (auto r : roots) {
-            if (find(inputs.begin(), inputs.end(), r) == inputs.end())
-                inputs.push_back(r);
+        if (hn->getType() != VARIABLE_NODE) {
+            HandleSeq roots;
+            pc.get_root_links(hn, roots);
+            for (auto r : roots) {
+                if (find(inputs.begin(), inputs.end(), r) == inputs.end() and r->getType()
+                        != BIND_LINK)
+                    inputs.push_back(r);
+            }
         }
     }
 
