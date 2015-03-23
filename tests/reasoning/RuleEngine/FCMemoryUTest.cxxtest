@@ -50,8 +50,8 @@ void FCMemoryUTest::test_isin_target_list(void) {
 			     "(InheritanceLink(VariableNode \"$B\")(VariableNode \"$C\")))");
 	fcmem.set_target(target_list);
 	Handle h = eval->eval_h("(VariableNode \"$B\")");
-	TS_ASSERT(fcmem.isin_target_list(h));
+	TS_ASSERT(fcmem.isin_premise_list(h));
     h= eval->eval_h("(VariableNode \"$D\")");
-    TS_ASSERT(not fcmem.isin_target_list(h));
+    TS_ASSERT(not fcmem.isin_premise_list(h));
 }
 
