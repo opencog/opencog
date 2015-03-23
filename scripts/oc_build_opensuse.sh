@@ -172,6 +172,7 @@ fi
 
 }
 # SECTION 5: Main Program (MAIN main)
+pattern_install
 add_repositories
 install_dependencies
 update_opencog_source
