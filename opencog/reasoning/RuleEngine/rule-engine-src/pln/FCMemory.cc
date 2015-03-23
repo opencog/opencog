@@ -44,6 +44,7 @@ void FCMemory::set_rules(vector<Rule*> rules) {
 	rules_ = rules;
 }
 void FCMemory::set_target(Handle target) {
+
 	cur_target_ = target;
 	target_list_.push_back(cur_target_);
 }
@@ -83,8 +84,8 @@ Handle FCMemory::get_cur_target(void) {
 	return cur_target_;
 }
 
-bool FCMemory::isin_target_list(Handle h) {
-	for (Handle hi : target_list_) {
+bool FCMemory::isin_premise_list(Handle h) {
+	for (Handle hi : premise_list_) {
 		if (hi.value() == h.value())
 			return true;
 		//recursive lookup
