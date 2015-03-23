@@ -216,18 +216,7 @@ esac
 
 
 # SECTION 5: Main Program (MAIN main)
-
-#if [ "$SELF_NAME" == "install-dependencies-trusty" ] ; then
-#  add_repositories
- # install_dependencies
- # exit 0
-#fi
-
-#if [ "$SELF_NAME" == "$TOOL_NAME" ] ; then
-# if [ $ADD_REPOSITORIES ] ; then add_repositories ; fi 
-#add_repositories
-#su
-#yum group install $PACKAGE_GROUPS_BUILD
+yum group install $PACKAGE_GROUPS_BUILD
 install_dependencies
 update_opencog_source
 build_opencog
