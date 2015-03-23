@@ -27,84 +27,127 @@
 
 #include <opencog/query/PatternMatch.h>
 #include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
+#include <opencog/guile/SchemeSmob.h>
 
 ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :
-		as_(as) {
-	fcmem_ = new FCMemory(as_);
-	if (conf_path != "")
-		_conf_path = conf_path;
-	init();
+        as_(as)
+{
+    fcmem_ = new FCMemory(as_);
+    if (conf_path != "")
+        _conf_path = conf_path;
+    init();
 }
 
-ForwardChainer::~ForwardChainer() {
-	delete cpolicy_loader_;
-	delete fcmem_;
+ForwardChainer::~ForwardChainer()
+{
+    delete cpolicy_loader_;
+    delete fcmem_;
 }
 
-void ForwardChainer::init() {
-	cpolicy_loader_ = new JsonicControlPolicyParamLoader(as_, _conf_path);
-	cpolicy_loader_->load_config();
-	fcmem_->search_in_af_ = cpolicy_loader_->get_attention_alloc();
-	fcmem_->rules_ = cpolicy_loader_->get_rules();
-	fcmem_->cur_rule_ = nullptr;
+void ForwardChainer::init()
+{
+    cpolicy_loader_ = new JsonicControlPolicyParamLoader(as_, _conf_path);
+    cpolicy_loader_->load_config();
+    fcmem_->search_in_af_ = cpolicy_loader_->get_attention_alloc();
+    fcmem_->rules_ = cpolicy_loader_->get_rules();
+    fcmem_->cur_rule_ = nullptr;
+
+    // Provide a logger
+    log_ = NULL;
+    setLogger(new opencog::Logger("forward_chainer.log", Logger::FINE, true));
+}
+
+void ForwardChainer::setLogger(Logger* log)
+{
+    if (log_)
+        delete log_;
+    log_ = log;
+}
+
+Logger* ForwardChainer::getLogger()
+{
+    return log_;
 }
 
 void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
-		Handle htarget/*=Handle::UNDEFINED*/) {
-	int iteration = 0;
-	auto max_iter = cpolicy_loader_->get_max_iter();
-	init_target(htarget);
-	while (iteration < max_iter /*OR other termination criteria*/) {
-		//add more premise to hcurrent_target by pattern matching
-		HandleSeq input = fcb.choose_input(*fcmem_);
-		fcmem_->update_target_list(input);
-		//choose the best rule to apply
-		vector<Rule*> rules = fcb.choose_rule(*fcmem_);
-		map<Rule*, float> rule_weight;
-		for (Rule* r : rules)
-			rule_weight[r] = r->get_cost();
-		PLNCommons pc(as_);
-		auto r = pc.tournament_select(rule_weight);
-		//if no rules matches the pattern of the target,choose another target if there is, else end forward chaining.
-		if (not r)
-			return;
-		fcmem_->cur_rule_ = r;
-		//apply rule
-		HandleSeq product = fcb.apply_rule(*fcmem_);
-		fcmem_->add_rules_product(iteration, product);
-		fcmem_->update_target_list(product);
-		//next target
-		fcmem_->set_target(fcb.choose_next_target(*fcmem_));
-		iteration++;
-	}
+                              Handle htarget/*=Handle::UNDEFINED*/)
+{
+    int iteration = 0;
+    auto max_iter = cpolicy_loader_->get_max_iter();
+    init_target(htarget);
+
+    while (iteration < max_iter /*OR other termination criteria*/) {
+        log_->info("Iteration %d", iteration);
+        log_->info("Next target %s",
+                   SchemeSmob::to_string(fcmem_->cur_target_).c_str());
+
+        //Add more premise to hcurrent_target by pattern matching.
+        HandleSeq input = fcb.choose_input(*fcmem_);
+        fcmem_->update_target_list(input);
+
+        //Choose the best rule to apply.
+        vector<Rule*> rules = fcb.choose_rule(*fcmem_);
+        map<Rule*, float> rule_weight;
+        for (Rule* r : rules) {
+            log_->info("Matching rule %s", r->get_name().c_str());
+            rule_weight[r] = r->get_cost();
+        }
+        PLNCommons pc(as_);
+        auto r = pc.tournament_select(rule_weight);
+        log_->info("Chosen rule %s", r->get_name().c_str());
+
+        //!If no rules matches the pattern of the target,choose another target if there is, else end forward chaining.
+        if (not r)
+            return;
+        fcmem_->cur_rule_ = r;
+
+        //!Apply rule.
+        log_->info("Applying chosen rule", r->get_name().c_str());
+        HandleSeq product = fcb.apply_rule(*fcmem_);
+        log_->info("Results of rule application");
+        for (auto p : product)
+            log_->info("%s",SchemeSmob::to_string(p).c_str());
+        fcmem_->add_rules_product(iteration, product);
+        fcmem_->update_target_list(product);
+
+        //!Choose next target.
+        auto target = fcb.choose_next_target(*fcmem_);
+        fcmem_->set_target(target);
+        iteration++;
+    }
 }
 
-void ForwardChainer::init_target(Handle htarget) {
-	if (htarget == Handle::UNDEFINED)
-		fcmem_->set_target(choose_random_target(as_)); //start FC on a random target
-	else
-		fcmem_->set_target(htarget);
+void ForwardChainer::init_target(Handle htarget)
+{
+    if (htarget == Handle::UNDEFINED) {
+        log_->info("Choosing a random target");
+        fcmem_->set_target(choose_random_target(as_)); //start FC on a random target
+    } else {
+        fcmem_->set_target(htarget);
+    }
 }
 
-Handle ForwardChainer::choose_random_target(AtomSpace * as) {
-	//choose a random atoms to start forward chaining with
-	HandleSeq hs;
-	if (cpolicy_loader_->get_attention_alloc())
-		as->getHandleSetInAttentionalFocus(back_inserter(hs));
-	else
-		as->getHandlesByType(back_inserter(hs), ATOM, true);
-	Handle rand_target;
-	for (;;) {
-		Handle h = hs[rand() % hs.size()];
-		Type t = as->getType(h);
-		if (t != VARIABLE_NODE and t != BIND_LINK and t != IMPLICATION_LINK) {
-			rand_target = h;
-			break;
-		}
-	}
-	return rand_target;
+Handle ForwardChainer::choose_random_target(AtomSpace * as)
+{
+    //!choose a random atoms to start forward chaining with
+    HandleSeq hs;
+    if (cpolicy_loader_->get_attention_alloc())
+        as->getHandleSetInAttentionalFocus(back_inserter(hs));
+    else
+        as->getHandlesByType(back_inserter(hs), ATOM, true);
+    Handle rand_target;
+    for (;;) {
+        Handle h = hs[rand() % hs.size()];
+        Type t = as->getType(h);
+        if (t != VARIABLE_NODE and t != BIND_LINK and t != IMPLICATION_LINK) {
+            rand_target = h;
+            break;
+        }
+    }
+    return rand_target;
 }
 
-HandleSeq ForwardChainer::get_chaining_result() {
-	return fcmem_->get_result();
+HandleSeq ForwardChainer::get_chaining_result()
+{
+    return fcmem_->get_result();
 }
