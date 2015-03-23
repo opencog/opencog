@@ -27,12 +27,14 @@
 #include <opencog/query/PatternMatch.h>
 #include <opencog/guile/SchemeSmob.h>
 
-DefaultForwardChainerCB::DefaultForwardChainerCB(AtomSpace* as) :
+DefaultForwardChainerCB::DefaultForwardChainerCB(
+        AtomSpace* as, target_selection_mode ts_mode /*=TV_FITNESS_BASED*/) :
         ForwardChainerCallBack(as)
 {
     as_ = as;
     fcim_ = new ForwardChainInputMatchCB(as);
     fcpm_ = new ForwardChainPatternMatchCB(as);
+    ts_mode_ = ts_mode;
 }
 
 DefaultForwardChainerCB::~DefaultForwardChainerCB()
@@ -188,8 +190,20 @@ Handle DefaultForwardChainerCB::choose_next_target(FCMemory& fcmem)
     map<Handle, float> tournament_elem;
     PLNCommons pc(as_);
     for (Handle t : tlist) {
-        float fitness = pc.target_tv_fitness(t);
-        tournament_elem[t] = fitness;
+        switch (ts_mode_) {
+        case TV_FITNESS_BASED: {
+            float fitness = pc.target_tv_fitness(t);
+            tournament_elem[t] = fitness;
+        }
+            break;
+        case STI_BASED:
+            tournament_elem[t] = t->getSTI();
+            break;
+        default:
+            throw RuntimeException(TRACE_INFO,
+                                   "Unknown target selection mode.");
+            break;
+        }
     }
     return pc.tournament_select(tournament_elem);
 }
