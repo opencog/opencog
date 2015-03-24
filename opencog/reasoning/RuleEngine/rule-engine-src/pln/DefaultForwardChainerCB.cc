@@ -238,5 +238,15 @@ HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
     } catch (InvalidParamException& e) {
         cout << "VALIDATION FAILED:" << endl << e.what() << endl;
     }
-    return fcpm_->get_products();
+
+    HandleSeq product = fcpm_->get_products();
+
+    //! Make sure the inferences made are new.
+    HandleSeq new_product;
+    for (auto h : product) {
+        if (not fcmem.isin_premise_list(h))
+            new_product.push_back(h);
+    }
+
+    return new_product;
 }
