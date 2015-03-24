@@ -69,17 +69,17 @@ TYPED_VARIABLE_LINK <- ORDERED_LINK
 // Everything under a QuoteLink is interpreted literally.
 QUOTE_LINK <- ORDERED_LINK
 
+// Function constructor (predicate and schema)
+LAMBDA_LINK <- ORDERED_LINK
+
 // Scoping and Logical quantifiers
-BIND_LINK <- ORDERED_LINK
-FORALL_LINK <- BIND_LINK "ForAllLink"
-EXISTS_LINK <- BIND_LINK
+BIND_LINK <- LAMBDA_LINK
+FORALL_LINK <- LAMBDA_LINK "ForAllLink"
+EXISTS_LINK <- LAMBDA_LINK
 AVERAGE_LINK <- FORALL_LINK
 
 // Convert predicate into concept
 SATISFYING_SET_LINK <- UNORDERED_LINK
-
-// Function constructor (predicate and schema)
-LAMBDA_LINK <- BIND_LINK
 
 SCHOLEM_LINK <- ORDERED_LINK
 
