@@ -13382,7 +13382,89 @@ information
 \end_layout
 
 \begin_layout Section*
-The End 
+24 March 2015
+\end_layout
+
+\begin_layout Standard
+Some quick short notes: blog post: 
+\begin_inset Quotes eld
+\end_inset
+
+Thermodynamics with Continuous Information Flow
+\begin_inset Quotes erd
+\end_inset
+
+ https://johncarlosbaez.wordpress.com/2015/03/21/19395 with arxiv paper: http://ar
+xiv.org/pdf/1402.3276v3.pdf Jordan M.
+ Horowitz and Massimiliano Esposito study the master equation for a probability
+ p(x,y) over two distributions X,Y, which are connected via a bipartite
+ graph.
+ The total system is also connected to a thermal bath.
+ The eqn is
+\begin_inset Formula 
+\[
+\frac{dp(x,y)}{dt}=\sum_{x',y'}H_{x,x'}^{y,y'}p(x',y')-H_{x',x}^{y',y}p(x,y)
+\]
+
+\end_inset
+
+i.e.
+ its Markovian; we've written two indexes, which makes it clearer when H
+ is bipartite i.e.
+\begin_inset Formula 
+\[
+H_{x,x'}^{y,y'}=\begin{cases}
+H_{x,x'}^{y} & \mbox{\ if\ }y=y'\\
+H_{x}^{y,y'} & \mbox{\ if\ }x=x'\\
+0 & \mbox{\ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+The interesting part is the entropy, and the thermal bath, which is not
+ in the master eqn(!) The total entropy is 
+\begin_inset Formula $S_{tot}=S_{XY}+S_{env}$
+\end_inset
+
+.
+ Per usual, the information entropy is 
+\begin_inset Formula $S_{XY}=-\sum_{x,y}p(x,y)\log p(x,y)$
+\end_inset
+
+.
+ Two tricks now happen: (1) taking the timer derivative of 
+\begin_inset Formula $S_{XY}$
+\end_inset
+
+ results in something that naturally splits into an X piece and a Y piece.
+ Trick (2) is that 
+\begin_inset Formula $S_{env}$
+\end_inset
+
+ cannot be written down directly, but its time derivative can be; it is
+ proportional to the heat current: 
+\begin_inset Formula $\dot{S}_{env}=-\dot{Q}/T$
+\end_inset
+
+ Observer the tiny dot over S,Q these are the usuaul rate-of-change dots,
+ (i.e.
+ just rates, not functions we are taking time derivative of).
+ Q is heat, Q-dot is heat flow, T is temp.
+ Local detailed balance requires that 
+\begin_inset Formula 
+\[
+\log\frac{H_{x,x'}^{y,y'}}{H_{x',x}^{y',y}}=\frac{-(E_{x,y}-E_{x',y'})}{T}
+\]
+
+\end_inset
+
+is the change in energy due to a state transition: the change in energy
+ is supplied by the heat reservior.
+\end_layout
+
+\begin_layout Section*
+The End ￼
 \end_layout
 
 \begin_layout Standard
