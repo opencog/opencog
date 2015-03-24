@@ -59,8 +59,23 @@ string Rule::get_name()
 	return name_;
 }
 
-void Rule::set_handle(Handle h) throw (exception)
+void Rule::set_handle(Handle h) throw (InvalidParamException)
 {
+	// rules must be defined in a BindLink for pattern matching
+	if (h->getType() != BIND_LINK)
+		throw InvalidParamException(TRACE_INFO, "Expected BindLink for rule.");
+
+	HandleSeq outgoing = LinkCast(h)->getOutgoingSet();
+
+	// check for the BindLink's implication
+	if (outgoing.size() != 2 || outgoing[1]->getType() != IMPLICATION_LINK)
+		throw InvalidParamException(TRACE_INFO, "Rule's BindLink missing ImplicationLink.");
+
+	outgoing = LinkCast(outgoing[1])->getOutgoingSet();
+
+	if (outgoing.size() != 2)
+		throw InvalidParamException(TRACE_INFO, "Rule's ImplicationLink structure incorrect.");
+
 	rule_handle_ = h;
 }
 
@@ -76,22 +91,9 @@ Handle Rule::get_handle()
  */
 Handle Rule::get_implicant()
 {
-	// rules must be defined in a BindLink for pattern matching
-	if (rule_handle_->getType() != BIND_LINK)
-		return Handle::UNDEFINED;
-
 	HandleSeq outgoing = LinkCast(rule_handle_)->getOutgoingSet();
 
-	// check for the BindLink's implication
-	if (outgoing.size() != 2 || outgoing[1]->getType() != IMPLICATION_LINK)
-		return Handle::UNDEFINED;
-
-	outgoing = LinkCast(outgoing[1])->getOutgoingSet();
-
-	if (outgoing.size() != 2)
-		return Handle::UNDEFINED;
-
-	return outgoing[0];
+	return LinkCast(outgoing[1])->getOutgoingSet()[0];
 }
 
 /**
@@ -104,22 +106,9 @@ Handle Rule::get_implicant()
  */
 Handle Rule::get_implicand()
 {
-	// rules must be defined in a BindLink for pattern matching
-	if (rule_handle_->getType() != BIND_LINK)
-		return Handle::UNDEFINED;
-
 	HandleSeq outgoing = LinkCast(rule_handle_)->getOutgoingSet();
 
-	// check for the BindLink's implication
-	if (outgoing.size() != 2 || outgoing[1]->getType() != IMPLICATION_LINK)
-		return Handle::UNDEFINED;
-
-	outgoing = LinkCast(outgoing[1])->getOutgoingSet();
-
-	if (outgoing.size() != 2)
-		return Handle::UNDEFINED;
-
-	return outgoing[1];
+	return LinkCast(outgoing[1])->getOutgoingSet()[1];
 }
 
 void Rule::set_cost(int p)
