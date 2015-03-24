@@ -23,50 +23,63 @@
 
 #include "Rule.h"
 
-Rule::Rule(Handle rule) {
+Rule::Rule(Handle rule)
+{
 	rule_handle_ = rule;
 }
 
 
-Rule::~Rule() {
+Rule::~Rule()
+{
 
 }
 
-Handle Rule::get_handle() {
-	return rule_handle_;
-}
-
-int Rule::get_cost() {
+int Rule::get_cost()
+{
 	return cost_;
 }
 
-void Rule::set_category(string name) {
+void Rule::set_category(string name)
+{
 	category_ = name;
 }
 
-string& Rule::get_category() {
+string& Rule::get_category()
+{
 	return category_;
 }
 
-void Rule::set_name(string name) {
+void Rule::set_name(string name)
+{
 	name_ = name;
 }
 
-string Rule::get_name() {
+string Rule::get_name()
+{
 	return name_;
 }
-void Rule::set_rule_handle(Handle h) throw (exception) {
+
+void Rule::set_rule_handle(Handle h) throw (exception)
+{
 	rule_handle_ = h;
 }
 
-void Rule::set_cost(int p) {
+Handle Rule::get_handle()
+{
+	return rule_handle_;
+}
+
+void Rule::set_cost(int p)
+{
 	cost_ = p;
 }
 
-void Rule::add_disjunct_rule(Rule* r) {
+void Rule::add_disjunct_rule(Rule* r)
+{
 	disjunct_rules_.push_back(r);
 }
 
-vector<Rule*> Rule::get_disjunct_rules(void) {
+vector<Rule*> Rule::get_disjunct_rules(void)
+{
 	return disjunct_rules_;
 }
