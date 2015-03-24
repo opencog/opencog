@@ -1,0 +1,64 @@
+#include <string>
+#include <cstdio>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/cython/opencog/Utilities.h>
+
+
+using std::string;
+
+using namespace opencog;
+
+
+class PythonUtilitiesUTest :  public CxxTest::TestSuite
+{
+
+private:
+
+
+public:
+
+    PythonUtilitiesUTest() {
+
+    }
+
+    ~PythonUtilitiesUTest() {
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+
+    void testOpencogInitializationFinalization() {
+
+        // Create a atomspace.
+        AtomSpace* atomSpace = new AtomSpace();
+
+        // Initialize OpenCog standalone.
+        initialize_opencog(atomSpace);
+
+        // Stop OpenCog standalone.
+        finalize_opencog();
+
+        // Delete the atom space.
+        delete atomSpace;
+
+        // Do it again.
+
+        // Create a atomspace.
+        atomSpace = new AtomSpace();
+
+        // Initialize OpenCog standalone.
+        initialize_opencog(atomSpace);
+
+        // Stop OpenCog standalone.
+        finalize_opencog();
+
+        // Delete the atom space.
+        delete atomSpace;
+   }
+
+
+};

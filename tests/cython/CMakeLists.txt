@@ -58,6 +58,21 @@ SET_TESTS_PROPERTIES(PythonEvalUTest
 	PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
 
 
+# The PythonUtilitiesUTest tests C++ utility functions used from Cython bindings
+# outside of those bindings so failures are easier to debug.
+#
+ADD_CXXTEST(PythonUtilitiesUTest)
+
+TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
+	atomspace
+	PythonEval
+	cogutil
+	utilities_cython
+)
+SET_TESTS_PROPERTIES(PythonUtilitiesUTest
+	PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
+
+
 IF (HAVE_NOSETESTS)
 
 	# Basic test, just does the cython wrapper for opencog/util
@@ -70,6 +85,13 @@ IF (HAVE_NOSETESTS)
 		ADD_TEST(CythonAtomSpace ${NOSETESTS_EXECUTABLE} -vs
 			${CMAKE_SOURCE_DIR}/tests/cython/atomspace/)
 		SET_TESTS_PROPERTIES(CythonAtomSpace
+			PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
+	ENDIF (HAVE_ATOMSPACE)
+
+	IF (HAVE_ATOMSPACE)
+		ADD_TEST(CythonUtilities ${NOSETESTS_EXECUTABLE} -vs
+			${CMAKE_SOURCE_DIR}/tests/cython/utilities/)
+		SET_TESTS_PROPERTIES(CythonUtilities
 			PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
 	ENDIF (HAVE_ATOMSPACE)
 

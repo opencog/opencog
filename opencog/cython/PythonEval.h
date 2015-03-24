@@ -104,7 +104,6 @@ class PythonEval : public GenericEval
                                         std::string& functionName);
 
         static PythonEval* singletonInstance;
-        static AtomSpace* singletonAtomSpace;
 
         AtomSpace* _atomspace;
 

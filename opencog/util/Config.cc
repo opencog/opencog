@@ -52,6 +52,35 @@
 using namespace opencog;
 using namespace std;
 
+const std::string* Config::DEFAULT()
+{
+    static const std::string defaultConfig[] = {
+        "SERVER_PORT",                  "17001",
+        "LOG_FILE",                     "opencog_server.log",
+        "LOG_LEVEL",                    "info",
+        "BACK_TRACE_LOG_LEVEL",         "error",   // C++ stack trace printing!
+        "LOG_TO_STDOUT",                "true",
+        "SERVER_CYCLE_DURATION",        "100",     // in milliseconds
+        "EXTERNAL_TICK_MODE",           "false",
+        "STARTING_STI_FUNDS",           "10000",
+        "STARTING_LTI_FUNDS",           "10000",
+        "STI_FUNDS_BUFFER",              "10000",
+        "LTI_FUNDS_BUFFER",             "10000",
+        "MIN_STI",                      "-400",
+        "ANSI_ENABLED",                 "false",
+        "PROMPT",                       "opencog> ",
+        "ANSI_PROMPT",                  "opencog> ",
+        "SCM_PROMPT",                   "guile> ",
+        "ANSI_SCM_PROMPT",              "guile> ",
+        "MODULES",                      "libbuiltinreqs.so",
+        "SCM_PRELOAD",                  "",
+        "PYTHON_PRELOAD_FUNCTIONS",     "../opencog/python/preload_functions",
+        "",                             ""
+    };
+
+    return defaultConfig;
+}
+
 // Returns a string with leading/trailing characters of a set stripped
 static char const* blank_chars = " \t\f\v\n\r";
 static string strip(string const& str, char const *strip_chars = blank_chars)
