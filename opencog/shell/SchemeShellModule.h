@@ -48,7 +48,7 @@ class SchemeShellModule : public Module
 			"If 'hush' or 'quiet' is specified after the command, then the prompt\n"
 			"will not be returned.  This is nice when catting large scripts using\n"
 			"netcat, as it avoids printing garbage when the scripts work well.\n"
-			"If 'sync' is specified after the command, then the output is sync, "
+			"If 'sync' is specified after the command, then the output is sync,\n"
 			"instead of async.\n",
 			true, false)
 
