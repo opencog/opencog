@@ -32,7 +32,7 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
-typedef unsigned long octime_t;
+typedef uint64_t octime_t;
 
 /** \addtogroup grp_spacetime
  *  @{
