@@ -58,7 +58,7 @@ public:
 		return cost_ < r.cost_;
 	}
 
-	void set_rule_handle(Handle h) throw (exception);
+	void set_handle(Handle h) throw (exception);
 	void set_name(string name);
 	string get_name();
 	void set_category(string name);

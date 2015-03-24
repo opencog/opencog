@@ -59,7 +59,7 @@ string Rule::get_name()
 	return name_;
 }
 
-void Rule::set_rule_handle(Handle h) throw (exception)
+void Rule::set_handle(Handle h) throw (exception)
 {
 	rule_handle_ = h;
 }

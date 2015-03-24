@@ -156,7 +156,7 @@ void JsonicControlPolicyParamLoader::read_obj(const Value &v, int lev)
 
             // resolve the scheme variable to get the BindLink
             Handle rule_handle = scm_eval_->eval_h(cur_read_rule_->get_name());
-            cur_read_rule_->set_rule_handle(rule_handle);
+            cur_read_rule_->set_handle(rule_handle);
 
         } else if (key == PRIORITY) {
             cur_read_rule_->set_cost(value.get_value<int>());
