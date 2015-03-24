@@ -24,7 +24,7 @@
 #ifndef RULE_H_
 #define RULE_H_
 
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
 using namespace std;
@@ -65,6 +65,8 @@ public:
 	void set_cost(int p);
 
 	Handle get_handle();
+	Handle get_implicant();
+	Handle get_implicand();
 	string& get_category();
 	int get_cost();
 	vector<Rule*> get_disjunct_rules(void);

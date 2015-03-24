@@ -69,6 +69,59 @@ Handle Rule::get_handle()
 	return rule_handle_;
 }
 
+/**
+ * Get the implicant (input) of the rule defined in a BindLink.
+ *
+ * @return the Handle of the implicant
+ */
+Handle Rule::get_implicant()
+{
+	// rules must be defined in a BindLink for pattern matching
+	if (rule_handle_->getType() != BIND_LINK)
+		return Handle::UNDEFINED;
+
+	HandleSeq outgoing = LinkCast(rule_handle_)->getOutgoingSet();
+
+	// check for the BindLink's implication
+	if (outgoing.size() != 2 || outgoing[1]->getType() != IMPLICATION_LINK)
+		return Handle::UNDEFINED;
+
+	outgoing = LinkCast(outgoing[1])->getOutgoingSet();
+
+	if (outgoing.size() != 2)
+		return Handle::UNDEFINED;
+
+	return outgoing[0];
+}
+
+/**
+ * Get the implicand (output) of the rule defined in a BindLink.
+ *
+ * XXX TODO Might want to do extra processing find the real output over an
+ *     ExecutionOutputLink.  ie, skip to the ListLink under the ExLink.
+ *
+ * @return the Handle of the implicand
+ */
+Handle Rule::get_implicand()
+{
+	// rules must be defined in a BindLink for pattern matching
+	if (rule_handle_->getType() != BIND_LINK)
+		return Handle::UNDEFINED;
+
+	HandleSeq outgoing = LinkCast(rule_handle_)->getOutgoingSet();
+
+	// check for the BindLink's implication
+	if (outgoing.size() != 2 || outgoing[1]->getType() != IMPLICATION_LINK)
+		return Handle::UNDEFINED;
+
+	outgoing = LinkCast(outgoing[1])->getOutgoingSet();
+
+	if (outgoing.size() != 2)
+		return Handle::UNDEFINED;
+
+	return outgoing[1];
+}
+
 void Rule::set_cost(int p)
 {
 	cost_ = p;
