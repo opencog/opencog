@@ -23,50 +23,105 @@
 
 #include "Rule.h"
 
-Rule::Rule(Handle rule) {
+Rule::Rule(Handle rule)
+{
 	rule_handle_ = rule;
 }
 
 
-Rule::~Rule() {
+Rule::~Rule()
+{
 
 }
 
-Handle Rule::get_handle() {
-	return rule_handle_;
-}
-
-int Rule::get_cost() {
+int Rule::get_cost()
+{
 	return cost_;
 }
 
-void Rule::set_category(string name) {
+void Rule::set_category(string name)
+{
 	category_ = name;
 }
 
-string& Rule::get_category() {
+string& Rule::get_category()
+{
 	return category_;
 }
 
-void Rule::set_name(string name) {
+void Rule::set_name(string name)
+{
 	name_ = name;
 }
 
-string Rule::get_name() {
+string Rule::get_name()
+{
 	return name_;
 }
-void Rule::set_rule_handle(Handle h) throw (exception) {
+
+void Rule::set_handle(Handle h) throw (InvalidParamException)
+{
+	// rules must be defined in a BindLink for pattern matching
+	if (h->getType() != BIND_LINK)
+		throw InvalidParamException(TRACE_INFO, "Expected BindLink for rule.");
+
+	HandleSeq outgoing = LinkCast(h)->getOutgoingSet();
+
+	// check for the BindLink's implication
+	if (outgoing.size() != 2 || outgoing[1]->getType() != IMPLICATION_LINK)
+		throw InvalidParamException(TRACE_INFO, "Rule's BindLink missing ImplicationLink.");
+
+	outgoing = LinkCast(outgoing[1])->getOutgoingSet();
+
+	if (outgoing.size() != 2)
+		throw InvalidParamException(TRACE_INFO, "Rule's ImplicationLink structure incorrect.");
+
 	rule_handle_ = h;
 }
 
-void Rule::set_cost(int p) {
+Handle Rule::get_handle()
+{
+	return rule_handle_;
+}
+
+/**
+ * Get the implicant (input) of the rule defined in a BindLink.
+ *
+ * @return the Handle of the implicant
+ */
+Handle Rule::get_implicant()
+{
+	HandleSeq outgoing = LinkCast(rule_handle_)->getOutgoingSet();
+
+	return LinkCast(outgoing[1])->getOutgoingSet()[0];
+}
+
+/**
+ * Get the implicand (output) of the rule defined in a BindLink.
+ *
+ * XXX TODO Might want to do extra processing find the real output over an
+ *     ExecutionOutputLink.  ie, skip to the ListLink under the ExLink.
+ *
+ * @return the Handle of the implicand
+ */
+Handle Rule::get_implicand()
+{
+	HandleSeq outgoing = LinkCast(rule_handle_)->getOutgoingSet();
+
+	return LinkCast(outgoing[1])->getOutgoingSet()[1];
+}
+
+void Rule::set_cost(int p)
+{
 	cost_ = p;
 }
 
-void Rule::add_disjunct_rule(Rule* r) {
+void Rule::add_disjunct_rule(Rule* r)
+{
 	disjunct_rules_.push_back(r);
 }
 
-vector<Rule*> Rule::get_disjunct_rules(void) {
+vector<Rule*> Rule::get_disjunct_rules(void)
+{
 	return disjunct_rules_;
 }

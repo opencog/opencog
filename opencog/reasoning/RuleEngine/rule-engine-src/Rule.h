@@ -24,25 +24,27 @@
 #ifndef RULE_H_
 #define RULE_H_
 
-/*#include <string>
- #include <vector>*/
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
 using namespace std;
+
 /**
  * Mainly wraps a BindLink/ImplicationLink but with other important attributes
  */
-class Rule {
+class Rule
+{
 private:
 	Handle rule_handle_;
 	string name_;
 	string category_;
 	int cost_ = -1;
 	vector<Rule*> disjunct_rules_;
+
 public:
-	Handle get_handle();
 	Rule(Handle rule);
+	virtual ~Rule();
+
 	inline bool operator ==(const Rule& r) {
 		return r.rule_handle_ == rule_handle_;
 	}
@@ -55,15 +57,20 @@ public:
 	inline bool operator <(const Rule& r) {
 		return cost_ < r.cost_;
 	}
-	void set_rule_handle(Handle h) throw (exception);
+
+	void set_handle(Handle h) throw (InvalidParamException);
 	void set_name(string name);
 	string get_name();
 	void set_category(string name);
-	string& get_category();
 	void set_cost(int p);
+
+	Handle get_handle();
+	Handle get_implicant();
+	Handle get_implicand();
+	string& get_category();
 	int get_cost();
-	void add_disjunct_rule(Rule* r);
 	vector<Rule*> get_disjunct_rules(void);
-	virtual ~Rule();
+
+	void add_disjunct_rule(Rule* r);
 };
 #endif /* RULE_H_ */
