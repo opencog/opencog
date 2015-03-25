@@ -28,6 +28,8 @@
 #include "ForwardChainInputMatchCB.h"
 #include "ForwardChainPatternMatchCB.h"
 
+namespace opencog {
+
 class FCMemory;
 class Rule;
 class DefaultForwardChainerCB: public virtual ForwardChainerCallBack {
@@ -49,5 +51,7 @@ public:
     virtual Handle choose_next_target(FCMemory& fcmem);
     virtual HandleSeq apply_rule(FCMemory& fcmem);
 };
+
+} // ~namespace opencog
 
 #endif /* DEFAULTFORWARDCHAINERCB_H_ */

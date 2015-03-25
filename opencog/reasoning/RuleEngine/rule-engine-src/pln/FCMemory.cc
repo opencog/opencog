@@ -22,6 +22,8 @@
  */
 #include "FCMemory.h"
 
+using namespace opencog;
+
 FCMemory::FCMemory(AtomSpace* as)
 {
     as_ = as;

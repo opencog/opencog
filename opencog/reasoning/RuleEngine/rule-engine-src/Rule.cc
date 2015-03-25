@@ -28,6 +28,8 @@
 
 #include "Rule.h"
 
+using namespace opencog;
+
 Rule::Rule(Handle rule)
 {
 	rule_handle_ = rule;

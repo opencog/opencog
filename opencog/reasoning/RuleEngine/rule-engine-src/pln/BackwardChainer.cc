@@ -143,8 +143,8 @@ Handle BackwardChainer::get_unvisited_logical_link(HandleSeq& llinks,
 HandleSeq BackwardChainer::get_grounded(HandleSeq result) {
 	HandleSeq grounded;
 	for (Handle h : result) {
-		HandleSeq var_containing = commons_->get_nodes(h, vector<Type> {
-				VARIABLE_NODE });
+		UnorderedHandleSet var_containing =
+			commons_->get_nodes(h, {VARIABLE_NODE});
 		if (var_containing.empty())
 			grounded.push_back(h);
 	}
@@ -255,8 +255,7 @@ HandleSeq BackwardChainer::chase_var_values(Handle& hvar,
 map<Handle, HandleSeq> BackwardChainer::ground_target_vars(Handle& hgoal,
 		vector<map<Handle, HandleSeq>>& inference_list) {
 	map<Handle, HandleSeq> vg_map;
-	HandleSeq hgoal_vars = commons_->get_nodes(hgoal, vector<Type> {
-			VARIABLE_NODE });
+	UnorderedHandleSet hgoal_vars = commons_->get_nodes(hgoal, {VARIABLE_NODE});
 
 	for (map<Handle, HandleSeq> vgm : inference_list) {
 		for (auto it = vgm.begin(); it != vgm.end(); ++it) {
@@ -297,8 +296,7 @@ map<Handle, HandleSeq> BackwardChainer::ground_target_vars(Handle& hgoal,
 	return vg_map;
 }
 map<Handle, HandleSeq> BackwardChainer::unify_to_empty_set(Handle&htarget) {
-	HandleSeq vars = commons_->get_nodes(htarget,
-			vector<Type> { VARIABLE_NODE });
+	UnorderedHandleSet vars = commons_->get_nodes(htarget, {VARIABLE_NODE});
 	map<Handle, HandleSeq> result;
 	for (Handle h : vars)
 		result[h] = HandleSeq { Handle::UNDEFINED };
@@ -306,9 +304,7 @@ map<Handle, HandleSeq> BackwardChainer::unify_to_empty_set(Handle&htarget) {
 }
 
 map<Handle, HandleSeq> BackwardChainer::unify(Handle& htarget, Handle& match,
-		map<Handle, HandleSeq>& result) {
-	HandleSeq vars = commons_->get_nodes(htarget,
-			vector<Type> { VARIABLE_NODE });
+                                              map<Handle, HandleSeq>& result) {
 	if (LinkCast(htarget)) {
 		HandleSeq target_outg = as_->getOutgoing(htarget);
 		HandleSeq match_outg = as_->getOutgoing(match);

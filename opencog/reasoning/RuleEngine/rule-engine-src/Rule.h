@@ -26,28 +26,26 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-using namespace opencog;
+#include <boost/operators.hpp>
+
+namespace opencog {
+
 using namespace std;
 
 /**
  * Mainly wraps a BindLink/ImplicationLink but with other important attributes
  */
-class Rule
+class Rule : public boost::less_than_comparable<Rule>,
+             public boost::equality_comparable<Rule>
 {
 public:
 	Rule(Handle rule);
 	virtual ~Rule();
 
-	inline bool operator ==(const Rule& r) {
+	bool operator==(const Rule& r) const {
 		return r.rule_handle_ == rule_handle_;
 	}
-	inline bool operator !=(const Rule& r) {
-		return !(r.rule_handle_ == rule_handle_);
-	}
-	inline bool operator >(const Rule& r) {
-		return cost_ > r.cost_;
-	}
-	inline bool operator <(const Rule& r) {
+	bool operator<(const Rule& r) const {
 		return cost_ < r.cost_;
 	}
 
@@ -73,4 +71,7 @@ private:
 
 	Handle standardize_helper(Handle, std::map<Handle, Handle>&);
 };
+
+} // ~namespace opencog
+
 #endif /* RULE_H_ */

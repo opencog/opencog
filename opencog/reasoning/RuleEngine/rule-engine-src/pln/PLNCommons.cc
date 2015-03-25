@@ -51,9 +51,8 @@ Handle PLNCommons::create_quoted(Handle himplicant)
     return hquoted;
 }
 
-Handle PLNCommons::create_bindLink(
-        Handle himplicant, bool vnode_is_typedv)
-                throw (opencog::InvalidParamException)
+Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
+    throw (opencog::InvalidParamException)
 {
     if (!LinkCast(himplicant)) {
         throw InvalidParamException(TRACE_INFO, "Input must be a link type ");
@@ -62,8 +61,7 @@ Handle PLNCommons::create_bindLink(
     //if(vnode_is_typedv)
     himplicant = replace_nodes_with_varnode(himplicant);
 
-    HandleSeq variable_nodes = get_nodes(himplicant, vector<Type> {
-            VARIABLE_NODE });
+    UnorderedHandleSet variable_nodes = get_nodes(himplicant, {VARIABLE_NODE});
     HandleSeq list_link_elem;
 
     //for searching implicationLinks with variables
@@ -74,7 +72,8 @@ Handle PLNCommons::create_bindLink(
             list_link_elem.push_back(hi);
         }
     } else
-        list_link_elem = variable_nodes;
+        list_link_elem.insert(list_link_elem.end(),
+                              variable_nodes.begin(), variable_nodes.end());
 
     Handle var_listLink = as_->addLink(LIST_LINK, list_link_elem);
 
@@ -84,39 +83,34 @@ Handle PLNCommons::create_bindLink(
     return as_->addLink(BIND_LINK, var_listLink, implicationLink);
 }
 
-HandleSeq PLNCommons::get_nodes(const Handle& hinput,
-                                vector<Type> required_nodes)
+UnorderedHandleSet PLNCommons::get_nodes(const Handle& hinput,
+                                         const vector<Type>& required_nodes) const
 {
-    HandleSeq found_nodes;
-    auto exists =
-            [&found_nodes](Handle h) {return (find(found_nodes.begin(),found_nodes.end(),h)!= found_nodes.end()?true:false);};
+    // Recursive case
     if (LinkCast(hinput)) {
-        HandleSeq hsoutgoing = as_->getOutgoing(hinput);
-        for (auto it = hsoutgoing.begin(); it != hsoutgoing.end(); ++it) {
-            HandleSeq tmp = get_nodes(*it, required_nodes);
-            for (Handle h : tmp) {
-                if (not exists(h))
-                    found_nodes.push_back(h);
-            }
+        UnorderedHandleSet found_nodes;
+        for (const Handle& h : as_->getOutgoing(hinput)) {
+            UnorderedHandleSet tmp = get_nodes(h, required_nodes);
+            found_nodes.insert(tmp.begin(), tmp.end());
         }
         return found_nodes;
-    } else {
-        if (NodeCast(hinput)) {
+    }
+    // Base case
+    else {
+        OC_ASSERT(NodeCast(hinput) != nullptr);
+
+        if (required_nodes.empty()) { // Empty means all kinds of nodes
+            return {hinput};
+        } else {
+            // Check if this node is in our wish list
             Type t = NodeCast(hinput)->getType();
-            if (required_nodes.empty()) { //empty means all kinds of nodes
-                if (not exists(hinput))
-                    found_nodes.push_back(hinput);
-            } else {
-                auto it = find(required_nodes.begin(), required_nodes.end(), t); //check if this node is in our wish list
-                if (it != required_nodes.end()) {
-                    if (not exists(hinput))
-                        found_nodes.push_back(hinput);
-                }
-            }
-            return found_nodes;
+            auto it = find(required_nodes.begin(), required_nodes.end(), t);
+            if (it != required_nodes.end())
+                return {hinput};
+            else
+                return {};
         }
     }
-    return found_nodes;
 }
 
 bool PLNCommons::exists_in(Handle& hlink, Handle& h)
@@ -184,7 +178,7 @@ string PLNCommons::get_unique_name(Handle& h)
 Handle PLNCommons::replace_nodes_with_varnode(Handle& handle,
                                               Type t /*=VARIABLE_NODE*/)
 {
-    HandleSeq hvars;
+    UnorderedHandleSet hvars;
     if (t == NODE)
         hvars = get_nodes(handle, vector<Type> { }); //get every node
     else

@@ -51,7 +51,8 @@ public:
 	 * @param required_nodes - a list of nodes to look for. if vector is empty, all kinds of nodes are looked
 	 * @return - a set of nodes
 	 */
-	HandleSeq get_nodes(const Handle& hinput, vector<Type> required_nodes);
+	UnorderedHandleSet get_nodes(const Handle& hinput,
+	                             const vector<Type>& required_nodes) const;
 	/**
 	 * checks if a handle already exists in a HandleSeq
 	 */

@@ -29,7 +29,7 @@
 
 #include "FCMemory.h"
 
-using namespace opencog;
+namespace opencog {
 
 class ForwardChainerCallBack;
 class ForwardChainer {
@@ -37,7 +37,7 @@ private:
     JsonicControlPolicyParamLoader* cpolicy_loader_;
     string _conf_path = "reasoning/RuleEngine/default_cpolicy.json";
     AtomSpace * as_;
-    FCMemory* fcmem_;
+    FCMemory fcmem_;
     Logger * log_;
     /**
      * initialize config methods
@@ -66,5 +66,7 @@ public:
     void setLogger(Logger* log);
     Logger* getLogger(void);
 };
+
+} // ~namespace opencog
 
 #endif /* FORWARDCHAINERX_H_ */
