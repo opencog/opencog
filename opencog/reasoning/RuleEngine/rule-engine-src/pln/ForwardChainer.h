@@ -29,7 +29,7 @@
 
 #include "FCMemory.h"
 
-using namespace opencog;
+namespace opencog {
 
 class ForwardChainerCallBack;
 class ForwardChainer {
@@ -66,5 +66,7 @@ public:
     void setLogger(Logger* log);
     Logger* getLogger(void);
 };
+
+} // ~namespace opencog
 
 #endif /* FORWARDCHAINERX_H_ */
