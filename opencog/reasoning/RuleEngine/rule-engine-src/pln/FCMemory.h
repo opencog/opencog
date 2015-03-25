@@ -47,7 +47,6 @@ private:
     Handle cur_target_;
     vector<Inference> inf_history_; /*<inference history*/
     AtomSpace* as_;
-    void update_premise_list(HandleSeq input);
 public:
     FCMemory(AtomSpace* as);
     ~FCMemory();
@@ -56,6 +55,7 @@ public:
     void set_target(Handle target);
     HandleSeq get_target_list(void);
     HandleSeq get_premise_list(void);
+    void update_premise_list(HandleSeq input);
     bool is_search_in_af(void);
     Rule* get_cur_rule(void);
     void add_rules_product(int iteration, HandleSeq product);

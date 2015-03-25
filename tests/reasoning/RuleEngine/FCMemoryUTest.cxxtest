@@ -33,7 +33,7 @@ public:
 
 	void setUp(void);
 	void tearDown(void);
-	void test_isin_target_list(void);
+	void test_isin_premise_list(void);
 };
 
 void FCMemoryUTest::setUp() {
@@ -44,11 +44,12 @@ void FCMemoryUTest::tearDown() {
 
 }
 
-void FCMemoryUTest::test_isin_target_list(void) {
+void FCMemoryUTest::test_isin_premise_list(void) {
 	FCMemory fcmem(as);
-	Handle target_list = eval->eval_h("(AndLink (InheritanceLink(VariableNode \"$A\")(VariableNode \"$B\"))"
+	Handle premise = eval->eval_h("(AndLink (InheritanceLink(VariableNode \"$A\")(VariableNode \"$B\"))"
 			     "(InheritanceLink(VariableNode \"$B\")(VariableNode \"$C\")))");
-	fcmem.set_target(target_list);
+	HandleSeq premise_list = {premise};
+	fcmem.update_premise_list(premise_list);
 	Handle h = eval->eval_h("(VariableNode \"$B\")");
 	TS_ASSERT(fcmem.isin_premise_list(h));
     h= eval->eval_h("(VariableNode \"$D\")");
