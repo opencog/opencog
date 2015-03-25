@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/query/BindLink.h>
+
 #include "Rule.h"
 
 Rule::Rule(Handle rule)
@@ -61,20 +63,7 @@ string Rule::get_name()
 
 void Rule::set_handle(Handle h) throw (InvalidParamException)
 {
-	// rules must be defined in a BindLink for pattern matching
-	if (h->getType() != BIND_LINK)
-		throw InvalidParamException(TRACE_INFO, "Expected BindLink for rule.");
-
-	HandleSeq outgoing = LinkCast(h)->getOutgoingSet();
-
-	// check for the BindLink's implication
-	if (outgoing.size() != 2 || outgoing[1]->getType() != IMPLICATION_LINK)
-		throw InvalidParamException(TRACE_INFO, "Rule's BindLink missing ImplicationLink.");
-
-	outgoing = LinkCast(outgoing[1])->getOutgoingSet();
-
-	if (outgoing.size() != 2)
-		throw InvalidParamException(TRACE_INFO, "Rule's ImplicationLink structure incorrect.");
+	validate_bindlink(NULL, h);
 
 	rule_handle_ = h;
 }
@@ -91,6 +80,10 @@ Handle Rule::get_handle()
  */
 Handle Rule::get_implicant()
 {
+	// if the rule's handle has not been set yet
+	if (rule_handle_ == Handle::UNDEFINED)
+		return Handle::UNDEFINED;
+
 	HandleSeq outgoing = LinkCast(rule_handle_)->getOutgoingSet();
 
 	return LinkCast(outgoing[1])->getOutgoingSet()[0];
@@ -106,6 +99,10 @@ Handle Rule::get_implicant()
  */
 Handle Rule::get_implicand()
 {
+	// if the rule's handle has not been set yet
+	if (rule_handle_ == Handle::UNDEFINED)
+		return Handle::UNDEFINED;
+
 	HandleSeq outgoing = LinkCast(rule_handle_)->getOutgoingSet();
 
 	return LinkCast(outgoing[1])->getOutgoingSet()[1];
