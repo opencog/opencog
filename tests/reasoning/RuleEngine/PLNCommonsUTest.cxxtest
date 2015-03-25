@@ -224,7 +224,7 @@ void PLNCommonsUTest::test_create_bindLink()
      cmp = eval_->eval_h("(BindLink"
      "(TypedVariableLink"
      "(VariableNode \"$x\")"
-     "(VariableTypeNode \"VariableNode\")"
+     "(TypeNode \"VariableNode\")"
      ")"
      "(ImplicationLink"
      "(InheritanceLink"

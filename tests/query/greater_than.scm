@@ -44,11 +44,11 @@
 			(VariableNode "$who")
 			(TypedVariableLink
 				(VariableNode "$less-wealth")
-				(VariableTypeNode "NumberNode")
+				(TypeNode "NumberNode")
 			)
 			(TypedVariableLink
 				(VariableNode "$more-wealth")
-				(VariableTypeNode "NumberNode")
+				(TypeNode "NumberNode")
 			)
 		)
 		(ImplicationLink

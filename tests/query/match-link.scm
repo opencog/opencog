@@ -125,7 +125,7 @@
       (VariableList
          (TypedVariableLink
             (VariableNode "$var")
-            (VariableTypeNode "MemberLink")
+            (TypeNode "MemberLink")
          )
       )
       (ImplicationLink
@@ -169,7 +169,7 @@
          (VariableNode "$var-a")
          (TypedVariableLink
             (VariableNode "$var-b")
-            (VariableTypeNode "MemberLink")
+            (TypeNode "MemberLink")
          )
       )
       (ImplicationLink
@@ -193,7 +193,7 @@
          (VariableNode "$var-a")
          (TypedVariableLink
             (VariableNode "$var-b")
-            (VariableTypeNode "FeatureNode")
+            (TypeNode "FeatureNode")
          )
       )
       (ImplicationLink

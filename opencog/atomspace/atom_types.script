@@ -61,11 +61,17 @@ ABSENT_LINK <- UNORDERED_LINK
 // Universe of discourse
 CONTEXT_LINK <- ORDERED_LINK
 
+// ---------------------------------------------------------
 // Basic first-order logic ungrounded terms and term types
-VARIABLE_NODE <- NODE
-VARIABLE_TYPE_NODE <- NODE
-TYPED_VARIABLE_LINK <- ORDERED_LINK
+
+// Type declarations
+TYPE_NODE <- NODE
 TYPE_CHOICE <- OR_LINK
+
+// Variables and variable types
+VARIABLE_NODE <- NODE
+VARIABLE_TYPE_NODE <- TYPE_NODE // XXX for backwards-compat, only
+TYPED_VARIABLE_LINK <- ORDERED_LINK
 
 // A list of variables or variable declarations.
 VARIABLE_LIST <- LIST_LINK

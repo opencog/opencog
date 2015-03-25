@@ -44,7 +44,7 @@
       (VariableList
          (TypedVariableLink
             (VariableNode "$a")
-            (VariableTypeNode "ConceptNode"))
+            (TypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
          (VariableNode "$d")
@@ -85,7 +85,7 @@
       (VariableList
          (TypedVariableLink
             (VariableNode "$a")
-            (VariableTypeNode "ConceptNode"))
+            (TypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
          (VariableNode "$d")
@@ -133,7 +133,7 @@
       (VariableList
          (TypedVariableLink
             (VariableNode "$a")
-            (VariableTypeNode "ConceptNode"))
+            (TypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
          (VariableNode "$d")
@@ -180,7 +180,7 @@
       (VariableList
          (TypedVariableLink
             (VariableNode "$a")
-            (VariableTypeNode "ConceptNode"))
+            (TypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
          (VariableNode "$d")
@@ -225,7 +225,7 @@
       (VariableList
          (TypedVariableLink
             (VariableNode "$a")
-            (VariableTypeNode "ConceptNode"))
+            (TypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
       )
@@ -292,7 +292,7 @@
       (VariableList
          (TypedVariableLink
             (VariableNode "$a")
-            (VariableTypeNode "ConceptNode"))
+            (TypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c1")
          (VariableNode "$c2")
@@ -340,7 +340,7 @@
       (VariableList
          (TypedVariableLink
             (VariableNode "$a")
-            (VariableTypeNode "ConceptNode"))
+            (TypeNode "ConceptNode"))
          (VariableNode "$b1")
          (VariableNode "$b2")
          (VariableNode "$c1")

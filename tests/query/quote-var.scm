@@ -55,7 +55,7 @@
 	(BindLink
 		(TypedVariableLink
 			(VariableNode "$var-a")
-			(VariableTypeNode "ConceptNode")
+			(TypeNode "ConceptNode")
 		)
 		(ImplicationLink
 			(EvaluationLink
@@ -76,7 +76,7 @@
 	(BindLink
 		(TypedVariableLink
 			(VariableNode "$other")
-			(VariableTypeNode "ConceptNode")
+			(TypeNode "ConceptNode")
 		)
 		(ImplicationLink
 			(EvaluationLink

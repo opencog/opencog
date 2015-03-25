@@ -59,7 +59,7 @@
 (define (decl-var type var)
 	(TypedVariableLink
 		(VariableNode var)
-		(VariableTypeNode type)
+		(TypeNode type)
 	)
 )
 

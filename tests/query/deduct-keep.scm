@@ -11,7 +11,7 @@
 		(VariableList
 			(TypedVariableLink
 				(VariableNode "$person")
-				(VariableTypeNode "FeatureNode")
+				(TypeNode "FeatureNode")
 			)
 			(VariableNode "$nationality")
 			(VariableNode "$house")
@@ -59,12 +59,12 @@
 		(VariableList
 			(TypedVariableLink
 				(VariableNode "$person")
-				(VariableTypeNode "FeatureNode")
+				(TypeNode "FeatureNode")
 			)
 			(VariableNode "$pred")
 			(TypedVariableLink
 				(VariableNode "$attr")
-				(VariableTypeNode "ConceptNode")
+				(TypeNode "ConceptNode")
 			)
 		)
 		(ImplicationLink

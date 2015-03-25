@@ -214,7 +214,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 
 	// The vartype is either a single type name, or a list of typenames.
 	Type t = vartype->getType();
-	if (VARIABLE_TYPE_NODE == t)
+	if (TYPE_NODE == t or VARIABLE_TYPE_NODE == t)
 	{
 		const std::string &tn = NodeCast(vartype)->getName();
 		Type vt = classserver().getType(tn);
@@ -239,10 +239,11 @@ int PatternMatch::get_vartype(Handle htypelink,
 		for (size_t i=0; i<tss; i++)
 		{
 			Handle h(tset[i]);
-			if (VARIABLE_TYPE_NODE != h->getType())
+			Type var_type = h->getType();
+			if (TYPE_NODE != var_type and VARIABLE_TYPE_NODE != var_type)
 			{
 				logger().warn("%s: VariableChoiceLink has unexpected content:\n"
-				              "Expected VariableTypeNode, got %s",
+				              "Expected TypeNode, got %s",
 				              __FUNCTION__,
 				              classserver().getTypeName(h->getType()).c_str());
 				return 3;
