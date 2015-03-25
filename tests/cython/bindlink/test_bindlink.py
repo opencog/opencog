@@ -40,15 +40,15 @@ class BindlinkTest(TestCase):
         bind_link_query = \
             '''
             (BindLink
-                ;; The variable to be bound
+                ;; The variable to be grounded
                 (VariableNode "$var")
                 (ImplicationLink
-                    ;; The pattern to be searched for
+                    ;; The pattern to be grounded
                     (InheritanceLink
                         (VariableNode "$var")
                         (ConceptNode "animal")
                     )
-                    ;; The value to be returned.
+                    ;; The grounding to be returned.
                     (VariableNode "$var")
                 )
             )
