@@ -182,16 +182,16 @@ typedef std::pair<Handle, const std::set<Type> > ATPair;
  *
  *    TypedVariableLink
  *       VariableNode "$some_var_name"
- *       VariableTypeNode  "ConceptNode"
+ *       TypeNode  "ConceptNode"
  *
  * or
  *
  *    TypedVariableLink
  *       VariableNode "$some_var_name"
  *       ListLink
- *          VariableTypeNode  "ConceptNode"
- *          VariableTypeNode  "NumberNode"
- *          VariableTypeNode  "WordNode"
+ *          TypeNode  "ConceptNode"
+ *          TypeNode  "NumberNode"
+ *          TypeNode  "WordNode"
  *
  * In either case, the variable itself is appended to "vset",
  * and the list of allowed types are associated with the variable
@@ -221,7 +221,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 
 		if (NOTYPE == vt)
 		{
-			logger().warn("%s: VariableTypeNode specifies unknown type: %s\n",
+			logger().warn("%s: TypeNode specifies unknown type: %s\n",
 			               __FUNCTION__, tn.c_str());
 			return 4;
 		}
@@ -252,7 +252,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 			Type vt = classserver().getType(tn);
 			if (NOTYPE == vt)
 			{
-				logger().warn("%s: VariableTypeNode specifies unknown type: %s\n",
+				logger().warn("%s: TypeNode specifies unknown type: %s\n",
 				               __FUNCTION__, tn.c_str());
 				return 5;
 			}
@@ -265,7 +265,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 	else
 	{
 		logger().warn("%s: Unexpected contents in TypedVariableLink\n"
-				        "Expected VariableTypeNode or ListLink, got %s",
+				        "Expected TypeNode or ListLink, got %s",
 		              __FUNCTION__,
 		              classserver().getTypeName(t).c_str());
 		return 2;
