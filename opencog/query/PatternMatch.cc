@@ -47,7 +47,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	Type tclauses = hclauses->getType();
 	if (VARIABLE_LIST != tvarbles and LIST_LINK != tvarbles)
 		throw InvalidParamException(TRACE_INFO,
-			"Expected SignatureLink for bound variable list.");
+			"Expected VariableList for the bound variable list.");
 
 	if (AND_LINK != tclauses)
 		throw InvalidParamException(TRACE_INFO,
@@ -230,7 +230,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 		typemap.insert(ATPair(varname, ts));
 		vset.insert(varname);
 	}
-	else if (LIST_LINK == t)
+	else if (TYPE_CHOICE == t)
 	{
 		std::set<Type> ts;
 
@@ -241,7 +241,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 			Handle h(tset[i]);
 			if (VARIABLE_TYPE_NODE != h->getType())
 			{
-				logger().warn("%s: TypedVariableLink has unexpected content:\n"
+				logger().warn("%s: VariableChoiceLink has unexpected content:\n"
 				              "Expected VariableTypeNode, got %s",
 				              __FUNCTION__,
 				              classserver().getTypeName(h->getType()).c_str());

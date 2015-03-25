@@ -58,7 +58,7 @@
    (VariableList
     (TypedVariableLink
      (VariableNode "$agent")
-     (ListLink
+     (TypeChoice
       (VariableTypeNode "ConceptNode")
       (VariableTypeNode "WordInstanceNode")
       )
