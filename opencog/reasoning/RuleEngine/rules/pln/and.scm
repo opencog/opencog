@@ -21,10 +21,10 @@
     (VariableNode "$B")
     (TypedVariableLink
      (VariableNode "$A")
-     (VariableTypeNode "PredicateNode"))
+     (TypeNode "PredicateNode"))
     (TypedVariableLink
      (VariableNode "$B")
-     (VariableTypeNode "PredicateNode")))
+     (TypeNode "PredicateNode")))
    (ImplicationLink
     (AndLink
      (VariableNode "$A")

@@ -5,7 +5,7 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$parse node")
-                (VariableTypeNode "ParseNode")
+                (TypeNode "ParseNode")
             )
             (VariableNode "$target")
 

@@ -5,7 +5,7 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$target")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (VariableNode "$number")
         )

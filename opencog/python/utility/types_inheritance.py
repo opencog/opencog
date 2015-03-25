@@ -91,7 +91,7 @@ types_graph.add_edge('SchemaExecutionLink','SchemaEvaluationLink')
 types_graph.add_edge('Node','ConceptNode')
 types_graph.add_edge('Node','AnchorNode')
 types_graph.add_edge('Node','VariableNode')
-types_graph.add_edge('Node','VariableTypeNode')
+types_graph.add_edge('Node','TypeNode')
 types_graph.add_edge('Node','ProcedureNode')
 types_graph.add_edge('Node','TimeNode')
 types_graph.add_edge('Node','ObjectNode')
@@ -144,7 +144,7 @@ name_type_dict["SimultaneousEquivalenceLink"] = t.SimultaneousEquivalenceLink
 name_type_dict["DocumentNode"] = t.DocumentNode
 name_type_dict["WordInstanceLink"] = t.WordInstanceLink
 name_type_dict["SymmetricHebbianLink"] = t.SymmetricHebbianLink
-name_type_dict["VariableTypeNode"] = t.VariableTypeNode
+name_type_dict["TypeNode"] = t.VariableTypeNode
 name_type_dict["ParseLink"] = t.ParseLink
 name_type_dict["IsAcceptableSecondArgLink"] = t.IsAcceptableSecondArgLink
 name_type_dict["SentenceNode"] = t.SentenceNode
@@ -242,7 +242,7 @@ type_name_dict[t.TypedVariableLink] = "TypedVariableLink"
 type_name_dict[t.UnknownObjectNode] = "UnknownObjectNode"
 type_name_dict[t.LemmaNode] = "LemmaNode"
 type_name_dict[t.EquivalenceLink] = "EquivalenceLink"
-type_name_dict[t.VariableTypeNode] = "VariableTypeNode"
+type_name_dict[t.TypeNode] = "VariableTypeNode"
 type_name_dict[t.SequentialAndLink] = "SequentialAndLink"
 type_name_dict[t.SubsetLink] = "SubsetLink"
 type_name_dict[t.HebbianLink] = "HebbianLink"
