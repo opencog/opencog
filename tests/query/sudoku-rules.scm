@@ -538,7 +538,7 @@
 ; This is just a big list of all the cells.
 ;
 (define (variable-decls)
-	(SignatureLink
+	(VariableList
 		(VariableNode "$cell_11")
 		(VariableNode "$cell_12")
 		(VariableNode "$cell_13")

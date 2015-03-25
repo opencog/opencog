@@ -98,7 +98,7 @@ void BackwardChainerUTest::test_get_grounded() {
 
 void BackwardChainerUTest::test_filter_rules() {
 	string bl1 =
-			"(BindLink (SignatureLink  (VariableNode \"$A\") (VariableNode \"$B\")) "
+			"(BindLink (VariableList  (VariableNode \"$A\") (VariableNode \"$B\")) "
 					"(ImplicationLink (AndLink (ImplicationLink (VariableNode \"$A\") "
 					"(VariableNode \"$B\"))) (ListLink (ExecutionLink "
 					" (GroundedSchemaNode \"scm: pln-formula-simple-modus-ponens\") "

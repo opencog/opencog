@@ -8,7 +8,7 @@
 (define (print-ownership)
 	(BindLink
 		;; variable declarations
-		(SignatureLink
+		(VariableList
 			(TypedVariableLink
 				(VariableNode "$person")
 				(VariableTypeNode "FeatureNode")
@@ -56,7 +56,7 @@
 (define (print-results)
 	(BindLink
 		;; variable declarations
-		(SignatureLink
+		(VariableList
 			(TypedVariableLink
 				(VariableNode "$person")
 				(VariableTypeNode "FeatureNode")

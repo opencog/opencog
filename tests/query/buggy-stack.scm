@@ -55,7 +55,7 @@
 (define (impy)
 
   (BindLink (stv 1 1)
-   (SignatureLink
+   (VariableList
     (TypedVariableLink
      (VariableNode "$agent")
      (ListLink

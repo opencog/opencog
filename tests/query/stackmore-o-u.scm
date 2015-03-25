@@ -180,7 +180,7 @@
 (define (bind_ou)
 	(BindLink
 		;; variable decls
-		(SignatureLink
+		(VariableList
 			(VariableNode "$var_number")
 			(VariableNode "$var_schema")
 		)

@@ -45,7 +45,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	// Types must be as expected
 	Type tvarbles = hvarbles->getType();
 	Type tclauses = hclauses->getType();
-	if (SIGNATURE_LINK != tvarbles and LIST_LINK != tvarbles)
+	if (VARIABLE_LIST != tvarbles and LIST_LINK != tvarbles)
 		throw InvalidParamException(TRACE_INFO,
 			"Expected SignatureLink for bound variable list.");
 
@@ -336,7 +336,7 @@ void PatternMatch::validate_bindvars(Handle hbindlink)
 			throw InvalidParamException(TRACE_INFO,
 				"Cannot understand the typed variable definition");
 	}
-	else if (SIGNATURE_LINK == tdecls or LIST_LINK == tdecls)
+	else if (VARIABLE_LIST == tdecls or LIST_LINK == tdecls)
 	{
 		// The list of variable declarations should be .. a list of
 		// variables! Make sure its as expected.

@@ -95,7 +95,7 @@
 ; The actual BindLink
 (define cap-deduce
 	(BindLink
-		(SignatureLink
+		(VariableList
 			(VariableNode "$be-word")
 			(VariableNode "$capital")
 			(VariableNode "$country")

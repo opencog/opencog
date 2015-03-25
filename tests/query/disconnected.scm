@@ -5,7 +5,7 @@
 ; kind of thing to have. 
 (define anaphora-resolution
    (BindLink
-      (SignatureLink
+      (VariableList
          (TypedVariableLink
             (VariableNode "$word-inst-antecedent")
             (VariableTypeNode "WordInstanceNode")
@@ -42,7 +42,7 @@
 ; the pattern matcher.
 (define pronoun-finder
    (BindLink
-      (SignatureLink
+      (VariableList
            (VariableNode "$sent")
            (VariableNode "$parse")
            (VariableNode "$word-inst")

@@ -62,7 +62,7 @@
 
 (define (threshold)
 	(BindLink
-		(SignatureLink
+		(VariableList
 			(VariableNode "$who")
 			(VariableNode "$how_much")
 		)

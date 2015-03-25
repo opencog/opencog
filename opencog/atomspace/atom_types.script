@@ -66,11 +66,11 @@ VARIABLE_NODE <- NODE
 VARIABLE_TYPE_NODE <- NODE
 TYPED_VARIABLE_LINK <- ORDERED_LINK
 
+// A list of variables or variable declarations.
+VARIABLE_LIST <- LIST_LINK
+
 // Everything under a QuoteLink is interpreted literally.
 QUOTE_LINK <- ORDERED_LINK
-
-// Type signature declaration
-SIGNATURE_LINK <- LIST_LINK
 
 // Pattern and function declaration
 LAMBDA_LINK <- ORDERED_LINK

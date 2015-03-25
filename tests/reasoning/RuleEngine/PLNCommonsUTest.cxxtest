@@ -129,7 +129,7 @@ void PLNCommonsUTest::test_get_root_links(void)
 {
     string bindlink =
             "(BindLink"
-            "   (SignatureLink"
+            "   (VariableList"
             "       (VariableNode \"$A\")"
             "       (VariableNode \"$B\")"
             "       (VariableNode \"$C\"))"
