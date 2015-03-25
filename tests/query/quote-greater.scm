@@ -65,7 +65,7 @@
 ;; The actual BindLink that will be tested.
 (define (richer-than-person-x person-x)
 	(BindLink
-		(ListLink
+		(SignatureLink
 			(VariableNode "$who")
 			(VariableNode "$less-wealth")
 			(VariableNode "$more-wealth")

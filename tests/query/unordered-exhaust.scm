@@ -41,7 +41,7 @@
 (define (exhaust)
    (BindLink
       ;; variable decls
-      (ListLink
+      (SignatureLink
          (TypedVariableLink
             (VariableNode "$a")
             (VariableTypeNode "ConceptNode"))
@@ -82,7 +82,7 @@
 (define (exhaust-2)
    (BindLink
       ;; variable decls
-      (ListLink
+      (SignatureLink
          (TypedVariableLink
             (VariableNode "$a")
             (VariableTypeNode "ConceptNode"))
@@ -130,7 +130,7 @@
 (define (exhaust-3)
    (BindLink
       ;; variable decls
-      (ListLink
+      (SignatureLink
          (TypedVariableLink
             (VariableNode "$a")
             (VariableTypeNode "ConceptNode"))
@@ -177,7 +177,7 @@
 (define (exhaust-4)
    (BindLink
       ;; variable decls
-      (ListLink
+      (SignatureLink
          (TypedVariableLink
             (VariableNode "$a")
             (VariableTypeNode "ConceptNode"))
@@ -222,7 +222,7 @@
 (define (exhaust-5)
    (BindLink
       ;; variable decls
-      (ListLink
+      (SignatureLink
          (TypedVariableLink
             (VariableNode "$a")
             (VariableTypeNode "ConceptNode"))
@@ -289,7 +289,7 @@
 (define (exhaust-eq-12)
    (BindLink
       ;; variable decls
-      (ListLink
+      (SignatureLink
          (TypedVariableLink
             (VariableNode "$a")
             (VariableTypeNode "ConceptNode"))
@@ -337,7 +337,7 @@
 (define (exhaust-eq-6)
    (BindLink
       ;; variable decls
-      (ListLink
+      (SignatureLink
          (TypedVariableLink
             (VariableNode "$a")
             (VariableTypeNode "ConceptNode"))

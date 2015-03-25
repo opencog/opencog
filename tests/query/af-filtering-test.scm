@@ -19,8 +19,7 @@
 ; Pattern for the pattern matcher to match, to find them.
 (define find-man
     (BindLink
-        (ListLink
-            (VariableNode "$X"))
+        (VariableNode "$X")
         (ImplicationLink
             (InheritanceLink
                 (VariableNode "$X")

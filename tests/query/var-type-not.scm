@@ -27,7 +27,7 @@
 
 (define (rule-good)
    (BindLink
-      (ListLink
+      (SignatureLink
          (TypedVariableLink
             (VariableNode "$var2")
             (VariableTypeNode "WordInstanceNode")
@@ -77,7 +77,7 @@
 ; since we want to test for the mis-spelled case).
 (define (rule-bad)
    (BindLink
-      (ListLink
+      (SignatureLink
          (TypedVariableLink
             (VariableNode "$var2")
             (VariableTypeNode "WordInstanceNode")

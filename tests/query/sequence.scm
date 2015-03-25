@@ -27,7 +27,7 @@
 ; corn fields.
 (define (off-road)
 	(BindLink
-		(ListLink)  ; no variables
+		(SignatureLink)  ; no variables
 		(ImplicationLink
 			(SequentialAndLink
 				(EvaluationLink
@@ -47,7 +47,7 @@
 ;; errors when evaluating this.
 (define (traffic-lights)
 	(BindLink
-		(ListLink)  ; no variables
+		(SignatureLink)  ; no variables
 		(ImplicationLink
 			(SequentialAndLink
 				(EvaluationLink

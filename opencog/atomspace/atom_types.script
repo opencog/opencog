@@ -69,7 +69,10 @@ TYPED_VARIABLE_LINK <- ORDERED_LINK
 // Everything under a QuoteLink is interpreted literally.
 QUOTE_LINK <- ORDERED_LINK
 
-// Function constructor (predicate and schema)
+// Type signature declaration
+SIGNATURE_LINK <- LIST_LINK
+
+// Pattern and function declaration
 LAMBDA_LINK <- ORDERED_LINK
 
 // Scoping and Logical quantifiers
@@ -81,6 +84,7 @@ AVERAGE_LINK <- FORALL_LINK
 // Convert predicate into concept
 SATISFYING_SET_LINK <- UNORDERED_LINK
 
+// ??? What is this???
 SCHOLEM_LINK <- ORDERED_LINK
 
 // Basic first-order logic operations

@@ -66,7 +66,7 @@
 (define (blank)
 	(BindLink
 		;; variable decls
-		(ListLink
+		(SignatureLink
 			(TypedVariableLink
 				(VariableNode "$var_number_node_type")
 				(VariableTypeNode "NumberNode")

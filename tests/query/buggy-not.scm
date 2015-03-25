@@ -30,7 +30,7 @@
 (define (is-same-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(SignatureLink
 			(TypedVariableLink
 				(VariableNode "$predicate")
 				(VariableTypeNode "PredicateNode")
@@ -93,7 +93,7 @@
 (define (transitive-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(SignatureLink
 			(TypedVariableLink
 				(VariableNode "$person_a")
 				(VariableTypeNode "FeatureNode")

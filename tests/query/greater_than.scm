@@ -40,7 +40,7 @@
 
 (define (richer-than-person-x person-x)
 	(BindLink
-		(ListLink
+		(SignatureLink
 			(VariableNode "$who")
 			(TypedVariableLink
 				(VariableNode "$less-wealth")

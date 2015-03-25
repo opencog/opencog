@@ -34,9 +34,7 @@
 ; quoted variable is not a variable, but is a constant.
 (define query_rule_bad
     (BindLink (stv 1 1)
-        (ListLink (stv 1 1)
-            (VariableNode "$x")
-        )
+        (VariableNode "$x")
         (ImplicationLink (stv 1 1)
             (InheritanceLink
                 (QuoteLink
