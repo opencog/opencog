@@ -32,9 +32,8 @@
 using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :
-        as_(as)
+	as_(as), fcmem_(as_)
 {
-    fcmem_ = new FCMemory(as_);
     if (conf_path != "")
         _conf_path = conf_path;
     init();
@@ -43,16 +42,15 @@ ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :
 ForwardChainer::~ForwardChainer()
 {
     delete cpolicy_loader_;
-    delete fcmem_;
 }
 
 void ForwardChainer::init()
 {
     cpolicy_loader_ = new JsonicControlPolicyParamLoader(as_, _conf_path);
     cpolicy_loader_->load_config();
-    fcmem_->search_in_af_ = cpolicy_loader_->get_attention_alloc();
-    fcmem_->rules_ = cpolicy_loader_->get_rules();
-    fcmem_->cur_rule_ = nullptr;
+    fcmem_.search_in_af_ = cpolicy_loader_->get_attention_alloc();
+    fcmem_.rules_ = cpolicy_loader_->get_rules();
+    fcmem_.cur_rule_ = nullptr;
 
     // Provide a logger
     log_ = NULL;
@@ -81,14 +79,14 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
     while (iteration < max_iter /*OR other termination criteria*/) {
         log_->info("Iteration %d", iteration);
         log_->info("Next target %s",
-                   SchemeSmob::to_string(fcmem_->cur_target_).c_str());
+                   SchemeSmob::to_string(fcmem_.cur_target_).c_str());
 
         //Add more premise to hcurrent_target by pattern matching.
-        HandleSeq input = fcb.choose_premises(*fcmem_);
-        fcmem_->update_premise_list(input);
+        HandleSeq input = fcb.choose_premises(fcmem_);
+        fcmem_.update_premise_list(input);
 
         //Choose the best rule to apply.
-        vector<Rule*> rules = fcb.choose_rule(*fcmem_);
+        vector<Rule*> rules = fcb.choose_rule(fcmem_);
         map<Rule*, float> rule_weight;
         for (Rule* r : rules) {
             log_->info("Matching rule %s", r->get_name().c_str());
@@ -101,20 +99,20 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         //!If no rules matches the pattern of the target,choose another target if there is, else end forward chaining.
         if (not r)
             return;
-        fcmem_->cur_rule_ = r;
+        fcmem_.cur_rule_ = r;
 
         //!Apply rule.
         log_->info("Applying chosen rule", r->get_name().c_str());
-        HandleSeq product = fcb.apply_rule(*fcmem_);
+        HandleSeq product = fcb.apply_rule(fcmem_);
         log_->info("Results of rule application");
         for (auto p : product)
             log_->info("%s",SchemeSmob::to_string(p).c_str());
-        fcmem_->add_rules_product(iteration, product);
-        fcmem_->update_premise_list(product);
+        fcmem_.add_rules_product(iteration, product);
+        fcmem_.update_premise_list(product);
 
         //!Choose next target.
-        auto target = fcb.choose_next_target(*fcmem_);
-        fcmem_->set_target(target);
+        auto target = fcb.choose_next_target(fcmem_);
+        fcmem_.set_target(target);
         iteration++;
     }
 }
@@ -123,9 +121,9 @@ void ForwardChainer::init_target(Handle htarget)
 {
     if (htarget == Handle::UNDEFINED) {
         log_->info("Choosing a random target");
-        fcmem_->set_target(choose_random_target(as_)); //start FC on a random target
+        fcmem_.set_target(choose_random_target(as_)); //start FC on a random target
     } else {
-        fcmem_->set_target(htarget);
+        fcmem_.set_target(htarget);
     }
 }
 
@@ -151,5 +149,5 @@ Handle ForwardChainer::choose_random_target(AtomSpace * as)
 
 HandleSeq ForwardChainer::get_chaining_result()
 {
-    return fcmem_->get_result();
+    return fcmem_.get_result();
 }
