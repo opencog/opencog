@@ -52,7 +52,7 @@ public:
 	 * @return - a set of nodes
 	 */
 	UnorderedHandleSet get_nodes(const Handle& hinput,
-	                             const vector<Type>& required_nodes);
+	                             const vector<Type>& required_nodes) const;
 	/**
 	 * checks if a handle already exists in a HandleSeq
 	 */
