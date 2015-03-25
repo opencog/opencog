@@ -119,7 +119,7 @@ public:
             size_t isz = iset.size();
             // Don't do them all at once; thrash around a bit.
             // This wastes a lot of CPU, BTW.
-            isz = std::min(isz, 2010UL);  // thrash around
+            isz = std::min(isz, (size_t)2010);  // thrash around
             for (size_t i = 0; i < isz; i++) {
                 Handle n = iset[i]->getOutgoingAtom(1);
 
