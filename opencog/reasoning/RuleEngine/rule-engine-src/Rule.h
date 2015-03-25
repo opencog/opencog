@@ -26,7 +26,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-using namespace opencog;
+namespace opencog {
+
 using namespace std;
 
 /**
@@ -73,4 +74,7 @@ private:
 
 	Handle standardize_helper(Handle, std::map<Handle, Handle>&);
 };
+
+} // ~namespace opencog
+
 #endif /* RULE_H_ */
