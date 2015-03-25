@@ -34,13 +34,6 @@ using namespace std;
  */
 class Rule
 {
-private:
-	Handle rule_handle_;
-	string name_;
-	string category_;
-	int cost_ = -1;
-	vector<Rule*> disjunct_rules_;
-
 public:
 	Rule(Handle rule);
 	virtual ~Rule();
@@ -69,8 +62,15 @@ public:
 	Handle get_implicand();
 	string& get_category();
 	int get_cost();
-	vector<Rule*> get_disjunct_rules(void);
 
-	void add_disjunct_rule(Rule* r);
+	Rule standardize_apart();
+
+private:
+	Handle rule_handle_;
+	string name_;
+	string category_;
+	int cost_;
+
+	Handle standardize_helper(Handle, std::map<Handle, Handle>&);
 };
 #endif /* RULE_H_ */
