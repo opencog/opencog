@@ -38,10 +38,7 @@ void JsonicControlPolicyParamLoaderUTest::test_load_config() {
 	jcpl.load_config();
 	vector<Rule*> rules = jcpl.get_rules();
 	TS_ASSERT_EQUALS(1, rules.size());
-	for (Rule * r : rules) {
-		if (r->get_name() == "pln-rule-deduction")
-			TS_ASSERT(r->get_disjunct_rules().empty());
-	}
+	TS_ASSERT_EQUALS(rules[0]->get_name(), "pln-rule-deduction");
 	TS_ASSERT_EQUALS(false, jcpl.get_attention_alloc());
 	TS_ASSERT_EQUALS(20, jcpl.get_max_iter());
 }

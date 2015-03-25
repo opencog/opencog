@@ -117,16 +117,6 @@ void Rule::set_cost(int p)
 	cost_ = p;
 }
 
-void Rule::add_disjunct_rule(Rule* r)
-{
-	disjunct_rules_.push_back(r);
-}
-
-vector<Rule*> Rule::get_disjunct_rules(void)
-{
-	return disjunct_rules_;
-}
-
 /**
  * Create a new rule where all variables are renamed.
  *
@@ -156,7 +146,7 @@ Rule Rule::standardize_apart()
  */
 Handle Rule::standardize_helper(const Handle h, std::map<Handle, Handle>& dict)
 {
-    if (LinkCast(h))
+	if (LinkCast(h))
 	{
 		HandleSeq old_outgoing = LinkCast(h)->getOutgoingSet();
 		HandleSeq new_outgoing;
@@ -167,9 +157,11 @@ Handle Rule::standardize_helper(const Handle h, std::map<Handle, Handle>& dict)
 		return Handle(createLink(h->getType(), new_outgoing, h->getTruthValue()));
 	}
 
+	// normal node does not need to be changed
 	if (h->getType() != VARIABLE_NODE)
 		return h;
 
+	// use existing mapping if the VariableNode is already mapped
 	if (dict.count(h) == 1)
 		return dict[h];
 

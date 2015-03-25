@@ -249,17 +249,7 @@ template<typename> void JsonicControlPolicyParamLoader::read_primitive(
  */
 void JsonicControlPolicyParamLoader::set_disjunct_rules(void)
 {
-    for (auto i = rule_mutex_map_.begin(); i != rule_mutex_map_.end(); ++i) {
-        auto mset = i->second;
-        auto cur_rule = i->first;
-        for (string name : mset) {
-            Rule* r = get_rule(name);
-            if (!r)
-                throw invalid_argument(
-                        "A rule by name " + name + " doesn't exist"); //TODO throw appropriate exception
-            cur_rule->add_disjunct_rule(r);
-        }
-    }
+
 }
 
 /**
