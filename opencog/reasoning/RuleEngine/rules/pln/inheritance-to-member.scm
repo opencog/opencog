@@ -1,6 +1,6 @@
 ; =============================================================================
 ; InheritanceToMemberRule
-;	InheritanceLink( B C )
+;	InheritanceLink( {B} C )
 ;			becomes
 ;	MemberLink( B C )
 ; -----------------------------------------------------------------------------
@@ -12,7 +12,8 @@
 			(VariableNode "$C"))
 		(ImplicationLink
 			(InheritanceLink
-				(VariableNode "$B")
+				(SetLink
+					(VariableNode "$B"))
 				(VariableNode "$C"))
 			(ExecutionOutputLink
 				(GroundedSchemaNode "scm:pln-formula-inheritance-to-member")
@@ -21,7 +22,8 @@
 						(VariableNode "$B")
 						(VariableNode "$C"))
 					(InheritanceLink
-						(VariableNode "$B")
+						(SetLink
+							(VariableNode "$B"))
 						(VariableNode "$C")))))))
 
 ; -----------------------------------------------------------------------------

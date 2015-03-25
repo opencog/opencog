@@ -49,8 +49,17 @@
 		(EvaluationLink (stv (cog-stv-strength BXDC) (cog-stv-confidence BXDC))
 			(gaddr BXDC)
 			(ListLink
-				(cons
-					(gar BXDC)
-					(cdr (cog-outgoing-set (gdddr BXDC))))))))
+				(find-replace (cog-outgoing-set (gdddr BXDC)) (VariableNode "$X") (gar BXDC))))))
+
+; -----------------------------------------------------------------------------
+; Helper Function for creating ListLink for EvaluationLink
+; -----------------------------------------------------------------------------
+
+(define (find-replace l old new)
+	(cond
+		((null? l) '())
+		((equal? (car l) old) (cons new (cdr l)))
+		(else
+			(cons (car l) (find-replace (cdr l) old new))))) 
 
 ; =============================================================================
