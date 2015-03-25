@@ -21,6 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+
 #include <opencog/query/BindLink.h>
 
 #include "Rule.h"
@@ -28,6 +31,7 @@
 Rule::Rule(Handle rule)
 {
 	rule_handle_ = rule;
+	cost_ = -1;
 }
 
 
@@ -121,4 +125,58 @@ void Rule::add_disjunct_rule(Rule* r)
 vector<Rule*> Rule::get_disjunct_rules(void)
 {
 	return disjunct_rules_;
+}
+
+/**
+ * Create a new rule where all variables are renamed.
+ *
+ * @return a new Rule object with its own new BindLink
+ */
+Rule Rule::standardize_apart()
+{
+	// clone the Rule
+	Rule st_ver = *this;
+	std::map<Handle, Handle> dict;
+
+	Handle st_bindlink = standardize_helper(rule_handle_, dict);
+
+	// hard setting rule_handle_ to avoid validating, since Handle cannot
+	// be compared until added to an AtomSpace
+	st_ver.rule_handle_ = st_bindlink;
+
+	return st_ver;
+}
+
+/**
+ * Basic helper function to standardize apart the BindLink.
+ *
+ * @param h      an input atom to standardize apart
+ * @param dict   a mapping of old VariableNode and new VariableNode
+ * @return       the new atom
+ */
+Handle Rule::standardize_helper(const Handle h, std::map<Handle, Handle>& dict)
+{
+    if (LinkCast(h))
+	{
+		HandleSeq old_outgoing = LinkCast(h)->getOutgoingSet();
+		HandleSeq new_outgoing;
+
+		for (auto ho : old_outgoing)
+			new_outgoing.push_back(standardize_helper(ho, dict));
+
+		return Handle(createLink(h->getType(), new_outgoing, h->getTruthValue()));
+	}
+
+	if (h->getType() != VARIABLE_NODE)
+		return h;
+
+	if (dict.count(h) == 1)
+		return dict[h];
+
+	std::string new_name = NodeCast(h)->getName() + "-standardize_apart-" + to_string(boost::uuids::random_generator()());
+
+	Handle hcpy = Handle(createNode(h->getType(), new_name, h->getTruthValue()));
+	dict[h] = hcpy;
+
+	return hcpy;
 }
