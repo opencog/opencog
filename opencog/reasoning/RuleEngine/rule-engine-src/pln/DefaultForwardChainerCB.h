@@ -35,16 +35,17 @@ private:
     AtomSpace * as_;
     ForwardChainInputMatchCB* fcim_;
     ForwardChainPatternMatchCB* fcpm_;
-
     HandleSeq get_rootlinks(Handle htarget, AtomSpace* as, Type link_type,
     bool subclasses = false);
+    target_selection_mode ts_mode_;
 public:
-    DefaultForwardChainerCB(AtomSpace* as);
+    DefaultForwardChainerCB(AtomSpace* as, target_selection_mode ts_mode =
+            TV_FITNESS_BASED);
     virtual ~DefaultForwardChainerCB();
 
     //callbacks
     virtual vector<Rule*> choose_rule(FCMemory& fcmem);
-    virtual HandleSeq choose_input(FCMemory& fcmem);
+    virtual HandleSeq choose_premises(FCMemory& fcmem);
     virtual Handle choose_next_target(FCMemory& fcmem);
     virtual HandleSeq apply_rule(FCMemory& fcmem);
 };

@@ -25,6 +25,7 @@
 #define FORWARDCHAINERX_H_
 
 #include <opencog/reasoning/RuleEngine/rule-engine-src/JsonicControlPolicyParamLoader.h>
+#include <opencog/util/Logger.h>
 
 #include "FCMemory.h"
 
@@ -33,29 +34,37 @@ using namespace opencog;
 class ForwardChainerCallBack;
 class ForwardChainer {
 private:
-	JsonicControlPolicyParamLoader* cpolicy_loader_;
-	string _conf_path = "reasoning/RuleEngine/default_cpolicy.json";
-	AtomSpace * as_;
-	FCMemory* fcmem_;
-	/**
-	 * initialize config methods
-	 */
-	void init();
-	//TODO this is duplicate method
-	/**
-	 * choose a random target to start forward chaining with. This is useful when there is no target
-	 * specified ahead to the forward chaining process.
-	 * @param as - the atomspace instance from which target is selected
-	 */
-	Handle choose_random_target(AtomSpace *);
-	void add_to_target_list(Handle h);
-	void init_target(Handle target);
+    JsonicControlPolicyParamLoader* cpolicy_loader_;
+    string _conf_path = "reasoning/RuleEngine/default_cpolicy.json";
+    AtomSpace * as_;
+    FCMemory* fcmem_;
+    Logger * log_;
+    /**
+     * initialize config methods
+     */
+    void init();
+    //TODO this is duplicate method
+    /**
+     * choose a random target to start forward chaining with. This is useful when there is no target
+     * specified ahead to the forward chaining process.
+     * @param as - the atomspace instance from which target is selected
+     */
+    Handle choose_random_target(AtomSpace *);
+    void add_to_target_list(Handle h);
+    void init_target(Handle target);
+protected:
+    enum target_selection_mode {
+        TV_FITNESS_BASED,STI_BASED
+    };
 public:
-	ForwardChainer(AtomSpace * as, string conf_path = "");
-	virtual ~ForwardChainer();
-	void do_chain(ForwardChainerCallBack& fcb, Handle htarget =
-			Handle::UNDEFINED);
-     HandleSeq get_chaining_result(void);
+    ForwardChainer(AtomSpace * as, string conf_path = "");
+    virtual ~ForwardChainer();
+    void do_chain(ForwardChainerCallBack& fcb, Handle htarget =
+            Handle::UNDEFINED);
+    HandleSeq get_chaining_result(void);
+
+    void setLogger(Logger* log);
+    Logger* getLogger(void);
 };
 
 #endif /* FORWARDCHAINERX_H_ */

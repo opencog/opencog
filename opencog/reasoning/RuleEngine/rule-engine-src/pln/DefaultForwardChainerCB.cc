@@ -27,12 +27,14 @@
 #include <opencog/query/PatternMatch.h>
 #include <opencog/guile/SchemeSmob.h>
 
-DefaultForwardChainerCB::DefaultForwardChainerCB(AtomSpace* as) :
+DefaultForwardChainerCB::DefaultForwardChainerCB(
+        AtomSpace* as, target_selection_mode ts_mode /*=TV_FITNESS_BASED*/) :
         ForwardChainerCallBack(as)
 {
     as_ = as;
     fcim_ = new ForwardChainInputMatchCB(as);
     fcpm_ = new ForwardChainPatternMatchCB(as);
+    ts_mode_ = ts_mode;
 }
 
 DefaultForwardChainerCB::~DefaultForwardChainerCB()
@@ -118,7 +120,6 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
         auto it = find(chosen_bindlinks.begin(), chosen_bindlinks.end(),
                        r->get_handle()); //xxx not matching
         if (it != chosen_bindlinks.end()) {
-            cout << "RULE FOUND" << endl;
             matched_rules.push_back(r);
         }
     }
@@ -161,24 +162,69 @@ HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle htarget, AtomSpace* as,
 
     return chosen_roots;
 }
-HandleSeq DefaultForwardChainerCB::choose_input(FCMemory& fcmem)
+HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
 {
+    HandleSeq inputs;
+    PLNCommons pc(as_);
     Handle htarget = fcmem.get_cur_target();
-    //get everything associated with the target handle
-    HandleSeq inputs = as_->getNeighbors(htarget, true, true, LINK, true);
+
+    //Get everything associated with the target handle.
+    HandleSeq neighbors = as_->getNeighbors(htarget, true, true, LINK, true);
+
+    //Add all root links of atoms in @param neighbors.
+    for (auto hn : neighbors) {
+        if (hn->getType() != VARIABLE_NODE) {
+            HandleSeq roots;
+            pc.get_root_links(hn, roots);
+            for (auto r : roots) {
+                if (find(inputs.begin(), inputs.end(), r) == inputs.end() and r->getType()
+                        != BIND_LINK)
+                    inputs.push_back(r);
+            }
+        }
+    }
+
     return inputs;
 }
 
 Handle DefaultForwardChainerCB::choose_next_target(FCMemory& fcmem)
 {
-    HandleSeq tlist = fcmem.get_target_list();
+    HandleSeq tlist = fcmem.get_premise_list();
     map<Handle, float> tournament_elem;
     PLNCommons pc(as_);
+    Handle hchosen = Handle::UNDEFINED;
+
     for (Handle t : tlist) {
-        float fitness = pc.target_tv_fitness(t);
-        tournament_elem[t] = fitness;
+        switch (ts_mode_) {
+        case TV_FITNESS_BASED: {
+            float fitness = pc.target_tv_fitness(t);
+            tournament_elem[t] = fitness;
+        }
+            break;
+        case STI_BASED:
+            tournament_elem[t] = t->getSTI();
+            break;
+        default:
+            throw RuntimeException(TRACE_INFO,
+                                   "Unknown target selection mode.");
+            break;
+        }
     }
-    return pc.tournament_select(tournament_elem);
+
+    //!Choose a new target that has never been chosen before.
+    //!xxx FIXME since same handle might be chosen multiple times the following
+    //!code doesn't guarantee all targets have been exhaustively looked.
+    for (size_t i = 0; i < tournament_elem.size(); i++) {
+        Handle hselected = pc.tournament_select(tournament_elem);
+        if (fcmem.isin_target_list(hselected)) {
+            continue;
+        } else {
+            hchosen = hselected;
+            break;
+        }
+    }
+
+    return hchosen;
 }
 
 //TODO applier should check on atoms (Inference.matched_atoms when Inference.Rule =Cur_Rule), for mutex rules
@@ -192,5 +238,15 @@ HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
     } catch (InvalidParamException& e) {
         cout << "VALIDATION FAILED:" << endl << e.what() << endl;
     }
-    return fcpm_->get_products();
+
+    HandleSeq product = fcpm_->get_products();
+
+    //! Make sure the inferences made are new.
+    HandleSeq new_product;
+    for (auto h : product) {
+        if (not fcmem.isin_premise_list(h))
+            new_product.push_back(h);
+    }
+
+    return new_product;
 }
