@@ -37,7 +37,7 @@ private:
     JsonicControlPolicyParamLoader* cpolicy_loader_;
     string _conf_path = "reasoning/RuleEngine/default_cpolicy.json";
     AtomSpace * as_;
-    FCMemory* fcmem_;
+    FCMemory fcmem_;
     Logger * log_;
     /**
      * initialize config methods
