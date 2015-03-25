@@ -84,7 +84,7 @@ Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
 }
 
 UnorderedHandleSet PLNCommons::get_nodes(const Handle& hinput,
-                                         const vector<Type>& required_nodes)
+                                         const vector<Type>& required_nodes) const
 {
     // Recursive case
     if (LinkCast(hinput)) {
