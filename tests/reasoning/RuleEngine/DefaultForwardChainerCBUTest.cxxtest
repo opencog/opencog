@@ -79,6 +79,6 @@ void DefaultForwardChainerCBUTest::test_choose_target(void)
 	 FCMemory fcmem(as);
 	 fcmem.set_target(target);
 	 DefaultForwardChainerCB dfcb(as);
-	 HandleSeq hs = dfcb.choose_input(fcmem);
+	 HandleSeq hs = dfcb.choose_premises(fcmem);
 	 TS_ASSERT(5 == hs.size());
 }

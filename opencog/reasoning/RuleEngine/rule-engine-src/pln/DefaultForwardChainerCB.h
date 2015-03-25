@@ -44,7 +44,7 @@ public:
 
     //callbacks
     virtual vector<Rule*> choose_rule(FCMemory& fcmem);
-    virtual HandleSeq choose_input(FCMemory& fcmem);
+    virtual HandleSeq choose_premises(FCMemory& fcmem);
     virtual Handle choose_next_target(FCMemory& fcmem);
     virtual HandleSeq apply_rule(FCMemory& fcmem);
 };

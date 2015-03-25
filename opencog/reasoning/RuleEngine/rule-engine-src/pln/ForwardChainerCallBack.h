@@ -57,7 +57,7 @@ public:
      * @return a set of Handles chosen as a result of applying fitness
      * criteria with respect to the current target.
      */
-    virtual HandleSeq choose_input(FCMemory& fcmem) = 0;
+    virtual HandleSeq choose_premises(FCMemory& fcmem) = 0;
     /**
      * choose next target from the target list
      * @return a handle to the chosen target from target list

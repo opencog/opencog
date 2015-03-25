@@ -82,7 +82,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
                    SchemeSmob::to_string(fcmem_->cur_target_).c_str());
 
         //Add more premise to hcurrent_target by pattern matching.
-        HandleSeq input = fcb.choose_input(*fcmem_);
+        HandleSeq input = fcb.choose_premises(*fcmem_);
         fcmem_->update_premise_list(input);
 
         //Choose the best rule to apply.

@@ -162,7 +162,7 @@ HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle htarget, AtomSpace* as,
 
     return chosen_roots;
 }
-HandleSeq DefaultForwardChainerCB::choose_input(FCMemory& fcmem)
+HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
 {
     HandleSeq inputs;
     PLNCommons pc(as_);
