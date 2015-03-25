@@ -6,6 +6,9 @@
 ;		becomes
 ;	MemberLink( B (SatisfyingSetLink( Variable $X 
 ;		(EvaluationLink (pred D (ListLink X C))))))
+;						&
+;	MemberLink( B (LambdaLink( Variable $X 
+;		(EvaluationLink (pred D (ListLink X C))))))
 ; -----------------------------------------------------------------------------
 
 (define pln-rule-evaluation-to-member
@@ -32,27 +35,59 @@
 ; -----------------------------------------------------------------------------
 
 ; -----------------------------------------------------------------------------
-; Side-effect: TruthValue of the new link stays the same
+; Side-effect: TruthValue of the new links stays the same
 ; -----------------------------------------------------------------------------
 
 (define (pln-formula-evaluation-to-member DBC)
 	(if (= (cog-arity (gdr DBC)) 0)
-		(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
-			(gdr DBC)
-			(SatisfyingSetLink
-				(VariableNode "$X")
-				(EvaluationLink
-					(gar DBC)
-					(VariableNode "$X"))))
-		(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
-			(gadr DBC)
-			(SatisfyingSetLink
-				(VariableNode "$X")
-				(EvaluationLink
-					(gar DBC)
-					(ListLink
-						(cons
-							(VariableNode "$X")
-							(cdr (cog-get-all-nodes (gdr DBC))))))))))
+		(begin
+			(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
+				(gdr DBC)
+				(SatisfyingSetLink
+					(VariableNode "$X")
+					(EvaluationLink
+						(gar DBC)
+						(VariableNode "$X"))))
+			(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
+    			(gdr DBC)
+    			(LambdaLink
+        			(VariableNode "$X")
+        			(EvaluationLink
+            			(gar DBC)
+						(VariableNode "$X")))))
+		(pln-create-member DBC '() (cog-outgoing-set (gdr DBC)))))
+
+; -----------------------------------------------------------------------------
+; Creating Multiple Links for Multiple Values
+; -----------------------------------------------------------------------------
+
+(define (pln-create-member DBC preceding-nodes trailing-nodes)
+	(if (not (null? trailing-nodes))
+		(begin
+			(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
+				(car trailing-nodes)
+				(SatisfyingSetLink
+					(VariableNode "$X")
+					(EvaluationLink
+						(gar DBC)
+						(ListLink
+							(append
+								preceding-nodes
+								(cons (VariableNode "$X")
+									(cdr trailing-nodes)))))))
+			(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
+				(car trailing-nodes)
+				(LambdaLink
+					(VariableNode "$X")
+					(EvaluationLink
+						(gar DBC)
+						(ListLink
+							(append
+								preceding-nodes
+								(cons (VariableNode "$X")
+									(cdr trailing-nodes)))))))
+			(pln-create-member DBC 
+				(reverse (cons (car trailing-nodes) (reverse preceding-nodes)))
+				(cdr trailing-nodes)))))
 
 ; =============================================================================
