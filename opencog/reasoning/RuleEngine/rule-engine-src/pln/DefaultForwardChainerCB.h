@@ -39,7 +39,8 @@ private:
     bool subclasses = false);
     target_selection_mode ts_mode_;
 public:
-    DefaultForwardChainerCB(AtomSpace* as,target_selection_mode ts_mode = TV_FITNESS_BASED);
+    DefaultForwardChainerCB(AtomSpace* as, target_selection_mode ts_mode =
+            TV_FITNESS_BASED);
     virtual ~DefaultForwardChainerCB();
 
     //callbacks
