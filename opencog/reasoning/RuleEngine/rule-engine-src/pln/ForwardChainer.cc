@@ -29,6 +29,8 @@
 #include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
 #include <opencog/guile/SchemeSmob.h>
 
+using namespace opencog;
+
 ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :
         as_(as)
 {

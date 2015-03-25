@@ -27,7 +27,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Handle.h>
 
-using namespace opencog;
+namespace opencog {
 
 enum target_selection_mode {
     TV_FITNESS_BASED, STI_BASED
@@ -70,4 +70,7 @@ public:
      */
     virtual HandleSeq apply_rule(FCMemory& fcmem) = 0;
 };
+
+} // ~namespace opencog
+
 #endif /* FORWARDCHAINERCALLBACK_H_ */

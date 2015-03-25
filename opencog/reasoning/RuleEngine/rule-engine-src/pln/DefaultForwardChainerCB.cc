@@ -27,6 +27,8 @@
 #include <opencog/query/PatternMatch.h>
 #include <opencog/guile/SchemeSmob.h>
 
+using namespace opencog;
+
 DefaultForwardChainerCB::DefaultForwardChainerCB(
         AtomSpace* as, target_selection_mode ts_mode /*=TV_FITNESS_BASED*/) :
         ForwardChainerCallBack(as)

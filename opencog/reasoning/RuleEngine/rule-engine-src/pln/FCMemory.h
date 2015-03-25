@@ -26,14 +26,14 @@
 #include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
 #include <opencog/atomspace/AtomSpace.h>
 
+namespace opencog {
+
 struct Inference {
     int iter_step;
     Rule* applied_rule;
     HandleSeq inf_product;
     HandleSeq matched_nodes; /**<matched nodes with the variables in the rule,useful during mutual exclusion checking*/
 };
-
-using namespace opencog;
 
 class ForwardChainer;
 class FCMemory {
@@ -70,5 +70,7 @@ public:
     vector<Rule*> get_applied_rules(void);
 
 };
+
+} // ~namespace opencog
 
 #endif /* FCMEMORY_H_ */
