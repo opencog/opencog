@@ -64,8 +64,9 @@ void Temporal::init(octime_t a, octime_t b, bool normal) throw (InvalidParamExce
             throw InvalidParamException(TRACE_INFO,
                                         "Cannot create a Temporal (normal-distribution) with the variance (%lu) greater than the mean (%lu). This causes negative lower bound.", b,  a);
         }
-        octime_t long sum = (octime_t long) a + b;
-        if (sum > (octime_t long) UINT_MAX) {
+        octime_t sum = a + b;
+        // if the addition caused an overflow
+        if (sum < a) {
             throw InvalidParamException(TRACE_INFO,
                                         "Temporal - Upper bound reached when creating a Temporal (normal-distribution): %lu.", sum);
         }
