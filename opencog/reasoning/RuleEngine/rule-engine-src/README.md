@@ -48,21 +48,21 @@ The implementation of the forward chainer is pretty straight forward.  The call 
 the do_chain method.  I have tried to use config files as a ways to declare what rules to use during the chaining process. The rules are read
 by `load_fc_conf` method. The current state of the code does the forward chaining algorithm stated in the wiki page.
  
-Below is a kind of pseudo code of the do_bc function
+Below is a kind of pseudo code of the do_chain function
 
-	do_chain(htarget)
-		hcurrent_target	
+	do_chain(hsource)
+		hcurrent_source	
 		steps = 0
 		while (steps <= ITERATION_SIZE /*or !terminate*/) 
 			if steps == 0
-				if htarget == Handle::UNDEFINED
-					hcurrent_target = choose_target_from_atomspace(main_atom_space); //start FC on a random target
+				if hsource == Handle::UNDEFINED
+					hcurrent_source = choose_source_from_atomspace(main_atom_space); //start FC on a random source
 				else
-					hcurrent_target = htarget;
+					hcurrent_source = hsource;
 	    	else 
-				if (!target_list_.empty())
-					hcurrent_target = choose_target_from_list(target_list_)
-			choose_input(hcurrent_target); //add more premise via pattern matching of related atoms to hcurrent_target
+				if (!source_list_.empty())
+					hcurrent_source = choose_source_from_list(source_list_)
+			choose_input(hcurrent_source); //add more premise via pattern matching of related atoms to hcurrent_source
 			choose_rule()
 			patternmatch(hcurrent_chosen_rule) // call the pattern matching with the chosen rule wrapped in a BindLink
 			steps++
@@ -77,7 +77,7 @@ Below is a kind of pseudo code of the do_bc function
 
 ####How to call the forward chainer from a scheme interface?####
 
-One can use the `cog-fc` scheme binding to start forward chaining on a particular target.
+One can use the `cog-fc` scheme binding to start forward chaining on a particular source.
 
 **Example**: suppose there is some knowledges about the ConceptNode Socrates then one can do a bunch of forward chaining inference
 by calling `(cog-fc (ConceptNode "Socrates"))` from a scheme shell or interfaces. All results of the inferences are returned in 

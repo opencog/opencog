@@ -45,21 +45,23 @@ private:
     void init();
     //TODO this is duplicate method
     /**
-     * choose a random target to start forward chaining with. This is useful when there is no target
-     * specified ahead to the forward chaining process.
-     * @param as - the atomspace instance from which target is selected
+     * choose a random source to start forward chaining with. This is
+     * useful when there is no source specified ahead to the forward
+     * chaining process.
+     *
+     * @param as - the atomspace instance from which source is selected
      */
-    Handle choose_random_target(AtomSpace *);
-    void add_to_target_list(Handle h);
-    void init_target(Handle target);
+    Handle choose_random_source(AtomSpace *);
+    void add_to_source_list(Handle h);
+    void init_source(Handle source);
 protected:
-    enum target_selection_mode {
+    enum source_selection_mode {
         TV_FITNESS_BASED,STI_BASED
     };
 public:
     ForwardChainer(AtomSpace * as, string conf_path = "");
     virtual ~ForwardChainer();
-    void do_chain(ForwardChainerCallBack& fcb, Handle htarget =
+    void do_chain(ForwardChainerCallBack& fcb, Handle hsource =
             Handle::UNDEFINED);
     HandleSeq get_chaining_result(void);
 

@@ -123,12 +123,17 @@ public:
 		return hbest;
 	}
 	/**
-	 * calculates fitness values in target_list_atom_space using the formula F = s^x * c^(2-x)
+	 * Calculates fitness values in source_list_atom_space (or
+	 * target_list_atom_space for the BC) using the formula
+	 *
+	 * F = s^x * c^(2-x)
+	 *
 	 * where s is strength,c is confidence and x is some fixed value
+	 *
 	 * @param h - a handle
 	 * @return a fitness value
 	 */
-	float target_tv_fitness(Handle h);
+	float tv_fitness(Handle h);
 };
 
 #endif /* PLNCOMMONS_H_ */
