@@ -510,18 +510,19 @@ public:
     }
 
     /**
-     * Returns neighboring atoms, following links and returning their
-     * target sets.
+     * Returns neighboring atoms, following incoming links and
+     * returning their outgoing sets.
+     *
      * @param h Get neighbours for the atom this handle points to.
-     * @param fanin Whether directional links point to this node should be
-     * considered.
-     * @param fanout Whether directional links point from this node to
-     * another should be considered.
+     * @param fanin Whether directional (ordered) links point to this
+     *              node should beconsidered.
+     * @param fanout Whether directional (ordered) links point from this
+     *               node to another should be considered.
      * @param linkType Follow only these types of links.
      * @param subClasses Follow subtypes of linkType too.
      */
     HandleSeq getNeighbors(const Handle& h, bool fanin, bool fanout,
-            Type linkType=LINK, bool subClasses=true) const
+                           Type linkType=LINK, bool subClasses=true) const
     {
         return getImplconst().getNeighbors(h, fanin, fanout, linkType, subClasses);
     }

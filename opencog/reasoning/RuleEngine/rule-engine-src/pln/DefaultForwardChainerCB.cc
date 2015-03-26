@@ -170,10 +170,10 @@ HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
     PLNCommons pc(as_);
     Handle hsource = fcmem.get_cur_source();
 
-    //Get everything associated with the source handle.
+    // Get everything associated with the source handle.
     HandleSeq neighbors = as_->getNeighbors(hsource, true, true, LINK, true);
 
-    //Add all root links of atoms in @param neighbors.
+    // Add all root links of atoms in @param neighbors.
     for (auto hn : neighbors) {
         if (hn->getType() != VARIABLE_NODE) {
             HandleSeq roots;
