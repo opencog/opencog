@@ -59,10 +59,6 @@ map<Handle, HandleSeq>& BackwardChainer::get_chaining_result()
 	return _chaining_result;
 }
 
-void BackwardChainer::choose_rule()
-{
-
-}
 
 /**
  * The main recursive backward chaining method.

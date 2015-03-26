@@ -23,8 +23,9 @@
 #ifndef BACKWARDCHAINER_H_
 #define BACKWARDCHAINER_H_
 
+#include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
+
 #include "PLNCommons.h"
-#include "BCPatternMatch.h"
 
 #define DEBUG 1
 
@@ -68,8 +69,6 @@ public:
 
 	void do_chain(Handle init_target);
 	map<Handle, HandleSeq>& get_chaining_result();
-
-	void choose_rule();
 
 	AtomSpace* _as;
 	HandleSeq _rule_set; //set of matching rules
