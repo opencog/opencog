@@ -94,7 +94,7 @@ Handle InferenceSCM::do_backward_chaining(Handle h)
 #ifdef HAVE_GUILE
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
 
-    BackwardChainer bc(as);
+    BackwardChainer bc(as, std::vector<Rule>());
 
     bc.do_chain(h);
     map<Handle, HandleSeq> soln = bc.get_chaining_result();

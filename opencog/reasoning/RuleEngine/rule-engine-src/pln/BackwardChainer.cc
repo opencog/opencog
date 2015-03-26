@@ -20,24 +20,25 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include "BackwardChainer.h"
+#include "BCPatternMatch.h"
 
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atoms/bind/BindLink.h>
 
 using namespace opencog;
 
-BackwardChainer::BackwardChainer(AtomSpace * as)
+BackwardChainer::BackwardChainer(AtomSpace* as, std::vector<Rule> rs)
     : _as(as)
 {
 	_commons = new PLNCommons(_as);
-	_bcpm = new BCPatternMatch(_as);
+	_rules_set = rs;
 }
 
 BackwardChainer::~BackwardChainer()
 {
 	delete _commons;
-	delete _bcpm;
 }
 
 /**
@@ -184,37 +185,45 @@ map<Handle, HandleSeq> BackwardChainer::apply_rule(Handle& htarget, Handle& rule
 }
 
 /**
- * Finds rule with their implicand matching the input.
+ * Find all rules in which the input could be an output.
  *
- * XXX what if a VariableNode is inside QuoteLink
- *
- * @param htarget    the input atom which will match the rules
- * @return           a list of rules
+ * @param htarget   an input atom to match
+ * @return          a vector of rules
  */
-HandleSeq BackwardChainer::query_rule_base(Handle htarget)
+std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
 {
-	Handle hbind_link = _commons->create_bindLink(htarget);
+	// for each rule, check its implicand (output)
+	// try to see if the output can be unified to htarget
+	//   if so, then this rule is a candidate rule
+	//   else reject rule
 
-	logger().debug("QUERY-RB:\n" + hbind_link->toString());
 
-	BindLinkPtr bl(BindLinkCast(hbind_link));
-	bl->imply(_bcpm);
+	std::vector<Rule> rules;
 
-	_commons->clean_up_bind_link(hbind_link);
+	for (Rule& r : _rules_set)
+	{
+		Handle output = r.get_implicand();
+		std::map<Handle, HandleSeq> mapping;
 
-	auto result = _bcpm->get_result_list();
-	_bcpm->clear_result_list(); //makes sure on each query only new results are returned
+		// move on to next rule if htarget cannot map to the output
+		if (not unify(output, htarget, mapping))
+			continue;
 
-	return result;
+		rules.push_back(r);
+	}
+
+	return rules;
 }
 
 /**
- * Finds atoms in the atomspace that match the VariableNodes in the input
+ * Filter the atomspace and find grounded expressions matching input.
  *
- * @param htarget
- * @return
+ * XXX what if a VariableNode is inside QuoteLink
+ *
+ * @param htarget  the atom to pattern match against
+ * @return         a vector of grounded expressions
  */
-HandleSeq BackwardChainer::query_knowledge_base(Handle htarget)
+HandleSeq BackwardChainer::filter_grounded_experssions(Handle htarget)
 {
 	Handle hbind_link = _commons->create_bindLink(htarget);
 
@@ -225,63 +234,9 @@ HandleSeq BackwardChainer::query_knowledge_base(Handle htarget)
 
 	_commons->clean_up_bind_link(hbind_link);
 
-	auto result = _bcpm->get_result_list();
-	_bcpm->clear_result_list(); //for making sure on each query new results are returned
-	return result;
-}
-
-/**
- * Find and return all handles containing variable and are within an implicationLink.
- *
- * @param handles
- * @return
- */
-HandleSeq BackwardChainer::filter_rules(HandleSeq handles)
-{
-	HandleSeq rules;
-
-	for (Handle h : handles)
-	{
-		HandleSeq links = _as->getIncoming(h);
-		for (Handle l : links)
-		{
-			Type t = _as->getType(l);
-			if (t == LIST_LINK)
-			{
-				HandleSeq incoming = _as->getIncoming(l);
-				if (not incoming.empty())
-				{
-					if (_as->getType(incoming[0]) == EXECUTION_LINK)
-					{
-						HandleSeq hs = _as->getIncoming(incoming[0]);
-						if (not hs.empty())
-						{
-							if (_as->getType(hs[0]) == IMPLICATION_LINK)
-								rules.push_back(hs[0]);
-						}
-					}
-				}
-			}
-			if (t == IMPLICATION_LINK)
-				if (_as->getOutgoing(l)[1] == h)
-					rules.push_back(l);
-		}
-	}
-
-	return rules;
-}
-
-/**
- * Helper method for removing links with VariableNode.
- *
- * @param hpremise  a vector of atoms
- * @return          a cleaned vector with no link containing VariableNode
- */
-HandleSeq BackwardChainer::filter_grounded_experssions(HandleSeq handles)
-{
 	HandleSeq grounded;
 
-	for (Handle h : handles)
+	for (Handle h : bcpm.get_result_list())
 	{
 		UnorderedHandleSet uhs = getAllUniqueNodes(h);
 

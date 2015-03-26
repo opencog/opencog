@@ -64,14 +64,13 @@ class BackwardChainer
     friend class ::BackwardChainerUTest;
 
 public:
-	BackwardChainer(AtomSpace* as);
+	BackwardChainer(AtomSpace* as, std::vector<Rule>);
 	~BackwardChainer();
 
 	void do_chain(Handle init_target);
 	map<Handle, HandleSeq>& get_chaining_result();
 
 	AtomSpace* _as;
-	HandleSeq _rule_set; //set of matching rules
 	std::map<int, HandleSeq> _step_inference_map; //for holding inference history
 
 private:
@@ -83,7 +82,7 @@ private:
 	HandleSeq query_knowledge_base(Handle hpremise);
 
 	HandleSeq filter_rules(HandleSeq handles);
-	HandleSeq filter_grounded_experssions(HandleSeq handles);
+	HandleSeq filter_grounded_experssions(Handle htarget);
 
 	map<Handle, HandleSeq> unify(Handle& htarget, Handle& match, map<Handle, HandleSeq>& output);
 	map<Handle, HandleSeq> unify_to_empty_set(Handle& htarget);
@@ -108,9 +107,10 @@ private:
 #endif
 
 	PLNCommons* _commons;
-	BCPatternMatch* _bcpm;
 	map<Handle, HandleSeq> _chaining_result;
 	vector<map<Handle, HandleSeq>> _inference_list;
+
+	std::vector<Rule> _rules_set;
 
 	// need to be removed at the end of the backward chaining process
     HandleSeq _bc_generated_rules;
