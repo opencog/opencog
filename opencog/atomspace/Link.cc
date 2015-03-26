@@ -123,7 +123,7 @@ bool Link::isSource(Handle handle) const throw (InvalidParamException)
     if (classserver().isA(_type, ORDERED_LINK)) {
         return arity > 0 && _outgoing[0] == handle;
     } else if (classserver().isA(_type, UNORDERED_LINK)) {
-        // if the links is unordered, the outgoing set is scanned, and the
+        // If the link is unordered, the outgoing set is scanned, and the
         // method returns true if any position is equal to the handle given.
         for (Arity i = 0; i < arity; i++) {
             if (_outgoing[i] == handle) {
@@ -159,7 +159,7 @@ bool Link::isSource(size_t i) const throw (IndexErrorException, InvalidParamExce
 
 bool Link::isTarget(Handle handle) const throw (InvalidParamException)
 {
-    // on ordered links, the first position of the outgoing set defines the
+    // On ordered links, the first position of the outgoing set defines the
     // source of the link. The other positions are targets. So, it scans the
     // outgoing set from the second position searching for the given handle. If
     // it is found, true is returned.
@@ -172,7 +172,7 @@ bool Link::isTarget(Handle handle) const throw (InvalidParamException)
         }
         return false;
     } else if (classserver().isA(_type, UNORDERED_LINK)) {
-        // if the links is unordered, all the outgoing set is scanned.
+        // If the links is unordered, all the outgoing set is scanned.
         for (Arity i = 0; i < arity; i++) {
             if (_outgoing[i] == handle) {
                 return true;
