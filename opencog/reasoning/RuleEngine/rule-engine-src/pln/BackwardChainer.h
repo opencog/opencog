@@ -89,8 +89,6 @@ private:
 	map<Handle, HandleSeq> unify_to_empty_set(Handle& htarget);
 
 	Handle get_unvisited_logical_link(HandleSeq& connectors, HandleSeq& visited);
-	Handle get_root_logical_link(Handle hrule) throw (opencog::InvalidParamException);
-	HandleSeq get_grounded(HandleSeq handles);
 	map<Handle, HandleSeq> get_logical_link_premises_map(Handle& himplication_link) throw (opencog::InvalidParamException);
 
 	map<Handle, HandleSeq> join_premise_vgrounding_maps(const Handle& connector,

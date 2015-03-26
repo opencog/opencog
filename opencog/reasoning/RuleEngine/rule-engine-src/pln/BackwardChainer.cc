@@ -417,42 +417,6 @@ Handle BackwardChainer::get_unvisited_logical_link(HandleSeq& llinks,
 }
 
 /**
- * find and return all Handles with no variables
- * @param handles
- * @return vectors of handles with no variables in them
- */
-HandleSeq BackwardChainer::get_grounded(HandleSeq result) {
-	HandleSeq grounded;
-	for (Handle h : result) {
-		UnorderedHandleSet var_containing =
-			get_outgoing_nodes(h, {VARIABLE_NODE});
-		if (var_containing.empty())
-			grounded.push_back(h);
-	}
-	return grounded;
-}
-
-/**
- * gets the roolt logical link in an implications link
- * eg. (ImplicationLink (AndLink .....) (...)) AndLink will be the root logical link
- * @param hrule
- * @return a handle if there is a root logical link or Handle::UNDEFINED if there is no
- */
-Handle BackwardChainer::get_root_logical_link(Handle himplication_link)
-		throw (opencog::InvalidParamException) {
-	if (_as->getType(himplication_link) != IMPLICATION_LINK)
-		throw InvalidParamException(TRACE_INFO,
-				"input should be implication link");
-	HandleSeq outg = _as->getOutgoing(himplication_link);
-	Handle implicant = outg[0];
-	if (find(_logical_link_types.begin(), _logical_link_types.end(),
-			_as->getType(implicant)) != _logical_link_types.end()) {
-		return implicant;
-	} else
-		return Handle::UNDEFINED;
-}
-
-/**
  *returns a map of connector link to set of premises connected xxx what if there is no connector?
  *eg. if implicatoinLink is
  *ImplicationLink(
