@@ -30,7 +30,7 @@
 using namespace opencog;
 
 DefaultForwardChainerCB::DefaultForwardChainerCB(
-        AtomSpace* as, target_selection_mode ts_mode /*=TV_FITNESS_BASED*/) :
+        AtomSpace* as, source_selection_mode ts_mode /*=TV_FITNESS_BASED*/) :
         ForwardChainerCallBack(as)
 {
     as_ = as;
@@ -46,7 +46,7 @@ DefaultForwardChainerCB::~DefaultForwardChainerCB()
 }
 
 /**
- * choose rule based on premises of rule matching the target
+ * choose rule based on premises of rule matching the source
  * uses temporary atomspace to limit the search space
  *
  * @param fcmem forward chainer's working memory
@@ -55,15 +55,15 @@ DefaultForwardChainerCB::~DefaultForwardChainerCB()
 
 vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
 {
-    Handle target = fcmem.get_cur_target();
-    if (target == Handle::UNDEFINED or NodeCast(target))
+    Handle source = fcmem.get_cur_source();
+    if (source == Handle::UNDEFINED or NodeCast(source))
         throw InvalidParamException(TRACE_INFO,
-                                    "Needs a target atom of type LINK");
+                                    "Needs a source atom of type LINK");
     HandleSeq chosen_bindlinks;
 
-    if (LinkCast(target)) {
+    if (LinkCast(source)) {
         AtomSpace rule_atomspace;
-        Handle target_cpy = rule_atomspace.addAtom(target);
+        Handle source_cpy = rule_atomspace.addAtom(source);
 
         // Copy rules to the temporary atomspace.
         vector<Rule*> rules = fcmem.get_rules();
@@ -71,9 +71,9 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
             rule_atomspace.addAtom(r->get_handle());
         }
 
-        // Create bindlink with target as an implicant.
+        // Create bindlink with source as an implicant.
         PLNCommons pc(&rule_atomspace);
-        Handle copy = pc.replace_nodes_with_varnode(target_cpy, NODE);
+        Handle copy = pc.replace_nodes_with_varnode(source_cpy, NODE);
         Handle bind_link = pc.create_bindLink(copy, false);
 
         // Pattern match.
@@ -110,9 +110,9 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
         }
     }
 
-    // Try to find specialized rules that contain the target node.
-    if (NodeCast(target)) {
-        chosen_bindlinks = get_rootlinks(target, as_, BIND_LINK);
+    // Try to find specialized rules that contain the source node.
+    if (NodeCast(source)) {
+        chosen_bindlinks = get_rootlinks(source, as_, BIND_LINK);
     }
 
     // Find the rules containing the bindLink in copied_back.
@@ -130,14 +130,14 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
 }
 
 /**
- * Gets all top level links of certain types and subclasses that contain @param htarget
+ * Gets all top level links of certain types and subclasses that contain @param hsource
  *
- * @param htarget handle whose top level links are to be searched
+ * @param hsource handle whose top level links are to be searched
  * @param as the atomspace in which search is to be done
  * @param link_type the root link types to be searched
  * @param subclasses a flag that tells to look subclasses of @link_type
  */
-HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle htarget, AtomSpace* as,
+HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle hsource, AtomSpace* as,
                                                  Type link_type,
                                                  bool subclasses)
 {
@@ -145,7 +145,7 @@ HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle htarget, AtomSpace* as,
     PLNCommons pc(as);
     HandleSeq chosen_roots;
     HandleSeq candidates_roots;
-    pc.get_root_links(htarget, candidates_roots);
+    pc.get_root_links(hsource, candidates_roots);
 
     for (Handle hr : candidates_roots) {
         bool notexist = find(chosen_roots.begin(), chosen_roots.end(), hr)
@@ -155,7 +155,7 @@ HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle htarget, AtomSpace* as,
         if (((type == link_type) or subtype) and notexist) {
             //make sure matches are actually part of the premise list rather than the output of the bindLink
             Handle hpremise = outgoing(outgoing(hr)[1])[0]; //extracting premise from (BindLink((ListLinK..)(ImpLink (premise) (..))))
-            if (pc.exists_in(hpremise, htarget)) {
+            if (pc.exists_in(hpremise, hsource)) {
                 chosen_roots.push_back(hr);
             }
         }
@@ -168,10 +168,10 @@ HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
 {
     HandleSeq inputs;
     PLNCommons pc(as_);
-    Handle htarget = fcmem.get_cur_target();
+    Handle hsource = fcmem.get_cur_source();
 
-    //Get everything associated with the target handle.
-    HandleSeq neighbors = as_->getNeighbors(htarget, true, true, LINK, true);
+    //Get everything associated with the source handle.
+    HandleSeq neighbors = as_->getNeighbors(hsource, true, true, LINK, true);
 
     //Add all root links of atoms in @param neighbors.
     for (auto hn : neighbors) {
@@ -189,7 +189,7 @@ HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
     return inputs;
 }
 
-Handle DefaultForwardChainerCB::choose_next_target(FCMemory& fcmem)
+Handle DefaultForwardChainerCB::choose_next_source(FCMemory& fcmem)
 {
     HandleSeq tlist = fcmem.get_premise_list();
     map<Handle, float> tournament_elem;
@@ -199,7 +199,7 @@ Handle DefaultForwardChainerCB::choose_next_target(FCMemory& fcmem)
     for (Handle t : tlist) {
         switch (ts_mode_) {
         case TV_FITNESS_BASED: {
-            float fitness = pc.target_tv_fitness(t);
+            float fitness = pc.tv_fitness(t);
             tournament_elem[t] = fitness;
         }
             break;
@@ -208,17 +208,17 @@ Handle DefaultForwardChainerCB::choose_next_target(FCMemory& fcmem)
             break;
         default:
             throw RuntimeException(TRACE_INFO,
-                                   "Unknown target selection mode.");
+                                   "Unknown source selection mode.");
             break;
         }
     }
 
-    //!Choose a new target that has never been chosen before.
+    //!Choose a new source that has never been chosen before.
     //!xxx FIXME since same handle might be chosen multiple times the following
-    //!code doesn't guarantee all targets have been exhaustively looked.
+    //!code doesn't guarantee all sources have been exhaustively looked.
     for (size_t i = 0; i < tournament_elem.size(); i++) {
         Handle hselected = pc.tournament_select(tournament_elem);
-        if (fcmem.isin_target_list(hselected)) {
+        if (fcmem.isin_source_list(hselected)) {
             continue;
         } else {
             hchosen = hselected;

@@ -41,10 +41,10 @@ private:
     friend class ForwardChainer; /*<allow access to private*/
     bool search_in_af_;
     vector<Rule*> rules_; /*<loaded rules*/
-    HandleSeq target_list_; /*<selected targets on each forward chaining steps*/
+    HandleSeq source_list_; /*<selected sources on each forward chaining steps*/
     HandleSeq premise_list_; /*<list of premises*/
     Rule* cur_rule_;
-    Handle cur_target_;
+    Handle cur_source_;
     vector<Inference> inf_history_; /*<inference history*/
     AtomSpace* as_;
 public:
@@ -52,8 +52,8 @@ public:
     ~FCMemory();
     vector<Rule*> get_rules(void);
     void set_rules(vector<Rule*> rules);
-    void set_target(Handle target);
-    HandleSeq get_target_list(void);
+    void set_source(Handle source);
+    HandleSeq get_source_list(void);
     HandleSeq get_premise_list(void);
     void update_premise_list(HandleSeq input);
     bool is_search_in_af(void);
@@ -62,8 +62,8 @@ public:
     void set_cur_rule(Rule* r);
     void add_inference(int iteration, HandleSeq product,
                        HandleSeq matched_nodes);
-    Handle get_cur_target(void);
-    bool isin_target_list(Handle h);
+    Handle get_cur_source(void);
+    bool isin_source_list(Handle h);
     bool isin_premise_list(Handle h);
     HandleSeq get_result(void);
     vector<Inference>& get_inf_history(void);

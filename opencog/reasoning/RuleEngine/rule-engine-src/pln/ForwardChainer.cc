@@ -70,18 +70,18 @@ Logger* ForwardChainer::getLogger()
 }
 
 void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
-                              Handle htarget/*=Handle::UNDEFINED*/)
+                              Handle hsource/*=Handle::UNDEFINED*/)
 {
     int iteration = 0;
     auto max_iter = cpolicy_loader_->get_max_iter();
-    init_target(htarget);
+    init_source(hsource);
 
     while (iteration < max_iter /*OR other termination criteria*/) {
         log_->info("Iteration %d", iteration);
-        log_->info("Next target %s",
-                   SchemeSmob::to_string(fcmem_.cur_target_).c_str());
+        log_->info("Next source %s",
+                   SchemeSmob::to_string(fcmem_.cur_source_).c_str());
 
-        //Add more premise to hcurrent_target by pattern matching.
+        //Add more premise to hcurrent_source by pattern matching.
         HandleSeq input = fcb.choose_premises(fcmem_);
         fcmem_.update_premise_list(input);
 
@@ -96,7 +96,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         auto r = pc.tournament_select(rule_weight);
         log_->info("Chosen rule %s", r->get_name().c_str());
 
-        //!If no rules matches the pattern of the target,choose another target if there is, else end forward chaining.
+        //!If no rules matches the pattern of the source,choose another source if there is, else end forward chaining.
         if (not r)
             return;
         fcmem_.cur_rule_ = r;
@@ -110,24 +110,24 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         fcmem_.add_rules_product(iteration, product);
         fcmem_.update_premise_list(product);
 
-        //!Choose next target.
-        auto target = fcb.choose_next_target(fcmem_);
-        fcmem_.set_target(target);
+        //!Choose next source.
+        auto source = fcb.choose_next_source(fcmem_);
+        fcmem_.set_source(source);
         iteration++;
     }
 }
 
-void ForwardChainer::init_target(Handle htarget)
+void ForwardChainer::init_source(Handle hsource)
 {
-    if (htarget == Handle::UNDEFINED) {
-        log_->info("Choosing a random target");
-        fcmem_.set_target(choose_random_target(as_)); //start FC on a random target
+    if (hsource == Handle::UNDEFINED) {
+        log_->info("Choosing a random source");
+        fcmem_.set_source(choose_random_source(as_)); //start FC on a random source
     } else {
-        fcmem_.set_target(htarget);
+        fcmem_.set_source(hsource);
     }
 }
 
-Handle ForwardChainer::choose_random_target(AtomSpace * as)
+Handle ForwardChainer::choose_random_source(AtomSpace * as)
 {
     //!choose a random atoms to start forward chaining with
     HandleSeq hs;
@@ -135,16 +135,16 @@ Handle ForwardChainer::choose_random_target(AtomSpace * as)
         as->getHandleSetInAttentionalFocus(back_inserter(hs));
     else
         as->getHandlesByType(back_inserter(hs), ATOM, true);
-    Handle rand_target;
+    Handle rand_source;
     for (;;) {
         Handle h = hs[rand() % hs.size()];
         Type t = as->getType(h);
         if (t != VARIABLE_NODE and t != BIND_LINK and t != IMPLICATION_LINK) {
-            rand_target = h;
+            rand_source = h;
             break;
         }
     }
-    return rand_target;
+    return rand_source;
 }
 
 HandleSeq ForwardChainer::get_chaining_result()
