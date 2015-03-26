@@ -117,66 +117,63 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
 }
 
 /**
- * Apply a rule to an atom.
+ * Apply a rule to an atom by first backward chaining the rule's implicant.
  *
  * @param htarget   the atom in which the rule will be applied
- * @param rule      the rule to apply    // XXX originally an ImplicationLink
+ * @param rule      the rule to apply
  * @return          ???
  */
 map<Handle, HandleSeq> BackwardChainer::apply_rule(Handle& htarget, Rule& rule)
 {
 	vector<map<Handle, HandleSeq>> results;
 
-	Handle himplicant = rule.get_implicant();
+	std::stack<Handle> visit_stack;
+	visit_stack.push(rule.get_implicant());
 
-	// if the implicant is a normal link and not a logical conditions
-	// eg. (ImplicationLink (Inheritance $x "human") (InheritanceLink "$x" "bipedal"))
-	if (find(_logical_link_types.begin(), _logical_link_types.end(), himplicant->getType()) == _logical_link_types.end())
-		return do_bc(himplicant);
-
-	// build a tree of the the logical links and premises( premises could by themselves be a logical link) as a map
 	map<Handle, HandleSeq> logical_link_premise_map = get_logical_link_premises_map(himplicant);
 	map<Handle, map<Handle, HandleSeq>> premise_var_ground_map;
+	UnorderedHandleSet evaluated_premises;
 
-	std::stack<Handle> visited_logical_link;
-	HandleSeq evaluated_premises;
-	visited_logical_link.push(himplicant); //start from the root
-
-	// go down deep until a logical link maps only to set of premises in the logical_link_premise_map object
-	// e.g start from (and x y) instead of (and (and x y) x) and start backward chaining  from there. i.e bottom up.
-	while (not visited_logical_link.empty())
+	while (not visit_stack.empty())
 	{
-		Handle logical_link = visited_logical_link.top();
-		visited_logical_link.pop();
+		Handle premise = visit_stack.top();
+		visit_stack.pop();
 
-		HandleSeq premises = logical_link_premise_map[logical_link];
+		// check if premise was already visited
+		if (evaluated_premises.count(premise) == 1)
+			continue;
 
-		// check each premise
-		for (Handle premise : premises)
+		// if premise has more sub-premises
+		if (logical_link_premise_map.count(premise) == 1)
 		{
-			// if premise already evaluated, skip it
-			if (find(evaluated_premises.begin(), evaluated_premises.end(), premise) == evaluated_premises.end())
-				continue;
+			HandleSeq sub_premises = logical_link_premise_map[premise];
 
-			// if it is another logical link, add it to the stack for future visit
-			if (logical_link_premise_map.count(premise) != 0)
+			// check if all its sub-premises are already evaluated
+			if (std::all_of(sub_premises.begin(), sub_premises.end(), [](const Handle& h) { evaluated_premises.count(h) == 1; }))
 			{
-				visited_logical_link.push(premise);
+				auto v = join_premise_vgrounding_maps(premise, premise_var_ground_map);
+
+				results.push_back(v);
+				evaluated_premises.emplace(premise);
+
 				continue;
 			}
 
-			auto var_grounding = do_bc(premise);
-			premise_var_ground_map[premise] = var_grounding;
-			evaluated_premises.push_back(premise);
+			// if not all evaluated, add this premise back into the stack, but
+			// put all its sub-premises on top
+			visit_stack.push(premise);
+
+			for (auto p : sub_premises)
+				visit_stack.push(p);
+
+			continue;
 		}
 
-		// XXX TODO logical_link premises might get evaluated multiple times
-
-		auto v = join_premise_vgrounding_maps(logical_link,	premise_var_ground_map);
-
-		results.push_back(v);		//add to results
-
-		evaluated_premises.push_back(logical_link);
+		// if premise has no sub-premises (ie. not a logical condition), just
+		// backward chain on it
+		auto var_grounding = do_bc(premise);
+		premise_var_ground_map[premise] = var_grounding;
+		evaluated_premises.emplace(premise);
 	}
 
 	return ground_target_vars(htarget, results);
