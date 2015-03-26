@@ -66,13 +66,14 @@ verbosity_group.add_argument("-c", "--columns", action="store_true", default=Tru
 test_group = parser.add_mutually_exclusive_group()
 test_group.add_argument("-a", "--all",  default=False, action="store_true", help="run all tests")
 test_group.add_argument("-t", "--test", type=str, default='spread',
-                        choices=['spread','node', 'bindlink', 'traverse', 'scheme'],
+                        choices=['spread','node', 'bindlink', 'traverse', 'scheme', 'get_vs_xget'],
                         help="R|Test to benchmark, where:\n"
-                             "  spread    - a spread of tests across areas (default)\n"
-                             "  node      - atomspace node operations \n"
-                             "  bindlink  - all the bindlink forms\n"
-                             "  traverse  - traversal of atomspace lists\n"
-                             "  scheme    - scheme evaluation functions")
+                             "  spread      - a spread of tests across areas (default)\n"
+                             "  node        - atomspace node operations \n"
+                             "  bindlink    - all the bindlink forms\n"
+                             "  traverse    - traversal of atomspace lists\n"
+                             "  scheme      - scheme evaluation functions\n"
+                             "  get_vs_xget - compare get to xget functions")
 parser.add_argument("-i", "--iterations", metavar='N', type=int, default=10, help="iterations to average (default=10)")
 args = parser.parse_args()
 
@@ -121,6 +122,31 @@ def prep_traverse_1M(atomspace):
     for i in xrange(n):
         atomspace.add_node(types.ConceptNode, str(i), TruthValue(.5, .5))
     return n, atomspace.get_atoms_by_type(types.ConceptNode)
+
+def prep_get_100K(atomspace):
+    """Add n nodes in atomspace with python bindings"""
+    n = 100000
+    for i in xrange(n):
+        atomspace.add_node(types.ConceptNode, str(i), TruthValue(.5, .5))
+    return n
+
+def prep_get_outgoing(atomspace):
+    """Add n nodes and create a complete (fully-connected) graph in atomspace
+    and returns the number of items processed
+    """
+    n = 1000
+    offset = atomspace.add_node(types.ConceptNode, "Starting handle offset")
+    offset = offset.h.value()
+
+    for i in xrange(1, n+1):
+        atomspace.add_node(types.ConceptNode, str(i), TruthValue(.5, .5))
+        for j in xrange(1, i):
+            atomspace.add_link(types.HebbianLink,
+                       [Handle(i + offset), Handle(j + offset)],
+                       TruthValue(.2, .3))
+
+    # Number of vertices plus number of edges in a fully connected graph
+    return n + (n**2 - n) / 2
 
 def prep_scheme(atomspace):
     scheme.__init__(atomspace)
@@ -226,9 +252,8 @@ def test_add_connected(atomspace, prep_handle):
 # Traversal tests
 def test_bare_traversal(atomspace, prep_traverse_result):
     atom_count, atom_list = prep_traverse_result
-    counter = 0;
     for atom in atom_list:
-        counter += 1
+        pass
 
     # Prep for traversal returned the node count. The above iterates all.
     return atom_count
@@ -242,6 +267,49 @@ def test_resolve_traversal(atomspace, prep_traverse_result):
 
     # Prep for traversal returned the node count. The above iterates all.
     return atom_count
+
+def test_get_traverse(atomspace, prep_result):
+    atom_count = prep_result
+    atom_list = atomspace.get_atoms_by_type(types.ConceptNode)
+    for atom in atom_list:
+        pass
+
+    # Prep returned the atom count. The above iterates all.
+    return atom_count
+
+def test_xget_traverse(atomspace, prep_result):
+    atom_count = prep_result
+    for atom in atomspace.xget_atoms_by_type(types.ConceptNode):
+        pass
+
+    # Prep returned the atom count. The above iterates all.
+    return atom_count
+
+def test_get_outgoing(atomspace, prep_result):
+    atom_count = prep_result
+    atom_list = atomspace.get_atoms_by_type(types.HebbianLink)
+    count = 0
+    for atom in atom_list:
+        outgoing_list = atomspace.get_outgoing(atom.h)
+        for outgoing in outgoing_list:
+            count += 1
+    return count
+
+def test_get_outgoing_no_list(atomspace, prep_result):
+    atom_count = prep_result
+    count = 0
+    for atom in atomspace.get_atoms_by_type(types.HebbianLink):
+        for outgoing in atomspace.get_outgoing(atom.h):
+            count += 1
+    return count
+
+def test_xget_outgoing(atomspace, prep_result):
+    atom_count = prep_result
+    count = 0
+    for atom in atomspace.xget_atoms_by_type(types.HebbianLink):
+        for outgoing in atomspace.xget_outgoing(atom.h):
+            count += 1
+    return count
 
 
 # Bindlink tests
@@ -347,27 +415,35 @@ def do_test(prep, test, description, op_time_adjustment):
 # build complex predicates etc. without affecting test times.
 # Prep function     # Test function         # Test description
 tests = [
-(['all'],                   None,               None,                   "-- Testing Node Adds --"),
-(['node','spread'],         prep_none,          test_add_nodes,         "Add nodes - Cython"),
-(['node'],                  prep_none,          test_add_nodes_large,   "Add nodes - Cython (500K)"),
-(['node'],                  prep_none,          test_add_connected,     "Add fully connected nodes"),
+(['all'],                   None,               None,                       "-- Testing Node Adds --"),
+(['node','spread'],         prep_none,          test_add_nodes,             "Add nodes - Cython"),
+(['node'],                  prep_none,          test_add_nodes_large,       "Add nodes - Cython (500K)"),
+(['node'],                  prep_none,          test_add_connected,         "Add fully connected nodes"),
 
-(['all'],                   None,               None,                   "-- Testing Atom Traversal --"),
-(['traverse'],              prep_traverse_100K, test_bare_traversal,    "Bare atom traversal 100K - by type"),
-(['traverse'],              prep_traverse_10K,  test_resolve_traversal, "Resolve Handle 10K - by type"),
-(['traverse','spread'],     prep_traverse_100K, test_resolve_traversal, "Resolve Handle 100K - by type"),
-(['traverse'],              prep_traverse_1M,   test_resolve_traversal, "Resolve Handle 1M - by type"),
+(['all'],                   None,               None,                       "-- Testing Atom Traversal --"),
+(['traverse'],              prep_traverse_100K, test_bare_traversal,        "Bare atom traversal 100K - by type"),
+(['traverse'],              prep_traverse_10K,  test_resolve_traversal,     "Resolve Handle 10K - by type"),
+(['traverse','spread'],     prep_traverse_100K, test_resolve_traversal,     "Resolve Handle 100K - by type"),
+(['traverse'],              prep_traverse_1M,   test_resolve_traversal,     "Resolve Handle 1M - by type"),
 
-(['all'],                   None,               None,                   "-- Testing Bind --"),
-(['bindlink'],              prep_none,          test_stub_bindlink,     "Bind - stub_bindlink - Cython"),
-(['bindlink','spread'],     prep_bind_python,   test_bind,              "Bind - bindlink - Cython"),
-(['bindlink'],              prep_bind_python,   test_validate_bindlink, "Bind - validate_bindlink - Cython"),
 
-(['all'],                   None,               None,                   "-- Testing Scheme Eval --"),
-(['scheme','spread'],       prep_scheme,        test_scheme_eval,       "Test scheme_eval_h(+ 2 2)"),
-(['scheme'],                prep_bind_scheme,   test_bind_scheme,       "Bind - cog-bind - Scheme"),
-(['scheme'],                prep_scheme,        test_add_nodes_scheme,  "Add nodes - cog-new-node - Scheme"),
-(['scheme'],                prep_scheme,        test_add_nodes_sugar,   "Add nodes - ConceptNode sugar - Scheme"),
+(['all'],                   None,               None,                       "-- Testing Atom Traversal --"),
+(['get_vs_xget'],           prep_get_100K,      test_get_traverse,          "Get and Traverse 100K - by type"),
+(['get_vs_xget'],           prep_get_100K,      test_xget_traverse,         "Yield Get and Traverse 100K - by type"),
+(['get_vs_xget'],           prep_get_outgoing,  test_get_outgoing,          "Get Outgoing"),
+(['get_vs_xget'],           prep_get_outgoing,  test_get_outgoing_no_list,  "Get Outgoing - no temporary list"),
+(['get_vs_xget'],           prep_get_outgoing,  test_xget_outgoing,         "Yield Get Outgoing"),
+
+(['all'],                   None,               None,                       "-- Testing Bind --"),
+(['bindlink'],              prep_none,          test_stub_bindlink,         "Bind - stub_bindlink - Cython"),
+(['bindlink','spread'],     prep_bind_python,   test_bind,                  "Bind - bindlink - Cython"),
+(['bindlink'],              prep_bind_python,   test_validate_bindlink,     "Bind - validate_bindlink - Cython"),
+
+(['all'],                   None,               None,                       "-- Testing Scheme Eval --"),
+(['scheme','spread'],       prep_scheme,        test_scheme_eval,           "Test scheme_eval_h(+ 2 2)"),
+(['scheme'],                prep_bind_scheme,   test_bind_scheme,           "Bind - cog-bind - Scheme"),
+(['scheme'],                prep_scheme,        test_add_nodes_scheme,      "Add nodes - cog-new-node - Scheme"),
+(['scheme'],                prep_scheme,        test_add_nodes_sugar,       "Add nodes - ConceptNode sugar - Scheme"),
 ]
 
 
