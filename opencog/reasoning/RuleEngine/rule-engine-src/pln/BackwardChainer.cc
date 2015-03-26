@@ -70,52 +70,50 @@ map<Handle, HandleSeq>& BackwardChainer::get_chaining_result()
 map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
 {
 	// TODO filter grounded representations so the next condition would never be fooled
-	HandleSeq kb_match = filter_grounded_experssions(query_knowledge_base(hgoal));
+	// XXX what does the above meant?
+	HandleSeq kb_match = filter_grounded_experssions(hgoal);
 
 	if (kb_match.empty())
 	{
-		HandleSeq rules = filter_rules(query_rule_base(hgoal));
+		logger().debug("[BackwardChainer] Knowledge base empty");
 
-		if (rules.empty())
-		{
-			// nothing found
+		// find all rules whose implicand can be unified to hgoal
+		std::vector<Rule> acceptable_rules = filter_rules(hgoal);
+
+		// if no rules to backward chain on
+		if (acceptable_rules.empty())
 			return unify_to_empty_set(hgoal);
-		}
-		else
-		{
-			// TODO use all rules for found here.
-			Handle rule = select_rule(rules);
 
-			Handle stadardized_rule = _commons->replace_nodes_with_varnode(rule);
+		// TODO use all rules for found here.
+		Rule stadardized_rule = select_rule(rules).standardize_apart();
 
-			//for later removal
-			_bc_generated_rules.push_back(stadardized_rule);
+		//for later removal
+//		_bc_generated_rules.push_back(stadardized_rule);
 
-			map<Handle, HandleSeq> out;
-			Handle implicand = _as->getOutgoing(stadardized_rule)[1];
-			_inference_list.push_back(unify(hgoal, implicand, out));
+		Handle implicand = stadardized_rule.get_implicand();
 
-			map<Handle, HandleSeq> solution = apply_rule(implicand, stadardized_rule);
-			_inference_list.push_back(solution);
-
-			return ground_target_vars(hgoal, _inference_list);
-		}
-	}
-	else
-	{
-		vector<map<Handle, HandleSeq>> kb_results;
-		HandleSeq solns = get_grounded(kb_match); //find existing ones
-
+		// XXX TODO check unify return value
 		map<Handle, HandleSeq> out;
-		for (Handle soln : solns)
-		{
-			kb_results.push_back(unify(hgoal, soln, out));
-		}
+		unify(hgoal, implicand, out);
+		_inference_list.push_back(out);
 
-		return ground_target_vars(hgoal, kb_results);
+		map<Handle, HandleSeq> solution = apply_rule(implicand, stadardized_rule);
+		_inference_list.push_back(solution);
+
+		return ground_target_vars(hgoal, _inference_list);
 	}
 
-	return unify_to_empty_set(hgoal);
+	vector<map<Handle, HandleSeq>> kb_results;
+
+	map<Handle, HandleSeq> out;
+	for (Handle soln : kb_match)
+	{
+		// XXX TODO check unify return value
+		unify(hgoal, soln, out);
+		kb_results.push_back(out);
+	}
+
+	return ground_target_vars(hgoal, kb_results);
 }
 
 /**
@@ -248,29 +246,58 @@ HandleSeq BackwardChainer::filter_grounded_experssions(Handle htarget)
 }
 
 /**
- * maps variable to their groundings given a target handle with variables and a fully grounded matching handle
- * and adds the result to @param output
- * @param htarget the target with variable nodes
- * @param match a fully grounded matching handle with @param htarget
- * @param output a map object to store results
- * @return @param output a map of variable to their groundings
+ * Unify two atoms, finding a mapping that makes them equal.
+ *
+ * Unification is done by mapping VariableNodes from one atom to atoms in the
+ * other.
+ *
+ * XXX TODO unify UNORDERED_LINK
+ * XXX TODO check unifying same variable twice
+ * XXX TODO check VariableNode inside QuoteLink
+ *
+ * @param htarget    the target with variable nodes
+ * @param hmatch     a fully grounded matching handle with @param htarget
+ * @param output     a map object to store results and for recursion
+ * @return           true if the two atoms can be unified
  */
-map<Handle, HandleSeq> BackwardChainer::unify(Handle& htarget, Handle& match,
-                                              map<Handle, HandleSeq>& result) {
-	if (LinkCast(htarget)) {
+bool BackwardChainer::unify(const Handle& htarget,
+                            const Handle& hmatch,
+                            map<Handle, HandleSeq>& result)
+{
+	// if unifying a link
+	if (LinkCast(htarget) && LinkCast(hmatch))
+	{
+		// if the two links type are not equal
+		if (htarget->getType() != hmatch->getType())
+		{
+			result = std::map<Handle, HandleSeq>();
+			return false;
+		}
+
 		HandleSeq target_outg = _as->getOutgoing(htarget);
-		HandleSeq match_outg = _as->getOutgoing(match);
-		assert(target_outg.size()==match_outg.size()); //TODO throw exception instead
-		for (vector<Handle>::size_type i = 0; i < target_outg.size(); i++) {
+		HandleSeq match_outg = _as->getOutgoing(hmatch);
+
+		// if the two links are not of equal size, cannot unify
+		if (target_outg.size() != hmatch_outg.size())
+		{
+			result = std::map<Handle, HandleSeq>();
+			return false;
+		}
+
+		for (vector<Handle>::size_type i = 0; i < target_outg.size(); i++)
+		{
 			if (_as->getType(target_outg[i]) == VARIABLE_NODE)
 				result[target_outg[i]].push_back(match_outg[i]);
-			else
-				unify(target_outg[i], match_outg[i], result);
+			else if (not unify(target_outg[i], match_outg[i], result))
+				return false;
 		}
-	} else if (_as->getType(htarget) == VARIABLE_NODE)
-		result[htarget].push_back(match);
+	}
+	else if (_as->getType(htarget) == VARIABLE_NODE)
+	{
+		result[htarget].push_back(hmatch);
+	}
 
-	return result;
+	return true;
 }
 
 /**
@@ -278,7 +305,7 @@ map<Handle, HandleSeq> BackwardChainer::unify(Handle& htarget, Handle& match,
  */
 map<Handle, HandleSeq> BackwardChainer::unify_to_empty_set(Handle& htarget)
 {
-	logger().debug("[BC] Unify to empty set.");
+	logger().debug("[BackwardChainer] Unify to empty set.");
 
 	UnorderedHandleSet vars = get_outgoing_nodes(htarget, {VARIABLE_NODE});
 
@@ -289,15 +316,18 @@ map<Handle, HandleSeq> BackwardChainer::unify_to_empty_set(Handle& htarget)
 }
 
 /**
- *Given a target find a matching rule
- *@param target handle of the target
+ * Given a target, select a candidate rule.
+ *
+ * XXX TODO apply selection criteria to select one amongst the matching rules
+ *
+ * @param rules   a vector of rules to select from
+ * @return        one of the rule
  */
-Handle BackwardChainer::select_rule(HandleSeq& hseq_rule) {
-	//apply selection criteria to select one amongst the matching rules
-
+Rule BackwardChainer::select_rule(const std::vector<Rule>& rules)
+{
 	//xxx return random for the purpose of integration testing before going
 	//for a complex implementation of this function
-	return hseq_rule[random() % hseq_rule.size()];
+	return rules[random() % rules.size()];
 }
 
 

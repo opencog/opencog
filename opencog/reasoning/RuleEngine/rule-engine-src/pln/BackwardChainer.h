@@ -76,15 +76,12 @@ public:
 private:
 	map<Handle, HandleSeq> do_bc(Handle& htarget);
 
-	map<Handle, HandleSeq> apply_rule( Handle& htarget, Handle& rule);
-
-	HandleSeq query_rule_base(Handle hpremise);
-	HandleSeq query_knowledge_base(Handle hpremise);
+	map<Handle, HandleSeq> apply_rule( Handle& htarget, Rule& rule);
 
 	HandleSeq filter_rules(HandleSeq handles);
 	HandleSeq filter_grounded_experssions(Handle htarget);
 
-	map<Handle, HandleSeq> unify(Handle& htarget, Handle& match, map<Handle, HandleSeq>& output);
+	bool unify(const Handle& htarget, const Handle& match, map<Handle, HandleSeq>& output);
 	map<Handle, HandleSeq> unify_to_empty_set(Handle& htarget);
 
 	Handle get_unvisited_logical_link(HandleSeq& connectors, HandleSeq& visited);
@@ -93,7 +90,7 @@ private:
 	map<Handle, HandleSeq> join_premise_vgrounding_maps(const Handle& connector,
 			const map<Handle, map<Handle, HandleSeq> >& premise_var_grounding_map);
 
-	Handle select_rule(HandleSeq& hseq_rule);
+	Rule select_rule(HandleSeq& hseq_rule);
 	HandleSeq chase_var_values(Handle& hvar, vector<map<Handle, HandleSeq>>& inference_list, HandleSeq& results);
 
 	map<Handle, HandleSeq> ground_target_vars(Handle& hgoal, vector<map<Handle, HandleSeq>>& var_grounding_map);
