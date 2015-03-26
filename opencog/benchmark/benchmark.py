@@ -426,8 +426,7 @@ tests = [
 (['traverse','spread'],     prep_traverse_100K, test_resolve_traversal,     "Resolve Handle 100K - by type"),
 (['traverse'],              prep_traverse_1M,   test_resolve_traversal,     "Resolve Handle 1M - by type"),
 
-
-(['all'],                   None,               None,                       "-- Testing Atom Traversal --"),
+(['all'],                   None,               None,                       "-- Testing Get versus Yield-based Get --"),
 (['get_vs_xget'],           prep_get_100K,      test_get_traverse,          "Get and Traverse 100K - by type"),
 (['get_vs_xget'],           prep_get_100K,      test_xget_traverse,         "Yield Get and Traverse 100K - by type"),
 (['get_vs_xget'],           prep_get_outgoing,  test_get_outgoing,          "Get Outgoing"),
