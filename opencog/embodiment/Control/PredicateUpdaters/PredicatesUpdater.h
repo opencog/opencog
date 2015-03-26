@@ -67,7 +67,7 @@ public:
      *                that were updated
      * @param timestamp The current timestamp in the virtual world.
      */
-    void update(std::vector<Handle> & objects, unsigned long timestamp);
+    void update(std::vector<Handle> & objects, octime_t timestamp);
 
 };// class
 

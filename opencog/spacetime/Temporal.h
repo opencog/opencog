@@ -27,12 +27,17 @@
 #define _OPENCOG_TEMPORAL_H
 
 #include <string>
+#include <limits.h>
 #include <boost/functional/hash.hpp>
 
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
+using namespace std;
+
 typedef uint64_t octime_t;
+
+#define OCTIME_MAX numeric_limits<octime_t>::max()
 
 /** \addtogroup grp_spacetime
  *  @{
