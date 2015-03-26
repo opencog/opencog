@@ -312,7 +312,8 @@ Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
 }
 
 HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
-        bool fanout, Type desiredLinkType, bool subClasses) const
+                                      bool fanout, Type desiredLinkType,
+                                      bool subClasses) const
 {
     if (h == NULL) {
         throw InvalidParamException(TRACE_INFO,
@@ -320,18 +321,14 @@ HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
     }
     HandleSeq answer;
 
-    HandleSeq iset;
-    h->getIncomingSet(back_inserter(iset));
-    for (HandleSeq::iterator it = iset.begin();
-         it != iset.end(); ++it)
+    for (const LinkPtr& link : h->getIncomingSet())
     {
-        LinkPtr link(LinkCast(*it));
         Type linkType = link->getType();
-        DPRINTF("Atom::getNeighbors(): linkType = %d desiredLinkType = %d\n", linkType, desiredLinkType);
-        if ((linkType == desiredLinkType) || (subClasses && classserver().isA(linkType, desiredLinkType))) {
-            Arity linkArity = link->getArity();
-            for (Arity i = 0; i < linkArity; i++) {
-                Handle handle(link->getOutgoingSet()[i]);
+        DPRINTF("Atom::getNeighbors(): linkType = %d desiredLinkType = %d\n",
+                linkType, desiredLinkType);
+        if ((linkType == desiredLinkType)
+            || (subClasses && classserver().isA(linkType, desiredLinkType))) {
+            for (const Handle& handle : link->getOutgoingSet()) {
                 if (handle == h) continue;
                 if (!fanout && link->isSource(h)) continue;
                 if (!fanin && link->isTarget(h)) continue;
