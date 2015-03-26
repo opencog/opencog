@@ -3,105 +3,10 @@ from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 
 from atomspace cimport *
+
 # @todo use the guide here to separate out into a hierarchy
 # http://wiki.cython.org/PackageHierarchy
-
-cdef class Handle:
-    def __cinit__(self, h):
-        self.h = new cHandle(h)
-    def __dealloc__(self):
-        del self.h
-    def value(self):
-        return self.h.value()
-    def __richcmp__(Handle h1, Handle h2, int op):
-        if op == 2: # ==
-            return deref(h1.h) == deref(h2.h)
-        elif op == 3: # !=
-            return deref(h1.h) != deref(h2.h)
-        elif op == 4: # >
-            return deref(h1.h) > deref(h2.h)
-        elif op == 0: # <
-            return deref(h1.h) < deref(h2.h)
-        elif op == 1: # <=
-            return deref(h1.h) <= deref(h2.h)
-        elif op == 5: # >=
-            return deref(h1.h) >= deref(h2.h)
-    def __str__(self):
-        return "<UUID:" + str(self.h.value()) + ">"
-    def __repr__(self):
-        return "Handle(" + str(self.h.value()) + ")"
-    def is_undefined(self):
-        if deref(self.h) == self.h.UNDEFINED: return True
-        return False
-    def __nonzero__(self):
-        """ Allows boolean comparison, return false is handle == UNDEFINED """
-        return not self.is_undefined()
     
-
-cdef class TruthValue:
-    """ The truth value represents the strength and confidence of
-        a relationship or term. In OpenCog there are a number of TruthValue
-        types, but as these involve additional complexity we focus primarily on
-        the SimpleTruthValue type which allows strength and count
-
-        @todo Support IndefiniteTruthValue, DistributionalTV, NullTV etc
-    """
-    # This stores a pointer to a smart pointer to the C++ TruthValue object
-    # This indirection is unfortunately necessary because cython doesn't
-    # allow C++ objects on the stack
-    cdef tv_ptr *cobj
-
-    def __cinit__(self, strength=0.0, count=0.0):
-        # By default create a SimpleTruthValue
-        self.cobj = new tv_ptr(new cSimpleTruthValue(strength, count))
-
-    def __dealloc__(self):
-        # This deletes the *smart pointer*, not the actual pointer
-        del self.cobj
-
-    property mean:
-        def __get__(self): return self._mean()
-
-    property confidence:
-        def __get__(self): return self._confidence()
-
-    property count:
-        def __get__(self): return self._count()
-
-    cdef _mean(self):
-        return self._ptr().getMean()
-
-    cdef _confidence(self):
-        return self._ptr().getConfidence()
-
-    cdef _count(self):
-        return self._ptr().getCount()
-
-    def __richcmp__(TruthValue h1, TruthValue h2, int op):
-        " @todo support the rest of the comparison operators"
-        if op == 2: # ==
-            return deref(h1._ptr()) == deref(h2._ptr())
-        
-        raise ValueError, "TruthValue does not yet support most comparison operators"
-
-    cdef cTruthValue* _ptr(self):
-        return self.cobj.get()
-
-    cdef tv_ptr* _tvptr(self):
-        return self.cobj
-
-    def truth_value_ptr_object(self):
-        return PyLong_FromVoidPtr(<void*>self.cobj)
-
-    def __str__(self):
-        return self._ptr().toString().c_str()
-
-    def confidence_to_count(self, float conf):
-        return (<cSimpleTruthValue*>self._ptr()).confidenceToCount(conf)
-
-    def count_to_confidence(self, float count):
-        return (<cSimpleTruthValue*>self._ptr()).countToConfidence(count)
-
 
 # @todo this should be a generator using the yield statement
 cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomspace):
