@@ -127,20 +127,20 @@ map<Handle, HandleSeq> BackwardChainer::apply_rule(Handle& htarget, Rule& rule)
 {
 	vector<map<Handle, HandleSeq>> results;
 
-	Handle implicant = rule.get_implicant();
+	Handle himplicant = rule.get_implicant();
 
 	// if the implicant is a normal link and not a logical conditions
 	// eg. (ImplicationLink (Inheritance $x "human") (InheritanceLink "$x" "bipedal"))
-	if (find(_logical_link_types.begin(), _logical_link_types.end(), implicant->getType()) == _logical_link_types.end())
-		return do_bc(implicant);
+	if (find(_logical_link_types.begin(), _logical_link_types.end(), himplicant->getType()) == _logical_link_types.end())
+		return do_bc(himplicant);
 
 	// build a tree of the the logical links and premises( premises could by themselves be a logical link) as a map
-	map<Handle, HandleSeq> logical_link_premise_map = get_logical_link_premises_map(rule);
+	map<Handle, HandleSeq> logical_link_premise_map = get_logical_link_premises_map(himplicant);
 	map<Handle, map<Handle, HandleSeq>> premise_var_ground_map;
 
 	std::stack<Handle> visited_logical_link;
 	HandleSeq evaluated_premises;
-	visited_logical_link.push(implicant); //start from the root
+	visited_logical_link.push(himplicant); //start from the root
 
 	// go down deep until a logical link maps only to set of premises in the logical_link_premise_map object
 	// e.g start from (and x y) instead of (and (and x y) x) and start backward chaining  from there. i.e bottom up.
@@ -376,75 +376,62 @@ map<Handle, HandleSeq> BackwardChainer::join_premise_vgrounding_maps(
 }
 
 /**
- *returns a map of connector link to set of premises connected xxx what if there is no connector?
- *eg. if implicatoinLink is
- *ImplicationLink(
- *  Andlink@1(
- *   Inheritance@1(
- *               (ConceptNode $x)
- *               (ConceptNode "Animal")
- *                )
- *            )
- *   AndLink@2(
- *           EvaluationLink@1(
- *                  (PredicateNode "eats")
- *                   ListLink(
- *                  (ConceptNode $x)
- *                  (ConceptNode "leaves")
- *                           )
- *                          )
- *           EvaluationLink@2(
- *                  (PredicateNode "eats")
- *                   ListLink(
- *                  (ConceptNode "$x")
- *                  (ConceptNode "flesh")
- *                           )
- *                          )
- *             )
- *    Inheritance@2(
- *               (ConceptNode $x)
- *               (ConceptNode "Omnivore")
- *                 )
- *               )
- *  will be returned as[Andlink@1->{Inheritance@1,AndLink@2},Andlink@2->{EvaluationLink@1,EvaluationLink@2}]
- *  where @n represents unique instance of links/connectors.its actually a BackInferenceTree(BIT) as a map
- *  without the use of tree DS.
- *  Note that implicand(consequent) has been rejected.the only interest here is the implicant(antecedent)
- *@ himplication_link a handle to an implication link
- *@ return a connector premise map found in the implicant of the implication link
+ * Returns a map of connector link to set of premises connected.
+ *
+ * eg. if the implicant is
+ *
+ *    Andlink@1
+ *       Inheritance@1
+ *          ConceptNode $x
+ *          ConceptNode "Animal"
+ *       AndLink@2
+ *          EvaluationLink@1
+ *             PredicateNode "eats"
+ *             ListLink
+ *                ConceptNode $x
+ *                ConceptNode "leaves"
+ *          EvaluationLink@2
+ *             PredicateNode "eats"
+ *             ListLink
+ *                ConceptNode "$x"
+ *                ConceptNode "flesh"
+ *
+ * will be returned as
+ *
+ *    Andlink@1->{Inheritance@1,AndLink@2}
+ *    Andlink@2->{EvaluationLink@1,EvaluationLink@2}
+ *
+ * where @n represents unique instance of links/connectors.  It'ss actually
+ * a Back Inference Tree (BIT) as a map without the use of tree.
+ *
+ * @param implicant    a handle to the implicant
+ * @return             a mapping of the above structure
  */
-map<Handle, HandleSeq> BackwardChainer::get_logical_link_premises_map(
-		Handle& himplication_link) throw (opencog::InvalidParamException) {
-	if (_as->getType(himplication_link) != IMPLICATION_LINK)
-		throw InvalidParamException(TRACE_INFO,
-				"input should be implication link");
-	Handle root_llink = _as->getOutgoing(himplication_link)[0];
+map<Handle, HandleSeq> BackwardChainer::get_logical_link_premises_map(Handle& himplicant)
+{
 	map<Handle, HandleSeq> logical_link_premise_map;
-	HandleSeq logical_links;
+	std::stack<Handle> visit_stack;
 
-	Type t = _as->getType(root_llink);
-	auto it = find(_logical_link_types.begin(), _logical_link_types.end(), t);
-	if (it != _logical_link_types.end()) {
-		logical_links.push_back(root_llink);
-		do {
-			Handle llink = logical_links[logical_links.size() - 1];
-			logical_links.pop_back();
-			HandleSeq premises = _as->getOutgoing(llink);
-			for (Handle h : premises) {
-				logical_link_premise_map[llink].push_back(h);
-				//check if h is a logical link type and push it for building next iter map
-				t = _as->getType(h);
-				it = find(_logical_link_types.begin(),
-						_logical_link_types.end(), t);
-				if (it != _logical_link_types.end())
-					logical_links.push_back(h);
+	visit_stack.push(himplicant);
 
-			}
-		} while (not logical_links.empty());
-		return logical_link_premise_map;
-	} else
-		return map<Handle, HandleSeq> { { Handle::UNDEFINED, HandleSeq {
-				root_llink } } };
+	while (not visit_stack.empty())
+	{
+		Handle head = visit_stack.top();
+		visit_stack.pop();
+
+		// if not a logical link, continue
+		if (find(_logical_link_types.begin(), _logical_link_types.end(), head->getType()) == _logical_link_types.end())
+			continue;
+
+		for (Handle h : LinkCast(head)->getOutgoingSet())
+		{
+			logical_link_premise_map[head].push_back(h);
+			visit_stack.push(h);
+		}
+
+	}
+
+	return logical_link_premise_map;
 }
 
 /**
