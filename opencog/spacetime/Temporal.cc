@@ -44,8 +44,8 @@ std::ostream& operator<<(std::ostream& out, const Temporal& t)
 // Values of A, B and NORMAL for the UNDEFINED_TEMPORAL Temporal instance
 // These values should not compose a valid Temporal, btw.
 // In other words, if someone pass these values for a Temporal constructor it will throw an exception.
-#define UNDEFINED_A UINT_MAX
-#define UNDEFINED_B UINT_MAX
+#define UNDEFINED_A OCTIME_MAX
+#define UNDEFINED_B OCTIME_MAX
 #define UNDEFINED_NORMAL true
 
 // USED TO SEEK MEMORY LEAK
@@ -62,18 +62,18 @@ void Temporal::init(octime_t a, octime_t b, bool normal) throw (InvalidParamExce
     if (normal) {
         if (b > a) {
             throw InvalidParamException(TRACE_INFO,
-                                        "Cannot create a Temporal (normal-distribution) with the variance (%lu) greater than the mean (%lu). This causes negative lower bound.", b,  a);
+                                        "Cannot create a Temporal (normal-distribution) with the variance (%llu) greater than the mean (%llu). This causes negative lower bound.", b,  a);
         }
         octime_t sum = a + b;
         // if the addition caused an overflow
         if (sum < a) {
             throw InvalidParamException(TRACE_INFO,
-                                        "Temporal - Upper bound reached when creating a Temporal (normal-distribution): %lu.", sum);
+                                        "Temporal - Upper bound reached when creating a Temporal (normal-distribution): %llu.", sum);
         }
     } else {
         if (a > b) {
             throw InvalidParamException(TRACE_INFO,
-                                        "Cannot create a Temporal (uniform-distribution) with lower bound (%lu) greater than upper bound (%lu)", b, a);
+                                        "Cannot create a Temporal (uniform-distribution) with lower bound (%llu) greater than upper bound (%llu)", b, a);
         }
     }
     this->normal = normal;
@@ -149,7 +149,7 @@ std::string Temporal::toString() const
     if (*this == UNDEFINED_TEMPORAL) return "UNDEFINED_TEMPORAL";
     char buf[1 << 8];
     char* answer = buf;
-    sprintf(answer, "(%s,%lu,%lu)", (normal ? "NORMAL" : "UNIFORM"), a, b);
+    sprintf(answer, "(%s,%llu,%llu)", (normal ? "NORMAL" : "UNIFORM"), a, b);
     return answer;
 }
 
@@ -157,11 +157,11 @@ std::string Temporal::getTimeNodeName() const
 {
     char buffer[1000];
     if (normal) {
-        sprintf(buffer, "%lu:%lu:%d", a, b, normal);
+        sprintf(buffer, "%llu:%llu:%d", a, b, normal);
     } else if (a == b) {
-        sprintf(buffer, "%lu", a);
+        sprintf(buffer, "%llu", a);
     } else {
-        sprintf(buffer, "%lu:%lu", a, b);
+        sprintf(buffer, "%llu:%llu", a, b);
     }
     return buffer;
 }
@@ -172,16 +172,16 @@ std::string Temporal::getTimeNodeName(octime_t timestamp)
     //   return Temporal(timestamp).getTimeNodeName();
     // However, for performance reasons, this is implemented as bellow:
     char buffer[1000];
-    sprintf(buffer, "%lu", timestamp);
+    sprintf(buffer, "%llu", timestamp);
     return buffer;
 }
 
 Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
 {
     const char* nextToken = timeNodeName;
-    octime_t a = (octime_t) strtoul(nextToken,NULL,10);
+    octime_t a = (octime_t) strtoull(nextToken,NULL,10);
 
-    DPRINTF("Temporal::getFromTimeNodeName: %ld %lu %lu / %s\n", a, a, (octime_t)atof(timeNodeName), timeNodeName);
+    DPRINTF("Temporal::getFromTimeNodeName: %ld %llu %llu / %s\n", a, a, (octime_t)atof(timeNodeName), timeNodeName);
 
     while (*nextToken && *nextToken != ':') {
         nextToken++;
@@ -189,9 +189,9 @@ Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
     if (!(*nextToken)) {
         return Temporal(a);
     }
-    octime_t b = (octime_t)strtoul(++nextToken,NULL,10);
+    octime_t b = (octime_t)strtoull(++nextToken,NULL,10);
 
-    DPRINTF("Temporal::getFromTimeNodeName: %ld %lu / %s\n", b, b, nextToken);
+    DPRINTF("Temporal::getFromTimeNodeName: %ld %llu / %s\n", b, b, nextToken);
 
     while (*nextToken && *nextToken != ':') {
         nextToken++;
