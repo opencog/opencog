@@ -84,7 +84,6 @@ private:
 	bool unify(const Handle& htarget, const Handle& match, map<Handle, HandleSeq>& output);
 	map<Handle, HandleSeq> unify_to_empty_set(Handle& htarget);
 
-	Handle get_unvisited_logical_link(HandleSeq& connectors, HandleSeq& visited);
 	map<Handle, HandleSeq> get_logical_link_premises_map(Handle& himplication_link) throw (opencog::InvalidParamException);
 
 	map<Handle, HandleSeq> join_premise_vgrounding_maps(const Handle& connector,

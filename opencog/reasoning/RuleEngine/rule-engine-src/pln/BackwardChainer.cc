@@ -120,59 +120,59 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
  * Apply a rule to an atom.
  *
  * @param htarget   the atom in which the rule will be applied
- * @param rule      the rule to apply
+ * @param rule      the rule to apply    // XXX originally an ImplicationLink
  * @return          ???
  */
-map<Handle, HandleSeq> BackwardChainer::apply_rule(Handle& htarget, Handle& rule)
+map<Handle, HandleSeq> BackwardChainer::apply_rule(Handle& htarget, Rule& rule)
 {
 	vector<map<Handle, HandleSeq>> results;
-	Handle root_logical_link = get_root_logical_link(rule);
 
-	if (root_logical_link == Handle::UNDEFINED)
-	{
-		//eg. ImplicationLink (Inheritance $x "human") (InheritanceLink "$x" "bipedal")) has no logical links
-		Handle implicant = _as->getOutgoing(rule)[0];
+	Handle implicant = rule.get_implicant();
+
+	// if the implicant is a normal link and not a logical conditions
+	// eg. (ImplicationLink (Inheritance $x "human") (InheritanceLink "$x" "bipedal"))
+	if (find(_logical_link_types.begin(), _logical_link_types.end(), implicant->getType()) == _logical_link_types.end())
 		return do_bc(implicant);
-	}
 
-	//build a tree of the the logical links and premises( premises could by themselves be a logical link) as a map
+	// build a tree of the the logical links and premises( premises could by themselves be a logical link) as a map
 	map<Handle, HandleSeq> logical_link_premise_map = get_logical_link_premises_map(rule);
 	map<Handle, map<Handle, HandleSeq>> premise_var_ground_map;
 
-	HandleSeq visited_logical_link;
+	std::stack<Handle> visited_logical_link;
 	HandleSeq evaluated_premises;
-	visited_logical_link.push_back(root_logical_link); //start from the root
+	visited_logical_link.push(implicant); //start from the root
 
-	//go down deep until a logical link maps only to set of premises in the logical_link_premise_map object
-	//e.g start from (and x y) instead of (and (and x y) x) and start backward chaining  from there. i.e bottom up.
+	// go down deep until a logical link maps only to set of premises in the logical_link_premise_map object
+	// e.g start from (and x y) instead of (and (and x y) x) and start backward chaining  from there. i.e bottom up.
 	while (not visited_logical_link.empty())
 	{
-		Handle logical_link = visited_logical_link.back();
-		visited_logical_link.pop_back();
+		Handle logical_link = visited_logical_link.top();
+		visited_logical_link.pop();
 
 		HandleSeq premises = logical_link_premise_map[logical_link];
-		Handle llink = get_unvisited_logical_link(premises, evaluated_premises);
 
-		if (llink != Handle::UNDEFINED)
-		{
-			visited_logical_link.push_back(llink);
-			continue;
-		}
-
+		// check each premise
 		for (Handle premise : premises)
 		{
-			auto i = find(evaluated_premises.begin(), evaluated_premises.end(),
-					premise);
-			if (i == evaluated_premises.end())
+			// if premise already evaluated, skip it
+			if (find(evaluated_premises.begin(), evaluated_premises.end(), premise) == evaluated_premises.end())
+				continue;
+
+			// if it is another logical link, add it to the stack for future visit
+			if (logical_link_premise_map.count(premise) != 0)
 			{
-				auto var_grounding = do_bc(premise);
-				premise_var_ground_map[premise] = var_grounding;
-				evaluated_premises.push_back(premise);
+				visited_logical_link.push(premise);
+				continue;
 			}
+
+			auto var_grounding = do_bc(premise);
+			premise_var_ground_map[premise] = var_grounding;
+			evaluated_premises.push_back(premise);
 		}
 
-		auto v = join_premise_vgrounding_maps(logical_link,
-				premise_var_ground_map);
+		// XXX TODO logical_link premises might get evaluated multiple times
+
+		auto v = join_premise_vgrounding_maps(logical_link,	premise_var_ground_map);
 
 		results.push_back(v);		//add to results
 
@@ -373,32 +373,6 @@ map<Handle, HandleSeq> BackwardChainer::join_premise_vgrounding_maps(
 		}
 	}
 	return result;
-}
-
-/**
- * Looks if first list input exists in,VARIABLE_NODE the second ,gets that aren't contained in the second list
- * and returns the first amongst the non contained ones
- * @param connectors
- * @param visited
- * @return
- */
-Handle BackwardChainer::get_unvisited_logical_link(HandleSeq& llinks,
-		HandleSeq& visited) {
-	HandleSeq result;
-	for (Handle h : llinks) {
-		Type t = _as->getType(h);
-		auto it = find(_logical_link_types.begin(), _logical_link_types.end(),
-				t);
-		if (it != _logical_link_types.end()) {
-			auto i = find(visited.begin(), visited.end(), h);
-			if (i == visited.end())
-				result.push_back(h);
-		}
-	}
-	if (not result.empty())
-		return result[0];
-
-	return Handle::UNDEFINED;
 }
 
 /**
