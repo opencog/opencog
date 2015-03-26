@@ -123,7 +123,7 @@
                     (+
                         (* sAB sBC)
                         (/
-                            (* (- 1 sAB) (- sC (* sB SBC)))
+                            (* (- 1 sAB) (- sC (* sB sBC)))
                             (- 1 sB)
                         )
                     )
