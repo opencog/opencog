@@ -13454,13 +13454,36 @@ The interesting part is the entropy, and the thermal bath, which is not
  Local detailed balance requires that 
 \begin_inset Formula 
 \[
-\log\frac{H_{x,x'}^{y,y'}}{H_{x',x}^{y',y}}=\frac{-(E_{x,y}-E_{x',y'})}{T}
+\log\frac{H_{x,x'}^{y,y'}}{H_{x',x}^{y',y}}=\frac{-(E_{x,y}-E_{x',y'})}{kT}
 \]
 
 \end_inset
 
 is the change in energy due to a state transition: the change in energy
  is supplied by the heat reservior.
+ Where does this mystery equation come from? Answer:
+\end_layout
+
+\begin_layout Standard
+Detailed balance requires that:
+\begin_inset Formula 
+\[
+H_{ji}p_{i}=H_{ij}p_{j}
+\]
+
+\end_inset
+
+(there is NO repeated-index summation).
+ Then, just write 
+\begin_inset Formula $p_{i}=\exp-E_{i}/kT$
+\end_inset
+
+, and turn the crank.
+ The general principle: 
+\emph on
+the log of the ratio of the forward and backward transition rates between
+ two states must be proportional to the energy difference between those
+ states!
 \end_layout
 
 \begin_layout Section*
