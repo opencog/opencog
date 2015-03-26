@@ -187,12 +187,12 @@
             (ListLink
                 (TypedVariableLink
                     (VariableNode "$var_time_node_type") 
-                    (VariableTypeNode "TimeNode")
+                    (TypeNode "TimeNode")
                 )
 
                 (TypedVariableLink
                     (VariableNode "$var_number_node_type") 
-                    (VariableTypeNode "NumberNode")
+                    (TypeNode "NumberNode")
                 )
 
             ); ListLink 
@@ -390,7 +390,7 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$var_list_link_type") 
-                (VariableTypeNode "ListLink")
+                (TypeNode "ListLink")
             ) 
         ) 
 
@@ -535,11 +535,11 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$var_time_node_type") 
-                (VariableTypeNode "TimeNode")
+                (TypeNode "TimeNode")
             )
             (TypedVariableLink
                 (VariableNode "$var_list_link_type") 
-                (VariableTypeNode "ListLink")
+                (TypeNode "ListLink")
             ) 
         ) 
 
@@ -791,11 +791,11 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$var_time_node_type") 
-                (VariableTypeNode "TimeNode")
+                (TypeNode "TimeNode")
             )
             (TypedVariableLink
                 (VariableNode "$var_list_link_type") 
-                (VariableTypeNode "ListLink")
+                (TypeNode "ListLink")
             ) 
         ) 
 

@@ -38,7 +38,7 @@ public:
 	void setUp(void);
 	void tearDown(void);
 	void test_choose_rule(void);
-	void test_choose_target(void);
+	void test_choose_source(void);
 };
 
 void DefaultForwardChainerCBUTest::setUp() {}
@@ -69,15 +69,15 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void)
 	TS_ASSERT_DIFFERS(it, bindlinks.end());*/
 }
 
-void DefaultForwardChainerCBUTest::test_choose_target(void)
+void DefaultForwardChainerCBUTest::test_choose_source(void)
 {
 	 config().set("SCM_PRELOAD",
 		"tests/reasoning/RuleEngine/simple-assertions.scm");
 	 load_scm_files_from_config(*as);
 
-	 Handle target = eval->eval_h("(ConceptNode \"Einstein\")");
+	 Handle source = eval->eval_h("(ConceptNode \"Einstein\")");
 	 FCMemory fcmem(as);
-	 fcmem.set_target(target);
+	 fcmem.set_source(source);
 	 DefaultForwardChainerCB dfcb(as);
 	 HandleSeq hs = dfcb.choose_premises(fcmem);
 	 TS_ASSERT(5 == hs.size());

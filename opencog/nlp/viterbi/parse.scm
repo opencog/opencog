@@ -17,15 +17,15 @@
     (ListLink
       (TypedVariableLink
         (VariableNode "$left word")
-        (VariableTypeNode "WordNode")
+        (TypeNode "WordNode")
       )
       (TypedVariableLink
         (VariableNode "$right word")
-        (VariableTypeNode "WordNode")
+        (TypeNode "WordNode")
       )
       (TypedVariableLink
         (VariableNode "$connector")
-        (VariableTypeNode "LgConnectorNode")
+        (TypeNode "LgConnectorNode")
       )
     )
     (ImplicationLink

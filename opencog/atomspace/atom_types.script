@@ -61,15 +61,25 @@ ABSENT_LINK <- UNORDERED_LINK
 // Universe of discourse
 CONTEXT_LINK <- ORDERED_LINK
 
+// ---------------------------------------------------------
 // Basic first-order logic ungrounded terms and term types
+
+// Type declarations
+TYPE_NODE <- NODE
+TYPE_CHOICE <- OR_LINK
+
+// Variables and variable types
 VARIABLE_NODE <- NODE
-VARIABLE_TYPE_NODE <- NODE
+VARIABLE_TYPE_NODE <- TYPE_NODE // XXX for backwards-compat, only
 TYPED_VARIABLE_LINK <- ORDERED_LINK
+
+// A list of variables or variable declarations.
+VARIABLE_LIST <- LIST_LINK
 
 // Everything under a QuoteLink is interpreted literally.
 QUOTE_LINK <- ORDERED_LINK
 
-// Function constructor (predicate and schema)
+// Pattern and function declaration
 LAMBDA_LINK <- ORDERED_LINK
 
 // Scoping and Logical quantifiers
@@ -81,6 +91,7 @@ AVERAGE_LINK <- FORALL_LINK
 // Convert predicate into concept
 SATISFYING_SET_LINK <- UNORDERED_LINK
 
+// ??? What is this???
 SCHOLEM_LINK <- ORDERED_LINK
 
 // Basic first-order logic operations

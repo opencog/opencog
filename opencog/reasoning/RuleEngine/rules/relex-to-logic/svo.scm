@@ -6,19 +6,19 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$a-parse")
-                (VariableTypeNode "ParseNode")
+                (TypeNode "ParseNode")
             )
             (TypedVariableLink
                 (VariableNode "$X")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$Y")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$Z")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
         )
         (ImplicationLink

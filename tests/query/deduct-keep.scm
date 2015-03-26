@@ -8,10 +8,10 @@
 (define (print-ownership)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(TypedVariableLink
 				(VariableNode "$person")
-				(VariableTypeNode "FeatureNode")
+				(TypeNode "FeatureNode")
 			)
 			(VariableNode "$nationality")
 			(VariableNode "$house")
@@ -56,15 +56,15 @@
 (define (print-results)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(TypedVariableLink
 				(VariableNode "$person")
-				(VariableTypeNode "FeatureNode")
+				(TypeNode "FeatureNode")
 			)
 			(VariableNode "$pred")
 			(TypedVariableLink
 				(VariableNode "$attr")
-				(VariableTypeNode "ConceptNode")
+				(TypeNode "ConceptNode")
 			)
 		)
 		(ImplicationLink

@@ -30,22 +30,22 @@
 (define (is-same-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(TypedVariableLink
 				(VariableNode "$predicate")
-				(VariableTypeNode "PredicateNode")
+				(TypeNode "PredicateNode")
 			)
 			(TypedVariableLink
 				(VariableNode "$person_a")
-				(VariableTypeNode "FeatureNode")
+				(TypeNode "FeatureNode")
 			)
 			(TypedVariableLink
 				(VariableNode "$person_b")
-				(VariableTypeNode "FeatureNode")
+				(TypeNode "FeatureNode")
 			)
 			(TypedVariableLink
 				(VariableNode "$property")
-				(VariableTypeNode "ConceptNode")
+				(TypeNode "ConceptNode")
 			)
 		)
 		(ImplicationLink
@@ -93,14 +93,14 @@
 (define (transitive-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(TypedVariableLink
 				(VariableNode "$person_a")
-				(VariableTypeNode "FeatureNode")
+				(TypeNode "FeatureNode")
 			)
 			(TypedVariableLink
 				(VariableNode "$person_b")
-				(VariableTypeNode "FeatureNode")
+				(TypeNode "FeatureNode")
 			)
 		)
 		(ImplicationLink

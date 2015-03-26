@@ -42,7 +42,7 @@
 
 (define bindy
 	(BindLink
-		(ListLink
+		(VariableList
 			(VariableNode "$var_1")
 			(VariableNode "$var_2")
 		)

@@ -237,7 +237,7 @@ void PLNCommons::get_root_links(Handle h, HandleSeq& parents)
     }
 }
 
-float PLNCommons::target_tv_fitness(Handle h)
+float PLNCommons::tv_fitness(Handle h)
 {
     TruthValuePtr ptv = as_->getTV(h);
     confidence_t c = ptv->getConfidence();

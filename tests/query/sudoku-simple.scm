@@ -86,7 +86,7 @@
 ; This is just a big list of all the cells.
 ;
 (define (x2-variable-decls)
-	(ListLink
+	(VariableList
 		(VariableNode "$cell_11")
 		(VariableNode "$cell_12")
 
@@ -241,7 +241,7 @@
 ; This is just a big list of all the cells.
 ;
 (define (x3-variable-decls)
-	(ListLink
+	(VariableList
 		(VariableNode "$cell_11")
 		(VariableNode "$cell_12")
 		(VariableNode "$cell_13")

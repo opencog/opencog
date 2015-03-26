@@ -129,7 +129,7 @@ void PLNCommonsUTest::test_get_root_links(void)
 {
     string bindlink =
             "(BindLink"
-            "   (ListLink"
+            "   (VariableList"
             "       (VariableNode \"$A\")"
             "       (VariableNode \"$B\")"
             "       (VariableNode \"$C\"))"
@@ -204,9 +204,7 @@ void PLNCommonsUTest::test_create_bindLink()
      Handle cmp =
      eval_->eval_h(
      "(BindLink"
-     "(ListLink"
      "(VariableNode \"$var-rich\")"
-     ")"
      "(ImplicationLink"
      "(InheritanceLink (VariableNode \"$var-rich\") (ConceptNode \"happy\"))"
      "(InheritanceLink (VariableNode \"$var-rich\") (ConceptNode \"happy\"))"
@@ -224,11 +222,9 @@ void PLNCommonsUTest::test_create_bindLink()
      ")");
      h = commons_->create_bindLink(himplicant, true);
      cmp = eval_->eval_h("(BindLink"
-     "(ListLink"
      "(TypedVariableLink"
      "(VariableNode \"$x\")"
-     "(VariableTypeNode \"VariableNode\")"
-     ")"
+     "(TypeNode \"VariableNode\")"
      ")"
      "(ImplicationLink"
      "(InheritanceLink"

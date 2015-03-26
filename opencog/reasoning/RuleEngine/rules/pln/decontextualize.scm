@@ -51,7 +51,7 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$A")
-                (VariableTypeNode "PredicateNode"))
+                (TypeNode "PredicateNode"))
             (VariableNode "$B")
             (VariableNode "$C"))
         (ImplicationLink

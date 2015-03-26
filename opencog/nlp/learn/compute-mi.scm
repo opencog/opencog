@@ -473,7 +473,7 @@
 			; eval links with AnyNode floating around ...
 			(TypedVariableLink
 				(VariableNode "$left-word")
-				(VariableTypeNode item-type-str)
+				(TypeNode item-type-str)
 			)
 			(ImplicationLink
 				(EvaluationLink
@@ -498,7 +498,7 @@
 		(BindLink
 			(TypedVariableLink
 				(VariableNode "$right-word")
-				(VariableTypeNode item-type-str)
+				(TypeNode item-type-str)
 			)
 			(ImplicationLink
 				(EvaluationLink
@@ -932,7 +932,7 @@
 			; eval links with AnyNode floating around ...
 			(TypedVariableLink
 				(VariableNode "$left-word")
-				(VariableTypeNode item-type-str)
+				(TypeNode item-type-str)
 			)
 			(ImplicationLink
 				(EvaluationLink lg_rel

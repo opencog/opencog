@@ -59,7 +59,7 @@
 (define (decl-var type var)
 	(TypedVariableLink
 		(VariableNode var)
-		(VariableTypeNode type)
+		(TypeNode type)
 	)
 )
 
@@ -70,7 +70,7 @@
 (define (is-same-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "PredicateNode" "$predicate")
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
@@ -103,7 +103,7 @@
 (define (transitive-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "PredicateNode" "$predicate")
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
@@ -136,7 +136,7 @@
 (define (transitive-not-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "PredicateNode" "$predicate")
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
@@ -165,7 +165,7 @@
 (define (by-elimination-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "FeatureNode" "$person")
 			(decl-var "PredicateNode" "$predicate")
 			(decl-var "ConceptNode" "$attr_a")
@@ -223,7 +223,7 @@
 (define (distinct-attr-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
 			(decl-var "PredicateNode" "$predicate_common")
@@ -260,7 +260,7 @@
 (define (neighbor-not-attr-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
 			(decl-var "PredicateNode" "$predicate")
@@ -293,7 +293,7 @@
 (define (first-addr-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
 			(decl-var "ConceptNode" "$addr_a")
@@ -328,7 +328,7 @@
 (define (neighbor-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
 			(decl-var "ConceptNode" "$addr_a")
@@ -358,7 +358,7 @@
 (define (neighbor-symmetry-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
 		)
@@ -384,7 +384,7 @@
 (define (found-solution-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "FeatureNode" "$person")
 			(decl-var "ConceptNode" "$nationality")
 			(decl-var "ConceptNode" "$drink")

@@ -146,7 +146,7 @@
 	(define (var-type var type)
 		(TypedVariableLink
 			(VariableNode var)
-			(VariableTypeNode type)
+			(TypeNode type)
 		)
 	)
 
@@ -413,7 +413,7 @@
 ;
 ; During pattern matching, a variable can be constrained to be of a 
 ; a certain type, so that it is not matched too freely. This is done
-; by using TypedVariableLink's and VariableTypeNode's. 
+; by using TypedVariableLink's and TypeNode's. 
 ;
 ; This routine returns an r-expression.
 ;
@@ -424,7 +424,7 @@
 	(define (vd vtype vname)
 		(TypedVariableLink
 			(VariableNode vname)
-			(VariableTypeNode vtype)
+			(TypeNode vtype)
 		)
 	)
 	(r-new-expr (list (vd vartype varname)) '() '())
@@ -452,7 +452,7 @@
 
 	; Return #t if the var appears in the variable-type declaration
 	; else return #f.  The vartype is assumed to be of the form:
-	; (TypedVariableLink (VariableNode "$abc") (VariableTypeNode "WhateverNode"))
+	; (TypedVariableLink (VariableNode "$abc") (TypeNode "WhateverNode"))
 	; so that car of outgoping set identifies the variable.
 	(define (is-vdecl? vartype var)
 		(equal? var

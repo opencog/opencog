@@ -49,14 +49,14 @@ void FCMemory::set_rules(vector<Rule*> rules)
 {
     rules_ = rules;
 }
-void FCMemory::set_target(Handle target)
+void FCMemory::set_source(Handle source)
 {
-    cur_target_ = target;
-    target_list_.push_back(cur_target_);
+    cur_source_ = source;
+    source_list_.push_back(cur_source_);
 }
-HandleSeq FCMemory::get_target_list(void)
+HandleSeq FCMemory::get_source_list(void)
 {
-    return target_list_;
+    return source_list_;
 }
 HandleSeq FCMemory::get_premise_list(void)
 {
@@ -96,13 +96,13 @@ void FCMemory::add_inference(int iter_step, HandleSeq product,
         inf.matched_nodes.push_back(mn);
     inf_history_.push_back(inf);
 }
-Handle FCMemory::get_cur_target(void)
+Handle FCMemory::get_cur_source(void)
 {
-    return cur_target_;
+    return cur_source_;
 }
-bool FCMemory::isin_target_list(Handle h)
+bool FCMemory::isin_source_list(Handle h)
 {
-    return (find(target_list_.begin(), target_list_.end(), h) != target_list_.end());
+    return (find(source_list_.begin(), source_list_.end(), h) != source_list_.end());
 }
 bool FCMemory::isin_premise_list(Handle h)
 {

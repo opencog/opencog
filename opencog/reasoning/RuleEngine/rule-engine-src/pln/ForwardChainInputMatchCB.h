@@ -34,9 +34,9 @@ private:
 	HandleSeq _input_match;
 public:
 	/**
-	 * @param main_as the main atomspace where initial target is fetched from
-	 * @param target_list_as the chaining specific atomspace where targets is copied from the main atomspace
-	 *  where PLN rules are applied on target lists for new knowledge discovery.
+	 * @param main_as the main atomspace where initial source is fetched from
+	 * @param source_list_as the chaining specific atomspace where sources is copied from the main atomspace
+	 *  where PLN rules are applied on source lists for new knowledge discovery.
 	 *
 	 *  one can set the above two pointers to  the same atomspace object (wich now is the default way)
 	 *  if there is no intention of chaining in a separate atomspace.

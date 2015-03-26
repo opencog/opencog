@@ -6,32 +6,32 @@
             (TypedVariableLink
                 (VariableNode "$top relationship")
                 (ListLink
-                    (VariableTypeNode "DefinedLinguisticRelationshipNode")
-                    (VariableTypeNode "PrepositionalRelationshipNode")
+                    (TypeNode "DefinedLinguisticRelationshipNode")
+                    (TypeNode "PrepositionalRelationshipNode")
                 )
             )
             (TypedVariableLink
                 (VariableNode "$other relationship")
                 (ListLink
-                    (VariableTypeNode "DefinedLinguisticRelationshipNode")
-                    (VariableTypeNode "PrepositionalRelationshipNode")
+                    (TypeNode "DefinedLinguisticRelationshipNode")
+                    (TypeNode "PrepositionalRelationshipNode")
                 )
             )
             (TypedVariableLink
                 (VariableNode "$parse node")
-                (VariableTypeNode "ParseNode")
+                (TypeNode "ParseNode")
             )
             (TypedVariableLink
                 (VariableNode "$parent")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$root")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$child")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
         )
         (ImplicationLink

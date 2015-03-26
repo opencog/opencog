@@ -18,7 +18,7 @@
       (VariableNode "$A")
       (TypedVariableLink
        (VariableNode "$A")
-       (VariableTypeNode "PredicateNode")))
+       (TypeNode "PredicateNode")))
     (ImplicationLink
       (VariableNode "$A")
       (ExecutionOutputLink

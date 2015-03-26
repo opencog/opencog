@@ -24,7 +24,7 @@
 (define (pair)
 	(BindLink
 		;; variable decls
-		(ListLink
+		(VariableList
 			(VariableNode "$var_one")
 			(VariableNode "$var_two")
 		)
@@ -54,7 +54,7 @@
 (define (blink)
 	(BindLink
 		;; variable decls
-		(ListLink
+		(VariableList
 			(VariableNode "$var_number")
 			(VariableNode "$var_schema")
 		)
@@ -83,7 +83,7 @@
 (define (blinker)
 	(BindLink
 		;; variable decls
-		(ListLink
+		(VariableList
 			(VariableNode "$vbr_schema")
 			(VariableNode "$vbr_number")
 		)

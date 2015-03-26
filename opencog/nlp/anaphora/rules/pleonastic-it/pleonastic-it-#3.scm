@@ -5,15 +5,15 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$target")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$appears")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$word")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
         )
         (ImplicationLink

@@ -139,19 +139,19 @@ doesn't match any accidentally similar hypergraphs.
          ListLink
             TypedVariableLink
                VariableNode "$rel-var"
-               VariableTypeNode "DefinedLinguisticRelationshipNode"
+               TypeNode "DefinedLinguisticRelationshipNode"
             TypedVariableLink
                VariableNode "$wi-a"
-               VariableTypeNode "WordInstanceNode"
+               TypeNode "WordInstanceNode"
             TypedVariableLink
                VariableNode "$wi-b"
-               VariableTypeNode "WordInstanceNode"
+               TypeNode "WordInstanceNode"
             TypedVariableLink
                VariableNode "$word-a"
-               VariableTypeNode "WordNode"
+               TypeNode "WordNode"
             TypedVariableLink
                VariableNode "$word-b"
-               VariableTypeNode "WordNode"
+               TypeNode "WordNode"
          ImplicationLink
             AndLink
                EvaluationLink
@@ -203,7 +203,7 @@ the following:
       TemplateLink
          TypedVariableLink
             VariableNode "$word-b"
-            VariableTypeNode "WordNode"
+            TypeNode "WordNode"
          ImplicationLink
             EvaluationLink
                DefinedPatternNode "word-pairs"
@@ -332,28 +332,28 @@ is shown below.
          ListLink
             TypedVariableLink
                VariableNode "$rel-l"
-               VariableTypeNode "DefinedLinguisticRelationshipNode"
+               TypeNode "DefinedLinguisticRelationshipNode"
             TypedVariableLink
                VariableNode "$rel-r"
-               VariableTypeNode "DefinedLinguisticRelationshipNode"
+               TypeNode "DefinedLinguisticRelationshipNode"
             TypedVariableLink
                VariableNode "$wi-head"
-               VariableTypeNode "WordInstanceNode"
+               TypeNode "WordInstanceNode"
             TypedVariableLink
                VariableNode "$wi-a"
-               VariableTypeNode "WordInstanceNode"
+               TypeNode "WordInstanceNode"
             TypedVariableLink
                VariableNode "$wi-b"
-               VariableTypeNode "WordInstanceNode"
+               TypeNode "WordInstanceNode"
             TypedVariableLink
                VariableNode "$word-a"
-               VariableTypeNode "WordNode"
+               TypeNode "WordNode"
             TypedVariableLink
                VariableNode "$word-b"
-               VariableTypeNode "WordNode"
+               TypeNode "WordNode"
             TypedVariableLink
                VariableNode "$parse"
-               VariableTypeNode "ParseNode"
+               TypeNode "ParseNode"
          ImplicationLink
             AndLink
                ;; The pattern matcher operates more efficiently if
@@ -509,7 +509,7 @@ by running the pattern matcher on the following:
        ListLink
            TypedVariableLink
                VariableNode "$left-word"
-               VariableTypeNode "WordNode"
+               TypeNode "WordNode"
        ImplicationLink
            ;; The IF clause
            PredicateLink
@@ -540,7 +540,7 @@ should run the following pattern:
        ListLink
            TypedVariableLink
                VariableNode "$left-word"
-               VariableTypeNode "WordNode"
+               TypeNode "WordNode"
        ImplicationLink
            ;; The IF clause
            AndLink

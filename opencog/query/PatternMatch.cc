@@ -45,9 +45,9 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	// Types must be as expected
 	Type tvarbles = hvarbles->getType();
 	Type tclauses = hclauses->getType();
-	if (LIST_LINK != tvarbles)
+	if (VARIABLE_LIST != tvarbles and LIST_LINK != tvarbles)
 		throw InvalidParamException(TRACE_INFO,
-			"Expected ListLink for bound variable list.");
+			"Expected VariableList for the bound variable list.");
 
 	if (AND_LINK != tclauses)
 		throw InvalidParamException(TRACE_INFO,
@@ -182,16 +182,16 @@ typedef std::pair<Handle, const std::set<Type> > ATPair;
  *
  *    TypedVariableLink
  *       VariableNode "$some_var_name"
- *       VariableTypeNode  "ConceptNode"
+ *       TypeNode  "ConceptNode"
  *
  * or
  *
  *    TypedVariableLink
  *       VariableNode "$some_var_name"
  *       ListLink
- *          VariableTypeNode  "ConceptNode"
- *          VariableTypeNode  "NumberNode"
- *          VariableTypeNode  "WordNode"
+ *          TypeNode  "ConceptNode"
+ *          TypeNode  "NumberNode"
+ *          TypeNode  "WordNode"
  *
  * In either case, the variable itself is appended to "vset",
  * and the list of allowed types are associated with the variable
@@ -214,14 +214,14 @@ int PatternMatch::get_vartype(Handle htypelink,
 
 	// The vartype is either a single type name, or a list of typenames.
 	Type t = vartype->getType();
-	if (VARIABLE_TYPE_NODE == t)
+	if (TYPE_NODE == t or VARIABLE_TYPE_NODE == t)
 	{
 		const std::string &tn = NodeCast(vartype)->getName();
 		Type vt = classserver().getType(tn);
 
 		if (NOTYPE == vt)
 		{
-			logger().warn("%s: VariableTypeNode specifies unknown type: %s\n",
+			logger().warn("%s: TypeNode specifies unknown type: %s\n",
 			               __FUNCTION__, tn.c_str());
 			return 4;
 		}
@@ -230,7 +230,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 		typemap.insert(ATPair(varname, ts));
 		vset.insert(varname);
 	}
-	else if (LIST_LINK == t)
+	else if (TYPE_CHOICE == t)
 	{
 		std::set<Type> ts;
 
@@ -239,10 +239,11 @@ int PatternMatch::get_vartype(Handle htypelink,
 		for (size_t i=0; i<tss; i++)
 		{
 			Handle h(tset[i]);
-			if (VARIABLE_TYPE_NODE != h->getType())
+			Type var_type = h->getType();
+			if (TYPE_NODE != var_type and VARIABLE_TYPE_NODE != var_type)
 			{
-				logger().warn("%s: TypedVariableLink has unexpected content:\n"
-				              "Expected VariableTypeNode, got %s",
+				logger().warn("%s: VariableChoiceLink has unexpected content:\n"
+				              "Expected TypeNode, got %s",
 				              __FUNCTION__,
 				              classserver().getTypeName(h->getType()).c_str());
 				return 3;
@@ -251,7 +252,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 			Type vt = classserver().getType(tn);
 			if (NOTYPE == vt)
 			{
-				logger().warn("%s: VariableTypeNode specifies unknown type: %s\n",
+				logger().warn("%s: TypeNode specifies unknown type: %s\n",
 				               __FUNCTION__, tn.c_str());
 				return 5;
 			}
@@ -264,7 +265,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 	else
 	{
 		logger().warn("%s: Unexpected contents in TypedVariableLink\n"
-				        "Expected VariableTypeNode or ListLink, got %s",
+				        "Expected TypeNode or ListLink, got %s",
 		              __FUNCTION__,
 		              classserver().getTypeName(t).c_str());
 		return 2;
@@ -336,7 +337,7 @@ void PatternMatch::validate_bindvars(Handle hbindlink)
 			throw InvalidParamException(TRACE_INFO,
 				"Cannot understand the typed variable definition");
 	}
-	else if (LIST_LINK == tdecls)
+	else if (VARIABLE_LIST == tdecls or LIST_LINK == tdecls)
 	{
 		// The list of variable declarations should be .. a list of
 		// variables! Make sure its as expected.

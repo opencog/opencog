@@ -67,7 +67,7 @@
 	(BindLink
 		(TypedVariableLink
 			(VariableNode "$prNode")
-			(VariableTypeNode "PredicateNode")
+			(TypeNode "PredicateNode")
 		)
 		(ImplicationLink
 			(InheritanceLink

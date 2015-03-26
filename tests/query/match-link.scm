@@ -104,7 +104,7 @@
 ; Match any arity-2 structure of the desired form.
 (define (untyped-link-match)
    (BindLink
-      (ListLink
+      (VariableList
          (VariableNode "$var")
       )
       (ImplicationLink
@@ -122,10 +122,10 @@
 ; Match arity-2 with the link having a type.
 (define (typed-link-match)
    (BindLink
-      (ListLink
+      (VariableList
          (TypedVariableLink
             (VariableNode "$var")
-            (VariableTypeNode "MemberLink")
+            (TypeNode "MemberLink")
          )
       )
       (ImplicationLink
@@ -143,7 +143,7 @@
 ; Match any arity-two structure
 (define (untyped-any-match)
    (BindLink
-      (ListLink
+      (VariableList
          (VariableNode "$var-a")
          (VariableNode "$var-b")
       )
@@ -165,11 +165,11 @@
 ; Match typed arity-two structure
 (define (typed-memb-link-match)
    (BindLink
-      (ListLink
+      (VariableList
          (VariableNode "$var-a")
          (TypedVariableLink
             (VariableNode "$var-b")
-            (VariableTypeNode "MemberLink")
+            (TypeNode "MemberLink")
          )
       )
       (ImplicationLink
@@ -189,11 +189,11 @@
 
 (define (typed-pet-node-match)
    (BindLink
-      (ListLink
+      (VariableList
          (VariableNode "$var-a")
          (TypedVariableLink
             (VariableNode "$var-b")
-            (VariableTypeNode "FeatureNode")
+            (TypeNode "FeatureNode")
          )
       )
       (ImplicationLink

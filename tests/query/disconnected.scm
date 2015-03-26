@@ -5,14 +5,14 @@
 ; kind of thing to have. 
 (define anaphora-resolution
    (BindLink
-      (ListLink
+      (VariableList
          (TypedVariableLink
             (VariableNode "$word-inst-antecedent")
-            (VariableTypeNode "WordInstanceNode")
+            (TypeNode "WordInstanceNode")
          )
          (TypedVariableLink
             (VariableNode "$word-inst-anaphor")
-            (VariableTypeNode "WordInstanceNode")
+            (TypeNode "WordInstanceNode")
          )
       )
       (ImplicationLink
@@ -42,7 +42,7 @@
 ; the pattern matcher.
 (define pronoun-finder
    (BindLink
-      (ListLink
+      (VariableList
            (VariableNode "$sent")
            (VariableNode "$parse")
            (VariableNode "$word-inst")
