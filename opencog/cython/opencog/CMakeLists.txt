@@ -57,8 +57,8 @@ IF (HAVE_ATOMSPACE)
 
 	###################### atomspace ####################################
 	CYTHON_ADD_MODULE_PYX(atomspace
-		"atom.pyx" "classserver.pyx" "atomspace_details.pyx"
-		"spacetime.pyx" opencog_atom_types
+		"atom.pyx" "classserver.pyx" "handle.pyx" "truth_value.pyx"
+		"atomspace_details.pyx" "spacetime.pyx" opencog_atom_types
 		"../../atomspace/TruthValue.h" "../../atomspace/SimpleTruthValue.h"
 		"../../atomspace/ClassServer.h" "../../atomspace/Handle.h"
 		"../../atomspace/AtomSpace.h"
