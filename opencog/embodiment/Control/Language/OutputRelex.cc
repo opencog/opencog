@@ -29,7 +29,7 @@
 
 using namespace opencog::oac;
 
-std::string OutputRelex::getOutput( const AtomSpace &atomSpace, const std::vector< std::pair<std::string, Handle> >& handles ) 
+std::string OutputRelex::getOutput(AtomSpace &atomSpace, const std::vector< std::pair<std::string, Handle> >& handles ) 
 {
     //for each frames_order
     //for each handle

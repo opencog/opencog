@@ -224,13 +224,13 @@ public:
      * AtomSpace querying for inheritance links of nullary predicates
      * (e.g. food_bowl)
      */
-    static std::string lookupInheritanceLink(const AtomSpace& as, Handle);
+    static std::string lookupInheritanceLink(AtomSpace&, Handle);
 
     /**
      * AtomSpace querying for execution links of nullary predicates
      * (e.g. pet_bowl)
      */
-    static std::string lookupExecLink(const AtomSpace& as, Handle);
+    static std::string lookupExecLink(AtomSpace&, Handle);
 
     /**
      * convenience function - used to create predicates for filtering

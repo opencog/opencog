@@ -816,8 +816,7 @@ public:
      * @param object The object handle
      * @return the name of the object if it exists, or an empty string, otherwise.
      */
-    static std::string getObjectName( const AtomSpace& atomSpace, 
-                                      Handle object );
+    static std::string getObjectName(AtomSpace&, Handle object);
     
     /**
      * Given the name of an object, whose letters  may be all in upercase, gets its id.

@@ -632,7 +632,7 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByTargetType(OutputIterator result,
                  Type type,
                  Type targetType,
                  bool subclass,
@@ -679,32 +679,43 @@ public:
      * (order is considered) in their outgoing sets, where the type and
      * subclasses of the atoms are optional.
      *
-     * @param result An output iterator.
-     * @param handles An array of handles to match the outgoing sets of the searched
-     * atoms. This array can be empty (or each of its elements can be null), if
-     * the handle value does not matter or if it does not apply to the
-     * specific search.
-     * Note that if this array is not empty, it must contain "arity" elements.
-     * @param types An array of target types to match the types of the atoms in
-     * the outgoing set of searched atoms.
-     * @param subclasses An array of boolean values indicating whether each of the
-     * above types must also consider subclasses. This array can be null,
-     * what means that subclasses will not be considered. Note that if this
-     * array is not null, it must contains "arity" elements.
-     * @param arity The length of the outgoing set of the atoms being searched.
-     * @param type The type of the atom.
-     * @param subclass Whether atom type subclasses should be considered.
+     * @param  An array of handles to match the outgoing sets of the
+     *         searched atoms. This array can be empty (or each of its
+     *         elements can be null), if the handle value does not
+     *         matter or if it does not apply to the specific search.
+     *         Note that if this array is not empty, it must contain
+     *         "arity" elements.
+     * @param  An array of target types to match the types of the atoms
+     *         in the outgoing set of searched atoms.
+     * @param  An array of boolean values indicating whether each of the
+     *         above types must also consider subclasses. This array can
+     *         be null, which means that subclasses will not be
+     *         considered.
+     *         Note that if this array is not null, it must contains
+     *         "arity" elements.
+     * @param  The length of the outgoing set of the atoms being
+     * searched.
+     * @param  The optional type of the atom.
+     * @param  Whether atom type subclasses should be considered.
      * @return The set of atoms of the given type with the matching
-     * criteria in their outgoing set.
+     *         criteria in their outgoing set.
      *
-     * @note The matched entries are appended to a container whose OutputIterator
-     * is passed as the first argument. Example of call to this method, which
-     * would return all entries in AtomSpace:
+     * @note The matched entries are appended to a container whose
+     *       OutputIterator is passed as the first argument. Example
+     *       of call to this method, which would return all entries
+     *       in AtomSpace:
      * @code
      *     std::list<Handle> ret;
      *     atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
      * @endcode
      */
+    UnorderedHandleSet getHandlesByOutgoingSet(const HandleSeq& handles,
+                 Type* types,
+                 bool* subclasses,
+                 Arity arity,
+                 Type type,
+                 bool subclass);
+
     template <typename OutputIterator> OutputIterator
     getHandlesByOutgoing(OutputIterator result,
                  const HandleSeq& handles,
@@ -712,9 +723,9 @@ public:
                  bool* subclasses,
                  Arity arity,
                  Type type,
-                 bool subclass) const
+                 bool subclass)
     {
-        UnorderedHandleSet hs = getAtomTable().getHandlesByOutgoing(handles,
+        UnorderedHandleSet hs = getHandlesByOutgoingSet(handles,
                 types, subclasses, arity, type, subclass);
         return std::copy(hs.begin(), hs.end(), result);
     }

@@ -370,14 +370,14 @@ cdef class AtomSpace:
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         cdef bint target_subt = target_subtype
-        self.atomspace.getHandleSet(back_inserter(handle_vector),t,target_t,subt,target_subt)
+        self.atomspace.getHandlesByTargetType(back_inserter(handle_vector),t,target_t,subt,target_subt)
         return convert_handle_seq_to_python_list(handle_vector,self)
 
     def xget_atoms_by_target_type(self, Type t, Type target_t, subtype = True, target_subtype = True):
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         cdef bint target_subt = target_subtype
-        self.atomspace.getHandleSet(back_inserter(handle_vector),t,target_t,subt,target_subt)
+        self.atomspace.getHandlesByTargetType(back_inserter(handle_vector),t,target_t,subt,target_subt)
 
         # This code is the same for all the x iterators but there is no
         # way in Cython to yield out of a cdef function and no way to pass a 

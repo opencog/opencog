@@ -155,7 +155,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         # get by name
         output_iterator getHandlesByName(output_iterator, string& name, Type t, bint subclass)
         # get by target types
-        output_iterator getHandleSet(output_iterator,Type t,Type target,bint subclass,bint target_subclass)
+        output_iterator getHandlesByTargetType(output_iterator,Type t,Type target,bint subclass,bint target_subclass)
         # get by target handle
         output_iterator getHandleSet(output_iterator,cHandle& h,Type t,bint subclass)
         # get by STI range

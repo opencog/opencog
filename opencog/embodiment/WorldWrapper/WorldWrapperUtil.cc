@@ -123,7 +123,7 @@ Handle WorldWrapperUtil::toHandle(AtomSpace& as,
 }
 
 std::string WorldWrapperUtil::lookupInheritanceLink(
-        const AtomSpace& as,
+        AtomSpace& as,
         Handle h)
 {
 
@@ -144,7 +144,7 @@ std::string WorldWrapperUtil::lookupInheritanceLink(
 }
 
 std::string WorldWrapperUtil::lookupExecLink(
-        const AtomSpace& as,
+        AtomSpace& as,
         Handle h)
 {
     //look for x satisfying ExecutionLink(h,ListLink(),ListLink(x))

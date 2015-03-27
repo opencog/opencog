@@ -1993,7 +1993,7 @@ std::string AtomSpaceUtil::getHoldingObjectIdAtTime(AtomSpace& as,
     return as.getName(objectHandle);
 }
 
-std::string AtomSpaceUtil::getObjectName( const AtomSpace& atomSpace,
+std::string AtomSpaceUtil::getObjectName(AtomSpace& atomSpace,
                                           Handle object )
 {
     std::string name("");

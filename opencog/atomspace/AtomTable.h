@@ -286,35 +286,6 @@ public:
     }
 
     /**
-     * Returns the set of atoms with the given target handles and types
-     * (order is considered) in their outgoing sets, where the type and
-     * subclasses of the atoms are optional.
-     *
-     * @param  An array of handles to match the outgoing sets of the
-     *         searched atoms. This array can be empty (or each of its
-     *         elements can be null), if the handle value does not
-     *         matter or if it does not apply to the specific search.
-     *         Note that if this array is not empty, it must contain
-     *         "arity" elements.
-     * @param  An array of target types to match the types of the atoms
-     *         in the outgoing set of searched atoms.
-     * @param  An array of boolean values indicating whether each of the
-     *         above types must also consider subclasses. This array can
-     *         be null, which means that subclasses will not be considered.
-     *         Note that if this array is not null, it must contains
-     *         "arity" elements.
-     * @param  The length of the outgoing set of the atoms being searched.
-     * @param  The optional type of the atom.
-     * @param  Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the matching
-     *         criteria in their outgoing set.
-     */
-    UnorderedHandleSet getHandlesByOutgoing(const std::vector<Handle>&,
-                              Type*, bool*, Arity,
-                              Type type = ATOM,
-                              bool subclass = true) const;
-
-    /**
      * Returns the set of atoms within the given importance range.
      *
      * @param Importance range lower bound (inclusive).
