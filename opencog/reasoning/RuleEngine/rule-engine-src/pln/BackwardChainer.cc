@@ -25,6 +25,7 @@
 #include "BCPatternMatch.h"
 
 #include <opencog/atomutils/AtomUtils.h>
+#include <opencog/atomutils/PatternUtils.h>
 #include <opencog/atoms/bind/BindLink.h>
 
 using namespace opencog;
@@ -92,8 +93,10 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
 
 		Handle implicand = stadardized_rule.get_implicand();
 
-		// XXX TODO check unify return value
 		map<Handle, HandleSeq> out;
+
+		// it should always be possible to unify here, since filter_rules
+		// already removed rules that cannot unify to hgoal
 		unify(hgoal, implicand, out);
 		_inference_list.push_back(out);
 
@@ -160,7 +163,7 @@ map<Handle, HandleSeq> BackwardChainer::apply_rule(Handle& htarget, Rule& rule)
 			}
 
 			// if not all evaluated, add this premise back into the stack, but
-			// put all its sub-premises on top
+			// put all its sub-premises on top, so they are evaluated first
 			visit_stack.push(premise);
 
 			for (auto p : sub_premises)
@@ -187,11 +190,6 @@ map<Handle, HandleSeq> BackwardChainer::apply_rule(Handle& htarget, Rule& rule)
  */
 std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
 {
-	// for each rule, check its implicand (output)
-	// try to see if the output can be unified to htarget
-	//   if so, then this rule is a candidate rule
-	//   else reject rule
-
 
 	std::vector<Rule> rules;
 
@@ -213,8 +211,6 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
 /**
  * Filter the atomspace and find grounded expressions matching input.
  *
- * XXX what if a VariableNode is inside QuoteLink
- *
  * @param htarget  the atom to pattern match against
  * @return         a vector of grounded expressions
  */
@@ -233,9 +229,10 @@ HandleSeq BackwardChainer::filter_grounded_experssions(Handle htarget)
 
 	for (Handle h : bcpm.get_result_list())
 	{
-		UnorderedHandleSet uhs = getAllUniqueNodes(h);
+		FindVariables fv(VARIABLE_NODE);
+		fv.find_vars(h);
 
-		if (std::none_of(uhs.begin(), uhs.end(), [](const Handle& n) { return NodeCast(n)->getType() == VARIABLE_NODE; }))
+		if (fv.varset.empty())
 			grounded.push_back(h);
 	}
 
@@ -298,17 +295,24 @@ bool BackwardChainer::unify(const Handle& htarget,
 }
 
 /**
- * maps @param htarget's variables wiht empty HandleSewq
+ * Maps htarget's variables with empty HandleSeq.
+ *
+ * @param htarget   the input Handle with VariableNodes
+ * @return          a mapping of all VariableNode to empty vector
  */
 map<Handle, HandleSeq> BackwardChainer::unify_to_empty_set(Handle& htarget)
 {
 	logger().debug("[BackwardChainer] Unify to empty set.");
 
-	UnorderedHandleSet vars = get_outgoing_nodes(htarget, {VARIABLE_NODE});
+	// find all VariableNode, except those inside QuoteLink
+	FindVariables fv(VARIABLE_NODE);
+	fv.find_vars(htarget);
 
 	map<Handle, HandleSeq> result;
-	for (Handle h : vars)
+
+	for (Handle h : fv.varset)
 		result[h] = HandleSeq { Handle::UNDEFINED };
+
 	return result;
 }
 
@@ -459,41 +463,56 @@ HandleSeq BackwardChainer::chase_var_values(Handle& hvar,
 }
 
 /**
- * matches the variables in the target to their groundings in the variable grounding map list
- * @param hgoal the target Handle consisting of variable nodes
- * @param var_grounding_map a variable to groundings map list
- * @return  a map of variable to all found groundings
+ * Matches the variables in the target to their groundings.
+ *
+ * @param hgoal               the target Handle consisting of variable nodes
+ * @param var_grounding_map   a variable to groundings map list
+ * @return                    a map of variable to all found groundings
  */
-map<Handle, HandleSeq> BackwardChainer::ground_target_vars(Handle& hgoal,
-		vector<map<Handle, HandleSeq>>& inference_list) {
+map<Handle, HandleSeq> BackwardChainer::ground_target_vars(
+        Handle& hgoal,
+        vector<map<Handle, HandleSeq>>& inference_list)
+{
 	map<Handle, HandleSeq> vg_map;
-	UnorderedHandleSet hgoal_vars = get_outgoing_nodes(hgoal, {VARIABLE_NODE});
 
-	for (map<Handle, HandleSeq> vgm : inference_list) {
-		for (auto it = vgm.begin(); it != vgm.end(); ++it) {
+	// find all VariableNode inside hgoal, but not those inside QuoteLink
+	FindVariables fv(VARIABLE_NODE);
+	fv.find_vars(hgoal);
 
+	for (map<Handle, HandleSeq> vgm : inference_list)
+	{
+		for (auto it = vgm.begin(); it != vgm.end(); ++it)
+		{
 			Handle hvar = it->first;
-			auto i = find(hgoal_vars.begin(), hgoal_vars.end(), hvar);
 
-			if (i != hgoal_vars.end()) {
+			// if hvar is in hgoal
+			if (fv.varset.count(hvar) == 1)
+			{
 				HandleSeq values;
 				HandleSeq groundings = it->second;
-				for (Handle h : groundings) {
-					if (_as->getType(h) == VARIABLE_NODE) {
+
+				for (Handle h : groundings)
+				{
+					if (h->getType() == VARIABLE_NODE)
+					{
 						HandleSeq val;
 						val = chase_var_values(h, inference_list, val);
 						values.insert(values.end(), val.begin(), val.end());
-					} else {
+					}
+					else
+					{
 						values.push_back(h);
 					}
+
 					//erase duplicates i.e union
 					sort(values.begin(), values.end());
-					values.erase(unique(values.begin(), values.end()),
-							values.end());
+					values.erase(unique(values.begin(), values.end()), values.end());
 				}
+
 				if (vg_map.count(hvar) == 0)
 					vg_map[hvar] = values;
-				else {
+				else
+				{
 					HandleSeq existing = vg_map[hvar];
 					sort(existing.begin(), existing.end());
 					sort(values.begin(), values.end());
@@ -505,6 +524,7 @@ map<Handle, HandleSeq> BackwardChainer::ground_target_vars(Handle& hgoal,
 			}
 		}
 	}
+
 	return vg_map;
 }
 
