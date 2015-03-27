@@ -74,6 +74,8 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
 {
     int iteration = 0;
     auto max_iter = cpolicy_loader_->get_max_iter();
+    PLNCommons pc(as_);
+
     init_source(hsource);
 
     while (iteration < max_iter /*OR other termination criteria*/) {
@@ -92,7 +94,6 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
             log_->info("Matching rule %s", r->get_name().c_str());
             rule_weight[r] = r->get_cost();
         }
-        PLNCommons pc(as_);
         auto r = pc.tournament_select(rule_weight);
         log_->info("Chosen rule %s", r->get_name().c_str());
 
