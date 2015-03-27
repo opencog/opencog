@@ -105,8 +105,7 @@ Handle InferenceSCM::do_backward_chaining(Handle h)
         hs.push_back(it->first);
         hs.insert(hs.end(), it->second.begin(), it->second.end());
 
-        if (hs[1] != Handle::UNDEFINED)
-            soln_list_link.push_back(as->addLink(LIST_LINK, hs));
+        soln_list_link.push_back(as->addLink(LIST_LINK, hs));
     }
 
     return as->addLink(LIST_LINK, soln_list_link);

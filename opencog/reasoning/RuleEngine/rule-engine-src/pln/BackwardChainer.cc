@@ -60,7 +60,6 @@ map<Handle, HandleSeq>& BackwardChainer::get_chaining_result()
 	return _chaining_result;
 }
 
-
 /**
  * The main recursive backward chaining method.
  *
@@ -82,7 +81,7 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
 
 		// if no rules to backward chain on
 		if (acceptable_rules.empty())
-			return unify_to_empty_set(hgoal);
+			return map<Handle, HandleSeq>();
 
 		// TODO use all rules for found here.
 		Rule stadardized_rule = select_rule(rules).standardize_apart();
@@ -295,28 +294,6 @@ bool BackwardChainer::unify(const Handle& htarget,
 	}
 
 	return true;
-}
-
-/**
- * Maps htarget's variables with empty HandleSeq.
- *
- * @param htarget   the input Handle with VariableNodes
- * @return          a mapping of all VariableNode to empty vector
- */
-map<Handle, HandleSeq> BackwardChainer::unify_to_empty_set(Handle& htarget)
-{
-	logger().debug("[BackwardChainer] Unify to empty set.");
-
-	// find all VariableNode, except those inside QuoteLink
-	FindVariables fv(VARIABLE_NODE);
-	fv.find_vars(htarget);
-
-	map<Handle, HandleSeq> result;
-
-	for (Handle h : fv.varset)
-		result[h] = HandleSeq { Handle::UNDEFINED };
-
-	return result;
 }
 
 /**

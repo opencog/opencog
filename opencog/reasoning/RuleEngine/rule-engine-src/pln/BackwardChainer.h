@@ -82,7 +82,6 @@ private:
 	HandleSeq filter_grounded_experssions(Handle htarget);
 
 	bool unify(const Handle& htarget, const Handle& match, map<Handle, HandleSeq>& output);
-	map<Handle, HandleSeq> unify_to_empty_set(Handle& htarget);
 
 	map<Handle, HandleSeq> get_logical_link_premises_map(Handle& himplicant);
 
