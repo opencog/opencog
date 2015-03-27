@@ -1739,7 +1739,10 @@ Handle AtomSpaceUtil::getObjectHolderHandle( AtomSpace& atomSpace,
     // TODO: try to optimize this method. It is using getHandleSet twice for
     // isHolding (below and through getLatestHoldingObjectHandle)
     std::vector<Handle> handles;
-    atomSpace.getHandlesByName( back_inserter(handles), objectId, OBJECT_NODE, true );
+    classserver().foreachRecursive(
+        [&](Type t)->void {
+            Handle h(atomSpace.getHandle(t, objectId));
+            if (h) handles.push_back(h); }, OBJECT_NODE);
 
     if (handles.size() != 1) {
         logger().debug("AtomSpaceUtil - No agent is holding object[%s]",

@@ -537,7 +537,16 @@ public:
     bool isLink(Handle h) const { return LinkCast(h) != NULL; }
 
     /**
-     * Gets a set of handles that matches with the given arguments.
+     * DEPRECATED! DO NOT USE IN NEW CODE!
+     * If you need this function, just cut and paste the code below into
+     * whatever you are doing!
+     *
+     * Returns the set of atoms of a given name (atom type and subclasses
+     * optionally).  If the name is not null or the empty string, then
+     * this returns Nodes ONLY (of the requested name, of course). However,
+     * if the name is null (or empty string) then Links might be  included!
+     * This behaviour is surprising, but is explicilty tested for in the
+     * AtomSpaceImplUTest. I don't know why its done like this.
      *
      * @param result An output iterator.
      * @param type the type of the atoms to be searched
@@ -559,9 +568,23 @@ public:
     getHandlesByName(OutputIterator result,
                      const std::string& name,
                      Type type = NODE,
-                     bool subclass = true) const
+                     bool subclass = true)
     {
-        return getAtomTable().getHandlesByName(result, name, type, subclass);
+        if (name.c_str()[0] == 0)
+            return getHandlesByType(result, type, subclass);
+
+        if (false == subclass) {
+            Handle h(getHandle(type, name));
+            if (h) *(result++) = h;
+            return result;
+        }
+
+        classserver().foreachRecursive(
+            [&](Type t)->void {
+                Handle h(getHandle(t, name));
+                if (h) *(result++) = h; }, type);
+
+        return result;
     }
 
     /**

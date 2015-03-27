@@ -1,5 +1,5 @@
 /*
- * TODO: Once PLN is ready and can process GroundedPredicateNode automatically, we should then use 
+ * TODO: Once PLN is ready and can process GroundedPredicateNode automatically, we should then use
  *       'PsiRelationUpdaterByPLNAgent.h|cc' instead. Of course, some modification are needed :-)
  *
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiRelationUpdaterAgent.h
@@ -37,7 +37,7 @@ namespace opencog { namespace oac {
  * @brief MindAgent for updating relations between the entities in the environment and the pet
  *
  * @note Each (relation, pet, entity) triple in AtomSpace is represented as follows:
- *       
+ *
  *       EvaluationLink
  *           PredicateNode "relationName"
  *           ListLink
@@ -76,14 +76,14 @@ private:
         /**
          * Check if the novelty level can be reset to initial value
          *
-         * @param resetThreshold 
+         * @param resetThreshold
          */
         inline bool canBeReset (float resetThreshold) const {
             return (this->noveltyLevel <= resetThreshold);
         }
 
         inline void resetNoveltyLevel(float initLevel) {
-            this->noveltyLevel = initLevel; 
+            this->noveltyLevel = initLevel;
             this->resetTime = time(NULL);
         }
 
@@ -99,7 +99,7 @@ private:
         }
 
     private:
-        float noveltyLevel;  
+        float noveltyLevel;
         long resetTime;      // When the novelty level is reset to initial level
 
     }; // class Novelty
@@ -108,14 +108,14 @@ private:
 
     bool bInitialized;  // Indicate whether the Agent has been Initialized
 
-    std::vector<Handle> instantRelationRules; // Psi Rules (ImplicatonLinks) about Relations, 
-                                              // 'instant' here means they have NULL_ACTION   
+    std::vector<Handle> instantRelationRules; // Psi Rules (ImplicatonLinks) about Relations,
+                                              // 'instant' here means they have NULL_ACTION
 
     std::map<std::string, Novelty> entityNovelty; // Contains (entityId, novelty level) pairs
 
     float noveltyInitLevel;      // Initial value of novelty level
     float noveltyThreshold;      // Entity with novelty level greater than the threshold is novel
-    float noveltyResetThreshold; // Entity with novelty level less than the threshold should be 
+    float noveltyResetThreshold; // Entity with novelty level less than the threshold should be
                                  // reset or removed
     float noveltyDecayFactor;    // Larger the value, the novelty level decays more quickly
 
@@ -128,40 +128,40 @@ private:
      * Get the EvaluationLink holding the relation between the pet and the entity.
      * If failed to find the EvaluationLink, it will create one automatically and return the EvaluationLink.
      *
-     * @note  
+     * @note
      *     EvaluationLink
      *         PredicateNode "relationName"
      *         ListLink
      *             petHandle
      *             entityHandle
      */
-    Handle getRelationEvaluationLink(AtomSpace & atomSpace, 
-                                     const std::string & relationName, 
-                                     Handle petHandle, 
+    Handle getRelationEvaluationLink(AtomSpace&,
+                                     const std::string & relationName,
+                                     Handle petHandle,
                                      Handle entityHandle
-                                    ); 
+                                    );
     /**
      * Get the Handle to entity given its id
      */
-    Handle getEntityHandle(const AtomSpace & atomSpace, const std::string & entityName);
+    Handle getEntityHandle(AtomSpace&, const std::string& entityName);
 
     /**
-     * Update novel levels of all the entities.  
+     * Update novel levels of all the entities.
      *
      * @param server
      *
      * @note Each entity associates with a novelty level decreasing by time
-     *       If the novelty level is higher than PSI_NOVELTY_THRESHOLD, 
+     *       If the novelty level is higher than PSI_NOVELTY_THRESHOLD,
      *       the entity would be considered as novel.
-     *       If the novelty level is below or equals to PSI_NOVELTY_RESET_THRESHOLD, 
+     *       If the novelty level is below or equals to PSI_NOVELTY_RESET_THRESHOLD,
      *       it would be reset to PSI_NOVELTY_INIT_VALUE next time
-     *       the pet encounters the corresponding entity. 
+     *       the pet encounters the corresponding entity.
      */
     void updateEntityNovelty(opencog::CogServer * server);
 
-    void updateEntityRelation(AtomSpace & atomSpace, 
-                              Handle petHandle, 
-                              Procedure::ProcedureInterpreter & procedureInterpreter, 
+    void updateEntityRelation(AtomSpace & atomSpace,
+                              Handle petHandle,
+                              Procedure::ProcedureInterpreter & procedureInterpreter,
                               const Procedure::ProcedureRepository & procedureRepository);
 
 public:
@@ -184,7 +184,7 @@ public:
     virtual void run();
 
      /**
-      * After calling this function, the Agent will invoke its "init" method firstly 
+      * After calling this function, the Agent will invoke its "init" method firstly
       * in "run" function during its next cycle
       */
     void forceInitNextCycle() {

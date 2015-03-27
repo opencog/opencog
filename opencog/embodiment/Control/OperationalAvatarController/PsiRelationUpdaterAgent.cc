@@ -226,16 +226,15 @@ Handle PsiRelationUpdaterAgent::getRelationEvaluationLink(AtomSpace & atomSpace,
     return evaluationLinkHandle;
 }
 
-Handle PsiRelationUpdaterAgent::getEntityHandle(const AtomSpace & atomSpace, const std::string & entityName)
+Handle PsiRelationUpdaterAgent::getEntityHandle(AtomSpace& atomSpace, const std::string & entityName)
 {
     // TODO: What is responsible for creating these handles to entities?
     std::vector<Handle> entityHandleSet;
 
-    atomSpace.getHandlesByName( back_inserter(entityHandleSet),
-                            entityName,
-                            OBJECT_NODE,
-                            true   // Use 'true' here, because OBJECT_NODE is the base class for all the entities
-                          );
+    classserver().foreachRecursive(
+        [&](Type t)->void {
+            Handle h(atomSpace.getHandle(t, entityName));
+            if (h) entityHandleSet.push_back(h); }, OBJECT_NODE);
 
     if ( entityHandleSet.size() != 1 ) { 
         logger().warn( "PsiRelationUpdaterAgent::%s - The number of entity ( id = '%s' ) registered in AtomSpace should be exactly 1. Got %d [ cycle = %d ]", 

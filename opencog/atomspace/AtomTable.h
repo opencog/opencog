@@ -315,37 +315,6 @@ public:
                               bool subclass = true) const;
 
     /**
-     * Returns the set of atoms of a given name (atom type and subclasses
-     * optionally).  If the name is not null or the empty string, then
-     * this returns Nodes ONLY (of the requested name, of course). However,
-     * if the name is null (or empty string) then Links might be included!
-     * This behaviour is surprising, but is explicilty tested for in the
-     * AtomSpaceImplUTest. I don't know why its done like this.
-     *
-     * @param The desired name of the atoms.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type and name.
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByName(OutputIterator result,
-                     const std::string& name,
-                     Type type = NODE,
-                     bool subclass = true) const
-    {
-        if (name.c_str()[0] == 0)
-            return getHandlesByType(result, type, subclass);
-
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-#if MAKIN_COPIES
-        UnorderedHandleSet hs = nodeIndex.getHandleSet(type, name, subclass);
-        return std::copy(hs.begin(), hs.end(), result);
-#else
-        return nodeIndex.getHandleSet(result, type, name, subclass);
-#endif
-    }
-
-    /**
      * Returns the set of atoms within the given importance range.
      *
      * @param Importance range lower bound (inclusive).

@@ -116,8 +116,10 @@ AtomTable::AtomTable(const AtomTable& other)
 Handle AtomTable::getHandle(Type t, std::string name) const
 {
     // NumberNodes need to have a uniformly-agreed-upon name.
-    if (NUMBER_NODE == t)
-        name = std::to_string(std::stod(name));
+    if (NUMBER_NODE == t) {
+        try { name = std::to_string(std::stod(name)); }
+        catch (...) { return Handle::UNDEFINED; }
+    }
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     Atom* atom = nodeIndex.getAtom(t, name);
