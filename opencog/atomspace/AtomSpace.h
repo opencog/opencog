@@ -588,36 +588,6 @@ public:
     }
 
     /**
-     * Returns the set of atoms of a given type which have atoms of a
-     * given target type in their outgoing set (subclasses optionally).
-     *
-     * @param result An output iterator.
-     * @param type The desired type.
-     * @param targetType The desired target type.
-     * @param subclass Whether type subclasses should be considered.
-     * @param targetSubclass Whether target type subclasses should be considered.
-     * @return The set of atoms of a given type and target type (subclasses
-     * optionally).
-     *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace:
-     * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
-     * @endcode
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByTargetType(OutputIterator result,
-                 Type type,
-                 Type targetType,
-                 bool subclass,
-                 bool targetSubclass) const
-    {
-        return getAtomTable().getHandlesByTargetType(result,
-               type, targetType, subclass, targetSubclass);
-    }
-
-    /**
      * DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this function, just copy the one-liner below.
      * XXX ONLY the python bindings use this. XXX kill that code.
