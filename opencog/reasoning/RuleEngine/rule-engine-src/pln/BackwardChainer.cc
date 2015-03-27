@@ -24,7 +24,6 @@
 #include "BackwardChainer.h"
 #include "BCPatternMatch.h"
 
-#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/PatternUtils.h>
 #include <opencog/atoms/bind/BindLink.h>
 
@@ -100,7 +99,7 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
 		unify(hgoal, implicand, out);
 		_inference_list.push_back(out);
 
-		map<Handle, HandleSeq> solution = apply_rule(implicand, stadardized_rule);
+		map<Handle, HandleSeq> solution = bc_rule(stadardized_rule);
 		_inference_list.push_back(solution);
 
 		return ground_target_vars(hgoal, _inference_list);
@@ -120,16 +119,20 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
 }
 
 /**
- * Apply a rule to an atom by first backward chaining the rule's implicant.
+ * Backward chaining on a rule's implicant.
  *
- * @param htarget   the atom in which the rule will be applied
+ * Get all the premises inside the implicant, and backward chain on each
+ * premise separately.
+ *
+ * XXX TODO actually use the unified implicand to limit the implicant
+ * Right now the whole atomspace is searched to match the implicant, which
+ * might not be necessary...
+ *
  * @param rule      the rule to apply
  * @return          ???
  */
-map<Handle, HandleSeq> BackwardChainer::apply_rule(Handle& htarget, Rule& rule)
+map<Handle, HandleSeq> BackwardChainer::bc_rule(Rule& rule)
 {
-	vector<map<Handle, HandleSeq>> results;
-
 	std::stack<Handle> visit_stack;
 	visit_stack.push(rule.get_implicant());
 
@@ -154,9 +157,8 @@ map<Handle, HandleSeq> BackwardChainer::apply_rule(Handle& htarget, Rule& rule)
 			// check if all its sub-premises are already evaluated
 			if (std::all_of(sub_premises.begin(), sub_premises.end(), [](const Handle& h) { evaluated_premises.count(h) == 1; }))
 			{
-				auto v = join_premise_vgrounding_maps(premise, premise_var_ground_map);
-
-				results.push_back(v);
+				// if so, apply the logical operation to the solutions
+				premise_var_ground_map[premise] = join_premise_vgrounding_maps(premise, premise_var_ground_map);
 				evaluated_premises.emplace(premise);
 
 				continue;
@@ -179,7 +181,8 @@ map<Handle, HandleSeq> BackwardChainer::apply_rule(Handle& htarget, Rule& rule)
 		evaluated_premises.emplace(premise);
 	}
 
-	return ground_target_vars(htarget, results);
+	// get the final grounding
+	return premise_var_ground_map[rule.get_implicant()];
 }
 
 /**

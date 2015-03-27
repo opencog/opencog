@@ -76,7 +76,7 @@ public:
 private:
 	map<Handle, HandleSeq> do_bc(Handle& htarget);
 
-	map<Handle, HandleSeq> apply_rule( Handle& htarget, Rule& rule);
+	map<Handle, HandleSeq> bc_rule(Rule& rule);
 
 	HandleSeq filter_rules(HandleSeq handles);
 	HandleSeq filter_grounded_experssions(Handle htarget);
