@@ -53,8 +53,8 @@ Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f
 Agent::~Agent()
 {
     // give back funds
-    _cogserver.getAtomSpace().getAttentionBank().updateSTIFunds(_attentionValue->getSTI());
-    _cogserver.getAtomSpace().getAttentionBank().updateLTIFunds(_attentionValue->getLTI());
+    _cogserver.getAtomSpace().updateSTIFunds(_attentionValue->getSTI());
+    _cogserver.getAtomSpace().updateLTIFunds(_attentionValue->getLTI());
 
     resetUtilizedHandleSets();
     conn.disconnect();

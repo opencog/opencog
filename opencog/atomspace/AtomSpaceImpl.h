@@ -2,7 +2,7 @@
  * opencog/atomspace/AtomSpaceImpl.h
  *
  * Copyright (c) 2010-2011 OpenCog Foundation
- * Copyright (c) 2009, 2013 Linas Vepstas
+ * Copyright (c) 2009, 2013, 2015 Linas Vepstas
  * All Rights Reserved
  *
  * Written by Joel Pitt <joel@opencog.org>
@@ -48,14 +48,12 @@ namespace opencog
  */
 
 /**
- * \warning The AtomSpaceImpl class contains methods that are only to be called by
- * the AtomSpace
+ * \warning The AtomSpaceImpl class does not contain any methods
+ * that you should be using! These are all private to the atomspace.
  */
 class AtomSpaceImpl
 {
     friend class AtomSpace;
-    friend class SavingLoading;
-    friend class SaveRequest;
     friend class ::AtomSpaceImplUTest;
 
 public:

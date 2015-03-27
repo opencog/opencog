@@ -124,10 +124,10 @@ public:
     
         AtomSpace* as = &cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds
-	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeSTIRange[0], as->getAttentionBank().getSTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(as->getAttentionBank().getSTIFunds(), agent->acceptableLobeSTIRange[1]);
-	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeLTIRange[0], as->getAttentionBank().getLTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(as->getAttentionBank().getLTIFunds(), agent->acceptableLobeLTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeSTIRange[0], as->getSTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->getSTIFunds(), agent->acceptableLobeSTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeLTIRange[0], as->getLTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->getLTIFunds(), agent->acceptableLobeLTIRange[1]);
 	}
 
 	void testNoise() {
@@ -137,10 +137,10 @@ public:
 
        AtomSpace* as = &cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds
-	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], as->getAttentionBank().getSTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(as->getAttentionBank().getSTIFunds(), agent->acceptableLobeSTIRange[1]);
-	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeLTIRange[0], as->getAttentionBank().getLTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(as->getAttentionBank().getLTIFunds(), agent->acceptableLobeLTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], as->getSTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->getSTIFunds(), agent->acceptableLobeSTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeLTIRange[0], as->getLTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->getLTIFunds(), agent->acceptableLobeLTIRange[1]);
 	}
 
 	void testNoLinks() {
@@ -154,10 +154,10 @@ public:
 
        AtomSpace* as = &cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds
-	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeSTIRange[0], as->getAttentionBank().getSTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(as->getAttentionBank().getSTIFunds(), agent->acceptableLobeSTIRange[1]);
-	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeLTIRange[0], as->getAttentionBank().getLTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(as->getAttentionBank().getLTIFunds(), agent->acceptableLobeLTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeSTIRange[0], as->getSTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->getSTIFunds(), agent->acceptableLobeSTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeLTIRange[0], as->getLTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->getLTIFunds(), agent->acceptableLobeLTIRange[1]);
 	}
 
     /// @todo check changing function parameters correct alters the

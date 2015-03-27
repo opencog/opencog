@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2008-2011 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,15 +48,12 @@ namespace opencog
  *  // Create an atomspace
  *  AtomSpace atomspace;
  * @endcode
- *
- * If one were to add atoms to via AtomTable or AtomSpace, they would both be
- * in the same "AtomSpace".
  */
 class AtomSpace
 {
     friend class SavingLoading;
+    friend class SQLPersistSCM;
     friend class ::AtomTableUTest;
-    friend class SaveRequest;
 
     /**
      * Override and declare copy constructor and equals operator, to
@@ -68,11 +66,6 @@ class AtomSpace
      * The AtomSpace class is just a wrapper of the AtomTable
      */
     AtomSpaceImpl* _atomSpaceImpl;
-
-public:
-    AtomSpace(AtomSpace* parent = NULL);
-
-    ~AtomSpace();
 
     inline AttentionBank& getAttentionBank()
     { return _atomSpaceImpl->bank; }
@@ -89,12 +82,20 @@ public:
     inline const AtomTable& getAtomTable() const
     { return getImplconst().atomTable; }
 
+public:
+    AtomSpace(AtomSpace* parent = NULL);
+
+    ~AtomSpace();
+
     /**
      * Return the number of atoms contained in the space.
      */
     inline int getSize() const { return getAtomTable().getSize(); }
     inline int getNumNodes() const { return getAtomTable().getNumNodes(); }
     inline int getNumLinks() const { return getAtomTable().getNumLinks(); }
+
+    //! Clear the atomspace, remove all atoms
+    void clear() { getImpl().clear(); }
 
     /**
      * Add an atom to the Atom Table.  If the atom already exists
@@ -255,6 +256,47 @@ public:
      * NB: at this time, we don't distinguish barrier and flush.
      */
     void barrier(void) { getImpl().barrier(); }
+
+    /**
+     * Unconditionally fetch an atom from the backingstore.
+     * If there is no backingstore, then Handle::UNDEINFED is returned.
+     * If the atom is found in the backingstore, then it is placed in
+     * the atomtable before returning.  If the atom is already in the
+     * atomtable, and is also found in the backingstore, then the TV's
+     * are merged.
+     *
+     * The fetch is 'unconditional', in that it is fetched, even if it
+     * already is in the atomspace.  Also, the ignored-types of the
+     * backing store are not used.
+     *
+     * To avoid a fetch if the atom already is in the atomtable, use the
+     * getAtom() method instead.
+     */
+    Handle fetchAtom(Handle h) { return getImpl().fetchAtom(h); }
+
+    /**
+     * Load *all* atoms of the given type, but only if they are not
+     * already in the AtomTable.
+     */
+    void fetchAllAtomsOfType(Type t) { getImpl().loadType(t); }
+
+    /**
+     * Use the backing store to load the entire incoming set of the
+     * atom.
+     * If the flag is true, then the load is done recursively.
+     * This method queries the backing store to obtain all atoms that
+     * contain this one in their outgoing sets. All of these atoms are
+     * then loaded into this atomtable/atomspace.
+     */
+    Handle fetchIncomingSet(Handle h, bool rec) {
+        return getImpl().fetchIncomingSet(h, rec); }
+
+    /**
+     * Recursively store the atom to the backing store.
+     * I.e. if the atom is a link, then store all of the atoms
+     * in its outgoing set as well, recursively.
+     */
+    void storeAtom(Handle h) { getImpl().storeAtom(h); }
 
     /**
      * Purge an atom from the atomspace.  This only removes the atom
@@ -541,9 +583,10 @@ public:
      * @param m New maximum STI
      */
     void updateMaxSTI(AttentionValue::sti_t m) { getAttentionBank().updateMaxSTI(m); }
-
-    //! Clear the atomspace, remove all atoms
-    void clear() { getImpl().clear(); }
+    void updateSTIFunds(AttentionValue::sti_t m) { getAttentionBank().updateSTIFunds(m); }
+    void updateLTIFunds(AttentionValue::lti_t m) { getAttentionBank().updateLTIFunds(m); }
+    long getSTIFunds() const { return getAttentionBankconst().getSTIFunds(); }
+    long getLTIFunds() const { return getAttentionBankconst().getLTIFunds(); }
 
     /* ----------------------------------------------------------- */
     // ---- Signals

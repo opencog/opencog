@@ -218,23 +218,6 @@ public:
     }
 
     /**
-     * Returns all atoms satisfying the predicate
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByTypePred(OutputIterator result,
-                         Type type,
-                         bool subclass,
-                         HandlePredicate& pred) const
-    {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        std::for_each(typeIndex.begin(type, subclass),
-                      typeIndex.end(),
-                      [&](const Handle &h)->void
-                      { if (pred(h)) *result = h; });
-        return result;
-    }
-
-    /**
      * Returns the set of atoms within the given importance range.
      *
      * @param Importance range lower bound (inclusive).

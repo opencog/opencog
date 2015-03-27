@@ -97,7 +97,7 @@ bool isSource(Handle source, Handle link)
     return false;
 }
 
-HandleSeq createSimpleGraph(AtomSpaceImpl* atomSpace, const char* baseName)
+HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 {
     char buf[256];
     HandleSeq testAtoms;
@@ -146,7 +146,7 @@ HandleSeq createSimpleGraph(AtomSpaceImpl* atomSpace, const char* baseName)
     return testAtoms;
 }
 
-Handle addRealAtom(AtomSpaceImpl& as, AtomPtr atom,
+Handle addRealAtom(AtomSpace& as, AtomPtr atom,
                    TruthValuePtr tvn = TruthValue::NULL_TV())
 {
     TruthValuePtr newTV = (tvn->isNullTv()) ? atom->getTruthValue() : tvn;
@@ -157,7 +157,7 @@ Handle addRealAtom(AtomSpaceImpl& as, AtomPtr atom,
     Handle result;
     NodePtr node(NodeCast(atom));
     if (node) {
-        result = as.atomTable.getHandle(node->getType(), node->getName());
+        result = as.getHandle(node->getType(), node->getName());
         if (result == Handle::UNDEFINED) {
             Handle h = as.addNode(node->getType(), node->getName());
             h->setTruthValue(newTV);
@@ -165,7 +165,7 @@ Handle addRealAtom(AtomSpaceImpl& as, AtomPtr atom,
         }
     } else {
         LinkPtr link(LinkCast(atom));
-        result = as.atomTable.getHandle(link->getType(), link->getOutgoingSet());
+        result = as.getHandle(link->getType(), link->getOutgoingSet());
         if (result == Handle::UNDEFINED) {
             Handle h = as.addLink(link->getType(), link->getOutgoingSet());
             h->setTruthValue(newTV);
@@ -256,7 +256,7 @@ class AtomSpaceImplUTest :  public CxxTest::TestSuite
 {
 private:
 
-    static AtomSpaceImpl *atomSpace;
+    static AtomSpace *atomSpace;
 
 public:
     AtomSpaceImplUTest() {
@@ -265,7 +265,7 @@ public:
     }
 
     void setUp() {
-        atomSpace = new AtomSpaceImpl();
+        atomSpace = new AtomSpace();
     }
 
     void tearDown() {
@@ -358,11 +358,11 @@ public:
         logger().debug("TVS checked\n");
 
         HandleSeq hsn;
-        atomSpace->atomTable.getHandlesByType(back_inserter(hsn), NODE, true);
+        atomSpace->getHandlesByType(back_inserter(hsn), NODE, true);
         TS_ASSERT(hsn.size() == NUM_NODES);
 
         HandleSeq hsl;
-        atomSpace->atomTable.getHandlesByType(back_inserter(hsl), LINK, true);
+        atomSpace->getHandlesByType(back_inserter(hsl), LINK, true);
         TS_ASSERT(hsl.size() == 8);
 
         // Test getHandleSet
@@ -375,36 +375,36 @@ public:
 
             // Note: SCHEMA_EXECUTION_LINK is a subType of INHERITANCE_LINK
             HandleSeq links;
-            atomSpace->atomTable.getHandlesByType(back_inserter(links), LINK, true);
+            atomSpace->getHandlesByType(back_inserter(links), LINK, true);
             logger().debug("1) links.size() = %d Expected = %d\n", (int) links.size(), (vhIdx == 0 ? 8 : 2));
             TS_ASSERT(links.size() == 8);
             links.clear();
-            atomSpace->atomTable.getHandlesByType(back_inserter(links), LINK, false);
+            atomSpace->getHandlesByType(back_inserter(links), LINK, false);
             //logger().debug("2) links.size() = %d\n", links.size());
             TS_ASSERT(links.size() == 0);
             HandleSeq allInhLinks;
-            atomSpace->atomTable.getHandlesByType(back_inserter(allInhLinks), INHERITANCE_LINK, true);
+            atomSpace->getHandlesByType(back_inserter(allInhLinks), INHERITANCE_LINK, true);
             //logger().info("4) allInhLinks.size() = %d (vhIdx: %d)\n", allInhLinks.size(), vhIdx);
             //for (unsigned int x = 0; x < allInhLinks.size(); ++x) {
             //    logger().info("allInhLinks[x]: %s\n", allInhLinks[x]->toString().c_str());
             //}
             TS_ASSERT(allInhLinks.size() == 8);
             HandleSeq justInhLinks;
-            atomSpace->atomTable.getHandlesByType(back_inserter(justInhLinks), INHERITANCE_LINK, false);
+            atomSpace->getHandlesByType(back_inserter(justInhLinks), INHERITANCE_LINK, false);
             //logger().info("5) justInhLinks.size() = %d (vhIdx: %d)\n", justInhLinks.size(), vhIdx);
             TS_ASSERT(justInhLinks.size() == 4);
             HandleSeq partOfLinks;
-            atomSpace->atomTable.getHandlesByType(back_inserter(partOfLinks), SCHEMA_EXECUTION_LINK, true);
+            atomSpace->getHandlesByType(back_inserter(partOfLinks), SCHEMA_EXECUTION_LINK, true);
             //logger().debug("5) partOfLinks.size() = %d\n", partOfLinks.size());
             TS_ASSERT(partOfLinks.size() == 4);
             partOfLinks.clear();
-            atomSpace->atomTable.getHandlesByType(back_inserter(partOfLinks), SCHEMA_EXECUTION_LINK, false);
+            atomSpace->getHandlesByType(back_inserter(partOfLinks), SCHEMA_EXECUTION_LINK, false);
             //logger().debug("6) partOfLinks.size() = %d\n", partOfLinks.size());
             TS_ASSERT(partOfLinks.size() == 4);
         }
     }
 
-    static inline Handle addAtomIter(AtomSpaceImpl& as, tree<Vertex>& a, tree<Vertex>::iterator it, TruthValuePtr tvn)
+    static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::iterator it, TruthValuePtr tvn)
     {
         Handle* head_handle_ptr = boost::get<Handle>(&(*it));
         Type* head_type_ptr = boost::get<Type>(&(*it));
@@ -413,7 +413,7 @@ public:
         HandleSeq handles;
 
         if (head_handle_ptr != NULL) {
-            OC_ASSERT(as.atomTable.holds(*head_handle_ptr), "head_handle_ptr is not valid");
+            // OC_ASSERT(as.holds(*head_handle_ptr), "head_handle_ptr is not valid");
             Handle h = addRealAtom(as, *head_handle_ptr);
             h->setTruthValue(tvn);
             return h;
@@ -434,7 +434,7 @@ public:
         return h;
     }
 
-    static inline Handle addAtom(AtomSpaceImpl& as, tree<Vertex>& a, TruthValuePtr tvn)
+    static inline Handle addAtom(AtomSpace& as, tree<Vertex>& a, TruthValuePtr tvn)
     {
         return addAtomIter(as, a, a.begin(), tvn);
     }
@@ -472,13 +472,13 @@ public:
                               );
 
         HandleSeq links;
-        atomSpace->atomTable.getHandlesByType(back_inserter(links), LINK, true);
+        atomSpace->getHandlesByType(back_inserter(links), LINK, true);
         logger().debug("links.size() = %d\n", (int) links.size());
         TS_ASSERT(links.size() == 0);
         Handle evalLink = addAtom(*atomSpace, *tr, TruthValue::DEFAULT_TV());
         TS_ASSERT(evalLink != Handle::UNDEFINED);
         links.clear();
-        atomSpace->atomTable.getHandlesByType(back_inserter(links), LINK, true);
+        atomSpace->getHandlesByType(back_inserter(links), LINK, true);
         logger().debug("links.size() = %d\n", (int) links.size());
         TS_ASSERT(links.size() == 2);
         delete tr;
@@ -579,7 +579,7 @@ public:
 
         // test fetching all unnamed nodes
         HandleSeq allUnnamed;
-        atomSpace->atomTable.getHandlesByName(back_inserter(allUnnamed), NODE, "", true);
+        atomSpace->getHandlesByName(back_inserter(allUnnamed), NODE, "", true);
         printf("\nallUnnamed.size() == %zu\n", allUnnamed.size());
         TS_ASSERT(allUnnamed.size() == 2);
         TS_ASSERT(find(allUnnamed.begin(), allUnnamed.end(), h5) != allUnnamed.end());
@@ -706,12 +706,12 @@ public:
     }
 
     void testGetHandle_bugfix1() {
-        AtomSpaceImpl atomSpace;
+        AtomSpace atomSpace;
         HandleSeq emptyOutgoing;
-        Handle result = atomSpace.atomTable.getHandle(LIST_LINK, emptyOutgoing);
+        Handle result = atomSpace.getHandle(LIST_LINK, emptyOutgoing);
         TS_ASSERT(result == Handle::UNDEFINED);
         atomSpace.addLink(LIST_LINK, emptyOutgoing);
-        result = atomSpace.atomTable.getHandle(LIST_LINK, emptyOutgoing);
+        result = atomSpace.getHandle(LIST_LINK, emptyOutgoing);
         TS_ASSERT(result != Handle::UNDEFINED);
     }
 
@@ -741,7 +741,7 @@ public:
         AtomSpace* as = new AtomSpace();
         HandleSeq atoms;
         logger().debug("BEGIN TEST: getSortedHandleSet");
-        atoms = createSimpleGraph(&as->getImpl(), "stim_sortedHandleSet\0");
+        atoms = createSimpleGraph(as, "stim_sortedHandleSet\0");
         
         logger().debug("STISort");
 
@@ -776,55 +776,6 @@ public:
     /**
      * Method tested:
      *
-     * Gets a set of handles that matches with the given type
-     * (subclasses optionally) and a given criterion.
-     *
-     * @param An output iterator.
-     * @param The desired type.
-     * @param Whether type subclasses should be considered.
-     * @param A criterion for including atoms. It must be something that returns a bool when called.
-     *
-     * @return The set of atoms of a given type (subclasses optionally).
-     *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer beyond 500 LTI:
-     *         std::list<Handle> ret;
-     *         atomSpace->getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
-     */
-    void testgetHandleSetFiltered()
-    {
-        HandleSeq atoms;
-        logger().debug("BEGIN TEST: getHandleSetFiltered");
-        
-        atoms = createSimpleGraph(atomSpace, "hs_filt\0");
-        
-        logger().debug("STIAboveThreshold");
-
-        HandleSeq highSTI;
-        STIAboveThreshold stiAbove(1000);
-        atomSpace->atomTable.getHandlesByTypePred(back_inserter(highSTI), NODE, true, stiAbove);
-        for (unsigned int i = 0; i < highSTI.size(); i++) {
-            TS_ASSERT(stiAbove (highSTI[i]) );
-        }
-        TS_ASSERT(highSTI.size() == 1U);
-        TS_ASSERT(highSTI[0] == atoms[0]);
-
-        logger().debug("LTIAboveThreshold");
-        
-        HandleSeq highLTI;
-        LTIAboveThreshold ltiAbove(800);
-        atomSpace->atomTable.getHandlesByTypePred(back_inserter(highLTI), NODE, true, ltiAbove);
-        for (unsigned int i = 0; i < highLTI.size(); i++) {
-            TS_ASSERT(ltiAbove (highLTI[i]) );
-        }
-        TS_ASSERT(highLTI.size() == 1U);
-        TS_ASSERT(highLTI[0] == atoms[1]);
-        logger().debug("END TEST: getHandleSetFiltered");
-    }
-
-    /**
-     * Method tested:
-     *
      * Filter handles from a sequence according to the given criterion.
      *
      * @param begin iterator for the sequence
@@ -836,15 +787,15 @@ public:
     void testGetNormalisedSTI() {
         Handle h = atomSpace->addNode(CONCEPT_NODE,"blah");
         bool clip = false, average = false;
-        TS_ASSERT_EQUALS(atomSpace->bank.getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip), 0.0f);
+        TS_ASSERT_EQUALS(atomSpace->getNormalisedZeroToOneSTI(h, average, clip), 0.0f);
         average = true;
         setSTI(h,10);
-        atomSpace->bank.updateMaxSTI(10);
-        TS_ASSERT(atomSpace->bank.getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip) > 1.0f);
+        atomSpace->updateMaxSTI(10);
+        TS_ASSERT(atomSpace->getNormalisedZeroToOneSTI(h, average, clip) > 1.0f);
         clip = true;
-        TS_ASSERT_DELTA(atomSpace->bank.getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip), 1.0f, 0.001f);
+        TS_ASSERT_DELTA(atomSpace->getNormalisedZeroToOneSTI(h, average, clip), 1.0f, 0.001f);
     }
 
 };
 
-AtomSpaceImpl *AtomSpaceImplUTest::atomSpace = NULL;
+AtomSpace *AtomSpaceImplUTest::atomSpace = NULL;
