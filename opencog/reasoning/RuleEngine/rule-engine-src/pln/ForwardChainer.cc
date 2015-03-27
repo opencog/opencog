@@ -26,13 +26,14 @@
 #include "PLNCommons.h"
 
 #include <opencog/query/PatternMatch.h>
+#include <opencog/query/DefaultImplicator.h>
 #include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :
-	as_(as), fcmem_(as_)
+        as_(as), fcmem_(as_)
 {
     if (conf_path != "")
         _conf_path = conf_path;
@@ -72,12 +73,18 @@ Logger* ForwardChainer::getLogger()
 void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
                               Handle hsource/*=Handle::UNDEFINED*/)
 {
-    int iteration = 0;
-    auto max_iter = cpolicy_loader_->get_max_iter();
+
     PLNCommons pc(as_);
 
-    init_source(hsource);
+    //Variable fulfillment query.
+    UnorderedHandleSet var_nodes = pc.get_nodes(hsource, { VARIABLE_NODE });
+    if (not var_nodes.empty())
+        return do_pm(hsource,var_nodes);
 
+    //Forward chaining on a particular type of atom.
+    int iteration = 0;
+    auto max_iter = cpolicy_loader_->get_max_iter();
+    init_source(hsource);
     while (iteration < max_iter /*OR other termination criteria*/) {
         log_->info("Iteration %d", iteration);
         log_->info("Next source %s",
@@ -107,7 +114,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         HandleSeq product = fcb.apply_rule(fcmem_);
         log_->info("Results of rule application");
         for (auto p : product)
-            log_->info("%s",SchemeSmob::to_string(p).c_str());
+            log_->info("%s", SchemeSmob::to_string(p).c_str());
         fcmem_.add_rules_product(iteration, product);
         fcmem_.update_premise_list(product);
 
@@ -118,6 +125,32 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
     }
 }
 
+/**
+ * Does pattern matching for a variable containing query.
+ * @param source handle containing VariableNode
+ */
+void ForwardChainer::do_pm(const Handle& hsource,const UnorderedHandleSet& var_nodes)
+{
+    DefaultImplicator impl(as_);
+    impl.implicand = hsource;
+    PatternMatch pm;
+    PatternMatchEngine pme;
+    HandleSeq vars;
+    for (auto h : var_nodes)
+        vars.push_back(h);
+    Handle hvar_list = as_->addLink(LIST_LINK, vars);
+    Handle hclause = as_->addLink(AND_LINK, hsource);
+    pm.match(&impl, hvar_list, hclause);
+
+    //update result
+    fcmem_.add_rules_product(0, impl.result_list);
+
+    //Delete the AND_LINK and LIST_LINK
+    as_->removeAtom(hvar_list);
+    as_->removeAtom(hclause);
+
+    return;
+}
 void ForwardChainer::init_source(Handle hsource)
 {
     if (hsource == Handle::UNDEFINED) {

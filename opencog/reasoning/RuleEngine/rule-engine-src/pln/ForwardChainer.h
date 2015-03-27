@@ -54,9 +54,10 @@ private:
     Handle choose_random_source(AtomSpace *);
     void add_to_source_list(Handle h);
     void init_source(Handle source);
+    void do_pm(const Handle& hsource,const UnorderedHandleSet& var_nodes);
 protected:
     enum source_selection_mode {
-        TV_FITNESS_BASED,STI_BASED
+        TV_FITNESS_BASED, STI_BASED
     };
 public:
     ForwardChainer(AtomSpace * as, string conf_path = "");
