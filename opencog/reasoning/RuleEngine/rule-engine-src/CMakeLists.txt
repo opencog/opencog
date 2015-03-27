@@ -19,11 +19,12 @@ ADD_DEPENDENCIES(ruleengine
 	opencog_atom_types
 )
 
-TARGET_LINK_LIBRARIES(ruleengine 
+TARGET_LINK_LIBRARIES(ruleengine
 	query
-	atomspace 
-	execution 
 	smob
+	execution
+	atomutils
+	atomspace
 )
 
 # Build the RuelEngine cogserver module
@@ -31,7 +32,7 @@ ADD_LIBRARY(RuleEngineModule SHARED
 	RuleEngineModule.cc
 )
 
-TARGET_LINK_LIBRARIES(RuleEngineModule ruleengine  server)
+TARGET_LINK_LIBRARIES(RuleEngineModule ruleengine server)
 
 IF (WIN32)
    INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")

@@ -7,7 +7,6 @@ ADD_LIBRARY(query SHARED
 	PatternMatch.cc
 	PatternMatchEngine.cc
 	PatternSCM.cc
-	PatternUtils.cc
 	VirtualMatch.cc
 	AttentionalFocusCB.cc
 	FuzzyMatch/FuzzyPatternMatch.cc
@@ -19,13 +18,14 @@ ADD_DEPENDENCIES(query
 	opencog_atom_types
 )
 
-TARGET_LINK_LIBRARIES(query 
-	atomspace 
-	execution 
+TARGET_LINK_LIBRARIES(query
+	atomutils
+	atomspace
+	execution
 )
 
 IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(query 
+	TARGET_LINK_LIBRARIES(query
 		smob
 	)
 ENDIF (HAVE_GUILE)

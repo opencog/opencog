@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/atom_types.h>
+#include <opencog/atomspace/Link.h>
 #include "AtomSpaceUtils.h"
 
 
@@ -30,28 +32,22 @@ using namespace opencog;
 /**
  * Get all the nodes within a link and its sublinks.
  *
- * @param pAS   the AtomSpace to look into
  * @param h     the top level link
  * @return      a HandleSeq of nodes
  */
-HandleSeq AtomSpaceUtils::getAllNodes(AtomSpace* pAS, Handle h)
+HandleSeq AtomSpaceUtils::getAllNodes(Handle h)
 {
     HandleSeq results;
 
-    if (pAS->isLink(h))
-    {
-        HandleSeq oset = pAS->getOutgoing(h);
-
-        for (Handle o : oset)
+    LinkPtr lll(LinkCast(h));
+    if (lll)
+        for (const Handle& o : lll->getOutgoingSet())
         {
-            HandleSeq sub = getAllNodes(pAS, o);
+            HandleSeq sub = getAllNodes(o);
             results.insert(results.end(), sub.begin(), sub.end());
         }
-    }
-    else if (pAS->isNode(h))
-    {
+    else
         results.push_back(h);
-    }
 
     // Handle is copy safe, but in this case C++11 would move it
     return results;
@@ -62,29 +58,53 @@ HandleSeq AtomSpaceUtils::getAllNodes(AtomSpace* pAS, Handle h)
  *
  * Similar to getAllNodes except there will be no repetition.
  *
- * @param pAS   the AtomSpace to look into
  * @param h     the top level link
  * @return      a UnorderedHandleSet of nodes
  */
-UnorderedHandleSet AtomSpaceUtils::getAllUniqueNodes(AtomSpace* pAS, Handle h)
+UnorderedHandleSet AtomSpaceUtils::getAllUniqueNodes(Handle h)
 {
     UnorderedHandleSet results;
 
-    if (pAS->isLink(h))
-    {
-        HandleSeq oset = pAS->getOutgoing(h);
-
-        for (Handle o : oset)
+    LinkPtr lll(LinkCast(h));
+    if (lll)
+        for (const Handle& o : lll->getOutgoingSet())
         {
-            UnorderedHandleSet sub = getAllUniqueNodes(pAS, o);
+            UnorderedHandleSet sub = getAllUniqueNodes(o);
             results.insert(sub.begin(), sub.end());
         }
-    }
-    else if (pAS->isNode(h))
-    {
+    else
         results.insert(h);
-    }
 
     return results;
 }
 
+namespace opencog
+{
+
+HandleSeq getNeighbors(const Handle& h, bool fanin,
+                       bool fanout, Type desiredLinkType,
+                       bool subClasses)
+{
+    if (h == NULL) {
+        throw InvalidParamException(TRACE_INFO,
+            "Handle %d doesn't refer to a Atom", h.value());
+    }
+    HandleSeq answer;
+
+    for (const LinkPtr& link : h->getIncomingSet())
+    {
+        Type linkType = link->getType();
+        if ((linkType == desiredLinkType)
+            or (subClasses && classserver().isA(linkType, desiredLinkType))) {
+            for (const Handle& handle : link->getOutgoingSet()) {
+                if (handle == h) continue;
+                if (!fanout && link->isSource(h)) continue;
+                if (!fanin && link->isTarget(h)) continue;
+                answer.push_back(handle);
+            }
+        }
+    }
+    return answer;
+}
+
+}

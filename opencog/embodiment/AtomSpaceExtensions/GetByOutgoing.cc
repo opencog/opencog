@@ -117,7 +117,12 @@ UnorderedHandleSet getHandlesByOutgoingSet(
 
         } else if ((types != NULL) && (types[i] != NOTYPE)) {
             bool sub = subclasses == NULL ? false : subclasses[i];
-            as.getHandlesByTargetType(inserter(sets[i]), type, types[i], subclass, sub);
+
+            HandleSeq targets;
+            as.getHandlesByType(back_inserter(targets), types[i], sub);
+            for (Handle h: targets) {
+                h->getIncomingSetByType(inserter(sets[i]), type, subclass);
+            }
             if (sets[i].size() == 0)
                 return UnorderedHandleSet();
         } else {

@@ -22,11 +22,14 @@
  */
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/atomspace/Foreach.h>
-#include <opencog/atomspace/ForeachTwo.h>
+#include <opencog/atomutils/Foreach.h>
+#include <opencog/atomutils/ForeachTwo.h>
+#include <opencog/atomutils/PatternUtils.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
 
 #include "PatternMatchEngine.h"
-#include "PatternUtils.h"
 
 using namespace opencog;
 

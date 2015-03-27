@@ -95,7 +95,6 @@ bool AtomTable::isCleared(void) const
     // if (nameIndex.size() != 0) return false;
     if (typeIndex.size() != 0) return false;
     if (importanceIndex.size() != 0) return false;
-    if (targetTypeIndex.size() != 0) return false;
     return true;
 }
 
@@ -468,7 +467,6 @@ void AtomTable::put_atom_into_index(AtomPtr& atom)
     nodeIndex.insertAtom(pat);
     linkIndex.insertAtom(atom);
     typeIndex.insertAtom(pat);
-    targetTypeIndex.insertAtom(pat);
     importanceIndex.insertAtom(pat);
 }
 
@@ -662,7 +660,6 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
             a->remove_atom(lll);
         }
     }
-    targetTypeIndex.removeAtom(pat);
     importanceIndex.removeAtom(pat);
 
     // XXX Setting the atom table causes AVChanged signals to be emitted.
@@ -683,6 +680,5 @@ void AtomTable::typeAdded(Type t)
     nodeIndex.resize();
     linkIndex.resize();
     typeIndex.resize();
-    targetTypeIndex.resize();
 }
 

@@ -1,13 +1,6 @@
 # To make Boost ublas much more efficient.
 ADD_DEFINITIONS(-DNDEBUG)
 
-INCLUDE_DIRECTORIES(
-	${PROJECT_SOURCE_DIR}/opencog/atomspace
-	${PROJECT_SOURCE_DIR}/opencog/query
-	${PROJECT_SOURCE_DIR}/opencog/server
-	${PROJECT_SOURCE_DIR}/opencog/util
-)
-
 # --------------------------------------------------
 OPENCOG_ADD_ATOM_TYPES(atom_types.script
 	atom_types.h
@@ -38,31 +31,31 @@ ADD_LIBRARY(attention SHARED
 	SimpleHebbianUpdatingAgent
 	ImportanceSpreadingAgent
 	ImportanceDiffusionAgent
-	SimpleImportanceDiffusionAgent        
+	SimpleImportanceDiffusionAgent
 	ImportanceUpdatingAgent
 )
 
-TARGET_LINK_LIBRARIES(attention server)
+TARGET_LINK_LIBRARIES(attention server atomutils atomspace)
 
 # HebbianCreationModule
 IF (TBB_FOUND)
-    INCLUDE_DIRECTORIES (
-	    ${TBB_INCLUDE_DIR}
-    )
+	INCLUDE_DIRECTORIES (
+		${TBB_INCLUDE_DIR}
+	)
 
-    LINK_DIRECTORIES(
-	    ${TBB_INCLUDE_DIR}
-	    ${TBB_LIBRARY_DIRS}
-    )
+	LINK_DIRECTORIES(
+		${TBB_INCLUDE_DIR}
+		${TBB_LIBRARY_DIRS}
+	)
 
-    ADD_LIBRARY(hebbiancreation SHARED
-	    HebbianCreationModule
-    )
+	ADD_LIBRARY(hebbiancreation SHARED
+		HebbianCreationModule
+	)
 
-    TARGET_LINK_LIBRARIES(hebbiancreation
-	    server
-	    tbb
-    )
+	TARGET_LINK_LIBRARIES(hebbiancreation
+		server
+		tbb
+	)
 ENDIF (TBB_FOUND)
 
 IF (CYGWIN)

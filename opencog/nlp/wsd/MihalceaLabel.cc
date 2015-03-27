@@ -16,7 +16,7 @@
 #include <stdio.h>
 
 #include <opencog/util/platform.h>
-#include <opencog/atomspace/Foreach.h>
+#include <opencog/atomutils/Foreach.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>

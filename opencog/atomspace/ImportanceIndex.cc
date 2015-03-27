@@ -28,7 +28,6 @@
 
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/AtomTable.h>
 
 using namespace opencog;

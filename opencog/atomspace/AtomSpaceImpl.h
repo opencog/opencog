@@ -178,24 +178,6 @@ public:
      */
     Handle getLink(Type t, const HandleSeq& outgoing);
 
-    /** Retrieve the incoming set of a given atom */
-    HandleSeq getIncoming(Handle);
-
-    /**
-     * Returns neighboring atoms, following incoming links and
-     * returning their outgoing sets.
-     *
-     * @param h Get neighbours for the atom this handle points to.
-     * @param fanin Whether directional (ordered) links point to this
-     *              node should beconsidered.
-     * @param fanout Whether directional (ordered) links point from this
-     *               node to another should be considered.
-     * @param linkType Follow only these types of links.
-     * @param subClasses Follow subtypes of linkType too.
-     */
-    HandleSeq getNeighbors(Handle h, bool fanin=true, bool fanout=true,
-                           Type linkType=LINK, bool subClasses=true) const;
-
     /**
      * Purges an atom from the atomtable. Attached storage is not
      * affected.  The removed atom stays valid (is not deleted) until

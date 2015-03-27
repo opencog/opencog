@@ -22,10 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SimpleImportanceDiffusionAgent.h"
-#include "SpreadDecider.h"
 #include <time.h>
 #include <math.h>
+
+#include <opencog/atomutils/AtomSpaceUtils.h>
+#include <opencog/atomutils/FollowLink.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/server/CogServer.h>
@@ -33,7 +34,9 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/algorithm.h>
-#include <opencog/atomspace/FollowLink.h>
+
+#include "SimpleImportanceDiffusionAgent.h"
+#include "SpreadDecider.h"
 
 #define DEBUG
 #define _unused(x) ((void)x)
@@ -436,7 +439,7 @@ HandleSeq SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(Handle h)
     // Chase the hebbian links originating at this atom and obtain the 
     // adjacent atoms that are found by traversing those links
     HandleSeq resultSet = 
-            as->getNeighbors(h, false, true, ASYMMETRIC_HEBBIAN_LINK, false);
+            getNeighbors(h, false, true, ASYMMETRIC_HEBBIAN_LINK, false);
     
     return resultSet;
 }

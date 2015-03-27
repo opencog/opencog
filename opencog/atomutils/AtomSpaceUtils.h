@@ -24,7 +24,9 @@
 #ifndef _OPENCOG_ATOMSPACE_UTILS_H
 #define _OPENCOG_ATOMSPACE_UTILS_H
 
-#include "AtomSpace.h"
+#include <opencog/atomspace/atom_types.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/types.h>
 
 namespace opencog
 {
@@ -41,11 +43,25 @@ class AtomSpaceUtils
 {
 
 public:
-    static HandleSeq getAllNodes(AtomSpace* pAS, Handle h);
+    static HandleSeq getAllNodes(Handle h);
 
-    static UnorderedHandleSet getAllUniqueNodes(AtomSpace* pAS, Handle h);
-
+    static UnorderedHandleSet getAllUniqueNodes(Handle h);
 };
+
+/**
+ * Returns neighboring atoms, following incoming links and
+ * returning their outgoing sets.
+ *
+ * @param h Get neighbours for the atom this handle points to.
+ * @param fanin Whether directional (ordered) links point to this
+ *              node should beconsidered.
+ * @param fanout Whether directional (ordered) links point from this
+ *               node to another should be considered.
+ * @param linkType Follow only these types of links.
+ * @param subClasses Follow subtypes of linkType too.
+ */
+HandleSeq getNeighbors(const Handle&, bool fanin=true, bool fanout=true,
+                       Type linkType=LINK, bool subClasses=true);
 
 /** @}*/
 }

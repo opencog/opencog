@@ -26,7 +26,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/platform.h>
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
 

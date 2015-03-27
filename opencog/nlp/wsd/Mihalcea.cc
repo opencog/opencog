@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 
-#include <opencog/atomspace/ForeachChaseLink.h>
+#include <opencog/atomutils/ForeachChaseLink.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/nlp/wsd/MihalceaEdge.h>
 #include <opencog/nlp/wsd/MihalceaLabel.h>

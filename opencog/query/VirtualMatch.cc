@@ -23,11 +23,11 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomutils/PatternUtils.h>
 #include <opencog/util/Logger.h>
 
 #include "Instantiator.h"
 #include "PatternMatch.h"
-#include "PatternUtils.h"
 #include "DefaultPatternMatchCB.h"
 #include "CrispLogicPMCB.h"
 

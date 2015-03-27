@@ -21,11 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomutils/AtomSpaceUtils.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/query/PatternMatch.h>
+
 #include "DefaultForwardChainerCB.h"
 #include "PLNCommons.h"
-
-#include <opencog/query/PatternMatch.h>
-#include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
 
@@ -171,7 +172,7 @@ HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
     Handle hsource = fcmem.get_cur_source();
 
     // Get everything associated with the source handle.
-    HandleSeq neighbors = as_->getNeighbors(hsource, true, true, LINK, true);
+    HandleSeq neighbors = getNeighbors(hsource, true, true, LINK, true);
 
     // Add all root links of atoms in @param neighbors.
     for (auto hn : neighbors) {

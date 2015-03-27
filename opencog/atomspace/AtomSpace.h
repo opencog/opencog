@@ -329,115 +329,6 @@ public:
         return getImpl().getLink(t, outgoing);
     }
 
-    /** Get the atom referred to by Handle h represented as a string. */
-    std::string atomAsString(Handle h, bool terse = true) const {
-        if (terse) return h->toShortString();
-        return h->toString();
-    }
-
-    /** Retrieve the name of a given Handle */
-    const std::string& getName(Handle h) const {
-        static std::string noname;
-        NodePtr nnn(NodeCast(h));
-        if (nnn) return nnn->getName();
-        return noname;
-    }
-
-    /** Change the Short-Term Importance of a given Handle */
-    void setSTI(Handle h, AttentionValue::sti_t stiValue) const {
-        h->setSTI(stiValue);
-    }
-
-    /** Change the Long-term Importance of a given Handle */
-    void setLTI(Handle h, AttentionValue::lti_t ltiValue) const {
-        h->setLTI(ltiValue);
-    }
-
-    /** Increase the Very-Long-Term Importance of a given Handle by 1 */
-    void incVLTI(Handle h) const { h->incVLTI(); }
-
-    /** Decrease the Very-Long-Term Importance of a given Handle by 1 */
-    void decVLTI(Handle h) const { h->decVLTI(); }
-
-    /** Retrieve the Short-Term Importance of a given Handle */
-    AttentionValue::sti_t getSTI(Handle h) const {
-        return h->getAttentionValue()->getSTI();
-    }
-
-    /** Retrieve the Long-term Importance of a given atom */
-    AttentionValue::lti_t getLTI(Handle h) const {
-        return h->getAttentionValue()->getLTI();
-    }
-
-    /** Retrieve the Very-Long-Term Importance of a given atom */
-    AttentionValue::vlti_t getVLTI(Handle h) const {
-        return h->getAttentionValue()->getVLTI();
-    }
-
-    /** Retrieve the outgoing set of a given link */
-    const HandleSeq& getOutgoing(Handle h) const {
-        static HandleSeq empty;
-        LinkPtr lll(LinkCast(h));
-        if (lll) return lll->getOutgoingSet();
-        return empty;
-    }
-
-    /** Retrieve a single Handle from the outgoing set of a given link */
-    Handle getOutgoing(Handle h, Arity idx) const {
-        LinkPtr lll = LinkCast(h);
-        if (lll) return lll->getOutgoingAtom(idx);
-        return Handle::UNDEFINED;
-    }
-
-    /** Retrieve the arity of a given link */
-    Arity getArity(Handle h) const {
-        LinkPtr lll(LinkCast(h));
-        if (lll) return lll->getArity();
-        return 0;
-    }
-
-    /** Return whether s is the source handle in a link l */
-    bool isSource(Handle source, Handle link) const
-    {
-        LinkPtr l(LinkCast(link));
-        if (l) return l->isSource(source);
-        return false;
-    }
-
-    /** Retrieve the AttentionValue of a given Handle */
-    AttentionValuePtr getAV(Handle h) const {
-        return h->getAttentionValue();
-    }
-
-    /** Change the AttentionValue of a given Handle */
-    void setAV(Handle h, AttentionValuePtr av) const {
-        h->setAttentionValue(av);
-    }
-
-    /** Retrieve the type of a given Handle */
-    Type getType(Handle h) const {
-        return h->getType();
-    }
-
-    /** Retrieve the TruthValue of a given Handle */
-    TruthValuePtr getTV(Handle h) const
-    {
-        return h->getTruthValue();
-    }
-
-    strength_t getMean(Handle h) const {
-        return h->getTruthValue()->getMean();
-    }
-
-    confidence_t getConfidence(Handle h) const {
-        return h->getTruthValue()->getConfidence();
-    }
-
-    /** Change the TruthValue of a given Handle */
-    void setTV(Handle h, TruthValuePtr tv) const {
-        h->setTruthValue(tv);
-    }
-
     /**
      * Return true if the handle points to an atom that is in some
      * (any) atomspace; else return false.
@@ -478,6 +369,63 @@ public:
         return (NULL != h) and (h->getHandle() != Handle::UNDEFINED);
     }
 
+    /**
+     * Gets a set of handles that matches with the given type
+     * (subclasses optionally).
+     *
+     * @param result An output iterator.
+     * @param type The desired type.
+     * @param subclass Whether type subclasses should be considered.
+     *
+     * @return The set of atoms of a given type (subclasses optionally).
+     *
+     * @note The matched entries are appended to a container whose
+     *        OutputIterator is passed as the first argument.
+     *
+     * Example of call to this method, which would return all entries
+     * in AtomSpace:
+     * @code
+     *         std::list<Handle> ret;
+     *         atomSpace.getHandlesByType(back_inserter(ret), ATOM, true);
+     * @endcode
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandlesByType(OutputIterator result,
+                     Type type,
+                     bool subclass = false) const
+    {
+        return getAtomTable().getHandlesByType(result, type, subclass);
+    }
+
+    /* ----------------------------------------------------------- */
+    /* The foreach routines offer an alternative interface
+     * to the getHandleSet API.
+     */
+    /**
+     * Invoke the callback on each handle of the given type.
+     */
+    template<class T>
+    inline bool foreach_handle_of_type(Type atype,
+                                       bool (T::*cb)(Handle), T *data,
+                                       bool subclass = false) {
+        std::list<Handle> handle_set;
+        // The intended signatue is
+        // getHandleSet(OutputIterator result, Type type, bool subclass)
+        getHandlesByType(back_inserter(handle_set), atype, subclass);
+
+        // Loop over all handles in the handle set.
+        std::list<Handle>::iterator i = handle_set.begin();
+        std::list<Handle>::iterator iend = handle_set.end();
+        for (; i != iend; ++i) {
+            bool rc = (data->*cb)(*i);
+            if (rc) return rc;
+        }
+        return false;
+    }
+
+    /* ----------------------------------------------------------- */
+    /* Attentional Focus stuff */
+
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
      * for a given Handle. STI above and below threshold normalised separately
      * and linearly.
@@ -505,130 +453,6 @@ public:
      */
     float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
         return getAttentionBankconst().getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip);
-    }
-
-    /**
-     * Returns neighboring atoms, following incoming links and
-     * returning their outgoing sets.
-     *
-     * @param h Get neighbours for the atom this handle points to.
-     * @param fanin Whether directional (ordered) links point to this
-     *              node should beconsidered.
-     * @param fanout Whether directional (ordered) links point from this
-     *               node to another should be considered.
-     * @param linkType Follow only these types of links.
-     * @param subClasses Follow subtypes of linkType too.
-     */
-    HandleSeq getNeighbors(const Handle& h, bool fanin, bool fanout,
-                           Type linkType=LINK, bool subClasses=true) const
-    {
-        return getImplconst().getNeighbors(h, fanin, fanout, linkType, subClasses);
-    }
-
-    /** Retrieve the incoming set of a given atom */
-    HandleSeq getIncoming(Handle h) {
-        return getImpl().getIncoming(h);
-    }
-
-    /** Convenience functions... */
-    bool isNode(Handle h) const { return NodeCast(h) != NULL; }
-    bool isLink(Handle h) const { return LinkCast(h) != NULL; }
-
-    /**
-     * DEPRECATED! DO NOT USE IN NEW CODE!
-     * If you need this function, just cut and paste the code below into
-     * whatever you are doing!
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByName(OutputIterator result,
-                     const std::string& name,
-                     Type type = NODE,
-                     bool subclass = true)
-    {
-        if (name.c_str()[0] == 0)
-            return getHandlesByType(result, type, subclass);
-
-        if (false == subclass) {
-            Handle h(getHandle(type, name));
-            if (h) *(result++) = h;
-            return result;
-        }
-
-        classserver().foreachRecursive(
-            [&](Type t)->void {
-                Handle h(getHandle(t, name));
-                if (h) *(result++) = h; }, type);
-
-        return result;
-    }
-
-    /**
-     * Gets a set of handles that matches with the given type
-     * (subclasses optionally).
-     *
-     * @param result An output iterator.
-     * @param type The desired type.
-     * @param subclass Whether type subclasses should be considered.
-     *
-     * @return The set of atoms of a given type (subclasses optionally).
-     *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace:
-     * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandlesByType(back_inserter(ret), ATOM, true);
-     * @endcode
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByType(OutputIterator result,
-                     Type type,
-                     bool subclass = false) const
-    {
-        return getAtomTable().getHandlesByType(result, type, subclass);
-    }
-
-    /**
-     * Returns the set of atoms of a given type which have atoms of a
-     * given target type in their outgoing set (subclasses optionally).
-     *
-     * @param result An output iterator.
-     * @param type The desired type.
-     * @param targetType The desired target type.
-     * @param subclass Whether type subclasses should be considered.
-     * @param targetSubclass Whether target type subclasses should be considered.
-     * @return The set of atoms of a given type and target type (subclasses
-     * optionally).
-     *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace:
-     * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
-     * @endcode
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByTargetType(OutputIterator result,
-                 Type type,
-                 Type targetType,
-                 bool subclass,
-                 bool targetSubclass) const
-    {
-        return getAtomTable().getHandlesByTargetType(result,
-               type, targetType, subclass, targetSubclass);
-    }
-
-    /**
-     * DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this function, just copy the one-liner below.
-     * XXX ONLY the python bindings use this. XXX kill that code.
-     */
-    template <typename OutputIterator> OutputIterator
-    getIncomingSetByType(OutputIterator result,
-                 Handle handle,
-                 Type type,
-                 bool subclass) const
-    {
-        return handle->getIncomingSetByType(result, type, subclass);
     }
 
     /**
@@ -660,42 +484,6 @@ public:
     {
         return getHandlesByAV(result, getAttentionalFocusBoundary(), AttentionValue::AttentionValue::MAXSTI);
     }
-
-    /* ----------------------------------------------------------- */
-    /* The foreach routines offer an alternative interface
-     * to the getHandleSet API.
-     */
-    /**
-     * Invoke the callback on each handle of the given type.
-     */
-    template<class T>
-    inline bool foreach_handle_of_type(Type atype,
-                                       bool (T::*cb)(Handle), T *data,
-                                       bool subclass = false) {
-        std::list<Handle> handle_set;
-        // The intended signatue is
-        // getHandleSet(OutputIterator result, Type type, bool subclass)
-        getHandlesByType(back_inserter(handle_set), atype, subclass);
-
-        // Loop over all handles in the handle set.
-        std::list<Handle>::iterator i = handle_set.begin();
-        std::list<Handle>::iterator iend = handle_set.end();
-        for (; i != iend; ++i) {
-            bool rc = (data->*cb)(*i);
-            if (rc) return rc;
-        }
-        return false;
-    }
-
-    template<class T>
-    inline bool foreach_handle_of_type(const char * atypename,
-                                       bool (T::*cb)(Handle), T *data,
-                                       bool subclass = false) {
-        Type atype = classserver().getType(atypename);
-        return foreach_handle_of_type(atype, cb, data, subclass);
-    }
-
-    /* ----------------------------------------------------------- */
 
     /** Get attentional focus boundary
      * Generally atoms below this threshold shouldn't be accessed unless search
@@ -757,7 +545,8 @@ public:
     //! Clear the atomspace, remove all atoms
     void clear() { getImpl().clear(); }
 
-// ---- Signals
+    /* ----------------------------------------------------------- */
+    // ---- Signals
 
     boost::signals2::connection addAtomSignal(const AtomSignal::slot_type& function)
     {
@@ -782,6 +571,195 @@ public:
     boost::signals2::connection RemoveAFSignal(const AVCHSigl::slot_type& function)
     {
         return getAttentionBank().RemoveAFSignal().connect(function);
+    }
+
+    /* ----------------------------------------------------------- */
+    /* Deprecated and obsolete code */
+
+    /**
+     * DEPRECATED! DO NOT USE IN NEW CODE!
+     * If you need this function, just cut and paste the code below into
+     * whatever you are doing!
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandlesByName(OutputIterator result,
+                     const std::string& name,
+                     Type type = NODE,
+                     bool subclass = true)
+    {
+        if (name.c_str()[0] == 0)
+            return getHandlesByType(result, type, subclass);
+
+        if (false == subclass) {
+            Handle h(getHandle(type, name));
+            if (h) *(result++) = h;
+            return result;
+        }
+
+        classserver().foreachRecursive(
+            [&](Type t)->void {
+                Handle h(getHandle(t, name));
+                if (h) *(result++) = h; }, type);
+
+        return result;
+    }
+
+    /**
+     * DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this function, just copy the one-liner below.
+     * XXX ONLY the python bindings use this. XXX kill that code.
+     */
+    template <typename OutputIterator> OutputIterator
+    getIncomingSetByType(OutputIterator result,
+                 Handle handle,
+                 Type type,
+                 bool subclass) const
+    {
+        return handle->getIncomingSetByType(result, type, subclass);
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    HandleSeq getIncoming(Handle h) const {
+        HandleSeq hs;
+        h->getIncomingSet(back_inserter(hs));
+        return hs;
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    bool isNode(Handle h) const { return NodeCast(h) != NULL; }
+    bool isLink(Handle h) const { return LinkCast(h) != NULL; }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    std::string atomAsString(Handle h, bool terse = true) const {
+        if (terse) return h->toShortString();
+        return h->toString();
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    const std::string& getName(Handle h) const {
+        static std::string noname;
+        NodePtr nnn(NodeCast(h));
+        if (nnn) return nnn->getName();
+        return noname;
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    void setSTI(Handle h, AttentionValue::sti_t stiValue) const {
+        h->setSTI(stiValue);
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    void setLTI(Handle h, AttentionValue::lti_t ltiValue) const {
+        h->setLTI(ltiValue);
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    void incVLTI(Handle h) const { h->incVLTI(); }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    void decVLTI(Handle h) const { h->decVLTI(); }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    AttentionValue::sti_t getSTI(Handle h) const {
+        return h->getAttentionValue()->getSTI();
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    AttentionValue::lti_t getLTI(Handle h) const {
+        return h->getAttentionValue()->getLTI();
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    AttentionValue::vlti_t getVLTI(Handle h) const {
+        return h->getAttentionValue()->getVLTI();
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    const HandleSeq& getOutgoing(Handle h) const {
+        static HandleSeq empty;
+        LinkPtr lll(LinkCast(h));
+        if (lll) return lll->getOutgoingSet();
+        return empty;
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    Handle getOutgoing(Handle h, Arity idx) const {
+        LinkPtr lll = LinkCast(h);
+        if (lll) return lll->getOutgoingAtom(idx);
+        return Handle::UNDEFINED;
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    Arity getArity(Handle h) const {
+        LinkPtr lll(LinkCast(h));
+        if (lll) return lll->getArity();
+        return 0;
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    bool isSource(Handle source, Handle link) const
+    {
+        LinkPtr l(LinkCast(link));
+        if (l) return l->isSource(source);
+        return false;
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    AttentionValuePtr getAV(Handle h) const {
+        return h->getAttentionValue();
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    void setAV(Handle h, AttentionValuePtr av) const {
+        h->setAttentionValue(av);
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    Type getType(Handle h) const {
+        return h->getType();
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    TruthValuePtr getTV(Handle h) const
+    {
+        return h->getTruthValue();
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    strength_t getMean(Handle h) const {
+        return h->getTruthValue()->getMean();
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    confidence_t getConfidence(Handle h) const {
+        return h->getTruthValue()->getConfidence();
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    void setTV(Handle h, TruthValuePtr tv) const {
+        h->setTruthValue(tv);
     }
 };
 

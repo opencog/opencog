@@ -21,10 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/AtomSpaceUtils.h>
+#include <opencog/atomutils/AtomSpaceUtils.h>
+#include <opencog/atomutils/PatternUtils.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/query/PatternMatchEngine.h>
-#include <opencog/query/PatternUtils.h>
 #include <opencog/nlp/types/atom_types.h>
 
 #include "SuRealSCM.h"
@@ -117,7 +117,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     // get all the nodes to be treated as variable in the Pattern Matcher
     // XXX perhaps it's better to write a eval_q in SchemeEval to convert
     //     a scm list to HandleSeq, so can just use the scheme utilities?
-    UnorderedHandleSet allNodes = AtomSpaceUtils::getAllUniqueNodes(pAS, h);
+    UnorderedHandleSet allNodes = AtomSpaceUtils::getAllUniqueNodes(h);
 
     // isolate which nodes are actually words, and which are not; all words
     // need to become variable for the Pattern Matcher
@@ -142,7 +142,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
             continue;
 
         // if no LG dictionary entry
-        if (pAS->getNeighbors(hWordNode, false, true, LG_WORD_CSET, false).empty())
+        if (getNeighbors(hWordNode, false, true, LG_WORD_CSET, false).empty())
             continue;
 
         sVars.insert(n);
@@ -259,8 +259,8 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     auto itprComp = [&pAS](const Handle& hi, const Handle& hj)
     {
         // get the corresponding SetLink
-        HandleSeq qi = pAS->getNeighbors(hi, false, true, REFERENCE_LINK, false);
-        HandleSeq qj = pAS->getNeighbors(hj, false, true, REFERENCE_LINK, false);
+        HandleSeq qi = getNeighbors(hi, false, true, REFERENCE_LINK, false);
+        HandleSeq qj = getNeighbors(hj, false, true, REFERENCE_LINK, false);
         qi.erase(std::remove_if(qi.begin(), qi.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qi.end());
         qj.erase(std::remove_if(qj.begin(), qj.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qj.end());
 

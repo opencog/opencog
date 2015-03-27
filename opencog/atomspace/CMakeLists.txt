@@ -16,7 +16,6 @@ ADD_LIBRARY (atomspace SHARED
     AtomSpace.cc
     AtomSpaceImpl.cc
     AtomSpaceInit.cc
-    AtomSpaceUtils.cc
     AtomTable.cc
     AttentionValue.cc
     AttentionBank.cc
@@ -38,7 +37,6 @@ ADD_LIBRARY (atomspace SHARED
     NullTruthValue.cc
     ProbabilisticTruthValue.cc
     SimpleTruthValue.cc
-    TargetTypeIndex.cc
     TLB.cc
     TruthValue.cc
     TypeIndex.cc
@@ -65,7 +63,6 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
     Atom.h
-    AtomSpaceDefinitions.h
     AtomSpace.h
     AtomSpaceUtils.h
     ${CMAKE_CURRENT_BINARY_DIR}/atom_types.h

@@ -17,7 +17,7 @@
 #define _OPENCOG_FOLLOW_LINK_H
 
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Foreach.h>
+#include <opencog/atomutils/Foreach.h>
 
 namespace opencog
 {

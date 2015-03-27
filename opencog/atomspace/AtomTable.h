@@ -48,7 +48,6 @@
 #include <opencog/atomspace/NodeIndex.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/TypeIndex.h>
-#include <opencog/atomspace/TargetTypeIndex.h>
 
 class AtomTableUTest;
 
@@ -108,7 +107,6 @@ private:
     NodeIndex nodeIndex;
     LinkIndex linkIndex;
     ImportanceIndex importanceIndex;
-    TargetTypeIndex targetTypeIndex;
 
     async_caller<AtomTable, AtomPtr> _index_queue;
     void put_atom_into_index(AtomPtr&);
@@ -234,33 +232,6 @@ public:
                       [&](const Handle &h)->void
                       { if (pred(h)) *result = h; });
         return result;
-    }
-
-    /**
-     * Returns the set of atoms of a given type which have atoms of a
-     * given target type in their outgoing set (subclasses optionally).
-     *
-     * @param The desired type.
-     * @param The desired target type.
-     * @param Whether type subclasses should be considered.
-     * @param Whether target type subclasses should be considered.
-     * @return The set of atoms of a given type and target type
-     *         (subclasses optionally).
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByTargetType(OutputIterator result,
-                             Type type,
-                             Type targetType,
-                             bool subclass,
-                             bool targetSubclass) const
-    {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(targetTypeIndex.begin(targetType, targetSubclass),
-                            targetTypeIndex.end(),
-                            result,
-             [&](Handle h)->bool{
-                 return h->isType(type, subclass);
-             });
     }
 
     /**
