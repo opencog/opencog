@@ -63,7 +63,7 @@ public:
 	const string& get_category() const;
 	Handle get_handle();
 	Handle get_implicant();
-	Handle get_implicand();
+	HandleSeq get_implicand();
 	int get_cost();
 
 	Rule standardize_apart();

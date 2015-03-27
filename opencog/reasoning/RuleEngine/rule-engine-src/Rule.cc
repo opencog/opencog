@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <queue>
+
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
@@ -104,20 +106,56 @@ Handle Rule::get_implicant()
 /**
  * Get the implicand (output) of the rule defined in a BindLink.
  *
- * XXX TODO Might want to do extra processing find the real output over an
- *     ExecutionOutputLink.  ie, skip to the ListLink under the ExLink.
+ * This function does extra processing to find the real output over an
+ * ExecutionOutputLink.  ie, skip to the ListLink under the ExLink.
  *
  * @return the Handle of the implicand
  */
-Handle Rule::get_implicand()
+HandleSeq Rule::get_implicand()
 {
 	// if the rule's handle has not been set yet
 	if (rule_handle_ == Handle::UNDEFINED)
-		return Handle::UNDEFINED;
+		return HandleSeq();
 
 	HandleSeq outgoing = LinkCast(rule_handle_)->getOutgoingSet();
+	Handle implicand = LinkCast(outgoing[1])->getOutgoingSet()[1];
 
-	return LinkCast(outgoing[1])->getOutgoingSet()[1];
+	std::queue<Handle> pre_output;
+	HandleSeq final_output;
+
+	// skip the top level ListLink
+	if (implicand->getType() == LIST_LINK)
+	{
+		for (Handle h : LinkCast(implicand)->getOutgoingSet())
+			pre_output.push(h);
+	}
+	else
+	{
+		pre_output.push(implicand);
+	}
+
+	// check all output of ExecutionOutputLink
+	while (not pre_output.empty())
+	{
+		Handle hfront = pre_output.front();
+		pre_output.pop();
+
+		if (hfront->getType() == EXECUTION_OUTPUT_LINK)
+		{
+			// get the ListLink containing the arguments of the ExecutionOutputLink
+			Handle harg = LinkCast(hfront)->getOutgoingSet()[1];
+
+			for (Handle h : LinkCast(harg)->getOutgoingSet())
+				pre_output.push(h);
+
+			continue;
+		}
+
+		// if not an ExecutionOutputLink, it is a final output
+		final_output.push_back(hfront);
+	}
+
+	return final_output;
 }
 
 void Rule::set_cost(int p)

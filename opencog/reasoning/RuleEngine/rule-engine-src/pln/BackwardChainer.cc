@@ -79,6 +79,8 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
 		// find all rules whose implicand can be unified to hgoal
 		std::vector<Rule> acceptable_rules = filter_rules(hgoal);
 
+		logger().debug("[BackwardChainer] Found %d acceptable rules", acceptable_rules.size());
+
 		// if no rules to backward chain on
 		if (acceptable_rules.empty())
 			return map<Handle, HandleSeq>();
@@ -91,14 +93,19 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
 		_as->addAtom(stadardized_rule.get_handle());
 //		_bc_generated_rules.push_back(stadardized_rule);
 
-		Handle implicand = stadardized_rule.get_implicand();
+		HandleSeq output = stadardized_rule.get_implicand();
 
-		map<Handle, HandleSeq> out;
+		// check which output can be unified and add to history
+		for (Handle h : output)
+		{
+			map<Handle, HandleSeq> out;
 
-		// it should always be possible to unify here, since filter_rules
-		// already removed rules that cannot unify to hgoal
-		unify(hgoal, implicand, out);
-		_inference_list.push_back(out);
+			if (not unify(hgoal, h, out))
+				continue;
+
+			_inference_list.push_back(out);
+			break;
+		}
 
 		map<Handle, HandleSeq> solution = bc_rule(stadardized_rule);
 		_inference_list.push_back(solution);
@@ -196,16 +203,27 @@ map<Handle, HandleSeq> BackwardChainer::bc_rule(Rule& rule)
  */
 std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
 {
-
 	std::vector<Rule> rules;
 
 	for (Rule& r : _rules_set)
 	{
-		Handle output = r.get_implicand();
-		std::map<Handle, HandleSeq> mapping;
+		HandleSeq output = r.get_implicand();
+		bool unifiable = false;
+
+		// check if any of the implicand's output can be unified to target
+		for (Handle h : output)
+		{
+			std::map<Handle, HandleSeq> mapping;
+
+			if (not unify(h, htarget, mapping))
+				continue;
+
+			unifiable = true;
+			break;
+		}
 
 		// move on to next rule if htarget cannot map to the output
-		if (not unify(output, htarget, mapping))
+		if (not unifiable)
 			continue;
 
 		rules.push_back(r);
@@ -254,6 +272,9 @@ HandleSeq BackwardChainer::filter_grounded_experssions(Handle htarget)
  * XXX TODO unify UNORDERED_LINK
  * XXX TODO check unifying same variable twice
  * XXX TODO check VariableNode inside QuoteLink
+ * XXX TODO unify in both direction
+ * XXX Should (Link (Node A)) be unifiable to (Node A))?  BC literature never
+ * unify this way, but in AtomSpace context, (Link (Node A)) does contain (Node A)
  *
  * @param htarget    the target with variable nodes
  * @param hmatch     a fully grounded matching handle with @param htarget
@@ -270,6 +291,8 @@ bool BackwardChainer::unify(const Handle& htarget,
 	// if unifying a link
 	if (lptr_target && lptr_match)
 	{
+		HandleSeq target_outg = lptr_target->getOutgoingSet();
+
 		// if the two links type are not equal
 		if (lptr_target->getType() != lptr_match->getType())
 		{
@@ -277,7 +300,6 @@ bool BackwardChainer::unify(const Handle& htarget,
 			return false;
 		}
 
-		HandleSeq target_outg = lptr_target->getOutgoingSet();
 		HandleSeq match_outg = lptr_match->getOutgoingSet();
 
 		// if the two links are not of equal size, cannot unify
