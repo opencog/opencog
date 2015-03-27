@@ -97,19 +97,6 @@ public:
     inline int getNumLinks() const { return getAtomTable().getNumLinks(); }
 
     /**
-     * Prints atoms of this AtomSpace to the given output stream.
-     * @param output  the output stream where the atoms will be printed.
-     * @param type  the type of atoms that should be printed.
-     * @param subclass  if true, matches all atoms whose type is
-     *              subclass of the given type. If false, matches
-     *              only atoms of the exact type.
-     */
-    void print(std::ostream& output = std::cout,
-               Type type = ATOM, bool subclass = true) const {
-        getAtomTable().print(output, type, subclass);
-    }
-
-    /**
      * Add an atom to the Atom Table.  If the atom already exists
      * then new truth value is ignored, and the existing atom is
      * returned.

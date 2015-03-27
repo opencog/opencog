@@ -163,28 +163,6 @@ public:
     UUID get_uuid(void) { return _uuid; }
 
     /**
-     * Prints atoms of this AtomTable to the given output stream.
-     * @param output  the output stream where the atoms will be printed
-     * @param type  the type of atoms that should be printed
-     * @param subclass  if true, matches all atoms whose type is
-     *        subclass of the given type. If false, matches only atoms of the
-     *        exact type.
-     */
-    void print(std::ostream& output = std::cout,
-               Type type = ATOM,
-               bool subclass = true) const;
-
-    /**
-     * Prints atoms of this AtomTable though the given logger
-     * @param logger the logger used to print the atoms
-     * @param type  the type of atoms that should be printed
-     * @param subclass  if true, matches all atoms whose type is
-     *        subclass of the given type. If false, matches only atoms of the
-     *        exact type.
-     */
-    void log(Logger& l = logger(), Type t = ATOM, bool subclass = true) const;
-
-    /**
      * Return the number of atoms contained in a table.
      */
     size_t getSize() const;

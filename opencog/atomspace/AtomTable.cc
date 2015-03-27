@@ -494,24 +494,6 @@ size_t AtomTable::getNumLinks() const
     return linkIndex.size();
 }
 
-void AtomTable::log(Logger& logger, Type type, bool subclass) const
-{
-    foreachHandleByType(
-        [&](Handle h)->void {
-            logger.debug("%d: %s", h.value(), h->toString().c_str());
-        },
-        type, subclass);
-}
-
-void AtomTable::print(std::ostream& output, Type type, bool subclass) const
-{
-    foreachHandleByType(
-        [&](Handle h)->void {
-            output << h->toString() << std::endl;
-        },
-        type, subclass);
-}
-
 Handle AtomTable::getRandom(RandGen *rng) const
 {
     size_t x = rng->randint(getSize());

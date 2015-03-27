@@ -441,7 +441,8 @@ cdef class AtomSpace:
                 [item for sublist in [atom.out for atom in atoms if len(atom.out) > 0] for item in sublist]))
 
     def print_list(self):
-        self.atomspace.print_list()
+    #    self.atomspace.print_list()
+         pass
 
 cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)

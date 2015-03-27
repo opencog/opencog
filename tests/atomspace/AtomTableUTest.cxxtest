@@ -222,28 +222,6 @@ public:
         delete rng;
     }
 
-    void testPrint()
-    {
-        const char *filename = PROJECT_BINARY_DIR"/tests/atomspace/AtomTableUTest.log";
-        std::ofstream out(filename);
-
-        out << "All Atoms:" << endl;
-        table->print(out);
-        out << "All Nodes:" << endl;
-        table->print(out, NODE);
-        out << "All ConceptNodes:" << endl;
-        table->print(out, CONCEPT_NODE, false);
-        out << "All Links:" << endl;
-        table->print(out, LINK);
-        out << "All ListLinks:" << endl;
-        table->print(out, LIST_LINK, false);
-
-        out.close();
-
-        if (!CxxTest::TestTracker::tracker().testFailed())
-            std::remove(filename);
-    }
-
     /* test the fix for the bug triggered whenever we had a link pointing to the
      * same atom twice (or more) */
     void testDoubleLink()

@@ -170,8 +170,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         void clear()
         bint removeAtom(cHandle h, bint recursive) 
 
-        void print_list "print" ()
-
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
 
 cdef class AtomSpace:
