@@ -78,7 +78,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
     //Variable fulfillment query.
     UnorderedHandleSet var_nodes = pc.get_nodes(hsource, { VARIABLE_NODE });
     if (not var_nodes.empty())
-        return do_pm(hsource,var_nodes);
+        return do_pm(hsource, var_nodes);
 
     //Forward chaining on a particular type of atom.
     int iteration = 0;
@@ -86,8 +86,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
     init_source(hsource);
     while (iteration < max_iter /*OR other termination criteria*/) {
         log_->info("Iteration %d", iteration);
-        log_->info("Next source %s",
-                   fcmem_.cur_source_->toString().c_str());
+        log_->info("Next source %s", fcmem_.cur_source_->toString().c_str());
 
         //Add more premise to hcurrent_source by pattern matching.
         HandleSeq input = fcb.choose_premises(fcmem_);
@@ -128,10 +127,12 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
  * Does pattern matching for a variable containing query.
  * @param source handle containing VariableNode
  */
-void ForwardChainer::do_pm(const Handle& hsource,const UnorderedHandleSet& var_nodes)
+void ForwardChainer::do_pm(const Handle& hsource,
+                           const UnorderedHandleSet& var_nodes)
 {
     DefaultImplicator impl(as_);
     impl.implicand = hsource;
+    PatternMatch pm;
     HandleSeq vars;
     for (auto h : var_nodes)
         vars.push_back(h);
@@ -151,7 +152,6 @@ void ForwardChainer::do_pm(const Handle& hsource,const UnorderedHandleSet& var_n
     as_->removeAtom(hvar_list);
     as_->removeAtom(hclause);
 }
-
 
 void ForwardChainer::init_source(Handle hsource)
 {
