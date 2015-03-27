@@ -167,24 +167,6 @@ class AtomSpaceTest(TestCase):
         assert len(result) == 4
         assert set(result) == set([h1, h2, h3, h4])
 
-    def test_get_by_target_type(self):
-        h1 = self.space.add_node(types.Node, "test1")
-        h2 = self.space.add_node(types.ConceptNode, "test2")
-        h3 = self.space.add_node(types.PredicateNode, "test3")
-
-        # test it doesn't apply to Nodes
-        result = self.space.get_atoms_by_target_type(types.Node, types.Node)
-        self.assertTrue(h1 not in result)
-
-        # links
-        l1 = self.space.add_link(types.InheritanceLink, [h1.h, h2.h])
-        result = self.space.get_atoms_by_target_type(types.Link, types.ConceptNode, target_subtype=False)
-        self.assertTrue(l1 in result)
-        
-        # test recursive target subtype
-        result = self.space.get_atoms_by_target_type(types.Link, types.Node, target_subtype=True)
-        self.assertTrue(l1 in result)
-
     def test_get_by_target_atom(self):
         h1 = self.space.add_node(types.Node, "test1")
         h2 = self.space.add_node(types.ConceptNode, "test2")
