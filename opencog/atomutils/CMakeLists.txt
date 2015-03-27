@@ -1,6 +1,7 @@
 
 ADD_LIBRARY (atomutils SHARED
-    AtomSpaceUtils.cc
+	AtomSpaceUtils.cc
+	PatternUtils.cc
 )
 
 TARGET_LINK_LIBRARIES(atomutils
@@ -23,5 +24,6 @@ INSTALL (FILES
     ForeachChaseLink.h
     Foreach.h
     ForeachTwo.h
+    PatternUtils.h
     DESTINATION "include/${PROJECT_NAME}/atomutils"
 )

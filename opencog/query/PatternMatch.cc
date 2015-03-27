@@ -22,10 +22,10 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomutils/PatternUtils.h>
 #include <opencog/util/Logger.h>
 
 #include "PatternMatch.h"
-#include "PatternUtils.h"
 
 using namespace opencog;
 

@@ -22,9 +22,9 @@
  */
 
 #include <opencog/atomutils/AtomSpaceUtils.h>
+#include <opencog/atomutils/PatternUtils.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/query/PatternMatchEngine.h>
-#include <opencog/query/PatternUtils.h>
 #include <opencog/nlp/types/atom_types.h>
 
 #include "SuRealSCM.h"

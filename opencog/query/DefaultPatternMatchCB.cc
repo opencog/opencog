@@ -22,10 +22,10 @@
  */
 
 #include <opencog/execution/EvaluationLink.h>
+#include <opencog/atomutils/PatternUtils.h>
 
 #include "DefaultPatternMatchCB.h"
 #include "PatternMatchEngine.h"
-#include "PatternUtils.h"
 
 using namespace opencog;
 
