@@ -19,6 +19,7 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/guile/SchemePrimitive.h>
+#include <opencog/nlp/types/atom_types.h>
 #include <opencog/nlp/wsd/MihalceaLabel.h>
 #include <opencog/server/CogServer.h>
 
@@ -107,7 +108,7 @@ void WordSenseProcessor::work_thread(void)
 void WordSenseProcessor::run_no_delay()
 {
 	// Look for recently entered text
-	atom_space->foreach_handle_of_type("DocumentNode",
+	atom_space->foreach_handle_of_type(DOCUMENT_NODE,
 	               &WordSenseProcessor::do_document, this);
 }
 

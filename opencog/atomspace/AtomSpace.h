@@ -387,15 +387,6 @@ public:
         return getImplconst().getNeighbors(h, fanin, fanout, linkType, subClasses);
     }
 
-    /** Retrieve the incoming set of a given atom */
-    HandleSeq getIncoming(Handle h) {
-        return getImpl().getIncoming(h);
-    }
-
-    /** Convenience functions... */
-    bool isNode(Handle h) const { return NodeCast(h) != NULL; }
-    bool isLink(Handle h) const { return LinkCast(h) != NULL; }
-
     /**
      * Gets a set of handles that matches with the given type
      * (subclasses optionally).
@@ -653,13 +644,28 @@ public:
         return handle->getIncomingSetByType(result, type, subclass);
     }
 
-    /** Get the atom referred to by Handle h represented as a string. */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    HandleSeq getIncoming(Handle h) const {
+        HandleSeq hs;
+        h->getIncomingSet(back_inserter(hs));
+        return hs;
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    bool isNode(Handle h) const { return NodeCast(h) != NULL; }
+    bool isLink(Handle h) const { return LinkCast(h) != NULL; }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     std::string atomAsString(Handle h, bool terse = true) const {
         if (terse) return h->toShortString();
         return h->toString();
     }
 
-    /** Retrieve the name of a given Handle */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     const std::string& getName(Handle h) const {
         static std::string noname;
         NodePtr nnn(NodeCast(h));
@@ -667,38 +673,46 @@ public:
         return noname;
     }
 
-    /** Change the Short-Term Importance of a given Handle */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     void setSTI(Handle h, AttentionValue::sti_t stiValue) const {
         h->setSTI(stiValue);
     }
 
-    /** Change the Long-term Importance of a given Handle */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     void setLTI(Handle h, AttentionValue::lti_t ltiValue) const {
         h->setLTI(ltiValue);
     }
 
-    /** Increase the Very-Long-Term Importance of a given Handle by 1 */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     void incVLTI(Handle h) const { h->incVLTI(); }
 
-    /** Decrease the Very-Long-Term Importance of a given Handle by 1 */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     void decVLTI(Handle h) const { h->decVLTI(); }
 
-    /** Retrieve the Short-Term Importance of a given Handle */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     AttentionValue::sti_t getSTI(Handle h) const {
         return h->getAttentionValue()->getSTI();
     }
 
-    /** Retrieve the Long-term Importance of a given atom */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     AttentionValue::lti_t getLTI(Handle h) const {
         return h->getAttentionValue()->getLTI();
     }
 
-    /** Retrieve the Very-Long-Term Importance of a given atom */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     AttentionValue::vlti_t getVLTI(Handle h) const {
         return h->getAttentionValue()->getVLTI();
     }
 
-    /** Retrieve the outgoing set of a given link */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     const HandleSeq& getOutgoing(Handle h) const {
         static HandleSeq empty;
         LinkPtr lll(LinkCast(h));
@@ -706,21 +720,24 @@ public:
         return empty;
     }
 
-    /** Retrieve a single Handle from the outgoing set of a given link */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     Handle getOutgoing(Handle h, Arity idx) const {
         LinkPtr lll = LinkCast(h);
         if (lll) return lll->getOutgoingAtom(idx);
         return Handle::UNDEFINED;
     }
 
-    /** Retrieve the arity of a given link */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     Arity getArity(Handle h) const {
         LinkPtr lll(LinkCast(h));
         if (lll) return lll->getArity();
         return 0;
     }
 
-    /** Return whether s is the source handle in a link l */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     bool isSource(Handle source, Handle link) const
     {
         LinkPtr l(LinkCast(link));
@@ -728,40 +745,48 @@ public:
         return false;
     }
 
-    /** Retrieve the AttentionValue of a given Handle */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     AttentionValuePtr getAV(Handle h) const {
         return h->getAttentionValue();
     }
 
-    /** Change the AttentionValue of a given Handle */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     void setAV(Handle h, AttentionValuePtr av) const {
         h->setAttentionValue(av);
     }
 
-    /** Retrieve the type of a given Handle */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     Type getType(Handle h) const {
         return h->getType();
     }
 
-    /** Retrieve the TruthValue of a given Handle */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     TruthValuePtr getTV(Handle h) const
     {
         return h->getTruthValue();
     }
 
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     strength_t getMean(Handle h) const {
         return h->getTruthValue()->getMean();
     }
 
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     confidence_t getConfidence(Handle h) const {
         return h->getTruthValue()->getConfidence();
     }
 
-    /** Change the TruthValue of a given Handle */
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
     void setTV(Handle h, TruthValuePtr tv) const {
         h->setTruthValue(tv);
     }
-
 };
 
 /** @}*/

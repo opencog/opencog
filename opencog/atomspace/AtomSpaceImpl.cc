@@ -339,24 +339,6 @@ HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
     return answer;
 }
 
-HandleSeq AtomSpaceImpl::getIncoming(Handle h)
-{
-    // It is possible that the incoming set that we currently hold is
-    // much smaller than what is in persistant storage. In this case,
-    // we would like to automatically pull all of those other atoms
-    // into here (using fetchIncomingSet(h,true) to do so). However,
-    // maybe the incoming set is up-to-date, in which case polling
-    // storage over and over is a huge waste of time.  What to do?
-    //
-    // h = fetchIncomingSet(h, true);
-    //
-    // Anyway, the user can call fetch explicitly, if desired.
-
-    HandleSeq hs;
-    h->getIncomingSet(back_inserter(hs));
-    return hs;
-}
-
 bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
 {
     if (backing_store) {

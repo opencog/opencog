@@ -178,9 +178,6 @@ public:
      */
     Handle getLink(Type t, const HandleSeq& outgoing);
 
-    /** Retrieve the incoming set of a given atom */
-    HandleSeq getIncoming(Handle);
-
     /**
      * Returns neighboring atoms, following incoming links and
      * returning their outgoing sets.
