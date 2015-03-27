@@ -1167,7 +1167,8 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
     // Get the  HandleSet to ExecutionOutputLink
     std::vector<Handle> executionOutputLinkSet;
 
-    atomSpace.getHandleSet
+#define getIncomingSet(iter,h,t,sub) h->getIncomingSetByType(iter,t,sub)
+    getIncomingSet
                   ( back_inserter(executionOutputLinkSet), // return value
                     hGroundedSchemaNode,      // returned link should contain this node
                     EXECUTION_OUTPUT_LINK,    // type of the returned link
@@ -1219,7 +1220,7 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
 
     std::vector<Handle> similarityLinkSet;
 
-    atomSpace.getHandleSet(back_inserter(similarityLinkSet), hExecutionOutputLink, SIMILARITY_LINK, false);
+    getIncomingSet(back_inserter(similarityLinkSet), hExecutionOutputLink, SIMILARITY_LINK, false);
 
     logger().debug("AtomSpaceUtil::%s - Get %d SimilarityLink that holds modulator updater (ExecutionOutputLink)",
                    __FUNCTION__,
@@ -1333,7 +1334,7 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
     // Get the  HandleSet to ExecutionOutputLink
     std::vector<Handle> executionOutputLinkSet;
 
-    atomSpace.getHandleSet
+    getIncomingSet
                   ( back_inserter(executionOutputLinkSet), // return value
                     hGroundedSchemaNode,      // returned link should contain this node
                     EXECUTION_OUTPUT_LINK,    // type of the returned link
@@ -1374,7 +1375,7 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
 
     std::vector<Handle> similarityLinkSet;
 
-    atomSpace.getHandleSet(back_inserter(similarityLinkSet), hExecutionOutputLink, SIMILARITY_LINK, false);
+    getIncomingSet(back_inserter(similarityLinkSet), hExecutionOutputLink, SIMILARITY_LINK, false);
 
     logger().debug("AtomSpaceUtil::%s - Get %d SimilarityLink that holds demand updater (ExecutionOutputLink)",
                    __FUNCTION__,
@@ -1522,8 +1523,11 @@ void AtomSpaceUtil::getAllEvaluationLinks(AtomSpace& atomSpace,
             "Searching for PredicateNode '%s'.",
             predicateNodeName.c_str());
 
+#define getIncSet(iter, name, targ, type, sub) { \
+Handle targh(atomSpace.getHandle(targ, name)); \
+targh->getIncomingSetByType(iter, type, sub); }
     std::vector<Handle> handles;
-    atomSpace.getHandleSet(back_inserter(handles),
+    getIncSet(back_inserter(handles),
                            predicateNodeName.c_str(),
                            PREDICATE_NODE,
                            EVALUATION_LINK, true);
@@ -1752,7 +1756,7 @@ Handle AtomSpaceUtil::getObjectHolderHandle( AtomSpace& atomSpace,
     Handle holdedObjectHandle = handles[0];
 
     handles.clear( );
-    atomSpace.getHandleSet( back_inserter(handles),
+    getIncSet( back_inserter(handles),
                             "isHolding",
                             PREDICATE_NODE,
                             EVALUATION_LINK, true );
@@ -1826,7 +1830,7 @@ Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(AtomSpace& atomSpace,
     } // if
 
     std::vector<Handle> handles;
-    atomSpace.getHandleSet( back_inserter(handles),
+    getIncSet( back_inserter(handles),
                             IS_HOLDING_PREDICATE_NAME,
                             PREDICATE_NODE, EVALUATION_LINK, true );
 
@@ -1931,7 +1935,7 @@ Handle AtomSpaceUtil::getIsHoldingLinkAtTime(AtomSpace& atomSpace,
     if ( holderHandle == Handle::UNDEFINED ) return Handle::UNDEFINED;
 
     std::vector<Handle> handles;
-    atomSpace.getHandleSet(back_inserter(handles), IS_HOLDING_PREDICATE_NAME,
+    getIncSet(back_inserter(handles), IS_HOLDING_PREDICATE_NAME,
                            PREDICATE_NODE, EVALUATION_LINK, true);
 
     std::vector<HandleTemporalPair> timestamps;
@@ -2526,7 +2530,7 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
     // Get the  HandleSet to ExecutionOutputLink
     std::vector<Handle> executionOutputLinkSet;
 
-    atomSpace.getHandleSet
+    getIncomingSet
                   ( back_inserter(executionOutputLinkSet), // return value
                     groundedSchemaNode,       // returned link should contain this node
                     EXECUTION_OUTPUT_LINK,    // type of the returned link
@@ -2569,7 +2573,7 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
     // Get the Handle to SimilarityLink
     std::vector<Handle> similarityLinkSet;
 
-    atomSpace.getHandleSet
+    getIncomingSet
         ( back_inserter(similarityLinkSet), // return value
           executionOutputLink,              // returned link should contain this link
           SIMILARITY_LINK,                  // type of the returned link
@@ -2719,7 +2723,7 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
     // Get the  HandleSet to ExecutionOutputLink
     std::vector<Handle> executionOutputLinkSet;
 
-    atomSpace.getHandleSet
+    getIncomingSet
                   ( back_inserter(executionOutputLinkSet), // return value
                     hGroundedSchemaNode,      // returned link should contain this node
                     EXECUTION_OUTPUT_LINK,    // type of the returned link
@@ -2752,7 +2756,7 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
     // Get the Handle to ListLink that contains ExecutionOutputLink
     std::vector<Handle> listLinkSet;
 
-    atomSpace.getHandleSet
+    getIncomingSet
         ( back_inserter(listLinkSet), // return value
           hExecutionOutputLink,       // returned link should contain this link
           LIST_LINK,                  // type of the returned link
@@ -2828,7 +2832,7 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
     // Get the HandleSet to EvaluationLink that contains the PredicateNode above
     std::vector<Handle> evaluationLinkSet;
 
-    atomSpace.getHandleSet
+    getIncomingSet
         ( back_inserter(evaluationLinkSet), // return value
           hPredicateNode,                             // returned link should contain this link
           EVALUATION_LINK,                            // type of the returned link
@@ -2880,7 +2884,7 @@ Handle AtomSpaceUtil::getRuleImplicationLink(AtomSpace& atomSpace,
     }
 
     std::vector<Handle> ruleReferenceLink;
-    atomSpace.getHandleSet(back_inserter(ruleReferenceLink),
+    getIncomingSet(back_inserter(ruleReferenceLink),
                            rulePhraseNode, REFERENCE_LINK, false);
     if (ruleReferenceLink.size() != 1) {
         logger().error(

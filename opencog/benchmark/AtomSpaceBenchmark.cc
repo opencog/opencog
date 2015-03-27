@@ -202,7 +202,7 @@ void AtomSpaceBenchmark::showMethods() {
     cout << "  getType" << endl;
     cout << "  getTruthValue" << endl;
     cout << "  setTruthValue" << endl;
-    cout << "  getHandleSet" << endl;
+    cout << "  getHandlesByType" << endl;
     cout << "  getOutgoingSet" << endl;
 
 }
@@ -227,8 +227,8 @@ void AtomSpaceBenchmark::setMethod(std::string _methodName)
 #endif
     } else if (_methodName == "setTV") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_setTruthValue);
-    } else if (_methodName == "getHandleSet") {
-        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getHandleSet);
+    } else if (_methodName == "getHandlesByType") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getHandlesByType);
     } else if (_methodName == "getOutgoingSet") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getOutgoingSet);
     } else if (_methodName == "getIncomingSet") {
@@ -964,7 +964,7 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     return timepair_t(0,0);
 }
 
-timepair_t AtomSpaceBenchmark::bm_getHandleSet()
+timepair_t AtomSpaceBenchmark::bm_getHandlesByType()
 {
     Type t = randomType(ATOM);
     switch (testKind) {

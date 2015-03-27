@@ -1426,8 +1426,8 @@ combo::vertex WorldWrapperUtil::evalPerception(
                              "WWUtil - There should be a ConceptNode for currentActionRepetition");
 
             HandleSeq result;
-            atomSpace.getHandleSet(back_inserter(result),
-                                   handle, FREQUENCY_LINK, false);
+            handle->getIncomingSetByType(back_inserter(result),
+                                    FREQUENCY_LINK, false);
 
             if (result.size() != 1) {
                 logger().warn("WWUtil - There should be only one FrequencyLink, got '%d'",

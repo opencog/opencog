@@ -527,29 +527,6 @@ public:
      * DEPRECATED! DO NOT USE IN NEW CODE!
      * If you need this function, just cut and paste the code below into
      * whatever you are doing!
-     *
-     * Returns the set of atoms of a given name (atom type and subclasses
-     * optionally).  If the name is not null or the empty string, then
-     * this returns Nodes ONLY (of the requested name, of course). However,
-     * if the name is null (or empty string) then Links might be  included!
-     * This behaviour is surprising, but is explicilty tested for in the
-     * AtomSpaceImplUTest. I don't know why its done like this.
-     *
-     * @param result An output iterator.
-     * @param type the type of the atoms to be searched
-     * @param name the name of the atoms to be searched.
-     * @param subclass if sub types of the given type are accepted
-     *        in this search
-     *
-     * @return The set of atoms of a given type (subclasses optionally).
-     *
-     * @note The matched entries are appended to a container whose
-     * OutputIterator is passed as the first argument. Example of a
-     * call to this method, which would return all entries in AtomSpace:
-     * @code
-     *      std::list<Handle> ret;
-     *      atomSpace.getHandlesByName(back_inserter(ret), ATOM, true);
-     * @endcode
      */
     template <typename OutputIterator> OutputIterator
     getHandlesByName(OutputIterator result,
@@ -630,30 +607,12 @@ public:
     }
 
     /**
-     * Returns the set of atoms with a given target handle in their
-     * outgoing set (atom type and its subclasses optionally).
-     * i.e. returns the incoming set for that handle, but filtered
-     * by the Type you specify.
-     *
-     * @param result An output iterator.
-     * @param handle The handle that must be in the outgoing set of the atom.
-     * @param type The type of the atom.
-     * @param subclass Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the given handle in
-     * their outgoing set.
-     *
-     * @note The matched entries are appended to a container whose 
-     *       OutputIterator is passed as the first argument.
-     *       Example of call to this method, which would return all
-     *       entries in AtomSpace:
-     * @code
-     *         // Handle h == the Handle for your choice of Atom
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), h, ATOM, true);
-     * @endcode
+     * DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this function, just copy the one-liner below.
+     * XXX ONLY the python bindings use this. XXX kill that code.
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getIncomingSetByType(OutputIterator result,
                  Handle handle,
                  Type type,
                  bool subclass) const
@@ -715,48 +674,6 @@ public:
         UnorderedHandleSet hs = getHandlesByOutgoingSet(handles,
                 types, subclasses, arity, type, subclass);
         return std::copy(hs.begin(), hs.end(), result);
-    }
-
-    /**
-     * DEPRECATED!  DO NOT USE IN NEW CODE!
-     * If you need this, just cut-n-paste the two lines of code below.
-     *
-     * Returns the set of atoms whose outgoing set contains at least one
-     * atom with the given name and type (atom type and subclasses
-     * optionally).
-     *
-     * @param result An output iterator.
-     * @param targetName The name of the atom in the outgoing set of
-     *        the searched atoms.
-     * @param targetType The type of the atom in the outgoing set of
-     *        the searched atoms.
-     * @param type type of the atom.
-     * @param subclass Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type and name whose outgoing
-     * set contains at least one atom of the given type and name.
-     *
-     * @note The matched entries are appended to a container whose
-     * OutputIterator is passed as the first argument.  Example of call to
-     * this method, which would return all entries in AtomSpace:
-     *
-     * @code
-     * std::list<Handle> ret;
-     * atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
-     * @endcode
-     *
-     * DEPRECATED!  DO NOT USE IN NEW CODE!
-     * If you need this, just cut-n-paste the two lines of code below.
-     *
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
-                 const char* targetName,
-                 Type targetType,
-                 Type type,
-                 bool subclass)
-    {
-        Handle targh(getHandle(targetType, targetName));
-        return targh->getIncomingSetByType(result, type, subclass);
     }
 
     /**
