@@ -33,7 +33,6 @@
 // dir
 #define ATOM_TABLE_TEST_SCM_FILE PROJECT_SOURCE_DIR"/tests/atomspace/atom_table_utest.scm"
 
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>

@@ -63,7 +63,6 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
     Atom.h
-    AtomSpaceDefinitions.h
     AtomSpace.h
     AtomSpaceUtils.h
     ${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
