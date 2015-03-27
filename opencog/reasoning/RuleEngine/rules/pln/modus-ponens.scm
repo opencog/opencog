@@ -11,15 +11,15 @@
             (VariableNode "$B"))
         (ImplicationLink
             (ImplicationLink
-                (VariableNode "$A")
-                (VariableNode "$B"))
-            (ListLink
-                (ExecutionOutputLink
-                    (GroundedSchemaNode "scm: pln-formula-simple-modus-ponens")
-                    (ListLink
-                        (ImplicationLink
-                            (VariableNode "$A")
-                            (VariableNode "$B"))))))))
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+            (ExecutionOutputLink
+                (GroundedSchemaNode "scm: pln-formula-simple-modus-ponens")
+                (ListLink
+                    (VariableNode "$B")
+                    (ImplicationLink
+                        (VariableNode "$A")
+                        (VariableNode "$B")))))))
 
 ; -----------------------------------------------------------------------------
 ; Modus Ponens Formula
@@ -29,13 +29,11 @@
 ; Side-effect: TruthValue of AC may be updated
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-simple-modus-ponens AB)
-    (let
-        ((B (gdr AB)))
-            (cog-set-tv!
-                B
-                (pln-formula-simple-modus-ponens-side-effect-free
-                    AB))))
+(define (pln-formula-simple-modus-ponens B AB)
+    (cog-set-tv!
+        B
+        (pln-formula-simple-modus-ponens-side-effect-free
+            AB)))
 
 ; -----------------------------------------------------------------------------
 ; This version has no side effects and simply returns a TruthValue
