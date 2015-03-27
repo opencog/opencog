@@ -68,20 +68,15 @@ cdef class AtomSpace:
         @todo support type name for type.
         @returns the newly created Atom
         """
-        # convert to string
-        py_byte_string = atom_name.encode('UTF-8')
-        # create temporary cpp string
-        cdef string *name = new string(py_byte_string)
+        cdef string name = atom_name.encode('UTF-8')
         cdef cHandle result
         if prefixed:
             # prefixed nodes ALWAYS generate a new atom using atom_name
             # as the prefix
-            result = self.atomspace.addPrefixedNode(t, deref(name))
+            result = self.atomspace.addPrefixedNode(t, name)
         else:
-            result = self.atomspace.addNode(t, deref(name))
+            result = self.atomspace.addNode(t, name)
 
-        # delete temporary string
-        del name
         if result == result.UNDEFINED: return None
         atom = Atom(Handle(result.value()), self);
         if tv :
@@ -300,23 +295,16 @@ cdef class AtomSpace:
 
     def get_atoms_by_name(self, Type t, name, subtype = True):
         cdef vector[cHandle] handle_vector
-        # create temporary cpp string
-        py_byte_string = name.encode('UTF-8')
-        cdef string *cname = new string(py_byte_string)
+        cdef string cname = name.encode('UTF-8')
         cdef bint subt = subtype
-        self.atomspace.getHandlesByName(back_inserter(handle_vector), deref(cname), t, subt)
-        del cname
+        self.atomspace.getHandlesByName(back_inserter(handle_vector), cname, t, subt)
         return convert_handle_seq_to_python_list(handle_vector,self)
-
 
     def xget_atoms_by_name(self, Type t, name, subtype = True):
         cdef vector[cHandle] handle_vector
-        # create temporary cpp string
-        py_byte_string = name.encode('UTF-8')
-        cdef string *cname = new string(py_byte_string)
+        cdef string cname = name.encode('UTF-8')
         cdef bint subt = subtype
-        self.atomspace.getHandlesByName(back_inserter(handle_vector), deref(cname), t, subt)
-        del cname
+        self.atomspace.getHandlesByName(back_inserter(handle_vector), cname, t, subt)
 
         # This code is the same for all the x iterators but there is no
         # way in Cython to yield out of a cdef function and no way to pass a 
