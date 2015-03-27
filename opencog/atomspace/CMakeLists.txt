@@ -16,7 +16,6 @@ ADD_LIBRARY (atomspace SHARED
     AtomSpace.cc
     AtomSpaceImpl.cc
     AtomSpaceInit.cc
-    AtomSpaceUtils.cc
     AtomTable.cc
     AttentionValue.cc
     AttentionBank.cc

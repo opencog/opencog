@@ -25,7 +25,7 @@
 
 #include <tbb/task.h>
 
-#include <opencog/atomspace/AtomSpaceUtils.h>
+#include <opencog/atomutils/AtomSpaceUtils.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/server/CogServer.h>

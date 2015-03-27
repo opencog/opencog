@@ -15,8 +15,8 @@
 #define _OPENCOG_FOREACH_WORD_H
 
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/ForeachChaseLink.h>
-#include <opencog/atomspace/FollowLink.h>
+#include <opencog/atomutils/ForeachChaseLink.h>
+#include <opencog/atomutils/FollowLink.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/atom_types.h>

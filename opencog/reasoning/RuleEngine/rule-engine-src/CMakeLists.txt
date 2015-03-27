@@ -23,6 +23,7 @@ TARGET_LINK_LIBRARIES(ruleengine
 	query
 	smob
 	execution
+	atomutils
 	atomspace
 )
 

@@ -35,7 +35,7 @@ ADD_LIBRARY(attention SHARED
 	ImportanceUpdatingAgent
 )
 
-TARGET_LINK_LIBRARIES(attention server atomspace)
+TARGET_LINK_LIBRARIES(attention server atomutils atomspace)
 
 # HebbianCreationModule
 IF (TBB_FOUND)
