@@ -25,6 +25,8 @@
 #include "Temporal.h"
 
 #include <iostream>
+#include <sstream>
+
 
 #include <limits.h>
 #include <stdlib.h>
@@ -61,19 +63,22 @@ void Temporal::init(octime_t a, octime_t b, bool normal) throw (InvalidParamExce
     // sanity checks
     if (normal) {
         if (b > a) {
-            throw InvalidParamException(TRACE_INFO,
-                                        "Cannot create a Temporal (normal-distribution) with the variance (%lu) greater than the mean (%lu). This causes negative lower bound.", b,  a);
+            std::ostringstream out;
+            out << "Cannot create a Temporal (normal-distribution) with the variance (" << b << ") greater than the mean (" << a << "). This causes negative lower bound.";
+            throw InvalidParamException(TRACE_INFO, out.str().c_str());
         }
         octime_t sum = a + b;
         // if the addition caused an overflow
         if (sum < a) {
-            throw InvalidParamException(TRACE_INFO,
-                                        "Temporal - Upper bound reached when creating a Temporal (normal-distribution): %lu.", sum);
+            std::ostringstream out;
+            out << "Temporal - Upper bound reached when creating a Temporal (normal-distribution): " << sum << ".";
+            throw InvalidParamException(TRACE_INFO, out.str().c_str());
         }
     } else {
         if (a > b) {
-            throw InvalidParamException(TRACE_INFO,
-                                        "Cannot create a Temporal (uniform-distribution) with lower bound (%lu) greater than upper bound (%lu)", b, a);
+            std::ostringstream out;
+            out << "Cannot create a Temporal (uniform-distribution) with lower bound (" << b << ") greater than upper bound (" << a << ").";
+            throw InvalidParamException(TRACE_INFO, out.str().c_str());
         }
     }
     this->normal = normal;
@@ -147,23 +152,22 @@ octime_t Temporal::getUpperBound() const
 std::string Temporal::toString() const
 {
     if (*this == UNDEFINED_TEMPORAL) return "UNDEFINED_TEMPORAL";
-    char buf[1 << 8];
-    char* answer = buf;
-    sprintf(answer, "(%s,%lu,%lu)", (normal ? "NORMAL" : "UNIFORM"), a, b);
-    return answer;
+    std::ostringstream out;
+    out << "(" << (normal ? "NORMAL" : "UNIFORM") << "," << a << "," << b << ")";
+    return out.str();
 }
 
 std::string Temporal::getTimeNodeName() const
 {
-    char buffer[1000];
+    std::ostringstream out;
     if (normal) {
-        sprintf(buffer, "%lu:%lu:%d", a, b, normal);
+        out << a << ":" << b << ":" << normal;
     } else if (a == b) {
-        sprintf(buffer, "%lu", a);
+        out << a;
     } else {
-        sprintf(buffer, "%lu:%lu", a, b);
+        out << a << ":" << b;
     }
-    return buffer;
+    return out.str();
 }
 
 std::string Temporal::getTimeNodeName(octime_t timestamp)
@@ -171,9 +175,9 @@ std::string Temporal::getTimeNodeName(octime_t timestamp)
     // NOTE: The strictly correct way to implement this would be like follows:
     //   return Temporal(timestamp).getTimeNodeName();
     // However, for performance reasons, this is implemented as bellow:
-    char buffer[1000];
-    sprintf(buffer, "%lu", timestamp);
-    return buffer;
+    std::ostringstream out;
+    out << timestamp;
+    return out.str();
 }
 
 Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
