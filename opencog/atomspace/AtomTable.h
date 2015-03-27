@@ -163,28 +163,6 @@ public:
     UUID get_uuid(void) { return _uuid; }
 
     /**
-     * Prints atoms of this AtomTable to the given output stream.
-     * @param output  the output stream where the atoms will be printed
-     * @param type  the type of atoms that should be printed
-     * @param subclass  if true, matches all atoms whose type is
-     *        subclass of the given type. If false, matches only atoms of the
-     *        exact type.
-     */
-    void print(std::ostream& output = std::cout,
-               Type type = ATOM,
-               bool subclass = true) const;
-
-    /**
-     * Prints atoms of this AtomTable though the given logger
-     * @param logger the logger used to print the atoms
-     * @param type  the type of atoms that should be printed
-     * @param subclass  if true, matches all atoms whose type is
-     *        subclass of the given type. If false, matches only atoms of the
-     *        exact type.
-     */
-    void log(Logger& l = logger(), Type t = ATOM, bool subclass = true) const;
-
-    /**
      * Return the number of atoms contained in a table.
      */
     size_t getSize() const;
@@ -283,66 +261,6 @@ public:
              [&](Handle h)->bool{
                  return h->isType(type, subclass);
              });
-    }
-
-    /**
-     * Returns the set of atoms with the given target handles and types
-     * (order is considered) in their outgoing sets, where the type and
-     * subclasses of the atoms are optional.
-     *
-     * @param  An array of handles to match the outgoing sets of the
-     *         searched atoms. This array can be empty (or each of its
-     *         elements can be null), if the handle value does not
-     *         matter or if it does not apply to the specific search.
-     *         Note that if this array is not empty, it must contain
-     *         "arity" elements.
-     * @param  An array of target types to match the types of the atoms
-     *         in the outgoing set of searched atoms.
-     * @param  An array of boolean values indicating whether each of the
-     *         above types must also consider subclasses. This array can
-     *         be null, which means that subclasses will not be considered.
-     *         Note that if this array is not null, it must contains
-     *         "arity" elements.
-     * @param  The length of the outgoing set of the atoms being searched.
-     * @param  The optional type of the atom.
-     * @param  Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the matching
-     *         criteria in their outgoing set.
-     */
-    UnorderedHandleSet getHandlesByOutgoing(const std::vector<Handle>&,
-                              Type*, bool*, Arity,
-                              Type type = ATOM,
-                              bool subclass = true) const;
-
-    /**
-     * Returns the set of atoms of a given name (atom type and subclasses
-     * optionally).  If the name is not null or the empty string, then
-     * this returns Nodes ONLY (of the requested name, of course). However,
-     * if the name is null (or empty string) then Links might be included!
-     * This behaviour is surprising, but is explicilty tested for in the
-     * AtomSpaceImplUTest. I don't know why its done like this.
-     *
-     * @param The desired name of the atoms.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type and name.
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByName(OutputIterator result,
-                     const std::string& name,
-                     Type type = NODE,
-                     bool subclass = true) const
-    {
-        if (name.c_str()[0] == 0)
-            return getHandlesByType(result, type, subclass);
-
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-#if MAKIN_COPIES
-        UnorderedHandleSet hs = nodeIndex.getHandleSet(type, name, subclass);
-        return std::copy(hs.begin(), hs.end(), result);
-#else
-        return nodeIndex.getHandleSet(result, type, name, subclass);
-#endif
     }
 
     /**

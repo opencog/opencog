@@ -97,19 +97,6 @@ public:
     inline int getNumLinks() const { return getAtomTable().getNumLinks(); }
 
     /**
-     * Prints atoms of this AtomSpace to the given output stream.
-     * @param output  the output stream where the atoms will be printed.
-     * @param type  the type of atoms that should be printed.
-     * @param subclass  if true, matches all atoms whose type is
-     *              subclass of the given type. If false, matches
-     *              only atoms of the exact type.
-     */
-    void print(std::ostream& output = std::cout,
-               Type type = ATOM, bool subclass = true) const {
-        getAtomTable().print(output, type, subclass);
-    }
-
-    /**
      * Add an atom to the Atom Table.  If the atom already exists
      * then new truth value is ignored, and the existing atom is
      * returned.
@@ -330,6 +317,17 @@ public:
     Handle getHandle(Type t, const HandleSeq& outgoing) {
         return getImpl().getLink(t, outgoing);
     }
+    Handle getHandle(Type t, const Handle& ha) {
+        HandleSeq outgoing;
+        outgoing.push_back(ha);
+        return getImpl().getLink(t, outgoing);
+    }
+    Handle getHandle(Type t, const Handle& ha, const Handle& hb) {
+        HandleSeq outgoing;
+        outgoing.push_back(ha);
+        outgoing.push_back(hb);
+        return getImpl().getLink(t, outgoing);
+    }
 
     /** Get the atom referred to by Handle h represented as a string. */
     std::string atomAsString(Handle h, bool terse = true) const {
@@ -537,31 +535,31 @@ public:
     bool isLink(Handle h) const { return LinkCast(h) != NULL; }
 
     /**
-     * Gets a set of handles that matches with the given arguments.
-     *
-     * @param result An output iterator.
-     * @param type the type of the atoms to be searched
-     * @param name the name of the atoms to be searched.
-     * @param subclass if sub types of the given type are accepted
-     *        in this search
-     *
-     * @return The set of atoms of a given type (subclasses optionally).
-     *
-     * @note The matched entries are appended to a container whose
-     * OutputIterator is passed as the first argument. Example of a
-     * call to this method, which would return all entries in AtomSpace:
-     * @code
-     *      std::list<Handle> ret;
-     *      atomSpace.getHandlesByName(back_inserter(ret), ATOM, true);
-     * @endcode
+     * DEPRECATED! DO NOT USE IN NEW CODE!
+     * If you need this function, just cut and paste the code below into
+     * whatever you are doing!
      */
     template <typename OutputIterator> OutputIterator
     getHandlesByName(OutputIterator result,
                      const std::string& name,
                      Type type = NODE,
-                     bool subclass = true) const
+                     bool subclass = true)
     {
-        return getAtomTable().getHandlesByName(result, name, type, subclass);
+        if (name.c_str()[0] == 0)
+            return getHandlesByType(result, type, subclass);
+
+        if (false == subclass) {
+            Handle h(getHandle(type, name));
+            if (h) *(result++) = h;
+            return result;
+        }
+
+        classserver().foreachRecursive(
+            [&](Type t)->void {
+                Handle h(getHandle(t, name));
+                if (h) *(result++) = h; }, type);
+
+        return result;
     }
 
     /**
@@ -609,7 +607,7 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByTargetType(OutputIterator result,
                  Type type,
                  Type targetType,
                  bool subclass,
@@ -620,115 +618,17 @@ public:
     }
 
     /**
-     * Returns the set of atoms with a given target handle in their
-     * outgoing set (atom type and its subclasses optionally).
-     * i.e. returns the incoming set for that handle, but filtered
-     * by the Type you specify.
-     *
-     * @param result An output iterator.
-     * @param handle The handle that must be in the outgoing set of the atom.
-     * @param type The type of the atom.
-     * @param subclass Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the given handle in
-     * their outgoing set.
-     *
-     * @note The matched entries are appended to a container whose 
-     *       OutputIterator is passed as the first argument.
-     *       Example of call to this method, which would return all
-     *       entries in AtomSpace:
-     * @code
-     *         // Handle h == the Handle for your choice of Atom
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), h, ATOM, true);
-     * @endcode
+     * DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this function, just copy the one-liner below.
+     * XXX ONLY the python bindings use this. XXX kill that code.
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getIncomingSetByType(OutputIterator result,
                  Handle handle,
                  Type type,
                  bool subclass) const
     {
         return handle->getIncomingSetByType(result, type, subclass);
-    }
-
-    /**
-     * Returns the set of atoms with the given target handles and types
-     * (order is considered) in their outgoing sets, where the type and
-     * subclasses of the atoms are optional.
-     *
-     * @param result An output iterator.
-     * @param handles An array of handles to match the outgoing sets of the searched
-     * atoms. This array can be empty (or each of its elements can be null), if
-     * the handle value does not matter or if it does not apply to the
-     * specific search.
-     * Note that if this array is not empty, it must contain "arity" elements.
-     * @param types An array of target types to match the types of the atoms in
-     * the outgoing set of searched atoms.
-     * @param subclasses An array of boolean values indicating whether each of the
-     * above types must also consider subclasses. This array can be null,
-     * what means that subclasses will not be considered. Note that if this
-     * array is not null, it must contains "arity" elements.
-     * @param arity The length of the outgoing set of the atoms being searched.
-     * @param type The type of the atom.
-     * @param subclass Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the matching
-     * criteria in their outgoing set.
-     *
-     * @note The matched entries are appended to a container whose OutputIterator
-     * is passed as the first argument. Example of call to this method, which
-     * would return all entries in AtomSpace:
-     * @code
-     *     std::list<Handle> ret;
-     *     atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
-     * @endcode
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByOutgoing(OutputIterator result,
-                 const HandleSeq& handles,
-                 Type* types,
-                 bool* subclasses,
-                 Arity arity,
-                 Type type,
-                 bool subclass) const
-    {
-        UnorderedHandleSet hs = getAtomTable().getHandlesByOutgoing(handles,
-                types, subclasses, arity, type, subclass);
-        return std::copy(hs.begin(), hs.end(), result);
-    }
-
-    /**
-     * Returns the set of atoms whose outgoing set contains at least one
-     * atom with the given name and type (atom type and subclasses
-     * optionally).
-     *
-     * @param result An output iterator.
-     * @param targetName The name of the atom in the outgoing set of
-     *        the searched atoms.
-     * @param targetType The type of the atom in the outgoing set of
-     *        the searched atoms.
-     * @param type type of the atom.
-     * @param subclass Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type and name whose outgoing
-     * set contains at least one atom of the given type and name.
-     *
-     * @note The matched entries are appended to a container whose
-     * OutputIterator is passed as the first argument.  Example of call to
-     * this method, which would return all entries in AtomSpace:
-     *
-     * @code
-     * std::list<Handle> ret;
-     * atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
-     * @endcode
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
-                 const char* targetName,
-                 Type targetType,
-                 Type type,
-                 bool subclass) const
-    {
-        Handle targh(getAtomTable().getHandle(targetType, targetName));
-        return targh->getIncomingSetByType(result, type, subclass);
     }
 
     /**

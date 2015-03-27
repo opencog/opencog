@@ -49,6 +49,7 @@
 #include <opencog/spacetime/SpaceTime.h>
 
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
+#include <opencog/embodiment/AtomSpaceExtensions/GetByOutgoing.h>
 
 #include "AtomSpaceUtil.h"
 #include "PredefinedProcedureNames.h"
@@ -575,8 +576,10 @@ throw(opencog::NotFoundException)
         seq.push_back(predicateHandle);
         seq.push_back(listLinkHandle);
 
-        atomSpace.getHandlesByOutgoing(back_inserter(evalLinkHandleset),
-                               seq, NULL, NULL, 2, EVALUATION_LINK, false);
+        getHandlesByOutgoing(back_inserter(evalLinkHandleset),
+                               atomSpace,
+                               EVALUATION_LINK,
+                               seq, NULL, NULL, 2);
 
     }
 
@@ -841,7 +844,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
     return result;
 }
 
-Handle AtomSpaceUtil::getMostRecentEvaluationLink(const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getMostRecentEvaluationLink(AtomSpace& atomSpace,
         const std::string& predicateNodeName )
 {
     std::vector<HandleTemporalPair> timestamps;
@@ -1167,7 +1170,8 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
     // Get the  HandleSet to ExecutionOutputLink
     std::vector<Handle> executionOutputLinkSet;
 
-    atomSpace.getHandleSet
+#define getIncomingSet(iter,h,t,sub) h->getIncomingSetByType(iter,t,sub)
+    getIncomingSet
                   ( back_inserter(executionOutputLinkSet), // return value
                     hGroundedSchemaNode,      // returned link should contain this node
                     EXECUTION_OUTPUT_LINK,    // type of the returned link
@@ -1219,7 +1223,7 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
 
     std::vector<Handle> similarityLinkSet;
 
-    atomSpace.getHandleSet(back_inserter(similarityLinkSet), hExecutionOutputLink, SIMILARITY_LINK, false);
+    getIncomingSet(back_inserter(similarityLinkSet), hExecutionOutputLink, SIMILARITY_LINK, false);
 
     logger().debug("AtomSpaceUtil::%s - Get %d SimilarityLink that holds modulator updater (ExecutionOutputLink)",
                    __FUNCTION__,
@@ -1333,7 +1337,7 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
     // Get the  HandleSet to ExecutionOutputLink
     std::vector<Handle> executionOutputLinkSet;
 
-    atomSpace.getHandleSet
+    getIncomingSet
                   ( back_inserter(executionOutputLinkSet), // return value
                     hGroundedSchemaNode,      // returned link should contain this node
                     EXECUTION_OUTPUT_LINK,    // type of the returned link
@@ -1374,7 +1378,7 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
 
     std::vector<Handle> similarityLinkSet;
 
-    atomSpace.getHandleSet(back_inserter(similarityLinkSet), hExecutionOutputLink, SIMILARITY_LINK, false);
+    getIncomingSet(back_inserter(similarityLinkSet), hExecutionOutputLink, SIMILARITY_LINK, false);
 
     logger().debug("AtomSpaceUtil::%s - Get %d SimilarityLink that holds demand updater (ExecutionOutputLink)",
                    __FUNCTION__,
@@ -1510,7 +1514,7 @@ Handle AtomSpaceUtil::getDemandGoalEvaluationLink(AtomSpace & atomSpace,
     return evaluationLink;
 }
 
-void AtomSpaceUtil::getAllEvaluationLinks(const AtomSpace& atomSpace,
+void AtomSpaceUtil::getAllEvaluationLinks(AtomSpace& atomSpace,
         std::vector<HandleTemporalPair>& timestamps,
         const std::string& predicateNodeName,
         const Temporal& temporal,
@@ -1522,8 +1526,11 @@ void AtomSpaceUtil::getAllEvaluationLinks(const AtomSpace& atomSpace,
             "Searching for PredicateNode '%s'.",
             predicateNodeName.c_str());
 
+#define getIncSet(iter, name, targ, type, sub) { \
+Handle targh(atomSpace.getHandle(targ, name)); \
+targh->getIncomingSetByType(iter, type, sub); }
     std::vector<Handle> handles;
-    atomSpace.getHandleSet(back_inserter(handles),
+    getIncSet(back_inserter(handles),
                            predicateNodeName.c_str(),
                            PREDICATE_NODE,
                            EVALUATION_LINK, true);
@@ -1739,7 +1746,10 @@ Handle AtomSpaceUtil::getObjectHolderHandle( AtomSpace& atomSpace,
     // TODO: try to optimize this method. It is using getHandleSet twice for
     // isHolding (below and through getLatestHoldingObjectHandle)
     std::vector<Handle> handles;
-    atomSpace.getHandlesByName( back_inserter(handles), objectId, OBJECT_NODE, true );
+    classserver().foreachRecursive(
+        [&](Type t)->void {
+            Handle h(atomSpace.getHandle(t, objectId));
+            if (h) handles.push_back(h); }, OBJECT_NODE);
 
     if (handles.size() != 1) {
         logger().debug("AtomSpaceUtil - No agent is holding object[%s]",
@@ -1749,7 +1759,7 @@ Handle AtomSpaceUtil::getObjectHolderHandle( AtomSpace& atomSpace,
     Handle holdedObjectHandle = handles[0];
 
     handles.clear( );
-    atomSpace.getHandleSet( back_inserter(handles),
+    getIncSet( back_inserter(handles),
                             "isHolding",
                             PREDICATE_NODE,
                             EVALUATION_LINK, true );
@@ -1823,7 +1833,7 @@ Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(AtomSpace& atomSpace,
     } // if
 
     std::vector<Handle> handles;
-    atomSpace.getHandleSet( back_inserter(handles),
+    getIncSet( back_inserter(handles),
                             IS_HOLDING_PREDICATE_NAME,
                             PREDICATE_NODE, EVALUATION_LINK, true );
 
@@ -1928,7 +1938,7 @@ Handle AtomSpaceUtil::getIsHoldingLinkAtTime(AtomSpace& atomSpace,
     if ( holderHandle == Handle::UNDEFINED ) return Handle::UNDEFINED;
 
     std::vector<Handle> handles;
-    atomSpace.getHandleSet(back_inserter(handles), IS_HOLDING_PREDICATE_NAME,
+    getIncSet(back_inserter(handles), IS_HOLDING_PREDICATE_NAME,
                            PREDICATE_NODE, EVALUATION_LINK, true);
 
     std::vector<HandleTemporalPair> timestamps;
@@ -1990,7 +2000,7 @@ std::string AtomSpaceUtil::getHoldingObjectIdAtTime(AtomSpace& as,
     return as.getName(objectHandle);
 }
 
-std::string AtomSpaceUtil::getObjectName( const AtomSpace& atomSpace,
+std::string AtomSpaceUtil::getObjectName(AtomSpace& atomSpace,
                                           Handle object )
 {
     std::string name("");
@@ -2001,8 +2011,11 @@ std::string AtomSpaceUtil::getObjectName( const AtomSpace& atomSpace,
         objectName[1] = object;
         Type types[] = { WORD_NODE, atomSpace.getType( object ) };
         HandleSeq wrLinks;
-        atomSpace.getHandlesByOutgoing( back_inserter(wrLinks), objectName,
-                                &types[0], NULL, 2, WR_LINK, false );
+        getHandlesByOutgoing( back_inserter(wrLinks),
+                                atomSpace,
+                                WR_LINK,
+                                objectName,
+                                &types[0], NULL, 2);
         if ( wrLinks.size( ) > 0 ) {
             name = atomSpace.getName( atomSpace.getOutgoing( wrLinks[0], 0 ) );
         } // if
@@ -2022,8 +2035,10 @@ std::string AtomSpaceUtil::getObjIdFromName( AtomSpace& atomSpace,
         outgoing.push_back(objNameHandle);
         outgoing.push_back(Handle::UNDEFINED);
         HandleSeq wrLinks;
-        atomSpace.getHandlesByOutgoing(back_inserter(wrLinks), outgoing,
-                               NULL, NULL, 2, WR_LINK, false);
+        getHandlesByOutgoing(back_inserter(wrLinks),
+                               atomSpace,
+                               WR_LINK, outgoing,
+                               NULL, NULL, 2);
         if (!wrLinks.empty()) {
             objIdHandle = atomSpace.getOutgoing(wrLinks[0], 1);
             // TODO: check for multiple answers...
@@ -2047,8 +2062,10 @@ std::string AtomSpaceUtil::getObjIdFromName( AtomSpace& atomSpace,
             outgoing.push_back(objNameHandle);
             outgoing.push_back(Handle::UNDEFINED);
             HandleSeq wrLinks;
-            atomSpace.getHandlesByOutgoing(back_inserter(wrLinks), outgoing,
-                                   NULL, NULL, 2, WR_LINK, false);
+            getHandlesByOutgoing(back_inserter(wrLinks),
+                                   atomSpace,
+                                   WR_LINK, outgoing,
+                                   NULL, NULL, 2);
             if (!wrLinks.empty()) {
                 objIdHandle = atomSpace.getOutgoing(wrLinks[0], 1);
                 // TODO: check for multiple answers...
@@ -2074,8 +2091,10 @@ std::string AtomSpaceUtil::getObjIdFromName( AtomSpace& atomSpace,
             outgoing.push_back(objNameHandle);
             outgoing.push_back(Handle::UNDEFINED);
             HandleSeq wrLinks;
-            atomSpace.getHandlesByOutgoing(back_inserter(wrLinks), outgoing,
-                                   NULL, NULL, 2, WR_LINK, false);
+            getHandlesByOutgoing(back_inserter(wrLinks),
+                                   atomSpace,
+                                   WR_LINK, outgoing,
+                                   NULL, NULL, 2);
             if (!wrLinks.empty()) {
                 objIdHandle = atomSpace.getOutgoing(wrLinks[0], 1);
                 // TODO: check for multiple answers...
@@ -2098,7 +2117,7 @@ std::string AtomSpaceUtil::getObjIdFromName( AtomSpace& atomSpace,
     return result;
 }
 
-Handle AtomSpaceUtil::getMostRecentPetSchemaExecLink(const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getMostRecentPetSchemaExecLink(AtomSpace& atomSpace,
         unsigned long timestamp,
         bool schemaSuccessful)
 {
@@ -2173,7 +2192,7 @@ std::string AtomSpaceUtil::convertPetExecLinkParametersToString(const AtomSpace&
     return "";
 }
 
-Handle AtomSpaceUtil::getMostRecentAgentActionLink(const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getMostRecentAgentActionLink(AtomSpace& atomSpace,
         const std::string& agentId,
         const Temporal& temporal,
         TemporalTable::TemporalRelationship criterion)
@@ -2396,7 +2415,7 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
 }
 
 
-Handle AtomSpaceUtil::getMostRecentAgentActionLinkWithinTime( const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getMostRecentAgentActionLinkWithinTime(AtomSpace& atomSpace,
         const std::string& agentId,
         unsigned long t1,
         unsigned long t2 )
@@ -2407,7 +2426,7 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLinkWithinTime( const AtomSpace& a
                                         t, TemporalTable::ENDS_WITHIN);
 }
 
-Handle AtomSpaceUtil::getMostRecentAgentActionLinkAfterTime( const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getMostRecentAgentActionLinkAfterTime(AtomSpace& atomSpace,
         const std::string& agentId,
         unsigned long timestamp )
 {
@@ -2523,7 +2542,7 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
     // Get the  HandleSet to ExecutionOutputLink
     std::vector<Handle> executionOutputLinkSet;
 
-    atomSpace.getHandleSet
+    getIncomingSet
                   ( back_inserter(executionOutputLinkSet), // return value
                     groundedSchemaNode,       // returned link should contain this node
                     EXECUTION_OUTPUT_LINK,    // type of the returned link
@@ -2566,7 +2585,7 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
     // Get the Handle to SimilarityLink
     std::vector<Handle> similarityLinkSet;
 
-    atomSpace.getHandleSet
+    getIncomingSet
         ( back_inserter(similarityLinkSet), // return value
           executionOutputLink,              // returned link should contain this link
           SIMILARITY_LINK,                  // type of the returned link
@@ -2716,7 +2735,7 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
     // Get the  HandleSet to ExecutionOutputLink
     std::vector<Handle> executionOutputLinkSet;
 
-    atomSpace.getHandleSet
+    getIncomingSet
                   ( back_inserter(executionOutputLinkSet), // return value
                     hGroundedSchemaNode,      // returned link should contain this node
                     EXECUTION_OUTPUT_LINK,    // type of the returned link
@@ -2749,7 +2768,7 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
     // Get the Handle to ListLink that contains ExecutionOutputLink
     std::vector<Handle> listLinkSet;
 
-    atomSpace.getHandleSet
+    getIncomingSet
         ( back_inserter(listLinkSet), // return value
           hExecutionOutputLink,       // returned link should contain this link
           LIST_LINK,                  // type of the returned link
@@ -2825,7 +2844,7 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
     // Get the HandleSet to EvaluationLink that contains the PredicateNode above
     std::vector<Handle> evaluationLinkSet;
 
-    atomSpace.getHandleSet
+    getIncomingSet
         ( back_inserter(evaluationLinkSet), // return value
           hPredicateNode,                             // returned link should contain this link
           EVALUATION_LINK,                            // type of the returned link
@@ -2877,7 +2896,7 @@ Handle AtomSpaceUtil::getRuleImplicationLink(AtomSpace& atomSpace,
     }
 
     std::vector<Handle> ruleReferenceLink;
-    atomSpace.getHandleSet(back_inserter(ruleReferenceLink),
+    getIncomingSet(back_inserter(ruleReferenceLink),
                            rulePhraseNode, REFERENCE_LINK, false);
     if (ruleReferenceLink.size() != 1) {
         logger().error(
@@ -2924,7 +2943,7 @@ float AtomSpaceUtil::getRuleImplicationLinkStrength(AtomSpace& atomSpace,
     return (atomSpace.getTV(implicationLink)->getMean());
 }
 
-spatial::math::Vector3 AtomSpaceUtil::getMostRecentObjectVelocity( const AtomSpace& atomSpace, const std::string& objectId, unsigned long afterTimestamp )
+spatial::math::Vector3 AtomSpaceUtil::getMostRecentObjectVelocity(AtomSpace& atomSpace, const std::string& objectId, unsigned long afterTimestamp )
 {
     // look for a velocity predicate at 2 RuleEngine cycles before the current cycle
     std::vector<HandleTemporalPair> timestamps;
@@ -3445,9 +3464,11 @@ std::map<std::string, Handle> AtomSpaceUtil::getFrameElementInstanceNameValues( 
 
     Type inheritanceLinkTypes[] = { PREDICATE_NODE, DEFINED_FRAME_NODE };
     HandleSeq inheritanceLinks;
-    atomSpace.getHandlesByOutgoing( back_inserter( inheritanceLinks ),
+    getHandlesByOutgoing( back_inserter( inheritanceLinks ),
+                            atomSpace,
+                            INHERITANCE_LINK,
                             inheritanceLink,
-                            &inheritanceLinkTypes[0], NULL, 2, INHERITANCE_LINK, false );
+                            &inheritanceLinkTypes[0], NULL, 2);
 
     // if it is a frame instance, retrieve the frame name
     if ( inheritanceLinks.size() > 0 ) {
@@ -3506,8 +3527,10 @@ std::map<std::string, Handle> AtomSpaceUtil::getFrameElementInstanceNameValues( 
         elementValue.push_back( Handle::UNDEFINED );
 
         HandleSeq evaluationLinks;
-        atomSpace.getHandlesByOutgoing( back_inserter( evaluationLinks ),
-                                elementValue, NULL, NULL, 2, EVALUATION_LINK, false );
+        getHandlesByOutgoing( back_inserter( evaluationLinks ),
+                                atomSpace,
+                                EVALUATION_LINK,
+                                elementValue, NULL, NULL, 2);
 
         // store (frame element name, frame element instance value) pair
         if ( evaluationLinks.size() > 0 ) {
@@ -3549,9 +3572,11 @@ HandleSeq AtomSpaceUtil::retrieveFrameInstancesUsingAnElementValue( AtomSpace& a
     evalLink.push_back( aElementValue );
     HandleSeq evalLinks;
     Type evalLinkTypes[] = {PREDICATE_NODE, atomSpace.getType( aElementValue ) };
-    atomSpace.getHandlesByOutgoing( back_inserter( evalLinks ),
+    getHandlesByOutgoing( back_inserter( evalLinks ),
+                            atomSpace,
+                            EVALUATION_LINK,
                             evalLink,
-                            &evalLinkTypes[0], NULL, 2, EVALUATION_LINK, false );
+                            &evalLinkTypes[0], NULL, 2);
 
     // now check if the predicate nodes belongs to a specific frame instance
     unsigned int i;
@@ -3575,10 +3600,11 @@ HandleSeq AtomSpaceUtil::retrieveFrameInstancesUsingAnElementValue( AtomSpace& a
 
                 HandleSeq frameElementLinks;
                 Type frameElementLinkTypes[] = { PREDICATE_NODE, PREDICATE_NODE };
-                atomSpace.getHandlesByOutgoing( back_inserter( frameElementLinks ),
+                getHandlesByOutgoing( back_inserter( frameElementLinks ),
+                                        atomSpace,
+                                        FRAME_ELEMENT_LINK,
                                         frameElementLink,
-                                        &frameElementLinkTypes[0], NULL, 2,
-                                        FRAME_ELEMENT_LINK, false );
+                                        &frameElementLinkTypes[0], NULL, 2);
                 // finally check if the upper predicate node inherits from
                 // the correct frame node
                 unsigned int k;

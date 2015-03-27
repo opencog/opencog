@@ -21,16 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <stdlib.h>
 #include <string>
 
-#include <boost/bind.hpp>
-
-#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
 #include "AtomSpace.h"
-
-//#define DPRINTF printf
-#define DPRINTF(...)
 
 using namespace opencog;
 
@@ -82,4 +76,3 @@ Handle AtomSpace::addPrefixedNode(Type t, const std::string& prefix)
     } while (isValidHandle(result)); // If the name already exists, try again
     return addNode(t, name);
 }
-

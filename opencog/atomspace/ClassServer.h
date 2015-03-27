@@ -38,7 +38,7 @@ namespace opencog
  *  @{
  */
 
-class ClassServer; 
+class ClassServer;
 
 typedef ClassServer* ClassServerFactory(void);
 
@@ -105,7 +105,7 @@ public:
         return n_children;
     }
 
-    template<typename OutputIterator>
+    template <typename OutputIterator>
     unsigned long getChildrenRecursive(Type type, OutputIterator result)
     {
         unsigned long n_children = 0;
@@ -116,6 +116,14 @@ public:
             }
         }
         return n_children;
+    }
+
+    template <typename Function>
+    void foreachRecursive(Function func, Type type)
+    {
+        for (Type i = 0; i < nTypes; ++i) {
+            if (recursiveMap[type][i]) (func)(i);
+        }
     }
 
     /**

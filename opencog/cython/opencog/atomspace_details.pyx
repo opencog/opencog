@@ -370,14 +370,14 @@ cdef class AtomSpace:
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         cdef bint target_subt = target_subtype
-        self.atomspace.getHandleSet(back_inserter(handle_vector),t,target_t,subt,target_subt)
+        self.atomspace.getHandlesByTargetType(back_inserter(handle_vector),t,target_t,subt,target_subt)
         return convert_handle_seq_to_python_list(handle_vector,self)
 
     def xget_atoms_by_target_type(self, Type t, Type target_t, subtype = True, target_subtype = True):
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         cdef bint target_subt = target_subtype
-        self.atomspace.getHandleSet(back_inserter(handle_vector),t,target_t,subt,target_subt)
+        self.atomspace.getHandlesByTargetType(back_inserter(handle_vector),t,target_t,subt,target_subt)
 
         # This code is the same for all the x iterators but there is no
         # way in Cython to yield out of a cdef function and no way to pass a 
@@ -395,14 +395,14 @@ cdef class AtomSpace:
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         cdef Handle target_h = target_atom.h
-        self.atomspace.getHandleSet(back_inserter(handle_vector),deref(target_h.h),t,subt)
+        self.atomspace.getIncomingSetByType(back_inserter(handle_vector),deref(target_h.h),t,subt)
         return convert_handle_seq_to_python_list(handle_vector,self)
 
     def xget_atoms_by_target_atom(self, Type t, Atom target_atom, subtype = True):
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         cdef Handle target_h = target_atom.h
-        self.atomspace.getHandleSet(back_inserter(handle_vector),deref(target_h.h),t,subt)
+        self.atomspace.getIncomingSetByType(back_inserter(handle_vector),deref(target_h.h),t,subt)
 
         # This code is the same for all the x iterators but there is no
         # way in Cython to yield out of a cdef function and no way to pass a 
@@ -441,7 +441,8 @@ cdef class AtomSpace:
                 [item for sublist in [atom.out for atom in atoms if len(atom.out) > 0] for item in sublist]))
 
     def print_list(self):
-        self.atomspace.print_list()
+    #    self.atomspace.print_list()
+         pass
 
 cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)

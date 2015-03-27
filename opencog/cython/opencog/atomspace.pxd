@@ -152,12 +152,13 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         # ==== query methods ====
         # get by type
         output_iterator getHandlesByType(output_iterator, Type t, bint subclass)
-        # get by name
+        # XXX DEPRECATED, REMOVE ASAP XXX get by name
+        # Just do the right thing, here...
         output_iterator getHandlesByName(output_iterator, string& name, Type t, bint subclass)
         # get by target types
-        output_iterator getHandleSet(output_iterator,Type t,Type target,bint subclass,bint target_subclass)
-        # get by target handle
-        output_iterator getHandleSet(output_iterator,cHandle& h,Type t,bint subclass)
+        output_iterator getHandlesByTargetType(output_iterator,Type t,Type target,bint subclass,bint target_subclass)
+        # XXX DEPRECATED, REMOVE ASAP XXX get by target handle
+        output_iterator getIncomingSetByType(output_iterator,cHandle& h,Type t,bint subclass)
         # get by STI range
         output_iterator getHandlesByAV(output_iterator, short lowerBound, short upperBound)
         output_iterator getHandlesByAV(output_iterator, short lowerBound)
@@ -169,8 +170,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         void clear()
         bint removeAtom(cHandle h, bint recursive) 
-
-        void print_list "print" ()
 
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
 

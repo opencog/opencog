@@ -639,12 +639,11 @@ public:
             std::ostringstream oss;
             oss << "thread " << thread_id << " concept node " << i;
             //std::cout << "removing " << oss.str() << std::endl;
-            HandleSeq hs;
-            atomSpace->getHandlesByName(back_inserter(hs), oss.str(), CONCEPT_NODE);
-            TS_ASSERT_EQUALS(hs.size(), 1);
-            if (hs.size() != 0) {
-                //std::cout << " handle " << hs[0] << std::endl;
-                atomSpace->purgeAtom(hs[0], true);
+            Handle h(atomSpace->getHandle(CONCEPT_NODE, oss.str()));
+            TS_ASSERT(h != Handle::UNDEFINED);
+            if (h) {
+                //std::cout << " handle " << h << std::endl;
+                atomSpace->purgeAtom(h, true);
             }
         }
     }

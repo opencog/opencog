@@ -202,8 +202,7 @@ void AtomSpaceBenchmark::showMethods() {
     cout << "  getType" << endl;
     cout << "  getTruthValue" << endl;
     cout << "  setTruthValue" << endl;
-    cout << "  getHandleSet" << endl;
-    cout << "  getNodeHandles" << endl;
+    cout << "  getHandlesByType" << endl;
     cout << "  getOutgoingSet" << endl;
 
 }
@@ -228,10 +227,8 @@ void AtomSpaceBenchmark::setMethod(std::string _methodName)
 #endif
     } else if (_methodName == "setTV") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_setTruthValue);
-    } else if (_methodName == "getHandleSet") {
-        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getHandleSet);
-    } else if (_methodName == "getNodeHandles") {
-        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getNodeHandles);
+    } else if (_methodName == "getHandlesByType") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getHandlesByType);
     } else if (_methodName == "getOutgoingSet") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getOutgoingSet);
     } else if (_methodName == "getIncomingSet") {
@@ -967,51 +964,7 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     return timepair_t(0,0);
 }
 
-timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
-{
-    HandleSeq results;
-    HandleSeq results2;
-    // Build node name first
-    std::ostringstream oss;
-    counter++;
-    oss << "node " << (rng->randint((atomCount-1) * percentLinks)+1);
-
-    clock_t t_begin;
-    clock_t time_taken;
-    switch (testKind) {
-#if HAVE_CYTHON
-    case BENCH_PYTHON: {
-        OC_ASSERT(1 == Nloops, "Looping not supported for python");
-        std::ostringstream dss;
-        dss << "aspace.get_atoms_by_name(types.Node, \"" << oss.str() << "\", True)\n";
-        std::string ps = dss.str();
-        clock_t t_begin = clock();
-        pyev->eval(ps);
-        return clock() - t_begin;
-    }
-#endif /* HAVE_CYTHON */
-#if HAVE_GUILE
-    case BENCH_SCM: {
-        // Currently not expose in the SCM API
-        return timepair_t(0,0);
-    }
-#endif /* HAVE_GUILE */
-    case BENCH_TABLE: {
-        t_begin = clock();
-        atab->getHandlesByName(back_inserter(results2), oss.str(), NODE, true);
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
-    case BENCH_AS: {
-        t_begin = clock();
-        asp->getHandlesByName(back_inserter(results), oss.str(), NODE, true);
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }}
-    return timepair_t(0,0);
-}
-
-timepair_t AtomSpaceBenchmark::bm_getHandleSet()
+timepair_t AtomSpaceBenchmark::bm_getHandlesByType()
 {
     Type t = randomType(ATOM);
     switch (testKind) {

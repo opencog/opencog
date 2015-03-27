@@ -237,7 +237,7 @@ public:
      * @param predicateNodeName The name of the predicate node of the Evaluation link
      * @return Link evaluation link
      */
-    static Handle getMostRecentEvaluationLink(const AtomSpace& atomSpace,
+    static Handle getMostRecentEvaluationLink(AtomSpace&,
             const std::string& predicateNodeName );
 
     // get all the nodes from InheritanceLinks, given the SecondOutgoing
@@ -265,7 +265,7 @@ public:
      * there are more than one handle for the predicate node, there results will
      * be ordered by ther handles not the temporal.
      */
-    static void getAllEvaluationLinks(const AtomSpace& atomSpace,
+    static void getAllEvaluationLinks(AtomSpace&,
                                       std::vector<HandleTemporalPair>& timestamps,
                                       const std::string& predicateNodeName,
                                       const Temporal& temporal = UNDEFINED_TEMPORAL,
@@ -816,8 +816,7 @@ public:
      * @param object The object handle
      * @return the name of the object if it exists, or an empty string, otherwise.
      */
-    static std::string getObjectName( const AtomSpace& atomSpace, 
-                                      Handle object );
+    static std::string getObjectName(AtomSpace&, Handle object);
     
     /**
      * Given the name of an object, whose letters  may be all in upercase, gets its id.
@@ -838,7 +837,7 @@ public:
      * @return a handle that points to the latest agent action link or
      * Handle::UNDEFINED if there is no action link for the given agentid
      */
-    static Handle getMostRecentAgentActionLink( const AtomSpace& atomSpace,
+    static Handle getMostRecentAgentActionLink(AtomSpace&,
             const std::string& agentId,
             const Temporal& temporal = UNDEFINED_TEMPORAL,
             TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT);
@@ -874,7 +873,7 @@ public:
      * @return a handle that points to the latest agent action link or Handle::UNDEFINED if
      *                            there is no action link for the given agentid
      */
-    static Handle getMostRecentAgentActionLinkWithinTime( const AtomSpace& atomSpace,
+    static Handle getMostRecentAgentActionLinkWithinTime(AtomSpace&,
             const std::string& agentId,
             unsigned long t1,
             unsigned long t2 );
@@ -889,7 +888,7 @@ public:
      * @return a handle that points to the latest agent action link or Handle::UNDEFINED if
      *                            there is no action link for the given agentid
      */
-    static Handle getMostRecentAgentActionLinkAfterTime( const AtomSpace& atomSpace,
+    static Handle getMostRecentAgentActionLinkAfterTime(AtomSpace&,
             const std::string& agentId,
             unsigned long timestamp );
 
@@ -1003,7 +1002,7 @@ public:
      * @param objectID The id of a moving object
      * @return A 3D Vector(x,y,z) indicating the current object velocity
      */
-    static spatial::math::Vector3 getMostRecentObjectVelocity( const AtomSpace& atomSpace,
+    static spatial::math::Vector3 getMostRecentObjectVelocity(AtomSpace&,
             const std::string& objectId,
             unsigned long afterTimestamp = 0 );
 
@@ -1017,7 +1016,7 @@ public:
      *                         SchemaFailure
      * @return The ExecLink for the most recent schema done or Handle::UNDEFINED
      */
-    static Handle getMostRecentPetSchemaExecLink(const AtomSpace& atomSpace,
+    static Handle getMostRecentPetSchemaExecLink(AtomSpace&,
             unsigned long timestamp,
             bool schemaSuccessful);
 

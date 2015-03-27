@@ -369,18 +369,6 @@ public:
 
 #define NUM_VHS 4
         for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
-            for (int i = 0; i < NUM_NODES; i++) {
-                HandleSeq nodes;
-                atomSpace->atomTable.getHandlesByName(back_inserter(nodes), nodeNames[i], NODE, true);
-                TS_ASSERT_EQUALS(nodes.size(), 1);
-                for (int j = 0; j < NUM_NODES; j++) {
-                    if (i == j) {
-                        TS_ASSERT(find(nodes.begin(), nodes.end(), h[j]) != nodes.end());
-                    } else {
-                        TS_ASSERT(find(nodes.begin(), nodes.end(), h[j]) == nodes.end());
-                    }
-                }
-            }
 
             TS_ASSERT(classserver().isA(SCHEMA_EXECUTION_LINK, INHERITANCE_LINK));
 
