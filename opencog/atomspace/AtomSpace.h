@@ -720,6 +720,9 @@ public:
     }
 
     /**
+     * DEPRECATED!  DO NOT USE IN NEW CODE!
+     * If you need this, just cut-n-paste the two lines of code below.
+     *
      * Returns the set of atoms whose outgoing set contains at least one
      * atom with the given name and type (atom type and subclasses
      * optionally).
@@ -742,15 +745,19 @@ public:
      * std::list<Handle> ret;
      * atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
      * @endcode
+     *
+     * DEPRECATED!  DO NOT USE IN NEW CODE!
+     * If you need this, just cut-n-paste the two lines of code below.
+     *
      */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
                  const char* targetName,
                  Type targetType,
                  Type type,
-                 bool subclass) const
+                 bool subclass)
     {
-        Handle targh(getAtomTable().getHandle(targetType, targetName));
+        Handle targh(getHandle(targetType, targetName));
         return targh->getIncomingSetByType(result, type, subclass);
     }
 

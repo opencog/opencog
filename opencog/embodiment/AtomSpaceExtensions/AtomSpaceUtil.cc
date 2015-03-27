@@ -841,7 +841,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
     return result;
 }
 
-Handle AtomSpaceUtil::getMostRecentEvaluationLink(const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getMostRecentEvaluationLink(AtomSpace& atomSpace,
         const std::string& predicateNodeName )
 {
     std::vector<HandleTemporalPair> timestamps;
@@ -1510,7 +1510,7 @@ Handle AtomSpaceUtil::getDemandGoalEvaluationLink(AtomSpace & atomSpace,
     return evaluationLink;
 }
 
-void AtomSpaceUtil::getAllEvaluationLinks(const AtomSpace& atomSpace,
+void AtomSpaceUtil::getAllEvaluationLinks(AtomSpace& atomSpace,
         std::vector<HandleTemporalPair>& timestamps,
         const std::string& predicateNodeName,
         const Temporal& temporal,
@@ -2101,7 +2101,7 @@ std::string AtomSpaceUtil::getObjIdFromName( AtomSpace& atomSpace,
     return result;
 }
 
-Handle AtomSpaceUtil::getMostRecentPetSchemaExecLink(const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getMostRecentPetSchemaExecLink(AtomSpace& atomSpace,
         unsigned long timestamp,
         bool schemaSuccessful)
 {
@@ -2176,7 +2176,7 @@ std::string AtomSpaceUtil::convertPetExecLinkParametersToString(const AtomSpace&
     return "";
 }
 
-Handle AtomSpaceUtil::getMostRecentAgentActionLink(const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getMostRecentAgentActionLink(AtomSpace& atomSpace,
         const std::string& agentId,
         const Temporal& temporal,
         TemporalTable::TemporalRelationship criterion)
@@ -2399,7 +2399,7 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
 }
 
 
-Handle AtomSpaceUtil::getMostRecentAgentActionLinkWithinTime( const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getMostRecentAgentActionLinkWithinTime(AtomSpace& atomSpace,
         const std::string& agentId,
         unsigned long t1,
         unsigned long t2 )
@@ -2410,7 +2410,7 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLinkWithinTime( const AtomSpace& a
                                         t, TemporalTable::ENDS_WITHIN);
 }
 
-Handle AtomSpaceUtil::getMostRecentAgentActionLinkAfterTime( const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getMostRecentAgentActionLinkAfterTime(AtomSpace& atomSpace,
         const std::string& agentId,
         unsigned long timestamp )
 {
@@ -2927,7 +2927,7 @@ float AtomSpaceUtil::getRuleImplicationLinkStrength(AtomSpace& atomSpace,
     return (atomSpace.getTV(implicationLink)->getMean());
 }
 
-spatial::math::Vector3 AtomSpaceUtil::getMostRecentObjectVelocity( const AtomSpace& atomSpace, const std::string& objectId, unsigned long afterTimestamp )
+spatial::math::Vector3 AtomSpaceUtil::getMostRecentObjectVelocity(AtomSpace& atomSpace, const std::string& objectId, unsigned long afterTimestamp )
 {
     // look for a velocity predicate at 2 RuleEngine cycles before the current cycle
     std::vector<HandleTemporalPair> timestamps;
