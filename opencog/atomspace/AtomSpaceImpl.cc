@@ -311,34 +311,6 @@ Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
     return h;
 }
 
-HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
-                                      bool fanout, Type desiredLinkType,
-                                      bool subClasses) const
-{
-    if (h == NULL) {
-        throw InvalidParamException(TRACE_INFO,
-            "Handle %d doesn't refer to a Atom", h.value());
-    }
-    HandleSeq answer;
-
-    for (const LinkPtr& link : h->getIncomingSet())
-    {
-        Type linkType = link->getType();
-        DPRINTF("Atom::getNeighbors(): linkType = %d desiredLinkType = %d\n",
-                linkType, desiredLinkType);
-        if ((linkType == desiredLinkType)
-            || (subClasses && classserver().isA(linkType, desiredLinkType))) {
-            for (const Handle& handle : link->getOutgoingSet()) {
-                if (handle == h) continue;
-                if (!fanout && link->isSource(h)) continue;
-                if (!fanin && link->isTarget(h)) continue;
-                answer.push_back(handle);
-            }
-        }
-    }
-    return answer;
-}
-
 bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
 {
     if (backing_store) {

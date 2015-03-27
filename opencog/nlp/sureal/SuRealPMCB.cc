@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpaceUtils.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/nlp/lg-dict/LGDictUtils.h>
@@ -96,7 +97,7 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
     std::string scmCode = "(ListLink (word-inst-get-source-conn " + SchemeSmob::to_string(hSolnWordInst) + "))";
     HandleSeq qTargetConns = _as->getOutgoing(m_eval->eval_h(scmCode));
 
-    HandleSeq qOr = _as->getNeighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
+    HandleSeq qOr = getNeighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
     HandleSeq qDisjuncts;
 
     auto insertHelper = [&](const Handle& h)
@@ -202,7 +203,7 @@ bool SuRealPMCB::clause_match(Handle &pattrn_link_h, Handle &grnd_link_h)
     // helper lambda function to check for linkage to an InterpretationNode, given SetLink
     auto hasInterpretation = [this](Handle& h)
     {
-        HandleSeq qN = _as->getNeighbors(h, true, false, REFERENCE_LINK, false);
+        HandleSeq qN = getNeighbors(h, true, false, REFERENCE_LINK, false);
         return std::any_of(qN.begin(), qN.end(), [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
     };
 
@@ -235,7 +236,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
         for (auto& hSetLink : qISet)
         {
-            HandleSeq qN  = _as->getNeighbors(hSetLink, true, false, REFERENCE_LINK, false);
+            HandleSeq qN  = getNeighbors(hSetLink, true, false, REFERENCE_LINK, false);
             qN.erase(std::remove_if(qN.begin(), qN.end(), [](Handle& h) { return h->getType() != INTERPRETATION_NODE; }), qN.end());
 
             results.insert(results.end(), qN.begin(), qN.end());
@@ -357,7 +358,7 @@ void SuRealPMCB::perform_search(PatternMatchEngine* pPME, std::set<Handle>& vars
 
         auto hasNode = [this](Handle& hl)
         {
-            HandleSeq qN = _as->getNeighbors(hl, true, false, REFERENCE_LINK, false);
+            HandleSeq qN = getNeighbors(hl, true, false, REFERENCE_LINK, false);
             return std::any_of(qN.begin(), qN.end(), [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
         };
 

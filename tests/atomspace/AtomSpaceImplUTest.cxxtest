@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/AtomSpaceUtils.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/misc.h>
@@ -699,9 +700,9 @@ public:
         Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2);
         l2->setTruthValue(tv2);
 
-        TS_ASSERT(atomSpace->getNeighbors(h1).size() == 1);
+        TS_ASSERT(getNeighbors(h1).size() == 1);
         Handle badHandle(10000); 
-        TS_ASSERT_THROWS(atomSpace->getNeighbors(badHandle),opencog::InvalidParamException);
+        TS_ASSERT_THROWS(getNeighbors(badHandle),opencog::InvalidParamException);
     }
 
     void testGetHandle_bugfix1() {

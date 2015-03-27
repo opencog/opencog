@@ -370,24 +370,6 @@ public:
     }
 
     /**
-     * Returns neighboring atoms, following incoming links and
-     * returning their outgoing sets.
-     *
-     * @param h Get neighbours for the atom this handle points to.
-     * @param fanin Whether directional (ordered) links point to this
-     *              node should beconsidered.
-     * @param fanout Whether directional (ordered) links point from this
-     *               node to another should be considered.
-     * @param linkType Follow only these types of links.
-     * @param subClasses Follow subtypes of linkType too.
-     */
-    HandleSeq getNeighbors(const Handle& h, bool fanin, bool fanout,
-                           Type linkType=LINK, bool subClasses=true) const
-    {
-        return getImplconst().getNeighbors(h, fanin, fanout, linkType, subClasses);
-    }
-
-    /**
      * Gets a set of handles that matches with the given type
      * (subclasses optionally).
      *
@@ -439,14 +421,6 @@ public:
             if (rc) return rc;
         }
         return false;
-    }
-
-    template<class T>
-    inline bool foreach_handle_of_type(const char * atypename,
-                                       bool (T::*cb)(Handle), T *data,
-                                       bool subclass = false) {
-        Type atype = classserver().getType(atypename);
-        return foreach_handle_of_type(atype, cb, data, subclass);
     }
 
     /* ----------------------------------------------------------- */

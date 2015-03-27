@@ -41,11 +41,25 @@ class AtomSpaceUtils
 {
 
 public:
-    static HandleSeq getAllNodes(AtomSpace* pAS, Handle h);
+    static HandleSeq getAllNodes(Handle h);
 
-    static UnorderedHandleSet getAllUniqueNodes(AtomSpace* pAS, Handle h);
-
+    static UnorderedHandleSet getAllUniqueNodes(Handle h);
 };
+
+/**
+ * Returns neighboring atoms, following incoming links and
+ * returning their outgoing sets.
+ *
+ * @param h Get neighbours for the atom this handle points to.
+ * @param fanin Whether directional (ordered) links point to this
+ *              node should beconsidered.
+ * @param fanout Whether directional (ordered) links point from this
+ *               node to another should be considered.
+ * @param linkType Follow only these types of links.
+ * @param subClasses Follow subtypes of linkType too.
+ */
+HandleSeq getNeighbors(const Handle&, bool fanin=true, bool fanout=true,
+                       Type linkType=LINK, bool subClasses=true);
 
 /** @}*/
 }
