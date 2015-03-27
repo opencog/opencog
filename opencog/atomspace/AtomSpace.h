@@ -329,6 +329,330 @@ public:
         return getImpl().getLink(t, outgoing);
     }
 
+    /**
+     * Return true if the handle points to an atom that is in some
+     * (any) atomspace; else return false.
+     *
+     * Currently, this code has the side-effect of resolving the handle.
+     * That is, if the handle's atom-pointer was non-null, and the atom
+     * can be located based on its UUID, then the atom will be
+     * instantiated in the appropriate atomspace.  Thus, this method
+     * returns false only if the handles UUID is -1 or if the UUID is
+     * positive, but no atomspace can lay claim to it.
+     *
+     * A UUID can be positive, but not a part of any atomspace, if the
+     * atom was recently removed from some atomspace. In this case, the
+     * handle is still caching its old UUID, although the atom itself
+     * now has a UUID of -1.
+     *
+     * Note also: a handle that is pointing to a recently-created atom
+     * that is not in any atomspace will have a UUID of -1, and thus is
+     * considered "invalid", even though it points to an atom that
+     * exists in RAM (and is thus usable as a naked atom).
+     */
+    bool isValidHandle(Handle h) const {
+        // The h->getHandle() maneuver below is a trick to get at the
+        // UUID of the actual atom, rather than the cached UUID in the
+        // handle. Technically, this is not quite right, since, in
+        // principle, a handle could have a valid UUID, but the atom
+        // pointer is null, because the atom is on disk, in a database,
+        // is on a remote server, or has been purged from RAM.  But we
+        // have no way of knowing that the situation really is, so it
+        // seems like the only thing that can be done here is to resolve
+        // the pointer (i.e. make it point to an acutal atom, in RAM,
+        // and then check the actual UUID in the atom.
+        //
+        // The actual resolution is done with the (NULL != h) check,
+        // which causes h.operator!=() to run, which fixes up the atom
+        // pointer, as needed.
+        //
+        return (NULL != h) and (h->getHandle() != Handle::UNDEFINED);
+    }
+
+    /**
+     * Returns neighboring atoms, following incoming links and
+     * returning their outgoing sets.
+     *
+     * @param h Get neighbours for the atom this handle points to.
+     * @param fanin Whether directional (ordered) links point to this
+     *              node should beconsidered.
+     * @param fanout Whether directional (ordered) links point from this
+     *               node to another should be considered.
+     * @param linkType Follow only these types of links.
+     * @param subClasses Follow subtypes of linkType too.
+     */
+    HandleSeq getNeighbors(const Handle& h, bool fanin, bool fanout,
+                           Type linkType=LINK, bool subClasses=true) const
+    {
+        return getImplconst().getNeighbors(h, fanin, fanout, linkType, subClasses);
+    }
+
+    /** Retrieve the incoming set of a given atom */
+    HandleSeq getIncoming(Handle h) {
+        return getImpl().getIncoming(h);
+    }
+
+    /** Convenience functions... */
+    bool isNode(Handle h) const { return NodeCast(h) != NULL; }
+    bool isLink(Handle h) const { return LinkCast(h) != NULL; }
+
+    /**
+     * Gets a set of handles that matches with the given type
+     * (subclasses optionally).
+     *
+     * @param result An output iterator.
+     * @param type The desired type.
+     * @param subclass Whether type subclasses should be considered.
+     *
+     * @return The set of atoms of a given type (subclasses optionally).
+     *
+     * @note The matched entries are appended to a container whose
+     *        OutputIterator is passed as the first argument.
+     *
+     * Example of call to this method, which would return all entries
+     * in AtomSpace:
+     * @code
+     *         std::list<Handle> ret;
+     *         atomSpace.getHandlesByType(back_inserter(ret), ATOM, true);
+     * @endcode
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandlesByType(OutputIterator result,
+                     Type type,
+                     bool subclass = false) const
+    {
+        return getAtomTable().getHandlesByType(result, type, subclass);
+    }
+
+    /* ----------------------------------------------------------- */
+    /* The foreach routines offer an alternative interface
+     * to the getHandleSet API.
+     */
+    /**
+     * Invoke the callback on each handle of the given type.
+     */
+    template<class T>
+    inline bool foreach_handle_of_type(Type atype,
+                                       bool (T::*cb)(Handle), T *data,
+                                       bool subclass = false) {
+        std::list<Handle> handle_set;
+        // The intended signatue is
+        // getHandleSet(OutputIterator result, Type type, bool subclass)
+        getHandlesByType(back_inserter(handle_set), atype, subclass);
+
+        // Loop over all handles in the handle set.
+        std::list<Handle>::iterator i = handle_set.begin();
+        std::list<Handle>::iterator iend = handle_set.end();
+        for (; i != iend; ++i) {
+            bool rc = (data->*cb)(*i);
+            if (rc) return rc;
+        }
+        return false;
+    }
+
+    template<class T>
+    inline bool foreach_handle_of_type(const char * atypename,
+                                       bool (T::*cb)(Handle), T *data,
+                                       bool subclass = false) {
+        Type atype = classserver().getType(atypename);
+        return foreach_handle_of_type(atype, cb, data, subclass);
+    }
+
+    /* ----------------------------------------------------------- */
+    /* Attentional Focus stuff */
+
+    /** Retrieve the doubly normalised Short-Term Importance between -1..1
+     * for a given Handle. STI above and below threshold normalised separately
+     * and linearly.
+     *
+     * @param h The atom handle to get STI for
+     * @param average Should the recent average max/min STI be used, or the
+     * exact min/max?
+     * @param clip Should the returned value be clipped to -1..1? Outside this
+     * range can be returned if average=true
+     * @return normalised STI between -1..1
+     */
+    float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const {
+        return getAttentionBankconst().getNormalisedSTI(h->getAttentionValue(), average, clip);
+    }
+
+    /** Retrieve the linearly normalised Short-Term Importance between 0..1
+     * for a given Handle.
+     *
+     * @param h The atom handle to get STI for
+     * @param average Should the recent average max/min STI be used, or the
+     * exact min/max?
+     * @param clip Should the returned value be clipped to 0..1? Outside this
+     * range can be returned if average=true
+     * @return normalised STI between 0..1
+     */
+    float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
+        return getAttentionBankconst().getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip);
+    }
+
+    /**
+     * Returns the set of atoms within the given importance range.
+     *
+     * @param Importance range lower bound (inclusive).
+     * @param Importance range upper bound (inclusive).
+     * @return The set of atoms within the given importance range.
+     *
+     * @note: This method utilizes the ImportanceIndex
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandlesByAV(OutputIterator result,
+                   AttentionValue::sti_t lowerBound,
+                   AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
+    {
+        UnorderedHandleSet hs = getAtomTable().getHandlesByAV(lowerBound, upperBound);
+        return std::copy(hs.begin(), hs.end(), result);
+    }
+
+    /**
+     * Gets the set of all handles in the Attentional Focus
+     *
+     * @return The set of all atoms in the Attentional Focus
+     * @note: This method utilizes the ImportanceIndex
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandleSetInAttentionalFocus(OutputIterator result) const
+    {
+        return getHandlesByAV(result, getAttentionalFocusBoundary(), AttentionValue::AttentionValue::MAXSTI);
+    }
+
+    /** Get attentional focus boundary
+     * Generally atoms below this threshold shouldn't be accessed unless search
+     * methods are unsuccessful on those that are above this value.
+     *
+     * @return Short Term Importance threshold value
+     */
+    AttentionValue::sti_t getAttentionalFocusBoundary() const {
+        return getAttentionBankconst().getAttentionalFocusBoundary();
+    }
+
+    /** Change the attentional focus boundary.
+     * Some situations may benefit from less focussed searches.
+     *
+     * @param s New threshold
+     * @return Short Term Importance threshold value
+     */
+    AttentionValue::sti_t setAttentionalFocusBoundary(
+        AttentionValue::sti_t s) {
+        return getAttentionBank().setAttentionalFocusBoundary(s);
+    }
+
+    /** Get the maximum STI observed in the AtomSpace.
+     * @param average If true, return an exponentially decaying average of
+     * maximum STI, otherwise return the actual maximum.
+     * @return Maximum STI
+     */
+    AttentionValue::sti_t getMaxSTI(bool average=true) const
+    { return getAttentionBankconst().getMaxSTI(average); }
+
+    /** Get the minimum STI observed in the AtomSpace.
+     *
+     * @param average If true, return an exponentially decaying average of
+     * minimum STI, otherwise return the actual maximum.
+     * @return Minimum STI
+     */
+    AttentionValue::sti_t getMinSTI(bool average=true) const
+    { return getAttentionBankconst().getMinSTI(average); }
+
+    /** Update the minimum STI observed in the AtomSpace.
+     * Min/max are not updated on setSTI because average is calculate by lobe
+     * cycle, although this could potentially also be handled by the cogServer.
+     *
+     * @warning Should only be used by attention allocation system.
+     * @param m New minimum STI
+     */
+    void updateMinSTI(AttentionValue::sti_t m) { getAttentionBank().updateMinSTI(m); }
+
+    /**
+     * Update the maximum STI observed in the AtomSpace. Min/max are not updated
+     * on setSTI because average is calculate by lobe cycle, although this could
+     * potentially also be handled by the cogServer.
+     *
+     * @warning Should only be used by attention allocation system.
+     * @param m New maximum STI
+     */
+    void updateMaxSTI(AttentionValue::sti_t m) { getAttentionBank().updateMaxSTI(m); }
+
+    //! Clear the atomspace, remove all atoms
+    void clear() { getImpl().clear(); }
+
+    /* ----------------------------------------------------------- */
+    // ---- Signals
+
+    boost::signals2::connection addAtomSignal(const AtomSignal::slot_type& function)
+    {
+        return getImpl().atomTable.addAtomSignal().connect(function);
+    }
+    boost::signals2::connection removeAtomSignal(const AtomPtrSignal::slot_type& function)
+    {
+        return getImpl().atomTable.removeAtomSignal().connect(function);
+    }
+    boost::signals2::connection AVChangedSignal(const AVCHSigl::slot_type& function)
+    {
+        return getImpl().atomTable.AVChangedSignal().connect(function);
+    }
+    boost::signals2::connection TVChangedSignal(const TVCHSigl::slot_type& function)
+    {
+        return getImpl().atomTable.TVChangedSignal().connect(function);
+    }
+    boost::signals2::connection AddAFSignal(const AVCHSigl::slot_type& function)
+    {
+        return getAttentionBank().AddAFSignal().connect(function);
+    }
+    boost::signals2::connection RemoveAFSignal(const AVCHSigl::slot_type& function)
+    {
+        return getAttentionBank().RemoveAFSignal().connect(function);
+    }
+
+    /* ----------------------------------------------------------- */
+    /* Deprecated and obsolete code */
+
+    /**
+     * DEPRECATED! DO NOT USE IN NEW CODE!
+     * If you need this function, just cut and paste the code below into
+     * whatever you are doing!
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandlesByName(OutputIterator result,
+                     const std::string& name,
+                     Type type = NODE,
+                     bool subclass = true)
+    {
+        if (name.c_str()[0] == 0)
+            return getHandlesByType(result, type, subclass);
+
+        if (false == subclass) {
+            Handle h(getHandle(type, name));
+            if (h) *(result++) = h;
+            return result;
+        }
+
+        classserver().foreachRecursive(
+            [&](Type t)->void {
+                Handle h(getHandle(t, name));
+                if (h) *(result++) = h; }, type);
+
+        return result;
+    }
+
+    /**
+     * DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this function, just copy the one-liner below.
+     * XXX ONLY the python bindings use this. XXX kill that code.
+     */
+    template <typename OutputIterator> OutputIterator
+    getIncomingSetByType(OutputIterator result,
+                 Handle handle,
+                 Type type,
+                 bool subclass) const
+    {
+        return handle->getIncomingSetByType(result, type, subclass);
+    }
+
     /** Get the atom referred to by Handle h represented as a string. */
     std::string atomAsString(Handle h, bool terse = true) const {
         if (terse) return h->toShortString();
@@ -438,321 +762,6 @@ public:
         h->setTruthValue(tv);
     }
 
-    /**
-     * Return true if the handle points to an atom that is in some
-     * (any) atomspace; else return false.
-     *
-     * Currently, this code has the side-effect of resolving the handle.
-     * That is, if the handle's atom-pointer was non-null, and the atom
-     * can be located based on its UUID, then the atom will be
-     * instantiated in the appropriate atomspace.  Thus, this method
-     * returns false only if the handles UUID is -1 or if the UUID is
-     * positive, but no atomspace can lay claim to it.
-     *
-     * A UUID can be positive, but not a part of any atomspace, if the
-     * atom was recently removed from some atomspace. In this case, the
-     * handle is still caching its old UUID, although the atom itself
-     * now has a UUID of -1.
-     *
-     * Note also: a handle that is pointing to a recently-created atom
-     * that is not in any atomspace will have a UUID of -1, and thus is
-     * considered "invalid", even though it points to an atom that
-     * exists in RAM (and is thus usable as a naked atom).
-     */
-    bool isValidHandle(Handle h) const {
-        // The h->getHandle() maneuver below is a trick to get at the
-        // UUID of the actual atom, rather than the cached UUID in the
-        // handle. Technically, this is not quite right, since, in
-        // principle, a handle could have a valid UUID, but the atom
-        // pointer is null, because the atom is on disk, in a database,
-        // is on a remote server, or has been purged from RAM.  But we
-        // have no way of knowing that the situation really is, so it
-        // seems like the only thing that can be done here is to resolve
-        // the pointer (i.e. make it point to an acutal atom, in RAM,
-        // and then check the actual UUID in the atom.
-        //
-        // The actual resolution is done with the (NULL != h) check,
-        // which causes h.operator!=() to run, which fixes up the atom
-        // pointer, as needed.
-        //
-        return (NULL != h) and (h->getHandle() != Handle::UNDEFINED);
-    }
-
-    /** Retrieve the doubly normalised Short-Term Importance between -1..1
-     * for a given Handle. STI above and below threshold normalised separately
-     * and linearly.
-     *
-     * @param h The atom handle to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to -1..1? Outside this
-     * range can be returned if average=true
-     * @return normalised STI between -1..1
-     */
-    float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const {
-        return getAttentionBankconst().getNormalisedSTI(h->getAttentionValue(), average, clip);
-    }
-
-    /** Retrieve the linearly normalised Short-Term Importance between 0..1
-     * for a given Handle.
-     *
-     * @param h The atom handle to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to 0..1? Outside this
-     * range can be returned if average=true
-     * @return normalised STI between 0..1
-     */
-    float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
-        return getAttentionBankconst().getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip);
-    }
-
-    /**
-     * Returns neighboring atoms, following incoming links and
-     * returning their outgoing sets.
-     *
-     * @param h Get neighbours for the atom this handle points to.
-     * @param fanin Whether directional (ordered) links point to this
-     *              node should beconsidered.
-     * @param fanout Whether directional (ordered) links point from this
-     *               node to another should be considered.
-     * @param linkType Follow only these types of links.
-     * @param subClasses Follow subtypes of linkType too.
-     */
-    HandleSeq getNeighbors(const Handle& h, bool fanin, bool fanout,
-                           Type linkType=LINK, bool subClasses=true) const
-    {
-        return getImplconst().getNeighbors(h, fanin, fanout, linkType, subClasses);
-    }
-
-    /** Retrieve the incoming set of a given atom */
-    HandleSeq getIncoming(Handle h) {
-        return getImpl().getIncoming(h);
-    }
-
-    /** Convenience functions... */
-    bool isNode(Handle h) const { return NodeCast(h) != NULL; }
-    bool isLink(Handle h) const { return LinkCast(h) != NULL; }
-
-    /**
-     * DEPRECATED! DO NOT USE IN NEW CODE!
-     * If you need this function, just cut and paste the code below into
-     * whatever you are doing!
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByName(OutputIterator result,
-                     const std::string& name,
-                     Type type = NODE,
-                     bool subclass = true)
-    {
-        if (name.c_str()[0] == 0)
-            return getHandlesByType(result, type, subclass);
-
-        if (false == subclass) {
-            Handle h(getHandle(type, name));
-            if (h) *(result++) = h;
-            return result;
-        }
-
-        classserver().foreachRecursive(
-            [&](Type t)->void {
-                Handle h(getHandle(t, name));
-                if (h) *(result++) = h; }, type);
-
-        return result;
-    }
-
-    /**
-     * Gets a set of handles that matches with the given type
-     * (subclasses optionally).
-     *
-     * @param result An output iterator.
-     * @param type The desired type.
-     * @param subclass Whether type subclasses should be considered.
-     *
-     * @return The set of atoms of a given type (subclasses optionally).
-     *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace:
-     * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandlesByType(back_inserter(ret), ATOM, true);
-     * @endcode
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByType(OutputIterator result,
-                     Type type,
-                     bool subclass = false) const
-    {
-        return getAtomTable().getHandlesByType(result, type, subclass);
-    }
-
-    /**
-     * DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this function, just copy the one-liner below.
-     * XXX ONLY the python bindings use this. XXX kill that code.
-     */
-    template <typename OutputIterator> OutputIterator
-    getIncomingSetByType(OutputIterator result,
-                 Handle handle,
-                 Type type,
-                 bool subclass) const
-    {
-        return handle->getIncomingSetByType(result, type, subclass);
-    }
-
-    /**
-     * Returns the set of atoms within the given importance range.
-     *
-     * @param Importance range lower bound (inclusive).
-     * @param Importance range upper bound (inclusive).
-     * @return The set of atoms within the given importance range.
-     *
-     * @note: This method utilizes the ImportanceIndex
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByAV(OutputIterator result,
-                   AttentionValue::sti_t lowerBound,
-                   AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
-    {
-        UnorderedHandleSet hs = getAtomTable().getHandlesByAV(lowerBound, upperBound);
-        return std::copy(hs.begin(), hs.end(), result);
-    }
-
-    /**
-     * Gets the set of all handles in the Attentional Focus
-     *
-     * @return The set of all atoms in the Attentional Focus
-     * @note: This method utilizes the ImportanceIndex
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandleSetInAttentionalFocus(OutputIterator result) const
-    {
-        return getHandlesByAV(result, getAttentionalFocusBoundary(), AttentionValue::AttentionValue::MAXSTI);
-    }
-
-    /* ----------------------------------------------------------- */
-    /* The foreach routines offer an alternative interface
-     * to the getHandleSet API.
-     */
-    /**
-     * Invoke the callback on each handle of the given type.
-     */
-    template<class T>
-    inline bool foreach_handle_of_type(Type atype,
-                                       bool (T::*cb)(Handle), T *data,
-                                       bool subclass = false) {
-        std::list<Handle> handle_set;
-        // The intended signatue is
-        // getHandleSet(OutputIterator result, Type type, bool subclass)
-        getHandlesByType(back_inserter(handle_set), atype, subclass);
-
-        // Loop over all handles in the handle set.
-        std::list<Handle>::iterator i = handle_set.begin();
-        std::list<Handle>::iterator iend = handle_set.end();
-        for (; i != iend; ++i) {
-            bool rc = (data->*cb)(*i);
-            if (rc) return rc;
-        }
-        return false;
-    }
-
-    template<class T>
-    inline bool foreach_handle_of_type(const char * atypename,
-                                       bool (T::*cb)(Handle), T *data,
-                                       bool subclass = false) {
-        Type atype = classserver().getType(atypename);
-        return foreach_handle_of_type(atype, cb, data, subclass);
-    }
-
-    /* ----------------------------------------------------------- */
-
-    /** Get attentional focus boundary
-     * Generally atoms below this threshold shouldn't be accessed unless search
-     * methods are unsuccessful on those that are above this value.
-     *
-     * @return Short Term Importance threshold value
-     */
-    AttentionValue::sti_t getAttentionalFocusBoundary() const {
-        return getAttentionBankconst().getAttentionalFocusBoundary();
-    }
-
-    /** Change the attentional focus boundary.
-     * Some situations may benefit from less focussed searches.
-     *
-     * @param s New threshold
-     * @return Short Term Importance threshold value
-     */
-    AttentionValue::sti_t setAttentionalFocusBoundary(
-        AttentionValue::sti_t s) {
-        return getAttentionBank().setAttentionalFocusBoundary(s);
-    }
-
-    /** Get the maximum STI observed in the AtomSpace.
-     * @param average If true, return an exponentially decaying average of
-     * maximum STI, otherwise return the actual maximum.
-     * @return Maximum STI
-     */
-    AttentionValue::sti_t getMaxSTI(bool average=true) const
-    { return getAttentionBankconst().getMaxSTI(average); }
-
-    /** Get the minimum STI observed in the AtomSpace.
-     *
-     * @param average If true, return an exponentially decaying average of
-     * minimum STI, otherwise return the actual maximum.
-     * @return Minimum STI
-     */
-    AttentionValue::sti_t getMinSTI(bool average=true) const
-    { return getAttentionBankconst().getMinSTI(average); }
-
-    /** Update the minimum STI observed in the AtomSpace.
-     * Min/max are not updated on setSTI because average is calculate by lobe
-     * cycle, although this could potentially also be handled by the cogServer.
-     *
-     * @warning Should only be used by attention allocation system.
-     * @param m New minimum STI
-     */
-    void updateMinSTI(AttentionValue::sti_t m) { getAttentionBank().updateMinSTI(m); }
-
-    /**
-     * Update the maximum STI observed in the AtomSpace. Min/max are not updated
-     * on setSTI because average is calculate by lobe cycle, although this could
-     * potentially also be handled by the cogServer.
-     *
-     * @warning Should only be used by attention allocation system.
-     * @param m New maximum STI
-     */
-    void updateMaxSTI(AttentionValue::sti_t m) { getAttentionBank().updateMaxSTI(m); }
-
-    //! Clear the atomspace, remove all atoms
-    void clear() { getImpl().clear(); }
-
-// ---- Signals
-
-    boost::signals2::connection addAtomSignal(const AtomSignal::slot_type& function)
-    {
-        return getImpl().atomTable.addAtomSignal().connect(function);
-    }
-    boost::signals2::connection removeAtomSignal(const AtomPtrSignal::slot_type& function)
-    {
-        return getImpl().atomTable.removeAtomSignal().connect(function);
-    }
-    boost::signals2::connection AVChangedSignal(const AVCHSigl::slot_type& function)
-    {
-        return getImpl().atomTable.AVChangedSignal().connect(function);
-    }
-    boost::signals2::connection TVChangedSignal(const TVCHSigl::slot_type& function)
-    {
-        return getImpl().atomTable.TVChangedSignal().connect(function);
-    }
-    boost::signals2::connection AddAFSignal(const AVCHSigl::slot_type& function)
-    {
-        return getAttentionBank().AddAFSignal().connect(function);
-    }
-    boost::signals2::connection RemoveAFSignal(const AVCHSigl::slot_type& function)
-    {
-        return getAttentionBank().RemoveAFSignal().connect(function);
-    }
 };
 
 /** @}*/
