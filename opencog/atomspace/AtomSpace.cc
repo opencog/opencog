@@ -53,26 +53,3 @@ AtomSpace::AtomSpace(const AtomSpace& other)
     throw opencog::RuntimeException(TRACE_INFO,
             "AtomSpace - Cannot copy an object of this class");
 }
-
-
-Handle AtomSpace::addPrefixedNode(Type t, const std::string& prefix)
-{
-    static const char alphanum[] =
-        "0123456789"
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "abcdefghijklmnopqrstuvwxyz";
-    static unsigned long int cnt = 0;
-    srand(++cnt);
-    static const int len = 16;
-    std::string name;
-    Handle result;
-    //Keep trying new random suffixes until you generate a new name
-    do {
-        name = prefix;
-        for (int i = 0; i < len; ++i) {
-            name += alphanum[rand() % (sizeof(alphanum) - 1)];
-        }
-        result = getHandle(t, name);
-    } while (isValidHandle(result)); // If the name already exists, try again
-    return addNode(t, name);
-}

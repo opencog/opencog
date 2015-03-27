@@ -25,6 +25,7 @@
 #define _OPENCOG_ATOMSPACE_UTILS_H
 
 #include <opencog/atomspace/atom_types.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/types.h>
 
@@ -62,6 +63,12 @@ public:
  */
 HandleSeq getNeighbors(const Handle&, bool fanin=true, bool fanout=true,
                        Type linkType=LINK, bool subClasses=true);
+
+/**
+ * Add a new node to the AtomSpace. A random 16-character string
+ * will be appended to the provided name.
+ **/
+Handle addPrefixedNode(AtomSpace&, Type, const std::string& prefix = "");
 
 /** @}*/
 }

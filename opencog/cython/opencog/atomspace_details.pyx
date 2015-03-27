@@ -70,10 +70,15 @@ cdef class AtomSpace:
         """
         cdef string name = atom_name.encode('UTF-8')
         cdef cHandle result
+# XXX fix this prefixed thing -- the code should be clling the atomspace
+# utility for this.  How does one call a utility function here ??
+        prefixed = False
         if prefixed:
             # prefixed nodes ALWAYS generate a new atom using atom_name
             # as the prefix
-            result = self.atomspace.addPrefixedNode(t, name)
+            # Need to call the utility that does prefixing, here.
+            # result = self.addPrefixedNode(atromspace, t, name)
+            pass
         else:
             result = self.atomspace.addNode(t, name)
 
