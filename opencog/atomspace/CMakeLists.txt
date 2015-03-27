@@ -31,7 +31,6 @@ ADD_LIBRARY (atomspace SHARED
     ImportanceIndex.cc
     IncomingIndex.cc
     IndefiniteTruthValue.cc
-    Intersect.cc
     Link.cc
     LinkIndex.cc
     Node.cc

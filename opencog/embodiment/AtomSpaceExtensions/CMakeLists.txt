@@ -27,6 +27,8 @@ IF (HAVE_EMBODIMENT)
 		AtomSpaceUtil
 		makeVirtualAtom
 		CompareAtomTreeTemplate
+		GetByOutgoing
+      Intersect
 	)
 
 	TARGET_LINK_LIBRARIES (AtomSpaceExtensions

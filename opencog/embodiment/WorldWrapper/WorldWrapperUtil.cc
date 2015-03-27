@@ -39,6 +39,7 @@
 
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/GetByOutgoing.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
@@ -134,8 +135,8 @@ std::string WorldWrapperUtil::lookupInheritanceLink(
     seq.push_back(h);
 
     std::vector<Handle> res;
-    as.getHandlesByOutgoing(back_inserter(res),
-                    INHERITANCE_LINK, seq, NULL, NULL, 2);
+    getHandlesByOutgoing(back_inserter(res),
+                    as, INHERITANCE_LINK, seq, NULL, NULL, 2);
     if (res.empty())
         return id::null_obj;
 
@@ -152,8 +153,8 @@ std::string WorldWrapperUtil::lookupExecLink(
     std::vector<Handle> match(3);
     match[0] = h;
     Type t[] = { PREDICATE_NODE, LIST_LINK, LIST_LINK };
-    as.getHandlesByOutgoing(back_inserter(res),
-                    EXECUTION_LINK, match, t,
+    getHandlesByOutgoing(back_inserter(res),
+                    as, EXECUTION_LINK, match, t,
                     NULL, 3, true);
     if (res.empty())
         return id::null_obj;

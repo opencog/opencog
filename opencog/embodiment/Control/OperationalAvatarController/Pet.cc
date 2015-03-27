@@ -43,6 +43,7 @@
 #include <opencog/embodiment/Learning/behavior/BDTracker.h>
 #include <opencog/embodiment/Learning/behavior/PAIWorldProvider.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/GetByOutgoing.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 
@@ -989,7 +990,8 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
         patternToSearchLearningSession.push_back(conceptNode);
         // get the handles of all trick
         HandleSeq learningSessionHandles;
-        atomSpace->getHandlesByOutgoing(back_inserter(learningSessionHandles),
+        getHandlesByOutgoing(back_inserter(learningSessionHandles),
+                *atomSpace,
                 INHERITANCE_LINK,
                 patternToSearchLearningSession, NULL, NULL, 2,
                 true);

@@ -27,6 +27,7 @@
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
 
+#include <opencog/embodiment/AtomSpaceExtensions/GetByOutgoing.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/OAC.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/EntityExperienceAgent.h>
 
@@ -66,7 +67,8 @@ void EntityExperienceAgent::run()
         HandleSeq links, link(2);
         link[0] = Handle::UNDEFINED;
         link[1] = Handle::UNDEFINED;
-        atomSpace.getHandlesByOutgoing( std::back_inserter(links),
+        getHandlesByOutgoing( std::back_inserter(links),
+                                 atomSpace,
                                  REFERENCE_LINK, link, &type[0],
                                  &subclasses[0], 2);
         unsigned int i;
@@ -86,14 +88,16 @@ void EntityExperienceAgent::run()
         {
             Type type[] = { SEME_NODE, CONCEPT_NODE };
             HandleSeq link = { semeNodes[i], Handle::UNDEFINED };
-            atomSpace.getHandlesByOutgoing( std::back_inserter( typeLinks ),
+            getHandlesByOutgoing( std::back_inserter( typeLinks ),
+                                    atomSpace,
                                     INHERITANCE_LINK, link,
                                      &type[0], NULL, 2);
         }
         {
             Type type[] = { CONCEPT_NODE, SEME_NODE };
             HandleSeq link = { Handle::UNDEFINED, semeNodes[i] };
-            atomSpace.getHandlesByOutgoing( std::back_inserter( classLinks ),
+            getHandlesByOutgoing( std::back_inserter( classLinks ),
+                                     atomSpace,
                                      REFERENCE_LINK, link,
                                      &type[0], NULL, 2);
         }

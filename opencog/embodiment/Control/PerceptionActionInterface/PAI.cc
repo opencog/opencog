@@ -55,6 +55,7 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/GetByOutgoing.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/query/BindLink.h>
@@ -3801,7 +3802,8 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
             HandleSeq outgoing;
             outgoing.push_back(predNode);
             outgoing.push_back(Handle::UNDEFINED);
-            atomSpace.getHandlesByOutgoing(back_inserter(sizeEvalLinks),
+            getHandlesByOutgoing(back_inserter(sizeEvalLinks),
+                 atomSpace,
                  EVALUATION_LINK, outgoing, NULL, NULL, 2);
             for (Handle evalLink : sizeEvalLinks) {
                 Handle listLink = atomSpace.getOutgoing(evalLink, 1);

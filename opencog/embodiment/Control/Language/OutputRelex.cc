@@ -26,6 +26,7 @@
 
 #include <opencog/embodiment/Control/Language/OutputRelex.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/GetByOutgoing.h>
 
 using namespace opencog::oac;
 
@@ -73,8 +74,9 @@ std::string OutputRelex::getOutput(AtomSpace &atomSpace, const std::vector< std:
                         Type types[] = {OBJECT_NODE, SEME_NODE};
                         bool lookForSubTypes[] = {true, false};
                         HandleSeq refLinks;
-                        atomSpace.getHandlesByOutgoing(
+                        getHandlesByOutgoing(
                               back_inserter(refLinks),
+                              atomSpace,
                               REFERENCE_LINK,
                              realObject, &types[0], &lookForSubTypes[0], 2);
                         

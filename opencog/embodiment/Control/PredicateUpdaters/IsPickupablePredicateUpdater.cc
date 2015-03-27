@@ -30,6 +30,7 @@
 
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
+#include <opencog/embodiment/AtomSpaceExtensions/GetByOutgoing.h>
 
 
 #include "IsPickupablePredicateUpdater.h"
@@ -105,7 +106,8 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
             HandleSeq parentHandles;
             Type types[] = { SEME_NODE, CONCEPT_NODE };
             
-            atomSpace.getHandlesByOutgoing( back_inserter(parentHandles),
+            getHandlesByOutgoing( back_inserter(parentHandles),
+                                    atomSpace,
                                     INHERITANCE_LINK,
                                     isMovableFrame, &types[0], NULL, 2);
 

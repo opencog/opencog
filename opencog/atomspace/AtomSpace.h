@@ -632,33 +632,6 @@ public:
     }
 
     /**
-     * DEPRECATED! Do NOT USE IN NEW CODE!
-     * Use the Pattern Matcher instead!
-     */
-    UnorderedHandleSet getHandlesByOutgoingSet(
-                 Type type,
-                 const HandleSeq& handles,
-                 Type* types,
-                 bool* subclasses,
-                 Arity arity,
-                 bool subclass = false);
-
-    template <typename OutputIterator> OutputIterator
-    getHandlesByOutgoing(OutputIterator result,
-                 Type type,
-                 const HandleSeq& handles,
-                 Type* types,
-                 bool* subclasses,
-                 Arity arity,
-                 bool subclass = false)
-    {
-        UnorderedHandleSet hs = getHandlesByOutgoingSet(
-                type, handles,
-                types, subclasses, arity, subclass);
-        return std::copy(hs.begin(), hs.end(), result);
-    }
-
-    /**
      * Returns the set of atoms within the given importance range.
      *
      * @param Importance range lower bound (inclusive).
