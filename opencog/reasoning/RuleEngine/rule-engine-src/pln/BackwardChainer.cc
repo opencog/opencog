@@ -84,9 +84,11 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
 			return map<Handle, HandleSeq>();
 
 		// TODO use all rules for found here.
-		Rule stadardized_rule = select_rule(rules).standardize_apart();
+		// TODO need to add the rule to the atomspace to be useable
+		Rule stadardized_rule = select_rule(acceptable_rules).standardize_apart();
 
 		//for later removal
+		_as->addAtom(stadardized_rule.get_handle());
 //		_bc_generated_rules.push_back(stadardized_rule);
 
 		Handle implicand = stadardized_rule.get_implicand();
@@ -109,7 +111,7 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
 	map<Handle, HandleSeq> out;
 	for (Handle soln : kb_match)
 	{
-		// XXX TODO check unify return value
+		// should be possible to unify since kb_match is found by PM on hgoal
 		unify(hgoal, soln, out);
 		kb_results.push_back(out);
 	}
@@ -132,8 +134,10 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
  */
 map<Handle, HandleSeq> BackwardChainer::bc_rule(Rule& rule)
 {
+	Handle himplicant = rule.get_implicant();
+
 	std::stack<Handle> visit_stack;
-	visit_stack.push(rule.get_implicant());
+	visit_stack.push(himplicant);
 
 	map<Handle, HandleSeq> logical_link_premise_map = get_logical_link_premises_map(himplicant);
 	map<Handle, map<Handle, HandleSeq>> premise_var_ground_map;
@@ -154,7 +158,7 @@ map<Handle, HandleSeq> BackwardChainer::bc_rule(Rule& rule)
 			HandleSeq sub_premises = logical_link_premise_map[premise];
 
 			// check if all its sub-premises are already evaluated
-			if (std::all_of(sub_premises.begin(), sub_premises.end(), [](const Handle& h) { evaluated_premises.count(h) == 1; }))
+			if (std::all_of(sub_premises.begin(), sub_premises.end(), [&](const Handle& h) { return evaluated_premises.count(h) == 1; }))
 			{
 				// if so, apply the logical operation to the solutions
 				premise_var_ground_map[premise] = join_premise_vgrounding_maps(premise, premise_var_ground_map);
@@ -181,7 +185,7 @@ map<Handle, HandleSeq> BackwardChainer::bc_rule(Rule& rule)
 	}
 
 	// get the final grounding
-	return premise_var_ground_map[rule.get_implicant()];
+	return premise_var_ground_map[himplicant];
 }
 
 /**
@@ -260,21 +264,24 @@ bool BackwardChainer::unify(const Handle& htarget,
                             const Handle& hmatch,
                             map<Handle, HandleSeq>& result)
 {
+	LinkPtr lptr_target(LinkCast(htarget));
+	LinkPtr lptr_match(LinkCast(hmatch));
+
 	// if unifying a link
-	if (LinkCast(htarget) && LinkCast(hmatch))
+	if (lptr_target && lptr_match)
 	{
 		// if the two links type are not equal
-		if (htarget->getType() != hmatch->getType())
+		if (lptr_target->getType() != lptr_match->getType())
 		{
 			result = std::map<Handle, HandleSeq>();
 			return false;
 		}
 
-		HandleSeq target_outg = _as->getOutgoing(htarget);
-		HandleSeq match_outg = _as->getOutgoing(hmatch);
+		HandleSeq target_outg = lptr_target->getOutgoingSet();
+		HandleSeq match_outg = lptr_match->getOutgoingSet();
 
 		// if the two links are not of equal size, cannot unify
-		if (target_outg.size() != hmatch_outg.size())
+		if (target_outg.size() != match_outg.size())
 		{
 			result = std::map<Handle, HandleSeq>();
 			return false;
@@ -282,13 +289,13 @@ bool BackwardChainer::unify(const Handle& htarget,
 
 		for (vector<Handle>::size_type i = 0; i < target_outg.size(); i++)
 		{
-			if (_as->getType(target_outg[i]) == VARIABLE_NODE)
+			if (target_outg[i]->getType() == VARIABLE_NODE)
 				result[target_outg[i]].push_back(match_outg[i]);
 			else if (not unify(target_outg[i], match_outg[i], result))
 				return false;
 		}
 	}
-	else if (_as->getType(htarget) == VARIABLE_NODE)
+	else if (htarget->getType() == VARIABLE_NODE)
 	{
 		result[htarget].push_back(hmatch);
 	}
@@ -313,30 +320,40 @@ Rule BackwardChainer::select_rule(const std::vector<Rule>& rules)
 
 
 /**
- * @param connector
- * @param premise_var_grounding_map
- * @return a map of variable to groundings
+ * Apply the logical link to the solution from its sub-premisies.
+ *
+ * @param logical_link               the top logical link
+ * @param premise_var_grounding_map  the solutions from the sub-premises
+ * @return                           a map of variable to groundings
  */
 map<Handle, HandleSeq> BackwardChainer::join_premise_vgrounding_maps(
 		const Handle& logical_link,
 		const map<Handle, map<Handle, HandleSeq> >& premise_var_grounding_map)
 {
 	map<Handle, HandleSeq> result;
+
 	for (auto pvg_it = premise_var_grounding_map.begin();
-			pvg_it != premise_var_grounding_map.end(); ++pvg_it) {
+	     pvg_it != premise_var_grounding_map.end();
+	     ++pvg_it)
+	{
 		map<Handle, HandleSeq> var_groundings = pvg_it->second;
+
 		if (pvg_it == premise_var_grounding_map.begin())
 			result = var_groundings;
-		else {
+		else
+		{
 			for (auto vg_it = var_groundings.begin();
-					vg_it != var_groundings.end(); vg_it++) {
-				if (result.count(vg_it->first) == 1) {
+					vg_it != var_groundings.end(); vg_it++)
+			{
+				if (result.count(vg_it->first) == 1)
+				{
 					HandleSeq vg1 = vg_it->second;
 					HandleSeq vg2 = result[vg_it->first];
 					HandleSeq common_values;
 					sort(vg1.begin(), vg1.end());
 					sort(vg2.begin(), vg2.end());
-					if (_as->getType(logical_link) == AND_LINK) {
+					if (_as->getType(logical_link) == AND_LINK)
+					{
 						set_intersection(vg1.begin(), vg1.end(), vg2.begin(),
 								vg2.end(), back_inserter(common_values));
 
@@ -348,7 +365,8 @@ map<Handle, HandleSeq> BackwardChainer::join_premise_vgrounding_maps(
 
 					result[vg_it->first] = common_values;
 
-				} else
+				}
+				else
 					result[vg_it->first] = vg_it->second;
 			}
 		}
@@ -422,7 +440,9 @@ map<Handle, HandleSeq> BackwardChainer::get_logical_link_premises_map(Handle& hi
  * @param results a set of grounded nodes found for @param hvar
  */
 HandleSeq BackwardChainer::chase_var_values(Handle& hvar,
-		vector<map<Handle, HandleSeq>>& inference_list, HandleSeq& results) {
+                                            vector<map<Handle, HandleSeq>>& inference_list,
+                                            HandleSeq& results)
+{
 	for (auto it = inference_list.begin(); it != inference_list.end(); ++it) {
 		map<Handle, HandleSeq> var_value = *it;
 		if (var_value.count(hvar) != 0) {
@@ -512,11 +532,11 @@ map<Handle, HandleSeq> BackwardChainer::ground_target_vars(
  * calls atomspace to remove each variables and links present the bc_gnerated_rules
  */
 void BackwardChainer::remove_generated_rules() {
-	for (vector<Handle>::size_type i = 0; i < _bc_generated_rules.size(); i++) {
-		Handle h = _bc_generated_rules.back();
-		_commons->clean_up_implication_link(h);
-		_bc_generated_rules.pop_back();
-	}
+//	for (vector<Handle>::size_type i = 0; i < _bc_generated_rules.size(); i++) {
+//		Handle h = _bc_generated_rules.back();
+//		_commons->clean_up_implication_link(h);
+//		_bc_generated_rules.pop_back();
+//	}
 }
 
 #ifdef DEBUG

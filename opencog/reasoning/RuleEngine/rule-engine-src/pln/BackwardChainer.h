@@ -78,7 +78,7 @@ private:
 
 	map<Handle, HandleSeq> bc_rule(Rule& rule);
 
-	HandleSeq filter_rules(HandleSeq handles);
+	std::vector<Rule> filter_rules(Handle htarget);
 	HandleSeq filter_grounded_experssions(Handle htarget);
 
 	bool unify(const Handle& htarget, const Handle& match, map<Handle, HandleSeq>& output);
@@ -88,7 +88,7 @@ private:
 	map<Handle, HandleSeq> join_premise_vgrounding_maps(const Handle& connector,
 			const map<Handle, map<Handle, HandleSeq> >& premise_var_grounding_map);
 
-	Rule select_rule(HandleSeq& hseq_rule);
+	Rule select_rule(const std::vector<Rule>& rules);
 	HandleSeq chase_var_values(Handle& hvar, vector<map<Handle, HandleSeq>>& inference_list, HandleSeq& results);
 
 	map<Handle, HandleSeq> ground_target_vars(Handle& hgoal, vector<map<Handle, HandleSeq>>& var_grounding_map);
