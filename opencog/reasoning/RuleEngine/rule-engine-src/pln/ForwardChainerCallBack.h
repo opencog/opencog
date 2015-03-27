@@ -47,13 +47,17 @@ public:
     {
     }
     /**
-     * given a set of rules,choose next rule to be applied based on
-     * source matching rule premises,fitness evaluation,weight of rule in the current context...etc
+     * Choose a set of applicable rules from the rule base by selecting
+     * rules whose premise structurally matches with the source.
+     * @fcmem an object holding the current source/target and other inform
+     * ation of the forward chaining instance.
+     * @return a set of applicable rules
      */
     virtual std::vector<Rule*> choose_rule(FCMemory& fcmem) = 0;
     /**
-     * Choose additional premises to the chainer based on fitness
-     * evaluation in the focus set.
+     * Choose additional premises for the rule.
+     * @fcmem an object holding the current source/target and other inform
+     * ation of the forward chaining instance.
      * @return a set of Handles chosen as a result of applying fitness
      * criteria with respect to the current source.
      */
