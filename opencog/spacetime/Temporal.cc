@@ -29,10 +29,15 @@
 #include <limits.h>
 #include <stdlib.h>
 
+#include <boost/format.hpp>
+
 #include <opencog/util/platform.h>
 
 //#define DPRINTF printf
 #define DPRINTF(...)
+
+using boost::format;
+using boost::str;
 
 using namespace opencog;
 
@@ -62,18 +67,18 @@ void Temporal::init(octime_t a, octime_t b, bool normal) throw (InvalidParamExce
     if (normal) {
         if (b > a) {
             throw InvalidParamException(TRACE_INFO,
-                                        "Cannot create a Temporal (normal-distribution) with the variance (%llu) greater than the mean (%llu). This causes negative lower bound.", b,  a);
+                                        str(format("Cannot create a Temporal (normal-distribution) with the variance (%1%) greater than the mean (%2%). This causes negative lower bound.") % a % b).c_str());
         }
         octime_t sum = a + b;
         // if the addition caused an overflow
         if (sum < a) {
             throw InvalidParamException(TRACE_INFO,
-                                        "Temporal - Upper bound reached when creating a Temporal (normal-distribution): %llu.", sum);
+                                        str(format("Temporal - Upper bound reached when creating a Temporal (normal-distribution): %1%.") % sum).c_str());
         }
     } else {
         if (a > b) {
             throw InvalidParamException(TRACE_INFO,
-                                        "Cannot create a Temporal (uniform-distribution) with lower bound (%llu) greater than upper bound (%llu)", b, a);
+                                        str(format("Cannot create a Temporal (uniform-distribution) with lower bound (%1%) greater than upper bound (%2%)") % b % a).c_str());
         }
     }
     this->normal = normal;
@@ -147,23 +152,20 @@ octime_t Temporal::getUpperBound() const
 std::string Temporal::toString() const
 {
     if (*this == UNDEFINED_TEMPORAL) return "UNDEFINED_TEMPORAL";
-    char buf[1 << 8];
-    char* answer = buf;
-    sprintf(answer, "(%s,%llu,%llu)", (normal ? "NORMAL" : "UNIFORM"), a, b);
-    return answer;
+    return str(format("(%1%,%2%,%3%)") % (normal ? "NORMAL" : "UNIFORM") % a % b);
 }
 
 std::string Temporal::getTimeNodeName() const
 {
-    char buffer[1000];
+    std::string name;
     if (normal) {
-        sprintf(buffer, "%llu:%llu:%d", a, b, normal);
+        name = str(format("%1%:%2%:%3%") % a % b % normal);
     } else if (a == b) {
-        sprintf(buffer, "%llu", a);
+        name = str(format("%1%") % a);
     } else {
-        sprintf(buffer, "%llu:%llu", a, b);
+        name = str(format("%1%:%2%") % a % b);
     }
-    return buffer;
+    return name;
 }
 
 std::string Temporal::getTimeNodeName(octime_t timestamp)
@@ -171,9 +173,8 @@ std::string Temporal::getTimeNodeName(octime_t timestamp)
     // NOTE: The strictly correct way to implement this would be like follows:
     //   return Temporal(timestamp).getTimeNodeName();
     // However, for performance reasons, this is implemented as bellow:
-    char buffer[1000];
-    sprintf(buffer, "%llu", timestamp);
-    return buffer;
+
+    return str(format("%1%") % timestamp);
 }
 
 Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
@@ -181,7 +182,7 @@ Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
     const char* nextToken = timeNodeName;
     octime_t a = (octime_t) strtoull(nextToken,NULL,10);
 
-    DPRINTF("Temporal::getFromTimeNodeName: %ld %llu %llu / %s\n", a, a, (octime_t)atof(timeNodeName), timeNodeName);
+    DPRINTF("Temporal::getFromTimeNodeName: %llu %llu %llu / %s\n", a, a, (octime_t)atof(timeNodeName), timeNodeName);
 
     while (*nextToken && *nextToken != ':') {
         nextToken++;
@@ -189,9 +190,10 @@ Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
     if (!(*nextToken)) {
         return Temporal(a);
     }
+
     octime_t b = (octime_t)strtoull(++nextToken,NULL,10);
 
-    DPRINTF("Temporal::getFromTimeNodeName: %ld %llu / %s\n", b, b, nextToken);
+    DPRINTF("Temporal::getFromTimeNodeName: %llu %llu / %s\n", b, b, nextToken);
 
     while (*nextToken && *nextToken != ':') {
         nextToken++;
