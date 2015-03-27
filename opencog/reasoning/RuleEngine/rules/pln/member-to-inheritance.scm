@@ -2,7 +2,7 @@
 ; MemberToInheritanceRule
 ;	MemberLink( B C )
 ;			becomes
-;	InheritanceLink( {B} C )
+;	InheritanceLink( B C )
 ; -----------------------------------------------------------------------------
 
 (define pln-rule-member-to-inheritance
@@ -18,8 +18,7 @@
 				(GroundedSchemaNode "scm:pln-formula-member-to-inheritance")
 				(ListLink
 					(InheritanceLink
-						(SetLink
-							(VariableNode "$B"))
+						(VariableNode "$B")
 						(VariableNode "$C"))
 					(MemberLink
 						(VariableNode "$B")

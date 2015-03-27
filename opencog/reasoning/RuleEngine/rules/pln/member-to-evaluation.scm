@@ -5,6 +5,7 @@
 ;		becomes
 ;	EvaluationLink (pred D (ListLink B C))
 ; -----------------------------------------------------------------------------
+(include "formulas.scm")
 
 (define pln-rule-member-to-evaluation
 	(BindLink
@@ -49,17 +50,9 @@
 		(EvaluationLink (stv (cog-stv-strength BXDC) (cog-stv-confidence BXDC))
 			(gaddr BXDC)
 			(ListLink
-				(find-replace (cog-outgoing-set (gdddr BXDC)) (VariableNode "$X") (gar BXDC))))))
-
-; -----------------------------------------------------------------------------
-; Helper Function for creating ListLink for EvaluationLink
-; -----------------------------------------------------------------------------
-
-(define (find-replace l old new)
-	(cond
-		((null? l) '())
-		((equal? (car l) old) (cons new (cdr l)))
-		(else
-			(cons (car l) (find-replace (cdr l) old new))))) 
+				(find-replace 
+					(cog-outgoing-set (gdddr BXDC)) 
+					(VariableNode "$X") 
+					(gar BXDC))))))
 
 ; =============================================================================

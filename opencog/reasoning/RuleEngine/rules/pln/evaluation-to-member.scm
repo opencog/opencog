@@ -1,4 +1,4 @@
-; ============================================================================= 
+; =============================================================================
 ; GeneralEvaluationToMemberRule 
 ;	Takes EvaluationLinks with >=2 Arguments and creates a Member Link
 ;
@@ -10,6 +10,8 @@
 ;	MemberLink( B (LambdaLink( Variable $X 
 ;		(EvaluationLink (pred D (ListLink X C))))))
 ; -----------------------------------------------------------------------------
+
+(include "formulas.scm")
 
 (define pln-rule-evaluation-to-member
 	(BindLink
@@ -29,65 +31,45 @@
                         (VariableNode "$D")
                         (VariableNode "$A")))))))
 
-
 ; -----------------------------------------------------------------------------
 ; Evaluation To Member Formula
 ; -----------------------------------------------------------------------------
 
 ; -----------------------------------------------------------------------------
-; Side-effect: TruthValue of the new links stays the same
+; Side-effect: TruthValue of the new link/s stays the same
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-evaluation-to-member DBC)
-	(if (= (cog-arity (gdr DBC)) 0)
-		(begin
-			(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
-				(gdr DBC)
-				(SatisfyingSetLink
-					(VariableNode "$X")
-					(EvaluationLink
-						(gar DBC)
-						(VariableNode "$X"))))
-			(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
-    			(gdr DBC)
-    			(LambdaLink
-        			(VariableNode "$X")
-        			(EvaluationLink
-            			(gar DBC)
-						(VariableNode "$X")))))
-		(pln-create-member DBC '() (cog-outgoing-set (gdr DBC)))))
+(define (pln-formula-evaluation-to-member DA)
+	(if (= (cog-arity (gdr DA)) 0)
+		(MemberLink (stv (cog-stv-strength DA) (cog-stv-confidence DA))
+			(gdr DA)
+			(SatisfyingSetLink
+				(VariableNode "$X")
+				(EvaluationLink
+					(gar DA)
+					(VariableNode "$X"))))
+		(ListLink
+			(create-multiple-links DA '() (cog-outgoing-set (gdr DA))))))
 
-; -----------------------------------------------------------------------------
-; Creating Multiple Links for Multiple Values
-; -----------------------------------------------------------------------------
-
-(define (pln-create-member DBC preceding-nodes trailing-nodes)
+(define (create-multiple-links DA preceding-nodes trailing-nodes)
 	(if (not (null? trailing-nodes))
-		(begin
-			(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
+		(cons
+			(MemberLink (stv (cog-stv-strength DA) (cog-stv-confidence DA))
 				(car trailing-nodes)
 				(SatisfyingSetLink
 					(VariableNode "$X")
 					(EvaluationLink
-						(gar DBC)
+						(gar DA)
 						(ListLink
 							(append
 								preceding-nodes
-								(cons (VariableNode "$X")
+								(cons
+									(VariableNode "$X")
 									(cdr trailing-nodes)))))))
-			(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
-				(car trailing-nodes)
-				(LambdaLink
-					(VariableNode "$X")
-					(EvaluationLink
-						(gar DBC)
-						(ListLink
-							(append
-								preceding-nodes
-								(cons (VariableNode "$X")
-									(cdr trailing-nodes)))))))
-			(pln-create-member DBC 
+			(create-multiple-links 
+				DA
 				(reverse (cons (car trailing-nodes) (reverse preceding-nodes)))
-				(cdr trailing-nodes)))))
+				(cdr trailing-nodes)))
+		'())) 
 
 ; =============================================================================
