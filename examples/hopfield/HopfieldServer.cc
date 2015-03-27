@@ -33,6 +33,7 @@
 #endif
 #include <unistd.h>
 
+#include <opencog/atomutils/AtomSpaceUtils.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
@@ -77,39 +78,29 @@ float HopfieldServer::totalEnergy()
     for (int j = 1; j < N; j++) {
         for (int i = 0; i < N; i++) {
             if (i==j) continue;
-            HandleSeq outgoing;
-            outgoing.push_back(hGrid[i]);
-            outgoing.push_back(hGrid[j]);
             
-            HandleSeq ret;
-            a.getHandlesByOutgoing(back_inserter(ret), outgoing, NULL,
-                           NULL, 2, HEBBIAN_LINK, true);
+            Handle ret(a.getHandle(HEBBIAN_LINK, hGrid[i], hGrid[j]));
             // If no links then skip
-            if (ret.size() == 0) { continue; }
-            if (ret.size() > 1) {
-                logger().error("More than one Hebbian link from unit i_%d to j_%d "
-                        "while trying to get calculate energy of network.", i, j);
-                cout << "ret size=" << ret.size() << " [0]=" << ret[0] << " [1]=" << ret[1] <<endl;
-                return NAN;
-            }
+            if (NULL == ret) { continue; }
+
             float iSTI, jSTI;
             iSTI = a.getNormalisedSTI(hGrid[i],false);
             jSTI = a.getNormalisedSTI(hGrid[j],false);
             if (iSTI > 0.0f || jSTI > 0.0f) {
-                Type rType = a.getType(ret[0]);
+                Type rType = ret->getType();
                 if (rType == SYMMETRIC_HEBBIAN_LINK) {
                     if (iSTI > jSTI)
-                        E += a.getTV(ret[0])->getMean() * (iSTI - jSTI);
+                        E += ret->getTruthValue()->getMean() * (iSTI - jSTI);
                     else
-                        E += a.getTV(ret[0])->getMean() * (jSTI - iSTI);
+                        E += ret->getTruthValue()->getMean() * (jSTI - iSTI);
                 } else if (rType == INVERSE_HEBBIAN_LINK) {
                     if (iSTI > 0.0f && iSTI > jSTI)
-                        E += (a.getTV(ret[0])->getMean()) * (iSTI - jSTI);
+                        E += ret->getTruthValue()->getMean() * (iSTI - jSTI);
                 } else if (rType == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
                     if (iSTI > jSTI)
-                        E += (a.getTV(ret[0])->getMean()) * fabs(iSTI - jSTI);
+                        E += ret->getTruthValue()->getMean() * fabs(iSTI - jSTI);
                     else
-                        E += (a.getTV(ret[0])->getMean()) * fabs(jSTI - iSTI);
+                        E += ret->getTruthValue()->getMean() * fabs(jSTI - iSTI);
                 } else {
                     logger().error("Unknown Hebbian link type between unit s_%d and j_%d."
                             " Ignoring.", i, j);
@@ -412,41 +403,32 @@ void HopfieldServer::addRandomLinks()
 {
     AtomSpace& atomSpace = getAtomSpace();
     HandleSeq countLinks;
-    int amount, attempts = 0;
+    int attempts = 0;
     int maxAttempts = 10000;
 
     // Add links if less than desired number and to replace forgotten links
     atomSpace.getHandlesByType(back_inserter(countLinks), HEBBIAN_LINK, true);
-    amount = this->links - countLinks.size();
+    int amount = this->links - countLinks.size();
 
     logger().fine("Adding %d random Hebbian Links.", amount);
     // Link nodes randomly with amount links
     while (amount > 0 && attempts < maxAttempts) {
         int source, target;
-        HandleSeq outgoing;
-        HandleSeq selected;
 
         source = rng->randint(hGrid.size());
         target = rng->randint(hGrid.size() - 1);
         if (target >= source) target++;
 
-        outgoing.push_back(hGrid[source]);
-        outgoing.push_back(hGrid[target]);
-        atomSpace.getHandlesByOutgoing(back_inserter(selected), outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
+        Handle selected = atomSpace.getHandle(HEBBIAN_LINK, hGrid[source], hGrid[target]);
         // try links going the other way (because some Hebbian links are
         // ordered)
-        if (selected.size() == 0) {
-            outgoing.clear();
-            outgoing.push_back(hGrid[target]);
-            outgoing.push_back(hGrid[source]);
-            // try links going the other way (because some Hebbian links are
-            atomSpace.getHandlesByOutgoing(back_inserter(selected), outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
+        if (selected == NULL) {
+            selected = atomSpace.getHandle(HEBBIAN_LINK, hGrid[target], hGrid[source]);
         }
-        if (selected.size() > 0) {
-            //logger().fine("Trying to add %d -> %d, but already exists %s", source, target, atomSpace.atomAsString(he->handle).c_str());
+        if (selected) {
             attempts++;
         } else {
-            Handle rl = atomSpace.addLink(SYMMETRIC_HEBBIAN_LINK, outgoing);
+            Handle rl = atomSpace.addLink(SYMMETRIC_HEBBIAN_LINK, hGrid[source], hGrid[target]);
             recentlyAddedLinks.push_back(rl);
 #ifdef HAVE_UBIGRAPH
             if (options->visualize) {
@@ -504,7 +486,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
     HandleSeq tempGrid(hGrid);
 
     // get all links from key node
-    HandleSeq neighbours = a.getNeighbors(keyHandle,true,true,HEBBIAN_LINK);
+    HandleSeq neighbours = getNeighbors(keyHandle,true,true,HEBBIAN_LINK);
     
     // for each entry in hGrid
     for (uint i = 0; i < hGrid.size(); i++) {
