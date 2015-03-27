@@ -13,7 +13,6 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 ADD_LIBRARY (atomspace SHARED
     atom_types.h
     Atom.cc
-    AtomSpace.cc
     AtomSpaceImpl.cc
     AtomSpaceInit.cc
     AtomTable.cc

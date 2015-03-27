@@ -59,33 +59,42 @@ class AtomSpace
      * Override and declare copy constructor and equals operator, to
      * prevent the accidental copying of large objects.
      */
-    AtomSpace& operator=(const AtomSpace&);
-    AtomSpace(const AtomSpace&);
+    AtomSpace& operator=(const AtomSpace&)
+    {
+         throw opencog::RuntimeException(TRACE_INFO,
+             "AtomSpace - Cannot copy an object of this class");
+    }
+    AtomSpace(const AtomSpace&)
+    {
+         throw opencog::RuntimeException(TRACE_INFO,
+             "AtomSpace - Cannot copy an object of this class");
+    }
 
     /**
      * The AtomSpace class is just a wrapper of the AtomTable
      */
-    AtomSpaceImpl* _atomSpaceImpl;
+    AtomSpaceImpl _atomSpaceImpl;
 
     inline AttentionBank& getAttentionBank()
-    { return _atomSpaceImpl->bank; }
+    { return _atomSpaceImpl.bank; }
 
     inline const AttentionBank& getAttentionBankconst() const
-    { return _atomSpaceImpl->bank; }
+    { return _atomSpaceImpl.bank; }
 
     inline AtomSpaceImpl& getImpl()
-    { return *_atomSpaceImpl; }
+    { return _atomSpaceImpl; }
 
     inline const AtomSpaceImpl& getImplconst() const
-    { return *_atomSpaceImpl; }
+    { return _atomSpaceImpl; }
 
     inline const AtomTable& getAtomTable() const
     { return getImplconst().atomTable; }
 
 public:
-    AtomSpace(AtomSpace* parent = NULL);
+    AtomSpace(AtomSpace* parent = NULL)
+        : _atomSpaceImpl(parent? parent->_atomSpaceImpl : NULL) {}
 
-    ~AtomSpace();
+    ~AtomSpace() {}
 
     /**
      * Return the number of atoms contained in the space.
