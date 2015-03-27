@@ -71,8 +71,9 @@ void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
         types[0] = AT_TIME_LINK;
         types[1] = AT_TIME_LINK;
 
-        wp.getAtomSpace().getHandlesByOutgoing(back_inserter(result), outputs,
-                                       types, NULL, 2, MEMBER_LINK, false);
+        wp.getAtomSpace().getHandlesByOutgoing(back_inserter(result),
+                                        MEMBER_LINK, outputs,
+                                       types, NULL, 2);
         for (std::list<Handle>::iterator ih = result.begin(); ih != result.end(); ++ih) {
 
             OC_ASSERT((*ih) != Handle::UNDEFINED && wp.getAtomSpace().getArity(*ih) == 2,

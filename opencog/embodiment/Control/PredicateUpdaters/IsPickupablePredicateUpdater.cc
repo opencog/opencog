@@ -106,7 +106,8 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
             Type types[] = { SEME_NODE, CONCEPT_NODE };
             
             atomSpace.getHandlesByOutgoing( back_inserter(parentHandles),
-                                    isMovableFrame, &types[0], NULL, 2, INHERITANCE_LINK, false );
+                                    INHERITANCE_LINK,
+                                    isMovableFrame, &types[0], NULL, 2);
 
             OC_ASSERT(parentHandles.size( ) == 1, 
                       "Invalid number of InheritanceLinks which defines the object type. %d but should be 1", 

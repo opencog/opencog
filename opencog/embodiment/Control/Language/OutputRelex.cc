@@ -73,7 +73,10 @@ std::string OutputRelex::getOutput(AtomSpace &atomSpace, const std::vector< std:
                         Type types[] = {OBJECT_NODE, SEME_NODE};
                         bool lookForSubTypes[] = {true, false};
                         HandleSeq refLinks;
-                        atomSpace.getHandlesByOutgoing( back_inserter(refLinks), realObject, &types[0], &lookForSubTypes[0], 2, REFERENCE_LINK, false );
+                        atomSpace.getHandlesByOutgoing(
+                              back_inserter(refLinks),
+                              REFERENCE_LINK,
+                             realObject, &types[0], &lookForSubTypes[0], 2);
                         
                         if ( refLinks.size( ) > 0 ) {
                             if ( refLinks.size( ) > 1 ) {

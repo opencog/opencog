@@ -990,7 +990,8 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
         // get the handles of all trick
         HandleSeq learningSessionHandles;
         atomSpace->getHandlesByOutgoing(back_inserter(learningSessionHandles),
-                patternToSearchLearningSession, NULL, NULL, 2, INHERITANCE_LINK,
+                INHERITANCE_LINK,
+                patternToSearchLearningSession, NULL, NULL, 2,
                 true);
         for (Handle learningSessionHandle : learningSessionHandles) {
             if (atomSpace->getArity(learningSessionHandle) > 1)  {

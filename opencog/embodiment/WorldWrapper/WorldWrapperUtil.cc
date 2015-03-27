@@ -135,7 +135,7 @@ std::string WorldWrapperUtil::lookupInheritanceLink(
 
     std::vector<Handle> res;
     as.getHandlesByOutgoing(back_inserter(res),
-                    seq, NULL, NULL, 2, INHERITANCE_LINK, false);
+                    INHERITANCE_LINK, seq, NULL, NULL, 2);
     if (res.empty())
         return id::null_obj;
 
@@ -152,8 +152,9 @@ std::string WorldWrapperUtil::lookupExecLink(
     std::vector<Handle> match(3);
     match[0] = h;
     Type t[] = { PREDICATE_NODE, LIST_LINK, LIST_LINK };
-    as.getHandlesByOutgoing(back_inserter(res), match, t,
-                    NULL, 3, EXECUTION_LINK, true);
+    as.getHandlesByOutgoing(back_inserter(res),
+                    EXECUTION_LINK, match, t,
+                    NULL, 3, true);
     if (res.empty())
         return id::null_obj;
     return (as.getName(res[randGen().randint(res.size())]));

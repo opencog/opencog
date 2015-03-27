@@ -317,6 +317,17 @@ public:
     Handle getHandle(Type t, const HandleSeq& outgoing) {
         return getImpl().getLink(t, outgoing);
     }
+    Handle getHandle(Type t, const Handle& ha) {
+        HandleSeq outgoing;
+        outgoing.push_back(ha);
+        return getImpl().getLink(t, outgoing);
+    }
+    Handle getHandle(Type t, const Handle& ha, const Handle& hb) {
+        HandleSeq outgoing;
+        outgoing.push_back(ha);
+        outgoing.push_back(hb);
+        return getImpl().getLink(t, outgoing);
+    }
 
     /** Get the atom referred to by Handle h represented as a string. */
     std::string atomAsString(Handle h, bool terse = true) const {
@@ -621,58 +632,29 @@ public:
     }
 
     /**
-     * Returns the set of atoms with the given target handles and types
-     * (order is considered) in their outgoing sets, where the type and
-     * subclasses of the atoms are optional.
-     *
-     * @param  An array of handles to match the outgoing sets of the
-     *         searched atoms. This array can be empty (or each of its
-     *         elements can be null), if the handle value does not
-     *         matter or if it does not apply to the specific search.
-     *         Note that if this array is not empty, it must contain
-     *         "arity" elements.
-     * @param  An array of target types to match the types of the atoms
-     *         in the outgoing set of searched atoms.
-     * @param  An array of boolean values indicating whether each of the
-     *         above types must also consider subclasses. This array can
-     *         be null, which means that subclasses will not be
-     *         considered.
-     *         Note that if this array is not null, it must contains
-     *         "arity" elements.
-     * @param  The length of the outgoing set of the atoms being
-     * searched.
-     * @param  The optional type of the atom.
-     * @param  Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the matching
-     *         criteria in their outgoing set.
-     *
-     * @note The matched entries are appended to a container whose
-     *       OutputIterator is passed as the first argument. Example
-     *       of call to this method, which would return all entries
-     *       in AtomSpace:
-     * @code
-     *     std::list<Handle> ret;
-     *     atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
-     * @endcode
+     * DEPRECATED! Do NOT USE IN NEW CODE!
+     * Use the Pattern Matcher instead!
      */
-    UnorderedHandleSet getHandlesByOutgoingSet(const HandleSeq& handles,
-                 Type* types,
-                 bool* subclasses,
-                 Arity arity,
+    UnorderedHandleSet getHandlesByOutgoingSet(
                  Type type,
-                 bool subclass);
-
-    template <typename OutputIterator> OutputIterator
-    getHandlesByOutgoing(OutputIterator result,
                  const HandleSeq& handles,
                  Type* types,
                  bool* subclasses,
                  Arity arity,
+                 bool subclass = false);
+
+    template <typename OutputIterator> OutputIterator
+    getHandlesByOutgoing(OutputIterator result,
                  Type type,
-                 bool subclass)
+                 const HandleSeq& handles,
+                 Type* types,
+                 bool* subclasses,
+                 Arity arity,
+                 bool subclass = false)
     {
-        UnorderedHandleSet hs = getHandlesByOutgoingSet(handles,
-                types, subclasses, arity, type, subclass);
+        UnorderedHandleSet hs = getHandlesByOutgoingSet(
+                type, handles,
+                types, subclasses, arity, subclass);
         return std::copy(hs.begin(), hs.end(), result);
     }
 

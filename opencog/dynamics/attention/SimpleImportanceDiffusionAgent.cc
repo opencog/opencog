@@ -495,13 +495,7 @@ SimpleImportanceDiffusionAgent::probabilityVectorHebbianAdjacent(
     for (Handle target : targets)
     {
         // Find the hebbian link that connects the source atom to this target
-        HandleSeq searchAtoms(2);
-        searchAtoms[0] = source;
-        searchAtoms[1] = target;
-        HandleSeq resultList;
-        as->getHandlesByOutgoing(back_inserter(resultList), searchAtoms, NULL, 
-                                 NULL, 2, ASYMMETRIC_HEBBIAN_LINK, false);
-        Handle link = resultList.front();
+        Handle link = as->getHandle(ASYMMETRIC_HEBBIAN_LINK, source, target);
         
         // Calculate the discounted diffusion amount based on the link
         // attributes

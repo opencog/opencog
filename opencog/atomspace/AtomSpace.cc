@@ -88,11 +88,12 @@ Handle AtomSpace::addPrefixedNode(Type t, const std::string& prefix)
     return addNode(t, name);
 }
 
-UnorderedHandleSet AtomSpace::getHandlesByOutgoingSet(const HandleSeq& handles,
+UnorderedHandleSet AtomSpace::getHandlesByOutgoingSet(
+                                     Type type,
+                                     const HandleSeq& handles,
                                      Type* types,
                                      bool* subclasses,
                                      Arity arity,
-                                     Type type,
                                      bool subclass)
 {
     // Check if it is the special case of looking for an specific atom

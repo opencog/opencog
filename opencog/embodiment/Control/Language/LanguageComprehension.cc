@@ -155,7 +155,8 @@ HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string&
     Type types[] = {PREDICATE_NODE, LIST_LINK };
     HandleSeq evalLinks;
     as.getHandlesByOutgoing( back_inserter(evalLinks),
-                     commands, &types[0], NULL, 2, EVALUATION_LINK, false );
+                      EVALUATION_LINK,
+                     commands, &types[0], NULL, 2);
     logger().debug( "LanguageComprehension::%s - Number of EvaluationLinks for Predicate '%s': %d",
                     __FUNCTION__, predicateName.c_str(), evalLinks.size() );
 
@@ -287,8 +288,9 @@ std::string LanguageComprehension::resolveFrames2Sentence(void)
         Type inheritanceLinkTypes[] = { PREDICATE_NODE, DEFINED_FRAME_NODE };
         HandleSeq inheritanceLinks;
         as.getHandlesByOutgoing( back_inserter( inheritanceLinks ),
+                         INHERITANCE_LINK,
                          inheritanceLink,
-                         &inheritanceLinkTypes[0], NULL, 2, INHERITANCE_LINK, false );
+                         &inheritanceLinkTypes[0], NULL, 2);
 
         // If it is a valid frame instance, then retrieve the frame name
         if ( inheritanceLinks.size() > 0 ) {
@@ -627,7 +629,8 @@ void LanguageComprehension::answerQuestion()
                 Type types[] = {PREDICATE_NODE, LIST_LINK };
                 HandleSeq evalLinks;
                 atomSpace.getHandlesByOutgoing( back_inserter(evalLinks),
-                                        link, &types[0], NULL, 2, EVALUATION_LINK, false );
+                               EVALUATION_LINK,
+                                        link, &types[0], NULL, 2);
 
                 // search for unknown terms
                 bool unknownTermFound = false;
