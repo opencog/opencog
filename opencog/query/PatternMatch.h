@@ -63,8 +63,8 @@ class PatternMatch
 		std::set<Handle> _varset;
 		VariableTypeMap _typemap;
 
-		/// Handle of the ImplicationLink
-		Handle _himpl;
+		/// Handle of the body of the expression.
+		Handle _body;
 
 		/// The actual clauses. Set by validate_implication()
 		Handle _hclauses;
@@ -78,24 +78,23 @@ class PatternMatch
 		bool _used;
 
 		// Validate the top-level BindLink only
-		void validate_bindvars(Handle)
-			throw (InvalidParamException);
+		void validate_bindvars(const Handle&);
 
-		// Validate the strcture of the ImplicationLink
-		void validate_implication(Handle)
-			throw (InvalidParamException);
+		// vildate the variable decls
+		void validate_vardecl(const Handle&);
+
+		// Validate the strcuture of the ImplicationLink
+		void validate_implication(const Handle&);
 
 		// Validate the clauses inside the ImplicationLink
 		void validate_clauses(std::set<Handle>& vars,
-		                      std::vector<Handle>& clauses)
-			throw (InvalidParamException);
+		                      std::vector<Handle>& clauses);
 
 	public:
 		PatternMatch(void);
 
 		// See PatternMatch.cc for comments
-		void validate(Handle)
-			throw (InvalidParamException);
+		void validate(Handle);
 
 		void match(PatternMatchCallback *,
 		           Handle vars,

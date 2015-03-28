@@ -276,53 +276,29 @@ int PatternMatch::get_vartype(Handle htypelink,
 
 /* ================================================================= */
 /**
- * Validate a BindLink for syntax correctness.
+ * Validate variable declarations for syntax correctness.
  *
- * Given a BindLink, this will check to make sure that the variable
- * declarations are appropriate.  Thus, for example, a structure
- * similar to the below is expected.
+ * This will check to make sure that a set of variable declarations are
+ * of a reasonable form. Thus, for example, a structure similar to the
+ * below is expected.
  *
- *    BindLink
  *       ListLink
  *          VariableNode "$var0"
  *          VariableNode "$var1"
- *       ImplicationLink
- *          etc ...
- *
- * The BindLink must indicate the bindings of the variables, and
- * (optionally) limit the types of acceptable groundings for the
- * varaibles.  The ImplicationLink is not validated here, it is
- * validated by validate_implication()
+ *          TypedVariableLink
+ *             VariableNode "$var2"
+ *             TypeNode  "ConceptNode"
+ *          TypedVariableLink
+ *             VariableNode "$var3"
+ *             TypeChoice
+ *                 TypeNode  "PredicateNode"
+ *                 TypeNode  "GroundedPredicateNode"
  *
  * As a side-effect, the variables and type restrictions are unpacked.
  */
 
-void PatternMatch::validate_bindvars(Handle hbindlink)
-	throw (InvalidParamException)
+void PatternMatch::validate_vardecl(const Handle& hdecls)
 {
-	// Must be non-empty.
-	LinkPtr lbl(LinkCast(hbindlink));
-	if (NULL == lbl)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a BindLink");
-
-	// Type must be as expected
-	Type tscope = hbindlink->getType();
-	if (BIND_LINK != tscope)
-	{
-		const std::string& tname = classserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a BindLink, got %s", tname.c_str());
-	}
-
-	const std::vector<Handle>& oset = lbl->getOutgoingSet();
-	if (2 != oset.size())
-		throw InvalidParamException(TRACE_INFO,
-			"BindLink has wrong size %d", oset.size());
-
-	Handle hdecls(oset[0]);  // VariableNode declarations
-	_himpl = oset[1];   // ImplicationLink
-
 	// Expecting the declaration list to be either a single
 	// variable, or a list of variable declarations
 	Type tdecls = hdecls->getType();
@@ -371,6 +347,58 @@ void PatternMatch::validate_bindvars(Handle hbindlink)
 
 /* ================================================================= */
 /**
+ * Validate a BindLink for syntax correctness.
+ *
+ * Given a BindLink, this will check to make sure that the variable
+ * declarations are appropriate.  Thus, for example, a structure
+ * similar to the below is expected.
+ *
+ *    BindLink
+ *       ListLink
+ *          VariableNode "$var0"
+ *          VariableNode "$var1"
+ *       ImplicationLink
+ *          etc ...
+ *
+ * The BindLink must indicate the bindings of the variables, and
+ * (optionally) limit the types of acceptable groundings for the
+ * varaibles.  The ImplicationLink is not validated here, it is
+ * validated by validate_implication()
+ *
+ * As a side-effect, the variables and type restrictions are unpacked.
+ */
+
+void PatternMatch::validate_bindvars(const Handle& hbindlink)
+{
+	// Must be non-empty.
+	LinkPtr lbl(LinkCast(hbindlink));
+	if (NULL == lbl)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a BindLink");
+
+	// Type must be as expected
+	Type tscope = hbindlink->getType();
+	if (BIND_LINK != tscope and SATISFACTION_LINK != tscope)
+	{
+		const std::string& tname = classserver().getTypeName(tscope);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a SatisfactionLink or BindLink, got %s", tname.c_str());
+	}
+
+	// Must have variable decls and body
+	const HandleSeq& oset = lbl->getOutgoingSet();
+	if (2 != oset.size())
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting variabe decls and body, got size %d", oset.size());
+
+	Handle hdecls(oset[0]);  // VariableNode declarations
+	_body = oset[1];         // Body
+
+	validate_vardecl(hdecls);
+}
+
+/* ================================================================= */
+/**
  * Validate a ImplicationLink for syntax correctness.
  *
  * Given an ImplicatioLink, this will check to make sure that
@@ -388,8 +416,7 @@ void PatternMatch::validate_bindvars(Handle hbindlink)
  * As a side-effect, if SomeLink is an AndLink, the list of clauses
  * is unpacked.
  */
-void PatternMatch::validate_implication (Handle himplication)
-	throw (InvalidParamException)
+void PatternMatch::validate_implication(const Handle& himplication)
 {
 	// Must be non-empty.
 	LinkPtr limplication(LinkCast(himplication));
@@ -434,10 +461,9 @@ void PatternMatch::validate_implication (Handle himplication)
  * Run the full validation suite.
  */
 void PatternMatch::validate(Handle hbindlink)
-	throw (InvalidParamException)
 {
 	validate_bindvars(hbindlink);
-	validate_implication(_himpl);
+	validate_implication(_body);
 	validate_clauses(_varset, _clauses);
 }
 
@@ -469,7 +495,7 @@ void PatternMatch::do_bindlink (Handle hbindlink,
 {
 	validate_bindvars(hbindlink);
 	implicator.set_type_restrictions(_typemap);
-	do_imply(_himpl, implicator, _varset);
+	do_imply(_body, implicator, _varset);
 }
 
 void PatternMatch::do_imply (Handle himplication,

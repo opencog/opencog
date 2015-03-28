@@ -264,7 +264,6 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 void PatternMatch::validate_clauses(std::set<Handle>& vars,
                                     std::vector<Handle>& clauses)
 
-	throw (InvalidParamException)
 {
 	// Make sure that the user did not pass in bogus clauses.
 	// Make sure that every clause contains at least one variable.
