@@ -126,6 +126,7 @@ class SchemeSmob
 		static SCM ss_ptv_p(SCM);
 		static SCM ss_ftv_p(SCM);
 		static SCM take_tv(TruthValue *);
+		static SCM tv_to_scm(TruthValuePtr);
 		static SCM ss_tv_get_value(SCM);
 
 		// Atom Spaces
