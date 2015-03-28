@@ -190,4 +190,9 @@ Handle opencog::validate_bindlink(AtomSpace* as, Handle bindlink)
 	return bindlink;
 }
 
+TruthValuePtr opencog::satisfaction_link(AtomSpace* as, Handle bindlink)
+{
+	return TruthValue::TRUE_TV();
+}
+
 /* ===================== END OF FILE ===================== */

@@ -2,13 +2,14 @@
  * PatternSCM.h
  *
  * Guile scheme bindings for the pattern matcher
- * Copyright (c) 2008, 2014 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
 #ifndef _OPENCOG_PATTERN_SCM_H
 #define _OPENCOG_PATTERN_SCM_H
 
 #include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/TruthValue.h>
 
 namespace opencog {
 
@@ -18,11 +19,16 @@ class AtomSpace;
 class PatternWrap
 {
 	private:
-		Handle wrapper(Handle);
 		Handle (*_func)(AtomSpace*, Handle);
+		Handle wrapper(Handle);
+
+		TruthValuePtr (*_pred)(AtomSpace*, Handle);
+		TruthValuePtr prapper(Handle);
+
 		const char *_name;  // scheme name of the c++ function.
 	public:
 		PatternWrap(Handle (*)(AtomSpace*, Handle), const char*);
+		PatternWrap(TruthValuePtr (*)(AtomSpace*, Handle), const char*);
 };
 
 class PatternSCM
