@@ -5,14 +5,14 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$top relationship")
-                (ListLink
+                (TypeChoice
                     (TypeNode "DefinedLinguisticRelationshipNode")
                     (TypeNode "PrepositionalRelationshipNode")
                 )
             )
             (TypedVariableLink
                 (VariableNode "$other relationship")
-                (ListLink
+                (TypeChoice
                     (TypeNode "DefinedLinguisticRelationshipNode")
                     (TypeNode "PrepositionalRelationshipNode")
                 )

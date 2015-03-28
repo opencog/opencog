@@ -433,8 +433,6 @@ class HobbsAgent(MindAgent):
               "opencog/nlp/anaphora/rules/getWords.scm",
               "opencog/nlp/anaphora/rules/isIt.scm",
 
-              "opencog/nlp/anaphora/rules/filtersGenerator.scm",
-
               "opencog/nlp/anaphora/rules/filters/filter-#1.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#2.scm",
               "opencog/nlp/anaphora/rules/filters/filter-#3.scm",

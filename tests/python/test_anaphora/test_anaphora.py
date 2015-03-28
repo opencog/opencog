@@ -28,7 +28,7 @@ class AnaphoraUnitTester(TestCase):
               "opencog/nlp/types/nlp_types.scm",
               "opencog/dynamics/attention/attention_types.scm",
               "opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm",
-              "opencog/learning/pln/pln_types.scm",
+              "opencog/reasoning/pln/pln_types.scm",
               "opencog/scm/apply.scm",
               "opencog/scm/file-utils.scm",
               "opencog/scm/persistence.scm",
@@ -41,7 +41,6 @@ class AnaphoraUnitTester(TestCase):
               "opencog/nlp/scm/nlp-utils.scm",
               "opencog/nlp/scm/disjunct-list.scm",
               "opencog/nlp/scm/processing-utils.scm",
-              "opencog/nlp/scm/relex-to-logic.scm",
               ]
 
 

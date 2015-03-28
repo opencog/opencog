@@ -5,7 +5,7 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$relationshipNode")
-                (ListLink
+                (TypeChoice
                     (TypeNode "DefinedLinguisticRelationshipNode")
                     (TypeNode "PrepositionalRelationshipNode")
                 )

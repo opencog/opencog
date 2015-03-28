@@ -140,13 +140,13 @@ class PLNUnitTester(TestCase):
         # Default to dev mode
         coreTypes = "atomspace/core_types.scm"
         utilities = "scm/utilities.scm"
-        plnTypes = "learning/pln/pln_types.scm"
+        plnTypes = "reasoning/pln/pln_types.scm"
 
         if not __DEV_MODE__:
             coreTypes = os.path.join(test_pln_directory, 
                     '../../../build/opencog/atomspace/core_types.scm')
             utilities = os.path.join(test_pln_directory, 
-                    '../../../scm/utilities.scm')
+                    '../../../opencog/scm/utilities.scm')
             plnTypes = os.path.join(test_pln_directory, 
                     '../../../build/opencog/reasoning/pln/pln_types.scm')
 

@@ -265,7 +265,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 	else
 	{
 		logger().warn("%s: Unexpected contents in TypedVariableLink\n"
-				        "Expected TypeNode or ListLink, got %s",
+				        "Expected TypeNode or TypeChoice, got %s",
 		              __FUNCTION__,
 		              classserver().getTypeName(t).c_str());
 		return 2;
