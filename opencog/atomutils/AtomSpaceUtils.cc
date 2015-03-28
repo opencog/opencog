@@ -107,4 +107,26 @@ HandleSeq getNeighbors(const Handle& h, bool fanin,
     return answer;
 }
 
+
+Handle addPrefixedNode(AtomSpace& as, Type t, const std::string& prefix)
+{
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    static const int len = 8;
+    std::string name;
+    Handle result;
+    // Keep trying random suffixes until a non-existant name is generated.
+    do {
+        name = prefix;
+        for (int i = 0; i < len; ++i) {
+            name += alphanum[rand() % (sizeof(alphanum) - 1)];
+        }
+        result = as.getHandle(t, name);
+    } while (as.isValidHandle(result));
+
+    return as.addNode(t, name);
+}
+
 }

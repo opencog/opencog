@@ -641,11 +641,11 @@ implements the raw capability: it does not implement the policy.
 There is one thing that is automatic: when a new atom is added to the
 atomspace, then the database is automatically searched, to see if this
 atom already exists.  If it does, then its truth value is restored.
-However, **AND THIS IS IMPRTANT**, the incoming set of the atom is not
+However, **AND THIS IS IMPORTANT**, the incoming set of the atom is not
 automatically fecthed from storage.  This must be done manually, using
 either C++:
 ```
-   AtomSpace::getImpl()->fetchIncomingSet(h, true);
+   AtomSpace::fetchIncomingSet(h, true);
 ```
 or the scheme call
 ```

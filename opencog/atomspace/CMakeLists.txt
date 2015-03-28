@@ -14,7 +14,6 @@ ADD_LIBRARY (atomspace SHARED
     atom_types.h
     Atom.cc
     AtomSpace.cc
-    AtomSpaceImpl.cc
     AtomSpaceInit.cc
     AtomTable.cc
     AttentionValue.cc
@@ -64,7 +63,6 @@ ENDIF (CYGWIN)
 INSTALL (FILES
     Atom.h
     AtomSpace.h
-    AtomSpaceUtils.h
     ${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
     AttentionValue.h
     AttentionBank.h

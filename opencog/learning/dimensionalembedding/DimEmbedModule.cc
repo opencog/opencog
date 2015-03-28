@@ -28,6 +28,7 @@
 #include <string>
 #include <utility>
 
+#include <opencog/atomutils/AtomSpaceUtils.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/guile/SchemePrimitive.h>
@@ -839,7 +840,7 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
     for (pQueue_t::iterator it = clusters.begin();it!=clusters.end();++it) {
         const HandleSeq& cluster = it->second.first;
         const std::vector<double>& centroid = it->second.second;
-        Handle newNode = as->addPrefixedNode(CONCEPT_NODE, "cluster_");
+        Handle newNode = addPrefixedNode(*as, CONCEPT_NODE, "cluster_");
         std::vector<double> strNumer(0,numDims);
         std::vector<double> strDenom(0,numDims);
         //Connect newNode to each handle in its cluster and each pivot
@@ -969,7 +970,7 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         if (dist1>dist2) newVec[i]=embedVec2[i];
     }
     std::string prefix("blend_"+as->getName(n1)+"_"+as->getName(n2)+"_");
-    Handle newNode = as->addPrefixedNode(as->getType(n1), prefix);
+    Handle newNode = addPrefixedNode(*as, n1->getType(), prefix);
 
     for (unsigned int i=0; i<numDims; i++) {
         double strength = sqrt(newVec[i]);

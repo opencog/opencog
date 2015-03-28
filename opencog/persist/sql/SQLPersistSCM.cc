@@ -192,7 +192,7 @@ void SQLPersistSCM::do_open(const std::string& dbname,
 	if (NULL == as)
 		as = SchemeSmob::ss_get_env_as("sql-open");
 #endif
-	as->getImpl().registerBackingStore(_backing);
+	as->registerBackingStore(_backing);
 }
 
 void SQLPersistSCM::do_close(void)
@@ -206,7 +206,7 @@ void SQLPersistSCM::do_close(void)
 	if (NULL == as)
 		as = SchemeSmob::ss_get_env_as("sql-close");
 #endif
-	as->getImpl().unregisterBackingStore(_backing);
+	as->unregisterBackingStore(_backing);
 
 	_backing->set_store(NULL);
 	delete _store;

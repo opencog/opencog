@@ -30,6 +30,7 @@
 
 #include <boost/range/irange.hpp>
 
+#include <opencog/atomutils/AtomSpaceUtils.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/server/CogServer.h>
@@ -77,7 +78,7 @@ int BenchmarkModule::fullyConnectedTestConcurrent(int numAtoms)
 
     OMP_ALGO::for_each(indices.begin(), indices.end(), [this](int index)
     {
-        as->addPrefixedNode(CONCEPT_NODE, "test_atom_");
+        addPrefixedNode(*as, CONCEPT_NODE, "test_atom_");
     });
 
     // Retrieve all the ConceptNodes into an iterator

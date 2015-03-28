@@ -23,7 +23,6 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AtomSpaceImpl.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -182,7 +181,7 @@ public:
     }
 
     void testVLTI() {
-        AtomSpaceImpl* atomSpace = new AtomSpaceImpl();
+        AtomSpace* atomSpace = new AtomSpace();
         vector<Handle> atoms = createSimpleGraph(atomSpace, "vlti");
         
         TS_ASSERT(getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
@@ -207,7 +206,7 @@ public:
     void testComparisons() {
         logger().debug("BEGIN TEST:");
         
-        AtomSpaceImpl* atomSpace = new AtomSpaceImpl();
+        AtomSpace* atomSpace = new AtomSpace();
         vector<Handle> atoms = createSimpleGraph(atomSpace, "comparisons");
         
         logger().debug("STISort");
@@ -254,7 +253,7 @@ public:
     }
 
     // copied from AtomSpaceUTest.cxxtest, but modified for the test testComparisons 
-    vector<Handle> createSimpleGraph(AtomSpaceImpl* atomSpace, const char* baseName) {
+    vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName) {
         char buf[256];
         vector<Handle> testAtoms;
         int baseNameLength;

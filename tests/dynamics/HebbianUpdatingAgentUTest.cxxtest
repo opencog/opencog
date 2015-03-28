@@ -75,7 +75,6 @@ std::vector<Handle> createCase(bool srcInAF, int srcSTI, bool targInAF,
         int targSTI, bool inverse, float linkStr, std::string baseName)
 {
     AtomSpace* a = &server().getAtomSpace();
-    AttentionBank& bank = a->getAttentionBank();
     vector<Handle> testAtoms;
     std::ostringstream buf1;
     std::ostringstream buf2;
@@ -84,19 +83,19 @@ std::vector<Handle> createCase(bool srcInAF, int srcSTI, bool targInAF,
     Handle h1 = a->addNode(CONCEPT_NODE, buf1.str().c_str());
     h1->setTruthValue(tv1);
     a->setSTI(h1,srcSTI);
-    if (srcSTI >= bank.getMaxSTI())
-        bank.updateMaxSTI(srcSTI);
-    else if (srcSTI <= bank.getMinSTI())
-        bank.updateMinSTI(srcSTI);
+    if (srcSTI >= a->getMaxSTI())
+        a->updateMaxSTI(srcSTI);
+    else if (srcSTI <= a->getMinSTI())
+        a->updateMinSTI(srcSTI);
     testAtoms.push_back(h1);
     buf2 << baseName << 2;
     Handle h2 = a->addNode(CONCEPT_NODE, buf2.str().c_str());
     h2->setTruthValue(tv1);
     a->setSTI(h2,targSTI);
-    if (targSTI >= bank.getMaxSTI())
-        bank.updateMaxSTI(targSTI);
-    else if (targSTI <= bank.getMinSTI())
-        bank.updateMinSTI(targSTI);
+    if (targSTI >= a->getMaxSTI())
+        a->updateMaxSTI(targSTI);
+    else if (targSTI <= a->getMinSTI())
+        a->updateMinSTI(targSTI);
     testAtoms.push_back(h2);
 
     Handle l;

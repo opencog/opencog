@@ -4,7 +4,10 @@ ADD_LIBRARY (atomutils SHARED
 	PatternUtils.cc
 )
 
+ADD_DEPENDENCIES(atomutils opencog_atom_types)
+
 TARGET_LINK_LIBRARIES(atomutils
+	atomspace
 	cogutil
 )
 
