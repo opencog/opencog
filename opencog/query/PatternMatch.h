@@ -29,6 +29,7 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/query/Implicator.h>
 #include <opencog/query/PatternMatchCallback.h>
+#include <opencog/query/Satisfier.h>
 
 namespace opencog {
 
@@ -36,7 +37,7 @@ class PatternMatch
 {
 	private:
 		// See PatternMatch.cc for comments
-		static int get_vartype(Handle,
+		static int get_vartype(const Handle&,
 		                       std::set<Handle>&,
 		                       VariableTypeMap&);
 
@@ -46,7 +47,7 @@ class PatternMatch
 		              std::vector<Handle>& clauses);
 
 		// See PatternMatch.cc for comments
-		void do_imply(Handle, Implicator&, std::set<Handle>&);
+		void do_imply(const Handle&, Implicator&, std::set<Handle>&);
 
 		bool recursive_virtual(PatternMatchCallback *cb,
 		            const std::vector<Handle>& virtuals,
@@ -98,18 +99,19 @@ class PatternMatch
 		PatternMatch(void);
 
 		// See PatternMatch.cc for comments
-		void validate(Handle);
+		void validate(const Handle&);
 
 		void match(PatternMatchCallback *,
-		           Handle vars,
-		           Handle clauses);
+		           const Handle& vars,
+		           const Handle& clauses);
 
 		// See PatternMatch.cc for comments
-		void do_bindlink(Handle, Implicator&);
+		void do_bindlink(const Handle&, Implicator&);
+		void do_satlink(const Handle&, Satisfier&);
 
 		// Deprecated: DO NOT USE IN NEW ODE!
 		// This is used only in the unit-test cases.
-		void do_imply(Handle, Implicator&);
+		void do_imply(const Handle&, Implicator&);
 };
 
 } // namespace opencog

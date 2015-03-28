@@ -34,8 +34,8 @@ PatternMatch::PatternMatch(void) : _used(false) {}
 /// See the documentation for do_match() to see what this function does.
 /// This is just a convenience wrapper around do_match().
 void PatternMatch::match(PatternMatchCallback *cb,
-                         Handle hvarbles,
-                         Handle hclauses)
+                         const Handle& hvarbles,
+                         const Handle& hclauses)
 {
 	// Both must be non-empty.
 	LinkPtr lclauses(LinkCast(hclauses));
@@ -150,7 +150,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
  * method repeatedly on them, until one is exhausted.
  */
 
-void PatternMatch::do_imply (Handle himplication,
+void PatternMatch::do_imply (const Handle& himplication,
                              Implicator &impl,
                              std::set<Handle>& varset)
 {
@@ -195,7 +195,7 @@ typedef std::pair<Handle, const std::set<Type> > ATPair;
  * and the list of allowed types are associated with the variable
  * via the map "typemap".
  */
-int PatternMatch::get_vartype(Handle htypelink,
+int PatternMatch::get_vartype(const Handle& htypelink,
                               std::set<Handle> &vset,
                               VariableTypeMap &typemap)
 {
@@ -440,7 +440,7 @@ void PatternMatch::unbundle_clauses(const Handle& clauses)
 /**
  * Run the full validation suite.
  */
-void PatternMatch::validate(Handle hbindlink)
+void PatternMatch::validate(const Handle& hbindlink)
 {
 	unbundle_body(hbindlink);
 	validate_vardecl(_vardecl);
@@ -472,7 +472,7 @@ void PatternMatch::validate(Handle hbindlink)
  * the types of acceptable groundings for the varaibles.
  */
 
-void PatternMatch::do_bindlink (Handle hbindlink,
+void PatternMatch::do_bindlink (const Handle& hbindlink,
                                 Implicator& implicator)
 {
 	unbundle_body(hbindlink);
@@ -484,9 +484,20 @@ void PatternMatch::do_bindlink (Handle hbindlink,
 	do_imply(_body, implicator, _varset);
 }
 
+void PatternMatch::do_satlink (const Handle& hsatlink,
+                               Satisfier& sater)
+{
+	unbundle_body(hsatlink);
+	validate_vardecl(_vardecl);
+	validate_body(_body);
+	unbundle_clauses(_hclauses);
+
+	do_match(&sater, _varset, _clauses);
+}
+
 /// Deprecated; do not use in new code.
 /// This is used only in test cases.
-void PatternMatch::do_imply (Handle himplication,
+void PatternMatch::do_imply (const Handle& himplication,
                              Implicator &impl)
 {
 	std::set<Handle> varset;
