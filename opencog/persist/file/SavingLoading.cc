@@ -80,8 +80,6 @@ void SavingLoading::save(const char *fileName,
                           "SavingLoading - Unable to open file '%s' for writing", fileName);
     }
 
-    // TODO: bad bad - saving and loading should be integrated as a request or
-    // use the AtomSpace API.
     AtomTable& atomTable = const_cast<AtomTable&> (atomSpace.getAtomTable());
 
     // stores the total number of atoms in the system

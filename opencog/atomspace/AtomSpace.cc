@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/AtomSpaceImpl.cc
+ * opencog/atomspace/AtomSpace.cc
  *
  * Copyright (c) 2008-2010 OpenCog Foundation
  * Copyright (c) 2009, 2013 Linas Vepstas
@@ -37,7 +37,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 
-#include "AtomSpaceImpl.h"
+#include "AtomSpace.h"
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -52,49 +52,51 @@ using namespace opencog;
 
 // ====================================================================
 
-AtomSpaceImpl::AtomSpaceImpl(AtomSpaceImpl* parent) :
+AtomSpace::AtomSpace(AtomSpace* parent) :
     atomTable(parent? &parent->atomTable : NULL),
-    bank(atomTable)
+    bank(atomTable),
+    backing_store(NULL)
 {
-    backing_store = NULL;
-    DPRINTF("AtomSpaceImpl::Constructor AtomTable address: %p\n", &atomTable);
 }
 
-AtomSpaceImpl::~AtomSpaceImpl()
+AtomSpace::~AtomSpace()
 {
     // Be sure to disconnect the attention bank signals before the
     // atom table destructor runs. XXX FIXME yes this is an ugly hack.
     bank.shutdown();
 }
 
+AtomSpace::AtomSpace(const AtomSpace&) :
+    atomTable(NULL),
+    bank(atomTable),
+    backing_store(NULL)
+{
+     throw opencog::RuntimeException(TRACE_INFO,
+         "AtomSpace - Cannot copy an object of this class");
+}
+
+AtomSpace& AtomSpace::operator=(const AtomSpace&)
+{
+     throw opencog::RuntimeException(TRACE_INFO,
+         "AtomSpace - Cannot copy an object of this class");
+}
+
+
 // ====================================================================
 
-void AtomSpaceImpl::registerBackingStore(BackingStore *bs)
+void AtomSpace::registerBackingStore(BackingStore *bs)
 {
     backing_store = bs;
 }
 
-void AtomSpaceImpl::unregisterBackingStore(BackingStore *bs)
+void AtomSpace::unregisterBackingStore(BackingStore *bs)
 {
     if (bs == backing_store) backing_store = NULL;
 }
 
 // ====================================================================
 
-AtomSpaceImpl& AtomSpaceImpl::operator=(const AtomSpaceImpl& other)
-{
-    throw opencog::RuntimeException(TRACE_INFO,
-            "AtomSpaceImpl - Cannot copy an object of this class");
-}
-
-AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other)
-    : bank(atomTable)
-{
-    throw opencog::RuntimeException(TRACE_INFO,
-            "AtomSpaceImpl - Cannot copy an object of this class");
-}
-
-Handle AtomSpaceImpl::addAtom(AtomPtr atom, bool async)
+Handle AtomSpace::addAtom(AtomPtr atom, bool async)
 {
     // Is this atom already in the atom table?
     Handle hexist(atomTable.getHandle(atom));
@@ -117,7 +119,7 @@ Handle AtomSpaceImpl::addAtom(AtomPtr atom, bool async)
     return atomTable.add(atom, async);
 }
 
-Handle AtomSpaceImpl::addNode(Type t, const string& name,
+Handle AtomSpace::addNode(Type t, const string& name,
                               bool async)
 {
     // Is this atom already in the atom table?
@@ -137,7 +139,7 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name,
     return atomTable.add(createNode(t, name), async);
 }
 
-Handle AtomSpaceImpl::getNode(Type t, const string& name)
+Handle AtomSpace::getNode(Type t, const string& name)
 {
     // Is this atom already in the atom table?
     Handle hexist = atomTable.getHandle(t, name);
@@ -157,7 +159,7 @@ Handle AtomSpaceImpl::getNode(Type t, const string& name)
     return Handle::UNDEFINED;
 }
 
-Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
+Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
                               bool async)
 {
     // Is this atom already in the atom table?
@@ -187,7 +189,7 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
     return atomTable.add(createLink(t, outgoing), async);
 }
 
-Handle AtomSpaceImpl::getLink(Type t, const HandleSeq& outgoing)
+Handle AtomSpace::getLink(Type t, const HandleSeq& outgoing)
 {
     // Is this atom already in the atom table?
     Handle hexist = atomTable.getHandle(t, outgoing);
@@ -215,7 +217,7 @@ Handle AtomSpaceImpl::getLink(Type t, const HandleSeq& outgoing)
     return Handle::UNDEFINED;
 }
 
-void AtomSpaceImpl::storeAtom(Handle h)
+void AtomSpace::storeAtom(Handle h)
 {
     if (NULL == backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
@@ -223,7 +225,7 @@ void AtomSpaceImpl::storeAtom(Handle h)
     backing_store->storeAtom(h);
 }
 
-Handle AtomSpaceImpl::fetchAtom(Handle h)
+Handle AtomSpace::fetchAtom(Handle h)
 {
     if (NULL == backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
@@ -282,13 +284,13 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
     return atomTable.add(h, false);
 }
 
-Handle AtomSpaceImpl::getAtom(Handle h)
+Handle AtomSpace::getAtom(Handle h)
 {
     if (atomTable.holds(h)) return h;
     return fetchAtom(h);
 }
 
-Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
+Handle AtomSpace::fetchIncomingSet(Handle h, bool recursive)
 {
     if (NULL == backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
@@ -311,16 +313,16 @@ Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
     return h;
 }
 
-bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
+bool AtomSpace::removeAtom(Handle h, bool recursive)
 {
     if (backing_store) {
 // Under construction ....
-        throw RuntimeException(TRACE_INFO, "Not Implemented!!!");
+        throw RuntimeException(TRACE_INFO, "Not emented!!!");
     }
     return 0 < atomTable.extract(h, recursive).size();
 }
 
-void AtomSpaceImpl::clear()
+void AtomSpace::clear()
 {
     std::vector<Handle> allAtoms;
 

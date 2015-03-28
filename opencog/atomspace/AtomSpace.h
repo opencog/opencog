@@ -30,8 +30,10 @@
 #include <set>
 #include <vector>
 
-#include <opencog/atomspace/AtomSpaceImpl.h>
+#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/AttentionBank.h>
 #include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/BackingStore.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
@@ -59,62 +61,45 @@ class AtomSpace
      * Override and declare copy constructor and equals operator, to
      * prevent the accidental copying of large objects.
      */
-    AtomSpace& operator=(const AtomSpace&)
-    {
-         throw opencog::RuntimeException(TRACE_INFO,
-             "AtomSpace - Cannot copy an object of this class");
-    }
-    AtomSpace(const AtomSpace&)
-    {
-         throw opencog::RuntimeException(TRACE_INFO,
-             "AtomSpace - Cannot copy an object of this class");
-    }
+    AtomSpace& operator=(const AtomSpace&);
+    AtomSpace(const AtomSpace&);
+
+    AtomTable atomTable;
+    AttentionBank bank;
+    /**
+     * Used to fetch atoms from disk.
+     */
+    BackingStore *backing_store;
+
+    AtomTable& getAtomTable(void) { return atomTable; }
+protected:
 
     /**
-     * The AtomSpace class is just a wrapper of the AtomTable
+     * Register a provider of backing storage.
      */
-    AtomSpaceImpl _atomSpaceImpl;
-
-    inline AttentionBank& getAttentionBank()
-    { return _atomSpaceImpl.bank; }
-
-    inline const AttentionBank& getAttentionBankconst() const
-    { return _atomSpaceImpl.bank; }
-
-    inline AtomSpaceImpl& getImpl()
-    { return _atomSpaceImpl; }
-
-    inline const AtomSpaceImpl& getImplconst() const
-    { return _atomSpaceImpl; }
-
-    inline const AtomTable& getAtomTable() const
-    { return getImplconst().atomTable; }
+    void registerBackingStore(BackingStore *);
+    void unregisterBackingStore(BackingStore *);
 
 public:
-    AtomSpace(AtomSpace* parent = NULL)
-        : _atomSpaceImpl(parent? parent->_atomSpaceImpl : NULL) {}
-
-    ~AtomSpace() {}
+    AtomSpace(AtomSpace* parent = NULL);
+    ~AtomSpace();
 
     /**
      * Return the number of atoms contained in the space.
      */
-    inline int getSize() const { return getAtomTable().getSize(); }
-    inline int getNumNodes() const { return getAtomTable().getNumNodes(); }
-    inline int getNumLinks() const { return getAtomTable().getNumLinks(); }
+    inline int getSize() const { return atomTable.getSize(); }
+    inline int getNumNodes() const { return atomTable.getNumNodes(); }
+    inline int getNumLinks() const { return atomTable.getNumLinks(); }
 
     //! Clear the atomspace, remove all atoms
-    void clear() { getImpl().clear(); }
+    void clear();
 
     /**
      * Add an atom to the Atom Table.  If the atom already exists
      * then new truth value is ignored, and the existing atom is
      * returned.
      */
-    inline Handle addAtom(AtomPtr atom)
-    {
-        return getImpl().addAtom(atom);
-    }
+    Handle addAtom(AtomPtr atom, bool async=false);
 
     /**
      * Add a node to the Atom Table.  If the atom already exists
@@ -123,10 +108,8 @@ public:
      * \param t     Type of the node
      * \param name  Name of the node
      */
-    inline Handle addNode(Type t, const std::string& name = "")
-    {
-        return getImpl().addNode(t, name);
-    }
+    Handle addNode(Type t, const std::string& name = "",
+                   bool async = false);
 
     /**
      * Add a link to the Atom Table. If the atom already exists, then
@@ -136,10 +119,7 @@ public:
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
      */
-    inline Handle addLink(Type t, const HandleSeq& outgoing)
-    {
-        return getImpl().addLink(t, outgoing);
-    }
+    Handle addLink(Type t, const HandleSeq& outgoing, bool async = false);
 
     inline Handle addLink(Type t, Handle h)
     {
@@ -255,7 +235,10 @@ public:
      * operations have completed.
      * NB: at this time, we don't distinguish barrier and flush.
      */
-    void barrier(void) { getImpl().barrier(); }
+    void barrier(void) {
+        atomTable.barrier();
+        if (backing_store) backing_store->barrier();
+    }
 
     /**
      * Unconditionally fetch an atom from the backingstore.
@@ -272,13 +255,25 @@ public:
      * To avoid a fetch if the atom already is in the atomtable, use the
      * getAtom() method instead.
      */
-    Handle fetchAtom(Handle h) { return getImpl().fetchAtom(h); }
+    Handle fetchAtom(Handle h);
+
+    /**
+     * Get an atom from the AtomTable. If not found there, get it from
+     * the backingstore (and add it to the AtomTable).  If the atom is
+     * not found in either place, return Handle::UNDEFINED.
+     */
+    Handle getAtom(Handle);
 
     /**
      * Load *all* atoms of the given type, but only if they are not
      * already in the AtomTable.
      */
-    void fetchAllAtomsOfType(Type t) { getImpl().loadType(t); }
+    void fetchAllAtomsOfType(Type t) {
+        if (NULL == backing_store)
+            throw RuntimeException(TRACE_INFO, "No backing store");
+        backing_store->loadType(atomTable, t);
+    }
+
 
     /**
      * Use the backing store to load the entire incoming set of the
@@ -288,15 +283,14 @@ public:
      * contain this one in their outgoing sets. All of these atoms are
      * then loaded into this atomtable/atomspace.
      */
-    Handle fetchIncomingSet(Handle h, bool rec) {
-        return getImpl().fetchIncomingSet(h, rec); }
+    Handle fetchIncomingSet(Handle, bool);
 
     /**
      * Recursively store the atom to the backing store.
      * I.e. if the atom is a link, then store all of the atoms
      * in its outgoing set as well, recursively.
      */
-    void storeAtom(Handle h) { getImpl().storeAtom(h); }
+    void storeAtom(Handle h);
 
     /**
      * Purge an atom from the atomspace.  This only removes the atom
@@ -317,7 +311,7 @@ public:
      *         removed. False, otherwise.
      */
     bool purgeAtom(Handle h, bool recursive = false) {
-        return getImpl().purgeAtom(h, recursive);
+        return 0 < atomTable.extract(h, recursive).size();
     }
 
     /**
@@ -336,39 +330,50 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool removeAtom(Handle h, bool recursive = false) {
-        return getImpl().removeAtom(h, recursive);
-    }
+    bool removeAtom(Handle h, bool recursive = false);
 
     /**
-     * Retrieve from the Atom Table the Handle of a given node
+     * Get a node from the AtomTable, if it's in there. If its not found
+     * in the AtomTable, and there's a backing store, then the atom will
+     * be fetched from the backingstore (and added to the AtomTable). If
+     * the atom can't be found in either place, Handle::UNDEFINED will be
+     * returned.
      *
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle getHandle(Type t, const std::string& str) {
-        return getImpl().getNode(t, str);
+    Handle getNode(Type t, const std::string& name = "");
+    inline Handle getHandle(Type t, const std::string& str) {
+        return getNode(t, str);
     }
 
     /**
-     * Retrieve from the Atom Table the Handle of a given link
+     * Get a link from the AtomTable, if it's in there. If its not found
+     * in the AtomTable, and there's a backing store, then the atom will
+     * be fetched from the backingstore (and added to the AtomTable). If
+     * the atom can't be found in either place, Handle::UNDEFINED will be
+     * returned.
+     *
+     * See also the getAtom() method.
+     *
      * @param t        Type of the node
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
     */
+    Handle getLink(Type t, const HandleSeq& outgoing);
     Handle getHandle(Type t, const HandleSeq& outgoing) {
-        return getImpl().getLink(t, outgoing);
+        return getLink(t, outgoing);
     }
     Handle getHandle(Type t, const Handle& ha) {
         HandleSeq outgoing;
         outgoing.push_back(ha);
-        return getImpl().getLink(t, outgoing);
+        return getLink(t, outgoing);
     }
     Handle getHandle(Type t, const Handle& ha, const Handle& hb) {
         HandleSeq outgoing;
         outgoing.push_back(ha);
         outgoing.push_back(hb);
-        return getImpl().getLink(t, outgoing);
+        return getLink(t, outgoing);
     }
 
     /**
@@ -436,7 +441,7 @@ public:
                      Type type,
                      bool subclass = false) const
     {
-        return getAtomTable().getHandlesByType(result, type, subclass);
+        return atomTable.getHandlesByType(result, type, subclass);
     }
 
     /* ----------------------------------------------------------- */
@@ -480,7 +485,7 @@ public:
      * @return normalised STI between -1..1
      */
     float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const {
-        return getAttentionBankconst().getNormalisedSTI(h->getAttentionValue(), average, clip);
+        return bank.getNormalisedSTI(h->getAttentionValue(), average, clip);
     }
 
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
@@ -494,7 +499,7 @@ public:
      * @return normalised STI between 0..1
      */
     float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
-        return getAttentionBankconst().getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip);
+        return bank.getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip);
     }
 
     /**
@@ -511,7 +516,7 @@ public:
                    AttentionValue::sti_t lowerBound,
                    AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
-        UnorderedHandleSet hs = getAtomTable().getHandlesByAV(lowerBound, upperBound);
+        UnorderedHandleSet hs = atomTable.getHandlesByAV(lowerBound, upperBound);
         return std::copy(hs.begin(), hs.end(), result);
     }
 
@@ -534,7 +539,7 @@ public:
      * @return Short Term Importance threshold value
      */
     AttentionValue::sti_t getAttentionalFocusBoundary() const {
-        return getAttentionBankconst().getAttentionalFocusBoundary();
+        return bank.getAttentionalFocusBoundary();
     }
 
     /** Change the attentional focus boundary.
@@ -545,7 +550,7 @@ public:
      */
     AttentionValue::sti_t setAttentionalFocusBoundary(
         AttentionValue::sti_t s) {
-        return getAttentionBank().setAttentionalFocusBoundary(s);
+        return bank.setAttentionalFocusBoundary(s);
     }
 
     /** Get the maximum STI observed in the AtomSpace.
@@ -554,7 +559,7 @@ public:
      * @return Maximum STI
      */
     AttentionValue::sti_t getMaxSTI(bool average=true) const
-    { return getAttentionBankconst().getMaxSTI(average); }
+    { return bank.getMaxSTI(average); }
 
     /** Get the minimum STI observed in the AtomSpace.
      *
@@ -563,7 +568,7 @@ public:
      * @return Minimum STI
      */
     AttentionValue::sti_t getMinSTI(bool average=true) const
-    { return getAttentionBankconst().getMinSTI(average); }
+    { return bank.getMinSTI(average); }
 
     /** Update the minimum STI observed in the AtomSpace.
      * Min/max are not updated on setSTI because average is calculate by lobe
@@ -572,7 +577,7 @@ public:
      * @warning Should only be used by attention allocation system.
      * @param m New minimum STI
      */
-    void updateMinSTI(AttentionValue::sti_t m) { getAttentionBank().updateMinSTI(m); }
+    void updateMinSTI(AttentionValue::sti_t m) { bank.updateMinSTI(m); }
 
     /**
      * Update the maximum STI observed in the AtomSpace. Min/max are not updated
@@ -582,38 +587,38 @@ public:
      * @warning Should only be used by attention allocation system.
      * @param m New maximum STI
      */
-    void updateMaxSTI(AttentionValue::sti_t m) { getAttentionBank().updateMaxSTI(m); }
-    void updateSTIFunds(AttentionValue::sti_t m) { getAttentionBank().updateSTIFunds(m); }
-    void updateLTIFunds(AttentionValue::lti_t m) { getAttentionBank().updateLTIFunds(m); }
-    long getSTIFunds() const { return getAttentionBankconst().getSTIFunds(); }
-    long getLTIFunds() const { return getAttentionBankconst().getLTIFunds(); }
+    void updateMaxSTI(AttentionValue::sti_t m) { bank.updateMaxSTI(m); }
+    void updateSTIFunds(AttentionValue::sti_t m) { bank.updateSTIFunds(m); }
+    void updateLTIFunds(AttentionValue::lti_t m) { bank.updateLTIFunds(m); }
+    long getSTIFunds() const { return bank.getSTIFunds(); }
+    long getLTIFunds() const { return bank.getLTIFunds(); }
 
     /* ----------------------------------------------------------- */
     // ---- Signals
 
     boost::signals2::connection addAtomSignal(const AtomSignal::slot_type& function)
     {
-        return getImpl().atomTable.addAtomSignal().connect(function);
+        return atomTable.addAtomSignal().connect(function);
     }
     boost::signals2::connection removeAtomSignal(const AtomPtrSignal::slot_type& function)
     {
-        return getImpl().atomTable.removeAtomSignal().connect(function);
+        return atomTable.removeAtomSignal().connect(function);
     }
     boost::signals2::connection AVChangedSignal(const AVCHSigl::slot_type& function)
     {
-        return getImpl().atomTable.AVChangedSignal().connect(function);
+        return atomTable.AVChangedSignal().connect(function);
     }
     boost::signals2::connection TVChangedSignal(const TVCHSigl::slot_type& function)
     {
-        return getImpl().atomTable.TVChangedSignal().connect(function);
+        return atomTable.TVChangedSignal().connect(function);
     }
     boost::signals2::connection AddAFSignal(const AVCHSigl::slot_type& function)
     {
-        return getAttentionBank().AddAFSignal().connect(function);
+        return bank.AddAFSignal().connect(function);
     }
     boost::signals2::connection RemoveAFSignal(const AVCHSigl::slot_type& function)
     {
-        return getAttentionBank().RemoveAFSignal().connect(function);
+        return bank.RemoveAFSignal().connect(function);
     }
 
     /* ----------------------------------------------------------- */
