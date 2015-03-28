@@ -2,7 +2,7 @@
 
 (define getNumberNode_ParseNode
     (BindLink
-        (ListLink
+        (VariableList
             (VariableNode "$target")
             (VariableNode "$sentence")
             (VariableNode "$number")

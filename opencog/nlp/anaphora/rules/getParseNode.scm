@@ -2,7 +2,7 @@
 
 (define getParseNode
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$parse node")
                 (TypeNode "ParseNode")

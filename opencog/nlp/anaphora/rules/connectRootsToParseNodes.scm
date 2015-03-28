@@ -2,7 +2,7 @@
 
 (define connectRootsToParseNodes
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$top relationship")
                 (TypeChoice

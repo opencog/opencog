@@ -2,7 +2,7 @@
 
 (define pleonastic-it-#3
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$target")
                 (TypeNode "WordInstanceNode")

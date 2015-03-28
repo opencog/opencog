@@ -2,7 +2,7 @@
 
 (define getConjunction
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$noun")
                 (TypeNode "WordInstanceNode")

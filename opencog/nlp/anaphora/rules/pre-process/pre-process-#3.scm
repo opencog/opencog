@@ -2,7 +2,7 @@
 
 (define pre-process-#3
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$target")
                 (TypeNode "WordInstanceNode")

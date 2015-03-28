@@ -2,7 +2,7 @@
 
 (define getChildren
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$relationshipNode")
                 (TypeChoice

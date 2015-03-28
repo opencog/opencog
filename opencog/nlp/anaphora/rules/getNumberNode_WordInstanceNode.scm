@@ -2,7 +2,7 @@
 
 (define getNumberNode_WordInstanceNode
     (BindLink
-        (ListLink
+        (VariableList
             (VariableNode "$target")
             (VariableNode "$number")
         )
