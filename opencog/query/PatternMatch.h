@@ -56,6 +56,9 @@ class PatternMatch
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds);
 
+		/// Handle of the topmost variable declaration.
+		Handle _vardecl;
+
 		/// Unbundled variables and types for them.
 		/// _typemap is the (possibly empty) list of restrictions on
 		/// the variable types.
@@ -77,16 +80,17 @@ class PatternMatch
 
 		bool _used;
 
-		// Validate the top-level BindLink only
-		void validate_bindvars(const Handle&);
+		// Extract variable decls and the body.
+		void unbundle_body(const Handle&);
 
-		// vildate the variable decls
+		// Validate the variable decls
 		void validate_vardecl(const Handle&);
 
-		// Validate the strcuture of the ImplicationLink
-		void validate_implication(const Handle&);
+		// Validate the strcuture of the body
+		void validate_body(const Handle&);
 
-		// Validate the clauses inside the ImplicationLink
+		// Validate the clauses inside the body
+		void unbundle_clauses(const Handle&);
 		void validate_clauses(std::set<Handle>& vars,
 		                      std::vector<Handle>& clauses);
 
@@ -103,7 +107,8 @@ class PatternMatch
 		// See PatternMatch.cc for comments
 		void do_bindlink(Handle, Implicator&);
 
-		// Deprecated: used only in the unit-test cases.
+		// Deprecated: DO NOT USE IN NEW ODE!
+		// This is used only in the unit-test cases.
 		void do_imply(Handle, Implicator&);
 };
 

@@ -154,8 +154,6 @@ void PatternMatch::do_imply (Handle himplication,
                              Implicator &impl,
                              std::set<Handle>& varset)
 {
-	validate_implication(himplication);
-
 	// Extract the set of variables, if needed.
 	// This is used only by the deprecated imply() function, as the
 	// BindLink will include a list of variables up-front.
@@ -347,28 +345,13 @@ void PatternMatch::validate_vardecl(const Handle& hdecls)
 
 /* ================================================================= */
 /**
- * Validate a BindLink for syntax correctness.
+ * Unpack a SatisfactionLink/BindLink into vardels and body
  *
- * Given a BindLink, this will check to make sure that the variable
- * declarations are appropriate.  Thus, for example, a structure
- * similar to the below is expected.
- *
- *    BindLink
- *       ListLink
- *          VariableNode "$var0"
- *          VariableNode "$var1"
- *       ImplicationLink
- *          etc ...
- *
- * The BindLink must indicate the bindings of the variables, and
- * (optionally) limit the types of acceptable groundings for the
- * varaibles.  The ImplicationLink is not validated here, it is
- * validated by validate_implication()
- *
- * As a side-effect, the variables and type restrictions are unpacked.
+ * Given a SatisfactionLink or a BindLink, this will extract the
+ * variable declarations, and the body.
  */
 
-void PatternMatch::validate_bindvars(const Handle& hbindlink)
+void PatternMatch::unbundle_body(const Handle& hbindlink)
 {
 	// Must be non-empty.
 	LinkPtr lbl(LinkCast(hbindlink));
@@ -391,15 +374,13 @@ void PatternMatch::validate_bindvars(const Handle& hbindlink)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting variabe decls and body, got size %d", oset.size());
 
-	Handle hdecls(oset[0]);  // VariableNode declarations
-	_body = oset[1];         // Body
-
-	validate_vardecl(hdecls);
+	_vardecl = oset[0];  // VariableNode declarations
+	_body = oset[1];     // Body
 }
 
 /* ================================================================= */
 /**
- * Validate a ImplicationLink for syntax correctness.
+ * Validate the body for syntax correctness.
  *
  * Given an ImplicatioLink, this will check to make sure that
  * it is of the appropriate structure: that it consists of two
@@ -416,35 +397,34 @@ void PatternMatch::validate_bindvars(const Handle& hbindlink)
  * As a side-effect, if SomeLink is an AndLink, the list of clauses
  * is unpacked.
  */
-void PatternMatch::validate_implication(const Handle& himplication)
+void PatternMatch::validate_body(const Handle& hbody)
 {
-	// Must be non-empty.
-	LinkPtr limplication(LinkCast(himplication));
-	if (NULL == limplication)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected ImplicationLink");
-
 	// Type must be as expected
-	Type timpl = himplication->getType();
-	if (IMPLICATION_LINK != timpl)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected ImplicationLink");
+	Type tbody = hbody->getType();
+	if (IMPLICATION_LINK == tbody)
+	{
+		LinkPtr lbody(LinkCast(hbody));
+		const std::vector<Handle>& oset = lbody->getOutgoingSet();
+		if (2 != oset.size())
+			throw InvalidParamException(TRACE_INFO,
+				"ImplicationLink has wrong size: %d", oset.size());
+		_hclauses = oset[0];
+		_implicand = oset[1];
+		return;
+	}
 
-	const std::vector<Handle>& oset = limplication->getOutgoingSet();
-	if (2 != oset.size())
-		throw InvalidParamException(TRACE_INFO,
-			"ImplicationLink has wrong size: %d", oset.size());
+	_hclauses = hbody;
+}
 
-	_hclauses = oset[0];
-	_implicand = oset[1];
-
+void PatternMatch::unbundle_clauses(const Handle& clauses)
+{
 	// The predicate is either an AndList, or a single clause
 	// If its an AndList, then its a list of clauses.
 	// XXX FIXME Perhaps, someday, some sort of embedded OrList should
 	// be supported, allowing several different patterns to be matched
 	// in one go. But not today, this is complex and low priority. See
 	// the README for slighly more detail
-	Type tclauses = _hclauses->getType();
+	Type tclauses = clauses->getType();
 	if (AND_LINK == tclauses)
 	{
 		_clauses = LinkCast(_hclauses)->getOutgoingSet();
@@ -452,7 +432,7 @@ void PatternMatch::validate_implication(const Handle& himplication)
 	else
 	{
 		// There's just one single clause!
-		_clauses.push_back(_hclauses);
+		_clauses.push_back(clauses);
 	}
 }
 
@@ -462,8 +442,10 @@ void PatternMatch::validate_implication(const Handle& himplication)
  */
 void PatternMatch::validate(Handle hbindlink)
 {
-	validate_bindvars(hbindlink);
-	validate_implication(_body);
+	unbundle_body(hbindlink);
+	validate_vardecl(_vardecl);
+	validate_body(_body);
+	unbundle_clauses(_hclauses);
 	validate_clauses(_varset, _clauses);
 }
 
@@ -493,15 +475,28 @@ void PatternMatch::validate(Handle hbindlink)
 void PatternMatch::do_bindlink (Handle hbindlink,
                                 Implicator& implicator)
 {
-	validate_bindvars(hbindlink);
+	unbundle_body(hbindlink);
+	validate_vardecl(_vardecl);
+	validate_body(_body);
+	unbundle_clauses(_hclauses);
+
 	implicator.set_type_restrictions(_typemap);
 	do_imply(_body, implicator, _varset);
 }
 
+/// Deprecated; do not use in new code.
+/// This is used only in test cases.
 void PatternMatch::do_imply (Handle himplication,
                              Implicator &impl)
 {
 	std::set<Handle> varset;
+	Type timplication = himplication->getType();
+	if (IMPLICATION_LINK != timplication)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an ImplicationLink, got: %d", timplication);
+
+	validate_body(himplication);
+	unbundle_clauses(_hclauses);
 	do_imply(himplication, impl, varset);
 }
 
