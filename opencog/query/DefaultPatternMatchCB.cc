@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atomutils/PatternUtils.h>
 
 #include "DefaultPatternMatchCB.h"

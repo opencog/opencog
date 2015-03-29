@@ -9,8 +9,8 @@
 
 #include <cstddef>
 #include <libguile.h>
-#include <opencog/execution/ExecutionOutputLink.h>
-#include <opencog/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 
 #include "SchemeEval.h"
 #include "SchemeSmob.h"

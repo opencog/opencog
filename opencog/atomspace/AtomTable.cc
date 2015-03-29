@@ -37,7 +37,7 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/execution/NumberNode.h>
+#include <opencog/atoms/NumberNode.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>

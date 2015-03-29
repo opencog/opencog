@@ -484,6 +484,10 @@ void PatternMatch::do_bindlink (const Handle& hbindlink,
 	do_imply(_body, implicator, _varset);
 }
 
+/**
+ * Perform a satisfaction check only, no implication is performed.
+ *
+ */
 void PatternMatch::do_satlink (const Handle& hsatlink,
                                Satisfier& sater)
 {

@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/execution/ExecutionOutputLink.h>
 
 #include "Instantiator.h"
 
