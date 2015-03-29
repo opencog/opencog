@@ -320,7 +320,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 			"A PatternMatch instance cannot be used more than once!");
 	_used = true;
 
-	validate_clauses(vars, clauses);
+	// validate_clauses(vars, clauses);
 
 	cb->validate_clauses(vars, clauses);
 

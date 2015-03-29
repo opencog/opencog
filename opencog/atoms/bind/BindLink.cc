@@ -33,8 +33,26 @@ BindLink::BindLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
 	: SatisfactionLink(t, hseq, tv, av)
 {
+	if (not classserver().isA(t, BIND_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a BindLink, got %s", tname.c_str());
+	}
 }
 
+BindLink::BindLink(Link &l)
+	: SatisfactionLink(l.getType(), l.getOutgoingSet(),
+	                   l.getTruthValue(), l.getAttentionValue())
+{
+	Type t = l.getType();
+	if (not classserver().isA(t, BIND_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a BindLink, got %s", tname.c_str());
+	}
+}
 
 /* ================================================================= */
 /**
@@ -58,9 +76,9 @@ BindLink::BindLink(Type t, const HandleSeq& hseq,
 void BindLink::validate_body(const Handle& hbody)
 {
 	// Type must be as expected
-	if (IMPLICATION_LINK == hbody->getType())
+	if (IMPLICATION_LINK != hbody->getType())
 		throw InvalidParamException(TRACE_INFO,
-			"Bindlink expects an ImplicationLink, got $s",
+			"Bindlink expects an ImplicationLink, got %s",
 			classserver().getTypeName(hbody->getType()).c_str());
 
 	LinkPtr lbody(LinkCast(hbody));

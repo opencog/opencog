@@ -42,8 +42,8 @@ LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
 			"Expecting a LambdaLink, got %s", tname.c_str());
 	}
 
-	// Don't throw an error, don''t initialize if its the pattern matcher
-	if (0 == oset.size()) return;
+	// Don't throw an error, don't initialize if its the pattern matcher
+	if (0 == oset.size()) return;  // XXX temporary hack ??
 
 	// Must have variable decls and body
 	if (2 != oset.size())
@@ -56,7 +56,7 @@ LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
 }
 
 LambdaLink::LambdaLink(Link &l)
-	: Link(LAMBDA_LINK, l.getOutgoingSet(),
+	: Link(l.getType(), l.getOutgoingSet(),
 	       l.getTruthValue(), l.getAttentionValue())
 {
 	// Type must be as expected

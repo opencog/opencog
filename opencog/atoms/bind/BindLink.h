@@ -52,12 +52,7 @@ public:
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	BindLink(Link &l)
-		: SatisfactionLink(BIND_LINK, l.getOutgoingSet(),
-		       l.getTruthValue(), l.getAttentionValue())
-	{
-		OC_ASSERT(BIND_LINK == l.getType(), "Bad BindLink constructor!");
-	}
+	BindLink(Link &l);
 };
 
 typedef std::shared_ptr<BindLink> BindLinkPtr;

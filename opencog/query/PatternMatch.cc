@@ -177,26 +177,7 @@ void PatternMatch::validate(const Handle& hbindlink)
 {
 	BindLinkPtr bl(BindLinkCast(hbindlink));
 	if (NULL == bl)
-	{
-		unbundle_body(hbindlink);
-		validate_vardecl(_vardecl);
-		validate_body(_body);
-		unbundle_clauses(_hclauses);
-		validate_clauses(_varset, _clauses);
-	}
-	else
-	{
-// XXX fixme temporary hack
-		_vardecl = bl->_vardecl;
-		_varset = bl->_varset;
-		_typemap = bl->_typemap;
-		_body = bl->_body;
-
-		_hclauses = bl->_hclauses;
-		_clauses = bl->_clauses;
-		_virtuals = bl->_virtuals;
-		_nonvirts = bl->_nonvirts;
-	}
+		createBindLink(*LinkCast(hbindlink));
 }
 
 /* ================================================================= */
@@ -227,25 +208,18 @@ void PatternMatch::do_bindlink (const Handle& hbindlink,
 {
 	BindLinkPtr bl(BindLinkCast(hbindlink));
 	if (NULL == bl)
-	{
-		unbundle_body(hbindlink);
-		validate_vardecl(_vardecl);
-		validate_body(_body);
-		unbundle_clauses(_hclauses);
-	}
-	else
-	{
-// XXX fixme temporary hack
-		_vardecl = bl->_vardecl;
-		_varset = bl->_varset;
-		_typemap = bl->_typemap;
-		_body = bl->_body;
+		bl = createBindLink(*LinkCast(hbindlink));
 
-		_hclauses = bl->_hclauses;
-		_clauses = bl->_clauses;
-		_virtuals = bl->_virtuals;
-		_nonvirts = bl->_nonvirts;
-	}
+// XXX fixme temporary hack
+	_vardecl = bl->_vardecl;
+	_varset = bl->_varset;
+	_typemap = bl->_typemap;
+	_body = bl->_body;
+
+	_hclauses = bl->_hclauses;
+	_clauses = bl->_clauses;
+	_virtuals = bl->_virtuals;
+	_nonvirts = bl->_nonvirts;
 
 	implicator.set_type_restrictions(_typemap);
 	do_imply(_body, implicator, _varset);
@@ -260,26 +234,17 @@ void PatternMatch::do_satlink (const Handle& hsatlink,
 {
 	SatisfactionLinkPtr bl(SatisfactionLinkCast(hsatlink));
 	if (NULL == bl)
-	{
-		unbundle_body(hsatlink);
-		validate_vardecl(_vardecl);
-
-		validate_body(_body);
-		unbundle_clauses(_hclauses);
-	}
-	else
-	{
+		bl = createSatisfactionLink(*LinkCast(hsatlink));
 // XXX fixme temporary hack
-		_vardecl = bl->_vardecl;
-		_varset = bl->_varset;
-		_typemap = bl->_typemap;
-		_body = bl->_body;
+	_vardecl = bl->_vardecl;
+	_varset = bl->_varset;
+	_typemap = bl->_typemap;
+	_body = bl->_body;
 
-		_hclauses = bl->_hclauses;
-		_clauses = bl->_clauses;
-		_virtuals = bl->_virtuals;
-		_nonvirts = bl->_nonvirts;
-	}
+	_hclauses = bl->_hclauses;
+	_clauses = bl->_clauses;
+	_virtuals = bl->_virtuals;
+	_nonvirts = bl->_nonvirts;
 
 	do_match(&sater, _varset, _clauses);
 }

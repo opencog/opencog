@@ -34,6 +34,16 @@ SatisfactionLink::SatisfactionLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
 	: LambdaLink(t, hseq, tv, av)
 {
+	if (not classserver().isA(t, SATISFACTION_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a SatsifactionLink, got %s", tname.c_str());
+	}
+
+	// Don't throw an error, don't initialize if its the pattern matcher
+	if (NULL == _body) return;  // XXX temp hack ??
+
 	// The LambdLink scontructor setup _body and _varset
 	validate_body(_body);
 	unbundle_clauses(_hclauses);
@@ -41,11 +51,20 @@ SatisfactionLink::SatisfactionLink(Type t, const HandleSeq& hseq,
 }
 
 SatisfactionLink::SatisfactionLink(Link &l)
-	: LambdaLink(SATISFACTION_LINK, l.getOutgoingSet(),
+	: LambdaLink(l.getType(), l.getOutgoingSet(),
 	             l.getTruthValue(), l.getAttentionValue())
 {
-	OC_ASSERT(SATISFACTION_LINK == l.getType(),
-		"Bad SatisfactionLink constructor!");
+	// Type must be as expected
+	Type tscope = l.getType();
+	if (not classserver().isA(tscope, SATISFACTION_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(tscope);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a SatsifactionLink, got %s", tname.c_str());
+	}
+
+	// Don't throw an error, don't initialize if its the pattern matcher
+	if (NULL == _body) return;  // XXX temp hack ??
 
 	// The LambdLink scontructor setup _body and _varset
 	validate_body(_body);
