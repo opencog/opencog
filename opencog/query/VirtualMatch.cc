@@ -322,6 +322,10 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	// validate_clauses(vars, clauses);
 
+// XXX this is fucked up. all that the callback does is call
+// get_connected_components a second time, and print a message.
+// This is because PLN is doing something fucked up.  PLN
+// need to do the right thing, not force crap onto us...
 	cb->validate_clauses(vars, clauses);
 
 	// Split the non virtual clauses into stronly connected components

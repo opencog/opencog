@@ -39,11 +39,18 @@ BindLink::BindLink(Type t, const HandleSeq& hseq,
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a BindLink, got %s", tname.c_str());
 	}
+
+	// Don't throw an error, don't initialize if its the pattern matcher
+	if (NULL == _body) return;  // XXX temp hack ??
+
+	// The LambdaLink contructor sets up _body and _varset
+	validate_body(_body);
+	unbundle_clauses(_hclauses);
+	validate_clauses(_varset, _clauses);
 }
 
 BindLink::BindLink(Link &l)
-	: SatisfactionLink(l.getType(), l.getOutgoingSet(),
-	                   l.getTruthValue(), l.getAttentionValue())
+	: SatisfactionLink(l)
 {
 	Type t = l.getType();
 	if (not classserver().isA(t, BIND_LINK))
@@ -52,6 +59,11 @@ BindLink::BindLink(Link &l)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a BindLink, got %s", tname.c_str());
 	}
+
+	// The LambdaLink contructor sets up _body and _varset
+	validate_body(_body);
+	unbundle_clauses(_hclauses);
+	validate_clauses(_varset, _clauses);
 }
 
 /* ================================================================= */
@@ -86,6 +98,7 @@ void BindLink::validate_body(const Handle& hbody)
 	if (2 != oset.size())
 		throw InvalidParamException(TRACE_INFO,
 			"ImplicationLink has wrong size: %d", oset.size());
+
 	_hclauses = oset[0];
 	_implicand = oset[1];
 }

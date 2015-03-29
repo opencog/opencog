@@ -56,8 +56,7 @@ LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
 }
 
 LambdaLink::LambdaLink(Link &l)
-	: Link(l.getType(), l.getOutgoingSet(),
-	       l.getTruthValue(), l.getAttentionValue())
+	: Link(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();

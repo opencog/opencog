@@ -41,18 +41,17 @@ SatisfactionLink::SatisfactionLink(Type t, const HandleSeq& hseq,
 			"Expecting a SatsifactionLink, got %s", tname.c_str());
 	}
 
-	// Don't throw an error, don't initialize if its the pattern matcher
-	if (NULL == _body) return;  // XXX temp hack ??
+	// BindLink has a different clause sequence
+	if (SATISFACTION_LINK != t) return;
 
-	// The LambdLink scontructor setup _body and _varset
-	validate_body(_body);
+	// The LambdaLink contructor sets up _body and _varset
+	_hclauses = _body;
 	unbundle_clauses(_hclauses);
 	validate_clauses(_varset, _clauses);
 }
 
 SatisfactionLink::SatisfactionLink(Link &l)
-	: LambdaLink(l.getType(), l.getOutgoingSet(),
-	             l.getTruthValue(), l.getAttentionValue())
+	: LambdaLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
@@ -63,28 +62,15 @@ SatisfactionLink::SatisfactionLink(Link &l)
 			"Expecting a SatsifactionLink, got %s", tname.c_str());
 	}
 
-	// Don't throw an error, don't initialize if its the pattern matcher
-	if (NULL == _body) return;  // XXX temp hack ??
+	// BindLink has a different clause sequence
+	if (SATISFACTION_LINK != tscope) return;
 
-	// The LambdLink scontructor setup _body and _varset
-	validate_body(_body);
+	// The LambdaLink contructor sets up _body and _varset
+	_hclauses = _body;
 	unbundle_clauses(_hclauses);
 	validate_clauses(_varset, _clauses);
 }
 
-/* ================================================================= */
-/**
- * Validate the body for syntax correctness.
- *
- * For a SatisfcationLink, this is trivial.  However, this is a virtual
- * method, and the validation is non-trivial for the BindLink, which
- * inherits from this.  Overloading is necessary, since body validation
- * must run before clause unpacking does.
- */
-void SatisfactionLink::validate_body(const Handle& hbody)
-{
-	_hclauses = hbody;
-}
 
 /* ================================================================= */
 

@@ -49,7 +49,7 @@ protected:
 	Handle _implicand;
 
 	// Validate the structure of the body
-	virtual void validate_body(const Handle&);
+	void validate_body(const Handle&);
 
 public:
 	BindLink(Type, const HandleSeq&,

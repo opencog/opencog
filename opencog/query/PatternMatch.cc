@@ -101,24 +101,13 @@ void PatternMatch::do_bindlink (const Handle& hbindlink,
 	if (NULL == bl)
 		bl = createBindLink(*LinkCast(hbindlink));
 
-// XXX fixme temporary hack
-	_vardecl = bl->_vardecl;
-	_varset = bl->_varset;
-	_typemap = bl->_typemap;
-	_body = bl->_body;
+	implicator.implicand = bl->_implicand;
+	implicator.set_type_restrictions(bl->_typemap);
 
-	_hclauses = bl->_hclauses;
-	_clauses = bl->_clauses;
 	_virtuals = bl->_virtuals;
 	_nonvirts = bl->_nonvirts;
 
-	_implicand = bl->_implicand;
-
-	implicator.implicand = _implicand;
-	implicator.set_type_restrictions(_typemap);
-
-	validate_clauses(_varset, _clauses);
-	do_match(&implicator, _varset, _clauses);
+	do_match(&implicator, bl->_varset, bl->_clauses);
 }
 
 /**
@@ -131,18 +120,11 @@ void PatternMatch::do_satlink (const Handle& hsatlink,
 	SatisfactionLinkPtr bl(SatisfactionLinkCast(hsatlink));
 	if (NULL == bl)
 		bl = createSatisfactionLink(*LinkCast(hsatlink));
-// XXX fixme temporary hack
-	_vardecl = bl->_vardecl;
-	_varset = bl->_varset;
-	_typemap = bl->_typemap;
-	_body = bl->_body;
 
-	_hclauses = bl->_hclauses;
-	_clauses = bl->_clauses;
 	_virtuals = bl->_virtuals;
 	_nonvirts = bl->_nonvirts;
 
-	do_match(&sater, _varset, _clauses);
+	do_match(&sater, bl->_varset, bl->_clauses);
 }
 
 /* ================================================================= */
