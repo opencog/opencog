@@ -6,7 +6,7 @@
 
 (define filter-#12
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$word-inst-antecedent")
                 (TypeNode "ParseNode")

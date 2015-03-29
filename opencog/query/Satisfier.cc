@@ -1,7 +1,9 @@
 /*
- * BindLink.h
+ * Satisfier.cc
  *
- * Copyright (C) 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2015 Linas Vepstas
+ *
+ * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,20 +21,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_BINDLINK_H
-#define _OPENCOG_BINDLINK_H
-
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
 
-namespace opencog {
+#include "BindLink.h"
+#include "PatternMatch.h"
 
-Handle bindlink(AtomSpace*, Handle);
-Handle single_bindlink (AtomSpace*, Handle);
-Handle crisp_logic_bindlink(AtomSpace*, Handle);
-Handle pln_bindlink(AtomSpace*, Handle);
-Handle validate_bindlink(AtomSpace*, Handle);
-TruthValuePtr satisfaction_link(AtomSpace*, Handle);
+using namespace opencog;
 
-} // namespace opencog
+bool Satisfier::grounding(const std::map<Handle, Handle> &var_soln,
+                           const std::map<Handle, Handle> &pred_soln)
+{
+	// PatternMatchEngine::print_solution(pred_soln, var_soln);
+	result = TruthValue::TRUE_TV();
 
-#endif // _OPENCOG_BINDLINK_H
+	// Look for more groundings.
+	return false;
+}
+
+TruthValuePtr opencog::satisfaction_link(AtomSpace* as, Handle satlink)
+{
+	Satisfier sat(as);
+	PatternMatch pm;
+	pm.do_satlink(satlink, sat);
+
+	return sat.result;
+}
+
+/* ===================== END OF FILE ===================== */

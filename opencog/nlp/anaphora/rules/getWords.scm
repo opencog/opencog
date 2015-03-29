@@ -2,7 +2,7 @@
 
 (define getWords
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$target")
                 (TypeNode "WordInstanceNode")

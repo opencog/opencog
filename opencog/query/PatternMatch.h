@@ -29,6 +29,7 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/query/Implicator.h>
 #include <opencog/query/PatternMatchCallback.h>
+#include <opencog/query/Satisfier.h>
 
 namespace opencog {
 
@@ -36,7 +37,7 @@ class PatternMatch
 {
 	private:
 		// See PatternMatch.cc for comments
-		static int get_vartype(Handle,
+		static int get_vartype(const Handle&,
 		                       std::set<Handle>&,
 		                       VariableTypeMap&);
 
@@ -46,7 +47,7 @@ class PatternMatch
 		              std::vector<Handle>& clauses);
 
 		// See PatternMatch.cc for comments
-		void do_imply(Handle, Implicator&, std::set<Handle>&);
+		void do_imply(const Handle&, Implicator&, std::set<Handle>&);
 
 		bool recursive_virtual(PatternMatchCallback *cb,
 		            const std::vector<Handle>& virtuals,
@@ -56,6 +57,9 @@ class PatternMatch
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds);
 
+		/// Handle of the topmost variable declaration.
+		Handle _vardecl;
+
 		/// Unbundled variables and types for them.
 		/// _typemap is the (possibly empty) list of restrictions on
 		/// the variable types.
@@ -63,8 +67,8 @@ class PatternMatch
 		std::set<Handle> _varset;
 		VariableTypeMap _typemap;
 
-		/// Handle of the ImplicationLink
-		Handle _himpl;
+		/// Handle of the body of the expression.
+		Handle _body;
 
 		/// The actual clauses. Set by validate_implication()
 		Handle _hclauses;
@@ -77,35 +81,37 @@ class PatternMatch
 
 		bool _used;
 
-		// Validate the top-level BindLink only
-		void validate_bindvars(Handle)
-			throw (InvalidParamException);
+		// Extract variable decls and the body.
+		void unbundle_body(const Handle&);
 
-		// Validate the strcture of the ImplicationLink
-		void validate_implication(Handle)
-			throw (InvalidParamException);
+		// Validate the variable decls
+		void validate_vardecl(const Handle&);
 
-		// Validate the clauses inside the ImplicationLink
+		// Validate the strcuture of the body
+		void validate_body(const Handle&);
+
+		// Validate the clauses inside the body
+		void unbundle_clauses(const Handle&);
 		void validate_clauses(std::set<Handle>& vars,
-		                      std::vector<Handle>& clauses)
-			throw (InvalidParamException);
+		                      std::vector<Handle>& clauses);
 
 	public:
 		PatternMatch(void);
 
 		// See PatternMatch.cc for comments
-		void validate(Handle)
-			throw (InvalidParamException);
+		void validate(const Handle&);
 
 		void match(PatternMatchCallback *,
-		           Handle vars,
-		           Handle clauses);
+		           const Handle& vars,
+		           const Handle& clauses);
 
 		// See PatternMatch.cc for comments
-		void do_bindlink(Handle, Implicator&);
+		void do_bindlink(const Handle&, Implicator&);
+		void do_satlink(const Handle&, Satisfier&);
 
-		// Deprecated: used only in the unit-test cases.
-		void do_imply(Handle, Implicator&);
+		// Deprecated: DO NOT USE IN NEW ODE!
+		// This is used only in the unit-test cases.
+		void do_imply(const Handle&, Implicator&);
 };
 
 } // namespace opencog

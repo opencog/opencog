@@ -7,6 +7,7 @@ ADD_LIBRARY(query SHARED
 	PatternMatch.cc
 	PatternMatchEngine.cc
 	PatternSCM.cc
+	Satisfier.cc
 	VirtualMatch.cc
 	AttentionalFocusCB.cc
 	FuzzyMatch/FuzzyPatternMatch.cc
@@ -48,5 +49,6 @@ INSTALL (FILES
 	Instantiator.h
 	PatternMatch.h
 	PatternMatchCallback.h
+	Satisfier.h
 	DESTINATION "include/${PROJECT_NAME}/query"
 )

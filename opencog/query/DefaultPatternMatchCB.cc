@@ -338,8 +338,15 @@ void DefaultPatternMatchCB::full_search(PatternMatchEngine *pme,
 	// the different clauses, and find the one with the smallest number
 	// of atoms of that type, or otherwise try to find a small ("thin")
 	// incoming set to search over.
+	//
+	// If ptype is a VariableNode, then basically, the pattern says
+	// "Search all of the atomspace." Literally. So this will blow up
+	// if the atomspace is large.
 	std::list<Handle> handle_set;
-	_as->getHandlesByType(back_inserter(handle_set), ptype);
+	if (VARIABLE_NODE != ptype)
+		_as->getHandlesByType(back_inserter(handle_set), ptype);
+	else
+		_as->getHandlesByType(back_inserter(handle_set), ATOM, true);
 	std::list<Handle>::iterator i = handle_set.begin();
 	std::list<Handle>::iterator iend = handle_set.end();
 	for (; i != iend; ++i)

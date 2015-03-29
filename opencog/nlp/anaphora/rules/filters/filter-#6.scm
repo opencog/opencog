@@ -9,7 +9,7 @@
 
 (define filter-#6
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$word-inst-antecedent")
                 (TypeNode "WordInstanceNode")

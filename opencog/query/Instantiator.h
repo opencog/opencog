@@ -42,8 +42,7 @@ private:
 
 		/**
 		 * Recursively walk a tree starting with the root of the
-		 * hypergraph to instantiate (typically an
-		 * ExecutionOutputLink).
+		 * hypergraph to instantiate (typically an ExecutionOutputLink).
 		 *
 		 * Return the current result of the execution. If the node is an
 		 * ExecutionOutputLink then it returns the final result. If the

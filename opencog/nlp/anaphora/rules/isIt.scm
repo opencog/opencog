@@ -2,7 +2,7 @@
 
 (define isIt
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$target")
                 (TypeNode "WordInstanceNode")

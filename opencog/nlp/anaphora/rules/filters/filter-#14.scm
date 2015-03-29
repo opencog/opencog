@@ -16,7 +16,7 @@
 
 (define filter-#14
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$noun")
                 (TypeNode "WordInstanceNode")

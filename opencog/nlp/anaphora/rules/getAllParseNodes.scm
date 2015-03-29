@@ -2,7 +2,7 @@
 
 (define getAllParseNodes
     (BindLink
-        (ListLink
+        (VariableList
             (VariableNode "$parse node")
             (VariableNode "$sentence")
         )

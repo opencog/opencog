@@ -15,6 +15,7 @@
 #include <string>
 
 #include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <libguile.h>
 #include <opencog/atomspace/ClassServer.h>
@@ -79,6 +80,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			// q == HandleSeq
 			// k == HandleSeqSeq
 			// s == string
+			// p == TruthValuePtr
 			// t == Type
 			// v == void
 			// Extend the above, if required.
@@ -104,6 +106,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			const std::string& (T::*s_sss)(const std::string&,
 			                               const std::string&,
 			                               const std::string&);
+			TruthValuePtr (T::*p_h)(Handle);
 			void (T::*v_h)(Handle);
 			void (T::*v_s)(const std::string&);
 			void (T::*v_ss)(const std::string&,
@@ -136,6 +139,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			S_S,   // return string, take string
 			S_SS,  // return string, take two strings
 			S_SSS, // return string, take three strings
+			P_H,   // return truth value, take Handle
 			V_H,   // return void, take Handle
 			V_S,   // return void, take string
 			V_SS,  // return void, take two strings
@@ -153,7 +157,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			{
 				case B_HI:
 				{
-					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
 					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
 					bool b = (that->*method.b_hi)(h, i);
 					if (b) { rc = SCM_BOOL_T; } else { rc = SCM_BOOL_F; }
@@ -161,8 +165,8 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case B_HH:
 				{
-					Handle h1 = SchemeSmob::verify_handle(scm_car(args), scheme_name, 1);
-					Handle h2 = SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2);
+					Handle h1(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
+					Handle h2(SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
 					bool b = (that->*method.b_hh)(h1, h2);
 
 					if (b)
@@ -174,8 +178,8 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case D_HHT:
 				{
-					Handle h1 = SchemeSmob::verify_handle(scm_car(args), scheme_name, 1);
-					Handle h2 = SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2);
+					Handle h1(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
+					Handle h2(SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
 					Type t = SchemeSmob::verify_atom_type(scm_caddr(args), scheme_name, 3);
 
 					double d = (that->*method.d_hht)(h1,h2,t);
@@ -184,8 +188,8 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case D_HHTB:
 				{
-					Handle h1 = SchemeSmob::verify_handle(scm_car(args), scheme_name, 1);
-					Handle h2 = SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2);
+					Handle h1(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
+					Handle h2(SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
 					Type t = SchemeSmob::verify_atom_type(scm_caddr(args), scheme_name, 3);
 					bool b = scm_to_bool(scm_cadddr(args));
 
@@ -195,16 +199,16 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case H_H:
 				{
-					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
-					Handle rh = (that->*method.h_h)(h);
+					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
+					Handle rh((that->*method.h_h)(h));
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
 				case H_HI:
 				{
-					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
 					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
-					Handle rh = (that->*method.h_hi)(h,i);
+					Handle rh((that->*method.h_hi)(h,i));
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
@@ -217,7 +221,7 @@ class SchemePrimitive : public PrimitiveEnviron
 					SCM list = scm_cadr(args);
 					HandleSeq seq = SchemeSmob::verify_handle_list(list, scheme_name, 2);
 
-					Handle rh = (that->*method.h_sq)(str, seq);
+					Handle rh((that->*method.h_sq)(str, seq));
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
@@ -234,19 +238,19 @@ class SchemePrimitive : public PrimitiveEnviron
 					SCM list2 = scm_caddr(args);
 					HandleSeq seq2 = SchemeSmob::verify_handle_list(list2, scheme_name, 3);
 
-					Handle rh = (that->*method.h_sqq)(str, seq1, seq2);
+					Handle rh((that->*method.h_sqq)(str, seq1, seq2));
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
 				case Q_H:
 				{
 					// the only argument is a handle
-					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
-					HandleSeq rHS = (that->*method.q_h)(h);
+					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
+					HandleSeq rHS((that->*method.q_h)(h));
 
 					rc = SCM_EOL;
 
-					// reverse iteration to preserve order when doing cons
+					// Reverse iteration to preserve order when doing cons
 					for (HandleSeq::reverse_iterator rit = rHS.rbegin(); rit != rHS.rend(); ++rit)
 						rc = scm_cons(SchemeSmob::handle_to_scm(*rit), rc);
 
@@ -255,7 +259,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				case Q_HTI:
 				{
 					// First arg is a handle
-					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name, 1);
+					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
 
 					// Second arg is a type
 					Type t = SchemeSmob::verify_atom_type(scm_cadr(args), scheme_name, 2);
@@ -277,7 +281,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				case Q_HTIB:
 				{
 					// First arg is a handle
-					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name, 1);
+					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
 
 					// Second arg is a type
 					Type t = SchemeSmob::verify_atom_type(scm_cadr(args), scheme_name, 2);
@@ -302,7 +306,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				case K_H:
 				{
 					// the only argument is a handle
-					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
 					HandleSeqSeq rHSS = (that->*method.k_h)(h);
 
 					rc = SCM_EOL;
@@ -324,7 +328,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				case S_S:
 				{
 					// First argument is a string
-					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
+					std::string str(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
 
 					const std::string &rs = (that->*method.s_s)(str);
 					rc = scm_from_utf8_string(rs.c_str());
@@ -333,8 +337,8 @@ class SchemePrimitive : public PrimitiveEnviron
 				case S_SS:
 				{
 					// All args are strings
-					std::string str1 = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
-					std::string str2 = SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2);
+					std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
+					std::string str2(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
 
 					const std::string &rs = (that->*method.s_ss)(str1, str2);
 					rc = scm_from_utf8_string(rs.c_str());
@@ -343,24 +347,31 @@ class SchemePrimitive : public PrimitiveEnviron
 				case S_SSS:
 				{
 					// All args are strings
-					std::string str1 = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
-					std::string str2 = SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2);
-					std::string str3 = SchemeSmob::verify_string(scm_caddr(args), scheme_name, 3);
+					std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
+					std::string str2(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
+					std::string str3(SchemeSmob::verify_string(scm_caddr(args), scheme_name, 3));
 
 					const std::string &rs = (that->*method.s_sss)(str1, str2, str3);
 					rc = scm_from_utf8_string(rs.c_str());
 					break;
 				}
-				case V_H:
+				case P_H:
 				{
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					TruthValuePtr tv((that->*method.p_h)(h));
+					rc = SchemeSmob::tv_to_scm(tv);
+					break;
+				}
+				case V_H:
+				{
+					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
 					(that->*method.v_h)(h);
 					break;
 				}
 				case V_S:
 				{
 					// First argument is a string
-					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
+					std::string str(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
 
 					(that->*method.v_s)(str);
 					break;
@@ -368,8 +379,8 @@ class SchemePrimitive : public PrimitiveEnviron
 				case V_SS:
 				{
 					// All args are strings
-					std::string str1 = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
-					std::string str2 = SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2);
+					std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
+					std::string str2(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
 
 					(that->*method.v_ss)(str1, str2);
 					break;
@@ -377,9 +388,9 @@ class SchemePrimitive : public PrimitiveEnviron
 				case V_SSS:
 				{
 					// All args are strings
-					std::string str1 = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
-					std::string str2 = SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2);
-					std::string str3 = SchemeSmob::verify_string(scm_caddr(args), scheme_name, 3);
+					std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
+					std::string str2(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
+					std::string str3(SchemeSmob::verify_string(scm_caddr(args), scheme_name, 3));
 
 					(that->*method.v_sss)(str1, str2, str3);
 					break;
@@ -519,6 +530,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		                             const std::string&)
 		DECLARE_CONSTR_3(S_SSS,s_sss,const std::string&, const std::string&,
 		                             const std::string&, const std::string&)
+		DECLARE_CONSTR_1(P_H,  p_h,  TruthValuePtr, Handle)
 		DECLARE_CONSTR_1(V_H,  v_h,  void, Handle)
 		DECLARE_CONSTR_1(V_S,  v_s,  void, const std::string&)
 		DECLARE_CONSTR_2(V_SS, v_ss, void, const std::string&,
@@ -581,6 +593,7 @@ DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(HandleSeq, Handle)
 DECLARE_DECLARE_1(HandleSeqSeq, Handle)
 DECLARE_DECLARE_1(const std::string&, const std::string&)
+DECLARE_DECLARE_1(TruthValuePtr, Handle)
 DECLARE_DECLARE_1(void, Handle)
 DECLARE_DECLARE_1(void, const std::string&)
 DECLARE_DECLARE_1(void, Type)

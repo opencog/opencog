@@ -208,6 +208,14 @@ TruthValuePtr SchemeSmob::to_tv(SCM s)
 
 /* ============================================================== */
 /**
+ * Import a truth value
+ */
+SCM SchemeSmob::tv_to_scm (TruthValuePtr tvp)
+{
+	return take_tv(tvp->rawclone());
+}
+/* ============================================================== */
+/**
  * Take over memory management of a truth value
  */
 SCM SchemeSmob::take_tv (TruthValue *tv)
