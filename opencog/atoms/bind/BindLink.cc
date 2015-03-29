@@ -23,6 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/ClassServer.h>
+
 #include "BindLink.h"
 
 using namespace opencog;
@@ -31,6 +33,43 @@ BindLink::BindLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
 	: SatisfactionLink(t, hseq, tv, av)
 {
+}
+
+
+/* ================================================================= */
+/**
+ * Validate the body for syntax correctness.
+ *
+ * Given an ImplicatioLink, this will check to make sure that
+ * it is of the appropriate structure: that it consists of two
+ * parts: a set of clauses, and an implicand.  That is, it must
+ * have the structure:
+ *
+ *    ImplicationLink
+ *       SomeLink
+ *       AnotherLink
+ *
+ * The conents of "SomeLink" is not validated here, it is
+ * validated by validate_clauses()
+ *
+ * As a side-effect, if SomeLink is an AndLink, the list of clauses
+ * is unpacked.
+ */
+void BindLink::validate_body(const Handle& hbody)
+{
+	// Type must be as expected
+	if (IMPLICATION_LINK == hbody->getType())
+		throw InvalidParamException(TRACE_INFO,
+			"Bindlink expects an ImplicationLink, got $s",
+			classserver().getTypeName(hbody->getType()).c_str());
+
+	LinkPtr lbody(LinkCast(hbody));
+	const std::vector<Handle>& oset = lbody->getOutgoingSet();
+	if (2 != oset.size())
+		throw InvalidParamException(TRACE_INFO,
+			"ImplicationLink has wrong size: %d", oset.size());
+	_hclauses = oset[0];
+	_implicand = oset[1];
 }
 
 

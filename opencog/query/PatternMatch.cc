@@ -171,44 +171,6 @@ void PatternMatch::do_imply (const Handle& himplication,
 
 /* ================================================================= */
 /**
- * Validate the body for syntax correctness.
- *
- * Given an ImplicatioLink, this will check to make sure that
- * it is of the appropriate structure: that it consists of two
- * parts: a set of clauses, and an implicand.  That is, it must
- * have the structure:
- *
- *    ImplicationLink
- *       SomeLink
- *       AnotherLink
- *
- * The conents of "SomeLink" is not validated here, it is
- * validated by validate_clauses()
- *
- * As a side-effect, if SomeLink is an AndLink, the list of clauses
- * is unpacked.
- */
-void PatternMatch::validate_body(const Handle& hbody)
-{
-	// Type must be as expected
-	Type tbody = hbody->getType();
-	if (IMPLICATION_LINK == tbody)
-	{
-		LinkPtr lbody(LinkCast(hbody));
-		const std::vector<Handle>& oset = lbody->getOutgoingSet();
-		if (2 != oset.size())
-			throw InvalidParamException(TRACE_INFO,
-				"ImplicationLink has wrong size: %d", oset.size());
-		_hclauses = oset[0];
-		_implicand = oset[1];
-		return;
-	}
-
-	_hclauses = hbody;
-}
-
-/* ================================================================= */
-/**
  * Run the full validation suite.
  */
 void PatternMatch::validate(const Handle& hbindlink)
@@ -218,6 +180,9 @@ void PatternMatch::validate(const Handle& hbindlink)
 	{
 		unbundle_body(hbindlink);
 		validate_vardecl(_vardecl);
+		validate_body(_body);
+		unbundle_clauses(_hclauses);
+		validate_clauses(_varset, _clauses);
 	}
 	else
 	{
@@ -226,17 +191,12 @@ void PatternMatch::validate(const Handle& hbindlink)
 		_varset = bl->_varset;
 		_typemap = bl->_typemap;
 		_body = bl->_body;
-	}
-	validate_body(_body);
-	if (NULL == bl)
-	{
-		unbundle_clauses(_hclauses);
-	}
-	else
-	{
+
+		_hclauses = bl->_hclauses;
 		_clauses = bl->_clauses;
+		_virtuals = bl->_virtuals;
+		_nonvirts = bl->_nonvirts;
 	}
-	validate_clauses(_varset, _clauses);
 }
 
 /* ================================================================= */
@@ -270,6 +230,8 @@ void PatternMatch::do_bindlink (const Handle& hbindlink,
 	{
 		unbundle_body(hbindlink);
 		validate_vardecl(_vardecl);
+		validate_body(_body);
+		unbundle_clauses(_hclauses);
 	}
 	else
 	{
@@ -278,15 +240,11 @@ void PatternMatch::do_bindlink (const Handle& hbindlink,
 		_varset = bl->_varset;
 		_typemap = bl->_typemap;
 		_body = bl->_body;
-	}
-	validate_body(_body);
-	if (NULL == bl)
-	{
-		unbundle_clauses(_hclauses);
-	}
-	else
-	{
+
+		_hclauses = bl->_hclauses;
 		_clauses = bl->_clauses;
+		_virtuals = bl->_virtuals;
+		_nonvirts = bl->_nonvirts;
 	}
 
 	implicator.set_type_restrictions(_typemap);
@@ -305,6 +263,9 @@ void PatternMatch::do_satlink (const Handle& hsatlink,
 	{
 		unbundle_body(hsatlink);
 		validate_vardecl(_vardecl);
+
+		validate_body(_body);
+		unbundle_clauses(_hclauses);
 	}
 	else
 	{
@@ -313,15 +274,11 @@ void PatternMatch::do_satlink (const Handle& hsatlink,
 		_varset = bl->_varset;
 		_typemap = bl->_typemap;
 		_body = bl->_body;
-	}
-	validate_body(_body);
-	if (NULL == bl)
-	{
-		unbundle_clauses(_hclauses);
-	}
-	else
-	{
+
+		_hclauses = bl->_hclauses;
 		_clauses = bl->_clauses;
+		_virtuals = bl->_virtuals;
+		_nonvirts = bl->_nonvirts;
 	}
 
 	do_match(&sater, _varset, _clauses);

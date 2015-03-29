@@ -52,6 +52,9 @@ protected:
 	std::vector<Handle> _virtuals;
 	std::vector<Handle> _nonvirts;
 
+	// Validate the structure of the body
+	virtual void validate_body(const Handle&);
+
 	// Validate the clauses inside the body
 	void unbundle_clauses(const Handle&);
 	void validate_clauses(std::set<Handle>& vars,
@@ -62,12 +65,7 @@ public:
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	SatisfactionLink(Link &l)
-		: LambdaLink(SATISFACTION_LINK, l.getOutgoingSet(),
-		       l.getTruthValue(), l.getAttentionValue())
-	{
-		OC_ASSERT(SATISFACTION_LINK == l.getType(), "Bad SatisfactionLink constructor!");
-	}
+	SatisfactionLink(Link &l);
 };
 
 typedef std::shared_ptr<SatisfactionLink> SatisfactionLinkPtr;

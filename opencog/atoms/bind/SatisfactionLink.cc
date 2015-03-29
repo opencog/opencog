@@ -34,6 +34,37 @@ SatisfactionLink::SatisfactionLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
 	: LambdaLink(t, hseq, tv, av)
 {
+	// The LambdLink scontructor setup _body and _varset
+	validate_body(_body);
+	unbundle_clauses(_hclauses);
+	validate_clauses(_varset, _clauses);
+}
+
+SatisfactionLink::SatisfactionLink(Link &l)
+	: LambdaLink(SATISFACTION_LINK, l.getOutgoingSet(),
+	             l.getTruthValue(), l.getAttentionValue())
+{
+	OC_ASSERT(SATISFACTION_LINK == l.getType(),
+		"Bad SatisfactionLink constructor!");
+
+	// The LambdLink scontructor setup _body and _varset
+	validate_body(_body);
+	unbundle_clauses(_hclauses);
+	validate_clauses(_varset, _clauses);
+}
+
+/* ================================================================= */
+/**
+ * Validate the body for syntax correctness.
+ *
+ * For a SatisfcationLink, this is trivial.  However, this is a virtual
+ * method, and the validation is non-trivial for the BindLink, which
+ * inherits from this.  Overloading is necessary, since body validation
+ * must run before clause unpacking does.
+ */
+void SatisfactionLink::validate_body(const Handle& hbody)
+{
+	_hclauses = hbody;
 }
 
 /* ================================================================= */
@@ -46,8 +77,7 @@ void SatisfactionLink::unbundle_clauses(const Handle& clauses)
 	// be supported, allowing several different patterns to be matched
 	// in one go. But not today, this is complex and low priority. See
 	// the README for slighly more detail
-	Type tclauses = clauses->getType();
-	if (AND_LINK == tclauses)
+	if (AND_LINK == clauses->getType())
 	{
 		_clauses = LinkCast(_hclauses)->getOutgoingSet();
 	}

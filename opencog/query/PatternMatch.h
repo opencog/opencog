@@ -53,13 +53,7 @@ class PatternMatch : public BindLink
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds);
 
-		/// The actual clauses. Set by validate_implication()
-		Handle _implicand;
-
 		bool _used;
-
-		// Validate the structure of the body
-		void validate_body(const Handle&);
 
 	public:
 		PatternMatch(void);

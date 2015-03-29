@@ -41,6 +41,12 @@ class BindLink : public SatisfactionLink
 {
 protected:
 
+	/// The actual clauses. Set by validate_body()
+	Handle _implicand;
+
+	// Validate the structure of the body
+	virtual void validate_body(const Handle&);
+
 public:
 	BindLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
