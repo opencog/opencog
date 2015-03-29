@@ -23,16 +23,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atoms/TypeNode.h>
-
 #include "BindLink.h"
 
 using namespace opencog;
 
 BindLink::BindLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: LambdaLink(t, hseq, tv, av)
+	: SatisfactionLink(t, hseq, tv, av)
 {
 }
 

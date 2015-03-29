@@ -54,23 +54,12 @@ class PatternMatch : public BindLink
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds);
 
 		/// The actual clauses. Set by validate_implication()
-		Handle _hclauses;
 		Handle _implicand;
-		std::vector<Handle> _clauses;
-
-		/// The graph components. Set by validate_clauses()
-		std::vector<Handle> _virtuals;
-		std::vector<Handle> _nonvirts;
 
 		bool _used;
 
 		// Validate the structure of the body
 		void validate_body(const Handle&);
-
-		// Validate the clauses inside the body
-		void unbundle_clauses(const Handle&);
-		void validate_clauses(std::set<Handle>& vars,
-		                      std::vector<Handle>& clauses);
 
 	public:
 		PatternMatch(void);

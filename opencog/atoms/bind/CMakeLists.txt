@@ -5,10 +5,12 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY (lambda SHARED
 	BindLink.cc
 	LambdaLink.cc
+	SatisfactionLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(lambda opencog_atom_types)
 
-# TARGET_LINK_LIBRARIES(lambda
-#)
+TARGET_LINK_LIBRARIES(lambda
+	atomutils
+)

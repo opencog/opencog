@@ -83,7 +83,7 @@ LAMBDA_LINK <- ORDERED_LINK
 
 // Scoping and Logical quantifiers
 SATISFACTION_LINK <- LAMBDA_LINK   // Finds all groundings
-BIND_LINK <- LAMBDA_LINK           // Finds all groundings and executes
+BIND_LINK <- SATISFACTION_LINK           // Finds all groundings and executes
 
 FORALL_LINK <- LAMBDA_LINK "ForAllLink"
 EXISTS_LINK <- LAMBDA_LINK

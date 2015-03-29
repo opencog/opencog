@@ -25,7 +25,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atoms/bind/LambdaLink.h>
+#include <opencog/atoms/bind/SatisfactionLink.h>
 
 namespace opencog
 {
@@ -37,7 +37,7 @@ namespace opencog
  * be replaced by something completely different, someday ...
  */
 
-class BindLink : public LambdaLink
+class BindLink : public SatisfactionLink
 {
 protected:
 
@@ -47,7 +47,7 @@ public:
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	BindLink(Link &l)
-		: LambdaLink(BIND_LINK, l.getOutgoingSet(),
+		: SatisfactionLink(BIND_LINK, l.getOutgoingSet(),
 		       l.getTruthValue(), l.getAttentionValue())
 	{
 		OC_ASSERT(BIND_LINK == l.getType(), "Bad BindLink constructor!");

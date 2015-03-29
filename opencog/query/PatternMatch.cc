@@ -207,26 +207,6 @@ void PatternMatch::validate_body(const Handle& hbody)
 	_hclauses = hbody;
 }
 
-void PatternMatch::unbundle_clauses(const Handle& clauses)
-{
-	// The predicate is either an AndList, or a single clause
-	// If its an AndList, then its a list of clauses.
-	// XXX FIXME Perhaps, someday, some sort of embedded OrList should
-	// be supported, allowing several different patterns to be matched
-	// in one go. But not today, this is complex and low priority. See
-	// the README for slighly more detail
-	Type tclauses = clauses->getType();
-	if (AND_LINK == tclauses)
-	{
-		_clauses = LinkCast(_hclauses)->getOutgoingSet();
-	}
-	else
-	{
-		// There's just one single clause!
-		_clauses.push_back(clauses);
-	}
-}
-
 /* ================================================================= */
 /**
  * Run the full validation suite.
@@ -248,7 +228,14 @@ void PatternMatch::validate(const Handle& hbindlink)
 		_body = bl->_body;
 	}
 	validate_body(_body);
-	unbundle_clauses(_hclauses);
+	if (NULL == bl)
+	{
+		unbundle_clauses(_hclauses);
+	}
+	else
+	{
+		_clauses = bl->_clauses;
+	}
 	validate_clauses(_varset, _clauses);
 }
 
@@ -293,7 +280,14 @@ void PatternMatch::do_bindlink (const Handle& hbindlink,
 		_body = bl->_body;
 	}
 	validate_body(_body);
-	unbundle_clauses(_hclauses);
+	if (NULL == bl)
+	{
+		unbundle_clauses(_hclauses);
+	}
+	else
+	{
+		_clauses = bl->_clauses;
+	}
 
 	implicator.set_type_restrictions(_typemap);
 	do_imply(_body, implicator, _varset);
@@ -306,7 +300,7 @@ void PatternMatch::do_bindlink (const Handle& hbindlink,
 void PatternMatch::do_satlink (const Handle& hsatlink,
                                Satisfier& sater)
 {
-	LambdaLinkPtr bl(LambdaLinkCast(hsatlink));
+	SatisfactionLinkPtr bl(SatisfactionLinkCast(hsatlink));
 	if (NULL == bl)
 	{
 		unbundle_body(hsatlink);
@@ -321,7 +315,14 @@ void PatternMatch::do_satlink (const Handle& hsatlink,
 		_body = bl->_body;
 	}
 	validate_body(_body);
-	unbundle_clauses(_hclauses);
+	if (NULL == bl)
+	{
+		unbundle_clauses(_hclauses);
+	}
+	else
+	{
+		_clauses = bl->_clauses;
+	}
 
 	do_match(&sater, _varset, _clauses);
 }
