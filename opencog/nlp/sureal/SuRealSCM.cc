@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomutils/AtomSpaceUtils.h>
+#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/PatternUtils.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/query/PatternMatchEngine.h>
@@ -117,7 +117,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     // get all the nodes to be treated as variable in the Pattern Matcher
     // XXX perhaps it's better to write a eval_q in SchemeEval to convert
     //     a scm list to HandleSeq, so can just use the scheme utilities?
-    UnorderedHandleSet allNodes = AtomSpaceUtils::getAllUniqueNodes(h);
+    UnorderedHandleSet allNodes = getAllUniqueNodes(h);
 
     // isolate which nodes are actually words, and which are not; all words
     // need to become variable for the Pattern Matcher

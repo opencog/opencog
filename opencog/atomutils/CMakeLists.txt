@@ -1,13 +1,12 @@
 
 ADD_LIBRARY (atomutils SHARED
-	AtomSpaceUtils.cc
+	AtomUtils.cc
 	PatternUtils.cc
 )
 
 ADD_DEPENDENCIES(atomutils opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomutils
-	atomspace
 	cogutil
 )
 
@@ -22,7 +21,7 @@ ELSE (CYGWIN)
 ENDIF (CYGWIN)
 
 INSTALL (FILES
-    AtomSpaceUtils.h
+    AtomUtils.h
     FollowLink.h
     ForeachChaseLink.h
     Foreach.h

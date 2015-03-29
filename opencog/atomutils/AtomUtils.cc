@@ -1,5 +1,5 @@
 /*
- * AtomSpaceUtils.cc
+ * AtomUtils.cc
  *
  * Copyright (C) 2014 OpenCog Foundation
  *
@@ -21,13 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/Link.h>
-#include "AtomSpaceUtils.h"
+#include "AtomUtils.h"
 
-
-using namespace opencog;
-
+namespace opencog
+{
 
 /**
  * Get all the nodes within a link and its sublinks.
@@ -35,7 +33,7 @@ using namespace opencog;
  * @param h     the top level link
  * @return      a HandleSeq of nodes
  */
-HandleSeq AtomSpaceUtils::getAllNodes(Handle h)
+HandleSeq getAllNodes(Handle h)
 {
     HandleSeq results;
 
@@ -61,7 +59,7 @@ HandleSeq AtomSpaceUtils::getAllNodes(Handle h)
  * @param h     the top level link
  * @return      a UnorderedHandleSet of nodes
  */
-UnorderedHandleSet AtomSpaceUtils::getAllUniqueNodes(Handle h)
+UnorderedHandleSet getAllUniqueNodes(Handle h)
 {
     UnorderedHandleSet results;
 
@@ -77,9 +75,6 @@ UnorderedHandleSet AtomSpaceUtils::getAllUniqueNodes(Handle h)
 
     return results;
 }
-
-namespace opencog
-{
 
 HandleSeq getNeighbors(const Handle& h, bool fanin,
                        bool fanout, Type desiredLinkType,
@@ -105,28 +100,6 @@ HandleSeq getNeighbors(const Handle& h, bool fanin,
         }
     }
     return answer;
-}
-
-
-Handle addPrefixedNode(AtomSpace& as, Type t, const std::string& prefix)
-{
-    static const char alphanum[] =
-        "0123456789"
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "abcdefghijklmnopqrstuvwxyz";
-    static const int len = 8;
-    std::string name;
-    Handle result;
-    // Keep trying random suffixes until a non-existant name is generated.
-    do {
-        name = prefix;
-        for (int i = 0; i < len; ++i) {
-            name += alphanum[rand() % (sizeof(alphanum) - 1)];
-        }
-        result = as.getHandle(t, name);
-    } while (as.isValidHandle(result));
-
-    return as.addNode(t, name);
 }
 
 }

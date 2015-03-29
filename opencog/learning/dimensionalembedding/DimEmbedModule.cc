@@ -28,7 +28,7 @@
 #include <string>
 #include <utility>
 
-#include <opencog/atomutils/AtomSpaceUtils.h>
+#include <opencog/atomspaceutils/AtomSpaceUtils.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/guile/SchemePrimitive.h>
