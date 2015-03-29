@@ -42,9 +42,6 @@ class PatternMatch : public BindLink
 		              std::set<Handle>& vars,
 		              std::vector<Handle>& clauses);
 
-		// See PatternMatch.cc for comments
-		void do_imply(const Handle&, Implicator&, std::set<Handle>&);
-
 		bool recursive_virtual(PatternMatchCallback *cb,
 		            const std::vector<Handle>& virtuals,
 		            const std::vector<Handle>& negations,

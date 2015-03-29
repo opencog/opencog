@@ -289,7 +289,7 @@ void PatternUTest::test_two_links(void)
 
 	Handle han = as->addLink(AND_LINK, hl1, hl2);
 
-	Handle hv = as->addLink(LIST_LINK, hx);
+	Handle hv = as->addLink(VARIABLE_LIST, hx);
 
 	std::set<Handle> vars;
 	vars.insert(hx);

@@ -37,8 +37,12 @@ namespace opencog
  * be replaced by something completely different, someday ...
  */
 
+class PatternMatch;
+
 class BindLink : public SatisfactionLink
 {
+	friend class PatternMatch;
+
 protected:
 
 	/// The actual clauses. Set by validate_body()

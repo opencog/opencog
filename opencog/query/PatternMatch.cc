@@ -37,28 +37,112 @@ void PatternMatch::match(PatternMatchCallback *cb,
                          const Handle& hvarbles,
                          const Handle& hclauses)
 {
-	// Both must be non-empty.
-	LinkPtr lclauses(LinkCast(hclauses));
-	LinkPtr lvarbles(LinkCast(hvarbles));
-	if (NULL == lclauses or NULL == lvarbles) return;
-
 	// Types must be as expected
 	Type tvarbles = hvarbles->getType();
-	Type tclauses = hclauses->getType();
 	if (VARIABLE_LIST != tvarbles and LIST_LINK != tvarbles)
 		throw InvalidParamException(TRACE_INFO,
 			"Expected VariableList for the bound variable list.");
 
+	Type tclauses = hclauses->getType();
 	if (AND_LINK != tclauses)
 		throw InvalidParamException(TRACE_INFO,
 			"Expected AndLink for clause list.");
 
-	std::set<Handle> vars;
-	for (Handle v: lvarbles->getOutgoingSet()) vars.insert(v);
+	// Unpack and validate the variable declarations
+	_vardecl = hvarbles;
+	validate_vardecl(_vardecl);
 
-	std::vector<Handle> clauses(lclauses->getOutgoingSet());
+	// Unpack and validate the clauses
+	_hclauses = hclauses;
+	unbundle_clauses(_hclauses);
 
-	do_match(cb, vars, clauses);
+	validate_clauses(_varset, _clauses);
+	do_match(cb, _varset, _clauses);
+}
+
+/* ================================================================= */
+/**
+ * Run the full validation suite.
+ */
+void PatternMatch::validate(const Handle& hbindlink)
+{
+	BindLinkPtr bl(BindLinkCast(hbindlink));
+	if (NULL == bl)
+		createBindLink(*LinkCast(hbindlink));
+}
+
+/* ================================================================= */
+/**
+ * Evaluate an ImplicationLink embedded in a BindLink
+ *
+ * Given a BindLink containing variable declarations and an
+ * ImplicationLink, this method will "evaluate" the implication, matching
+ * the predicate, and creating a grounded implicand, assuming the
+ * predicate can be satisfied. Thus, for example, given the structure
+ *
+ *    BindLink
+ *       ListLink
+ *          VariableNode "$var0"
+ *          VariableNode "$var1"
+ *       ImplicationLink
+ *          AndList
+ *             etc ...
+ *
+ * Evaluation proceeds as decribed in the "do_imply()" function above.
+ * The whole point of the BindLink is to do nothing more than
+ * to indicate the bindings of the variables, and (optionally) limit
+ * the types of acceptable groundings for the varaibles.
+ */
+
+void PatternMatch::do_bindlink (const Handle& hbindlink,
+                                Implicator& implicator)
+{
+	BindLinkPtr bl(BindLinkCast(hbindlink));
+	if (NULL == bl)
+		bl = createBindLink(*LinkCast(hbindlink));
+
+// XXX fixme temporary hack
+	_vardecl = bl->_vardecl;
+	_varset = bl->_varset;
+	_typemap = bl->_typemap;
+	_body = bl->_body;
+
+	_hclauses = bl->_hclauses;
+	_clauses = bl->_clauses;
+	_virtuals = bl->_virtuals;
+	_nonvirts = bl->_nonvirts;
+
+	_implicand = bl->_implicand;
+
+	implicator.implicand = _implicand;
+	implicator.set_type_restrictions(_typemap);
+
+	validate_clauses(_varset, _clauses);
+	do_match(&implicator, _varset, _clauses);
+}
+
+/**
+ * Perform a satisfaction check only, no implication is performed.
+ *
+ */
+void PatternMatch::do_satlink (const Handle& hsatlink,
+                               Satisfier& sater)
+{
+	SatisfactionLinkPtr bl(SatisfactionLinkCast(hsatlink));
+	if (NULL == bl)
+		bl = createSatisfactionLink(*LinkCast(hsatlink));
+// XXX fixme temporary hack
+	_vardecl = bl->_vardecl;
+	_varset = bl->_varset;
+	_typemap = bl->_typemap;
+	_body = bl->_body;
+
+	_hclauses = bl->_hclauses;
+	_clauses = bl->_clauses;
+	_virtuals = bl->_virtuals;
+	_nonvirts = bl->_nonvirts;
+
+	do_match(&sater, _varset, _clauses);
 }
 
 /* ================================================================= */
@@ -150,111 +234,11 @@ void PatternMatch::match(PatternMatchCallback *cb,
  * method repeatedly on them, until one is exhausted.
  */
 
-void PatternMatch::do_imply (const Handle& himplication,
-                             Implicator &impl,
-                             std::set<Handle>& varset)
-{
-	// Extract the set of variables, if needed.
-	// This is used only by the deprecated imply() function, as the
-	// BindLink will include a list of variables up-front.
-	if (varset.empty())
-	{
-		FindVariables fv(VARIABLE_NODE);
-		fv.find_vars(_hclauses);
-		varset = fv.varset;
-	}
-
-	// Now perform the search.
-	impl.implicand = _implicand;
-	do_match(&impl, varset, _clauses);
-}
-
-/* ================================================================= */
-/**
- * Run the full validation suite.
- */
-void PatternMatch::validate(const Handle& hbindlink)
-{
-	BindLinkPtr bl(BindLinkCast(hbindlink));
-	if (NULL == bl)
-		createBindLink(*LinkCast(hbindlink));
-}
-
-/* ================================================================= */
-/**
- * Evaluate an ImplicationLink embedded in a BindLink
- *
- * Given a BindLink containing variable declarations and an
- * ImplicationLink, this method will "evaluate" the implication, matching
- * the predicate, and creating a grounded implicand, assuming the
- * predicate can be satisfied. Thus, for example, given the structure
- *
- *    BindLink
- *       ListLink
- *          VariableNode "$var0"
- *          VariableNode "$var1"
- *       ImplicationLink
- *          AndList
- *             etc ...
- *
- * Evaluation proceeds as decribed in the "do_imply()" function above.
- * The whole point of the BindLink is to do nothing more than
- * to indicate the bindings of the variables, and (optionally) limit
- * the types of acceptable groundings for the varaibles.
- */
-
-void PatternMatch::do_bindlink (const Handle& hbindlink,
-                                Implicator& implicator)
-{
-	BindLinkPtr bl(BindLinkCast(hbindlink));
-	if (NULL == bl)
-		bl = createBindLink(*LinkCast(hbindlink));
-
-// XXX fixme temporary hack
-	_vardecl = bl->_vardecl;
-	_varset = bl->_varset;
-	_typemap = bl->_typemap;
-	_body = bl->_body;
-
-	_hclauses = bl->_hclauses;
-	_clauses = bl->_clauses;
-	_virtuals = bl->_virtuals;
-	_nonvirts = bl->_nonvirts;
-
-	implicator.set_type_restrictions(_typemap);
-	do_imply(_body, implicator, _varset);
-}
-
-/**
- * Perform a satisfaction check only, no implication is performed.
- *
- */
-void PatternMatch::do_satlink (const Handle& hsatlink,
-                               Satisfier& sater)
-{
-	SatisfactionLinkPtr bl(SatisfactionLinkCast(hsatlink));
-	if (NULL == bl)
-		bl = createSatisfactionLink(*LinkCast(hsatlink));
-// XXX fixme temporary hack
-	_vardecl = bl->_vardecl;
-	_varset = bl->_varset;
-	_typemap = bl->_typemap;
-	_body = bl->_body;
-
-	_hclauses = bl->_hclauses;
-	_clauses = bl->_clauses;
-	_virtuals = bl->_virtuals;
-	_nonvirts = bl->_nonvirts;
-
-	do_match(&sater, _varset, _clauses);
-}
-
 /// Deprecated; do not use in new code.
 /// This is used only in test cases.
 void PatternMatch::do_imply (const Handle& himplication,
                              Implicator &impl)
 {
-	std::set<Handle> varset;
 	Type timplication = himplication->getType();
 	if (IMPLICATION_LINK != timplication)
 		throw InvalidParamException(TRACE_INFO,
@@ -262,7 +246,17 @@ void PatternMatch::do_imply (const Handle& himplication,
 
 	validate_body(himplication);
 	unbundle_clauses(_hclauses);
-	do_imply(himplication, impl, varset);
+
+	// Extract the variables; the were not specified.
+	FindVariables fv(VARIABLE_NODE);
+	fv.find_vars(_hclauses);
+	_varset = fv.varset;
+
+	// Now perform the search.
+	impl.implicand = _implicand;
+
+	validate_clauses(_varset, _clauses);
+	do_match(&impl, _varset, _clauses);
 }
 
 /* ===================== END OF FILE ===================== */
