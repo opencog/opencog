@@ -39,6 +39,8 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
+#include <opencog/atoms/bind/BindLink.h>
+#include <opencog/atoms/bind/LambdaLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -123,7 +125,6 @@ Handle AtomTable::getHandle(Type t, std::string name) const
         }
     }
     catch (...) { return Handle::UNDEFINED; }
-
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     Atom* atom = nodeIndex.getAtom(t, name);
@@ -282,6 +283,12 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     } else if (TYPE_NODE == atom_type) {
         if (NULL == TypeNodeCast(atom))
             atom = createTypeNode(*NodeCast(atom));
+    } else if (BIND_LINK == atom_type) {
+        if (NULL == BindLinkCast(atom))
+            atom = createBindLink(*LinkCast(atom));
+    } else if (LAMBDA_LINK == atom_type) {
+        if (NULL == LambdaLinkCast(atom))
+            atom = createLambdaLink(*LinkCast(atom));
     }
 
     // Is the equivalent of this atom already in the table?
