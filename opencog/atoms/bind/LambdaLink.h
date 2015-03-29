@@ -71,12 +71,7 @@ public:
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	LambdaLink(Link &l)
-		: Link(LAMBDA_LINK, l.getOutgoingSet(),
-		       l.getTruthValue(), l.getAttentionValue())
-	{
-		OC_ASSERT(LAMBDA_LINK == l.getType(), "Bad LambdaLink constructor!");
-	}
+	LambdaLink(Link &l);
 };
 
 typedef std::shared_ptr<LambdaLink> LambdaLinkPtr;

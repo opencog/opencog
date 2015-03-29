@@ -30,9 +30,9 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
-#include <opencog/execution/ExecutionOutputLink.h>
-#include <opencog/execution/EvaluationLink.h>
-#include <opencog/execution/NumberNode.h>
+#include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/NumberNode.h>
 
 using namespace opencog;
 

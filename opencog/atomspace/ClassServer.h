@@ -143,7 +143,7 @@ public:
      */
     bool isA(Type sub, Type super)
     {
-        /* Because this metod is called extremely often, we want
+        /* Because this method is called extremely often, we want
          * the best-case fast-path for it.  Since updates are extremely
          * unlikely after initialization, we use a multi-reader lock,
          * and don't care at all about writer starvation, since there

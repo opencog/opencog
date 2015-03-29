@@ -26,22 +26,86 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
 
-#include "BindLink.h"
 #include "LambdaLink.h"
-
 
 using namespace opencog;
 
-LambdaLink::LambdaLink(Type t, const HandleSeq& hseq,
+LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(t, hseq, tv, av)
+	: Link(t, oset, tv, av)
 {
+	// Type must be as expected
+	if (not classserver().isA(t, LAMBDA_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a LambdaLink, got %s", tname.c_str());
+	}
+
+	// Must have variable decls and body
+	if (2 != oset.size())
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting variabe decls and body, got size %d", oset.size());
+
+	_vardecl = oset[0];  // VariableNode declarations
+	_body = oset[1];     // Body
+	validate_vardecl(_vardecl);
 }
 
-BindLink::BindLink(Type t, const HandleSeq& hseq,
-                   TruthValuePtr tv, AttentionValuePtr av)
-	: LambdaLink(t, hseq, tv, av)
+LambdaLink::LambdaLink(Link &l)
+	: Link(LAMBDA_LINK, l.getOutgoingSet(),
+	       l.getTruthValue(), l.getAttentionValue())
 {
+	// Type must be as expected
+	Type tscope = l.getType();
+	if (not classserver().isA(tscope, LAMBDA_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(tscope);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a LambdaLink, got %s", tname.c_str());
+	}
+
+	// Must have variable decls and body
+	const HandleSeq& oset = l.getOutgoingSet();
+	if (2 != oset.size())
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting variabe decls and body, got size %d", oset.size());
+
+	_vardecl = oset[0];  // VariableNode declarations
+	_body = oset[1];     // Body
+	validate_vardecl(_vardecl);
+}
+
+/* ================================================================= */
+/**
+ * Unpack a LambdaLink into vardecls and body
+ * Very similar to the constructors.
+ */
+void LambdaLink::unbundle_body(const Handle& hlambda)
+{
+	// Must be non-empty.
+	LinkPtr lbl(LinkCast(hlambda));
+	if (NULL == lbl)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a LambdaLink");
+
+	// Type must be as expected
+	Type tscope = hlambda->getType();
+	if (not classserver().isA(tscope, LAMBDA_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(tscope);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a LambdaLink, got %s", tname.c_str());
+	}
+
+	// Must have variable decls and body
+	const HandleSeq& oset = lbl->getOutgoingSet();
+	if (2 != oset.size())
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting variabe decls and body, got size %d", oset.size());
+
+	_vardecl = oset[0];  // VariableNode declarations
+	_body = oset[1];     // Body
 }
 
 /* ================================================================= */
@@ -200,37 +264,6 @@ void LambdaLink::validate_vardecl(const Handle& hdecls)
 		throw InvalidParamException(TRACE_INFO,
 			"Expected a VariableList holding variable declarations");
 	}
-}
-
-/* ================================================================= */
-/**
- * Unpack a LambdaLink into vardecls and body
- */
-void LambdaLink::unbundle_body(const Handle& hlambda)
-{
-	// Must be non-empty.
-	LinkPtr lbl(LinkCast(hlambda));
-	if (NULL == lbl)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a LambdaLink");
-
-	// Type must be as expected
-	Type tscope = hlambda->getType();
-	if (not classserver().isA(tscope, LAMBDA_LINK))
-	{
-		const std::string& tname = classserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a LambdaLink, got %s", tname.c_str());
-	}
-
-	// Must have variable decls and body
-	const HandleSeq& oset = lbl->getOutgoingSet();
-	if (2 != oset.size())
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting variabe decls and body, got size %d", oset.size());
-
-	_vardecl = oset[0];  // VariableNode declarations
-	_body = oset[1];     // Body
 }
 
 /* ===================== END OF FILE ===================== */

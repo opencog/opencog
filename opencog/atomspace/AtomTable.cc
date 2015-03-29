@@ -315,7 +315,13 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             }
         } else {
             LinkPtr lll(LinkCast(atom));
-            atom = createLink(*lll);
+            if (BIND_LINK == atom_type) {
+                atom = createBindLink(*lll);
+            } else if (LAMBDA_LINK == atom_type) {
+                atom = createLambdaLink(*lll);
+            } else {
+                atom = createLink(*lll);
+            }
 
             // Well, if the link was in some other atomspace, then
             // the outgoing set will be too. So we recursively clone

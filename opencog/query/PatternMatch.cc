@@ -233,8 +233,12 @@ void PatternMatch::unbundle_clauses(const Handle& clauses)
  */
 void PatternMatch::validate(const Handle& hbindlink)
 {
-	unbundle_body(hbindlink);
-	validate_vardecl(_vardecl);
+	BindLinkPtr bl(BindLinkCast(hbindlink));
+	if (NULL == bl)
+	{
+		unbundle_body(hbindlink);
+		validate_vardecl(_vardecl);
+	}
 	validate_body(_body);
 	unbundle_clauses(_hclauses);
 	validate_clauses(_varset, _clauses);
