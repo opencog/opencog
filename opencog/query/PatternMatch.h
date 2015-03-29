@@ -38,11 +38,6 @@ class PatternMatch : public BindLink
 {
 	private:
 		// See PatternMatch.cc for comments
-		static int get_vartype(const Handle&,
-		                       std::set<Handle>&,
-		                       VariableTypeMap&);
-
-		// See PatternMatch.cc for comments
 		void do_match(PatternMatchCallback *,
 		              std::set<Handle>& vars,
 		              std::vector<Handle>& clauses);
@@ -58,16 +53,6 @@ class PatternMatch : public BindLink
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds);
 
-		/// Unbundled variables and types for them.
-		/// _typemap is the (possibly empty) list of restrictions on
-		/// the variable types.
-		/// Set by validate_bindvars()
-		std::set<Handle> _varset;
-		VariableTypeMap _typemap;
-
-		/// Handle of the body of the expression.
-		Handle _body;
-
 		/// The actual clauses. Set by validate_implication()
 		Handle _hclauses;
 		Handle _implicand;
@@ -79,13 +64,7 @@ class PatternMatch : public BindLink
 
 		bool _used;
 
-		// Extract variable decls and the body.
-		void unbundle_body(const Handle&);
-
-		// Validate the variable decls
-		void validate_vardecl(const Handle&);
-
-		// Validate the strcuture of the body
+		// Validate the structure of the body
 		void validate_body(const Handle&);
 
 		// Validate the clauses inside the body

@@ -28,10 +28,10 @@
 #include <set>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/atoms/bind/LambdaLink.h>
 
 namespace opencog {
 class PatternMatchEngine;
-typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
 
 /**
  * Callback interface, used to implement specifics of hypergraph

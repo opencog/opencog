@@ -23,6 +23,8 @@
 #ifndef _OPENCOG_LAMBDA_LINK_H
 #define _OPENCOG_LAMBDA_LINK_H
 
+#include <map>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 
@@ -36,6 +38,8 @@ namespace opencog
  * be replaced by something completely different, someday ...
  */
 
+typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
+
 class LambdaLink : public Link
 {
 protected:
@@ -44,6 +48,23 @@ protected:
 
 	/// Unbundled variables and types for them.
 	/// _typemap is the (possibly empty) list of restrictions on
+	/// the variable types. Set by validate_vars()
+	std::set<Handle> _varset;
+	VariableTypeMap _typemap;
+
+	/// Handle of the body of the expression.
+	Handle _body;
+
+	// See LambdaLink.cc for comments
+	static int get_vartype(const Handle&,
+	                       std::set<Handle>&,
+	                       VariableTypeMap&);
+
+	// Extract variable decls and the body.
+	void unbundle_body(const Handle&);
+
+	// Validate the variable decls
+	void validate_vardecl(const Handle&);
 
 public:
 	LambdaLink(Type, const HandleSeq&,
