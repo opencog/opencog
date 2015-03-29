@@ -70,7 +70,6 @@ TYPE_CHOICE <- OR_LINK     // used for type polymorphism
 
 // Variables and variable types
 VARIABLE_NODE <- NODE
-VARIABLE_TYPE_NODE <- TYPE_NODE // XXX for backwards-compat, only
 TYPED_VARIABLE_LINK <- ORDERED_LINK
 
 // A list of variables or variable declarations.

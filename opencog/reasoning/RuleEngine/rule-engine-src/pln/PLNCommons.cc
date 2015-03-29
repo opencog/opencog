@@ -64,9 +64,9 @@ Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
     UnorderedHandleSet variable_nodes = get_nodes(himplicant, {VARIABLE_NODE});
     HandleSeq list_link_elem;
 
-    //for searching implicationLinks with variables
+    // For searching ImplicationLinks with variables.
     if (vnode_is_typedv) {
-        Handle h = as_->addNode(VARIABLE_TYPE_NODE, "VariableNode");
+        Handle h = as_->addNode(TYPE_NODE, "VariableNode");
         for (Handle hvn : variable_nodes) {
             Handle hi = as_->addLink(TYPED_VARIABLE_LINK, hvn, h);
             list_link_elem.push_back(hi);
@@ -75,7 +75,7 @@ Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
         list_link_elem.insert(list_link_elem.end(),
                               variable_nodes.begin(), variable_nodes.end());
 
-    Handle var_listLink = as_->addLink(LIST_LINK, list_link_elem);
+    Handle var_listLink = as_->addLink(VARIABLE_LIST, list_link_elem);
 
     Handle implicationLink = as_->addLink(IMPLICATION_LINK, himplicant,
                                           himplicant);

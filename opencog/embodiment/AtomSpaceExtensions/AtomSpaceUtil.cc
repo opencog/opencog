@@ -2653,10 +2653,10 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
 {
     // Create BindLink used by pattern matcher
 
-    Handle hVariableListLink = atomSpace.addLink(LIST_LINK,
+    Handle hVariableListLink = atomSpace.addLink(VARIABLE_LIST,
         atomSpace.addLink(TYPED_VARIABLE_LINK,
             atomSpace.addNode(VARIABLE_NODE, "$var_list_link"),
-            atomSpace.addNode(VARIABLE_TYPE_NODE, "ListLink")));
+            atomSpace.addNode(TYPE_NODE, "ListLink")));
 
     Handle hEvaluationLinkDemandGoal = atomSpace.addLink(EVALUATION_LINK,
          atomSpace.addNode(PREDICATE_NODE, demandName+"DemandGoal"));

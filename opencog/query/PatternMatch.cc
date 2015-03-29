@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/TypeNode.h>
 #include <opencog/atomutils/PatternUtils.h>
 #include <opencog/util/Logger.h>
 
@@ -212,18 +213,9 @@ int PatternMatch::get_vartype(const Handle& htypelink,
 
 	// The vartype is either a single type name, or a list of typenames.
 	Type t = vartype->getType();
-	if (TYPE_NODE == t or VARIABLE_TYPE_NODE == t)
+	if (TYPE_NODE == t)
 	{
-		const std::string &tn = NodeCast(vartype)->getName();
-		Type vt = classserver().getType(tn);
-
-		if (NOTYPE == vt)
-		{
-			logger().warn("%s: TypeNode specifies unknown type: %s\n",
-			               __FUNCTION__, tn.c_str());
-			return 4;
-		}
-
+		Type vt = TypeNodeCast(vartype)->getValue();
 		std::set<Type> ts = {vt};
 		typemap.insert(ATPair(varname, ts));
 		vset.insert(varname);
@@ -238,7 +230,7 @@ int PatternMatch::get_vartype(const Handle& htypelink,
 		{
 			Handle h(tset[i]);
 			Type var_type = h->getType();
-			if (TYPE_NODE != var_type and VARIABLE_TYPE_NODE != var_type)
+			if (TYPE_NODE != var_type)
 			{
 				logger().warn("%s: VariableChoiceLink has unexpected content:\n"
 				              "Expected TypeNode, got %s",
@@ -246,14 +238,7 @@ int PatternMatch::get_vartype(const Handle& htypelink,
 				              classserver().getTypeName(h->getType()).c_str());
 				return 3;
 			}
-			const std::string &tn = NodeCast(h)->getName();
-			Type vt = classserver().getType(tn);
-			if (NOTYPE == vt)
-			{
-				logger().warn("%s: TypeNode specifies unknown type: %s\n",
-				               __FUNCTION__, tn.c_str());
-				return 5;
-			}
+			Type vt = TypeNodeCast(h)->getValue();
 			ts.insert(vt);
 		}
 
