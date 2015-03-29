@@ -48,25 +48,33 @@ public:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV())
 		// Convert to number and back to string to avoid miscompares.
 		: Node(TYPE_NODE, s, tv, av),
-		  value(classerver().getType(s))
+		  value(classserver().getType(s))
 	{}
 
 	TypeNode(Type t,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-		: Node(TYPE_NODE, classerver().getTypeName(t), tv, av),
+		: Node(TYPE_NODE, classserver().getTypeName(t), tv, av),
 		  value(t)
 	{}
 
 	TypeNode(Node &n)
 		: Node(TYPE_NODE, n.getName(),
 		       n.getTruthValue(), n.getAttentionValue()),
-		  value(classerver().getTypeName(n.getName()))
+		  value(classserver().getType(n.getName()))
 	{
 		OC_ASSERT(TYPE_NODE == n.getType(), "Bad TypeNode constructor!");
 	}
 
-	double getValue(void) { return value; }
+	static void validate(const std::string& str)
+	{
+		Type t = classserver().getType(str);
+		if (NOTYPE == t)
+			throw RuntimeException(TRACE_INFO,
+				"Not a valid typename");
+	}
+
+	Type getValue(void) { return value; }
 };
 
 typedef std::shared_ptr<TypeNode> TypeNodePtr;

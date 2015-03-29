@@ -65,6 +65,11 @@ public:
 		OC_ASSERT(NUMBER_NODE == n.getType(), "Bad NumberNode constructor!");
 	}
 
+	static std::string validate(const std::string& str)
+	{
+		return std::to_string(std::stod(str));
+	}
+
 	double getValue(void) { return value; }
 };
 

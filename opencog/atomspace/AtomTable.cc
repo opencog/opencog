@@ -38,6 +38,7 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/TypeNode.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -113,11 +114,16 @@ AtomTable::AtomTable(const AtomTable& other)
 
 Handle AtomTable::getHandle(Type t, std::string name) const
 {
-    // NumberNodes need to have a uniformly-agreed-upon name.
-    if (NUMBER_NODE == t) {
-        try { name = std::to_string(std::stod(name)); }
-        catch (...) { return Handle::UNDEFINED; }
+    // Special types need validation
+    try {
+        if (NUMBER_NODE == t) {
+            name = NumberNode::validate(name);
+        } else if (TYPE_NODE == t) {
+            TypeNode::validate(name);
+        }
     }
+    catch (...) { return Handle::UNDEFINED; }
+
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     Atom* atom = nodeIndex.getAtom(t, name);
@@ -268,12 +274,14 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (inEnviron(atom))
         return atom->getHandle();
 
-    // Experimental NumberNode support code
-    if (atom->getType() == NUMBER_NODE) {
-        NumberNodePtr nnp(NumberNodeCast(atom));
-        if (NULL == nnp) {
-           atom = createNumberNode(*NodeCast(atom));
-        }
+    // Experimental C++ atom types support code
+    Type atom_type = atom->getType();
+    if (NUMBER_NODE == atom_type) {
+        if (NULL == NumberNodeCast(atom))
+            atom = createNumberNode(*NodeCast(atom));
+    } else if (TYPE_NODE == atom_type) {
+        if (NULL == TypeNodeCast(atom))
+            atom = createTypeNode(*NodeCast(atom));
     }
 
     // Is the equivalent of this atom already in the table?
@@ -290,11 +298,14 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (at != NULL) {
         NodePtr nnn(NodeCast(atom));
         if (nnn) {
-            // Experimental support for NumberNodes
-            if (NUMBER_NODE == nnn->getType())
+            // Experimental support for atom types
+            if (NUMBER_NODE == atom_type) {
                 atom = createNumberNode(*nnn);
-            else
+            } else if (TYPE_NODE == atom_type) {
+                atom = createTypeNode(*nnn);
+            } else {
                 atom = createNode(*nnn);
+            }
         } else {
             LinkPtr lll(LinkCast(atom));
             atom = createLink(*lll);
