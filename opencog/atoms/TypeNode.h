@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/NumberNode.h
+ * opencog/atoms/TypeNode.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,10 +20,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_NUMBER_NODE_H
-#define _OPENCOG_NUMBER_NODE_H
+#ifndef _OPENCOG_TYPE_NODE_H
+#define _OPENCOG_TYPE_NODE_H
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Node.h>
 
 namespace opencog
@@ -31,53 +32,53 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  *
- * Experimental NumberNode class. This is a rough sketch for how things
+ * Experimental TypeNode class. This is a rough sketch for how things
  * like this might be done. It is not necessarily a good idea, and might
  * be replaced by something completely different, someday ...
  */
 
-class NumberNode : public Node
+class TypeNode : public Node
 {
 protected:
-	double value;
+	Type value;
 
 public:
-	NumberNode(const std::string& s,
+	TypeNode(const std::string& s,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV())
 		// Convert to number and back to string to avoid miscompares.
-		: Node(NUMBER_NODE, std::to_string(std::stod(s)), tv, av),
-		  value(std::stod(s))
+		: Node(TYPE_NODE, s, tv, av),
+		  value(classerver().getType(s))
 	{}
 
-	NumberNode(double vvv,
+	TypeNode(Type t,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-		: Node(NUMBER_NODE, std::to_string(vvv), tv, av),
-		  value(vvv)
+		: Node(TYPE_NODE, classerver().getTypeName(t), tv, av),
+		  value(t)
 	{}
 
-	NumberNode(Node &n)
-		: Node(NUMBER_NODE, std::to_string(std::stod(n.getName())),
+	TypeNode(Node &n)
+		: Node(TYPE_NODE, n.getName(),
 		       n.getTruthValue(), n.getAttentionValue()),
-		  value(std::stod(n.getName()))
+		  value(classerver().getTypeName(n.getName()))
 	{
-		OC_ASSERT(NUMBER_NODE == n.getType(), "Bad NumberNode constructor!");
+		OC_ASSERT(TYPE_NODE == n.getType(), "Bad TypeNode constructor!");
 	}
 
 	double getValue(void) { return value; }
 };
 
-typedef std::shared_ptr<NumberNode> NumberNodePtr;
-static inline NumberNodePtr NumberNodeCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<NumberNode>(a); }
-static inline NumberNodePtr NumberNodeCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<NumberNode>(a); }
+typedef std::shared_ptr<TypeNode> TypeNodePtr;
+static inline TypeNodePtr TypeNodeCast(const Handle& h)
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<TypeNode>(a); }
+static inline TypeNodePtr TypeNodeCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<TypeNode>(a); }
 
 // XXX temporary hack ...
-#define createNumberNode std::make_shared<NumberNode>
+#define createTypeNode std::make_shared<TypeNode>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_NUMBER_NODE_H
+#endif // _OPENCOG_TYPE_NODE_H
