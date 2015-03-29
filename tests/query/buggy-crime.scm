@@ -32,7 +32,7 @@
 ; because the variable $x never appears unquoted in the pattern.
 ; In fact, the pattern has no variables in it at all, since any
 ; quoted variable is not a variable, but is a constant.
-(define query_rule_bad
+(define (query_rule_bad)
     (BindLink (stv 1 1)
         (VariableNode "$x")
         (ImplicationLink (stv 1 1)
@@ -55,6 +55,13 @@
 ; two clauses in the above:  $zzz can be grounded by 
 ; (VariableNode "$x") and it can be grounded by 
 ; (QuoteLink (VariableNode "$x"))
+; ... err right, except that (QuoteLink (VariableNode "$x"))
+; is not actually in the atomspace, because query_rule_bad
+; cannot be added to the atomspace: it will throw an exception
+; when the add is attempted. And thus, the atomspace does not
+; actually contain (QuoteLink (VariableNode "$x")) in it...
+;
+; Conclude: the below will find only one grounding!
 (define query_rule_good
     (BindLink (stv 1 1)
         (VariableNode "$zzz")

@@ -328,7 +328,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 // need to do the right thing, not force crap onto us...
 	cb->validate_clauses(vars, clauses);
 
-	// Split the non virtual clauses into stronly connected components
+	// Split the non virtual clauses into strongly connected components
 	std::set<std::vector<Handle>> nvcomps;
 	get_connected_components(vars, _nonvirts, nvcomps);
 
