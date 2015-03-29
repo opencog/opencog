@@ -39,8 +39,17 @@ namespace opencog
 class LambdaLink : public Link
 {
 protected:
+	/// Handle of the topmost variable declaration.
+	Handle _vardecl;
+
+	/// Unbundled variables and types for them.
+	/// _typemap is the (possibly empty) list of restrictions on
 
 public:
+	LambdaLink(Type, const HandleSeq&,
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
 	LambdaLink(Link &l)
 		: Link(LAMBDA_LINK, l.getOutgoingSet(),
 		       l.getTruthValue(), l.getAttentionValue())

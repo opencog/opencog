@@ -30,7 +30,8 @@
 
 using namespace opencog;
 
-PatternMatch::PatternMatch(void) : _used(false) {}
+PatternMatch::PatternMatch(void)
+	: BindLink(BIND_LINK, HandleSeq()), _used(false) {}
 
 /// See the documentation for do_match() to see what this function does.
 /// This is just a convenience wrapper around do_match().

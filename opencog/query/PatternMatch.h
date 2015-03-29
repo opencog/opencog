@@ -27,13 +27,14 @@
 #include <set>
 
 #include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/bind/BindLink.h>
 #include <opencog/query/Implicator.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/Satisfier.h>
 
 namespace opencog {
 
-class PatternMatch
+class PatternMatch : public BindLink
 {
 	private:
 		// See PatternMatch.cc for comments
@@ -56,9 +57,6 @@ class PatternMatch
 		            const std::map<Handle, Handle>& pred_gnds,
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds);
-
-		/// Handle of the topmost variable declaration.
-		Handle _vardecl;
 
 		/// Unbundled variables and types for them.
 		/// _typemap is the (possibly empty) list of restrictions on

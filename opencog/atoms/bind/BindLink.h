@@ -25,6 +25,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/atoms/bind/LambdaLink.h>
 
 namespace opencog
 {
@@ -36,13 +37,17 @@ namespace opencog
  * be replaced by something completely different, someday ...
  */
 
-class BindLink : public Link
+class BindLink : public LambdaLink
 {
 protected:
 
 public:
+	BindLink(Type, const HandleSeq&,
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
 	BindLink(Link &l)
-		: Link(BIND_LINK, l.getOutgoingSet(),
+		: LambdaLink(BIND_LINK, l.getOutgoingSet(),
 		       l.getTruthValue(), l.getAttentionValue())
 	{
 		OC_ASSERT(BIND_LINK == l.getType(), "Bad BindLink constructor!");
