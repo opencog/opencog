@@ -42,6 +42,9 @@ LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
 			"Expecting a LambdaLink, got %s", tname.c_str());
 	}
 
+	// Don't throw an error, don''t initialize if its the pattern matcher
+	if (0 == oset.size()) return;
+
 	// Must have variable decls and body
 	if (2 != oset.size())
 		throw InvalidParamException(TRACE_INFO,

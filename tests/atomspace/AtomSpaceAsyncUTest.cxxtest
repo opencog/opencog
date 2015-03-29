@@ -207,7 +207,10 @@ public:
         OC_ASSERT(t < numberOfTypes);
         Type randomType = NOTYPE;
         while (!classserver().isA(randomType, t)
-               or NUMBER_NODE == randomType)
+               or NUMBER_NODE == randomType
+               or TYPE_NODE == randomType
+               or LAMBDA_LINK == randomType
+               or BIND_LINK == randomType)
             randomType = ATOM + rng->randint(numberOfTypes-1);
         return randomType;
     }

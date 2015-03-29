@@ -182,7 +182,7 @@ void PatternMatch::do_imply (const Handle& himplication,
  *       SomeLink
  *       AnotherLink
  *
- * The conetns of "SomeLink" is not validated here, it is
+ * The conents of "SomeLink" is not validated here, it is
  * validated by validate_clauses()
  *
  * As a side-effect, if SomeLink is an AndLink, the list of clauses
@@ -239,6 +239,14 @@ void PatternMatch::validate(const Handle& hbindlink)
 		unbundle_body(hbindlink);
 		validate_vardecl(_vardecl);
 	}
+	else
+	{
+// XXX fixme temporary hack
+		_vardecl = bl->_vardecl;
+		_varset = bl->_varset;
+		_typemap = bl->_typemap;
+		_body = bl->_body;
+	}
 	validate_body(_body);
 	unbundle_clauses(_hclauses);
 	validate_clauses(_varset, _clauses);
@@ -270,8 +278,20 @@ void PatternMatch::validate(const Handle& hbindlink)
 void PatternMatch::do_bindlink (const Handle& hbindlink,
                                 Implicator& implicator)
 {
-	unbundle_body(hbindlink);
-	validate_vardecl(_vardecl);
+	BindLinkPtr bl(BindLinkCast(hbindlink));
+	if (NULL == bl)
+	{
+		unbundle_body(hbindlink);
+		validate_vardecl(_vardecl);
+	}
+	else
+	{
+// XXX fixme temporary hack
+		_vardecl = bl->_vardecl;
+		_varset = bl->_varset;
+		_typemap = bl->_typemap;
+		_body = bl->_body;
+	}
 	validate_body(_body);
 	unbundle_clauses(_hclauses);
 
@@ -286,8 +306,20 @@ void PatternMatch::do_bindlink (const Handle& hbindlink,
 void PatternMatch::do_satlink (const Handle& hsatlink,
                                Satisfier& sater)
 {
-	unbundle_body(hsatlink);
-	validate_vardecl(_vardecl);
+	LambdaLinkPtr bl(LambdaLinkCast(hsatlink));
+	if (NULL == bl)
+	{
+		unbundle_body(hsatlink);
+		validate_vardecl(_vardecl);
+	}
+	else
+	{
+// XXX fixme temporary hack
+		_vardecl = bl->_vardecl;
+		_varset = bl->_varset;
+		_typemap = bl->_typemap;
+		_body = bl->_body;
+	}
 	validate_body(_body);
 	unbundle_clauses(_hclauses);
 

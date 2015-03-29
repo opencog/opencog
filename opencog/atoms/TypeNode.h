@@ -49,7 +49,11 @@ public:
 		// Convert to number and back to string to avoid miscompares.
 		: Node(TYPE_NODE, s, tv, av),
 		  value(classserver().getType(s))
-	{}
+	{
+		if (NOTYPE == value)
+			throw InvalidParamException(TRACE_INFO,
+				"Not a valid typename: '%s'", s.c_str());
+	}
 
 	TypeNode(Type t,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -64,14 +68,18 @@ public:
 		  value(classserver().getType(n.getName()))
 	{
 		OC_ASSERT(TYPE_NODE == n.getType(), "Bad TypeNode constructor!");
+
+		if (NOTYPE == value)
+			throw InvalidParamException(TRACE_INFO,
+				"Not a valid typename: '%s'", n.getName().c_str());
 	}
 
 	static void validate(const std::string& str)
 	{
 		Type t = classserver().getType(str);
 		if (NOTYPE == t)
-			throw RuntimeException(TRACE_INFO,
-				"Not a valid typename");
+			throw InvalidParamException(TRACE_INFO,
+				"Not a valid typename: '%s'", str.c_str());
 	}
 
 	Type getValue(void) { return value; }

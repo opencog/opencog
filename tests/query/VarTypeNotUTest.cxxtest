@@ -95,12 +95,6 @@ void VarTypeNot::setUp(void)
 
 	cogserver().loadModules();
 	load_scm_files_from_config(*as);
-
-	// Create an implication link that will be tested.
-	SchemeEval* evaluator = new SchemeEval(as);
-	vscope_good = evaluator->apply("rule-good", Handle::UNDEFINED);
-	vscope_bad = evaluator->apply("rule-bad", Handle::UNDEFINED);
-	delete evaluator;
 }
 
 void VarTypeNot::tearDown(void)
@@ -117,8 +111,35 @@ void VarTypeNot::test_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	// Create an implication link that will be tested.
+	SchemeEval* evaluator = new SchemeEval(as);
+	vscope_good = evaluator->apply("rule-good", Handle::UNDEFINED);
+
+	// With the new atomspace design, we can't even insert the bad atom
+	// without throwing. So really, the test doesn't get very far...
+	bool caught = false;
+	try
+	{
+		vscope_bad = evaluator->apply("rule-bad", Handle::UNDEFINED);
+	}
+   catch (const RuntimeException& ex)
+   {
+      logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+		caught = true;
+   }
+   TSM_ASSERT("Failed to catch expected exception", caught);
+	delete evaluator;
+
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_good);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED == vscope_bad);
+
+
+/*****************
+	In the good old days, it was the pattern matcher that threw the exception
+	for the bad variable type. Now, it is thown much earlier, by the
+	atomspace, so the remainder of this test is irrelevant.
+
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_bad);
 
 	// Result should be a ListLink w/ zero solutions
@@ -126,7 +147,7 @@ void VarTypeNot::test_exec(void)
 	logger().debug("result-good is %s\n", SchemeSmob::to_string(result_good).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 0, getarity(result_good));
 
-	bool caught = false;
+	caught = false;
 	try
 	{
 		bindlink(as, vscope_bad);
@@ -137,6 +158,7 @@ void VarTypeNot::test_exec(void)
 		caught = true;
    }
    TSM_ASSERT("Failed to catch expected exception", caught);
+**********************/
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

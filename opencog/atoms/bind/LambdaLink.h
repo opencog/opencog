@@ -40,8 +40,11 @@ namespace opencog
 
 typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
 
+class PatternMatch;
+
 class LambdaLink : public Link
 {
+   friend class PatternMatch;
 protected:
 	/// Handle of the topmost variable declaration.
 	Handle _vardecl;
