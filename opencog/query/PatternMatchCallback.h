@@ -248,7 +248,7 @@ class PatternMatchCallback
 		 * will not alter the final semantics of the search.
 		 */
 		virtual void perform_search(PatternMatchEngine *,
-		                            std::set<Handle> &vars,
+		                            const std::set<Handle> &vars,
 		                            std::vector<Handle> &clauses,
 		                            std::vector<Handle> &negations) = 0;
 };

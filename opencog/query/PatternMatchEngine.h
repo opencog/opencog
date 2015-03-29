@@ -129,7 +129,7 @@ class PatternMatchEngine
 
 		// Do the actual pattern search.
 		void match(PatternMatchCallback *,
-		           std::set<Handle> &vars,
+		           const std::set<Handle> &vars,
 		           std::vector<Handle> &clauses,
 		           std::vector<Handle> &negations);
 

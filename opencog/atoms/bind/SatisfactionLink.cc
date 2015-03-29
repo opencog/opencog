@@ -160,6 +160,9 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 			_nonvirts.push_back(clause);
 	}
 
+	// Split the non virtual clauses into connected components
+	get_connected_components(vars, _nonvirts, _components);
+
 #ifdef I_DONT_THINK_THIS_CHECK_IS_NEEDED
 	// For now, the virtual links must be at the top. Not sure
 	// what code breaks if this isn't the case.  Why are we checking

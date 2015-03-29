@@ -51,6 +51,7 @@ protected:
 	/// The graph components. Set by validate_clauses()
 	std::vector<Handle> _virtuals;
 	std::vector<Handle> _nonvirts;
+	std::set<std::vector<Handle>> _components;
 
 	// Validate the clauses inside the body
 	void unbundle_clauses(const Handle&);

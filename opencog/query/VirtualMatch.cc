@@ -89,7 +89,7 @@ class PMCGroundings : public PatternMatchCallback
 			_cb->validate_clauses(vars, clauses);
 		}
 		void perform_search(PatternMatchEngine* pme,
-	                       std::set<Handle> &vars,
+	                       const std::set<Handle> &vars,
 	                       std::vector<Handle> &clauses,
 	                       std::vector<Handle> &negations)
 		{
@@ -310,8 +310,9 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
  * to support multiple exclusive disjuncts. See the README for more info.
  */
 void PatternMatch::do_match(PatternMatchCallback *cb,
-                            std::set<Handle>& vars,
-                            std::vector<Handle>& clauses)
+                            const std::set<Handle>& vars,
+                            const std::vector<Handle>& virtuals,
+                            const std::set<std::vector<Handle>>& nvcomps)
 {
 	// Its cheaper to run ctor and dtor than it is to clear the
 	// internal variables, and use this instance more than once.
@@ -320,21 +321,15 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 			"A PatternMatch instance cannot be used more than once!");
 	_used = true;
 
-	// validate_clauses(vars, clauses);
-
 // XXX this is fucked up. all that the callback does is call
 // get_connected_components a second time, and print a message.
 // This is because PLN is doing something fucked up.  PLN
 // need to do the right thing, not force crap onto us...
-	cb->validate_clauses(vars, clauses);
-
-	// Split the non virtual clauses into strongly connected components
-	std::set<std::vector<Handle>> nvcomps;
-	get_connected_components(vars, _nonvirts, nvcomps);
+//	cb->validate_clauses(vars, clauses);
 
 	// If there's only 1 component and there is no virtual clause then
 	// we can directly match the component using the callback cb
-	if (nvcomps.size() == 1 and _virtuals.empty()) {
+	if (nvcomps.size() == 1 and virtuals.empty()) {
 		// Split in positive and negative clauses
 		std::vector<Handle> affirm, negate;
 		split_clauses_pos_neg(*nvcomps.begin(), affirm, negate);
@@ -390,7 +385,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	std::map<Handle, Handle> empty_vg;
 	std::map<Handle, Handle> empty_pg;
 	std::vector<Handle> negations; // currently ignored
-	recursive_virtual(cb, _virtuals, negations,
+	recursive_virtual(cb, virtuals, negations,
 	                  empty_vg, empty_pg,
 	                  comp_var_gnds, comp_pred_gnds);
 }

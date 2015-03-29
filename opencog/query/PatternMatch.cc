@@ -57,7 +57,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	unbundle_clauses(_hclauses);
 
 	validate_clauses(_varset, _clauses);
-	do_match(cb, _varset, _clauses);
+	do_match(cb, _varset, _virtuals, _components);
 }
 
 /* ================================================================= */
@@ -104,10 +104,7 @@ void PatternMatch::do_bindlink (const Handle& hbindlink,
 	implicator.implicand = bl->_implicand;
 	implicator.set_type_restrictions(bl->_typemap);
 
-	_virtuals = bl->_virtuals;
-	_nonvirts = bl->_nonvirts;
-
-	do_match(&implicator, bl->_varset, bl->_clauses);
+	do_match(&implicator, bl->_varset, bl->_virtuals, bl->_components);
 }
 
 /**
@@ -121,10 +118,7 @@ void PatternMatch::do_satlink (const Handle& hsatlink,
 	if (NULL == bl)
 		bl = createSatisfactionLink(*LinkCast(hsatlink));
 
-	_virtuals = bl->_virtuals;
-	_nonvirts = bl->_nonvirts;
-
-	do_match(&sater, bl->_varset, bl->_clauses);
+	do_match(&sater, bl->_varset, bl->_virtuals, bl->_components);
 }
 
 /* ================================================================= */
@@ -238,7 +232,7 @@ void PatternMatch::do_imply (const Handle& himplication,
 	impl.implicand = _implicand;
 
 	validate_clauses(_varset, _clauses);
-	do_match(&impl, _varset, _clauses);
+	do_match(&impl, _varset, _virtuals, _components);
 }
 
 /* ===================== END OF FILE ===================== */

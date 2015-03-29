@@ -262,7 +262,7 @@ void DefaultPatternMatchCB::validate_clauses(std::set<Handle>& vars,
  * "normal" case.
  */
 void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
-                                           std::set<Handle> &vars,
+                                           const std::set<Handle> &vars,
                                            std::vector<Handle> &clauses,
                                            std::vector<Handle> &negations)
 {
