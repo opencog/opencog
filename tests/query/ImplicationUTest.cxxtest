@@ -214,7 +214,7 @@ void ImplicationUTest::setUp(void)
 	const char * strict2 =
 	"(define (restrict2)\n"
 	"(BindLink\n"
-	"   (ListLink\n"
+	"   (VariableList\n"
 	"      (TypedVariableLink\n"
 	"         (VariableNode \"$predNode\")\n"
 	"         (TypeNode \"PredicateNode\")\n"
@@ -286,29 +286,29 @@ void ImplicationUTest::test_exec(void)
 
 	// Result should be a ListLink
 	Handle result = imply(as, implication);
-	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("first result is %s\n", SchemeSmob::to_string(result).c_str());
 
 	// There should be two solutions: 
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	// Result should be a ListLink w/ two solutions
 	result = imply(as, implication2);
-	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("second result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	// Result should be a ListLink w/ two solutions
 	result = bindlink(as, varscope);
-	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("third result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	// Result should be a ListLink w/ one solution
 	result = bindlink(as, restrict);
-	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("fourth result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	// Result should be a ListLink w/ one solution
 	result = bindlink(as, restrict2);
-	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("fifth result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);

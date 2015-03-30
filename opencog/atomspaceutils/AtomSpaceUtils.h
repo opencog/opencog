@@ -1,7 +1,7 @@
 /*
- * BindLink.h
+ * AtomSpaceUtils.h
  *
- * Copyright (C) 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2014 OpenCog Foundation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,22 +19,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_BINDLINK_H
-#define _OPENCOG_BINDLINK_H
+#ifndef _OPENCOG_ATOMSPACE_UTILS_H
+#define _OPENCOG_ATOMSPACE_UTILS_H
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/types.h>
 
-namespace opencog {
+namespace opencog
+{
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
-class AtomSpace;
+/**
+ * Add a new node to the AtomSpace. A random 16-character string
+ * will be appended to the provided name.
+ **/
+Handle addPrefixedNode(AtomSpace&, Type, const std::string& prefix = "");
 
-Handle bindlink(AtomSpace*, const Handle&);
-Handle single_bindlink (AtomSpace*, const Handle&);
-Handle crisp_logic_bindlink(AtomSpace*, const Handle&);
-Handle pln_bindlink(AtomSpace*, const Handle&);
-TruthValuePtr satisfaction_link(AtomSpace*, const Handle&);
+/** @}*/
+}
 
-} // namespace opencog
-
-#endif // _OPENCOG_BINDLINK_H
+#endif // _OPENCOG_ATOMSPACE_UTILS_H

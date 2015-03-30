@@ -28,10 +28,10 @@
 #include <set>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/atoms/bind/LambdaLink.h>
 
 namespace opencog {
 class PatternMatchEngine;
-typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
 
 /**
  * Callback interface, used to implement specifics of hypergraph
@@ -228,16 +228,7 @@ class PatternMatchCallback
 		 * in a slightly more convenient C++ form, is all.  This
 		 * callback may alter the typemap before returning.
 		 */
-		virtual void set_type_restrictions(VariableTypeMap &tm) {}
-
-		/**
-		 * Called by PatternMatch::validate_clauses before calling
-		 * perform_search for refining clause validation. For instance
-		 * disconnected clause may not be allowed by default but may be
-		 * allowed for PLN.
-		 */
-		virtual void validate_clauses(std::set<Handle>& vars,
-		                              std::vector<Handle>& clauses) = 0;
+		virtual void set_type_restrictions(const VariableTypeMap& tm) {}
 
 		/**
 		 * Called to initiate the search. This callback is responsible
@@ -248,7 +239,7 @@ class PatternMatchCallback
 		 * will not alter the final semantics of the search.
 		 */
 		virtual void perform_search(PatternMatchEngine *,
-		                            std::set<Handle> &vars,
+		                            const std::set<Handle> &vars,
 		                            std::vector<Handle> &clauses,
 		                            std::vector<Handle> &negations) = 0;
 };

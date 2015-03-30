@@ -1,5 +1,5 @@
 /*
- * opencog/execution/NumberNode.h
+ * opencog/atoms/NumberNode.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -32,7 +32,7 @@ namespace opencog
  *  @{
  *
  * Experimental NumberNode class. This is a rough sketch for how things
- * like this might be done. It is not necessarily a god idea, and might
+ * like this might be done. It is not necessarily a good idea, and might
  * be replaced by something completely different, someday ...
  */
 
@@ -62,7 +62,12 @@ public:
 		       n.getTruthValue(), n.getAttentionValue()),
 		  value(std::stod(n.getName()))
 	{
-		OC_ASSERT(NUMBER_NODE == n.getType(), "Bad NumberNode consructor!");
+		OC_ASSERT(NUMBER_NODE == n.getType(), "Bad NumberNode constructor!");
+	}
+
+	static std::string validate(const std::string& str)
+	{
+		return std::to_string(std::stod(str));
 	}
 
 	double getValue(void) { return value; }

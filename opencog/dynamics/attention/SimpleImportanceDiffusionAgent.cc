@@ -25,7 +25,7 @@
 #include <time.h>
 #include <math.h>
 
-#include <opencog/atomutils/AtomSpaceUtils.h>
+#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FollowLink.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/dynamics/attention/atom_types.h>

@@ -30,7 +30,7 @@
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomutils/AtomSpaceUtils.h>
+#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>

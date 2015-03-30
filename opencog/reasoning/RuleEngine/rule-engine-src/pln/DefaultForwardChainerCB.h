@@ -32,7 +32,8 @@ namespace opencog {
 
 class FCMemory;
 class Rule;
-class DefaultForwardChainerCB: public virtual ForwardChainerCallBack {
+class DefaultForwardChainerCB: public virtual ForwardChainerCallBack
+{
 private:
     AtomSpace * as_;
     ForwardChainInputMatchCB* fcim_;

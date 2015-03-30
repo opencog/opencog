@@ -77,13 +77,8 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h)
 	return filtered_set;
 }
 
-void AttentionalFocusCB::validate_clauses(std::set<Handle>& vars,
-                                          std::vector<Handle>& clauses)
-{
-}
-
 void AttentionalFocusCB::perform_search(PatternMatchEngine *pme,
-                                        std::set<Handle> &vars,
+                                        const std::set<Handle> &vars,
                                         std::vector<Handle> &clauses,
                                         std::vector<Handle> &negations)
 {
@@ -140,7 +135,7 @@ void AttentionalFocusCB::perform_search(PatternMatchEngine *pme,
 	// Get the set of types of the potential candidates
 	std::set<Type> ptypes;
 	if (_root->getType() == VARIABLE_NODE)
-		ptypes = (*_type_restrictions)[_root];
+		ptypes = _type_restrictions->at(_root);
 
 	// XXX TODO -- as a performance optimization, we should try all
 	// the different clauses, and find the one with the smallest number

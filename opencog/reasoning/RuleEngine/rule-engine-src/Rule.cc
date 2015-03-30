@@ -24,8 +24,6 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
-#include <opencog/query/BindLink.h>
-
 #include "Rule.h"
 
 using namespace opencog;
@@ -69,8 +67,6 @@ string Rule::get_name()
 
 void Rule::set_handle(Handle h) throw (InvalidParamException)
 {
-	validate_bindlink(NULL, h);
-
 	rule_handle_ = h;
 }
 

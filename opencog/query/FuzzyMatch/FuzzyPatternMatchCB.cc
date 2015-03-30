@@ -43,7 +43,7 @@ FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as) : DefaultPatternMatchCB(
  * @param negations  The negative clauses
  */
 void FuzzyPatternMatchCB::perform_search(PatternMatchEngine* pme,
-                                         std::set<Handle>& vars,
+                                         const std::set<Handle>& vars,
                                          std::vector<Handle>& clauses,
                                          std::vector<Handle>& negations)
 {

@@ -28,8 +28,8 @@
 
 #include "Instantiator.h"
 #include "PatternMatch.h"
-#include "DefaultPatternMatchCB.h"
-#include "CrispLogicPMCB.h"
+#include "PatternMatchEngine.h"
+#include "PatternMatchCallback.h"
 
 using namespace opencog;
 
@@ -80,16 +80,11 @@ class PMCGroundings : public PatternMatchCallback
 		}
 		void push(void) { _cb->push(); }
 		void pop(void) { _cb->pop(); }
-		void set_type_restrictions(VariableTypeMap &tm) {
+		void set_type_restrictions(const VariableTypeMap& tm) {
 			_cb->set_type_restrictions(tm);
 		}
-
-		void validate_clauses(std::set<Handle>& vars,
-		                      std::vector<Handle>& clauses) {
-			_cb->validate_clauses(vars, clauses);
-		}
 		void perform_search(PatternMatchEngine* pme,
-	                       std::set<Handle> &vars,
+	                       const std::set<Handle> &vars,
 	                       std::vector<Handle> &clauses,
 	                       std::vector<Handle> &negations)
 		{
@@ -152,10 +147,8 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 		// these temporaries.  The atomspace is blown away when we finish.
 		//
 		// XXX FIXME ... I suspect the atomspace initialzation is pretty
-		// heavyweight.  Most recently, the AtomTable create async write
-		// queues and forks 4 threads. So we init and destroy 4 threads
-		// every time we hit this.  Will need to explore a more
-		// lightweight approach someday ...
+		// heavyweight.  Will need to explore a more lightweight approach
+		// someday ...
 		AtomSpace aspace;
 		Instantiator instor(&aspace);
 
@@ -246,94 +239,6 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 }
 
 /* ================================================================= */
-
-/**
- * Validate a collection of clauses and negations for correctness.
- *
- * Every clause should contain at least one variable in it; clauses
- * that are constants and can be trivially discarded.
- * Furthermore, all clauses should be connected. Two clauses are
- * connected if they contain a common variable.
- *
- * As a side effect, this looks for 'virtual links' and separates
- * them out into a distinct list, _virtuals and _nonvirts.
- *
- * It also partition the clauses into a set of connected components,
- * _components.
- */
-void PatternMatch::validate_clauses(std::set<Handle>& vars,
-                                    std::vector<Handle>& clauses)
-
-{
-	// Make sure that the user did not pass in bogus clauses.
-	// Make sure that every clause contains at least one variable.
-	// The presence of constant clauses will mess up the current
-	// pattern matcher.  Constant clauses are "trivial" to match,
-	// and so its pointless to even send them through the system.
-	bool bogus = remove_constants(vars, clauses);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern matching",
-		              __FUNCTION__);
-	}
-
-	// Make sure that each declared variable appears in some clause.
-	// We can't ground variables that aren't attached to something.
-	// Quoted variables are constants, and so don't count.
-	for (Handle v : vars)
-	{
-		if (not is_variable_in_any_tree(clauses, v))
-		{
-			std::stringstream ss;
-			ss << "The variable " << v->toString()
-			   << " does not appear (unquoted) in any clause!";
-			throw InvalidParamException(TRACE_INFO, ss.str().c_str());
-		}
-	}
-
-	// Are there any virtual links in the clauses? If so, then we need
-	// to do some special handling.  BTW: a clause is virtual only if
-	// it contains a GroundedPredicate, and the GroundedPredicate takes
-	// an argument that contains a variable. Otherwise, its not really
-	// virtual.
-	//
-	// The GreaterThanLink is a link type that implicitly contains
-	// a GroundedPredicate for numeric greater-than relations. So
-	// we search for that too.
-	//
-	// XXX FIXME, the check below is not quite correct; for example,
-	// it would tag the following as virtual, although it is not:
-	// (BlahLink (VariableNode "$var") (EvaluationLink (GPN "scm:duh")
-	// (ListLink (ConceptNode "Stuff"))))  -- the var is there but not
-	// in the GPN.
-	for (Handle clause: clauses)
-	{
-		if ((contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
-		    or contains_atomtype(clause, GREATER_THAN_LINK))
-		    and any_variable_in_tree(clause, vars))
-			_virtuals.push_back(clause);
-		else
-			_nonvirts.push_back(clause);
-	}
-
-#ifdef I_DONT_THINK_THIS_CHECK_IS_NEEDED
-	// For now, the virtual links must be at the top. Not sure
-	// what code breaks if this isn't the case.  Why are we checking
-	// this???
-	for (Handle v : _virtuals)
-	{
-		Type vt = v->getType();
-		if ((not classserver().isA(vt, EVALUATION_LINK))
-		    and (not classserver().isA(vt, GREATER_THAN_LINK)))
-		{
-			throw InvalidParamException(TRACE_INFO,
-				"Expecting EvaluationLink at the top level!");
-		}
-	}
-#endif
-}
-
-/* ================================================================= */
 /**
  * Ground (solve) a pattern; perform unification. That is, find one
  * or more groundings for the variables occuring in a collection of
@@ -398,27 +303,13 @@ void PatternMatch::validate_clauses(std::set<Handle>& vars,
  * to support multiple exclusive disjuncts. See the README for more info.
  */
 void PatternMatch::do_match(PatternMatchCallback *cb,
-                            std::set<Handle>& vars,
-                            std::vector<Handle>& clauses)
+                            const std::set<Handle>& vars,
+                            const std::vector<Handle>& virtuals,
+                            const std::set<std::vector<Handle>>& nvcomps)
 {
-	// Its cheaper to run ctor and dtor than it is to clear the
-	// internal variables, and use this instance more than once.
-	if (_used)
-		throw InvalidParamException(TRACE_INFO,
-			"A PatternMatch instance cannot be used more than once!");
-	_used = true;
-
-	validate_clauses(vars, clauses);
-
-	cb->validate_clauses(vars, clauses);
-
-	// Split the non virtual clauses into stronly connected components
-	std::set<std::vector<Handle>> nvcomps;
-	get_connected_components(vars, _nonvirts, nvcomps);
-
 	// If there's only 1 component and there is no virtual clause then
 	// we can directly match the component using the callback cb
-	if (nvcomps.size() == 1 and _virtuals.empty()) {
+	if (nvcomps.size() == 1 and virtuals.empty()) {
 		// Split in positive and negative clauses
 		std::vector<Handle> affirm, negate;
 		split_clauses_pos_neg(*nvcomps.begin(), affirm, negate);
@@ -470,11 +361,11 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	// And now, try grounding each of the virtual clauses.
 	dbgprt("BEGIN component recursion: ====================== "
 	       "num comp=%zd num virts=%zd\n",
-	       comp_var_gnds.size(), _virtuals.size());
+	       comp_var_gnds.size(), virtuals.size());
 	std::map<Handle, Handle> empty_vg;
 	std::map<Handle, Handle> empty_pg;
 	std::vector<Handle> negations; // currently ignored
-	recursive_virtual(cb, _virtuals, negations,
+	recursive_virtual(cb, virtuals, negations,
 	                  empty_vg, empty_pg,
 	                  comp_var_gnds, comp_pred_gnds);
 }

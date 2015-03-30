@@ -24,11 +24,11 @@
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/NumberNode.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include "ExecutionOutputLink.h"
-#include "NumberNode.h"
 
 using namespace opencog;
 

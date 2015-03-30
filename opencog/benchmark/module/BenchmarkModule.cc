@@ -30,7 +30,7 @@
 
 #include <boost/range/irange.hpp>
 
-#include <opencog/atomutils/AtomSpaceUtils.h>
+#include <opencog/atomspaceutils/AtomSpaceUtils.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/server/CogServer.h>

@@ -27,7 +27,7 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 
@@ -133,18 +133,12 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual bool virtual_link_match(Handle& pat, Handle& args);
 
 		/**
-		 * Check that all clauses are connected
-		 */
-		virtual void validate_clauses(std::set<Handle>& vars,
-		                              std::vector<Handle>& clauses);
-
-		/**
 		 * Called to perform the actual search. This makes some default
 		 * assumptions about the kind of things that might be matched,
 		 * in order to drive a reasonably-fast search.
 		 */
 		virtual void perform_search(PatternMatchEngine *,
-		                            std::set<Handle> &vars,
+		                            const std::set<Handle> &vars,
 		                            std::vector<Handle> &clauses,
 		                            std::vector<Handle> &negations);
 
@@ -153,14 +147,14 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * The typemap contains a map from variables to a set of types
 		 * that the groundings for the variable are allowed to have.
 		 */
-		virtual void set_type_restrictions(VariableTypeMap &tm)
+		virtual void set_type_restrictions(const VariableTypeMap &tm)
 		{
 			_type_restrictions = &tm;
 		}
 	protected:
 		Handle _root;
 		Handle _starter_pred;
-		VariableTypeMap *_type_restrictions;
+		const VariableTypeMap* _type_restrictions;
 		virtual Handle find_starter(Handle, size_t&, Handle&, size_t&);
 		virtual Handle find_thinnest(std::vector<Handle>&, Handle&, size_t&);
 

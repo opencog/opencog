@@ -36,7 +36,6 @@ class PatternUTest: public CxxTest::TestSuite
 {
 	private:
 		PatternMatchEngine pme;
-		PatternMatch pm;
 		AtomSpace *as;
 
 		// These handles are documented below.
@@ -289,7 +288,7 @@ void PatternUTest::test_two_links(void)
 
 	Handle han = as->addLink(AND_LINK, hl1, hl2);
 
-	Handle hv = as->addLink(LIST_LINK, hx);
+	Handle hv = as->addLink(VARIABLE_LIST, hx);
 
 	std::set<Handle> vars;
 	vars.insert(hx);
@@ -312,7 +311,7 @@ void PatternUTest::test_two_links(void)
 
 	// Test the non-std::vector interface also.
 	pmcb.found = 0;
-	pm.match(&pmcb, hv, han);
+	match(&pmcb, hv, han);
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 2);
 
 	logger().debug("END TEST: %s", __FUNCTION__);

@@ -15,9 +15,8 @@ using namespace opencog;
 static inline Handle imply(AtomSpace* as, Handle himplication)
 {
 	// Perform the search.
-	PatternMatch pm;
 	DefaultImplicator impl(as);
-	pm.do_imply(himplication, impl);
+	do_imply(himplication, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -43,9 +42,8 @@ static inline Handle imply(AtomSpace* as, Handle himplication)
 static inline Handle crisp_logic_imply(AtomSpace* as, Handle himplication)
 {
 	// Perform the search.
-	PatternMatch pm;
 	CrispImplicator impl(as);
-	pm.do_imply(himplication, impl);
+	do_imply(himplication, impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.

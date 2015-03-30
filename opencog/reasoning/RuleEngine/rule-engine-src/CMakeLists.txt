@@ -20,6 +20,7 @@ ADD_DEPENDENCIES(ruleengine
 )
 
 TARGET_LINK_LIBRARIES(ruleengine
+	lambda
 	query
 	smob
 	execution

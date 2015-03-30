@@ -117,7 +117,7 @@ SQLPersistSCM::SQLPersistSCM(AtomSpace *as)
 #define NLP_HACK 1
 #ifdef NLP_HACK
 	_backing->_ignored_types.insert(VARIABLE_NODE);
-	_backing->_ignored_types.insert(VARIABLE_TYPE_NODE);
+	_backing->_ignored_types.insert(TYPE_NODE);
 	_backing->_ignored_types.insert(TYPED_VARIABLE_LINK);
 	_backing->_ignored_types.insert(BIND_LINK);
 

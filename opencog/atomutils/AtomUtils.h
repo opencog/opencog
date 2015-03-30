@@ -1,5 +1,5 @@
 /*
- * AtomSpaceUtils.h
+ * AtomUtils.h
  *
  * Copyright (C) 2014 OpenCog Foundation
  *
@@ -21,11 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_ATOMSPACE_UTILS_H
-#define _OPENCOG_ATOMSPACE_UTILS_H
+#ifndef _OPENCOG_ATOM_UTILS_H
+#define _OPENCOG_ATOM_UTILS_H
 
 #include <opencog/atomspace/atom_types.h>
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/types.h>
 
@@ -36,18 +36,13 @@ namespace opencog
  */
 
 /**
- * General purpose utilities for processing atoms in the AtomSpace.
+ * General purpose utilities for processing atoms in the Atom.
  *
  * Contains methods and algorithms which might be useful to other processes.
  */
-class AtomSpaceUtils
-{
+HandleSeq getAllNodes(Handle h);
 
-public:
-    static HandleSeq getAllNodes(Handle h);
-
-    static UnorderedHandleSet getAllUniqueNodes(Handle h);
-};
+UnorderedHandleSet getAllUniqueNodes(Handle h);
 
 /**
  * Returns neighboring atoms, following incoming links and
@@ -64,13 +59,7 @@ public:
 HandleSeq getNeighbors(const Handle&, bool fanin=true, bool fanout=true,
                        Type linkType=LINK, bool subClasses=true);
 
-/**
- * Add a new node to the AtomSpace. A random 16-character string
- * will be appended to the provided name.
- **/
-Handle addPrefixedNode(AtomSpace&, Type, const std::string& prefix = "");
-
 /** @}*/
 }
 
-#endif // _OPENCOG_ATOMSPACE_UTILS_H
+#endif // _OPENCOG_ATOM_UTILS_H

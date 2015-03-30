@@ -75,27 +75,6 @@ class BindlinkTest(TestCase):
         self.assertEquals(ending_size, starting_size)
 
 
-    def test_validate_bindlink(self):
-
-        # Remember the starting atomspace size. This test should not
-        # change the atomspace.
-        starting_size = self.atomspace.size()
-
-        # Run bindlink.
-        result = validate_bindlink(self.atomspace, self.bindlink_handle)
-        self.assertTrue(result is not None and result.value() > 0)
-
-        # Check the ending atomspace size, it should be the same.
-        ending_size = self.atomspace.size()
-        self.assertEquals(ending_size, starting_size)
-
-        # This should return the BindLink which has two items in it, i.e.
-        # the VariableNode and ImplicationLink.
-        atom = self.atomspace[result]
-        self.assertEquals(atom.arity, 2)
-        self.assertEquals(atom.type, types.BindLink)
-
-
     def test_bindlink(self):
 
         # Remember the starting atomspace size.
@@ -170,3 +149,7 @@ class BindlinkTest(TestCase):
         atom = self.atomspace[result]
         self.assertEquals(atom.arity, 0)
         self.assertEquals(atom.type, types.ListLink)
+
+    def test_satisfy(self):
+        # XXX TODO implement a test here...
+        pass

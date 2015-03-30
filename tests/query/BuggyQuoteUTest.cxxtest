@@ -95,7 +95,7 @@ void BuggyQuoteUTest::setUp(void)
 
 /*
  * BuggyQuote unit test.  Test binding to unquoted links.
- * This test explicitly tests the bug described in 
+ * This test explicitly tests the bug described in
  * https://github.com/opencog/opencog/issues/1092
  * The old pattern matcher would throw a runtime exception in the
  * atomsapce, since we gave it a link with an undefined handle in it.
@@ -109,18 +109,24 @@ void BuggyQuoteUTest::test_bad_quote(void)
     config().set("SCM_PRELOAD", "tests/query/buggy-crime.scm");
     load_scm_files_from_config(*as);
 
-    Handle qrule = eval->eval_h("query_rule_bad");
-    TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != qrule);
+    // This should throw an exception from scheme.
+    // Disable logging so as to avoid the hopeless spew of errors.
+    logger().setLevel(Logger::NONE);
 
     bool caught = false;
     try
     {
-       bindlink(as, qrule);
+       // We expect the atomspace itself to throw an exception, when
+       // the bad bindlink is inserted into it.
+       Handle qrule = eval->eval_h("(query_rule_bad)");
+       // TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != qrule);
+       // bindlink(as, qrule);
     }
-    catch (const InvalidParamException& e)
+    catch (const RuntimeException& e)
     {
         caught = true;
     }
+    logger().setLevel(Logger::INFO);
 
     TS_ASSERT_EQUALS(true, caught);
 }
@@ -138,6 +144,6 @@ void BuggyQuoteUTest::test_good_form(void)
     Handle rslt = bindlink(as, qrule);
     logger().debug() << "Result is this:\n" << rslt->toString();
 
-    TS_ASSERT_EQUALS(2, as->getArity(rslt));
+    // See buggy-crime.scm for explanation for why this is 1 not 2
+    TS_ASSERT_EQUALS(1, as->getArity(rslt));
 }
-

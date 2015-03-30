@@ -22,25 +22,28 @@
  */
 #include "BackwardChainer.h"
 
-#include <opencog/query/PatternMatch.h>
+#include <opencog/atoms/bind/BindLink.h>
 #include <opencog/guile/SchemeSmob.h>
 
 BackwardChainer::BackwardChainer(AtomSpace * as) :
-		 as_(as) {
+		 as_(as)
+{
 	commons_ = new PLNCommons(as_);
 	bcpm_ = new BCPatternMatch(as_);
 }
 
-BackwardChainer::~BackwardChainer() {
+BackwardChainer::~BackwardChainer()
+{
 	delete commons_;
 	delete bcpm_;
 }
 
-void BackwardChainer::choose_rule() {
-
+void BackwardChainer::choose_rule()
+{
 }
 
-Handle BackwardChainer::select_rule(HandleSeq& hseq_rule) {
+Handle BackwardChainer::select_rule(HandleSeq& hseq_rule)
+{
 	//apply selection criteria to select one amongst the matching rules
 
 	//xxx return random for the purpose of integration testing before going
@@ -48,34 +51,31 @@ Handle BackwardChainer::select_rule(HandleSeq& hseq_rule) {
 	return hseq_rule[random() % hseq_rule.size()];
 }
 
-HandleSeq BackwardChainer::query_rule_base(Handle htarget) {
+HandleSeq BackwardChainer::query_rule_base(Handle htarget)
+{
 	Handle hbind_link = commons_->create_bindLink(htarget);
 #if DEBUG
 	cout << "QUERY-RB:" << endl << SchemeSmob::to_string(hbind_link) << endl;
 #endif
-	PatternMatch pm;
-	try {
-		pm.do_bindlink(hbind_link, *bcpm_);
-	} catch (InvalidParamException& e) {
-		cout << "VALIDATION FAILED:" << endl << e.what() << endl;
-	}
+
+	BindLinkPtr bl(BindLinkCast(hbind_link));
+	bl->imply(bcpm_);
+
 	commons_->clean_up_bind_link(hbind_link);
 	auto result = bcpm_->get_result_list();
 	bcpm_->clear_result_list(); //makes sure on each query only new results are returned
 	return result;
 }
 
-HandleSeq BackwardChainer::query_knowledge_base(Handle htarget) {
+HandleSeq BackwardChainer::query_knowledge_base(Handle htarget)
+{
 	Handle hbind_link = commons_->create_bindLink(htarget);
 #if DEBUG
 	cout << "QUERY-KB:" << endl << SchemeSmob::to_string(hbind_link) << endl;
 #endif
-	PatternMatch pm;
-	try {
-		pm.do_bindlink(hbind_link, *bcpm_);
-	} catch (InvalidParamException& e) {
-		cout << "VALIDATION FAILED:" << endl << e.what() << endl;
-	}
+	BindLinkPtr bl(BindLinkCast(hbind_link));
+	bl->imply(bcpm_);
+
 	commons_->clean_up_bind_link(hbind_link);
 
 	auto result = bcpm_->get_result_list();
@@ -85,7 +85,8 @@ HandleSeq BackwardChainer::query_knowledge_base(Handle htarget) {
 
 map<Handle, HandleSeq> BackwardChainer::join_premise_vgrounding_maps(
 		const Handle& logical_link,
-		const map<Handle, map<Handle, HandleSeq> >& premise_var_grounding_map) {
+		const map<Handle, map<Handle, HandleSeq> >& premise_var_grounding_map)
+{
 	map<Handle, HandleSeq> result;
 	for (auto pvg_it = premise_var_grounding_map.begin();
 			pvg_it != premise_var_grounding_map.end(); ++pvg_it) {

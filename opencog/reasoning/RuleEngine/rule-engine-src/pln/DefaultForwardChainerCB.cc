@@ -21,9 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomutils/AtomSpaceUtils.h>
+#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/atoms/bind/BindLink.h>
 
 #include "DefaultForwardChainerCB.h"
 #include "PLNCommons.h"
@@ -78,13 +78,11 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
         Handle bind_link = pc.create_bindLink(copy, false);
 
         // Pattern match.
+        BindLinkPtr bl(BindLinkCast(bind_link));
         DefaultImplicator imp(&rule_atomspace);
-        try {
-            PatternMatch pm;
-            pm.do_bindlink(bind_link, imp);
-        } catch (InvalidParamException& e) {
-            cout << "VALIDATION FAILED:" << endl << e.what() << endl;
-        }
+        imp.implicand = bl->get_implicand();
+        imp.set_type_restrictions(bl->get_typemap());
+        bl->imply(&imp);
 
         // Get matched bindLinks.
         HandleSeq matches = imp.result_list;
@@ -235,12 +233,9 @@ HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
 {
     Rule * cur_rule = fcmem.get_cur_rule();
     fcpm_->set_fcmem(&fcmem);
-    PatternMatch pm;
-    try {
-        pm.do_bindlink(cur_rule->get_handle(), *fcpm_);
-    } catch (InvalidParamException& e) {
-        cout << "VALIDATION FAILED:" << endl << e.what() << endl;
-    }
+
+    BindLinkPtr bl(BindLinkCast(cur_rule->get_handle()));
+    bl->imply(fcpm_);
 
     HandleSeq product = fcpm_->get_products();
 

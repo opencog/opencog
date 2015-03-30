@@ -28,7 +28,7 @@
 #include <string.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomutils/AtomSpaceUtils.h>
+#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/misc.h>

@@ -70,7 +70,6 @@ TYPE_CHOICE <- OR_LINK     // used for type polymorphism
 
 // Variables and variable types
 VARIABLE_NODE <- NODE
-VARIABLE_TYPE_NODE <- TYPE_NODE // XXX for backwards-compat, only
 TYPED_VARIABLE_LINK <- ORDERED_LINK
 
 // A list of variables or variable declarations.
@@ -84,7 +83,7 @@ LAMBDA_LINK <- ORDERED_LINK
 
 // Scoping and Logical quantifiers
 SATISFACTION_LINK <- LAMBDA_LINK   // Finds all groundings
-BIND_LINK <- LAMBDA_LINK           // Finds all groundings and executes
+BIND_LINK <- SATISFACTION_LINK           // Finds all groundings and executes
 
 FORALL_LINK <- LAMBDA_LINK "ForAllLink"
 EXISTS_LINK <- LAMBDA_LINK

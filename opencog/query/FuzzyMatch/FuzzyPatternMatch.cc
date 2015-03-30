@@ -38,7 +38,7 @@ using namespace opencog;
  * @param hg  The query hypergraph
  * @return    One or more similar hypergraphs
  */
-Handle opencog::find_approximate_match(AtomSpace* as, Handle hg)
+Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hg)
 {
 #ifdef HAVE_GUILE
     FuzzyPatternMatchCB fpmcb(as);

@@ -45,6 +45,7 @@ ADD_LIBRARY (atomspace SHARED
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace
+	lambda
 	cogutil
 	${GSL_LIBRARIES}
 	${Boost_THREAD_LIBRARY}

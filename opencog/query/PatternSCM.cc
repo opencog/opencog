@@ -17,7 +17,7 @@
 
 using namespace opencog;
 
-PatternWrap::PatternWrap(Handle (f)(AtomSpace*, Handle), const char* n)
+PatternWrap::PatternWrap(Handle (f)(AtomSpace*, const Handle&), const char* n)
 	: _func(f), _pred(NULL), _name(n)
 {
 #ifdef HAVE_GUILE
@@ -25,7 +25,7 @@ PatternWrap::PatternWrap(Handle (f)(AtomSpace*, Handle), const char* n)
 #endif
 }
 
-PatternWrap::PatternWrap(TruthValuePtr (p)(AtomSpace*, Handle), const char* n)
+PatternWrap::PatternWrap(TruthValuePtr (p)(AtomSpace*, const Handle&), const char* n)
 	: _func(NULL), _pred(p), _name(n)
 {
 #ifdef HAVE_GUILE
@@ -102,9 +102,6 @@ void PatternSCM::init_in_module(void*)
 
    // Fuzzy matching.
 	_binders.push_back(new PatternWrap(find_approximate_match, "cog-fuzzy-match"));
-
-	// Validate the bindlink for syntax correctness
-	_binders.push_back(new PatternWrap(validate_bindlink, "cog-validate-bindlink"));
 
 	// A bindlink that does not return a value
 	_binders.push_back(new PatternWrap(satisfaction_link, "cog-satisfy"));
