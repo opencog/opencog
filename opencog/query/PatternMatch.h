@@ -29,20 +29,25 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/query/Implicator.h>
 #include <opencog/query/PatternMatchCallback.h>
-#include <opencog/query/Satisfier.h>
 
 namespace opencog {
 
+class BindLink;
+class SatisfactionLink;
+
 class PatternMatch
 {
-	private:
+	friend class BindLink;
+	friend class SatisfactionLink;
+
+	protected:
 		// See PatternMatch.cc for comments
-		void do_match(PatternMatchCallback *,
+		static void do_match(PatternMatchCallback *,
 		              const std::set<Handle>& vars,
 		              const std::vector<Handle>& virtuals,
 		              const std::set<std::vector<Handle>>& components);
 
-		bool recursive_virtual(PatternMatchCallback *cb,
+		static bool recursive_virtual(PatternMatchCallback *cb,
 		            const std::vector<Handle>& virtuals,
 		            const std::vector<Handle>& negations,
 		            const std::map<Handle, Handle>& var_gnds,
@@ -50,20 +55,12 @@ class PatternMatch
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds);
 
-		bool _check_connectivity;
-		void check_connectivity(const std::set<std::vector<Handle>>&);
-
 	public:
-		PatternMatch(void) : _check_connectivity(true) {}
+		PatternMatch(void) {}
 
 		void match(PatternMatchCallback *,
 		           const Handle& vars,
 		           const Handle& clauses);
-
-		// See PatternMatch.cc for comments
-		void ignore_connectivity_check() { _check_connectivity = false; }
-		void do_bindlink(const Handle&, Implicator&);
-		void do_satlink(const Handle&, Satisfier&);
 
 		// Deprecated: DO NOT USE IN NEW CODE!
 		// This is used only in the unit-test cases.

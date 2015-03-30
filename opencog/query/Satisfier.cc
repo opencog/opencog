@@ -23,9 +23,10 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atoms/bind/SatisfactionLink.h>
 
 #include "BindLink.h"
-#include "PatternMatch.h"
+#include "Satisfier.h"
 
 using namespace opencog;
 
@@ -33,19 +34,23 @@ bool Satisfier::grounding(const std::map<Handle, Handle> &var_soln,
                            const std::map<Handle, Handle> &pred_soln)
 {
 	// PatternMatchEngine::print_solution(pred_soln, var_soln);
-	result = TruthValue::TRUE_TV();
+	_result = TruthValue::TRUE_TV();
 
 	// Look for more groundings.
 	return false;
 }
 
-TruthValuePtr opencog::satisfaction_link(AtomSpace* as, Handle satlink)
+TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hsatlink)
 {
-	Satisfier sat(as);
-	PatternMatch pm;
-	pm.do_satlink(satlink, sat);
+	Satisfier sater(as);
 
-	return sat.result;
+	SatisfactionLinkPtr bl(SatisfactionLinkCast(hsatlink));
+	if (NULL == bl)
+		bl = createSatisfactionLink(*LinkCast(hsatlink));
+
+	bl->satisfy(&sater);
+
+	return sater._result;
 }
 
 /* ===================== END OF FILE ===================== */

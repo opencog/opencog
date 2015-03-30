@@ -36,13 +36,8 @@ namespace opencog
  * like this might be done. It is not necessarily a good idea, and might
  * be replaced by something completely different, someday ...
  */
-
-class PatternMatch;
-
 class BindLink : public SatisfactionLink
 {
-	friend class PatternMatch;
-
 protected:
 
 	/// The actual clauses. Set by validate_body()
@@ -57,6 +52,9 @@ public:
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	BindLink(Link &l);
+
+	void imply(PatternMatchCallback*, bool check_connectivity=true);
+	Handle& get_implicand(void) { return _implicand; }
 };
 
 typedef std::shared_ptr<BindLink> BindLinkPtr;

@@ -22,15 +22,18 @@
 #ifndef _OPENCOG_BINDLINK_H
 #define _OPENCOG_BINDLINK_H
 
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/TruthValue.h>
 
 namespace opencog {
 
-Handle bindlink(AtomSpace*, Handle);
-Handle single_bindlink (AtomSpace*, Handle);
-Handle crisp_logic_bindlink(AtomSpace*, Handle);
-Handle pln_bindlink(AtomSpace*, Handle);
-TruthValuePtr satisfaction_link(AtomSpace*, Handle);
+class AtomSpace;
+
+Handle bindlink(AtomSpace*, const Handle&);
+Handle single_bindlink (AtomSpace*, const Handle&);
+Handle crisp_logic_bindlink(AtomSpace*, const Handle&);
+Handle pln_bindlink(AtomSpace*, const Handle&);
+TruthValuePtr satisfaction_link(AtomSpace*, const Handle&);
 
 } // namespace opencog
 

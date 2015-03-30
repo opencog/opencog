@@ -228,7 +228,7 @@ class PatternMatchCallback
 		 * in a slightly more convenient C++ form, is all.  This
 		 * callback may alter the typemap before returning.
 		 */
-		virtual void set_type_restrictions(VariableTypeMap &tm) {}
+		virtual void set_type_restrictions(const VariableTypeMap& tm) {}
 
 		/**
 		 * Called to initiate the search. This callback is responsible

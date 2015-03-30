@@ -75,6 +75,8 @@ public:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	LambdaLink(Link &l);
+
+	const VariableTypeMap& get_typemap(void) { return _typemap; }
 };
 
 typedef std::shared_ptr<LambdaLink> LambdaLinkPtr;

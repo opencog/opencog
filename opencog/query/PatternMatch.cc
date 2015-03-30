@@ -50,85 +50,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 
 	BindLinkPtr bl(createBindLink(BIND_LINK, boset));
 
-	do_match(cb, bl->_varset, bl->_virtuals, bl->_components);
-}
-
-/* ================================================================= */
-/**
- * Evaluate an ImplicationLink embedded in a BindLink
- *
- * Given a BindLink containing variable declarations and an
- * ImplicationLink, this method will "evaluate" the implication, matching
- * the predicate, and creating a grounded implicand, assuming the
- * predicate can be satisfied. Thus, for example, given the structure
- *
- *    BindLink
- *       ListLink
- *          VariableNode "$var0"
- *          VariableNode "$var1"
- *       ImplicationLink
- *          AndList
- *             etc ...
- *
- * Evaluation proceeds as decribed in the "do_imply()" function above.
- * The whole point of the BindLink is to do nothing more than
- * to indicate the bindings of the variables, and (optionally) limit
- * the types of acceptable groundings for the varaibles.
- */
-
-void PatternMatch::do_bindlink (const Handle& hbindlink,
-                                Implicator& implicator)
-{
-	BindLinkPtr bl(BindLinkCast(hbindlink));
-	if (NULL == bl)
-		bl = createBindLink(*LinkCast(hbindlink));
-
-	implicator.implicand = bl->_implicand;
-	implicator.set_type_restrictions(bl->_typemap);
-
-	if (_check_connectivity) check_connectivity(bl->_components);
-	do_match(&implicator, bl->_varset, bl->_virtuals, bl->_components);
-}
-
-/**
- * Perform a satisfaction check only, no implication is performed.
- *
- */
-void PatternMatch::do_satlink (const Handle& hsatlink,
-                               Satisfier& sater)
-{
-	SatisfactionLinkPtr bl(SatisfactionLinkCast(hsatlink));
-	if (NULL == bl)
-		bl = createSatisfactionLink(*LinkCast(hsatlink));
-
-	if (_check_connectivity) check_connectivity(bl->_components);
-	do_match(&sater, bl->_varset, bl->_virtuals, bl->_components);
-}
-
-/* ================================================================= */
-/**
- * Check that all clauses are connected
- */
-void PatternMatch::check_connectivity(
-	const std::set<std::vector<Handle>>& components)
-{
-	if (1 == components.size()) return;
-
-	// Users are going to be stumped by this one, so print
-	// out a verbose, user-freindly debug message to help
-	// them out.
-	std::stringstream ss;
-	ss << "Pattern is not connected! Found "
-	   << components.size() << " components:\n";
-	int cnt = 0;
-	for (const auto& comp : components)
-	{
-		ss << "Connected component " << cnt
-		   << " consists of ----------------: \n";
-		for (Handle h : comp) ss << h->toString();
-		cnt++;
-	}
-	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
+	bl->imply(cb);
 }
 
 /* ================================================================= */
@@ -252,7 +174,7 @@ void PatternMatch::do_imply (const Handle& himplication,
 	// Now perform the search.
 	impl.implicand = limp->getOutgoingAtom(1);
 
-	do_match(&impl, bl->_varset, bl->_virtuals, bl->_components);
+	bl->imply(&impl);
 }
 
 /* ===================== END OF FILE ===================== */

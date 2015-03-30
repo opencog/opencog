@@ -24,6 +24,7 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/query/PatternMatch.h>
 
 #include "BindLink.h"
 
@@ -103,5 +104,34 @@ void BindLink::validate_body(const Handle& hbody)
 	_implicand = oset[1];
 }
 
+
+/* ================================================================= */
+/**
+ * Evaluate an ImplicationLink embedded in a BindLink
+ *
+ * Given a BindLink containing variable declarations and an
+ * ImplicationLink, this method will "evaluate" the implication,
+ * matching
+ * the predicate, and creating a grounded implicand, assuming the
+ * predicate can be satisfied. Thus, for example, given the structure
+ *
+ *    BindLink
+ *       ListLink
+ *          VariableNode "$var0"
+ *          VariableNode "$var1"
+ *       ImplicationLink
+ *          AndList
+ *             etc ...
+ *
+ * Evaluation proceeds as decribed in the "do_imply()" function above.
+ * The whole point of the BindLink is to do nothing more than
+ * to indicate the bindings of the variables, and (optionally) limit
+ * the types of acceptable groundings for the variables.
+ */
+void BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
+{
+	if (check_conn) check_connectivity(_components);
+	//PatternMatch::do_match(pmc, _varset, _virtuals, _components);
+}
 
 /* ===================== END OF FILE ===================== */

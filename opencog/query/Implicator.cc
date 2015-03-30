@@ -23,6 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atoms/bind/BindLink.h>
 
 #include "BindLink.h"
 #include "DefaultImplicator.h"
@@ -88,22 +89,23 @@ bool SingleImplicator::grounding(const std::map<Handle, Handle> &var_soln,
 	return true;
 }
 
-/**
- * Evaluate an ImplicationLink embedded in a BindLink
- *
- * Use the default implicator to find pattern-matches. Associated truth
- * values are completely ignored during pattern matching; if a set of
- * atoms that could be a ground are found in the atomspace, then they
- * will be reported.
- *
- * See the do_bindlink function documentation for details.
- */
-Handle opencog::bindlink(AtomSpace* as, Handle hbindlink)
+namespace opencog
 {
-	// Now perform the search.
-	DefaultImplicator impl(as);
-	PatternMatch pm;
-	pm.do_bindlink(hbindlink, impl);
+
+/* Simplified utility */
+static Handle do_imply(AtomSpace* as,
+                       const Handle& hbindlink,
+                       Implicator& impl,
+                       bool do_conn_check=true)
+{
+	BindLinkPtr bl(BindLinkCast(hbindlink));
+	if (NULL == bl)
+		bl = createBindLink(*LinkCast(hbindlink));
+
+	impl.implicand = bl->get_implicand();
+	impl.set_type_restrictions(bl->get_typemap());
+
+	bl->imply(&impl, do_conn_check);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -114,22 +116,33 @@ Handle opencog::bindlink(AtomSpace* as, Handle hbindlink)
 /**
  * Evaluate an ImplicationLink embedded in a BindLink
  *
+ * Use the default implicator to find pattern-matches. Associated truth
+ * values are completely ignored during pattern matching; if a set of
+ * atoms that could be a ground are found in the atomspace, then they
+ * will be reported.
+ *
+ * See the do_bindlink function documentation for details.
+ */
+Handle bindlink(AtomSpace* as, const Handle& hbindlink)
+{
+	// Now perform the search.
+	DefaultImplicator impl(as);
+	return do_imply(as, hbindlink, impl);
+}
+
+/**
+ * Evaluate an ImplicationLink embedded in a BindLink
+ *
  * Returns the first match only. Otherwise, the behavior is identical to
  * PatternMatch::bindlink above.
  *
  * See the do_bindlink function documentation for details.
  */
-Handle opencog::single_bindlink (AtomSpace* as, Handle hbindlink)
+Handle single_bindlink (AtomSpace* as, const Handle& hbindlink)
 {
 	// Now perform the search.
 	SingleImplicator impl(as);
-	PatternMatch pm;
-	pm.do_bindlink(hbindlink, impl);
-
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = as->addLink(LIST_LINK, impl.result_list);
-	return gl;
+	return do_imply(as, hbindlink, impl);
 }
 
 /**
@@ -149,34 +162,23 @@ Handle opencog::single_bindlink (AtomSpace* as, Handle hbindlink)
  *
  * See the do_bindlink function documentation for details.
  */
-Handle opencog::crisp_logic_bindlink(AtomSpace* as, Handle hbindlink)
+Handle crisp_logic_bindlink(AtomSpace* as, const Handle& hbindlink)
 {
 	// Now perform the search.
 	CrispImplicator impl(as);
-	PatternMatch pm;
-	pm.do_bindlink(hbindlink, impl);
-
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = as->addLink(LIST_LINK, impl.result_list);
-	return gl;
+	return do_imply(as, hbindlink, impl);
 }
 
 /**
  * PLN specific PatternMatchCallback implementation
  */
-Handle opencog::pln_bindlink(AtomSpace* as, Handle hbindlink)
+Handle pln_bindlink(AtomSpace* as, const Handle& hbindlink)
 {
 	// Now perform the search.
 	PLNImplicator impl(as);
-	PatternMatch pm;
-	pm.ignore_connectivity_check();
-	pm.do_bindlink(hbindlink, impl);
+	return do_imply(as, hbindlink, impl, false);
+}
 
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = as->addLink(LIST_LINK, impl.result_list);
-	return gl;
 }
 
 /* ===================== END OF FILE ===================== */

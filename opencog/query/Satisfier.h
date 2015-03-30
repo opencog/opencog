@@ -52,8 +52,8 @@ class Satisfier :
 	public:
 		Satisfier(AtomSpace* as) :
 			DefaultPatternMatchCB(as),
-			_as(as), result(TruthValue::FALSE_TV()) {}
-		TruthValuePtr result;
+			_as(as), _result(TruthValue::FALSE_TV()) {}
+		TruthValuePtr _result;
 
 		// Return true if a satisfactory grounding has been
 		// found. Note that in case where you want all possible

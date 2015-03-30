@@ -19,16 +19,16 @@ class AtomSpace;
 class PatternWrap
 {
 	private:
-		Handle (*_func)(AtomSpace*, Handle);
+		Handle (*_func)(AtomSpace*, const Handle&);
 		Handle wrapper(Handle);
 
-		TruthValuePtr (*_pred)(AtomSpace*, Handle);
+		TruthValuePtr (*_pred)(AtomSpace*, const Handle&);
 		TruthValuePtr prapper(Handle);
 
 		const char *_name;  // scheme name of the c++ function.
 	public:
-		PatternWrap(Handle (*)(AtomSpace*, Handle), const char*);
-		PatternWrap(TruthValuePtr (*)(AtomSpace*, Handle), const char*);
+		PatternWrap(Handle (*)(AtomSpace*, const Handle&), const char*);
+		PatternWrap(TruthValuePtr (*)(AtomSpace*, const Handle&), const char*);
 };
 
 class PatternSCM

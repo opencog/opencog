@@ -26,6 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atoms/bind/LambdaLink.h>
+#include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog
 {
@@ -37,12 +38,8 @@ namespace opencog
  * be replaced by something completely different, someday ...
  */
 
-class PatternMatch;
-
 class SatisfactionLink : public LambdaLink
 {
-	friend class PatternMatch;
-
 protected:
 	/// The actual clauses. Set by validate_clauses()
 	Handle _hclauses;
@@ -58,12 +55,15 @@ protected:
 	void validate_clauses(std::set<Handle>& vars,
 	                      std::vector<Handle>& clauses);
 
+	void check_connectivity(const std::set<std::vector<Handle>>&);
 public:
 	SatisfactionLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	SatisfactionLink(Link &l);
+
+	void satisfy(PatternMatchCallback *);
 };
 
 typedef std::shared_ptr<SatisfactionLink> SatisfactionLinkPtr;

@@ -25,6 +25,7 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomutils/PatternUtils.h>
+#include <opencog/query/PatternMatch.h>
 
 #include "SatisfactionLink.h"
 
@@ -179,4 +180,38 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 	}
 #endif
 }
+
+/* ================================================================= */
+/**
+ * Check that all clauses are connected
+ */
+void SatisfactionLink::check_connectivity(
+	const std::set<std::vector<Handle>>& components)
+{
+	if (1 == components.size()) return;
+
+	// Users are going to be stumped by this one, so print
+	// out a verbose, user-freindly debug message to help
+	// them out.
+	std::stringstream ss;
+	ss << "Pattern is not connected! Found "
+	   << components.size() << " components:\n";
+	int cnt = 0;
+	for (const auto& comp : components)
+	{
+		ss << "Connected component " << cnt
+		   << " consists of ----------------: \n";
+		for (Handle h : comp) ss << h->toString();
+		cnt++;
+	}
+	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
+}
+
+/* ================================================================= */
+
+void SatisfactionLink::satisfy(PatternMatchCallback* pmc)
+{
+	//PatternMatch::do_match(pmc, _varset, _virtuals, _components);
+}
+
 /* ===================== END OF FILE ===================== */

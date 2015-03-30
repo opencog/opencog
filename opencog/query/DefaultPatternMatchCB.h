@@ -147,14 +147,14 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * The typemap contains a map from variables to a set of types
 		 * that the groundings for the variable are allowed to have.
 		 */
-		virtual void set_type_restrictions(VariableTypeMap &tm)
+		virtual void set_type_restrictions(const VariableTypeMap &tm)
 		{
 			_type_restrictions = &tm;
 		}
 	protected:
 		Handle _root;
 		Handle _starter_pred;
-		VariableTypeMap *_type_restrictions;
+		const VariableTypeMap* _type_restrictions;
 		virtual Handle find_starter(Handle, size_t&, Handle&, size_t&);
 		virtual Handle find_thinnest(std::vector<Handle>&, Handle&, size_t&);
 

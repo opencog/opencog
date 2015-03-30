@@ -28,6 +28,7 @@
 
 #include "Instantiator.h"
 #include "PatternMatch.h"
+#include "PatternMatchEngine.h"
 #include "PatternMatchCallback.h"
 
 using namespace opencog;
@@ -79,7 +80,7 @@ class PMCGroundings : public PatternMatchCallback
 		}
 		void push(void) { _cb->push(); }
 		void pop(void) { _cb->pop(); }
-		void set_type_restrictions(VariableTypeMap &tm) {
+		void set_type_restrictions(const VariableTypeMap& tm) {
 			_cb->set_type_restrictions(tm);
 		}
 		void perform_search(PatternMatchEngine* pme,
