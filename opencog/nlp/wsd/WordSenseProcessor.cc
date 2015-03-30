@@ -15,7 +15,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomutils/ForeachChaseLink.h>
-#include <opencog/atomutils/Foreach.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/guile/SchemePrimitive.h>

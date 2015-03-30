@@ -236,7 +236,7 @@ bool EdgeThin::thin_word(const Handle& word_h)
 		int deleted_links = 0;
 		while (rc)
 		{
-			rc = foreach_incoming_handle(sense_h, &EdgeThin::delete_sim, this);
+			rc = sense_h->foreach_incoming(&EdgeThin::delete_sim, this);
 			deleted_links ++;
 		}
 #ifdef THIN_DEBUG

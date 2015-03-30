@@ -22,7 +22,6 @@
  */
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/atomutils/Foreach.h>
 #include <opencog/atomutils/ForeachZip.h>
 #include <opencog/atomutils/PatternUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -963,7 +962,7 @@ bool PatternMatchEngine::note_root(const Handle& h)
 	_root_map[h].push_back(curr_root);
 
 	LinkPtr l(LinkCast(h));
-	if (l) foreach_outgoing_handle(l, &PatternMatchEngine::note_root, this);
+	if (l) l->foreach_outgoing(&PatternMatchEngine::note_root, this);
 	return false;
 }
 

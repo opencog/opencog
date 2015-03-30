@@ -16,7 +16,6 @@
 #include <stdio.h>
 
 #include <opencog/util/platform.h>
-#include <opencog/atomutils/Foreach.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
@@ -171,7 +170,7 @@ bool MihalceaLabel::pull_pos(const Handle& sense_h)
  */
 void MihalceaLabel::fetch_senses(const Handle& lemma_h)
 {
-	bool rc = foreach_incoming_handle(lemma_h, &MihalceaLabel::have_sense, this);
+	bool rc = lemma_h->foreach_incoming(&MihalceaLabel::have_sense, this);
    if (rc) return;
 
 	// If we are here, we need to pull senses from the database.
@@ -181,7 +180,7 @@ void MihalceaLabel::fetch_senses(const Handle& lemma_h)
 	foreach_binary_link(lemma_h, WORD_SENSE_LINK, &MihalceaLabel::pull_pos, this);
 
 	// If we now have senses, we are done.
-	rc = foreach_incoming_handle(lemma_h, &MihalceaLabel::have_sense, this);
+	rc = lemma_h->foreach_incoming(&MihalceaLabel::have_sense, this);
 	if (rc) return;
 
 	// Add a bogus sense.

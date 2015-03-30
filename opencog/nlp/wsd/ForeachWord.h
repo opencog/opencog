@@ -56,7 +56,7 @@ inline bool foreach_word_instance(const Handle& ha, bool (T::*cb)(const Handle&)
 {
 	FollowLink fl;
 	Handle h = fl.follow_binary_link(ha, REFERENCE_LINK);
-	return foreach_outgoing_handle (LinkCast(h), cb, data);
+	return LinkCast(h)->foreach_outgoing(cb, data);
 }
 
 /**
@@ -318,7 +318,7 @@ class PrivateUseOnlyRelexRelationFinder
 			listlink = LinkCast(h);
 
 			// If we are here, lets see if the list link is in eval link.
-			foreach_incoming_handle(h, &PrivateUseOnlyRelexRelationFinder::look_for_eval_link, this);
+			h->foreach_incoming(&PrivateUseOnlyRelexRelationFinder::look_for_eval_link, this);
 			return false;
 		}
 };
@@ -332,7 +332,7 @@ foreach_relex_relation(const Handle& h,
 	rrf.user_cb = cb;
 	rrf.user_data = data;
 	rrf.first_arg = h;
-	return foreach_incoming_handle(h, &PrivateUseOnlyRelexRelationFinder<T>::look_for_list_link, &rrf);
+	return h->foreach_incoming(&PrivateUseOnlyRelexRelationFinder<T>::look_for_list_link, &rrf);
 }
 
 /**

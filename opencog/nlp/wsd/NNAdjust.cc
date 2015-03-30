@@ -128,7 +128,7 @@ bool NNAdjust::sense_of_second_inst(const Handle& second_word_sense_h,
                                     const Handle& second_sense_link)
 {
 	// printf("second sense %s!\n", sense->getName().c_str());
-	foreach_incoming_handle(second_sense_link, &NNAdjust::sense_pair, this);
+	second_sense_link->foreach_incoming(&NNAdjust::sense_pair, this);
 	return false;
 }
 

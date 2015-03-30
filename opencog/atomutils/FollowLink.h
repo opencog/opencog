@@ -17,7 +17,6 @@
 #define _OPENCOG_FOLLOW_LINK_H
 
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomutils/Foreach.h>
 
 namespace opencog
 {
@@ -58,7 +57,7 @@ public:
 		to_atom = Handle::UNDEFINED;
 		position_from = from;
 		position_to = to;
-		foreach_incoming_handle(h, &FollowLink::find_link_type, this);
+		h->foreach_incoming(&FollowLink::find_link_type, this);
 		return to_atom;
 	}
 
@@ -81,7 +80,7 @@ private:
 		cnt = -1;
 		to_atom = Handle::UNDEFINED;
 		LinkPtr l(LinkCast(h));
-		if (l) foreach_outgoing_handle(l, &FollowLink::pursue_link, this);
+		if (l) l->foreach_outgoing(&FollowLink::pursue_link, this);
 		if (to_atom != Handle::UNDEFINED) return true;
 		return false;
 	}

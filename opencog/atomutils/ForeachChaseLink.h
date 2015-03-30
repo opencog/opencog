@@ -37,7 +37,7 @@
 #ifndef _OPENCOG_LINK_CHASE_H
 #define _OPENCOG_LINK_CHASE_H
 
-#include <opencog/atomutils/Foreach.h>
+#include <opencog/atomspace/Link.h>
 
 namespace opencog
 {
@@ -165,7 +165,7 @@ private:
 		position_to = to;
 		user_data = data;
 		endpoint_matcher = &PrivateUseOnlyChaseLink::pursue_link;
-		bool rc = foreach_incoming_handle(h, &PrivateUseOnlyChaseLink::find_link_type, this);
+		bool rc = h->foreach_incoming(&PrivateUseOnlyChaseLink::find_link_type, this);
 		return rc;
 	}
 
@@ -178,7 +178,7 @@ private:
 		to_atom = Handle::UNDEFINED;
 		user_data = data;
 		endpoint_matcher = &PrivateUseOnlyChaseLink::pursue_unordered_link;
-		bool rc = foreach_incoming_handle(h, &PrivateUseOnlyChaseLink::find_link_type, this);
+		bool rc = h->foreach_incoming(&PrivateUseOnlyChaseLink::find_link_type, this);
 		return rc;
 	}
 
@@ -193,7 +193,7 @@ private:
 		cnt = -1;
 		to_atom = Handle::UNDEFINED;
 		// foreach_outgoing_handle(link_h, PrivateUseOnlyChaseLink::endpoint_matcher, this);
-		foreach_outgoing_handle(LinkCast(link_h), endpoint_matcher, this);
+		LinkCast(link_h)->foreach_outgoing(endpoint_matcher, this);
 
 		bool rc = false;
 		if (Handle::UNDEFINED != to_atom)

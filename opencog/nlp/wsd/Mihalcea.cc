@@ -129,7 +129,7 @@ bool Mihalcea::process_sentence(const Handle& h)
 bool Mihalcea::process_sentence_list(const Handle& h)
 {
 	short_list.clear();
-	foreach_outgoing_handle(LinkCast(h), &Mihalcea::process_sentence, this);
+	LinkCast(h)->foreach_outgoing(&Mihalcea::process_sentence, this);
 
 	// Solve the page-rank equations for the whole set of sentences.
 	// sense_ranker.rank_document(parse_list);
