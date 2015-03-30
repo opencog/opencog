@@ -109,6 +109,10 @@ void BuggyQuoteUTest::test_bad_quote(void)
     config().set("SCM_PRELOAD", "tests/query/buggy-crime.scm");
     load_scm_files_from_config(*as);
 
+    // This should throw an exception from scheme.
+    // Disable logging so as to avoid the hopeless spew of errors.
+    logger().setLevel(Logger::NONE);
+
     bool caught = false;
     try
     {
@@ -122,6 +126,7 @@ void BuggyQuoteUTest::test_bad_quote(void)
     {
         caught = true;
     }
+    logger().setLevel(Logger::INFO);
 
     TS_ASSERT_EQUALS(true, caught);
 }

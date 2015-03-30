@@ -55,10 +55,11 @@ class PatternMatch
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds);
 
-	public:
 		PatternMatch(void) {}
 };
 
+// Deprecated: DO NOT USE IN NEW CODE!
+// This is used only in the unit-test cases.
 void match(PatternMatchCallback *,
            const Handle& vars,
            const Handle& clauses);

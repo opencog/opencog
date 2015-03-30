@@ -361,7 +361,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	// And now, try grounding each of the virtual clauses.
 	dbgprt("BEGIN component recursion: ====================== "
 	       "num comp=%zd num virts=%zd\n",
-	       comp_var_gnds.size(), _virtuals.size());
+	       comp_var_gnds.size(), virtuals.size());
 	std::map<Handle, Handle> empty_vg;
 	std::map<Handle, Handle> empty_pg;
 	std::vector<Handle> negations; // currently ignored

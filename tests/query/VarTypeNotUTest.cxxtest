@@ -115,6 +115,10 @@ void VarTypeNot::test_exec(void)
 	SchemeEval* evaluator = new SchemeEval(as);
 	vscope_good = evaluator->apply("rule-good", Handle::UNDEFINED);
 
+	// This should throw an exception.
+	// Disable logging so as to avoid the hopeless spew of errors.
+	logger().setLevel(Logger::NONE);
+
 	// With the new atomspace design, we can't even insert the bad atom
 	// without throwing. So really, the test doesn't get very far...
 	bool caught = false;
@@ -124,11 +128,14 @@ void VarTypeNot::test_exec(void)
 	}
    catch (const RuntimeException& ex)
    {
-      logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+		logger().setLevel(Logger::INFO);
+      logger().info("Caught exception, just as expected: %s", ex.getMessage());
 		caught = true;
    }
    TSM_ASSERT("Failed to catch expected exception", caught);
 	delete evaluator;
+
+	logger().setLevel(Logger::INFO);
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_good);

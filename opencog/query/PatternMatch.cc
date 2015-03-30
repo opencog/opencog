@@ -99,17 +99,17 @@ void opencog::match(PatternMatchCallback *cb,
  *
  *    ImplicationLink
  *       AndList
- *          EvaluationList
+ *          EvaluationLink
  *             PredicateNode "_obj"
  *             ListLink
  *                ConceptNode "make"
  *                VariableNode "$var0"
- *          EvaluationList
+ *          EvaluationLink
  *             PredicateNode "from"
  *             ListLink
  *                ConceptNode "make"
  *                VariableNode "$var1"
- *       EvaluationList
+ *       EvaluationLink
  *          PredicateNode "make_from"
  *          ListLink
  *             VariableNode "$var0"
@@ -119,7 +119,7 @@ void opencog::match(PatternMatchCallback *cb,
  * sentence "Pottery is made from clay", that is, if it contains the
  * hypergraph
  *
- *    EvaluationList
+ *    EvaluationLink
  *       PredicateNode "_obj"
  *       ListLink
  *          ConceptNode "make"
@@ -127,7 +127,7 @@ void opencog::match(PatternMatchCallback *cb,
  *
  * and the hypergraph
  *
- *    EvaluationList
+ *    EvaluationLink
  *       PredicateNode "from"
  *       ListLink
  *          ConceptNode "make"
@@ -141,7 +141,7 @@ void opencog::match(PatternMatchCallback *cb,
  * Next, a grounded copy of the implicand is then created; that is,
  * the following hypergraph is created and added to the atomspace:
  *
- *    EvaluationList
+ *    EvaluationLink
  *       PredicateNode "make_from"
  *       ListLink
  *          ConceptNode "pottery"
