@@ -328,7 +328,7 @@ map<Handle, HandleSeq> BackwardChainer::unify_to_empty_set(Handle& htarget)
 {
 	logger().debug("[BC] Unify to empty set.");
 
-	UnorderedHandleSet vars = _commons->get_nodes(htarget, {VARIABLE_NODE});
+	UnorderedHandleSet vars = get_outgoing_nodes(htarget, {VARIABLE_NODE});
 
 	map<Handle, HandleSeq> result;
 	for (Handle h : vars)
@@ -428,7 +428,7 @@ HandleSeq BackwardChainer::get_grounded(HandleSeq result) {
 	HandleSeq grounded;
 	for (Handle h : result) {
 		UnorderedHandleSet var_containing =
-			_commons->get_nodes(h, {VARIABLE_NODE});
+			get_outgoing_nodes(h, {VARIABLE_NODE});
 		if (var_containing.empty())
 			grounded.push_back(h);
 	}
@@ -563,7 +563,7 @@ HandleSeq BackwardChainer::chase_var_values(Handle& hvar,
 map<Handle, HandleSeq> BackwardChainer::ground_target_vars(Handle& hgoal,
 		vector<map<Handle, HandleSeq>>& inference_list) {
 	map<Handle, HandleSeq> vg_map;
-	UnorderedHandleSet hgoal_vars = _commons->get_nodes(hgoal, {VARIABLE_NODE});
+	UnorderedHandleSet hgoal_vars = get_outgoing_nodes(hgoal, {VARIABLE_NODE});
 
 	for (map<Handle, HandleSeq> vgm : inference_list) {
 		for (auto it = vgm.begin(); it != vgm.end(); ++it) {

@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
 #include "AtomUtils.h"
 
 namespace opencog
@@ -102,6 +103,38 @@ HandleSeq getNeighbors(const Handle& h, bool fanin,
     return answer;
 }
 
+UnorderedHandleSet get_outgoing_nodes(const Handle& hinput,
+                                      const std::vector<Type>& types)
+{
+	LinkPtr link(LinkCast(hinput));
+
+    // Recursive case
+    if (link) {
+        UnorderedHandleSet found_nodes;
+        for (const Handle& h : link->getOutgoingSet()) {
+            UnorderedHandleSet tmp = get_outgoing_nodes(h, types);
+            found_nodes.insert(tmp.begin(), tmp.end());
+        }
+        return found_nodes;
+    }
+    // Base case
+    else {
+        OC_ASSERT(NodeCast(hinput) != nullptr);
+
+        if (types.empty()) { // Empty means all kinds of nodes
+            return {hinput};
+        } else {
+            // Check if this node is in our wish list
+            Type t = NodeCast(hinput)->getType();
+            auto it = find(types.begin(), types.end(), t);
+            if (it != types.end())
+                return {hinput};
+            else
+                return {};
+        }
+    }
+}
+
 UnorderedHandleSet get_distant_neighbors(const Handle& h, int dist)
 {
     UnorderedHandleSet results;
@@ -113,10 +146,10 @@ UnorderedHandleSet get_distant_neighbors(const Handle& h, int dist)
 void get_distant_neighbors_rec(const Handle& h, UnorderedHandleSet& res,
                                int dist)
 {
-	res.insert(h);
+    res.insert(h);
 
-	// Recursive calls
-	if (dist != 0) {
+    // Recursive calls
+    if (dist != 0) {
         // 1. Fetch incomings
         for (const LinkPtr& in_l : h->getIncomingSet()) {
             Handle in_h = in_l->getHandle();
@@ -126,10 +159,10 @@ void get_distant_neighbors_rec(const Handle& h, UnorderedHandleSet& res,
         // 2. Fetch outgoings
         LinkPtr link = LinkCast(h);
         if (link) {
-	        for (const Handle& out_h : link->getOutgoingSet()) {
-		        if (res.find(out_h) == res.cend()) // Do not re-explore
-			        get_distant_neighbors_rec(out_h, res, dist - 1);
-	        }
+            for (const Handle& out_h : link->getOutgoingSet()) {
+                if (res.find(out_h) == res.cend()) // Do not re-explore
+                    get_distant_neighbors_rec(out_h, res, dist - 1);
+            }
         }
     }
 }

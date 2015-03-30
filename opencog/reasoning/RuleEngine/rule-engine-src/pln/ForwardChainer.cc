@@ -25,6 +25,7 @@
 #include "ForwardChainerCallBack.h"
 #include "PLNCommons.h"
 
+#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/query/DefaultImplicator.h>
 #include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
@@ -77,7 +78,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
     PLNCommons pc(as_);
 
     //Variable fulfillment query.
-    UnorderedHandleSet var_nodes = pc.get_nodes(hsource, { VARIABLE_NODE });
+    UnorderedHandleSet var_nodes = get_outgoing_nodes(hsource, {VARIABLE_NODE});
     if (not var_nodes.empty())
         return do_pm(hsource,var_nodes);
 

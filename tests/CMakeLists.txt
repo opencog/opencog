@@ -21,6 +21,7 @@ IF (CXXTEST_FOUND)
 
 	IF (HAVE_ATOMSPACE)
 		ADD_SUBDIRECTORY (atomspace)
+        ADD_SUBDIRECTORY (atomutils)
 
 		# Persistence is for saving/restoring atomspace to disk.
 		ADD_SUBDIRECTORY (persist)

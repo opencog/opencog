@@ -45,14 +45,7 @@ public:
 	 */
 	Handle create_bindLink(Handle himplicant, bool is_quoted = false)
 			throw (opencog::InvalidParamException);
-	/**
-	 * Given an atom (a link or node), Find and return all the nodes associated
-	 * @param hinput - an atoms to be looked
-	 * @param required_nodes - a list of nodes to look for. if vector is empty, all kinds of nodes are looked
-	 * @return - a set of nodes
-	 */
-	UnorderedHandleSet get_nodes(const Handle& hinput,
-	                             const vector<Type>& required_nodes) const;
+
 	/**
 	 * checks if a handle already exists in a HandleSeq
 	 */

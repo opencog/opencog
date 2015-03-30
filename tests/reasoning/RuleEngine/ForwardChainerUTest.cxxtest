@@ -12,7 +12,7 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/guile/load-file.h>
-//TODO test choose_target
+//TODO test choose_source
 using namespace opencog;
 class ForwardChainerUTest: public CxxTest::TestSuite {
 private:
@@ -24,7 +24,13 @@ private:
 public:
 	ForwardChainerUTest()
 		: find_node_test1(
-			"(InheritanceLink (EvaluationLink (PredicateNode \"rich\") (ListLink (ConceptNode \"M\") (ConceptNode \"R\"))) (EvaluationLink (PredicateNode \"happy\") (ListLink (ConceptNode \"M\") (ConceptNode \"R\"))))")
+			"(InheritanceLink"
+			"    (EvaluationLink"
+			"        (PredicateNode \"rich\")"
+			"        (ListLink (ConceptNode \"M\") (ConceptNode \"R\")))"
+			"    (EvaluationLink"
+			"        (PredicateNode \"happy\")"
+			"        (ListLink (ConceptNode \"M\") (ConceptNode \"R\"))))")
 	{
 		server(CogServer::createInstance);
 		as_ = &cogserver().getAtomSpace();
@@ -48,35 +54,24 @@ public:
 	void tearDown(void);
 	void test_find_node(void);
 	void test_exists(void);
-	void test_target_to_pmimplicant(void);
+	void test_source_to_pmimplicant(void);
 	void test_choose_variable(void);
 	void test_load_fc_conf(void);
-	void test_choose_target(void);
+	void test_choose_source(void);
 	void test_choose_input(void);
 	void test_do_chain(void);
 };
-void ForwardChainerUTest::setUp(void) {
+void ForwardChainerUTest::setUp(void)
+{
 
 }
 
-void ForwardChainerUTest::tearDown(void) {
+void ForwardChainerUTest::tearDown(void)
+{
 
 }
-
-void ForwardChainerUTest::test_find_node(void) {
-	Handle h = eval_->eval_h(find_node_test1);
-	TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
-	HandleSeq hs = commons_->get_nodes(h, vector<Type> { CONCEPT_NODE });
-	TS_ASSERT_EQUALS(2, hs.size());
-	HandleSeq hs1 = commons_->get_nodes(h, vector<Type> { PREDICATE_NODE });
-	TS_ASSERT_EQUALS(2, hs1.size());
-	h =
-			eval_->eval_h(
-					"(ConceptNode \"man@80d4e852-1b93-4c49-84e1-5a7352b0dcb1\" (stv 0.001 0.99000001))");
-	TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
-	hs = commons_->get_nodes(h, vector<Type> { CONCEPT_NODE });
-}
-void ForwardChainerUTest::test_exists() {
+void ForwardChainerUTest::test_exists()
+{
 	Handle x = eval_->eval_h("(ConceptNode \"x\")");
 	Handle y = eval_->eval_h("(ConceptNode \"y\")");
 	Handle z = eval_->eval_h("(ConceptNode \"z\")");
@@ -84,7 +79,8 @@ void ForwardChainerUTest::test_exists() {
 	HandleSeq hs = { x, y, z };
 	TS_ASSERT(fc_->exists(hs, zx));
 }
-void ForwardChainerUTest::test_target_to_pmimplicant(void) {
+void ForwardChainerUTest::test_source_to_pmimplicant(void)
+{
 	Handle hc1 = eval_->eval_h("(ConceptNode \"rich\")");
 	TS_ASSERT_DIFFERS(hc1, Handle::UNDEFINED);
 
@@ -92,16 +88,16 @@ void ForwardChainerUTest::test_target_to_pmimplicant(void) {
 	TS_ASSERT_DIFFERS(hc2, Handle::UNDEFINED);
 
 	HandleSeq hseq = { hc1, hc2 };
-	Handle htarget = as_->addLink(INHERITANCE_LINK, hseq,
+	Handle hsource = as_->addLink(INHERITANCE_LINK, hseq,
 			TruthValue::DEFAULT_TV());
-	Handle himplicant = fc_->target_to_pmimplicant(htarget, map<Handle, string> {
+	Handle himplicant = fc_->source_to_pmimplicant(hsource, map<Handle, string> {
 			{ hc1, "$var-rich" } });
 	Handle himp_expected =
 			eval_->eval_h(
 					"(InheritanceLink (VariableNode \"$var-rich\") (ConceptNode \"happy\"))");
 	TS_ASSERT_EQUALS(himplicant.value(), himp_expected.value());
 
-	himplicant = fc_->target_to_pmimplicant(hc2, map<Handle, string> { { hc2,
+	himplicant = fc_->source_to_pmimplicant(hc2, map<Handle, string> { { hc2,
 			"$var-happy" } });
 	himp_expected = eval_->eval_h("(VariableNode \"$var-happy\")");
 	TS_ASSERT_EQUALS(himplicant.value(), himp_expected.value());
@@ -111,7 +107,7 @@ void ForwardChainerUTest::test_target_to_pmimplicant(void) {
 	himp_expected = eval_->eval_h(expected);
 	Handle h = eval_->eval_h(find_node_test1);
 	TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
-	himplicant = fc_->target_to_pmimplicant(h,
+	himplicant = fc_->source_to_pmimplicant(h,
 			map<Handle, string> { { eval_->eval_h("(ConceptNode \"M\")"),
 					"$var-M" },
 					{ eval_->eval_h("(ConceptNode \"R\")"), "$var-R" } });
@@ -132,20 +128,23 @@ void ForwardChainerUTest::test_choose_variable(void) {
 	//for (auto mit: var_name_map)
 	//	cout <<endl<< SchemeSmob::to_string(mit.first)<<endl;
 }
-void ForwardChainerUTest::test_load_fc_conf() {
+void ForwardChainerUTest::test_load_fc_conf()
+{
 	fc_->load_fc_conf();
 	for (string s : fc_->bind_link_name_) {
 		cout << endl << "RULE VARIABLES:" << s << endl;
 	}
+}
+void ForwardChainerUTest::test_choose_source()
+{
 
 }
-void ForwardChainerUTest::test_choose_target() {
+void ForwardChainerUTest::test_choose_input()
+{
 
 }
-void ForwardChainerUTest::test_choose_input() {
-
-}
-void ForwardChainerUTest::test_do_chain() {
+void ForwardChainerUTest::test_do_chain()
+{
 	Handle h = eval_->eval_h("(ConceptNode \"Peter\" )");
 	//Handle h2 = as->addNode(CONCEPT_NODE,"Peter",TruthValue::DEFAULT_TV());
 	fc_->do_chain(h);
