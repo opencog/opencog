@@ -77,11 +77,6 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h)
 	return filtered_set;
 }
 
-void AttentionalFocusCB::validate_clauses(std::set<Handle>& vars,
-                                          std::vector<Handle>& clauses)
-{
-}
-
 void AttentionalFocusCB::perform_search(PatternMatchEngine *pme,
                                         std::set<Handle> &vars,
                                         std::vector<Handle> &clauses,

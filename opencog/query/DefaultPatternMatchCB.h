@@ -133,12 +133,6 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual bool virtual_link_match(Handle& pat, Handle& args);
 
 		/**
-		 * Check that all clauses are connected
-		 */
-		virtual void validate_clauses(std::set<Handle>& vars,
-		                              std::vector<Handle>& clauses);
-
-		/**
 		 * Called to perform the actual search. This makes some default
 		 * assumptions about the kind of things that might be matched,
 		 * in order to drive a reasonably-fast search.

@@ -165,36 +165,6 @@ Handle DefaultPatternMatchCB::find_thinnest(std::vector<Handle>& clauses,
 }
 
 /**
- * Check that all clauses are connected
- */
-void DefaultPatternMatchCB::validate_clauses(std::set<Handle>& vars,
-                                             std::vector<Handle>& clauses)
-{
-	std::set<std::vector<Handle>> components;
-
-	get_connected_components(vars, clauses, components);
-
-	if (1 != components.size())
-	{
-		// Users are going to be stumped by this one, so print
-		// out a verbose, user-freindly debug message to help
-		// them out.
-		std::stringstream ss;
-		ss << "Pattern is not connected! Found "
-		   << components.size() << " components:\n";
-		int cnt = 0;
-		for (const auto& comp : components)
-		{
-			ss << "Connected component " << cnt
-			   << " consists of ----------------: \n";
-			for (Handle h : comp) ss << h->toString();
-			cnt++;
-		}
-		throw InvalidParamException(TRACE_INFO, ss.str().c_str());
-	}
-}
-
-/**
  * Search for solutions/groundings over all of the AtomSpace, using
  * some "reasonable" assumptions for what might be searched for. Or,
  * to put it bluntly, this search method *might* miss some possible

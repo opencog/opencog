@@ -170,6 +170,7 @@ Handle opencog::pln_bindlink(AtomSpace* as, Handle hbindlink)
 	// Now perform the search.
 	PLNImplicator impl(as);
 	PatternMatch pm;
+	pm.ignore_connectivity_check();
 	pm.do_bindlink(hbindlink, impl);
 
 	// The result_list contains a list of the grounded expressions.

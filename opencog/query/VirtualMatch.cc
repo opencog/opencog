@@ -83,11 +83,6 @@ class PMCGroundings : public PatternMatchCallback
 		void set_type_restrictions(VariableTypeMap &tm) {
 			_cb->set_type_restrictions(tm);
 		}
-
-		void validate_clauses(std::set<Handle>& vars,
-		                      std::vector<Handle>& clauses) {
-			_cb->validate_clauses(vars, clauses);
-		}
 		void perform_search(PatternMatchEngine* pme,
 	                       const std::set<Handle> &vars,
 	                       std::vector<Handle> &clauses,
@@ -314,19 +309,6 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
                             const std::vector<Handle>& virtuals,
                             const std::set<std::vector<Handle>>& nvcomps)
 {
-	// Its cheaper to run ctor and dtor than it is to clear the
-	// internal variables, and use this instance more than once.
-	if (_used)
-		throw InvalidParamException(TRACE_INFO,
-			"A PatternMatch instance cannot be used more than once!");
-	_used = true;
-
-// XXX this is fucked up. all that the callback does is call
-// get_connected_components a second time, and print a message.
-// This is because PLN is doing something fucked up.  PLN
-// need to do the right thing, not force crap onto us...
-//	cb->validate_clauses(vars, clauses);
-
 	// If there's only 1 component and there is no virtual clause then
 	// we can directly match the component using the callback cb
 	if (nvcomps.size() == 1 and virtuals.empty()) {

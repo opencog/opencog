@@ -29,9 +29,6 @@
 
 using namespace opencog;
 
-PatternMatch::PatternMatch(void)
-	: _used(false) {}
-
 /// See the documentation for do_match() to see what this function does.
 /// This is just a convenience wrapper around do_match().
 void PatternMatch::match(PatternMatchCallback *cb,
@@ -89,6 +86,7 @@ void PatternMatch::do_bindlink (const Handle& hbindlink,
 	implicator.implicand = bl->_implicand;
 	implicator.set_type_restrictions(bl->_typemap);
 
+	if (_check_connectivity) check_connectivity(bl->_components);
 	do_match(&implicator, bl->_varset, bl->_virtuals, bl->_components);
 }
 
@@ -103,7 +101,34 @@ void PatternMatch::do_satlink (const Handle& hsatlink,
 	if (NULL == bl)
 		bl = createSatisfactionLink(*LinkCast(hsatlink));
 
+	if (_check_connectivity) check_connectivity(bl->_components);
 	do_match(&sater, bl->_varset, bl->_virtuals, bl->_components);
+}
+
+/* ================================================================= */
+/**
+ * Check that all clauses are connected
+ */
+void PatternMatch::check_connectivity(
+	const std::set<std::vector<Handle>>& components)
+{
+	if (1 == components.size()) return;
+
+	// Users are going to be stumped by this one, so print
+	// out a verbose, user-freindly debug message to help
+	// them out.
+	std::stringstream ss;
+	ss << "Pattern is not connected! Found "
+	   << components.size() << " components:\n";
+	int cnt = 0;
+	for (const auto& comp : components)
+	{
+		ss << "Connected component " << cnt
+		   << " consists of ----------------: \n";
+		for (Handle h : comp) ss << h->toString();
+		cnt++;
+	}
+	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
 }
 
 /* ================================================================= */

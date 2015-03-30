@@ -47,10 +47,6 @@ public:
 	// Only get incomming sets that are in the attentional focus
 	IncomingSet get_incoming_set(Handle h);
 
-	// Does nothing, disconnected clauses are allowed
-	void validate_clauses(std::set<Handle>& vars,
-	                      std::vector<Handle>& clauses);
-
 	// Starts from atoms in the attentional focus, with the right types
 	void perform_search(PatternMatchEngine *pme,
 	                    std::set<Handle> &vars,
