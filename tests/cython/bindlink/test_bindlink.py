@@ -2,8 +2,7 @@ from unittest import TestCase
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle, types
 from opencog.bindlink import    stub_bindlink, bindlink, single_bindlink,\
-                                crisp_logic_bindlink, pln_bindlink,\
-                                validate_bindlink
+                                crisp_logic_bindlink, pln_bindlink
 import opencog.scheme_wrapper as scheme
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h
 
