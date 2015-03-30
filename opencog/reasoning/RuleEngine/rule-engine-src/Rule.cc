@@ -168,17 +168,16 @@ void Rule::set_cost(int p)
  *
  * @return a new Rule object with its own new BindLink
  */
-Rule Rule::standardize_apart()
+Rule Rule::gen_standardize_apart(AtomSpace* as)
 {
 	// clone the Rule
 	Rule st_ver = *this;
 	std::map<Handle, Handle> dict;
 
 	Handle st_bindlink = standardize_helper(rule_handle_, dict);
+	st_bindlink = as->addAtom(st_bindlink);
 
-	// hard setting rule_handle_ to avoid validating, since Handle cannot
-	// be compared until added to an AtomSpace
-	st_ver.rule_handle_ = st_bindlink;
+	st_ver.set_handle(st_bindlink);
 
 	return st_ver;
 }

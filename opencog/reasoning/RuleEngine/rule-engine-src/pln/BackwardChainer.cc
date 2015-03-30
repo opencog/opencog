@@ -87,28 +87,36 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
 
 		// TODO use all rules for found here.
 		// TODO need to add the rule to the atomspace to be useable
-		Rule stadardized_rule = select_rule(acceptable_rules).standardize_apart();
+		Rule standardized_rule = select_rule(acceptable_rules).gen_standardize_apart(_as);
 
 		//for later removal
-		_as->addAtom(stadardized_rule.get_handle());
 //		_bc_generated_rules.push_back(stadardized_rule);
 
-		HandleSeq output = stadardized_rule.get_implicand();
+		HandleSeq output = standardized_rule.get_implicand();
 
 		// check which output can be unified and add to history
 		for (Handle h : output)
 		{
 			map<Handle, HandleSeq> out;
 
-			if (not unify(hgoal, h, out))
+			if (not unify(h, hgoal, out))
 				continue;
+
+			logger().debug("[BackwardChainer] Found one implicand's output unifiable " + h->toShortString());
 
 			_inference_list.push_back(out);
 			break;
 		}
 
-		map<Handle, HandleSeq> solution = bc_rule(stadardized_rule);
+		logger().debug("[BackwardChainer] Before chaining on rule %s", standardized_rule.get_name().c_str());
+		logger().debug("[BackwardChainer] Inference history's size is %d", _inference_list.size());
+		print_inference_list();
+
+		map<Handle, HandleSeq> solution = bc_rule(standardized_rule);
 		_inference_list.push_back(solution);
+
+		logger().debug("[BackwardChainer] After chaining on rule %s", standardized_rule.get_name().c_str());
+		print_inference_list();
 
 		return ground_target_vars(hgoal, _inference_list);
 	}
@@ -150,6 +158,8 @@ map<Handle, HandleSeq> BackwardChainer::bc_rule(Rule& rule)
 	map<Handle, map<Handle, HandleSeq>> premise_var_ground_map;
 	UnorderedHandleSet evaluated_premises;
 
+	logger().debug("[BackwardChainer] Before looping rule's premises");
+
 	while (not visit_stack.empty())
 	{
 		Handle premise = visit_stack.top();
@@ -183,6 +193,8 @@ map<Handle, HandleSeq> BackwardChainer::bc_rule(Rule& rule)
 
 			continue;
 		}
+
+		logger().debug("[BackwardChainer] Backward chaining on sub-premises");
 
 		// if premise has no sub-premises (ie. not a logical condition), just
 		// backward chain on it
@@ -245,7 +257,10 @@ HandleSeq BackwardChainer::filter_grounded_experssions(Handle htarget)
 	logger().debug("QUERY-KB:\n" + hbind_link->toString());
 
 	BindLinkPtr bl(BindLinkCast(hbind_link));
-	bl->imply(_bcpm);
+	BCPatternMatch bcpm(_as);
+	bcpm.implicand = bl->get_implicand();
+
+	bl->imply(&bcpm);
 
 	_commons->clean_up_bind_link(hbind_link);
 
@@ -272,6 +287,7 @@ HandleSeq BackwardChainer::filter_grounded_experssions(Handle htarget)
  * XXX TODO unify UNORDERED_LINK
  * XXX TODO check unifying same variable twice
  * XXX TODO check VariableNode inside QuoteLink
+ * XXX TODO check Typed VariableNode
  * XXX TODO unify in both direction
  * XXX Should (Link (Node A)) be unifiable to (Node A))?  BC literature never
  * unify this way, but in AtomSpace context, (Link (Node A)) does contain (Node A)
@@ -322,7 +338,7 @@ bool BackwardChainer::unify(const Handle& htarget,
 		result[htarget].push_back(hmatch);
 	}
 
-	return true;
+	return not result.empty();
 }
 
 /**

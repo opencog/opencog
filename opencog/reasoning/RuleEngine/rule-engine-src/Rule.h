@@ -66,7 +66,7 @@ public:
 	HandleSeq get_implicand();
 	int get_cost();
 
-	Rule standardize_apart();
+	Rule gen_standardize_apart(AtomSpace* as);
 
 private:
 	Handle rule_handle_;
