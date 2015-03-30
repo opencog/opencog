@@ -130,8 +130,8 @@ class PatternMatchEngine
 		// Do the actual pattern search.
 		void match(PatternMatchCallback *,
 		           const std::set<Handle> &vars,
-		           std::vector<Handle> &clauses,
-		           std::vector<Handle> &negations);
+		           const std::vector<Handle> &clauses,
+		           const std::vector<Handle> &negations);
 
 		// Handy-dandy utilities
 		static void print_solution(const std::map<Handle, Handle> &vars,

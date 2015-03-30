@@ -79,8 +79,8 @@ IncomingSet AttentionalFocusCB::get_incoming_set(Handle h)
 
 void AttentionalFocusCB::perform_search(PatternMatchEngine *pme,
                                         const std::set<Handle> &vars,
-                                        std::vector<Handle> &clauses,
-                                        std::vector<Handle> &negations)
+                                        const std::vector<Handle> &clauses,
+                                        const std::vector<Handle> &negations)
 {
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by

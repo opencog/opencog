@@ -44,8 +44,8 @@ FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as) : DefaultPatternMatchCB(
  */
 void FuzzyPatternMatchCB::perform_search(PatternMatchEngine* pme,
                                          const std::set<Handle>& vars,
-                                         std::vector<Handle>& clauses,
-                                         std::vector<Handle>& negations)
+                                         const std::vector<Handle>& clauses,
+                                         const std::vector<Handle>& negations)
 {
     full_search(pme, clauses);
 }

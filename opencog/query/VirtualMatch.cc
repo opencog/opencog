@@ -85,8 +85,8 @@ class PMCGroundings : public PatternMatchCallback
 		}
 		void perform_search(PatternMatchEngine* pme,
 	                       const std::set<Handle> &vars,
-	                       std::vector<Handle> &clauses,
-	                       std::vector<Handle> &negations)
+	                       const std::vector<Handle> &clauses,
+	                       const std::vector<Handle> &negations)
 		{
 			_cb->perform_search(pme, vars, clauses, negations);
 		}

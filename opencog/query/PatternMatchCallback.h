@@ -240,8 +240,8 @@ class PatternMatchCallback
 		 */
 		virtual void perform_search(PatternMatchEngine *,
 		                            const std::set<Handle> &vars,
-		                            std::vector<Handle> &clauses,
-		                            std::vector<Handle> &negations) = 0;
+		                            const std::vector<Handle> &clauses,
+		                            const std::vector<Handle> &negations) = 0;
 };
 
 } // namespace opencog

@@ -1065,8 +1065,8 @@ void PatternMatchEngine::clear(void)
  */
 void PatternMatchEngine::match(PatternMatchCallback *cb,
                                const std::set<Handle> &vars,
-                               std::vector<Handle> &clauses,
-                               std::vector<Handle> &negations)
+                               const std::vector<Handle> &clauses,
+                               const std::vector<Handle> &negations)
 {
 	// Clear all state.
 	clear();
