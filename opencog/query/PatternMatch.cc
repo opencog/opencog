@@ -226,7 +226,7 @@ void PatternMatch::do_imply (const Handle& himplication,
                              Implicator &impl)
 {
 	LinkPtr limp(LinkCast(himplication));
-	OC_ASSERT(limp != NULL, "Bad implicaiton link");
+	OC_ASSERT(limp != NULL, "Bad implication link");
 
 	Handle hclauses = limp->getOutgoingAtom(0);
 

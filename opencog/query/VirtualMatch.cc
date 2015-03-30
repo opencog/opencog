@@ -28,8 +28,7 @@
 
 #include "Instantiator.h"
 #include "PatternMatch.h"
-#include "DefaultPatternMatchCB.h"
-#include "CrispLogicPMCB.h"
+#include "PatternMatchCallback.h"
 
 using namespace opencog;
 
@@ -147,10 +146,8 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 		// these temporaries.  The atomspace is blown away when we finish.
 		//
 		// XXX FIXME ... I suspect the atomspace initialzation is pretty
-		// heavyweight.  Most recently, the AtomTable create async write
-		// queues and forks 4 threads. So we init and destroy 4 threads
-		// every time we hit this.  Will need to explore a more
-		// lightweight approach someday ...
+		// heavyweight.  Will need to explore a more lightweight approach
+		// someday ...
 		AtomSpace aspace;
 		Instantiator instor(&aspace);
 
