@@ -153,39 +153,4 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmc)
  * method repeatedly on them, until one is exhausted.
  */
 
-/// Deprecated; do not use in new code.
-/// This is used only in test cases.
-void opencog::do_imply (const Handle& himplication,
-                        Implicator &impl)
-{
-	LinkPtr limp(LinkCast(himplication));
-	OC_ASSERT(limp != NULL, "Bad implication link");
-
-	Handle hclauses = limp->getOutgoingAtom(0);
-
-	// Extract the variables; the were not specified.
-	FindVariables fv(VARIABLE_NODE);
-	fv.find_vars(hclauses);
-
-	HandleSeq vars;
-	for (Handle h : fv.varset)
-	{
-		vars.push_back(h);
-	}
-
-	// Stuff the variables into a proper variable list.
-	Handle hvars(createLink(VARIABLE_LIST, vars));
-
-	HandleSeq oset;
-	oset.push_back(hvars);
-	oset.push_back(himplication);
-
-	BindLinkPtr bl(createBindLink(oset));
-
-	// Now perform the search.
-	impl.implicand = limp->getOutgoingAtom(1);
-
-	bl->imply(&impl);
-}
-
 /* ===================== END OF FILE ===================== */
