@@ -1,8 +1,10 @@
 
-                   AtomSpace Utilities README
-                   --------------------------
+                   Atom Utilities README
+                   ---------------------
 
-The README contains miscellaneous notes about the atomspace utilities. 
+The README contains miscellaneous notes about the atoms
+utilities. Unlike AtomSpaceUtils those functions do not require a
+pointer to an AtomSpace.
 
 ======================================================================
 

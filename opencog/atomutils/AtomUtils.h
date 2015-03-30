@@ -59,6 +59,25 @@ UnorderedHandleSet getAllUniqueNodes(Handle h);
 HandleSeq getNeighbors(const Handle&, bool fanin=true, bool fanout=true,
                        Type linkType=LINK, bool subClasses=true);
 
+
+/**
+ * Return all atoms connected to h up to a given distance. Both
+ * incomings and outgoings are considered (unlike getNeighbors).
+ *
+ * @param h     the center atom
+ * @param dist  the maximum distance
+ * @return      an UnorderedHandleSet of neighbors
+ */
+UnorderedHandleSet get_distant_neighbors(const Handle& h, unsigned dist = 1);
+
+/**
+ * Helper for getDistantNeighbors. Warning: it includes h in the
+ * results.
+ */
+void get_distant_neighbors_rec(const Handle& h, UnorderedHandleSet& results,
+                               unsigned dist = 1);
+
+
 /** @}*/
 }
 
