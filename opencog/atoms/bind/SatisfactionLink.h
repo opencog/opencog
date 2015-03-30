@@ -56,8 +56,13 @@ protected:
 	                      std::vector<Handle>& clauses);
 
 	void check_connectivity(const std::set<std::vector<Handle>>&);
-public:
+
 	SatisfactionLink(Type, const HandleSeq&,
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
+public:
+	SatisfactionLink(const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 

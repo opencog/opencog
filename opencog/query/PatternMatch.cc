@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/bind/BindLink.h>
+#include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/atomutils/PatternUtils.h>
 #include <opencog/util/Logger.h>
 
@@ -71,22 +72,13 @@ void opencog::match(PatternMatchCallback *cb,
                     const Handle& hvarbles,
                     const Handle& hclauses)
 {
-	// Empty implicand...
-	HandleSeq empty;
-	Handle hcand(createLink(LIST_LINK, empty));
-
 	HandleSeq oset;
+	oset.push_back(hvarbles);
 	oset.push_back(hclauses);
-	oset.push_back(hcand);
-	Handle himpl(createLink(IMPLICATION_LINK, oset));
 
-	HandleSeq boset;
-	boset.push_back(hvarbles);
-	boset.push_back(himpl);
+	SatisfactionLinkPtr bl(createSatisfactionLink(oset));
 
-	BindLinkPtr bl(createBindLink(BIND_LINK, boset));
-
-	bl->imply(cb);
+	bl->satisfy(cb);
 }
 
 /* ================================================================= */
@@ -205,7 +197,7 @@ void opencog::do_imply (const Handle& himplication,
 	oset.push_back(hvars);
 	oset.push_back(himplication);
 
-	BindLinkPtr bl(createBindLink(BIND_LINK, oset));
+	BindLinkPtr bl(createBindLink(oset));
 
 	// Now perform the search.
 	impl.implicand = limp->getOutgoingAtom(1);
