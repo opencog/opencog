@@ -27,14 +27,13 @@
 #include <set>
 
 #include <opencog/atomspace/Handle.h>
-#include <opencog/atoms/bind/BindLink.h>
 #include <opencog/query/Implicator.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/Satisfier.h>
 
 namespace opencog {
 
-class PatternMatch : public BindLink
+class PatternMatch
 {
 	private:
 		// See PatternMatch.cc for comments

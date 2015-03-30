@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atomutils/PatternUtils.h>
 #include <opencog/util/Logger.h>
 
@@ -29,7 +30,7 @@
 using namespace opencog;
 
 PatternMatch::PatternMatch(void)
-	: BindLink(BIND_LINK, HandleSeq()), _used(false) {}
+	: _used(false) {}
 
 /// See the documentation for do_match() to see what this function does.
 /// This is just a convenience wrapper around do_match().
@@ -37,27 +38,22 @@ void PatternMatch::match(PatternMatchCallback *cb,
                          const Handle& hvarbles,
                          const Handle& hclauses)
 {
-	// Types must be as expected
-	Type tvarbles = hvarbles->getType();
-	if (VARIABLE_LIST != tvarbles and LIST_LINK != tvarbles)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected VariableList for the bound variable list.");
+	// Empty implicand...
+	HandleSeq empty;
+	Handle hcand(createLink(LIST_LINK, empty));
 
-	Type tclauses = hclauses->getType();
-	if (AND_LINK != tclauses)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected AndLink for clause list.");
+	HandleSeq oset;
+	oset.push_back(hclauses);
+	oset.push_back(hcand);
+	Handle himpl(createLink(IMPLICATION_LINK, oset));
 
-	// Unpack and validate the variable declarations
-	_vardecl = hvarbles;
-	validate_vardecl(_vardecl);
+	HandleSeq boset;
+	boset.push_back(hvarbles);
+	boset.push_back(himpl);
 
-	// Unpack and validate the clauses
-	_hclauses = hclauses;
-	unbundle_clauses(_hclauses);
+	BindLinkPtr bl(createBindLink(BIND_LINK, boset));
 
-	validate_clauses(_varset, _clauses);
-	do_match(cb, _varset, _virtuals, _components);
+	do_match(cb, bl->_varset, bl->_virtuals, bl->_components);
 }
 
 /* ================================================================= */
@@ -204,24 +200,34 @@ void PatternMatch::do_satlink (const Handle& hsatlink,
 void PatternMatch::do_imply (const Handle& himplication,
                              Implicator &impl)
 {
-	Type timplication = himplication->getType();
-	if (IMPLICATION_LINK != timplication)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an ImplicationLink, got: %d", timplication);
+	LinkPtr limp(LinkCast(himplication));
+	OC_ASSERT(limp != NULL, "Bad implicaiton link");
 
-	validate_body(himplication);
-	unbundle_clauses(_hclauses);
+	Handle hclauses = limp->getOutgoingAtom(0);
 
 	// Extract the variables; the were not specified.
 	FindVariables fv(VARIABLE_NODE);
-	fv.find_vars(_hclauses);
-	_varset = fv.varset;
+	fv.find_vars(hclauses);
+
+	HandleSeq vars;
+	for (Handle h : fv.varset)
+	{
+		vars.push_back(h);
+	}
+
+	// Stuff the variables into a proper variable list.
+	Handle hvars(createLink(VARIABLE_LIST, vars));
+
+	HandleSeq oset;
+	oset.push_back(hvars);
+	oset.push_back(himplication);
+
+	BindLinkPtr bl(createBindLink(BIND_LINK, oset));
 
 	// Now perform the search.
-	impl.implicand = _implicand;
+	impl.implicand = limp->getOutgoingAtom(1);
 
-	validate_clauses(_varset, _clauses);
-	do_match(&impl, _varset, _virtuals, _components);
+	do_match(&impl, bl->_varset, bl->_virtuals, bl->_components);
 }
 
 /* ===================== END OF FILE ===================== */
