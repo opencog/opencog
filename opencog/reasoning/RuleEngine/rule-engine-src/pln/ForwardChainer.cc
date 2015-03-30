@@ -110,7 +110,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         fcmem_.cur_rule_ = r;
 
         //!Apply rule.
-        log_->info("Applying chosen rule", r->get_name().c_str());
+        log_->info("Applying chosen rule %s", r->get_name().c_str());
         HandleSeq product = fcb.apply_rule(fcmem_);
         log_->info("Results of rule application");
         for (auto p : product)
