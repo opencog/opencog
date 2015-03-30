@@ -33,7 +33,7 @@
 #endif
 #include <unistd.h>
 
-#include <opencog/atomutils/AtomSpaceUtils.h>
+#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
