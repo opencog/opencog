@@ -36,7 +36,6 @@ class PatternUTest: public CxxTest::TestSuite
 {
 	private:
 		PatternMatchEngine pme;
-		PatternMatch pm;
 		AtomSpace *as;
 
 		// These handles are documented below.
@@ -312,7 +311,7 @@ void PatternUTest::test_two_links(void)
 
 	// Test the non-std::vector interface also.
 	pmcb.found = 0;
-	pm.match(&pmcb, hv, han);
+	match(&pmcb, hv, han);
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 2);
 
 	logger().debug("END TEST: %s", __FUNCTION__);

@@ -207,11 +207,4 @@ void SatisfactionLink::check_connectivity(
 	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
 }
 
-/* ================================================================= */
-
-void SatisfactionLink::satisfy(PatternMatchCallback* pmc)
-{
-	//PatternMatch::do_match(pmc, _varset, _virtuals, _components);
-}
-
 /* ===================== END OF FILE ===================== */

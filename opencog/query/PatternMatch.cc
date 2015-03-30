@@ -29,11 +29,47 @@
 
 using namespace opencog;
 
+/* ================================================================= */
+/**
+ * Evaluate an ImplicationLink embedded in a BindLink
+ *
+ * Given a BindLink containing variable declarations and an
+ * ImplicationLink, this method will "evaluate" the implication,
+ * matching
+ * the predicate, and creating a grounded implicand, assuming the
+ * predicate can be satisfied. Thus, for example, given the structure
+ *
+ *    BindLink
+ *       ListLink
+ *          VariableNode "$var0"
+ *          VariableNode "$var1"
+ *       ImplicationLink
+ *          AndList
+ *             etc ...
+ *
+ * Evaluation proceeds as decribed in the "do_imply()" function below.
+ * The whole point of the BindLink is to do nothing more than
+ * to indicate the bindings of the variables, and (optionally) limit
+ * the types of acceptable groundings for the variables.
+ */
+void BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
+{
+   if (check_conn) check_connectivity(_components);
+   PatternMatch::do_match(pmc, _varset, _virtuals, _components);
+}
+
+void SatisfactionLink::satisfy(PatternMatchCallback* pmc)
+{
+   PatternMatch::do_match(pmc, _varset, _virtuals, _components);
+}
+
+/* ================================================================= */
+
 /// See the documentation for do_match() to see what this function does.
 /// This is just a convenience wrapper around do_match().
-void PatternMatch::match(PatternMatchCallback *cb,
-                         const Handle& hvarbles,
-                         const Handle& hclauses)
+void opencog::match(PatternMatchCallback *cb,
+                    const Handle& hvarbles,
+                    const Handle& hclauses)
 {
 	// Empty implicand...
 	HandleSeq empty;
@@ -144,8 +180,8 @@ void PatternMatch::match(PatternMatchCallback *cb,
 
 /// Deprecated; do not use in new code.
 /// This is used only in test cases.
-void PatternMatch::do_imply (const Handle& himplication,
-                             Implicator &impl)
+void opencog::do_imply (const Handle& himplication,
+                        Implicator &impl)
 {
 	LinkPtr limp(LinkCast(himplication));
 	OC_ASSERT(limp != NULL, "Bad implication link");

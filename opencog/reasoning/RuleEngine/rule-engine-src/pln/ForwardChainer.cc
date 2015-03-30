@@ -133,14 +133,12 @@ void ForwardChainer::do_pm(const Handle& hsource,const UnorderedHandleSet& var_n
 {
     DefaultImplicator impl(as_);
     impl.implicand = hsource;
-    PatternMatch pm;
-    PatternMatchEngine pme;
     HandleSeq vars;
     for (auto h : var_nodes)
         vars.push_back(h);
-    Handle hvar_list = as_->addLink(LIST_LINK, vars);
+    Handle hvar_list = as_->addLink(VARIABLE_LIST, vars);
     Handle hclause = as_->addLink(AND_LINK, hsource);
-    pm.match(&impl, hvar_list, hclause);
+    match(&impl, hvar_list, hclause);
 
     //update result
     fcmem_.add_rules_product(0, impl.result_list);
