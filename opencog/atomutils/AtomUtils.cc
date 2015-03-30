@@ -102,16 +102,12 @@ HandleSeq getNeighbors(const Handle& h, bool fanin,
     return answer;
 }
 
-UnorderedHandleSet get_distant_neighbors(const Handle& h, unsigned dist)
-{
-    UnorderedHandleSet results;
-    get_distant_neighbors_rec(h, results, dist);
-    results.erase(h);
-    return results;
-}
-
-void get_distant_neighbors_rec(const Handle& h, UnorderedHandleSet& res,
-                               unsigned dist)
+/* Tail-recursive helper function. We mark it static, so that
+ * gcc can optimize this, i.e. call it without buying the stack
+ * frame. */
+static void get_distant_neighbors_rec(const Handle& h,
+                                      UnorderedHandleSet& res,
+                                      unsigned dist)
 {
 	res.insert(h);
 
@@ -133,5 +129,13 @@ void get_distant_neighbors_rec(const Handle& h, UnorderedHandleSet& res,
         }
     }
 }
-	
+
+UnorderedHandleSet get_distant_neighbors(const Handle& h, unsigned dist)
+{
+    UnorderedHandleSet results;
+    get_distant_neighbors_rec(h, results, dist);
+    results.erase(h);
+    return results;
+}
+
 }

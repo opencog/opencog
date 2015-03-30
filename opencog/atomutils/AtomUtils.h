@@ -70,14 +70,6 @@ HandleSeq getNeighbors(const Handle&, bool fanin=true, bool fanout=true,
  */
 UnorderedHandleSet get_distant_neighbors(const Handle& h, unsigned dist = 1);
 
-/**
- * Helper for getDistantNeighbors. Warning: it includes h in the
- * results.
- */
-void get_distant_neighbors_rec(const Handle& h, UnorderedHandleSet& results,
-                               unsigned dist = 1);
-
-
 /** @}*/
 }
 
