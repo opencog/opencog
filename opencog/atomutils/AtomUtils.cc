@@ -102,4 +102,36 @@ HandleSeq getNeighbors(const Handle& h, bool fanin,
     return answer;
 }
 
+UnorderedHandleSet get_distant_neighbors(const Handle& h, unsigned dist)
+{
+    UnorderedHandleSet results;
+    get_distant_neighbors_rec(h, results, dist);
+    results.erase(h);
+    return results;
+}
+
+void get_distant_neighbors_rec(const Handle& h, UnorderedHandleSet& res,
+                               unsigned dist)
+{
+	res.insert(h);
+
+	// Recursive calls
+	if (dist > 0) {
+        // 1. Fetch incomings
+        for (const LinkPtr& in_l : h->getIncomingSet()) {
+            Handle in_h = in_l->getHandle();
+            if (res.find(in_h) == res.cend()) // Do not re-explore
+                get_distant_neighbors_rec(in_h, res, dist - 1);
+        }
+        // 2. Fetch outgoings
+        LinkPtr link = LinkCast(h);
+        if (link) {
+	        for (const Handle& out_h : link->getOutgoingSet()) {
+		        if (res.find(out_h) == res.cend()) // Do not re-explore
+			        get_distant_neighbors_rec(out_h, res, dist - 1);
+	        }
+        }
+    }
+}
+	
 }
