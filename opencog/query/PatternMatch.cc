@@ -62,17 +62,6 @@ void PatternMatch::match(PatternMatchCallback *cb,
 
 /* ================================================================= */
 /**
- * Run the full validation suite.
- */
-void PatternMatch::validate(const Handle& hbindlink)
-{
-	BindLinkPtr bl(BindLinkCast(hbindlink));
-	if (NULL == bl)
-		createBindLink(*LinkCast(hbindlink));
-}
-
-/* ================================================================= */
-/**
  * Evaluate an ImplicationLink embedded in a BindLink
  *
  * Given a BindLink containing variable declarations and an

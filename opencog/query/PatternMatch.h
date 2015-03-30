@@ -56,9 +56,6 @@ class PatternMatch : public BindLink
 	public:
 		PatternMatch(void);
 
-		// See PatternMatch.cc for comments
-		void validate(const Handle&);
-
 		void match(PatternMatchCallback *,
 		           const Handle& vars,
 		           const Handle& clauses);

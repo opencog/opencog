@@ -103,9 +103,6 @@ void PatternSCM::init_in_module(void*)
    // Fuzzy matching.
 	_binders.push_back(new PatternWrap(find_approximate_match, "cog-fuzzy-match"));
 
-	// Validate the bindlink for syntax correctness
-	_binders.push_back(new PatternWrap(validate_bindlink, "cog-validate-bindlink"));
-
 	// A bindlink that does not return a value
 	_binders.push_back(new PatternWrap(satisfaction_link, "cog-satisfy"));
 }
