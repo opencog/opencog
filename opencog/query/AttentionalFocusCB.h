@@ -39,13 +39,13 @@ public:
 		DefaultPatternMatchCB(as) {}
 
 	// Only match nodes if they are in the attentional focus
-	bool node_match(Handle&, Handle&);
+	bool node_match(const Handle&, const Handle&);
 
 	// Only match links if they are in the attentional focus
-	bool link_match(LinkPtr&, LinkPtr&);
+	bool link_match(const LinkPtr&, const LinkPtr&);
 
 	// Only get incomming sets that are in the attentional focus
-	IncomingSet get_incoming_set(Handle h);
+	IncomingSet get_incoming_set(const Handle&);
 
 	// Starts from atoms in the attentional focus, with the right types
 	void perform_search(PatternMatchEngine *pme,

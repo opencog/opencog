@@ -32,19 +32,19 @@ using namespace opencog;
    #define dbgprt(f, varargs...)
 #endif
 
-bool AttentionalFocusCB::node_match(Handle& node1, Handle& node2)
+bool AttentionalFocusCB::node_match(const Handle& node1, const Handle& node2)
 {
 	return node1 == node2 and
 		node2->getSTI() > _as->getAttentionalFocusBoundary();
 }
 
-bool AttentionalFocusCB::link_match(LinkPtr& lpat, LinkPtr& lsoln)
+bool AttentionalFocusCB::link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
 {
 	return DefaultPatternMatchCB::link_match(lpat, lsoln)
 		and lsoln->getSTI() > _as->getAttentionalFocusBoundary();
 }
 
-IncomingSet AttentionalFocusCB::get_incoming_set(Handle h)
+IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 {
 	const IncomingSet &incoming_set = h->getIncomingSet();
 
