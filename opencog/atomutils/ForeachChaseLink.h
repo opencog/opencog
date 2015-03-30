@@ -37,7 +37,7 @@
 #ifndef _OPENCOG_LINK_CHASE_H
 #define _OPENCOG_LINK_CHASE_H
 
-#include <opencog/atomutils/Foreach.h>
+#include <opencog/atomspace/Link.h>
 
 namespace opencog
 {
@@ -68,7 +68,7 @@ namespace opencog
  *
  * class MyClass
  * {
- *	bool my_callback(Handle h)
+ *	bool my_callback(const Handle& h)
  *	{
  *	   printf("Hello world, found %ul\n", (unsigned long) h);
  *	}
@@ -106,7 +106,8 @@ public:
 	 * The callback should return false to search for
 	 * more matches, or return true to halt the search.
 	 */
-	inline bool follow_link(Handle h, Type ltype, int from, int to, bool (T::*cb)(Handle), T *data)
+	inline bool follow_link(const Handle& h, Type ltype,
+	              int from, int to, bool (T::*cb)(const Handle&), T *data)
 	{
 		user_callback = cb;
 		user_callback_lh = NULL;
@@ -117,22 +118,24 @@ public:
 	 * Same as above, except the callback is passed the handle of
 	 * the link itself in the second arg.
 	 */
-	inline bool follow_link_lh(Handle h, Type ltype, int from, int to,
-							   bool (T::*cb)(Handle, Handle), T *data)
+	inline bool follow_link_lh(const Handle& h, Type ltype, int from, int to,
+							   bool (T::*cb)(const Handle&, const Handle&), T *data)
 	{
 		user_callback = NULL;
 		user_callback_lh = cb;
 		return do_follow_link (h, ltype, from, to, data);
 	}
 
-	inline bool follow_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
+	inline bool follow_unordered_binary_link(const Handle& h, Type ltype,
+	                                         bool (T::*cb)(const Handle&), T *data)
 	{
 		user_callback = cb;
 		user_callback_lh = NULL;
 		return do_follow_unordered_binary_link(h, ltype, data);
 	}
 
-	inline bool follow_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
+	inline bool follow_unordered_binary_link(const Handle& h, Type ltype,
+	                        bool (T::*cb)(const Handle&, const Handle&), T *data)
 	{
 		user_callback = NULL;
 		user_callback_lh = cb;
@@ -146,12 +149,12 @@ private:
 	int position_from;
 	int position_to;
 	int cnt;
-	bool (PrivateUseOnlyChaseLink::*endpoint_matcher)(Handle);
-	bool (T::*user_callback)(Handle);
-	bool (T::*user_callback_lh)(Handle, Handle);
+	bool (PrivateUseOnlyChaseLink::*endpoint_matcher)(const Handle&);
+	bool (T::*user_callback)(const Handle&);
+	bool (T::*user_callback_lh)(const Handle&, const Handle&);
 	T *user_data;
 
-	inline bool do_follow_link(Handle h, Type ltype, int from, int to, T *data)
+	inline bool do_follow_link(const Handle& h, Type ltype, int from, int to, T *data)
 	{
 		// Look for incoming links that are of the given type.
 		// Then grab the thing that they link to.
@@ -162,11 +165,11 @@ private:
 		position_to = to;
 		user_data = data;
 		endpoint_matcher = &PrivateUseOnlyChaseLink::pursue_link;
-		bool rc = foreach_incoming_handle(h, &PrivateUseOnlyChaseLink::find_link_type, this);
+		bool rc = h->foreach_incoming(&PrivateUseOnlyChaseLink::find_link_type, this);
 		return rc;
 	}
 
-	inline bool do_follow_unordered_binary_link(Handle h, Type ltype, T *data)
+	inline bool do_follow_unordered_binary_link(const Handle& h, Type ltype, T *data)
 	{
 		// Look for incoming links that are of the given type.
 		// Then grab the thing that they link to.
@@ -175,14 +178,14 @@ private:
 		to_atom = Handle::UNDEFINED;
 		user_data = data;
 		endpoint_matcher = &PrivateUseOnlyChaseLink::pursue_unordered_link;
-		bool rc = foreach_incoming_handle(h, &PrivateUseOnlyChaseLink::find_link_type, this);
+		bool rc = h->foreach_incoming(&PrivateUseOnlyChaseLink::find_link_type, this);
 		return rc;
 	}
 
 	/**
 	 * Check for link of the desired type, then loop over its outgoing set.
 	 */
-	inline bool find_link_type(Handle link_h)
+	inline bool find_link_type(const Handle& link_h)
 	{
 		// Make sure the link is of the specified link type
 		if (link_type != link_h->getType()) return false;
@@ -190,7 +193,7 @@ private:
 		cnt = -1;
 		to_atom = Handle::UNDEFINED;
 		// foreach_outgoing_handle(link_h, PrivateUseOnlyChaseLink::endpoint_matcher, this);
-		foreach_outgoing_handle(LinkCast(link_h), endpoint_matcher, this);
+		LinkCast(link_h)->foreach_outgoing(endpoint_matcher, this);
 
 		bool rc = false;
 		if (Handle::UNDEFINED != to_atom)
@@ -203,7 +206,7 @@ private:
 		return rc;
 	}
 
-	inline bool pursue_link(Handle h)
+	inline bool pursue_link(const Handle& h)
 	{
 		cnt ++;
 
@@ -227,7 +230,7 @@ private:
 		return false;
 	}
 
-	inline bool pursue_unordered_link(Handle h)
+	inline bool pursue_unordered_link(const Handle& h)
 	{
 		// There are only two atoms in a binary link. The one that is
 		// not the from_atom is the one we are looking for.
@@ -252,7 +255,8 @@ private:
  * more matches, or return true to halt the search.
  */
 template <typename T>
-inline bool foreach_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
+inline bool foreach_binary_link(const Handle& h, Type ltype,
+                                bool (T::*cb)(const Handle&), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_link(h, ltype, 0, 1, cb, data);
@@ -263,7 +267,8 @@ inline bool foreach_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *
  * The handle of the link itself is passed in the second argument.
  */
 template <typename T>
-inline bool foreach_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
+inline bool foreach_binary_link(const Handle& h, Type ltype,
+              bool (T::*cb)(const Handle&, const Handle&), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_link_lh(h, ltype, 0, 1, cb, data);
@@ -276,7 +281,8 @@ inline bool foreach_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Hand
  * reverse direction.
  */
 template <typename T>
-inline bool foreach_reverse_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
+inline bool foreach_reverse_binary_link(const Handle& h, Type ltype,
+                             bool (T::*cb)(const Handle&), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_link(h, ltype, 1, 0, cb, data);
@@ -287,7 +293,8 @@ inline bool foreach_reverse_binary_link(Handle h, Type ltype, bool (T::*cb)(Hand
  * The handle of the link itself is passed in the second argument.
  */
 template <typename T>
-inline bool foreach_reverse_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
+inline bool foreach_reverse_binary_link(const Handle& h, Type ltype,
+                  bool (T::*cb)(const Handle&, const Handle&), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_link_lh(h, ltype, 1, 0, cb, data);
@@ -308,7 +315,8 @@ inline bool foreach_reverse_binary_link(Handle h, Type ltype, bool (T::*cb)(Hand
  * more matches, or return true to halt the search.
  */
 template <typename T>
-inline bool foreach_link(Handle h, Type ltype, int from, int to, bool (T::*cb)(Handle), T *data)
+inline bool foreach_link(const Handle& h, Type ltype, int from, int to,
+                         bool (T::*cb)(const Handle&), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_link(h, ltype, from, to, cb, data);
@@ -319,8 +327,8 @@ inline bool foreach_link(Handle h, Type ltype, int from, int to, bool (T::*cb)(H
  * the link itself in the second arg.
  */
 template <typename T>
-inline bool foreach_link(Handle h, Type ltype, int from, int to,
-						 bool (T::*cb)(Handle, Handle), T *data)
+inline bool foreach_link(const Handle& h, Type ltype, int from, int to,
+						 bool (T::*cb)(const Handle&, const Handle&), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_link_lh(h, ltype, from, to, cb, data);
@@ -330,14 +338,16 @@ inline bool foreach_link(Handle h, Type ltype, int from, int to,
  * foreach_unordered_binary_link - chase link from one to other atom.
  */
 template <typename T>
-inline bool foreach_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
+inline bool foreach_unordered_binary_link(const Handle& h, Type ltype,
+                                     bool (T::*cb)(const Handle&), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_unordered_binary_link(h, ltype, cb, data);
 }
 
 template <typename T>
-inline bool foreach_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
+inline bool foreach_unordered_binary_link(const Handle& h, Type ltype,
+                      bool (T::*cb)(const Handle&, const Handle&), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_unordered_binary_link(h, ltype, cb, data);

@@ -66,7 +66,7 @@ class TestPMCB :
 	Handle anch;
 	TestPMCB(AtomSpace* as) : DefaultPatternMatchCB(as), lcnt(0), scnt(0) {}
 
-	virtual bool clause_match(Handle& pattrn, Handle& grnd)
+	virtual bool clause_match(const Handle& pattrn, const Handle& grnd)
 	{
 		lcnt ++;
 		// match the initial anchor clause, but reject the rest.

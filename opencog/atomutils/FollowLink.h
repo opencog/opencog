@@ -17,7 +17,6 @@
 #define _OPENCOG_FOLLOW_LINK_H
 
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomutils/Foreach.h>
 
 namespace opencog
 {
@@ -39,17 +38,17 @@ public:
 	 * and that its binary.
 	 * Return a pointer to where the link is going.
 	 */
-	inline Handle follow_binary_link(Handle h, Type ltype)
+	inline Handle follow_binary_link(const Handle& h, Type ltype)
 	{
 		return follow_link(h, ltype, 0, 1);
 	}
 
-	inline Handle backtrack_binary_link(Handle h, Type ltype)
+	inline Handle backtrack_binary_link(const Handle& h, Type ltype)
 	{
 		return follow_link(h, ltype, 1, 0);
 	}
 
-	inline Handle follow_link(Handle h, Type ltype, int from, int to)
+	inline Handle follow_link(const Handle& h, Type ltype, int from, int to)
 	{
 		// Look for incoming links that are of the given type.
 		// Then grab the thing that they link to.
@@ -58,7 +57,7 @@ public:
 		to_atom = Handle::UNDEFINED;
 		position_from = from;
 		position_to = to;
-		foreach_incoming_handle(h, &FollowLink::find_link_type, this);
+		h->foreach_incoming(&FollowLink::find_link_type, this);
 		return to_atom;
 	}
 
@@ -73,7 +72,7 @@ private:
 	/**
 	 * Find the (first!, assumed only!?) link of desired type.
 	 */
-	inline bool find_link_type(Handle h)
+	inline bool find_link_type(const Handle& h)
 	{
 		// Make sure that the link is of the desired type.
 		if (link_type != h->getType()) return false;
@@ -81,12 +80,12 @@ private:
 		cnt = -1;
 		to_atom = Handle::UNDEFINED;
 		LinkPtr l(LinkCast(h));
-		if (l) foreach_outgoing_handle(l, &FollowLink::pursue_link, this);
+		if (l) l->foreach_outgoing(&FollowLink::pursue_link, this);
 		if (to_atom != Handle::UNDEFINED) return true;
 		return false;
 	}
 
-	inline bool pursue_link(Handle h)
+	inline bool pursue_link(const Handle& h)
 	{
 		cnt ++;
 

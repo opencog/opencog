@@ -58,7 +58,7 @@ class CrispLogicPMCB :
 		 * Return "true" to accept a clause, and return "false" to
 		 * reject it.
 		 */
-		virtual bool clause_match(Handle& pattrn, Handle& grnd)
+		virtual bool clause_match(const Handle& pattrn, const Handle& grnd)
 		{
 			TruthValuePtr tv(grnd->getTruthValue());
 			// printf (">>>>>>>> clause match tv=%f\n", tv.getMean());
@@ -76,7 +76,7 @@ class CrispLogicPMCB :
 		 * As usual, return "true" to accept a clause, and return "false" to
 		 * reject it.
 		 */
-		virtual bool optional_clause_match(Handle& pattrn, Handle& grnd)
+		virtual bool optional_clause_match(const Handle& pattrn, const Handle& grnd)
 		{
 			// printf (">>>>>>>>>> hello optional term!! %p\n", grnd);
 			if (Handle::UNDEFINED == grnd) return true;
@@ -85,7 +85,7 @@ class CrispLogicPMCB :
 			return tv->getMean() < 0.5;
 		}
 
-		virtual bool link_match(LinkPtr& lpat, LinkPtr& lsoln)
+		virtual bool link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
 		{
 			Type pattype = lpat->getType();
 			if (SEQUENTIAL_AND_LINK == pattype) _in_seq_and = true;
@@ -101,7 +101,7 @@ class CrispLogicPMCB :
 			return pattype == soltype;
 		}
 
-		virtual bool post_link_match(LinkPtr& pat_link, LinkPtr& gnd_link)
+		virtual bool post_link_match(const LinkPtr& pat_link, const LinkPtr& gnd_link)
 		{
 			if (not _in_seq_and) return true;
 
@@ -131,8 +131,8 @@ class CrispLogicPMCB :
 
 		virtual void perform_search(PatternMatchEngine* pme,
 		                            const std::set<Handle> &vars,
-		                            std::vector<Handle> &clauses,
-		                            std::vector<Handle> &negations)
+		                            const std::vector<Handle> &clauses,
+		                            const std::vector<Handle> &negations)
 		{
 			// Extract the GPN's. We will need these during the search.
 			_in_seq_and = false;

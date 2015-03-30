@@ -21,23 +21,23 @@ class EdgeThin
 	private:
 		AtomSpace *atom_space;
 		int prune_count;
-		bool prune_sense(Handle, Handle);
-		bool prune_word(Handle);
+		bool prune_sense(const Handle&, const Handle&);
+		bool prune_word(const Handle&);
 
 		int sense_count;
-		bool count_sense(Handle, Handle);
+		bool count_sense(const Handle&, const Handle&);
 
 		std::list<Handle> sense_list;
-		bool make_sense_list(Handle, Handle);
-		bool delete_sim(Handle);
+		bool make_sense_list(const Handle&, const Handle&);
+		bool delete_sim(const Handle&);
 
 		int keep;
 		int edge_count;
-		bool thin_word(Handle);
+		bool thin_word(const Handle&);
 	public:
 		void set_atom_space(AtomSpace *);
-		void thin_parse(Handle, int);
-		void prune_parse(Handle);
+		void thin_parse(const Handle&, int);
+		void prune_parse(const Handle&);
 };
 
 }

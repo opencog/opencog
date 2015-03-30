@@ -23,15 +23,15 @@ class SenseCache
 		AtomSpace *atom_space;
 		Handle match_sense;
 		Handle found_link;
-		bool find_sense(Handle, Handle);
+		bool find_sense(const Handle&, const Handle&);
 
 	public:
 		SenseCache(void);
 		~SenseCache();
 
 		void set_atom_space(AtomSpace *);
-		TruthValuePtr similarity(Handle, Handle);
-		void set_similarity(Handle, Handle, TruthValuePtr);
+		TruthValuePtr similarity(const Handle&, const Handle&);
+		void set_similarity(const Handle&, const Handle&, TruthValuePtr);
 };
 
 } // namespace opencog

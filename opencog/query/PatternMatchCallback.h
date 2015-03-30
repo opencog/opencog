@@ -51,7 +51,7 @@ class PatternMatchCallback
 		 * Return true if the nodes match, else return
 		 * false. (i.e. return false if mis-match).
 		 */
-		virtual bool node_match(Handle& node1, Handle& node2) = 0;
+		virtual bool node_match(const Handle& node1, const Handle& node2) = 0;
 
 		/**
 		 * Called when a variable in the template pattern
@@ -62,7 +62,7 @@ class PatternMatchCallback
 		 * Return true if the grouding is acceptable, else
 		 * return false. (i.e. return false if mis-match).
 		 */
-		virtual bool variable_match(Handle& node1, Handle& node2) = 0;
+		virtual bool variable_match(const Handle& node1, const Handle& node2) = 0;
 
 		/**
 		 * Called right before link in the template pattern
@@ -89,7 +89,7 @@ class PatternMatchCallback
 		 * type, and to proceed with the search, or cut it
 		 * off, based on these values.
 		 */
-		virtual bool link_match(LinkPtr& link1, LinkPtr& link2) = 0;
+		virtual bool link_match(const LinkPtr& link1, const LinkPtr& link2) = 0;
 
 		/**
 		 * Called after a candidate grounding has been found
@@ -104,7 +104,7 @@ class PatternMatchCallback
 		 * the candidate grounding, or to reject it for some
 		 * reason.
 		 */
-		virtual bool post_link_match(LinkPtr& link1, LinkPtr& link2)
+		virtual bool post_link_match(const LinkPtr& link1, const LinkPtr& link2)
 		{
 			return true; // Accept the match, by default.
 		}
@@ -138,7 +138,7 @@ class PatternMatchCallback
 		 * main AtomSpace (it is held in a temporary AtomSpace that is
 		 * deleted upon return from this callback).
 		 */
-		virtual bool virtual_link_match(Handle& virt, Handle& args) = 0;
+		virtual bool virtual_link_match(const Handle& virt, const Handle& args) = 0;
 
 		/**
 		 * Called when a complete grounding to all clauses is found.
@@ -160,7 +160,7 @@ class PatternMatchCallback
 		 * Return false to discard the use of this clause as a possible
 		 * grounding, return true to use this grounding.
 		 */
-		virtual bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h)
+		virtual bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h)
 		{
 			//	if (pattrn_link_h == grnd_link_h) return true;
 			return true;
@@ -185,7 +185,7 @@ class PatternMatchCallback
 		 * AbsentLink: a match is possible only if the indicated clauses
 		 * are absent!
 		 */
-		virtual bool optional_clause_match(Handle& pattrn, Handle& grnd)
+		virtual bool optional_clause_match(const Handle& pattrn, const Handle& grnd)
 		{
 			if (Handle::UNDEFINED == grnd) return true;
 			return false;
@@ -200,7 +200,7 @@ class PatternMatchCallback
 		 * is smaller than the full incoming set (for example, by
 		 * returning only those atoms with a high av-sti).
 		 */
-		virtual IncomingSet get_incoming_set(Handle h)
+		virtual IncomingSet get_incoming_set(const Handle& h)
 		{
 			return h->getIncomingSet();
 		}
@@ -240,8 +240,8 @@ class PatternMatchCallback
 		 */
 		virtual void perform_search(PatternMatchEngine *,
 		                            const std::set<Handle> &vars,
-		                            std::vector<Handle> &clauses,
-		                            std::vector<Handle> &negations) = 0;
+		                            const std::vector<Handle> &clauses,
+		                            const std::vector<Handle> &negations) = 0;
 };
 
 } // namespace opencog
