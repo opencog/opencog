@@ -30,7 +30,6 @@
 
 using namespace opencog;
 
-class ForwardChainer;
 class ForwardChainPatternMatchCB: public virtual PLNImplicator {
 private:
 	AtomSpace* _as;
