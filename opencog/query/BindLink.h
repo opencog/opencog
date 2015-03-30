@@ -30,7 +30,6 @@ Handle bindlink(AtomSpace*, Handle);
 Handle single_bindlink (AtomSpace*, Handle);
 Handle crisp_logic_bindlink(AtomSpace*, Handle);
 Handle pln_bindlink(AtomSpace*, Handle);
-Handle validate_bindlink(AtomSpace*, Handle);
 TruthValuePtr satisfaction_link(AtomSpace*, Handle);
 
 } // namespace opencog
