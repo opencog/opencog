@@ -24,7 +24,6 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/query/PatternMatch.h>
 
 #include "BindLink.h"
 

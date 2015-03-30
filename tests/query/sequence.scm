@@ -26,18 +26,15 @@
 ; Should throw an exception in all cases. Shouldn't do donuts on
 ; corn fields.
 (define (off-road)
-	(BindLink
+	(SatisfactionLink
 		(VariableList)  ; no variables
-		(ImplicationLink
-			(SequentialAndLink
-				(EvaluationLink
-					(GroundedPredicateNode "scm: stop-go")
-					(ListLink
-						(ConceptNode "corn field")
-					)
+		(SequentialAndLink
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink
+					(ConceptNode "corn field")
 				)
 			)
-			(ListLink)  ; no returned value
 		)
 	)
 )
@@ -46,33 +43,30 @@
 ;; the matching should stop.  There should be no exceptions or
 ;; errors when evaluating this.
 (define (traffic-lights)
-	(BindLink
+	(SatisfactionLink
 		(VariableList)  ; no variables
-		(ImplicationLink
-			(SequentialAndLink
-				(EvaluationLink
-					(GroundedPredicateNode "scm: stop-go")
-					(ListLink green-light)
-				)
+		(SequentialAndLink
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink green-light)
+			)
 
-				(EvaluationLink
-					(GroundedPredicateNode "scm: stop-go")
-					(ListLink green-light)
-				)
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink green-light)
+			)
 
-				(EvaluationLink
-					(GroundedPredicateNode "scm: stop-go")
-					(ListLink red-light)
-				)
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink red-light)
+			)
 
-				(EvaluationLink
-					(GroundedPredicateNode "scm: stop-go")
-					(ListLink
-						(ConceptNode "traffic ticket")
-					)
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink
+					(ConceptNode "traffic ticket")
 				)
 			)
-			(ListLink) ; no returned value
 		)
 	)
 )
