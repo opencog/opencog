@@ -331,7 +331,7 @@ void DefaultPatternMatchCB::full_search(PatternMatchEngine *pme,
 
 /* ======================================================== */
 
-bool DefaultPatternMatchCB::virtual_link_match(Handle& virt, Handle& gargs)
+bool DefaultPatternMatchCB::virtual_link_match(const Handle& virt, const Handle& gargs)
 {
 	// At this time, we expect all virutal links to be in one of two
 	// forms: either EvaluationLink's or GreaterThanLink's.  The

@@ -54,28 +54,28 @@ class PMCGroundings : public PatternMatchCallback
 		PMCGroundings(PatternMatchCallback* cb) : _cb(cb) {}
 
 		// Pass all the calls straight through, except one.
-		bool node_match(Handle& node1, Handle& node2) {
+		bool node_match(const Handle& node1, const Handle& node2) {
 			return _cb->node_match(node1, node2);
 		}
-		bool variable_match(Handle& node1, Handle& node2) {
+		bool variable_match(const Handle& node1, const Handle& node2) {
 			return _cb->variable_match(node1, node2);
 		}
-		bool link_match(LinkPtr& link1, LinkPtr& link2) {
+		bool link_match(const LinkPtr& link1, const LinkPtr& link2) {
 			return _cb->link_match(link1, link2);
 		}
-		bool post_link_match(LinkPtr& link1, LinkPtr& link2) {
+		bool post_link_match(const LinkPtr& link1, const LinkPtr& link2) {
 			return _cb->post_link_match(link1, link2);
 		}
-		bool virtual_link_match(Handle& link1, Handle& args) {
+		bool virtual_link_match(const Handle& link1, const Handle& args) {
 			throw InvalidParamException(TRACE_INFO, "Not expecting a virtual link here!");
 		}
-		bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h) {
+		bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h) {
 			return _cb->clause_match(pattrn_link_h, grnd_link_h);
 		}
-		bool optional_clause_match(Handle& pattrn, Handle& grnd) {
+		bool optional_clause_match(const Handle& pattrn, const Handle& grnd) {
 			return _cb->optional_clause_match(pattrn, grnd);
 		}
-		IncomingSet get_incoming_set(Handle h) {
+		IncomingSet get_incoming_set(const Handle& h) {
 			return _cb->get_incoming_set(h);
 		}
 		void push(void) { _cb->push(); }

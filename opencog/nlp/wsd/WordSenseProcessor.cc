@@ -127,7 +127,7 @@ void WordSenseProcessor::run()
  * connected ideas.  The sentences composing the document are handled
  * in order.
  */
-bool WordSenseProcessor::do_document(Handle h)
+bool WordSenseProcessor::do_document(const Handle& h)
 {
 	// Obtain the handle which indicates that the WSD processing of a
  	// document has started.
@@ -169,7 +169,7 @@ bool WordSenseProcessor::do_document(Handle h)
 	return false;
 }
 
-bool WordSenseProcessor::check_start(Handle h)
+bool WordSenseProcessor::check_start(const Handle& h)
 {
 	if (h == start_handle) return true;
 	return false;

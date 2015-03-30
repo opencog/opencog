@@ -46,7 +46,7 @@ void MihalceaLabel::set_atom_space(AtomSpace *as)
  * word sense for that word. The argument handle is presumed to identify
  * a SentenceNode.
  */
-void MihalceaLabel::annotate_sentence(Handle h)
+void MihalceaLabel::annotate_sentence(const Handle& h)
 {
 	foreach_parse(h, &MihalceaLabel::annotate_parse_f, this);
 }
@@ -56,7 +56,7 @@ void MihalceaLabel::annotate_sentence(Handle h)
  * for that word. The argument handle is presumed to identify a specific
  * parse.
  */
-void MihalceaLabel::annotate_parse(Handle h)
+void MihalceaLabel::annotate_parse(const Handle& h)
 {
 	total_words = 0;
 	total_labels = 0;
@@ -67,7 +67,7 @@ void MihalceaLabel::annotate_parse(Handle h)
 #endif
 }
 
-bool MihalceaLabel::annotate_parse_f(Handle h)
+bool MihalceaLabel::annotate_parse_f(const Handle& h)
 {
 	annotate_parse(h);
 	return false;
@@ -78,7 +78,7 @@ bool MihalceaLabel::annotate_parse_f(Handle h)
  * part-of-speech. The argument handle is assumed to point at a specific 
  * word-instance in some parse.
  */
-bool MihalceaLabel::annotate_word(Handle h)
+bool MihalceaLabel::annotate_word(const Handle& h)
 {
     
 	word_instance = h;
@@ -123,7 +123,7 @@ bool MihalceaLabel::annotate_word(Handle h)
  *      WordInstanceNode "bark_144"
  *      WordSenseNode "bark_sense_23"
  */
-bool MihalceaLabel::annotate_word_sense(Handle word_sense)
+bool MihalceaLabel::annotate_word_sense(const Handle& word_sense)
 {
 #ifdef DEBUG
 	printf(";\thas word-sense %s\n", atom_space->atomAsString(word_sense).c_str());
@@ -144,13 +144,13 @@ bool MihalceaLabel::annotate_word_sense(Handle word_sense)
 
 // ==================================================================
 
-bool MihalceaLabel::have_sense(Handle h)
+bool MihalceaLabel::have_sense(const Handle& h)
 {
 	if (atom_space->getType(h) == WORD_SENSE_LINK) return true;
 	return false;
 }
 
-bool MihalceaLabel::pull_pos(Handle sense_h)
+bool MihalceaLabel::pull_pos(const Handle& sense_h)
 {
 	atom_space->fetchIncomingSet(sense_h, false);
 	return false;
@@ -169,7 +169,7 @@ bool MihalceaLabel::pull_pos(Handle sense_h)
  * repeated lookups of these by tagging them with a single, unknown 
  * sense.
  */
-void MihalceaLabel::fetch_senses(Handle lemma_h)
+void MihalceaLabel::fetch_senses(const Handle& lemma_h)
 {
 	bool rc = foreach_incoming_handle(lemma_h, &MihalceaLabel::have_sense, this);
    if (rc) return;

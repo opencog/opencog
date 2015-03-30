@@ -59,7 +59,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * Return true if the nodes match, else return false.
 		 * By default, the nodes must be identical.
 		 */
-		virtual bool node_match(Handle& npat_h, Handle& nsoln_h)
+		virtual bool node_match(const Handle& npat_h, const Handle& nsoln_h)
 		{
 			// If equality, then a match.
 			return npat_h == nsoln_h;
@@ -73,7 +73,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * is a possible grounding node from the atomspace.
 		 * Return true if the nodes match, else return false.
 		 */
-		virtual bool variable_match(Handle& npat_h, Handle& nsoln_h)
+		virtual bool variable_match(const Handle& npat_h, const Handle& nsoln_h)
 		{
 			Type pattype = npat_h->getType();
 
@@ -112,7 +112,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * By default, the search continues if the link
 		 * arity and the link types match.
 		 */
-		virtual bool link_match(LinkPtr& lpat, LinkPtr& lsoln)
+		virtual bool link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
 		{
 			// If the pattern is exactly the same link as the proposed
 			// grounding, then its a perfect match. 
@@ -130,7 +130,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * Called when a virtual link is encountered. Returns false
 		 * to reject the match.
 		 */
-		virtual bool virtual_link_match(Handle& pat, Handle& args);
+		virtual bool virtual_link_match(const Handle& pat, const Handle& args);
 
 		/**
 		 * Called to perform the actual search. This makes some default

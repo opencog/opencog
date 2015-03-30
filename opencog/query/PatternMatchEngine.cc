@@ -23,7 +23,7 @@
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/atomutils/Foreach.h>
-#include <opencog/atomutils/ForeachTwo.h>
+#include <opencog/atomutils/ForeachZip.h>
 #include <opencog/atomutils/PatternUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
@@ -123,7 +123,7 @@ static inline void prtmsg(const char * msg, const Handle& h)
  * var_grounding when encountering variables (and sub-clauses) in the
  * pattern.
  */
-bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
+bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 {
 	// If the pattern link is a quote, then we compare the quoted
 	// contents. This is done recursively, of course.  The QuoteLink
@@ -496,7 +496,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 /* ======================================================== */
 
 /// Return true if a grounding was found.
-bool PatternMatchEngine::soln_up(Handle hsoln)
+bool PatternMatchEngine::soln_up(const Handle& hsoln)
 {
 	// Let's not stare at our own navel. ... Unless the current
 	// clause has GroundedPredicateNodes in it. In that case, we
@@ -549,7 +549,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 /// Return true if a grounding was found.  It also has the side effect
 /// of updating clause_grounding map when the current clause is being
 /// grounded.
-bool PatternMatchEngine::do_soln_up(Handle& hsoln)
+bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 {
 	depth = 1;
 
@@ -770,7 +770,7 @@ bool PatternMatchEngine::do_soln_up(Handle& hsoln)
 	return found;
 }
 
-bool PatternMatchEngine::pred_up(Handle h)
+bool PatternMatchEngine::pred_up(const Handle& h)
 {
 	// Move up the solution outgoing set, looking for a match.
 	Handle curr_pred_save(curr_pred_handle);
@@ -958,7 +958,7 @@ bool PatternMatchEngine::do_candidate(const Handle& do_clause,
  * Create an associative array that gives a list of all of the
  * clauses that a given node participates in.
  */
-bool PatternMatchEngine::note_root(Handle h)
+bool PatternMatchEngine::note_root(const Handle& h)
 {
 	_root_map[h].push_back(curr_root);
 

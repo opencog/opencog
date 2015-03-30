@@ -24,7 +24,7 @@ namespace opencog
 //! false is returned.
 /// XXX TODO this should be moved to class Link
 template<class T>
-inline bool foreach_outgoing_handle(LinkPtr ll, bool (T::*cb)(Handle), T *data)
+inline bool foreach_outgoing_handle(LinkPtr ll, bool (T::*cb)(const Handle&), T *data)
 {
     for (Handle out_h : ll->getOutgoingSet()) {
         bool rc = (data->*cb)(out_h);
@@ -41,7 +41,7 @@ inline bool foreach_outgoing_handle(LinkPtr ll, bool (T::*cb)(Handle), T *data)
 //! false is returned.
 /// XXX TODO this routine should be moved to class Atom
 template<class T>
-inline bool foreach_incoming_handle(Handle h, bool (T::*cb)(Handle), T *data)
+inline bool foreach_incoming_handle(Handle h, bool (T::*cb)(const Handle&), T *data)
 {
     IncomingSet vh = h->getIncomingSet();
     size_t sz = vh.size();

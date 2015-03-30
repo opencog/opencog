@@ -32,11 +32,11 @@ class WordSenseProcessor : public Module
 
 		int cnt;
 		AtomSpace *atom_space;
-		bool do_document(Handle h);
+		bool do_document(const Handle& h);
 
 		Handle start_handle;
 		Handle completion_handle;
-		bool check_start(Handle h);
+		bool check_start(const Handle& h);
 
 		Mihalcea *wsd;
 

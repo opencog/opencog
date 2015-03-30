@@ -70,7 +70,8 @@ SenseSimilarityLCH::~SenseSimilarityLCH()
  * Note that currently, only the "mean" is used to nindicate similarity;
  * whereas teh confidence is set to the arbitrary 0.9
  */
-SimpleTruthValuePtr SenseSimilarityLCH::similarity(Handle fs, Handle ss)
+SimpleTruthValuePtr SenseSimilarityLCH::similarity(const Handle& fs,
+                                                   const Handle& ss)
 {
 	first_sense = fs;
 	second_sense = ss;
@@ -140,7 +141,7 @@ SimpleTruthValuePtr SenseSimilarityLCH::similarity(Handle fs, Handle ss)
 	return SimpleTruthValue::createSTV((float) sim, 0.9f);
 }
 
-bool SenseSimilarityLCH::up_first(Handle up)
+bool SenseSimilarityLCH::up_first(const Handle& up)
 {
 	if (up->getType() != WORD_SENSE_NODE) return false;
 
@@ -187,7 +188,7 @@ bool SenseSimilarityLCH::up_first(Handle up)
 	return false;
 }
 
-bool SenseSimilarityLCH::up_second(Handle up)
+bool SenseSimilarityLCH::up_second(const Handle& up)
 {
 	if (up->getType() != WORD_SENSE_NODE) return false;
 

@@ -20,7 +20,7 @@ class SenseSimilarity
 		SenseSimilarity(void) {};
 		virtual ~SenseSimilarity() {};
 
-		virtual SimpleTruthValuePtr similarity(Handle, Handle) = 0;
+		virtual SimpleTruthValuePtr similarity(const Handle&, const Handle&) = 0;
 };
 
 } // namespace opencog

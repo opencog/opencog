@@ -34,7 +34,7 @@ namespace opencog {
  *        SentenceNode "sentence@22"
  */
 template<class T>
-inline bool foreach_parse(Handle h, bool (T::*cb)(Handle), T *data)
+inline bool foreach_parse(const Handle& h, bool (T::*cb)(const Handle&), T *data)
 {
 	return foreach_reverse_binary_link(h, PARSE_LINK, cb, data);
 }
@@ -52,7 +52,7 @@ inline bool foreach_parse(Handle h, bool (T::*cb)(Handle), T *data)
  *          WordInstanceNode "stopped@456"
  */
 template <class T>
-inline bool foreach_word_instance(Handle ha, bool (T::*cb)(Handle), T *data)
+inline bool foreach_word_instance(const Handle& ha, bool (T::*cb)(const Handle&), T *data)
 {
 	FollowLink fl;
 	Handle h = fl.follow_binary_link(ha, REFERENCE_LINK);
@@ -80,9 +80,9 @@ template<typename T>
 class PrivateUseOnlyEachSense
 {
 	public:
-		bool (T::*user_cb)(Handle, Handle);
+		bool (T::*user_cb)(const Handle&, const Handle&);
 		T *user_data;
-		bool sense_filter(Handle h, Handle l)
+		bool sense_filter(const Handle& h, const Handle& l)
 		{
 			// Rule out relations that aren't actual word-senses.
 			if (h->getType() != WORD_SENSE_NODE) return false;
@@ -91,7 +91,8 @@ class PrivateUseOnlyEachSense
 };
 
 template<typename T>
-inline bool foreach_word_sense_of_inst(Handle h, bool (T::*cb)(Handle, Handle), T *data)
+inline bool foreach_word_sense_of_inst(const Handle& h,
+                    bool (T::*cb)(const Handle&, const Handle&), T *data)
 {
 	PrivateUseOnlyEachSense<T> es;
 	es.user_cb = cb;
@@ -111,7 +112,8 @@ inline bool foreach_word_sense_of_inst(Handle h, bool (T::*cb)(Handle, Handle), 
  *       WordSenseNode "bark%1:20:00::"
  */
 template <class T>
-inline bool foreach_dict_word_sense(Handle h, bool (T::*cb)(Handle), T *data)
+inline bool foreach_dict_word_sense(const Handle& h,
+                     bool (T::*cb)(const Handle&), T *data)
 {
 	return foreach_binary_link(h, WORD_SENSE_LINK, cb, data);
 }
@@ -142,14 +144,14 @@ template <typename T>
 class PrivateUseOnlyPOSFilter
 {
 	public:
-		bool (T::*user_cb)(Handle);
+		bool (T::*user_cb)(const Handle&);
 		T *user_data;
 		const std::string *desired_pos;
-		bool pos_filter(Handle word_sense)
+		bool pos_filter(const Handle& word_sense)
 		{
 			// Find the part-of-speech for this word-sense.
 			FollowLink fl;
-			Handle h = fl.follow_binary_link(word_sense, PART_OF_SPEECH_LINK);
+			Handle h(fl.follow_binary_link(word_sense, PART_OF_SPEECH_LINK));
 
 			// The 'no-sense' special-case sense will not have a pos.
 			const std::string &sense_pos = NodeCast(h)->getName();
@@ -163,8 +165,8 @@ class PrivateUseOnlyPOSFilter
 };
 
 template <typename T>
-inline bool foreach_dict_word_sense_pos(Handle h, const std::string &pos,
-                                        bool (T::*cb)(Handle), T *data)
+inline bool foreach_dict_word_sense_pos(const Handle& h, const std::string &pos,
+                                        bool (T::*cb)(const Handle&), T *data)
 {
 	PrivateUseOnlyPOSFilter<T> pf;
 	pf.user_cb = cb;
@@ -195,13 +197,13 @@ inline bool foreach_dict_word_sense_pos(Handle h, const std::string &pos,
  *       WordSenseNode "bark%1:20:00::"
  *       DefinedLinguisticConceptNode "noun"
  */
-inline const std::string get_part_of_speech(Handle word_instance)
+inline const std::string get_part_of_speech(const Handle& word_instance)
 {
 	static std::string empty;
 
 	// Find the part-of-speech for this word instance.
 	FollowLink fl;
-	Handle inst_pos = fl.follow_binary_link(word_instance, PART_OF_SPEECH_LINK);
+	Handle inst_pos(fl.follow_binary_link(word_instance, PART_OF_SPEECH_LINK));
 	NodePtr n(NodeCast(inst_pos));
 	if (NULL == n) return empty;
 	return n->getName();
@@ -217,7 +219,7 @@ inline const std::string get_part_of_speech(Handle word_instance)
  *      WordInstanceNode "bark@169"
  *      WordNode "bark"
  */
-inline Handle get_dict_word_of_word_instance(Handle word_instance)
+inline Handle get_dict_word_of_word_instance(const Handle& word_instance)
 {
 	FollowLink fl;
 	Handle dict_word = fl.follow_binary_link(word_instance, REFERENCE_LINK);
@@ -234,7 +236,7 @@ inline Handle get_dict_word_of_word_instance(Handle word_instance)
  *      WordInstanceNode "was@169"
  *      WordNode "is"
  */
-inline Handle get_lemma_of_word_instance(Handle word_instance)
+inline Handle get_lemma_of_word_instance(const Handle& word_instance)
 {
 	FollowLink fl;
 	Handle dict_word = fl.follow_binary_link(word_instance, LEMMA_LINK);
@@ -249,8 +251,8 @@ inline Handle get_lemma_of_word_instance(Handle word_instance)
  */
 template <typename T>
 inline bool
-foreach_sense_edge(Handle h,
-                   bool (T::*cb)(Handle, Handle), T *data)
+foreach_sense_edge(const Handle& h,
+                   bool (T::*cb)(const Handle&, const Handle&), T *data)
 {
 	return foreach_unordered_binary_link(h, COSENSE_LINK, cb, data);
 }
@@ -283,13 +285,13 @@ class PrivateUseOnlyRelexRelationFinder
 {
 	private:
 		LinkPtr listlink;
-		bool look_for_eval_link(Handle h)
+		bool look_for_eval_link(const Handle& h)
 		{
 			Type t = h->getType();
 			if (t != EVALUATION_LINK) return false;
 
 			// If we are here, lets see if the first node is a ling rel.
-			Handle a = LinkCast(h)->getOutgoingAtom(0);
+			Handle a(LinkCast(h)->getOutgoingAtom(0));
 			if (a->getType() != DEFINED_LINGUISTIC_RELATIONSHIP_NODE) return false;
 
 			// OK, we've found a relationship. Get the second member of
@@ -307,10 +309,10 @@ class PrivateUseOnlyRelexRelationFinder
 
 	public:
 		Handle first_arg;
-		bool (T::*user_cb)(const std::string &, Handle, Handle);
+		bool (T::*user_cb)(const std::string &, const Handle&, const Handle&);
 		T *user_data;
 
-		bool look_for_list_link(Handle h)
+		bool look_for_list_link(const Handle& h)
 		{
 			if (h->getType() != LIST_LINK) return false;
 			listlink = LinkCast(h);
@@ -323,8 +325,8 @@ class PrivateUseOnlyRelexRelationFinder
 
 template <typename T>
 inline bool
-foreach_relex_relation(Handle h,
-                       bool (T::*cb)(const std::string &, Handle, Handle), T *data)
+foreach_relex_relation(const Handle& h,
+                       bool (T::*cb)(const std::string &, const Handle&, const Handle&), T *data)
 {
 	PrivateUseOnlyRelexRelationFinder<T> rrf;
 	rrf.user_cb = cb;
@@ -343,7 +345,7 @@ foreach_relex_relation(Handle h,
  *      WordInstanceNode "bark@144"
  *      WordSenseNode "bark%1:20:00::"
  */
-inline Handle get_word_instance_of_sense_link(Handle h)
+inline Handle get_word_instance_of_sense_link(const Handle& h)
 {
 	return LinkCast(h)->getOutgoingAtom(0);
 }
@@ -358,7 +360,7 @@ inline Handle get_word_instance_of_sense_link(Handle h)
  *      WordInstanceNode "bark@144"
  *      WordSenseNode "bark%1:20:00::"
  */
-inline Handle get_word_sense_of_sense_link(Handle h)
+inline Handle get_word_sense_of_sense_link(const Handle& h)
 {
 	return LinkCast(h)->getOutgoingAtom(1);
 }

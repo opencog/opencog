@@ -453,8 +453,12 @@ public:
      */
     template<class T>
     inline bool foreach_handle_of_type(Type atype,
-                                       bool (T::*cb)(Handle), T *data,
-                                       bool subclass = false) {
+                                       bool (T::*cb)(const Handle&), T *data,
+                                       bool subclass = false)
+    {
+        // First we extract, then we loop. This is to avoid holding
+        // the lock for too long. (because we don't know how long
+        // the callback will take.)
         std::list<Handle> handle_set;
         // The intended signatue is
         // getHandleSet(OutputIterator result, Type type, bool subclass)

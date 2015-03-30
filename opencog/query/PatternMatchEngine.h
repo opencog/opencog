@@ -53,17 +53,17 @@ class PatternMatchEngine
 		// Traversal utilities
 		RootMap _root_map;
 		Handle curr_root;
-		bool note_root(Handle);
+		bool note_root(const Handle&);
 		
 		// -------------------------------------------
 		// Recurisve tree comparison algorithm.
-		bool tree_compare(Handle, Handle);
+		bool tree_compare(const Handle&, const Handle&);
 		int depth;      // Recursion depth for tree_compare.
 		bool in_quote;  // Everything is literal in a quote.
 
-		bool pred_up(Handle);
-		bool soln_up(Handle);
-		bool do_soln_up(Handle&); // See PatternMatchEngine.cc for comment
+		bool pred_up(const Handle&);
+		bool soln_up(const Handle&);
+		bool do_soln_up(const Handle&); // See PatternMatchEngine.cc for comment
 		bool clause_accepted;
 		Handle curr_soln_handle;
 		Handle curr_pred_handle;

@@ -39,17 +39,17 @@ public:
 	 * and that its binary.
 	 * Return a pointer to where the link is going.
 	 */
-	inline Handle follow_binary_link(Handle h, Type ltype)
+	inline Handle follow_binary_link(const Handle& h, Type ltype)
 	{
 		return follow_link(h, ltype, 0, 1);
 	}
 
-	inline Handle backtrack_binary_link(Handle h, Type ltype)
+	inline Handle backtrack_binary_link(const Handle& h, Type ltype)
 	{
 		return follow_link(h, ltype, 1, 0);
 	}
 
-	inline Handle follow_link(Handle h, Type ltype, int from, int to)
+	inline Handle follow_link(const Handle& h, Type ltype, int from, int to)
 	{
 		// Look for incoming links that are of the given type.
 		// Then grab the thing that they link to.
@@ -73,7 +73,7 @@ private:
 	/**
 	 * Find the (first!, assumed only!?) link of desired type.
 	 */
-	inline bool find_link_type(Handle h)
+	inline bool find_link_type(const Handle& h)
 	{
 		// Make sure that the link is of the desired type.
 		if (link_type != h->getType()) return false;
@@ -86,7 +86,7 @@ private:
 		return false;
 	}
 
-	inline bool pursue_link(Handle h)
+	inline bool pursue_link(const Handle& h)
 	{
 		cnt ++;
 
