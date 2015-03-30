@@ -8,7 +8,7 @@ ADD_LIBRARY(ruleengine SHARED
 	pln/ForwardChainPatternMatchCB.cc
 	pln/ForwardChainerCallBack.h
 	pln/DefaultForwardChainerCB.cc
-	pln/FCMemory.cc
+	pln/FCMemory.cc	
 	RuleEngineModule.cc
 	InferenceSCM.cc
 	Rule.cc
@@ -34,6 +34,30 @@ ADD_LIBRARY(RuleEngineModule SHARED
 )
 
 TARGET_LINK_LIBRARIES(RuleEngineModule ruleengine server)
+
+
+# PLNModule
+IF (TBB_FOUND)
+	INCLUDE_DIRECTORIES (
+		${TBB_INCLUDE_DIR}
+	)
+
+	LINK_DIRECTORIES(
+		${TBB_INCLUDE_DIR}
+		${TBB_LIBRARY_DIRS}
+	)
+
+	ADD_LIBRARY(plnmodule SHARED
+		pln/PLNModule.cc
+	)
+
+	TARGET_LINK_LIBRARIES(plnmodule
+		server
+		tbb
+		ruleengine
+	)
+ENDIF (TBB_FOUND)
+
 
 IF (WIN32)
    INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
