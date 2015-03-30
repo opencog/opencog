@@ -60,12 +60,6 @@ class PatternMatch
 
 // Deprecated: DO NOT USE IN NEW CODE!
 // This is used only in the unit-test cases.
-void match(PatternMatchCallback *,
-           const Handle& vars,
-           const Handle& clauses);
-
-// Deprecated: DO NOT USE IN NEW CODE!
-// This is used only in the unit-test cases.
 void do_imply(const Handle&, Implicator&);
 
 } // namespace opencog

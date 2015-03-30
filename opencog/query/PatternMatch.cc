@@ -65,23 +65,6 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmc)
 }
 
 /* ================================================================= */
-
-/// See the documentation for do_match() to see what this function does.
-/// This is just a convenience wrapper around do_match().
-void opencog::match(PatternMatchCallback *cb,
-                    const Handle& hvarbles,
-                    const Handle& hclauses)
-{
-	HandleSeq oset;
-	oset.push_back(hvarbles);
-	oset.push_back(hclauses);
-
-	SatisfactionLinkPtr bl(createSatisfactionLink(oset));
-
-	bl->satisfy(cb);
-}
-
-/* ================================================================= */
 /**
  * do_imply -- Evaluate an ImplicationLink.
  *

@@ -61,8 +61,14 @@ protected:
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+	void init(void);
+
 public:
 	SatisfactionLink(const HandleSeq&,
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
+	SatisfactionLink(const Handle& varcdecls, const Handle& body,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 

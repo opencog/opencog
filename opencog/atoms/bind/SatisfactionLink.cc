@@ -31,14 +31,26 @@
 
 using namespace opencog;
 
-SatisfactionLink::SatisfactionLink(const HandleSeq& hseq,
-                   TruthValuePtr tv, AttentionValuePtr av)
-	: LambdaLink(SATISFACTION_LINK, hseq, tv, av)
+void SatisfactionLink::init(void)
 {
 	// The LambdaLink constructor sets up _body and _varset
 	_hclauses = _body;
 	unbundle_clauses(_hclauses);
 	validate_clauses(_varset, _clauses);
+}
+
+SatisfactionLink::SatisfactionLink(const HandleSeq& hseq,
+                   TruthValuePtr tv, AttentionValuePtr av)
+	: LambdaLink(SATISFACTION_LINK, hseq, tv, av)
+{
+	init();
+}
+
+SatisfactionLink::SatisfactionLink(const Handle& vars, const Handle& body,
+                   TruthValuePtr tv, AttentionValuePtr av)
+	: LambdaLink(SATISFACTION_LINK, HandleSeq({vars, body}), tv, av)
+{
+	init();
 }
 
 SatisfactionLink::SatisfactionLink(Type t, const HandleSeq& hseq,
@@ -47,11 +59,7 @@ SatisfactionLink::SatisfactionLink(Type t, const HandleSeq& hseq,
 {
 	// BindLink has a different clause initialization sequence
 	if (SATISFACTION_LINK != t) return;
-
-	// The LambdaLink constructor sets up _body and _varset
-	_hclauses = _body;
-	unbundle_clauses(_hclauses);
-	validate_clauses(_varset, _clauses);
+	init();
 }
 
 SatisfactionLink::SatisfactionLink(Link &l)
@@ -69,10 +77,7 @@ SatisfactionLink::SatisfactionLink(Link &l)
 	// BindLink has a different clause sequence
 	if (SATISFACTION_LINK != tscope) return;
 
-	// The LambdaLink constructor sets up _body and _varset
-	_hclauses = _body;
-	unbundle_clauses(_hclauses);
-	validate_clauses(_varset, _clauses);
+	init();
 }
 
 
