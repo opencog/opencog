@@ -235,6 +235,17 @@ public:
         Handle hl1 = table->add(l1, false);
 
         table->extract(hn1, true);
+
+        // 2nd part of the same test
+        Handle h3(createNode(CONCEPT_NODE, "3"));
+        os.clear();
+        os.push_back(h3);
+        os.push_back(h3);
+
+        Handle l33 = table->add(createLink(LIST_LINK, os), false);
+        LinkPtr lptr33(LinkCast(l33));
+        HandleSeq hs = lptr33->getOutgoingSet();
+        TS_ASSERT_EQUALS(hs[0], hs[1]);
     }
 
     void testSimpleWithCustomAtomTypes()
