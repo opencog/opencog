@@ -46,6 +46,6 @@
 (define (pln-formula-inheritance-to-member-side-effect-free MBC IBC)
 	(stv
 		(cog-stv-strength IBC)
-		(cog-stv-confidence IBC)))
+		(* (cog-stv-confidence IBC) 0.9))
 
 ; =============================================================================
