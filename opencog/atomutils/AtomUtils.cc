@@ -102,7 +102,7 @@ HandleSeq getNeighbors(const Handle& h, bool fanin,
     return answer;
 }
 
-UnorderedHandleSet get_distant_neighbors(const Handle& h, unsigned dist)
+UnorderedHandleSet get_distant_neighbors(const Handle& h, int dist)
 {
     UnorderedHandleSet results;
     get_distant_neighbors_rec(h, results, dist);
@@ -111,12 +111,12 @@ UnorderedHandleSet get_distant_neighbors(const Handle& h, unsigned dist)
 }
 
 void get_distant_neighbors_rec(const Handle& h, UnorderedHandleSet& res,
-                               unsigned dist)
+                               int dist)
 {
 	res.insert(h);
 
 	// Recursive calls
-	if (dist > 0) {
+	if (dist != 0) {
         // 1. Fetch incomings
         for (const LinkPtr& in_l : h->getIncomingSet()) {
             Handle in_h = in_l->getHandle();
@@ -133,5 +133,5 @@ void get_distant_neighbors_rec(const Handle& h, UnorderedHandleSet& res,
         }
     }
 }
-	
+
 }

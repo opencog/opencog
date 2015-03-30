@@ -65,17 +65,17 @@ HandleSeq getNeighbors(const Handle&, bool fanin=true, bool fanout=true,
  * incomings and outgoings are considered (unlike getNeighbors).
  *
  * @param h     the center atom
- * @param dist  the maximum distance
+ * @param dist  the maximum distance, or none if negative
  * @return      an UnorderedHandleSet of neighbors
  */
-UnorderedHandleSet get_distant_neighbors(const Handle& h, unsigned dist = 1);
+UnorderedHandleSet get_distant_neighbors(const Handle& h, int dist = 1);
 
 /**
  * Helper for getDistantNeighbors. Warning: it includes h in the
  * results.
  */
 void get_distant_neighbors_rec(const Handle& h, UnorderedHandleSet& results,
-                               unsigned dist = 1);
+                               int dist = 1);
 
 
 /** @}*/
