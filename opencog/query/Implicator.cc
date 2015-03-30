@@ -109,7 +109,7 @@ static Handle do_imply(AtomSpace* as,
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
-	Handle gl = as->addLink(LIST_LINK, impl.result_list);
+	Handle gl = as->addLink(SET_LINK, impl.result_list);
 	return gl;
 }
 

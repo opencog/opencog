@@ -74,8 +74,9 @@ class PLNImplicator:
 	public virtual AttentionalFocusCB
 {
 	public:
-		PLNImplicator(AtomSpace* asp) : 
-			Implicator(asp), DefaultPatternMatchCB(asp), AttentionalFocusCB(asp) {}
+		PLNImplicator(AtomSpace* asp) :
+			Implicator(asp), DefaultPatternMatchCB(asp), AttentionalFocusCB(asp)
+		{}
 };
 
 }; // namespace opencog

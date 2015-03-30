@@ -2,9 +2,10 @@
                    Atom Utilities README
                    ---------------------
 
-The README contains miscellaneous notes about the atoms
-utilities. Unlike AtomSpaceUtils those functions do not require a
-pointer to an AtomSpace.
+The README contains miscellaneous notes about the atom utilities.
+Unlike the code in atomspaceutils, none of these functions require a
+pointer to an AtomSpace.  This avoids circular-reference problems,
+when linking shared libraries.
 
 ======================================================================
 

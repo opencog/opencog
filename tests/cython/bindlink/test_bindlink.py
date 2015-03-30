@@ -83,14 +83,14 @@ class BindlinkTest(TestCase):
         result = bindlink(self.atomspace, self.bindlink_handle)
         self.assertTrue(result is not None and result.value() > 0)
 
-        # Check the ending atomspace size, it should have added one ListLink.
+        # Check the ending atomspace size, it should have added one SetLink.
         ending_size = self.atomspace.size()
         self.assertEquals(ending_size, starting_size + 1)
 
-        # The ListLink should have three items in it.
+        # The SetLink should have three items in it.
         atom = self.atomspace[result]
         self.assertEquals(atom.arity, 3)
-        self.assertEquals(atom.type, types.ListLink)
+        self.assertEquals(atom.type, types.SetLink)
 
 
     def test_single_bindlink(self):
@@ -102,14 +102,14 @@ class BindlinkTest(TestCase):
         result = single_bindlink(self.atomspace, self.bindlink_handle)
         self.assertTrue(result is not None and result.value() > 0)
 
-        # Check the ending atomspace size, it should have added one ListLink.
+        # Check the ending atomspace size, it should have added one SetLink.
         ending_size = self.atomspace.size()
         self.assertEquals(ending_size, starting_size + 1)
 
-        # The ListLink should have one item in it.
+        # The SetLink should have one item in it.
         atom = self.atomspace[result]
         self.assertEquals(atom.arity, 1)
-        self.assertEquals(atom.type, types.ListLink)
+        self.assertEquals(atom.type, types.SetLink)
 
 
     def test_crisp_logic_bindlink(self):
@@ -121,14 +121,14 @@ class BindlinkTest(TestCase):
         result = crisp_logic_bindlink(self.atomspace, self.bindlink_handle)
         self.assertTrue(result is not None and result.value() > 0)
 
-        # Check the ending atomspace size, it should have added one ListLink.
+        # Check the ending atomspace size, it should have added one SetLink.
         ending_size = self.atomspace.size()
         self.assertEquals(ending_size, starting_size + 1)
 
-        # The ListLink should have three items in it.
+        # The SetLink should have three items in it.
         atom = self.atomspace[result]
         self.assertEquals(atom.arity, 3)
-        self.assertEquals(atom.type, types.ListLink)
+        self.assertEquals(atom.type, types.SetLink)
 
 
     def test_pln_bindlink(self):
@@ -140,14 +140,14 @@ class BindlinkTest(TestCase):
         result = pln_bindlink(self.atomspace, self.bindlink_handle)
         self.assertTrue(result is not None and result.value() > 0)
 
-        # Check the ending atomspace size, it should have added one ListLink.
+        # Check the ending atomspace size, it should have added one SetLink.
         ending_size = self.atomspace.size()
         self.assertEquals(ending_size, starting_size + 1)
 
-        # The ListLink is empty. ??? Should it be.
+        # The SetLink is empty. ??? Should it be.
         atom = self.atomspace[result]
         self.assertEquals(atom.arity, 0)
-        self.assertEquals(atom.type, types.ListLink)
+        self.assertEquals(atom.type, types.SetLink)
 
     def test_satisfy(self):
         # XXX TODO implement a test here...

@@ -23,7 +23,6 @@
 #include "PLNCommons.h"
 
 #include <opencog/util/macros.h>
-#include <opencog/guile/SchemeSmob.h>
 
 PLNCommons::PLNCommons(AtomSpace * as) :
         as_(as)

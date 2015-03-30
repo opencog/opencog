@@ -30,21 +30,8 @@
 
 using namespace opencog;
 
-LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: Link(t, oset, tv, av)
+void LambdaLink::init(const HandleSeq& oset)
 {
-	// Type must be as expected
-	if (not classserver().isA(t, LAMBDA_LINK))
-	{
-		const std::string& tname = classserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a LambdaLink, got %s", tname.c_str());
-	}
-
-	// Don't throw an error, don't initialize if its the pattern matcher
-	if (0 == oset.size()) return;  // XXX temporary hack ??
-
 	// Must have variable decls and body
 	if (2 != oset.size())
 		throw InvalidParamException(TRACE_INFO,
@@ -53,6 +40,27 @@ LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
 	_vardecl = oset[0];  // VariableNode declarations
 	_body = oset[1];     // Body
 	validate_vardecl(_vardecl);
+}
+
+LambdaLink::LambdaLink(const HandleSeq& oset,
+                       TruthValuePtr tv, AttentionValuePtr av)
+	: Link(LAMBDA_LINK, oset, tv, av)
+{
+	init(oset);
+}
+
+LambdaLink::LambdaLink(const Handle& vars, const Handle& body,
+                       TruthValuePtr tv, AttentionValuePtr av)
+	: Link(LAMBDA_LINK, HandleSeq({vars, body}), tv, av)
+{
+	init(getOutgoingSet());
+}
+
+LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
+                       TruthValuePtr tv, AttentionValuePtr av)
+	: Link(t, oset, tv, av)
+{
+	init(oset);
 }
 
 LambdaLink::LambdaLink(Link &l)
@@ -67,15 +75,7 @@ LambdaLink::LambdaLink(Link &l)
 			"Expecting a LambdaLink, got %s", tname.c_str());
 	}
 
-	// Must have variable decls and body
-	const HandleSeq& oset = l.getOutgoingSet();
-	if (2 != oset.size())
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting variabe decls and body, got size %d", oset.size());
-
-	_vardecl = oset[0];  // VariableNode declarations
-	_body = oset[1];     // Body
-	validate_vardecl(_vardecl);
+	init(l.getOutgoingSet());
 }
 
 /* ================================================================= */

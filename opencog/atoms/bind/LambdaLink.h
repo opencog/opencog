@@ -69,8 +69,17 @@ protected:
 	// Validate the variable decls
 	void validate_vardecl(const Handle&);
 
-public:
 	LambdaLink(Type, const HandleSeq&,
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
+	void init(const HandleSeq&);
+public:
+	LambdaLink(const HandleSeq&,
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
+	LambdaLink(const Handle& varcdecls, const Handle& body,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 

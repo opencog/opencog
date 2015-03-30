@@ -543,7 +543,7 @@ Open Questions
 --------------
 In many ways, the above algorithm resembles that of a recursive descent
 parser.  However, it does a *lot* of backtracking during its solution
-search. It is throughly unclear as to whether the hypergraph
+search. It is thoroughly unclear as to whether the hypergraph
 pattern-matching problem can be reformulated to resemble an LL(k)
 grammar, so that linear-time predictive parsing techniques can be used.
 
