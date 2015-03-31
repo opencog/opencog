@@ -29,7 +29,8 @@
 
 #include "FCMemory.h"
 
-namespace opencog {
+namespace opencog
+{
 
 class ForwardChainerCallBack;
 class ForwardChainer {
@@ -54,7 +55,8 @@ private:
     Handle choose_random_source(AtomSpace *);
     void add_to_source_list(Handle h);
     void init_source(Handle source);
-    void do_pm(const Handle& hsource,const UnorderedHandleSet& var_nodes);
+    void do_pm(const Handle& hsource, const UnorderedHandleSet& var_nodes,
+               ForwardChainerCallBack& fcb);
 protected:
     enum source_selection_mode {
         TV_FITNESS_BASED, STI_BASED
