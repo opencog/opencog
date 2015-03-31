@@ -42,6 +42,7 @@ public:
 	Rule(Handle rule);
 	virtual ~Rule();
 
+	// Comparison
 	bool operator==(const Rule& r) const {
 		return r.rule_handle_ == rule_handle_;
 	}
@@ -49,16 +50,20 @@ public:
 		return cost_ < r.cost_;
 	}
 
+	// Modifiers
 	void set_handle(Handle h) throw (InvalidParamException);
-	void set_name(string name);
-	string get_name();
-	void set_category(string name);
-	void set_cost(int p);
+	void set_name(const string& name);
+	void set_category(const string& name);
+	void set_cost(int p);	
 
+	// Access
+	string& get_name();
+	const string& get_name() const;
+	string& get_category();
+	const string& get_category() const;
 	Handle get_handle();
 	Handle get_implicant();
 	Handle get_implicand();
-	string& get_category();
 	int get_cost();
 
 	Rule standardize_apart();
