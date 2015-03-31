@@ -46,8 +46,12 @@ protected:
 	// Validate the structure of the body
 	void validate_body(const Handle&);
 
-public:
 	BindLink(Type, const HandleSeq&,
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
+public:
+	BindLink(const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 

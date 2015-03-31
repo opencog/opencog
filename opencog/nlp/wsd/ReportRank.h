@@ -20,17 +20,17 @@ class ReportRank
 {
 	private:
 		int parse_cnt;
-		bool report_parse_f(Handle);
+		bool report_parse_f(const Handle&);
 
-		bool count_word(Handle);
-		bool count_sense(Handle, Handle);
+		bool count_word(const Handle&);
+		bool count_sense(const Handle&, const Handle&);
 		int word_count;
 		double normalization;
 		double sense_count;
 		double choosen_sense_count;
-		bool renorm_parse(Handle);
-		bool renorm_word(Handle);
-		bool renorm_sense(Handle, Handle);
+		bool renorm_parse(const Handle&);
+		bool renorm_word(const Handle&);
+		bool renorm_sense(const Handle&, const Handle&);
 
 		double hi_score;
 		const char *hi_sense;
@@ -38,8 +38,8 @@ class ReportRank
 	public:
 		ReportRank(void);
 		~ReportRank();
-		void report_sentence(Handle);
-		void report_parse(Handle);
+		void report_sentence(const Handle&);
+		void report_parse(const Handle&);
 		void report_document(const std::deque<Handle> &);
 };
 

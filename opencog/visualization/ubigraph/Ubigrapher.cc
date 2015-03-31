@@ -373,7 +373,7 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
             ubigraph_change_vertex_style(h.value(), style);
     }
 }
-bool Ubigrapher::addVertex(Handle h)
+bool Ubigrapher::addVertex(const Handle& h)
 {
 	// Policy: don't display PLN's FWVariableNodes, because it's annoying
 	// if (classserver().isA(space.getType(h), FW_VARIABLE_NODE)) return false;
@@ -423,7 +423,7 @@ bool Ubigrapher::addVertex(Handle h)
 /**
  * Outputs ubigraph links for an atom's outgoing connections.
  */
-bool Ubigrapher::addEdges(Handle h)
+bool Ubigrapher::addEdges(const Handle& h)
 {
     if (!isConnected()) return false;
 

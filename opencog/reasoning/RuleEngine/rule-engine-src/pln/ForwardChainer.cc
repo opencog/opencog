@@ -21,15 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/bind/SatisfactionLink.h>
+#include <opencog/atomutils/AtomUtils.h>
+#include <opencog/query/DefaultImplicator.h>
+#include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
+
 #include "ForwardChainer.h"
 #include "ForwardChainerCallBack.h"
 #include "PLNCommons.h"
-
-#include <opencog/atomutils/AtomUtils.h>
-#include <opencog/query/PatternMatch.h>
-#include <opencog/query/DefaultImplicator.h>
-#include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
-#include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
 
@@ -89,7 +88,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
     while (iteration < max_iter /*OR other termination criteria*/) {
         log_->info("Iteration %d", iteration);
         log_->info("Next source %s",
-                   SchemeSmob::to_string(fcmem_.cur_source_).c_str());
+                   fcmem_.cur_source_->toString().c_str());
 
         // Add more premise to hcurrent_source by pattern matching.
         HandleSeq input = fcb.choose_premises(fcmem_);
@@ -117,7 +116,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         HandleSeq product = fcb.apply_rule(fcmem_);
         log_->info("Results of rule application");
         for (auto p : product)
-            log_->info("%s", SchemeSmob::to_string(p).c_str());
+            log_->info("%s", p->toString().c_str());
         fcmem_.add_rules_product(iteration, product);
         fcmem_.update_premise_list(product);
 
@@ -139,19 +138,24 @@ void ForwardChainer::do_pm(const Handle& hsource,const UnorderedHandleSet& var_n
     HandleSeq vars;
     for (auto h : var_nodes)
         vars.push_back(h);
+
     Handle hvar_list = as_->addLink(VARIABLE_LIST, vars);
     Handle hclause = as_->addLink(AND_LINK, hsource);
-    match(&impl, hvar_list, hclause);
 
-    //update result
+    // Run the pattner matcher, find all patterns that satisfy the
+    // the clause, with the given variables in it.
+    SatisfactionLinkPtr sl(createSatisfactionLink(hvar_list, hclause));
+    sl->satisfy(&impl);
+
+    // Update result
     fcmem_.add_rules_product(0, impl.result_list);
 
-    //Delete the AND_LINK and LIST_LINK
+    // Delete the AND_LINK and LIST_LINK
     as_->removeAtom(hvar_list);
     as_->removeAtom(hclause);
-
-    return;
 }
+
+
 void ForwardChainer::init_source(Handle hsource)
 {
     if (hsource == Handle::UNDEFINED) {

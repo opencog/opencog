@@ -39,7 +39,7 @@ using namespace opencog;
  * @param pAS    the corresponding AtomSpace
  * @param vars   the set of nodes that should be treated as variables
  */
-SuRealPMCB::SuRealPMCB(AtomSpace* pAS, std::set<Handle> vars)
+SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars)
     : DefaultPatternMatchCB(pAS), m_vars(vars), m_eval(new SchemeEval(pAS))
 {
 
@@ -67,7 +67,7 @@ SuRealPMCB::~SuRealPMCB()
  * @param hSoln   the potential mapping
  * @return        false if solution is rejected, true if accepted
  */
-bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
+bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
 {
     logger().debug("[SuReal] In variable_match, looking at %s", hSoln->toShortString().c_str());
 
@@ -191,7 +191,7 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
  * @param grnd_link_h     the corresponding grounding to be checked
  * @return                false if rejected, true if accepted
  */
-bool SuRealPMCB::clause_match(Handle &pattrn_link_h, Handle &grnd_link_h)
+bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_link_h)
 {
     logger().debug("[SuReal] In clause_match, looking at %s", grnd_link_h->toShortString().c_str());
 
@@ -316,7 +316,10 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
  * @param clauses    the clauses for the query
  * @param negations  the negative clauses
  */
-void SuRealPMCB::perform_search(PatternMatchEngine* pPME, std::set<Handle>& vars, HandleSeq& clauses, HandleSeq& negations)
+void SuRealPMCB::perform_search(PatternMatchEngine* pPME,
+                                const std::set<Handle>& vars,
+                                const HandleSeq& clauses,
+                                const HandleSeq& negations)
 {
     size_t bestClauseIndex;
     Handle bestClause, bestSubClause, bestSubNode;

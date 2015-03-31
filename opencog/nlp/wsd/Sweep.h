@@ -26,13 +26,13 @@ class Sweep
 		std::set<Handle> curgraph;
 		std::set<Handle> maxedges;
 		std::set<Handle> curedges;
-		bool mark_word(Handle);
-		bool start_mark_sense(Handle, Handle);
-		bool mark_sense(Handle, Handle);
+		bool mark_word(const Handle&);
+		bool start_mark_sense(const Handle&, const Handle&);
+		bool mark_sense(const Handle&, const Handle&);
 		void delete_edges(std::set<Handle> &);
 	public:
 		void set_atom_space(AtomSpace *);
-		void sweep_parse(Handle);
+		void sweep_parse(const Handle&);
 };
 
 };

@@ -82,14 +82,6 @@ UnorderedHandleSet get_outgoing_nodes(const Handle& hinput,
  */
 UnorderedHandleSet get_distant_neighbors(const Handle& h, int dist = 1);
 
-/**
- * Helper for getDistantNeighbors. Warning: it includes h in the
- * results.
- */
-void get_distant_neighbors_rec(const Handle& h, UnorderedHandleSet& results,
-                               int dist = 1);
-
-
 /** @}*/
 }
 

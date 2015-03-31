@@ -1,8 +1,3 @@
-OPENCOG_ADD_ATOM_TYPES(atom_types.script
-	atom_types.h
-	atom_types.definitions
-	atom_types.inheritance
-	atom_test_types.scm)
 
 LINK_LIBRARIES(
 	atomutils
@@ -11,8 +6,9 @@ LINK_LIBRARIES(
 
 IF(HAVE_GUILE)
 	ADD_CXXTEST(AtomTableUTest HandleEntry.cc)
-	TARGET_LINK_LIBRARIES(AtomTableUTest smob server spacetime-types)
+	TARGET_LINK_LIBRARIES(AtomTableUTest smob spacetime-types)
 ENDIF(HAVE_GUILE)
+ADD_DEPENDENCIES(AtomTableUTest spacetime_atom_types)
 
 ADD_CXXTEST(ClassServerUTest)
 ADD_CXXTEST(AtomUTest)

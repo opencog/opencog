@@ -21,21 +21,21 @@ class NNAdjust
 	private:
 		double strength_adjust;
 
-		bool adjust_parse_f(Handle);
-		bool adjust_word(Handle);
-		bool adjust_relation(const std::string &, Handle, Handle);
+		bool adjust_parse_f(const Handle&);
+		bool adjust_word(const Handle&);
+		bool adjust_relation(const std::string &, const Handle&, const Handle&);
 
 		Handle second_word_inst;
 		Handle first_sense_link;
-		bool sense_of_first_inst(Handle, Handle);
-		bool sense_of_second_inst(Handle, Handle);
-		bool sense_pair(Handle);
+		bool sense_of_first_inst(const Handle&, const Handle&);
+		bool sense_of_second_inst(const Handle&, const Handle&);
+		bool sense_pair(const Handle&);
 
 	public:
 		NNAdjust(void);
 		~NNAdjust();
-		void adjust_sentence(Handle);
-		void adjust_parse(Handle);
+		void adjust_sentence(const Handle&);
+		void adjust_parse(const Handle&);
 };
 
 } // namespace opencog

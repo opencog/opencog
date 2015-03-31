@@ -1,5 +1,5 @@
 /*
- * tests/atomspace/AtomTableUTest.cxxtest
+ * tests/atomspace/AtomTableUTest.cxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by OpenCog Foundation
@@ -55,6 +55,10 @@ using namespace std;
 const char* gpnNames[] = {"GPN1", "GPN2", "GPN3", "GPN4", "GNP5", "GNP6"};
 int numberOfExpectedMatches[] = {26, 26, 26, 1, 1, 1};
 
+extern "C" {
+void spacetime_types_init(void);
+};
+
 class AtomTableUTest : public CxxTest::TestSuite
 {
 
@@ -70,6 +74,8 @@ public:
         //logger().setLevel(Logger::DEBUG);
         //logger().setPrintToStdoutFlag(true);
 
+        spacetime_types_init();
+
         atomSpace = new AtomSpace();
         table = (AtomTable*) & (atomSpace->getAtomTable());
     }
@@ -81,8 +87,9 @@ public:
     {
         atomSpace->clear();
         /* load scm files with all necessary nodes and links  */
-        load_scm_file(*atomSpace, PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
-        load_scm_file(*atomSpace, ATOM_TABLE_TEST_SCM_FILE);
+        load_scm_file(*atomSpace, "opencog/atomspace/core_types.scm");
+        load_scm_file(*atomSpace, "opencog/spacetime/spacetime_types.scm");
+        // load_scm_file(*atomSpace, ATOM_TABLE_TEST_SCM_FILE);
     }
 
     void tearDown() {
@@ -230,11 +237,26 @@ public:
         Handle hn1 = table->add(n1, false);
         Handle hn2 = table->add(n2, false);
 
-        std::vector<Handle> os; os.push_back(hn1); os.push_back(hn1); os.push_back(hn2);
+        std::vector<Handle> os;
+        os.push_back(hn1); os.push_back(hn1); os.push_back(hn2);
         LinkPtr l1(createLink(LIST_LINK, os));
         Handle hl1 = table->add(l1, false);
 
         table->extract(hn1, true);
+
+        // Number nodes are handled differently, in the atomspace. Try
+        // again, with concept nodes.
+        Handle h3(createNode(CONCEPT_NODE, "3"));
+        os.clear();
+        os.push_back(h3);
+        os.push_back(h3);
+
+        Handle l33 = table->add(createLink(LIST_LINK, os), false);
+        LinkPtr lptr33(LinkCast(l33));
+        HandleSeq hs = lptr33->getOutgoingSet();
+        printf("hs1 & hs2 uuid's: %lu %lu\n", hs[0].value(), hs[1].value());
+        printf("hs1 & hs2 ptr's: %p %p\n", hs[0].operator->(), hs[1].operator->());
+        TS_ASSERT_EQUALS(hs[0], hs[1]);
     }
 
     void testSimpleWithCustomAtomTypes()

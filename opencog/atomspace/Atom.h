@@ -317,6 +317,22 @@ public:
         return result;
     }
 
+    //! Invoke the callback on each atom in the incoming set of
+    //! handle h, until one of them returns true, in which case
+    //! iteration stopsm and true is returned. Otherwise the
+    //! callback is called on all incomings and false is returned.
+    template<class T>
+    inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data)
+    {
+        // We make a copy of the set, so that we don't call the
+        //callback with locks held.
+        IncomingSet vh(getIncomingSet());
+
+        for (const LinkPtr& lp : vh)
+            if ((data->*cb)(Handle(lp))) return true;
+        return false;
+    }
+
     /**
      * Returns the set of atoms with a given target handle in their
      * outgoing set (atom type and its subclasses optionally).

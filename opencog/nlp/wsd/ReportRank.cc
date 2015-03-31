@@ -33,7 +33,7 @@ ReportRank::~ReportRank()
 /**
  * For each parse of the sentence, make a report.
  */
-void ReportRank::report_sentence(Handle h)
+void ReportRank::report_sentence(const Handle& h)
 {
 	parse_cnt = 0;
 	foreach_parse(h, &ReportRank::report_parse_f, this);
@@ -94,7 +94,7 @@ void ReportRank::report_document(const std::deque<Handle> &parse_list)
 /**
  * Same as report_document, but done only for one parse
  */
-void ReportRank::report_parse(Handle h)
+void ReportRank::report_parse(const Handle& h)
 {
 #ifdef DEBUG
 	printf ("; ReportRank: Sentence %d:\n", parse_cnt);
@@ -113,20 +113,20 @@ void ReportRank::report_parse(Handle h)
 	foreach_word_instance(h, &ReportRank::renorm_word, this);
 }
 
-bool ReportRank::report_parse_f(Handle h)
+bool ReportRank::report_parse_f(const Handle& h)
 {
 	report_parse(h);
 	return false;
 }
 
-bool ReportRank::count_word(Handle h)
+bool ReportRank::count_word(const Handle& h)
 {
 	word_count ++;
 	foreach_word_sense_of_inst(h, &ReportRank::count_sense, this);
 	return false;
 }
 
-bool ReportRank::renorm_word(Handle h)
+bool ReportRank::renorm_word(const Handle& h)
 {
 #ifdef HISCORE_DEBUG
 	hi_score = -1e10;
@@ -143,16 +143,16 @@ bool ReportRank::renorm_word(Handle h)
 	return false;
 }
 
-bool ReportRank::count_sense(Handle word_sense_h,
-                             Handle sense_link_h)
+bool ReportRank::count_sense(const Handle& word_sense_h,
+                             const Handle& sense_link_h)
 {
 	normalization += sense_link_h->getTruthValue()->getCount();
 	sense_count += 1.0;
 	return false;
 }
 
-bool ReportRank::renorm_sense(Handle word_sense_h,
-                              Handle sense_link_h)
+bool ReportRank::renorm_sense(const Handle& word_sense_h,
+                              const Handle& sense_link_h)
 {
 	double score = sense_link_h->getTruthValue()->getCount();
 

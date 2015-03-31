@@ -27,9 +27,9 @@ using namespace opencog;
 
 //#define DEBUG
 
-FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as) : DefaultPatternMatchCB(as)
+FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as)
+	: DefaultPatternMatchCB(as)
 {
-
 }
 
 /**
@@ -44,8 +44,8 @@ FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as) : DefaultPatternMatchCB(
  */
 void FuzzyPatternMatchCB::perform_search(PatternMatchEngine* pme,
                                          const std::set<Handle>& vars,
-                                         std::vector<Handle>& clauses,
-                                         std::vector<Handle>& negations)
+                                         const std::vector<Handle>& clauses,
+                                         const std::vector<Handle>& negations)
 {
     full_search(pme, clauses);
 }
@@ -61,7 +61,7 @@ void FuzzyPatternMatchCB::perform_search(PatternMatchEngine* pme,
  * @param gLink  A possible grounding link found by the Pattern Matcher
  * @return       Always return false to search for more solutions
  */
-bool FuzzyPatternMatchCB::link_match(LinkPtr& pLink, LinkPtr& gLink)
+bool FuzzyPatternMatchCB::link_match(const LinkPtr& pLink, const LinkPtr& gLink)
 {
     // If two links are identical, skip it
     if (pLink == gLink) return false;
@@ -89,7 +89,7 @@ bool FuzzyPatternMatchCB::link_match(LinkPtr& pLink, LinkPtr& gLink)
  * @param gNode  A handle of a possible grounding node
  * @return       Always return false to search for more solutions
  */
-bool FuzzyPatternMatchCB::node_match(Handle& pNode, Handle& gNode)
+bool FuzzyPatternMatchCB::node_match(const Handle& pNode, const Handle& gNode)
 {
     // If two handles are identical, skip it
     if (pNode == gNode) return false;

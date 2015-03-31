@@ -67,7 +67,7 @@ void MihalceaEdge::set_atom_space(AtomSpace *as)
 }
 
 /** Loop over all parses for this sentence. */
-void MihalceaEdge::annotate_sentence(Handle h)
+void MihalceaEdge::annotate_sentence(const Handle& h)
 {
 	foreach_parse(h, &MihalceaEdge::annotate_parse_f, this);
 }
@@ -78,7 +78,7 @@ void MihalceaEdge::annotate_sentence(Handle h)
  * create an edge between all corresponding (word-instance, word-sense)
  * pairs.
  */
-void MihalceaEdge::annotate_parse(Handle h)
+void MihalceaEdge::annotate_parse(const Handle& h)
 {
 	words.clear();
 	foreach_word_instance(h, &EdgeUtils::look_at_word, (EdgeUtils *) this);
@@ -112,7 +112,7 @@ void MihalceaEdge::annotate_parse(Handle h)
 #endif
 }
 
-bool MihalceaEdge::annotate_parse_f(Handle h)
+bool MihalceaEdge::annotate_parse_f(const Handle& h)
 {
 	annotate_parse(h);
 	return false;
@@ -122,7 +122,7 @@ bool MihalceaEdge::annotate_parse_f(Handle h)
  * For each pair of parses, create word-sense edge-links between
  * the two parses.
  */
-void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
+void MihalceaEdge::annotate_parse_pair(const Handle& ha, const Handle& hb)
 {
 	words.clear();
 	foreach_word_instance(ha, &EdgeUtils::look_at_word, (EdgeUtils *) this);
@@ -174,7 +174,7 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
  * Therefore, in order to improve performance, this routine does not
  * create any edges between words of differing parts-of-speech.
  */
-bool MihalceaEdge::annotate_word_pair(Handle first, Handle second)
+bool MihalceaEdge::annotate_word_pair(const Handle& first, const Handle& second)
 {
 #ifdef DETAIL_DEBUG
 	const std::string &fn = as->getName(first);
@@ -194,8 +194,8 @@ bool MihalceaEdge::annotate_word_pair(Handle first, Handle second)
  * word-instance of a relex relationship. This, in turn iterates
  * over the second word-instance of the relex relationship.
  */
-bool MihalceaEdge::sense_of_first_inst(Handle first_word_sense_h,
-                                       Handle first_sense_link_h)
+bool MihalceaEdge::sense_of_first_inst(const Handle& first_word_sense_h,
+                                       const Handle& first_sense_link_h)
 {
 	first_word_sense = first_word_sense_h;
 
@@ -235,8 +235,8 @@ bool MihalceaEdge::sense_of_first_inst(Handle first_word_sense_h,
  *          WordInstanceNode "bark_144"
  *          WordSenseNode "bark_sense_23"
  */
-bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
-                                        Handle second_sense_link)
+bool MihalceaEdge::sense_of_second_inst(const Handle& second_word_sense_h,
+                                        const Handle& second_sense_link)
 {
 #ifdef SENSE_DETAIL_DEBUG
 	const std::string &fn = as->getName(second_word_sense_h);

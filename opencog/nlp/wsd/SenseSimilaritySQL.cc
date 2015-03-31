@@ -127,8 +127,8 @@ SenseSimilaritySQL::~SenseSimilaritySQL()
 	delete db_conn;
 }
 
-SimpleTruthValuePtr SenseSimilaritySQL::similarity(Handle first_sense,
-        Handle second_sense)
+SimpleTruthValuePtr SenseSimilaritySQL::similarity(const Handle& first_sense,
+        const Handle& second_sense)
 {
 	std::string fk = as->getName(first_sense);
 	std::string sk = as->getName(second_sense);

@@ -109,7 +109,7 @@ void GreaterComputeUTest::test_computation(void)
 
     // Create the expected answer, and compare
     Handle expected = eval->eval_h(
-    "(ListLink "
+    "(SetLink "
     "   (EvaluationLink "
     "      (PredicateNode \"power\")"
     "      (ListLink "

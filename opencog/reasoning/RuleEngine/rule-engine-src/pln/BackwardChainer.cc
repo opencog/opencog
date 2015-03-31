@@ -24,7 +24,6 @@
 
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atoms/bind/BindLink.h>
-#include <opencog/guile/SchemeSmob.h>
 
 BackwardChainer::BackwardChainer(AtomSpace * as)
     : _as(as)
@@ -198,7 +197,7 @@ HandleSeq BackwardChainer::query_rule_base(Handle htarget)
 {
 	Handle hbind_link = _commons->create_bindLink(htarget);
 
-	logger().debug("QUERY-RB:\n" + SchemeSmob::to_string(hbind_link));
+	logger().debug("QUERY-RB:\n" + hbind_link->toString());
 
 	BindLinkPtr bl(BindLinkCast(hbind_link));
 	bl->imply(_bcpm);
@@ -221,7 +220,7 @@ HandleSeq BackwardChainer::query_knowledge_base(Handle htarget)
 {
 	Handle hbind_link = _commons->create_bindLink(htarget);
 
-	logger().debug("QUERY-KB:\n" + SchemeSmob::to_string(hbind_link));
+	logger().debug("QUERY-KB:\n" + hbind_link->toString());
 
 	BindLinkPtr bl(BindLinkCast(hbind_link));
 	bl->imply(_bcpm);
@@ -620,10 +619,10 @@ void BackwardChainer::print_inference_list() {
 	for (auto it = _inference_list.begin(); it != _inference_list.end(); ++it) {
 		map<Handle, HandleSeq> var_ground = *it;
 		for (auto j = var_ground.begin(); j != var_ground.end(); ++j) {
-			cout << "[VAR:" << SchemeSmob::to_string(j->first) << endl;
+			cout << "[VAR:" << j->first->toString() << endl;
 			HandleSeq hs = j->second;
 			for (Handle h : hs)
-			cout << "\tVAL:" << SchemeSmob::to_string(h) << endl;
+			cout << "\tVAL:" << h->toString() << endl;
 		}
 		cout << "]" << endl;
 	}
@@ -632,7 +631,7 @@ void BackwardChainer::print_premise_var_ground_mapping(
 		const map<Handle, map<Handle, HandleSeq>>& premise_var_ground_map) {
 	for (auto it = premise_var_ground_map.begin();
 			it != premise_var_ground_map.end(); ++it) {
-		cout << "PREMISE:" << endl << SchemeSmob::to_string(it->first) << endl;
+		cout << "PREMISE:" << endl << it->first->toString() << endl;
 		map<Handle, HandleSeq> var_ground = it->second;
 		print_var_value(var_ground);
 	}
@@ -640,10 +639,10 @@ void BackwardChainer::print_premise_var_ground_mapping(
 void BackwardChainer::print_var_value(
 		const map<Handle, HandleSeq>& var_ground) {
 	for (auto j = var_ground.begin(); j != var_ground.end(); ++j) {
-		cout << "[VAR:" << SchemeSmob::to_string(j->first) << endl;
+		cout << "[VAR:" << j->first->toString() << endl;
 		HandleSeq hs = j->second;
 		for (Handle h : hs)
-		cout << "\tVAL:" << SchemeSmob::to_string(h) << endl;
+		cout << "\tVAL:" << h->toString() << endl;
 	}
 	cout << "]" << endl;
 }

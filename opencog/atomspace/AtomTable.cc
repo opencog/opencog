@@ -257,7 +257,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
 #if LATER
     // XXX FIXME -- technically, this throw is correct, except
-    // thatSavingLoading gives us atoms with handles preset.
+    // that SavingLoading gives us atoms with handles preset.
     // So we have to accept that, and hope its correct and consistent.
     // XXX this can also occur if the atom is in some other atomspace;
     // so we need to move this check elsewhere.
@@ -289,6 +289,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     } else if (LAMBDA_LINK == atom_type) {
         if (NULL == LambdaLinkCast(atom))
             atom = createLambdaLink(*LinkCast(atom));
+    } else if (SATISFACTION_LINK == atom_type) {
+        if (NULL == SatisfactionLinkCast(atom))
+            atom = createSatisfactionLink(*LinkCast(atom));
     }
 
     // Is the equivalent of this atom already in the table?
@@ -319,6 +322,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 atom = createBindLink(*lll);
             } else if (LAMBDA_LINK == atom_type) {
                 atom = createLambdaLink(*lll);
+            } else if (SATISFACTION_LINK == atom_type) {
+                atom = createSatisfactionLink(*lll);
             } else {
                 atom = createLink(*lll);
             }
@@ -427,11 +432,18 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         LinkPtr llc(LinkCast(atom));
         for (size_t i = 0; i < arity; i++) {
 
-            // Make sure all children are in the atom table.
+            // Make sure all children have correct incoming sets
             Handle ho(llc->_outgoing[i]);
             if (not inEnviron(ho)) {
                 ho->remove_atom(llc);
                 llc->_outgoing[i] = add(ho, async);
+            }
+            else if (ho == Handle::UNDEFINED) {
+                // If we are here, then the atom is in the atomspace,
+                // but the handle has an invalid UUID. This can happen
+                // if the atom appears more than once in the outgoing
+                // set. Fix the handles' UUID, by forcing a cast.
+                llc->_outgoing[i] = ((AtomPtr) llc->_outgoing[i]);
             }
             // Build the incoming set of outgoing atom h.
             llc->_outgoing[i]->insert_atom(llc);

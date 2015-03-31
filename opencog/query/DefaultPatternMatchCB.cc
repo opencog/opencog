@@ -132,7 +132,7 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
 }
 
 // Look at all the clauses, to find the "thinnest" one.
-Handle DefaultPatternMatchCB::find_thinnest(std::vector<Handle>& clauses,
+Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
                                             Handle& starter_pred,
                                             size_t& bestclause)
 {
@@ -233,8 +233,8 @@ Handle DefaultPatternMatchCB::find_thinnest(std::vector<Handle>& clauses,
  */
 void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
                                            const std::set<Handle> &vars,
-                                           std::vector<Handle> &clauses,
-                                           std::vector<Handle> &negations)
+                                           const std::vector<Handle> &clauses,
+                                           const std::vector<Handle> &negations)
 {
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -291,7 +291,7 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 /// search. Note that exhaustive searches can be exhaustingly long,
 /// so watch out!
 void DefaultPatternMatchCB::full_search(PatternMatchEngine *pme,
-                                        std::vector<Handle> &clauses)
+                                        const std::vector<Handle> &clauses)
 {
 	_root = clauses[0];
 	_starter_pred = _root;
@@ -331,7 +331,7 @@ void DefaultPatternMatchCB::full_search(PatternMatchEngine *pme,
 
 /* ======================================================== */
 
-bool DefaultPatternMatchCB::virtual_link_match(Handle& virt, Handle& gargs)
+bool DefaultPatternMatchCB::virtual_link_match(const Handle& virt, const Handle& gargs)
 {
 	// At this time, we expect all virutal links to be in one of two
 	// forms: either EvaluationLink's or GreaterThanLink's.  The

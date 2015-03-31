@@ -43,7 +43,7 @@ void Mihalcea::set_atom_space(AtomSpace *as)
 	sweeper.set_atom_space(as);
 }
 
-bool Mihalcea::process_sentence(Handle h)
+bool Mihalcea::process_sentence(const Handle& h)
 {
 	Handle top_parse = parse_ranker.get_top_ranked_parse(h);
 	if (Handle::UNDEFINED == top_parse)
@@ -126,10 +126,10 @@ bool Mihalcea::process_sentence(Handle h)
 	return false;
 }
 
-bool Mihalcea::process_sentence_list(Handle h)
+bool Mihalcea::process_sentence_list(const Handle& h)
 {
 	short_list.clear();
-	foreach_outgoing_handle(LinkCast(h), &Mihalcea::process_sentence, this);
+	LinkCast(h)->foreach_outgoing(&Mihalcea::process_sentence, this);
 
 	// Solve the page-rank equations for the whole set of sentences.
 	// sense_ranker.rank_document(parse_list);
@@ -162,7 +162,7 @@ bool Mihalcea::process_sentence_list(Handle h)
 	return false;
 }
 
-void Mihalcea::process_document(Handle h)
+void Mihalcea::process_document(const Handle& h)
 {
 	foreach_binary_link(h, REFERENCE_LINK, &Mihalcea::process_sentence_list, this);
 }

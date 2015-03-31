@@ -3,7 +3,7 @@
  *
  * Author: Linas Vepstas February 2008
  *
- * Copyright (C) 2008,2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2008,2009,2015 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -54,19 +54,7 @@ class PatternMatch
 		            const std::map<Handle, Handle>& pred_gnds,
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
 		            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds);
-
-		PatternMatch(void) {}
 };
-
-// Deprecated: DO NOT USE IN NEW CODE!
-// This is used only in the unit-test cases.
-void match(PatternMatchCallback *,
-           const Handle& vars,
-           const Handle& clauses);
-
-// Deprecated: DO NOT USE IN NEW CODE!
-// This is used only in the unit-test cases.
-void do_imply(const Handle&, Implicator&);
 
 } // namespace opencog
 

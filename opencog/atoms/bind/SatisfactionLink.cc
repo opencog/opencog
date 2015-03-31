@@ -25,30 +25,40 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomutils/PatternUtils.h>
-#include <opencog/query/PatternMatch.h>
 
 #include "SatisfactionLink.h"
 
 using namespace opencog;
 
+void SatisfactionLink::init(void)
+{
+	// The LambdaLink constructor sets up _body and _varset
+	_hclauses = _body;
+	unbundle_clauses(_hclauses);
+	validate_clauses(_varset, _clauses);
+}
+
+SatisfactionLink::SatisfactionLink(const HandleSeq& hseq,
+                   TruthValuePtr tv, AttentionValuePtr av)
+	: LambdaLink(SATISFACTION_LINK, hseq, tv, av)
+{
+	init();
+}
+
+SatisfactionLink::SatisfactionLink(const Handle& vars, const Handle& body,
+                   TruthValuePtr tv, AttentionValuePtr av)
+	: LambdaLink(SATISFACTION_LINK, HandleSeq({vars, body}), tv, av)
+{
+	init();
+}
+
 SatisfactionLink::SatisfactionLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
 	: LambdaLink(t, hseq, tv, av)
 {
-	if (not classserver().isA(t, SATISFACTION_LINK))
-	{
-		const std::string& tname = classserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a SatsifactionLink, got %s", tname.c_str());
-	}
-
-	// BindLink has a different clause sequence
+	// BindLink has a different clause initialization sequence
 	if (SATISFACTION_LINK != t) return;
-
-	// The LambdaLink contructor sets up _body and _varset
-	_hclauses = _body;
-	unbundle_clauses(_hclauses);
-	validate_clauses(_varset, _clauses);
+	init();
 }
 
 SatisfactionLink::SatisfactionLink(Link &l)
@@ -66,10 +76,7 @@ SatisfactionLink::SatisfactionLink(Link &l)
 	// BindLink has a different clause sequence
 	if (SATISFACTION_LINK != tscope) return;
 
-	// The LambdaLink contructor sets up _body and _varset
-	_hclauses = _body;
-	unbundle_clauses(_hclauses);
-	validate_clauses(_varset, _clauses);
+	init();
 }
 
 

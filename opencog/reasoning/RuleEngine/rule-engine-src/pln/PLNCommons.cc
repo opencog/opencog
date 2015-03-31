@@ -29,7 +29,6 @@
 PLNCommons::PLNCommons(AtomSpace * as) :
         as_(as)
 {
-
 }
 
 PLNCommons::~PLNCommons()

@@ -39,10 +39,10 @@ namespace opencog
 
             virtual void perform_search(PatternMatchEngine* pme,
                                         const std::set<Handle>& vars,
-                                        std::vector<Handle>& clauses,
-                                        std::vector<Handle>& negations);
-            virtual bool link_match(LinkPtr& pLink, LinkPtr& gLink);
-            virtual bool node_match(Handle& pNode, Handle& gNode);
+                                        const std::vector<Handle>& clauses,
+                                        const std::vector<Handle>& negations);
+            virtual bool link_match(const LinkPtr& pLink, const LinkPtr& gLink);
+            virtual bool node_match(const Handle& pNode, const Handle& gNode);
             virtual bool grounding(const std::map<Handle, Handle>& var_soln,
                                    const std::map<Handle, Handle>& pred_soln);
 

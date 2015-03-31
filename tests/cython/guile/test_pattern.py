@@ -88,5 +88,5 @@ class SchemeTest(TestCase):
         answer = Atom(h, self.space)
         print "\nThe answer is:"
         print answer
-        self.assertEqual(answer.type, types.ListLink)
+        self.assertEqual(answer.type, types.SetLink)
         self.assertEqual(answer.arity, 2)

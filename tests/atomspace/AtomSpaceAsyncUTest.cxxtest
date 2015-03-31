@@ -78,8 +78,8 @@ public:
     {
         // Current atomspace can to 50K or 100K atoms/sec, so the
         // below should run for at least 2 to 5 seconds each time.
-        n_threads = 20;
-        num_atoms = 13000;
+        n_threads = 10;
+        num_atoms = 5000;
         logger().setLevel(Logger::INFO);
         logger().setPrintToStdoutFlag(true);
     }

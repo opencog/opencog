@@ -23,7 +23,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -311,7 +311,8 @@ void PatternUTest::test_two_links(void)
 
 	// Test the non-std::vector interface also.
 	pmcb.found = 0;
-	match(&pmcb, hv, han);
+	SatisfactionLinkPtr sl(createSatisfactionLink(hv, han));
+	sl->satisfy(&pmcb);
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 2);
 
 	logger().debug("END TEST: %s", __FUNCTION__);

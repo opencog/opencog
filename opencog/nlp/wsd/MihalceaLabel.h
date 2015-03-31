@@ -22,13 +22,13 @@ class MihalceaLabel
 	private:
 		AtomSpace *atom_space;
 
-		bool annotate_parse_f(Handle);
-		bool annotate_word(Handle);
-		bool annotate_word_sense(Handle);
+		bool annotate_parse_f(const Handle&);
+		bool annotate_word(const Handle&);
+		bool annotate_word_sense(const Handle&);
 
-		void fetch_senses(Handle);
-		bool have_sense(Handle);
-		bool pull_pos(Handle);
+		void fetch_senses(const Handle&);
+		bool have_sense(const Handle&);
+		bool pull_pos(const Handle&);
 		Handle no_sense;
 
 		Handle word_instance;
@@ -40,8 +40,8 @@ class MihalceaLabel
 		~MihalceaLabel();
 		void set_atom_space(AtomSpace *);
 
-		void annotate_sentence(Handle);
-		void annotate_parse(Handle);
+		void annotate_sentence(const Handle&);
+		void annotate_parse(const Handle&);
 };
 
 } // namespace opencog

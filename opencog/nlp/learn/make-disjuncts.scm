@@ -6,6 +6,9 @@
 (define letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 ;The function which actually constructs a name for the node.
+;Input: Integer
+;Output: Name 
+;Eg:- 1 --> A, 2--> B
 (define (number->letters num)
   (unfold-right negative?
                 (lambda (i) (string-ref letters (remainder i 26)))
@@ -14,10 +17,12 @@
 
 ;This function calls number->letters function and prepends an 'M' to the 
 ;generated name.
+;Input: Integer
+;Output: 1--> MA, 2--> MB
 (define (number->tag num)
   (list->string (cons #\M (number->letters num))))
 
-;This is a counter which will increment by 1 automatically on every usage.
+;This is a counter which will increment by 1 automatically on every call.
 (define (make-counter . x)
    ; validate argument
    (let ((count (if (and
@@ -36,6 +41,8 @@
 
 ;The word pair has mutual information also embedded in it. This function strips
 ;that away and keeps only the two wordnodes.
+;Input: Word-pair
+;Output: Word-pair without the mutual information
 (define (actual-wp wp) (car (cdr wp)))
 
 ;Get the first wordnode in the wordpair.
@@ -97,6 +104,12 @@
 			#t))
 	(map create-evaluation-link (filter criteria? (parse text)) ))
 
+;This function will return a list of disjuncts related to that word.
+;For example, let the sentence be "The game is played on a level playing field".
+;Now, MST nodes are created for this sentence. The word "game" is passed along
+;with the MST nodes to this function. It will return the following output:
+;((played.MB+) (The.MD-) (is.ME+)) because game is paired with these words in the
+;EvaluationLink nodes.
 (define (get-related-words-disjuncts word nodes)
 	;This function will return the first word present in the ListLink component of 
 	;an EvaluationLink.
@@ -131,19 +144,36 @@
 					(get-related-words-disjuncts word (cdr nodes))))))
 		'()))
 
-(define (arrange-disjuncts-in-order listofdisjuncts sentence)
+;This function will take a list of word connector lists like these: 
+;((played . MB+) (The . MD-) (is . ME+))
+;The sentence is "The game is played on a level playing field"
+;According to the order of the words in the sentence, the above list would
+;be arranged. The output if the word connector list is passed to this function
+;is: ((The . MD-) (is . ME+) (played . MB+))
+;Note: The sentence in this function must be a list of words in the sentence.
+(define (arrange-disjuncts-in-order wordconnectorlist sentence)
 	(if (not (null? sentence))
-		(let ([firstw (car sentence)])
-			(cons (get-disjunct-from-list listofdisjuncts firstw) (arrange-disjuncts-in-order listofdisjuncts (cdr sentence))))
+		(let ([word (car sentence)])
+			(cons (get-wordconnector-from-list wordconnectorlist word) (arrange-disjuncts-in-order wordconnectorlist (cdr sentence))))
 		'()))
 
-(define (get-disjunct-from-list listofdisjuncts firstw)
-	(if (not (null? listofdisjuncts))
-		(let* ([firstdisjunct (car listofdisjuncts)]
+;A word connector list is this: (played.MB+). It consists of the disjunct along
+;with the word for which the disjunct is meant. 
+;This function will get a word connector from the given list of word connectors.
+;It takes as input a word connector list like this: ((played . MB+) (The . MD-) (is . ME+))
+;and a word. It searches for the word in this list and returns the whole 
+;word connector.
+;This function is used as follows:
+;The sentence is scanned from left to right and for each word, its word connector is
+;gotten so that the word connector list is arranged in order. This makes it easier
+;to arrange disjuncts in the order of the sentence.
+(define (get-wordconnector-from-list wordconnectorlist word)
+	(if (not (null? wordconnectorlist))
+		(let* ([firstdisjunct (car wordconnectorlist)]
 			   [firstdisjunctword (car firstdisjunct)])
-			(if (equal? firstw firstdisjunctword)
+			(if (equal? word firstdisjunctword)
 				firstdisjunct
-				(get-disjunct-from-list (cdr listofdisjuncts) firstw)))
+				(get-wordconnector-from-list (cdr wordconnectorlist) word)))
 		'()))
 
 ;Given a list of disjuncts, it will create MSTConnector atoms and return a list
@@ -169,10 +199,10 @@
 ;also the disjuncts for that given WordNode.
 (define (create-disjunct word disjuncts)
 	(if (not (null? (create-connector-atoms disjuncts)))
-		(LgWordCset
-			(WordNode word)
-			(LgAnd
-				(create-connector-atoms disjuncts)))
+		(store-atom (cog-atom-incr (LgWordCset
+							(WordNode word)
+							(LgAnd
+								(create-connector-atoms disjuncts))) 1))
 		'()))
 
 ;This function extracts the disjuncts for the given sentence for each and every

@@ -24,27 +24,26 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/query/PatternMatch.h>
 
 #include "BindLink.h"
 
 using namespace opencog;
 
+BindLink::BindLink(const HandleSeq& hseq,
+                   TruthValuePtr tv, AttentionValuePtr av)
+	: SatisfactionLink(BIND_LINK, hseq, tv, av)
+{
+	// The LambdaLink constructor sets up _body and _varset
+	validate_body(_body);
+	unbundle_clauses(_hclauses);
+	validate_clauses(_varset, _clauses);
+}
+
 BindLink::BindLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
 	: SatisfactionLink(t, hseq, tv, av)
 {
-	if (not classserver().isA(t, BIND_LINK))
-	{
-		const std::string& tname = classserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a BindLink, got %s", tname.c_str());
-	}
-
-	// Don't throw an error, don't initialize if its the pattern matcher
-	if (NULL == _body) return;  // XXX temp hack ??
-
-	// The LambdaLink contructor sets up _body and _varset
+	// The LambdaLink constructor sets up _body and _varset
 	validate_body(_body);
 	unbundle_clauses(_hclauses);
 	validate_clauses(_varset, _clauses);

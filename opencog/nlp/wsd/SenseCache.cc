@@ -45,7 +45,8 @@ void SenseCache::set_atom_space(AtomSpace *as)
  *       WordSenseNode "bark_sense_23"
  *       WordSenseNode "covering_sense_42"
  */
-TruthValuePtr SenseCache::similarity(Handle sense_a, Handle sense_b)
+TruthValuePtr SenseCache::similarity(const Handle& sense_a,
+                                     const Handle& sense_b)
 {
 	match_sense = sense_b;
 
@@ -56,7 +57,7 @@ TruthValuePtr SenseCache::similarity(Handle sense_a, Handle sense_b)
 	return found_link->getTruthValue();
 }
 
-bool SenseCache::find_sense(Handle sense, Handle link)
+bool SenseCache::find_sense(const Handle& sense, const Handle& link)
 {
 	if (sense != match_sense) return false;
 	found_link = link;
@@ -70,7 +71,8 @@ bool SenseCache::find_sense(Handle sense, Handle link)
  * senses.  This link is *not* a part of any atom space; it must be
  * aded to an atom space if desired.
  */
-void SenseCache::set_similarity(Handle sense_a, Handle sense_b, TruthValuePtr tv)
+void SenseCache::set_similarity(const Handle& sense_a,
+                                const Handle& sense_b, TruthValuePtr tv)
 {
 	// Create a link connecting the two senses.
 	atom_space->addLink(SIMILARITY_LINK, sense_a, sense_b)->setTruthValue(tv);
