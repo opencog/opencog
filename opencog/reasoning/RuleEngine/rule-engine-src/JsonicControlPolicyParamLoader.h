@@ -45,9 +45,9 @@ public:
     virtual ~JsonicControlPolicyParamLoader();
     virtual void load_config();
 
-    int get_max_iter(void);
-    bool get_attention_alloc(void);
-    vector<Rule*>& get_rules(void);
+    int get_max_iter();
+    bool get_attention_alloc();
+    vector<Rule*>& get_rules();
 
 private:
     Rule* cur_read_rule_;
@@ -79,7 +79,7 @@ private:
 
     void set_disjunct_rules(void);
 
-    Rule* get_rule(string& name);
+    Rule* get_rule(const string& name);
     const string get_working_path(const string& filename,
                                    vector<string> search_paths = { });
     vector<vector<Rule*>> get_mutex_sets(void);

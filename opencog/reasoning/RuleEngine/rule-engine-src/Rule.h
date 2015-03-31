@@ -72,6 +72,9 @@ private:
 	Handle rule_handle_;
 	string name_;
 	string category_;
+
+	// TODO weird here it is called cost, but it seems it's actually a
+	// priority
 	int cost_;
 
 	Handle standardize_helper(Handle, std::map<Handle, Handle>&);
