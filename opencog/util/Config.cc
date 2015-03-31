@@ -74,7 +74,6 @@ const std::string* Config::DEFAULT()
         "ANSI_SCM_PROMPT",              "guile> ",
         "MODULES",                      "libbuiltinreqs.so",
         "SCM_PRELOAD",                  "",
-        "PYTHON_PRELOAD_FUNCTIONS",     "../opencog/python/preload_functions",
         "",                             ""
     };
 
