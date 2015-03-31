@@ -41,24 +41,25 @@ namespace opencog {
  *  @{
  */
 
-//! Choose an element of the set s randomly, with uniform distribution.
-//! \warning it is assumed that s is non-empty
-template<typename T, typename C>
-const T& randset(const std::set<T, C>& s, RandGen& rng = randGen())
+//! Pick an element of container c randomly, with uniform
+//! distribution.  \warning it is assumed that c is non-empty
+template<typename C>
+const typename C::value_type& rand_element(const C& c, RandGen& rng = randGen())
 {
-    OC_ASSERT(!s.empty());
-    return *std::next(s.begin(), rng.randint(s.size()));
+    OC_ASSERT(!c.empty());
+    return *std::next(c.begin(), rng.randint(c.size()));
 }
 
-//! Choose an element of the set s, with uniform distribution, 
-//! and remove it
-template<typename T>
-T randset_erase(std::set<T>& s, RandGen& rng = randGen())
+//! Pick an element of container c randomly, with uniform
+//! distribution, and remove it.  \warning it is assumed that c is
+//! non-empty
+template<typename C>
+typename C::value_type rand_element_erase(C& c, RandGen& rng = randGen())
 {
-    OC_ASSERT(!s.empty());
-    auto it = std::next(s.begin(), rng.randint(s.size()));
-    T val = *it;
-    s.erase(it);
+    OC_ASSERT(!c.empty());
+    auto it = std::next(c.begin(), rng.randint(c.size()));
+    typename C::value_type val = *it;
+    c.erase(it);
     return val;
 }
 

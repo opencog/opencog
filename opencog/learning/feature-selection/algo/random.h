@@ -49,7 +49,7 @@ FeatureSet random_selection(const FeatureSet& features,
     // Pick features randomly, until num_desired have been chosen.
     FeatureSet final;
     while (0 < num_desired) {
-        final.insert(randset(features));
+        final.insert(rand_element(features));
         num_desired --;
     }
 
