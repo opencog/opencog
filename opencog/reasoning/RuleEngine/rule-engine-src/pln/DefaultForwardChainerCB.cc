@@ -129,7 +129,8 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
 }
 
 /**
- * Gets all top level links of certain types and subclasses that contain @param hsource
+ * Gets all top level links of certain types and subclasses that
+ * contain @param hsource
  *
  * @param hsource handle whose top level links are to be searched
  * @param as the atomspace in which search is to be done

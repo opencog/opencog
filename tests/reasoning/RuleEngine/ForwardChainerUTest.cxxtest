@@ -4,7 +4,9 @@
  *  Created on: Sep 2, 2014
  *      Author: misgana
  */
+
 #include <opencog/reasoning/RuleEngine/rule-engine-src/pln/ForwardChainer.h>
+#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/DefaultForwardChainerCB.h>
 #include <opencog/reasoning/RuleEngine/rule-engine-src/pln/PLNCommons.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>

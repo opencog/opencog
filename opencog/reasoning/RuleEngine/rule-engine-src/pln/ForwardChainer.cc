@@ -77,12 +77,12 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
 
     PLNCommons pc(as_);
 
-    //Variable fulfillment query.
+    // Variable fulfillment query.
     UnorderedHandleSet var_nodes = get_outgoing_nodes(hsource, {VARIABLE_NODE});
     if (not var_nodes.empty())
         return do_pm(hsource,var_nodes);
 
-    //Forward chaining on a particular type of atom.
+    // Forward chaining on a particular type of atom.
     int iteration = 0;
     auto max_iter = cpolicy_loader_->get_max_iter();
     init_source(hsource);
@@ -91,11 +91,11 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         log_->info("Next source %s",
                    SchemeSmob::to_string(fcmem_.cur_source_).c_str());
 
-        //Add more premise to hcurrent_source by pattern matching.
+        // Add more premise to hcurrent_source by pattern matching.
         HandleSeq input = fcb.choose_premises(fcmem_);
         fcmem_.update_premise_list(input);
 
-        //Choose the best rule to apply.
+        // Choose the best rule to apply.
         vector<Rule*> rules = fcb.choose_rule(fcmem_);
         map<Rule*, float> rule_weight;
         for (Rule* r : rules) {
@@ -110,7 +110,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
             return;
         fcmem_.cur_rule_ = r;
 
-        //!Apply rule.
+        //! Apply rule.
         log_->info("Applying chosen rule %s", r->get_name().c_str());
         HandleSeq product = fcb.apply_rule(fcmem_);
         log_->info("Results of rule application");
@@ -119,7 +119,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         fcmem_.add_rules_product(iteration, product);
         fcmem_.update_premise_list(product);
 
-        //!Choose next source.
+        //! Choose next source.
         auto source = fcb.choose_next_source(fcmem_);
         fcmem_.set_source(source);
         iteration++;
