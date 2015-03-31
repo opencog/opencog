@@ -170,7 +170,7 @@ HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
     Handle hsource = fcmem.get_cur_source();
 
     // Get everything associated with the source handle.
-    HandleSeq neighbors = getNeighbors(hsource, true, true, LINK, true);
+    UnorderedHandleSet neighbors = get_distant_neighbors(hsource, 2);
 
     // Add all root links of atoms in @param neighbors.
     for (auto hn : neighbors) {
