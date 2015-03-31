@@ -50,24 +50,26 @@ private:
 public:
     FCMemory(AtomSpace* as);
     ~FCMemory();
-    vector<Rule*> get_rules(void);
+    vector<Rule*> get_rules();
     void set_rules(vector<Rule*> rules);
     void set_source(Handle source);
-    HandleSeq get_source_list(void);
-    HandleSeq get_premise_list(void);
+    HandleSeq get_source_list();
+    HandleSeq get_premise_list();
     void update_premise_list(HandleSeq input);
-    bool is_search_in_af(void);
-    Rule* get_cur_rule(void);
+    bool is_search_in_af();
+    Rule* get_cur_rule();
     void add_rules_product(int iteration, HandleSeq product);
     void set_cur_rule(Rule* r);
     void add_inference(int iteration, HandleSeq product,
                        HandleSeq matched_nodes);
-    Handle get_cur_source(void);
+    Handle get_cur_source();
     bool isin_source_list(Handle h);
     bool isin_premise_list(Handle h);
-    HandleSeq get_result(void);
-    vector<Inference>& get_inf_history(void);
-    vector<Rule*> get_applied_rules(void);
+    HandleSeq get_result();
+    vector<Inference>& get_inf_history();
+
+	// TODO: not used anywhere
+	vector<Rule*> get_applied_rules();
 
 };
 
