@@ -68,30 +68,29 @@ public:
 	~BackwardChainer();
 
 	void do_chain(Handle init_target);
-	map<Handle, HandleSeq>& get_chaining_result();
+	map<Handle, UnorderedHandleSet>& get_chaining_result();
 
 	AtomSpace* _as;
 	std::map<int, HandleSeq> _step_inference_map; //for holding inference history
 
 private:
-	map<Handle, HandleSeq> do_bc(Handle& htarget);
-
-	map<Handle, HandleSeq> bc_rule(Rule& rule);
+	map<Handle, UnorderedHandleSet> do_bc(Handle& htarget);
+	map<Handle, UnorderedHandleSet> bc_rule(Rule& rule, const map<Handle, Handle>& mapping);
 
 	std::vector<Rule> filter_rules(Handle htarget);
 	HandleSeq filter_grounded_experssions(Handle htarget);
 
-	bool unify(const Handle& htarget, const Handle& match, map<Handle, HandleSeq>& output);
+	bool unify(const Handle& htarget, const Handle& match, map<Handle, Handle>& output);
 
 	map<Handle, HandleSeq> get_logical_link_premises_map(Handle& himplicant);
 
-	map<Handle, HandleSeq> join_premise_vgrounding_maps(const Handle& connector,
-			const map<Handle, map<Handle, HandleSeq> >& premise_var_grounding_map);
+	map<Handle, UnorderedHandleSet> join_premise_vgrounding_maps(const Handle& connector,
+			const map<Handle, map<Handle, UnorderedHandleSet> >& premise_var_grounding_map);
 
 	Rule select_rule(const std::vector<Rule>& rules);
-	HandleSeq chase_var_values(Handle& hvar, vector<map<Handle, HandleSeq>>& inference_list, HandleSeq& results);
 
-	map<Handle, HandleSeq> ground_target_vars(Handle& hgoal, vector<map<Handle, HandleSeq>>& var_grounding_map);
+	UnorderedHandleSet chase_var_values(Handle& hvar, const vector<map<Handle, UnorderedHandleSet>>& inference_list, UnorderedHandleSet& results);
+	map<Handle, UnorderedHandleSet> ground_target_vars(Handle& hgoal, vector<map<Handle, UnorderedHandleSet>>& var_grounding_map);
 
 	void remove_generated_rules();
 
@@ -102,8 +101,10 @@ private:
 #endif
 
 	PLNCommons* _commons;
-	map<Handle, HandleSeq> _chaining_result;
-	vector<map<Handle, HandleSeq>> _inference_list;
+	map<Handle, UnorderedHandleSet> _chaining_result;
+
+	// XXX TODO do we need to store the rule used too?
+	vector<map<Handle, UnorderedHandleSet>> _inference_list;
 
 	std::vector<Rule> _rules_set;
 

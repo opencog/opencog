@@ -44,18 +44,26 @@ BackwardChainer::~BackwardChainer()
 /**
  * The public entry point for backward chaining.
  *
+ * XXX TODO allow backward chaining 1 step (for mixing forward/backward chaining)
+ *
  * @param init_target  the initial atom to start the chaining
  */
 void BackwardChainer::do_chain(Handle init_target)
 {
 	_chaining_result.clear();
-	_chaining_result = do_bc(init_target);
+
+	do_bc(init_target);
+
+	// results will contain a mapping of the variables in init_target
+	// but it could point to other varialbes, so need to chase its
+	// final grounding
+	_chaining_result = ground_target_vars(init_target, _inference_list);
 
 	//clean variables
 	remove_generated_rules();
 }
 
-map<Handle, HandleSeq>& BackwardChainer::get_chaining_result()
+map<Handle, UnorderedHandleSet>& BackwardChainer::get_chaining_result()
 {
 	return _chaining_result;
 }
@@ -66,7 +74,7 @@ map<Handle, HandleSeq>& BackwardChainer::get_chaining_result()
  * @param hgoal  the atom to do backward chaining on
  * @return       ???
  */
-map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
+map<Handle, UnorderedHandleSet> BackwardChainer::do_bc(Handle& hgoal)
 {
 	// TODO filter grounded representations so the next condition would never be fooled
 	// XXX what does the above meant?
@@ -83,55 +91,55 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
 
 		// if no rules to backward chain on
 		if (acceptable_rules.empty())
-			return map<Handle, HandleSeq>();
+			return map<Handle, UnorderedHandleSet>();
 
-		// TODO use all rules for found here.
-		// TODO need to add the rule to the atomspace to be useable
+		// XXX TODO use all rules found here; this will require branching on the
+		// rules, so this will be the point where a variable could end up mapping
+		// to more than one solution
 		Rule standardized_rule = select_rule(acceptable_rules).gen_standardize_apart(_as);
 
 		//for later removal
 //		_bc_generated_rules.push_back(stadardized_rule);
 
 		HandleSeq output = standardized_rule.get_implicand();
+		map<Handle, Handle> implicand_mapping;
 
 		// check which output can be unified and add to history
 		for (Handle h : output)
 		{
-			map<Handle, HandleSeq> out;
-
-			if (not unify(h, hgoal, out))
+			if (not unify(h, hgoal, implicand_mapping))
 				continue;
 
 			logger().debug("[BackwardChainer] Found one implicand's output unifiable " + h->toShortString());
-
-			_inference_list.push_back(out);
 			break;
 		}
 
 		logger().debug("[BackwardChainer] Before chaining on rule %s", standardized_rule.get_name().c_str());
 		logger().debug("[BackwardChainer] Inference history's size is %d", _inference_list.size());
+
+		if (_inference_list.size() > 5)
+			return map<Handle, UnorderedHandleSet>();
+
 		print_inference_list();
 
-		map<Handle, HandleSeq> solution = bc_rule(standardized_rule);
-		_inference_list.push_back(solution);
-
-		logger().debug("[BackwardChainer] After chaining on rule %s", standardized_rule.get_name().c_str());
-		print_inference_list();
-
-		return ground_target_vars(hgoal, _inference_list);
+		return bc_rule(standardized_rule, implicand_mapping);
 	}
 
-	vector<map<Handle, HandleSeq>> kb_results;
+	map<Handle, UnorderedHandleSet> results;
 
-	map<Handle, HandleSeq> out;
 	for (Handle soln : kb_match)
 	{
+		map<Handle, Handle> vgm;
+
 		// should be possible to unify since kb_match is found by PM on hgoal
-		unify(hgoal, soln, out);
-		kb_results.push_back(out);
+		unify(hgoal, soln, vgm);
+
+		// construct the hgoal to all mappings here to be returned
+		for (auto it = vgm.begin(); it != vgm.end(); ++it)
+			results[it->first].emplace(it->second);
 	}
 
-	return ground_target_vars(hgoal, kb_results);
+	return results;
 }
 
 /**
@@ -147,15 +155,26 @@ map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
  * @param rule      the rule to apply
  * @return          ???
  */
-map<Handle, HandleSeq> BackwardChainer::bc_rule(Rule& rule)
+map<Handle, UnorderedHandleSet> BackwardChainer::bc_rule(Rule& rule, const map<Handle, Handle>& mapping)
 {
 	Handle himplicant = rule.get_implicant();
+
+	// add the mapping to the inference history
+	map<Handle, UnorderedHandleSet> history;
+	for (auto& m : mapping)
+		history[m.first].emplace(m.second);
+	_inference_list.push_back(history);
+
+	// reverse ground the implicant with the grounding we found from unifying
+	// the implicand
+	Instantiator inst(_as);
+	himplicant = inst.instantiate(himplicant, mapping);
 
 	std::stack<Handle> visit_stack;
 	visit_stack.push(himplicant);
 
 	map<Handle, HandleSeq> logical_link_premise_map = get_logical_link_premises_map(himplicant);
-	map<Handle, map<Handle, HandleSeq>> premise_var_ground_map;
+	map<Handle, map<Handle, UnorderedHandleSet>> premise_var_ground_map;
 	UnorderedHandleSet evaluated_premises;
 
 	logger().debug("[BackwardChainer] Before looping rule's premises");
@@ -194,17 +213,27 @@ map<Handle, HandleSeq> BackwardChainer::bc_rule(Rule& rule)
 			continue;
 		}
 
-		logger().debug("[BackwardChainer] Backward chaining on sub-premises");
+		logger().debug("[BackwardChainer] Backward chaining on sub-premise " + premise->toShortString());
 
 		// if premise has no sub-premises (ie. not a logical condition), just
 		// backward chain on it
-		auto var_grounding = do_bc(premise);
-		premise_var_ground_map[premise] = var_grounding;
+		// XXX TODO instead of immediately chain on the premise, add it to a queue instead
+		// ie. do something like BFS instead of DFS
+
+
+		// some of its mapping might need to be removed by AND_LINK, but if they are in the _inference_list, we cannot tell
+
+		premise_var_ground_map[premise] = do_bc(premise);
 		evaluated_premises.emplace(premise);
 	}
 
+	map<Handle, UnorderedHandleSet> result = premise_var_ground_map[himplicant];
+
+	// add the final joined result to inference history
+	_inference_list.push_back(result);
+
 	// get the final grounding
-	return premise_var_ground_map[himplicant];
+	return result;
 }
 
 /**
@@ -225,7 +254,7 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
 		// check if any of the implicand's output can be unified to target
 		for (Handle h : output)
 		{
-			std::map<Handle, HandleSeq> mapping;
+			std::map<Handle, Handle> mapping;
 
 			if (not unify(h, htarget, mapping))
 				continue;
@@ -299,7 +328,7 @@ HandleSeq BackwardChainer::filter_grounded_experssions(Handle htarget)
  */
 bool BackwardChainer::unify(const Handle& htarget,
                             const Handle& hmatch,
-                            map<Handle, HandleSeq>& result)
+                            map<Handle, Handle>& result)
 {
 	LinkPtr lptr_target(LinkCast(htarget));
 	LinkPtr lptr_match(LinkCast(hmatch));
@@ -312,7 +341,7 @@ bool BackwardChainer::unify(const Handle& htarget,
 		// if the two links type are not equal
 		if (lptr_target->getType() != lptr_match->getType())
 		{
-			result = std::map<Handle, HandleSeq>();
+			result = std::map<Handle, Handle>();
 			return false;
 		}
 
@@ -321,21 +350,21 @@ bool BackwardChainer::unify(const Handle& htarget,
 		// if the two links are not of equal size, cannot unify
 		if (target_outg.size() != match_outg.size())
 		{
-			result = std::map<Handle, HandleSeq>();
+			result = std::map<Handle, Handle>();
 			return false;
 		}
 
 		for (vector<Handle>::size_type i = 0; i < target_outg.size(); i++)
 		{
 			if (target_outg[i]->getType() == VARIABLE_NODE)
-				result[target_outg[i]].push_back(match_outg[i]);
+				result[target_outg[i]] = match_outg[i];
 			else if (not unify(target_outg[i], match_outg[i], result))
 				return false;
 		}
 	}
 	else if (htarget->getType() == VARIABLE_NODE)
 	{
-		result[htarget].push_back(hmatch);
+		result[htarget] = hmatch;
 	}
 
 	return not result.empty();
@@ -364,51 +393,59 @@ Rule BackwardChainer::select_rule(const std::vector<Rule>& rules)
  * @param premise_var_grounding_map  the solutions from the sub-premises
  * @return                           a map of variable to groundings
  */
-map<Handle, HandleSeq> BackwardChainer::join_premise_vgrounding_maps(
+map<Handle, UnorderedHandleSet> BackwardChainer::join_premise_vgrounding_maps(
 		const Handle& logical_link,
-		const map<Handle, map<Handle, HandleSeq> >& premise_var_grounding_map)
+		const map<Handle, map<Handle, UnorderedHandleSet> >& premise_var_grounding_map)
 {
-	map<Handle, HandleSeq> result;
+	map<Handle, UnorderedHandleSet> result;
 
+	// for each sub-premise, look at its solution
 	for (auto pvg_it = premise_var_grounding_map.begin();
 	     pvg_it != premise_var_grounding_map.end();
 	     ++pvg_it)
 	{
-		map<Handle, HandleSeq> var_groundings = pvg_it->second;
+		// get the sub-premise's solution
+		map<Handle, UnorderedHandleSet> var_groundings = pvg_it->second;
 
+		// first sub-premise, just add all its solution
 		if (pvg_it == premise_var_grounding_map.begin())
-			result = var_groundings;
-		else
 		{
-			for (auto vg_it = var_groundings.begin();
-					vg_it != var_groundings.end(); vg_it++)
+			result = var_groundings;
+			continue;
+		}
+
+		// for each variable
+		for (auto vg_it = var_groundings.begin();
+			 vg_it != var_groundings.end();
+			 ++vg_it)
+		{
+			Handle key = vg_it->first;
+			UnorderedHandleSet vals = vg_it->second;
+
+			// if OR_LINK, the mapping of common variable can be merged
+			if (logical_link->getType() == OR_LINK)
 			{
-				if (result.count(vg_it->first) == 1)
+				result[key].insert(vals.begin(), vals.end());
+				continue;
+			}
+
+			// if AND_LINK, the mapping of common variable must agree
+			if (logical_link->getType() == AND_LINK)
+			{
+				UnorderedHandleSet common_vals;
+				UnorderedHandleSet old_vals = result[key];
+
+				for (auto o : old_vals)
 				{
-					HandleSeq vg1 = vg_it->second;
-					HandleSeq vg2 = result[vg_it->first];
-					HandleSeq common_values;
-					sort(vg1.begin(), vg1.end());
-					sort(vg2.begin(), vg2.end());
-					if (_as->getType(logical_link) == AND_LINK)
-					{
-						set_intersection(vg1.begin(), vg1.end(), vg2.begin(),
-								vg2.end(), back_inserter(common_values));
-
-					}
-
-					if (_as->getType(logical_link) == OR_LINK)
-						set_union(vg1.begin(), vg1.end(), vg2.begin(),
-								vg2.end(), back_inserter(common_values));
-
-					result[vg_it->first] = common_values;
-
+					if (vals.count(o) == 1)
+						common_vals.emplace(o);
 				}
-				else
-					result[vg_it->first] = vg_it->second;
+
+				result[key] = common_vals;
 			}
 		}
 	}
+
 	return result;
 }
 
@@ -472,53 +509,64 @@ map<Handle, HandleSeq> BackwardChainer::get_logical_link_premises_map(Handle& hi
 }
 
 /**
- * looks for possible grounding of variable node in the entire inference list which was built through the backward chaining process
- * @param hvar a variable node whose possible values to be searched in the inference list
- * @param inference_list of variable to possible list of matches(to variableNode or ConceptNode) built in the prev inference steps
- * @param results a set of grounded nodes found for @param hvar
+ * Looks for possible grounding of variable node in the input inference list.
+ *
+ * Does the main recursive chasing for ground_target_vars()
+ *
+ * @param hvar            a variable node whose possible values to be searched in the inference list
+ * @param inference_list  variable to possible list of matches
+ * @param results         a set of grounded solution found
  */
-HandleSeq BackwardChainer::chase_var_values(Handle& hvar,
-                                            vector<map<Handle, HandleSeq>>& inference_list,
-                                            HandleSeq& results)
+UnorderedHandleSet BackwardChainer::chase_var_values(
+        Handle& hvar,
+        const vector<map<Handle, UnorderedHandleSet>>& inference_list,
+        UnorderedHandleSet& results)
 {
-	for (auto it = inference_list.begin(); it != inference_list.end(); ++it) {
-		map<Handle, HandleSeq> var_value = *it;
-		if (var_value.count(hvar) != 0) {
-			HandleSeq values = var_value[hvar];
-			for (Handle h : values) {
-				if (_as->getType(h) == VARIABLE_NODE) {
-					HandleSeq new_values;
-					HandleSeq hseq = chase_var_values(h, inference_list,
-							new_values);
-					results.insert(results.end(), hseq.begin(), hseq.end());
-				} else {
-					results.push_back(h);
-				}
+	// check the inference history to see where hvar appear
+	for (map<Handle, UnorderedHandleSet> vgm : inference_list)
+	{
+		// each time it appear, add its mapping to the results
+		if (vgm.count(hvar) != 0)
+		{
+			UnorderedHandleSet groundings = vgm[hvar];
+
+			for (Handle h : groundings)
+			{
+				if (h->getType() == VARIABLE_NODE)
+					chase_var_values(h, inference_list, results);
+				else
+					results.emplace(h);
 			}
 		}
 	}
+
 	return results;
 }
 
 /**
  * Matches the variables in the target to their groundings.
  *
- * @param hgoal               the target Handle consisting of variable nodes
- * @param var_grounding_map   a variable to groundings map list
- * @return                    a map of variable to all found groundings
+ * This method will chase the mapping, so if $x->$y, $y->"dog", then in the
+ * end we will get $x->"dog".
+ *
+ * @param hgoal            the target Handle consisting of variable nodes
+ * @param inference_list   a variable to groundings map list
+ * @return                 a map of variable to all found groundings
  */
-map<Handle, HandleSeq> BackwardChainer::ground_target_vars(
+map<Handle, UnorderedHandleSet> BackwardChainer::ground_target_vars(
         Handle& hgoal,
-        vector<map<Handle, HandleSeq>>& inference_list)
+        vector<map<Handle, UnorderedHandleSet>>& inference_list)
 {
-	map<Handle, HandleSeq> vg_map;
+	map<Handle, UnorderedHandleSet> vg_map;
 
 	// find all VariableNode inside hgoal, but not those inside QuoteLink
 	FindVariables fv(VARIABLE_NODE);
 	fv.find_vars(hgoal);
 
-	for (map<Handle, HandleSeq> vgm : inference_list)
+	// check all inference history
+	for (map<Handle, UnorderedHandleSet> vgm : inference_list)
 	{
+		// check the mapping generated at each point
 		for (auto it = vgm.begin(); it != vgm.end(); ++it)
 		{
 			Handle hvar = it->first;
@@ -526,38 +574,16 @@ map<Handle, HandleSeq> BackwardChainer::ground_target_vars(
 			// if hvar is in hgoal
 			if (fv.varset.count(hvar) == 1)
 			{
-				HandleSeq values;
-				HandleSeq groundings = it->second;
+				UnorderedHandleSet groundings = it->second;
 
 				for (Handle h : groundings)
 				{
+					UnorderedHandleSet results;
+
 					if (h->getType() == VARIABLE_NODE)
-					{
-						HandleSeq val;
-						val = chase_var_values(h, inference_list, val);
-						values.insert(values.end(), val.begin(), val.end());
-					}
-					else
-					{
-						values.push_back(h);
-					}
+						chase_var_values(h, inference_list, results);
 
-					//erase duplicates i.e union
-					sort(values.begin(), values.end());
-					values.erase(unique(values.begin(), values.end()), values.end());
-				}
-
-				if (vg_map.count(hvar) == 0)
-					vg_map[hvar] = values;
-				else
-				{
-					HandleSeq existing = vg_map[hvar];
-					sort(existing.begin(), existing.end());
-					sort(values.begin(), values.end());
-					HandleSeq hs_combined;
-					set_union(existing.begin(), existing.end(), values.begin(),
-							values.end(), back_inserter(hs_combined));
-					vg_map[hvar] = hs_combined;
+					vg_map[hvar].insert(results.begin(), results.end());
 				}
 			}
 		}
@@ -569,7 +595,8 @@ map<Handle, HandleSeq> BackwardChainer::ground_target_vars(
 /**
  * calls atomspace to remove each variables and links present the bc_gnerated_rules
  */
-void BackwardChainer::remove_generated_rules() {
+void BackwardChainer::remove_generated_rules()
+{
 //	for (vector<Handle>::size_type i = 0; i < _bc_generated_rules.size(); i++) {
 //		Handle h = _bc_generated_rules.back();
 //		_commons->clean_up_implication_link(h);
@@ -578,20 +605,24 @@ void BackwardChainer::remove_generated_rules() {
 }
 
 #ifdef DEBUG
-void BackwardChainer::print_inference_list() {
+void BackwardChainer::print_inference_list()
+{
 	for (auto it = _inference_list.begin(); it != _inference_list.end(); ++it) {
-		map<Handle, HandleSeq> var_ground = *it;
+		map<Handle, UnorderedHandleSet> var_ground = *it;
 		for (auto j = var_ground.begin(); j != var_ground.end(); ++j) {
-			cout << "[VAR:" << j->first->toString() << endl;
-			HandleSeq hs = j->second;
+			UnorderedHandleSet hs = j->second;
+			std::string mapping;
 			for (Handle h : hs)
-			cout << "\tVAL:" << h->toString() << endl;
+				mapping += "\tVAL:" + h->toString() + "\n";
+
+			logger().debug("[BackwardChainer] VAR:" + j->first->toString() + mapping);
 		}
-		cout << "]" << endl;
 	}
 }
+
 void BackwardChainer::print_premise_var_ground_mapping(
-		const map<Handle, map<Handle, HandleSeq>>& premise_var_ground_map) {
+		const map<Handle, map<Handle, HandleSeq>>& premise_var_ground_map)
+{
 	for (auto it = premise_var_ground_map.begin();
 			it != premise_var_ground_map.end(); ++it) {
 		cout << "PREMISE:" << endl << it->first->toString() << endl;
@@ -599,13 +630,14 @@ void BackwardChainer::print_premise_var_ground_mapping(
 		print_var_value(var_ground);
 	}
 }
-void BackwardChainer::print_var_value(
-		const map<Handle, HandleSeq>& var_ground) {
+
+void BackwardChainer::print_var_value( const map<Handle, HandleSeq>& var_ground)
+{
 	for (auto j = var_ground.begin(); j != var_ground.end(); ++j) {
 		cout << "[VAR:" << j->first->toString() << endl;
 		HandleSeq hs = j->second;
 		for (Handle h : hs)
-		cout << "\tVAL:" << h->toString() << endl;
+			cout << "\tVAL:" << h->toString() << endl;
 	}
 	cout << "]" << endl;
 }
