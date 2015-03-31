@@ -444,10 +444,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 // if the atom appears more than once in the outgoing
                 // set. Fix the handles' UUID, by forcing a cast.
                 llc->_outgoing[i] = ((AtomPtr) llc->_outgoing[i]);
-            } else {
-               // Build the incoming set of outgoing atom h.
-               llc->_outgoing[i]->insert_atom(llc);
             }
+            // Build the incoming set of outgoing atom h.
+            llc->_outgoing[i]->insert_atom(llc);
         }
 
         // OK, so if the above fixed up the outgoing set, and
