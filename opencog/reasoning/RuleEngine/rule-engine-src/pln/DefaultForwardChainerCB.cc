@@ -236,6 +236,8 @@ HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
     fcpm_->set_fcmem(&fcmem);
 
     BindLinkPtr bl(BindLinkCast(cur_rule->get_handle()));
+    fcpm_->implicand = bl->get_implicand();
+    fcpm_->set_type_restrictions(bl->get_typemap());
     bl->imply(fcpm_);
 
     HandleSeq product = fcpm_->get_products();
