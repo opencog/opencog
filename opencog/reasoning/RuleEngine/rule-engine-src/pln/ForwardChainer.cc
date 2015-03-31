@@ -103,11 +103,13 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
             rule_weight[r] = r->get_cost();
         }
         auto r = pc.tournament_select(rule_weight);
-        log_->info("Chosen rule %s", r->get_name().c_str());
 
-        //!If no rules matches the pattern of the source,choose another source if there is, else end forward chaining.
+        //! If no rules matches the pattern of the source, choose
+        //! another source if there is, else end forward chaining.
+        //! @todo actually rightnow it just stops if no rule matches.
         if (not r)
             return;
+        log_->info("Chosen rule %s", r->get_name().c_str());
         fcmem_.cur_rule_ = r;
 
         //! Apply rule.

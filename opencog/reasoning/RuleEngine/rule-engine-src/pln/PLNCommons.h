@@ -23,6 +23,9 @@
 #ifndef PLNCOMMONS_H_
 #define PLNCOMMONS_H_
 
+#include <opencog/util/dorepeat.h>
+#include <opencog/util/random.h>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/types.h>
@@ -91,29 +94,29 @@ public:
 	 * @return a Link or Handle::UNDEFINED if there is no
 	 */
 	void get_root_links(Handle h, HandleSeq& parents);
-	template<class Type> Type tournament_select(map<Type, float> tfitnes_map) {
-		if (tfitnes_map.size() == 1) {
-			return tfitnes_map.begin()->first;
-		}
 
-		map<Type, float> winners;
-		int size = tfitnes_map.size() / 2; //TODO change the way tournament size is calculated
-		for (auto i = 0; i < size; i++) {
-			int index = (random() % tfitnes_map.size());
-			auto it = tfitnes_map.begin();
-			advance(it, index);
-			winners[it->first] = it->second;
+	/**
+	 * Randomly pick about half of the elements, and amongst those
+	 * return the fittest (higher is better). If tfitness_map is
+	 * empty, then return the default value (build with Type()).
+	 */
+	template<class Type>
+	Type tournament_select(map<Type, float> tfitnes_map) {
+		// Nothing to select, return the nullptr rule
+		if (tfitnes_map.empty())
+			return Type();
+
+		// Something to select, randomly pick (without replacement)
+		// about half of the rules and return the best
+		// TODO change the way pick_size is calculated
+		size_t pick_size = std::max(static_cast<size_t>(1),
+		                            tfitnes_map.size() / 2);
+		multimap<float, Type> winners;
+		dorepeat(pick_size) {
+			auto el = rand_element(tfitnes_map);
+			winners.insert({el.second, el.first});
 		}
-		auto it = winners.begin();
-		Type hbest = it->first;
-		float max = it->second;
-		for (; it != winners.end(); ++it) {
-			if (it->second > max) {
-				hbest = it->first;
-				max = it->second;
-			}
-		}
-		return hbest;
+		return winners.rbegin()->second;
 	}
 	/**
 	 * Calculates fitness values in source_list_atom_space (or
