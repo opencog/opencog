@@ -37,23 +37,21 @@ ForwardChainPatternMatchCB::~ForwardChainPatternMatchCB()
 bool ForwardChainPatternMatchCB::node_match(Handle& node1, Handle& node2)
 {
     //constrain search within premise list
-    if (_fcmem->is_search_in_af())
-        return (_fcmem->isin_premise_list(node2) and AttentionalFocusCB::node_match(
-                node1, node2));
-    else
-        return (_fcmem->isin_premise_list(node2) and DefaultPatternMatchCB::node_match(
-                node1, node2));
+    return _fcmem->isin_premise_list(node2)
+        and (_fcmem->is_search_in_af() ?
+             AttentionalFocusCB::node_match(node1, node2)
+             : DefaultPatternMatchCB::node_match(node1, node2));
 }
+
 bool ForwardChainPatternMatchCB::link_match(LinkPtr& lpat, LinkPtr& lsoln)
 {
     //constrain search within premise list
-    if (_fcmem->is_search_in_af())
-        return (_fcmem->isin_premise_list(Handle(lsoln)) and AttentionalFocusCB::link_match(
-                lpat, lsoln));
-    else
-        return (_fcmem->isin_premise_list(Handle(lsoln)) and DefaultPatternMatchCB::link_match(
-                lpat, lsoln));
+    return _fcmem->isin_premise_list(Handle(lsoln))
+        and (_fcmem->is_search_in_af() ?
+             AttentionalFocusCB::link_match(lpat, lsoln)
+             : DefaultPatternMatchCB::link_match(lpat, lsoln));
 }
+
 bool ForwardChainPatternMatchCB::grounding(
         const std::map<Handle, Handle> &var_soln,
         const std::map<Handle, Handle> &pred_soln)
