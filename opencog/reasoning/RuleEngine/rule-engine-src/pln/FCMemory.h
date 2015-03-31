@@ -26,6 +26,8 @@
 #include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
 #include <opencog/atomspace/AtomSpace.h>
 
+class ForwardChainerUTest;
+
 namespace opencog {
 
 struct Inference {
@@ -35,10 +37,10 @@ struct Inference {
     HandleSeq matched_nodes; /**<matched nodes with the variables in the rule,useful during mutual exclusion checking*/
 };
 
-class ForwardChainer;
 class FCMemory {
 private:
     friend class ForwardChainer; /*<allow access to private*/
+    friend class ::ForwardChainerUTest; /*<allow access to private*/
     bool search_in_af_;
     vector<Rule*> rules_; /*<loaded rules*/
     HandleSeq source_list_; /*<selected sources on each forward chaining steps*/
