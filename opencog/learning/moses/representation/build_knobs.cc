@@ -1184,7 +1184,7 @@ void build_knobs::sample_action_perms(pre_it it, vector<combo_tree>& perms)
         pre_it iv = v.begin();
 
         // append a randomly picked perception
-        v.append_child(iv, randset(*_perceptions).begin());
+        v.append_child(iv, rand_element(*_perceptions).begin());
 
         int x = randpair();
         int a = x / (number_of_actions - 1);

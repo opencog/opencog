@@ -818,4 +818,13 @@ public:
 /** @}*/
 } // namespace opencog
 
+namespace std {
+
+/**
+* Output the whole atomspace (useful for debugging)
+*/
+ostream& operator<<(ostream&, const opencog::AtomSpace&);
+
+} //namespace std
+
 #endif // _OPENCOG_ATOMSPACE_H

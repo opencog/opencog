@@ -209,7 +209,7 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const
             unsigned timestamps_size = timestamps.size(),
                 rm_size = (1.0 - params.subsampling_ratio) * timestamps_size;
             dorepeat(rm_size)
-                rm_timestamps.insert(randset_erase(timestamps));
+                rm_timestamps.insert(rand_element_erase(timestamps));
             fs_ctable.remove_rows_at_times(rm_timestamps);
         } else {
             subsampleCTable(params.subsampling_ratio, fs_ctable);

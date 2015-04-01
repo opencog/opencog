@@ -1,0 +1,94 @@
+/*
+ * tests/atomspace/AtomUtilsUTest.cxxtest
+ *
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomutils/AtomUtils.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class AtomUtilsUTest :  public CxxTest::TestSuite
+{
+private:
+
+public:
+    AtomUtilsUTest()
+    {
+        logger().setPrintToStdoutFlag(true);
+    }
+
+	void test_get_distant_neighbors();
+	void test_get_outgoing_nodes();
+};
+
+// Test get_distant_neighbors()
+void AtomUtilsUTest::test_get_distant_neighbors()
+{
+	// Fill atomspace
+	AtomSpace as;
+	Handle A = as.addNode(CONCEPT_NODE, "A"),
+		B = as.addNode(CONCEPT_NODE, "B"),
+		C = as.addNode(CONCEPT_NODE, "C"),
+		D = as.addNode(CONCEPT_NODE, "D"),
+		AB = as.addLink(INHERITANCE_LINK, A, B),
+		BC = as.addLink(INHERITANCE_LINK, B, C),
+		CD = as.addLink(INHERITANCE_LINK, C, D);
+
+	// Test neighbors at distance 1 of A
+	TS_ASSERT_EQUALS(get_distant_neighbors(A, 1),
+	                 UnorderedHandleSet({AB}));
+
+	// Test neighbors at distance 1 of AB
+	TS_ASSERT_EQUALS(get_distant_neighbors(AB, 1),
+	                 UnorderedHandleSet({A, B}));
+
+	// Test neighbors at distance 2 of AB
+	TS_ASSERT_EQUALS(get_distant_neighbors(AB, 2),
+	                 UnorderedHandleSet({A, B, BC}));
+
+	// Test all neighbors of AB
+	TS_ASSERT_EQUALS(get_distant_neighbors(AB, -1),
+	                 UnorderedHandleSet({A, B, C, D, BC, CD}));
+}
+
+// Test get_outgoing_nodes()
+void AtomUtilsUTest::test_get_outgoing_nodes()
+{
+	AtomSpace as;
+	Handle A = as.addNode(CONCEPT_NODE, "A"),
+		B = as.addNode(CONCEPT_NODE, "B"),
+		P = as.addNode(PREDICATE_NODE, "P"),
+		AB = as.addLink(INHERITANCE_LINK, A, B),
+		ABP = as.addLink(LIST_LINK, AB, P);
+
+	// Get all nodes from ABP
+	TS_ASSERT_EQUALS(get_outgoing_nodes(ABP),
+	                 UnorderedHandleSet({A, B, P}));
+
+	// Get all concept nodes from ABP
+	TS_ASSERT_EQUALS(get_outgoing_nodes(ABP, {CONCEPT_NODE}),
+	                 UnorderedHandleSet({A, B}));
+
+	// Get all predicate nodes from ABP
+	TS_ASSERT_EQUALS(get_outgoing_nodes(ABP, {PREDICATE_NODE}),
+	                 UnorderedHandleSet({P}));
+}

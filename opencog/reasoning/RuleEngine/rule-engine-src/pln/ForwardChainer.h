@@ -29,12 +29,14 @@
 
 #include "FCMemory.h"
 
-namespace opencog
-{
+class ForwardChainerUTest;
+
+namespace opencog {
 
 class ForwardChainerCallBack;
 class ForwardChainer {
 private:
+    friend class ::ForwardChainerUTest;
     JsonicControlPolicyParamLoader* cpolicy_loader_;
     string _conf_path = "reasoning/RuleEngine/default_cpolicy.json";
     AtomSpace * as_;

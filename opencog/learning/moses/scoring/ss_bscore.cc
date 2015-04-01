@@ -73,7 +73,7 @@ behavioral_score ss_bscore::operator()(const combo_tree& tr) const {
         // // ~Debug
 
         for (unsigned i = 0; i < tt_size; ++i) {
-            TTable::value_type time = randset_erase(timestamps);
+            TTable::value_type time = rand_element_erase(timestamps);
             ignore_timestamps_per_ss_deme[i % _n_subsamples].insert(time);
         }
 

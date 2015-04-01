@@ -41,7 +41,7 @@ void FCMemory::update_premise_list(HandleSeq input)
     }
 }
 
-vector<Rule*> FCMemory::get_rules(void)
+vector<Rule*> FCMemory::get_rules()
 {
     return rules_;
 }
@@ -54,19 +54,19 @@ void FCMemory::set_source(Handle source)
     cur_source_ = source;
     source_list_.push_back(cur_source_);
 }
-HandleSeq FCMemory::get_source_list(void)
+HandleSeq FCMemory::get_source_list()
 {
     return source_list_;
 }
-HandleSeq FCMemory::get_premise_list(void)
+HandleSeq FCMemory::get_premise_list()
 {
     return premise_list_;
 }
-bool FCMemory::is_search_in_af(void)
+bool FCMemory::is_search_in_af()
 {
     return search_in_af_;
 }
-Rule* FCMemory::get_cur_rule(void)
+Rule* FCMemory::get_cur_rule()
 {
     return cur_rule_;
 }
@@ -96,7 +96,7 @@ void FCMemory::add_inference(int iter_step, HandleSeq product,
         inf.matched_nodes.push_back(mn);
     inf_history_.push_back(inf);
 }
-Handle FCMemory::get_cur_source(void)
+Handle FCMemory::get_cur_source()
 {
     return cur_source_;
 }
@@ -141,7 +141,7 @@ vector<Inference>& FCMemory::get_inf_history()
     return inf_history_;
 }
 
-vector<Rule*> FCMemory::get_applied_rules(void)
+vector<Rule*> FCMemory::get_applied_rules()
 {
     vector<Rule*> applied_rules;
     for (Inference i : inf_history_) {

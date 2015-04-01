@@ -23,11 +23,12 @@
 #include "PLNCommons.h"
 
 #include <opencog/util/macros.h>
+#include <opencog/atomutils/AtomUtils.h>
+#include <opencog/guile/SchemeSmob.h>
 
 PLNCommons::PLNCommons(AtomSpace * as) :
         as_(as)
 {
-
 }
 
 PLNCommons::~PLNCommons()
@@ -61,8 +62,8 @@ Handle PLNCommons::create_bindLink(
     //if(vnode_is_typedv)
     himplicant = replace_nodes_with_varnode(himplicant);
 
-    UnorderedHandleSet variable_nodes = get_nodes(himplicant,
-                                                  { VARIABLE_NODE });
+    UnorderedHandleSet variable_nodes = get_outgoing_nodes(himplicant,
+                                                           {VARIABLE_NODE});
     HandleSeq list_link_elem;
 
     // For searching ImplicationLinks with variables.
@@ -84,6 +85,8 @@ Handle PLNCommons::create_bindLink(
     return as_->addLink(BIND_LINK, var_listLink, implicationLink);
 }
 
+<<<<<<< HEAD
+=======
 UnorderedHandleSet PLNCommons::get_nodes(
         const Handle& hinput, const vector<Type>& required_nodes) const
 {
@@ -114,6 +117,7 @@ UnorderedHandleSet PLNCommons::get_nodes(
     }
 }
 
+>>>>>>> refs/remotes/upstream/master
 bool PLNCommons::exists_in(Handle& hlink, Handle& h)
 {
     if (hlink == h) {
@@ -148,7 +152,7 @@ void PLNCommons::clean_up_bind_link(Handle& hbind_link)
 void PLNCommons::remove_vnode_containing_links(Handle& h)
 {
     if (LinkCast(h)) {
-        auto vnodes = get_nodes(h, vector<Type> { VARIABLE_NODE });
+        auto vnodes = get_outgoing_nodes(h, {VARIABLE_NODE});
         if (not vnodes.empty()) {
             HandleSeq outgoings = as_->getOutgoing(h);
             as_->removeAtom(h);
@@ -186,9 +190,9 @@ Handle PLNCommons::replace_nodes_with_varnode(Handle& handle,
 {
     UnorderedHandleSet hvars;
     if (t == NODE)
-        hvars = get_nodes(handle, vector<Type> { }); //get every node
+        hvars = get_outgoing_nodes(handle); // Get every node
     else
-        hvars = get_nodes(handle, vector<Type> { t });
+        hvars = get_outgoing_nodes(handle, {t});
     map<Handle, Handle> node_unique_var_map;
     for (Handle h : hvars)
         node_unique_var_map[h] = as_->addNode(VARIABLE_NODE,

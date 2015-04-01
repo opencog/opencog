@@ -45,7 +45,7 @@ int Rule::get_cost()
 	return cost_;
 }
 
-void Rule::set_category(string name)
+void Rule::set_category(const string& name)
 {
 	category_ = name;
 }
@@ -55,12 +55,22 @@ string& Rule::get_category()
 	return category_;
 }
 
-void Rule::set_name(string name)
+const string& Rule::get_category() const
+{
+	return category_;
+}
+
+void Rule::set_name(const string& name)
 {
 	name_ = name;
 }
 
-string Rule::get_name()
+string& Rule::get_name()
+{
+	return name_;
+}
+
+const string& Rule::get_name() const
 {
 	return name_;
 }

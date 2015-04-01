@@ -1,7 +1,7 @@
 
 ADD_LIBRARY (atomutils SHARED
-	AtomUtils.cc
-	PatternUtils.cc
+	AtomUtils
+	PatternUtils
 )
 
 ADD_DEPENDENCIES(atomutils opencog_atom_types)

@@ -59,16 +59,28 @@ UnorderedHandleSet getAllUniqueNodes(Handle h);
 HandleSeq getNeighbors(const Handle&, bool fanin=true, bool fanout=true,
                        Type linkType=LINK, bool subClasses=true);
 
+/**
+ * Given an atom (a link or node), Return all its children nodes
+ * (i.e. traversing the outgoings recursively)
+ *
+ * @param hinput - an atoms to be looked
+ * @param types - a list of type nodes to look for. if vector
+ *                is empty, all kinds of nodes are looked
+ * @return - a set of nodes
+ */
+UnorderedHandleSet get_outgoing_nodes(const Handle& hinput,
+                                      const std::vector<Type>& types =
+                                      std::vector<Type>());
 
 /**
  * Return all atoms connected to h up to a given distance. Both
  * incomings and outgoings are considered (unlike getNeighbors).
  *
  * @param h     the center atom
- * @param dist  the maximum distance
+ * @param dist  the maximum distance, or none if negative
  * @return      an UnorderedHandleSet of neighbors
  */
-UnorderedHandleSet get_distant_neighbors(const Handle& h, unsigned dist = 1);
+UnorderedHandleSet get_distant_neighbors(const Handle& h, int dist = 1);
 
 /** @}*/
 }

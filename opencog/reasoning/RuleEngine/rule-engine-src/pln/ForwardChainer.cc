@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/bind/SatisfactionLink.h>
+#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/query/DefaultImplicator.h>
 #include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
 #include <opencog/atoms/bind/BindLink.h>
@@ -75,12 +76,12 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
 
     PLNCommons pc(as_);
 
-    //Variable fulfillment query.
-    UnorderedHandleSet var_nodes = pc.get_nodes(hsource, { VARIABLE_NODE });
+    // Variable fulfillment query.
+    UnorderedHandleSet var_nodes = get_outgoing_nodes(hsource, {VARIABLE_NODE});
     if (not var_nodes.empty())
         return do_pm(hsource, var_nodes, fcb);
 
-    //Forward chaining on a particular type of atom.
+    // Forward chaining on a particular type of atom.
     int iteration = 0;
     auto max_iter = cpolicy_loader_->get_max_iter();
     init_source(hsource);
@@ -88,11 +89,11 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         log_->info("Iteration %d", iteration);
         log_->info("Next source %s", fcmem_.cur_source_->toString().c_str());
 
-        //Add more premise to hcurrent_source by pattern matching.
+        // Add more premise to hcurrent_source by pattern matching.
         HandleSeq input = fcb.choose_premises(fcmem_);
         fcmem_.update_premise_list(input);
 
-        //Choose the best rule to apply.
+        // Choose the best rule to apply.
         vector<Rule*> rules = fcb.choose_rule(fcmem_);
         map<Rule*, float> rule_weight;
         for (Rule* r : rules) {
@@ -100,15 +101,17 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
             rule_weight[r] = r->get_cost();
         }
         auto r = pc.tournament_select(rule_weight);
-        log_->info("Chosen rule %s", r->get_name().c_str());
 
-        //!If no rules matches the pattern of the source,choose another source if there is, else end forward chaining.
+        //! If no rules matches the pattern of the source, choose
+        //! another source if there is, else end forward chaining.
+        //! @todo actually rightnow it just stops if no rule matches.
         if (not r)
             return;
+        log_->info("Chosen rule %s", r->get_name().c_str());
         fcmem_.cur_rule_ = r;
 
-        //!Apply rule.
-        log_->info("Applying chosen rule", r->get_name().c_str());
+        //! Apply rule.
+        log_->info("Applying chosen rule %s", r->get_name().c_str());
         HandleSeq product = fcb.apply_rule(fcmem_);
         log_->info("Results of rule application");
         for (auto p : product)
@@ -116,7 +119,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         fcmem_.add_rules_product(iteration, product);
         fcmem_.update_premise_list(product);
 
-        //!Choose next source.
+        //! Choose next source.
         auto source = fcb.choose_next_source(fcmem_);
         fcmem_.set_source(source);
         iteration++;

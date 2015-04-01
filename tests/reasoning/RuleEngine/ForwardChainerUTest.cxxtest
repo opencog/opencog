@@ -4,7 +4,9 @@
  *  Created on: Sep 2, 2014
  *      Author: misgana
  */
+
 #include <opencog/reasoning/RuleEngine/rule-engine-src/pln/ForwardChainer.h>
+#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/DefaultForwardChainerCB.h>
 #include <opencog/reasoning/RuleEngine/rule-engine-src/pln/PLNCommons.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
@@ -12,29 +14,24 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/guile/load-file.h>
-//TODO test choose_target
+
 using namespace opencog;
+
 class ForwardChainerUTest: public CxxTest::TestSuite {
 private:
-	PLNCommons * commons_;
 	ForwardChainer * fc_;
 	AtomSpace * as_;
-	SchemeEval * eval_;
 	const std::string find_node_test1;
 public:
 	ForwardChainerUTest()
-		: find_node_test1(
-			"(InheritanceLink (EvaluationLink (PredicateNode \"rich\") (ListLink (ConceptNode \"M\") (ConceptNode \"R\"))) (EvaluationLink (PredicateNode \"happy\") (ListLink (ConceptNode \"M\") (ConceptNode \"R\"))))")
 	{
 		server(CogServer::createInstance);
 		as_ = &cogserver().getAtomSpace();
-		eval_ = new SchemeEval(as_);
-		commons_= new PLNCommons(as_);
 		as_->clear();
 		config().set("SCM_PRELOAD",
-				"opencog/atomspace/core_types.scm, "
-				"opencog/scm/utilities.scm, "
-				"opencog/python/pln/examples/deduction/atomspace_contents.scm");
+		             "opencog/atomspace/core_types.scm, "
+		             "opencog/scm/utilities.scm, "
+		             "opencog/scm/av-tv.scm");
 		config().set("MODULES", "opencog/query/libQueryModule.so");
 		cogserver().loadModules();
 		cogserver().loadSCMModules();
@@ -44,109 +41,43 @@ public:
 	~ForwardChainerUTest() {
 		delete as_;
 	}
-	void setUp(void);
-	void tearDown(void);
-	void test_find_node(void);
-	void test_exists(void);
-	void test_target_to_pmimplicant(void);
-	void test_choose_variable(void);
-	void test_load_fc_conf(void);
-	void test_choose_target(void);
-	void test_choose_input(void);
-	void test_do_chain(void);
+	void test_do_chain();
 };
-void ForwardChainerUTest::setUp(void) {
 
-}
+void ForwardChainerUTest::test_do_chain()
+{
+	// Test simple deduction
+	//
+	// InheritanceLink A B
+	// InheritanceLink B C
+	// |-
+	// InheritanceLink A C
+	Handle A = as_->addNode(CONCEPT_NODE, "A"),
+		B = as_->addNode(CONCEPT_NODE, "B"),
+		C = as_->addNode(CONCEPT_NODE, "C"),
+		AB = as_->addLink(INHERITANCE_LINK, A, B),
+		BC = as_->addLink(INHERITANCE_LINK, B, C);
 
-void ForwardChainerUTest::tearDown(void) {
-
-}
-
-void ForwardChainerUTest::test_find_node(void) {
-	Handle h = eval_->eval_h(find_node_test1);
-	TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
-	HandleSeq hs = commons_->get_nodes(h, vector<Type> { CONCEPT_NODE });
-	TS_ASSERT_EQUALS(2, hs.size());
-	HandleSeq hs1 = commons_->get_nodes(h, vector<Type> { PREDICATE_NODE });
-	TS_ASSERT_EQUALS(2, hs1.size());
-	h =
-			eval_->eval_h(
-					"(ConceptNode \"man@80d4e852-1b93-4c49-84e1-5a7352b0dcb1\" (stv 0.001 0.99000001))");
-	TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
-	hs = commons_->get_nodes(h, vector<Type> { CONCEPT_NODE });
-}
-void ForwardChainerUTest::test_exists() {
-	Handle x = eval_->eval_h("(ConceptNode \"x\")");
-	Handle y = eval_->eval_h("(ConceptNode \"y\")");
-	Handle z = eval_->eval_h("(ConceptNode \"z\")");
-	Handle zx = eval_->eval_h("(ConceptNode \"z\")");
-	HandleSeq hs = { x, y, z };
-	TS_ASSERT(fc_->exists(hs, zx));
-}
-void ForwardChainerUTest::test_target_to_pmimplicant(void) {
-	Handle hc1 = eval_->eval_h("(ConceptNode \"rich\")");
-	TS_ASSERT_DIFFERS(hc1, Handle::UNDEFINED);
-
-	Handle hc2 = eval_->eval_h("(ConceptNode \"happy\")");
-	TS_ASSERT_DIFFERS(hc2, Handle::UNDEFINED);
-
-	HandleSeq hseq = { hc1, hc2 };
-	Handle htarget = as_->addLink(INHERITANCE_LINK, hseq,
-			TruthValue::DEFAULT_TV());
-	Handle himplicant = fc_->target_to_pmimplicant(htarget, map<Handle, string> {
-			{ hc1, "$var-rich" } });
-	Handle himp_expected =
-			eval_->eval_h(
-					"(InheritanceLink (VariableNode \"$var-rich\") (ConceptNode \"happy\"))");
-	TS_ASSERT_EQUALS(himplicant.value(), himp_expected.value());
-
-	himplicant = fc_->target_to_pmimplicant(hc2, map<Handle, string> { { hc2,
-			"$var-happy" } });
-	himp_expected = eval_->eval_h("(VariableNode \"$var-happy\")");
-	TS_ASSERT_EQUALS(himplicant.value(), himp_expected.value());
-
-	string expected =
-			"(InheritanceLink (EvaluationLink (PredicateNode \"rich\") (ListLink (VariableNode \"$var-M\") (VariableNode \"$var-R\"))) (EvaluationLink (PredicateNode \"happy\") (ListLink (VariableNode \"$var-M\") (VariableNode \"$var-R\"))))";
-	himp_expected = eval_->eval_h(expected);
-	Handle h = eval_->eval_h(find_node_test1);
-	TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
-	himplicant = fc_->target_to_pmimplicant(h,
-			map<Handle, string> { { eval_->eval_h("(ConceptNode \"M\")"),
-					"$var-M" },
-					{ eval_->eval_h("(ConceptNode \"R\")"), "$var-R" } });
-	TS_ASSERT_EQUALS(himplicant.value(), himp_expected.value());
-}
-void ForwardChainerUTest::test_choose_variable(void) {
-	Handle h = eval_->eval_h(find_node_test1);
-	Handle h2 =
-			eval_->eval_h(
-					"(ConceptNode \"man@80d4e852-1b93-4c49-84e1-5a7352b0dcb1\" (stv 0.001 0.99000001))");
-	map<Handle, string> var_name_map = fc_->choose_variable(h2);
-	Handle hcomp = eval_->eval_h(
-			"(ConceptNode \"man@80d4e852-1b93-4c49-84e1-5a7352b0dcb1\")");
-	TS_ASSERT_EQUALS(1, var_name_map.size());
-	auto i = var_name_map.begin();
-	TS_ASSERT_EQUALS(hcomp.value(), i->first.value());
-	var_name_map = fc_->choose_variable(h);
-	//for (auto mit: var_name_map)
-	//	cout <<endl<< SchemeSmob::to_string(mit.first)<<endl;
-}
-void ForwardChainerUTest::test_load_fc_conf() {
-	fc_->load_fc_conf();
-	for (string s : fc_->bind_link_name_) {
-		cout << endl << "RULE VARIABLES:" << s << endl;
+	// Run forward chainer (and remove problematic rules)
+	DefaultForwardChainerCB dfc(as_);
+	vector<Rule*>& rules = fc_->fcmem_.rules_;
+	for (auto it = rules.begin(); it != rules.end();) {
+		if ((*it)->get_name() == "pln-rule-create-and-as-1st-arg-of-inheritance"
+			or
+		    (*it)->get_name() == "pln-rule-create-and-as-2nd-arg-of-inheritance")
+			it = rules.erase(it);
+		else
+			++it;
 	}
+	fc_->do_chain(dfc, AB);
 
-}
-void ForwardChainerUTest::test_choose_target() {
+	// Collect the results
+	HandleSeq results = fc_->get_chaining_result();
+	std::cout << "do_chain results:" << std::endl;
+	for (Handle h : results)
+		std::cout << h->toString() << std::endl;
 
-}
-void ForwardChainerUTest::test_choose_input() {
-
-}
-void ForwardChainerUTest::test_do_chain() {
-	Handle h = eval_->eval_h("(ConceptNode \"Peter\" )");
-	//Handle h2 = as->addNode(CONCEPT_NODE,"Peter",TruthValue::DEFAULT_TV());
-	fc_->do_chain(h);
+	// Check that AC is in the results
+	Handle AC = as_->addLink(INHERITANCE_LINK, A, C);
+	TS_ASSERT_DIFFERS(find(results.begin(), results.end(), AC), results.end());
 }

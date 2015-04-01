@@ -129,7 +129,8 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
 }
 
 /**
- * Gets all top level links of certain types and subclasses that contain @param hsource
+ * Gets all top level links of certain types and subclasses that
+ * contain @param hsource
  *
  * @param hsource handle whose top level links are to be searched
  * @param as the atomspace in which search is to be done
@@ -170,7 +171,7 @@ HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
     Handle hsource = fcmem.get_cur_source();
 
     // Get everything associated with the source handle.
-    HandleSeq neighbors = getNeighbors(hsource, true, true, LINK, true);
+    UnorderedHandleSet neighbors = get_distant_neighbors(hsource, 2);
 
     // Add all root links of atoms in @param neighbors.
     for (auto hn : neighbors) {
@@ -235,6 +236,8 @@ HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
     fcpm_->set_fcmem(&fcmem);
 
     BindLinkPtr bl(BindLinkCast(cur_rule->get_handle()));
+    fcpm_->implicand = bl->get_implicand();
+    fcpm_->set_type_restrictions(bl->get_typemap());
     bl->imply(fcpm_);
 
     HandleSeq product = fcpm_->get_products();

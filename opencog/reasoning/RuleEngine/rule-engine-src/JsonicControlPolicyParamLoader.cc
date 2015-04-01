@@ -256,15 +256,15 @@ void JsonicControlPolicyParamLoader::set_disjunct_rules(void)
  * Get a single Rule of a specific name.
  *
  * @param name   the name of the Rule
- * @return       pointer to a Rule object if found, NULL otherwise
+ * @return       pointer to a Rule object if found, nullptr otherwise
  */
-Rule* JsonicControlPolicyParamLoader::get_rule(string& name)
+Rule* JsonicControlPolicyParamLoader::get_rule(const string& name)
 {
     for (Rule* r : rules_) {
         if (r->get_name() == name)
             return r;
     }
-    return NULL;
+    return nullptr;
 }
 
 /**

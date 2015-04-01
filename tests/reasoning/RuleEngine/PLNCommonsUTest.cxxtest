@@ -39,7 +39,6 @@ public:
     void tearDown();
 
     void test_create_quoted(void);
-    void test_get_nodes(void);
     void test_exists_in(void);
     void test_clean_up_bind_link(void);
     void test_remove_vnode_containing_links(void);
@@ -76,11 +75,6 @@ void PLNCommonsUTest::test_create_quoted()
             "(InheritanceLink (QuoteLink (VariableNode \"$x\")) (ConceptNode \"criminal\"))";
     Handle hexpect = eval_->eval_h(expected);
     TS_ASSERT_EQUALS(hc.value(), hexpect.value());
-}
-
-void PLNCommonsUTest::test_get_nodes(void)
-{
-
 }
 
 void PLNCommonsUTest::test_exists_in(void)
