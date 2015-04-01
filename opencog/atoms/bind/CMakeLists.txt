@@ -7,6 +7,7 @@ ADD_LIBRARY (lambda SHARED
 	DefineLink.cc
 	LambdaLink.cc
 	SatisfactionLink.cc
+	VariableList.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
