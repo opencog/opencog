@@ -85,39 +85,6 @@ Handle PLNCommons::create_bindLink(
     return as_->addLink(BIND_LINK, var_listLink, implicationLink);
 }
 
-<<<<<<< HEAD
-=======
-UnorderedHandleSet PLNCommons::get_nodes(
-        const Handle& hinput, const vector<Type>& required_nodes) const
-{
-    // Recursive case
-    if (LinkCast(hinput)) {
-        UnorderedHandleSet found_nodes;
-        for (const Handle& h : as_->getOutgoing(hinput)) {
-            UnorderedHandleSet tmp = get_nodes(h, required_nodes);
-            found_nodes.insert(tmp.begin(), tmp.end());
-        }
-        return found_nodes;
-    }
-    // Base case
-    else {
-        OC_ASSERT(NodeCast(hinput) != nullptr);
-
-        if (required_nodes.empty()) { // Empty means all kinds of nodes
-            return {hinput};
-        } else {
-            // Check if this node is in our wish list
-            Type t = NodeCast(hinput)->getType();
-            auto it = find(required_nodes.begin(), required_nodes.end(), t);
-            if (it != required_nodes.end())
-                return {hinput};
-            else
-                return {};
-        }
-    }
-}
-
->>>>>>> refs/remotes/upstream/master
 bool PLNCommons::exists_in(Handle& hlink, Handle& h)
 {
     if (hlink == h) {
