@@ -40,8 +40,8 @@ public:
 	HandleSeq get_products(void);
 	void set_fcmem(FCMemory *fcmem);
 	//the follwing callbacks are used for guiding the PM to look only the source list
-	bool node_match(Handle& node1, Handle& node2);
-	bool link_match(LinkPtr& lpat, LinkPtr& lsoln);
+	bool node_match(const Handle& node1, const Handle& node2);
+	bool link_match(const LinkPtr& lpat, const LinkPtr& lsoln);
 
 	/**
 	 * A callback handler of the Pattern matcher used to store references to new conclusion the source list

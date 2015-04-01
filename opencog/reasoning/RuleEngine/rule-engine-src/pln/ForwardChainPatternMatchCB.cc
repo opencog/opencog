@@ -34,7 +34,8 @@ ForwardChainPatternMatchCB::~ForwardChainPatternMatchCB()
 {
 }
 
-bool ForwardChainPatternMatchCB::node_match(Handle& node1, Handle& node2)
+bool ForwardChainPatternMatchCB::node_match(const Handle& node1,
+                                            const Handle& node2)
 {
     //constrain search within premise list
     return _fcmem->isin_premise_list(node2)
@@ -43,7 +44,8 @@ bool ForwardChainPatternMatchCB::node_match(Handle& node1, Handle& node2)
              : DefaultPatternMatchCB::node_match(node1, node2));
 }
 
-bool ForwardChainPatternMatchCB::link_match(LinkPtr& lpat, LinkPtr& lsoln)
+bool ForwardChainPatternMatchCB::link_match(const LinkPtr& lpat,
+                                            const LinkPtr& lsoln)
 {
     //constrain search within premise list
     return _fcmem->isin_premise_list(Handle(lsoln))
