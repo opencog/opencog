@@ -48,7 +48,12 @@ class VariableList : public Link
 protected:
 	/// Unbundled variables and types for them.
 	/// _typemap is the (possibly empty) list of restrictions on
-	/// the variable types. Set by validate_vars()
+	/// the variable types. The _varset contains exactly the same atoms
+	/// as the outgoing set; it is used for fast lookup; (i.e. is some
+	/// some variable a part of this set?) whereas the outgoing set
+	/// preserves the original order of the variables.  Yes, teh fast
+	/// lookup really is needed!
+	HandleSeq _varseq;
 	std::set<Handle> _varset;
 	VariableTypeMap _typemap;
 
@@ -77,6 +82,8 @@ public:
 	VariableList(Link &l);
 
 	const VariableTypeMap& get_typemap(void) { return _typemap; }
+	bool is_type(const Handle&);
+	bool is_type(const HandleSeq&);
 };
 
 typedef std::shared_ptr<VariableList> VariableListPtr;

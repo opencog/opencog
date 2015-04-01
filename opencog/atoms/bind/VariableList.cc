@@ -225,4 +225,61 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 	}
 }
 
+/* ================================================================= */
+/**
+ * Simple type checker.
+ *
+ * Returns true/false if the indicated handle is of the type that
+ * we have memoized.
+ */
+bool VariableList::is_type(const Handle& h)
+{
+	// The arity must be one for there to be a match.
+	if (1 != _varset.size()) return false;
+
+	// No type restrictions.
+	if (0 == _typemap.size()) return true;
+
+	// Check the type restrictions.
+	VariableTypeMap::const_iterator it =_typemap.find(_outgoing[0]);
+	const std::set<Type> &tchoice = it->second;
+
+	Type htype = h->getType();
+	std::set<Type>::const_iterator allow = tchoice.find(htype);
+	return allow != tchoice.end();
+}
+
+/* ================================================================= */
+/**
+ * Very simple type checker.
+ *
+ * Returns true/false if the indicated handles are of the type that
+ * we have memoized.
+ *
+ * XXX TODO this does not currently handle type equations, as outlined
+ * on the wiki; We would need the general pattern matcher to do type
+ * checking, in that situation.
+ */
+bool VariableList::is_type(const HandleSeq& hseq)
+{
+	// The arity must be one for there to be a match.
+	size_t len = hseq.size();
+	if (_varset.size() != len) return false;
+	// No type restrictions.
+	if (0 == _typemap.size()) return true;
+
+	// Check the type restrictions.
+	for (size_t i=0; i<len; i++)
+	{
+		VariableTypeMap::const_iterator it =_typemap.find(_outgoing[i]);
+		if (it == _typemap.end()) continue;  // no restriction
+
+		const std::set<Type> &tchoice = it->second;
+		Type htype = hseq[i]->getType();
+		std::set<Type>::const_iterator allow = tchoice.find(htype);
+		if (allow == tchoice.end()) return false;
+	}
+	return true;
+}
+
 /* ===================== END OF FILE ===================== */
