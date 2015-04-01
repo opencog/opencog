@@ -47,7 +47,8 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 		}
 		else
 			throw InvalidParamException(TRACE_INFO,
-				"Expected a VariableNode or a TypedVariableLink");
+				"Expected a VariableNode or a TypedVariableLink, got: %s",
+					classserver().getTypeName(t).c_str());
 	}
 }
 
@@ -79,6 +80,8 @@ VariableList::VariableList(Link &l)
 			"Expecting a VariableList, got %s", tname.c_str());
 	}
 
+	// Dervided types have a different initialization sequence
+	if (VARIABLE_LIST != tscope) return;
 	validate_vardecl(l.getOutgoingSet());
 }
 
