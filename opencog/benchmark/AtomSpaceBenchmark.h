@@ -80,6 +80,7 @@ class AtomSpaceBenchmark
     std::string memoize_or_compile(std::string);
 
     std::vector<std::string>  methodNames;
+
 public:
     unsigned int Nreps;
     unsigned int Nloops;
@@ -125,6 +126,7 @@ public:
     void buildAtomSpace(long atomspaceSize=(1 << 16), float percentLinks = 0.1, 
             bool display = true);
     Handle getRandomHandle();
+    void setTestAllMethods() { setMethod("all"); }
 
     timepair_t bm_noop();
     timepair_t bm_addNode();

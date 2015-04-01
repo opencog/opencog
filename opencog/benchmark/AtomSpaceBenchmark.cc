@@ -199,45 +199,95 @@ void AtomSpaceBenchmark::showMethods() {
     cout << "Methods that can be tested:" << endl;
     cout << "  addNode" << endl;
     cout << "  addLink" << endl;
+    cout << "  removeAtom" << endl;
     cout << "  getType" << endl;
     cout << "  getTruthValue" << endl;
     cout << "  setTruthValue" << endl;
+ #ifdef ZMQ_EXPERIMENT
+    cout << "  getTruthValueZMQ" << endl;
+#endif
     cout << "  getHandlesByType" << endl;
     cout << "  getOutgoingSet" << endl;
-
+    cout << "  getIncomingSet" << endl;
 }
 
-void AtomSpaceBenchmark::setMethod(std::string _methodName)
+void AtomSpaceBenchmark::setMethod(std::string methodToTest)
 {
-    if (_methodName == "noop") {
+    bool foundMethod = false;
+
+    if (methodToTest == "all" || methodToTest == "noop") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_noop);
-    } else if (_methodName == "addNode") {
+        methodNames.push_back( "noop");
+        foundMethod = true;
+    } 
+
+    if (methodToTest == "all" || methodToTest == "addNode") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_addNode);
-    } else if (_methodName == "addLink") {
+        methodNames.push_back( "addNode");
+        foundMethod = true;
+   } 
+
+    if (methodToTest == "all" || methodToTest == "addLink") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_addLink);
-    } else if (_methodName == "removeAtom") {
+        methodNames.push_back( "addLink");
+        foundMethod = true;
+    } 
+
+    if (methodToTest == "all" || methodToTest == "removeAtom") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_rmAtom);
-    } else if (_methodName == "getType") {
+        methodNames.push_back( "removeAtom");
+        foundMethod = true;
+    } 
+
+    if (methodToTest == "all" || methodToTest == "getType") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getType);
-    } else if (_methodName == "getTV") {
+        methodNames.push_back( "getType");
+        foundMethod = true;
+    } 
+
+    if (methodToTest == "all" || methodToTest == "getTruthValue") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValue);
+        methodNames.push_back( "getTruthValue");
+        foundMethod = true;
+    } 
+
 #ifdef ZMQ_EXPERIMENT
-    } else if (_methodName == "getTVZmq") {
+    if (methodToTest == "all" || methodToTest == "getTruthValueZMQ") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValueZmq);
+        methodNames.push_back( "getTruthValueZMQ");
+        foundMethod = true;
+    } 
 #endif
-    } else if (_methodName == "setTV") {
+
+    if (methodToTest == "all" || methodToTest == "setTruthValue") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_setTruthValue);
-    } else if (_methodName == "getHandlesByType") {
+        methodNames.push_back( "setTruthValue");
+        foundMethod = true;
+    } 
+
+    if (methodToTest == "all" || methodToTest == "getHandlesByType") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getHandlesByType);
-    } else if (_methodName == "getOutgoingSet") {
+        methodNames.push_back( "getHandlesByType");
+        foundMethod = true;
+    } 
+
+    if (methodToTest == "all" || methodToTest == "getOutgoingSet") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getOutgoingSet);
-    } else if (_methodName == "getIncomingSet") {
+        methodNames.push_back( "getOutgoingSet");
+        foundMethod = true;
+    } 
+
+    if (methodToTest == "all" || methodToTest == "getIncomingSet") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getIncomingSet);
-    } else {
-        std::cerr << "Error: specified a bad test name: " << _methodName << std::endl;
+        methodNames.push_back( "getIncomingSet");
+        foundMethod = true;
+    } 
+
+    if (!foundMethod) {
+        std::cerr << "Error: specified a bad test name: " << methodToTest << std::endl;
         exit(1);
     }
-    methodNames.push_back( _methodName);
+    
 }
 
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
@@ -441,10 +491,20 @@ AtomSpaceBenchmark::memoize_or_compile(std::string exp)
 Type AtomSpaceBenchmark::randomType(Type t)
 {
     OC_ASSERT(t < numberOfTypes);
-    Type randomType = ATOM + rng->randint(numberOfTypes-1);
-    while (!classserver().isA(randomType, t))
-        randomType = ATOM + rng->randint(numberOfTypes-1);
-    return randomType;
+    Type candidateType;
+
+    // Loop until we get a type that is a subclass of t, skipping TYPE_NODE
+    // since that type can't handle randomly generated names. Also skip
+    // BIND_LINK and other validated types since the validation will fail.
+    do {
+        candidateType = ATOM + rng->randint(numberOfTypes-1);
+    } while (!classserver().isA(candidateType, t) ||
+        candidateType == TYPE_NODE ||
+        candidateType == BIND_LINK || 
+        candidateType == SATISFACTION_LINK ||
+        candidateType == LAMBDA_LINK );
+
+    return candidateType;
 }
 
 clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
@@ -987,8 +1047,10 @@ timepair_t AtomSpaceBenchmark::bm_getHandlesByType()
 #endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         clock_t t_begin = clock();
+        //size_t max_atoms = asp->getNumAtomsOfType(t,true);
         HandleSeq results;
-        atab->getHandlesByType(back_inserter(results), t, true);
+        //results.reserve(max_atoms);
+        asp->getHandlesByType(back_inserter(results), t, true);
         clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
