@@ -40,6 +40,7 @@
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/bind/BindLink.h>
+#include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/atoms/bind/LambdaLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
@@ -286,6 +287,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     } else if (BIND_LINK == atom_type) {
         if (NULL == BindLinkCast(atom))
             atom = createBindLink(*LinkCast(atom));
+    } else if (DEFINE_LINK == atom_type) {
+        if (NULL == DefineLinkCast(atom))
+            atom = createDefineLink(*LinkCast(atom));
     } else if (LAMBDA_LINK == atom_type) {
         if (NULL == LambdaLinkCast(atom))
             atom = createLambdaLink(*LinkCast(atom));
@@ -320,6 +324,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             LinkPtr lll(LinkCast(atom));
             if (BIND_LINK == atom_type) {
                 atom = createBindLink(*lll);
+            } else if (DEFINE_LINK == atom_type) {
+                atom = createDefineLink(*lll);
             } else if (LAMBDA_LINK == atom_type) {
                 atom = createLambdaLink(*lll);
             } else if (SATISFACTION_LINK == atom_type) {

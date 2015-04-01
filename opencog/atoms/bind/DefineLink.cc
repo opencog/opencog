@@ -39,7 +39,7 @@ void DefineLink::init(const HandleSeq& oset)
 
 	// The name mut not have been previously defined before.
 	HandleSeq ename;
-   oset[0]->getIncomingSetByType(std::back_inserter(ename), DEFINE);
+   oset[0]->getIncomingSetByType(std::back_inserter(ename), DEFINE_LINK);
 	if (0 < ename.size())
 		throw InvalidParamException(TRACE_INFO,
 			"This is already defined; remoce before redfining!");
@@ -56,14 +56,14 @@ void DefineLink::init(const HandleSeq& oset)
 
 DefineLink::DefineLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(DEFINE, oset, tv, av)
+	: Link(DEFINE_LINK, oset, tv, av)
 {
 	init(oset);
 }
 
 DefineLink::DefineLink(const Handle& name, const Handle& defn,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(DEFINE, HandleSeq({name, defn}), tv, av)
+	: Link(DEFINE_LINK, HandleSeq({name, defn}), tv, av)
 {
 	init(getOutgoingSet());
 }
@@ -73,7 +73,7 @@ DefineLink::DefineLink(Link &l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
-	if (not classserver().isA(tscope, DEFINE))
+	if (not classserver().isA(tscope, DEFINE_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
