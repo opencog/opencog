@@ -30,7 +30,7 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-// #define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
@@ -269,7 +269,8 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 		for (size_t i = 0; i < sz; i++) {
 			Handle h(iset[i]);
 			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-			dbgprt("Loop candidate: %s\n", h->toShortString().c_str());
+			dbgprt("Loop candidate (%lu/%lu): %s\n", i, sz,
+			       h->toShortString().c_str());
 			bool rc = pme->do_candidate(_root, _starter_pred, h);
 			if (rc) break;
 		}
@@ -317,13 +318,13 @@ void DefaultPatternMatchCB::full_search(PatternMatchEngine *pme,
 		_as->getHandlesByType(back_inserter(handle_set), ptype);
 	else
 		_as->getHandlesByType(back_inserter(handle_set), ATOM, true);
-	std::list<Handle>::iterator i = handle_set.begin();
-	std::list<Handle>::iterator iend = handle_set.end();
-	for (; i != iend; ++i)
+
+	size_t handle_set_size = handle_set.size(), i = 0;
+	for (const Handle& h : handle_set)
 	{
-		Handle h(*i);
 		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-		dbgprt("Loop candidate: %s\n", h->toShortString().c_str());
+		dbgprt("Loop candidate (%lu/%lu): %s\n", i++, handle_set_size,
+		       h->toShortString().c_str());
 		bool rc = pme->do_candidate(_root, _starter_pred, h);
 		if (rc) break;
 	}

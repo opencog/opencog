@@ -114,7 +114,8 @@ void AttentionalFocusCB::perform_search(PatternMatchEngine *pme,
 		for (size_t i = 0; i < sz; i++) {
 			Handle h(iset[i]);
 			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-			dbgprt("Loop candidate: %s\n", h->toShortString().c_str());
+			dbgprt("Loop candidate (%lu/%lu): %s\n", i, sz,
+			       h->toShortString().c_str());
 			bool rc = pme->do_candidate(_root, _starter_pred, h);
 			if (rc) break;
 		}
@@ -161,10 +162,12 @@ void AttentionalFocusCB::perform_search(PatternMatchEngine *pme,
 		handle_set.erase(it, handle_set.end());
 	}
 
+	size_t handle_set_size = handle_set.size(), i = 0;
 	for (const Handle& h : handle_set)
 	{
 		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-		dbgprt("Loop candidate: %s\n", h->toShortString().c_str());
+		dbgprt("Loop candidate (%lu/%lu): %s\n", i++, handle_set_size,
+		       h->toShortString().c_str());
 		bool rc = pme->do_candidate(_root, _starter_pred, h);
 		if (rc) break;
 	}
