@@ -29,10 +29,9 @@ public:
 		as_ = &cogserver().getAtomSpace();
 		as_->clear();
 		config().set("SCM_PRELOAD",
-				"opencog/atomspace/core_types.scm, "
-				"opencog/scm/utilities.scm, "
-				"opencog/scm/av-tv.scm, "
-				"opencog/python/pln/examples/deduction/atomspace_contents.scm");
+		             "opencog/atomspace/core_types.scm, "
+		             "opencog/scm/utilities.scm, "
+		             "opencog/scm/av-tv.scm");
 		config().set("MODULES", "opencog/query/libQueryModule.so");
 		cogserver().loadModules();
 		cogserver().loadSCMModules();
