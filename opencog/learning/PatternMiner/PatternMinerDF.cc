@@ -532,9 +532,19 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace);
 
 //    // debug
-//    string lastGramLinksStr = "";
-//    for (Handle h : lastGramLinks)
-//        lastGramLinksStr += _fromAtomSpace->atomAsString(h);
+    string lastGramLinksStr = "";
+    for (Handle h : lastGramLinks)
+        lastGramLinksStr += _fromAtomSpace->atomAsString(h);
+
+    string inputLinksStr = "";
+    for (Handle h : inputLinks)
+        inputLinksStr += _fromAtomSpace->atomAsString(h);
+
+        if ((inputLinksStr.find("man") != inputLinksStr.npos) && (inputLinksStr.find("soda drinker") != inputLinksStr.npos))
+        {
+            int i = 0; // debug 1111111111
+            i ++;
+        }
 
 
     // var_num is the number of variables
@@ -627,7 +637,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                 // There are two different super patterns: extended from a variable, and extended from a const by turning it into a variable:
                 unsigned int nodeIndex = 0;
                 map<Handle,Handle>::iterator niter;
-                for (niter = newValueToVarMap.begin(); niter != newValueToVarMap.end(); ++ niter)
+                for (niter = valueToVarMap.begin(); niter != valueToVarMap.end(); ++ niter)
                 {
 
                     Handle extendNode = (Handle)(niter->first);
