@@ -87,6 +87,12 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
     init_source(hsource);
     while (iteration < max_iter /*OR other termination criteria*/) {
         log_->info("Iteration %d", iteration);
+
+        if (fcmem_.cur_source_ == Handle::UNDEFINED) {
+            log_->info("No current source, forward chaining aborted");
+            break;
+        }
+
         log_->info("Next source %s", fcmem_.cur_source_->toString().c_str());
 
         // Add more premise to hcurrent_source by pattern matching.
@@ -105,8 +111,11 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         //! If no rules matches the pattern of the source, choose
         //! another source if there is, else end forward chaining.
         //! @todo actually rightnow it just stops if no rule matches.
-        if (not r)
-            return;
+        if (not r) {
+            log_->info("No chosen rule, forward chaining aborted");
+            break;
+        }
+
         log_->info("Chosen rule %s", r->get_name().c_str());
         fcmem_.cur_rule_ = r;
 
