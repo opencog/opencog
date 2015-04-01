@@ -51,8 +51,9 @@ Handle PLNCommons::create_quoted(Handle himplicant)
     return hquoted;
 }
 
-Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
-    throw (opencog::InvalidParamException)
+Handle PLNCommons::create_bindLink(
+        Handle himplicant, bool vnode_is_typedv)
+                throw (opencog::InvalidParamException)
 {
     if (!LinkCast(himplicant)) {
         throw InvalidParamException(TRACE_INFO, "Input must be a link type ");
@@ -73,8 +74,8 @@ Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
             list_link_elem.push_back(hi);
         }
     } else
-        list_link_elem.insert(list_link_elem.end(),
-                              variable_nodes.begin(), variable_nodes.end());
+        list_link_elem.insert(list_link_elem.end(), variable_nodes.begin(),
+                              variable_nodes.end());
 
     Handle var_listLink = as_->addLink(VARIABLE_LIST, list_link_elem);
 
@@ -84,20 +85,58 @@ Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
     return as_->addLink(BIND_LINK, var_listLink, implicationLink);
 }
 
-bool PLNCommons::exists_in(Handle& hlink, Handle& h)
+<<<<<<< HEAD
+=======
+UnorderedHandleSet PLNCommons::get_nodes(
+        const Handle& hinput, const vector<Type>& required_nodes) const
 {
-    if (not LinkCast(hlink))
-        throw InvalidParamException(TRACE_INFO, "Need a LINK type to look in");
-    auto outg = as_->getOutgoing(hlink);
-    if (find(outg.begin(), outg.end(), h) != outg.end())
-        return true;
+    // Recursive case
+    if (LinkCast(hinput)) {
+        UnorderedHandleSet found_nodes;
+        for (const Handle& h : as_->getOutgoing(hinput)) {
+            UnorderedHandleSet tmp = get_nodes(h, required_nodes);
+            found_nodes.insert(tmp.begin(), tmp.end());
+        }
+        return found_nodes;
+    }
+    // Base case
     else {
-        for (Handle hi : outg) {
-            if (LinkCast(hi) and exists_in(hi, h))
-                return true;
+        OC_ASSERT(NodeCast(hinput) != nullptr);
+
+        if (required_nodes.empty()) { // Empty means all kinds of nodes
+            return {hinput};
+        } else {
+            // Check if this node is in our wish list
+            Type t = NodeCast(hinput)->getType();
+            auto it = find(required_nodes.begin(), required_nodes.end(), t);
+            if (it != required_nodes.end())
+                return {hinput};
+            else
+                return {};
         }
     }
-    return false;
+}
+
+>>>>>>> refs/remotes/upstream/master
+bool PLNCommons::exists_in(Handle& hlink, Handle& h)
+{
+    if (hlink == h) {
+        return true;
+    } else {
+        if (not LinkCast(hlink))
+            throw InvalidParamException(TRACE_INFO,
+                                        "Need a LINK type to look in");
+        auto outg = as_->getOutgoing(hlink);
+        if (find(outg.begin(), outg.end(), h) != outg.end())
+            return true;
+        else {
+            for (Handle hi : outg) {
+                if (LinkCast(hi) and exists_in(hi, h))
+                    return true;
+            }
+        }
+        return false;
+    }
 }
 
 void PLNCommons::clean_up_bind_link(Handle& hbind_link)

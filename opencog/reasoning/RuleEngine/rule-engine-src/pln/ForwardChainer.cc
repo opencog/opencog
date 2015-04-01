@@ -25,7 +25,7 @@
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/query/DefaultImplicator.h>
 #include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
-
+#include <opencog/atoms/bind/BindLink.h>
 #include "ForwardChainer.h"
 #include "ForwardChainerCallBack.h"
 #include "PLNCommons.h"
@@ -79,7 +79,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
     // Variable fulfillment query.
     UnorderedHandleSet var_nodes = get_outgoing_nodes(hsource, {VARIABLE_NODE});
     if (not var_nodes.empty())
-        return do_pm(hsource,var_nodes);
+        return do_pm(hsource, var_nodes, fcb);
 
     // Forward chaining on a particular type of atom.
     int iteration = 0;
@@ -87,8 +87,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
     init_source(hsource);
     while (iteration < max_iter /*OR other termination criteria*/) {
         log_->info("Iteration %d", iteration);
-        log_->info("Next source %s",
-                   fcmem_.cur_source_->toString().c_str());
+        log_->info("Next source %s", fcmem_.cur_source_->toString().c_str());
 
         // Add more premise to hcurrent_source by pattern matching.
         HandleSeq input = fcb.choose_premises(fcmem_);
@@ -131,14 +130,16 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
  * Does pattern matching for a variable containing query.
  * @param source handle containing VariableNode
  */
-void ForwardChainer::do_pm(const Handle& hsource,const UnorderedHandleSet& var_nodes)
+void ForwardChainer::do_pm(const Handle& hsource,
+                           const UnorderedHandleSet& var_nodes,
+                           ForwardChainerCallBack& fcb)
 {
     DefaultImplicator impl(as_);
     impl.implicand = hsource;
     HandleSeq vars;
     for (auto h : var_nodes)
         vars.push_back(h);
-
+    fcmem_.set_source(hsource);
     Handle hvar_list = as_->addLink(VARIABLE_LIST, vars);
     Handle hclause = as_->addLink(AND_LINK, hsource);
 
@@ -153,8 +154,20 @@ void ForwardChainer::do_pm(const Handle& hsource,const UnorderedHandleSet& var_n
     // Delete the AND_LINK and LIST_LINK
     as_->removeAtom(hvar_list);
     as_->removeAtom(hclause);
-}
 
+    //!Additionally, find applicable rules and apply.
+    vector<Rule*> rules = fcb.choose_rule(fcmem_);
+    for (Rule* rule : rules) {
+        BindLinkPtr bl(BindLinkCast(rule->get_handle()));
+        DefaultImplicator impl(as_);
+        impl.implicand = bl->get_implicand();
+        impl.set_type_restrictions(bl->get_typemap());
+        bl->imply(&impl);
+        fcmem_.set_cur_rule(rule);
+        fcmem_.add_rules_product(0, impl.result_list);
+    }
+
+}
 
 void ForwardChainer::init_source(Handle hsource)
 {
