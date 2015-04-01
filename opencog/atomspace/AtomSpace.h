@@ -422,6 +422,43 @@ public:
      * Gets a set of handles that matches with the given type
      * (subclasses optionally).
      *
+     * @param appendToHandles the HandleSeq to which to append the handles.
+     * @param type The desired type.
+     * @param subclass Whether type subclasses should be considered.
+     *
+     * @note The matched entries are appended to a container whose
+     *        OutputIterator is passed as the first argument.
+     *
+     * Example of call to this method, which would return all entries
+     * in AtomSpace:
+     * @code
+     *         std::list<Handle> ret;
+     *         atomSpace.getHandlesByType(back_inserter(ret), ATOM, true);
+     * @endcode
+     */
+    void getHandlesByType(HandleSeq& appendToHandles,
+                          Type type,
+                          bool subclass = false) const
+    {
+        // Get the initial size of the handles vector.
+        size_t initial_size = appendToHandles.size();
+
+        // Determine the number of atoms we'll be adding.
+        size_t size_of_append = atomTable.getNumAtomsOfType(type, subclass);
+
+        // Now reserve size for the addition. This is faster for large
+        // append iterations since appends to the list won't require new
+        // allocations and copies whenever the allocated size is exceeded.
+        appendToHandles.reserve(initial_size + size_of_append);
+
+        // Now defer to the output iterator call, eating the return.
+        getHandlesByType(back_inserter(appendToHandles), type, subclass);
+    }
+
+    /**
+     * Gets a set of handles that matches with the given type
+     * (subclasses optionally).
+     *
      * @param result An output iterator.
      * @param type The desired type.
      * @param subclass Whether type subclasses should be considered.

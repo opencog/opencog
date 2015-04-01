@@ -881,3 +881,27 @@ much.
   addNode          195
   addLink          101
   removeAtom       170
+
+
+======================================================================
+01 April 2015:
+
+Updated the benchmark and getHandlesByType to use .reserve on the HandleSeq
+to eliminate unnecessary copies of the Handles during resize.
+
+This resulted in the following improvement:
+
+Before:
+                      -m getHandlesByType
+   test               AtomSpace
+   name               K-ops/sec
+   ----               ---------
+  getHandlesByType    0.320
+
+After:                
+                      -m getHandlesByType
+   test               AtomSpace
+   name               K-ops/sec
+   ----               ---------
+  getHandlesByType    0.439
+

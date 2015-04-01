@@ -1047,10 +1047,8 @@ timepair_t AtomSpaceBenchmark::bm_getHandlesByType()
 #endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         clock_t t_begin = clock();
-        //size_t max_atoms = asp->getNumAtomsOfType(t,true);
         HandleSeq results;
-        //results.reserve(max_atoms);
-        asp->getHandlesByType(back_inserter(results), t, true);
+        asp->getHandlesByType(results, t, true);
         clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
