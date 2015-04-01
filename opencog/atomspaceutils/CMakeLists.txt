@@ -1,6 +1,6 @@
 
 ADD_LIBRARY (atomspaceutils SHARED
-	AtomSpaceUtils.cc
+	AtomSpaceUtils
 )
 
 ADD_DEPENDENCIES(atomspaceutils opencog_atom_types)
