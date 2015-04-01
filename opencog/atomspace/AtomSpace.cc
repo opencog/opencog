@@ -346,3 +346,15 @@ void AtomSpace::clear()
 
     logger().setLevel(save);
 }
+
+namespace std {
+
+ostream& operator<<(ostream& out, const opencog::AtomSpace& as) {
+    list<opencog::Handle> results;
+    as.getHandlesByType(back_inserter(results), opencog::ATOM, true);
+    for (const opencog::Handle& h : results)
+        out << h->toString() << endl;
+    return out;
+}
+
+} // namespace std
