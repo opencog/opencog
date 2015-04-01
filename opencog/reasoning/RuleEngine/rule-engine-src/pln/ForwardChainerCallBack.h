@@ -53,7 +53,7 @@ public:
      * ation of the forward chaining instance.
      * @return a set of applicable rules
      */
-    virtual std::vector<Rule*> choose_rule(FCMemory& fcmem) = 0;
+    virtual std::vector<Rule*> choose_rules(FCMemory& fcmem) = 0;
     /**
      * Choose additional premises for the rule.
      * @fcmem an object holding the current source/target and other inform

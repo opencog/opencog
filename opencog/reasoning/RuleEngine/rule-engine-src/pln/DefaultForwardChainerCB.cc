@@ -47,14 +47,13 @@ DefaultForwardChainerCB::~DefaultForwardChainerCB()
 }
 
 /**
- * choose rule based on premises of rule matching the source
+ * choose rules based on premises of rule matching the source
  * uses temporary atomspace to limit the search space
  *
  * @param fcmem forward chainer's working memory
  * @return a vector of chosen rules
  */
-
-vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
+vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
 {
     Handle source = fcmem.get_cur_source();
     if (source == Handle::UNDEFINED or NodeCast(source))

@@ -47,7 +47,7 @@ public:
     virtual ~DefaultForwardChainerCB();
 
     //callbacks
-    virtual vector<Rule*> choose_rule(FCMemory& fcmem);
+    virtual vector<Rule*> choose_rules(FCMemory& fcmem);
     virtual HandleSeq choose_premises(FCMemory& fcmem);
     virtual Handle choose_next_source(FCMemory& fcmem);
     virtual HandleSeq apply_rule(FCMemory& fcmem);
