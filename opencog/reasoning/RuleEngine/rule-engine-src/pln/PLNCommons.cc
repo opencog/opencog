@@ -50,8 +50,9 @@ Handle PLNCommons::create_quoted(Handle himplicant)
     return hquoted;
 }
 
-Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
-    throw (opencog::InvalidParamException)
+Handle PLNCommons::create_bindLink(
+        Handle himplicant, bool vnode_is_typedv)
+                throw (opencog::InvalidParamException)
 {
     if (!LinkCast(himplicant)) {
         throw InvalidParamException(TRACE_INFO, "Input must be a link type ");
@@ -60,7 +61,8 @@ Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
     //if(vnode_is_typedv)
     himplicant = replace_nodes_with_varnode(himplicant);
 
-    UnorderedHandleSet variable_nodes = get_nodes(himplicant, {VARIABLE_NODE});
+    UnorderedHandleSet variable_nodes = get_nodes(himplicant,
+                                                  { VARIABLE_NODE });
     HandleSeq list_link_elem;
 
     // For searching ImplicationLinks with variables.
@@ -71,8 +73,8 @@ Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
             list_link_elem.push_back(hi);
         }
     } else
-        list_link_elem.insert(list_link_elem.end(),
-                              variable_nodes.begin(), variable_nodes.end());
+        list_link_elem.insert(list_link_elem.end(), variable_nodes.begin(),
+                              variable_nodes.end());
 
     Handle var_listLink = as_->addLink(VARIABLE_LIST, list_link_elem);
 
@@ -82,8 +84,8 @@ Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
     return as_->addLink(BIND_LINK, var_listLink, implicationLink);
 }
 
-UnorderedHandleSet PLNCommons::get_nodes(const Handle& hinput,
-                                         const vector<Type>& required_nodes) const
+UnorderedHandleSet PLNCommons::get_nodes(
+        const Handle& hinput, const vector<Type>& required_nodes) const
 {
     // Recursive case
     if (LinkCast(hinput)) {
@@ -114,18 +116,23 @@ UnorderedHandleSet PLNCommons::get_nodes(const Handle& hinput,
 
 bool PLNCommons::exists_in(Handle& hlink, Handle& h)
 {
-    if (not LinkCast(hlink))
-        throw InvalidParamException(TRACE_INFO, "Need a LINK type to look in");
-    auto outg = as_->getOutgoing(hlink);
-    if (find(outg.begin(), outg.end(), h) != outg.end())
+    if (hlink == h) {
         return true;
-    else {
-        for (Handle hi : outg) {
-            if (LinkCast(hi) and exists_in(hi, h))
-                return true;
+    } else {
+        if (not LinkCast(hlink))
+            throw InvalidParamException(TRACE_INFO,
+                                        "Need a LINK type to look in");
+        auto outg = as_->getOutgoing(hlink);
+        if (find(outg.begin(), outg.end(), h) != outg.end())
+            return true;
+        else {
+            for (Handle hi : outg) {
+                if (LinkCast(hi) and exists_in(hi, h))
+                    return true;
+            }
         }
+        return false;
     }
-    return false;
 }
 
 void PLNCommons::clean_up_bind_link(Handle& hbind_link)
