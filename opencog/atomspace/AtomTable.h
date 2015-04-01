@@ -166,6 +166,7 @@ public:
     size_t getSize() const;
     size_t getNumNodes() const;
     size_t getNumLinks() const;
+    size_t getNumAtomsOfType(Type type, bool subclass = true) const;
 
     /**
      * Returns the exact atom for the given name and type.

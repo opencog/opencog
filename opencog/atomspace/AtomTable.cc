@@ -528,6 +528,12 @@ size_t AtomTable::getNumLinks() const
     return linkIndex.size();
 }
 
+size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
+{ 
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    return typeIndex.getNumAtomsOfType(type, subclass);
+}
+
 Handle AtomTable::getRandom(RandGen *rng) const
 {
     size_t x = rng->randint(getSize());

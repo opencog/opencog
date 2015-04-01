@@ -90,6 +90,8 @@ public:
     inline int getSize() const { return atomTable.getSize(); }
     inline int getNumNodes() const { return atomTable.getNumNodes(); }
     inline int getNumLinks() const { return atomTable.getNumLinks(); }
+    inline int getNumAtomsOfType(Type type, bool subclass = true) const
+        { return atomTable.getNumAtomsOfType(type, subclass); }
 
     //! Clear the atomspace, remove all atoms
     void clear();
