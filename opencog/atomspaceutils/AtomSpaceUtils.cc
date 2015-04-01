@@ -23,8 +23,7 @@
 #include <opencog/atomspace/Link.h>
 #include "AtomSpaceUtils.h"
 
-namespace opencog
-{
+namespace opencog {
 
 Handle addPrefixedNode(AtomSpace& as, Type t, const std::string& prefix)
 {
@@ -47,4 +46,4 @@ Handle addPrefixedNode(AtomSpace& as, Type t, const std::string& prefix)
     return as.addNode(t, name);
 }
 
-}
+} // namespace opencog
