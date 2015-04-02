@@ -1,6 +1,34 @@
 ;
 ; data for ComposeUTest
 ;
+; First, we test double-definition. Here is a very bogus define.
+(define (defun-a)
+	(DefineLink
+		(ConceptNode "some-name")
+		(SatisfactionLink
+			(VariableNode "$some-var")
+			(ListLink
+				(ConceptNode "random-atom")
+				(VariableNode "$some-var")
+			)
+		)
+	)
+)
+
+; a different definition, but with the same name as above.
+(define (defun-b)
+	(DefineLink
+		(ConceptNode "some-name")
+		(SatisfactionLink
+			(VariableNode "$other-var")
+			(ListLink
+				(VariableNode "$other-var")
+				(ConceptNode "other-atom")
+			)
+		)
+	)
+)
+
 ;
 ;; The data that we expect to find
 (EvaluationLink

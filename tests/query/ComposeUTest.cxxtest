@@ -55,6 +55,21 @@ public:
 		server(CogServer::createInstance);
 		as = &cogserver().getAtomSpace();
 		eval = new SchemeEval(as);
+
+		config().set("SCM_PRELOAD",
+			"opencog/atomspace/core_types.scm, "
+			"opencog/scm/utilities.scm");
+
+		load_scm_files_from_config(*as);
+
+		config().set("MODULES",
+			"opencog/query/libQueryModule.so");
+
+		cogserver().loadModules();
+
+		config().set("SCM_PRELOAD", "tests/query/compose.scm");
+		load_scm_files_from_config(*as);
+
 	}
 
 	~ComposeUTest()
@@ -68,6 +83,7 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
+	void test_double_define(void);
 	void test_simple_compose(void);
 };
 
@@ -77,16 +93,40 @@ void ComposeUTest::tearDown(void)
 
 void ComposeUTest::setUp(void)
 {
-	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm, "
-		"opencog/scm/utilities.scm");
+}
 
-	load_scm_files_from_config(*as);
+/*
+ * Test double-definition of a DefineLink.  Double definitions
+ * should not be posible.
+ */
+void ComposeUTest::test_double_define(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("MODULES",
-		"opencog/query/libQueryModule.so");
+	Handle defun_a = eval->eval_h("(defun-a)");
+	TSM_ASSERT("Failed to load definition", defun_a != Handle::UNDEFINED);
 
-	cogserver().loadModules();
+	// Disable logging to avoid dreck on stdout
+	logger().setLevel(Logger::NONE);
+
+	// Inserting a second atom with the same name should throw.
+	bool caught = false;
+	try
+	{
+		Handle defun_b = eval->eval_h("(defun-b)");
+	}
+	catch (const RuntimeException& ex)
+	{
+		caught = true;
+	}
+	logger().setLevel(Logger::INFO);
+	TSM_ASSERT("Failed to catch exception", caught == true);
+
+	// Inserting the same atom a second time should be harmless.
+	Handle refun = eval->eval_h("(defun-a)");
+	TSM_ASSERT("Failed to reload definition", defun_a == refun);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -96,9 +136,6 @@ void ComposeUTest::test_simple_compose(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/compose.scm");
-	load_scm_files_from_config(*as);
-
 	Handle hans = eval->eval_h("expected-answer");
 	Handle hgnd = eval->eval_h("(cog-bind (simple-call))");
 
@@ -106,4 +143,6 @@ void ComposeUTest::test_simple_compose(void)
 	printf("Found this answer: %s\n", hgnd->toString().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }

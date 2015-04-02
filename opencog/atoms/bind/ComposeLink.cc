@@ -1,5 +1,5 @@
 /*
- * DefineLink.cc
+ * ComposeLink.cc
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  *
@@ -26,18 +26,18 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
 
-#include "DefineLink.h"
+#include "ComposeLink.h"
 
 using namespace opencog;
 
-void DefineLink::init(const HandleSeq& oset)
+void ComposeLink::init(const HandleSeq& oset)
 {
 	// Must have name and body
 	if (2 != oset.size())
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting name and definition, got size %d", oset.size());
 
-	// The name must not have been previously defined before.
+	// The name mut not have been previously defined before.
 	HandleSeq ename;
    oset[0]->getIncomingSetByType(std::back_inserter(ename), DEFINE_LINK);
 	if (0 < ename.size())
@@ -51,23 +51,24 @@ void DefineLink::init(const HandleSeq& oset)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a LambdaLink, got %s", tname.c_str());
 	}
+
 }
 
-DefineLink::DefineLink(const HandleSeq& oset,
+ComposeLink::ComposeLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: Link(DEFINE_LINK, oset, tv, av)
 {
 	init(oset);
 }
 
-DefineLink::DefineLink(const Handle& name, const Handle& defn,
+ComposeLink::ComposeLink(const Handle& name, const Handle& defn,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: Link(DEFINE_LINK, HandleSeq({name, defn}), tv, av)
 {
 	init(getOutgoingSet());
 }
 
-DefineLink::DefineLink(Link &l)
+ComposeLink::ComposeLink(Link &l)
 	: Link(l)
 {
 	// Type must be as expected
@@ -76,7 +77,7 @@ DefineLink::DefineLink(Link &l)
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a DefineLink, got %s", tname.c_str());
+			"Expecting a ComposeLink, got %s", tname.c_str());
 	}
 
 	init(l.getOutgoingSet());
