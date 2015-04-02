@@ -246,7 +246,7 @@ bool VariableList::is_type(const Handle& h)
 	if (0 == _typemap.size()) return true;
 
 	// Check the type restrictions.
-	VariableTypeMap::const_iterator it =_typemap.find(_outgoing[0]);
+	VariableTypeMap::const_iterator it =_typemap.find(_varseq[0]);
 	const std::set<Type> &tchoice = it->second;
 
 	Type htype = h->getType();
@@ -276,7 +276,7 @@ bool VariableList::is_type(const HandleSeq& hseq)
 	// Check the type restrictions.
 	for (size_t i=0; i<len; i++)
 	{
-		VariableTypeMap::const_iterator it =_typemap.find(_outgoing[i]);
+		VariableTypeMap::const_iterator it =_typemap.find(_varseq[i]);
 		if (it == _typemap.end()) continue;  // no restriction
 
 		const std::set<Type> &tchoice = it->second;
@@ -294,10 +294,10 @@ bool VariableList::is_type(const HandleSeq& hseq)
 void VariableList::build_index(void)
 {
 	if (0 < _index.size()) return;
-	size_t sz = _outgoing.size();
+	size_t sz = _varseq.size();
 	for (size_t i=0; i<sz; i++)
 	{
-		_index.insert(std::pair<Handle,Arity>(_outgoing[i], i));
+		_index.insert(std::pair<Handle,Arity>(_varseq[i], i));
 	}
 }
 
@@ -345,9 +345,21 @@ void VariableList::build_index(void)
  */
 Handle VariableList::substitute(const Handle& fun, const HandleSeq& args)
 {
-	if (args.size() != _outgoing.size())
-		return Handle::UNDEFINED;
+	if (args.size() != _varseq.size())
+		throw InvalidParamException(TRACE_INFO,
+			"Incorrect numer of arguments specified, expecting %lu got %lu",
+			_varseq.size(), args.size());
 
+	if (not is_type(args))
+		throw InvalidParamException(TRACE_INFO,
+			"Arguments fail to match variable declarations");
+
+	return substitute_nocheck(fun, args);
+}
+
+Handle VariableList::substitute_nocheck(const Handle& fun,
+                                        const HandleSeq& args)
+{
 	// If it is a singleton, just return that singleton.
 	std::map<Handle, Arity>::const_iterator idx;
 	idx = _index.find(fun);
@@ -363,7 +375,7 @@ Handle VariableList::substitute(const Handle& fun, const HandleSeq& args)
 	HandleSeq oset;
 	for (const Handle& h : lfun->getOutgoingSet())
 	{
-		oset.push_back(substitute(h, args));
+		oset.push_back(substitute_nocheck(h, args));
 	}
 	return Handle(createLink(fun->getType(), oset));
 }

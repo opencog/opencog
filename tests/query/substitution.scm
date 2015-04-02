@@ -34,3 +34,37 @@
 		)
 	)
 )
+
+; a more complex template
+(define free-template
+	(EvaluationLink
+		(PredicateNode "something")
+		(ListLink
+			(VariableNode "$b")		; note the reversed order
+			(VariableNode "$c")
+			(VariableNode "$a")
+			(ListLink
+				(VariableNode "$d")
+			)
+			(VariableNode "$a")
+			(VariableNode "$a")
+		)
+	)
+)
+
+;; answer for above
+(define free-answer
+	(EvaluationLink
+		(PredicateNode "something")
+		(ListLink
+			(NumberNode 2.0000)
+			(VariableNode "$c")
+			(ConceptNode "one")
+			(ListLink
+				(VariableNode "$d")
+			)
+			(ConceptNode "one")
+			(ConceptNode "one")
+		)
+	)
+)

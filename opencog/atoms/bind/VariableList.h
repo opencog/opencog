@@ -42,6 +42,16 @@ typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
 
 class PatternMatch;
 
+/// The VariableList class records it's outgoing set in various ways
+/// that make it easier and faster to work with.  It implements a
+/// substitute method that will replace all variables in a tree by
+/// the corresponding atoms that it is given. See the .cc file for
+/// more info.
+///
+/// The constructors make sure that the contents of the variable list
+/// are syntactically correct; i.e that it actually contains variables.
+/// Otherwise, it throws an error on bad syntax.  Thus, bad
+/// VariableLists cannot be inserted into the atomspace.
 class VariableList : public Link
 {
    friend class PatternMatch;
@@ -51,7 +61,7 @@ protected:
 	/// the variable types. The _varset contains exactly the same atoms
 	/// as the outgoing set; it is used for fast lookup; (i.e. is some
 	/// some variable a part of this set?) whereas the outgoing set
-	/// preserves the original order of the variables.  Yes, teh fast
+	/// preserves the original order of the variables.  Yes, the fast
 	/// lookup really is needed!
 	HandleSeq _varseq;
 	std::set<Handle> _varset;
@@ -72,6 +82,7 @@ protected:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	void build_index(void);
+	Handle substitute_nocheck(const Handle&, const HandleSeq&);
 public:
 	VariableList(const HandleSeq& vardecls,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),

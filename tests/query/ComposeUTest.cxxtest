@@ -68,7 +68,6 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
-	void test_simple_substitution(void);
 	void test_simple_compose(void);
 };
 
@@ -88,41 +87,6 @@ void ComposeUTest::setUp(void)
 		"opencog/query/libQueryModule.so");
 
 	cogserver().loadModules();
-}
-
-/*
- * Basic VariableList unit test.
- */
-void ComposeUTest::test_simple_substitution(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	config().set("SCM_PRELOAD", "tests/query/substitution.scm");
-	load_scm_files_from_config(*as);
-
-	Handle hvarlist = eval->eval_h("varlist");
-	Handle htemplate = eval->eval_h("template");
-	Handle harglist = eval->eval_h("arglist");
-	Handle hexpected = eval->eval_h("answer");
-
-	printf("Variable list is %s\n", hvarlist->toString().c_str());
-
-	Type vt = hvarlist->getType();
-	TSM_ASSERT("Didn't get the variable listtype", vt == VARIABLE_LIST);
-
-	VariableListPtr vlp(VariableListCast(hvarlist));
-	TSM_ASSERT("Didn't get the variable list", vlp != NULL);
-
-	LinkPtr argl(LinkCast(harglist));
-	TSM_ASSERT("Didn't get the arguent list", argl != NULL);
-
-	Handle hanswer = vlp->substitute(htemplate, argl->getOutgoingSet());
-	hanswer = as->getAtom(hanswer);
-
-	printf("Expected this: %s\n", hexpected->toString().c_str());
-	printf("Found this answer: %s\n", hanswer->toString().c_str());
-
-	TSM_ASSERT("Didn't get the expected grounding", hanswer == hexpected);
 }
 
 /*

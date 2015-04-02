@@ -1,0 +1,197 @@
+/*
+ * tests/query/SubstitutionUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/atoms/bind/VariableList.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class SubstitutionUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
+
+public:
+	SubstitutionUTest(void)
+	{
+		try
+		{
+			 config().load("opencog-test.conf");
+		}
+		catch (RuntimeException &e)
+		{
+			std::cerr << e.getMessage() << std::endl;
+		}
+		logger().setFilename(config()["LOG_FILE"]);
+		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+		server(CogServer::createInstance);
+		as = &cogserver().getAtomSpace();
+		eval = new SchemeEval(as);
+	}
+
+	~SubstitutionUTest()
+	{
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void xtest_simple_substitution(void);
+	void test_free_substitution(void);
+	void xtest_typed_substitution(void);
+};
+
+void SubstitutionUTest::tearDown(void)
+{
+}
+
+void SubstitutionUTest::setUp(void)
+{
+	config().set("SCM_PRELOAD",
+		"opencog/atomspace/core_types.scm, "
+		"opencog/scm/utilities.scm");
+
+	load_scm_files_from_config(*as);
+
+	config().set("MODULES",
+		"opencog/query/libQueryModule.so");
+
+	cogserver().loadModules();
+
+	config().set("SCM_PRELOAD", "tests/query/substitution.scm");
+	load_scm_files_from_config(*as);
+}
+
+/*
+ * Basic VariableList unit test.
+ * It just make sure that the substitute method works, at least
+ * in the very simplest case.
+ */
+void SubstitutionUTest::xtest_simple_substitution(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle hvarlist = eval->eval_h("varlist");
+	Handle htemplate = eval->eval_h("template");
+	Handle harglist = eval->eval_h("arglist");
+	Handle hexpected = eval->eval_h("answer");
+
+	printf("Variable list is %s\n", hvarlist->toString().c_str());
+
+	Type vt = hvarlist->getType();
+	TSM_ASSERT("Didn't get the variable listtype", vt == VARIABLE_LIST);
+
+	VariableListPtr vlp(VariableListCast(hvarlist));
+	TSM_ASSERT("Didn't get the variable list", vlp != NULL);
+
+	LinkPtr argl(LinkCast(harglist));
+	TSM_ASSERT("Didn't get the arguent list", argl != NULL);
+
+	Handle hanswer = vlp->substitute(htemplate, argl->getOutgoingSet());
+	hanswer = as->getAtom(hanswer);
+
+	printf("Expected this: %s\n", hexpected->toString().c_str());
+	printf("Found this answer: %s\n", hanswer->toString().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hanswer == hexpected);
+}
+
+/*
+ * Basic VariableList unit test.
+ * It just make sure that the substitute method works, at least
+ * in the very simplest case.
+ */
+void SubstitutionUTest::test_free_substitution(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle hvarlist = eval->eval_h("varlist");
+	Handle htemplate = eval->eval_h("free-template");
+	Handle harglist = eval->eval_h("arglist");
+	Handle hexpected = eval->eval_h("free-answer");
+
+	printf("Variable list is %s\n", hvarlist->toString().c_str());
+
+	Type vt = hvarlist->getType();
+	TSM_ASSERT("Didn't get the variable listtype", vt == VARIABLE_LIST);
+
+	VariableListPtr vlp(VariableListCast(hvarlist));
+	TSM_ASSERT("Didn't get the variable list", vlp != NULL);
+
+	LinkPtr argl(LinkCast(harglist));
+	TSM_ASSERT("Didn't get the arguent list", argl != NULL);
+
+	Handle hanswer = vlp->substitute(htemplate, argl->getOutgoingSet());
+	hanswer = as->getAtom(hanswer);
+
+	printf("Expected this: %s\n", hexpected->toString().c_str());
+	printf("Found this answer: %s\n", hanswer->toString().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hanswer == hexpected);
+}
+
+/*
+ * Basic VariableList unit test.
+ * It just make sure that the substitute method works, at least
+ * in the very simplest case.
+ */
+void SubstitutionUTest::xtest_typed_substitution(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle hvarlist = eval->eval_h("varlist");
+	Handle htemplate = eval->eval_h("template");
+	Handle harglist = eval->eval_h("arglist");
+	Handle hexpected = eval->eval_h("answer");
+
+	printf("Variable list is %s\n", hvarlist->toString().c_str());
+
+	Type vt = hvarlist->getType();
+	TSM_ASSERT("Didn't get the variable listtype", vt == VARIABLE_LIST);
+
+	VariableListPtr vlp(VariableListCast(hvarlist));
+	TSM_ASSERT("Didn't get the variable list", vlp != NULL);
+
+	LinkPtr argl(LinkCast(harglist));
+	TSM_ASSERT("Didn't get the arguent list", argl != NULL);
+
+	Handle hanswer = vlp->substitute(htemplate, argl->getOutgoingSet());
+	hanswer = as->getAtom(hanswer);
+
+	printf("Expected this: %s\n", hexpected->toString().c_str());
+	printf("Found this answer: %s\n", hanswer->toString().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hanswer == hexpected);
+}
