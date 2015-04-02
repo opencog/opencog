@@ -42,6 +42,7 @@
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/atoms/bind/LambdaLink.h>
+#include <opencog/atoms/bind/VariableList.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -296,6 +297,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == SatisfactionLinkCast(atom))
             atom = createSatisfactionLink(*LinkCast(atom));
+    } else if (VARIABLE_LIST == atom_type) {
+        if (NULL == VariableListCast(atom))
+            atom = createVariableList(*LinkCast(atom));
     }
 
     // Is the equivalent of this atom already in the table?
@@ -330,6 +334,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 atom = createLambdaLink(*lll);
             } else if (SATISFACTION_LINK == atom_type) {
                 atom = createSatisfactionLink(*lll);
+            } else if (VARIABLE_LIST == atom_type) {
+                atom = createVariableList(*lll);
             } else {
                 atom = createLink(*lll);
             }

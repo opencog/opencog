@@ -108,7 +108,7 @@ void ComposeUTest::test_simple_substitution(void)
 	printf("Variable list is %s\n", hvarlist->toString().c_str());
 
 	Type vt = hvarlist->getType();
-	TSM_ASSERT("Didn't get the variable listtype", vt != VARIABLE_LIST);
+	TSM_ASSERT("Didn't get the variable listtype", vt == VARIABLE_LIST);
 
 	VariableListPtr vlp(VariableListCast(hvarlist));
 	TSM_ASSERT("Didn't get the variable list", vlp != NULL);
@@ -117,6 +117,7 @@ void ComposeUTest::test_simple_substitution(void)
 	TSM_ASSERT("Didn't get the arguent list", argl != NULL);
 
 	Handle hanswer = vlp->substitute(htemplate, argl->getOutgoingSet());
+	hanswer = as->getAtom(hanswer);
 
 	printf("Expected this: %s\n", hexpected->toString().c_str());
 	printf("Found this answer: %s\n", hanswer->toString().c_str());
