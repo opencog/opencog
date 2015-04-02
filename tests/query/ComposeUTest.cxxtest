@@ -105,7 +105,7 @@ void SequenceUTest::test_sequence(void)
     bool caught_exception = false;
     try
     {
-        eval->eval_tv("(cog-satisfy (off-road))");
+        eval->eval_h("(cog-bind-crisp (off-road))");
     }
     catch (const RuntimeException &e)
     {
@@ -115,7 +115,7 @@ void SequenceUTest::test_sequence(void)
     logger().setLevel(Logger::INFO);
 
     // This should not throw any exceptions.
-    TruthValuePtr tv = eval->eval_tv("(cog-satisfy (traffic-lights))");
+    Handle ans = eval->eval_h("(cog-satisfy (traffic-lights))");
 
     // Check the number of green lights and red lights that were
     // evaluated. The pattern has two green lights and one red
@@ -128,5 +128,5 @@ void SequenceUTest::test_sequence(void)
     TS_ASSERT_EQUALS(2, ngreen);
     TS_ASSERT_EQUALS(1, nred);
 
-    TS_ASSERT_LESS_THAN_EQUALS(tv->getMean(), 0.5);
+    TS_ASSERT_EQUALS(0, as->getArity(ans));
 }

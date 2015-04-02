@@ -214,5 +214,6 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args
 
 	// Unkown proceedure type.
 	throw RuntimeException(TRACE_INFO,
-	     "Cannot evaluate unknown GroundedPredicateNode!");
+	     "Cannot evaluate unknown GroundedPredicateNode: %s",
+	      schema.c_str());
 }
