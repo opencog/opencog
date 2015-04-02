@@ -56,6 +56,7 @@ protected:
 	HandleSeq _varseq;
 	std::set<Handle> _varset;
 	VariableTypeMap _typemap;
+	std::map<Handle, Arity> _index;
 
 	// See VariableList.cc for comments
 	static int get_vartype(const Handle&,
@@ -70,6 +71,7 @@ protected:
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+	void build_index(void);
 public:
 	VariableList(const HandleSeq& vardecls,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -84,6 +86,8 @@ public:
 	const VariableTypeMap& get_typemap(void) { return _typemap; }
 	bool is_type(const Handle&);
 	bool is_type(const HandleSeq&);
+
+	Handle substitute(const Handle&, const HandleSeq&);
 };
 
 typedef std::shared_ptr<VariableList> VariableListPtr;

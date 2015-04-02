@@ -50,6 +50,7 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 				"Expected a VariableNode or a TypedVariableLink, got: %s",
 					classserver().getTypeName(t).c_str());
 	}
+	build_index();
 }
 
 VariableList::VariableList(const HandleSeq& oset,
@@ -284,6 +285,87 @@ bool VariableList::is_type(const HandleSeq& hseq)
 		if (allow == tchoice.end()) return false;
 	}
 	return true;
+}
+
+/* ================================================================= */
+/**
+ * Build the reverse index from variable name, to its ordinal.
+ */
+void VariableList::build_index(void)
+{
+	if (0 < _index.size()) return;
+	size_t sz = _outgoing.size();
+	for (size_t i=0; i<sz; i++)
+	{
+		_index.insert(std::pair<Handle,Arity>(_outgoing[i], i));
+	}
+}
+
+/* ================================================================= */
+/**
+ * Substitute variables in tree with the indicated values.
+ * This is a lot like applying the function fun to the argument list
+ * args, except that no actual evaluation is performed; only
+ * substitution.  The resulting tree is NOT placed into any atomspace,
+ * either. If you want that, you must do it youself.  If you want
+ * evaluation or execution to happen during sustitution, use either
+ * the EvaluationLink, the ExecutionOutputLink, or the Instantiator.
+ *
+ * So, for example, if this VariableList contains:
+ *
+ *   VariableList
+ *       Variable $a
+ *       Variable $b
+ *
+ * and func is the template:
+ *
+ *   EvaluationList
+ *      PrediceNode "something"
+ *      ListLink
+ *         VariableNode $b      ; note the reversed order
+ *         VariableNode $a
+ *
+ * and the args is a list
+ *
+ *      ConceptNode "one"
+ *      NumberNode 2.0000
+ *
+ * then the returned value will be
+ *
+ *   EvaluationList
+ *      PrediceNode "something"
+ *      ListLink
+ *          NumberNode 2.0000
+ *          ConceptNode "one"
+ *
+ * That is, the values 1 and 2 were substituted for %a and $b.
+ *
+ * Again, only a substitution is performed, there is not evaluation.
+ * Note also that the resulting tree is NOT placed into any atomspace!
+ */
+Handle VariableList::substitute(const Handle& fun, const HandleSeq& args)
+{
+	if (args.size() != _outgoing.size())
+		return Handle::UNDEFINED;
+
+	// If it is a singleton, just return that singleton.
+	std::map<Handle, Arity>::const_iterator idx;
+	idx = _index.find(fun);
+	if (idx != _index.end())
+		return args.at(idx->second);
+
+	// If its a node, and its not a variable, then it is a constant,
+	// and just return that.
+	LinkPtr lfun(LinkCast(fun));
+	if (NULL == lfun) return fun;
+
+	// Recursively file out the subtrees.
+	HandleSeq oset;
+	for (const Handle& h : lfun->getOutgoingSet())
+	{
+		oset.push_back(substitute(h, args));
+	}
+	return Handle(createLink(fun->getType(), oset));
 }
 
 /* ===================== END OF FILE ===================== */

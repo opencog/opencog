@@ -90,7 +90,6 @@ Handle Instantiator::walk_tree(Handle expr)
  */
 Handle Instantiator::instantiate(Handle& expr,
                                  const std::map<Handle, Handle> &vars)
-	throw (InvalidParamException)
 {
 	// throw, not assert, because this is a user error ...
 	if (Handle::UNDEFINED == expr)
