@@ -160,7 +160,7 @@ AttentionValuePtr Atom::getAttentionValue()
     return local;
 }
 
-void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)
+void Atom::setAttentionValue(AttentionValuePtr av)
 {
     // Must obtain a local copy of the AV, since there may be
     // parallel writers in other threads.

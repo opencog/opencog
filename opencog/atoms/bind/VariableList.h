@@ -87,7 +87,7 @@ public:
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	VariableList(Link &l);
+	VariableList(Link&);
 
 	const VariableTypeMap& get_typemap(void) { return _typemap; }
 	bool is_type(const Handle&);

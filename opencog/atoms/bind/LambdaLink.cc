@@ -40,14 +40,15 @@ void LambdaLink::init(const HandleSeq& oset)
 	validate_vardecl(oset[0]);
 	_body = oset[1];     // Body
 
-	_vardecl = VariableListCast(oset[0]);  // VariableNode declarations
+	const Handle& vars = oset[0];
+	_vardecl = VariableListCast(vars);  // VariableNode declarations
 	if (NULL == _vardecl)
-		_vardecl = createVariableList(*LinkCast(oset[0]));
-	if (NULL == _vardecl)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting variabe declarations, got %s",
-			classserver().getTypeName(oset[0]->getType()).c_str());
-
+	{
+		// Note: this uses the "crazy constructor"!!
+		// It builds VarLists from single VariableNode's
+		_vardecl = createVariableList(vars);
+	}
+	// _vardecl cannot be null here, after the above...
 }
 
 LambdaLink::LambdaLink(const HandleSeq& oset,
