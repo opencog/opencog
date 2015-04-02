@@ -55,7 +55,7 @@
         ((sB (cog-stv-strength (gdr AB)))
          (sC (cog-stv-strength (gdr BC))))
             (stv
-                (if (eq?
+                (if (approx-eq?
                         0
                         (-
                             1
