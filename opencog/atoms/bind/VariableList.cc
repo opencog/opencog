@@ -230,7 +230,11 @@ void VariableList::validate_vardecl(const Handle& hdecls)
  * Simple type checker.
  *
  * Returns true/false if the indicated handle is of the type that
- * we have memoized.
+ * we have memoized.  If this typelist contians more than one type in
+ * it, then clearly, there is a mismatch.  If there are no type
+ * restrictions, then it is trivially a match.  Otherwise, there must
+ * be a TypeChoice, and so the handle must be one of the types in the
+ * TypeChoice.
  */
 bool VariableList::is_type(const Handle& h)
 {

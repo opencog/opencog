@@ -31,6 +31,8 @@ ADD_CXXTEST(Boolean2NotUTest)
 ADD_CXXTEST(FuzzyPatternUTest)
 
 # Its a *lot* easier to write scheme, than to write C++ code!
+# These are not in alphabetical order; they are in order of
+# simpler to more complex.
 IF (HAVE_GUILE)
 	ADD_CXXTEST(DisconnectedUTest)
 	ADD_CXXTEST(ImplicationUTest)
@@ -41,6 +43,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(MatchLinkUTest)
 	ADD_CXXTEST(UnorderedUTest)
 	ADD_CXXTEST(StackMoreUTest)
+	ADD_CXXTEST(ComposeUTest)
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(GreaterComputeUTest)
 	ADD_CXXTEST(SequenceUTest)
@@ -75,6 +78,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-link.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-stack.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-stack.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/compose.scm
+    ${PROJECT_BINARY_DIR}/tests/query/compose.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater-compute.scm
     ${PROJECT_BINARY_DIR}/tests/query/greater-compute.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater_than.scm
