@@ -7,7 +7,7 @@
 		(ConceptNode "some-name")
 		(SatisfactionLink
 			(VariableNode "$some-var")
-			(ListLink
+			(AndLink
 				(ConceptNode "random-atom")
 				(VariableNode "$some-var")
 			)
@@ -26,6 +26,24 @@
 				(ConceptNode "other-atom")
 			)
 		)
+	)
+)
+
+; A compose link that should compose with defun-a
+(define composer
+	(ComposeLink
+		(ConceptNode "some-name")
+		(ListLink
+			(ConceptNode "bogosity")
+		)
+	)
+)
+
+; The expected result of composing defun-a with compser
+(define bogo-a
+	(AndLink
+		(ConceptNode "random-atom")
+		(ConceptNode "bogosity")
 	)
 )
 

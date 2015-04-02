@@ -25,6 +25,7 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/atoms/bind/ComposeLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -137,13 +138,26 @@ void ComposeUTest::test_simple_compose(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle hdef = eval->eval_h("defined-patter");
+	Handle hdef = eval->eval_h("(defun-a)");
 	printf("Get a defintion: %s\n", hdef->toString().c_str());
 	DefineLinkPtr defun = DefineLinkCast(hdef);
 	TSM_ASSERT("Excepected to get a definion", defun != NULL);
 
+	Handle hcomp = eval->eval_h("composer");
+	printf("Get a composer: %s\n", hcomp->toString().c_str());
+	ComposeLinkPtr compr = ComposeLinkCast(hcomp);
+	TSM_ASSERT("Excepected to get a ComposeLink", compr != NULL);
+
+	Handle hresult = compr->compose();
+	// We must place it in the atomspace, the composer doesn't do that.
+	hresult = as->getAtom(hresult);
+	printf("Got the result: %s\n", hresult->toString().c_str());
+
+	Handle hexpected = eval->eval_h("bogo-a");
+	TSM_ASSERT("Excepected to get desired result", hresult == hexpected);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
+
 /*
  * Basic ComposeLink unit test.
  */
