@@ -3,14 +3,14 @@
 ;
 (define varlist
 	(VariableList
-		(Variable "$a")
-		(Variable "$b")
+		(VariableNode "$a")
+		(VariableNode "$b")
 	)
 )
 
 (define template
-	(EvaluationList
-		(PrediceNode "something")
+	(EvaluationLink
+		(PredicateNode "something")
 		(ListLink
 			(VariableNode "$b")		; note the reversed order
 			(VariableNode "$a")
@@ -25,9 +25,9 @@
 	)
 )
 
-(define anser
-	(EvaluationList
-		(PrediceNode "something")
+(define answer
+	(EvaluationLink
+		(PredicateNode "something")
 		(ListLink
 			(NumberNode 2.0000)
 			(ConceptNode "one")

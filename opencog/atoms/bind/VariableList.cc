@@ -314,13 +314,13 @@ void VariableList::build_index(void)
  * So, for example, if this VariableList contains:
  *
  *   VariableList
- *       Variable $a
- *       Variable $b
+ *       VariableNode $a
+ *       VariableNode $b
  *
  * and func is the template:
  *
- *   EvaluationList
- *      PrediceNode "something"
+ *   EvaluationLink
+ *      PredicateNode "something"
  *      ListLink
  *         VariableNode $b      ; note the reversed order
  *         VariableNode $a
@@ -332,8 +332,8 @@ void VariableList::build_index(void)
  *
  * then the returned value will be
  *
- *   EvaluationList
- *      PrediceNode "something"
+ *   EvaluationLink
+ *      PredicateNode "something"
  *      ListLink
  *          NumberNode 2.0000
  *          ConceptNode "one"

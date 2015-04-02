@@ -105,6 +105,11 @@ void ComposeUTest::test_simple_substitution(void)
 	Handle harglist = eval->eval_h("arglist");
 	Handle hexpected = eval->eval_h("answer");
 
+	printf("Variable list is %s\n", hvarlist->toString().c_str());
+
+	Type vt = hvarlist->getType();
+	TSM_ASSERT("Didn't get the variable listtype", vt != VARIABLE_LIST);
+
 	VariableListPtr vlp(VariableListCast(hvarlist));
 	TSM_ASSERT("Didn't get the variable list", vlp != NULL);
 
