@@ -30,7 +30,7 @@
 )
 
 ;
-;; The data that we expect to find
+;; The data that we expect to be able to match
 (EvaluationLink
 	(PredicateNode "some-pred")
 	(ListLink
@@ -38,6 +38,7 @@
 		(ConceptNode "thing-two")
 	)
 )
+
 (define expected-answer
 	(SetLink
 		(InheritanceLink
@@ -48,20 +49,22 @@
 )
 
 ;; the named pattern
-(DefineLink
-	(ConceptNode "two-argument-pattern`")
-	(SatisfactionLink
-		;; First, some simple variable definitions
-		(VariableList
-			(VariableNode "$first-arg")
-			(VariableNode "$second-arg")
-		)
-		;; This is what should get substituted.
-		(EvaluationLink
-			(PredicateNode "some-pred")
-			(ListLink
-				(VariableNode "$second-arg")
+(define defined-pattern
+	(DefineLink
+		(ConceptNode "two-argument-pattern")
+		(SatisfactionLink
+			;; First, some simple variable definitions
+			(VariableList
 				(VariableNode "$first-arg")
+				(VariableNode "$second-arg")
+			)
+			;; This is what should get substituted.
+			(EvaluationLink
+				(PredicateNode "some-pred")
+				(ListLink
+					(VariableNode "$second-arg")
+					(VariableNode "$first-arg")
+				)
 			)
 		)
 	)
@@ -76,7 +79,7 @@
 		)
 		(ImplicationLink
 			(ComposeLink
-				(ConceptNode "two-argument-pattern`")
+				(ConceptNode "two-argument-pattern")
 				(ListLink
 					(VariableNode "$var-one")
 					(VariableNode "$var-two")

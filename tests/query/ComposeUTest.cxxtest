@@ -25,7 +25,7 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/atoms/bind/VariableList.h>
+#include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -85,6 +85,7 @@ public:
 
 	void test_double_define(void);
 	void test_simple_compose(void);
+	void xtest_simple_match(void);
 };
 
 void ComposeUTest::tearDown(void)
@@ -119,7 +120,7 @@ void ComposeUTest::test_double_define(void)
 	{
 		caught = true;
 	}
-	logger().setLevel(Logger::INFO);
+	logger().setLevel(Logger::DEBUG);
 	TSM_ASSERT("Failed to catch exception", caught == true);
 
 	// Inserting the same atom a second time should be harmless.
@@ -133,6 +134,20 @@ void ComposeUTest::test_double_define(void)
  * Basic ComposeLink unit test.
  */
 void ComposeUTest::test_simple_compose(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle hdef = eval->eval_h("defined-patter");
+	printf("Get a defintion: %s\n", hdef->toString().c_str());
+	DefineLinkPtr defun = DefineLinkCast(hdef);
+	TSM_ASSERT("Excepected to get a definion", defun != NULL);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+/*
+ * Basic ComposeLink unit test.
+ */
+void ComposeUTest::xtest_simple_match(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
