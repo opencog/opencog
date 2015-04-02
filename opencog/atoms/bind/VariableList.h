@@ -40,8 +40,6 @@ namespace opencog
 
 typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
 
-class PatternMatch;
-
 /// The VariableList class records it's outgoing set in various ways
 /// that make it easier and faster to work with.  It implements a
 /// substitute method that will replace all variables in a tree by
@@ -54,7 +52,6 @@ class PatternMatch;
 /// VariableLists cannot be inserted into the atomspace.
 class VariableList : public Link
 {
-   friend class PatternMatch;
 protected:
 	/// Unbundled variables and types for them.
 	/// _typemap is the (possibly empty) list of restrictions on

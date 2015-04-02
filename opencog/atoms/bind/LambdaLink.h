@@ -37,6 +37,17 @@ namespace opencog
  * be replaced by something completely different, someday ...
  */
 
+/// The LambdaLink consitsts of two parts: A variable declaration,
+/// wgich must conform to current variable declaration standards: i.e.
+/// it must be either a single VariableNode, a single TypedVariableLink,
+/// or a VariableLink.  This is then followed by a body, of any
+/// arbitrary form.  This class does little other than to check for
+/// the above-described format; it will throw an error if an ill-formed
+/// LambdaLink is inserted into the atomspace.  In addition to the
+/// above, it also unpacks the variable declarations, using the
+/// VariableList class as a helper class to do that unpacking.
+/// As usual, the unpacked variables act as a memo or cache, speeding
+/// up later calculations.
 class LambdaLink : public VariableList
 {
 protected:

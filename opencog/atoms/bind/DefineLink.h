@@ -40,11 +40,30 @@ namespace opencog
 
 typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
 
-class PatternMatch;
-
+/// The DefineLink is used to give a name to a pattern, typically to
+/// a LmbdaLink, a SatisfactionLink or a BindLink.  The DefineLink is
+/// unique, in that, if any other atoms exists with this same name, it
+/// will throw an error!  Thus, only ONE DefineLink with a given name
+/// can exist at a time.
+///
+/// This class is intended to be used for anything that needs to be
+/// accessed by namea: for, if there were two things with the same name,
+/// it would be ambiguous as to which to access. (It would not make
+///  sense to access both: would the result of access have 'and'
+/// semantics? 'or' semantics ??)  Thus, this exists to define an atom
+/// uniquely.
+///
+/// The only place where I know of, at the moment, for this beast, is
+/// for the construction of recursive patterns, as that is the only
+/// place where a simple cut-n-paste is insufficient to specify what
+/// comes next.
+///
+/// It is intended that the DefineLink be used with the ComposeLink,
+/// which provides the values for the variables bound by the DefineLink.
+/// That is, the ComposeLink acts like function composition. It does not
+/// catually call, invoke or ground the resulting composition.
 class DefineLink : public Link
 {
-   friend class PatternMatch;
 protected:
 	void init(const HandleSeq&);
 public:
