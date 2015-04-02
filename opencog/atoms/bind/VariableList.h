@@ -59,8 +59,8 @@ protected:
 	/// Unbundled variables and types for them.
 	/// _typemap is the (possibly empty) list of restrictions on
 	/// the variable types. The _varset contains exactly the same atoms
-	/// as the outgoing set; it is used for fast lookup; (i.e. is some
-	/// some variable a part of this set?) whereas the outgoing set
+	/// as the _varseq; it is used for fast lookup; (i.e. is some
+	/// some variable a part of this set?) whereas the _varseq list
 	/// preserves the original order of the variables.  Yes, the fast
 	/// lookup really is needed!
 	HandleSeq _varseq;

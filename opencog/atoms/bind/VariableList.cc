@@ -37,7 +37,8 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 		Type t = h->getType();
 		if (VARIABLE_NODE == t)
 		{
-			_varset.insert(h);
+			_varset.insert(h);    // tree (unordered)
+			_varseq.push_back(h); // vector (ordered)
 		}
 		else if (TYPED_VARIABLE_LINK == t)
 		{

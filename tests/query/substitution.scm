@@ -68,3 +68,45 @@
 		)
 	)
 )
+
+(define typed-varlist
+	(VariableList
+		(TypedVariableLink
+			(VariableNode "$a")
+			(TypeNode "ConceptNode")
+		)
+		(TypedVariableLink
+			(VariableNode "$b")
+			(TypeChoice
+				(TypeNode "NumberNode")
+				(TypeNode "AnchorNode")
+			)
+		)
+	)
+)
+
+;; constrained typelist
+(define bad-varlist
+	(VariableList
+		(TypedVariableLink
+			(VariableNode "$a")
+			(TypeNode "ConceptNodeNode")  ;; intentionally mis-spelled
+		)
+		(TypedVariableLink
+			(VariableNode "$b")
+			(TypeChoice
+				(TypeNode "NumberNode")
+				(TypeNode "AnchorNode")
+			)
+		)
+	)
+)
+
+;; This must not match the typed varlist above
+(define bad-arglist
+	(ListLink
+		(NumberNode 1.0000)
+		(ConceptNode "two")
+	)
+)
+

@@ -69,8 +69,9 @@ public:
 	void tearDown(void);
 
 	void xtest_simple_substitution(void);
-	void test_free_substitution(void);
-	void xtest_typed_substitution(void);
+	void xtest_free_substitution(void);
+	void test_typed_substitution(void);
+	void xtest_bad_stuff(void);
 };
 
 void SubstitutionUTest::tearDown(void)
@@ -129,11 +130,9 @@ void SubstitutionUTest::xtest_simple_substitution(void)
 }
 
 /*
- * Basic VariableList unit test.
- * It just make sure that the substitute method works, at least
- * in the very simplest case.
+ * Make sure that only the bound variables are substituted.
  */
-void SubstitutionUTest::test_free_substitution(void)
+void SubstitutionUTest::xtest_free_substitution(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -163,15 +162,13 @@ void SubstitutionUTest::test_free_substitution(void)
 }
 
 /*
- * Basic VariableList unit test.
- * It just make sure that the substitute method works, at least
- * in the very simplest case.
+ * As above, but make sure that type restrictions are applied.
  */
-void SubstitutionUTest::xtest_typed_substitution(void)
+void SubstitutionUTest::test_typed_substitution(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle hvarlist = eval->eval_h("varlist");
+	Handle hvarlist = eval->eval_h("typed-varlist");
 	Handle htemplate = eval->eval_h("template");
 	Handle harglist = eval->eval_h("arglist");
 	Handle hexpected = eval->eval_h("answer");
@@ -195,3 +192,14 @@ void SubstitutionUTest::xtest_typed_substitution(void)
 
 	TSM_ASSERT("Didn't get the expected grounding", hanswer == hexpected);
 }
+/*
+ * As above, but make sure that type restrictions are applied.
+ */
+void SubstitutionUTest::xtest_bad_stuff(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle hbad = eval->eval_h("bad-varlist");
+	TSM_ASSERT("Expecting a bad handle", hbad == Handle::UNDEFINED);
+}
+
