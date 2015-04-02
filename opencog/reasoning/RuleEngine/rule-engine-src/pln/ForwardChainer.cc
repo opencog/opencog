@@ -100,7 +100,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         fcmem_.update_premise_list(input);
 
         // Choose the best rule to apply.
-        vector<Rule*> rules = fcb.choose_rule(fcmem_);
+        vector<Rule*> rules = fcb.choose_rules(fcmem_);
         map<Rule*, float> rule_weight;
         for (Rule* r : rules) {
             log_->info("Matching rule %s", r->get_name().c_str());
@@ -165,7 +165,7 @@ void ForwardChainer::do_pm(const Handle& hsource,
     as_->removeAtom(hclause);
 
     //!Additionally, find applicable rules and apply.
-    vector<Rule*> rules = fcb.choose_rule(fcmem_);
+    vector<Rule*> rules = fcb.choose_rules(fcmem_);
     for (Rule* rule : rules) {
         BindLinkPtr bl(BindLinkCast(rule->get_handle()));
         DefaultImplicator impl(as_);

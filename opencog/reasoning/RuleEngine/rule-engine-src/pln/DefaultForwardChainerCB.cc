@@ -47,14 +47,13 @@ DefaultForwardChainerCB::~DefaultForwardChainerCB()
 }
 
 /**
- * choose rule based on premises of rule matching the source
+ * choose rules based on premises of rule matching the source
  * uses temporary atomspace to limit the search space
  *
  * @param fcmem forward chainer's working memory
  * @return a vector of chosen rules
  */
-
-vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
+vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
 {
     Handle source = fcmem.get_cur_source();
     if (source == Handle::UNDEFINED or NodeCast(source))
@@ -92,32 +91,26 @@ vector<Rule*> DefaultForwardChainerCB::choose_rule(FCMemory& fcmem)
             return vector<Rule*> { };
         }
 
-        HandleSeq bindlinks;
+        UnorderedHandleSet bindlinks;
         for (Handle hm : matches) {
             //get all BindLinks whose part of their premise matches with hm
             HandleSeq hs = get_rootlinks(hm, &rule_atomspace, BIND_LINK);
-            for (Handle hi : hs) {
-                if (find(bindlinks.begin(), bindlinks.end(), hi) == bindlinks.end()) {
-                    bindlinks.push_back(hi);
-                }
-            }
+            bindlinks.insert(hs.cbegin(), hs.cend());
         }
 
         // Copy handles to main atomspace.
         for (Handle h : bindlinks) {
             chosen_bindlinks.push_back(as_->addAtom(h));
         }
-    }
-
-    // Try to find specialized rules that contain the source node.
-    if (NodeCast(source)) {
+    } else {
+        // Try to find specialized rules that contain the source node.
+        OC_ASSERT(NodeCast(source) != nullptr);
         chosen_bindlinks = get_rootlinks(source, as_, BIND_LINK);
     }
 
     // Find the rules containing the bindLink in copied_back.
     vector<Rule*> matched_rules;
-    vector<Rule*> rules = fcmem.get_rules();
-    for (Rule* r : rules) {
+    for (Rule* r : fcmem.get_rules()) {
         auto it = find(chosen_bindlinks.begin(), chosen_bindlinks.end(),
                        r->get_handle()); //xxx not matching
         if (it != chosen_bindlinks.end()) {
