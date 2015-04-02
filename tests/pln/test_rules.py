@@ -1,7 +1,8 @@
 __author__ = 'root'
 
 import unittest
-#raise unittest.SkipTest("Unit test temporarily disabled - see: https://github.com/opencog/opencog/issues/442")
+raise unittest.SkipTest("Unit test disabled because Python PLN is deprecated.")
+
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
 from opencog.atomspace import types, is_a, get_type, get_type_name
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
