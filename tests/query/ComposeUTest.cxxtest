@@ -25,7 +25,7 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/query/BindLink.h>
+#include <opencog/atoms/bind/VariableList.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -68,6 +68,7 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
+	void test_simple_substitution(void);
 	void test_simple_compose(void);
 };
 
@@ -90,6 +91,35 @@ void ComposeUTest::setUp(void)
 }
 
 /*
+ * Basic VariableList unit test.
+ */
+void ComposeUTest::test_simple_substitution(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/substitution.scm");
+	load_scm_files_from_config(*as);
+
+	Handle hvarlist = eval->eval_h("varlist");
+	Handle htemplate = eval->eval_h("template");
+	Handle harglist = eval->eval_h("arglist");
+	Handle hexpected = eval->eval_h("answer");
+
+	VariableListPtr vlp(VariableListCast(hvarlist));
+	TSM_ASSERT("Didn't get the variable list", vlp != NULL);
+
+	LinkPtr argl(LinkCast(harglist));
+	TSM_ASSERT("Didn't get the arguent list", argl != NULL);
+
+	Handle hanswer = vlp->substitute(htemplate, argl->getOutgoingSet());
+
+	printf("Expected this: %s\n", hexpected->toString().c_str());
+	printf("Found this answer: %s\n", hanswer->toString().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hanswer == hexpected);
+}
+
+/*
  * Basic ComposeLink unit test.
  */
 void ComposeUTest::test_simple_compose(void)
@@ -102,7 +132,7 @@ void ComposeUTest::test_simple_compose(void)
 	Handle hans = eval->eval_h("expected-answer");
 	Handle hgnd = eval->eval_h("(cog-bind (simple-call))");
 
-	printf("Epected this: %s\n", hans->toString().c_str());
+	printf("Expected this: %s\n", hans->toString().c_str());
 	printf("Found this answer: %s\n", hgnd->toString().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
