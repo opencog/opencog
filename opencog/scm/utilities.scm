@@ -911,10 +911,10 @@
 ; Returns true when x is equal to y up to an epsilon
 (define (approx-eq? x y)
     (let ((diff (- x y))
-          (lower-epsilon -0.1)
-          (upper-epsilon 0.1)
+          (minus-epsilon -0.000001)
+          (plus-epsilon 0.000001)
           )
-        (and (< lower-epsilon diff) (> upper-epsilon diff))        
+        (and (< minus-epsilon diff) (> plus-epsilon diff))        
     )
 )
 
