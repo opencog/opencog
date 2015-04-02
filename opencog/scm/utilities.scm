@@ -40,6 +40,7 @@
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
+; -- approx-eq? -- Test equality of 2 floats up to an epsilon
 ;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -905,6 +906,17 @@
 	)
 )
 
+; ---------------------------------------------------------------------
+
+; Returns true when x is equal to y up to an epsilon
+(define (approx-eq? x y)
+    (let ((diff (- x y))
+          (lower-epsilon -0.1)
+          (upper-epsilon 0.1)
+          )
+        (and (< lower-epsilon diff) (> upper-epsilon diff))        
+    )
+)
 
 ; ---------------------------------------------------------------------
 
@@ -954,6 +966,7 @@
 'filter-hypergraph
 'cartesian-prod
 'cartesian-prod-list-only
+'approx-eq?
 ))
 
 ; Compile 'em all.  This should improve performance a bit.
