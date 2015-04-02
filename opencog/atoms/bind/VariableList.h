@@ -69,9 +69,7 @@ protected:
 	std::map<Handle, Arity> _index;
 
 	// See VariableList.cc for comments
-	static int get_vartype(const Handle&,
-	                       std::set<Handle>&,
-	                       VariableTypeMap&);
+	void get_vartype(const Handle&);
 
 	// Validate the variable decls
 	void validate_vardecl(const Handle&);

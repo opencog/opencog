@@ -42,9 +42,7 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 		}
 		else if (TYPED_VARIABLE_LINK == t)
 		{
-			if (get_vartype(h, _varset, _typemap))
-				throw InvalidParamException(TRACE_INFO,
-					"Don't understand the TypedVariableLink");
+			get_vartype(h);
 		}
 		else
 			throw InvalidParamException(TRACE_INFO,
@@ -113,16 +111,13 @@ typedef std::pair<Handle, const std::set<Type> > ATPair;
  * and the list of allowed types are associated with the variable
  * via the map "typemap".
  */
-int VariableList::get_vartype(const Handle& htypelink,
-                            std::set<Handle> &vset,
-                            VariableTypeMap &typemap)
+void VariableList::get_vartype(const Handle& htypelink)
 {
 	const std::vector<Handle>& oset = LinkCast(htypelink)->getOutgoingSet();
 	if (2 != oset.size())
 	{
-		logger().warn("%s: TypedVariableLink has wrong size",
-		              __FUNCTION__);
-		return 1;
+		throw InvalidParamException(TRACE_INFO,
+			"TypedVariableLink has wrong size, got %lu", oset.size());
 	}
 
 	Handle varname = oset[0];
@@ -134,8 +129,9 @@ int VariableList::get_vartype(const Handle& htypelink,
 	{
 		Type vt = TypeNodeCast(vartype)->getValue();
 		std::set<Type> ts = {vt};
-		typemap.insert(ATPair(varname, ts));
-		vset.insert(varname);
+		_typemap.insert(ATPair(varname, ts));
+		_varset.insert(varname);
+		_varseq.push_back(varname);
 	}
 	else if (TYPE_CHOICE == t)
 	{
@@ -149,29 +145,26 @@ int VariableList::get_vartype(const Handle& htypelink,
 			Type var_type = h->getType();
 			if (TYPE_NODE != var_type)
 			{
-				logger().warn("%s: VariableChoiceLink has unexpected content:\n"
+				throw InvalidParamException(TRACE_INFO,
+					"VariableChoice has unexpected content:\n"
 				              "Expected TypeNode, got %s",
-				              __FUNCTION__,
 				              classserver().getTypeName(h->getType()).c_str());
-				return 3;
 			}
 			Type vt = TypeNodeCast(h)->getValue();
 			ts.insert(vt);
 		}
 
-		typemap.insert(ATPair(varname,ts));
-		vset.insert(varname);
+		_typemap.insert(ATPair(varname,ts));
+		_varset.insert(varname);
+		_varseq.push_back(varname);
 	}
 	else
 	{
-		logger().warn("%s: Unexpected contents in TypedVariableLink\n"
-				        "Expected TypeNode or TypeChoice, got %s",
-		              __FUNCTION__,
-		              classserver().getTypeName(t).c_str());
-		return 2;
+		throw InvalidParamException(TRACE_INFO,
+			"Unexpected contents in TypedVariableLink\n"
+			"Expected TypeNode or TypeChoice, got %s",
+			classserver().getTypeName(t).c_str());
 	}
-
-	return 0;
 }
 
 /* ================================================================= */
@@ -209,9 +202,7 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 	}
 	else if (TYPED_VARIABLE_LINK == tdecls)
 	{
-		if (get_vartype(hdecls, _varset, _typemap))
-			throw InvalidParamException(TRACE_INFO,
-				"Cannot understand the typed variable definition");
+		get_vartype(hdecls);
 	}
 	else if (VARIABLE_LIST == tdecls or LIST_LINK == tdecls)
 	{
