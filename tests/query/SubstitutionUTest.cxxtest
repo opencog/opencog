@@ -27,6 +27,7 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/atoms/bind/VariableList.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -55,6 +56,20 @@ public:
 		server(CogServer::createInstance);
 		as = &cogserver().getAtomSpace();
 		eval = new SchemeEval(as);
+		config().set("SCM_PRELOAD",
+			"opencog/atomspace/core_types.scm, "
+			"opencog/scm/utilities.scm");
+
+		load_scm_files_from_config(*as);
+
+		config().set("MODULES",
+			"opencog/query/libQueryModule.so");
+
+		cogserver().loadModules();
+
+		config().set("SCM_PRELOAD", "tests/query/substitution.scm");
+
+		load_scm_files_from_config(*as);
 	}
 
 	~SubstitutionUTest()
@@ -68,10 +83,11 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
-	void xtest_simple_substitution(void);
-	void xtest_free_substitution(void);
+	void test_simple_substitution(void);
+	void test_free_substitution(void);
 	void test_typed_substitution(void);
-	void xtest_bad_stuff(void);
+	void test_typecheck(void);
+	void test_bad_stuff(void);
 };
 
 void SubstitutionUTest::tearDown(void)
@@ -80,19 +96,6 @@ void SubstitutionUTest::tearDown(void)
 
 void SubstitutionUTest::setUp(void)
 {
-	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm, "
-		"opencog/scm/utilities.scm");
-
-	load_scm_files_from_config(*as);
-
-	config().set("MODULES",
-		"opencog/query/libQueryModule.so");
-
-	cogserver().loadModules();
-
-	config().set("SCM_PRELOAD", "tests/query/substitution.scm");
-	load_scm_files_from_config(*as);
 }
 
 /*
@@ -100,7 +103,7 @@ void SubstitutionUTest::setUp(void)
  * It just make sure that the substitute method works, at least
  * in the very simplest case.
  */
-void SubstitutionUTest::xtest_simple_substitution(void)
+void SubstitutionUTest::test_simple_substitution(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -132,7 +135,7 @@ void SubstitutionUTest::xtest_simple_substitution(void)
 /*
  * Make sure that only the bound variables are substituted.
  */
-void SubstitutionUTest::xtest_free_substitution(void)
+void SubstitutionUTest::test_free_substitution(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -195,11 +198,43 @@ void SubstitutionUTest::test_typed_substitution(void)
 /*
  * As above, but make sure that type restrictions are applied.
  */
-void SubstitutionUTest::xtest_bad_stuff(void)
+void SubstitutionUTest::test_typecheck(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle hbad = eval->eval_h("bad-varlist");
-	TSM_ASSERT("Expecting a bad handle", hbad == Handle::UNDEFINED);
+	Handle hvarlist = eval->eval_h("typed-varlist");
+	Handle hbadlist = eval->eval_h("bad-arglist");
+	Handle harglist = eval->eval_h("arglist");
+
+	VariableListPtr vlp(VariableListCast(hvarlist));
+	TSM_ASSERT("Didn't get the variable list", vlp != NULL);
+
+	LinkPtr badl(LinkCast(hbadlist));
+	TSM_ASSERT("Didn't get the arguent list", badl != NULL);
+
+	LinkPtr argl(LinkCast(harglist));
+	TSM_ASSERT("Didn't get the arguent list", argl != NULL);
+
+	bool mismatch = vlp->is_type(badl->getOutgoingSet());
+	TSM_ASSERT("failed to typecheck bad", mismatch == false);
+
+	bool match = vlp->is_type(argl->getOutgoingSet());
+	TSM_ASSERT("failed to typecheck good", match == true);
+}
+
+void SubstitutionUTest::test_bad_stuff(void)
+{
+	// Avoid spew of warnings due to the exception
+	logger().setLevel(Logger::NONE);
+	bool caught = false;
+	try
+	{
+		eval->eval_h("bad-varlist");
+	}
+	catch (...)
+	{
+		caught = true;
+	}
+	TSM_ASSERT("failed to catch exception", caught == true);
 }
 

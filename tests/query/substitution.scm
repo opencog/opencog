@@ -85,7 +85,16 @@
 	)
 )
 
-;; constrained typelist
+;; This must not match the typed varlist above
+(define bad-arglist
+	(ListLink
+		(NumberNode 1.0000)
+		(ConceptNode "two")
+	)
+)
+
+;; malformed typelist
+;; This should throw exception upon load
 (define bad-varlist
 	(VariableList
 		(TypedVariableLink
@@ -101,12 +110,3 @@
 		)
 	)
 )
-
-;; This must not match the typed varlist above
-(define bad-arglist
-	(ListLink
-		(NumberNode 1.0000)
-		(ConceptNode "two")
-	)
-)
-
