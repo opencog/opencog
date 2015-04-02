@@ -24,7 +24,7 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atoms/TypeNode.h>
+#include <opencog/atoms/bind/DefineLink.h>
 
 #include "ComposeLink.h"
 
@@ -35,35 +35,24 @@ void ComposeLink::init(const HandleSeq& oset)
 	// Must have name and body
 	if (2 != oset.size())
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting name and definition, got size %d", oset.size());
+			"Expecting name and a list of values, got size %d", oset.size());
 
-	// The name mut not have been previously defined before.
-	HandleSeq ename;
-   oset[0]->getIncomingSetByType(std::back_inserter(ename), DEFINE_LINK);
-	if (0 < ename.size())
-		throw InvalidParamException(TRACE_INFO,
-			"This is already defined; remoce before redfining!");
-
-	Type t = oset[1]->getType();
-	if (not classserver().isA(t, LAMBDA_LINK))
-	{
-		const std::string& tname = classserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a LambdaLink, got %s", tname.c_str());
-	}
-
+	Type ot = oset[1]->getType();
+	if (not classserver().isA(ot, ORDERED_LINK))
+      throw InvalidParamException(TRACE_INFO,
+         "Expecting and ordered list of arguments!");
 }
 
 ComposeLink::ComposeLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(DEFINE_LINK, oset, tv, av)
+	: Link(COMPOSE_LINK, oset, tv, av)
 {
 	init(oset);
 }
 
 ComposeLink::ComposeLink(const Handle& name, const Handle& defn,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(DEFINE_LINK, HandleSeq({name, defn}), tv, av)
+	: Link(COMPOSE_LINK, HandleSeq({name, defn}), tv, av)
 {
 	init(getOutgoingSet());
 }
@@ -73,7 +62,7 @@ ComposeLink::ComposeLink(Link &l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
-	if (not classserver().isA(tscope, DEFINE_LINK))
+	if (not classserver().isA(tscope, COMPOSE_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
@@ -81,6 +70,24 @@ ComposeLink::ComposeLink(Link &l)
 	}
 
 	init(l.getOutgoingSet());
+}
+
+/// Compose this link with the defined link, and return the result.
+Handle ComposeLink::compose(void)
+{
+	// Is the defined link actually defined?
+	// We cannot do this check when the ctor runs, since it might
+	// not yet be defined (or the definition may have changed!!)
+   HandleSeq ename;
+   _outgoing[0]->getIncomingSetByType(std::back_inserter(ename), DEFINE_LINK);
+   if (1 != ename.size())
+      throw InvalidParamException(TRACE_INFO,
+         "Cannot compose with an undefined function!");
+
+	// Get the the defined function
+	DefineLinkPtr ldefun(DefineLinkCast(ename[0]));
+	LambdaLinkPtr lam(ldefun->get_definition());
+	return lam->substitute(_outgoing);
 }
 
 /* ===================== END OF FILE ===================== */

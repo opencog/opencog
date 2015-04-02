@@ -61,6 +61,8 @@ public:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	ComposeLink(Link &l);
+
+	Handle compose(void);
 };
 
 typedef std::shared_ptr<ComposeLink> ComposeLinkPtr;

@@ -37,9 +37,17 @@ void LambdaLink::init(const HandleSeq& oset)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting variabe decls and body, got size %d", oset.size());
 
-	_vardecl = oset[0];  // VariableNode declarations
+	validate_vardecl(oset[0]);
 	_body = oset[1];     // Body
-	validate_vardecl(_vardecl);
+
+	_vardecl = VariableListCast(oset[0]);  // VariableNode declarations
+	if (NULL == _vardecl)
+		_vardecl = createVariableList(*LinkCast(oset[0]));
+	if (NULL == _vardecl)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting variabe declarations, got %s",
+			classserver().getTypeName(oset[0]->getType()).c_str());
+
 }
 
 LambdaLink::LambdaLink(const HandleSeq& oset,
@@ -100,14 +108,7 @@ void LambdaLink::unbundle_body(const Handle& hlambda)
 			"Expecting a LambdaLink, got %s", tname.c_str());
 	}
 
-	// Must have variable decls and body
-	const HandleSeq& oset = lbl->getOutgoingSet();
-	if (2 != oset.size())
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting variabe decls and body, got size %d", oset.size());
-
-	_vardecl = oset[0];  // VariableNode declarations
-	_body = oset[1];     // Body
+	init(lbl->getOutgoingSet());
 }
 
 /* ===================== END OF FILE ===================== */

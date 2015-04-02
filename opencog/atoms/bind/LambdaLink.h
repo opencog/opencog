@@ -52,7 +52,7 @@ class LambdaLink : public VariableList
 {
 protected:
 	/// Handle of the topmost variable declaration.
-	Handle _vardecl;
+	VariableListPtr _vardecl;
 
 	/// Handle of the body of the expression.
 	Handle _body;
@@ -75,6 +75,11 @@ public:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	LambdaLink(Link &l);
+
+	Handle substitute (const HandleSeq& seq)
+	{
+		return _vardecl->substitute(_body, seq);
+	}
 };
 
 typedef std::shared_ptr<LambdaLink> LambdaLinkPtr;

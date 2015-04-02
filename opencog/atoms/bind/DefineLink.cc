@@ -24,7 +24,6 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atoms/TypeNode.h>
 
 #include "DefineLink.h"
 
@@ -44,9 +43,12 @@ void DefineLink::init(const HandleSeq& oset)
 		throw InvalidParamException(TRACE_INFO,
 			"This is already defined; remoce before redfining!");
 
-	Type t = oset[1]->getType();
-	if (not classserver().isA(t, LAMBDA_LINK))
+	_definition = LambdaLinkCast(oset[1]);
+	if (NULL == _definition)
+		_definition = createLambdaLink(*LinkCast(oset[1]));
+	if (NULL == _definition)
 	{
+		Type t = oset[1]->getType();
 		const std::string& tname = classserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a LambdaLink, got %s", tname.c_str());

@@ -27,6 +27,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/atoms/bind/LambdaLink.h>
 
 namespace opencog
 {
@@ -37,8 +38,6 @@ namespace opencog
  * like this might be done. It is not necessarily a good idea, and might
  * be replaced by something completely different, someday ...
  */
-
-typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
 
 /// The DefineLink is used to give a name to a pattern, typically to
 /// a LmbdaLink, a SatisfactionLink or a BindLink.  The DefineLink is
@@ -65,6 +64,8 @@ typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
 class DefineLink : public Link
 {
 protected:
+	// The definition is the named object that this link is defining.
+	LambdaLinkPtr _definition;
 	void init(const HandleSeq&);
 public:
 	DefineLink(const HandleSeq&,
@@ -76,6 +77,7 @@ public:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	DefineLink(Link &l);
+	LambdaLinkPtr get_definition(void) { return _definition; }
 };
 
 typedef std::shared_ptr<DefineLink> DefineLinkPtr;
