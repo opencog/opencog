@@ -87,7 +87,10 @@ Handle ComposeLink::compose(void)
 	// Get the the defined function
 	DefineLinkPtr ldefun(DefineLinkCast(ename[0]));
 	LambdaLinkPtr lam(ldefun->get_definition());
-	return lam->substitute(_outgoing);
+
+	// Get the arguments
+	LinkPtr args(LinkCast(_outgoing[1]));
+	return lam->substitute(args->getOutgoingSet());
 }
 
 /* ===================== END OF FILE ===================== */
