@@ -38,36 +38,40 @@
 
 namespace opencog {
 
-/// Find all of the variables, and all of the links holding a variable,
-/// occuring in a clause.
+/// Find a "target atom", or find all atoms of a given "target type",
+/// and all of the links that hold that target, that occur in a clause
+/// (an expression tree formed by the outgoing set.) This is typically
+/// used to find all variables in an expression, but it can be used for
+/// any purpose.
 ///
-/// After find_vars() is called, the set of variables that were found
+/// After find_atoms() is called, the set of target atoms that were found
 /// can be retreived from the public member `varset`.  The set of links
-/// that had a variable occuring somewhere within them is in the public
-/// member `holders`.
+/// that had one of these targets occuring somewhere within them is in
+/// the public member `holders`.
 ///
-/// A "variable" is defined in one of two ways: It is either a specified
-/// type, or it is a member of the given domain.  When only the type is
-/// given, it will typically be VARIABLE_NODE, GROUNDED_PREDICATE_NODE
-/// or GROUNDED_SCHEMA_NODE, and so this just finds these atom types in
-/// the clause(s).  Alternately, if a set of handles is given, then this
-/// finds the subset of that set that actually occurs in the given
-/// clause(s).  That is, it computes the intersection between the set of
-/// given handles, and the set of all handles that occur in the clauses.
+/// A "target" is defined in one of two ways: It is either a specified
+/// target type, or it is any one of the given set of specific target
+/// atoms.  When only the type is given, it will typically be
+/// VARIABLE_NODE, GROUNDED_PREDICATE_NODE or GROUNDED_SCHEMA_NODE,
+/// COMPOSE_LINK, or something like that, and so this just finds these
+/// atom types if they occur in the clause(s).  Alternately, if a set
+/// of specific atoms is given, then this finds the subset of that set
+/// that actually occurs in the given clause(s).  That is, it computes
+/// the intersection between the set of given atoms, and the set of all
+/// atoms that occur in the clauses.
 ///
-/// However, QUOTED variables are NOT reported. If a variable (atom
-/// type or set) occurs under a QUOTE_LINK, then it is ignored. That is,
-/// QUOTE_LINK halt the recursive search.
+/// Note that anything occuring below a QUOTE_LINK is not explored.
+/// Thus, a quote acts like a cut, halting recursion.
 ///
-class FindVariables
+class FindAtoms
 {
 	public:
 		std::set<Handle> varset;
 		std::set<Handle> holders;
 
-		inline FindVariables(Type t, bool recurs_hold=true)
+		inline FindAtoms(Type t, bool recurs_hold=true)
 			: _recursive_hold(recurs_hold), _var_type(t) {}
-		inline FindVariables(const std::set<Handle>& selection)
+		inline FindAtoms(const std::set<Handle>& selection)
 			: _recursive_hold(true), _var_type(NOTYPE),
 			 _var_domain(selection) {}
 
@@ -75,7 +79,7 @@ class FindVariables
 		 * Create a set of all of the VariableNodes that lie in the
 		 * outgoing set of the handle (recursively).
 		 */
-		inline bool find_vars(Handle h)
+		inline bool find_atoms(Handle h)
 		{
 			Type t = h->getType();
 			if ((t == _var_type) or _var_domain.count(h) == 1)
@@ -92,7 +96,7 @@ class FindVariables
 				bool held = false;
 				for (Handle oh : l->getOutgoingSet())
 				{
-					if (find_vars(oh)) held = true;
+					if (find_atoms(oh)) held = true;
 				}
 				if (held) holders.insert(h);
 				return _recursive_hold and held;
@@ -100,9 +104,9 @@ class FindVariables
 			return false;
 		}
 
-		inline void find_vars(std::vector<Handle> hlist)
+		inline void find_atoms(std::vector<Handle> hlist)
 		{
-			for (Handle h : hlist) find_vars(h);
+			for (Handle h : hlist) find_atoms(h);
 		}
 	private:
 		bool _recursive_hold;

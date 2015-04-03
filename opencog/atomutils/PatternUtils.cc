@@ -131,8 +131,8 @@ void get_connected_components(const std::set<Handle> &vars,
 					components[i].push_back(cl);
 
 					// Add to the varset cache for that component.
-					FindVariables fv(vars);
-					fv.find_vars(cl);
+					FindAtoms fv(vars);
+					fv.find_atoms(cl);
 					for (Handle v : fv.varset) cur_vars.insert(v);
 
 					extended = true;
@@ -161,8 +161,8 @@ void get_connected_components(const std::set<Handle> &vars,
 		// Start a new component
 		components.push_back({ncl});
 
-		FindVariables fv(vars);
-		fv.find_vars(ncl);
+		FindAtoms fv(vars);
+		fv.find_atoms(ncl);
 		component_vars.push_back(fv.varset);
 	}
 

@@ -1085,12 +1085,12 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 
 	// Preparation prior to search.
 	// Find everything that contains GPN's or GSN's.
-	FindVariables fv(GROUNDED_PREDICATE_NODE);
-	fv.find_vars(_cnf_clauses);
-	FindVariables fg(GREATER_THAN_LINK);
-	fg.holders = fv.holders;
-	fg.find_vars(_cnf_clauses);
-	_evaluatable = fg.holders;
+	FindAtoms fgpn(GROUNDED_PREDICATE_NODE);
+	fgpn.find_atoms(_cnf_clauses);
+	FindAtoms fgtl(GREATER_THAN_LINK);
+	fgtl.holders = fgpn.holders;
+	fgtl.find_atoms(_cnf_clauses);
+	_evaluatable = fgtl.holders;
 
 	// Create a table of the nodes that appear in the clauses, and
 	// a list of the clauses that each node participates in.
