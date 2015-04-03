@@ -319,7 +319,7 @@ void DefaultPatternMatchCB::full_search(PatternMatchEngine *pme,
 	else
 		_as->getHandlesByType(back_inserter(handle_set), ATOM, true);
 
-	size_t i = 0;
+	// size_t i = 0;
 	for (const Handle& h : handle_set)
 	{
 		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");

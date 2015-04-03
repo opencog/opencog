@@ -340,9 +340,9 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	{
 		// Find the variables in each component.
 		std::set<Handle> cvars;
-		for (Handle v : vars)
+		for (const Handle& v : vars)
 		{
-			if (is_variable_in_any_tree(comp, v)) cvars.insert(v);
+			if (is_unquoted_in_any_tree(comp, v)) cvars.insert(v);
 		}
 
 		// Split in positive and negative clauses

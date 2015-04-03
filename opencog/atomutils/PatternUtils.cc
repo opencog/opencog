@@ -57,7 +57,7 @@ bool remove_constants(const std::set<Handle> &vars,
 	for (i = clauses.begin(); i != clauses.end(); )
 	{
 		Handle clause(*i);
-		if (any_variable_in_tree(clause, vars)
+		if (any_unquoted_in_tree(clause, vars)
 		    or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
 		    or contains_atomtype(clause, GROUNDED_SCHEMA_NODE))
 		{
@@ -125,7 +125,7 @@ void get_connected_components(const std::set<Handle> &vars,
 				std::set<Handle>& cur_vars = component_vars[i];
 				// If clause cl is connected to this component, then add it
 				// to this component.
-				if (any_variable_in_tree(cl, cur_vars))
+				if (any_unquoted_in_tree(cl, cur_vars))
 				{
 					// Extend the component
 					components[i].push_back(cl);

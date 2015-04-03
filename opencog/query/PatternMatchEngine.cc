@@ -202,7 +202,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		if (hg == curr_pred_handle)
 		{
 			// Mismatch, if hg contains bound vars in it.
-			if (any_variable_in_tree(hg, _bound_vars)) return false;
+			if (any_unquoted_in_tree(hg, _bound_vars)) return false;
 		}
 		else
 		{
@@ -285,12 +285,12 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		// XXX FIXME For now, we punt on this... a proper fix would be
 		// ... hard, as we would have to line up the location of the
 		// quoted and the unquoted parts.
-		if (any_variable_in_tree(hg, _bound_vars))
+		if (any_unquoted_in_tree(hg, _bound_vars))
 		{
 			for (Handle vh: _bound_vars)
 			{
 				// OK, which tree is it in? And is it quoted in the pattern?
-				if (is_variable_in_tree(hg, vh))
+				if (is_unquoted_in_tree(hg, vh))
 				{
 					prtmsg("found bound variable in grounding tree:", vh);
 					prtmsg("matching  pattern  is:", hp);
@@ -571,7 +571,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 
 			// Is this link even a part of the predicate we
 			// are considering?   If not, try the next atom.
-			bool valid = is_node_in_tree(curr_root, hi);
+			bool valid = is_atom_in_tree(curr_root, hi);
 			if (not valid) continue;
 
 			// Ugh. If the next step up the predicate is an OrLink,

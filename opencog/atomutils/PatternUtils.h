@@ -136,132 +136,126 @@ class FindAtoms
 };
 
 /**
- * Return true if the indicated node occurs somewhere in the tree
+ * Return true if the indicated atom occurs somewhere in the tree
  * (viz, the tree recursively spanned by the outgoing set of the handle)
  */
-static inline bool is_node_in_tree(const Handle& tree, const Handle& node)
+static inline bool is_atom_in_tree(const Handle& tree, const Handle& atom)
 {
 	if (tree == Handle::UNDEFINED) return false;
-	if (tree == node) return true;
+	if (tree == atom) return true;
 	LinkPtr ltree(LinkCast(tree));
 	if (NULL == ltree) return false;
 
 	// Recurse downwards...
-	const std::vector<Handle> &vh = ltree->getOutgoingSet();
-	size_t sz = vh.size();
-	for (size_t i = 0; i < sz; i++) {
-		if (is_node_in_tree(vh[i], node)) return true;
+	for (const Handle h: ltree->getOutgoingSet()) {
+		if (is_atom_in_tree(h, atom)) return true;
 	}
 	return false;
 }
 
 /**
- * Return true if the indicated node occurs quoted somewhere in the
- * tree.  That is, it returns true only if the node is inside a
+ * Return true if the indicated atom occurs quoted somewhere in the
+ * tree.  That is, it returns true only if the atom is inside a
  * QuoteLink.
  */
-static inline bool is_quoted_in_tree(const Handle& tree, const Handle& node)
+static inline bool is_quoted_in_tree(const Handle& tree, const Handle& atom)
 {
 	if (tree == Handle::UNDEFINED) return false;
-	if (tree == node) return false;  // not quoted, so false.
+	if (tree == atom) return false;  // not quoted, so false.
 	LinkPtr ltree(LinkCast(tree));
 	if (NULL == ltree) return false;
 
 	if (tree->getType() == QUOTE_LINK)
 	{
-		if (is_node_in_tree(tree, node)) return true;
+		if (is_atom_in_tree(tree, atom)) return true;
 		return false;
 	}
 
 	// Recurse downwards...
-	const std::vector<Handle> &vh = ltree->getOutgoingSet();
-	size_t sz = vh.size();
-	for (size_t i = 0; i < sz; i++) {
-		if (is_quoted_in_tree(vh[i], node)) return true;
+	for (const Handle& h: ltree->getOutgoingSet()) {
+		if (is_quoted_in_tree(h, atom)) return true;
 	}
 	return false;
 }
 
 /**
- * Return true if the indicated node occurs somewhere in the tree
+ * Return true if the indicated atom occurs unquoted somewhere in the tree
  * (viz, the tree recursively spanned by the outgoing set of the handle)
  * but ONLY if it is not quoted!  This is meant to be be used to search
  * for variables, but only those variables that have not been quoted, as
  * the quoted variables are constants (literals).
  */
-static inline bool is_variable_in_tree(const Handle& tree, const Handle& node)
+static inline bool is_unquoted_in_tree(const Handle& tree, const Handle& atom)
 {
 	if (tree == Handle::UNDEFINED) return false;
-	if (tree == node) return true;
+	if (tree == atom) return true;
 	LinkPtr ltree(LinkCast(tree));
 	if (NULL == ltree) return false;
 
 	if (tree->getType() == QUOTE_LINK) return false;
 
 	// Recurse downwards...
-	const std::vector<Handle> &vh = ltree->getOutgoingSet();
-	size_t sz = vh.size();
-	for (size_t i = 0; i < sz; i++) {
-		if (is_variable_in_tree(vh[i], node)) return true;
+	for (const Handle& h : ltree->getOutgoingSet()) {
+		if (is_unquoted_in_tree(h, atom)) return true;
 	}
 	return false;
 }
 
 /**
- * Return true if any of the indicated nodes occurs somewhere in
+ * Return true if any of the indicated atoms occur somewhere in
  * the tree (that is, in the tree spanned by the outgoing set.)
  */
-static inline bool any_node_in_tree(const Handle& tree,
-                                    const std::set<Handle>& nodes)
+static inline bool any_atom_in_tree(const Handle& tree,
+                                    const std::set<Handle>& atoms)
 {
-	for (Handle n: nodes)
+	for (const Handle& n: atoms)
 	{
-		if (is_node_in_tree(tree, n)) return true;
+		if (is_atom_in_tree(tree, n)) return true;
 	}
 	return false;
 }
 
 /**
- * Return true if any of the indicated nodes occurs somewhere in
+ * Return true if any of the indicated atoms occur somewhere in
  * the tree (that is, in the tree spanned by the outgoing set.)
  * But ONLY if they are not quoted!  This is intended to be used to
  * search for variables; but when a variable is quoted, it is no
  * longer a variable.
  */
-static inline bool any_variable_in_tree(const Handle& tree,
-                                        const std::set<Handle>& nodes)
+static inline bool any_unquoted_in_tree(const Handle& tree,
+                                        const std::set<Handle>& atoms)
 {
-	for (Handle n: nodes)
+	for (const Handle& n: atoms)
 	{
-		if (is_variable_in_tree(tree, n)) return true;
+		if (is_unquoted_in_tree(tree, n)) return true;
 	}
 	return false;
 }
 
 /**
- * Return true if the indicated node occurs somewhere in any of the trees.
+ * Return true if the indicated atom occurs somewhere in any of the trees.
  */
-static inline bool is_node_in_any_tree(const std::vector<Handle>& trees,
-                                       const Handle& node)
+static inline bool is_atom_in_any_tree(const std::vector<Handle>& trees,
+                                       const Handle& atom)
 {
-	for (Handle tree: trees)
+	for (const Handle& tree: trees)
 	{
-		if (is_node_in_tree(tree, node)) return true;
+		if (is_atom_in_tree(tree, atom)) return true;
 	}
 	return false;
 }
 
 /**
- * Return true if the indicated node occurs somewhere in any of the trees,
+ * Return true if the indicated atom occurs somewhere in any of the trees,
  * but only if it is not quoted.  This is intended to be used to search
  * for variables, which cease to be variable when they are quoted.
  */
-static inline bool is_variable_in_any_tree(const std::vector<Handle>& trees,
-                                           const Handle& node)
+static inline bool is_unquoted_in_any_tree(const std::vector<Handle>& trees,
+                                           const Handle& atom)
 {
-	for (Handle tree: trees)
+	for (const Handle& tree: trees)
 	{
-		if (is_variable_in_tree(tree, node)) return true;
+		if (is_unquoted_in_tree(tree, atom)) return true;
 	}
 	return false;
 }
@@ -270,7 +264,7 @@ static inline bool is_variable_in_any_tree(const std::vector<Handle>& trees,
  * Returns true if the clause contains an atom of type atom_type.
  * ... but only if it is not quoted.  Quoted terms are constants (literals).
  */
-static inline bool contains_atomtype(Handle& clause, Type atom_type)
+static inline bool contains_atomtype(const Handle& clause, Type atom_type)
 {
 	Type clause_type = clause->getType();
 	if (QUOTE_LINK == clause_type) return false;
@@ -279,12 +273,8 @@ static inline bool contains_atomtype(Handle& clause, Type atom_type)
 	LinkPtr lc(LinkCast(clause));
 	if (not lc) return false;
 
-	const std::vector<Handle> &oset = lc->getOutgoingSet();
-	std::vector<Handle>::const_iterator i = oset.begin();
-	std::vector<Handle>::const_iterator iend = oset.end();
-	for (; i != iend; ++i)
+	for (const Handle& subclause: lc->getOutgoingSet())
 	{
-		Handle subclause(*i);
 		if (contains_atomtype(subclause, atom_type)) return true;
 	}
 	return false;

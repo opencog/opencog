@@ -135,9 +135,9 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 	// Make sure that each declared variable appears in some clause.
 	// We can't ground variables that aren't attached to something.
 	// Quoted variables are constants, and so don't count.
-	for (Handle v : vars)
+	for (const Handle& v : vars)
 	{
-		if (not is_variable_in_any_tree(clauses, v))
+		if (not is_unquoted_in_any_tree(clauses, v))
 			throw InvalidParamException(TRACE_INFO,
 				"The variable %s does not appear (unquoted) in any clause!",
 				v->toString().c_str());
@@ -162,7 +162,7 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 	{
 		if ((contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
 		    or contains_atomtype(clause, GREATER_THAN_LINK))
-		    and any_variable_in_tree(clause, vars))
+		    and any_unquoted_in_tree(clause, vars))
 			_virtual.push_back(clause);
 		else if (contains_atomtype(clause, COMPOSE_LINK))
 		{
