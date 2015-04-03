@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atomutils/PatternUtils.h>
+#include <opencog/atomutils/FindUtils.h>
 
 #include "DefaultPatternMatchCB.h"
 #include "PatternMatchEngine.h"

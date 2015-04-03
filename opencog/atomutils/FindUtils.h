@@ -1,7 +1,7 @@
 /**
- * PatternUtils.h
+ * FindUtils.h
  *
- * Utilities for navigating a tree of outgoing edges.
+ * Utilities for finding atoms in trees.
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -37,6 +37,12 @@
 #include <opencog/atomspace/types.h>
 
 namespace opencog {
+
+/// There are two different types of utilities in this file: those that
+/// tell you if some target atom or target atom type occurs in some
+/// tree, returning a simple yes/no answer, and another utility, telling
+/// you exactly where it occurs.  We start with the more complicated one
+/// first.  Otherwise, skip down to get at the simpler ones.
 
 /// Find a "target atom", or find all atoms of a given "target type",
 /// and all of the links that hold that target, that occur in a clause

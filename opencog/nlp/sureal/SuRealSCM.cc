@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atomutils/AtomUtils.h>
-#include <opencog/atomutils/PatternUtils.h>
+#include <opencog/atomutils/FindUtils.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/query/PatternMatchEngine.h>
 #include <opencog/nlp/types/atom_types.h>

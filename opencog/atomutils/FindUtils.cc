@@ -1,5 +1,5 @@
 /*
- * PatternUtils.cc
+ * FindUtils.cc
  *
  * Copyright (C) 2008,2009,2011,2014 Linas Vepstas
  *
@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PatternUtils.h"
+#include "FindUtils.h"
 
 using namespace opencog;
 

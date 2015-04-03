@@ -23,7 +23,6 @@
 
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
-#include <opencog/atomutils/PatternUtils.h>
 #include <opencog/util/Logger.h>
 
 #include "PatternMatch.h"

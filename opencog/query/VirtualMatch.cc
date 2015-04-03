@@ -23,7 +23,7 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomutils/PatternUtils.h>
+#include <opencog/atomutils/FindUtils.h>
 #include <opencog/util/Logger.h>
 
 #include "Instantiator.h"
