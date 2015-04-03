@@ -15,7 +15,7 @@
 	)
 )
 
-; a different definition, but with the same name as above.
+; A different definition, but with the same name as above.
 (define (defun-b)
 	(DefineLink
 		(ConceptNode "some-name")
@@ -39,7 +39,7 @@
 	)
 )
 
-; The expected result of composing defun-a with compser
+; The expected result of composing defun-a with composer
 (define bogo-a
 	(AndLink
 		(ConceptNode "random-atom")
@@ -47,3 +47,40 @@
 	)
 )
 
+; A different definition, but with a quote link
+(define (defun-quote)
+	(DefineLink
+		(ConceptNode "quoter")
+		(SatisfactionLink
+			(VariableNode "$other-var")
+			(OrLink
+				(VariableNode "$other-var")
+				(ConceptNode "other-atom")
+				(QuoteLink
+					(VariableNode "$other-var")
+				)
+			)
+		)
+	)
+)
+
+; A compose link that should compose with defun-quote
+(define compose-quote
+	(ComposeLink
+		(ConceptNode "quoter")
+		(ListLink
+			(ConceptNode "yeah, right")
+		)
+	)
+)
+
+; The expected result of composing defun-a with composer
+(define yeah-quote
+	(OrLink
+		(ConceptNode "yeah, right")
+		(ConceptNode "other-atom")
+		(QuoteLink
+			(VariableNode "$other-var")
+		)
+	)
+)

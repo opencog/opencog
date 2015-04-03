@@ -390,7 +390,10 @@ Handle VariableList::substitute_nocheck(const Handle& fun,
 	LinkPtr lfun(LinkCast(fun));
 	if (NULL == lfun) return fun;
 
-	// Recursively file out the subtrees.
+	// QuoteLinks halt the reursion
+	if (QUOTE_LINK == fun->getType()) return fun;
+
+	// Recursively fill out the subtrees.
 	HandleSeq oset;
 	for (const Handle& h : lfun->getOutgoingSet())
 	{

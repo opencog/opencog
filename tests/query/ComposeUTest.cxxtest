@@ -86,6 +86,7 @@ public:
 
 	void test_double_define(void);
 	void test_simple_compose(void);
+	void test_quote_compose(void);
 };
 
 void ComposeUTest::tearDown(void)
@@ -140,12 +141,12 @@ void ComposeUTest::test_simple_compose(void)
 	Handle hdef = eval->eval_h("(defun-a)");
 	printf("Get a defintion: %s\n", hdef->toString().c_str());
 	DefineLinkPtr defun = DefineLinkCast(hdef);
-	TSM_ASSERT("Excepected to get a definion", defun != NULL);
+	TSM_ASSERT("Exepected to get a definion", defun != NULL);
 
 	Handle hcomp = eval->eval_h("composer");
 	printf("Get a composer: %s\n", hcomp->toString().c_str());
 	ComposeLinkPtr compr = ComposeLinkCast(hcomp);
-	TSM_ASSERT("Excepected to get a ComposeLink", compr != NULL);
+	TSM_ASSERT("Exepected to get a ComposeLink", compr != NULL);
 
 	Handle hresult = compr->compose();
 	// We must place it in the atomspace, the composer doesn't do that.
@@ -153,6 +154,32 @@ void ComposeUTest::test_simple_compose(void)
 	printf("Got the result: %s\n", hresult->toString().c_str());
 
 	Handle hexpected = eval->eval_h("bogo-a");
-	TSM_ASSERT("Excepected to get desired result", hresult == hexpected);
+	TSM_ASSERT("Exepected to get desired result", hresult == hexpected);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+/*
+ * ComposeLink with QuoteLink in it
+ */
+void ComposeUTest::test_quote_compose(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle hdef = eval->eval_h("(defun-quote)");
+	printf("Get a defintion: %s\n", hdef->toString().c_str());
+	DefineLinkPtr defun = DefineLinkCast(hdef);
+	TSM_ASSERT("Exepected to get a definion", defun != NULL);
+
+	Handle hcomp = eval->eval_h("compose-quote");
+	printf("Get a composer: %s\n", hcomp->toString().c_str());
+	ComposeLinkPtr compr = ComposeLinkCast(hcomp);
+	TSM_ASSERT("Exepected to get a ComposeLink", compr != NULL);
+
+	Handle hresult = compr->compose();
+	// We must place it in the atomspace, the composer doesn't do that.
+	hresult = as->getAtom(hresult);
+	printf("Got the result: %s\n", hresult->toString().c_str());
+
+	Handle hexpected = eval->eval_h("yeah-quote");
+	TSM_ASSERT("Exepected to get desired result", hresult == hexpected);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
