@@ -1,6 +1,6 @@
 
-                Query and Satisfaction
-                ----------------------
+Query and Satisfaction
+======================
 
 The atoms in this directory memoize (cache) the patterns specified by
 the SatisfactionLink and the BindLink.  This helps avoid having to
@@ -99,3 +99,16 @@ or any quantifier whatsoever.
 Note that this method can be used to create a simple forward-chainer:
 One need only to take a set of implication links, and call this
 method repeatedly on them, until one is exhausted.
+
+TO-DO List
+==========
+
+Type Restrictions
+-----------------
+It couold make sense to store type restrictions with a new VariableNode
+class. This would offer a minor performance improvement: type
+restrictions would not have to be looked up in a mp, as currently
+implemented.  On the other hand, this could e a major headache: every
+variable would have to be globally unique, as otherwise, the type
+restrictions would clash with one another.  This would also make
+type equations hrd to enforce.  Hmm. So maybe this is a bad idea...

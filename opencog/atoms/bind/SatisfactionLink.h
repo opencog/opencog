@@ -38,6 +38,18 @@ namespace opencog
  * be replaced by something completely different, someday ...
  */
 
+/// The SatisfactionLink is used to specify a list of variables, and a
+/// pattern (containing those variables) that is to be grounded
+/// (satisfied).  Thus, it resembles a LambdaLink, with the difference
+/// being that it has a very specific semantics: the pattern is to be
+/// grounded!
+///
+/// It is similar to a BindLink, except that a BindLink also causes an
+/// implication to be performed: after a grounding is found, the
+/// BindLink then causes the implication to run with the resultant
+/// grounding.  The SatisfactionLink does not specify what should happen
+/// with the grounding, although the (cog-satisfy) scheme call returns
+/// a truth value.
 class SatisfactionLink : public LambdaLink
 {
 protected:

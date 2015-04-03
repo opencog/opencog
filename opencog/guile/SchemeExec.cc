@@ -108,7 +108,8 @@ SCM SchemeSmob::ss_evaluate (SCM satom)
 	AtomSpace* atomspace = ss_get_env_as("cog-evaluate!");
 	// do_evaluate() may throw a C++ exception in various cases:
 	// e.g. if it names a non-existant function, or a function
-	// with syntax errors.
+	// with syntax errors, or if the schene code intetionally
+	// threw an error.
 	try
 	{
 		TruthValuePtr tvp = EvaluationLink::do_evaluate(atomspace, h);

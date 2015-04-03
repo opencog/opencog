@@ -24,6 +24,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
+#include <opencog/atomspace/TruthValue.h>
 
 #include "SchemeEval.h"
 #include "SchemePrimitive.h"
@@ -841,6 +842,9 @@ TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
 		// scm_from_utf8_string is lots faster than scm_from_locale_string
 		SCM expr_str = scm_from_utf8_string(expr.c_str());
 		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
+
+		// Pass evaluation errors out of the wrapper.
+		if (eval_error()) return TruthValue::NULL_TV();
 		return SchemeSmob::to_tv(rc);
 	}
 
@@ -870,6 +874,10 @@ void * SchemeEval::c_wrap_eval_tv(void * p)
 	// scm_from_utf8_string is lots faster than scm_from_locale_string
 	SCM expr_str = scm_from_utf8_string(self->pexpr->c_str());
 	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
+
+	// Pass evaluation errors out of the wrapper.
+	if (self->eval_error()) return self;
+
 	self->tvp = SchemeSmob::to_tv(rc);
 	return self;
 }

@@ -25,8 +25,7 @@
 
 #include <map>
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/bind/VariableList.h>
 
 namespace opencog
 {
@@ -38,36 +37,28 @@ namespace opencog
  * be replaced by something completely different, someday ...
  */
 
-typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
-
-class PatternMatch;
-
-class LambdaLink : public Link
+/// The LambdaLink consitsts of two parts: A variable declaration,
+/// wgich must conform to current variable declaration standards: i.e.
+/// it must be either a single VariableNode, a single TypedVariableLink,
+/// or a VariableLink.  This is then followed by a body, of any
+/// arbitrary form.  This class does little other than to check for
+/// the above-described format; it will throw an error if an ill-formed
+/// LambdaLink is inserted into the atomspace.  In addition to the
+/// above, it also unpacks the variable declarations, using the
+/// VariableList class as a helper class to do that unpacking.
+/// As usual, the unpacked variables act as a memo or cache, speeding
+/// up later calculations.
+class LambdaLink : public VariableList
 {
-   friend class PatternMatch;
 protected:
 	/// Handle of the topmost variable declaration.
-	Handle _vardecl;
-
-	/// Unbundled variables and types for them.
-	/// _typemap is the (possibly empty) list of restrictions on
-	/// the variable types. Set by validate_vars()
-	std::set<Handle> _varset;
-	VariableTypeMap _typemap;
+	VariableListPtr _vardecl;
 
 	/// Handle of the body of the expression.
 	Handle _body;
 
-	// See LambdaLink.cc for comments
-	static int get_vartype(const Handle&,
-	                       std::set<Handle>&,
-	                       VariableTypeMap&);
-
 	// Extract variable decls and the body.
 	void unbundle_body(const Handle&);
-
-	// Validate the variable decls
-	void validate_vardecl(const Handle&);
 
 	LambdaLink(Type, const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -85,7 +76,10 @@ public:
 
 	LambdaLink(Link &l);
 
-	const VariableTypeMap& get_typemap(void) { return _typemap; }
+	Handle substitute (const HandleSeq& seq)
+	{
+		return _vardecl->substitute(_body, seq);
+	}
 };
 
 typedef std::shared_ptr<LambdaLink> LambdaLinkPtr;

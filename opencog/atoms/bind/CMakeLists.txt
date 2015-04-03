@@ -4,8 +4,11 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (lambda SHARED
 	BindLink.cc
+	ComposeLink.cc
+	DefineLink.cc
 	LambdaLink.cc
 	SatisfactionLink.cc
+	VariableList.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.

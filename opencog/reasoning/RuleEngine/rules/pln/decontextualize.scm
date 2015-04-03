@@ -17,7 +17,7 @@
 ; i.e. reduced to an inheritance relationship
 (define pln-rule-decontextualize-inheritance
     (BindLink
-        (ListLink
+        (VariableList
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C"))
@@ -48,7 +48,7 @@
 ; gets rid of the ContextLink enclosing an EvaluationLink
 (define pln-rule-decontextualize-evaluation
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$A")
                 (TypeNode "PredicateNode"))
@@ -91,7 +91,7 @@
 ; ContextLink is transformed into a SubsetLink
 (define pln-rule-decontextualize-subset
     (BindLink
-        (ListLink
+        (VariableList
             (VariableNode "$A")
             (VariableNode "$C"))
         (ImplicationLink

@@ -286,8 +286,11 @@ Handle AtomSpace::fetchAtom(Handle h)
 
 Handle AtomSpace::getAtom(Handle h)
 {
-    if (atomTable.holds(h)) return h;
-    return fetchAtom(h);
+    Handle he(atomTable.getHandle(h));
+    if (he) return he;
+    if (backing_store)
+        return fetchAtom(h);
+    return Handle::UNDEFINED;
 }
 
 Handle AtomSpace::fetchIncomingSet(Handle h, bool recursive)

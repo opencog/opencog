@@ -44,7 +44,7 @@
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_17"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_18"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_19"))
-	
+
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_21"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_22"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_23"))
@@ -54,7 +54,7 @@
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_27"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_28"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_29"))
-	
+
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_31"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_32"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_33"))
@@ -64,7 +64,7 @@
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_37"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_38"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_39"))
-	
+
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_41"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_42"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_43"))
@@ -74,7 +74,7 @@
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_47"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_48"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_49"))
-	
+
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_51"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_52"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_53"))
@@ -84,7 +84,7 @@
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_57"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_58"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_59"))
-	
+
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_61"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_62"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_63"))
@@ -94,7 +94,7 @@
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_67"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_68"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_69"))
-	
+
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_71"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_72"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_73"))
@@ -104,7 +104,7 @@
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_77"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_78"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_79"))
-	
+
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_81"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_82"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_83"))
@@ -114,7 +114,7 @@
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_87"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_88"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_89"))
-	
+
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_91"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_92"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_93"))
@@ -538,7 +538,7 @@
 ; This is just a big list of all the cells.
 ;
 (define (variable-decls)
-	(VariableList
+	(begin
 		(VariableNode "$cell_11")
 		(VariableNode "$cell_12")
 		(VariableNode "$cell_13")

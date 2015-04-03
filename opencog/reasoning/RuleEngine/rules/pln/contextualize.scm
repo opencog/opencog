@@ -34,7 +34,7 @@
 ; between two concepts designates the intersection of these concepts.
 (define pln-rule-contextualize-inheritance
     (BindLink
-        (ListLink
+        (VariableList
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C"))
@@ -72,7 +72,7 @@
 ; In the context of the moon, the sky is black."
 (define pln-rule-contextualize-evaluation
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$A")
                 (TypeNode "PredicateNode"))
@@ -127,7 +127,7 @@
 ;   (ConceptNode "bulldog"))
 (define pln-rule-contextualize-subset
     (BindLink
-        (ListLink
+        (VariableList
             (VariableNode "$C")
             (VariableNode "$A"))
         (ImplicationLink
@@ -159,7 +159,7 @@
 ; for the above rules which have AndLinks as embedded links.
 (define pln-rule-create-and-as-1st-arg-of-inheritance
     (BindLink
-        (ListLink
+        (VariableList
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C"))
@@ -213,7 +213,7 @@
 ; for the above rules which have AndLinks as embedded links.
 (define pln-rule-create-and-as-2nd-arg-of-inheritance
     (BindLink
-        (ListLink
+        (VariableList
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C"))

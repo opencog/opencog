@@ -79,7 +79,9 @@ VARIABLE_LIST <- LIST_LINK
 QUOTE_LINK <- ORDERED_LINK
 
 // Pattern and function declaration
-LAMBDA_LINK <- ORDERED_LINK
+LAMBDA_LINK <- VARIABLE_LIST
+DEFINE_LINK <- ORDERED_LINK
+COMPOSE_LINK <- ORDERED_LINK
 
 // Scoping and Logical quantifiers
 SATISFACTION_LINK <- LAMBDA_LINK   // Finds all groundings

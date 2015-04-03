@@ -216,7 +216,7 @@ public:
     AttentionValuePtr getAttentionValue();
 
     //! Sets the AttentionValue object of the atom.
-    void setAttentionValue(AttentionValuePtr) throw (RuntimeException);
+    void setAttentionValue(AttentionValuePtr);
 
     /// Handy-dandy convenience getters for attention values.
     AttentionValue::sti_t getSTI()

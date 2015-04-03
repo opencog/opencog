@@ -16,7 +16,7 @@
 
 (define pln-rule-and
   (BindLink
-   (ListLink
+   (VariableList
     (VariableNode "$A")
     (VariableNode "$B")
     (TypedVariableLink
