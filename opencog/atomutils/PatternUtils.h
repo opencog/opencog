@@ -46,8 +46,12 @@ namespace opencog {
 ///
 /// After find_atoms() is called, the set of target atoms that were found
 /// can be retreived from the public member `varset`.  The set of links
-/// that had one of these targets occuring somewhere within them is in
-/// the public member `holders`.
+/// that had one of these targets occuring somewhere, anywhere, within
+/// them is in the public member `holders`. This includes the holders of
+/// holders, etc, all the way up to the very top.  The `least_holders`
+/// member will contain only those links that contain a target in thier
+/// immediate outgoing set.  That is, the `least_holders` are the
+/// smallest links that contain the target.
 ///
 /// A "target" is defined in one of two ways: It is either a specified
 /// target type, or it is any one of the given set of specific target
@@ -68,48 +72,65 @@ class FindAtoms
 	public:
 		std::set<Handle> varset;
 		std::set<Handle> holders;
+		std::set<Handle> least_holders;
 
-		inline FindAtoms(Type t, bool recurs_hold=true)
-			: _recursive_hold(recurs_hold), _var_type(t) {}
+		inline FindAtoms(Type t)
+			: _var_type(t) {}
 		inline FindAtoms(const std::set<Handle>& selection)
-			: _recursive_hold(true), _var_type(NOTYPE),
+			: _var_type(NOTYPE),
 			 _var_domain(selection) {}
 
 		/**
-		 * Create a set of all of the VariableNodes that lie in the
+		 * Create a set of all of the target atoms/types that lie in the
 		 * outgoing set of the handle (recursively).
 		 */
-		inline bool find_atoms(Handle h)
+		inline void find_atoms(const Handle& h)
+		{
+			find_rec(h);
+		}
+
+		inline void find_atoms(const std::vector<Handle>& hlist)
+		{
+			for (const Handle& h : hlist) find_atoms(h);
+		}
+	private:
+		typedef enum
+		{
+			NOPE,  // Does not contain.
+			YEP,   // Contains, but not immediately so.
+			IMM    // Contains immediately below.
+		} Loco;
+
+		inline Loco find_rec(const Handle& h)
 		{
 			Type t = h->getType();
 			if ((t == _var_type) or _var_domain.count(h) == 1)
 			{
 				varset.insert(h);
-				return true; //! Don't explore link-typed vars!
+				return IMM; //! Don't explore link-typed vars!
 			}
 
-			if (QUOTE_LINK == t) return false;
+			if (QUOTE_LINK == t) return NOPE;
 
 			LinkPtr l(LinkCast(h));
 			if (l)
 			{
 				bool held = false;
-				for (Handle oh : l->getOutgoingSet())
+				bool imm = false;
+				for (const Handle& oh : l->getOutgoingSet())
 				{
-					if (find_atoms(oh)) held = true;
+					Loco where = find_rec(oh);
+					if (NOPE != where) held = true;
+					if (IMM == where) imm = true;
 				}
 				if (held) holders.insert(h);
-				return _recursive_hold and held;
+				if (imm) least_holders.insert(h);
+				return YEP;
 			}
-			return false;
+			return NOPE;
 		}
 
-		inline void find_atoms(std::vector<Handle> hlist)
-		{
-			for (Handle h : hlist) find_atoms(h);
-		}
 	private:
-		bool _recursive_hold;
 		Type _var_type;
 		std::set<Handle> _var_domain;
 };

@@ -136,10 +136,10 @@ class CrispLogicPMCB :
 		{
 			// Extract the GPN's. We will need these during the search.
 			_in_seq_and = false;
-			FindAtoms fgpn(GROUNDED_PREDICATE_NODE, false);
+			FindAtoms fgpn(GROUNDED_PREDICATE_NODE);
 			fgpn.find_atoms(clauses);
 			fgpn.find_atoms(negations);
-			_dyns = fgpn.holders;
+			_dyns = fgpn.least_holders;
 			DefaultPatternMatchCB::perform_search(pme, vars, clauses, negations);
 		}
 
